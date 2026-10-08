@@ -1,0 +1,57 @@
+{
+  "key": "gmail",
+  "title": "Mail",
+  "generic": true,
+  "output": "resources/styles/builtin/assets/applets/gmail/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-067b9aa7-441e-4ccd-ab52-40f8c29ca43b.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/world/devices/gmail.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Mail. Image1 is the existing unbranded device identity to preserve but simplify. A village mailbox: large sage-green arched mailbox with ivory envelope at open lip and amber flag. Single sturdy short timber post, compact footprint, no flower bed. Same mailbox identity as original. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "identitySource": "resources/styles/builtin/assets/world/devices/gmail.png",
+  "baseRevision": {
+    "prompt": "Edit this Mail Applet sprite. Replace ONLY the narrow wooden post below the mailbox with a sturdy low warm timber pedestal: a broad short solid wooden support directly under the mailbox, seated firmly on a wide thick rounded rectangular all-wood foot, restrained brass fasteners. It must look planted, heavy and stable, not balanced on a thin pole. Keep the sage mailbox, envelope with red wax seal, brass flag, same camera front facing screen-left/right side visible, same soft painted miniature village style and colors. The mailbox remains dominant; support and base together about bottom 20% of total height. No stone trim, flowers, grass or extra props. Entire object visible, isolated on true transparent background. Static figurine.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-2d6cc882-1e92-4cc8-9dd5-d85b4be700b0.png"
+  },
+  "lampRevision": {
+    "key": "gmail",
+    "prompt": "Precisely edit the attached gmail Applet miniature. Preserve the existing entire device, correct original logo, functional accessories, wooden base, camera angle, silhouette, materials, color and framing. Add exactly ONE clearly visible status indicator recessed in the FRONT FACE of the wooden base, centered horizontally on that FRONT FACE (not the side), near its vertical center. It is a small warm brass circular bezel with a plain BLACK charcoal glass center, switched OFF: absolutely no glow, no colored light. Black lens diameter approximately 4% of total image width, bezel outside diameter 5%; slightly oblique oval consistent with front face perspective. Make sure unobstructed by props. If existing small indicator occupies base front center replace it with this unlit black lens; remove other colored status indicators on the base, retain brand graphics and non-status functional parts. If support has no continuous wood front, add a discreet low timber connecting foot with the socket at center, otherwise do not redesign base. No extra text, labels, dots, buttons or scenery. Full object isolated on true transparent background. Preserve 1024-or-1280 square composition and safe margins.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-dae70083-a5b1-4b43-8f4a-3c385bb96216.png",
+    "anchor": {
+      "center": [
+        0.414274,
+        0.892344
+      ],
+      "radius": [
+        0.015949,
+        0.020335
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  },
+  "homeIdentityRevision": {
+    "key": "gmail",
+    "prompt": "Worldlet Home sprite redesign. Input is style/edit reference. A small village postbox: rounded weathered sage-green painted metal mail chest, a short broad oak support, open horizontal letter slot with one ivory envelope halfway out. Its front bears a modest blue enamel plaque with an ivory envelope relief, the familiar Mail cue. Tiny brass flag on side. The postbox itself is the dominant object, NOT a giant blue app tile. Primary identity is a useful countryside object, native app icon cues are secondary integrated material accents. Cohesive soft hand-painted miniature village illustration: matte honey oak, cream paper, restrained dusty colors, small aged brass hardware, soft upper-left daylight, broad shapes and tasteful detail. Avoid glossy plastic, harsh specular highlights, excessive weathering, flowers, grass, tiny clutter. Same fixed slightly top-down camera, front facing screen-left with right side visible. Stable solid rounded timber base, about bottom 15%, exactly one small BLACK unlit circular lens in thin brass rim centered on front face. No extra status lights. Whole object isolated on TRUE TRANSPARENT square background, balanced margins, no ground or outside cast shadow. Clearly readable at 80px.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-8481afe7-bfd1-4461-8876-83fdef81970c.png",
+    "tool": "built-in imagegen",
+    "anchor": {
+      "center": [
+        0.389553,
+        0.833333
+      ],
+      "radius": [
+        0.021531,
+        0.02512
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed",
+    "date": "2026-09-27"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "built-in generation with style reference",
+  "status": "candidate independent upper-arm and forearm surfaces; not runtime",
+  "reference": "reading-parts.png",
+  "generatedSource": "~/.codex/generated_images/01a0d4e7-67c7-7823-99e7-6ed6267910f7/exec-2e114448-4276-4245-a165-365a93135825.png",
+  "prompt": "Use case: stylized-concept. Asset type: 2D skeletal animation atlas with TWO separate complete limb pieces for the orange fox's viewer-left book-holding arm. Input image 1 is the character style and paw identity reference, specifically its bottom-left arm. Do not draw the book or loose page or whole fox. Transparent square canvas. TOP HALF: one isolated complete orange-fur upper-arm segment, almost vertical, shoulder at top, elbow at bottom, both ends fully rounded with generous hidden fur surface for overlap; no paw, no fingers. BOTTOM HALF: one isolated complete orange-fur forearm ending in the SAME dark-brown softly curled three-toed gripping paw as the reference, horizontal, rounded elbow cap at LEFT and paw pointing RIGHT. The forearm must include a complete round orange elbow cap even where it will overlap the upper arm; no diagonal cuts, amputated flat ends, gaps or holes. Each piece has a full intact silhouette, painted independently, separated by wide transparent padding. Maintain the same soft orange fur texture, brown paw color, cozy finely painted 2.5D appearance and upper-left light; not rubber or plastic, no bones visible. No labels, numbers, text, border, floor, shadow plane or other objects. These are animation components with hidden joint overlap, not a complete connected arm. Genuine transparent background with clean antialiased edges.",
+  "usage": "Preserve original alpha. Register each bone by similarity, never non-uniform stretch. Requires elbow overlap and full-character review before runtime adoption."
+}

@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "id": "village",
+  "title": "Village",
+  "version": "1.7.1",
+  "style": {
+    "id": "cozy-miniature",
+    "version": "1.0.0"
+  },
+  "artStatus": "approved",
+  "canvas": {
+    "width": 3840,
+    "height": 2160,
+    "coordinates": "normalized",
+    "origin": "top-left"
+  },
+  "camera": {
+    "projection": "fixed-oblique",
+    "overview": [
+      0.145,
+      0.12,
+      0.77,
+      0.78
+    ]
+  },
+  "layers": [
+    {
+      "id": "day-environment",
+      "kind": "environment",
+      "src": "images/day-six-regions-sunburst-4k.png",
+      "lighting": "day",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "night",
+      "kind": "environment",
+      "src": "images/night-six-regions-sunburst-4k.png",
+      "lighting": "night",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ]
+    }
+  ],
+  "hudSafeAreas": [
+    [
+      0.36,
+      0.82,
+      0.3,
+      0.18
+    ]
+  ],
+  "areas": [
+    {
+      "id": "home",
+      "title": "Home",
+      "legacyIds": [
+        "home"
+      ],
+      "purpose": "Personal mail, calendars, reminders, notes, photos and the browser",
+      "bounds": [
+        0.435,
+        0.46,
+        0.18,
+        0.125
+      ],
+      "focus": [
+        0.523,
+        0.529
+      ],
+      "label": [
+        0.525,
+        0.585
+      ],
+      "slots": [
+        {
+          "id": "home-seat-1",
+          "anchor": [
+            0.477,
+            0.522
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.522
+        },
+        {
+          "id": "home-seat-2",
+          "anchor": [
+            0.525,
+            0.522
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.522
+        },
+        {
+          "id": "home-seat-3",
+          "anchor": [
+            0.573,
+            0.522
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.522
+        },
+        {
+          "id": "home-seat-4",
+          "anchor": [
+            0.501,
+            0.562
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.562
+        },
+        {
+          "id": "home-seat-5",
+          "anchor": [
+            0.549,
+            0.562
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.562
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "title": "Work",
+      "legacyIds": [
+        "work"
+      ],
+      "purpose": "Office, projects, meetings, collaboration, software development, notes, documents, design and media production",
+      "bounds": [
+        0.59,
+        0.6,
+        0.22,
+        0.14
+      ],
+      "focus": [
+        0.699,
+        0.689
+      ],
+      "label": [
+        0.7,
+        0.727
+      ],
+      "slots": [
+        {
+          "id": "work-seat-1",
+          "anchor": [
+            0.652,
+            0.664
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.664
+        },
+        {
+          "id": "work-seat-2",
+          "anchor": [
+            0.7,
+            0.664
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.664
+        },
+        {
+          "id": "work-seat-3",
+          "anchor": [
+            0.748,
+            0.664
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.664
+        },
+        {
+          "id": "work-seat-4",
+          "anchor": [
+            0.676,
+            0.704
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.704
+        },
+        {
+          "id": "work-seat-5",
+          "anchor": [
+            0.724,
+            0.704
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.704
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Social",
+      "legacyIds": [
+        "library"
+      ],
+      "purpose": "Social networks, communities and messaging",
+      "bounds": [
+        0.348,
+        0.33,
+        0.15,
+        0.107
+      ],
+      "focus": [
+        0.428,
+        0.392
+      ],
+      "label": [
+        0.43,
+        0.445
+      ],
+      "slots": [
+        {
+          "id": "create-seat-1",
+          "anchor": [
+            0.382,
+            0.382
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.382
+        },
+        {
+          "id": "create-seat-2",
+          "anchor": [
+            0.43,
+            0.382
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.382
+        },
+        {
+          "id": "create-seat-3",
+          "anchor": [
+            0.478,
+            0.382
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.382
+        },
+        {
+          "id": "create-seat-4",
+          "anchor": [
+            0.406,
+            0.422
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.422
+        },
+        {
+          "id": "create-seat-5",
+          "anchor": [
+            0.454,
+            0.422
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.422
+        }
+      ]
+    },
+    {
+      "id": "finance",
+      "title": "Life",
+      "legacyIds": [
+        "money"
+      ],
+      "purpose": "Banking, payments, budgets, investments and bills",
+      "bounds": [
+        0.542,
+        0.33,
+        0.15,
+        0.11
+      ],
+      "focus": [
+        0.62,
+        0.399
+      ],
+      "label": [
+        0.62,
+        0.449
+      ],
+      "slots": [
+        {
+          "id": "finance-seat-1",
+          "anchor": [
+            0.572,
+            0.386
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.386
+        },
+        {
+          "id": "finance-seat-2",
+          "anchor": [
+            0.62,
+            0.386
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.386
+        },
+        {
+          "id": "finance-seat-3",
+          "anchor": [
+            0.668,
+            0.386
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.386
+        },
+        {
+          "id": "finance-seat-4",
+          "anchor": [
+            0.596,
+            0.426
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.426
+        },
+        {
+          "id": "finance-seat-5",
+          "anchor": [
+            0.644,
+            0.426
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.426
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "title": "Games",
+      "legacyIds": [
+        "health"
+      ],
+      "purpose": "Small games to play in the world",
+      "bounds": [
+        0.675,
+        0.46,
+        0.16,
+        0.113
+      ],
+      "focus": [
+        0.754,
+        0.527
+      ],
+      "label": [
+        0.753,
+        0.574
+      ],
+      "slots": [
+        {
+          "id": "health-seat-1",
+          "anchor": [
+            0.705,
+            0.511
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.511
+        },
+        {
+          "id": "health-seat-2",
+          "anchor": [
+            0.753,
+            0.511
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.511
+        },
+        {
+          "id": "health-seat-3",
+          "anchor": [
+            0.801,
+            0.511
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.511
+        },
+        {
+          "id": "health-seat-4",
+          "anchor": [
+            0.729,
+            0.551
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.551
+        },
+        {
+          "id": "health-seat-5",
+          "anchor": [
+            0.777,
+            0.551
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "open stone court",
+          "depth": 0.551
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "title": "Entertainment",
+      "legacyIds": [
+        "travel",
+        "people"
+      ],
+      "purpose": "Video, music, live streams and short video",
+      "bounds": [
+        0.275,
+        0.565,
+        0.235,
+        0.14
+      ],
+      "focus": [
+        0.397,
+        0.635
+      ],
+      "label": [
+        0.396,
+        0.679
+      ],
+      "slots": [
+        {
+          "id": "tools-seat-1",
+          "anchor": [
+            0.348,
+            0.616
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "river landing",
+          "depth": 0.616
+        },
+        {
+          "id": "tools-seat-2",
+          "anchor": [
+            0.396,
+            0.616
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "river landing",
+          "depth": 0.616
+        },
+        {
+          "id": "tools-seat-3",
+          "anchor": [
+            0.444,
+            0.616
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "river landing",
+          "depth": 0.616
+        },
+        {
+          "id": "tools-seat-4",
+          "anchor": [
+            0.372,
+            0.656
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "river landing",
+          "depth": 0.656
+        },
+        {
+          "id": "tools-seat-5",
+          "anchor": [
+            0.42,
+            0.656
+          ],
+          "maxSize": [
+            0.038,
+            0.067
+          ],
+          "surface": "river landing",
+          "depth": 0.656
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "mode": "image-api",
+    "model": "gpt-image-2.5-sunburst",
+    "size": "3840x2160",
+    "quality": "high",
+    "prompt": "drafts/sunburst-4k/day.prompt.txt",
+    "generatedAt": "2026-09-25",
+    "upscaled": false,
+    "requests": [
+      "drafts/sunburst-4k/day.request.json",
+      "drafts/sunburst-4k/night.request.json"
+    ]
+  }
+}

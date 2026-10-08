@@ -1,0 +1,8 @@
+{
+  "mode": "built-in imagegen",
+  "source": "exec-9add3d0b-caca-449f-a159-f5b1fe265e1c",
+  "input": "../../assets/companion/rig/fallback.png",
+  "output": "neck-underpaint.png",
+  "status": "inspector-only masked neck backing; original head retained",
+  "prompt": "Use case: precise-object-edit. Asset type: hidden neck/collar underpainting for a layered 2D Fox animation rig. Image 1 is the exact edit target and sole style reference. Remove the entire head including both ears, face and cheek tufts from this seated Fox, leaving ONLY the existing seated body, tail, four paws and sage-green scarf in their exact original positions and scale on the same square transparent canvas. Paint the otherwise hidden short rounded furry neck and COMPLETE rear collar of the scarf behind the removed head. This is a non-graphic modular character sprite: a smooth cream-furred rounded short neck top, absolutely no anatomical cut or injury. The neck top should reach about y=0.50 of the canvas and meet the scarf around y=0.59. Preserve the original scarf front folds, knot, body fur, paws, tail, lighting, painterly style, full-canvas registration and transparent background. Do not enlarge the body, zoom, crop, recenter, or add a new head. Only the small neck/collar backing will be used under the original rigid head; it must look natural when briefly exposed by a small head tilt. No text, props, border, floor shadow or checkerboard."
+}

@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: production HUD button sprite atlas for Worldlet, a cozy miniature village personal desktop app.
+Input image 1 is MATERIAL / COLOR STYLE REFERENCE ONLY: the existing village. Input image 2 is STYLE REFERENCE ONLY: the existing Fox. Do NOT reproduce the environment or character in the atlas.
+Create ONE high-resolution square atlas, ideally 2048x2048, transparent background with true alpha. Exactly 16 separate buttons, 4 columns x 4 rows, evenly spaced on an invisible grid. Every button centered within its own equal square cell, identical diameter about 64% of the cell, ample transparent gutters, all fully visible. No captions, letters, legends, grid lines, background or extra objects.
+Style: beautifully understated cozy illustrated interface assets, simple clearly readable silhouettes at 32px. Warm ivory matte smooth porcelain/paper buttons, barely organic rounded circular outlines, extremely shallow soft shading, tiny diffuse contact shadow, soft upper-left light, dark moss-green centered symbols. Every glyph same optical weight and scale. Gentle handcrafted finish matching the rounded matte village and Fox, NOT realistic hardware, NOT metal or glossy plastic. Surfaces mostly clean, almost no texture. NO rings, borders, ornamental frames, bevel ridges, gold coins, flowers, leaves, screws, badges, or wood grain. Each button looks like a simple warm soft ivory pebble seen perfectly front-on, very shallow.
+Exact grid left to right:
+Row 1: close X; back left arrow; forward right arrow; plus sign.
+Row 2: checkmark; three horizontal dots; simple panel/window glyph (rectangle with narrow left sidebar and two short right lines, NOT four squares); simple house outline for Back to World.
+Row 3: upward equilateral triangle; downward equilateral triangle; microphone; upward send arrow.
+Row 4: play triangle pointing right; pause two bars; speaker with two sound arcs; circular refresh arrow.
+Make all sixteen buttons same material and shape, restrained deep forest green symbols, no heavy black outlines, no letters. True transparent background, no checkerboard painted into image. This is an asset atlas, not a screenshot or presentation.

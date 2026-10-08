@@ -1,0 +1,66 @@
+{
+  "generator": "OpenAI imagegen",
+  "date": "2026-09-25",
+  "entries": [
+    {
+      "key": "twitch",
+      "asset": "resources/styles/builtin/assets/applets/twitch/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet applet Twitch: purple ceramic live broadcast television shaped like a speech bubble with ivory display and fabric microphone. Soft hand-painted dimensional miniature, fixed elevated three-quarter orthographic camera, muted cozy village palette, warm diffuse upper-left daylight. Ceramic, enamel, glass and brass with distinct functional silhouette, original application identity integrated into useful device. No wooden furniture, no terrain, no stone pedestal (added separately in runtime), no extra labels, no background or cast shadow. Whole device visible centered with 10% margin, square 1024px real transparent alpha.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-7db74988-dc5a-4f63-afb7-0dd8f85a0379.png"
+    },
+    {
+      "key": "steam",
+      "asset": "resources/styles/builtin/assets/applets/steam/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet applet Steam: charcoal and blue enamel game console with articulated silver connecting rod emblem, ivory controls. Soft hand-painted dimensional miniature, fixed elevated three-quarter orthographic camera, muted cozy village palette, warm diffuse upper-left daylight. Ceramic, enamel, glass and brass with distinct functional silhouette, original application identity integrated into useful device. No wooden furniture, no terrain, no stone pedestal (added separately in runtime), no extra labels, no background or cast shadow. Whole device visible centered with 10% margin, square 1024px real transparent alpha.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-09cc8b6b-6163-498d-b8b4-e8c1e0760859.png"
+    },
+    {
+      "key": "copilot",
+      "asset": "resources/styles/builtin/assets/applets/copilot/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Microsoft Copilot: soft multicolor folded enamel ribbon assistant with a glass conversation lens and cream dialogue cards. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-c7f75a55-f7b5-4404-aa7e-3eef67304d90.png"
+    },
+    {
+      "key": "acrobat",
+      "asset": "resources/styles/builtin/assets/applets/acrobat/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Adobe Acrobat: ivory and red enamel document press, red curved Acrobat ribbon forms a paper guide above a PDF manuscript tray. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-076ad1e8-b71e-4ed2-86c1-94e492be3c79.png"
+    },
+    {
+      "key": "wikipedia",
+      "asset": "resources/styles/builtin/assets/applets/wikipedia/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Wikipedia: ivory ceramic incomplete puzzle globe with subtle gray glyphs mounted over an open reference book and brass magnifier. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-aee12a74-8ceb-49db-b71b-b314b85f20fa.png"
+    },
+    {
+      "key": "qq",
+      "asset": "resources/styles/builtin/assets/applets/qq/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet QQ: ivory ceramic penguin-shaped chat intercom with black enamel wings, warm yellow beak and cream message slips. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-67ec29ab-f79a-49fe-aaf2-96b8272a2c13.png"
+    },
+    {
+      "key": "wps",
+      "asset": "resources/styles/builtin/assets/applets/wps/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet WPS Office: coral enamel office document press with W-shaped paper rollers, cream manuscript and spreadsheet cards. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-656ff8dd-82ed-4183-8aff-8a9584a69b26.png"
+    },
+    {
+      "key": "doubao",
+      "asset": "resources/styles/builtin/assets/applets/doubao/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet 豆包: warm ivory ceramic conversation companion with a soft blue glass thought sphere and small message cards. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-4c9d52e8-b32a-4ed4-8d59-b0f82ed35670.png"
+    },
+    {
+      "key": "taobao",
+      "asset": "resources/styles/builtin/assets/applets/taobao/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet 淘宝: warm orange enamel market parcel counter with rounded shopping bag handle and cream packages. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-8c84e351-1dd2-4724-b7a2-e78048632cf8.png"
+    },
+    {
+      "key": "alipay",
+      "asset": "resources/styles/builtin/assets/applets/alipay/peek.png",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet 支付宝: blue ceramic payment wallet with ivory folded pocket, small brass coin tray and a restrained white payment mark. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-fdd523ca-401e-459e-bd13-1c24e9d8fe96.png"
+    }
+  ]
+}

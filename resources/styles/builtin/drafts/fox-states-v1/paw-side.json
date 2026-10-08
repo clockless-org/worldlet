@@ -1,0 +1,10 @@
+{
+  "status": "dev-runtime-native-acceptance-pending",
+  "file": "paw-side-v1.png",
+  "sourceWrist": [0.54, 0.33],
+  "targetWrist": [0.677, 0.91],
+  "scale": [0.18, 0.14],
+  "projectedThickness": 0.55,
+  "blend": [0.90, 0.93],
+  "notes": "Dev wrist-side surface. Projected thickness 0.55 was reviewed against 0.75 after the rounded open-paw update: a slimmer edge-on silhouette retains volume without the previous bulge. Closed/open endpoints and attachment remain unchanged. Whole-gesture native acceptance is pending; release remains on the previous renderer."
+}

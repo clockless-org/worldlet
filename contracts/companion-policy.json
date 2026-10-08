@@ -1,0 +1,20 @@
+{
+  "format": "worldlet.companion",
+  "version": 1,
+  "maxNameLength": 80,
+  "maxPersonalityBytes": 64000,
+  "maxMemories": 1000,
+  "maxConversations": 10000,
+  "maxMemoryIdLength": 160,
+  "maxMemoryBytes": 1000000,
+  "maxSourceLength": 240,
+  "maxSessionLength": 160,
+  "maxTurnBytes": 128000,
+  "maxArchiveBytes": 16000000,
+  "rotateAfterTurns": 500,
+  "promptMemoryBudget": 8000,
+  "promptMemoryExcerpt": 1200,
+  "timestampPattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]([.][0-9]{1,7})?(Z|[+-]((0[0-9]|1[0-3]):[0-5][0-9]|14:00))\\z",
+  "uuidPattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\z",
+  "memoryAuthorityPattern": "^(worldlet|hermes|adapter:[a-z][a-z0-9-]{0,63})\\z"
+}

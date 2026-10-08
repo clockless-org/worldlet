@@ -1,0 +1,9 @@
+{
+  "version": "0.38.1",
+  "assets": {
+    "darwin-arm64": {"name": "agent-browser-darwin-arm64", "sha256": "2e61287259053ea964d39e77002c6a34af0e589e55ccff25e659efae7e892e0d"},
+    "darwin-x64": {"name": "agent-browser-darwin-x64", "sha256": "9187f885f7da0a6d880ff6d2e7dea58e17bea490a1fec85bbb6a36067272ea8e"},
+    "linux-x64": {"name": "agent-browser-linux-x64", "sha256": "5100149a1903211c889de4e545bf36d90803740cea4f99aa22651649f9205ea1"},
+    "win32-x64": {"name": "agent-browser-win32-x64.exe", "sha256": "70bd758b2a5a72b18055f60ff877d2297d036c4104e3bc94af6f7c1ceb941408"}
+  }
+}

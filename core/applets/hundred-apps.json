@@ -1,0 +1,85 @@
+[
+  {
+    "key": "twitch",
+    "title": "Twitch",
+    "purpose": "Watch live streams on Twitch",
+    "region": "travel",
+    "url": "https://www.twitch.tv/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "purple ceramic live broadcast television shaped like a speech bubble with ivory display and fabric microphone"
+  },
+  {
+    "key": "copilot",
+    "title": "Microsoft Copilot",
+    "purpose": "Chat with Microsoft Copilot on its website, next to Fox",
+    "region": "work",
+    "url": "https://copilot.microsoft.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "soft multicolor folded enamel ribbon assistant with a glass conversation lens and cream dialogue cards"
+  },
+  {
+    "key": "acrobat",
+    "title": "Adobe Acrobat",
+    "purpose": "Read and edit PDFs in Adobe Acrobat on the web",
+    "region": "work",
+    "url": "https://acrobat.adobe.com/",
+    "bundleIds": [
+      "com.adobe.Reader",
+      "com.adobe.Acrobat.Pro"
+    ],
+    "preferNative": false,
+    "deviceConcept": "ivory and red enamel document press, red curved Acrobat ribbon forms a paper guide above a PDF manuscript tray"
+  },
+  {
+    "key": "wikipedia",
+    "title": "Wikipedia",
+    "purpose": "Read Wikipedia; Fox can look things up there for you",
+    "region": "travel",
+    "url": "https://www.wikipedia.org/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "ivory ceramic incomplete puzzle globe with subtle gray glyphs mounted over an open reference book and brass magnifier"
+  },
+  {
+    "key": "doubao",
+    "title": "豆包",
+    "purpose": "Chat with Doubao on its website, next to Fox",
+    "region": "work",
+    "url": "https://www.doubao.com/chat/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "warm ivory ceramic conversation companion with a soft blue glass thought sphere and small message cards"
+  },
+  {
+    "key": "taobao",
+    "title": "淘宝",
+    "purpose": "Shop on Taobao; Fox can search and compare items for you",
+    "region": "money",
+    "url": "https://www.taobao.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "warm orange enamel market parcel counter with rounded shopping bag handle and cream packages"
+  },
+  {
+    "key": "alipay",
+    "title": "支付宝",
+    "purpose": "Pay and check your bills on Alipay’s website",
+    "region": "money",
+    "url": "https://www.alipay.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "blue ceramic payment wallet with ivory folded pocket, small brass coin tray and a restrained white payment mark"
+  },
+  {
+    "key": "douyin",
+    "title": "抖音",
+    "purpose": "Watch short videos on Douyin; Fox can find them for you",
+    "region": "travel",
+    "url": "https://www.douyin.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "walnut music-note stand in Douyin's cyan and red, with a small clip-on camera and a vertical phone screen"
+  }
+]

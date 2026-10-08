@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {tennisDemo} from '../ui/practice/tennis-demo.ts';
+let guide:any,body='Date: 2026-09-26\nGuest: Sam <sam.okafor@example.com>',writes=0,opened='',settled=0;
+(globalThis as any).document={createElement:()=>({append(){}})};
+const config={read:()=>body,save:(_id,value)=>{body=value;writes++;return {ok:true};},show:value=>guide=value,open:id=>opened=id,onConfirmed:()=>settled++};
+const click=label=>guide.actions.find(b=>b.textContent===label).onclick();
+tennisDemo(config);click('Not now');assert.equal(writes,0);
+tennisDemo(config);const confirm=guide.actions[0];click('Confirm outing');confirm.onclick();assert.equal(writes,1);assert.equal(settled,1);assert.match(body,/Booking: confirmed/);assert.match(body,/Calendar: added/);assert.match(body,/Invitation: sent to sam.okafor@example.com/);
+click('View plan');assert.equal(opened,'sample-tennis-plan');tennisDemo(config);assert.equal(guide.actions.length,1);assert.equal(writes,1);
+body='Date: 2026-09-26';tennisDemo(config);assert.equal(guide.actions.length,2);
+console.log('PASS prepared Saturday tennis: cancellation, one confirmation, no duplicates, local calendar/invitation and reset');

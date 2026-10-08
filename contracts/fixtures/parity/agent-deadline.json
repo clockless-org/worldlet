@@ -1,0 +1,124 @@
+[
+ {
+  "name": "chat deadline",
+  "operation": "agentRequestDeadline",
+  "input": {
+   "action": "chat"
+  },
+  "expected": {
+   "ok": true,
+   "value": 120
+  }
+ },
+ {
+  "name": "attention tick deadline",
+  "operation": "agentRequestDeadline",
+  "input": {
+   "action": "attention_tick"
+  },
+  "expected": {
+   "ok": true,
+   "value": 600
+  }
+ },
+ {
+  "name": "monitor deadline",
+  "operation": "agentRequestDeadline",
+  "input": {
+   "action": "chat",
+   "monitor": true
+  },
+  "expected": {
+   "ok": true,
+   "value": 600
+  }
+ },
+ {
+  "name": "idle conversation summary deadline",
+  "operation": "agentRequestDeadline",
+  "input": {
+   "action": "compact",
+   "_background": true
+  },
+  "expected": {
+   "ok": true,
+   "value": 720
+  }
+ },
+ {
+  "name": "background task timeout",
+  "operation": "agentRequestDeadline",
+  "input": {
+   "action": "chat",
+   "_background": true,
+   "_taskTimeoutSeconds": 90
+  },
+  "expected": {
+   "ok": true,
+   "value": 90
+  }
+ },
+ {
+  "name": "invalid task timeout",
+  "operation": "agentRequestDeadline",
+  "input": {
+   "action": "chat",
+   "_background": true,
+   "_taskTimeoutSeconds": 601
+  },
+  "expected": {
+   "error": "Invalid task timeout",
+   "ok": false
+  }
+ },
+ {
+  "name": "foreground chat is idle-based",
+  "operation": "agentDeadlineRemaining",
+  "input": {
+   "body": {
+    "action": "chat"
+   },
+   "started": 0,
+   "lastInput": 500,
+   "now": 560
+  },
+  "expected": {
+   "ok": true,
+   "value": 60
+  }
+ },
+ {
+  "name": "background is capped by total",
+  "operation": "agentDeadlineRemaining",
+  "input": {
+   "body": {
+    "action": "chat",
+    "_background": true,
+    "_taskTimeoutSeconds": 120
+   },
+   "started": 0,
+   "lastInput": 100,
+   "now": 110
+  },
+  "expected": {
+   "ok": true,
+   "value": 10
+  }
+ },
+ {
+  "name": "attention tick is capped by total",
+  "operation": "agentDeadlineRemaining",
+  "input": {
+   "body": {
+    "action": "attention_tick"
+   },
+   "started": 0,
+   "lastInput": 590,
+   "now": 595
+  },
+  "expected": {
+   "ok": true,
+   "value": 5
+  }
+ }
+]

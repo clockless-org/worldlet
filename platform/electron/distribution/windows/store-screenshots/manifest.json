@@ -1,0 +1,175 @@
+{
+  "purpose": "Microsoft Store screenshots for the Electron Worldlet listing (Issue #589). Originals, not edited: each file is the byte-identical PNG written by the capture.",
+  "capturedAt": "2026-10-01",
+  "host": "01 (Windows 11 Pro 10.0.26200, x64), display scale 125%",
+  "source": {
+    "commit": "2585a176fa307d56629d40f54900842e4c2b225c",
+    "appVersion": "2026.1001.1084",
+    "electron": "44.5.1"
+  },
+  "build": [
+    "WORLDLET_BUILD_CHANNEL=release node scripts/build-native-ui.ts",
+    "node scripts/build-electron.ts"
+  ],
+  "capture": {
+    "route": "WORLDLET_CAPTURE (webContents.capturePage of the revealed window: page pixels only, no OS title bar or cursor)",
+    "environment": {
+      "WORLDLET_DEV": "1 (capture logging only; the UI itself is the release-channel build)",
+      "WORLDLET_QUIET": "1",
+      "WORLDLET_WINDOW_TITLE": "Worldlet",
+      "WORLDLET_CAPTURE_WAIT": "30000",
+      "WORLDLET_CAPTURE_SETTLE": "4000",
+      "WORLDLET_CAPTURE_PROBE": "scripted UI step per scene (click, then wait)"
+    },
+    "profile": "new disposable profile per scene with preferences.json {\"worldlet.sampleEnabled\":true}: the built-in fictional sample world, no sign-in, no model, no personal data",
+    "window": "1922 x 1042 CSS px at devicePixelRatio 1.25"
+  },
+  "data": "Fictional sample world only (people, tasks, notes and numbers are sample content). The clock shows the capture time.",
+  "tool": "sharp 0.35.4 / libvips 8.18.6",
+  "screenshots": [
+    {
+      "file": "01-day-overview.png",
+      "scene": "Day world overview of the fictional sample world",
+      "width": 2403,
+      "height": 1302,
+      "format": "png",
+      "channels": 3,
+      "bytes": 4397081,
+      "sha256": "117ac91b4a33e891bd057eb156c7ff70c83e00023dacfc991632926976b04d23",
+      "pngChunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "steps": {
+        "script": "Wait 2 s after reveal; no input."
+      },
+      "checks": {
+        "captureOutcome": "revealed",
+        "stalled": 0,
+        "gpuExits": 0,
+        "storeMinimum1366x768": true,
+        "nonBlank": true,
+        "distinctColoursIn240x130Sample": 22271,
+        "privateOrDevStringsInFile": 0
+      }
+    },
+    {
+      "file": "02-fox.png",
+      "scene": "Fox companion guide bubble and Ask Fox input (avatar clicked)",
+      "width": 2403,
+      "height": 1302,
+      "format": "png",
+      "channels": 3,
+      "bytes": 4323635,
+      "sha256": "51c2af1f787ca41ab9fc9ce63077fbf6adc6476e417b0775e61bb9d7828be0f6",
+      "pngChunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "steps": {
+        "script": "Click the Fox avatar (.companion-avatar); wait 4 s."
+      },
+      "checks": {
+        "captureOutcome": "revealed",
+        "stalled": 0,
+        "gpuExits": 0,
+        "storeMinimum1366x768": true,
+        "nonBlank": true,
+        "distinctColoursIn240x130Sample": 22281,
+        "privateOrDevStringsInFile": 0
+      }
+    },
+    {
+      "file": "03-attention-preview.png",
+      "scene": "Attention preview of the sample task \"Tennis with Sam\"",
+      "width": 2403,
+      "height": 1302,
+      "format": "png",
+      "channels": 3,
+      "bytes": 4103464,
+      "sha256": "44abac5b6c39d9bafc238f6cd1fcfa5b2b6906440cf1a08ec0717bdb72f3b7ef",
+      "pngChunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "steps": {
+        "script": "Click the Worth Doing task \"Tennis with Sam\" (.world-task); wait 4 s."
+      },
+      "checks": {
+        "captureOutcome": "revealed",
+        "stalled": 0,
+        "gpuExits": 0,
+        "storeMinimum1366x768": true,
+        "nonBlank": true,
+        "distinctColoursIn240x130Sample": 20531,
+        "privateOrDevStringsInFile": 0
+      }
+    },
+    {
+      "file": "04-open-applet.png",
+      "scene": "Notes Applet open with sample notes",
+      "width": 2403,
+      "height": 1302,
+      "format": "png",
+      "channels": 3,
+      "bytes": 1978600,
+      "sha256": "079b0ce9e27c6bac91126cad6a0d154fe6d8e25ade8e914874904e137302651d",
+      "pngChunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "steps": {
+        "script": "Click the Notes pin (.notion-pin); wait 5 s."
+      },
+      "checks": {
+        "captureOutcome": "revealed",
+        "stalled": 0,
+        "gpuExits": 0,
+        "storeMinimum1366x768": true,
+        "nonBlank": true,
+        "distinctColoursIn240x130Sample": 12946,
+        "privateOrDevStringsInFile": 0
+      }
+    },
+    {
+      "file": "05-night.png",
+      "scene": "Night world (saved scene lighting \"night\", labelled Night preview)",
+      "width": 2403,
+      "height": 1302,
+      "format": "png",
+      "channels": 3,
+      "bytes": 4021569,
+      "sha256": "c26d630489d39fb953aa9a1c2f56be1a0b99e7ca80dbefcd53056fa11f154834",
+      "pngChunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "steps": {
+        "script": "Wait 2 s after reveal; no input.",
+        "environmentJson": {
+          "presentation": {
+            "recording": {
+              "weather": "clear",
+              "lighting": "night"
+            }
+          }
+        },
+        "note": "Seeded as <profile>/environment.json: the saved scene lighting that Fox set_scene_lighting writes."
+      },
+      "checks": {
+        "captureOutcome": "revealed",
+        "stalled": 0,
+        "gpuExits": 0,
+        "storeMinimum1366x768": true,
+        "nonBlank": true,
+        "distinctColoursIn240x130Sample": 20144,
+        "privateOrDevStringsInFile": 0
+      }
+    }
+  ]
+}

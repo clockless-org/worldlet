@@ -1,0 +1,2077 @@
+{
+  "schemaVersion": 1,
+  "id": "authored",
+  "title": "Authored fixture",
+  "version": "1.0.0",
+  "style": {
+    "id": "cozy-miniature",
+    "version": "1.0.0"
+  },
+  "artStatus": "approved",
+  "canvas": {
+    "width": 1672,
+    "height": 941,
+    "coordinates": "normalized",
+    "origin": "top-left"
+  },
+  "camera": {
+    "projection": "fixed-oblique",
+    "overview": [
+      0,
+      0,
+      1,
+      1
+    ]
+  },
+  "layers": [
+    {
+      "id": "environment-day",
+      "kind": "environment",
+      "src": "images/layers/background-day.png",
+      "lighting": "day",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": -0.004,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1672,
+        941
+      ]
+    },
+    {
+      "id": "environment-night",
+      "kind": "environment",
+      "src": "images/layers/background-night.png",
+      "lighting": "night",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": -0.004,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1672,
+        941
+      ]
+    },
+    {
+      "id": "architecture-day",
+      "kind": "architecture",
+      "src": "images/layers/stone-day.png",
+      "lighting": "day",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": 0,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1672,
+        941
+      ]
+    },
+    {
+      "id": "architecture-night",
+      "kind": "architecture",
+      "src": "images/layers/stone-night.png",
+      "lighting": "night",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": 0,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1671,
+        941
+      ]
+    },
+    {
+      "id": "atmosphere-day",
+      "kind": "atmosphere",
+      "src": "images/layers/mist.png",
+      "lighting": "day",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": -0.0015,
+      "opacity": 0.55,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1672,
+        941
+      ]
+    },
+    {
+      "id": "atmosphere-night",
+      "kind": "atmosphere",
+      "src": "images/layers/mist.png",
+      "lighting": "night",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": -0.0015,
+      "opacity": 0.55,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1672,
+        941
+      ]
+    },
+    {
+      "id": "foreground-day",
+      "kind": "foreground",
+      "src": "images/layers/foreground-day.png",
+      "lighting": "day",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": 0.006,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1672,
+        941
+      ]
+    },
+    {
+      "id": "foreground-night",
+      "kind": "foreground",
+      "src": "images/layers/foreground-night.png",
+      "lighting": "night",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "parallax": 0.006,
+      "prompt": "images/layers/prompts.json",
+      "sourceSize": [
+        1672,
+        941
+      ]
+    }
+  ],
+  "hudSafeAreas": [
+    [
+      0.35,
+      0.84,
+      0.3,
+      0.16
+    ],
+    [
+      0,
+      0.08,
+      0.29,
+      0.72
+    ]
+  ],
+  "areas": [
+    {
+      "id": "home",
+      "title": "Home",
+      "legacyIds": [
+        "home"
+      ],
+      "purpose": "Personal mail, calendars, chat, household, shopping, maps and travel",
+      "bounds": [
+        0.1,
+        0.59,
+        0.36,
+        0.14
+      ],
+      "focus": [
+        0.28,
+        0.66
+      ],
+      "label": [
+        0.38,
+        0.75
+      ],
+      "slots": [
+        {
+          "id": "home-seat-1",
+          "anchor": [
+            0.32,
+            0.688
+          ],
+          "maxSize": [
+            0.03604,
+            0.096
+          ],
+          "surface": "stone terrace",
+          "depth": 0.688
+        },
+        {
+          "id": "home-seat-2",
+          "anchor": [
+            0.36,
+            0.678
+          ],
+          "maxSize": [
+            0.03604,
+            0.096
+          ],
+          "surface": "stone terrace",
+          "depth": 0.678
+        },
+        {
+          "id": "home-seat-3",
+          "anchor": [
+            0.4,
+            0.694
+          ],
+          "maxSize": [
+            0.03604,
+            0.096
+          ],
+          "surface": "stone terrace",
+          "depth": 0.694
+        },
+        {
+          "id": "home-seat-4",
+          "anchor": [
+            0.44,
+            0.682
+          ],
+          "maxSize": [
+            0.03604,
+            0.096
+          ],
+          "surface": "stone terrace",
+          "depth": 0.682
+        }
+      ],
+      "closeView": {
+        "src": "images/home/plate.png",
+        "slots": [
+          {
+            "id": "home-seat-1",
+            "anchor": [
+              0.26,
+              0.539
+            ],
+            "maxSize": [
+              0.14,
+              0.255
+            ]
+          },
+          {
+            "id": "home-seat-2",
+            "anchor": [
+              0.42,
+              0.539
+            ],
+            "maxSize": [
+              0.14,
+              0.255
+            ]
+          },
+          {
+            "id": "home-seat-3",
+            "anchor": [
+              0.58,
+              0.539
+            ],
+            "maxSize": [
+              0.14,
+              0.255
+            ]
+          },
+          {
+            "id": "home-seat-4",
+            "anchor": [
+              0.74,
+              0.539
+            ],
+            "maxSize": [
+              0.14,
+              0.255
+            ]
+          }
+        ],
+        "devices": {
+          "gmail": "images/home/mail.png",
+          "google-calendar": "images/home/calendar.png",
+          "apple-notes": "images/home/notes.png",
+          "apple-reminders": "images/home/reminders.png"
+        },
+        "occlusion": [
+          [
+            0,
+            0.564,
+            1,
+            0.436
+          ]
+        ],
+        "ambience": [
+          {
+            "id": "hearth-light",
+            "kind": "light",
+            "bounds": [
+              0,
+              0.24,
+              0.15,
+              0.32
+            ],
+            "color": "#ef9744",
+            "count": 1
+          },
+          {
+            "id": "window-dust",
+            "kind": "dust",
+            "bounds": [
+              0.65,
+              0.19,
+              0.18,
+              0.26
+            ],
+            "color": "#c6dbed",
+            "count": 12
+          }
+        ]
+      }
+    },
+    {
+      "id": "work",
+      "title": "Work",
+      "legacyIds": [
+        "work"
+      ],
+      "purpose": "Office, projects, meetings, collaboration and software development",
+      "bounds": [
+        0.352,
+        0.23,
+        0.115,
+        0.09
+      ],
+      "focus": [
+        0.41,
+        0.285
+      ],
+      "label": [
+        0.41,
+        0.33
+      ],
+      "slots": [
+        {
+          "id": "work-seat-1",
+          "anchor": [
+            0.37,
+            0.287
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.287
+        },
+        {
+          "id": "work-seat-2",
+          "anchor": [
+            0.41,
+            0.288
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.288
+        },
+        {
+          "id": "work-seat-3",
+          "anchor": [
+            0.45,
+            0.287
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.287
+        }
+      ],
+      "closeView": {
+        "src": "images/areas/work.png",
+        "slots": [
+          {
+            "id": "work-seat-1",
+            "anchor": [
+              0.27,
+              0.546
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "work-seat-2",
+            "anchor": [
+              0.5,
+              0.546
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "work-seat-3",
+            "anchor": [
+              0.73,
+              0.546
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          }
+        ],
+        "devices": {
+          "gmail": "images/home/mail.png",
+          "google-calendar": "images/home/calendar.png",
+          "apple-notes": "images/home/notes.png",
+          "apple-reminders": "images/home/reminders.png"
+        },
+        "occlusion": [
+          [
+            0,
+            0.58,
+            1,
+            0.42
+          ]
+        ],
+        "ambience": [
+          {
+            "id": "candle-left",
+            "kind": "light",
+            "bounds": [
+              0.082,
+              0.2,
+              0.05,
+              0.09
+            ],
+            "color": "#edb060",
+            "count": 1
+          },
+          {
+            "id": "star-window",
+            "kind": "stars",
+            "bounds": [
+              0.855,
+              0.06,
+              0.085,
+              0.1
+            ],
+            "color": "#c7dbec",
+            "count": 8
+          },
+          {
+            "id": "observatory-dust",
+            "kind": "dust",
+            "bounds": [
+              0.38,
+              0.2,
+              0.2,
+              0.24
+            ],
+            "color": "#e4d6b4",
+            "count": 9
+          }
+        ]
+      }
+    },
+    {
+      "id": "create",
+      "title": "Create",
+      "legacyIds": [
+        "library"
+      ],
+      "purpose": "Reading, learning, notes, writing, design, drawing and media production",
+      "bounds": [
+        0.558,
+        0.315,
+        0.115,
+        0.075
+      ],
+      "focus": [
+        0.614,
+        0.36
+      ],
+      "label": [
+        0.612,
+        0.405
+      ],
+      "slots": [
+        {
+          "id": "create-seat-1",
+          "anchor": [
+            0.58,
+            0.375
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.375
+        },
+        {
+          "id": "create-seat-2",
+          "anchor": [
+            0.615,
+            0.375
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.375
+        },
+        {
+          "id": "create-seat-3",
+          "anchor": [
+            0.65,
+            0.374
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.374
+        }
+      ],
+      "closeView": {
+        "src": "images/areas/create.png",
+        "slots": [
+          {
+            "id": "create-seat-1",
+            "anchor": [
+              0.27,
+              0.531
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "create-seat-2",
+            "anchor": [
+              0.5,
+              0.531
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "create-seat-3",
+            "anchor": [
+              0.73,
+              0.531
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          }
+        ],
+        "devices": {
+          "gmail": "images/home/mail.png",
+          "google-calendar": "images/home/calendar.png",
+          "apple-notes": "images/home/notes.png",
+          "apple-reminders": "images/home/reminders.png"
+        },
+        "occlusion": [
+          [
+            0,
+            0.559,
+            1,
+            0.441
+          ]
+        ],
+        "ambience": [
+          {
+            "id": "candle-left",
+            "kind": "light",
+            "bounds": [
+              0.155,
+              0.15,
+              0.05,
+              0.1
+            ],
+            "color": "#edb060",
+            "count": 1
+          },
+          {
+            "id": "candle-right",
+            "kind": "light",
+            "bounds": [
+              0.807,
+              0.15,
+              0.05,
+              0.1
+            ],
+            "color": "#edb060",
+            "count": 1
+          },
+          {
+            "id": "library-dust",
+            "kind": "dust",
+            "bounds": [
+              0.33,
+              0.19,
+              0.32,
+              0.27
+            ],
+            "color": "#e4d6b4",
+            "count": 18
+          }
+        ]
+      }
+    },
+    {
+      "id": "finance",
+      "title": "Life",
+      "legacyIds": [
+        "money"
+      ],
+      "purpose": "Banking, payments, budgets, investments and bills",
+      "bounds": [
+        0.59,
+        0.49,
+        0.22,
+        0.06
+      ],
+      "focus": [
+        0.715,
+        0.53
+      ],
+      "label": [
+        0.73,
+        0.565
+      ],
+      "slots": [
+        {
+          "id": "finance-seat-1",
+          "anchor": [
+            0.625,
+            0.53
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.53
+        },
+        {
+          "id": "finance-seat-2",
+          "anchor": [
+            0.685,
+            0.538
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.538
+        },
+        {
+          "id": "finance-seat-3",
+          "anchor": [
+            0.746,
+            0.537
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.537
+        },
+        {
+          "id": "finance-seat-4",
+          "anchor": [
+            0.792,
+            0.535
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.535
+        }
+      ],
+      "closeView": {
+        "src": "images/areas/finance.png",
+        "slots": [
+          {
+            "id": "finance-seat-1",
+            "anchor": [
+              0.26,
+              0.546
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "finance-seat-2",
+            "anchor": [
+              0.42,
+              0.546
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "finance-seat-3",
+            "anchor": [
+              0.58,
+              0.546
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "finance-seat-4",
+            "anchor": [
+              0.74,
+              0.546
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          }
+        ],
+        "devices": {
+          "gmail": "images/home/mail.png",
+          "google-calendar": "images/home/calendar.png",
+          "apple-notes": "images/home/notes.png",
+          "apple-reminders": "images/home/reminders.png"
+        },
+        "occlusion": [
+          [
+            0,
+            0.585,
+            1,
+            0.415
+          ]
+        ],
+        "ambience": [
+          {
+            "id": "lantern-left",
+            "kind": "light",
+            "bounds": [
+              0.09,
+              0.075,
+              0.06,
+              0.11
+            ],
+            "color": "#ebbd72",
+            "count": 1
+          },
+          {
+            "id": "lantern-right",
+            "kind": "light",
+            "bounds": [
+              0.65,
+              0.115,
+              0.06,
+              0.11
+            ],
+            "color": "#ebbd72",
+            "count": 1
+          },
+          {
+            "id": "fern-motes",
+            "kind": "motes",
+            "bounds": [
+              0.15,
+              0.25,
+              0.24,
+              0.18
+            ],
+            "color": "#c9d49b",
+            "count": 10
+          },
+          {
+            "id": "vine-motes",
+            "kind": "motes",
+            "bounds": [
+              0.57,
+              0.26,
+              0.27,
+              0.18
+            ],
+            "color": "#c9d49b",
+            "count": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "health",
+      "title": "Games",
+      "legacyIds": [
+        "health"
+      ],
+      "purpose": "Small games to play in the world",
+      "bounds": [
+        0.71,
+        0.24,
+        0.2,
+        0.075
+      ],
+      "focus": [
+        0.81,
+        0.28
+      ],
+      "label": [
+        0.85,
+        0.338
+      ],
+      "slots": [
+        {
+          "id": "health-seat-1",
+          "anchor": [
+            0.744,
+            0.28
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.28
+        },
+        {
+          "id": "health-seat-2",
+          "anchor": [
+            0.793,
+            0.29
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.29
+        },
+        {
+          "id": "health-seat-3",
+          "anchor": [
+            0.846,
+            0.29
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.29
+        },
+        {
+          "id": "health-seat-4",
+          "anchor": [
+            0.891,
+            0.28
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.28
+        }
+      ],
+      "closeView": {
+        "src": "images/areas/health.png",
+        "slots": [
+          {
+            "id": "health-seat-1",
+            "anchor": [
+              0.26,
+              0.537
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "health-seat-2",
+            "anchor": [
+              0.42,
+              0.537
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "health-seat-3",
+            "anchor": [
+              0.58,
+              0.537
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "health-seat-4",
+            "anchor": [
+              0.74,
+              0.537
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          }
+        ],
+        "devices": {
+          "gmail": "images/home/mail.png",
+          "google-calendar": "images/home/calendar.png",
+          "apple-notes": "images/home/notes.png",
+          "apple-reminders": "images/home/reminders.png"
+        },
+        "occlusion": [
+          [
+            0,
+            0.593,
+            1,
+            0.407
+          ]
+        ],
+        "ambience": [
+          {
+            "id": "pillar-left",
+            "kind": "light",
+            "bounds": [
+              0.16,
+              0.14,
+              0.05,
+              0.09
+            ],
+            "color": "#edb060",
+            "count": 1
+          },
+          {
+            "id": "pillar-right",
+            "kind": "light",
+            "bounds": [
+              0.739,
+              0.17,
+              0.05,
+              0.09
+            ],
+            "color": "#edb060",
+            "count": 1
+          },
+          {
+            "id": "pavilion-dust",
+            "kind": "dust",
+            "bounds": [
+              0.28,
+              0.23,
+              0.43,
+              0.18
+            ],
+            "color": "#d4cdaa",
+            "count": 12
+          }
+        ]
+      }
+    },
+    {
+      "id": "tools",
+      "title": "Explore",
+      "legacyIds": [
+        "travel",
+        "people"
+      ],
+      "purpose": "Browsing, media and discovery",
+      "bounds": [
+        0.76,
+        0.68,
+        0.19,
+        0.08
+      ],
+      "focus": [
+        0.865,
+        0.731
+      ],
+      "label": [
+        0.855,
+        0.79
+      ],
+      "slots": [
+        {
+          "id": "tools-seat-1",
+          "anchor": [
+            0.795,
+            0.731
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.731
+        },
+        {
+          "id": "tools-seat-2",
+          "anchor": [
+            0.85,
+            0.74
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.74
+        },
+        {
+          "id": "tools-seat-3",
+          "anchor": [
+            0.909,
+            0.738
+          ],
+          "maxSize": [
+            0.03392,
+            0.078
+          ],
+          "surface": "stone terrace",
+          "depth": 0.738
+        }
+      ],
+      "closeView": {
+        "src": "images/areas/tools.png",
+        "slots": [
+          {
+            "id": "tools-seat-1",
+            "anchor": [
+              0.27,
+              0.548
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "tools-seat-2",
+            "anchor": [
+              0.5,
+              0.548
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          },
+          {
+            "id": "tools-seat-3",
+            "anchor": [
+              0.73,
+              0.548
+            ],
+            "maxSize": [
+              0.135,
+              0.2
+            ]
+          }
+        ],
+        "devices": {
+          "gmail": "images/home/mail.png",
+          "google-calendar": "images/home/calendar.png",
+          "apple-notes": "images/home/notes.png",
+          "apple-reminders": "images/home/reminders.png"
+        },
+        "occlusion": [
+          [
+            0,
+            0.585,
+            1,
+            0.415
+          ]
+        ],
+        "ambience": [
+          {
+            "id": "lantern-left",
+            "kind": "light",
+            "bounds": [
+              0.065,
+              0.14,
+              0.05,
+              0.09
+            ],
+            "color": "#ecbd74",
+            "count": 1
+          },
+          {
+            "id": "lantern-centre",
+            "kind": "light",
+            "bounds": [
+              0.485,
+              0.145,
+              0.05,
+              0.09
+            ],
+            "color": "#ecbd74",
+            "count": 1
+          },
+          {
+            "id": "lantern-right",
+            "kind": "light",
+            "bounds": [
+              0.749,
+              0.14,
+              0.05,
+              0.09
+            ],
+            "color": "#ecbd74",
+            "count": 1
+          },
+          {
+            "id": "pond-reflections",
+            "kind": "ripples",
+            "bounds": [
+              0.592,
+              0.396,
+              0.115,
+              0.1
+            ],
+            "color": "#afbfd0",
+            "count": 10
+          }
+        ]
+      }
+    }
+  ],
+  "provenance": {
+    "mode": "image-api",
+    "model": "built-in imagegen",
+    "size": "1672x941",
+    "quality": "tool default",
+    "prompt": "prompts.json",
+    "generatedAt": "2026-10-05",
+    "upscaled": false
+  },
+  "ambience": [
+    {
+      "id": "gorge-mist",
+      "kind": "mist",
+      "color": "#bed0df",
+      "count": 9,
+      "strength": 0.8,
+      "bounds": [
+        0.533,
+        0.68,
+        0.184,
+        0.23
+      ],
+      "clip": [
+        [
+          0.11413,
+          0.0
+        ],
+        [
+          0.282609,
+          0.143478
+        ],
+        [
+          0.396739,
+          0.391304
+        ],
+        [
+          0.728261,
+          0.504348
+        ],
+        [
+          1.0,
+          0.478261
+        ],
+        [
+          1.0,
+          0.717391
+        ],
+        [
+          0.777174,
+          0.826087
+        ],
+        [
+          0.445652,
+          0.826087
+        ],
+        [
+          0.380435,
+          1.0
+        ],
+        [
+          0.065217,
+          0.9
+        ],
+        [
+          0.0,
+          0.608696
+        ],
+        [
+          0.005435,
+          0.26087
+        ]
+      ]
+    },
+    {
+      "id": "far-shore-mist",
+      "kind": "mist",
+      "color": "#c8d5e6",
+      "count": 5,
+      "strength": 0.65,
+      "bounds": [
+        0.938,
+        0.418,
+        0.062,
+        0.184
+      ],
+      "clip": [
+        [
+          0.548387,
+          0.0
+        ],
+        [
+          0.822581,
+          0.228261
+        ],
+        [
+          0.322581,
+          0.570652
+        ],
+        [
+          0.0,
+          0.76087
+        ],
+        [
+          0.129032,
+          0.929348
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.01087
+        ]
+      ]
+    },
+    {
+      "id": "black-pond-water",
+      "kind": "ripples",
+      "color": "#adcbe1",
+      "count": 32,
+      "strength": 0.65,
+      "bounds": [
+        0.695,
+        0.84,
+        0.302,
+        0.16
+      ],
+      "clip": [
+        [
+          0.033113,
+          0.03125
+        ],
+        [
+          0.175497,
+          0.0
+        ],
+        [
+          0.304636,
+          0.29375
+        ],
+        [
+          0.423841,
+          0.1125
+        ],
+        [
+          0.543046,
+          0.45
+        ],
+        [
+          0.692053,
+          0.54375
+        ],
+        [
+          0.92053,
+          0.175
+        ],
+        [
+          1.0,
+          0.25
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.261589,
+          1.0
+        ],
+        [
+          0.13245,
+          0.78125
+        ],
+        [
+          0.115894,
+          0.59375
+        ],
+        [
+          0.0,
+          0.39375
+        ]
+      ]
+    },
+    {
+      "id": "hearth-glow",
+      "kind": "light",
+      "bounds": [
+        0.299,
+        0.535,
+        0.052,
+        0.084
+      ],
+      "color": "#ffad59",
+      "count": 1,
+      "strength": 0.75,
+      "lighting": "night"
+    },
+    {
+      "id": "study-lamp",
+      "kind": "light",
+      "bounds": [
+        0.374,
+        0.188,
+        0.046,
+        0.051
+      ],
+      "color": "#ffce85",
+      "count": 1,
+      "strength": 0.8,
+      "lighting": "night"
+    },
+    {
+      "id": "library-lamp",
+      "kind": "light",
+      "bounds": [
+        0.601,
+        0.27,
+        0.036,
+        0.052
+      ],
+      "color": "#ffce85",
+      "count": 1,
+      "strength": 0.8,
+      "lighting": "night"
+    },
+    {
+      "id": "greenhouse-light",
+      "kind": "light",
+      "bounds": [
+        0.726,
+        0.415,
+        0.082,
+        0.101
+      ],
+      "color": "#f5c270",
+      "count": 1,
+      "strength": 0.7,
+      "lighting": "night"
+    },
+    {
+      "id": "greenhouse-motes",
+      "kind": "motes",
+      "bounds": [
+        0.807,
+        0.478,
+        0.04,
+        0.045
+      ],
+      "color": "#d4dd91",
+      "count": 6,
+      "strength": 0.6,
+      "lighting": "night"
+    },
+    {
+      "id": "boathouse-light",
+      "kind": "light",
+      "bounds": [
+        0.807,
+        0.646,
+        0.091,
+        0.072
+      ],
+      "color": "#ffce85",
+      "count": 1,
+      "strength": 0.7,
+      "lighting": "night"
+    },
+    {
+      "id": "study-day-dust",
+      "kind": "dust",
+      "bounds": [
+        0.383,
+        0.205,
+        0.058,
+        0.055
+      ],
+      "color": "#ffe9c2",
+      "count": 6,
+      "strength": 0.55,
+      "lighting": "day"
+    }
+  ],
+  "occlusion": [
+    {
+      "id": "home-front-parapet",
+      "depth": 0.79,
+      "day": [
+        [
+          0.0,
+          0.723698
+        ],
+        [
+          0.069378,
+          0.723698
+        ],
+        [
+          0.085526,
+          0.736451
+        ],
+        [
+          0.166268,
+          0.737513
+        ],
+        [
+          0.299043,
+          0.721573
+        ],
+        [
+          0.397727,
+          0.702444
+        ],
+        [
+          0.448565,
+          0.686504
+        ],
+        [
+          0.475478,
+          0.668438
+        ],
+        [
+          0.488636,
+          0.647184
+        ],
+        [
+          0.488636,
+          0.70457
+        ],
+        [
+          0.454545,
+          0.749203
+        ],
+        [
+          0.394139,
+          0.791711
+        ],
+        [
+          0.285885,
+          0.825717
+        ],
+        [
+          0.158493,
+          0.839532
+        ],
+        [
+          0.0,
+          0.839532
+        ]
+      ],
+      "night": [
+        [
+          0.0,
+          0.722635
+        ],
+        [
+          0.069378,
+          0.722635
+        ],
+        [
+          0.085526,
+          0.736451
+        ],
+        [
+          0.166268,
+          0.737513
+        ],
+        [
+          0.299043,
+          0.721573
+        ],
+        [
+          0.397727,
+          0.702444
+        ],
+        [
+          0.448565,
+          0.686504
+        ],
+        [
+          0.475478,
+          0.668438
+        ],
+        [
+          0.488636,
+          0.647184
+        ],
+        [
+          0.488636,
+          0.70457
+        ],
+        [
+          0.454545,
+          0.749203
+        ],
+        [
+          0.394139,
+          0.791711
+        ],
+        [
+          0.285885,
+          0.825717
+        ],
+        [
+          0.158493,
+          0.839532
+        ],
+        [
+          0.0,
+          0.839532
+        ]
+      ]
+    },
+    {
+      "id": "home-side-balustrade",
+      "depth": 0.75,
+      "day": [
+        [
+          0.427033,
+          0.612115
+        ],
+        [
+          0.453947,
+          0.626993
+        ],
+        [
+          0.476675,
+          0.645058
+        ],
+        [
+          0.488636,
+          0.664187
+        ],
+        [
+          0.483852,
+          0.682253
+        ],
+        [
+          0.476675,
+          0.690755
+        ],
+        [
+          0.464713,
+          0.678002
+        ],
+        [
+          0.472488,
+          0.666312
+        ],
+        [
+          0.464115,
+          0.652497
+        ],
+        [
+          0.447368,
+          0.638682
+        ],
+        [
+          0.425837,
+          0.626993
+        ]
+      ],
+      "night": [
+        [
+          0.427033,
+          0.612115
+        ],
+        [
+          0.453947,
+          0.626993
+        ],
+        [
+          0.476675,
+          0.645058
+        ],
+        [
+          0.488636,
+          0.664187
+        ],
+        [
+          0.483852,
+          0.682253
+        ],
+        [
+          0.476675,
+          0.690755
+        ],
+        [
+          0.464713,
+          0.678002
+        ],
+        [
+          0.472488,
+          0.666312
+        ],
+        [
+          0.464115,
+          0.652497
+        ],
+        [
+          0.447368,
+          0.638682
+        ],
+        [
+          0.425837,
+          0.626993
+        ]
+      ]
+    },
+    {
+      "id": "study-balustrade",
+      "depth": 0.34,
+      "day": [
+        [
+          0.353469,
+          0.301807
+        ],
+        [
+          0.363636,
+          0.304995
+        ],
+        [
+          0.450359,
+          0.304995
+        ],
+        [
+          0.461722,
+          0.297556
+        ],
+        [
+          0.462321,
+          0.337938
+        ],
+        [
+          0.353469,
+          0.341126
+        ]
+      ],
+      "night": [
+        [
+          0.353469,
+          0.301807
+        ],
+        [
+          0.363636,
+          0.304995
+        ],
+        [
+          0.450359,
+          0.304995
+        ],
+        [
+          0.461722,
+          0.297556
+        ],
+        [
+          0.462321,
+          0.337938
+        ],
+        [
+          0.353469,
+          0.341126
+        ]
+      ]
+    },
+    {
+      "id": "library-front-edge",
+      "depth": 0.42,
+      "day": [
+        [
+          0.559211,
+          0.386823
+        ],
+        [
+          0.57177,
+          0.390011
+        ],
+        [
+          0.654904,
+          0.386823
+        ],
+        [
+          0.665072,
+          0.381509
+        ],
+        [
+          0.665072,
+          0.403826
+        ],
+        [
+          0.559809,
+          0.404888
+        ]
+      ],
+      "night": [
+        [
+          0.559211,
+          0.386823
+        ],
+        [
+          0.57177,
+          0.390011
+        ],
+        [
+          0.654904,
+          0.386823
+        ],
+        [
+          0.665072,
+          0.381509
+        ],
+        [
+          0.665072,
+          0.403826
+        ],
+        [
+          0.559809,
+          0.404888
+        ]
+      ]
+    },
+    {
+      "id": "greenhouse-front-wall",
+      "depth": 0.59,
+      "day": [
+        [
+          0.623804,
+          0.541977
+        ],
+        [
+          0.662679,
+          0.548353
+        ],
+        [
+          0.702153,
+          0.543039
+        ],
+        [
+          0.704545,
+          0.569607
+        ],
+        [
+          0.715311,
+          0.571732
+        ],
+        [
+          0.720694,
+          0.544102
+        ],
+        [
+          0.769139,
+          0.540914
+        ],
+        [
+          0.777512,
+          0.54729
+        ],
+        [
+          0.79067,
+          0.543039
+        ],
+        [
+          0.812799,
+          0.543039
+        ],
+        [
+          0.833134,
+          0.552604
+        ],
+        [
+          0.858254,
+          0.55898
+        ],
+        [
+          0.857057,
+          0.583422
+        ],
+        [
+          0.820574,
+          0.584485
+        ],
+        [
+          0.783493,
+          0.572795
+        ],
+        [
+          0.732057,
+          0.571732
+        ],
+        [
+          0.727273,
+          0.5983
+        ],
+        [
+          0.699761,
+          0.596174
+        ],
+        [
+          0.674641,
+          0.581296
+        ],
+        [
+          0.624402,
+          0.568544
+        ]
+      ],
+      "night": [
+        [
+          0.623804,
+          0.541977
+        ],
+        [
+          0.662679,
+          0.548353
+        ],
+        [
+          0.702153,
+          0.543039
+        ],
+        [
+          0.704545,
+          0.569607
+        ],
+        [
+          0.715311,
+          0.571732
+        ],
+        [
+          0.720694,
+          0.544102
+        ],
+        [
+          0.769139,
+          0.540914
+        ],
+        [
+          0.777512,
+          0.54729
+        ],
+        [
+          0.79067,
+          0.543039
+        ],
+        [
+          0.812799,
+          0.543039
+        ],
+        [
+          0.833134,
+          0.552604
+        ],
+        [
+          0.858254,
+          0.55898
+        ],
+        [
+          0.857057,
+          0.583422
+        ],
+        [
+          0.820574,
+          0.584485
+        ],
+        [
+          0.783493,
+          0.572795
+        ],
+        [
+          0.732057,
+          0.571732
+        ],
+        [
+          0.727273,
+          0.5983
+        ],
+        [
+          0.699761,
+          0.596174
+        ],
+        [
+          0.674641,
+          0.581296
+        ],
+        [
+          0.624402,
+          0.568544
+        ]
+      ]
+    },
+    {
+      "id": "boathouse-dock-edge",
+      "depth": 0.82,
+      "day": [
+        [
+          0.751196,
+          0.723698
+        ],
+        [
+          0.776914,
+          0.730074
+        ],
+        [
+          0.812201,
+          0.738576
+        ],
+        [
+          0.850478,
+          0.74814
+        ],
+        [
+          0.895933,
+          0.75983
+        ],
+        [
+          0.924043,
+          0.766206
+        ],
+        [
+          0.923445,
+          0.78746
+        ],
+        [
+          0.880981,
+          0.785335
+        ],
+        [
+          0.819976,
+          0.767269
+        ],
+        [
+          0.776316,
+          0.755579
+        ],
+        [
+          0.751196,
+          0.74814
+        ]
+      ],
+      "night": [
+        [
+          0.751196,
+          0.723698
+        ],
+        [
+          0.776914,
+          0.730074
+        ],
+        [
+          0.812201,
+          0.738576
+        ],
+        [
+          0.850478,
+          0.74814
+        ],
+        [
+          0.895933,
+          0.75983
+        ],
+        [
+          0.924043,
+          0.766206
+        ],
+        [
+          0.923445,
+          0.78746
+        ],
+        [
+          0.880981,
+          0.785335
+        ],
+        [
+          0.819976,
+          0.767269
+        ],
+        [
+          0.776316,
+          0.755579
+        ],
+        [
+          0.751196,
+          0.74814
+        ]
+      ]
+    }
+  ]
+}

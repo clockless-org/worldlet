@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_e44f0b3c17434badbc0b46bf5fa9a707",
+  "source": "resources/styles/builtin/assets/applets/notion/peek.png"
+}

@@ -1,0 +1,8 @@
+{
+  "tool": "built-in imagegen",
+  "source": "exec-44840483-b216-4aae-a4a7-4619214228d6.png",
+  "file": "reading-eyes.png",
+  "reference": "../../assets/companion/rig/fallback.png",
+  "status": "Only registered eye RGB is consumed; original face and alpha retained. Reading-gaze study, not live.",
+  "prompt": "Use case: precise-object-edit. Image 1 is the exact edit target. Change ONLY the gaze direction of BOTH brown eyes: the fox is reading a book below its face, so its pupils and irises look DOWN toward its chest. Keep both eyes open and attentive, not sleepy; a small downward upper-eyelid adjustment is acceptable. Preserve the exact eye size, locations, white sclera, brown iris color, pupil size and catchlights. Keep ALL other original pixels/appearance as unchanged as possible: head position and scale, ears, fur, eyebrows, nose, muzzle, smile, scarf, body, paws, tail and original square canvas. No added book or props, no head tilt, no change in expression except gaze, no redesign, no text. Genuine transparent background. This is an eye-texture variant for the original illustration, not a new portrait."
+}

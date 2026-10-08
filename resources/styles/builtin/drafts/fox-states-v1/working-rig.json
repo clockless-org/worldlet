@@ -1,0 +1,14 @@
+{
+  "status": "working-study-not-live",
+  "device": "working-device.png",
+  "registration": {"scale": 0.9, "offset": [0.095, 0.20]},
+  "lidHinge": {"left": [0.455,0.817], "right": [0.847,0.807], "openAxis": [0.033,-0.227], "closedAxis": [-0.078,-0.057]},
+  "keyContacts": {"L": [0.432823073, 0.784662596], "R": [0.739016968, 0.779143222]},
+  "pawContacts": {"L": [0.54, 0.958], "R": [0.67, 0.958]},
+  "screenPolygon": [[0.488,0.575],[0.91,0.575],[0.91,0.84],[0.449,0.84],[0.450,0.80]],
+  "contactPose": {
+    "upperArmL": 66, "forearmL": -90,
+    "upperArmR": -76, "forearmR": 90
+  },
+  "tapTimes": {"L": [1700,2180,2840,3430,6100,6560,7230], "R": [1940,2470,3140,3720,6320,6880,7520]}
+}

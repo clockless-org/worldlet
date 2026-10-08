@@ -1,0 +1,34 @@
+{
+  "key": "uber-eats",
+  "title": "Uber Eats",
+  "generic": false,
+  "output": "resources/styles/builtin/assets/applets/uber-eats/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-e03a51d8-20e0-4468-b298-1f55e61b70c3.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/.local/logo-inputs/uber-eats.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Uber Eats. Image1 is the sourced ORIGINAL publisher icon, the authority for logo geometry, colors, negative spaces and lettering. Recreate it faithfully as a substantial physical sculpture. Image2/3 are MATERIAL and hierarchy examples only; do not copy their logos. Secondary functional cue (reduce this concept to at most two small attachments, not the dominant shape): sage insulated food delivery carrier with ivory cloche lid and receipt dispenser. Preserve original icon rather than literal full machine in that cue. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "identitySource": "ui/applets/uber-eats/logo-source.ts",
+  "lampRevision": {
+    "key": "uber-eats",
+    "prompt": "Precisely edit this uber-eats Applet miniature. Preserve its entire device, original logo, functional accessories, camera direction, colors, materials, silhouette and framing. Add exactly ONE small recessed circular status lamp on the CENTER of the FRONT FACE of its lowest supporting base. Brass thin rim and plain charcoal BLACK glass lens, OFF, absolutely no glow or colored emission. Lens diameter about 3.5% of image width, bezel outside diameter 4.5%, oval consistent with base perspective. If no continuous base exists, add a discreet sturdy low warm timber foot connecting the supports and put the lens in its front center. If the front is obstructed by a drawer/accessory, extend the supporting foot slightly below it so the lamp is clearly visible and centered. Never put the lamp on a side accessory or on the main logo. Remove/replace any other colored status lamp in the base, but preserve actual logo colors, headlights, projectors and functional props. Keep all original identity and detail. Cozy painted miniature village style, grounded, frontal face angled toward screen-left/right side visible as in reference. Do NOT flip. Whole object with safe margins, true transparent background. No labels or scenery.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-3def36e4-1da1-4807-99ca-44032d56620f.png",
+    "anchor": {
+      "center": [
+        0.396332,
+        0.872807
+      ],
+      "radius": [
+        0.016348,
+        0.017544
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

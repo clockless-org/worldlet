@@ -1,0 +1,854 @@
+{
+  "date": "2026-10-06",
+  "authorization": "Sentinel_4d3cbcb252908191adec8e9a81e097ba",
+  "generatedV4": 85,
+  "counts": {
+    "functional-candidate-needs-review": 20,
+    "redo-required": 65,
+    "not-generated-rebrief-required": 30,
+    "retain-approved-sample": 3
+  },
+  "sourceInspection": "First54 source+UI review sheets in v4/review; remaining source sheets v5/audit/1-4. Candidates are not final acceptance.",
+  "items": [
+    {
+      "key": "gmail",
+      "title": "Mail",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "google-calendar",
+      "title": "Calendar",
+      "generatedInV4": false,
+      "directionStatus": "retain-approved-sample",
+      "reason": "Owner-approved clear functional scene."
+    },
+    {
+      "key": "apple-notes",
+      "title": "Notes",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "apple-reminders",
+      "title": "Reminders",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "weather",
+      "title": "Weather",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "meetings",
+      "title": "Meetings",
+      "generatedInV4": false,
+      "directionStatus": "retain-approved-sample",
+      "reason": "Owner-approved clear functional scene."
+    },
+    {
+      "key": "github",
+      "title": "GitHub",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "codex",
+      "title": "Codex",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "claude-code",
+      "title": "Claude Code",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "notion",
+      "title": "Notion",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "obsidian",
+      "title": "Obsidian",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "voice-memos",
+      "title": "Voice Memos",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "messages",
+      "title": "Messages",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "plaid",
+      "title": "Plaid",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "stripe",
+      "title": "Stripe",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "paypal",
+      "title": "PayPal",
+      "generatedInV4": true,
+      "directionStatus": "approved-use-case-sample",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "todoist",
+      "title": "Todoist",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "supabase",
+      "title": "Supabase",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "docker",
+      "title": "Docker",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "google-drive",
+      "title": "Google Drive",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "google-docs",
+      "title": "Google Docs",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "google-sheets",
+      "title": "Google Sheets",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "google-slides",
+      "title": "Google Slides",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "oura",
+      "title": "Oura Ring",
+      "generatedInV4": true,
+      "directionStatus": "approved-use-case-sample",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "strava",
+      "title": "Strava",
+      "generatedInV4": true,
+      "directionStatus": "approved-use-case-sample",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "fitbit",
+      "title": "Fitbit",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "google-maps",
+      "title": "Google Maps",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "airbnb",
+      "title": "Airbnb",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "tripit",
+      "title": "TripIt",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "x",
+      "title": "X",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "youtube",
+      "title": "YouTube",
+      "generatedInV4": false,
+      "directionStatus": "retain-approved-sample",
+      "reason": "Owner-approved clear functional scene."
+    },
+    {
+      "key": "tiktok",
+      "title": "TikTok",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "discord",
+      "title": "Discord",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "browser",
+      "title": "Browser",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "ongoing",
+      "title": "Ongoing",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "doordash",
+      "title": "DoorDash",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "game-2048",
+      "title": "2048",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "snake",
+      "title": "Snake",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "minesweeper",
+      "title": "Minesweeper",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "sudoku",
+      "title": "Sudoku",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "random-game",
+      "title": "Random game",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "wordle",
+      "title": "Wordle",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "nyt-connections",
+      "title": "Connections",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "slither-io",
+      "title": "Slither.io",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "agar-io",
+      "title": "Agar.io",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "krunker-io",
+      "title": "Krunker",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "skribbl-io",
+      "title": "skribbl.io",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "infinite-craft",
+      "title": "Infinite Craft",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "little-alchemy-2",
+      "title": "Little Alchemy 2",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "cookie-clicker",
+      "title": "Cookie Clicker",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "lichess",
+      "title": "Lichess",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "drive-mad",
+      "title": "Drive Mad",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "subway-surfers",
+      "title": "Subway Surfers",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "sekai",
+      "title": "Sekai",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "sekai-rogue-ai-tic-tac-toe",
+      "title": "Rogue AI Tic-Tac-Toe",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "sekai-sketch-racer",
+      "title": "Sketch Racer",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "sekai-mixing-colors",
+      "title": "Mixing Colors",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "sekai-roller-coaster",
+      "title": "Roller Coaster Builder",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "sekai-3d-uno",
+      "title": "3D UNO!",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "sekai-devil-level",
+      "title": "Devil Level: 50 Trolls",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "pokemon-showdown",
+      "title": "Pok\u00e9mon Showdown",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "chatgpt",
+      "title": "ChatGPT",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "claude",
+      "title": "Claude",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "gemini",
+      "title": "Gemini",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "perplexity",
+      "title": "Perplexity",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "deepseek",
+      "title": "DeepSeek",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "whatsapp",
+      "title": "WhatsApp",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "telegram",
+      "title": "Telegram",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "slack",
+      "title": "Slack",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "teams",
+      "title": "Microsoft Teams",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "zoom",
+      "title": "Zoom",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "dropbox",
+      "title": "Dropbox",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "onedrive",
+      "title": "OneDrive",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "microsoft-word",
+      "title": "Word",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "microsoft-excel",
+      "title": "Excel",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "microsoft-powerpoint",
+      "title": "PowerPoint",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "figma",
+      "title": "Figma",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "canva",
+      "title": "Canva",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "spotify",
+      "title": "Spotify",
+      "generatedInV4": true,
+      "directionStatus": "reuse-functional-source-pending-ui",
+      "reason": "Functional place is legible; candidate only, still needs owner-direction and seam validation."
+    },
+    {
+      "key": "apple-music",
+      "title": "Apple Music",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "reddit",
+      "title": "Reddit",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "instagram",
+      "title": "Instagram",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "linkedin",
+      "title": "LinkedIn",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "amazon",
+      "title": "Amazon",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "netflix",
+      "title": "Netflix",
+      "generatedInV4": true,
+      "directionStatus": "redo-after-candidate-review",
+      "reason": "Candidate review found frame/seam or functional clarity issue; explicit replacement brief exists."
+    },
+    {
+      "key": "outlook",
+      "title": "Outlook",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "apple-podcasts",
+      "title": "Apple Podcasts",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "google-photos",
+      "title": "Google Photos",
+      "generatedInV4": true,
+      "directionStatus": "redo-required",
+      "reason": "Generic room/desk/board framing or use case unclear; rebrief around actual product activity and varied setting."
+    },
+    {
+      "key": "pinterest",
+      "title": "Pinterest",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "facebook",
+      "title": "Facebook",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "threads",
+      "title": "Threads",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "capcut",
+      "title": "CapCut",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "uber",
+      "title": "Uber",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "uber-eats",
+      "title": "Uber Eats",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "booking",
+      "title": "Booking.com",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "feishu",
+      "title": "\u98de\u4e66",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "bilibili",
+      "title": "\u54d4\u54e9\u54d4\u54e9",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "xiaohongshu",
+      "title": "\u5c0f\u7ea2\u4e66",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "baidu-netdisk",
+      "title": "\u767e\u5ea6\u7f51\u76d8",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "linear",
+      "title": "Linear",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "twitch",
+      "title": "Twitch",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "copilot",
+      "title": "Microsoft Copilot",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "acrobat",
+      "title": "Adobe Acrobat",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "wikipedia",
+      "title": "Wikipedia",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "doubao",
+      "title": "\u8c46\u5305",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "taobao",
+      "title": "\u6dd8\u5b9d",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "alipay",
+      "title": "\u652f\u4ed8\u5b9d",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "douyin",
+      "title": "\u6296\u97f3",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "posthog",
+      "title": "PostHog",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "cloudflare",
+      "title": "Cloudflare",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "vercel",
+      "title": "Vercel",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "netlify",
+      "title": "Netlify",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "firebase",
+      "title": "Firebase",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "sentry",
+      "title": "Sentry",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "railway",
+      "title": "Railway",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "render",
+      "title": "Render",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "gitlab",
+      "title": "GitLab",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    },
+    {
+      "key": "jira",
+      "title": "Jira",
+      "generatedInV4": false,
+      "directionStatus": "not-generated-rebrief-required",
+      "reason": "Old room-template brief stopped before generation; replace brief after sample feedback."
+    }
+  ],
+  "continuedAuthorization": "Sentinel_c14672e6e8d081918382aa56647088e0",
+  "latestReview": {
+    "reusedCandidates": 9,
+    "candidateReworks": 11,
+    "reason": "Wide primary frames cross content seam, or functional cues depend too much on a logo; each receives a narrower use-case composition."
+  },
+  "finalStatus": {
+    "generated": 118,
+    "integrated": 118,
+    "visualPassed": 118,
+    "interactionPassed": 118,
+    "authoritativeChecklist": "use-cases.json",
+    "date": "2026-10-06"
+  }
+}

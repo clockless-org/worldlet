@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "key": "google-calendar",
+  "provider": "google-calendar",
+  "mode": "scheduled",
+  "reader": "native-calendar",
+  "publishAttention": true,
+  "initialLimit": 1000,
+  "windowDays": 30,
+  "tasks": [
+    {
+      "key": "sync",
+      "handler": "source.read",
+      "pool": "source-io",
+      "trigger": "interval",
+      "intervalMinutes": 30,
+      "batchSize": 20,
+      "timeoutSeconds": 240
+    },
+    {
+      "key": "analyze",
+      "handler": "source.analyze",
+      "pool": "source-analysis",
+      "trigger": "observations",
+      "batchSize": 5,
+      "timeoutSeconds": 600,
+      "highWaterMark": 100,
+      "prompt": "prompts/extract.md"
+    }
+  ]
+}

@@ -1,0 +1,645 @@
+[
+ {
+  "name": "delta with streaming",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "delta",
+    "text": "Hi"
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "event": {
+     "text": "Hi",
+     "type": "delta"
+    },
+    "kind": "event",
+    "state": {
+     "action": "chat",
+     "capabilities": {
+      "cancel": true,
+      "memory": false,
+      "sessions": false,
+      "steer": false,
+      "streaming": true,
+      "tools": true
+     },
+     "finished": false,
+     "requestId": "r1",
+     "toolIDs": []
+    }
+   }
+  }
+ },
+ {
+  "name": "delta without streaming",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": false,
+     "tools": false,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "delta",
+    "text": "Hi"
+   }
+  },
+  "expected": {
+   "error": "Agent emitted streaming events without declaring streaming support.",
+   "ok": false
+  }
+ },
+ {
+  "name": "unknown turn",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r2",
+    "type": "delta",
+    "text": "Hi"
+   }
+  },
+  "expected": {
+   "error": "Agent returned an event for an unknown turn.",
+   "ok": false
+  }
+ },
+ {
+  "name": "duplicate tool",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [
+     "t1"
+    ],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "tool",
+    "id": "t1",
+    "name": "search",
+    "args": {}
+   }
+  },
+  "expected": {
+   "error": "Undeclared or duplicate Agent tool request.",
+   "ok": false
+  }
+ },
+ {
+  "name": "new tool",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "tool",
+    "id": "t1",
+    "name": "search",
+    "args": {}
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "event": {
+     "args": {},
+     "id": "t1",
+     "name": "search",
+     "type": "tool"
+    },
+    "kind": "event",
+    "state": {
+     "action": "chat",
+     "capabilities": {
+      "cancel": true,
+      "memory": false,
+      "sessions": false,
+      "steer": false,
+      "streaming": true,
+      "tools": true
+     },
+     "finished": false,
+     "requestId": "r1",
+     "toolIDs": [
+      "t1"
+     ]
+    }
+   }
+  }
+ },
+ {
+  "name": "final reply",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "result",
+    "value": {
+     "message": "Done"
+    }
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "kind": "result",
+    "state": {
+     "action": "chat",
+     "capabilities": {
+      "cancel": true,
+      "memory": false,
+      "sessions": false,
+      "steer": false,
+      "streaming": true,
+      "tools": true
+     },
+     "finished": true,
+     "requestId": "r1",
+     "toolIDs": []
+    },
+    "value": {
+     "message": "Done"
+    }
+   }
+  }
+ },
+ {
+  "name": "blank final reply",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "result",
+    "value": {
+     "message": " "
+    }
+   }
+  },
+  "expected": {
+   "error": "Agent returned an invalid final reply.",
+   "ok": false
+  }
+ },
+ {
+  "name": "agent error",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "error",
+    "message": "Model unavailable"
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "kind": "error",
+    "message": "Model unavailable",
+    "state": {
+     "action": "chat",
+     "capabilities": {
+      "cancel": true,
+      "memory": false,
+      "sessions": false,
+      "steer": false,
+      "streaming": true,
+      "tools": true
+     },
+     "finished": true,
+     "requestId": "r1",
+     "toolIDs": []
+    }
+   }
+  }
+ },
+ {
+  "name": "finished turn",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r1",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": false,
+     "sessions": false
+    },
+    "toolIDs": [],
+    "finished": true
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "delta",
+    "text": "late"
+   }
+  },
+  "expected": {
+   "error": "Agent turn is already complete.",
+   "ok": false
+  }
+ },
+ {
+  "name": "hermes late frame from a retired turn",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r2",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": true,
+     "memory": true,
+     "sessions": true,
+     "tracing": true
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r1",
+    "type": "steer_result",
+    "controlId": "c1",
+    "accepted": false
+   },
+   "hermes": true,
+   "retired": [
+    "r1"
+   ]
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "kind": "stale",
+    "state": {
+     "action": "chat",
+     "capabilities": {
+      "cancel": true,
+      "memory": true,
+      "sessions": true,
+      "steer": true,
+      "streaming": true,
+      "tools": true,
+      "tracing": true
+     },
+     "finished": false,
+     "requestId": "r2",
+     "toolIDs": []
+    }
+   }
+  }
+ },
+ {
+  "name": "hermes frame for an unknown turn",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r2",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": true,
+     "memory": true,
+     "sessions": true,
+     "tracing": true
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r0",
+    "type": "delta",
+    "text": "Hi"
+   },
+   "hermes": true,
+   "retired": [
+    "r1"
+   ]
+  },
+  "expected": {
+   "error": "Agent returned an event for an unknown turn.",
+   "ok": false
+  }
+ },
+ {
+  "name": "hermes unknown frame type",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r2",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": true,
+     "memory": true,
+     "sessions": true,
+     "tracing": true
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r2",
+    "type": "shell",
+    "command": "true"
+   },
+   "hermes": true,
+   "retired": [
+    "r1"
+   ]
+  },
+  "expected": {
+   "error": "Unsupported or malformed Agent event: shell",
+   "ok": false
+  }
+ },
+ {
+  "name": "hermes steering acknowledgement",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r2",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": true,
+     "memory": true,
+     "sessions": true,
+     "tracing": true
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r2",
+    "type": "steer_result",
+    "controlId": "c2",
+    "accepted": true
+   },
+   "hermes": true,
+   "retired": [
+    "r1"
+   ]
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "accepted": true,
+    "controlId": "c2",
+    "kind": "steer",
+    "state": {
+     "action": "chat",
+     "capabilities": {
+      "cancel": true,
+      "memory": true,
+      "sessions": true,
+      "steer": true,
+      "streaming": true,
+      "tools": true,
+      "tracing": true
+     },
+     "finished": false,
+     "requestId": "r2",
+     "toolIDs": []
+    }
+   }
+  }
+ },
+ {
+  "name": "hermes host applet event",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r2",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": true,
+     "memory": true,
+     "sessions": true,
+     "tracing": true
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r2",
+    "type": "applet",
+    "provider": "google"
+   },
+   "hermes": true,
+   "retired": [
+    "r1"
+   ]
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "frame": {
+     "provider": "google",
+     "requestId": "r2",
+     "type": "applet"
+    },
+    "kind": "host",
+    "state": {
+     "action": "chat",
+     "capabilities": {
+      "cancel": true,
+      "memory": true,
+      "sessions": true,
+      "steer": true,
+      "streaming": true,
+      "tools": true,
+      "tracing": true
+     },
+     "finished": false,
+     "requestId": "r2",
+     "toolIDs": []
+    }
+   }
+  }
+ },
+ {
+  "name": "applet without hermes host events",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r2",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": true,
+     "memory": true,
+     "sessions": true,
+     "tracing": true
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r2",
+    "type": "applet",
+    "provider": "google"
+   }
+  },
+  "expected": {
+   "error": "Unsupported or malformed Agent event: applet",
+   "ok": false
+  }
+ },
+ {
+  "name": "steering acknowledgement without steer",
+  "operation": "harnessReceive",
+  "input": {
+   "state": {
+    "requestId": "r2",
+    "action": "chat",
+    "capabilities": {
+     "streaming": true,
+     "tools": true,
+     "cancel": true,
+     "steer": false,
+     "memory": true,
+     "sessions": true,
+     "tracing": true
+    },
+    "toolIDs": [],
+    "finished": false
+   },
+   "frame": {
+    "requestId": "r2",
+    "type": "steer_result",
+    "controlId": "c2",
+    "accepted": true
+   },
+   "hermes": true
+  },
+  "expected": {
+   "error": "Unexpected Agent steering acknowledgement.",
+   "ok": false
+  }
+ }
+]

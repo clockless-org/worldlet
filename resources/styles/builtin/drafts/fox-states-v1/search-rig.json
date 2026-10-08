@@ -1,0 +1,13 @@
+{
+  "status": "searching-study-not-live",
+  "device": "search-magnifier.png",
+  "grip": [0.495, 0.75],
+  "paw": [0.674, 0.943],
+  "scale": 0.34,
+  "dock": {
+    "device": "search-dock.png",
+    "sourceAnchor": [0.5, 0.60],
+    "worldAnchor": [0.752, 0.946],
+    "width": 0.18
+  }
+}

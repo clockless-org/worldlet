@@ -1,0 +1,39 @@
+{
+  "key": "vscode",
+  "title": "vscode",
+  "generic": false,
+  "output": "resources/styles/builtin/assets/applets/vscode/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-b43aac2e-62e6-4fef-94a7-2b1eedc3669a.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/.local/logo-inputs/vscode.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: vscode. Image1 is the sourced ORIGINAL publisher icon, the authority for logo geometry, colors, negative spaces and lettering. Recreate it faithfully as a substantial physical sculpture. Image2/3 are MATERIAL and hierarchy examples only; do not copy their logos. Secondary functional cue (reduce this concept to at most two small attachments, not the dominant shape): . Preserve original icon rather than literal full machine in that cue. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "revision": {
+    "reason": "Replace generic lantern with a functional device cue",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-88e8e67f-e0c9-4435-97a2-a5737b802d55.png",
+    "prompt": "Edit this production transparent Applet sprite. Preserve the main logo sculpture exactly: geometry, recognizable identity, colors, size, perspective and painted material. Replace the tiny lantern at bottom right with a compact ivory-and-walnut code terminal: dark screen with only a pair of simple code angle brackets and a very small keyboard. It should occupy the same small area as the lantern. Functional cue must be secondary, no more than 15% of total object; logo dominates. Keep soft upper-left daylight, village timber/brass/ivory materials, no background, no text except the specified symbols. Do not add scenery or alter the primary logo. Transparent background."
+  },
+  "identitySource": "ui/applets/vscode/logo-source.ts",
+  "lampRevision": {
+    "key": "vscode",
+    "prompt": "Precisely edit this vscode Applet miniature. Preserve its entire device, original logo, functional accessories, camera direction, colors, materials, silhouette and framing. Add exactly ONE small recessed circular status lamp on the CENTER of the FRONT FACE of its lowest supporting base. Brass thin rim and plain charcoal BLACK glass lens, OFF, absolutely no glow or colored emission. Lens diameter about 3.5% of image width, bezel outside diameter 4.5%, oval consistent with base perspective. If no continuous base exists, add a discreet sturdy low warm timber foot connecting the supports and put the lens in its front center. If the front is obstructed by a drawer/accessory, extend the supporting foot slightly below it so the lamp is clearly visible and centered. Never put the lamp on a side accessory or on the main logo. Remove/replace any other colored status lamp in the base, but preserve actual logo colors, headlights, projectors and functional props. Keep all original identity and detail. Cozy painted miniature village style, grounded, frontal face angled toward screen-left/right side visible as in reference. Do NOT flip. Whole object with safe margins, true transparent background. No labels or scenery.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-cc29d78a-bc86-433b-abb8-93d80115468f.png",
+    "anchor": {
+      "center": [
+        0.497608,
+        0.868421
+      ],
+      "radius": [
+        0.013955,
+        0.014753
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

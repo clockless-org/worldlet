@@ -1,0 +1,39 @@
+{
+  "key": "oura",
+  "title": "Oura Ring",
+  "generic": false,
+  "output": "resources/styles/builtin/assets/applets/oura/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-7af81225-1b2a-4f01-82ad-5ab43f517916.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/.local/logo-inputs/oura.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Oura Ring. Image1 is the sourced ORIGINAL publisher icon, the authority for logo geometry, colors, negative spaces and lettering. Recreate it faithfully as a substantial physical sculpture. Image2/3 are MATERIAL and hierarchy examples only; do not copy their logos. Secondary functional cue (reduce this concept to at most two small attachments, not the dominant shape): Browse your Oura account website. Sleep and readiness data are not synced.. Preserve original icon rather than literal full machine in that cue. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "revision": {
+    "reason": "Replace unrelated globe with smart-ring and sleep cue",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-2d47f779-8e3f-48eb-b381-3244bbf0c217.png",
+    "prompt": "Edit only the tiny accessory of this Oura Applet sprite. Preserve the entire dominant charcoal disc, ivory Oura O/macron logo, view angle, material, scale, wooden cradle and transparent background exactly. Remove the small gold globe badge at bottom right. In its place put a small three-dimensional titanium smart ring resting in a compact wooden charging nook, with a tiny ivory crescent moon embossed beside it. Clearly a health/sleep ring, no globe. Ring remains secondary, about the size of the previous globe badge. No other changes, no additional text, no scenery, transparent alpha."
+  },
+  "identitySource": "ui/applets/oura/logo-source.ts",
+  "lampRevision": {
+    "key": "oura",
+    "prompt": "Precisely edit this oura Applet miniature. Preserve its entire device, original logo, functional accessories, camera direction, colors, materials, silhouette and framing. Add exactly ONE small recessed circular status lamp on the CENTER of the FRONT FACE of its lowest supporting base. Brass thin rim and plain charcoal BLACK glass lens, OFF, absolutely no glow or colored emission. Lens diameter about 3.5% of image width, bezel outside diameter 4.5%, oval consistent with base perspective. If no continuous base exists, add a discreet sturdy low warm timber foot connecting the supports and put the lens in its front center. If the front is obstructed by a drawer/accessory, extend the supporting foot slightly below it so the lamp is clearly visible and centered. Never put the lamp on a side accessory or on the main logo. Remove/replace any other colored status lamp in the base, but preserve actual logo colors, headlights, projectors and functional props. Keep all original identity and detail. Cozy painted miniature village style, grounded, frontal face angled toward screen-left/right side visible as in reference. Do NOT flip. Whole object with safe margins, true transparent background. No labels or scenery.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-548c7376-81a5-4dc4-9a52-018e7f8f7a2a.png",
+    "anchor": {
+      "center": [
+        0.404705,
+        0.817783
+      ],
+      "radius": [
+        0.019936,
+        0.021531
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

@@ -1,0 +1,604 @@
+{
+  "schemaVersion": 1,
+  "id": "village",
+  "title": "Village",
+  "version": "1.2.0",
+  "style": {
+    "id": "cozy-miniature",
+    "version": "1.0.0"
+  },
+  "artStatus": "draft",
+  "canvas": {
+    "width": 3840,
+    "height": 2160,
+    "coordinates": "normalized",
+    "origin": "top-left"
+  },
+  "camera": {
+    "projection": "fixed-oblique",
+    "overview": [
+      0,
+      0,
+      1,
+      1
+    ]
+  },
+  "layers": [
+    {
+      "id": "day-environment",
+      "kind": "environment",
+      "src": "images/day-target-4k.png",
+      "lighting": "day",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ]
+    }
+  ],
+  "hudSafeAreas": [
+    [
+      0.36,
+      0.82,
+      0.3,
+      0.18
+    ]
+  ],
+  "areas": [
+    {
+      "id": "home",
+      "title": "Home",
+      "legacyIds": [
+        "home"
+      ],
+      "purpose": "Personal mail, calendars, chat, household, shopping, maps and travel",
+      "bounds": [
+        0.38,
+        0.3,
+        0.27,
+        0.3
+      ],
+      "focus": [
+        0.515,
+        0.5
+      ],
+      "label": [
+        0.515,
+        0.61
+      ],
+      "slots": [
+        {
+          "id": "home-01",
+          "anchor": [
+            0.46,
+            0.525
+          ],
+          "maxSize": [
+            0.033,
+            0.052
+          ],
+          "surface": "grass courtyard",
+          "depth": 0.525
+        },
+        {
+          "id": "home-02",
+          "anchor": [
+            0.515,
+            0.525
+          ],
+          "maxSize": [
+            0.033,
+            0.052
+          ],
+          "surface": "grass courtyard",
+          "depth": 0.525
+        },
+        {
+          "id": "home-03",
+          "anchor": [
+            0.57,
+            0.525
+          ],
+          "maxSize": [
+            0.033,
+            0.052
+          ],
+          "surface": "grass courtyard",
+          "depth": 0.525
+        },
+        {
+          "id": "home-04",
+          "anchor": [
+            0.48,
+            0.56
+          ],
+          "maxSize": [
+            0.033,
+            0.052
+          ],
+          "surface": "grass courtyard",
+          "depth": 0.56
+        },
+        {
+          "id": "home-05",
+          "anchor": [
+            0.535,
+            0.56
+          ],
+          "maxSize": [
+            0.033,
+            0.052
+          ],
+          "surface": "grass courtyard",
+          "depth": 0.56
+        },
+        {
+          "id": "home-06",
+          "anchor": [
+            0.59,
+            0.56
+          ],
+          "maxSize": [
+            0.033,
+            0.052
+          ],
+          "surface": "grass courtyard",
+          "depth": 0.56
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "title": "Work",
+      "legacyIds": [
+        "work"
+      ],
+      "purpose": "Office, projects, meetings, collaboration and software development",
+      "bounds": [
+        0.66,
+        0.56,
+        0.24,
+        0.29
+      ],
+      "focus": [
+        0.77,
+        0.74
+      ],
+      "label": [
+        0.79,
+        0.86
+      ],
+      "slots": [
+        {
+          "id": "work-01",
+          "anchor": [
+            0.705,
+            0.81
+          ],
+          "maxSize": [
+            0.034,
+            0.06
+          ],
+          "surface": "front lawn",
+          "depth": 0.81
+        },
+        {
+          "id": "work-02",
+          "anchor": [
+            0.755,
+            0.82
+          ],
+          "maxSize": [
+            0.034,
+            0.06
+          ],
+          "surface": "front lawn",
+          "depth": 0.82
+        },
+        {
+          "id": "work-03",
+          "anchor": [
+            0.805,
+            0.825
+          ],
+          "maxSize": [
+            0.034,
+            0.06
+          ],
+          "surface": "front lawn",
+          "depth": 0.825
+        },
+        {
+          "id": "work-04",
+          "anchor": [
+            0.855,
+            0.82
+          ],
+          "maxSize": [
+            0.034,
+            0.06
+          ],
+          "surface": "front lawn",
+          "depth": 0.82
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Create",
+      "legacyIds": [
+        "library"
+      ],
+      "purpose": "Reading, learning, notes, writing, design, drawing and media production",
+      "bounds": [
+        0.22,
+        0.21,
+        0.19,
+        0.21
+      ],
+      "focus": [
+        0.31,
+        0.335
+      ],
+      "label": [
+        0.3,
+        0.435
+      ],
+      "slots": [
+        {
+          "id": "create-01",
+          "anchor": [
+            0.255,
+            0.395
+          ],
+          "maxSize": [
+            0.029,
+            0.05
+          ],
+          "surface": "front lawn and path",
+          "depth": 0.395
+        },
+        {
+          "id": "create-02",
+          "anchor": [
+            0.295,
+            0.405
+          ],
+          "maxSize": [
+            0.029,
+            0.05
+          ],
+          "surface": "front lawn and path",
+          "depth": 0.405
+        },
+        {
+          "id": "create-03",
+          "anchor": [
+            0.335,
+            0.405
+          ],
+          "maxSize": [
+            0.029,
+            0.05
+          ],
+          "surface": "front lawn and path",
+          "depth": 0.405
+        }
+      ]
+    },
+    {
+      "id": "finance",
+      "title": "Finance",
+      "legacyIds": [
+        "money"
+      ],
+      "purpose": "Banking, payments, budgets, investments and bills",
+      "bounds": [
+        0.6,
+        0.175,
+        0.195,
+        0.24
+      ],
+      "focus": [
+        0.7,
+        0.32
+      ],
+      "label": [
+        0.695,
+        0.43
+      ],
+      "slots": [
+        {
+          "id": "finance-01",
+          "anchor": [
+            0.645,
+            0.397
+          ],
+          "maxSize": [
+            0.028,
+            0.049
+          ],
+          "surface": "front lawn and path",
+          "depth": 0.397
+        },
+        {
+          "id": "finance-02",
+          "anchor": [
+            0.692,
+            0.403
+          ],
+          "maxSize": [
+            0.028,
+            0.049
+          ],
+          "surface": "front lawn and path",
+          "depth": 0.403
+        },
+        {
+          "id": "finance-03",
+          "anchor": [
+            0.74,
+            0.39
+          ],
+          "maxSize": [
+            0.028,
+            0.049
+          ],
+          "surface": "front lawn and path",
+          "depth": 0.39
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "title": "Health",
+      "legacyIds": [
+        "health"
+      ],
+      "purpose": "Exercise, sleep, meditation and medical tools",
+      "bounds": [
+        0.725,
+        0.35,
+        0.26,
+        0.225
+      ],
+      "focus": [
+        0.85,
+        0.48
+      ],
+      "label": [
+        0.855,
+        0.58
+      ],
+      "slots": [
+        {
+          "id": "health-01",
+          "anchor": [
+            0.8,
+            0.49
+          ],
+          "maxSize": [
+            0.032,
+            0.052
+          ],
+          "surface": "grass garden",
+          "depth": 0.49
+        },
+        {
+          "id": "health-02",
+          "anchor": [
+            0.85,
+            0.49
+          ],
+          "maxSize": [
+            0.032,
+            0.052
+          ],
+          "surface": "grass garden",
+          "depth": 0.49
+        },
+        {
+          "id": "health-03",
+          "anchor": [
+            0.82,
+            0.53
+          ],
+          "maxSize": [
+            0.032,
+            0.052
+          ],
+          "surface": "grass garden",
+          "depth": 0.53
+        },
+        {
+          "id": "health-04",
+          "anchor": [
+            0.87,
+            0.535
+          ],
+          "maxSize": [
+            0.032,
+            0.052
+          ],
+          "surface": "grass garden",
+          "depth": 0.535
+        },
+        {
+          "id": "health-05",
+          "anchor": [
+            0.92,
+            0.53
+          ],
+          "maxSize": [
+            0.032,
+            0.052
+          ],
+          "surface": "grass garden",
+          "depth": 0.53
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "title": "Tools",
+      "legacyIds": [
+        "travel"
+      ],
+      "purpose": "Files, compression, passwords, networking, system maintenance and automation",
+      "bounds": [
+        0.36,
+        0.63,
+        0.225,
+        0.183
+      ],
+      "focus": [
+        0.47,
+        0.75
+      ],
+      "label": [
+        0.59,
+        0.79
+      ],
+      "slots": [
+        {
+          "id": "tools-01",
+          "anchor": [
+            0.38,
+            0.79
+          ],
+          "maxSize": [
+            0.028,
+            0.05
+          ],
+          "surface": "front path and side lawn",
+          "depth": 0.79
+        },
+        {
+          "id": "tools-02",
+          "anchor": [
+            0.425,
+            0.805
+          ],
+          "maxSize": [
+            0.028,
+            0.05
+          ],
+          "surface": "front path and side lawn",
+          "depth": 0.805
+        },
+        {
+          "id": "tools-03",
+          "anchor": [
+            0.48,
+            0.805
+          ],
+          "maxSize": [
+            0.028,
+            0.05
+          ],
+          "surface": "front path and side lawn",
+          "depth": 0.805
+        },
+        {
+          "id": "tools-04",
+          "anchor": [
+            0.56,
+            0.79
+          ],
+          "maxSize": [
+            0.028,
+            0.05
+          ],
+          "surface": "front path and side lawn",
+          "depth": 0.79
+        }
+      ]
+    },
+    {
+      "id": "explore",
+      "title": "Explore",
+      "legacyIds": [
+        "people"
+      ],
+      "purpose": "Browsing, news, social feeds, listening, video and games",
+      "bounds": [
+        0.085,
+        0.43,
+        0.195,
+        0.235
+      ],
+      "focus": [
+        0.18,
+        0.57
+      ],
+      "label": [
+        0.19,
+        0.68
+      ],
+      "slots": [
+        {
+          "id": "explore-01",
+          "anchor": [
+            0.15,
+            0.565
+          ],
+          "maxSize": [
+            0.029,
+            0.05
+          ],
+          "surface": "wooden dock",
+          "depth": 0.565
+        },
+        {
+          "id": "explore-02",
+          "anchor": [
+            0.2,
+            0.565
+          ],
+          "maxSize": [
+            0.029,
+            0.05
+          ],
+          "surface": "wooden dock",
+          "depth": 0.565
+        },
+        {
+          "id": "explore-03",
+          "anchor": [
+            0.17,
+            0.6
+          ],
+          "maxSize": [
+            0.029,
+            0.05
+          ],
+          "surface": "wooden dock",
+          "depth": 0.6
+        },
+        {
+          "id": "explore-04",
+          "anchor": [
+            0.22,
+            0.59
+          ],
+          "maxSize": [
+            0.029,
+            0.05
+          ],
+          "surface": "wooden dock",
+          "depth": 0.59
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "mode": "image-api",
+    "model": "gpt-image-2",
+    "size": "3840x2160",
+    "quality": "high",
+    "prompt": "prompts/day-target-final.txt",
+    "generatedAt": "2026-09-23",
+    "upscaled": false
+  }
+}

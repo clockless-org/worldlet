@@ -1,0 +1,485 @@
+/* A HUD briefing, independent of the World/Applet navigation stack. */
+.native-console .attention-preview{position:absolute;z-index:70;bottom:380px;left:clamp(378px,calc(50% - 360px),620px);width:min(760px,calc(100% - 410px));box-sizing:border-box;max-height:calc(100dvh - 450px);padding:28px 34px 22px;display:flex;flex-direction:column;gap:12px;background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--hud-paper-ink);border:1px solid #b4a17d38;border-radius:24px 28px 26px 30px;box-shadow:0 4px 0 #b4a17d45,0 18px 46px #162a3245;font:400 var(--ui-text-body)/1.4 var(--ui-font-ui);text-shadow:none;overflow:visible;isolation:isolate}
+.native-console .attention-preview[hidden]{display:none}
+.attention-preview[data-kind=event]{--attention-accent:#28718a}
+.attention-preview[data-kind=task]{--attention-accent:#946e2b}
+.attention-preview[data-kind=update]{--attention-accent:#557955}
+.fox-artifact{--attention-accent:#315f48}
+.attention-preview-tools{position:absolute;top:12px;right:14px;display:flex;gap:4px;z-index:2}
+.attention-preview-control{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;border-radius:8px;min-height:34px;padding:6px 8px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.attention-preview-tools .attention-preview-control{width:34px;font-size:24px;padding:4px}
+.attention-preview-control:hover{background:#294d4310}
+.attention-preview-control:focus-visible,.attention-preview a:focus-visible{outline:2px solid #28718a;outline-offset:3px}
+.attention-preview-hero{position:relative;min-height:190px;display:flex;align-items:flex-start;isolation:isolate}
+.attention-preview-heading{width:46%;position:relative;z-index:1;padding:18px 0}
+.attention-preview-category{display:block;color:var(--attention-accent);font-size:var(--ui-text-label);font-weight:600;margin-bottom:14px;text-transform:uppercase;letter-spacing:.015em}
+.attention-preview-title{font:600 var(--ui-text-title)/1.25 var(--ui-font-ui);margin:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* The picture is the card's background (owner Order 2026-10-08): it fills the card and shows most on the right,
+   where the heading leaves room; the paper scrim fades it out under the heading, the summary and the footer so the
+   words keep the card's own contrast. An email's own picture (data-art=source) gets the same treatment. */
+#attentionPreview .attention-preview-art,.attention-preview-art{position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;border-radius:inherit;object-fit:cover;object-position:right center;pointer-events:none;z-index:-2;mask:none;-webkit-mask:none}
+.attention-preview-scrim{--scrim:var(--ui-paper,#f6efdc);position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;background:linear-gradient(90deg,var(--scrim) 0%,color-mix(in srgb,var(--scrim) 94%,transparent) 34%,color-mix(in srgb,var(--scrim) 62%,transparent) 58%,color-mix(in srgb,var(--scrim) 6%,transparent) 100%),linear-gradient(180deg,transparent 0%,transparent 34%,color-mix(in srgb,var(--scrim) 72%,transparent) 56%,color-mix(in srgb,var(--scrim) 88%,transparent) 100%)}
+.attention-preview[data-art=source] .attention-preview-art{object-position:center}
+.attention-preview-when{display:flex;align-items:center;justify-content:flex-start;gap:8px}
+.attention-preview-when[hidden],.attention-preview-summary[hidden],.attention-preview-venue[hidden]{display:none}
+.attention-preview-date{color:var(--attention-accent);font-weight:500}
+.attention-preview-clock{margin-left:auto;font-weight:400;text-align:right;font-variant-numeric:tabular-nums}
+.attention-preview-summary{margin:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.attention-preview-venue{display:flex;align-items:center;gap:10px;margin-top:4px;min-width:0}
+.attention-preview-location{color:inherit;text-underline-offset:3px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.attention-preview-location-icon{display:flex;flex-shrink:0;opacity:.7}
+.attention-preview-review{margin:0;font-size:13px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;opacity:.9}
+.attention-preview-review[hidden]{display:none}
+.attention-preview-review-choice{background:none;border:0;padding:0;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.attention-preview-review-choice:disabled{opacity:.5;cursor:default}
+.attention-preview-original{font-size:13px;text-decoration:underline;text-underline-offset:3px;opacity:.8}
+#notionWorld[data-attention-preview=true] .world-task-tracker{display:flex;visibility:visible}
+#notionWorld[data-attention-preview=true] .world-matter[aria-current=location]{background:var(--ui-matter-selected);border-radius:12px}
+#notionWorld[data-attention-preview=true] .companion-dialogue{width:520px;min-width:0;max-width:calc(100vw - 40px);display:block}
+/* Attention overlays the world; the shared Companion layout owns Fox's anchor. */
+@media(max-height:850px){
+ .native-console .attention-preview{top:auto;bottom:380px;padding:18px 26px 14px;gap:10px;min-height:0;max-height:calc(100dvh - 450px)}
+ .attention-preview-hero{min-height:120px}
+ .attention-preview-title{font-size:var(--ui-text-title);-webkit-line-clamp:2}
+ .attention-preview-category{margin-bottom:10px}
+}
+@media(max-width:800px){
+ .native-console .attention-preview{left:24px;right:24px;top:100px;bottom:auto;width:auto;padding:16px 20px;max-height:calc(100dvh - 400px);min-height:0;gap:8px}
+ .attention-preview-hero{min-height:100px}.attention-preview-title{font-size:var(--ui-text-section);-webkit-line-clamp:2}
+ #notionWorld[data-attention-preview=true] .world-task-tracker{visibility:hidden}
+ .attention-preview-summary{-webkit-line-clamp:2}
+}
+@media(max-height:650px){
+ .native-console .attention-preview{top:64px;bottom:auto;max-height:calc(100dvh - 265px);padding:12px 22px;gap:6px}
+ .attention-preview-hero{min-height:72px}.attention-preview-category{margin-bottom:6px}
+ .attention-preview-heading{width:65%;padding:0}.attention-preview-summary{-webkit-line-clamp:2}
+}
+
+
+
+/* Keep the original left heading/right illustration, with plain facts below. */
+.native-console .attention-preview{bottom:300px;max-height:calc(100dvh - 360px);gap:14px}
+.attention-preview-title{-webkit-line-clamp:2}
+.attention-preview-facts{display:grid;gap:9px}
+.attention-preview-venue{margin:0;gap:8px}
+.attention-preview-original{justify-self:start;padding:0;min-height:0;font-size:var(--ui-text-body);opacity:1}
+.attention-preview-summary{display:block;overflow:auto;min-height:36px;overscroll-behavior:contain;scrollbar-width:thin;line-height:1.5}
+.attention-preview-hero,.attention-preview-facts{flex-shrink:0}
+.attention-preview-summary strong{font-weight:650}
+@media(max-height:850px){
+ .native-console .attention-preview{top:auto;bottom:285px;max-height:calc(100dvh - 340px);gap:9px;padding:18px 26px}
+
+ .attention-preview-facts{gap:6px}
+}
+@media(max-width:800px){
+ .native-console .attention-preview{top:65px;bottom:auto;left:16px;right:16px;max-height:calc(100dvh - 280px);padding:16px 20px;gap:8px}
+
+ .attention-preview-category{font-size:12px}
+ .attention-preview-when{flex-wrap:wrap;gap:2px 8px}.attention-preview-clock{margin-left:auto}
+}
+
+/* Category tint connects the briefing to the ordinary Fox bubble. */
+#notionWorld[data-attention-kind=event]{--attention-accent:#28718a;--attention-tint:#dfedf2}
+#notionWorld[data-attention-kind=task]{--attention-accent:#946e2b;--attention-tint:#f4e7c8}
+#notionWorld[data-attention-kind=update]{--attention-accent:#557955;--attention-tint:#e1ebdb}
+#notionWorld[data-attention-preview=true] .companion-speaker{color:var(--attention-accent)}
+#notionWorld[data-attention-preview=true] .attention-preview{bottom:410px;max-height:calc(100dvh - 470px)}
+@media(max-width:800px){
+ #notionWorld.native-console.fox-first-console[data-attention-preview=true] .companion-dialogue{width:calc(100vw - 32px);max-width:calc(100vw - 32px);padding:14px 18px}
+ #notionWorld[data-attention-preview=true] .attention-preview{top:65px;bottom:auto;max-height:calc(100dvh - 390px)}
+}
+
+/* One dialogue footer; task choices and item management share the same controls: bold underlined
+   words, the way Fox's replies offer them (owner decision). */
+.native-console.fox-first-console .companion-action-bar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:4px}
+.native-console.fox-first-console .companion-action-bar[hidden],.companion-attention-actions[hidden]{display:none}
+.native-console.fox-first-console .companion-action-bar :is(.companion-guide-actions,.companion-action-footer){display:contents}
+.native-console.fox-first-console .companion-action-bar :is(.companion-guide-actions,.companion-action-footer)[hidden]{display:none}
+.native-console.fox-first-console .companion-action-bar :is(.companion-guide-actions,.companion-action-footer)>:first-child{margin-left:0}
+.companion-attention-actions{display:contents}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar :is(button,a){display:inline-flex;align-items:center;justify-content:center;min-height:28px;box-sizing:border-box;padding:3px 7px;margin:0;border:0;border-radius:4px;font:700 14px/1.3 var(--ui-font-ui);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-shadow:none;background:transparent;color:var(--attention-accent,#385644);box-shadow:none;cursor:pointer;white-space:normal;transition:background .16s,filter .16s}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-attention-actions button{background:transparent;color:var(--attention-accent,#385644)}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar :is(button,a):hover{filter:brightness(.95);text-decoration-thickness:2px}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar :is(button,a):focus-visible{outline:2px solid var(--attention-accent,#385644);outline-offset:3px}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar button:disabled{opacity:.45;cursor:default}
+/* Browse with me | Don't bother: one small two-way switch at the footer's left, quieter than the card's actions;
+   the choice in force is the filled half (native-chat.ts browseSwitch). */
+#notionWorld.native-console .companion-browse{display:inline-flex;margin-right:auto;padding:2px;border-radius:999px;background:#38564414;gap:2px}
+#notionWorld.native-console .companion-browse[hidden]{display:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar .companion-browse button{min-height:24px;padding:2px 10px;border-radius:999px;font:600 12px/1.3 var(--ui-font-ui);text-decoration:none;color:#5d6b60;background:transparent}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar .companion-browse button[aria-pressed=true]{background:#fffdf8;color:var(--attention-accent,#385644);box-shadow:0 1px 2px #2a3a2e26;cursor:default}
+
+
+/* Use the same compact speech surface in ordinary conversation and Attention. */
+/* One steady width: the card never grows or shrinks with its words. In the World it is a little wider than a
+   third of the window (owner Order 2026-10-08); beside an Applet it keeps to Fox's lane. No filter here: it would
+   stop the frosted cards below from blurring the World. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{width:min(460px,calc(100vw / 3));min-width:0;max-width:calc(100vw / 3)}
+@media(min-width:801px){#notionWorld.native-console.fox-first-console:not([data-detail-open=true]):not([data-depth=object]) .companion-dialogue{width:min(560px,calc(100vw * .4));max-width:calc(100vw * .4)}}
+#notionWorld[data-attention-preview=true] .attention-preview{box-shadow:0 2px 3px #b4a17d20,0 10px 28px #162a3224}
+@media(max-width:800px){
+ #notionWorld.native-console.fox-first-console .companion-dialogue{min-width:min(320px,calc(100vw - 40px));max-width:calc(100vw - 40px)}
+}
+
+@media(min-width:801px){#notionWorld.native-console.fox-first-console .companion-action-bar{min-width:min(320px,calc(100vw / 3 - 48px))}}
+
+
+/* The conversation is a regular paper panel; transient activity floats over its edge. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{border-radius:22px;padding-bottom:24px}
+#notionWorld.native-console.fox-first-console .companion-dialogue::before{inset:0;border-radius:inherit;mask:none;-webkit-mask:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue::after{display:none}
+
+
+/* Fox's name badge sits on the card's top edge, outside the reply flow. */
+#notionWorld.native-console .companion-topic{position:absolute;left:24px;top:-18px;z-index:2;display:block;box-sizing:border-box;max-width:calc(100% - 48px);margin:0;padding:5px 14px;border-radius:13px 11px 14px 10px;background:#f0c27a;color:#4a3413;box-shadow:0 2px 6px #5a3a1033;font:650 14px/1.5 var(--ui-font-ui);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transform:none}
+#notionWorld.native-console .companion-topic[hidden]{display:none}
+/* Expand and Fold: one quiet paper tab on the card's top edge, muted ink that darkens when
+   pointed at (owner request 2026-10-05: the control should not be loud). */
+#notionWorld.native-console :is(.companion-earlier,.companion-fold){all:unset;position:absolute;right:22px;top:-13px;z-index:3;box-sizing:border-box;display:inline-flex;align-items:center;gap:3px;min-height:24px;padding:2px 10px 2px 7px;border:1px solid #e3d9b8;border-radius:999px;background:#fff9e7;color:#6c7a70;font:600 12px/1.3 var(--ui-font-ui,system-ui);box-shadow:0 1px 3px #162a3214;cursor:pointer;white-space:nowrap}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold):hover{color:#24402f;border-color:#cdbf95}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold):focus-visible{outline:2px solid #315f48;outline-offset:2px}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold)[hidden]{display:none}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold)>svg{flex:0 0 12px;width:12px;height:12px}
+#notionWorld.native-console .companion-dialogue:has(>.companion-earlier:not([hidden])){padding-top:24px}
+#notionWorld.native-console .companion-dialogue:has(>:is(.companion-earlier,.companion-fold):not([hidden]))>.companion-topic{max-width:calc(100% - 150px)}
+/* Expanded in the world: the cards stand taller over the World and any open card, earlier turns stacked
+   above the latest and scrolling; no box around them (owner requests 2026-10-05). They keep the card's one
+   width: expanding no longer widens it, so the card does not change width from message to message (owner Order 2026-10-07). */
+#notionWorld[data-fox-chat-sheet=true] .notion-hud{z-index:72}
+#notionWorld.native-console .companion-dialogue:has(>.companion-earlier:not([hidden])){padding-top:24px}
+#notionWorld.native-console .companion-dialogue:has(>.companion-earlier:not([hidden]))>.companion-topic{max-width:calc(100% - 170px)}
+#notionWorld.native-console .companion-dialogue:has(>.companion-topic:not([hidden])){padding-top:24px}
+
+/* Opaque speech paper and a small tail point to Fox; activity stays above both. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{background:none;isolation:isolate;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 6px 16px #162a321c}
+#notionWorld.native-console.fox-first-console .companion-dialogue::before{background:#fff9e7;backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid #efe6cc}
+#notionWorld.native-console.fox-first-console .companion-dialogue::after{display:block;content:'';position:absolute;left:calc(50% - 8px);bottom:-11px;top:auto;width:18px;height:12px;border:0;background:#fff9e7;clip-path:polygon(0 0,100% 0,50% 100%);transform:none;z-index:0;pointer-events:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation{min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#55795555 transparent;flex:0 1 auto;padding-right:4px}
+/* Content and its buttons are told apart by space alone, in Fox's bubble and the Attention card alike
+   (owner feedback 2026-10-02: two dividers read as repetition). */
+#notionWorld.native-console .companion-dialogue>.companion-action-bar{flex-shrink:0}
+
+
+
+/* A reply or guide only scrolls once it is taller than its room (data-scrollable, below); otherwise it shows whole. */
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation{overflow:hidden}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav{position:absolute;inset:-18px 22px auto auto;z-index:3;display:flex;flex-direction:row;align-items:center;justify-content:center;width:auto;height:31px;gap:4px;margin:0;padding:0 5px;transform:none;background:#e6e8dc;border:0;border-radius:12px;box-shadow:0 2px 5px #233d301c;color:var(--hud-paper-ink)}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav[hidden]{display:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav button{width:28px;height:24px;font:400 23px/1 var(--ui-font-ui);color:inherit;transform:none;border-radius:8px;background:transparent}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav button::before{display:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav button:disabled{visibility:visible;opacity:.25}
+
+/* A medium artifact grows with its content up to its cap above Fox; a large one is as tall as the window allows. */
+#notionWorld .fox-artifact{height:auto;max-height:min(440px,calc(100dvh - 460px));bottom:410px;display:flex;overflow:hidden}
+#notionWorld .fox-artifact[hidden]{display:none}
+/* A small artifact (owner decision 2026-10-07) is a short card above Fox, centered where a medium one is. */
+@media(min-width:801px){#notionWorld.native-console .fox-artifact[data-size=small]{left:calc(clamp(378px,calc(50% - 360px),620px) + 150px);width:min(460px,calc(100% - 410px));max-height:min(300px,calc(100dvh - 460px))}}
+.fox-artifact>h2{margin:0 84px 0 0;font:600 var(--ui-text-title)/1.25 var(--ui-font-ui);overflow-wrap:anywhere}
+.fox-artifact>.attention-preview-control{position:absolute;right:14px;top:10px;font-size:24px}
+.fox-artifact>.fox-artifact-size{right:52px;top:14px;display:grid;place-items:center;opacity:.7}.fox-artifact>.fox-artifact-size:hover{opacity:1}
+.fox-artifact>.fox-artifact-origin{margin:0 84px -6px 0}
+/* An artifact never pages: what fits shows whole, a longer body scrolls inside the card (owner Order 2026-10-07). */
+.fox-artifact-body{font:400 16px/1.5 var(--ui-font-ui);overflow-wrap:anywhere;flex:0 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#55795555 transparent;padding-right:4px}
+.fox-artifact-body[data-more=true]{mask-image:linear-gradient(#000 calc(100% - 28px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent)}
+/* The card's Markdown comes as reader prose (.notion-prose); on a card it keeps the card's own type and rules. */
+.fox-artifact .fox-artifact-body .notion-prose{font-size:inherit;line-height:inherit}
+.fox-artifact .fox-artifact-body table{display:table;width:100%;border-collapse:collapse;table-layout:fixed;font-size:inherit;margin:0 0 12px}.fox-artifact .fox-artifact-body :is(td,th){padding:7px;border:0;border-bottom:1px solid #38564420;text-align:left;min-width:0}
+/* One style for every artifact (owner Order 2026-10-07): the Attention card's paper, title and accent labels. A section
+   heading, whatever level Fox wrote, reads as the card's accent label; tables, lists and links share the same ink. */
+.fox-artifact .fox-artifact-body :is(h1,h2,h3,h4,h5,h6){margin:14px 0 6px;color:var(--attention-accent);font:600 var(--ui-text-label)/1.3 var(--ui-font-ui);text-transform:uppercase;letter-spacing:.015em}
+.fox-artifact .fox-artifact-body :is(.fox-artifact-body,.notion-prose)>:first-child{margin-top:0}
+.fox-artifact .fox-artifact-body th{background:none;color:var(--attention-accent);font-weight:600;font-size:var(--ui-text-label);border-bottom-color:#38564440}
+.fox-artifact .fox-artifact-body td,.fox-artifact .fox-artifact-body th{vertical-align:top}
+.fox-artifact .fox-artifact-body :is(ul,ol){margin:0 0 12px;padding-left:22px}.fox-artifact .fox-artifact-body li{margin:2px 0}
+.fox-artifact .fox-artifact-body a{color:var(--attention-accent);text-underline-offset:3px}
+.fox-artifact .fox-artifact-body blockquote{margin:0 0 12px;padding-left:12px;border-left:3px solid #38564425}
+.fox-artifact .fox-artifact-body hr{display:none}
+.fox-artifact .fox-artifact-body p{margin:0 0 12px}.fox-artifact-body figure{margin:0 0 18px}.fox-artifact-body figcaption{font-weight:600;margin-bottom:8px}
+.fox-artifact-bar{display:grid;grid-template-columns:100px 1fr 80px;align-items:center;gap:8px;margin:7px 0}.fox-artifact-bar i{height:12px;background:color-mix(in srgb,var(--attention-accent) 70%,transparent);border-radius:3px}.fox-artifact-bar span:last-child{text-align:right;font-size:13px}
+/* The card system (ui/attention/CARD-SYSTEM.md, owner Order 2026-10-08). Tones are the Attention card's own accents,
+   one per kind of thing; a card, a Journal card or one block sets its tone and everything inside follows it. */
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=moss]{--attention-accent:#315f48}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=teal]{--attention-accent:#28718a}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=honey]{--attention-accent:#946e2b}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=sage]{--attention-accent:#557955}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=clay]{--attention-accent:#a04e33}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=plum]{--attention-accent:#6c4a78}
+.artifact-blocks{--card-wash:color-mix(in srgb,var(--attention-accent) 8%,transparent);--card-line:color-mix(in srgb,var(--attention-accent) 30%,transparent);--card-rule:#38564420;--card-radius:12px}
+/* An answer's picture is a band across its head, under the same paper scrim as the Attention card's. */
+.native-console .fox-artifact{isolation:isolate}
+.fox-artifact>.fox-artifact-art{inset:0 0 auto auto;width:58%;height:min(132px,40%);object-position:right 42%;
+ -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 50%),linear-gradient(180deg,#000 25%,transparent 92%);-webkit-mask-composite:source-in;
+ mask-image:linear-gradient(90deg,transparent 0%,#000 50%),linear-gradient(180deg,#000 25%,transparent 92%);mask-composite:intersect}
+.fox-artifact>.fox-artifact-scrim{display:none}
+.fox-artifact[data-art]>.attention-preview-control{background:color-mix(in srgb,var(--ui-paper,#f6efdc) 78%,transparent)}
+.fox-artifact>.fox-artifact-art[hidden],.fox-artifact>.fox-artifact-scrim[hidden]{display:none}
+.fox-artifact[data-art]>h2{max-width:64%}
+.fox-artifact[data-art]>.fox-artifact-origin{max-width:60%}
+/* Callout: the one line that matters, on the tone's wash with its rule. */
+.fox-artifact .fox-artifact-body .artifact-callout{margin:0;padding:12px 14px;border-left:3px solid var(--attention-accent);border-radius:0 var(--card-radius) var(--card-radius) 0;background:var(--card-wash);font-weight:500}
+/* Stats: headline figures as tiles. */
+.fox-artifact .artifact-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.fox-artifact .artifact-stat{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border:1px solid var(--card-line);border-radius:var(--card-radius);background:var(--card-wash);min-width:0}
+.fox-artifact .artifact-stat-value{font:600 26px/1.15 var(--ui-font-ui);color:var(--attention-accent);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.fox-artifact .artifact-stat-label{font-size:var(--ui-text-label);font-weight:500}.fox-artifact .artifact-stat-note{font-size:12px;opacity:.72}
+/* Facts: the Attention card's time and venue lines, one icon each. */
+.fox-artifact .fox-artifact-body .artifact-facts{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.fox-artifact .fox-artifact-body .artifact-facts li{display:flex;align-items:flex-start;gap:10px;margin:0}
+.fox-artifact .artifact-fact-icon{display:flex;flex:none;margin-top:2px;color:var(--attention-accent)}
+/* Steps: numbered marks on a thread, with their time on the right. */
+.fox-artifact .fox-artifact-body .artifact-steps{list-style:none;margin:0;padding:0;counter-reset:none}
+.fox-artifact .fox-artifact-body .artifact-steps li{position:relative;display:flex;gap:12px;margin:0;padding:0 0 12px}
+.fox-artifact .artifact-steps li:not(:last-child)::before{content:"";position:absolute;left:11px;top:26px;bottom:2px;width:1.5px;background:var(--card-line)}
+.fox-artifact .artifact-step-mark{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--attention-accent);color:#fffdf5;font:600 12px/1 var(--ui-font-ui)}
+.fox-artifact .artifact-step-text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.fox-artifact .artifact-step-head{display:flex;gap:10px;align-items:baseline}.fox-artifact .artifact-step-when{margin-left:auto;color:var(--attention-accent);font-size:var(--ui-text-label);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fox-artifact .artifact-step-detail{font-size:14px;opacity:.8}
+/* Compare: options side by side; the recommended one stands in the tone. */
+.fox-artifact .artifact-compare{display:grid;grid-template-columns:repeat(var(--columns,2),minmax(0,1fr));gap:10px}
+.fox-artifact .artifact-option{position:relative;display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--card-rule);border-radius:var(--card-radius);min-width:0}
+.fox-artifact .artifact-option[data-pick=true]{border-color:var(--attention-accent);background:var(--card-wash);box-shadow:inset 0 0 0 1px var(--attention-accent)}
+.fox-artifact .artifact-option-pick{align-self:flex-start;padding:2px 8px;border-radius:999px;background:var(--attention-accent);color:#fffdf5;font:600 11px/1.4 var(--ui-font-ui);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}
+.fox-artifact .artifact-option-name{font-weight:600;font-size:17px}.fox-artifact .artifact-option-note{font-size:14px;opacity:.78}
+.fox-artifact .fox-artifact-body .artifact-option ul{margin:4px 0 0;padding-left:18px;font-size:14px}
+/* Tags: short labels as chips, the Attention category chip's shape. */
+.fox-artifact .artifact-tags{display:flex;flex-wrap:wrap;gap:6px}
+.fox-artifact .artifact-tag{padding:3px 10px;border-radius:999px;background:var(--card-wash);border:1px solid var(--card-line);color:var(--attention-accent);font-size:13px;font-weight:500}
+@media(max-width:800px){.fox-artifact .artifact-compare{grid-template-columns:1fr}}
+/* Blocks the person works with on the card (owner Order 2026-10-08): the Attention card is the design system, so they
+   are its accent label, ink, rules and outline/filled buttons, nothing of their own. */
+.artifact-blocks{display:grid;gap:14px;margin:4px 0 12px}
+.fox-artifact .fox-artifact-body .artifact-block-label{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+.artifact-block-count{margin-left:auto;font-weight:500;letter-spacing:0;font-variant-numeric:tabular-nums;opacity:.8}
+.fox-artifact .fox-artifact-body .artifact-checklist{list-style:none;margin:0;padding:0}
+.fox-artifact .fox-artifact-body .artifact-checklist li{margin:0;border-bottom:1px solid #38564420}
+.artifact-check{display:flex;align-items:flex-start;gap:10px;padding:7px 0;cursor:pointer}
+.artifact-check input{position:absolute;opacity:0;width:1px;height:1px}
+.artifact-check-mark{flex:none;width:18px;height:18px;margin-top:2px;box-sizing:border-box;border:1.5px solid color-mix(in srgb,var(--attention-accent) 55%,transparent);border-radius:5px;display:grid;place-items:center}
+.artifact-checklist li[data-done=true] .artifact-check-mark{background:var(--attention-accent);border-color:var(--attention-accent)}
+.artifact-checklist li[data-done=true] .artifact-check-mark::after{content:"";width:9px;height:5px;margin-top:-2px;border:solid #fffdf5;border-width:0 0 2px 2px;transform:rotate(-45deg)}
+.artifact-checklist li[data-done=true] .artifact-check-text{opacity:.6;text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--attention-accent) 50%,transparent)}
+.artifact-check input:focus-visible+.artifact-check-mark{outline:2px solid var(--attention-accent);outline-offset:2px}
+.artifact-scale{display:flex;align-items:center;gap:12px;margin:0 0 6px}
+.fox-artifact .artifact-scale .artifact-scale-step{min-width:34px;padding:5px 0;font-size:18px;line-height:1}
+.fox-artifact .artifact-scale .artifact-scale-step:disabled{opacity:.4;cursor:default}
+.fox-artifact .artifact-scale-value{min-width:84px;text-align:center;font-weight:600;color:var(--attention-accent);font-variant-numeric:tabular-nums}
+.fox-artifact .fox-artifact-body .artifact-scale-rows{margin:0}.fox-artifact .fox-artifact-body .artifact-scale-rows .artifact-scale-amount{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.artifact-choice,.artifact-parts{display:flex;flex-wrap:wrap;gap:8px}
+.fox-artifact .fox-artifact-body .artifact-part-detail{margin:10px 0 0;padding-left:12px;border-left:3px solid color-mix(in srgb,var(--attention-accent) 35%,transparent)}
+.fox-artifact>.fox-artifact-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:4px}.fox-artifact>.fox-artifact-actions[hidden]{display:none}
+
+
+/* A rounded card of frosted paper, slightly see-through over the World (owner Order 2026-10-08); a small
+   triangle points from it to Fox. The blur keeps its text at reading contrast whatever is behind it. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{padding:18px 22px 20px;gap:6px;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue:has(>.companion-topic:not([hidden])){padding-top:22px}
+#notionWorld.native-console.fox-first-console .companion-dialogue::before{inset:0;border:1px solid #ebe5cc;border-radius:20px;clip-path:none;background:var(--fox-glass,#f9f6e4e3);backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);box-shadow:0 4px 12px #162a321c}
+#notionWorld.native-console.fox-first-console .companion-dialogue::after{display:block;content:'';position:absolute;left:calc(var(--fox-tail-x,50%) - 9px);bottom:-10px;top:auto;width:18px;height:11px;border:0;background:var(--fox-glass,#f9f6e4e3);backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);clip-path:polygon(0 0,100% 0,50% 100%);transform:none;z-index:0;pointer-events:none}
+#notionWorld.native-console.fox-first-console .companion-action-bar{margin-top:4px;padding-top:4px}
+
+/* Navigation shares the context badge line. */
+#notionWorld.native-console .companion-dialogue:has(.companion-reply-nav:not([hidden]))>.companion-topic{max-width:calc(100% - 128px)}
+#notionWorld.native-console .companion-pet{z-index:6}
+
+#notionWorld.native-console.fox-first-console .companion-dialogue{filter:drop-shadow(0 6px 10px #20362930)}
+
+
+/* A brief reads in order: category, title, facts, then the useful detail. */
+.attention-preview-summary :is(p,ul,ol,blockquote){margin:0 0 .8em}
+.attention-preview-summary :is(h2,h3,h4){margin:1em 0 .4em;font-size:1em;line-height:1.4}
+.attention-preview-summary :is(ul,ol){padding-left:1.25em}
+.attention-preview-summary li+li{margin-top:.4em}
+.attention-preview-summary strong{color:inherit}
+.attention-preview-summary a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.attention-preview-summary>:last-child{margin-bottom:0}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-attention-actions :is(button,a){color:#657068}
+/* Scene tooltips never float over a foreground card or panel. */
+body:has(.attention-preview:not([hidden]),.region-shelf:not([hidden]),dialog[open],#notionContent:not([hidden])) .applet-hover-name{display:none}
+body:has(.attention-preview:not([hidden]),.region-shelf:not([hidden]),dialog[open],#notionContent:not([hidden])) .notion-pin>strong{opacity:0!important}
+
+/* The brief header keeps all identifying facts together beside the illustration. */
+#attentionPreview .attention-preview-hero{min-height:190px;align-items:stretch}
+#attentionPreview .attention-preview-heading{width:50%;padding:8px 14px 8px 0;box-sizing:border-box}
+#attentionPreview .attention-preview-facts{margin-top:14px;gap:8px;font-size:14px}
+#attentionPreview .attention-preview-when{flex-wrap:wrap;justify-content:flex-start;column-gap:7px;row-gap:3px}
+#attentionPreview .attention-preview-clock{margin-left:0;text-align:left}
+#attentionPreview .attention-preview-date{color:inherit;font-weight:400}
+#attentionPreview .attention-preview-location{display:block;overflow:visible;font-size:14px}
+#attentionPreview .attention-preview-summary{flex:1 1 auto;min-height:0;line-height:1.5}
+#attentionPreview .attention-preview-summary strong{color:inherit;font-weight:650}
+#attentionPreview .attention-preview-summary>p:first-child{margin-bottom:10px}
+#attentionPreview .attention-preview-summary li+li{margin-top:5px}
+#attentionPreview .attention-preview-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;padding-top:10px;color:#617065;font:400 12px/1.4 var(--ui-font-ui)}
+#attentionPreview .attention-preview-original{font:inherit;white-space:nowrap;flex-shrink:0}
+#attentionPreview .attention-preview-original svg{width:14px;height:14px}
+@media(max-height:850px){#attentionPreview .attention-preview-hero{min-height:150px}#attentionPreview .attention-preview-category{margin-bottom:8px}#attentionPreview .attention-preview-facts{margin-top:10px}}
+@media(max-width:800px){#attentionPreview .attention-preview-heading{width:56%;padding-right:10px}#attentionPreview .attention-preview-footer{font-size:11px}}
+
+#attentionPreview .attention-preview-category{display:flex;align-items:center;gap:7px}
+#attentionPreview .attention-preview-kind{display:inline-flex;flex:0 0 18px;width:18px;height:18px}
+#attentionPreview .attention-preview-kind svg{width:100%;height:100%}
+#attentionPreview .attention-preview-footer{justify-content:flex-end;border:0;padding-top:4px;gap:8px}
+#attentionPreview .attention-preview-original{width:28px;height:28px;min-height:28px;padding:5px;text-decoration:none}
+#attentionPreview .attention-preview-original svg{width:17px;height:17px}
+
+#attentionPreview .attention-preview-sources{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:2px}
+#attentionPreview .attention-preview-footer[hidden]{display:none}
+#attentionPreview .attention-preview-provenance{white-space:nowrap}
+
+/* The card's controls are the user's own hands: a ruled action bar with a filled primary
+   outcome and outlined secondary choices. Fox's options (below) read as replies instead. */
+#attentionPreview .attention-preview-footer:has(.attention-preview-actions:not(:empty)){margin-top:6px;padding-top:12px}
+#attentionPreview .attention-preview-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-left:auto;justify-content:flex-end}
+#attentionPreview .attention-preview-actions:empty{display:none}
+:is(#attentionPreview,#foxArtifact) .attention-preview-action{min-height:32px;padding:5px 14px;border:1px solid color-mix(in srgb,var(--attention-accent) 35%,transparent);border-radius:9px;background:transparent;color:var(--attention-accent);font:500 14px/1.2 var(--ui-font-ui);cursor:pointer}
+:is(#attentionPreview,#foxArtifact) .attention-preview-action:hover{background:color-mix(in srgb,var(--attention-accent) 9%,transparent)}
+:is(#attentionPreview,#foxArtifact) .attention-preview-action-primary{padding:5px 20px;border-color:var(--attention-accent);background:var(--attention-accent);color:#fffdf5;font-weight:600}
+:is(#attentionPreview,#foxArtifact) .attention-preview-action-primary:hover{background:color-mix(in srgb,var(--attention-accent) 86%,#000)}
+:is(#attentionPreview,#foxArtifact) .attention-preview-action:focus-visible{outline:2px solid var(--attention-accent);outline-offset:2px}
+#attentionPreview .attention-preview-provenance[hidden]{display:none}
+#attentionPreview .attention-preview-provenance.is-link{cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 40%,transparent)}
+/* After Fox finishes, the card's own Done invites the user's confirmation. */
+@keyframes attention-nudge{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--attention-accent) 45%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
+#attentionPreview .attention-preview-action-primary.attention-preview-nudge{animation:attention-nudge 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){#attentionPreview .attention-preview-action-primary.attention-preview-nudge{animation:none;outline:2px solid var(--attention-accent);outline-offset:3px}}
+
+/* One Fox thread across places, one card per turn. The front card shows the question it
+   answers above the answer; this place's earlier turns wait behind it as a deck whose top
+   edges peek out; a click expands them upward into a scrolling column of whole cards. */
+#notionWorld.native-console .companion-asked{margin:0 0 2px;font:600 12px/1.4 var(--ui-font-ui,system-ui);color:var(--ui-ink,#1f3a2a);opacity:.62;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+#notionWorld.native-console .companion-asked::before{content:'You · ';font-weight:400}
+#notionWorld.native-console .companion-asked[hidden]{display:none}
+#notionWorld.native-console .companion-dialogue[data-expandable=true]{cursor:pointer}
+/* While Fox works, its card holds one lighter line, the current step, typed in as it
+   arrives, so it never reads as the answer. */
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-working=true]{color:#7b857c;font-style:italic}
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-working=true]>p{animation:fox-step-stream .6s steps(28,end) both}
+@keyframes fox-step-stream{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console .companion-dialogue>#worldConversation[data-working=true]>p{animation:none}}
+/* A long reply scrolls inside its card, without a scrollbar: its foot fades and a small
+   down arrow says more waits below, until the end is in view (owner feedback 2026-10-04). */
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation[data-scrollable=true]{overflow-y:auto;scrollbar-width:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation[data-scrollable=true]::-webkit-scrollbar{display:none}
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-more=true]{-webkit-mask-image:linear-gradient(#000 calc(100% - 30px),transparent);mask-image:linear-gradient(#000 calc(100% - 30px),transparent)}
+/* A last line over two hours old fades down the card under a gradient, so it reads as from earlier (owner Order 2026-10-07). */
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-stale=true]{-webkit-mask-image:linear-gradient(#000a,#0002);mask-image:linear-gradient(#000a,#0002)}
+#notionWorld.native-console .companion-scroll-hint{position:relative;align-self:center;flex:0 0 8px;width:12px;height:8px;margin-top:-14px;pointer-events:none;z-index:2}
+#notionWorld.native-console .companion-scroll-hint[hidden]{display:none}
+#notionWorld.native-console .companion-scroll-hint::before{content:'';position:absolute;left:0;top:-4px;border-style:solid;border-width:7px 6px 0;border-color:var(--ui-reply-success,#2f6b45) transparent transparent;opacity:.75;animation:companion-scroll-hint 1.6s ease-in-out infinite}
+@keyframes companion-scroll-hint{50%{transform:translateY(3px)}}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console .companion-scroll-hint::before{animation:none}}
+/* The deck is one card edge behind the front card, with a darker paper rule and a shadow on its top edge:
+   two cards in all, however many turns wait (owner Order 2026-10-07: three edges were too busy). */
+#notionWorld.native-console .companion-deck{position:absolute;left:0;right:0;bottom:calc(100% - 18px);height:42px;z-index:-2;pointer-events:none}
+#notionWorld.native-console .companion-deck[hidden]{display:none}
+#notionWorld.native-console .companion-deck>i{position:absolute;left:16px;right:16px;bottom:0;z-index:2;height:30px;border-radius:16px 20px 0 0;background:#f1e7c9;border:1px solid #cbbb8c;box-shadow:0 -2px 6px #162a3226;transition:transform .2s ease}
+#notionWorld.native-console .companion-dialogue[data-expandable=true]:hover .companion-deck>i:first-child{transform:translateY(-2px)}
+@media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-deck>i{transition:none}#notionWorld.native-console .companion-dialogue[data-expandable=true]:hover .companion-deck>i{transform:none}}
+/* Beside an Applet the column folds to its front card: the deck is the way back up, and the
+   toggle on the card's top edge is a small capsule in the family of World and Summarize. */
+#notionWorld.native-console .companion-deck[data-unfold=true]{bottom:calc(100% - 14px);height:40px;pointer-events:auto;cursor:pointer}
+#notionWorld.native-console .companion-deck[data-unfold=true]>i{left:14px;right:14px;bottom:0;height:22px;z-index:3;background:#f4ecd4;border-color:#d8cca6;box-shadow:0 -2px 6px #162a3212}
+#notionWorld.native-console .companion-deck[data-unfold=true]:hover>i:first-child{transform:translateY(-2px)}
+/* Scene-capsule ink, line, shadow and blur (the dark glass of the controls under Fox). It sits
+   half on the paper card, so its glass is the deeper forest tint that keeps the label legible there. */
+#notionWorld.native-console .companion-dialogue:has(>.companion-fold:not([hidden]))>.companion-topic{max-width:calc(100% - 170px)}
+@media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-deck[data-unfold=true]:hover>i{transform:none}}
+#notionWorld.native-console .companion-thread{position:absolute;left:0;right:0;bottom:calc(100% + 28px);display:flex;flex-direction:column;gap:8px;margin:0;padding:0;border:0;cursor:default;pointer-events:auto}
+#notionWorld.native-console .companion-thread[hidden]{display:none}
+#notionWorld.native-console .companion-thread-list{box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow-y:auto;overflow-anchor:none;overscroll-behavior:contain;scrollbar-width:none;padding:2px 2px 4px}
+#notionWorld.native-console .companion-thread-list::-webkit-scrollbar{display:none}
+#notionWorld.native-console .companion-thread-list[hidden]{display:none}
+#notionWorld.native-console .companion-thread-list[data-cramped=true]{visibility:hidden}
+/* Earlier turns sit over World art, so the list never fades them into the scenery (#1652): its
+   edges clip the opaque cards cleanly and a thin scrollbar says more turns are above or below. */
+#notionWorld.native-console .companion-thread-list:is([data-overflow=true],[data-more=true]){scrollbar-width:thin;scrollbar-color:#55795588 transparent}
+#notionWorld.native-console .companion-thread-list:is([data-overflow=true],[data-more=true])::-webkit-scrollbar{display:block;width:6px}
+#notionWorld.native-console .companion-thread-list:is([data-overflow=true],[data-more=true])::-webkit-scrollbar-thumb{background:#55795588;border-radius:3px}
+/* The current card stays whole; earlier ones step back on the same frosted paper, paler with
+   age, the oldest the palest, while their text keeps normal reading contrast (#1652). */
+#notionWorld.native-console.fox-first-console{--fox-glass:#f9f6e4e3;--fox-glass-blur:blur(18px) saturate(1.3)}
+/* On the desktop nothing of the World is behind the card to blur, so it stays opaque paper there. */
+.desktop-companion #notionWorld.native-console.fox-first-console{--fox-glass:#f9f6e4;--fox-glass-blur:none}
+#notionWorld.native-console .companion-thread-card{box-sizing:border-box;display:grid;gap:4px;flex-shrink:0;width:100%;padding:12px 16px;border-radius:20px;--fade:calc(min(var(--age,0),4) * 18% + 14%);background:color-mix(in srgb,#ecebe4e3 var(--fade),var(--fox-glass,#f9f6e4e3));backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);border:1px solid color-mix(in srgb,#dedcd3 var(--fade),#ebe5cc);box-shadow:0 3px 10px #162a3218;color:color-mix(in srgb,#56625a var(--fade),var(--ui-ink,#1f3a2a));font:400 14px/1.45 var(--ui-font-ui,system-ui)}
+/* A topic of several turns is one stack (owner Order 2026-10-08): its name and count on top, its newest turn,
+   and two card edges peeking out under it; the name opens it into its turns and folds it again. */
+#notionWorld.native-console .companion-thread-card.is-topic-stack{margin-bottom:10px;box-shadow:0 5px 0 -1px color-mix(in srgb,#e4ddc6 80%,transparent),0 10px 0 -3px color-mix(in srgb,#d9d1b6 70%,transparent),0 3px 10px #162a3218}
+#notionWorld.native-console .companion-topic-head{all:unset;box-sizing:border-box;display:flex;align-items:baseline;gap:8px;min-width:0;margin:-2px 0 2px;cursor:pointer;color:#5d6b60;font:600 12px/1.4 var(--ui-font-ui,system-ui)}
+#notionWorld.native-console .companion-topic-name{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#notionWorld.native-console .companion-topic-count{flex:none;padding:0 7px;border:1px solid #d8cfb2;border-radius:999px;font-weight:600;color:#6c7a70}
+#notionWorld.native-console .companion-topic-head:hover .companion-topic-count{background:#efe7cf}
+#notionWorld.native-console .companion-topic-head:focus-visible{outline:2px solid var(--ui-reply-success,#3d7a52);outline-offset:2px;border-radius:4px}
+#notionWorld.native-console .companion-thread-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px}
+#notionWorld.native-console .companion-thread-foot:not(:has(>:not([hidden]))){display:none}
+#notionWorld.native-console .companion-thread-user{margin:0;font:600 12px/1.4 var(--ui-font-ui,system-ui)}
+#notionWorld.native-console .companion-thread-user::before{content:'You · ';font-weight:400}
+/* An action's or a choice's icon before its title, so it reads as an action, not typed words. */
+#notionWorld.native-console :is(.companion-asked,.companion-thread-user) .companion-user-icon{display:inline-flex;vertical-align:-2px;margin-right:4px}
+#notionWorld.native-console :is(.companion-asked,.companion-thread-user) .companion-user-icon svg{width:13px;height:13px;stroke-width:2.2}
+#notionWorld.native-console .companion-thread-reply>*{margin:0 0 6px}
+#notionWorld.native-console .companion-thread-reply>:last-child{margin-bottom:0}
+#notionWorld.native-console .companion-thread-reply :is(ul,ol){padding-left:18px}
+#notionWorld.native-console .companion-thread-card[data-status=error] .companion-thread-reply{color:#8a3b2b}
+#notionWorld.native-console :is(.companion-thread-running,.companion-thread-agent)[hidden]{display:none}
+#notionWorld.native-console .companion-thread-agent{margin:0;padding:2px 10px;color:var(--ui-muted,#5d6b62);font:500 11px/1.4 var(--ui-font-ui,system-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* What the place's thread used, as the person's Agent reported it: quiet, at the start of the foot. */
+#notionWorld.native-console .companion-thread-usage{margin:0 auto 0 4px;color:#6c7a70;font:500 11px/1.4 var(--ui-font-ui,system-ui);white-space:nowrap}
+#notionWorld.native-console .companion-thread-usage[hidden]{display:none}
+#notionWorld.native-console .companion-thread-running{margin:0;padding:5px 10px;border-radius:999px;background:#1f2a24;color:#fff;font:600 11px/1.4 var(--ui-font-ui,system-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console .companion-deck>i{transition:none}}
+
+/* Sources lead; outcomes stay at the far edge and wrap as a group on narrow cards. */
+#attentionPreview .attention-preview-footer{flex-wrap:wrap;justify-content:space-between}
+#attentionPreview .attention-preview-source-group{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-width:0;max-width:100%}
+#attentionPreview .attention-preview-sources{justify-content:flex-start}
+#attentionPreview .attention-preview-actions{max-width:100%}
+
+.attention-preview-when[data-deadline=true] .attention-preview-date{font-weight:700}
+/* Relative timing sits on its own line under the date: how far away, and when the mail came. */
+.attention-preview-age{flex-basis:100%;font-size:.92em;opacity:.78}
+.attention-preview-age:empty{display:none}
+.attention-preview-when[data-overdue=true] .attention-preview-age{opacity:1;font-weight:600;color:var(--attention-accent)}
+
+/* The briefing's height follows its content (#1217). It grows upward from its anchor above
+   Fox's column to the window's top margin (below the place title, where Fox's own ceiling
+   starts); as it nears that limit the illustration band gives way to its heading first, and
+   only a finding taller than all of that space scrolls its body. Short windows lower the
+   anchor and compact the band so Fox keeps one guide card below it; narrow windows hang the
+   card from the top. */
+#notionWorld #attentionPreview{--attention-card-top:64px;--attention-card-bottom:410px;top:auto;bottom:var(--attention-card-bottom);max-height:calc(100dvh - var(--attention-card-top) - var(--attention-card-bottom))}
+#attentionPreview .attention-preview-hero{flex:0 1000 190px;min-height:auto}
+#attentionPreview .attention-preview-summary{flex:0 1 auto;min-height:2em}
+@media(max-height:850px){
+ #notionWorld #attentionPreview{--attention-card-bottom:330px}
+ #attentionPreview .attention-preview-hero{flex-basis:150px}
+}
+@media(max-height:650px){
+ #notionWorld #attentionPreview{--attention-card-bottom:300px}
+ #attentionPreview .attention-preview-hero{flex-basis:72px}
+ #attentionPreview .attention-preview-heading{padding-block:0}
+}
+@media(max-width:800px){#notionWorld #attentionPreview{top:65px;bottom:auto;max-height:calc(100dvh - 390px)}}
+/* A large artifact in the World takes the stage right of the Attention Center while Fox and the conversation stand
+   in the right-hand column (layout.css moves the HUD; owner decisions 2026-10-05 and 2026-10-06). */
+@media(min-width:801px){
+ #notionWorld.native-console[data-fox-lane=true] .fox-artifact{left:378px;right:calc(var(--reader-companion-lane) + 12px);width:auto;top:84px;bottom:28px;height:auto;max-height:none}
+ #notionWorld.native-console.radial-pet-console.companion-console[data-fox-lane=true] .companion-dialogue{width:min(440px,calc(var(--reader-companion-lane) - 32px));max-width:min(440px,calc(var(--reader-companion-lane) - 32px))}
+}
+/* Over an Applet an artifact is a small card in the top-right corner, at the head of Fox's column, so the Applet stays
+   in view while Fox talks about it (owner Order 2026-10-07). It keeps its one style; the size control has no meaning
+   there, and anything taller than the corner scrolls inside the card. */
+@media(min-width:801px){
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact{left:auto;right:16px;width:calc(var(--reader-companion-lane,464px) - 32px);top:var(--applet-bar-top);bottom:auto;height:auto;max-height:min(380px,calc(100dvh - 500px));min-height:0;padding:16px 20px 14px;gap:8px;border-radius:18px 20px 19px 21px}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>:is(.fox-artifact-art,.fox-artifact-scrim){display:none}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-art]>:is(h2,.fox-artifact-origin){max-width:none}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>h2{font-size:var(--ui-text-section,18px);margin-right:44px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.fox-artifact-origin{margin-right:44px}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>:is(h2,.fox-artifact-origin){flex-shrink:0}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact .artifact-option-pick{padding:2px 6px;font-size:10px;letter-spacing:0}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.fox-artifact-size{display:none}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.attention-preview-control{top:6px;right:10px}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact-body{font-size:14px;line-height:1.45;overflow-y:auto;overscroll-behavior:contain}
+}
+/* Close stays visible over the brightest corner of a picture. */
+#attentionPreview .attention-preview-tools .attention-preview-control{background:color-mix(in srgb,var(--ui-paper,#f6efdc) 82%,transparent)}
+#attentionPreview .attention-preview-tools .attention-preview-control:hover{background:var(--ui-paper,#f6efdc)}

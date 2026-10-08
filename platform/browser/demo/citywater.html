@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>City Water Utility · Your bill</title>
+<!-- Worldlet development rehearsal page. Served only by Dev builds at https://demo.worldlet.test/citywater.
+     Fictional utility; nothing leaves this Mac and no card data is accepted or stored. -->
+<style>
+:root{--ink:#16324a;--muted:#5d7385;--accent:#1c6bb0;--paper:#f4f8fb;--line:#d7e3ec}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:18px 32px;background:#fff;border-bottom:1px solid var(--line)}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700}
+header strong{font-size:19px}
+header span{margin-left:auto;color:var(--muted);font-size:14px}
+main{max-width:620px;margin:40px auto;padding:0 24px}
+h1{font-size:30px;line-height:1.2;margin:0 0 8px}
+p.lead{color:var(--muted);margin:0 0 28px}
+.card{padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff;margin:0 0 20px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:6px 0}
+.row span{color:var(--muted)}
+.total{font-size:22px}
+label{display:block;font-weight:600;margin:0 0 6px}
+input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font:inherit;margin:0 0 16px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{width:100%;padding:15px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:600 17px/1 inherit;cursor:pointer}
+.note{color:var(--muted);font-size:14px;margin:12px 0 0}
+footer{margin:48px auto 24px;max-width:620px;padding:0 24px;color:var(--muted);font-size:13px}
+</style>
+<header><div class="logo" aria-hidden="true">W</div><strong>City Water Utility</strong><span>Account ending 2218</span></header>
+<main id="app"></main>
+<footer>Worldlet rehearsal site · fictional utility · no card data is accepted or stored.</footer>
+<script>
+(function(){
+ var app=document.getElementById('app');
+ var due=new Date();due.setDate(due.getDate()+5);
+ var dueLabel=due.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+ function bill(){
+  app.innerHTML='<h1>Your September bill</h1><p class="lead">Service address on file · 1,840 gallons used.</p>'+
+   '<div class="card"><div class="row"><span>Water service</span><strong>$31.40</strong></div>'+
+   '<div class="row"><span>Sewer</span><strong>$12.10</strong></div>'+
+   '<div class="row"><span>Fees</span><strong>$2.68</strong></div>'+
+   '<div class="row total"><span>Amount due</span><strong>$46.18</strong></div>'+
+   '<div class="row"><span>Due</span><strong>'+dueLabel+'</strong></div></div>'+
+   '<button type="button" id="pay">Pay $46.18</button>';
+  document.getElementById('pay').onclick=payment;
+ }
+ function payment(){
+  app.innerHTML='<h1>Pay $46.18</h1><p class="lead">Enter your card to finish. Due '+dueLabel+'.</p>'+
+   '<form id="card" novalidate><label for="number">Card number</label><input id="number" autocomplete="cc-number" inputmode="numeric">'+
+   '<div class="pair"><div><label for="exp">Expiry</label><input id="exp" autocomplete="cc-exp" placeholder="MM/YY"></div>'+
+   '<div><label for="cvc">Security code</label><input id="cvc" autocomplete="cc-csc" inputmode="numeric"></div></div>'+
+   '<button type="submit">Pay now</button><p class="note">This rehearsal page never accepts a payment.</p></form>';
+  document.getElementById('card').addEventListener('submit',function(event){
+   event.preventDefault();
+   document.querySelector('.note').textContent='Rehearsal only: no payment was made.';
+  });
+ }
+ bill();
+})();
+</script>
+</html>

@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "explaining.png",
+  "selected": "paw-side-v1.png",
+  "status": "registration-draft-not-accepted",
+  "attempts": [
+    {
+      "output": "exec-c847e54d-79b2-4611-a8fc-bdaf7326aa1b.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent 2D painted character rig sprite. Input image 1 is ONLY a style and anatomy reference, not the output composition. Generate ONLY the SIDE PROFILE of this exact little fox's short dark-brown furry front paw and a short orange wrist attachment; no fox body, no head, no other parts. This is an anthropomorphic fox hand, matching the outstretched hand at viewer right of the reference: short rounded digits, soft warm brown fur, no nails. View exactly edge-on from the little-finger side, fingers held gently together and slightly curved, so the nearest rounded digit and palm edge occlude the other digits. Do NOT show the broad palm face or spread fingers, do not turn it into a human hand or a foot. Orientation: wrist at TOP center, fingertips pointing straight DOWN, viewed as a vertical isolated side silhouette. The palm has real rounded cushion thickness (approximately 40 percent of its front-view width), a subtle curved outer contour, and softly rounded finger tip. Orange fur at the top transitions into the dark brown paw. Short wrist stub only; no elbow, long forearm, severed cross-section or bone. Warm soft upper-left lighting, matte painted fur texture exactly consistent with reference. One centered sprite on genuine fully transparent background with generous transparent margins. No shadows on a ground plane, no text, no labels, no checkerboard, no extra objects. This is a local animation asset, not a redesigned character.",
+      "decision": "Rejected as direct replacement: long digits and overly fine fur."
+    },
+    {
+      "output": "exec-c80cf51c-1cf6-4366-b291-4b927077eaff.png",
+      "prompt": "Use case: precise-object-edit. Image 1 is the EDIT TARGET (isolated side paw). Image 2 is STYLE/PROPORTION reference only (the original fox). Correct ONLY the isolated paw sprite from image 1: shorten its dangling finger section by about 45%, making the digits stubby and rounded like the original fox hand in image 2. Make the whole brown palm-and-digits region a compact softly curved mitten side silhouette, about 1.4 times as long as it is wide, NOT a long human/glove hand. Keep the edge-on little-finger-side view: closest digit overlaps the other digits; no spread fingers, no broad palm face. Match image 2's softer painted surface and broad shading, less photographic fine hair. Keep the wrist at top, fingertips down, warm orange wrist into warm dark brown paw, same gentle upper-left light. Preserve true transparency and clean non-glowing edges. No background, no other body parts, no text, no ground shadow, no new objects.",
+      "decision": "Retained for local side-surface registration review; proportions and lighting still require comparison in the full character."
+    }
+  ]
+}

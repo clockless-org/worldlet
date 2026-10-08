@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_973946c5f1b44f0daf45a69d4e964dd1",
+  "source": "resources/styles/builtin/assets/applets/twitch/peek.png"
+}

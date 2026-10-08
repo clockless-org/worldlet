@@ -1,0 +1,27 @@
+{
+  "description": "Fictional onboarding evidence. Never send to a real mailbox or merchant.",
+  "messages": [
+    {
+      "id": "thread:workshop-invitation",
+      "subject": "Your workshop place is reserved — confirm attendance",
+      "from": "Community Studio <hello@community-studio.example>",
+      "body": "Your free place in the sketching workshop is reserved. Please confirm attendance at https://community-studio.example/reservation/workshop-42. No payment or account is required. If you cannot attend, you may decline instead. We will show a confirmation reference when your response is saved.",
+      "expectedKind": "task"
+    },
+    {
+      "id": "thread:library-hours",
+      "subject": "Library reading room now opens at 8 AM",
+      "from": "Village Library <news@village-library.example>",
+      "body": "The reading room now opens at 8 AM on weekdays. Weekend opening hours remain 10 AM to 5 PM. No response is needed.",
+      "expectedKind": "update"
+    },
+    {
+      "id": "thread:workshop-already-confirmed",
+      "subject": "Your workshop attendance is confirmed",
+      "from": "Community Studio <hello@community-studio.example>",
+      "body": "Your attendance for reservation workshop-42 is confirmed. Reference: RSVP-0042. No further action is needed. View your response at https://community-studio.example/reservation/workshop-42.",
+      "expectedKind": "update",
+      "resolves": "thread:workshop-invitation"
+    }
+  ]
+}

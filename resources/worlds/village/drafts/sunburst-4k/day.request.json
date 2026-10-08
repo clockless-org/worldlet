@@ -1,0 +1,24 @@
+{
+  "created": 1790373581,
+  "size": "3840x2160",
+  "quality": "high",
+  "output_format": "png",
+  "usage": {
+    "input_tokens": 1806,
+    "input_tokens_details": {
+      "image_tokens": 1508,
+      "text_tokens": 298
+    },
+    "output_tokens": 3336,
+    "output_tokens_details": {
+      "image_tokens": 3336,
+      "text_tokens": 0
+    },
+    "total_tokens": 5142
+  },
+  "model": "gpt-image-2.5-sunburst",
+  "requested_size": "3840x2160",
+  "requested_quality": "high",
+  "request_id": "req_5ffb550c434f4c82b8acb8831e4123ae",
+  "source": "resources/worlds/village/images/day-six-regions-quiet.png"
+}

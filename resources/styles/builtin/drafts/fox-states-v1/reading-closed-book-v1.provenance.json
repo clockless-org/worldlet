@@ -1,0 +1,9 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "built-in generation with style reference",
+  "status": "draft closed-book endpoint; not registered or enabled in runtime",
+  "reference": "reading-parts.png",
+  "generatedSource": "~/.codex/generated_images/01a0d4e7-67c7-7823-99e7-6ed6267910f7/exec-dd1dcdd5-57e9-41d9-9002-eee97d21d055.png",
+  "prompt": "Use case: stylized-concept. Asset type: transparent 2D game animation prop, closed-book endpoint for the existing Fox reading animation. Input image 1 is a style/material reference only: use the olive cloth book in its upper left. Generate ONE fully closed version of that same book, isolated, upright, near-frontal three-quarter view, centered on a transparent square canvas with generous clear padding. The broad plain olive cloth front cover faces the camera, spine on the viewer's left, a narrow cream paper fore-edge visible on the right and a little paper thickness at top. Match the reference's subdued moss/olive woven fabric, softly rounded cover edges, warm ivory paper, soft upper-left lighting and cozy detailed painted 2.5D finish. Match the physical proportions of ONE cover of the reference open book, not the width of both covers together. No lettering, embossing, symbols, ornament, bookmark, hands, fox, loose page, floor, cast floor shadow, border or background. Genuinely transparent background, preserve clean antialiased alpha. Entire book visible. This is a reusable closed prop, not an app icon, no surrounding badge.",
+  "usage": "Preserve generated alpha. Requires explicit size/pivot/grip registration, a physical closing transition, and hand/page contact review before runtime adoption. Do not crossfade whole props or infer a finished put-away performance."
+}

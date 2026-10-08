@@ -1,0 +1,9 @@
+{
+  "mode": "built-in imagegen",
+  "status": "draft-not-live",
+  "source": "working.png",
+  "output": "working-device.png",
+  "sourceId": "exec-13f51c15-ba36-4388-b270-76983576e22b",
+  "transparent_background": true,
+  "prompt": "Use case: background-extraction. Asset type: transparent painted 2D animation prop for the existing Fox. Input image 1 is the edit target, an existing working key pose. Remove the entire fox, paws, fur, scarf, legs and tail. Preserve ONLY the open sage-green laptop in exactly its existing normalized position, size, perspective, silhouette, lid angle, soft matte painterly surface and warm upper-left lighting. Reconstruct the small keyboard/base areas that were covered by paws, as coherent laptop material. The whole surrounding canvas must be genuinely transparent, not a checkerboard. Keep the original square canvas layout; do not center or enlarge the laptop. Its overall bounds are approximately x 0.44–0.85, y 0.65–0.85. We see the plain back of the upright screen, with a narrow keyboard/base behind it on the viewer-left. Do not turn the laptop around or expose an invented UI. No new objects, no fox pixels or fur, no shadow on a ground plane, no text, no logo, no labels. Preserve actual alpha transparency and a crisp soft painted edge. The output is ONLY this complete isolated laptop, for compositing under and over separately animated paws."
+}

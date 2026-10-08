@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+import json,sys
+ID='11111111-1111-4111-8111-111111111111'
+thread={'id':ID,'name':'Test fixture','cwd':'/tmp','updatedAt':1,'status':{'type':'notLoaded'}}
+def emit(v):print(json.dumps(v),flush=True)
+def event(method,params):emit(dict(method=method,params={'threadId':ID,**params}))
+for line in sys.stdin:
+ m=json.loads(line);method=m.get('method');p=m.get('params',{})
+ if method=='initialized':continue
+ if 'result' in m:
+  assert m['id']==999 and m['result']=={'decision':'accept'}
+  event('turn/completed',{'turn':{'id':'turn-1','status':'completed'}});continue
+ result={}
+ if method=='initialize':result={'userAgent':'fixture'}
+ elif method=='thread/list':result={'data':[thread],'nextCursor':None}
+ elif method=='thread/read':result={'thread':thread}
+ elif method=='thread/turns/list':result={'data':[],'nextCursor':None}
+ elif method=='thread/resume':
+  assert p=={'threadId':ID,'excludeTurns':True},'must preserve session settings'
+  result={'thread':thread}
+ elif method=='turn/start':
+  assert p['threadId']==ID and p['input'][0]['text']=='Test fixture request'
+  result={'turn':{'id':'turn-1','status':'inProgress'}}
+ emit({'id':m['id'],'result':result})
+ if method=='turn/start':
+  event('turn/started',{'turn':result['turn']})
+  emit({'id':999,'method':'item/commandExecution/requestApproval','params':{'threadId':ID,'turnId':'turn-1','itemId':'item-1','command':'echo fixture'}})

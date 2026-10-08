@@ -1,0 +1,12 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "built-in edit",
+  "status": "candidate forearm proportion refinement; only lower component consumed",
+  "references": [
+    "reading-grip-parts-v1.png",
+    "reading-parts.png"
+  ],
+  "generatedSource": "~/.codex/generated_images/01a0d4e7-67c7-7823-99e7-6ed6267910f7/exec-21b324ca-f068-4b9b-a52d-9df80921872f.png",
+  "prompt": "Use case: precise-object-edit. Image 1 is the edit target, a two-piece fox arm animation atlas. Image 2 is the paw size/proportion/style reference: its lower-left book-holding arm. Change ONLY the bottom forearm/paw component in Image 1. Keep the complete upper component, canvas, alpha background and spacing unchanged. The bottom component currently has an overly long orange forearm and small dark paw. Make the orange forearm roughly HALF its current elbow-to-wrist length, and make the dark-brown gripping paw substantially chunkier (about 1.4x current height), closely matching Image 2's thick soft three-toed paw. The lower piece should be a short sturdy forearm with a large gently curled gripping paw pointing right, and a fully rounded orange elbow cap on its left for overlap, NOT a long narrow limb. Keep all hidden elbow surface complete with no flat cutoff. Maintain orange fine fur, brown paw identity, warm upper-left light and painted 2.5D style. No book, loose pages, character, text, labels, floor, shadow or new elements. Genuinely transparent background, clean edges.",
+  "usage": "Use lower forearm only; retain v1 upper component. Registration remains isolated study, not live."
+}

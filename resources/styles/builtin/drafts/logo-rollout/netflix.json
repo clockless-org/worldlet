@@ -1,0 +1,25 @@
+{
+  "key": "netflix",
+  "prompt": "Revise this village Applet figurine. Keep this charming miniature theater's curved black stage TOP canopy with fine brass trim and small central star. The red fabric curtains must form a clearly readable large N beneath it (left and right vertical curtains plus diagonal red fabric upper-left to lower-right). Keep small film projector. Replace lower black plinth with low solid warm wood stage base with rounded edges and small brass fasteners. Turn whole theater toward SCREEN LEFT, show RIGHT side depth; correct non-mirrored N. Keep fabric richly folded, original theater feeling, restrained decoration. Unified soft painted cozy dimensional miniature, matte surfaces, warm timber/brass, original brand colors. Upright stable support. Gentle 20-degree view front toward screen-left with right side and top visible, soft upper-left light. Full object on true transparent background with safe margins.",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-77b1fcc0-9ce6-4570-b025-c0845ab11231.png",
+  "output": "resources/styles/builtin/assets/applets/netflix/peek-logo-v3.png",
+  "status": "reviewed",
+  "reference": "resources/styles/builtin/assets/applets/netflix/peek.png",
+  "lampRevision": {
+    "key": "netflix",
+    "prompt": "Precisely edit the attached netflix Applet miniature. Preserve the existing entire device, correct original logo, functional accessories, wooden base, camera angle, silhouette, materials, color and framing. Add exactly ONE clearly visible status indicator recessed in the FRONT FACE of the wooden base, centered horizontally on that FRONT FACE (not the side), near its vertical center. It is a small warm brass circular bezel with a plain BLACK charcoal glass center, switched OFF: absolutely no glow, no colored light. Black lens diameter approximately 4% of total image width, bezel outside diameter 5%; slightly oblique oval consistent with front face perspective. Make sure unobstructed by props. If existing small indicator occupies base front center replace it with this unlit black lens; remove other colored status indicators on the base, retain brand graphics and non-status functional parts. If support has no continuous wood front, add a discreet low timber connecting foot with the socket at center, otherwise do not redesign base. No extra text, labels, dots, buttons or scenery. Full object isolated on true transparent background. Preserve 1024-or-1280 square composition and safe margins.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-4984a7ba-0a4b-47cb-bee2-191e99f97b2f.png",
+    "anchor": {
+      "center": [
+        0.403509,
+        0.820175
+      ],
+      "radius": [
+        0.017145,
+        0.019936
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

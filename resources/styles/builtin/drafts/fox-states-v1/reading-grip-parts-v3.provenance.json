@@ -1,0 +1,14 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "built-in edit",
+  "status": "Dev holding-arm replacement after full-character review; lower component only; stowing unfinished",
+  "references": [
+    "reading-grip-parts-v2.png",
+    "reading-parts.png",
+    "../../assets/companion/rig/fallback.png"
+  ],
+  "generatedSource": "~/.codex/generated_images/01a0d4e7-67c7-7823-99e7-6ed6267910f7/exec-f31c8dc5-e661-4218-8e85-813b346f5554.png",
+  "sha256": "462288baf1e03387169037398e3a393bac53456305310b0afadfb75ce646a28a",
+  "prompt": "Use case: precise-object-edit. Asset type: transparent 2D skeletal character limb atlas. Image 1 is the edit target, a two-piece fox limb atlas; Image 2 is the approved original reading-arms color/texture reference; Image 3 is the approved character identity/color reference. Change only the lower horizontal forearm's orange elbow in Image 1. The current left orange end is a bright spherical ball, and looks like a separate pompom when connected to the upper arm. Make that orange section a gently tapered continuous forearm with a flatter oval rounded hidden elbow cap, reducing the upward bulge by about 20 percent, keeping enough complete painted overlap for a joint. Match the quieter burnt-orange midtones and soft subtle fur lighting of Image 2's lower-left bent arm, without a bright golden specular elbow spot. Preserve the lower paw's dark-brown three-finger gripping shape and position, fingertip direction to the right, overall horizontal orientation and registration: elbow center near normalized (0.38,0.81), finger-contact point near (0.68,0.815). Keep the top upper-arm piece, canvas layout, spacing and all other aspects unchanged. Both components fully isolated on genuine transparent alpha, no background, no shadows outside the pieces, no text, no additional body parts or props. This is a replacement animation part, not a posed character illustration. Do not add outlines, seams or joint markings.",
+  "usage": "Preserve original alpha. Consume lower forearm only; upper still comes from v1."
+}

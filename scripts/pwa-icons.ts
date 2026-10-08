@@ -1,0 +1,3 @@
+import {brandAssets,BRAND} from '../ui/components/primitives/brand.ts';
+import {chromium} from 'playwright';import {mkdir} from 'node:fs/promises';
+const browser=await chromium.launch();try{const svg=brandAssets()['worldlet-app-icon.svg'];await mkdir('resources/styles/builtin/assets/brand',{recursive:true});for(const [file,size]of ([['icon-192',192],['icon-512',512],['apple-touch-icon',180]] as [string,number][])){const page=await browser.newPage({viewport:{width:size,height:size},deviceScaleFactor:1});await page.setContent(`<style>body{margin:0;background:${BRAND.paper}}svg{width:100vw;height:100vh}</style>${svg}`);await page.screenshot({path:`resources/styles/builtin/assets/brand/${file}.png`});await page.close();}}finally{await browser.close();}

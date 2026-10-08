@@ -1,0 +1,394 @@
+/* Built-in interaction materials. Shared verbatim by Applets, HUD and website. */
+:root{
+ --control-forest:var(--ui-brand,#315f48);--control-ink:var(--ui-ink,#203b30);
+ --control-paper:var(--ui-paper,#f4f0e5);--control-muted:var(--ui-ink-muted,#4d6255);
+ --control-fill:#fffdf4b8;--control-line:#315f4838;--control-hover:#e4ebdfeb;
+ --control-glass:#181b20c2;--control-glass-hover:#181b20df;--control-glass-ink:#fff;
+ --control-radius:14px 17px 15px 16px;--control-shadow:0 2px 8px #182c2012,inset 0 1px 0 #ffffff40;
+ --control-height:44px;
+}
+:is(.native-console[data-time-of-day=night],.ui-gallery[data-theme=night]){
+ --control-fill:#243b32eb;--control-line:#e3eddf45;--control-hover:#354f43;
+ --control-ink:#f4f0e5;--control-muted:#c1cec3;
+}
+.ui-button,.button{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;
+ min-height:44px;min-width:44px;padding:10px 18px;border:1px solid var(--control-line);
+ border-radius:var(--control-radius);background:var(--control-fill);color:var(--control-ink);
+ font:500 var(--ui-text-label,14px)/1.4 var(--ui-font-ui,inherit);text-decoration:none;text-shadow:none;
+ box-shadow:var(--control-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ cursor:pointer;white-space:nowrap;transition:background .16s ease,box-shadow .16s ease;
+}
+.ui-button:not(:disabled):hover{background:var(--control-hover);color:var(--control-ink);filter:none}
+.ui-button[data-variant=primary]{background:#315f48ed;color:#fff;border-color:#d5bf874d;box-shadow:inset 0 1px 0 #ffffff1f,0 1px 2px #203b301a}
+.ui-button[data-variant=primary]:not(:disabled):hover{background:#234936;color:#fff}
+.ui-button[data-variant=quiet]{background:transparent;box-shadow:none;border-color:transparent}
+.ui-button[data-variant=danger]{background:#a3443f;color:#fff;border-color:transparent}
+.ui-button[data-material=glass]{background:var(--control-glass);color:var(--control-glass-ink);border-color:#ffffff30;border-radius:999px}
+.ui-button[data-material=glass]:not(:disabled):hover{background:var(--control-glass-hover);color:#fff}
+.ui-button:not(:disabled):active{box-shadow:inset 0 2px 4px #0002}
+.ui-button:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.ui-button[aria-busy=true]{opacity:.75;cursor:progress}
+.ui-button[aria-busy=true]::after{content:'';width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:control-spin .8s linear infinite}
+:is(.ui-button,.ui-input):focus-visible{outline:2px solid var(--control-ink);outline-offset:3px}
+[data-material=glass]:focus-visible{outline-color:#fff;box-shadow:0 0 0 5px #181b20}
+.ui-input{box-sizing:border-box;min-height:44px;max-width:100%;padding:10px 14px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-fill);color:var(--control-ink);font:inherit}
+.ui-input[aria-invalid=true]{border-color:var(--ui-error,#a3443f);outline-color:var(--ui-error,#a3443f)}
+.ui-pane,.ui-choice{background:var(--control-fill);color:var(--control-ink);border:1px solid var(--control-line);border-radius:20px;padding:24px}
+.ui-applet-surface{position:relative;background:var(--control-paper);border-color:#b6a78780;box-shadow:0 3px 14px #203b3012;padding:24px;isolation:isolate}
+.ui-applet-header{position:relative;min-height:60px;padding:0 80px 16px 0;border-bottom:1px solid var(--control-line);margin-bottom:20px}
+.ui-applet-header::after{content:'';position:absolute;right:0;top:-8px;width:80px;height:68px;background:url('hud/village-corner.png') center/contain no-repeat;pointer-events:none}
+.ui-applet-header .ui-title{margin:0;font-size:28px;line-height:1.2;font-weight:600}
+.ui-applet-header .ui-caption{margin:8px 0 0;font-size:14px}
+.ui-applet-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--control-line)}
+.ui-empty-state{padding:72px 20px 20px;text-align:center;background:url('hud/village-corner.png') center 4px/80px 64px no-repeat;color:var(--control-ink)}
+.ui-empty-state h3{margin:0 0 8px;font-size:16px}.ui-empty-state p{margin:0}
+.ui-applet-tabs{display:flex;gap:6px;margin:0 0 16px}.ui-applet-tabs button{font:inherit;padding:8px 20px;border:0;border-radius:8px;background:transparent;color:var(--control-ink);min-height:44px;cursor:pointer}.ui-applet-tabs [aria-selected=true]{background:#91b17d55}
+.ui-applet-list{display:grid;gap:8px}.ui-applet-list button{display:block;width:100%;text-align:left;font:inherit;color:var(--control-ink);border:1px solid var(--control-line);background:var(--control-fill);border-radius:12px;padding:12px;cursor:pointer}.ui-applet-list [aria-current=true]{background:#91b17d44}
+:is(.native-console[data-time-of-day=night],.ui-gallery[data-theme=night]) .ui-applet-surface{--control-paper:#203c33;border-color:#c6d5c03d}
+.ui-applet-surface :is(button,input):focus-visible{outline:2px solid #6d9bac;outline-offset:3px}
+/* All native text readers share the Village shell; source content is never painted. */
+#notionWorld #notionContent[data-reader-hud=true]{
+ position:absolute;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden;scroll-padding:0;
+ padding:24px;background:var(--control-paper);color:var(--control-ink);
+ border:1px solid var(--control-line);border-radius:20px;box-shadow:var(--control-shadow);
+ backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+#notionWorld #notionContent[data-reader-hud=true]::after{display:none}
+#notionWorld #notionContent[data-reader-hud=true]>.ui-applet-header{
+ flex:none;box-sizing:border-box;width:100%;max-width:none;min-height:60px;
+ padding:0 80px 16px 0;margin:0 0 16px;border-bottom:1px solid var(--control-line);
+}
+#notionWorld #notionContent[data-reader-hud=true]>.ui-applet-header::after{width:64px;height:56px;top:0;bottom:auto;left:auto;right:0;background:url('hud/village-corner.png') center/contain no-repeat;opacity:1}
+#notionWorld #notionContent[data-reader-hud=true] .notion-eyebrow{font-size:12px;margin:0 0 6px;color:var(--control-muted)}
+#notionWorld #notionContent[data-reader-hud=true] .notion-eyebrow::before{display:none}
+#notionWorld #notionContent[data-reader-hud=true] .ui-title{font-size:28px;line-height:1.25;color:var(--control-ink);overflow-wrap:anywhere}
+#notionWorld #notionContent[data-reader-hud=true]>.ui-reader-body{flex:1;min-height:0;width:100%;box-sizing:border-box;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:8px;outline-offset:-2px;font:400 16px/1.75 var(--ui-font-ui)}
+#notionWorld #notionContent[data-reader-hud=true] :is(.app-source-body,.work-reader,.codex-reader){width:100%;box-sizing:border-box;max-width:none;margin:0;padding:0;color:inherit}
+#notionWorld #notionContent[data-reader-hud=true] :is(.notion-prose,.notion-prose :is(h1,h2,h3,h4,h5,h6),.ui-title){color:var(--control-ink)}
+#notionWorld #notionContent[data-reader-hud=true] .notion-prose{font:inherit;line-height:1.8;max-width:74ch;margin-inline:auto}
+#notionWorld #notionContent[data-reader-hud=true] :is(.notion-prose a,.notion-original){color:var(--control-ink);text-decoration:underline;text-underline-offset:3px}
+#notionWorld #notionContent[data-reader-hud=true] :is(pre,textarea){max-width:100%;box-sizing:border-box;color:var(--control-ink);background:var(--control-fill);border-color:var(--control-line)}
+#notionWorld #notionContent[data-reader-hud=true] :is(.notion-prose blockquote,.notion-prose :is(th,td),.notion-prose pre){border-color:var(--control-line);color:inherit;background:var(--control-fill)}
+#notionWorld #notionContent[data-reader-hud=true] :is(.codex-message h3,.codex-session-hint,.work-reader small,.ui-caption){color:var(--control-muted)}
+/* Mail retains sender/thread anatomy, while using the same paper/forest palette. */
+.mail-focus.ui-applet-surface{padding:24px;background:var(--control-paper);color:var(--control-ink);border-color:var(--control-line);border-radius:20px;box-shadow:var(--control-shadow)}
+.mail-focus>.ui-applet-header{padding:0 70px 16px 0;margin:0 0 16px;background:none;border-color:var(--control-line);min-height:60px}
+.mail-focus>.ui-applet-header::after{width:64px;height:56px;top:0}
+.mail-focus .mail-page-title.ui-title{font-size:28px;color:var(--control-ink);margin:0;padding:0}
+.mail-focus .mail-paper{padding:0 8px 8px 0;background:none;color:inherit}
+#notionWorld #notionContent[data-applet=gmail] .mail-focus :is(.notion-prose,.notion-prose :is(h1,h2,h3,h4),a){color:var(--control-ink)}
+#notionWorld #notionContent[data-applet=gmail] .mail-focus .notion-prose :is(blockquote,pre,code,th,td){color:var(--control-ink);background:var(--control-fill);border-color:var(--control-line)}
+#notionWorld #notionContent :is(.ui-reader-body,.mail-focus) .notion-prose li::marker{color:var(--control-muted)}
+.mail-focus :is(.mail-address,.mail-recipient,.mail-date,.mail-thread-message summary){color:var(--control-muted)}
+.mail-focus :is(.mail-attachment,.mail-message pre){background:var(--control-fill);color:var(--control-ink);border-color:var(--control-line)}
+.mail-focus :is(.mail-thread-message,.mail-attachments,.mail-identity-card,.mail-message td,.mail-message th){border-color:var(--control-line)}
+@media(max-width:1000px){
+ #notionWorld #notionContent[data-reader-hud=true],.mail-focus.ui-applet-surface{padding:16px}
+ #notionWorld #notionContent[data-reader-hud=true] .ui-title,.mail-focus .mail-page-title.ui-title{font-size:22px}
+ .mail-focus>.ui-applet-header{padding-right:0;flex-wrap:wrap}
+ .mail-focus>.ui-applet-header::after{display:none}
+}
+.ui-note-columns{display:grid;grid-template-columns:minmax(180px,1fr) 1.5fr;gap:16px}.ui-note-columns .ui-input{width:100%;margin-bottom:10px}.ui-note-editor{padding:16px;border:1px solid var(--control-line);border-radius:12px}.ui-note-editor h3{margin:0 0 16px;font-size:18px}.ui-note-editor label{display:flex;align-items:center;gap:10px;margin:12px 0}.ui-note-editor input{accent-color:var(--control-forest);width:18px;height:18px}
+@media(max-width:600px){.ui-note-columns{grid-template-columns:1fr}}
+@media(max-width:600px){.ui-applet-surface{padding:18px}.ui-applet-header .ui-title{font-size:24px}}
+.ui-choice[data-selected=true]{border-color:var(--control-forest);box-shadow:inset 0 0 0 1px var(--control-forest)}
+.ui-notice{border-radius:12px;padding:12px 16px;background:#91b17d22;color:var(--control-ink)}
+.ui-notice[data-state=error]{background:#a3443f18;color:var(--control-ink);border-inline-start:3px solid var(--ui-error,#a3443f)}
+.ui-gallery{color:var(--control-ink)}
+/* Weather keeps identity and Refresh fixed; only continuous content scrolls. */
+.weather-panel{display:flex;flex-direction:column;flex:1;min-height:0;max-height:100%}
+.weather-panel>.ui-applet-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin}
+.weather-panel>.ui-applet-header,.weather-panel>.ui-applet-footer{flex:none}
+.weather-panel .ui-applet-header{min-height:0;margin-bottom:0;padding-bottom:8px}
+.weather-panel .ui-applet-header .ui-title{font-size:24px}
+.weather-panel .ui-applet-header .ui-caption{margin-top:4px}
+.weather-panel .ui-applet-footer{margin-top:8px;padding-top:8px;justify-content:flex-start;gap:20px}
+.native-console #notionContent[data-template=weather]{top:56px!important;bottom:var(--reader-bottom,16px)!important;padding:8px!important;overflow:hidden!important;display:flex;flex-direction:column}
+.native-console #notionContent[data-template=weather]>.notion-reader-head{height:32px;min-height:32px;flex:none;margin:0;padding:0;border:0}
+@media(max-height:760px){.weather-panel{padding:14px}.weather-current{padding:6px 0;gap:10px}.weather-current>.weather-panel-icon{width:44px;height:44px}.weather-forecast-heading{margin:8px 0}}
+.ui-title,.ui-section-title{color:var(--control-ink)}
+.ui-caption,.ui-facts dt{color:var(--control-muted)}
+body.ui-gallery:has([data-theme=night]){background:#233c34}
+.ui-gallery .ui-material-demo{padding:32px;border-radius:20px;background:linear-gradient(125deg,#acc3aa,#52694e 55%,#e3d4b4);display:flex;gap:12px;flex-wrap:wrap}
+.ui-gallery .ui-palette{display:flex;flex-wrap:wrap;gap:12px}.ui-swatch{padding:18px;border-radius:14px;min-width:110px}
+@keyframes control-spin{to{transform:rotate(360deg)}}
+/* Scene actions also use ui-button, but must not inherit content-button paint.
+   Keep this in the final controls layer so variant/hover rules cannot harden it. */
+.native-console .companion-dock .ui-button.world-capsule,.native-console .ui-button.world-footer-update{
+ background:var(--system-glass-fill);color:var(--hud-scene-ink);border:1px solid var(--system-glass-line);
+ border-radius:999px;box-shadow:var(--system-glass-shadow);text-shadow:var(--hud-scene-text-shadow);
+ backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);font-weight:400;
+}
+.native-console :is(.companion-dock .ui-button.world-capsule,.ui-button.world-footer-update):not(:disabled):is(:hover,:active){background:var(--system-glass-hover);color:var(--hud-scene-ink);border-color:var(--system-glass-line);box-shadow:var(--system-glass-shadow);filter:none}
+.native-console :is(.companion-dock .ui-button.world-capsule,.ui-button.world-footer-update):focus-visible{outline:2px solid var(--hud-scene-ink);outline-offset:3px}
+/* One-line controls, not document/list-row content. Rows may contain rich copy. */
+:is(.ui-button,.native-console .world-capsule){height:var(--control-height);min-height:var(--control-height);box-sizing:border-box;white-space:nowrap;flex-wrap:nowrap}
+:is(.ui-button,.native-console .world-capsule)>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console .companion-panel-button{width:var(--control-height);height:var(--control-height);min-height:var(--control-height)}
+/* Dialogue actions are part of the sentence, not floating HUD pills. */
+.native-console .companion-dialogue :is(.companion-action-footer a,.companion-guide-actions button,.companion-guide-content button,.companion-suggestions button),
+.native-console .companion-dialogue :is(.companion-action-footer a,.companion-guide-actions button,.companion-guide-content button,.companion-suggestions button):is(:hover,:active){
+ display:inline-flex;align-items:center;min-height:var(--control-height);box-sizing:border-box;
+ max-width:100%;padding:4px 0;border:0;border-radius:3px;background:transparent;
+ box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;text-shadow:none;filter:none;
+ color:var(--ui-reply-success);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;
+}
+.native-console .companion-dialogue :is(.companion-action-footer a,.companion-guide-actions button,.companion-guide-content button,.companion-suggestions button):hover{text-decoration-thickness:2px}
+@media(prefers-reduced-motion:reduce){.ui-button{transition:none}.ui-button[aria-busy=true]::after{animation:none}}
+/* One message bar under Fox (owner decision 2026-10-04): click to type, hold to speak, a microphone and Send inside;
+   a desktop-only return sits left of it. Fox opens the companion panel. */
+/* The bar keeps a clear margin above the window's bottom edge (owner report 2026-10-07). */
+#notionWorld.native-console .notion-hud{bottom:16px}
+/* In a narrow window the bar would cover the bottom-left Update capsule: Fox and the bar stand above it. */
+@media(max-width:640px){#notionWorld.native-console:has(.world-update-dock>.world-footer-update:not([hidden])) .notion-hud{bottom:68px}}
+#notionWorld.native-console .notion-hud[data-positioned=true]{transition:none}
+#notionWorld.native-console .companion-pet{bottom:calc(48px + var(--fox-tag-room,0px))}
+/* The dock's wings (Review, World) rise with Fox over its name tag, so they stay level with Fox and Settings
+   (owner report 2026-10-07: Review sat 20px below Settings since #2037). */
+#notionWorld.native-console .companion-dock{bottom:calc(42px + var(--fox-tag-room,0px))}
+/* The bar's bottom margin grew 8px (#2064); Fox's card keeps its place over the World so it does not cover the
+   devices of a place (Browser in Explore). */
+#notionWorld.native-console .companion-dialogue{bottom:calc(174px + var(--fox-tag-room,0px))}
+/* Beside an Applet the right-hand column is tall: Fox's card sits a little higher there. */
+@media(min-width:801px){#notionWorld.native-console:is([data-detail-open=true],[data-depth=object]):not(.compact-viewport):not(.is-typing) .companion-dialogue{bottom:calc(204px + var(--fox-tag-room,0px))}}
+/* The bar has two sizes (owner Order 2026-10-08): small until it is focused, larger while typing. Pointing at it
+   changes its look, never its size. */
+#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:200px}
+#notionWorld.native-console[data-entry-expanded=true] .companion-text-entry{--companion-bar-width:360px}
+/* In a website the small bar also says it takes a web address (owner request 2026-10-07), so it is wide enough to read it. */
+#notionWorld.native-console:not([data-entry-expanded=true]) .companion-text-entry[data-website=true]{--companion-bar-width:272px}
+/* At rest the bar is low-key (owner request 2026-10-05): fainter, its name only; pointing at it or at Fox brings
+   back the hint. Send shows only once there is something to send. */
+#notionWorld.native-console:not([data-entry-expanded=true]) .companion-text-entry #notionCommand:has(#notionInput:placeholder-shown) #notionSend{display:none}
+#notionWorld.native-console .companion-text-entry[data-quiet=true] #notionCommand{opacity:.62;box-shadow:none}
+#notionWorld.native-console .companion-text-entry[data-quiet=true] #notionSend{display:none}
+#notionWorld.native-console .companion-text-entry[data-quiet=true] #notionInput{text-align:center}
+#notionWorld.native-console .companion-controls{position:absolute;bottom:0;right:calc(50% + min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 6px);display:flex;align-items:center;gap:4px;height:44px;pointer-events:auto;transition:right .22s ease-out}
+#notionWorld.native-console .companion-controls.companion-voice-controls{right:auto;left:calc(50% + min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 6px);transition:left .22s ease-out}
+/* The microphone menu under the mic (#1228): long device names ellipsize; the current one is checked. */
+.companion-mic-menu{position:fixed;z-index:200;transform:translateX(-50%);display:flex;flex-direction:column;gap:2px;min-width:180px;max-width:min(320px,calc(100vw - 16px));padding:6px;box-sizing:border-box;border:1px solid var(--hud-scene-line,#ffffff40);border-radius:12px;background:#181b20e0;color:var(--hud-scene-ink,#fff);backdrop-filter:var(--hud-scene-blur,blur(12px));-webkit-backdrop-filter:var(--hud-scene-blur,blur(12px));pointer-events:auto}
+.companion-mic-menu[hidden]{display:none}
+.companion-mic-menu>button{all:unset;box-sizing:border-box;display:block;width:100%;padding:6px 10px 6px 26px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;position:relative}
+.companion-mic-menu>button[aria-checked=true]::before{content:'✓';position:absolute;left:9px}
+.companion-mic-menu>button:is(:hover,:focus-visible){background:var(--hud-scene-dark-hover,#ffffff26)}
+.companion-mic-menu>button:focus-visible{outline:2px solid var(--hud-scene-ink,#fff);outline-offset:-2px}
+/* The darker frosted control: Fox's three controls, and every control of the top bar (#951):
+   Back, World, the Applet's actions, Picture in picture and the Native / Web switch. */
+#notionWorld.native-console :is(.companion-controls>button,.scene-control,.applet-mode-toggle){
+ box-sizing:border-box;border:1px solid var(--system-glass-line);background:var(--system-glass-fill);color:var(--hud-scene-ink);
+ box-shadow:var(--system-glass-shadow);text-shadow:var(--hud-scene-text-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);
+}
+#notionWorld.native-console :is(.companion-controls>button,.scene-control):is(:hover,:active,[aria-pressed=true],[aria-expanded=true]){background:var(--system-glass-hover)}
+#notionWorld.native-console :is(.companion-controls>button,.scene-control,.applet-mode-toggle button):focus-visible{outline:2px solid var(--hud-scene-ink);outline-offset:2px}
+/* The buttons beside Fox (owner requests 2026-10-05): at most three a side, stacked top to bottom and
+   centered on Fox, each the same frosted capsule with an icon and its name. On the left, Fox's own
+   (Settings, then Order) sit under the dock's left actions as one column: native-chat counts both
+   (--fox-wing-n, --fox-side-n) and each moves by half the other's height (44px buttons, 6px and 8px gaps).
+   Where Fox moves to the corner the column follows on Fox's right. Settings opens Settings directly and steps
+   aside while the tour runs (the tour's way out is the Tutorial switch in the World's corner). */
+#notionWorld.native-console .companion-side{position:absolute;right:calc(100% + 10px);top:50%;transform:translateY(calc(-50% + var(--fox-wing-n,0) * 25px));display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none;z-index:2}
+#notionWorld.native-console:is(.is-typing,.compact-viewport) .companion-side{right:auto;left:calc(100% + 8px);align-items:flex-start;transform:translateY(-50%)}
+#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport) .fox-action-left{transform:translateY(calc(var(--fox-side-n,0) * -26px))}
+#notionWorld.native-console.fox-first-console .world-actions .world-capsule{height:44px;min-height:44px;font-weight:500}
+#notionWorld[data-onboarding-locked=true] .companion-side{display:none}
+#notionWorld:is([data-tour-skippable=true],[data-tour-lock=true]) .companion-side :is(.companion-panel-button,.companion-journal-button){visibility:hidden}
+/* Journal and Settings belong to the World: inside an Applet they step aside (owner request 2026-10-08). */
+#notionWorld:is([data-depth=object],[data-depth=note]) .companion-side{display:none}
+:is(#notionWorld.native-console,body) .fox-side-button.fox-side-button{
+ box-sizing:border-box;display:inline-flex;align-items:center;gap:7px;width:auto;min-width:0;height:44px;min-height:44px;margin:0;padding:0 16px 0 13px;
+ border:1px solid var(--system-glass-line);border-radius:999px;background:var(--system-glass-fill);color:var(--hud-scene-ink,#fffdf4);
+ box-shadow:var(--system-glass-shadow);text-shadow:var(--hud-scene-text-shadow,0 1px 2px #14251bb3);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);
+ font:500 14px/1 var(--ui-font-ui,system-ui);white-space:nowrap;cursor:pointer;pointer-events:auto;appearance:none;
+}
+:is(#notionWorld.native-console,body) .fox-side-button.fox-side-button::before{content:none;display:none}
+#notionWorld.native-console .companion-side>.fox-side-button.fox-side-button{position:static;inset:auto;transform:none}
+:is(#notionWorld.native-console,body) .fox-side-button svg{position:static;width:18px;height:18px;flex:none;opacity:1;stroke-width:1.8;filter:drop-shadow(0 1px 2px #14251b99)}
+:is(#notionWorld.native-console,body) .fox-side-button.fox-side-button:is(:hover,:active,[aria-expanded=true],[aria-pressed=true]){background:var(--system-glass-hover)}
+:is(#notionWorld.native-console,body) .fox-side-button:focus-visible{outline:2px solid var(--hud-scene-ink,#fffdf4);outline-offset:2px}
+/* Fox's name tag at its feet (owner request 2026-10-07, fox-name-tag.ts): the name at rest; while Fox works, a soft
+   pulsing dot and what it is doing. It wears the original name tab of Fox's card (.companion-topic: amber, brown ink,
+   uneven corners; owner request 2026-10-07 "用原来的样式"). It rides with Fox, keeps out of the tour (Fox stays quiet
+   there) and of the small Fox of a typing or short window. It hangs just under Fox's paws, never over them (owner
+   report 2026-10-07 "脚还是有点问题"): while it shows, Fox and its card stand --fox-tag-room higher above the bar. */
+#notionWorld.native-console{--fox-tag-room:20px}
+.native-console .fox-name-tag.fox-name-tag{
+ position:absolute;left:50%;top:calc(100% - 2px);bottom:auto;right:auto;z-index:6;transform:translateX(-50%);
+ box-sizing:border-box;display:inline-flex;align-items:center;gap:5px;width:auto;min-width:0;max-width:240px;height:auto;min-height:0;margin:0;padding:1px 12px;
+ border:0;border-radius:13px 11px 14px 10px;background:#f0c27a;color:#4a3413;box-shadow:0 2px 6px #5a3a1033;text-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+ font:650 13px/1.5 var(--ui-font-ui,system-ui);letter-spacing:0;white-space:nowrap;cursor:pointer;pointer-events:auto;appearance:none;
+}
+.native-console .fox-name-tag.fox-name-tag:hover{background:#f4cb88}
+.native-console .fox-name-tag:focus-visible{outline:2px solid #4a3413;outline-offset:2px}
+.native-console .fox-name-tag-name{flex:none}
+.native-console .fox-name-tag-status{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:500;opacity:.92}
+.native-console .fox-name-tag-status::before{content:"";display:inline-block;width:6px;height:6px;margin:0 6px 1px 1px;border-radius:50%;background:currentColor;vertical-align:middle;animation:fox-name-tag-pulse 1.2s ease-in-out infinite}
+.native-console .fox-name-tag-status[hidden]{display:none}
+@keyframes fox-name-tag-pulse{0%,100%{opacity:.35}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.native-console .fox-name-tag-status::before{animation:none}}
+.native-console:is(.is-typing,.compact-viewport,[data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true],[data-tour-fox],[data-fox-away]) .fox-name-tag{display:none}
+#notionWorld.native-console:is(.is-typing,.compact-viewport,[data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true],[data-tour-fox],[data-fox-away]){--fox-tag-room:0px}
+:is(#notionWorld.native-console,body) .fox-side-button[hidden]{display:none}
+/* The Tutorial switch, last line of the World's top-right corner (owner Order 2026-10-07, ui/onboarding/tour-lock.ts):
+   the corner's own type, a bulb, the word and a small switch. While the tour runs its copy, on, stands over it on the
+   body, above the spotlight and the lock, wearing the corner's colours. */
+:is(#notionWorld .world-environment,body) .tutorial-switch{order:10;justify-self:end;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;height:28px;min-height:28px;margin:0;padding:0;border:0;border-radius:8px;appearance:none;background:none;box-shadow:none;color:inherit;font:500 var(--ui-text-label,13px)/1.5 var(--ui-font-ui,system-ui);text-shadow:inherit;white-space:nowrap;cursor:pointer;pointer-events:auto}
+:is(#notionWorld .world-environment,body) .tutorial-switch[hidden]{display:none}
+:is(#notionWorld .world-environment,body) .tutorial-switch svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;filter:var(--ui-hud-glyph-shadow,none)}
+:is(#notionWorld .world-environment,body) .tutorial-switch:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.tutorial-switch-track{position:relative;flex:none;width:28px;height:16px;border-radius:999px;background:#ffffff38;box-shadow:inset 0 0 0 1px #ffffff73,0 1px 2px #14251b40;transition:background-color .15s}
+.tutorial-switch-track>i{position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fffdf4;box-shadow:0 1px 2px #14251b66;transition:transform .15s}
+.tutorial-switch[aria-checked=true] .tutorial-switch-track{background:#e9a63c}
+.tutorial-switch[aria-checked=true] .tutorial-switch-track>i{transform:translateX(12px)}
+@media (prefers-reduced-motion:reduce){.tutorial-switch-track,.tutorial-switch-track>i{transition:none}}
+body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001;color:#fffdf4;text-shadow:0 1px 2px #14251bb3}
+#notionWorld[data-tour-skippable=true] .world-environment .world-tutorial{visibility:hidden}
+/* Order / Feedback: a round bug on its own just left of the message bar on every channel (owner 2026-10-06, kept there
+   2026-10-07), the bar's own glass; while an Order listens it glows red, so capturing is always visible. The microphone
+   is its twin on the bar's right (owner 2026-10-07). */
+#notionWorld.native-console .companion-controls>:is(.companion-order-button,.companion-speech-button){border:1px solid var(--system-glass-line);background:var(--system-glass-fill);color:var(--hud-scene-ink,#fffdf4);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur)}
+#notionWorld.native-console .companion-controls>.companion-order-button[hidden],#notionWorld.native-console:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true]) .companion-order-button,.desktop-companion #notionWorld.native-console .companion-order-button{display:none}
+#notionWorld.native-console .companion-controls>:is(.companion-order-button,.companion-speech-button):is(:hover,:focus-visible){background:var(--system-glass-hover)}
+#notionWorld.native-console[data-order] .companion-order-button.companion-order-button{background:#c2412ee6;border-color:#ffd2c8;color:#fff;box-shadow:0 0 0 4px #c2412e40,var(--system-glass-shadow)}
+#notionWorld.native-console[data-order=listening] .companion-order-button.companion-order-button{animation:order-listening 1.2s ease-in-out infinite}
+@keyframes order-listening{50%{box-shadow:0 0 0 9px #c2412e1a,var(--system-glass-shadow)}}
+/* Talk with Fox (ui/companion/fox-talk.ts): while it is on, the microphone wears a lantern ring; it breathes while Fox
+   speaks, when a click on it interrupts. The Talk item heads the microphone menu, above a thin line. */
+#notionWorld.native-console:is([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-speech-button.companion-speech-button{border-color:#ffe3a3;box-shadow:0 0 0 4px #e3b04b59,var(--system-glass-shadow)}
+#notionWorld.native-console[data-talk=speaking] .companion-speech-button.companion-speech-button{animation:talk-speaking 1.6s ease-in-out infinite}
+@keyframes talk-speaking{50%{box-shadow:0 0 0 9px #e3b04b26,var(--system-glass-shadow)}}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console[data-talk=speaking] .companion-speech-button.companion-speech-button{animation:none}}
+/* The wake word ("Hey Fox", platform modules/media/wake.ts): while it listens, a small lantern light sits on the
+   microphone's shoulder, beside the system's own microphone indicator. */
+#notionWorld.native-console[data-wake=listening] .companion-speech-button.companion-speech-button{position:relative}
+#notionWorld.native-console[data-wake=listening] .companion-speech-button.companion-speech-button::after{content:"";position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:#ffd27a;box-shadow:0 0 0 1px #00000040,0 0 6px #ffd27acc;pointer-events:none}
+.companion-mic-menu>[role=separator]{height:1px;margin:3px 6px;background:var(--hud-scene-line,#ffffff40)}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console[data-order=listening] .companion-order-button.companion-order-button{animation:none}}
+/* After the second click, the button alone shows the Order is being heard and sent: a ring turns in place of the bug. */
+#notionWorld.native-console[data-order=sending] .companion-order-button.companion-order-button{cursor:progress}
+#notionWorld.native-console[data-order=sending] .companion-order-button svg{opacity:0}
+#notionWorld.native-console[data-order=sending] .companion-order-button::after{content:'';position:absolute;inset:12px;border:2px solid #ffffff59;border-top-color:#fff;border-radius:50%;animation:order-sending .8s linear infinite}
+@keyframes order-sending{to{transform:rotate(1turn)}}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console[data-order=sending] .companion-order-button::after{animation-duration:2.4s}}
+#notionWorld.native-console :is(.companion-controls,.scene-control,.applet-mode-toggle) svg{filter:drop-shadow(0 1px 2px #14251b99)}
+#notionWorld.native-console .companion-controls>button{
+ position:static;display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;
+ width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;cursor:pointer;transform:none;pointer-events:auto;
+}
+#notionWorld.native-console .companion-controls svg{width:20px;height:20px}
+/* A bar control is only its icon, a circle like Fox's (Back, World, an Applet's actions, Picture in
+   picture); the label stays its accessible name and tooltip. */
+#notionWorld.native-console .scene-control{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-height:44px;min-width:44px;margin:0;padding:0;border-radius:22px;font:500 14px/1 var(--ui-font-ui);white-space:nowrap;cursor:pointer}
+#notionWorld.native-console .scene-control svg{width:20px;height:20px;flex:none}
+#notionWorld.native-console .scene-control>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#notionWorld.native-console .scene-control[hidden]{display:none}
+/* A website page's Back at its first page, or Forward with nothing ahead, rests. */
+#notionWorld.native-console .scene-control:is(.browser-back,.browser-forward):disabled{opacity:.45;cursor:default;background:var(--system-glass-fill)}
+/* Make Applet at the top of the Browser says what it does: icon and words on one pill. */
+#notionWorld.native-console .scene-control.browser-make-applet{width:auto;padding:0 16px 0 13px;gap:7px}
+#notionWorld.native-console .scene-control.browser-make-applet>span{position:static;width:auto;height:auto;overflow:visible;clip-path:none}
+#notionWorld.native-console .scene-control.browser-make-applet:disabled{opacity:.6;cursor:wait}
+/* Native / Web: a capsule of two icon segments; the chosen one is lit (owner decision 2026-10-03). */
+#notionWorld.native-console .applet-mode-toggle{display:flex;gap:2px;height:44px;padding:3px;border-radius:22px}
+#notionWorld.native-console .applet-mode-toggle button{display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer}
+#notionWorld.native-console .applet-mode-toggle button:is(:hover,:active){background:var(--system-glass-hover)}
+#notionWorld.native-console .applet-mode-toggle button[aria-pressed=true]{background:var(--hud-scene-hover)}
+#notionWorld.native-console .applet-mode-toggle svg{display:block;width:20px;height:20px}
+#notionWorld.native-console .companion-controls>.companion-world-button{display:none}
+.desktop-companion #notionWorld.native-console .companion-controls>.companion-world-button{display:inline-flex}
+#notionWorld.native-console .companion-text-entry #notionCommand{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(var(--companion-bar-width),calc(100vw - 32px));height:auto;min-height:44px;align-items:flex-end;border-radius:22px;overflow:hidden;pointer-events:auto;transition:width .22s ease-out}
+/* Send: a 32px circle with an 18px icon inside the bar's right end. */
+#notionWorld.native-console .companion-text-entry #notionSend{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;min-height:32px;margin:0 0 4px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;opacity:1;font-size:0;cursor:pointer}
+/* Send stands out from the bar (owner 2026-10-07: the plain arrow was easy to miss): a light filled circle, dark arrow. */
+#notionWorld.native-console .companion-text-entry #notionSend.companion-send-button{background:#fffdf4;color:#1d2a22;box-shadow:0 1px 3px #0b120e66}
+#notionWorld.native-console .companion-text-entry #notionSend.companion-send-button:is(:hover,:focus-visible){background:#ffffff;box-shadow:0 0 0 3px #fffdf440,0 1px 3px #0b120e66}
+#notionWorld.native-console .companion-text-entry #notionSend.companion-send-button:disabled{opacity:.45;cursor:default}
+#notionWorld.native-console .companion-text-entry #notionSend.companion-send-button svg{stroke-width:2.4}
+#notionWorld.native-console .companion-text-entry #notionSend svg{width:18px;height:18px}
+#notionWorld.native-console[data-entry-expanded=false] .companion-text-entry #notionInput{cursor:pointer;white-space:nowrap;text-overflow:ellipsis}
+/* The draft grows upward with its text, up to six lines, then scrolls (owner report 2026-10-04); native-chat's fitInput sets the height
+   and lifts Fox and its reply by the added height so the field never covers them. */
+#notionWorld.native-console :is(.companion-pet,.companion-dialogue){translate:0 calc(-1 * var(--companion-entry-lift,0px))}
+#notionWorld.native-console .companion-text-entry #notionInput{box-sizing:content-box;height:24px;min-height:0;border:0;border-radius:0;padding:0;margin:7px 0;line-height:24px;resize:none;overflow:hidden;display:block}
+@media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-text-entry #notionCommand,#notionWorld.native-console .companion-controls{transition:none}}
+#notionWorld.native-console .companion-text-entry #notionCommand,#notionWorld.native-console .companion-text-entry #notionCommand:focus-within{background:var(--control-glass)}
+#notionWorld.native-console .companion-text-entry #notionCommand[hidden]{display:none}
+#notionWorld.native-console .companion-input-wave{bottom:48px;top:auto;height:36px;pointer-events:none}
+#notionWorld.native-console .companion-listening-state,#notionWorld.native-console .companion-gesture-hint{display:none}
+#notionWorld.native-console .companion-avatar{cursor:grab}
+#notionWorld.native-console.is-dragging-fox .companion-avatar{cursor:grabbing}
+/* Native readers keep their reading gutter; browser frames own their tighter inset. */
+@media(min-width:801px){
+ #notionWorld.native-console #notionContent:not([data-template=browser]){top:64px!important;left:64px!important;bottom:64px!important}
+ #notionWorld.native-console #notionContent:not([data-template=browser]):is([data-template=weather],[data-applet=gmail]){--weather-shell-padding:0px;padding:0!important}
+ #notionWorld.native-console #notionContent[data-template=weather]>.notion-reader-head{display:none}
+ #notionWorld.native-console #notionContent .weather-panel{max-width:none;margin:0}
+}
+@media(prefers-reduced-transparency:reduce){:root{--control-fill:#f4f0e5;--control-glass:#181b20}.ui-button{backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media(prefers-reduced-transparency:reduce){:is(.native-console[data-time-of-day=night],.ui-gallery[data-theme=night]){--control-fill:#243b32}.ui-button[data-variant=primary]{background:#315f48}}
+
+/* Companion configuration and Area editing use one Village HUD reading shell. */
+.native-console .ui-hud-panel{
+ --control-fill:#fffdf4b8;--control-hover:#e4ebdfeb;--control-ink:var(--ui-ink,#203b30);--control-muted:var(--ui-ink-muted,#4d6255);--control-line:#315f4838;
+ background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--control-ink);
+ border:1px solid var(--control-line);border-radius:24px 28px 26px 30px;
+ box-shadow:0 12px 40px #162a3230;padding:24px;backdrop-filter:none;-webkit-backdrop-filter:none;
+ font:400 14px/1.5 var(--ui-font-ui);text-shadow:none;
+}
+.ui-hud-panel :is(.companion-info-body,.region-shelf-scroll){gap:16px}
+.ui-hud-panel :is(.companion-info-main,.region-shelf-scroll){scrollbar-width:thin;scrollbar-color:var(--control-line) transparent}
+.ui-hud-panel :is(p,.companion-info-note,.region-shelf-note,.companion-profile-facts dt,.companion-feedback summary,small){color:var(--control-muted);font-size:13px;line-height:1.5;opacity:1}
+.ui-hud-panel :is(.companion-info-section>h3,.region-shelf-scroll h3){color:var(--control-ink);font-size:14px;font-weight:600;margin:16px 0 8px}
+.ui-hud-panel :is(.region-shelf-header h2,.companion-info-profile h2){color:var(--control-ink);font-size:24px;line-height:1.4;font-weight:600}
+.ui-hud-panel .companion-info-nav{border:0;gap:6px;padding-bottom:0;box-shadow:none}
+.native-console .ui-hud-panel .companion-info-nav button{border:0;border-radius:var(--control-radius);background:transparent;color:var(--control-muted);box-shadow:none;min-height:44px;padding:10px 14px;font-size:14px}
+.native-console .ui-hud-panel .companion-info-nav button:is([aria-selected=true],:hover){background:var(--control-hover);color:var(--control-ink)}
+.ui-hud-panel :is(.companion-info-card,.companion-feedback-draft){background:var(--control-fill);border:1px solid var(--control-line);border-radius:var(--control-radius);padding:12px;gap:12px;color:var(--control-ink)}
+.ui-hud-panel :is(.companion-info-card p,.companion-info-profile p,.companion-profile-facts dt){color:var(--control-muted);font-size:13px;line-height:1.5}
+.ui-hud-panel :is(.companion-info-symbol,.companion-history-source){color:var(--control-forest)}
+.ui-hud-panel :is(.companion-history-controls,.companion-history-source){background:var(--ui-paper)}
+.ui-hud-panel :is(.companion-info-card button,.companion-feedback-actions button,.companion-history-controls button,.companion-settings-body button,.companion-panel-guide button){min-width:44px;min-height:44px;padding:8px 12px;border:1px solid var(--control-line);border-radius:var(--control-radius);background:var(--control-fill);color:var(--control-ink);font:500 14px/1.5 var(--ui-font-ui);box-shadow:var(--control-shadow)}
+.ui-hud-panel :is(.companion-info-card button,.companion-feedback-actions button,.companion-history-controls button,.companion-settings-body button,.companion-panel-guide button,.region-shelf-applet):not(:disabled):hover{background:var(--control-hover);color:var(--control-ink)}
+.ui-hud-panel :is(input:not([type=checkbox]):not([type=range]),textarea,select){background:var(--control-fill);color:var(--control-ink);border:1px solid var(--control-line);border-radius:12px;min-height:44px;font:inherit;padding:10px 14px;box-sizing:border-box;max-width:100%}
+.ui-hud-panel :is(button,input,textarea,select):focus-visible{outline:2px solid var(--control-forest);outline-offset:2px}
+.ui-hud-panel .region-shelf-applet{border-radius:var(--control-radius);padding:8px;gap:8px;min-height:44px}
+.ui-hud-panel .region-shelf-applet span{font-size:14px;line-height:1.5}
+.ui-hud-panel .region-shelf-empty{color:var(--control-muted);opacity:1}
+.ui-hud-panel .region-shelf-grid [data-ground-slot].is-drop-target{background:var(--control-hover);outline-color:var(--control-forest)}
+@media(max-width:600px){.native-console .ui-hud-panel{padding:16px}.native-console .companion-info-panel.ui-hud-panel[open]{padding-top:48px}.native-console .ui-hud-panel .companion-info-nav button{padding-inline:10px}}
+
+/* Home Focus surfaces continue their physical device without obscuring source text. */
+#notionWorld #notionContent[data-reader-hud=true][data-applet=apple-notes]{border-top:20px solid #d8b963;background:var(--control-paper) var(--hud-paper-art) center/cover}
+#notionWorld #notionContent[data-reader-hud=true][data-applet=apple-reminders]{border-top:12px solid #b3a68e;background:var(--control-paper) var(--hud-paper-art) center/cover}
+#notionWorld #notionContent[data-reader-hud=true][data-applet=google-calendar]{border-top:20px solid #c36f54;background:var(--control-paper) var(--hud-paper-art) center/cover}
+#notionWorld #notionContent[data-reader-hud=true]:is([data-applet=apple-notes],[data-applet=apple-reminders],[data-applet=google-calendar])>.ui-applet-header::after{display:none}
+.home-record-facts{display:flex;flex-wrap:wrap;gap:16px 32px;margin:0 0 24px;padding:0 0 20px;border-bottom:1px solid var(--control-line)}.home-record-facts>div{min-width:100px;max-width:100%}.home-record-facts dt{font-size:12px;color:var(--control-muted)}.home-record-facts dd{margin:4px 0 0;font-size:16px;overflow-wrap:anywhere}
+/* Paper reading materials (Mail and the Home Notes, Reminders and Calendar pages) stay light with day ink
+   even when the surrounding world is night: the night's light ink on painted paper was unreadable (Order 2026-10-06). */
+:is(.native-console,.ui-gallery) .mail-focus.ui-applet-surface,.mail-focus.ui-applet-surface,
+#notionWorld #notionContent[data-reader-hud=true]:is([data-applet=apple-notes],[data-applet=apple-reminders],[data-applet=google-calendar]){--control-paper:var(--ui-paper,#f4f0e5);--control-ink:#203b30;--control-muted:#4d6255;--control-line:#315f4838;--control-fill:#fffdf4b8;--control-hover:#e4ebdfeb}
+:is(.native-console,.ui-gallery) .mail-focus.ui-applet-surface,.mail-focus.ui-applet-surface{background:var(--control-paper) var(--hud-paper-art) center/cover;border-radius:4px 8px 6px 5px;box-shadow:0 4px 0 #e4dbc8,0 8px 20px #203b3020}
+.mail-focus>.ui-applet-header{padding-right:116px}.mail-focus>.ui-applet-header::after{display:none}.mail-focus .mail-message .notion-prose{max-width:72ch;margin-inline:auto;font-size:16px;line-height:1.8}
+.mail-focus .mail-sender-portrait{display:grid;place-items:center;flex:none;width:48px;height:48px;overflow:hidden;border-radius:4px;background:var(--mail-avatar-tint,#a4ae94);color:#fffaf0;border:3px solid #fff8e7;outline:1px dashed #8a987d}.mail-focus .mail-date{align-self:flex-end}.mail-focus .mail-sender-portrait[data-kind=logo]{background:#fffaf0}.mail-focus .mail-sender-portrait .mail-avatar-initials{font-size:18px}
+
+
+/* System navigation has its own glass material; content surfaces keep their paper/forest palette. */
+:root{--system-glass-fill:#25332b99;--system-glass-hover:#243329bf;--system-glass-line:#fffdf433;--system-glass-blur:blur(18px) saturate(1.15);--system-glass-shadow:inset 0 1px 0 #ffffff14,0 2px 6px #15281c14;--system-glass-menu:#1d2a23e6}
+#notionWorld.native-console .companion-text-entry #notionCommand,#notionWorld.native-console .companion-text-entry #notionCommand:focus-within{background:var(--system-glass-fill);border-color:var(--system-glass-line);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur)}
+@media(prefers-reduced-transparency:reduce){:root{--system-glass-fill:#33483b;--system-glass-hover:#263b2e;--system-glass-blur:none;--system-glass-shadow:none}}
+@supports not (backdrop-filter:blur(1px)){:root{--system-glass-fill:#33483b;--system-glass-hover:#263b2e;--system-glass-blur:none}}
+@media(forced-colors:active){#notionWorld.native-console :is(.companion-controls>button,.companion-order-button,.scene-control,.applet-mode-toggle){border:1px solid ButtonText;background:ButtonFace;color:ButtonText;text-shadow:none;box-shadow:none}}
+
+/* Imagegen country assets: decorative layers only; live content and hit targets stay above. */
+:is(.native-console,.ui-gallery) .mail-focus.ui-applet-surface,.mail-focus.ui-applet-surface{padding:40px;background:none;border:0;border-radius:12px;box-shadow:none}
+.mail-focus.ui-applet-surface::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;border:56px solid transparent;border-image:url('hud/country-stationery.png') 220 fill / 56px / 0 stretch}
+.mail-focus .mail-identity-card{padding:12px 16px 16px;border:1px solid #9f8c6140;border-radius:5px;background:#e5d3a52b}
+#notionWorld .mail-reader-switch{transform:translate(-12px,16px)}
+#notionWorld .mail-reader-switch button{background:#e8d8b6;color:#304f40;border:1px solid #98875b66;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:inset 0 1px 0 #fff8e880}
+#notionWorld .mail-reader-switch button:hover{background:#dfcda4}
+.game-panel .game-header{position:relative;isolation:isolate;padding:10px 32px;background:none;border:0;border-radius:12px;box-shadow:none;color:#302b20}
+.game-panel .game-header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;border:14px solid transparent;border-image:url('hud/country-rail.png') 30 70 fill / 14px 26px / 0 stretch}
+.game-panel .game-header :is(.game-title,.ui-caption){color:inherit}
+@media(max-width:600px){:is(.native-console,.ui-gallery) .mail-focus.ui-applet-surface,.mail-focus.ui-applet-surface{padding:30px 24px 26px}.mail-focus.ui-applet-surface::before{border-image-width:32px}.mail-focus .mail-identity-card{padding:10px}.mail-focus>.ui-applet-header{padding-right:112px}.game-panel .game-header{padding-inline:28px}}
+@media(forced-colors:active){.mail-focus.ui-applet-surface::before,.game-panel .game-header::before{display:none}.mail-focus.ui-applet-surface,.game-panel .game-header{background:Canvas;border:1px solid CanvasText;color:CanvasText}}

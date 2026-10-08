@@ -1,0 +1,16 @@
+{
+  "mode": "built-in imagegen",
+  "reference": "../../assets/companion/rig/fallback.png",
+  "head": {
+    "file": "head-underpaint.png",
+    "source": "exec-e1ecb2c7-b0f7-4f60-9ce8-5fcc183ab67a",
+    "prompt": "Use case: precise-object-edit. Asset type: hidden-surface underpainting for a finely layered 2D Fox rig. Image 1 is the exact approved fox and edit target. Keep its full square canvas and the HEAD in its EXACT original location, scale, angle, fur texture, orange/cream palette and lighting. Output ONLY the rounded fluffy head mass with cheeks/chin: remove both ears, all eyes and eyelids, eyebrows, nose, black mouth/smile lines; fill their former locations with natural matching fur (orange where eyes/brows were, cream where nose/mouth were). Remove the entire scarf, torso, legs and tail to genuine transparency. Reconstruct small hidden fur areas at ear roots and under the jaw. No face features at all, no dark holes. The head silhouette from forehead through cheeks and chin must match the original, not shrink or recenter. This is an invisible backing plate; original face parts will be placed over it. Do not redesign or change perspective. Transparent background, no shadow, no text.",
+    "status": "Generated head was enlarged/recentered; requires registration. Not live."
+  },
+  "body": {
+    "file": "body-underpaint.png",
+    "source": "exec-180d3ca6-d513-4548-a386-081f776c3fe4",
+    "prompt": "Use case: precise-object-edit. Input image is the EXACT approved fox, edit target. Produce a clean body plate for 2D articulated animation: REMOVE BOTH FRONT LEGS completely, including both brown front paws on the floor. Reconstruct the previously hidden cream belly fur and small orange side-of-chest fur naturally. Keep the TWO REAR legs and rear paws where they are, keep tail. Keep the ENTIRE HEAD, face, eyes, ears, nose, smile, head placement, scarf, lighting, fur style, camera, original framing and scale unchanged. Do not shrink the body, do not move rear feet inward, no new forearms. All pixels above scarf should be copied unchanged. Single full fox with no forelegs, genuinely transparent background. No text, objects, shadow floor or redesign. This is a torso/background layer; two separate foreleg layers will be attached later at shoulders.",
+    "status": "Generated in previous turn; retained for registration, not live."
+  }
+}

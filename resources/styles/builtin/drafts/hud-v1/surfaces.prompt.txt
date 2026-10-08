@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: one transparent-background HUD surface atlas for Worldlet, matching the attached button family.
+Image 1: style reference only, the approved existing village. Image 2: generated button-family material reference only, do not copy the glyphs.
+Generate a cohesive set of SIX BLANK UI SURFACES in 2 columns by 3 rows, on true transparent background. Ample transparent gutters, entirely isolated, no touching, no captions, no letters, no glyphs, no checkerboard.
+Row 1: left a small warm ivory horizontal pill button base, right the SAME pill in muted honey amber for primary action.
+Row 2: left a longer warm ivory input-bar surface, right an identical longer deep moss-green input-bar surface with a subtly lighter upper edge.
+Row 3: left a broad warm ivory rounded dialogue panel, right a broad warm ivory rounded panel with only a very small integrated rounded tab protruding at its upper left (blank name tag).
+Front-on UI geometry, soft corners, NOT perspective. Handcrafted matte finish coherent with the village and reference button sheet, but FLATTER than its buttons: only the tiniest hint of edge shading, low elevation, subtle upper-left diffuse light. The center of each surface is quiet, nearly uniform, ideal for live readable text. No ornate trim, metallic rims, stone masonry, wood grain, foliage, gold borders, glossy highlights, thick bevels, aggressive shadows. Friendly and professional, clean and simple at small sizes. Each surface must have a clean antialiased silhouette without flecks or stray pixels around it. Background must be transparent including all gutters. Large square image. This is a source asset sheet, not a mockup.

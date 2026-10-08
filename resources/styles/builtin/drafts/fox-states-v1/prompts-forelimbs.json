@@ -1,0 +1,8 @@
+{
+  "mode": "built-in imagegen",
+  "source": "exec-2410e61d-cc9b-4572-b976-3fc58252badc",
+  "file": "complete-forelimbs.png",
+  "reference": "../../assets/companion/rig/fallback.png",
+  "prompt": "Use case: precise-object-edit. Asset type: complete forelimb layers for the EXACT illustrated fox in Image 1 (edit target). Extract ONLY its TWO FRONT LEGS, upper arm through forearm through brown paw, both in the ORIGINAL relaxed downward seated pose, as two disconnected transparent cutouts. Reconstruct their hidden orange fur along both sides and rounded shoulder caps so each is a complete usable limb; preserve exact original orange/brown fur, lighting, three rounded toe shapes, original paw appearance, camera and proportions. No white chest fur attached to either limb, no torso, rear legs, scarf, head, tail or floor. Keep the same square canvas and original positions/scale: left-viewer shoulder near (47%,66%), elbow (49%,80%), paw (54%,93%); right-viewer shoulder (72%,66%), elbow (71%,80%), paw (68%,93%). Leave the entire upper 60% of canvas empty transparent. The paws must have complete rounded outer contours, no clipping or straight polygon cuts. Genuine transparency, no labels or added props. Do not redesign paws as hands. Only TWO complete forelimbs.",
+  "status": "Complete painted arm contours, no attached chest fur. Normalized crop and affine landmark registration are recorded in anatomy.json and connected in the optional authored inspector mode. Two timed benchmark clips pass contour bounds and rendered head-isolation checks. Full repertoire, production performance and live acceptance remain pending. Not a live asset."
+}

@@ -1,0 +1,595 @@
+{
+  "description": "Normalized leftmost essential subject boundary, manually reviewed from each encoded painting. Used to fit the complete painting beyond the reader seam without cropping or stretching. Default .70 for compositions within the requested right-third area.",
+  "items": {
+    "uber": {
+      "subjectLeft": 0.44,
+      "sourceSha256": "d323b5b9b93e86afafa581828924abfaf09268b67ac66a41fb80eed289269fe9",
+      "encodedSha256": "fd18ab40929f2b9f7dfaecd07f0e6830da0dbbb0b132353f8eb125dba6ed0239"
+    },
+    "uber-eats": {
+      "subjectLeft": 0.5399999999999999,
+      "sourceSha256": "faef488cea28148c3d4e68cf2b8dd41dd8d5776f6349ed2ebd6a8875730e3ba2",
+      "encodedSha256": "0e73b14ebabc005bedf8b798f2ff3f1e28e477b1ee03de9c9a6fe37eb0881aa8"
+    },
+    "outlook": {
+      "subjectLeft": 0.51,
+      "sourceSha256": "7fd010eb4049c410ae32eec3476406007ee2aa16c28fbd3de15de7ff37812c01",
+      "encodedSha256": "f93a86848dc0ec2f0f878e68eef89cfb007cf975d5c4ef5a5cad3f4582f95cfe"
+    },
+    "apple-podcasts": {
+      "subjectLeft": 0.5499999999999999,
+      "sourceSha256": "c2a5590e395e3df0c998f104b5512652912e1769287830abce36def97d4f677c",
+      "encodedSha256": "1aa14603a14625f6f1011251be8a103312558971ff9c9bd63fec115c3a30bac3"
+    },
+    "google-photos": {
+      "subjectLeft": 0.5499999999999999,
+      "sourceSha256": "d6e47c1c3280bb481087bc46ed1b0458c35c6cea5149229c93cddb249d84f598",
+      "encodedSha256": "9984d0852f2b2e49a4d3a4eab679d19af4870204229a181a457876215009a4e1"
+    },
+    "pinterest": {
+      "subjectLeft": 0.49000000000000005,
+      "sourceSha256": "7a9c99195dfb007a443100de39e9849893442bd09cc75d46bbcba772e491ad8e",
+      "encodedSha256": "b4de9a6d3db4f20cadca67b91636cbe540739d984b93b1d7ba47d8fba6716baf"
+    },
+    "xiaohongshu": {
+      "subjectLeft": 0.51,
+      "sourceSha256": "428aeb55bcba1b01d34f565f6b9773780e5cc66bb03743f67b0c7ac1c8a36207",
+      "encodedSha256": "321b421661aeae6198e0c5127307393dae0cb48d0e9557dbc89c24ff8349f70b"
+    },
+    "linear": {
+      "subjectLeft": 0.57,
+      "sourceSha256": "6203279eba401fcda221e2690e786fbc7dca7b1e67b3db697d7bee40b0675853",
+      "encodedSha256": "f4c0a932e3d6b437ee71fe11e308a70aefd9e493692a6741b64d3b5e18c8a105"
+    },
+    "twitch": {
+      "subjectLeft": 0.5399999999999999,
+      "sourceSha256": "4759969d5c529c3f03f37931134071f90dbc8c7d56fa6c6c8f74b28c0bcce2c0",
+      "encodedSha256": "7a0c84e680d491ab05fe5ae59860bca8993bed9657ef29a1413bad8f83f4fd87"
+    },
+    "wikipedia": {
+      "subjectLeft": 0.48000000000000004,
+      "sourceSha256": "b18917755b74d6dbc874a0cd08f02d85bff78651345002c5224337c659830b3d",
+      "encodedSha256": "68e6acd7efa045aa5d4a54b4c62c2a5b67b10d9f856d9c51250a862dd458431e"
+    },
+    "reddit": {
+      "subjectLeft": 0.6,
+      "sourceSha256": "c2a97b8bcc3cf83ae0f5f2155c60d5b437592cceee94869ce9d8ad9df3a075ba",
+      "encodedSha256": "dc3c1ce3dc4072d932d05c03d3fb26d798d8e31b26623189c3b0e8a0659cf49e"
+    },
+    "instagram": {
+      "subjectLeft": 0.59,
+      "sourceSha256": "ea21ad4751b443f0016dcacfb357179c544c223fb150a883b34d228540bc8aed",
+      "encodedSha256": "16e1792078543eb3f7056c4e135d6a45a1e5933aa3ec0ba0849df0b6b6a95e9b"
+    },
+    "linkedin": {
+      "subjectLeft": 0.5499999999999999,
+      "sourceSha256": "0eff88deb86d00abc2163a5793f4ff320782c8a4465b5379c0c9cbdefe5d9854",
+      "encodedSha256": "cb9460af4196ef6649817bfd7519b1836505f2f721c90597e8250916a65e51c7"
+    },
+    "microsoft-word": {
+      "subjectLeft": 0.5299999999999999,
+      "sourceSha256": "0973da2be55341c05030ba7aa8eab3e4c6d5c97c4af8b4f85776764b9364fee9",
+      "encodedSha256": "7b3123880f7ee8acca37b1945fd5716ffd147891261bc5bd5acf2de20498776b"
+    },
+    "microsoft-excel": {
+      "subjectLeft": 0.58,
+      "sourceSha256": "3c9399d3a6bab1687fc868f0b2a912f1476a30a7b49ae59f885919e04ef8ef7d",
+      "encodedSha256": "7a52fb4d65e8dffb4dc90219f59b4799de44abca30f88cb3b4ef5e23b3c9661a"
+    },
+    "game-2048": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "1bc2d5c621e4f4e176935dae3d88ff7ab9c4e59db4594f283f0f24f7ddc05881",
+      "encodedSha256": "746b0c0426c92ad00e5cbfb0bfd74fa1f5f2f5c5b6d96a1f30ca0545cf3e750b"
+    },
+    "sudoku": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "0ddf773ea072e7c7ca5ae5b4c665d3b5acfd79775ecd27da64585d629334070f",
+      "encodedSha256": "1bbdc153c7ddc967193ba92fadd5f26e0741a59f3a729b0fca3b60c843118052"
+    },
+    "nyt-connections": {
+      "subjectLeft": 0.61,
+      "sourceSha256": "1e952e398584640045d095feba0e61398be37e8384805bd5877c9189d1269b73",
+      "encodedSha256": "c099f8a72c9cf4d07be3ece24063a07d95b33cb7a65ab175fc5633ab6cecad46"
+    },
+    "skribbl-io": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "0953e83f2b03817c03fba5bacb871698aa6817a59263f730eae4363c054732f5",
+      "encodedSha256": "15480b878c4c0a46bb13cfa21151180b9f88ad8c8c1b21ca1d2a498997aad895"
+    },
+    "sekai-rogue-ai-tic-tac-toe": {
+      "subjectLeft": 0.64,
+      "sourceSha256": "090178051ada8559b6f78ad3c51e84d8bf8231ea9e902d3cd22bf8c6af4a953b",
+      "encodedSha256": "a170bb46c6a93d51eb4cc708ead241e4b7e3dbf246a7551406becb0144261a34"
+    },
+    "claude": {
+      "subjectLeft": 0.59,
+      "sourceSha256": "264d7c514ca9dd3abd9a69d5636c77f5be316094474ccfe86f6ab94b21e45e6b",
+      "encodedSha256": "ea0196e93cbe80fd1094d933ddb8748ce8718ebd686eeacbfa13f369c5d81150"
+    },
+    "google-drive": {
+      "subjectLeft": 0.63,
+      "sourceSha256": "a6de9e0e9ede55af713abd7be3a1533d36bae3beca6447603e5ef541f6886fe2",
+      "encodedSha256": "821a43aaad10c80025dcf314fe1ef582be55263309d9f5cf20a647242dd1c23b"
+    },
+    "google-calendar": {
+      "subjectLeft": 0.66,
+      "sourceSha256": "046fb538514308781a86aa56039b58c903d02f4619ba91b5b5f1399e5de8e831",
+      "encodedSha256": "b4aa5eaa02d9a415eb4bc08a89a45bb958dd44be9d665c67174162979af67444"
+    },
+    "meetings": {
+      "subjectLeft": 0.68,
+      "sourceSha256": "8fad4beaced990b2ae5a82aea143539f210148893d4a2e926b479d3d99b4c26f",
+      "encodedSha256": "7cdfc36e83e0b9f5373712565890aecf963b4ff08822ac90a3c8c7128fba06ca"
+    },
+    "zoom": {
+      "subjectLeft": 0.63,
+      "sourceSha256": "1aef9da503aaf47f096dcc11d0776e57e98e841f01a6147ac1e43fee98c75d8b",
+      "encodedSha256": "cb97ecd150f52bb87491190832aa52735941db985021807bb42ab11c04f74069"
+    },
+    "airbnb": {
+      "subjectLeft": 0.66,
+      "sourceSha256": "691fdbd8f8f86238bf3ebaf4f60736096bde8747734b5d2d668414d8d9478eee",
+      "encodedSha256": "51ee713e04ca8bbce924a810303a751034c83395bf316be8077445384c8506ec"
+    },
+    "pokemon-showdown": {
+      "subjectLeft": 0.52,
+      "sourceSha256": "b5de65a2f443ec3875aef9b4daf38fe2de5c5f9a0c185d79b504becb871cd83d",
+      "encodedSha256": "85032e3556691ad0f0df6ffa4844d20cdd57ffd88031932cf794379b835a7970"
+    },
+    "gmail": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "94085cb82315921d497deb1cc22d8ffb6ac3eb11ef7f69e07ecfe7de54ed1eb9",
+      "encodedSha256": "ed6ff1b7753873e8941dc0accb9d2cf23d33b49aa900ce9920bd9b3fa40a05d3"
+    },
+    "apple-notes": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "44f6691c04ec4949473178745f3ff458bea0a5f4197e5a34931ffce2acf82cc9",
+      "encodedSha256": "1d28fa77f8f2a6876d496c6a9bfd863e29021c62fd8dfe81e60e253361f2a845"
+    },
+    "apple-reminders": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "b9d73bd42acaf68e2015ace3ac7386a3e1cbdfbed4bdda27d0e75e6da12dde34",
+      "encodedSha256": "8178daa12f1ee295146d2d366d0ef1ae75b64d490df187e1a29248e5c4eb0864"
+    },
+    "weather": {
+      "subjectLeft": 0.61,
+      "sourceSha256": "a19e4ac6425997c577743c3b17479f3cf6f4765b6bb67790f05e97fb5cdd127a",
+      "encodedSha256": "b6c4d859211e4e2f0efa72317b72ae7a5c73bb7c5fef2624256aad9a8f93bea5"
+    },
+    "github": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "efc344df19783644ae84be8cfd5a9d8bba95915950903f4ea55120ba223fe6cf",
+      "encodedSha256": "bf9ff6d9dc8c74ccb5d585f56d396efb1426e5f857880b4af436a879002dfa50"
+    },
+    "codex": {
+      "subjectLeft": 0.63,
+      "sourceSha256": "6556fd777eaabf233688ff331bc91a7019fc80f393303855194e8d4aa4c87892",
+      "encodedSha256": "b7c588a4a091eb19967314a36f364d81245f404fae035da40de324a295d2f495"
+    },
+    "claude-code": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "d5d7bc93ef4cbc94c046e730269737c3453a3eb1c7d4a1544c69f2ec367f6493",
+      "encodedSha256": "3bad1333ed0ee5f305325e434f5aef9689c26fc8af1ed75bc0530cfeed32a744"
+    },
+    "notion": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "c9ec6e1db6554a23b928517f0ba1e7d71c6db508087a5f145bfd3e52995a71e8",
+      "encodedSha256": "9359d8300c9ae79002546e9c24f8248befc68475df84e5e69d910bd2092b0880"
+    },
+    "obsidian": {
+      "subjectLeft": 0.61,
+      "sourceSha256": "d0df2bf0237d1d28fda720b1a8d1782ed24157bcf683ae784da466075e35c517",
+      "encodedSha256": "16bbf2f7de94678d106882c1ca41c52c8a0676327f600d67c7c240b2cc4141b7"
+    },
+    "voice-memos": {
+      "subjectLeft": 0.58,
+      "sourceSha256": "9ee6ae4cbb6600ed51ab5b4ee04ae2fb6c12f108f222c3dbbbe1c1e83a649733",
+      "encodedSha256": "02ed643f949618f96010339d65bdbc152b7e790dfb24a84c9c066285cb10ae2f"
+    },
+    "messages": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "5c51cc6023dbe5daa219aeb5e4250f42618da331927c31c01710fc8c1fb20795",
+      "encodedSha256": "3b6e242db188e176d173399177633aebc1ed6e5e039d784ff364b3728e27c778"
+    },
+    "plaid": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "f179373efb8d071d375b73348c804915556362de987f2e8364818b24a6be4f5d",
+      "encodedSha256": "c6a957a10ccfcd422b79c195ea9cfcb9b1a99d1be6d4dd7fcb73b1f3c4690f6e"
+    },
+    "stripe": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "83ceea83120566a233dbbf89b9293c340d70db2cf1467dca38693d1e07c3dbc5",
+      "encodedSha256": "802e967435a615ecdfa709fffbb488a39b0b8ec4186d623562753b371cb6cb63"
+    },
+    "paypal": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "87c1f83cfe6fe39b375b37c954cdc228be08e3db5012fc0982674045e5c460d3",
+      "encodedSha256": "758d7ebfdf0b17258a923505cbc939f45883704a8101ec70c3b83b007e452f67"
+    },
+    "todoist": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "8d22f2cf058244f486486ae7cde81cd459d17eeae5cbe049870e4c41315ec506",
+      "encodedSha256": "a419ab37db4a4e583f55885f192636f74cd39dfb287ed793c63e5b110e0dac16"
+    },
+    "supabase": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "4c7cfa2f9fee82d2b92af32452bc05bc09da7d0b9284f0f65c801c786c0c948e",
+      "encodedSha256": "cbe06f82539e611972cc65fb5adba0785efb5ac07d3e1860370dce644784c64d"
+    },
+    "docker": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "2d593b99d419cbf03cbd0eb4b7bd414773731dc64964ad0b3242a8c20325b9ab",
+      "encodedSha256": "3b386f2a5829173783735a7bb669eb55fe28835ed5b42a870c939c68333f7930"
+    },
+    "google-docs": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "82d1581c448ed8cf677f2674c52ce6089ec498a3c60b4f403a9d18c5c13fdc7e",
+      "encodedSha256": "4cf98d317f5fa4fe02f4f1c869af195fc16910370f50e7a2c73aa567600661ad"
+    },
+    "google-sheets": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "11174491a386ce63882753e8b12c70fcb82dd14b60de498bc8a84d8df6df6b6a",
+      "encodedSha256": "f43285d5842637527319428444698f7321166130b78b941c8147a1ca562f8ba6"
+    },
+    "google-slides": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "7f7f9b4e61c9ae97b8634e089bbb54fda8862caf064b06c19e9d4536239a3278",
+      "encodedSha256": "3a4ddb5e9fa0571b52df00eae000315c9e3f2ce246b971d58457220c8dc347b8"
+    },
+    "oura": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "0a26f970d7a72d83003567316c915f9d8fcee3ee3155422f6974159a1c8191f1",
+      "encodedSha256": "992b5fb181b86952c34de0ab760cb6306bf00f6c436f77533e4cbc57f4cde3ef"
+    },
+    "strava": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "b24e64cde239e9c528bfa86935b6dd97bfe64805ed4ea718cc616d944596094d",
+      "encodedSha256": "e3afb6dd7027c1cec4de025ba7a15ba3ec57b9e6cd604261b7be09b029fdb039"
+    },
+    "fitbit": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "0d2793eef5718573aff5398c906db62b22deba001a1494df93e34a5eb80bf0c6",
+      "encodedSha256": "4f9d3fcc4b9abab87d93d9a4940e12eb812855f0e05824d5deac2449c9baccaf"
+    },
+    "google-maps": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "0e12a1e108c5bbe4409cb6094127e39906c62593af18245fabb6efd4c5750223",
+      "encodedSha256": "06e2870ce009be571a1135c137bc38991214097fc8fbab40fc5f43ad7ccdadd7"
+    },
+    "tripit": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "705adc71c40e1a522095e4ffa76fda9a4abefc58b682147491c3e2b3387be907",
+      "encodedSha256": "4478520048de9d675a737f04f59142f2c25af627c99e7c3fa845755854c8c65e"
+    },
+    "x": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "3e7d3daa41b4d106c2c0b7618ac0ba01c518e9e8762a6983de023732df351fe6",
+      "encodedSha256": "2536552d836fa0c36266bb8bd3856ecfd5a29f10810b1c7ea8717f159f000306"
+    },
+    "youtube": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "670732a52b88240ecb2c0583b540c2b34ebbab8608fc71a25e93c989b405cac6",
+      "encodedSha256": "7ec40ea4d7039f20a94375fa8133f15a546b9022d06c9f5c1ae2cf3675ee2c48"
+    },
+    "tiktok": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "3296bb7a85e0b1e71149de872a73444d774415241a2761f52d8a08f8791e90cd",
+      "encodedSha256": "a3d0b4d705ca7dea9bbdd572b809ab92bfc190335ba54ca1c0719056707f938f"
+    },
+    "discord": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "ead72ed3a7185b80066cf0e0ba233504f97449cc62d4bb5473f9383d24425680",
+      "encodedSha256": "e45528adc1fb3ca642ff322c16ff52c15425a47e04f42f2721614615d73a05a6"
+    },
+    "browser": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "22ad063b67868c59592dd927f1d5e69befe2fb5d634f0dc17419fac6950286e5",
+      "encodedSha256": "43936346af26af92fe2e6ef3323be5ff6d7bc4d92ac222b2098ec351bd0c8526"
+    },
+    "ongoing": {
+      "subjectLeft": 0.59,
+      "sourceSha256": "ce030f2d3f658efda5ab449b4c3bdf6f9e40bf0bc2e19a85b3278463f86075ea",
+      "encodedSha256": "fc0d447708e7a42e5d34a993fca5ddcc91cce0fde4606be1db0fd789d7bfb921"
+    },
+    "doordash": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "39303a82676cd38caf600c1bdc2ef2468f7a7e7320e2105bcce3c5d14ba597ef",
+      "encodedSha256": "90fe2526a2a2f3f4aa6eb4c1700f6389eda42094276114658c972b69d89cbf8e"
+    },
+    "snake": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "78199716d4eca4b34e51d873abb9afe0ce6fc6f045efc1f75638221d6ac85343",
+      "encodedSha256": "34b4887538302913b879218a6c9cae13d0825c2063309a221536958d809f829d"
+    },
+    "minesweeper": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "0fa255a74919404d0e37d45900a0ea549188f134d65015ec50b08bcd27e0d15e",
+      "encodedSha256": "92129132cdfdb6a0436bc10f2b782c9bed654d68357d24375d5488b40525c0bb"
+    },
+    "random-game": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "5d9df89d5adae532fef1a0b3f02a51833fbf9adf5dd4771ce20b076baaee78c4",
+      "encodedSha256": "26c7b3fd19087b4c3b4c29bf2fc0a026fcb5a8adf33f29c29f2141fa5e14aa7f"
+    },
+    "wordle": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "938178c18a0f61e012872bb18a29ad541f979ae3d1909079e24d5cff27b0a78e",
+      "encodedSha256": "20c99a75f2ac1872832707d1564eb2f8d78f978cefe875a01ed3d476fa470d36"
+    },
+    "slither-io": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "855c05b858a05d3c338148c4466b0341eeec7d7cfdfbab161aa00145105354cc",
+      "encodedSha256": "27ce6f11ad82a17db29e4bc6a1dbd6a23a952823d48f04330320dd5ad467098b"
+    },
+    "agar-io": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "290f9f728ea7b2789fdb964e120c2f9aad9969423dbec747ad1a639467c403e5",
+      "encodedSha256": "8ca253f01bab1c46abe363d2d405f431f5a092e5ddaff119e4237110bf496f17"
+    },
+    "krunker-io": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "c8224125d20503dfa381150f1617ce3122bd972a2812accbd769359b1213b2dd",
+      "encodedSha256": "349e01984e36037039b85b68a8290819b5a4d4e58bb1c2554fa388e12ad60ac1"
+    },
+    "infinite-craft": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "d6f042cdaa1de2c6fc9f9ee404e7192e6887ce37b0c973aa52c26621f1046c05",
+      "encodedSha256": "a3b9968dfa1bb8687c7352e50be427fba021b4c97da83bd0b0e2c999d20c95a9"
+    },
+    "little-alchemy-2": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "556ab21b9802b85c3ec8c25025d03611075d7531ab2e3b07f207346b46d462d0",
+      "encodedSha256": "c1ae5295f9ab15a2f7e90842adb044af1e716f3fd0905a83eea6f61ec671cde0"
+    },
+    "cookie-clicker": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "fd12563d5d760c6829b5fa07c775c8618243f1b86d429aa0119ab95af9fbe666",
+      "encodedSha256": "483fc402ad1ddcadcc645ccab834aa023e82a9e71bfdd10abad770020b2d3fa5"
+    },
+    "lichess": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "dbe8b8ff8d11ff091972104eb7fb566bb7b21375e6060d6f6c176d37b05a0c60",
+      "encodedSha256": "0ee330e9cf3b70b6648bae683d20ab7baad9895e058c8955f5b36a08e65fe44c"
+    },
+    "drive-mad": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "d583252f830a1ecd34ba8de25f8d2a7bff94065be1829b06c4349d9dea7a298f",
+      "encodedSha256": "8d3110143dde482fc5b5a3d7c28059410b5c3beca85cdf01c7d6e560de88f6a8"
+    },
+    "subway-surfers": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "962cc534cd501e38c9cbd7c4cd9760be951036b92a9e7b06d7ad0911b47f2900",
+      "encodedSha256": "217d5b214a2d8d12c0ccb30027724df1885e6d49374283c6b1a5d0bbeb469d02"
+    },
+    "sekai": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "36b99f19f7debd2b31144e3d10b157f782ed0ee86259652b78dd563915486485",
+      "encodedSha256": "7cf2634dab1c5ad9ed58fd0430fdcd060bfcf5b78e891eb1043652c89c6cb80d"
+    },
+    "sekai-sketch-racer": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "a341a180ff7fcf495fa7d9364b8ea7357fc7c052d88dbfd82ac8dfef0ad60c8d",
+      "encodedSha256": "3f004a9f3245af2c29eb14b0f336b45eb8d356b34b0f5da1b8f5e83dc3d355a8"
+    },
+    "sekai-mixing-colors": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "a36e2893fdab98aa40a78f691ef1ea05985c10fa36ed30c2f534856c8c47c325",
+      "encodedSha256": "a117c6c6a62a11a932d9e8fb63945a5ba845132799dda1051d32d8941b42e07e"
+    },
+    "sekai-roller-coaster": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "59081cd4513cc7d930676dc6764ebe0298eed270224393fd1ecf0660c6587c9e",
+      "encodedSha256": "87b198c8ac6ebd8f82f4758a25a76c6bcc3ce1f8029a05fe992533e8399a5252"
+    },
+    "sekai-3d-uno": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "79f3d2bba4fdc9e2744f569be572061b3465c91c3d8ea8fe34936789a00b80aa",
+      "encodedSha256": "42fba49749942010e6ef56a7ab5180f694362a268b6a3ee58014d20fc19418f1"
+    },
+    "sekai-devil-level": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "7f3966b39e29541f223569760352399946a071969bac47905fd910d7e666f430",
+      "encodedSha256": "0945e561813162c8e87a7d0524c0ec254e74388b5092c861a8a06bd31daffe74"
+    },
+    "chatgpt": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "5a0e4865f10f864b94a28ceaaf962c6bff8978d8e069e18e341fa30c92649ff4",
+      "encodedSha256": "32d31049da6e9500d40a196746f2358f11d723313bd20657268515f57260ac8f"
+    },
+    "gemini": {
+      "subjectLeft": 0.55,
+      "sourceSha256": "97cbbb8aea5b7fbb2b8235d5c29238d8bd565e90c6b9c4e9f3695551b112da3f",
+      "encodedSha256": "1a01f4c81e95d9394d1d04f1310c942b93087333034d5a449ee71e566a9db7db"
+    },
+    "perplexity": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "b18b40c6910052e5f8771e8be8782be7527a6799ae160e99218c330b2a712e84",
+      "encodedSha256": "57afa47d0101996efad3688c1601f1e9f2507bd81621b0f9f99378969aab503b"
+    },
+    "deepseek": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "102db3fca106f501b23a64abcba20c7330ba86712c1e249b025f0ba900b5c535",
+      "encodedSha256": "767cc3cc5b0038a4bbd6ff39f4f02b031a9dd95f6d96ac8277eac31c17bffc91"
+    },
+    "whatsapp": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "5af6e119319f739ccfcd68bc2137bf62a236a160152f99693a4532526ad29890",
+      "encodedSha256": "969f2ae067073c8eacc75973e90aabf74171c225dafc6d986f2f07fa54ec0864"
+    },
+    "telegram": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "8ec9c41a608f94d98b9940caba31869d0f087141959f450599a3bcdb17793d69",
+      "encodedSha256": "9e3c0a5d681888b65b3f0b3b9561ab2c1a2c3d10444c285c2b51098d0d196811"
+    },
+    "slack": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "959b52225d5eb01166dad419779d44bcf1ac9b6dca125371de82a2354d4abe12",
+      "encodedSha256": "ec4331f2a23bd6b54e7d2d42c056729568b54bdecb214f880d6c2be275d4079d"
+    },
+    "teams": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "387f145d9b84354a92ac139ef39486e929171bab04063e00a75326f2788575c2",
+      "encodedSha256": "1dc5eba9d6d8910d9b48af08085e5b9d9628d3b6703507d42c107b86d530f6d9"
+    },
+    "dropbox": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "2723eda7989310102076d0fdb9a8169d0a434d2be7b4ba2e8739fa91837396af",
+      "encodedSha256": "a9be122e1c3dc868524cfa35cc9b1711acf77443b070598d89dc8208557ae22b"
+    },
+    "onedrive": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "0789976aeb3f4dda166d4efbbef1261749df944d22a89e2fb0924cd549a084ba",
+      "encodedSha256": "e09d307207c6c4f45c38ac1c3e4a96b5dc711da73b540953a9e942d1b99ba59d"
+    },
+    "microsoft-powerpoint": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "283669e173da016d4e0713eb244914a2e08ebf8aaf6dc28a998e0793d8255b0d",
+      "encodedSha256": "477dd568014a2db272b5da10e21b9029925e8304f1466d675117939650bbf604"
+    },
+    "figma": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "abd393136d3a5ed8e1f3da46540b17430d45668b8dec04e56e6cf69b9a3f8e10",
+      "encodedSha256": "a104cba236281c8918091f27c41fb062976768e4ae2b12fd644bf026af5db089"
+    },
+    "canva": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "e988c67cba5e0b0a87d832ff3577966b34fdc6089f7ecf02753f4cd3b148631e",
+      "encodedSha256": "c8310f35f29f0a5ee2203e662de8edd7087899a0cef603cb9df55c4ce133d69b"
+    },
+    "spotify": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "8b270cbfa7dbe3d290e68eb399e65e07e1e9f694b4b326957a79264adb0494be",
+      "encodedSha256": "54734b16a664332d6a5ea516ecc3b7964589e2828a8a8f1c48e4804eda126fa5"
+    },
+    "apple-music": {
+      "subjectLeft": 0.64,
+      "sourceSha256": "c7db7c548e20e3f3f571f840432c95c2f4f184389f5ba42acc20c70ba8cb55a1",
+      "encodedSha256": "e274a1ea361cbb7722e1cda0ce92d71ca4308ab6b87247c3c84d4d5757af05c1"
+    },
+    "amazon": {
+      "subjectLeft": 0.63,
+      "sourceSha256": "006610d7f2d0f26f7da0fc282c37f882ae3c897a40c60b96e150eab3be0d11ee",
+      "encodedSha256": "bd7f04b130059b09edd7b05e9694e42512bc8819d10e67ab21eddb0495a3e5ac"
+    },
+    "netflix": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "a9a9de6f4d79b3af634d54d7a2e9dc52e3be4b047d0a68e73b4671fcc2dfc21e",
+      "encodedSha256": "4e35891114961fa8a20742b892a2bfb4d7419741fb41856ad9e255ab88de6e31"
+    },
+    "facebook": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "29b4faaba4d584ef42449a8282efb77452f464757c21324c89978f419fe763a9",
+      "encodedSha256": "8ae2c82ca4c076bbb02b2d347c3318a6c3a794eb1fe22e06a65fb625148ef3a6"
+    },
+    "threads": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "f3308b4c4588109e779475e05bf9412e3e574669dc2f36f56c7632a07fcf04cb",
+      "encodedSha256": "abaedf282db7b81d44be2ef09e6c11b169e04fb3379de6d8800aa957df7c9289"
+    },
+    "capcut": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "a3bd50dc3e8f593f261bbacaf763848b3a4a131e53ebbdf5381ea6e4969fcd78",
+      "encodedSha256": "708fa63c9691f22ab5c92917a9bb2408ac326c3e195c28c6c06707bcdf8240f8"
+    },
+    "booking": {
+      "subjectLeft": 0.59,
+      "sourceSha256": "1b244e2e507b25e3b29f7d3e178c51055bf55bf84485822e0466d265e3448e2f",
+      "encodedSha256": "131b67db7fb423f55a3233239dc2b847d837921b616a1c91f823f6775e7278c7"
+    },
+    "feishu": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "d31866ec04e943a46b076c56785ccf48befed74c8b8e48275e96cd2de6c6bd73",
+      "encodedSha256": "1adad6896c6e738ae15ebe82b7eb3a98381f48a9ace9a98d801b6790e6fffdbe"
+    },
+    "bilibili": {
+      "subjectLeft": 0.6,
+      "sourceSha256": "6747acf9e01c5d78dd61632e56584fc3d4986f9e5d3fc6d2836e8c6fc3a641a8",
+      "encodedSha256": "2f949395c3e9ccb9783cd452ad9fabc69c75c5ce149ae6fc2f9f8facecb978b7"
+    },
+    "baidu-netdisk": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "75bff7e624ff826db8095dc7e91ab6bc61e159873b2ef42665cc440e9fc96c84",
+      "encodedSha256": "c8734053405e0d1e1d91f417a87646169931e23f7205eca41dc8b32e19494467"
+    },
+    "copilot": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "a7f9d6d24b786751bf92ed98398dcf91a1e6a7f75d7ba02cba8b4ca969ee3203",
+      "encodedSha256": "ffda2ea1a756fb66eecb1aff644202e92fe81557c34af0709fca7406e20493fd"
+    },
+    "acrobat": {
+      "subjectLeft": 0.7,
+      "sourceSha256": "2b5072e29b205d7f7b39c5945976182757caa86a899e95bfce7402201e85c2a2",
+      "encodedSha256": "2c94b29348e6de6b674498fee6ab8d6f3893fd8576e13ce7f3fa9daac1b89e2e"
+    },
+    "doubao": {
+      "subjectLeft": 0.58,
+      "sourceSha256": "0615709935ab495604d0385162e3a2bc957ead809bbf24b45176e8ed10289e80",
+      "encodedSha256": "c51e4817aa6cb824f4123a6b8c5009be3682dc745002551bdfc2decc347b185b"
+    },
+    "taobao": {
+      "subjectLeft": 0.52,
+      "sourceSha256": "e5e9af921eec4a089f09f9b6f4039a750e2a5c28662662a2e82c071197b4e1cb",
+      "encodedSha256": "a7a034ee18b5e2f6bf57a4924ee933bb5ac0a1f0f56ce2b916030b46b0042384"
+    },
+    "alipay": {
+      "subjectLeft": 0.68,
+      "sourceSha256": "6a4163fd7ef5558ec6cd4868ca08a780e6c0be13523f9b9678c6bb6275ee9a95",
+      "encodedSha256": "1f8ed57f0c0544087d68d4e5660116c9107f9ffc56d67c07445b71c0ded86b52"
+    },
+    "douyin": {
+      "subjectLeft": 0.65,
+      "sourceSha256": "bd89ddbadb28bfa8c76376197daa8cecbfc5e34669e875d5df7cc5bfe86d2b1f",
+      "encodedSha256": "4b70c35591133335fb986cdcbeaca90f6a59d766ac738cc2ca2bc6743c3f371a"
+    },
+    "posthog": {
+      "subjectLeft": 0.57,
+      "sourceSha256": "9b6a8a18df787e6b9038e6e69f99f6236e84399ee78324b6f12c4fb05cf367ef",
+      "encodedSha256": "9dfb125c3fa9fb892d27a6d8f6a370e08edbd04eeae197124caecfc71b23f1e8"
+    },
+    "cloudflare": {
+      "subjectLeft": 0.54,
+      "sourceSha256": "33cb78e623be55e885985d9f6b8e907ce5aba5218dac237edfa15efda99bf454",
+      "encodedSha256": "17108ab57c601089644cb5ab976192ae0f4e20ac07e2da9d1e77cef10de168b5"
+    },
+    "vercel": {
+      "subjectLeft": 0.64,
+      "sourceSha256": "a2843e1b94a0480fce90487b9d71515be81d868522f1508c011fbf53198b5ed2",
+      "encodedSha256": "eb061ffb0a29b7788bd7222e5f8f1855cace28a9479a1c47b9b4a5194ed5efa7"
+    },
+    "netlify": {
+      "subjectLeft": 0.62,
+      "sourceSha256": "aa464cc8d81b542ff447eea2a0365d66537b2a2f82c22b3ad9d4c28ac0bf3fed",
+      "encodedSha256": "25560298090d058375d71d29a2489870c4903cae8e45c773013f1ec73f80c7db"
+    },
+    "firebase": {
+      "subjectLeft": 0.64,
+      "sourceSha256": "402fb38c7a1c7a149ee223436a88bcbd22c57992e2ff89a7c0f20c3735643647",
+      "encodedSha256": "d089463f727123803fae7f6d0409eafad3a43e3b00fe4571d69d18f5cf2af663"
+    },
+    "sentry": {
+      "subjectLeft": 0.67,
+      "sourceSha256": "2ff5c56cc0cc826de91782453e9b1af1e3369301e4e91811a27f12bf36d82f2c",
+      "encodedSha256": "e1c31e83b16132776d6daf4debab46696c3748cb6886c458025068ed8e970fb5"
+    },
+    "railway": {
+      "subjectLeft": 0.55,
+      "sourceSha256": "4b7664a23fea99eee0cf53f3b40e30bdeac55c543c9a3cbda427c3e1809bcc0f",
+      "encodedSha256": "b6b17888fef9d78ed9143c775735d5d77aaf50b53f501ab96229f0231c636ded"
+    },
+    "render": {
+      "subjectLeft": 0.59,
+      "sourceSha256": "d421a646ee6b14e536ab4183eec4b6321628fa14db16fc8e0ec90a72b25eacb5",
+      "encodedSha256": "d7cabc1281ab4bb5ada94c9378259e43c44d6af61898e8a1738967c423a44289"
+    },
+    "gitlab": {
+      "subjectLeft": 0.65,
+      "sourceSha256": "60c5ad1b67632f2a0562dfb912a2b45582cc53a52479ba5c5a56dc8fe6d22bb3",
+      "encodedSha256": "8d0c0224be2949ad0dd8b145a6f71af7f242cd2277d0e7d32a30f22553e33d90"
+    },
+    "jira": {
+      "subjectLeft": 0.59,
+      "sourceSha256": "d63e34cb165fafbef38b2f61efa9f2fd027502f55ee49ef4f2d298b322b0be83",
+      "encodedSha256": "7062554fdfcbb1c35fc1b8589e4b40b56db89659c8db8d5d9154e291c1d592df"
+    }
+  }
+}

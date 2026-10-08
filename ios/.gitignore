@@ -1,0 +1,10 @@
+.build/
+.swiftpm/
+Worldlet.xcodeproj/
+App/Info.plist
+App/Worldlet.entitlements
+Notify/Info.plist
+Notify/WorldletNotify.entitlements
+DerivedData/
+build/
+build.log

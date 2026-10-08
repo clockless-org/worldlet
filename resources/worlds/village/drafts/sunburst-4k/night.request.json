@@ -1,0 +1,25 @@
+{
+  "created": 1790373819,
+  "background": "opaque",
+  "output_format": "png",
+  "quality": "high",
+  "size": "3840x2160",
+  "usage": {
+    "input_tokens": 1671,
+    "input_tokens_details": {
+      "image_tokens": 1508,
+      "text_tokens": 163
+    },
+    "output_tokens": 3336,
+    "output_tokens_details": {
+      "image_tokens": 3336,
+      "text_tokens": 0
+    },
+    "total_tokens": 5007
+  },
+  "model": "gpt-image-2.5-sunburst",
+  "requested_size": "3840x2160",
+  "requested_quality": "high",
+  "request_id": "req_37f0dbb1d2e449dc8dbd14e51d500237",
+  "source": "resources/worlds/village/images/day-six-regions-sunburst-4k.png"
+}

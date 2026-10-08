@@ -1,0 +1,50 @@
+{
+  "key": "weather",
+  "title": "Weather",
+  "generic": true,
+  "output": "resources/styles/builtin/assets/applets/weather/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-b17280f3-9536-4b46-bf32-6a5b7b15bf6e.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/weather/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Weather. Image1 is the existing unbranded device identity to preserve but simplify. A handsome golden rooster weather vane as dominant sculptural silhouette on a short timber post with a small brass compass and little windsock. Calm rounded painted rural aesthetic, no map UI. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "identitySource": "resources/styles/builtin/assets/applets/weather/peek.png",
+  "lampRevision": {
+    "key": "weather",
+    "prompt": "Precisely edit this weather Applet miniature. Preserve its entire device, original logo, functional accessories, camera direction, colors, materials, silhouette and framing. Add exactly ONE small recessed circular status lamp on the CENTER of the FRONT FACE of its lowest supporting base. Brass thin rim and plain charcoal BLACK glass lens, OFF, absolutely no glow or colored emission. Lens diameter about 3.5% of image width, bezel outside diameter 4.5%, oval consistent with base perspective. If no continuous base exists, add a discreet sturdy low warm timber foot connecting the supports and put the lens in its front center. If the front is obstructed by a drawer/accessory, extend the supporting foot slightly below it so the lamp is clearly visible and centered. Never put the lamp on a side accessory or on the main logo. Remove/replace any other colored status lamp in the base, but preserve actual logo colors, headlights, projectors and functional props. Keep all original identity and detail. Cozy painted miniature village style, grounded, frontal face angled toward screen-left/right side visible as in reference. Do NOT flip. Whole object with safe margins, true transparent background. No labels or scenery.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-c1803719-0ab9-41f2-96be-220fa891d139.png",
+    "anchor": {
+      "center": [
+        0.47807,
+        0.903509
+      ],
+      "radius": [
+        0.015152,
+        0.016348
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  },
+  "orientationRevision": {
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-edf13476-3b63-40b4-9983-b6768f9d3e1c.png",
+    "correction": "Match Calendar left-facing timber base: front edge slopes down right, right side visible. Preserve rooster, compass, windsock and black front-center lamp.",
+    "anchor": {
+      "center": [
+        0.362041,
+        0.897927
+      ],
+      "radius": [
+        0.017145,
+        0.020335
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

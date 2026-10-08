@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-03",
+  "tool": "built-in image_gen",
+  "model": "not exposed by tool",
+  "prompt": "Create ONE production Random game applet icon for Worldlet. Reference image is STYLE ONLY: match the selected miniature hand-painted ceramic / warm timber game-device family, softly rounded edges, upper-left soft warm light, restrained brass hardware, visible right side and top with front facing screen-left (20 degree yaw, 25 degree elevation), upright, grounded. Subject: a big chunky ivory six-sided die as the dominant recognizable silhouette, front face has one big navy question mark '?' embossed, visible right face has three simple navy round pips. Behind the die, one short thick muted blue curved shuffle arrow and one terracotta curved shuffle arrow form an unmistakable random-choice cue without obscuring the die. All supported on ONE low rounded warm wooden base with subtle shallow circular wooden backing/cradle, no tall pedestal. One small brass-rimmed black OFF status-lamp lens embedded in base front. Tiny scale readability at 48/84px: only die, bold question mark, two simple arrows, no tiny game boards, no numbered tiles, no controller, no specific game identity. Smooth matte painted materials, not glossy plastic. Whole device centered with generous 12% clear padding on all sides. Square 1280-style output, genuine transparent alpha background, no ground plane, no shadow outside object, no background, no text labels or watermark.",
+  "reference": "resources/styles/builtin/assets/applets/game-2048/peek-logo-v4.png (style only)",
+  "originalLibrary": "libfile_16be2eaa18c081919fb03fcdebcf2e32",
+  "processing": "Preserved original master; cleared alpha <=8 fringe, fitted visible bounds uniformly to 1024px in 1280px square with 128px safety margin and y=1152 baseline.",
+  "approval": "User authorized game-icon integration and PR merge; reuse previously delivered Random game artwork."
+}

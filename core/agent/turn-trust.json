@@ -1,0 +1,10 @@
+{
+  "trustedTools": ["describe_world_tools", "memory", "skills_list", "skill_view", "skill_manage", "clarify", "todo"],
+  "persistentTools": ["memory", "skill_manage"],
+  "worldGatewayTool": "call_world_tool",
+  "trustedWorldActions": ["artifact/show", "artifact/list", "artifact/open", "world/navigate", "world/lighting", "world/weather", "applets/open", "settings/open", "applet:*/launch"],
+  "denial": "Worldlet blocked this write. Earlier in this turn a tool returned untrusted content (such as a web page, email, document or external tool result), so actions that save data or reach outside Worldlet are denied automatically for the rest of the turn. Nothing was changed. Read-only tools still work. Tell the user plainly that this action was not performed and why; they can ask for it directly in a new message.",
+  "denials": {
+    "manage_routines": "Worldlet blocked this routine change. Earlier in this turn a tool returned untrusted content (such as an email, web page, document or external tool result), and Worldlet does not create, change or resume scheduled routines from instructions found in that content. Nothing was scheduled. Pausing or removing a routine still works. Tell the user plainly that the routine was not set up and why; they can ask for it directly in a new message."
+  }
+}

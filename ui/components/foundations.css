@@ -1,0 +1,17 @@
+@font-face{font-family:InterVariable;src:url('fonts/InterVariable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:InterVariable;src:url('fonts/InterVariable-Italic.woff2') format('woff2');font-weight:100 900;font-style:italic;font-display:swap}
+:root{font-family:var(--ui-font-ui);font-size:16px;color:var(--ui-ink);font-synthesis:none;font-optical-sizing:auto}
+/* Product chrome and source rendering inherit one font; code remains monospace. */
+.notion-world,.notion-world :where(button,input,textarea,select,p,span,strong,small,time,summary,div,section,article,nav,header,h1,h2,h3,h4,li,td,th,a,label),.ui-gallery,.ui-gallery :where(button,input,textarea,select){font-family:var(--ui-font-ui)}
+.notion-world :where(pre,code,pre span){font-family:var(--ui-font-mono)}
+.notion-world :where(button,input,textarea,select){font-size:var(--ui-text-label)}
+.notion-world :where(button){cursor:pointer}
+.notion-world :where(button:disabled){cursor:default;opacity:.45}
+:where(button,input,textarea,select,a,summary):focus-visible{outline:2px solid var(--ui-focus);outline-offset:3px}
+/* A single accessibility invariant; hidden elements must never become visible via layout rules. */
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){:where(.notion-world,.ui-gallery) *{animation-duration:0s!important;transition-duration:0s!important;scroll-behavior:auto!important}}
+
+/* Controls are not copyable text; document content and editors remain selectable. */
+.notion-world :where(button,button *,[role=button],[role=button] *),.ui-gallery :where(button,button *){-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.notion-world button :where(svg,img){-webkit-user-drag:none}

@@ -1,0 +1,35 @@
+{
+  "key": "microsoft-excel",
+  "title": "Excel",
+  "generic": false,
+  "output": "resources/styles/builtin/assets/applets/microsoft-excel/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-68640822-8960-409a-a90a-034271ac4002.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/.local/logo-inputs/microsoft-excel.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Excel. Image1 is the sourced ORIGINAL publisher icon, the authority for logo geometry, colors, negative spaces and lettering. Recreate it faithfully as a substantial physical sculpture. Image2/3 are MATERIAL and hierarchy examples only; do not copy their logos. Secondary functional cue (reduce this concept to at most two small attachments, not the dominant shape): sage enamel mechanical ledger calculator, green X side panel, paper spreadsheet feeding through brass rollers, visible abacus wheel. Preserve original icon rather than literal full machine in that cue. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "identitySource": "ui/applets/microsoft-excel/logo-source.ts",
+  "lampRevision": {
+    "key": "microsoft-excel",
+    "prompt": "Precisely edit this microsoft-excel Applet miniature. Preserve its entire device, original logo, functional accessories, camera direction, colors, materials, silhouette and framing. Add exactly ONE small recessed circular status lamp on the CENTER of the FRONT FACE of its lowest supporting base. Brass thin rim and plain charcoal BLACK glass lens, OFF, absolutely no glow or colored emission. Lens diameter about 3.5% of image width, bezel outside diameter 4.5%, oval consistent with base perspective. If no continuous base exists, add a discreet sturdy low warm timber foot connecting the supports and put the lens in its front center. If the front is obstructed by a drawer/accessory, extend the supporting foot slightly below it so the lamp is clearly visible and centered. Never put the lamp on a side accessory or on the main logo. Remove/replace any other colored status lamp in the base, but preserve actual logo colors, headlights, projectors and functional props. Keep all original identity and detail. Cozy painted miniature village style, grounded, frontal face angled toward screen-left/right side visible as in reference. Do NOT flip. Whole object with safe margins, true transparent background. No labels or scenery.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-909d8596-a174-4c77-a881-54f0a13f5eee.png",
+    "correction": "Fix only the support and lamp placement of this Excel sprite. REMOVE the black lamp currently on the bottom of the green X logo. Add a low, sturdy warm wooden plinth connecting all supporting feet underneath the green logo AND abacus. Place exactly one small brass-rimmed black unlit glass lamp in the front center of this wood plinth. Preserve everything else, all logo shapes/colors and abacus, same angle and framing, transparent background. The lamp must be ON WOOD BELOW the green logo, not on green.",
+    "anchor": {
+      "center": [
+        0.407496,
+        0.843301
+      ],
+      "radius": [
+        0.017145,
+        0.018341
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

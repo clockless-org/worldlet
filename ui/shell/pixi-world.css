@@ -1,0 +1,723 @@
+.pixi-applet-stage{position:absolute;z-index:4;left:24px;top:90px;bottom:180px;width:calc(64% - 32px);max-height:none;overflow:auto;padding:16px;border-radius:20px;background:linear-gradient(145deg,rgba(255,250,232,.94),rgba(246,231,199,.88));box-shadow:0 6px 28px #463b2826;color:#483f31;backdrop-filter:blur(8px);pointer-events:auto}
+.pixi-applet-stage[hidden]{display:none}.pixi-applet-stage h2{font-size:16px;margin:0 0 10px}.pixi-applet-stage p{font-size:13px}.pixi-stage-item{display:block;width:100%;text-align:left;border:0;border-radius:9px;padding:9px 10px;margin:4px 0;background:#fff9e870;color:inherit;cursor:pointer;font:inherit}.pixi-stage-item:hover,.pixi-stage-item:focus-visible{background:#ffe7a7;outline:2px solid #dbad61}.pixi-stage-item strong{font-size:13px;display:block}.pixi-stage-item span{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;opacity:.75;margin-top:3px}
+
+/* Quiet game UI, shared by image stages, source panels and the Fox dock. */
+#notionWorld .notion-pin:is(:hover,[data-hovered=true]){background:transparent;box-shadow:none;color:#fff3cf;text-shadow:0 1px 4px #584421,0 0 12px #fff0b680;outline:none}
+#notionWorld .notion-pin:focus-visible{outline:2px solid #e7c77c;outline-offset:2px}
+#notionWorld[data-depth=object]:not([data-detail-open=true]) .world-task-tracker{visibility:hidden;pointer-events:none}
+#notionWorld .pixi-applet-stage{border:1px solid #f8e7bf;border-radius:24px 29px 22px 26px;padding:24px;background:linear-gradient(145deg,#fff7e9f5,#e8d9baf0);box-shadow:0 16px 40px #42362130,inset 0 1px 0 #fffdf0;color:#574a36}
+#notionWorld .pixi-stage-item{background:#fffdf06b;border-bottom:1px solid #cbb99240;padding:13px 14px;border-radius:12px;transition:background .16s,transform .16s}
+#notionWorld .pixi-stage-item:hover{background:#fff1ce;transform:translateX(2px)}
+#notionWorld .pixi-stage-item strong{font-size:15px;font-weight:600}
+#notionWorld .pixi-stage-item span{font-size:13px;line-height:1.5}
+/* Open is the installation itself. Only Focus receives a reading panel. */
+#notionWorld .pixi-applet-stage[data-installation=true]{left:50%;top:47%;bottom:auto;transform:translate(-50%,-50%);width:min(880px,82vw,calc((100vh - 220px)*1.5));aspect-ratio:3/2;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none;overflow:visible;pointer-events:none}
+.pixi-open-art{position:absolute;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 18px 20px #302c2524)}
+.pixi-open-contents{position:relative}
+[data-installation=true] .pixi-open-contents{position:absolute;inset:28% 19% 39% 16%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);grid-auto-flow:column;gap:4% 11%;pointer-events:none}
+#notionWorld [data-installation=true] .pixi-stage-item{pointer-events:auto;min-width:0;width:100%;height:100%;margin:0;padding:7px 12px;border:0;border-radius:8px;background:transparent;box-shadow:none;overflow:hidden;transform:none;text-align:left;animation:applet-leaf-in .4s both;animation-delay:calc(var(--leaf)*35ms)}
+#notionWorld [data-installation=true] .pixi-stage-item strong{font-size:clamp(12px,1.3vw,17px);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#notionWorld [data-installation=true] .pixi-stage-item span{font-size:12px}
+#notionWorld [data-installation=true] .pixi-stage-item:is(:hover,:focus-visible){background:#e8c77545;transform:translateY(-3px);outline:1px solid #b3945766}
+.pixi-open-empty{grid-column:1/-1;grid-row:1/-1;align-self:center;text-align:center;color:#65553c}
+.pixi-open-pagination{position:absolute;top:15%;left:0;right:0;display:flex;gap:18px;align-items:center;justify-content:center;color:#fff9e9;text-shadow:0 1px 4px #383124;font-size:13px;pointer-events:auto}
+.pixi-open-pagination button{font:inherit;color:inherit;text-shadow:inherit;border:0;border-bottom:1px solid #fff9e977;background:none;cursor:pointer;padding:5px}
+.pixi-open-pagination button:disabled{visibility:hidden}
+/* Nothing here pages (owner Order 2026-10-07): with more items than places, the places run on in rows and the item
+   area scrolls, each row the height of one place. */
+#notionWorld [data-installation=true] .pixi-open-contents[data-scroll=true]{--place-row:30.66%;grid-template-rows:none;grid-auto-flow:row;grid-auto-rows:var(--place-row);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#8f7a5466 transparent;pointer-events:auto}
+#notionWorld :is([data-applet=apple-notes],[data-applet=apple-reminders]) .pixi-open-contents[data-scroll=true]{--place-row:100%}
+#notionWorld [data-work=true] .pixi-open-contents[data-scroll=true]{--place-row:calc(50% - 12px)}
+@keyframes applet-leaf-in{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+@media(prefers-reduced-motion:reduce){#notionWorld [data-installation=true] .pixi-stage-item{animation:none;transition:none}}
+#notionWorld .notion-content:not([data-reader-hud=true]):not([data-template=browser]):not([data-template=game]){background:linear-gradient(145deg,#fff9ecf5,#ece1c9f5);border-color:#f4e4bf;border-radius:24px;box-shadow:0 12px 40px #58472b25}
+@media(max-width:800px){#notionWorld .pixi-applet-stage{left:16px;top:75px;bottom:210px;width:calc(100% - 32px);padding:16px}}
+
+/* Open and Focus share the right Companion lane defined in layout.css. */
+
+/* Content floats over the world; the soft backing has no card edge. */
+#notionWorld .world-task-tracker{width:330px;max-width:30%;top:76px;bottom:76px;height:auto;max-height:none;justify-content:center;text-shadow:0 1px 3px #25332680;--ui-matter-ink:#fff9e9;--ui-matter-muted:#f4eedc;--ui-matter-hover:#fff6df14}
+#notionWorld .world-task-tracker::before{display:none}
+#notionWorld .world-task-list{position:relative;isolation:isolate;overflow:visible;padding:16px 12px;border:0;border-radius:0;background:none;box-shadow:none;max-height:100%}
+#notionWorld .world-task-list::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:#0000007a;box-shadow:0 0 48px 24px #00000022;filter:blur(48px)}
+#notionWorld .world-task-list:empty{display:none}
+/* Today heads the Attention Center (owner request 2026-10-08): the date opens today's plan in the Journal, the weather its forecast. */
+#notionWorld:has(>.world-today) .world-task-tracker{top:124px}
+#notionWorld .world-today{--environment-inline-gap:10px;position:absolute;left:24px;top:26px;z-index:24;width:330px;max-width:30%;display:grid;justify-items:start;gap:2px;padding:0 12px 0 20px;color:var(--ui-chrome);text-shadow:var(--ui-shadow-text);pointer-events:none}
+#notionWorld:is(.is-typing,.compact-viewport,[data-view-level=app]) .world-today{display:none}
+#notionWorld .world-today :is(.world-today-open,#worldWeather){pointer-events:auto;appearance:none;border:0;background:none;box-shadow:none;color:inherit;text-shadow:inherit;font:inherit;cursor:pointer;margin:0;text-align:left}
+#notionWorld .world-today-open{display:grid;gap:2px;padding:4px 8px;margin:0 -8px!important;border-radius:12px!important}
+#notionWorld .world-today-open:hover{background:#fff8e724!important}
+#notionWorld .world-today .world-date-time{display:flex;align-items:baseline;gap:10px;white-space:nowrap;font:600 22px/1.25 var(--ui-font-ui);font-variant-numeric:tabular-nums;letter-spacing:0}
+#notionWorld .world-today #worldClock{font-weight:500}
+#notionWorld .world-today-hint{display:inline-flex;align-items:center;gap:6px;font:600 12px/1.4 var(--ui-font-ui);letter-spacing:.04em;text-transform:uppercase;opacity:.9}
+#notionWorld .world-today-hint svg{width:16px;height:16px;flex:0 0 16px;filter:var(--ui-hud-glyph-shadow)}
+#notionWorld .world-today-hint>span::after{content:' ›'}
+#notionWorld .world-today-open:hover .world-today-hint>span{text-decoration:underline;text-underline-offset:3px}
+#notionWorld .world-today .world-weather-control{position:relative;justify-self:start}
+#notionWorld .world-today #worldWeather{display:inline-flex;align-items:center;gap:10px;padding:2px 8px;margin:0 -8px;border-radius:12px;font:500 15px/1.4 var(--ui-font-ui)}
+#notionWorld .world-today #worldWeather:hover{background:#fff8e724}
+#notionWorld .world-today #worldWeather:disabled{cursor:default;background:none;opacity:1;color:inherit}
+#notionWorld .world-today .world-weather-text{display:inline-flex;gap:10px}
+#notionWorld .world-today .world-audio{justify-self:start;display:flex;align-items:center;min-height:28px;margin:0 0 0 -6px;pointer-events:auto;font:500 15px/1.4 var(--ui-font-ui)}
+#notionWorld .world-today .world-audio-current{height:28px;min-height:28px}
+#notionWorld:has(>.world-today .world-audio) .world-task-tracker{top:150px}
+#notionWorld .world-today :is(.world-today-open,#worldWeather):focus-visible{outline:2px solid var(--ui-hud-focus);outline-offset:2px}
+@media(max-width:800px){#notionWorld .world-today .world-date-time{font-size:17px;white-space:normal;flex-wrap:wrap;gap:0 8px}#notionWorld .world-today{left:14px;top:20px;width:210px;max-width:27%;padding:0 6px 0 12px}#notionWorld:has(>.world-today) .world-task-tracker{top:132px}}
+@media(max-height:560px){#notionWorld .world-today{display:none}}
+#notionWorld .world-task-heading{color:var(--activity-color);border-bottom-color:color-mix(in srgb,var(--activity-color) 22%,transparent);letter-spacing:.025em;font-size:11px}
+#notionWorld .world-task-group+.world-task-group{margin-top:15px}
+#notionWorld .world-matter{padding:10px}
+#notionWorld .world-matter .world-task-objective{opacity:.82}
+@media(max-width:800px){#notionWorld .world-task-tracker{width:210px;max-width:27%;top:64px;bottom:64px}#notionWorld .world-task-list{padding:10px 6px}}
+
+/* Mail unfolds individual envelopes; Calendar keeps a readable agenda on its
+   flip page. All titles, dates and hit targets are live, never painted text. */
+#notionWorld [data-installation=true] .pixi-open-pagination{top:7%;bottom:auto;left:auto;right:13%;background:#f8f0dce8;border-radius:12px;padding:4px 12px;color:#62533b;text-shadow:none}
+/* Core Open v2: runtime content occupies the painted leaves, never the scenery. */
+#notionWorld [data-applet=gmail] .pixi-open-contents{inset:32% 32% 44% 9%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr;gap:3%}
+#notionWorld [data-applet=gmail] .pixi-stage-item{padding:18px 10px 10px;transform:rotate(-2deg);box-shadow:2px 5px 8px #473b2440}
+#notionWorld [data-applet=apple-notes] .pixi-open-contents{inset:29% 7% 39%;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:1fr;gap:4%}
+#notionWorld [data-applet=apple-reminders] .pixi-open-contents{inset:38% 15% 35%;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr;gap:8%}
+#notionWorld [data-applet=apple-reminders] .pixi-stage-item{background:transparent;box-shadow:none;padding:12px 8px}
+#notionWorld [data-applet=apple-reminders] .pixi-stage-item::before{display:none}
+#notionWorld [data-applet=google-calendar] .pixi-open-art{transform:scaleY(1.45)}
+#notionWorld [data-applet=google-calendar] .pixi-open-contents{inset:25% 7% 25%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:1%;overflow:hidden;background:linear-gradient(170deg,#fbf6e8,#e9dfc7);border-radius:8px;padding:12px 8px;box-shadow:0 5px 12px #473b2420}
+.pixi-calendar-day{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;pointer-events:auto;scrollbar-width:thin;padding:0 3px 8px}
+.pixi-calendar-day time{position:sticky;top:0;z-index:2;background:#f5eedc;display:block;color:#756850;font-size:13px;text-align:center;padding:0 0 8px;border-bottom:1px solid #ab957144}
+#notionWorld [data-applet=google-calendar] .pixi-stage-item{height:auto;min-height:65px;padding:8px 4px;border:0;background:#d9e1ca80;margin-top:5px;border-radius:4px}
+#notionWorld [data-applet=google-calendar] .pixi-stage-item strong{font-size:12px;line-height:1.35}
+#notionWorld [data-applet=google-calendar] .pixi-stage-item span{font-size:10px}
+#notionWorld .pixi-undated-item{grid-column:1/-1!important;max-height:55px}
+#notionWorld .pixi-selected-item{position:absolute;z-index:4;left:72%;top:18%;width:22%;box-sizing:border-box;padding:28px 24px;color:#51452f;background:linear-gradient(145deg,#fff9e9,#eadcba);border:1px solid #c7b58c;border-radius:5px 8px 6px 4px;box-shadow:2px 8px 20px #42352128;transform:rotate(2deg);pointer-events:none}
+#notionWorld .pixi-selected-item[hidden]{display:none}
+.pixi-selected-item small{display:block;font-size:11px;color:#8b7753;margin-bottom:14px}
+.pixi-selected-item strong{display:block;font-size:22px;line-height:1.3}
+.pixi-selected-item p{font-size:14px;line-height:1.6}
+#notionWorld .pixi-selected-item[data-applet=gmail]{border-top:22px solid #eee0c2}
+#notionWorld .pixi-selected-item[data-applet=google-calendar]{border-top:16px solid #8d9b80;transform:rotate(-1deg)}
+#notionWorld .pixi-selected-item[data-applet=apple-notes]{border-left:12px solid #8b9a79;background:repeating-linear-gradient(#f7efda 0 27px,#d7cba8 28px,#f7efda 29px)}
+#notionWorld .pixi-selected-item[data-applet=apple-reminders]{border-top:12px solid #ba9b62;transform:rotate(1deg)}
+@media(max-width:850px){#notionWorld .pixi-selected-item{padding:16px 12px}.pixi-selected-item strong{font-size:17px}}
+#notionContent[data-template=app-source]:is([data-applet=gmail],[data-applet=google-calendar],[data-applet=apple-notes],[data-applet=apple-reminders]) .notion-close{display:none}
+.notion-pin[data-kind=app] small:not([hidden]){display:block;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#fff8e8;text-shadow:0 1px 5px #312917}
+#notionWorld [data-applet=gmail] .pixi-stage-item{position:relative;background:linear-gradient(170deg,#fffaf0,#eadfc9);border:1px solid #c6b99880;border-radius:3px 5px 6px 4px}
+#notionWorld [data-applet=gmail] .pixi-stage-item::before{content:'';position:absolute;top:0;left:10%;right:10%;height:7px;border-bottom:1px solid #bbae9066;border-radius:0 0 50% 50%}
+
+.notion-pin .applet-attention{position:absolute;top:var(--applet-guide-top);left:50%;margin-left:var(--applet-guide-x,0px);transform:translateX(-50%);width:25px;height:25px;color:#fff3c9;filter:drop-shadow(0 2px 3px #43351db3);pointer-events:none;animation:applet-attention-arrive .5s cubic-bezier(.2,.8,.3,1) both}
+.applet-connection-label{display:none}
+@keyframes applet-attention-arrive{0%{opacity:0;translate:0 10px;scale:.55}65%{opacity:1;translate:0 -3px;scale:1.12}100%{opacity:1;translate:0 0;scale:1}}
+#notionWorld .notion-pin[data-kind=app][data-label-visible=false]{pointer-events:none}
+#notionWorld .notion-pin[data-kind=app][data-label-visible=false]>strong{opacity:0}
+#notionWorld .notion-pin[data-kind=app]:focus-visible>strong{opacity:1}
+/* Deferred until artwork supplies an authored socket, matching Discord's lamp.
+   Keep runtime state, but do not overlay generic floating dots on devices. */
+.applet-base-lamp{display:none;position:absolute;left:50%;width:7px;height:5px;border-radius:50%;background:#3c443d99;border:1px solid #ece2b340;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 1px 1px #17261c55}
+.applet-base-lamp>i{position:absolute;inset:0;border-radius:inherit;background:#f2eee3b3;box-shadow:0 0 2px #fff5dc40;opacity:1;transition:background .35s,box-shadow .35s}
+[data-lamp-state=off]>.applet-base-lamp>i{opacity:0}
+[data-lamp-state=processing]>.applet-base-lamp>i{background:#fff;box-shadow:0 0 5px 2px #ffffff99;animation:applet-lamp-breathe 2.4s ease-in-out infinite}
+[data-lamp-state=error]>.applet-base-lamp>i{background:#ff9a8e;box-shadow:0 0 5px 2px #ef655999}
+@keyframes applet-lamp-breathe{0%,100%{filter:brightness(.7);scale:.85}50%{filter:brightness(1.15);scale:1.12}}
+@media(prefers-reduced-motion:reduce){.notion-pin .applet-attention,[data-lamp-state=processing]>.applet-base-lamp>i{animation:none}.applet-base-lamp>i{transition:none}}
+.notion-pin .applet-attention svg{display:block;width:100%;height:100%;fill:#776542b3}
+
+.applet-attention[data-state=event]{color:#b2dce6}.applet-attention[data-state=needsAction]{color:#f0cc80}.applet-attention[data-state=unseen]{color:#c6dfb7}
+
+/* Attention follows the actual finding from its device to its unfolded item. */
+#notionWorld [data-installation=true] .pixi-stage-item{position:relative;overflow:visible}
+#notionWorld .applet-item-attention{position:absolute;top:-39px;left:50%;width:24px;height:24px;transform:translateX(-50%);filter:drop-shadow(0 2px 3px #43351d99);font-style:normal;pointer-events:auto}
+.applet-item-attention svg{display:block;width:100%;height:100%;fill:#776542b3}
+#notionWorld [data-applet=google-calendar] .pixi-stage-item[data-attention=true]{margin-top:40px}
+#notionWorld .applet-attention{transition:transform .24s cubic-bezier(.2,.8,.3,1.3);pointer-events:auto}
+#notionWorld .applet-attention:hover,#notionWorld .pixi-stage-item:focus-visible .applet-attention,#notionWorld .notion-pin:focus-visible .applet-attention{transform:translate(-50%,-6px)}
+@media(prefers-reduced-motion:reduce){#notionWorld .applet-attention{transition:none}#notionWorld .applet-attention:hover{transform:translateX(-50%)}}
+/* Work Open: the brand-derived installation hosts live repository/session folios. */
+#notionWorld .pixi-applet-stage[data-work=true]{width:min(1040px,88vw,calc((100vh - 210px)*1.7))}
+#notionWorld [data-work=true] .pixi-open-art{left:auto;right:-3%;top:12%;width:40%;height:70%;object-fit:contain}
+#notionWorld [data-work=true] .pixi-open-contents{inset:24% 35% 28% 3%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-flow:row;gap:24px 20px}
+/* Folios read as paper you could pick up (after Charming, restrained): warm sheet, fine grain, a
+   colored spine, a contact shadow plus a soft lift; hover raises the sheet instead of tinting it. */
+#notionWorld [data-work=true] .pixi-stage-item{height:100%;padding:18px;background:repeating-linear-gradient(0deg,#7a5f3a05 0 1px,transparent 1px 3px),linear-gradient(170deg,#fffbf1,#f1e7d1);border:1px solid #cdbf9f;border-top:6px solid #8f9a8b;border-radius:7px 7px 10px 10px;box-shadow:inset 0 1px 0 #fffdf6,0 1px 1px #3a2f1f2e,0 10px 18px -8px #3a2f1f59;transition:transform .2s,box-shadow .2s}
+#notionWorld [data-work=true] .pixi-stage-item:is(:hover,:focus-visible){background:repeating-linear-gradient(0deg,#7a5f3a05 0 1px,transparent 1px 3px),linear-gradient(170deg,#fffdf6,#f4ebd7);transform:translateY(-4px);box-shadow:inset 0 1px 0 #fffdf6,0 2px 3px #3a2f1f26,0 20px 28px -10px #3a2f1f66;outline:none}
+#notionWorld [data-work=true] .pixi-stage-item:focus-visible{outline:2px solid #b3945799;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){#notionWorld [data-work=true] .pixi-stage-item{transition:none}#notionWorld [data-work=true] .pixi-stage-item:is(:hover,:focus-visible){transform:none}}
+#notionWorld [data-work=true][data-applet=codex] .pixi-stage-item{border-top-color:#8c9ebf}
+#notionWorld [data-work=true][data-applet=claude-code] .pixi-stage-item{border-top-color:#c59178}
+#notionWorld [data-work=true] .pixi-open-pagination{top:9%;left:3%;right:auto}
+.pixi-open-scope{position:absolute;left:3%;right:35%;bottom:19%;text-align:center;color:#fff6e2;text-shadow:0 1px 4px #29352b;pointer-events:none}
+.pixi-work-more{position:absolute;bottom:12%;left:27%;pointer-events:auto;border:0;border-radius:16px;padding:7px 16px;background:#f2ead3;color:#544b39}
+#notionWorld [data-work=true] .pixi-open-empty{grid-column:1/-1;background:#f4ecd9ed;border-radius:12px;padding:24px;color:#514735;align-self:center;line-height:1.6}
+.work-reader{padding:8px 16px 24px}.work-repo-entry{padding:15px 0;border-bottom:1px solid #998b6926}.work-repo-entry p{margin:5px 0}
+#notionContent[data-template=coding-session] .notion-close{display:none}
+#notionWorld .pixi-selected-item:is([data-applet=github],[data-applet=codex],[data-applet=claude-code]){border-top:10px solid #8f9a8b}
+#notionWorld [data-work=true] .pixi-open-scope{top:18%;bottom:auto;margin:0;font-size:12px;text-align:left;line-height:1.35}
+#notionWorld [data-work=true] .pixi-work-more{top:9%;bottom:auto;left:auto;right:35%}
+#notionWorld [data-work=true] .pixi-stage-item[data-execution=Running]{border-top-color:#80ab81}
+#notionWorld [data-work=true] .pixi-stage-item[data-execution="Waiting for you"]{border-top-color:#d0a35f}
+#notionWorld [data-work=true] .pixi-stage-item[data-execution=Failed]{border-top-color:#bc7e6d}
+
+/* Focus keeps the selected content above its parent device, with Fox below. */
+#notionWorld .pixi-selected-item{top:14%;max-height:22%;overflow:auto;padding:16px 20px;pointer-events:auto}
+.pixi-selected-item small{margin-bottom:7px}.pixi-selected-item strong{font-size:19px}.pixi-selected-item p{margin:7px 0;font-size:13px}
+.pixi-focus-switch{display:flex;justify-content:space-between;gap:12px;margin-top:6px}
+.pixi-focus-switch button{border:0;background:transparent;color:inherit;font:inherit;font-size:24px;line-height:1;cursor:pointer;padding:2px 10px}
+.pixi-focus-switch button[hidden]{display:none}
+
+.applet-weekly-battery{position:absolute;left:0;top:0;width:36px;height:12px;padding:2px;border:1px solid #f7efd6aa;border-radius:3px;background:#4a513acc;z-index:8;pointer-events:auto;box-sizing:border-box}.applet-weekly-battery:after{content:'';position:absolute;right:-4px;top:3px;width:2px;height:4px;background:#e3d7b4}.applet-weekly-battery span{display:block;height:100%;width:var(--remaining);background:#b8cb91;border-radius:1px}.applet-weekly-battery[data-known=false]{border-style:dashed;opacity:.55}.applet-weekly-battery[hidden]{display:none}
+
+/* Visible battery is a child of the Pixi device; this is its accessible hit target. */
+.applet-weekly-battery{border:0;background:transparent;transform-origin:50% 100%;width:36px;height:14px}.applet-weekly-battery span,.applet-weekly-battery:after{display:none}
+
+#notionWorld .pixi-selected-item{overflow:visible}
+.pixi-selected-item p{max-height:3.2em;overflow:hidden}
+.pixi-focus-switch{position:absolute;inset:0;pointer-events:none;margin:0;display:block}
+.pixi-focus-switch button{position:absolute;top:50%;transform:translateY(-50%);pointer-events:auto;padding:4px;width:44px;height:44px;border-radius:50%;background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--hud-paper-ink);box-shadow:var(--hud-control-shadow);text-shadow:none;font-size:30px}
+.pixi-focus-switch button:first-child{right:calc(100% + 10px)}
+.pixi-focus-switch button:last-child{left:calc(100% + 10px)}
+
+/* Library native reading: quiet parchment, matching the actual device material. */
+#notionWorld [data-work=true][data-applet=notion] .pixi-stage-item{border-top-color:#777a70}
+#notionWorld [data-work=true][data-applet=obsidian] .pixi-stage-item{border-top-color:#9b8ab5}
+#notionContent:is([data-applet=notion],[data-applet=obsidian]) .notion-close{display:none}
+#notionWorld .pixi-selected-item[data-applet=obsidian]{border-top:10px solid #9b8ab5}
+#notionWorld .pixi-selected-item[data-applet=notion]{border-top:10px solid #777a70}
+
+#notionWorld [data-work=true][data-applet=stripe] .pixi-stage-item{border-top-color:#a19aba}
+#notionWorld [data-work=true][data-applet=linear] .pixi-stage-item{border-top-color:#7c83c9}
+#notionWorld [data-work=true][data-applet=todoist] .pixi-stage-item{border-top-color:#c97a66}
+#notionWorld [data-work=true][data-applet=paypal] .pixi-stage-item{border-top-color:#819ab2}
+#notionContent:is([data-applet=stripe],[data-applet=paypal]) .notion-close{display:none}
+#notionWorld .pixi-selected-item[data-applet=stripe]{border-top:10px solid #a19aba}
+#notionWorld .pixi-selected-item[data-applet=paypal]{border-top:10px solid #819ab2}
+/* Seven readable forecast tiles beside the rooster; no extra account setup. */
+#notionWorld .pixi-applet-stage[data-applet=weather]{top:23%;bottom:auto;max-height:52%;overflow:auto}
+#notionWorld [data-applet=weather] .pixi-open-contents{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#notionWorld [data-applet=weather] .pixi-open-contents h2,#notionWorld [data-applet=weather] .pixi-open-empty{grid-column:1/-1}
+#notionWorld [data-applet=weather] .pixi-stage-item{text-align:center;min-height:130px;background:linear-gradient(#fffaf0,#f0e4c9);border:1px solid #d8c6a366;padding:12px 5px}
+.weather-day-icon{width:55px;margin:8px auto}.weather-day-icon svg{display:block;width:100%;height:auto}
+.weather-day-detail .weather-day-icon{width:110px;margin:20px 0}
+@media(max-width:800px){#notionWorld [data-applet=weather] .pixi-open-contents{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#notionWorld .pixi-applet-stage[data-applet=weather]{top:14%;max-height:46%}
+#notionWorld [data-applet=weather] .pixi-stage-item{min-height:108px;padding:8px 5px}
+#notionWorld [data-applet=weather] .weather-day-icon{width:43px;margin:5px auto}
+#notionWorld [data-applet=weather] .pixi-open-scope{position:static;color:#71614c;text-shadow:none;text-align:left;margin:10px 0 0}
+#notionContent[data-applet=weather] .notion-close{display:none}
+
+/* Voice Memos keeps listening and the optional transcript readable. */
+.voice-memo-reader progress{display:block;width:100%;height:8px;margin:28px 0;accent-color:#a45f4f}
+.voice-memo-transcript{white-space:pre-wrap;font:inherit;line-height:1.8;color:var(--control-ink)}
+.voice-memo-reader small{display:block;margin-top:24px;opacity:.65}
+/* Messages: the conversation as bubbles (yours on the right) over one box to write in. */
+.messages-thread{list-style:none;margin:16px 0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto}
+.messages-bubble{max-width:78%;align-self:flex-start;padding:8px 12px;border-radius:16px;background:var(--ui-paper,#fffaf0);color:var(--ui-ink,#3d3326);box-shadow:0 1px 0 #0000001a}
+.messages-bubble[data-from=me]{align-self:flex-end;background:#3f8f5a;color:#fff}
+.messages-bubble p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}
+.messages-bubble small{display:block;margin-top:3px;font-size:.75em;opacity:.7}
+.messages-attachment{display:block;margin-top:6px;max-width:100%;padding:5px 9px;border:1px solid currentColor;border-radius:10px;background:transparent;color:inherit;font:inherit;font-size:.85em;text-align:left;overflow-wrap:anywhere;cursor:pointer}
+.messages-attachment:disabled{cursor:default;opacity:.6}
+.messages-compose{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.messages-compose .messages-to{grid-column:1/-1}
+.messages-compose input,.messages-compose textarea{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid #d8c6a3;background:var(--ui-paper,#fffaf0);color:var(--ui-ink,#3d3326);resize:vertical}
+.messages-note{display:block;margin-top:10px;opacity:.65}
+/* Mail Open: meaningful letters above, a folded-away pile below. */
+#notionWorld .pixi-applet-stage[data-installation=true][data-applet=gmail]{left:4%;right:5%;top:16%;bottom:16%;transform:none;width:auto;aspect-ratio:auto;overflow:visible}
+
+/* Painted Mail parts share the mailbox's materials; labels remain live text. */
+#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:14% 36% 42% 1%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr;gap:24px}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{display:grid;position:relative;align-self:center;justify-self:center;width:86%;height:auto;aspect-ratio:1.72;padding:0;border:0;background:none;box-shadow:none;transform:none;isolation:isolate;animation:mail-arrival .85s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--leaf)*120ms)}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::before,#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{display:none}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{position:absolute;left:10%;right:10%;top:48%;height:38%;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.4vw,20px);line-height:1.25;font-weight:600;color:#203f31;text-shadow:none;text-align:center;overflow:hidden}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:is(:hover,:focus-visible){transform:translateY(-5px);filter:brightness(1.035);outline:2px solid #f3d59d88;outline-offset:5px;border-radius:7px}
+.mail-open-device{position:absolute;right:0;top:10%;width:31%;height:84%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 12px 14px #28322525)}
+@keyframes mail-arrival{from{opacity:0;translate:80px 25px}to{opacity:1;translate:0 0}}
+@media(max-width:800px){#notionWorld [data-applet=gmail] .mail-open-envelopes{gap:12px;right:32%}}
+@media(prefers-reduced-motion:reduce){#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{animation:none}}
+
+
+/* Mail item navigation belongs to the reader, not the foreground device. */
+#notionWorld .mail-reader-switch{position:absolute;z-index:40;left:28px;right:calc(33.333% + 16px);top:85px;height:32px;display:flex;justify-content:space-between;pointer-events:none}
+#notionWorld .mail-reader-switch[hidden]{display:none}
+.mail-reader-switch button{pointer-events:auto;border:0;border-radius:12px;background:#f4efdfed;color:#344741;padding:5px 12px;font:inherit;font-size:14px;cursor:pointer}
+.mail-reader-switch button:last-child{margin-left:auto}
+.mail-reader-switch button[hidden]{visibility:hidden;display:block;pointer-events:none}
+/* Keep the Open device above Fox's bounded conversation area. */
+@media(min-width:801px){#notionWorld .mail-open-device{top:0;height:58%}}
+
+#notionWorld .mail-reader-switch{top:100px;left:38px;right:calc(33.333% + 30px)}
+.mail-reader-switch button{background:#edbd70;color:#674923;font-size:26px;line-height:28px;width:34px;height:34px;padding:0;border-radius:10px}
+
+/* Match the original sage mailbox: matte colour, quiet highlights and soft shadows.
+   Grade painted parts only; live labels retain their reading contrast. All bin
+   layers share one grade so the foreground rim does not reveal a colour seam. */
+[data-applet=gmail]{--mail-paint:saturate(.68) contrast(.84) brightness(1.06)}
+.notion-pin .applet-attention:has(.applet-guide-mark){width:44px;height:52px}
+
+/* The same device stays anchored in both Open and Focus. */
+#notionWorld .mail-shared-device{position:absolute;right:6%;top:21%;width:21%;height:35%;object-fit:contain;pointer-events:none;z-index:12;filter:drop-shadow(0 10px 12px #28322522)}
+.mail-shared-device[hidden]{display:none}
+
+/* A level rack for useful mail, aligned with the three lower-priority bins. */
+#notionWorld [data-applet=gmail] .mail-open-envelopes{left:6%;right:39%;top:12%;bottom:49%;z-index:1;align-items:end}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{width:88%;align-self:end;aspect-ratio:1.72;animation:none}
+
+/* A cork-like wood backing keeps important letters visibly pinned together. */
+#notionWorld [data-applet=gmail] .mail-open-envelopes{padding:14px 16px 18px;border:8px solid #977651;border-radius:9px;background:linear-gradient(120deg,#b39a73,#a28b64);box-shadow:inset 0 2px 9px #51442b35,0 5px 12px #34422c24;box-sizing:border-box}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{content:'';display:block;position:absolute;top:3px;left:calc(50% - 4px);width:8px;height:8px;border-radius:50%;background:#ae7644;box-shadow:0 2px 2px #4b342750}
+
+/* Painted furniture shares one camera, palette and material; labels stay native. */
+#notionWorld [data-applet=gmail] .mail-open-envelopes{border:0;border-radius:0;background-color:transparent;background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;padding:26px 20px 22px}
+
+/* The pinboard owns only attention mail. Opened bins spread beneath it. */
+.mail-open-desk{position:absolute;left:3%;right:36%;top:-2%;bottom:-4%;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#bba98770 transparent;padding:8px 10px 24px;pointer-events:auto}
+.mail-attention-board{position:relative;width:100%;aspect-ratio:1.85;background-size:100% 100%;background-repeat:no-repeat;filter:var(--mail-paint)}
+#notionWorld [data-applet=gmail] .mail-open-envelopes{position:absolute;inset:19% 6% 10%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-flow:row;gap:12px 16px;padding:0;border:0;background:none!important;box-shadow:none;align-items:center;overflow:visible}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{position:relative;display:block;width:100%;height:auto;aspect-ratio:1.72;align-self:center;justify-self:center;padding:0;margin:0;background:none;border:0;box-shadow:none;animation:none;transform:none;isolation:isolate}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{position:absolute;left:9%;right:9%;top:48%;height:40%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(12px,1.1vw,17px);line-height:1.18;color:#203f31;text-shadow:none;overflow:hidden}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{top:0;left:calc(50% - 4px)}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .applet-item-attention{top:-30px;left:50%;right:auto;bottom:auto;transform:translateX(-50%);translate:none;width:22px;height:22px}
+/* The overview fits both board and all three bins; only expanded bins scroll. */
+.mail-open-desk{top:-6%;bottom:-7%}
+[data-mail-category=attention] .mail-open-desk{overflow:visible;display:grid;grid-template-rows:minmax(0,1fr) minmax(120px,29%);gap:12px;padding-block:4px}
+[data-mail-category=attention] .mail-attention-board{height:100%;aspect-ratio:auto}
+
+.notion-pin .applet-attention:has(.applet-guide-mark){margin-top:12px}
+
+/* Authored Home devices stay visible beside their expanded content. */
+#notionWorld .pixi-applet-stage[data-installation=true][data-animated-device=true]:is([data-applet=google-calendar],[data-applet=apple-notes],[data-applet=apple-reminders]){left:35%;width:min(860px,68vw,calc((100vh - 220px)*1.5))}
+/* Envelope fronts carry real addressing metadata, never text over the flap. */
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front{position:absolute;inset:0;display:block;margin:0;opacity:1;border:1px solid #d7cbb3;border-radius:3px 5px 4px 3px;background:linear-gradient(115deg,#faf4e5,#eee4cf);box-shadow:0 3px 7px #403b2926,inset 0 0 10px #cbb89317;pointer-events:none}
+.mail-envelope-front::after{content:'';position:absolute;right:9%;top:10%;width:12%;height:22%;border:2px dotted #a1a88f;background:#b7bd9e33;box-shadow:inset 0 0 0 2px #f7f0df}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{top:35%;height:40%;left:9%;right:9%;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-align:left;font-size:clamp(12px,1.1vw,16px);line-height:1.25;background:none;padding:0;border:0;border-radius:0}
+#notionWorld [data-applet=gmail] .pixi-stage-item .mail-letter-sender{position:absolute;top:10%;left:9%;right:26%;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;font-size:11px;line-height:1.3;color:#68715e;opacity:1}
+#notionWorld [data-applet=gmail] .mail-letter-time{position:absolute;bottom:8%;right:9%;font-size:10px;color:#7b7767}
+#notionWorld .mail-reader-switch button{background:var(--ui-paper) var(--hud-paper-art) center/cover;box-shadow:var(--hud-control-shadow);color:var(--hud-paper-ink);font-size:12px;width:34px;height:34px;line-height:34px;border-radius:50%}
+#notionWorld .mail-reader-switch button:hover{filter:brightness(1.04)}
+.mail-account-status{position:absolute;z-index:13;top:57%;right:16.5%;transform:translateX(50%);width:28px;height:28px;padding:0;border:0;background:transparent;color:#fff8e8b8;font:20px/28px system-ui;text-shadow:0 1px 5px #233126aa;cursor:help}
+.mail-account-status:hover,.mail-account-status:focus-visible{color:#fff8e8}
+.mail-account-tooltip{position:absolute;bottom:calc(100% + 8px);right:0;width:max-content;max-width:min(280px,65vw);padding:9px 12px;border-radius:9px;background:#f5edddeF;color:#48503e;font:12px/1.5 system-ui;text-shadow:none;box-shadow:0 3px 14px #202a2426;white-space:normal;overflow-wrap:anywhere;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .12s}
+.mail-account-status:hover .mail-account-tooltip,.mail-account-status:focus-visible .mail-account-tooltip{visibility:visible;opacity:1}
+.mail-account-status[hidden]{display:none}
+.mail-envelope-front::after{display:none}
+#notionWorld [data-applet=gmail] .pixi-stage-item .mail-envelope-avatar{position:absolute;right:7%;top:8%;display:grid;place-items:center;width:30px;height:32px;margin:0;opacity:1;background:var(--mail-avatar-tint,#a0a98f);color:#fff9eb;border:2px solid #f8f2e0;outline:1px dashed #a1a88f;border-radius:3px;font:600 12px/1 system-ui;box-shadow:0 1px 3px #403b291a}
+
+#notionWorld [data-applet=gmail] .pixi-stage-item .mail-letter-sender{font-size:12px;font-weight:650;color:#414d3d;line-height:1.4;background:#a0a98f26;padding:2px 5px;border-radius:3px}
+.mail-avatar svg{display:block;width:65%;height:65%;margin:auto}
+/* Region labels and overflow share one projected baseline. */
+#notionWorld .notion-pin[data-kind=region-more]{transform:translate(-50%,-50%);box-sizing:border-box;display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;line-height:1;border:0;border-radius:50%;background:transparent;color:var(--hud-scene-ink,#fff9e8);text-shadow:var(--hud-scene-text-shadow);backdrop-filter:none;isolation:isolate}
+#notionWorld .notion-pin[data-kind=region-more]::before{content:'';position:absolute;inset:8px;border:1px solid var(--hud-scene-line,transparent);border-radius:50%;background:var(--hud-scene-glass,#ffffff18);backdrop-filter:var(--hud-scene-blur,blur(12px));-webkit-backdrop-filter:var(--hud-scene-blur,blur(12px));z-index:-1;pointer-events:none}
+#notionWorld .notion-pin[data-kind=region-more] strong{font-size:14px;line-height:1;letter-spacing:0}
+#notionWorld .notion-pin[data-kind=region-more]:hover{background:transparent}
+#notionWorld .notion-pin[data-kind=region-more]:hover::before{background:var(--hud-scene-hover,#ffffff30)}
+#notionWorld[data-onboarding-locked=true] .notion-pin[data-kind=region-more]{display:none}
+
+/* Native Mail: a quiet, pinned correspondence board, never an inbox of bins. */
+#notionWorld [data-applet=gmail] .mail-open-desk{left:2%;right:35%;top:-5%;bottom:-6%;display:block;overflow:hidden;padding:8px 12px 12px}
+#notionWorld [data-applet=gmail] .mail-attention-board{height:100%;box-sizing:border-box;aspect-ratio:auto;border:12px solid #a38c6d;border-radius:12px;background:radial-gradient(ellipse at 30% 10%,#dbccac88,transparent 70%),repeating-linear-gradient(93deg,#baa78520 0 1px,transparent 1px 4px),#bca988;box-shadow:inset 0 2px 10px #67523b28,0 7px 18px #40392924,inset 0 0 0 2px #eadcc14d;filter:none}
+#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:15% 5% 8%;grid-template-rows:repeat(3,minmax(0,1fr));gap:25px 18px;align-items:center}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{aspect-ratio:1.62;width:100%;max-height:100%;height:100%;rotate:-1deg;cursor:pointer;transition:translate .18s,filter .18s}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:nth-child(3n+2){rotate:1deg}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:nth-child(3n){rotate:-.5deg}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:is(:hover,:focus-visible){translate:0 -3px;transform:none;outline:2px solid #fff1cb;outline-offset:4px}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front{border-color:#cfc2a7;background:radial-gradient(ellipse at 20% 0%,#fffdf4b3,transparent 80%),linear-gradient(175deg,#faf4e5,#eee2c9);box-shadow:1px 6px 6px #59483029,inset 0 -2px 2px #cabfa638,inset 0 1px #fffaf1;border-radius:2px 3px 5px 2px}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front::after{top:13%;right:6%;width:19%;height:27%;border:1px dashed #93977c;background:transparent;box-shadow:0 0 0 3px #faf3e3;rotate:3deg}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{display:none}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item[data-stacked=true]::before{content:'';display:block;position:absolute;inset:2px -2px -3px 2px;z-index:-1;border:1px solid #d2c4a7;border-radius:3px;background:#eee5d1;rotate:2deg;box-shadow:1px 3px 4px #51453520}
+.mail-letter-pin{position:absolute;top:-5px;left:calc(50% - 5px);z-index:3;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 32% 25%,#f7e1b3,#b49360 60%,#8b744f);box-shadow:1px 3px 2px #58452e55}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{top:43%;height:38%;left:8%;right:8%;font-size:clamp(12px,1.15vw,17px);line-height:1.25;color:#3d4c40;font-weight:600}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{top:15%;left:8%;right:29%;font-size:clamp(10px,.95vw,13px);font-weight:650;color:#526047;background:none;padding:0}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{top:14%;right:7%;width:18%;height:26%;border-radius:2px;object-fit:cover;z-index:2}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-time{bottom:7%;font-size:clamp(9px,.8vw,11px)}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .applet-item-attention{top:-23px;width:18px;height:18px}
+#notionWorld .mail-shared-device{top:12%;height:36%}
+#notionWorld .mail-account-status{top:49%}
+@media(prefers-reduced-motion:reduce){#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{transition:none}}
+
+/* Generated stationery: painted materials, live accessible mail metadata. */
+#notionWorld [data-applet=gmail] .mail-attention-board{border:0;background:none;border-radius:0;box-shadow:none}
+#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:23% 13% 15%;gap:20px 14px}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front{inset:-5% -3%;border:0;border-radius:0;background:none;box-shadow:none}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front::after,#notionWorld [data-applet=gmail] .mail-letter-pin{display:none}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{top:15%;right:4%;width:11%;height:17%;border:0;outline:0;background:var(--mail-avatar-tint,#9ba587);box-shadow:none;border-radius:0}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{top:20%;right:25%}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{top:44%;font-size:clamp(12px,1.05vw,16px)}
+
+.mail-board-paint{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mail-envelope-paint{display:block;width:100%;height:100%;pointer-events:none}
+/* The region name alone opens its five places and the complete app shelf. */
+#notionWorld .notion-pin[data-kind=region-more]{display:flex;align-items:center;justify-content:center;gap:8px;width:auto;min-width:44px;padding:0 8px;border-radius:24px;white-space:nowrap}
+#notionWorld .notion-pin[data-kind=region-more]::before{display:block;inset:4px 0;border-radius:24px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18)}
+#notionWorld .notion-pin[data-kind=region-more] strong{font-size:15px;font-weight:600}
+.region-shelf-slot{min-height:122px;display:grid;place-items:center;border:1px dashed #53675c30;border-radius:16px;font-size:12px;color:#53675c99}
+.region-shelf-note{font-size:13px;line-height:1.5;margin:4px 0 10px;color:#53675c}
+
+/* A full-size wall noticeboard prioritizes correspondence over its frame. */
+#notionWorld .pixi-applet-stage[data-installation=true][data-applet=gmail]{left:1.5%;right:2%;top:10%;bottom:9%}
+#notionWorld [data-applet=gmail] .mail-open-desk{left:0;right:33%;top:0;bottom:0;padding:0;overflow:hidden}
+#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:20% 5% 6%;gap:20px 18px}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{font-size:clamp(13px,1.25vw,19px)}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{font-size:clamp(11px,1vw,15px)}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{right:4%;top:14%;width:12%;height:21%;border:2px solid #f6edd9;outline:1px dashed #a1a58b}
+
+
+/* Live letters align with the painted paper-wear marks. */
+#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:25% 7% 12%;column-gap:5%;row-gap:7%}
+
+/* Region labels share one opacity, including courts near the lower HUD. */
+#notionWorld #notionPins{mask-image:none;-webkit-mask-image:none}
+#notionWorld .notion-pin[data-kind=region-more]{opacity:1;padding-inline:16px}
+#notionWorld .notion-pin[data-kind=region-more]:is(:hover,:focus-visible)::before{background:rgba(255,255,255,.23)}
+
+/* Quiet editable region titles; reserve the hint outside the centered label. */
+#notionWorld .notion-pin[data-kind=region-more],#notionWorld .notion-pin[data-kind=region-more]:is(:hover,:focus-visible){background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;cursor:pointer}
+#notionWorld .notion-pin[data-kind=region-more]::before{display:none}
+#notionWorld .notion-pin[data-kind=region-more]:is(:hover,:focus-visible,[data-hovered=true]) strong{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+.region-edit-hint{position:absolute;left:calc(100% - 9px);top:50%;transform:translateY(-50%);display:flex;opacity:0;pointer-events:none;transition:opacity .16s ease}
+#notionWorld .notion-pin[data-kind=region-more]:is(:hover,:focus-visible) .region-edit-hint{opacity:1}
+@media(hover:none){.region-edit-hint{opacity:.7}}
+@media(prefers-reduced-motion:reduce){.region-edit-hint{transition:none}}
+/* Keep the Applet shortcut outside the native browser overlay. */
+#notionWorld .browser-applet-offer{position:absolute;z-index:20;right:16.5%;top:52%;transform:translateX(50%);max-width:29%;padding:9px 16px;border:1px solid #f5e7c280;border-radius:20px;background:#f5eddbed;color:#3d5949;font:600 14px/1.3 system-ui;box-shadow:0 3px 10px #39422e20;cursor:pointer}
+#notionWorld .browser-applet-offer[hidden]{display:none}
+#notionWorld .browser-applet-offer:disabled{opacity:.6;cursor:wait}
+#notionWorld .browser-sign-in-offer{top:38%}
+/* Saved sign-ins (core/browser/saved-logins.ts): the same paper card as the page's other offers, beside the page. */
+#notionWorld .browser-login-fill{position:absolute;z-index:20;right:16.5%;top:24%;transform:translateX(50%);width:min(29%,340px);display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+#notionWorld .browser-login-fill button{padding:7px 13px;border:1px solid #3d594933;border-radius:16px;background:#fffaf0;color:#3d5949;font:600 13px/1.2 system-ui;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#notionWorld .browser-login-fill button{padding:9px 16px;border-color:#f5e7c280;border-radius:20px;background:#f5eddbed;font-size:14px;box-shadow:0 3px 10px #39422e20}
+#notionWorld .browser-login-fill button:disabled{opacity:.6;cursor:wait}
+#notionWorld .browser-login-fill[hidden]{display:none}
+
+/* HTML device emission follows its authored socket, with a small soft halo. */
+.applet-image-lamp{position:absolute;z-index:200;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%)}
+.applet-image-lamp{background-size:100% 100%;background-repeat:no-repeat}
+.applet-image-lamp[hidden]{display:none}
+/* Opacity uses the World clock and the same stop rules as its Pixi copy. */
+
+/* Device names are captions, distinct from the larger Region headings. */
+#notionWorld .notion-pin[data-kind=app]>strong{font:600 12px/1.3 var(--ui-font-ui);letter-spacing:.015em;color:#fff;display:block;text-shadow:0 1px 2px #15271fe6,0 2px 6px #15271f99}
+#notionWorld .notion-pin[data-kind=app]:is(:hover,[data-hovered=true],:focus-visible)>strong{opacity:1;color:#fff;text-shadow:0 1px 2px #15271f,0 2px 7px #15271fcc}
+
+.applet-hover-name{position:fixed;z-index:100;pointer-events:none;padding:6px 10px;border-radius:8px;background:rgba(30,43,36,.94);color:#fff;font:600 13px/1.3 var(--ui-font-ui);box-shadow:0 2px 8px #15271f30;white-space:nowrap;max-width:calc(100vw - 16px);overflow:hidden;text-overflow:ellipsis}
+.applet-hover-name[hidden]{display:none}
+/* The person's own Applets (core/applets/MY-APPLETS.md): the device mark's star, then "Yours". */
+.applet-hover-name[data-mine]::after{content:'\2605  Yours';margin-left:8px;color:#f2c56b;font-weight:600}
+
+/* Reuse the approved sculpted exclamation; runtime stays in the base lamp. */
+#notionWorld .notion-pin>.applet-attention{display:block;width:34px;height:34px;background:none;border:0;box-shadow:none;filter:drop-shadow(0 2px 2px #26372a66)}
+#notionWorld .notion-pin>.applet-attention .applet-guide-mark{display:block;width:100%;height:100%;object-fit:contain}
+
+/* The marker clears the visible silhouette; hover motion never shifts its anchor. */
+#notionWorld .notion-pin>.applet-attention{margin-top:0}
+#notionWorld .notion-pin[data-hovered=true]>.applet-attention .applet-guide-mark{animation:applet-attention-hop 380ms ease-out}
+@keyframes applet-attention-hop{0%,100%{transform:translateY(0)}45%{transform:translateY(-6px)}75%{transform:translateY(-1px)}}
+@media(prefers-reduced-motion:reduce){#notionWorld .notion-pin[data-hovered=true]>.applet-attention .applet-guide-mark{animation:none}}
+
+/* Installation controls appear only after the welcome arrival has settled. */
+html:has(#worldStartup.has-setup) .notion-pin[data-kind=region-add],
+html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
+#notionWorld[data-onboarding-locked=true] .notion-pin[data-kind=region-add]{display:none}
+
+/* Home devices unfold into live paper, never bitmap records. */
+#notionWorld .pixi-applet-stage[data-installation=true][data-animated-device].home-open{inset:10% 35% 8% 4%;width:auto;height:auto;aspect-ratio:auto;transform:none;pointer-events:auto;padding:0}
+.home-open-sheet{height:100%;box-sizing:border-box;display:flex;flex-direction:column;position:relative;padding:32px 24px 24px;border-radius:15px 18px 16px 17px;background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--ui-ink);border:1px solid #a38b6040;box-shadow:0 9px 0 #ad9165,0 12px 20px #253a3025;font:14px/1.5 var(--ui-font-ui)}
+.home-open-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;flex:none;margin-bottom:14px}
+.home-open-header h2{font-size:24px;margin:0;font-weight:600}.home-open-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;display:grid;align-content:start;gap:12px;padding:4px}
+.home-calendar-modes,.home-calendar-navigation{display:flex;align-items:center;gap:6px}.home-calendar-navigation{justify-content:space-between;margin-bottom:12px;flex:none}.home-calendar-navigation strong{font-weight:500}
+.home-open button{font:inherit;color:inherit;cursor:pointer}.home-calendar-modes button,.home-calendar-navigation button{min-height:44px;min-width:44px;border:0;border-radius:10px;padding:8px 12px;background:transparent}.home-calendar-modes button[aria-pressed=true]{background:#315f48;color:#fffaf0}.home-calendar-modes button:hover,.home-calendar-navigation button:hover{box-shadow:inset 0 0 0 1px #315f4855}
+.home-open[data-home-kind=calendar] .home-open-body{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-content:stretch}.home-open[data-calendar-mode=day] .home-open-body{grid-template-columns:1fr;align-content:start}.home-calendar-day{min-width:0;padding:8px 4px;border:1px solid #506b4020;border-radius:5px}.home-calendar-day>time{display:block;margin-bottom:12px;font-size:13px;font-weight:600}.home-calendar-day[data-today=true]>time{color:#315f48;text-decoration:underline;text-underline-offset:4px}.home-calendar-undated{grid-column:1/-1}.home-calendar-undated h3{font-size:14px}
+.home-leaf{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;border:1px solid #526d4530;border-radius:8px;padding:16px;background:#fffdf5ad;box-shadow:0 2px 4px #203b3008;min-width:0;min-height:44px}.home-leaf:hover{background:#e8eddf}.home-leaf:focus-visible,.home-open button:focus-visible{outline:2px solid #315f48;outline-offset:2px}.home-leaf-text{display:flex;flex-direction:column;gap:8px;min-width:0}.home-leaf strong{font-size:16px;line-height:1.4;overflow-wrap:anywhere}.home-leaf small,.home-leaf p{font-size:13px;line-height:1.5;margin:0;color:#4d6255}.home-leaf[data-attention=true]{border-left:3px solid #bd9753}.home-calendar-day .home-leaf{padding:8px 6px;margin-bottom:8px;background:#b5c6ad40}.home-calendar-day .home-leaf strong{font-size:13px}.home-calendar-day .home-leaf small{font-size:12px}.home-task-check{font-size:25px;color:#a38b60;line-height:1}
+.home-open[data-home-kind=notes] .home-open-sheet{border-top:24px solid #d8b963}.home-open[data-home-kind=notes] .home-open-body{grid-template-columns:repeat(2,minmax(0,1fr))}.home-open[data-home-kind=notes] .home-leaf{min-height:140px;background:linear-gradient(#fffdf5ed,#f7f1dfed);border-radius:3px 3px 14px 3px}
+.home-open[data-home-kind=reminders] .home-open-sheet{border-top:12px solid #b3a68e}.home-open[data-home-kind=reminders] .home-open-body{display:flex;flex-direction:column}.home-open-empty{grid-column:1/-1;color:#4d6255;padding:16px;margin:0}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{top:15%;left:8%;right:28%;font-size:clamp(12px,1.05vw,16px);font-weight:650;line-height:1.4}
+/* Avatar fills the painted stamp inset; the asset already supplies its perforated rim. */
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{top:16.6%;left:84.1%;right:auto;width:8.5%;height:18.1%;margin:0;padding:0;background:var(--mail-avatar-tint,#a4ae94);border:0;outline:0;border-radius:0;box-shadow:none;display:grid;place-items:center;overflow:hidden}
+.mail-avatar img{width:100%;height:100%;object-fit:cover}.mail-avatar svg{width:80%;height:80%}
+/* A logo sits whole on stamp paper; initials are the sender's own letters, never a stock figure. */
+#notionWorld [data-applet=gmail] .mail-avatar[data-kind=logo]{background:#fffaf0}.mail-avatar[data-kind=logo] img{object-fit:contain;box-sizing:border-box;padding:12%}
+.mail-avatar-initials{font:650 clamp(10px,1vw,15px)/1 var(--ui-font-ui,system-ui);letter-spacing:.02em;color:#fffaf0;text-transform:uppercase}
+#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-time{bottom:10%;right:8%;font-size:clamp(11px,.85vw,13px)}
+@media(max-width:850px){#notionWorld .pixi-applet-stage[data-installation=true][data-animated-device].home-open{left:3%;right:34%}.home-open-sheet{padding:22px 12px 16px}.home-calendar-modes button{padding:6px 8px}.home-open[data-home-kind=calendar] .home-open-body{grid-template-columns:repeat(7,minmax(84px,1fr))}.home-open[data-calendar-mode=day] .home-open-body{grid-template-columns:1fr}.home-open[data-home-kind=notes] .home-open-body{grid-template-columns:1fr}}
+
+.home-open[data-home-kind=calendar] .home-open-sheet{background:transparent;border:0;box-shadow:none;padding:12% 6% 10%}.home-open[data-home-kind=calendar] .home-open-sheet::before{display:none}
+.home-day-open{display:none}.home-open-sheet{animation:home-page-arrive .2s ease-out;transform-origin:50% 0}.home-open[data-home-kind=reminders] .home-open-sheet{border:10px solid #ba8954;border-top:22px solid #bfa463;box-shadow:inset 8px 0 #99a381,inset -8px 0 #99a381,0 8px 18px #253a3025}.home-open[data-home-kind=reminders] .home-task-check{color:#5e91b1}.home-open[data-home-kind=reminders] .home-leaf:nth-child(3n+2) .home-task-check{color:#bf9746}.home-open[data-home-kind=reminders] .home-leaf:nth-child(3n) .home-task-check{color:#bd7362}
+@keyframes home-page-arrive{from{opacity:.65;transform:perspective(900px) rotateX(-4deg) translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.home-open-sheet{animation:none}}
+@media(max-width:800px){
+ #notionWorld .pixi-applet-stage[data-installation=true][data-animated-device].home-open{inset:12% 16px 24% 16px}
+ .home-open[data-home-kind=calendar] .home-open-sheet{padding:14% 6% 10%}
+ .home-open[data-home-kind=calendar]:not([data-calendar-mode=month]) .home-open-body{display:flex;flex-direction:column;gap:10px}
+ .home-calendar-day{flex:none;display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px}.home-calendar-day>time{grid-row:1/99;margin:4px 0}.home-calendar-day .home-leaf{margin:0;grid-column:2}.home-calendar-day .home-leaf strong{font-size:14px}
+ .home-open[data-calendar-mode=month] .home-open-body{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;align-content:start}
+ .home-open[data-calendar-mode=month] .home-calendar-day{display:flex;flex-direction:column;padding:6px 2px;gap:2px;min-height:68px;text-align:center}
+ .home-open[data-calendar-mode=month] .home-calendar-day>.home-leaf{display:none}
+ .home-day-open{display:block;border:0;background:transparent;font-size:11px!important;min-height:44px;padding:2px;overflow-wrap:anywhere}
+ .home-open-header h2{font-size:20px}.home-open-header{gap:6px;margin-bottom:8px}.home-calendar-navigation{margin-bottom:6px}.home-open[data-home-kind=notes] .home-open-body{grid-template-columns:1fr}.home-open[data-home-kind=notes] .home-leaf{min-height:100px}
+ #notionWorld #notionContent:is([data-applet=gmail],[data-applet=google-calendar],[data-applet=apple-notes],[data-applet=apple-reminders]){left:16px;right:16px;top:84px;bottom:25%;width:auto;max-width:none}
+ .mail-focus .mail-identity-card{flex-wrap:wrap;gap:10px}.mail-focus .mail-date{max-width:none}.mail-focus .mail-message .notion-prose{font-size:16px}
+}
+@media(max-height:600px){#notionWorld .pixi-applet-stage[data-installation=true][data-animated-device].home-open{top:76px;bottom:18px}.home-open-header{margin-bottom:4px}.home-open-sheet{padding-top:20px}.home-open[data-home-kind=calendar] .home-open-sheet{padding-top:10%}}
+
+.home-leaf{position:relative}.home-leaf>.applet-attention{position:static;flex:0 0 18px;width:18px;height:22px;align-self:flex-start;transform:none;pointer-events:none}.home-leaf>.applet-attention svg{width:100%;height:100%}
+
+.home-calendar-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}.home-open-sheet>header,.home-open-sheet>nav,.home-open-sheet>.home-open-body{position:relative;z-index:1}
+#notionWorld .pixi-applet-stage.home-open{container-type:size}
+.home-open[data-home-kind=calendar] .home-open-sheet{padding:25cqh 6% 16cqh}
+.home-open[data-home-kind=calendar] .home-open-header h2{font-size:20px}
+@media(max-width:800px){
+ #notionWorld .pixi-applet-stage[data-installation=true][data-animated-device].home-open{top:150px;bottom:36%}
+ #notionWorld .pixi-applet-stage[data-installation=true][data-applet=gmail]{inset:140px 16px 36%;width:auto}
+ #notionWorld [data-applet=gmail] .mail-open-desk{right:0}
+ #notionWorld [data-applet=gmail] .mail-open-envelopes{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:130px;overflow:auto;align-content:start;padding-top:24px;row-gap:26px}
+ #notionWorld #notionContent:is([data-applet=gmail],[data-applet=google-calendar],[data-applet=apple-notes],[data-applet=apple-reminders]){top:150px;bottom:36%}
+}
+
+/* The top bar (#951; measures in components/layout.css, controls in controls.css). Every control
+   is an icon circle right beside the title, not out at the bar's ends (owner feedback 2026-10-03):
+   Back, then World inside an Applet, on its left; the Applet's actions and its own controls
+   (Picture in picture, the Native / Web switch) on its right. Native-hud.ts places the two sides
+   against the title and keeps the title's room for them (--applet-bar-side). A narrow stacked
+   window puts the title below the bar, so the sides start after the Mac's traffic lights there,
+   the right one following the left. */
+#notionWorld>.applet-bar-side{position:absolute;left:var(--applet-bar-start);top:var(--applet-bar-top);z-index:40;display:flex;align-items:center;gap:8px;height:var(--applet-bar-height);pointer-events:none}
+#notionWorld>.applet-bar-side :is(button,.applet-mode-toggle){pointer-events:auto}
+#notionWorld>.applet-bar-right,#notionWorld .applet-bar-controls{display:flex;align-items:center;gap:8px}
+#notionWorld .applet-bar-controls:not(:has(button:not([hidden]))){display:none}
+#notionWorld #notionBack[hidden],#notionWorld .browser-pip-offer[hidden],#notionWorld>.browser-pip[hidden]{display:none}
+/* On a website Applet's page its own Back and Forward stand in Back's place (browser/browser-device.ts). */
+#notionWorld>.applet-bar-left:has(>.browser-back[data-web-page])>#notionBack{display:none}
+/* Picture in picture (#919, browser/picture-in-picture.ts). The window is a small paper frame
+   like the website panel's, the native video in its slot and its controls on the bar above,
+   since nothing can draw over the native page. It appears in place, as its offer does: nothing
+   shrinks or animates, with or without reduced motion. */
+#notionWorld>.browser-pip{position:absolute;z-index:30;box-sizing:border-box;display:flex;flex-direction:column;padding:var(--pip-rim);border-radius:18px;background:linear-gradient(135deg,#fff6de,#d8c8a4);box-shadow:0 0 0 1px #b4a180,0 8px 24px #453b2533,inset 0 1px 0 #fffdf3;pointer-events:auto}
+#notionWorld>.browser-pip .browser-pip-bar{flex:none;box-sizing:border-box;height:var(--pip-bar);padding:0 0 4px 2px;display:flex;align-items:center;gap:4px}
+#notionWorld>.browser-pip :is(.browser-pip-open,.browser-pip-close){display:inline-flex;align-items:center;min-height:28px;border:0;border-radius:14px;background:transparent;color:#3d5949;cursor:pointer}
+#notionWorld>.browser-pip .browser-pip-open{min-width:0;gap:7px;padding:0 10px 0 6px;margin-right:auto;font:600 13px/1.2 var(--ui-font-ui,system-ui)}
+#notionWorld>.browser-pip .browser-pip-grip{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;padding:0;border:0;border-radius:14px;background:transparent;color:#3d5949;cursor:nwse-resize;touch-action:none}
+#notionWorld>.browser-pip .browser-pip-grip svg{width:15px;height:15px}
+#notionWorld>.browser-pip .browser-pip-grip:hover{background:#fffaeb}
+#notionWorld>.browser-pip .browser-pip-grip:focus-visible{outline:2px solid #3d5949;outline-offset:1px}
+#notionWorld>.browser-pip .browser-pip-open span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#notionWorld>.browser-pip .browser-pip-open img{width:18px;height:18px;object-fit:contain;flex:none;border-radius:5px}
+#notionWorld>.browser-pip .browser-pip-open img[hidden]{display:none}
+#notionWorld>.browser-pip .browser-pip-close{justify-content:center;flex:none;width:28px;padding:0;font:400 20px/1 var(--ui-font-ui,system-ui)}
+#notionWorld>.browser-pip :is(.browser-pip-open,.browser-pip-close):hover{background:#fffaeb}
+#notionWorld>.browser-pip :is(.browser-pip-open,.browser-pip-close):focus-visible{outline:2px solid #3d5949;outline-offset:1px}
+#notionWorld>.browser-pip .browser-pip-video{flex:1;min-height:0;border-radius:12px;background:#1f2a24}
+/* Back leaves picture in picture in one click; pointing at the window lights it up. */
+#notionWorld>.browser-pip .browser-pip-back{display:inline-flex;align-items:center;gap:3px;flex:none;min-height:26px;padding:0 10px 0 6px;border:1px solid #b4a180;border-radius:13px;background:#fffaeb;color:#3d5949;font:600 12px/1.2 var(--ui-font-ui,system-ui);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+#notionWorld>.browser-pip .browser-pip-back svg{width:14px;height:14px}
+#notionWorld>.browser-pip:hover .browser-pip-back,#notionWorld>.browser-pip .browser-pip-back:is(:hover,:focus-visible){background:#3d5949;border-color:#3d5949;color:#fffaeb}
+#notionWorld>.browser-pip .browser-pip-back:focus-visible{outline:2px solid #3d5949;outline-offset:1px}
+/* A running Applet in the World (ui/browser/applet-task-screen.ts): Fox's page in a small screen over
+   the device, a tail pointing down at it, then a Done mark there once Fox's turn ends. */
+#notionWorld>.applet-task-screen{position:absolute;left:0;top:0;z-index:26;box-sizing:border-box;display:flex;flex-direction:column;padding:0 var(--task-screen-rim) var(--task-screen-rim);border:1.5px solid #e9a63c;border-radius:12px;background:#fff8e8;box-shadow:0 0 0 3px #ffb45a33,0 6px 18px #14251b47;pointer-events:auto}
+#notionWorld>.applet-task-screen[hidden]{display:none}
+#notionWorld>.applet-task-screen:after{content:'';position:absolute;left:var(--task-screen-tail-x,50%);bottom:calc(-1 * var(--task-screen-tail) - 1px);width:0;height:0;border:var(--task-screen-tail) solid transparent;border-bottom:0;border-top-color:#e9a63c;transform:translateX(-50%);pointer-events:none}
+#notionWorld>.applet-task-screen .applet-task-screen-bar{flex:none;display:flex;align-items:center;gap:6px;height:var(--task-screen-bar);padding:0 4px;border:0;background:none;color:#8a4a12;font:600 12px/1.2 var(--ui-font-ui,system-ui);white-space:nowrap;cursor:pointer;text-align:left}
+#notionWorld>.applet-task-screen .applet-task-screen-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#notionWorld>.applet-task-screen .applet-task-screen-bar img{width:16px;height:16px;object-fit:contain}
+#notionWorld>.applet-task-screen .applet-task-screen-bar img[hidden]{display:none}
+#notionWorld>.applet-task-screen .applet-task-screen-bar:focus-visible{outline:2px solid #e9a63c;outline-offset:1px;border-radius:6px}
+#notionWorld>.applet-task-screen .applet-task-screen-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#7fa36b}
+#notionWorld>.applet-task-screen.is-working .applet-task-screen-dot{background:#ff8a3d;animation:fox-task-pulse 1.4s ease-in-out infinite}
+#notionWorld>.applet-task-screen .applet-task-screen-slot{flex:1;min-height:0;border-radius:7px;background:#fff;overflow:hidden}
+#notionWorld>.applet-task-done{position:absolute;left:0;top:0;z-index:25;display:flex;flex-direction:column;align-items:center;gap:2px;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto}
+#notionWorld>.applet-task-done[hidden]{display:none}
+#notionWorld>.applet-task-done .applet-task-check{display:grid;place-items:center;width:28px;height:28px;border:2px solid #f6fbef;border-radius:50%;background:#3f8f3a;color:#fff;font:800 16px/1 var(--ui-font-ui,system-ui);box-shadow:0 2px 6px #14251b55}
+#notionWorld>.applet-task-done .applet-task-done-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#notionWorld>.applet-task-done:focus-visible{outline:2px solid #e9a63c;outline-offset:2px;border-radius:8px}
+@keyframes fox-task-pulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){#notionWorld>.applet-task-screen .applet-task-screen-dot{animation:none}}
+/* While Fox works, the page's own frame turns colorful; the host glows it inward over the page
+   edge, evenly round the corners, with Fox's steps card and pointer (browser-device.ts, #1619).
+   No extra ring, and the page keeps its size and place. */
+:is(#notionWorld,.native-console)>.notion-content[data-template=browser]:has(>.browser-viewport.is-fox-control[data-fox-overlay]){border-color:transparent;background:conic-gradient(from var(--fox-ring-angle,0deg),var(--fox-ring-colors)) border-box;animation:fox-ring-turn var(--fox-ring-turn) linear infinite}
+@media(prefers-reduced-motion:reduce){:is(#notionWorld,.native-console)>.notion-content[data-template=browser]:has(>.browser-viewport.is-fox-control[data-fox-overlay]){animation:none}}
+/* The native page is rounded inward to whole points; let the frame's colors, not the slot's
+   white, fill that sub-point seam so frame and page meet without a light hairline. */
+:is(#notionWorld,.native-console) .browser-viewport.is-fox-control[data-fox-overlay]{background:transparent}
+/* Use the red binding for view controls; reserve the paper for dates and events. */
+.home-open[data-home-kind=calendar] .home-open-header{position:absolute;top:14%;left:25%;right:25%;height:10%;margin:0;justify-content:center;flex-wrap:nowrap}
+.home-open[data-home-kind=calendar] .home-open-header h2{display:none}
+.home-open[data-home-kind=calendar] .home-calendar-modes{justify-content:center;gap:2px}
+.home-open[data-home-kind=calendar] .home-open-sheet{padding-bottom:14cqh}
+
+/* The Center's two pages (owner decision 2026-10-03): Now, and one screen below it Later.
+   The page button sits centered at the foot, quieter than the rows. */
+#notionWorld .world-task-more{flex:none;padding:6px 12px 0;color:var(--ui-matter-muted);text-align:center;pointer-events:auto}
+#notionWorld .world-task-more .world-task-more-button{opacity:.78}
+#notionWorld .world-task-more .world-task-more-button:is(:hover,:focus-visible){opacity:1}
+/* Later fills the Center's height so its Now button stays in one place at the foot while Later scrolls. */
+#notionWorld .world-task-list.is-expanded{height:100%;display:flex;flex-direction:column}
+#notionWorld .world-task-list.is-expanded>.world-attention-later{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;pointer-events:auto}
+#notionWorld .world-task-list.is-expanded>.world-task-more{flex:none;margin-top:auto;padding-top:10px}
+/* A page turn slides the new page in the direction of the gesture. */
+#notionWorld .world-task-list[data-turn=later]>.world-attention-later,#notionWorld .world-task-list[data-turn=now]>.world-task-group{animation:attention-page-in .34s cubic-bezier(.2,.8,.2,1) both}
+#notionWorld .world-task-list[data-turn=now]>.world-task-group{--page-from:-36px}
+@keyframes attention-page-in{from{opacity:0;transform:translateY(var(--page-from,36px))}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){#notionWorld .world-task-list[data-turn]>*{animation:none}}
+#notionWorld .world-attention-zone-head{padding:0 10px 8px}
+#notionWorld .world-attention-zone-title{display:flex;align-items:center;gap:8px;margin:0;font:700 17px/1.25 var(--ui-font-ui);color:var(--ui-matter-muted);letter-spacing:.01em}
+#notionWorld .world-attention-zone-note{margin:3px 0 0;font:400 12px/1.35 var(--ui-font-ui);color:var(--ui-matter-muted);opacity:.85}
+/* A Later row keeps its own category colour; a dashed rule and a lighter weight say it can wait. */
+#notionWorld .world-task-group[data-group=later] .world-matter[data-matter-state=event]{--activity-color:var(--ui-hud-event)}
+#notionWorld .world-task-group[data-group=later] .world-matter[data-matter-state=needsAction]{--activity-color:var(--ui-hud-task)}
+#notionWorld .world-task-group[data-group=later] .world-matter[data-matter-state=unseen]{--activity-color:var(--ui-hud-update)}
+#notionWorld .world-matter-later{border-left:2px dashed color-mix(in srgb,var(--activity-color,currentColor) 55%,transparent);border-radius:0 8px 8px 0;padding-block:7px;opacity:.64;transition:opacity .15s}
+#notionWorld .world-matter-later .world-task-title{font-size:14px;font-weight:500}
+#notionWorld .world-matter-later:is(:hover,:focus-visible,[aria-current=location]){opacity:1}
+#notionWorld .world-task-more[hidden]{display:none}
+#notionWorld .world-task-clear{margin:0 0 4px;font:600 15px/1.3 var(--ui-font-ui);color:var(--ui-matter-ink)}
+/* Reading what was connected: three hopping dots, the same as setup's (owner request 2026-10-06). */
+#notionWorld .world-task-waiting.is-reading{display:flex;gap:5px;padding:6px 2px}
+#notionWorld .world-task-waiting.is-reading i{display:block;width:7px;height:7px;border-radius:50%;background:var(--ui-matter-ink);opacity:.7;animation:world-task-hop .9s ease-in-out infinite}
+#notionWorld .world-task-waiting.is-reading i:nth-child(2){animation-delay:.15s}
+#notionWorld .world-task-waiting.is-reading i:nth-child(3){animation-delay:.3s}
+@keyframes world-task-hop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){#notionWorld .world-task-waiting.is-reading i{animation:none}}
+#notionWorld .world-task-more-button{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 14px;border:0;border-radius:999px;background:color-mix(in srgb,var(--ui-matter-ink) 10%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ui-matter-ink) 16%,transparent);color:inherit;font:500 13px/1.3 var(--ui-font-ui);cursor:pointer}
+#notionWorld .world-task-more-chevron{display:inline-flex}
+#notionWorld .world-task-more-button:hover{color:var(--ui-matter-ink)}
+#notionWorld .world-task-more-button:focus-visible{outline:2px solid var(--ui-matter-ink);outline-offset:3px;border-radius:4px}
+
+/* Fox speaks after the arriving devices land, never underneath them. */
+#notionWorld[data-arriving=true] .companion-dialogue{visibility:hidden}
+/* The guided introduction points at one place at a time with a soft lantern glow. */
+/* The tour's choices in Fox's bubble are underlined words like every other choice in Fox's bubble, never filled buttons
+   (owner feedback 2026-10-06). The main one (Continue, Connect Mail, Do it for me) keeps Fox's link colour; a second
+   choice (Not now, Change my name) is muted beside it. */
+#notionWorld.native-console .companion-dialogue .companion-guide-actions button.world-tour-quiet{color:var(--brand-muted,#4d6255);font-weight:500}
+#notionWorld.native-console .companion-dialogue .companion-guide-actions button.world-tour-quiet:is(:hover,:active){color:var(--brand-ink,#203b30)}
+
+/* Runtime alerts are separate from saved Attention findings. Text and controls
+   remain legible without color, including static reduced-motion running lamps. */
+.applet-lamp-label{position:absolute;z-index:60;transform:translate(-50%,-100%);display:grid;grid-template-columns:18px minmax(0,1fr);gap:2px 5px;width:164px;padding:6px 8px;border:1px solid #8b9987;border-radius:8px;background:#fffdf3;color:#263a2e;font:11px/1.3 system-ui;text-align:left;box-shadow:0 2px 6px #182b2520;pointer-events:auto}
+.applet-lamp-label [hidden]{display:none}
+.applet-lamp-exclamation{grid-row:1/3;align-self:center;text-align:center;font-size:19px;font-weight:800}
+.applet-lamp-label>button{grid-column:2;padding:4px 0;min-height:28px;border:0;background:none;color:inherit;font:inherit;font-weight:650;text-align:left;text-decoration:underline;cursor:pointer;overflow-wrap:anywhere}
+.applet-lamp-label>button:focus-visible{outline:2px solid #263a2e;outline-offset:2px;border-radius:2px}
+.applet-lamp-label[data-foreground=true]{transform:translate(-50%,0)}
+.applet-lamp-label[hidden]{display:none}
+@media(max-width:600px){.applet-lamp-label{width:150px;font-size:12px}.applet-lamp-label>button{min-height:36px}}
+/* The guided tour's spotlight and coach mark (ui/onboarding/tour-spotlight.ts): above the World,
+   Fox and its bubble stay bright, one ringed box shows what Fox talks about. */
+.tour-spotlight{position:fixed;inset:0;z-index:2147483000;pointer-events:none}
+.tour-spotlight-catcher{position:absolute;inset:0;pointer-events:auto;cursor:pointer}
+.tour-spotlight[hidden]{display:none}
+.tour-spotlight>svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.tour-spotlight-shade{fill:#0d1a1f;fill-opacity:.56}
+.tour-spotlight-ring{position:absolute;box-sizing:border-box;border-radius:22px;pointer-events:none;border:1.5px solid #ffe2a6b3;box-shadow:var(--tour-ring-glow);animation:tour-ring 3.2s ease-in-out infinite}
+/* One soft highlight style (owner feedback 2026-10-02, round 4): Fox and its bubble share one lit,
+   gently haloed area instead of separate rings, and what Fox talks about gets the same soft halo. */
+:root{--tour-ring:#ffe2a6;--tour-ring-glow:0 0 22px 6px #ffd98a40,0 0 60px 18px #ffd98a1f}
+/* Every choice is made at Fox (owner request 2026-10-06), so Fox's area wears a solid warm ring that stays still, unlike the
+   soft, breathing halo around what Fox explains: the two never read as the same kind of box. */
+.tour-spotlight-ring.is-guide{border:2.5px solid #f2b25c;border-radius:32px;box-shadow:0 0 0 5px #f2b25c2e,0 0 26px 4px #f2b25c4d;animation:none}
+.tour-spotlight-ring[hidden]{display:none}
+@keyframes tour-ring{50%{box-shadow:0 0 28px 9px #ffd98a55,0 0 72px 24px #ffd98a29}}
+.tour-coach{position:fixed;z-index:2147483000;max-width:260px;padding:10px 14px;border-radius:14px;background:#fff8e8f2;color:#2c3a33;font:500 13px/1.4 var(--ui-font-ui,system-ui);box-shadow:0 6px 24px #14251b40;pointer-events:none}
+.tour-coach-ring{position:fixed;z-index:2147483000;box-sizing:border-box;border-radius:24px;border:2px solid var(--tour-ring);pointer-events:none;animation:tour-ring 1.6s ease-in-out infinite}
+:is(.tour-coach,.tour-coach-ring)[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.tour-spotlight-ring,.tour-coach-ring{animation:none}}
+/* Until the first run is over only the tour responds (ui/onboarding/tour-lock.ts): a clear layer
+   under the spotlight takes the clicks between its steps, and the tour's Tutorial switch (on; off skips) stays in the World's corner above both. */
+.tour-lock{position:fixed;inset:0;z-index:2147482990;background:transparent;cursor:default}
+.tour-lock[hidden]{display:none}
+/* While the tour lights the card, its own Done (or Got it) answers; Dismiss and Later wait (owner request 2026-10-04). */
+[data-tour-spotlight] #attentionPreview .attention-preview-action:not(.attention-preview-action-primary){display:none}
+/* Fox never moves during the tour: no hop to the middle, no lift under the card (owner feedback 2026-10-04 and 2026-10-06). */
+/* Fox's name, in its bubble while it introduces itself. */
+#notionWorld .world-tour-name{display:block;margin-top:8px}
+#notionWorld .world-tour-name input{box-sizing:border-box;width:min(220px,100%);padding:7px 10px;border-radius:10px;border:1px solid #c9c2a8;background:#fffdf4;color:#2c3a33;font:500 15px/1.2 var(--ui-font-ui,system-ui)}
+#notionWorld .world-tour-name input:focus-visible{outline:2px solid #e9a63c;outline-offset:1px}
+
+/* The welcome belongs to the world (owner feedback 2026-10-02): Fox, its bubble and its buttons stay
+   out of it, and Fox comes in for the tour's hello where it always stands. */
+#notionWorld[data-fox-away] .notion-hud :is(.companion-pet,.companion-dialogue,.companion-dock,.companion-text-entry){opacity:0;visibility:hidden;pointer-events:none;transition:none}
+/* Fox fades in already at its own place (owner request 2026-10-06): an entrance that moved or scaled it overrode
+   its centring transform and made it jump when the entrance ended. Fox, its bubble, its buttons, the tour's Tutorial switch
+   and the tour's shade come in as one fade (owner feedback 2026-10-06: Fox flashed on entry when the World darkened in one
+   frame, Fox came in alone and its bubble popped in after it). */
+#notionWorld[data-fox-entering] .notion-hud :is(.companion-pet,.companion-dialogue,.companion-dock,.companion-text-entry){animation:tour-fox-enter .6s ease-out both}
+body:has(#notionWorld[data-fox-entering])>:is(.tour-switch,.tour-spotlight){animation:tour-fox-enter .6s ease-out both}
+@keyframes tour-fox-enter{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#notionWorld[data-fox-entering] .notion-hud :is(.companion-pet,.companion-dialogue,.companion-dock,.companion-text-entry),body:has(#notionWorld[data-fox-entering])>:is(.tour-switch,.tour-spotlight){animation:none}}
+
+/* Meetings: the next calls, a new call on each service and a pasted link, on one sheet of paper. */
+#notionWorld .pixi-applet-stage.meetings-open{inset:10% 35% 8% 4%;width:auto;height:auto;aspect-ratio:auto;transform:none;pointer-events:auto;padding:0}
+.meetings-open-sheet{height:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:28px 24px 20px;border-radius:15px 18px 16px 17px;background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--ui-ink);border:1px solid #a38b6040;box-shadow:0 9px 0 #ad9165,0 12px 20px #253a3025;font:14px/1.5 var(--ui-font-ui)}
+.meetings-open-sheet h2{font-size:24px;margin:0;font-weight:600}.meetings-open-sheet h3{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#4d6255;margin:0 0 8px}
+.meetings-open button{font:inherit;color:inherit;cursor:pointer}
+.meetings-upcoming{display:flex;flex-direction:column;gap:8px}.meetings-empty{margin:0;color:#4d6255}
+.meetings-call{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:14px;width:100%;min-height:56px;text-align:left;border:1px solid #526d4530;border-radius:10px;padding:12px 14px;background:#fffdf5ad}
+.meetings-call:hover{background:#e8eddf}.meetings-call:focus-visible,.meetings-service:focus-visible,.meetings-link :focus-visible{outline:2px solid #315f48;outline-offset:2px}
+.meetings-when{font-size:13px;color:#4d6255;font-variant-numeric:tabular-nums}.meetings-call[data-live=true]{border-color:#315f48;background:#e3eddc}.meetings-call[data-live=true] .meetings-when{color:#315f48;font-weight:600}
+.meetings-call-text{display:flex;flex-direction:column;gap:2px;min-width:0}.meetings-call-text strong{font-size:15px;overflow-wrap:anywhere}.meetings-call-text small{font-size:12px;color:#4d6255;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meetings-join{font-size:13px;font-weight:600;color:#315f48;white-space:nowrap}.meetings-call[data-live=true] .meetings-join{background:#315f48;color:#fffaf0;border-radius:999px;padding:6px 12px}
+.meetings-services{display:flex;flex-wrap:wrap;gap:8px}.meetings-service{min-height:44px;border:1px solid #526d4545;border-radius:999px;padding:8px 16px;background:#fffdf5d0}.meetings-service:hover{background:#e8eddf}
+.meetings-link{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}.meetings-link input{flex:1;min-width:180px;min-height:40px;box-sizing:border-box;border:1px solid #526d4545;border-radius:10px;padding:8px 12px;background:#fffdf5e6;font:inherit;color:inherit}
+.meetings-link button{min-height:40px;border:0;border-radius:10px;padding:8px 16px;background:#315f48;color:#fffaf0}.meetings-link-hint{flex-basis:100%;color:#8a4b2e;font-size:12px}.meetings-link-hint:empty{display:none}
+.meetings-scope{margin:auto 0 0;color:#4d6255;font-size:12px}
+.meetings-transcripts{display:flex;flex-direction:column;gap:6px}.meetings-transcript{display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%;min-height:44px;text-align:left;border:1px solid #526d4530;border-radius:10px;padding:10px 14px;background:#fffdf5ad}.meetings-transcript:hover{background:#e8eddf}.meetings-transcript:focus-visible{outline:2px solid #315f48;outline-offset:2px}.meetings-transcript small{color:#4d6255;white-space:nowrap}
+
+/* A call being transcribed: always in view above the call, with Stop and the reminder to tell the others. */
+.meeting-transcribing{flex:none;display:flex;align-items:center;gap:12px;margin:0 0 6px;padding:8px 10px 8px 14px;border-radius:12px;background:#fbefe6;border:1px solid #c0584a55;color:#5a2d24;font:13px/1.4 var(--ui-font-ui)}
+.meeting-transcribing-dot{width:10px;height:10px;border-radius:50%;background:#c0392b;flex:none;animation:meeting-recording 1.6s ease-in-out infinite}.meeting-transcribing[data-active=false] .meeting-transcribing-dot{background:#7d8f83;animation:none}
+.meeting-transcribing-text{display:flex;flex-direction:column;min-width:0;flex:1}.meeting-transcribing-text small{color:#6d4a40;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meeting-transcribing-stop{flex:none;min-height:36px;border:0;border-radius:999px;padding:6px 16px;background:#9c3326;color:#fff8f2;font:inherit;font-weight:600;cursor:pointer}.meeting-transcribing-stop:focus-visible{outline:2px solid #5a2d24;outline-offset:2px}
+@keyframes meeting-recording{50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.meeting-transcribing-dot{animation:none}}
+.meeting-transcript{max-width:760px;margin:0 auto;padding:8px 4px 32px;font:15px/1.6 var(--ui-font-ui);color:var(--ui-ink)}.meeting-transcript-head h1{font-size:22px;margin:0 0 4px}.meeting-transcript-head p{margin:0 0 16px;color:#4d6255;font-size:13px}
+.meeting-transcript-line{display:grid;grid-template-columns:64px 64px 1fr;gap:10px;margin:0;padding:6px 0;border-bottom:1px solid #526d4518}.meeting-transcript-line time{color:#6b7c70;font-size:12px;font-variant-numeric:tabular-nums;padding-top:2px}.meeting-transcript-line strong{font-size:13px;color:#4d6255}.meeting-transcript-line[data-speaker=you] strong{color:#315f48}
+
+.region-manage{display:none}
+/* The tour's phone step (owner request 2026-10-06): the code to get the app, then the pairing code, in Fox's bubble. */
+#notionWorld .world-tour-phone{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:10px}
+#notionWorld .world-tour-phone-qr{width:168px;height:168px;padding:6px;box-sizing:border-box;border-radius:12px;background:#fff;border:1px solid #58654b1f}
+#notionWorld .world-tour-phone-qr svg{display:block;width:100%;height:100%}
+#notionWorld .world-tour-phone small{font-size:12px;color:#5c6a5f;text-align:center}
+
+/* Dedicated Applet landscapes already paint the identity; live contents stay above them. */
+#notionWorld[data-immersive-background] :is(.pixi-open-art,.mail-shared-device){display:none}
+
+/* Calendar's day and week time grid (ui/applets/google-calendar/grid.ts): hours, an all-day strip, and the
+   person's own events in terracotta beside the synced ones in sage. Explicit ink: the page is painted paper day and night. */
+.home-open[data-home-kind=calendar] .home-open-body[data-grid=time]{display:grid;grid-template-columns:44px repeat(var(--calendar-days),minmax(0,1fr));gap:0;align-content:start;padding:0 2px 0 0;--calendar-head:calc(28px + var(--calendar-allday,0)*26px)}
+.home-open-body[data-grid=time] .home-calendar-day{display:block;padding:0;border:0;border-left:1px solid #506b4026;border-radius:0;min-width:0;min-height:0}
+.home-open-body[data-grid=time] .home-calendar-dayhead{position:sticky;top:0;z-index:3;height:var(--calendar-head);box-sizing:border-box;background:#f5f0e3;border-bottom:1px solid #506b4033;padding:3px 2px 2px}
+.home-open-body[data-grid=time] .home-calendar-dayhead>time{display:block;margin:0 0 2px;font-size:13px;line-height:20px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#21342a}
+.home-open-body[data-grid=time] .home-calendar-dayhead>time b{font-weight:600}
+.home-open-body[data-grid=time] .home-calendar-day[data-today=true] .home-calendar-dayhead>time{color:#b3402f;text-decoration:none}
+@media(max-width:800px){.home-open[data-home-kind=calendar] .home-open-body[data-grid=time]{grid-template-columns:38px repeat(var(--calendar-days),minmax(0,1fr));--calendar-head:calc(40px + var(--calendar-allday,0)*26px)}.home-open-body[data-grid=time] .home-calendar-dayhead>time{line-height:16px;font-size:12px}.home-open-body[data-grid=time] .home-calendar-dayhead>time span{display:block;font-weight:500;font-size:11px}}
+.home-calendar-allday{display:flex;flex-direction:column;gap:2px}
+.home-calendar-allday .home-leaf,.home-calendar-day .home-calendar-allday .home-leaf{height:24px;min-height:0;margin:0;padding:1px 6px;border-radius:4px;overflow:hidden;gap:4px}
+.home-calendar-allday .home-leaf small{display:none}.home-calendar-allday .home-leaf strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-calendar-hours{position:relative;height:960px;background:repeating-linear-gradient(to bottom,#506b4024 0 1px,transparent 1px 40px)}
+.home-calendar-gutter .home-calendar-hours{background:none}
+.home-calendar-gutter .home-calendar-hours span{position:absolute;right:6px;transform:translateY(-50%);font-size:11px;line-height:1;color:#53665a;white-space:nowrap}
+.home-calendar-day .home-calendar-event{position:absolute;margin:0;padding:2px 5px;min-height:0;overflow:hidden;border-radius:5px;border:0;border-left:3px solid #5f8a6c;background:#d3dfcbeb;gap:4px;box-sizing:border-box;z-index:1;color:#21342a}
+.home-calendar-event .home-leaf-text{gap:0}.home-calendar-day .home-calendar-event strong{font-size:12px;line-height:1.25}.home-calendar-day .home-calendar-event small{font-size:11px;line-height:1.25}
+.home-calendar-event[data-short=true] small{display:none}.home-calendar-event>.applet-attention{flex-basis:14px;width:14px;height:16px}
+.home-calendar-day .home-leaf[data-local=true]{border:0;border-left:3px solid #c0623f;background:#f4d8c6f0;color:#3d2418;cursor:grab;touch-action:none}
+.home-calendar-day .home-leaf[data-local=true]:hover{background:#efcbb4}.home-calendar-day .home-leaf[data-local=true] small{color:#6b4130}
+.home-calendar-day .home-leaf[data-dragging=true]{cursor:grabbing;opacity:.9;box-shadow:0 6px 14px #203b3033;z-index:4}
+.home-calendar-resize{position:absolute;left:0;right:0;bottom:0;height:7px;cursor:ns-resize}
+.home-calendar-draft{position:absolute;left:1px;right:2px;border-radius:5px;background:#c0623f2e;border:1px dashed #c0623f;font-size:11px;padding:2px 5px;color:#5b2c1a;pointer-events:none;z-index:2;box-sizing:border-box;overflow:hidden}
+.home-calendar-now{position:absolute;left:0;right:0;height:2px;background:#d0453a;z-index:2;pointer-events:none}.home-calendar-now::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:#d0453a}
+.home-calendar-day[data-drop=true]{background:#c0623f1f}
+.home-calendar-note{flex:none;display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:12px;line-height:1.4;color:#4d6255}
+.home-calendar-undo{border:0;border-radius:8px;padding:4px 10px;background:#315f48;color:#fffaf0;min-height:32px}
+.home-calendar-navigation .home-calendar-add{font-size:22px;line-height:1;font-weight:500}.home-calendar-navigation .home-calendar-today{font-size:13px}
+.home-calendar-navigation .home-calendar-add:disabled{opacity:.4;cursor:default}
+.home-event-editor{position:absolute;z-index:6;width:min(320px,calc(100% - 8px));box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:#fffdf6;color:#21342a;border:1px solid #a38b6055;box-shadow:0 12px 30px #203b3040;font:13px/1.4 var(--ui-font-ui)}
+.home-event-editor input,.home-event-editor textarea,.home-event-editor select{font:inherit;color:inherit;background:#f6f2e7;border:1px solid #a38b6040;border-radius:6px;padding:5px 7px;min-width:0;box-sizing:border-box}
+.home-event-editor textarea{resize:vertical}
+.home-event-editor .home-event-title{font-size:16px;font-weight:600}
+.home-event-row{display:grid;grid-template-columns:42px minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:center}.home-event-row>span{color:#53665a}
+.home-event-row input[hidden],.home-event-row[hidden]{display:none}.home-event-row select{grid-column:2/4;padding:4px 5px}
+.home-event-check{display:flex;justify-content:flex-start;gap:8px;align-items:center}.home-event-editor .home-event-check input{flex:none;width:16px;height:16px;margin:0;padding:0}
+.home-event-actions{display:flex;justify-content:space-between;gap:8px}.home-event-actions .home-event-delete+.home-event-delete{margin-right:auto}.home-open .home-event-actions .home-event-delete{padding:6px 8px}
+.home-open .home-event-actions button{min-height:36px;padding:6px 14px;border-radius:8px;border:0}
+.home-open .home-event-delete{background:transparent;color:#a3392b}.home-open .home-event-delete:hover{background:#a3392b14}
+.home-open .home-event-done{background:#315f48;color:#fffaf0}
+.home-event-calendar{color:#6b4130;font-size:11px}

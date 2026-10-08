@@ -1,0 +1,197 @@
+[
+ {
+  "name": "word segmentation, case folding and local days",
+  "operation": "attentionObserve",
+  "input": {
+   "facts": [],
+   "registration": {
+    "version": 1,
+    "provider": "notes",
+    "reader": "observation",
+    "intervalMinutes": 15,
+    "freshnessMinutes": 60
+   },
+   "observations": [
+    {
+     "id": "n1",
+     "title": "ÉCOLE Straße",
+     "text": "東京都で会議を開催します İstanbul résumé",
+     "attributes": {
+      "start": "2026-01-15",
+      "end": "2026-07-15",
+      "allDay": true
+     }
+    },
+    {
+     "id": "n2",
+     "title": "Zeta",
+     "text": "alpha beta gamma delta",
+     "observedAt": 1790675000,
+     "attributes": {
+      "start": "2026-03-08T10:00:00Z"
+     }
+    }
+   ],
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": [
+    {
+     "attributes": {
+      "allDay": true,
+      "end": "2026-07-15T00:00:00-07:00",
+      "start": "2026-01-15T00:00:00-08:00"
+     },
+     "changedAt": 1790676000,
+     "expiresAt": 1790679600,
+     "fingerprint": "",
+     "id": "[\"notes\",\"n1\"]",
+     "keys": [
+      "résumé",
+      "stanbul",
+      "straße",
+      "école",
+      "京都",
+      "会議",
+      "東京",
+      "開催"
+     ],
+     "observedAt": 1790676000,
+     "provider": "notes",
+     "removed": false,
+     "revision": 1790676000000,
+     "sourceId": "n1",
+     "text": "東京都で会議を開催します İstanbul résumé",
+     "title": "ÉCOLE Straße",
+     "url": ""
+    },
+    {
+     "attributes": {
+      "start": "2026-03-08T10:00:00Z"
+     },
+     "changedAt": 1790676000,
+     "expiresAt": 1790678600,
+     "fingerprint": "",
+     "id": "[\"notes\",\"n2\"]",
+     "keys": [
+      "alpha",
+      "beta",
+      "delta",
+      "gamma",
+      "zeta"
+     ],
+     "observedAt": 1790675000,
+     "provider": "notes",
+     "removed": false,
+     "revision": 1790676000000,
+     "sourceId": "n2",
+     "text": "alpha beta gamma delta",
+     "title": "Zeta",
+     "url": ""
+    }
+   ]
+  }
+ },
+ {
+  "name": "grapheme clipping of flags and families",
+  "operation": "browserHistoryRecord",
+  "input": {
+   "visits": [],
+   "item": {
+    "url": "https://u.test/",
+    "title": "🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦é",
+    "text": "",
+    "visitedAt": 1
+   },
+   "sameDay": []
+  },
+  "expected": {
+   "ok": true,
+   "value": [
+    {
+     "text": "",
+     "title": "🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦🇺🇸🇨🇳👨‍👩‍👧‍👦",
+     "url": "https://u.test/",
+     "visitedAt": 1
+    }
+   ]
+  }
+ },
+ {
+  "name": "NFC comparison of decomposed Hangul",
+  "operation": "worldItemResolveID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "한",
+      "provider": "gmail",
+      "quote": "q"
+     }
+    ],
+    "id": "한"
+   },
+   "previous": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "한",
+      "provider": "gmail",
+      "quote": "q"
+     }
+    ],
+    "id": "한"
+   },
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expected": {
+   "ok": true,
+   "value": "한"
+  }
+ },
+ {
+  "name": "Unicode lowercase search",
+  "operation": "browserHistorySearch",
+  "input": {
+   "visits": [
+    {
+     "url": "https://a.test/",
+     "title": "ΣΟΦΊΑ İstanbul",
+     "text": "x",
+     "visitedAt": 1
+    }
+   ],
+   "query": "σοφία",
+   "offset": 0,
+   "after": null,
+   "before": null
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "items": [
+     {
+      "text": "x",
+      "title": "ΣΟΦΊΑ İstanbul",
+      "url": "https://a.test/",
+      "visitedAt": 1
+     }
+    ],
+    "offset": 0,
+    "scope": "Pages visited inside Worldlet only; snippets may be incomplete. Times are actual visits, not page publication dates.",
+    "total": 1,
+    "untrustedContent": true
+   }
+  }
+ }
+]

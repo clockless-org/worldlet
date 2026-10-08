@@ -1,0 +1,5 @@
+{
+  "generator": "image_gen",
+  "prompt": "Create ONE transparent PNG game sprite: an empty very low circular flagstone stepping pad, for placing a small interactive device on top. Match exactly the warm ivory/sandstone courtyard paving and hand painted miniature style of the supplied village reference. Irregular large gently rounded flagstones fitted into a circular pad, subtle seams, thin beveled perimeter only ONE shallow stone thickness, NOT a column, NO stacked cylindrical pedestal, no tall sides. Viewed in same elevated fixed three-quarter orthographic camera, circular top appears a horizontal ellipse about 2.6 times wider than tall. Soft daylight from upper left, muted warm beige stone, gentle contact shadow, subtle painterly detail. No grass, objects, scenery, text or border. Entire isolated pad centered on transparent alpha, wide landscape 1024 by 512 sprite with very little transparent margin.",
+  "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-2eedeb0a-1360-4b4b-bdf1-7a51288b33d4.png"
+}

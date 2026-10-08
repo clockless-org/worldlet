@@ -1,0 +1,19 @@
+{
+  "maxWindows": 4,
+  "cases": [
+    {"gesture": true, "open": 0, "url": "https://example.com/sign-in", "allowed": true},
+    {"gesture": true, "open": 3, "url": "https://example.com/sign-in", "allowed": true},
+    {"gesture": true, "open": 0, "url": "about:blank", "allowed": true},
+    {"gesture": true, "open": 0, "url": "", "allowed": true},
+    {"gesture": false, "open": 0, "url": "https://example.com/sign-in", "allowed": false},
+    {"gesture": false, "open": 0, "url": "about:blank", "allowed": false},
+    {"gesture": true, "open": 4, "url": "https://example.com/sign-in", "allowed": false},
+    {"gesture": true, "open": 9, "url": "about:blank", "allowed": false},
+    {"gesture": true, "open": 0, "url": "http://example.com/", "allowed": true},
+    {"gesture": true, "open": 0, "url": "http://localhost/", "allowed": false},
+    {"gesture": true, "open": 0, "url": "http://example.com:8080/", "allowed": false},
+    {"gesture": true, "open": 0, "url": "https://worldlet.invalid/index.html", "allowed": false},
+    {"gesture": true, "open": 0, "url": "file:///etc/hosts", "allowed": false},
+    {"gesture": true, "open": 0, "url": "about:srcdoc", "allowed": false}
+  ]
+}

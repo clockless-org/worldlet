@@ -1,0 +1,184 @@
+[
+  {
+    "key": "outlook",
+    "title": "Outlook",
+    "purpose": "Read and send mail on Outlook’s website",
+    "region": "home",
+    "url": "https://outlook.live.com/mail/",
+    "bundleIds": [
+      "com.microsoft.Outlook"
+    ],
+    "preferNative": false,
+    "deviceConcept": "blue enamel mail sorting cabinet with O-shaped aperture and a folded envelope tray"
+  },
+  {
+    "key": "google-slides",
+    "title": "Google Slides",
+    "region": "work",
+    "url": "https://docs.google.com/presentation/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "golden yellow slide carousel projector with folded-page silhouette and translucent presentation slides"
+  },
+  {
+    "key": "todoist",
+    "title": "Todoist",
+    "region": "home",
+    "url": "https://app.todoist.com/",
+    "bundleIds": [
+      "com.todoist.mac.Todoist"
+    ],
+    "preferNative": false,
+    "deviceConcept": "coral enamel task sorter with three white checkmark slots and paper task cards"
+  },
+  {
+    "key": "apple-podcasts",
+    "title": "Apple Podcasts",
+    "purpose": "Listen to podcasts on Apple Podcasts’ website",
+    "region": "travel",
+    "url": "https://podcasts.apple.com/",
+    "bundleIds": [
+      "com.apple.podcasts"
+    ],
+    "preferNative": false,
+    "deviceConcept": "lavender ceramic microphone shaped like concentric broadcast rings, fabric speaker and brass tuning dial"
+  },
+  {
+    "key": "google-photos",
+    "title": "Google Photos",
+    "purpose": "Look through your photos on Google Photos’ website",
+    "region": "home",
+    "url": "https://photos.google.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "four pastel pinwheel petals in frosted glass framing a small rotating photo viewer"
+  },
+  {
+    "key": "pinterest",
+    "title": "Pinterest",
+    "purpose": "Find ideas on Pinterest; Fox can search boards for you",
+    "region": "library",
+    "url": "https://www.pinterest.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "coral enamel inspiration pinwheel with P-shaped pin handle and small textile swatch cards"
+  },
+  {
+    "key": "facebook",
+    "title": "Facebook",
+    "purpose": "Browse Facebook in your world",
+    "region": "library",
+    "url": "https://www.facebook.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "blue ceramic community message station with white f-shaped card divider and little conversation slips"
+  },
+  {
+    "key": "threads",
+    "title": "Threads",
+    "purpose": "Read Threads in your world",
+    "region": "library",
+    "url": "https://www.threads.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "ivory and charcoal thread spool conversation device, looped at-sign wire and paper message ribbon"
+  },
+  {
+    "key": "capcut",
+    "title": "CapCut",
+    "purpose": "Edit videos in CapCut on the web",
+    "region": "work",
+    "url": "https://www.capcut.com/editor",
+    "bundleIds": [
+      "com.lemon.lvoverseas"
+    ],
+    "preferNative": false,
+    "deviceConcept": "ivory enamel film editing machine with black crossed ribbon cutter and two small film reels"
+  },
+  {
+    "key": "uber",
+    "title": "Uber",
+    "purpose": "Book rides on Uber’s website; Fox can check prices for you",
+    "region": "money",
+    "url": "https://m.uber.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "charcoal and ivory miniature ride pickup meter with a tiny car-shaped cabin and route ribbon"
+  },
+  {
+    "key": "uber-eats",
+    "title": "Uber Eats",
+    "purpose": "Order food on Uber Eats; Fox can find a place for you",
+    "region": "money",
+    "url": "https://www.ubereats.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "sage insulated food delivery carrier with ivory cloche lid and receipt dispenser"
+  },
+  {
+    "key": "booking",
+    "title": "Booking.com",
+    "purpose": "Find hotels on Booking.com; Fox can search and compare them for you",
+    "region": "money",
+    "url": "https://www.booking.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "blue enamel hotel reservation key rack with small brass keys and B-shaped reception bell"
+  },
+  {
+    "key": "feishu",
+    "title": "飞书",
+    "purpose": "Work with your team on Feishu’s website",
+    "region": "work",
+    "url": "https://www.feishu.cn/",
+    "bundleIds": [
+      "com.electron.lark"
+    ],
+    "preferNative": false,
+    "deviceConcept": "blue turquoise wing-shaped ceramic team message hub with shared document trays"
+  },
+  {
+    "key": "bilibili",
+    "title": "哔哩哔哩",
+    "purpose": "Watch videos on bilibili; Fox can find them for you",
+    "region": "travel",
+    "url": "https://www.bilibili.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "pastel blue ceramic smiling television with twin antennae, pink dial and compact fabric speaker"
+  },
+  {
+    "key": "xiaohongshu",
+    "title": "小红书",
+    "purpose": "Find tips on Xiaohongshu; Fox can search notes for you",
+    "region": "library",
+    "url": "https://www.xiaohongshu.com/explore",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "coral enamel lifestyle scrapbook camera with cream picture cards and small red book"
+  },
+  {
+    "key": "baidu-netdisk",
+    "title": "百度网盘",
+    "purpose": "Open your files on Baidu Netdisk’s website",
+    "region": "work",
+    "url": "https://pan.baidu.com/",
+    "bundleIds": [
+      "com.baidu.netdisk"
+    ],
+    "preferNative": false,
+    "deviceConcept": "blue red interlocking cloud-shaped enamel storage unit with cream file drawers"
+  },
+  {
+    "key": "linear",
+    "title": "Linear",
+    "purpose": "Track issues in Linear on its website",
+    "region": "work",
+    "url": "https://linear.app/",
+    "bundleIds": [
+      "com.linear"
+    ],
+    "preferNative": false,
+    "deviceConcept": "violet metal issue-track conveyor with circular diagonal-striped wheel and small ticket cards"
+  }
+]

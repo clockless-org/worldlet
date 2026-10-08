@@ -1,0 +1,435 @@
+[
+ {
+  "name": "google accepted",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid"
+   }
+  }
+ },
+ {
+  "name": "google v2 path and explicit default port accepted",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com:443/o/oauth2/v2/auth?x=1"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com:443/o/oauth2/v2/auth?x=1"
+   }
+  }
+ },
+ {
+  "name": "google wrong path rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/token?x=1"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google path traversal rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/../oauth2/auth"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google non-default port rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com:8443/o/oauth2/auth"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google fragment rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid#x"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google user info rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://user@accounts.google.com/o/oauth2/auth"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google http rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "http://accounts.google.com/o/oauth2/auth"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google other host rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com.evil.test/o/oauth2/auth"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google whitespace rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid x"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google oversize rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?q=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google second handoff rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": true
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google missing run flag rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid"
+   },
+   "action": "google",
+   "operation": "connect"
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google wrong operation rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid"
+   },
+   "action": "google",
+   "operation": "disconnect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google during model login rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid"
+   },
+   "action": "modelLogin",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected Google authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "google missing url rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "google_auth"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Missing Agent event field: url",
+   "ok": false
+  }
+ },
+ {
+  "name": "model accepted",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://auth.openai.com/codex/device",
+    "code": "ABCD-1234"
+   },
+   "action": "modelLogin",
+   "sent": false
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "code": "ABCD-1234",
+    "type": "authorization",
+    "url": "https://auth.openai.com/codex/device"
+   }
+  }
+ },
+ {
+  "name": "model second handoff rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://auth.openai.com/codex/device",
+    "code": "ABCD-1234"
+   },
+   "action": "modelLogin",
+   "sent": true
+  },
+  "expected": {
+   "error": "Unexpected model authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "model wrong action rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://auth.openai.com/codex/device",
+    "code": "ABCD-1234"
+   },
+   "action": "google",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected model authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "model other url rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://evil.test/codex/device",
+    "code": "ABCD-1234"
+   },
+   "action": "modelLogin",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected model authorization event.",
+   "ok": false
+  }
+ },
+ {
+  "name": "model empty code rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://auth.openai.com/codex/device",
+    "code": ""
+   },
+   "action": "modelLogin",
+   "sent": false
+  },
+  "expected": {
+   "error": "Invalid model authorization code.",
+   "ok": false
+  }
+ },
+ {
+  "name": "model oversize code rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://auth.openai.com/codex/device",
+    "code": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+   },
+   "action": "modelLogin",
+   "sent": false
+  },
+  "expected": {
+   "error": "Invalid model authorization code.",
+   "ok": false
+  }
+ },
+ {
+  "name": "model invalid code rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://auth.openai.com/codex/device",
+    "code": "ABCD 1234"
+   },
+   "action": "modelLogin",
+   "sent": false
+  },
+  "expected": {
+   "error": "Invalid model authorization code.",
+   "ok": false
+  }
+ },
+ {
+  "name": "model non-ascii code rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "model_auth",
+    "url": "https://auth.openai.com/codex/device",
+    "code": "ABCD-１２"
+   },
+   "action": "modelLogin",
+   "sent": false
+  },
+  "expected": {
+   "error": "Invalid model authorization code.",
+   "ok": false
+  }
+ },
+ {
+  "name": "unknown handoff rejected",
+  "operation": "harnessAuthHandoff",
+  "input": {
+   "event": {
+    "type": "browser_open",
+    "url": "https://accounts.google.com/o/oauth2/auth?client_id=abc&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=openid"
+   },
+   "action": "google",
+   "operation": "connect",
+   "sent": false
+  },
+  "expected": {
+   "error": "Unexpected authorization event.",
+   "ok": false
+  }
+ }
+]

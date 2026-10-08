@@ -1,0 +1,14 @@
+{
+ "version":1,
+ "status":"registration-draft-not-live",
+ "atlas":"drafting-release-v1.png",
+ "size":[1536,1024],
+ "pencilMask":[[100,10],[450,10],[450,390],[100,390]],
+ "sourceEraser":[207,50],
+ "sourceTip":[414,376],
+ "bindEraser":[509,578],
+ "bindTip":[715,912],
+ "coordinates":"Pixel-space similarity into original drafting atlas; existing writing-arm transform then maps to Fox canvas.",
+ "ownership":"Only use the empty writing arm and independent pencil from this atlas; keep original paper and supporting arm.",
+ "limitations":["Fingers are a relaxed cupped paw, not separately articulated","Release choreography and hand-shape transition need visual acceptance"]
+}

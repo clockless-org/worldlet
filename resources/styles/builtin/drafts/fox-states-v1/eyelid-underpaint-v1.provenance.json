@@ -1,0 +1,8 @@
+{
+  "status": "draft; not runtime artwork",
+  "tool": "built-in image_gen",
+  "reference": "resources/styles/builtin/assets/companion/rig/fallback.png",
+  "output": "eyelid-underpaint-v1.png",
+  "transparentBackground": true,
+  "prompt": "Use case: precise-object-edit. Asset type: hidden underpaint for a painted 2D character's independently animated eyelids, not a new character design. Image 1 is the EDIT TARGET and exact registration reference. Change ONLY the two eye ovals: remove both eyeballs, pupils, white sclera, highlights and every dark eyelid/lash contour; fill each former eye area with uninterrupted orange fur matching the surrounding fox face's local color, lighting and hair direction. These are deliberately featureless orange-fur patches underneath future animated eyelids, NOT closed eyes: no dark closed-eye smile lines, no eye sockets, no dark outlines. Preserve eyebrows. Preserve exact original full-body pose, head shape/tilt, ears, mouth, nose, scarf, limbs, tail, proportions, framing and camera. Preserve transparent background. Same square composition as reference, character must not shift, rotate, zoom or be redesigned. No text, no labels, no extra elements."
+}

@@ -1,0 +1,105 @@
+/* One painted material family, shared by the world and detached Companion.
+   Surface art stays separate from runtime text, hit areas and organic masks. */
+:root{
+ --hud-paper-art:url('hud/paper.png');
+ --hud-button-art:url('hud/buttons.png');
+ --hud-paper-ink:#304f40;
+ --hud-honey:#efc77f;
+ --hud-control-shadow:0 2px 5px #233d3020,inset 0 1px 0 #fffdf3a0;
+ --hud-scene-glass:#f4f0e518;
+ --hud-scene-hover:#f4f0e530;
+ --hud-scene-dark-glass:#181b2059;
+ --hud-scene-dark-hover:#181b2080;
+ --hud-scene-line:#ffffff14;
+ --hud-scene-blur:blur(12px);
+ --hud-input-inset:inset 0 2px 5px #14251b24,inset 0 -1px 0 #ffffff12;
+ --hud-scene-ink:#fffdf4;
+ --hud-scene-text-shadow:0 1px 3px #14251bd9,0 0 8px #14251b66;
+}
+.native-console.is-dragging-fox .companion-avatar{cursor:grabbing}
+.ui-button,.native-console :is(.world-actions .world-capsule,.companion-guide-actions button,.companion-suggestions button,.world-onboarding button,.companion-info-card button,.companion-info-action,.companion-feedback-actions button,.companion-history-controls button,.companion-action-footer a){
+ border:1px solid #b4a17d38;border-radius:20px 23px 21px 22px;
+ background:var(--control-fill);
+ color:var(--hud-paper-ink);box-shadow:var(--hud-control-shadow);text-shadow:none;
+ backdrop-filter:none;-webkit-backdrop-filter:none;white-space:nowrap;
+ transition:filter .16s ease,box-shadow .16s ease,opacity .16s ease;
+}
+.ui-button[data-variant=primary],.native-console :is(.companion-speaker,.companion-feedback-actions .companion-feedback-send){
+ background-color:var(--hud-honey);background-image:linear-gradient(#efc77fc9,#efc77fc9),var(--hud-paper-art);color:var(--hud-paper-ink);border:0;
+}
+.ui-button:not(:disabled):hover,.native-console :is(.world-actions .world-capsule,.companion-guide-actions button,.companion-suggestions button,.world-onboarding button,.companion-info-card button,.companion-feedback-actions button,.companion-history-controls button):not(:disabled):hover{
+ background:var(--control-hover);color:var(--control-ink);filter:none;box-shadow:0 3px 8px #233d3028;
+}
+.ui-button[data-variant=primary]:hover{background-color:var(--hud-honey);background-image:linear-gradient(#efc77fc9,#efc77fc9),var(--hud-paper-art)}
+.ui-button:active,.native-console :is(.world-capsule,.companion-guide-actions button,.companion-suggestions button,.companion-info-card button):not(:disabled):active{filter:brightness(.96);box-shadow:inset 0 1px 3px #233d3028}
+.native-console :is(.world-capsule,.companion-guide-actions button,.companion-suggestions button,.companion-info-card button):disabled{opacity:.45;cursor:default}
+.native-console :is(.world-capsule,.companion-guide-actions button,.companion-suggestions button,.companion-info-panel button):focus-visible{outline:2px solid var(--hud-paper-ink);outline-offset:3px}
+.native-console :is(.world-capsule,.companion-guide-actions button) svg{stroke-width:2.6;filter:none}
+
+/* Keep the existing irregular speech silhouette and upright paging controls.
+   The paint fills the mask, so no atlas alpha fringe can enter the world. */
+.native-console.fox-first-console .companion-dialogue{--fox-ink:var(--hud-paper-ink);--fox-badge:var(--hud-honey);--fox-paper:var(--ui-paper);color:var(--hud-paper-ink)}
+.native-console.fox-first-console .companion-dialogue::before{background:var(--ui-paper) var(--hud-paper-art) center/cover}
+.native-console.fox-first-console .companion-speaker{background:linear-gradient(#efc77fc9,#efc77fc9),var(--hud-paper-art) center/cover;color:var(--hud-paper-ink);border-radius:13px 11px 14px 10px;box-shadow:0 2px 4px #233d3014;transform:rotate(-3deg)}
+.native-console :is(.companion-info-panel,.notion-dialog){background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--hud-paper-ink);border:1px solid #b4a17d38;border-radius:24px 28px 26px 30px;box-shadow:0 12px 40px #162a3230}
+.native-console .companion-info-nav button{border-radius:15px 17px 0 0;color:var(--hud-paper-ink)}
+.native-console .companion-info-nav button[aria-current]{background:#efc77f60;border-bottom-color:var(--hud-paper-ink);color:var(--hud-paper-ink)}
+.native-console .companion-history-controls{background:var(--ui-paper) var(--hud-paper-art) center/cover}
+.native-console .companion-text-entry #notionCommand{background:var(--ui-paper) var(--hud-paper-art) center/cover;border:1px solid #b4a17d38;border-radius:22px 25px 23px 24px;box-shadow:var(--hud-control-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
+.native-console .companion-text-entry :is(#notionInput,#notionSend){color:var(--hud-paper-ink);text-shadow:none}
+.native-console .companion-text-entry #notionSend{opacity:1}
+.native-console .companion-action-footer a{padding:6px 13px;text-decoration:none}
+.native-console .notion-pin[data-kind="region-more"]{background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--hud-paper-ink);border-color:transparent;backdrop-filter:none;text-shadow:none;box-shadow:var(--hud-control-shadow)}
+.native-console .notion-pin[data-kind="region-more"]:hover{background:var(--ui-paper) var(--hud-paper-art) center/cover;filter:brightness(1.05)}
+
+/* Actual painted atlas windows; 240px crops sit within the clean 260px discs.
+   Runtime clipping intentionally excludes every dirty edge/gutter pixel.
+   Screen artwork is 34px, while the semantic button keeps a 44px hit target. */
+.native-console .companion-panel-button::before{
+ inset:5px;background:var(--hud-button-art) 64.6943% 35.3057%/522.5% 522.5%;
+ border:0;border-radius:50%;clip-path:circle(48%);box-shadow:none;transition:filter .16s ease;
+}
+.native-console .companion-panel-button{left:calc(100% - 24px);bottom:6px}
+.native-console .companion-panel-button svg{width:18px;height:18px;opacity:1;color:var(--hud-scene-ink);filter:drop-shadow(0 1px 2px #14251bb3);position:relative;stroke-width:1.6}
+.native-console .companion-panel-button:is(:hover,[aria-expanded=true])::before{background:var(--hud-button-art) 64.6943% 35.3057%/522.5% 522.5%;filter:brightness(1.06)}
+.native-console .companion-panel-button:active::before{filter:brightness(.94);box-shadow:none}
+.native-console :is(.notion-close,.companion-info-close){width:44px;height:44px;min-height:44px;padding:0;border:0;border-radius:50%;background:none;color:transparent;font-size:0;box-shadow:none;isolation:isolate;cursor:pointer}
+.native-console :is(.notion-close,.companion-info-close)::before{content:'';position:absolute;inset:5px;background:var(--hud-button-art) 5.6213% 6.6075%/522.5% 522.5%;clip-path:circle(48%);border-radius:50%;pointer-events:none}
+.native-console :is(.notion-close,.companion-info-close)>svg{opacity:0}
+.native-console :is(.notion-close,.companion-info-close):hover::before{filter:brightness(1.06)}
+.native-console :is(.notion-close,.companion-info-close):active::before{filter:brightness(.94)}
+.native-console :is(.notion-close,.companion-info-close):focus-visible{outline:2px solid var(--hud-paper-ink);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.ui-button,.native-console :is(.world-capsule,.companion-guide-actions button,.companion-suggestions button,.companion-info-card button),.native-console .companion-panel-button::before{transition:none}}
+
+/* World controls float above scenery; reading surfaces retain their organic paper. */
+.native-console :is(.companion-info-panel,.notion-dialog){--control-fill:#fffdf4b8;--control-hover:#e4ebdfeb;--control-ink:#203b30;--control-muted:#4d6255}
+.native-console .companion-feedback-actions .companion-feedback-send{background:var(--control-forest);color:#fff}
+.native-console :is(.world-actions .world-capsule,.companion-guide-actions button,.companion-suggestions button,.world-footer-update),
+.native-console .companion-panel-button::before,
+.native-console .companion-panel-button:is(:hover,[aria-expanded=true])::before{
+ background:var(--hud-scene-glass);color:var(--hud-scene-ink);border:1px solid var(--hud-scene-line);border-radius:999px;
+ backdrop-filter:var(--hud-scene-blur);-webkit-backdrop-filter:var(--hud-scene-blur);box-shadow:none;
+ text-shadow:var(--hud-scene-text-shadow);clip-path:none;filter:none;
+}
+.native-console :is(.world-actions .world-capsule,.companion-guide-actions button,.companion-suggestions button,.world-footer-update):not(:disabled):hover,
+.native-console .companion-panel-button:is(:hover,[aria-expanded=true])::before{background:var(--hud-scene-hover);color:var(--hud-scene-ink);filter:none;box-shadow:none}
+.native-console .companion-panel-button::before{inset:8px}
+.native-console :is(.world-capsule,.companion-guide-actions button) svg{stroke-width:1.8;filter:drop-shadow(0 1px 2px #14251b99)}
+.native-console :is(.world-actions .world-capsule,.companion-guide-actions button,.companion-suggestions button){min-height:44px}
+.native-console .companion-text-entry{width:min(160px,calc(100% - 32px));transition:width .22s ease-out}
+.native-console .companion-text-entry:has(#notionInput:focus){width:min(224px,calc(100% - 32px))}
+.native-console .companion-text-entry #notionCommand,
+.native-console .companion-text-entry #notionCommand:focus-within{background:var(--hud-scene-glass);border-color:var(--hud-scene-line);border-radius:18px;box-shadow:var(--hud-input-inset);backdrop-filter:var(--hud-scene-blur);-webkit-backdrop-filter:var(--hud-scene-blur)}
+.native-console .companion-text-entry #notionCommand:hover{background:var(--hud-scene-hover)}
+.native-console .companion-text-entry :is(#notionInput,#notionSend){color:var(--hud-scene-ink);text-shadow:var(--hud-scene-text-shadow)}
+.native-console .companion-text-entry #notionInput::placeholder{color:#ffffffbd}
+.native-console :is(.world-capsule,.companion-guide-actions button,.companion-suggestions button):focus-visible{outline-color:#fff;box-shadow:0 0 0 5px #181b20}
+.notion-world .notion-pin[data-kind="region-more"]{border-color:transparent;background:var(--hud-scene-glass);color:var(--hud-scene-ink);box-shadow:none;text-shadow:var(--hud-scene-text-shadow);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.notion-world .notion-pin[data-kind="region-more"]:hover{background:var(--hud-scene-hover);filter:none}
+@media(max-width:800px){.native-console:is(.is-typing,.compact-viewport) .companion-text-entry{width:min(160px,calc(100% - 124px))}.native-console:is(.is-typing,.compact-viewport) .companion-text-entry:has(#notionInput:focus){width:min(224px,calc(100% - 124px))}}
+@media(prefers-reduced-motion:reduce){.native-console .companion-text-entry{transition:none}}
+@media(prefers-reduced-transparency:reduce){:root{--hud-scene-glass:#314339;--hud-scene-hover:#43574a;--hud-scene-dark-glass:#181b20;--hud-scene-dark-hover:#30353d;--hud-scene-blur:none}}
+
+/* Fox actions use the same controls in Native Open, Native Focus and Web. */
+#notionWorld.native-console.fox-first-console .world-actions .world-capsule{min-height:40px;height:auto;padding:8px 12px;gap:7px;font:500 14px/1.3 var(--ui-font-ui);border-radius:20px}
+#notionWorld.native-console.fox-first-console .world-actions .world-capsule svg{width:16px;height:16px;flex:0 0 16px}

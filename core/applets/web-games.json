@@ -1,0 +1,182 @@
+[
+ {
+  "key": "wordle",
+  "title": "Wordle",
+  "url": "https://www.nytimes.com/games/wordle/index.html",
+  "source": "New York Times Games",
+  "description": "Guess the five-letter word in six tries. A new puzzle every day.",
+  "color": "#6aaa64",
+  "popularity": "Most-played browser game by daily players (NYT reports tens of millions a day)"
+ },
+ {
+  "key": "nyt-connections",
+  "title": "Connections",
+  "url": "https://www.nytimes.com/games/connections",
+  "source": "New York Times Games",
+  "description": "Sort sixteen words into four hidden groups. A new puzzle every day.",
+  "color": "#b49fda",
+  "popularity": "NYT Games second hit after Wordle; daily puzzle"
+ },
+ {
+  "key": "slither-io",
+  "title": "Slither.io",
+  "url": "https://slither.io/",
+  "source": "slither.io",
+  "description": "Grow the longest snake in a live arena full of other players.",
+  "color": "#3a8f5c",
+  "popularity": "One of the highest-traffic browser games for about a decade"
+ },
+ {
+  "key": "agar-io",
+  "title": "Agar.io",
+  "url": "https://agar.io/",
+  "source": "agar.io",
+  "description": "Eat smaller cells and grow in a live arena full of other players.",
+  "color": "#4f8fd6",
+  "popularity": "The original .io arena game, still among the most-played"
+ },
+ {
+  "key": "krunker-io",
+  "title": "Krunker",
+  "url": "https://krunker.io/",
+  "source": "krunker.io",
+  "description": "A fast first-person arena shooter that runs right in the browser.",
+  "color": "#c8553d",
+  "popularity": "Most-played browser shooter, with its own esports scene"
+ },
+ {
+  "key": "skribbl-io",
+  "title": "skribbl.io",
+  "url": "https://skribbl.io/",
+  "source": "skribbl.io",
+  "description": "Draw a word while friends guess it, then guess theirs.",
+  "color": "#2c5bb5",
+  "popularity": "Highest-traffic browser game for groups of friends"
+ },
+ {
+  "key": "infinite-craft",
+  "title": "Infinite Craft",
+  "url": "https://neal.fun/infinite-craft/",
+  "source": "neal.fun",
+  "description": "Combine elements into new ones, starting from water, fire, wind and earth.",
+  "color": "#e8e4da",
+  "popularity": "neal.fun AI crafting game that went viral in 2024 and stays popular"
+ },
+ {
+  "key": "little-alchemy-2",
+  "title": "Little Alchemy 2",
+  "url": "https://littlealchemy2.com/",
+  "source": "littlealchemy2.com",
+  "description": "Mix elements to discover hundreds of new ones.",
+  "color": "#3c3c50",
+  "popularity": "Long-running crafting puzzle with millions of players"
+ },
+ {
+  "key": "cookie-clicker",
+  "title": "Cookie Clicker",
+  "url": "https://orteil.dashnet.org/cookieclicker/",
+  "source": "DashNet",
+  "description": "Bake cookies, buy grandmas and factories, bake even more cookies.",
+  "color": "#b07a3c",
+  "popularity": "The classic idle game, online since 2013"
+ },
+ {
+  "key": "lichess",
+  "title": "Lichess",
+  "url": "https://lichess.org/",
+  "source": "lichess.org",
+  "description": "Free chess: play people or the computer, solve puzzles. No ads.",
+  "color": "#3b3b3b",
+  "popularity": "Free, ad-free chess site with millions of games a day"
+ },
+ {
+  "key": "drive-mad",
+  "title": "Drive Mad",
+  "url": "https://poki.com/en/g/drive-mad",
+  "source": "Poki",
+  "description": "Drive a little truck over wild physics tracks without flipping.",
+  "color": "#e0a03a",
+  "popularity": "Top game on Poki (100M monthly players) in 2026"
+ },
+ {
+  "key": "subway-surfers",
+  "title": "Subway Surfers",
+  "url": "https://poki.com/en/g/subway-surfers",
+  "source": "Poki",
+  "description": "Run along the tracks, dodge trains and collect coins.",
+  "color": "#e2c33f",
+  "popularity": "Top Poki game; one of the most-downloaded mobile games ever"
+ },
+ {
+  "key": "sekai",
+  "title": "Sekai",
+  "url": "https://sekai.ai/",
+  "source": "Sekai",
+  "description": "Play, make and remix small AI-made games from the Sekai community.",
+  "color": "#7c5cff",
+  "popularity": "Sekai (5M+ Android installs, 15M community mini-apps); the feed itself"
+ },
+ {
+  "key": "sekai-rogue-ai-tic-tac-toe",
+  "title": "Rogue AI Tic-Tac-Toe",
+  "url": "https://sekai.ai/play/6431a93a-e538-4564-ac34-8b46ac6e467c",
+  "source": "Sekai",
+  "description": "Tic-tac-toe against an AI that does not play fair. A Sekai favourite.",
+  "color": "#5a6bd8",
+  "popularity": "Most-liked game in the Sekai web feed (58.3K likes, 2026-10-03)"
+ },
+ {
+  "key": "sekai-sketch-racer",
+  "title": "Sketch Racer",
+  "url": "https://sekai.ai/play/878c8bed-80d5-469c-93a5-8a96aa1e4ad4",
+  "source": "Sekai",
+  "description": "Race a hand-drawn car over sketchbook tracks with jump pads. A Sekai favourite.",
+  "color": "#d8d2c0",
+  "popularity": "Sekai web feed, 50.6K likes (2026-10-03)"
+ },
+ {
+  "key": "sekai-mixing-colors",
+  "title": "Mixing Colors",
+  "url": "https://sekai.ai/play/1821065b-6528-4963-bde3-30af540fd6b8",
+  "source": "Sekai",
+  "description": "Mix paints to match the target shade. A Sekai favourite.",
+  "color": "#d86a8f",
+  "popularity": "Sekai web feed, 28.7K likes (2026-10-03)"
+ },
+ {
+  "key": "sekai-roller-coaster",
+  "title": "Roller Coaster Builder",
+  "url": "https://sekai.ai/play/1b092651-e97e-40f4-bb29-49f6fe133bfd",
+  "source": "Sekai",
+  "description": "Draw a roller coaster track and ride it in 3D. A Sekai favourite.",
+  "color": "#4f9fd6",
+  "popularity": "Sekai web feed, 27.8K likes (2026-10-03)"
+ },
+ {
+  "key": "sekai-3d-uno",
+  "title": "3D UNO!",
+  "url": "https://sekai.ai/play/6cd2ca94-7b6f-409d-a17c-0b0751291c55",
+  "source": "Sekai",
+  "description": "The card game UNO in 3D against the computer. A Sekai favourite.",
+  "color": "#d84a3a",
+  "popularity": "Sekai web feed, 24.9K likes (2026-10-03)"
+ },
+ {
+  "key": "sekai-devil-level",
+  "title": "Devil Level: 50 Trolls",
+  "url": "https://sekai.ai/play/3beb3307-e5cc-44b3-89b4-b8942e5d085e",
+  "source": "Sekai",
+  "description": "Fifty troll platformer levels where nothing is what it seems. A Sekai favourite.",
+  "color": "#e8c23a",
+  "popularity": "Sekai web feed, 24.5K likes (2026-10-03)"
+ },
+ {
+  "key": "pokemon-showdown",
+  "title": "Pokémon Showdown",
+  "url": "https://play.pokemonshowdown.com/",
+  "source": "Smogon",
+  "description": "Battle trainers with random or your own Pokémon teams; Fox can review your games.",
+  "color": "#5865a8",
+  "popularity": "The most-played Pokémon battle simulator (owner request 2026-10-04)"
+ }
+]

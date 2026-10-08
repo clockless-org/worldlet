@@ -1,0 +1,13 @@
+{
+  "status": "draft-not-live",
+  "tool": "built-in image_gen",
+  "asset": "search-dock.png",
+  "prompt": "Use case: stylized-concept. Asset type: one transparent-background 2D game prop sprite for a cozy painted miniature village, a small magnifying-glass handle resting cradle. Primary request: draw ONLY an empty low wooden rest, no magnifying glass, no fox, no other props. A tiny warm walnut block with soft rounded corners, wider than tall, two subtly raised sides forming a shallow diagonal V-shaped groove on its upper surface. The groove receives the lower tip of a handheld magnifier leaning upward to the right at about 45 degrees. Three-quarter frontal view, see its top and front, camera gently above ground. Low compact stable silhouette, approximately width 3 times height, no tall posts. Hand-painted storybook game sprite with fine warm wood grain, restrained dark brown / warm caramel highlights, soft diffuse light from upper left, dimensional painterly shading matching a softly painted orange fox and aged-brass magnifier. Object centered with generous transparent margins, clean soft antialiased contour, genuinely transparent background and no opaque backdrop, no scenery, no broad ground shadow, no lettering, no logo, no metal decoration, no glow. This will render very small beside a fox, so simplify details and keep clear rounded silhouette.",
+  "source": "exec-3c95e962-1638-485a-9c08-c1254e7b2b53.png",
+  "alpha": "Original generated alpha preserved. Exterior brown RGB is invisible where alpha is zero.",
+  "rejectedEdit": {
+    "source": "exec-225151d3-70de-4e85-bc16-619a55bc25d4.png",
+    "prompt": "Use case: background-extraction. Edit target: supplied wooden cradle sprite. Change ONLY the background/outer halo: remove every bit of the brown glow, haze, cast shadow and backdrop outside the actual wooden object. Output a clean isolated wooden cradle cutout with genuinely fully transparent alpha outside its physical silhouette, including the open U-shaped groove above the concave wood surface. Preserve the wooden object's shape, camera, wood grain, color and painted shading exactly. Do not darken the wood. Keep normal narrow antialiased edge pixels only. No glow, no ground shadow, no border, no backdrop, no new object. This is a transparent sprite for compositing on arbitrary backgrounds.",
+    "reason": "Unnecessary extraction edit changed wood size and texture; original alpha already isolates the object."
+  }
+}

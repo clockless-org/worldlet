@@ -1,0 +1,8 @@
+{
+ "tool":"built-in imagegen",
+ "source":"exec-9b1e9e4d-45ab-44fa-a041-64a043d239e0.png",
+ "file":"reading-parts.png",
+ "reference":"reading.png",
+ "status":"Transparent separated book, turning page and complete gripping forelimbs. Registration study, not live artwork.",
+ "prompt":"Use case: precise-object-edit. Asset type: 2D animation separated reading-prop atlas. Image 1 is the edit target and exact fur/material/style reference. Extract and reconstruct ONLY four isolated pieces arranged as a clean 2x2 atlas on genuinely transparent background: top-left the complete small open olive-green clothbound book alone (no paws attached), same front cover/spine perspective as the reference; top-right a single cream turning page in that book's perspective, softly curved; bottom-left the fox's viewer-left complete bent orange forelimb with brown three-toed paw in its reference book-gripping pose; bottom-right the viewer-right complete bent forelimb with brown three-toed paw in its reference gripping pose. Each arm is one continuous shoulder-to-paw cutout with hidden fur reconstructed, rounded shoulder cap, original paw curl, NO white chest fur and NO book fragments attached. All four pieces completely separate, generous transparent gutters, no overlaps. Keep original painted soft fur, warm lighting, sage book cloth, cream paper, brown paws, no text. No fox head, body, tail, scarf, hindlegs, scene, labels, shadows on a floor, checkerboard, frames or extra items. Preserve reference appearance, not vector/cartoon redesign. This atlas is for attaching these layers to the original unchanged fox."
+}

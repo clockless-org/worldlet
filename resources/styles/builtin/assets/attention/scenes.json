@@ -1,0 +1,830 @@
+[
+  {
+    "id": "tennis",
+    "keywords": [
+      "tennis",
+      "网球"
+    ]
+  },
+  {
+    "id": "badminton",
+    "keywords": [
+      "badminton",
+      "羽毛球"
+    ]
+  },
+  {
+    "id": "basketball",
+    "keywords": [
+      "basketball",
+      "篮球"
+    ]
+  },
+  {
+    "id": "soccer",
+    "keywords": [
+      "soccer",
+      "football",
+      "足球"
+    ]
+  },
+  {
+    "id": "running",
+    "keywords": [
+      "running",
+      "jogging",
+      "marathon",
+      "跑步",
+      "马拉松"
+    ]
+  },
+  {
+    "id": "cycling",
+    "keywords": [
+      "cycling",
+      "bike ride",
+      "骑行",
+      "骑车"
+    ]
+  },
+  {
+    "id": "swimming",
+    "keywords": [
+      "swimming",
+      "游泳"
+    ]
+  },
+  {
+    "id": "yoga",
+    "keywords": [
+      "yoga",
+      "瑜伽"
+    ]
+  },
+  {
+    "id": "hiking",
+    "keywords": [
+      "hiking",
+      "hike",
+      "徒步",
+      "爬山"
+    ]
+  },
+  {
+    "id": "golf",
+    "keywords": [
+      "golf",
+      "高尔夫"
+    ]
+  },
+  {
+    "id": "coffee-meetup",
+    "keywords": [
+      "coffee",
+      "cafe",
+      "café",
+      "咖啡"
+    ]
+  },
+  {
+    "id": "lunch",
+    "keywords": [
+      "lunch",
+      "午餐",
+      "午饭"
+    ]
+  },
+  {
+    "id": "dinner",
+    "keywords": [
+      "dinner",
+      "晚餐",
+      "晚饭"
+    ]
+  },
+  {
+    "id": "birthday",
+    "keywords": [
+      "birthday",
+      "生日"
+    ]
+  },
+  {
+    "id": "picnic",
+    "keywords": [
+      "picnic",
+      "野餐"
+    ]
+  },
+  {
+    "id": "family-gathering",
+    "keywords": [
+      "family gathering",
+      "family dinner",
+      "家庭聚会"
+    ]
+  },
+  {
+    "id": "wedding",
+    "keywords": [
+      "wedding",
+      "婚礼"
+    ]
+  },
+  {
+    "id": "reunion",
+    "keywords": [
+      "reunion",
+      "同学聚会"
+    ]
+  },
+  {
+    "id": "playdate",
+    "keywords": [
+      "playdate",
+      "亲子活动"
+    ]
+  },
+  {
+    "id": "volunteering",
+    "keywords": [
+      "volunteer",
+      "volunteering",
+      "志愿者",
+      "义工"
+    ]
+  },
+  {
+    "id": "team-meeting",
+    "keywords": [
+      "meeting",
+      "standup",
+      "会议",
+      "例会"
+    ]
+  },
+  {
+    "id": "video-call",
+    "keywords": [
+      "video call",
+      "zoom call",
+      "视频通话",
+      "视频会议"
+    ]
+  },
+  {
+    "id": "conference",
+    "keywords": [
+      "conference",
+      "summit",
+      "大会",
+      "峰会"
+    ]
+  },
+  {
+    "id": "presentation",
+    "keywords": [
+      "presentation",
+      "presenting",
+      "演示",
+      "汇报"
+    ]
+  },
+  {
+    "id": "interview",
+    "keywords": [
+      "interview",
+      "面试"
+    ]
+  },
+  {
+    "id": "focus-work",
+    "keywords": [
+      "focus work",
+      "deep work",
+      "专注工作"
+    ]
+  },
+  {
+    "id": "project-deadline",
+    "keywords": [
+      "deadline",
+      "due date",
+      "截止"
+    ]
+  },
+  {
+    "id": "document-review",
+    "keywords": [
+      "document review",
+      "review document",
+      "文档审核"
+    ]
+  },
+  {
+    "id": "contract-review",
+    "keywords": [
+      "contract",
+      "agreement",
+      "合同",
+      "协议"
+    ]
+  },
+  {
+    "id": "workshop",
+    "keywords": [
+      "workshop",
+      "工作坊"
+    ]
+  },
+  {
+    "id": "flight",
+    "keywords": [
+      "flight",
+      "flying",
+      "航班",
+      "机票"
+    ]
+  },
+  {
+    "id": "train",
+    "keywords": [
+      "train",
+      "railway",
+      "火车",
+      "高铁"
+    ]
+  },
+  {
+    "id": "road-trip",
+    "keywords": [
+      "road trip",
+      "自驾"
+    ]
+  },
+  {
+    "id": "hotel",
+    "keywords": [
+      "hotel",
+      "酒店"
+    ]
+  },
+  {
+    "id": "packing",
+    "keywords": [
+      "packing",
+      "luggage",
+      "行李"
+    ]
+  },
+  {
+    "id": "passport",
+    "keywords": [
+      "passport",
+      "visa",
+      "护照",
+      "签证"
+    ]
+  },
+  {
+    "id": "airport-pickup",
+    "keywords": [
+      "airport pickup",
+      "pick up at airport",
+      "接机"
+    ]
+  },
+  {
+    "id": "public-transit",
+    "keywords": [
+      "public transit",
+      "bus",
+      "subway",
+      "公交",
+      "地铁"
+    ]
+  },
+  {
+    "id": "beach-trip",
+    "keywords": [
+      "beach",
+      "海滩"
+    ]
+  },
+  {
+    "id": "camping",
+    "keywords": [
+      "camping",
+      "campsite",
+      "露营"
+    ]
+  },
+  {
+    "id": "package-delivery",
+    "keywords": [
+      "package",
+      "delivery",
+      "parcel",
+      "快递",
+      "包裹"
+    ]
+  },
+  {
+    "id": "package-return",
+    "keywords": [
+      "return package",
+      "package return",
+      "return label",
+      "退货"
+    ]
+  },
+  {
+    "id": "grocery-shopping",
+    "keywords": [
+      "groceries",
+      "grocery",
+      "买菜",
+      "采购食材"
+    ]
+  },
+  {
+    "id": "cooking",
+    "keywords": [
+      "cooking",
+      "recipe",
+      "烹饪",
+      "菜谱"
+    ]
+  },
+  {
+    "id": "laundry",
+    "keywords": [
+      "laundry",
+      "洗衣"
+    ]
+  },
+  {
+    "id": "house-cleaning",
+    "keywords": [
+      "cleaning",
+      "housekeeping",
+      "打扫",
+      "清洁"
+    ]
+  },
+  {
+    "id": "home-repair",
+    "keywords": [
+      "repair",
+      "plumber",
+      "维修"
+    ]
+  },
+  {
+    "id": "moving-home",
+    "keywords": [
+      "moving home",
+      "moving house",
+      "搬家"
+    ]
+  },
+  {
+    "id": "gardening",
+    "keywords": [
+      "garden",
+      "gardening",
+      "园艺"
+    ]
+  },
+  {
+    "id": "pet-care",
+    "keywords": [
+      "pet care",
+      "pet food",
+      "宠物"
+    ]
+  },
+  {
+    "id": "medical-appointment",
+    "keywords": [
+      "doctor",
+      "medical appointment",
+      "看医生",
+      "就诊"
+    ]
+  },
+  {
+    "id": "dental-appointment",
+    "keywords": [
+      "dentist",
+      "dental",
+      "牙医",
+      "洗牙"
+    ]
+  },
+  {
+    "id": "eye-check",
+    "keywords": [
+      "eye exam",
+      "eye check",
+      "optometrist",
+      "视力",
+      "眼科"
+    ]
+  },
+  {
+    "id": "pharmacy",
+    "keywords": [
+      "pharmacy",
+      "prescription",
+      "药房",
+      "取药"
+    ]
+  },
+  {
+    "id": "wellness-check",
+    "keywords": [
+      "checkup",
+      "check-up",
+      "health check",
+      "体检"
+    ]
+  },
+  {
+    "id": "rest",
+    "keywords": [
+      "recovery",
+      "rest",
+      "康复",
+      "休息"
+    ]
+  },
+  {
+    "id": "sleep",
+    "keywords": [
+      "sleep",
+      "bedtime",
+      "睡眠",
+      "睡觉"
+    ]
+  },
+  {
+    "id": "hydration",
+    "keywords": [
+      "hydration",
+      "drink water",
+      "喝水"
+    ]
+  },
+  {
+    "id": "fitness-class",
+    "keywords": [
+      "fitness",
+      "gym",
+      "workout",
+      "健身"
+    ]
+  },
+  {
+    "id": "vet-appointment",
+    "keywords": [
+      "vet",
+      "veterinarian",
+      "兽医"
+    ]
+  },
+  {
+    "id": "bill-payment",
+    "keywords": [
+      "bill",
+      "payment",
+      "invoice",
+      "账单",
+      "缴费"
+    ]
+  },
+  {
+    "id": "subscription",
+    "keywords": [
+      "subscription",
+      "renewal",
+      "订阅",
+      "续费"
+    ]
+  },
+  {
+    "id": "budget-review",
+    "keywords": [
+      "budget",
+      "预算"
+    ]
+  },
+  {
+    "id": "tax-documents",
+    "keywords": [
+      "tax",
+      "taxes",
+      "税务",
+      "报税"
+    ]
+  },
+  {
+    "id": "insurance",
+    "keywords": [
+      "insurance",
+      "保险"
+    ]
+  },
+  {
+    "id": "banking",
+    "keywords": [
+      "bank",
+      "banking",
+      "银行"
+    ]
+  },
+  {
+    "id": "expense-report",
+    "keywords": [
+      "expense",
+      "reimbursement",
+      "报销"
+    ]
+  },
+  {
+    "id": "refund",
+    "keywords": [
+      "refund",
+      "refunded",
+      "退款"
+    ]
+  },
+  {
+    "id": "savings",
+    "keywords": [
+      "savings",
+      "储蓄"
+    ]
+  },
+  {
+    "id": "charity",
+    "keywords": [
+      "charity",
+      "donation",
+      "慈善",
+      "捐款"
+    ]
+  },
+  {
+    "id": "reading",
+    "keywords": [
+      "reading",
+      "读书"
+    ]
+  },
+  {
+    "id": "class",
+    "keywords": [
+      "class",
+      "lesson",
+      "上课",
+      "课程"
+    ]
+  },
+  {
+    "id": "homework",
+    "keywords": [
+      "homework",
+      "assignment",
+      "作业"
+    ]
+  },
+  {
+    "id": "exam",
+    "keywords": [
+      "exam",
+      "test preparation",
+      "考试"
+    ]
+  },
+  {
+    "id": "library",
+    "keywords": [
+      "library",
+      "图书馆"
+    ]
+  },
+  {
+    "id": "online-course",
+    "keywords": [
+      "online course",
+      "网课"
+    ]
+  },
+  {
+    "id": "language-learning",
+    "keywords": [
+      "language learning",
+      "language lesson",
+      "语言学习"
+    ]
+  },
+  {
+    "id": "music-practice",
+    "keywords": [
+      "music practice",
+      "piano",
+      "guitar",
+      "练琴",
+      "钢琴",
+      "吉他"
+    ]
+  },
+  {
+    "id": "art-class",
+    "keywords": [
+      "art class",
+      "painting",
+      "绘画",
+      "美术"
+    ]
+  },
+  {
+    "id": "research",
+    "keywords": [
+      "research",
+      "研究"
+    ]
+  },
+  {
+    "id": "concert",
+    "keywords": [
+      "concert",
+      "音乐会",
+      "演唱会"
+    ]
+  },
+  {
+    "id": "cinema",
+    "keywords": [
+      "cinema",
+      "movie",
+      "电影"
+    ]
+  },
+  {
+    "id": "theater",
+    "keywords": [
+      "theater",
+      "theatre",
+      "话剧",
+      "剧院"
+    ]
+  },
+  {
+    "id": "museum",
+    "keywords": [
+      "museum",
+      "博物馆"
+    ]
+  },
+  {
+    "id": "exhibition",
+    "keywords": [
+      "exhibition",
+      "gallery",
+      "展览"
+    ]
+  },
+  {
+    "id": "book-club",
+    "keywords": [
+      "book club",
+      "读书会"
+    ]
+  },
+  {
+    "id": "farmers-market",
+    "keywords": [
+      "farmers market",
+      "farmers' market",
+      "农夫市集"
+    ]
+  },
+  {
+    "id": "festival",
+    "keywords": [
+      "festival",
+      "节庆",
+      "节日"
+    ]
+  },
+  {
+    "id": "restaurant-booking",
+    "keywords": [
+      "restaurant reservation",
+      "restaurant booking",
+      "订餐厅"
+    ]
+  },
+  {
+    "id": "local-exploration",
+    "keywords": [
+      "local exploration",
+      "neighborhood walk",
+      "周边探索"
+    ]
+  },
+  {
+    "id": "weather-rain",
+    "keywords": [
+      "rain",
+      "rainy",
+      "下雨",
+      "降雨"
+    ]
+  },
+  {
+    "id": "weather-heat",
+    "keywords": [
+      "heat advisory",
+      "heat wave",
+      "heatwave",
+      "高温"
+    ]
+  },
+  {
+    "id": "weather-storm",
+    "keywords": [
+      "storm",
+      "hurricane",
+      "typhoon",
+      "暴风",
+      "台风"
+    ]
+  },
+  {
+    "id": "air-quality",
+    "keywords": [
+      "air quality",
+      "aqi",
+      "wildfire smoke",
+      "空气质量",
+      "山火烟雾"
+    ]
+  },
+  {
+    "id": "power-outage",
+    "keywords": [
+      "power outage",
+      "blackout",
+      "停电"
+    ]
+  },
+  {
+    "id": "water-service",
+    "keywords": [
+      "water service",
+      "water outage",
+      "停水"
+    ]
+  },
+  {
+    "id": "road-closure",
+    "keywords": [
+      "road closure",
+      "road closed",
+      "封路"
+    ]
+  },
+  {
+    "id": "security-notice",
+    "keywords": [
+      "security",
+      "phishing",
+      "suspicious login",
+      "安全提醒",
+      "可疑登录"
+    ]
+  },
+  {
+    "id": "service-update",
+    "keywords": [
+      "service update",
+      "maintenance",
+      "服务更新",
+      "系统维护"
+    ]
+  },
+  {
+    "id": "emergency-preparedness",
+    "keywords": [
+      "emergency",
+      "earthquake",
+      "disaster",
+      "应急",
+      "地震",
+      "灾害"
+    ]
+  }
+]

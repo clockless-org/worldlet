@@ -1,0 +1,7 @@
+{
+  "walking": {
+    "file": "walking.png",
+    "count": 24,
+    "minArea": 2500
+  }
+}

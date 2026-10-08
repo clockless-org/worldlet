@@ -1,0 +1,25 @@
+{
+  "key": "x",
+  "prompt": "Create the new production version of this x village Applet using the attached old device as identity reference. Preserve dominant black rounded X news device, ivory original X, tiny side brass megaphone and printed news slip. Replace separate feet with a single sturdy low wood plinth. The original recognizable app icon dominates 75% of the object, its function conveyed by restrained working elements. Unified cozy painted dimensional miniature, matte enamel/wood/cloth, soft upper-left light, warm low solid timber base with rounded edges and few brass fasteners, physically grounded. Camera 20 degrees to the side and 25 down, front faces SCREEN-LEFT with narrow RIGHT side visible; upright no roll. Preserve original asymmetric logo and letters, never mirror them. No scenery, no grass, no stone or ivory base edging, no text labels, no added symbols. Center entire object on transparent background with safe margins.",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-b6833b06-eafb-4034-9854-c76f8cc26311.png",
+  "output": "resources/styles/builtin/assets/applets/x/peek-logo-v3.png",
+  "status": "reviewed",
+  "reference": "resources/styles/builtin/assets/applets/x/peek-logo-v2.png",
+  "lampRevision": {
+    "key": "x",
+    "prompt": "Precisely edit the attached x Applet miniature. Preserve the existing entire device, correct original logo, functional accessories, wooden base, camera angle, silhouette, materials, color and framing. Add exactly ONE clearly visible status indicator recessed in the FRONT FACE of the wooden base, centered horizontally on that FRONT FACE (not the side), near its vertical center. It is a small warm brass circular bezel with a plain BLACK charcoal glass center, switched OFF: absolutely no glow, no colored light. Black lens diameter approximately 4% of total image width, bezel outside diameter 5%; slightly oblique oval consistent with front face perspective. Make sure unobstructed by props. If existing small indicator occupies base front center replace it with this unlit black lens; remove other colored status indicators on the base, retain brand graphics and non-status functional parts. If support has no continuous wood front, add a discreet low timber connecting foot with the socket at center, otherwise do not redesign base. No extra text, labels, dots, buttons or scenery. Full object isolated on true transparent background. Preserve 1024-or-1280 square composition and safe margins.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-b16d4b9c-8c76-4403-8881-0494c0ddc18d.png",
+    "anchor": {
+      "center": [
+        0.341308,
+        0.846093
+      ],
+      "radius": [
+        0.013158,
+        0.01555
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

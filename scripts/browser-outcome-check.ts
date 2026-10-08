@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {inspectBrowserOutcome} from '../ui/browser/action-outcome.ts';
+const calls:any[]=[];let attempts=0;
+const value=await inspectBrowserOutcome(async args=>{calls.push(args);return ++attempts<3?{error:'Loading'}:{receipt:{id:'r'},observation:{text:'Your request was received.'}};},'r',undefined,async()=>{});
+assert.equal(value.observation.text,'Your request was received.');
+assert.equal(calls.length,3);assert(calls.every(c=>c.operation==='outcome'&&c.receiptId==='r'));
+let failures=0;const unknown=await inspectBrowserOutcome(async()=>{failures++;throw Error('offline');},'r',undefined,async()=>{});
+assert.equal(failures,4);assert.equal(unknown.outcome,'unverified');assert.match(unknown.guidance,/never repeat/);
+const controller=new AbortController();controller.abort();let called=false;
+await inspectBrowserOutcome(async()=>{called=true;},'r',controller.signal,async()=>{});assert.equal(called,false);
+const during=new AbortController();await inspectBrowserOutcome(async()=>{called=true;},'r',during.signal,async()=>{during.abort();});assert.equal(called,false);
+console.log('PASS bounded outcome inspection, loading retries, unknown results and cancellation; never repeats a click');

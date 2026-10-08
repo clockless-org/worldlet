@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StreamBox · Your membership</title>
+<!-- Worldlet development rehearsal page. Served only by Dev builds at https://demo.worldlet.test/streambox.
+     Fictional service; nothing leaves this Mac. Membership state lives in this page's local storage. -->
+<style>
+:root{--ink:#1d1a2b;--muted:#6a6580;--accent:#6b3fd4;--paper:#f6f5fa;--line:#e1ddef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:18px 32px;background:#fff;border-bottom:1px solid var(--line)}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700}
+header strong{font-size:19px}
+header span{margin-left:auto;color:var(--muted);font-size:14px}
+main{max-width:620px;margin:40px auto;padding:0 24px}
+h1{font-size:30px;line-height:1.2;margin:0 0 8px}
+p.lead{color:var(--muted);margin:0 0 28px}
+.card{padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff;margin:0 0 20px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:6px 0}
+.row span{color:var(--muted)}
+fieldset{border:0;padding:0;margin:0 0 20px}
+legend{font-weight:600;margin-bottom:10px}
+label.reason{display:flex;align-items:center;gap:10px;padding:10px 0}
+button{width:100%;padding:15px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:600 17px/1 inherit;cursor:pointer;margin:0 0 10px}
+button.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+.done{padding:28px;border-radius:16px;background:#fff;border:1px solid var(--line);text-align:center}
+.done .check{width:56px;height:56px;margin:0 auto 12px;border-radius:50%;background:#e2f3ec;color:#1b7a52;display:grid;place-items:center;font-size:28px}
+footer{margin:48px auto 24px;max-width:620px;padding:0 24px;color:var(--muted);font-size:13px}
+</style>
+<header><div class="logo" aria-hidden="true">S</div><strong>StreamBox</strong><span>Signed in as you@worldlet.test</span></header>
+<main id="app"></main>
+<footer>Worldlet rehearsal site · fictional service · nothing is sent anywhere.</footer>
+<script>
+(function(){
+ var KEY='streambox-membership',app=document.getElementById('app');
+ var ends=new Date();ends.setDate(ends.getDate()+3);
+ var endLabel=ends.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+ function saved(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){return null;}}
+ function cancelled(record){
+  app.innerHTML='<div class="done" role="status"><div class="check" aria-hidden="true">✓</div>'+
+   '<h1>Your trial is cancelled</h1><p>You still have Premium until <strong>'+record.until+'</strong>. You won’t be charged.</p>'+
+   '<p>Cancellation reference <strong id="reference">'+record.reference+'</strong></p>'+
+   '<p class="lead">A confirmation was sent to you@worldlet.test.</p></div>';
+  document.title='Cancelled · StreamBox';
+ }
+ function account(){
+  app.innerHTML='<h1>Your membership</h1><p class="lead">Manage your plan and billing.</p>'+
+   '<div class="card"><div class="row"><span>Plan</span><strong>Premium · free trial</strong></div>'+
+   '<div class="row"><span>Trial ends</span><strong>'+endLabel+'</strong></div>'+
+   '<div class="row"><span>After the trial</span><strong>$15.99 / month</strong></div>'+
+   '<div class="row"><span>Payment method</span><strong>Card on file</strong></div></div>'+
+   '<button type="button" class="secondary" id="cancel">Cancel free trial</button>';
+  document.getElementById('cancel').onclick=confirmStep;
+ }
+ function confirmStep(){
+  app.innerHTML='<h1>Before you go</h1><p class="lead">If you cancel now, you keep Premium until '+endLabel+' and won’t be charged.</p>'+
+   '<form id="confirm"><fieldset><legend>Why are you leaving? (optional)</legend>'+
+   ['Too expensive','Not watching enough','Just trying it out'].map(function(r){return '<label class="reason"><input type="radio" name="reason" value="'+r+'">'+r+'</label>';}).join('')+
+   '</fieldset><button type="button" id="keep">Keep my trial</button>'+
+   '<button type="submit" class="secondary" id="confirmCancel">Confirm cancellation</button></form>';
+  document.getElementById('keep').onclick=account;
+  document.getElementById('confirm').addEventListener('submit',function(event){
+   event.preventDefault();
+   var button=document.getElementById('confirmCancel');button.disabled=true;button.textContent='Cancelling…';
+   setTimeout(function(){
+    var record={until:endLabel,reference:'SBX-'+(4000+Math.floor(Math.random()*900))};
+    try{localStorage.setItem(KEY,JSON.stringify(record));}catch(e){}
+    cancelled(record);
+   },700);
+  });
+ }
+ var existing=saved();if(existing)cancelled(existing);else account();
+})();
+</script>
+</html>

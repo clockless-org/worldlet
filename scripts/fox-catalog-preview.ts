@@ -1,0 +1,30 @@
+import {build} from 'esbuild';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {buildCompanionPresentation} from './build-companion-presentation.ts';
+import {FOX_STATES} from '../ui/companion/fox-state-catalog.ts';
+const sources=(await buildCompanionPresentation(process.cwd(),'dev')).companionAnatomy;
+const bundle=await build({stdin:{resolveDir:process.cwd(),contents:`
+import {loadAnatomyFox} from './ui/companion/fox-anatomy-runtime.ts';
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
+const rig=await loadAnatomyFox(globalThis.sources,canvas),states=globalThis.states;
+const select=document.querySelector('select'),slider=document.querySelector('#time'),status=document.querySelector('#status'),play=document.querySelector('#play');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+let state='idle',time=0,previous=0,playing=!reduced.matches,speed=1,raf=0;
+const render=()=>{rig.draw(ctx,state,time,time,reduced.matches);slider.value=String(time);status.textContent=(time/1000).toFixed(1)+' s · '+states.find(s=>s.id===state).performance;};
+const restart=(next=select.value)=>{state=next;time=0;rig.reset();render();};
+const frame=now=>{if(previous&&playing&&!document.hidden){time+=Math.min(100,now-previous)*speed;if(time>24000){time=24000;playing=false;play.textContent='Play';}render();}previous=now;raf=requestAnimationFrame(frame);};
+select.onchange=()=>restart();document.querySelector('#replay').onclick=()=>{restart();playing=!reduced.matches;play.textContent=playing?'Pause':'Play';};
+play.onclick=()=>{playing=!playing&&!reduced.matches;play.textContent=playing?'Pause':'Play';};
+slider.oninput=()=>{playing=false;play.textContent='Play';rig.reset();rig.draw(ctx,state,0,0,reduced.matches);time=Number(slider.value);render();};
+document.querySelector('#speed').onchange=e=>speed=Number(e.target.value);
+document.querySelector('#dark').onchange=e=>document.body.classList.toggle('dark',e.target.checked);
+reduced.addEventListener('change',()=>{playing=!reduced.matches;render();});
+document.addEventListener('visibilitychange',()=>previous=0);
+window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);rig.dispose();},{once:true});
+globalThis.catalogPreview={canvas,rig,states,select,stop(){playing=false;},sample(id,ms,reduce=false){playing=false;rig.reset();rig.draw(ctx,id,0,0,reduce);return rig.draw(ctx,id,ms,ms,reduce);}};
+play.textContent=playing?'Pause':'Play';restart('idle');raf=requestAnimationFrame(frame);document.body.dataset.ready='true';
+`},bundle:true,write:false,format:'esm'});
+await mkdir('output/companion-32',{recursive:true});
+await writeFile('output/companion-32/index.html',`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Companion · 32 performances</title><style>
+:root{font:16px system-ui;color:#35473e;background:#ebe8df}*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:28px;background:#ebe8df}body.dark{background:#26332e;color:#f1eddf}main{max-width:850px;margin:auto}h1{font-size:26px;letter-spacing:-.04em}p{line-height:1.6}canvas{display:block;width:min(400px,100%);height:auto;margin:auto}.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}select,button{padding:10px 14px;border:1px solid #849184;border-radius:12px;background:#faf8ef;color:#35473e;font:inherit}label{display:flex;gap:8px;align-items:center}input[type=range]{width:100%}.stage{border:1px solid #80908166;border-radius:24px;margin:22px 0;padding:12px}#status{min-height:80px}small{opacity:.7}</style><main><h1>Companion · 32 performances</h1><p>One painted Fox, with distinct conversation, work, rest and interaction performances. Use the timeline to inspect anticipation, pauses and follow-through.</p><div class="controls"><select aria-label="Animation">${FOX_STATES.map(s=>`<option value="${s.id}">${s.label} · ${s.id}</option>`).join('')}</select><button id="play">Pause</button><button id="replay">Replay</button><label>Speed<select id="speed"><option value=".25">0.25×</option><option value=".5">0.5×</option><option value="1" selected>1×</option></select></label><label><input type="checkbox" id="dark">Dark background</label></div><div class="stage"><canvas width="640" height="640" aria-label="Animated Fox"></canvas><input aria-label="Animation time" id="time" type="range" min="0" max="24000" step="50"></div><p id="status" role="status">Loading…</p><small>Production development renderer. Digital work shares one supported desk; the screen does not invent results. Reduced-motion preferences are respected. This preview does not perform tasks.</small></main><script>globalThis.sources=${JSON.stringify(sources)};globalThis.states=${JSON.stringify(FOX_STATES)};</script><script type="module">${bundle.outputFiles[0].text}</script></html>`);
+console.log('output/companion-32/index.html');

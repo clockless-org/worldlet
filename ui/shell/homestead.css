@@ -1,0 +1,736 @@
+/* Legacy compatibility only. Current product UI belongs in ui/components/*.css. */
+/* Native world's minimal HUD. Connector badges are anchored to projected land positions. */
+.notion-pin[data-kind="connector"]{display:flex;flex-direction:column;align-items:center;gap:5px;background:transparent;border:0;box-shadow:none;min-width:94px;padding:8px 12px;transform:translate(-50%,-70%);color:#354d3f;transition:filter .2s}
+.notion-pin[data-kind="connector"] strong{font-size:13px;font-weight:600;letter-spacing:.02em}
+.notion-pin[data-kind="connector"] small{font-size:11px;opacity:.8;white-space:nowrap}
+
+/* Mac single-field console. No account sign-in gate, notifications or toolbar clutter. */
+.native-console #notionUpdates,.native-console #homesteadLibrary,.native-console #notionBack{display:none!important}
+.native-console .notion-tools{gap:0}.native-console .notion-hud{width:460px;max-width:calc(100% - 40px);left:50%;bottom:28px;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;overflow:visible;max-height:calc(100dvh - 205px);gap:8px;align-items:center}
+.native-console .notion-command{display:flex;position:relative;order:2;align-items:center;flex-shrink:0;min-height:52px;width:100%;margin:0;padding:6px;background:#fff8e6a8;border:1px solid #fff9;border-radius:28px;backdrop-filter:blur(18px);box-shadow:0 8px 35px #243e3420;transition:box-shadow .2s,background .2s}
+.native-console #notionSend{display:grid;place-items:center;background:#3e604bcc;color:#fff8e5;width:36px;height:36px;min-height:36px;padding:0;font-size:23px;flex-shrink:0;margin-left:6px}
+.native-console.is-listening .notion-command{background:#eef5e5ed;box-shadow:0 0 0 3px #729b7b70,0 8px 35px #243e3420}
+.native-console.is-preparing-speech .notion-command{box-shadow:0 0 0 2px #aaba9470,0 8px 35px #243e3420}
+.native-console .notion-shortcuts{order:3;padding:0;justify-content:center;width:100%}
+.native-console #notionNext{font-size:12px;opacity:1;border:1px solid #fff7;background:#f9f4e28c;color:#3d5949;border-radius:24px;min-height:32px;padding:6px 15px;backdrop-filter:blur(20px);max-width:100%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;box-shadow:0 4px 24px #253e3412}
+.native-console #notionNext:hover{background:#fff9e9bd}.native-console .notion-content{width:100%;border-radius:22px;background:#fff8e9b3;border:1px solid #fff8;backdrop-filter:blur(22px);max-height:40vh;box-shadow:0 10px 40px #16362820}
+.native-console .notion-status{background:#fff6e5a8;border-radius:16px;padding:10px 16px;width:auto;max-width:100%;font-size:12px;backdrop-filter:blur(18px)}
+.native-console #notionVoiceStatus{order:1}.native-console .native-conversation{width:100%;max-height:240px;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:9px;padding:26px 8px 3px;mask-image:linear-gradient(transparent,#000 22%);-webkit-mask-image:linear-gradient(transparent,#000 22%);flex-shrink:1;min-height:0;overscroll-behavior:contain}
+@media(prefers-reduced-motion:reduce){.native-console *{animation:none!important;transition:none!important}}
+@media(max-height:760px){.native-console .native-conversation{max-height:170px}.native-console .notion-hud{bottom:18px;gap:9px}}
+
+/* The sample switch is the only companion to Settings in the top-right corner. */
+.native-console .notion-tools{gap:10px}
+
+/* Conversation lives above the compact composer; next action stays below it. */
+.native-console .native-conversation{opacity:1;transition:opacity 2s ease;order:0}
+.native-console .notion-round,.native-console #worldWeather{background:#fff8e59c;border:1px solid #ffffff70;backdrop-filter:blur(18px)}
+.native-console .notion-dialog{background:#fff8e6c7;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+
+.native-console .notion-breadcrumb button{background:#fff8e59c;backdrop-filter:blur(18px)}
+.native-console .notion-breadcrumb button:last-child{background:#3e5e4cb8;color:#fff8e9}
+
+/* Tool HUD: quiet history, stable composer and shared spatial actions. */
+.native-console .notion-world-caption,.native-console #notionNext{display:none!important}
+.native-console .world-watermark{position:absolute;left:auto;right:24px;bottom:18px;letter-spacing:.08em;font-size:11px;font-weight:500;background:none;color:#52664d;opacity:.55;padding:6px;pointer-events:auto}
+.native-console[data-time-of-day=night] .world-watermark{color:#eee9d8;text-shadow:0 1px 8px #183329}
+.native-console .world-environment{margin:0;gap:8px;align-items:center}.native-console .world-environment time{font-size:18px}
+.native-console .world-sample-label{font-size:11px;color:#5a6b50;align-self:center;padding:3px 7px;border-radius:8px;background:#fff8e8e6}
+.native-console .notion-hud{width:480px;max-width:calc(100% - 32px);bottom:28px;gap:10px;max-height:calc(100dvh - 145px)}
+.native-console .notion-command{order:3;min-height:58px;padding:6px;background:#fff8e8ed;border-radius:25px;box-shadow:0 5px 20px #243e3419}
+.native-console #notionSend{width:44px;height:44px;min-height:44px;border-radius:19px}
+.native-console .notion-shortcuts{order:2;display:flex;width:100%;padding:0}
+.native-console .world-actions{display:flex;align-items:center;gap:8px;width:100%;min-width:0;flex-wrap:nowrap}
+.native-console .world-capsule{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;max-width:100%;padding:8px 12px;border-radius:24px;border:1px solid #d3dac6;background:#fff9ebf5;color:#3c5544;font-size:13px;line-height:1.3;box-shadow:0 3px 12px #2f493414;flex-shrink:0;white-space:nowrap;cursor:pointer}
+.native-console .world-capsule svg{flex-shrink:0}.native-console .world-capsule>span{max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.native-console .world-capsule:hover{background:#eef2e3}.native-console .world-capsule:disabled{opacity:.5;cursor:default}.native-console .world-capsule[data-state=needsAction]{border-color:#b79d71;background:#f7ecd3}
+.native-console .world-context{display:flex;align-items:center;width:100%;gap:7px;order:0;min-height:44px;flex-shrink:0}
+.native-console .world-context #notionBack{display:inline-flex!important;align-items:center;min-height:44px;background:#fff8e8ed;border:1px solid #d3dac6;border-radius:18px;padding:7px 12px;white-space:nowrap;flex-shrink:0;font-size:13px}
+.native-console .world-context .notion-breadcrumb{margin:0;font-size:12px;min-width:0;gap:6px}.native-console .world-context .notion-breadcrumb button{min-height:40px;padding:5px 10px}
+.native-console .notion-content{order:1;flex-shrink:1;width:min(720px,calc(100vw - 32px));max-width:calc(100vw - 32px);max-height:calc(100dvh - 300px);padding:24px;background:#fff9edf7;border:1px solid #e1e3d3;backdrop-filter:blur(20px)}
+.native-console .notion-hud.is-reading .world-context{width:min(720px,calc(100vw - 32px))}
+.native-console .notion-content .notion-prose{font-size:15px;line-height:1.8;color:#304837}.native-console .notion-content .notion-reader-head h1{font-size:22px}
+.native-console .native-conversation{position:absolute;bottom:calc(100% + 12px);left:0;right:0;order:0;width:100%;height:160px;max-height:max(60px,min(160px,calc(50dvh - 150px)));padding:8px 4px 3px;overflow:hidden;display:flex;justify-content:flex-end;gap:8px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease,visibility .3s;mask-image:linear-gradient(transparent,#0008 30%,#000 62%);-webkit-mask-image:linear-gradient(transparent,#0008 30%,#000 62%)}
+.native-console .notion-hud.is-reading .native-conversation{display:none}
+.native-console .notion-hud.is-chat-peeking .native-conversation{display:flex}
+.native-console .notion-hud.is-chat-peeking .notion-content,.native-console .notion-hud.is-chat-peeking .world-context{display:none!important}
+.native-console .world-action-row{display:flex;width:100%;text-align:left;justify-content:flex-start!important;margin:8px 0!important;min-height:44px;padding:10px 12px;border-radius:12px;background:#eef1e3;color:#334e3e}
+.native-console .world-decision{padding:14px 0;display:flex;gap:8px;flex-wrap:wrap}.native-console .world-decision p{width:100%;margin:0 0 5px}
+.native-console .notion-dialog{background:#fff9edf7}.native-console .notion-status{background:#fff8edf2;order:1}
+.native-console .world-context[hidden],.native-console .notion-shortcuts[hidden]{display:none!important}
+@media(max-width:600px){.native-console .notion-top{inset:20px 16px auto}.native-console .notion-identity{max-width:calc(100% - 70px)}.native-console .world-capsule>span{max-width:135px}.native-console .world-watermark{right:12px;bottom:3px;font-size:10px}.native-console .notion-hud{bottom:25px}.native-console .notion-content{padding:18px}.native-console .world-context .notion-breadcrumb button{max-width:170px;overflow:hidden;text-overflow:ellipsis}}
+@media(max-height:600px){.native-console .notion-content{max-height:calc(100dvh - 235px)}.native-console .native-conversation{max-height:70px}}
+@media(prefers-reduced-motion:reduce){.native-console .native-conversation{transition:none;animation:none}}
+
+/* Three levels: world → area directory → inset reading HUD. */
+.native-console{--panel-top:152px;--panel-bottom:156px;--panel-side:max(28px,calc((100% - 1100px)/2));--hud-ink:#304b3d;--hud-glass:#fff9eceb;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
+.native-console .notion-top{z-index:12;gap:24px}
+.native-console .notion-identity{max-width:48%;color:var(--hud-ink)}
+.native-console .world-environment{display:flex;gap:4px 14px;margin:0;font-size:18px;font-weight:550;line-height:1.5;letter-spacing:0;color:inherit}
+.native-console .world-environment #worldDate,.native-console .world-environment #worldClock,.native-console .world-environment #worldWeather{font-family:inherit;font-size:18px;font-weight:550;letter-spacing:0;line-height:1.5;color:inherit}
+.native-console .world-environment #worldWeather{min-height:44px;margin:-8px 0 -8px -8px;padding:8px;border:0;border-radius:12px;background:none;backdrop-filter:none;box-shadow:none;text-align:left}
+.native-console .world-environment #worldWeather:hover{background:#fff8e780}
+.native-console .world-location{display:flex;flex-direction:column;align-items:flex-end;gap:10px;min-width:0;max-width:50%;pointer-events:auto}
+.native-console .world-context{width:auto;max-width:100%;min-height:44px;gap:4px;border:1px solid #fff8;border-radius:22px;background:var(--hud-glass);padding:0 6px;backdrop-filter:blur(16px);color:var(--hud-ink)}
+.native-console .world-context #notionBack{background:none;border:0;min-height:44px;padding:6px 8px;font-size:14px}
+.native-console .world-context #notionBack[hidden]{display:none!important}
+.native-console .world-context .notion-breadcrumb{gap:3px;max-width:100%;font-size:14px}
+.native-console .world-context .notion-breadcrumb button{background:none;backdrop-filter:none;color:var(--hud-ink);padding:6px 8px;border-radius:12px;min-height:44px;font-size:14px;max-width:185px;overflow:hidden;text-overflow:ellipsis}
+.native-console .world-context .notion-breadcrumb button:last-child{font-weight:650;background:#e0e8d466}
+.native-console .world-context button:hover{background:#e0e8d4}
+.native-console .notion-hud{z-index:14}
+.native-console .world-area{position:absolute;z-index:4;left:30px;top:168px;bottom:170px;width:330px;max-width:40%;overflow:auto;padding:24px;border:1px solid #fff9;border-radius:24px;background:#fff9e9d9;backdrop-filter:blur(20px);color:var(--hud-ink);box-shadow:0 8px 32px #213c3212}
+.native-console .world-area[hidden]{display:none}
+.native-console .world-area-eyebrow{font-size:13px;color:#65715d;margin:0 0 8px}
+.native-console .world-area h1{font-size:25px;line-height:1.4;margin:0 0 24px}
+.native-console .world-project{width:100%;display:flex;align-items:flex-start;flex-direction:column;gap:9px;padding:18px 0;text-align:left;background:none;border-top:1px solid #43584226;color:inherit;cursor:pointer}
+.native-console .world-project strong{font-size:17px;line-height:1.5;font-weight:600;overflow-wrap:anywhere}
+.native-console .world-project-state{font-size:13px;line-height:1.5;color:#5b6b52}
+.native-console .world-project-state::before{content:'';display:inline-block;width:6px;height:6px;margin:0 7px 2px 0;border-radius:50%;background:#819276}
+.native-console .world-project[data-state=needsAction] .world-project-state{color:#795419}
+.native-console .world-project[data-state=needsAction] .world-project-state::before{background:#b78539}
+.native-console .world-project[data-state=unseen] .world-project-state::before{background:#477d65}
+.native-console .world-project:hover{background:#e5ecd27a}
+.native-console>.notion-content{position:absolute;inset:var(--panel-top) var(--panel-side) var(--panel-bottom);z-index:10;width:auto;max-width:none;height:auto;max-height:none;border:1px solid #fff9;border-radius:28px;padding:36px clamp(28px,5vw,72px);background:#f7f5eae6;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 16px 60px #203b3020;scroll-padding:36px 0}
+.native-console>.notion-content> *{max-width:860px;margin-left:auto;margin-right:auto}
+.native-console>.notion-content[hidden]{display:none}
+.native-console>.notion-content .notion-reader-head{padding:0;margin-bottom:30px}
+.native-console>.notion-content .notion-reader-head:focus{outline:none}
+.native-console>.notion-content .notion-reader-head h1{font-size:32px;line-height:1.4;margin-top:10px}
+.native-console>.notion-content .notion-eyebrow{font-size:12px;letter-spacing:.06em}
+.native-console>.notion-content .notion-prose{font-size:17px;line-height:1.85}
+.native-console>.notion-content .notion-table-wrap{max-height:none}
+.native-console[data-depth=note] .notion-stage,.native-console[data-depth=search] .notion-stage{pointer-events:none}
+.native-console .notion-dialog{inset:var(--panel-top) var(--panel-side) var(--panel-bottom);margin:0;width:auto;max-width:none;height:auto;max-height:none;border:1px solid #fff9;border-radius:28px;background:#f7f5eaeb;padding:36px clamp(28px,5vw,72px);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.native-console #notionDialogBody{max-width:860px;margin:0 auto}
+.native-console .notion-dialog::backdrop{background:#263d3010}
+.native-console .notion-dialog h2{font-size:32px;margin-bottom:32px}
+.native-console .notion-dialog p{font-size:16px;line-height:1.8}
+.native-console .notion-dialog .notion-close{top:16px;right:16px;width:44px;height:44px;background:#e6ebdc}
+.native-console .notion-dialog button:not(.notion-close){font-size:15px}
+.native-console .world-watermark{z-index:15}
+.native-console button:focus-visible,.native-console input:focus-visible{outline:2px solid #59734c;outline-offset:3px}
+@media(max-width:800px){.native-console .world-environment{gap:4px 10px}.native-console .world-environment #worldDate,.native-console .world-environment #worldClock,.native-console .world-environment #worldWeather{font-size:16px}.native-console .world-location{max-width:48%}.native-console .world-context .notion-breadcrumb button{max-width:120px;font-size:13px}.native-console .world-area{left:20px;width:290px;padding:20px;max-width:45%}.native-console{--panel-side:20px}.native-console>.notion-content{padding:28px}}
+@media(max-width:600px){.native-console .notion-top{gap:10px}.native-console .world-environment #worldWeather{flex-basis:100%}.native-console .world-location{max-width:46%}.native-console .world-context{gap:0}.native-console .world-context #notionBack{font-size:12px;padding:6px}.native-console .world-context .notion-breadcrumb button{max-width:100px}.native-console .world-area{top:195px;max-width:calc(100% - 32px);width:calc(100% - 32px);left:16px;background:#fff9e9cd}.native-console{--panel-top:195px;--panel-side:16px}.native-console>.notion-content{padding:24px}.native-console>.notion-content .notion-reader-head h1{font-size:27px}}
+
+/* Location belongs to the active panel, directly above its content. */
+.native-console .world-panel-context{position:sticky;top:-36px;z-index:2;justify-content:flex-start;width:100%;max-width:860px;margin:0 auto 24px;padding:0 0 12px;border:0;border-bottom:1px solid #42593c20;border-radius:0;background:#f7f5eaf5;backdrop-filter:blur(14px)}
+.native-console .world-panel-context .notion-breadcrumb{flex:1;min-width:0;font-size:14px}
+.native-console .world-panel-context .notion-breadcrumb button{max-width:320px}
+.native-console .world-panel-context #notionBack{padding-left:0;padding-right:12px}
+.native-console .world-area .world-panel-context{top:-24px;background:#f7f5eae6;margin-bottom:20px}
+.native-console .world-area .world-panel-context .notion-breadcrumb button{padding:6px;max-width:140px;font-size:13px}
+@media(max-width:800px){.native-console .world-panel-context{top:-28px}}
+@media(max-width:600px){.native-console .world-panel-context{top:-24px}.native-console .world-panel-context .notion-breadcrumb button{max-width:180px}}
+
+/* Domain → matter → object. Keep the sprite world visible until reading. */
+.native-console .world-area.world-matter-panel{bottom:auto;max-height:calc(100% - 340px);background:#fff9e9bd}
+.world-matter-hint{font-size:14px;line-height:1.7;color:#52674f}
+.world-object-directory summary,.world-provenance summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:14px}
+.world-provenance{padding:8px 16px;background:#e7eddd80;border-radius:14px;margin-bottom:20px;color:#42583f}
+.native-console[data-depth=area] .world-area{bottom:auto;max-height:calc(100% - 340px)}
+@media(max-width:600px){.native-console .world-area.world-matter-panel,.native-console[data-depth=area] .world-area{top:auto;bottom:175px;max-height:180px;padding:12px 18px}.native-console .world-area h1{font-size:20px;margin-bottom:8px}.native-console .world-area .world-panel-context{margin-bottom:8px}}
+
+/* At-a-glance travel: status is anchored to evidence-bearing objects. */
+.native-console .world-area.world-trip-panel{top:128px;width:350px;max-width:calc(100% - 60px);padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none;overflow:visible}
+.native-console .world-trip-panel .world-area-eyebrow,.native-console .world-trip-panel .world-matter-hint,.native-console .world-trip-panel h1{display:none}
+.native-console .world-trip-panel .world-panel-context{position:relative;top:0;border-radius:18px;background:#fff9e9dc;margin:0 0 6px;padding:0 6px}
+.native-console .world-trip-panel .world-panel-context .notion-breadcrumb button{font-size:12px;padding:4px 6px}
+.native-console .world-trip-panel .world-object-directory{background:#fff9e9dc;border-radius:16px;padding:2px 14px;width:fit-content;max-width:100%}
+.native-console .world-trip-panel .world-object-directory summary{font-size:13px;min-height:44px}
+.native-console .world-trip-panel .world-object-directory[open]{width:100%;max-height:340px;overflow:auto}
+
+/* Five View layers: a small contextual directory, with the scene kept primary. */
+.native-console .world-area.world-view-panel{top:142px;left:28px;width:300px;max-height:calc(100% - 320px)}
+.world-view-panel .world-view-hint{font-size:12px;letter-spacing:.02em;margin:8px 12px;color:#4e6250}
+.world-view-panel .world-object-directory{max-width:300px}
+.world-view-panel .world-object-directory[open]{max-height:calc(100vh - 380px);overflow:auto}
+@media(max-width:760px){.world-view-panel{left:16px!important;top:125px!important;max-width:calc(100vw - 32px)}.world-view-panel .world-view-hint{display:none}.world-view-panel .world-object-directory{max-width:240px}}
+.native-console .world-view-panel .world-panel-context{width:max-content;max-width:calc(100vw - 56px)}
+.native-console .world-view-panel .world-panel-context .notion-breadcrumb{overflow-x:auto}
+
+/* Quiet composer: small at rest, opens on focus without moving its bottom edge. */
+.native-console .notion-hud{width:280px;gap:5px;transition:width .24s ease}
+.native-console .notion-hud.composer-expanded{width:560px}
+.native-console .notion-command{min-height:46px;height:46px;padding:4px 6px;border-radius:25px;background:#fffdf4c7;border:1px solid #ffffffae;box-shadow:0 4px 20px #243e3412;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.native-console .composer-expanded .notion-command{background:#fffdf5e3;box-shadow:0 6px 26px #243e341a}
+.native-console .notion-command:focus-within{border-color:#8fa389;box-shadow:0 0 0 2px #81967825,0 4px 20px #243e3412}
+.native-console #notionSend{width:34px;height:34px;min-height:34px;border-radius:50%;font-size:21px;margin-left:4px;background:#597562e0}
+.native-console .world-actions{justify-content:center;gap:5px}
+.native-console .world-actions .world-capsule{min-height:30px;padding:5px 10px;font-size:12px;border-color:#ffffff80;background:#fffdf4a8;box-shadow:none;backdrop-filter:blur(18px)}
+.native-console .world-actions .world-capsule svg{width:14px;height:14px}
+.native-console .native-conversation{bottom:calc(100% + 9px);height:auto;max-height:min(280px,calc(100dvh - 310px));padding:16px;gap:12px;justify-content:flex-start;overflow:auto;border:1px solid #ffffff9c;border-radius:20px;background:#faf9efba;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 8px 35px #263d3015;mask-image:none;-webkit-mask-image:none}
+.native-console .native-conversation::before{content:'Recent conversation';font-size:11px;color:#73806c;letter-spacing:.03em;flex-shrink:0}
+@media(max-width:600px){.native-console .notion-hud.composer-expanded{width:calc(100% - 32px)}.native-console .native-conversation{max-height:200px}.native-console .world-actions .world-capsule>span{max-width:130px}}
+
+
+/* Field HUD: frosted surfaces, restrained metal edging, no ornamental controls. */
+.native-console{--hud-glass:rgba(250,247,232,.67)}
+.native-console>.notion-content,.native-console .notion-dialog{background:linear-gradient(145deg,#fffdf17a,#f3f1e5ad);border:1px solid #fffce3ab;border-top-color:#fffdef;backdrop-filter:blur(24px) saturate(1.12);-webkit-backdrop-filter:blur(24px) saturate(1.12);box-shadow:0 15px 48px #243e3426,inset 0 1px 0 #ffffe8c9,inset 0 -2px 0 #8c784b24;border-radius:20px}
+.native-console>.notion-content::before,.native-console .notion-dialog::before{content:'';position:absolute;top:12px;left:12px;width:16px;height:16px;border-left:2px solid #ae935c99;border-top:2px solid #ae935c99;border-radius:5px 0 0;pointer-events:none}
+.native-console>.notion-content::after,.native-console .notion-dialog::after{content:'';position:absolute;bottom:12px;right:12px;width:16px;height:16px;border-right:2px solid #ae935c99;border-bottom:2px solid #ae935c99;border-radius:0 0 5px;pointer-events:none}
+.native-console .world-panel-context,.native-console .world-area .world-panel-context{background:#f8f6e6a3;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-color:#a28d5f45}
+.native-console .world-area.world-view-panel .world-object-directory{background:#fbf7e8a6;border:1px solid #fffce3a8;box-shadow:inset 0 1px 0 #fffce8b3,0 4px 16px #243e3410;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.native-console .world-area.world-view-panel .world-object-directory[open]{background:#f8f5e5c7}
+.native-console .world-trip-records{font-size:12px;min-height:36px;margin-top:10px;padding:7px 12px;border:1px solid #fff8;border-radius:12px;background:#f8f5e59c;backdrop-filter:blur(18px);color:#425c4d}
+.native-console .notion-command,.native-console .composer-expanded .notion-command{background:#fbf9efad;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.native-console .notion-shortcuts{width:min(600px,calc(100vw - 48px));max-width:none;position:relative;left:auto;transform:none;align-self:center}
+.native-console .world-actions{gap:8px;padding:5px 2px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;scroll-behavior:smooth}
+.native-console .world-actions::-webkit-scrollbar{display:none}
+.native-console .notion-hud:not(.composer-expanded) .world-actions>.world-capsule{display:inline-flex}
+.native-console .world-actions .world-capsule{min-height:42px;padding:9px 15px;font-size:14px;background:#fff9e8b5;border:1px solid #fffbe3ae;box-shadow:inset 0 1px 0 #fffdf4b0,0 3px 10px #29443512}
+.native-console .world-actions .world-capsule[data-state=needsAction]{border-color:#b29b718f;background:#f9ecd3bd}
+.native-console .world-actions .world-capsule svg{width:17px;height:17px}
+.native-console .world-actions .world-capsule>span{max-width:220px}
+@media(prefers-reduced-motion:reduce){.native-console .world-actions{scroll-behavior:auto}}
+
+/* Companion dock: a resident, a permanent invitation, and contextual actions. */
+.native-console.companion-console .notion-hud{width:720px;gap:12px;bottom:28px;overflow:visible}
+.companion-dock{display:flex;align-items:center;gap:10px;width:100%;min-width:0;justify-content:center;order:4;pointer-events:auto}
+.companion-avatar{flex:0 0 62px;width:62px;height:62px;border-radius:50%;padding:0;border:1px solid #fff4d5d9;background:linear-gradient(145deg,#e9dabae8,#b6c6a7d9);box-shadow:inset 0 1px 0 #fffae8,0 5px 18px #30463225;cursor:pointer;overflow:visible}
+.companion-avatar img{display:block;width:76px;height:76px;max-width:none;margin:-12px -7px -2px;pointer-events:none;filter:drop-shadow(0 2px 2px #543b2620);transition:transform .25s}
+.companion-avatar:hover img,.companion-avatar[aria-expanded=true] img{transform:translateY(-3px) rotate(-5deg)}
+.companion-avatar[data-state=thinking] img{transform:rotate(9deg)}
+.companion-avatar[data-state=listening]{box-shadow:0 0 0 4px #96b99470,0 5px 18px #30463225}
+.native-console.companion-console .notion-shortcuts{display:flex;flex:0 1 auto;width:auto;min-width:0;max-width:calc(100% - 160px);margin:0;order:initial}
+.native-console.companion-console .world-actions{justify-content:flex-start!important;padding:5px 2px;width:100%;min-width:0;gap:7px}
+.native-console.companion-console .world-actions .world-capsule{font-size:13px;padding:10px 13px}
+.companion-dialogue{position:relative;display:flex;flex-direction:column;gap:12px;order:0;padding:20px 24px 16px;border:1px solid #fff9e0ce;border-radius:10px 24px 24px 24px;background:linear-gradient(130deg,#fffae5df,#eaf0e2cc);backdrop-filter:blur(26px) saturate(1.1);-webkit-backdrop-filter:blur(26px) saturate(1.1);box-shadow:inset 0 1px 0 #fffcecd9,inset 0 -3px 0 #9a845224,0 14px 45px #213c332b;animation:companion-open .2s ease-out;pointer-events:auto}
+.companion-dialogue[hidden]{display:none!important}
+.companion-dialogue::after{content:'';position:absolute;bottom:-9px;left:24px;width:16px;height:16px;background:#e8ecdacc;border-bottom:1px solid #fff9e0ce;border-right:1px solid #fff9e0ce;transform:rotate(45deg);clip-path:polygon(0 100%,100% 0,100% 100%)}
+.companion-name{position:absolute;top:-16px;left:24px;padding:7px 15px;border-radius:8px 8px 8px 2px;background:#46644f;color:#fff5df;font-size:13px;font-weight:600;letter-spacing:.025em;border:1px solid #f4e7c194;box-shadow:0 2px 5px #293e2b18}
+.native-console.companion-console .native-conversation{position:static;display:block!important;width:100%;height:auto;min-height:60px;max-height:min(230px,30dvh);padding:0 2px;margin:0;visibility:visible;opacity:1;transform:none;overflow:auto;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;mask-image:none;-webkit-mask-image:none;pointer-events:auto}
+.native-console.companion-console .native-conversation::before{display:none}
+.native-console.companion-console .notion-command{order:initial;width:100%;min-height:46px;height:46px;padding:4px 6px;background:#fffdf478;border:1px solid #93a68765;border-radius:15px;box-shadow:inset 0 1px 3px #344c3d08}
+.native-console.companion-console .notion-command:focus-within{border-color:#6d896ca6;box-shadow:0 0 0 2px #81967819}
+.native-console.companion-console #notionSend{width:34px;height:34px}
+.companion-console button:focus-visible{outline:2px solid #57754e;outline-offset:3px}
+@keyframes companion-open{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:600px){.native-console.companion-console .notion-hud{bottom:22px;max-width:calc(100% - 24px)}.companion-dock{gap:7px}.companion-avatar{flex-basis:52px;width:52px;height:52px}.companion-avatar img{width:66px;height:66px}.native-console.companion-console .notion-shortcuts{max-width:calc(100% - 135px)}.companion-dialogue{padding:19px 16px 12px}}
+@media(prefers-reduced-motion:reduce){.companion-dialogue{animation:none}.companion-avatar img{transition:none}}
+.native-console.companion-console .companion-dialogue{width:100%;box-sizing:border-box}
+
+/* Contextual travel prototype: actions belong to the selected miniature. */
+.travel-experiment-active .world-area .world-view-hint,.travel-experiment-active .world-object-directory,.travel-experiment-active .world-trip-records{display:none}
+.travel-experiment-active .notion-shortcuts{display:none!important}
+
+/* Pet console v2: one stable bottom interaction surface for every context. */
+.native-console .world-sample-label{display:none!important}
+.native-console #notionAccount svg{width:21px;height:21px;transform:none}
+.native-console .world-environment{gap:12px;font-weight:500}
+.native-console .world-environment #worldDate,.native-console .world-environment #worldClock,.native-console .world-environment #worldWeather{font-size:17px;font-weight:500}
+.native-console.companion-console .notion-hud{width:760px;gap:0;bottom:25px;padding:0;isolation:isolate}
+.native-console.companion-console .companion-dialogue{padding:13px 18px 11px 100px;border:1px solid #fff9dc85;border-radius:24px 24px 0 0;background:#f9f5e5bf;box-shadow:none;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);animation:none;gap:7px;overflow:visible}
+.native-console.companion-console .companion-dialogue::after{display:none}
+.native-console.companion-console .companion-name{position:static;padding:0;border:0;box-shadow:none;background:none;color:#586c55;font-size:12px;font-weight:600;letter-spacing:.015em;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.native-console.companion-console .native-conversation{min-height:0;max-height:160px;padding:0}
+.native-console.companion-console .companion-dock{position:static;order:4;box-sizing:border-box;justify-content:flex-start;padding:3px 14px 12px 100px;gap:7px;min-height:52px;border:1px solid #fff9dc85;border-top:0;border-radius:0 0 24px 24px;background:#f9f5e5bf;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.native-console.companion-console .companion-avatar{position:absolute;left:14px;top:15px;width:70px;height:70px;border:0;background:none;box-shadow:none;z-index:5;transition:top .28s ease,transform .28s ease;transform-origin:center bottom;cursor:pointer}
+.native-console.companion-console .companion-avatar img{width:92px;height:92px;margin:-16px -11px 0;filter:drop-shadow(0 5px 3px #33433325)}
+.native-console.companion-console.companion-talking .companion-avatar{top:-32px;transform:scale(1.22) rotate(-5deg)}
+.native-console.companion-console.companion-talking .companion-dialogue{padding-top:15px}
+.native-console.companion-console .companion-avatar[aria-expanded=true] img{transform:none}
+.native-console.companion-console .notion-shortcuts,.native-console.companion-console.travel-experiment-active .notion-shortcuts{display:flex!important;flex:1;max-width:none;width:auto;min-width:0;align-self:center}
+.native-console.companion-console .world-actions{padding:3px 0;gap:7px}
+.native-console.companion-console .world-actions .world-capsule{min-height:36px;padding:8px 12px;font-size:13px;border:1px solid #a6b39566;background:#fffbed60;box-shadow:none;backdrop-filter:none;white-space:nowrap}
+.native-console.companion-console .world-actions .world-capsule[data-state=needsAction]{background:#eedaad80;border-color:#b69e6d90}
+.native-console.companion-console .notion-command{min-height:42px;height:42px;margin-top:4px;background:#fffdf375;border-radius:14px}
+.native-console.companion-console .notion-command[hidden]{display:none!important}
+.native-console.companion-console.is-listening .notion-command{display:none}
+.native-console.companion-console .world-area{display:none!important}
+.native-console.companion-console>.world-context{display:none!important}
+.native-console.companion-console .notion-content .world-panel-context{display:flex}
+.native-console.companion-console .notion-content .world-decision{display:none}
+.native-console.companion-console .notion-content{bottom:260px;max-height:calc(100dvh - 365px)}
+#notionWorld.travel-experiment-active .notion-pin[data-page=compare] small{display:none}
+#notionWorld[data-travel-selection=garden] .notion-pin[data-page=garden],#notionWorld[data-travel-selection=station] .notion-pin[data-page=station]{background:#e3edcedf;border-color:#60865b;box-shadow:0 0 0 3px #9fb98750}
+@media(max-width:700px){.native-console.companion-console .notion-hud{width:calc(100% - 28px);max-width:none;bottom:18px}.native-console.companion-console .companion-dialogue{padding-left:78px;padding-right:12px}.native-console.companion-console .companion-dock{padding-left:14px;padding-right:12px}.native-console.companion-console .companion-avatar{left:3px;width:62px;top:7px}.native-console.companion-console .companion-avatar img{width:80px;height:80px;margin:-12px -9px 0}.native-console.companion-console.companion-talking .companion-avatar{top:-25px;transform:scale(1.1)}.native-console.companion-console .companion-name{font-size:11px}.native-console .world-environment #worldDate,.native-console .world-environment #worldClock,.native-console .world-environment #worldWeather{font-size:15px;flex-basis:auto}}
+@media(prefers-reduced-motion:reduce){.native-console.companion-console .companion-avatar{transition:none}}
+
+/* NPC dialogue: companion statement, player replies, then free expression. */
+.native-console.companion-console .notion-hud{width:660px;gap:0}
+.native-console.companion-console .companion-dialogue{padding-left:88px;border-radius:22px 22px 0 0}
+.native-console.companion-console .companion-dock{padding-left:88px}
+.native-console.companion-console.companion-talking .companion-dialogue{border-radius:6px 22px 22px 22px;padding:16px 20px 17px 88px;background:#faf5e5cc}
+.native-console.companion-console.companion-talking .companion-avatar{top:-28px;left:8px;transform:scale(1.15) rotate(-5deg)}
+.native-console.companion-console .native-conversation{max-height:120px}
+@media(max-width:700px){.native-console.companion-console .notion-hud{width:calc(100% - 28px);bottom:16px}.native-console.companion-console .companion-dock{padding-left:14px}.native-console.companion-console.companion-talking .companion-dialogue{padding-left:72px;padding-right:13px}.native-console.companion-console .companion-dialogue{padding-left:72px}}
+
+/* Quiet companionship: no dialogue until the user starts one. */
+.native-console.companion-console:not(.companion-talking) .companion-dock{padding:0 0 0 84px;min-height:58px;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;gap:12px}
+.native-console.companion-console:not(.companion-talking) .companion-avatar{top:-9px;left:0;transform:none}
+.native-console.companion-console .world-actions{display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;gap:8px;padding:7px 2px}
+.native-console.companion-console .world-actions::-webkit-scrollbar{display:none}
+.native-console.companion-console .world-actions .world-capsule{flex:0 0 auto;width:auto;border-radius:24px;padding:8px 12px;font-size:13px;white-space:nowrap;min-height:42px;background:#f9f5e5cf;border-color:#fff9e4a8;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.native-console.companion-console .world-actions .world-capsule>span{white-space:nowrap}
+@media(max-width:700px){.native-console.companion-console:not(.companion-talking) .companion-dock{padding-left:68px;gap:8px}.native-console.companion-console:not(.companion-talking) .companion-avatar{left:-1px;top:-4px}}
+
+/* One action surface; the pet's location badge replaces navigation controls. */
+.native-console.companion-console .companion-context{position:absolute;left:0;top:-60px;z-index:6;display:flex;align-items:center;max-width:min(300px,80vw);min-height:30px;padding:6px 11px;border-radius:12px 12px 12px 3px;border:1px solid #fff9e5a6;background:#f8f4e3c7;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 2px 8px #33483212;cursor:pointer;color:#455f43}
+.native-console.companion-console .companion-context .companion-name{max-width:100%;font-size:12px;line-height:17px}
+.native-console.companion-console .companion-context:not(:disabled):hover{background:#fffae9eb}
+.native-console.companion-console .companion-context:disabled{opacity:1;cursor:default}
+.native-console.companion-console.companion-talking .companion-context{top:-87px;left:0}
+@media(max-width:700px){.native-console.companion-console .companion-context{top:-48px;max-width:calc(100vw - 50px)}.native-console.companion-console.companion-talking .companion-context{top:-81px}}
+
+/* Stable pet dock: input mode never changes the context actions. */
+.native-console.companion-console .notion-hud{display:grid;grid-template-columns:130px minmax(0,1fr);grid-template-rows:auto auto 56px;align-items:end;column-gap:22px;row-gap:8px;width:760px;min-height:170px}
+.native-console.companion-console .companion-pet{position:absolute;left:0;bottom:0;width:130px;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:auto}
+.native-console.companion-console .companion-pet .companion-context{position:static;inset:auto;max-width:170px;flex-shrink:0;justify-content:center;transform:none;border-radius:14px;text-align:center}
+.native-console.companion-console .companion-pet .companion-context .companion-name{max-width:148px;text-align:center}
+.native-console.companion-console .companion-pet .companion-avatar{position:static;inset:auto;flex:0 0 76px;width:76px;height:76px;margin:0;transform:none;transition:none}
+.native-console.companion-console .companion-pet .companion-avatar img{width:92px;height:92px;margin:-10px -8px 0;transform:none}
+.native-console.companion-console .companion-dialogue,.native-console.companion-console.companion-talking .companion-dialogue{grid-column:2;grid-row:1;width:100%;padding:14px 18px;margin:0;border-radius:18px 18px 18px 5px}
+.native-console.companion-console .companion-dock,.native-console.companion-console:not(.companion-talking) .companion-dock{grid-column:2;grid-row:3;order:initial;display:flex;align-self:end;width:100%;min-height:56px;padding:0;margin:0;border:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.native-console.companion-console .notion-shortcuts{width:100%;max-width:none;flex:1;min-width:0}
+.native-console.companion-console .companion-dock .world-actions{justify-content:flex-start!important}
+@media(max-width:700px){.native-console.companion-console .notion-hud{width:calc(100% - 28px);grid-template-columns:90px minmax(0,1fr);column-gap:10px;min-height:170px}.native-console.companion-console .companion-pet{width:90px}.native-console.companion-console .companion-pet .companion-context{max-width:100px;padding:5px 8px}.native-console.companion-console .companion-pet .companion-context .companion-name{max-width:84px;font-size:11px}.native-console.companion-console .companion-dialogue,.native-console.companion-console.companion-talking .companion-dialogue{padding:12px}}
+
+/* Current location belongs to the top-left information group. */
+.native-console.companion-console .notion-identity .companion-context{position:static;inset:auto;display:block;width:auto;max-width:100%;min-height:0;margin:0 0 7px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;transform:none;color:var(--hud-ink);text-align:left}
+.native-console.companion-console .notion-identity .companion-context .companion-name{display:block;max-width:100%;font-size:17px;font-weight:600;line-height:1.5;letter-spacing:0;color:inherit;text-align:left}
+.native-console.companion-console .notion-identity .companion-context:not(:disabled):hover{background:none;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:700px){.native-console.companion-console .notion-identity .companion-context .companion-name{font-size:15px}}
+
+/* Only the current reply is visible; long replies remain readable. */
+.native-console.companion-console .native-conversation{max-height:min(120px,24dvh);overscroll-behavior:contain}
+
+/* One expression slot: reply, typing and voice take turns above actions. */
+.native-console.companion-console .notion-hud{grid-template-rows:minmax(48px,auto) 56px;min-height:130px}
+.native-console.companion-console .companion-dialogue,.native-console.companion-console.companion-talking .companion-dialogue{grid-column:2;grid-row:1;min-height:48px;align-self:end}
+.native-console.companion-console .companion-dock,.native-console.companion-console:not(.companion-talking) .companion-dock{grid-row:2}
+.native-console.companion-console .companion-dialogue,.native-console.companion-console.companion-talking .companion-dialogue{justify-content:center;padding:9px 10px;border:0;border-radius:0;background:linear-gradient(90deg,#f4f3df70,#f4f3df00);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;text-shadow:0 1px 8px #fffce8}
+.native-console.companion-console[data-expression-mode=voice] .native-conversation,.native-console.companion-console[data-expression-mode=status] .native-conversation{display:none!important}
+.native-console.companion-console .native-conversation{max-height:min(100px,23dvh)}
+.native-console.companion-console .companion-pet .companion-avatar[data-state=listening] img{transform:rotate(-5deg)}
+@media(max-width:700px){.native-console.companion-console .notion-hud{min-height:130px}.native-console.companion-console .companion-dialogue,.native-console.companion-console.companion-talking .companion-dialogue{padding:8px}}
+
+/* Voice companion: fox-only input and a paged, game-like reply plaque. */
+.native-console.voice-pet-console #notionCommand,
+.native-console.voice-pet-console #notionVoiceStatus{display:none!important}
+.native-console.voice-pet-console .notion-hud{grid-template-columns:100px minmax(0,1fr);grid-template-rows:minmax(0,auto) 56px;column-gap:20px;row-gap:14px;min-height:130px}
+.native-console.voice-pet-console .companion-pet{width:100px;bottom:3px;gap:4px}
+.native-console.voice-pet-console .companion-pet .companion-avatar{width:90px;height:96px;flex-basis:96px;position:relative;border:0;border-radius:42%;background:none;box-shadow:none}
+.native-console.voice-pet-console .companion-pet .companion-avatar img{width:108px;height:108px;margin:-6px -9px 0}
+.native-console.voice-pet-console .companion-listening-state{height:18px;font-size:11px;font-weight:600;line-height:18px;color:#3d5641;white-space:nowrap;text-shadow:0 1px 5px #fff8de}
+.native-console.voice-pet-console .companion-avatar[data-state=listening]::before,
+.native-console.voice-pet-console .companion-avatar[data-state=preparing]::before{content:'';position:absolute;inset:13px 0 -1px;border:2px solid #f8ecc4;border-radius:50%;background:#f6e8ae30;box-shadow:0 0 0 5px #6f957d30;animation:fox-listen 1.5s ease-in-out infinite}
+.native-console.voice-pet-console .companion-pet .companion-avatar[data-state=listening] img{transform:rotate(-5deg)}
+.native-console.voice-pet-console .companion-pet .companion-avatar[data-state=thinking] img{animation:fox-think 1.5s ease-in-out infinite}
+.native-console.voice-pet-console .companion-dialogue,
+.native-console.voice-pet-console.companion-talking .companion-dialogue{grid-column:2;grid-row:1;min-height:126px;justify-content:center;gap:0;padding:25px 43px 28px 25px;border:2px solid #99774fbc;border-radius:9px;background:linear-gradient(125deg,#fbf1d5e8,#ede0bfe0);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 0 0 3px #fff7dfb3,inset 0 0 0 5px #b99d6e5c,0 4px 0 #7f67445c,0 10px 24px #33432c17;text-shadow:none;overflow:visible}
+.native-console.voice-pet-console .companion-dialogue::after{display:none}
+.native-console.voice-pet-console .companion-speaker{position:absolute;left:20px;top:-15px;min-width:56px;padding:3px 15px;border:2px solid #9e805dbd;border-radius:7px 7px 4px 4px;background:#eee0bdeb;box-shadow:inset 0 0 0 2px #fff4d578;color:#4d5941;text-align:center;font-size:12px;font-weight:650;line-height:19px;letter-spacing:.025em}
+.native-console.voice-pet-console .native-conversation{min-height:0;max-height:none;padding:0;margin:0;overflow:visible;color:#374d3d;font-size:17px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;font-weight:450}
+.native-console.voice-pet-console .companion-advance{position:absolute;right:8px;bottom:7px;display:grid;place-items:center;width:36px;height:32px;padding:0;border:0;border-radius:5px;background:transparent;color:#746442;cursor:pointer}
+.native-console.voice-pet-console .companion-advance[hidden]{display:none}
+.native-console.voice-pet-console .companion-advance:hover{background:#c9b07b40;color:#344e3a}
+.native-console.voice-pet-console .companion-advance svg{filter:drop-shadow(0 1px 0 #fff5d3);animation:fox-continue 1.8s ease-in-out infinite}
+@keyframes fox-listen{50%{transform:scale(1.07);opacity:.6}}
+@keyframes fox-think{50%{transform:translateY(-3px) rotate(5deg)}}
+@keyframes fox-continue{50%{transform:translateX(3px)}}
+@media(max-width:700px){.native-console.voice-pet-console .notion-hud{grid-template-columns:70px minmax(0,1fr);column-gap:10px}.native-console.voice-pet-console .companion-pet{width:70px}.native-console.voice-pet-console .companion-pet .companion-avatar{width:68px;height:82px;flex-basis:82px}.native-console.voice-pet-console .companion-pet .companion-avatar img{width:88px;height:88px;margin:-4px -10px 0}.native-console.voice-pet-console .companion-dialogue,.native-console.voice-pet-console.companion-talking .companion-dialogue{padding:22px 24px 33px 18px;min-height:116px}.native-console.voice-pet-console .native-conversation{font-size:14px;line-height:1.55}}
+@media(prefers-reduced-motion:reduce){.native-console.voice-pet-console .companion-avatar::before,.native-console.voice-pet-console .companion-avatar img,.native-console.voice-pet-console .companion-advance svg{animation:none!important}}
+
+/* The reader and companion are two parts of one game HUD. */
+.native-console.voice-pet-console{
+ --game-paper:linear-gradient(135deg,#f7f8f0d9,#eef2e8c9);
+ --game-edge:#ffffff87;--game-ink:#344a40;
+ --game-raised:0 8px 30px #243d3012;
+ --game-well:#536c5010;--game-line:#455c3f21;--console-reserve:170px;--reader-top:160px;
+}
+.native-console.voice-pet-console>.notion-content,
+.native-console.voice-pet-console .notion-dialog,
+.native-console.voice-pet-console .companion-dialogue{
+ border:2px solid var(--game-edge);border-radius:9px;background:var(--game-paper);box-shadow:var(--game-raised);color:var(--game-ink);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)
+}
+.native-console.voice-pet-console>.notion-content,
+.native-console.voice-pet-console .notion-dialog{
+ position:absolute;inset:var(--reader-top) max(28px,calc((100% - 980px)/2)) var(--console-reserve);z-index:12;
+ width:auto;height:auto;max-width:none;max-height:none;min-height:0;padding:24px 32px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9c89676b transparent;scroll-padding:20px
+}
+.native-console.voice-pet-console .notion-dialog:not([open]){display:none}
+.native-console.voice-pet-console>.notion-content::before,
+.native-console.voice-pet-console>.notion-content::after,
+.native-console.voice-pet-console .notion-dialog::before,
+.native-console.voice-pet-console .notion-dialog::after{display:none}
+.native-console.voice-pet-console .notion-hud{z-index:16}
+.native-console.voice-pet-console .notion-hud.is-reading .native-conversation{display:block}
+.native-console.voice-pet-console .world-panel-context{position:relative;top:0;background:none;backdrop-filter:none;border-bottom:1px solid var(--game-line);padding:0 0 12px;margin-bottom:18px}
+.native-console.voice-pet-console>.notion-content .notion-reader-head{margin-bottom:18px}
+.native-console.voice-pet-console>.notion-content .notion-reader-head h1,
+.native-console.voice-pet-console .notion-dialog h2{font-size:25px;line-height:1.3;margin:6px 0 18px;color:var(--game-ink);padding-right:36px}
+.native-console.voice-pet-console>.notion-content .notion-prose{font-size:16px;line-height:1.75}
+.native-console.voice-pet-console .notion-dialog .notion-close{width:32px;height:32px;right:14px;top:14px;border-radius:6px;border:1px solid var(--game-line);background:#fff4d57a;color:var(--game-ink)}
+.native-console.voice-pet-console .world-actions .world-capsule{
+ background:var(--game-paper);border:1px solid var(--game-edge);box-shadow:inset 0 0 0 2px #fff7df8c,0 2px 0 #7f674438;color:var(--game-ink)
+}
+.native-console.voice-pet-console .world-actions .world-capsule:hover{background:#fff2d2;transform:translateY(-1px)}
+.native-console.voice-pet-console .notion-dialog button:not(.notion-close),
+.native-console.voice-pet-console .notion-table-pager button,
+.native-console.voice-pet-console .notion-content>button{
+ border:1px solid var(--game-edge);border-radius:7px;background:#f8ebce9e;color:var(--game-ink);box-shadow:inset 0 0 0 2px #fff7df70;padding:9px 14px
+}
+.native-console.voice-pet-console :is(.notion-dialog,.notion-content) :is(input:not([type=checkbox]),textarea,select){
+ border:1px solid var(--game-line);border-radius:6px;background:#fffae770;box-shadow:inset 0 1px 3px #7059320d;color:var(--game-ink)
+}
+.native-console.voice-pet-console :is(.notion-prose pre,.notion-prose code,.notion-prose details,.notion-table-wrap,.private-original){background:var(--game-well);border-color:var(--game-line);border-radius:6px;box-shadow:none}
+.native-console.voice-pet-console :is(.notion-prose th,.notion-prose td,.notion-database th,.notion-database td){border-color:var(--game-line);color:var(--game-ink)}
+.native-console.voice-pet-console .notion-database th{background:#eadbbaf5}
+.native-console.voice-pet-console .notion-database tr:nth-child(even){background:#d6c8a31c}
+.native-console.voice-pet-console .notion-page-link{border-color:var(--game-line)!important;background:none;box-shadow:none}
+.native-console.voice-pet-console .companion-pet{transition:left .5s cubic-bezier(.2,.7,.3,1),bottom .5s cubic-bezier(.2,.7,.3,1);z-index:2}
+.native-console.voice-pet-console.companion-talking .companion-pet{left:128px;bottom:calc(100% - 20px)}
+.native-console.voice-pet-console.companion-talking .companion-speaker{left:112px}
+.native-console.voice-pet-console .companion-pet .companion-avatar[data-state=thinking] img{animation:none}
+@media(max-width:700px){
+ .native-console.voice-pet-console>.notion-content,.native-console.voice-pet-console .notion-dialog{left:14px;right:14px;padding:18px}
+ .native-console.voice-pet-console.companion-talking .companion-pet{left:85px}
+ .native-console.voice-pet-console.companion-talking .companion-speaker{left:86px}
+ .native-console.voice-pet-console .notion-dialog h2,.native-console.voice-pet-console>.notion-content .notion-reader-head h1{font-size:21px}
+}
+@media(prefers-reduced-motion:reduce){.native-console.voice-pet-console .companion-pet{transition:none}}
+.native-console.voice-pet-console .notion-dialog{z-index:14}
+.native-console.voice-pet-console:has(.notion-dialog[open])>.notion-content{visibility:hidden;pointer-events:none}
+.native-console.voice-pet-console .world-provenance{padding:0 0 10px;margin-bottom:16px;border:0;border-bottom:1px solid var(--game-line);border-radius:0;background:none;color:#746442;box-shadow:none}
+.native-console.voice-pet-console .world-provenance summary{min-height:28px;font-size:12px}
+.native-console.voice-pet-console .notion-breadcrumb span{background:none;border-radius:0}
+
+/* Quiet native surfaces: the world carries the character, chrome stays light. */
+.native-console.voice-pet-console>.notion-content,
+.native-console.voice-pet-console .notion-dialog,
+.native-console.voice-pet-console .companion-dialogue,
+.native-console.voice-pet-console.companion-talking .companion-dialogue{
+ border:1px solid var(--game-edge);border-radius:20px;background:var(--game-paper);box-shadow:var(--game-raised);backdrop-filter:blur(28px) saturate(.9);-webkit-backdrop-filter:blur(28px) saturate(.9)
+}
+.native-console.voice-pet-console .companion-speaker{display:none}
+.native-console.voice-pet-console .companion-dialogue,
+.native-console.voice-pet-console.companion-talking .companion-dialogue{min-height:104px;padding:22px 40px 23px 24px}
+.native-console.voice-pet-console .world-actions .world-capsule{border:1px solid #ffffff85;background:#f4f6ecc9;box-shadow:0 2px 9px #263b2f08;font-weight:450}
+.native-console.voice-pet-console .world-actions .world-capsule:hover{background:#fafbf2e8;transform:none}
+.native-console.voice-pet-console .notion-dialog button:not(.notion-close),
+.native-console.voice-pet-console .notion-table-pager button,
+.native-console.voice-pet-console .notion-content>button{border-color:var(--game-line);background:#f8faf26b;box-shadow:none;border-radius:10px}
+.native-console.voice-pet-console :is(.notion-dialog,.notion-content) :is(input:not([type=checkbox]),textarea,select){background:#ffffff50;box-shadow:none;border-radius:9px}
+.native-console.voice-pet-console .notion-dialog .notion-close{border:0;background:#596a4d0d;border-radius:50%}
+.native-console.voice-pet-console .notion-database th{background:#e8eee2f5}
+.native-console.voice-pet-console .notion-database tr:nth-child(even){background:#536c5009}
+.native-console.voice-pet-console .world-provenance{color:#657463}
+.native-console.voice-pet-console .companion-advance{color:#526950}
+.native-console.voice-pet-console .companion-advance:hover{background:#61795712}
+.native-console.voice-pet-console .companion-advance svg{animation:none;filter:none}
+.native-console.voice-pet-console .companion-pet{transition-duration:.35s}
+.native-console.voice-pet-console .companion-avatar[data-state=listening]::before,
+.native-console.voice-pet-console .companion-avatar[data-state=preparing]::before{border:1px solid #7c9c8266;background:#cfdfcc16;box-shadow:0 0 0 3px #7c9c8214}
+@media(max-width:700px){.native-console.voice-pet-console .companion-dialogue,.native-console.voice-pet-console.companion-talking .companion-dialogue{padding:18px 28px 24px 18px;min-height:94px}}
+
+/* Idle companion sits on the action baseline, leaving the world quiet. */
+.native-console.voice-pet-console:not(.companion-talking) .companion-pet{left:54px;bottom:7px;width:64px;gap:0}
+.native-console.voice-pet-console:not(.companion-talking) .companion-pet .companion-avatar{width:60px;height:60px;flex-basis:60px}
+.native-console.voice-pet-console:not(.companion-talking) .companion-avatar img{width:68px!important;height:68px!important;margin:-4px;transform:none}
+.native-console.voice-pet-console:not(.companion-talking) .companion-listening-state{position:absolute;top:-18px;left:50%;transform:translateX(-50%);height:16px;line-height:16px}
+.native-console.voice-pet-console:not(.companion-talking) .companion-listening-state:empty{display:none}
+.native-console.voice-pet-console:not(.companion-talking) .companion-avatar[data-state=listening]::before,
+.native-console.voice-pet-console:not(.companion-talking) .companion-avatar[data-state=preparing]::before{inset:3px -2px -1px}
+@media(max-width:700px){.native-console.voice-pet-console:not(.companion-talking) .companion-pet{left:14px;width:64px}}
+
+/* Fox-centered command space: two action arcs and a reply above the head. */
+.native-console.radial-pet-console .notion-hud{display:block;width:min(760px,calc(100% - 28px));height:150px;min-height:150px;bottom:20px;overflow:visible}
+.native-console.radial-pet-console .companion-pet,
+.native-console.radial-pet-console:not(.companion-talking) .companion-pet,
+.native-console.radial-pet-console.companion-talking .companion-pet{left:50%;bottom:52px;width:90px;height:88px;transform:translateX(-50%);gap:0;transition:none}
+.native-console.radial-pet-console .companion-pet .companion-avatar,
+.native-console.radial-pet-console:not(.companion-talking) .companion-pet .companion-avatar{width:82px;height:88px;flex-basis:88px}
+.native-console.radial-pet-console .companion-avatar img,
+.native-console.radial-pet-console:not(.companion-talking) .companion-avatar img{width:96px!important;height:96px!important;margin:-4px -7px;animation:none!important}
+.native-console.radial-pet-console .companion-listening-state,
+.native-console.radial-pet-console:not(.companion-talking) .companion-listening-state{position:absolute;top:-18px;left:50%;transform:translateX(-50%);height:16px;line-height:16px}
+.native-console.radial-pet-console .companion-dialogue,
+.native-console.radial-pet-console.companion-talking .companion-dialogue{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);width:min(420px,calc(100% - 32px));min-height:80px;margin:0;padding:18px 34px 21px 22px;animation:none}
+.native-console.radial-pet-console .companion-dialogue::after{display:block;position:absolute;left:calc(50% - 7px);bottom:-8px;width:14px;height:14px;background:#eef2e8e6;border:0;border-right:1px solid #ffffff87;border-bottom:1px solid #ffffff87;transform:rotate(45deg);clip-path:polygon(0 100%,100% 0,100% 100%)}
+.native-console.radial-pet-console .companion-dock,
+.native-console.radial-pet-console:not(.companion-talking) .companion-dock{position:absolute;inset:auto 0 46px;height:152px;min-height:0;padding:0;pointer-events:none}
+.native-console.radial-pet-console .notion-shortcuts{width:100%;max-width:none;min-width:0}
+.native-console.radial-pet-console .world-actions{display:grid;grid-template-columns:minmax(0,1fr) 160px minmax(0,1fr);gap:0;width:100%;height:152px;padding:0;overflow:visible;pointer-events:none}
+.native-console.radial-pet-console .world-actions .world-capsule{flex:0 0 auto;min-height:42px;max-width:100%;width:auto;padding:9px 13px;font-size:12px;white-space:normal;box-sizing:border-box;line-height:1.3;text-align:center;justify-content:center}
+.native-console.radial-pet-console .world-actions .world-capsule>span{white-space:normal;max-width:170px}
+.native-console.radial-pet-console .companion-text-entry{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(300px,calc(100% - 24px));height:38px;pointer-events:auto}
+.native-console.radial-pet-console .companion-text-entry[hidden]{display:none}
+.native-console.radial-pet-console #notionCommand{display:flex!important;align-items:center;gap:7px;height:38px;min-height:38px;width:100%;padding:4px 5px 4px 13px;margin:0;border:1px solid #ffffff9c;border-radius:21px;background:#f4f6ece0;box-shadow:0 3px 14px #243d3010}
+.native-console.radial-pet-console #notionInput{flex:1;min-width:0;width:100%;height:28px;padding:0;border:0;outline:none;background:none;color:#344a40;font-size:13px}
+.native-console.radial-pet-console #notionSend{flex:0 0 28px;width:28px;height:28px;min-height:28px;border:0;border-radius:50%;background:#63806c;color:white;font-size:19px}
+@media(max-width:600px){.native-console.radial-pet-console .world-actions{grid-template-columns:minmax(0,1fr) 90px minmax(0,1fr)}.native-console.radial-pet-console .world-actions .world-capsule{font-size:11px;padding:7px 9px}.native-console.radial-pet-console .world-actions .world-capsule svg{display:none}}
+@media(max-height:720px){.native-console.radial-pet-console .companion-dialogue,.native-console.radial-pet-console.companion-talking .companion-dialogue{min-height:60px;padding:12px 32px 14px 18px}.native-console.radial-pet-console .native-conversation{font-size:14px;line-height:1.5}}
+
+/* Quiet companion dock: one suggestion per side, the rest on demand. */
+.native-console.radial-pet-console .notion-hud{width:min(580px,calc(100% - 28px));isolation:isolate}
+.native-console.radial-pet-console .notion-hud::before{content:"";position:absolute;z-index:-1;pointer-events:none;width:100vw;left:50%;transform:translateX(-50%);bottom:-22px;height:240px;background:linear-gradient(transparent 0%,#c3caa3b8 52%,#c3caa3f5 88%)}
+.native-console.radial-pet-console #notionPins{mask-image:linear-gradient(to bottom,#000 0%,#000 calc(100% - 260px),transparent calc(100% - 161px));-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 calc(100% - 260px),transparent calc(100% - 161px))}
+.native-console.radial-pet-console .companion-dock,
+.native-console.radial-pet-console:not(.companion-talking) .companion-dock{bottom:100px;height:44px}
+.native-console.radial-pet-console .world-actions{grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);height:44px}
+.native-console.radial-pet-console .world-actions .world-capsule svg{display:none}
+@media(max-width:600px){.native-console.radial-pet-console .world-actions{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr)}}
+
+.native-console.radial-pet-console[data-time-of-day=night] .notion-hud::before{background:linear-gradient(transparent,#283e38bb 52%,#283e38f5 88%)}
+
+/* A single hover-to-open input, with press-and-hold dictation. */
+.native-console.radial-pet-console .companion-dock,
+.native-console.radial-pet-console:not(.companion-talking) .companion-dock{bottom:52px;height:88px}
+.native-console.radial-pet-console .world-actions{height:88px}
+.native-console.radial-pet-console .companion-text-entry{bottom:4px;width:90px;height:38px;transition:width .18s ease;touch-action:none}
+.native-console.radial-pet-console[data-entry-expanded=true] .companion-text-entry{width:min(280px,calc(100% - 24px))}
+.native-console.radial-pet-console .companion-input-handle{display:grid;place-items:center;width:90px;height:38px;min-height:38px;padding:0;border:0;background:transparent;cursor:text}
+.native-console.radial-pet-console .companion-input-handle::before{content:"";width:62px;height:7px;border-radius:8px;background:#eef2e5d9;box-shadow:0 1px 3px #344b3820}
+.native-console.radial-pet-console .companion-input-state{display:flex;align-items:center;justify-content:center;height:38px;width:100%;border-radius:22px;background:#f1f5e9ed;color:#3d5d48;font-size:12px;border:1px solid #fff9;user-select:none}
+.native-console.radial-pet-console .companion-text-entry #notionCommand{overflow:hidden}
+@media(prefers-reduced-motion:reduce){.native-console.radial-pet-console .companion-text-entry{transition:none}}
+
+.native-console.radial-pet-console .companion-text-entry #notionCommand[hidden]{display:none!important}
+
+/* Recall belongs to the fox; a submitted message is only a brief handoff effect. */
+.native-console.radial-pet-console .companion-input-flight{position:absolute;z-index:8;width:9px;height:9px;padding:0;border:0;border-radius:50%;background:#f6efdbe8;box-shadow:0 0 12px 3px #f6efdb4d;transform:translate(-50%,-50%);pointer-events:none;user-select:none;will-change:transform,opacity}
+
+/* Phone layout: readable ambient information and an inset, independently scrolling reader. */
+@media(max-width:600px){
+ .native-console.radial-pet-console.companion-console .notion-top{inset:max(12px,env(safe-area-inset-top)) 14px auto;gap:8px}
+ .native-console.radial-pet-console.companion-console .notion-identity{width:calc(100% - 52px);max-width:calc(100% - 52px)}
+ .native-console.radial-pet-console.companion-console .world-location{width:44px;max-width:44px}
+ .native-console.radial-pet-console.companion-console .world-environment{flex-wrap:nowrap;gap:5px;margin:0;white-space:nowrap}
+ .native-console.radial-pet-console.companion-console .world-environment :is(#worldDate,#worldClock,#worldWeather){font-size:12px;line-height:1.5;flex-basis:auto}
+ .native-console.radial-pet-console.companion-console .world-environment #worldWeather{padding:8px 4px;margin:-8px 0;min-height:34px}
+ .native-console.radial-pet-console.companion-console .companion-context .companion-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .native-console.radial-pet-console.companion-console .notion-hud{width:calc(100% - 24px);bottom:max(12px,env(safe-area-inset-bottom));max-height:none}
+ .native-console.radial-pet-console.companion-console .world-actions{grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr)}
+ .native-console.radial-pet-console.companion-console .companion-dock,
+ .native-console.radial-pet-console.companion-console:not(.companion-talking) .companion-dock{height:96px}
+ .native-console.radial-pet-console.companion-console .companion-pet .companion-avatar{width:66px;height:76px;flex-basis:76px}
+ .native-console.radial-pet-console.companion-console .companion-dialogue,
+ .native-console.radial-pet-console.companion-console.companion-talking .companion-dialogue{width:100%;padding:12px 28px 14px 16px;min-height:60px}
+ .native-console.radial-pet-console.companion-console .native-conversation{font-size:14px;line-height:1.5}
+ .native-console.radial-pet-console.companion-console #notionInput{font-size:16px}
+ .native-console.radial-pet-console.companion-console #notionSend{width:34px;height:34px;flex-basis:34px}
+ .native-console.radial-pet-console.companion-console .companion-text-entry,
+ .native-console.radial-pet-console.companion-console #notionCommand{height:44px;min-height:44px}
+ .native-console.radial-pet-console.companion-console>.notion-content,
+ .native-console.radial-pet-console.companion-console .notion-dialog{left:12px;right:12px;padding:16px;border-radius:20px}
+ .native-console.radial-pet-console.companion-console .world-panel-context{padding-bottom:8px;margin-bottom:12px;min-height:36px}
+ .native-console.radial-pet-console.companion-console .notion-breadcrumb{min-width:0;margin-top:0}
+ .native-console.radial-pet-console.companion-console :is(.notion-content,.notion-dialog) :is(h1,h2){font-size:20px;margin-bottom:12px}
+ .native-console.radial-pet-console.companion-console>.notion-content .notion-prose{font-size:15px;line-height:1.65}
+ .native-console.radial-pet-console.companion-console[data-depth=overview] .notion-pin strong{font-size:11px}
+ .native-console.radial-pet-console.companion-console[data-depth=overview] .notion-pin{padding:3px 6px;min-height:28px}
+}
+/* The keyboard owns the lower screen: keep typing and the reply reachable above it. */
+@media(max-width:900px){
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .world-environment{display:none}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .notion-top{top:8px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .notion-hud{height:60px;min-height:60px;bottom:8px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .companion-dock{display:none}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .companion-pet{left:0;bottom:4px;width:50px;height:48px;transform:none}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .companion-pet .companion-avatar{width:48px;height:48px;flex-basis:48px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .companion-text-entry{left:60px;bottom:4px;transform:none;width:calc(100% - 60px)}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .companion-dialogue{bottom:68px;min-height:48px;padding:10px 28px 10px 14px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .notion-hud::before{height:140px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .companion-dialogue::after{display:none}
+}
+
+@media(max-width:900px){
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) #notionInput{font-size:16px}
+ .native-console.radial-pet-console.compact-viewport:not(.is-typing) .notion-hud{height:108px;min-height:108px}
+ .native-console.radial-pet-console.compact-viewport:not(.is-typing) .companion-dock{display:block;bottom:60px;height:44px}
+ .native-console.radial-pet-console.compact-viewport:not(.is-typing) .world-actions{display:flex;gap:6px;height:44px;overflow-x:auto;pointer-events:auto;scrollbar-width:none}
+ .native-console.radial-pet-console.compact-viewport:not(.is-typing) .world-actions .world-capsule{flex:0 0 auto;width:auto;max-width:200px;min-height:44px}
+ .native-console.radial-pet-console.compact-viewport:not(.is-typing) .companion-dialogue{bottom:112px}
+}
+
+@media(max-width:900px){
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport)>.notion-content{padding:12px 16px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .world-panel-context{min-height:28px;padding-bottom:4px;margin-bottom:6px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .notion-breadcrumb{visibility:visible;font-size:12px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .notion-reader-head{margin-bottom:6px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .notion-reader-head .notion-eyebrow{display:none}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .notion-reader-head h1{font-size:18px;margin:4px 0 6px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .world-provenance{padding-bottom:4px;margin-bottom:8px}
+}
+
+/* Three roles, three surfaces: Fox speaks, actions choose, the dark field accepts input. */
+.native-console.radial-pet-console.companion-console .companion-dialogue{background:#f6f3e8ed;border:1px solid #fff9;border-radius:16px;box-shadow:0 5px 20px #142c2112;color:#304a3c}
+.native-console.radial-pet-console.companion-console .companion-dialogue::after{background:#f6f3e8ed}
+.native-console.radial-pet-console.companion-console .world-actions .world-capsule::after{content:'›';flex:none;font-size:18px;line-height:1;opacity:.65}
+.native-console.radial-pet-console.companion-console .world-actions .world-capsule:hover{background:#e7edde85;border-color:#3957409c}
+.native-console.radial-pet-console.companion-console #notionCommand{background:#28483de8;border:1px solid #bfd4bc55;border-radius:14px;box-shadow:0 3px 12px #10251e18}
+.native-console.radial-pet-console.companion-console #notionInput{color:#f5f4e9}
+.native-console.radial-pet-console.companion-console #notionInput::placeholder{color:#d0dccc}
+.native-console.radial-pet-console.companion-console #notionSend{background:#ecf1e3;color:#355341}
+.native-console.radial-pet-console.companion-console #notionCommand:focus-within{border-color:#e8efddcc}
+@media(max-width:600px){
+ .native-console.radial-pet-console.companion-console .notion-hud{width:calc(100% - 32px)}
+ .native-console.radial-pet-console.companion-console .world-actions{grid-template-columns:minmax(0,1fr) 78px minmax(0,1fr);height:98px}
+ .native-console.radial-pet-console.companion-console:not(.compact-viewport):not(.is-typing) .companion-dock{bottom:64px;height:98px}
+ .native-console.radial-pet-console.companion-console:not(.compact-viewport):not(.is-typing) .companion-pet{bottom:65px}
+ .native-console.radial-pet-console.companion-console:not(.compact-viewport):not(.is-typing) .companion-dialogue{bottom:184px;width:calc(100% - 12px);padding:14px 26px 15px 16px}
+ .native-console.radial-pet-console.companion-console[data-entry-expanded=true]:not(.compact-viewport):not(.is-typing) .companion-text-entry{width:min(244px,calc(100% - 48px))}
+}
+.native-console.radial-pet-console[data-time-of-day=night] .companion-context{color:#edf2e5;text-shadow:0 1px 8px #19312730}
+.world-note-search{display:flex;gap:8px;margin:0 0 16px}
+.world-note-search input{min-width:0;flex:1;font:16px -apple-system,sans-serif;padding:10px;border-radius:10px;border:1px solid #5b765e55;background:#f5f6edaa;color:#304b3a}
+.world-note-search button{border:1px solid #5b765e55;border-radius:10px;padding:10px 14px;background:#dce5d280;color:#304b3a;min-height:44px}
+
+/* Fox is the one input control: tap for text, hold for voice. */
+.native-console.radial-pet-console .companion-avatar{touch-action:none;-webkit-touch-callout:none}
+.native-console.radial-pet-console .companion-gesture-hint{position:absolute;left:50%;top:-31px;transform:translateX(-50%);z-index:7;padding:5px 9px;border:1px solid #ffffff88;border-radius:11px;background:#f5f3e8cf;backdrop-filter:blur(12px);color:#3d5545;font:500 11px/1.2 -apple-system,sans-serif;white-space:nowrap;pointer-events:none;box-shadow:0 3px 12px #263d3012;animation:fox-hint-in .24s ease-out}
+.native-console.radial-pet-console .companion-gesture-hint[hidden],
+.native-console.radial-pet-console.companion-talking .companion-gesture-hint{display:none}
+.native-console.radial-pet-console .companion-avatar[data-state=transcribing]::before{content:'';position:absolute;inset:6px -1px 1px;border:1px solid #7c9c8277;border-radius:50%;background:#cfdfcc18;box-shadow:0 0 0 3px #7c9c8214;animation:fox-transcribing 1.15s ease-in-out infinite}
+.native-console.radial-pet-console .companion-avatar[data-state=listening]::after{content:'';position:absolute;right:-4px;top:24px;width:7px;height:17px;border:2px solid #f8f2d9;border-top-color:transparent;border-bottom-color:transparent;border-radius:50%;filter:drop-shadow(0 1px 3px #29423355);animation:fox-wave .8s ease-in-out infinite;pointer-events:none}
+@keyframes fox-hint-in{from{opacity:0;transform:translate(-50%,5px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes fox-wave{0%,100%{opacity:.35;transform:scale(.72)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes fox-transcribing{0%,100%{opacity:.45;transform:rotate(0)}50%{opacity:1;transform:rotate(8deg)}}
+@media(max-width:600px){.native-console.radial-pet-console .companion-gesture-hint{top:-27px;font-size:10px;padding:4px 7px}}
+@media(prefers-reduced-motion:reduce){.native-console.radial-pet-console .companion-gesture-hint,.native-console.radial-pet-console .companion-avatar::before,.native-console.radial-pet-console .companion-avatar::after{animation:none!important}}
+
+/* A single input line under Fox, with the same meaning on Mac and the PWA. */
+.native-console.radial-pet-console .companion-text-entry{width:min(280px,calc(100% - 24px))}
+.native-console.radial-pet-console .companion-input-handle{width:100%;font:500 12px/1.4 -apple-system,sans-serif;color:#294735;text-shadow:0 1px 5px #f4f3db;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.native-console.radial-pet-console .companion-input-handle::before{display:none}
+.native-console.radial-pet-console .companion-input-state{padding:0 12px;display:block;line-height:38px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box;background:#e9efdfb8;backdrop-filter:blur(12px)}
+.native-console.radial-pet-console .companion-listening-state{display:none}
+.native-console.radial-pet-console .companion-gesture-hint{display:none!important}
+.native-console.radial-pet-console.companion-console .world-actions .world-capsule::after{display:none}
+.native-console.radial-pet-console.companion-console .world-actions .world-capsule svg{display:block;width:16px;height:16px;flex:0 0 16px}
+.native-console.radial-pet-console .notion-identity{position:relative;isolation:isolate;display:flex;flex-direction:column;text-shadow:0 1px 3px #fff9}
+.native-console.radial-pet-console .notion-identity::before{content:'';position:absolute;inset:-20px -36px -22px -30px;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 25% 30%,#eef0dba8,transparent 75%);filter:blur(10px)}
+.native-console.radial-pet-console .notion-identity .world-environment{order:0}
+.native-console.radial-pet-console .notion-identity .companion-context{order:2;margin:6px 0 0;color:#294735}
+.native-console.radial-pet-console .notion-identity .companion-context:not(:disabled)::before{content:'⌂';margin-right:7px;display:inline-block}
+.native-console.radial-pet-console .notion-identity .companion-context .companion-name{display:inline;font-size:14px}
+.native-console.radial-pet-console .world-watermark{z-index:70;color:#f4f4e9;background:#243f347a;border-radius:8px;padding:4px 8px;font-size:12px;font-weight:600;opacity:1;text-shadow:0 1px 3px #10251980;backdrop-filter:blur(8px)}
+.native-console.radial-pet-console[data-time-of-day=night] .notion-identity::before{background:radial-gradient(ellipse at 25% 30%,#13291dba,transparent 75%)}
+.native-console.radial-pet-console[data-time-of-day=night] .notion-identity,.native-console.radial-pet-console[data-time-of-day=night] .companion-input-handle{color:#f5f4e7;text-shadow:0 1px 5px #12281ee6}
+.native-console.radial-pet-console[data-time-of-day=night] .notion-identity .companion-context{color:#f5f4e7}
+
+/* One quiet surface for typing, live transcription and the idle hint. */
+.native-console.radial-pet-console .companion-text-entry{--entry-ink:#314b3c;--entry-glass:#edf1e28c;--entry-edge:#ffffff50}
+.native-console.radial-pet-console .companion-text-entry :is(#notionCommand,.companion-input-state,.companion-input-handle){box-sizing:border-box;height:36px;min-height:36px;margin:0;border:1px solid var(--entry-edge);border-radius:18px;background:var(--entry-glass);box-shadow:none;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--entry-ink);font:400 12px/34px -apple-system,BlinkMacSystemFont,sans-serif;text-shadow:none}
+.native-console.radial-pet-console .companion-text-entry #notionCommand{padding:2px 4px 2px 12px;gap:4px}
+.native-console.radial-pet-console .companion-input-handle{opacity:.7}
+.native-console.radial-pet-console .companion-input-handle:hover{opacity:1}
+.native-console.radial-pet-console .companion-input-state{text-align:left;padding:0 12px}
+.native-console.radial-pet-console .companion-text-entry #notionInput{font:400 12px/28px -apple-system,BlinkMacSystemFont,sans-serif;color:var(--entry-ink)}
+.native-console.radial-pet-console .companion-text-entry #notionSend{background:transparent;color:var(--entry-ink);opacity:.65;font-size:17px}
+.native-console.radial-pet-console .world-watermark{display:flex;flex-direction:column;gap:2px;align-items:flex-end;right:16px;bottom:12px;padding:5px 7px;background:#233d3020;border-radius:6px;color:#f5f4e9;opacity:.65;letter-spacing:.01em;font-weight:400;font-size:10px;line-height:1.3;text-shadow:0 1px 4px #163222b0;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.native-console.radial-pet-console .world-brand{font-size:12px;letter-spacing:.05em}
+.native-console.radial-pet-console .world-watermark:hover{opacity:.95}
+@media(max-width:600px){.native-console.radial-pet-console .world-watermark{right:8px;bottom:5px;gap:0;padding:3px 5px;font-size:8px}.native-console.radial-pet-console .world-brand{font-size:10px}}
+@media(max-width:600px){
+ .native-console.radial-pet-console.companion-console .companion-text-entry :is(#notionCommand,.companion-input-state,.companion-input-handle){height:44px;min-height:44px;font-size:16px;line-height:42px;border-radius:22px}
+ .native-console.radial-pet-console.companion-console .companion-text-entry #notionInput{font-size:16px}
+ .native-console.radial-pet-console.companion-console .companion-input-handle{font-size:12px}
+ .native-console.radial-pet-console .world-watermark{flex-direction:row;align-items:baseline;gap:5px;bottom:1px;padding:0 3px;background:none;backdrop-filter:none;white-space:nowrap}
+}
+.native-console.radial-pet-console .world-watermark{min-height:0;min-width:0;height:auto;border:0;pointer-events:none}
+
+/* Details belong to the right side; the companion floats independently above them. */
+.native-console.radial-pet-console.companion-console>.notion-content,
+.native-console.radial-pet-console.companion-console .notion-dialog{inset:94px 24px 32px calc(50% + 12px);width:auto;height:auto;max-height:none;max-width:none;margin:0;padding:26px;z-index:30;scroll-padding-bottom:180px}
+.native-console.radial-pet-console.companion-console>.notion-content::after{content:"";display:block;height:160px;pointer-events:none}
+.native-console.radial-pet-console.companion-console .notion-hud{z-index:80}
+.native-console.radial-pet-console.companion-console .world-context,
+.native-console.radial-pet-console.companion-console .world-panel-context{display:none!important}
+.native-console.radial-pet-console.companion-console>.companion-context{position:absolute;z-index:85;left:50%;top:26px;transform:translateX(-50%);width:auto;max-width:32%;min-height:30px;margin:0;padding:3px 8px;border:0;background:none;box-shadow:none;backdrop-filter:none;color:#f6f5eb;text-shadow:0 1px 6px #16352ccc;font-size:16px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console.radial-pet-console.companion-console>.companion-context:disabled{opacity:1}
+.native-console.radial-pet-console.companion-console .notion-reader-head{position:relative;padding-right:28px}
+.native-console.radial-pet-console.companion-console .notion-reader-head .notion-close{position:absolute;top:0;right:-10px;width:32px;height:32px;min-height:32px;border:0;border-radius:50%;background:#52644912;color:#344a40;font-size:22px}
+.native-console.radial-pet-console.companion-console .notion-hud::before{width:300px;max-width:80vw;height:150px;bottom:-12px;background:radial-gradient(ellipse,#b7c9a14d 0%,#b7c9a128 38%,transparent 72%);filter:blur(8px)}
+.native-console.radial-pet-console.companion-console[data-time-of-day=night] .notion-hud::before{background:radial-gradient(ellipse,#142e3059 0%,#142e3026 38%,transparent 72%)}
+@media(max-width:800px){
+ .native-console.radial-pet-console.companion-console>.companion-context{top:83px;max-width:75%;font-size:14px}
+ .native-console.radial-pet-console.companion-console>.notion-content,
+ .native-console.radial-pet-console.companion-console .notion-dialog{inset:116px 12px 30px;padding:18px}
+ .native-console.radial-pet-console.companion-console:is(.is-typing,.compact-viewport)>.companion-context{top:42px}
+ .native-console.radial-pet-console.companion-console:is(.is-typing,.compact-viewport)>.notion-content,
+ .native-console.radial-pet-console.companion-console:is(.is-typing,.compact-viewport) .notion-dialog{top:78px;bottom:24px}
+}
+.native-console.radial-pet-console.companion-console>.companion-context .companion-name{font:inherit;line-height:1.4}
+.native-console.radial-pet-console.companion-console>.companion-context:not(:disabled):hover{background:none;text-decoration:underline;text-underline-offset:4px}
+.native-console.radial-pet-console.companion-console #notionDialogBody::after{content:"";display:block;height:150px}
+.native-console.radial-pet-console.companion-console>.companion-context .companion-name{color:inherit}
+.native-console.radial-pet-console .companion-text-entry :is(.companion-input-handle,.companion-input-state)[hidden]{display:none!important}
+
+/* Task tracker: global priorities above; context-specific actions stay with Fox. */
+.native-console.radial-pet-console .world-task-tracker{order:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:10px;max-width:360px}
+.native-console.radial-pet-console .world-task-tracker[hidden]{display:none!important}
+.native-console.radial-pet-console .world-task{display:flex;align-items:center;gap:9px;max-width:100%;min-height:32px;padding:4px 7px 4px 0;border:0;border-radius:7px;background:none;color:inherit;font:500 14px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;text-align:left;text-shadow:inherit;cursor:pointer}
+.native-console.radial-pet-console .world-task svg{flex:0 0 16px;width:16px;height:16px;opacity:.85}
+.native-console.radial-pet-console .world-task span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console.radial-pet-console .world-task[data-state=unseen]{opacity:.75;font-weight:400}
+.native-console.radial-pet-console .world-task[aria-current=location]{font-weight:650}
+.native-console.radial-pet-console .world-task:hover{background:#f5f5e822;opacity:1}
+.native-console.radial-pet-console .world-task:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(max-width:800px){
+ .native-console.radial-pet-console.companion-console>.companion-context{top:155px}
+ .native-console.radial-pet-console.companion-console>.notion-content,.native-console.radial-pet-console.companion-console .notion-dialog{top:190px}
+ .native-console.radial-pet-console .world-task-tracker{margin-top:7px;gap:0;max-width:100%}
+ .native-console.radial-pet-console .world-task{min-height:34px;font-size:12px}
+ .native-console.radial-pet-console:is(.is-typing,.compact-viewport) .world-task-tracker{display:none}
+ .native-console.radial-pet-console.companion-console:is(.is-typing,.compact-viewport)>.companion-context{top:42px}
+ .native-console.radial-pet-console.companion-console:is(.is-typing,.compact-viewport)>.notion-content,.native-console.radial-pet-console.companion-console:is(.is-typing,.compact-viewport) .notion-dialog{top:78px}
+}
+
+/* Illustrated-world surfaces. Tokens come from the same art direction as the scene. */
+.native-console.radial-pet-console.companion-console{
+ --folio-paper:color-mix(in srgb,var(--world-ui-paper) 92%,transparent);
+ --folio-line:color-mix(in srgb,var(--world-ui-edge) 42%,transparent);
+ --folio-well:color-mix(in srgb,var(--world-ui-ink) 5%,transparent);
+ --folio-heading:Georgia,'Times New Roman',serif;
+}
+.native-console.radial-pet-console.companion-console>.notion-content,
+.native-console.radial-pet-console.companion-console .notion-dialog{
+ color:var(--world-ui-ink);border:1px solid var(--folio-line);border-radius:var(--world-ui-radius);
+ background:linear-gradient(140deg,#fffbef3d,transparent 55%),var(--folio-paper);
+ box-shadow:inset 0 0 0 5px #fffaf02b,inset 0 0 0 6px #a68f6024,0 12px 38px #152a3224;
+ backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+ scrollbar-color:var(--world-ui-edge) transparent;
+ animation:folio-enter var(--world-ui-motion) ease-out;
+}
+.native-console.radial-pet-console.companion-console .notion-reader-head{padding-bottom:18px;margin-bottom:20px;border-bottom:1px solid var(--folio-line)}
+.native-console.radial-pet-console.companion-console .notion-reader-head h1,
+.native-console.radial-pet-console.companion-console .notion-dialog h2{font-family:var(--folio-heading);font-weight:400;font-size:30px;line-height:1.2;letter-spacing:-.025em;color:var(--world-ui-ink);margin:10px 0 0}
+.native-console.radial-pet-console.companion-console .notion-dialog h2{margin:0 36px 24px 0}
+.native-console.radial-pet-console.companion-console .notion-reader-head>p{color:var(--world-ui-muted);font-size:11px;letter-spacing:.07em}
+.native-console.radial-pet-console.companion-console>.notion-content .notion-prose{color:var(--world-ui-ink);font-size:16px;line-height:1.8}
+.native-console.radial-pet-console.companion-console .notion-prose :is(h1,h2,h3){font-family:var(--folio-heading);font-weight:400;letter-spacing:-.015em;font-size:22px;color:var(--world-ui-ink)}
+.native-console.radial-pet-console.companion-console :is(.notion-prose pre,.notion-prose code,.notion-prose details,.notion-table-wrap,.private-original){background:var(--folio-well);border-color:var(--folio-line);border-radius:6px;box-shadow:none;color:var(--world-ui-ink)}
+.native-console.radial-pet-console.companion-console :is(.notion-prose th,.notion-prose td,.notion-database th,.notion-database td){border-color:var(--folio-line);color:var(--world-ui-ink)}
+.native-console.radial-pet-console.companion-console .notion-prose th{background:var(--folio-well)}
+.native-console.radial-pet-console.companion-console .notion-prose blockquote{border-color:var(--world-ui-gold);color:var(--world-ui-muted)}
+.native-console.radial-pet-console.companion-console .notion-prose hr{background:var(--folio-line)}
+.native-console.radial-pet-console.companion-console :is(.world-note-search input){background:#fffaf065;border-color:var(--folio-line);border-radius:7px;color:var(--world-ui-ink)}
+.native-console.radial-pet-console.companion-console :is(.notion-content,.notion-dialog) button:not(.notion-close){border-color:var(--folio-line);border-radius:8px;box-shadow:none}
+.native-console.radial-pet-console.companion-console :is(.notion-content,.notion-dialog) .notion-close{border:1px solid var(--folio-line);background:transparent;color:var(--world-ui-ink);font-weight:400}
+.native-console.radial-pet-console.companion-console .companion-dialogue{
+ border:1px solid var(--folio-line);border-radius:var(--world-ui-radius);
+ background:linear-gradient(125deg,#fffaf54d,transparent 65%),var(--folio-paper);
+ color:var(--world-ui-ink);box-shadow:inset 0 1px #fffaf0b0,0 5px 20px #18322a18;
+ backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+.native-console.radial-pet-console.companion-console .companion-dialogue::after{background:var(--folio-paper);border-color:var(--folio-line)}
+.native-console.radial-pet-console.companion-console #worldConversation{color:var(--world-ui-ink);font-size:16px;line-height:1.65}
+.native-console.radial-pet-console.companion-console .companion-text-entry{--entry-ink:var(--world-ui-ink);--entry-glass:color-mix(in srgb,var(--world-ui-glass) 60%,transparent);--entry-edge:var(--folio-line)}
+.native-console.radial-pet-console.companion-console .companion-text-entry #notionInput::placeholder{color:var(--world-ui-muted)}
+.native-console.radial-pet-console.companion-console .world-task[data-state=needsAction] svg{color:#926c31;opacity:1}
+.native-console.radial-pet-console.companion-console[data-time-of-day=night] .world-task[data-state=needsAction] svg{color:#e0c68e}
+.native-console.radial-pet-console.companion-console>.companion-context{font-family:var(--folio-heading);font-weight:400;font-size:20px;letter-spacing:.015em}
+.native-console.radial-pet-console.companion-console .notion-tools .notion-round{border:1px solid var(--folio-line);background:color-mix(in srgb,var(--world-ui-paper) 65%,transparent);color:var(--world-ui-ink);box-shadow:inset 0 1px #fffaf08c}
+@keyframes folio-enter{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:600px){
+ .native-console.radial-pet-console.companion-console .notion-reader-head h1,.native-console.radial-pet-console.companion-console .notion-dialog h2{font-size:26px}
+ .native-console.radial-pet-console.companion-console>.companion-context{font-size:18px}
+ .native-console.radial-pet-console.companion-console #worldConversation{font-size:15px}
+ .native-console.radial-pet-console.companion-console>.notion-content .notion-prose{font-size:15px;line-height:1.7}
+}
+@media(prefers-reduced-motion:reduce){.native-console.radial-pet-console.companion-console>.notion-content,.native-console.radial-pet-console.companion-console .notion-dialog{animation:none}}
+/* The old always-flex composer must not show beneath the idle/voice surface. */
+.native-console.radial-pet-console.companion-console .companion-text-entry #notionCommand[hidden]{display:none!important}
+

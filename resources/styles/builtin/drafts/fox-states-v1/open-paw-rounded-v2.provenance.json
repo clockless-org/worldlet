@@ -1,0 +1,9 @@
+{
+  "status": "dev-runtime-native-acceptance-pending",
+  "file": "open-paw-rounded-v2.png",
+  "tool": "built-in image_gen",
+  "generation": "exec-5ef73511-f0c4-4f14-ba1f-ba51782cabb8",
+  "inputs": ["explaining.png", "../../assets/companion/rig/fallback.png"],
+  "prompt": "Use case: precise-object-edit. Asset type: painted 2D character animation source sprite, same full-body transparent canvas as Image 1. Image 1 is the edit target; Image 2 is the original character and paw-shape reference. Change ONLY the extended open paw at the far RIGHT of Image 1 (around x=.87,y=.65). Preserve EXACTLY the full image composition, wrist position, forearm direction, head, body, face, scarf, feet and tail. Replace the human-hand-like shape with a compact rounded furry fox forepaw: short clustered toe lobes, rounded mitten-like silhouette, NO opposed human thumb, NO long fingers, NO claws or pink pads. Match the dark warm brown short fur on the original resting paws in Image 2. Keep the same outward/upward presenting gesture and the paw within the existing local bounding area; keep the wrist attachment at the same coordinates. This will be cropped as an animation part, so spatial registration matters. Soft painted fur, same lighting and exact established character style. Real transparent alpha background, no glow, no shadow outside subject, no text, no extra parts.",
+  "integration": "Only registeredArt.openPalmR.crop is consumed. Generated face/body pixels are not used. Existing wrist collar, side surface, closed paw, transforms and timing remain unchanged. Original explaining.png retained."
+}

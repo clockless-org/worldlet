@@ -1,0 +1,238 @@
+{
+ "schemaVersion": 1,
+ "id": "village",
+ "title": "Village",
+ "version": "1.0.0",
+ "record": {
+  "name": "Village",
+  "origin": "original",
+  "assetSource": "Worldlet's own artwork: the Village 1.7 day/night plates and landmarks from the OpenAI image API (gpt-image-2.5-sunburst), Applet devices, HUD material and the Rive Fox, with per-file provenance in resources/worlds/village/README.md and resources/styles/builtin/PRODUCTION.md.",
+  "license": "Proprietary, owned by Worldlet. Provider marks shown on Applet devices belong to their owners and are used only to identify the provider.",
+  "notes": "No third-party IP. A licensed or fan theme records its rights holder and terms here."
+ },
+ "style": {
+  "id": "cozy-miniature",
+  "version": "1.0.0"
+ },
+ "space": {
+  "world": "village",
+  "scenes": [
+   {
+    "id": "overview",
+    "kind": "overview",
+    "areas": "world"
+   }
+  ],
+  "rooms": [
+   {
+    "id": "home",
+    "group": "home",
+    "entrance": "landmark",
+    "connects": [
+     "library",
+     "money",
+     "health",
+     "work",
+     "travel"
+    ]
+   },
+   {
+    "id": "library",
+    "group": "library",
+    "entrance": "landmark",
+    "connects": [
+     "home"
+    ]
+   },
+   {
+    "id": "money",
+    "group": "money",
+    "entrance": "landmark",
+    "connects": [
+     "home"
+    ]
+   },
+   {
+    "id": "health",
+    "group": "health",
+    "entrance": "landmark",
+    "connects": [
+     "home"
+    ]
+   },
+   {
+    "id": "work",
+    "group": "work",
+    "entrance": "landmark",
+    "connects": [
+     "home"
+    ]
+   },
+   {
+    "id": "travel",
+    "group": "travel",
+    "entrance": "landmark",
+    "connects": [
+     "home"
+    ]
+   }
+  ],
+  "hitAreas": "area-bounds",
+  "slots": "world-pack"
+ },
+ "layout": {
+  "overview": {
+   "frame": "world-pack",
+   "hudSafe": "world-pack",
+   "companionSafe": "shared"
+  },
+  "room": {
+   "foreground": [
+    0.835,
+    0.52
+   ],
+   "companionSafe": "shared"
+  },
+  "reading": {
+   "content": "shared-reader",
+   "companionSafe": "shared"
+  }
+ },
+ "hud": {
+  "tokens": "style",
+  "assets": "style",
+  "controls": "resources/styles/builtin/controls.css"
+ },
+ "applets": {
+  "presentation": "style",
+  "fallback": "moment",
+  "focusFallback": "world-device"
+ },
+ "motion": {
+  "ambient": [
+   {
+    "id": "water-glints",
+    "when": "day",
+    "stop": "reduced-motion"
+   },
+   {
+    "id": "chimney-smoke",
+    "when": "day",
+    "stop": "reduced-motion"
+   },
+   {
+    "id": "landmark-lamps",
+    "when": "night",
+    "stop": "never"
+   },
+   {
+    "id": "weather",
+    "when": "weather",
+    "stop": "reduced-motion"
+   }
+  ],
+  "events": {
+   "applet.arrived": {
+    "cue": "device-reveal",
+    "play": "once",
+    "reduced": "appear"
+   },
+   "task.working": {
+    "cue": "lamp-breathe",
+    "play": "while-running",
+    "reduced": "static"
+   },
+   "task.succeeded": {
+    "cue": "done-mark",
+    "play": "once",
+    "reduced": "static"
+   },
+   "task.failed": {
+    "cue": "stop-at-step",
+    "play": "once",
+    "reduced": "static"
+   },
+   "task.cancelled": {
+    "cue": "stop-at-step",
+    "play": "once",
+    "reduced": "static"
+   }
+  },
+  "sound": {
+   "events": {},
+   "ambient": {}
+  },
+  "transitions": {
+   "area": "shared",
+   "room": "shared",
+   "ms": 0
+  }
+ },
+ "surfaces": {
+  "tokens": {},
+  "fonts": {
+   "display": "shared",
+   "label": "shared"
+  },
+  "skin": {
+   "attention": "shared",
+   "note": "shared",
+   "nameplate": "shared",
+   "back": "shared",
+   "bubble": "shared",
+   "panel": "shared",
+   "log": "shared",
+   "button": "shared",
+   "card": "shared",
+   "frame": "shared"
+  },
+  "startup": {
+   "portrait": "companion"
+  }
+ },
+ "companion": {
+  "id": "fox",
+  "rig": "resources/styles/builtin/assets/companion/rive/fox.riv",
+  "portrait": "resources/styles/builtin/assets/companion/rig/fallback.png",
+  "fallbackPose": "idle",
+  "performances": {
+   "idle": "idle",
+   "greeting": "greeting",
+   "listening": "listening",
+   "acknowledging": "acknowledging",
+   "thinking": "thinking",
+   "explaining": "explaining",
+   "reading": "reading",
+   "searching": "searching",
+   "comparing": "comparing",
+   "planning": "planning",
+   "drafting": "drafting",
+   "calculating": "calculating",
+   "organizing": "organizing",
+   "creating": "creating",
+   "working": "working",
+   "checking": "checking",
+   "awaiting_user": "awaiting_user",
+   "awaiting_service": "awaiting_service",
+   "notifying": "notifying",
+   "urgent": "urgent",
+   "succeeded": "succeeded",
+   "blocked": "blocked",
+   "looking": "looking",
+   "grooming": "grooming",
+   "stretching": "stretching",
+   "yawning": "yawning",
+   "sleeping": "sleeping",
+   "waking": "waking",
+   "pickup": "pickup",
+   "settle": "settle",
+   "delighted": "delighted",
+   "farewell": "farewell"
+  },
+  "perches": {
+   "overview": "stable",
+   "room": "stable",
+   "reading": "stable"
+  }
+ }
+}

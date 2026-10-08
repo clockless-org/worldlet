@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_202c610bf4e04879a53acd60f7ad3c31",
+  "source": "resources/styles/builtin/assets/applets/microsoft-word/peek.png"
+}

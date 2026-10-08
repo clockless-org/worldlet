@@ -1,0 +1,9 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "built-in edit",
+  "status": "candidate underpaint; not a whole-character replacement",
+  "reference": "../../assets/companion/rig/fallback.png",
+  "generatedSource": "~/.codex/generated_images/01a0d4e7-67c7-7823-99e7-6ed6267910f7/exec-36840fcb-f6af-40fa-b54b-f66a42b9bdb8.png",
+  "prompt": "Use case: precise-object-edit. Asset type: hidden sclera underpaint for a layered 2D Fox animation, not a finished character expression. Image 1 is the edit target. Remove ONLY both brown irises, black pupils and their small white specular dots inside the two open eyes; seamlessly fill their former areas with the same softly shaded warm ivory eye white (sclera). Keep the existing dark outer eyelid contours and exact open-eye shapes in their original positions. Preserve absolutely everything else: exact canvas/framing and Fox scale, head tilt, eyebrow shapes, orange fur, white muzzle, black nose, mouth, ears, scarf, tail, torso and paws. No new iris/pupil, no blank fur over the eyes, no closed eyelids. The two eyeballs should be featureless ivory interiors with existing outer lid borders. Match existing painterly lighting, no new shadows or highlights. Maintain original transparent background and silhouette. Same square composition; do not crop, recenter or enlarge. No text, no other elements.",
+  "usage": "Eye-local RGB only. Preserve original character alpha, face and silhouette; use the original iris/pupil as one translated layer."
+}

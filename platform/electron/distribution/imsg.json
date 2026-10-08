@@ -1,0 +1,6 @@
+{
+  "version": "0.15.10",
+  "source": "https://github.com/openclaw/imsg/releases/download/v0.15.10/imsg-macos.zip",
+  "sha256": "d8817abbeaf3b8996ac932f5a92ac01fbe171dd2cbd6a957e726309b97a8ef9c",
+  "files": ["imsg", "PhoneNumberKit_PhoneNumberKit.bundle", "SQLite.swift_SQLite.bundle"]
+}

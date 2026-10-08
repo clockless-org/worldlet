@@ -1,0 +1,8 @@
+{
+ "status":"dev-reading-grip; physical-stow-not-complete",
+ "atlas":"reading-grip-parts-v1.png",
+ "coordinates":"normalized atlas; independently rigid bone pieces",
+ "foregroundPaw":{"start":0.5,"end":0.75},
+ "upper":{"atlas":"reading-grip-parts-v1.png","crop":[0,0,1,0.64],"start":[0.41,0.16],"end":[0.465,0.515]},
+ "forearm":{"atlas":"reading-grip-parts-v3.png","crop":[0,0.64,1,0.36],"start":[0.38,0.81],"end":[0.68,0.815]}
+}

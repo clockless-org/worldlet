@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Card illustrations are looked up by name (Card.kt Hero), so resource shrinking must keep them. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/scene_*,@drawable/coming_up,@drawable/do_something,@drawable/worth_knowing" />

@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {"gesture": true, "tab": true, "url": "https://example.com/hotel", "opens": true},
+    {"gesture": true, "tab": true, "url": "http://example.com/hotel", "opens": true},
+    {"gesture": false, "tab": true, "url": "https://example.com/hotel", "opens": false},
+    {"gesture": true, "tab": false, "url": "https://example.com/hotel", "opens": false},
+    {"gesture": true, "tab": true, "url": "about:blank", "opens": false},
+    {"gesture": true, "tab": true, "url": "", "opens": false},
+    {"gesture": true, "tab": true, "url": "https://accounts.google.com/o/oauth2/auth", "opens": false},
+    {"gesture": true, "tab": true, "url": "https://appleid.apple.com/auth/authorize", "opens": false},
+    {"gesture": true, "tab": true, "url": "https://127.0.0.1/", "opens": false},
+    {"gesture": true, "tab": true, "url": "mailto:someone@example.com", "opens": false}
+  ]
+}

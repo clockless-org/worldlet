@@ -1,0 +1,110 @@
+# The Worldlet iPhone app (README.md in this folder). Generate the Xcode project with `xcodegen` here; the generated
+# Worldlet.xcodeproj is not committed. WorldletKit (Package.swift) holds the protocol code and its tests.
+name: Worldlet
+options:
+  bundleIdPrefix: app.worldlet
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+packages:
+  WorldletKit:
+    path: .
+settings:
+  base:
+    DEVELOPMENT_TEAM: N9KJV72CSL
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "8"
+targets:
+  Worldlet:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Shared
+    dependencies:
+      - package: WorldletKit
+      - target: WorldletNotify
+    # Notifications (README.md › Notifications): APNs (the export's distribution profile makes it production), and the
+    # app's own keychain access group, shared with WorldletNotify so the extension reads the pairing link.
+    entitlements:
+      path: App/Worldlet.entitlements
+      properties:
+        aps-environment: development
+        keychain-access-groups: [$(AppIdentifierPrefix)app.worldlet.ios]
+    scheme:
+      testTargets: [WorldletUITests]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.worldlet.ios
+        PRODUCT_NAME: Worldlet
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundlePackageType: $(PRODUCT_BUNDLE_PACKAGE_TYPE)
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundleDevelopmentRegion: $(DEVELOPMENT_LANGUAGE)
+        CFBundleDisplayName: Worldlet
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSCameraUsageDescription: Worldlet uses the camera only to scan the pairing code shown on your computer.
+        NSMicrophoneUsageDescription: Hold the microphone button to talk to Fox. Your voice is turned into text on this iPhone and is never recorded or sent.
+        NSSpeechRecognitionUsageDescription: Worldlet turns what you say to Fox into text on this iPhone. Only the text goes to your computer.
+        ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:
+          - CFBundleURLName: app.worldlet.pair
+            CFBundleURLSchemes: [worldlet]
+  # The Notification Service Extension: opens a notification's sealed content with the pairing key and shows it.
+  WorldletNotify:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Notify
+      - Shared
+    dependencies:
+      - package: WorldletKit
+    entitlements:
+      path: Notify/WorldletNotify.entitlements
+      properties:
+        keychain-access-groups: [$(AppIdentifierPrefix)app.worldlet.ios]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.worldlet.ios.notify
+        PRODUCT_NAME: WorldletNotify
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: Notify/Info.plist
+      properties:
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundlePackageType: $(PRODUCT_BUNDLE_PACKAGE_TYPE)
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundleDevelopmentRegion: $(DEVELOPMENT_LANGUAGE)
+        CFBundleDisplayName: Worldlet
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+  WorldletUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: Worldlet
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.worldlet.ios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Worldlet

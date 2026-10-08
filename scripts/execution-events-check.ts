@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {executionEvent,taskExecutionEvents,worldActionEvent} from '../core/items/index.ts';
+import {claimRuntimeTask,finishRuntimeTask} from '../core/scheduling/index.ts';
+import {invoke} from '../core/index.ts';
+const claim=claimRuntimeTask({taskId:'mail:read',ownerId:'gmail',pool:'source-io',generation:1,runId:'run-1',now:100,leaseSeconds:30})!;
+const first=taskExecutionEvents(claim)[0];
+assert.equal(first.kind,'task.running');assert.equal(first.taskId,claim.task.id);assert.equal(first.runId,claim.run.id);
+const replaced=claimRuntimeTask({task:claim.task,previousRun:claim.run,taskId:claim.task.id,ownerId:'gmail',pool:'source-io',generation:1,runId:'run-2',now:131,leaseSeconds:30})!;
+assert.deepEqual(taskExecutionEvents(replaced).map(e=>e.kind),['task.interrupted','task.running']);
+for(const status of ['succeeded','failed','cancelled','interrupted','yielded'] as const){
+ const done=finishRuntimeTask({...replaced,status,now:132,nextAt:140,generation:1,errorCode:'private message secret@example.com'})!;
+ const event=taskExecutionEvents(done)[0];assert.equal(event.kind,'task.'+status);assert.equal(event.at,132);assert(!JSON.stringify(event).includes('secret'));
+ assert.equal(finishRuntimeTask({...done,status,now:133,nextAt:140,generation:1}),null,'Duplicate settlement cannot emit another event');
+}
+assert.throws(()=>taskExecutionEvents({...claim,run:{...claim.run,taskId:'other'}}),/Mismatched/);
+assert.throws(()=>executionEvent({...first,version:2}));
+assert.throws(()=>executionEvent({...first,kind:'task.invented'}));
+assert.throws(()=>executionEvent({...first,runId:undefined}));
+assert.throws(()=>executionEvent({...first,extra:true}));
+assert.throws(()=>executionEvent({...first,data:{password:'secret'}}));
+assert.throws(()=>executionEvent({...first,at:Infinity}));
+assert.throws(()=>executionEvent({...first,data:{status:{nested:'private'}}}));
+assert.equal(worldActionEvent({action:'snapshot',body:{},requestId:'r',at:100,phase:'requested'}),null);
+const request={action:'browserShow',body:{moduleId:'app-browser',url:'https://private/?token=secret',text:'private',password:'secret'},requestId:'request-1',at:100,phase:'requested' as const};
+const start=worldActionEvent(request)!;
+const finish=worldActionEvent({...request,at:101,phase:'failed'})!;
+assert.equal(start.requestId,finish.requestId);assert.notEqual(start.id,finish.id);assert.equal(start.appletId,'app-browser');
+assert(!/private|secret/.test(JSON.stringify(start)));
+assert.deepEqual(JSON.parse(invoke('taskExecutionEvents',JSON.stringify(claim))).value,[first]);
+assert.deepEqual(JSON.parse(invoke('worldActionEvent',JSON.stringify(request))).value,start);
+console.log('PASS execution entities: correlation, superseded/terminal tasks, duplicate settlement, closed metadata, secret projection and native JSON boundary');

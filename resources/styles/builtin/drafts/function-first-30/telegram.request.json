@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_e4e42d008a73433cafd95e41dcc6e6c9",
+  "source": "resources/styles/builtin/assets/applets/telegram/peek.png"
+}

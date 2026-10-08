@@ -1,0 +1,8 @@
+{
+  "mode": "built-in imagegen",
+  "status": "searching-study-not-live",
+  "output": "search-magnifier.png",
+  "transparent_background": true,
+  "sourceId": "exec-ae400cda-221d-4efe-b5fa-733e4fb3cf96",
+  "prompt": "Use case: stylized-concept\nAsset type: one isolated painted 2D animation prop for a warm miniature village fox companion.\nPrimary request: a small simple handheld magnifying glass, upright, near frontal with very slight three-quarter thickness. One round muted warm brass ring, a dark walnut brown short straight handle extending vertically down from the ring. Soft hand-painted storybook shading, subtle material grain, gentle warm upper-left lighting; clean readable silhouette, no photoreal chrome.\nComposition: centered on a square genuinely transparent RGBA canvas. Ring center near (0.5,0.36), outside diameter about 0.48 canvas width; handle centered x=0.5 from y=0.58 to y=0.86. Entire prop visible with margins. The lens interior must be transparent with only a very faint translucent warm-cool edge reflection, NOT an opaque white or blue disc. No shadow outside the prop.\nConstraints: Only the magnifying glass. No fox, hand, paw, character, face, lettering, logo, star, glitter, UI button border, background scene, checkerboard painting or watermark. This is an animation prop, not a search-interface icon."
+}

@@ -1,0 +1,77 @@
+{
+  "generator": "Built-in image_gen",
+  "assets": [
+    {
+      "key": "posthog",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet PostHog: amber ceramic hedgehog analytics console with small colored chart cards. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-5e8dc85a-8b57-4601-b7c5-e05cf5e59a31.png",
+      "asset": "resources/styles/builtin/assets/applets/posthog/peek.png"
+    },
+    {
+      "key": "cloudflare",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Cloudflare: ivory and muted orange cloud shaped enamel network gateway with brass connecting ports. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-9d20c32a-b055-4d2f-a68a-1dd34fd504bc.png",
+      "asset": "resources/styles/builtin/assets/applets/cloudflare/peek.png"
+    },
+    {
+      "key": "vercel",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Vercel: charcoal triangular deployment beacon with ivory launch platform. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-7d0538a4-a683-4fe0-b738-a60c015211d6.png",
+      "asset": "resources/styles/builtin/assets/applets/vercel/peek.png"
+    },
+    {
+      "key": "netlify",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Netlify: muted teal enamel deployment signal station with radiating silver spokes. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-79dda43f-dc00-4a43-998f-1e63f019e378.png",
+      "asset": "resources/styles/builtin/assets/applets/netlify/peek.png"
+    },
+    {
+      "key": "supabase",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Supabase: sage green lightning shaped database cabinet with glass data drawers. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-34feb2b6-c010-440d-855d-2552c1855093.png",
+      "asset": "resources/styles/builtin/assets/applets/supabase/peek.png"
+    },
+    {
+      "key": "firebase",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Firebase: amber flame shaped ceramic database furnace with ivory storage drawers. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-5b268d4a-4254-4c11-bbe3-baab0c0d2b15.png",
+      "asset": "resources/styles/builtin/assets/applets/firebase/peek.png"
+    },
+    {
+      "key": "sentry",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Sentry: muted plum error monitoring radar with triangular signal rings. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-164af6cc-c301-4cff-af5a-a1d6d6e38a19.png",
+      "asset": "resources/styles/builtin/assets/applets/sentry/peek.png"
+    },
+    {
+      "key": "docker",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Docker: muted blue ceramic whale carrying small shipping containers. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-65289ef3-f170-41c2-9900-69596af4a8e8.png",
+      "asset": "resources/styles/builtin/assets/applets/docker/peek.png"
+    },
+    {
+      "key": "railway",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Railway: charcoal miniature locomotive deployment console with ivory rail stripes. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-0979b632-3242-4e3a-a03e-a9d15b45b95e.png",
+      "asset": "resources/styles/builtin/assets/applets/railway/peek.png"
+    },
+    {
+      "key": "render",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Render: mint and charcoal curved deployment console with cream server drawers. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-0f9cd76d-f7f6-4eb8-a59e-917a9685d0ee.png",
+      "asset": "resources/styles/builtin/assets/applets/render/peek.png"
+    },
+    {
+      "key": "gitlab",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet GitLab: terracotta geometric fox shaped code forge with cream manuscript tray. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-1218e0b8-321e-4174-ab6b-ebe4ae66b978.png",
+      "asset": "resources/styles/builtin/assets/applets/gitlab/peek.png"
+    },
+    {
+      "key": "jira",
+      "prompt": "One production transparent PNG 2.5D sprite for Worldlet Jira: muted blue enamel task board with diamond shaped tickets. Refined soft hand-painted dimensional miniature, elevated three-quarter orthographic camera, muted cozy village colors, upper-left warm diffuse light, clear silhouette, tactile ceramic enamel brass and glass. Recognizable application identity and purpose integrated. No wood furniture, no floor or pedestal (stone base added at runtime), no scenery, no text labels, no extra props, real transparent alpha background. Square 1024px centered whole object with 10% margin.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-15425532-b176-40dd-9f10-211120214b38.png",
+      "asset": "resources/styles/builtin/assets/applets/jira/peek.png"
+    }
+  ]
+}

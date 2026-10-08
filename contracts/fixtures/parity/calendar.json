@@ -1,0 +1,189 @@
+[
+ {
+  "name": "calendar source supplies times",
+  "operation": "worldItemCalendarTimes",
+  "input": {
+   "item": {
+    "provider": "google-calendar",
+    "kind": "event",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "provider": "google-calendar",
+      "id": "év",
+      "quote": "q"
+     }
+    ],
+    "start": "wrong",
+    "end": "wrong"
+   },
+   "evidence": {
+    "google-calendar:év": {
+     "start": "2026-09-30T09:00:00-07:00",
+     "allDay": false
+    }
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "allDay": false,
+    "attentionReason": "Direct request",
+    "context": "Ana asked for the deck.",
+    "kind": "event",
+    "provider": "google-calendar",
+    "sources": [
+     {
+      "id": "év",
+      "provider": "google-calendar",
+      "quote": "q"
+     }
+    ],
+    "start": "2026-09-30T09:00:00-07:00",
+    "title": "Reply to Ana"
+   }
+  }
+ },
+ {
+  "name": "all-day source",
+  "operation": "worldItemCalendarTimes",
+  "input": {
+   "item": {
+    "provider": "google-calendar",
+    "kind": "event",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "provider": "google-calendar",
+      "id": "ev",
+      "quote": "q"
+     }
+    ],
+    "start": "x"
+   },
+   "evidence": {
+    "google-calendar:ev": {
+     "start": "2026-09-30",
+     "end": "2026-10-01",
+     "allDay": true
+    }
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "allDay": true,
+    "attentionReason": "Direct request",
+    "context": "Ana asked for the deck.",
+    "end": "2026-10-01",
+    "kind": "event",
+    "provider": "google-calendar",
+    "sources": [
+     {
+      "id": "ev",
+      "provider": "google-calendar",
+      "quote": "q"
+     }
+    ],
+    "start": "2026-09-30",
+    "title": "Reply to Ana"
+   }
+  }
+ },
+ {
+  "name": "two calendar sources are ambiguous",
+  "operation": "worldItemCalendarTimes",
+  "input": {
+   "item": {
+    "provider": "google-calendar",
+    "kind": "event",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "provider": "google-calendar",
+      "id": "a",
+      "quote": "q"
+     },
+     {
+      "provider": "google-calendar",
+      "id": "b",
+      "quote": "q"
+     }
+    ],
+    "start": "x"
+   },
+   "evidence": {
+    "google-calendar:a": {
+     "start": "2026-09-30"
+    }
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "attentionReason": "Direct request",
+    "context": "Ana asked for the deck.",
+    "kind": "event",
+    "provider": "google-calendar",
+    "sources": [
+     {
+      "id": "a",
+      "provider": "google-calendar",
+      "quote": "q"
+     },
+     {
+      "id": "b",
+      "provider": "google-calendar",
+      "quote": "q"
+     }
+    ],
+    "start": "x",
+    "title": "Reply to Ana"
+   }
+  }
+ },
+ {
+  "name": "non-calendar item unchanged",
+  "operation": "worldItemCalendarTimes",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "evidence": {}
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "attentionReason": "Direct request",
+    "context": "Ana asked for the deck.",
+    "kind": "task",
+    "provider": "gmail",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "title": "Reply to Ana"
+   }
+  }
+ }
+]

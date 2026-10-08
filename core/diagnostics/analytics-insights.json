@@ -1,0 +1,115 @@
+[
+  {
+    "name": "Onboarding: start \u2192 Google \u2192 apps \u2192 complete \u2192 world",
+    "filters": {
+      "insight": "FUNNELS",
+      "date_from": "-30d",
+      "funnel_window_interval": 7,
+      "funnel_window_interval_unit": "day",
+      "events": [
+        {
+          "id": "onboarding_started",
+          "name": "onboarding_started",
+          "type": "events",
+          "order": 0
+        },
+        {
+          "id": "google_connect_completed",
+          "name": "google_connect_completed",
+          "type": "events",
+          "order": 1
+        },
+        {
+          "id": "onboarding_apps_viewed",
+          "name": "onboarding_apps_viewed",
+          "type": "events",
+          "order": 2
+        },
+        {
+          "id": "onboarding_completed",
+          "name": "onboarding_completed",
+          "type": "events",
+          "order": 3
+        },
+        {
+          "id": "world_entered",
+          "name": "world_entered",
+          "type": "events",
+          "order": 4
+        }
+      ]
+    }
+  },
+  {
+    "name": "Activation: world \u2192 Fox reply",
+    "filters": {
+      "insight": "FUNNELS",
+      "date_from": "-30d",
+      "funnel_window_interval": 7,
+      "funnel_window_interval_unit": "day",
+      "events": [
+        {
+          "id": "world_entered",
+          "name": "world_entered",
+          "type": "events",
+          "order": 0
+        },
+        {
+          "id": "fox_turn_completed",
+          "name": "fox_turn_completed",
+          "type": "events",
+          "order": 1
+        }
+      ]
+    }
+  },
+  {
+    "name": "Agent onboarding: detected \u2192 chosen \u2192 brought \u2192 world \u2192 first Fox reply \u2192 first win",
+    "filters": {
+      "insight": "FUNNELS",
+      "date_from": "-30d",
+      "funnel_window_interval": 7,
+      "funnel_window_interval_unit": "day",
+      "events": [
+        {
+          "id": "local_agents_detected",
+          "name": "local_agents_detected",
+          "type": "events",
+          "order": 0
+        },
+        {
+          "id": "local_agent_selected",
+          "name": "local_agent_selected",
+          "type": "events",
+          "order": 1
+        },
+        {
+          "id": "agent_bring_completed",
+          "name": "agent_bring_completed",
+          "type": "events",
+          "order": 2
+        },
+        {
+          "id": "world_entered",
+          "name": "world_entered",
+          "type": "events",
+          "order": 3
+        },
+        {
+          "id": "fox_turn_completed",
+          "name": "fox_turn_completed",
+          "type": "events",
+          "order": 4
+        },
+        {
+          "id": "first_win",
+          "name": "first_win",
+          "type": "events",
+          "order": 5
+        }
+      ],
+      "breakdown": "local_agent",
+      "breakdown_type": "event"
+    }
+  }
+]

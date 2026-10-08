@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_85fcad44c75a4b6baf52f938151ee59d",
+  "source": "resources/styles/builtin/assets/applets/chatgpt/peek.png"
+}

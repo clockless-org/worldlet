@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "key": "outlook",
+  "provider": "outlook",
+  "mode": "website",
+  "reader": "existing-applet-adapter",
+  "intervalMinutes": 0,
+  "publishAttention": false,
+  "analysis": "none",
+  "initialLimit": 20,
+  "pageSize": 20,
+  "windowDays": 0
+}

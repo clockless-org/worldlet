@@ -1,0 +1,21 @@
+{
+  "description": "Model sources the host can hand to a Harness. Worldlet provides no model of its own (owner decision 2026-10-05; the `worldlet` model service source is retired), so the only source is `local-codex`, the person's own Codex sign-in on this computer, in every build; a personal source routes tiers only in a process the host started with it. The host chooses one source ID (WORLDLET_MODEL_SOURCE) and supplies its credential; the Harness maps each task tier to that source's model. Changing a model is an edit here, not in Harness code. A person's own provider (Codex account, API key, compatible endpoint) is configured in the Harness and is not listed here.",
+  "tiers": ["S", "M", "background-M", "L", "XL"],
+  "sources": {
+    "local-codex": {
+      "name": "Codex on this computer",
+      "provider": "openai-codex",
+      "baseURL": "https://chatgpt.com/backend-api/codex",
+      "credential": "codex-local",
+      "model": "gpt-5.6-terra",
+      "personal": true,
+      "tiers": {
+        "S": {"model": "gpt-5.6-luna", "reasoning": "low"},
+        "M": {"model": "gpt-5.6-terra", "reasoning": "low"},
+        "background-M": {"model": "gpt-5.6-terra", "reasoning": "low"},
+        "L": {"model": "gpt-5.6-sol", "reasoning": "high"},
+        "XL": {"model": "gpt-6-astra", "reasoning": "high"}
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "mode": "built-in imagegen",
+  "source": "exec-0610db2e-c3a2-473c-a804-4540f334e8de",
+  "input": "../../assets/companion/rig/fallback.png",
+  "output": "ear-root-underpaint.png",
+  "status": "inspector-only hidden ear-root backing, not a live replacement",
+  "prompt": "Use case: precise-object-edit. Asset type: transparent 2D Fox anatomical underpainting, not a new character. Input image 1 is the exact edit target and sole identity/style reference. Remove ONLY the two tall pointed ears from this seated orange Fox, replacing their roots with a coherent rounded orange-fur skull/head silhouette. It should be the SAME Fox with both external ears hidden, a modest softly rounded furry crown behind where the ears attached; do not make a larger forehead, do not move facial features. Preserve the entire original face, eyes, eyebrows, white cheek tufts, nose, mouth, head tilt, scarf, body, paws, tail, proportions, lighting, painterly fur and canvas registration unchanged. Keep the same square framing and character scale/position. This will be used UNDER the original moving ear sprites, so fully paint the orange fur that would be hidden by the ears, with no holes or exposed flat cuts at either root. No ear stubs, no replacement small ears, no additional objects, text or watermark. Preserve genuinely transparent background, no ground plane or checkerboard."
+}

@@ -1,0 +1,68 @@
+import assert from 'node:assert/strict';
+import {claimRuntimeTask,finishRuntimeTask,runtimeClaimCanWrite} from '../core/scheduling/runtime-tasks.ts';
+const args={taskId:'mail:sync',ownerId:'mail',pool:'source-io' as const,generation:1,runId:'one',now:100,leaseSeconds:30};
+const a=claimRuntimeTask(args)!;
+assert.equal(claimRuntimeTask({...args,task:a.task,runId:'duplicate'}),null);
+const b=claimRuntimeTask({...args,task:a.task,runId:'two',now:131})!;
+assert.equal(b.task.token,2);
+assert.equal(finishRuntimeTask({task:b.task,run:a.run,now:132,generation:1,status:'succeeded',nextAt:200}),null);
+assert.equal(finishRuntimeTask({...a,now:132,generation:1,status:'succeeded',nextAt:200}),null);
+assert.equal(finishRuntimeTask({...b,now:132,generation:2,status:'succeeded',nextAt:200}),null);
+const done=finishRuntimeTask({...b,now:132,generation:1,status:'succeeded',nextAt:200})!;
+assert.equal(done.task.lastSuccessAt,132);
+assert.equal(claimRuntimeTask({...args,task:done.task,now:150}),null);
+assert.equal(claimRuntimeTask({...args,task:{...done.task,enabled:false},now:201}),null);
+const failed=finishRuntimeTask({...b,now:132,generation:1,status:'failed',nextAt:160,errorCode:'offline'})!;
+assert.equal(failed.task.waitReason,'retry_at');
+assert.equal(failed.run.errorCode,'offline');
+assert.equal(claimRuntimeTask({...args,task:failed.task,now:159}),null);
+assert.ok(claimRuntimeTask({...args,task:failed.task,now:160}));
+assert.equal(claimRuntimeTask({...args,task:b.task,generation:0,now:200}),null);
+assert.ok(claimRuntimeTask({...args,task:b.task,generation:2,now:132}));
+console.log('PASS task claims: duplicate admission, lease expiry, fencing, account generation, pause, retry and durable success');
+
+assert.equal(runtimeClaimCanWrite({...b,generation:1,now:132}),true);
+assert.equal(runtimeClaimCanWrite({task:b.task,run:a.run,generation:1,now:132}),false);
+assert.equal(runtimeClaimCanWrite({...b,generation:2,now:132}),false);
+assert.equal(runtimeClaimCanWrite({...b,generation:1,now:161}),false);
+assert.equal(runtimeClaimCanWrite({...done,generation:1,now:133}),false);
+assert.equal(runtimeClaimCanWrite({...b,task:{...b.task,enabled:false},generation:1,now:132}),false);
+
+const {setRuntimeTaskEnabled}=await import('../core/scheduling/runtime-tasks.ts');
+const paused=setRuntimeTaskEnabled(a.task,false);
+assert.equal(paused.status,'paused');assert.equal(paused.nextAt,a.task.nextAt);
+assert.equal(runtimeClaimCanWrite({task:paused,run:a.run,generation:1,now:101}),false);
+assert.equal(claimRuntimeTask({...args,task:paused,now:101}),null);
+const enabled=setRuntimeTaskEnabled(paused,true);
+assert.equal(runtimeClaimCanWrite({task:enabled,run:a.run,generation:1,now:101}),false);
+assert.ok(claimRuntimeTask({...args,task:enabled,runId:'resumed',now:101}));
+assert.deepEqual(setRuntimeTaskEnabled(a.task,true),a.task,'An interval edit must not revoke an enabled run');
+assert.equal(setRuntimeTaskEnabled({...paused,nextAt:999},true).nextAt,999,'Resume preserves retry deadlines');
+
+const yielded=finishRuntimeTask({...a,now:110,generation:1,status:'yielded',nextAt:115})!;
+assert.equal(yielded.task.status,'queued');assert.equal(yielded.run.status,'yielded');
+assert.equal(yielded.task.lastSuccessAt,undefined,'partial work must not claim whole-task success');
+assert.equal(yielded.task.failures,0);
+assert.equal(runtimeClaimCanWrite({...yielded,generation:1,now:111}),false);
+assert.equal(claimRuntimeTask({...args,task:yielded.task,now:114}),null);
+assert.ok(claimRuntimeTask({...args,task:yielded.task,now:115,runId:'resumed'}));
+assert.equal(finishRuntimeTask({...a,now:131,generation:1,status:'yielded',nextAt:136}),null,'expired worker cannot yield a valid receipt');
+console.log('PASS yielded run is durable, releases its claim and resumes without claiming completion');
+
+const replaced=claimRuntimeTask({...args,task:a.task,previousRun:a.run,runId:'replacement',now:131})!;
+assert.equal(replaced.supersededRun?.status,'interrupted');
+assert.equal(replaced.supersededRun?.errorCode,'lease_expired');
+assert.equal(replaced.supersededRun?.finishedAt,131);
+assert.equal(claimRuntimeTask({...args,task:a.task,previousRun:a.run,runId:'duplicate',now:110}),null);
+assert.throws(()=>claimRuntimeTask({...args,task:a.task,previousRun:{...a.run,token:99},runId:'replacement',now:131}));
+assert.throws(()=>claimRuntimeTask({...args,task:a.task,previousRun:a.run,now:131}));
+assert.equal(claimRuntimeTask({...args,task:a.task,previousRun:a.run,generation:2,runId:'new-account',now:110})!.supersededRun?.errorCode,'generation_changed');
+console.log('PASS replacement claims retire matched old runs without admitting duplicate identities');
+
+const {configureRuntimeSource}=await import('../core/scheduling/index.ts');
+const scheduled=configureRuntimeSource({...a.task,nextAt:9000},{provider:'mail',enabled:true,nextAt:120});
+assert.equal(scheduled.nextAt,120);assert.equal(scheduled.token,a.task.token);assert.equal(scheduled.runId,a.task.runId);
+assert.throws(()=>configureRuntimeSource(a.task,{provider:'other',enabled:true,nextAt:120}));
+assert.throws(()=>configureRuntimeSource(a.task,{provider:'mail',enabled:false,nextAt:120}));
+assert.throws(()=>configureRuntimeSource(a.task,{provider:'mail',enabled:true,nextAt:Infinity}));
+console.log('PASS explicit source rescheduling updates due time without stealing a live claim');

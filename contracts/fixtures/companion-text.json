@@ -1,0 +1,10 @@
+[
+ {"text":"Fox","count":3,"limit":2,"prefix":"Fo"},
+ {"text":"🦊你好","count":3,"limit":1,"prefix":"🦊"},
+ {"text":"éclair","count":6,"limit":1,"prefix":"é"},
+ {"text":"👩‍💻Fox","count":4,"limit":1,"prefix":"👩‍💻"},
+ {"text":"👨‍👩‍👧‍👦!","count":2,"limit":1,"prefix":"👨‍👩‍👧‍👦"},
+ {"text":"🇺🇸🇨🇳","count":2,"limit":1,"prefix":"🇺🇸"},
+ {"text":"你好","count":2,"limit":0,"prefix":""},
+ {"text":"","count":0,"limit":4,"prefix":""}
+]

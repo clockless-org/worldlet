@@ -1,0 +1,38 @@
+/* Mail supplies anatomy only. The shared HUD owns all reading materials. */
+#notionWorld #notionContent[data-template=app-source][data-applet=gmail]{background:none;border:0;box-shadow:none;backdrop-filter:none;overflow:hidden;padding:0}
+#notionWorld #notionContent[data-applet=gmail]>.notion-reader-head,#notionWorld #notionContent[data-applet=gmail]::after{display:none}
+#notionWorld #notionContent[data-applet=gmail]>.app-source-body{height:100%;max-width:none;margin:0}
+@layer components{
+.mail-focus{height:100%;box-sizing:border-box;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;font:400 16px/1.75 var(--ui-font-ui,system-ui)}
+.mail-focus>.ui-applet-header{flex:none;max-height:35%;overflow:auto}
+.mail-page-title{overflow-wrap:anywhere}
+.mail-paper{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;outline-offset:-3px}
+.mail-identity-card{display:flex;align-items:flex-start;gap:16px;padding:0 0 20px;margin:0 0 24px;border-bottom:1px solid var(--control-line)}
+.mail-person{display:flex;flex-direction:column;flex:1;min-width:0;overflow-wrap:anywhere}
+.mail-sender-name{font-size:15px;font-weight:600}.mail-address,.mail-recipient{font-size:13px;line-height:1.65;color:var(--control-muted)}
+.mail-date{flex:none;max-width:120px;font-size:12px;line-height:1.65;text-align:right;color:var(--control-muted)}
+.mail-message{overflow-wrap:anywhere;max-width:42em}
+.mail-message .notion-prose{font:inherit;font-size:16px;line-height:1.7;color:inherit;max-width:none;margin:0;white-space:normal}
+.mail-message .notion-prose>:first-child{margin-top:0}.mail-message .notion-prose>:last-child{margin-bottom:0}
+.mail-message p{margin:0 0 .9em}.mail-message p:empty{display:none}
+.mail-message :is(h1,h2){font-size:1.25em;line-height:1.35;font-weight:650;margin:1.5em 0 .5em;color:inherit}
+.mail-message :is(h3,h4,h5,h6){font-size:1.08em;line-height:1.4;font-weight:650;margin:1.3em 0 .4em;color:inherit}
+.mail-message strong{font-weight:650}
+.mail-message :is(ul,ol){padding-left:1.4em;margin:.4em 0 1em}.mail-message li{margin:.3em 0;padding-left:.15em}
+.mail-message a{color:inherit;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 40%,transparent);text-underline-offset:3px;overflow-wrap:anywhere}
+.mail-message a:hover{text-decoration-color:currentColor}
+.mail-message hr{border:0;border-top:1px solid var(--control-line);margin:1.6em 0}
+.mail-message img{display:block;max-width:100%;height:auto;margin:18px 0;border-radius:4px}
+.mail-message table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;font-size:14px}.mail-message :is(th,td){border:1px solid var(--control-line);padding:9px 12px;text-align:left}
+.mail-message pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:14px;background:var(--control-fill);border-radius:8px;font-size:14px}
+.mail-message blockquote{margin:1em 0;padding:2px 0 2px 16px;border-left:3px solid var(--control-line);color:var(--control-muted)}.mail-message blockquote blockquote{margin:.6em 0}
+.mail-quoted{margin:1.4em 0 0;color:var(--control-muted)}.mail-quoted>summary{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid var(--control-line);border-radius:999px;font-size:13px;font-weight:550;cursor:pointer;list-style:none}.mail-quoted>summary::-webkit-details-marker{display:none}.mail-quoted[open]>summary{margin-bottom:1em}.mail-quoted .notion-prose{font-size:15px;padding:0;margin:0}
+.mail-thread-message{margin:24px 0 0;border-top:1px solid var(--control-line);padding-top:16px}.mail-thread-message summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--control-ink);padding:8px 0}.mail-thread-message .mail-identity-card{margin-top:16px}
+.mail-attachments{border-top:1px solid var(--control-line);margin-top:28px;padding-top:12px}.mail-attachments h3{font-size:14px}.mail-attachment{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin:8px 0;background:var(--control-fill);border:1px solid var(--control-line);border-radius:12px;font-size:13px}.mail-file-name{overflow-wrap:anywhere;font-weight:500}
+@media(max-width:850px){.mail-identity-card{flex-wrap:wrap;gap:8px}.mail-date{text-align:left;max-width:none}.mail-person{flex-basis:100%}}
+}
+#notionWorld .mail-reader-switch{height:44px}
+#notionWorld .mail-reader-switch button{box-sizing:border-box;width:44px;height:44px;line-height:44px;border:1px solid var(--hud-scene-line);border-radius:12px;background:var(--ui-paper);color:var(--hud-paper-ink);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;font-size:12px}
+#notionWorld .mail-reader-switch button:hover{background:#e4dbc5;filter:none}
+/* The quoted-reply fold is a quiet control, not the shared bordered details panel. */
+.mail-focus .mail-message details.mail-quoted{margin:1.4em 0 0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:var(--control-muted)}

@@ -1,0 +1,4 @@
+{
+  "stationery": {"source":"stationery-master.png","crop":{"left":40,"top":44,"width":1176,"height":1170},"resizeWidth":1024},
+  "rail": {"source":"rail-master.png","crop":{"left":52,"top":167,"width":2060,"height":364},"resizeWidth":1024}
+}

@@ -1,0 +1,552 @@
+/* Shared controls: three emphasis levels, one icon system and one state vocabulary. */
+.companion-bust .companion-halo{position:absolute;inset:8px;border-radius:50%;pointer-events:none;border:2px solid #f4deacb3;background:radial-gradient(circle at 40% 30%,#fff0c14d,#a2bd9940 65%,#476c533d);box-shadow:0 0 0 5px #f4deac0d,0 0 22px #f5d18b26,inset 0 0 18px #fff1c21f;transition:border-color 250ms,box-shadow 250ms}
+.companion-bust :is(canvas,img){filter:drop-shadow(0 5px 3px #293f362e)}
+.companion-bust:hover .companion-halo,.companion-bust:focus-visible .companion-halo{border-color:#fff0c9;box-shadow:0 0 0 5px #f4deac18,0 0 24px #f5d18b42,inset 0 0 18px #fff1c22e}
+.companion-bust[data-state=listening] .companion-halo,.companion-bust[data-state=talking] .companion-halo{border-color:#fff0c9;animation:fox-halo-breathe 1.8s ease-in-out infinite}
+.companion-bust[data-state=working] .companion-halo,.companion-bust[data-state=thinking] .companion-halo,.companion-bust[data-state=transcribing] .companion-halo{animation:fox-halo-breathe 3s ease-in-out infinite}
+@keyframes fox-halo-breathe{50%{box-shadow:0 0 0 6px #f4deac21,0 0 28px #f5d18b50,inset 0 0 18px #fff1c238}}
+@media(prefers-reduced-motion:reduce){.companion-bust .companion-halo{animation:none!important;transition:none}}
+.ui-button,.native-console :where(.world-capsule,.world-action-row,.world-note-search button,.notion-dialog button:not(.notion-close)){
+ display:inline-flex;align-items:center;justify-content:center;gap:var(--ui-space-2);min-height:var(--ui-control-height);padding:8px 12px;
+ border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-float);color:var(--ui-ink);
+ font:var(--ui-weight-label) var(--ui-text-label)/1.4 var(--ui-font-ui);box-shadow:none;text-shadow:none;cursor:pointer;
+ transition:background var(--ui-duration-fast),border-color var(--ui-duration-fast),opacity var(--ui-duration-fast);
+}
+.ui-button[data-variant=primary]{background:var(--ui-accent);color:var(--ui-on-dark);border-color:var(--ui-accent)}
+.ui-button[data-variant=quiet]{background:transparent;border-color:transparent}
+.ui-button:hover,.native-console :is(.world-capsule,.world-action-row):hover{border-color:var(--ui-focus);background:var(--ui-paper)}
+.ui-button[data-variant=primary]:hover{background:var(--ui-ink)}
+.ui-button:active,.native-console .world-capsule:active{filter:brightness(.95)}
+.ui-button:disabled,.ui-button[aria-busy=true]{opacity:.5;cursor:default}
+.ui-button svg,.native-console .world-capsule svg{width:18px;height:18px;flex:0 0 18px;display:block}
+.ui-button[data-variant=quiet]:hover{background:var(--ui-well)}
+.native-console .world-actions .world-capsule{justify-content:flex-start;min-width:0;max-width:100%;flex-wrap:nowrap;white-space:nowrap;font-size:var(--ui-text-label);border-radius:var(--ui-radius-control)}
+.native-console .world-actions .world-capsule::after{display:none}
+.native-console .world-actions .world-capsule>span{min-width:0;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui-input,.native-console :is(.world-note-search input,.notion-dialog input,.notion-dialog select,.notion-dialog .agent-place textarea){
+ box-sizing:border-box;min-height:40px;padding:10px 12px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:#ffffff60;color:var(--ui-ink);font:400 var(--ui-text-body)/1.5 var(--ui-font-ui);box-shadow:none;max-width:100%;
+}
+.ui-pane,.native-console>.notion-content,.native-console .notion-dialog{
+ color:var(--ui-ink);border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface);background-image:none;
+ box-shadow:var(--ui-shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);scrollbar-color:var(--ui-line) transparent;
+}
+.native-console .notion-reader-head{position:relative;padding:0 36px 20px 0;margin:0 0 20px;border-bottom:1px solid var(--ui-line)}
+.ui-title,.native-console .notion-reader-head h1,.native-console .notion-dialog h2{font:600 var(--ui-text-title)/1.25 var(--ui-font-ui);letter-spacing:-.025em;color:var(--ui-ink);margin:8px 0 0}
+.native-console .notion-dialog h2{margin:0 36px 24px 0}
+.native-console .notion-reader-head>p,.ui-caption{font:400 var(--ui-text-caption)/1.5 var(--ui-font-ui);letter-spacing:0;color:var(--ui-ink-muted)}
+.native-console .notion-reader-head .notion-close,.native-console .notion-dialog .notion-close{position:absolute;top:0;right:0;width:40px;height:40px;min-height:40px;border:0;border-radius:var(--ui-radius-control);background:transparent;color:var(--ui-ink);font:400 24px/1 var(--ui-font-ui)}
+.native-console .notion-dialog .notion-close{top:16px;right:16px}
+.native-console .notion-prose,.native-console .notion-dialog p{font:400 var(--ui-text-body)/1.6 var(--ui-font-ui);color:var(--ui-ink)}
+.native-console .notion-prose :is(h1,h2,h3),.ui-section-title{font:600 var(--ui-text-section)/1.4 var(--ui-font-ui);letter-spacing:-.015em;color:var(--ui-ink);margin:24px 0 12px}
+.native-console :is(.notion-prose pre,.notion-prose code,.notion-prose details,.notion-table-wrap,.private-original){background:var(--ui-well);border-color:var(--ui-line);border-radius:var(--ui-radius-control);box-shadow:none;color:var(--ui-ink)}
+.native-console .notion-prose :is(td,th),.native-console .notion-database :is(td,th){border-color:var(--ui-line);padding:12px;color:var(--ui-ink);font-size:var(--ui-text-label);text-align:left}
+.native-console .notion-prose th{background:var(--ui-well)}
+.native-console .notion-prose blockquote{border-color:var(--ui-attention);color:var(--ui-ink-muted)}
+.native-console .notion-prose hr{background:var(--ui-line)}
+.native-console .notion-prose a{color:var(--ui-accent)}
+/* Replies own the strongest surface; nearby utilities stay quiet. */
+.native-console .companion-dialogue{padding:20px 28px 20px 20px;border:1px solid var(--ui-dialogue-line);border-radius:var(--ui-radius-panel);background:var(--ui-dialogue);background-image:linear-gradient(145deg,var(--ui-reply-sheen),transparent 60%);color:var(--ui-dialogue-ink);text-shadow:none;box-shadow:var(--ui-dialogue-shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.native-console .companion-dialogue::after{display:block;content:'';position:absolute;bottom:-8px;left:calc(50% - 7px);width:14px;height:14px;background:var(--ui-dialogue);border:0;border-right:1px solid var(--ui-dialogue-line);border-bottom:1px solid var(--ui-dialogue-line);transform:rotate(45deg);clip-path:polygon(0 100%,100% 0,100% 100%)}
+.native-console .native-conversation{font:400 var(--ui-text-body)/1.6 var(--ui-font-ui);color:var(--ui-dialogue-ink)}
+.native-console .companion-listening-state,.native-console .companion-speaker,.native-console .companion-gesture-hint{display:none}
+/* A soft NPC speech card; the name tab belongs to Fox, not the current place. */
+.native-console.fox-first-console .companion-dialogue{--fox-paper:var(--ui-paper);--fox-ink:var(--ui-ink);--fox-badge:#edbd76;--fox-arrow:var(--ui-attention);padding:16px 18px 10px;gap:6px;border:0;border-radius:30px 48px 34px 42px / 38px 28px 42px 27px;background:transparent;color:var(--fox-ink);box-shadow:none;isolation:isolate;backdrop-filter:none;-webkit-backdrop-filter:none}
+
+/* A separate cloud skin keeps text and edge controls unclipped. */
+.native-console.fox-first-console .companion-dialogue::before{content:'';position:absolute;inset:-3px -4px;z-index:-1;pointer-events:none;background:var(--fox-paper);-webkit-mask:var(--fox-cloud-top) top/100% min(48px,50%) no-repeat,linear-gradient(#000,#000) center/calc(100% - 12px) max(0px,calc(100% - 80px)) no-repeat,var(--fox-cloud-bottom) bottom/100% min(48px,50%) no-repeat;mask:var(--fox-cloud-top) top/100% min(48px,50%) no-repeat,linear-gradient(#000,#000) center/calc(100% - 12px) max(0px,calc(100% - 80px)) no-repeat,var(--fox-cloud-bottom) bottom/100% min(48px,50%) no-repeat;--fox-cloud-top:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 80' preserveAspectRatio='none'%3E%3Cpath d='M32 14C90 5 143 8 196 12C269 4 335 8 399 12C462 5 527 7 565 16C590 22 600 45 592 78C603 110 588 140 563 146C497 153 445 148 391 148C322 155 255 148 198 148C127 155 68 151 32 144C9 139 0 114 8 81C0 48 8 23 32 14Z'/%3E%3C/svg%3E");--fox-cloud-bottom:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 80 600 80' preserveAspectRatio='none'%3E%3Cpath d='M32 14C90 5 143 8 196 12C269 4 335 8 399 12C462 5 527 7 565 16C590 22 600 45 592 78C603 110 588 140 563 146C497 153 445 148 391 148C322 155 255 148 198 148C127 155 68 151 32 144C9 139 0 114 8 81C0 48 8 23 32 14Z'/%3E%3C/svg%3E");--fox-cloud:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 160' preserveAspectRatio='none'%3E%3Cpath d='M32 14C90 5 143 8 196 12C269 4 335 8 399 12C462 5 527 7 565 16C590 22 600 45 592 78C603 110 588 140 563 146C497 153 445 148 391 148C322 155 255 148 198 148C127 155 68 151 32 144C9 139 0 114 8 81C0 48 8 23 32 14Z'/%3E%3C/svg%3E")}
+.native-console.fox-first-console .companion-dialogue::after{display:none}
+.fox-first-console .companion-speaker{position:absolute;display:flex;align-items:center;gap:6px;left:24px;top:-18px;min-width:0;padding:5px 16px;border:0;border-radius:13px 10px 12px 9px;background:var(--fox-badge);color:#684729;box-shadow:none;transform:rotate(-4deg);font:600 var(--ui-text-body)/1.5 var(--ui-font-ui);letter-spacing:.02em}
+.fox-first-console .native-conversation{color:var(--fox-ink);font-weight:400;line-height:1.6}
+.fox-first-console[data-time-of-day=night] .companion-dialogue{--fox-paper:#eee7d3;--fox-ink:#343f32;box-shadow:none}
+.native-console .companion-text-entry #notionCommand{box-sizing:border-box;width:100%;height:40px;min-height:40px;padding:0 12px;margin:0;border:1px solid var(--ui-line);border-radius:20px;background:var(--ui-float);color:var(--ui-ink);font:400 var(--ui-text-label)/38px var(--ui-font-ui);text-shadow:none;box-shadow:none;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.native-console .companion-text-entry #notionCommand{display:flex;align-items:center;gap:4px;padding:2px 4px 2px 12px}
+.native-console .companion-text-entry #notionInput{height:34px;min-width:0;padding:0;flex:1;background:transparent;border:0;box-shadow:none;font:400 var(--ui-text-body)/1.5 var(--ui-font-ui);color:var(--ui-ink)}
+.native-console .companion-text-entry #notionInput::placeholder{color:var(--ui-ink-muted)}
+.native-console .companion-text-entry #notionSend{background:transparent;color:var(--ui-ink);width:32px;height:32px;min-height:32px;opacity:.8}
+.native-console .companion-input-handle{opacity:.8;text-align:center;cursor:text;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console .companion-input-handle::before{display:none}
+.native-console .companion-input-state{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.world-task-heading{display:flex;align-items:center;gap:8px;font:600 var(--ui-text-label)/1.4 var(--ui-font-ui);color:inherit;margin:0 0 4px;padding:0 0 6px;border-bottom:1px solid #f4f0e526}
+.world-task-heading:not(:first-child){margin-top:12px;font-weight:500;opacity:.8}
+.native-console .world-task,.ui-gallery .world-task{position:relative;display:flex;align-items:flex-start;gap:12px;width:100%;min-height:54px;padding:10px 8px 10px 10px;border:0;border-left:2px solid transparent;border-radius:0;background:none;text-align:left;color:inherit;text-shadow:none;cursor:pointer;font-family:var(--ui-font-ui)}
+.world-task-marker{display:block;position:relative;flex:0 0 14px;width:14px;height:18px;margin-top:2px}
+.world-task-marker[data-state=needsAction]::before{content:'';position:absolute;width:7px;height:7px;left:2px;top:4px;border:1.5px solid currentColor;transform:rotate(45deg)}
+.world-task-marker[data-state=needsAction]{color:#dfc58e}
+.world-task-marker svg{display:block;width:14px;height:18px}
+.world-task-marker[data-state=widget]::before{content:'';position:absolute;width:9px;height:11px;left:2px;top:3px;border:1.5px solid var(--widget-accent,#d9822b);border-radius:2px;background:linear-gradient(var(--widget-accent,#d9822b) 0 0) 2px 3px/5px 1.5px no-repeat,linear-gradient(var(--widget-accent,#d9822b) 0 0) 2px 6px/5px 1.5px no-repeat}
+.world-widget .world-task-time{color:var(--widget-accent,#d9822b)}
+.world-task-copy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.world-task .world-task-title{font:500 var(--ui-text-body)/1.35 var(--ui-font-ui);white-space:normal;overflow-wrap:anywhere}
+.world-task .world-task-objective{font:400 var(--ui-text-label)/1.4 var(--ui-font-ui);opacity:.8;white-space:normal}
+.native-console>.companion-context,.native-console>.companion-context .companion-name{font:600 var(--ui-text-section)/1.4 var(--ui-font-ui);letter-spacing:-.01em;color:inherit}
+.native-console .world-environment :is(#worldDate,#worldClock,#worldWeather,.world-audio){font:500 var(--ui-text-label)/1.5 var(--ui-font-ui);font-variant-numeric:tabular-nums}
+.native-console .notion-pin :is(strong,small){font-family:var(--ui-font-ui)}
+.native-console .notion-tools .notion-round{width:44px;height:44px;background:var(--ui-float);border:1px solid var(--ui-line);color:var(--ui-ink);box-shadow:none}
+.ui-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0}
+.ui-facts div{min-width:0}.ui-facts dt{font-size:var(--ui-text-caption);color:var(--ui-ink-muted);margin-bottom:4px}.ui-facts dd{margin:0;font-size:var(--ui-text-body);font-weight:500}
+.ui-notice{border-left:2px solid var(--ui-attention);padding:8px 12px;color:var(--ui-ink-muted);background:var(--ui-well);font-size:var(--ui-text-label);line-height:1.5}
+.ui-notice[data-state=error]{border-color:var(--ui-error);color:var(--ui-error)}
+.ui-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0}
+.ui-choice{display:flex;flex-direction:column;padding:16px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-well)}
+.ui-choice[data-selected=true]{border-color:var(--ui-accent)}
+/* Who answers in an Applet: one place per row, its agent and the person's instructions there. */
+.native-console .notion-dialog .agent-place{display:grid;gap:8px;margin:16px 0}
+.native-console .notion-dialog .agent-place textarea{width:100%;resize:vertical}
+.native-console .notion-dialog .agent-place>button{justify-self:start}
+.ui-choice h3{font-size:var(--ui-text-section);margin:0 0 8px}.ui-choice p{margin:8px 0}.ui-choice .ui-button{width:100%;margin-top:auto}.ui-choice p:last-of-type{margin-bottom:20px}
+.ui-template{margin:20px 0;font:400 var(--ui-text-body)/1.6 var(--ui-font-ui)}.ui-agenda{list-style:none;padding:0;display:grid;gap:0}.ui-agenda li{display:grid;grid-template-columns:64px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--ui-line)}.ui-agenda time{font-variant-numeric:tabular-nums;font-size:var(--ui-text-label);color:var(--ui-ink-muted)}.ui-agenda strong{font-weight:500}.ui-agenda p{margin:4px 0 0;color:var(--ui-ink-muted);font-size:var(--ui-text-label)}
+
+/* Labels above a moving scene use restrained contrast; text on a surface needs no glow. */
+.native-console .notion-pin{text-shadow:none}
+.native-console .notion-pin[data-kind=app]{color:var(--ui-hud-ink);text-shadow:var(--ui-hud-shadow)}
+.native-console .notion-pin[data-kind=app] strong{color:inherit}
+.native-console .notion-pin .applet-icon{display:inline-block;width:19px;height:19px;object-fit:contain;margin-right:5px;vertical-align:-3px;border-radius:3px;filter:drop-shadow(0 1px 2px #10291e55)}
+.native-console .notion-pin .applet-icon[data-kind=emoji]{width:auto;height:auto;border-radius:0;font:400 19px/1 var(--ui-font-emoji);vertical-align:-2px;filter:drop-shadow(0 1px 2px #10291e4d)}
+.native-console .notion-pin:has(.applet-icon) strong{display:inline}
+.native-console .world-brand{display:inline-flex;align-items:center;gap:4px;font-weight:600;letter-spacing:-.02em}
+.native-console .world-brand-mark{width:20px;height:20px;flex:none}
+.native-console .world-watermark{text-shadow:none;font-size:12px;max-width:calc(100% - 24px);white-space:normal;overflow-wrap:anywhere;flex-wrap:wrap;justify-content:flex-end}
+.native-console .companion-input-flight{width:14px;height:4px;padding:0;border:0;border-radius:999px;background:var(--ui-hud-ink);box-shadow:var(--ui-hud-glyph-shadow);font:0/0 a}
+
+/* Fox utilities and input share a quiet surface, subordinate to the reply. */
+.native-console .world-actions .world-capsule{border-radius:var(--ui-radius-capsule);background:var(--ui-utility-surface);color:var(--ui-utility-ink);border:1px solid transparent;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);box-shadow:none;text-shadow:var(--ui-utility-shadow);opacity:1}
+.native-console .companion-text-entry #notionCommand{border-radius:12px;background:var(--ui-utility-surface);border:1px solid transparent;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:var(--ui-utility-ink);box-shadow:inset 0 2px 5px #172c241a;opacity:1}
+.native-console .companion-text-entry #notionInput,.native-console .companion-text-entry #notionSend{color:var(--ui-utility-ink)}
+.native-console .companion-text-entry #notionInput::placeholder{color:var(--ui-utility-ink);opacity:.72;font-size:12px}
+.native-console .companion-text-entry #notionInput:focus{outline:0;box-shadow:none}
+.native-console .companion-text-entry #notionCommand:focus-within{border-color:transparent;box-shadow:inset 0 2px 5px #172c241a;outline:0}
+
+.native-console>.companion-context{padding:6px 16px;overflow:visible}
+.ui-trip-route{display:flex;align-items:center;gap:8px;color:var(--ui-ink-muted);font-size:var(--ui-text-label);margin:12px 0 20px}
+.ui-trip-route strong{color:var(--ui-accent)}
+.ui-trip-status{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.ui-trip-status span{padding:4px 8px;border-radius:4px;background:var(--ui-well);font-size:var(--ui-text-caption)}
+.ui-trip-status [data-pending=true]{color:var(--ui-attention)}
+.ui-stay-preview{width:100%;text-align:left;align-items:flex-start;justify-content:flex-start;flex-direction:column;height:100%;padding:16px;gap:8px;background:var(--ui-well)}
+.ui-stay-preview[aria-pressed=true]{border-color:var(--ui-accent);background:#4a695815}
+.ui-stay-preview strong{font-size:var(--ui-text-section)}
+.ui-stay-preview small{font-size:var(--ui-text-label);font-weight:400;color:var(--ui-ink-muted);line-height:1.5}
+.ui-stay-preview .ui-stay-letter{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;color:var(--ui-on-dark);background:var(--ui-accent);font-size:var(--ui-text-label)}
+.ui-stay-preview[data-stay=station] .ui-stay-letter{background:#527985}
+.ui-trip-confirm{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--ui-line);padding-top:20px;margin-top:20px}
+.ui-trip-confirm .ui-button{align-self:flex-start}
+.ui-trip-confirm p{margin:0}
+
+/* Unboxed world chrome: diffuse text shadows only, never stroke or clipped scrims. */
+.native-console>.companion-context,.native-console>.companion-context .companion-name,.native-console .world-environment,.native-console .world-watermark{color:var(--ui-chrome);text-shadow:var(--ui-shadow-text);-webkit-text-stroke:0;box-shadow:none;border:0;background:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.native-console>.companion-context{cursor:default;pointer-events:none;user-select:text;border-radius:0}
+.native-console>.companion-context .companion-name{min-width:0;display:block;overflow:visible;white-space:normal;border-radius:0}
+/* Context is plain text; only its back control is interactive. */
+.native-console>.companion-context #notionBack{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;min-height:36px;flex:0 0 36px;margin:0;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 1px 3px #223c4455)}
+.native-console>.companion-context #notionBack:hover{background:rgba(255,255,255,.16)}
+.native-console>.companion-context #notionBack:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.native-console>.companion-context #notionBack[hidden]{display:none}
+.native-console>.companion-context::before,.native-console>.companion-context::after{display:none}
+.native-console .world-task{border-left:0;padding-left:0;text-shadow:inherit}
+.native-console .world-task :is(.world-task-copy,.world-task-title,.world-task-objective){overflow:visible;text-overflow:clip;text-shadow:inherit}
+.native-console .world-task-heading{border:0;text-shadow:inherit;padding-bottom:4px}
+.native-console .world-task[aria-current=location] .world-task-marker::before{background:currentColor}
+.native-console .world-watermark{opacity:.8;padding:0;border-radius:0}
+
+/* Rich reply typography: calm forest ink, warm emphasis, light inset surfaces. */
+.native-console .native-conversation{display:block;white-space:normal;overflow-wrap:anywhere;line-height:1.65}
+.native-console .native-conversation :is(p,ul,ol,blockquote,pre,table){margin:0 0 .75em}
+.native-console .native-conversation>:last-child{margin-bottom:0}
+.native-console .native-conversation :is(h1,h2,h3,h4){font:600 1.06em/1.35 var(--ui-font-ui);letter-spacing:-.015em;margin:1em 0 .5em;color:var(--ui-reply-title)}
+.native-console .native-conversation h1{font-size:1.25em}
+.native-console .native-conversation h2{font-size:1.15em}
+.native-console .native-conversation>:first-child{margin-top:0}
+.native-console .native-conversation strong{font-weight:650;color:var(--ui-reply-title)}
+.native-console .native-conversation em{color:var(--ui-reply-muted)}
+.native-console .native-conversation a{color:var(--ui-reply-link);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--ui-reply-link) 40%,transparent);text-underline-offset:3px;text-decoration-thickness:1px;overflow-wrap:anywhere;cursor:pointer;border-radius:4px;transition:background var(--ui-duration-fast),text-decoration-color var(--ui-duration-fast)}
+.native-console .native-conversation a[href^="#"]{padding:0;background:none;color:var(--ui-reply-success);font-weight:650;text-decoration-color:currentColor}
+.native-console .native-conversation a[href^="#"]:hover{background:none;text-decoration-thickness:2px}
+.native-console .native-conversation a:hover{background:var(--ui-reply-rule);text-decoration-color:currentColor}
+.native-console .native-conversation a:focus-visible{outline:2px solid var(--ui-focus);outline-offset:3px}
+.native-console .native-conversation :is(ul,ol){padding-left:1.35em}
+.native-console .native-conversation li+li{margin-top:.35em}
+.native-console .native-conversation li::marker{color:var(--ui-reply-link);font-weight:600}
+.native-console .native-conversation blockquote{padding:9px 12px;border:0;border-left:2px solid var(--ui-accent);border-radius:0 8px 8px 0;background:var(--ui-reply-well);color:var(--ui-reply-muted);font-size:.95em}
+.native-console .native-conversation blockquote>:last-child{margin-bottom:0}
+.native-console .native-conversation code{font-family:var(--ui-font-mono);font-size:.85em;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--ui-reply-well);border:1px solid var(--ui-reply-rule);border-radius:4px;padding:1px 4px}
+.native-console .native-conversation pre{padding:12px;background:var(--ui-reply-well);border:1px solid var(--ui-reply-rule);border-radius:8px}
+.native-console .native-conversation pre code{padding:0;border:0;background:none}
+.native-console .native-conversation table{display:table;width:100%;max-width:100%;table-layout:fixed;overflow:visible;border-collapse:separate;border-spacing:0;font-size:.9em;border:1px solid var(--ui-reply-rule);border-radius:8px}
+.native-console .native-conversation :is(th,td){padding:7px 10px;text-align:left;border-bottom:1px solid var(--ui-reply-rule)}
+.native-console .native-conversation th{background:var(--ui-reply-well);font-weight:600;color:var(--ui-reply-title)}
+.native-console .native-conversation tbody tr:last-child td{border-bottom:0}
+.native-console .native-conversation hr{border:0;height:1px;background:linear-gradient(90deg,var(--ui-reply-rule),transparent);margin:1em 0}
+.native-console .native-conversation mark{background:var(--ui-reply-highlight);color:var(--ui-reply-highlight-ink);padding:.05em .2em;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.native-console .native-conversation [data-tone=accent]{color:var(--ui-reply-link)}
+.native-console .native-conversation [data-tone=muted]{color:var(--ui-reply-muted)}
+.native-console .native-conversation [data-tone=warning]{color:var(--ui-reply-warning)}
+.native-console .native-conversation [data-tone=success]{color:var(--ui-reply-success)}
+
+/* Public demo only. The desktop app has no download promotion. */
+.native-console .demo-mac-download{position:absolute;top:max(76px,env(safe-area-inset-top));left:24px;z-index:26;display:flex;flex-direction:column;align-items:flex-start;gap:5px;max-width:30%;font-family:var(--ui-font-ui);pointer-events:auto}
+.native-console .demo-mac-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:9px 15px;border:1px solid #fff7;border-radius:24px;background:#f8f7e8c4;color:#304b3c;text-decoration:none;font:550 13px/1.3 var(--ui-font-ui);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);user-select:none;white-space:nowrap}
+.native-console .demo-mac-link[href]:hover{background:#fffcec}
+.native-console .demo-mac-link:focus-visible{outline:2px solid var(--ui-focus);outline-offset:3px}
+.native-console .demo-mac-link[aria-disabled=true]{opacity:.72;cursor:default}
+.native-console .demo-mac-download small{padding-left:14px;font-size:11px;line-height:1.4;color:var(--ui-chrome);text-shadow:var(--ui-shadow-text)}
+@media(max-width:800px){.native-console .demo-mac-download{top:max(12px,env(safe-area-inset-top));left:14px;max-width:46%}.native-console .demo-mac-link{padding:8px 11px;gap:6px;font-size:12px}}
+@media(max-height:450px){.native-console .demo-mac-download small{display:none}}
+
+/* Fox is the control. The line under it is a passive caption, never a capsule. */
+.native-console.radial-pet-console.companion-console .companion-text-entry{pointer-events:none;touch-action:auto}
+.native-console.radial-pet-console.companion-console .companion-text-entry #notionCommand{pointer-events:auto;touch-action:manipulation}
+.native-console.radial-pet-console.companion-console .companion-text-entry :is(.companion-input-handle,.companion-input-state){display:block;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:none;cursor:default;opacity:1;padding:3px 0;height:38px;min-height:0;font:400 var(--ui-text-caption)/1.5 var(--ui-font-ui);text-align:center;color:var(--ui-hud-muted);text-shadow:var(--ui-hud-shadow);white-space:normal;overflow:hidden}
+.native-console.radial-pet-console.companion-console .companion-input-wave{--voice-level:0;position:absolute;inset:0;display:flex;justify-content:center;align-items:center;gap:4px;height:34px;pointer-events:none;color:var(--ui-hud-ink);opacity:1;text-shadow:var(--ui-hud-shadow)}
+.native-console.radial-pet-console.companion-console .companion-input-wave i{display:block;width:4px;height:calc(4px + var(--voice-level)*28px);border-radius:4px;background:currentColor;box-shadow:var(--ui-hud-glyph-shadow);transition:height 60ms linear}
+.native-console.radial-pet-console.companion-console .companion-input-wave i:nth-child(3n){height:calc(4px + var(--voice-level)*18px)}
+.native-console.radial-pet-console.companion-console .companion-input-wave i:nth-child(3n + 1){height:calc(4px + var(--voice-level)*12px)}
+.native-console.radial-pet-console.companion-console .companion-input-wave[hidden]{display:none}
+@media(prefers-reduced-motion:reduce){.native-console.radial-pet-console.companion-console .companion-input-wave i{transition:none}}
+
+/* The browser toolbar uses the same quiet controls as the document reader. */
+/* Embedded apps own their whole panel; only the world panel rim remains. */
+.native-console .browser-caption{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.native-console .browser-viewport{flex:1;width:100%;max-width:none;margin:0;min-height:120px;border-radius:12px;background:#fff;overflow:hidden}
+/* Fox's working colors: the frame in pixi-world.css, the fallback ring below, and the
+   host's inward glow (browser-device.ts reads them) all turn together. */
+.native-console{--fox-ring-colors:#ff8a3d,#ffd166,#6ee7a8,#4cc9f0,#a78bfa,#f472b6,#ff8a3d;--fox-ring-turn:2.4s}
+/* Without host glow the page is inset and the ring and label show around it. */
+.native-console .browser-viewport.is-fox-control:not([data-fox-overlay]),#notionWorld .browser-viewport.is-fox-control:not([data-fox-overlay]){position:relative;overflow:visible;background:conic-gradient(from var(--fox-ring-angle,0deg),var(--fox-ring-colors));animation:fox-ring-turn var(--fox-ring-turn) linear infinite,fox-ring-glow var(--fox-ring-turn) linear infinite}
+.browser-viewport.is-fox-control:not([data-fox-overlay])::after{content:'🦊 ' attr(data-fox-label);position:absolute;left:50%;top:4px;transform:translateX(-50%);padding:2px 12px;border-radius:999px;background:#1f2a24;color:#fff;font:600 12px/1.4 var(--ui-font-ui,system-ui);white-space:nowrap;box-shadow:0 2px 10px #0004;pointer-events:none;z-index:2}
+@property --fox-ring-angle{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes fox-ring-turn{to{--fox-ring-angle:360deg}}
+@keyframes fox-ring-glow{0%{box-shadow:0 0 22px 4px #ff8a3d99}25%{box-shadow:0 0 22px 4px #6ee7a899}50%{box-shadow:0 0 22px 4px #4cc9f099}75%{box-shadow:0 0 22px 4px #a78bfa99}100%{box-shadow:0 0 22px 4px #ff8a3d99}}
+@media (prefers-reduced-motion:reduce){:is(#notionWorld,.native-console) .browser-viewport.is-fox-control:not([data-fox-overlay]){animation:none}}
+.native-console .browser-memory-flight{position:fixed;top:0;left:0;pointer-events:none;color:#e5bd69;font-size:24px;z-index:110}
+
+.native-console .browser-caption.is-error{position:static;width:auto;height:auto;max-width:none;margin:0;padding:12px 16px;overflow:visible;clip-path:none;white-space:normal;flex:none;font:400 var(--ui-text-caption)/1.5 var(--ui-font-ui);color:var(--ui-ink);background:var(--ui-float);border-bottom:1px solid var(--ui-line)}
+.native-console .browser-caption.is-error .ui-button{display:block;margin-top:8px}
+
+/* Local capture acknowledgement stays beside Fox, outside the native X surface. */
+
+.native-console .world-task-marker[data-state=event]{color:inherit;opacity:.85}
+.native-console .companion-input-handle{width:300px;max-width:calc(100vw - 32px);position:relative;left:50%;transform:translateX(-50%)}
+
+/* All setup controls are content inside Fox's existing dialogue surface. */
+.world-onboarding{position:static;width:100%;max-width:100%;padding:0;margin:12px 0 0;border:0;background:none;box-shadow:none;color:var(--ui-dialogue-ink);font:var(--ui-text-label)/1.5 var(--ui-font-ui);}
+.world-onboarding small{display:block;color:var(--ui-reply-muted);font-size:12px;line-height:1.5;margin-top:12px;}
+.world-onboarding button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 14px;margin:4px 8px 4px 0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-capsule);background:transparent;color:var(--ui-dialogue-ink);font:inherit;cursor:pointer;}
+.world-onboarding button.onboarding-primary{background:var(--ui-accent);color:var(--ui-on-dark);border-color:transparent;}
+.world-onboarding button:disabled{opacity:.5;cursor:wait;}
+.world-onboarding input:not([type=checkbox]),.world-onboarding textarea,.world-onboarding select{display:block;box-sizing:border-box;width:100%;margin:8px 0;padding:10px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-reply-well);color:var(--ui-dialogue-ink);font:inherit;resize:vertical;user-select:text;}
+.companion-guide-content{max-height:min(36dvh,320px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;}
+/* What an approved command or edit changed (ui/companion/fox-harness-approval.ts): a line diff per file. */
+.fox-approval-result{display:grid;gap:4px}.fox-approval-file{font:650 var(--ui-text-label)/1.4 var(--ui-font-ui);overflow-wrap:anywhere}
+.fox-approval-diff{margin:0 0 6px;padding:6px 8px;max-height:220px;overflow:auto;white-space:pre;font:var(--ui-text-caption)/1.45 var(--ui-font-mono);background:var(--ui-reply-well);border:1px solid var(--ui-reply-rule);border-radius:4px}
+.fox-approval-add{color:var(--ui-reply-success)}.fox-approval-del{color:var(--ui-error)}.fox-approval-same{color:var(--ui-reply-muted)}
+.fox-model-catalog-wrap{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:4px;width:100%;}
+.fox-model-filter{box-sizing:border-box;width:100%;margin:0;padding:8px 0;border:0;border-bottom:1px solid var(--ui-line);border-radius:0;background:transparent;color:inherit;font:inherit;}
+.fox-model-filter:focus{outline:none;border-bottom-color:var(--ui-reply-success);}
+.fox-model-catalog{display:flex;flex-direction:column;align-items:flex-start;gap:0;width:100%;margin:0;padding:0;list-style:none;}
+.fox-model-catalog li{display:block;width:100%;margin:0;padding:0;}
+.fox-model-catalog button{display:block;width:auto;max-width:100%;margin:0;padding:6px 0;text-align:left;white-space:normal;}
+.native-console[data-fox-guide=true] .native-conversation{max-height:none;}
+.world-onboarding .onboarding-error{color:var(--ui-error);margin:12px 0 0;}
+.world-onboarding .onboarding-error:empty{display:none;}
+
+.onboarding-sources:empty{display:none;}
+.world-onboarding details{margin:12px 0;}
+.world-onboarding summary{cursor:pointer;color:var(--ui-ink);padding:8px 0;}
+.onboarding-regions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.world-onboarding .onboarding-regions button{margin:0;padding:10px;}
+.world-onboarding .onboarding-regions small{font-size:11px;margin-top:3px;}
+
+/* Setup belongs to Fox; plots are simple connection targets in the world. */
+.companion-guide-actions{display:flex;gap:10px;flex-wrap:nowrap;margin-top:16px;pointer-events:auto}
+.companion-guide-actions button{min-height:44px;padding:8px 16px;white-space:nowrap;border:1px solid var(--ui-line);border-radius:var(--ui-radius-capsule);background:transparent;color:var(--ui-dialogue-ink);font:var(--ui-text-label)/1.4 var(--ui-font-ui);cursor:pointer}
+.companion-guide-actions .onboarding-primary{background:var(--ui-accent);color:var(--ui-paper);border-color:transparent}
+.companion-guide-actions button:disabled{opacity:.5;cursor:progress}
+.native-console[data-fox-guide=true] .world-actions{visibility:visible}
+
+/* An off-view bearing is a sky readout, never a relocated astronomical body. */
+
+/* Module controls share the panel system; state is readable without relying on color. */
+.native-console .module-state{display:inline-flex;align-items:center;gap:8px;font-size:var(--ui-text-label);color:var(--ui-ink);padding:8px 12px;border:1px solid var(--ui-line);border-radius:24px;background:var(--ui-float)}
+.native-console .module-state::before{content:'';width:7px;height:7px;border-radius:50%;background:#999c8c}
+.native-console .module-state[data-state=ready]::before,.native-console .module-state[data-state=sample]::before{background:#678663}
+.native-console .module-state[data-state=error]::before{background:#b97253}
+.native-console .module-description,.native-console .module-empty{line-height:1.6}
+.native-console .module-connect{display:block;margin:12px 0;padding:12px 18px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-float);color:var(--ui-ink);cursor:pointer}
+.native-console .module-records{display:grid;gap:8px;margin-block:16px}
+
+/* Apps are source entrances; Matters are the user's meaningful contexts. */
+.native-console .app-brand{width:68px;height:68px;object-fit:contain;float:right;margin:0 0 16px 16px;border-radius:14px;box-shadow:0 3px 12px #263e3714}
+.native-console .app-availability{padding:12px 0;color:var(--ui-ink-muted);font:var(--ui-text-label)/1.6 var(--ui-font-ui)}
+.native-console .matter-sources{font:12px/1.5 var(--ui-font-ui);color:var(--ui-ink-muted);margin:8px 0 20px}
+/* The background fades to transparent on all four edges; text stays unmasked. */
+.native-console .world-task-tracker{--ui-matter-ink:var(--ui-matter-hud-ink);--ui-matter-muted:var(--ui-matter-hud-muted);--ui-matter-hover:var(--ui-matter-hud-hover);--ui-matter-selected:var(--ui-matter-hud-selected);--ui-matter-accent:var(--ui-matter-hud-accent);background:none;color:var(--ui-matter-ink);border:0;border-radius:0;box-shadow:none;text-shadow:var(--ui-matter-hud-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
+.native-console .world-task-tracker .world-task-heading{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 6px;padding:0 8px 6px;border-bottom:1px solid color-mix(in srgb,currentColor 22%,transparent);font:600 var(--ui-text-label)/1.4 var(--ui-font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--activity-color);opacity:1;flex-shrink:0}
+.native-console .world-task-tracker .world-task-heading>span:first-child{display:inline-flex;align-items:center;gap:6px}
+
+/* The mark belongs to the title, so it centres on the title's line rather than
+   on a row whose height depends on how long the context ran. */
+.native-console .matter-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;width:26px;height:calc(var(--ui-text-body) * 1.32);min-height:0;align-self:flex-start;color:var(--activity-color,var(--ui-matter-hud-accent));text-shadow:none;margin:0;overflow:visible;font:600 var(--ui-text-body)/1.32 var(--ui-font-ui)}
+.native-console .world-matter{margin:0;flex:0 0 auto;height:auto;min-height:0;padding:10px;box-sizing:border-box;border:0;gap:10px;border-radius:var(--ui-radius-control)}
+.native-console .world-matter .world-task-copy{gap:4px}
+/* Short relative time shares the heading; the reason stays on its own row. */
+.world-task-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px;min-width:0}
+.native-console .world-matter{align-items:flex-start}
+.native-console .world-matter{background:none}
+.world-task-head .world-task-title{flex:1;min-width:0}
+/* Relative time is secondary, category-coloured and never shrinks into the title. */
+/* The time leads the key-facts line, category-coloured so it reads first (#1281); a long one wraps inside its row. */
+.native-console .world-task-objective .world-task-time{color:var(--activity-color,var(--ui-matter-hud-accent));font-weight:600;font-variant-numeric:tabular-nums;white-space:normal;overflow:visible}
+.native-console .world-task-head .world-task-soon{flex:0 0 auto;margin-left:auto;color:var(--activity-color,var(--ui-matter-hud-accent));font:600 max(12px,var(--ui-text-caption))/1.4 var(--ui-font-ui);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+
+.native-console .world-matter .world-task-title{display:block;overflow:visible;font:600 var(--ui-text-body)/1.32 var(--ui-font-ui);color:var(--ui-matter-ink)}
+.native-console .world-matter .world-task-objective{display:block;overflow:visible;overflow-wrap:anywhere;font:400 var(--ui-text-label)/1.42 var(--ui-font-ui);color:var(--ui-matter-muted);opacity:.72}
+.native-console .notion-pin[data-kind=app] strong{font-size:16px}
+.native-console .notion-pin[data-kind=app] small{font-size:10px}
+
+/* Connected Notion shelf: local originals in the existing right-side reader. */
+
+/* Mac pointer controls stay compact; touch targets retain their larger hit area. */
+@media(pointer:fine){
+ .fox-first-console .companion-dialogue :is(.companion-guide-actions,.world-onboarding) button{min-height:32px;padding:5px 11px;font:400 13px/1.4 var(--ui-font-ui);margin-block:2px}
+ .fox-first-console .companion-guide-actions{gap:8px;margin-top:12px}
+}
+
+/* Applet controls live inside Fox; the right reader is for originals. */
+.fox-first-console .app-device-inventory{position:static;width:auto;max-height:none;color:var(--ui-dialogue-ink);pointer-events:auto}
+.fox-first-console .app-device-head{float:right;margin:0 0 6px 12px}
+.fox-first-console .app-device-head h2{display:none}
+.fox-first-console .app-device-records{clear:both}
+.fox-first-console .app-device-row{display:block;width:100%;padding:8px 6px;border:0;border-bottom:1px solid var(--ui-line);background:transparent;color:inherit;font:400 13px/1.45 var(--ui-font-ui);text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.fox-first-console .app-device-row:hover{background:var(--ui-float)}
+.fox-first-console .app-device-row:focus-visible{outline:2px solid var(--ui-focus);outline-offset:1px}
+.fox-first-console .app-device-head button{width:auto;border:1px solid var(--ui-line);border-radius:8px;min-height:30px;padding:4px 10px}
+.fox-first-console .app-device-status{font:500 13px/1.5 var(--ui-font-ui);margin:0 0 6px}
+.fox-first-console .app-device-error{font:400 13px/1.5 var(--ui-font-ui);border-left:2px solid #b97253;padding-left:8px}
+.session-row{display:flex;align-items:center;gap:6px}.session-row>button:first-child{flex:1;min-width:0}.session-row>button:last-child{width:auto;font-size:11px}.session-row small{display:block;opacity:.75;font-size:11px;margin-top:4px}
+[data-template=coding-session] textarea{display:block;width:100%;padding:12px;margin:12px 0;background:var(--ui-dialogue);color:inherit;border:1px solid var(--ui-line);border-radius:8px;resize:vertical;font:12px/1.5 monospace}
+
+
+/* Applet controls belong to Fox. Only a selected original opens the right reader. */
+.fox-first-console .fox-app-options .app-brand{width:36px;height:36px;object-fit:contain}
+.fox-first-console .fox-app-options .module-connect{margin:4px;padding:7px 10px;font-size:12px;min-height:32px}
+
+.native-console .world-task-group{--activity-color:var(--ui-hud-task);display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.native-console .world-task-group[data-group=event]{--activity-color:var(--ui-hud-event)}
+.native-console .world-task-group[data-group=unseen]{--activity-color:var(--ui-hud-update)}
+.native-console .world-task-group+.world-task-group{margin-top:14px}
+.native-console .world-task-group{width:100%}
+
+.native-console .app-state-token{position:absolute;left:calc(50% + var(--token-x,0px));top:var(--token-y,-30px);transform:translate(-50%,-50%);display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#f4f0e5e8;color:#405348;border:1px solid #ffffff70;box-shadow:0 3px 8px #17372b26;text-shadow:none;pointer-events:none}
+.native-console .app-state-token[data-phase=connected]{background:#d2e5bfe8;color:#28513b}
+.native-console .app-state-token[data-phase=attention]{background:#f6d2a8;color:#7d3d25}
+.native-console .app-state-token:is([data-phase=planned],[data-phase=unavailable]){background:#ded9c9e6;color:#6c6a5d}
+.native-console .app-state-token:is([data-phase=syncing],[data-phase=reading],[data-phase=connecting]) svg{animation:app-token-turn 3s linear infinite}
+@keyframes app-token-turn{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.native-console .app-state-token svg{animation:none!important}}
+
+.native-console .matter-icon svg{flex:0 0 22px;width:22px;height:22px;filter:var(--ui-hud-glyph-shadow)}
+
+.native-console.radial-pet-console.companion-console .world-matter .matter-icon svg{flex:0 0 24px;width:24px;height:24px;opacity:1;color:var(--activity-color,var(--ui-hud-task))}
+.native-console.radial-pet-console .world-matter[data-state]{opacity:1}
+
+/* Codex keeps service-specific history in the reader and input with Fox. */
+.native-console .codex-summary{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.native-console .codex-count{font:12px/1.5 var(--ui-font-ui);padding:3px 7px;border-radius:8px;background:#6a8f851c}
+.native-console .codex-session-row{display:flex;align-items:center;gap:10px;text-align:left;width:100%}
+.native-console .codex-session-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.native-console .codex-session-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.native-console .codex-state-light{width:8px;height:8px;border-radius:50%;background:#899d9d;flex:none}
+.native-console .codex-state-light[data-state=Running]{background:#5b9a7b}
+.native-console .codex-state-light[data-state="Waiting for you"]{background:#bd903f}
+.native-console .codex-state-light[data-state=Completed]{background:#6b8cba}
+.native-console .codex-message{margin:0 0 24px;padding-bottom:16px;border-bottom:1px solid #5a756719}
+.native-console .codex-message h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#617568}
+.native-console .codex-tool{font-size:13px;margin:10px 0}
+.native-console .codex-tool pre,.native-console .codex-stream,.native-console .codex-request pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto;font-size:12px}
+.native-console .codex-request{display:flex;flex-direction:column;gap:8px}
+.native-console .codex-request input{display:block;width:100%;box-sizing:border-box}
+.native-console .codex-session-hint{font-size:13px;color:#526f61}
+
+
+.fox-first-console .companion-suggestions{display:flex;justify-content:flex-end;flex-wrap:nowrap;gap:6px;margin-top:12px;padding-right:12px}
+.fox-first-console .companion-suggestions[hidden]{display:none}
+.fox-first-console .companion-suggestions button{max-width:100%;min-height:30px;padding:5px 10px;border:1px solid #bb914e40;border-radius:12px 10px 13px 10px;background:#efc78430;color:var(--fox-ink);font:500 13px/1.4 var(--ui-font-ui);cursor:pointer}
+.fox-first-console .companion-suggestions button:hover{background:#efc78460}
+.fox-first-console .companion-suggestions button:focus-visible{outline:2px solid var(--fox-arrow);outline-offset:2px}
+
+.native-console .native-conversation a.fox-inline-action{color:var(--ui-reply-success);text-decoration-color:currentColor;font-weight:600}
+.native-console .native-conversation .fox-inline-action svg{width:13px;height:13px;vertical-align:-2px;margin-right:4px}
+.native-console .native-conversation .fox-inline-action[aria-disabled=true]{opacity:.55;cursor:wait}
+
+.fox-first-console .companion-speaker{max-width:calc(100% - 48px);white-space:nowrap}
+.native-console .companion-reply-status[hidden]{display:none}
+
+/* Reply text and actions share a responsive type size. */
+.fox-first-console .companion-dialogue{--fox-reply-size:16px}
+@media(max-width:600px){.fox-first-console .companion-dialogue{--fox-reply-size:15px}}
+.native-console.fox-first-console.radial-pet-console.companion-console .native-conversation{font-size:var(--fox-reply-size)}
+/* Fox actions share one quiet text treatment, aligned at the reply's lower right. */
+/* Actions wrap at word boundaries so no available action is hidden offscreen. */
+.fox-first-console :is(.companion-action-footer,.companion-guide-actions,.companion-suggestions){display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px 14px;margin-top:12px;padding-right:0;max-width:100%;overflow:visible}
+/* The nav is pinned to a corner, not laid out in the column with the rest. */
+.fox-first-console .companion-reply-nav{display:flex;flex-wrap:nowrap;gap:0}
+.fox-first-console :is(.companion-action-footer,.companion-guide-actions,.companion-reply-nav,.companion-suggestions)::-webkit-scrollbar{display:none}
+.fox-first-console :is(.companion-action-footer,.companion-guide-actions,.companion-reply-nav,.companion-suggestions)>:first-child{margin-left:auto}
+.fox-first-console :is(.companion-action-footer,.companion-guide-actions,.companion-reply-nav,.companion-suggestions)[hidden]{display:none}
+.fox-first-console .companion-dialogue :is(.companion-action-footer a,.companion-guide-actions button,.companion-guide-content button,.companion-suggestions button){min-height:32px;max-width:100%;flex:none;white-space:nowrap;padding:4px 0;border:0;border-radius:3px;background:none;background-image:none;box-shadow:none;color:var(--ui-reply-success);font:650 var(--fox-reply-size)/1.5 var(--ui-font-ui);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.fox-first-console .companion-dialogue :is(.companion-action-footer a,.companion-guide-actions button,.companion-guide-content button,.companion-suggestions button):hover{background:none;text-decoration-thickness:2px}
+.fox-first-console .companion-guide-content .fox-model-catalog{display:flex;flex-direction:column;align-items:flex-start;}
+.fox-first-console .companion-dialogue .fox-model-catalog button{display:block;width:auto;margin:0;text-align:left;white-space:normal;}
+.fox-first-console .companion-action-footer a[aria-disabled=true]{opacity:.5;cursor:wait}
+
+.fox-dev-preview{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0;margin-block:8px}
+.fox-dev-preview select,.fox-dev-preview [role=status]{grid-column:1/-1;min-width:0;font:inherit}
+.fox-dev-preview select{width:100%;padding:6px 8px;border:1px solid currentColor;border-radius:8px;background:var(--ui-dialogue);color:var(--ui-dialogue-ink)}
+.fox-dev-preview [role=status]{font-size:.85em;opacity:.7;overflow-wrap:anywhere}
+.fox-dev-preview button{white-space:nowrap}
+.world-recovery-status{display:block;max-width:220px}
+
+.native-console .native-conversation pre{white-space:pre-wrap;overflow-wrap:anywhere}
+
+.native-console .native-conversation[hidden]{display:none}
+
+.fox-first-console .companion-dialogue :is(.companion-action-footer a,.companion-guide-actions button,.companion-guide-content button,.companion-suggestions button):focus-visible{outline:2px solid var(--ui-reply-success);outline-offset:3px}
+.fox-first-console .companion-dialogue :is(.companion-guide-actions button,.companion-guide-content button,.companion-reply-nav button):disabled{opacity:.5;cursor:default}
+
+
+.native-console .companion-context-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.native-console .companion-context-icon[data-kind=emoji]{font:400 19px/1 var(--ui-font-emoji);filter:drop-shadow(0 1px 2px #10291e40)}
+.native-console .companion-context-icon svg{width:30px;height:30px;filter:drop-shadow(0 1px 3px #10291e73)}
+/* The mark draws a whole little world; it needs more room than a flat glyph to read. */
+.native-console .companion-context-icon[data-kind=mark] svg{width:40px;height:40px}
+
+/* Sprite body motion supplements the registered facial frames. */
+.native-console.fox-first-console .companion-cozy canvas.companion-sprite{object-fit:contain;animation:none!important;pointer-events:none}
+@media(prefers-reduced-motion:reduce){#notionWorld .companion-cozy canvas.companion-sprite{animation:none!important}}
+
+/* Visually hidden text for screen readers. */
+.space-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* One spacing rhythm for short dialogue, optional context and its action row. */
+.native-console.fox-first-console .companion-dialogue :is(.companion-guide-actions,.companion-action-footer){margin-top:0;padding:0}
+
+/* New source-backed findings arrive once, without replaying on HUD refresh. */
+.world-matter-arriving{animation:attention-arrival .9s cubic-bezier(.2,.7,.3,1) both}
+@keyframes attention-arrival{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.world-matter-arriving{animation:none}}
+
+/* A quiet speech-shaped affordance makes typing distinct from opening Fox's panel. */
+.native-console.radial-pet-console.companion-console .companion-input-handle:not([hidden]){pointer-events:auto;cursor:text;box-sizing:border-box;width:280px;max-width:calc(100vw - 40px);height:36px;min-height:36px;padding:7px 12px;border-radius:12px;white-space:nowrap;text-overflow:ellipsis;background:#233d3024;box-shadow:inset 0 1px 3px #17332818;text-shadow:var(--ui-hud-shadow)}
+
+.native-console.fox-first-console .companion-dialogue{padding-top:12px;gap:6px}
+.native-console.fox-first-console .companion-guide-content:empty{display:none}
+[data-onboarding-finish=true] .companion-avatar{filter:drop-shadow(0 0 10px #ffe2a9);outline:2px solid #f0c477;outline-offset:5px;border-radius:50%}
+.companion-guide-content input[aria-label="Companion name"]{width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid #b5b89e;border-radius:10px;background:#fff8e8;color:var(--ui-ink);font:inherit}
+
+.onboarding-spotlight[data-kind=center]{pointer-events:none}
+
+.companion-guide-content input[aria-label="Companion name"]{appearance:none;-webkit-appearance:none;background-image:none;box-shadow:inset 0 1px 3px #293b3210;outline:none;border-color:#b5b89e80}
+.companion-guide-content input[aria-label="Companion name"]:focus{outline:none;border-color:#aa956c;box-shadow:0 0 0 2px #d7bc8133}
+
+/* A small painted mark with a generous hit target, separate from talk/hold. */
+.native-console .companion-panel-button{position:absolute;left:calc(100% - 18px);top:auto;bottom:-4px;display:grid;place-items:center;width:44px;height:44px;min-width:44px;padding:0;border:0;border-radius:50%;background:none;color:var(--ui-ink);cursor:pointer;pointer-events:auto;z-index:2;isolation:isolate}
+.native-console .companion-panel-button::before{content:'';position:absolute;inset:5px;border-radius:50%;background:linear-gradient(145deg,var(--ui-paper) 30%,var(--ui-attention));box-shadow:0 2px 5px #243e3430,inset 0 1px 2px #ffffffb0,inset 0 -2px 2px #76562830;z-index:-1;transition:background .18s,box-shadow .18s}
+.native-console .companion-panel-button svg{width:21px;height:21px;pointer-events:none;filter:drop-shadow(0 1px 0 #fff8e780)}
+.native-console .companion-panel-button:hover::before,.native-console .companion-panel-button[aria-expanded=true]::before{background:var(--ui-accent-soft,var(--ui-paper))}
+.native-console .companion-panel-button:focus-visible{outline:2px solid var(--ui-focus);outline-offset:1px}
+.native-console .companion-panel-button:active::before{box-shadow:inset 0 1px 3px #243e3440}
+
+
+.notion-pin small[hidden]{display:none}
+
+/* Region folders: one quiet menu beside the place name; five stable installations. */
+.notion-world .notion-pin[data-kind="region-more"]{min-width:28px;width:28px;height:28px;padding:0;border:1px solid #fff8;border-radius:50%;background:#f8f1df25;color:#fff;box-shadow:none;backdrop-filter:blur(5px);font-size:16px;line-height:1}
+.notion-world .notion-pin[data-kind="region-more"]:hover{background:#f8f1df60}
+.notion-dialog[data-kind="region-library"]{width:min(860px,88vw);max-height:85vh;background:#f5efdf;color:#29473b;border-radius:24px;overflow:auto;padding:28px}
+
+/* Dates live beside the clock; every row reserves only the glyph's width. */
+.native-console .world-task-tracker .world-matter{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:9px}
+.native-console .world-task-tracker .world-matter>.matter-icon{width:24px;min-width:0;max-width:24px;justify-self:center}
+.native-console.radial-pet-console .world-task-tracker .world-matter{grid-template-columns:24px minmax(0,1fr)}
+.native-console.radial-pet-console .world-task-tracker .world-matter>.matter-icon{width:24px;max-width:24px}
+/* Region overflow is a foreground shelf. Narrow windows centre it over a still World; wide ones dock it right (below). */
+.region-shelf{position:absolute;z-index:80;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(760px,76vw);max-height:88%;display:flex;flex-direction:column;padding:16px 24px 12px;border-radius:28px;background:linear-gradient(150deg,#f8f3e8f5,#efe7d8ee);color:#29473b;box-shadow:0 16px 60px #263a3138,inset 0 1px #fff9;backdrop-filter:blur(12px);animation:region-shelf-in .26s ease-out}
+.region-shelf-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:8px}
+.region-shelf-header h2{margin:0;font-size:24px;font-weight:600}
+.region-shelf-scroll{overflow:auto;min-height:0;overscroll-behavior:contain;padding:0 4px 8px}
+.region-shelf-scroll h3{font-size:12px;font-weight:500;color:#677568;margin:16px 0 8px}
+.region-shelf-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.region-shelf-grid[data-group="On the ground"]{grid-template-columns:repeat(6,minmax(0,1fr));max-width:440px;margin-inline:auto}
+.region-shelf-grid[data-group="On the ground"]>*{grid-column:span 2}
+.region-shelf-grid[data-group="On the ground"]>:nth-child(4){grid-column:2 / span 2}
+.region-shelf-grid[data-group="On the ground"]>:nth-child(5){grid-column:4 / span 2}
+.region-shelf-grid [data-ground-slot].is-drop-target{background:#fff8;outline:2px solid #c8b480;outline-offset:2px}
+.region-shelf-applet{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px;min-width:0;padding:8px 4px 10px;border:0;border-radius:16px;background:transparent;color:inherit;font:inherit;cursor:pointer;transition:background .2s,transform .2s}
+.region-shelf-applet img{width:100%;max-width:96px;height:88px;object-fit:contain;filter:drop-shadow(0 5px 3px #283b2828);pointer-events:none;transition:transform .2s}
+.region-shelf-applet span{font-size:13px;line-height:1.25;text-align:center;overflow-wrap:anywhere}
+.region-shelf-applet:hover,.region-shelf-applet:focus-visible{background:#fff8;outline:2px solid #c8b48080;outline-offset:0}
+.region-shelf-applet:hover img{transform:translateY(-3px)}
+/* A ground place's pin: shown on hover or focus, and always once pinned (owner request 2026-10-04). */
+.region-shelf-cell{position:relative;display:flex;min-width:0}
+.region-shelf-cell>.region-shelf-applet{flex:1}
+.region-shelf-pin{position:absolute;top:2px;right:2px;display:grid;place-items:center;width:26px;height:26px;padding:0;border:1px solid #536e4b30;border-radius:50%;background:#fffc;color:#536e4b;cursor:pointer;opacity:0;transition:opacity .2s}
+.region-shelf-cell:hover .region-shelf-pin,.region-shelf-pin:focus-visible,.region-shelf-cell[data-pinned=true] .region-shelf-pin{opacity:1}
+.region-shelf-cell[data-pinned=true] .region-shelf-pin{background:#536e4b;color:#fff8e6;border-color:#536e4b}
+.region-shelf-add{flex:none;align-self:center;border:1px solid #536e4b30;border-radius:20px;background:#ffffff55;color:inherit;font:inherit;font-size:14px;margin-top:14px;padding:10px 24px;cursor:pointer}
+.region-shelf-add:hover{background:#fff9}
+.region-shelf-empty{text-align:center;opacity:.65;padding:20px}
+.region-shelf-move{position:absolute;top:2px;left:2px;display:grid;place-items:center;width:26px;height:26px;padding:0;border:1px solid #536e4b30;border-radius:50%;background:#fffc;color:#536e4b;cursor:pointer;opacity:0;transition:opacity .2s}
+.region-shelf-cell:hover .region-shelf-move,.region-shelf-move:focus-visible,.region-shelf-move[aria-expanded=true]{opacity:1}
+.region-shelf-move-menu{position:absolute;z-index:2;top:30px;left:2px;display:flex;flex-direction:column;min-width:150px;padding:4px;border-radius:12px;background:#fffdf7;box-shadow:0 6px 20px #283b2833}
+.region-shelf-move-item{border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:13px;text-align:left;padding:7px 10px;cursor:pointer}
+.region-shelf-move-item:hover,.region-shelf-move-item:focus-visible{background:#536e4b1f}
+.region-shelf-place{position:absolute;top:2px;right:2px;display:grid;place-items:center;width:26px;height:26px;padding:0;border:1px solid #536e4b30;border-radius:50%;background:#fffc;color:#536e4b;cursor:pointer;opacity:0;transition:opacity .2s}
+.region-shelf-cell:hover .region-shelf-place,.region-shelf-place:focus-visible{opacity:1}
+.region-shelf-all{display:block;margin:14px auto 4px;border:1px solid #536e4b30;border-radius:20px;background:#ffffff55;color:inherit;font:inherit;font-size:13px;padding:8px 18px;cursor:pointer}
+.region-shelf-all:hover{background:#fff9}
+@keyframes region-shelf-in{from{opacity:0;transform:translate(-50%,calc(-50% + 12px)) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@media(max-width:700px){.region-shelf{width:86vw;padding:18px}.region-shelf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.region-shelf{animation:none}.region-shelf-applet,.region-shelf-applet img{transition:none}}
+
+/* One bounded collection scrolls; the region heading and guidance stay put. */
+.region-shelf{top:50%;bottom:auto;max-height:88%;max-width:calc(100% - 32px);box-sizing:border-box;padding:18px 24px}
+.region-shelf-scroll{overflow-y:auto;overflow-x:hidden;min-height:0;flex:1;padding:0;overscroll-behavior:contain}
+.region-shelf>.region-shelf-header,.region-shelf>.region-shelf-note{flex:none}
+.region-shelf-note{font-size:12px;margin:8px 0;line-height:1.4}
+.region-shelf-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.region-shelf-applet{padding:4px;gap:4px;min-height:44px}
+.region-shelf-applet img{height:48px;max-width:64px}
+.region-shelf-scroll h3{margin:8px 0 4px}
+.region-shelf-slot{min-height:64px}
+@media(max-width:600px){.region-shelf{width:calc(100% - 24px);padding:14px}.region-shelf-applet span{font-size:12px}.region-shelf-applet img{height:40px}}
+
+/* Only actionable connection issues earn a Fox alert; transient reads stay quiet. */
+.native-console .companion-source-alert{position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:5;width:28px;height:28px;min-width:28px;min-height:28px;display:grid;place-items:center;padding:0;border:2px solid #fff3cc;border-radius:50%;background:#d79838;color:#263e32;font:800 20px/24px var(--ui-font-ui);box-shadow:0 2px 6px #16342645;cursor:pointer;pointer-events:auto}
+.native-console .companion-source-alert[hidden]{display:none}
+.native-console .companion-source-alert:focus-visible{outline:2px solid var(--ui-focus);outline-offset:3px}
+
+.notion-world .notion-pin[data-kind="region-add"],.notion-world .notion-pin[data-kind="region-slot"]{transform:translate(-50%,-50%);width:44px;height:44px;min-width:44px;padding:0;border:1px solid #fff7;border-radius:50%;background:#f8f1df30;color:#fff;font-size:28px;box-shadow:0 2px 12px #25382d18;backdrop-filter:blur(3px)}
+.notion-world .notion-pin[data-kind="region-add"]:is(:hover,:focus-visible,[data-hovered="true"]),.notion-world .notion-pin[data-kind="region-slot"].is-drop-target{background:#f8f1dfb0;color:#355543;border-color:#fff;}
+.notion-world .notion-pin[data-kind="region-slot"]{z-index:75;border-style:dashed;}
+
+.notion-world .notion-pin:is([data-kind="region-add"],[data-kind="region-slot"]) strong{font-size:28px;line-height:1}
+
+.region-shelf.is-dragging{top:auto;bottom:12px;max-height:32%;animation:none;transform:translate(-50%,calc(100% - 48px));opacity:.45;pointer-events:none}
+/* Wide windows: the area panel slides in from the right while the World zooms the area into the space left of
+   it (notion-world.ts openRegion, pixi-world.ts frameArea). It takes the right side over Fox's column while open. */
+@media(min-width:701px){
+.region-shelf{--region-shelf-side:1;inset:12px 12px 12px auto;transform:none;width:clamp(360px,calc(50% - 100px),600px);max-width:calc(100% - 24px);max-height:none;z-index:95;animation:region-shelf-side-in .3s cubic-bezier(.2,.8,.2,1)}
+.region-shelf.is-dragging{inset:12px 12px 12px auto;max-height:none;transform:none;opacity:.55}
+.region-shelf.is-refresh{animation:none}
+.region-shelf-grid:not([data-group="On the ground"]){grid-template-columns:repeat(auto-fill,minmax(76px,1fr))}
+/* Fox stays in view at the bottom centre; the side capsule the panel would cut in half steps aside meanwhile. */
+.notion-world:has(.region-shelf[data-side=true]) .fox-action-right{visibility:hidden}
+}
+@keyframes region-shelf-side-in{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.region-shelf{animation:none}}
+.region-shelf-factory{display:flex;flex-direction:column;gap:6px;margin:0 0 10px;padding:12px 14px;border-radius:14px;background:#fffdf7b3}
+.region-shelf-factory-title{display:flex;align-items:center;gap:8px}
+.region-shelf-factory h3{margin:0;font-size:15px}
+.region-shelf-factory p{margin:0;font-size:13px;line-height:1.35}
+.region-shelf-factory input{box-sizing:border-box;width:100%;padding:8px 10px;border:1px solid #20251d24;border-radius:10px;background:#f4f0e5;color:inherit;font:inherit;font-size:13px;opacity:.75}
+.region-shelf-soon{padding:2px 8px;border-radius:999px;background:#e3b04b;color:#3d2f1d;font-size:11.5px;font-weight:600}

@@ -1,0 +1,47 @@
+[
+  {
+    "file": "ocean-shore.m4a",
+    "title": "Waves at Baltic Sea shore.wav",
+    "author": "pulswelle",
+    "source": "https://freesound.org/people/pulswelle/sounds/339517/",
+    "download": "https://cdn.freesound.org/previews/339/339517_2367966-hq.mp3",
+    "license": "CC0-1.0",
+    "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "verified": "2026-09-16",
+    "downloadRange": "first 1600000 bytes or full preview if shorter",
+    "sourceSHA256": "0627686907c2f49107b8eae6221f56e73fcbf3ea43f5b436683a4192b9487839",
+    "sha256": "84a04a15d5ffd33c9b3cdf3834618c1e753231050082185a84a38da4c5bb7ce0",
+    "processing": "HQ preview; up to first 75 seconds, 3-second loop crossfade, normalized peak -7.5 dBFS, stereo 32kHz AAC",
+    "seconds": 65.349
+  },
+  {
+    "file": "soft-rain.m4a",
+    "title": "Rain_01.wav",
+    "author": "Q.K.",
+    "source": "https://freesound.org/people/Q.K./sounds/56306/",
+    "download": "https://cdn.freesound.org/previews/56/56306_91374-hq.mp3",
+    "license": "CC0-1.0",
+    "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "verified": "2026-09-16",
+    "downloadRange": "first 1600000 bytes or full preview if shorter",
+    "sourceSHA256": "97eba2ec0bfb826268057b379b9c4d3522bba8544f21d8fd3da75a2850ada56e",
+    "sha256": "cad5690e1487fa14596eb4e1781ffea1ccc5aab4b38cc6d38486accfebbc4583",
+    "processing": "HQ preview; up to first 75 seconds, 3-second loop crossfade, normalized peak -7.5 dBFS, stereo 32kHz AAC",
+    "seconds": 22.762
+  },
+  {
+    "file": "forest-air.m4a",
+    "title": "forest ambience constant breeze.flac",
+    "author": "kyles",
+    "source": "https://freesound.org/people/kyles/sounds/637559/",
+    "download": "https://cdn.freesound.org/previews/637/637559_612689-hq.mp3",
+    "license": "CC0-1.0",
+    "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "verified": "2026-09-16",
+    "downloadRange": "first 1600000 bytes or full preview if shorter",
+    "sourceSHA256": "fcb29e883fc349c84e8067dde73690c1e7e634cb7f4ccbc06fb281999b527832",
+    "sha256": "635d2eca619943739f342c3b4a700cba420edc4b6112a0b3fa29c8a7144745eb",
+    "processing": "HQ preview; up to first 75 seconds, 3-second loop crossfade, normalized peak -7.5 dBFS, stereo 32kHz AAC",
+    "seconds": 69.564
+  }
+]

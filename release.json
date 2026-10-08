@@ -1,0 +1,9 @@
+{
+  "version": "2026.1003.1130",
+  "build": 1143,
+  "platformBuilds": {
+    "mac": 1143,
+    "windows": 1130
+  },
+  "builtAt": "2026-10-04T04:59:02Z"
+}

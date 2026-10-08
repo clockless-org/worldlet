@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readPresentationRequest,EMPTY_OVERLAY} from '../core/context/index.ts';
+for(const value of [1,1.25,1.5,2])assert.equal(readPresentationRequest({action:'setTextScale',value}).action,'setTextScale');
+for(const value of [1.2,'1',null,Infinity])assert.throws(()=>readPresentationRequest({action:'setTextScale',value}));
+assert.throws(()=>readPresentationRequest({action:'setTextScale',value:1,provider:'custom'}));
+assert.deepEqual(readPresentationRequest({action:'saveOverlay',state:EMPTY_OVERLAY()}),{action:'saveOverlay',state:EMPTY_OVERLAY()});
+assert.throws(()=>readPresentationRequest({action:'saveOverlay',state:{...EMPTY_OVERLAY(),created:[]}}));
+assert.throws(()=>readPresentationRequest({action:'saveOverlay',state:{...EMPTY_OVERLAY(),created:{bad:{title:'invalid'}}}}));
+assert.throws(()=>readPresentationRequest({action:'saveSampleUI',state:{unexpected:'value'}}));
+assert.throws(()=>readPresentationRequest({action:'saveSampleUI',state:{items:1}}));
+assert.throws(()=>readPresentationRequest({action:'saveSampleUI',state:{items:'文'.repeat(500000)}}));
+assert.throws(()=>readPresentationRequest({action:'saveOverlay',state:{...EMPTY_OVERLAY(),undo:'文'.repeat(500000)}}));
+const sample={items:'[]','dataset-version':'fixture'};
+assert.deepEqual(readPresentationRequest({action:'saveSampleUI',state:sample}),{action:'saveSampleUI',state:sample});
+console.log('PASS shared presentation contract: supported text sizes, bounded UTF-8 data, closed Sample keys and valid edits');

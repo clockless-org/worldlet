@@ -1,0 +1,118 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+const W=+(new URLSearchParams(location.search).get('w')||1400),H=+(new URLSearchParams(location.search).get('h')||1000);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(1);renderer.setSize(W,H);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(27.5,W/H,1,400);
+// Elevated three-quarter view, like the World's Applet figurines.
+cam.position.set(-33,50,70);cam.lookAt(1.6,0,2.2);
+
+// Light: warm diffuse day, soft grounded shadows.
+scene.add(new THREE.HemisphereLight(0xfff4e0,0x7d8a62,1.35));
+const sun=new THREE.DirectionalLight(0xffe6c4,2.4);sun.position.set(-22,40,18);
+sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);sun.shadow.radius=6;sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.02;
+Object.assign(sun.shadow.camera,{left:-34,right:34,top:34,bottom:-34,near:1,far:120});scene.add(sun);
+const fill=new THREE.DirectionalLight(0xd9e6ff,0.45);fill.position.set(26,14,-10);scene.add(fill);
+
+// Painted materials.
+function canvasTex(w,h,draw,rep=[1,1]){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(...rep);t.anisotropy=8;return t;}
+function rnd(s){return()=>{s=(s*16807)%2147483647;return s/2147483647;};}
+const travTex=canvasTex(512,512,(g,w,h)=>{const r=rnd(7);g.fillStyle='#efe4cc';g.fillRect(0,0,w,h);
+ for(let i=0;i<2600;i++){g.fillStyle=`rgba(${150+r()*60|0},${130+r()*50|0},${95+r()*40|0},${r()*0.10})`;g.fillRect(r()*w,r()*h,1+r()*7,1+r()*2);}
+ g.strokeStyle='rgba(150,128,92,.30)';g.lineWidth=2;for(let y=0;y<=h;y+=64){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke();}
+ for(let y=0;y<h;y+=64)for(let x=(y/64%2)*64;x<w;x+=128){g.beginPath();g.moveTo(x,y);g.lineTo(x,y+64);g.stroke();}},[2,2]);
+const panelTex=canvasTex(256,256,(g,w,h)=>{g.fillStyle='#f6f3ec';g.fillRect(0,0,w,h);g.strokeStyle='rgba(160,160,150,.35)';g.lineWidth=2;
+ for(let i=0;i<=w;i+=64){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();g.beginPath();g.moveTo(0,i);g.lineTo(w,i);g.stroke();}},[2,2]);
+const grassTex=canvasTex(512,512,(g,w,h)=>{const r=rnd(3);g.fillStyle='#a9bd84';g.fillRect(0,0,w,h);
+ for(let i=0;i<900;i++){const c=r()<.5?'rgba(126,160,105,.28)':'rgba(196,206,140,.22)';g.fillStyle=c;g.beginPath();g.ellipse(r()*w,r()*h,4+r()*16,3+r()*10,r()*3,0,7);g.fill();}},[3,3]);
+const woodTex=canvasTex(512,128,(g,w,h)=>{const r=rnd(11);g.fillStyle='#a87a52';g.fillRect(0,0,w,h);
+ for(let i=0;i<60;i++){g.strokeStyle=`rgba(${90+r()*40|0},${58+r()*20|0},${34},${.15+r()*.2})`;g.lineWidth=1+r()*3;g.beginPath();const y=r()*h;g.moveTo(0,y);
+  for(let x=0;x<=w;x+=32)g.lineTo(x,y+Math.sin(x/60+i)*3);g.stroke();}},[3,1]);
+const M=(o)=>new THREE.MeshStandardMaterial(Object.assign({roughness:.92,metalness:0},o));
+const mat={trav:M({map:travTex,color:0xffffff}),panel:M({map:panelTex,color:0xffffff,roughness:.8}),grass:M({map:grassTex}),
+ wood:M({map:woodTex}),water:M({color:0x86b8c2,roughness:.35}),glass:M({color:0x9fb7b6,roughness:.4}),path:M({color:0xe6dcc4}),
+ leaf:M({color:0x7f9f6c}),leaf2:M({color:0x93ad73}),cypress:M({color:0x5f7f5a}),trunk:M({color:0x8a6a4c}),
+ azalea:M({color:0xd98a95}),azalea2:M({color:0xe7a9a0}),cactus:M({color:0x7f9b6e}),tram:M({color:0xf7f5ef,roughness:.6}),
+ rail:M({color:0xbfb6a2}),hill:M({color:0x9fb57d,map:grassTex}),soil:M({color:0xb79b78}),brass:M({color:0xc9a35a,roughness:.5,metalness:.3}),
+ stone:M({color:0xd8ccb3})};
+const add=(geo,m,x,y,z,o={})=>{const me=new THREE.Mesh(geo,m);me.position.set(x,y,z);me.castShadow=o.cast!==false;me.receiveShadow=true;if(o.ry)me.rotation.y=o.ry;if(o.rx)me.rotation.x=o.rx;scene.add(me);return me;};
+const rbox=(w,h,d,r=.35)=>new RoundedBoxGeometry(w,h,d,4,r);
+
+// Timber base, like the World's ground Applets.
+add(rbox(46,2.4,36,1.1),mat.wood,0,-1.2,0);
+add(rbox(47,.5,37,.25),mat.brass,0,-2.5,0,{cast:false});
+// The hill: a low meadow, then the plateau the museum stands on.
+add(rbox(45,1.6,35,.8),mat.grass,0,.6,0);
+add(rbox(30,3.2,22,1.4),mat.hill,3,2.4,-3);
+add(rbox(27,1,19.5,.45),mat.trav,3.6,4.3,-3.4);
+// Pavilions: travertine bases with white panel tops.
+function pavilion(x,z,w,d,h,ry=0){add(rbox(w,h,d,.4),mat.trav,x,4.8+h/2,z,{ry});add(rbox(w*.86,1.3,d*.86,.4),mat.panel,x,4.8+h+.65,z,{ry});
+ for(let i=0;i<3;i++)add(new THREE.BoxGeometry(w*.7,.06,.06),mat.glass,x,4.8+h*.55,z+d/2+.01,{ry,cast:false});}
+pavilion(-4.6,-9.2,8,4.2,3.4);          // North
+pavilion(9.6,-8.4,4.6,6.6,3.8);         // East
+pavilion(11,0.6,6,4.6,3.2);            // South
+pavilion(-6,-1.2,4.8,6.2,3.6);          // West
+pavilion(-8.6,-10.2,3.8,3.8,2.6);       // Exhibitions
+{const g=new THREE.CylinderGeometry(3.4,3.4,3.2,48,1,true,Math.PI*0.15,Math.PI*0.7);const m=new THREE.MeshStandardMaterial({map:panelTex,roughness:.8,side:THREE.DoubleSide});add(g,m,-6,4.8+1.6,1.4);}
+{const g=new THREE.CylinderGeometry(4.4,4.4,1.6,48,1,true,-Math.PI*0.2,Math.PI*0.9);const m=new THREE.MeshStandardMaterial({map:travTex,roughness:.9,side:THREE.DoubleSide});add(g,m,2.6,4.8+.8,-3.6);}
+// Entrance hall rotunda.
+add(new THREE.CylinderGeometry(2.6,2.6,4.4,48),mat.panel,2.6,4.8+2.2,-3.6);
+add(new THREE.CylinderGeometry(2.8,2.8,.35,48),mat.trav,2.6,4.8+4.55,-3.6);
+add(rbox(5.2,2.4,3,.3),mat.trav,2.6,4.8+1.2,.2);
+// Courtyard fountain channel and plaza.
+add(rbox(7,.25,1.4,.12),mat.water,3.6,4.92,-6.4,{cast:false});
+add(new THREE.CylinderGeometry(1.3,1.3,.28,40),mat.water,7,4.92,-4,{cast:false});
+// Arrival plaza and tram station on the plateau's front.
+add(rbox(6,.25,3,.12),mat.path,3,4.9,4.6,{cast:false});
+// Central Garden: lower terrace with the azalea maze in its round pool.
+add(rbox(13,1.6,10,.8),mat.hill,-11.5,1.6,9.2);
+const gx=-11.8,gz=10,gy=2.45;
+add(new THREE.CylinderGeometry(4.1,4.1,.3,64),mat.water,gx,gy,gz,{cast:false});
+for(const [r,m] of [[3.3,mat.azalea],[2.3,mat.azalea2],[1.3,mat.azalea]]){const t=add(new THREE.TorusGeometry(r,.32,12,64),m,gx,gy+.3,gz);t.rotation.x=Math.PI/2;}
+// Cactus garden on the south promontory.
+add(rbox(7,3.4,6,1),mat.hill,19,2.3,-2);add(rbox(6.4,.8,5.4,.4),mat.soil,19,4.2,-2);
+const cr=rnd(5);for(let i=0;i<9;i++){const h=.8+cr()*1.4;add(new THREE.CapsuleGeometry(.32,h,6,12),mat.cactus,16.6+cr()*4.8,4.6+h/2,-4.2+cr()*4.2);}
+// Tram: a track climbing from the station at the foot to the arrival plaza.
+const t0=new THREE.Vector3(15,1.8,14),t1=new THREE.Vector3(4.2,5,6.2);
+const tv=t1.clone().sub(t0),tl=tv.length();
+const track=add(rbox(tl,.5,1.2,.2),mat.rail,(t0.x+t1.x)/2,(t0.y+t1.y)/2,(t0.z+t1.z)/2);
+track.lookAt(t1);track.rotateY(Math.PI/2);
+const along=(f,lift)=>t0.clone().add(tv.clone().multiplyScalar(f)).add(new THREE.Vector3(0,lift,0));
+for(const f of [.42,.53]){const p=along(f,.95);const car=add(rbox(2.4,1.3,1.1,.45),mat.tram,p.x,p.y,p.z);car.lookAt(along(f+.1,.95));car.rotateY(Math.PI/2);
+ const win=add(rbox(1.9,.4,1.14,.15),mat.glass,p.x,p.y+.18,p.z,{cast:false});win.quaternion.copy(car.quaternion);}
+add(rbox(3.6,1.6,2.6,.4),mat.trav,17.4,2.2,14.6);add(rbox(4,.4,3,.2),mat.panel,17.4,3.2,14.6);
+// Trees: soft massed foliage and a few cypresses.
+const tr=rnd(19);
+function tree(x,z,y,s=1){add(new THREE.CylinderGeometry(.16*s,.22*s,1.2*s,8),mat.trunk,x,y+.6*s,z);
+ const m=tr()<.5?mat.leaf:mat.leaf2;for(let i=0;i<4;i++)add(new THREE.SphereGeometry((.8+tr()*.4)*s,16,12),m,x+(tr()-.5)*1.1*s,y+(1.6+tr()*.8)*s,z+(tr()-.5)*1.1*s);}
+function cypress(x,z,y,s=1){add(new THREE.CapsuleGeometry(.45*s,2.2*s,6,12),mat.cypress,x,y+1.6*s,z);}
+[[-19,-12],[-16,-14],[-20,-4],[-21,3],[-17,-8],[19,-13],[21,-10],[21,10],[-4,13],[1,14.5],[-20,12],[-18,15],[-14,1],[-12,-15],[8,-15.5],[14,-15]].forEach(([x,z])=>tree(x,z,1.4,1+tr()*.3));
+[[-1,-12.6],[4,-12.6],[15,-11.5],[-11,-4],[16.8,-2]].forEach(([x,z])=>cypress(x,z,4.8,.8));
+[[-15,6],[-8,13.5],[-16,12.6]].forEach(([x,z])=>tree(x,z,2.4,.8));
+// Café terrace with honey umbrellas above the garden.
+for(const [x,z] of [[-3.2,5.6],[-5.6,6.4],[-4.2,7.8]]){add(new THREE.CylinderGeometry(.06,.06,1.4,6),mat.trunk,x,5.5,z);add(new THREE.ConeGeometry(1,.45,18),M({color:0xe2b765}),x,6.3,z);add(new THREE.CylinderGeometry(.42,.42,.08,14),mat.wood,x,5.15,z);}
+// Path and steps down to the garden.
+for(let i=0;i<5;i++)add(rbox(1.6,.3,1.2,.1),mat.path,-7.2-i*.9,4.6-i*.5,6.4+i*.55,{cast:false});
+// Flower beds along the meadow road.
+const fr=rnd(29);for(let i=0;i<26;i++){const x=-6+fr()*26,z=11+fr()*5;if(x>11&&z<15.5&&x<19)continue;add(new THREE.SphereGeometry(.38+fr()*.25,10,8),[mat.azalea2,M({color:0xe8c46e}),mat.leaf2,M({color:0xf1ead8})][i%4],x,1.55,z);}
+// Little benches and planters around the plaza.
+for(const [x,z] of [[0.5,-6.4],[6.6,-6.4],[-1.2,1.6],[7.6,2.6]])add(new THREE.SphereGeometry(.5,12,10),mat.leaf2,x,5.2,z);
+
+renderer.render(scene,cam);
+// Where each stop is on screen, for the page's pins.
+const P={tram:[17.4,3.8,14.6],arrive:[3,5.6,4.6],west:[-6,9.8,-1.2],garden:[gx,3.4,gz],north:[-4.6,9.8,-9.2],east:[9.6,10.2,-8.4],south:[11,9.6,.6],exhibit:[-8.6,8.4,-10.2],cactus:[19,6.6,-2],hall:[2.6,10,-3.6]};
+const pins={};for(const [k,v] of Object.entries(P)){const p=new THREE.Vector3(...v).project(cam);pins[k]=[+((p.x+1)/2*100).toFixed(1),+((1-p.y)/2*100).toFixed(1)];}
+window.PINS=pins;window.READY=true;
+</script></body></html>

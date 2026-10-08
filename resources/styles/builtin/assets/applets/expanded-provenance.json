@@ -1,0 +1,204 @@
+{
+  "generator": "OpenAI imagegen",
+  "date": "2026-09-25",
+  "entries": [
+    {
+      "key": "outlook",
+      "asset": "resources/styles/builtin/assets/applets/outlook/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Outlook. Concept: blue enamel mail sorting cabinet with O-shaped aperture and a folded envelope tray. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-3cd494e3-fb14-4d24-95db-e771ddef631d.png"
+    },
+    {
+      "key": "google-slides",
+      "asset": "resources/styles/builtin/assets/applets/google-slides/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Google Slides. Concept: golden yellow slide carousel projector with folded-page silhouette and translucent presentation slides. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-54fa8176-8e72-47b3-9fb6-7e5a05fa7834.png"
+    },
+    {
+      "key": "todoist",
+      "asset": "resources/styles/builtin/assets/applets/todoist/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Todoist. Concept: coral enamel task sorter with three white checkmark slots and paper task cards. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-2fa6d475-f022-4757-b9a0-7894e6662434.png"
+    },
+    {
+      "key": "things",
+      "asset": "resources/styles/builtin/assets/applets/things/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Things. Concept: blue glazed ceramic checkmark task basket with neatly stacked cream cards. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-63b719fa-dcdc-4b73-bd8d-c8e96f304eb5.png"
+    },
+    {
+      "key": "apple-podcasts",
+      "asset": "resources/styles/builtin/assets/applets/apple-podcasts/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Apple Podcasts. Concept: lavender ceramic microphone shaped like concentric broadcast rings, fabric speaker and brass tuning dial. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-45b69fa9-e639-4d4f-a5ae-9715b84ab366.png"
+    },
+    {
+      "key": "google-photos",
+      "asset": "resources/styles/builtin/assets/applets/google-photos/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Google Photos. Concept: four pastel pinwheel petals in frosted glass framing a small rotating photo viewer. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-649492e3-f1e7-4b52-86d7-0e20e0577427.png"
+    },
+    {
+      "key": "apple-photos",
+      "asset": "resources/styles/builtin/assets/applets/apple-photos/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Photos. Concept: soft multicolor flower-shaped glass slide viewer on an ivory ceramic photo archive base. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-e4a8d978-a744-40c0-a922-68c6e7e414fd.png"
+    },
+    {
+      "key": "pages",
+      "asset": "resources/styles/builtin/assets/applets/pages/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Pages. Concept: orange enamel manuscript press with a white fountain pen arm and paper stack. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-1ba55057-5b89-4633-b724-2d9cdaaea11f.png"
+    },
+    {
+      "key": "numbers",
+      "asset": "resources/styles/builtin/assets/applets/numbers/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Numbers. Concept: green glass bar-chart instrument with metal ledger rollers and small ivory keys. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-3e853883-e5d5-414b-b6e1-cd80e75ba73c.png"
+    },
+    {
+      "key": "keynote",
+      "asset": "resources/styles/builtin/assets/applets/keynote/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Keynote. Concept: blue enamel presentation lectern with small ivory slide display and brass pointer. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-07cd44af-7581-44fa-8085-dc3d2db8ac11.png"
+    },
+    {
+      "key": "messages",
+      "asset": "resources/styles/builtin/assets/applets/messages/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Messages. Concept: green ceramic speech-bubble intercom with two ivory message cards and tiny brass bell. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-418875e5-41f7-44d2-8ebc-1346fa5a4d51.png"
+    },
+    {
+      "key": "facetime",
+      "asset": "resources/styles/builtin/assets/applets/facetime/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for FaceTime. Concept: green enamel video call camera with white ceramic lens housing and soft fabric microphone. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-842bb1cf-a0cf-4d50-ad70-7551922cc4cd.png"
+    },
+    {
+      "key": "safari",
+      "asset": "resources/styles/builtin/assets/applets/safari/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Safari. Concept: blue glass compass navigation instrument with red needle in silver ring and ceramic base. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-e3e92ace-460d-4d3c-ba6b-35e936466027.png"
+    },
+    {
+      "key": "chrome",
+      "asset": "resources/styles/builtin/assets/applets/chrome/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Chrome. Concept: red yellow green enamel navigation wheel with blue glass central globe mounted on metal stand. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-d7cacc00-8803-4998-83d7-85359267fee8.png"
+    },
+    {
+      "key": "firefox",
+      "asset": "resources/styles/builtin/assets/applets/firefox/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Firefox. Concept: orange ceramic fox-tail crescent curled around purple glass navigation globe on a small plinth. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-6bc09729-6145-4afd-8138-5120791426b8.png"
+    },
+    {
+      "key": "arc",
+      "asset": "resources/styles/builtin/assets/applets/arc/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Arc. Concept: pastel rose blue arched enamel browsing portal with a cream page tray. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-eb5701fd-7eac-469c-9687-7d88e124e788.png"
+    },
+    {
+      "key": "pinterest",
+      "asset": "resources/styles/builtin/assets/applets/pinterest/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Pinterest. Concept: coral enamel inspiration pinwheel with P-shaped pin handle and small textile swatch cards. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-c5a73d87-b7b0-4b9b-81f9-9549f92b3a5f.png"
+    },
+    {
+      "key": "facebook",
+      "asset": "resources/styles/builtin/assets/applets/facebook/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Facebook. Concept: blue ceramic community message station with white f-shaped card divider and little conversation slips. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-4aa17efc-15b2-43c5-8157-ddaaca274c36.png"
+    },
+    {
+      "key": "threads",
+      "asset": "resources/styles/builtin/assets/applets/threads/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Threads. Concept: ivory and charcoal thread spool conversation device, looped at-sign wire and paper message ribbon. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-5ccca428-4c6d-495f-84ef-3d43eb6bc6f5.png"
+    },
+    {
+      "key": "photoshop",
+      "asset": "resources/styles/builtin/assets/applets/photoshop/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Photoshop. Concept: deep blue enamel photo editing lightbox with glass lens, translucent layers and subtle Ps mark. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-aa8a4567-1d00-41cd-a2fe-782ff4f6704a.png"
+    },
+    {
+      "key": "illustrator",
+      "asset": "resources/styles/builtin/assets/applets/illustrator/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Illustrator. Concept: amber metal precision vector drawing compass and pen nib on a cream ceramic drafting base with Ai emblem. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-49a5bca6-8c85-458c-a52a-14ad96eba66f.png"
+    },
+    {
+      "key": "lightroom",
+      "asset": "resources/styles/builtin/assets/applets/lightroom/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Lightroom. Concept: blue glass photographic developing lantern with photo clips and small Lr enamel plaque. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-38ae787e-3863-4430-96f6-e944faa6529f.png"
+    },
+    {
+      "key": "capcut",
+      "asset": "resources/styles/builtin/assets/applets/capcut/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for CapCut. Concept: ivory enamel film editing machine with black crossed ribbon cutter and two small film reels. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-3874fa17-81f3-424b-8564-e90a3cfd4fb6.png"
+    },
+    {
+      "key": "uber",
+      "asset": "resources/styles/builtin/assets/applets/uber/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Uber. Concept: charcoal and ivory miniature ride pickup meter with a tiny car-shaped cabin and route ribbon. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-4d74978a-215a-43dd-9120-cb435dba1748.png"
+    },
+    {
+      "key": "uber-eats",
+      "asset": "resources/styles/builtin/assets/applets/uber-eats/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Uber Eats. Concept: sage insulated food delivery carrier with ivory cloche lid and receipt dispenser. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-2472cfe6-13c3-4078-ba17-1290565367b7.png"
+    },
+    {
+      "key": "booking",
+      "asset": "resources/styles/builtin/assets/applets/booking/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Booking.com. Concept: blue enamel hotel reservation key rack with small brass keys and B-shaped reception bell. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-90c36090-97be-4a28-a902-04c37f233fb9.png"
+    },
+    {
+      "key": "feishu",
+      "asset": "resources/styles/builtin/assets/applets/feishu/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for 飞书. Concept: blue turquoise wing-shaped ceramic team message hub with shared document trays. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-adf16368-2451-464d-9688-116b7b989fe9.png"
+    },
+    {
+      "key": "dingtalk",
+      "asset": "resources/styles/builtin/assets/applets/dingtalk/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for 钉钉. Concept: blue enamel wing-shaped team intercom with ivory lightning motif and small task cards. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-ed566155-f53d-4db5-a0a4-55fae1694200.png"
+    },
+    {
+      "key": "tencent-meeting",
+      "asset": "resources/styles/builtin/assets/applets/tencent-meeting/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for 腾讯会议. Concept: blue glass video meeting console with twin camera panels and silver microphone. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-20a87356-dee6-4b0a-abb5-96d23fa70d5a.png"
+    },
+    {
+      "key": "bilibili",
+      "asset": "resources/styles/builtin/assets/applets/bilibili/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for 哔哩哔哩. Concept: pastel blue ceramic smiling television with twin antennae, pink dial and compact fabric speaker. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-86b2c53a-2999-46b1-ae51-3a222a61b957.png"
+    },
+    {
+      "key": "xiaohongshu",
+      "asset": "resources/styles/builtin/assets/applets/xiaohongshu/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for 小红书. Concept: coral enamel lifestyle scrapbook camera with cream picture cards and small red book. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-03140a38-ca3b-472e-be1e-a399c7f62b08.png"
+    },
+    {
+      "key": "baidu-netdisk",
+      "asset": "resources/styles/builtin/assets/applets/baidu-netdisk/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for 百度网盘. Concept: blue red interlocking cloud-shaped enamel storage unit with cream file drawers. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-ab6db8d2-2cb0-433d-bff7-a3d4c1d4d262.png"
+    },
+    {
+      "key": "linear",
+      "asset": "resources/styles/builtin/assets/applets/linear/peek.png",
+      "prompt": "Production game asset: ONE standalone interactive 2.5D device for Linear. Concept: violet metal issue-track conveyor with circular diagonal-striped wheel and small ticket cards. Soft hand-painted dimensional miniature for Worldlet, fixed elevated three-quarter orthographic view, muted village-compatible palette, warm diffuse upper-left lighting, refined cozy materials, readable silhouette at small scale. Integrate application identity into functional device; no wooden furniture, no generic logo pedestal. Ceramic, enamel, glass, fabric, brass as described. Entire object centered with 10 percent clear margin; 1024 square PNG with real transparent alpha background, no ground plane, no cast shadow on background, no scenery, no extra objects, no text labels.",
+      "original": "~/.codex/generated_images/01a0cf78-6474-78e0-977b-b4bb1cf82087/exec-5ba96dc5-0774-45d7-b42c-792189750a92.png"
+    }
+  ]
+}

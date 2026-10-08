@@ -1,0 +1,2161 @@
+{
+ "id": "kelvin-v3",
+ "language": "en",
+ "fictional": true,
+ "attentionItems": [
+  1,
+  3,
+  4,
+  6,
+  7,
+  24,
+  37
+ ],
+ "name": "Kelvin Ren",
+ "profilePageId": "sample-profile",
+ "description": "An entirely fictional week in the life of Kelvin Ren, founder of a three-person Shanghai studio building Worldlet. Authored by hand for demos and checks. No real mailbox, repository, bank account, customer or person is represented; email addresses use example.com.",
+ "persona": {
+  "name": "Kelvin Ren",
+  "pronouns": "he/him",
+  "age": 34,
+  "city": "Shanghai",
+  "timeZone": "Asia/Shanghai",
+  "role": "Founder of Clockless, building Worldlet for Mac",
+  "family": [
+   "Yiwen Su — partner",
+   "Mum & Dad — in Chengdu, visiting soon",
+   "Tofu — cat"
+  ],
+  "preferences": [
+   "Concise English replies",
+   "Amounts in USD",
+   "Show the tradeoff before asking for a decision",
+   "One main thing per day; evenings are for Yiwen and a run",
+   "Never book, pay or message anyone without an explicit request"
+  ],
+  "summary": "Kelvin is 34 and runs Clockless, a small studio in Shanghai building Worldlet, the Mac app with Fox. The next three weeks hold a release, an investor meeting, a designer hire, a talk in Tokyo and his parents' visit."
+ },
+ "dates": {
+  "today": 0,
+  "yesterday": -1,
+  "tomorrow": 1,
+  "designerInterview": 1,
+  "boardCall": 2,
+  "investorMeeting": 3,
+  "dentist": 4,
+  "lakeTrip": 5,
+  "pilotReview": 6,
+  "lakeBack": 7,
+  "yiwenBirthday": 8,
+  "launch": 9,
+  "rentDue": 10,
+  "designerDecision": 4,
+  "fanRepair": 3,
+  "weatherCheck": 4,
+  "departure": 12,
+  "talkDay": 13,
+  "kyotoDay": 15,
+  "returnDate": 18,
+  "parentsArrive": 21,
+  "leaseDecision": 26,
+  "parentsLeave": 28,
+  "leaseRenewal": 40,
+  "tennisSaturday": 0,
+  "lastWeek": -7
+ },
+ "matters": [
+  {
+   "key": "home",
+   "title": "Flat & everyday",
+   "region": "home",
+   "shape": "house",
+   "moduleKey": "home",
+   "description": "The lease, the plants, the cat and the small repairs",
+   "theme": "home"
+  },
+  {
+   "key": "family",
+   "title": "Family & friends",
+   "region": "home",
+   "shape": "people",
+   "moduleKey": "household",
+   "description": "Yiwen, the parents, and the people who keep showing up",
+   "theme": "home"
+  },
+  {
+   "key": "journal",
+   "title": "Journal",
+   "region": "home",
+   "shape": "journal",
+   "moduleKey": "journal",
+   "description": "A few lines a day, kept",
+   "theme": "calendar"
+  },
+  {
+   "key": "visit",
+   "title": "Parents' visit",
+   "region": "home",
+   "shape": "project",
+   "moduleKey": "household",
+   "description": "Three weeks to get the flat and the days ready",
+   "theme": "family"
+  },
+  {
+   "key": "release",
+   "title": "Worldlet 0.36",
+   "region": "work",
+   "shape": "code",
+   "moduleKey": "code",
+   "description": "Stages, pilot feedback, one blocker and the builds",
+   "theme": "factory"
+  },
+  {
+   "key": "seed",
+   "title": "Seed round",
+   "region": "work",
+   "shape": "project",
+   "moduleKey": "projects",
+   "description": "The deck, the numbers and who to call next",
+   "theme": "studio"
+  },
+  {
+   "key": "hiring",
+   "title": "Designer hire",
+   "region": "work",
+   "shape": "followup",
+   "moduleKey": "projects",
+   "description": "Two candidates and a decision by Friday",
+   "theme": "studio"
+  },
+  {
+   "key": "learning",
+   "title": "Reading & research",
+   "region": "work",
+   "shape": "book",
+   "moduleKey": "reading",
+   "description": "Notes from books, papers and talks",
+   "theme": "library"
+  },
+  {
+   "key": "writing",
+   "title": "Writing & talks",
+   "region": "work",
+   "shape": "research",
+   "moduleKey": "research",
+   "description": "The summit talk, a blog draft and a thread",
+   "theme": "vision"
+  },
+  {
+   "key": "runway",
+   "title": "Company finances",
+   "region": "money",
+   "shape": "budget",
+   "moduleKey": "budget",
+   "description": "Runway, pre-orders, invoices and payouts",
+   "theme": "finance"
+  },
+  {
+   "key": "personal",
+   "title": "Personal budget",
+   "region": "money",
+   "shape": "coins",
+   "moduleKey": "spending",
+   "description": "Rent, subscriptions, gifts and the trip",
+   "theme": "expense"
+  },
+  {
+   "key": "wellbeing",
+   "title": "Movement & sleep",
+   "region": "health",
+   "shape": "activity",
+   "moduleKey": "activity",
+   "description": "Runs, sleep and the small habits that hold",
+   "theme": "health"
+  },
+  {
+   "key": "japan",
+   "title": "Tokyo & Kyoto",
+   "region": "money",
+   "shape": "map",
+   "moduleKey": "trip",
+   "description": "Tokyo Dev Summit, then two quiet days",
+   "theme": "rocket"
+  },
+  {
+   "key": "camping",
+   "title": "Lake weekend",
+   "region": "money",
+   "shape": "camp",
+   "moduleKey": "trip",
+   "description": "A short escape with Dan and a tent",
+   "theme": "rocket"
+  },
+  {
+   "key": "memories",
+   "title": "Travel memories",
+   "region": "money",
+   "shape": "globe",
+   "moduleKey": "travel-journal",
+   "description": "Places kept, and the ones to return to",
+   "theme": "rocket"
+  },
+  {
+   "key": "watching",
+   "title": "Watching & listening",
+   "region": "people",
+   "shape": "sound",
+   "moduleKey": "research",
+   "description": "Talks, podcasts and the things saved for later",
+   "theme": "news"
+  },
+  {
+   "key": "community",
+   "title": "Pilot community",
+   "region": "library",
+   "shape": "gathering",
+   "moduleKey": "gatherings",
+   "description": "The Discord, the testers and what they are saying",
+   "theme": "cafe"
+  }
+ ],
+ "summaries": {
+  "family": "Parents arriving {{parentsArrive}} · Yiwen's birthday {{yiwenBirthday}}",
+  "finance": "Runway 14 months · $3,000 of payouts Friday",
+  "contacts": "Sam Okafor · Meeting {{investorMeeting}}",
+  "studio": "Seed deck v7 · Two designer candidates"
+ },
+ "tour": [
+  "sample-mail-sam",
+  "sample-release-plan",
+  "sample-hiring-compare",
+  "sample-japan-booking",
+  "sample-seed-deck",
+  "sample-journal-today"
+ ],
+ "decisions": [
+  {
+   "id": "sample-designer-choice",
+   "pageId": "sample-hiring-compare",
+   "title": "Designer hire",
+   "objective": "Ruth or Omar",
+   "label": "Choose the designer",
+   "choices": [
+    "Make Ruth an offer",
+    "Bring Omar in for a month"
+   ]
+  }
+ ],
+ "trip": {
+  "route": "sample-japan-map",
+  "calendar": "sample-japan-calendar",
+  "flight": "sample-japan-flight",
+  "stay": "sample-japan-booking",
+  "facts": {
+   "sample-japan-map": {
+    "summary": "Tokyo 3 nights → Kyoto 2 nights → Osaka 1 night",
+    "stops": [
+     "Tokyo",
+     "Kyoto",
+     "Osaka"
+    ]
+   },
+   "sample-japan-calendar": {
+    "departure": "{{departure}}",
+    "returnDate": "{{returnDate}}"
+   },
+   "sample-japan-flight": {
+    "status": "Flights · Confirmed",
+    "summary": "Out from Pudong · Back from Kansai · Sample"
+   },
+   "sample-japan-booking": {
+    "status": "Kyoto stay · Choose one",
+    "next": "Next: compare two stays",
+    "needsAction": true
+   }
+  }
+ },
+ "items": [
+  {
+   "provider": "google-calendar",
+   "kind": "task",
+   "title": "Tennis with Sam",
+   "context": "Saturday is clear. Court and invite are ready.",
+   "summary": "Sam is back, and a relaxed Saturday game fits your plans.\n\n- **Riverside Court 2** is available at **10 AM**, not yet booked.\n- The forecast is **sunny** and your activity plan has room.\n- **Review the plan**, then confirm the practice booking and invitation.",
+   "actionLabel": "Review tennis plan",
+   "noteId": "sample-tennis-plan",
+   "quote": "Sam is back, Saturday is sunny, and Court 2 is available.",
+   "evidence": [
+    {
+     "provider": "gmail",
+     "id": "sample-tennis-sam",
+     "quote": "Back from vacation! Free on Saturday {{tennisSaturday}} morning."
+    },
+    {
+     "provider": "weather",
+     "id": "sample-tennis-weather",
+     "quote": "Forecast: sunny, 22°C at 10 AM, light wind, 5% rain chance."
+    },
+    {
+     "provider": "strava",
+     "id": "sample-tennis-health",
+     "quote": "Two easy runs this week, no hard workout yesterday."
+    },
+    {
+     "provider": "google-maps",
+     "id": "sample-tennis-court",
+     "quote": "10:00–11:00: available"
+    }
+   ],
+   "priority": "high"
+  },
+  {
+   "provider": "gmail",
+   "kind": "task",
+   "title": "Approve Mia's invoice",
+   "context": "$2,400 for the onboarding illustrations, due Friday.",
+   "summary": "Invoice #14 arrived by mail. It matches the agreed rate and the last two frames are in the shared folder. Approving it here is local; the payout itself goes through PayPal on Friday.",
+   "noteId": "sample-mail-invoice",
+   "quote": "invoice #14 for the onboarding illustrations, $2,400, due Friday"
+  },
+  {
+   "provider": "gmail",
+   "kind": "update",
+   "title": "Talk slot confirmed",
+   "context": "Day two, 14:30, Hall B. Slides due the night before.",
+   "summary": "Your Tokyo Dev Summit talk is confirmed.\n\n- **Day two, 14:30 · Hall B**: 25 minutes plus questions.\n- The organizers **cover your flights**.\n- Send your **slides the night before**.",
+   "actionLabel": "Prepare talk slides",
+   "noteId": "sample-mail-summit",
+   "quote": "confirmed for day two at 14:30 in Hall B"
+  },
+  {
+   "provider": "gmail",
+   "kind": "update",
+   "title": "Pilot newsletter drafted",
+   "context": "Ready to send Friday after office hours.",
+   "summary": "Pilot newsletter #6 is drafted for Friday.\n\n- It covers **tester findings, resulting changes and the 0.36 release**.\n- Review the **thank-you list** at the end.\n- Send **after Friday office hours**.",
+   "actionLabel": "Review newsletter",
+   "noteId": "sample-writing-newsletter",
+   "quote": "Send Friday after office hours."
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Dinner with Leo",
+   "context": "Leave at six. Bring the spare key for the cat-sitting week.",
+   "summary": "Dinner with Leo tonight. He is taking Tofu for the Tokyo week, so bring the spare key and the feeding notes.",
+   "noteId": "sample-journal-today",
+   "quote": "leave at six for dinner with Leo",
+   "start": "{{today}}T19:00:00",
+   "end": "{{today}}T20:30:00"
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Interview: Ruth Ma",
+   "context": "With Mia. Ask what she last removed from a design.",
+   "summary": "Ruth Ma is interviewing for the designer role with you and Mia.\n\n- Ask about **the last thing she removed from a design**.\n- Follow up on **what happened afterward**.",
+   "actionLabel": "Prepare interview",
+   "noteId": "sample-hiring-ruth",
+   "quote": "Interview on {{designerInterview}} at 14:00 with Kelvin and Mia.",
+   "start": "{{designerInterview}}T14:00:00",
+   "end": "{{designerInterview}}T15:00:00"
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Northwind meeting",
+   "context": "At their office with Jay. Numbers go out the night before.",
+   "summary": "You and Jay are meeting Sam Okafor at Northwind Ventures.\n\n- Bring **Jay** to the seed meeting.\n- Send the **four answers the night before**.\n- Use the meeting for **discussion**, rather than reading the answers aloud.",
+   "actionLabel": "Prepare four answers",
+   "noteId": "sample-seed-northwind",
+   "quote": "meet at ten at their office, bring Jay",
+   "start": "{{investorMeeting}}T10:00:00",
+   "end": "{{investorMeeting}}T11:00:00"
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Dentist",
+   "context": "Dr. Wang, Huaihai Road. Bring the insurance card.",
+   "summary": "Cleaning and the crown check with Dr. Wang. Thirty minutes, then straight to the studio.",
+   "noteId": "sample-health-dentist",
+   "quote": "Bring the insurance card.",
+   "start": "{{dentist}}T09:30:00",
+   "end": "{{dentist}}T10:00:00"
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Pilot review",
+   "context": "Go/no-go for 0.36 with Jay and Wen.",
+   "summary": "The pilot review decides whether 0.36 ships on {{launch}} as planned. If the stage-exit crash is not closed, it ships without the Reminders board rather than slipping the date.",
+   "noteId": "sample-release-plan",
+   "quote": "Go/no-go on {{pilotReview}} at the pilot review.",
+   "start": "{{pilotReview}}T16:00:00",
+   "end": "{{pilotReview}}T17:00:00"
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Yiwen's birthday",
+   "context": "Dinner at Osteria Lin at seven thirty. Not a surprise.",
+   "summary": "Yiwen's birthday. A small dinner at Osteria Lin, the corner table, her sister on video at the end. She has asked twice for it not to be a surprise.",
+   "noteId": "sample-family-birthday",
+   "quote": "Not a surprise.",
+   "start": "{{yiwenBirthday}}",
+   "allDay": true
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Office hours",
+   "context": "Thirty minutes on Discord voice, whoever comes.",
+   "summary": "Friday office hours with the pilots on Discord voice. This week: show the crash fix, ask about the tick sound, and thank Tester 4 in person.",
+   "noteId": "sample-community-office",
+   "quote": "Thirty minutes on Discord voice.",
+   "start": "{{tomorrow}}T16:00:00",
+   "end": "{{tomorrow}}T16:30:00"
+  },
+  {
+   "provider": "google-calendar",
+   "kind": "event",
+   "title": "Flight to Tokyo",
+   "context": "Pudong to Haneda. Leo has Tofu and the key.",
+   "summary": "The flight out for the Tokyo Dev Summit, 09:40 from Pudong to Haneda. Leo has Tofu for the week; the slides are due the night before the talk.",
+   "noteId": "sample-japan-flight",
+   "quote": "09:40 from Pudong to Haneda",
+   "start": "{{departure}}T09:40:00",
+   "end": "{{departure}}T13:30:00"
+  },
+  {
+   "provider": "apple-notes",
+   "kind": "update",
+   "title": "Talk outline locked",
+   "context": "Structure set; the demo still needs an offline fallback.",
+   "summary": "Outline v2 of the summit talk is settled: six parts in twenty-five minutes. The open piece is the demo, which needs a path that does not depend on the network.",
+   "noteId": "sample-writing-talk",
+   "quote": "the demo needs a fallback that does not need the network"
+  },
+  {
+   "provider": "apple-notes",
+   "kind": "update",
+   "title": "Packing list started",
+   "context": "Four of eleven packed; the printed photo is missing.",
+   "summary": "The Tokyo packing list has four of eleven ticked. Still missing: the printed Kyoto photo for Hana, the clicker, the rain jacket and the spare key for Leo.",
+   "noteId": "sample-japan-packing",
+   "quote": "The Kyoto photo, printed"
+  },
+  {
+   "provider": "apple-notes",
+   "kind": "update",
+   "title": "Journal written",
+   "context": "Three things today, and the thing you keep circling.",
+   "summary": "This morning's journal: a short run, three things for the day, and the demo fallback that keeps coming back.",
+   "noteId": "sample-journal-today",
+   "quote": "Three things today"
+  },
+  {
+   "provider": "apple-reminders",
+   "kind": "task",
+   "title": "Book the Kyoto stay",
+   "context": "Garden House or Station House. Decide this week.",
+   "summary": "Kyoto's two nights are still open. Garden House is quieter and $80 more; Station House is steps from the trains. Both cancel free until three days before, so deciding this week costs nothing.",
+   "noteId": "sample-japan-booking",
+   "quote": "Both cancel free until three days before."
+  },
+  {
+   "provider": "apple-reminders",
+   "kind": "task",
+   "title": "Order Tofu's food",
+   "context": "The salmon kibble runs out Saturday.",
+   "summary": "Tofu's current bag of salmon kibble runs out Saturday, and Leo takes over feeding in twelve days. One bag lasts five weeks.",
+   "noteId": "sample-home-tofu",
+   "quote": "The current bag runs out Saturday."
+  },
+  {
+   "provider": "apple-reminders",
+   "kind": "task",
+   "title": "Send Ada the deck",
+   "context": "She asked for v7 after the call; it is ready.",
+   "summary": "Ada Park asked for the updated deck after the call. Version 7 is done; send it, and ask Wen for two pilots willing to talk to her.",
+   "noteId": "sample-seed-followups",
+   "quote": "Send Ada the updated deck."
+  },
+  {
+   "provider": "apple-reminders",
+   "kind": "task",
+   "title": "Water the fig",
+   "context": "Thursday. It droops when it is missed two days running.",
+   "summary": "The fiddle-leaf fig by the window is watered on Thursdays and turned a quarter each week. Leo waters twice during the Tokyo trip.",
+   "noteId": "sample-home-plants",
+   "quote": "It droops when it is missed two days running."
+  },
+  {
+   "provider": "apple-reminders",
+   "kind": "task",
+   "title": "Fix the bathroom fan",
+   "context": "The building office can send someone {{day:fanRepair}}.",
+   "summary": "The bathroom fan rattles and Mum and Dad arrive on {{parentsArrive}}. The building office offered {{day:fanRepair}}; the balcony door is the other repair before the visit.",
+   "noteId": "sample-home-fix",
+   "quote": "someone can come {{day:fanRepair}}"
+  },
+  {
+   "provider": "github",
+   "kind": "task",
+   "title": "Review PR 212",
+   "context": "Jay's letters on an arc; the exit tween ties to issue 208.",
+   "summary": "PR #212 puts the Mail letters on an arc. Two review items are open: the exit has to cancel the animation, which is the same fault as the stage-exit crash, and the arc must stay legible with eight letters.",
+   "noteId": "sample-release-pr212",
+   "quote": "read it properly, not on the phone",
+   "priority": "high"
+  },
+  {
+   "provider": "github",
+   "kind": "update",
+   "title": "PR 215 merged",
+   "context": "The Calendar track landed after two rounds.",
+   "summary": "The Calendar track merged: the next seven days on a length of track, with what is coming standing on top as the thing it is. One question is open about a day with six events.",
+   "noteId": "sample-release-pr215",
+   "quote": "Merged {{yesterday}} after two rounds."
+  },
+  {
+   "provider": "github",
+   "kind": "task",
+   "title": "Triage pilot bugs",
+   "context": "Five open from the pilot; two are the same crash as 208.",
+   "summary": "Wen filed five issues from Tuesday's pilot session. Two are high: the stage-exit crash, which is GitHub #208, and the Calendar track showing yesterday's event.",
+   "noteId": "sample-release-triage",
+   "quote": "WL-141 is the same crash as GitHub #208."
+  },
+  {
+   "provider": "stripe",
+   "kind": "update",
+   "title": "38 pre-orders",
+   "context": "$1,900 collected; two refunds asked, both expected Windows.",
+   "summary": "Pre-orders reached 38 in three weeks.\n\n- **38 orders at $50** each.\n- **Two refunds** this week came from people expecting Windows support.\n- Clarify **platform availability before the purchase button**.",
+   "actionLabel": "Review platform copy",
+   "noteId": "sample-runway-preorders",
+   "quote": "Two refunds requested this week"
+  },
+  {
+   "provider": "plaid",
+   "kind": "update",
+   "title": "Runway at 14 months",
+   "context": "$198,800 after payroll and the Tokyo flights.",
+   "summary": "The company account holds $198,800 after this month's payroll and the Tokyo flights. At $14,200 a month that is fourteen months; the seed round would reset the line.",
+   "noteId": "sample-runway",
+   "quote": "$198,800"
+  },
+  {
+   "provider": "paypal",
+   "kind": "task",
+   "title": "Pay Friday's payouts",
+   "context": "Mia $2,400 and Wen $600, once the invoice is approved.",
+   "summary": "Two contractor payouts go out Friday through PayPal: Mia's invoice #14 and Wen's September coordination. Approve Mia's invoice first; it arrived by mail.",
+   "noteId": "sample-runway-payouts",
+   "quote": "Approve Mia's invoice first"
+  },
+  {
+   "provider": "strava",
+   "kind": "update",
+   "title": "Longest run this year",
+   "context": "12.4 km along the river at an easy pace.",
+   "summary": "Saturday's run was the longest of the year, 12.4 km on the river path at an easy pace. Three of four runs done this week.",
+   "noteId": "sample-health-runs",
+   "quote": "the longest this year, easy pace"
+  },
+  {
+   "provider": "oura",
+   "kind": "update",
+   "title": "Sleep dipped to 6h",
+   "context": "Three short nights before demos; readiness back to 78.",
+   "summary": "The ring shows an average of six hours over the last seven nights, with three short ones before demos. Readiness fell to 61 and recovered to 78 after the long run.",
+   "noteId": "sample-health-sleep",
+   "quote": "Three nights under six hours"
+  },
+  {
+   "provider": "airbnb",
+   "kind": "update",
+   "title": "Tokyo stay confirmed",
+   "context": "Three nights near the venue at $165 a night.",
+   "summary": "The Tokyo stay is confirmed: three nights near the summit venue at $165 a night. Kyoto is still a choice between two places; Osaka is an estimate.",
+   "noteId": "sample-japan-booking",
+   "quote": "three nights near the summit venue at $165 a night"
+  },
+  {
+   "provider": "tripit",
+   "kind": "update",
+   "title": "Flights in one plan",
+   "context": "Out on {{departure}}, back on {{returnDate}}; both covered.",
+   "summary": "Both flights are in the plan: out on {{departure}} from Pudong, back on {{returnDate}} from Kansai. The summit covers both.",
+   "noteId": "sample-japan-flight",
+   "quote": "The summit covers both."
+  },
+  {
+   "provider": "youtube",
+   "kind": "update",
+   "title": "Last year's talk online",
+   "context": "The organisers uploaded it; watch once for pacing.",
+   "summary": "Last year's summit talk is online. Worth one watch for the pacing before this year's; the content has moved on twice since.",
+   "noteId": "sample-watch-summit",
+   "quote": "Watch it once for the pacing"
+  },
+  {
+   "provider": "discord",
+   "kind": "update",
+   "title": "3 new pilot reports",
+   "context": "Two about the Calendar track, one about eight letters.",
+   "summary": "Three reports in the pilot server this week: two about the Calendar track showing yesterday's event, one about the Mail letters overlapping at eight. Wen files them Wednesday.",
+   "noteId": "sample-community-discord",
+   "quote": "three new reports"
+  },
+  {
+   "provider": "x",
+   "kind": "task",
+   "title": "Answer the thread",
+   "context": "Three good questions under the stages thread; 1.2k views.",
+   "summary": "The thread on Applet stages has three questions worth answering: fifty letters, whether ticking a reminder touches the real app, and why not VR.",
+   "noteId": "sample-writing-thread",
+   "quote": "three good questions"
+  },
+  {
+   "provider": "codex",
+   "kind": "update",
+   "title": "Stage build halved",
+   "context": "40 ms to 19 ms; review the disposal path before merging.",
+   "summary": "Codex moved the text-plane generation off the first frame and cached the wrapped paragraphs. Building a stage went from 40 ms to 19 ms; the disposal path needs a look before merging.",
+   "noteId": "sample-release-codex",
+   "quote": "40 ms to 19 ms"
+  },
+  {
+   "provider": "claude-code",
+   "kind": "update",
+   "title": "Panel fit session saved",
+   "context": "Rows drop from the longest group first; check added.",
+   "summary": "The Attention Center no longer drops rows silently: whole rows go from the longest group first, and a check measures it. Two files changed; the resume command is saved.",
+   "noteId": "sample-release-claude",
+   "quote": "whole rows are dropped from the longest group first"
+  },
+  {
+   "provider": "notion",
+   "kind": "update",
+   "title": "Deck sent to Ada",
+   "context": "v8 goes to Sam after his questions are answered.",
+   "summary": "Seed deck v7 went to Ada Park. Sam gets v8 once the four questions are answered; the ask is $1.2M for two engineers, a designer and a year.",
+   "noteId": "sample-seed-deck",
+   "quote": "Sent to Ada on {{yesterday}}."
+  },
+  {
+   "provider": "gmail",
+   "kind": "task",
+   "title": "Plan a museum afternoon",
+   "context": "Pick a trip within the $120 budget.",
+   "summary": "Plan a museum afternoon for two adults next Saturday.\n\n- Compare **two museums** using official hours and prices.\n- Keep admission within **$120** and prefer public transit.\n- Save a **sourced plan** before making any booking.",
+   "actionLabel": "Compare museums",
+   "noteId": "sample-museum-plan",
+   "quote": "Could you compare the Exploratorium and California Academy of Sciences for two adults next Saturday afternoon? We have a $120 admission budget and prefer public transit from San Francisco Ferry Building."
+  }
+ ],
+ "notes": [
+  {
+   "id": "sample-profile",
+   "room": "family",
+   "matter": "family",
+   "kind": "people",
+   "title": "Kelvin Ren · Personal profile",
+   "status": "Meet Kelvin",
+   "applet": "notion",
+   "markdown": "# Kelvin Ren\nKelvin is 34, uses he/him pronouns, and lives in Shanghai with his partner Yiwen and a cat called Tofu. He runs Clockless, a three-person studio building Worldlet, the Mac app where Fox lives.\n\n## Home\nPartner: Yiwen Su, a product manager at a hospital-scheduling company. Parents: in Chengdu, arriving {{parentsArrive}} for a week. Cat: Tofu, eight, opinionated about breakfast.\n\n## What matters now\n- Ship Worldlet 0.36 on {{launch}} with the Applet stages in it and the stage-exit crash gone.\n- Walk into the Northwind meeting on {{investorMeeting}} with the numbers Sam asked for.\n- Choose between Ruth and Omar for the designer role by {{day:designerDecision}}.\n- Give the Tokyo Dev Summit talk on {{talkDay}}, then rest two days in Kyoto.\n- Have the flat ready before Mum and Dad arrive.\n\n## Preferences\nShort answers, amounts in USD, the tradeoff before the decision. One main thing per day. Evenings belong to Yiwen and a run by the river. Never book, pay or message anyone without being asked.\n\nThis person, his company, his contacts and every record in this world are fictional. Email addresses use example.com.\n\nRelated: [[How I like to work with Fox]] · [[Yiwen Su · Family rhythms]] · [[Worldlet 0.36 · Release plan]]"
+  },
+  {
+   "id": "sample-home-fox",
+   "room": "family",
+   "matter": "family",
+   "kind": "book",
+   "title": "How I like to work with Fox",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## Working with Fox\nSay what is waiting, not everything that exists. Group by the thing I am doing, not by the app it came from.\n\n- Mornings: what is on today and the one thing that would hurt to miss.\n- Before a meeting: the people, the last thing we said to each other, the number they asked for.\n- Evenings: nothing, unless a flight or a person is involved.\n\nWhen I ask for a decision, show me the two options and the difference between them, then wait. Never send a message, book a room or move money on your own.\n\nRelated: [[Kelvin Ren · Personal profile]]"
+  },
+  {
+   "id": "sample-home-lease",
+   "room": "home",
+   "matter": "home",
+   "kind": "document",
+   "title": "Lease renewal",
+   "status": "Decide by {{leaseDecision}}",
+   "applet": "notion",
+   "markdown": "## The offer\nThe landlord, Mr. Gao, proposes renewing from {{leaseRenewal}} at $1,560 a month, up 4% from $1,500. A twelve-month term, deposit unchanged. He wants an answer by {{leaseDecision}}.\n\n## Options\n| Option | Monthly | Notes |\n| --- | --- | --- |\n| Renew as offered | $1,560 | No move, no lost week |\n| Counter at 2% | $1,530 | He accepted 2% two years ago |\n| Look elsewhere | $1,400–1,700 | A move in the release month is a bad idea |\n\nYiwen leans toward countering. The flat is fifteen minutes from the studio and the river path, which is worth more than $30.\n\nRelated: [[Lease renewal offer]] · [[Personal budget · This month]]"
+  },
+  {
+   "id": "sample-home-plants",
+   "room": "home",
+   "matter": "home",
+   "kind": "plant",
+   "title": "Plant care",
+   "status": "Fig needs water Thursday",
+   "applet": "apple-notes",
+   "markdown": "## The plants\n- Fiddle-leaf fig by the window: water Thursdays, turn a quarter every week. It droops when it is missed two days running.\n- Monstera: every ten days, wipe the leaves.\n- Basil, mint and chilli on the balcony: every other day in this heat.\n\n## Before Tokyo\nAsk Leo to water on {{departure}} and {{kyotoDay}}; the fig can wait for the return."
+  },
+  {
+   "id": "sample-home-tofu",
+   "room": "home",
+   "matter": "home",
+   "kind": "book",
+   "title": "Tofu · Cat care",
+   "status": "Food runs out Saturday",
+   "applet": "apple-notes",
+   "markdown": "## Tofu\nEight years old, grey, six kilos. Breakfast at seven, dinner at seven, complains at both.\n\n- Food: the salmon kibble, one bag lasts five weeks. The current bag runs out Saturday.\n- Vet: annual check done in spring; next due next spring.\n- Litter: change fully every ten days.\n\n## While away\nLeo cat-sits from {{departure}} to {{returnDate}}, as he did last year. Leave the spare key and the feeding notes on the counter.\n\nRelated: [[Leo Chen · Running partner]]"
+  },
+  {
+   "id": "sample-home-groceries",
+   "room": "home",
+   "matter": "home",
+   "kind": "task",
+   "title": "Weekly groceries",
+   "status": "6 items",
+   "applet": "apple-reminders",
+   "markdown": "## This week\n- [x] Rice, eggs, tofu\n- [x] Oat milk\n- [ ] Salmon kibble for Tofu\n- [ ] Coffee beans (the Yunnan ones from the market)\n- [ ] Ginger, spring onions, chilli\n- [ ] Peaches, if they are good\n\nYiwen shops on Wednesdays; Kelvin on Saturdays after the run."
+  },
+  {
+   "id": "sample-home-fix",
+   "room": "home",
+   "matter": "home",
+   "kind": "task",
+   "title": "Things to fix in the flat",
+   "status": "2 before the visit",
+   "applet": "apple-reminders",
+   "markdown": "## Before Mum and Dad arrive\n- [ ] Bathroom fan rattles. The building office said someone can come {{day:fanRepair}}.\n- [ ] Balcony door sticks; plane the bottom edge or call the carpenter.\n- [x] Replace the hallway bulb.\n- [ ] Fold-out bed: check the frame and buy a mattress topper.\n\nRelated: [[Parents' visit · Plan]]"
+  },
+  {
+   "id": "sample-home-routine",
+   "room": "home",
+   "matter": "home",
+   "kind": "book",
+   "title": "House routine",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## The shape of the house week\nLaundry Sunday morning. Floors Wednesday evening while Yiwen shops. Bins on Tuesday and Friday nights. Plants Thursday.\n\nKelvin cooks on weekdays, Yiwen on weekends, and Thursday is a delivery night when there is a demo the next day.\n\nRelated: [[Dinner in · DoorDash]]"
+  },
+  {
+   "id": "sample-mail-lease",
+   "room": "home",
+   "matter": "home",
+   "kind": "mail",
+   "title": "Lease renewal offer",
+   "status": "+4% from {{leaseRenewal}} · Reply by {{leaseDecision}}",
+   "applet": "gmail",
+   "markdown": "## From: Gao Wenbin <landlord.gao@example.com>\nTo: Kelvin Ren <kelvin@example.com>\nSubject: Renewal from {{leaseRenewal}}\n\nDear Kelvin and Yiwen,\n\nI would like to offer a renewal from {{leaseRenewal}} for twelve months at $1,560 a month, a 4% increase. The deposit stays as it is. Please let me know by {{leaseDecision}}.\n\nBest regards,\nGao Wenbin\n\nRelated: [[Lease renewal]]"
+  },
+  {
+   "id": "sample-family-yiwen",
+   "room": "family",
+   "matter": "family",
+   "kind": "people",
+   "title": "Yiwen Su · Family rhythms",
+   "status": "Birthday {{yiwenBirthday}}",
+   "applet": "notion",
+   "markdown": "## Yiwen\nProduct manager at Mediflow, a hospital-scheduling company. Runs a launch of her own this month, so evenings are quieter than usual.\n\n- Dinner together at seven, phones on the shelf.\n- Saturday mornings are hers; Kelvin runs, she reads.\n- Birthday on {{yiwenBirthday}}: a small dinner, not a surprise. She has said so twice.\n\n## Right now\nShe wants the lease countered, the parents' visit planned early, and the Tokyo trip to include two days that are actually rest.\n\nRelated: [[Yiwen's birthday plan]] · [[Lease renewal]]"
+  },
+  {
+   "id": "sample-family-parents",
+   "room": "family",
+   "matter": "family",
+   "kind": "people",
+   "title": "Mum & Dad",
+   "status": "Arrive {{parentsArrive}}",
+   "applet": "notion",
+   "markdown": "## Ren Guoping and Liu Mei\nIn Chengdu. Arriving {{parentsArrive}} on the afternoon train, leaving {{parentsLeave}}. First time seeing the new flat.\n\n- Dad's knee: fine on flat ground, no long stairs. Dad wants to see the studio.\n- Mum: will cook at least twice, wants the market and a garden. Does not like air conditioning at night.\n- Both: an early dinner, and a photo at the river.\n\nRelated: [[Parents' visit · Plan]] · [[What they like to eat]]"
+  },
+  {
+   "id": "sample-family-leo",
+   "room": "family",
+   "matter": "family",
+   "kind": "people",
+   "title": "Leo Chen · Running partner",
+   "status": "Tuesday run",
+   "applet": "notion",
+   "markdown": "## Leo\nArchitect, lives two streets over. Runs with Kelvin on Tuesday evenings and Saturday mornings along the river. Cat-sits Tofu when the Rens travel.\n\nLast conversation: he offered to take Tofu for the Tokyo week and asked whether the summit talk has a recording.\n\nNext: confirm the cat-sitting dates and bring the spare key on Tuesday.\n\nRelated: [[Tofu · Cat care]] · [[Runs this week]]"
+  },
+  {
+   "id": "sample-family-hana",
+   "room": "family",
+   "matter": "family",
+   "kind": "people",
+   "title": "Hana Sato · Tokyo",
+   "status": "Dinner in Tokyo, day 3",
+   "applet": "notion",
+   "markdown": "## Hana\nFriend from the 2019 exchange year, now a product designer at a Tokyo studio. She is coming to the summit talk and has booked a table for the evening of day three.\n\nShe asked for the Yunnan coffee beans and a copy of the old Kyoto photo.\n\nRelated: [[Evening with Hana]] · [[Kyoto · 2019]]"
+  },
+  {
+   "id": "sample-family-dan",
+   "room": "family",
+   "matter": "family",
+   "kind": "people",
+   "title": "Dan Wu · Lake weekend",
+   "status": "{{lakeTrip}} to {{lakeBack}}",
+   "applet": "notion",
+   "markdown": "## Dan\nUniversity friend, geologist, owns the tent. Proposes the lake for {{lakeTrip}} to {{lakeBack}}: drive up Friday after work, back Sunday afternoon.\n\nDan brings the tent and the stove; Kelvin brings the food and the coffee.\n\nRelated: [[Lake weekend · Plan]]"
+  },
+  {
+   "id": "sample-family-birthday",
+   "room": "family",
+   "matter": "family",
+   "kind": "task",
+   "title": "Yiwen's birthday plan",
+   "status": "3 things to do",
+   "applet": "apple-reminders",
+   "markdown": "## {{yiwenBirthday}}\n- [ ] Book the small table at Osteria Lin for seven thirty. Ask for the corner.\n- [ ] Gift: the linen jacket she looked at twice, or the pottery class in October.\n- [ ] Call her sister so she can join by video at the end.\n\nNot a surprise. She has said so twice.\n\nRelated: [[Yiwen Su · Family rhythms]] · [[Gifts · Birthday and Tokyo]]"
+  },
+  {
+   "id": "sample-journal-today",
+   "room": "calendar",
+   "matter": "journal",
+   "kind": "book",
+   "title": "Journal · Today",
+   "status": "Written this morning",
+   "applet": "apple-notes",
+   "markdown": "## {{today}}\nSlept short again. Ran anyway, four kilometres, slow. The river was flat and the light was good.\n\nThree things today: send Sam the numbers he asked for, read Jay's PR properly instead of skimming it, and leave at six for dinner with Leo.\n\nThe thing I keep circling: the demo needs a fallback that does not depend on the network."
+  },
+  {
+   "id": "sample-journal-yesterday",
+   "room": "calendar",
+   "matter": "journal",
+   "kind": "book",
+   "title": "Journal · Yesterday",
+   "status": "Ready to view",
+   "applet": "apple-notes",
+   "markdown": "## {{yesterday}}\nPilot session with Wen and four testers. Two of them found the Mail letters without being told what they were, which is the whole point. One could not get back out of the stage and hit the crash.\n\nYiwen's launch is next week too. We ate late and did not talk about work, which was the right call."
+  },
+  {
+   "id": "sample-journal-week",
+   "room": "calendar",
+   "matter": "journal",
+   "kind": "book",
+   "title": "Week in review",
+   "status": "Ready to view",
+   "applet": "apple-notes",
+   "markdown": "## Last week\nShipped the Calendar track. Lost a day to the stage-exit crash. Ran three times, slept badly twice. Sam's email arrived Friday and turned the weekend into a spreadsheet.\n\nKept: the Tuesday run with Leo, dinner at seven every day but one.\n\nDropped: the blog draft, again."
+  },
+  {
+   "id": "sample-journal-rhythm",
+   "room": "calendar",
+   "matter": "journal",
+   "kind": "calendar",
+   "title": "Weekly rhythm",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## The shape of a good week\n| Day | Morning | Afternoon | Evening |\n| --- | --- | --- | --- |\n| Mon | Plan, standup | Deep work | Dinner at seven |\n| Tue | Deep work | Reviews | Run with Leo |\n| Wed | Pilot session | Follow-ups | Floors, Yiwen shops |\n| Thu | Deep work | Demo prep | Delivery night |\n| Fri | Office hours | Writing | Early stop |\n| Sat | Run, market | Free | Free |\n| Sun | Laundry, read | Free | Plan the week |\n\nRelated: [[House routine]]"
+  },
+  {
+   "id": "sample-journal-gratitude",
+   "room": "calendar",
+   "matter": "journal",
+   "kind": "book",
+   "title": "Three good things",
+   "status": "Ready to view",
+   "applet": "apple-notes",
+   "markdown": "## Kept from the week\n1. A tester saying the letters felt like mail, not like a list.\n2. Yiwen laughing at Tofu falling off the sofa.\n3. The first cool evening of the season on the river path."
+  },
+  {
+   "id": "sample-visit-plan",
+   "room": "growth",
+   "matter": "visit",
+   "kind": "task",
+   "title": "Parents' visit · Plan",
+   "status": "{{parentsArrive}} · 4 things left",
+   "applet": "apple-reminders",
+   "markdown": "## Before {{parentsArrive}}\n- [x] Book their train tickets from Chengdu.\n- [ ] Mattress topper for the fold-out bed.\n- [ ] Fix the bathroom fan and the balcony door.\n- [ ] Stock the kitchen the way Mum likes it.\n- [ ] Plan two day trips that do not involve stairs.\n\n## While they are here\nDinner at six, not seven. Dad wants to see the studio on a weekday. Mum wants the market on Saturday morning.\n\nRelated: [[Mum & Dad]] · [[Two day trips]] · [[Things to fix in the flat]]"
+  },
+  {
+   "id": "sample-visit-days",
+   "room": "growth",
+   "matter": "visit",
+   "kind": "map",
+   "title": "Two day trips",
+   "status": "Ready to view",
+   "applet": "google-maps",
+   "markdown": "## Options\n- Suzhou gardens: an hour by train, flat paths, benches everywhere. Go on a weekday to avoid the crowds.\n- Zhujiajiao water town: forty minutes by car, mostly flat, bridges have steps.\n- The river park at sunset: no travel at all, and the photo Dad wants.\n\nChoose the gardens for Dad's knee; keep the water town if the weather is kind.\n\nRelated: [[Parents' visit · Plan]]"
+  },
+  {
+   "id": "sample-visit-food",
+   "room": "growth",
+   "matter": "visit",
+   "kind": "book",
+   "title": "What they like to eat",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## Mum\nTwice-cooked pork, mapo tofu made properly, a fish steamed whole. She will want to cook at least twice, so buy Sichuan peppercorn and doubanjiang before she arrives.\n\n## Dad\nDumplings, noodles for breakfast, a beer with dinner. Nothing too sweet.\n\n## Both\nAn early dinner, hot water on the table, fruit after."
+  },
+  {
+   "id": "sample-visit-knee",
+   "room": "growth",
+   "matter": "visit",
+   "kind": "document",
+   "title": "Dad's knee · Clinic options",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## If it flares\nDad had the knee looked at in Chengdu in spring: wear, not damage. Walking is fine; stairs and long standing are not.\n\nNearby: the community clinic on Fuxing Road does walk-ins until six. The hospital physiotherapy desk needs a booking, which Yiwen can arrange through work.\n\nBring: his prescription and the spring report."
+  },
+  {
+   "id": "sample-visit-budget",
+   "room": "growth",
+   "matter": "visit",
+   "kind": "coins",
+   "title": "Visit budget",
+   "status": "$900 planned",
+   "applet": "notion",
+   "markdown": "## The week\n| Item | Planned |\n| --- | --- |\n| Train tickets, both ways | $180 |\n| Day trips | $150 |\n| Meals out | $300 |\n| Mattress topper, kitchen | $120 |\n| Buffer | $150 |\n\nTotal planned: $900. Scenario numbers, not a bank balance.\n\nRelated: [[Personal budget · This month]]"
+  },
+  {
+   "id": "sample-release-plan",
+   "room": "project",
+   "matter": "release",
+   "kind": "task",
+   "title": "Worldlet 0.36 · Release plan",
+   "status": "Release {{launch}} · 1 blocker",
+   "applet": "notion",
+   "markdown": "## Ship on {{launch}}\n0.36 is the release where Home's four Applets become stages: Mail, Calendar, Notes and Reminders come forward as their own 3D set instead of opening a website.\n\n- [x] Mail letters on an arc (PR #212)\n- [x] Calendar track with the next seven days (PR #215)\n- [x] Notes on a line, Reminders on a board\n- [ ] Crash when leaving a stage (issue #208) — the blocker, Jay\n- [ ] Pilot round 2 feedback folded in\n- [ ] Release notes and the update feed\n\nGo/no-go on {{pilotReview}} at the pilot review. If #208 is not closed by then, ship on {{launch}} without the Reminders board rather than slip the date.\n\nRelated: [[Blocker: crash leaving a stage]] · [[Pilot round 2 · Feedback]] · [[Release notes draft]]"
+  },
+  {
+   "id": "sample-release-blocker",
+   "room": "support",
+   "matter": "release",
+   "kind": "ticket",
+   "title": "Blocker: crash leaving a stage",
+   "status": "#208 · Jay · In progress",
+   "applet": "github",
+   "markdown": "## Issue #208 · clockless/worldlet\nLeaving the Mail stage while a letter is still rising closes the app. Reproduces on three of four pilot Macs.\n\nSteps: open Mail, pick a letter, press Back before the sheet finishes rising.\n\nFindings so far: the stage is disposed while its animation still holds a reference to the renderer target. Jay has a fix that cancels the tween on exit; needs a test that drives the click on the canvas.\n\n- [x] Reproduced on the studio Mac\n- [x] Cause found\n- [ ] Fix reviewed\n- [ ] Test added\n\nRelated: [[Worldlet 0.36 · Release plan]] · [[PR #212 · Mail letters on an arc]]"
+  },
+  {
+   "id": "sample-release-pr212",
+   "room": "factory",
+   "matter": "release",
+   "kind": "monitor",
+   "title": "PR #212 · Mail letters on an arc",
+   "status": "Ready for review · 14 files",
+   "applet": "github",
+   "markdown": "## clockless/worldlet · PR #212\nAuthor: Jay Zhou. Letters rise out of the postbox along an arc and hang in the air, amber when they need an action, sage when they are only worth knowing.\n\n## Review checklist\n- [x] One object per saved item\n- [x] Reduced motion honoured\n- [ ] Exit cancels the animation (ties to #208)\n- [ ] The arc stays legible with eight letters\n\nKelvin's note to self: read it properly, not on the phone.\n\nRelated: [[Blocker: crash leaving a stage]]"
+  },
+  {
+   "id": "sample-release-pr215",
+   "room": "factory",
+   "matter": "release",
+   "kind": "monitor",
+   "title": "PR #215 · Calendar track",
+   "status": "Merged {{yesterday}}",
+   "applet": "github",
+   "markdown": "## clockless/worldlet · PR #215\nA length of track hanging in the air with the next seven days notched into it. What is coming stands on top as the thing it is: a plane for a flight, a cup for a meal, a cake for a birthday.\n\nMerged {{yesterday}} after two rounds. The one open question is what a day with six events looks like; Mia has a sketch."
+  },
+  {
+   "id": "sample-release-triage",
+   "room": "support",
+   "matter": "release",
+   "kind": "ticket",
+   "title": "Pilot bugs · Issue triage",
+   "status": "5 open · 2 high",
+   "applet": "github",
+   "markdown": "## From Tuesday's session\n| Issue | Title | Priority | Owner |\n| --- | --- | --- | --- |\n| WL-141 | Back from a stage crashes the app | High | Jay |\n| WL-142 | Calendar track shows yesterday's event | High | Kelvin |\n| WL-143 | Letters overlap with eight items | Medium | Jay |\n| WL-144 | Reminders tick has no sound feedback | Low | — |\n| WL-145 | Attention Center drops a row silently | Medium | Kelvin |\n\nWL-141 is the same crash as GitHub #208. Wen files everything from the pilot channel; Kelvin triages on Wednesdays.\n\nRelated: [[Pilot reports · This week]]"
+  },
+  {
+   "id": "sample-release-pilot",
+   "room": "meeting",
+   "matter": "release",
+   "kind": "document",
+   "title": "Pilot round 2 · Feedback",
+   "status": "12 testers · 3 themes",
+   "applet": "notion",
+   "markdown": "## What twelve people said\nRound two ran for ten days with twelve testers.\n\n1. The stages read as objects, not screens. Nine of twelve found the Mail letters without being told.\n2. The Attention Center is trusted more than expected; two testers asked for fewer items, not more.\n3. Calendar is the one people open first in the morning.\n\n## Asked for\nA way to know when a row was dropped from the panel. A sound when a reminder is ticked. Notes that open the original app.\n\nRelated: [[Worldlet 0.36 · Release plan]] · [[Worldlet Pilots · Discord]]"
+  },
+  {
+   "id": "sample-release-standup",
+   "room": "meeting",
+   "matter": "release",
+   "kind": "sound",
+   "title": "Standup notes · {{today}}",
+   "status": "3 follow-ups",
+   "applet": "google-calendar",
+   "markdown": "## Kelvin, Jay, Wen · 15 minutes\nJay: fix for #208 is up as a draft; wants Kelvin's eyes on the tween cancel. Wen: two new pilot reports, both Calendar. Kelvin: numbers for Sam by tonight, then PR #212.\n\n## Follow-ups\n- [ ] Kelvin reviews the #208 draft before lunch\n- [ ] Wen files the Calendar reports as WL-146 and WL-147\n- [ ] Jay measures the arc with eight letters\n\nRelated: [[Blocker: crash leaving a stage]]"
+  },
+  {
+   "id": "sample-release-codex",
+   "room": "factory",
+   "matter": "release",
+   "kind": "monitor",
+   "title": "Codex session · Stage build cost",
+   "status": "Finished · Review before merge",
+   "applet": "codex",
+   "markdown": "## Session · {{yesterday}}\nAsked Codex to find why building a stage took 40 ms on the studio Mac. It moved the text-plane generation off the first frame and cached the wrapped paragraphs.\n\nResult: 40 ms to 19 ms on the same machine. Twelve files touched, tests green.\n\nKelvin's note: the cache key includes the font, which is right. Review the disposal path before merging, given #208."
+  },
+  {
+   "id": "sample-release-claude",
+   "room": "factory",
+   "matter": "release",
+   "kind": "monitor",
+   "title": "Claude Code session · Panel fit",
+   "status": "Saved · 2 files",
+   "applet": "claude-code",
+   "markdown": "## Session · Attention Center fit\nThe panel dropped rows silently when more arrived than fit. Claude Code changed the fit so whole rows are dropped from the longest group first, and wrote the check that measures it instead of assuming it.\n\nTwo files changed, one check added. Resume command saved in the Work region."
+  },
+  {
+   "id": "sample-release-notes",
+   "room": "archive",
+   "matter": "release",
+   "kind": "document",
+   "title": "Release notes draft",
+   "status": "Draft · needs the crash line",
+   "applet": "notion",
+   "markdown": "## Worldlet 0.36\nHome's four Applets come forward as their own stages. Mail's letters rise out of the postbox; Calendar hangs the next seven days on a track; Notes peg to a line; Reminders sit on a board with a real box to tick.\n\nThe Attention Center never scrolls and never cuts a line. What does not fit is dropped from the longest group first.\n\nAlso: the sound control in the corner is one icon now, and podcasts play.\n\nTo add: the fixed crash, once #208 is closed."
+  },
+  {
+   "id": "sample-release-tests",
+   "room": "data",
+   "matter": "release",
+   "kind": "sheet",
+   "title": "Test matrix",
+   "status": "18 checks · 16 green",
+   "applet": "notion",
+   "markdown": "## Before {{launch}}\n| Area | Check | State |\n| --- | --- | --- |\n| Stages | All four build, one object per item | Green |\n| Stages | Leaving restores the silhouette | Green |\n| Stages | Exit during animation | Red (#208) |\n| Attention | Fit never cuts a row | Green |\n| Calendar | Yesterday's event hidden | Red (WL-142) |\n| Audio | Podcast plays | Green |\n\nSixteen of eighteen green. The two red ones are the two the pilots found."
+  },
+  {
+   "id": "sample-release-retro",
+   "room": "meeting",
+   "matter": "release",
+   "kind": "book",
+   "title": "What 0.35 taught us",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## Three lessons\n1. Measure before changing. Two hypotheses about the stage stutter were wrong; the fix was a redraw that nobody had counted.\n2. Fewer items in the Attention Center earned more trust than more.\n3. A demo needs a fallback that does not need the network.\n\nKeep for 0.36: the same three."
+  },
+  {
+   "id": "sample-seed-deck",
+   "room": "studio",
+   "matter": "seed",
+   "kind": "canvas",
+   "title": "Seed deck v7",
+   "status": "v7 · Sent to Ada",
+   "applet": "notion",
+   "markdown": "## Twelve slides\n1. A little world, not another dashboard\n2. Fox: a personal companion that reads so you do not have to\n3. What twelve pilots did in ten days\n4. The Attention Center: publish less than you could\n5. Applets: services as places\n6. Why Mac first, why local\n7. Pre-orders: 38 in three weeks\n8. The team: Kelvin, Jay, Mia, Wen\n9. What we ship next: 0.36 stages\n10. The ask: $1.2M seed\n11. Use of funds: two engineers, a designer, a year\n12. Contact\n\nSent to Ada on {{yesterday}}. Sam gets v8 after his questions are answered.\n\nRelated: [[Questions before {{day:investorMeeting}}]] · [[Numbers Sam asked for]]"
+  },
+  {
+   "id": "sample-seed-northwind",
+   "room": "contacts",
+   "matter": "seed",
+   "kind": "people",
+   "title": "Northwind · Sam Okafor",
+   "status": "Meeting {{investorMeeting}} 10:00",
+   "applet": "notion",
+   "markdown": "## Sam Okafor\nPartner at Northwind Ventures. Met at the spring founders' dinner; asked for a deck the same night.\n\nCares about: retention in the pilot, whether local-first limits growth, and what happens when the model provider changes prices.\n\nLast conversation: his email with four questions. Next: answer them before {{day:investorMeeting}}, meet at ten at their office, bring Jay.\n\nRelated: [[Questions before {{day:investorMeeting}}]] · [[Numbers Sam asked for]]"
+  },
+  {
+   "id": "sample-seed-ada",
+   "room": "contacts",
+   "matter": "seed",
+   "kind": "people",
+   "title": "Ada Park · Angel",
+   "status": "Deck sent",
+   "applet": "notion",
+   "markdown": "## Ada Park\nFormer head of product at a calendar company; angel in four small studios. Warm, quick, allergic to buzzwords.\n\nAsked for the updated deck after the call and for an intro to two of the pilots. Has said she would come in for $150k if a lead appears.\n\nNext: send the deck, arrange the pilot intros through Wen.\n\nRelated: [[Seed deck v7]] · [[Investor follow-ups]]"
+  },
+  {
+   "id": "sample-seed-numbers",
+   "room": "data",
+   "matter": "seed",
+   "kind": "sheet",
+   "title": "Numbers Sam asked for",
+   "status": "4 answers · 3 ready",
+   "applet": "notion",
+   "markdown": "## The four questions, with answers\n| Question | Answer | State |\n| --- | --- | --- |\n| Pilot retention after 10 days | 9 of 12 opened the app daily in the last 3 days | Ready |\n| Pre-orders and refunds | 38 pre-orders, $1,900 collected, 2 refunds | Ready |\n| Monthly burn and runway | $14,200 a month, 14 months | Ready |\n| Cost per user if the model price doubles | Depends on Fox turn volume; measuring this week | Pending |\n\nScenario values for a fictional company.\n\nRelated: [[Runway · 14 months]] · [[Pre-orders · Stripe]]"
+  },
+  {
+   "id": "sample-seed-dataroom",
+   "room": "project",
+   "matter": "seed",
+   "kind": "task",
+   "title": "Data room checklist",
+   "status": "6 of 9 in place",
+   "applet": "notion",
+   "markdown": "## Northwind data room\n- [x] Incorporation documents\n- [x] Cap table\n- [x] Pilot summary and quotes\n- [x] Product roadmap to 0.40\n- [x] Deck v7\n- [x] Team bios\n- [ ] Monthly burn, last six months\n- [ ] Model cost model\n- [ ] Customer references (two pilots, via Wen)"
+  },
+  {
+   "id": "sample-seed-story",
+   "room": "archive",
+   "matter": "seed",
+   "kind": "document",
+   "title": "The story in one page",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## Worldlet in one page\nPeople do not want another dashboard. They want to know what needs them, in their own words, at a time that suits them. Worldlet is a little world on a Mac where each service is a thing you walk up to, and Fox is the companion who reads so you do not have to.\n\nThe Attention Center publishes less than it could. That restraint is the product.\n\nLocal first, because the world is personal and the Mac is already there."
+  },
+  {
+   "id": "sample-seed-followups",
+   "room": "project",
+   "matter": "seed",
+   "kind": "task",
+   "title": "Investor follow-ups",
+   "status": "3 open",
+   "applet": "apple-reminders",
+   "markdown": "## Open\n- [ ] Send Ada the updated deck.\n- [ ] Answer Sam's four questions before {{day:investorMeeting}}.\n- [ ] Ask Wen for two pilots willing to talk to Ada.\n\n## Done\n- [x] Northwind meeting confirmed for {{investorMeeting}}, 10:00."
+  },
+  {
+   "id": "sample-mail-sam",
+   "room": "home",
+   "matter": "seed",
+   "kind": "mail",
+   "title": "Questions before {{day:investorMeeting}}",
+   "status": "4 questions · Reply needed",
+   "applet": "gmail",
+   "markdown": "Status: Unread\n\n## From: Sam Okafor <sam.okafor@example.com>\nTo: Kelvin Ren <kelvin@example.com>\nSubject: Questions before {{day:investorMeeting}}\n\nKelvin — looking forward to {{day:investorMeeting}}. Four things before we meet:\n\n1. Pilot retention after ten days.\n2. Pre-orders and refunds to date.\n3. Monthly burn and runway.\n4. What happens to cost per user if the model price doubles.\n\nNumbers before the meeting would help. Bring Jay if he can make it.\n\n— Sam\n\nRelated: [[Numbers Sam asked for]] · [[Northwind · Sam Okafor]]"
+  },
+  {
+   "id": "sample-hiring-brief",
+   "room": "studio",
+   "matter": "hiring",
+   "kind": "document",
+   "title": "Designer · Role brief",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## The role\nA product designer who can draw a 3D device and the panel beside it with the same hand. Half the job is deciding what not to show.\n\nFull time, Shanghai or remote within two hours. Salary band $55k–70k plus options.\n\nTwo finalists: Ruth Ma and Omar Haddad. Decide by {{day:designerDecision}}.\n\nRelated: [[Ruth Ma · Candidate]] · [[Omar Haddad · Candidate]] · [[Ruth or Omar]]"
+  },
+  {
+   "id": "sample-hiring-ruth",
+   "room": "contacts",
+   "matter": "hiring",
+   "kind": "people",
+   "title": "Ruth Ma · Candidate",
+   "status": "Interview {{designerInterview}} 14:00",
+   "applet": "notion",
+   "markdown": "## Ruth Ma\nSeven years in product design, three of them on a spatial app. Strong on systems, quieter on illustration. Portfolio: a calendar that people described as calm.\n\nInterview on {{designerInterview}} at 14:00 with Kelvin and Mia. Ask about the last thing she removed from a design and why.\n\nRelated: [[Interview questions]] · [[Ruth or Omar]]"
+  },
+  {
+   "id": "sample-hiring-omar",
+   "room": "contacts",
+   "matter": "hiring",
+   "kind": "people",
+   "title": "Omar Haddad · Candidate",
+   "status": "Trial task submitted",
+   "applet": "notion",
+   "markdown": "## Omar Haddad\nFour years, illustration-heavy, fast. His trial task — a Reminders board — was the best drawing we have seen, and it added three things the brief said to leave out.\n\nWould need a lead who says no. Available in two weeks.\n\nRelated: [[Ruth or Omar]]"
+  },
+  {
+   "id": "sample-hiring-compare",
+   "room": "project",
+   "matter": "hiring",
+   "kind": "task",
+   "title": "Ruth or Omar",
+   "status": "Decide by {{day:designerDecision}}",
+   "applet": "notion",
+   "markdown": "## The choice\n| | Ruth | Omar |\n| --- | --- | --- |\n| Systems | Strong | Developing |\n| Illustration | Adequate | Excellent |\n| Restraint | Yes | Not yet |\n| Start | 6 weeks | 2 weeks |\n| Ask | $68k | $58k |\n\nMia's view: Ruth for the next two years, Omar for the next two months. Jay's view: whoever needs the least direction.\n\nDecision needed by {{day:designerDecision}} so an offer can go out before Tokyo.\n\nRelated: [[Designer · Role brief]]"
+  },
+  {
+   "id": "sample-hiring-questions",
+   "room": "meeting",
+   "matter": "hiring",
+   "kind": "book",
+   "title": "Interview questions",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## For both\n- What is the last thing you removed from a design, and what happened?\n- Draw the Mail stage from memory. What did you leave out?\n- A tester says the panel has too much. What do you do first?\n- What do you need from an engineer to do your best work?\n\n## Only for Ruth\n- The calm calendar: what made it calm?\n\n## Only for Omar\n- The Reminders board added three things. Which would you take back?"
+  },
+  {
+   "id": "sample-hiring-mia",
+   "room": "contacts",
+   "matter": "hiring",
+   "kind": "people",
+   "title": "Mia Tan · Contractor",
+   "status": "Invoice #14 due Friday",
+   "applet": "notion",
+   "markdown": "## Mia Tan\nFreelance illustrator and designer, three days a week since spring. Drew every Applet's stage sketch and the onboarding illustrations.\n\nSits in on the designer interviews. Her invoice #14 for the onboarding illustrations is $2,400, due Friday, paid through PayPal.\n\nRelated: [[Invoice #14 · Onboarding illustrations]] · [[Contractor payouts · PayPal]]"
+  },
+  {
+   "id": "sample-mail-invoice",
+   "room": "home",
+   "matter": "hiring",
+   "kind": "mail",
+   "title": "Invoice #14 · Onboarding illustrations",
+   "status": "$2,400 · Approve",
+   "applet": "gmail",
+   "markdown": "## From: Mia Tan <mia.tan@example.com>\nTo: Kelvin Ren <kelvin@example.com>\nSubject: Invoice #14 · Onboarding illustrations\n\nHi Kelvin — attached is invoice #14 for the onboarding illustrations, $2,400, due Friday. Same PayPal as before.\n\nThe last two frames are in the shared folder; the fox at the door is the one you asked for.\n\n— Mia\n\nRelated: [[Contractor payouts · PayPal]]"
+  },
+  {
+   "id": "sample-learning-agents",
+   "room": "library",
+   "matter": "learning",
+   "kind": "book",
+   "title": "Reading notes · Agents that wait",
+   "status": "Chapter 6 of 9",
+   "applet": "notion",
+   "markdown": "## Agents that wait (fictional title)\nThe argument: an agent earns trust by what it does not do. It waits, it asks less, and when it does speak it says the thing, not where it came from.\n\nKept lines:\n- \"A notification is a claim on someone's attention; make fewer claims.\"\n- \"The best interruption is one the person would have made themselves.\"\n\nApplies to: the Attention Center. Publish less than you could.\n\nRelated: [[Lines worth keeping]]"
+  },
+  {
+   "id": "sample-learning-spatial",
+   "room": "library",
+   "matter": "learning",
+   "kind": "book",
+   "title": "Reading notes · Spatial interfaces",
+   "status": "Finished",
+   "applet": "notion",
+   "markdown": "## Spatial interfaces\nA place is remembered; a list is scanned. The book argues for stable positions, few landmarks, and objects that show their state on their own body.\n\nFor Worldlet: regions do not move, Applets keep their dock, and state is on the device, not floating above it."
+  },
+  {
+   "id": "sample-learning-attention",
+   "room": "library",
+   "matter": "learning",
+   "kind": "book",
+   "title": "Reading notes · Attention as a budget",
+   "status": "Chapter 3",
+   "applet": "notion",
+   "markdown": "## Attention as a budget\nEvery row in a panel costs something. Budget it like money: a fixed panel, whole rows only, and a rule for what gets dropped when it is over.\n\nKept: \"Silence is a valid answer.\"\n\nRelated: [[Reading notes · Agents that wait]]"
+  },
+  {
+   "id": "sample-learning-paper",
+   "room": "archive",
+   "matter": "learning",
+   "kind": "document",
+   "title": "Paper · Progressive tool disclosure",
+   "status": "Read · notes made",
+   "applet": "notion",
+   "markdown": "## Summary\nDeferring tools behind a search step cuts request size but adds a model round trip to the turns that need a tool. The paper measures on chat workloads; the gain lands on short turns and the cost on long ones.\n\nKelvin's measurement matched: cache hits at 766 ms versus misses at 1,495 ms, and the deferral helped the turns that were already fast.\n\nDecision: keep Hermes' default unless a measured gain appears."
+  },
+  {
+   "id": "sample-learning-plan",
+   "room": "library",
+   "matter": "learning",
+   "kind": "task",
+   "title": "Learning plan · This month",
+   "status": "2 of 4",
+   "applet": "notion",
+   "markdown": "## This month\n- [x] Finish Spatial interfaces\n- [x] Read the tool disclosure paper and measure it\n- [ ] Chapters 6–9 of Agents that wait, on the flight\n- [ ] One evening on the summit's other talks\n\nTwenty minutes a day, one line written down each time."
+  },
+  {
+   "id": "sample-learning-obsidian",
+   "room": "library",
+   "matter": "learning",
+   "kind": "book",
+   "title": "Obsidian vault · Map of content",
+   "status": "214 notes",
+   "applet": "obsidian",
+   "markdown": "## The vault\nTwo hundred and fourteen notes, most of them short. The map of content has four branches: product, people, places, and lines worth keeping.\n\nRecent: the pilot feedback themes, a note on why the Calendar is opened first, and the Kyoto photo story.\n\nRelated: [[Lines worth keeping]]"
+  },
+  {
+   "id": "sample-learning-notion",
+   "room": "archive",
+   "matter": "learning",
+   "kind": "document",
+   "title": "Notion · Product principles",
+   "status": "v3",
+   "applet": "notion",
+   "markdown": "## Worldlet product principles\n1. Publish less than you could.\n2. Nothing interrupts.\n3. State lives on the thing, not above it.\n4. Local first; the model is a choice, not a dependency.\n5. A demo must work without the network.\n\nReviewed with Jay and Mia every release."
+  },
+  {
+   "id": "sample-learning-quotes",
+   "room": "library",
+   "matter": "learning",
+   "kind": "book",
+   "title": "Lines worth keeping",
+   "status": "Ready to view",
+   "applet": "obsidian",
+   "markdown": "## Kept\n- \"Make fewer claims on attention.\"\n- \"A place is remembered; a list is scanned.\"\n- \"Silence is a valid answer.\"\n- Jay, Tuesday: \"Measure it before you believe it.\"\n- Yiwen: \"You do not have to answer every email the day it arrives.\"\n"
+  },
+  {
+   "id": "sample-writing-talk",
+   "room": "vision",
+   "matter": "writing",
+   "kind": "document",
+   "title": "Summit talk · Outline v2",
+   "status": "Structure locked · demo fallback open",
+   "applet": "apple-notes",
+   "markdown": "## A little world, not a dashboard · 25 minutes\n1. The problem: every app pushes; nobody reads. (3 min)\n2. A world you walk through: regions, Applets as devices. (5 min)\n3. Fox: a personal companion who publishes less than it could. (5 min)\n4. Demo: Mail letters, the Calendar track, the Attention Center. (8 min)\n5. What the pilots taught us. (3 min)\n6. Where it goes next. (1 min)\n\nOpen: the demo needs a fallback that does not need the network. A recorded run, or the sample world.\n\nRelated: [[Demo script & fallback]] · [[Tokyo Dev Summit]]"
+  },
+  {
+   "id": "sample-writing-demo",
+   "room": "vision",
+   "matter": "writing",
+   "kind": "task",
+   "title": "Demo script & fallback",
+   "status": "Fallback not done",
+   "applet": "notion",
+   "markdown": "## Live path\nOpen Home, walk up to Mail, pick the amber letter, read Fox's summary, mark it done, watch the row leave the panel.\n\n## Fallback\n- [ ] Record the live path on the studio Mac at 60 fps\n- [ ] Load the sample world as the offline path\n- [ ] Rehearse switching between them without a pause\n\nRelated: [[Summit talk · Outline v2]]"
+  },
+  {
+   "id": "sample-writing-blog",
+   "room": "archive",
+   "matter": "writing",
+   "kind": "document",
+   "title": "Blog draft · Why a world, not a dashboard",
+   "status": "Draft 3 · 900 words",
+   "applet": "notion",
+   "markdown": "## Draft\nA dashboard asks you to look at everything so you can find the one thing. A world lets the one thing find you, in a place you remember.\n\nThree sections: what we tried first, what the pilots did, what restraint costs and buys.\n\nDropped twice for the release. Finish on the flight or let it go."
+  },
+  {
+   "id": "sample-writing-thread",
+   "room": "vision",
+   "matter": "writing",
+   "kind": "book",
+   "title": "X thread · Applet stages",
+   "status": "1.2k views · 3 questions",
+   "applet": "x",
+   "markdown": "## The thread\nSix posts on why Home's four Applets became stages. 1.2k views, three good questions:\n\n1. What happens with fifty letters? — the arc holds eight; the rest wait in the panel.\n2. Does ticking a reminder change the real app? — no, local only.\n3. Why not VR? — because a Mac is already there.\n\nAnswer the three this week.\n\nRelated: [[X · Mentions & replies]]"
+  },
+  {
+   "id": "sample-writing-newsletter",
+   "room": "home",
+   "matter": "writing",
+   "kind": "mail",
+   "title": "Pilot newsletter #6",
+   "status": "Draft · send Friday",
+   "applet": "gmail",
+   "markdown": "## To the twelve\nSubject: Stages, and a crash we are fixing\n\nWhat you found this round, what changed because of it, and when 0.36 lands. A thank-you list at the end.\n\nSend Friday after office hours.\n\nRelated: [[Testers to thank]]"
+  },
+  {
+   "id": "sample-writing-ideas",
+   "room": "vision",
+   "matter": "writing",
+   "kind": "book",
+   "title": "Ideas backlog",
+   "status": "Ready to view",
+   "applet": "obsidian",
+   "markdown": "## Someday\n- A stage for GitHub: pull requests as parcels on the conveyor.\n- The weather Applet as a vane that actually turns.\n- A sound when a reminder is ticked.\n- A world that ages: paper that yellows when a note is old.\n- Fox reading the summit programme and picking the three talks worth going to."
+  },
+  {
+   "id": "sample-runway",
+   "room": "finance",
+   "matter": "runway",
+   "kind": "coins",
+   "title": "Runway · 14 months",
+   "status": "14 months · After payroll",
+   "applet": "plaid",
+   "markdown": "## Company account\nBalance after this month's payroll and the Tokyo flights: $198,800. Burn is $14,200 a month, so fourteen months.\n\n| Month | Expected balance |\n| --- | --- |\n| This month | $198,800 |\n| +3 | $156,200 |\n| +6 | $113,600 |\n| +12 | $28,400 |\n\nScenario numbers for a fictional company, not a bank balance. The seed round would reset the line.\n\nRelated: [[Monthly burn]] · [[Numbers Sam asked for]]"
+  },
+  {
+   "id": "sample-runway-preorders",
+   "room": "finance",
+   "matter": "runway",
+   "kind": "coins",
+   "title": "Pre-orders · Stripe",
+   "status": "38 · 2 refunds",
+   "applet": "stripe",
+   "markdown": "## Three weeks of pre-orders\n38 pre-orders at $50, $1,900 collected. Two refunds requested this week, both from people who expected Windows.\n\n| Week | Orders | Refunds |\n| --- | --- | --- |\n| 1 | 9 | 0 |\n| 2 | 17 | 0 |\n| 3 | 12 | 2 |\n\nFix: say \"Mac only\" on the page before the button, not after.\n\nRelated: [[Runway · 14 months]]"
+  },
+  {
+   "id": "sample-runway-payouts",
+   "room": "expense",
+   "matter": "runway",
+   "kind": "coins",
+   "title": "Contractor payouts · PayPal",
+   "status": "$3,000 due Friday",
+   "applet": "paypal",
+   "markdown": "## Due Friday\n| Who | For | Amount |\n| --- | --- | --- |\n| Mia Tan | Invoice #14, onboarding illustrations | $2,400 |\n| Wen Li | Pilot coordination, September | $600 |\n\nBoth paid through PayPal on the last Friday of the month. Approve Mia's invoice first; it arrived by mail.\n\nRelated: [[Invoice #14 · Onboarding illustrations]] · [[Mia Tan · Contractor]]"
+  },
+  {
+   "id": "sample-runway-burn",
+   "room": "data",
+   "matter": "runway",
+   "kind": "sheet",
+   "title": "Monthly burn",
+   "status": "$14,200",
+   "applet": "notion",
+   "markdown": "## Where it goes\n| Line | Monthly |\n| --- | --- |\n| Salaries (Kelvin, Jay) | $9,000 |\n| Contractors (Mia, Wen) | $3,000 |\n| Studio rent | $1,100 |\n| Model and hosting | $600 |\n| Tools and subscriptions | $300 |\n| Everything else | $200 |\n\nTotal: $14,200. The model line is the one Sam will ask about.\n\nRelated: [[Company subscriptions]]"
+  },
+  {
+   "id": "sample-runway-invoices",
+   "room": "expense",
+   "matter": "runway",
+   "kind": "task",
+   "title": "Invoices to send",
+   "status": "1 to send",
+   "applet": "notion",
+   "markdown": "## Consulting\n- [ ] The workshop for Mediflow's design team, $1,800. Send this week; Yiwen's company, so keep it formal.\n- [x] Summit speaker fee: the organisers pay the flights instead."
+  },
+  {
+   "id": "sample-runway-tokyo",
+   "room": "expense",
+   "matter": "runway",
+   "kind": "coins",
+   "title": "Tokyo trip costs",
+   "status": "$1,120 company · $2,280 personal",
+   "applet": "notion",
+   "markdown": "## Split\nThe summit covers the flights. The company pays the three Tokyo nights and the summit days; Kelvin pays Kyoto and Osaka himself, since those are rest.\n\n| Item | Company | Personal |\n| --- | --- | --- |\n| Flights | covered | — |\n| Tokyo, 3 nights | $495 | — |\n| Meals, transport (Tokyo) | $300 | — |\n| Kyoto, 2 nights | — | $280–360 |\n| Osaka, 1 night | — | $150 |\n| Trains | — | $260 |\n| Meals, gifts | — | $500 |\n| Buffer | $325 | $1,000 |\n\nRelated: [[Trip budget · $3,400]]"
+  },
+  {
+   "id": "sample-runway-subs",
+   "room": "data",
+   "matter": "runway",
+   "kind": "sheet",
+   "title": "Company subscriptions",
+   "status": "8 · $300 a month",
+   "applet": "notion",
+   "markdown": "## Renewals\n| Service | Monthly | Renews |\n| --- | --- | --- |\n| GitHub team | $48 | monthly |\n| Linear | $40 | monthly |\n| Notion | $32 | monthly |\n| Model API | $600 | usage |\n| Hosting, domains | $60 | monthly |\n| Design tools | $75 | monthly |\n| Discord boost | $10 | monthly |\n| Others | $35 | monthly |\n\nReview every quarter. Nothing here is a real account."
+  },
+  {
+   "id": "sample-personal-month",
+   "room": "expense",
+   "matter": "personal",
+   "kind": "coins",
+   "title": "Personal budget · This month",
+   "status": "$4,300 · $610 unallocated",
+   "applet": "notion",
+   "markdown": "## This month\n| Line | Planned |\n| --- | --- |\n| Rent (half) | $780 |\n| Food, groceries | $520 |\n| Transport | $90 |\n| Subscriptions | $60 |\n| Yiwen's birthday | $260 |\n| Tokyo (personal share) | $1,500 |\n| Parents' visit | $480 |\n| Unallocated | $610 |\n\nScenario values, not a bank balance. The Tokyo share is the one to watch.\n\nRelated: [[Tokyo trip costs]] · [[Visit budget]]"
+  },
+  {
+   "id": "sample-personal-subs",
+   "room": "expense",
+   "matter": "personal",
+   "kind": "sheet",
+   "title": "Subscriptions",
+   "status": "5 · $60",
+   "applet": "notion",
+   "markdown": "## Personal\n| Service | Monthly |\n| --- | --- |\n| Music | $10 |\n| Storage | $3 |\n| Running app | $8 |\n| Ring subscription | $6 |\n| Reading | $33 |\n\nCancel the reading one after the flight if the backlog is still unread."
+  },
+  {
+   "id": "sample-personal-rent",
+   "room": "finance",
+   "matter": "personal",
+   "kind": "coins",
+   "title": "Rent due {{rentDue}}",
+   "status": "$1,500 · Split",
+   "applet": "notion",
+   "markdown": "## Rent\n$1,500 on the 10th, split with Yiwen. Transfer Kelvin's half on {{rentDue}}; the landlord's renewal offer would make it $1,560 from {{leaseRenewal}}.\n\nRelated: [[Lease renewal]]"
+  },
+  {
+   "id": "sample-personal-gifts",
+   "room": "expense",
+   "matter": "personal",
+   "kind": "task",
+   "title": "Gifts · Birthday and Tokyo",
+   "status": "3 to buy",
+   "applet": "apple-reminders",
+   "markdown": "## To buy\n- [ ] Yiwen: the linen jacket, or the pottery class voucher\n- [ ] Hana: Yunnan coffee beans, the Kyoto photo printed\n- [ ] Mum and Dad: nothing from Tokyo; they want the flat tidy and a photo at the river\n\nRelated: [[Yiwen's birthday plan]]"
+  },
+  {
+   "id": "sample-personal-savings",
+   "room": "finance",
+   "matter": "personal",
+   "kind": "book",
+   "title": "Savings note",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## The rule\nTen percent of Kelvin's salary goes to savings on payday, before anything else. The Tokyo rest days come out of the travel jar, which has $900 in it and refills at $100 a month.\n\nScenario numbers only."
+  },
+  {
+   "id": "sample-health-runs",
+   "room": "health",
+   "matter": "wellbeing",
+   "kind": "plant",
+   "title": "Runs this week",
+   "status": "3 of 4 · Longest 12.4 km",
+   "applet": "strava",
+   "markdown": "## This week\nGoal: four easy runs. Done: three.\n\n- [x] Tuesday · 6 km with Leo, river path, 34 min\n- [x] Thursday · 4 km before standup, slow\n- [x] Saturday · 12.4 km, the longest this year, easy pace\n- [ ] Sunday · 5 km, or a walk if the legs say so\n\nNot a training plan; time outside with a friend.\n\nRelated: [[Leo Chen · Running partner]]"
+  },
+  {
+   "id": "sample-health-sleep",
+   "room": "health",
+   "matter": "wellbeing",
+   "kind": "plant",
+   "title": "Sleep · Oura",
+   "status": "6h 05 average · 3 short nights",
+   "applet": "oura",
+   "markdown": "## Last seven nights\nAverage 6 h 05. Three nights under six hours, all before demos. Readiness dipped to 61 on Wednesday and recovered to 78 after the long run.\n\nThe pattern is the same as before every release: fine until the last week, then short. In bed by eleven this week, for real."
+  },
+  {
+   "id": "sample-health-steps",
+   "room": "health",
+   "matter": "wellbeing",
+   "kind": "plant",
+   "title": "Steps · Fitbit",
+   "status": "9,400 a day",
+   "applet": "fitbit",
+   "markdown": "## Daily average\n9,400 steps, mostly the walk to the studio and back. Lowest day: Friday, 3,100, the spreadsheet day. Highest: Saturday, 18,600, the long run and the market."
+  },
+  {
+   "id": "sample-health-dentist",
+   "room": "health",
+   "matter": "wellbeing",
+   "kind": "calendar",
+   "title": "Dentist {{dentist}}",
+   "status": "09:30 · Dr. Wang",
+   "applet": "google-calendar",
+   "markdown": "## Check-up\n{{dentist}} at 09:30 with Dr. Wang on Huaihai Road. Cleaning and the crown check. Thirty minutes; go straight to the studio after.\n\nBring the insurance card."
+  },
+  {
+   "id": "sample-health-evenings",
+   "room": "health",
+   "matter": "wellbeing",
+   "kind": "book",
+   "title": "Quiet evenings",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## The rule for release weeks\nNo screens after ten. Dinner at seven whatever the build says. One evening a week with nothing planned at all.\n\nKept this week: two of three. The night before the demo is always the one that goes."
+  },
+  {
+   "id": "sample-health-stretch",
+   "room": "health",
+   "matter": "wellbeing",
+   "kind": "task",
+   "title": "Desk stretches",
+   "status": "Ready to view",
+   "applet": "apple-reminders",
+   "markdown": "## Every two hours\n- [ ] Stand, shoulders back, thirty seconds\n- [ ] Hip flexor stretch, each side\n- [ ] Look at something far away for a minute\n\nThe reminder fires at 11, 1, 3 and 5. Tick it or it stays."
+  },
+  {
+   "id": "sample-japan-map",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "map",
+   "title": "Tokyo to Kyoto · Route",
+   "status": "Tokyo → Kyoto → Osaka",
+   "applet": "google-maps",
+   "markdown": "## The route\nTokyo 3 nights → Kyoto 2 nights → Osaka 1 night. Depart {{departure}}, return {{returnDate}}.\n\nTokyo: the summit for two days, the talk on day two, dinner with Hana on day three. Kyoto: a garden in the morning, one quiet neighbourhood walk, nothing else. Osaka: one night near the station and the morning flight home.\n\nTokyo Tower, a Kyoto pagoda and Osaka Castle mark the cities on the map; they are not booked visits.\n\nRelated: [[Tokyo & Kyoto · Trip calendar]] · [[Stays & bookings]]"
+  },
+  {
+   "id": "sample-japan-calendar",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "calendar",
+   "title": "Tokyo & Kyoto · Trip calendar",
+   "status": "{{departure}} to {{returnDate}}",
+   "applet": "google-calendar",
+   "markdown": "## Itinerary\nDepart {{departure}}, return {{returnDate}}. The departure moves twelve days ahead every time the sample restarts, to show the countdown.\n\n| Days | Where | What |\n| --- | --- | --- |\n| Days 1–3 | Tokyo | Summit; the talk on day 2 at 14:30; dinner with Hana on day 3 |\n| Days 4–5 | Kyoto | A garden morning, a quiet walk, rest |\n| Days 6–7 | Osaka | One night; morning flight home |\n\nRelated: [[Tokyo Dev Summit]] · [[Evening with Hana]]"
+  },
+  {
+   "id": "sample-japan-flight",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "plane",
+   "title": "Round-trip flights",
+   "status": "Flights · Confirmed",
+   "applet": "tripit",
+   "markdown": "## Confirmed\nOut: {{departure}}, 09:40 from Pudong to Haneda. Back: {{returnDate}}, 10:15 from Kansai to Pudong. The summit covers both.\n\nSeat by the window on the way out for the chapters of Agents that wait. No real flight number, ticket or booking reference exists in this sample.\n\nRelated: [[Tokyo & Kyoto · Trip calendar]]"
+  },
+  {
+   "id": "sample-japan-booking",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "case",
+   "title": "Stays & bookings",
+   "status": "Kyoto stay · Choose one",
+   "applet": "airbnb",
+   "markdown": "## Where to sleep\nTokyo is confirmed: three nights near the summit venue at $165 a night. Osaka is a $150 one-night estimate near the station, still to review.\n\n## Kyoto · Two nights\n| Stay | Nightly | Two nights | Tradeoff |\n| --- | --- | --- | --- |\n| Garden House | $180 | $360 | Quiet courtyard, 18 minutes to the station |\n| Station House | $140 | $280 | Steps from the trains, busier streets |\n\nYiwen's vote is the courtyard: the point of Kyoto is rest. Both cancel free until three days before.\n\nChoosing here saves the choice in this sample world only. Nothing is booked, paid or sent.\n\nRelated: [[Tokyo to Kyoto · Route]] · [[Trip budget · $3,400]]"
+  },
+  {
+   "id": "sample-japan-summit",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "document",
+   "title": "Tokyo Dev Summit",
+   "status": "Talk {{talkDay}} · 14:30 · Hall B",
+   "applet": "notion",
+   "markdown": "## Two days\nDay one: registration, the opening keynote, the hallway. Day two: Kelvin's talk at 14:30 in Hall B, twenty-five minutes plus questions.\n\nTalks worth going to: the one on local-first sync, the one on progressive disclosure, and Hana's studio's session on calm defaults.\n\nThe organisers cover the flights and want the slides by the night before.\n\nRelated: [[Summit talk · Outline v2]] · [[Your talk slot is confirmed]]"
+  },
+  {
+   "id": "sample-japan-packing",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "task",
+   "title": "Packing list",
+   "status": "Started · 4 of 11",
+   "applet": "apple-notes",
+   "markdown": "## Tokyo & Kyoto\n- [x] Passport, cards\n- [x] Laptop, charger, the HDMI adapter\n- [x] Running shoes\n- [x] Yunnan coffee beans for Hana\n- [ ] The Kyoto photo, printed\n- [ ] Clicker for the talk\n- [ ] Two shirts that survive a suitcase\n- [ ] Rain jacket for Kyoto\n- [ ] Chapters 6–9, downloaded\n- [ ] Spare key for Leo, left on the counter\n- [ ] Gifts list checked\n\nRelated: [[Gifts · Birthday and Tokyo]] · [[Rain plan for Kyoto]]"
+  },
+  {
+   "id": "sample-japan-hana",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "people",
+   "title": "Evening with Hana",
+   "status": "Day 3 · Table booked",
+   "applet": "notion",
+   "markdown": "## Day three\nHana has booked a table at a small place in Shimokitazawa for seven. She is bringing two people from her studio who saw the thread on stages.\n\nBring: the coffee beans and the Kyoto photo. Ask: whether her studio would take a pilot seat.\n\nRelated: [[Hana Sato · Tokyo]]"
+  },
+  {
+   "id": "sample-japan-budget",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "coins",
+   "title": "Trip budget · $3,400",
+   "status": "$1,120 company · $2,280 personal",
+   "applet": "notion",
+   "markdown": "## Cap\n$3,400 for seven days: the company's share is the Tokyo nights and summit days, Kelvin's share is Kyoto, Osaka, trains and gifts.\n\nIf Garden House is chosen the personal share is $2,280; Station House saves $80. Not a bank balance.\n\nRelated: [[Tokyo trip costs]] · [[Stays & bookings]]"
+  },
+  {
+   "id": "sample-japan-rain",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "book",
+   "title": "Rain plan for Kyoto",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## If it rains\nIt usually does for an afternoon. The garden still works in the morning; the afternoon becomes a tea house, a bookshop and the covered arcade near the station.\n\nPack the rain jacket, not an umbrella.\n\nRelated: [[Packing list]]"
+  },
+  {
+   "id": "sample-japan-trains",
+   "room": "rocket",
+   "matter": "japan",
+   "kind": "sheet",
+   "title": "Trains · Tokyo → Kyoto → Osaka",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## Plan\n| Leg | Train | Time | Fare |\n| --- | --- | --- | --- |\n| Tokyo → Kyoto | Shinkansen, morning | 2 h 15 | $95 |\n| Kyoto → Osaka | Local express | 30 min | $6 |\n| Osaka → airport | Airport express | 50 min | $12 |\n\nReserve the Tokyo → Kyoto seat the day before; the others do not need it."
+  },
+  {
+   "id": "sample-mail-summit",
+   "room": "home",
+   "matter": "japan",
+   "kind": "mail",
+   "title": "Your talk slot is confirmed",
+   "status": "Day 2 · 14:30 · Hall B",
+   "applet": "gmail",
+   "markdown": "Status: Unread\n\n## From: Tokyo Dev Summit <programme@example.com>\nTo: Kelvin Ren <kelvin@example.com>\nSubject: Your talk slot is confirmed\n\nDear Kelvin,\n\nYour talk \"A little world, not a dashboard\" is confirmed for day two at 14:30 in Hall B, twenty-five minutes plus questions. Please send the slides by the night before. Flights are covered as agreed.\n\nThe programme team\n\nRelated: [[Tokyo Dev Summit]]"
+  },
+  {
+   "id": "sample-camp-plan",
+   "room": "rocket",
+   "matter": "camping",
+   "kind": "task",
+   "title": "Lake weekend · Plan",
+   "status": "{{lakeTrip}} · Friday after work",
+   "applet": "notion",
+   "markdown": "## With Dan\nDrive up Friday {{lakeTrip}} after work, two hours. Camp by the north shore. Back Sunday {{lakeBack}} by mid-afternoon.\n\n- [x] Dan has the tent and the stove\n- [ ] Food and coffee (Kelvin)\n- [ ] Check the weather window on {{day:weatherCheck}}\n- [ ] Tell Yiwen the return time\n\nThe phone stays in the car. That is the point.\n\nRelated: [[Gear check]] · [[Weather window]]"
+  },
+  {
+   "id": "sample-camp-gear",
+   "room": "rocket",
+   "matter": "camping",
+   "kind": "task",
+   "title": "Gear check",
+   "status": "3 of 7",
+   "applet": "notion",
+   "markdown": "## Kelvin's half\n- [x] Sleeping bag\n- [x] Headlamp, batteries\n- [x] Water filter\n- [ ] The good coffee kit\n- [ ] Two dinners, one breakfast\n- [ ] Warm layer for the evening\n- [ ] Book, paper one"
+  },
+  {
+   "id": "sample-camp-weather",
+   "room": "rocket",
+   "matter": "camping",
+   "kind": "book",
+   "title": "Weather window",
+   "status": "Check {{day:weatherCheck}}",
+   "applet": "weather",
+   "markdown": "## The forecast\nFriday evening clear, Saturday sunny with a breeze from the lake, Sunday morning a chance of showers. If Sunday turns, pack up early and take breakfast in the town.\n\nCheck again on {{day:weatherCheck}}; the corner of the world shows the sky."
+  },
+  {
+   "id": "sample-camp-food",
+   "room": "rocket",
+   "matter": "camping",
+   "kind": "book",
+   "title": "Camp food",
+   "status": "Ready to view",
+   "applet": "notion",
+   "markdown": "## Two dinners, one breakfast\nFriday: noodles with the dried mushrooms and an egg. Saturday: rice, the smoked tofu, greens from the market. Sunday breakfast: oats, the good coffee.\n\nDan does the washing up; that was the deal in 2016 and it holds."
+  },
+  {
+   "id": "sample-camp-map",
+   "room": "rocket",
+   "matter": "camping",
+   "kind": "map",
+   "title": "Lake · Route & campsite",
+   "status": "2 hours by car",
+   "applet": "google-maps",
+   "markdown": "## Getting there\nTwo hours north by car, the last twenty minutes on a gravel road. The north shore site has a stone fire ring and no phone signal.\n\nFuel up in the last town; the station by the lake closes at six."
+  },
+  {
+   "id": "sample-memory-lisbon",
+   "room": "rocket",
+   "matter": "memories",
+   "kind": "book",
+   "title": "Lisbon · 2023",
+   "status": "Kept",
+   "applet": "notion",
+   "markdown": "## Lisbon\nYiwen's idea. A week of hills, tiles and the yellow tram, the studio's first working week away from the studio. The Attention Center was sketched on a napkin at a café in Alfama.\n\nReturn for: the light at six in the evening."
+  },
+  {
+   "id": "sample-memory-kyoto",
+   "room": "rocket",
+   "matter": "memories",
+   "kind": "book",
+   "title": "Kyoto · 2019",
+   "status": "Kept",
+   "applet": "notion",
+   "markdown": "## Kyoto, the first time\nThe exchange year's last trip, with Hana. A garden in the rain, a photo on the stone bridge that both of them still have.\n\nGoing back this month is for the two quiet days more than for the garden; the garden is the excuse.\n\nRelated: [[Hana Sato · Tokyo]] · [[Tokyo & Kyoto · Trip calendar]]"
+  },
+  {
+   "id": "sample-memory-yunnan",
+   "room": "rocket",
+   "matter": "memories",
+   "kind": "book",
+   "title": "Yunnan · Last spring",
+   "status": "Kept",
+   "applet": "notion",
+   "markdown": "## Yunnan\nTen days in the tea hills with Yiwen's family. The coffee beans from the market in Pu'er are the ones Hana keeps asking about.\n\nReturn for: the morning fog and the slowness."
+  },
+  {
+   "id": "sample-memory-list",
+   "room": "rocket",
+   "matter": "memories",
+   "kind": "book",
+   "title": "Places to return to",
+   "status": "4 places",
+   "applet": "notion",
+   "markdown": "## The list\n- Lisbon, for the light.\n- Kyoto, this month.\n- Yunnan, when the tea is picked.\n- The lake, every autumn with Dan.\n\nRelated: [[Lisbon · 2023]] · [[Kyoto · 2019]] · [[Yunnan · Last spring]]"
+  },
+  {
+   "id": "sample-watch-talks",
+   "room": "cafe",
+   "matter": "watching",
+   "kind": "book",
+   "title": "Talks queue · YouTube",
+   "status": "4 saved · 1 watched",
+   "applet": "youtube",
+   "markdown": "## Saved for the evenings\n- [x] Local-first software, the long talk\n- [ ] Progressive disclosure in agent tools\n- [ ] A calm calendar: what people said\n- [ ] Rendering small worlds on one GPU\n\nWatch one a week; the flight gets two.\n\nRelated: [[Last year's summit talk]]"
+  },
+  {
+   "id": "sample-watch-summit",
+   "room": "cafe",
+   "matter": "watching",
+   "kind": "book",
+   "title": "Last year's summit talk",
+   "status": "Uploaded by the organisers",
+   "applet": "youtube",
+   "markdown": "## Kelvin, last year\nTwenty minutes on the first Worldlet prototype. The organisers uploaded it this week. Watch it once for the pacing, not the content; the slides have changed twice since.\n\nRelated: [[Summit talk · Outline v2]]"
+  },
+  {
+   "id": "sample-watch-tiktok",
+   "room": "cafe",
+   "matter": "watching",
+   "kind": "book",
+   "title": "Saved · TikTok",
+   "status": "6 saved",
+   "applet": "tiktok",
+   "markdown": "## Saved\nSix clips: two on tent setup, one on the Shinkansen seat trick, three on cats and sofas. Nothing here is work."
+  },
+  {
+   "id": "sample-watch-podcasts",
+   "room": "cafe",
+   "matter": "watching",
+   "kind": "book",
+   "title": "Podcasts for the flight",
+   "status": "3 episodes",
+   "applet": "notion",
+   "markdown": "## For {{departure}}\nThree episodes downloaded: one on founder sleep, one on Kyoto gardens, one long interview about attention. The corner of the world plays podcasts too."
+  },
+  {
+   "id": "sample-watch-search",
+   "room": "vision",
+   "matter": "watching",
+   "kind": "book",
+   "title": "Browser · Things to look up",
+   "status": "5 to look up",
+   "applet": "browser",
+   "markdown": "## Look up\n- Whether the Hall B projector takes HDMI or USB-C\n- The Kyoto garden's opening hours in this season\n- Mattress topper sizes for a fold-out bed\n- The summit's other talks on day two\n- How the calm calendar handled six events in a day"
+  },
+  {
+   "id": "sample-watch-doordash",
+   "room": "cafe",
+   "matter": "watching",
+   "kind": "book",
+   "title": "Dinner in · DoorDash",
+   "status": "Thursday · demo night",
+   "applet": "doordash",
+   "markdown": "## Thursday\nDemo night means nobody cooks. The usual: the noodle place on Wulumuqi Road, two bowls, extra chilli for Yiwen. Order at 6:40 so it arrives by seven.\n\nOrdering here is a request to Fox in the personal world; nothing is ordered from the sample.\n\nRelated: [[House routine]]"
+  },
+  {
+   "id": "sample-community-discord",
+   "room": "cafe",
+   "matter": "community",
+   "kind": "people",
+   "title": "Worldlet Pilots · Discord",
+   "status": "12 members · 3 new reports",
+   "applet": "discord",
+   "markdown": "## The server\nTwelve testers, three channels: #reports, #ideas, #office-hours. Wen reads everything and files the reports to GitHub on Wednesdays.\n\nThis week: three new reports, two about the Calendar track showing yesterday's event, one about the Mail letters overlapping at eight. Two ideas: a tick sound, and Notes that open the original app.\n\nRelated: [[Pilot reports · This week]] · [[Wen Li · Pilot coordinator]]"
+  },
+  {
+   "id": "sample-community-reports",
+   "room": "support",
+   "matter": "community",
+   "kind": "ticket",
+   "title": "Pilot reports · This week",
+   "status": "3 new · 2 Calendar",
+   "applet": "discord",
+   "markdown": "## New\n| From | Report | Filed as |\n| --- | --- | --- |\n| Tester 4 | Calendar track shows yesterday's event | WL-142 |\n| Tester 9 | Same, after midnight | WL-146 |\n| Tester 2 | Eight letters overlap on the arc | WL-143 |\n\nTester 9's version is the midnight case; WL-142 and WL-146 are one fix.\n\nRelated: [[Pilot bugs · Issue triage]]"
+  },
+  {
+   "id": "sample-community-wen",
+   "room": "contacts",
+   "matter": "community",
+   "kind": "people",
+   "title": "Wen Li · Pilot coordinator",
+   "status": "Part-time · Wednesdays",
+   "applet": "notion",
+   "markdown": "## Wen\nRuns the pilot: recruits testers, hosts the Tuesday sessions, reads the Discord, files the reports. Part-time since June, $600 a month.\n\nNext: two pilots willing to talk to Ada; file the Calendar reports.\n\nRelated: [[Worldlet Pilots · Discord]] · [[Ada Park · Angel]]"
+  },
+  {
+   "id": "sample-community-x",
+   "room": "cafe",
+   "matter": "community",
+   "kind": "book",
+   "title": "X · Mentions & replies",
+   "status": "3 questions to answer",
+   "applet": "x",
+   "markdown": "## Since the thread\nThree questions under the stages thread, one designer asking for a pilot seat, and a reply from someone who built a spatial notes app in 2014 and wants to compare notes.\n\nAnswer the three, offer the seat through Wen, and say yes to the comparison.\n\nRelated: [[X thread · Applet stages]]"
+  },
+  {
+   "id": "sample-community-office",
+   "room": "cafe",
+   "matter": "community",
+   "kind": "calendar",
+   "title": "Office hours · Fridays",
+   "status": "Friday 16:00",
+   "applet": "google-calendar",
+   "markdown": "## Every Friday at four\nThirty minutes on Discord voice. Whoever comes. This week: show the crash fix, ask about the tick sound, thank Tester 4 in person."
+  },
+  {
+   "id": "sample-community-thanks",
+   "room": "support",
+   "matter": "community",
+   "kind": "task",
+   "title": "Testers to thank",
+   "status": "4 named",
+   "applet": "apple-reminders",
+   "markdown": "## In newsletter #6\n- [ ] Tester 4, for the midnight Calendar case\n- [ ] Tester 2, for counting the letters\n- [ ] Tester 9, for the second report that made it one fix\n- [ ] Tester 11, for the line about mail that feels like mail\n\nRelated: [[Pilot newsletter #6]]"
+  },
+  {
+   "id": "sample-meeting-standup",
+   "room": "meeting",
+   "matter": "release",
+   "kind": "page",
+   "title": "Monday design standup",
+   "status": "Google Meet · Recurring",
+   "applet": "meetings",
+   "markdown": "## Monday design standup\nThe three of us, Mondays at ten. Jay walks the week's art, Yiwen brings anything the pilot Macs turned up, and we pick one thing to finish before Thursday.\n\nStanding agenda: last week's blocker, this week's one thing, anything a pilot user said twice."
+  },
+  {
+   "id": "sample-meeting-pilot",
+   "room": "meeting",
+   "matter": "release",
+   "kind": "page",
+   "title": "Pilot check-in with Dana",
+   "status": "Zoom · Every other Thursday",
+   "applet": "meetings",
+   "markdown": "## Pilot check-in with Dana\nDana runs the four pilot Macs at the clinic. She keeps notes on what confused people that fortnight and reads them out in order.\n\nOpen from last time: the Mail stage crash, and whether Fox should say anything when an Applet opens."
+  },
+  {
+   "id": "sample-tennis-plan",
+   "title": "Tennis with Sam",
+   "room": "health",
+   "applet": "google-calendar",
+   "matter": "wellbeing",
+   "kind": "note",
+   "status": "Ready to confirm",
+   "markdown": "# Tennis with Sam\n\nDate: {{tennisSaturday}}\n\nTime: 10:00–11:00\n\nCourt: Riverside Court 2\n\nPrice: $20\n\nGuest: Sam Okafor <sam.okafor@example.com>\n\nSam is back, Saturday is sunny, and Court 2 is available.\n\n## Why this fits\n- [[Sam is back]]: Sam returned from vacation and is free Saturday morning.\n- [[Saturday tennis weather]]: 22°C, sunny, light wind.\n- [[Movement check-in]]: recovered after an easy week; a gentle hour fits.\n- [[Riverside court availability]]: Court 2 is open from 10 to 11.\n\n## Prepared invitation\nHi Sam, welcome back! Tennis at Riverside Court 2 this Saturday, 10–11? I can take care of the booking. — Kelvin\n\nOne confirmation records the court, calendar entry and invitation locally. No real booking, payment or message is sent."
+  },
+  {
+   "id": "sample-tennis-sam",
+   "title": "Sam is back",
+   "room": "family",
+   "applet": "gmail",
+   "matter": "family",
+   "kind": "note",
+   "status": "Unread",
+   "markdown": "Status: Unread\n\n# Sam is back\n\nFrom: Sam Okafor <sam.okafor@example.com>\nTo: Kelvin <kelvin@example.com>\n\nBack from vacation! Free on Saturday {{tennisSaturday}} morning. Shall we play some tennis?"
+  },
+  {
+   "id": "sample-tennis-weather",
+   "title": "Saturday tennis weather",
+   "room": "health",
+   "applet": "weather",
+   "matter": "wellbeing",
+   "kind": "note",
+   "status": "Sunny · 22°C",
+   "markdown": "# Saturday tennis weather\n\nDate: {{tennisSaturday}}\nForecast: sunny, 22°C at 10 AM, light wind, 5% rain chance.\n\nAuthored practice forecast, not a live weather observation."
+  },
+  {
+   "id": "sample-tennis-health",
+   "title": "Movement check-in",
+   "room": "health",
+   "applet": "strava",
+   "matter": "wellbeing",
+   "kind": "note",
+   "status": "Ready for an easy session",
+   "markdown": "# Movement check-in\n\nTwo easy runs this week, no hard workout yesterday. Kelvin wants a relaxed social hour this weekend. An easy tennis session fits; this is a fictional activity summary, not medical advice."
+  },
+  {
+   "id": "sample-tennis-court",
+   "title": "Riverside court availability",
+   "room": "health",
+   "applet": "google-maps",
+   "matter": "wellbeing",
+   "kind": "note",
+   "status": "Court 2 · 10 AM",
+   "markdown": "# Riverside court availability\n\nDate: {{tennisSaturday}}\nRiverside Court 2\n10:00–11:00: available\n11:00–12:00: unavailable\nPrice: $20 per hour\n\nPreset availability for the practice world; no real booking service is connected."
+  },
+  {
+   "id": "sample-japan-dinner",
+   "title": "Japan travel plan · Dinner with Alex",
+   "room": "rocket",
+   "applet": "notion",
+   "matter": "japan",
+   "kind": "note",
+   "status": "Dinner idea saved",
+   "markdown": "# Japan travel plan · Dinner with Alex\n\nDate: {{departure}}\n\nTime: 19:00\n\nRestaurant: Maple Table, Shimokitazawa\n\nAddress: 2-14 Kitazawa, Tokyo\n\nGuest: Alex Chen <alex@example.com>\n\nA quiet dinner after the summit. Vegetarian options, about $35 per person. Meet at the station at 18:45 and walk together. No table booked yet.\n\nAlex asked for these details by email. This restaurant and invitation are fictional demo content."
+  },
+  {
+   "id": "sample-demo-outbox",
+   "title": "Mail · Sent from Fox",
+   "room": "home",
+   "applet": "gmail",
+   "matter": "home",
+   "kind": "note",
+   "status": "Outbox",
+   "markdown": "# Mail · Sent from Fox\n\nNo practice messages have been recorded yet."
+  },
+  {
+   "id": "sample-web-research-history",
+   "title": "Browsing history · Last week’s research paper",
+   "room": "library",
+   "applet": "browser",
+   "matter": "learning",
+   "kind": "note",
+   "status": "Saved last week",
+   "markdown": "# Browsing history · Last week’s research paper\n\nVisited: {{lastWeek}} 14:20\nTitle: Generative Agents: Interactive Simulacra of Human Behavior\nURL: https://arxiv.org/abs/2304.03442\nSaved note: agents combine observations, reflection and planning to maintain believable behavior. Kelvin kept it while researching persistent companion memory.\n\nThis is an authored browsing-history record for the practice world, not a claim that Worldlet recorded private browsing. Open the original URL to read the real paper."
+  },
+  {
+   "id": "sample-demo-work-state",
+   "title": "Workshop execution states",
+   "room": "factory",
+   "applet": "codex",
+   "matter": "release",
+   "kind": "note",
+   "status": "Practice execution",
+   "markdown": "{}"
+  },
+  {
+   "id": "sample-web-shoes-history",
+   "title": "Browsing history · Shoes from last week",
+   "room": "library",
+   "applet": "browser",
+   "matter": "learning",
+   "kind": "note",
+   "status": "Saved last week",
+   "markdown": "# Shoes from last week\n\nVisited: {{lastWeek}} 18:35\nTitle: Allbirds Tree Runner NZ · Medium Grey\nURL: https://www.allbirds.com/products/mens-tree-runner-nz-medium-grey\nSaved note: lightweight everyday shoes for walking around the village and travelling; comparing breathable material and a simple neutral colour. No purchase made.\n\nAuthored browsing-memory example. The URL opens the public product page; current price, colour and availability must be checked there."
+  },
+  {
+   "id": "sample-notion-design-latest",
+   "title": "Earlier design doc · Quiet focus timer",
+   "room": "library",
+   "applet": "notion",
+   "matter": "release",
+   "kind": "note",
+   "status": "Earlier example",
+   "markdown": "# Quiet focus timer\n\nUpdated: {{today}} 09:30\nVersion: 2 (earlier example)\n\n## Goal\nA small focus timer for one useful piece of work.\n\n## Acceptance\n- Start a 25-minute session.\n- Pause without losing the remaining time.\n- Resume, or reset to 25 minutes.\n- Calm cream and forest-green styling, clear numbers, keyboard-accessible controls.\n- Keep it local. No signup, notification permission or background audio.\n\nThis is an authored design brief for the Notion-to-Codex walkthrough."
+  },
+  {
+   "id": "sample-notion-navigation-latest",
+   "title": "Latest design doc · Applet navigation",
+   "room": "library",
+   "applet": "notion",
+   "matter": "release",
+   "kind": "note",
+   "status": "Updated today",
+   "markdown": "# Applet navigation\n\nUpdated: {{today}} 10:00\nVersion: 3 (latest)\n\n## Goal\nKeep movement between the world and its Applets continuous and predictable.\n\n## Acceptance\n- Preserve the native Peek → Open → Focus transition.\n- Back returns to the previous place without losing context.\n- Keep the original document attached to the coding request.\n- Show progress and leave the result ready for review.\n\nAuthored design brief for the practice Notion-to-Codex handoff. No live CLI execution is implied."
+  },
+  {
+   "id": "sample-voice-memo",
+   "room": "library",
+   "matter": "learning",
+   "kind": "book",
+   "title": "Garden walk idea",
+   "status": "Fictional recording",
+   "applet": "voice-memos",
+   "markdown": "Fictional transcript: Put a small reading bench beside the herb garden. Check the shade in the afternoon before choosing a spot."
+  },
+  {
+   "id": "sample-messages-leo",
+   "room": "family",
+   "matter": "family",
+   "kind": "note",
+   "title": "Leo · Tofu for the Tokyo week",
+   "status": "Fictional conversation",
+   "applet": "messages",
+   "markdown": "## Leo Chen\nFictional iMessage conversation.\n\nLeo: Still happy to take Tofu while you are in Tokyo. Drop the spare key on Tuesday after the run?\nKelvin: Perfect. Food and litter are by the door, and she gets half a tin at seven.\nLeo: Got it. Is the summit talk being recorded? I want to see it.\nKelvin: I will send you the link once it is up.\n\nRelated: [[Leo Chen · Running partner]]"
+  },
+  {
+   "id": "sample-messages-yiwen",
+   "room": "growth",
+   "matter": "visit",
+   "kind": "note",
+   "title": "Yiwen · Train time",
+   "status": "Fictional conversation",
+   "applet": "messages",
+   "markdown": "## Yiwen Su\nFictional iMessage conversation.\n\nYiwen: Your mum says the train gets in at 3:40 on {{parentsArrive}}. Can you meet them? I have a launch review until five.\nKelvin: Yes. I will take the car so Dad does not have to manage the stairs at the metro.\nYiwen: Thank you. I will pick up fruit on the way home.\n\nRelated: [[Parents' visit · Plan]]"
+  },
+  {
+   "id": "sample-museum-plan",
+   "title": "Plan a museum afternoon",
+   "room": "home",
+   "applet": "gmail",
+   "matter": "family",
+   "kind": "note",
+   "status": "Research requested",
+   "markdown": "# Plan a museum afternoon\n\nFrom: Sam <sam.okafor@example.com>\n\nCould you compare the Exploratorium and California Academy of Sciences for two adults next Saturday afternoon? We have a $120 admission budget and prefer public transit from San Francisco Ferry Building.\n\n## What would help\n- Use each museum's official website to check current Saturday opening hours, adult admission, and any timed-entry requirements.\n- Check the visitor directions for public transit from the Ferry Building.\n- Recommend one option within budget, with a short itinerary, total admission cost, and source links.\n- Save the comparison as a note. Do not buy tickets, make reservations, or send messages.\n- If a price depends on the date or cannot be verified, say so; never guess.\n\nOfficial starting points:\n- [Exploratorium](https://www.exploratorium.edu/visit)\n- [California Academy of Sciences](https://www.calacademy.org/plan-your-visit)\n\nThis request is fictional. Website information must be checked live.\n"
+  },
+  {
+   "id": "sample-release-todoist",
+   "room": "project",
+   "matter": "release",
+   "kind": "task",
+   "title": "Launch week · Todoist",
+   "status": "5 open · 2 today",
+   "applet": "todoist",
+   "markdown": "## Worldlet 0.36 · Launch week\n- [ ] Today: confirm the stage-exit fix on all four pilot Macs\n- [ ] Today: send the release notes draft to Jay\n- [ ] {{day:pilotReview}}: walk the pilot group through the new stages\n- [ ] Record a thirty-second demo for the newsletter\n- [ ] Tag the build on {{launch}}\n- [x] Freeze the feature list\n\nRelated: [[Worldlet 0.36 · Release plan]]"
+  },
+  {
+   "id": "sample-seed-todoist",
+   "room": "project",
+   "matter": "seed",
+   "kind": "task",
+   "title": "Seed round · Todoist",
+   "status": "4 open",
+   "applet": "todoist",
+   "markdown": "## Before {{day:investorMeeting}}\n- [ ] Rehearse the demo twice without the network\n- [ ] Print two copies of the one-pager\n- [ ] Update the pilot numbers in the deck\n- [ ] Book a quiet room near the Northwind office\n- [x] Share the data room link with Sam\n\nRelated: [[Seed deck v7]]"
+  },
+  {
+   "id": "sample-release-linear",
+   "room": "project",
+   "matter": "release",
+   "kind": "ticket",
+   "title": "Release 0.36 · Linear",
+   "status": "4 issues · 1 urgent",
+   "applet": "linear",
+   "markdown": "## My issues · Worldlet 0.36\n| Issue | Status | Priority | Due |\n| --- | --- | --- | --- |\n| WOR-41 Stage exit cancels its tween | In progress | Urgent | {{day:pilotReview}} |\n| WOR-38 Reminders board keeps its order | In review | High | {{day:pilotReview}} |\n| WOR-35 Update feed lists 0.36 | Todo | Medium | {{launch}} |\n| WOR-33 Release notes in two languages | Todo | Low | {{launch}} |\n\nWOR-41 tracks the same fault as the blocker: the stage is disposed while its animation still runs.\n\nRelated: [[Blocker: crash leaving a stage]] · [[Worldlet 0.36 · Release plan]]"
+  },
+  {
+   "id": "sample-release-linear-pilot",
+   "room": "project",
+   "matter": "release",
+   "kind": "ticket",
+   "title": "WOR-38 · Reminders board order",
+   "status": "In review · Jay",
+   "applet": "linear",
+   "markdown": "## WOR-38 · Reminders board keeps its order\nProject: Worldlet 0.36 · Team: Studio · Assignee: Jay · Labels: stage, pilot\n\nTwo pilots saw the Reminders board shuffle its cards after a restart. The board now saves the order with each card and restores it on load.\n\n- [x] Reproduced with a fresh launch\n- [x] Order saved with each card\n- [ ] Checked on a second pilot Mac\n\nRelated: [[Worldlet 0.36 · Release plan]]"
+  },
+  {
+   "id": "sample-release-supabase",
+   "room": "data",
+   "matter": "release",
+   "kind": "sheet",
+   "title": "Pilot sync · Supabase",
+   "status": "3 tables · 12 pilots",
+   "applet": "supabase",
+   "markdown": "## Project: worldlet-pilot (fictional)\n| Table | Rows | Note |\n| --- | ---: | --- |\n| pilots | 12 | One row per pilot Mac |\n| feedback | 86 | Tagged by stage |\n| crash_reports | 9 | Seven from the stage-exit bug |\n\nNo personal content is stored: only build numbers, stage names and short feedback text.\n\nRelated: [[Blocker: crash leaving a stage]]"
+  },
+  {
+   "id": "sample-release-supabase-policy",
+   "room": "data",
+   "matter": "release",
+   "kind": "document",
+   "title": "Row access rules · Pilot feedback",
+   "status": "Reviewed {{yesterday}}",
+   "applet": "supabase",
+   "markdown": "## Row-level rules\n- Pilots can insert feedback and read only their own rows.\n- The studio role reads everything; nobody updates old feedback.\n- Crash reports expire after ninety days.\n\nJay reviewed the rules {{yesterday}}. One open question: whether pilots may delete their own feedback. Kelvin's view: yes."
+  },
+  {
+   "id": "sample-release-docker",
+   "room": "factory",
+   "matter": "release",
+   "kind": "monitor",
+   "title": "Build runners · Docker",
+   "status": "2 running · 1 stopped",
+   "applet": "docker",
+   "markdown": "## Containers on the studio build box\n| Container | Image | State |\n| --- | --- | --- |\n| pilot-api | worldlet/pilot-api:0.36 | Running · 6 days |\n| docs-preview | worldlet/docs:latest | Running · 2 days |\n| art-export | worldlet/art-export:0.35 | Stopped {{yesterday}} |\n\nThe art export container stopped after the palette check moved into the app build. Safe to remove after {{launch}}."
+  },
+  {
+   "id": "sample-release-compose",
+   "room": "factory",
+   "matter": "release",
+   "kind": "document",
+   "title": "Local stack · docker compose",
+   "status": "3 services",
+   "applet": "docker",
+   "markdown": "## How Jay runs the pilot stack locally\n1. `docker compose up` starts the API, a database and the docs preview.\n2. Seed data is fictional: twelve pilots with invented names.\n3. `docker compose down` leaves the data volume in place.\n\nKnown issue: the docs preview takes a minute on the first start.\n\nRelated: [[Test matrix]]"
+  },
+  {
+   "id": "sample-seed-drive",
+   "room": "archive",
+   "matter": "seed",
+   "kind": "document",
+   "title": "Data room · Google Drive",
+   "status": "9 files · shared with 2",
+   "applet": "google-drive",
+   "markdown": "## Clockless · Data room\n- Seed deck v7 (PDF)\n- One-page story\n- Runway model\n- Pilot feedback summary\n- Cap table (view only)\n- Incorporation documents\n- Two customer letters\n- Product roadmap\n- Team bios\n\nShared with Sam and Ada, view only. Kelvin is the only editor.\n\nRelated: [[Data room checklist]]"
+  },
+  {
+   "id": "sample-hiring-drive",
+   "room": "studio",
+   "matter": "hiring",
+   "kind": "document",
+   "title": "Designer portfolios",
+   "status": "6 files · 2 candidates",
+   "applet": "google-drive",
+   "markdown": "## Hiring · Designer\n- Ruth Ma · Portfolio (PDF)\n- Ruth Ma · Take-home: the Weather stage\n- Ruth Ma · References\n- Omar Haddad · Portfolio (link)\n- Omar Haddad · Take-home: the Weather stage\n- Interview scorecards\n\nOnly Kelvin and Jay can open this folder.\n\nRelated: [[Ruth or Omar]]"
+  },
+  {
+   "id": "sample-writing-docs",
+   "room": "vision",
+   "matter": "writing",
+   "kind": "document",
+   "title": "Summit talk · Speaker notes",
+   "status": "Draft · 1,900 words",
+   "applet": "google-docs",
+   "markdown": "## Opening\nStart with the question every pilot asked: where did my inbox go? Answer it with the postbox on the stage, not a slide.\n\n## Middle\nThree short stories from the pilots. Keep each under a minute.\n\n## Close\nOne line: a place is remembered; a list is scanned.\n\nComments: Jay left four, all about timing.\n\nRelated: [[Summit talk · Outline v2]]"
+  },
+  {
+   "id": "sample-hiring-docs",
+   "room": "project",
+   "matter": "hiring",
+   "kind": "document",
+   "title": "Designer offer · Draft",
+   "status": "Waiting on the decision",
+   "applet": "google-docs",
+   "markdown": "## Offer letter (template)\nRole: Product designer, full time, Shanghai or remote.\nStart: the first Monday after acceptance.\nFirst project: the Applet stages after 0.36.\n\nThe name, salary and start date stay blank until Kelvin decides.\n\nRelated: [[Designer · Role brief]]"
+  },
+  {
+   "id": "sample-runway-sheets",
+   "room": "data",
+   "matter": "runway",
+   "kind": "sheet",
+   "title": "Pre-order tracker",
+   "status": "41 pre-orders",
+   "applet": "google-sheets",
+   "markdown": "## Pre-orders by week\n| Week | New | Total |\n| --- | ---: | ---: |\n| 1 | 18 | 18 |\n| 2 | 11 | 29 |\n| 3 | 7 | 36 |\n| 4 | 5 | 41 |\n\nRefunds so far: none. The sheet pulls weekly totals by hand from the payments export.\n\nRelated: [[Pre-orders · Stripe]]"
+  },
+  {
+   "id": "sample-runway-pricing",
+   "room": "finance",
+   "matter": "runway",
+   "kind": "sheet",
+   "title": "Pilot seat pricing",
+   "status": "3 options",
+   "applet": "google-sheets",
+   "markdown": "## Options for after the pilot\n| Option | Price | Note |\n| --- | --- | --- |\n| A | Free for pilots, one year | Easiest thank-you |\n| B | Half price, one year | Covers model costs |\n| C | Full price after launch | Simplest to run |\n\nKelvin leans towards A for the first twelve pilots and B for anyone after.\n\nRelated: [[Runway · 14 months]]"
+  },
+  {
+   "id": "sample-seed-slides",
+   "room": "studio",
+   "matter": "seed",
+   "kind": "canvas",
+   "title": "Seed deck · Slides",
+   "status": "14 slides · 3 comments",
+   "applet": "google-slides",
+   "markdown": "## Working deck\n1. Title: a small world for your work and life\n2. The problem: attention spent on lists\n3. The world, in one picture\n4. Fox, the one conversation\n5. Pilot numbers\n\nOpen comments: Ada asked for a clearer pricing slide; Jay wants the demo video on slide 3.\n\nRelated: [[Seed deck v7]]"
+  },
+  {
+   "id": "sample-writing-slides",
+   "room": "vision",
+   "matter": "writing",
+   "kind": "canvas",
+   "title": "Summit talk · Slides",
+   "status": "18 slides · Draft",
+   "applet": "google-slides",
+   "markdown": "## Talk deck\n- Few words per slide; the stages carry the story.\n- Slide 4 plays the Mail stage recording with the sound off.\n- Slide 12 is a live demo; slide 13 is the recorded fallback.\n- The last slide is a single line, no logo wall.\n\nRelated: [[Demo script & fallback]]"
+  }
+ ]
+}

@@ -1,0 +1,349 @@
+[
+ {
+  "name": "owner allowed by schedule",
+  "operation": "attentionOwnerAllowed",
+  "input": {
+   "provider": "gmail",
+   "sources": [
+    {
+     "provider": "gmail",
+     "id": "m1"
+    }
+   ],
+   "scheduled": [
+    "gmail"
+   ],
+   "facts": []
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "owner needs its own source",
+  "operation": "attentionOwnerAllowed",
+  "input": {
+   "provider": "gmail",
+   "sources": [
+    {
+     "provider": "slack",
+     "id": "s1"
+    }
+   ],
+   "scheduled": [
+    "gmail"
+   ],
+   "facts": []
+  },
+  "expected": {
+   "ok": true,
+   "value": false
+  }
+ },
+ {
+  "name": "owner outside monitor",
+  "operation": "attentionOwnerAllowed",
+  "input": {
+   "provider": "gmail",
+   "sources": [
+    {
+     "provider": "gmail",
+     "id": "m1"
+    }
+   ],
+   "scheduled": [
+    "gmail"
+   ],
+   "facts": [],
+   "monitorProvider": "slack"
+  },
+  "expected": {
+   "ok": true,
+   "value": false
+  }
+ },
+ {
+  "name": "owner allowed by fact",
+  "operation": "attentionOwnerAllowed",
+  "input": {
+   "provider": "notes",
+   "sources": [
+    {
+     "provider": "notes",
+     "id": "n1"
+    }
+   ],
+   "scheduled": [],
+   "facts": [
+    {
+     "provider": "notes"
+    }
+   ]
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "quote whitespace is canonicalized",
+  "operation": "canonicalSourceQuotes",
+  "input": {
+   "items": [
+    {
+     "title": "t",
+     "sources": [
+      {
+       "provider": "gmail",
+       "id": "m1",
+       "quote": "send  the\ndeck"
+      },
+      {
+       "provider": "gmail",
+       "id": "m2",
+       "quote": "missing"
+      }
+     ]
+    }
+   ],
+   "evidence": {
+    "gmail:m1": {
+     "text": "Could you send the  deck today?"
+    },
+    "gmail:m2": {
+     "text": "nothing here"
+    }
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": [
+    {
+     "sources": [
+      {
+       "id": "m1",
+       "provider": "gmail",
+       "quote": "send the  deck"
+      },
+      {
+       "id": "m2",
+       "provider": "gmail",
+       "quote": "missing"
+      }
+     ],
+     "title": "t"
+    }
+   ]
+  }
+ },
+ {
+  "name": "ambiguous quote is unchanged",
+  "operation": "canonicalSourceQuotes",
+  "input": {
+   "items": [
+    {
+     "sources": [
+      {
+       "provider": "gmail",
+       "id": "m1",
+       "quote": "a  b"
+      }
+     ]
+    }
+   ],
+   "evidence": {
+    "gmail:m1": {
+     "text": "a b and a b"
+    }
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": [
+    {
+     "sources": [
+      {
+       "id": "m1",
+       "provider": "gmail",
+       "quote": "a  b"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "name": "rejected items withhold cited context",
+  "operation": "withheldContextIds",
+  "input": {
+   "context": [
+    {
+     "id": "f1",
+     "provider": "gmail",
+     "sourceId": "m1"
+    },
+    {
+     "id": "f2",
+     "provider": "gmail"
+    },
+    {
+     "id": "f3",
+     "provider": "slack",
+     "sourceId": "m1"
+    }
+   ],
+   "rejected": [
+    {
+     "sources": [
+      {
+       "provider": "gmail",
+       "id": "m1"
+      },
+      {
+       "provider": "gmail",
+       "id": "f2"
+      }
+     ]
+    }
+   ]
+  },
+  "expected": {
+   "ok": true,
+   "value": [
+    "f1",
+    "f2"
+   ]
+  }
+ },
+ {
+  "name": "matching attention id",
+  "operation": "attentionMatchingID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "items": [
+    {
+     "provider": "gmail",
+     "kind": "task",
+     "title": "Reply to Ana",
+     "context": "Ana asked for the deck.",
+     "attentionReason": "Direct request",
+     "sources": [
+      {
+       "id": "m1",
+       "provider": "gmail",
+       "quote": "Can you send the deck?"
+      }
+     ],
+     "id": "old"
+    }
+   ]
+  },
+  "expected": {
+   "ok": true,
+   "value": "old"
+  }
+ },
+ {
+  "name": "service credits",
+  "operation": "attentionFailure",
+  "input": {
+   "message": "HTTP 402 worldlet_service_credits",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "code": "service_credits",
+    "nextAt": 1790676900
+   }
+  }
+ },
+ {
+  "name": "billing update text",
+  "operation": "attentionFailure",
+  "input": {
+   "message": "The included AI service needs a billing update.",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "code": "service_credits",
+    "nextAt": 1790676900
+   }
+  }
+ },
+ {
+  "name": "allowance with future reset",
+  "operation": "attentionFailure",
+  "input": {
+   "message": "worldlet_daily_allowance reset at 2026-09-30T00:00:00.500Z",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "code": "model_allowance",
+    "nextAt": 1790726405.5
+   }
+  }
+ },
+ {
+  "name": "allowance with past reset",
+  "operation": "attentionFailure",
+  "input": {
+   "message": "worldlet_monthly_allowance reset at 2026-09-01T00:00:00Z",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "code": "model_allowance",
+    "nextAt": 1790726405
+   }
+  }
+ },
+ {
+  "name": "allowance text without reset",
+  "operation": "attentionFailure",
+  "input": {
+   "message": "Your included model budget for today is used.",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "code": "model_allowance",
+    "nextAt": 1790726405
+   }
+  }
+ },
+ {
+  "name": "unclassified failure",
+  "operation": "attentionFailure",
+  "input": {
+   "message": "socket hang up",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "code": "synthesis_failed"
+   }
+  }
+ }
+]

@@ -1,0 +1,858 @@
+{
+  "airbnb": {
+    "page": "https://www.airbnb.com/",
+    "source": "https://a0.muscache.com/airbnb/static/icons/apple-touch-icon-180x180-bcbe0e3960cd084eb8eaf1353cf3c730.png",
+    "file": "airbnb/logo.png",
+    "sha256": "a3b0572f1eac888ee1071a63f6cad84cd71434c4675ed13d97bf35284358679a",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "apple-notes": {
+    "page": "https://apps.apple.com/us/app/notes/id1110145109?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/bc/b1/1c/bcb11c9d-ea61-089f-3b84-0f8911dd175d/notesCalistoga-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg",
+    "file": "apple-notes/logo.jpg",
+    "sha256": "e400c32e57207e9347fe78b5a32d4dd26a41eda5c7df3c6987287e844e6f35f7",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "apple-reminders": {
+    "page": "https://apps.apple.com/us/app/reminders/id1108187841?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ac/53/c8/ac53c892-22b6-b0d8-ace6-9750d777b56f/remindersCalistoga-0-0-1x_U007epad-0-1-0-0-85-220.png/512x512bb.jpg",
+    "file": "apple-reminders/logo.jpg",
+    "sha256": "a40c1ece124cc2765479c06e12546f29a7883ac5689cd5503cb60703bb911329",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "claude-code": {
+    "page": "https://claude.com/product/claude-code",
+    "source": "https://claude.ai/favicon.svg",
+    "file": "claude-code/logo.svg",
+    "sha256": "b150888bc7257af83e3b85d3c2be4294f88986026f8168f6c12fc1fde6697350",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "codex": {
+    "page": "https://openai.com/codex/",
+    "source": "Official installed OpenAI app: Contents/Resources/app.icns",
+    "file": "codex/logo.png",
+    "sha256": "8c249bc2f382692491a33e80f61bd447829bd298be751af02f3b106c0b9bf41a",
+    "retrieved": "2026-09-15",
+    "note": "Original Codex icon extracted from the installed OpenAI desktop app with macOS sips (ICNS to PNG); no redrawing or recoloring."
+  },
+  "discord": {
+    "page": "https://discord.com/branding",
+    "source": "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg",
+    "file": "discord/logo.svg",
+    "sha256": "296286aa112c4400af8e96191ab888f81abd4bd1d5dc7294112a622ef43581b1",
+    "retrieved": "2026-09-16",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "doordash": {
+    "page": "https://about.doordash.com/en-us",
+    "source": "https://about.doordash.com/favicon.ico",
+    "file": "doordash/logo.ico",
+    "sha256": "dcee9c93bf53d2193e094747290cf83db0fb174526170ab5f13902a394c16f2d",
+    "retrieved": "2026-09-16",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "fitbit": {
+    "page": "https://www.fitbit.com/",
+    "source": "https://www.fitbit.com/apple-touch-icon.png",
+    "file": "fitbit/logo.png",
+    "sha256": "00bf003fc797237f21abd1b30800872a108a023ad206d3a21f1992bc7a23df91",
+    "retrieved": "2026-09-17",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "github": {
+    "page": "https://github.com/",
+    "source": "https://github.githubassets.com/favicons/favicon.svg",
+    "file": "github/logo.svg",
+    "sha256": "6a9577cd4f7fa6b75bde1025af85b944e9dd1388373b55ccba6e9f80ac2eae60",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "gmail": {
+    "page": "https://workspace.google.com/products/gmail/",
+    "source": "https://www.gstatic.com/images/branding/productlogos/gmail_2026/v2/web/192px.svg",
+    "file": "gmail/logo.svg",
+    "sha256": "0a242131424b796a26247a8edd41d66fa294da6d177897526a19b7e81aedfdb8",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "google-calendar": {
+    "page": "https://workspace.google.com/products/calendar/",
+    "source": "https://www.gstatic.com/images/branding/productlogos/calendar_2026/v2/web/192px.svg",
+    "file": "google-calendar/logo.svg",
+    "sha256": "7f55cd877b2261948168db3d2e9468c0cf3f07766789489e853a0f9931dff8ea",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "google-maps": {
+    "page": "https://about.google/products/",
+    "source": "https://www.gstatic.com/marketing-cms/assets/images/55/0e/c70d6751460a973c06968f0b64e0/logo-maps-2025-color-2x-web-96dp.webp",
+    "file": "google-maps/logo.webp",
+    "sha256": "8a3234a66b8c25693b32e8b663aa86749a5dd878c6bbe902785d6914bf9a1b2e",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "notion": {
+    "page": "https://www.notion.com/",
+    "source": "https://www.notion.com/front-static/logo-ios.png",
+    "file": "notion/logo.png",
+    "sha256": "483846a85e43e22879445047b83b22033e70fcc25ab34809ebadb7f856507ee0",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "obsidian": {
+    "page": "https://obsidian.md/",
+    "source": "https://obsidian.md/favicon.svg",
+    "file": "obsidian/logo.svg",
+    "sha256": "70fd49cda1de5b31893331d0966134afca1a25e61057b8bc071c4b033de0b9fe",
+    "retrieved": "2026-09-17",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "oura": {
+    "page": "https://ouraring.com/",
+    "source": "https://ouraring.com/assets/icons/apple-touch-icon.png",
+    "file": "oura/logo.png",
+    "sha256": "62e0ec5ff982740054980366b38255f3e41ec3bd6e254330675163f53c452ace",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "paypal": {
+    "page": "https://www.paypal.com/",
+    "source": "https://www.paypalobjects.com/webstatic/icon/pp258.png",
+    "file": "paypal/logo.png",
+    "sha256": "6d8050cc8b33b9fdca434c4a66bde15cb8540db2a4bc29f7bb9ede78753477df",
+    "retrieved": "2026-09-17",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "plaid": {
+    "page": "https://plaid.com/",
+    "source": "https://plaid.com/assets/img/favicons/apple-touch-icon.png",
+    "file": "plaid/logo.png",
+    "sha256": "f9a98e98c41212eb89e1d92e9f2318349570001e497e1fb1cc32bc39eb2f1016",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "strava": {
+    "page": "https://www.strava.com/",
+    "source": "https://d3nn82uaxijpm6.cloudfront.net/icon-strava-chrome-192.png?v=dLlWydWlG8",
+    "file": "strava/logo.png",
+    "sha256": "5a728298eeaa1b1e16f516e9bc042a7ac8d339d2729bbbbfb1fb5e0bf7026dc2",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "stripe": {
+    "page": "https://stripe.com/newsroom/information",
+    "source": "https://stripe.com/favicon.ico",
+    "file": "stripe/logo.ico",
+    "sha256": "50630726cbd85299c64dbb510f051e5d70013abcd620fa2b23be82e618140150",
+    "retrieved": "2026-09-16",
+    "note": "Original publisher favicon; unchanged bytes, proportional rendering only."
+  },
+  "tiktok": {
+    "page": "https://www.tiktok.com/",
+    "source": "https://www.tiktok.com/favicon.ico",
+    "file": "tiktok/logo.png",
+    "sha256": "d0d48654b83875f95e62ef0744e31de50aa9913c031eeee4a20f407485be3595",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher favicon; unchanged PNG bytes, proportional rendering only."
+  },
+  "tripit": {
+    "page": "https://www.tripit.com/",
+    "source": "https://www.tripit.com/themes/custom/tripit_theme/favicon.ico",
+    "file": "tripit/logo.ico",
+    "sha256": "51ece43450bd4566c62a464a7b8c4b1176c78e1f5ab1a62260d9c7d4fa3bc079",
+    "retrieved": "2026-09-17",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "x": {
+    "page": "https://about.x.com/en",
+    "source": "https://about.x.com/content/dam/about-twitter/x/large-x-logo.png.twimg.1920.png",
+    "file": "x/logo.png",
+    "sha256": "36ed579b7824a33ac5410f35425ea7b746564f998f191118634409e20a122685",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher asset; unchanged bytes, proportional rendering only."
+  },
+  "youtube": {
+    "page": "https://www.youtube.com/",
+    "source": "https://www.youtube.com/s/desktop/dc4e66d7/img/favicon_144x144.png",
+    "file": "youtube/logo.png",
+    "sha256": "e39dc3d8c2f82ad2375132a8efcf521c232d5e2cf08abeb9bebe1ad94afb2157",
+    "retrieved": "2026-09-15",
+    "note": "Original publisher favicon; unchanged PNG bytes, proportional rendering only."
+  },
+  "claude": {
+    "page": "https://claude.ai/",
+    "source": "https://claude.ai/favicon.ico",
+    "file": "claude/logo.ico",
+    "sha256": "525d5c063365f7656ba0fe8b9165742c4874e70852d9bed7153b6faca8663a02",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "perplexity": {
+    "page": "https://www.perplexity.ai/",
+    "source": "https://www.perplexity.ai/favicon.ico",
+    "file": "perplexity/logo.ico",
+    "sha256": "df9a6478592660077e4e774d37bae6db1eb4d7d9d2cac31f0dcdab8804f76c06",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "whatsapp": {
+    "page": "https://web.whatsapp.com/",
+    "source": "https://static.whatsapp.net/rsrc.php/yd/r/PfkSLByWV8O.webp",
+    "file": "whatsapp/logo.webp",
+    "sha256": "48e94afeffb29c66f5e84dc8df4ee247f838c287f87cb8960cbf67f4e8d3dd37",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "telegram": {
+    "page": "https://web.telegram.org/",
+    "source": "https://web.telegram.org/favicon.ico",
+    "file": "telegram/logo.ico",
+    "sha256": "462c72824442b77689e0650dfe56a218cbea68b48669d68f3f7b3247af187d09",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "wechat": {
+    "page": "https://www.wechat.com/",
+    "source": "https://www.wechat.com/favicon.ico",
+    "file": "wechat/logo.ico",
+    "sha256": "a2bf6e2029c55abb5398e8289e1de6a585fc019f3b6982e18a6e64889655f85f",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "slack": {
+    "page": "https://app.slack.com/",
+    "source": "https://a.slack-edge.com/9cc0056/img/icons/favicon-32.png",
+    "file": "slack/logo.png",
+    "sha256": "ca3872d0fb85ff9858bcbdc529d6e1db32c029c681c6e723e4f2ecb1c7defea6",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "teams": {
+    "page": "https://teams.microsoft.com/",
+    "source": "https://teams.public.onecdn.static.microsoft/evergreen-assets/icons/microsoft_teams_logo_refresh_v2025.ico",
+    "file": "teams/logo.ico",
+    "sha256": "5b47b12308f87a6a8060f63dc91ca2fd01b063e3d233aa62f5ec255cd68e6037",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "zoom": {
+    "page": "https://app.zoom.us/wc/",
+    "source": "https://st1.zoom.us/zoom.ico",
+    "file": "zoom/logo.ico",
+    "sha256": "4c1dd4dc46d1b7c6aee2f25d8977733670f80920180c220ac04440958120ceb0",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "google-drive": {
+    "page": "https://drive.google.com/drive/u/0/my-drive",
+    "source": "https://ssl.gstatic.com/images/branding/productlogos/drive_2026/v2/ico/drive_2026_32dp.ico",
+    "file": "google-drive/logo.ico",
+    "sha256": "16640c06f6249fdafd7828fd8425753abc360864dfd88f66704a32c38943c805",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "dropbox": {
+    "page": "https://www.dropbox.com/home",
+    "source": "https://cfl.dropboxstatic.com/static/metaserver/static/images/favicon.ico",
+    "file": "dropbox/logo.ico",
+    "sha256": "c0906d540d89dbe1f09b24f17b7f35b81350e8d381c1558b075c28ea913c450d",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "microsoft-word": {
+    "page": "https://word.cloud.microsoft/",
+    "source": "https://res.cdn.office.net/files/fabric-cdn-prod_20251117.001/assets/brand-icons/product/svg/word_16x1.svg",
+    "file": "microsoft-word/logo.svg",
+    "sha256": "28e0bcf7243ff6affa00fb19d25217f37230886d1e789ba27e17eddb9d703d68",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "microsoft-excel": {
+    "page": "https://excel.cloud.microsoft/",
+    "source": "https://res.cdn.office.net/files/fabric-cdn-prod_20251117.001/assets/brand-icons/product/svg/excel_16x1.svg",
+    "file": "microsoft-excel/logo.svg",
+    "sha256": "b2cc3616270b448a5f2abbebb7bf23f048136556da1930c292f6edef659ace58",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "microsoft-powerpoint": {
+    "page": "https://powerpoint.cloud.microsoft/",
+    "source": "https://res.cdn.office.net/files/fabric-cdn-prod_20251117.001/assets/brand-icons/product/svg/powerpoint_16x1.svg",
+    "file": "microsoft-powerpoint/logo.svg",
+    "sha256": "d7399a7410c9bc1266619b1b5d23f9a1d36601a08e6c51710124b3b38a6e3e06",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "google-docs": {
+    "page": "https://workspace.google.com/",
+    "source": "https://www.gstatic.com/images/branding/product/2x/docs_2020q4_48dp.png",
+    "file": "google-docs/logo.png",
+    "sha256": "847dd64eee44da9ba829bd44a3dbe2bc11a5f8ce6547f88c62c98910f096a27e",
+    "retrieved": "2026-09-25",
+    "note": "Official Google Workspace web product icon; unchanged bytes."
+  },
+  "google-sheets": {
+    "page": "https://workspace.google.com/",
+    "source": "https://www.gstatic.com/images/branding/product/2x/sheets_2020q4_48dp.png",
+    "file": "google-sheets/logo.png",
+    "sha256": "7bef05dde4e1e8e9c5e7374cab674241f4d77b8574b19e829f2f414fe94191a6",
+    "retrieved": "2026-09-25",
+    "note": "Official Google Workspace web product icon; unchanged bytes."
+  },
+  "figma": {
+    "page": "https://www.figma.com/files/",
+    "source": "https://static.figma.com/app/icon/1/touch-180.png",
+    "file": "figma/logo.png",
+    "sha256": "c20f348f4776fb1070aeede7e58b13fc64d4ac13fbef4ec792be0e387c40ca21",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "canva": {
+    "page": "https://www.canva.com/",
+    "source": "https://static.canva.com/static/images/favicon.ico",
+    "file": "canva/logo.ico",
+    "sha256": "ec2fbad47e598fe06c7a2b825224b3b1b8d8221f3002e6370e627d459ff0634a",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "spotify": {
+    "page": "https://open.spotify.com/",
+    "source": "https://open.spotifycdn.com/cdn/images/favicon32.b64ecc03.png",
+    "file": "spotify/logo.png",
+    "sha256": "b64ecc030dcc47688f94d6c4b14d747f2b8dbcdc7012e5c69574f8354eac7257",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "apple-music": {
+    "page": "https://music.apple.com/",
+    "source": "https://music.apple.com/assets/favicon/favicon-180.png",
+    "file": "apple-music/logo.png",
+    "sha256": "9595edfa46d80814cbccad52f507315702218a7db1f2235401cad21ed99698e6",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "reddit": {
+    "page": "https://www.reddit.com/",
+    "source": "https://www.redditstatic.com/shreddit/assets/favicon/64x64.png",
+    "file": "reddit/logo.png",
+    "sha256": "f60ae5a33ee8d16c71a0ff6b45e3c2524f9ccaf3cd33e6636c6493dd4ec2d953",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "instagram": {
+    "page": "https://www.instagram.com/",
+    "source": "https://static.cdninstagram.com/rsrc.php/yr/r/rzWiSjZRxk5.webp",
+    "file": "instagram/logo.webp",
+    "sha256": "5ea73220ab5bda046e21d3f0cba26eafadeb3cc2bbd07a91978774048c84b6ee",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "linkedin": {
+    "page": "https://www.linkedin.com/feed/",
+    "source": "https://static.licdn.com/aero-v1/sc/h/akt4ae504epesldzj74dzred8",
+    "file": "linkedin/logo.svg",
+    "sha256": "b1f9ca49adf83cc0c5953d1067f56dc0ba8d46b3262b7078792f19b96cb11bcd",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "amazon": {
+    "page": "https://www.amazon.com/",
+    "source": "https://www.amazon.com/favicon.ico",
+    "file": "amazon/logo.ico",
+    "sha256": "5866636f18764cd66366ae6eb682e972b4eae1771512cd76b304b6dd3c0f1d2d",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "netflix": {
+    "page": "https://www.netflix.com/browse",
+    "source": "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2023.ico",
+    "file": "netflix/logo.ico",
+    "sha256": "9c5f7722c5df8eb24dda20ecc01c9f73e3103e10052fd980da4e7d9f753a97d3",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "cursor": {
+    "page": "https://cursor.com/",
+    "source": "https://cursor.com/marketing-static/icon-192x192-light.png",
+    "file": "cursor/logo.png",
+    "sha256": "267649be4d2a26dea632bb6cc1f7a400daa117e5cd3335a140ba5cb0148aaedc",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "deepseek": {
+    "source": "https://www.deepseek.com/favicon.ico",
+    "file": "deepseek/logo.ico",
+    "sha256": "30a4420e6e4dcb17fd7de560c5004346c2bc8cd971d2d5f5ee15326603e51321",
+    "retrieved": "2026-09-25"
+  },
+  "onedrive": {
+    "page": "https://apps.apple.com/us/app/onedrive/id823766827?mt=12&uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/be/0c/51/be0c5106-dfe3-f562-9fca-a3984a223bfd/OneDrive.png/512x512bb.png",
+    "file": "onedrive/logo.png",
+    "sha256": "387a7fecd5f3ef04a9d5c8703386a0ffd8cefa0de861a450a1ca4a99dd0eee2d",
+    "retrieved": "2026-09-25",
+    "note": "Official App Store publisher artwork, unchanged bytes."
+  },
+  "chatgpt": {
+    "page": "https://apps.apple.com/us/app/chatgpt/id6448311069?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e6/9a/0e/e69a0e54-a15f-4b2a-cb42-84788edb896e/AppIcon-0-0-1x_U007epad-0-0-0-1-0-P3-85-220.png/512x512bb.jpg",
+    "file": "chatgpt/logo.png",
+    "sha256": "87e5a47088149ecc80fe1491cb66175d0db7ebdfea5223d8012dc908556e8a0d",
+    "retrieved": "2026-09-25",
+    "note": "Official App Store publisher artwork, unchanged bytes."
+  },
+  "gemini": {
+    "file": "gemini/logo.png",
+    "source": "Installed official Mac app icon, sips PNG conversion",
+    "sha256": "04d879e8e7b7b415dbe6ec1c4b37a10c1eb074f341b6f8246788fc81d8d221de",
+    "retrieved": "2026-09-25"
+  },
+  "vscode": {
+    "file": "vscode/logo.png",
+    "source": "Installed official Mac app icon, sips PNG conversion",
+    "sha256": "58f0342ac9dce1ff42146dbc00bcfaa7e30e4db102b2b0c88486250c333eed2a",
+    "retrieved": "2026-09-25"
+  },
+  "apple-podcasts": {
+    "source": "Installed publisher application icon: com.apple.podcasts",
+    "file": "apple-podcasts/logo.png",
+    "sha256": "fbfe94a7bcb470a1bc80542d84f70618d64e57b68ca952297f45b9c827eb530b",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "apple-photos": {
+    "source": "Installed publisher application icon: com.apple.Photos",
+    "file": "apple-photos/logo.png",
+    "sha256": "72dcf1d85517bbff934b5cf56f86a9810422a3e540c286b6644326a0dbf9d210",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "pages": {
+    "source": "Installed publisher application icon: com.apple.iWork.Pages",
+    "file": "pages/logo.png",
+    "sha256": "d0de8ecb6dfa50e1b23b67fdf28848e67af1facb58d26e352dd37d2380b4d98a",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "numbers": {
+    "source": "Installed publisher application icon: com.apple.iWork.Numbers",
+    "file": "numbers/logo.png",
+    "sha256": "94c9f645d1423dec62ee2e979a395ac58d551d7ee4c53b6445255900f28a123c",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "keynote": {
+    "source": "Installed publisher application icon: com.apple.iWork.Keynote",
+    "file": "keynote/logo.png",
+    "sha256": "4b68a41c469c46be9d086962f992a510cf37d05f8b058c70133ba4abc4f3b290",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "messages": {
+    "source": "Installed publisher application icon: com.apple.MobileSMS",
+    "file": "messages/logo.png",
+    "sha256": "28bcaae2ec6b696f2d58ea75ab11226c8b2b64ffe04b88ffb0b89e4c937e0c09",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "facetime": {
+    "source": "Installed publisher application icon: com.apple.FaceTime",
+    "file": "facetime/logo.png",
+    "sha256": "b09d6afa94e81356a60e8b84d446d0cb5b828d52257d1e993c816f998fdcca3a",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "safari": {
+    "source": "Installed publisher application icon: com.apple.Safari",
+    "file": "safari/logo.png",
+    "sha256": "9e8d2eb38fdbf0cf1f2566f7a829e825f43fd8155e66e6d577c2d29a8a2cf77c",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "chrome": {
+    "source": "Installed publisher application icon: com.google.Chrome",
+    "file": "chrome/logo.png",
+    "sha256": "c3bc06ce343a356cac6043eb608bc13a351f1ffbb6b1ab27bea126a1d1f286ad",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "capcut": {
+    "source": "Installed publisher application icon: com.lemon.lvoverseas",
+    "file": "capcut/logo.png",
+    "sha256": "556ad0274c11291db757a8e2c3303db7473c663367e59ad253439b6e9d63aad2",
+    "retrieved": "2026-09-25",
+    "note": "Publisher icon converted proportionally to PNG."
+  },
+  "outlook": {
+    "page": "https://outlook.live.com/mail/",
+    "source": "https://outlook.live.com/owa/favicon.ico",
+    "file": "outlook/logo.ico",
+    "sha256": "e35d94b76894d6eca96ff5b1a12d94dfe73485ef3c52cb5b4395be8ffac1cb45",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "google-slides": {
+    "page": "https://workspace.google.com/",
+    "source": "https://www.gstatic.com/images/branding/product/2x/slides_2020q4_48dp.png",
+    "file": "google-slides/logo.png",
+    "sha256": "faafa258b255df313ec807447f87fde903d9b4b560cb83025d1396c5a07fe517",
+    "retrieved": "2026-09-25",
+    "note": "Official Google Workspace web product icon; unchanged bytes."
+  },
+  "todoist": {
+    "page": "https://app.todoist.com/",
+    "source": "https://app.todoist.com/apple-touch-icon.png",
+    "file": "todoist/logo.png",
+    "sha256": "1a2aea089217f8fd78c74abeccffbdff07a6320ae47c3edae362780b53f3f089",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "things": {
+    "page": "https://culturedcode.com/things/",
+    "source": "https://culturedcode.com/apple-touch-icon.png?breackcache=ddi27f1a",
+    "file": "things/logo.png",
+    "sha256": "7e504cbeb79105dbd54b86a4023ed7a75abff044d17b7a582c01b03fcc838f74",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "google-photos": {
+    "page": "https://photos.google.com/",
+    "source": "https://storage.googleapis.com/gweb-mobius-cdn/photos/uploads/383ce0413fa82bcaf6de49fd7997678b21b9762e.svg",
+    "file": "google-photos/logo.svg",
+    "sha256": "5b636d1b5b59cb4e4b9b92d25c7ecd4a28ff72fe742ed0c2862af5d383d9abc8",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "firefox": {
+    "page": "https://www.mozilla.org/firefox/",
+    "source": "https://www.firefox.com/media/img/favicons/firefox/browser/apple-touch-icon.79c2abeb4e35.png",
+    "file": "firefox/logo.png",
+    "sha256": "b52f82badc13b02847679c14c927332cd7a24c4d35a94368dc070d47a0f0d802",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "arc": {
+    "page": "https://arc.net/",
+    "source": "https://arc.net/favicon.png",
+    "file": "arc/logo.png",
+    "sha256": "2e6881ee4ea7b22e3bdd97f2432b7ce5bb3e3d5bbbdb5457a4a4f8b69a43e7bd",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "pinterest": {
+    "page": "https://www.pinterest.com/",
+    "source": "https://s.pinimg.com/webapp/logo_transparent_144x144-3da7a67b.png",
+    "file": "pinterest/logo.png",
+    "sha256": "5410764149903d1db37bbd92d37aa6e08ff4c129bd13d7d9e65762312d4da774",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "facebook": {
+    "page": "https://www.facebook.com/",
+    "source": "https://static.xx.fbcdn.net/rsrc.php/y1/r/ay1hV6OlegS.ico",
+    "file": "facebook/logo.ico",
+    "sha256": "8924f44d76426a340b105cbdc5b93678c6b772e847b393f2568d94847c0d8d80",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "threads": {
+    "page": "https://www.threads.com/",
+    "source": "https://static.cdninstagram.com/rsrc.php/yP/r/0Qa-AOmHi0c.ico",
+    "file": "threads/logo.ico",
+    "sha256": "9507ab25e108609881b195aea46f36844aeb229c2ae80301c10c42202bc28770",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "photoshop": {
+    "page": "https://photoshop.adobe.com/",
+    "source": "https://photoshop.adobe.com/favicon-512x512.png",
+    "file": "photoshop/logo.png",
+    "sha256": "4d3833baec89fee9af73284459e699da2c98dec760d83bc1ecad4ac1580fce3c",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "illustrator": {
+    "page": "https://apps.apple.com/us/app/adobe-illustrator-graphic-art/id1018784575?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c8/9f/bb/c89fbbff-23ab-fa49-fef0-7c96ca0023b9/AppIcon-0-1x_U007emarketing-0-8-0-sRGB-85-220-0.png/512x512bb.jpg",
+    "file": "illustrator/logo.jpg",
+    "sha256": "caa90566239e0523815ecc82fb9722f1926fa213d857faad1984d598658d0421",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "lightroom": {
+    "page": "https://lightroom.adobe.com/",
+    "source": "https://d3gnp5fs6fu2h7.cloudfront.net/assets/lr_appicon_128-c8fa6e68091cbae9d1a081539ebee8180f3bb6faab5506f69ce3a7ab5a79076a.png",
+    "file": "lightroom/logo.png",
+    "sha256": "c8fa6e68091cbae9d1a081539ebee8180f3bb6faab5506f69ce3a7ab5a79076a",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "feishu": {
+    "page": "https://www.feishu.cn/",
+    "source": "https://p16-hera-overseas.larksuitecdn.com/tos-mya-i-lojyj5t9n9/c801a0760aef41dc9835bb36a61400eb.png~tplv-lojyj5t9n9-origin.image",
+    "file": "feishu/logo.png",
+    "sha256": "f58d925630a7f1f99fd9bcb45d695d4446e6639fe774eabd69c6c2ebcfacdfb1",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "dingtalk": {
+    "page": "https://www.dingtalk.com/",
+    "source": "https://gw.alicdn.com/imgextra/i3/O1CN01eMicSg1GVD4uXMWGv_!!6000000000627-73-tps-32-32.ico",
+    "file": "dingtalk/logo.ico",
+    "sha256": "86a24b5e0853f6d74f1ca5614e1c41c83fb0e7032c4e246fe9e0efc5baced36c",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "tencent-meeting": {
+    "page": "https://meeting.tencent.com/",
+    "source": "https://meeting.tencent.com/favicon.ico",
+    "file": "tencent-meeting/logo.ico",
+    "sha256": "9fd53bcee529f2fca9a6e404cece0e6a9c85ec3e2ef56acbd5e615602d05711f",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "bilibili": {
+    "page": "https://www.bilibili.com/",
+    "source": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+    "file": "bilibili/logo.png",
+    "sha256": "cccf93bd64c30b6c8670cb871460213029d11161555d63eef9ce791c825f2544",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "xiaohongshu": {
+    "page": "https://www.xiaohongshu.com/explore",
+    "source": "https://fe-video-qc.xhscdn.com/fe-platform/ed8fe781ce9e16c1bfac2cd962f0721edabe2e49.ico",
+    "file": "xiaohongshu/logo.ico",
+    "sha256": "a2dc2a235f74251f72d1692ac246098a98d8cb4f4a474e606617b5208a2c83bf",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "linear": {
+    "page": "https://linear.app/",
+    "source": "https://linear.app/static/apple-touch-icon.png?v=2",
+    "file": "linear/logo.png",
+    "sha256": "3d22d53907820245ec1724a4954d3e180b70f21b2552697986b3f141a6730ef7",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "uber": {
+    "page": "https://apps.apple.com/us/app/uber-rides-eats-hotels/id368677368?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/44/1a/85/441a85d4-6bf8-5542-15ca-d28b5b278824/AppIcon-0-0-1x_U007emarketing-0-8-0-0-85-220.png/512x512bb.jpg",
+    "file": "uber/logo.jpg",
+    "sha256": "83e5eea1169a198b416cec3cb81e6e6fb1e902c96646b28f46e783f9dd4e3628",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "uber-eats": {
+    "page": "https://apps.apple.com/us/app/uber-eats-food-groceries/id1058959277?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/20/e9/29/20e929af-3299-1b90-e6cf-ca033d379569/AppIcon-0-0-1x_U007emarketing-0-8-0-0-sRGB-85-220.png/512x512bb.jpg",
+    "file": "uber-eats/logo.jpg",
+    "sha256": "21cce16622d7687507e4e7685997f34ddd4d82ac16a367811c0c71f9fcae3dcd",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "booking": {
+    "page": "https://apps.apple.com/us/app/booking-com-hotels-travel/id367003839?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/00/66/a6/0066a6ac-2a85-5e30-9b8a-7c58977e1269/AppIcon-0-0-1x_U007epad-0-9-0-85-220.jpeg/512x512bb.jpg",
+    "file": "booking/logo.jpg",
+    "sha256": "96449c44493852605c6014da3b4828c762669d2c5577e1fa1e257e168eebd5bb",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "baidu-netdisk": {
+    "page": "https://apps.apple.com/us/app/%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98/id547166701?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/52/2a/c3/522ac3b7-a0ec-a226-d8f0-9f1d0c7efca2/AppIcon-0-0-1x_U007ephone-0-1-0-0-sRGB-85-220.png/512x512bb.jpg",
+    "file": "baidu-netdisk/logo.jpg",
+    "sha256": "319ee5edc0006a1112d71b95151b65b7ce018a964d0ab3caf1d93735af92b028",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "twitch": {
+    "page": "https://www.twitch.tv/",
+    "source": "https://assets.twitch.tv/assets/favicon-32-e29e246c157142c94346.png",
+    "file": "twitch/logo.png",
+    "sha256": "4d87b8e63982e6f22b71048d310922e0c23858d3df0f7f3f0b362e7db7b25abb",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "steam": {
+    "page": "https://store.steampowered.com/",
+    "source": "https://store.steampowered.com/favicon.ico",
+    "file": "steam/logo.ico",
+    "sha256": "9f890a9debcdfccc339149a7943be9aff9e4c9203c2fa37d5671a5b2c88503ad",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "copilot": {
+    "page": "https://copilot.microsoft.com/",
+    "source": "https://copilot.microsoft.com/static/cmc/favicon.ico",
+    "file": "copilot/logo.ico",
+    "sha256": "87547088ebfbe90de71a7005befcb49de9744c09cd2546a4864f92e090300837",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "acrobat": {
+    "page": "https://acrobat.adobe.com/",
+    "source": "https://acrobat.adobe.com/apple-touch-icon-57x57-precomposed.png",
+    "file": "acrobat/logo.png",
+    "sha256": "a8681d11b73ff6b8bf65db2ecfe3f872b06569f2473816930030b78ccc9ce655",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "wikipedia": {
+    "page": "https://www.wikipedia.org/",
+    "source": "https://www.wikipedia.org/static/apple-touch/wikipedia.png",
+    "file": "wikipedia/logo.png",
+    "sha256": "4c8bf96d667fa2e9f072bdd8e9f25c8ba6ba2ad55df1af7d9ea0dd575c12abee",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "qq": {
+    "page": "https://apps.apple.com/us/app/qq/id444934666?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/04/ad/b6/04adb647-777c-85e3-83ed-979ea46484bf/AppIcon-1-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg",
+    "file": "qq/logo.jpg",
+    "sha256": "104ac0f9accddba42291d3302a3aa07b79c5945c912e2a8fc4b68838141cdcdf",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "wps": {
+    "page": "https://apps.apple.com/us/app/wps-office-ai-doc-pdf-sheet/id1468073139?mt=12&uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/f8/fb/a5/f8fba583-08aa-e885-2197-5c591ee0d2ae/wpsoffice.png/512x512bb.png",
+    "file": "wps/logo.png",
+    "sha256": "4d779902e9df20f2e97e6b4870f61f7a7217c158eb17996c8ec617c52349a8aa",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "doubao": {
+    "page": "https://www.doubao.com/chat/",
+    "source": "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/favicon/new-doubao/192x192.png",
+    "file": "doubao/logo.png",
+    "sha256": "dabb2abd94e3a6c11e7f1a42c9343839b6ef643c086751b71afbc68f615aec38",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "taobao": {
+    "page": "https://www.taobao.com/",
+    "source": "https://img.alicdn.com/tps/i3/T1OjaVFl4dXXa.JOZB-114-114.png",
+    "file": "taobao/logo.png",
+    "sha256": "c6c57174b28f92c3b5bf64b020ba8436862de7091c238ca898f252ed6d3ac8b5",
+    "retrieved": "2026-09-25",
+    "note": "Publisher website icon; unchanged bytes."
+  },
+  "alipay": {
+    "page": "https://apps.apple.com/us/app/alipay-simplify-your-life/id333206289?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/49/83/3c/49833c6e-247b-4abd-bc82-459887acd961/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/512x512bb.jpg",
+    "file": "alipay/logo.jpg",
+    "sha256": "a6e98b9a625914e392492ae7b041f8a158588e18ca93652caaacf8b5bda59ed1",
+    "retrieved": "2026-09-25",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  },
+  "posthog": {
+    "page": "https://posthog.com",
+    "source": "https://posthog.com/favicon-32x32.png?v=6e5ac8d4a5b381b5caa29396fbf7c955",
+    "file": "posthog/logo.png",
+    "sha256": "aaae15e2cf376520cb052e4f3a42850b6caeaac279c44809760d3b2c3f9a31f8",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "cloudflare": {
+    "page": "https://www.cloudflare.com",
+    "source": "https://www.cloudflare.com/favicon.ico",
+    "file": "cloudflare/logo.ico",
+    "sha256": "5414bc6e4b3f6e10f99b5d37abf4420da4dcaece66f8f2c08e090e87267adbc5",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "vercel": {
+    "page": "https://vercel.com/dashboard",
+    "source": "https://vercel.com/favicon.ico",
+    "file": "vercel/logo.ico",
+    "sha256": "6d03f17164357abb5dc49e90a572f94c4f5e6004e659d3efed6a9e947670d81b",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "netlify": {
+    "page": "https://www.netlify.com",
+    "source": "https://www.netlify.com/favicon/apple-touch-icon.png",
+    "file": "netlify/logo.png",
+    "sha256": "3e79c01aa9a888d576441a5bc28288d70dd6b4ad1f8cae37c4f88e99543a4483",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "supabase": {
+    "page": "https://supabase.com/dashboard",
+    "source": "https://supabase.com/dashboard/favicon/apple-icon-57x57.png",
+    "file": "supabase/logo.png",
+    "sha256": "14d3ee3719c27454f0598f5e1ee4d617baa8c6909ab3aa4f16aec611e1505e7f",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "firebase": {
+    "page": "https://firebase.google.com",
+    "source": "https://www.gstatic.com/devrel-devsite/prod/v5be16d8c9f9402e54c2da2ff24cb75c148f5d2bc84c6f8dfc8b9e16ae456160b/firebase/images/favicon.png",
+    "file": "firebase/logo.png",
+    "sha256": "7f7d3fdcc0f5da6cf7ee9e8444e46282674ca655b1ab81ad169e554e97105325",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "sentry": {
+    "page": "https://sentry.io",
+    "source": "https://sentry.io/favicon.ico",
+    "file": "sentry/logo.ico",
+    "sha256": "49a1d2db07116397feff5454872ecec134df7cad81aa366c0ced3a2940f13355",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "docker": {
+    "page": "https://www.docker.com",
+    "source": "https://www.docker.com/app/uploads/2024/02/cropped-docker-logo-favicon-32x32.png",
+    "file": "docker/logo.png",
+    "sha256": "a9e08fe48c361085d3348efdd81d5ac5830a8695aead9b616df96af88dddaac7",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "railway": {
+    "page": "https://railway.com/dashboard",
+    "source": "https://railway.com/apple-touch-icon.png",
+    "file": "railway/logo.png",
+    "sha256": "018a86de433081830621999d347d2752c810e9d839e6631138ccc9493443c3af",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "render": {
+    "page": "https://dashboard.render.com/",
+    "source": "https://dashboard.render.com/favicon-light.png",
+    "file": "render/logo.png",
+    "sha256": "01eb5c4b27b6755152a7b5e24f1df4e968ee5c22055bc18e5339c387399bee44",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "gitlab": {
+    "page": "https://about.gitlab.com",
+    "source": "https://about.gitlab.com/images/ico/favicon.ico",
+    "file": "gitlab/logo.ico",
+    "sha256": "378996a8488bf3a9e18aa56be0689878c60ed6fdb26c9445f2f55fbf88623e93",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "jira": {
+    "page": "https://www.atlassian.com/software/jira",
+    "source": "https://www.atlassian.com/favicon.ico",
+    "file": "jira/logo.ico",
+    "sha256": "43baad43fa76aa0cf465221172dd48c8acee360fcb2852d191aed588e23daf19",
+    "retrieved": "2026-09-25",
+    "note": "Original publisher asset; unchanged bytes."
+  },
+  "douyin": {
+    "page": "https://apps.apple.com/cn/app/%E6%8A%96%E9%9F%B3/id1142110895?uo=4",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/4d/b7/f2/4db7f24d-f39c-b291-c880-8afd5d93a1a4/AppIcon-0-0-1x_U007emarketing-0-0-0-7-0-0-85-220.png/512x512bb.jpg",
+    "file": "douyin/logo.jpg",
+    "sha256": "1d6317ff3cc453d7b29df04a7f5139cbdd535e3d7ef3b71c29dd08a81e6969a7",
+    "retrieved": "2026-10-04",
+    "note": "Official publisher App Store artwork; unchanged bytes."
+  }
+}

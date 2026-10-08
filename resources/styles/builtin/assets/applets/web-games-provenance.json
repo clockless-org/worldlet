@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-03",
+  "frame": "resources/styles/builtin/assets/applets/steam/peek-logo-v3.png (dormant Steam artwork, unchanged silhouette and controller)",
+  "method": "The round screen of the frame (blue Steam face, convex hull, minus the controller in front) is replaced by the game's own publisher art, cover- or contain-fitted, softened 0.8px, edge-vignetted 18% and warmed 7% toward cream so it reads painted. No generative model; the brass rim, stand and controller stay pixel-identical.",
+  "sources": {
+    "wordle": "https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png",
+    "nyt-connections": "https://www.nytimes.com/games-assets/v2/metadata/connections-apple-touch-icon.png",
+    "slither-io": "https://slither.io/s/fbthumb5.jpg",
+    "agar-io": "https://agar.io/img/1200x630.png",
+    "krunker-io": "https://krunker.io/img/pwa/icon1024x1024.png",
+    "skribbl-io": "https://skribbl.io/img/thumbnail.png",
+    "infinite-craft": "https://neal.fun/share-cards/infinite-craft.png",
+    "little-alchemy-2": "https://littlealchemy2.com/static/img/icon-256x256.png",
+    "cookie-clicker": "https://orteil.dashnet.org/cookieclicker/img/perfectCookie.png",
+    "lichess": "https://lichess1.org/assets/logo/lichess.svg",
+    "drive-mad": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/591d984dcac4fb694f3f8195bb8f6118/drive-mad-logo.png",
+    "subway-surfers": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/1c920b9279c2bedec567c1b58129ae8f/subway-surfers-logo.png",
+    "sekai": "https://sekai.ai/apple-touch-icon.png",
+    "sekai-rogue-ai-tic-tac-toe": "https://prod-data.sekai.chat/v3-games/sandbox/games/6431a93a-e538-4564-ac34-8b46ac6e467c/key-art/poster/fd4700f454d24a528b6021f9f907d18f/art.large.webp",
+    "sekai-sketch-racer": "https://prod-data.sekai.chat/v3-games/sandbox/games/878c8bed-80d5-469c-93a5-8a96aa1e4ad4/key-art/poster/43b22fea38074512a51eb18513f1efc6/art.large.webp",
+    "sekai-mixing-colors": "https://prod-data.sekai.chat/v3-games/sandbox/games/1821065b-6528-4963-bde3-30af540fd6b8/key-art/poster/717f9db165d54e01a42714549d80d0e4/art.large.webp",
+    "sekai-roller-coaster": "https://prod-data.sekai.chat/v3-games/sandbox/games/1b092651-e97e-40f4-bb29-49f6fe133bfd/key-art/poster/ca5aaa2a367d4550b9f0a9a50a6f98e8/art.large.webp",
+    "sekai-3d-uno": "https://prod-data.sekai.chat/v3-games/sandbox/games/6cd2ca94-7b6f-409d-a17c-0b0751291c55/key-art/poster/4d604d2813d74ad1b84615607028ddba/art.large.webp",
+    "sekai-devil-level": "https://prod-data.sekai.chat/v3-games/sandbox/games/3beb3307-e5cc-44b3-89b4-b8942e5d085e/key-art/poster/0a905b47ade74bc9bb83e46495587b5c/art.large.webp"
+  }
+}

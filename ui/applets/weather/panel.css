@@ -1,0 +1,29 @@
+.weather-panel{font:400 15px/1.4 var(--ui-font-ui);width:100%;box-sizing:border-box}
+.weather-panel .ui-applet-header{min-height:48px;margin-bottom:8px;padding-bottom:12px}
+.weather-current{display:flex;align-items:center;gap:16px;padding:8px 0 12px;border-bottom:1px solid var(--control-line);flex-wrap:wrap}
+.weather-panel-icon{display:inline-flex;flex:none;width:36px;height:38px}.weather-panel-icon svg{width:100%;height:100%}
+.weather-current>.weather-panel-icon{width:64px;height:66px}.weather-temperature{font-size:44px;line-height:1;font-weight:600;letter-spacing:-2px}
+.weather-condition{font-size:18px}.weather-current-meta{display:grid;gap:6px;margin-left:auto;font-size:13px}
+.weather-forecast-heading{font-size:18px;margin:14px 0 10px}
+.weather-forecast-list{display:grid;gap:4px}
+.weather-forecast-row{display:grid;grid-template-columns:50px 36px minmax(85px,1fr) 34px minmax(40px,1fr) 34px 44px;align-items:center;gap:10px;padding:2px 10px;min-height:44px;box-sizing:border-box;width:100%;border:1px solid var(--control-line);border-radius:10px;background:transparent;color:var(--control-ink);text-align:left;font:inherit;cursor:pointer}
+.weather-forecast-row[aria-pressed=true]{background:#91b17d30;border-color:#91b17d66}.weather-forecast-row:hover{background:#91b17d20}
+.weather-row-condition{font-size:13px}.weather-low{color:var(--control-muted)}.weather-rain{text-align:right;color:var(--control-muted);font-size:13px}
+.weather-range{position:relative;height:7px;border-radius:8px;background:#84938124;overflow:hidden}.weather-range>span{position:absolute;height:100%;border-radius:inherit;background:linear-gradient(90deg,#97b987,#e8c66b,#e7a25f)}
+.weather-selected-day{border-top:1px solid var(--control-line);margin-top:14px;padding-top:12px}.weather-selected-day h3{font-size:16px;margin:0 0 10px}
+.weather-panel .ui-applet-footer{margin-top:12px;padding-top:10px}
+.weather-selected-day .ui-facts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0}.weather-selected-day .ui-facts>div{display:flex;flex-direction:column;gap:6px;min-width:0;padding:0;border:0}.weather-selected-day dt{font-size:11px}.weather-selected-day dd{margin:0;font-size:14px;font-weight:500}
+.native-console #notionContent[data-template=weather]{padding:var(--weather-shell-padding,12px)!important;background:none!important;box-shadow:none!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;overflow:visible}
+.native-console #notionContent[data-template=weather]>.notion-reader-head{position:relative;margin:0;height:32px;min-height:32px;padding:0;background:none}
+@media(max-width:700px){.weather-forecast-row{grid-template-columns:42px 30px 30px minmax(30px,1fr) 30px 38px;gap:6px;padding:8px}.weather-row-condition{display:none}.weather-panel-icon{width:30px;height:32px}.weather-selected-day .ui-facts{grid-template-columns:repeat(3,minmax(0,1fr))}.weather-current-meta{margin-left:0}.weather-temperature{font-size:36px}.weather-condition{font-size:16px}.native-console #notionContent[data-template=weather]{padding:12px!important}}
+.weather-panel{padding:18px;container-type:inline-size}
+@container(max-width:440px){
+ .weather-forecast-row{grid-template-columns:42px 30px 30px minmax(20px,1fr) 30px 38px;gap:6px;padding:6px}
+ .weather-row-condition{display:none}
+ .weather-panel-icon{width:30px;height:32px}
+ .weather-current-meta{margin-left:0}
+}
+.weather-panel .ui-applet-header{min-height:0;margin-bottom:0}
+.weather-panel .ui-applet-header .ui-title{font-size:24px}
+.weather-panel .ui-applet-header .ui-caption{margin-top:4px}
+.weather-selected-day .ui-facts{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}

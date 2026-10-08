@@ -1,0 +1,16 @@
+Use case: precise-object-edit
+Input image: CURRENT SHIPPED Worldlet daytime world; edit target and exact style/geometry reference.
+Make a conservative rearrangement of its seven places. Preserve the original camera, horizon, mountains, sky, sunlight, colors, grass texture, tree character and terrain. Most importantly preserve the RIVER EXACTLY WHERE IT IS: same distant source, same meandering course past the left of the cottage, same broad foreground bend flowing out through the lower middle/right. Do not divert it to the bottom-left. Do not flatten hills or clear away foreground vegetation to make a new composition.
+Only exchange the functional scenery in the existing land clearings. Keep the same small scale and the same clear, visible paved installation spaces. Empty space for later application devices IS desired; do not paint devices or individual slot outlines.
+Exactly seven places, with the following local edits:
+1. Home: keep the central terracotta cottage and courtyard at their original position and size, unchanged.
+2. Create: move the existing lower-center reading nook with its roof/bookshelves to the upper-left sheltered terrace site, about x=.41,y=.35. Fit its existing style and scale to this terrace; remove the old shade structure there.
+3. Finance: keep the existing upper-right counting/chest terrace in place, about x=.60,y=.38. Keep its front clear.
+4. Explore: keep the original left wooden river dock IN PLACE, about x=.35,y=.60. This is the leftmost functional place; do not move it to an invented new bank. Keep its canvas shade and open front deck.
+5. Health: move the lower-right exercise bars to the existing right-middle terrace at x=.72,y=.48; remove that site's old workbench/frame. Leave open paved ground in front.
+6. Work: place that existing workbench/timber frame on the former exercise terrace at x=.71,y=.63. Keep open installation ground; no new large workshop building.
+7. Tools: replace the relocated reading nook's original lower-center location with a modest low timber tool/storage rack at the REAR of a clear paving patch, about x=.52,y=.65. Use the existing footprint; do not push it toward the foreground.
+Reconnect only the short paths needed immediately around changed sites. Do not redesign the entire road network. Keep all land and water silhouettes outside those edits as close to identical as possible.
+Preserve obvious usable empty forecourts for separate Applets, but use the source's stone sizes, paving color, border treatment and shadow softness. No stronger contrast, new giant perimeter walls, new buildings, extra terraces or repeated extra props.
+The Fox HUD overlays the foreground: only keep functional structures/slots above y=.80. Water, grass, trees and scenery in the foreground MUST remain unchanged; do NOT create a blank grass rectangle for HUD and do NOT move the river for it.
+Daytime only. Preserve the original rendering style, not a reinterpretation. No text, labels, arrows, numbers, grids, logos, characters, Fox, UI or watermark. Native 3840x2160 output.

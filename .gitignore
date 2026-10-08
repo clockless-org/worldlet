@@ -1,0 +1,45 @@
+.build/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+
+node_modules
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Imported personal sources and screenshots of private notes never belong in Git.
+.local/
+private-screenshots/
+__pycache__/
+
+# Disposable test artifacts; curated documentation figures live in screenshots/.
+/output/
+
+# Local Dream Loop working files and scratch captures.
+.dream-loop/
+
+# Generated caches left by pre-layer Windows checkouts; never source.
+app/windows/bin/
+app/windows/obj/
+.worldlet-task/
+
+# Built from docs/ by gatehouse/build-diagrams.mjs at deploy.
+gatehouse/public/diagrams/
+
+# Signing keys, keystores and platform service files are never source.
+*.pem
+*.p8
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist

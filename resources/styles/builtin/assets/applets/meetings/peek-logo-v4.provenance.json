@@ -1,0 +1,15 @@
+{
+  "asset": "peek-logo-v4.png",
+  "acceptedOn": "2026-10-06",
+  "approval": "Owner approved the second version with 换上; preserve the approved pixels without redesign.",
+  "libraryFileId": "libfile_e1274a15e76c81919270dfdda1c33dfa",
+  "fileId": "file_000000007d0882109df7050292974c41",
+  "version": 1,
+  "sourceFilename": "meetings-applet-icon-worldlet-v2.png",
+  "description": "Blue hand-painted retro video camera, four-color lens ring, purple participant screen and low timber base.",
+  "sourceDimensions": [1254, 1254],
+  "processing": "Unmodified RGBA PNG. Runtime optical scale recalibrated with scripts/calibrate-applet-scale.ts. Only the Meetings iOS asset regenerated using the exact scripts/ios-applet-icons.mjs pipeline.",
+  "generationModel": null,
+  "generationPrompt": null,
+  "generationMetadataNote": "Original prompt and model were not included in the resolved approved Library reference; no reconstruction or regeneration was performed."
+}

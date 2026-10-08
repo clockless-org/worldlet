@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {conversationEntries,recentWorldHistory} from '../core/items/index.ts';
+const text='Full user text 🦊\n'.repeat(20000);
+const base={id:'message',requestId:'request-1',at:1,scope:'private',type:'sent',text};
+const parts=conversationEntries(base);assert(parts.length>1);assert.equal(parts.map(p=>p.data.text).join(''),text);
+assert(parts.every((p,i)=>p.data.part===i&&p.data.parts===parts.length&&p.runId==='request-1'));
+const stream=['response_start','delta','interrupted'].flatMap((type,i)=>conversationEntries({...base,id:'event-'+i,type,text:type==='delta'?'partial answer':undefined}));
+assert.equal(stream[1].data.text,'partial answer');assert.equal(stream[2].kind,'conversation.interrupted');
+assert.deepEqual(recentWorldHistory(stream.map(e=>({...e,at:'now',body:e})),10),[]);
+assert.throws(()=>conversationEntries({...base,type:'bad.kind'}));
+console.log('PASS lossless conversation chunks, correlated streaming/interruption and no automatic context injection');

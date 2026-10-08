@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_ba4d221ab75f46b8a6ad731d104873df",
+  "source": "resources/styles/builtin/assets/applets/discord/peek.png"
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The pairing and the widgets it brought (widgets.json, with AtomicFile's .new and .bak) never leave this phone. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="file" path="widgets.json" />
+        <exclude domain="file" path="widgets.json.new" />
+        <exclude domain="file" path="widgets.json.bak" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="file" path="widgets.json" />
+        <exclude domain="file" path="widgets.json.new" />
+        <exclude domain="file" path="widgets.json.bak" />
+    </device-transfer>
+</data-extraction-rules>

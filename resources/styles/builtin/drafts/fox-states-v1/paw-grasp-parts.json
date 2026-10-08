@@ -1,0 +1,21 @@
+{
+  "status": "unregistered-parts-study-not-live",
+  "image": "paw-grasp-parts-v1.png",
+  "size": [1984, 793],
+  "coordinates": "source pixels; roots are provisional attachment landmarks, not accepted anatomy",
+  "registration": {
+    "roots": {"palm": [0.677, 0.925], "thumb": [0.703, 0.958], "index": [0.655, 0.968], "middle": [0.675, 0.971], "outer": [0.695, 0.968]},
+    "palmScale": 0.00011,
+    "thumbScale": 0.000075,
+    "fingerWidthScale": 0.00009,
+    "fingerLengthScale": 0.00005,
+    "fingerHinge": 0.008
+  },
+  "parts": [
+    {"id": "palm", "crop": [0, 0, 660, 793], "root": [338, 230]},
+    {"id": "thumb", "crop": [660, 0, 395, 793], "root": [885, 330]},
+    {"id": "index", "crop": [1055, 0, 310, 793], "root": [1200, 325]},
+    {"id": "middle", "crop": [1365, 0, 320, 793], "root": [1515, 325]},
+    {"id": "outer", "crop": [1685, 0, 299, 793], "root": [1825, 330]}
+  ]
+}

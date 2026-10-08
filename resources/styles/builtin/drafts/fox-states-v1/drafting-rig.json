@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "status": "registration-study-not-live",
+  "atlas": "drafting-parts-v1.png",
+  "atlasSize": [1536, 1024],
+  "coordinates": "Source anchors and masks are atlas pixels; target coordinates are normalized original Fox canvas. Similarity transforms preserve the non-square atlas aspect ratio.",
+  "masks": {
+    "paper": [[480,30],[1150,30],[1150,500],[480,500]],
+    "writing": [[0,380],[440,380],[440,520],[800,520],[800,1000],[0,1000]],
+    "support": [[1120,380],[1536,380],[1536,1000],[850,1000],[850,520],[1120,520]]
+  },
+  "paper": {"scale": 0.00036, "offset": [0.38,0.712], "contact": [750,300]},
+  "writing": {"shoulder": [270,470], "elbow": [200,795], "tip": [715,912], "targetShoulder": [0.47,0.69]},
+  "support": {"shoulder": [1330,470], "elbow": [1380,800], "grip": [1020,808], "targetShoulder": [0.723,0.69], "paperGrip": [1000,425]},
+  "limitations": ["Pencil remains rigid with gripping hand", "Arm segmentation and joint overlaps require rendered review", "No physical pickup/stow or live state routing yet"]
+}

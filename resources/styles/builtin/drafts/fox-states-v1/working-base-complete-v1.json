@@ -1,0 +1,12 @@
+{
+  "status": "draft-device-closure-review-not-live",
+  "asset": "working-base-complete-v1.png",
+  "source": "working-device.png",
+  "generator": "built-in image_gen",
+  "date": "2026-09-26",
+  "size": [1254, 1254],
+  "purpose": "Complete keyboard/chassis under the original upright lid, for physical closing without exposing missing pixels.",
+  "prompt": "Use case: precise-object-edit. Edit the registered transparent laptop sprite. Remove the entire upright screen/lid; reconstruct only the complete keyboard and chassis that were hidden behind it. Keep the visible left keyboard, muted sage green material, soft painted miniature style, exact low camera, scale and position. Base corners roughly (0.377,0.760), (0.790,0.737), (0.879,0.807), (0.455,0.820) in the original square canvas. Preserve the full canvas and transparent margins. No screen, character, accessories, backdrop, floor shadow, words, branding or colored fringe. Return one transparent PNG.",
+  "invariants": ["Original source unchanged", "Independent complete base layer", "Original square registration", "No release/native asset promotion"],
+  "remaining": ["Paw-to-lid contact choreography", "Interrupted close/reopen controller", "Native/HUD visual acceptance"]
+}

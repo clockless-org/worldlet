@@ -1,0 +1,44 @@
+{
+  "key": "render",
+  "title": "Render",
+  "generic": false,
+  "output": "resources/styles/builtin/assets/applets/render/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-c93059e4-4a70-4d8f-955d-fc37659c4bb2.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/.local/logo-inputs/render.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Render. Image1 is the sourced ORIGINAL publisher icon, the authority for logo geometry, colors, negative spaces and lettering. Recreate it faithfully as a substantial physical sculpture. Image2/3 are MATERIAL and hierarchy examples only; do not copy their logos. Secondary functional cue (reduce this concept to at most two small attachments, not the dominant shape): mint and charcoal curved deployment console with cream server drawers. Preserve original icon rather than literal full machine in that cue. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "revision": {
+    "prompt": "Create ONE transparent PNG dimensional Applet sprite for Render (render.com cloud hosting). Attached image is its ORIGINAL BLACK logo on transparency; inspect the alpha silhouette and reproduce that mark faithfully as raised charcoal enamel on an ivory block. It is not YouTube and not video rendering. Only this identity reference is authoritative. The original Render logo occupies 80% of the object, on a compact timber base. One small mint-green server drawer and amber deployment indicator at the base express cloud hosting. Cozy village painted matte material, rounded dimensional sculpture, gentle three-quarter view from slightly above, soft upper-left light. Whole device visible with narrow transparent margins. No landscape, no play button, no other brand, no written labels.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-c330533e-280e-49af-b97c-7d9158dc150c.png",
+    "reason": "Reject wrong-brand output; use original Render identity only"
+  },
+  "identitySource": "ui/applets/render/logo-source.ts",
+  "orientationRevision": {
+    "key": "render",
+    "prompt": "Edit this render Applet figurine. Change the CAMERA orientation to the opposite side: the front faces slightly SCREEN-LEFT, camera sees its RIGHT side and top, NOT its left side. 20 degree gentle side angle, 25 degree elevation, no camera roll. All verticals upright; heavy stable grounded figurine, low functional warm timber base with rounded wood edges and small brass fasteners. Preserve this exact object's identity, original logo shape and correct non-mirrored lettering, palette, functional attachments, cozy miniature village material. Do NOT mirror the logo. Reconstruct the new view, front face still dominant. For Notion add a very low timber stationery tray under feet. Others keep current functional bases. Isolated centered full object on transparent background, nothing cropped. No surrounding landscape.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-aa69dc90-78d5-4348-a9d2-001c45389dd5.png"
+  },
+  "lampRevision": {
+    "key": "render",
+    "prompt": "Precisely edit this render Applet miniature. Preserve its entire device, original logo, functional accessories, camera direction, colors, materials, silhouette and framing. Add exactly ONE small recessed circular status lamp on the CENTER of the FRONT FACE of its lowest supporting base. Brass thin rim and plain charcoal BLACK glass lens, OFF, absolutely no glow or colored emission. Lens diameter about 3.5% of image width, bezel outside diameter 4.5%, oval consistent with base perspective. If no continuous base exists, add a discreet sturdy low warm timber foot connecting the supports and put the lens in its front center. If the front is obstructed by a drawer/accessory, extend the supporting foot slightly below it so the lamp is clearly visible and centered. Never put the lamp on a side accessory or on the main logo. Remove/replace any other colored status lamp in the base, but preserve actual logo colors, headlights, projectors and functional props. Keep all original identity and detail. Cozy painted miniature village style, grounded, frontal face angled toward screen-left/right side visible as in reference. Do NOT flip. Whole object with safe margins, true transparent background. No labels or scenery.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-8273b453-cc34-4653-a53e-b98a784830d6.png",
+    "anchor": {
+      "center": [
+        0.4063,
+        0.888756
+      ],
+      "radius": [
+        0.015949,
+        0.017544
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

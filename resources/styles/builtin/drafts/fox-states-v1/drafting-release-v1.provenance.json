@@ -1,0 +1,8 @@
+{
+  "status": "registration-draft-not-accepted",
+  "generator": "Codex built-in image generation",
+  "reference": "drafting-parts-v1.png",
+  "generatedFile": "exec-21e4cfbb-6a72-4518-85c6-d6bcdc759ad1.png",
+  "transparentBackground": true,
+  "prompt": "Use case: precise-object-edit. Asset type: transparent painted 2D puppet atlas for an existing fox. Image 1 is the edit target. Preserve the exact canvas layout, exact notebook, exact orange arm silhouettes, elbow positions, dark brown paw size, fur colors, matte painted lighting and camera of Image 1. Change ONLY the lower-left writing hand: remove the pencil completely from its grasp and extend its short rounded brown digits just enough to make a relaxed empty cupped paw, showing the painted fur previously hidden by the pencil. No long human fingers; keep its same wrist, hand size and position. Put ONE complete separate copy of the original wooden pencil in the empty top-left region, diagonally pointing down-right, with its previously occluded middle fully painted, eraser and graphite tip both visible. Keep the notebook and lower-right supporting arm unchanged. All four elements (notebook, two arms, separate pencil) must be separated by genuinely transparent space. No head/body, no text, labels, extra props, no cast shadows or glow. Transparent RGBA background; maintain existing transparency."
+}

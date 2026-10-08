@@ -1,0 +1,780 @@
+{
+  "schemaVersion": 1,
+  "id": "cozy-miniature",
+  "version": "1.0.0",
+  "title": "Worldlet Cozy Miniature",
+  "hud": {
+    "village-corner": "resources/styles/builtin/assets/hud/village/lantern-corner.png",
+    "paper": "resources/styles/builtin/assets/hud/paper.png",
+    "buttons": "resources/styles/builtin/drafts/hud-v1/buttons.png",
+    "country-stationery": "resources/styles/builtin/assets/hud/country/stationery.png",
+    "country-rail": "resources/styles/builtin/assets/hud/country/rail.png"
+  },
+  "references": {
+    "palette": "resources/worlds/village/images/day-six-regions-sunburst-4k.png",
+    "day": "resources/worlds/village/images/day-six-regions-sunburst-4k.png",
+    "night": "resources/worlds/village/images/night-six-regions-sunburst-4k.png",
+    "contract": "resources/styles/builtin/STYLE.md",
+    "brand": "resources/styles/builtin/assets/brand/mark.json"
+  },
+  "direction": {
+    "medium": "Soft painted dimensional miniatures; matte rounded forms, broad gentle shadows.",
+    "palette": "Sage grass, muted blue water, hazy mountains, ivory stone, subdued terracotta and timber.",
+    "detail": "Quiet terrain and open installation spaces; Applets remain readable.",
+    "camera": "Match the target world camera, scale, ground anchor and lighting.",
+    "lighting": "One shared time state; preserve material identity at night. Text and websites stay ungraded.",
+    "production": "Use the current shipped day/night plates and registered Applet/Fox assets as the style baseline. Historical concepts and new drafts are not authoritative.",
+    "acceptance": "Review composed World, Applets and Fox at overview and close view, day and night; palette checks alone do not prove a match."
+  },
+  "world": {
+    "day": "resources/worlds/village/images/day-six-regions-sunburst-4k.png",
+    "night": "resources/worlds/village/images/night-six-regions-sunburst-4k.png",
+    "hiresDay": "resources/worlds/village/images/day-six-regions-sunburst-4k.png",
+    "hiresNight": "resources/worlds/village/images/night-six-regions-sunburst-4k.png"
+  },
+  "landmarks": {
+    "home": {
+      "day": "resources/worlds/village/images/landmarks/home.png",
+      "night": "resources/worlds/village/images/landmarks/home-night.png"
+    },
+    "library": {
+      "day": "resources/worlds/village/images/landmarks/library.png",
+      "night": "resources/worlds/village/images/landmarks/library-night.png"
+    },
+    "money": {
+      "day": "resources/worlds/village/images/landmarks/money.png",
+      "night": "resources/worlds/village/images/landmarks/money-night.png"
+    },
+    "health": {
+      "day": "resources/worlds/village/images/landmarks/health.png",
+      "night": "resources/worlds/village/images/landmarks/health-night.png"
+    },
+    "work": {
+      "day": "resources/worlds/village/images/landmarks/work.png",
+      "night": "resources/worlds/village/images/landmarks/work-night.png"
+    },
+    "travel": {
+      "day": "resources/worlds/village/images/landmarks/travel.png",
+      "night": "resources/worlds/village/images/landmarks/travel-night.png"
+    }
+  },
+  "applets": {
+    "gmail": {
+      "peek": "resources/styles/builtin/assets/applets/gmail/peek-logo-v4.png",
+      "open": "resources/styles/builtin/assets/applets/gmail/open.png",
+      "focus": "resources/styles/builtin/assets/applets/gmail/immersive.webp"
+    },
+    "google-calendar": {
+      "peek": "resources/styles/builtin/assets/applets/google-calendar/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/google-calendar/open-v2.png",
+      "motion": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+      "focus": "resources/styles/builtin/assets/applets/google-calendar/immersive.webp"
+    },
+    "apple-notes": {
+      "peek": "resources/styles/builtin/assets/applets/apple-notes/peek-logo-v4.png",
+      "open": "resources/styles/builtin/assets/applets/apple-notes/open.png",
+      "motion": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+      "focus": "resources/styles/builtin/assets/applets/apple-notes/immersive.webp"
+    },
+    "apple-reminders": {
+      "peek": "resources/styles/builtin/assets/applets/apple-reminders/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/apple-reminders/open.png",
+      "motion": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+      "focus": "resources/styles/builtin/assets/applets/apple-reminders/immersive.webp"
+    },
+    "weather": {
+      "peek": "resources/styles/builtin/assets/applets/weather/peek-logo-v3.png",
+      "motion": "resources/styles/builtin/assets/animations/home/weather.png",
+      "focus": "resources/styles/builtin/assets/applets/weather/immersive.webp"
+    },
+    "meetings": {
+      "peek": "resources/styles/builtin/assets/applets/meetings/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/meetings/immersive.webp"
+    },
+    "github": {
+      "peek": "resources/styles/builtin/assets/applets/github/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/github/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/github/immersive.webp"
+    },
+    "codex": {
+      "peek": "resources/styles/builtin/assets/applets/codex/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/codex/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/codex/immersive.webp"
+    },
+    "claude-code": {
+      "peek": "resources/styles/builtin/assets/applets/claude-code/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/claude-code/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/claude-code/immersive.webp"
+    },
+    "notion": {
+      "peek": "resources/styles/builtin/assets/applets/notion/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/notion/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/notion/immersive.webp"
+    },
+    "obsidian": {
+      "peek": "resources/styles/builtin/assets/applets/obsidian/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/obsidian/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/obsidian/immersive.webp"
+    },
+    "voice-memos": {
+      "peek": "resources/styles/builtin/assets/applets/voice-memos/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/voice-memos/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/voice-memos/immersive.webp"
+    },
+    "plaid": {
+      "peek": "resources/styles/builtin/assets/applets/plaid/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/plaid/immersive.webp"
+    },
+    "stripe": {
+      "peek": "resources/styles/builtin/assets/applets/stripe/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/stripe/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/stripe/immersive.webp"
+    },
+    "paypal": {
+      "peek": "resources/styles/builtin/assets/applets/paypal/peek-logo-v3.png",
+      "open": "resources/styles/builtin/assets/applets/paypal/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/paypal/immersive.webp"
+    },
+    "oura": {
+      "peek": "resources/styles/builtin/assets/applets/oura/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/oura/immersive.webp"
+    },
+    "strava": {
+      "peek": "resources/styles/builtin/assets/applets/strava/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/strava/immersive.webp"
+    },
+    "fitbit": {
+      "peek": "resources/styles/builtin/assets/applets/fitbit/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/fitbit/immersive.webp"
+    },
+    "google-maps": {
+      "peek": "resources/styles/builtin/assets/applets/google-maps/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/google-maps/immersive.webp"
+    },
+    "airbnb": {
+      "peek": "resources/styles/builtin/assets/applets/airbnb/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/airbnb/immersive.webp"
+    },
+    "tripit": {
+      "peek": "resources/styles/builtin/assets/applets/tripit/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/tripit/immersive.webp"
+    },
+    "x": {
+      "peek": "resources/styles/builtin/assets/applets/x/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/x/immersive.webp"
+    },
+    "youtube": {
+      "peek": "resources/styles/builtin/assets/applets/youtube/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/youtube/immersive.webp"
+    },
+    "tiktok": {
+      "peek": "resources/styles/builtin/assets/applets/tiktok/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/tiktok/immersive.webp"
+    },
+    "discord": {
+      "peek": "resources/styles/builtin/assets/applets/discord/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/discord/immersive.webp"
+    },
+    "browser": {
+      "peek": "resources/styles/builtin/assets/applets/browser/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/browser/immersive.webp"
+    },
+    "doordash": {
+      "peek": "resources/styles/builtin/assets/applets/doordash/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/doordash/immersive.webp"
+    },
+    "chatgpt": {
+      "peek": "resources/styles/builtin/assets/applets/chatgpt/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/chatgpt/immersive.webp"
+    },
+    "claude": {
+      "peek": "resources/styles/builtin/assets/applets/claude/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/claude/immersive.webp"
+    },
+    "gemini": {
+      "peek": "resources/styles/builtin/assets/applets/gemini/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/gemini/immersive.webp"
+    },
+    "perplexity": {
+      "peek": "resources/styles/builtin/assets/applets/perplexity/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/perplexity/immersive.webp"
+    },
+    "deepseek": {
+      "peek": "resources/styles/builtin/assets/applets/deepseek/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/deepseek/immersive.webp"
+    },
+    "whatsapp": {
+      "peek": "resources/styles/builtin/assets/applets/whatsapp/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/whatsapp/immersive.webp"
+    },
+    "telegram": {
+      "peek": "resources/styles/builtin/assets/applets/telegram/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/telegram/immersive.webp"
+    },
+    "wechat": {
+      "peek": "resources/styles/builtin/assets/applets/wechat/peek-logo-v3.png"
+    },
+    "slack": {
+      "peek": "resources/styles/builtin/assets/applets/slack/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/slack/immersive.webp"
+    },
+    "teams": {
+      "peek": "resources/styles/builtin/assets/applets/teams/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/teams/immersive.webp"
+    },
+    "zoom": {
+      "peek": "resources/styles/builtin/assets/applets/zoom/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/zoom/immersive.webp"
+    },
+    "google-drive": {
+      "peek": "resources/styles/builtin/assets/applets/google-drive/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/google-drive/immersive.webp"
+    },
+    "dropbox": {
+      "peek": "resources/styles/builtin/assets/applets/dropbox/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/dropbox/immersive.webp"
+    },
+    "onedrive": {
+      "peek": "resources/styles/builtin/assets/applets/onedrive/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/onedrive/immersive.webp"
+    },
+    "microsoft-word": {
+      "peek": "resources/styles/builtin/assets/applets/microsoft-word/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/microsoft-word/immersive.webp"
+    },
+    "microsoft-excel": {
+      "peek": "resources/styles/builtin/assets/applets/microsoft-excel/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/microsoft-excel/immersive.webp"
+    },
+    "microsoft-powerpoint": {
+      "peek": "resources/styles/builtin/assets/applets/microsoft-powerpoint/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/microsoft-powerpoint/immersive.webp"
+    },
+    "google-docs": {
+      "peek": "resources/styles/builtin/assets/applets/google-docs/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/google-docs/immersive.webp"
+    },
+    "google-sheets": {
+      "peek": "resources/styles/builtin/assets/applets/google-sheets/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/google-sheets/immersive.webp"
+    },
+    "figma": {
+      "peek": "resources/styles/builtin/assets/applets/figma/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/figma/immersive.webp"
+    },
+    "canva": {
+      "peek": "resources/styles/builtin/assets/applets/canva/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/canva/immersive.webp"
+    },
+    "spotify": {
+      "peek": "resources/styles/builtin/assets/applets/spotify/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/spotify/immersive.webp"
+    },
+    "apple-music": {
+      "peek": "resources/styles/builtin/assets/applets/apple-music/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/apple-music/immersive.webp"
+    },
+    "reddit": {
+      "peek": "resources/styles/builtin/assets/applets/reddit/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/reddit/immersive.webp"
+    },
+    "instagram": {
+      "peek": "resources/styles/builtin/assets/applets/instagram/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/instagram/immersive.webp"
+    },
+    "linkedin": {
+      "peek": "resources/styles/builtin/assets/applets/linkedin/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/linkedin/immersive.webp"
+    },
+    "amazon": {
+      "peek": "resources/styles/builtin/assets/applets/amazon/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/amazon/immersive.webp"
+    },
+    "netflix": {
+      "peek": "resources/styles/builtin/assets/applets/netflix/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/netflix/immersive.webp"
+    },
+    "vscode": {
+      "peek": "resources/styles/builtin/assets/applets/vscode/peek-logo-v3.png"
+    },
+    "cursor": {
+      "peek": "resources/styles/builtin/assets/applets/cursor/peek-logo-v3.png"
+    },
+    "outlook": {
+      "peek": "resources/styles/builtin/assets/applets/outlook/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/outlook/immersive.webp"
+    },
+    "google-slides": {
+      "peek": "resources/styles/builtin/assets/applets/google-slides/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/google-slides/immersive.webp"
+    },
+    "todoist": {
+      "peek": "resources/styles/builtin/assets/applets/todoist/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/todoist/immersive.webp"
+    },
+    "things": {
+      "peek": "resources/styles/builtin/assets/applets/things/peek-logo-v3.png"
+    },
+    "apple-podcasts": {
+      "peek": "resources/styles/builtin/assets/applets/apple-podcasts/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/apple-podcasts/immersive.webp"
+    },
+    "google-photos": {
+      "peek": "resources/styles/builtin/assets/applets/google-photos/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/google-photos/immersive.webp"
+    },
+    "apple-photos": {
+      "peek": "resources/styles/builtin/assets/applets/apple-photos/peek-logo-v3.png"
+    },
+    "pages": {
+      "peek": "resources/styles/builtin/assets/applets/pages/peek-logo-v3.png"
+    },
+    "numbers": {
+      "peek": "resources/styles/builtin/assets/applets/numbers/peek-logo-v3.png"
+    },
+    "keynote": {
+      "peek": "resources/styles/builtin/assets/applets/keynote/peek-logo-v3.png"
+    },
+    "messages": {
+      "peek": "resources/styles/builtin/assets/applets/messages/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/messages/immersive.webp"
+    },
+    "facetime": {
+      "peek": "resources/styles/builtin/assets/applets/facetime/peek-logo-v3.png"
+    },
+    "safari": {
+      "peek": "resources/styles/builtin/assets/applets/safari/peek-logo-v3.png"
+    },
+    "chrome": {
+      "peek": "resources/styles/builtin/assets/applets/chrome/peek-logo-v3.png"
+    },
+    "firefox": {
+      "peek": "resources/styles/builtin/assets/applets/firefox/peek-logo-v3.png"
+    },
+    "arc": {
+      "peek": "resources/styles/builtin/assets/applets/arc/peek-logo-v3.png"
+    },
+    "pinterest": {
+      "peek": "resources/styles/builtin/assets/applets/pinterest/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/pinterest/immersive.webp"
+    },
+    "facebook": {
+      "peek": "resources/styles/builtin/assets/applets/facebook/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/facebook/immersive.webp"
+    },
+    "threads": {
+      "peek": "resources/styles/builtin/assets/applets/threads/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/threads/immersive.webp"
+    },
+    "photoshop": {
+      "peek": "resources/styles/builtin/assets/applets/photoshop/peek-logo-v3.png"
+    },
+    "illustrator": {
+      "peek": "resources/styles/builtin/assets/applets/illustrator/peek-logo-v3.png"
+    },
+    "lightroom": {
+      "peek": "resources/styles/builtin/assets/applets/lightroom/peek-logo-v3.png"
+    },
+    "capcut": {
+      "peek": "resources/styles/builtin/assets/applets/capcut/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/capcut/immersive.webp"
+    },
+    "uber": {
+      "peek": "resources/styles/builtin/assets/applets/uber/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/uber/immersive.webp"
+    },
+    "uber-eats": {
+      "peek": "resources/styles/builtin/assets/applets/uber-eats/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/uber-eats/immersive.webp"
+    },
+    "booking": {
+      "peek": "resources/styles/builtin/assets/applets/booking/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/booking/immersive.webp"
+    },
+    "feishu": {
+      "peek": "resources/styles/builtin/assets/applets/feishu/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/feishu/immersive.webp"
+    },
+    "dingtalk": {
+      "peek": "resources/styles/builtin/assets/applets/dingtalk/peek-logo-v3.png"
+    },
+    "tencent-meeting": {
+      "peek": "resources/styles/builtin/assets/applets/tencent-meeting/peek-logo-v3.png"
+    },
+    "bilibili": {
+      "peek": "resources/styles/builtin/assets/applets/bilibili/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/bilibili/immersive.webp"
+    },
+    "xiaohongshu": {
+      "peek": "resources/styles/builtin/assets/applets/xiaohongshu/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/xiaohongshu/immersive.webp"
+    },
+    "baidu-netdisk": {
+      "peek": "resources/styles/builtin/assets/applets/baidu-netdisk/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/baidu-netdisk/immersive.webp"
+    },
+    "linear": {
+      "peek": "resources/styles/builtin/assets/applets/linear/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/linear/immersive.webp"
+    },
+    "twitch": {
+      "peek": "resources/styles/builtin/assets/applets/twitch/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/twitch/immersive.webp"
+    },
+    "steam": {
+      "peek": "resources/styles/builtin/assets/applets/steam/peek-logo-v3.png"
+    },
+    "copilot": {
+      "peek": "resources/styles/builtin/assets/applets/copilot/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/copilot/immersive.webp"
+    },
+    "acrobat": {
+      "peek": "resources/styles/builtin/assets/applets/acrobat/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/acrobat/immersive.webp"
+    },
+    "wikipedia": {
+      "peek": "resources/styles/builtin/assets/applets/wikipedia/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/wikipedia/immersive.webp"
+    },
+    "qq": {
+      "peek": "resources/styles/builtin/assets/applets/qq/peek-logo-v3.png"
+    },
+    "wps": {
+      "peek": "resources/styles/builtin/assets/applets/wps/peek-logo-v3.png"
+    },
+    "doubao": {
+      "peek": "resources/styles/builtin/assets/applets/doubao/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/doubao/immersive.webp"
+    },
+    "taobao": {
+      "peek": "resources/styles/builtin/assets/applets/taobao/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/taobao/immersive.webp"
+    },
+    "alipay": {
+      "peek": "resources/styles/builtin/assets/applets/alipay/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/alipay/immersive.webp"
+    },
+    "posthog": {
+      "peek": "resources/styles/builtin/assets/applets/posthog/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/posthog/immersive.webp"
+    },
+    "cloudflare": {
+      "peek": "resources/styles/builtin/assets/applets/cloudflare/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/cloudflare/immersive.webp"
+    },
+    "vercel": {
+      "peek": "resources/styles/builtin/assets/applets/vercel/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/vercel/immersive.webp"
+    },
+    "netlify": {
+      "peek": "resources/styles/builtin/assets/applets/netlify/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/netlify/immersive.webp"
+    },
+    "supabase": {
+      "peek": "resources/styles/builtin/assets/applets/supabase/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/supabase/immersive.webp"
+    },
+    "firebase": {
+      "peek": "resources/styles/builtin/assets/applets/firebase/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/firebase/immersive.webp"
+    },
+    "sentry": {
+      "peek": "resources/styles/builtin/assets/applets/sentry/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/sentry/immersive.webp"
+    },
+    "docker": {
+      "peek": "resources/styles/builtin/assets/applets/docker/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/docker/immersive.webp"
+    },
+    "railway": {
+      "peek": "resources/styles/builtin/assets/applets/railway/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/railway/immersive.webp"
+    },
+    "render": {
+      "peek": "resources/styles/builtin/assets/applets/render/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/render/immersive.webp"
+    },
+    "gitlab": {
+      "peek": "resources/styles/builtin/assets/applets/gitlab/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/gitlab/immersive.webp"
+    },
+    "jira": {
+      "peek": "resources/styles/builtin/assets/applets/jira/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/jira/immersive.webp"
+    },
+    "game-2048": {
+      "peek": "resources/styles/builtin/assets/applets/game-2048/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/game-2048/immersive.webp"
+    },
+    "snake": {
+      "peek": "resources/styles/builtin/assets/applets/snake/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/snake/immersive.webp"
+    },
+    "minesweeper": {
+      "peek": "resources/styles/builtin/assets/applets/minesweeper/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/minesweeper/immersive.webp"
+    },
+    "sudoku": {
+      "peek": "resources/styles/builtin/assets/applets/sudoku/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sudoku/immersive.webp"
+    },
+    "random-game": {
+      "peek": "resources/styles/builtin/assets/applets/random-game/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/random-game/immersive.webp"
+    },
+    "garden": {
+      "peek": "resources/styles/builtin/assets/applets/garden/peek-logo-v3.png"
+    },
+    "moment": {
+      "peek": "resources/styles/builtin/assets/applets/moment/peek-logo-v3.png"
+    },
+    "ongoing": {
+      "peek": "resources/styles/builtin/assets/applets/ongoing/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/ongoing/immersive.webp"
+    },
+    "breakout": {
+      "peek": "resources/styles/builtin/assets/applets/breakout/peek-logo-v4.png"
+    },
+    "wordle": {
+      "peek": "resources/styles/builtin/assets/applets/wordle/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/wordle/immersive.webp"
+    },
+    "nyt-connections": {
+      "peek": "resources/styles/builtin/assets/applets/nyt-connections/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/nyt-connections/immersive.webp"
+    },
+    "slither-io": {
+      "peek": "resources/styles/builtin/assets/applets/slither-io/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/slither-io/immersive.webp"
+    },
+    "agar-io": {
+      "peek": "resources/styles/builtin/assets/applets/agar-io/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/agar-io/immersive.webp"
+    },
+    "krunker-io": {
+      "peek": "resources/styles/builtin/assets/applets/krunker-io/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/krunker-io/immersive.webp"
+    },
+    "skribbl-io": {
+      "peek": "resources/styles/builtin/assets/applets/skribbl-io/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/skribbl-io/immersive.webp"
+    },
+    "infinite-craft": {
+      "peek": "resources/styles/builtin/assets/applets/infinite-craft/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/infinite-craft/immersive.webp"
+    },
+    "little-alchemy-2": {
+      "peek": "resources/styles/builtin/assets/applets/little-alchemy-2/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/little-alchemy-2/immersive.webp"
+    },
+    "cookie-clicker": {
+      "peek": "resources/styles/builtin/assets/applets/cookie-clicker/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/cookie-clicker/immersive.webp"
+    },
+    "lichess": {
+      "peek": "resources/styles/builtin/assets/applets/lichess/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/lichess/immersive.webp"
+    },
+    "drive-mad": {
+      "peek": "resources/styles/builtin/assets/applets/drive-mad/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/drive-mad/immersive.webp"
+    },
+    "subway-surfers": {
+      "peek": "resources/styles/builtin/assets/applets/subway-surfers/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/subway-surfers/immersive.webp"
+    },
+    "sekai": {
+      "peek": "resources/styles/builtin/assets/applets/sekai/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sekai/immersive.webp"
+    },
+    "sekai-rogue-ai-tic-tac-toe": {
+      "peek": "resources/styles/builtin/assets/applets/sekai-rogue-ai-tic-tac-toe/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sekai-rogue-ai-tic-tac-toe/immersive.webp"
+    },
+    "sekai-sketch-racer": {
+      "peek": "resources/styles/builtin/assets/applets/sekai-sketch-racer/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sekai-sketch-racer/immersive.webp"
+    },
+    "sekai-mixing-colors": {
+      "peek": "resources/styles/builtin/assets/applets/sekai-mixing-colors/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sekai-mixing-colors/immersive.webp"
+    },
+    "sekai-roller-coaster": {
+      "peek": "resources/styles/builtin/assets/applets/sekai-roller-coaster/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sekai-roller-coaster/immersive.webp"
+    },
+    "sekai-3d-uno": {
+      "peek": "resources/styles/builtin/assets/applets/sekai-3d-uno/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sekai-3d-uno/immersive.webp"
+    },
+    "sekai-devil-level": {
+      "peek": "resources/styles/builtin/assets/applets/sekai-devil-level/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/sekai-devil-level/immersive.webp"
+    },
+    "pokemon-showdown": {
+      "peek": "resources/styles/builtin/assets/applets/pokemon-showdown/peek-logo-v4.png",
+      "focus": "resources/styles/builtin/assets/applets/pokemon-showdown/immersive.webp"
+    },
+    "douyin": {
+      "peek": "resources/styles/builtin/assets/applets/douyin/peek-logo-v3.png",
+      "focus": "resources/styles/builtin/assets/applets/douyin/immersive.webp"
+    }
+  },
+  "mailParts": {
+    "envelope": "resources/styles/builtin/assets/applets/gmail/mail-parts/envelope.png",
+    "bin": "resources/styles/builtin/assets/applets/gmail/mail-parts/bin.png",
+    "bin-front": "resources/styles/builtin/assets/applets/gmail/mail-parts/bin-front.png",
+    "sign": "resources/styles/builtin/assets/applets/gmail/mail-parts/sign.png",
+    "flight": "resources/styles/builtin/assets/applets/gmail/mail-parts/flight.png",
+    "attention": "resources/styles/builtin/assets/applets/gmail/mail-parts/attention.png",
+    "board": "resources/styles/builtin/assets/applets/gmail/mail-parts/wall-board-v5.png",
+    "archive-bin": "resources/styles/builtin/assets/applets/gmail/mail-parts/archive-bin.png",
+    "offers-bin": "resources/styles/builtin/assets/applets/gmail/mail-parts/offers-bin.png",
+    "spam-bin": "resources/styles/builtin/assets/applets/gmail/mail-parts/spam-bin.png",
+    "archive-bin-front": "resources/styles/builtin/assets/applets/gmail/mail-parts/archive-bin-front.png",
+    "offers-bin-front": "resources/styles/builtin/assets/applets/gmail/mail-parts/offers-bin-front.png",
+    "spam-bin-front": "resources/styles/builtin/assets/applets/gmail/mail-parts/spam-bin-front.png",
+    "pinned-envelope": "resources/styles/builtin/assets/applets/gmail/mail-parts/pinned-envelope-v2.png"
+  },
+  "logos": {
+    "youtube": "ui/applets/youtube/logo.png"
+  },
+  "companion": {
+    "anatomyDraft": {
+      "eyeUnderpaint": "resources/styles/builtin/drafts/fox-states-v1/eyelid-underpaint-v1.png",
+      "sclera": "resources/styles/builtin/drafts/fox-states-v1/eye-sclera-underpaint-v1.png",
+      "down": "resources/styles/builtin/drafts/fox-states-v1/reading-eyes.png",
+      "body": "resources/styles/builtin/drafts/fox-states-v1/body-underpaint.png",
+      "limbs": "resources/styles/builtin/drafts/fox-states-v1/complete-forelimbs.png",
+      "reading": "resources/styles/builtin/drafts/fox-states-v1/reading-parts.png",
+      "turnArm": "resources/styles/builtin/drafts/fox-states-v1/reading-turn-arm.png",
+      "readingGripUpper": "resources/styles/builtin/drafts/fox-states-v1/reading-grip-parts-v1.png",
+      "readingGripForearm": "resources/styles/builtin/drafts/fox-states-v1/reading-grip-parts-v3.png",
+      "earRoots": "resources/styles/builtin/drafts/fox-states-v1/ear-root-underpaint.png",
+      "neck": "resources/styles/builtin/drafts/fox-states-v1/neck-underpaint.png",
+      "openPalm": "resources/styles/builtin/drafts/fox-states-v1/open-paw-rounded-v2.png",
+      "sidePalm": "resources/styles/builtin/drafts/fox-states-v1/paw-side-v1.png",
+      "workstation": "resources/styles/builtin/drafts/fox-states-v1/working-device.png",
+      "workstationBase": "resources/styles/builtin/drafts/fox-states-v1/working-base-complete-v1.png",
+      "magnifier": "resources/styles/builtin/drafts/fox-states-v1/search-magnifier.png",
+      "searchDock": "resources/styles/builtin/drafts/fox-states-v1/search-dock.png",
+      "grasp": "resources/styles/builtin/drafts/fox-states-v1/paw-grasp-parts-v1.png"
+    },
+    "painted": {
+      "original": "resources/styles/builtin/assets/companion/rig/fallback.png",
+      "half": "resources/styles/builtin/assets/companion/painted/half-eye.png",
+      "closed": "resources/styles/builtin/assets/companion/painted/closed-eye.png"
+    },
+    "rive": "resources/styles/builtin/assets/companion/rive/fox.riv",
+    "portrait": "resources/styles/builtin/assets/companion/rig/fallback.png",
+    "expressions": "resources/styles/builtin/assets/companion/expressions/atlas.png"
+  },
+  "shared": {
+    "appletPlinth": "resources/styles/builtin/assets/shared/applet-stepping-stone.png"
+  },
+  "attention": {
+    "coming-up": "resources/styles/builtin/assets/attention/coming-up.png",
+    "do-something": "resources/styles/builtin/assets/attention/do-something.png",
+    "worth-knowing": "resources/styles/builtin/assets/attention/worth-knowing.png",
+    "scene-tennis": "resources/styles/builtin/assets/attention/scenes/tennis.webp",
+    "scene-badminton": "resources/styles/builtin/assets/attention/scenes/badminton.webp",
+    "scene-basketball": "resources/styles/builtin/assets/attention/scenes/basketball.webp",
+    "scene-soccer": "resources/styles/builtin/assets/attention/scenes/soccer.webp",
+    "scene-running": "resources/styles/builtin/assets/attention/scenes/running.webp",
+    "scene-cycling": "resources/styles/builtin/assets/attention/scenes/cycling.webp",
+    "scene-swimming": "resources/styles/builtin/assets/attention/scenes/swimming.webp",
+    "scene-yoga": "resources/styles/builtin/assets/attention/scenes/yoga.webp",
+    "scene-hiking": "resources/styles/builtin/assets/attention/scenes/hiking.webp",
+    "scene-golf": "resources/styles/builtin/assets/attention/scenes/golf.webp",
+    "scene-coffee-meetup": "resources/styles/builtin/assets/attention/scenes/coffee-meetup.webp",
+    "scene-lunch": "resources/styles/builtin/assets/attention/scenes/lunch.webp",
+    "scene-dinner": "resources/styles/builtin/assets/attention/scenes/dinner.webp",
+    "scene-birthday": "resources/styles/builtin/assets/attention/scenes/birthday.webp",
+    "scene-picnic": "resources/styles/builtin/assets/attention/scenes/picnic.webp",
+    "scene-family-gathering": "resources/styles/builtin/assets/attention/scenes/family-gathering.webp",
+    "scene-wedding": "resources/styles/builtin/assets/attention/scenes/wedding.webp",
+    "scene-reunion": "resources/styles/builtin/assets/attention/scenes/reunion.webp",
+    "scene-playdate": "resources/styles/builtin/assets/attention/scenes/playdate.webp",
+    "scene-volunteering": "resources/styles/builtin/assets/attention/scenes/volunteering.webp",
+    "scene-team-meeting": "resources/styles/builtin/assets/attention/scenes/team-meeting.webp",
+    "scene-video-call": "resources/styles/builtin/assets/attention/scenes/video-call.webp",
+    "scene-conference": "resources/styles/builtin/assets/attention/scenes/conference.webp",
+    "scene-presentation": "resources/styles/builtin/assets/attention/scenes/presentation.webp",
+    "scene-interview": "resources/styles/builtin/assets/attention/scenes/interview.webp",
+    "scene-focus-work": "resources/styles/builtin/assets/attention/scenes/focus-work.webp",
+    "scene-project-deadline": "resources/styles/builtin/assets/attention/scenes/project-deadline.webp",
+    "scene-document-review": "resources/styles/builtin/assets/attention/scenes/document-review.webp",
+    "scene-contract-review": "resources/styles/builtin/assets/attention/scenes/contract-review.webp",
+    "scene-workshop": "resources/styles/builtin/assets/attention/scenes/workshop.webp",
+    "scene-flight": "resources/styles/builtin/assets/attention/scenes/flight.webp",
+    "scene-train": "resources/styles/builtin/assets/attention/scenes/train.webp",
+    "scene-road-trip": "resources/styles/builtin/assets/attention/scenes/road-trip.webp",
+    "scene-hotel": "resources/styles/builtin/assets/attention/scenes/hotel.webp",
+    "scene-packing": "resources/styles/builtin/assets/attention/scenes/packing.webp",
+    "scene-passport": "resources/styles/builtin/assets/attention/scenes/passport.webp",
+    "scene-airport-pickup": "resources/styles/builtin/assets/attention/scenes/airport-pickup.webp",
+    "scene-public-transit": "resources/styles/builtin/assets/attention/scenes/public-transit.webp",
+    "scene-beach-trip": "resources/styles/builtin/assets/attention/scenes/beach-trip.webp",
+    "scene-camping": "resources/styles/builtin/assets/attention/scenes/camping.webp",
+    "scene-package-delivery": "resources/styles/builtin/assets/attention/scenes/package-delivery.webp",
+    "scene-package-return": "resources/styles/builtin/assets/attention/scenes/package-return.webp",
+    "scene-grocery-shopping": "resources/styles/builtin/assets/attention/scenes/grocery-shopping.webp",
+    "scene-cooking": "resources/styles/builtin/assets/attention/scenes/cooking.webp",
+    "scene-laundry": "resources/styles/builtin/assets/attention/scenes/laundry.webp",
+    "scene-house-cleaning": "resources/styles/builtin/assets/attention/scenes/house-cleaning.webp",
+    "scene-home-repair": "resources/styles/builtin/assets/attention/scenes/home-repair.webp",
+    "scene-moving-home": "resources/styles/builtin/assets/attention/scenes/moving-home.webp",
+    "scene-gardening": "resources/styles/builtin/assets/attention/scenes/gardening.webp",
+    "scene-pet-care": "resources/styles/builtin/assets/attention/scenes/pet-care.webp",
+    "scene-medical-appointment": "resources/styles/builtin/assets/attention/scenes/medical-appointment.webp",
+    "scene-dental-appointment": "resources/styles/builtin/assets/attention/scenes/dental-appointment.webp",
+    "scene-eye-check": "resources/styles/builtin/assets/attention/scenes/eye-check.webp",
+    "scene-pharmacy": "resources/styles/builtin/assets/attention/scenes/pharmacy.webp",
+    "scene-wellness-check": "resources/styles/builtin/assets/attention/scenes/wellness-check.webp",
+    "scene-rest": "resources/styles/builtin/assets/attention/scenes/rest.webp",
+    "scene-sleep": "resources/styles/builtin/assets/attention/scenes/sleep.webp",
+    "scene-hydration": "resources/styles/builtin/assets/attention/scenes/hydration.webp",
+    "scene-fitness-class": "resources/styles/builtin/assets/attention/scenes/fitness-class.webp",
+    "scene-vet-appointment": "resources/styles/builtin/assets/attention/scenes/vet-appointment.webp",
+    "scene-bill-payment": "resources/styles/builtin/assets/attention/scenes/bill-payment.webp",
+    "scene-subscription": "resources/styles/builtin/assets/attention/scenes/subscription.webp",
+    "scene-budget-review": "resources/styles/builtin/assets/attention/scenes/budget-review.webp",
+    "scene-tax-documents": "resources/styles/builtin/assets/attention/scenes/tax-documents.webp",
+    "scene-insurance": "resources/styles/builtin/assets/attention/scenes/insurance.webp",
+    "scene-banking": "resources/styles/builtin/assets/attention/scenes/banking.webp",
+    "scene-expense-report": "resources/styles/builtin/assets/attention/scenes/expense-report.webp",
+    "scene-refund": "resources/styles/builtin/assets/attention/scenes/refund.webp",
+    "scene-savings": "resources/styles/builtin/assets/attention/scenes/savings.webp",
+    "scene-charity": "resources/styles/builtin/assets/attention/scenes/charity.webp",
+    "scene-reading": "resources/styles/builtin/assets/attention/scenes/reading.webp",
+    "scene-class": "resources/styles/builtin/assets/attention/scenes/class.webp",
+    "scene-homework": "resources/styles/builtin/assets/attention/scenes/homework.webp",
+    "scene-exam": "resources/styles/builtin/assets/attention/scenes/exam.webp",
+    "scene-library": "resources/styles/builtin/assets/attention/scenes/library.webp",
+    "scene-online-course": "resources/styles/builtin/assets/attention/scenes/online-course.webp",
+    "scene-language-learning": "resources/styles/builtin/assets/attention/scenes/language-learning.webp",
+    "scene-music-practice": "resources/styles/builtin/assets/attention/scenes/music-practice.webp",
+    "scene-art-class": "resources/styles/builtin/assets/attention/scenes/art-class.webp",
+    "scene-research": "resources/styles/builtin/assets/attention/scenes/research.webp",
+    "scene-concert": "resources/styles/builtin/assets/attention/scenes/concert.webp",
+    "scene-cinema": "resources/styles/builtin/assets/attention/scenes/cinema.webp",
+    "scene-theater": "resources/styles/builtin/assets/attention/scenes/theater.webp",
+    "scene-museum": "resources/styles/builtin/assets/attention/scenes/museum.webp",
+    "scene-exhibition": "resources/styles/builtin/assets/attention/scenes/exhibition.webp",
+    "scene-book-club": "resources/styles/builtin/assets/attention/scenes/book-club.webp",
+    "scene-farmers-market": "resources/styles/builtin/assets/attention/scenes/farmers-market.webp",
+    "scene-festival": "resources/styles/builtin/assets/attention/scenes/festival.webp",
+    "scene-restaurant-booking": "resources/styles/builtin/assets/attention/scenes/restaurant-booking.webp",
+    "scene-local-exploration": "resources/styles/builtin/assets/attention/scenes/local-exploration.webp",
+    "scene-weather-rain": "resources/styles/builtin/assets/attention/scenes/weather-rain.webp",
+    "scene-weather-heat": "resources/styles/builtin/assets/attention/scenes/weather-heat.webp",
+    "scene-weather-storm": "resources/styles/builtin/assets/attention/scenes/weather-storm.webp",
+    "scene-air-quality": "resources/styles/builtin/assets/attention/scenes/air-quality.webp",
+    "scene-power-outage": "resources/styles/builtin/assets/attention/scenes/power-outage.webp",
+    "scene-water-service": "resources/styles/builtin/assets/attention/scenes/water-service.webp",
+    "scene-road-closure": "resources/styles/builtin/assets/attention/scenes/road-closure.webp",
+    "scene-security-notice": "resources/styles/builtin/assets/attention/scenes/security-notice.webp",
+    "scene-service-update": "resources/styles/builtin/assets/attention/scenes/service-update.webp",
+    "scene-emergency-preparedness": "resources/styles/builtin/assets/attention/scenes/emergency-preparedness.webp"
+  }
+}

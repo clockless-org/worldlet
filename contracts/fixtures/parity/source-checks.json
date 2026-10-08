@@ -1,0 +1,259 @@
+[
+ {
+  "name": "start uses interval",
+  "operation": "sourceCheckStart",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "id": "gmail",
+    "intervalMinutes": 30,
+    "lastStartedAt": 1790676000,
+    "lastStatus": "running",
+    "nextAt": 1790677800
+   }
+  }
+ },
+ {
+  "name": "start uses default interval",
+  "operation": "sourceCheckStart",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true
+   },
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "id": "gmail",
+    "lastStartedAt": 1790676000,
+    "lastStatus": "running",
+    "nextAt": 1790677800
+   }
+  }
+ },
+ {
+  "name": "finish complete clears failure",
+  "operation": "sourceCheckFinish",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30,
+    "failures": 2,
+    "errorCode": "network",
+    "waitReason": "x"
+   },
+   "latest": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "status": "complete",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "id": "gmail",
+    "intervalMinutes": 30,
+    "lastFinishedAt": 1790676000,
+    "lastStatus": "complete",
+    "lastSuccessAt": 1790676000
+   }
+  }
+ },
+ {
+  "name": "finish error keeps message reason",
+  "operation": "sourceCheckFinish",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "latest": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "status": "error",
+   "now": 1790676000,
+   "message": "worldlet_daily_allowance reset at 2026-09-30T00:00:00Z"
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "errorCode": "model_allowance",
+    "failures": 1,
+    "id": "gmail",
+    "intervalMinutes": 30,
+    "lastFinishedAt": 1790676000,
+    "lastStatus": "error",
+    "nextAt": 1790726405,
+    "waitReason": "model_budget"
+   }
+  }
+ },
+ {
+  "name": "finish error without message",
+  "operation": "sourceCheckFinish",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30,
+    "failures": 1
+   },
+   "latest": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "status": "error",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "errorCode": "operation_failed",
+    "failures": 2,
+    "id": "gmail",
+    "intervalMinutes": 30,
+    "lastFinishedAt": 1790676000,
+    "lastStatus": "error",
+    "nextAt": 1790676060,
+    "waitReason": "retry_at"
+   }
+  }
+ },
+ {
+  "name": "finish network error",
+  "operation": "sourceCheckFinish",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "latest": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "status": "error",
+   "now": 1790676000,
+   "message": "The network connection was lost."
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "errorCode": "offline",
+    "failures": 1,
+    "id": "gmail",
+    "intervalMinutes": 30,
+    "lastFinishedAt": 1790676000,
+    "lastStatus": "error",
+    "nextAt": 1790676030,
+    "waitReason": "network"
+   }
+  }
+ },
+ {
+  "name": "finish cancelled",
+  "operation": "sourceCheckFinish",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "latest": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30
+   },
+   "status": "cancelled",
+   "now": 1790676000
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "errorCode": "cancelled",
+    "failures": 0,
+    "id": "gmail",
+    "intervalMinutes": 30,
+    "lastFinishedAt": 1790676000,
+    "lastStatus": "cancelled",
+    "nextAt": 1790676005,
+    "waitReason": "retry_at"
+   }
+  }
+ },
+ {
+  "name": "finish after user changed interval",
+  "operation": "sourceCheckFinish",
+  "input": {
+   "check": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 30,
+    "nextAt": 1
+   },
+   "latest": {
+    "id": "gmail",
+    "enabled": true,
+    "intervalMinutes": 60,
+    "nextAt": 1790679600
+   },
+   "status": "error",
+   "now": 1790676000,
+   "message": "failed"
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "enabled": true,
+    "errorCode": "operation_failed",
+    "failures": 1,
+    "id": "gmail",
+    "intervalMinutes": 60,
+    "lastFinishedAt": 1790676000,
+    "lastStatus": "error",
+    "nextAt": 1790679600,
+    "waitReason": "retry_at"
+   }
+  }
+ },
+ {
+  "name": "finish rejects unknown status",
+  "operation": "sourceCheckFinish",
+  "input": {
+   "check": {
+    "id": "gmail"
+   },
+   "status": "done",
+   "now": 1790676000
+  },
+  "expected": {
+   "error": "Invalid source check outcome",
+   "ok": false
+  }
+ }
+]

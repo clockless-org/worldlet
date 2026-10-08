@@ -1,0 +1,23 @@
+Worldlet
+Copyright 2026 The Worldlet Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes third-party components under their own licenses:
+
+- agent-browser (Apache-2.0), Copyright 2025 Vercel Inc.
+  platform/browser/agent-browser-LICENSE.txt
+- imsg (MIT), Copyright 2026 Peter Steinberger
+  platform/electron/distribution/imsg-LICENSE.txt
+- Astronomy Engine (MIT), Copyright 2019-2023 Don Cross
+  resources/common/ASTRONOMY-LICENSE.txt
+- fireworks-js (MIT), Copyright 2021-2023 Vitalij Ryndin
+  resources/common/FIREWORKS-LICENSE.txt
+- Stripe CLI (Apache-2.0)
+  resources/common/STRIPE-CLI-LICENSE.txt
+- Inter font (SIL Open Font License 1.1), Copyright 2016 The Inter Project Authors
+  resources/common/fonts/INTER-LICENSE.txt
+
+npm dependencies are listed in package-lock.json and keep their own licenses.
+Product names and logos of third-party services shown in Applets are trademarks
+of their respective owners and are used only to identify those services.

@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "key": "notion",
+  "provider": "notion",
+  "mode": "scheduled",
+  "reader": "source-reader",
+  "publishAttention": true,
+  "initialLimit": 20,
+  "windowDays": 0,
+  "tasks": [
+    {
+      "key": "sync",
+      "handler": "source.read",
+      "pool": "source-io",
+      "trigger": "interval",
+      "intervalMinutes": 30,
+      "batchSize": 20,
+      "timeoutSeconds": 240
+    }
+  ]
+}

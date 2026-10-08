@@ -1,0 +1,125 @@
+name: Architecture contracts
+# Pull request CI (owner decision 2026-10-04, after Actions spend went from about $3 a day to about $60): Linux only,
+# only the basic checks, the required `Architecture` check green within three minutes of a push. The checks below run
+# as three jobs side by side (about a minute and a half each) so the whole run stays under three minutes; together they
+# are exactly the former single fast job. The UI checks (test:ui, including test:ui:core), the iPhone and Android apps,
+# Electron, Harness/Hermes, browser and packaging suites run in the RC on 01/02 (scripts/gate.mjs). No macOS or Windows
+# runner runs here. `npm run ci:time` reports how long PR CI takes and what it spent.
+on:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+permissions:
+  contents: read
+# No `parallel:` steps (GitHub Actions 2026-06): #2009 moved the checks into two runners with them and, on 2026-10-07,
+# the job using them waited 39 s and 70 s for a runner while the plain job beside it started at once, pushing a run to
+# 3:15; with all checks on one runner the run took 2:44. Four plain jobs start within seconds.
+# No `concurrency` group: with one, GitHub holds a new push's run until the superseded run has fully stopped, and on
+# 2026-10-05 (#1826) the old run took 80 s to stop, so the new run spent 1:24 waiting and finished in 3:24. The
+# Architecture job below cancels the superseded run instead, and the new run starts at once.
+# The checkout skips the media files (about 770 MB of the tree's 800 MB, 1,000-odd images, audio and one film): fetching
+# them took about 30 s per job and, on 2026-10-05, 86 s and 153 s, which pushed two runs past three minutes. The PR
+# checks only test that media files exist (`access`/`stat`, never a read), so each skipped file is stood in for by an
+# empty file at its path; only files the commit has get one, so a missing image still fails. A check that reads image
+# bytes belongs in the RC, which has the full tree.
+env:
+  SKIP_MEDIA: |
+    /*
+    !*.png
+    !*.webp
+    !*.mp4
+    !*.m4a
+    !*.wav
+  MEDIA_STAND_INS: git ls-files -t -z | sed -z -n 's/^S //p' | xargs -0 -r sh -c 'for f; do mkdir -p "$(dirname "$f")" && :> "$f"; done' sh
+jobs:
+  # Types, layer/component boundaries, contracts, docs and style.
+  static:
+    name: Static checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: ${{ env.SKIP_MEDIA }}
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+      - run: npm ci --ignore-scripts
+      - run: ${{ env.MEDIA_STAND_INS }}
+      - run: npm run check:pr
+  # The browser-free part of the test suite (#1225): the node/python checks of test:core and test:worktrees. Fast enough
+  # (about a minute) to count as a check (owner, 2026-10-05: "3分钟内的话可以改名check，继续跑").
+  tests:
+    name: Fast checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: ${{ env.SKIP_MEDIA }}
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+      - run: npm ci --ignore-scripts
+      - run: ${{ env.MEDIA_STAND_INS }}
+      - run: node scripts/test-fast.mjs
+  # The load smoke of changed automation code (needs the PR's diff) and every operational/trust check.
+  operations:
+    name: Operational checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout: ${{ env.SKIP_MEDIA }}
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+      - run: npm ci --ignore-scripts
+      - run: ${{ env.MEDIA_STAND_INS }}
+      - run: node scripts/pr-checks-check.mjs
+      - run: node scripts/pr-checks.mjs
+      - run: node scripts/pr-checks.mjs --all
+  # The required check, green only when every other job of this run passed. It starts with the other three instead of
+  # after them (`needs`): a job that only starts once the others finish waits for a runner on the critical path, which
+  # usually takes 3 s but took 5:04 on 2026-10-05 (#1829) and 37–39 s three more times that day. It first cancels this
+  # PR's older runs, then waits for the other jobs of this run.
+  architecture:
+    name: Architecture
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      BRANCH: ${{ github.head_ref }}
+      RUN: ${{ github.run_id }}
+      ATTEMPT: ${{ github.run_attempt }}
+    steps:
+      - name: Cancel this pull request's superseded runs
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: |
+          gh api "repos/$GH_REPO/actions/workflows/architecture.yml/runs?event=pull_request&branch=$BRANCH&per_page=30" \
+            --jq ".workflow_runs[] | select(.status != \"completed\" and .id < $RUN and any(.pull_requests[]; .number == $PR)) | .id" |
+            while read -r old; do echo "cancel run $old"; gh api -X POST "repos/$GH_REPO/actions/runs/$old/cancel" || true; done
+      - name: Wait for the other jobs
+        run: |
+          while :; do
+            jobs=$(gh api "repos/$GH_REPO/actions/runs/$RUN/attempts/$ATTEMPT/jobs?per_page=100" --jq '[.jobs[] | select(.name != "Architecture")]') || { sleep 4; continue; }
+            if [ "$(jq 'length >= 3 and all(.status == "completed")' <<<"$jobs")" = true ]; then
+              jq -r '.[] | "\(.name): \(.conclusion)"' <<<"$jobs"
+              jq -e 'all(.conclusion == "success")' <<<"$jobs" >/dev/null
+              exit
+            fi
+            sleep 4
+          done

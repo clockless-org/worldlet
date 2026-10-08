@@ -1,0 +1,669 @@
+{
+  "schemaVersion": 1,
+  "id": "village",
+  "title": "Village",
+  "version": "1.5.0",
+  "style": {
+    "id": "cozy-miniature",
+    "version": "1.0.0"
+  },
+  "artStatus": "approved",
+  "canvas": {
+    "width": 3840,
+    "height": 2160,
+    "coordinates": "normalized",
+    "origin": "top-left"
+  },
+  "camera": {
+    "projection": "fixed-oblique",
+    "overview": [
+      0.16666666666666666,
+      0.16666666666666666,
+      0.6666666666666666,
+      0.6666666666666666
+    ]
+  },
+  "layers": [
+    {
+      "id": "day-environment",
+      "kind": "environment",
+      "src": "images/day-preserve-terrain-4k.png",
+      "lighting": "day",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "night",
+      "kind": "environment",
+      "src": "images/night-preserve-terrain-4k.png",
+      "lighting": "night",
+      "bounds": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "prompt": "prompts/night-preserve-terrain.txt"
+    }
+  ],
+  "hudSafeAreas": [
+    [
+      0.36,
+      0.82,
+      0.3,
+      0.18
+    ]
+  ],
+  "areas": [
+    {
+      "id": "home",
+      "title": "Home",
+      "legacyIds": [
+        "home"
+      ],
+      "purpose": "Personal mail, calendars, chat, household, shopping, maps and travel",
+      "bounds": [
+        0.45,
+        0.395,
+        0.15,
+        0.148
+      ],
+      "focus": [
+        0.52,
+        0.509
+      ],
+      "label": [
+        0.522,
+        0.56
+      ],
+      "slots": [
+        {
+          "id": "home-01",
+          "anchor": [
+            0.501,
+            0.51
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "stone courtyard",
+          "depth": 0.51
+        },
+        {
+          "id": "home-02",
+          "anchor": [
+            0.522,
+            0.508
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "stone courtyard",
+          "depth": 0.508
+        },
+        {
+          "id": "home-03",
+          "anchor": [
+            0.542,
+            0.511
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "stone courtyard",
+          "depth": 0.511
+        },
+        {
+          "id": "home-04",
+          "anchor": [
+            0.561,
+            0.505
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "stone courtyard",
+          "depth": 0.505
+        },
+        {
+          "id": "home-05",
+          "anchor": [
+            0.487,
+            0.525
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "stone courtyard",
+          "depth": 0.525
+        },
+        {
+          "id": "home-06",
+          "anchor": [
+            0.509,
+            0.531
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "stone courtyard",
+          "depth": 0.531
+        },
+        {
+          "id": "home-slot-7",
+          "anchor": [
+            0.53,
+            0.532
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "courtyard",
+          "depth": 0.532
+        },
+        {
+          "id": "home-slot-8",
+          "anchor": [
+            0.55,
+            0.529
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "courtyard",
+          "depth": 0.529
+        },
+        {
+          "id": "home-slot-9",
+          "anchor": [
+            0.569,
+            0.525
+          ],
+          "maxSize": [
+            0.019,
+            0.04
+          ],
+          "surface": "courtyard",
+          "depth": 0.525
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "title": "Work",
+      "legacyIds": [
+        "work"
+      ],
+      "purpose": "Office, projects, meetings, collaboration and software development",
+      "bounds": [
+        0.625,
+        0.545,
+        0.16,
+        0.145
+      ],
+      "focus": [
+        0.704,
+        0.643
+      ],
+      "label": [
+        0.707,
+        0.694
+      ],
+      "slots": [
+        {
+          "id": "work-01",
+          "anchor": [
+            0.662,
+            0.645
+          ],
+          "maxSize": [
+            0.028,
+            0.046
+          ],
+          "surface": "stone work terrace",
+          "depth": 0.645
+        },
+        {
+          "id": "work-02",
+          "anchor": [
+            0.699,
+            0.645
+          ],
+          "maxSize": [
+            0.028,
+            0.046
+          ],
+          "surface": "stone work terrace",
+          "depth": 0.645
+        },
+        {
+          "id": "work-03",
+          "anchor": [
+            0.736,
+            0.645
+          ],
+          "maxSize": [
+            0.028,
+            0.046
+          ],
+          "surface": "stone work terrace",
+          "depth": 0.645
+        },
+        {
+          "id": "work-04",
+          "anchor": [
+            0.711,
+            0.667
+          ],
+          "maxSize": [
+            0.028,
+            0.046
+          ],
+          "surface": "stone work terrace",
+          "depth": 0.667
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Create",
+      "legacyIds": [
+        "library"
+      ],
+      "purpose": "Reading, learning, notes, writing, design, drawing and media production",
+      "bounds": [
+        0.385,
+        0.292,
+        0.108,
+        0.12
+      ],
+      "focus": [
+        0.44,
+        0.38
+      ],
+      "label": [
+        0.44,
+        0.416
+      ],
+      "slots": [
+        {
+          "id": "create-01",
+          "anchor": [
+            0.412,
+            0.381
+          ],
+          "maxSize": [
+            0.023,
+            0.04
+          ],
+          "surface": "stone reading terrace",
+          "depth": 0.381
+        },
+        {
+          "id": "create-02",
+          "anchor": [
+            0.442,
+            0.387
+          ],
+          "maxSize": [
+            0.023,
+            0.04
+          ],
+          "surface": "stone reading terrace",
+          "depth": 0.387
+        },
+        {
+          "id": "create-03",
+          "anchor": [
+            0.468,
+            0.382
+          ],
+          "maxSize": [
+            0.023,
+            0.04
+          ],
+          "surface": "stone reading terrace",
+          "depth": 0.382
+        }
+      ]
+    },
+    {
+      "id": "finance",
+      "title": "Finance",
+      "legacyIds": [
+        "money"
+      ],
+      "purpose": "Banking, payments, budgets, investments and bills",
+      "bounds": [
+        0.535,
+        0.33,
+        0.122,
+        0.085
+      ],
+      "focus": [
+        0.6,
+        0.386
+      ],
+      "label": [
+        0.6,
+        0.423
+      ],
+      "slots": [
+        {
+          "id": "finance-01",
+          "anchor": [
+            0.561,
+            0.388
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "stone counting terrace",
+          "depth": 0.388
+        },
+        {
+          "id": "finance-02",
+          "anchor": [
+            0.594,
+            0.393
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "stone counting terrace",
+          "depth": 0.393
+        },
+        {
+          "id": "finance-03",
+          "anchor": [
+            0.626,
+            0.389
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "stone counting terrace",
+          "depth": 0.389
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "title": "Health",
+      "legacyIds": [
+        "health"
+      ],
+      "purpose": "Exercise, sleep, meditation and medical tools",
+      "bounds": [
+        0.635,
+        0.405,
+        0.16,
+        0.12
+      ],
+      "focus": [
+        0.718,
+        0.489
+      ],
+      "label": [
+        0.72,
+        0.535
+      ],
+      "slots": [
+        {
+          "id": "health-01",
+          "anchor": [
+            0.67,
+            0.493
+          ],
+          "maxSize": [
+            0.025,
+            0.044
+          ],
+          "surface": "exercise terrace",
+          "depth": 0.493
+        },
+        {
+          "id": "health-02",
+          "anchor": [
+            0.708,
+            0.493
+          ],
+          "maxSize": [
+            0.025,
+            0.044
+          ],
+          "surface": "exercise terrace",
+          "depth": 0.493
+        },
+        {
+          "id": "health-03",
+          "anchor": [
+            0.746,
+            0.493
+          ],
+          "maxSize": [
+            0.025,
+            0.044
+          ],
+          "surface": "exercise terrace",
+          "depth": 0.493
+        },
+        {
+          "id": "health-04",
+          "anchor": [
+            0.69,
+            0.512
+          ],
+          "maxSize": [
+            0.025,
+            0.044
+          ],
+          "surface": "exercise terrace",
+          "depth": 0.512
+        },
+        {
+          "id": "health-05",
+          "anchor": [
+            0.733,
+            0.512
+          ],
+          "maxSize": [
+            0.025,
+            0.044
+          ],
+          "surface": "exercise terrace",
+          "depth": 0.512
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "title": "Tools",
+      "legacyIds": [
+        "travel"
+      ],
+      "purpose": "Files, compression, passwords, networking, system maintenance and automation",
+      "bounds": [
+        0.477,
+        0.593,
+        0.108,
+        0.11
+      ],
+      "focus": [
+        0.536,
+        0.67
+      ],
+      "label": [
+        0.544,
+        0.707
+      ],
+      "slots": [
+        {
+          "id": "tools-01",
+          "anchor": [
+            0.501,
+            0.67
+          ],
+          "maxSize": [
+            0.022,
+            0.04
+          ],
+          "surface": "stone utility patch",
+          "depth": 0.67
+        },
+        {
+          "id": "tools-02",
+          "anchor": [
+            0.53,
+            0.677
+          ],
+          "maxSize": [
+            0.022,
+            0.04
+          ],
+          "surface": "stone utility patch",
+          "depth": 0.677
+        },
+        {
+          "id": "tools-03",
+          "anchor": [
+            0.562,
+            0.674
+          ],
+          "maxSize": [
+            0.022,
+            0.04
+          ],
+          "surface": "stone utility patch",
+          "depth": 0.674
+        },
+        {
+          "id": "tools-04",
+          "anchor": [
+            0.544,
+            0.681
+          ],
+          "maxSize": [
+            0.022,
+            0.04
+          ],
+          "surface": "stone utility patch",
+          "depth": 0.681
+        }
+      ]
+    },
+    {
+      "id": "explore",
+      "title": "Explore",
+      "legacyIds": [
+        "people"
+      ],
+      "purpose": "Browsing, news, social feeds, listening, video and games",
+      "bounds": [
+        0.288,
+        0.525,
+        0.123,
+        0.115
+      ],
+      "focus": [
+        0.35,
+        0.603
+      ],
+      "label": [
+        0.35,
+        0.65
+      ],
+      "slots": [
+        {
+          "id": "explore-01",
+          "anchor": [
+            0.322,
+            0.592
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "wooden dock",
+          "depth": 0.592
+        },
+        {
+          "id": "explore-02",
+          "anchor": [
+            0.35000000000000003,
+            0.592
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "wooden dock",
+          "depth": 0.592
+        },
+        {
+          "id": "explore-03",
+          "anchor": [
+            0.378,
+            0.592
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "wooden dock",
+          "depth": 0.592
+        },
+        {
+          "id": "explore-04",
+          "anchor": [
+            0.322,
+            0.618
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "wooden dock",
+          "depth": 0.618
+        },
+        {
+          "id": "explore-slot-5",
+          "anchor": [
+            0.35,
+            0.618
+          ],
+          "maxSize": [
+            0.024,
+            0.042
+          ],
+          "surface": "dock",
+          "depth": 0.618
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "mode": "image-api",
+    "model": "gpt-image-2",
+    "size": "3840x2160",
+    "quality": "high",
+    "prompt": "prompts/day-preserve-terrain.txt",
+    "generatedAt": "2026-09-23",
+    "upscaled": false
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "counts": {
+    "total": 118,
+    "generated": 118,
+    "integrated": 118,
+    "visualPassed": 118,
+    "interactionPassed": 118,
+    "bytes": 33456374
+  },
+  "uniqueEncodedAssets": 118,
+  "renders": 472,
+  "sizes": [
+    [
+      1600,
+      1000
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      2560,
+      1080
+    ],
+    [
+      820,
+      900
+    ]
+  ],
+  "minBytes": 173902,
+  "maxBytes": 418244,
+  "maximumThreeDecodedPlateBytes": 17299200,
+  "decodedEstimateExcludes": "peripheral caches, GPU overhead, world and other app textures",
+  "settings": {
+    "indoor": 37,
+    "open": 49,
+    "outdoor": 32
+  },
+  "functionalChecks": [
+    "browser-focus-check",
+    "applet-stage-check",
+    "game-hud-check",
+    "immersive-fallback-check"
+  ],
+  "otherChecks": [
+    "root TypeScript",
+    "scripts TypeScript",
+    "builtin-style-check",
+    "git diff --check"
+  ],
+  "notTested": [
+    "real authenticated third-party accounts",
+    "native OS WebView acceptance",
+    "Windows/iOS device acceptance",
+    "full release gate"
+  ],
+  "limits": [
+    "Tall windows show soft peripheral margins while preserving the whole painting.",
+    "Foreground selected-item cards and expanded Fox dialogue can intentionally overlay scenery.",
+    "Compact windows <=800px omit the decorative background."
+  ],
+  "generationException": "Pokemon Showdown refinement was rejected by imagegen safety; existing unique original retained and complete subjects verified using the shared subject-bound fitting. No retry or missing Applet.",
+  "publication": "Original local validation record; subsequent protected PR integration authorized in issue #1945. No package release."
+}

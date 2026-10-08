@@ -1,0 +1,350 @@
+{
+  "x": {
+    "bodyBounds": [
+      743,
+      712
+    ],
+    "scale": 0.9907120743034056,
+    "renderBounds": [
+      960,
+      924
+    ],
+    "groundBaseline": 1000
+  },
+  "discord": {
+    "bodyBounds": [
+      761,
+      708
+    ],
+    "scale": 1.0158730158730158,
+    "renderBounds": [
+      960,
+      909
+    ],
+    "groundBaseline": 1000
+  },
+  "github": {
+    "bodyBounds": [
+      756,
+      673
+    ],
+    "scale": 1.0344827586206897,
+    "renderBounds": [
+      944,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "notion": {
+    "bodyBounds": [
+      762,
+      726
+    ],
+    "scale": 0.995850622406639,
+    "renderBounds": [
+      922,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "slack": {
+    "bodyBounds": [
+      683,
+      712
+    ],
+    "scale": 0.9876543209876543,
+    "renderBounds": [
+      803,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "spotify": {
+    "bodyBounds": [
+      779,
+      719
+    ],
+    "scale": 1,
+    "renderBounds": [
+      931,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "wechat": {
+    "bodyBounds": [
+      793,
+      668
+    ],
+    "scale": 1.0278372591006424,
+    "renderBounds": [
+      960,
+      915
+    ],
+    "groundBaseline": 1000
+  },
+  "whatsapp": {
+    "bodyBounds": [
+      752,
+      708
+    ],
+    "scale": 1.01159114857745,
+    "renderBounds": [
+      909,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "telegram": {
+    "bodyBounds": [
+      776,
+      605
+    ],
+    "scale": 1.0514786418400877,
+    "renderBounds": [
+      960,
+      831
+    ],
+    "groundBaseline": 1000
+  },
+  "linear": {
+    "bodyBounds": [
+      760,
+      607
+    ],
+    "scale": 1.0094637223974763,
+    "renderBounds": [
+      960,
+      826
+    ],
+    "groundBaseline": 1000
+  },
+  "cloudflare": {
+    "bodyBounds": [
+      798,
+      654
+    ],
+    "scale": 1.0158730158730158,
+    "renderBounds": [
+      960,
+      883
+    ],
+    "groundBaseline": 1000
+  },
+  "chatgpt": {
+    "bodyBounds": [
+      609,
+      781
+    ],
+    "scale": 0.997920997920998,
+    "renderBounds": [
+      755,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "claude": {
+    "bodyBounds": [
+      590,
+      708
+    ],
+    "scale": 1.0223642172523961,
+    "renderBounds": [
+      788,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "gemini": {
+    "bodyBounds": [
+      695,
+      688
+    ],
+    "scale": 1.0446137105549511,
+    "renderBounds": [
+      952,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "perplexity": {
+    "bodyBounds": [
+      721,
+      656
+    ],
+    "scale": 1.0169491525423728,
+    "renderBounds": [
+      898,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "deepseek": {
+    "bodyBounds": [
+      670,
+      682
+    ],
+    "scale": 1.0020876826722338,
+    "renderBounds": [
+      960,
+      900
+    ],
+    "groundBaseline": 1000
+  },
+  "teams": {
+    "bodyBounds": [
+      756,
+      617
+    ],
+    "scale": 1.054945054945055,
+    "renderBounds": [
+      960,
+      847
+    ],
+    "groundBaseline": 1000
+  },
+  "zoom": {
+    "bodyBounds": [
+      730,
+      725
+    ],
+    "scale": 1.013727560718057,
+    "renderBounds": [
+      899,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "google-drive": {
+    "bodyBounds": [
+      661,
+      689
+    ],
+    "scale": 1.0010427528675705,
+    "renderBounds": [
+      831,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "dropbox": {
+    "bodyBounds": [
+      633,
+      654
+    ],
+    "scale": 1.065482796892342,
+    "renderBounds": [
+      935,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "onedrive": {
+    "bodyBounds": [
+      591,
+      731
+    ],
+    "scale": 0.986639260020555,
+    "renderBounds": [
+      737,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "microsoft-word": {
+    "bodyBounds": [
+      734,
+      775
+    ],
+    "scale": 0.9687184661957619,
+    "renderBounds": [
+      935,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "microsoft-excel": {
+    "bodyBounds": [
+      744,
+      725
+    ],
+    "scale": 1.0020876826722338,
+    "renderBounds": [
+      939,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "microsoft-powerpoint": {
+    "bodyBounds": [
+      784,
+      653
+    ],
+    "scale": 0.9775967413441955,
+    "renderBounds": [
+      960,
+      864
+    ],
+    "groundBaseline": 1000
+  },
+  "google-docs": {
+    "bodyBounds": [
+      667,
+      700
+    ],
+    "scale": 1.0389610389610389,
+    "renderBounds": [
+      891,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "google-sheets": {
+    "bodyBounds": [
+      698,
+      719
+    ],
+    "scale": 1.0201912858661,
+    "renderBounds": [
+      918,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "figma": {
+    "bodyBounds": [
+      721,
+      745
+    ],
+    "scale": 1,
+    "renderBounds": [
+      936,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "canva": {
+    "bodyBounds": [
+      671,
+      791
+    ],
+    "scale": 1.0020876826722338,
+    "renderBounds": [
+      838,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "tiktok": {
+    "bodyBounds": [
+      687,
+      717
+    ],
+    "scale": 0.9836065573770492,
+    "renderBounds": [
+      854,
+      960
+    ],
+    "groundBaseline": 1000
+  }
+}

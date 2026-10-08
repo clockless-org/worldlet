@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {sourceEvidenceIssues as issues,sourceEvidenceContext} from '../core/attention/evidence-issues.ts';
+const evidence={'gmail:thread':{text:'PRIVATE: Please reply tomorrow.',url:'https://private.example'}};
+const ref={provider:'gmail',id:'thread',quote:'Please reply tomorrow.'};
+assert.deepEqual(issues([{sources:[ref]}],evidence,['gmail']),[]);
+const result=issues([{sources:[{...ref,id:'item-id'},{...ref,quote:'Reply tomorrow'},{...ref,quote:''},{...ref,provider:'revoked'}]}],evidence,['gmail']);
+assert.deepEqual(result.map(r=>r.code),['source_not_read','quote_mismatch','invalid_reference','unauthorized_source']);
+assert.deepEqual(result.map(r=>r.sourceIndex),[0,1,2,3]);
+assert.ok(!JSON.stringify(result).includes('PRIVATE'));assert.ok(!JSON.stringify(result).includes('private.example'));
+assert.equal(issues(Array.from({length:100},()=>({sources:[{...ref,id:'missing'}]})),evidence,['gmail']).length,20);
+assert.equal(issues([{sources:[]},{sources:[{...ref,quote:'Wrong'}]}],evidence,['gmail'])[0].itemIndex,1);
+console.log('PASS bounded indexed evidence repair distinguishes identity, authorization and quote errors without echoing source content');
+
+const raw={id:'thread',provider:'untrusted',text:'Please reply tomorrow.',sourceReference:{provider:'wrong',id:'wrong'}};
+const [analysis]=sourceEvidenceContext([raw],'gmail');
+assert.deepEqual(analysis.sourceReference,{provider:'gmail',id:'thread'});
+assert.equal(raw.sourceReference.id,'wrong');
+const [center]=sourceEvidenceContext([{id:'context-revision',sourceId:'thread',provider:'gmail',text:raw.text}]);
+assert.equal(center.id,'context-revision');
+assert.deepEqual(center.sourceReference,analysis.sourceReference);
+assert.deepEqual(issues([{sources:[{...center.sourceReference,quote:raw.text}]}],evidence,['gmail']),[]);
+assert.throws(()=>sourceEvidenceContext([{id:'context-only',provider:'gmail'}]));
+console.log('PASS explicit source references distinguish acknowledgement IDs and override untrusted identities');

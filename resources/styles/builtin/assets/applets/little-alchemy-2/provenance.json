@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-04",
+  "tool": "built-in image_gen",
+  "model": "not exposed by tool",
+  "prompt": "Create ONE transparent PNG Worldlet applet icon. The reference is STYLE ONLY, not geometry. Cozy hand-painted dimensional miniature, rounded ceramic and enamel, soft matte surfaces with restrained highlights, warm timber low base and sparse brass fittings. Main recognizable game subject dominates, not a generic screen/pedestal/controller. Compact wooden base only 8-12% height, one small black OFF lamp in brass rim centered on its front. Front faces screen-left, narrow RIGHT side visible, top visible, 20° yaw /25° elevation, no roll, upright and grounded. Warm diffuse upper-left light. Entire object centered on transparent alpha with 12% empty margin all sides, clean readable silhouette at 48px. No scenery or island, no outside shadow, no printed poster, no labels or watermark. Keep composition simple, 1-3 large forms. LITTLE ALCHEMY 2: one dominant rounded triangular ivory glass-like laboratory flask filled with warm golden-orange potion, three big cream bubbles, and one small sage leaf emerging beside the stopper. Preserve the recognizable orange flask silhouette, black/navy rim accents, no tiny scientific markings.",
+  "reference": [
+    "game-2048/peek-logo-v4.png (style only)",
+    "web-games-current.png (previous applet identities)"
+  ],
+  "original": "exec-d34d8fdf-3590-483e-8637-5b2acdeba310.png",
+  "processing": "Preserved original master; cleared alpha <=8 fringe, uniformly fitted visible bounds to 1024px in 1280px RGBA square, minimum 128px padding, bottom baseline y=1152."
+}

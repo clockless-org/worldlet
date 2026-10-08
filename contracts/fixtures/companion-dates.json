@@ -1,0 +1,16 @@
+[
+ {"text":"2026-09-24T12:34:56Z","valid":true},
+ {"text":"2026-09-24T12:34:56.1234567-07:00","valid":true},
+ {"text":"2024-02-29T23:59:59+14:00","valid":true},
+ {"text":"2025-02-29T12:00:00Z","valid":false},
+ {"text":"2026-02-30T12:00:00Z","valid":false},
+ {"text":"2026-13-01T00:00:00Z","valid":false},
+ {"text":"2026-09-24","valid":false},
+ {"text":"09/24/2026 12:00 PM","valid":false},
+ {"text":"2026-09-24T12:00:00","valid":false},
+ {"text":"2026-09-24T24:00:00Z","valid":false},
+ {"text":"2026-09-24T12:00:60Z","valid":false},
+ {"text":"2026-09-24T12:00:00+14:01","valid":false},
+ {"text":"0000-01-01T00:00:00Z","valid":false},
+ {"text":"2026-09-24T12:00:00Z\n","valid":false}
+]

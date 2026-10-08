@@ -1,0 +1,5 @@
+build/
+# Intermediate output of scripts/fox-rive/build.py; regenerated on every build.
+fox.rml
+rive.yaml
+textures/

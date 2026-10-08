@@ -1,0 +1,32 @@
+/* Theme Pack surfaces (ui/themes/theme-surfaces.ts). A theme that paints a HUD piece, ships a font or picks a
+   room transition sets the matching data attribute on <html> and the --theme-* properties; a theme that leaves
+   a surface 'shared' sets nothing, so the shared look (Village's) stays exactly as it is. */
+html[data-theme-skin~=attention] #notionWorld .world-task-list,
+html[data-theme-skin~=note] #attentionPreview,
+html[data-theme-skin~=nameplate] #notionWorld>.companion-context,
+html[data-theme-skin~=back] :is(#notionWorld .applet-bar-left button,#notionBack),
+html[data-theme-skin~=bubble] #companionDialogue,
+html[data-theme-skin~=panel] :is(.companion-info-panel,.notion-dialog),
+html[data-theme-skin~=log] #notionWorld .world-log,
+html[data-theme-skin~=button] .ui-button,
+html[data-theme-skin~=card] :is(.ui-applet-surface,.home-leaf),
+html[data-theme-skin~=frame] .pixi-applet-stage:not([data-installation=true]){border-style:solid;background:none;box-shadow:none;backdrop-filter:none}
+html[data-theme-skin~=attention] #notionWorld .world-task-list{border-width:var(--theme-skin-attention-width);border-image:var(--theme-skin-attention) var(--theme-skin-attention-slice) fill/var(--theme-skin-attention-width) stretch}
+html[data-theme-skin~=note] #attentionPreview{border-width:var(--theme-skin-note-width);border-image:var(--theme-skin-note) var(--theme-skin-note-slice) fill/var(--theme-skin-note-width) stretch}
+html[data-theme-skin~=nameplate] #notionWorld>.companion-context{border-width:var(--theme-skin-nameplate-width);border-image:var(--theme-skin-nameplate) var(--theme-skin-nameplate-slice) fill/var(--theme-skin-nameplate-width) stretch}
+html[data-theme-skin~=back] :is(#notionWorld .applet-bar-left button,#notionBack){border-width:var(--theme-skin-back-width);border-image:var(--theme-skin-back) var(--theme-skin-back-slice) fill/var(--theme-skin-back-width) stretch}
+html[data-theme-skin~=bubble] #companionDialogue{border-width:var(--theme-skin-bubble-width);border-image:var(--theme-skin-bubble) var(--theme-skin-bubble-slice) fill/var(--theme-skin-bubble-width) stretch}
+html[data-theme-skin~=panel] :is(.companion-info-panel,.notion-dialog){border-width:var(--theme-skin-panel-width);border-image:var(--theme-skin-panel) var(--theme-skin-panel-slice) fill/var(--theme-skin-panel-width) stretch}
+html[data-theme-skin~=log] #notionWorld .world-log{border-width:var(--theme-skin-log-width);border-image:var(--theme-skin-log) var(--theme-skin-log-slice) fill/var(--theme-skin-log-width) stretch}
+html[data-theme-skin~=button] .ui-button{border-width:var(--theme-skin-button-width);border-image:var(--theme-skin-button) var(--theme-skin-button-slice) fill/var(--theme-skin-button-width) stretch}
+html[data-theme-skin~=card] :is(.ui-applet-surface,.home-leaf){border-width:var(--theme-skin-card-width);border-image:var(--theme-skin-card) var(--theme-skin-card-slice) fill/var(--theme-skin-card-width) stretch}
+html[data-theme-skin~=frame] .pixi-applet-stage:not([data-installation=true]){border-width:var(--theme-skin-frame-width);border-image:var(--theme-skin-frame) var(--theme-skin-frame-slice)/var(--theme-skin-frame-width) stretch}
+/* Fonts: display for titles and nameplates, label for place names and small captions. Reading text stays the shared face. */
+html[data-theme-fonts~=display] :is(.ui-title,.notion-content h2,.companion-name,.world-task-heading,.home-open-header h2,.region-shelf-header h2,.mail-attention-board>h2,#notionWorld>.companion-context){font-family:var(--theme-font-display)}
+html[data-theme-fonts~=label] :is(.notion-pin strong,.world-date-time,.companion-topic,.fox-name-tag){font-family:var(--theme-font-label)}
+/* Entering an Applet's room. */
+@keyframes theme-room-fade{from{opacity:0}to{opacity:1}}
+@keyframes theme-room-door{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0 0 0 0)}}
+html[data-theme-room-transition=fade] #notionWorld[data-depth=object] #notionContent:not([hidden]){animation:theme-room-fade var(--theme-transition-ms) ease-out}
+html[data-theme-room-transition=door] #notionWorld[data-depth=object] #notionContent:not([hidden]){animation:theme-room-door var(--theme-transition-ms) cubic-bezier(.3,.7,.2,1)}
+@media(prefers-reduced-motion:reduce){html[data-theme-room-transition] #notionWorld #notionContent{animation:none}}

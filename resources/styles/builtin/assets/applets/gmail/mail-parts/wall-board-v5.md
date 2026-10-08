@@ -1,0 +1,7 @@
+# Aged attention noticeboard
+
+Built-in image_gen edit of wall-board-v4.png. The title is painted on the plaque. Nine aged paper impressions suggest the 3 by 3 layout even when empty. Mail content stays live and selectable.
+
+## Prompt
+
+Edit this exact transparent noticeboard asset. Preserve geometry, thin frame, mounting tabs, small paper corner, brass clip, enamel plaque position, colors, painted style and alpha background. TWO CHANGES ONLY: 1) On ivory enamel plaque render exact clearly legible text 'Needs Attention', dark muted sage green classic clean lettering, centered, tastefully printed with tiny wear, no additional words. 2) On linen board below plaque add EXACTLY NINE subtle aged rectangular envelope ghost impressions arranged evenly THREE COLUMNS by THREE ROWS. These are old discoloration marks of removed envelopes, NOT actual paper: same visible linen texture throughout each mark, slightly paler sun-protected interior, faint irregular dusty edges, a few tiny old pinholes at top center. No hard outlines or drawn grid lines. Nine impressions should remain softly visible on empty board without looking like buttons. Placement: occupied field spans x=5%-95%, y=23%-93%; columns x=6%-33%,36%-63%,66%-93%; rows y=24%-45%,48%-69%,72%-93%. Landscape rectangular impressions. Keep everything else strictly unchanged. NO actual envelopes, NO pins sticking out, NO extra decoration. True transparent outside board.

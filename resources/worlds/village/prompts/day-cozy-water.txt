@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Asset type: native 3840x2160 Worldlet Village daytime background, cozy-miniature@1.0.0.
+Input: the generated Village painting to correct. Preserve its exact framing, geometry, terrain, sky, architecture, paths, trees, seven region clearings and every edge position. Do not add or remove anything.
+Change ONLY the river water's color: reduce the blue/cyan saturation by approximately 20 percent relative to this input, toward a calm soft muted blue-gray river. Preserve water luminance, highlights, reflections, ripples, flow and shoreline. No gray filter over the rest of the image. The result should remain warm, softly painted and dimensional, with quiet background contrast.
+Do not sharpen, add texture, redesign, relocate objects, change camera, recolor grass or sky, or introduce text, UI, people, devices or watermarks. Deliver the same complete scene at native 3840x2160.

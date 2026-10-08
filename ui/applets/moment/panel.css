@@ -1,0 +1,9 @@
+.moment-applet{color:#303936;display:flex;flex-direction:column;gap:10px;padding:4px 2px 4px;height:100%;font-size:14px;box-sizing:border-box}
+.moment-applet button{cursor:pointer;font:inherit;color:inherit}
+.moment-message{margin:0;font:400 13px/1.35 var(--ui-font-ui)}.moment-message[data-error=true]{color:#a3402d}
+.moment-bar{display:flex;align-items:center;gap:12px}
+.moment-until{flex:1;min-width:0;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--moment-accent,#d9822b);font:500 13px/1.2 var(--ui-font-ui);font-variant-numeric:tabular-nums}
+.moment-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.moment-actions button{color:#303936;min-height:30px;padding:4px 10px;border:1px solid #d9cfb9;border-radius:8px;background:#fffdf4;font:500 12px/1.2 var(--ui-font-ui)}
+.moment-delete{color:#a3402d!important}
+.moment-slot{flex:1;min-height:360px;border-radius:12px;background:#f6f0df;box-shadow:inset 0 0 0 1px #0000000f}

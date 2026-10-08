@@ -1,0 +1,16 @@
+/* Desktop crops the original viewport. Never override HUD dimensions or layout. */
+.companion-backdrop-capture #notionHUD>:is(.companion-pet,.companion-dialogue,.companion-text-entry,.companion-dock),.companion-backdrop-capture .desktop-companion-setup{visibility:hidden!important}
+.desktop-companion-setup{display:none}
+.desktop-companion:not(:has(.companion-avatar)) body>:not(.desktop-companion-setup){display:none!important}
+.desktop-companion:not(:has(.companion-avatar)) .desktop-companion-setup{display:flex;position:fixed;inset:auto 24px 20px;align-items:center;flex-direction:column;color:var(--ui-ink)}
+.desktop-companion-setup img{width:140px;height:140px;object-fit:contain}
+.desktop-companion-setup p{background:var(--ui-paper);border-radius:16px;padding:16px;font:14px/1.5 var(--ui-font-ui)}
+html.desktop-companion,html.desktop-companion body{background:transparent!important;overflow:hidden}
+.desktop-companion #worldStartup{display:none!important}
+.desktop-companion .notion-world{background:transparent!important}
+.desktop-companion .notion-world::before,.desktop-companion .notion-world::after{display:none!important}
+.desktop-companion .notion-world>:not(#notionHUD){display:none!important}
+.desktop-companion #notionHUD>:not(.companion-pet):not(.companion-dialogue):not(.companion-text-entry):not(.companion-dock){display:none!important}
+.desktop-companion #notionHUD{transform:var(--companion-desktop-transform,translateX(-50%))!important;transition:none!important}
+.desktop-companion .companion-avatar{cursor:grab}
+.desktop-companion .is-dragging-fox .companion-avatar{cursor:grabbing}

@@ -1,0 +1,116 @@
+// Browser plugin unavailable: use existing Playwright with its virtual clock.
+import {chromium} from 'playwright';
+import {build} from 'esbuild';
+import {readFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {buildCompanionPresentation} from './build-companion-presentation.ts';
+import {ambientPose,companionPreviewDuration,companionPreviewActions} from '../ui/companion/companion-life.ts';
+import {FOX_ACTIONS} from '../ui/companion/fox-actions.ts';
+assert.equal(companionPreviewDuration('stretching',true),6850);
+assert.equal(companionPreviewDuration('stretching'),6000);
+const previews=companionPreviewActions(true);
+assert.deepEqual(companionPreviewActions(),FOX_ACTIONS);
+assert.equal(previews.length,32);assert.equal(new Set(previews).size,previews.length);
+for(const added of ['drafting','comparing','planning','yawning','sleeping','waking','pickup','settle'])assert(previews.includes(added),'Authored state is missing from preview');
+assert(companionPreviewDuration('idle',true)>17800);
+for(let t=0;t<45000;t+=100)assert.equal(ambientPose(t,true),null);
+for(let t=45000;t<56200;t+=100)assert.equal(ambientPose(t,true),'looking');
+assert.equal(ambientPose(56200,true),null);assert.equal(ambientPose(135000,true),'looking');
+assert.equal(ambientPose(8000),'looking');assert.equal(ambientPose(9500),null);
+const presentation=await buildCompanionPresentation(process.cwd(),'dev');
+const bundle=await build({stdin:{resolveDir:process.cwd(),contents:`import {mountCompanionPortrait} from './ui/companion/companion-portrait.ts';import {createFoxDevPreviewControls} from './ui/companion/fox-dev-preview.ts';import {foxFrameTimingText} from './ui/companion/fox-frame-timing.ts';globalThis.mountFox=mountCompanionPortrait;globalThis.previewControls=createFoxDevPreviewControls;globalThis.foxTiming=foxFrameTimingText;`},bundle:true,write:false,format:'iife'});
+const browser=await chromium.launch();try{
+ const page=await browser.newPage({viewport:{width:900,height:700}}),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.clock.install();
+ page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+ await page.setContent('<title>Fox animation schedule</title><style>body{background:#eee9dd}.companion-model{width:144px;height:144px}</style><div id="fox" class="companion-avatar" data-state="idle"></div>');
+ await page.addStyleTag({content:(await readFile('ui/components/components.css','utf8')).split('\n').filter(line=>line.startsWith('.fox-dev-preview')).join('\n')});
+ await page.evaluate(p=>{(globalThis as any).__WORLDLET_ENV_ASSETS__={companionPortrait:p.companionPainted.original,...p};// This check covers the anatomy portrait; the Rive Fox has scripts/fox-rive-check.ts.
+ delete (globalThis as any).__WORLDLET_ENV_ASSETS__.companionRive;},presentation);await page.addScriptTag({content:bundle.outputFiles[0].text});
+ const start=await page.evaluate(()=>{const w=globalThis as any,t=performance.now();w.disposeFox=w.mountFox(document.querySelector('#fox'),{bust:true});return t;});
+ await page.waitForFunction(()=>document.querySelector('canvas')?.dataset.animationFrame==='anatomy-v1:idle');
+ const burst=await page.evaluate(()=>{
+  const canvas=document.querySelector('canvas')!,observer=new MutationObserver(()=>{});
+  observer.observe(canvas,{attributes:true,attributeFilter:['data-animation-frame']});
+  for(let i=0;i<100;i++)document.dispatchEvent(new Event('wheel'));
+  const writes=observer.takeRecords().length;observer.disconnect();return writes;
+ });
+ assert.equal(burst,0,'Input bursts must not synchronously redraw the Fox 100 times');
+ const at=async(t:number)=>{const now=await page.evaluate(()=>performance.now());assert(start+t>=now,'Virtual target already passed');await page.clock.fastForward(start+t-now);};
+ await at(9500);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'idle');
+ await at(16000);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'idle');
+ await at(45050);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'looking');
+ await at(48000);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'looking','Authored looking must outlive legacy 2s slot');
+ await at(56150);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'looking');
+ await at(56300);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'idle');
+ for(let i=0;i<previews.indexOf('stretching');i++)await page.locator('#fox').dispatchEvent('dblclick');
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'stretching');
+ await page.clock.fastForward(6300);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'stretching','Preview cannot cut the 6200ms clip at 6000ms');
+ await page.clock.fastForward(650);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'idle');
+ for(let i=0;i<previews.length;i++){
+  await page.locator('#fox').dispatchEvent('dblclick');
+  const expected=previews[(previews.indexOf('stretching')+i+1)%previews.length];
+  assert.equal(await page.locator('#fox').getAttribute('data-pose'),expected);
+  assert.equal(await page.locator('canvas').getAttribute('data-animation-frame'),'anatomy-v1:'+expected,'Preview must use its distinct anatomical route');
+  assert.equal(await page.locator('#fox').getAttribute('data-state'),'idle','Preview cannot manufacture foreground task state');
+  await page.clock.fastForward(800);
+ }
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'stretching');
+ await page.evaluate(()=>{document.querySelector<HTMLElement>('#fox')!.dataset.state='listening';});await page.clock.runFor(32);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'listening','Real input must interrupt preview');
+ await page.locator('#fox').dispatchEvent('dblclick');assert.equal(await page.locator('#fox').getAttribute('data-pose'),'listening','Double click cannot interrupt active input');
+ await page.evaluate(()=>document.body.append((globalThis as any).previewControls(document)));
+ assert.equal(await page.locator('select option').count(),32);
+ await page.getByLabel('Fox animation preview state').selectOption('reading');
+ await page.getByRole('button',{name:'Preview animation',exact:true}).click();
+ assert.match(await page.getByRole('status').innerText(),/busy/);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'listening');
+ await page.evaluate(()=>{document.querySelector<HTMLElement>('#fox')!.dataset.state='idle';});await page.clock.runFor(32);
+ for(const state of ['reading','explaining','listening','thinking','working','searching','idle']){
+  await page.getByLabel('Fox animation preview state').selectOption(state);
+  await page.getByRole('button',{name:'Preview animation',exact:true}).click();await page.clock.runFor(32);
+  assert.equal(await page.locator('canvas').getAttribute('data-animation-frame'),'anatomy-v1:'+state);
+  assert.equal(await page.locator('#fox').getAttribute('data-state'),'idle');
+ }
+ await page.clock.fastForward(30000);assert.equal(await page.locator('#fox').getAttribute('data-pose'),'idle','Fixed idle preview allows ambient look');
+ await page.getByLabel('Fox animation preview state').selectOption('greeting');
+ await page.getByRole('button',{name:'Preview animation',exact:true}).click();await page.clock.fastForward(7000);
+ assert.doesNotMatch(await page.evaluate(()=>(globalThis as any).foxTiming()),/greeting \/ settled/,'Initial settled segment should still be active');
+ await page.getByRole('button',{name:'Preview animation',exact:true}).click();await page.clock.runFor(1000);
+ assert.match(await page.evaluate(()=>(globalThis as any).foxTiming()),/greeting \/ settled/,'Same-state Dev replay must leave settled breathing and restart its performance');
+ assert.equal(await page.locator('#fox').getAttribute('data-state'),'idle','Replaying must not manufacture a task');
+ await page.screenshot({path:'/tmp/fox-dev-preview-replay.png'});
+ await page.getByLabel('Fox animation preview state').selectOption('reading');await page.getByRole('button',{name:'Preview animation',exact:true}).click();
+ await page.getByRole('button',{name:'Stop preview',exact:true}).click();assert.notEqual(await page.locator('#fox').getAttribute('data-pose'),'reading');
+ await page.getByRole('button',{name:'Preview animation',exact:true}).click();
+ await page.evaluate(()=>{document.querySelector<HTMLElement>('#fox')!.dataset.state='talking';});await page.clock.runFor(32);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'talking');
+ await page.evaluate(()=>{document.querySelector<HTMLElement>('#fox')!.dataset.state='idle';});await page.clock.runFor(32);
+ assert.notEqual(await page.locator('#fox').getAttribute('data-pose'),'reading','Cancelled preview resurrected after speech');
+ await page.getByRole('button',{name:'Preview animation',exact:true}).click();await page.clock.fastForward(60050);
+ assert.notEqual(await page.locator('#fox').getAttribute('data-pose'),'reading','Dev preview never expires');
+ // Actual drag presentation and rest wake-up use the same mounted renderer.
+ await page.getByRole('button',{name:'Stop preview',exact:true}).click();
+ await page.evaluate(()=>document.querySelector('#fox')!.classList.add('is-dragging-fox'));await page.clock.runFor(32);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'pickup');
+ await page.evaluate(()=>document.querySelector('#fox')!.classList.remove('is-dragging-fox'));await page.clock.runFor(32);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'settle');
+ await page.clock.fastForward(1700);assert.notEqual(await page.locator('#fox').getAttribute('data-pose'),'settle');
+ await page.getByLabel('Fox animation preview state').selectOption('sleeping');await page.getByRole('button',{name:'Preview animation',exact:true}).click();await page.clock.fastForward(3500);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'sleeping');
+ await page.evaluate(()=>document.dispatchEvent(new Event('keydown')));await page.clock.runFor(32);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'waking');
+ await page.evaluate(()=>{const host=document.querySelector<HTMLElement>('#fox')!;host.dataset.state='listening';host.classList.add('is-dragging-fox');});await page.clock.runFor(32);
+ assert.equal(await page.locator('#fox').getAttribute('data-pose'),'listening','Voice input outranks wake and drag');
+ await page.evaluate(()=>{const host=document.querySelector<HTMLElement>('#fox')!;host.dataset.state='idle';host.classList.remove('is-dragging-fox');});await page.clock.runFor(32);
+ assert.equal(await page.title(),'Fox animation schedule');assert.equal(page.url(),'about:blank');
+ await page.screenshot({path:'/tmp/fox-dev-preview-controls.png'});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/fox-dev-preview-controls-narrow.png'});
+ await page.screenshot({path:'/tmp/fox-animation-schedule.png'});await page.evaluate(()=>(globalThis as any).disposeFox());assert.equal(await page.locator('canvas').count(),0);assert.deepEqual(errors,[]);
+ await page.getByRole('button',{name:'Preview animation',exact:true}).click();assert.match(await page.getByRole('status').innerText(),/unavailable/,'Disposed preview listener leaked');
+ await page.evaluate(()=>{const w=globalThis as any;delete w.__WORLDLET_ENV_ASSETS__.companionAnatomy;w.disposeFox=w.mountFox(document.querySelector('#fox'));});
+ await page.waitForFunction(()=>document.querySelector('canvas')?.dataset.animationFrame);
+ await page.getByRole('button',{name:'Preview animation',exact:true}).click();assert.match(await page.getByRole('status').innerText(),/unavailable/,'Non-Dev portrait accepts preview events');
+ await page.evaluate(()=>(globalThis as any).disposeFox());
+ assert.deepEqual(errors,[]);
+ console.log('PASS mounted Dev schedule: uninterrupted idle, complete look/stretch, 32 distinct preview routes without fabricated task state, input priority, drag/settle/wake, legacy list/timing and disposal.');
+}finally{await browser.close();}

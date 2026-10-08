@@ -1,0 +1,986 @@
+{
+  "gmail": {
+    "bodyBounds": [
+      638,
+      700
+    ],
+    "scale": 1.0514786418400877,
+    "renderBounds": [
+      847,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "google-calendar": {
+    "bodyBounds": [
+      715,
+      704
+    ],
+    "scale": 1.0267379679144386,
+    "renderBounds": [
+      954,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "apple-notes": {
+    "bodyBounds": [
+      779,
+      678
+    ],
+    "scale": 1.0052356020942408,
+    "renderBounds": [
+      960,
+      949
+    ],
+    "groundBaseline": 1000
+  },
+  "apple-reminders": {
+    "bodyBounds": [
+      594,
+      689
+    ],
+    "scale": 1.0333692142088267,
+    "renderBounds": [
+      751,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "weather": {
+    "bodyBounds": [
+      494,
+      787
+    ],
+    "scale": 0.9815950920245399,
+    "renderBounds": [
+      749,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "meetings": {
+    "bodyBounds": [
+      625,
+      723
+    ],
+    "scale": 1.056105610561056,
+    "renderBounds": [
+      849,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "codex": {
+    "bodyBounds": [
+      724,
+      657
+    ],
+    "scale": 1.0423452768729642,
+    "renderBounds": [
+      960,
+      920
+    ],
+    "groundBaseline": 1000
+  },
+  "claude-code": {
+    "bodyBounds": [
+      709,
+      715
+    ],
+    "scale": 1.0223642172523961,
+    "renderBounds": [
+      923,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "obsidian": {
+    "bodyBounds": [
+      607,
+      651
+    ],
+    "scale": 1.0503282275711159,
+    "renderBounds": [
+      792,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "voice-memos": {
+    "bodyBounds": [
+      665,
+      716
+    ],
+    "scale": 1.023454157782516,
+    "renderBounds": [
+      852,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "plaid": {
+    "bodyBounds": [
+      704,
+      615
+    ],
+    "scale": 1.1047180667433831,
+    "renderBounds": [
+      928,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "stripe": {
+    "bodyBounds": [
+      731,
+      645
+    ],
+    "scale": 1.0457516339869282,
+    "renderBounds": [
+      960,
+      895
+    ],
+    "groundBaseline": 1000
+  },
+  "paypal": {
+    "bodyBounds": [
+      708,
+      583
+    ],
+    "scale": 1.1307420494699647,
+    "renderBounds": [
+      960,
+      871
+    ],
+    "groundBaseline": 1000
+  },
+  "oura": {
+    "bodyBounds": [
+      663,
+      642
+    ],
+    "scale": 1.146953405017921,
+    "renderBounds": [
+      952,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "strava": {
+    "bodyBounds": [
+      751,
+      680
+    ],
+    "scale": 1.0311493018259936,
+    "renderBounds": [
+      917,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "fitbit": {
+    "bodyBounds": [
+      556,
+      736
+    ],
+    "scale": 1.0468920392584515,
+    "renderBounds": [
+      792,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "google-maps": {
+    "bodyBounds": [
+      644,
+      644
+    ],
+    "scale": 1.0786516853932584,
+    "renderBounds": [
+      960,
+      936
+    ],
+    "groundBaseline": 1000
+  },
+  "airbnb": {
+    "bodyBounds": [
+      492,
+      727
+    ],
+    "scale": 1.0105263157894737,
+    "renderBounds": [
+      639,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "tripit": {
+    "bodyBounds": [
+      719,
+      734
+    ],
+    "scale": 0.9968847352024922,
+    "renderBounds": [
+      928,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "browser": {
+    "bodyBounds": [
+      606,
+      762
+    ],
+    "scale": 0.9937888198757764,
+    "renderBounds": [
+      763,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "doordash": {
+    "bodyBounds": [
+      797,
+      562
+    ],
+    "scale": 0.9896907216494846,
+    "renderBounds": [
+      960,
+      800
+    ],
+    "groundBaseline": 1000
+  },
+  "apple-music": {
+    "bodyBounds": [
+      682,
+      719
+    ],
+    "scale": 1.037837837837838,
+    "renderBounds": [
+      883,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "reddit": {
+    "bodyBounds": [
+      544,
+      795
+    ],
+    "scale": 0.9667673716012085,
+    "renderBounds": [
+      671,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "instagram": {
+    "bodyBounds": [
+      697,
+      736
+    ],
+    "scale": 1.0526315789473684,
+    "renderBounds": [
+      937,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "linkedin": {
+    "bodyBounds": [
+      612,
+      757
+    ],
+    "scale": 0.9886714727085479,
+    "renderBounds": [
+      860,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "amazon": {
+    "bodyBounds": [
+      647,
+      685
+    ],
+    "scale": 1.08843537414966,
+    "renderBounds": [
+      864,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "netflix": {
+    "bodyBounds": [
+      703,
+      680
+    ],
+    "scale": 1.0992120316936271,
+    "renderBounds": [
+      960,
+      939
+    ],
+    "groundBaseline": 1000
+  },
+  "vscode": {
+    "bodyBounds": [
+      658,
+      715
+    ],
+    "scale": 1.0423452768729642,
+    "renderBounds": [
+      897,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "cursor": {
+    "bodyBounds": [
+      554,
+      749
+    ],
+    "scale": 1.01159114857745,
+    "renderBounds": [
+      792,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "outlook": {
+    "bodyBounds": [
+      596,
+      666
+    ],
+    "scale": 1.0201912858661,
+    "renderBounds": [
+      782,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "google-slides": {
+    "bodyBounds": [
+      728,
+      658
+    ],
+    "scale": 1.0311493018259936,
+    "renderBounds": [
+      960,
+      930
+    ],
+    "groundBaseline": 1000
+  },
+  "todoist": {
+    "bodyBounds": [
+      732,
+      610
+    ],
+    "scale": 1.067853170189099,
+    "renderBounds": [
+      960,
+      904
+    ],
+    "groundBaseline": 1000
+  },
+  "things": {
+    "bodyBounds": [
+      685,
+      697
+    ],
+    "scale": 1.0344827586206897,
+    "renderBounds": [
+      920,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "apple-podcasts": {
+    "bodyBounds": [
+      596,
+      777
+    ],
+    "scale": 1.0267379679144386,
+    "renderBounds": [
+      791,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "google-photos": {
+    "bodyBounds": [
+      622,
+      721
+    ],
+    "scale": 1.0750279955207167,
+    "renderBounds": [
+      883,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "apple-photos": {
+    "bodyBounds": [
+      616,
+      734
+    ],
+    "scale": 1.0503282275711159,
+    "renderBounds": [
+      899,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "pages": {
+    "bodyBounds": [
+      710,
+      686
+    ],
+    "scale": 1.0180275715800635,
+    "renderBounds": [
+      955,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "numbers": {
+    "bodyBounds": [
+      722,
+      670
+    ],
+    "scale": 1.0223642172523961,
+    "renderBounds": [
+      936,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "keynote": {
+    "bodyBounds": [
+      560,
+      679
+    ],
+    "scale": 1.0786516853932584,
+    "renderBounds": [
+      854,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "messages": {
+    "bodyBounds": [
+      657,
+      656
+    ],
+    "scale": 1.0971428571428572,
+    "renderBounds": [
+      882,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "facetime": {
+    "bodyBounds": [
+      685,
+      680
+    ],
+    "scale": 1.1135605842311018,
+    "renderBounds": [
+      938,
+      951
+    ],
+    "groundBaseline": 1000
+  },
+  "safari": {
+    "bodyBounds": [
+      695,
+      640
+    ],
+    "scale": 1.0333692142088267,
+    "renderBounds": [
+      960,
+      859
+    ],
+    "groundBaseline": 1000
+  },
+  "chrome": {
+    "bodyBounds": [
+      678,
+      681
+    ],
+    "scale": 1.0468920392584515,
+    "renderBounds": [
+      948,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "firefox": {
+    "bodyBounds": [
+      575,
+      730
+    ],
+    "scale": 1.0212765957446808,
+    "renderBounds": [
+      795,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "arc": {
+    "bodyBounds": [
+      605,
+      687
+    ],
+    "scale": 1.0126582278481013,
+    "renderBounds": [
+      758,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "pinterest": {
+    "bodyBounds": [
+      652,
+      757
+    ],
+    "scale": 0.9805924412665986,
+    "renderBounds": [
+      841,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "facebook": {
+    "bodyBounds": [
+      685,
+      700
+    ],
+    "scale": 1.0084033613445378,
+    "renderBounds": [
+      911,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "threads": {
+    "bodyBounds": [
+      632,
+      738
+    ],
+    "scale": 0.9795918367346939,
+    "renderBounds": [
+      866,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "photoshop": {
+    "bodyBounds": [
+      798,
+      659
+    ],
+    "scale": 1.014799154334038,
+    "renderBounds": [
+      960,
+      918
+    ],
+    "groundBaseline": 1000
+  },
+  "illustrator": {
+    "bodyBounds": [
+      580,
+      726
+    ],
+    "scale": 1.0094637223974763,
+    "renderBounds": [
+      752,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "lightroom": {
+    "bodyBounds": [
+      571,
+      730
+    ],
+    "scale": 0.9687184661957619,
+    "renderBounds": [
+      719,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "capcut": {
+    "bodyBounds": [
+      728,
+      712
+    ],
+    "scale": 1,
+    "renderBounds": [
+      861,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "uber": {
+    "bodyBounds": [
+      514,
+      776
+    ],
+    "scale": 1.0169491525423728,
+    "renderBounds": [
+      698,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "uber-eats": {
+    "bodyBounds": [
+      694,
+      636
+    ],
+    "scale": 1.0786516853932584,
+    "renderBounds": [
+      924,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "booking": {
+    "bodyBounds": [
+      698,
+      714
+    ],
+    "scale": 1.035598705501618,
+    "renderBounds": [
+      881,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "feishu": {
+    "bodyBounds": [
+      630,
+      681
+    ],
+    "scale": 1.0596026490066226,
+    "renderBounds": [
+      851,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "dingtalk": {
+    "bodyBounds": [
+      651,
+      668
+    ],
+    "scale": 1.0822998872604284,
+    "renderBounds": [
+      900,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "tencent-meeting": {
+    "bodyBounds": [
+      741,
+      630
+    ],
+    "scale": 1.0311493018259936,
+    "renderBounds": [
+      960,
+      841
+    ],
+    "groundBaseline": 1000
+  },
+  "bilibili": {
+    "bodyBounds": [
+      719,
+      623
+    ],
+    "scale": 1.037837837837838,
+    "renderBounds": [
+      887,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "xiaohongshu": {
+    "bodyBounds": [
+      694,
+      723
+    ],
+    "scale": 0.9989594172736732,
+    "renderBounds": [
+      884,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "baidu-netdisk": {
+    "bodyBounds": [
+      748,
+      578
+    ],
+    "scale": 1.024546424759872,
+    "renderBounds": [
+      960,
+      769
+    ],
+    "groundBaseline": 1000
+  },
+  "twitch": {
+    "bodyBounds": [
+      760,
+      569
+    ],
+    "scale": 1.0311493018259936,
+    "renderBounds": [
+      960,
+      912
+    ],
+    "groundBaseline": 1000
+  },
+  "steam": {
+    "bodyBounds": [
+      836,
+      597
+    ],
+    "scale": 0.9766022380467956,
+    "renderBounds": [
+      960,
+      783
+    ],
+    "groundBaseline": 1000
+  },
+  "copilot": {
+    "bodyBounds": [
+      671,
+      686
+    ],
+    "scale": 1.087202718006795,
+    "renderBounds": [
+      937,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "acrobat": {
+    "bodyBounds": [
+      670,
+      696
+    ],
+    "scale": 0.9785932721712538,
+    "renderBounds": [
+      878,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "wikipedia": {
+    "bodyBounds": [
+      702,
+      689
+    ],
+    "scale": 0.9907120743034056,
+    "renderBounds": [
+      960,
+      886
+    ],
+    "groundBaseline": 1000
+  },
+  "qq": {
+    "bodyBounds": [
+      522,
+      735
+    ],
+    "scale": 1.054945054945055,
+    "renderBounds": [
+      745,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "wps": {
+    "bodyBounds": [
+      726,
+      690
+    ],
+    "scale": 0.9907120743034056,
+    "renderBounds": [
+      960,
+      900
+    ],
+    "groundBaseline": 1000
+  },
+  "doubao": {
+    "bodyBounds": [
+      643,
+      751
+    ],
+    "scale": 0.9937888198757764,
+    "renderBounds": [
+      800,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "taobao": {
+    "bodyBounds": [
+      661,
+      716
+    ],
+    "scale": 1.0180275715800635,
+    "renderBounds": [
+      821,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "alipay": {
+    "bodyBounds": [
+      667,
+      645
+    ],
+    "scale": 1.1586994958541417,
+    "renderBounds": [
+      928,
+      958
+    ],
+    "groundBaseline": 1000
+  },
+  "posthog": {
+    "bodyBounds": [
+      719,
+      721
+    ],
+    "scale": 1.024546424759872,
+    "renderBounds": [
+      930,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "vercel": {
+    "bodyBounds": [
+      525,
+      678
+    ],
+    "scale": 1.0896708286038592,
+    "renderBounds": [
+      760,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "netlify": {
+    "bodyBounds": [
+      656,
+      731
+    ],
+    "scale": 1.0311493018259936,
+    "renderBounds": [
+      896,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "supabase": {
+    "bodyBounds": [
+      519,
+      725
+    ],
+    "scale": 1.0619469026548674,
+    "renderBounds": [
+      768,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "firebase": {
+    "bodyBounds": [
+      696,
+      699
+    ],
+    "scale": 0.9815950920245399,
+    "renderBounds": [
+      815,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "sentry": {
+    "bodyBounds": [
+      754,
+      682
+    ],
+    "scale": 1.0289389067524115,
+    "renderBounds": [
+      960,
+      949
+    ],
+    "groundBaseline": 1000
+  },
+  "docker": {
+    "bodyBounds": [
+      722,
+      575
+    ],
+    "scale": 1.0052356020942408,
+    "renderBounds": [
+      960,
+      754
+    ],
+    "groundBaseline": 1000
+  },
+  "railway": {
+    "bodyBounds": [
+      713,
+      709
+    ],
+    "scale": 1.0333692142088267,
+    "renderBounds": [
+      938,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "render": {
+    "bodyBounds": [
+      783,
+      587
+    ],
+    "scale": 1.0457516339869282,
+    "renderBounds": [
+      960,
+      812
+    ],
+    "groundBaseline": 1000
+  },
+  "gitlab": {
+    "bodyBounds": [
+      649,
+      731
+    ],
+    "scale": 1.024546424759872,
+    "renderBounds": [
+      908,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "jira": {
+    "bodyBounds": [
+      684,
+      670
+    ],
+    "scale": 1.0423452768729642,
+    "renderBounds": [
+      815,
+      960
+    ],
+    "groundBaseline": 1000
+  }
+}

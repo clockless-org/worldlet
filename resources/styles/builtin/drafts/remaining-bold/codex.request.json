@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_51abe35f0f5849a3af26c68bf9e18f9c",
+  "source": "resources/styles/builtin/assets/applets/codex/peek.png"
+}

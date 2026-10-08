@@ -1,0 +1,144 @@
+// Teleprompter walkthrough against the real bundled UI, with fictional native transport.
+import assert from 'node:assert/strict';
+import {withBrowser,fileAccess,worldUrl} from './browser-test.ts';
+import dataset from '../ui/world/sample-persona.json' with {type:'json'};
+await withBrowser(fileAccess,async browser=>{
+ const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});page.setDefaultTimeout(12000);
+ const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});
+ await page.addInitScript(({id})=>{
+  window.calls=[];let stored={};
+  window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);
+   if(b.action==='snapshot')return {workspaceId:'demo-script',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],sampleEnabled:true,sampleUI:{'dataset-version':id,...stored},cloudConsent:false,onboarding:{completed:true}};
+   if(b.action==='saveSampleUI'){stored=b.state;return {ok:true};}
+   if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
+   if(b.action==='foxPreferences')return {cloudConsent:false,model:{ready:true,name:'Fixture',provider:'custom'}};
+   if(b.action==='agentChat'){
+   const tool=(name,args)=>window.worldletAgentTool(b.id,{type:'tool',id:crypto.randomUUID(),name,args});
+    if(b.text.includes('Check my unread emails')){
+     const opened=await tool('open_applet',{id:'app-gmail'});
+     if(!opened.ok)throw Error(opened.error||'Mail Applet did not open');
+     const unread=await tool('find_content',{query:'Unread'});
+     const ids=(unread.results||[]).map(item=>item.id).filter(Boolean);
+     const originals=[];for(const id of ids.slice(0,5))originals.push(await tool('read_content',{id}));
+     if(!originals.some(item=>item.text?.includes('Sam')))throw Error('Missing authored unread email');
+     return {message:'You have one unread email from Sam about Saturday tennis. I opened Mail so you can review it there.'};
+    }
+    if(b.text.includes('implement the latest design')){
+     const blocked=await tool('delegate_codex',{title:'Quiet focus timer',task:'Implement the latest design',note_ids:['sample-notion-design-latest']});
+     if(!blocked.error)throw Error('Coding delegation must require reading the source');
+     const source=await tool('read_content',{id:'sample-notion-design-latest'});
+     const job=await tool('delegate_codex',{title:'Quiet focus timer',task:'Implement the latest design',note_ids:[source.id]});
+     if(!job.ok||!job.fictional)throw Error(job.error||'Missing practice receipt');
+     (window as any).practiceJobId=job.id;
+     return {message:'The design brief is attached in Codex. The local prototype is ready to try.'};
+    }
+    const blocked=await tool('prepare_email',{sourceIds:['sample-japan-dinner'],to:'alex@example.com',subject:'Dinner',body:'Hi'});
+    if(!blocked.error)throw Error('Draft must require reading the source');
+    const source=await tool('read_content',{id:'sample-japan-dinner'});
+    if(!source.text?.includes('Maple Table'))throw Error('Missing original');
+    const draft=await tool('prepare_email',{sourceIds:[source.id],to:'alex@example.com',subject:'Dinner in Shimokitazawa',body:'Hi Alex, dinner at Maple Table at 19:00? Let’s meet at the station at 18:45. No table booked yet. — Kelvin'});
+    if(!draft.ok)throw Error(draft.error);
+    return {message:'The dinner details are in the draft for your review.'};
+   }
+   return {ok:true};
+  }}}};
+ },{id:dataset.id});
+ await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached',timeout:60000});
+ await page.locator('.companion-avatar').waitFor();
+ const run=(name,args={})=>page.evaluate(async({name,args})=>window.worldletExecute(name,args,{request:'Run this walkthrough action',operationId:crypto.randomUUID()}),{name,args});
+ const unread=await run('find_content',{query:'Unread'});assert.match(JSON.stringify(unread),/sample-mail/);
+ await page.locator('#notionInput').click();
+ await page.locator('#notionInput').fill('Check my unread emails');await page.locator('#notionInput').press('Enter');
+ await page.waitForFunction(()=>document.querySelector('.companion-dialogue')?.textContent.includes('one unread email from Sam'));
+ assert.equal(await page.evaluate(()=>location.hash),'#object=app-gmail');
+ assert.equal(await page.locator('#notionContent').getAttribute('hidden'), '');
+ await run('move_view',{direction:'overview'});
+ await run('open_applet',{id:'app-codex'});
+ await page.locator('.pixi-stage-item[data-execution="Running"]').waitFor();
+ await page.getByRole('button',{name:/Review navigation/}).click();
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Review result',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('#notionContent')?.textContent.includes('Prepared result:'));
+ await page.screenshot({path:'/tmp/worldlet-demo-code.png'});
+ await run('move_view',{direction:'overview'});
+ await run('open_applet',{id:'app-tiktok'});await page.locator('.browser-viewport').waitFor();
+ // Native show/hide are deferred to the next frame, so wait for the queued call.
+ await page.waitForFunction(()=>calls.some(c=>c.action==='browserShow'&&c.platform==='tiktok'));
+ await run('move_view',{direction:'back'});
+ await page.waitForFunction(()=>calls.some(c=>c.action==='browserHide'));
+ await run('open_content',{id:'sample-japan-dinner'});
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Email Alex',exact:true}).click();
+ await page.locator('.fox-email-review').waitFor();
+ assert.match(await page.locator('.fox-email-review').textContent(),/19:00/);
+ await page.locator('.companion-guide-actions').getByRole('button',{name:'Cancel',exact:true}).click();
+ const beforeSend=await run('read_content',{id:'sample-demo-outbox'});assert.doesNotMatch(beforeSend.text,/Status: recorded/);
+ await page.locator('#notionInput').click();
+ await page.locator('#notionInput').fill('Grab that dinner spot from my Notion notes and shoot an email to Alex.');
+ await page.locator('#notionInput').press('Enter');
+ await page.locator('.fox-email-review').waitFor();
+ assert.match(await page.locator('.fox-email-review').textContent(),/alex@example.com/);
+ assert.match(await page.locator('.fox-email-review').textContent(),/Maple Table/);
+ await page.screenshot({path:'/tmp/worldlet-demo-mail.png'});
+ await page.locator('.companion-guide-actions').getByRole('button',{name:'Send',exact:true}).click();
+ await page.waitForFunction(()=>document.body.textContent.includes('Email recorded for alex@example.com'));
+ assert.equal(await page.locator('.companion-guide-actions').getByRole('button',{name:'Send',exact:true}).count(),0,'Completed draft cannot be sent again');
+ const outbox=await run('read_content',{id:'sample-demo-outbox'});assert.match(outbox.text,/Status: recorded \(practice\)/);
+ assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='emailAction').length),0,'No native mail send');
+ const history=await run('browse_web',{operation:'saved',query:'paper'});assert.equal(history.results[0].url,'https://arxiv.org/abs/2304.03442');
+ await run('open_content',{id:history.results[0].id});
+ const shoes=await run('browse_web',{operation:'saved',query:'shoes'});assert.equal(shoes.results.length,1);assert.match(shoes.results[0].url,/allbirds/);
+ await run('browse_web',{operation:'open',url:shoes.results[0].url});
+ await page.waitForFunction(()=>calls.some(c=>['browserCommand','browserShow'].includes(c.action)&&JSON.stringify(c).includes('allbirds')));
+ await run('move_view',{direction:'overview'});
+ await page.locator('#notionInput').click();
+ await page.locator('#notionInput').fill('Use Notion and Codex to implement the latest design');await page.locator('#notionInput').press('Enter');
+ await page.waitForFunction(()=>(window as any).practiceJobId);
+ await page.waitForFunction(()=>document.querySelector('#notionWorld')?.getAttribute('data-reply-busy')!=='true');
+ await page.waitForFunction(()=>document.querySelector('#notionContent')?.textContent.includes('Prepared implementation'));
+ // The practice job becomes reviewable after PRACTICE_BUILD_MS (8 s).
+ await page.getByText(/Ready for review · worldlet/).first().waitFor({timeout:20000});
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Try prototype',exact:true}).click();
+ await page.locator('.practice-timer').waitFor();assert.match(await page.locator('.practice-timer').textContent(),/25:00/);
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Start',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('.practice-timer strong')?.textContent==='24:59');
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Pause',exact:true}).click();
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Reset',exact:true}).click();
+ assert.equal(await page.locator('.practice-timer strong').textContent(),'25:00');
+ await page.screenshot({path:'/tmp/worldlet-demo-prototype.png'});
+ const jobs=await run('list_codex_tasks');assert.equal(jobs.tasks.length,1);
+ await run('show_codex_task',{id:jobs.tasks[0].id});
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Copy HTML',exact:true}).click();
+ await page.waitForFunction(()=>calls.some(c=>c.action==='copyAppletPrototype'&&c.html.includes('Quiet focus timer')));
+ assert.match(await page.locator('#notionContent').textContent(),/Version: 2/);
+ assert.equal(await page.evaluate(()=>calls.filter(c=>['codexTask','codexSession'].includes(c.action)).length),0,'Practice delegation never runs native Codex');
+ const rain=await run('set_scene_weather',{weather:'rain'});assert.equal(rain.ok,true);await page.getByText('Rain scene',{exact:true}).waitFor();
+ await run('set_scene_weather',{weather:'actual'});assert.equal(await page.locator('#notionWorld').getAttribute('data-scene-weather'),'actual');
+ await run('move_view',{direction:'overview'});
+ await page.locator('.world-task-group .world-matter',{hasText:'Tennis with Sam'}).waitFor();
+ // The Attention preview's action asks Fox; the authored practice review lives in Calendar.
+ await run('open_applet',{id:'app-google-calendar'});
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Plan tennis',exact:true}).click();
+ await page.getByRole('button',{name:'Confirm outing',exact:true}).waitFor();
+ assert.match(await page.locator('.tennis-evidence').textContent(),/sam.okafor@example.com/);
+ await page.screenshot({path:'/tmp/worldlet-demo-tennis.png'});
+ await page.getByRole('button',{name:'Confirm outing',exact:true}).click();
+ await page.getByText('Your outing plan is saved on this device.',{exact:false}).waitFor();
+ await run('move_view',{direction:'overview'});
+ await page.locator('.world-task-group .world-matter').first().waitFor();
+ await page.waitForFunction(()=>![...document.querySelectorAll('.world-task-group .world-matter')].some(r=>r.textContent.includes('Tennis with Sam')));
+ const plan=await run('read_content',{id:'sample-tennis-plan'});assert.match(plan.text,/Invitation: sent to sam.okafor@example.com/);assert.match(plan.text,/Booking: confirmed/);
+ await run('open_applet',{id:'app-codex'});
+ await page.getByRole('button',{name:/Polish the village/}).click();
+ await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Review result',exact:true}).click();
+ await run('move_view',{direction:'overview'});
+ await page.locator('.world-task-group .world-matter').first().waitFor();
+ assert.equal(await page.locator('.world-task-group .world-matter',{hasText:'Tennis with Sam'}).count(),0,'Another content save must not revive a completed task');
+ const date=plan.text.match(/^Date: (.+)$/m)[1];assert.equal(new Date(date+'T10:00:00').getDay(),6);
+ assert.equal(await page.evaluate(()=>calls.filter(c=>['codexSession','claudeSession','appContent','notionContent'].includes(c.action)).length),0,'Practice sources never use private providers');
+ await run('customize_companion',{name:'Vox',expression:'sleeping'});
+ await page.waitForFunction(()=>document.querySelector('#companionDialogue')?.getAttribute('aria-label')==='Vox reply');
+ await page.waitForFunction(()=>document.querySelector('.companion-avatar')?.getAttribute('data-pose')==='sleeping');
+ await run('customize_companion',{name:'Vox',expression:'waving'});
+ await page.waitForFunction(()=>document.querySelector('.companion-avatar')?.getAttribute('data-pose')==='waving');
+ assert.deepEqual(errors,[]);
+ console.log('PASS demo: code state/review, TikTok enter/exit, Hermes Notion-to-email review/record, paper/shoes recall, source-backed Notion-to-Codex prototype/start/pause/reset/export, Vox name/sleep/wave, scene weather, Saturday tennis evidence/confirmation/completion; no private writes.');
+});

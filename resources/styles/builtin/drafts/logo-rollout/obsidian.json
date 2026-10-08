@@ -1,0 +1,34 @@
+{
+  "key": "obsidian",
+  "title": "Obsidian",
+  "generic": false,
+  "output": "resources/styles/builtin/assets/applets/obsidian/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-50e11dfa-38d8-467e-ac8b-aa321f6138e3.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/.local/logo-inputs/obsidian.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Obsidian. Image1 is the sourced ORIGINAL publisher icon, the authority for logo geometry, colors, negative spaces and lettering. Recreate it faithfully as a substantial physical sculpture. Image2/3 are MATERIAL and hierarchy examples only; do not copy their logos. Secondary functional cue (reduce this concept to at most two small attachments, not the dominant shape): A vault is a folder of Markdown files; point Worldlet at it and it reads, never writes.. Preserve original icon rather than literal full machine in that cue. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "identitySource": "ui/applets/obsidian/logo-source.ts",
+  "lampRevision": {
+    "key": "obsidian",
+    "prompt": "Precisely edit the attached obsidian Applet miniature. Preserve the existing entire device, correct original logo, functional accessories, wooden base, camera angle, silhouette, materials, color and framing. Add exactly ONE clearly visible status indicator recessed in the FRONT FACE of the wooden base, centered horizontally on that FRONT FACE (not the side), near its vertical center. It is a small warm brass circular bezel with a plain BLACK charcoal glass center, switched OFF: absolutely no glow, no colored light. Black lens diameter approximately 4% of total image width, bezel outside diameter 5%; slightly oblique oval consistent with front face perspective. Make sure unobstructed by props. If existing small indicator occupies base front center replace it with this unlit black lens; remove other colored status indicators on the base, retain brand graphics and non-status functional parts. If support has no continuous wood front, add a discreet low timber connecting foot with the socket at center, otherwise do not redesign base. No extra text, labels, dots, buttons or scenery. Full object isolated on true transparent background. Preserve 1024-or-1280 square composition and safe margins.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-ba17b663-e1bc-43b4-b117-f9d6ac756ff7.png",
+    "anchor": {
+      "center": [
+        0.436204,
+        0.88437
+      ],
+      "radius": [
+        0.017943,
+        0.019537
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

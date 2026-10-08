@@ -1,0 +1,122 @@
+[
+  {
+    "key": "posthog",
+    "title": "PostHog",
+    "purpose": "Check your product analytics on PostHog’s website",
+    "region": "work",
+    "url": "https://app.posthog.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "amber ceramic hedgehog analytics console with small colored chart cards"
+  },
+  {
+    "key": "cloudflare",
+    "title": "Cloudflare",
+    "purpose": "Manage your sites on Cloudflare’s dashboard",
+    "region": "work",
+    "url": "https://dash.cloudflare.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "ivory and muted orange cloud shaped enamel network gateway with brass connecting ports"
+  },
+  {
+    "key": "vercel",
+    "title": "Vercel",
+    "purpose": "Check your deployments on Vercel’s website",
+    "region": "work",
+    "url": "https://vercel.com/dashboard",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "charcoal triangular deployment beacon with ivory launch platform"
+  },
+  {
+    "key": "netlify",
+    "title": "Netlify",
+    "purpose": "Check your sites and deploys on Netlify’s website",
+    "region": "work",
+    "url": "https://app.netlify.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "muted teal enamel deployment signal station with radiating silver spokes"
+  },
+  {
+    "key": "supabase",
+    "title": "Supabase",
+    "region": "work",
+    "url": "https://supabase.com/dashboard",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "sage green lightning shaped database cabinet with glass data drawers"
+  },
+  {
+    "key": "firebase",
+    "title": "Firebase",
+    "purpose": "Open your Firebase projects in its console",
+    "region": "work",
+    "url": "https://console.firebase.google.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "amber flame shaped ceramic database furnace with ivory storage drawers"
+  },
+  {
+    "key": "sentry",
+    "title": "Sentry",
+    "purpose": "Check your app’s errors on Sentry’s website",
+    "region": "work",
+    "url": "https://sentry.io/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "muted plum error monitoring radar with triangular signal rings"
+  },
+  {
+    "key": "docker",
+    "title": "Docker",
+    "region": "work",
+    "url": "https://app.docker.com/",
+    "bundleIds": [
+      "com.docker.docker"
+    ],
+    "preferNative": false,
+    "deviceConcept": "muted blue ceramic whale carrying small shipping containers"
+  },
+  {
+    "key": "railway",
+    "title": "Railway",
+    "purpose": "Check your services on Railway’s website",
+    "region": "work",
+    "url": "https://railway.com/dashboard",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "charcoal miniature locomotive deployment console with ivory rail stripes"
+  },
+  {
+    "key": "render",
+    "title": "Render",
+    "purpose": "Check your services on Render’s website",
+    "region": "work",
+    "url": "https://dashboard.render.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "mint and charcoal curved deployment console with cream server drawers"
+  },
+  {
+    "key": "gitlab",
+    "title": "GitLab",
+    "purpose": "Follow your code and merge requests on GitLab’s website",
+    "region": "work",
+    "url": "https://gitlab.com/",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "terracotta geometric fox shaped code forge with cream manuscript tray"
+  },
+  {
+    "key": "jira",
+    "title": "Jira",
+    "purpose": "Track issues in Jira on its website",
+    "region": "work",
+    "url": "https://www.atlassian.com/software/jira",
+    "bundleIds": [],
+    "preferNative": false,
+    "deviceConcept": "muted blue enamel task board with diamond shaped tickets"
+  }
+]

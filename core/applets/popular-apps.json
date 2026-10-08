@@ -1,0 +1,308 @@
+[
+  {
+    "key": "chatgpt",
+    "title": "ChatGPT",
+    "purpose": "Chat with ChatGPT on its website, next to Fox",
+    "region": "work",
+    "url": "https://chatgpt.com/",
+    "bundleIds": [
+      "com.openai.chat"
+    ],
+    "deviceConcept": "sage ceramic conversation oracle with six-loop interwoven knot speaker face; cream rounded body, brass microphone, two small paper dialogue cards; no desk",
+    "preferNative": false
+  },
+  {
+    "key": "claude",
+    "title": "Claude",
+    "purpose": "Chat with Claude on its website, next to Fox",
+    "region": "work",
+    "url": "https://claude.ai/",
+    "bundleIds": [
+      "com.anthropic.claudefordesktop"
+    ],
+    "deviceConcept": "terracotta asterisk-shaped soft glowing reading lamp on an ivory ceramic base with a manuscript cradle; thoughtful writing companion; no desk",
+    "preferNative": false
+  },
+  {
+    "key": "gemini",
+    "title": "Gemini",
+    "purpose": "Chat with Gemini on its website, next to Fox",
+    "region": "work",
+    "url": "https://gemini.google.com/",
+    "bundleIds": [
+      "com.google.GeminiMacOS"
+    ],
+    "deviceConcept": "iridescent blue violet four-point star crystal held by a brushed brass observatory ring, small lens and ceramic base",
+    "preferNative": false
+  },
+  {
+    "key": "perplexity",
+    "title": "Perplexity",
+    "purpose": "Ask Perplexity; Fox can run a search there for you",
+    "region": "work",
+    "url": "https://www.perplexity.ai/",
+    "bundleIds": [
+      "ai.perplexity.mac"
+    ],
+    "deviceConcept": "teal geometric compass research instrument on a small cast-metal plinth with rotating magnifier and reference cards",
+    "preferNative": false
+  },
+  {
+    "key": "deepseek",
+    "title": "DeepSeek",
+    "purpose": "Chat with DeepSeek on its website, next to Fox",
+    "region": "work",
+    "url": "https://chat.deepseek.com/",
+    "bundleIds": [],
+    "deviceConcept": "friendly blue ceramic whale with a white paper scroll curving from its mouth, a subtle glass thought bubble above, tiny brass feet",
+    "preferNative": false
+  },
+  {
+    "key": "whatsapp",
+    "title": "WhatsApp",
+    "purpose": "Message your friends on WhatsApp Web",
+    "region": "library",
+    "url": "https://web.whatsapp.com/",
+    "bundleIds": [
+      "net.whatsapp.WhatsApp"
+    ],
+    "deviceConcept": "rounded sage green speech-bubble telephone with ivory handset integrated into its side, cream ceramic feet and two paper message slips; no kiosk",
+    "preferNative": false
+  },
+  {
+    "key": "telegram",
+    "title": "Telegram",
+    "purpose": "Message your chats on Telegram Web",
+    "region": "library",
+    "url": "https://web.telegram.org/",
+    "bundleIds": [
+      "ru.keepcoder.Telegram"
+    ],
+    "deviceConcept": "folded blue enamel paper airplane on a slim brushed metal launch stand with white paper message tray",
+    "preferNative": false
+  },
+  {
+    "key": "slack",
+    "title": "Slack",
+    "purpose": "Talk with your team on Slack’s website",
+    "region": "work",
+    "url": "https://app.slack.com/",
+    "bundleIds": [
+      "com.tinyspeck.slackmacgap"
+    ],
+    "deviceConcept": "four-channel collaborative message hub made from interlocking muted teal blue coral yellow enamel hashtag pieces, each holds a small paper note, metal feet",
+    "preferNative": false
+  },
+  {
+    "key": "teams",
+    "title": "Microsoft Teams",
+    "purpose": "Chat and meet on Microsoft Teams’ website",
+    "region": "work",
+    "url": "https://teams.microsoft.com/",
+    "bundleIds": [
+      "com.microsoft.teams2",
+      "com.microsoft.teams"
+    ],
+    "deviceConcept": "purple frosted glass meeting capsule with two pale ceramic participant silhouettes and a violet T plaque, slim silver microphone",
+    "preferNative": false
+  },
+  {
+    "key": "zoom",
+    "title": "Zoom",
+    "purpose": "Join and host calls on Zoom’s website",
+    "region": "work",
+    "url": "https://app.zoom.us/wc/",
+    "bundleIds": [
+      "us.zoom.xos"
+    ],
+    "deviceConcept": "powder blue enamel video camera with big glass lens, ivory ceramic microphone and slim aluminum tripod",
+    "preferNative": false
+  },
+  {
+    "key": "google-drive",
+    "title": "Google Drive",
+    "region": "work",
+    "url": "https://drive.google.com/drive/u/0/my-drive",
+    "bundleIds": [
+      "com.google.drivefs"
+    ],
+    "deviceConcept": "sculptural triangular file vault with three enamel sections in muted yellow green blue, functional document drawer in each side, no wood",
+    "preferNative": false
+  },
+  {
+    "key": "dropbox",
+    "title": "Dropbox",
+    "purpose": "Open your files on Dropbox’s website",
+    "region": "work",
+    "url": "https://www.dropbox.com/home",
+    "bundleIds": [
+      "com.getdropbox.dropbox"
+    ],
+    "deviceConcept": "open folded-blue metal storage box shaped like Dropbox diamonds, cream document folders visible inside, short rubber feet",
+    "preferNative": false
+  },
+  {
+    "key": "onedrive",
+    "title": "OneDrive",
+    "purpose": "Open your files on OneDrive’s website",
+    "region": "work",
+    "url": "https://onedrive.live.com/",
+    "bundleIds": [
+      "com.microsoft.OneDrive"
+    ],
+    "deviceConcept": "blue frosted-glass cloud hovering just over a cream metal filing unit with rounded drawers, slim cloud arch physically attached",
+    "preferNative": false
+  },
+  {
+    "key": "microsoft-word",
+    "title": "Word",
+    "purpose": "Write documents in Word on the web",
+    "region": "work",
+    "url": "https://word.cloud.microsoft/",
+    "bundleIds": [
+      "com.microsoft.Word"
+    ],
+    "deviceConcept": "ivory ceramic typewriter with deep blue W book-spine carriage and a fresh manuscript sheet, metal keys",
+    "preferNative": false
+  },
+  {
+    "key": "microsoft-excel",
+    "title": "Excel",
+    "purpose": "Work on spreadsheets in Excel on the web",
+    "region": "work",
+    "url": "https://excel.cloud.microsoft/",
+    "bundleIds": [
+      "com.microsoft.Excel"
+    ],
+    "deviceConcept": "sage enamel mechanical ledger calculator, green X side panel, paper spreadsheet feeding through brass rollers, visible abacus wheel",
+    "preferNative": false
+  },
+  {
+    "key": "microsoft-powerpoint",
+    "title": "PowerPoint",
+    "purpose": "Make presentations in PowerPoint on the web",
+    "region": "work",
+    "url": "https://powerpoint.cloud.microsoft/",
+    "bundleIds": [
+      "com.microsoft.Powerpoint"
+    ],
+    "deviceConcept": "terracotta enamel compact slide projector, coral P side emblem, brass lens and a translucent circular chart slide",
+    "preferNative": false
+  },
+  {
+    "key": "google-docs",
+    "title": "Google Docs",
+    "region": "work",
+    "url": "https://docs.google.com/document/",
+    "bundleIds": [],
+    "deviceConcept": "blue folded-page shaped writing machine made of powder-coated metal, ivory ruled paper roll and two ceramic ink pots",
+    "preferNative": false
+  },
+  {
+    "key": "google-sheets",
+    "title": "Google Sheets",
+    "region": "work",
+    "url": "https://docs.google.com/spreadsheets/",
+    "bundleIds": [],
+    "deviceConcept": "green folded-page spreadsheet calculator, pale metal grid tray with tiny square glass data blocks and a chart needle",
+    "preferNative": false
+  },
+  {
+    "key": "figma",
+    "title": "Figma",
+    "purpose": "Design in Figma on its website",
+    "region": "work",
+    "url": "https://www.figma.com/files/",
+    "bundleIds": [
+      "com.figma.Desktop"
+    ],
+    "deviceConcept": "five Figma rounded color blocks built from matte tinted resin, arranged as a functional adjustable drafting arm above a translucent glass layout board",
+    "preferNative": false
+  },
+  {
+    "key": "canva",
+    "title": "Canva",
+    "purpose": "Make designs in Canva on its website",
+    "region": "work",
+    "url": "https://www.canva.com/",
+    "bundleIds": [
+      "com.canva.CanvaDesktop"
+    ],
+    "deviceConcept": "turquoise glazed ceramic C-shaped paint ribbon holding a canvas panel, white brush cup and pastel paint wells",
+    "preferNative": false
+  },
+  {
+    "key": "spotify",
+    "title": "Spotify",
+    "purpose": "Play music on Spotify’s web player",
+    "region": "travel",
+    "url": "https://open.spotify.com/",
+    "bundleIds": [
+      "com.spotify.client"
+    ],
+    "deviceConcept": "rounded sage green fabric-covered music speaker with three curved sound-wave grille slits, brass dial, ivory ceramic record slot",
+    "preferNative": false
+  },
+  {
+    "key": "apple-music",
+    "title": "Apple Music",
+    "purpose": "Play music on Apple Music’s website",
+    "region": "travel",
+    "url": "https://music.apple.com/",
+    "bundleIds": [
+      "com.apple.Music"
+    ],
+    "deviceConcept": "rose enamel miniature record player with ivory musical-note shaped tonearm, black vinyl disc and cream fabric speaker",
+    "preferNative": false
+  },
+  {
+    "key": "reddit",
+    "title": "Reddit",
+    "purpose": "Read Reddit; Fox can find threads on a topic for you",
+    "region": "library",
+    "url": "https://www.reddit.com/",
+    "bundleIds": [],
+    "deviceConcept": "white ceramic friendly antenna robot with orange glass eyes presenting nested conversation cards, orange enamel circular base",
+    "preferNative": false
+  },
+  {
+    "key": "instagram",
+    "title": "Instagram",
+    "purpose": "Browse Instagram in your world",
+    "region": "library",
+    "url": "https://www.instagram.com/",
+    "bundleIds": [],
+    "deviceConcept": "muted coral plum enamel instant camera, thick glass lens, cream paper photos emerging from bottom slot, rounded ceramic feet",
+    "preferNative": false
+  },
+  {
+    "key": "linkedin",
+    "title": "LinkedIn",
+    "purpose": "Use LinkedIn; Fox can look up people and jobs for you",
+    "region": "work",
+    "url": "https://www.linkedin.com/feed/",
+    "bundleIds": [],
+    "deviceConcept": "blue enamel professional calling-card exchange device with white in emblem and two brass portfolio trays, clean geometric silhouette",
+    "preferNative": false
+  },
+  {
+    "key": "amazon",
+    "title": "Amazon",
+    "purpose": "Shop on Amazon; Fox can search and compare items for you",
+    "region": "money",
+    "url": "https://www.amazon.com/",
+    "bundleIds": [],
+    "deviceConcept": "cream powder-coated parcel locker with orange curved smile-shaped handle, cardboard parcels and small woven shopping basket",
+    "preferNative": false
+  },
+  {
+    "key": "netflix",
+    "title": "Netflix",
+    "purpose": "Watch Netflix in your world",
+    "region": "travel",
+    "url": "https://www.netflix.com/browse",
+    "bundleIds": [],
+    "deviceConcept": "charcoal fabric cinema screen with sculptural red N-shaped velvet curtain folds, small metal film reel projector attached to base",
+    "preferNative": false
+  }
+]

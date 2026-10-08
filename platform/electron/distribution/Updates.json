@@ -1,0 +1,7 @@
+{
+  "feedURL": "https://worldlet.clockless.workers.dev/downloads/appcast.xml",
+  "intelFeedURL": "https://worldlet.clockless.workers.dev/downloads/appcast-intel.xml",
+  "publicKey": "/cnKGaG0V8YgptS7GK0mB/gDUsQbVRkoDn6714zeZUE=",
+  "keychainAccount": "app.worldlet.mac",
+  "bucket": "worldlet-releases"
+}

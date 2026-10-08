@@ -1,0 +1,54 @@
+import assert from 'node:assert/strict';
+import {launchTestBrowser,worldUrl} from './browser-test.ts';
+const browser=await launchTestBrowser({args:['--allow-file-access-from-files']});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:940},reducedMotion:'reduce'});
+ page.setDefaultTimeout(10000);
+ await page.addInitScript(()=>{(window as any).webkit={messageHandlers:{worldlet:{async postMessage(b){if(b.action==='snapshot')return {platform:'macos',workspaceId:'empty-area-check',sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true,unlockedApplets:[],hiddenApplets:[]},sampleEnabled:false};if(b.action==='appContent')return {pages:[]};if(b.action==='onboarding'&&b.operation==='regionLayout')((window as any).regionSaves??=[]).push(b.layout);return {ok:true};}}}};});
+ await page.goto(worldUrl());
+ await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl',undefined,{timeout:60000});
+ await page.locator('#worldStartup').waitFor({state:'detached',timeout:60000});
+ const plus=page.locator('[data-kind=region-add][data-page=building-work]');
+ const label=page.locator('[data-kind=region-more][data-page=building-work]');
+ await plus.hover();assert.equal(await label.locator('strong').evaluate(n=>getComputedStyle(n).textDecorationLine),'underline');
+ assert.equal(await plus.getAttribute('data-hovered'),'true');
+ await page.mouse.move(0,0);assert.equal(await label.getAttribute('data-hovered'),'false');
+ await label.hover();assert.equal(await plus.getAttribute('data-hovered'),'true');
+ await plus.click();
+ assert.equal(await page.evaluate(()=>document.querySelector<any>('#notionWorld').sceneMetrics.level),'overview','Add does not require entering the area');
+ const shelf=page.locator('.region-shelf');await shelf.waitFor();
+ const panel=(await shelf.boundingBox())!;assert(Math.abs(panel.y+panel.height/2-470)<2,'Shelf is vertically centered');
+ const tile=shelf.locator('.region-shelf-applet').first();
+ const title=await tile.getAttribute('aria-label');
+ const transfer=await page.evaluateHandle(()=>new DataTransfer());
+ await tile.dispatchEvent('dragstart',{dataTransfer:transfer});
+ assert.equal(await page.locator('[data-kind=region-slot]').count(),5);
+ await tile.dispatchEvent('dragend',{dataTransfer:transfer});
+ assert.equal(await page.locator('[data-kind=region-slot]').count(),0,'Cancelled drag removes targets');
+ assert.equal(await plus.count(),1,'Cancelled drag does not install');
+ await tile.dispatchEvent('dragstart',{dataTransfer:transfer});
+ const slot=page.locator('[data-kind=region-slot]').nth(2);
+ const bounds=(await slot.boundingBox())!;
+ assert(await slot.evaluate((el,p)=>el.contains(document.elementFromPoint(p.x,p.y)),{x:bounds.x+bounds.width/2,y:bounds.y+bounds.height/2}),'World drop target is not covered');
+ await slot.dispatchEvent('dragover',{dataTransfer:transfer});
+ await slot.dispatchEvent('drop',{dataTransfer:transfer});
+ await page.waitForFunction(()=>!document.querySelector('[data-kind=region-add][data-page=building-work]'));
+ assert.equal(await page.locator('[data-ground-slot="2"]').getAttribute('aria-label'),title);
+ // The areas' layout is kept in the World (onboarding.regionLayout), not the page's storage.
+ await page.waitForFunction(()=>(window as any).regionSaves?.some(v=>v.pins.work?.[2]));
+ assert.equal(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.startsWith('worldlet-regions-v1:'))),false,'World drop persists the exact slot in the World');
+ assert.equal(await page.locator('[data-kind=region-slot]').count(),0);
+ const resident=page.locator('[data-ground-slot="2"]');await resident.scrollIntoViewIfNeeded();
+ const box=(await resident.boundingBox())!;await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2,box.y-20,{steps:8});
+ await page.locator('[data-kind=region-slot]').first().waitFor();
+ const dest=(await page.locator('[data-kind=region-slot]').first().boundingBox())!;await page.mouse.move(dest.x+dest.width/2,dest.y+dest.height/2,{steps:12});await page.mouse.move(dest.x+dest.width/2+1,dest.y+dest.height/2);await page.mouse.up();
+ await page.waitForFunction(t=>document.querySelector('[data-ground-slot="0"]')?.getAttribute('aria-label')===t,title);
+ // The dropped Applet is pinned there; its pin unpins it, and pinning again keeps it in place.
+ const cell=page.locator('.region-shelf-cell').filter({has:page.locator('[data-ground-slot="0"]')});
+ assert.equal(await cell.getAttribute('data-pinned'),'true','a dropped Applet is pinned to its place');
+ await cell.locator('.region-shelf-pin').click();
+ await page.waitForFunction(()=>(window as any).regionSaves.at(-1).pins.work.every(id=>id===null));
+ await page.locator('.region-shelf-cell').filter({has:page.locator('[data-ground-slot="0"]')}).locator('.region-shelf-pin').click();
+ await page.waitForFunction(t=>document.querySelector('[data-ground-slot="0"]')?.getAttribute('aria-label')===t&&(window as any).regionSaves.at(-1).pins.work[0],title);
+ console.log('PASS empty area add, paired hover, centered shelf, cancelled drag, world drop, exact slot persistence in the World, pin and unpin');
+}finally{for(const context of browser.contexts())for(const page of context.pages()){await page.mouse.up();await page.keyboard.press('Escape');}await browser.close();}

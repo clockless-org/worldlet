@@ -1,0 +1,688 @@
+[
+ {
+  "name": "valid task",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "Foundation whitespace title is blank",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "​",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "error": "Invalid world item: title.",
+   "ok": false
+  }
+ },
+ {
+  "name": "title limit counts graphemes",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "title over grapheme limit",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻👩‍💻",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "error": "Invalid world item: title.",
+   "ok": false
+  }
+ },
+ {
+  "name": "task needs attention reason",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": " ",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "error": "Invalid world item: attentionReason.",
+   "ok": false
+  }
+ },
+ {
+  "name": "invalid priority",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "priority": "critical"
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "error": "Invalid world item: priority.",
+   "ok": false
+  }
+ },
+ {
+  "name": "missing sources",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": []
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "error": "A world item needs source references.",
+   "ok": false
+  }
+ },
+ {
+  "name": "empty quote",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": ""
+     }
+    ]
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "error": "Invalid source evidence.",
+   "ok": false
+  }
+ },
+ {
+  "name": "event needs start",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "event",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "dates": {
+    "start": null,
+    "end": null
+   }
+  },
+  "expected": {
+   "error": "Events need a date and time zone.",
+   "ok": false
+  }
+ },
+ {
+  "name": "event end before start",
+  "operation": "worldItemValidate",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "event",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "start": "2026-09-29T10:00:00Z",
+    "end": "2026-09-29T09:00:00Z"
+   },
+   "dates": {
+    "start": 1790676000,
+    "end": 1790672400
+   }
+  },
+  "expected": {
+   "error": "Invalid event end time.",
+   "ok": false
+  }
+ },
+ {
+  "name": "prepare new task",
+  "operation": "worldItemPrepare",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "run": "run-1",
+   "now": "2026-09-29T10:00:00Z"
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "attentionReason": "Direct request",
+    "context": "Ana asked for the deck.",
+    "createdAt": "2026-09-29T10:00:00Z",
+    "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "kind": "task",
+    "obligationIdentityAliases": [
+     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "obligationIdentityVersion": 1,
+    "policyVersion": 2,
+    "provider": "gmail",
+    "runId": "run-1",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "status": "open",
+    "statusOrigin": "agent",
+    "title": "Reply to Ana",
+    "updatedAt": "2026-09-29T10:00:00Z",
+    "observedAt": "2026-09-29T10:00:00Z"
+   }
+  }
+ },
+ {
+  "name": "prepare keeps previous state and aliases",
+  "operation": "worldItemPrepare",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "key": "legacy",
+    "obligationIdentityAliases": [
+     "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    ],
+    "snoozedUntil": "x"
+   },
+   "previous": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "identity": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "status": "candidate",
+    "statusOrigin": "user",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "snoozedUntil": "2026-10-01T00:00:00Z",
+    "obligationIdentityVersion": 1,
+    "obligationIdentityAliases": [
+     "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+     "not-hex"
+    ],
+    "legacySourceId": "old"
+   },
+   "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "identity": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+   "run": "run-2",
+   "now": "2026-09-29T10:00:00Z",
+   "previousIdentity": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "attentionReason": "Direct request",
+    "context": "Ana asked for the deck.",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "identity": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "kind": "task",
+    "legacySourceId": "old",
+    "obligationIdentityAliases": [
+     "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "obligationIdentityVersion": 1,
+    "policyVersion": 2,
+    "provider": "gmail",
+    "runId": "run-2",
+    "snoozedUntil": "2026-10-01T00:00:00Z",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "status": "open",
+    "statusOrigin": "user",
+    "title": "Reply to Ana",
+    "updatedAt": "2026-09-29T10:00:00Z"
+   }
+  }
+ },
+ {
+  "name": "prepare update drops task identity fields",
+  "operation": "worldItemPrepare",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "update",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "obligationIdentityVersion": 1
+   },
+   "previous": {
+    "provider": "gmail",
+    "kind": "update",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "status": "read"
+   },
+   "id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+   "identity": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+   "run": "run-3",
+   "now": "2026-09-29T10:00:00Z"
+  },
+  "expected": {
+   "ok": true,
+   "value": {
+    "attentionReason": "Direct request",
+    "context": "Ana asked for the deck.",
+    "createdAt": "2026-09-29T10:00:00Z",
+    "id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "identity": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "kind": "update",
+    "policyVersion": 2,
+    "provider": "gmail",
+    "runId": "run-3",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "status": "read",
+    "statusOrigin": "agent",
+    "title": "Reply to Ana",
+    "updatedAt": "2026-09-29T10:00:00Z"
+   }
+  }
+ },
+ {
+  "name": "new item uses matching id",
+  "operation": "worldItemResolveID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "matchingID": "existing",
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expected": {
+   "ok": true,
+   "value": "existing"
+  }
+ },
+ {
+  "name": "new item uses identity",
+  "operation": "worldItemResolveID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ]
+   },
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expected": {
+   "ok": true,
+   "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+ },
+ {
+  "name": "update matches canonically equivalent source",
+  "operation": "worldItemResolveID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "mé",
+      "provider": "gmail",
+      "quote": "q"
+     }
+    ],
+    "id": "café"
+   },
+   "previous": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "mé",
+      "provider": "gmail",
+      "quote": "q"
+     }
+    ],
+    "id": "café"
+   },
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expected": {
+   "ok": true,
+   "value": "café"
+  }
+ },
+ {
+  "name": "update with a different owner source",
+  "operation": "worldItemResolveID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m2",
+      "provider": "gmail",
+      "quote": "q"
+     }
+    ],
+    "id": "x"
+   },
+   "previous": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "id": "x"
+   },
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expected": {
+   "error": "An update must reference an existing item with the same owner, kind and a matching source.",
+   "ok": false
+  }
+ },
+ {
+  "name": "update with a different kind",
+  "operation": "worldItemResolveID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "update",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "id": "x"
+   },
+   "previous": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "id": "x"
+   },
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expected": {
+   "error": "An update must reference an existing item with the same owner, kind and a matching source.",
+   "ok": false
+  }
+ },
+ {
+  "name": "update without previous",
+  "operation": "worldItemResolveID",
+  "input": {
+   "item": {
+    "provider": "gmail",
+    "kind": "task",
+    "title": "Reply to Ana",
+    "context": "Ana asked for the deck.",
+    "attentionReason": "Direct request",
+    "sources": [
+     {
+      "id": "m1",
+      "provider": "gmail",
+      "quote": "Can you send the deck?"
+     }
+    ],
+    "id": "x"
+   },
+   "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "expected": {
+   "error": "An update must reference an existing item with the same owner, kind and a matching source.",
+   "ok": false
+  }
+ }
+]

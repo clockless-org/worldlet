@@ -1,0 +1,395 @@
+/* Spatial mode does not determine the depth of stored content. */
+.native-console .notion-top{inset:24px 24px auto;pointer-events:none}
+.native-console .notion-identity{max-width:32%;width:auto;pointer-events:auto}
+/* As tall as the left edge allows, with what it holds centred on that edge:
+   the panel is read at a glance, never scrolled. */
+.native-console .world-task-tracker{display:flex;flex-direction:column;justify-content:center;margin:0;width:330px;max-width:30%;position:absolute;left:24px;top:76px;bottom:84px;z-index:24;overflow:visible;isolation:isolate;padding:0;pointer-events:none}
+.native-console .world-task-list{display:flex;flex-direction:column;gap:12px;align-items:stretch;justify-content:flex-start;flex:0 1 auto;min-height:0;overflow:hidden;padding:10px 14px;pointer-events:none}
+.native-console .world-task-tracker :is(.world-matter,.world-widget,.world-task-heading){pointer-events:auto}
+/* The top bar (#951): Back at its start, after the Mac's traffic lights where the window has
+   them; inside an Applet the title centered over the area beside Fox's column and the Applet's
+   own controls at the end. Each side keeps room for its icon-only controls (.scene-control in
+   controls.css). */
+.native-console{--applet-bar-top:16px;--applet-bar-height:44px;--applet-bar-start:16px;--applet-bar-side:132px}
+:root[data-leading-window-controls] .native-console{--applet-bar-start:76px}
+/* The content-sized backing is owned by the shared 2.5D HUD stylesheet. */
+.native-console>.companion-context{position:absolute;top:24px;left:50%;transform:translateX(-50%);max-width:min(46%,calc(100% - 560px));width:auto;margin:0;padding:0;border:0;background:none;box-shadow:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;z-index:25;white-space:normal;overflow:visible;overflow-wrap:anywhere}
+.native-console .world-context,.native-console .world-panel-context{display:none}
+.native-console>.notion-content,.native-console .notion-dialog{position:absolute;inset:84px calc(33.333% + 12px) var(--world-footer-clearance,64px) 24px;width:auto;height:auto;min-width:0;max-width:none;max-height:none;margin:0;padding:24px;z-index:30;overflow:auto;scroll-padding-bottom:180px}
+.native-console>.notion-content::after,.native-console #notionDialogBody::after{content:'';display:block;height:160px;pointer-events:none}
+.native-console .notion-hud{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;width:min(680px,calc(100% - 32px));height:150px;min-height:150px;max-height:none;display:block;overflow:visible;z-index:80;pointer-events:none}
+.native-console .notion-hud::before{content:'';position:absolute;left:50%;transform:translateX(-50%);width:260px;max-width:70vw;height:130px;bottom:0;background:radial-gradient(ellipse,#25433330,transparent 70%);filter:blur(8px);pointer-events:none}
+.native-console .companion-pet{position:absolute;left:50%;bottom:56px;top:auto;width:90px;height:88px;transform:translateX(-50%);gap:0;pointer-events:auto}
+.native-console .companion-pet .companion-avatar{width:82px;height:88px;background:none;border:0;padding:0;touch-action:none}
+.native-console .companion-avatar :is(canvas,img){width:96px;height:96px;margin:-4px -7px}
+.native-console .companion-dock{position:absolute;inset:auto 0 52px;height:88px;min-height:0;padding:0}
+.native-console .notion-shortcuts{width:100%;max-width:none}
+.native-console .world-actions{display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);grid-template-rows:repeat(2,40px);height:88px;gap:8px 0;padding:0;overflow:visible;pointer-events:none}
+/* Fill the lower row left to right, then the upper row. DOM and keyboard order agree. */
+.native-console .world-actions .world-capsule{transform:none;flex:0 0 auto;pointer-events:auto;width:max-content;max-width:calc(100% - 16px);margin:0 8px;grid-row:2}
+.native-console .world-actions .world-capsule:nth-child(odd){grid-column:1;justify-self:end}
+.native-console .world-actions .world-capsule:nth-child(even){grid-column:3;justify-self:start}
+.native-console .world-actions .world-capsule:nth-child(n+3){grid-row:1}
+.native-console .companion-dialogue{position:absolute;left:50%;bottom:158px;top:auto;width:min(420px,calc(100% - 24px));min-height:0;margin:0;transform:translateX(-50%);pointer-events:auto;z-index:2}
+.native-console .companion-text-entry{position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:min(224px,calc(100% - 32px));height:40px;pointer-events:none;transition:none}
+.native-console .world-watermark{z-index:20;left:12px;right:auto;bottom:6px;pointer-events:none;font-family:var(--ui-font-ui);display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.native-console .world-build-version{display:flex;align-items:center;min-height:28px;padding-right:0}
+@media(max-width:800px){
+ .native-console .notion-top{inset:12px 14px auto;gap:8px}
+ .native-console .notion-identity{width:calc(100% - 52px);max-width:calc(100% - 52px)}
+ .native-console .world-task-tracker{left:14px;top:64px;bottom:96px;max-width:38%;width:224px;padding:0}
+ .native-console .world-task-list{padding:8px 12px}
+ .native-console .world-task{min-height:44px;padding-block:7px}
+ .native-console .world-task:not([aria-current=location]) .world-task-objective{display:none}
+ .native-console .world-matter .world-task-title{-webkit-line-clamp:2}
+ .native-console>.companion-context{top:104px;left:50%;max-width:calc(100% - 28px);font-size:var(--ui-text-section)}
+ .native-console>.notion-content,.native-console .notion-dialog{inset:204px 12px var(--world-footer-clearance,64px);padding:20px}
+ .native-console .notion-hud{bottom:24px;width:calc(100% - 24px)}
+ .native-console .world-actions{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr)}
+ .native-console .world-actions .world-capsule{width:max-content;max-width:calc(100% - 8px);margin:0 4px;padding:7px 10px;min-height:40px;font-size:var(--ui-text-label);gap:6px}
+ .native-console .companion-dialogue{width:calc(100% - 16px);bottom:158px;padding:16px 28px 16px 16px}
+ .native-console .companion-text-entry,.native-console .companion-text-entry #notionCommand{height:44px;min-height:44px}
+ .native-console .companion-text-entry :is(.companion-input-state,.companion-input-handle){line-height:16px}
+ .native-console .companion-text-entry #notionInput{font-size:16px}
+ .native-console .world-environment{gap:5px;flex-wrap:wrap}
+ .native-console .world-environment :is(#worldDate,#worldClock,#worldWeather,.world-audio){font-size:12px}
+ .ui-choice-grid{grid-template-columns:1fr}
+}
+@media(max-height:560px){.native-console>.companion-context{top:20px}.native-console .world-task-tracker{display:none}.native-console>.notion-content,.native-console .notion-dialog{top:64px;bottom:var(--world-footer-clearance,64px)}.native-console .notion-hud{bottom:12px}}
+@media(max-width:800px){
+
+ .native-console>.notion-content,.native-console .notion-dialog{top:calc(var(--ui-top-bound,160px) + 20px + var(--ui-text-section) * 1.4)}
+}
+.ui-preference{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0;font-size:var(--ui-text-label)}
+.ui-preference select{width:auto}
+.native-console[data-text-scale="2"] .notion-hud{width:min(880px,calc(100% - 32px))}
+@media(max-width:800px){.native-console[data-text-scale="2"] .world-actions .world-capsule{padding:4px 6px;font-size:20px}.native-console[data-text-scale="2"] .world-actions .world-capsule svg{width:14px;height:14px;flex-basis:14px}.native-console[data-text-scale="2"] .companion-input-handle{font-size:16px}}
+
+/* Stable positions: orientation above, tracked work at left, command dock below. */
+.native-console .notion-tools{display:none}
+.native-console .world-environment{--environment-inline-gap:10px}
+.native-console .world-environment{position:absolute;right:0;top:0;display:grid;grid-template-columns:max-content;justify-items:end;gap:4px;justify-content:end;text-align:right;padding:0;border-radius:0;background:none;color:var(--ui-chrome);text-shadow:var(--ui-shadow-text);backdrop-filter:none}
+.native-console.radial-pet-console.companion-console .world-environment{display:grid;gap:4px}
+.native-console.radial-pet-console.companion-console .world-environment :is(.world-date-time,.world-weather-control,.world-audio){height:28px;min-height:28px;margin:0;display:flex;align-items:center;justify-content:flex-end}
+.native-console.radial-pet-console.companion-console .world-environment :is(#worldWeather,.world-audio-current){height:28px;min-height:28px;line-height:28px;padding:0;margin:0}
+.native-console .world-date-time{display:flex;align-items:baseline;justify-self:end;gap:var(--environment-inline-gap);white-space:nowrap}
+.native-console .world-weather-control{position:relative;justify-self:end}
+.native-console .world-environment #worldWeather{appearance:none;border:0;background:none;color:inherit;text-shadow:inherit;cursor:pointer;padding:4px 0;text-align:right}
+.native-console .world-environment #worldWeather:hover{text-decoration:underline;text-underline-offset:4px}
+.native-console #worldWeather{display:inline-flex;align-items:center;gap:var(--environment-inline-gap);justify-self:end;color:inherit;margin:0;padding:0;border:0;background:none;text-shadow:inherit}
+.world-weather-icon{display:inline-flex;width:28px;height:28px;flex:0 0 28px;filter:var(--ui-hud-glyph-shadow)}
+.world-weather-icon svg{display:block;width:100%;height:100%}
+.world-weather-text{display:inline-flex;align-items:baseline;gap:var(--environment-inline-gap);white-space:nowrap}
+.native-console .world-actions .world-capsule{min-height:40px;height:40px}
+.native-console[data-ui-mode=inspect] .world-task:not([aria-current=location]){display:none}
+@media(max-width:800px){
+ .native-console .world-environment{right:0;top:0;max-width:100%;gap:4px 8px}
+ .native-console>.companion-context{top:104px}
+ .native-console>.notion-content,.native-console .notion-dialog{top:138px}
+ .native-console .world-actions .world-capsule{height:auto;min-height:40px}
+ .native-console[data-ui-mode=inspect] .world-task-tracker{display:none}
+}
+
+.native-console #worldWeather{height:24px;min-height:24px;line-height:24px}
+.native-console[data-ui-mode=inspect] .world-task-tracker{max-width:220px}
+
+/* Reader fills the left two-thirds; companion and foreground share the right third.
+   Reserve 24px on both sides plus the cloud’s 10px painted overhang. */
+.native-console.radial-pet-console.companion-console .companion-dialogue{box-sizing:border-box;width:calc(100vw / 3 - 68px);min-width:0;max-width:calc(100vw / 3 - 68px);max-height:var(--fox-dialogue-room,calc(100dvh - 280px))}
+.native-console .native-conversation{max-height:none;overflow:clip;overscroll-behavior:none;flex:none}
+@media(min-width:801px){
+ /* The same HUD group is translated, never rescaled or restyled for a reader. */
+ .native-console .notion-hud{width:min(440px,calc(100vw - 32px));transition:transform 280ms cubic-bezier(.2,.7,.3,1),left 280ms cubic-bezier(.2,.7,.3,1)}
+ .native-console:is([data-detail-open=true],[data-depth=object]){--reader-companion-lane:max(33.333%,464px)}
+ .native-console:is([data-detail-open=true],[data-depth=object]) .notion-hud{left:calc(100% - var(--reader-companion-lane) / 2);width:440px;transform:translateX(-50%)}
+ .native-console:is([data-detail-open=true],[data-depth=object])>.notion-content,.native-console:is([data-detail-open=true],[data-depth=object]) .notion-dialog{right:calc(var(--reader-companion-lane) + 12px)}
+ /* The title names the Applet over its side, on the bar's row between Back and its controls. */
+ .native-console:is([data-detail-open=true],[data-depth=object])>.companion-context{left:calc((100% - var(--reader-companion-lane)) / 2);top:calc(var(--applet-bar-top) + var(--applet-bar-height) / 2);transform:translate(-50%,-50%);max-width:calc(100% - var(--reader-companion-lane) - 2 * var(--applet-bar-side))}
+ .native-console:is([data-detail-open=true],[data-depth=object])>.companion-context .companion-name{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+ .native-console[data-detail-open=true]>.notion-content,.native-console[data-detail-open=true] .notion-dialog{scroll-padding-bottom:24px}
+ .native-console[data-detail-open=true] .world-task-tracker{display:none}
+ .native-console[data-detail-open=true]>.notion-content::after,.native-console[data-detail-open=true] #notionDialogBody::after{height:0}
+ /* An Attention card or artifact open in the World takes the main stage on the left, and Fox with the
+    whole conversation moves to the right-hand column, as beside an Applet (owner decision 2026-10-05). */
+ .native-console[data-fox-lane=true]{--reader-companion-lane:max(33.333%,464px)}
+ .native-console[data-fox-lane=true] .notion-hud{left:calc(100% - var(--reader-companion-lane) / 2);width:440px;transform:translateX(-50%)}
+}
+@media(prefers-reduced-motion:reduce){.native-console .notion-hud{transition:none}}
+
+/* Reply paging uses the same in-bubble text actions as other Fox controls. */
+/* Two arrows on the world's bottom-right corner. Paging back through replies is
+   navigation, not speech, and it kept taking two words of room inside the bubble. */
+.native-console .companion-reply-nav{position:absolute;right:20px;bottom:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;width:28px;height:28px;gap:0;margin:0;padding:0;border:1px solid color-mix(in srgb,var(--ui-hud-ink) 45%,transparent);background:color-mix(in srgb,var(--ui-paper) 72%,transparent);box-shadow:var(--ui-hud-glyph-shadow);transform:rotate(45deg);pointer-events:auto;z-index:26}
+.native-console .companion-reply-nav[hidden]{display:none}
+.native-console .companion-reply-nav button{position:static;display:grid;place-items:center;width:18px;height:14px;text-decoration:none;flex:none;padding:0;border:0;background:none;color:var(--ui-hud-focus);text-shadow:none;opacity:1;font:400 10px/1 var(--ui-font-ui);cursor:pointer;pointer-events:auto;transform:rotate(-45deg)}
+.native-console .companion-reply-nav button:hover{transform:rotate(-45deg) scale(1.2)}
+.native-console .companion-reply-nav button:disabled{opacity:.22;cursor:default;transform:rotate(-45deg)}
+.native-console .companion-reply-nav button[data-unavailable=true]{display:grid}
+.native-console .companion-reply-nav button:focus-visible{outline:2px solid var(--ui-focus);outline-offset:1px}
+/* The arrows are pinned to the bubble's corner; this rule used to clear that
+   inset back to auto and drop them into the flow beside the text. */
+.fox-first-console .companion-dialogue .companion-reply-nav{right:4px;bottom:4px;left:auto;top:auto;margin:0}
+.fox-first-console .companion-dialogue .companion-reply-nav>:first-child{margin-left:0}
+.fox-first-console .companion-dialogue .companion-reply-nav button{backdrop-filter:none;-webkit-backdrop-filter:none}
+/* The diamond straddles the bottom edge, inset from the curved right corner. */
+.native-console.fox-first-console .companion-dialogue .companion-reply-nav{width:24px;height:30px;right:24px;bottom:-15px;gap:2px;border:0;background:none;box-shadow:none;transform:none}
+.native-console.fox-first-console .companion-dialogue .companion-reply-nav button{position:static;width:24px;height:14px;min-height:0;margin:0;padding:0;border:0;border-radius:0;background:none;color:var(--fox-badge);transform:none;font-size:0;line-height:0}
+/* Equilateral: height = side × sqrt(3) / 2. Keep the hit area larger than the glyph. */
+.native-console.fox-first-console .companion-dialogue .companion-reply-nav button::before{content:'';display:block;width:14px;height:12.124px;background:currentColor;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.native-console.fox-first-console .companion-dialogue .companion-reply-nav .companion-advance::before{clip-path:polygon(0 0,100% 0,50% 100%)}
+.native-console>.notion-content[data-template=browser]{display:flex;flex-direction:column;align-items:stretch;overflow:hidden;padding:3px;scroll-padding-bottom:0}
+.native-console>.notion-content[data-template=browser][hidden]{display:none}
+.native-console>.notion-content[data-template=browser]::after{display:none}
+.native-console>.notion-content[data-template=browser] .notion-reader-head{display:none}
+
+/* Mac Fox: two balanced wings, at most three actions on each side. */
+.native-console.fox-first-console .companion-dock{bottom:34px;height:132px}
+.native-console.fox-first-console .companion-pet{bottom:40px;width:120px;height:120px}
+.native-console.fox-first-console .companion-pet .companion-avatar{position:relative;width:120px;height:120px;flex-basis:120px;overflow:visible;isolation:isolate}
+.native-console.fox-first-console .companion-avatar :is(canvas,img){position:absolute;left:-12px;top:-22px;width:144px;height:144px;margin:0;pointer-events:none}
+.native-console.fox-first-console .companion-dialogue{bottom:184px}
+.native-console.fox-first-console .world-actions{height:132px;grid-template-columns:minmax(0,1fr) 140px minmax(0,1fr);grid-template-rows:1fr;align-items:center}
+.native-console.fox-first-console .fox-action-side{display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0;height:132px;pointer-events:none}
+.native-console.fox-first-console .fox-action-left{grid-column:1;align-items:flex-end}
+.native-console.fox-first-console .fox-action-right{grid-column:3;align-items:flex-start}
+.native-console.fox-first-console .fox-action-left :is(#notionBack,[data-slot=home]){min-width:90px;justify-content:center}
+.native-console.fox-first-console .world-actions #notionBack{display:inline-flex}
+.native-console.fox-first-console .world-actions #notionBack[hidden]{display:none}
+.native-console.fox-first-console .world-actions .world-capsule{flex:0 0 auto;height:40px;min-height:40px;grid-row:auto;grid-column:auto;transform:none}
+
+.native-console.fox-first-console .companion-text-entry{bottom:-12px}
+
+.native-console .world-watermark{opacity:.32;color:var(--ui-chrome);background:none;text-shadow:var(--ui-hud-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
+.native-console .world-watermark .world-brand[href]{pointer-events:auto;color:inherit;text-decoration:none;cursor:pointer}
+.native-console .world-task-tracker[hidden]{display:none}
+
+@media(min-width:801px){
+ /* In the right third Fox keeps its own lane: the reserve clears the drawn avatar
+    and its ring, and each wing keeps a gutter, so no action is pressed against Fox. */
+ .native-console.fox-first-console[data-detail-open=true] .world-actions{grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr)}
+ /* Action labels wrap in narrow wings; the action must remain readable. */
+ .native-console.fox-first-console[data-detail-open=true] .fox-action-side{gap:8px}
+ .native-console.fox-first-console[data-detail-open=true] .fox-action-left{padding-right:10px}
+ .native-console.fox-first-console[data-detail-open=true] .fox-action-right{padding-left:10px}
+ .native-console.fox-first-console[data-detail-open=true] .fox-action-left :is(#notionBack,[data-slot=home]){min-width:0}
+}
+
+/* Audio is the third line of the same right-aligned environment readout. */
+.native-console .world-audio{position:relative;justify-self:end;display:flex;align-items:center;gap:4px;height:24px;margin:0 -6px 0 0;max-width:100%}
+.native-console :is(.world-environment,.world-today) .world-audio-current{display:inline-flex;align-items:center;padding:0 6px;margin:0;min-height:24px;height:24px;border:0;border-radius:8px;appearance:none;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:inherit;font:inherit;line-height:24px;text-shadow:inherit;text-decoration:none}
+.native-console :is(.world-environment,.world-today) .world-audio-current:is(:hover,:active,:focus){background:none;box-shadow:none;filter:none}
+/* The icons cannot take the text shadow, so they wear the same halo as a filter. */
+.native-console .world-audio .world-audio-icon{display:inline-flex;align-items:center;flex:0 0 18px}
+.native-console .world-audio .world-audio-icon svg{filter:var(--ui-hud-glyph-shadow)}
+/* Hover names the source beside its icon. The row is right-aligned, so the icon
+   slides left to make room and the name reads to its right. */
+/* What is playing is always beside its icon. Revealing it on hover moved the
+   clock and the date every time the pointer crossed the corner. */
+.native-console .world-audio .world-audio-now{display:block;margin-left:var(--environment-inline-gap);max-width:164px;overflow:hidden;white-space:nowrap;pointer-events:none}
+.native-console .world-audio .world-audio-marquee{display:inline-block;white-space:nowrap}
+.native-console .world-audio .world-audio-now[data-scroll=true] .world-audio-marquee{padding-right:20px;animation:world-audio-marquee 7s ease-in-out infinite alternate}
+@keyframes world-audio-marquee{to{transform:translateX(calc(-1 * var(--world-audio-scroll)))}}
+/* One icon at rest; the choices are there when reached for. The menu hangs under
+   the corner so it never pushes the clock or the date around. */
+/* :focus-within would keep the menu open after a mouse click, because the button
+   that was clicked keeps focus. :has(:focus-visible) reaches it by keyboard only. */
+/* The corner is the target, not the row: the row's own width changes as the
+   choices open, so hanging the hover on it makes the pointer fall out of the
+   thing it just opened. */
+/* The corner sits on open sky, so nothing in it fades: a faded line loses its halo
+   with it and vanishes over a bright day (#1841). Off reads apart by the secondary
+   colour and a slash across the icon, never by dimming. */
+.native-console .world-audio-current[data-on=false]{color:var(--ui-hud-muted);opacity:1}
+.native-console .world-audio-current[data-on=true]{color:var(--ui-hud-ink);opacity:1}
+.native-console .world-audio-current .world-audio-icon{position:relative}
+.native-console .world-audio-current[data-on=false] .world-audio-icon::after{content:'';position:absolute;left:50%;top:50%;width:20px;height:2px;border-radius:1px;background:currentColor;box-shadow:var(--ui-hud-shadow);transform:translate(-50%,-50%) rotate(-45deg);pointer-events:none}
+/* Weather is only disabled while the scene is presented (recording, presets); it
+   still reports the sky, so it keeps the clock's full strength. */
+.native-console .world-environment #worldWeather:disabled{opacity:1;cursor:default}
+/* Playing is carried by brightness alone; no icon moves, on or off. */
+.native-console .world-audio-current[aria-busy=true] .world-audio-icon svg{animation:world-audio-wait 1.3s ease-in-out infinite}
+@keyframes world-audio-wait{0%,100%{opacity:1}50%{opacity:.45}}
+.native-console .world-audio-error:empty{display:none}
+.native-console .world-audio-error{font:inherit}
+@media(prefers-reduced-motion:reduce){.native-console .world-audio .world-audio-now[data-scroll=true] .world-audio-marquee{animation:none}}
+
+
+/* A guide written as explicit pages (steps) continues on click. */
+.native-console .companion-dialogue[data-continue=true]{cursor:pointer}
+
+/* Keep context readable over every sky; brand remains the original Applet asset. */
+.native-console>.companion-context,.native-console>.companion-context .companion-name{color:var(--ui-hud-ink);text-shadow:var(--ui-hud-shadow)}
+.native-console>.companion-context .companion-name{min-width:0}
+/* A website page's address takes the name's place while the pointer is on the title (owner request 2026-10-08,
+   browser/browser-device.ts): same ink, a quieter weight, one line cut with an ellipsis; a click copies it. */
+.native-console>.companion-context .browser-address{display:none;min-width:0;max-width:100%;margin:0;padding:2px 6px;border:0;border-radius:8px;background:none;color:var(--ui-hud-ink);text-shadow:var(--ui-hud-shadow);font:500 var(--ui-text-label)/1.4 var(--ui-font-ui);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:copy;pointer-events:auto}
+.native-console>.companion-context .browser-address>span{display:inline}
+.native-console>.companion-context .browser-address[data-copied]>span{display:none}
+.native-console>.companion-context .browser-address[data-copied]::before{content:'Copied'}
+.native-console>.companion-context .browser-address:focus-visible{outline:2px solid currentColor;outline-offset:1px}
+.native-console[data-web-address]>.companion-context{pointer-events:auto;min-height:var(--applet-bar-height)}
+.native-console[data-web-address]>.companion-context:is(:hover,:has(.browser-address:focus-visible)) .companion-name{display:none}
+.native-console[data-web-address]>.companion-context:is(:hover,:has(.browser-address:focus-visible)) .browser-address{display:block}
+.native-console .companion-app-logo{width:28px;height:28px;object-fit:contain;flex:none;border-radius:7px;filter:drop-shadow(0 1px 3px #12251f66)}
+
+/* External content sits in a real object: a timber frame lit from above, with a bevelled rim,
+   a recessed groove the page sits in and a soft shadow on the scene (Kelvin 2026-10-07: "偏实物一点",
+   restrained, after Charming). The native website view follows the viewport geometry, so all
+   ornament stays in the rim and never overlays the page. */
+#notionWorld>.notion-content[data-template=browser]{animation:none;transition:none;transform:none;border:1px solid #7d6646;background:repeating-linear-gradient(3deg,#ffffff0b 0 2px,#7054330b 3px 4px,transparent 5px 11px),linear-gradient(125deg,#dcc6a0,#b99d73 45%,#d8c198);box-shadow:0 2px 3px #3b2f1d38,0 18px 40px -10px #3b2f1d61,0 40px 70px -30px #3b2f1d4d,inset 0 1px 0 #fff3d2,inset 1px 0 0 #f6e4bf80,inset 0 -3px 4px #5e472c70,inset -1px 0 0 #6f553660}
+#notionWorld>.notion-content[data-template=browser] .browser-viewport{box-shadow:0 0 0 1px #5a4429b3,0 -1px 0 2px #4a37211f,0 1px 0 2px #fff4d880}
+/* While Fox works the whole frame turns colorful (pixi-world.css); the groove would draw a second ring inside it. */
+#notionWorld>.notion-content[data-template=browser] .browser-viewport.is-fox-control[data-fox-overlay]{box-shadow:none}
+@media(min-width:801px){
+ #notionWorld>.notion-content[data-template=browser]{top:64px;left:16px;bottom:16px;right:calc(var(--reader-companion-lane,33.333%) + 12px);padding:12px;border-radius:22px;animation:none;transition:none}
+}
+#notionWorld>.notion-content[data-template=browser] .browser-viewport{width:auto;min-width:0;max-width:100%;min-height:0;align-self:stretch;box-sizing:border-box;overflow:hidden;isolation:isolate}
+/* The Browser's tabs (owner request 2026-10-07; ui/browser/browser-device.ts): a slim strip on the frame's top rim, above the
+   page and outside its rect, so the native page never covers it. Practical, not a copy of a browser's chrome (owner: 以实用为主):
+   flat tabs tinted into the timber, the active one the page's own white, a close on each and + at the end. */
+:is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-tabs{flex:none;display:flex;align-items:center;gap:4px;height:28px;margin:0 0 4px;padding:0 1px;min-width:0;overflow:hidden}
+.browser-tabs>.browser-tab{display:flex;align-items:center;flex:0 1 200px;min-width:64px;height:28px;box-sizing:border-box;border-radius:8px;background:#4a372124;color:#3a2b18;transition:background-color .12s ease}
+.browser-tabs>.browser-tab:hover{background:#4a372138}
+.browser-tabs>.browser-tab[data-active]{background:#fffdf7;color:#1f2a24;box-shadow:0 1px 2px #3b2f1d4d}
+.browser-tabs .browser-tab-pick{flex:1;min-width:0;height:100%;padding:0 4px 0 11px;border:0;border-radius:8px;background:none;color:inherit;font:500 12.5px/1 var(--ui-font-ui,system-ui);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.browser-tabs .browser-tab[data-active] .browser-tab-pick{font-weight:600;cursor:default}
+.browser-tabs .browser-tab-close{flex:none;display:grid;place-items:center;width:20px;height:20px;margin-right:4px;padding:0;border:0;border-radius:50%;background:none;color:inherit;opacity:.62;cursor:pointer}
+.browser-tabs .browser-tab-close svg,.browser-tabs .browser-tab-new svg{width:14px;height:14px}
+.browser-tabs .browser-tab-close:not(:disabled):hover{opacity:1;background:#4a372124}
+.browser-tabs .browser-tab-new{flex:none;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:8px;background:none;color:#3a2b18;cursor:pointer}
+.browser-tabs .browser-tab-new:not(:disabled):hover{background:#4a372124}
+.browser-tabs :is(button):focus-visible{outline:2px solid #1f2a24;outline-offset:-2px}
+.browser-tabs :is(button):disabled{cursor:default}
+.browser-tabs .browser-tab-new:disabled{opacity:.4}
+/* While Fox works on the page the strip rests: Fox drives the page in view. */
+.browser-tabs[data-resting]{opacity:.55}
+@media(prefers-reduced-motion:reduce){.browser-tabs>.browser-tab{transition:none}}
+
+/* Reserve both arrow slots so an unavailable direction never moves its neighbor. */
+.native-console.fox-first-console .companion-dialogue .companion-reply-nav button:disabled{visibility:hidden;pointer-events:none}
+.native-console.fox-first-console .companion-guide-content{min-height:0;max-height:none;flex:1 1 auto}
+.native-console.fox-first-console :is(.companion-guide-actions,.companion-action-footer){flex-shrink:0}
+
+/* Native Applet originals: one quiet, aligned reading column. */
+.native-console #notionContent[data-template=app-source]{padding:clamp(24px,3.2vw,56px);background:#faf7ee;border:1px solid #fffdf480;border-radius:20px;box-shadow:0 8px 30px #26392d14;scrollbar-gutter:stable;color:var(--ui-ink)}
+.native-console #notionContent[data-template=app-source] :is(.notion-reader-head,.app-source-body){box-sizing:border-box;width:100%;max-width:740px;margin-inline:auto}
+.native-console #notionContent[data-template=app-source] .notion-reader-head{padding:0 0 26px;margin-bottom:28px;border-bottom:1px solid #38564418;outline:none}
+.native-console #notionContent[data-template=app-source] .notion-eyebrow{margin:0 0 10px;font-size:var(--ui-text-caption);font-weight:500;letter-spacing:.025em;color:var(--ui-ink-muted)}
+.native-console #notionContent[data-template=app-source] .notion-reader-head h1{margin:0;font-size:var(--ui-text-title);line-height:1.2;font-weight:600;letter-spacing:-.035em;text-wrap:balance;overflow-wrap:anywhere}
+.native-console #notionContent[data-template=app-source] .notion-close{display:none}
+.native-console #notionContent[data-template=app-source] .notion-prose{max-width:none;width:auto;margin:0;padding:0;font:400 var(--ui-text-body)/1.8 var(--ui-font-ui);color:var(--ui-ink);overflow-wrap:anywhere}
+.native-console #notionContent[data-template=app-source] .notion-prose :is(h1,h2,h3,h4,h5,h6){font-family:var(--ui-font-ui);font-weight:600;line-height:1.35;letter-spacing:-.02em;margin:1.7em 0 .65em;color:var(--ui-ink)}
+.native-console #notionContent[data-template=app-source] .notion-prose h1{font-size:var(--ui-text-title)}
+.native-console #notionContent[data-template=app-source] .notion-prose h2{font-size:var(--ui-text-section)}
+.native-console #notionContent[data-template=app-source] .notion-prose h3{font-size:var(--ui-text-body)}
+.native-console #notionContent[data-template=app-source] .notion-prose :is(h4,h5,h6){font-size:var(--ui-text-body)}
+.native-console #notionContent[data-template=app-source] .notion-prose>:first-child{margin-top:0}
+.native-console #notionContent[data-template=app-source] .notion-prose p{margin:0 0 1.1em}
+.native-console #notionContent[data-template=app-source] .notion-prose :is(ul,ol){margin:.5em 0 1.3em;padding-left:1.5em}
+.native-console #notionContent[data-template=app-source] .notion-prose li{margin:.35em 0;padding-left:.2em}
+.native-console #notionContent[data-template=app-source] .notion-prose li>p{margin:.35em 0}
+.native-console #notionContent[data-template=app-source] .notion-prose li::marker{color:var(--ui-ink-muted)}
+.native-console #notionContent[data-template=app-source] .notion-prose blockquote{margin:1.4em 0;padding:12px 20px;border-left:3px solid #98aa94;background:#526b4f08;border-radius:0 8px 8px 0;color:var(--ui-ink-muted)}
+.native-console #notionContent[data-template=app-source] .notion-prose blockquote>:last-child{margin-bottom:0}
+.native-console #notionContent[data-template=app-source] .notion-prose a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;color:var(--ui-accent)}
+.native-console #notionContent[data-template=app-source] .notion-prose a:hover{text-decoration-thickness:2px}
+.native-console #notionContent[data-template=app-source] .notion-prose code{font: var(--ui-text-label)/1.6 var(--ui-font-mono);background:#526b4f0b;padding:2px 5px;border-radius:4px}
+.native-console #notionContent[data-template=app-source] .notion-prose pre{padding:18px 20px;margin:1.4em 0;overflow:auto;border:1px solid #38564414;border-radius:10px;background:#526b4f08;white-space:pre;overflow-wrap:normal}
+.native-console #notionContent[data-template=app-source] .notion-prose pre code{padding:0;background:none;font-size:var(--ui-text-label)}
+.native-console #notionContent[data-template=app-source] .notion-prose hr{border:0;height:1px;background:#38564418;margin:2em 0}
+.native-console #notionContent[data-template=app-source] .notion-prose .reader-table{width:100%;overflow:auto;margin:1.4em 0;border:1px solid #38564418;border-radius:10px}
+.native-console #notionContent[data-template=app-source] .notion-prose table{width:100%;margin:0;border-collapse:collapse;font-size:var(--ui-text-label)}
+.native-console #notionContent[data-template=app-source] .notion-prose :is(th,td){padding:11px 16px;border:0;border-bottom:1px solid #38564412;line-height:1.6;min-width:100px}
+.native-console #notionContent[data-template=app-source] .notion-prose th{background:#526b4f08;font-weight:600}
+.native-console #notionContent[data-template=app-source] .notion-prose tr:last-child td{border-bottom:0}
+.native-console #notionContent[data-template=app-source] .notion-prose .notion-check-item{padding-left:0;display:list-item}
+.native-console #notionContent[data-template=app-source] .notion-prose input[type=checkbox]{width:14px;height:14px;margin:0 9px 0 0;accent-color:#647e60;opacity:.8}
+.native-console #notionContent[data-template=app-source]::after{display:none}
+
+/* A small brass marker and a short rule echo the village's materials. */
+.native-console #notionContent[data-template=app-source] .notion-eyebrow{display:flex;align-items:center;gap:9px}
+.native-console #notionContent[data-template=app-source] .notion-eyebrow::before{content:'';width:5px;height:5px;flex:none;border:1px solid var(--world-ui-gold);border-radius:1px;transform:rotate(45deg);opacity:.7}
+.native-console #notionContent[data-template=app-source] .notion-reader-head::after{content:'';position:absolute;bottom:-1px;left:0;width:36px;height:2px;border-radius:2px;background:var(--world-ui-gold);opacity:.55;pointer-events:none}
+.native-console #notionContent[data-template=app-source] .notion-prose :is(th,td){font-size:var(--ui-text-label)}
+
+/* Illustrated outing: source text remains available without dominating the plan. */
+.native-console #notionContent[data-tennis=true]{padding:24px 36px}
+.native-console #notionContent[data-tennis=true] .notion-reader-head{padding-bottom:12px;margin-bottom:14px}
+.tennis-plan-art{display:block;width:100%;height:350px;object-fit:contain;object-position:center;border-radius:12px}
+.tennis-plan-signals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:16px 0}
+.tennis-plan-signal{color:var(--ui-ink);text-decoration:none;border-bottom:1px solid #38564424;padding-bottom:10px}
+.tennis-plan-signal strong{display:block;font-size:var(--ui-text-body);font-weight:600}
+.tennis-plan-signal span{display:block;margin-top:4px;font-size:var(--ui-text-caption);color:var(--ui-ink-muted)}
+.tennis-plan .ui-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0}
+.tennis-plan .ui-facts>div{display:block;padding:0;border:0}
+.tennis-plan .ui-facts dt{font-size:var(--ui-text-caption);color:var(--ui-ink-muted)}
+.tennis-plan .ui-facts dd{margin:5px 0 0;font-size:var(--ui-text-body);font-weight:500}
+.tennis-plan-status{margin:16px 0 12px;font-size:var(--ui-text-caption);color:var(--ui-ink-muted)}
+.tennis-plan-details summary{cursor:pointer;font-size:var(--ui-text-caption);color:var(--ui-ink-muted)}
+.tennis-plan-details[open] summary{margin-bottom:16px}
+@media(max-width:800px){.tennis-plan .ui-facts{grid-template-columns:repeat(2,1fr)}.tennis-plan-signals{gap:8px}.tennis-plan-art{height:190px}}
+/* A little more reading room, while preserving equal margins in the Focus column. */
+.native-console.radial-pet-console.companion-console .companion-dialogue{width:calc(100vw / 3 - 48px);max-width:calc(100vw / 3 - 48px)}
+.native-console.fox-first-console .companion-dialogue{padding-block:18px 16px;gap:8px}
+
+/* Never truncate an action: short labels are preferred, wrapping is the fallback. */
+#notionWorld.fox-first-console .world-actions .world-capsule{height:auto;white-space:normal;max-width:100%;min-width:0;overflow:visible}
+#notionWorld.fox-first-console .world-actions .world-capsule>span{min-width:0;max-width:100%;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.3}
+#notionWorld.fox-first-console .fox-action-side{height:auto;min-height:132px}
+
+/* Narrow windows stack the reader above Fox instead of overlaying its controls.
+   The reply's scroll room uses the same reserved height as the layout. */
+@media(max-width:800px){
+ .native-console:is([data-detail-open=true],[data-depth=object]){--reader-bottom:390px;--fox-reader-room:180px}
+ .native-console:is([data-detail-open=true],[data-depth=object])>.notion-content,.native-console:is([data-detail-open=true],[data-depth=object]) .notion-dialog{bottom:var(--reader-bottom)}
+ .native-console.radial-pet-console.companion-console:is([data-detail-open=true],[data-depth=object]) .companion-dialogue{width:calc(100vw - 64px);max-width:calc(100vw - 64px)}
+}
+
+/* Global maintenance controls share the bottom-left Settings row. */
+.native-console .world-update-dock{position:absolute;z-index:25;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));display:flex;align-items:center;pointer-events:auto}
+.native-console .world-footer-update{height:44px;min-height:44px;max-width:calc(100vw - 32px);padding:0 16px;font:500 var(--ui-text-label)/1 var(--ui-font-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console .world-footer-update[hidden]{display:none}
+
+.curated-source-table{width:100%;border-collapse:collapse;font:inherit;color:inherit;background:#fffaf0b3}
+.curated-source-table caption{text-align:left;padding:12px;font-weight:600}
+.curated-source-table td{padding:10px 14px;border:1px solid #7d816029;white-space:pre-wrap;overflow-wrap:anywhere;min-width:80px}
+.curated-source-table tr:nth-child(even){background:#7d81600a}
+
+/* Dev build delivery is separate from production updates and never reloads the page.
+   Its Apply capsule shares the update dock and the Update button's look (.world-footer-update). */
+.native-console .dev-build-update[hidden]{display:none}
+/* The brand and build line stay hidden; Update and Dev Apply are capsules in the update dock. */
+.native-console #notionHome.world-watermark{display:none}
+/* The world log runs bottom right, right-aligned. Like the Attention Center it is faint
+   text on the scene until the pointer is over it. */
+/* Quieter than the HUD at rest, but always readable: a soft dark backing keeps the plain lines
+   legible over bright meadow, water or night (RC UI reviews 2737/2743, #1699). The host narrows it
+   to the space right of Fox's actions and message bar, and sets it aside when none is left. */
+.native-console .world-log{position:absolute;z-index:20;right:16px;bottom:12px;max-width:min(360px,40vw,var(--world-log-room,100vw));display:flex;flex-direction:column;align-items:flex-end;padding:4px 6px;border-radius:10px;font:400 13px/1.4 var(--ui-font-ui,-apple-system,BlinkMacSystemFont,sans-serif);color:var(--ui-chrome,#f5f4e9);text-shadow:0 1px 2px #10201890;background:#18291fcc;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:.9;transition:opacity .2s,background-color .2s;pointer-events:auto}
+.native-console .world-log:is(:hover,:focus-within){opacity:1;background:#18291fe6}
+.native-console .world-log[data-crowded=true]{visibility:hidden;pointer-events:none}
+.native-console .world-log[hidden]{display:none}
+.native-console .world-log-next{all:unset;box-sizing:border-box;display:block;cursor:pointer;max-width:100%;height:22px;line-height:22px;padding:0 4px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console .world-log-next:focus-visible{outline:2px solid var(--ui-focus,#edc47d);outline-offset:1px}
+.native-console .world-log-next:hover{text-decoration:underline}
+/* An open panel, typing or a floating video owns the right side; the log steps back. */
+.native-console:is([data-detail-open=true],.is-typing,.companion-info-open,:has(>.browser-pip:not([hidden]))) .world-log{display:none}
+.notion-world[data-onboarding=true] .world-log{display:none}
+@media(max-height:560px),(max-width:600px){.native-console .world-log{display:none}}
+/* The person's own Applet on the background painted for it (core/applets/MY-APPLETS.md#pictures): a cream wash keeps its words readable. */
+[data-own-background]{background:linear-gradient(#fbf7ecd9,#fbf7ecf2),var(--own-applet-background) center/cover no-repeat;border-radius:14px}
+
+/* The computer's own music (ui/shell/local-music.ts) takes the World's sound line itself: the same note,
+   ink and halo, its title and who made it, and three small controls. Nothing else: no cover, no card. */
+.native-console .world-audio[data-local=true] .world-audio-current{display:none}
+.native-console .world-now-playing{position:relative;display:inline-flex;align-items:center;gap:0;max-width:100%;height:24px;padding-left:6px;color:var(--ui-hud-ink)}
+.native-console .world-now-playing[hidden]{display:none}
+.native-console .world-now-playing-words{display:block;margin-left:var(--environment-inline-gap);max-width:164px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.native-console .world-now-playing-controls{display:inline-flex;align-items:center;margin-left:4px}
+.native-console :is(.world-environment,.world-today) .world-now-playing-control{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;margin:0;border:0;border-radius:6px;appearance:none;background:none;box-shadow:none;color:inherit;cursor:pointer}
+.native-console .world-now-playing-control svg{width:14px;height:14px;filter:var(--ui-hud-glyph-shadow)}
+.native-console .world-now-playing-control.is-previous svg{transform:scaleX(-1)}
+.native-console .world-now-playing-control:hover{background:rgb(255 255 255 / .14)}
+.native-console .world-now-playing[aria-busy=true] .world-now-playing-controls{opacity:.7}
+.native-console .world-now-playing-status{position:absolute;right:0;top:100%;margin-top:4px;max-width:280px;font:500 11.5px/1.3 var(--ui-font-ui);white-space:normal}
+.native-console .world-now-playing-status:empty{display:none}

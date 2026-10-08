@@ -1,0 +1,8 @@
+{
+  "tool": "built-in imagegen",
+  "source": "exec-d0f6794c-f2c4-4809-b427-01dbf6766750.png",
+  "file": "reading-turn-arm.png",
+  "reference": "reading.png",
+  "status": "Dedicated longer-forearm page-turn silhouette registered in reading-rig.json. Separate rigid upper/lower pieces in Page turn study; fixed paw size and contact checks pass. Book-edge occlusion refinement and visual acceptance pending; not live.",
+  "prompt": "Use case: precise-object-edit. Asset type: ONE complete isolated painted fox forelimb for 2D animation. Image 1 is the exact fur/style/identity reference. Create the VIEWER-RIGHT forelimb in a natural page-turning pose: a rounded orange shoulder at the right, upper arm descending to a low outward elbow, then forearm bending up and toward the LEFT, ending in a small brown three-toed paw with toes angled gently DOWN to pinch the upper corner of a book page. The paw is ABOVE AND LEFT of the elbow; the elbow must remain below the paw, never up by the face. The paw is only slightly higher than the shoulder. Orange shoulder and forearm, dark brown paw, soft painted fur exactly like reference. Complete contiguous shoulder/elbow/forearm/paw silhouette, including hidden fur; NO white chest fur. Isolated single forelimb only: no head, body, scarf, book, page, second arm, floor, lettering or labels. Genuine transparent background. Place this ONE limb centrally with enough empty margin around all sides, high detail. Do not turn it into a human hand or a straight waving arm; three curled soft toes, small gentle page-pinching pose."
+}

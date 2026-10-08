@@ -1,0 +1,26 @@
+{
+ "x": {
+  "allowed": ["https://x.com/home", "https://x.com/worldlet/status/123", "https://www.x.com/search?q=fox", "https://twitter.com/i/bookmarks", "https://x.com:443/explore"],
+  "refused": ["http://x.com/home", "https://x.com.example/home", "https://user:pass@x.com/", "https://x.com:8443/", "https://t.co/abc", "https://evil.test/x.com"]
+ },
+ "youtube": {
+  "allowed": ["https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42", "https://youtube.com/feed/subscriptions", "https://m.youtube.com/shorts/abc", "https://youtu.be/dQw4w9WgXcQ"],
+  "refused": ["https://music.youtube.com/", "https://www.youtube.com.evil.test/", "http://www.youtube.com/", "https://accounts.google.com/ServiceLogin"]
+ },
+ "tiktok": {
+  "allowed": ["https://www.tiktok.com/@worldlet/video/1", "https://tiktok.com/foryou", "https://m.tiktok.com/"],
+  "refused": ["https://vm.tiktok.com/abc", "https://www.tiktok.com.evil.test/", "https://www.youtube.com/"]
+ },
+ "airbnb": {
+  "allowed": ["https://www.airbnb.com/rooms/1", "https://airbnb.com/", "https://es.airbnb.com/s/Lisbon"],
+  "refused": ["https://notairbnb.com/", "https://airbnb.com.evil.test/", "https://www.google.com/maps/"]
+ },
+ "google-maps": {
+  "allowed": ["https://www.google.com/maps/", "https://www.google.com/maps/place/Lisbon", "https://google.com/maps", "https://maps.google.com/?q=Lisbon"],
+  "refused": ["https://www.google.com/", "https://www.google.com/mapsfoo", "https://www.google.com/search?q=maps", "https://drive.google.com/maps/"]
+ },
+ "web": {
+  "allowed": [],
+  "refused": ["https://example.com/", "https://www.google.com/maps/"]
+ }
+}

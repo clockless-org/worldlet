@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The pairing never leaves this phone: a new phone pairs again (like the iPhone's ThisDeviceOnly Keychain item).
+     Nor do the widgets it brought (widgets.json, with AtomicFile's .new and .bak). -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="." />
+    <exclude domain="file" path="widgets.json" />
+    <exclude domain="file" path="widgets.json.new" />
+    <exclude domain="file" path="widgets.json.bak" />
+</full-backup-content>

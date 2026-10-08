@@ -1,0 +1,233 @@
+[
+ {
+  "name": "valid archive",
+  "operation": "companionValidate",
+  "input": {
+   "archive": {
+    "format": "worldlet.companion",
+    "version": 1,
+    "identity": {
+     "id": "00000000-0000-0000-0000-000000000001",
+     "name": "Fox",
+     "createdAt": "2026-09-24T00:00:00Z"
+    },
+    "personality": "Helpful",
+    "memoryAuthority": "worldlet",
+    "memories": [
+     {
+      "id": "m",
+      "kind": "user",
+      "text": "t",
+      "source": "s"
+     }
+    ],
+    "conversations": [
+     {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "role": "user",
+      "session": "one",
+      "text": "hi",
+      "createdAt": "2026-09-24T00:00:00.123+08:00"
+     }
+    ]
+   }
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "unsupported version",
+  "operation": "companionValidate",
+  "input": {
+   "archive": {
+    "format": "worldlet.companion",
+    "version": 2
+   }
+  },
+  "expected": {
+   "error": "Invalid companion profile.",
+   "ok": false
+  }
+ },
+ {
+  "name": "blank name",
+  "operation": "companionValidate",
+  "input": {
+   "archive": {
+    "format": "worldlet.companion",
+    "version": 1,
+    "identity": {
+     "id": "00000000-0000-0000-0000-000000000001",
+     "name": " ",
+     "createdAt": "2026-09-24T00:00:00Z"
+    },
+    "personality": "",
+    "memoryAuthority": "worldlet",
+    "memories": [],
+    "conversations": []
+   }
+  },
+  "expected": {
+   "error": "Invalid companion profile.",
+   "ok": false
+  }
+ },
+ {
+  "name": "canonical duplicate memory ids",
+  "operation": "companionValidate",
+  "input": {
+   "archive": {
+    "format": "worldlet.companion",
+    "version": 1,
+    "identity": {
+     "id": "00000000-0000-0000-0000-000000000001",
+     "name": "Fox",
+     "createdAt": "2026-09-24T00:00:00Z"
+    },
+    "personality": "",
+    "memoryAuthority": "worldlet",
+    "memories": [
+     {
+      "id": "café",
+      "kind": "user",
+      "text": "",
+      "source": ""
+     },
+     {
+      "id": "café",
+      "kind": "user",
+      "text": "",
+      "source": ""
+     }
+    ],
+    "conversations": []
+   }
+  },
+  "expected": {
+   "error": "Invalid companion memories or conversation records.",
+   "ok": false
+  }
+ },
+ {
+  "name": "invalid memory authority",
+  "operation": "companionValidate",
+  "input": {
+   "archive": {
+    "format": "worldlet.companion",
+    "version": 1,
+    "identity": {
+     "id": "00000000-0000-0000-0000-000000000001",
+     "name": "Fox",
+     "createdAt": "2026-09-24T00:00:00Z"
+    },
+    "personality": "",
+    "memoryAuthority": "adapter:Bad",
+    "memories": [],
+    "conversations": []
+   }
+  },
+  "expected": {
+   "error": "Invalid companion profile.",
+   "ok": false
+  }
+ },
+ {
+  "name": "invalid turn timestamp",
+  "operation": "companionValidate",
+  "input": {
+   "archive": {
+    "format": "worldlet.companion",
+    "version": 1,
+    "identity": {
+     "id": "00000000-0000-0000-0000-000000000001",
+     "name": "Fox",
+     "createdAt": "2026-09-24T00:00:00Z"
+    },
+    "personality": "",
+    "memoryAuthority": "hermes",
+    "memories": [],
+    "conversations": [
+     {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "role": "user",
+      "session": "one",
+      "text": "hi",
+      "createdAt": "2025-02-29T00:00:00Z"
+     }
+    ]
+   }
+  },
+  "expected": {
+   "error": "Invalid companion memories or conversation records.",
+   "ok": false
+  }
+ },
+ {
+  "name": "uuid",
+  "operation": "companionValidID",
+  "input": {
+   "text": "0A000000-0000-0000-0000-00000000000f"
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "uuid with newline",
+  "operation": "companionValidID",
+  "input": {
+   "text": "00000000-0000-0000-0000-000000000001\n"
+  },
+  "expected": {
+   "ok": true,
+   "value": false
+  }
+ },
+ {
+  "name": "timestamp with fraction and offset",
+  "operation": "companionValidTimestamp",
+  "input": {
+   "text": "2026-09-24T12:34:56.1234567-07:00"
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "leap day",
+  "operation": "companionValidTimestamp",
+  "input": {
+   "text": "2024-02-29T23:59:59+14:00"
+  },
+  "expected": {
+   "ok": true,
+   "value": true
+  }
+ },
+ {
+  "name": "invalid leap day",
+  "operation": "companionValidTimestamp",
+  "input": {
+   "text": "2025-02-29T12:00:00Z"
+  },
+  "expected": {
+   "ok": true,
+   "value": false
+  }
+ },
+ {
+  "name": "date only",
+  "operation": "companionValidTimestamp",
+  "input": {
+   "text": "2026-09-24"
+  },
+  "expected": {
+   "ok": true,
+   "value": false
+  }
+ }
+]

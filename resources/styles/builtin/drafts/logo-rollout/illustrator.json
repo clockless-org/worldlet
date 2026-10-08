@@ -1,0 +1,39 @@
+{
+  "key": "illustrator",
+  "title": "illustrator",
+  "generic": false,
+  "output": "resources/styles/builtin/assets/applets/illustrator/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-22de7367-3a13-4f98-b7c5-b029c75d1e66.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/.local/logo-inputs/illustrator.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: illustrator. Image1 is the sourced ORIGINAL publisher icon, the authority for logo geometry, colors, negative spaces and lettering. Recreate it faithfully as a substantial physical sculpture. Image2/3 are MATERIAL and hierarchy examples only; do not copy their logos. Secondary functional cue (reduce this concept to at most two small attachments, not the dominant shape): . Preserve original icon rather than literal full machine in that cue. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "revision": {
+    "reason": "Clarify the functional cue without reducing original logo identity",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-19b01c5a-bdf3-4618-b4a5-8b5e012b6b22.png",
+    "prompt": "Edit this transparent Applet sprite, changing only a small functional accessory. Preserve the main logo sculpture exactly: original recognizable identity, geometry, colors, size, perspective and painted material. Add a small brass fountain pen nib and a tiny ivory card showing a curved path with three anchor dots at the bottom right, to express vector illustration. Keep the Ai identity intact. Accessories must remain secondary, together at most 15% of visible mass, not covering the mark. Logo dominates. Soft upper-left daylight, village timber/brass/ivory, no scenery, no extra branding or UI text. Transparent background."
+  },
+  "identitySource": "ui/applets/illustrator/logo-source.ts",
+  "lampRevision": {
+    "key": "illustrator",
+    "prompt": "Precisely edit this illustrator Applet miniature. Preserve its entire device, original logo, functional accessories, camera direction, colors, materials, silhouette and framing. Add exactly ONE small recessed circular status lamp on the CENTER of the FRONT FACE of its lowest supporting base. Brass thin rim and plain charcoal BLACK glass lens, OFF, absolutely no glow or colored emission. Lens diameter about 3.5% of image width, bezel outside diameter 4.5%, oval consistent with base perspective. If no continuous base exists, add a discreet sturdy low warm timber foot connecting the supports and put the lens in its front center. If the front is obstructed by a drawer/accessory, extend the supporting foot slightly below it so the lamp is clearly visible and centered. Never put the lamp on a side accessory or on the main logo. Remove/replace any other colored status lamp in the base, but preserve actual logo colors, headlights, projectors and functional props. Keep all original identity and detail. Cozy painted miniature village style, grounded, frontal face angled toward screen-left/right side visible as in reference. Do NOT flip. Whole object with safe margins, true transparent background. No labels or scenery.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-60c20c1c-ce9f-4753-a539-b4fb819b629c.png",
+    "anchor": {
+      "center": [
+        0.456539,
+        0.820574
+      ],
+      "radius": [
+        0.015949,
+        0.017145
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

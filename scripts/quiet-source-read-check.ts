@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {sourceReadAction,readRetryDelay} from '../core/applets/read-recovery.ts';
+import {quietSourceReader} from '../ui/shell/quiet-source-reader.ts';
+assert.equal(sourceReadAction(Error('Network timed out')),null);
+assert.equal(sourceReadAction(Error('Fox is working. Try again when it finishes.')),null);
+assert.equal(sourceReadAction(Error('Your Google sign-in expired or was revoked. Reconnect with Fox.')),'reconnect');
+assert.equal(sourceReadAction({syncError:'Folder access expired. Choose the folder again.'}),'permissions');
+assert.equal(sourceReadAction({failed:true}),null);
+assert.equal(readRetryDelay(99),300000);
+let calls=0,scheduled=[],issues=[],results=[],enabled=true;
+const reader=quietSourceReader({read:async()=>{if(++calls===1)throw Error('Timeout');return {pages:['saved']};},enabled:()=>enabled,onSuccess:(key,value)=>results.push(value),onIssue:(key,action)=>issues.push(action),schedule:(fn,delay)=>{scheduled.push({fn,delay});return 1;},cancel:()=>{}});
+await reader.run('gmail');assert.equal(calls,1);assert.equal(scheduled[0].delay,15000);assert.deepEqual(issues,[null]);
+await reader.run('gmail');assert.equal(calls,1,'coalesce requests during backoff');
+scheduled.shift().fn();await new Promise(resolve=>setTimeout(resolve,0));assert.equal(calls,2);assert.equal(results.length,1);
+reader.stop();await reader.run('gmail');assert.equal(calls,2);
+const auth=quietSourceReader({read:async()=>{throw Error('Please reconnect');},enabled:()=>true,onSuccess:()=>assert.fail(),onIssue:(key,action)=>issues.push(action),schedule:()=>assert.fail('auth errors need user action, no blind retry'),cancel:()=>{}});
+await auth.run('gmail');assert.equal(issues.at(-1),'reconnect');auth.stop();
+console.log('PASS quiet read retries, coalescing, capped backoff, recovery and actionable auth/permission classification');

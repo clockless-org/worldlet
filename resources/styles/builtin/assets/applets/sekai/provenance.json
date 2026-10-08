@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-04",
+  "tool": "built-in image_gen",
+  "model": "not exposed by tool",
+  "prompt": "Create ONE transparent PNG Worldlet applet icon. The reference is STYLE ONLY, not geometry. Cozy hand-painted dimensional miniature, rounded ceramic and enamel, soft matte surfaces with restrained highlights, warm timber low base and sparse brass fittings. Main recognizable game subject dominates, not a generic screen/pedestal/controller. Compact wooden base only 8-12% height, one small black OFF lamp in brass rim centered on its front. Front faces screen-left, narrow RIGHT side visible, top visible, 20° yaw /25° elevation, no roll, upright and grounded. Warm diffuse upper-left light. Entire object centered on transparent alpha with 12% empty margin all sides, clean readable silhouette at 48px. No scenery or island, no outside shadow, no printed poster, no labels or watermark. Keep composition simple, 1-3 large forms. SEKAI community game hub: sculptural teal-and-lime shooting star planet emblem (matching Sekai's star with orbital ring), mounted above a low timber dock with two small purple tile cards tucked behind. Dominant mint star and orbit, no question mark, no text, polished friendly hub identity.",
+  "reference": [
+    "game-2048/peek-logo-v4.png (style only)",
+    "web-games-current.png (previous applet identities)"
+  ],
+  "original": "exec-de72bebc-d585-40ae-bcf9-9563939eb129.png",
+  "processing": "Preserved original master; cleared alpha <=8 fringe, uniformly fitted visible bounds to 1024px in 1280px RGBA square, minimum 128px padding, bottom baseline y=1152."
+}

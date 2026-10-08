@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_2002f1d321cd4ba487a38112023711c7",
+  "source": "resources/styles/builtin/assets/applets/gitlab/peek.png"
+}

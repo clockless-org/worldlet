@@ -1,0 +1,28 @@
+{
+  "key": "google-maps",
+  "output": "resources/styles/builtin/assets/applets/google-maps/peek-logo-v3.png",
+  "status": "reviewed",
+  "baseRevision": {
+    "key": "google-maps",
+    "v": 2,
+    "prompt": "Edit this google-maps Applet figurine: Mount the folded map and original multicolor pin together on a solid low rounded rectangular wooden map tray. Keep the little direction sign. The paper map lies on top of the wood, not directly on ground. Shared base design: warm medium honey timber, softly rounded wooden edges, subtle woodgrain, restrained brass fasteners, no stone or ivory rim, low solid support about 10–15% height. Match existing village miniature style, upper-left soft light. Preserve the original device, logo, colors, functions and gentle screen-left-facing view with right side visible. Keep verticals upright and object firmly supported. Base only slightly wider than device. No added scenery or text. Entire object centered with safe margins on true transparent background.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-85a1044d-9a9e-430d-a7ed-656b02d52a5c.png"
+  },
+  "lampRevision": {
+    "key": "google-maps",
+    "prompt": "Precisely edit the attached google-maps Applet miniature. Preserve the existing entire device, correct original logo, functional accessories, wooden base, camera angle, silhouette, materials, color and framing. Add exactly ONE clearly visible status indicator recessed in the FRONT FACE of the wooden base, centered horizontally on that FRONT FACE (not the side), near its vertical center. It is a small warm brass circular bezel with a plain BLACK charcoal glass center, switched OFF: absolutely no glow, no colored light. Black lens diameter approximately 4% of total image width, bezel outside diameter 5%; slightly oblique oval consistent with front face perspective. Make sure unobstructed by props. If existing small indicator occupies base front center replace it with this unlit black lens; remove other colored status indicators on the base, retain brand graphics and non-status functional parts. If support has no continuous wood front, add a discreet low timber connecting foot with the socket at center, otherwise do not redesign base. No extra text, labels, dots, buttons or scenery. Full object isolated on true transparent background. Preserve 1024-or-1280 square composition and safe margins.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-aa189082-3a71-4549-b9bd-536236498865.png",
+    "anchor": {
+      "center": [
+        0.422648,
+        0.888756
+      ],
+      "radius": [
+        0.020335,
+        0.020734
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}

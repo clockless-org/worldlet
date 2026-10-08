@@ -1,0 +1,63 @@
+{
+  "key": "google-calendar",
+  "title": "Calendar",
+  "generic": true,
+  "output": "resources/styles/builtin/assets/applets/google-calendar/peek-logo-v3.png",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-0fefc43a-a386-49b0-86b1-02248270aa70.png",
+  "tool": "built-in image_gen",
+  "references": [
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/world/devices/google-calendar.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/youtube/peek.png",
+    "~/.codex/worktrees/7012/worldlet/resources/styles/builtin/assets/applets/spotify/peek-logo-v2.png"
+  ],
+  "prompt": "Use case: stylized-concept. Create ONE production transparent PNG sprite, whole object centered, square with narrow transparent margins. This is a dimensional interactive Applet for a cozy miniature village. Not a flat icon sheet. Soft painted matte enamel, rounded sculptural relief, restrained timber/brass/ivory accents. Gentle fixed view about 18 degrees sideways and 25 degrees downward, logo front dominant. Soft upper-left daylight. No landscape, no floor island, no big furniture, no flowers, no extra branding badges or duplicate logos, no fake counts or UI text. The original icon must be immediately recognizable at 84 pixels. Icon sculpture occupies 75-85% of visible mass; just ONE or TWO tiny functional additions at base/side. Do NOT invent a generic machine and place a little logo on it. Not glossy plastic, not steampunk. Subject: Calendar. Image1 is the existing unbranded device identity to preserve but simplify. A freestanding cream calendar leaf with honey binding rings and warm timber frame. Calendar page is the dominant sculptural icon. Blank subtle seven-column grid; no numbers or invented date. No desk. Images2/3 show accepted village materials and logo-first hierarchy. Do not include screenshot backgrounds, watermarks or labels outside the object.",
+  "date": "2026-09-26",
+  "status": "reviewed",
+  "identitySource": "resources/styles/builtin/assets/world/devices/google-calendar.png",
+  "baseRevision": {
+    "key": "google-calendar",
+    "prompt": "Edit IMAGE 1 only. Replace the splayed freestanding easel feet with a compact solid low wooden display base; shorten the supports so the calendar feels like a sturdy tabletop collectible firmly attached to the base. Keep calendar leaves and brass rings. IMAGE 2 Spotify is MATERIAL REFERENCE FOR THE BASE ONLY: warm medium-brown rounded timber with small brass fasteners. Do not copy Spotify identity. Same matching wood base family for all village Applets. No stone rim, no ivory rim, no grass or terrain, no tall pedestal. Low stable substantial collectible figurine, firm visible contact shading, no floating parts. Preserve image1 main object, logo, colors, perspective, soft upper-left lighting and secondary functional details. Base around 8-12% height. Narrow transparent margins, full object centered. Transparent background.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-309494c4-9f13-4fed-aa21-efd01e23d193.png"
+  },
+  "orientationRevision": {
+    "key": "google-calendar",
+    "prompt": "Edit this google-calendar Applet figurine. Change the CAMERA orientation to the opposite side: the front faces slightly SCREEN-LEFT, camera sees its RIGHT side and top, NOT its left side. 20 degree gentle side angle, 25 degree elevation, no camera roll. All verticals upright; heavy stable grounded figurine, low functional warm timber base with rounded wood edges and small brass fasteners. Preserve this exact object's identity, original logo shape and correct non-mirrored lettering, palette, functional attachments, cozy miniature village material. Do NOT mirror the logo. Reconstruct the new view, front face still dominant. For Notion add a very low timber stationery tray under feet. Others keep current functional bases. Isolated centered full object on transparent background, nothing cropped. No surrounding landscape.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-e1e4d206-e4a0-4fff-8a82-715a4a57271c.png"
+  },
+  "lampRevision": {
+    "key": "google-calendar",
+    "prompt": "Precisely edit the attached google-calendar Applet miniature. Preserve the existing entire device, correct original logo, functional accessories, wooden base, camera angle, silhouette, materials, color and framing. Add exactly ONE clearly visible status indicator recessed in the FRONT FACE of the wooden base, centered horizontally on that FRONT FACE (not the side), near its vertical center. It is a small warm brass circular bezel with a plain BLACK charcoal glass center, switched OFF: absolutely no glow, no colored light. Black lens diameter approximately 4% of total image width, bezel outside diameter 5%; slightly oblique oval consistent with front face perspective. Make sure unobstructed by props. If existing small indicator occupies base front center replace it with this unlit black lens; remove other colored status indicators on the base, retain brand graphics and non-status functional parts. If support has no continuous wood front, add a discreet low timber connecting foot with the socket at center, otherwise do not redesign base. No extra text, labels, dots, buttons or scenery. Full object isolated on true transparent background. Preserve 1024-or-1280 square composition and safe margins.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-39869aa2-e762-4551-bead-ff99d6e09d9f.png",
+    "anchor": {
+      "center": [
+        0.366029,
+        0.825758
+      ],
+      "radius": [
+        0.02193,
+        0.025518
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  },
+  "homeIdentityRevision": {
+    "key": "google-calendar",
+    "prompt": "Worldlet Home sprite redesign. Input is style/edit reference. An actual village desk calendar: warm oak A-frame with slim side cheeks, two modest brass rings holding layered cream paper, matte terracotta-red header and simple date grid, one ochre cell, bottom page gently curled. Small wooden turning peg on side. Calendar icon identity comes from red header and paper grid, not a flat rounded-square tile. No written dates or numbers. Primary identity is a useful countryside object, native app icon cues are secondary integrated material accents. Cohesive soft hand-painted miniature village illustration: matte honey oak, cream paper, restrained dusty colors, small aged brass hardware, soft upper-left daylight, broad shapes and tasteful detail. Avoid glossy plastic, harsh specular highlights, excessive weathering, flowers, grass, tiny clutter. Same fixed slightly top-down camera, front facing screen-left with right side visible. Stable solid rounded timber base, about bottom 15%, exactly one small BLACK unlit circular lens in thin brass rim centered on front face. No extra status lights. Whole object isolated on TRUE TRANSPARENT square background, balanced margins, no ground or outside cast shadow. Clearly readable at 80px.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-d94f4d50-0f66-4b7a-8a0d-fdc0630027da.png",
+    "tool": "built-in imagegen",
+    "anchor": {
+      "center": [
+        0.370415,
+        0.824561
+      ],
+      "radius": [
+        0.024721,
+        0.027512
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed",
+    "date": "2026-09-27"
+  }
+}

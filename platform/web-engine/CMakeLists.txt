@@ -1,0 +1,41 @@
+# The website engine (README.md). scripts/build-web-engine.ts configures this with -DCEF_ROOT=<the
+# pinned CEF distribution> and assembles the runnable bundle around the built binaries.
+cmake_minimum_required(VERSION 3.21)
+project(WorldletWeb LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(APPLE)
+  enable_language(OBJCXX)
+  set(CMAKE_OBJCXX_STANDARD 20)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
+endif()
+
+list(APPEND CMAKE_MODULE_PATH "${CEF_ROOT}/cmake")
+find_package(CEF REQUIRED)
+add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+
+set(ENGINE_SOURCES src/channel.cc src/engine.cc src/page.cc src/policy.cc src/cookies.cc)
+
+if(APPLE)
+  add_executable(WorldletWeb ${ENGINE_SOURCES} src/main_mac.mm src/frames_mac.mm)
+  target_link_libraries(WorldletWeb PRIVATE libcef_dll_wrapper "-framework Cocoa" "-framework Metal" "-framework IOSurface")
+  add_executable(WorldletWebHelper src/helper_mac.mm)
+  target_link_libraries(WorldletWebHelper PRIVATE libcef_dll_wrapper "-framework Cocoa")
+  set_source_files_properties(src/main_mac.mm src/frames_mac.mm src/helper_mac.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+  foreach(target WorldletWeb WorldletWebHelper)
+    target_include_directories(${target} PRIVATE "${CEF_ROOT}")
+  endforeach()
+elseif(WIN32)
+  add_executable(WorldletWeb WIN32 ${ENGINE_SOURCES} src/main_win.cc src/frames_win.cc src/engine.manifest)
+  SET_EXECUTABLE_TARGET_PROPERTIES(WorldletWeb)
+  target_include_directories(WorldletWeb PRIVATE "${CEF_ROOT}")
+  target_link_libraries(WorldletWeb PRIVATE libcef_dll_wrapper ${CEF_STANDARD_LIBS} "${CEF_BINARY_DIR}/libcef.lib" d3d11 dxgi)
+else()
+  # Linux: `worldlet-web` finds libcef.so beside itself. The engine uses no X11 of its own, so
+  # CEF_STANDARD_LIBS (X11) is not linked.
+  add_executable(WorldletWeb ${ENGINE_SOURCES} src/main_linux.cc src/frames_linux.cc)
+  SET_EXECUTABLE_TARGET_PROPERTIES(WorldletWeb)
+  target_include_directories(WorldletWeb PRIVATE "${CEF_ROOT}")
+  target_link_libraries(WorldletWeb PRIVATE libcef_dll_wrapper "${CEF_BINARY_DIR}/libcef.so")
+  set_target_properties(WorldletWeb PROPERTIES OUTPUT_NAME worldlet-web INSTALL_RPATH "$ORIGIN" BUILD_WITH_INSTALL_RPATH TRUE)
+endif()

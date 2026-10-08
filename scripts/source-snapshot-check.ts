@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {sourceSnapshotRows} from '../core/context/index.ts';
+const source={id:'one',revision:1,title:'Original',origin:'file',enabled:true,connectionId:'mail',excerpt:'Original text',privatePath:'/private/fixture'};
+assert.equal(sourceSnapshotRows([source],[{sourceId:'one',sourceRevision:1},{sourceId:'one',sourceRevision:0}])[0].excerpt,'');
+assert.equal(sourceSnapshotRows([{...source,enabled:false}],[])[0].excerpt,'');
+const visible=sourceSnapshotRows([source],[],{mail:'work'})[0];
+assert.equal(visible.preset,'work');assert.equal(visible.excerpt,source.excerpt);assert(!('privatePath' in visible));
+assert.equal(sourceSnapshotRows([{...source,preset:'life'}],[],{mail:'work'})[0].preset,'life');
+const rows=sourceSnapshotRows(Array.from({length:100},(_,i)=>({...source,id:String(i),excerpt:'🦊'.repeat(5000)})),[]);
+assert.equal(rows[0].excerpt.length,8000);
+assert.equal(rows.reduce((total,row)=>total+Buffer.byteLength(row.excerpt),0),128000);
+assert(rows.every(row=>!/[\uD800-\uDBFF]$/.test(row.excerpt)));
+assert.equal(source.excerpt,'Original text');
+console.log('PASS shared World source projection: revision filtering, UTF-8 budget, complete characters, regions and private metadata exclusion');

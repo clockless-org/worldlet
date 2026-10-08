@@ -1,0 +1,16 @@
+Use case: precise-object-edit
+Asset type: Worldlet world environment, native 3840x2160 landscape.
+Input image 1: the CURRENT SHIPPED daytime world. It is the exact style, landscape, camera and material reference to preserve. Do not redesign the art direction.
+Primary request: rearrange the seven existing functional places into the approved new layout while keeping this same world, its broad green hills, distant mountains, sky, winding river, soft dimensional painted look, stone paving, timber and terracotta. Keep the camera scale and generous landscape spacing close to the input. Do not turn it into a different village with giant new buildings. Output daytime only.
+New layout, normalized full-image coordinates. These names are semantic instructions, NOT text to paint:
+Home remains central at (.53,.49): preserve the existing ivory cottage and terracotta roof, small stone forecourt, entry clear.
+Create at (.39,.35), upper-left of Home: MOVE the existing bottom-center open reading/library nook here, keep its distinctive small roof and bookshelves. Add no other reading nook elsewhere.
+Finance at (.68,.35), upper-right of Home: retain the modest counting terrace with a small chest at its REAR edge. No giant vault or new fortress.
+Explore at (.23,.57), far left: move the existing wooden dock to the left riverbank here. Keep its wooden posts/canvas shade and a clear front deck. River can bend left to meet it, then flow toward the lower-left corner instead of through the bottom-center HUD space.
+Health at (.80,.49), right of Home: MOVE the existing exercise bar/garden from lower right here. Grass/stone ground, sparse rear tree, no front fence blocking devices.
+Work at (.79,.68), lower right: MOVE the existing right-middle open work terrace with timber rear frame and workbench here; retain the same visual scale and open court. Do not add a huge blue-roof building.
+Tools at (.49,.69), lower center: use the former reading-nook area, but replace the relocated reading building with a SMALL low timber tool/storage rack at the rear of an open stone/grass working patch. No duplicate library, no travel balloon.
+For every place provide visibly empty quiet ground for 3–6 independent application devices: wide clear front/side ground, no baked mailboxes, monitors, icons or other Applets. Natural irregular paving from the input is fine. Do not add conspicuous platform rims or repeated tall perimeter walls.
+Mandatory clearance: all Tools ground/props finish above y=.79. Keep x=.36–.66 and y=.81–1 completely free of buildings, props, paths, river or large trees: quiet grass for the Fox HUD. Keep all seven sites separate; Paths connect entrances naturally and do not run through installation spaces.
+Preserve the current reference's exact color/material family and lighting character, but no harsher contrast or more saturated water/grass. No artificial flattening/desaturation. Far scenery stays less prominent than functional sites.
+Invariants: fixed oblique perspective, same rounded miniature geometry, same cottage identity, broad landscape, daytime with unlit lamps, exactly seven places. Only change site placement and the Tools function as specified. No extra settlements, characters, Fox, labels, text, numbers, arrows, logos, UI, watermarks or borders. Deliver the unannotated environment only.

@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_846c58d1d1c64c0c80a57e95b892dd47",
+  "source": "resources/styles/builtin/assets/applets/cloudflare/peek.png"
+}

@@ -1,0 +1,7 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "size": "1024x1024",
+  "request_id": "req_0d9f949e740b4a18b86c0b71f4e1254b",
+  "source": "resources/styles/builtin/assets/applets/firebase/peek.png"
+}

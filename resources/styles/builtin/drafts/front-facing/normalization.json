@@ -1,0 +1,146 @@
+{
+  "x": {
+    "bodyBounds": [
+      750,
+      630
+    ],
+    "scale": 1.0073452256033577,
+    "renderBounds": [
+      960,
+      789
+    ],
+    "groundBaseline": 1000
+  },
+  "discord": {
+    "bodyBounds": [
+      805,
+      634
+    ],
+    "scale": 1.0201912858661,
+    "renderBounds": [
+      960,
+      945
+    ],
+    "groundBaseline": 1000
+  },
+  "slack": {
+    "bodyBounds": [
+      575,
+      755
+    ],
+    "scale": 1.0446137105549511,
+    "renderBounds": [
+      702,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "notion": {
+    "bodyBounds": [
+      761,
+      796
+    ],
+    "scale": 0.9764830970218611,
+    "renderBounds": [
+      880,
+      884
+    ],
+    "groundBaseline": 1000
+  },
+  "linear": {
+    "bodyBounds": [
+      584,
+      753
+    ],
+    "scale": 1.0738255033557047,
+    "renderBounds": [
+      771,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "cloudflare": {
+    "bodyBounds": [
+      776,
+      573
+    ],
+    "scale": 1.0572687224669604,
+    "renderBounds": [
+      960,
+      730
+    ],
+    "groundBaseline": 1000
+  },
+  "youtube": {
+    "bodyBounds": [
+      800,
+      672
+    ],
+    "scale": 1.0278372591006424,
+    "renderBounds": [
+      960,
+      817
+    ],
+    "groundBaseline": 1000
+  },
+  "spotify": {
+    "bodyBounds": [
+      787,
+      580
+    ],
+    "scale": 1.0367170626349893,
+    "renderBounds": [
+      960,
+      726
+    ],
+    "groundBaseline": 1000
+  },
+  "wechat": {
+    "bodyBounds": [
+      752,
+      596
+    ],
+    "scale": 1.0223642172523961,
+    "renderBounds": [
+      960,
+      790
+    ],
+    "groundBaseline": 1000
+  },
+  "whatsapp": {
+    "bodyBounds": [
+      720,
+      688
+    ],
+    "scale": 1.067853170189099,
+    "renderBounds": [
+      960,
+      942
+    ],
+    "groundBaseline": 1000
+  },
+  "telegram": {
+    "bodyBounds": [
+      665,
+      539
+    ],
+    "scale": 1.213653603034134,
+    "renderBounds": [
+      928,
+      960
+    ],
+    "groundBaseline": 1000
+  },
+  "github": {
+    "bodyBounds": [
+      766,
+      624
+    ],
+    "scale": 1.0223642172523961,
+    "renderBounds": [
+      960,
+      767
+    ],
+    "groundBaseline": 1000
+  }
+}

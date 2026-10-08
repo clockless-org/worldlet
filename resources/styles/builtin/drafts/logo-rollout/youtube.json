@@ -1,0 +1,25 @@
+{
+  "key": "youtube",
+  "prompt": "Revise this village Applet figurine. Use the old wooden CINEMA CANVAS design in this reference as the primary concept. Keep a real soft ivory fabric projection screen with a red YouTube rounded play emblem and correct white right-pointing triangle PAINTED on the fabric, gentle fabric folds and tension rings, wooden side posts and top crossbeam, small projector. Add one sturdy low rounded warm wooden platform supporting everything, no isolated feet. Simplify clutter but preserve the charming outdoor village cinema essence. Do not replace the fabric with a solid red icon block. Unified soft painted cozy dimensional miniature, matte surfaces, warm timber/brass, original brand colors. Upright stable support. Gentle 20-degree view front toward screen-left with right side and top visible, soft upper-left light. Full object on true transparent background with safe margins.",
+  "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-ebbc7711-151b-4534-b1b8-918b92d1998d.png",
+  "output": "resources/styles/builtin/assets/applets/youtube/peek-logo-v3.png",
+  "status": "reviewed",
+  "reference": "resources/styles/builtin/assets/applets/youtube/peek.png",
+  "lampRevision": {
+    "key": "youtube",
+    "prompt": "Precisely edit the attached youtube Applet miniature. Preserve the existing entire device, correct original logo, functional accessories, wooden base, camera angle, silhouette, materials, color and framing. Add exactly ONE clearly visible status indicator recessed in the FRONT FACE of the wooden base, centered horizontally on that FRONT FACE (not the side), near its vertical center. It is a small warm brass circular bezel with a plain BLACK charcoal glass center, switched OFF: absolutely no glow, no colored light. Black lens diameter approximately 4% of total image width, bezel outside diameter 5%; slightly oblique oval consistent with front face perspective. Make sure unobstructed by props. If existing small indicator occupies base front center replace it with this unlit black lens; remove other colored status indicators on the base, retain brand graphics and non-status functional parts. If support has no continuous wood front, add a discreet low timber connecting foot with the socket at center, otherwise do not redesign base. No extra text, labels, dots, buttons or scenery. Full object isolated on true transparent background. Preserve 1024-or-1280 square composition and safe margins.",
+    "source": "~/.codex/generated_images/01a0b70d-ebdf-76f2-b6b8-ccf239d94577/exec-2bc89e9e-18ff-4f6c-ad5d-b87d8e329c1f.png",
+    "anchor": {
+      "center": [
+        0.367624,
+        0.907496
+      ],
+      "radius": [
+        0.017943,
+        0.019537
+      ],
+      "defaultState": "off"
+    },
+    "status": "visually reviewed"
+  }
+}
