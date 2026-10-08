@@ -4,7 +4,7 @@ import {generateKeyPairSync,sign} from 'node:crypto';
 import {mkdtempSync,readFileSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {BUILD_OFFSET,channelKeys,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
+import {BUILD_OFFSET,channelKeys,githubStore,labelOf,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
 
 // Build = offset + commit position; the label is the commit's Pacific day.
 const id=releaseIdentity(12,'2026-10-09T05:30:00Z');
@@ -17,58 +17,79 @@ assert.deepEqual(releaseManifest(id,'a'.repeat(40)).platformBuilds,{mac:4012,win
 // The builds this repository publishes stay above every build the release hosts published before it.
 assert(BUILD_OFFSET>=3400);
 
-// Channels: live ones use the feeds installed apps read; others stay under ci-staging/.
+// Channels: live ones use the feeds installed apps read; others go to staging releases nothing reads.
 assert.equal(liveChannel('dev',{live:['dev']}),true);
 assert.equal(liveChannel('beta',{live:['dev']}),false);
 assert.throws(()=>liveChannel('nightly',{live:[]}));
-assert.deepEqual(channelKeys('alpha',true),{prefix:'alpha/',mac:['appcast-alpha.xml'],windows:'windows-alpha.json',history:false});
-assert.deepEqual(channelKeys('beta',true),{prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',history:true});
-assert.deepEqual(channelKeys('beta',false),{prefix:'ci-staging/beta/',mac:['ci-staging/beta/appcast.xml','ci-staging/beta/appcast-intel.xml'],windows:'ci-staging/beta/windows-preview.json',history:true});
-assert.equal(channelKeys('dev',false).windows,'ci-staging/dev/windows-dev.json');
+assert.deepEqual(channelKeys('alpha',true),{feedTag:'channel-alpha',prefix:'alpha/',mac:['appcast-alpha.xml'],windows:'windows-alpha.json',history:false});
+assert.deepEqual(channelKeys('beta',true),{feedTag:'channel-beta',prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',history:true});
+assert.equal(channelKeys('beta',false).feedTag,'staging-beta');
+assert.equal(labelOf('2026.105.4001'),'2026.0105.4001');
 const committed=JSON.parse(readFileSync(new URL('../platform/electron/distribution/Channels.json',import.meta.url),'utf8'));
 assert(committed.live.every(c=>['dev','alpha','beta'].includes(c)));
 
-// A Sparkle item keeps its signature and moves to the channel's address; history keeps other builds.
+// A Sparkle item keeps its signature and points at the build's release; history keeps other builds.
 const dir=mkdtempSync(path.join(os.tmpdir(),'ci-release-check-'));
 const dmg=path.join(dir,'Worldlet-2026.1008.4012-4012-macos-universal.dmg');writeFileSync(dmg,'disk image bytes');writeFileSync(dmg+'.sha256','x');
+writeFileSync(path.join(dir,'release.json'),JSON.stringify(releaseManifest(id,'c'.repeat(40))));
 const {publicKey,privateKey}=generateKeyPairSync('ed25519');
 const raw=publicKey.export({format:'jwk'}).x,signature=sign(null,readFileSync(dmg),privateKey).toString('base64');
 const appcast=`<rss><channel><item><title>2026.1008.4012</title><pubDate>Thu, 08 Oct 2026 12:00:00 +0000</pubDate><sparkle:version>4012</sparkle:version><enclosure url="https://example.com/downloads/${path.basename(dmg)}" length="16" type="application/octet-stream" sparkle:edSignature="${signature}"/></item></channel></rss>`;
 writeFileSync(path.join(dir,'appcast.xml'),appcast);
-const item=macItem(appcast,path.basename(dmg),'https://example.com/downloads/dev/'+path.basename(dmg),new Date('2026-10-09T00:00:00Z'));
-assert.match(item,/url="https:\/\/example\.com\/downloads\/dev\/Worldlet-2026\.1008\.4012-4012-macos-universal\.dmg"/);
+const url='https://github.com/example/worldlet/releases/download/v2026.1008.4012/'+path.basename(dmg);
+const item=macItem(appcast,path.basename(dmg),url,new Date('2026-10-09T00:00:00Z'));
+assert(item.includes(`url="${url}"`));
 assert.match(item,/<pubDate>Fri, 09 Oct 2026 00:00:00 \+0000<\/pubDate>/);
-await verifyMacItem(item,dmg,Buffer.from(raw,'base64url').toString('base64'));
-await assert.rejects(verifyMacItem(item.replace(signature,sign(null,Buffer.from('other'),privateKey).toString('base64')),dmg,Buffer.from(raw,'base64url').toString('base64')));
+const key=Buffer.from(raw,'base64url').toString('base64');
+await verifyMacItem(item,dmg,key);
+await assert.rejects(verifyMacItem(item.replace(signature,sign(null,Buffer.from('other'),privateKey).toString('base64')),dmg,key));
 const old='<rss><channel><item><sparkle:version>3300</sparkle:version></item><item><sparkle:version>4012</sparkle:version></item></channel></rss>';
 const merged=macFeed(item,'Worldlet beta',old);
 assert.equal(feedBuild('mac',merged),4012);
 assert.equal((merged.match(/<item>/g)||[]).length,2,'the same build is replaced, older builds stay');
-assert.equal(feedBuild('mac',macFeed(item,'Worldlet dev')),4012);
 assert.equal(feedBuild('windows','{"build":4012}'),4012);
 assert.equal(feedBuild('windows','not json'),0);
-assert.equal(windowsManifest({version:'2026.1008.4012',build:4012,sha256:'f'.repeat(64)},1e6,'dev/').url,'/downloads/dev/Worldlet-2026.1008.4012-4012-windows-x64-unsigned.exe');
+const manifest=windowsManifest({version:'2026.1008.4012',build:4012,sha256:'f'.repeat(64)},1e6,'dev/','https://example.com/x.exe');
+assert.equal(manifest.url,'/downloads/dev/Worldlet-2026.1008.4012-4012-windows-x64-unsigned.exe');
+assert.equal(manifest.download,'https://example.com/x.exe');
 
-// Publication: installer first, then feeds; a channel's newer build is never replaced.
-const store=(feeds={})=>{const writes=[];return {writes,feeds,read:async k=>feeds[k]||'',upload:async k=>{writes.push(k);},put:async(k,body)=>{writes.push(k);feeds[k]=body;}};};
-const updates={feedURL:'https://example.com/downloads/appcast.xml',publicKey:Buffer.from(raw,'base64url').toString('base64')};
-const own=store();
-await assert.rejects(publish({channel:'dev',platform:'mac',dir,live:true,store:own}),/signature/,'an item not signed by the published key is refused');
-assert.deepEqual(own.writes,[]);
+// Publication: release, installer, then feeds; a channel's newer build is never replaced.
+const store=(assets={})=>{const writes=[];return {repo:'example/worldlet',writes,assets,
+ ensure:async tag=>{writes.push('ensure '+tag);},read:async(tag,name)=>assets[tag+'/'+name]||'',
+ upload:async(tag,file)=>{writes.push(tag+'/'+path.basename(file));},put:async(tag,name,body)=>{writes.push(tag+'/'+name);assets[tag+'/'+name]=body;},
+ promote:async tag=>{writes.push('promote '+tag);}};};
+const updates={feedURL:'https://example.com/downloads/appcast.xml',publicKey:key};
+await assert.rejects(publish({channel:'dev',platform:'mac',dir,live:true,store:store()}),/signature/,'an item not signed by the published key is refused');
 const dev=store();
 assert.equal((await publish({channel:'dev',platform:'mac',dir,live:true,store:dev,updates})).build,4012);
-assert.deepEqual(dev.writes,['dev/'+path.basename(dmg),'dev/'+path.basename(dmg)+'.sha256','appcast-dev.xml']);
-assert.match(dev.feeds['appcast-dev.xml'],/downloads\/dev\/Worldlet-2026\.1008\.4012/);
-const newer=store({'appcast-alpha.xml':'<item><sparkle:version>4013</sparkle:version></item>'});
+const name=path.basename(dmg);
+assert.deepEqual(dev.writes,['ensure v2026.1008.4012','ensure channel-dev','v2026.1008.4012/'+name,'v2026.1008.4012/'+name+'.sha256','channel-dev/appcast-dev.xml']);
+assert(dev.assets['channel-dev/appcast-dev.xml'].includes(url));
+const newer=store({'channel-alpha/appcast-alpha.xml':'<item><sparkle:version>4013</sparkle:version></item>'});
 assert.match((await publish({channel:'alpha',platform:'mac',dir,live:true,store:newer,updates})).skipped,/4013/);
-assert.deepEqual(newer.writes,[]);
-const beta=store({'appcast.xml':old,'appcast-intel.xml':old});
+assert(!newer.writes.some(w=>w.startsWith('v2026')&&w.includes('/')),'nothing is uploaded over a newer build');
+const beta=store({'channel-beta/appcast.xml':old,'channel-beta/appcast-intel.xml':old});
 await publish({channel:'beta',platform:'mac',dir,live:true,store:beta,updates});
-assert.equal((beta.feeds['appcast.xml'].match(/<item>/g)||[]).length,2);
-await assert.rejects(publish({channel:'beta',platform:'mac',dir,live:true,store:store({'appcast.xml':'<item><sparkle:version>5000</sparkle:version></item>'}),updates}),/newer/);
+assert.equal((beta.assets['channel-beta/appcast.xml'].match(/<item>/g)||[]).length,2);
+assert.equal(beta.writes.at(-1),'promote v2026.1008.4012','a live Beta build becomes the latest release');
+await assert.rejects(publish({channel:'beta',platform:'mac',dir,live:true,store:store({'channel-beta/appcast.xml':'<item><sparkle:version>5000</sparkle:version></item>'}),updates}),/newer/);
 const staged=store();
 await publish({channel:'beta',platform:'mac',dir,live:false,store:staged,updates});
-assert(staged.writes.every(k=>k.startsWith('ci-staging/')),'a channel that is not live writes only under ci-staging/');
+assert(staged.writes.every(w=>!w.includes('channel-')&&!w.startsWith('promote')),'a channel that is not live writes only to its staging release');
+
+// The GitHub store: reads only listed assets, never replaces an installer with other bytes, tolerates a parallel create.
+{
+ const calls=[];let created=false;
+ const fake=(args)=>{calls.push(args.join(' '));
+  if(args[0]==='api')return created||args[1].endsWith('/v1')?{status:0,stdout:JSON.stringify({assets:[{name:path.basename(dmg),size:1}]})}:{status:1,stderr:'gh: Not Found (HTTP 404)'};
+  if(args[0]==='release'&&args[1]==='create'){created=true;return {status:1,stderr:'already exists'};}
+  return {status:0,stdout:''};};
+ const gh=githubStore('example/worldlet',fake);
+ await gh.ensure('v2',{title:'t'});
+ assert.equal(await gh.read('v0','appcast.xml'),'');
+ assert.throws(()=>gh.upload('v1',dmg),/different bytes/);
+ gh.close();
+}
 
 // The workflow: never on pull requests, secrets only in jobs of the protected `release` environment on main.
 const workflow=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');

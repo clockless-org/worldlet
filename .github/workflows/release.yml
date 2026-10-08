@@ -1,6 +1,6 @@
 name: Release
 # Desktop releases (docs/RELEASING.md). Every push to main builds a signed, numbered Mac and Windows build and
-# publishes it to the Dev channel; a manual run promotes a Dev build's exact bytes to Alpha or Beta. Nothing here runs
+# publishes it on this repository's GitHub Releases to the Dev channel; a manual run promotes a Dev build's exact bytes to Alpha or Beta. Nothing here runs
 # for pull requests: signing and publishing secrets live only in the protected `release` environment, which only main
 # can use. Pull request CI stays in architecture.yml (Linux only).
 on:
@@ -62,12 +62,12 @@ jobs:
       - id: check
         env:
           MAC: ${{ secrets.MAC_CERTIFICATE_P12 != '' && secrets.MAC_CERTIFICATE_PASSWORD != '' && secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.SPARKLE_PRIVATE_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
-          R2: ${{ secrets.R2_ENDPOINT != '' && secrets.R2_ACCESS_KEY_ID != '' && secrets.R2_SECRET_ACCESS_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
+          GOOGLE: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
         run: |
-          echo "mac=$([[ $MAC == true && $R2 == true ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          echo "windows=$([[ $R2 == true ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          [[ $MAC == true && $R2 == true ]] || echo '::warning::Release secrets are missing in the release environment (docs/RELEASING.md); the Mac build is skipped.'
-          [[ $R2 == true ]] || echo '::warning::The R2 or Google client secrets are missing in the release environment; the Windows build is skipped.'
+          echo "mac=$MAC" >> "$GITHUB_OUTPUT"
+          echo "windows=$GOOGLE" >> "$GITHUB_OUTPUT"
+          [[ $MAC == true ]] || echo '::warning::Release secrets are missing in the release environment (docs/RELEASING.md); the Mac build is skipped.'
+          [[ $GOOGLE == true ]] || echo '::warning::GOOGLE_OAUTH_CLIENT_JSON is missing in the release environment; the Windows build is skipped.'
 
   mac:
     name: Mac
@@ -76,6 +76,8 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 120
     environment: release
+    permissions:
+      contents: write
     env:
       VERSION: ${{ needs.identity.outputs.version }}
       BUILD: ${{ needs.identity.outputs.build }}
@@ -148,9 +150,7 @@ jobs:
           compression-level: 0
       - name: Publish to Dev
         env:
-          WORLDLET_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          GH_TOKEN: ${{ github.token }}
         run: node scripts/ci-release.mjs publish --channel dev --platform mac --dir dist/ci/mac
       - name: Remove the keychain and keys
         if: always()
@@ -165,6 +165,8 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 90
     environment: release
+    permissions:
+      contents: write
     defaults:
       run:
         shell: bash
@@ -219,7 +221,7 @@ jobs:
           set -euo pipefail
           node scripts/windows.ts installer
           mkdir -p dist/ci/windows
-          cp dist/windows-installers/Worldlet-*-windows-x64-unsigned.exe* dist/ci/windows/
+          cp dist/windows-installers/Worldlet-*-windows-x64-unsigned.exe* "$WORLDLET_RELEASE_MANIFEST" dist/ci/windows/
           ls -l dist/ci/windows
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -229,16 +231,14 @@ jobs:
           compression-level: 0
       - name: Publish to Dev
         env:
-          WORLDLET_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          GH_TOKEN: ${{ github.token }}
         run: node scripts/ci-release.mjs publish --channel dev --platform windows --dir dist/ci/windows
       - name: Remove the keys
         if: always()
         run: rm -rf "$RUNNER_TEMP/release-keys"
 
-  # Alpha or Beta: the named Dev build's exact bytes, no rebuild. Beta also records the release as a GitHub Release
-  # tagged v<label> / windows-v<label> on its source commit, once Beta is live.
+  # Alpha or Beta: the named Dev build's exact bytes, no rebuild. On live Beta its release v<label> becomes the
+  # repository's latest release.
   promote:
     name: Promote
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.channel != 'dev'
@@ -282,18 +282,7 @@ jobs:
           done
       - name: Publish
         env:
-          WORLDLET_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform mac --dir dist/ci/mac
           node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform windows --dir dist/ci/windows
-      - name: GitHub Release
-        if: inputs.channel == 'beta'
-        run: |
-          set -euo pipefail
-          node -e 'process.exit(require("./platform/electron/distribution/Channels.json").live.includes("beta")?0:1)' || { echo 'Beta is not live yet; no GitHub Release.'; exit 0; }
-          identity=$(ls dist/ci/windows/*.exe.json)
-          read -r label sha < <(node -e 'const i=require(process.argv[1]);const [y,md,b]=i.version.split(".");console.log(`${y}.${md.padStart(4,"0")}.${b}`,i.sourceCommit)' "$identity")
-          gh release create "v$label" --target "$sha" --title "Worldlet v$label" --notes "Mac Build $BUILD." dist/ci/mac/*.dmg dist/ci/mac/*.dmg.sha256
-          gh release create "windows-v$label" --target "$sha" --title "Worldlet Windows v$label" --notes "Windows Build $BUILD." dist/ci/windows/*.exe dist/ci/windows/*.exe.sha256

@@ -13,17 +13,17 @@ The channels are the in-app update channels ([update-channel.ts](../core/distrib
 | Beta | An Alpha build a maintainer promotes; the public download and the default channel | Run the workflow with `channel: beta` and the Build |
 | Production | Not open on the desktop yet | — |
 
-Promotion never rebuilds. It republishes the exact installer and its signed Sparkle item that the Dev build produced (kept as workflow artifacts for 30 days), so what was tried on Dev is byte for byte what ships.
+Promotion never rebuilds. It names the exact installer and signed Sparkle item that the Dev build produced in another channel's feed, so what was tried on Dev is byte for byte what ships.
 
-[Channels.json](../platform/electron/distribution/Channels.json) lists the channels that publish to their live feeds. A channel not listed publishes under `ci-staging/` in the release bucket, where installed apps and the download page never look. That is how CI releases run beside the release machines before they take over: Alpha and Beta are added to the list in a pull request when CI takes them over.
+Everything lives on this repository's GitHub Releases:
 
-| Channel | Installers | Mac feed | Windows manifest |
-| --- | --- | --- | --- |
-| Dev | `dev/` | `appcast-dev.xml` | `windows-dev.json` |
-| Alpha | `alpha/` | `appcast-alpha.xml` | `windows-alpha.json` |
-| Beta | bucket root | `appcast.xml`, `appcast-intel.xml` (with history) | `windows-preview.json` |
+| Release | What it holds |
+| --- | --- |
+| `v<label>` | One per Build: the Mac DMG, the Windows installer and their checksums. A prerelease until the Build reaches Beta, which makes it the latest release. |
+| `channel-dev`, `channel-alpha`, `channel-beta` | Each channel's update feeds, replaced in place so their addresses never change: `appcast-dev.xml` and `windows-dev.json`; `appcast-alpha.xml` and `windows-alpha.json`; `appcast.xml`, `appcast-intel.xml` (with history) and `windows-preview.json`. |
+| `staging-<channel>` | The same feeds for a channel that is not live yet. |
 
-Beta promotions also create the GitHub Releases `v<label>` (Mac) and `windows-v<label>` on the source commit, with the installers attached.
+[Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. While the release machines still run Alpha and Beta, CI publishes those to their staging releases, which nothing reads, so both can run side by side; a pull request adds a channel to the list when CI takes it over. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
 
 ## Build numbers
 
@@ -33,7 +33,7 @@ Build = 4000 + the commit's position on `main` (`git rev-list --count`). The off
 
 - **Mac** (`macos-15`): [ci-build.sh](../platform/electron/distribution/mac/ci-build.sh) packages one universal app signed with the Developer ID certificate, puts it in a signed DMG, notarizes the DMG with an App Store Connect API key, staples it, and writes the Sparkle item signed with the update key. Apple notarizes the app inside the DMG in the same submission, so there is one notarization wait instead of two.
 - **Windows** (`windows-2025`): `npm run installer:windows`, the unsigned NSIS installer the Windows updater already reads.
-- Both then publish to Dev with `node scripts/ci-release.mjs publish`, which uploads the installer and its checksum, then the channel's feed, and refuses to replace a channel's newer build.
+- Both then publish to Dev with `node scripts/ci-release.mjs publish`, which uploads the installer and its checksum to the Build's release, then replaces the channel's feed, and refuses to replace a channel's newer build.
 
 How long it takes: Dev cannot be ready three minutes after a push. Building the universal app with its Chromium engine takes several minutes on a hosted Mac, and Apple's notarization usually takes a few minutes more, sometimes much longer. The Build number is fixed the moment the commit lands; the job summary of each run records how long each part took.
 
@@ -50,11 +50,8 @@ Signing and publishing secrets live only in the repository's `release` environme
 | `APPLE_API_ISSUER_ID` | The key's issuer ID |
 | `SPARKLE_PRIVATE_KEY` | The Ed25519 update key whose public half is `publicKey` in [Updates.json](../platform/electron/distribution/Updates.json) (`generate_keys -x`) |
 | `GOOGLE_OAUTH_CLIENT_JSON` | The Google Desktop OAuth client registration bundled into the app |
-| `R2_ENDPOINT` | The release bucket's R2 S3 endpoint |
-| `R2_ACCESS_KEY_ID` | An R2 API token's access key, scoped to the release bucket |
-| `R2_SECRET_ACCESS_KEY` | That token's secret |
 
-Windows installers are unsigned today, so there is no Windows signing secret.
+Publishing to GitHub Releases uses the workflow's own token, so it needs no secret. Windows installers are unsigned today, so there is no Windows signing secret.
 
 ## Checks
 

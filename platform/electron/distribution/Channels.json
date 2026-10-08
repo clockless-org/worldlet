@@ -1,4 +1,4 @@
 {
- "comment": "Update channels that scripts/ci-release.mjs publishes to their live feeds. A channel not listed publishes under ci-staging/ in the release bucket, where installed apps and the download page never look (docs/RELEASING.md).",
+ "comment": "Update channels that scripts/ci-release.mjs publishes to their live feeds. A channel not listed publishes its feeds to the GitHub release staging-<channel>, which installed apps and the download page never read (docs/RELEASING.md).",
  "live": ["dev"]
 }
