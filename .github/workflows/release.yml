@@ -1,0 +1,299 @@
+name: Release
+# Desktop releases (docs/RELEASING.md). Every push to main builds a signed, numbered Mac and Windows build and
+# publishes it to the Dev channel; a manual run promotes a Dev build's exact bytes to Alpha or Beta. Nothing here runs
+# for pull requests: signing and publishing secrets live only in the protected `release` environment, which only main
+# can use. Pull request CI stays in architecture.yml (Linux only).
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'dev builds this commit; alpha or beta promotes an existing build'
+        type: choice
+        options: [dev, alpha, beta]
+        default: dev
+      build:
+        description: 'Build to promote (alpha or beta), for example 4012'
+        required: false
+permissions:
+  contents: read
+# One Dev build at a time; while one runs, only the newest push waits (GitHub replaces an older pending run).
+concurrency:
+  group: release-${{ github.event_name == 'push' && 'dev' || inputs.channel }}
+  cancel-in-progress: false
+jobs:
+  identity:
+    name: Identity
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || inputs.channel == 'dev')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.identity.outputs.version }}
+      build: ${{ steps.identity.outputs.build }}
+      label: ${{ steps.identity.outputs.label }}
+      builtAt: ${{ steps.identity.outputs.builtAt }}
+    steps:
+      # Full history without file contents: the Build is the commit's position on main.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: scripts/ci-release.mjs
+          sparse-checkout-cone-mode: false
+      - id: identity
+        run: node scripts/ci-release.mjs identity --count "$(git rev-list --count HEAD)" --committed-at "$(git log -1 --format=%cI HEAD)"
+
+  # Until the release secrets are set, the builds are skipped instead of failing every push to main.
+  ready:
+    name: Secrets
+    needs: identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: release
+    outputs:
+      mac: ${{ steps.check.outputs.mac }}
+      windows: ${{ steps.check.outputs.windows }}
+    steps:
+      - id: check
+        env:
+          MAC: ${{ secrets.MAC_CERTIFICATE_P12 != '' && secrets.MAC_CERTIFICATE_PASSWORD != '' && secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.SPARKLE_PRIVATE_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
+          R2: ${{ secrets.R2_ENDPOINT != '' && secrets.R2_ACCESS_KEY_ID != '' && secrets.R2_SECRET_ACCESS_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
+        run: |
+          echo "mac=$([[ $MAC == true && $R2 == true ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "windows=$([[ $R2 == true ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          [[ $MAC == true && $R2 == true ]] || echo '::warning::Release secrets are missing in the release environment (docs/RELEASING.md); the Mac build is skipped.'
+          [[ $R2 == true ]] || echo '::warning::The R2 or Google client secrets are missing in the release environment; the Windows build is skipped.'
+
+  mac:
+    name: Mac
+    needs: [identity, ready]
+    if: needs.ready.outputs.mac == 'true'
+    runs-on: macos-15
+    timeout-minutes: 120
+    environment: release
+    env:
+      VERSION: ${{ needs.identity.outputs.version }}
+      BUILD: ${{ needs.identity.outputs.build }}
+      BUILT_AT: ${{ needs.identity.outputs.builtAt }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+          cache: npm
+      # Chromium (CEF) archives, the browser driver, imsg, uv and the DMG tools, keyed by their pins.
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/Library/Caches/WorldletBuild
+            .local/browser-driver
+            .local/imsg
+            .local/bootstrap
+            .local/dmg-tools
+            .local/sparkle
+          key: mac-build-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'scripts/package-agent-browser.ts', 'scripts/package-imsg.ts', 'scripts/bundle-hermes-bootstrap.py', 'scripts/sparkle-tools.ts') }}
+          restore-keys: mac-build-
+      - run: npm ci
+      - name: Signing keychain and keys
+        env:
+          MAC_CERTIFICATE_P12: ${{ secrets.MAC_CERTIFICATE_P12 }}
+          MAC_CERTIFICATE_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON }}
+        run: |
+          set -euo pipefail
+          umask 077
+          KEYS="$RUNNER_TEMP/release-keys"; mkdir -p "$KEYS"
+          KEYCHAIN="$KEYS/release.keychain-db" PASSWORD="$(openssl rand -hex 24)"
+          security create-keychain -p "$PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$PASSWORD" "$KEYCHAIN"
+          printf '%s' "$MAC_CERTIFICATE_P12" | base64 --decode > "$KEYS/certificate.p12"
+          security import "$KEYS/certificate.p12" -k "$KEYCHAIN" -P "$MAC_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          rm -f "$KEYS/certificate.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)"
+          [[ -n "$IDENTITY" ]] || { echo 'MAC_CERTIFICATE_P12 holds no Developer ID Application identity.' >&2; exit 1; }
+          echo "::add-mask::$IDENTITY"
+          printf '%s' "$APPLE_API_KEY_P8" > "$KEYS/notary.p8"
+          printf '%s' "$SPARKLE_PRIVATE_KEY" > "$KEYS/sparkle.key"
+          [[ -z "$GOOGLE_OAUTH_CLIENT_JSON" ]] || printf '%s' "$GOOGLE_OAUTH_CLIENT_JSON" > "$KEYS/google-oauth-client.json"
+          node scripts/ci-release.mjs manifest --version "$VERSION" --build "$BUILD" --built-at "$BUILT_AT" --sha "$GITHUB_SHA" --out "$KEYS/release.json"
+          {
+            echo "WORLDLET_SIGN_IDENTITY=$IDENTITY"
+            echo "WORLDLET_RELEASE_MANIFEST=$KEYS/release.json"
+            echo "WORLDLET_SPARKLE_KEY_FILE=$KEYS/sparkle.key"
+            echo "NOTARY_KEY_FILE=$KEYS/notary.p8"
+            [[ -z "$GOOGLE_OAUTH_CLIENT_JSON" ]] || echo "WORLDLET_GOOGLE_CLIENT_FILE=$KEYS/google-oauth-client.json"
+          } >> "$GITHUB_ENV"
+      - name: Build, sign and notarize
+        env:
+          NOTARY_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          NOTARY_ISSUER: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: bash platform/electron/distribution/mac/ci-build.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: worldlet-mac-${{ env.BUILD }}
+          path: dist/ci/mac/
+          retention-days: 30
+          compression-level: 0
+      - name: Publish to Dev
+        env:
+          WORLDLET_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: node scripts/ci-release.mjs publish --channel dev --platform mac --dir dist/ci/mac
+      - name: Remove the keychain and keys
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/release-keys/release.keychain-db" 2>/dev/null || true
+          rm -rf "$RUNNER_TEMP/release-keys"
+
+  windows:
+    name: Windows
+    needs: [identity, ready]
+    if: needs.ready.outputs.windows == 'true'
+    runs-on: windows-2025
+    timeout-minutes: 90
+    environment: release
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.identity.outputs.version }}
+      BUILD: ${{ needs.identity.outputs.build }}
+      BUILT_AT: ${{ needs.identity.outputs.builtAt }}
+      WORLDLET_SETUP_PYTHON: python
+      WORLDLET_TARGET_PLATFORM: windows
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+          cache: npm
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/AppData/Local/WorldletBuild
+            .local/browser-driver
+            .local/bootstrap
+            .local/tools
+          key: windows-build-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'scripts/package-agent-browser.ts', 'scripts/bundle-hermes-windows.py') }}-nsis-3.12
+          restore-keys: windows-build-
+      - run: npm ci
+      # The installer needs exactly NSIS 3.12 (scripts/windows-installer.ts checks makensis /VERSION).
+      - name: NSIS 3.12
+        run: |
+          set -euo pipefail
+          if [[ ! -x .local/tools/nsis-3.12/makensis.exe ]]; then
+            mkdir -p .local/tools
+            curl -fsSL --retry 3 -o "$RUNNER_TEMP/nsis.zip" 'https://downloads.sourceforge.net/project/nsis/NSIS%203/3.12/nsis-3.12.zip'
+            unzip -q "$RUNNER_TEMP/nsis.zip" -d .local/tools
+          fi
+          .local/tools/nsis-3.12/makensis.exe /VERSION
+      - name: Release identity and keys
+        env:
+          GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON }}
+        run: |
+          set -euo pipefail
+          KEYS="$RUNNER_TEMP/release-keys"; mkdir -p "$KEYS"
+          node scripts/ci-release.mjs manifest --version "$VERSION" --build "$BUILD" --built-at "$BUILT_AT" --sha "$GITHUB_SHA" --out "$KEYS/release.json"
+          echo "WORLDLET_RELEASE_MANIFEST=$KEYS/release.json" >> "$GITHUB_ENV"
+          if [[ -n "$GOOGLE_OAUTH_CLIENT_JSON" ]]; then
+            printf '%s' "$GOOGLE_OAUTH_CLIENT_JSON" > "$KEYS/google-oauth-client.json"
+            echo "WORLDLET_GOOGLE_CLIENT_FILE=$KEYS/google-oauth-client.json" >> "$GITHUB_ENV"
+          fi
+      - name: Build the installer
+        run: |
+          set -euo pipefail
+          node scripts/windows.ts installer
+          mkdir -p dist/ci/windows
+          cp dist/windows-installers/Worldlet-*-windows-x64-unsigned.exe* dist/ci/windows/
+          ls -l dist/ci/windows
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: worldlet-windows-${{ env.BUILD }}
+          path: dist/ci/windows/
+          retention-days: 30
+          compression-level: 0
+      - name: Publish to Dev
+        env:
+          WORLDLET_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: node scripts/ci-release.mjs publish --channel dev --platform windows --dir dist/ci/windows
+      - name: Remove the keys
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/release-keys"
+
+  # Alpha or Beta: the named Dev build's exact bytes, no rebuild. Beta also records the release as a GitHub Release
+  # tagged v<label> / windows-v<label> on its source commit, once Beta is live.
+  promote:
+    name: Promote
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.channel != 'dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: release
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      CHANNEL: ${{ inputs.channel }}
+      BUILD: ${{ inputs.build }}
+    steps:
+      - name: Check the input
+        run: '[[ "$BUILD" =~ ^[0-9]{1,5}$ ]] || { echo "Name the Build to promote, for example 4012." >&2; exit 2; }'
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            /*
+            !*.png
+            !*.webp
+            !*.mp4
+            !*.m4a
+            !*.wav
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+      - run: npm ci --ignore-scripts
+      - name: Download the build
+        run: |
+          set -euo pipefail
+          for platform in mac windows; do
+            name="worldlet-$platform-$BUILD"
+            run="$(gh api "repos/$GH_REPO/actions/artifacts?name=$name&per_page=1" --jq '.artifacts[0].workflow_run.id // empty')"
+            [[ -n "$run" ]] || { echo "No $platform artifact for Build $BUILD (artifacts are kept 30 days)." >&2; exit 1; }
+            gh run download "$run" -n "$name" -D "dist/ci/$platform"
+          done
+      - name: Publish
+        env:
+          WORLDLET_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform mac --dir dist/ci/mac
+          node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform windows --dir dist/ci/windows
+      - name: GitHub Release
+        if: inputs.channel == 'beta'
+        run: |
+          set -euo pipefail
+          node -e 'process.exit(require("./platform/electron/distribution/Channels.json").live.includes("beta")?0:1)' || { echo 'Beta is not live yet; no GitHub Release.'; exit 0; }
+          identity=$(ls dist/ci/windows/*.exe.json)
+          read -r label sha < <(node -e 'const i=require(process.argv[1]);const [y,md,b]=i.version.split(".");console.log(`${y}.${md.padStart(4,"0")}.${b}`,i.sourceCommit)' "$identity")
+          gh release create "v$label" --target "$sha" --title "Worldlet v$label" --notes "Mac Build $BUILD." dist/ci/mac/*.dmg dist/ci/mac/*.dmg.sha256
+          gh release create "windows-v$label" --target "$sha" --title "Worldlet Windows v$label" --notes "Windows Build $BUILD." dist/ci/windows/*.exe dist/ci/windows/*.exe.sha256
