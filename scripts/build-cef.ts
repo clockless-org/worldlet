@@ -113,7 +113,7 @@ async function gitLfs():Promise<string|null> {
  writeFileSync(zip,Buffer.from(await response.arrayBuffer()));
  if(await sha256(zip)!==digest)throw Error('git-lfs checksum mismatch.');
  const unpacked=path.join(work,'tools','git-lfs-unpack');mkdirSync(unpacked,{recursive:true});
- run(process.platform==='win32'?'tar':'ditto',process.platform==='win32'?['-xf',zip,'-C',unpacked]:['-x','-k',zip,unpacked]);
+ run(process.platform==='win32'?path.join(process.env.SystemRoot??'C:\\Windows','System32','tar.exe'):'ditto',process.platform==='win32'?['-xf',zip,'-C',unpacked]:['-x','-k',zip,unpacked]);
  mkdirSync(directory,{recursive:true});
  copyFileSync(path.join(unpacked,`git-lfs-${GIT_LFS.version}`,path.basename(binary)),binary);
  if(process.platform!=='win32')chmodSync(binary,0o755);

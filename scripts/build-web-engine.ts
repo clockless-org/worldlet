@@ -85,7 +85,8 @@ export async function cefDistribution(key:string){
   console.log(`Downloading CEF ${version} (${platform})…`);
   await download(base+encodeURIComponent(path.basename(file)),file,partial=>sha1(partial)===archive.sha1);
  }
- run('tar',['-xjf',file,'-C',cache]);
+ // Windows' own tar: Git Bash's GNU tar, first on PATH in a bash shell, reads "C:\…" as a remote host.
+ run(process.platform==='win32'?path.join(process.env.SystemRoot??'C:\\Windows','System32','tar.exe'):'tar',['-xjf',file,'-C',cache]);
  if(!existsSync(path.join(directory,'include/cef_version.h')))throw Error('The CEF archive did not unpack as expected.');
  return directory;
 }
