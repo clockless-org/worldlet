@@ -204,7 +204,8 @@ jobs:
             curl -fsSL --retry 3 -o "$RUNNER_TEMP/nsis.zip" 'https://downloads.sourceforge.net/project/nsis/NSIS%203/3.12/nsis-3.12.zip'
             unzip -q "$RUNNER_TEMP/nsis.zip" -d .local/tools
           fi
-          .local/tools/nsis-3.12/makensis.exe /VERSION
+          # -VERSION, not /VERSION: Git Bash rewrites a leading slash into a Windows path.
+          .local/tools/nsis-3.12/makensis.exe -VERSION
       - name: Release identity and keys
         env:
           GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON }}
