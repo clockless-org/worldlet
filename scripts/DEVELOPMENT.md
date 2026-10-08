@@ -4,7 +4,7 @@ Chapters:
 - [Companion feedback](#feedback)
 
 
-Worldlet ships one desktop app built on the [Electron host](../platform/electron/README.md) for Mac, Windows and Linux; the trusted PixiJS world/HUD and website panels are separate Chromium views. The private repository is renkelvin/worldlet; the primary website is [worldlet.ai](https://worldlet.ai/). Development commands are the same on every OS; signing and publication are in [desktop distribution](../platform/electron/DISTRIBUTION.md). GitHub Actions dispatches release-check Issues; release hosts perform builds and publication.
+Worldlet ships one desktop app built on the [Electron host](../platform/electron/README.md) for Mac, Windows and Linux; the trusted PixiJS world/HUD and website panels are separate Chromium views. The source repository is [clockless-org/worldlet](https://github.com/clockless-org/worldlet); the primary website is [worldlet.ai](https://worldlet.ai/). Development commands are the same on every OS; signing and publication are in [desktop distribution](../platform/electron/DISTRIBUTION.md). GitHub Actions dispatches release-check Issues; release hosts perform builds and publication.
 
 ## Daily development
 
