@@ -1,4 +1,5 @@
 name: Release
+run-name: ${{ github.event_name == 'push' && format('Dev · {0}', github.event.head_commit.message) || format('{0} {1}', inputs.channel, inputs.build) }}
 # Desktop releases (docs/RELEASING.md). Every push to main builds a signed, numbered Mac and Windows build and
 # publishes it on this repository's GitHub Releases to the Dev channel; a manual run promotes a Dev build's exact bytes to Alpha or Beta. Nothing here runs
 # for pull requests: signing and publishing secrets live only in the protected `release` environment, which only main
