@@ -84,12 +84,12 @@ The generated inventory lists every Markdown file in the repository.
 
 <!-- documentation-inventory:start -->
 
-Indexed: **263 Markdown documents** and **39 supporting documentation files**.
+Indexed: **264 Markdown documents** and **39 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
 | Root entry points | 6 |
-| Product, architecture and operations guides | 13 |
+| Product, architecture and operations guides | 14 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 24 |
 | Resource and artwork records | 66 |
@@ -108,7 +108,7 @@ Indexed: **263 Markdown documents** and **39 supporting documentation files**.
 
 </details>
 
-<details><summary>Product, architecture and operations guides (13)</summary>
+<details><summary>Product, architecture and operations guides (14)</summary>
 
 - [docs/AGENT-PORTABILITY.md](docs/AGENT-PORTABILITY.md)
 - [docs/ANALYTICS.md](docs/ANALYTICS.md)
@@ -120,6 +120,7 @@ Indexed: **263 Markdown documents** and **39 supporting documentation files**.
 - [docs/FOX-AGENT.md](docs/FOX-AGENT.md)
 - [docs/LAUNCH-READINESS.md](docs/LAUNCH-READINESS.md)
 - [docs/RELEASE-GUIDELINES.md](docs/RELEASE-GUIDELINES.md)
+- [docs/RELEASING.md](docs/RELEASING.md)
 - [docs/UI-CORE-PLATFORM.md](docs/UI-CORE-PLATFORM.md)
 - [docs/WORLD-LAYOUT.md](docs/WORLD-LAYOUT.md)
 - [docs/WORLD-STORAGE.md](docs/WORLD-STORAGE.md)

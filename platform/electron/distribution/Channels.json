@@ -1,0 +1,4 @@
+{
+ "comment": "Update channels that scripts/ci-release.mjs publishes to their live feeds. A channel not listed publishes under ci-staging/ in the release bucket, where installed apps and the download page never look (docs/RELEASING.md).",
+ "live": ["dev"]
+}
