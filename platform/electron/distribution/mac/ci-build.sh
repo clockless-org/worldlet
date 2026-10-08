@@ -9,7 +9,7 @@
 #
 # Inputs: WORLDLET_RELEASE_MANIFEST (scripts/ci-release.mjs identity), WORLDLET_SIGN_IDENTITY, WORLDLET_SPARKLE_KEY_FILE,
 # WORLDLET_GOOGLE_CLIENT_FILE, NOTARY_KEY_FILE, NOTARY_KEY_ID, NOTARY_ISSUER. Output: dist/ci/mac/ with the DMG, its
-# checksum, appcast.xml and the notary record.
+# checksum, appcast.xml, the notary record and release.json (the identity).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"
@@ -67,6 +67,7 @@ TOOLS="$(node scripts/sparkle-tools.ts)"
 FEED="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["feedURL"])' "$HERE/../Updates.json")"
 "$TOOLS/generate_appcast" --ed-key-file "$WORLDLET_SPARKLE_KEY_FILE" --maximum-deltas 0 --download-url-prefix "${FEED%/*}/" "$OUT"
 rm -rf "$HOME/Library/Caches/Sparkle_generate_appcast"
+cp "$WORLDLET_RELEASE_MANIFEST" "$OUT/release.json"
 (cd "$OUT" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256")
 summary "Mac Build $BUILD ready in $((SECONDS-started))s"
 echo "Built $DMG"

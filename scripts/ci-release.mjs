@@ -1,31 +1,36 @@
 // Desktop releases from GitHub Actions (.github/workflows/release.yml, docs/RELEASING.md). This repository builds,
-// signs and publishes the Mac and Windows apps itself; nothing here needs a release machine.
+// signs and publishes the Mac and Windows apps itself, and keeps them on its own GitHub Releases (owner decision
+// 2026-10-08): no release machine and no separate storage.
 //
+// Where things live:
+//  v<label>          one release per Build, holding the Mac DMG, the Windows installer and their checksums. A prerelease
+//                    until the Build is promoted to Beta, which makes it the repository's latest release.
+//  channel-<name>    one release per channel (dev, alpha, beta) holding that channel's update feeds, replaced in place,
+//                    so a feed's address never changes: releases/download/channel-<name>/<feed>.
+//  staging-<name>    the same for a channel that is not live yet (platform/electron/distribution/Channels.json): CI
+//                    publishes there while the release machines still run the channel, and nothing reads it.
 // Channels are the in-app update channels (core/distribution/update-channel.ts):
-//  dev    every push to main: a signed, numbered build, published to dev/ with its own one-build feeds
-//  alpha  a Dev build promoted to Alpha: the same bytes, under alpha/ with one-build feeds
-//  beta   an Alpha (or Dev) build promoted to Beta: the download everyone gets and the release feeds, which keep history
-// Promotion never rebuilds: it republishes the exact installer and its signed Sparkle item under the channel.
-// A channel that is not live yet (platform/electron/distribution/Channels.json) publishes under ci-staging/ instead,
-// where installed apps and the download page never look, so CI releases can run beside the old release hosts.
+//  dev    every push to main; alpha  a Dev build promoted by a maintainer; beta  an Alpha build promoted, the public
+//  download, whose feeds keep history. Promotion never rebuilds: it only names the same installer in another feed.
+// The website's old /downloads/ addresses forward to these (installed apps that read them keep updating).
 //
 // Build numbers: Build = BUILD_OFFSET + the commit's position on main (git rev-list --count). The offset keeps every
-// build of this repository above the builds the release hosts published before it (up to about 3,300), so installed
+// build of this repository above the builds the release machines published before it (up to about 3,300), so installed
 // apps keep updating; the label is YYYY.MMDD.<build>, the date being the commit's day in Pacific time.
 import {createHash} from 'node:crypto';
-import {createReadStream,existsSync,readdirSync,readFileSync,statSync,writeFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {createReadStream,existsSync,mkdtempSync,readdirSync,readFileSync,rmSync,statSync,writeFileSync} from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 export const BUILD_OFFSET=4000;
-export const BUCKET='worldlet-releases';
 export const CHANNELS={
  dev:{prefix:'dev/',mac:['appcast-dev.xml'],windows:'windows-dev.json',history:false},
  alpha:{prefix:'alpha/',mac:['appcast-alpha.xml'],windows:'windows-alpha.json',history:false},
  beta:{prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',history:true},
 };
-export const STAGING='ci-staging/';
 export const macName=(version,build)=>`Worldlet-${version}-${build}-macos-universal.dmg`;
 export const windowsName=(version,build)=>`Worldlet-${version}-${build}-windows-x64-unsigned.exe`;
 
@@ -36,7 +41,12 @@ export function releaseIdentity(count,committedAt,offset=BUILD_OFFSET){
  const date=new Date(committedAt);if(!Number.isFinite(date.getTime()))throw Error('Invalid commit time');
  const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date).map(x=>[x.type,x.value]));
  const version=`${p.year}.${Number(p.month)*100+Number(p.day)}.${build}`;
- return {version,build,label:`${p.year}.${p.month}${p.day}.${build}`,builtAt:date.toISOString().replace(/\.\d{3}Z$/,'Z')};
+ return {version,build,label:labelOf(version),builtAt:date.toISOString().replace(/\.\d{3}Z$/,'Z')};
+}
+/** The public label of a native version: 2026.105.4001 → 2026.0105.4001. */
+export function labelOf(version){
+ const m=/^(\d{4})\.(\d{3,4})\.(\d+)$/.exec(version||'');if(!m)throw Error('Invalid release version '+version);
+ return `${m[1]}.${m[2].padStart(4,'0')}.${m[3]}`;
 }
 /** The manifest scripts/build-info.ts reads through WORLDLET_RELEASE_MANIFEST: the identity, bound to its commit. */
 export const releaseManifest=(identity,sourceCommit)=>({version:identity.version,build:identity.build,platformBuilds:{mac:identity.build,windows:identity.build},builtAt:identity.builtAt,sourceCommit});
@@ -46,12 +56,12 @@ export function liveChannel(channel,config=JSON.parse(readFileSync(path.join(roo
  if(!CHANNELS[channel])throw Error('Unknown channel '+channel);
  return Array.isArray(config.live)&&config.live.includes(channel);
 }
-/** The storage keys of a channel: installers under `prefix`, the feeds by name; under ci-staging/ when not live. */
+/** Where a channel's feeds go: the release `channel-<name>`, or `staging-<name>` while it is not live. */
 export function channelKeys(channel,live){
- const c=CHANNELS[channel],base=live?'':STAGING+(c.prefix||'beta/');
- const prefix=live?c.prefix:base;
- return {prefix,mac:c.mac.map(f=>(live?'':base)+f),windows:(live?'':base)+c.windows,history:c.history};
+ const c=CHANNELS[channel];
+ return {feedTag:(live?'channel-':'staging-')+channel,prefix:c.prefix,mac:c.mac,windows:c.windows,history:c.history};
 }
+export const assetURL=(repo,tag,name)=>`https://github.com/${repo}/releases/download/${tag}/${name}`;
 
 const attribute=(xml,name)=>new RegExp(`\\s${name}="([^"]*)"`).exec(xml)?.[1];
 const items=xml=>[...String(xml).matchAll(/<item\b[^>]*>[\s\S]*?<\/item>/g)].map(m=>m[0]);
@@ -82,56 +92,87 @@ export async function verifyMacItem(item,file,publicKey){
  const key=createPublicKey({key:{kty:'OKP',crv:'Ed25519',x:Buffer.from(publicKey,'base64').toString('base64url')},format:'jwk'});
  if(!verify(null,readFileSync(file),key,Buffer.from(signature,'base64')))throw Error('The Sparkle signature does not verify against the published key.');
 }
-/** The Windows update manifest for an installer under `prefix` (the updater's format, windows-release.ts). */
-export const windowsManifest=({version,build,sha256},size,prefix)=>({formatVersion:1,version,build,architecture:'x64',signed:false,url:'/downloads/'+prefix+windowsName(version,build),size,sha256,googleSignIn:true});
+/** The Windows update manifest. `url` is the website path installed updaters read (they accept only /downloads/ and
+ * /downloads/alpha/ on the website, which forwards to the release); `download` is the release asset itself. */
+export const windowsManifest=({version,build,sha256},size,prefix,download)=>({formatVersion:1,version,build,architecture:'x64',signed:false,url:'/downloads/'+prefix+windowsName(version,build),size,sha256,googleSignIn:true,download});
 
 async function sha256(file){const h=createHash('sha256');for await(const b of createReadStream(file))h.update(b);return h.digest('hex');}
-async function storage(){
- const {S3Client,GetObjectCommand,PutObjectCommand}=await import('@aws-sdk/client-s3');
- const {clientOptions,uploadFile}=await import('./r2-object-upload.mjs');
- const client=new S3Client(clientOptions());
- const read=async key=>{try{return await (await client.send(new GetObjectCommand({Bucket:BUCKET,Key:key}))).Body.transformToString();}catch(error){if(error.$metadata?.httpStatusCode===404||error.name==='NoSuchKey')return '';throw error;}};
- return {read,
-  upload:(key,file,type)=>uploadFile(client,BUCKET,key,file,type),
-  put:async(key,body,type)=>{await client.send(new PutObjectCommand({Bucket:BUCKET,Key:key,Body:body,ContentType:type,CacheControl:'no-cache'}));if(await read(key)!==body)throw Error('The stored feed differs: '+key);},
-  close:()=>client.destroy()};
+/** GitHub Releases of this repository through the gh CLI (GH_TOKEN with contents: write). */
+export function githubStore(repo=process.env.GITHUB_REPOSITORY,gh=(args,input)=>spawnSync('gh',args,{encoding:'utf8',input,maxBuffer:64*1024*1024})){
+ if(!/^[\w.-]+\/[\w.-]+$/.test(repo||''))throw Error('Set GITHUB_REPOSITORY.');
+ const run=(...args)=>{const r=gh(args);if(r.status!==0)throw Error(`gh ${args.slice(0,2).join(' ')} failed: ${(r.stderr||'').trim().slice(0,300)}`);return r.stdout;};
+ const release=tag=>{const r=gh(['api',`repos/${repo}/releases/tags/${tag}`]);if(r.status===0)return JSON.parse(r.stdout);if(/HTTP 404|Not Found/.test(r.stderr||''))return null;throw Error(`Could not read release ${tag}: ${(r.stderr||'').trim().slice(0,300)}`);};
+ const scratch=mkdtempSync(path.join(os.tmpdir(),'ci-release-'));
+ return {
+  repo,
+  ensure(tag,{title,target,prerelease=true,notes=''}){
+   if(release(tag))return;
+   const r=gh(['release','create',tag,'--repo',repo,'--title',title,'--notes',notes||title,...(target?['--target',target]:[]),...(prerelease?['--prerelease']:[]),'--latest=false']);
+   // The Mac and Windows jobs publish side by side: the other one may have just created it.
+   if(r.status!==0&&!release(tag))throw Error(`Could not create release ${tag}: ${(r.stderr||'').trim().slice(0,300)}`);
+  },
+  read(tag,name){
+   const found=release(tag)?.assets?.find(a=>a.name===name);if(!found)return '';
+   const out=path.join(scratch,'read-'+name);rmSync(out,{force:true});
+   run('release','download',tag,'--repo',repo,'--pattern',name,'--output',out);
+   return readFileSync(out,'utf8');
+  },
+  // Installers are immutable: an asset already there must be the same size (a re-run), never replaced.
+  upload(tag,file){
+   const found=release(tag)?.assets?.find(a=>a.name===path.basename(file));
+   if(found){if(found.size!==statSync(file).size)throw Error(`${tag}/${found.name} already exists with different bytes.`);return {reused:true};}
+   run('release','upload',tag,file,'--repo',repo);return {reused:false};
+  },
+  put(tag,name,body){
+   const file=path.join(scratch,name);writeFileSync(file,body);
+   run('release','upload',tag,file,'--repo',repo,'--clobber');
+   if(this.read(tag,name)!==body)throw Error(`The stored feed differs: ${tag}/${name}`);
+  },
+  promote(tag){run('release','edit',tag,'--repo',repo,'--prerelease=false','--latest');},
+  close(){rmSync(scratch,{recursive:true,force:true});},
+ };
 }
 
-/** Publishes one platform's build to a channel. `dir` holds the build job's output. Refuses to replace a channel's
- * newer build. Returns what it did. */
+/** Publishes one platform's build to a channel. `dir` holds the build job's output (with release.json, its
+ * identity). Refuses to replace a channel's newer build. Returns what it did. */
 export async function publish({channel,platform,dir,live=liveChannel(channel),store,now=new Date(),updates=JSON.parse(readFileSync(path.join(root,'platform/electron/distribution/Updates.json'),'utf8'))}){
- const keys=channelKeys(channel,live);
- const origin=new URL(updates.feedURL).origin;
- const own=store||await storage();
+ const keys=channelKeys(channel,live),own=store||githubStore();
+ const identity=JSON.parse(readFileSync(path.join(dir,'release.json'),'utf8')),label=labelOf(identity.version),tag='v'+label;
  try{
+  await own.ensure(tag,{title:`Worldlet v${label}`,target:identity.sourceCommit,notes:`Build ${identity.build} of ${identity.sourceCommit}.`});
+  await own.ensure(keys.feedTag,{title:`Worldlet ${channel} channel${live?'':' (staging)'}`,notes:`The ${channel} channel's update feeds. Installed apps read them here; the installers are in each build's release.`});
+  let result;
   if(platform==='mac'){
    const dmg=readdirOne(dir,/-macos-universal\.dmg$/),name=path.basename(dmg),appcast=readFileSync(path.join(dir,'appcast.xml'),'utf8');
-   const item=macItem(appcast,name,`${origin}/downloads/${keys.prefix}${name}`,now);
+   const item=macItem(appcast,name,assetURL(own.repo,tag,name),now);
    await verifyMacItem(item,dmg,updates.publicKey);
-   const build=itemBuild(item),current=await own.read(keys.mac[0]);
-   if(feedBuild('mac',current)>=build&&!keys.history)return {skipped:`${keys.mac[0]} already has Build ${feedBuild('mac',current)}`};
-   await own.upload(keys.prefix+name,dmg,'application/x-apple-diskimage');
-   await own.upload(keys.prefix+name+'.sha256',dmg+'.sha256','text/plain');
+   const build=itemBuild(item);if(build!==identity.build)throw Error('The DMG is not this Build.');
+   const current=feedBuild('mac',await own.read(keys.feedTag,keys.mac[0]));
+   if(current>=build&&!keys.history)return {skipped:`${keys.feedTag}/${keys.mac[0]} already has Build ${current}`};
+   await own.upload(tag,dmg);await own.upload(tag,dmg+'.sha256');
    // Feeds go last, so a feed never names an installer that is not there.
-   for(const key of keys.mac){
-    const old=keys.history?await own.read(key):'';
-    if(keys.history&&feedBuild('mac',old)>build)throw Error(`${key} already names a newer Build than ${build}.`);
-    await own.put(key,macFeed(item,`Worldlet ${channel}`,old),'application/rss+xml');
+   for(const name of keys.mac){
+    const old=keys.history?await own.read(keys.feedTag,name):'';
+    if(keys.history&&feedBuild('mac',old)>build)throw Error(`${keys.feedTag}/${name} already names a newer Build than ${build}.`);
+    await own.put(keys.feedTag,name,macFeed(item,`Worldlet ${channel}`,old));
    }
-   return {published:true,build,keys:[keys.prefix+name,...keys.mac]};
+   result={published:true,build,keys:[`${tag}/${name}`,...keys.mac.map(n=>`${keys.feedTag}/${n}`)]};
+  }else{
+   const exe=readdirOne(dir,/-windows-x64-unsigned\.exe$/),built=JSON.parse(readFileSync(exe+'.json','utf8')),name=path.basename(exe);
+   if(built.sha256!==await sha256(exe)||built.build!==identity.build)throw Error('The Windows installer differs from its identity.');
+   const manifest=windowsManifest(built,statSync(exe).size,keys.prefix,assetURL(own.repo,tag,name));
+   const {parseWindowsManifest}=await import(pathToFileURL(path.join(root,'platform/electron/src/modules/shell/windows-release.ts')).href);
+   // The shipped updater reads /downloads/ and /downloads/alpha/; every other field is checked as it would check them.
+   parseWindowsManifest(['','alpha/'].includes(keys.prefix)?manifest:{...manifest,url:'/downloads/'+name});
+   const current=feedBuild('windows',await own.read(keys.feedTag,keys.windows));
+   if(current>identity.build||current===identity.build&&!keys.history)return {skipped:`${keys.feedTag}/${keys.windows} already has Build ${current}`};
+   await own.upload(tag,exe);await own.upload(tag,exe+'.sha256');
+   await own.put(keys.feedTag,keys.windows,JSON.stringify(manifest,null,2)+'\n');
+   result={published:true,build:identity.build,keys:[`${tag}/${name}`,`${keys.feedTag}/${keys.windows}`]};
   }
-  const exe=readdirOne(dir,/-windows-x64-unsigned\.exe$/),identity=JSON.parse(readFileSync(exe+'.json','utf8'));
-  if(identity.sha256!==await sha256(exe))throw Error('The Windows installer differs from its identity.');
-  const manifest=windowsManifest(identity,statSync(exe).size,keys.prefix);
-  const {parseWindowsManifest}=await import(pathToFileURL(path.join(root,'platform/electron/src/modules/shell/windows-release.ts')).href);
-  // The shipped updater reads /downloads/ and /downloads/alpha/; every other field is checked as it would check them.
-  parseWindowsManifest(['','alpha/'].includes(keys.prefix)?manifest:{...manifest,url:'/downloads/'+path.basename(exe)});
-  const published=feedBuild('windows',await own.read(keys.windows));
-  if(published>=identity.build&&!(keys.history&&published===identity.build))return {skipped:`${keys.windows} already has Build ${published}`};
-  await own.upload(keys.prefix+path.basename(exe),exe,'application/vnd.microsoft.portable-executable');
-  await own.upload(keys.prefix+path.basename(exe)+'.sha256',exe+'.sha256','text/plain');
-  await own.put(keys.windows,JSON.stringify(manifest,null,2)+'\n','application/json');
-  return {published:true,build:identity.build,keys:[keys.prefix+path.basename(exe),keys.windows]};
+  // A Build on live Beta is the public release: no longer a prerelease, and the repository's latest.
+  if(channel==='beta'&&live)await own.promote(tag);
+  return result;
  }finally{if(!store)own.close();}
 }
 function readdirOne(dir,pattern){
@@ -161,14 +202,13 @@ async function main(){
   const channel=arg('channel'),platform=arg('platform'),dir=path.resolve(arg('dir')||'');
   if(!CHANNELS[channel]||!['mac','windows'].includes(platform)||!existsSync(dir))throw Error('Usage: ci-release.mjs publish --channel dev|alpha|beta --platform mac|windows --dir <dir>');
   const live=liveChannel(channel),result=await publish({channel,platform,dir,live});
-  const line=result.published?`Published ${platform} Build ${result.build} to ${channel}${live?'':' (staging: ci-staging/)'}: ${result.keys.join(', ')}`:`Skipped ${platform} ${channel}: ${result.skipped}`;
+  const line=result.published?`Published ${platform} Build ${result.build} to ${channel}${live?'':' (staging)'}: ${result.keys.join(', ')}`:`Skipped ${platform} ${channel}: ${result.skipped}`;
   if(process.env.GITHUB_STEP_SUMMARY)writeFileSync(process.env.GITHUB_STEP_SUMMARY,`- ${line}\n`,{flag:'a'});
   console.log(line);return;
  }
  throw Error('Usage: ci-release.mjs identity … | publish …');
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))main().catch(error=>{
- // SDK errors can carry signed request details; print only the classification.
- console.error(error.$metadata?`R2 request failed: ${error.name}, HTTP ${error.$metadata.httpStatusCode??'unknown'}.`:error.message);
+ console.error(error.message);
  process.exitCode=1;
 });
