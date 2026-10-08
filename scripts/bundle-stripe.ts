@@ -26,7 +26,7 @@ export async function bundleStripe(contents){
     const temp=await mkdtemp(path.join(tmpdir(),'worldlet-stripe-'));
     try{
       const archive=path.join(temp,'stripe.tgz');await writeFile(archive,bytes);
-      execFileSync('tar',['-xzf',archive,'-C',temp,'package/bin/stripe']);
+      execFileSync(process.platform==='win32'?path.join(process.env.SystemRoot??'C:\\Windows','System32','tar.exe'):'tar',['-xzf',archive,'-C',temp,'package/bin/stripe']);
       await copyFile(path.join(temp,'package/bin/stripe'),target);
     }finally{await rm(temp,{recursive:true,force:true});}
   }
