@@ -32,6 +32,7 @@ val signing = Properties().apply {
 val fcmDefaults = mapOf(
     "FCM_PROJECT_ID" to "worldlet",
     "FCM_APP_ID" to "1:575876440084:android:0e7edbdc33e264a9d6c701",
+    // public-safety: allow (a Firebase client key is public by design; it ships in every app)
     "FCM_API_KEY" to "AIzaSyDCs2jy6NhNKolpko3WvOk9DvdQXIdYF6Q",
     "FCM_SENDER_ID" to "575876440084",
 )

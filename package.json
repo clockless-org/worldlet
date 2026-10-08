@@ -9,12 +9,13 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "check:pr": "npm run check && npm run check:source && npm run check:contracts && node scripts/browser-surface-contract-check.ts && npm run check:docs && npm run check:style",
+    "check:pr": "npm run check && npm run check:source && npm run check:contracts && node scripts/browser-surface-contract-check.ts && npm run check:docs && npm run check:style && npm run check:public",
     "check": "npm run check:arch && npm run check:types && npm run check:syntax",
     "check:arch": "node scripts/architecture-check.ts && node scripts/component-boundary-check.ts && node scripts/platform-contract-check.ts && node scripts/fox-host-contract-check.ts && node scripts/item-host-contract-check.ts && node scripts/browser-surface-contract-check.ts && node scripts/presentation-contract-check.ts && npm run check:contracts && node scripts/execution-events-check.ts && node scripts/runtime-tasks-check.ts && node scripts/execution-journal-check.ts && node scripts/activity-check.ts && node scripts/world-history-query-check.ts && node scripts/world-history-durability-check.ts && node scripts/conversation-journal-check.ts && node scripts/parity-vectors.ts && node scripts/parity-core-usage.ts",
     "check:types": "tsc -p tsconfig.json && tsc -p platform/electron/tsconfig.json",
     "check:contracts": "node scripts/harness-contract-check.ts && node scripts/browser-driver-flow-check.ts",
     "check:docs": "node scripts/docs-check.ts",
+    "check:public": "node scripts/public-safety-check.mjs",
     "check:style": "node scripts/builtin-style-check.ts && node scripts/world-pack-check.ts",
     "check:source": "node scripts/source-layout-check.ts && node scripts/ts-specifiers.ts --check",
     "check:syntax": "python3 scripts/quick-check.py",
@@ -23,7 +24,6 @@
     "test:ui": "node scripts/test-ui.mjs",
     "test:ui:core": "node scripts/test-ui.mjs --core",
     "test:ui:quick": "node scripts/test-ui.mjs --quick",
-    "ci:time": "node scripts/ci-time.mjs",
     "test:render": "npm run build:native-ui && node scripts/celestial-art-check.ts && node scripts/landmark-night-check.ts && node scripts/night-interaction-check.ts",
     "test:world": "npm run build:native-ui && node scripts/world-filter-area-check.ts && node scripts/world-layout-check.ts && node scripts/world-plate-registration-check.ts && node scripts/world-projection-worker-check.ts && node scripts/world-history-ui-check.ts && node scripts/world-readability-check.ts && node scripts/content-store-incremental-check.ts && python3 scripts/world-storage-check.py",
     "gate": "node scripts/gate.mjs",

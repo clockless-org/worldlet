@@ -23,7 +23,7 @@ assert.deepEqual(Object.keys(HARNESS_SERVICES).filter(id=>harnessService(id,'con
 
 // Never a secret ----------------------------------------------------------------------------------------------------
 assert.equal(maskSecrets('https://user:pw@mcp.example.com/mcp?api_key=abc123&x=1'),'https://•••@mcp.example.com/mcp?api_key=•••&x=•••');
-assert.equal(maskSecrets('npx -y @modelcontextprotocol/server-filesystem /Users/kelvin/Documents'),'npx -y @modelcontextprotocol/server-filesystem /Users/kelvin/Documents','an ordinary command stays readable');
+assert.equal(maskSecrets('npx -y @modelcontextprotocol/server-filesystem /Users/alex/Documents'),'npx -y @modelcontextprotocol/server-filesystem /Users/alex/Documents','an ordinary command stays readable');
 assert.equal(maskSecrets('server --token ghp_abcdefghijklmnop1234 GITHUB_TOKEN=xyz Authorization: Bearer sk-live'),'server --token ••• GITHUB_TOKEN=••• Authorization: Bearer •••');
 assert.equal(maskSecrets('run a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8'),'run a1b2•••');
 assert.deepEqual(dotenvNames('TELEGRAM_BOT_TOKEN=123:abc\nexport DISCORD_BOT_TOKEN="x"\nEMPTY=\n# NOTE=1\nSLACK_BOT_TOKEN=""\n'),['TELEGRAM_BOT_TOKEN','DISCORD_BOT_TOKEN'],'names with a value, never the values');

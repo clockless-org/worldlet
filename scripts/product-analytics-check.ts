@@ -121,7 +121,7 @@ console.log('PASS confirmed outcomes are separate from tool success, receipt IDs
 const {exceptionReport}=await import('../core/diagnostics/index.ts');
 const thrown=new TypeError('Cannot read properties of undefined (reading secret@example.com)');
 thrown.stack=`TypeError: Cannot read properties of undefined (reading secret@example.com)
-    at WorldStore.snapshot (/Users/kelvin/Applications/Worldlet.app/Contents/Resources/app.asar/out/main.js:812:19)
+    at WorldStore.snapshot (/Users/alex/Applications/Worldlet.app/Contents/Resources/app.asar/out/main.js:812:19)
     at async Router.dispatch [as dispatch] (C:\\Users\\Alex\\AppData\\Local\\Worldlet\\resources\\app.asar\\out\\main.js:40:7)
     at worldlet://app/index.js?token=private:3:9
     at node:internal/process/task_queues:95:5`;

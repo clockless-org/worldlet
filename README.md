@@ -84,11 +84,11 @@ The generated inventory lists every Markdown file in the repository.
 
 <!-- documentation-inventory:start -->
 
-Indexed: **261 Markdown documents** and **39 supporting documentation files**.
+Indexed: **263 Markdown documents** and **39 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
-| Root entry points | 4 |
+| Root entry points | 6 |
 | Product, architecture and operations guides | 13 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 24 |
@@ -97,8 +97,10 @@ Indexed: **261 Markdown documents** and **39 supporting documentation files**.
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 39 |
 
-<details><summary>Root entry points (4)</summary>
+<details><summary>Root entry points (6)</summary>
 
+- [AGENTS.md](AGENTS.md)
+- [CLAUDE.md](CLAUDE.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [README.md](README.md)
 - [README.zh.md](README.zh.md)

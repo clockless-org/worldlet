@@ -1,0 +1,1 @@
+Read and follow [AGENTS.md](AGENTS.md) and [README.md](README.md) before starting any work. Nothing private goes into this public repository: see [Keep private information out](AGENTS.md#keep-private-information-out).
