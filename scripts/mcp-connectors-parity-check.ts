@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {MCP_POLICY,READ_SHAPED,fnmatchcase,mcpConfiguration,enabledMcpTools,mcpPayload,jsonSchemaValid,notion,notionPageId,
@@ -350,10 +352,13 @@ write('notion',[prepare()],{'notion-fetch':[J(fetched('Big','a',{truncated:true}
 write('notion',[prepare()],{'notion-fetch':[J({title:'Index',text:'<page/>'})]});
 write('notion',[prepare()],{'notion-fetch':[R({isError:true})]});
 // Saved reviews: IDs, bindings, markers, stray and oversized files, the 20-review limit.
+// The Python side writes the files to a real temporary folder. On a case-insensitive disk (macOS and Windows by
+// default) an uppercase name is the lowercase review's own file, so that stray file is written only where it is one.
+const caseSensitive=(()=>{const dir=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-case-'));try{fs.writeFileSync(path.join(dir,'a'),'');return !fs.existsSync(path.join(dir,'A'));}finally{fs.rmSync(dir,{recursive:true,force:true});}})();
 const saved=(id:string,extra:any={})=>JSON.stringify({id,operation:'create',target:P,targetTitle:'Trip',title:'Old',markdown:'- Old',binding:BINDING,priorCount:0,url:'https://www.notion.so/'+P,status:'review',createdAt:1791000000.5,tool:'notion-create-pages',args:{},fingerprint:'0',...extra});
 write('notion',[step({operation:'reviews'}),act('check',ID2),act('commit',ID2),act('check',ID3),step({operation:'reviews',binding:'notion:sam-workspace'})],{'notion-fetch':[J(before)]},
  {files:{[ID1+'.json']:saved(ID1),[ID2+'.json']:saved(ID2,{status:'review'}),[ID2+'.attempt']:'',[ID3+'.json']:saved(ID3,{binding:'notion:sam-workspace',status:'submitted',url:'https://www.notion.so/'+NEW}),
-  'notes.json':'{}','.review-x.tmp':'{}',[ID1.toUpperCase()+'.json']:saved(ID1),'.json':'{}'}});
+  'notes.json':'{}','.review-x.tmp':'{}',...caseSensitive?{[ID1.toUpperCase()+'.json']:saved(ID1)}:{},'.json':'{}'}});
 write('notion',[step({operation:'reviews'})],{},{files:{[ID1+'.json']:saved(ID1,{markdown:'x'.repeat(300_000)})}});
 write('notion',[step({operation:'reviews'})],{},{files:{[ID1+'.json']:saved(ID1,{markdown:'x'.repeat(299_000)})}});
 for(const id of ['not-a-uuid',ID1.toUpperCase(),'{'+ID1+'}','urn:uuid:'+ID1,ID1.replaceAll('-',''),'-'+'0'.repeat(31),'+'+'1'.repeat(31),'0x'+'1'.repeat(30),'z'.repeat(32),ID2,5,null,'',undefined])
