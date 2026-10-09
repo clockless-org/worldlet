@@ -53,15 +53,18 @@
 .world-startup .startup-fox{animation:none}
 .world-startup[data-failed]:not(.has-setup)>.startup-status,.world-startup[data-delayed]:not(.has-setup)>.startup-status{display:flex}
 .world-startup:not(.has-setup) .startup-progress{display:none}
-/* First-use setup is one page (owner request 2026-10-09): the brand on top, the Agents found here as cards,
-   everything else folded under More options, one big button at the bottom. Choosing brings the Agent in on
+/* First-use setup is one page (owner requests 2026-10-09): the Agents found here as cards in the upper middle,
+   everything else folded under More options, one big button in the lower middle, and the brand as a small mark at
+   the bottom centre. Choosing brings the Agent in on
    the same page: its card on the left, what comes along arriving as tiles on the right. The World it is
    about to get is painted softly behind; Fox waits for the World. */
-.world-startup.has-setup{justify-content:flex-start;gap:0;padding:clamp(20px,5vh,48px) 24px clamp(20px,4vh,40px);box-sizing:border-box;overflow:hidden}
+.world-startup.has-setup{justify-content:flex-start;gap:0;padding:clamp(24px,12vh,150px) 24px clamp(72px,13vh,140px);box-sizing:border-box;overflow:hidden}
+/* Bringing an Agent in uses the height for its tiles. */
+.world-startup.has-setup[data-setup-step="1"]{padding-top:clamp(20px,6vh,60px)}
 .world-startup.has-setup::before{content:'';position:absolute;left:0;right:0;bottom:0;height:62%;background:var(--setup-world,none) center 70%/cover no-repeat;opacity:.5;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 78%);mask-image:linear-gradient(to bottom,transparent,#000 78%);pointer-events:none}
 .has-setup>.startup-scene,.has-setup>.startup-status{display:none}
-.world-startup.has-setup>.startup-brand{position:relative;flex:none;display:flex;margin:0;--brand-wordmark-size:clamp(24px,3.4vh,30px);--brand-mark-size:clamp(36px,5.4vh,48px);gap:10px}
-.startup-setup{position:relative;flex:1;min-height:0;width:min(1040px,100%);display:flex;flex-direction:column;align-items:center;margin-top:clamp(12px,2.6vh,26px);color:var(--brand-ink);text-align:center;animation:setup-enter .4s ease both}
+.world-startup.has-setup>.startup-brand{position:absolute;left:50%;bottom:clamp(14px,3vh,28px);transform:translateX(-50%);z-index:1;display:flex;margin:0;--brand-wordmark-size:17px;--brand-mark-size:26px;gap:6px;opacity:.85}
+.startup-setup{position:relative;flex:1;min-height:0;width:min(1040px,100%);display:flex;flex-direction:column;align-items:center;color:var(--brand-ink);text-align:center;animation:setup-enter .4s ease both}
 @keyframes setup-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .setup-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .startup-setup button{font:inherit;cursor:pointer;border:0;margin:0;color:var(--brand-ink);transition:background .2s,transform .2s,opacity .2s,box-shadow .2s}
@@ -72,7 +75,7 @@
 .startup-setup .setup-error{font-size:12.5px;line-height:1.45;margin:6px auto;color:#8a3b25;max-width:560px}
 .startup-setup button.setup-link{background:none;min-height:32px;padding:4px 10px;font-size:13px;color:var(--brand-muted);text-decoration:underline;text-underline-offset:3px}
 .startup-setup button.setup-link:hover:not(:disabled){color:var(--brand-ink)}
-.setup-choose{display:flex;flex-direction:column;align-items:center;width:100%;flex:1;min-height:0}
+.setup-choose{display:flex;flex-direction:column;align-items:center;width:100%;flex:none;min-height:0}
 
 /* The Agents found here: one card each, the picked one lifted with a check. */
 .setup-agent-cards{display:flex;flex:none;justify-content:center;gap:16px;width:100%;min-height:clamp(150px,24vh,210px)}
@@ -131,7 +134,7 @@
 .setup-hermes-code strong{font:600 15px ui-monospace,monospace;letter-spacing:.08em;margin-left:4px}
 
 /* The chosen Agent on the left, what comes along on the right. */
-.setup-import{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start;width:100%;flex:1;min-height:0;text-align:left}
+.setup-import{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start;width:100%;flex:none;min-height:0;text-align:left}
 .setup-passport{display:flex;flex-direction:column;align-items:center;padding:clamp(18px,3vh,26px) 20px 20px;border-radius:24px;background:#fffffff2;box-shadow:0 14px 34px #203b301c;text-align:center;transform-origin:50% 50%}
 .setup-passport-icon{width:clamp(72px,12vh,104px);height:clamp(72px,12vh,104px);border-radius:24px;object-fit:contain}
 .setup-passport-name{margin:12px 0 0;font-size:clamp(19px,2.8vh,23px);font-weight:700;letter-spacing:-.02em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -140,7 +143,7 @@
 .setup-passport-facts .setup-agent-fact{display:grid;grid-template-columns:auto 1fr;gap:12px}
 .setup-passport-facts dt{color:var(--brand-muted)}
 .setup-passport-facts dd{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.setup-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(74px,calc((100dvh - 330px)/4),118px);grid-auto-flow:row dense;gap:10px}
+.setup-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(74px,calc((87dvh - 300px)/4),118px);grid-auto-flow:row dense;gap:10px}
 .setup-tile{position:relative;min-width:0;padding:12px 14px;border-radius:18px;background:#fffffff0;box-shadow:0 4px 14px #203b300f;overflow:hidden;box-sizing:border-box}
 .setup-tile.is-arriving{animation:setup-tile-in .42s cubic-bezier(.22,.7,.2,1) both}
 @keyframes setup-tile-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
@@ -162,23 +165,26 @@
 .setup-tile-logos img{border-radius:7px;object-fit:contain;background:#fff;box-shadow:0 1px 3px #0000001a;padding:2px;box-sizing:border-box}
 .setup-tile-chip{display:inline-flex;align-items:center;height:28px;padding:0 8px;border-radius:8px;background:var(--brand-surface);font-size:12px}
 .setup-tile-done{position:absolute;top:11px;right:11px;width:18px;height:18px;border-radius:50%;background:var(--brand-sage)}
+.setup-tile.is-empty{grid-column:span 1;grid-row:span 1;background:#ffffffa6;box-shadow:none}
+.setup-tile.is-empty .setup-tile-done{display:none}
+.setup-tile-none{margin:6px 0 0;font-size:14px;color:var(--brand-muted)}
+.setup-passport .setup-choose-again{margin-top:10px}
 .setup-tile-done::after{content:'✓';display:block;color:#fff;font:700 11px/18px sans-serif;text-align:center}
 .setup-tile-reading{display:flex;align-items:center;gap:10px;grid-column:span 2;background:#ffffff99;box-shadow:none}
 .setup-tile-spinner{width:16px;height:16px;flex:none;border:2px solid var(--brand-line);border-top-color:var(--brand-forest);border-radius:50%;animation:setup-spin .8s linear infinite}
 .setup-tile-line{margin:0;font-size:13px;color:var(--brand-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;animation:setup-tile-pulse 1.4s ease-in-out infinite}
 @keyframes setup-tile-pulse{50%{opacity:.5}}
 
-/* One big button at the bottom; Back beside it keeps its room. */
-.startup-setup .setup-footer{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;flex:none;margin-top:auto;padding-top:10px}
+/* One big button in the lower middle, narrower than the content above it. */
+.startup-setup .setup-footer{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;flex:none;margin-top:auto;padding-top:clamp(14px,3vh,28px)}
 .setup-status-slot{min-height:28px;width:100%;display:flex;align-items:flex-end;justify-content:center}
 .setup-status-slot p{margin:0 0 6px}
-.startup-setup button.setup-primary{width:min(460px,100%);min-height:clamp(50px,7.5vh,60px);padding:0 24px;border-radius:30px;background:var(--brand-forest);color:var(--brand-on-forest);font-size:clamp(16px,2.4vh,18px);font-weight:650;letter-spacing:.01em;box-shadow:0 12px 28px #315f4850}
+.startup-setup button.setup-primary{width:min(340px,100%);min-height:clamp(50px,7.5vh,60px);padding:0 24px;border-radius:30px;background:var(--brand-forest);color:var(--brand-on-forest);font-size:clamp(16px,2.4vh,18px);font-weight:650;letter-spacing:.01em;box-shadow:0 12px 28px #315f4850}
 .startup-setup button.setup-primary:hover:not(:disabled){background:var(--brand-forest-hover)}
 .startup-setup button.setup-primary:disabled{background:#7d9486;box-shadow:none}
 .startup-setup button.setup-primary.is-loading::before{content:'';display:inline-block;width:13px;height:13px;margin-right:10px;border:2px solid #ffffff50;border-top-color:currentColor;border-radius:50%;vertical-align:-2px;animation:setup-spin .8s linear infinite}
 @keyframes setup-spin{to{transform:rotate(360deg)}}
-.startup-setup .setup-back{position:absolute;left:calc(50% - min(230px,50%) - 90px);bottom:calc(clamp(50px,7.5vh,60px)/2 - 16px)}
-@media(max-width:720px){.startup-setup .setup-back{position:static}.setup-import{grid-template-columns:1fr}.setup-more{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.setup-import{grid-template-columns:1fr}.setup-more{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.startup-setup,.setup-tile.is-arriving{animation:none}.setup-tile-spinner,.setup-tile-line,.startup-setup button.setup-primary.is-loading::before{animation:none}.setup-more-chevron::before{transition:none}}
 
 /* Entering: the chosen apps gather and become their devices while the page fades. */

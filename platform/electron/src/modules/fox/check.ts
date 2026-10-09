@@ -137,6 +137,15 @@ try{
  preferences.remove('worldlet.sampleEnabled');
  pass('adopt: never into the practice world');
 
+ // An Agent Fox talks through (connected at setup) keeps its own memory: only its name comes in, and nothing fails
+ // for want of Fox's own Harness memory (owner report 2026-10-09).
+ const replaceMemories=agent.replaceCompanionMemories;delete agent.replaceCompanionMemories;
+ assert.deepEqual(companion.adoptMemory({name:'Elon North',soul:'',user:'',longTerm:'',source:'Hermes Agent on this computer'}),{name:'Elon North',memories:[]});
+ assert.throws(()=>companion.adoptMemory({name:null,user:'Kelvin prefers Chinese.',longTerm:'',source:'x'}),/cannot take another Agent/);
+ agent.replaceCompanionMemories=replaceMemories;
+ companion.adoptMemory({name:'Nova',user:'',longTerm:'',source:'x'});
+ pass('adopt: an Agent Fox talks through brings its name only');
+
  // Memory edits and an imported companion are saved in the database, together with the Harness's copy.
  const before=companion.memoryManager({operation:'read'});
  companion.memoryManager({operation:'save',kind:'user',text:'Prefers green tea.',revision:before.revision});

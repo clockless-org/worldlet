@@ -60,6 +60,8 @@ const copy:Record<string,string[]>={
  'Choose an HTML bookmark export from your browser.':['请选择浏览器导出的 HTML 收藏夹文件。','ブラウザから書き出した HTML を選んでください。','Elige un archivo HTML de marcadores exportado.'],
  'Welcome to your personal AI world':['欢迎来到你的专属 AI 世界','あなたの AI の世界へようこそ','Bienvenido a tu mundo de IA'],
  'Bring your apps into your World':['把常用应用带进你的世界','いつものアプリをあなたの世界へ','Trae tus apps a tu mundo'],
+ 'Choose again':['重新选择','選び直す','Elegir de nuevo'],
+ 'None':['没有','なし','Ninguno'],
  'Enter your world':['进入你的世界','あなたの世界へ','Entra en tu mundo'],
  'Back to your world':['回到你的世界','あなたの世界へ戻る','Vuelve a tu mundo'],
  'Fox now runs on your own agent. What Fox has learned comes along.':['Fox 现在运行在你自己的 Agent 上，它学到的东西会一起带过去。','Fox はこれからあなた自身のエージェントで動きます。Fox が覚えたことも一緒に移ります。','Fox ahora funciona con tu propio agente. Lo que Fox ha aprendido viene con él.'],

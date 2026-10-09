@@ -49,8 +49,13 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1);
    assert.equal(await page.locator('.setup-steps,.setup-languages,.setup-progress,.setup-skip,.setup-gallery').count(),0,'No step bars and no app gallery');
    assert.equal(await page.locator('.startup-scene').isVisible(),false,'Fox waits for the World');
-   const [brandBox,chooseBox]=await Promise.all([page.locator('.startup-brand').boundingBox(),page.locator('.setup-choose').boundingBox()]);
-   assert.ok(brandBox.y+brandBox.height<=chooseBox.y,'The brand signs the top of the page: '+JSON.stringify({brandBox,chooseBox}));
+   // The choices sit in the upper middle, the big button in the lower middle, and the brand is a small mark at the
+   // bottom centre (owner request 2026-10-09).
+   const [brandBox,chooseBox,nextBox]=await Promise.all([page.locator('.startup-brand').boundingBox(),page.locator('.setup-choose').boundingBox(),page.locator('.setup-next').boundingBox()]);
+   const viewport=page.viewportSize()!;
+   assert.ok(nextBox.y+nextBox.height<=brandBox.y&&brandBox.y+brandBox.height<=viewport.height&&Math.abs(brandBox.x+brandBox.width/2-viewport.width/2)<=2,'The brand marks the bottom centre: '+JSON.stringify({brandBox,nextBox}));
+   assert.ok(chooseBox.y>viewport.height*.12,'The choices are not pushed to the top: '+JSON.stringify(chooseBox));
+   assert.ok(nextBox.width<=360,'The big button is narrower: '+nextBox.width);
    assert.equal(await page.locator('.startup-brand .startup-version').count(),0,'The page shows no version (owner feedback 2026-10-03)');
    assert.equal(await page.getByRole('link').count(),0,'No links on the page');
    assert.equal(await page.locator('[data-kind=region-add]:visible').count(),0,'No area add controls during onboarding');
@@ -58,7 +63,7 @@ await withBrowser(fileAccess,async browser=>{
    await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
    assert.equal(await page.locator('.setup-agent-card.is-install strong').textContent(),'Hermes Agent');
    assert.equal(await page.getByRole('button',{name:'Give Hermes a world',exact:true}).isEnabled(),true);
-   assert.equal(await page.locator('.setup-back').isVisible(),false,'The first half has nothing to go back to');
+   assert.equal(await page.locator('.setup-choose-again').count(),0,'The first half has nothing to choose again');
    const frame=async()=>{const next=await page.locator('.setup-next').boundingBox();return [next.x,next.y,next.width,next.height].map(Math.round);};
    // The page settles in first (its short entrance), then the big button keeps its place.
    await page.locator('.startup-setup').evaluate(e=>Promise.all(e.getAnimations().map(a=>a.finished)));
@@ -115,7 +120,7 @@ await withBrowser(fileAccess,async browser=>{
    const shelf=await page.locator('.setup-tile-apps .setup-app').evaluateAll((list:HTMLElement[])=>list.map(e=>e.dataset.appletId));
    if(platform==='macos')assert.equal(shelf[0],'app-notion','Apps found here come first: '+shelf.join(' '));
    assert.ok(shelf.length>=8&&!shelf.includes('app-game-2048'),'Starters show, games arrive unshown: '+shelf.join(' '));
-   assert.equal(await page.locator('.setup-back').isVisible(),false,'Google has nothing to go back to');
+   assert.equal(await page.locator('.setup-choose-again').count(),0,'Google has nothing to choose again');
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-world-'+platform+'.png')});
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='google_connect_failed')),'Saved native connections recover even when the original bridge reply fails');
    assert.equal(await page.getByRole('alert').count(),0,'Recovered authorization does not show a stale sign-in error');
@@ -272,7 +277,8 @@ await withBrowser(fileAccess,async browser=>{
   const bringFrame=await page.locator('.setup-next').boundingBox();
   assert.ok(['x','y','width','height'].every(k=>Math.abs(bringFrame[k]-firstFrame[k])<=1.5),'The big button stays put: '+JSON.stringify({firstFrame,bringFrame}));
   assert.equal(await page.locator('.setup-next').textContent(),'Enter your world');
-  assert.equal(await page.locator('.setup-back').isVisible(),true,'Bringing an Agent in can go back');
+  assert.equal(await page.locator('.setup-passport .setup-choose-again').isVisible(),true,'The chosen Agent\'s card can choose again (owner request 2026-10-09: no Back button)');
+  assert.equal(await page.getByRole('button',{name:'Back',exact:true}).count(),0,'No Back button');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-bring-'+platform+'.png')});
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
@@ -290,8 +296,8 @@ await withBrowser(fileAccess,async browser=>{
   await page.reload();
   await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='localAgent').length),0,'nothing is brought twice');
-  // Back to the first half and the same Agent again shows what came over without reading it again (owner request 2026-10-06).
-  await page.getByRole('button',{name:'Back',exact:true}).click();
+  // Choose again returns to the first half, and the same Agent again shows what came over without reading it again (owner request 2026-10-06).
+  await page.getByRole('button',{name:'Choose again',exact:true}).click();
   await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   await page.waitForFunction(()=>!(document.querySelector('[data-agent="openclaw"]') as HTMLButtonElement)?.disabled);
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
@@ -554,5 +560,5 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS: one-page setup: the brand on top, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
+ console.log('PASS: one-page setup: the brand as a small mark at the bottom, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
 });
