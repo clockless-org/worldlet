@@ -12,6 +12,10 @@ assert.deepEqual(outcome({job:'failure',results:{results:[{command:'test:ui',ok:
 assert.deepEqual(outcome({job:'failure',results:null}),{state:'fail',failing:[],signature:'setup'},'a job that never reached the gate is a setup failure');
 assert.equal(outcome({job:'cancelled'}).state,'none','a superseded run reports nothing');
 assert.deepEqual(outcome({job:'failure',results:{results:[{command:'test:ui',ok:false},{command:'test:ui',ok:false}]}}).failing,['test:ui'],'two failing test:ui shares are one failing gate');
+const withError=outcome({job:'failure',results:{results:[{command:'test:onboarding',ok:false,error:'FAIL onboarding flow: missing the `Hermes` runtime\nmore'},{command:'test',ok:true,error:'ignored'}]}});
+assert.deepEqual(withError.errors,{'test:onboarding':"FAIL onboarding flow: missing the 'Hermes' runtime"},'a release machine\'s first error line per failed gate, without backticks');
+assert.equal(withError.signature,'test:onboarding','the error line never changes the signature');
+assert.match(issueBody({stage:'alpha',platform:'mac',...withError,sha:'abc',runURL:'r'}),/- `npm run test:onboarding`: FAIL onboarding flow: missing the 'Hermes' runtime\n/);
 
 // A machine may run a platform's gate in parts; the report joins one platform's parts and leaves the other's.
 {
