@@ -24,10 +24,13 @@ on:
         required: false
 permissions:
   contents: read
-# One Dev build at a time; while one runs, only the newest push waits (GitHub replaces an older pending run).
+# Dev packages only the newest commit (owner decision 2026-10-09): a newer push to main cancels the run of an older one,
+# Dev tests and builds included, since Alpha only ever tests the newest Dev build. Publishing uploads installers before
+# feeds, so a cancelled run never leaves a feed naming a missing installer; at worst its Build is left without a Dev feed
+# entry, and the newer run publishes its own. Promotions (alpha, beta) are never cancelled: each runs to the end in turn.
 concurrency:
   group: release-${{ github.event_name == 'push' && 'dev' || inputs.channel }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 jobs:
   identity:
     name: Identity

@@ -124,6 +124,7 @@ assert.deepEqual(devTests([job('Static checks','completed','failure'),job('Fast 
 
 // The workflow: never on pull requests, secrets only in jobs of the protected `release` environment on main.
 const workflow=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');
+assert(/cancel-in-progress: \$\{\{ github\.event_name == 'push' \}\}/.test(workflow),'a newer push cancels an older Dev run; promotions are never cancelled');
 assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow),'release.yml never runs for pull requests');
 const jobs=workflow.split(/\n  (?=[a-z][\w-]*:\n)/).slice(1);
 for(const job of jobs){
