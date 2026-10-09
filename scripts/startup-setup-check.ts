@@ -477,6 +477,41 @@ await withBrowser(fileAccess,async browser=>{
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-no-agent-'+platform+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
+ // Moving off Fox's own Hermes (ui/onboarding/README.md#moving-off-foxs-own-hermes-2026-10-09): a finished World whose Fox
+ // still runs on it gets the first page once; Google does not stand in for an Agent, an Agent it only copied from is not
+ // taken as chosen, the pick answers for Fox itself, nothing about apps or onboarding is redone, and Back to your world
+ // opens the World as it was.
+ {
+  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
+  await page.addInitScript(({platform})=>{
+   const w=window as any;w.calls=[];
+   w.fixture={platform,workspaceId:'setup-move-test',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:true,onboarding:{version:1,presets:['home'],completed:true,unlockedApplets:['app-gmail']},agentNeeded:true,connections:['gmail','google-calendar'].map(provider=>({provider,status:'connected',enabled:true})),sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
+   w.webkit={messageHandlers:{worldlet:{async postMessage(b){
+    w.calls.push(b);
+    if(b.action==='snapshot')return structuredClone(w.fixture);
+    if(b.action==='installedApplets')return {keys:[]};
+    if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,memory:{name:'Nova',user:true,longTerm:true,model:true}}],recommended:'openclaw',selected:'openclaw'};
+    if(b.action==='agentHarness'&&b.operation==='select'){w.fixture.agentNeeded=false;return {ok:true,id:b.id,title:'OpenClaw',connected:true};}
+    if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Nova',memories:[],model:{ok:false},summary:{},history:{conversations:0,notes:0,skills:0,routines:0,list:[]}};
+    if(b.action==='agentIntegrations')return {integrations:[]};
+    if(b.action==='foxEnergy')return {source:'own'};
+    if(b.action==='foxPreferences')return {companionStyle:'',model:{ready:true}};
+    if(b.action==='appContent')return {pages:[]};return {ok:true};
+   }}}};
+   if(platform==='windows')w.worldletHost={version:1,platform:'windows',request:w.webkit.messageHandlers.worldlet.postMessage};
+  },{platform});
+  await page.goto(worldUrl());
+  await page.getByText('Fox now runs on your own agent. What Fox has learned comes along.',{exact:true}).waitFor();
+  await page.locator('[data-agent="openclaw"]').waitFor();
+  await page.getByRole('button',{name:'Give Nova a world',exact:true}).click();
+  await page.getByRole('heading',{name:/^Nova moved in$/}).waitFor();
+  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>[c.id,c.direct])),[['openclaw',true]],'the pick answers for Fox itself');
+  assert.equal(await page.locator('.setup-tile-apps').count(),0,'no apps to choose again');
+  await page.getByRole('button',{name:'Back to your world',exact:true}).click();
+  await page.waitForFunction(()=>!document.querySelector('.startup-setup')&&!document.getElementById('worldStartup'));
+  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.operation==='setup')),false,'onboarding setup is not redone');
+  assert.deepEqual(errors,[]);await page.close();
+ }
  // My Agent is on another computer (core/phone/README.md#another-computers-agent): the code from Worldlet there pairs
  // this one with it, and setup goes on to the second half; a refused code says why and the code box stays.
  {
@@ -519,5 +554,5 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS: one-page setup: the brand on top, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, Agent on another computer, no scrolling at desktop sizes');
+ console.log('PASS: one-page setup: the brand on top, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
 });

@@ -12,6 +12,7 @@ import {attachedHermes,bindHermes,discoverOtherHermes,isOwnHermes,standardHermes
 import {keepHermesResident,type HermesRuntime} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {endSetup} from './installation.ts';
+import {moveFoxProfile} from './fox-move.ts';
 import {endHermesInstall,installHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {ExternalAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
 import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
@@ -51,7 +52,7 @@ export function selectAdapter(context:RuntimeContext,configuration=process.env.W
   if(gateway?.active)return new RemoteGatewayAdapter(gateway,()=>new HermesAdapter(context));
   const local=selectedInstall(context.root);
   // A Hermes Agent chosen before its profile became the World's Harness is attached on the next launch.
-  if(local?.id==='hermes')try{attachChosenHermes(context.root,local.id);}catch{}
+  if(local?.id==='hermes')try{attachChosenHermes(context.root,local.id,error=>context.failure(error,'foxMove'));}catch{}
   if(local)return new LocalHarnessAdapter(context,local,undefined,()=>new HermesAdapter(context));
   return new HermesAdapter(context);
  }catch(error){return new UnavailableAgentAdapter(context,error instanceof Error?error:new WorldletError(String(error)));}
@@ -163,7 +164,7 @@ export function forgetSetupChoice(root:string){writeSelection(root,null);writeAd
 /** The person's own Hermes Agent is the World's Harness (owner decision 2026-10-07): the World's account
  * connections, background checks, Applet tasks and routines run on its profile, so whatever it is connected to
  * keeps working in the World and a new connection is made in that profile. Any other choice ends the attachment. */
-export function attachChosenHermes(root:string,id:string){
+export function attachChosenHermes(root:string,id:string,failure:(error:unknown)=>void=()=>{}){
  // Fox's own profile, reached through the standard location (standardHermes), is not another Agent to attach.
  const profile=id==='hermes'?discoverOtherHermes(root):null;
  if(!profile){unbindHermes(root);return;}
@@ -176,6 +177,8 @@ export function attachChosenHermes(root:string,id:string){
   try{if(fs.existsSync(from)&&!fs.existsSync(to)){fs.copyFileSync(from,to,fs.constants.COPYFILE_EXCL);fs.chmodSync(to,0o600);}}catch{}
  }
  bindHermes(root,profile);
+ // Someone who used Fox's own Hermes profile brings what it learned (fox-move.ts), once.
+ try{moveFoxProfile(root,own,profile);}catch(error){failure(error);}
 }
 
 /** Only the library the installed app opens by default sets up this computer's Hermes Agent: never a development
@@ -183,6 +186,14 @@ export function attachChosenHermes(root:string,id:string){
 export function setsUpThisComputer(context:RuntimeContext):boolean {
  const profile=context.profile;
  return profile.channel==='release'&&!profile.rcCheck&&!profile.smoke&&process.env.WORLDLET_AGENT_CONFIG===undefined&&path.resolve(context.root)===path.resolve(installationRoot(profile));
+}
+
+/** Someone who used Fox's own Hermes (no Agent chosen, none elsewhere) chooses an Agent once (owner decisions 2026-10-09:
+ * no built-in Hermes; no Agent → stock Hermes Agent, with what Fox's profile learned moved into it, fox-move.ts). Only in
+ * the library this app opens by default, never a release check's, a smoke run's or a configured Agent's. */
+export function foxNeedsAgent(context:RuntimeContext,adapter:Adapter):boolean {
+ const profile=context.profile;
+ return adapter instanceof HermesAdapter&&!profile.rcCheck&&!profile.smoke&&process.env.WORLDLET_AGENT_CONFIG===undefined&&path.resolve(context.root)===path.resolve(installationRoot(profile));
 }
 
 /** Fox's own Hermes profile becomes the person's standard Hermes Agent (`standardHermes`) while Fox runs on it:
@@ -329,7 +340,8 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // Hermes Agent, OpenClaw and pi are the person's own Agents: Fox talks through them directly, with World tools,
    // and only the World's background work stays on the built-in Agent (owner decision 2026-10-07).
    const connect=localHarness(install.id).connect;
-   if(!connect&&isAdoptable(install.id)&&(own||readLocalAgentMemory(install.id)?.model)){
+   // `direct`: Fox talks through it, never Fox's own Hermes (moving off it, foxNeedsAgent).
+   if(request.direct!==true&&!connect&&isAdoptable(install.id)&&(own||readLocalAgentMemory(install.id)?.model)){
     // Its CLI is not run. Its own model settings stay with it; Fox pays with the Codex sign-in here when there is one.
     writeSelection(context.root,null);writeAdopted(context.root,install.id);writeModelSource(context.root,own?'local-codex':null);unbindHermes(context.root);
     await switchTo(builtIn());
@@ -352,7 +364,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    try{await probe.run({action:'chat',text:'Reply with the single word: ready',_background:true},adapter.home('setup'));}
    catch(error){throw new WorldletError((error as Error)?.name==='AbortError'?`${install.title} did not answer in time. Check that it is signed in, then try again.`:(error as Error)?.message||`${install.title} did not answer.`);}
    finally{clearTimeout(timer);}
-   writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id);
+   writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id,error=>context.failure(error,'foxMove'));
    // Background work runs on the built-in Agent with this computer's Codex sign-in when there is one.
    writeModelSource(context.root,own?'local-codex':null);
    await switchTo(adapter);
@@ -407,6 +419,8 @@ export function installAgentRuntime(host:Host){
   await switchTo(builtIn());
  };
  host.provide<AgentService>(AGENT,service);
+ const extras=host.store.snapshotExtras;
+ host.store.snapshotExtras=()=>({...extras(),agentNeeded:foxNeedsAgent(context,adapter)});
  // `--connect=<id>` from an install script, at launch or on a second launch while running (main.ts brings the window
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);

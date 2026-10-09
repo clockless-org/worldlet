@@ -283,7 +283,7 @@ export function readCodex(home=os.homedir(),environment=process.env,ownFolders:s
 // Hermes Agent ---------------------------------------------------------------------------------
 
 /** Skills Hermes Agent ships itself (listed in `.bundled_manifest`); Fox's own Hermes has them. */
-function bundledSkills(root:string):Set<string> {
+export function bundledSkills(root:string):Set<string> {
  return new Set(readFile(root,path.join(root,'skills','.bundled_manifest')).split('\n').map(line=>line.split(':')[0].trim()).filter(Boolean));
 }
 export function hermesJobs(root:string):unknown[] {
