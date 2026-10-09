@@ -3,11 +3,25 @@
 // one mailbox, and must answer identically: Markdown text, pictures, excerpts, pages, discovery, call order and errors.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {GoogleRestError,MailText,compactMessage,contentImage,discover,htmlUnescape,jsonSize,readPage,tidyMail,type GoogleRest} from '../core/accounts/index.ts';
 import {HTML5_ENTITIES} from '../core/accounts/google/html-entities.ts';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
+/** The port reads mail as current CPython does. Python's HTMLParser changed in patch releases (2025: HTML5 comments
+ * such as `<!-->` and references without `;` in attribute values), so an older one (Ubuntu 24.04's 3.12.3) answers
+ * differently: compare with the first Python here that has those changes, from PATH or the CI runner's tool cache. */
+function referencePython(){
+ const probe='from html.parser import HTMLParser as P\nclass H(P):\n def __init__(s):super().__init__();s.out=[]\n def handle_data(s,d):s.out.append(d)\n def handle_starttag(s,t,a):s.out.extend(v or "" for _,v in a)\nh=H();h.feed(\'C<!-->D<!--->E<a href="?a&copy=1">\');h.close();print("|".join(h.out))';
+ const cache='/opt/hostedtoolcache/Python';
+ const cached=fs.existsSync(cache)?fs.readdirSync(cache).filter(v=>/^3\.\d+\.\d+$/.test(v)).sort((a,b)=>b.localeCompare(a,undefined,{numeric:true})).map(v=>path.join(cache,v,'x64','bin','python3')):[];
+ for(const candidate of ['python3','python3.14','python3.13',...cached]){
+  try{if(execFileSync(candidate,['-I','-c',probe],{encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim()==='C|D|E|?a&copy=1')return candidate;}catch{}
+ }
+ throw new Error('Gmail reader parity needs a Python whose html.parser has the 2025 HTML5 changes (3.13.6 or newer, or a patched 3.12).');
+}
 const b64=(text:string|Uint8Array)=>Buffer.from(text).toString('base64url');
 
 // Real-world shapes, fictional content.
@@ -272,7 +286,7 @@ sys.stdout.write(json.dumps(out))
 `;
 const email='alex@example.com';
 const input={mailbox,email,html,compact,tidy,unescape:unescapes,images,pages:PAGES,discover:DISCOVER};
-const python=JSON.parse(execFileSync('python3',['-I','-c',PYTHON,root],{input:JSON.stringify(input),maxBuffer:1<<30,encoding:'utf8'}));
+const python=JSON.parse(execFileSync(referencePython(),['-I','-c',PYTHON,root],{input:JSON.stringify(input),maxBuffer:1<<30,encoding:'utf8'}));
 
 const attempt=async(run:()=>any)=>{try{return await run();}catch(error){return {error:error.message};}};
 const plain=(value:unknown)=>value===undefined?undefined:JSON.parse(JSON.stringify(value));
