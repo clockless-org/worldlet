@@ -108,8 +108,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await preview.locator('.attention-preview-action').allTextContents(),['Done','Dismiss','Later'],'A task is marked done from its card');
  await page.screenshot({path:evidence+'/attention-preview-task.png'});
  // Clearing from the card advances to the next row still in the Center.
- const order=await page.locator('.world-matter').evaluateAll(n=>n.map(e=>(e as HTMLElement).dataset.worldItemId));
- const after=(id:string)=>{const rest=order.filter(x=>x!==id),i=order.indexOf(id);return [...order.slice(i+1),...order.slice(0,i)].find(x=>rest.includes(x));};
+ // Row order follows the work/personal focus of the clock, so the expected next row skips every row already cleared.
+ const order=await page.locator('.world-matter').evaluateAll(n=>n.map(e=>(e as HTMLElement).dataset.worldItemId)),cleared=new Set<string>();
+ const after=(id:string)=>{cleared.add(id);const i=order.indexOf(id);return [...order.slice(i+1),...order.slice(0,i)].find(x=>!cleared.has(x));};
  await preview.getByRole('button',{name:'Done',exact:true}).click();
  await row('Optional tennis').waitFor({state:'detached'});
  await preview.getByRole('heading',{name:after('Optional tennis'),exact:true}).waitFor();
@@ -119,7 +120,7 @@ await withBrowser(fileAccess,async browser=>{
  await preview.getByRole('button',{name:'Later',exact:true}).click();
  assert.equal(await preview.getByRole('button',{name:'In 1 hour',exact:true}).count(),0);
  await row('Confirmed meeting').waitFor({state:'detached'});
- await preview.getByRole('heading',{name:after('Confirmed meeting')==='Optional tennis'?'Refund arrived':after('Confirmed meeting'),exact:true}).waitFor();
+ await preview.getByRole('heading',{name:after('Confirmed meeting'),exact:true}).waitFor();
  assert.ok(await page.evaluate(()=>(window as any).calls.some(b=>b.action==='worldItemStatus'&&b.snoozedUntil&&b.status==='open')));
  const savedUntil=await page.evaluate(()=>(window as any).fixture.worldItems.find(i=>i.id==='Confirmed meeting').snoozedUntil);
  const expectedUntil=new Date(deferredAt);expectedUntil.setDate(expectedUntil.getDate()+1);
