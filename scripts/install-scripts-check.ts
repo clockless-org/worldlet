@@ -29,5 +29,6 @@ assert.match(sh,/--args "--connect=\$AGENT"/);
 assert.match(ps,/"--connect=\$Agent"/);
 assert.match(sh,/\/downloads\/appcast\.xml/);
 assert.match(ps,/\/downloads\/windows-preview\.json/);
+assert.match(sh,/target="\$\{WORLDLET_INSTALL_DIR:-\/Applications\}"/,'Mac installs into WORLDLET_INSTALL_DIR when set (release machines\' Beta install check)');
 assert.ok(!/sudo/.test(sh),'never asks for an administrator password');
 console.log('PASS one-line installers: syntax, Agent ids, checksum and signature before install, --connect hand-off');

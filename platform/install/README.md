@@ -17,4 +17,4 @@ What they do:
 3. Install it: Mac copies `Worldlet.app` into `/Applications` (or `~/Applications` when that is not writable); Windows runs the per-user installer silently (`/S`, `%LOCALAPPDATA%\Programs\Worldlet`). A running Worldlet is quit first.
 4. Open Worldlet. With `--agent` / `-Agent` (`openclaw`, `hermes`, `pi`, `claude-code`, `codex`) the app starts with `--connect=<id>`, so first-run setup connects that Agent without asking which one.
 
-`WORLDLET_SITE` points them at another origin for testing. Linux is not supported yet; the scripts say so and stop. `node scripts/install-scripts-check.ts` checks them.
+`WORLDLET_SITE` points them at another origin for testing, and on Mac `WORLDLET_INSTALL_DIR` installs into another folder. The release machines use both in Beta: each night they run the one-line installer against a loopback copy of the site that offers that night's candidate build, into a temporary folder on a set-aside library on Mac and a separate profile on Windows. Linux is not supported yet; the scripts say so and stop. `node scripts/install-scripts-check.ts` checks them.
