@@ -49,12 +49,12 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1);
    assert.equal(await page.locator('.setup-steps,.setup-languages,.setup-progress,.setup-skip,.setup-gallery').count(),0,'No step bars and no app gallery');
    assert.equal(await page.locator('.startup-scene').isVisible(),false,'Fox waits for the World');
-   // The choices sit in the upper middle, the big button in the lower middle, and the brand is a small mark at the
-   // bottom centre (owner request 2026-10-09).
+   // The brand sits large on top, and the choices with the big button below them sit in the middle (owner requests
+   // 2026-10-09).
    const [brandBox,chooseBox,nextBox]=await Promise.all([page.locator('.startup-brand').boundingBox(),page.locator('.setup-choose').boundingBox(),page.locator('.setup-next').boundingBox()]);
    const viewport=page.viewportSize()!;
-   assert.ok(nextBox.y+nextBox.height<=brandBox.y&&brandBox.y+brandBox.height<=viewport.height&&Math.abs(brandBox.x+brandBox.width/2-viewport.width/2)<=2,'The brand marks the bottom centre: '+JSON.stringify({brandBox,nextBox}));
-   assert.ok(chooseBox.y>viewport.height*.12,'The choices are not pushed to the top: '+JSON.stringify(chooseBox));
+   assert.ok(brandBox.y+brandBox.height<=chooseBox.y&&brandBox.height>=40&&Math.abs(brandBox.x+brandBox.width/2-viewport.width/2)<=2,'The brand is large on top: '+JSON.stringify({brandBox,chooseBox}));
+   assert.ok(Math.abs((chooseBox.y+nextBox.y+nextBox.height)/2-viewport.height/2)<=viewport.height*.08,'The choices and the big button sit in the middle: '+JSON.stringify({chooseBox,nextBox}));
    assert.ok(nextBox.width<=360,'The big button is narrower: '+nextBox.width);
    assert.equal(await page.locator('.startup-brand .startup-version').count(),0,'The page shows no version (owner feedback 2026-10-03)');
    assert.equal(await page.getByRole('link').count(),0,'No links on the page');
@@ -64,8 +64,9 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.locator('.setup-agent-card.is-install strong').textContent(),'Hermes Agent');
    assert.equal(await page.getByRole('button',{name:'Give Hermes a world',exact:true}).isEnabled(),true);
    assert.equal(await page.locator('.setup-choose-again').count(),0,'The first half has nothing to choose again');
-   const frame=async()=>{const next=await page.locator('.setup-next').boundingBox();return [next.x,next.y,next.width,next.height].map(Math.round);};
-   // The page settles in first (its short entrance), then the big button keeps its place.
+   // The main part is centred, so it may slide as it grows; the big button keeps its size and its column.
+   const frame=async()=>{const next=await page.locator('.setup-next').boundingBox();return [next.x,next.width,next.height].map(Math.round);};
+   // The page settles in first (its short entrance), then the big button keeps its shape.
    await page.locator('.startup-setup').evaluate(e=>Promise.all(e.getAnimations().map(a=>a.finished)));
    const firstFrame=await frame();
    // More options holds the rest, folded: Agents not on this computer greyed, Google and ChatGPT coming soon (owner request 2026-10-09).
@@ -76,12 +77,12 @@ await withBrowser(fileAccess,async browser=>{
    assert.deepEqual(await page.locator('.setup-more .setup-agent-button.is-missing').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['OpenClaw','pi','Claude Code'],'Hermes Agent is the card, the rest wait in More options');
    assert.deepEqual(await page.locator('.setup-more :is(.setup-google-button,.setup-chatgpt-button)').allTextContents(),['Continue with GoogleComing soon','Continue with ChatGPTComing soon']);
    assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is greyed for everyone');
-   assert.deepEqual(await frame(),firstFrame,'Opening More options does not move the big button');
+   assert.deepEqual(await frame(),firstFrame,'Opening More options keeps the big button as it was');
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-'+platform+'.png')});
    // Nothing around Google moves at any sign-in stage (#1615): connecting, the browser step with its help and consent
    // links, then preparing. Only the development build's mock signs in now.
    const mockGoogle=page.getByRole('button',{name:'Use mock Google (Dev)',exact:true});
-   const layout=()=>page.evaluate(()=>[...document.querySelectorAll('.startup-setup :is(.setup-agent-cards,.setup-more-toggle,.setup-more,.setup-next)')].map(e=>{const r=e.getBoundingClientRect();return e.className+'@'+Math.round(r.top)+'+'+Math.round(r.height);}).join(' '));
+   const layout=()=>page.evaluate(()=>[...document.querySelectorAll('.startup-setup :is(.setup-agent-cards,.setup-more-toggle,.setup-more)')].map(e=>{const r=e.getBoundingClientRect();return e.className+'@'+Math.round(r.top-document.querySelector('.setup-agent-cards')!.getBoundingClientRect().top)+'+'+Math.round(r.height);}).join(' '));
    const still=await layout(),before=await page.locator('.setup-google-button').boundingBox();
    await mockGoogle.click();
    assert.match(await page.locator('.setup-google-button').textContent(),/(Connecting to|Waiting for) Google…|Finishing setup…/);
@@ -99,13 +100,13 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.locator('.desktop-companion-setup').isVisible(),false,'Setup shows no Fox');
    const waiting=await page.locator('.setup-google-button').boundingBox();
    const cancel=await page.getByRole('button',{name:'Cancel sign-in'}).boundingBox();
-   assert.ok(Math.abs(before.y-waiting.y)<1&&Math.abs(before.x-waiting.x)<1,'Google button stays still: '+JSON.stringify({before,waiting}));
+   assert.ok(Math.abs(before.x-waiting.x)<1&&Math.abs(before.height-waiting.height)<1,'Google button keeps its place in the row: '+JSON.stringify({before,waiting}));
    assert.ok(cancel.y>=waiting.y+waiting.height,'Cancel is below Google');
    await page.evaluate(()=>(window as any).cancelGoogle());
    await page.getByRole('alert').filter({hasText:'Your request was cancelled.'}).waitFor();
    assert.equal(await page.locator('.setup-import').count(),0,'Failed login cannot advance');
    assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='usageEvent').map(c=>c.event)),['google_connection_absent','onboarding_started','local_agents_detected','google_connect_started','google_connect_cancelled']);
-   assert.deepEqual(await frame(),firstFrame,'The error does not move the big button');
+   assert.deepEqual(await frame(),firstFrame,'The error keeps the big button as it was');
    await mockGoogle.click();
    // Google goes straight to the second half: Google on the left, Mail and Calendar and the apps on the right.
    await page.getByRole('heading',{name:'Your world is ready'}).waitFor();
@@ -275,7 +276,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('.setup-tile-connections .setup-tile-logos>*').count(),2);
   assert.equal(await page.locator('.setup-tile-reading').count(),0,'Nothing reads as waiting once everything came over');
   const bringFrame=await page.locator('.setup-next').boundingBox();
-  assert.ok(['x','y','width','height'].every(k=>Math.abs(bringFrame[k]-firstFrame[k])<=1.5),'The big button stays put: '+JSON.stringify({firstFrame,bringFrame}));
+  assert.ok(['x','width','height'].every(k=>Math.abs(bringFrame[k]-firstFrame[k])<=1.5)&&bringFrame.y+bringFrame.height<=850,'The big button keeps its shape and stays on screen: '+JSON.stringify({firstFrame,bringFrame}));
   assert.equal(await page.locator('.setup-next').textContent(),'Enter your world');
   assert.equal(await page.locator('.setup-passport .setup-choose-again').isVisible(),true,'The chosen Agent\'s card can choose again (owner request 2026-10-09: no Back button)');
   assert.equal(await page.getByRole('button',{name:'Back',exact:true}).count(),0,'No Back button');
@@ -560,5 +561,5 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS: one-page setup: the brand as a small mark at the bottom, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
+ console.log('PASS: one-page setup: the brand large on top, the main part in the middle, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
 });
