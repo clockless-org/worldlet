@@ -1,7 +1,8 @@
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import {renderArtifactBlocks,artifactPicture} from './artifact-blocks.ts';
-import {journalPages,madeArtifacts,readArtifact,type Artifact,type JournalPage,type MadeArtifact} from '../../core/artifacts/index.ts';
+import {fitArtifact} from './artifact-fit.ts';
+import {artifactBrief,artifactFitSteps,journalPages,madeArtifacts,readArtifact,type Artifact,type JournalPage,type MadeArtifact} from '../../core/artifacts/index.ts';
 /** The Journal (owner decisions 2026-10-06 and 2026-10-07; a book of its own, 2026-10-08): every card Fox showed in this
  * World, together one journal with a page a day. The book lies open on a day: its cards stand in time order on the left
  * leaf, then the right, two columns each, each at its size (large two by two, medium two by one, small one cell): the
@@ -111,9 +112,15 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   if(picture){const art=el('img','companion-artifact-art') as HTMLImageElement;art.src=picture;art.alt='';art.loading='lazy';art.decoding='async';li.dataset.art='illustration';li.append(art);}
   openButton.append(top,el('strong','companion-artifact-title',artifact.title));
   if(made)openButton.append(el('span','companion-artifact-preview',made.state==='kept'?'Applet, kept':made.state==='now'?'Applet until '+new Date(made.endsAt*1000).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}):'Finished'),...(made.body?[el('span','companion-artifact-preview',made.body)]:[]));
-  else if(artifact.body.trim())openButton.append(body(artifact.body));
-  // Its blocks show still, as the person left them; they work again when the card opens in the World.
-  if(!made&&(artifact as Artifact).blocks?.length)openButton.append(renderArtifactBlocks((artifact as Artifact).blocks!));
+  else{
+   // The card never scrolls (owner Order 2026-10-09): it shows the fullest version its cell holds, down to the brief, as
+   // the World card does, once it stands on the page. Its blocks show still, as the person left them; they work again
+   // when the card opens in the World.
+   const kept=artifact as Artifact,content=el('div','companion-artifact-content');openButton.append(content);
+   const steps=artifactFitSteps({body:kept.body.trim()?kept.body:'',detail:kept.detail,blocks:kept.blocks});
+   const fit=()=>{if(openButton.isConnected&&openButton.clientHeight)fitArtifact(openButton,steps,step=>content.replaceChildren(...(step.text==='brief'?[el('p','companion-artifact-brief',artifactBrief(kept))]:[...(kept.body.trim()||step.text==='detail'?[body(step.text==='detail'?kept.detail!:kept.body)]:[]),...(step.blocks?[renderArtifactBlocks(kept.blocks!.slice(0,step.blocks))]:[])])));};
+   fitting.set(openButton,fit);cardFits.observe(openButton);
+  }
   openButton.onclick=()=>made?openMade(made.id,false):open(artifact.id);
   li.append(openButton);
   // A finished page comes back as an Applet only when the person keeps it.
@@ -126,8 +133,11 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   forget.onclick=async()=>{forget.disabled=true;try{await call('artifacts',{operation:'delete',id:artifact.id});artifacts=artifacts.filter(a=>a.id!==artifact.id);draw();}catch(error){status.hidden=false;status.textContent=error?.message||'Could not forget it. Try again.';forget.disabled=false;}};
   li.append(forget);return li;
  }
+ // Each card fits again when its cell changes size (a narrow window, the book opening).
+ const fitting=new WeakMap<Element,()=>void>(),cardFits=new ResizeObserver(entries=>{for(const entry of entries)fitting.get(entry.target)?.();});
  const rowHeight=()=>parseFloat(getComputedStyle(section).getPropertyValue('--journal-row'))||132;
  function draw(){
+  cardFits.disconnect();
   pages=journalPages(artifacts);
   if(!pages.some(p=>p.day===day))day=pages[0]?.day||'';
   const index=pages.findIndex(p=>p.day===day),page=pages[index];
@@ -152,6 +162,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   }
   section.dataset.leaves=one?'1':'2';
   leftPage.replaceChildren(left);rightPage.replaceChildren(right);leftPage.scrollTop=rightPage.scrollTop=0;
+  for(const button of section.querySelectorAll('.companion-artifact-open'))fitting.get(button)?.();
  }
  async function load(){
   const mine=++version;

@@ -393,18 +393,22 @@
 .companion-artifact[data-kind=attention]{--attention-accent:#946e2b}
 .companion-artifact-open{position:absolute;inset:0;display:flex;flex-direction:column;gap:4px;text-align:left;border:0;background:none;color:inherit;padding:12px 14px;cursor:pointer;font:inherit;border-radius:inherit;overflow:hidden;mask-image:linear-gradient(#000 calc(100% - 22px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 22px),transparent)}
 /* The Journal keeps the card as it was shown (owner request 2026-10-08, ui/attention/CARD-SYSTEM.md#in-the-journal):
-   the World card's paper and corners, its painted picture across the head, and all of its parts. A card taller than
-   its cell scrolls inside it, so nothing is cut away. */
+   the World card's paper and corners, its painted picture across the head, and its parts. It never scrolls (owner
+   Order 2026-10-09): it shows the fullest version its cell holds, down to the one-sentence brief, and says More when it
+   left something out; opening it shows the rest. */
 .journal-book .companion-artifact[data-kind=answer]{background:var(--ui-paper,#f6efdc) var(--hud-paper-art) center/cover;border-radius:12px 14px 13px 15px}
 .companion-artifact>.companion-artifact-art{position:absolute;inset:0 0 auto auto;width:58%;height:min(96px,44%);object-fit:cover;object-position:right 42%;pointer-events:none;
  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 50%),linear-gradient(180deg,#000 25%,transparent 100%);-webkit-mask-composite:source-in;
  mask-image:linear-gradient(90deg,transparent 0%,#000 50%),linear-gradient(180deg,#000 25%,transparent 100%);mask-composite:intersect}
 .companion-artifact[data-size=small]>.companion-artifact-art{width:50%;height:min(64px,40%)}
-.companion-artifact[data-art]>.companion-artifact-open{overflow-y:auto;scrollbar-width:thin;scrollbar-color:#55795555 transparent;padding-bottom:22px}
+.companion-artifact-open[data-fit]{mask-image:none;-webkit-mask-image:none}
+.companion-artifact-content{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.companion-artifact-brief{margin:0;font-size:13.5px;line-height:1.4;overflow-wrap:anywhere;color:var(--hud-paper-ink,#22362b)}
+.companion-artifact-open[data-shortened=true]::after{content:'More';position:absolute;right:14px;bottom:2px;font:600 10px/1 var(--ui-font-ui);letter-spacing:.02em;text-transform:uppercase;color:var(--attention-accent)}
 .companion-artifact[data-art] .companion-artifact-title{max-width:70%}
 .companion-artifact[data-art] .companion-artifact-origin time{position:relative;padding:0 5px;border-radius:6px;background:color-mix(in srgb,var(--ui-paper,#f6efdc) 82%,transparent)}
 .companion-artifact[data-art]>.companion-artifact-forget{background:color-mix(in srgb,var(--ui-paper,#f6efdc) 80%,transparent)}
-/* The origin and title never give way to a tall body; the body is what fades out at the foot. */
+/* The origin and title never give way to the body. */
 .companion-artifact-open>:is(.companion-artifact-origin,.companion-artifact-title){flex-shrink:0}
 .companion-artifact-open:hover,.companion-artifact-open:focus-visible{background:#e6dbc433}
 .companion-artifact-open:disabled{cursor:default;opacity:.75}

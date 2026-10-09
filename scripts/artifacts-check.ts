@@ -17,7 +17,7 @@ assert.equal(defaultArtifactSize('| a | b |\n| - | - |',null),'medium','A table 
 assert.equal(defaultArtifactSize('Text',{title:'t',unit:'u',values:[{label:'a',value:1}]}),'medium','A chart needs at least a medium card');
 assert.equal(defaultArtifactSize('x'.repeat(1401),null),'large','A long body needs the large card');
 assert.equal(artifactSizeFor('large','Short answer.',null),'large','Fox may name a larger size');
-assert.equal(artifactSizeFor('small','x'.repeat(500),null),'medium','Never smaller than the content needs');
+assert.equal(artifactSizeFor('small','x'.repeat(500),null),'small','A named size is kept: the card shows what fits it');
 assert.equal(artifactSizeFor(null,'| a |\n| - |',null),'medium','Without a name, the content decides');
 // One card at most (owner Order 2026-10-07): Fox writes to fit, and show_artifact refuses a body past the large card.
 assert.equal(defaultArtifactSize('x'.repeat(ARTIFACT_CARD.medium),null),'large','A body heavier than a medium card is large');

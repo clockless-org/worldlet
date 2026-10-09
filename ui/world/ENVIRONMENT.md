@@ -271,10 +271,11 @@ costs, not covered by the idle callback's timeout.
 
 Attention keeps unchanged rows and resolves actions against the latest model.
 Container size, text scale and font completion invalidate fitting; a hidden panel
-is fitted again when shown. Fox replies and artifacts are never split into pages,
-so they cost no measuring passes. Neither change reduces rendering resolution or visual effects.
+is fitted again when shown. Fox replies and artifacts are never split into pages.
+An artifact measures once per version it tries (at most its blocks plus three) when it
+opens or its room changes, never while it is only shown. Neither change reduces rendering resolution or visual effects.
 Focused checks: `scripts/snapshot-inbox-check.ts`, `scripts/snapshot-refresh-check.ts`,
-`scripts/attention-idle-check.ts` and `scripts/artifact-scroll-check.ts`
+`scripts/attention-idle-check.ts` and `scripts/artifact-fit-check.ts`
 (run `npm run build:native-ui` first for full World fixtures). Operation-count checks are not a
 60-fps certification. Target 16.7 ms per frame and investigate gaps above 33 ms;
 report first entry, repeat entry, return and background-load cases separately.
