@@ -751,7 +751,7 @@ export function installFox(host:Host){
    let voices:Row[]=[];
    try{voices=await speech()?.voices()??[];}catch(error){host.diagnostics.record(error,'foxPreferences');}
    const service=analytics();
-   return {platform:store.options.platform,hostCapabilities:store.options.capabilities(),model:{name:model.name??'',ready:model.ready??false,provider:model.provider??''},
+   return {platform:store.options.platform,hostCapabilities:store.options.capabilities(),model:{name:model.name??'',ready:model.ready??false,provider:model.provider??'',harness:agent()?.harness?.title??null},
     cloudConsent:store.state.cloudConsent===true,autoSync:store.state.autoSync===true,companionStyle:style.current(),spokenReplies:preferences.bool('worldlet.spokenReplies'),talkReplies:preferences.bool('worldlet.talkReplies',true),
     // The wake word where local Whisper runs (Mac and Windows), off by default and kept on this computer.
     ...(speech()?.localSupported?{wakeWord:preferences.bool('worldlet.wakeWord'),wakeState:speech()?.wakeState??'off'}:{}),
@@ -1015,12 +1015,12 @@ export function installFox(host:Host){
    const longTerm=[memory?.longTerm??'',brought?.note??''].filter(Boolean).join('\n\n');
    const result=companion.adoptMemory({name:memory?.name??null,soul:memory?.soul??'',user:memory?.user??'',longTerm,source:MIGRATION_SOURCE_TITLES[request.id]+' on this computer'});
    if(result.name)page.event('worldlet:companion-appearance',{name:style.name()});
-   return {...result,summary,model:memory?.model?await adoptModel(request.id):null,...brought?{history:{conversations:brought.conversations,messages:brought.messages,notes:brought.notes,skills:brought.skills.length,routines:brought.routines.length,stayed:brought.stayed,partial:brought.partial,list:brought.list,...brought.older?{older:brought.older.remaining}:{}}}:{}};
+   return {...result,summary,model:own&&memory?.model?await adoptModel(request.id):null,...brought?{history:{conversations:brought.conversations,messages:brought.messages,notes:brought.notes,skills:brought.skills.length,routines:brought.routines.length,stayed:brought.stayed,partial:brought.partial,list:brought.list,...brought.older?{older:brought.older.remaining}:{}}}:{}};
   }
   return runtime.profile(true);
  }
- /** Its API-key model becomes Fox's model (the energy it brought); a sign-in model stays with that Agent.
-  * Best effort: Fox keeps the model it had when this cannot be copied. */
+ /** Its API-key model becomes the built-in Fox's model (the energy it brought); a sign-in model stays with that Agent,
+  * and an Agent Fox talks through keeps its own. Best effort: Fox keeps the model it had when this cannot be copied. */
  async function adoptModel(id:MigrationSource):Promise<Row|null> {
   const from=ownAgentHome(id);
   if(!from)return null;

@@ -43,6 +43,8 @@ export function createFoxModelGuide({call,view,setup}){
   const info=await call('foxPreferences').catch(()=>null);if(turn!==epoch)return;
   if(info?.model?.ready)window.dispatchEvent(new Event('worldlet:model-refresh'));
   if(info?.model?.ready && onConnected){const resume=onConnected;onConnected=null;done();await resume();return;}
+  // Fox talks through the person's own Agent: its models and sign-ins are that Agent's own, changed there.
+  if(info?.model?.harness){render(info.model.ready?`I use ${info.model.name||'the model'} through ${info.model.harness}. To change it, change the model in ${info.model.harness}.`:`${info.model.harness} has no model yet. Sign in to a model in ${info.model.harness}, then come back.`,[button('Keep chatting',()=>{done();view.openText?.();})]);return;}
   if(info?.model?.ready){render(`I’m connected to ${info.model.name}. You can keep chatting, or change my connection here.`,[button('Keep chatting',()=>{done();view.openText?.();}),...(info.model.provider==='openai-codex'?[button('Check available models',repair)]:[]),button('Choose a model',()=>providers())]);return;}
   return providers();
  }

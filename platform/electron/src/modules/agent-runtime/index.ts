@@ -52,7 +52,7 @@ export function selectAdapter(context:RuntimeContext,configuration=process.env.W
   const local=selectedInstall(context.root);
   // A Hermes Agent chosen before its profile became the World's Harness is attached on the next launch.
   if(local?.id==='hermes')try{attachChosenHermes(context.root,local.id);}catch{}
-  if(local)return new LocalHarnessAdapter(context,local,undefined,()=>new HermesAdapter(context),codexSignedIn);
+  if(local)return new LocalHarnessAdapter(context,local,undefined,()=>new HermesAdapter(context));
   return new HermesAdapter(context);
  }catch(error){return new UnavailableAgentAdapter(context,error instanceof Error?error:new WorldletError(String(error)));}
 }
@@ -347,7 +347,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
     return {ok:true,id:install.id,title:install.title,model:true};
    }
    // One short turn proves the sign-in; its answer is not shown.
-   const adapter=new LocalHarnessAdapter(context,install,undefined,()=>new HermesAdapter(context),codexSignedIn);
+   const adapter=new LocalHarnessAdapter(context,install,undefined,()=>new HermesAdapter(context));
    const probe=new LocalHarnessRuntime(install);
    const timer=setTimeout(()=>probe.cancel(),90_000);
    try{await probe.run({action:'chat',text:'Reply with the single word: ready',_background:true},adapter.home('setup'));}
