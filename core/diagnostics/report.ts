@@ -44,6 +44,24 @@ export function itemRule(message:string){
  const text=message.toLowerCase();
  return text.includes('source evidence')?'evidence':ITEM_RULES.find(([pattern])=>pattern.test(text))?.[1]??'other';
 }
+/** Which Fox setup step stopped, as a fixed tag, from the plain-words message the setup threw (setup-failure.ts and
+ * installation.ts). The first Windows person to fail setup (3199, 2026-10-09) reached PostHog only as operationFailed
+ * thrown from installWindows, which every step shares. */
+const SETUP_STEPS:[RegExp,string][]=[
+ [/^fox setup could not start because another worldlet window/,'setupLock'],
+ [/^fox could not download its setup files|^fox setup download is too large/,'setupDownload'],
+ [/^the fox files downloaded from github did not match|^fox setup failed integrity verification/,'setupVerify'],
+ [/^fox could not unpack its setup files/,'setupExtract'],
+ [/^fox could not get python ready/,'setupPython'],
+ [/^fox could not install the python packages/,'setupDependencies'],
+ [/^fox installed its packages, but they did not start|^fox setup did not produce a python runtime/,'setupValidate'],
+ [/^fox setup files (are missing|do not match)|^invalid fox setup manifest/,'setupFiles'],
+ [/^fox could not finish setup|^background setup could not finish/,'setupOther'],
+];
+export function setupStep(message:string){
+ const text=message.toLowerCase();
+ return SETUP_STEPS.find(([pattern])=>pattern.test(text))?.[1];
+}
 /** Raw text is classification input only and never part of the returned record. */
 export function diagnosticError(value){
  const message=typeof value.message==='string'?value.message.toLowerCase():'';
@@ -78,11 +96,12 @@ function stackFrame(line:string){
 /** An uncaught or recorded error as a PostHog `$exception` projection: its type, Core's failure code and sanitized
  * frames (oldest first, as error tracking expects). The message is classification input only and is never returned. */
 export function exceptionReport(value){
- const code=diagnosticError({message:value?.message,operation:value?.operation}).code as string;
+ const message=typeof value?.message==='string'?value.message:'';
+ const code=diagnosticError({message,operation:value?.operation}).code as string;
  const type=typeof value?.name==='string'&&/^[A-Z][A-Za-z]{0,40}$/.test(value.name)?value.name:'Error';
  const frames=(typeof value?.stack==='string'?value.stack.split('\n').slice(1,41):[]).map(stackFrame).filter(Boolean).reverse();
  const area=['main','renderer','host'].includes(value?.area)?value.area:'host';
  const operation=typeof value?.operation==='string'&&/^[A-Za-z][\w:-]{0,60}$/.test(value.operation)?value.operation:'';
  return {type,code,area,operation,level:ENVIRONMENTAL.has(code)?'warning':'error',handled:area==='host',frames,
-  ...(operation==='worldItemSave'?{rule:itemRule(typeof value?.message==='string'?value.message:'')}:{})};
+  ...(operation==='worldItemSave'?{rule:itemRule(message)}:setupStep(message)?{rule:setupStep(message)}:{})};
 }

@@ -145,7 +145,21 @@ for(const [message,code,rule] of [['Invalid Applet candidate title.','outputVali
  const saved=exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation:'worldItemSave'});
  assert.deepEqual([saved.code,saved.rule],[code,rule],message);assert.doesNotMatch(JSON.stringify(saved),/secret|Invalid|Events/);
 }
-assert.equal('rule' in crash,false,'only World item saves carry a rule');
+assert.equal('rule' in crash,false,'only World item saves and Fox setup failures carry a rule');
+// A Fox setup failure names the step that stopped as a fixed tag, whatever operation waited on it (the first Windows
+// setup failure, 2026-10-09, reached PostHog only as operationFailed from installWindows).
+{
+ const {setupFailure}=await import('../platform/electron/src/modules/agent-runtime/setup-failure.ts');
+ const detail='Fox setup (uv.exe, exit 2) could not finish: error: Failed to install cpython-3.12.14 secret@example.com';
+ for(const [step,rule] of [['download','setupDownload'],['verify','setupVerify'],['extract','setupExtract'],['python','setupPython'],['dependencies','setupDependencies'],['validate','setupValidate'],['files','setupOther']]){
+  const failed=exceptionReport({name:'WorldletError',message:setupFailure(step,detail,false),stack:'',area:'host',operation:'connect'});
+  assert.equal(failed.rule,rule,step);assert.doesNotMatch(JSON.stringify(failed),/secret|cpython|Failed to/);
+ }
+ assert.equal(setupFailure('python','Fox setup (uv.exe, exit 13) could not finish: error: denied',false).includes('another Worldlet window'),false,'a Windows tool exit code is not install.sh\'s');
+ for(const [message,rule] of [['Fox setup files do not match this app. Reinstall Worldlet.','setupFiles'],['Fox setup files are missing. Reinstall Worldlet and try again.','setupFiles'],
+  ['Fox setup failed integrity verification. Reinstall Worldlet and try again.','setupVerify'],['Background setup could not finish. Check your connection and try connecting again. Your saved world is safe.','setupOther']])
+  assert.equal(exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation:'agentChat'}).rule,rule,message);
+}
 console.log('PASS exception projection: type, failure code and sanitized frames only; no message, path, query or user name; World item rejections name their rule');
 
 // Fox and startup timings reach PostHog only as buckets of an allowlisted row; running turns and steering send nothing.
