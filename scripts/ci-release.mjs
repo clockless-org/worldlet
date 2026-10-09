@@ -178,6 +178,13 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
    const current=feedBuild('windows',await own.read(keys.feedTag,keys.windows));
    if(current>identity.build||current===identity.build&&!keys.history)return {skipped:`${keys.feedTag}/${keys.windows} already has Build ${current}`};
    await own.upload(tag,exe);await own.upload(tag,exe+'.sha256');
+   // The Store MSIX of the same Build, when its build succeeded (release machine 01 submits it once the Build is on Beta).
+   const msix=exe.replace(/-unsigned\.exe$/,'-store.msix');
+   if(existsSync(msix)&&existsSync(msix+'.json')){
+    const record=JSON.parse(readFileSync(msix+'.json','utf8'));
+    if(record.sha256!==await sha256(msix)||record.build!==identity.build||record.distributionChannel!=='microsoft-store')throw Error('The Store MSIX differs from its record.');
+    await own.upload(tag,msix);await own.upload(tag,msix+'.json');
+   }
    await own.put(keys.feedTag,keys.windows,JSON.stringify(manifest,null,2)+'\n');
    result={published:true,build:identity.build,keys:[`${tag}/${name}`,`${keys.feedTag}/${keys.windows}`]};
   }
