@@ -35,10 +35,22 @@ export interface BrowserFoxGlow {label:string;colors:string[];turnSeconds:number
  * own layout size, so Fox keeps working on it unchanged. `press` means the page takes no input
  * there, and a press on it is reported (`{phase:'task-pip',event:'press'}`). Without `page` the page
  * takes `rect`'s size, as before.
+ *
+ * Fox's copy (same hosts, core/browser/picture-in-picture.ts `foxCopyPlacement`): browserLayout with
+ * `copy` gives Fox a copy of the visible page, made at its address in the same engine the first time,
+ * shown scaled into `copy.rect` at `copy.page` as its own size and taking no input. Fox's steps and
+ * the `fox` glow then go to the copy, while `rect` stays the person's page. The host reports a press
+ * on the copy (`{phase:'fox-copy',event:'press'}`), a press on its close control
+ * (`{event:'close'}`), and that it has no copy (`{event:'ended'}`, also when the visible page is
+ * not on that engine). Every browserShow and browserLayout carries the copy while it lasts; one
+ * without `copy` closes it; with `takeCopy` the copy becomes
+ * the visible page at `rect` instead, and the person's page closes. Hiding or switching the page
+ * closes the copy too.
  */
+export interface BrowserFoxCopy {rect:SurfaceRect;page:SurfacePageSize}
 export interface BrowserSurfaceBodies {
- browserShow:{rect:SurfaceRect;platform:string;url?:string;applet?:string;resume?:boolean;hold?:boolean;live?:string[];fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean};
- browserLayout:{rect:SurfaceRect;fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean};
+ browserShow:{rect:SurfaceRect;platform:string;url?:string;applet?:string;resume?:boolean;hold?:boolean;live?:string[];fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean;copy?:BrowserFoxCopy};
+ browserLayout:{rect:SurfaceRect;fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean;copy?:BrowserFoxCopy;takeCopy?:boolean};
  browserHide:{live?:string[]};
  browserPip:{applet:string;rect?:SurfaceRect;live?:string[]};
 }
@@ -101,7 +113,7 @@ function readRect(input:unknown):SurfaceRect {
 export function readBrowserSurfaceRequest(input:unknown):BrowserSurfaceRequest {
  const request=object(input),action=request.action;
  if(!isBrowserSurfaceAction(action))throw Error('Unknown browser surface action');
- keys(request,action==='browserShow'?['action','rect','platform','url','applet','resume','hold','live','fox','page','press']:action==='browserLayout'?['action','rect','fox','page','press']:action==='browserPip'?['action','applet','rect','live']:['action','live']);
+ keys(request,action==='browserShow'?['action','rect','platform','url','applet','resume','hold','live','fox','page','press','copy']:action==='browserLayout'?['action','rect','fox','page','press','copy','takeCopy']:action==='browserPip'?['action','applet','rect','live']:['action','live']);
  const kept=request.live!==undefined?{live:live(request.live)}:{};
  if(action==='browserHide')return {action,...kept};
  if(action==='browserPip'){
@@ -113,7 +125,13 @@ export function readBrowserSurfaceRequest(input:unknown):BrowserSurfaceRequest {
  if(request.press!==undefined&&typeof request.press!=='boolean')throw Error('Invalid browser surface press');
  if(request.press&&request.page===undefined)throw Error('Only a scaled page takes presses');
  const scaled={...request.page!==undefined?{page:readPage(request.page)}:{},...request.press!==undefined?{press:request.press as boolean}:{}};
- if(action==='browserLayout')return {action,rect,...fox,...scaled};
+ let copy={};
+ if(request.copy!==undefined){const value=object(request.copy);keys(value,['rect','page']);copy={copy:{rect:readRect(value.rect),page:readPage(value.page)}};}
+ if(action==='browserLayout'){
+  if(request.takeCopy!==undefined&&typeof request.takeCopy!=='boolean')throw Error('Invalid browser surface copy');
+  if(request.takeCopy&&request.copy!==undefined)throw Error('A taken copy is no longer a copy');
+  return {action,rect,...fox,...scaled,...copy,...request.takeCopy!==undefined?{takeCopy:request.takeCopy as boolean}:{}};
+ }
  if(typeof request.platform!=='string'||!request.platform||request.platform.length>128)throw Error('Invalid browser surface platform');
  if(request.url!==undefined&&(typeof request.url!=='string'||request.url.length>32768))throw Error('Invalid browser surface URL');
  if(request.applet!==undefined&&!appletKey(request.applet))throw Error('Invalid browser surface Applet');
@@ -122,5 +140,5 @@ export function readBrowserSurfaceRequest(input:unknown):BrowserSurfaceRequest {
  if(request.hold!==undefined&&(typeof request.hold!=='boolean'||request.hold&&(!request.resume||request.url===undefined)))throw Error('Invalid browser surface hold');
  return {action,rect,platform:request.platform,...request.url!==undefined?{url:request.url as string}:{},
   ...request.applet!==undefined?{applet:request.applet as string}:{},...request.resume!==undefined?{resume:request.resume as boolean}:{},...request.hold!==undefined?{hold:request.hold as boolean}:{},
-  ...kept,...fox,...scaled};
+  ...kept,...fox,...scaled,...copy};
 }

@@ -1754,8 +1754,9 @@ export function mountNotionWorld(data: World, native: any) {
     // person's Go ahead at the last step settles it (and a first task earns its first win).
     if(helpingTask&&!args.taskId&&['click','submit'].includes(args.operation))args={...args,taskId:helpingTask};
     if(!['open','receipts','outcome'].includes(args.operation))helpNarrator?.acting();
-    // Fox's page in the task picture-in-picture window stays Fox's; pages it opens load there (#1175).
-    if(!browserPanel.inTaskPicture()&&(args.operation==='open'||content.hidden||content.dataset.template!=='browser')){
+    // Fox's page in the task picture-in-picture window stays Fox's; pages it opens load there (#1175),
+    // as they do in Fox's copy of the page in view (FOX_COPY), leaving the person's page as it is.
+    if(!browserPanel.inTaskPicture()&&!browserPanel.foxCopy()&&(args.operation==='open'||content.hidden||content.dataset.template!=='browser')){
       if(args.operation==='open'){if(!asToolNavigation(()=>openWorldURL(args.url)))return {error:'Choose a valid HTTPS page.'};}
       else return {error:'No browser panel is open. Use the open browser action with the requested HTTPS URL before inspecting or interacting.'};
     }

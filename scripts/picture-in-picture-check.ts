@@ -1,7 +1,7 @@
 // Shared picture-in-picture rule for website Applets (#919, #950, core/browser/picture-in-picture.ts):
 // which Applets offer it, where the window shows and goes, its size and how it counts against live pages.
 import assert from 'node:assert/strict';
-import {PAGE_RESUME,PICTURE_IN_PICTURE,TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,livePagePlan,pageFrameRate,pictureInPictureApplet,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,taskPictureInPictureAspect} from '../core/browser/index.ts';
+import {FOX_COPY,PAGE_RESUME,PICTURE_IN_PICTURE,foxCopyPlacement,TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,livePagePlan,pageFrameRate,pictureInPictureApplet,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,taskPictureInPictureAspect} from '../core/browser/index.ts';
 
 // Applets whose own view is their website; not local Applets, meetings or a scene Applet's Web mode.
 for(const key of ['youtube','tiktok','x','netflix','twitch','bilibili','browser'])assert.equal(pictureInPictureApplet(key),true,key+' offers it');
@@ -73,3 +73,17 @@ assert.deepEqual(corner,{x:area.x+area.width-desktop.margin-desktop.width,y:area
 const narrow=desktopTaskPictureInPicturePlacement({area:{x:0,y:0,width:300,height:500},companion:null,aspect:1.5});
 assert.ok(narrow.width===300-2*desktop.margin&&narrow.x===desktop.margin,'a narrow screen narrows it to fit');
 console.log('PASS task picture in picture: the page\'s own shape (square to 2.2:1), frame rates by place (never none), and the window beside the desktop Companion inside the work area');
+// Fox's copy of the page (owner request 2026-10-09): the panel's top-right corner, in the page's shape.
+{
+ const panel={x:100,y:60,width:1200,height:760},spot=foxCopyPlacement({panel,page:panel})!;
+ assert.equal(spot.width,Math.round(1200*FOX_COPY.share),'a share of the panel\'s width');
+ assert.equal(spot.x+spot.width,panel.x+panel.width-FOX_COPY.margin,'at its right edge');
+ assert.equal(spot.y,panel.y+FOX_COPY.margin,'at its top');
+ assert.equal(spot.height,Math.round(spot.width/(1200/760)),'in the page\'s shape');
+ assert.equal(foxCopyPlacement({panel:{...panel,width:2400},page:panel})!.width,FOX_COPY.maxWidth,'never wider than maxWidth');
+ assert.equal(foxCopyPlacement({panel:{...panel,width:800},page:panel})!.width,FOX_COPY.minWidth,'never narrower than minWidth');
+ assert.equal(foxCopyPlacement({panel:{...panel,width:FOX_COPY.minPanel-1},page:panel}),null,'a narrow panel keeps Fox on the person\'s page');
+ assert.equal(foxCopyPlacement({panel:{...panel,height:100},page:{width:900,height:900}}),null,'no room for its height');
+ assert.equal(foxCopyPlacement({panel,page:{width:0,height:0}}),null);
+ console.log('PASS Fox\'s copy: the panel\'s top-right corner, a share of its width within limits, in the page\'s shape, none in a small panel');
+}

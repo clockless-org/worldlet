@@ -13,7 +13,7 @@ import {readMemory,refreshMemory} from './memory.ts';
 import type {WebPage} from './web-page.ts';
 import {AgentBrowser,type AgentBrowserEnvironment} from './agent.ts';
 import {FoxGlow,glowStyle,type GlowStyle} from './glow.ts';
-import {TaskWindow} from './task-window.ts';
+import {PressOverlay,TaskWindow} from './task-window.ts';
 import {BrowserHistory,historyDestination} from './history.ts';
 import {ActivityRecorder} from './activity.ts';
 import {WebRecorder,manageRecordings,readRecordings,type RecordedVisit} from './recorder.ts';
@@ -30,8 +30,10 @@ import {timingBucket} from '../../../../../core/diagnostics/index.ts';
 import {GAME_REVIEW_APPLET} from '../../../../../core/games/index.ts';
 
 type Kept={view:WebPage;platform:string;requestedURL:URL|null};
-type Layout={rect:Row;fox?:Row;page?:Row;press:boolean};
+type Layout={rect:Row;fox?:Row;page?:Row;press:boolean;copy?:Row};
 type Pip=Kept&{key:string;applet:string;press:WebContentsView};
+/** Fox's copy of the visible page in the panel's corner (foxCopyPlacement), its overlay and its own size. */
+type Copy={view:CefPageView;overlay:PressOverlay;page:{width:number;height:number}};
 /** A local calendar day, YYYY-MM-DD, of a time in seconds. */
 const localDay=(at:number)=>{const date=new Date(at*1000);return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;};
 /** How long a browser step waits for a loading page before telling Fox to try again. */
@@ -93,6 +95,8 @@ export class BrowserDevice {
  private worldLayout:Layout|null=null;
  private away=false;
  private task:TaskWindow|null=null;
+ // Fox's copy of the visible page while the person keeps it (core/browser/picture-in-picture.ts FOX_COPY).
+ private copy:Copy|null=null;
  private taskSize:{width:number;height:number}|null=null;
  private taskFox:GlowStyle|null=null;
  // Fox's pointer moves over the page as it shows: smaller in a task window.
@@ -113,7 +117,7 @@ export class BrowserDevice {
   this.host=host;this.surface=new Surface(host);this.activity=new ActivityRecorder(host.store);
   this.battles=new BattleReviews({day:at=>localDay(at),local:at=>new Date(at*1000).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
    start:review=>this.startGameReview(review),onError:error=>this.host.diagnostics.record(error,'gameReview')});
-  this.makeAgent=view=>new AgentBrowser(view,{...agent,pointer:()=>view===this.browser&&this.glow.isShowing?this.pointer:null});
+  this.makeAgent=view=>new AgentBrowser(view,{...agent,pointer:()=>view===this.foxPage()&&this.glow.isShowing?this.pointer:null});
   // Recordings expire whether or not a page is opened: shortly after start, then every hour.
   setTimeout(()=>this.pruneRecordings(true),60_000).unref?.();
   setInterval(()=>this.pruneRecordings(true),3_600_000).unref?.();
@@ -142,6 +146,8 @@ export class BrowserDevice {
  private get scope(){return this.sample?'practice':'personal';}
  get privateContextWasRead(){return this.contextRead;}
  get visiblePage(){return this.browser;}
+ /** The page Fox's steps go to: its copy while there is one, otherwise the visible page. */
+ private foxPage():WebPage|null {return this.copy?.view??this.browser;}
  private emit(event:Row){void this.host.page.call('worldletBrowser',event);}
  private scripts=new Map<string,string>();
  /** Page scripts from the packaged UI, read once; Dev builds reread them so a rebuild applies. */
@@ -253,7 +259,7 @@ export class BrowserDevice {
    this.pageIssue=null;this.requestedURL=destination;this.browser.load(destination.href);
   }
   this.browser.raise();
-  this.layout(body.rect,body.fox,body.page,body.press);this.browser.setHidden(false);this.status();
+  this.layout(body.rect,body.fox,body.page,body.press,body.copy);this.browser.setHidden(false);this.status();
   const focused=this.focusState.get(this.browser);if(focused)this.emit({...focused,platform:this.platform});
   this.startTimer();
  }
@@ -282,6 +288,8 @@ export class BrowserDevice {
  }
  /** Fox takes a step on the page: Focus steps aside first, so Fox sees and acts on the site's own page. */
  private async foxDrives(view:WebPage){
+  // Fox's copy leaves the person's page and its Focus as they are.
+  if(view!==this.browser)return;
   this.foxDrovePage=Date.now();
   const state=this.focusState.get(view);
   if(state?.active||state&&!state.paused)await this.focus(view,pageFocusPlan(view.url,siteFocusFor(this.focusRecords(),view.url)),true);
@@ -452,25 +460,86 @@ export class BrowserDevice {
   return !blocked.length;
  };
  private screenRect(frame:Rectangle){return this.surface.toScreen(frame);}
- layout(rect:Row,fox?:Row,page?:Row,press=false){
+ layout(rect:Row,fox?:Row,page?:Row,press=false,copy?:Row,takeCopy=false){
   // While the World is away, the page keeps its window beside the Companion; layouts only say
   // whether Fox is working.
   if(this.away){this.taskGlow(glowStyle(fox));return;}
-  this.worldLayout={rect,fox,page,press};
+  this.worldLayout={rect,fox,page,press,copy};
+  // Fox's copy lasts while layouts carry it; taken, it becomes the visible page.
+  if(takeCopy)this.takeCopy();else if(!copy)this.closeCopy();
   const browser=this.browser,frame=this.surface.toParent(rect);
   if(!browser||!frame)return;
   // Task picture in picture (#1175): the page keeps its own size and shows scaled into the rect.
   const size=this.pageSize(page);
   browser.setFrame(frame,size?{width:size.width,height:size.height}:undefined,!!size&&press===true);
   this.pointerScale=size&&size.width>0?frame.width/size.width:1;
-  this.applyGlow(glowStyle(fox),frame);
+  const style=glowStyle(fox),copied=copy?this.showCopy(copy,style):null;
+  // Fox's glow, pointer and status go with Fox's copy; the person's page carries none of them.
+  if(copied){this.pointerScale=copied.width/this.copy!.page.width;this.applyGlow(style,copied);}
+  else this.applyGlow(style,frame);
+ }
+ // Fox's copy (core/browser/picture-in-picture.ts FOX_COPY) ----------------------------------------
+ /** Shows Fox's copy at `request.rect`, made the first time from the visible page: its address on the
+  * same engine, so the same sign-in, at `request.page` as its own size. Only the CEF engine draws a
+  * page smaller than its own size; elsewhere there is no copy and Fox works on the person's page. */
+ private showCopy(request:Row,style:GlowStyle|null):Rectangle|null {
+  const browser=this.browser,frame=this.surface.toParent(request.rect),parent=this.surface.parent();
+  if(!browser||!frame||!parent||frame.width<1||frame.height<1)return null;
+  if(!this.copy){
+   const size=this.pageSize(request.page),address=parse(browser.url);
+   // A call page is never copied: the copy would join the call a second time.
+   if(!(browser instanceof CefPageView)||browser.hidden||!size||!address||!publicPage(address)||meetingPage(address.href)){this.emit({phase:'fox-copy',event:'ended'});return null;}
+   const view=this.create(address.href,'cef');
+   if(!(view instanceof CefPageView)){view.close();this.emit({phase:'fox-copy',event:'ended'});return null;}
+   // The person's page keeps the sound; Fox's copy plays muted.
+   view.mute(true);
+   const cookies=sharedEngine(this.host.profile);
+   view.onLoaded=()=>{if(cookies)cookieBridge(this.scope,cookies).enginePageChanged();};
+   const overlay=new PressOverlay({onPress:()=>{if(this.copy?.view===view)this.emit({phase:'fox-copy',event:'press'});},onClose:()=>{if(this.copy?.view===view)this.emit({phase:'fox-copy',event:'close'});}});
+   this.copy={view,overlay,page:{width:size.width,height:size.height}};
+  }
+  const copy=this.copy;
+  copy.view.setFrame(frame,copy.page,true);copy.view.setHidden(false);copy.view.raise();
+  // The overlay lies over the copy and takes its input; its close control shows once Fox's turn has ended.
+  parent.addChildView(copy.overlay.view);copy.overlay.view.setBounds(frame);
+  copy.overlay.closable(!style||style.finished);
+  return frame;
+ }
+ /** Fox's copy closes (the UI no longer lays it out, or its page went). The person's page stays. */
+ private closeCopy(){
+  const copy=this.copy;if(!copy)return;
+  this.copy=null;this.dropGlow();
+  try{this.surface.parent()?.removeChildView(copy.overlay.view);}catch{}
+  copy.overlay.destroy();copy.view.driver?.stop();copy.view.driver=null;copy.view.close();
+  this.emit({phase:'fox-copy',event:'ended'});
+ }
+ /** Fox's copy becomes the visible page, in place of the person's, which closes: the person pressed it
+  * to see Fox's page, or it goes with Fox's work out of sight. Fox's steps go on there. */
+ private takeCopy(){
+  const copy=this.copy;if(!copy)return;
+  this.copy=null;
+  try{this.surface.parent()?.removeChildView(copy.overlay.view);}catch{}
+  copy.overlay.destroy();
+  const previous=this.browser;
+  if(previous){
+   this.endTranscript();this.activityGeneration+=1;this.activity.observe({active:false,close:true,endReason:'navigation'});
+   this.held.delete(previous);previous.close();
+  }
+  const view=copy.view;
+  this.browser=view;this.requestedURL=parse(view.url);this.pageIssue=null;this.videoPlaying=false;
+  this.bind(view);view.mute(false);view.raise();this.status();
  }
  private pageSize(page?:Row){return page&&typeof page.width==='number'&&typeof page.height==='number'?this.surface.toParent({x:0,y:0,width:page.width,height:page.height},false):null;}
  /** The World window leaves for the desktop Companion. Fox's page, in the task window or driven by
   * Fox in the panel, stays alive to show beside the Companion (#1175); every other page stops. */
  detach(){
-  const view=this.browser,layout=this.worldLayout,fox=glowStyle(layout?.fox);
-  const size=view instanceof CefPageView&&layout&&(layout.press&&layout.page||fox&&!fox.finished)?this.pageSize(layout.page)??view.frameRect():null;
+  const layout=this.worldLayout,fox=glowStyle(layout?.fox),working=!!fox&&!fox.finished;
+  // Fox's copy goes along in place of the person's page while Fox works on it; after Fox's turn it closes.
+  const copied=working&&this.copy?this.copy.page:null;
+  if(copied)this.takeCopy();else this.closeCopy();
+  if(layout)layout.copy=undefined;
+  const view=this.browser;
+  const size=!(view instanceof CefPageView)||!layout?null:copied??(layout.press&&layout.page||working?this.pageSize(layout.page)??view.frameRect():null);
   if(!size||size.width<1||size.height<1){this.stop();return;}
   this.endPictureInPicture();
   for(const page of this.parked.values())page.view.close();
@@ -536,7 +605,7 @@ export class BrowserDevice {
   this.away=false;this.taskSize=null;this.taskFox=null;this.worldLayout=null;this.task?.destroy();this.task=null;
  }
  private close(){
-  this.endTranscript();
+  this.closeCopy();this.endTranscript();
   this.activityGeneration+=1;this.dropGlow();this.activity.observe({active:false,close:true});this.stopTimer();
   if(this.browser){this.held.delete(this.browser);this.browser.close();}
   this.browser=null;this.requestedURL=null;this.pageIssue=null;this.pageKey=null;this.videoPlaying=false;
@@ -544,7 +613,7 @@ export class BrowserDevice {
  // Fox's glow belongs to the visible page; a kept or closed page leaves without it.
  private dropGlow(){this.glow.hide();}
  private park(live?:string[]){
-  this.endTranscript();
+  this.closeCopy();this.endTranscript();
   const view=this.browser,key=this.pageKey;
   if(!view||!key||!live||!live.some(applet=>this.scope+':'+applet===key)){this.close();this.release(live);return;}
   this.activityGeneration+=1;this.activity.observe({active:false,close:true,endReason:'hidden'});this.stopTimer();
@@ -566,7 +635,7 @@ export class BrowserDevice {
    // No page of that Applet to show: the UI drops its window.
    if(!view||!parent||this.pageKey!==key){this.release(live);this.emit({phase:'pip',applet,event:'ended'});return;}
    // The page leaves the panel as when kept, but stays shown, playing and audible.
-   this.activity.observe({active:false,close:true});this.stopTimer();
+   this.closeCopy();this.activity.observe({active:false,close:true});this.stopTimer();
    this.dropGlow();view.driver?.stop();view.driver=null;this.held.delete(view);view.mute(false);
    const press=this.createPress(parent,()=>this.emit({phase:'pip',applet,event:'press'}));
    this.pipPage={view,platform:this.platform,requestedURL:this.requestedURL,key,applet,press};
@@ -743,7 +812,7 @@ export class BrowserDevice {
   this.held.delete(view);view.close();
   const next=this.create(url,engine,early);
   this.browser=next;this.pageIssue=null;this.videoPlaying=false;this.bind(next);next.raise();
-  if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press);
+  if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy);
   next.setHidden(false);this.status();
  }
  private videoStopped(){if(!this.videoPlaying)return;this.videoPlaying=false;this.emit({phase:'video',platform:this.platform,playing:false});}
@@ -852,8 +921,8 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
  private async settled(browser:WebPage,startMs=0){
   if(startMs)await new Promise(resolve=>setTimeout(resolve,startMs));
   const loadedBy=Date.now()+LOAD_WAIT_MS;
-  while(browser.isLoading&&!browser.isClosed&&this.browser===browser&&Date.now()<loadedBy)await new Promise(resolve=>setTimeout(resolve,100));
-  return this.browser===browser&&!browser.hidden&&!browser.isClosed&&!browser.isLoading;
+  while(browser.isLoading&&!browser.isClosed&&this.foxPage()===browser&&Date.now()<loadedBy)await new Promise(resolve=>setTimeout(resolve,100));
+  return this.foxPage()===browser&&!browser.hidden&&!browser.isClosed&&!browser.isLoading;
  }
  /** `result` with the page as it stands after Fox's step, as a fresh snapshot in `page`, when that
   * page loads and Fox may read it; otherwise `result` unchanged, and Fox takes a snapshot itself. */
@@ -982,7 +1051,8 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
   if(op==='automate'){
    if(!agent||!store.state.cloudConsent||this.sample)throw new WorldletError('Allow private context in your personal world before browser automation.');
    if(args.operation==='receipts')return {receipts:store.ledger().records('browser-actions').map(row=>{const value={...row};delete value.task;return value;})};
-   const browser=this.browser;
+   // Fox's copy of the page when it has one (FOX_COPY): the person's own page stays theirs.
+   const browser=this.foxPage();
    if(!browser||browser.hidden)throw new WorldletError('Open the Worldlet browser first.');
    this.contextRead=true;
    await this.foxDrives(browser);
@@ -990,13 +1060,14 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    if(operation==='open'){
     const url=parse(args.url);
     if(!url||!publicPage(url))throw new WorldletError('Choose a public HTTPS page.');
-    if(!(this.requestedURL?.href===url.href&&browser.isLoading)){this.platform='web';this.requestedURL=url;browser.load(url.href);}
+    if(browser!==this.browser)browser.load(url.href);
+    else if(!(this.requestedURL?.href===url.href&&browser.isLoading)){this.platform='web';this.requestedURL=url;browser.load(url.href);}
     return this.withPageAfter(browser,{ok:true});
    }
    // Fox's next step waits for the page it just opened or clicked through to finish loading,
    // rather than spending a whole model turn on being told to try again.
    await this.settled(browser);
-   if(this.browser!==browser||browser.hidden||browser.isClosed)throw new WorldletError('Open the Worldlet browser first.');
+   if(this.foxPage()!==browser||browser.hidden||browser.isClosed)throw new WorldletError('Open the Worldlet browser first.');
    if(browser.isLoading)return {error:'The page is still loading. Request another snapshot shortly.'};
    const current=parse(browser.url);
    if(!current||!publicPage(current))throw new WorldletError('Open a public HTTPS page and wait for it to load before using browser automation.');
@@ -1084,7 +1155,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    return this.historyStore().search(args);
   }
   if(op==='recordings'||op==='deleteRecordings'){
-   const views=[this.browser,...[...this.parked.values()].map(kept=>kept.view),this.pipPage?.view];
+   const views=[this.browser,this.copy?.view,...[...this.parked.values()].map(kept=>kept.view),this.pipPage?.view];
    return manageRecordings(op,args,{agent,sample:this.sample,ledger:store.ledger(),recorders:views.map(view=>view?.recorder)});
   }
   if(op==='records'||op==='record'){
@@ -1092,7 +1163,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    if(agent&&!store.state.cloudConsent)throw new WorldletError('Allow selected private context before Fox reads browsing recordings.');
    if(agent)this.contextRead=true;
    // What the open pages are still holding is saved first, so a read sees up to this moment.
-   const recorders=[this.browser,...[...this.parked.values()].map(kept=>kept.view),this.pipPage?.view].map(view=>view?.recorder);
+   const recorders=[this.browser,this.copy?.view,...[...this.parked.values()].map(kept=>kept.view),this.pipPage?.view].map(view=>view?.recorder);
    for(const recorder of recorders)recorder?.flush?.();
    const onScreen=this.browser&&!this.browser.hidden?this.browser.recorder?.openVisit?.()??'':'';
    return readRecordings(op,args,{ledger:store.ledger(),onScreen,now:Date.now()/1000,offsetMinutes:-new Date().getTimezoneOffset()});

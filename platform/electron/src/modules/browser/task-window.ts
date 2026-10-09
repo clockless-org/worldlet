@@ -2,6 +2,7 @@
 // While the World window is closed or minimized, Fox's page shows here smaller, at its own size, and
 // keeps working. A transparent overlay above the page takes the person's input: a press brings the
 // World back with the page's Applet, and once Fox's turn has ended a close control leaves the page.
+// Fox's copy of a page in the panel's corner (device.ts) takes its input through the same overlay.
 import crypto from 'node:crypto';
 import {BaseWindow,WebContentsView,session,type Rectangle} from 'electron';
 
@@ -18,22 +19,16 @@ document.getElementById('close').addEventListener('click',()=>console.log(${JSON
 function setClosable(on){document.body.classList.toggle('closable',!!on)}
 </script></body></html>`;
 
-export class TaskWindow {
- readonly window:BaseWindow;
- private overlay:WebContentsView;
+/** A transparent view to lay over a page shown smaller: a press on it and its close control (shown
+ * with `closable`) are reported, and the page beneath takes no input. */
+export class PressOverlay {
+ readonly view:WebContentsView;
  private ready:Promise<unknown>;
  constructor({onPress,onClose}:{onPress:()=>void;onClose:()=>void}){
-  const mac=process.platform==='darwin';
-  this.window=new BaseWindow({show:false,title:'Fox',frame:false,resizable:false,minimizable:false,maximizable:false,fullscreenable:false,
-   skipTaskbar:true,alwaysOnTop:true,hasShadow:true,backgroundColor:'#ffffff',...(mac?{type:'panel' as const}:{})});
-  this.window.setAlwaysOnTop(true,'floating');
-  this.window.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true});
-  // It goes with its page, never on its own.
-  this.window.on('close',event=>event.preventDefault());
   const nonce=crypto.randomBytes(16).toString('hex');
-  this.overlay=new WebContentsView({webPreferences:{session:session.fromPartition('worldlet-overlay'),contextIsolation:true,sandbox:true,nodeIntegration:false,spellcheck:false}});
-  this.overlay.setBackgroundColor('#00000000');
-  const contents=this.overlay.webContents;
+  this.view=new WebContentsView({webPreferences:{session:session.fromPartition('worldlet-overlay'),contextIsolation:true,sandbox:true,nodeIntegration:false,spellcheck:false}});
+  this.view.setBackgroundColor('#00000000');
+  const contents=this.view.webContents;
   contents.setWindowOpenHandler(()=>({action:'deny'}));
   contents.on('will-navigate',event=>event.preventDefault());
   contents.on('console-message',details=>{
@@ -42,18 +37,36 @@ export class TaskWindow {
   });
   this.ready=contents.loadURL('data:text/html;charset=utf-8,'+encodeURIComponent(overlayPage(nonce))).catch(()=>{});
  }
+ /** The close control shows only once Fox's turn has ended. */
+ closable(on:boolean){void this.ready.then(()=>this.view.webContents.isDestroyed()?undefined:this.view.webContents.executeJavaScript(`setClosable(${on})`)).catch(()=>{});}
+ destroy(){if(!this.view.webContents.isDestroyed())this.view.webContents.close();}
+}
+
+export class TaskWindow {
+ readonly window:BaseWindow;
+ private overlay:PressOverlay;
+ constructor({onPress,onClose}:{onPress:()=>void;onClose:()=>void}){
+  const mac=process.platform==='darwin';
+  this.window=new BaseWindow({show:false,title:'Fox',frame:false,resizable:false,minimizable:false,maximizable:false,fullscreenable:false,
+   skipTaskbar:true,alwaysOnTop:true,hasShadow:true,backgroundColor:'#ffffff',...(mac?{type:'panel' as const}:{})});
+  this.window.setAlwaysOnTop(true,'floating');
+  this.window.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true});
+  // It goes with its page, never on its own.
+  this.window.on('close',event=>event.preventDefault());
+  this.overlay=new PressOverlay({onPress,onClose});
+ }
  get contentView(){return this.window.contentView;}
  get visible(){return !this.window.isDestroyed()&&this.window.isVisible();}
  /** Places the window on screen; the page's surface and the overlay fill it. */
- place(bounds:Rectangle){this.window.setBounds(bounds);this.overlay.setBounds({x:0,y:0,width:bounds.width,height:bounds.height});}
+ place(bounds:Rectangle){this.window.setBounds(bounds);this.overlay.view.setBounds({x:0,y:0,width:bounds.width,height:bounds.height});}
  /** The overlay goes above the page's surface, which was added after it. */
- raise(){this.window.contentView.addChildView(this.overlay);}
+ raise(){this.window.contentView.addChildView(this.overlay.view);}
  show(){if(!this.window.isVisible())this.window.showInactive();}
  hide(){if(!this.window.isDestroyed())this.window.hide();}
  /** The close control shows only once Fox's turn has ended. */
- closable(on:boolean){void this.ready.then(()=>this.overlay.webContents.isDestroyed()?undefined:this.overlay.webContents.executeJavaScript(`setClosable(${on})`)).catch(()=>{});}
+ closable(on:boolean){this.overlay.closable(on);}
  destroy(){
-  if(!this.overlay.webContents.isDestroyed())this.overlay.webContents.close();
+  this.overlay.destroy();
   if(!this.window.isDestroyed())this.window.destroy();
  }
 }

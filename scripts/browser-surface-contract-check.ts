@@ -11,7 +11,10 @@ const valid=[{action:'browserShow',rect,platform:'web',url:'https://example.com/
  // Picture in picture: show or move the window, a zero-size one that draws nothing, and its end.
  {action:'browserPip',applet:'youtube',rect,live:['youtube','x']},{action:'browserPip',applet:'youtube',rect:{x:0,y:0,width:0,height:0}},{action:'browserPip',applet:'youtube',live:['youtube']},{action:'browserPip',applet:'tiktok'},
  // Task picture in picture (#1175): the page keeps its own size, scaled into the rect, and takes presses only.
- {action:'browserLayout',rect,fox,page:{width:1280,height:720},press:true},{action:'browserLayout',rect,page:{width:1280,height:720}},{action:'browserShow',rect,platform:'web',page:{width:960,height:600},press:true}];
+ {action:'browserLayout',rect,fox,page:{width:1280,height:720},press:true},{action:'browserLayout',rect,page:{width:1280,height:720}},{action:'browserShow',rect,platform:'web',page:{width:960,height:600},press:true},
+ // Fox's copy: shown scaled in the panel's corner while the person keeps the page, and taken into the panel.
+ {action:'browserLayout',rect,fox,copy:{rect:{x:500,y:12,width:300,height:188},page:{width:1280,height:800}}},{action:'browserLayout',rect,takeCopy:true,fox},
+ {action:'browserShow',rect,platform:'web',applet:'amazon',resume:true,fox,copy:{rect:{x:500,y:12,width:300,height:188},page:{width:1280,height:800}}}];
 for(const request of valid){
  assert.deepEqual(readBrowserSurfaceRequest(request),request);
  assert.deepEqual(JSON.parse(invoke('browserSurfaceRequest',JSON.stringify(request))),{ok:true,value:request});
@@ -46,7 +49,9 @@ for(const request of [null,[],{action:'unknown'},
  {action:'browserPip',rect},{action:'browserPip',applet:'You Tube',rect},{action:'browserPip',applet:'youtube',rect:{...rect,width:-1}},{action:'browserPip',applet:'youtube',rect:{...rect,y:Infinity}},
  {action:'browserPip',applet:'youtube',rect,fox},{action:'browserPip',applet:'youtube',url:'https://www.youtube.com/'},{action:'browserPip',applet:'youtube',live:'youtube'},{action:'browserHide',applet:'youtube'},
  {action:'browserLayout',rect,press:true},{action:'browserLayout',rect,page:{width:0,height:720}},{action:'browserLayout',rect,page:{width:1280,height:720,depth:1}},{action:'browserLayout',rect,page:{width:1280,height:720},press:'yes'},
- {action:'browserPip',applet:'youtube',rect,page:{width:1280,height:720}},{action:'browserHide',page:{width:1280,height:720}}])assert.throws(()=>readBrowserSurfaceRequest(request));
+ {action:'browserPip',applet:'youtube',rect,page:{width:1280,height:720}},{action:'browserHide',page:{width:1280,height:720}},
+ {action:'browserLayout',rect,copy:{rect}},{action:'browserLayout',rect,copy:{rect,page:{width:0,height:1}}},{action:'browserLayout',rect,copy:{rect,page:{width:1280,height:720},url:'https://example.com/'}},
+ {action:'browserLayout',rect,takeCopy:'yes'},{action:'browserLayout',rect,takeCopy:true,copy:{rect,page:{width:1280,height:720}}},{action:'browserShow',rect,platform:'web',takeCopy:true}])assert.throws(()=>readBrowserSurfaceRequest(request));
 const sent:unknown[]=[];
 (globalThis as any).window={worldletHost:{version:1,platform:'macos',request:async body=>{sent.push(body);return {ok:true};}}};
 await assert.rejects(callHost('browserLayout',{rect:{...rect,width:-1}}));
