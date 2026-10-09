@@ -90,7 +90,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  const orderStatus=()=>call('order',{operation:'status'}).then(r=>setOrderMode(r?.available&&r.ready?'order':'feedback'),()=>setOrderMode('feedback'));
  void orderStatus();window.addEventListener('worldlet:app-update',()=>void orderStatus());
  const endOrder=()=>{ordering=false;delete root.dataset.order;orderButton.removeAttribute('aria-pressed');orderButton.removeAttribute('aria-busy');};
- const orderSending=()=>{root.dataset.order='sending';orderButton.setAttribute('aria-busy','true');};
+ const orderSending=()=>{root.dataset.order='sending';orderButton.setAttribute('aria-busy','true');renderEntry();};
  orderButton.onclick=e=>{
   e.stopPropagation();
   if(orderMode==='feedback'&&!ordering){window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Feedback'}}));return;}
@@ -618,8 +618,13 @@ export function createNativeChat(call){return function({button,input,status,exec
   // or Fox brings back the hint, the microphone and Send, and a click opens it wide to type.
   const quiet=!expanded&&!speech&&!hoverInput&&!input.value.trim()&&!matchMedia('(hover: none)').matches;
   entry.dataset.quiet=String(quiet);
-  form.hidden=false;form.inert=false;fitInput(!expanded);inputState.hidden=true;
-  waveform.hidden=!speech;
+  // While the microphone listens, for Fox or for an Order, a sound wave stands where the bar was (owner request
+  // 2026-10-09); the bar comes back once the words are being understood or sent. While Fox speaks in Talk the open
+  // microphone only waits for an interruption, and the bar says how to interrupt.
+  const listening=(recording||starting)&&!(talk.on&&talk.phase!=='listening')&&root.dataset.order!=='sending';
+  entry.dataset.voice=String(listening);
+  form.hidden=listening;form.inert=listening;fitInput(!expanded);inputState.hidden=true;
+  waveform.hidden=!listening;
   state.textContent='';
   // A place with no conversation yet invites one; there is no canned greeting.
   // Resting, the bar says how to use it; once typing, it says whom you are asking.

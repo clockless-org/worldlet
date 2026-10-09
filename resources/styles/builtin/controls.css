@@ -155,10 +155,10 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 @media(min-width:801px){#notionWorld.native-console:is([data-detail-open=true],[data-depth=object]):not(.compact-viewport):not(.is-typing) .companion-dialogue{bottom:calc(204px + var(--fox-tag-room,0px))}}
 /* The bar has two sizes (owner Order 2026-10-08): small until it is focused, larger while typing. Pointing at it
    changes its look, never its size. */
-#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:200px}
-#notionWorld.native-console[data-entry-expanded=true] .companion-text-entry{--companion-bar-width:360px}
+#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:160px}
+#notionWorld.native-console[data-entry-expanded=true] .companion-text-entry{--companion-bar-width:300px}
 /* In a website the small bar also says it takes a web address (owner request 2026-10-07), so it is wide enough to read it. */
-#notionWorld.native-console:not([data-entry-expanded=true]) .companion-text-entry[data-website=true]{--companion-bar-width:272px}
+#notionWorld.native-console:not([data-entry-expanded=true]) .companion-text-entry[data-website=true]{--companion-bar-width:232px}
 /* At rest the bar is low-key (owner request 2026-10-05): fainter, its name only; pointing at it or at Fox brings
    back the hint. Send shows only once there is something to send. */
 #notionWorld.native-console:not([data-entry-expanded=true]) .companion-text-entry #notionCommand:has(#notionInput:placeholder-shown) #notionSend{display:none}
@@ -314,7 +314,10 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 @media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-text-entry #notionCommand,#notionWorld.native-console .companion-controls{transition:none}}
 #notionWorld.native-console .companion-text-entry #notionCommand,#notionWorld.native-console .companion-text-entry #notionCommand:focus-within{background:var(--control-glass)}
 #notionWorld.native-console .companion-text-entry #notionCommand[hidden]{display:none}
-#notionWorld.native-console .companion-input-wave{bottom:48px;top:auto;height:36px;pointer-events:none}
+/* While the microphone listens the bar gives way to a sound wave of the same size and glass (owner request 2026-10-09). */
+#notionWorld.native-console .companion-input-wave{position:absolute;inset:auto auto 0 50%;transform:translateX(-50%);box-sizing:border-box;width:min(var(--companion-bar-width),calc(100vw - 32px));height:44px;padding:0 16px;border:1px solid var(--system-glass-line);border-radius:22px;background:var(--system-glass-fill);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);pointer-events:none}
+#notionWorld.native-console .companion-input-wave i{flex:0 0 3px;width:3px}
+#notionWorld.native-console[data-order=listening] .companion-input-wave{color:#ffd7cf}
 #notionWorld.native-console .companion-listening-state,#notionWorld.native-console .companion-gesture-hint{display:none}
 #notionWorld.native-console .companion-avatar{cursor:grab}
 #notionWorld.native-console.is-dragging-fox .companion-avatar{cursor:grabbing}
