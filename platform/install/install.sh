@@ -57,7 +57,11 @@ if [ -n "${WORLDLET_INSTALL_DIR:-}" ]; then mkdir -p "$target"; elif [ ! -w "$ta
 if pgrep -xq Worldlet; then
   echo "Quitting the running Worldlet…"
   osascript -e 'quit app "Worldlet"' >/dev/null 2>&1 || true
-  sleep 2
+  # Quitting ends Hermes and the website engine first and can take several seconds. A copy opened while the old one
+  # still runs meets its single-instance lock and quits, so nothing opened after "Done" (10-09).
+  waited=0
+  while pgrep -xq Worldlet && [ "$waited" -lt 30 ]; do sleep 1; waited=$((waited + 1)); done
+  if pgrep -xq Worldlet; then fail "Worldlet is still running. Quit it from its menu, then run this command again."; fi
 fi
 echo "Installing into ${target}…"
 rm -rf "$target/Worldlet.app"
