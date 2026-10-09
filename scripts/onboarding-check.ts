@@ -30,11 +30,14 @@ const missing=[
 ];
 if(missing.length)fail('missing '+missing.join(' and '));
 
+// Each phase's time is printed, so a slow gate run shows where its minutes went (#41).
+const began=Date.now(),seconds=(since:number)=>`${Math.round((Date.now()-since)/1000)}s`;
 const build=(script:string)=>{const run=spawnSync(process.execPath,[script],{cwd:root,stdio:'inherit'});if(run.status!==0)fail(script+' failed');};
 if(!existsSync(path.join(root,'dist/WorldletWeb/index.html')))build('scripts/build-native-ui.ts');
 build('scripts/build-electron.ts');
 // Fox finishes the journey's task in the browser, so the pinned driver is required here.
 if(!process.env.WORLDLET_AGENT_BROWSER)await cachedAgentBrowser(root).catch(error=>fail('the browser driver: '+error.message));
+console.log(`Onboarding setup (builds, browser driver): ${seconds(began)}`);
 
 const profile=mkdtempSync(path.join(os.tmpdir(),'worldlet-onboarding-flow-'));
 // An empty preferences file: a disposable library never imports this Mac's Worldlet settings.
@@ -43,6 +46,10 @@ const logs=path.join(root,'.local/electron-checks');mkdirSync(logs,{recursive:tr
 const logFile=path.join(logs,'onboarding-flow.log'),log=createWriteStream(logFile);
 // RC 录像: pictures of the run for scripts/ui-review.ts (platform/electron/src/checks/index.ts).
 const env:NodeJS.ProcessEnv={...process.env,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile,WORLDLET_HERMES_PYTHON:hermes!};
+// The tour's phone step waits two minutes after the first win; here it waits WORLDLET_TOUR_CODA_MS (default 20 s), still
+// proven to wait and to come at a calm moment, so the gate's budget is not spent idle (#41). world-tour-check.ts (test:ui)
+// holds the two minutes on a moved clock.
+env.WORLDLET_TOUR_CODA_MS=process.env.WORLDLET_TOUR_CODA_MS||'20000';
 for(const key of ['ELECTRON_RUN_AS_NODE','WORLDLET_DEV_MODEL','WORLDLET_AGENT_CONFIG','WORLDLET_WORKTREE_PROFILE','WORLDLET_WEB_ROOT','WORLDLET_CAPTURE'])delete env[key];
 console.log(`Onboarding flow: library ${profile}, Hermes ${hermes}, log ${path.relative(root,logFile)}`);
 const started=Date.now();
@@ -74,7 +81,7 @@ console.log(summary);
 // rmdir, so files written meanwhile kept it failing (#1239): wait for them to exit (ending them after
 // 15 s), then remove the whole tree again on each attempt. The journey passed, so a library that still
 // cannot be removed is reported and left in the temporary folder.
-const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
+const cleanup=Date.now(),sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 const holders=()=>process.platform==='win32'?[]:(spawnSync('pgrep',['-f',profile],{encoding:'utf8'}).stdout??'').split('\n').map(Number).filter(Boolean);
 for(let waited=0;waited<20_000&&holders().length;waited+=250){
  if(waited===15_000)for(const pid of holders())try{process.kill(pid,'SIGKILL');}catch{}
@@ -85,3 +92,4 @@ for(let attempt=0;attempt<10&&!removed;attempt++){
  try{rmSync(profile,{recursive:true,force:true});removed=true;}catch{await sleep(500);}
 }
 if(!removed)console.warn(`warning: could not remove the onboarding library ${profile} (still held by ${holders().join(', ')||'no process'})`);
+console.log(`Onboarding cleanup: ${seconds(cleanup)}; whole run ${seconds(began)}`);

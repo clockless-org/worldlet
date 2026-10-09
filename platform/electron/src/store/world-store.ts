@@ -22,7 +22,7 @@ export function canBuild(connection:Row){
  if(!connection.transport||AGENT_TRANSPORTS_WITHOUT_LIFECYCLE.includes(connection.transport))return true;
  return ['connected','sync_error','syncing','reading'].includes(connection.syncStatus??'');
 }
-export interface StoreOptions {appName:string;platform:string;capabilities:()=>Row;mockGoogleAvailable:boolean;googleClientID?:string}
+export interface StoreOptions {appName:string;platform:string;capabilities:()=>Row;mockGoogleAvailable:boolean;googleClientID?:string;tourCodaAfterWinMs?:number}
 export interface AppletActivity {turn:string;calls:string[];succeeded:boolean;failed:boolean;summary:string;needsAttention:boolean;count?:number;readTurns?:string[]}
 function freshState():Row {
  return {version:1,workspaceId:crypto.randomUUID().toUpperCase(),revision:0,sources:[],knowledge:[],layout:null,connections:[],codexPath:'',model:'',cloudConsent:false,lastJob:'Not yet generated',autoSync:false,onboarding:{unlockedApplets:['app-gmail'],version:1,presets:['home'],completed:false}};
@@ -197,7 +197,7 @@ export class WorldStore {
   // One projection per snapshot, shared by every connection below.
   const worldItems=this.worldItems(),worldChecks=this.worldChecks(),attentionPending=this.attentionPendingProviders();
   return {
-   appName:this.options.appName,platform:this.options.platform,hostCapabilities:this.options.capabilities(),mockGoogleAvailable:this.options.mockGoogleAvailable,
+   appName:this.options.appName,platform:this.options.platform,hostCapabilities:this.options.capabilities(),mockGoogleAvailable:this.options.mockGoogleAvailable,...this.options.tourCodaAfterWinMs?{tourCodaAfterWinMs:this.options.tourCodaAfterWinMs}:{},
    worldItems,worldChecks,activityRevision:this.activityRevision,onboarding:this.state.onboarding??{version:1,presets:['home'],completed:false},
    cloudConsent:this.state.cloudConsent===true,busy:this.busy,sampleUI:{...this.sampleUI},textScale:this.preferences.number('worldlet.textScale',0),
    sampleEnabled:this.sampleEnabled(),workspaceId:this.state.workspaceId,revision:this.state.revision,sources:this.sourceRows(knowledge),knowledge,
