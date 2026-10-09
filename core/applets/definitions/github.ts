@@ -1,6 +1,6 @@
 // App-owned identity, visual recipe and connection declaration. No credentials or user data.
 export default {
-  fullView: {kind:'scene'},
+  fullView: {kind:'scene',original:{url:'https://github.com/',platform:'web'}},
   "id": "app-github",
   "key": "github",
   "title": "GitHub",
