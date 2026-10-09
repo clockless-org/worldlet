@@ -15,6 +15,7 @@ export * from './harness-usage.ts';
 export * from './harness-schedule.ts';
 export * from './harness-sessions.ts';
 export * from './hermes-server.ts';
+export * from './hermes-setup.ts';
 export * from './harness-tools.ts';
 export * from './harness-events.ts';
 export * from './harness-calls.ts';

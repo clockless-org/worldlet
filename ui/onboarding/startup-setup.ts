@@ -32,9 +32,18 @@ export function mountStartupSetup({state:initial,call,complete}){
  // "My Agent is on another computer" (core/phone/README.md#another-computers-agent): the code Worldlet there shows,
  // pasted here, pairs this Worldlet with it and Fox's conversation runs on its Agent.
  let remoteForm=false,remoteCode='',pairingRemote=false;
- // No Agent here: the API-key form for the built-in Agent (`modelCatalog`, `modelConfigure`). The key lives only in
- // this variable until it is sent, never in the draft or storage.
- let keyForm=false,savingKey=false,keyProviders:{id:string,name:string,provider:string,model:string,baseURL:string,keyEnv?:string}[]=[],keyProvider='',keyModel='',keySecret='';
+ // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
+ // the person signs in to ChatGPT inside it with Hermes' own sign-in (`sign-in-hermes`), owner decisions 2026-10-09.
+ // `hermesStep` is the installer's step being run; `hermesCode` the code Hermes' device page asks for, when it does.
+ let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null;
+ const onHermesSetup=(event:Event)=>{
+  const detail=(event as CustomEvent).detail;if(disposed||!detail)return;
+  if(detail.stage==='install'&&hermesSetup==='installing'&&Number.isInteger(detail.step)&&Number.isInteger(detail.steps)&&typeof detail.title==='string')hermesStep=t('Step {step} of {steps}: {title}').replace('{step}',String(detail.step)).replace('{steps}',String(detail.steps)).replace('{title}',detail.title.slice(0,80));
+  else if(detail.stage==='sign-in'&&hermesSetup==='signing-in')hermesCode=typeof detail.code==='string'&&/^[A-Z0-9-]{4,20}$/.test(detail.code)?detail.code:null;
+  else return;
+  render();
+ };
+ window.addEventListener('worldlet:hermes-setup',onHermesSetup);
  // The second page brings the chosen Agent in while the person watches (owner request 2026-10-04):
  // its card reads its name, personality, memory and model, while one line flashes what is happening
  // (owner request 2026-10-06: no list). `facts` and `shown` pace that reveal; `chatter` turns the
@@ -161,30 +170,28 @@ export function mountStartupSetup({state:initial,call,complete}){
   };
   revealTimer=window.setTimeout(tick,300);
  }
- /** The no-Agent block: what to install, Check again, or an API key for the Hermes Agent Worldlet sets up (standardHermes). */
+ /** The no-Agent block: Worldlet installs Hermes Agent (the page's one button), then ChatGPT is signed in inside it;
+  * Check again looks for an Agent installed meanwhile. */
  function noAgent(){
-  const box=node('div','','setup-agent-needed');
-  box.append(node('p',t('No agent found on this computer. Install Hermes Agent, OpenClaw, pi, Codex or Claude Code and check again, or use an API key and Worldlet sets up Hermes Agent with it.'),'setup-note'));
+  const box=node('div','','setup-agent-needed');box.setAttribute('aria-live','polite');
+  const says={
+   idle:'No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',
+   installing:'Installing Hermes Agent…',
+   installed:'Hermes Agent is installed. Sign in to ChatGPT in it. To use another model, run hermes model in Terminal, then check again.',
+   'signing-in':'Continue in your browser.'
+  }[hermesSetup];
+  // One line, so the page still fits: the installer's step while it runs, the code Hermes' device page asks for after
+  // the browser line.
+  const line=node('p',hermesSetup==='installing'&&hermesStep?hermesStep:t(says),'setup-note');
+  if(hermesSetup==='signing-in'&&hermesCode){const code=node('span',' '+t('Enter this code: '),'setup-hermes-code');code.append(node('strong',hermesCode));line.append(code);}
+  box.append(line);
   const links=node('div','','setup-agent-fallback');
-  const link=(label:string,fn:()=>void)=>{const b=node('button',t(label),'setup-link') as HTMLButtonElement;b.type='button';b.disabled=busy||savingKey;b.onclick=fn;links.append(b);return b;};
-  link('Check again',()=>{keyForm=false;void detectAgents();render();});
-  if(!keyForm)link('Use an API key',()=>{keyForm=true;error='';render();void loadKeyProviders();});
+  const link=(label:string,fn:()=>void)=>{const b=node('button',t(label),'setup-link') as HTMLButtonElement;b.type='button';b.onclick=fn;links.append(b);return b;};
+  if(hermesSetup==='signing-in')link('Cancel sign-in',()=>void call('agentHarness',{operation:'cancel-sign-in'}).catch(()=>{}));
+  else if(hermesSetup!=='installing')link('Check again',()=>void detectAgents()).disabled=busy;
   box.append(links);
-  if(keyForm){
-   const form=node('div','','setup-key-form');
-   const field=(label:string,input:HTMLInputElement|HTMLSelectElement)=>{const wrap=node('label',t(label),'setup-key-field');wrap.append(input);form.append(wrap);};
-   const select=document.createElement('select');select.setAttribute('aria-label',t('Provider'));select.disabled=savingKey;
-   for(const item of keyProviders){const option=document.createElement('option');option.value=item.id;option.textContent=item.name;option.selected=item.id===keyProvider;select.append(option);}
-   select.onchange=()=>{keyProvider=select.value;keyModel=keyProviders.find(p=>p.id===keyProvider)?.model||'';render();};
-   const model=document.createElement('input');model.value=keyModel;model.spellcheck=false;model.autocomplete='off';model.setAttribute('aria-label',t('Model ID'));model.disabled=savingKey;
-   model.oninput=()=>{keyModel=model.value;syncKey();};
-   const key=document.createElement('input');key.type='password';key.value=keySecret;key.autocomplete='off';key.spellcheck=false;key.setAttribute('aria-label',t('API key'));key.disabled=savingKey;
-   key.oninput=()=>{keySecret=key.value;syncKey();};
-   field('Provider',select);field('Model ID',model);field('API key',key);
-   box.append(form);
-   // The cloud agents' feedback line is hidden with them, so a failed connection says why here.
-   if(error){const feedback=node('p',t(error),'setup-error setup-key-error');feedback.setAttribute('role','alert');box.append(feedback);}
-  }
+  // Past its first line the block takes the cloud agents' room (both coming soon), whose feedback line goes with it.
+  if(hermesSetup!=='idle'&&error){const feedback=node('p',t(error),'setup-error setup-key-error');feedback.setAttribute('role','alert');box.append(feedback);}
   return box;
  }
  /** The link to an Agent on another computer, beside the local Agents' heading (the page never scrolls), and its code
@@ -213,32 +220,21 @@ export function mountStartupSetup({state:initial,call,complete}){
    window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
   }finally{pairingRemote=false;}
  }
- // Typing enables Connect without rebuilding the page (which would move the caret).
- function syncKey(){const next=document.querySelector('.startup-setup .setup-next') as HTMLButtonElement|null;if(next&&keyForm)next.disabled=!keyProvider||!keyModel.trim()||!keySecret.trim()||savingKey;}
- async function loadKeyProviders(){
-  if(keyProviders.length)return;
-  // API-key providers the built-in Agent connects here; sign-in providers (ChatGPT) and custom endpoints stay in Settings.
-  const order=['anthropic','openai-api','openai','openrouter','gemini'];
-  try{
-   const {providers=[]}=await call('modelCatalog');
-   keyProviders=providers.filter(p=>p?.nativeSetup&&!p.keyless&&!p.local&&p.id!=='custom'&&p.provider!=='openai-codex'&&typeof p.name==='string')
-    .sort((a,b)=>((order.indexOf(a.id)+1||99)-(order.indexOf(b.id)+1||99))||a.name.localeCompare(b.name,'en'));
-   keyProvider=keyProviders[0]?.id||'';keyModel=keyProviders[0]?.model||'';
-  }catch(e){error=e?.message||'That didn’t finish. Please try again.';}
-  if(!disposed&&!busy)render();
+ /** Installs Hermes Agent the official way (to its default location; nothing when one is already here). */
+ async function installHermes(){
+  hermesSetup='installing';hermesStep='';render();
+  try{await call('agentHarness',{operation:'install-hermes'});hermesSetup='installed';}
+  catch(e){hermesSetup='idle';throw e;}
  }
- async function connectKey(){
-  const provider=keyProviders.find(p=>p.id===keyProvider);
-  if(!provider)return;
-  savingKey=true;render();
-  const request={provider:provider.provider,baseURL:provider.baseURL,model:keyModel.trim(),apiKey:keySecret.trim()};
-  keySecret='';
-  try{
-   const pending=call('modelConfigure',request);request.apiKey='';await pending;
-   await call('foxPreferences',{cloudConsent:true});
-   keyForm=false;draft.ownModel=true;draft.consent=true;notice='';step=1;persist();
-   window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
-  }finally{savingKey=false;request.apiKey='';}
+ /** ChatGPT signed in inside Hermes Agent, then Hermes is brought like any Agent found here. */
+ async function signInHermes(){
+  hermesSetup='signing-in';hermesCode=null;render();
+  try{await call('agentHarness',{operation:'sign-in-hermes'});}
+  catch(e){hermesSetup='installed';throw e;}
+  hermesSetup='idle';
+  await detectAgents();
+  picked='hermes';
+  await chooseAgent('hermes');
  }
  const button=(label,fn,primary=false)=>{const b=node('button',t(label),primary?'setup-primary':'') as HTMLButtonElement;b.type='button';b.disabled=busy;b.onclick=()=>void run(fn);return b;};
  async function run(fn){if(busy)return;busy=true;error='';render();try{await fn();}catch(e){error=/cancel/i.test(e.message||'')?'Your request was cancelled.':e.message||'That didn’t finish. Please try again.';}finally{busy=false;if(!disposed)render();}}
@@ -312,7 +308,7 @@ export function mountStartupSetup({state:initial,call,complete}){
    ]);logo.remove();
   }));
   gathering.id='setupArrivingDevices';document.body.append(gathering);
-  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('resize',refit);
+  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('resize',refit);
   // Keep the final setup surface until the first world frame is ready.
   loader.classList.add('setup-entering');
   document.dispatchEvent(new Event('worldlet:setup-complete'));
@@ -461,8 +457,8 @@ export function mountStartupSetup({state:initial,call,complete}){
    // cloud agent (Google and ChatGPT, coming soon). Each local Agent shows its own name; ones not on
    // this computer stay listed, greyed, so people know they are supported.
    const list=node('div','','setup-signin');list.setAttribute('role','group');list.setAttribute('aria-label',t('Ways to continue'));
-   // The API-key form takes the cloud agents' room (both are coming soon), so the page still fits without scrolling.
-   if(keyForm&&!agents.length&&!detectingAgents)list.classList.add('is-key-form');
+   // Installing Hermes Agent and signing in take the cloud agents' room, so the page still fits without scrolling.
+   if(hermesSetup!=='idle'&&!agents.length&&!detectingAgents&&!remoteForm)list.classList.add('is-hermes-setup');
    const group=(title:string,cls:string)=>{const g=node('section','','setup-signin-group '+cls);g.append(node('h2',t(title),'setup-signin-heading'));list.append(g);return g;};
    const option=(into:HTMLElement,label:string,icon:string,tag='')=>{
     const b=button(label,async()=>{});b.classList.add('setup-signin-option');b.prepend(image(icon,'setup-signin-icon'));b.disabled=true;
@@ -475,12 +471,12 @@ export function mountStartupSetup({state:initial,call,complete}){
    // picked one is forest; found ones first, in AGENT_PRIORITY order.
    const tiles=node('div','','setup-agent-grid');local.append(tiles);
    const rank=(id:string)=>(agents.some(a=>a.id===id)?0:10)+AGENT_PRIORITY.indexOf(id);
-   for(const harness of [...LOCAL_HARNESSES].sort((x,y)=>rank(x.id)-rank(y.id))){
+   // Codex alone is no Agent for Fox (owner decision 2026-10-09 11:51 PDT), so it has no tile.
+   for(const harness of LOCAL_HARNESSES.filter(item=>item.id!=='codex').sort((x,y)=>rank(x.id)-rank(y.id))){
     const found=agents.find(a=>a.id===harness.id),title=found?.title||harness.title,connecting=connectingAgent===harness.id,chosen=harness.id===picked&&!!found;
     // Its own name first, then where it comes from and what comes along (two facts fit a tile).
     const history=found?.memory?.history,parts:string[]=[];
     if(found?.memory?.name)parts.push(title);
-    if(harness.id==='codex'&&found)parts.push(t((found as any).model===false?'Sign in to Codex first':'Your ChatGPT plan'));
     if(history?.conversations)parts.push(t('{count} conversations').replace('{count}',String(history.conversations)));
     if(history?.notes)parts.push(t('{count} notes').replace('{count}',String(history.notes)));
     if(found&&!parts.length)parts.push(t(found.memory?'Its memory comes along':'On this computer'));
@@ -498,8 +494,7 @@ export function mountStartupSetup({state:initial,call,complete}){
    }
    // Worldlet provides no model of its own (owner request 2026-10-05): Fox runs only on an Agent on this computer,
    // so with none found, the page says what to install.
-   // With none found there is no dead end (owner decision 2026-10-07): look again after installing one, or give the
-   // built-in Agent a model with an API key and go on to the apps page.
+   // With none found there is no dead end (owner decisions 2026-10-07, 2026-10-09): Worldlet installs Hermes Agent.
    if(remoteForm)local.append(remoteAgent());
    else if(!detectingAgents&&!agents.length)local.append(noAgent());
    // Cloud agents are coming soon (owner request 2026-10-05): Google, then ChatGPT; Muse is gone. Google is greyed
@@ -530,9 +525,13 @@ export function mountStartupSetup({state:initial,call,complete}){
    content.append(list);
    // The one Continue brings the picked Agent (owner request 2026-10-06).
    const going=connectingAgent?agents.find(a=>a.id===connectingAgent):null;
-   // The API-key form's Connect is the page's one button while it is open.
+   // With no Agent here, installing Hermes Agent and then signing in to ChatGPT in it is the page's one button.
    if(remoteForm){primary=button(pairingRemote?'Connecting to your other computer…':'Connect',pairRemote,true);primary.classList.toggle('is-loading',pairingRemote);if(!remoteCode.trim()||pairingRemote||signingIn)primary.disabled=true;}
-   else if(keyForm&&!agents.length){primary=button(savingKey?'Connecting…':'Connect',connectKey,true);primary.classList.toggle('is-loading',savingKey);if(!keyProvider||!keyModel.trim()||!keySecret.trim()||signingIn)primary.disabled=true;}
+   else if(!detectingAgents&&!agents.length&&!connectingAgent){
+    const working=hermesSetup==='installing'||hermesSetup==='signing-in';
+    primary=button(hermesSetup==='installing'?'Installing Hermes Agent…':hermesSetup==='signing-in'?'Waiting for ChatGPT…':hermesSetup==='installed'?'Sign in with ChatGPT':'Install Hermes Agent',hermesSetup==='installed'?signInHermes:installHermes,true);
+    primary.classList.toggle('is-loading',working);if(working||signingIn)primary.disabled=true;
+   }
    else{
     primary=button(going?agentText('Connecting to {agent}…',going.title):'Continue',()=>chooseAgent(picked),true);
     primary.classList.toggle('is-loading',!!going);if(!picked||!agents.some(a=>a.id===picked)||signingIn)primary.disabled=true;
@@ -557,7 +556,7 @@ export function mountStartupSetup({state:initial,call,complete}){
  detectingAgents=true;
  return Promise.resolve().then(()=>call('agentHarness',{operation:'detect'})).then(result=>{
   if(disposed)return;
-  const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'):[];
+  const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'&&a.id!=='codex'):[];
   // A choice the host no longer has (removed, or reset) returns to the first page.
   if(typeof draft.agent==='string'&&result?.selected!==draft.agent){delete draft.agent;delete draft.apps;persist();if(step===1&&!connected()){step=0;}}
   else if(typeof result?.selected==='string'&&step===0&&found.some(a=>a.id===result.selected)){draft.agent=result.selected;draft.agentName=agentName(found.find(a=>a.id===result.selected));step=1;persist();}
@@ -575,9 +574,9 @@ export function mountStartupSetup({state:initial,call,complete}){
  async function connectRequested(){
   const asked=await call('agentHarness',{operation:'requested'}).catch(()=>null);
   if(disposed)return;
-  const plan=connectRequestPlan(asked?.id,{firstPage:step===0,found:agents,busy:busy||signingIn||!!connectingAgent||pairingRemote||savingKey});
+  const plan=connectRequestPlan(asked?.id,{firstPage:step===0,found:agents,busy:busy||signingIn||!!connectingAgent||pairingRemote||hermesSetup==='installing'||hermesSetup==='signing-in'});
   if(!plan.pick)return;
-  picked=plan.pick;remoteForm=false;keyForm=false;
+  picked=plan.pick;remoteForm=false;
   if(plan.select){autoContinue=true;void run(async()=>{try{await chooseAgent(plan.pick);}catch(e){autoContinue=false;throw e;}});return;}
   if(plan.missing)error=agentText('{agent} isn’t installed on this computer.',LOCAL_HARNESSES.find(h=>h.id===plan.pick)?.title||plan.pick);
   if(!busy)render();
