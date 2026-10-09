@@ -10,7 +10,12 @@ export async function latestMacRelease(arch: 'arm64' | 'x86_64' = 'arm64') {
   const ns = 'http://www.andymatuschak.org/xml-namespaces/sparkle';
   const releases = [...xml.querySelectorAll('item')].flatMap(item => {
     try {
-      const enclosure = item.querySelector('enclosure'), url = new URL(enclosure.getAttribute('url'));
+      const enclosure = item.querySelector('enclosure');
+      let url = new URL(enclosure.getAttribute('url'));
+      // CI Builds' feeds point at this repository's GitHub Release (docs/RELEASING.md); the website's /downloads/ forwards
+      // there by file name, so the same file is offered at its same-origin address.
+      const github = /^\/clockless-org\/worldlet\/releases\/download\/v[\d.]+\/(Worldlet-[^/]+)$/.exec(url.origin === 'https://github.com' ? url.pathname : '');
+      if (github && !url.search && !url.hash) url = new URL('/downloads/' + github[1], location.origin);
       if (!trustedOrigins.has(url.origin) || url.username || url.password || url.search || url.hash || !/^\/downloads\/Worldlet-\d+\.\d+\.\d+-\d+(?:\.\d+){0,2}-macos-(arm64|x86_64|universal)\.(?:dmg|zip)$/.test(url.pathname) || !(url.pathname.endsWith('-macos-universal.dmg') || url.pathname.endsWith(`-macos-${arch}.dmg`))) return [];
       const version = item.getElementsByTagNameNS(ns, 'shortVersionString')[0]?.textContent || '';
       const build = item.getElementsByTagNameNS(ns, 'version')[0]?.textContent || url.pathname.match(/-(\d+(?:\.\d+){0,2})-macos-/)[1];
