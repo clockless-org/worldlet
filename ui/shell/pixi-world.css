@@ -487,11 +487,12 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld:has(.browser-back[data-web-page])>.applet-bar-left>#notionBack{display:none}
 /* The Applet shelf (hud/applet-shelf.ts, owner request 2026-10-09): the recent Applets stand on a wooden ledge over the
    Applet's side in place of its title, the open one in the middle, largest and lit; the others smaller and fainter the
-   further they stand. Moving between Applets slides them along the ledge. The Applet's panel starts below its names. */
+   further they stand. Moving between Applets slides them along the ledge. The Applet's panel starts below its names.
+   The ledge is a faint line fading at both ends, not a plank (owner feedback 2026-10-09: 下面那个 bar 太明显了). */
 #notionWorld>.applet-shelf{position:absolute;z-index:39;left:0;top:6px;width:calc(100% - var(--reader-companion-lane,464px));height:136px;pointer-events:none;font:600 12px/1.2 var(--ui-font-ui,system-ui)}
 #notionWorld>.applet-shelf[hidden]{display:none}
 #notionWorld[data-applet-shelf]>.companion-context{visibility:hidden}
-#notionWorld .applet-shelf-ledge{position:absolute;left:calc(var(--applet-bar-start) + 52px);right:var(--applet-shelf-controls,16px);top:92px;height:12px;border-radius:4px 4px 7px 7px;background:linear-gradient(#e2c99c,#b8935f 55%,#8d6a3e);box-shadow:0 3px 6px #28190a59,inset 0 1px 0 #fff5dcb3}
+#notionWorld .applet-shelf-ledge{position:absolute;left:calc(var(--applet-bar-start) + 52px);right:var(--applet-shelf-controls,16px);top:96px;height:5px;border-radius:3px;background:linear-gradient(#f1dfba,#c9a874);opacity:.5;box-shadow:0 2px 4px #28190a26;-webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
 #notionWorld .applet-shelf-tab{position:absolute;top:94px;width:0;height:0;transition:left 320ms cubic-bezier(.2,.7,.3,1)}
 #notionWorld .applet-shelf-pick{pointer-events:auto;position:absolute;left:0;bottom:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;padding:0;border:0;background:none;color:#fffaf0;cursor:pointer}
 #notionWorld .applet-shelf-pick img,#notionWorld .applet-shelf-mark{width:var(--shelf-size,48px);height:var(--shelf-size,48px);object-fit:contain;transition:width 320ms cubic-bezier(.2,.7,.3,1),height 320ms cubic-bezier(.2,.7,.3,1),opacity 320ms,filter 320ms;filter:drop-shadow(0 3px 3px #28190a66)}

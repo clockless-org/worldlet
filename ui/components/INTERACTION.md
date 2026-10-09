@@ -238,7 +238,7 @@ Measures live in `ui/components/layout.css` (`--applet-bar-*`), the sides' style
 <a id="applet-shelf"></a>
 ### Applet shelf
 
-Owner request 2026-10-09: 「applet之间要可以丝滑切换，进入applet后，上方显示最近使用的applets，像一个一个tab，开新tab是进入browser，切换的时候，背景也丝滑切换」; 「当前 applet 要在中间」. Inside an Applet on a window wider than 800px, the recently used Applets stand on a small wooden shelf above it, each its World device with its name below, in place of the title:
+Owner request 2026-10-09: 「applet之间要可以丝滑切换，进入applet后，上方显示最近使用的applets，像一个一个tab，开新tab是进入browser，切换的时候，背景也丝滑切换」; 「当前 applet 要在中间」. Inside an Applet on a window wider than 800px, the recently used Applets stand on a shelf above it, a faint line fading at both ends rather than a plank (「下面那个 bar 太明显了」), each its World device with its name below, in place of the title:
 
 - **The open Applet stands in the middle**, largest and lit, its name on a cream label; the others grow smaller and fainter the further they stand from it.
 - **One ring.** The Applets keep one order around the open one, so picking one slides the shelf to bring it to the middle and both sides always hold Applets. A new Applet joins the ring; one already on it keeps its place. Rules in `core/applets/shelf.ts`.
