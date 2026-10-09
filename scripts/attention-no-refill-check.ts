@@ -1,7 +1,7 @@
 // Synthetic bridge and durable fixture only: no mailbox, model or account calls.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl} from './browser-test.ts';
+import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1372,height:720},reducedMotion:'reduce'});
@@ -28,7 +28,7 @@ try{
  const row=(id:string)=>page.locator('.world-matter[data-world-item-id="'+id+'"]');
  const preview=page.locator('#attentionPreview');
  await page.goto(url);
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  await page.getByRole('button',{name:'Go to Later',exact:true}).waitFor();
  const initial=await rows();assert.ok(initial.length>2&&initial.length<14,'Fixture must have visible members and trimmed pressing backlog');
  // Dismiss only closes the card: nothing leaves the Center (owner decision).
@@ -47,7 +47,7 @@ try{
  }
  assert.deepEqual(await page.evaluate(()=>(window as any).fixture.worldItems.filter(i=>i.id==='task-0'||i.id==='task-0-copy').map(i=>i.status)),['done','done'],'Every clustered member is durably settled');
  const settled=await rows();
- await page.reload();await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.reload();await waitForWorld(page);
  await page.getByRole('button',{name:'Go to Later',exact:true}).waitFor();
  assert.deepEqual(await rows(),settled,'Restart preserves the reduced focus set and settled duplicate');
  await page.evaluate(()=>{const w=window as any;w.fixture.worldItems.push({...w.fixture.worldItems[0],id:'re-extracted-old',status:'open'});w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl} from './browser-test.ts';
+import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 const label=process.argv[2]||'after';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
@@ -10,7 +10,7 @@ try{
   if(b.action==='modelStatus')return {available:true};if(b.action==='weatherLoad')return null;return {ok:true};
  }}}};});
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  assert.equal(await page.title(),'Worldlet');
  for(const lighting of ['day','night']){
   await page.evaluate(lighting=>(window as any).worldletExecute('set_scene_lighting',{lighting}),lighting);

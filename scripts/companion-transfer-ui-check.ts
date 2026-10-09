@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {withBrowser,fileAccess,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1380,height:900},reducedMotion:'reduce'});
 await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);if(b.action==='snapshot')return {appName:'Worldlet Dev — codex/long-worktree-companion-profile · a26c46',workspaceId:'transfer',revision:0,sources:[],knowledge:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail']},sampleEnabled:false,cloudConsent:true};if(b.action==='companionProfile')return {name:'Fox',createdAt:'2026-09-01T12:00:00Z',personality:'Curious, thoughtful and playful.'};if(b.action==='modelStatus')return {available:true,provider:'hermes'};if(b.action==='companionArchive'&&b.operation==='choose')return {id:'reviewed',name:'Imported Fox',memories:2,messages:7};return {ok:true};}}}};});
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  assert.equal(await page.title(),'Worldlet Dev — codex/long-worktree-companion-profile · a26c46');
  await page.locator('.companion-context').getByText('Worldlet Dev — codex/long-worktree-companion-profile · a26c46',{exact:true}).waitFor();
  assert(await page.locator('.companion-context .companion-name').evaluate(e=>e.scrollWidth<=e.clientWidth+1&&getComputedStyle(e).overflow!=='hidden'),'Full worktree name remains readable');

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {execFileSync,spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {withBrowser,fileAccess,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,worldUrl,waitForWorld} from './browser-test.ts';
 import path from 'node:path';
 // The adapter runs on a bare environment. Windows has no /usr/bin/python3: there it is the installation
 // behind `python3` (the gate's shim), which also needs SystemRoot.
@@ -33,7 +33,7 @@ await withBrowser(fileAccess,async browser=>{
   return {ok:true};
  }}}};});
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  await page.locator('#notionInput').click();const input=page.locator('#notionInput');await input.fill('open browser');await input.press('Enter');
  await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='app-browser');
  await page.waitForFunction(()=>document.querySelector('#worldConversation')?.textContent.includes('Browser is open.'));

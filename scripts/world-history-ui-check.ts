@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {worldHistoryPage} from '../core/items/index.ts';
 import {worldEvent,recentWorldHistory} from '../core/items/world-events.ts';
-import {pageErrors,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 assert.equal(worldEvent('worldHistory',{}),null,'History reads must not journal themselves');
 assert.deepEqual(recentWorldHistory([{kind:'conversation.message',at:'now',body:{preview:'private'}},{kind:'applet.check',key:'gmail',at:'now',body:{status:'complete'}}],8),[{kind:'applet.check',applet:'gmail',at:'now',status:'complete'}]);
 const browser=await chromium.launch({executablePath:process.env.WORLDLET_TEST_BROWSER,args:['--allow-file-access-from-files',...(process.platform==='darwin'?['--use-angle=metal']:[])]});
@@ -15,7 +15,7 @@ try{
 if(b.action==='worldHistory'){(window as any).historyCalls++;if((window as any).historyFail)throw Error('Fixture offline');if((window as any).historySample)return {entries:[],sample:true};if((window as any).historyFixture){const rows=(window as any).historyFixture;return {entries:rows.filter(row=>!b.before||row.seq<b.before).slice(0,50)};}const head=b.before?b.before-1:(window as any).historyHead;return {entries:Array.from({length:Math.min(50,head)},(_,i)=>({seq:head-i,at:1720000000+head-i,kind:(head-i)%7===0?'applet.check':'conversation.message',key:'gmail',body:(head-i)%7===0?{status:'complete'}:{actor:(head-i)%4===2?'fox':'user',preview:'Fixture message '+(head-i)+' <b>plain text</b>'}}))};}
   return {ok:true};
  }}}};});
- await page.goto(process.env.WORLDLET_TEST_URL||worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(process.env.WORLDLET_TEST_URL||worldUrl());await waitForWorld(page);
  await openCompanionPanel(page);
  // Every recorded event lives in Settings › Troubleshoot; History is the plain feed.
  const panel=page.locator('#companionInfo'),history=panel.locator('.companion-history-records');
@@ -49,7 +49,7 @@ if(b.action==='worldHistory'){(window as any).historyCalls++;if((window as any).
  const projected=worldHistoryPage({rows:raw,limit:50}).events.map(row=>({...row,at:Date.parse(String(row.at))/1000}));
  for(const [host,fixture] of [['legacy-mac',raw],['mac',projected],['windows',projected]] as const){
   await page.evaluate(rows=>{(window as any).historySample=false;(window as any).historyFixture=rows;sessionStorage.setItem('history-fixture',JSON.stringify(rows));},fixture);
-  await page.reload();await page.locator('#worldStartup').waitFor({state:'detached'});
+  await page.reload();await waitForWorld(page);
   await openCompanionPanel(page);await panel.getByRole('tab',{name:'Settings',exact:true}).click();await panel.locator('[data-setting=troubleshoot]').click();await history.getByText('Source: Browser',{exact:false}).first().waitFor();
   assert.equal(await history.locator('li').count(),9,host+' retained fixture after reload');
   assert.deepEqual(await history.locator('li').evaluateAll(rows=>rows.map(row=>(row as HTMLElement).dataset.seq)),raw.map(row=>String(row.seq)));

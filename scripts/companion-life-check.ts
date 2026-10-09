@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import {activityPose,ambientPose} from '../ui/companion/companion-life.ts';
 import {companionPose} from '../ui/companion/companion-frames.ts';
 assert.equal(companionPose('idle',180000),'idle');
@@ -20,7 +20,7 @@ await withBrowser(fileAccess,async browser=>{
   return {ok:true};
  }}}};});
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  const fox=page.locator('.companion-avatar'),before=await fox.boundingBox();
  // One task: under software rendering a frame can outlast the 280 ms hold-to-talk timer before a real move lands.
  await fox.evaluate((el,[x,y])=>{const at=(type:string,dx:number,dy:number)=>el.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,buttons:type==='pointerup'?0:1,clientX:x+dx,clientY:y+dy}));
@@ -62,7 +62,7 @@ await withBrowser(fileAccess,async browser=>{
   const bounds=await fox.boundingBox();assert(bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=viewport.width,'Dragged Fox remains on screen');
  }
  await page.setViewportSize({width:1380,height:900});await page.waitForTimeout(350);
- await page.reload();await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.reload();await waitForWorld(page);
  assert.equal(await page.locator('#notionHUD').getAttribute('data-positioned'),'true','Saved anchor is restored');
  assert.deepEqual(errors,[]);console.log('PASS Companion life: typed tool/stage routing, explicit visual fallback, waiting dots, no three-minute sleep, world drag, saved anchor, one dialogue and no progress/completion bubbles');
 });

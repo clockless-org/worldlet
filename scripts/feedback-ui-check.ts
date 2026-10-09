@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1380,height:900},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{window.calls=[];(window as any).failFeedback=true;window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);if(b.action==='snapshot')return {workspaceId:'feedback-fixture',revision:0,sources:[],knowledge:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail']},sampleEnabled:false,cloudConsent:true};if(b.action==='modelStatus')return {available:true,provider:'hermes'};if(b.action==='feedback'){if((window as any).failFeedback)throw Error('Fixture offline');return {ok:true,id:b.id};}return {ok:true};}}}};});
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  await page.evaluate(()=>{const r=document.querySelector<HTMLElement>('#notionWorld')!;r.dataset.depth='object';r.dataset.page='app-gmail';});
  await page.locator('#notionInput').click();
  assert.equal(await page.locator('#companionInfo').evaluate(e=>(e as HTMLDetailsElement).open),false,'Clicking the message bar in an Applet does not open the panel');

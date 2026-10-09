@@ -3,7 +3,7 @@
 // its day in Calendar. The same rows go to the paired phone (native-hud onAttention).
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl} from './browser-test.ts';
+import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce',timezoneId:'America/Los_Angeles'}),errors=pageErrors(page);
@@ -25,7 +25,7 @@ try{
    }
    return {ok:true};
   }}}};});
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  const group=page.locator('.world-task-group[data-group=event]');await group.locator('.world-own-event').first().waitFor();
  assert.equal(await group.locator('h2').textContent(),'Coming Up');
  const rows=group.locator('.world-own-event');

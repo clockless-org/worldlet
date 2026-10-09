@@ -9,7 +9,7 @@
 // leaves the window while it listens: what was heard is still sent, and an Order stopped otherwise says so. Space
 // tapped on the World opens typing to Fox.
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 const fixture=(tell:{wakeError?:string}&object)=>{const w=window as any;w.calls=[];w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
  if(b.action==='snapshot')return {workspaceId:'tell-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
  if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
@@ -19,7 +19,7 @@ const fixture=(tell:{wakeError?:string}&object)=>{const w=window as any;w.calls=
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(fixture,{available:true,ready:true});
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  const tell=page.locator('.companion-order-button'),bar=page.locator('#notionCommand'),root=page.locator('.notion-world');
  await tell.waitFor({state:'visible'});
  assert.equal(await page.locator('.companion-side .companion-order-button').count(),0,'no longer beside Fox');

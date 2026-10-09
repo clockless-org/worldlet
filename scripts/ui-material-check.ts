@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import {chromium} from 'playwright';
 import {mkdir} from 'node:fs/promises';
-import {pageErrors,fileUrl} from './browser-test.ts';
-const browser=await chromium.launch({args:['--allow-file-access-from-files']});
+import {pageErrors,fileUrl,launchTestBrowser,fileAccess} from './browser-test.ts';
+const browser=await launchTestBrowser(fileAccess);
 await mkdir('output/ui-standard',{recursive:true});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:1100},reducedMotion:'reduce'});

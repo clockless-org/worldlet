@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {worldUrl} from './browser-test.ts';
+import {worldUrl,waitForWorld} from './browser-test.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try {
  const page=await browser.newPage();
@@ -15,7 +15,7 @@ try {
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  // The message bar rests low-key without its microphone (#1766); pointing at the bar brings it back.
  const bar=page.locator('#notionCommand'),button=page.locator('.companion-speech-button'),world=page.locator('#notionWorld');
  const mic={click:async()=>{await bar.hover();await button.click();}};

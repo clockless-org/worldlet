@@ -2,7 +2,7 @@
 // code, the paired state, the Center sent to the host, and a phone chat line reaching Fox as the person's message.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
@@ -17,7 +17,7 @@ try{
   if(b.action==='agentChat'){w.worldletAgentEvent(b.id,{type:'progress',name:'read_mail'});w.worldletAgentEvent(b.id,{type:'delta',text:'Hello '});await new Promise(r=>setTimeout(r,400));w.worldletAgentEvent(b.id,{type:'delta',text:'from'});await new Promise(r=>setTimeout(r,400));return {message:'Hello from Fox.'};}
   return {ok:true};
  }}}};});
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  // The Center goes to the host for the phone, shaped by core/phone.
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePublish'));
  const published=await page.evaluate(()=>(window as any).calls.find(c=>c.action==='phonePublish'));
