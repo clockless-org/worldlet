@@ -44,7 +44,7 @@ export const afterBesideGates=['test:ui:review'];
 // stayed "running" past a two-minute wait (Mac RCs 2963, 2965, 2968, 2971).
 export const besideAfter={'test:ci':'test:ui','test:ios':'test:ui','test:android':'test:ui'};
 export function gateCommands(platform=process.platform){return [...sharedGates,...(platformGates[platform]||[])];}
-// One part of the gate (the CI RC splits it over several runners to stay within 20 minutes): WORLDLET_GATE_ONLY names
+// One part of the gate (the CI RC splits it over several runners to stay within 30 minutes): WORLDLET_GATE_ONLY names
 // the gates to run, WORLDLET_GATE_SKIP the ones to leave to another part. A name this platform's gate lacks is an error.
 export function gatePart(commands,{only=process.env.WORLDLET_GATE_ONLY,skip=process.env.WORLDLET_GATE_SKIP}={}){
  const names=value=>String(value||'').split(',').map(n=>n.trim()).filter(Boolean),want=names(only),drop=names(skip);
@@ -105,7 +105,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const dir=path.dirname(process.execPath),cli=[path.join(dir,'node_modules/npm/bin/npm-cli.js'),path.join(dir,'../lib/node_modules/npm/bin/npm-cli.js')].find(existsSync);
  const root=fileURLToPath(new URL('../',import.meta.url)),commands=gatePart(gateCommands()),runtime=commands.some(c=>runtimeGates.includes(c))?hermesRuntime(root,process.env,spawnSync,workspace(root).primary):null;
  // WORLDLET_GATE_BUDGET_MINUTES caps the whole gate (the CI RC sets it, owner decision 2026-10-09: an RC takes at most
- // 20 minutes): the gate running when it runs out is stopped and the rest are not run, all reported as failures.
+ // 30 minutes): the gate running when it runs out is stopped and the rest are not run, all reported as failures.
  const budget=Number(process.env.WORLDLET_GATE_BUDGET_MINUTES)||0,deadline=budget?Date.now()+budget*60_000:0;
  const results=commands.map(command=>{
   if(runtimeGates.includes(command)&&!runtime.ok){console.error(runtime.reason);return {command,ok:false};}

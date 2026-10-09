@@ -1,6 +1,6 @@
 name: RC
 # The release candidate (docs/RELEASING.md): every push to main runs the release gate (scripts/gate.mjs) on Mac and
-# Windows runners, split into parts that run side by side so the RC stays within 20 minutes, beside the Release workflow that builds the same commit for Dev. A Build is promoted to Alpha or
+# Windows runners, split into parts that run side by side so the RC stays within 30 minutes, beside the Release workflow that builds the same commit for Dev. A Build is promoted to Alpha or
 # Beta only when both platforms passed here. A failure opens (or adds to) one Issue per platform and failing gates
 # (scripts/ci-rc-report.mjs), which a cloud AI session fixes with a normal pull request; a pass closes them. Hosted
 # runners are free for this public repository. Nothing here runs for pull requests, and nothing reads a secret.
@@ -18,9 +18,9 @@ permissions:
 # which a hosted runner has none of (its refresh tokens are single-use, so no secret copy either); they report SKIP.
 env:
   CODEX_SKIP: no Codex sign-in on a hosted runner
-  # An RC takes at most 20 minutes (owner decision 2026-10-09): the gate gets what is left after setup, and when it runs
+  # An RC takes at most 30 minutes (owner decision 2026-10-09, raised from 20): the gate gets what is left after setup, and when it runs
   # out the gate still running is stopped and reported as failing, so the timeout opens an Issue like any failure.
-  WORLDLET_GATE_BUDGET_MINUTES: 16
+  WORLDLET_GATE_BUDGET_MINUTES: 26
 # One RC at a time; while one runs, only the newest push waits (GitHub replaces an older pending run).
 concurrency:
   group: rc
@@ -32,7 +32,7 @@ jobs:
     name: Mac ${{ matrix.part.name }}
     if: github.repository == 'clockless-org/worldlet'
     runs-on: macos-15
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -90,7 +90,7 @@ jobs:
     name: Windows ${{ matrix.part.name }}
     if: github.repository == 'clockless-org/worldlet'
     runs-on: windows-2025
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -102,6 +102,9 @@ jobs:
     env:
       WORLDLET_SETUP_PYTHON: python
     steps:
+      # The checkout keeps the repository's LF line endings, as on the Windows release host: the hosted runner's Git
+      # converts to CRLF, and checks comparing generated copies or matching shell scripts then fail.
+      - run: git config --global core.autocrlf false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
