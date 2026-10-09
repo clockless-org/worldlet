@@ -1,0 +1,22 @@
+{
+  "contractVersion": 1,
+  "id": "village",
+  "version": "1.0.0",
+  "sha256": {
+    "assets/INTER-LICENSE.txt": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
+    "assets/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+    "assets/calendar-production.prompt.txt": "4d4c1bb5a9f709b53df65dc666e1d2f47145a1e2833d4cd3eeaab75fcd862fc4",
+    "assets/calendar-scene.png": "5baf54311c98536c1e426da81d725bff81bcf9dc1ac172d1f02befa6f58d0b53",
+    "assets/mail-icon.png": "60867b26dd76981d5d0fe2a3f65317b875cd48c883cf5bbf8cff515c6cf36bde",
+    "assets/mail-production.prompt.txt": "6f4c38a5ccfe99cd109bdfa1b363dafa7b6799d90f249f1e8518d10492b4b288",
+    "assets/mail-scene.png": "3cad54c80ac8aef91ec9bee4dc4f50e75329b05cc590ca1320fcf1c24950e9eb",
+    "assets/notes-production.prompt.txt": "0bd37f876f7e63aa2c9f70522fce747926e2d61103856c3d11c576af4afadbd8",
+    "assets/notes-scene.png": "0e30da60f579b1b592004973bf4d7ad1fc7b4fcd4c5941cac01d0831aab552ce",
+    "assets/reminders-production.prompt.txt": "26d0f6d57ec29aa81bf387cf45157f76897894a94bcfbc92447f703b1d0fb621",
+    "assets/reminders-scene.png": "d93caa61e2f7328ce8d68b9410d4e6bc0c91185e8d90fb66db2114d08d70ef3f",
+    "entry.ts": "25e654aaa1c816c1e946f1cc6838ae859af53c1f460387334aa91c2084940a04",
+    "surface.ts": "9e294d52679230db4f7f9a34999c8a18884fbdef55e386b3e9c2419446d44c25",
+    "theme.css": "359836fe2b9e4af42a2d0849766087ead62634d7747a58545229f22d10f17a78",
+    "theme.json": "c4006a3932392b50a8eb7d053987ee2bd1d99e8122875ae2b8cc663536f080d5"
+  }
+}

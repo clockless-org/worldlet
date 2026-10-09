@@ -1,0 +1,19 @@
+{
+  "contractVersion": 1,
+  "id": "village",
+  "version": "1.0.0",
+  "title": "Village",
+  "entry": "entry.ts",
+  "stylesheet": "theme.css",
+  "assets": "assets",
+  "inherits": "village",
+  "hud": "shared",
+  "fonts": "bundled",
+  "buttons": "styled",
+  "applets": [
+    "gmail",
+    "google-calendar",
+    "apple-notes",
+    "apple-reminders"
+  ]
+}

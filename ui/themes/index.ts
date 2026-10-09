@@ -10,3 +10,7 @@ export type {ThemeDeviceFeature,ThemeDeviceEffects,ThemeMailDelivery} from './th
 export {applyThemeSurfaces,attentionPicture,companionStill,playThemeSound,syncThemeSounds,themeStartupPicture,themeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
 
 export {themeAmbientTrack} from './theme-audio.ts';
+
+export type {BuildTheme,ThemeAppletContext,ThemeMount,BuildThemeManifest} from './build-theme-contract.ts';
+
+export {renderBuildTheme,BUILD_THEME_ID} from './build-theme.ts';

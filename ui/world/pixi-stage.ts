@@ -1,3 +1,4 @@
+import {renderBuildTheme} from '../themes/index.ts';
 import {renderHomeOpen,type HomeOpenState} from '../applets/index.ts';
 import {animateFrameImage} from './frame-image.ts';
 import {getApp,HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../core/applets/index.ts';
@@ -7,7 +8,8 @@ import {attentionIcon} from '../attention/index.ts';
 import {calendarDay} from './applet-content.ts';
 // Painted Open installations with accessible, live text and hit targets.
 export function createAppletStage(host,onPick){
- const panel=document.createElement('section');panel.className='pixi-applet-stage';panel.hidden=true;panel.setAttribute('aria-label','Applet contents');host.append(panel);
+ host.classList.add('ui-theme-world');
+ const panel=document.createElement('section');panel.className='pixi-applet-stage ui-theme-applet';panel.hidden=true;panel.setAttribute('aria-label','Applet contents');host.append(panel);
  const mailDevice=document.createElement('img');mailDevice.className='mail-shared-device';mailDevice.dataset.applet='gmail';mailDevice.alt='';mailDevice.hidden=true;host.append(mailDevice);
  let motionEnabled=true;
  const mailSpec=getApp('gmail')?.motion,mailFrames=(globalThis as any).__WORLDLET_25D_ASSETS__?.motionFrames?.gmail;
@@ -22,6 +24,7 @@ export function createAppletStage(host,onPick){
  const mailState={category:"attention",offset:0};
  const hidden=(element:HTMLElement,value:boolean)=>{if(element.hidden!==value)element.hidden=value;};
  const data=(element:HTMLElement,key:string,value:string)=>{if(element.dataset[key]!==value)element.dataset[key]=value;};
+ let themeMount:{dispose():void}|false=false;
  let signature='',focusSignature='',shownItems=[],allItems=[],selected=null,page=0,owner='';
  function render(room,value,visible,focused=false,showDevice=false){
   if(owner!==room.moduleId){owner=room.moduleId;page=0;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;mailState.category="attention";mailState.offset=0;}
@@ -36,7 +39,7 @@ export function createAppletStage(host,onPick){
   if(!mailAccount.hidden){const account=value?.sample?'Sample mail · No account connected':value?.connected?(value.accountLabel||'Connected mailbox'):'Mail not connected';const status=value?.reading?'Reading…':!value?.connected?'Connect with Fox':value?.loaded?'Mail loaded':'Waiting to read';const tip=account+' · '+status;if(mailAccountTip.textContent!==tip)mailAccountTip.textContent=tip;}
 
   if(!mailDevice.hidden&&!mailFrames){const asset=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.gmail;const src=typeof asset==='string'?asset:asset?.src;if(src&&mailDevice.getAttribute('src')!==src)mailDevice.src=src;}
-  hidden(panel,!visible);data(panel,'applet',room.key||'');data(panel,'animatedDevice',String(!!(globalThis as any).__WORLDLET_25D_ASSETS__?.motion?.[room.key]));if(!visible){signature='';return;}
+  hidden(panel,!visible);data(panel,'applet',room.key||'');data(panel,'animatedDevice',String(!!(globalThis as any).__WORLDLET_25D_ASSETS__?.motion?.[room.key]));if(!visible){if(themeMount){themeMount.dispose();themeMount=false;}delete panel.dataset.themeRendered;signature='';return;}
   const cards=['github',...CODING_SESSIONS,...ORIGINAL_READERS,'meetings','voice-memos','messages'].includes(room.key);
   const local=cards||HOME_NATIVE.includes(room.key),calendar=room.key==='google-calendar';
   const previousShown=shownItems;const items=allItems;
@@ -45,8 +48,14 @@ export function createAppletStage(host,onPick){
   // Nothing in the panel pages (owner Order 2026-10-07): every item is shown, and the item area scrolls when they
   // do not fit. Only the calendar moves by week, which changes the dates rather than paging.
   else shownItems=items;
-  const next=JSON.stringify([room.moduleId,items,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;panel.replaceChildren();panel.dataset.installation=String(local);panel.dataset.work=String(cards);
+  const next=JSON.stringify([room.moduleId,items,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar?calendarDay(value?.now):null]);if(next===signature){if(themeMount){hidden(mailDevice,true);hidden(mailAccount,true);}shownItems=previousShown;return;}signature=next;if(themeMount){themeMount.dispose();themeMount=false;}delete panel.dataset.themeRendered;panel.replaceChildren();panel.dataset.installation=String(local);panel.dataset.work=String(cards);
   panel.classList.remove('home-open','meetings-open');
+  themeMount=renderBuildTheme({host:panel,applet:{id:room.key,title:room.title},items,data:value||{},
+   openItem:id=>{const item=items.find(i=>i.id===id);if(item){selected=item;onPick({action:'applet-item',id:item.id});}},
+   invalidate:()=>{signature='';render(room,value,true);},
+   renderDefault:target=>{target.classList.add('ui-theme-default','home-open');renderHomeOpen(target,room,items,value,homeState,item=>{selected=item;onPick({action:'applet-item',id:item.id});},()=>{signature='';render(room,value,true);});}});
+  if(themeMount){panel.dataset.themeRendered='true';hidden(mailDevice,true);hidden(mailAccount,true);shownItems=items;return;}
+  panel.replaceChildren();
   if(HOME_RECORDS.includes(room.key)){shownItems=renderHomeOpen(panel,room,items,value,homeState,item=>{selected=item;onPick({action:'applet-item',id:item.id});},()=>{signature='';render(room,value,true);});return;}
   if(room.key==='meetings'){shownItems=renderMeetingsOpen(panel,room,items,value,item=>{selected=item;onPick({action:'applet-item',id:item.id});});return;}
   if(room.key==='gmail'){shownItems=renderMailOpen(panel,items,value,mailState,item=>{selected=item;onPick({action:'applet-item',id:item.id});},()=>{signature='';render(room,value,true);},mailDevice);return;}
@@ -75,5 +84,5 @@ export function createAppletStage(host,onPick){
    if(calendar)footer.append(move('Previous',-1));footer.append(label);if(calendar)footer.append(move('Next',1));panel.append(footer);
   }
  }
- return {render,setMotion(value:boolean){motionEnabled=value;},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null};},destroy(){stopMailMotion();(panel as any).mailLayoutObserver?.disconnect();panel.remove();mailDevice.remove();focus.remove();mailNav.remove();mailAccount.remove();}};
+ return {render,setMotion(value:boolean){motionEnabled=value;},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null};},destroy(){if(themeMount){themeMount.dispose();themeMount=false;}stopMailMotion();(panel as any).mailLayoutObserver?.disconnect();panel.remove();mailDevice.remove();focus.remove();mailNav.remove();mailAccount.remove();}};
 }

@@ -8,7 +8,7 @@ room shows it; the person's area names, Applet membership and last use are the s
 does not draw itself shows Village's. Settings → Theme switches registered themes in place, including an
 already opened Applet. The Hogwarts theme was removed on 2026-10-06.
 
-[External theme portability and acceptance contract](CONTRACT.md) defines HUD, typography, controls, packaging and the build-time import gates. Source overlays are development prototypes until those gates pass.
+[Build theme contract](CONTRACT.md) defines the trusted presentation source directory copied from the themes repository at build time, including HUD, typography, controls and Applet callbacks. The data-only ThemePack below continues to own the inherited world declarations.
 
 ## The parts
 

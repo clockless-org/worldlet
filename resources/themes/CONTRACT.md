@@ -1,75 +1,86 @@
-# Theme portability contract v1
+# Build theme contract v1
 
-This is the acceptance contract for themes authored outside Worldlet and imported at build time. This version selects one fixed theme per build; runtime downloading and theme switching are out of scope. It complements the executable `ThemePack` contract in `ui/themes/theme-pack.ts`; it does not add unsupported JSON fields. A runnable source overlay is a development prototype, not an importable Theme Pack.
+A theme is a **trusted presentation source directory copied at build time**. Worldlet imports one directory and compiles it with the app. Themes may change independently as long as they implement this versioned interface. There is no runtime theme download or switching protocol.
 
-## Ownership
+The executable API is [build-theme-contract.ts](../../ui/themes/build-theme-contract.ts), exported as the type-only `@worldlet/theme` module. The existing data-only `ThemePack` still describes the inherited world, art and shared surfaces; it does not prohibit trusted presentation source being compiled into the application.
 
-| Worldlet owns | Theme owns |
+## Directory
+
+```text
+package/
+  theme.json       # contractVersion, identity, presentation coverage
+  entry.ts         # default export implements BuildTheme
+  theme.css        # theme-owned presentation and shared CSS hooks
+  assets/          # backgrounds, icons, fonts and license files
+  …                # local TypeScript helpers and provenance
+```
+
+The source may import local helpers and **types** from `@worldlet/theme`. It cannot import private Worldlet modules or Node dependencies. The importer compiles and type-checks without evaluating the entry, rejects symlinks and unresolved LFS files, then replaces only `ui/selected-theme`. It generates the public index and a source hash inventory. An invalid package leaves the old selection unchanged. This is a development-source boundary, not a sandbox for untrusted scripts: review the source before importing it.
+
+## Manifest
+
+```json
+{
+  "contractVersion": 1,
+  "id": "village",
+  "version": "1.0.0",
+  "title": "Village",
+  "entry": "entry.ts",
+  "stylesheet": "theme.css",
+  "assets": "assets",
+  "inherits": "village",
+  "hud": "shared",
+  "fonts": "bundled",
+  "buttons": "styled",
+  "applets": ["gmail", "google-calendar", "apple-notes", "apple-reminders"]
+}
+```
+
+`hud` and `buttons` are `shared` or `styled`; `fonts` is `shared` or `bundled`. Each theme declares its choices, not a claim that every surface has original art. V1 inherits the registered Village world for surfaces it does not implement. It supports replacing Applet scenes and styling the shared shell; a completely new world renderer is not part of this interface yet. Other IDs can use the same interface and inheritance without host edits.
+
+## Runtime API
+
+`entry.ts` exports `{contractVersion: 1, id, renderApplet(context)}`. The ID must match the manifest. `renderApplet` returns `false` to use the standard host renderer, or `{dispose()}` after rendering into `context.host`.
+
+| Context | Contract |
 | --- | --- |
-| HUD DOM, navigation, keyboard/focus, account state, dialogs and actions | HUD material, supported skins, colors and safe-area declarations |
-| Shared Applet renderers, record IDs, loading/empty/error states and persistence | Peek/Open/Focus art, content plane geometry, typography and decoration |
-| Button semantics, disabled/busy state, keyboard and click handlers | Button material and visual state treatment |
-| Companion behavior, task events, sound channels and permission boundaries | Rig, portraits, perches, supported event cues and licensed audio |
-| Pack validation, registration, asset loading and build-time selection | Versioned JSON, local assets, provenance and declared shared fallbacks |
+| `host` | Owned Applet surface. Host clears it before each render. Do not replace the surrounding shell. |
+| `applet.id`, `.title` | Stable product identity; the theme never renames/moves data. |
+| `items` | Read-only in practice: IDs, display fields and source records. Copy before editing; never mutate host state. |
+| `data` | Current time, demo/connection/loading/error state and optional calendar save/remove capability. No account credentials. |
+| `openItem(id)` | Host source-reader action; unknown IDs are ignored. |
+| `invalidate()` | Request a re-render with the current host inputs. |
+| `renderDefault(target)` | Host-owned full Calendar/reader surface for the current applet. |
+| `dispose()` | Remove any observers/listeners/timers created by this render. Called on replacement, hide and stage destruction. |
 
-Themes MUST NOT ship executable JavaScript, TypeScript, arbitrary HTML/CSS, native patches, install hooks or replacement product logic in an importable artifact. Novel layouts require a reusable, trusted Worldlet renderer first. The renderer accepts theme data; downloaded theme code is never executed. Source overlays remain useful for developing that renderer, with code reviewed and merged into Worldlet before the corresponding theme can graduate.
+Business logic and persistence remain in Worldlet. A theme may own transient search, selection, editor and animation state. Writes are available only through supplied capabilities; an unavailable write operation must not be invented or simulated as a successful account update. Native websites remain on the existing native-browser path.
 
-## Required surfaces
+## HUD, fonts and buttons
 
-Each Theme Pack MUST declare all existing fields below, using `shared` explicitly wherever the host's standard appearance is retained. Shared appearance is a valid choice; silently missing coverage is not.
-
-| Surface | Existing declaration / owner | Acceptance |
-| --- | --- | --- |
-| World and areas | `space`, world and Style Pack manifests | One room per product group, valid connections, stable IDs, complete art references |
-| Content and HUD space | `layout`, `applets.focusLayouts`, `applets.roomLayouts` | Normalized content and companion rectangles; live content, HUD and Fox do not overlap or obscure controls |
-| HUD | `hud`, `surfaces.skin` | Attention, note, nameplate, back, bubble, panel, log, button, card and frame all declared; host navigation and status remain accessible |
-| Fonts | `surfaces.fonts.display`, `.label`; shared Style Pack UI type scale | Bundled licensed font or explicit shared fallback; fonts load before showing the world; multilingual and missing-glyph fallbacks remain available |
-| Typography roles | Shared UI tokens: caption, label, body, section, title and mono | Role-based type rather than selectors per theme; text remains live/selectable and survives long titles, empty content and CJK text |
-| Buttons | `surfaces.skin.button`, supported `--theme-*` properties, shared control renderer | Primary/secondary/destructive hierarchy; default, hover, pressed, focus, disabled and busy states; visible keyboard focus; stable hit area; no text baked into images |
-| Inputs and lists | Shared control renderer and supported surfaces | Search, selection, scrolling, validation and unsaved-edit protection stay functional; decorative edges do not steal pointer events |
-| Applets | Style Pack `peek/open/focus`, `applets.fallback` | Icon and open scene share visual identity; content fits its declared plane; source/action ownership stays intact |
-| Dialogs and errors | Shared panel/card/frame and host states | Loading, empty, failure, confirmation and overflow states tested; a theme cannot replace them with a static painting |
-| Motion and sound | `motion`, shared event and audio owners | Reduced motion, visibility and cancellation respected; success never plays on failure; decoration never indicates fabricated business state |
-| Companion | `companion` | Shared performance vocabulary, safe perches, still fallback and working host input |
-| Startup | `surfaces.startup`, registry preparation | All selected-theme assets/fonts are available before first display; an import failure retains the previous build selection |
-
-A new visual requirement that cannot be expressed by these fields is an **unsupported host capability**. Record it as a blocker; do not invent a theme-only field or bypass the contract with CSS selectors. For example, independent body fonts, per-Applet button materials, custom list/detail planes or new HUD arrangements require host support if the current shared renderer does not expose them.
-
-## Compatibility and artifact
-
-A release MUST identify its theme ID/version, `ThemePack.schemaVersion`, exact producer revision, tested public Worldlet commit and the hashes of the host contract files it was validated against. Never infer compatibility from “latest”. An update to those files requires revalidation; identical files establish contract compatibility, not complete behavioral compatibility.
-
-The artifact contains the Theme Pack, its Style/World declarations, the referenced asset closure, license/provenance files, coverage report and validation evidence. Every owned file has a repository-relative path and SHA-256. Referenced host-shared assets are explicit dependencies tied to the tested host revision. Reject traversal, external URLs, symlinks, duplicate destinations, missing files, LFS pointers and executable payloads. A matching checksum establishes integrity, not publisher trust.
-
-The existing theme registry uses trusted built-in registrations. Until Worldlet has a generic package registration/import path, **data validation alone does not certify one-command installation**. The consumer must support both the pack's data schema and its required renderer/registration capabilities.
-
-## Pull and import protocol
-
-The build-time consumer MUST perform these steps in order:
-
-1. Resolve an explicitly selected repository and immutable commit into staging. A remote branch may be used to discover an update, but the accepted result is locked to a commit.
-2. Validate the contract version, compatibility, resource closure, paths/hashes, registration and renderer requirements before changing the working installation. Never run theme-supplied scripts.
-3. Build a proposed registration and asset inventory. Existing data, accounts, native browser partitions, shared UI code and unrelated themes cannot be overwritten by the package.
-4. Run build and focused shared-host interaction checks, then inspect the actual host at the declared reference viewport. A standalone mock preview is insufficient.
-5. Promote the complete staged package and lock record as one recoverable change. Retain the previous artifact/version for rollback. Fetch, validation, build or activation failure leaves the current theme usable.
-
-No importer may silently apply a source overlay to make a failed package pass. The current source-overlay development commands are not this import protocol.
-
-## Acceptance gates
-
-| Gate | Required evidence |
+| Surface | Stable styling contract |
 | --- | --- |
-| Manifest | Host `parseThemePack`, Style/World validation, resource closure and provenance |
-| Presentation | HUD/type/button states, applet identity, safe areas and fallback coverage |
-| Interaction | Pointer and keyboard, long content, scroll, editors, busy/error/empty states, source actions and native-browser boundaries |
-| Host | Real shared HUD and companion, registered renderers, build and type checks, import rollback and state preservation |
-| Visual | Actual host captures at the declared viewport; current desktop theme reference is 1500 × 844; compare against authored references |
-| Import | Deterministic locked staging and registration, missing/incompatible asset rejection, no code payload, failure rollback |
+| World scope | `.ui-theme-world` identifies the host World. |
+| Applet | `.ui-theme-applet[data-theme-rendered=true]` identifies a theme-rendered stage. Theme classes inside it are private to that theme. |
+| Companion / command HUD | `.ui-theme-companion` exposes the host-owned command bar for placement/material styling. Keep its controls usable. |
+| Shared controls | Existing public `.ui-button` and `.ui-title` component classes and `--ui-*` UI token roles; do not reach private host IDs. |
+| Fonts | Bundled licensed fonts via `@font-face`, with URLs under `theme-assets/`; retain readable system/CJK fallbacks. |
+| Buttons | Theme CSS provides default, hover, pressed, focus-visible, disabled and busy appearances without changing actions or hit areas. |
 
-A release passes all gates. `preview` means a development implementation can run; `blocked` means the import contract has unmet requirements; `ready` requires consumer import evidence. A coverage declaration or successful screenshot cannot promote a theme to ready by itself.
+Assets are copied from `assets/<file>` to `theme-assets/<file>`. Use those URLs in the renderer/CSS. The generic build appends the selected stylesheet after shared styles. Selection replaces the directory and removes stale output assets; it never overlays arbitrary files onto the host repository.
 
-## Current migration
+The preview MUST run the same selected source against the host stage. Validate HUD/content/Fox overlap, typography, source actions, keyboard focus, long content, empty/error/loading states, local edits and reduced motion at the declared reference size (currently 1500 × 844). A demo screenshot is evidence of presentation, not an authenticated account test.
 
-Village's external four-Applet prototype and Hogwarts's source overlays need trusted renderer integration before they qualify as importable releases. Move reusable rendering/control behavior into Worldlet, expose supported data fields for scene geometry and materials, then express each theme through those fields. Consolidate fonts/buttons/HUD through the shared owners and retire the corresponding overlay overrides. Keep the preview using those same owners so that approval in the theme repository represents what the consumer will render.
+## Developer workflow
 
-Runtime downloading and theme switching are explicitly excluded from v1. The selected theme is resolved during development and bundled with the application. No new Settings switcher, download UI or live activation flow is required by this contract.
+After pulling the chosen revision of the themes repository, run in Worldlet:
+
+```sh
+npm run theme:source-check -- /path/to/worldlet-themes/themes/village/package
+npm run theme:import -- /path/to/worldlet-themes/themes/village/package
+npm run build:native-ui
+npm run theme:preview
+```
+
+Changing the package path changes the theme for the next build. No registry, HUD, stage or build-script edits are needed per theme. The imported folder is ordinary reviewable source and may be committed with the build selection. The public interface, not the current source commit or a theme's internal file names, defines compatibility. Breaking changes require a new contract major version.
+
+Host checks: `npm run test:theme-source` tests duplicate/import/replacement failures and boundaries. After building, `npm run test:theme-ui` exercises the imported Village through the real host stage in a hidden Electron window. The preview uses fictional data and no account writes.
