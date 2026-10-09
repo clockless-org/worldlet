@@ -175,7 +175,9 @@ export function mountNotionWorld(data: World, native: any) {
    void openArtifact(String(detail.id||'')).then(result=>{if(result?.error)notify(result.error);});
   });
   root.addEventListener('click',e=>{
-   if(foxArtifact.visible&&!(e.target as Element).closest('#foxArtifact,#notionHUD,button,a,input,textarea,select,[role="button"],.world-task-tracker')){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
+   // A click elsewhere in the World puts the card away into the Journal. Over an Applet the card stays pinned in the
+   // top-right corner until its × (owner Order 2026-10-09: a click beside it made it vanish with no way back).
+   if(foxArtifact.visible&&!insideApplet()&&!(e.target as Element).closest('#foxArtifact,#notionHUD,button,a,input,textarea,select,[role="button"],.world-task-tracker')){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
    if(!attentionPage||(e.target as Element).closest('#attentionPreview,#notionHUD,button,a,input,textarea,select,[role="button"],.notion-pin,.world-task-tracker,.notion-content,.notion-dialog'))return;
    e.preventDefault();e.stopPropagation();flyIntoJournal(root,$('attentionPreview'));closeAttentionPreview(false);voice?.hidePreview?.(true);
   },true);
