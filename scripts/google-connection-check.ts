@@ -149,6 +149,8 @@ await withBrowser(fileAccess,async browser=>{
   await app.goto(worldUrl());
   // Setup's Continue with Google is greyed (owner request 2026-10-05): Worldlet provides no model, so a Google
   // sign-in alone gives Fox nothing to run on. Google stays connectable from Mail and Calendar above.
+  // It sits under More options with the other ways in (owner request 2026-10-09).
+  await app.locator('.setup-more-toggle').click();
   const google=app.locator('.setup-google-button');await google.waitFor();
   assert.equal(await google.isDisabled(),true,'setup\'s Google is greyed');
   assert.equal(await google.locator('.setup-signin-tag').textContent(),'Coming soon');
