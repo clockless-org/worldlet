@@ -50,7 +50,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
 
 想用普通安装包？到 [worldlet.ai 下载](https://worldlet.ai/download/)，或者从 [GitHub Releases](https://github.com/clockless-org/worldlet/releases) 取。你的 Agent 也可以用 [`worldlet` 技能](harness/skills/worldlet/SKILL.md)替你安装。细节见[一行安装脚本](platform/install/README.md)。
 
-不需要账号。还没有 Agent 的话，Worldlet 第一次启动时会帮你装一个标准的 [Hermes Agent](core/agent/PORTABILITY.md#local-harnesses-chosen-at-setup)。
+不需要账号。还没有 Agent 的话，设置时会用官方方式把标准的 [Hermes Agent](core/agent/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) 装到它默认的位置；已经有的就直接用。
 
 ## 功能
 
