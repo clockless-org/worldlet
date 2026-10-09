@@ -107,7 +107,9 @@ async function start(){
  };
  // macOS's available memory and pressure, read before the World first asks for the page budget.
  void refreshMemory(null);
- const store=new WorldStore(profile.root,preferences,{appName:profile.title,platform:platformName(),capabilities:()=>hostCapabilities(implemented,{scaledPages:websiteEngine(profile)==='cef',budget:browserBudget(readMemory())}),mockGoogleAvailable:profile.channel==='dev'});
+ const store=new WorldStore(profile.root,preferences,{appName:profile.title,platform:platformName(),capabilities:()=>hostCapabilities(implemented,{scaledPages:websiteEngine(profile)==='cef',budget:browserBudget(readMemory())}),mockGoogleAvailable:profile.channel==='dev',
+  // test:onboarding's real-app journey shortens the wait before the tour's phone step (ui/onboarding/world-tour.ts); development only.
+  tourCodaAfterWinMs:profile.channel==='dev'?Number(process.env.WORLDLET_TOUR_CODA_MS)||undefined:undefined});
  store.historyFailure=(error,kind)=>diagnostics.record(error,'worldHistory:'+(kind||'unknown'));
  const page=createPageBridge(()=>world?.view.webContents??null,line=>diagnostics.log(line));
  const host:Host={

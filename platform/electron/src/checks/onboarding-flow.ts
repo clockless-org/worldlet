@@ -138,12 +138,19 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   mark('Fox’s page stays shown (the panel or its task picture-in-picture window)');
   await press('Go ahead');
   await wait('first win',dialogue('/first win/i'),300);
+  const won=Date.now();
   // The tour's last step (owner request 2026-10-06): Fox on the phone too. It never follows the first win's fireworks
-  // (owner feedback 2026-10-06): the World is free first, and the phone comes a couple of minutes later. Not now
-  // registers nothing with the relay.
-  await wait('the World free after the first win',"document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined&&document.querySelector('#notionWorld')?.dataset.tourLock===undefined",15);
+  // (owner feedback 2026-10-06): the World is free first, and the phone comes a couple of minutes later, at a calm
+  // moment. npm run test:onboarding shortens that wait (WORLDLET_TOUR_CODA_MS, the snapshot's tourCodaAfterWinMs) so
+  // the RC does not spend two minutes idle; the phone must still wait at least that long, and world-tour-check.ts
+  // holds the two minutes on a moved clock. Not now registers nothing with the relay.
+  const coda=Number(store.snapshot().tourCodaAfterWinMs)||120_000;
+  await wait('the World free after the first win, the phone step waiting',"document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined&&document.querySelector('#notionWorld')?.dataset.tourLock===undefined&&document.querySelector('#notionWorld')?.dataset.tourCoda==='waiting'",15);
   if(await js("document.querySelector('#notionWorld')?.dataset.tourStep==='phone'"))throw Error('The phone step came right after the first win.');
-  await step('phone',180);await press('Not now');
+  await step('phone',Math.round(coda/1000)+60);
+  // The check sees the first win up to a poll after the tour does, so allow two seconds.
+  if(Date.now()-won<coda-2000)throw Error(`The phone step came ${((Date.now()-won)/1000).toFixed(1)}s after the first win, before its ${coda/1000}s wait.`);
+  await press('Not now');
   await wait('the tour over',"document.querySelector('#notionWorld')?.dataset.tourStep===undefined&&document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined",10);
  }
  finally{clearInterval(watching);}

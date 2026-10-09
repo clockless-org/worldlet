@@ -33,6 +33,12 @@ const MAIL='app-gmail',RUNNING=['reading','syncing','connecting'];
 // a phone prompt right after finishing the first task felt wrong). When the tour ends with nothing to do, Fox's farewell
 // is seen first.
 const CODA_AFTER_WIN=120000,CODA_AFTER_END=3000,CODA_RETRY=5000;
+// A development host's real-app journey check (npm run test:onboarding) may shorten the wait after the first win with the
+// snapshot's `tourCodaAfterWinMs` (WORLDLET_TOUR_CODA_MS, never in a release build): it still proves the phone waits and
+// comes at a calm moment, without spending two wall-clock minutes of the RC; scripts/world-tour-check.ts holds the two
+// minutes themselves on a clock it moves forward. Never shorter than CODA_MIN, so it still never follows the fireworks.
+const CODA_MIN=10000;
+const codaAfterWin=(state:any)=>{const ms=state?.tourCodaAfterWinMs;return typeof ms==='number'&&Number.isFinite(ms)&&ms>=CODA_MIN&&ms<CODA_AFTER_WIN?ms:CODA_AFTER_WIN;};
 export function mountWorldTour({root,view,call,state:initial,arriving=false}){
  let state=initial,step=0,started=false,replaying=false,skipped=false,deferred=false,destroyed=false,waitingForArrival=arriving,shown='',name='',renaming=false,timer:ReturnType<typeof setTimeout>|undefined;
  // The phone step closes the first run after first value (`coda`); it is not saved, as pairing stays in Settings.
@@ -262,7 +268,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   if(destroyed)return;
   // First value saved the finished journey before celebrating; a snapshot from before it must not restart the tour.
   if(tourInProgress(state.onboarding)){skipped=true;state={...state,onboarding:{...state.onboarding,journeyStage:'finish'}};lock.refresh();}
-  startCoda(CODA_AFTER_WIN);
+  startCoda(codaAfterWin(state));
  };
  root.addEventListener('worldlet:first-win',firstWin);
  // A restart straight into first value never runs this half's start, so ask about the phone now.
