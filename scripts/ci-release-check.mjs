@@ -99,5 +99,5 @@ for(const job of jobs){
  const name=job.split(':')[0];
  if(/secrets\./.test(job))assert(/\n    environment: release\n/.test(job),`${name}: secrets only in the release environment`);
 }
-assert(/if: github\.ref == 'refs\/heads\/main'/.test(workflow));
+assert(/if: github\.repository == 'clockless-org\/worldlet' && github\.ref == 'refs\/heads\/main'/.test(workflow),'only clockless-org/worldlet main releases');
 console.log('ci-release checks passed');

@@ -3,7 +3,8 @@ run-name: ${{ github.event_name == 'push' && format('Dev · {0}', github.event.h
 # Desktop releases (docs/RELEASING.md). Every push to main builds a signed, numbered Mac and Windows build and
 # publishes it on this repository's GitHub Releases to the Dev channel; a manual run promotes a Dev build's exact bytes to Alpha or Beta. Nothing here runs
 # for pull requests: signing and publishing secrets live only in the protected `release` environment, which only main
-# can use. Pull request CI stays in architecture.yml (Linux only).
+# can use. Pull request CI stays in architecture.yml (Linux only). Only clockless-org/worldlet releases: forks and the
+# operations repository, which imports this tree, skip every job.
 on:
   push:
     branches: [main]
@@ -29,7 +30,7 @@ concurrency:
 jobs:
   identity:
     name: Identity
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || inputs.channel == 'dev')
+    if: github.repository == 'clockless-org/worldlet' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || inputs.channel == 'dev')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -243,7 +244,7 @@ jobs:
   # repository's latest release.
   promote:
     name: Promote
-    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.channel != 'dev'
+    if: github.repository == 'clockless-org/worldlet' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.channel != 'dev'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: release
