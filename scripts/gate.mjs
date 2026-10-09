@@ -2,7 +2,7 @@
 // platform's suites. `npm run gate` runs it here; machine-nightly.mjs runs the same list per host.
 import {spawnSync} from 'node:child_process';
 import path from 'node:path';
-import {existsSync,readFileSync} from 'node:fs';
+import {existsSync,readFileSync,writeFileSync} from 'node:fs';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {workspace} from './dev-workspace.ts';
 // test:harness:portable holds the untrusted-turn, routine-permission and read-only-tool rules on every
@@ -103,5 +103,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   return {command,ok:r.status===0&&!r.error};
  });
  console.log('\nGate ('+process.platform+'):\n'+results.map(r=>(r.ok?'PASS ':'FAIL ')+r.command).join('\n'));
+ // The CI release candidate (.github/workflows/rc.yml) reads the outcome from this file to report a failure as an Issue.
+ if(process.env.WORLDLET_GATE_RESULTS)writeFileSync(process.env.WORLDLET_GATE_RESULTS,JSON.stringify({platform:process.platform,results})+'\n');
  if(results.some(r=>!r.ok))process.exitCode=1;
 }

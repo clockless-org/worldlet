@@ -25,6 +25,14 @@ Everything lives on this repository's GitHub Releases:
 
 [Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. While the release machines still run Alpha and Beta, CI publishes those to their staging releases, which nothing reads, so both can run side by side; a pull request adds a channel to the list when CI takes it over. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
 
+## Release candidate
+
+[The RC workflow](../.github/workflows/rc.yml) runs the release gate (`npm run gate`, [gate.mjs](../scripts/gate.mjs)) on a Mac and a Windows runner for every push to `main`, beside the Dev build of the same commit. A Build is promoted to Alpha or Beta only when its commit passed the RC on both platforms; the promotion run checks this itself.
+
+A failing RC opens one Issue per platform and set of failing gates, labelled `rc-failure` and `platform:mac` or `platform:windows`, with the failing gates and the run ([ci-rc-report.mjs](../scripts/ci-rc-report.mjs)). The same failure on a later push adds a comment instead of another Issue, and the next passing RC on that platform closes it. A cloud AI session fixes these Issues with ordinary pull requests.
+
+Gates that need a signed-in Codex CLI (`test:agent:local`, `test:ui:review`) report SKIP on the hosted runners, and `test:android` stays advisory. The checks of the installed, signed package that the release machines ran (permission prompts, the login item, updating from the published release) are not part of the CI RC yet.
+
 ## Build numbers
 
 Build = 4000 + the commit's position on `main` (`git rev-list --count`). The offset keeps every build of this repository above the builds the release machines published before it, so installed apps keep updating. The label is `YYYY.MMDD.BUILD`, the date being the commit's day in Pacific time; the native version omits the leading zero of the month (`2026.1008.4012`). [scripts/ci-release.mjs](../scripts/ci-release.mjs) computes it and hands it to the build as `WORLDLET_RELEASE_MANIFEST` ([build-info.ts](../scripts/build-info.ts)), so no release commit is made.
@@ -55,4 +63,4 @@ Publishing to GitHub Releases uses the workflow's own token, so it needs no secr
 
 ## Checks
 
-`node scripts/ci-release-check.mjs` (part of `npm run check:pr`) checks build numbers, channel keys, feed rewriting, Sparkle signature verification, publication order and that the workflow never runs for pull requests or reads secrets outside the `release` environment.
+`node scripts/ci-release-check.mjs` (part of `npm run check:pr`) checks build numbers, channel keys, feed rewriting, Sparkle signature verification, publication order, that a promotion requires a passing RC and that the workflow never runs for pull requests or reads secrets outside the `release` environment. `node scripts/ci-rc-report-check.mjs` checks how RC results open, update and close Issues.
