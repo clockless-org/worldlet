@@ -97,20 +97,6 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
   <a href="docs/APPLET-RUNTIME.md"><img src="docs/assets/readme/applet-notes.jpg" alt="备忘录 Applet 列出笔记，Fox 提出可以帮你查找或总结" width="100%" /></a>
 </td>
 </tr>
-<tr>
-<td width="50%" valign="middle">
-
-### 你的 Agent，你的模型
-
-Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的登录、连接、技能和记忆，并通过 `worldlet` MCP 服务器把 World 工具交给 Agent。换 Agent，你的 World 还在。
-
-[文档 →](core/agent/PORTABILITY.md)
-
-</td>
-<td width="50%">
-  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.zh.svg" alt="个人电脑的层次和个人助理的层次对照：Worldlet 是 Harness 之上缺的那层 World UI" width="100%" /></a>
-</td>
-</tr>
 </table>
 
 **还有：**
@@ -121,7 +107,13 @@ Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的�
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
 
-## 用电脑来类比
+## 你的 Agent，你的模型：用电脑来类比
+
+<p align="center">
+  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.zh.svg" alt="个人电脑的层次和个人助理的层次对照：Worldlet 是 Harness 之上缺的那层 World UI" width="960" /></a>
+</p>
+
+Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的登录、连接、技能和记忆，并通过 `worldlet` MCP 服务器把 World 工具交给 Agent。换 Agent，你的 World 还在。
 
 | 电脑 | AI 时代 | 归谁 |
 | --- | --- | --- |
