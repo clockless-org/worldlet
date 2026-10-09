@@ -9,8 +9,7 @@ let shared:ToolsPython|null=null;
 export function toolsPython(host:Host):ToolsPython {
  if(!shared){
   const library=process.platform==='win32'?host.profile.root:installationRoot(host.profile);
-  const uv=()=>{const bootstrap=bundledResource(host.profile,'hermesBootstrap');return bootstrap?path.join(bootstrap,process.platform==='win32'?'uv.exe':'uv'):null;};
-  shared=new ToolsPython({folder:path.join(library,'tools'),uv,
+  shared=new ToolsPython({folder:path.join(library,'tools'),uv:()=>bundledResource(host.profile,'uv'),
    requirements:path.join(host.profile.webRoot,'local-tools','requirements.txt')});
  }
  return shared;

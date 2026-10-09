@@ -286,7 +286,7 @@ export const SPEECH='speech';
 // App shell (modules/shell) -------------------------------------------------------------------
 export interface DesktopCompanionService {
  readonly isDesktop:boolean;
- /** Window close/minimize keeps Fox on the desktop instead of quitting. */
+ /** Window close/minimize keeps Fox on the desktop instead of quitting; so does the World losing the foreground. */
  shouldKeepOpen():boolean;
  restoreWorld():Promise<void>;
  syncPresentation():void;
@@ -294,6 +294,8 @@ export interface DesktopCompanionService {
  /** After the Companion's window shows on the desktop (`true`) or the World view is back in the World
   * window (`false`). */
  onPresentation(listener:(desktop:boolean)=>void):void;
+ /** While any check is true, another app coming to the foreground leaves Fox in the World. */
+ keepInWorld(check:()=>boolean):void;
  /** The Companion's floating window on screen while on the desktop. */
  panelBounds():{x:number;y:number;width:number;height:number}|null;
 }

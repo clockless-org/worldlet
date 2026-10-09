@@ -96,12 +96,14 @@ export function installPhone(host:Host){
   agents:async()=>(await agentService()?.agents?.()?.list()??[]).map(item=>item.id),
   answer:(id,choice)=>void agentService()?.approvals?.()?.answer(id,choice).catch(error=>host.diagnostics.record(error,'agentPairing')),
   onError:error=>host.diagnostics.record(error,'agentPairing'),
-  run:async(body,onEvent,signal)=>{
+  run:async(body,onEvent,signal,lane)=>{
    const service=agentService(),scope=host.optional<FoxService>(FOX)?.scope();
    if(!service?.available)throw new WorldletError(`Fox’s Agent on ${computerName()} is not ready yet. Open Worldlet there and check Settings › Model.`);
    if(service.harness?.id==='remote')throw new WorldletError(`Fox on ${computerName()} also uses an Agent on another computer. Pair with that computer instead.`);
    if(!scope||scope.sample||scope.setup)throw new WorldletError(`Finish setting up Worldlet on ${computerName()} first.`);
-   const runtime=service.make(),stop=()=>runtime.cancel();
+   // The client's background work runs on this computer's background lane, beside its conversation.
+   if(lane==='background'&&!service.supportsBackgroundChecks)throw new WorldletError(`Fox’s Agent on ${computerName()} does not run background work.`);
+   const runtime=lane==='background'?service.makeBackground?.()??service.make():service.make(),stop=()=>runtime.cancel();
    signal.addEventListener('abort',stop);
    try{return await runtime.run(body,service.home('private'),onEvent);}finally{signal.removeEventListener('abort',stop);}
   },

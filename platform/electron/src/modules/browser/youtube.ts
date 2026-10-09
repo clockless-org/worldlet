@@ -88,6 +88,8 @@ export class YouTubePlayer {
  private hidden=false;
  snapshot:Row={state:-1};
  constructor(host:Host,surface:Surface,sessionFor:()=>Session){this.host=host;this.surface=surface;this.sessionFor=sessionFor;}
+ /** A video is open in the World. */
+ get playing(){return this.view!==null;}
  private get origin(){return 'https://'+(this.host.profile.channel==='release'?'app.worldlet.mac':'app.worldlet.mac.dev');}
  private emit(value:Row){void this.host.page.call('worldletYouTubePlayer',value);}
  show(body:Row){

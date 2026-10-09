@@ -325,7 +325,9 @@ export function createCompanion(host:Host){
  function adoptMemory(memory:{name:string|null,soul?:string,user:string,longTerm:string,source:string}):Row {
   if(!store.writable||store.sampleEnabled())throw new WorldletError('Return to your own world before bringing an Agent’s memory.');
   const runtime=agent();
-  if(external()||typeof runtime?.replaceCompanionMemories!=='function')throw new WorldletError('Fox cannot take another Agent’s memory in this build.');
+  // Only copying memory needs Fox's own Harness; a name alone is Fox's (an Agent Fox talks through keeps its memory).
+  const copies=['soul','user','longTerm'].some(kind=>(memory as any)[kind]?.trim());
+  if(copies&&(external()||typeof runtime?.replaceCompanionMemories!=='function'))throw new WorldletError('Fox cannot take another Agent’s memory in this build.');
   let value=archive();
   const brought:string[]=[];
   const memories=[...value.memories];

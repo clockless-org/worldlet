@@ -140,7 +140,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   const started=performance.now();
   try{
    const adopted=await call('localAgent',{operation:'adopt',id});
-   const history=adopted?.history||{};
+   // An Agent Fox talks through keeps its own history, so nothing is copied; the tiles count what it holds (detect).
+   const own=agents.find(a=>a.id===id)?.memory?.history;
+   const history=adopted?.history||(own?{conversations:own.conversations,notes:own.notes,skills:own.skills,routines:own.jobs}:{});
    const list=Array.isArray(history.list)?history.list.filter(item=>typeof item?.title==='string').slice(0,60).map(item=>({title:String(item.title).slice(0,160),messages:Number(item.messages)||0})):[];
    // What came along besides history: its name, and which of personality, about-you and long-term memory.
    const kinds=Array.isArray(adopted?.memories)?adopted.memories.map(m=>typeof m==='string'?m:m?.kind).filter(k=>typeof k==='string'):[];
@@ -171,25 +173,22 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // The apps the World starts with: those found on this computer first, then the starters chosen for the person.
  // Starter games arrive without being shown.
  const worldApps=()=>WORLD_APPS.filter(a=>selected.has(a.id)&&a.region!=='health'&&appletSupport(a.key,hostFeatures(state)).supported).sort((a,b)=>Number(detected.has(b.key))-Number(detected.has(a.key)));
- /** The tiles on the right, in the order they arrive (owner request 2026-10-09): the avatar, its profile,
-  * conversations, notes, skills and routines, the connections it had, then the apps. Only what actually came over
-  * gets a tile; the connections and apps wait until the bring is over, so arriving tiles only ever join the end. */
+ /** The tiles on the right, in the order they arrive (owner requests 2026-10-09): the avatar, its profile,
+  * conversations, notes, skills and routines, the connections it had, then the apps. Every tile shows once the bring
+  * is over, even when nothing came over (it then says None); the connections and apps wait until the integrations
+  * were read, so arriving tiles only ever join the end. */
  function tiles():string[]{
   const list=['avatar'];
   if(importingAgent()){
-   const brought=draft.brought;
-   if(!brought||brought.failed)return brought&&!porting?[...list,...connectionsTile(),...move?[]:['apps']]:list;
-   if(brought.name||brought.summary?.personality||brought.summary?.about)list.push('profile');
-   if(brought.conversations)list.push('conversations');
-   for(const kind of ['notes','skills','routines'])if(brought[kind])list.push(kind);
-   if(!porting)list.push(...connectionsTile(),...move?[]:['apps']);
+   if(!draft.brought)return list;
+   list.push('profile','conversations','notes','skills','routines');
+   if(!porting)list.push('connections',...move?[]:['apps']);
    return list;
   }
   // Google brings Mail and Calendar; an API key or an Agent on another computer brings only the World.
   if(connected()&&typeof draft.remoteAgent!=='string'&&draft.ownModel!==true)list.push('connections');
   return detecting||move?list:[...list,'apps'];
  }
- const connectionsTile=()=>(draft.integrations||[]).some(item=>item.outcome!=='stays')?['connections']:[];
  const settled=()=>!importingAgent()||(!!draft.brought&&!bringing&&!porting&&shownTiles>=tiles().length);
  // One tile at a time; with Reduce Motion, all at once.
  function reveal(){
@@ -351,6 +350,16 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   const lines=['Reading {agent}’s memory…','Packing up {agent}’s conversations…','Folding in {agent}’s notes…','Teaching Fox {agent}’s skills…'];
   return agentText(lines[chatter%lines.length],name);
  }
+ /** Choose again (owner request 2026-10-09: on the chosen card, instead of a Back button): what came over is kept,
+  * so coming back to the same Agent does not read it again. Google has nothing to choose again. */
+ const canChooseAgain=()=>step===1&&!entering&&(importingAgent()?!bringing&&!porting:draft.ownModel===true||typeof draft.remoteAgent==='string');
+ function chooseAgain(){
+  if(!canChooseAgain()||busy)return;
+  clearTimeout(revealTimer);
+  if(importingAgent()){delete draft.agent;delete draft.agentName;}
+  delete draft.ownModel;delete draft.remoteAgent;
+  step=0;notice='';error='';persist();render();
+ }
  /** The chosen Agent on the left: its mark, its own name, where it comes from and its model. */
  function passport(){
   const agentId=draft.agent as string,brought=draft.brought,found=agents.find(a=>a.id===agentId);
@@ -369,12 +378,14 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   }else{
    icon='brands/google.png';name='Google';from=t('Your Google account');
   }
-  return keep('passport',JSON.stringify([icon,name,from,rows,draft.language]),()=>{
+  const again=canChooseAgain();
+  return keep('passport',JSON.stringify([icon,name,from,rows,again,draft.language]),()=>{
    const card=node('section','','setup-passport');card.setAttribute('aria-label',name);
    const mark=node('div','','setup-passport-mark');mark.append(image(icon,'setup-passport-icon'));
    card.append(mark,node('h2',name,'setup-passport-name'));
    if(from)card.append(node('p',from,'setup-passport-from'));
    if(rows.length){const facts=node('dl','','setup-passport-facts');for(const [label,value] of rows){const row=node('div','','setup-agent-fact');row.append(node('dt',t(label)),node('dd',value));row.title=value;facts.append(row);}card.append(facts);}
+   if(again){const link=node('button',t('Choose again'),'setup-link setup-choose-again') as HTMLButtonElement;link.type='button';link.onclick=chooseAgain;card.append(link);}
    return card;
   });
  }
@@ -387,11 +398,14 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const done=node('span','','setup-tile-done');done.setAttribute('aria-hidden','true');el.append(done);
    return el;
   };
-  const big=(n:number,label:string)=>(el:HTMLElement)=>{el.append(node('strong',String(n),'setup-tile-count'),node('p',t(label),'setup-tile-note'));};
+  // Nothing of that kind came over: the tile stays, muted, and says None.
+  const none=(el:HTMLElement)=>{el.classList.add('is-empty');el.append(node('p',t('None'),'setup-tile-none'));};
+  const big=(n:number,label:string)=>(el:HTMLElement)=>{if(!n)return none(el);el.append(node('strong',String(n),'setup-tile-count'),node('p',t(label),'setup-tile-note'));};
   if(kind==='avatar')return keep('tile:avatar',draft.language,build('Avatar','is-tall',el=>{el.append(node('p',t('Fox, by default'),'setup-tile-note'));const fox=image('assets/fox-startup.png','setup-tile-fox');el.append(fox);}));
   if(kind==='profile'){
    const sig=JSON.stringify([brought.name,summary.personality,summary.about,draft.language]);
    return keep('tile:profile',sig,build('Profile','is-wide',el=>{
+    if(!brought.name&&!summary.personality&&!summary.about)return none(el);
     if(summary.personality)el.append(node('q',summary.personality,'setup-tile-quote'));
     else if(brought.name)el.append(node('p',brought.name,'setup-tile-lead'));
     if(summary.about)el.append(node('p',t('Knows: ')+summary.about,'setup-tile-note'));
@@ -400,6 +414,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(kind==='conversations'){
    const titles=(brought.list||[]).slice(0,4).map(item=>item.title);
    return keep('tile:conversations',JSON.stringify([brought.conversations,titles,draft.language]),build('Conversations','is-big',el=>{
+    if(!brought.conversations)return none(el);
     el.append(node('strong',String(brought.conversations),'setup-tile-count'));
     const list=node('ul','','setup-tile-titles');for(const title of titles)list.append(node('li',title));el.append(list);
    }));
@@ -412,6 +427,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     ?(draft.integrations||[]).filter(item=>item.outcome!=='stays').map(item=>({title:item.title,logo:item.provider==='google'?'brands/google.png':logoOf(item.provider),again:item.outcome==='reconnect'}))
     :[{title:'Gmail',logo:logoOf('gmail'),again:false},{title:'Google Calendar',logo:logoOf('google-calendar'),again:false}];
    return keep('tile:connections',JSON.stringify([items,draft.language]),build('Connections','is-wide',el=>{
+    if(!items.length)return none(el);
     const row=node('div','','setup-tile-logos');
     for(const item of items){const mark=item.logo?image(item.logo,'setup-tile-logo'):node('span',item.title,'setup-tile-chip');mark.title=item.title+(item.again?' · '+t('Sign in again after setup'):'');row.append(mark);}
     el.append(row);
@@ -527,7 +543,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   panel.classList.toggle('is-importing',importing);
   const footer=node('footer','','setup-footer');
   const status=node('div','','setup-status-slot');status.setAttribute('aria-live','polite');
-  let primary:HTMLButtonElement,back:(()=>void)|null=null;
+  let primary:HTMLButtonElement;
   const parts:HTMLElement[]=[];
   if(importing){
    const name=arriving?(draft.brought?.name||draft.agentName||draft.agent):'';
@@ -549,10 +565,6 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    else if(!done)primary=button(agentText('Moving {agent} in…',AGENT_SHORT[draft.agent]&&!draft.brought?.name?AGENT_SHORT[draft.agent]:name),async()=>{},true);
    else primary=button(move?'Back to your world':'Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
    primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering||!done);primary.setAttribute('aria-busy',String(entering||!done));if(!done||entering)primary.disabled=true;
-   // Back keeps what came over, so coming back to the same Agent does not read it again; Google has nothing to go back to.
-   if(arriving&&!bringing&&!porting)back=()=>{clearTimeout(revealTimer);delete draft.agent;delete draft.agentName;step=0;notice='';error='';persist();render();};
-   else if(draft.ownModel===true)back=()=>{delete draft.ownModel;step=0;persist();render();};
-   else if(typeof draft.remoteAgent==='string')back=()=>{delete draft.remoteAgent;step=0;persist();render();};
    if(error||notice)status.append(node('p',t(error||notice),error?'setup-error':'setup-note'));
   }else{
    parts.push(node('h1',t('Give your agent a world'),'setup-visually-hidden'));
@@ -588,10 +600,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    if((error||notice)&&!formOpen){const feedback=node('p',t(error||notice),error?'setup-error':'setup-note');if(error)feedback.setAttribute('role','alert');status.append(feedback);}
   }
   primary.classList.add('setup-next');
-  // Back keeps its room, so the big button never moves.
-  const backButton=node('button',t('Back'),'setup-link setup-back') as HTMLButtonElement;backButton.type='button';
-  if(back){backButton.disabled=busy;backButton.onclick=back;}else{backButton.style.visibility='hidden';backButton.setAttribute('aria-hidden','true');backButton.tabIndex=-1;}
-  footer.append(status,primary,backButton);
+  footer.append(status,primary);
   panel.replaceChildren(...parts,footer);
   // The chosen card travels to the left (owner request 2026-10-09).
   if(importing&&flipFrom){
