@@ -47,8 +47,9 @@ hdiutil attach "$work/$file" -nobrowse -readonly -quiet -mountpoint "$mount" || 
 [ -d "$mount/Worldlet.app" ] || fail "the disk image has no Worldlet.app."
 codesign --verify --deep --strict "$mount/Worldlet.app" 2>/dev/null || fail "the app's signature did not verify."
 
-target="/Applications"
-[ -w "$target" ] || { target="$HOME/Applications"; mkdir -p "$target"; }
+# WORLDLET_INSTALL_DIR installs somewhere else (the release machines' install check uses a temporary folder).
+target="${WORLDLET_INSTALL_DIR:-/Applications}"
+if [ -n "${WORLDLET_INSTALL_DIR:-}" ]; then mkdir -p "$target"; elif [ ! -w "$target" ]; then target="$HOME/Applications"; mkdir -p "$target"; fi
 if pgrep -xq Worldlet; then
   echo "Quitting the running Worldlet…"
   osascript -e 'quit app "Worldlet"' >/dev/null 2>&1 || true
