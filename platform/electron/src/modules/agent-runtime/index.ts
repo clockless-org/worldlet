@@ -125,7 +125,6 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   voice:()=>{const id=current().harness?.id;if(!id)return null;if(voice?.id!==id)voice={id,service:harnessVoice(id)};return voice.service;},
   agents:()=>current().agents?.()??null,
   models:()=>current().models?.()??null,
-  helperPython:()=>current().helperPython(),
   status:home=>current().status(home),
   prepare:async()=>{await current().prepare?.();},
   home:scope=>journal(current().home(scope),scope==='private'),

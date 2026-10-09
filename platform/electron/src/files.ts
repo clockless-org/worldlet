@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 /** Library folders that belong to this installation, not to the World: Fox's Hermes runtime, local
  * speech (helper packages and model) and the installation's model credential. Reset keeps them, backups
  * neither carry nor replace them, and a running install or recognizer can hold their files open. */
-export const INSTALLATION_FOLDERS=['runtime','speech','model-access'];
+export const INSTALLATION_FOLDERS=['runtime','speech','tools','model-access'];
 /** Moves a folder Worldlet kept outside the library into it, once: never over an existing target. */
 export function adoptFolder(from:string,to:string){
  try{

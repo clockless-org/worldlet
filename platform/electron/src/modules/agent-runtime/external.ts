@@ -44,12 +44,6 @@ export abstract class PortableAdapter {
  readonly context:RuntimeContext;
  constructor(context:RuntimeContext){this.context=context;}
  makeSourceConnections():AgentSourceConnections {return new UnsupportedSourceConnections();}
- /** Helpers are Python programs, not Agent requests: a custom adapter never installs Hermes for them. */
- async helperPython(){
-  const file=process.env.WORLDLET_TOOLS_PYTHON??'/usr/bin/python3';
-  if(!path.isAbsolute(file)||!executable(file))throw new WorldletError('Local tools need an executable Python path in WORLDLET_TOOLS_PYTHON.');
-  return file;
- }
  /** Refresh only portable durable memory, never runtime transcripts or credentials. */
  checkpointCompanion(archive:Row){return archive;}
  captureCompanion(archive:Row){
