@@ -6,7 +6,7 @@ import driver from '../../browser/driver.json';
 import imsg from '../distribution/imsg.json';
 // Helpers the packager places in `process.resourcesPath` (scripts/package-electron.ts).
 // Development builds resolve the same files from the checkout's caches instead.
-export type BundledResource='hermesBootstrap'|'agentBrowser'|'stripe'|'googleClient'|'distribution'|'buildInfo'|'imsg';
+export type BundledResource='hermesBootstrap'|'uv'|'agentBrowser'|'stripe'|'googleClient'|'distribution'|'buildInfo'|'imsg';
 /** `<platform>-<arm64|x64>`, the key prebuilt helpers are stored under. */
 export const platformArch=()=>`${process.platform}-${process.arch==='arm64'?'arm64':'x64'}`;
 const exe=(name:string)=>process.platform==='win32'?name+'.exe':name;
@@ -20,6 +20,15 @@ export function bundledResource(profile:Profile,name:BundledResource):string|nul
  const repo=profile.resources;
  switch(name){
   case 'hermesBootstrap':if(packaged)candidates.push(path.join(packaged,'HermesBootstrap'));candidates.push(path.join(repo,'.local/electron/HermesBootstrap'));break;
+  // The uv executable: the packaged bootstrap's, else in development the one `npm run setup:hermes` installs
+  // (scripts/dev-electron.ts passes the primary checkout's as WORLDLET_UV and installs it when missing).
+  case 'uv':
+   if(packaged)candidates.push(path.join(packaged,'HermesBootstrap',exe('uv')));
+   else{
+    if(process.env.WORLDLET_UV)candidates.push(process.env.WORLDLET_UV);
+    candidates.push(path.join(repo,'.local/electron/HermesBootstrap',exe('uv')),path.join(repo,'.local/bootstrap',process.platform==='win32'?'Scripts':'bin',exe('uv')));
+   }
+   break;
   case 'agentBrowser':
    if(process.env.WORLDLET_AGENT_BROWSER)candidates.push(process.env.WORLDLET_AGENT_BROWSER);
    if(packaged)candidates.push(path.join(packaged,exe('agent-browser')));
