@@ -31,6 +31,20 @@ url="$(curl -fsSL "$SITE/downloads/appcast.xml" | grep -o '<enclosure[^>]*url="[
 file="${url##*/}"
 case "$file" in Worldlet-*-macos-*.dmg) ;; *) fail "unexpected release file: $file" ;; esac
 
+# A Worldlet already at this Build or newer (an Alpha or Dev copy, say) is kept and opened: replacing it would go back
+# to an older app over newer data.
+build="${file%-macos-*}"; build="${build##*-}"
+for app in "${WORLDLET_INSTALL_DIR:-/Applications}/Worldlet.app" "$HOME/Applications/Worldlet.app"; do
+  [ -z "${WORLDLET_INSTALL_DIR:-}" ] || [ "$app" = "$WORLDLET_INSTALL_DIR/Worldlet.app" ] || continue
+  have="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$app/Contents/Info.plist" 2>/dev/null || true)"
+  case "$have:$build" in *[!0-9:]*|:*|*:) continue ;; esac
+  if [ "$have" -ge "$build" ]; then
+    echo "Worldlet (Build ${have}) is already installed in ${app%/Worldlet.app}, as new as the release (Build ${build}). Opening it…"
+    if [ -n "$AGENT" ]; then open "$app" --args "--connect=$AGENT"; else open "$app"; fi
+    exit 0
+  fi
+done
+
 work="$(mktemp -d)"
 mount="$work/volume"
 cleanup() { hdiutil detach "$mount" -quiet >/dev/null 2>&1 || true; rm -rf "$work"; }
@@ -38,13 +52,17 @@ trap cleanup EXIT INT TERM
 
 echo "Downloading ${file}…"
 curl -fL --progress-bar "$SITE/downloads/$file" -o "$work/$file"
+echo "Checking the download…"
 expected="$(curl -fsSL "$SITE/downloads/$file.sha256" | awk '{print $1}')"
 actual="$(shasum -a 256 "$work/$file" | awk '{print $1}')"
 [ -n "$expected" ] && [ "$expected" = "$actual" ] || fail "the download did not match its checksum."
 
+echo "Opening the disk image…"
 mkdir -p "$mount"
-hdiutil attach "$work/$file" -nobrowse -readonly -quiet -mountpoint "$mount" || fail "could not open the disk image."
+# </dev/null: under `curl … | sh` this shell reads the rest of the script from stdin, so nothing it runs may read it.
+hdiutil attach "$work/$file" -nobrowse -readonly -quiet -mountpoint "$mount" </dev/null || fail "could not open the disk image."
 [ -d "$mount/Worldlet.app" ] || fail "the disk image has no Worldlet.app."
+echo "Checking the app's signature…"
 codesign --verify --deep --strict "$mount/Worldlet.app" 2>/dev/null || fail "the app's signature did not verify."
 
 # WORLDLET_INSTALL_DIR installs somewhere else (the release machines' install check uses a temporary folder).
@@ -53,7 +71,11 @@ if [ -n "${WORLDLET_INSTALL_DIR:-}" ]; then mkdir -p "$target"; elif [ ! -w "$ta
 if pgrep -xq Worldlet; then
   echo "Quitting the running Worldlet…"
   osascript -e 'quit app "Worldlet"' >/dev/null 2>&1 || true
-  sleep 2
+  # Quitting ends Hermes and the website engine first and can take several seconds. A copy opened while the old one
+  # still runs meets its single-instance lock and quits, so nothing opened after "Done" (10-09).
+  waited=0
+  while pgrep -xq Worldlet && [ "$waited" -lt 30 ]; do sleep 1; waited=$((waited + 1)); done
+  if pgrep -xq Worldlet; then fail "Worldlet is still running. Quit it from its menu, then run this command again."; fi
 fi
 echo "Installing into ${target}…"
 rm -rf "$target/Worldlet.app"
