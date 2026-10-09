@@ -6,9 +6,9 @@ const supportRoots=['docs/','resources/styles/builtin/references/','platform/dis
 const isSupport=(file:string)=>supportRoots.some(root=>file.startsWith(root))||file==='core/diagnostics/analytics-insights.json';
 const files=trackedFiles.filter(f=>f.endsWith('.md'));
 const errors:string[]=[];
-// Keep the complete inventory in the one root entry point. Generated asset
-// binaries outside docs/ are represented by their resource documentation.
-const indexPath='README.md';
+// Keep the complete inventory in the documentation index, so the README stays a short
+// front page. Generated asset binaries outside docs/ are represented by their resource documentation.
+const indexPath='docs/README.md';
 const startMarker='<!-- documentation-inventory:start -->';
 const endMarker='<!-- documentation-inventory:end -->';
 const groups:[string,string[]][]=[
@@ -35,11 +35,11 @@ const lines=[`Indexed: **${files.length} Markdown documents** and **${total-file
  ...groups.map(([title,entries])=>`| ${title} | ${entries.length} |`), ''];
 for(const [title,entries] of groups){
  lines.push(`<details><summary>${title} (${entries.length})</summary>`, '',
-  ...entries.map(file=>`- [${file}](${file.split('/').map(encodeURIComponent).join('/')})`),
+  ...entries.map(file=>`- [${file}](${path.posix.relative(path.posix.dirname(indexPath),file).split('/').map(encodeURIComponent).join('/')})`),
   '', '</details>', '');
 }
 const inventory=lines.join('\n');
-if(!existsSync(indexPath))errors.push('Missing root documentation index: '+indexPath);
+if(!existsSync(indexPath))errors.push('Missing documentation index: '+indexPath);
 else{
  // Windows checkouts with core.autocrlf use CRLF; the generated inventory uses LF.
  const source=readFileSync(indexPath,'utf8').replace(/\r\n/g,'\n');

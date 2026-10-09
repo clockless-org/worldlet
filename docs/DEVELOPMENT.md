@@ -54,7 +54,7 @@ Public API schemas, commands, bounds and integration runbooks live beside their 
 component. Artwork prompts/provenance live with resources. Completed implementation
 and release journals live in Git or Issues, not a new documentation archive.
 
-The root [README](../README.md#documentation-index) indexes every document. Applet
+The [documentation index](README.md) indexes every document. Applet
 package descriptions are runtime-required references, not additional architecture docs.
 Update the existing inventory with `node scripts/docs-check.ts --write-index`.
 
