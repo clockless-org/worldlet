@@ -227,12 +227,12 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   assert.equal(alone.id,'local-claude-code','without a built-in Agent the Harness answers for itself');
   await assert.rejects(alone.makeSourceConnections().connect({provider:'gmail',target:'',endpoint:'',token:'',home:'',onStage(){},onConnected(){}}),/does not provide account connections/);
   await assert.rejects(alone.makeSourceAccess().run({action:'sourceRequest',provider:'gmail',operation:'read'},''),/does not read connected accounts/);
-  // Background model work runs on the person's Harness itself, beside the conversation; source reads stay on the built-in World service.
+  // Background model work runs on the person's Harness itself, beside the conversation.
   const task={run:async()=>({})},builtInHome=path.join(scratch,'built-in');fs.mkdirSync(builtInHome,{recursive:true});
   const ready:any={...builtIn,available:true,home:()=>builtInHome,makeTask:()=>task,hasInteractiveWork:()=>false};
   let codex=true;
   const withBackground=new LocalHarnessAdapter(context,claude,unix,()=>ready,()=>codex);
-  assert.equal(withBackground.supportsBackgroundChecks,true,'checks run while the built-in World service is installed');
+  assert.equal(withBackground.supportsBackgroundChecks,true,'checks run on Claude Code');
   assert.equal(withBackground.background()?.id,'local-claude-code','background work runs on Claude Code');
   const lane=withBackground.makeTask!();
   assert.ok(lane instanceof LocalHarnessRuntime,'an Applet task is a Claude Code turn beside the conversation');
@@ -247,7 +247,7 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   fs.writeFileSync(path.join(builtInHome,'config.yaml'),'model:\n  provider: openrouter\n  default: some/model\n');
   fs.writeFileSync(path.join(builtInHome,'config.yaml'),'model:\n  provider: openai-codex\n  worldlet_source: local-codex\n');
   assert.equal(builtInModel(builtInHome,false),false,'a host-chosen Codex source without a sign-in is no model');
-  assert.equal(new LocalHarnessAdapter(context,claude,unix,()=>({...ready,available:false}),()=>true).supportsBackgroundChecks,false,'not while the built-in Agent is still installing');
+  assert.equal(new LocalHarnessAdapter(context,claude,unix,()=>({...ready,available:false}),()=>true).supportsBackgroundChecks,true,'whether or not the built-in Agent is installed: the World reads accounts in the Platform');
  }
 
  // One streamed turn through the runtime.

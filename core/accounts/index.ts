@@ -1,4 +1,4 @@
-/** Public component API: the World's own account connections (Google Mail, Calendar and Drive; Notion, Todoist, Linear, PayPal and Supabase through their official MCP servers). Cross-component consumers import this entry point. */
+/** Public component API: the World's own account connections (Google Mail, Calendar and Drive; Notion, Todoist, Linear, PayPal and Supabase through their official MCP servers; DoorDash through its official CLI). Cross-component consumers import this entry point. */
 export {GoogleRestError,type GoogleQuery,type GoogleRest,type MailReceipts} from './google/rest.ts';
 export {DISCOVERY_QUERIES,MIN_PICTURE_WIDTH,MailText,compactMessage,contentImage,discover,jsonSize,readPage,tidyMail,type MailPage,type MailPicture} from './google/gmail.ts';
 export {HtmlParser,unescape as htmlUnescape,type HtmlAttrs} from './google/html-parser.ts';
@@ -19,3 +19,5 @@ export {TODOIST_ENDPOINT,TODOIST_TOOLS,TODOIST_GATE,todoistTimeoutSeconds,todois
 export {LINEAR_ENDPOINT,LINEAR_TOOLS,LINEAR_GATE,linearIssueId,linearListArguments,readLinear} from './mcp/linear.ts';
 export {PAYPAL_ENDPOINTS,PAYPAL_GATE,paypalPayload,readPaypal} from './mcp/paypal.ts';
 export {SUPABASE_ENDPOINT,SUPABASE_TOOLS,SUPABASE_GATE,supabaseProjectId,readSupabase} from './mcp/supabase.ts';
+// DoorDash's official CLI: which operations and arguments, and what reaches Fox; the Platform runs it.
+export {DOORDASH_CLI_VERSION,DOORDASH_MUTATIONS,doordashArgs,cleanDoordash,validDoordashCheckout,doordashOutcome,type DoordashRun} from './doordash.ts';

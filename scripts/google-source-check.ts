@@ -76,10 +76,15 @@ await withTempDir('worldlet-google-source-',async temp=>{
  assert.deepEqual(calls.map(call=>call[0]),['_world_authorize','_email_review']);
  assert.equal(review.review.to,'sam.okafor@example.com');assert.equal(review.review.subject,'Dinner Saturday?');assert.equal(review.review.from,'you@worldlet.test');
 
- // Notion and every other source still go to the account owner's runtime.
- await access.run({action:'sourceTool',name:'read_world_source',args:{provider:'notion'}},own,turn);
+ // read_world_source for every provider runs here: the World's own local records come with its permit (Apple Notes),
+ // and a source the Platform cannot read says so; nothing goes to the account owner's runtime.
+ const local=async(event:any)=>event.name==='_source_begin'?{ticket:'t-2',records:[{provider:'apple-notes',id:'n1',title:'List',text:'eggs'}]}:turn(event);
+ assert.equal((await access.run({action:'sourceTool',name:'read_world_source',args:{provider:'apple-notes'}},own,local)).records[0].id,'n1');
+ await assert.rejects(access.run({action:'sourceTool',name:'read_world_source',args:{provider:'notion'}},own,turn),/temporarily unavailable/);
+ assert.equal(delegated.length,0);
+ // Other sources' requests go on to the next runtime (the MCP connectors, DoorDash).
  await access.run({action:'sourceRequest',provider:'notion',operation:'list'},own);
- assert.equal(delegated.length,2);
+ assert.equal(delegated.length,1);
  await links.connect({provider:'notion',target:'',endpoint:'',token:'',home:own,onStage(){},onConnected(){}});
  assert.equal(delegated.at(-1),'connect');
 

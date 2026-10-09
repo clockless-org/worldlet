@@ -12,17 +12,17 @@ import {setTimeout as sleep} from 'node:timers/promises';
 // --app, from the RC package smoke). A release build has no mock Google and no Codex model source, so every
 // path here enters through a local Agent, as the 10-03 demo did. One launch per phase, all on one disposable
 // library; each phase ends with Quit Completely and the launcher proves nothing was left running:
-// - choose: sign-in page → a local Agent → the second page bringing it in → Continue → the apps page; close the window there, mid-onboarding,
+// - choose: the setup page → a local Agent → Give it a world → the same page bringing it in → Enter your world on; close the window there, mid-onboarding,
 //   which quits the app instead of leaving Fox on the desktop (owner request 2026-10-04; ADVISORY until it
 //   has passed on the Mac and Windows hosts, falling back to Quit Completely).
-// - resume: the relaunch opens on the apps page → Enter my World → the tour's Mail step → Google sign-in
-//   starts (google_connect_started, never google_connect_failed) → Cancel → Reset Fox → the sign-in page.
+// - resume: the relaunch opens with the Agent brought in → Enter your world → the tour's Mail step → Google sign-in
+//   starts (google_connect_started, never google_connect_failed) → Cancel → Reset Fox → the setup page.
 //   Before Reset: Not now, the tour's first half ends and, with nothing connected, Fox waits on nothing: the tour
 //   closes with the phone step (owner request 2026-10-06), which turning the Tutorial switch off ends, and then opening Mail from the World starts Google sign-in again
 //   (the 10-03 meeting: a later click must offer to connect too); closing the World keeps Fox on the
 //   desktop and Back to World restores it. Both are ADVISORY (a failure prints ADVISORY FAIL) until they
 //   have passed on the Mac and Windows hosts, except the desktop Companion on the Mac, which always blocked.
-// - after-reset: the relaunch after Reset Fox opens on the sign-in page with no local Agent chosen.
+// - after-reset: the relaunch after Reset Fox opens on the setup page's choices with no local Agent chosen.
 // The launcher puts a fixture OpenClaw on this computer's path (scripts/setup-fixtures.ts), so there is
 // always a local Agent to choose; finding none fails.
 export const ONBOARDING_PATH_PHASES=['choose','resume','after-reset'] as const;
@@ -61,7 +61,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
  const button=(label:string)=>`[...document.querySelectorAll('button')].find(b=>b.checkVisibility()&&b.textContent.trim()===${JSON.stringify(label)}&&!b.disabled)`;
  const press=async(label:string,seconds=30)=>{await wait(`button “${label}”`,`!!${button(label)}`,seconds);await js(`${button(label)}.click();true`);};
  const shown=(selector:string)=>`[...document.querySelectorAll(${JSON.stringify(selector)})].some(e=>e.checkVisibility())`;
- const signInPage=shown('.setup-google-button'),appsPage=`!!${button('Enter my World')}`;
+ const signInPage=shown('.setup-choose'),appsPage=`!!${button('Enter your world')}`;
  const tourOn="!!document.querySelector('.tour-switch:not([hidden])')";
  // The Tutorial switch in the World's top-right corner, on while the tour runs, turned off ends the first run (owner Order 2026-10-07).
  const skipTutorial=async()=>{
@@ -87,46 +87,45 @@ export async function onboardingPaths({host,window,view}:CheckContext){
 
  if(phase==='choose'){
   if(store.state.onboarding?.completed===true||store.state.connections.length)throw Error('the library is not fresh: '+store.root);
-  await wait('the sign-in page',signInPage,90);
+  await wait('the setup page',signInPage,90);
   await wait('local Agent detection',detected,90);
   const found=await js(available) as string[];
   const choice=PREFERRED.find(id=>found.includes(id))??found[0];
   if(!choice)throw Error(`no local Agent to choose, not even the launcher’s fixture OpenClaw\n  screen: ${await seen()}`);
-  // A local Agent found here is setup's default way in, picked for the person (owner requests 2026-10-04, 2026-10-06), above Google.
-  if(await js("(()=>{const d=document.querySelector('.setup-agent-default'),g=document.querySelector('.setup-google-button');return !!d&&!!g&&d.getBoundingClientRect().top<g.getBoundingClientRect().top;})()")!==true)throw Error(`no default local Agent above Google\n  screen: ${await seen()}`);
+  // A local Agent found here is setup's default way in, picked for the person (owner requests 2026-10-04, 2026-10-06), with Google folded under More options (2026-10-09).
+  if(await js("(()=>{const d=document.querySelector('.setup-agent-default');return !!d&&d.checkVisibility()&&!d.closest('.setup-more');})()")!==true)throw Error(`no default local Agent above More options\n  screen: ${await seen()}`);
   await js(`document.querySelector(':is(.setup-agent-default,.setup-agent-button)[data-agent=${JSON.stringify(choice)}]').click();true`);
   mark(`picked the local Agent ${choice}`);
-  // The page's one Continue brings the picked Agent (owner request 2026-10-06): the host proves it answers before Fox
-  // uses it, then the second page brings it in (its own files are only read); Continue there turns on once it came over.
-  await press('Continue',30);
-  await wait('the bring page',shown('.startup-setup.is-bringing'),300);
-  await press('Continue',300);
-  await wait('the apps page',appsPage,60);
-  if(chosen(store.root)!==choice)throw Error(`the apps page showed, but the library has ${chosen(store.root)??'no'} local Agent chosen, not ${choice}`);
+  // The page's one big button, Give {agent} a world, brings the picked Agent (owner requests 2026-10-06, 2026-10-09): the host
+  // proves it answers before Fox uses it, then the same page brings it in (its own files are only read); Enter your world turns on once it came over.
+  await js("document.querySelector('.setup-next').click();true");
+  await wait('the Agent moving in',shown('.setup-import'),300);
+  await wait('the Agent brought in',appsPage,300);
+  if(chosen(store.root)!==choice)throw Error(`Enter your world showed, but the library has ${chosen(store.root)??'no'} local Agent chosen, not ${choice}`);
   for(let i=0;i<25&&!events.includes('local_agent_selected');i++)await sleep(200);
   if(!events.includes('local_agent_selected'))throw Error('choosing the local Agent reported no local_agent_selected');
   await sleep(1000);
   // Before onboarding is over, closing the window quits (modules/shell/companion.ts); the launcher then
   // checks the exit and that nothing was left running, as after Quit Completely.
-  console.log(`PASS onboarding paths ${phase}: chose ${choice} on the sign-in page and reached the apps page (${Math.round((Date.now()-started)/1000)}s); closing the window mid-onboarding`);
+  console.log(`PASS onboarding paths ${phase}: chose ${choice} on the setup page and brought it in (${Math.round((Date.now()-started)/1000)}s); closing the window mid-onboarding`);
   window.close();
   await sleep(15000);
   const message=`closing the window during onboarding did not quit the app (Fox on the desktop: ${host.use<DesktopCompanionService>(DESKTOP_COMPANION).isDesktop})`;
   if(CLOSE_QUITS_BLOCKING)throw Error(message);
   console.log(`ADVISORY FAIL onboarding paths ${phase}, close quits during onboarding: ${message}`);
   await host.use<DesktopCompanionService>(DESKTOP_COMPANION).restoreWorld().catch(()=>{});
-  await quitCompletely(`chose ${choice} on the sign-in page and reached the apps page; quitting mid-onboarding`);
+  await quitCompletely(`chose ${choice} on the setup page and brought it in; quitting mid-onboarding`);
  }
 
  if(phase==='resume'){
   const choice=chosen(store.root);
   if(!choice)throw Error('the relaunch has no local Agent chosen; the choose phase did not keep it');
-  await wait('resumed on the apps page',`${appsPage}||${signInPage}`,90);
+  await wait('resumed with the Agent brought in',`${appsPage}||${signInPage}`,90);
   // Agent detection may still move the page on; give it time, then judge where setup resumed.
   await sleep(3000);
-  if(await js(signInPage)===true||await js(appsPage)!==true)throw Error(`after quitting on the apps page, the relaunch did not resume there\n  screen: ${await seen()}`);
-  mark('the relaunch resumed on the apps page');
-  await press('Enter my World',120);
+  if(await js(signInPage)===true||await js(appsPage)!==true)throw Error(`after quitting with the Agent brought in, the relaunch did not resume there\n  screen: ${await seen()}`);
+  mark('the relaunch resumed with the Agent brought in');
+  await press('Enter your world',120);
   await wait('world arrival',"!!document.querySelector('#notionWorld')?.sceneMetrics?.renderer",90);
   const step=(key:string,seconds=30)=>wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
   await step('hello',90);await press('Continue');
@@ -190,22 +189,22 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   try{
    const clicked=await js("(()=>{const settings=document.getElementById('notionWorld')?.companionSettings;settings?.querySelector('[data-setting=reset]')?.click();const reset=settings?.querySelector('[data-action=reset]');if(!reset)return false;reset.click();return true;})()");
    if(clicked!==true)throw Error('Settings has no Reset button');
-   await wait('Reset Fox returned to the sign-in page',signInPage,120);
+   await wait('Reset Fox returned to the setup page',signInPage,120);
   }finally{dialog.showMessageBox=confirm;}
   const agent=host.use<AgentService>(AGENT).id;
   if(chosen(store.root)||agent!=='hermes')throw Error(`Reset Fox left the local Agent chosen (${chosen(store.root)??'none'}, Fox's Agent ${agent})`);
   await wait('local Agent detection',detected,90);await sleep(3000);
-  if(await js(appsPage)===true)throw Error('after Reset Fox, setup moved on to the apps page');
-  await quitCompletely('resumed on the apps page, Mail started Google sign-in, Cancel, Reset Fox → sign-in page');
+  if(await js(appsPage)===true)throw Error('after Reset Fox, setup moved on to Enter your world');
+  await quitCompletely('resumed with the Agent brought in, Mail started Google sign-in, Cancel, Reset Fox → setup page');
  }
 
  if(phase==='after-reset'){
   if(chosen(store.root))throw Error('the relaunch after Reset Fox still has a local Agent chosen: '+chosen(store.root));
   if(store.state.onboarding?.completed===true)throw Error('the relaunch after Reset Fox has onboarding completed');
-  await wait('the sign-in page',signInPage,90);
+  await wait('the setup page',signInPage,90);
   await wait('local Agent detection',detected,90);await sleep(3000);
-  if(await js(signInPage)!==true||await js(appsPage)===true)throw Error(`the relaunch after Reset Fox did not stay on the sign-in page\n  screen: ${await seen()}`);
-  await quitCompletely('the relaunch after Reset Fox opens on the sign-in page');
+  if(await js(signInPage)!==true||await js(appsPage)===true)throw Error(`the relaunch after Reset Fox did not stay on the setup page\n  screen: ${await seen()}`);
+  await quitCompletely('the relaunch after Reset Fox opens on the setup page');
  }
 }
 

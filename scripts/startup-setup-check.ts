@@ -44,57 +44,40 @@ await withBrowser(fileAccess,async browser=>{
   },{mode,platform});
   await page.goto(worldUrl());
   if(mode!=='existing'){
-   await page.getByRole('button',{name:'Continue with Google'}).waitFor();
-   assert.equal(await page.getByRole('heading',{name:'Give your agent a World'}).count(),1);
-   assert.equal(await page.getByText('Bring the agent you have',{exact:true}).count(),1);
-   assert.equal(await page.locator('.setup-languages,.setup-progress,.setup-skip').count(),0);
-   // Three bars on top say where setup is (owner request 2026-10-05).
-   assert.deepEqual(await page.locator('.setup-steps .setup-step').evaluateAll(list=>list.map(e=>e.className)),['setup-step is-current','setup-step is-next','setup-step is-next']);
-   assert.equal(await page.locator('.setup-steps').getAttribute('aria-label'),'Step 1 of 3');
-   assert.equal(await page.locator('.startup-brand').isVisible(),true);
-   // One fixed frame (owner request 2026-10-06): the heading and the one big button keep their place on every page.
-   const frame=async()=>{const [h1,next]=await Promise.all([page.locator('.startup-setup h1').boundingBox(),page.locator('.setup-next').boundingBox()]);return [h1.y,next.x,next.y,next.width,next.height].map(Math.round);};
-   await page.locator('.setup-agent-button.is-missing').first().waitFor();
-   const firstFrame=await frame();
-   assert.equal(await page.getByRole('button',{name:'Install Hermes Agent',exact:true}).isEnabled(),true,'Without a local Agent, Worldlet installs Hermes Agent');
-   assert.equal(await page.locator('.setup-back').isVisible(),false,'The first page has nothing to go back to');
-   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-'+platform+'.png')});
+   // One page (owner request 2026-10-09): the brand on top and no Fox, the Agents found here, More options folded, one big button.
+   const toggle=page.locator('.setup-more-toggle');await toggle.waitFor();
+   assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1);
+   assert.equal(await page.locator('.setup-steps,.setup-languages,.setup-progress,.setup-skip,.setup-gallery').count(),0,'No step bars and no app gallery');
+   assert.equal(await page.locator('.startup-scene').isVisible(),false,'Fox waits for the World');
+   const [brandBox,chooseBox]=await Promise.all([page.locator('.startup-brand').boundingBox(),page.locator('.setup-choose').boundingBox()]);
+   assert.ok(brandBox.y+brandBox.height<=chooseBox.y,'The brand signs the top of the page: '+JSON.stringify({brandBox,chooseBox}));
+   assert.equal(await page.locator('.startup-brand .startup-version').count(),0,'The page shows no version (owner feedback 2026-10-03)');
+   assert.equal(await page.getByRole('link').count(),0,'No links on the page');
    assert.equal(await page.locator('[data-kind=region-add]:visible').count(),0,'No area add controls during onboarding');
-   // Terms and Privacy live on the website; the page signs off with the brand only.
-   assert.equal(await page.getByRole('link').count(),0,'No links on the first page');
-   assert.equal(await page.locator('.startup-brand .startup-version').count(),0,'The sign-in page shows no version (owner feedback 2026-10-03)');
-   // Two kinds of way in: an Agent on this computer first (owner request 2026-10-04), or an account in the cloud.
-   assert.deepEqual(await page.locator('.setup-signin-heading').allTextContents(),['Bring your local agent','Bring your cloud agent']);
-   assert.equal(await page.locator('.setup-agent-default').count(),0,'No default Agent when none is on this computer');
-   // Cloud agents are coming soon and Muse is gone; Worldlet provides no model, so Google is greyed even with no Agent
-   // here (owner requests 2026-10-05), and Worldlet installs Hermes Agent, with Check again (2026-10-09). Codex alone is
-   // no Agent (2026-10-09), so it has no tile.
-   assert.deepEqual(await page.locator('.is-new .setup-signin-option').allTextContents(),['Continue with GoogleComing soon','Continue with ChatGPTComing soon']);
+   // No Agent here (owner decisions 2026-10-07, 2026-10-09): Hermes Agent is offered, and the big button gives it a world.
+   await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
+   assert.equal(await page.locator('.setup-agent-card.is-install strong').textContent(),'Hermes Agent');
+   assert.equal(await page.getByRole('button',{name:'Give Hermes a world',exact:true}).isEnabled(),true);
+   assert.equal(await page.locator('.setup-back').isVisible(),false,'The first half has nothing to go back to');
+   const frame=async()=>{const next=await page.locator('.setup-next').boundingBox();return [next.x,next.y,next.width,next.height].map(Math.round);};
+   // The page settles in first (its short entrance), then the big button keeps its place.
+   await page.locator('.startup-setup').evaluate(e=>Promise.all(e.getAnimations().map(a=>a.finished)));
+   const firstFrame=await frame();
+   // More options holds the rest, folded: Agents not on this computer greyed, Google and ChatGPT coming soon (owner request 2026-10-09).
+   assert.equal(await toggle.getAttribute('aria-expanded'),'false');
+   assert.equal(await page.locator('#setupMore').isVisible(),false);
+   await toggle.click();
+   assert.equal(await page.locator('#setupMore').isVisible(),true);
+   assert.deepEqual(await page.locator('.setup-more .setup-agent-button.is-missing').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['OpenClaw','pi','Claude Code'],'Hermes Agent is the card, the rest wait in More options');
+   assert.deepEqual(await page.locator('.setup-more :is(.setup-google-button,.setup-chatgpt-button)').allTextContents(),['Continue with GoogleComing soon','Continue with ChatGPTComing soon']);
    assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is greyed for everyone');
-   await page.getByText('No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',{exact:true}).waitFor();
-   assert.deepEqual(await page.locator('.setup-agent-button').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['Hermes Agent','OpenClaw','pi','Claude Code']);
-   assert.equal(await page.locator('.setup-agent-button.is-missing').count(),4,'Agents not on this computer stay listed, greyed');
-   assert.equal(await page.locator('.setup-signin-option:disabled').count(),6,'Nothing can be chosen without a local Agent');
-   assert.equal(await page.locator('.setup-signin-option .setup-signin-icon').count(),6,'Each choice carries its icon');
-   // One square tile per local Agent in one row; the cloud buttons stack under each other below them (owner request 2026-10-06).
-   const tiles=await page.locator('.setup-agent-tile').evaluateAll(list=>list.map(e=>{const r=e.getBoundingClientRect();return [Math.round(r.width),Math.round(r.height),Math.round(r.top)];}));
-   assert.ok(tiles.length===4&&tiles.every(([w,h,top])=>Math.abs(w-h)<=1&&top===tiles[0][2]),'Agent tiles are squares in one row: '+JSON.stringify(tiles));
-   const [googleBox,chatgptBox,grid]=await Promise.all([page.locator('.setup-google-button').boundingBox(),page.locator('.setup-chatgpt-button').boundingBox(),page.locator('.setup-agent-grid').boundingBox()]);
-   assert.ok(chatgptBox.y>=googleBox.y+googleBox.height&&Math.abs(googleBox.x-chatgptBox.x)<1&&Math.abs((googleBox.x+googleBox.width/2)-(grid.x+grid.width/2))<2&&googleBox.y>grid.y+grid.height,'Google and ChatGPT stack under each other, centred under the tiles: '+JSON.stringify({googleBox,chatgptBox,grid}));
-   // The bars carry no words (owner request 2026-10-06), and the page sits together: Fox just above the heading,
-   // the Agents close to the big button, the brand well below it.
-   assert.equal(await page.locator('.setup-steps').innerText(),'');
-   const [fox,title,body,next,back,brand]=await Promise.all(['.startup-scene','.startup-setup h1','.setup-signin','.setup-next','.setup-back','.startup-brand'].map(s=>page.locator(s).boundingBox()));
-   assert.ok(fox.y>=60,'Fox is not pressed against the top: '+JSON.stringify(fox));
-   assert.ok(title.y-(fox.y+fox.height)<=24,'Fox sits just above the heading');
-   assert.ok(next.y-(body.y+body.height)<=110,'The Agents are close to Continue: '+JSON.stringify({body,next}));
-   assert.ok(brand.y-(back.y+back.height)>=24,'Back keeps clear of the brand: '+JSON.stringify({back,brand}));
-   const before=await page.locator('.setup-google-button').boundingBox(),heading=await page.getByRole('heading',{name:'Give your agent a World'}).boundingBox();
-   // Nothing above or around Google moves at any sign-in stage (#1615): connecting, the
-   // browser step with its help and consent links, then preparing. Only the development build's mock signs in now.
+   assert.deepEqual(await frame(),firstFrame,'Opening More options does not move the big button');
+   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-'+platform+'.png')});
+   // Nothing around Google moves at any sign-in stage (#1615): connecting, the browser step with its help and consent
+   // links, then preparing. Only the development build's mock signs in now.
    const mockGoogle=page.getByRole('button',{name:'Use mock Google (Dev)',exact:true});
-   const layout=()=>page.evaluate(()=>[...document.querySelectorAll('.startup-setup :is(h1,h2,.setup-signin-group,.setup-google-help,.startup-brand,.setup-next)')].map(e=>{const r=e.getBoundingClientRect();return e.className+'@'+Math.round(r.top)+'+'+Math.round(r.height);}).join(' '));
-   const still=await layout();
+   const layout=()=>page.evaluate(()=>[...document.querySelectorAll('.startup-setup :is(.setup-agent-cards,.setup-more-toggle,.setup-more,.setup-next)')].map(e=>{const r=e.getBoundingClientRect();return e.className+'@'+Math.round(r.top)+'+'+Math.round(r.height);}).join(' '));
+   const still=await layout(),before=await page.locator('.setup-google-button').boundingBox();
    await mockGoogle.click();
    assert.match(await page.locator('.setup-google-button').textContent(),/(Connecting to|Waiting for) Google…|Finishing setup…/);
    assert.equal(await layout(),still,'Starting Google sign-in moves nothing');
@@ -108,65 +91,49 @@ await withBrowser(fileAccess,async browser=>{
    assert.match(await page.locator('.setup-google-help').textContent(),/Google authorized/);
    await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:google-sign-in',{detail:'browser'})));
    assert.equal(await page.evaluate(()=>(window as any).worldletCompanionGeometry(true)),null,'OAuth browser activation must not detach setup into a second Fox');
-   assert.equal(await page.locator('.desktop-companion-setup').isVisible(),false,'Login keeps only its original Fox');
+   assert.equal(await page.locator('.desktop-companion-setup').isVisible(),false,'Setup shows no Fox');
    const waiting=await page.locator('.setup-google-button').boundingBox();
    const cancel=await page.getByRole('button',{name:'Cancel sign-in'}).boundingBox();
    assert.ok(Math.abs(before.y-waiting.y)<1&&Math.abs(before.x-waiting.x)<1,'Google button stays still: '+JSON.stringify({before,waiting}));
    assert.ok(cancel.y>=waiting.y+waiting.height,'Cancel is below Google');
-   // The Dev mock link keeps its room while signing in, so nothing above moves down.
-   assert.equal((await page.getByRole('heading',{name:'Give your agent a World'}).boundingBox()).y,heading.y,'The heading stays still while Google waits');
    await page.evaluate(()=>(window as any).cancelGoogle());
    await page.getByRole('alert').filter({hasText:'Your request was cancelled.'}).waitFor();
-   assert.equal(await page.locator('.setup-gallery').count(),0,'Failed login cannot advance');
+   assert.equal(await page.locator('.setup-import').count(),0,'Failed login cannot advance');
    assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='usageEvent').map(c=>c.event)),['google_connection_absent','onboarding_started','local_agents_detected','google_connect_started','google_connect_cancelled']);
-   const feedback=await page.getByRole('alert').boundingBox();assert.ok(Math.abs((feedback.y+feedback.height/2)-(cancel.y+cancel.height/2))<3,'Cancellation reuses cancel slot');
-   const failed=await page.locator('.setup-google-button').boundingBox();assert.ok(Math.abs(before.y-failed.y)<1,'Error does not shift sign-in layout');
+   assert.deepEqual(await frame(),firstFrame,'The error does not move the big button');
    await mockGoogle.click();
-   await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
+   // Google goes straight to the second half: Google on the left, Mail and Calendar and the apps on the right.
+   await page.getByRole('heading',{name:'Your world is ready'}).waitFor();
    if(platform==='macos')await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'));
-   await page.locator('[data-applet-id="app-notion"]').waitFor();
-   const appsFrame=await frame();assert.ok(appsFrame.every((v,i)=>Math.abs(v-firstFrame[i])<=1),'The heading and the big button stay where they were on the first page: '+JSON.stringify({firstFrame,appsFrame}));
-   // Only the apps found on this computer (owner request 2026-10-06): no search, bookmarks or more apps.
-   assert.equal(await page.locator('.setup-gallery-toolbar,.setup-more,.setup-show-all,.setup-import,input[type=search]').count(),0);
-   assert.equal(await page.getByRole('button',{name:'Read browser bookmarks',exact:true}).count(),0);
-   assert.equal(await page.locator('.setup-app').filter({hasText:'Notion'}).getByRole('checkbox').isChecked(),true,'Notion is a curated starter on both platforms');
-   // Two sections (owner request 2026-10-06): the apps found on this computer, then popular ones. The fixture Mac has
-   // Notion, the one app found; without detection, every chosen starter is a popular one.
-   if(platform==='macos'){
-    assert.deepEqual(await page.locator('.setup-app-section h2').allTextContents(),['Apps on your computer','Apps that are popular']);
-    assert.deepEqual(await page.locator('.setup-app-section.is-found .setup-app').evaluateAll((list:HTMLElement[])=>list.map(e=>e.dataset.appletId)),['app-notion']);
-    assert.ok(await page.locator('.setup-app-section.is-popular .setup-app').count()>=10);
-   }else{
-    assert.deepEqual(await page.locator('.setup-app-section h2').allTextContents(),['Apps that are popular']);
-    assert.ok(await page.locator('.setup-app').count()>=15);
-   }
-   assert.equal(await page.locator('.setup-app-section.is-popular [data-applet-id="app-game-2048"]').count(),0,'Starter games arrive without being shown');
-   assert.deepEqual(await page.locator('.setup-app').evaluateAll((list:HTMLElement[])=>list.filter(e=>!e.dataset.purpose||!e.title.includes(' — ')).map(e=>e.dataset.appletId)),[],'Every tile carries its purpose as a tooltip');
+   await page.locator('.setup-tile-apps').waitFor();
+   assert.equal(await page.locator('.setup-passport-name').textContent(),'Google');
+   assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-connections','setup-tile-apps']);
+   assert.deepEqual(await page.locator('.setup-tile-connections img').evaluateAll(list=>list.map(e=>(e as HTMLImageElement).title)),['Gmail','Google Calendar']);
+   assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
+   assert.deepEqual(await frame(),firstFrame,'The big button stays where it was');
+   // The apps the World starts with, the ones found here first (the fixture Mac has Notion); starter games arrive unshown.
+   const shelf=await page.locator('.setup-tile-apps .setup-app').evaluateAll((list:HTMLElement[])=>list.map(e=>e.dataset.appletId));
+   if(platform==='macos')assert.equal(shelf[0],'app-notion','Apps found here come first: '+shelf.join(' '));
+   assert.ok(shelf.length>=8&&!shelf.includes('app-game-2048'),'Starters show, games arrive unshown: '+shelf.join(' '));
    assert.equal(await page.locator('.setup-back').isVisible(),false,'Google has nothing to go back to');
-   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-apps-'+platform+'.png')});
-   await page.locator('.setup-app').filter({hasText:'Notion'}).getByRole('checkbox').click();
-   assert.equal(await page.locator('.setup-app').filter({hasText:'Notion'}).getByRole('checkbox').isChecked(),false);
+   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-world-'+platform+'.png')});
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='google_connect_failed')),'Saved native connections recover even when the original bridge reply fails');
    assert.equal(await page.getByRole('alert').count(),0,'Recovered authorization does not show a stale sign-in error');
-   await page.reload();
-   await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
-   await page.locator('[data-applet-id="app-notion"]').waitFor();
-   assert.equal(await page.locator('.setup-app').filter({hasText:'Notion'}).getByRole('checkbox').isChecked(),false,'Detection must not recheck a cancelled choice');
    // Setup in Chinese; then back to English.
-   for(const [language,heading] of [['zh','把常用应用带进你的世界'],['en','Bring your apps into your World']]){
+   for(const [language,heading] of [['zh','你的世界准备好了'],['en','Your world is ready']]){
     await page.evaluate(language=>{const key='worldlet-startup-setup:setup-test';localStorage.setItem(key,JSON.stringify({...JSON.parse(localStorage.getItem(key)),language}));},language);
     await page.reload();await page.getByRole('heading',{name:heading}).waitFor();
    }
+   await page.locator('.setup-tile-apps').waitFor();
    await page.setViewportSize({width:1000,height:680});
-   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-apps-compact-'+platform+'.png')});
+   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-world-compact-'+platform+'.png')});
    assert.ok(await page.evaluate(()=>{const el=document.getElementById('worldStartup');return el.scrollHeight<=el.clientHeight+1;}),'No scrolling at compact desktop size');
    await page.setViewportSize({width:1280,height:850});
-   assert.deepEqual(await page.locator('.setup-steps .setup-step').evaluateAll(list=>list.map(e=>e.className)),['setup-step is-done','setup-step is-done','setup-step is-current'],'Google skips bringing an Agent in');
-   await page.getByRole('button',{name:'Enter my World',exact:true}).click();
-   await page.getByRole('button',{name:'Entering your World…',exact:true}).waitFor();
-   // The bars and the brand leave as the icons start to change (owner request 2026-10-06).
+   await page.getByRole('button',{name:'Enter your world',exact:true}).click();
+   await page.getByRole('button',{name:'Entering your world…',exact:true}).waitFor();
+   // The brand and the painting leave as the icons start to change (owner request 2026-10-06).
    await page.waitForFunction(()=>document.getElementById('worldStartup')?.classList.contains('is-gathering'));
-   assert.ok(await page.evaluate(()=>['.setup-steps','.startup-brand'].every(s=>getComputedStyle(document.querySelector('#worldStartup>'+s)!).transitionProperty.includes('opacity')&&document.querySelector('#worldStartup')!.classList.contains('is-gathering'))),'Bars and brand fade while the icons change');
+   assert.ok(await page.evaluate(()=>getComputedStyle(document.querySelector('#worldStartup>.startup-brand')!).transitionProperty.includes('opacity')),'The brand fades while the icons change');
    assert.equal(await page.locator('.setup-primary[aria-busy=true]').count(),1);
   }
   await page.waitForFunction(()=>!document.getElementById('worldStartup'),{},{timeout:30000});
@@ -207,7 +174,7 @@ await withBrowser(fileAccess,async browser=>{
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.modules?.some(m=>m.id==='app-gmail'&&m.unlocked));
    assert.ok(!result.calls.some(c=>c.action==='localAgent'),'Companion setup is deferred');
    assert.ok(!result.calls.some(c=>c.action==='localAgent'&&c.operation==='bind'),'Binding still requires a choice');
-   assert.ok(!result.state.onboarding.unlockedApplets.includes('app-notion'));
+   if(platform==='macos')assert.ok(result.state.onboarding.unlockedApplets.includes('app-notion'),'An app found here comes along');
    if(platform==='windows')assert.ok(!result.calls.some(c=>c.action==='installedApplets'||c.operation==='checkMail'),'No unsupported detection or background checks');
    assert.ok(!result.calls.some(c=>c.action==='agentChat'),'No model call gates entry');
    if(platform==='macos'){const checks=result.calls.filter(c=>c.action==='onboarding'&&c.operation==='checkMail');assert.equal(checks.length,1,'Entering does not duplicate the gallery source check');const checkIndex=result.calls.findIndex(c=>c.action==='onboarding'&&c.operation==='checkMail'),setupIndex=result.calls.findIndex(c=>c.action==='onboarding'&&c.operation==='setup');assert.ok(checkIndex<setupIndex,'Reads start during app selection');}
@@ -250,70 +217,66 @@ await withBrowser(fileAccess,async browser=>{
    if(platform==='windows')w.worldletHost={version:1,platform:'windows',request:w.webkit.messageHandlers.worldlet.postMessage};
   },{platform});
   await page.goto(worldUrl());
-  const useClaude=page.getByRole('button',{name:'Claude Code',exact:true});
-  await useClaude.waitFor();
-  await page.waitForFunction(()=>!(document.querySelector('[data-agent="claude-code"]') as HTMLButtonElement)?.disabled);
-  // Cloud agents are coming soon once an Agent here can be brought (owner request 2026-10-05).
-  assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is coming soon');
-  assert.equal(await page.locator('.setup-google-button .setup-signin-tag').textContent(),'Coming soon');
+  await page.locator('.setup-agent-card[data-agent="openclaw"]').waitFor();
+  await page.waitForFunction(()=>!(document.querySelector('.setup-agent-card[data-agent="claude-code"]') as HTMLButtonElement)?.disabled);
   // Picked for the person (owner request 2026-10-06): Hermes, OpenClaw, pi first, then Claude Code; Codex alone is no
-  // Agent (owner decision 2026-10-09). Hermes isn't here, so OpenClaw is picked, first and forest; Google comes after the local Agents.
+  // Agent (owner decision 2026-10-09), so it has no card. Hermes isn't here, so OpenClaw is picked, first and lifted;
+  // the big button names it by its own name.
+  assert.deepEqual(await page.locator('.setup-agent-cards .setup-agent-card').evaluateAll((list:HTMLElement[])=>list.map(b=>b.dataset.agent)),['openclaw','pi','claude-code']);
+  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex has no card');
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
   assert.equal(await page.locator('.setup-agent-default').getAttribute('aria-pressed'),'true');
-  assert.equal(await page.locator('.setup-agent-tile .setup-signin-tag',{hasText:'Recommended'}).count(),0,'The pick is the recommendation');
-  // Agents found here in that order, then supported ones not found here, listed but greyed.
-  assert.deepEqual(await page.locator('.setup-agent-button').evaluateAll(list=>list.map(b=>b.dataset.agent)),['openclaw','pi','claude-code','hermes']);
-  const order=await page.locator('.setup-agent-default,.setup-google-button').evaluateAll(list=>list.map(e=>e.getBoundingClientRect().top));
-  assert.ok(order[0]<order[1],'the default Agent comes before Google');
-  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex has no tile');
-  for(const id of ['claude-code','openclaw','pi'])assert.equal(await page.locator(`[data-agent="${id}"]`).isEnabled(),true,id);
-  assert.equal(await page.locator('[data-agent="hermes"]').isDisabled(),true);
-  assert.equal(await page.locator('[data-agent="hermes"]').getAttribute('title'),'Hermes Agent isn’t installed on this computer.');
-  assert.equal(await page.locator('[data-agent="hermes"].is-missing').count(),1);
-  assert.equal(await page.locator('.setup-chatgpt-button').isDisabled(),true,'ChatGPT is coming soon');
-  assert.equal(await page.locator('.setup-muse-button').count(),0,'Muse is gone');
-  // Each Agent shows its own name, then where it comes from and what comes along.
-  assert.equal(await page.locator('[data-agent="openclaw"] strong').textContent(),'Nova');
-  assert.equal(await page.locator('[data-agent="openclaw"] small').textContent(),'OpenClaw · 6 conversations');
-  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-local-agent-'+platform+'.png')});
-  const firstFrame=await page.locator('.setup-next').boundingBox();
-  // Only some command lines can call World tools; the tile says so before the choice.
+  assert.equal(await page.locator('.setup-next').textContent(),'Give Nova a world');
+  // Each card shows its own name, then where it comes from and what comes along.
+  assert.equal(await page.locator('[data-agent="openclaw"] .setup-agent-name').textContent(),'Nova');
+  assert.equal(await page.locator('[data-agent="openclaw"] .setup-agent-sub').textContent(),'OpenClaw');
+  assert.deepEqual(await page.locator('[data-agent="openclaw"] .setup-agent-chip').allTextContents(),['6 conversations','31 notes','2 skills','3 routines']);
+  // Only some command lines can call World tools; the card says so before the choice.
   assert.equal(await page.locator('[data-agent="pi"] .setup-signin-tag').textContent(),'Chat only');
   assert.equal(await page.locator('[data-agent="pi"]').getAttribute('title'),'With pi, Fox can talk with you but can’t act in your world yet.');
-  // Clicking a tile only picks it; the one Continue brings it. An Agent that is not signed in leaves the person on the first page.
-  await page.getByRole('button',{name:'Claude Code',exact:true}).click();
+  // Hermes isn't here: it waits in More options, greyed, with Google and ChatGPT coming soon.
+  await page.locator('.setup-more-toggle').click();
+  assert.equal(await page.locator('.setup-more [data-agent="hermes"]').isDisabled(),true);
+  assert.equal(await page.locator('.setup-more [data-agent="hermes"]').getAttribute('title'),'Hermes Agent isn’t installed on this computer.');
+  assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is coming soon');
+  assert.equal(await page.locator('.setup-google-button .setup-signin-tag').textContent(),'Coming soon');
+  assert.equal(await page.locator('.setup-chatgpt-button').isDisabled(),true,'ChatGPT is coming soon');
+  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-local-agent-'+platform+'.png')});
+  await page.locator('.setup-more-toggle').click();
+  const firstFrame=await page.locator('.setup-next').boundingBox();
+  // Clicking a card only picks it; the big button brings it. An Agent that is not signed in leaves the person here.
+  await page.locator('.setup-agent-card[data-agent="claude-code"]').click();
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'claude-code');
-  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='select')),false,'Picking a tile brings nothing yet');
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='select')),false,'Picking a card brings nothing yet');
+  await page.getByRole('button',{name:'Give Claude Code a world',exact:true}).click();
   await page.getByText(/Claude Code did not answer/).waitFor();
-  assert.equal(await page.getByRole('heading',{name:'Give your agent a World'}).count(),1);
-  // Choosing Nova brings it in on the second page, named by its own name: its card reads it while what is happening scrolls past.
-  await page.getByRole('button',{name:'OpenClaw',exact:true}).click();
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByRole('heading',{name:'Bring your Nova'}).waitFor();
-  await page.locator('.setup-bring-ticker.is-done').waitFor();
-  assert.equal(await page.locator('.setup-bring-line.is-now').textContent(),'Nova moved in.');
-  assert.equal(await page.locator('.setup-lede').textContent(),'Everything came over');
-  assert.equal(await page.locator('.setup-bring-older').count(),0,'No background or older-conversation copy (owner request 2026-10-06)');
-  assert.equal(await page.locator('.setup-bring-feed,.setup-bring-counts,.setup-bring-links').count(),0,'No list under the card (owner request 2026-10-06)');
+  assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1);
+  // Choosing Nova brings it in on the same page: its card on the left, what came along arriving on the right.
+  await page.locator('.setup-agent-card[data-agent="openclaw"]').click();
+  await page.getByRole('button',{name:'Give Nova a world',exact:true}).click();
+  await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
+  assert.equal(await page.locator('.setup-passport-name').textContent(),'Nova');
+  assert.equal(await page.locator('.setup-passport-from').textContent(),'OpenClaw');
+  // Worldlet provides no model (owner request 2026-10-05): setup says where to choose one.
+  assert.deepEqual(await page.locator('.setup-passport .setup-agent-fact').allTextContents(),['ModelChoose one in Settings']);
+  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Model.',{exact:true}).waitFor();
+  // Only what came over gets a tile (owner request 2026-10-09), in the order it arrives.
+  assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-connections','setup-tile-apps']);
+  assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
+  assert.equal(await page.locator('.setup-tile-conversations .setup-tile-count').textContent(),'3');
+  assert.deepEqual(await page.locator('.setup-tile-conversations li').allTextContents(),['Trip plan for Kyoto','Weekly investor update','Fix the flaky login test']);
+  assert.deepEqual(await page.locator('.setup-tile-notes,.setup-tile-skills,.setup-tile-routines').evaluateAll(list=>list.map(e=>e.querySelector('.setup-tile-count')!.textContent)),['31','2','3']);
+  assert.equal(await page.locator('.setup-tile-connections .setup-tile-note').textContent(),'1 to sign in again after setup','The integration that stays with the Agent gets no mark');
+  assert.equal(await page.locator('.setup-tile-connections .setup-tile-logos>*').count(),2);
+  assert.equal(await page.locator('.setup-tile-reading').count(),0,'Nothing reads as waiting once everything came over');
   const bringFrame=await page.locator('.setup-next').boundingBox();
   assert.ok(['x','y','width','height'].every(k=>Math.abs(bringFrame[k]-firstFrame[k])<=1.5),'The big button stays put: '+JSON.stringify({firstFrame,bringFrame}));
-  // Its card reads the Agent: its name, personality, what it knows about the person and its model.
-  // Each says in a few words what came over (owner request 2026-10-06), never just "came over".
-  assert.deepEqual(await page.locator('.setup-agent-fact').allTextContents(),['NameNova','PersonalityFox’s own','About youRuns a small design studio in Kyoto','ModelChoose one in Settings']);
-  // Worldlet provides no model (owner request 2026-10-05): setup says where to choose one.
-  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Model.',{exact:true}).waitFor();
-  assert.equal(await page.locator('.setup-agent-card.is-reading').count(),0,'Reading ends once everything is shown');
-  assert.deepEqual(await page.locator('.setup-steps .setup-step').evaluateAll(list=>list.map(e=>e.className)),['setup-step is-done','setup-step is-current','setup-step is-next']);
-  assert.equal(await page.locator('.setup-back').isVisible(),true,'The bring page can go back');
-  assert.equal(await page.locator('.setup-gallery').count(),0,'No app gallery while bringing an Agent');
-  assert.equal(await page.getByRole('button',{name:'Enter my World',exact:true}).count(),0,'The apps come after the Agent');
+  assert.equal(await page.locator('.setup-next').textContent(),'Enter your world');
+  assert.equal(await page.locator('.setup-back').isVisible(),true,'Bringing an Agent in can go back');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-bring-'+platform+'.png')});
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
-  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='agentIntegrations'));
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),'No Google sign-in');
-  assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='local_agent_selected')),'The choice is measured');
   // Which Agent, who answers for Fox, and what came along: IDs, buckets and outcomes only (core/diagnostics/ANALYTICS.md#bringing-an-agent).
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='agent_bring_completed'));
   const usage=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='usageEvent'));
@@ -323,33 +286,20 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(brought&&brought.local_agent==='openclaw'&&brought.integrations_came_over==='1_9'&&brought.integrations_reconnect==='1_9'&&/^(0|1_9|10_99|100_999|1000_plus)$/.test(brought.bring_conversations),JSON.stringify(brought));
   assert.ok(!JSON.stringify(usage).match(/GitHub|Nova|#|\//),'No titles, names or paths in setup events');
   assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true,'Choosing an Agent allows Fox to use the world’s context');
-  // Restarting setup resumes on the second page with what already came over.
+  // Restarting setup resumes with what already came over, read nothing again.
   await page.reload();
-  await page.getByRole('heading',{name:'Bring your Nova'}).waitFor();
-  await page.locator('.setup-bring-ticker.is-done').waitFor();
+  await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='localAgent').length),0,'nothing is brought twice');
-  // Then the apps, as with Google, ending on one big Enter my World; Back returns to the Agent without bringing it again.
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
+  // Back to the first half and the same Agent again shows what came over without reading it again (owner request 2026-10-06).
   await page.getByRole('button',{name:'Back',exact:true}).click();
-  await page.getByRole('heading',{name:'Bring your Nova'}).waitFor();
-  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='localAgent').length),0,'Back brings nothing again');
-  // Back to the first page and Continue with the same Agent shows what came over without reading it again (owner request 2026-10-06).
-  await page.getByRole('button',{name:'Back',exact:true}).click();
-  await page.getByRole('heading',{name:'Give your agent a World'}).waitFor();
+  await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   await page.waitForFunction(()=>!(document.querySelector('[data-agent="openclaw"]') as HTMLButtonElement)?.disabled);
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByRole('heading',{name:'Bring your Nova'}).waitFor();
-  await page.locator('.setup-bring-ticker.is-done').waitFor();
+  await page.getByRole('button',{name:'Give Nova a world',exact:true}).click();
+  await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='localAgent').length),0,'Coming back to the same Agent reads nothing again');
-  assert.equal(await page.locator('.setup-agent-fact').nth(2).textContent(),'About youRuns a small design studio in Kyoto');
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
-  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-agent-apps-'+platform+'.png')});
-  await page.reload();
-  await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
-  await page.getByRole('button',{name:'Enter my World',exact:true}).click();
+  assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
+  await page.getByRole('button',{name:'Enter your world',exact:true}).click();
   await page.waitForFunction(()=>!document.getElementById('worldStartup'),{},{timeout:30000});
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
   assert.ok(!result.calls.some(c=>c.action==='connect'),'No Google sign-in');
@@ -389,7 +339,14 @@ await withBrowser(fileAccess,async browser=>{
    for(const [width,height] of sizes){
     await page.setViewportSize({width,height});
     await page.waitForTimeout(50);
-    const over=await page.evaluate(()=>[document.getElementById('worldStartup'),...document.querySelectorAll('#worldStartup .setup-content,#worldStartup .setup-gallery')].filter(e=>e&&e.scrollHeight>e.clientHeight+1).map(e=>e.className+' '+e.scrollHeight+'>'+e.clientHeight));
+    const over=await page.evaluate(()=>{
+     const scrolls=[document.getElementById('worldStartup')].filter(e=>e&&e.scrollHeight>e.clientHeight+1).map(e=>e!.className+' '+e!.scrollHeight+'>'+e!.clientHeight);
+     // The page's own part never runs under the big button, nor the button under the window's edge.
+     const footer=document.querySelector('.startup-setup .setup-footer')!.getBoundingClientRect(),body=[...document.querySelectorAll('.setup-agent-cards,.setup-more-wrap,.setup-import,.setup-tile')].map(e=>e.getBoundingClientRect());
+     if(body.some(r=>r.height&&r.bottom>footer.top+1))scrolls.push('the page runs under the big button');
+     if(footer.bottom>innerHeight+1)scrolls.push('the big button is cut off');
+     return scrolls;
+    });
     assert.deepEqual(over,[],where+' scrolls at '+width+'x'+height);
    }
    await page.setViewportSize({width:1024,height:700});
@@ -397,25 +354,22 @@ await withBrowser(fileAccess,async browser=>{
   await page.locator('.setup-agent-default[data-agent="hermes"]').waitFor();
   await noScroll('The agent page');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-1-'+host+'.png')});
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByRole('heading',{name:'Bring your Elon North'}).waitFor();
-  await page.locator('.setup-bring-ticker.is-done').waitFor();
-  await noScroll('The bring page');
+  await page.locator('.setup-more-toggle').click();
+  await noScroll('More options');
+  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-1-more-'+host+'.png')});
+  await page.locator('.setup-more-toggle').click();
+  await page.getByRole('button',{name:'Give Elon North a world',exact:true}).click();
+  await page.getByRole('heading',{name:'Elon North moved in'}).waitFor();
+  await noScroll('Bringing the Agent in');
+  if(host==='macos')assert.ok(await page.locator('.setup-tile-apps .setup-app').count()>=10,'The apps found here show in the Apps tile');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-2-'+host+'.png')});
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
-  await page.locator('.setup-app-section'+(host==='macos'?'.is-found':'.is-popular')+' .setup-app').first().waitFor();
-  await noScroll('The apps page');
-  if(host==='macos')assert.ok(await page.locator('.setup-app-section.is-found .setup-app').count()>=20,'Every app found is shown');
-  else assert.equal(await page.locator('.setup-app-section.is-found .setup-app').count(),0,'Windows finds no installed apps');
-  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-3-'+host+'.png')});
   await page.setViewportSize({width:1440,height:900});await page.waitForTimeout(50);
-  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-3-1440-'+host+'.png')});
+  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-2-1440-'+host+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
 // One-click install (`--connect=<id>`, core/agent/PORTABILITY.md#local-harnesses-chosen-at-setup): the Agent the
- // host hands over is connected with the same select as Continue and setup goes on to the apps page by itself; one not
- // found here, or a select that fails, leaves the first page with it picked and the error shown; a second launch while
+ // host hands over is connected with the same select as the big button and brought in by itself; one not
+ // found here, or a select that fails, leaves the first half with it picked and the error shown; a second launch while
  // setup is open (`worldlet:connect-agent`) does the same.
  for(const scenario of ['found','missing','fails','second-launch']){
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
@@ -445,13 +399,14 @@ await withBrowser(fileAccess,async browser=>{
    await page.evaluate(()=>{const w=window as any;w.requested='openclaw';window.dispatchEvent(new CustomEvent('worldlet:connect-agent'));});
   }
   if(scenario==='found'||scenario==='second-launch'){
-   await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
-   assert.deepEqual(await selects(),['openclaw'],'The named Agent is connected with the same select as Continue');
-   assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='openclaw')),'and brought in before the apps page');
+   await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
+   assert.deepEqual(await selects(),['openclaw'],'The named Agent is connected with the same select as the big button');
+   assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='openclaw')),'and brought in');
+   assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
   }else{
    const message=scenario==='missing'?'Hermes Agent isn’t installed on this computer.':'OpenClaw did not answer.';
    await page.getByText(message,{exact:true}).waitFor();
-   assert.equal(await page.getByRole('heading',{name:'Give your agent a World'}).count(),1,'The normal first page stays');
+   assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1,'The normal first half stays');
    assert.deepEqual(await selects(),scenario==='missing'?[]:['openclaw']);
    if(scenario==='fails')assert.equal(await page.locator('.setup-agent-default[data-agent="openclaw"]').count(),1,'The named Agent stays picked');
   }
@@ -459,20 +414,20 @@ await withBrowser(fileAccess,async browser=>{
   assert.deepEqual(errors,[]);await page.close();
  }
  // No Agent on this computer is no dead end (owner decisions 2026-10-07, 2026-10-09): Check again asks the host again,
- // Worldlet installs stock Hermes Agent (its installer's steps show as they run), ChatGPT is signed in inside Hermes
- // (the code its device page asks for shows here), and Hermes is then brought like any Agent found here.
+ // Give Hermes a world installs stock Hermes Agent (its installer's steps show as they run), ChatGPT is signed in inside
+ // Hermes (the code its device page asks for shows here), and Hermes then moves in like any Agent found here.
  {
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform})=>{
    const w=window as any;w.calls=[];w.detects=0;w.installed=false;w.signedIn=false;
-   w.fixture={platform,workspaceId:'setup-no-agent-test',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:false,unlockedApplets:[]},connections:[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
    const event=(detail:unknown)=>window.dispatchEvent(new CustomEvent('worldlet:hermes-setup',{detail}));
+   w.fixture={platform,workspaceId:'setup-no-agent-test',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:false,unlockedApplets:[]},connections:[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
    w.webkit={messageHandlers:{worldlet:{async postMessage(b){
     w.calls.push(b);
     if(b.action==='snapshot')return structuredClone(w.fixture);
     if(b.action==='installedApplets')return {keys:[]};
     // Codex alone is no Agent; Hermes appears once it is installed and signed in.
-    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[],recommended:null,selected:sessionStorage.getItem('fixture-agent')};}
+    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[{id:'codex',title:'Codex',configured:true,worldTools:true}],recommended:null,selected:sessionStorage.getItem('fixture-agent')};}
     if(b.action==='agentHarness'&&b.operation==='install-hermes'){
      event({stage:'install',step:3,steps:7,title:'Create Python environment'});
      await new Promise<void>(resolve=>{w.finishInstall=resolve;});
@@ -494,14 +449,17 @@ await withBrowser(fileAccess,async browser=>{
    if(platform==='windows')w.worldletHost={version:1,platform:'windows',request:w.webkit.messageHandlers.worldlet.postMessage};
   },{platform});
   await page.goto(worldUrl());
-  await page.getByText(/No agent found on this computer/).waitFor();
+  await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
+  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex alone is no Agent');
+  await page.getByText('No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Check again'}).click();
   await page.waitForFunction(()=>(window as any).detects>=2);
-  await page.getByText(/No agent found on this computer/).waitFor();
-  await page.getByRole('button',{name:'Install Hermes Agent',exact:true}).click();
+  await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Give Hermes a world',exact:true}).click();
   await page.getByText('Step 3 of 7: Create Python environment',{exact:true}).waitFor();
   assert.equal(await page.getByRole('button',{name:'Installing Hermes Agent…',exact:true}).isDisabled(),true,'nothing else while it installs');
   assert.equal(await page.getByRole('button',{name:'Check again'}).count(),0,'nothing to check while it installs');
+  assert.equal(await page.locator('.setup-more-toggle').count(),0,'More options waits while it installs');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-hermes-install-'+platform+'.png')});
   await page.evaluate(()=>(window as any).finishInstall());
   await page.getByText(/Hermes Agent is installed\. Sign in to ChatGPT in it\./).waitFor();
@@ -509,16 +467,18 @@ await withBrowser(fileAccess,async browser=>{
   await page.locator('.setup-hermes-code strong',{hasText:'ABCD-1234'}).waitFor();
   assert.equal(await page.getByRole('button',{name:'Cancel sign-in'}).isVisible(),true);
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-hermes-sign-in-'+platform+'.png')});
-  assert.deepEqual(await page.evaluate(()=>[document.getElementById('worldStartup'),...document.querySelectorAll('#worldStartup .setup-content')].filter(e=>e&&e.scrollHeight>e.clientHeight+1).map(e=>e!.className)),[],'the sign-in fits without scrolling');
+  assert.equal(await page.evaluate(()=>{const el=document.getElementById('worldStartup')!;return el.scrollHeight<=el.clientHeight+1;}),true,'the sign-in fits without scrolling');
   await page.evaluate(()=>(window as any).finishSignIn());
-  await page.getByRole('heading',{name:/^Bring your/}).waitFor();
+  await page.getByRole('heading',{name:/^Hermes Agent moved in$/}).waitFor();
+  assert.equal(await page.locator('.setup-passport-name').textContent(),'Hermes Agent');
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&!['detect','requested'].includes(c.operation)).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','sign-in-hermes','select:hermes']);
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>['modelConfigure','modelCatalog'].includes(c.action))),false,'no model is configured in Worldlet');
-  assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true);
+  await page.getByRole('button',{name:'Enter your world',exact:true}).waitFor();
+  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-no-agent-'+platform+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
  // My Agent is on another computer (core/phone/README.md#another-computers-agent): the code from Worldlet there pairs
- // this one with it, and setup goes on to the apps page; a refused code says why and the code box stays.
+ // this one with it, and setup goes on to the second half; a refused code says why and the code box stays.
  {
   const page=await browser.newPage({viewport:{width:1024,height:700},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform})=>{
@@ -536,26 +496,28 @@ await withBrowser(fileAccess,async browser=>{
    if(platform==='windows')w.worldletHost={version:1,platform:'windows',request:w.webkit.messageHandlers.worldlet.postMessage};
   },{platform});
   await page.goto(worldUrl());
+  await page.locator('.setup-more-toggle').click();
   const toggle=page.getByRole('button',{name:'My Agent is on another computer'});await toggle.waitFor();
   await toggle.click();
   const code=page.getByLabel('Code from your other computer');await code.waitFor();
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-remote-code-'+platform+'.png')});
-  assert.equal(await page.locator('.setup-agent-grid').isVisible(),false,'the code box takes the Agent tiles’ room');
+  assert.equal(await page.locator('.setup-agent-cards').count(),0,'the code box takes the Agent cards’ room');
   const connect=page.getByRole('button',{name:'Connect',exact:true});
   assert.equal(await connect.isDisabled(),true,'nothing to pair without a code');
   assert.deepEqual(await page.evaluate(()=>[document.getElementById('worldStartup'),...document.querySelectorAll('#worldStartup .setup-content')].filter(e=>e&&e.scrollHeight>e.clientHeight+1).map(e=>e!.className)),[],'the code box fits without scrolling');
   await code.fill('worldlet://pair?v=1&s=x');await connect.click();
   await page.getByText('This is not a code from Worldlet on another computer.').waitFor();
   await code.fill('worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac+mini');await connect.click();
-  await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
+  await page.getByRole('heading',{name:'Your world is ready'}).waitFor();
+  assert.equal(await page.locator('.setup-passport-from').textContent(),'On Mac mini');
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='pair').map(c=>c.link.slice(0,17))),['worldlet://pair?v','worldlet://agent?']);
   assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true);
-  // A relaunch resumes on the apps page while the pairing lasts, and returns to the first page once it ended there.
-  await page.reload();await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
+  // A relaunch resumes on the second half while the pairing lasts, and returns to the first half once it ended there.
+  await page.reload();await page.getByRole('heading',{name:'Your world is ready'}).waitFor();
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-remote-agent-'+platform+'.png')});
   await page.evaluate(()=>sessionStorage.removeItem('fixture-paired'));await page.reload();
-  await page.getByRole('button',{name:'My Agent is on another computer'}).waitFor();
+  await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS: three-page setup in one fixed frame: pick your local agent (square tiles, Hermes/OpenClaw/pi first), watch it move in on the second page, then the apps found here; cloud agents coming soon and Google greyed for everyone; Google retry, app choices, background checks, existing-user bypass, local Agent entry without Google, --connect from an install script and an Agent on another computer by code');
+ console.log('PASS: one-page setup: the brand on top, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, Agent on another computer, no scrolling at desktop sizes');
 });

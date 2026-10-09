@@ -50,9 +50,11 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  const button=(label:string)=>`[...document.querySelectorAll('button')].find(b=>b.offsetParent&&b.textContent.trim()===${JSON.stringify(label)}&&!b.disabled)`;
  const press=async(label:string,seconds=30)=>{await wait(`button “${label}”`,`!!${button(label)}`,seconds);await js(`${button(label)}.click();true`);};
  const dialogue=(pattern:string)=>`${pattern}.test(document.querySelector('#companionDialogue')?.innerText||'')`;
- await wait('first-use screen',"!!document.querySelector('.setup-google-button')",20);
+ await wait('first-use screen',"!!document.querySelector('.setup-more-toggle')",20);
+ // The one setup page keeps every way in but the local Agents under More options (owner request 2026-10-09).
+ await js("document.querySelector('.setup-more-toggle').click();true");
  await press('Use mock Google (Dev)');
- await press('Enter my World',120);
+ await press('Enter your world',120);
  await wait('world arrival',"document.querySelector('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl'",60);
  noRecordedFailures(host,'world arrival');
  // A real mouse click at the middle of an element: the tour's spotlight catches every click and

@@ -142,7 +142,8 @@ def fn(case):
     except Exception as error:
         return {'error': str(error), 'kind': kind(error)}
 
-cases, namespace, out = json.load(sys.stdin), host(), []
+# stdin is read as UTF-8 bytes: on Windows Python's text stdin uses the ANSI code page, which garbles non-ASCII fixtures.
+cases, namespace, out = json.loads(sys.stdin.buffer.read().decode('utf-8')), host(), []
 for case in cases:
     out.append(flow(case) if 'module' in case else configure(namespace, case) if 'probed' in case else fn(case))
 print(json.dumps({'cases': out, 'policy': {'READ_SHAPED': namespace['READ_SHAPED'], 'MCP_POLICY': namespace['MCP_POLICY']}, 'schema': SCHEMA}, ensure_ascii=True))
@@ -150,8 +151,14 @@ print(json.dumps({'cases': out, 'policy': {'READ_SHAPED': namespace['READ_SHAPED
 function python(input:unknown){
  const run=spawnSync('python3',['-I','-c',PYTHON,root],{input:JSON.stringify(input),encoding:'utf8',maxBuffer:1<<28});
  assert.equal(run.status,0,run.stderr);
- return JSON.parse(run.stdout);
+ return JSON.parse(pythonMessages(run.stdout));
 }
+/** Python 3.14 rewords two TypeErrors the port reproduces: "cannot use 'list' as a dict key (unhashable type: 'list')"
+ * for "unhashable type: 'list'", and "argument of type 'int' is not a container or iterable" for "… is not iterable".
+ * Earlier versions and the port use the older wording, so Python's answers are compared in it. */
+const pythonMessages=(text:string)=>text
+ .replace(/cannot use '[^'\\]*' as an? (?:dict key|set element) \((unhashable type: '[^'\\]*')\)/g,'$1')
+ .replace(/(argument of type '[^'\\]*' is not) a container or iterable/g,'$1 iterable');
 
 // The port, through the same scripted answers.
 type Answer={json?:unknown;result?:McpToolResult;raise?:string};

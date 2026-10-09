@@ -9,10 +9,10 @@ import type {CheckContext} from './index.ts';
 import {SETUP_OPTIONS,type SetupOption} from './setup-option-names.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
-// RC setup options (#1503): every way in on setup's sign-in page, one launch on one fresh library each
+// RC setup options (#1503): every way in on setup's one page, one launch on one fresh library each
 // (development builds only; launcher scripts/setup-options.ts). Mock Google; Continue with Codex (the
 // host's own sign-in becomes Fox's model); OpenClaw, Claude Code, pi and Hermes Agent, each brought in
-// from the launcher's fixture homes on setup's second page (owner request 2026-10-04: choosing an Agent
+// from the launcher's fixture homes on setup's page (owner requests 2026-10-04, 2026-10-09: choosing an Agent
 // brings it), so the World's database and the companion profile must hold what it brought. Each
 // option then enters the World and Fox must answer on that choice: after a bring, a question only the
 // brought memory answers. Ends with Quit Completely; the launcher proves nothing was left running.
@@ -45,15 +45,17 @@ export async function setupOptions({host,view}:CheckContext){
  const button=(label:string)=>`[...document.querySelectorAll('button')].find(b=>b.offsetParent&&b.textContent.trim()===${JSON.stringify(label)}&&!b.disabled)`;
  const press=async(label:string,seconds=30)=>{await wait(`button “${label}”`,`!!${button(label)}`,seconds);await js(`${button(label)}.click();true`);};
  const shown=(selector:string)=>`[...document.querySelectorAll(${JSON.stringify(selector)})].some(e=>e.offsetParent)`;
- const appsPage=`!!${button('Enter my World')}`;
+ const appsPage=`!!${button('Enter your world')}`;
  const available="[...document.querySelectorAll(':is(.setup-agent-default,.setup-agent-button):not(.is-missing)')].filter(b=>!b.disabled).map(b=>b.dataset.agent)";
 
- await wait('the sign-in page',shown('.setup-google-button'),90);
+ await wait('the setup page',shown('.setup-choose'),90);
  if(agent===null){
+  // Google is under More options (owner request 2026-10-09).
+  await js("document.querySelector('.setup-more-toggle').click();true");
   await press('Use mock Google (Dev)');
-  await wait('the apps page',appsPage,180);
+  await wait('Enter your world',appsPage,180);
   const live=['gmail','google-calendar'].filter(provider=>store.state.connections.some((c:any)=>c.provider===provider));
-  if(live.length!==2)throw Error('mock Google reached the apps page without Mail and Calendar connected: '+JSON.stringify(store.state.connections.map((c:any)=>c.provider)));
+  if(live.length!==2)throw Error('mock Google reached Enter your world without Mail and Calendar connected: '+JSON.stringify(store.state.connections.map((c:any)=>c.provider)));
  }else{
   await wait('local Agent detection',`(${available}.length>0||!!document.querySelector('.setup-agent-button.is-missing'))`,90);
   const found=await js(available) as string[];
@@ -63,19 +65,18 @@ export async function setupOptions({host,view}:CheckContext){
   }
   await js(`document.querySelector(':is(.setup-agent-default,.setup-agent-button)[data-agent=${JSON.stringify(agent)}]').click();true`);
   mark('picked '+agent);
-  // Continue brings the picked Agent; on the second page Continue turns on once everything came over, then the apps page.
-  await press('Continue',30);
-  await wait('the bring page',shown('.startup-setup.is-bringing'),300);
-  await press('Continue',300);
-  await wait('the Agent brought in',appsPage,60);
+  // Give {agent} a world brings the picked Agent on the same page; Enter your world turns on once everything came over.
+  await js("document.querySelector('.setup-next').click();true");
+  await wait('the Agent moving in',shown('.setup-import'),300);
+  await wait('the Agent brought in',appsPage,300);
   const choice=readSelection(store.root)??readAdopted(store.root)??(readModelSource(store.root)?'codex':null);
-  if(choice!==agent)throw Error(`the apps page showed, but the library has ${choice??'no'} local Agent chosen, not ${agent}`);
+  if(choice!==agent)throw Error(`Enter your world showed, but the library has ${choice??'no'} local Agent chosen, not ${agent}`);
   if(agent==='codex'&&readModelSource(store.root)!=='local-codex')throw Error('Continue with Codex did not make the Codex sign-in Fox’s model');
   if(bring)broughtCheck(store.root,store.ledger(),agent,expected);
   mark(bring?`${agent}’s memory, conversations, notes, skills and routines are in the World`:'Fox runs on the Codex sign-in');
  }
 
- await press('Enter my World',120);
+ await press('Enter your world',120);
  await wait('world arrival',"!!document.querySelector('#notionWorld')?.sceneMetrics?.renderer",90);
  await wait('Fox ready for a message',"!!document.getElementById('notionInput')&&!!document.getElementById('notionCommand')",60);
  // Fox answers on this choice; after a bring only the brought memory knows the answer.
