@@ -15,7 +15,13 @@ await withBrowser(fileAccess,async browser=>{
  await page.goto(worldUrl());
  await page.waitForFunction(()=>!document.querySelector('#worldStartup')&&document.querySelectorAll('.world-matter').length>0);
  await page.evaluate(()=>document.fonts.ready);
- await page.waitForTimeout(1000);
+ // Settled: the list has not changed for a second (a slow runner was still filling it after a fixed second).
+ await page.evaluate(()=>new Promise<void>((resolve,reject)=>{
+  const list=document.querySelector('#notionWorld .world-task-list');if(!list)return reject(Error('no Attention list'));
+  let quiet=setTimeout(done,1000);const give=setTimeout(()=>{observer.disconnect();reject(Error('Attention list kept changing for 20 s'));},20000);
+  const observer=new MutationObserver(()=>{clearTimeout(quiet);quiet=setTimeout(done,1000);});observer.observe(list,{childList:true,subtree:true,attributes:true});
+  function done(){observer.disconnect();clearTimeout(give);resolve();}
+ }));
  const unchanged=await page.evaluate(async()=>{
   const root=document.querySelector('#notionWorld'),list=root.querySelector('.world-task-list'),first=list.firstElementChild;
   const mutations:MutationRecord[]=[];const observer=new MutationObserver(rows=>mutations.push(...rows));observer.observe(list,{childList:true,subtree:true,attributes:true});

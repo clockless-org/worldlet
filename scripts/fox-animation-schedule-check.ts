@@ -20,14 +20,17 @@ assert.equal(ambientPose(8000),'looking');assert.equal(ambientPose(9500),null);
 const presentation=await buildCompanionPresentation(process.cwd(),'dev');
 const bundle=await build({stdin:{resolveDir:process.cwd(),contents:`import {mountCompanionPortrait} from './ui/companion/companion-portrait.ts';import {createFoxDevPreviewControls} from './ui/companion/fox-dev-preview.ts';import {foxFrameTimingText} from './ui/companion/fox-frame-timing.ts';globalThis.mountFox=mountCompanionPortrait;globalThis.previewControls=createFoxDevPreviewControls;globalThis.foxTiming=foxFrameTimingText;`},bundle:true,write:false,format:'iife'});
 const browser=await chromium.launch();try{
- const page=await browser.newPage({viewport:{width:900,height:700}}),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.clock.install();
+ const page=await browser.newPage({viewport:{width:900,height:700}}),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));// Paused, so a slow runner's real time cannot pass the virtual targets below: time moves only when the check moves it.
+ await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
  await page.setContent('<title>Fox animation schedule</title><style>body{background:#eee9dd}.companion-model{width:144px;height:144px}</style><div id="fox" class="companion-avatar" data-state="idle"></div>');
  await page.addStyleTag({content:(await readFile('ui/components/components.css','utf8')).split('\n').filter(line=>line.startsWith('.fox-dev-preview')).join('\n')});
  await page.evaluate(p=>{(globalThis as any).__WORLDLET_ENV_ASSETS__={companionPortrait:p.companionPainted.original,...p};// This check covers the anatomy portrait; the Rive Fox has scripts/fox-rive-check.ts.
  delete (globalThis as any).__WORLDLET_ENV_ASSETS__.companionRive;},presentation);await page.addScriptTag({content:bundle.outputFiles[0].text});
+ // The portrait decodes its images in real time; each wait advances the paused clock one frame, at most 4.8 s of it.
+ const drawn=async(ready:()=>boolean)=>{for(let i=0;!(await page.evaluate(ready));i++){assert(i<300,'The Fox portrait never drew');await page.clock.runFor(16);await new Promise(r=>setTimeout(r,50));}};
  const start=await page.evaluate(()=>{const w=globalThis as any,t=performance.now();w.disposeFox=w.mountFox(document.querySelector('#fox'),{bust:true});return t;});
- await page.waitForFunction(()=>document.querySelector('canvas')?.dataset.animationFrame==='anatomy-v1:idle');
+ await drawn(()=>document.querySelector('canvas')?.dataset.animationFrame==='anatomy-v1:idle');
  const burst=await page.evaluate(()=>{
   const canvas=document.querySelector('canvas')!,observer=new MutationObserver(()=>{});
   observer.observe(canvas,{attributes:true,attributeFilter:['data-animation-frame']});
@@ -108,7 +111,7 @@ const browser=await chromium.launch();try{
  await page.screenshot({path:'/tmp/fox-animation-schedule.png'});await page.evaluate(()=>(globalThis as any).disposeFox());assert.equal(await page.locator('canvas').count(),0);assert.deepEqual(errors,[]);
  await page.getByRole('button',{name:'Preview animation',exact:true}).click();assert.match(await page.getByRole('status').innerText(),/unavailable/,'Disposed preview listener leaked');
  await page.evaluate(()=>{const w=globalThis as any;delete w.__WORLDLET_ENV_ASSETS__.companionAnatomy;w.disposeFox=w.mountFox(document.querySelector('#fox'));});
- await page.waitForFunction(()=>document.querySelector('canvas')?.dataset.animationFrame);
+ await drawn(()=>!!document.querySelector('canvas')?.dataset.animationFrame);
  await page.getByRole('button',{name:'Preview animation',exact:true}).click();assert.match(await page.getByRole('status').innerText(),/unavailable/,'Non-Dev portrait accepts preview events');
  await page.evaluate(()=>(globalThis as any).disposeFox());
  assert.deepEqual(errors,[]);

@@ -187,9 +187,11 @@ export async function pool(steps,limit,run){
  return results;
 }
 const duration=s=>s<60?s.toFixed(1)+'s':Math.floor(s/60)+'m '+String(Math.floor(s%60)).padStart(2,'0')+'s';
-export async function testUi({parallel=parallelChecks,serial=serialChecks,limit=testUiConcurrency(),cli=npmCli(),run=runStep,log=console.log}={}){
+// On GitHub Actions a failed check's output also follows its FAIL line at once, folded: the RC's time limit can stop
+// the suite before the summary prints it (Windows RC 2026-10-09: 40 failures, no output).
+export async function testUi({parallel=parallelChecks,serial=serialChecks,limit=testUiConcurrency(),cli=npmCli(),run=runStep,log=console.log,inline=process.env.GITHUB_ACTIONS==='true'}={}){
  const started=Date.now(),total=parallel.length+serial.length;
- const report=r=>{log(`${r.ok?'PASS':'FAIL'} ${duration(r.seconds).padStart(7)}  ${r.name}`);return r;};
+ const report=r=>{log(`${r.ok?'PASS':'FAIL'} ${duration(r.seconds).padStart(7)}  ${r.name}`);if(!r.ok&&inline)log(`::group::${r.name} output\n${r.output.trimEnd()}\n::endgroup::`);return r;};
  log(`test:ui: build:native-ui, then ${parallel.length} checks ${limit} at a time and ${serial.length} alone`);
  if(!cli){log('FAIL build:native-ui: npm-cli.js not found beside '+process.execPath+'; run npm run test:ui');return 1;}
  const build=report(await run({name:'build:native-ui',bin:process.execPath,args:[cli,'run','build:native-ui']}));

@@ -62,7 +62,9 @@ try{
   assert.deepEqual(errors,[]);await page.close();
  }
  for(const reducedMotion of ['no-preference','reduce'] as const){
-  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion});await page.goto(url);await page.clock.install();
+  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion});await page.goto(url);
+  // Paused: on a slow runner real time kept flowing and the mist had cleared before it was read.
+  await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
   await page.evaluate(()=>{document.documentElement.dataset.firstVisit='true';(window as any).reveals=0;document.addEventListener('worldlet:world-revealed',()=>{(window as any).reveals++;});document.dispatchEvent(new Event('worldlet:world-ready'));});
   await page.clock.runFor(100);
   if(reducedMotion==='no-preference'){
