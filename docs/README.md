@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **265 Markdown documents** and **43 supporting documentation files**.
+Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -61,7 +61,7 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 | Product, architecture and operations guides | 15 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 24 |
-| Resource and artwork records | 66 |
+| Resource and artwork records | 67 |
 | Module and service documentation | 35 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 43 |
@@ -250,7 +250,7 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (66)</summary>
+<details><summary>Resource and artwork records (67)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -313,6 +313,7 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 - [resources/styles/builtin/references/immersive/README.md](../resources/styles/builtin/references/immersive/README.md)
 - [resources/styles/builtin/references/village-hud/README.md](../resources/styles/builtin/references/village-hud/README.md)
 - [resources/styles/builtin/references/youtube-web/README.md](../resources/styles/builtin/references/youtube-web/README.md)
+- [resources/themes/CONTRACT.md](../resources/themes/CONTRACT.md)
 - [resources/themes/README.md](../resources/themes/README.md)
 - [resources/worlds/README.md](../resources/worlds/README.md)
 - [resources/worlds/village/README.md](../resources/worlds/village/README.md)

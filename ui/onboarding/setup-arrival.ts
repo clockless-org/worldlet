@@ -24,7 +24,7 @@ export async function landSetupDevices(root:HTMLElement,onLanded:()=>void=()=>{}
      const ease=progress*progress*(3-2*progress);
      let live=frameModules(now).get(img.dataset.appletId)?.arrivalBounds||target;
      const bubble=module?.arrivalVisible===false?root.querySelector<HTMLElement>('[data-action="region-more"][data-page="'+module.region+'"]'):null;
-     const canvas=root.querySelector<HTMLCanvasElement>('canvas[data-renderer="pixi-webgl"]'),base=(canvas||root).getBoundingClientRect();
+     const canvas=root.querySelector<HTMLElement>('[data-renderer="sim-dom"],canvas[data-renderer="pixi-webgl"]'),base=(canvas||root).getBoundingClientRect();
      const sx=canvas?base.width/canvas.clientWidth:1,sy=canvas?base.height/canvas.clientHeight:1;
      if(bubble){const r=bubble.getBoundingClientRect();live={x:(r.left+r.width/2-base.left)/sx-8,y:(r.top+r.height/2-base.top)/sy-8,width:16,height:16};}
      const mix=(a:number,b:number)=>a+(b-a)*ease;

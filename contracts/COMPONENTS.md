@@ -391,3 +391,7 @@ conversation journal (`platform/electron/src/modules/fox/companion.ts`). It is w
 before request delivery and before streamed text reaches UI. The selected Harness
 cannot disable this journal. The portable Companion archive remains a view of
 completed visible messages; interrupted streams live in the World ledger.
+
+## Theme packages
+
+`ui/theme-packages/index.ts` is the generated registry of the trusted source packages copied by `theme:import`, one directory per theme. Each package implements the type-only `@worldlet/theme` API exported by `ui/themes/index.ts`. It owns no host data or native IO. See the [build theme contract](../resources/themes/CONTRACT.md).

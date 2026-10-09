@@ -1,0 +1,14 @@
+/* Public Sim shell slots. The scene owns positions; business controls retain their handlers. */
+html[data-build-theme] .ui-theme-top{left:var(--sim-top-x)!important;top:var(--sim-top-y)!important;width:var(--sim-top-width)!important;max-height:var(--sim-top-height);right:auto!important}
+html[data-build-theme] .ui-theme-companion{left:var(--sim-companion-x)!important;top:var(--sim-companion-y)!important;width:var(--sim-companion-width)!important;max-height:var(--sim-companion-height);right:auto!important;bottom:auto!important;transform:none!important;translate:none!important}
+html[data-build-theme] :is(.ui-theme-top,.ui-theme-companion,.ui-theme-dialog){font-family:var(--sim-body-font);color:var(--sim-ink)}
+html[data-build-theme] .ui-button{min-height:var(--sim-control-height);border-radius:var(--sim-radius)}
+html[data-build-theme] :is(.ui-theme-top,.ui-theme-companion,.ui-theme-dialog) :focus-visible{outline:3px solid var(--sim-focus);outline-offset:2px}
+html[data-build-theme] button[aria-busy=true]{cursor:progress;opacity:.65}
+html[data-build-theme] .ui-theme-applet[data-theme-rendered=true]{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:none!important;transform:none!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;overflow:hidden!important;pointer-events:auto}
+html[data-build-theme] .ui-theme-applet[hidden],html[data-build-theme] .ui-theme-world-scene[hidden]{display:none!important}
+html[data-sim-attention=placed] .ui-theme-attention{left:var(--sim-attention-x)!important;top:var(--sim-attention-y)!important;width:var(--sim-attention-width)!important;max-height:var(--sim-attention-height)!important;transform:none!important}
+html[data-sim-today=placed] .ui-theme-today{left:var(--sim-today-x)!important;top:var(--sim-today-y)!important;width:var(--sim-today-width)!important;max-height:var(--sim-today-height)!important}
+html[data-sim-dialog=placed] .ui-theme-dialog{left:var(--sim-dialog-x)!important;top:var(--sim-dialog-y)!important;width:var(--sim-dialog-width)!important;max-height:var(--sim-dialog-height)!important;margin:0!important}
+
+html[data-build-theme] .ui-theme-speech{position:fixed!important;left:var(--sim-speech-x)!important;top:var(--sim-speech-y)!important;width:var(--sim-speech-width)!important;max-width:var(--sim-speech-width)!important;max-height:var(--sim-speech-height)!important;right:auto!important;bottom:auto!important;transform:none!important;translate:none!important;overflow:auto}

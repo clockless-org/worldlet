@@ -14,9 +14,9 @@ try{
   for(let i=0;i<120;i++)stage.render(room,value,true);
   const unchanged=observer.takeRecords().length;
   stage.render(room,{...value,reading:true},true);
-  const reading=host.querySelector('.mail-account-tooltip').textContent;
+  const reading=host.querySelector('.village-status').textContent;
   stage.render(room,value,false,false,false);
-  const hidden=(host.querySelector('.mail-shared-device') as HTMLElement).hidden;
+  const hidden=(host.querySelector('.ui-theme-applet') as HTMLElement).hidden;
   observer.takeRecords();for(let i=0;i<120;i++)stage.render(room,value,false,false,false);
   const idle=observer.takeRecords().length;observer.disconnect();stage.destroy();return {unchanged,idle,reading,hidden};
  });

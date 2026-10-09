@@ -1,0 +1,11 @@
+{
+  "contractVersion": 2,
+  "id": "blueprint",
+  "title": "Blueprint",
+  "entry": "entry.ts",
+  "stylesheet": "theme.css",
+  "assets": "assets",
+  "applets": [],
+  "presentation": "presentation.json",
+  "updatedAt": "2026-10-09T23:40:00Z"
+}

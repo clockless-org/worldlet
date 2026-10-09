@@ -30,3 +30,13 @@ html[data-theme-fonts~=label] :is(.notion-pin strong,.world-date-time,.companion
 html[data-theme-room-transition=fade] #notionWorld[data-depth=object] #notionContent:not([hidden]){animation:theme-room-fade var(--theme-transition-ms) ease-out}
 html[data-theme-room-transition=door] #notionWorld[data-depth=object] #notionContent:not([hidden]){animation:theme-room-door var(--theme-transition-ms) cubic-bezier(.3,.7,.2,1)}
 @media(prefers-reduced-motion:reduce){html[data-theme-room-transition] #notionWorld #notionContent{animation:none}}
+
+/* Build theme renderers own the Applet stage; host helper layers obey hidden state. */
+.ui-theme-world :is(.pixi-selected-item,.mail-shared-device,.mail-reader-switch,.mail-account-status)[hidden]{display:none!important}
+
+/* Host-owned default content can be embedded on a theme-owned plane through renderDefault. */
+.ui-theme-default .home-open-sheet{height:100%;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;display:flex;flex-direction:column}
+.ui-theme-default .home-calendar-art{display:none}
+.ui-theme-default .home-open-body{flex:1;min-height:0;overflow:auto}
+.ui-theme-default .home-open-header h2{display:none}
+.ui-theme-default .home-open-header,.ui-theme-default .home-calendar-navigation{padding:0}

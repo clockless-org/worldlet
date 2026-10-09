@@ -58,7 +58,7 @@ export function createAppletTaskScreen({root,openApplet,place}:{root:HTMLElement
  function head(id:string){
   if((root.dataset.depth||'overview')==='object')return null;
   const module=((root as any).sceneMetrics?.modules||[]).find((m:any)=>m.id===id&&m.visible!==false);
-  const bounds=module?.peekBounds,canvas=root.querySelector<HTMLCanvasElement>('canvas[data-renderer="pixi-webgl"]')||root.querySelector('canvas');
+  const bounds=module?.peekBounds,canvas=root.querySelector<HTMLElement>('[data-renderer="sim-dom"],canvas[data-renderer="pixi-webgl"]')||root.querySelector('canvas');
   if(!bounds||!canvas||!(bounds.width>0))return null;
   const base=canvas.getBoundingClientRect(),box=root.getBoundingClientRect(),sx=canvas.clientWidth?base.width/canvas.clientWidth:1,sy=canvas.clientHeight?base.height/canvas.clientHeight:1;
   let top=base.top-box.top+bounds.y*sy;

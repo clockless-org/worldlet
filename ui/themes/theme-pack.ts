@@ -2,7 +2,7 @@ import {validateSceneMotion,type SceneMotion} from './scene-motion.ts';
 // The Theme Pack contract: one data-only description of how a theme presents the shared product
 // (owner request 2026-10-05). A theme decides where things are and how they look and move; it never
 // owns data. Mail keeps its ID, accounts, messages and background tasks whatever room shows it, and
-// the same business event drives a different animation in each theme. Never execute theme code.
+// the same business event drives a different animation in each theme. These data-only packs never execute code; trusted build-time Sim source uses build-theme-contract.ts.
 export type ThemeRect=[number,number,number,number];
 /** One transparent, silent mail performance registered to the room painting, in normalized coordinates. */
 export type ThemeMailDelivery={src:string;bounds:ThemeRect;duration:number;shadow:{bounds:ThemeRect;contact:[number,number]};foreground:ThemeRect[]};

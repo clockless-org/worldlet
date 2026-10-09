@@ -10,3 +10,8 @@ export type {ThemeDeviceFeature,ThemeDeviceEffects,ThemeMailDelivery} from './th
 export {applyThemeSurfaces,attentionPicture,companionStill,playThemeSound,syncThemeSounds,themeStartupPicture,themeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
 
 export {themeAmbientTrack} from './theme-audio.ts';
+
+export * from './build-theme-contract.ts';
+
+// The one Theme contract: bundled packages, the active one and the one-step switch.
+export {renderBuildTheme,renderBuildWorld,applyBuildThemeScene,activeBuildTheme,switchBuildTheme,readBuildThemePreference,themeAssetURL,BUILD_THEMES,DEFAULT_BUILD_THEME_ID,BUILD_THEME_PREFERENCE_KEY,type InstalledTheme} from './build-theme.ts';
