@@ -52,16 +52,11 @@ export class GoogleSourceAccess implements AgentRuntime {
   const provider=typeof body.provider==='string'?body.provider:'';
   if(body.action==='sourceTool'){
    const name=String(body.name??''),args=body.args&&typeof body.args==='object'?body.args as Row:{};
-<<<<<<< HEAD
-   const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source'&&(['gmail','google-calendar'].includes(String(args.provider))||args.provider==='notion'&&this.google.notionConnected());
-   // Journaled as every Agent runtime's runs are: the tools it calls back (`_source_result` among them) are the turn's record.
-   return ours?ExecutionJournal.run(body,home,onEvent,observed=>this.google.tool(name,args,observed,()=>this.cancelled)):this.other().run(body,home,onEvent);
-=======
    // read_world_source for every provider: Mail, Calendar and Notion are read here, and the rest are the World's own
    // local records, which its permit carries.
    const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source';
-   return ours?this.google.tool(name,args,onEvent,()=>this.cancelled):this.other().run(body,home,onEvent);
->>>>>>> origin/main
+   // Journaled as every Agent runtime's runs are: the tools it calls back (`_source_result` among them) are the turn's record.
+   return ours?ExecutionJournal.run(body,home,onEvent,observed=>this.google.tool(name,args,observed,()=>this.cancelled)):this.other().run(body,home,onEvent);
   }
   const request=googleRequest(body);
   if(request&&(request.operation!=='read'||body.action!=='sourceRefresh'||this.google.authorized()))return ExecutionJournal.run(body,home,onEvent,()=>this.request(request));
