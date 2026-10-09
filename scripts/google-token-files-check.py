@@ -40,7 +40,8 @@ def owner_only(file):
     if os.name == 'posix':
         return mode(file) == 0o600
     # Protected (nothing inherited), and only the user, SYSTEM and Administrators.
-    return re.fullmatch(r'D:PAI?\(A;;FA;;;S-1-5-[0-9-]+\)\(A;;FA;;;SY\)\(A;;FA;;;BA\)', dacl(file)) is not None
+    # The user may be the built-in Administrator account, which SDDL writes as LA (as on CI's hosted Windows runners).
+    return re.fullmatch(r'D:PAI?\(A;;FA;;;(?:S-1-5-[0-9-]+|LA)\)\(A;;FA;;;SY\)\(A;;FA;;;BA\)', dacl(file)) is not None
 
 
 previous = os.umask(0o022)

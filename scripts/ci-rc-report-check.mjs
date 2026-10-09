@@ -63,5 +63,5 @@ assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow)
 assert(!/secrets\./.test(workflow),'the RC needs no secret');
 assert.equal((workflow.match(/issues: write/g)||[]).length,1);
 assert(/fail-fast: false/.test(workflow),'one failing part does not cancel the others');
-assert.equal((workflow.match(/timeout-minutes: 20/g)||[]).length,2,'every part ends within 20 minutes');
+assert.equal((workflow.match(/timeout-minutes: 30/g)||[]).length,2,'every part ends within 30 minutes');
 console.log('ci-rc-report checks passed');
