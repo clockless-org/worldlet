@@ -628,7 +628,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  });
  return {
   lastVisit(key){return visits.get(key)||null;},
-  mount(key='x',{url=null,onLoad=null,platform:wanted=null}={}){
+  mount(key='x',{url=null,onLoad=null,platform:wanted=null,release=false}={}){
    const previous=appletKey;
    // The same Applet drawn again keeps what the host said about its page (Focus): the host says it
    // again only when the page itself changes.
@@ -652,7 +652,10 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    const app=getApp(key),view: any=app?.fullView,site=view?.original||view,target=wanted||returning||site?.platform||key,home=key==='browser'?browserHome.get():site?.url||'https://www.google.com/';
    // Opening an Applet without a specific page resumes its last one: the live hidden
    // page when the host kept it, otherwise the remembered address.
-   if(previous!==key&&resumeKey&&showing&&!hidden.has(resumeKey))hidden.set(resumeKey,Date.now());
+   // A page that moved on to another Applet (`release`, notion-world.ts carryToApplet) is let go: the host closes
+   // it, and the Applet it left opens on its own website next time.
+   if(previous!==key&&resumeKey&&release){hidden.delete(resumeKey);forget(resumeKey);visits.delete(previous);}
+   else if(previous!==key&&resumeKey&&showing&&!hidden.has(resumeKey))hidden.set(resumeKey,Date.now());
    const previousPage=resumeKey;
    resumeKey=appletSite(key)?key:'';resuming=!!resumeKey&&(!url||url===site?.url);
    // The Browser entered again after a while away starts on its home page (core/browser/browser-home.ts),

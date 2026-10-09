@@ -50,3 +50,12 @@ export function onScreenText(records:{kind:string;body:string}[],limit:number=PL
  const head=Math.floor(limit/3);
  return all.slice(0,head).join('').trimEnd()+' … '+all.slice(all.length-(limit-head-3)).join('').trimStart();
 }
+
+/** Carrying the conversation (owner Order 2026-10-09): when the page in an Applet moves to another website
+ * (a link, or Fox's own step) while the person and Fox are talking, the conversation goes with it instead of
+ * the new site starting its own. It is live while Fox works, or until CARRY.minutes after the last turn said
+ * in the place it carries; after that the website is its own place again. */
+export const CARRY={minutes:10} as const;
+export function carriesConversation({byFox=false,working=false,lastTurnAt=null,now}:{byFox?:boolean;working?:boolean;lastTurnAt?:number|null;now:number}):boolean {
+ return byFox||working||typeof lastTurnAt==='number'&&Number.isFinite(lastTurnAt)&&now-lastTurnAt>=0&&now-lastTurnAt<CARRY.minutes*60000;
+}

@@ -91,7 +91,7 @@ export const serialChecks=available([
  'scripts/meetings-check.ts','scripts/meeting-transcript-check.ts', // live transcripts from a real WebRTC call's audio
  // A playing video's picture-in-picture offer: beside the pool it missed its 15-second wait for the window in two Mac
  // RCs in a row (2026.1005.2909 and 2911); alone it passes.
- 'scripts/applet-pip-check.ts',
+ 'scripts/applet-pip-check.ts','scripts/applet-carry-check.ts',
 ]);
 // No longer in the RC (owner request 2026-10-05: an RC finishes within 20 minutes, without checks of how things look
 // or move): exact hover and motion pixels, weather animation timing, the painted Fox's blink, frame times while an
