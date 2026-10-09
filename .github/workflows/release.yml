@@ -24,13 +24,16 @@ on:
         required: false
 permissions:
   contents: read
-# Dev packages only the newest commit (owner decision 2026-10-09): a newer push to main cancels the run of an older one,
-# Dev tests and builds included, since Alpha only ever tests the newest Dev build. Publishing uploads installers before
-# feeds, so a cancelled run never leaves a feed naming a missing installer; at worst its Build is left without a Dev feed
-# entry, and the newer run publishes its own. Promotions (alpha, beta) are never cancelled: each runs to the end in turn.
+# Dev packages the newest commit (owner decision 2026-10-09), and a Mac or Windows build that has started runs to the
+# end. Each platform's build job has its own concurrency group: one build runs, the newest push's build waits, and a
+# newer push replaces an older waiting build (never a running one). Until 2026-10-09 a newer push cancelled the whole
+# older run; that afternoon ten merges in 52 minutes cancelled every Mac build (about 15 minutes each) and Mac Dev stood
+# still for over an hour while Windows kept publishing. Push runs themselves are no longer grouped, so every push runs
+# its Dev tests (Linux, about two minutes). Publishing never replaces a newer Build in a channel, and installers go up
+# before feeds. Promotions (alpha, beta) are never cancelled: each runs to the end in turn.
 concurrency:
-  group: release-${{ github.event_name == 'push' && 'dev' || inputs.channel }}
-  cancel-in-progress: ${{ github.event_name == 'push' }}
+  group: release-${{ github.event_name == 'push' && format('push-{0}', github.run_id) || inputs.channel }}
+  cancel-in-progress: false
 jobs:
   identity:
     name: Identity
@@ -115,6 +118,9 @@ jobs:
   mac:
     name: Mac
     needs: [identity, ready]
+    concurrency:
+      group: release-dev-mac
+      cancel-in-progress: false
     if: needs.ready.outputs.mac == 'true'
     runs-on: macos-15
     timeout-minutes: 120
@@ -211,6 +217,9 @@ jobs:
   windows:
     name: Windows
     needs: [identity, ready]
+    concurrency:
+      group: release-dev-windows
+      cancel-in-progress: false
     if: needs.ready.outputs.windows == 'true'
     runs-on: windows-2025
     timeout-minutes: 90

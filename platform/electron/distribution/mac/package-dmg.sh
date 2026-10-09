@@ -74,7 +74,13 @@ fi
 "$DMG_PYTHON" "$SCRIPT_DIR/dmg-layout.py" "$MOUNT"
 sync
 chflags hidden "$MOUNT/.fseventsd" 2>/dev/null || true
-hdiutil detach "$DEVICE"
+# Spotlight or diskimages-helper can still hold the fresh volume for a moment ("Resource busy", exit 16: the CI Mac
+# build of Build 4058 on 2026-10-09). Everything is written and synced by now, so retry, then force the last attempt.
+for attempt in 1 2 3 4 5; do
+  if hdiutil detach "$DEVICE"; then break; fi
+  [[ $attempt -lt 5 ]] || { hdiutil detach "$DEVICE" -force; break; }
+  sleep $((attempt * 2))
+done
 DEVICE=""
 MOUNT=""
 hdiutil convert "$STAGE/rw.dmg" -format ULMO -ov -o "$OUTPUT"
