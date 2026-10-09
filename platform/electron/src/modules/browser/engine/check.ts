@@ -402,8 +402,8 @@ const result={supported,played,width:video.videoWidth,error:video.error?.code??n
   device.layout({x:0,y:0,width:0,height:0},fox,{width:800,height:600},true);
   assert.deepEqual(page.frameRect(),{x:0,y:0,width:placed.width,height:placed.height});
   // A press there brings the World back, and the UI hears of it.
-  await task.ready;
-  for(const type of ['mouseDown','mouseUp'] as const)task.overlay.webContents.sendInputEvent({type,x:40,y:40,button:'left',clickCount:1});
+  await task.overlay.ready;
+  for(const type of ['mouseDown','mouseUp'] as const)task.overlay.view.webContents.sendInputEvent({type,x:40,y:40,button:'left',clickCount:1});
   await until('a press beside the Companion is reported',()=>restored===1&&events.some(event=>event.phase==='task-pip'&&event.event==='press'));
   device.attach();
   assert.ok(window.contentView.children.includes(surface.view)&&!task.visible,'back in the World window');
@@ -412,9 +412,9 @@ const result={supported,played,width:video.videoWidth,error:video.error?.code??n
   device.layout(inWorld,undefined,{width:800,height:600},true);
   device.detach();device.placeTask(companion);
   assert.ok(task.visible&&!panel.glow.isShowing);
-  await until('the close control shows',async()=>await task.overlay.webContents.executeJavaScript("document.body.classList.contains('closable')"));
-  const close=await task.overlay.webContents.executeJavaScript("(()=>{const r=document.getElementById('close').getBoundingClientRect();return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()");
-  for(const type of ['mouseDown','mouseUp'] as const)task.overlay.webContents.sendInputEvent({type,...close,button:'left',clickCount:1});
+  await until('the close control shows',async()=>await task.overlay.view.webContents.executeJavaScript("document.body.classList.contains('closable')"));
+  const close=await task.overlay.view.webContents.executeJavaScript("(()=>{const r=document.getElementById('close').getBoundingClientRect();return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()");
+  for(const type of ['mouseDown','mouseUp'] as const)task.overlay.view.webContents.sendInputEvent({type,...close,button:'left',clickCount:1});
   await until('closing there is reported',()=>events.some(event=>event.phase==='task-pip'&&event.event==='closed'));
   assert.ok(!task.visible&&device.visiblePage===null,'the page is left and the window goes');
   assert.equal(restored,1,'closing does not bring the World back');

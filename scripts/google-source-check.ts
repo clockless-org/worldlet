@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
 import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../platform/electron/src/modules/sources/google-source.ts';
 import {withTempDir} from './test-temp.ts';
@@ -54,6 +55,13 @@ await withTempDir('worldlet-google-source-',async temp=>{
  assert.equal(page.unreadOnly,true);assert.ok(page.records.length>=1&&page.records.every((r:any)=>r.unread===true&&r.provider==='gmail'));
  assert.match(page.records[0].text,/^Thread, newest first\. User: you@worldlet\.test/);
  assert.equal(calls[2][1].ticket,'t-1');assert.equal(calls[2][1].records,page.records);
+ // The run is journaled like any Agent runtime's, so the turn's record shows the read and its receipt.
+ const journaled:any[]=[];
+ ExecutionJournal.register(own,true,entry=>{journaled.push(entry);return true;});
+ calls.length=0;
+ await access.run({action:'sourceTool',name:'read_world_source',args:{provider:'gmail',unreadOnly:true}},own,turn);
+ ExecutionJournal.register(own,false,()=>true);
+ assert.deepEqual(journaled.map(entry=>entry.event.kind==='tool.requested'?entry.payload.name:entry.event.kind),['run.started','_world_authorize','tool.result','_source_begin','tool.result','_source_result','tool.result','run.succeeded']);
  // A failed read is recorded as failed and says only its kind.
  calls.length=0;
  await assert.rejects(access.run({action:'sourceTool',name:'read_world_source',args:{provider:'gmail',id:'thread:ffffffffffffffff'}},own,turn),/temporarily unavailable/);
