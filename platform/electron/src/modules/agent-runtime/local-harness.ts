@@ -514,14 +514,7 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  readonly available=true;
  private readonly environment:HarnessEnvironment;
  private running=new Set<LocalHarnessRuntime>();
- private readonly makeBuiltIn:(()=>Adapter)|null;
- private builtInAdapter:Adapter|null=null;
- constructor(context:RuntimeContext,install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),builtIn:(()=>Adapter)|null=null){super(context);this.install=install;this.environment=environment;this.makeBuiltIn=builtIn;this.turnApprovals=install.id==='hermes'?new TurnApprovals():null;}
- private builtIn(){return this.builtInAdapter??=this.makeBuiltIn?.()??null;}
- /** Accounts stay with the built-in Agent, in its own home: a Google grant made before or after
-  * choosing this Harness is the same connection, and opening Mail without one still goes straight
-  * to Google sign-in. Without a built-in Agent they report themselves unavailable. */
- accountOwner():Adapter {return this.builtIn()??this;}
+ constructor(context:RuntimeContext,install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment()){super(context);this.install=install;this.environment=environment;this.turnApprovals=install.id==='hermes'?new TurnApprovals():null;}
  /** Background work runs on the person's own Harness (owner decision 2026-10-07: the conversation and background
   * work alike), a chosen Hermes Agent too: its own `hermes acp` beside the conversation, on its own model (owner
   * decision 2026-10-09: Worldlet customizes nothing below the Harness contract). */
@@ -529,7 +522,7 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  /** Mail and Attention checks read accounts in the Platform (the World's connections) and think on this Harness. */
  override get supportsBackgroundChecks(){return this.background()!==null;}
  get id(){return localHarnessAdapterId(this.install.id);}
- hasInteractiveWork(){return this.running.size>0||this.builtInAdapter?.hasInteractiveWork()===true;}
+ hasInteractiveWork(){return this.running.size>0;}
  private readonly spares=new SpareTurns();
  /** Background turns and Applet tasks beside the conversation: no spare process, and not the person's interactive work. */
  private lanes=new Set<LocalHarnessRuntime>();
@@ -611,12 +604,11 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  async status(_home:string){return new LocalHarnessRuntime(this.install,this.environment).status();}
  home(scope:'private'|'sample'|'setup'){return path.join(this.context.root,'agent',scope,this.id);}
  override resetExplanation(){return `This deletes Worldlet’s companion archive, conversations, saved items and local connections. ${this.install.title} and its own data are kept. Worldlet then starts onboarding again. This cannot be undone.`;}
- async shutdown(){this.spares.clear();this.conversation?.shutdown();for(const runtime of [...this.running,...this.lanes])runtime.cancel();await this.builtInAdapter?.shutdown();}
+ async shutdown(){this.spares.clear();this.conversation?.shutdown();for(const runtime of [...this.running,...this.lanes])runtime.cancel();}
  whileStopped<T>(work:()=>Promise<T>):Promise<T> {
   this.spares.clear();this.conversation?.shutdown();
   for(const runtime of [...this.running,...this.lanes])runtime.cancel();
-  const builtIn=this.builtInAdapter;
-  return builtIn?.whileStopped?builtIn.whileStopped(work):(builtIn?.shutdown()??Promise.resolve()).then(work);
+  return work();
  }
 }
 
@@ -631,7 +623,7 @@ export function writeSelection(root:string,id:LocalHarnessId|null){
  if(id!==null)localHarness(id);
  writeAgentSetting(root,'local-harness',id===null?null:{version:1,id});
 }
-/** The saved Harness when it is still installed here; otherwise none, and Fox keeps the built-in Agent. */
+/** The saved Harness when it is still installed here; otherwise none, and Fox asks for an Agent. */
 export function selectedInstall(root:string,environment:HarnessEnvironment=currentEnvironment()):LocalHarnessInstall|null {
  const id=readSelection(root);
  return id?locateLocalHarnesses(environment).find(install=>install.id===id)??null:null;

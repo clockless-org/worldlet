@@ -185,7 +185,8 @@ export function installFox(host:Host){
   if(runtime&&!runtime.available&&runtime.prepare){
    try{await runtime.prepare();}catch(error){return {...unavailable,reason:error instanceof WorldletError?error.message:unavailable.reason};}
   }
-  if(!runtime?.available)return unavailable;
+  // No Agent chosen yet says so (agent-runtime NoAgentAdapter).
+  if(!runtime?.available){const why=runtime?(await runtime.status(home(scope)).catch(()=>null))?.error:null;return typeof why==='string'?{...unavailable,reason:why}:unavailable;}
   let model:Row;
   try{model=await runtime.status(home(scope));}catch{return unavailable;}
   if(model.ready===true)return {provider:runtime.id,available:true,ready:true,fallback:false,reason:'Configured Agent adapter',cloudAllowed,capabilities:model.capabilities??{}};

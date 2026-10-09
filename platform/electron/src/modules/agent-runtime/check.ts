@@ -12,7 +12,7 @@ import {WorldLedger} from '../../store/ledger.ts';
 import {attachChosenHermes,createAgentService,forgetSetupChoice,runtimeContext,selectAdapter} from './index.ts';
 import {attachedHermes,discoverHermes,hermesCommandPath,isOwnHermes,standardHermes,standardHermesHome,unbindHermes} from './hermes-files.ts';
 import {HermesAdapter,HermesRuntime,HermesSourceConnections} from './hermes.ts';
-import {ExternalAgentAdapter,ExternalAgentRuntime} from './external.ts';
+import {ExternalAgentAdapter,ExternalAgentRuntime,NO_AGENT,NoAgentAdapter} from './external.ts';
 import {ModelAccess,loadInstallationToken,readModelSource,writeModelSource} from './model-access.ts';
 import {endSetup,extractZip,runSetupStep} from './installation.ts';
 import {readAdopted,readLocalAgentMemory,writeAdopted} from './local-memory.ts';
@@ -185,6 +185,24 @@ async function external(){
  await rejects(unavailable.status(home),error=>/ENOENT|no such file/i.test(error.message),'unavailable adapter');
  assert.equal(agent.replaceCompanionMemories,undefined,'external memory is not editable');
  pass('external: a bad configuration selects the unavailable adapter; memory is not editable');
+}
+
+/** No Agent chosen (owner decisions 2026-10-09: no built-in Hermes): Fox waits for one, and the World's connections
+ * keep their home in Fox's earlier profile folder, or a chosen Hermes Agent's own profile. */
+async function noAgent(){
+ const {root,context,listeners}=harness('no-agent',path.join(scratch,'no-web'));
+ const adapter=selectAdapter(context,undefined);
+ assert.ok(adapter instanceof NoAgentAdapter,'no Agent chosen: no built-in one');
+ const agent=createAgentService(context,adapter,listeners);
+ assert.equal(agent.id,'none');assert.equal(agent.available,false);assert.equal(agent.supportsBackgroundChecks,false);
+ const status=await agent.status(agent.home('private'));
+ assert.equal(status.ready,false);assert.equal(status.error,NO_AGENT);
+ await rejects(agent.make().run({action:'chat',mode:'chat',text:'hi'},agent.home('private')),error=>error.message===NO_AGENT,'a turn says Fox needs an Agent');
+ await rejects(agent.makeModelAccess().run({action:'status'},agent.home('private')),error=>error.message===NO_AGENT,'no model of its own');
+ assert.equal(agent.accountsId,'hermes','connections keep the transport they have always had');
+ assert.equal(agent.accountsHome(),path.join(root,'agent','private','hermes'));
+ assert.equal(agent.replaceCompanionMemories,undefined);
+ pass('no Agent: Fox waits for one; connections keep their home');
 }
 
 async function hermes(){
@@ -576,6 +594,6 @@ function standardHermesProfile(){
 }
 
 // Top-level await: the Electron wrapper (scripts/electron-checks.ts) exits once this module settles.
-try{modelToken();modelSource();localMemory();hermesAttachment();standardHermesProfile();await sourceArchive();await setupQuit();await external();await harnessBoundary();await harnessExample();await hermes();await realHermes();console.log(`PASS agent runtime: ${passed.length} checks`);}
+try{modelToken();modelSource();localMemory();hermesAttachment();standardHermesProfile();await sourceArchive();await setupQuit();await external();await noAgent();await harnessBoundary();await harnessExample();await hermes();await realHermes();console.log(`PASS agent runtime: ${passed.length} checks`);}
 catch(error){console.error('FAIL',error);process.exitCode=1;}
 finally{fs.rmSync(scratch,{recursive:true,force:true});}

@@ -4,7 +4,6 @@ import crypto from 'node:crypto';
 import {Menu,type MenuItem} from 'electron';
 import {readSelection} from '../modules/agent-runtime/local-harness.ts';
 import {readAdopted} from '../modules/agent-runtime/local-memory.ts';
-import {readModelSource} from '../modules/agent-runtime/model-access.ts';
 import type {CheckContext} from './index.ts';
 import {SETUP_OPTIONS,type SetupOption} from './setup-option-names.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -69,9 +68,8 @@ export async function setupOptions({host,view}:CheckContext){
   await js("document.querySelector('.setup-next').click();true");
   await wait('the Agent moving in',shown('.setup-import'),300);
   await wait('the Agent brought in',appsPage,300);
-  const choice=readSelection(store.root)??readAdopted(store.root)??(readModelSource(store.root)?'codex':null);
+  const choice=readSelection(store.root)??readAdopted(store.root);
   if(choice!==agent)throw Error(`Enter your world showed, but the library has ${choice??'no'} local Agent chosen, not ${agent}`);
-  if(agent==='codex'&&readModelSource(store.root)!=='local-codex')throw Error('Continue with Codex did not make the Codex sign-in Fox’s model');
   if(bring)broughtCheck(store.root,store.ledger(),agent,expected);
   mark(bring?`${agent}’s memory, conversations, notes, skills and routines are in the World`:'Fox runs on the Codex sign-in');
  }
