@@ -67,7 +67,10 @@ for(const file of checks(path.join(root,'platform/electron/src')).sort()){
  // No top-level await here: Electron emits ready only after an ESM entry's top level settles.
  // Windowed checks read pixels back (modules/browser/engine): as in a capture run (#1057, #1060), Windows occlusion
  // tracking must not evict the window's surface and the display stays on, or capturePage rejects (RC b10523a0, #1218).
- writeFileSync(wrapper,`import {app,powerSaveBlocker} from 'electron';app.dock?.hide();
+ // Each run keeps its own Electron storage (cookies, persist: partitions) in its scratch home, never the user-wide
+ // default: a check that left cookies there (or another run beside it) changed what the next run read (Mac RC 3252,
+ // modules/browser/engine's shared sign-in step).
+ writeFileSync(wrapper,`import {app,powerSaveBlocker} from 'electron';app.dock?.hide();app.setPath('userData',${JSON.stringify(path.join(home,'Electron'))});
 if(process.platform==='win32')app.commandLine.appendSwitch('disable-features','CalculateNativeWinOcclusion');
 app.whenReady().then(()=>{powerSaveBlocker.start('prevent-display-sleep');}).then(()=>import(${JSON.stringify('./'+path.basename(outfile))})).then(()=>app.exit(process.exitCode??0),error=>{console.error(error?.stack||error);app.exit(1);});`);
  const real=/from 'electron'/.test(readFileSync(file,'utf8'));

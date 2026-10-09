@@ -98,7 +98,7 @@ if(!files){
    await bridge.beforeEnginePage(()=>false);
    await until('the engine gains Electron\'s cookie',async()=>(await inEngine('electron_sign_in'))?.value==='v1');
    await until('Electron gains the engine\'s cookie',async()=>(await inElectron('engine_sign_in'))?.value==='e1');
-   assert.equal((await inElectron('engine_sign_in'))?.httpOnly,true);
+   assert.equal((await inElectron('engine_sign_in'))?.httpOnly,true,'the engine\'s HttpOnly cookie stays HttpOnly in Electron');
    await electron.cookies.set({url:'https://demo.worldlet.test/',name:'electron_sign_in',value:'v2',secure:true,httpOnly:true,expirationDate:now+3600});
    await until('a change in Electron reaches the engine',async()=>(await inEngine('electron_sign_in'))?.value==='v2');
    engine.setCookies('practice',[{url:'https://demo.worldlet.test/',name:'engine_sign_in',value:'e2',domain:'',path:'/',secure:true,httpOnly:true,sameSite:'lax',expires:now+3600}],[]);
