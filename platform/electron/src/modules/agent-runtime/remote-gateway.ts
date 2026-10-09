@@ -51,7 +51,9 @@ export class RemoteGatewayRuntime implements AgentRuntime {
  private readonly host:string;
  private readonly local:()=>AgentRuntime;
  private readonly onActivity:(running:boolean)=>void;
- constructor(conversation:GatewayConversation,host:string,local:()=>AgentRuntime,onActivity:(running:boolean)=>void=()=>{}){this.conversation=conversation;this.host=host;this.local=local;this.onActivity=onActivity;}
+ /** `background`: a lane beside the conversation (makeLane): each turn in a session of its own, forgotten after it. */
+ private readonly lane:'background'|undefined;
+ constructor(conversation:GatewayConversation,host:string,local:()=>AgentRuntime,onActivity:(running:boolean)=>void=()=>{},lane?:'background'){this.conversation=conversation;this.host=host;this.local=local;this.onActivity=onActivity;this.lane=lane;}
  get title(){return this.conversation.title;}
  get isRunning(){return this.session!==null;}
  cancel(){this.cancelled=true;this.eventWait?.cancel();this.session?.cancel();}
@@ -63,8 +65,8 @@ export class RemoteGatewayRuntime implements AgentRuntime {
  run(body:Row,home:string,onEvent?:AgentEventHandler):Promise<Row> {
   if(body.action==='status')return Promise.resolve(this.status());
   if(body.action==='warmup')return this.warm(body,home);
-  // Only what the person says to Fox (in any thread) goes to the Gateway, never work Worldlet starts here.
-  if(body.action!=='chat'||body._background===true||body.mode!=='chat'||typeof body.text!=='string'||!body.text.trim())return this.local().run(body,home,onEvent);
+  // Every chat turn goes to the Gateway: the person's, and background work (a lane's, or one Worldlet started).
+  if(body.action!=='chat'||typeof body.text!=='string'||!body.text.trim())return this.local().run(body,home,onEvent);
   return ExecutionJournal.run(body,home,onEvent,observed=>this.execute(body,home,observed));
  }
  /** The practice world's threads and a paired client's (core/phone remoteTurnBody) keep sessions of their own. */
@@ -85,11 +87,14 @@ export class RemoteGatewayRuntime implements AgentRuntime {
   let chain:Promise<unknown>=Promise.resolve(),started=false;
   const emit=(event:Row)=>{const next=chain.then(()=>events.run(()=>onEvent(agentEvent(event))));chain=next.catch(()=>{});return next;};
   const say=async(text:string)=>{if(!text)return;if(!started){started=true;await emit({type:'response_start'});}await emit({type:'delta',text});};
-  const tools=body.allowActions!==false;
-  const turn=localHarnessTurn(body,{worldTools:tools,own:true,resident:true});
+  // Background work: World tools only for a check that may use them (a monitor), as on a local Agent.
+  const background=this.lane==='background'||body._background===true||body.mode==='setup';
+  const tools=body.allowActions!==false&&(body._background!==true||body.monitor===true);
+  const turn=localHarnessTurn(body,{worldTools:tools,own:true,resident:!background});
   const opening=performance.now();
   let session:ResidentSession;
-  try{session=await this.conversation.open(this.key(body),{home,sample:body.sample===true});}
+  const key=background?{world:'background',thread:'run-'+crypto.randomUUID()}:this.key(body);
+  try{session=await this.conversation.open(key,{home,sample:body.sample===true});}
   catch(error){events.cancel();this.eventWait=null;throw error;}
   const sessionMs=performance.now()-opening;
   let calls=0,timedOut=false;
@@ -99,7 +104,7 @@ export class RemoteGatewayRuntime implements AgentRuntime {
    const answer=await deadline.hold(emit({type:'tool',id:`world-${++calls}`,name,args}));
    return answer&&typeof answer==='object'?answer as Row:{error:'World tool is unavailable.'};
   };
-  this.session=session;this.onActivity(true);
+  this.session=session;if(!background)this.onActivity(true);
   let shown:Promise<unknown>=Promise.resolve(),firstText:number|null=null;const sent=performance.now();
   try{
    const result=await session.send({text:turn.prompt,instructions:turn.system,tools},event=>{
@@ -121,7 +126,8 @@ export class RemoteGatewayRuntime implements AgentRuntime {
   }finally{
    deadline.stop();session.dispatch=async()=>({error:'World tool is unavailable.'});
    events.cancel();this.eventWait=null;
-   this.session=null;this.onActivity(false);
+   if(background)this.conversation.forget(session as Parameters<GatewayConversation['forget']>[0]);
+   this.session=null;if(!background)this.onActivity(false);
   }
  }
 }
@@ -139,6 +145,7 @@ export class RemoteGatewayAdapter extends ElsewhereAdapter implements Adapter {
  /** The Harness Fox talks through, for the services the World asks of it (core harnessService `remote-openclaw`). */
  get harness(){return {id:REMOTE_GATEWAY_HARNESS_ID,title:this.conversation.title};}
  make():AgentRuntime {return new RemoteGatewayRuntime(this.conversation,this.host,()=>this.b.make(),this.activity);}
+ makeLane():AgentRuntime {return new RemoteGatewayRuntime(this.conversation,this.host,()=>this.b.make(),()=>{},'background');}
  /** Its exec approvals, answered on this computer's card and sent back over its WebSocket. */
  approvals(){return this.conversation.approvals;}
  async status(_home:string){return new RemoteGatewayRuntime(this.conversation,this.host,()=>this.b.make()).status();}

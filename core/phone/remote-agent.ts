@@ -19,7 +19,10 @@ export const REMOTE_TURN_LIMITS=Object.freeze({startMs:120_000,skewMs:300_000,id
 type Row=Record<string,unknown>;
 export type RemoteHistory={role:'user'|'assistant';text:string};
 /** Client to host. */
-export type RemoteTurnRequest={type:'turn';id:string;at:number;text:string;thread:string;instructions:string;view:Row;history:RemoteHistory[];agent?:string;session?:string;world?:string};
+/** `lane`: background work beside the conversation (an Attention check, an Applet task, Fox's own look-around) rather
+ * than the person's line; `background` marks a check Worldlet started (`_background`), `monitor` one that may use World
+ * tools, `actions` false one that must not act. */
+export type RemoteTurnRequest={type:'turn';id:string;at:number;text:string;thread:string;instructions:string;view:Row;history:RemoteHistory[];agent?:string;session?:string;world?:string;lane?:'background';background?:true;monitor?:true;actions?:false};
 export type RemoteToolResult={type:'tool-result';id:string;at:number;turn:string;call:string;result:Row};
 export type RemoteCancel={type:'cancel';id:string;at:number;turn:string};
 export type RemoteApprovalAnswer={type:'approval-answer';id:string;at:number;turn:string;approval:string;choice:HarnessApprovalChoice};
@@ -35,8 +38,10 @@ export type RemoteApproval={type:'approval';id:string;at:number;turn:string;requ
 export type RemoteToClient=RemoteEvents|RemoteToolCall|RemoteDone|RemoteApproval;
 /** Either way: one piece of a message longer than `partBytes` (its JSON's UTF-8 bytes, base64url). */
 export type RemotePart={type:'part';id:string;at:number;whole:string;index:number;of:number;data:string};
-/** What the host's `desktop` slot adds for its client: the protocol and the person's agents there (contracts `agents`). */
-export type RemoteHostInfo={v:number;agents:{id:string;name:string;model?:string;main?:true}[]};
+/** What the host's `desktop` slot adds for its client: the protocol, the person's agents there (contracts `agents`) and
+ * `lanes` when it runs background work beside the conversation (owner decision 2026-10-09: the Harness runs Fox's
+ * conversation and its background work alike, wherever it is). */
+export type RemoteHostInfo={v:number;agents:{id:string;name:string;model?:string;main?:true}[];lanes?:true};
 
 const record=(value:unknown):Row=>value&&typeof value==='object'&&!Array.isArray(value)?value as Row:{};
 const text=(value:unknown,max:number)=>typeof value==='string'?value.slice(0,max):'';
@@ -62,12 +67,14 @@ const worldNote=(value:unknown)=>{const note=readWorldSince(value);return note?{
  * it is said in, the companion's instructions (`style`: personality, memory, guidance), the current view (`context`),
  * the last turns for a Harness without sessions, the person's agent chosen for the thread there, and what happened in
  * that computer's World since the thread last replied (`world`, core/agent/world-since.ts). */
-export function remoteTurnRequest(body:unknown,{id:turn,at:sent}:{id:string;at:number}):RemoteTurnRequest {
+export function remoteTurnRequest(body:unknown,{id:turn,at:sent,lane}:{id:string;at:number;lane?:'background'}):RemoteTurnRequest {
  const input=record(body);
  const session=typeof input.session==='string'?input.session.replace(/[^A-Za-z0-9_.:-]+/g,'-').slice(0,100):'';
  return {type:'turn',id:turn,at:sent,text:text(input.text,REMOTE_TURN_LIMITS.text),thread:harnessSessionThread(input.thread),instructions:text(input.style,REMOTE_TURN_LIMITS.instructions),
-  view:fitRemoteView(input.context),history:history(input.history),...isHarnessAgentId(input.harnessAgent)?{agent:input.harnessAgent}:{},...session?{session}:{},...worldNote(input.worldSince)};
+  view:fitRemoteView(input.context),history:history(input.history),...isHarnessAgentId(input.harnessAgent)?{agent:input.harnessAgent}:{},...session?{session}:{},...worldNote(input.worldSince),
+  ...laneFlags({lane,background:input._background===true,monitor:input.monitor===true,actions:input.allowActions===false?false:undefined})};
 }
+const laneFlags=(v:Row)=>({...v.lane==='background'?{lane:'background' as const}:{},...v.background===true?{background:true as const}:{},...v.monitor===true?{monitor:true as const}:{},...v.actions===false?{actions:false as const}:{}});
 /** What the host takes from its client once the box opened: a turn, a tool's answer, a cancel or a part of one. Nothing
  * a phone sends (a chat line, an item action, an Order, a widget edit, a web record) is read. */
 export function readRemoteToHost(value:unknown):RemoteToHost|RemotePart|null {
@@ -79,7 +86,7 @@ export function readRemoteToHost(value:unknown):RemoteToHost|RemotePart|null {
   if(!line.trim()||typeof v.thread!=='string'||!THREAD.test(v.thread))return null;
   const session=typeof v.session==='string'&&/^[A-Za-z0-9_.:-]{1,100}$/.test(v.session)?v.session:'';
   return {type:'turn',id:mid,at:sent,text:line,thread:v.thread,instructions:text(v.instructions,REMOTE_TURN_LIMITS.instructions),view:fitRemoteView(v.view),history:history(v.history),
-   ...isHarnessAgentId(v.agent)?{agent:v.agent}:{},...session?{session}:{},...worldNote(v.world)};
+   ...isHarnessAgentId(v.agent)?{agent:v.agent}:{},...session?{session}:{},...worldNote(v.world),...laneFlags(v)};
  }
  const turn=id(v.turn);
  if(!turn)return null;
@@ -126,7 +133,8 @@ function readPart(v:Row,mid:string,sent:number):RemotePart|null {
  * Fox thread in `world` (the client's, apart from the host's own threads) and the agent chosen there when the host has it. */
 export function remoteTurnBody(turn:RemoteTurnRequest,{world,agents}:{world:string;agents:readonly string[]}):Row {
  return {action:'chat',mode:'chat',session:'remote-'+(turn.session||'main'),text:turn.text,history:turn.history,context:turn.view,thread:harnessThreadPlace(turn.thread),
-  style:turn.instructions,harnessWorld:world,...turn.agent&&agents.includes(turn.agent)?{harnessAgent:turn.agent}:{},...turn.world?{worldSince:turn.world}:{}};
+  style:turn.instructions,harnessWorld:world,...turn.agent&&agents.includes(turn.agent)?{harnessAgent:turn.agent}:{},...turn.world?{worldSince:turn.world}:{},
+  ...turn.background?{_background:true}:{},...turn.monitor?{monitor:true}:{},...turn.actions===false?{allowActions:false}:{}};
 }
 /** The session world of a client's threads on the host, from the client's name. */
 export const remoteSessionWorld=(client:string)=>'remote:'+(client.replace(/[^A-Za-z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'computer');
@@ -160,13 +168,13 @@ export function remoteAssembler(now:()=>number=Date.now){
  }};
 }
 /** The `agent` field a host adds to its `desktop` slot for its client: the protocol and the person's agents there. */
-export function remoteHostInfo(agents:readonly {id:string;name:string;model?:string;main?:boolean}[]):RemoteHostInfo {
- return {v:REMOTE_AGENT_VERSION,agents:agents.filter(a=>isHarnessAgentId(a.id)&&a.name).slice(0,50).map(a=>({id:a.id,name:a.name.slice(0,80),...a.model?{model:a.model.slice(0,80)}:{},...a.main?{main:true as const}:{}}))};
+export function remoteHostInfo(agents:readonly {id:string;name:string;model?:string;main?:boolean}[],lanes=true):RemoteHostInfo {
+ return {v:REMOTE_AGENT_VERSION,...lanes?{lanes:true as const}:{},agents:agents.filter(a=>isHarnessAgentId(a.id)&&a.name).slice(0,50).map(a=>({id:a.id,name:a.name.slice(0,80),...a.model?{model:a.model.slice(0,80)}:{},...a.main?{main:true as const}:{}}))};
 }
 /** The client's reading of it; an older host has none and is sent no turn. */
 export function readRemoteHostInfo(value:unknown):RemoteHostInfo|null {
  const v=record(record(value).agent);
  if(typeof v.v!=='number'||!Number.isInteger(v.v)||v.v<REMOTE_AGENT_VERSION)return null;
  return remoteHostInfo((Array.isArray(v.agents)?v.agents:[]).map(record).filter(a=>typeof a.name==='string'&&typeof a.id==='string')
-  .map(a=>({id:a.id as string,name:(a.name as string).trim(),...typeof a.model==='string'?{model:a.model}:{},main:a.main===true})));
+  .map(a=>({id:a.id as string,name:(a.name as string).trim(),...typeof a.model==='string'?{model:a.model}:{},main:a.main===true})),v.lanes===true);
 }
