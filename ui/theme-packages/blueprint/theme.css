@@ -10,7 +10,7 @@
 .blueprint-plot[data-hovered=true],.blueprint-plot[data-placing=true]{border-color:#ffd36e;background:#0b2f5a99}
 .blueprint-plot-title{all:unset;display:flex;align-items:baseline;gap:10px;cursor:pointer;font:600 15px/1.2 var(--sim-display-font,monospace);letter-spacing:.14em;text-transform:uppercase;color:#eaf3ff}
 .blueprint-plot-title:hover{color:#ffd36e}.blueprint-plot-no{font-weight:400;color:#7cc4ff}
-.blueprint-fixtures{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px;align-content:start;overflow:auto;min-height:0}
+.blueprint-fixtures{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));grid-auto-rows:max-content;gap:10px;align-content:start;overflow:auto;min-height:0}
 .blueprint-fixture,.blueprint-more{all:unset;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:var(--sim-control-height,36px);padding:6px 4px;border-radius:var(--sim-radius,4px);cursor:pointer;text-align:center}
 .blueprint-mark{display:grid;place-items:center;width:44px;height:44px;border:1.5px solid #cfe6ff;border-radius:4px;font:600 15px/1 var(--sim-display-font,monospace);letter-spacing:.04em;color:#eaf3ff;background:repeating-linear-gradient(135deg,#cfe6ff10 0 6px,transparent 6px 12px)}
 .blueprint-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;color:#d7e9ff}
@@ -48,3 +48,4 @@
 .blueprint-open{all:unset;display:inline-flex;align-items:center;padding:0 16px;min-height:var(--sim-control-height,36px);border-radius:var(--sim-radius,4px);background:#123f73;color:#fff;cursor:pointer;font:600 14px/1 var(--sim-body-font,system-ui)}
 .blueprint-open:hover{background:#0c2f57}
 .blueprint-body-empty{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}.blueprint-body-empty h2{margin:0 0 6px}.blueprint-body-empty p{margin:0;color:#4a6a8c}
+.blueprint-mark img{width:34px;height:34px;object-fit:contain;filter:grayscale(1) brightness(1.6) drop-shadow(0 0 1px #cfe6ff)}.blueprint-fixture:hover .blueprint-mark img,.blueprint-fixture[data-hovered=true] .blueprint-mark img{filter:none}

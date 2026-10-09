@@ -1,6 +1,7 @@
 import type {ThemeWorldApplet,ThemeWorldContext,ThemeWorldMount,ThemeWorldState} from '@worldlet/theme';
 import {frame,node} from './frame.ts';
-const PER_PLOT=8;
+/** Two rows of three; a full plot gives its last place to “+N more”. */
+const PER_PLOT=6;
 /** Pinned places first, then the rest in the host's order; what does not fit opens with the area. */
 function place(items:readonly ThemeWorldApplet[],pins:readonly (string|null)[],capacity:number){
  const slots:Array<ThemeWorldApplet|null>=Array.from({length:capacity},()=>null),left=new Map(items.map(i=>[i.id,i]));
@@ -19,7 +20,8 @@ export function renderWorld(context:ThemeWorldContext):ThemeWorldMount{
  function fixture(applet:ThemeWorldApplet,hovered:boolean){
   const b=node('button','blueprint-fixture');b.type='button';b.dataset.simId=applet.id;b.dataset.appletKey=applet.key;b.dataset.hovered=String(hovered);
   if(applet.status)b.dataset.status=applet.status;b.setAttribute('aria-label',applet.title+(applet.count?`, ${applet.count} new`:''));
-  b.append(node('span','blueprint-mark',mark(applet.title)),node('span','blueprint-name',applet.title));
+  const badge=node('span','blueprint-mark',applet.icon?'':mark(applet.title));if(applet.icon){const img=node('img');img.src=applet.icon;img.alt='';img.draggable=false;badge.append(img);}
+  b.append(badge,node('span','blueprint-name',applet.title));
   if(applet.count)b.append(node('small','blueprint-count',String(applet.count)));
   b.draggable=true;b.ondragstart=e=>e.dataTransfer?.setData('application/worldlet-applet',applet.id);
   b.onclick=()=>context.navigate({kind:'applet',id:applet.id});
@@ -40,7 +42,7 @@ export function renderWorld(context:ThemeWorldContext):ThemeWorldMount{
   plan.dataset.layout=framed?'area':'site';
   areas.forEach((area,index)=>{
    const region=area.id.replace(/^building-/,''),apps=state.applets.filter(a=>a.visible&&a.region===region);
-   const {shown,more}=framed?{shown:apps,more:[]}:place(apps,state.pins[region]||[],PER_PLOT);
+   const {shown,more}=framed?{shown:apps,more:[]}:place(apps,state.pins[region]||[],apps.length>PER_PLOT?PER_PLOT-1:PER_PLOT);
    const plot=node('section','blueprint-plot');plot.dataset.area=region;plot.dataset.placing=String(state.interaction.placementArea===area.id);plot.dataset.hovered=String(state.interaction.hoveredArea===area.id);
    const title=node('button','blueprint-plot-title');title.type='button';title.dataset.simId=area.id;
    title.append(node('span','blueprint-plot-no',String(index+1).padStart(2,'0')),node('span','',area.title));title.onclick=()=>context.navigate({kind:'area',id:area.id});

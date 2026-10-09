@@ -1,5 +1,12 @@
 import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState} from '../themes/index.ts';
 import {createAppletStage} from './pixi-stage.ts';
+import {myAppletKind} from '../../core/applets/index.ts';
+/** The host's picture of an Applet: a person's own Applet's icon, else its shared device art. */
+function appletIcon(room):string|undefined {
+ if(myAppletKind(room)&&typeof room.icon==='string')return room.icon;
+ const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[room.art||room.key];
+ const src=typeof art==='string'?art:art?.src;return typeof src==='string'&&src?src:undefined;
+}
 /** Compatibility adapter from the product's scene controller to the public Sim data interface. */
 export function createModuleScene(host,rooms,onPick,onProject,_pages,options):any {
  const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer='sim-dom';Object.assign(world.style,{position:'absolute',inset:'0'});host.append(world);
@@ -9,7 +16,7 @@ export function createModuleScene(host,rooms,onPick,onProject,_pages,options):an
  let hidden=new Set(options.hiddenApplets||[]),unlocked=options.unlockedApplets?new Set(options.unlockedApplets):null;
  const state=():ThemeWorldState=>({view:{...view},environment:{...environment},motion,interaction:{...interaction},pins:structuredClone(options.regionLayout?.pins||{}),
   areas:(options.buildings||[]).filter(b=>b.id!=='building-people').map(b=>({id:b.id,title:b.title})),
-  applets:rooms.map(r=>({id:r.moduleId||r.id,key:r.key||r.id,title:r.title,region:r.region||String(r.buildingId||'').replace(/^building-/,''),visible:!hidden.has(r.moduleId)&&(unlocked?unlocked.has(r.moduleId):r.installByDefault!==false),status:r.status?.state,count:r.status?.count}))});
+  applets:rooms.map(r=>({id:r.moduleId||r.id,key:r.key||r.id,title:r.title,region:r.region||String(r.buildingId||'').replace(/^building-/,''),visible:!hidden.has(r.moduleId)&&(unlocked?unlocked.has(r.moduleId):r.installByDefault!==false),status:r.status?.state,count:r.status?.count,icon:appletIcon(r)}))});
  const mount=renderBuildWorld({host:world,state:state(),navigate:target=>{
   if(target.kind==='applet'){const r=rooms.find(r=>(r.moduleId||r.id)===target.id);if(r&&state().applets.find(a=>a.id===target.id)?.visible)onPick({action:'space',id:r.id,level:'room'});}
   else if((options.buildings||[]).some(b=>b.id===target.id))onPick({action:'building',id:target.id});

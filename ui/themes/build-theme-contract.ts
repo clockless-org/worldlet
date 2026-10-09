@@ -37,7 +37,9 @@ export interface ThemeAppletContext {
  asset(path:string):string;
 }
 export interface ThemeMount {dispose():void}
-export interface ThemeWorldApplet {id:string;key:string;title:string;region:string;visible:boolean;status?:string;count?:number}
+export interface ThemeWorldApplet {id:string;key:string;title:string;region:string;visible:boolean;status?:string;count?:number;
+ /** The host's own picture of this Applet (its shared device art, or the icon a person's own Applet carries). Themes without their own art for an Applet show this rather than a placeholder. */
+ icon?:string}
 export interface ThemeWorldState {
  view:{id:string;level:'overview'|'area'|'applet'};
  applets:readonly ThemeWorldApplet[];
