@@ -44,9 +44,15 @@ export const directories=(folder:string)=>{try{return fs.readdirSync(folder,{wit
 export const json=(text:unknown)=>{try{return typeof text==='string'?JSON.parse(text):null;}catch{return null;}};
 const absolute=(value:string|undefined)=>value&&path.isAbsolute(value)?value:null;
 
-/** A working folder inside one of `folders` (Worldlet's own, where Fox's turns run). */
+/** Where any Worldlet library runs Fox's turns: `<library>/agent/<private|sample|setup>/<Agent>` (each runtime's home()).
+ * Another library's Fox on this computer (the Dev app beside the installed one, a release check's disposable library)
+ * is not the person either, also after that library is gone. */
+const FOX_TURN_FOLDER=/[\\/]agent[\\/](?:private|sample|setup)[\\/](?:local-[a-z0-9-]+|hermes|codex|external)(?:[\\/]|$)/;
+/** A working folder inside one of `folders` (Worldlet's own, where Fox's turns run), or any library's Fox turn folder. */
 export function inFolders(cwd:string|null|undefined,folders:string[]):boolean {
- if(!cwd||!folders.length)return false;
+ if(!cwd)return false;
+ if(FOX_TURN_FOLDER.test(path.resolve(cwd)))return true;
+ if(!folders.length)return false;
  let at=cwd;try{at=real(cwd);}catch{}
  return folders.some(folder=>{let base=path.resolve(folder);try{base=real(folder);}catch{}return at===base||at.startsWith(base+path.sep);});
 }

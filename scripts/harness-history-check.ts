@@ -34,6 +34,8 @@ try{
  const rollout='.codex/sessions/2026/10/08/rollout-2026-10-08T10-00-00-x1.jsonl';
  put(rollout,jsonl({timestamp:at(-60),type:'session_meta',payload:{id:'x1',cwd:'/Users/a/app',source:'cli'}},{timestamp:at(-59),type:'event_msg',payload:{type:'user_message',message:'Add dark mode'}}));
  put('.codex/sessions/2026/10/08/rollout-2026-10-08T10-05-00-fox.jsonl',jsonl({timestamp:at(-30),type:'session_meta',payload:{id:'fox1',cwd:path.join(root,'agent','private','local-codex'),source:'exec'}},{timestamp:at(-29),type:'event_msg',payload:{type:'user_message',message:'What is on my calendar?'}}));
+ // Another Worldlet library's Fox (the Dev app beside the installed one, a release check's disposable library, since deleted).
+ put('.codex/sessions/2026/10/08/rollout-2026-10-08T10-06-00-fox2.jsonl',jsonl({timestamp:at(-28),type:'session_meta',payload:{id:'fox2',cwd:path.join(home,'gone','worldlet-agent-local-x','agent','sample','local-codex'),source:'exec'}},{timestamp:at(-27),type:'event_msg',payload:{type:'user_message',message:'What is Mia Tan’s invoice email about?'}}));
  // Hermes Agent: a Telegram conversation compressed into a second session, and Fox's own ACP session.
  put('.hermes/config.yaml','model:\n  provider: openrouter\n');
  const hermesDb=new DatabaseSync(path.join(home,'.hermes','state.db'));
@@ -61,7 +63,7 @@ try{
  for(const source of ['claude-code','codex','hermes','openclaw'] as MigrationSource[])await bringAgent(source,{companion,world,hermesHome:null,importRoutines:null,home,environment:{},ownFolders:[path.join(root,'agent')]});
  const count=(source:string)=>world.companionTurns(source).length;
  const texts=(source:string)=>world.companionTurns(source).map(t=>t.session+' | '+t.role[0]+':'+t.text);
- assert.deepEqual(['claude-code','codex','hermes','openclaw','pi'].map(count),[2,1,2,2,0],'Fox’s own Codex turns are not brought either');
+ assert.deepEqual(['claude-code','codex','hermes','openclaw','pi'].map(count),[2,1,2,2,0],'Fox’s own Codex turns, in this library or another, are not brought either');
  // pi is the chosen Harness and was never brought: its recent conversations come with the first check.
  writeSelection(root,'pi');
 
