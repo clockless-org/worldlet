@@ -1,12 +1,22 @@
 {
-  "contractVersion": 1,
+  "contractVersion": 2,
   "id": "village",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "sha256": {
     "assets/INTER-LICENSE.txt": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
     "assets/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+    "assets/apple-notes-icon.png": "24e45c8b7db05732076d6211f3b52f907d0ef57df6a5499b8325c8b080a9941e",
+    "assets/apple-reminders-icon.png": "3b761cc894effd72f86976c935aa8c6e5b2d5aa55d9efa6046d102748a942a8e",
     "assets/calendar-production.prompt.txt": "4d4c1bb5a9f709b53df65dc666e1d2f47145a1e2833d4cd3eeaab75fcd862fc4",
     "assets/calendar-scene.png": "5baf54311c98536c1e426da81d725bff81bcf9dc1ac172d1f02befa6f58d0b53",
+    "assets/gmail-icon.png": "60867b26dd76981d5d0fe2a3f65317b875cd48c883cf5bbf8cff515c6cf36bde",
+    "assets/google-calendar-icon.png": "0aec778f98b520b2a7d8642f8131d44b019945c6bbc56ecb48bfe0bd454b3788",
+    "assets/landmark-health.png": "c177497edfc59142ced91ee765988d4b531f21b0522473258181a5a82c2b25b9",
+    "assets/landmark-home.png": "bc0e9c96a70541134207e09a12d5276d3794918250d1e40b9fe77d59cd2c75bc",
+    "assets/landmark-library.png": "23804bada6b77344c2841e553b3431c0e7d02cf490543855db7b774ebfdbfce0",
+    "assets/landmark-money.png": "da58f7ea4d2488b81df5150b652481be6410a52dee9396ebec5f650c17979020",
+    "assets/landmark-travel.png": "cff93510da6e0abd063b089fc3a267d31b8a336061acb7d5234b6a22babd17e6",
+    "assets/landmark-work.png": "0fe2c701099ef988754196e44a05cab4172fa4e9e10f5ba0157cbb9906a78d32",
     "assets/mail-icon.png": "60867b26dd76981d5d0fe2a3f65317b875cd48c883cf5bbf8cff515c6cf36bde",
     "assets/mail-production.prompt.txt": "6f4c38a5ccfe99cd109bdfa1b363dafa7b6799d90f249f1e8518d10492b4b288",
     "assets/mail-scene.png": "3cad54c80ac8aef91ec9bee4dc4f50e75329b05cc590ca1320fcf1c24950e9eb",
@@ -14,9 +24,15 @@
     "assets/notes-scene.png": "0e30da60f579b1b592004973bf4d7ad1fc7b4fcd4c5941cac01d0831aab552ce",
     "assets/reminders-production.prompt.txt": "26d0f6d57ec29aa81bf387cf45157f76897894a94bcfbc92447f703b1d0fb621",
     "assets/reminders-scene.png": "d93caa61e2f7328ce8d68b9410d4e6bc0c91185e8d90fb66db2114d08d70ef3f",
-    "entry.ts": "25e654aaa1c816c1e946f1cc6838ae859af53c1f460387334aa91c2084940a04",
+    "assets/world-day.png": "aa1b454ae1e8104fac4401c01f40cdb35a3b92fb64caa2eb3cbe994cab7fe1d8",
+    "assets/world-night.png": "65a4de26e9cac6a4414bb46c8b99bec2c1d2f2ee5636a50fc1a55af6cb55813c",
+    "entry.ts": "f0077a87ecb6f0ba13c1df61cccbce3b8389109cae062c8e110cc50be89045f5",
+    "frame.ts": "e2e8574a1b345bc2ee1eaa6e26a7096594c4187dac31384505e02677a3497e1a",
+    "map.json": "9a30eda1007780877f935dcba02ebc757a43e5c252b1b59b5ad25d47d53d03fb",
+    "presentation.json": "976369ec67e72eb4f50118164fd2828c427ea87a3488e0d0f07a48d66f522ddf",
     "surface.ts": "9e294d52679230db4f7f9a34999c8a18884fbdef55e386b3e9c2419446d44c25",
-    "theme.css": "359836fe2b9e4af42a2d0849766087ead62634d7747a58545229f22d10f17a78",
-    "theme.json": "c4006a3932392b50a8eb7d053987ee2bd1d99e8122875ae2b8cc663536f080d5"
+    "theme.css": "f40a822179eee1a9937c1bc7c0d6a0a54b2195ccb805b4e7bdbc1085a3878592",
+    "theme.json": "f50aee0c7a7b0356b3cd174a3325e7df922051373a6ae6bbce13dcac903556a4",
+    "world.ts": "5aa4108deb4533ec4056f0f69b6a13e4577867f7b1ad06b7a503d598eb417ade"
   }
 }

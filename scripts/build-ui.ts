@@ -14,7 +14,7 @@ export async function buildUI(root,output){
 ${n==='components'?(await Promise.all([...['youtube','stripe','weather','moment','ongoing'].map(key=>key+'/panel.css'),'_shared/games.css'].map(file=>readFile(path.join(root,'ui/applets',file),'utf8')))).join('\n'):''}\n}`));
  const builtinControls='resources/styles/builtin/controls.css';
  // Each other registered theme's controls (Village's are the built-in layer below), then the surfaces every theme can paint (ui/themes/theme-surfaces.css).
- const themeControls=(await Promise.all([...THEMES.values()].filter(t=>t.pack.hud.controls!==builtinControls).map(t=>readFile(path.join(root,t.pack.hud.controls),'utf8')))).join('\n')+'\n'+await readFile(path.join(root,'ui/themes/theme-surfaces.css'),'utf8');
+ const themeControls=(await Promise.all([...THEMES.values()].filter(t=>t.pack.hud.controls!==builtinControls).map(t=>readFile(path.join(root,t.pack.hud.controls),'utf8')))).join('\n')+'\n'+await readFile(path.join(root,'ui/themes/theme-surfaces.css'),'utf8')+'\n'+await readFile(path.join(root,'ui/themes/build-theme.css'),'utf8');
  const controls=await readFile(path.join(root,builtinControls),'utf8');
  await writeFile(path.join(output,'worldlet-ui.css'),`@layer legacy,foundations,components,layout,states,hud,controls;\n@layer legacy{${legacy}}\n@layer foundations{${uiTokenCSS()}}\n${layers.join('\n')}\n@layer controls{${controls}}\n${await readFile(path.join(root,'ui/attention/attention-preview.css'),'utf8')}\n${themeControls}\n${selectedThemeCSS}`);
  await mkdir(path.join(output,'hud'),{recursive:true});

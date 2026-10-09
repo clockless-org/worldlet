@@ -64,13 +64,13 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
   // A new depth moves the title by its stylesheet: place the sides before that frame paints.
   new MutationObserver(placeBar).observe(root,{attributes:true,attributeFilter:['data-depth','data-detail-open','class']});
  }
- const tracker=el('nav','world-task-tracker');tracker.setAttribute('aria-label','Attention Center: Coming Up, Worth Doing and Worth Knowing');
+ const tracker=el('nav','world-task-tracker ui-theme-attention');tracker.setAttribute('aria-label','Attention Center: Coming Up, Worth Doing and Worth Knowing');
  const trackerList=el('div','world-task-list');tracker.append(trackerList);root.append(tracker);
  // Today heads the Attention Center, standing above it even when it is empty (owner request 2026-10-08, "把今天的日期、天气之类的放到左边去，放到左边 Attention Center
  // 上面，然后你随时一点就可以看到今天的计划"): the date and clock open the Journal on today's page, where the morning
  // brief stands first, and the weather beside them keeps opening the forecast. The live nodes move here from the World's
  // corner, so the clock and the weather go on updating themselves; the sound comes too (owner request 2026-10-08).
- const today=el('div','world-today'),todayOpen=el('button','world-today-open');todayOpen.type='button';
+ const today=el('div','world-today ui-theme-today'),todayOpen=el('button','world-today-open');todayOpen.type='button';
  // It is where the Journal lives (owner request 2026-10-08: "收到左上角 journal 就行了，让人知道这是 journal 的位置"):
  // the book's mark and name under the date, and closed cards fly in here.
  todayOpen.setAttribute('aria-label','Journal: open today’s page');todayOpen.setAttribute('aria-controls','journalBook');

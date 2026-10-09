@@ -102,7 +102,8 @@
     "theme:source-check": "node scripts/build-theme-source.ts check",
     "theme:preview": "node scripts/build-theme-preview.ts",
     "test:theme-source": "node scripts/build-theme-source-check.ts",
-    "test:theme-ui": "node scripts/build-theme-preview.ts --build-only && electron scripts/build-theme-ui-check.cjs"
+    "test:theme-ui": "node scripts/build-theme-preview.ts --build-only && electron scripts/build-theme-ui-check.cjs",
+    "test:sim-ui": "node scripts/build-theme-preview.ts --build-only && electron scripts/build-sim-ui-check.cjs"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1141.0",

@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash,randomUUID} from 'node:crypto';
 import {build} from 'esbuild';
 import ts from 'typescript';
-import {parseBuildThemeManifest} from '../ui/themes/build-theme-contract.ts';
+import {parseBuildThemeManifest,parseThemePresentation,themeAssetPath} from '../ui/themes/build-theme-contract.ts';
 
 export async function themeFiles(root:string,prefix=''):Promise<string[]> {
  const result:string[]=[];
@@ -18,13 +18,28 @@ export async function themeFiles(root:string,prefix=''):Promise<string[]> {
 export async function validateBuildTheme(source:string){
  source=await fs.realpath(source);
  const files=await themeFiles(source),manifest=parseBuildThemeManifest(JSON.parse(await fs.readFile(path.join(source,'theme.json'),'utf8')));
- for(const required of ['entry.ts','theme.css'])if(!files.includes(required))throw Error('Missing '+required);
+ for(const required of ['entry.ts','theme.css','presentation.json'])if(!files.includes(required))throw Error('Missing '+required);
+ const presentation=parseThemePresentation(JSON.parse(await fs.readFile(path.join(source,'presentation.json'),'utf8')));
+ for(const id of manifest.applets)if(!presentation.applets[id])throw Error('Missing declared applet scene: '+id);
+ const assets=[presentation.world,presentation.fallback,...Object.values(presentation.applets)].map(s=>s.background);
+ for(const font of presentation.fonts)assets.push(font.file,font.license);
+ for(const asset of assets)if(!files.includes(themeAssetPath(asset)))throw Error('Missing theme asset: '+asset);
+ const css=await fs.readFile(path.join(source,'theme.css'),'utf8');
+ if(/@import\b/.test(css))throw Error('Theme CSS imports are not supported; bundle styles locally');
+ for(const match of css.matchAll(/url\(\s*['"]?([^'"\s)]+)['"]?\s*\)/g)){
+  const asset=match[1].replace(/^theme-assets\//,'assets/');
+  if(!files.includes(themeAssetPath(asset)))throw Error('Missing CSS asset: '+asset);
+ }
  const hashes:Record<string,string>={};
  for(const file of files){
   if(!/\.(?:ts|css|json|png|webp|jpg|jpeg|woff2?|ttf|otf|txt|md|svg|mp3|wav|ogg|webm)$/i.test(file))throw Error('Unsupported theme file: '+file);
   const bytes=await fs.readFile(path.join(source,file));
   if(bytes.length<1024&&bytes.toString().startsWith('version https://git-lfs.github.com/spec/v1'))throw Error('Run git lfs pull before importing: '+file);
   hashes[file]=createHash('sha256').update(bytes).digest('hex');
+  if(file.endsWith('.json')){
+   const inspect=(value:unknown)=>{if(typeof value==='string'&&value.startsWith('assets/')){if(!files.includes(themeAssetPath(value)))throw Error('Missing declared asset: '+value);}else if(value&&typeof value==='object')Object.values(value).forEach(inspect);};
+   inspect(JSON.parse(bytes.toString()));
+  }
   if(file.endsWith('.ts'))for(const ref of ts.preProcessFile(bytes.toString(),true,true).importedFiles){
    if(ref.fileName==='@worldlet/theme')continue; // Value imports are rejected by the bundler below.
    if(!ref.fileName.startsWith('.'))throw Error('Theme imports only local files and public types: '+ref.fileName);
@@ -43,7 +58,7 @@ export async function validateBuildTheme(source:string){
  });}}]});
  if(!result.outputFiles.length)throw Error('Theme entry did not compile');
  const virtual=path.join(source,'__theme_contract_check__.ts');
- const options:ts.CompilerOptions={target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext,moduleResolution:ts.ModuleResolutionKind.Bundler,strict:true,noImplicitAny:false,strictNullChecks:false,noEmit:true,allowImportingTsExtensions:true,skipLibCheck:true,types:[],baseUrl:source,paths:{'@worldlet/theme':[fileURLToPath(new URL('../ui/themes/build-theme-contract.ts',import.meta.url))]}};
+ const options:ts.CompilerOptions={target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext,moduleResolution:ts.ModuleResolutionKind.Bundler,strict:true,noImplicitAny:false,strictNullChecks:false,noEmit:true,allowImportingTsExtensions:true,skipLibCheck:true,resolveJsonModule:true,types:[],baseUrl:source,paths:{'@worldlet/theme':[fileURLToPath(new URL('../ui/themes/build-theme-contract.ts',import.meta.url))]}};
  const compiler=ts.createCompilerHost(options),originalRead=compiler.readFile,originalExists=compiler.fileExists;
  compiler.fileExists=file=>file===virtual||originalExists(file);
  compiler.readFile=file=>file===virtual?"import theme from './entry.ts'; import type {BuildTheme} from '@worldlet/theme'; const checked:BuildTheme=theme;":originalRead(file);
@@ -63,8 +78,8 @@ export async function importBuildTheme(source:string,root:string){
   // Revalidate the staged bytes, catching source edits made during copying.
   const staged=await validateBuildTheme(stage);
   if(JSON.stringify(staged.hashes)!==JSON.stringify(checked.hashes))throw Error('Theme changed during import; retry');
-  await fs.writeFile(path.join(stage,'index.ts'),"export {default} from './entry.ts';\nexport {default as manifest} from './theme.json' with {type:'json'};\n");
-  await fs.writeFile(path.join(stage,'source-lock.json'),JSON.stringify({contractVersion:1,id:checked.manifest.id,version:checked.manifest.version,sha256:checked.hashes},null,2)+'\n');
+  await fs.writeFile(path.join(stage,'index.ts'),"export {default} from './entry.ts';\nexport {default as manifest} from './theme.json' with {type:'json'};\nexport {default as presentation} from './presentation.json' with {type:'json'};\n");
+  await fs.writeFile(path.join(stage,'source-lock.json'),JSON.stringify({contractVersion:2,id:checked.manifest.id,version:checked.manifest.version,sha256:checked.hashes},null,2)+'\n');
   try{await fs.rename(dest,backup);moved=true;}catch(error){if(error.code!=='ENOENT')throw error;}
   try{await fs.rename(stage,dest);}catch(error){if(moved)await fs.rename(backup,dest);throw error;}
   if(moved)await fs.rm(backup,{recursive:true});

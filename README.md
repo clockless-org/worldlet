@@ -156,6 +156,8 @@ No account, secret or hosted service is needed to build. Checks: `npm run check:
 | `ios/`, `android/` | Phone companions |
 | `scripts/`, `docs/` | Build, validation and contributor guidance |
 
+Build-time presentation packages implement the [Sim contract](resources/themes/CONTRACT.md). Import one package with `npm run theme:import -- /path/to/theme/package`; it owns World rendering, Applet scenes and registered HTML layouts while the host supplies data and actions.
+
 ## Documentation
 
 | Start here | |

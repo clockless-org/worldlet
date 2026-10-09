@@ -11,3 +11,15 @@ global.villageFixture={open,events,stage,get value(){return value;},hide(){stage
 open('mail');
 
 for(const name of Object.keys(keys)){const b=document.createElement('button');b.textContent=name;b.onclick=()=>open(name as VillageKind);document.querySelector('#theme-preview-nav')?.append(b);}
+
+// Exercise the production World adapter as well as individual Applet stages.
+import {createModuleScene} from '../../../ui/world/build-theme-world.ts';
+const rooms=Object.entries(keys).map(([title,key])=>({id:'place-'+key,moduleId:'app-'+key,key,title,region:'home',entity:'app'}));
+rooms.push({id:'place-future',moduleId:'app-future',key:'future',title:'Future applet',region:'home',entity:'app'});
+let worldScene:any,worldHost:HTMLElement;
+global.simFixture={events,
+ open(){stage.render(current,value,false);worldScene?.destroy();worldHost?.remove();worldHost=document.createElement('div');worldHost.id='sim-world-fixture';Object.assign(worldHost.style,{position:'absolute',inset:'0'});root.append(worldHost);
+  worldScene=createModuleScene(worldHost,rooms,event=>{events.push(event);if(event.action==='space'){const room=rooms.find(r=>r.id===event.id)!;worldScene.setAppStage(room.moduleId,{sample:true,items:[{id:'sim-record',title:'Contract record'}]});worldScene.focus(room.moduleId,'object');}else if(event.action==='building')worldScene.focus(event.id,'building');},()=>{},new Map(),{buildings:[{id:'building-home',title:'Home'}]});
+ },home(){worldScene.focus('overview');},get scene(){return worldScene;},get host(){return worldHost;},destroy(){worldScene.destroy();worldHost.remove();}
+};
+const worldButton=document.createElement('button');worldButton.textContent='World';worldButton.onclick=()=>global.simFixture.open();document.querySelector('#theme-preview-nav')?.append(worldButton);

@@ -174,3 +174,5 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 ## 许可证
 
 Worldlet 以 [Apache License 2.0](LICENSE) 免费开源。第三方声明见 [NOTICE](NOTICE)。
+
+主题包遵循主仓库的 [Sim contract](resources/themes/CONTRACT.md)。构建前使用 `npm run theme:import -- /path/to/theme/package` 导入一个包；主题负责 World 渲染、Applet 场景和 HTML 布局，主仓库提供数据和操作。

@@ -45,7 +45,7 @@ export function elementBox(root:ParentNode,selector:string):Box|null {return vis
 /** An Applet's painted device on the World canvas, in viewport pixels, or null when it is not drawn. */
 export function appletBox(root:HTMLElement,id:string):Box|null {
  const module=((root as any).sceneMetrics?.modules||[]).find((m:any)=>m.id===id&&m.visible!==false);
- const bounds=module?.peekBounds,canvas=root.querySelector<HTMLCanvasElement>('canvas[data-renderer="pixi-webgl"]');
+ const bounds=module?.peekBounds,canvas=root.querySelector<HTMLElement>('[data-renderer="sim-dom"],canvas[data-renderer="pixi-webgl"]');
  if(!bounds||!canvas||!(bounds.width>0&&bounds.height>0))return null;
  const base=canvas.getBoundingClientRect(),sx=canvas.clientWidth?base.width/canvas.clientWidth:1,sy=canvas.clientHeight?base.height/canvas.clientHeight:1;
  return {x:base.left+bounds.x*sx,y:base.top+bounds.y*sy,width:bounds.width*sx,height:bounds.height*sy};

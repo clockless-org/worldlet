@@ -11,6 +11,6 @@ export {applyThemeSurfaces,attentionPicture,companionStill,playThemeSound,syncTh
 
 export {themeAmbientTrack} from './theme-audio.ts';
 
-export type {BuildTheme,ThemeAppletContext,ThemeMount,BuildThemeManifest} from './build-theme-contract.ts';
+export * from './build-theme-contract.ts';
 
-export {renderBuildTheme,BUILD_THEME_ID} from './build-theme.ts';
+export {renderBuildTheme,renderBuildWorld,applyBuildThemeScene,BUILD_THEME_PRESENTATION,BUILD_THEME_ID} from './build-theme.ts';
