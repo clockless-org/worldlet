@@ -170,6 +170,11 @@
   "companionValidID": "Electron validates whole companion archives with Core companionValidate, which applies the same ID rule to the identity and every record.",
   "companionValidTimestamp": "Electron validates whole companion archives with Core companionValidate, which applies the same timestamp rule to the identity and every record.",
   "interruptsBackground": "Electron decides foreground priority and background preemption per Agent request through Core foregroundAgentWork, agentWorkPriority, preemptAgentWork and nextAgentWork, and attention admission through Core admitBackgroundWork; the pool holds only Agent requests, so the UI-request classifier does not apply.",
-  "modelStatusFresh": "Electron renders the shared UI, whose model-status reader (platform/bridge/model-status.ts) caches ready results with Core modelStatusFresh and is invalidated by Core changesModelStatus in platform/bridge/host.ts."
+  "modelStatusFresh": "Electron renders the shared UI, whose model-status reader (platform/bridge/model-status.ts) caches ready results with Core modelStatusFresh and is invalidated by Core changesModelStatus in platform/bridge/host.ts.",
+  "agentWorkPriority": "Only Worldlet's built-in Hermes runtime scheduled model work and handed off Harness sign-ins; it was removed (2026-10-09: no built-in Agent), and a person's own Harness does both itself.",
+  "foregroundAgentWork": "Only Worldlet's built-in Hermes runtime scheduled model work and handed off Harness sign-ins; it was removed (2026-10-09: no built-in Agent), and a person's own Harness does both itself.",
+  "harnessAuthHandoff": "Only Worldlet's built-in Hermes runtime scheduled model work and handed off Harness sign-ins; it was removed (2026-10-09: no built-in Agent), and a person's own Harness does both itself.",
+  "nextAgentWork": "Only Worldlet's built-in Hermes runtime scheduled model work and handed off Harness sign-ins; it was removed (2026-10-09: no built-in Agent), and a person's own Harness does both itself.",
+  "preemptAgentWork": "Only Worldlet's built-in Hermes runtime scheduled model work and handed off Harness sign-ins; it was removed (2026-10-09: no built-in Agent), and a person's own Harness does both itself."
  }
 }

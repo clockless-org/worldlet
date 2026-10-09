@@ -8,7 +8,7 @@ import {WorldLedger} from '../store/ledger.ts';
 import {createDiagnostics,type DiagnosticNote} from '../host/diagnostics.ts';
 import {ExecutionJournal} from '../modules/agent-runtime/journal.ts';
 import {DEMO_HOST} from '../modules/browser/page.ts';
-import {BROWSER,COMPANION,DESKTOP_COMPANION,FOX,USER_ACTIVITY,type BrowserService,type CompanionService,type DesktopCompanionService,type FoxService,type UserActivityService} from '../host/services.ts';
+import {AGENT,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,USER_ACTIVITY,type AgentService,type BrowserService,type CompanionService,type DesktopCompanionService,type FoxService,type UserActivityService} from '../host/services.ts';
 import {desktopCompanion} from './onboarding-paths.ts';
 import type {WebPage} from '../modules/browser/web-page.ts';
 import type {Row} from '../host/types.ts';
@@ -24,7 +24,7 @@ import {errorMessage as message} from '../files.ts';
 // (mailConversation). At arrival, at Fox's first suggestion and after the first win the
 // library must hold no failed background work (journal, runs, Attention budget, diagnostics); an
 // item save the model repaired in the same successful run is a self-correction, not a failure.
-// Runs S/M and Fox on this computer's model source (development: the local Codex sign-in).
+// Runs Fox and its background work on this computer's Codex CLI, which the launcher chose as Fox's Agent.
 
 const COMPANION_BLOCKING=false;
 export async function onboardingFlow({host,window,view}:CheckContext){
@@ -33,6 +33,8 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  const disposable=process.env.WORLDLET_PROFILE_ROOT;
  if(!disposable||path.resolve(disposable)!==path.resolve(store.root))throw Error('needs a disposable library: start with WORLDLET_PROFILE_ROOT (npm run test:onboarding)');
  if(store.state.onboarding?.completed===true||store.state.connections.length||store.sampleEnabled())throw Error('the library is not fresh: '+store.root);
+ const agentId=host.optional<AgentService>(AGENT)?.id;
+ if(agentId!=='local-codex')throw Error(`Fox's Agent is ${agentId??'missing'}, not the local Codex CLI the launcher chose: install the Codex CLI where Worldlet looks for it`);
  // A person is going through first run: synthetic input never resets the system idle clock, and an
  // unattended release host's own idle time must not hold Attention back.
  host.provide<UserActivityService>(USER_ACTIVITY,{idleSeconds:()=>0});

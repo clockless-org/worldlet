@@ -5,15 +5,15 @@ import {idleStop} from './external.ts';
 import {AgentCancelled,AgentEventWait,agentEvent} from './protocol.ts';
 import {GatewayConversation,type GatewaySettings,type OwnSession,type ResidentSession} from './harness-sessions.ts';
 import {ElsewhereAdapter} from './remote-harness.ts';
-import type {Adapter,AgentEventHandler,AgentRuntime,Row} from './types.ts';
+import type {Adapter,AgentEventHandler,AgentRuntime,Row,RuntimeContext} from './types.ts';
 
 // Fox on an OpenClaw Gateway on another computer, reached directly (core/phone/README.md#an-agent-gateway-on-another-computer;
 // Harness `remote-openclaw`, location `native`): no Worldlet runs there. The person types its address and token in
 // Settings › Model; the token is kept in the vault (safeStorage: the OS keychain's key), never in a settings file, a
 // log or what the page reads. Fox's conversation turns go to its `/v1/responses` in a session per Fox thread, the same
 // GatewayConversation a local OpenClaw uses, with World tools as client function tools that run in this World; its
-// exec approvals come over its WebSocket while a turn runs, once its device is approved there. Everything else stays
-// with the built-in Agent on this computer (ElsewhereAdapter). Free of Electron, so scripts/remote-gateway-check.ts
+// exec approvals come over its WebSocket while a turn runs, once its device is approved there. Worldlet keeps the
+// companion's memory and conversations, as for any Harness (ElsewhereAdapter). Free of Electron, so scripts/remote-gateway-check.ts
 // drives it against a fixture Gateway.
 export type RemoteGatewaySaved={v:1;url:string;token:string;active:boolean};
 type Vault={get(id:string):string|null,set(id:string,v:string):void,delete(id:string):void};
@@ -136,20 +136,21 @@ export class RemoteGatewayAdapter extends ElsewhereAdapter implements Adapter {
  readonly id=REMOTE_GATEWAY_HARNESS_ID;
  private readonly host:string;
  readonly conversation:GatewayConversation;
- constructor(saved:{url:string;token:string},builtIn:()=>Adapter,own:OwnSession=()=>{}){
-  super(builtIn);
+ constructor(context:RuntimeContext,saved:{url:string;token:string},own:OwnSession=()=>{}){
+  super(context);
   const address=readRemoteGatewayUrl(saved.url),token=saved.token;
   this.host=address.host;
   this.conversation=new GatewayConversation(`OpenClaw at ${address.host}`,()=>settings(address,token),own,CHECK_MS);
  }
  /** The Harness Fox talks through, for the services the World asks of it (core harnessService `remote-openclaw`). */
  get harness(){return {id:REMOTE_GATEWAY_HARNESS_ID,title:this.conversation.title};}
- make():AgentRuntime {return new RemoteGatewayRuntime(this.conversation,this.host,()=>this.b.make(),this.activity);}
- makeLane():AgentRuntime {return new RemoteGatewayRuntime(this.conversation,this.host,()=>this.b.make(),()=>{},'background');}
+ make():AgentRuntime {return new RemoteGatewayRuntime(this.conversation,this.host,this.local,this.activity);}
+ makeLane():AgentRuntime {return new RemoteGatewayRuntime(this.conversation,this.host,this.local,()=>{},'background');}
  /** Its exec approvals, answered on this computer's card and sent back over its WebSocket. */
  approvals(){return this.conversation.approvals;}
- async status(_home:string){return new RemoteGatewayRuntime(this.conversation,this.host,()=>this.b.make()).status();}
- warm(home:string){this.b.warm(home);}
+ async status(_home:string){return new RemoteGatewayRuntime(this.conversation,this.host,this.local).status();}
+ override warm(){}
+ protected title(){return this.conversation.title;}
  override async shutdown(){this.conversation.shutdown();await super.shutdown();}
- resetExplanation(){return `This deletes Worldlet’s companion archive, conversations, saved items and local connections on this computer and forgets the Gateway at ${this.host}. OpenClaw there keeps its own data. Worldlet then starts onboarding again. This cannot be undone.`;}
+ override resetExplanation(){return `This deletes Worldlet’s companion archive, conversations, saved items and local connections on this computer and forgets the Gateway at ${this.host}. OpenClaw there keeps its own data. Worldlet then starts onboarding again. This cannot be undone.`;}
 }

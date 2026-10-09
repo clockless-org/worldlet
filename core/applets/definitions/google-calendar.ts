@@ -4,7 +4,7 @@ export default {
  attention:{version:1,provider:'google-calendar',reader:'native-calendar',intervalMinutes:30,freshnessMinutes:120} as const,
  motion:{version:2,kind:'sprite-frames',columns:3,rows:2,frames:6,fps:8,ambient:false} satisfies AppletMotion,
   content: {noun: ["event", "events"], hideTitle: true, statusText: "Connected · Read only", empty: "No events in your connected calendars in the next 30 days."},
-  fullView: {kind: 'scene'},
+  fullView: {kind: 'scene', original: {url: 'https://calendar.google.com/', platform: 'web'}},
   "id": "app-google-calendar",
   "key": "google-calendar",
   "title": "Calendar",

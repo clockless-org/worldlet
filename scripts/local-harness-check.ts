@@ -205,47 +205,33 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
  writeSelection(root,'claude-code');
  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'agent','local-harness.json'),'utf8')),{version:1,id:'claude-code'});
  assert.equal(selectedInstall(root,unix)?.id,'claude-code');
- writeSelection(root,'pi');assert.equal(selectedInstall(root,unix),null,'an uninstalled choice falls back to the built-in Agent');
+ writeSelection(root,'pi');assert.equal(selectedInstall(root,unix),null,'an uninstalled choice leaves Fox without an Agent');
  fs.writeFileSync(path.join(root,'agent','local-harness.json'),'{"version":1,"id":"/bin/sh"}');assert.equal(readSelection(root),null);
  writeSelection(root,null);assert.equal(readSelection(root),null);
 
- // Accounts belong to Worldlet's connector, not to Fox's Agent: with Claude Code as Fox's Agent the
- // built-in Hermes still owns them, in its own home, under its own transport. So a Google grant made
- // before choosing the Harness stays connected, and opening Mail without one goes to Google sign-in.
+ // There is no built-in Agent (owner decisions 2026-10-09): the World reads accounts in the Platform
+ // (agent-runtime/index.ts `worldSources`), and the person's Harness runs the conversation and background work alike.
  {
   const context={profile:{} as any,root,development:false,analyticsID:()=>'',openExternal:async()=>{},record:()=>true,failure:()=>{},changed:()=>{}};
-  let stopped=false;
-  const links={providers:()=>['gmail','google-calendar']},access={run:async()=>({records:[]})};
-  const builtIn:any={id:'hermes',home:(scope:string)=>path.join(root,'agent',scope,'hermes'),shutdown:async()=>{stopped=true;},makeSourceConnections:()=>links,makeSourceAccess:()=>access};
   const claude=locateLocalHarnesses(unix).find(h=>h.id==='claude-code')!;
-  const adapter=new LocalHarnessAdapter(context,claude,unix,()=>builtIn);
+  const adapter=new LocalHarnessAdapter(context,claude,unix);
   assert.equal(adapter.id,'local-claude-code','Fox talks through Claude Code');
-  const owner=adapter.accountOwner();
-  assert.deepEqual([owner.id,owner.home('private'),owner.makeSourceConnections(),owner.makeSourceAccess()],['hermes',builtIn.home('private'),links,access],'accounts stay with the built-in Hermes');
-  await adapter.shutdown();assert.ok(stopped,'the built-in Agent stops with the Harness');
-  const alone=new LocalHarnessAdapter(context,claude,unix).accountOwner();
-  assert.equal(alone.id,'local-claude-code','without a built-in Agent the Harness answers for itself');
-  await assert.rejects(alone.makeSourceConnections().connect({provider:'gmail',target:'',endpoint:'',token:'',home:'',onStage(){},onConnected(){}}),/does not provide account connections/);
-  await assert.rejects(alone.makeSourceAccess().run({action:'sourceRequest',provider:'gmail',operation:'read'},''),/does not read connected accounts/);
+  assert.equal((adapter as any).accountOwner,undefined,'no other Agent owns accounts');
+  await assert.rejects(adapter.makeSourceConnections().connect({provider:'gmail',target:'',endpoint:'',token:'',home:'',onStage(){},onConnected(){}}),/does not provide account connections/);
+  await assert.rejects(adapter.makeSourceAccess().run({action:'sourceRequest',provider:'gmail',operation:'read'},''),/does not read connected accounts/);
   // Background model work runs on the person's Harness itself, beside the conversation.
-  const task={run:async()=>({})},builtInHome=path.join(scratch,'built-in');fs.mkdirSync(builtInHome,{recursive:true});
-  const ready:any={...builtIn,available:true,home:()=>builtInHome,makeTask:()=>task,hasInteractiveWork:()=>false,
-   makeModelAccess:()=>assert.fail('never the built-in model'),makeRoutines:()=>assert.fail('never the built-in routines')};
-  const withBackground=new LocalHarnessAdapter(context,claude,unix,()=>ready);
-  assert.equal(withBackground.supportsBackgroundChecks,true,'checks run on Claude Code');
-  assert.equal(withBackground.background()?.id,'local-claude-code','background work runs on Claude Code');
-  const lane=withBackground.makeTask!();
-  assert.ok(lane instanceof LocalHarnessRuntime,'an Applet task is a Claude Code turn beside the conversation');
-  // Its models and scheduled jobs are its own: no model of the built-in runtime is used or chosen, none of its routines run.
-  await assert.rejects(withBackground.makeModelAccess().run({action:'browser_pick'},''),/Manage its models and accounts in Claude Code/);
-  const routines=withBackground.makeRoutines();routines.start(()=>true,()=>assert.fail('no routine runs'));routines.wake();routines.stop();
-  // A chosen Hermes Agent: background work runs on it like any Harness (its own `hermes acp`), never the built-in runtime.
-  const hermes=new LocalHarnessAdapter(context,{...claude,id:'hermes',title:'Hermes Agent'},unix,()=>ready);
-  assert.equal(hermes.supportsBackgroundChecks,true,'checks run on the person\'s Hermes Agent, whatever the built-in has');
+  assert.equal(adapter.supportsBackgroundChecks,true,'checks run on Claude Code');
+  assert.equal(adapter.background()?.id,'local-claude-code','background work runs on Claude Code');
+  assert.ok(adapter.makeTask!() instanceof LocalHarnessRuntime,'an Applet task is a Claude Code turn beside the conversation');
+  // Its models and scheduled jobs are its own: Worldlet chooses no model and runs no routine for it.
+  await assert.rejects(adapter.makeModelAccess().run({action:'browser_pick'},''),/Manage its models and accounts in Claude Code/);
+  const routines=adapter.makeRoutines();routines.start(()=>true,()=>assert.fail('no routine runs'));routines.wake();routines.stop();
+  // A chosen Hermes Agent: background work runs on it like any Harness (its own `hermes acp`).
+  const hermes=new LocalHarnessAdapter(context,{...claude,id:'hermes',title:'Hermes Agent'},unix);
+  assert.equal(hermes.supportsBackgroundChecks,true,'checks run on the person\'s Hermes Agent');
   assert.equal(hermes.background()?.id,'local-hermes','background work runs on the person\'s Hermes Agent');
   assert.ok(hermes.makeTask?.() instanceof LocalHarnessRuntime,'an Applet task is a Hermes Agent turn beside the conversation');
-  assert.notEqual(hermes.makeTask?.(),task,'not the built-in runtime');
-  assert.equal(new LocalHarnessAdapter(context,claude,unix,()=>({...ready,available:false})).supportsBackgroundChecks,true,'whether or not the built-in Agent is installed: the World reads accounts in the Platform');
+  await adapter.shutdown();await hermes.shutdown();
  }
 
  // One streamed turn through the runtime.
@@ -431,4 +417,4 @@ readline.createInterface({input:process.stdin}).on('line',async line=>{
  }finally{bridge.close();}
  assert.equal(fs.existsSync(tokenFile),false,'the token file goes with the turn');
 });
-console.log('PASS local Agent Harnesses: catalog, recommendation, turns, output readers, detection (Codex inside the ChatGPT and Codex apps too), selection, accounts through the built-in Agent, background work on the Harness, streamed turns (Hermes Agent over ACP with a World tool call, OpenClaw with its own workspace and a per-turn configuration) and the World tool MCP server and pi extension');
+console.log('PASS local Agent Harnesses: catalog, recommendation, turns, output readers, detection (Codex inside the ChatGPT and Codex apps too), selection, accounts in the Platform with no built-in Agent, background work on the Harness, streamed turns (Hermes Agent over ACP with a World tool call, OpenClaw with its own workspace and a per-turn configuration) and the World tool MCP server and pi extension');

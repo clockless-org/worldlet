@@ -406,8 +406,8 @@ extraction recovery, real self-uninstall and preservation of fixture data and un
 files. The contract check loads host modules without a window; it is not UI, first-run
 or clean-machine acceptance.
 
-**First-launch Hermes preparation**
-([`installation.ts`](src/modules/agent-runtime/installation.ts)). The package carries
+**First-launch Hermes preparation** (removed from the app on 2026-10-09 with the built-in Hermes; the package still
+carries its files until the packaging follows). The package carries
 only a bootstrap: `uv.exe` with its SHA-256, `runtime.json`, the Hermes source ZIP
 SHA-256 and [`windows-requirements.txt`](../../harness/hermes/windows-requirements.txt).
 When Fox first needs Hermes, the app prepares it in the background under

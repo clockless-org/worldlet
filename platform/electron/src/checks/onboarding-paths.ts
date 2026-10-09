@@ -3,7 +3,6 @@ import {dialog,Menu,shell,type BaseWindow,type MenuItem,type WebContents,type We
 import {AGENT,ANALYTICS,DESKTOP_COMPANION,type AgentService,type AnalyticsService,type DesktopCompanionService} from '../host/services.ts';
 import {readSelection} from '../modules/agent-runtime/local-harness.ts';
 import {readAdopted} from '../modules/agent-runtime/local-memory.ts';
-import {readModelSource} from '../modules/agent-runtime/model-access.ts';
 import type {CheckContext} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -30,9 +29,8 @@ export const ONBOARDING_PATH_PHASES=['choose','resume','after-reset'] as const;
 const PREFERRED=['codex','claude-code','hermes','openclaw','pi'];
 // New steps report ADVISORY FAIL until they have passed on the Mac and Windows hosts; then these turn on.
 const MAIL_AGAIN_BLOCKING=false,COMPANION_ELSEWHERE_BLOCKING=false,CLOSE_QUITS_BLOCKING=false;
-/** The local Agent setup chose, however it was kept (agent-runtime/index.ts `detect`'s `selected`): Fox's
- * Harness, an adopted Agent, or Codex as the model source. */
-const chosen=(root:string)=>readSelection(root)??readAdopted(root)??(readModelSource(root)?'codex':null);
+/** The local Agent setup chose, however it was kept: Fox's Harness, or an Agent adopted before there was none built in. */
+const chosen=(root:string)=>readSelection(root)??readAdopted(root);
 
 export async function onboardingPaths({host,window,view}:CheckContext){
  const {store,profile}=host;
@@ -192,7 +190,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
    await wait('Reset Fox returned to the setup page',signInPage,120);
   }finally{dialog.showMessageBox=confirm;}
   const agent=host.use<AgentService>(AGENT).id;
-  if(chosen(store.root)||agent!=='hermes')throw Error(`Reset Fox left the local Agent chosen (${chosen(store.root)??'none'}, Fox's Agent ${agent})`);
+  if(chosen(store.root)||agent!=='none')throw Error(`Reset Fox left the local Agent chosen (${chosen(store.root)??'none'}, Fox's Agent ${agent})`);
   await wait('local Agent detection',detected,90);await sleep(3000);
   if(await js(appsPage)===true)throw Error('after Reset Fox, setup moved on to Enter your world');
   await quitCompletely('resumed with the Agent brought in, Mail started Google sign-in, Cancel, Reset Fox → setup page');

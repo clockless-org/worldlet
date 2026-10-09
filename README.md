@@ -50,7 +50,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
 
 Prefer a regular installer? [Download from worldlet.ai](https://worldlet.ai/download/) or take one from [GitHub Releases](https://github.com/clockless-org/worldlet/releases). An Agent can install Worldlet for you with the [`worldlet` skill](harness/skills/worldlet/SKILL.md). Details: [one-line installers](platform/install/README.md).
 
-No account is needed. If you have no Agent yet, Worldlet sets up a standard [Hermes Agent](core/agent/PORTABILITY.md#local-harnesses-chosen-at-setup) on first launch.
+No account is needed. If you have no Agent yet, setup installs the standard [Hermes Agent](core/agent/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) the official way, to its usual location; one you already have is used as it is.
 
 ## Features
 

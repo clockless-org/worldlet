@@ -4,7 +4,7 @@
 
 Normal boot shows only a centered walking Fox, using the registered sprite frames. Branding, progress bars and status copy are hidden; delayed/failed startup exposes recovery controls. Reduced Motion holds a neutral frame. Completed users and the practice world bypass setup.
 
-First use is one page (owner request 2026-10-09, `ui/onboarding/startup-setup.ts`, `ui/shell/world-startup.css`): no Fox at first, the choices in the upper middle over a soft painting of the World, one big, narrower button in the lower middle, and the Worldlet logo as a small mark at the bottom centre (owner requests 2026-10-09). There are no sections, step bars or separate apps page.
+First use is one page (owner request 2026-10-09, `ui/onboarding/startup-setup.ts`, `ui/shell/world-startup.css`): no Fox at first, the Worldlet logo large on top, and in the middle, over a soft painting of the World, the choices with one big, narrower button below them (owner requests 2026-10-09). There are no sections, step bars or separate apps page.
 
 | Half | Surface | Result |
 | --- | --- | --- |

@@ -83,10 +83,8 @@ await withTempDir('worldlet-remote-gateway-',async scratch=>{
   await assert.rejects(checkRemoteGateway('http://192.168.1.20:18789','claw-secret'),/only over HTTPS/);
   assert.deepEqual(await checkRemoteGateway(url+'/v1/','claw-secret'),{url,token:'claw-secret',host:'127.0.0.1'});
 
-  // Fox's turns there; what is not the person's line runs on the built-in Agent here.
-  const local:Row[]=[];
-  const builtIn={warm(){},async shutdown(){},hasInteractiveWork:()=>false,make:()=>({run:async(body:Row)=>{local.push(body);return {message:'local'};},steer:async()=>false,cancel(){}})} as any;
-  const adapter=new RemoteGatewayAdapter({url,token:'claw-secret'},()=>builtIn);
+  // Fox's turns there; there is no built-in Agent here for anything else (owner decisions 2026-10-09).
+  const adapter=new RemoteGatewayAdapter({profile:{},root:scratch,development:false,analyticsID:()=>'',openExternal:async()=>{},record:()=>true,failure:()=>{},changed:()=>{}} as any,{url,token:'claw-secret'});
   const home=path.join(scratch,'agent','private','hermes'),tools:Row[]=[],notes:string[]=[];
   const thread=(place:string)=>JSON.stringify([place,'']);
   const chat=(text:string,place='overview',extra:Row={})=>adapter.make().run({action:'chat',mode:'chat',text,style:'Be warm.',thread:thread(place),history:[{role:'user',text:'old line'}],...extra},home,async(event:Row)=>{
@@ -110,7 +108,7 @@ await withTempDir('worldlet-remote-gateway-',async scratch=>{
   assert.ok(sockets.length>0&&sockets.every(route=>route==='/claw'),'its approvals connection goes to the same address');
   assert.equal(notes.length,1,'an unapproved device is said once');assert.match(notes[0],/approval requests cannot reach Fox: Worldlet could not sign in to its Gateway: device not approved/);
   // Background work runs on the Gateway too (owner decision 2026-10-09), each turn in a session of its own, with World
-  // tools only for a check that may use them; Applet tasks on its lane; only what is not a chat stays here.
+  // tools only for a check that may use them; Applet tasks on its lane; what is not a chat is the Gateway's own business.
   assert.equal(adapter.supportsBackgroundChecks,true);assert.equal(adapter.background(),adapter);
   assert.equal((await chat('Check mail','overview',{_background:true})).message,'Remote turn 1');
   const checked=seen.at(-1)!;
@@ -119,8 +117,8 @@ await withTempDir('worldlet-remote-gateway-',async scratch=>{
   assert.notEqual(seen.at(-1)!.key,checked.key,'each lane turn starts fresh');
   assert.deepEqual(seen.at(-1)!.body.tools.map((t:Row)=>t.name),['describe_world_tools','call_world_tool'],'an Applet task may act');
   assert.equal(adapter.hasInteractiveWork(),false,'background work is not the person\'s');
-  assert.equal((await adapter.make().run({action:'summarize',text:'x'},home)).message,'local');
-  assert.equal(local.length,1);
+  await assert.rejects(adapter.make().run({action:'summarize',text:'x'},home),/Fox uses OpenClaw at 127\.0\.0\.1\. Manage its models and accounts there\./);
+  assert.equal(adapter.memoryAuthority,'worldlet','Worldlet keeps the companion\'s memory');
   // A Gateway that is off or gone is the turn's error: there is no process here to fall back to.
   endpoint=false;(adapter.conversation as any).checked=0;
   await assert.rejects(chat('Still there?'),/OpenClaw at 127\.0\.0\.1 cannot answer: its Gateway's \/v1\/responses endpoint is off/);
