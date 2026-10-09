@@ -8,7 +8,7 @@ import {observeWorldActivity,recordWorldActivity} from '../../platform/bridge/ac
 import {curatedOriginal,renderCuratedTable} from './curated-source-applet.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
 import {firstValueRequest,firstValueLinks} from '../../core/onboarding/index.ts';
-import {worldSpeechTerms} from '../../core/companion/index.ts';
+import {carriesConversation,worldSpeechTerms} from '../../core/companion/index.ts';
 import {helpNarration,narrateHelp,foxStepWords} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement} from './product-analytics.ts';
@@ -190,7 +190,10 @@ export function mountNotionWorld(data: World, native: any) {
   // The page an item's help opens before Fox's turn (`previewActions`) is already the item's place while it
   // loads: Fox's turn starts there, and a place change mid-turn stops Fox's page steps ("The user changed views").
   let attentionOrigin:{key:string,title:string,at:number}|null=null,attentionOpening:{key:string,title:string,site:string}|null=null;
-  const siteThreads=new Map<string,{key:string,title:string}>();
+  // A carried thread (`carried`) is the conversation the page brought from the place it left (carryConversation).
+  const siteThreads=new Map<string,{key:string,title:string,carried?:boolean}>();
+  // The website each Applet's page was last on, to see the page move to another one.
+  const pageSites=new Map<string,string>();
   const browserPanel=createBrowserPanel({root,content,native,notify,openApplet:id=>visitObject(id),openPage:url=>openWorldURL(url),leave:()=>back(),sample:!!data.sample,
     // A page opened from something in its Applet (a link in an email, a meeting) goes back there from its first page.
     canReturn:()=>!!libraryWebReturn&&depth==='object'&&current===libraryWebReturn.app.moduleId,
@@ -203,9 +206,46 @@ export function mountNotionWorld(data: World, native: any) {
       const site=webSite(page.url);
       if(site&&byFox&&attentionOrigin&&Date.now()-attentionOrigin.at<15*60000){siteThreads.set(applet+'|'+site,{key:attentionOrigin.key,title:attentionOrigin.title});attentionOrigin=null;}
       if(site&&byFox)attentionOpening=null;
+      const before=pageSites.get(applet);if(site)pageSites.set(applet,site);
+      if(site&&before&&before!==site)carryConversation(applet,before,site,page,byFox);
       nativeHUD?.sync();
     }});
-  window.addEventListener('worldlet:fox-idle',()=>{attentionOrigin=null;attentionOpening=null;});
+  window.addEventListener('worldlet:fox-idle',()=>{attentionOrigin=null;attentionOpening=null;if(carryPending){const next=carryPending;carryPending=null;setTimeout(()=>carryToApplet(next.from,next.to),0);}});
+  /** The page in an Applet moved from one website to another (a link, or Fox's step). While the person and Fox are
+   * talking (core/companion/conversation-place.ts, carriesConversation) the conversation goes with it: the new site
+   * continues the place it came from instead of starting its own (owner Order 2026-10-09). A page that belongs to
+   * another website Applet in the World moves there, with its background and title; Fox's turn finishes first, so
+   * its steps on the page are never cut off by the move. */
+  let carryPending:{from:string,to:string}|null=null;
+  function carryConversation(applet:string,before:string,site:string,page:{url:string,title:string},byFox:boolean){
+    const r=sections.find(s=>s.key===applet&&s.entity==='app');if(!r)return;
+    const from=siteThreads.get(applet+'|'+before)||{key:'web:'+before,title:r.title+' · '+before};
+    const last=voice?.threadOf?.(from.key,1)?.[0];
+    const bound=siteThreads.get(applet+'|'+site);
+    if((!bound||bound.carried)&&carriesConversation({byFox,working:last?.status==='working',lastTurnAt:last?.at??null,now:Date.now()}))
+      siteThreads.set(applet+'|'+site,{key:from.key,title:from.title,carried:true});
+    // Only a website Applet (or one made from a site) hands its page on; the Browser offers the switch instead.
+    if(applet==='browser'||applet==='web'||depth!=='object'||current!==r.moduleId)return;
+    const own=pageApplet(page.url);
+    if(!own||own===r.moduleId)return;
+    if(byFox&&voice?.active){carryPending={from:r.moduleId,to:own};return;}
+    setTimeout(()=>carryToApplet(r.moduleId,own),0);
+  }
+  const pageApplet=(url:string)=>websiteAppletFor(url,sections.filter(s=>s.entity==='app').map(s=>({id:s.moduleId,web:s.fullView?.kind==='web',siteHost:s.site?.host})));
+  function carryToApplet(from:string,to:string){
+    const r=sections.find(s=>s.moduleId===from),target=sections.find(s=>s.moduleId===to);
+    // Only while the person is still on that page in that Applet.
+    if(!r||!target||depth!=='object'||current!==from||content.hidden||content.dataset.template!=='browser')return;
+    const page=browserPanel.lastVisit(r.key),site=page?webSite(page.url):'';
+    if(!page||pageApplet(page.url)!==to)return;
+    const thread=siteThreads.get(r.key+'|'+site);
+    if(thread)siteThreads.set(target.key+'|'+site,thread);
+    pageSites.set(target.key,site);
+    visitObject(target.moduleId,{enter:false});
+    // The Applet it left lets the page go and starts on its own website next time.
+    header(target.title,'Website',{applet:true});browserPanel.mount(target.key,{url:page.url,platform:'web',release:true});
+    sceneState();
+  }
   /** The place a browsing Applet's open page is: its Attention item's, or the website's own. The
    * title stays the Applet's name: it is the top bar's title (#951), and a page title or address
    * shown there would reach the World's activity record (applet-resume-check). Only Fox's turn
@@ -215,7 +255,12 @@ export function mountNotionWorld(data: World, native: any) {
     const page=browserPanel.lastVisit(r.key),site=page?webSite(page.url):'';
     if(attentionOpening)return {key:attentionOpening.key,title:r.title,detail:'Opening '+attentionOpening.site+' in '+r.title+' for the Attention item "'+attentionOpening.title+'". Read the page before acting.'};
     if(!page||!site)return null;
-    const bound=siteThreads.get(r.key+'|'+site);
+    let bound=siteThreads.get(r.key+'|'+site);
+    if(bound?.carried){
+      const last=voice?.threadOf?.(bound.key,1)?.[0];
+      if(!carriesConversation({working:last?.status==='working',lastTurnAt:last?.at??null,now:Date.now()})){siteThreads.delete(r.key+'|'+site);bound=undefined;}
+      else return {key:bound.key,title:r.title,detail:'Website open in '+r.title+': '+page.url+' ('+page.title+'). The conversation continues here from '+bound.title+': the page moved on while you were talking, so the earlier turns still apply. Read the page or the browser\'s recordings before answering about it.'};
+    }
     if(bound)return {key:bound.key,title:r.title,detail:'Working on the Attention item "'+bound.title+'" in '+r.title+' on '+page.url+' ('+page.title+'). Read the page before acting.'};
     return {key:'web:'+site,title:r.title,detail:'Website open in '+r.title+': '+page.url+' ('+page.title+'). Read the page or the browser\'s recordings before answering about it.'};
   }

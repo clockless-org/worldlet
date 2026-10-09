@@ -12,7 +12,7 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {WebRecorder,manageRecordings} from '../platform/electron/src/modules/browser/recorder.ts';
 import {installWebRecorder} from '../platform/bridge/web-record.js';
 import {typedAddress,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,privateWebAddress,scrubSent,secretField,SECRET_NAME,WEB_RECORD,webSearchPlan,webSite,webTranscript,RAW_KINDS,type WebRecord} from '../core/browser/index.ts';
-import {placeContext,recentBrowsing} from '../core/companion/index.ts';
+import {CARRY,carriesConversation,placeContext,recentBrowsing} from '../core/companion/index.ts';
 
 // Rules ------------------------------------------------------------------------------------------
 assert.equal(webSite('https://www.Example.com/a'),'example.com');
@@ -113,6 +113,13 @@ assert.equal(here?.place,'web:pokemonshowdown.com');
 assert.equal(here?.earlierHere.length,2);
 assert.equal(here?.cameFrom,'attention:honda','a turn after moving says where the person came from');
 assert.equal(placeContext({thread:'["web:a",""]',turns:[],previous:'["web:a",""]'})?.cameFrom,undefined);
+// Carrying the conversation (owner Order 2026-10-09): a page Fox moves, or one moved while Fox works or soon after a turn, keeps the conversation.
+const minute=60000;
+assert.equal(carriesConversation({byFox:true,now:0}),true,'a page Fox moved in its turn carries the conversation');
+assert.equal(carriesConversation({working:true,now:0}),true,'so does one the person moves while Fox works');
+assert.equal(carriesConversation({lastTurnAt:0,now:(CARRY.minutes-1)*minute}),true,'and one moved soon after a turn there');
+assert.equal(carriesConversation({lastTurnAt:0,now:CARRY.minutes*minute}),false,'later, the new website is its own place');
+assert.equal(carriesConversation({lastTurnAt:null,now:0}),false,'a place nobody talked in carries nothing');
 assert.deepEqual(recentBrowsing([{site:'a.com',title:'A',startedAt:0,endedAt:600}],1200),[{site:'a.com',title:'A',minutesAgo:10,minutes:10}]);
 // The visit on screen is marked as such, never as a finished one minutes ago.
 assert.deepEqual(recentBrowsing([{id:'v2',site:'b.com',title:'B',startedAt:900,endedAt:1200},{id:'v1',site:'a.com',title:'A',startedAt:0,endedAt:600}],1200,'v2'),[{site:'b.com',title:'B',onScreen:true,minutes:5},{site:'a.com',title:'A',minutesAgo:10,minutes:10}]);
