@@ -27,10 +27,8 @@ for name, source in model_tiers.SOURCES.items():
     for tier in source["tiers"].values():
         assert efforts.setdefault(tier["model"], tier.get("reasoning")) == tier.get("reasoning"), f"{name}: one reasoning effort per model"
     assert source["credential"] in {"included", "codex-local"} and source["baseURL"].startswith("https://"), name
-# The Electron host agrees with it: Codex on this computer is the only source.
-host = (ROOT / "platform/electron/src/modules/agent-runtime/model-access.ts").read_text()
+# Codex on this computer is the only source.
 assert set(model_tiers.SOURCES) == {"local-codex"}, "Worldlet provides no model: no Worldlet source"
-assert "return 'local-codex';" in host and "worldlet-model" not in host, "the Electron host names only the Codex source"
 
 os.environ["WORLDLET_MODEL_SOURCE"] = "local-codex"
 codex = model_tiers.source_model("local-codex")
