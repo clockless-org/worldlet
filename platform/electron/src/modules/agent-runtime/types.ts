@@ -61,7 +61,6 @@ export interface Adapter {
  agents?():HarnessAgents|null;
  /** The models the same Agent can answer a thread with (contracts/harness-services.ts `models`). */
  models?():HarnessModels|null;
- helperPython():Promise<string>;
  status(home:string):Promise<Row>;
  /** Installs the runtime when it is not `available` yet; absent when there is nothing to install. */
  prepare?():Promise<void>;

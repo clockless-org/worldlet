@@ -5,7 +5,7 @@ import {LOCAL_HARNESSES,finishLocalHarness,openClawToolConfig,localHarnessAdapte
  type LocalHarnessId} from '../core/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {LocalHarnessAdapter,LocalHarnessRuntime,builtInModel,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
+import {LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Local Agent Harnesses at setup: the shared catalog, recommendation, per-command turns and output
@@ -227,27 +227,25 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   assert.equal(alone.id,'local-claude-code','without a built-in Agent the Harness answers for itself');
   await assert.rejects(alone.makeSourceConnections().connect({provider:'gmail',target:'',endpoint:'',token:'',home:'',onStage(){},onConnected(){}}),/does not provide account connections/);
   await assert.rejects(alone.makeSourceAccess().run({action:'sourceRequest',provider:'gmail',operation:'read'},''),/does not read connected accounts/);
-  // Background model work runs on the person's Harness itself, beside the conversation; source reads stay on the built-in World service.
+  // Background model work runs on the person's Harness itself, beside the conversation.
   const task={run:async()=>({})},builtInHome=path.join(scratch,'built-in');fs.mkdirSync(builtInHome,{recursive:true});
-  const ready:any={...builtIn,available:true,home:()=>builtInHome,makeTask:()=>task,hasInteractiveWork:()=>false};
-  let codex=true;
-  const withBackground=new LocalHarnessAdapter(context,claude,unix,()=>ready,()=>codex);
-  assert.equal(withBackground.supportsBackgroundChecks,true,'checks run while the built-in World service is installed');
+  const ready:any={...builtIn,available:true,home:()=>builtInHome,makeTask:()=>task,hasInteractiveWork:()=>false,
+   makeModelAccess:()=>assert.fail('never the built-in model'),makeRoutines:()=>assert.fail('never the built-in routines')};
+  const withBackground=new LocalHarnessAdapter(context,claude,unix,()=>ready);
+  assert.equal(withBackground.supportsBackgroundChecks,true,'checks run on Claude Code');
   assert.equal(withBackground.background()?.id,'local-claude-code','background work runs on Claude Code');
   const lane=withBackground.makeTask!();
   assert.ok(lane instanceof LocalHarnessRuntime,'an Applet task is a Claude Code turn beside the conversation');
-  codex=false;
-  assert.equal(withBackground.background()?.id,'local-claude-code','with or without a built-in model');
+  // Its models and scheduled jobs are its own: no model of the built-in runtime is used or chosen, none of its routines run.
+  await assert.rejects(withBackground.makeModelAccess().run({action:'browser_pick'},''),/Manage its models and accounts in Claude Code/);
+  const routines=withBackground.makeRoutines();routines.start(()=>true,()=>assert.fail('no routine runs'));routines.wake();routines.stop();
   // A chosen Hermes Agent: background work runs on it like any Harness (its own `hermes acp`), never the built-in runtime.
-  const hermes=new LocalHarnessAdapter(context,{...claude,id:'hermes',title:'Hermes Agent'},unix,()=>ready,()=>codex);
+  const hermes=new LocalHarnessAdapter(context,{...claude,id:'hermes',title:'Hermes Agent'},unix,()=>ready);
   assert.equal(hermes.supportsBackgroundChecks,true,'checks run on the person\'s Hermes Agent, whatever the built-in has');
   assert.equal(hermes.background()?.id,'local-hermes','background work runs on the person\'s Hermes Agent');
   assert.ok(hermes.makeTask?.() instanceof LocalHarnessRuntime,'an Applet task is a Hermes Agent turn beside the conversation');
   assert.notEqual(hermes.makeTask?.(),task,'not the built-in runtime');
-  fs.writeFileSync(path.join(builtInHome,'config.yaml'),'model:\n  provider: openrouter\n  default: some/model\n');
-  fs.writeFileSync(path.join(builtInHome,'config.yaml'),'model:\n  provider: openai-codex\n  worldlet_source: local-codex\n');
-  assert.equal(builtInModel(builtInHome,false),false,'a host-chosen Codex source without a sign-in is no model');
-  assert.equal(new LocalHarnessAdapter(context,claude,unix,()=>({...ready,available:false}),()=>true).supportsBackgroundChecks,false,'not while the built-in Agent is still installing');
+  assert.equal(new LocalHarnessAdapter(context,claude,unix,()=>({...ready,available:false})).supportsBackgroundChecks,true,'whether or not the built-in Agent is installed: the World reads accounts in the Platform');
  }
 
  // One streamed turn through the runtime.

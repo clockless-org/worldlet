@@ -83,12 +83,14 @@ def run(case, home, api):
     action = mail_actions.send if kind == 'send' else mail_actions.reconcile
     return action(api, home, case['draft'], case['id'])
 
+# stdin is read as UTF-8 bytes: on Windows Python's text stdin uses the ANSI code page (cp1252), which garbles the
+# fixtures' non-ASCII text.
 if sys.argv[2] == 'mime':
-    print(json.dumps([mime(raw) for raw in json.load(sys.stdin)], ensure_ascii=True)); sys.exit()
+    print(json.dumps([mime(raw) for raw in json.loads(sys.stdin.buffer.read().decode('utf-8'))], ensure_ascii=True)); sys.exit()
 if sys.argv[2] == 'entities':
     print(json.dumps(html5, ensure_ascii=True)); sys.exit()
 out = []
-for case in json.load(sys.stdin):
+for case in json.loads(sys.stdin.buffer.read().decode('utf-8')):
     with tempfile.TemporaryDirectory() as temporary:
         home = Path(temporary)
         api = Api(case.get('routes', {}))

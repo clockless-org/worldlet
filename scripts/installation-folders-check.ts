@@ -31,7 +31,7 @@ assert.ok(base.startsWith(${JSON.stringify(home)}),'the check runs on its own te
 assert.equal(installationRoot(release),library);
 assert.equal(installationRoot({channel:'dev',worktree:''}),path.join(base,'Worldlet Development'));
 assert.equal(installationRoot({channel:'dev',worktree:'0123456789ab'}),path.join(base,'Worldlet Worktrees','0123456789ab'));
-assert.deepEqual(INSTALLATION_FOLDERS,['runtime','speech','model-access']);
+assert.deepEqual(INSTALLATION_FOLDERS,['runtime','speech','tools','model-access']);
 
 // The Hermes runtime: in the library; on Mac and Linux the installation's, even for an RC check's disposable library.
 const bootstrap=path.join(os.tmpdir(),'worldlet-bootstrap-'+process.pid);

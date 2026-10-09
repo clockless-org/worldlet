@@ -15,103 +15,128 @@ import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
 // Local Agent marks: Claude Code and Codex reuse their Applet logos; the rest ship in resources/brands.
 const AGENT_ICONS:Record<string,string>={'claude-code':appLogoSource({key:'claude-code'})||'','codex':appLogoSource({key:'codex'})||'',hermes:'brands/hermes.png',openclaw:'brands/openclaw.svg',pi:'brands/pi.svg'};
-// Page 1 picks one local Agent for the person, in this order (owner request 2026-10-06): Hermes, OpenClaw and pi
+// The name the big button gives an Agent without a name of its own: "Give Hermes a world".
+const AGENT_SHORT:Record<string,string>={hermes:'Hermes',openclaw:'OpenClaw',pi:'pi',codex:'Codex','claude-code':'Claude Code'};
+// The page picks one local Agent for the person, in this order (owner request 2026-10-06): Hermes, OpenClaw and pi
 // first, then Codex, then Claude Code.
 const AGENT_PRIORITY=['hermes','openclaw','pi','codex','claude-code'];
 const node=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.textContent=text;e.className=cls;return e;};
-/** First-use setup lives on the loading curtain. No model turn or source read gates entry. */
-export function mountStartupSetup({state:initial,call,complete}){
- let state=initial,step=0,busy=false,disposed=false,error='',notice='',detecting=true,signingIn=false,entering=false;
+/** First-use setup lives on the loading curtain, as one page (owner request 2026-10-09): the brand on top, the Agents
+ * found here as cards, every other way in folded under More options, and one big "Give {agent} a world". Choosing
+ * brings the Agent in on the same page: its card moves left while what comes along appears on the right, tile by tile,
+ * and the button becomes "Enter your world". No model turn or source read gates entry. */
+/** `move`: someone who used Fox's own Hermes chooses the Agent Fox runs on from now on (owner decisions 2026-10-09: no
+ * built-in Hermes); the same page, without the apps, and Back to your world returns to the World as it was. */
+export function mountStartupSetup({state:initial,call,complete,move=false}:{state:any,call:any,complete:(next:any,icons?:Record<string,string>)=>Promise<void>,move?:boolean}){
+ let state=initial,step=0,busy=false,disposed=false,error='',notice='',signingIn=false,entering=false;
  // Agents already on this computer (Claude Code, Codex, …): choosing one replaces Google sign-in.
- // Every supported Agent is listed; only the ones the host found here can be chosen.
  // Each Agent here reports whether it has a name, memory or history Fox can bring (never its text).
- let agents:{id:string,title:string,worldTools?:boolean,memory?:{name:string|null,user:boolean,longTerm:boolean,model?:boolean,history?:{conversations:number,notes:number,skills:number,jobs:number}}}[]=[],detectingAgents=true,connectingAgent:string|null=null;
- // The local Agent picked on page 1: the first found in AGENT_PRIORITY until the person picks another;
- // the page's one Continue brings it.
+ let agents:{id:string,title:string,worldTools?:boolean,model?:boolean,memory?:{name:string|null,user:boolean,longTerm:boolean,model?:boolean,history?:{conversations:number,notes:number,skills:number,jobs:number}}}[]=[],detectingAgents=true,connectingAgent:string|null=null;
+ // The local Agent picked: the first found in AGENT_PRIORITY until the person picks another; the big button brings it.
  let picked:string|null=null;
+ // More options (owner request 2026-10-09): the Agents not on this computer, Google and ChatGPT (coming soon), an Agent
+ // on another computer and an API key, folded under the cards.
+ let more=false;
  // "My Agent is on another computer" (core/phone/README.md#another-computers-agent): the code Worldlet there shows,
  // pasted here, pairs this Worldlet with it and Fox's conversation runs on its Agent.
  let remoteForm=false,remoteCode='',pairingRemote=false;
- // No Agent here: the API-key form for the built-in Agent (`modelCatalog`, `modelConfigure`). The key lives only in
- // this variable until it is sent, never in the draft or storage.
- let keyForm=false,savingKey=false,keyProviders:{id:string,name:string,provider:string,model:string,baseURL:string,keyEnv?:string}[]=[],keyProvider='',keyModel='',keySecret='';
- // The second page brings the chosen Agent in while the person watches (owner request 2026-10-04):
- // its card reads its name, personality, memory and model, while one line flashes what is happening
- // (owner request 2026-10-06: no list). `facts` and `shown` pace that reveal; `chatter` turns the
- // line while the host is still copying.
- let bringing=false,facts=0,fresh=-1,shown=0,revealTimer=0,porting=false,chatter=0,chatterTimer=0;
- let scanned:string[]=[];
+ // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
+ // the person signs in to ChatGPT inside it with Hermes' own sign-in (`sign-in-hermes`), owner decisions 2026-10-09.
+ // `hermesStep` is the installer's step being run; `hermesCode` the code Hermes' device page asks for, when it does.
+ let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null;
+ const onHermesSetup=(event:Event)=>{
+  const detail=(event as CustomEvent).detail;if(disposed||!detail)return;
+  if(detail.stage==='install'&&hermesSetup==='installing'&&Number.isInteger(detail.step)&&Number.isInteger(detail.steps)&&typeof detail.title==='string')hermesStep=t('Step {step} of {steps}: {title}').replace('{step}',String(detail.step)).replace('{steps}',String(detail.steps)).replace('{title}',detail.title.slice(0,80));
+  else if(detail.stage==='sign-in'&&hermesSetup==='signing-in')hermesCode=typeof detail.code==='string'&&/^[A-Z0-9-]{4,20}$/.test(detail.code)?detail.code:null;
+  else return;
+  render();
+ };
+ window.addEventListener('worldlet:hermes-setup',onHermesSetup);
+ // Bringing the chosen Agent in: `shownTiles` paces the tiles on the right, one at a time; `chatter` turns the
+ // waiting tile's line while the host is still copying.
+ let bringing=false,porting=false,chatter=0,chatterTimer=0,shownTiles=0,revealTimer=0;
+ // Where the chosen card was, so its card can travel from there to the left (owner request 2026-10-09).
+ let flipFrom:DOMRect|null=null;
+ // Elements kept across renders, so a tile that already arrived is not drawn arriving again.
+ const kept=new Map<string,{sig:string,el:HTMLElement}>();
+ const keep=(key:string,sig:string,build:()=>HTMLElement)=>{const old=kept.get(key);if(old&&old.sig===sig)return old.el;const el=build();el.dataset.key=key;kept.set(key,{sig,el});return el;};
  // 'connecting' until the host says it opened Google consent: a reused grant opens no browser.
  let googleStage:string='connecting',googleUrl:string|undefined;
  const onGoogleStage=(event:Event)=>{const detail=(event as CustomEvent).detail,stage=googleSignInStage(detail);if(disposed||!signingIn||!stage)return;googleStage=stage;googleUrl=googleConsentUrl(detail);render();};
  window.addEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);
  // An install script launched Worldlet with `--connect=<id>` (core/agent/PORTABILITY.md#local-harnesses-chosen-at-setup):
- // on the first page that Agent is picked and connected as Continue would, and once it has come over the
- // bring page goes on by itself. Launched again while setup is open, the host says so and setup looks again.
- let autoContinue=false;
+ // that Agent is picked and brought in as the big button would. Launched again while setup is open, the host says so
+ // and setup looks again.
  const onConnectRequest=()=>{if(!disposed)void detectAgents();};
  window.addEventListener('worldlet:connect-agent',onConnectRequest);
  const languages=['en','zh','ja','es'];
  const systemLanguage=navigator.language.split('-')[0];
- const key='worldlet-startup-setup:'+state.workspaceId;
+ const key=(move?'worldlet-agent-move:':'worldlet-startup-setup:')+state.workspaceId;
  let draft:any={step:0,language:languages.includes(systemLanguage)?systemLanguage:'en',applets:['app-gmail','app-google-calendar','app-browser'],touched:[],consent:true};
  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&Array.isArray(saved.applets))draft={...draft,...saved};}catch{}
- // Resume from account facts (or the chosen local Agent), not old three-step draft indices.
- step=typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string'||['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)))?1:0;
+ // Resume from account facts (or the chosen local Agent), not old draft indices.
+ step=typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string'||!move&&['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)))?1:0;
  const selected=new Set<string>(draft.applets.filter(id=>WORLD_APPS.some(a=>a.id===id)));
- let detected=new Set<string>(),nativeIcons:Record<string,string>={};
+ let detected=new Set<string>(),nativeIcons:Record<string,string>={},detecting=true;
  const t=(text:string)=>setupText(text,draft.language);
  const touched=new Set<string>(draft.touched||[]);
  const loader=document.getElementById('worldStartup');
  const panel=node('section','','startup-setup');panel.setAttribute('aria-label','Set up your world');
- loader.insertBefore(panel,loader.querySelector('.startup-brand'));loader.classList.add('has-setup');loader.setAttribute('role','region');loader.setAttribute('aria-busy','false');
- // The brand signs the page alone, with no version beside it (owner feedback 2026-10-03).
+ // The brand signs the top of the page (owner request 2026-10-09); Fox waits for the World.
+ const brand=loader.querySelector('.startup-brand');
+ if(brand)brand.after(panel);else loader.append(panel);
+ loader.classList.add('has-setup');loader.setAttribute('role','region');loader.setAttribute('aria-busy','false');
+ // The World this Agent is about to get, painted softly behind the page.
+ const painting=(globalThis as any).__WORLDLET_25D_ASSETS__?.surroundings;
+ if(typeof painting==='string')loader.style.setProperty('--setup-world','url("'+painting.replace(/"/g,'%22')+'")');
  document.dispatchEvent(new Event('worldlet:setup-start'));
  window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_started'}));
  if(step===1)window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
  const persist=()=>localStorage.setItem(key,JSON.stringify({...draft,step,applets:[...selected],touched:[...touched]}));
- const connected=()=>['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)));
- // Google or a chosen local Agent opens the apps page.
+ // Moving to an Agent is about the Agent alone: a Google connection the World already has does not stand in for one.
+ const connected=()=>!move&&['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)));
+ // Google, a chosen local Agent, an API key or an Agent on another computer opens the second half of the page.
  const ready=()=>connected()||typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string';
  const agentText=(text:string,agent:string)=>t(text).replace('{agent}',agent);
- // Three pages, shown as three bars on top (owner request 2026-10-05): your agent, bringing it in, your
- // apps. A chosen Agent passes through the second page; Google goes straight to the apps.
  // Setup's product events (core/diagnostics/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
  const productEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
  const failureCode=(error:any)=>{try{return String(diagnosticError({message:typeof error?.message==='string'?error.message:''}).code);}catch{return 'operationFailed';}};
- const bringingPage=()=>step===1&&typeof draft.agent==='string'&&draft.apps!==true;
+ const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const importingAgent=()=>step===1&&typeof draft.agent==='string';
+ // The Agent's own name where it has one (OpenClaw's Nova), else its product name.
+ const agentName=(agent:{title:string,memory?:{name:string|null}})=>agent.memory?.name||agent.title;
+ const giveName=(id:string|null)=>{const found=agents.find(a=>a.id===id);return found?.memory?.name||AGENT_SHORT[id||'']||found?.title||id||'';};
  async function chooseAgent(id:string|null){
   const agent=agents.find(a=>a.id===id);
   if(!agent)return;
   connectingAgent=agent.id;render();
   const started=performance.now();
   try{
-   // The host proves the Agent answers before Fox uses it; a failure leaves Google sign-in here.
+   // The host proves the Agent answers before Fox uses it; a failure leaves the person on the first half.
    let chosen;
-   try{chosen=await call('agentHarness',{operation:'select',id:agent.id});}
+   try{chosen=await call('agentHarness',{operation:'select',id:agent.id,...move?{direct:true}:{}});}
    catch(e){productEvent('local_agent_select_failed',{local_agent:agent.id,error_code:failureCode(e)},timingBucket(performance.now()-started));throw e;}
    await call('foxPreferences',{cloudConsent:true});
-   // Back then Continue with the same Agent shows what already came over instead of reading it again
-   // (owner request 2026-10-06); another Agent starts over.
-   if(draft.broughtFrom!==agent.id||draft.brought?.failed){delete draft.brought;delete draft.integrations;delete draft.broughtFrom;}
-   else{facts=FACTS;shown=scanTotal();scanned=[];}
-   notice='';draft.agent=agent.id;draft.agentName=agentName(agent);draft.connected=chosen?.connected===true;delete draft.apps;draft.consent=true;step=1;error='';persist();
+   // Back then the same Agent again shows what already came over instead of reading it again (owner request
+   // 2026-10-06); another Agent starts over.
+   if(draft.broughtFrom!==agent.id||draft.brought?.failed){delete draft.brought;delete draft.integrations;delete draft.broughtFrom;shownTiles=0;}
+   else shownTiles=99;
+   flipFrom=panel.querySelector(`.setup-agent-card[data-agent="${CSS.escape(agent.id)}"]`)?.getBoundingClientRect()||null;
+   notice='';draft.agent=agent.id;draft.agentName=agentName(agent);draft.connected=chosen?.connected===true;draft.consent=true;step=1;error='';persist();
    // fox_brain: the built-in Hermes Agent on a model Fox has, or the chosen Agent answering on its own sign-in.
    productEvent('local_agent_selected',{local_agent:agent.id,fox_brain:chosen?.model?'built_in':'agent'},timingBucket(performance.now()-started));
    window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
   }finally{connectingAgent=null;}
  }
- // The Agent's own name where it has one (OpenClaw's Nova), else its product name.
- const agentName=(agent:{title:string,memory?:{name:string|null}})=>agent.memory?.name||agent.title;
  /** Copies the chosen Agent into Fox (`localAgent` `adopt`: name, memory, conversations, notes,
   * skills, routines), then ports the integrations it had (`agentIntegrations`). Bringing again
   * replaces what it brought last time, so a relaunch on this page simply runs it again. */
  async function bringIn(){
   const id=draft.agent;
   if(bringing||typeof id!=='string'||draft.brought)return;
-  bringing=true;facts=0;shown=0;chatter=0;scanned=[];draft.broughtFrom=id;render();
-  // While the host copies, the line turns every so often; Reduce Motion keeps the first one.
-  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)chatterTimer=window.setInterval(()=>{chatter++;if(!disposed&&!busy)render();},1100);
+  bringing=true;chatter=0;draft.broughtFrom=id;render();
+  // While the host copies, the waiting tile's line turns every so often; Reduce Motion keeps the first one.
+  if(!reduced())chatterTimer=window.setInterval(()=>{chatter++;if(!disposed&&!busy)render();},1100);
   const started=performance.now();
   try{
    const adopted=await call('localAgent',{operation:'adopt',id});
@@ -133,75 +158,73 @@ export function mountStartupSetup({state:initial,call,complete}){
    productEvent('agent_bring_failed',{local_agent:id,error_code:failureCode(e)},timingBucket(performance.now()-started));
    draft.brought={conversations:0,notes:0,skills:0,routines:0,list:[],model:false,modelName:'',name:null,kinds:[],memory:false,failed:true,summary:{}};
    notice=agentText('Fox couldn’t bring {agent}’s memory. You can tell Fox about yourself instead.',draft.agentName||id);
-  }finally{bringing=false;clearInterval(chatterTimer);}
-  // Porting starts before the reveal, so the scan reads on to the connections before it says the Agent moved in.
-  porting=true;persist();reveal();render();
+  }finally{bringing=false;}
+  porting=true;persist();render();
   try{const result=await call('agentIntegrations',{operation:'port',id});draft.integrations=Array.isArray(result?.integrations)?result.integrations.filter(item=>typeof item?.title==='string'&&typeof item?.outcome==='string').slice(0,20):[];}
   catch{draft.integrations=[];}
   finally{
-   porting=false;persist();if(!disposed&&!busy)render();
+   porting=false;clearInterval(chatterTimer);persist();if(!disposed&&!busy)render();
    // Counts and outcomes only, once the whole bring (history and integrations) is over.
    if(!draft.brought.failed)productEvent('agent_bring_completed',agentBringDimensions(id,draft.brought,draft.integrations),timingBucket(performance.now()-started));
   }
  }
- // The Agent's facts appear one by one, then its conversations; with reduced motion, all at once.
- const FACTS=4,SCAN=24;
- // The titles scroll past like a scan (owner request 2026-10-06), the first SCAN of them at a steady pace.
- const scanTotal=()=>Math.min(SCAN,draft.brought?.list?.length||0);
- const revealed=()=>facts>=FACTS&&shown>=scanTotal();
+ // The apps the World starts with: those found on this computer first, then the starters chosen for the person.
+ // Starter games arrive without being shown.
+ const worldApps=()=>WORLD_APPS.filter(a=>selected.has(a.id)&&a.region!=='health'&&appletSupport(a.key,hostFeatures(state)).supported).sort((a,b)=>Number(detected.has(b.key))-Number(detected.has(a.key)));
+ /** The tiles on the right, in the order they arrive (owner request 2026-10-09): the avatar, its profile,
+  * conversations, notes, skills and routines, the connections it had, then the apps. Only what actually came over
+  * gets a tile; the connections and apps wait until the bring is over, so arriving tiles only ever join the end. */
+ function tiles():string[]{
+  const list=['avatar'];
+  if(importingAgent()){
+   const brought=draft.brought;
+   if(!brought||brought.failed)return brought&&!porting?[...list,...connectionsTile(),...move?[]:['apps']]:list;
+   if(brought.name||brought.summary?.personality||brought.summary?.about)list.push('profile');
+   if(brought.conversations)list.push('conversations');
+   for(const kind of ['notes','skills','routines'])if(brought[kind])list.push(kind);
+   if(!porting)list.push(...connectionsTile(),...move?[]:['apps']);
+   return list;
+  }
+  // Google brings Mail and Calendar; an API key or an Agent on another computer brings only the World.
+  if(connected()&&typeof draft.remoteAgent!=='string'&&draft.ownModel!==true)list.push('connections');
+  return detecting||move?list:[...list,'apps'];
+ }
+ const connectionsTile=()=>(draft.integrations||[]).some(item=>item.outcome!=='stays')?['connections']:[];
+ const settled=()=>!importingAgent()||(!!draft.brought&&!bringing&&!porting&&shownTiles>=tiles().length);
+ // One tile at a time; with Reduce Motion, all at once.
  function reveal(){
   clearTimeout(revealTimer);
-  const total=scanTotal();
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){facts=FACTS;shown=total;if(!disposed&&!busy)render();return;}
-  const tick=()=>{
-   // Only the fact read just now fades in; every render rebuilds the page.
-   if(facts<FACTS){fresh=facts;facts++;}else{fresh=-1;shown=Math.min(total,shown+1);}
-   if(!disposed&&!busy)render();
-   if(!revealed()&&!disposed)revealTimer=window.setTimeout(tick,facts<FACTS?420:Math.max(110,Math.min(220,2800/Math.max(1,total))));
-  };
-  revealTimer=window.setTimeout(tick,300);
+  const total=tiles().length;
+  if(shownTiles>=total||reduced())return;
+  revealTimer=window.setTimeout(()=>{shownTiles++;if(!disposed&&!busy)render();},shownTiles===0?200:280);
  }
- /** The no-Agent block: what to install, Check again, or an API key for the Hermes Agent Worldlet sets up (standardHermes). */
- function noAgent(){
-  const box=node('div','','setup-agent-needed');
-  box.append(node('p',t('No agent found on this computer. Install Hermes Agent, OpenClaw, pi, Codex or Claude Code and check again, or use an API key and Worldlet sets up Hermes Agent with it.'),'setup-note'));
-  const links=node('div','','setup-agent-fallback');
-  const link=(label:string,fn:()=>void)=>{const b=node('button',t(label),'setup-link') as HTMLButtonElement;b.type='button';b.disabled=busy||savingKey;b.onclick=fn;links.append(b);return b;};
-  link('Check again',()=>{keyForm=false;void detectAgents();render();});
-  if(!keyForm)link('Use an API key',()=>{keyForm=true;error='';render();void loadKeyProviders();});
-  box.append(links);
-  if(keyForm){
-   const form=node('div','','setup-key-form');
-   const field=(label:string,input:HTMLInputElement|HTMLSelectElement)=>{const wrap=node('label',t(label),'setup-key-field');wrap.append(input);form.append(wrap);};
-   const select=document.createElement('select');select.setAttribute('aria-label',t('Provider'));select.disabled=savingKey;
-   for(const item of keyProviders){const option=document.createElement('option');option.value=item.id;option.textContent=item.name;option.selected=item.id===keyProvider;select.append(option);}
-   select.onchange=()=>{keyProvider=select.value;keyModel=keyProviders.find(p=>p.id===keyProvider)?.model||'';render();};
-   const model=document.createElement('input');model.value=keyModel;model.spellcheck=false;model.autocomplete='off';model.setAttribute('aria-label',t('Model ID'));model.disabled=savingKey;
-   model.oninput=()=>{keyModel=model.value;syncKey();};
-   const key=document.createElement('input');key.type='password';key.value=keySecret;key.autocomplete='off';key.spellcheck=false;key.setAttribute('aria-label',t('API key'));key.disabled=savingKey;
-   key.oninput=()=>{keySecret=key.value;syncKey();};
-   field('Provider',select);field('Model ID',model);field('API key',key);
-   box.append(form);
-   // The cloud agents' feedback line is hidden with them, so a failed connection says why here.
-   if(error){const feedback=node('p',t(error),'setup-error setup-key-error');feedback.setAttribute('role','alert');box.append(feedback);}
-  }
+ /** The no-Agent card's line: what Worldlet does, the installer's step while it runs, then the ChatGPT sign-in inside
+  * Hermes (with the code its device page asks for); Check again looks for an Agent installed meanwhile. */
+ function hermesPanel(){
+  const box=node('div','','setup-agent-needed');box.setAttribute('aria-live','polite');
+  const says={
+   idle:'No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',
+   installing:'Installing Hermes Agent…',
+   installed:'Hermes Agent is installed. Sign in to ChatGPT in it. To use another model, run hermes model in Terminal, then check again.',
+   'signing-in':'Continue in your browser.'
+  }[hermesSetup];
+  const line=node('p',hermesSetup==='installing'&&hermesStep?hermesStep:t(says),'setup-note');
+  if(hermesSetup==='signing-in'&&hermesCode){const code=node('span',' '+t('Enter this code: '),'setup-hermes-code');code.append(node('strong',hermesCode));line.append(code);}
+  box.append(line);
+  const link=(label:string,fn:()=>void)=>{const b=node('button',t(label),'setup-link') as HTMLButtonElement;b.type='button';b.onclick=fn;box.append(b);return b;};
+  if(hermesSetup==='signing-in')link('Cancel sign-in',()=>void call('agentHarness',{operation:'cancel-sign-in'}).catch(()=>{}));
+  else if(hermesSetup!=='installing')link('Check again',()=>{void detectAgents();render();}).disabled=busy;
   return box;
  }
- /** The link to an Agent on another computer, beside the local Agents' heading (the page never scrolls), and its code
-  * box, which takes the Agent tiles' and the cloud agents' room while it is open. */
- function remoteToggle(){
-  const toggle=node('button',t(remoteForm?'Use an agent on this computer':'My Agent is on another computer'),'setup-link setup-remote-toggle') as HTMLButtonElement;toggle.type='button';toggle.disabled=busy||pairingRemote;
-  toggle.onclick=()=>{remoteForm=!remoteForm;error='';render();};
-  return toggle;
- }
- function remoteAgent(){
-  const box=node('div','','setup-agent-remote');
+ function remotePanel(){
+  const box=node('div','','setup-form-panel setup-agent-remote');
   box.append(node('p',t('On that computer, open Worldlet, then Fox’s panel › Mobile › Pair another computer, and paste its code here.'),'setup-note'));
   const code=document.createElement('input');code.className='setup-remote-code';code.value=remoteCode;code.placeholder='worldlet://agent?…';code.spellcheck=false;code.autocomplete='off';code.setAttribute('aria-label',t('Code from your other computer'));code.disabled=pairingRemote;
   code.oninput=()=>{remoteCode=code.value;const next=document.querySelector('.startup-setup .setup-next') as HTMLButtonElement|null;if(next)next.disabled=!remoteCode.trim()||pairingRemote;};
   box.append(code);
-  // The cloud agents' feedback line is hidden with them, so a refused code says why here.
   if(error){const feedback=node('p',t(error),'setup-error setup-key-error');feedback.setAttribute('role','alert');box.append(feedback);}
+  const back=node('button',t('Use an agent on this computer'),'setup-link') as HTMLButtonElement;back.type='button';back.disabled=pairingRemote;back.onclick=()=>{remoteForm=false;error='';render();};
+  box.append(back);
   return box;
  }
  async function pairRemote(){
@@ -209,36 +232,25 @@ export function mountStartupSetup({state:initial,call,complete}){
   try{
    const result=await call('agentHarness',{operation:'pair',link:remoteCode.trim()});
    await call('foxPreferences',{cloudConsent:true});
-   remoteForm=false;remoteCode='';draft.remoteAgent=String(result?.remote?.computer||'');draft.consent=true;delete draft.agent;notice='';step=1;persist();
+   remoteForm=false;remoteCode='';draft.remoteAgent=String(result?.remote?.computer||'');draft.consent=true;delete draft.agent;notice='';step=1;shownTiles=0;persist();
    window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
   }finally{pairingRemote=false;}
  }
- // Typing enables Connect without rebuilding the page (which would move the caret).
- function syncKey(){const next=document.querySelector('.startup-setup .setup-next') as HTMLButtonElement|null;if(next&&keyForm)next.disabled=!keyProvider||!keyModel.trim()||!keySecret.trim()||savingKey;}
- async function loadKeyProviders(){
-  if(keyProviders.length)return;
-  // API-key providers the built-in Agent connects here; sign-in providers (ChatGPT) and custom endpoints stay in Settings.
-  const order=['anthropic','openai-api','openai','openrouter','gemini'];
-  try{
-   const {providers=[]}=await call('modelCatalog');
-   keyProviders=providers.filter(p=>p?.nativeSetup&&!p.keyless&&!p.local&&p.id!=='custom'&&p.provider!=='openai-codex'&&typeof p.name==='string')
-    .sort((a,b)=>((order.indexOf(a.id)+1||99)-(order.indexOf(b.id)+1||99))||a.name.localeCompare(b.name,'en'));
-   keyProvider=keyProviders[0]?.id||'';keyModel=keyProviders[0]?.model||'';
-  }catch(e){error=e?.message||'That didn’t finish. Please try again.';}
-  if(!disposed&&!busy)render();
+ /** Installs Hermes Agent the official way (to its default location; nothing when one is already here). */
+ async function installHermes(){
+  hermesSetup='installing';hermesStep='';render();
+  try{await call('agentHarness',{operation:'install-hermes'});hermesSetup='installed';}
+  catch(e){hermesSetup='idle';throw e;}
  }
- async function connectKey(){
-  const provider=keyProviders.find(p=>p.id===keyProvider);
-  if(!provider)return;
-  savingKey=true;render();
-  const request={provider:provider.provider,baseURL:provider.baseURL,model:keyModel.trim(),apiKey:keySecret.trim()};
-  keySecret='';
-  try{
-   const pending=call('modelConfigure',request);request.apiKey='';await pending;
-   await call('foxPreferences',{cloudConsent:true});
-   keyForm=false;draft.ownModel=true;draft.consent=true;notice='';step=1;persist();
-   window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
-  }finally{savingKey=false;request.apiKey='';}
+ /** ChatGPT signed in inside Hermes Agent, then Hermes moves in like any Agent found here. */
+ async function signInHermes(){
+  hermesSetup='signing-in';hermesCode=null;render();
+  try{await call('agentHarness',{operation:'sign-in-hermes'});}
+  catch(e){hermesSetup='installed';throw e;}
+  hermesSetup='idle';
+  await detectAgents();
+  picked='hermes';
+  await chooseAgent('hermes');
  }
  const button=(label,fn,primary=false)=>{const b=node('button',t(label),primary?'setup-primary':'') as HTMLButtonElement;b.type='button';b.disabled=busy;b.onclick=()=>void run(fn);return b;};
  async function run(fn){if(busy)return;busy=true;error='';render();try{await fn();}catch(e){error=/cancel/i.test(e.message||'')?'Your request was cancelled.':e.message||'That didn’t finish. Please try again.';}finally{busy=false;if(!disposed)render();}}
@@ -248,7 +260,7 @@ export function mountStartupSetup({state:initial,call,complete}){
   if(!connected()||!draft.consent||!hostFeatures(state).backgroundSourceChecks)return Promise.resolve();
   sourcePreparation=(async()=>{
    await call('foxPreferences',{cloudConsent:true});
-   // Native store owns the task and streams findings while this gallery stays usable.
+   // Native store owns the task and streams findings while setup stays usable.
    await call('onboarding',{operation:'checkMail'});
   })().catch(()=>{sourcePreparation=null;});
   return sourcePreparation;
@@ -258,12 +270,20 @@ export function mountStartupSetup({state:initial,call,complete}){
  function advanceAfterGoogle(){
   if(step!==0||!connected())return false;
   draft.consent=true;selected.add('app-gmail');selected.add('app-google-calendar');
-  step=1;error='';notice='';persist();void prepareGoogleSources();
+  step=1;error='';notice='';shownTiles=0;persist();void prepareGoogleSources();
   window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
   return true;
  }
  async function finish(){
   if(!ready())throw Error('Connect Google to enter your world.');
+  if(move){
+   const snapshot=await call('snapshot');
+   localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);
+   loader.classList.add('setup-entering');
+   document.dispatchEvent(new Event('worldlet:setup-complete'));
+   await complete(snapshot);
+   return;
+  }
   // Preserve existing personality when setting an explicit response language.
   if(draft.language!=='auto'){
    const info=await call('foxPreferences');
@@ -278,21 +298,21 @@ export function mountStartupSetup({state:initial,call,complete}){
   await call('onboarding',{operation:'setup',applets:[...selected]});
   const snapshot=await call('snapshot');
   const gathering=node('div','','setup-gathering');loader.append(gathering);
-  // Every chosen app gathers: a shown tile flies from its place, the starters not shown come in from the middle.
+  // Every chosen app gathers: an icon shown in the Apps tile flies from its place, the rest come in from the middle.
+  const shelf=panel.querySelector('.setup-tile-apps');
   const iconsToGather=WORLD_APPS.filter(a=>selected.has(a.id)).map(app=>{
    const shown=panel.querySelector<HTMLImageElement>('.setup-app[data-applet-id="'+CSS.escape(app.id)+'"] .setup-app-logo');
    const img=shown||image(appIcon(app),'setup-app-logo');img.dataset.appletId=app.id;return img;
   });
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // Bringing an Agent in shows no gallery; its apps arrive without flying from tiles.
-  const gallery=(panel.querySelector('.setup-gallery')||panel).getBoundingClientRect();
+  const still=reduced();
+  const tile=(shelf||panel).getBoundingClientRect();
   const flights=iconsToGather.map((img,i)=>{
    const r=img.getBoundingClientRect(),copy=img.cloneNode() as HTMLImageElement;gathering.append(copy);
-   const visible=img.isConnected&&r.top>=gallery.top&&r.bottom<=gallery.bottom;
+   const visible=img.isConnected&&r.width>0&&r.top>=tile.top&&r.bottom<=tile.bottom;
    const x=visible?r.left+r.width/2:innerWidth/2,y=visible?r.top+r.height/2:innerHeight*.5;
    const columns=Math.min(6,iconsToGather.length),rows=Math.ceil(iconsToGather.length/columns),spacing=Math.min(140,(innerWidth-80)/columns,(innerHeight-140)/rows);
    const targetX=innerWidth*.5+((i%columns)-(columns-1)/2)*spacing,targetY=innerHeight*.45+(Math.floor(i/columns)-(rows-1)/2)*spacing;
-   return copy.animate([{left:x+'px',top:y+'px',opacity:visible?1:0,transform:'translate(-50%,-50%) scale(1)'},{left:targetX+'px',top:targetY+'px',opacity:1,transform:'translate(-50%,-50%) scale(.85)'}],{duration:reduced?0:650,easing:'cubic-bezier(.22,.7,.2,1)',fill:'forwards'}).finished;
+   return copy.animate([{left:x+'px',top:y+'px',opacity:visible?1:0,transform:'translate(-50%,-50%) scale(1)'},{left:targetX+'px',top:targetY+'px',opacity:1,transform:'translate(-50%,-50%) scale(.85)'}],{duration:still?0:650,easing:'cubic-bezier(.22,.7,.2,1)',fill:'forwards'}).finished;
   });
   loader.classList.add('is-gathering');await Promise.all(flights);
   // Let the user see each familiar flat icon become its actual device before opening.
@@ -305,280 +325,315 @@ export function mountStartupSetup({state:initial,call,complete}){
    try{await device.decode();}catch{return;}
    const size=APPLET_OVERVIEW_WIDTH*(APPLET_OPTICAL_SCALE[app.key]??1)*Math.max(innerWidth/WORLD_WIDTH,innerHeight/WORLD_HEIGHT);
    const r=logo.getBoundingClientRect();Object.assign(device.style,{left:(r.left+r.width/2)+'px',top:(r.top+r.height/2)+'px',width:size+'px',height:size+'px',transform:'translate(-50%,-50%)',opacity:'0'});gathering.append(device);
-   const duration=reduced?0:650,delay=reduced?0:i*140;
+   const duration=still?0:650,delay=still?0:i*140;
    await Promise.all([
     logo.animate([{opacity:1,filter:'brightness(1)'},{opacity:.6,filter:'brightness(2)',offset:.35},{opacity:0,filter:'brightness(1)'}],{duration,delay,fill:'forwards'}).finished,
     device.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.45)',filter:'brightness(2) drop-shadow(0 0 12px #ffe4a0)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.7},{opacity:1,transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1) drop-shadow(0 3px 5px #35453025)'}],{duration,delay,fill:'forwards'}).finished
    ]);logo.remove();
   }));
   gathering.id='setupArrivingDevices';document.body.append(gathering);
-  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('resize',refit);
+  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);
   // Keep the final setup surface until the first world frame is ready.
   loader.classList.add('setup-entering');
   document.dispatchEvent(new Event('worldlet:setup-complete'));
   const icons=Object.fromEntries(WORLD_APPS.filter(a=>selected.has(a.id)).map(a=>[a.id,nativeIcons[a.key]||appLogoSource(a)||coreAppletSource(CORE_APPLET_KINDS[a.key]||'calendar')]));
   await complete(snapshot,icons);
   // Native scheduler owns ongoing Mail/Calendar checks. Do not wait for inference.
-
  }
- const supportedApps=()=>WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported);
- function appTile(app){
-  const label=node('label','','setup-app'),check=document.createElement('input');check.type='checkbox';check.checked=selected.has(app.id);check.disabled=busy;
-  const name=t(app.title),say=()=>check.setAttribute('aria-label',(check.checked?t('Remove {app}'):t('Add {app}')).replace('{app}',name));say();
-  check.onchange=()=>{touched.add(app.id);if(check.checked)selected.add(app.id);else selected.delete(app.id);say();persist();};
-  const src=appIcon(app);
-  // What the app is for, as its tooltip (demo feedback 2026-10-03).
-  const purpose=app.purpose?t(app.purpose):'';if(purpose)label.dataset.purpose=purpose;
-  label.dataset.appletId=app.id;label.title=purpose?name+' — '+purpose:name;
-  const tile=node('span','','setup-icon-tile');tile.classList.toggle('is-native',!!nativeIcons[app.key]||app.key==='x');tile.append(image(src,'setup-app-logo'),node('span','','setup-app-badge'));
-  label.append(check,tile,node('strong',name));return label;
- }
+ // An integration's mark: its Applet's icon when Worldlet has that app, else its brand logo, else none (its name shows).
+ const logoOf=(provider:unknown)=>{if(typeof provider!=='string')return '';const app=WORLD_APPS.find(a=>a.key===provider);return app?appIcon(app):appLogoSource({key:provider})||'';};
  function appIcon(app){return nativeIcons[app.key]||(app.key==='x'?xAppIcon:appLogoSource(app))||coreAppletSource(CORE_APPLET_KINDS[app.key]||'calendar');}
  function image(src:string,cls=''){const img=document.createElement('img');img.src=src;img.alt='';img.className=cls;return img;}
- // The line page 2 flashes while it brings the Agent in (owner request 2026-10-06), in place of a list.
+ const count=(text:string,n:number)=>t(text).replace('{count}',String(n));
+ // The waiting tile's line while the host still copies (owner request 2026-10-06: what is happening, in a few words).
  function bringLine(name:string){
-  const brought=draft.brought,list:{title:string,messages:number}[]=brought?.list||[];
-  if(!brought){
-   const lines=['Reading {agent}’s memory…','Packing up {agent}’s conversations…','Folding in {agent}’s notes…','Teaching Fox {agent}’s skills…'];
-   return agentText(lines[chatter%lines.length],name);
-  }
-  if(brought.failed)return '';
-  if(facts<FACTS)return agentText('Reading {agent}’s memory…',name);
-  if(shown<scanTotal())return '“'+list[shown].title+'”';
   if(porting)return t('Checking its connections…');
-  return agentText('{agent} moved in.',name);
+  const lines=['Reading {agent}’s memory…','Packing up {agent}’s conversations…','Folding in {agent}’s notes…','Teaching Fox {agent}’s skills…'];
+  return agentText(lines[chatter%lines.length],name);
  }
- 
- const DENSITY=['is-dense','is-denser','is-densest'];
- function fitApps(content:HTMLElement){
-  const gallery=content.querySelector<HTMLElement>('.setup-gallery');if(!gallery)return;
-  const fits=()=>content.scrollHeight<=content.clientHeight+1;
-  gallery.classList.remove(...DENSITY);
-  for(const level of DENSITY){if(fits())return;gallery.classList.add(level);}
+ /** The chosen Agent on the left: its mark, its own name, where it comes from and its model. */
+ function passport(){
+  const agentId=draft.agent as string,brought=draft.brought,found=agents.find(a=>a.id===agentId);
+  let icon='',name='',from='',rows:[string,string][]=[];
+  if(importingAgent()){
+   const product=found?.title||LOCAL_HARNESSES.find(h=>h.id===agentId)?.title||agentId,summary=brought?.summary||{};
+   icon=AGENT_ICONS[agentId]||'';name=brought?.name||draft.agentName||product;from=name!==product?product:'';
+   const model=!brought?'':brought.model?(brought.modelName||summary.model||t('Its own')):summary.model&&(agentId==='codex'||brought.energy==='chatgpt')?summary.model+' · '+t('Your ChatGPT plan'):agentId==='codex'||brought.energy==='chatgpt'?t('Your ChatGPT plan'):brought.energy==='none'?t('Choose one in Settings'):summary.model||t('Its own sign-in');
+   if(model)rows.push(['Model',model]);
+   if(found?.worldTools===false)rows.push(['World tools',t('Chat only')]);
+  }else if(draft.ownModel===true){
+   icon=AGENT_ICONS.hermes;name='Hermes Agent';from=t('Set up by Worldlet');
+   if(draft.ownModelName)rows.push(['Model',[draft.ownModelName,draft.ownProvider].filter(Boolean).join(' · ')]);
+  }else if(typeof draft.remoteAgent==='string'){
+   icon='brand/worldlet-mark.svg';name=t('Your agent');from=draft.remoteAgent?agentText('On {agent}',draft.remoteAgent):t('On your other computer');
+  }else{
+   icon='brands/google.png';name='Google';from=t('Your Google account');
+  }
+  return keep('passport',JSON.stringify([icon,name,from,rows,draft.language]),()=>{
+   const card=node('section','','setup-passport');card.setAttribute('aria-label',name);
+   const mark=node('div','','setup-passport-mark');mark.append(image(icon,'setup-passport-icon'));
+   card.append(mark,node('h2',name,'setup-passport-name'));
+   if(from)card.append(node('p',from,'setup-passport-from'));
+   if(rows.length){const facts=node('dl','','setup-passport-facts');for(const [label,value] of rows){const row=node('div','','setup-agent-fact');row.append(node('dt',t(label)),node('dd',value));row.title=value;facts.append(row);}card.append(facts);}
+   return card;
+  });
  }
- const refit=()=>{const content=panel.querySelector<HTMLElement>('.setup-content');if(!disposed&&content)fitApps(content);};
- window.addEventListener('resize',refit);
+ /** One tile on the right. */
+ function tile(kind:string,fresh:boolean){
+  const brought=draft.brought||{},summary=brought.summary||{};
+  const build=(title:string,cls:string,fill:(el:HTMLElement)=>void)=>()=>{
+   const el=node('article','','setup-tile setup-tile-'+kind+' '+cls);if(fresh&&!reduced())el.classList.add('is-arriving');
+   el.append(node('h3',t(title),'setup-tile-title'));fill(el);
+   const done=node('span','','setup-tile-done');done.setAttribute('aria-hidden','true');el.append(done);
+   return el;
+  };
+  const big=(n:number,label:string)=>(el:HTMLElement)=>{el.append(node('strong',String(n),'setup-tile-count'),node('p',t(label),'setup-tile-note'));};
+  if(kind==='avatar')return keep('tile:avatar',draft.language,build('Avatar','is-tall',el=>{el.append(node('p',t('Fox, by default'),'setup-tile-note'));const fox=image('assets/fox-startup.png','setup-tile-fox');el.append(fox);}));
+  if(kind==='profile'){
+   const sig=JSON.stringify([brought.name,summary.personality,summary.about,draft.language]);
+   return keep('tile:profile',sig,build('Profile','is-wide',el=>{
+    if(summary.personality)el.append(node('q',summary.personality,'setup-tile-quote'));
+    else if(brought.name)el.append(node('p',brought.name,'setup-tile-lead'));
+    if(summary.about)el.append(node('p',t('Knows: ')+summary.about,'setup-tile-note'));
+   }));
+  }
+  if(kind==='conversations'){
+   const titles=(brought.list||[]).slice(0,4).map(item=>item.title);
+   return keep('tile:conversations',JSON.stringify([brought.conversations,titles,draft.language]),build('Conversations','is-big',el=>{
+    el.append(node('strong',String(brought.conversations),'setup-tile-count'));
+    const list=node('ul','','setup-tile-titles');for(const title of titles)list.append(node('li',title));el.append(list);
+   }));
+  }
+  if(kind==='notes')return keep('tile:notes',String(brought.notes)+draft.language,build('Notes','',big(brought.notes,'notes')));
+  if(kind==='skills')return keep('tile:skills',String(brought.skills)+draft.language,build('Skills','',big(brought.skills,'skills it learned')));
+  if(kind==='routines')return keep('tile:routines',String(brought.routines)+draft.language,build('Routines','',big(brought.routines,'run on their own')));
+  if(kind==='connections'){
+   const items:{title:string,logo:string,again:boolean}[]=importingAgent()
+    ?(draft.integrations||[]).filter(item=>item.outcome!=='stays').map(item=>({title:item.title,logo:item.provider==='google'?'brands/google.png':logoOf(item.provider),again:item.outcome==='reconnect'}))
+    :[{title:'Gmail',logo:logoOf('gmail'),again:false},{title:'Google Calendar',logo:logoOf('google-calendar'),again:false}];
+   return keep('tile:connections',JSON.stringify([items,draft.language]),build('Connections','is-wide',el=>{
+    const row=node('div','','setup-tile-logos');
+    for(const item of items){const mark=item.logo?image(item.logo,'setup-tile-logo'):node('span',item.title,'setup-tile-chip');mark.title=item.title+(item.again?' · '+t('Sign in again after setup'):'');row.append(mark);}
+    el.append(row);
+    const again=items.filter(item=>item.again).length;
+    el.append(node('p',again?count('{count} to sign in again after setup',again):items.map(item=>item.title).join(' · '),'setup-tile-note'));
+   }));
+  }
+  // The apps: the ones found here, then the starters; their icons fly into the World on Enter your world.
+  const apps=worldApps(),found=apps.filter(a=>detected.has(a.key)).length,limit=14;
+  return keep('tile:apps',JSON.stringify([apps.map(a=>a.id),found,Object.keys(nativeIcons).length,draft.language]),build('Apps','is-wide setup-tile-apps',el=>{
+   const row=node('div','','setup-tile-logos');
+   for(const app of apps.slice(0,limit)){const item=node('span','','setup-app');item.dataset.appletId=app.id;item.title=t(app.title);item.append(image(appIcon(app),'setup-app-logo'));row.append(item);}
+   el.append(row,node('p',[count('{count} apps',apps.length),found?count('{count} found on this computer',found):''].filter(Boolean).join(' · '),'setup-tile-note'));
+  }));
+ }
+ /** The Agents found here as cards, picked one first-class (owner request 2026-10-09). */
+ function agentCards(){
+  const cards=node('div','','setup-agent-cards');cards.setAttribute('role','group');cards.setAttribute('aria-label',t('Your agents'));
+  const rank=(id:string)=>AGENT_PRIORITY.indexOf(id);
+  for(const found of [...agents].sort((x,y)=>rank(x.id)-rank(y.id))){
+   const harness=LOCAL_HARNESSES.find(h=>h.id===found.id),title=found.title||harness?.title||found.id,connecting=connectingAgent===found.id,chosen=found.id===picked;
+   const card=node('button','','setup-agent-card setup-agent-button') as HTMLButtonElement;card.type='button';card.dataset.agent=found.id;
+   card.disabled=busy||signingIn||!!connectingAgent;card.setAttribute('aria-pressed',String(chosen));card.setAttribute('aria-label',title);
+   card.onclick=()=>{picked=found.id;error='';render();};
+   card.classList.toggle('setup-agent-default',chosen);card.classList.toggle('is-connecting',connecting);
+   card.append(image(AGENT_ICONS[found.id]||'','setup-agent-icon'),node('strong',agentName(found),'setup-agent-name'));
+   // Where it comes from when it has its own name, else what it runs on.
+   const sub=found.memory?.name?title:found.id==='codex'?t(found.model===false?'Sign in to Codex first':'Your ChatGPT plan'):t(found.memory?'Its memory comes along':'On this computer');
+   card.append(node('small',connecting?agentText('Connecting to {agent}…',title):sub,'setup-agent-sub'));
+   const history=found.memory?.history,chips=node('span','','setup-agent-chips');
+   for(const [n,label] of [[history?.conversations,'{count} conversations'],[history?.notes,'{count} notes'],[history?.skills,'{count} skills'],[history?.jobs,'{count} routines']] as [number|undefined,string][])if(n)chips.append(node('span',count(label,n),'setup-agent-chip'));
+   if(chips.childElementCount)card.append(chips);
+   if(found.worldTools===false){card.append(node('span',t('Chat only'),'setup-signin-tag'));card.title=agentText('With {agent}, Fox can talk with you but can’t act in your world yet.',title);}
+   cards.append(card);
+  }
+  return cards;
+ }
+ /** Everything else, folded (owner request 2026-10-09): the Agents not on this computer, Google and ChatGPT (both
+  * coming soon), an Agent on another computer, and an API key for the Hermes Agent Worldlet sets up. */
+ function moreOptions(){
+  const wrap=node('div','','setup-more-wrap');wrap.classList.toggle('is-open',more);
+  // Codex alone is no Agent for Fox (owner decision 2026-10-09), so it is not offered.
+  const missing=LOCAL_HARNESSES.filter(h=>h.id!=='codex'&&!agents.some(a=>a.id===h.id)&&(agents.length>0||detectingAgents||h.id!=='hermes')).sort((x,y)=>AGENT_PRIORITY.indexOf(x.id)-AGENT_PRIORITY.indexOf(y.id));
+  const toggle=node('button','','setup-more-toggle') as HTMLButtonElement;toggle.type='button';toggle.setAttribute('aria-expanded',String(more));toggle.setAttribute('aria-controls','setupMore');
+  toggle.append(node('span','','setup-more-chevron'),node('span',t('More options'),'setup-more-label'));
+  const peek=node('span','','setup-more-peek');peek.setAttribute('aria-hidden','true');
+  for(const src of [...missing.map(h=>AGENT_ICONS[h.id]),'brands/google.png',appLogoSource({key:'chatgpt'})||''].filter(Boolean).slice(0,6))peek.append(image(src));
+  toggle.append(peek);
+  toggle.onclick=()=>{more=!more;render();};
+  wrap.append(toggle);
+  const grid=node('div','','setup-more');grid.id='setupMore';grid.hidden=!more;
+  const option=(label:string,icon:string,cls:string,tag='',sub='')=>{
+   const b=node('button','','setup-more-option '+cls) as HTMLButtonElement;b.type='button';b.disabled=true;
+   if(icon)b.append(image(icon,'setup-signin-icon'));
+   const text=node('span','','setup-more-text');text.append(node('strong',label));if(sub)text.append(node('small',sub));b.append(text);
+   if(tag)b.append(node('span',t(tag),'setup-signin-tag'));
+   grid.append(b);return b;
+  };
+  for(const harness of missing){
+   const b=option(harness.title,AGENT_ICONS[harness.id],'setup-agent-button is-missing','',detectingAgents?'':t('Not on this computer'));
+   b.dataset.agent=harness.id;b.setAttribute('aria-label',harness.title);if(!detectingAgents)b.title=agentText('{agent} isn’t installed on this computer.',harness.title);
+  }
+  // Cloud agents are coming soon (owner request 2026-10-05): Google, then ChatGPT. Google is greyed for everyone, since a
+  // Google sign-in brings no model (only the development build's mock rehearses it).
+  const go=option(signingIn?({connecting:'Connecting to Google…',browser:'Waiting for Google…'}[googleStage]||'Finishing setup…'):t('Continue with Google'),'brands/google.png','setup-google-button',signingIn?'':'Coming soon');go.classList.toggle('is-connecting',signingIn);
+  option(t('Continue with ChatGPT'),appLogoSource({key:'chatgpt'})||'','setup-chatgpt-button','Coming soon');
+  const remote=option(t('My Agent is on another computer'),'','setup-remote-toggle');remote.disabled=busy||pairingRemote||signingIn;remote.prepend(node('span','⇄','setup-more-glyph'));
+  remote.onclick=()=>{remoteForm=true;error='';render();};
+  wrap.append(grid);
+  // Development builds only: rehearse onboarding with a fictional Google account.
+  if(state.mockGoogleAvailable===true){
+   const mock=button('Use mock Google (Dev)',()=>signIn(true));mock.className='setup-link setup-mock-google';mock.hidden=!more;
+   if(signingIn){mock.disabled=true;mock.style.visibility='hidden';mock.setAttribute('aria-hidden','true');}
+   wrap.append(mock);
+  }
+  const help=node('p','','setup-google-help');help.hidden=!signingIn;
+  // Browser steps only while consent is actually open.
+  if(signingIn&&googleStage==='browser'){help.append(document.createTextNode(t('Continue in your browser.')));help.append(document.createElement('br'));help.append(document.createTextNode(t('If prompted: ')));help.append(node('strong','Advanced → Go to Worldlet (unsafe)'));}
+  else if(signingIn&&googleStage!=='connecting')help.textContent=t(googleStage==='preparing'?'Google authorized. Preparing Fox in the background…':'Checking Mail and Calendar access…');
+  wrap.append(help);
+  if(signingIn){
+   const slot=node('div','','setup-cancel-slot');slot.setAttribute('aria-live','polite');
+   // The browser never came up (owner meetings 2026-10-02/03): open the same consent page again, or copy it.
+   if(googleStage==='browser'&&googleUrl){
+    const fallback=googleConsentActions(googleUrl,call),link=(label:string,fn:(b:HTMLButtonElement)=>void)=>{const b=node('button',t(label),'setup-link setup-consent') as HTMLButtonElement;b.type='button';b.onclick=()=>fn(b);slot.append(b);};
+    link('Open again',()=>void fallback.open().catch(()=>{}));
+    link('Copy link',b=>void fallback.copy().then(()=>{b.textContent=t('Link copied');},()=>{}));
+   }
+   const cancel=node('button',t('Cancel sign-in'),'setup-link setup-cancel') as HTMLButtonElement;cancel.type='button';cancel.onclick=()=>void call('connectCancel').catch(()=>{});slot.append(cancel);
+   wrap.append(slot);
+  }
+  return wrap;
+ }
+ async function signIn(mock=false){
+  signingIn=true;googleStage=mock?'preparing':googleSignInStart(state);googleUrl=undefined;notice='';render();
+  try{
+   let failure:unknown;
+   try{await call('connect',{provider:'google',region:'home',...mock?{mock:true}:{}});}catch(e){failure=e;}
+   // A post-authorization reply can fail after both grants were saved.
+   // Never ask for consent again when the host already confirms the grants.
+   try{state=await call('snapshot');}catch(e){if(!connected())throw failure||e;}
+   if(!connected())throw failure||Error('Sign-in wasn’t completed. Please try again.');
+   advanceAfterGoogle();
+  }finally{signingIn=false;}
+ }
  function render(){
-  if(disposed)return;panel.replaceChildren();loader.dataset.setupStep=String(step);
-  // Bringing the chosen Agent in (owner request 2026-10-04) comes before choosing apps; Google skips it.
-  const arriving=bringingPage();
-  panel.classList.toggle('is-bringing',arriving);
-  // Three bars on top say where setup is (owner request 2026-10-05): done, current, still to come; only
-  // the bars, no words under them (owner request 2026-10-06).
-  loader.querySelector('.setup-steps')?.remove();
-  const page=step===0?0:arriving?1:2,steps=node('ol','','setup-steps');
-  steps.setAttribute('aria-label',t('Step {step} of 3').replace('{step}',String(page+1)));
-  for(let i=0;i<3;i++){const item=node('li','','setup-step '+(i<page?'is-done':i===page?'is-current':'is-next'));if(i===page)item.setAttribute('aria-current','step');item.append(node('span','','setup-step-bar'));steps.append(item);}
-  loader.prepend(steps);
-  // Every page has the same frame (owner request 2026-10-06): a heading and one line under it at the
-  // same place, the page's own part below, and one big button of one size at the bottom with a small Back.
-  const agentId=draft.agent as string,found=agents.find(a=>a.id===agentId);
-  const product=found?.title||LOCAL_HARNESSES.find(h=>h.id===agentId)?.title||agentId;
-  const shownApps=supportedApps().filter(a=>detected.has(a.key));
-  // Page 2 names the Agent by its own name (owner request 2026-10-06: "Bring your Elon") and says only that
-  // everything comes along.
-  const settled=!!draft.brought&&revealed()&&!porting;
-  panel.append(node('h1',step===0?t('Give your agent a World'):arriving?agentText('Bring your {agent}',draft.brought?.name||draft.agentName||agentId):t('Bring your apps into your World')));
-  panel.append(node('p',step===0?t('Bring the agent you have'):arriving?t(settled?'Everything came over':'Bringing everything over'):detecting?t('Finding apps on this Mac…'):t('Click one to leave it out.'),'setup-lede'));
-  const content=node('div','','setup-content');panel.append(content);
-  const nav=node('footer','','setup-footer');
+  if(disposed)return;
+  const importing=step===1,arriving=importingAgent();
+  // With Reduce Motion, every tile that is ready shows at once.
+  if(importing&&reduced())shownTiles=Math.max(shownTiles,tiles().length);
+  loader.dataset.setupStep=String(step);
+  panel.classList.toggle('is-bringing',arriving&&!settled());
+  panel.classList.toggle('is-importing',importing);
+  const footer=node('footer','','setup-footer');
   const status=node('div','','setup-status-slot');status.setAttribute('aria-live','polite');
   let primary:HTMLButtonElement,back:(()=>void)|null=null;
-  if(arriving){
-   const brought=draft.brought;
-   // The Agent's card reads it while the person watches: its name, personality, what it knows about
-   // them and its model each resolve in turn; until then they read as being read.
-   const card=node('section','','setup-agent-card');card.classList.toggle('is-reading',!brought||!revealed());
-   // Every render rebuilds the card; a negative delay keeps the sweep and shimmer running on one clock.
-   const phase=(period:number)=>-(performance.now()%period)+'ms';
-   const scan=node('span','','setup-agent-scan');scan.style.animationDelay=phase(1600);
-   const portrait=node('div','','setup-agent-portrait');portrait.append(image(AGENT_ICONS[agentId]||'','setup-bring-icon'),scan);
-   const kinds:string[]=brought?.kinds||[],known=(kind:string)=>kinds.includes(kind);
-   const sheet=node('dl','','setup-agent-facts');
-   // Each fact says in a few words what came over (owner request 2026-10-06), read from the Agent's own files.
-   const summary=brought?.summary||{};
-   const values:[string,string][]=[
-    ['Name',brought?.name||draft.agentName||product],
-    ['Personality',summary.personality||(known('soul')?t('Its own'):t('Fox’s own'))],
-    ['About you',summary.about||(known('user')||known('longTerm')?t('What it knew'):t('Nothing yet'))],
-    ['Model',brought?.model?(brought.modelName||summary.model||t('Its own')):summary.model&&(agentId==='codex'||brought?.energy==='chatgpt')?summary.model+' · '+t('Your ChatGPT plan'):agentId==='codex'||brought?.energy==='chatgpt'?t('Your ChatGPT plan'):brought?.energy==='none'?t('Choose one in Settings'):summary.model||t('Its own sign-in')]
-   ];
-   values.forEach(([label,value],i)=>{
-    const row=node('div','','setup-agent-fact');row.append(node('dt',t(label)));
-    const ready=!!brought&&i<facts;row.classList.toggle('is-read',ready);row.classList.toggle('is-fresh',ready&&i===fresh);
-    const dd=ready?node('dd',value):node('dd',t('reading…'),'setup-fact-reading');if(ready)dd.title=value;if(!ready)dd.style.animationDelay=phase(1200);
-    row.append(dd);sheet.append(row);
-   });
-   const about=node('div','','setup-agent-about');about.append(sheet);
-   card.append(portrait,about);content.append(card);
-   // What is happening scrolls upward like a scan (owner request 2026-10-06: no flashing), then says it moved in.
-   const line=bringLine(draft.brought?.name||draft.agentName||agentId),done=settled;
-   const moved=!!line&&line!==scanned[scanned.length-1];
-   if(moved)scanned=[...scanned,line].slice(-4);
-   const ticker=node('div','','setup-bring-ticker');ticker.classList.toggle('is-done',done);ticker.classList.toggle('is-empty',!line);
-   const roll=node('div','','setup-bring-roll');roll.setAttribute('aria-hidden','true');if(moved&&scanned.length>1)roll.classList.add('is-rolling');
-   scanned.forEach((text,i)=>roll.append(node('span',text,'setup-bring-line'+(i===scanned.length-1?' is-now':''))));
-   // Screen readers hear the current line only.
-   const spoken=node('span',line,'setup-visually-hidden');spoken.setAttribute('aria-live','polite');
-   ticker.append(roll,spoken);content.append(ticker);
-   primary=button('Continue',async()=>{clearTimeout(revealTimer);draft.apps=true;persist();},true);if(!brought||!revealed())primary.disabled=true;
-   // Back keeps what came over, so coming back to the same Agent does not read it again.
-   if(settled&&autoContinue){autoContinue=false;queueMicrotask(()=>{if(!disposed&&bringingPage())void run(async()=>{clearTimeout(revealTimer);draft.apps=true;persist();});});}
-   if(!bringing)back=()=>{autoContinue=false;clearTimeout(revealTimer);delete draft.agent;delete draft.agentName;delete draft.apps;step=0;notice='';error='';persist();render();};
-  }else if(step===1){
-   // Two sections (owner request 2026-10-06): the apps found on this computer, then the popular starters
-   // chosen for the person (the starter games arrive without being shown). One left out stays shown,
-   // unchecked, after a relaunch so it can come back.
-   const gallery=node('div','','setup-gallery');gallery.setAttribute('role','region');gallery.setAttribute('aria-label',t('Choose your apps'));
-   const popular=detecting?[]:supportedApps().filter(a=>!detected.has(a.key)&&(selected.has(a.id)||touched.has(a.id))&&a.region!=='health');
-   for(const [title,list,cls] of [['Apps on your computer',shownApps,'is-found'],['Apps that are popular',popular,'is-popular']] as [string,typeof shownApps,string][]){
-    if(!list.length)continue;
-    const section=node('section','','setup-app-section '+cls);section.append(node('h2',t(title),'setup-group-title'));
-    const apps=node('div','','setup-apps');for(const app of list)apps.append(appTile(app));
-    section.append(apps);gallery.append(section);
+  const parts:HTMLElement[]=[];
+  if(importing){
+   const name=arriving?(draft.brought?.name||draft.agentName||draft.agent):'';
+   const done=settled();
+   parts.push(node('h1',arriving?agentText(done?'{agent} moved in':'{agent} is moving in',name):t('Your world is ready'),'setup-visually-hidden'));
+   const stage=node('div','','setup-import');
+   const card=passport();
+   const list=tiles(),shown=Math.min(shownTiles,list.length);
+   const bento=node('div','','setup-tiles');bento.setAttribute('aria-label',t('What comes along'));
+   for(let i=0;i<shown;i++)bento.append(tile(list[i],i===shown-1&&shownTiles<=list.length));
+   // While the host still copies, one tile says what is happening.
+   if(arriving&&(bringing||porting||!draft.brought)){
+    const waiting=node('article','','setup-tile setup-tile-reading');
+    const line=node('p',bringLine(name),'setup-tile-line');line.style.animationDelay=-(performance.now()%1400)+'ms';
+    waiting.append(node('span','','setup-tile-spinner'),line);bento.append(waiting);
    }
-   content.append(gallery);
-   primary=button(entering?'Entering your World…':'Enter my World',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
-   primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering);primary.setAttribute('aria-busy',String(entering));
-   // Back to the Agent brought in; Google has nothing to go back to.
-   if(typeof draft.agent==='string')back=()=>{draft.apps=false;persist();render();};
+   stage.append(card,bento);parts.push(stage);
+   if(entering)primary=button('Entering your world…',async()=>{},true);
+   else if(!done)primary=button(agentText('Moving {agent} in…',AGENT_SHORT[draft.agent]&&!draft.brought?.name?AGENT_SHORT[draft.agent]:name),async()=>{},true);
+   else primary=button(move?'Back to your world':'Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
+   primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering||!done);primary.setAttribute('aria-busy',String(entering||!done));if(!done||entering)primary.disabled=true;
+   // Back keeps what came over, so coming back to the same Agent does not read it again; Google has nothing to go back to.
+   if(arriving&&!bringing&&!porting)back=()=>{clearTimeout(revealTimer);delete draft.agent;delete draft.agentName;step=0;notice='';error='';persist();render();};
    else if(draft.ownModel===true)back=()=>{delete draft.ownModel;step=0;persist();render();};
    else if(typeof draft.remoteAgent==='string')back=()=>{delete draft.remoteAgent;step=0;persist();render();};
+   if(error||notice)status.append(node('p',t(error||notice),error?'setup-error':'setup-note'));
   }else{
-   const signIn=async(mock=false)=>{
-    signingIn=true;googleStage=mock?'preparing':googleSignInStart(state);googleUrl=undefined;notice='';render();
-    try{
-     let failure:unknown;
-     try{await call('connect',{provider:'google',region:'home',...mock?{mock:true}:{}});}catch(e){failure=e;}
-     // A post-authorization reply can fail after both grants were saved.
-     // Never ask for consent again when the host already confirms the grants.
-     try{state=await call('snapshot');}catch(e){if(!connected())throw failure||e;}
-     if(!connected())throw failure||Error('Sign-in wasn’t completed. Please try again.');
-     advanceAfterGoogle();
-    }finally{signingIn=false;}
-   };
-   // Two kinds of way in (owner request 2026-10-04): bring your local agent, the default, or bring your
-   // cloud agent (Google and ChatGPT, coming soon). Each local Agent shows its own name; ones not on
-   // this computer stay listed, greyed, so people know they are supported.
-   const list=node('div','','setup-signin');list.setAttribute('role','group');list.setAttribute('aria-label',t('Ways to continue'));
-   // The API-key form takes the cloud agents' room (both are coming soon), so the page still fits without scrolling.
-   if(keyForm&&!agents.length&&!detectingAgents)list.classList.add('is-key-form');
-   const group=(title:string,cls:string)=>{const g=node('section','','setup-signin-group '+cls);g.append(node('h2',t(title),'setup-signin-heading'));list.append(g);return g;};
-   const option=(into:HTMLElement,label:string,icon:string,tag='')=>{
-    const b=button(label,async()=>{});b.classList.add('setup-signin-option');b.prepend(image(icon,'setup-signin-icon'));b.disabled=true;
-    if(tag)b.append(node('span',t(tag),'setup-signin-tag'));
-    into.append(b);return b;
-   };
-   const local=group(remoteForm?'Your agent on another computer':'Bring your local agent','is-existing');{const heading=local.firstElementChild!,head=node('div','','setup-signin-head');heading.replaceWith(head);head.append(heading,remoteToggle());}
-   if(remoteForm)list.classList.add('is-remote-form');
-   // One square tile per supported Agent (owner request 2026-10-05): clicking one picks it, and the
-   // picked one is forest; found ones first, in AGENT_PRIORITY order.
-   const tiles=node('div','','setup-agent-grid');local.append(tiles);
-   const rank=(id:string)=>(agents.some(a=>a.id===id)?0:10)+AGENT_PRIORITY.indexOf(id);
-   for(const harness of [...LOCAL_HARNESSES].sort((x,y)=>rank(x.id)-rank(y.id))){
-    const found=agents.find(a=>a.id===harness.id),title=found?.title||harness.title,connecting=connectingAgent===harness.id,chosen=harness.id===picked&&!!found;
-    // Its own name first, then where it comes from and what comes along (two facts fit a tile).
-    const history=found?.memory?.history,parts:string[]=[];
-    if(found?.memory?.name)parts.push(title);
-    if(harness.id==='codex'&&found)parts.push(t((found as any).model===false?'Sign in to Codex first':'Your ChatGPT plan'));
-    if(history?.conversations)parts.push(t('{count} conversations').replace('{count}',String(history.conversations)));
-    if(history?.notes)parts.push(t('{count} notes').replace('{count}',String(history.notes)));
-    if(found&&!parts.length)parts.push(t(found.memory?'Its memory comes along':'On this computer'));
-    const row=node('button','','setup-signin-option setup-agent-button setup-agent-tile') as HTMLButtonElement;row.type='button';row.dataset.agent=harness.id;
-    row.disabled=busy||!found||signingIn||!!connectingAgent;row.setAttribute('aria-pressed',String(chosen));
-    row.onclick=()=>{picked=harness.id;error='';render();};
-    const text=node('span','','setup-agent-text');text.append(node('strong',found?agentName(found):title),node('small',connecting?agentText('Connecting to {agent}…',title):found?parts.slice(0,2).join(' · '):detectingAgents?'':t('Not on this computer')));
-    row.append(image(AGENT_ICONS[harness.id],'setup-signin-icon'),text);
-    if(found?.worldTools===false&&!connecting)row.append(node('span',t('Chat only'),'setup-signin-tag'));
-    row.setAttribute('aria-label',title);
-    if(!found&&!detectingAgents)row.title=agentText('{agent} isn’t installed on this computer.',title);
-    else if(found?.worldTools===false)row.title=agentText('With {agent}, Fox can talk with you but can’t act in your world yet.',title);
-    row.classList.toggle('setup-agent-default',chosen);row.classList.toggle('is-connecting',connecting);row.classList.toggle('is-missing',!found&&!detectingAgents);
-    tiles.append(row);
-   }
-   // Worldlet provides no model of its own (owner request 2026-10-05): Fox runs only on an Agent on this computer,
-   // so with none found, the page says what to install.
-   // With none found there is no dead end (owner decision 2026-10-07): look again after installing one, or give the
-   // built-in Agent a model with an API key and go on to the apps page.
-   if(remoteForm)local.append(remoteAgent());
-   else if(!detectingAgents&&!agents.length)local.append(noAgent());
-   // Cloud agents are coming soon (owner request 2026-10-05): Google, then ChatGPT; Muse is gone. Google is greyed
-   // for everyone, since a Google sign-in brings no model (only the development build's mock rehearses it).
-   const cloud=group('Bring your cloud agent','is-new'),cloudRow=node('div','','setup-cloud-row');cloud.append(cloudRow);
-   const go=option(cloudRow,signingIn?({connecting:'Connecting to Google…',browser:'Waiting for Google…'}[googleStage]||'Finishing setup…'):'Continue with Google','brands/google.png',signingIn?'':'Coming soon');go.classList.add('setup-google-button');go.classList.toggle('is-connecting',signingIn);
-   option(cloudRow,'Continue with ChatGPT',appLogoSource({key:'chatgpt'})||'','Coming soon').classList.add('setup-chatgpt-button');
-   // Development builds only: rehearse onboarding with a fictional Google account.
-   // It keeps its room while signing in, so nothing on the page moves (owner feedback 2026-10-02).
-   if(state.mockGoogleAvailable===true){const mock=button('Use mock Google (Dev)',()=>signIn(true));mock.className='setup-link setup-mock-google';if(signingIn){mock.disabled=true;mock.style.visibility='hidden';mock.setAttribute('aria-hidden','true');}cloud.append(mock);}
-   const help=node('p','','setup-google-help');
-   // Browser steps only while consent is actually open; the fixed-height line stays empty while connecting.
-   if(signingIn&&googleStage==='browser'){help.append(document.createTextNode(t('Continue in your browser.')));help.append(document.createElement('br'));help.append(document.createTextNode(t('If prompted: ')));help.append(node('strong','Advanced → Go to Worldlet (unsafe)'));}
-   else if(signingIn&&googleStage!=='connecting')help.textContent=t(googleStage==='preparing'?'Google authorized. Preparing Fox in the background…':'Checking Mail and Calendar access…');
-   cloud.append(help);
-   // Cancel, the browser fallbacks and feedback share one fixed slot, so nothing moves.
-   const slot=node('div','','setup-cancel-slot');slot.setAttribute('aria-live','polite');
-   if(signingIn){
-    // The browser never came up (owner meetings 2026-10-02/03): open the same consent page again, or copy it.
-    if(googleStage==='browser'&&googleUrl){
-     const fallback=googleConsentActions(googleUrl,call),link=(label:string,fn:(b:HTMLButtonElement)=>void)=>{const b=node('button',t(label),'setup-link setup-consent') as HTMLButtonElement;b.type='button';b.onclick=()=>fn(b);slot.append(b);};
-     link('Open again',()=>void fallback.open().catch(()=>{}));
-     link('Copy link',b=>void fallback.copy().then(()=>{b.textContent=t('Link copied');},()=>{}));
-    }
-    const cancel=node('button',t('Cancel sign-in'),'setup-link setup-cancel') as HTMLButtonElement;cancel.type='button';cancel.onclick=()=>void call('connectCancel').catch(()=>{});slot.append(cancel);
-   }else if((error||notice)&&!remoteForm){const feedback=node('p',t(error||notice),'setup-note');if(error)feedback.setAttribute('role','alert');slot.append(feedback);}
-   cloud.append(slot);
-   content.append(list);
-   // The one Continue brings the picked Agent (owner request 2026-10-06).
+   parts.push(node('h1',t('Give your agent a world'),'setup-visually-hidden'));
+   const choose=node('div','','setup-choose');
+   const formOpen=remoteForm,hermesBusy=hermesSetup!=='idle'&&!agents.length;
+   const lede=node('p',detectingAgents?t('Looking for agents on this computer…'):remoteForm?t('Your agent on another computer'):agents.length?t('Found on this computer'):t('No agent on this computer yet'),'setup-lede');
+   choose.append(lede);
+   if(move&&!remoteForm)choose.append(node('p',t('Fox now runs on your own agent. What Fox has learned comes along.'),'setup-note setup-move-note'));
+   if(remoteForm)choose.append(remotePanel());
+   else if(agents.length)choose.append(agentCards());
+   else if(!detectingAgents){
+    // No Agent here (owner decisions 2026-10-07, 2026-10-09): the big button installs stock Hermes Agent, then ChatGPT
+    // is signed in inside it, and Hermes moves in like any Agent found here.
+    const cards=node('div','','setup-agent-cards');
+    const card=node('div','','setup-agent-card setup-agent-default is-install');
+    card.append(image(AGENT_ICONS.hermes,'setup-agent-icon'),node('strong','Hermes Agent','setup-agent-name'),node('small',t('Worldlet sets it up for you'),'setup-agent-sub'));
+    cards.append(card);choose.append(cards,hermesPanel());
+   }else choose.append(node('div','','setup-agent-cards is-loading'));
+   // Installing and signing in keep the page to that one task.
+   if(!formOpen&&!hermesBusy)choose.append(moreOptions());
+   parts.push(choose);
    const going=connectingAgent?agents.find(a=>a.id===connectingAgent):null;
-   // The API-key form's Connect is the page's one button while it is open.
    if(remoteForm){primary=button(pairingRemote?'Connecting to your other computer…':'Connect',pairRemote,true);primary.classList.toggle('is-loading',pairingRemote);if(!remoteCode.trim()||pairingRemote||signingIn)primary.disabled=true;}
-   else if(keyForm&&!agents.length){primary=button(savingKey?'Connecting…':'Connect',connectKey,true);primary.classList.toggle('is-loading',savingKey);if(!keyProvider||!keyModel.trim()||!keySecret.trim()||signingIn)primary.disabled=true;}
+   else if(!agents.length&&!detectingAgents&&!connectingAgent){
+    const working=hermesSetup==='installing'||hermesSetup==='signing-in';
+    primary=button(hermesSetup==='installing'?'Installing Hermes Agent…':hermesSetup==='signing-in'?'Waiting for ChatGPT…':hermesSetup==='installed'?'Sign in with ChatGPT':agentText('Give {agent} a world','Hermes'),hermesSetup==='installed'?signInHermes:installHermes,true);
+    primary.classList.toggle('is-loading',working);if(working||signingIn)primary.disabled=true;
+   }
    else{
-    primary=button(going?agentText('Connecting to {agent}…',going.title):'Continue',()=>chooseAgent(picked),true);
+    primary=button(going?agentText('Connecting to {agent}…',going.title):agentText('Give {agent} a world',picked?giveName(picked):t('your agent')),()=>chooseAgent(picked),true);
     primary.classList.toggle('is-loading',!!going);if(!picked||!agents.some(a=>a.id===picked)||signingIn)primary.disabled=true;
    }
+   if((error||notice)&&!formOpen){const feedback=node('p',t(error||notice),error?'setup-error':'setup-note');if(error)feedback.setAttribute('role','alert');status.append(feedback);}
   }
   primary.classList.add('setup-next');
-  if(step===1&&(error||notice))status.append(node('p',t(error||notice),error?'setup-error':'setup-note'));
-  // Back keeps its room on every page, so the big button never moves.
+  // Back keeps its room, so the big button never moves.
   const backButton=node('button',t('Back'),'setup-link setup-back') as HTMLButtonElement;backButton.type='button';
   if(back){backButton.disabled=busy;backButton.onclick=back;}else{backButton.style.visibility='hidden';backButton.setAttribute('aria-hidden','true');backButton.tabIndex=-1;}
-  nav.append(status,primary,backButton);
-  panel.append(nav);
-  // No page scrolls (owner request 2026-10-06): the apps page tightens its tiles step by step until they fit.
-  if(content.querySelector('.setup-gallery'))fitApps(content);
+  footer.append(status,primary,backButton);
+  panel.replaceChildren(...parts,footer);
+  // The chosen card travels to the left (owner request 2026-10-09).
+  if(importing&&flipFrom){
+   const card=panel.querySelector<HTMLElement>('.setup-passport'),to=card?.getBoundingClientRect();
+   if(card&&to&&to.width&&!reduced()){const s=Math.min(1.4,Math.max(.5,flipFrom.width/to.width));card.animate([{transform:`translate(${flipFrom.left+flipFrom.width/2-(to.left+to.width/2)}px,${flipFrom.top+flipFrom.height/2-(to.top+to.height/2)}px) scale(${s})`,opacity:.6},{transform:'none',opacity:1}],{duration:650,easing:'cubic-bezier(.22,.7,.2,1)'});}
+   flipFrom=null;
+  }
+  if(importing)reveal();
   if(arriving&&!draft.brought&&!bringing)queueMicrotask(()=>void bringIn());
  }
- // A relaunch on the second page shows what already came over.
- shown=scanTotal();if(draft.brought)facts=FACTS;
+ // A relaunch on the second half shows what already came over.
+ if(draft.brought)shownTiles=99;
  setInterfaceLanguage(draft.language);render();
- // Hosts without local Agent support answer with an error or nothing; Google stays the only way in.
+ // Hosts without local Agent support answer with an error or nothing; More options stays the way in.
  function detectAgents(){
- detectingAgents=true;
- return Promise.resolve().then(()=>call('agentHarness',{operation:'detect'})).then(result=>{
-  if(disposed)return;
-  const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'):[];
-  // A choice the host no longer has (removed, or reset) returns to the first page.
-  if(typeof draft.agent==='string'&&result?.selected!==draft.agent){delete draft.agent;delete draft.apps;persist();if(step===1&&!connected()){step=0;}}
-  else if(typeof result?.selected==='string'&&step===0&&found.some(a=>a.id===result.selected)){draft.agent=result.selected;draft.agentName=agentName(found.find(a=>a.id===result.selected));step=1;persist();}
-  // A pairing with another computer that ended (unpaired there) returns to the first page too.
-  if(typeof draft.remoteAgent==='string'&&!result?.remote){delete draft.remoteAgent;persist();if(step===1&&!ready())step=0;}
-  agents=found;detectingAgents=false;
-  picked=AGENT_PRIORITY.find(id=>found.some(a=>a.id===id))||found[0]?.id||null;
-  // Only when the first page is what the person sees: how many supported Agents are here, and the one picked for them.
-  if(step===0)productEvent('local_agents_detected',agentsDetectedDimensions(found,picked));
-  if(!busy)render();
-  return connectRequested();
- }).catch(()=>{detectingAgents=false;if(!disposed&&!busy)render();});
+  detectingAgents=true;
+  return Promise.resolve().then(()=>call('agentHarness',{operation:'detect'})).then(result=>{
+   if(disposed)return;
+   // Codex alone is no Agent for Fox (owner decision 2026-10-09).
+   const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'&&a.id!=='codex'):[];
+   // A choice the host no longer has (removed, or reset) returns to the first half.
+   if(typeof draft.agent==='string'&&result?.selected!==draft.agent){delete draft.agent;persist();if(step===1&&!ready()){step=0;}}
+   // Moving off Fox's own Hermes: an Agent it only copied from (or Codex it paid with) is not yet Fox's Agent.
+   else if(!move&&typeof result?.selected==='string'&&step===0&&found.some(a=>a.id===result.selected)){draft.agent=result.selected;draft.agentName=agentName(found.find(a=>a.id===result.selected));step=1;persist();}
+   // A pairing with another computer that ended (unpaired there) returns to the first half too.
+   if(typeof draft.remoteAgent==='string'&&!result?.remote){delete draft.remoteAgent;persist();if(step===1&&!ready())step=0;}
+   agents=found;detectingAgents=false;
+   picked=AGENT_PRIORITY.find(id=>found.some(a=>a.id===id))||found[0]?.id||null;
+   // Only when the first half is what the person sees: how many supported Agents are here, and the one picked for them.
+   if(step===0)productEvent('local_agents_detected',agentsDetectedDimensions(found,picked));
+   if(!busy)render();
+   return connectRequested();
+  }).catch(()=>{detectingAgents=false;if(!disposed&&!busy)render();});
  }
  /** The Agent a `--connect=<id>` launch named, handed over once by the host; Core decides what setup does with it. */
  async function connectRequested(){
   const asked=await call('agentHarness',{operation:'requested'}).catch(()=>null);
   if(disposed)return;
-  const plan=connectRequestPlan(asked?.id,{firstPage:step===0,found:agents,busy:busy||signingIn||!!connectingAgent||pairingRemote||savingKey});
+  const plan=connectRequestPlan(asked?.id,{firstPage:step===0,found:agents,busy:busy||signingIn||!!connectingAgent||pairingRemote||hermesSetup==='installing'||hermesSetup==='signing-in'});
   if(!plan.pick)return;
-  picked=plan.pick;remoteForm=false;keyForm=false;
-  if(plan.select){autoContinue=true;void run(async()=>{try{await chooseAgent(plan.pick);}catch(e){autoContinue=false;throw e;}});return;}
+  picked=plan.pick;remoteForm=false;
+  if(plan.select){void run(()=>chooseAgent(plan.pick));return;}
   if(plan.missing)error=agentText('{agent} isn’t installed on this computer.',LOCAL_HARNESSES.find(h=>h.id===plan.pick)?.title||plan.pick);
   if(!busy)render();
  }
@@ -588,9 +643,8 @@ export function mountStartupSetup({state:initial,call,complete}){
  if(hostFeatures(state).installedAppDetection){
   void call('installedApplets').then(result=>{
    if(disposed)return;detected=new Set(result.keys||[]);nativeIcons=result.icons||{};
-   seed();detecting=false;if(step===1&&!busy)render();
-  }).catch(()=>{detecting=false;seed();if(step===1&&!busy)render();});
-
+   seed();detecting=false;if(!busy)render();
+  }).catch(()=>{detecting=false;seed();if(!busy)render();});
  }else {detecting=false;seed();render();}
  return {update(next){state=next;if(disposed)return;if(advanceAfterGoogle()){render();return;}if(!busy&&step===1&&!ready()){step=0;render();}}};
 }

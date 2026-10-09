@@ -503,12 +503,12 @@ export class LocalHarnessRuntime implements AgentRuntime {
 
 /** One turn's ordered event path to the page (LocalHarnessRuntime.execute). */
 interface TurnPipe {events:AgentEventWait;emit:(event:Row)=>Promise<unknown>;say:(text:string)=>Promise<void>;started:()=>boolean}
-/** Fox's Agent is the person's own Harness: Worldlet keeps the companion memory and conversations;
- * account connections stay with the built-in Agent's World service, which reads them without a model. Background
+/** Fox's Agent is the person's own Harness: Worldlet keeps the companion memory and conversations; the World's
+ * account connections are read in the Platform, without a model (agent-runtime/index.ts `worldSources`). Background
  * model work (the Attention check, Applet tasks, the day's plan and Fox's quiet-moment asks) runs on the person's
  * Harness too, beside the conversation (owner decision 2026-10-07 18:18 PDT: the conversation and background work
- * both run on the underlying Harness), a chosen Hermes Agent too (owner decision 2026-10-09);
- * routines made earlier keep running on the built-in Agent while it has a model. */
+ * both run on the underlying Harness), a chosen Hermes Agent too (owner decision 2026-10-09). Its models and its
+ * scheduled jobs are its own (owner decision 2026-10-09: Worldlet customizes nothing below the Harness contract). */
 export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  readonly install:LocalHarnessInstall;
  readonly available=true;
@@ -516,25 +516,18 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  private running=new Set<LocalHarnessRuntime>();
  private readonly makeBuiltIn:(()=>Adapter)|null;
  private builtInAdapter:Adapter|null=null;
- /** Whether this computer has a Codex sign-in, which the built-in Agent runs on (model-access.ts). */
- private readonly codex:()=>boolean;
- constructor(context:RuntimeContext,install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),builtIn:(()=>Adapter)|null=null,codex:()=>boolean=()=>false){super(context);this.install=install;this.environment=environment;this.makeBuiltIn=builtIn;this.codex=codex;this.turnApprovals=install.id==='hermes'?new TurnApprovals():null;}
+ constructor(context:RuntimeContext,install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),builtIn:(()=>Adapter)|null=null){super(context);this.install=install;this.environment=environment;this.makeBuiltIn=builtIn;this.turnApprovals=install.id==='hermes'?new TurnApprovals():null;}
  private builtIn(){return this.builtInAdapter??=this.makeBuiltIn?.()??null;}
  /** Accounts stay with the built-in Agent, in its own home: a Google grant made before or after
   * choosing this Harness is the same connection, and opening Mail without one still goes straight
   * to Google sign-in. Without a built-in Agent they report themselves unavailable. */
  accountOwner():Adapter {return this.builtIn()??this;}
- /** The built-in Agent while it has a model of the person's to run on: routines made on it earlier. */
- private builtInBackground():Adapter|null {
-  const builtIn=this.builtIn();
-  return builtIn?.available&&builtInModel(builtIn.home('private'),this.codex())?builtIn:null;
- }
  /** Background work runs on the person's own Harness (owner decision 2026-10-07: the conversation and background
   * work alike), a chosen Hermes Agent too: its own `hermes acp` beside the conversation, on its own model (owner
   * decision 2026-10-09: Worldlet customizes nothing below the Harness contract). */
  background():Adapter|null {return this;}
- /** Mail and Attention checks read accounts through the built-in Agent's World service, which needs no model. */
- override get supportsBackgroundChecks(){return this.background()!==null&&this.builtIn()?.available===true;}
+ /** Mail and Attention checks read accounts in the Platform (the World's connections) and think on this Harness. */
+ override get supportsBackgroundChecks(){return this.background()!==null;}
  get id(){return localHarnessAdapterId(this.install.id);}
  hasInteractiveWork(){return this.running.size>0||this.builtInAdapter?.hasInteractiveWork()===true;}
  private readonly spares=new SpareTurns();
@@ -591,14 +584,11 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   if(background===this)return ()=>this.makeLane();
   return background?.makeTask?()=>background.makeTask!():undefined;
  }
- /** The built-in Agent's model: what an API key the Agent brought uses. */
- makeModelAccess():AgentRuntime {return this.builtIn()?.makeModelAccess()??new UnsupportedRuntime(`Fox uses ${this.install.title} on this computer. Manage its models and accounts in ${this.install.title}.`);}
+ /** Its models are its own: Worldlet chooses or signs in to none (Settings › Model, a quick browser step). */
+ makeModelAccess():AgentRuntime {return new UnsupportedRuntime(`Fox uses ${this.install.title} on this computer. Manage its models and accounts in ${this.install.title}.`);}
  makeSourceAccess():AgentRuntime {return new UnsupportedRuntime(`${this.install.title} does not read connected accounts for Worldlet.`);}
- /** Routines made on the built-in Agent keep running there, each tick checking that it still has a model. */
- makeRoutines():AgentRoutines {
-  const adapter=this;let routines:AgentRoutines|null=null;
-  return {start(isAllowed,onResult,elsewhere){routines??=adapter.builtIn()?.makeRoutines()??null;routines?.start(()=>adapter.builtInBackground()!==null&&isAllowed(),onResult,elsewhere);},stop(){routines?.stop();},wake(){routines?.wake();}};
- }
+ /** Its scheduled jobs run on its own scheduler (`schedule`); Worldlet runs none of its own for it. */
+ makeRoutines():AgentRoutines {return {start(){},stop(){},wake(){}};}
  get harness(){return {id:this.install.id,title:this.install.title};}
  private scheduleService:HarnessSchedule|null|undefined;
  /** The person's jobs run on this Harness's own scheduler; its records are read from its folder (harness-schedule.ts). */
@@ -628,18 +618,6 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   const builtIn=this.builtInAdapter;
   return builtIn?.whileStopped?builtIn.whileStopped(work):(builtIn?.shutdown()??Promise.resolve()).then(work);
  }
-}
-
-/** Whether the built-in Agent has a model of the person's: this computer's Codex sign-in (ModelAccess hands it to
- * every built-in Harness), or a provider saved in its own settings (an API key typed in or brought by an Agent). */
-export function builtInModel(home:string,codex:boolean):boolean {
- if(codex)return true;
- try{
-  const config=fs.readFileSync(path.join(home,'config.yaml'),'utf8');
-  const block=/^model\s*:\s*\n((?:[ \t]+.*\n?)+)/m.exec(config)?.[1]??'';
-  // A host-chosen source (the Codex sign-in, marked worldlet_source/worldlet_route) is not the person's own.
-  return /^[ \t]+provider\s*:\s*["']?[\w.-]+/m.test(block)&&!/^[ \t]+worldlet_(?:source|route)\s*:/m.test(block);
- }catch{return false;}
 }
 
 // The person's choice --------------------------------------------------------------------------

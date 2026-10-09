@@ -43,142 +43,6 @@
 
 .applet-guide-mark{width:44px;height:52px;object-fit:contain;max-width:none;filter:drop-shadow(0 3px 3px #58452c33)}
 
-/* Onboarding is the loading scene: Fox above, choices in the open, brand below. */
-.world-startup.has-setup{justify-content:safe center;gap:0;padding:24px 40px;box-sizing:border-box;overflow:auto}
-.has-setup>.startup-scene{flex:none;width:148px;height:148px;margin:0 0 14px;transition:width .35s,height .35s}
-.has-setup[data-setup-step="1"]>.startup-scene{width:100px;height:100px;margin-bottom:8px}
-.has-setup>.startup-brand{flex:none;--brand-wordmark-size:23px;--brand-mark-size:36px;margin:18px 0 0;gap:6px}
-.has-setup>.startup-status{flex:none;margin-top:12px;min-height:32px}
-.has-setup .startup-progress{width:144px;gap:6px;margin-bottom:8px}
-.has-setup .startup-progress span{height:4px;background:color-mix(in srgb,var(--brand-ink) 12%,transparent)}
-.startup-setup{width:min(840px,100%);color:var(--brand-ink);text-align:center;animation:setup-enter .4s ease both}
-.startup-setup h1{font-size:clamp(26px,3vw,34px);font-weight:650;line-height:1.2;margin:0 0 10px;letter-spacing:-.035em}
-.startup-setup .setup-note{font-size:12px;line-height:1.55;margin:10px auto;color:var(--brand-muted)}
-.startup-setup button{font:inherit;min-height:44px;cursor:pointer;border:0;margin:0;color:var(--brand-ink);transition:background .2s,transform .2s,opacity .2s}
-.startup-setup button:active:not(:disabled){transform:translateY(1px)}
-.startup-setup button:disabled{opacity:.45;cursor:default}
-.startup-setup button.setup-primary{background:var(--brand-forest,#49645a);color:#fffdf3;border-radius:24px;padding:12px 36px;box-shadow:0 4px 12px #36564412;font-weight:600;min-width:160px}
-.startup-setup button.setup-primary:hover{background:#315747}
-.startup-setup footer{position:relative;display:flex;justify-content:center;align-items:center;min-height:48px;margin:18px auto 0;max-width:540px}
-.startup-setup button.setup-skip,.startup-setup button.setup-link{background:none;font-size:13px;color:var(--brand-muted);text-decoration:underline;text-underline-offset:4px}
-.startup-setup button.setup-language{display:flex;flex-direction:column;align-items:center;gap:10px;background:transparent;border-radius:18px;padding:14px 20px;min-width:100px;border:1px solid transparent;font-size:14px}
-.startup-setup button.setup-language:hover{background:#ffffff55}
-.startup-setup button.setup-language[aria-pressed="true"]{border-color:#71836966;background:#fffdf399;box-shadow:0 4px 20px #52634a08}
-.setup-apps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px 16px;max-width:760px;margin:0 auto}
-.setup-app{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;gap:5px;border-radius:18px;cursor:pointer;border:1px solid transparent;transition:background .2s,border-color .2s}
-.setup-app:has(input:checked){background:#fffdf477;border-color:#66795644}.setup-app:hover{background:#ffffffaa}.setup-app:has(input:focus-visible){outline:2px solid var(--brand-focus);outline-offset:3px}
-.setup-app-logo{display:block;width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 2px #303c2210);margin-bottom:3px}
-.setup-app strong{font-size:12px;font-weight:550;line-height:1.3}.setup-app small{font-size:10px;line-height:1.3;color:var(--brand-muted);min-height:13px}
-.setup-app input{position:absolute;top:7px;right:7px;width:14px;height:14px;accent-color:#49645a;cursor:pointer}
-.startup-setup .setup-error{color:#9b4330;margin:12px auto;max-width:480px;font-size:13px}
-@keyframes setup-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@media(max-height:760px){.world-startup.has-setup{padding:16px 28px}.has-setup>.startup-scene{width:108px;height:108px;margin-bottom:8px}.has-setup[data-setup-step="1"]>.startup-scene{width:72px;height:72px}.startup-setup h1{font-size:28px}.has-setup>.startup-brand{margin-top:10px}.startup-setup footer{margin-top:10px}.setup-apps{gap:6px 12px}.setup-app{padding:8px 4px 6px}.setup-app-logo{width:36px;height:36px}}
-@media(max-width:620px){.world-startup.has-setup{padding:18px}.setup-apps{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.startup-setup button.setup-language{min-width:68px;padding:12px}}
-@media(prefers-reduced-motion:reduce){.startup-setup{animation:none}.has-setup>.startup-scene,.startup-setup button,.setup-app{transition:none}}
-
-/* Three quiet steps: progress above Fox; one stable action at the bottom. */
-.world-startup.has-setup{padding:110px 32px 150px}
-.has-setup>.startup-brand,.has-setup>.startup-status{display:none}
-.has-setup .setup-progress{position:absolute;top:40px;left:50%;transform:translateX(-50%);display:flex;gap:10px;width:160px}
-.has-setup .setup-progress button{position:relative;flex:1;height:30px;min-height:30px;padding:0;margin:0;background:transparent;border:0;border-radius:4px;opacity:1}
-.setup-progress button::after{content:'';position:absolute;left:0;right:0;top:13px;height:4px;border-radius:4px;background:#cdd4c6}
-.setup-progress button:disabled{cursor:default}
-.startup-setup h1{margin-bottom:32px}
-.startup-setup footer{position:fixed;left:50%;bottom:42px;transform:translateX(-50%);width:min(440px,90vw);margin:0;min-height:64px;display:flex;flex-direction:column;gap:10px}
-.setup-apps{row-gap:16px}
-.setup-app strong{margin-top:6px}.setup-app{min-height:86px}
-@media(max-height:760px){.world-startup.has-setup{padding:76px 28px 128px}.has-setup .setup-progress{top:20px}.startup-setup h1{margin-bottom:22px}.startup-setup footer{bottom:24px}.setup-apps{row-gap:8px}.setup-app{min-height:74px}}
-.startup-setup{animation:none}
-
-/* Keep setup together around Fox instead of anchoring controls to window edges. */
-.world-startup.has-setup{padding:28px 32px}
-.has-setup .setup-progress{position:relative;top:auto;left:auto;transform:none;flex:none;margin:0 0 18px}
-.startup-setup footer{position:relative;left:auto;bottom:auto;transform:none;margin:24px auto 0;min-height:48px}
-.startup-setup h1{margin-bottom:24px}
-.setup-group-title{font-size:13px;font-weight:550;color:var(--brand-muted);margin:0 0 14px}
-.setup-apps{min-height:108px;justify-content:center}
-@media(max-height:760px){.world-startup.has-setup{padding:18px 28px}.has-setup .setup-progress{margin-bottom:10px}.startup-setup footer{margin-top:16px}.startup-setup h1{margin-bottom:18px}}
-
-.setup-apps{grid-template-columns:repeat(var(--setup-columns,6),minmax(0,112px))}
-@media(max-width:620px){.setup-apps{grid-template-columns:repeat(min(var(--setup-columns,6),4),minmax(0,100px))}}
-
-/* A single gallery scrolls; Fox, progress and Continue stay in place. */
-.setup-gallery{height:350px;max-height:42vh;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9ca99155 transparent;max-width:760px;margin:0 auto;padding:0 12px 8px;scroll-padding-top:36px;text-align:left}
-.setup-app-section{margin-bottom:20px}
-.setup-gallery .setup-group-title{position:sticky;top:0;z-index:1;background:var(--brand-paper);padding:9px 4px;margin:0 0 10px;font-size:12px}
-.setup-gallery .setup-apps{grid-template-columns:repeat(6,minmax(0,1fr));min-height:0;text-align:center;gap:10px}
-.setup-gallery .setup-app{min-height:80px}
-.world-startup.setup-entering .setup-progress{pointer-events:none}
-@media(max-width:620px){.setup-gallery .setup-apps{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-height:760px){.setup-gallery{height:290px}.setup-gallery .setup-app{min-height:68px}}
-
-/* Quiet, physical feedback without adding another layer of setup copy. */
-.has-setup>.startup-scene::before{content:'';position:absolute;inset:12% -24% -5%;border-radius:50%;background:radial-gradient(ellipse,#e7bc7150,transparent 68%);filter:blur(10px);pointer-events:none;transition:background .4s}
-.has-setup .startup-fox{position:relative;animation:setup-fox-sway 4s ease-in-out infinite}
-.has-setup[data-setup-step="1"]>.startup-scene::before{background:radial-gradient(ellipse,#abc6a350,transparent 68%)}
-.has-setup[data-setup-step="2"]>.startup-scene::before{background:radial-gradient(ellipse,#eac47160,transparent 68%)}
-.setup-app-logo{transition:transform .2s ease}
-.setup-app:hover .setup-app-logo{transform:translateY(-3px)}
-@keyframes setup-fox-sway{0%,100%{transform:rotate(-1deg) translateY(0)}50%{transform:rotate(1deg) translateY(-3px)}}
-@media(prefers-reduced-motion:reduce){.has-setup .startup-fox{animation:none}.setup-app-logo{transition:none}.setup-app:hover .setup-app-logo{transform:none}}
-
-/* Two-page entry: Google first, apps second; brand is a quiet signature. */
-.world-startup.has-setup{padding-bottom:90px}
-.has-setup>.startup-brand{display:flex;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);margin:0;--brand-wordmark-size:19px;--brand-mark-size:28px;opacity:.7}
-.has-setup[data-setup-step="0"]>.startup-scene{width:164px;height:164px;margin-bottom:22px}
-.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:30px}
-@media(max-height:760px){.world-startup.has-setup{padding-bottom:68px}.has-setup>.startup-brand{bottom:14px}.has-setup[data-setup-step="0"]>.startup-scene{width:132px;height:132px}}
-
-.setup-cancel-slot{height:44px;display:flex;align-items:center;justify-content:center}
-.has-setup[data-setup-step="0"]>.startup-scene{transition:none}
-
-.has-setup>.startup-brand{opacity:1}
-.setup-status-slot{position:relative;height:64px;width:100%;flex:none;overflow:auto}
-.startup-setup .setup-status-slot .setup-error{margin:8px auto;line-height:1.45}
-.setup-gallery{background:#f3f1e6;border:1px solid #78806a30;border-radius:18px;box-shadow:inset 0 2px 12px #48544014;padding:0 14px 12px;isolation:isolate}
-.setup-gallery .setup-group-title{background:#f3f1e6;margin-inline:-14px;padding-inline:18px;border-bottom:1px solid #78806a18}
-.setup-gathering{position:fixed;inset:0;pointer-events:none;z-index:2}
-.setup-gathering img{position:absolute;width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 3px 5px #35453025)}
-.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-scene{opacity:0;transition:opacity .4s}
-.world-startup.setup-entering{transition:opacity .7s ease}
-@media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-scene{transition:none}}
-.has-setup[data-setup-step="1"] .setup-status-slot{position:absolute;top:100%;height:48px}
-.setup-gallery{box-sizing:border-box}
-
-#setupArrivingDevices{z-index:10001}
-
-.has-setup[data-setup-step="0"]>.startup-scene{margin-bottom:8px}
-.has-setup[data-setup-step="0"] .startup-setup h1{font-size:clamp(22px,2.5vw,30px);margin-bottom:0}
-.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:58px}
-.setup-icon-tile{display:grid;place-items:center;width:48px;height:48px;flex:none;border-radius:12px;background:linear-gradient(#fffefa,#eeeade);box-shadow:0 1px 3px #33402a20,inset 0 0 0 1px #fff9}
-.setup-icon-tile .setup-app-logo{width:32px;height:32px;margin:0;filter:none}
-.setup-icon-tile.is-native{background:none;box-shadow:none}
-.setup-icon-tile.is-native .setup-app-logo{width:48px;height:48px}
-@media(max-height:760px){.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:40px}}
-
-.setup-import{display:block;margin:0 0 12px auto;padding:5px 10px;font-size:12px;border:1px solid #78806a40;border-radius:9px;background:#fff6;color:var(--brand-muted);cursor:pointer}
-
-.setup-gallery-toolbar{display:flex;align-items:center;gap:12px;max-width:760px;margin:0 auto 10px}
-.setup-gallery-toolbar input[type=search]{min-width:0;flex:1;padding:9px 12px;border:1px solid #78806a35;border-radius:10px;background:#fff5;color:var(--brand-forest);font:inherit;font-size:13px}
-.setup-gallery-toolbar .setup-import{margin:0;white-space:nowrap}
-.setup-category-title{font-size:11px;font-weight:550;letter-spacing:.03em;color:var(--brand-muted);margin:12px 4px 8px}
-.setup-gallery [hidden]{display:none!important}
-.setup-primary.is-loading::before{content:'';display:inline-block;width:13px;height:13px;margin-right:9px;border:2px solid #ffffff50;border-top-color:currentColor;border-radius:50%;vertical-align:-2px;animation:setup-spin .8s linear infinite}
-@keyframes setup-spin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.setup-primary.is-loading::before{animation:none}}
-
-/* Reserve space for search, the primary action, status and privacy at short heights. */
-@media(max-height:760px){.has-setup[data-setup-step="1"] .setup-gallery{height:min(290px,calc(100dvh - 430px))}}
-
-/* Calm, stable first-use composition. Only the explicit action owns feedback. */
-.has-setup .startup-fox{animation:none!important}
-.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:82px;gap:10px}
-.setup-cancel-slot{height:44px;min-height:44px;width:100%;overflow:hidden;gap:20px}
-.setup-cancel-slot p{margin:0;line-height:20px;font-size:13px}
-.setup-gallery{scroll-padding-top:40px;overflow-x:hidden}
-.setup-gallery .setup-group-title{top:0;margin:0 -14px 10px;padding:12px 18px;background:#f3f1e6;box-shadow:0 -4px 0 4px #f3f1e6;z-index:3}
-.setup-app-section>.setup-import{margin:0 0 14px 4px}
-@media(max-height:760px){.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:54px}}
 
 /* Keep the walking companion centered and the brand quietly below it. */
 .world-startup:not(.has-setup)>.startup-brand{display:flex;position:absolute;bottom:clamp(24px,6vh,64px);left:50%;transform:translateX(-50%);margin:0;--brand-wordmark-size:23px;--brand-mark-size:36px;gap:6px}
@@ -189,329 +53,138 @@
 .world-startup .startup-fox{animation:none}
 .world-startup[data-failed]:not(.has-setup)>.startup-status,.world-startup[data-delayed]:not(.has-setup)>.startup-status{display:flex}
 .world-startup:not(.has-setup) .startup-progress{display:none}
-
-.setup-google-help{height:48px;box-sizing:border-box;margin:0!important;max-width:450px;font-size:12px;line-height:22px;color:var(--brand-muted)}
-.setup-gallery>.setup-gallery-toolbar{position:static;margin:12px 0 18px}
-.has-setup[data-setup-step="1"] .setup-gallery{height:min(450px,calc(100dvh - 335px));max-height:none}
-@media(max-height:760px){.setup-google-help{height:44px;line-height:20px}.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:30px}.has-setup[data-setup-step="1"] .setup-gallery{height:min(350px,calc(100dvh - 380px))}}
-
-/* Dense apps page: a wider gallery of small tiles. Categories flow side by side
-   (each keeps its compact header), so short categories no longer leave empty rows. */
-.has-setup[data-setup-step="1"]>.startup-scene{width:68px;height:68px;margin-bottom:2px}
-.has-setup[data-setup-step="1"] .startup-setup{width:min(1080px,100%)}
-.has-setup[data-setup-step="1"] .startup-setup h1{font-size:clamp(24px,2.4vw,30px);margin-bottom:14px}
-.has-setup[data-setup-step="1"] .startup-setup footer{margin-top:16px}
-.has-setup[data-setup-step="1"] .setup-gallery{max-width:none;height:min(620px,calc(100dvh - 302px));padding:0 12px 10px}
-.setup-gallery>.setup-gallery-toolbar{max-width:none;margin:8px 0 4px}
-.setup-gallery-toolbar input[type=search]{padding:7px 12px}
-.setup-gallery .setup-group-title{margin:0 -12px 2px;padding:6px 16px;font-size:12px}
-.setup-gallery .setup-app-section{margin-bottom:8px}
-.startup-setup .setup-gallery .setup-app-section>button.setup-import{min-height:26px;margin:6px 0 2px 4px;padding:3px 10px;font-size:12px;border:1px solid #78806a40;border-radius:8px;background:#fff6;color:var(--brand-muted)}
-.setup-gallery .setup-categories{display:flex;flex-wrap:wrap;align-items:flex-start;gap:0 22px}
-.setup-gallery .setup-category{flex:0 1 auto;min-width:0;max-width:100%}
-.setup-gallery .setup-category-title{margin:5px 4px 1px;font-size:10.5px;line-height:14px;white-space:nowrap}
-.setup-gallery .setup-apps{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:4px;max-width:none;margin:0;min-height:0}
-.setup-gallery .setup-app{width:82px;min-height:0;height:64px;box-sizing:border-box;padding:5px 3px 3px;gap:0;border-radius:12px}
-.setup-gallery .setup-icon-tile{width:34px;height:34px;border-radius:9px}
-.setup-gallery .setup-icon-tile .setup-app-logo{width:22px;height:22px}
-.setup-gallery .setup-icon-tile.is-native .setup-app-logo{width:34px;height:34px}
-.setup-gallery .setup-app strong{display:block;max-width:100%;margin-top:4px;font-size:11px;line-height:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-/* Light selection (owner feedback 2026-10-02): no frame per app and no greying; a chosen app carries one
-   clear check in the Enter button's forest green on its icon's corner. The checkbox stays the real control. */
-.setup-gallery .setup-app,.setup-gallery .setup-app:has(input:checked){background:transparent;border-color:transparent}
-.setup-gallery .setup-app:hover{background:#ffffff80}
-.setup-gallery .setup-app input[type=checkbox]{appearance:none;-webkit-appearance:none;box-sizing:border-box;top:-1px;right:calc(50% - 27px);width:18px;height:18px;min-width:0;min-height:0;padding:0;margin:0;border-radius:50%;border:0;background:transparent}
-.setup-gallery .setup-app input[type=checkbox]:checked{background:var(--brand-forest,#49645a) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2 6.8 11 12 5.3' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat;box-shadow:0 0 0 2px #fffdf4,0 2px 6px #2a3d3340}
-.setup-gallery .setup-app:hover .setup-app-logo{transform:translateY(-2px)}
-@media(max-height:760px){.has-setup[data-setup-step="1"]>.startup-scene{width:64px;height:64px}.has-setup[data-setup-step="1"] .setup-gallery{height:calc(100dvh - 262px)}.has-setup[data-setup-step="1"] .startup-setup footer{margin-top:12px}}
-@media(max-width:620px){.setup-gallery .setup-categories{gap:0 12px}.setup-gallery .setup-app{width:76px}}
-
-/* One list of equal ways in: Google, ChatGPT (coming soon) and every supported local Agent.
-   Agents not found on this computer stay visible but greyed, so people know they are supported. */
-.setup-signin{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
-.setup-signin .setup-adopt-question{margin:0;font-size:16px;font-weight:600;text-align:center;max-width:360px}.setup-signin .setup-adopt-question+.setup-note{margin:0 0 4px;text-align:center;max-width:360px}
-.startup-setup .setup-signin button.setup-signin-option{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:0;width:364px;max-width:90vw;min-width:0;height:44px;min-height:44px;margin:0;padding:0 16px 0 54px;overflow:hidden;text-overflow:ellipsis;border-radius:22px;background:#fffdf8;color:#293d34;border:1px solid #58654b30;box-shadow:0 4px 16px #5065430b;font-size:15px;font-weight:500;white-space:nowrap;opacity:1}
-.startup-setup .setup-signin button.setup-signin-option:has(.setup-signin-tag){padding-right:100px}
-.startup-setup .setup-signin button.setup-signin-option:hover:not(:disabled){background:white;border-color:#58654b55}
-.startup-setup .setup-signin .setup-signin-option img.setup-signin-icon{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:22px;height:22px;flex:none;object-fit:contain;border-radius:5px}
-.setup-signin-tag{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:11px;line-height:18px;padding:0 8px;border-radius:9px;background:#ebe8db;color:#6b7464;font-weight:500}
-.startup-setup .setup-signin button.setup-signin-option:disabled{cursor:default;color:#29403466;background:#fffdf899;box-shadow:none}
-.startup-setup .setup-signin button.setup-signin-option:disabled img{filter:grayscale(1);opacity:.45}
-/* While one way is connecting, the others only dim; the one in progress keeps its colour. */
-.startup-setup .setup-signin button.setup-signin-option.is-connecting:disabled{color:#293d34;background:#fffdf8}
-.startup-setup .setup-signin button.setup-signin-option.is-connecting:disabled img{filter:none;opacity:1}
-@media(max-height:760px){.setup-signin{gap:6px}.startup-setup .setup-signin button.setup-signin-option{height:38px;min-height:38px;font-size:14px}.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:16px}.has-setup[data-setup-step="0"]>.startup-scene{width:96px;height:96px;margin-bottom:10px}}
-
-/* Round 4 (owner feedback 2026-10-02). Page 1 sorts the ways in into two kinds: start a new agent
-   (Google; ChatGPT soon) or bring the Agent already on this computer, as one row of small tiles. */
-.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:44px;max-width:none;width:auto}
-.setup-signin{gap:26px;width:auto}
-.setup-signin-group{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:392px;max-width:90vw}
-.setup-signin-group.is-adopt{align-items:center}
-.setup-signin-heading{margin:0 0 2px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-muted);text-align:left;padding-left:4px}
-.startup-setup .setup-signin .setup-signin-group button.setup-signin-option{width:100%;max-width:none}
-.setup-agent-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-.startup-setup .setup-signin .setup-agent-grid button.setup-signin-option{flex-direction:column;justify-content:center;gap:6px;height:80px;min-height:80px;padding:8px 4px;border-radius:16px;font-size:12px;line-height:14px;font-weight:550;white-space:normal;text-align:center}
-.startup-setup .setup-signin .setup-agent-grid .setup-signin-option img.setup-signin-icon{position:static;transform:none;width:26px;height:26px}
-.startup-setup .setup-signin .setup-agent-grid button.setup-signin-option:has(.setup-signin-tag){padding-right:4px}
-.setup-agent-grid .setup-signin-tag{position:absolute;top:auto;bottom:-8px;right:auto;left:50%;transform:translateX(-50%);font-size:9.5px;line-height:15px;padding:0 6px;white-space:nowrap;border:1px solid #58654b22}
-.startup-setup .setup-signin .setup-agent-grid button.setup-signin-option{overflow:visible}
-/* Not on this computer: quieter still, so the two that can be chosen read first. */
-.startup-setup .setup-signin .setup-agent-grid button.setup-signin-option.is-missing{background:transparent;border-style:dashed;border-color:#58654b26;color:#29403459}
-@media(max-height:760px){.setup-signin{gap:16px}.startup-setup .setup-signin .setup-agent-grid button.setup-signin-option{height:68px;min-height:68px}.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:22px}}
-/* The local Agent is the default way in (owner request 2026-10-04): the recommended one found here is
-   one wide forest button above the other Agents, with Google below as the account alternative. */
-.startup-setup .setup-signin .setup-signin-group button.setup-signin-option.setup-agent-default{height:48px;min-height:48px;background:var(--brand-forest,#49645a);color:#fffdf3;border-color:transparent;font-weight:600;box-shadow:0 4px 12px #36564422}
-.startup-setup .setup-signin .setup-signin-group button.setup-signin-option.setup-agent-default:hover:not(:disabled){background:#315747;border-color:transparent}
-.startup-setup .setup-signin button.setup-signin-option.setup-agent-default.is-connecting:disabled{background:var(--brand-forest,#49645a);color:#fffdf3}
-.setup-agent-default .setup-signin-tag{background:#fffdf326;color:#fffdf3}
-.startup-setup .setup-signin .setup-agent-default img.setup-signin-icon{background:#fffdf3;padding:2px;box-sizing:content-box}
-/* Round 5 (owner request 2026-10-04): "Give your agent a world". Each local Agent is one row with
-   its own name over where it comes from; the recommended one is forest. Page 2 brings it in live. */
-.setup-lede{margin:8px 0 0;color:var(--brand-muted);font-size:14.5px;text-align:center}
-.startup-setup .setup-signin .setup-signin-group button.setup-agent-button{height:54px;min-height:54px;padding-right:110px;white-space:normal}
-.startup-setup .setup-signin .setup-signin-group button.setup-agent-button.setup-agent-default{height:54px;min-height:54px}
-.setup-agent-text{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0;text-align:left}
-.setup-agent-text strong{font-size:15px;font-weight:600;line-height:19px}
-.setup-agent-text small{font-size:12px;line-height:15px;font-weight:450;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.setup-agent-text small:empty{display:none}
-.startup-setup .setup-signin .setup-signin-group button.setup-agent-button.is-missing{background:transparent;border-style:dashed;border-color:#58654b26;height:44px;min-height:44px}
-.has-setup[data-setup-step="0"] .startup-setup .setup-signin{gap:20px}
-.startup-setup.is-bringing .setup-content{display:flex;flex-direction:column;align-items:center;gap:14px;width:392px;max-width:90vw;margin:0 auto}
-.setup-bring-who{display:flex;align-items:center;gap:10px;align-self:stretch;justify-content:center}
-.setup-bring-who .setup-note{margin:0}
-.setup-bring-icon{width:28px;height:28px;border-radius:7px;object-fit:contain}
-.setup-bring-counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-self:stretch}
-.setup-bring-count{background:#fffdf8;border:1px solid #58654b26;border-radius:14px;padding:8px 4px;text-align:center}
-.setup-bring-count b{display:block;font-size:21px;font-weight:650;font-variant-numeric:tabular-nums;color:#293d34}
-.setup-bring-count span{font-size:11px;color:var(--brand-muted)}
-.setup-bring-feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;align-self:stretch;min-height:120px}
-.setup-bring-row{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 12px;border-radius:11px;background:#fffdf8;border:1px solid #58654b22;font-size:13px;color:#293d34;text-align:left}
-.setup-bring-row span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.setup-bring-row em{font-style:normal;font-size:11.5px;color:var(--brand-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-.setup-bring-dot{width:8px;height:8px;border-radius:50%;background:var(--brand-forest,#49645a);justify-self:center}
-.setup-bring-row.is-now .setup-bring-dot,.setup-bring-row.is-reconnect .setup-bring-dot{background:#c98a2e}
-.setup-bring-row.is-now .setup-bring-dot{animation:setup-bring-pulse 1.2s ease-in-out infinite}
-.setup-bring-row.is-stays{opacity:.6}.setup-bring-row.is-stays .setup-bring-dot{background:#9aa394}
-@keyframes setup-bring-pulse{50%{opacity:.3}}
-@media(prefers-reduced-motion:reduce){.setup-bring-row.is-now .setup-bring-dot{animation:none}}
-.setup-bring-links{display:flex;flex-direction:column;gap:5px;align-self:stretch}
-.setup-bring-empty,.setup-bring-done{margin:0;text-align:center}
-/* Five Agents and three cloud ways must fit above the brand at 850 px: a smaller Fox, tighter rows. */
-.has-setup[data-setup-step="0"]>.startup-scene{width:112px;height:112px;margin-bottom:4px}
-.has-setup[data-setup-step="0"] .startup-setup footer{margin-top:22px}
-.has-setup[data-setup-step="0"] .startup-setup .setup-signin{gap:14px}
-.startup-setup .setup-signin .setup-signin-group button.setup-agent-button,.startup-setup .setup-signin .setup-signin-group button.setup-agent-button.setup-agent-default{height:48px;min-height:48px}
-.startup-setup .setup-signin .setup-signin-group button.setup-agent-button.is-missing{height:38px;min-height:38px}
-.startup-setup .setup-signin .is-new button.setup-signin-option{height:40px;min-height:40px}
-.setup-signin-group{gap:6px}
-@media(max-height:760px){.has-setup[data-setup-step="0"]>.startup-scene{width:72px;height:72px}.startup-setup .setup-signin .setup-signin-group button.setup-agent-button,.startup-setup .setup-signin .setup-signin-group button.setup-agent-button.setup-agent-default{height:42px;min-height:42px}.startup-setup .setup-signin .setup-signin-group button.setup-agent-button.is-missing,.startup-setup .setup-signin .is-new button.setup-signin-option{height:34px;min-height:34px}.setup-lede{display:none}}
-/* Brand and version: one quiet signature line at the bottom. */
-.has-setup>.startup-brand{bottom:22px;--brand-wordmark-size:16px;--brand-mark-size:22px;gap:6px;align-items:center;opacity:.85}
-
-/* Page 2: chosen apps together on top, the rest by category below; one shared column grid. */
-.setup-gallery .setup-app-section{margin:0 0 12px}
-.setup-gallery .setup-section-head{position:sticky;top:0;z-index:3;display:flex;align-items:baseline;gap:8px;margin:0 -12px 6px;padding:8px 16px;background:#f3f1e6;border-bottom:1px solid #78806a18}
-.setup-gallery .setup-section-head .setup-group-title{position:static;margin:0;padding:0;border:0;box-shadow:none;background:none;font-size:12.5px;font-weight:600;color:var(--brand-ink)}
-.setup-count{min-width:18px;padding:0 6px;border-radius:9px;background:var(--brand-forest,#49645a);color:#fffdf3;font-size:11px;line-height:17px;font-weight:600;text-align:center}
-.setup-section-hint{margin-left:auto;min-width:0;font-size:11.5px;color:var(--brand-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.setup-gallery .setup-apps{display:grid;grid-template-columns:repeat(auto-fill,82px);justify-content:start;gap:4px 6px;margin:0;min-height:0}
-.setup-chosen .setup-origins{min-height:64px;padding:2px 4px;border-radius:14px;background:#fffdf6;box-shadow:inset 0 0 0 1px #78806a1f}
-/* Chosen apps in two groups, found on this computer, then popular (#1616): the category rows' label column. */
-.setup-gallery .setup-origin{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:start;padding:4px 0;border-top:1px solid #78806a14}
-.setup-gallery .setup-origin:first-child{border-top:0}
-.setup-gallery .setup-origin-title{margin:0;padding:17px 4px 0;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.03em;color:var(--brand-forest,#49645a);text-align:left}
-.setup-gallery .setup-category{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:start;padding:4px 0;border-top:1px solid #78806a12}
-.setup-gallery .setup-category:first-of-type{border-top:0}
-.setup-gallery .setup-category-title{margin:0;padding:23px 4px 0;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.03em;color:var(--brand-muted);text-align:left;white-space:nowrap}
-.setup-gallery .setup-app{width:82px;height:64px}
-/* The checkbox stays the real control, but invisible: the tile's place shows the choice. */
-.setup-gallery .setup-app input[type=checkbox],.setup-gallery .setup-app input[type=checkbox]:checked{position:absolute;inset:0;z-index:2;width:100%;height:100%;margin:0;opacity:0;background:none;box-shadow:none;cursor:pointer}
-.setup-gallery .setup-app:has(input:focus-visible){outline:2px solid var(--brand-focus);outline-offset:-1px}
-.setup-icon-tile{position:relative}
-.setup-app-badge{position:absolute;top:-6px;right:-7px;width:16px;height:16px;border-radius:50%;opacity:0;transform:scale(.7);transition:opacity .15s,transform .15s;box-shadow:0 0 0 2px #fffdf4,0 1px 3px #2a3d3333;background:var(--brand-forest,#49645a) center/10px no-repeat;pointer-events:none}
-.setup-more .setup-app-badge{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5v7M1.5 5h7' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")}
-.setup-chosen .setup-app-badge{background-color:#8a8f80;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5h7' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")}
-.setup-gallery .setup-app:is(:hover,:has(input:focus-visible)) .setup-app-badge{opacity:1;transform:none}
-.setup-more .setup-app .setup-icon-tile{opacity:.92}
-::view-transition-group(*){animation-duration:.38s;animation-timing-function:cubic-bezier(.22,.7,.2,1)}
-@media(prefers-reduced-motion:reduce){.setup-app-badge{transition:none}}
-.startup-setup .setup-gallery-toolbar button.setup-import{min-height:32px;height:32px;margin:0;padding:0 12px;font-size:12px;border:1px solid #78806a40;border-radius:9px;background:#fff6;color:var(--brand-muted)}
-/* Setup offers a few common apps; the rest of the catalog waits behind one quiet link-like button. */
-.startup-setup .setup-gallery .setup-more>button.setup-show-all{display:block;min-height:28px;margin:12px auto 6px;padding:4px 14px;font-size:12px;font-weight:550;border:1px solid #78806a40;border-radius:9px;background:#fff6;color:var(--brand-muted);box-shadow:none;cursor:pointer}
-.startup-setup .setup-gallery .setup-more>button.setup-show-all:hover{background:#fff;color:var(--brand-forest)}
-.setup-gallery .setup-more.is-short{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));column-gap:28px}
-.setup-gallery .setup-more.is-short>.setup-section-head,.setup-gallery .setup-more.is-short>.setup-show-all{grid-column:1/-1}
-.setup-gallery .setup-more.is-short>.setup-category:nth-of-type(2){border-top:0}
-/* Three pages, three bars and no words (owner requests 2026-10-05, 2026-10-06): done and current in forest, the rest pale. */
-.world-startup>.setup-steps{display:flex;gap:8px;margin:0;padding:0;list-style:none;z-index:2}
-.setup-step{display:block;width:64px}
-.setup-step-bar{display:block;width:100%;height:5px;border-radius:5px;background:#d6dacb;transition:background .3s}
-.setup-step.is-done .setup-step-bar{background:#8fa596}
-.setup-step.is-current .setup-step-bar{background:var(--brand-forest,#49645a)}
-.world-startup.setup-entering .setup-steps{opacity:0;transition:opacity .4s}
-/* Page 1: one square tile per local Agent (owner request 2026-10-05). */
-.has-setup[data-setup-step="0"] .setup-signin-group.is-existing,.has-setup[data-setup-step="0"] .setup-signin-group.is-new{width:640px;max-width:92vw}
-.setup-signin-group .setup-agent-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-.startup-setup .setup-signin .setup-signin-group .setup-agent-grid button.setup-agent-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;height:auto;min-height:0;aspect-ratio:1;padding:8px 8px 16px;border-radius:18px;overflow:visible;white-space:normal;text-align:center}
-.startup-setup .setup-signin .setup-agent-grid .setup-agent-tile img.setup-signin-icon{position:static;transform:none;width:38px;height:38px;margin-bottom:4px;border-radius:9px}
-.setup-agent-tile .setup-agent-text{align-items:center;text-align:center;width:100%}
-.setup-agent-tile .setup-agent-text strong{font-size:14px;line-height:17px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.setup-agent-tile .setup-agent-text small{font-size:10.5px;line-height:13px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-align:center}
-.startup-setup .setup-signin .setup-agent-grid .setup-agent-tile .setup-signin-tag{position:absolute;top:auto;bottom:-9px;right:auto;left:50%;transform:translateX(-50%);font-size:10px;line-height:16px;padding:0 8px;white-space:nowrap;border:1px solid #58654b22}
-.startup-setup .setup-signin .setup-signin-group .setup-agent-grid button.setup-agent-tile.setup-agent-default{height:auto;min-height:0;box-shadow:0 6px 16px #36564430}
-.startup-setup .setup-signin .setup-agent-grid .setup-agent-tile.setup-agent-default img.setup-signin-icon{background:#fffdf3;padding:3px;box-sizing:content-box;width:34px;height:34px}
-.startup-setup .setup-signin .setup-signin-group .setup-agent-grid button.setup-agent-tile.is-missing{height:auto;min-height:0}
-.startup-setup .setup-signin .setup-agent-grid .setup-agent-tile:hover:not(:disabled){transform:translateY(-2px);transition:transform .15s}
-.setup-cloud-row{display:flex;flex-direction:column;gap:8px}
-.startup-setup .setup-signin .setup-signin-group .setup-cloud-row button.setup-signin-option{height:44px;min-height:44px}
-@media(max-height:760px){.setup-signin-group .setup-agent-grid{gap:10px}.startup-setup .setup-signin .setup-agent-grid .setup-agent-tile img.setup-signin-icon{width:30px;height:30px}.startup-setup .setup-signin .setup-signin-group .setup-agent-grid button.setup-agent-tile{padding:6px 6px 9px}}
-/* Page 2: the Agent's card is read while the person watches: a light sweeps its portrait, each fact resolves in turn. */
-.startup-setup.is-bringing .setup-content{width:460px}
-.setup-agent-card{display:flex;align-items:center;gap:18px;align-self:stretch;padding:14px 18px;border-radius:18px;background:#fffdf8;border:1px solid #58654b26;box-shadow:0 6px 18px #36564412}
-.setup-agent-portrait{position:relative;flex:none;width:72px;height:72px;border-radius:20px;background:#f1efe3;display:grid;place-items:center;overflow:hidden}
-.setup-agent-portrait .setup-bring-icon{width:44px;height:44px;border-radius:10px}
-.setup-agent-scan{position:absolute;inset:0;pointer-events:none;opacity:0;background:linear-gradient(180deg,transparent 0,#ffe7a800 35%,#ffe7a8aa 50%,#ffe7a800 65%,transparent 100%);background-size:100% 220%}
-.setup-agent-card.is-reading .setup-agent-scan{opacity:1;animation:setup-agent-scan 1.6s ease-in-out infinite}
-.setup-agent-card.is-reading .setup-agent-portrait{box-shadow:0 0 0 3px #c98a2e33}
-@keyframes setup-agent-scan{0%{background-position:0 120%}100%{background-position:0 -20%}}
-.setup-agent-facts{flex:1;min-width:0;margin:0;display:grid;gap:5px}
-.setup-agent-fact{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:baseline;gap:8px;text-align:left;font-size:13px}
-.setup-agent-fact dt{color:var(--brand-muted);font-size:12px}
-.setup-agent-fact dd{margin:0;color:#293d34;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.setup-agent-fact.is-fresh dd{animation:setup-fact-in .35s ease-out}
-.setup-agent-fact:first-child dd{font-size:16px}
-.setup-agent-fact dd.setup-fact-reading{width:fit-content;font-weight:450;color:transparent;border-radius:6px;background:linear-gradient(90deg,#ebe8db 0,#f8f5ea 50%,#ebe8db 100%);background-size:200% 100%;animation:setup-fact-shimmer 1.2s linear infinite}
-@keyframes setup-fact-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-@keyframes setup-fact-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-.setup-agent-about{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
-.startup-setup .setup-agent-about .setup-bring-from{margin:0;font-size:11.5px;text-align:left}
-/* The bring page stays on one screen: a smaller Fox, tighter counts and rows. */
-.has-setup[data-setup-step="1"]:has(.is-bringing)>.startup-scene{width:56px;height:56px}
-.startup-setup.is-bringing .setup-content{gap:10px}
-.has-setup:has(.is-bringing)>.startup-brand{display:none}
-.startup-setup.is-bringing .setup-bring-count{padding:5px 4px}
-.startup-setup.is-bringing .setup-bring-count b{font-size:18px;line-height:22px}
-.startup-setup.is-bringing .setup-bring-feed{min-height:0;gap:4px}
-.startup-setup.is-bringing .setup-bring-row{padding:4px 12px}
-.startup-setup.is-bringing .setup-bring-links{gap:4px}
-@media(max-height:760px){.has-setup[data-setup-step="1"]:has(.is-bringing)>.startup-scene{display:none}.setup-agent-card{padding:10px 14px}.setup-agent-portrait{width:56px;height:56px}}
-@media(prefers-reduced-motion:reduce){.setup-agent-card.is-reading .setup-agent-scan,.setup-agent-fact.is-fresh dd,.setup-agent-fact dd.setup-fact-reading{animation:none}}
-/* The apps page ends on one big Enter my world (owner request 2026-10-05); the gallery gives it room above the brand. */
-.has-setup[data-setup-step="1"] .startup-setup:not(.is-bringing) .setup-gallery{height:min(580px,calc(100dvh - 392px))}
-@media(max-height:760px){.has-setup[data-setup-step="1"] .startup-setup:not(.is-bringing) .setup-gallery{height:calc(100dvh - 318px)}.has-setup[data-setup-step="1"]>.startup-scene{width:52px;height:52px}}
-.startup-setup button.setup-primary.setup-enter{min-width:260px;padding:16px 56px;border-radius:30px;font-size:18px;font-weight:650;letter-spacing:.01em;box-shadow:0 8px 22px #36564440,0 0 0 4px #49645a1a}
-.startup-setup button.setup-primary.setup-enter:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 26px #36564450,0 0 0 5px #49645a24}
-/* One frame for the three setup pages (owner requests 2026-10-06), centred in the window: the bars, Fox, the heading
-   and its line, the page's own part in a body of one height, then the big button and a small Back, with the brand
-   well below. The body is the same height on every page, so the heading and the button stay put from page to page,
-   and the page's part sits in the middle of it, so it is never far from the button. */
-.world-startup.has-setup{--setup-body:clamp(300px,calc(100dvh - 500px),440px);justify-content:safe center;align-items:center;gap:0;padding:36px 24px 92px;overflow:auto}
-.world-startup.has-setup>.setup-steps{position:static;transform:none;flex:none;margin:0 0 26px}
-.world-startup.has-setup[data-setup-step]>.startup-scene{display:block;position:relative;flex:none;width:96px;height:96px;margin:0 0 16px;transition:none}
-.world-startup.has-setup>.startup-setup{position:static;flex:none;margin:0;width:min(820px,100%);display:flex;flex-direction:column;align-items:center;animation:none}
-.world-startup.has-setup>.startup-brand,.world-startup.has-setup:has(.is-bringing)>.startup-brand{display:flex;position:absolute;bottom:26px;pointer-events:none}
-.world-startup.has-setup .startup-setup h1{flex:none;margin:0;font-size:30px;line-height:38px;height:38px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.world-startup.has-setup .startup-setup .setup-lede{display:block;flex:none;margin:8px 0 0;height:22px;font-size:15px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.world-startup.has-setup .startup-setup .setup-content{flex:none;height:var(--setup-body);width:100%;margin:32px 0 0;padding:4px 0;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;justify-content:safe center;align-items:center;gap:16px}
-.world-startup.has-setup .startup-setup footer.setup-footer{position:relative;left:auto;right:auto;bottom:auto;flex:none;margin:32px auto 0;width:320px;max-width:calc(100vw - 32px);min-height:0;display:flex;flex-direction:column;align-items:center;gap:6px;transform:none}
-/* Notices sit just above the button without taking room, so nothing moves when one appears. */
-.world-startup.has-setup .startup-setup footer .setup-status-slot{position:absolute;top:auto;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));height:auto;max-height:40px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
-.world-startup.has-setup .startup-setup footer .setup-status-slot p{margin:0;font-size:12.5px;line-height:18px;pointer-events:auto}
-.world-startup.has-setup .startup-setup footer button.setup-primary.setup-next{width:100%;height:56px;min-height:56px;padding:0 24px;border-radius:28px;font-size:18px;font-weight:650;letter-spacing:.01em;box-shadow:0 8px 22px #36564440,0 0 0 4px #49645a1a}
-.world-startup.has-setup .startup-setup footer button.setup-primary.setup-next:hover:not(:disabled){transform:translateY(-1px)}
-.world-startup.has-setup .startup-setup footer button.setup-primary.setup-next:disabled{opacity:.4;box-shadow:none}
-.world-startup.has-setup .startup-setup footer button.setup-back{min-height:28px;height:28px;padding:0 14px;font-size:13px;text-decoration:none;color:var(--brand-muted)}
-.world-startup.has-setup .startup-setup footer button.setup-back:hover:not(:disabled){color:var(--brand-ink);text-decoration:underline}
+/* First-use setup is one page (owner request 2026-10-09): the brand on top, the Agents found here as cards,
+   everything else folded under More options, one big button at the bottom. Choosing brings the Agent in on
+   the same page: its card on the left, what comes along arriving as tiles on the right. The World it is
+   about to get is painted softly behind; Fox waits for the World. */
+.world-startup.has-setup{justify-content:flex-start;gap:0;padding:clamp(20px,5vh,48px) 24px clamp(20px,4vh,40px);box-sizing:border-box;overflow:hidden}
+.world-startup.has-setup::before{content:'';position:absolute;left:0;right:0;bottom:0;height:62%;background:var(--setup-world,none) center 70%/cover no-repeat;opacity:.5;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 78%);mask-image:linear-gradient(to bottom,transparent,#000 78%);pointer-events:none}
+.has-setup>.startup-scene,.has-setup>.startup-status{display:none}
+.world-startup.has-setup>.startup-brand{position:relative;flex:none;display:flex;margin:0;--brand-wordmark-size:clamp(24px,3.4vh,30px);--brand-mark-size:clamp(36px,5.4vh,48px);gap:10px}
+.startup-setup{position:relative;flex:1;min-height:0;width:min(1040px,100%);display:flex;flex-direction:column;align-items:center;margin-top:clamp(12px,2.6vh,26px);color:var(--brand-ink);text-align:center;animation:setup-enter .4s ease both}
+@keyframes setup-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .setup-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-/* Page 1: the local Agents in one row of squares, then the cloud agents stacked under each other. */
-.world-startup.has-setup .startup-setup .setup-signin{gap:30px;width:auto}
-.world-startup.has-setup .startup-setup .setup-signin-group{gap:10px}
-.startup-setup .setup-signin .setup-agent-grid .setup-agent-tile[aria-pressed="true"]::after{content:'';position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#fffdf3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2 6.8 11 12 5.3' fill='none' stroke='%2349645a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;box-shadow:0 1px 4px #2a3d3340}
-.world-startup.has-setup .setup-signin-group.is-new{position:relative}
-.world-startup.has-setup .setup-cloud-row{flex-direction:column;align-items:center;gap:10px}
-.world-startup.has-setup .startup-setup .setup-signin .setup-signin-group .setup-cloud-row button.setup-signin-option{width:380px;max-width:100%;height:44px;min-height:44px;font-size:14.5px;padding:0 96px 0 48px}
-.world-startup.has-setup .startup-setup .setup-signin .setup-cloud-row .setup-signin-option img.setup-signin-icon{left:18px;width:20px;height:20px}
-.world-startup.has-setup .startup-setup .setup-cloud-row .setup-signin-tag{right:12px;font-size:10.5px}
-.world-startup.has-setup .startup-setup .setup-signin-group.is-new>button.setup-mock-google{align-self:center;min-height:28px;margin-top:2px}
-/* Sign-in help and its links hang under the cloud agents without taking room (Google is coming soon). */
-.world-startup.has-setup .startup-setup .setup-signin-group.is-new .setup-google-help{position:absolute;top:100%;left:0;right:0;height:44px;margin:0 auto!important;text-align:center}
-.world-startup.has-setup .startup-setup .setup-signin-group.is-new .setup-cancel-slot{position:absolute;top:calc(100% + 44px);left:0;right:0;height:44px;gap:20px}
-/* Page 2: the card, then a few lines that scroll upward like a scan while the Agent moves in. */
-.world-startup.has-setup .startup-setup.is-bringing .setup-content>*{width:min(500px,100%);flex:none;align-self:center;box-sizing:border-box}
-.world-startup.has-setup .startup-setup.is-bringing .setup-content{gap:22px}
-.setup-agent-card{padding:18px 22px;gap:22px}
-.setup-agent-fact{grid-template-columns:96px minmax(0,1fr)}
-.setup-agent-fact dd{font-weight:550}
-.setup-agent-fact:first-child dd{font-weight:650}
-.setup-bring-ticker{position:relative;display:block;height:66px;overflow:hidden;font-size:14px;color:#293d34;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 70%);mask-image:linear-gradient(to bottom,transparent 0,#000 70%)}
-.setup-bring-ticker.is-empty{visibility:hidden}
-.setup-bring-roll{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center}
-.setup-bring-roll.is-rolling{animation:setup-scan .26s ease-out both}
-.setup-bring-line{display:block;max-width:100%;height:22px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--brand-muted)}
-.setup-bring-line.is-now{color:#293d34;font-weight:550}
-.setup-bring-ticker.is-done .setup-bring-line.is-now{color:var(--brand-forest,#49645a);font-weight:650}
-@keyframes setup-scan{from{transform:translateY(22px)}to{transform:none}}
-/* Page 3: two sections, the apps on this computer, then popular ones. */
-.world-startup.has-setup[data-setup-step] .startup-setup .setup-gallery{height:auto;max-height:none;width:min(760px,100%);padding:0;margin:0;box-sizing:border-box;overflow:visible;background:none;border:0;box-shadow:none;display:flex;flex-direction:column;gap:16px}
-.world-startup.has-setup .startup-setup .setup-gallery .setup-app-section{margin:0;display:flex;flex-direction:column;gap:8px}
-.world-startup.has-setup .startup-setup .setup-gallery .setup-group-title{position:static;margin:0;padding:0 4px;border:0;background:none;box-shadow:none;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-muted);text-align:left}
-.world-startup.has-setup .startup-setup .setup-gallery .setup-apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:4px 8px}
-.world-startup.has-setup .startup-setup .setup-gallery .setup-app{width:auto;height:64px}
-.setup-gallery .setup-app:has(input:checked) .setup-app-badge{opacity:1;transform:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2 6.8 11 12 5.3' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
-.setup-gallery .setup-app:not(:has(input:checked)) .setup-icon-tile{opacity:.4;filter:grayscale(.6)}
-.world-startup.has-setup .startup-setup .setup-gallery:empty{display:none}
-@media(max-height:760px){
- .world-startup.has-setup{--setup-body:clamp(240px,calc(100dvh - 400px),360px);padding:20px 24px 28px}
- .world-startup.has-setup>.setup-steps{margin-bottom:16px}
- .world-startup.has-setup[data-setup-step]>.startup-scene{width:64px;height:64px;margin-bottom:10px}
- .world-startup.has-setup>.startup-brand,.world-startup.has-setup:has(.is-bringing)>.startup-brand{display:none}
- .world-startup.has-setup .startup-setup .setup-content{margin-top:22px}
- .world-startup.has-setup .startup-setup footer.setup-footer{margin-top:24px}
- .world-startup.has-setup .startup-setup .setup-signin{gap:20px}
-}
-@media(prefers-reduced-motion:reduce){.setup-bring-roll.is-rolling{animation:none}}
-/* Once Enter my World starts the icons' change, the bars and the brand leave with the rest (owner request 2026-10-06). */
-.world-startup.is-gathering>.setup-steps,.world-startup.is-gathering>.startup-brand{opacity:0;transition:opacity .3s}
-@media(prefers-reduced-motion:reduce){.world-startup.is-gathering>.setup-steps,.world-startup.is-gathering>.startup-brand{transition:none}}
-/* No scrollbar on any setup page (owner request 2026-10-06): the frame and the body fit the window; should a very
-   small window still overflow, it scrolls without a bar. The apps page is wider and tightens its tiles to fit
-   (startup-setup.ts fitApps). */
-.world-startup.has-setup,.world-startup.has-setup .startup-setup .setup-content{scrollbar-width:none}
-.world-startup.has-setup::-webkit-scrollbar,.world-startup.has-setup .startup-setup .setup-content::-webkit-scrollbar{display:none}
-.world-startup.has-setup[data-setup-step] .startup-setup .setup-gallery{width:min(940px,100%)}
-.world-startup.has-setup .startup-setup .setup-gallery .setup-apps{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
-.world-startup.has-setup .startup-setup .setup-gallery.is-dense{gap:10px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-dense .setup-apps{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:2px 6px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-dense .setup-app{height:56px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-dense .setup-icon-tile{width:30px;height:30px;border-radius:8px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-dense .setup-icon-tile.is-native .setup-app-logo{width:30px;height:30px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-dense .setup-app strong{font-size:10.5px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-denser .setup-apps{grid-template-columns:repeat(auto-fill,minmax(62px,1fr))}
-.world-startup.has-setup .startup-setup .setup-gallery.is-denser .setup-app{height:50px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-denser .setup-icon-tile,.world-startup.has-setup .startup-setup .setup-gallery.is-denser .setup-icon-tile.is-native .setup-app-logo{width:26px;height:26px}
-.world-startup.has-setup .startup-setup .setup-gallery.is-denser .setup-app strong{font-size:10px;line-height:12px}
-/* Last step: names give way to icons (each keeps its name as a tooltip). */
-.world-startup.has-setup .startup-setup .setup-gallery.is-densest .setup-apps{grid-template-columns:repeat(auto-fill,minmax(44px,1fr))}
-.world-startup.has-setup .startup-setup .setup-gallery.is-densest .setup-app{height:40px;justify-content:center}
-.world-startup.has-setup .startup-setup .setup-gallery.is-densest .setup-app strong{display:none}
-/* The sign-in help and its slot take no height, so an empty one adds nothing to scroll; their words hang below. */
-.world-startup.has-setup .startup-setup .setup-signin-group.is-new .setup-google-help{height:0;overflow:visible;line-height:20px;padding-top:10px}
-.world-startup.has-setup .startup-setup .setup-signin-group.is-new .setup-cancel-slot{top:calc(100% + 66px);height:0;min-height:0;overflow:visible}
-@media(max-height:760px){.world-startup.has-setup{--setup-body:clamp(240px,calc(100dvh - 362px),380px)}}
-@media(min-height:761px){.world-startup.has-setup{--setup-body:clamp(300px,calc(100dvh - 480px),440px);padding:28px 24px 92px}.world-startup.has-setup[data-setup-step]>.startup-scene{width:88px;height:88px}.world-startup.has-setup .startup-setup .setup-signin{gap:24px}.world-startup.has-setup>.startup-brand,.world-startup.has-setup:has(.is-bringing)>.startup-brand{bottom:22px}}
-/* No Agent on this computer: Check again, or an API key for the built-in Agent (owner decision 2026-10-07). */
-.startup-setup .setup-agent-needed{display:flex;flex-direction:column;align-items:center;gap:6px}
-.startup-setup .setup-agent-needed .setup-note{margin:6px auto 0;text-align:center;max-width:420px}
-.startup-setup .setup-signin-head{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 2px}
-.startup-setup .setup-signin-head .setup-signin-heading{margin:0}
-.startup-setup .setup-signin-head .setup-remote-toggle{text-transform:none;letter-spacing:0;font-size:12px;font-weight:500;padding:0;min-height:0}
-.startup-setup .setup-signin.is-remote-form .setup-agent-grid,.startup-setup .setup-signin.is-remote-form .setup-signin-group.is-new{display:none}
-.startup-setup .setup-agent-remote{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:8px}
-.startup-setup .setup-agent-remote .setup-note{margin:0 auto;text-align:center;max-width:420px}
-.startup-setup .setup-remote-code{width:min(420px,100%);font:12px ui-monospace,monospace;padding:8px 10px;border:1px solid #d9cbae;border-radius:10px;background:#fffdf6;color:#354132}
-.startup-setup .setup-agent-fallback{display:flex;gap:18px;justify-content:center}
-.startup-setup .setup-key-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:min(520px,100%)}
-.startup-setup .setup-key-field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--brand-muted)}
-.startup-setup .setup-key-field input,.startup-setup .setup-key-field select{font:inherit;font-size:13px;padding:7px 9px;border-radius:8px;border:1px solid color-mix(in srgb,var(--brand-muted) 40%,transparent);background:rgba(255,255,255,.75);color:inherit;min-width:0}
-.startup-setup .setup-signin.is-key-form .setup-signin-group.is-new{display:none}
+.startup-setup button{font:inherit;cursor:pointer;border:0;margin:0;color:var(--brand-ink);transition:background .2s,transform .2s,opacity .2s,box-shadow .2s}
+.startup-setup button:disabled{cursor:default}
+.startup-setup button:focus-visible{outline:2px solid var(--brand-focus);outline-offset:3px}
+.startup-setup .setup-lede{margin:0 0 clamp(10px,2vh,18px);font-size:15px;color:var(--brand-muted)}
+.startup-setup .setup-note{font-size:12.5px;line-height:1.55;margin:8px auto;color:var(--brand-muted);max-width:520px}
+.startup-setup .setup-error{font-size:12.5px;line-height:1.45;margin:6px auto;color:#8a3b25;max-width:560px}
+.startup-setup button.setup-link{background:none;min-height:32px;padding:4px 10px;font-size:13px;color:var(--brand-muted);text-decoration:underline;text-underline-offset:3px}
+.startup-setup button.setup-link:hover:not(:disabled){color:var(--brand-ink)}
+.setup-choose{display:flex;flex-direction:column;align-items:center;width:100%;flex:1;min-height:0}
+
+/* The Agents found here: one card each, the picked one lifted with a check. */
+.setup-agent-cards{display:flex;flex:none;justify-content:center;gap:16px;width:100%;min-height:clamp(150px,24vh,210px)}
+/* With More options open on a short window, the cards keep only their mark and name. */
+@media(max-height:860px){.setup-choose:has(.setup-more-wrap.is-open) .setup-agent-cards{min-height:0}.setup-choose:has(.setup-more-wrap.is-open) :is(.setup-agent-chips,.setup-agent-sub){display:none}.setup-choose:has(.setup-more-wrap.is-open) .setup-agent-icon{width:40px;height:40px;margin-bottom:4px}}
+.startup-setup .setup-agent-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:0 1 230px;min-width:0;padding:clamp(14px,2.4vh,22px) 14px;border-radius:22px;background:#fffffff0;border:2px solid transparent;box-shadow:0 6px 18px #203b3012}
+.startup-setup .setup-agent-card:hover:not(:disabled){box-shadow:0 10px 26px #203b301e}
+.startup-setup .setup-agent-card.setup-agent-default{border-color:var(--brand-forest);transform:translateY(-6px);box-shadow:0 16px 34px #315f4830}
+.setup-agent-card.setup-agent-default::after{content:'✓';position:absolute;top:11px;right:11px;width:24px;height:24px;border-radius:50%;background:var(--brand-forest);color:#fff;font:700 13px/24px sans-serif}
+.setup-agent-card.is-connecting{opacity:.8}
+.setup-agent-icon{width:clamp(48px,8vh,72px);height:clamp(48px,8vh,72px);border-radius:18px;object-fit:contain;margin-bottom:8px}
+.setup-agent-name{font-size:17px;font-weight:650;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-agent-sub{font-size:12px;color:var(--brand-muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-agent-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:10px}
+.setup-agent-chip{padding:2px 9px;border-radius:99px;background:var(--brand-surface);font-size:11.5px;white-space:nowrap}
+.setup-signin-tag{display:inline-block;margin-top:8px;padding:2px 8px;border-radius:99px;background:#efe7d3;color:#7a6a46;font-size:10.5px;font-weight:600}
+.setup-agent-card.is-install{cursor:default}
+.setup-agent-cards.is-loading{opacity:0}
+.setup-choose>.setup-link{margin-top:6px}
+
+/* More options: a quiet bar with a peek of what is inside; open, a grid of the rest, greyed where it cannot be used. */
+.setup-more-wrap{display:flex;flex-direction:column;align-items:center;width:100%;margin-top:clamp(14px,3vh,28px)}
+.startup-setup .setup-more-toggle{display:flex;align-items:center;gap:10px;min-height:38px;padding:6px 14px 6px 12px;border-radius:99px;background:#ffffffa0;color:var(--brand-muted);font-size:13.5px}
+.startup-setup .setup-more-toggle:hover{background:#fffffff0;color:var(--brand-ink)}
+.setup-more-chevron::before{content:'›';display:inline-block;font-size:16px;line-height:1;transition:transform .2s}
+.setup-more-wrap.is-open .setup-more-chevron::before{transform:rotate(90deg)}
+.setup-more-peek{display:flex}
+.setup-more-peek img{width:24px;height:24px;margin-left:-6px;padding:3px;border-radius:50%;background:#fff;border:1.5px solid var(--brand-paper);object-fit:contain;filter:grayscale(1);opacity:.75;box-sizing:border-box}
+.setup-more-peek img:first-child{margin-left:0}
+.setup-more-wrap.is-open .setup-more-peek{display:none}
+.setup-more{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:min(780px,100%);margin-top:12px}
+.setup-more[hidden]{display:none}
+.startup-setup .setup-more-option{display:flex;align-items:center;gap:10px;min-height:46px;padding:7px 12px;border-radius:12px;background:#ffffffb8;text-align:left;font-size:13px}
+.startup-setup .setup-more-option:hover:not(:disabled){background:#fff}
+.startup-setup .setup-more-option:disabled{color:#6d7b70}
+.startup-setup .setup-more-option:disabled .setup-signin-icon{filter:grayscale(1);opacity:.65}
+.setup-more-option .setup-signin-icon,.setup-more-glyph{width:26px;height:26px;flex:none;object-fit:contain;text-align:center;font-size:17px;line-height:26px}
+.setup-more-text{display:flex;flex-direction:column;min-width:0}
+.setup-more-text strong{font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.setup-more-text small{font-size:11px;color:#8a968c}
+.setup-more-option .setup-signin-tag{margin:0 0 0 auto;flex:none}
+.setup-more-option.is-connecting{color:var(--brand-ink)}
+.startup-setup .setup-mock-google{margin-top:6px}
+.setup-google-help{margin:6px 0 0;font-size:12px;line-height:20px;color:var(--brand-muted)}
+.setup-google-help[hidden]{display:none}
+.setup-cancel-slot{display:flex;align-items:center;justify-content:center;gap:16px;min-height:36px}
+
+/* The API key and another computer's code take the cards' place. */
+.setup-form-panel{display:flex;flex-direction:column;align-items:center;gap:6px;width:min(560px,100%);padding:16px 20px;border-radius:20px;background:#fffffff0;box-shadow:0 6px 18px #203b3012}
+.setup-remote-code{min-height:38px;padding:7px 10px;border:1px solid #78806a40;border-radius:10px;background:#fff;color:var(--brand-ink);font:inherit;font-size:13px;box-sizing:border-box}
+.setup-remote-code{width:100%}
+.setup-agent-fallback{display:flex;gap:6px;justify-content:center}
+/* No Agent here: Worldlet installs Hermes Agent, then ChatGPT is signed in inside it (owner decisions 2026-10-09). */
+.setup-agent-needed{display:flex;flex-direction:column;align-items:center;gap:2px;max-width:520px;text-align:center}
+.setup-agent-needed .setup-note{margin:0}
+.setup-hermes-code strong{font:600 15px ui-monospace,monospace;letter-spacing:.08em;margin-left:4px}
+
+/* The chosen Agent on the left, what comes along on the right. */
+.setup-import{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start;width:100%;flex:1;min-height:0;text-align:left}
+.setup-passport{display:flex;flex-direction:column;align-items:center;padding:clamp(18px,3vh,26px) 20px 20px;border-radius:24px;background:#fffffff2;box-shadow:0 14px 34px #203b301c;text-align:center;transform-origin:50% 50%}
+.setup-passport-icon{width:clamp(72px,12vh,104px);height:clamp(72px,12vh,104px);border-radius:24px;object-fit:contain}
+.setup-passport-name{margin:12px 0 0;font-size:clamp(19px,2.8vh,23px);font-weight:700;letter-spacing:-.02em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-passport-from{margin:2px 0 0;font-size:12.5px;color:var(--brand-muted)}
+.setup-passport-facts{width:100%;margin:14px 0 0;padding-top:12px;border-top:1px dashed var(--brand-line);display:grid;gap:5px;font-size:12.5px;text-align:left}
+.setup-passport-facts .setup-agent-fact{display:grid;grid-template-columns:auto 1fr;gap:12px}
+.setup-passport-facts dt{color:var(--brand-muted)}
+.setup-passport-facts dd{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(74px,calc((100dvh - 330px)/4),118px);grid-auto-flow:row dense;gap:10px}
+.setup-tile{position:relative;min-width:0;padding:12px 14px;border-radius:18px;background:#fffffff0;box-shadow:0 4px 14px #203b300f;overflow:hidden;box-sizing:border-box}
+.setup-tile.is-arriving{animation:setup-tile-in .42s cubic-bezier(.22,.7,.2,1) both}
+@keyframes setup-tile-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.setup-tile.is-tall{grid-row:span 2;background:linear-gradient(160deg,#fff7e6,#f1e3c4)}
+.setup-tile.is-wide{grid-column:span 2}
+.setup-tile.is-big{grid-column:span 2;grid-row:span 2}
+.setup-tile-title{margin:0;font-size:11px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--brand-muted)}
+.setup-tile-count{display:block;margin-top:4px;font-size:clamp(22px,3.4vh,30px);font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.setup-tile-note{margin:2px 0 0;font-size:12px;line-height:1.4;color:var(--brand-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-tile-quote{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:6px 0 2px;font-size:13.5px;line-height:1.4;font-style:italic}
+.setup-tile-lead{margin:6px 0 2px;font-size:16px;font-weight:650}
+.setup-tile-fox{position:absolute;left:50%;bottom:-6px;width:min(170px,92%);transform:translateX(-50%);object-fit:contain}
+.setup-tile-titles{list-style:none;margin:8px 0 0;padding:0}
+.setup-tile-titles li{margin-bottom:5px;padding:5px 10px;border-radius:9px;background:var(--brand-surface);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setup-tile-titles li:nth-child(3){opacity:.65}
+.setup-tile-titles li:nth-child(4){opacity:.35}
+.setup-tile-logos{display:flex;gap:6px;margin-top:8px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent)}
+.setup-tile-logos :is(img,.setup-app){display:block;width:28px;height:28px;flex:none}
+.setup-tile-logos img{border-radius:7px;object-fit:contain;background:#fff;box-shadow:0 1px 3px #0000001a;padding:2px;box-sizing:border-box}
+.setup-tile-chip{display:inline-flex;align-items:center;height:28px;padding:0 8px;border-radius:8px;background:var(--brand-surface);font-size:12px}
+.setup-tile-done{position:absolute;top:11px;right:11px;width:18px;height:18px;border-radius:50%;background:var(--brand-sage)}
+.setup-tile-done::after{content:'✓';display:block;color:#fff;font:700 11px/18px sans-serif;text-align:center}
+.setup-tile-reading{display:flex;align-items:center;gap:10px;grid-column:span 2;background:#ffffff99;box-shadow:none}
+.setup-tile-spinner{width:16px;height:16px;flex:none;border:2px solid var(--brand-line);border-top-color:var(--brand-forest);border-radius:50%;animation:setup-spin .8s linear infinite}
+.setup-tile-line{margin:0;font-size:13px;color:var(--brand-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;animation:setup-tile-pulse 1.4s ease-in-out infinite}
+@keyframes setup-tile-pulse{50%{opacity:.5}}
+
+/* One big button at the bottom; Back beside it keeps its room. */
+.startup-setup .setup-footer{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;flex:none;margin-top:auto;padding-top:10px}
+.setup-status-slot{min-height:28px;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.setup-status-slot p{margin:0 0 6px}
+.startup-setup button.setup-primary{width:min(460px,100%);min-height:clamp(50px,7.5vh,60px);padding:0 24px;border-radius:30px;background:var(--brand-forest);color:var(--brand-on-forest);font-size:clamp(16px,2.4vh,18px);font-weight:650;letter-spacing:.01em;box-shadow:0 12px 28px #315f4850}
+.startup-setup button.setup-primary:hover:not(:disabled){background:var(--brand-forest-hover)}
+.startup-setup button.setup-primary:disabled{background:#7d9486;box-shadow:none}
+.startup-setup button.setup-primary.is-loading::before{content:'';display:inline-block;width:13px;height:13px;margin-right:10px;border:2px solid #ffffff50;border-top-color:currentColor;border-radius:50%;vertical-align:-2px;animation:setup-spin .8s linear infinite}
+@keyframes setup-spin{to{transform:rotate(360deg)}}
+.startup-setup .setup-back{position:absolute;left:calc(50% - min(230px,50%) - 90px);bottom:calc(clamp(50px,7.5vh,60px)/2 - 16px)}
+@media(max-width:720px){.startup-setup .setup-back{position:static}.setup-import{grid-template-columns:1fr}.setup-more{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.startup-setup,.setup-tile.is-arriving{animation:none}.setup-tile-spinner,.setup-tile-line,.startup-setup button.setup-primary.is-loading::before{animation:none}.setup-more-chevron::before{transition:none}}
+
+/* Entering: the chosen apps gather and become their devices while the page fades. */
+.setup-gathering{position:fixed;inset:0;pointer-events:none;z-index:2}
+.setup-gathering img{position:absolute;width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 3px 5px #35453025)}
+.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::before{opacity:0;transition:opacity .4s}
+.world-startup.setup-entering{transition:opacity .7s ease}
+@media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::before{transition:none}}
+#setupArrivingDevices{z-index:10001}

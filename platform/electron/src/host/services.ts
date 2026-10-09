@@ -86,8 +86,6 @@ export interface AgentService {
  /** The models the same Agent can answer with, when it declares the `models` service; an Applet's thread can use a
   * cheaper one (`harnessModel` on its chat turns). */
  models?():import('../../../../contracts/harness-services.ts').HarnessModels|null;
- /** Python for local helper programs (speech, coding sessions, agent-browser transport). */
- helperPython():Promise<string>;
  status(home:string):Promise<Row>;
  /** Finishes installing the Agent's runtime while it is not `available` (the built-in Agent after an update).
   * Absent: the Agent has nothing to install. */

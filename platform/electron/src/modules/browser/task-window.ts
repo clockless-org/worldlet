@@ -23,7 +23,8 @@ function setClosable(on){document.body.classList.toggle('closable',!!on)}
  * with `closable`) are reported, and the page beneath takes no input. */
 export class PressOverlay {
  readonly view:WebContentsView;
- private ready:Promise<unknown>;
+ /** Settles once the overlay's page has loaded. */
+ readonly ready:Promise<unknown>;
  constructor({onPress,onClose}:{onPress:()=>void;onClose:()=>void}){
   const nonce=crypto.randomBytes(16).toString('hex');
   this.view=new WebContentsView({webPreferences:{session:session.fromPartition('worldlet-overlay'),contextIsolation:true,sandbox:true,nodeIntegration:false,spellcheck:false}});

@@ -104,7 +104,6 @@ export class HermesAdapter implements Adapter {
  makeSourceAccess():AgentRuntime {return new HermesSourceAccess(new HermesRuntime(this),this.context.development);}
  makeSourceConnections():AgentSourceConnections {return new HermesSourceConnections(new HermesRuntime(this),this.context);}
  makeRoutines():AgentRoutines {return new HermesRoutines(this);}
- async helperPython(){await this.prepare();return this.python;}
  status(home:string):Promise<Row> {
   const key=path.resolve(home);
   const running=this.reads.get(key);

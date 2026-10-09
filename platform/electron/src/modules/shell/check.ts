@@ -213,14 +213,14 @@ try{
   analytics.recordProductEvent('fox_proactive_asked','',{proactive_moment:'settled',proactive_status:'spoke',line:'private line'});
   analytics.recordProductEvent('page_load_timing','15_60s',{timing_outcome:'complete',page_engine:'cef',url:'https://private.example/'});
   analytics.recordProductEvent('update_applied','',{update_wait:'1_7d'});
-  analytics.recordProductEvent('update_failed','',{update_stage:'download',error:'private detail'});
+  analytics.recordProductEvent('update_failed','',{update_stage:'prepare',update_error:'signature',error:'private detail'});
   analytics.recordProductEvent('app_build_changed','',{from_build:'2733'});analytics.recordProductEvent('app_build_changed','',{from_build:'private 1'});
   await new Promise(resolve=>setTimeout(resolve,30));
   assert.equal(events.at(-2).properties.from_build,'2733','the Build before the new one');assert.equal(events.at(-1).properties.from_build,undefined,'only a Build number');
   const added=Object.fromEntries(events.slice(-6,-2).map(event=>[event.event,event.properties]));
   assert.deepEqual(Object.keys(added),['fox_proactive_asked','page_load_timing','update_applied','update_failed']);
   assert.equal(added.fox_proactive_asked.proactive_status,'spoke');assert.equal(added.page_load_timing.duration_bucket,'15_60s');
-  assert.equal(added.page_load_timing.page_engine,'cef');assert.equal(added.update_applied.update_wait,'1_7d');assert.equal(added.update_failed.update_stage,'download');
+  assert.equal(added.page_load_timing.page_engine,'cef');assert.equal(added.update_applied.update_wait,'1_7d');assert.equal(added.update_failed.update_stage,'prepare');assert.equal(added.update_failed.update_error,'signature');
   assert.ok(!JSON.stringify(added).includes('private'),'no line, URL or error text');
   // Orders: where one went and why one ended unsent, as buckets only.
   analytics.recordProductEvent('order_sent','',{order_result:'stored',said:'private words'});analytics.recordProductEvent('order_stopped','',{order_stop:'left_app'});

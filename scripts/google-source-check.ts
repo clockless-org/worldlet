@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
 import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../platform/electron/src/modules/sources/google-source.ts';
 import {withTempDir} from './test-temp.ts';
@@ -54,6 +55,13 @@ await withTempDir('worldlet-google-source-',async temp=>{
  assert.equal(page.unreadOnly,true);assert.ok(page.records.length>=1&&page.records.every((r:any)=>r.unread===true&&r.provider==='gmail'));
  assert.match(page.records[0].text,/^Thread, newest first\. User: you@worldlet\.test/);
  assert.equal(calls[2][1].ticket,'t-1');assert.equal(calls[2][1].records,page.records);
+ // The run is journaled like any Agent runtime's, so the turn's record shows the read and its receipt.
+ const journaled:any[]=[];
+ ExecutionJournal.register(own,true,entry=>{journaled.push(entry);return true;});
+ calls.length=0;
+ await access.run({action:'sourceTool',name:'read_world_source',args:{provider:'gmail',unreadOnly:true}},own,turn);
+ ExecutionJournal.register(own,false,()=>true);
+ assert.deepEqual(journaled.map(entry=>entry.event.kind==='tool.requested'?entry.payload.name:entry.event.kind),['run.started','_world_authorize','tool.result','_source_begin','tool.result','_source_result','tool.result','run.succeeded']);
  // A failed read is recorded as failed and says only its kind.
  calls.length=0;
  await assert.rejects(access.run({action:'sourceTool',name:'read_world_source',args:{provider:'gmail',id:'thread:ffffffffffffffff'}},own,turn),/temporarily unavailable/);
@@ -68,10 +76,15 @@ await withTempDir('worldlet-google-source-',async temp=>{
  assert.deepEqual(calls.map(call=>call[0]),['_world_authorize','_email_review']);
  assert.equal(review.review.to,'sam.okafor@example.com');assert.equal(review.review.subject,'Dinner Saturday?');assert.equal(review.review.from,'you@worldlet.test');
 
- // Notion and every other source still go to the account owner's runtime.
- await access.run({action:'sourceTool',name:'read_world_source',args:{provider:'notion'}},own,turn);
+ // read_world_source for every provider runs here: the World's own local records come with its permit (Apple Notes),
+ // and a source the Platform cannot read says so; nothing goes to the account owner's runtime.
+ const local=async(event:any)=>event.name==='_source_begin'?{ticket:'t-2',records:[{provider:'apple-notes',id:'n1',title:'List',text:'eggs'}]}:turn(event);
+ assert.equal((await access.run({action:'sourceTool',name:'read_world_source',args:{provider:'apple-notes'}},own,local)).records[0].id,'n1');
+ await assert.rejects(access.run({action:'sourceTool',name:'read_world_source',args:{provider:'notion'}},own,turn),/temporarily unavailable/);
+ assert.equal(delegated.length,0);
+ // Other sources' requests go on to the next runtime (the MCP connectors, DoorDash).
  await access.run({action:'sourceRequest',provider:'notion',operation:'list'},own);
- assert.equal(delegated.length,2);
+ assert.equal(delegated.length,1);
  await links.connect({provider:'notion',target:'',endpoint:'',token:'',home:own,onStage(){},onConnected(){}});
  assert.equal(delegated.at(-1),'connect');
 

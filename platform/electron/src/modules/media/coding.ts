@@ -7,7 +7,8 @@ import {WorldletError,ensureDirectory,isoSeconds,writeAtomic,errorMessage} from 
 import type {Host,Row} from '../../host/types.ts';
 import type {WorldLedger} from '../../store/ledger.ts';
 import {locateLocalHarnesses} from '../agent-runtime/local-harness.ts';
-import {WINDOWS_BASE,cancelled,children,environment,executable,helperPython,jsonLines,run,which} from './io.ts';
+import {WINDOWS_BASE,cancelled,children,environment,executable,jsonLines,run,which} from './io.ts';
+import {helperPython} from './local-tools.ts';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const windows=process.platform==='win32';

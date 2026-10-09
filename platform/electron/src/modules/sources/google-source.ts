@@ -9,6 +9,7 @@ import {harnessAuthHandoff} from '../../../../../core/agent/index.ts';
 import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as normalize,prepareMail as prepare,readCalendar,readDrive,readDriveList,readPage,reconcileMail as reconcile,sendMail as send,sourceFailure,type GoogleRest} from '../../../../../core/accounts/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
+import {ExecutionJournal} from '../agent-runtime/journal.ts';
 import type {GoogleAccount,GoogleService} from './google-account.ts';
 
 const GOOGLE=['gmail','google-calendar','google-drive'];
@@ -36,7 +37,7 @@ const MOCK_MARKER='mock.json';
 /** The World's own Google connection as the source-access runtime every Agent's account owner hands out: Gmail,
  * Calendar and Drive requests and the World service tools that read them (`read_world_source` for Mail and
  * Calendar, `read_connected_google`, `prepare_email`) run here, in the Platform, with no Harness and no model; every
- * other source still goes to `fallback` (the account owner's own runtime) until it moves too. */
+ * other source goes to `fallback` (the MCP connectors, DoorDash). */
 export class GoogleSourceAccess implements AgentRuntime {
  private readonly google:GoogleSource;
  private readonly fallback:()=>AgentRuntime;
@@ -51,22 +52,26 @@ export class GoogleSourceAccess implements AgentRuntime {
   const provider=typeof body.provider==='string'?body.provider:'';
   if(body.action==='sourceTool'){
    const name=String(body.name??''),args=body.args&&typeof body.args==='object'?body.args as Row:{};
-   const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source'&&['gmail','google-calendar'].includes(String(args.provider));
-   return ours?this.google.tool(name,args,onEvent,()=>this.cancelled):this.other().run(body,home,onEvent);
+   // read_world_source for every provider: Mail, Calendar and Notion are read here, and the rest are the World's own
+   // local records, which its permit carries.
+   const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source';
+   // Journaled as every Agent runtime's runs are: the tools it calls back (`_source_result` among them) are the turn's record.
+   return ours?ExecutionJournal.run(body,home,onEvent,observed=>this.google.tool(name,args,observed,()=>this.cancelled)):this.other().run(body,home,onEvent);
   }
   const request=googleRequest(body);
-  if(request&&(request.operation!=='read'||body.action!=='sourceRefresh'||this.google.authorized())){
-   // Gmail send access, asked from a mail review: the same sign-in with the send scope added.
-   if(request.operation==='connect'){
-    await this.google.account.connect(request.services,url=>this.google.openExternal(url),()=>this.cancelled);
-    const own=this.google.ownProfile();if(own)this.google.account.mirror(own);
-    return {ok:true};
-   }
-   const result=await this.google.request(request);
-   if(request.operation==='read'&&!Array.isArray(result?.records))throw new WorldletError('The source returned no valid records. Previous content is kept.');
-   return result;
-  }
+  if(request&&(request.operation!=='read'||body.action!=='sourceRefresh'||this.google.authorized()))return ExecutionJournal.run(body,home,onEvent,()=>this.request(request));
   return this.other().run(body,home,onEvent);
+ }
+ private async request(request:Row):Promise<Row> {
+  // Gmail send access, asked from a mail review: the same sign-in with the send scope added.
+  if(request.operation==='connect'){
+   await this.google.account.connect(request.services,url=>this.google.openExternal(url),()=>this.cancelled);
+   const own=this.google.ownProfile();if(own)this.google.account.mirror(own);
+   return {ok:true};
+  }
+  const result=await this.google.request(request);
+  if(request.operation==='read'&&!Array.isArray(result?.records))throw new WorldletError('The source returned no valid records. Previous content is kept.');
+  return result;
  }
 }
 
@@ -123,7 +128,8 @@ export class GoogleSourceConnections implements AgentSourceConnections {
 }
 
 const validators=new Map<string,ReturnType<typeof Compile>>();
-function validate(name:string,args:Row){
+/** A World service tool's arguments against its schema (core/tools). */
+export function validateWorldTool(name:string,args:Row){
  let validator=validators.get(name);
  if(!validator){
   const definition=listWorldTools().find((tool:Row)=>tool.name===name);
@@ -136,7 +142,9 @@ const failureCode=(error:unknown)=>error instanceof GoogleRestError?({400:'inval
 
 export interface GoogleSourceOptions {account:GoogleAccount;development:boolean;openExternal(url:string):Promise<void>;
  /** Fox's own Hermes profile, whose Google files go when the World disconnects, and where earlier mail receipts were kept. */
- ownProfile:()=>string|null;legacyHomes:()=>string[];now?:()=>number}
+ ownProfile:()=>string|null;legacyHomes:()=>string[];now?:()=>number;
+ /** Notion, read for `read_world_source` through the MCP connection the World or the person's Agent has (mcp-source.ts). */
+ notion?:{connected():boolean;read(body:Row):Promise<Row>}}
 /** Google's reads, mail drafts and sends for the World (host.py `_google` and `_google_reads`, world_service.py). */
 export class GoogleSource {
  readonly account:GoogleAccount;
@@ -192,7 +200,7 @@ export class GoogleSource {
   * Its calls back into the World (`_world_authorize`, `_source_begin`, `_source_result`, `_email_review`) go through
   * the turn that asked, under its trust. */
  async tool(name:string,args:Row,onEvent:AgentEventHandler|undefined,cancelled:()=>boolean):Promise<Row> {
-  validate(name,args);
+  validateWorldTool(name,args);
   if(cancelled())throw new WorldletError('Task stopped.');
   const call=async(tool:string,values:Row)=>{
    const reply=await onEvent?.({type:'tool',id:'world-'+crypto.randomUUID(),name:tool,args:values});
@@ -219,11 +227,13 @@ export class GoogleSource {
  private async readSource(args:Row,cancelled:()=>boolean){
   if(cancelled())throw new WorldletError('Source read was cancelled.');
   const provider=String(args.provider);
-  if(!['gmail','google-calendar'].includes(provider))throw new WorldletError('Unsupported backend source.');
+  if(!['gmail','google-calendar','notion'].includes(provider))throw new WorldletError('Unsupported backend source.');
   if(provider!=='gmail'&&(args.unreadOnly||(args.pageToken&&provider!=='google-calendar')||args.query||args.metadataOnly||args.discovery))throw new WorldletError('Unread filtering and paging are available for Gmail only.');
   let result:Row;
   try{
-   result=await this.request({operation:'read',service:provider,threads:provider==='gmail',limit:args.limit??20,id:args.id??'',unreadOnly:args.unreadOnly??false,pageToken:args.pageToken??'',
+   const notion=this.options.notion;
+   if(provider==='notion'){if(!notion)throw new WorldletError('Unsupported backend source.');result=await notion.read({operation:args.id?'fetch':'list',id:args.id??''});}
+   else result=await this.request({operation:'read',service:provider,threads:provider==='gmail',limit:args.limit??20,id:args.id??'',unreadOnly:args.unreadOnly??false,pageToken:args.pageToken??'',
     query:args.query??'',metadataOnly:args.metadataOnly??false,discovery:args.discovery??false,scanMessages:args.scanMessages??false,windowStart:args.windowStart,windowDays:args.windowDays??30});
   }catch(error){throw new WorldletError(sourceFailure([{type:'error',code:failureCode(error)}]));}
   return {scannedCount:result.scannedCount??(Array.isArray(result.records)?result.records.length:0),records:normalize(provider,result),scope:result.scope??'Bounded results, not the entire account.',

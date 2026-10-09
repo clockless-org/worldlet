@@ -51,7 +51,7 @@ Only protocol JSON goes to stdout. Diagnostics go to stderr (currently discarded
 
 ## Optional local helpers
 
-External mode never prepares Hermes for speech or local CLI inventories. Helpers use `WORLDLET_TOOLS_PYTHON` (absolute executable path). Without it the host tries `/usr/bin/python3`; where that does not exist (Windows) it reports that the variable is needed. Set a compatible Python with pip for optional MLX Whisper; the system Python may be too old for MLX. Failure to prepare local speech does not prevent text chat. The development launcher forwards this setting. The official Hermes composition continues to reuse its prepared Python environment.
+External mode never prepares Hermes for speech or local CLI inventories. Helpers run on Worldlet's own tools Python, whichever Agent is used (`platform/electron/src/modules/media/tools-python.ts`): the bundled uv sets up a pinned CPython and a virtual environment with pip on first use. `WORLDLET_TOOLS_PYTHON` (absolute executable path) selects another one instead. Failure to prepare local speech does not prevent text chat. The development launcher forwards this setting.
 
 The example has no scheduled-task service. Opening the app does not start Hermes cron or simulate schedule results. Source and model-configuration services are explicitly unsupported; these requests do not get routed into the chat executable.
 

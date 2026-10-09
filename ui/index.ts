@@ -47,7 +47,7 @@ window.worldletBrowser=value=>window.dispatchEvent(new CustomEvent('worldlet:bro
 // tab keys the Browser's tabs; it answers whether the page took the key (a Browser tab action), so ⌘W closes the window otherwise.
 window.worldletBrowserNavigate=value=>{const event=new CustomEvent('worldlet:browser-navigate',{detail:value,cancelable:true});window.dispatchEvent(event);return event.defaultPrevented;};
 const browser={call:(action,body)=>call(action,body),command:(operation,args,agent)=>call('browserCommand',{operation,args,agent}),foxOverlay:()=>hostFeatures(current).browserFoxOverlay,pictureInPicture:()=>hostFeatures(current).browserPictureInPicture,taskPictureInPicture:()=>hostFeatures(current).browserTaskPictureInPicture,budget:()=>hostBrowserBudget(current)};
-let startupSetup,setupFinished=false;
+let startupSetup,setupFinished=false,agentMoved=false;
 let sample=false,mountedSample=null,current,view,onboarding,preferences,values=new Map(),save=Promise.resolve();
 mountEmailReview(call,()=>view);
 mountNotionReview(call,()=>view);
@@ -95,6 +95,10 @@ async function applyReceivedSnapshot(state,isCurrent=()=>true){
  }
 
  if(startupSetup){startupSetup.update(state);return;}
+ // Someone who used Fox's own Hermes chooses the Agent Fox runs on, once, on the same page (host foxNeedsAgent).
+ if(!view&&!state.sampleEnabled&&state.onboarding?.completed&&state.agentNeeded===true&&!agentMoved){
+  startupSetup=mountStartupSetup({state,call,move:true,complete:async next=>{startupSetup=null;agentMoved=true;await receive(next);}});return;
+ }
  if(!view&&!state.sampleEnabled&&!state.onboarding?.completed&&!setupFinished){
   startupSetup=mountStartupSetup({state,call,complete:async (next,icons)=>{
    startupSetup=null;setupFinished=true;setupArrivalPending=true;
