@@ -102,6 +102,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(Math.abs(plan.width-casa.width)<2&&Math.abs(plan.height-casa.height)<2&&casa.width>getty.width*1.8&&plan.height>getty.height*1.8,'Large is two by two, small one cell '+JSON.stringify({plan,casa,getty}));
  if(shots)await page.screenshot({path:shots+'/journal-today.png'});
  assert.ok(await tab.evaluate(e=>e.scrollHeight<=e.clientHeight+1),'The day fits the book; its pages scroll on their own');
+ // No card scrolls (owner Order 2026-10-09): each shows the fullest version its cell holds, marked More when shortened.
+ const cardsFit=()=>tab.locator('.companion-artifact-open[data-fit]').evaluateAll(cards=>cards.map(c=>({fit:(c as HTMLElement).dataset.fit,overflow:getComputedStyle(c).overflowY,fits:c.scrollHeight<=c.clientHeight+1})));
+ {const fits=await cardsFit();assert.ok(fits.length>=2&&fits.every(f=>f.overflow==='hidden'&&(f.fits||f.fit==='brief')),'Journal cards fit their cells without scrolling '+JSON.stringify(fits));}
  {const [left,right]=await Promise.all(['.companion-journal-leaf-left','.companion-journal-leaf-right'].map(sel=>tab.locator(sel).boundingBox()));assert.ok(left&&right&&Math.abs(left.width-right.width)<2&&right.x>=left.x+left.width-1,'The book lies open on two leaves');
   assert.ok((await tab.locator('.companion-journal-leaf-left').innerText()).includes('Plan · '),'The plan is written on the left leaf');}
 
@@ -169,6 +172,11 @@ await withBrowser(fileAccess,async browser=>{
  if(await book.evaluate(e=>(e as HTMLDialogElement).open))await book.getByRole('button',{name:'Close journal'}).click();
  await ask('labs','Here are the labs.');
  await card.waitFor({state:'visible'});
+ // Three blocks are more than a medium card holds: it leaves out the last (owner Order 2026-10-09, no scrolling), and
+ // Show all makes it large with every block.
+ {const drawn=await card.locator('.artifact-block').count();assert.ok(drawn>=1&&drawn<3&&await card.locator('.artifact-block[data-type=callout]').count()===0,'A medium card leaves out its last blocks '+drawn);}
+ await card.getByRole('button',{name:'Show all'}).click();
+ assert.equal(await card.getAttribute('data-size'),'large');
  assert.equal(await card.getAttribute('data-tone'),'honey');
  assert.equal(await card.evaluate(c=>getComputedStyle(c).getPropertyValue('--attention-accent').trim()),'#946e2b','The tone is the card\'s accent');
  assert.equal(await card.locator('.artifact-block[data-type=callout]').evaluate(e=>getComputedStyle(e).getPropertyValue('--attention-accent').trim()),'#a04e33','A callout carries its own tone');
@@ -178,7 +186,10 @@ await withBrowser(fileAccess,async browser=>{
  if(shots)await page.screenshot({path:shots+'/card-system-compare.png'});
  await card.getByRole('button',{name:'Close artifact'}).click();
  await ask('trip','Safe travels.');
+ // Over an Applet the card is in the corner and shows what fits there; Show all lets it reach down Fox's column.
+ await card.getByRole('button',{name:'Show all'}).click();
  await card.locator('.artifact-steps').waitFor();
+ assert.equal(await card.getAttribute('data-expanded'),'true');
  assert.match(await card.locator('.fox-artifact-art').getAttribute('src')||'',/flight\.webp$/,'Fox can name the scene');
  assert.equal(await card.locator('.artifact-facts li').count(),3);
  assert.equal(await card.locator('.artifact-step-when').first().textContent(),'3:15 PM');
@@ -189,6 +200,7 @@ await withBrowser(fileAccess,async browser=>{
  // checklist work in place and are kept, parts show one at a time, a choice drafts the person's answer.
  await ask('pancakes','Here you go.');
  await card.waitFor({state:'visible'});
+ if(await card.locator('.fox-artifact-more').isVisible())await card.getByRole('button',{name:'Show all'}).click();
  assert.equal(await card.getAttribute('data-size'),'large','A card sizes to its blocks: a scale and a checklist need a large one');
  const amounts=async()=>card.locator('.artifact-scale-amount').allTextContents();
  assert.deepEqual(await amounts(),['250 g','300 ml','2']);
@@ -217,13 +229,17 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Journal'}})));
  const pancakes=tab.locator('.companion-artifact',{hasText:'Pancakes for four'});
  await pancakes.locator('.artifact-scale-value',{hasText:'6 guests'}).waitFor();
- assert.equal(await pancakes.locator('li[data-done=true]').count(),1);
+ // A cell shows the blocks it holds, first first, and says More for the rest (owner Order 2026-10-09: no scrolling).
+ const shownOrMore=async(card,block:string)=>(await card.locator(block).count())>0||await card.locator('.companion-artifact-open').getAttribute('data-shortened')==='true';
+ if(await pancakes.locator('.artifact-checklist').count())assert.equal(await pancakes.locator('li[data-done=true]').count(),1);
+ else assert.equal(await pancakes.locator('.companion-artifact-open').getAttribute('data-shortened'),'true','A cell that leaves out a block says More');
  assert.ok(((await pancakes.locator('.companion-artifact-title').boundingBox())?.height??0)>10,'Its title keeps its room above the blocks');
  // It keeps the card as it was shown (owner request 2026-10-08: "journal 里保留卡片"): its picture, tone and details.
  const trip=tab.locator('.companion-artifact',{hasText:'Flight to Seattle'});
  assert.match(await trip.locator('.companion-artifact-art').getAttribute('src')||'',/flight\.webp$/,'A Journal card keeps its picture');
  assert.equal(await trip.getAttribute('data-tone'),'teal');
- assert.ok(await trip.locator('.artifact-step-detail',{hasText:'Traffic on 101'}).evaluate(e=>getComputedStyle(e).display!=='none'),'A step keeps its detail');
+ if(await trip.locator('.artifact-steps').count())assert.ok(await trip.locator('.artifact-step-detail',{hasText:'Traffic on 101'}).evaluate(e=>getComputedStyle(e).display!=='none'),'A step keeps its detail');
+ else assert.ok(await shownOrMore(trip,'.artifact-steps'));
  assert.equal(await tab.locator('.companion-artifact',{hasText:'Which CASA lab'}).locator('.artifact-stat-note',{hasText:'lowest'}).count(),1,'A figure keeps its note');
  if(shots)await page.screenshot({path:shots+'/artifact-blocks-journal.png'});
  await page.keyboard.press('Escape');

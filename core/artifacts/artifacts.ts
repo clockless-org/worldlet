@@ -36,7 +36,10 @@ export type ArtifactFactIcon=typeof ARTIFACT_FACT_ICONS[number];
 export interface Artifact {
  id:string;kind:ArtifactKind;title:string;
  /** Markdown. An Attention card keeps the summary it showed; the World item stays the truth. */
- body:string;chart:ArtifactChart|null;size:ArtifactSize;origin:ArtifactOrigin;
+ body:string;
+ /** Answer only: the content at the card's other sizes (core/artifacts/README.md#fits-its-card): `brief` is the whole
+  * answer in one sentence for a card too small for the body, `detail` a fuller body for a card with room to spare. */
+ brief?:string;detail?:string;chart:ArtifactChart|null;size:ArtifactSize;origin:ArtifactOrigin;
  /** Answer only: up to three next steps Fox offered (core/artifacts/README.md#actions). */
  actions:ArtifactAction[];
  /** Answer only: up to two interactive blocks under the body (core/artifacts/README.md#blocks). */
@@ -49,7 +52,7 @@ export interface Artifact {
  /** Seconds since 1970. */
  createdAt:number;updatedAt:number;
 }
-export const ARTIFACT_LIMITS=Object.freeze({artifacts:500,title:80,body:12000,chartValues:8,chartLabel:60,category:40,place:200,actions:3,actionLabel:40,actionRequest:300,blocks:3,blockLabel:60,calloutText:220,stats:4,statValue:14,statLabel:40,facts:5,steps:6,stepTitle:60,stepDetail:120,stepWhen:20,compare:3,comparePoints:3,comparePoint:70,tags:8,tagText:24,checklistItems:8,itemText:100,scaleRows:8,choiceOptions:4,parts:6,partName:30,partDetail:280});
+export const ARTIFACT_LIMITS=Object.freeze({artifacts:500,title:80,body:12000,chartValues:8,chartLabel:60,category:40,place:200,brief:160,actions:3,actionLabel:40,actionRequest:300,blocks:3,blockLabel:60,calloutText:220,stats:4,statValue:14,statLabel:40,facts:5,steps:6,stepTitle:60,stepDetail:120,stepWhen:20,compare:3,comparePoints:3,comparePoint:70,tags:8,tagText:24,checklistItems:8,itemText:100,scaleRows:8,choiceOptions:4,parts:6,partName:30,partDetail:280});
 
 const clip=(value:unknown,count:number)=>typeof value==='string'?[...value.trim()].slice(0,count).join(''):'';
 const finite=(value:unknown)=>typeof value==='number'&&Number.isFinite(value)?value:null;
@@ -71,22 +74,26 @@ export function defaultArtifactSize(body:string,chart:unknown,blocks?:unknown):A
  return weight>ARTIFACT_CARD.medium?'large':chart||(Array.isArray(blocks)&&blocks.length)||/^\s*\|.*\|\s*$/m.test(body)||weight>ARTIFACT_CARD.small?'medium':'small';
 }
 const SIZES:ArtifactSize[]=['small','medium','large'];
-/** The size a card shows at: the one Fox (or the person) named, never smaller than its content needs. */
+/** The size a card shows at: the one Fox (or the person) named, else the one its content needs. A card smaller than its
+ * content shows less of it (artifactFitSteps, owner Order 2026-10-09), so a named size is kept as it is. */
 export function artifactSizeFor(named:unknown,body:string,chart:unknown,blocks?:unknown):ArtifactSize {
- const need=defaultArtifactSize(body,chart,blocks);
- return SIZES.includes(named as ArtifactSize)&&SIZES.indexOf(named as ArtifactSize)>=SIZES.indexOf(need)?named as ArtifactSize:need;
+ return SIZES.includes(named as ArtifactSize)?named as ArtifactSize:defaultArtifactSize(body,chart,blocks);
 }
 
-/** One card at most (owner Order 2026-10-07): an artifact is what fits on its card, never pages or a long scroll.
- * Fox writes to fit; `show_artifact` refuses a body past the large card's budget so Fox cuts it and shows it again.
+/** One card at most (owner Order 2026-10-07): an artifact is what fits on its card, never pages. It never scrolls either
+ * (owner Order 2026-10-09): Fox writes it at three lengths and the card shows the fullest that fits (artifactFitSteps).
+ * `show_artifact` refuses a body or detail past the large card's budget so Fox cuts it and shows it again.
  * Weights approximate the space text takes: a wide (CJK) character counts two, every line or table row twenty for
  * the room it leaves, a chart's bar forty. A medium card holds about half a large one, a small card a few lines. */
 export const ARTIFACT_CARD=Object.freeze({small:360,medium:900,large:1800});
-export const ARTIFACT_ONE_CARD_RULE='An artifact is one card, never longer: it must fit its card without scrolling or a second page. '
+export const ARTIFACT_ONE_CARD_RULE='An artifact is one card, never longer: it never scrolls or turns to a second page. '
  +'Use one layout every time: one or two lines with the takeaway first, then at most three short parts, each a bold label line with a few lines or bullets, '
  +'or one table of up to six rows and four short columns; no headings beyond a bold label, no nested lists. '
  +`Keep the body under about ${ARTIFACT_CARD.small} characters for small, ${ARTIFACT_CARD.medium} for medium and ${ARTIFACT_CARD.large} for large, counting a Chinese, Japanese or Korean character as two. `
- +'Choose what matters and cut the rest; never continue on another card.';
+ +'Choose what matters and cut the rest; never continue on another card. '
+ +`The card shows as much as its size holds, so write it at three lengths: brief, the whole answer in one sentence (up to ${ARTIFACT_LIMITS.brief} characters, no Markdown), shown when the card is small; `
+ +'the body; and, when there is more worth reading, detail, a fuller body in the same layout for a large card, or null. '
+ +'List blocks most important first: a smaller card leaves out the last ones.';
 const WIDE=/[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/u;
 /** How much of a card a body and chart take, in ARTIFACT_CARD units. */
 export function artifactWeight(body:string,chart?:{values?:unknown[]}|null,blocks?:unknown):number {
@@ -124,16 +131,48 @@ function blocksWeight(blocks:unknown):number {
 }
 /** A body Fox wrote that would not fit one card: the reason, so Fox shortens it. Stored artifacts are not checked. */
 export function artifactFitProblem(args:any):string|null {
- const weight=artifactWeight(args?.body,args?.chart,args?.blocks);
- if(weight<=ARTIFACT_CARD.large)return null;
- const cut=Math.ceil((1-ARTIFACT_CARD.large/weight)*100);
- return `Too long for one card (about ${weight} of ${ARTIFACT_CARD.large}): an artifact is at most one card. Cut about ${cut}% — keep the takeaway, at most three short parts or one table of up to six rows — and call show_artifact again.`;
+ for(const [field,text] of [['body',args?.body],['detail',args?.detail]] as const){
+  if(field==='detail'&&typeof text!=='string')continue;
+  const weight=artifactWeight(text,args?.chart,args?.blocks);
+  if(weight<=ARTIFACT_CARD.large)continue;
+  const cut=Math.ceil((1-ARTIFACT_CARD.large/weight)*100);
+  return `Too long for one card (${field==='detail'?'the detail, ':''}about ${weight} of ${ARTIFACT_CARD.large}): an artifact is at most one card. Cut about ${cut}% — keep the takeaway, at most three short parts or one table of up to six rows — and call show_artifact again.`;
+ }
+ return null;
+}
+
+/** What a card holds at one size: which text (the detail, the body or the one-sentence brief), how many of its blocks
+ * (the first ones, most important first) and whether its chart. */
+export type ArtifactFitStep={text:'detail'|'body'|'brief';blocks:number;chart:boolean};
+/** Fits its card (owner Order 2026-10-09: never scroll, show as much as the card's size holds): the steps a card tries,
+ * fullest first, and it shows the first that fits without scrolling. The detail, then the body with every block; then
+ * the last blocks are left out one at a time, then the chart, and last the brief alone. Nothing calls a model: a card
+ * that changes size only picks another step. */
+export function artifactFitSteps(a:{body?:string;detail?:string|null;blocks?:unknown[]|null;chart?:unknown}):ArtifactFitStep[] {
+ const blocks=Array.isArray(a.blocks)?a.blocks.length:0,chart=!!a.chart,steps:ArtifactFitStep[]=[];
+ if(typeof a.detail==='string'&&a.detail.trim())steps.push({text:'detail',blocks,chart});
+ for(let n=blocks;n>=0;n--)steps.push({text:'body',blocks:n,chart});
+ if(chart)steps.push({text:'body',blocks:0,chart:false});
+ steps.push({text:'brief',blocks:0,chart:false});
+ return steps;
+}
+/** The one sentence a card shows when nothing more fits: Fox's brief, or else the body's first sentence (an Attention
+ * card, or an artifact kept before briefs). */
+export function artifactBrief(a:{brief?:string|null;body?:string}):string {
+ if(typeof a.brief==='string'&&a.brief.trim())return clip(a.brief,ARTIFACT_LIMITS.brief);
+ const lines=String(a.body||'').split('\n').filter(line=>line.trim()&&!/^[\s:|-]+$/.test(line));
+ const first=lines.find(line=>!/^\s*#/.test(line))||lines[0]||'';
+ const plain=first.replace(/\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/^\s*(#+|[-*+>]|\d+[.)])\s*/,'').replace(/[|*_`]/g,' ').replace(/\s+/g,' ').trim();
+ const sentence=plain.match(/^.+?(?:[.!?](?=\s|$)|[。！？])/u)?.[0]||plain;
+ return [...sentence].length>ARTIFACT_LIMITS.brief?[...sentence].slice(0,ARTIFACT_LIMITS.brief-1).join('')+'…':sentence;
 }
 
 /** What `show_artifact` may present; the reason when it may not. */
 export function artifactInputProblem(args:any):string|null {
  if(typeof args?.title!=='string'||!args.title.trim()||args.title.length>ARTIFACT_LIMITS.title||typeof args.body!=='string'||args.body.length>ARTIFACT_LIMITS.body)
   return `Provide a title up to ${ARTIFACT_LIMITS.title} characters and Markdown up to ${ARTIFACT_LIMITS.body} characters.`;
+ if(args.brief!=null&&(typeof args.brief!=='string'||[...args.brief.trim()].length>ARTIFACT_LIMITS.brief))return `Brief is one sentence up to ${ARTIFACT_LIMITS.brief} characters, or null.`;
+ if(args.detail!=null&&(typeof args.detail!=='string'||args.detail.length>ARTIFACT_LIMITS.body))return `Detail is Markdown up to ${ARTIFACT_LIMITS.body} characters, or null.`;
  const c=args.chart;
  if(c&&(!Array.isArray(c.values)||!c.values.length||c.values.length>ARTIFACT_LIMITS.chartValues||c.values.some(v=>typeof v?.label!=='string'||v.label.length>ARTIFACT_LIMITS.chartLabel||!Number.isFinite(v.value)||v.value<0)))
   return 'Provide up to eight labeled, nonnegative chart values.';
@@ -232,6 +271,8 @@ export function readArtifact(value:any):Artifact|null {
  const artifact:Artifact={id:value.id,kind:value.kind,title,body,chart,size:value.size==='large'||value.size==='small'?value.size:'medium',origin,actions:value.kind==='answer'?readArtifactActions(value.actions):[],createdAt,updatedAt:updatedAt??createdAt};
  const blocks=value.kind==='answer'?readArtifactBlocks(value.blocks):[];
  if(blocks.length)artifact.blocks=blocks;
+ if(value.kind==='answer'&&typeof value.brief==='string'&&value.brief.trim())artifact.brief=clip(value.brief,ARTIFACT_LIMITS.brief);
+ if(value.kind==='answer'&&typeof value.detail==='string'&&value.detail.trim())artifact.detail=value.detail.slice(0,ARTIFACT_LIMITS.body);
  if(value.kind==='answer'&&tone(value.tone))artifact.tone=value.tone;
  if(value.kind==='answer'&&validArtifactArt(value.art))artifact.art=value.art;
  if(value.kind==='attention'&&typeof value.category==='string')artifact.category=clip(value.category,ARTIFACT_LIMITS.category);

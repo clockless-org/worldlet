@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {artifactSizeFor,journalPages,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../core/artifacts/index.ts';
+import {artifactSizeFor,artifactFitSteps,artifactBrief,journalPages,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../core/artifacts/index.ts';
 // The rules for artifacts (core/artifacts/README.md): IDs, what Fox may show, the default size, reading a stored
 // record, saving one again, the World's limit, the Artifacts page's days and what Fox finds.
 
@@ -17,7 +17,7 @@ assert.equal(defaultArtifactSize('| a | b |\n| - | - |',null),'medium','A table 
 assert.equal(defaultArtifactSize('Text',{title:'t',unit:'u',values:[{label:'a',value:1}]}),'medium','A chart needs at least a medium card');
 assert.equal(defaultArtifactSize('x'.repeat(1401),null),'large','A long body needs the large card');
 assert.equal(artifactSizeFor('large','Short answer.',null),'large','Fox may name a larger size');
-assert.equal(artifactSizeFor('small','x'.repeat(500),null),'medium','Never smaller than the content needs');
+assert.equal(artifactSizeFor('small','x'.repeat(500),null),'small','A named size is kept: the card shows what fits it');
 assert.equal(artifactSizeFor(null,'| a |\n| - |',null),'medium','Without a name, the content decides');
 // One card at most (owner Order 2026-10-07): Fox writes to fit, and show_artifact refuses a body past the large card.
 assert.equal(defaultArtifactSize('x'.repeat(ARTIFACT_CARD.medium),null),'large','A body heavier than a medium card is large');
@@ -28,6 +28,14 @@ assert.equal(artifactWeight('| a |\n| --- |\n| b |'),42,'A table divider takes n
 assert.equal(artifactWeight('',{values:[{label:'a',value:1},{label:'b',value:2}]}),140,'A chart takes room by its bars');
 assert.equal(artifactFitProblem({title:'T',body:'x'.repeat(1700)}),null,'A full large card fits');
 assert.match(artifactFitProblem({title:'T',body:'中'.repeat(2000)})!,/one card.*Cut about 5\d%/,'Five pages of Chinese is refused with how much to cut');
+assert.match(artifactFitProblem({title:'T',body:'Short.',detail:'x'.repeat(4000)})!,/the detail/,'A detail past the large card is refused too');
+// Fits its card (owner Order 2026-10-09): the steps a card tries, fullest first, and the brief it ends on.
+assert.deepEqual(artifactFitSteps({body:'b',detail:'d',blocks:[1,2],chart:{}}).map(s=>s.text+s.blocks+(s.chart?'c':'')),['detail2c','body2c','body1c','body0c','body0','brief0'],'Detail, then fewer blocks, then no chart, then the brief');
+assert.deepEqual(artifactFitSteps({body:'b'}).map(s=>s.text),['body','brief'],'Without detail or blocks: the body or the brief');
+assert.equal(artifactBrief({brief:'Ship on Friday.',body:'Long body.'}),'Ship on Friday.','Fox\'s brief comes first');
+assert.equal(artifactBrief({body:'## Labs\n\n**TAC** is cheapest. It fits.'}),'TAC is cheapest.','Without one, the body\'s first sentence, past its label');
+assert.equal(artifactBrief({body:'第一点。第二点。'}),'第一点。','A Chinese sentence ends at its full stop');
+assert.match(artifactInputProblem({title:'T',body:'b',brief:'x'.repeat(200)})!,/Brief/,'A brief is one sentence');
 for(const request of [dailyPlanRequest('2026-10-07'),dailySummaryRequest('2026-10-06')]){
  assert.ok(request.includes(ARTIFACT_ONE_CARD_RULE),'The day\'s artifacts carry the one-card rule');
  assert.doesNotMatch(request,/it can be long/,'No artifact is asked to be long');

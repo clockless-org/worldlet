@@ -178,9 +178,11 @@
 .fox-artifact>.attention-preview-control{position:absolute;right:14px;top:10px;font-size:24px}
 .fox-artifact>.fox-artifact-size{right:52px;top:14px;display:grid;place-items:center;opacity:.7}.fox-artifact>.fox-artifact-size:hover{opacity:1}
 .fox-artifact>.fox-artifact-origin{margin:0 84px -6px 0}
-/* An artifact never pages: what fits shows whole, a longer body scrolls inside the card (owner Order 2026-10-07). */
-.fox-artifact-body{font:400 16px/1.5 var(--ui-font-ui);overflow-wrap:anywhere;flex:0 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#55795555 transparent;padding-right:4px}
-.fox-artifact-body[data-more=true]{mask-image:linear-gradient(#000 calc(100% - 28px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent)}
+/* An artifact never pages (owner Order 2026-10-07) and never scrolls (owner Order 2026-10-09): the card shows the fullest
+   version that fits (ui/companion/artifact-fit.ts), down to the one-sentence brief, and Show all gives it more room. */
+.fox-artifact-body{font:400 16px/1.5 var(--ui-font-ui);overflow-wrap:anywhere;flex:0 1 auto;min-height:0;overflow:hidden}
+.fox-artifact-body .fox-artifact-brief{margin:0;font-size:1.125em;line-height:1.45}
+.fox-artifact>.fox-artifact-more{display:flex;flex-shrink:0}.fox-artifact>.fox-artifact-more[hidden]{display:none}
 /* The card's Markdown comes as reader prose (.notion-prose); on a card it keeps the card's own type and rules. */
 .fox-artifact .fox-artifact-body .notion-prose{font-size:inherit;line-height:inherit}
 .fox-artifact .fox-artifact-body table{display:table;width:100%;border-collapse:collapse;table-layout:fixed;font-size:inherit;margin:0 0 12px}.fox-artifact .fox-artifact-body :is(td,th){padding:7px;border:0;border-bottom:1px solid #38564420;text-align:left;min-width:0}
@@ -467,7 +469,7 @@ body:has(.attention-preview:not([hidden]),.region-shelf:not([hidden]),dialog[ope
 }
 /* Over an Applet an artifact is a small card in the top-right corner, at the head of Fox's column, so the Applet stays
    in view while Fox talks about it (owner Order 2026-10-07). It keeps its one style; the size control has no meaning
-   there, and anything taller than the corner scrolls inside the card. */
+   there; it shows what fits the corner, and Show all lets it reach down Fox's column. */
 @media(min-width:801px){
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact{left:auto;right:16px;width:calc(var(--reader-companion-lane,464px) - 32px);top:var(--applet-bar-top);bottom:auto;height:auto;max-height:min(380px,calc(100dvh - 500px));min-height:0;padding:16px 20px 14px;gap:8px;border-radius:18px 20px 19px 21px}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>:is(.fox-artifact-art,.fox-artifact-scrim){display:none}
@@ -478,7 +480,8 @@ body:has(.attention-preview:not([hidden]),.region-shelf:not([hidden]),dialog[ope
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact .artifact-option-pick{padding:2px 6px;font-size:10px;letter-spacing:0}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.fox-artifact-size{display:none}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.attention-preview-control{top:6px;right:10px}
- #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact-body{font-size:14px;line-height:1.45;overflow-y:auto;overscroll-behavior:contain}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-expanded=true]{max-height:calc(100dvh - var(--applet-bar-top,72px) - 140px)}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact-body{font-size:14px;line-height:1.45}
 }
 /* Close stays visible over the brightest corner of a picture. */
 #attentionPreview .attention-preview-tools .attention-preview-control{background:color-mix(in srgb,var(--ui-paper,#f6efdc) 82%,transparent)}
