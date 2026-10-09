@@ -13,9 +13,9 @@ const all=[...parallelChecks,...serialChecks];
 assert(coreChecks.length&&coreChecks.every(c=>all.includes(c)),'the core checks are a subset of the test:ui checks');
 assert.equal(new Set(all).size,all.length,'each check is listed once, in one group');
 for(const file of all)assert(/^(?:scripts\/[\w-]+-check\.(?:ts|py)|gatehouse\/[\w-]+-check\.mjs)$/.test(file)&&existsSync(new URL('../'+file,import.meta.url)),'listed check exists: '+file);
-assert.equal(testUiConcurrency(undefined,'darwin'),4);assert.equal(testUiConcurrency('','linux'),4);assert.equal(testUiConcurrency('2','darwin'),2);
+assert.equal(testUiConcurrency('','darwin'),4);assert.equal(testUiConcurrency('','linux'),4);assert.equal(testUiConcurrency('2','darwin'),2);
 // Windows release host 01 runs three at a time by default (#1099); an explicit value still wins.
-assert.equal(testUiConcurrency(undefined,'win32'),3);assert.equal(testUiConcurrency('2','win32'),2);
+assert.equal(testUiConcurrency('','win32'),3);assert.equal(testUiConcurrency('2','win32'),2);
 for(const bad of ['0','-1','1.5','four'])assert.throws(()=>testUiConcurrency(bad),/WORLDLET_TEST_UI_CONCURRENCY/);
 assert.deepEqual(checkStep('scripts/x-check.py'),{name:'scripts/x-check.py',bin:'python3',args:['scripts/x-check.py']},'Python runs as python3');
 assert.deepEqual(checkStep('scripts/x-check.ts'),{name:'scripts/x-check.ts',bin:process.execPath,args:['scripts/x-check.ts']},'node runs as this node, without a shell');
