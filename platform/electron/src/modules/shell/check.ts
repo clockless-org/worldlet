@@ -295,7 +295,7 @@ try{
  const fake:TrayFactory=()=>{const tray={tooltip:'',menu:null as Menu|null,click:()=>{},destroyed:false};trays.push(tray);
   return {setToolTip:text=>{tray.tooltip=text;},setContextMenu:menu=>{tray.menu=menu;},on:(_event,listener)=>{tray.click=listener;},destroy:()=>{tray.destroyed=true;}};};
  let quits=0,closeQuits=0,unfinished=true;
- const desktop:DesktopCompanion=new DesktopCompanion(live,companionEntry(live,{back:()=>{void desktop.restoreWorld();},quit:()=>{quits+=1;}},'win32',fake),{quit:()=>{closeQuits+=1;},unfinished:()=>unfinished});
+ const desktop:DesktopCompanion=new DesktopCompanion(live,companionEntry(live,{back:()=>{void desktop.restoreWorld();},quit:()=>{quits+=1;}},'win32',fake),{quit:()=>{closeQuits+=1;},unfinished:()=>unfinished,follows:false});
  desktop.attach();
  // Until onboarding is over, closing quits and Fox does not stay on the desktop (owner request 2026-10-04).
  assert(desktop.shouldKeepOpen(),'closing during onboarding keeps the window from merely closing');
@@ -339,7 +339,35 @@ try{
   const real=companionEntry(host,noop)!;
   real.show();assert(real.shown);real.hide();await tick();assert(!real.shown);
  }
- for(const window of BaseWindow.getAllWindows())window.destroy();
  console.log('PASS on Windows the desktop Companion keeps a tray way back to the World, removed on restore, with Quit Completely');
+ // Another app in front (owner Order 2026-10-09): Fox floats on top while the World window stays where it was.
+ {
+  const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
+  world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
+  const page={...host.page,ready:()=>true,call:async(name:string)=>name==='worldletCompanionGeometry'?{x:10,y:10,width:120,height:140}:undefined} as Host['page'];
+  const live:Host={...host,window:()=>world,worldView:()=>view,page};
+  let front=true,busy=false,unfinished=true;
+  const trays:string[]=[];
+  const fake:TrayFactory=()=>{trays.push('shown');return {setToolTip:()=>{},setContextMenu:()=>{},on:()=>{},destroy:()=>{}};};
+  const desktop=new DesktopCompanion(live,companionEntry(live,noop,'win32',fake),{quit:()=>{},unfinished:()=>unfinished,inFront:()=>front,follows:true});
+  desktop.keepInWorld(()=>busy);
+  desktop.attach();world.showInactive();
+  const away=async()=>{world.emit('blur');for(let i=0;i<20&&!desktop.isDesktop;i++)await new Promise(resolve=>setTimeout(resolve,50));};
+  front=false;await away();
+  assert(!desktop.isDesktop,'during onboarding Fox stays in the World when another app comes to the front');
+  unfinished=false;front=true;await away();
+  assert(!desktop.isDesktop,'focus moving to another Worldlet window keeps Fox in the World');
+  front=false;busy=true;await away();
+  assert(!desktop.isDesktop,'a website, video or call open in the World keeps Fox there');
+  busy=false;await away();
+  assert(desktop.isDesktop&&desktop.panelBounds(),'another app in front puts Fox on the desktop');
+  assert(world.isVisible()&&!world.contentView.children.includes(view),'the World window stays where it was while Fox is out');
+  assert.equal(trays.length,0,'the World keeps its taskbar button, so no tray icon');
+  world.emit('focus');await new Promise(resolve=>setImmediate(resolve));
+  assert(!desktop.isDesktop&&world.contentView.children.includes(view),'bringing the World back to the front brings Fox back into it');
+  desktop.stop();
+  console.log('PASS another app in front puts Fox on the desktop; the World coming back brings it home');
+ }
+ for(const window of BaseWindow.getAllWindows())window.destroy();
 }catch(error){console.error('FAIL shell:',error);process.exitCode=1;}
 finally{store.closeLedger();fs.rmSync(scratch,{recursive:true,force:true});}
