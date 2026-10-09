@@ -1,8 +1,11 @@
 // Fox's page out of sight (#1175, owner feedback 2026-10-02), driven through the real World UI with
 // a faked native bridge that declares browserTaskPictureInPicture (the CEF website engine).
-// - When Fox starts working on the page, the page stays full size in the Applet: no window moves it
-//   to the World's bottom-right, and the Picture in picture icon is not offered for Fox's page.
-// - When the person leaves the Applet while Fox works, the page is never hidden: the host draws it in
+// - When Fox starts working on the page, the person keeps it full size in the Applet, and Fox gets a
+//   copy of it in the panel's top-right corner (owner request 2026-10-09, FOX_COPY): the copy keeps
+//   the panel's size as its own and carries Fox's glow. No window moves the page to the World's
+//   bottom-right. A press on the copy takes Fox's page into the panel; after Fox's turn the copy
+//   stays until closed; a host without a copy leaves Fox on the panel's page.
+// - When the person leaves the Applet while Fox works, Fox's page (the copy) is never hidden: the host draws it in
 //   a small screen over the Applet's device (owner decision 2026-10-02), the screen's slot as the rect
 //   with the panel's size as the page's own size and `press`, and Fox's next steps still reach it.
 //   Where the device is not drawn the rect is zero.
@@ -64,13 +67,22 @@ const heldByFox=(page:Page)=>page.waitForFunction(()=>{const b=(window as any).s
   await page.waitForFunction(()=>(window as any).surface.at(-1)?.fox);
   await page.waitForTimeout(400);
   const working=await last(page);
-  assert.equal(working.action,'browserLayout');assert.deepEqual(working.rect,shown,'the page keeps the panel');assert.equal(working.page,undefined);
+  assert.equal(working.action,'browserLayout');assert.deepEqual(working.rect,shown,'the person keeps the page in the panel');assert.equal(working.page,undefined);
+  // Fox's copy sits in the panel's top-right corner, smaller, at the panel's size as its own.
+  const copy=working.copy;
+  assert.ok(copy,'Fox works on a copy of the page: '+JSON.stringify(working));
+  assert.deepEqual(copy.page,{width:shown.width,height:shown.height},'the copy lays out at the panel\'s size');
+  assert.ok(copy.rect.width<shown.width/2&&copy.rect.width>=280,'the copy is small: '+JSON.stringify(copy.rect));
+  assert.ok(copy.rect.x+copy.rect.width<=shown.x+shown.width&&shown.x+shown.width-(copy.rect.x+copy.rect.width)<=16&&copy.rect.y-shown.y<=16&&copy.rect.y>=shown.y,'in the panel\'s top-right corner');
+  assert.ok(working.fox,'Fox\'s glow goes with the copy');
+  assert.equal(await page.evaluate(()=>document.querySelector('.browser-viewport')!.classList.contains('is-fox-control')),false,'the person\'s page carries no Fox frame');
   assert.equal(await appletOpen(page),true,'the Applet stays open for the person to watch and step in');
   assert.equal(await page.locator('.browser-pip-offer').isVisible(),false,'Picture in picture is not offered for Fox\'s page');
   assert.equal(await page.locator('.browser-task-pip').count(),0,'no task window exists');
-  // The person goes back to the World while Fox works: the page stays Fox's, in the screen over its device.
+  // The person goes back to the World while Fox works: Fox's copy goes to the screen over its device.
   await page.locator('.fox-action-left [data-slot=home]').click();
   await heldByFox(page);
+  assert.ok(await page.evaluate(()=>(window as any).surface.some(b=>b.action==='browserLayout'&&b.takeCopy&&b.page&&b.press)),'the copy goes along in place of the person\'s page');
   assert.equal(await appletOpen(page),false,'the person is back in the World');
   assert.ok(!(await page.evaluate(()=>(window as any).surface.some(b=>b.action==='browserHide'))),'the page was never hidden');
   assert.deepEqual((await taskEvents(page)).at(-1),{applet:'app-browser',working:true},'the World hears Fox works on the Browser Applet');
@@ -131,7 +143,56 @@ const heldByFox=(page:Page)=>page.waitForFunction(()=>{const b=(window as any).s
   assert.equal(await page.locator('.applet-task-done').count(),0,'opening the Applet clears the Done mark');
   assert.deepEqual(errors,[]);
   await page.close();
-  console.log('PASS Fox\'s page stays full size in its Applet; leaving shows it live in a small screen over the device; the screen returns to it; after Fox\'s turn the device shows Done until opened');
+  console.log('PASS Fox works on a copy in the panel\'s corner while the person keeps the page; leaving shows it live in a small screen over the device; the screen returns to it; after Fox\'s turn the device shows Done until opened');
+ }
+ {
+  // Fox's copy in the panel: pressed, Fox's page takes the panel; after Fox's turn it stays until its close.
+  const {page,errors}=await open();
+  const shown:Box=(await page.evaluate(()=>(window as any).surface.find(b=>b.action==='browserShow'))).rect;
+  await foxStep(page);
+  await page.waitForFunction(()=>(window as any).surface.at(-1)?.copy);
+  if(shots)await page.screenshot({path:path.join(shots,'fox-copy.png')});
+  await host(page,{phase:'fox-copy',event:'press'});
+  await page.waitForFunction(()=>(window as any).surface.at(-1)?.takeCopy);
+  const taken=await last(page);
+  assert.deepEqual(taken.rect,shown,'Fox\'s page takes the panel');assert.equal(taken.copy,undefined);
+  await page.waitForTimeout(200);
+  assert.equal((await last(page)).copy,undefined,'no new copy this turn: Fox goes on in the panel');
+  assert.ok(!(await foxStep(page))?.error,'Fox\'s next step reaches the page in the panel');
+  await page.waitForTimeout(200);
+  assert.equal((await last(page)).copy,undefined);
+  await foxIdle(page);
+  // Next turn: a new copy; after it, the copy stays; its close (only after the turn) closes it.
+  await foxStep(page);
+  await page.waitForFunction(()=>(window as any).surface.at(-1)?.copy);
+  await host(page,{phase:'fox-copy',event:'close'});
+  await page.waitForTimeout(200);
+  assert.ok((await last(page)).copy,'the copy cannot be closed while Fox works on it');
+  await foxIdle(page);
+  await page.waitForTimeout(200);
+  assert.ok((await last(page)).copy,'after Fox\'s turn the copy stays with Fox\'s result');
+  await host(page,{phase:'fox-copy',event:'close'});
+  await page.waitForFunction(()=>{const b=(window as any).surface.at(-1);return b?.action==='browserLayout'&&!b.copy;});
+  assert.deepEqual((await last(page)).rect,shown,'the person\'s page stays');
+  // A page Fox opens loads in its copy; the person's page stays where it is.
+  const shows=await page.evaluate(()=>(window as any).surface.filter(b=>b.action==='browserShow').length);
+  const opened=await page.evaluate(()=>(window as any).worldletExecute('automate_browser',{operation:'open',url:'https://example.com/'}));
+  assert.ok(!opened?.error,'Fox opens a page: '+JSON.stringify(opened));
+  assert.ok((await last(page)).copy,'in a new copy');
+  assert.equal(await page.evaluate(()=>(window as any).surface.filter(b=>b.action==='browserShow').length),shows,'the person\'s page did not move');
+  assert.equal(await page.evaluate(()=>(window as any).commands.at(-1)?.args?.operation),'open','the host opens it in the copy');
+  await foxIdle(page);
+  await host(page,{phase:'fox-copy',event:'close'});
+  await page.waitForFunction(()=>{const b=(window as any).surface.at(-1);return b?.action==='browserLayout'&&!b.copy;});
+  // A host without a copy (a page not on the website engine) leaves Fox on the panel's page, framed.
+  await foxStep(page);
+  await page.waitForFunction(()=>(window as any).surface.at(-1)?.copy);
+  await host(page,{phase:'fox-copy',event:'ended'});
+  await page.waitForFunction(()=>document.querySelector('.browser-viewport')!.classList.contains('is-fox-control'));
+  assert.equal((await last(page)).copy,undefined);
+  assert.deepEqual(errors,[]);
+  await page.close();
+  console.log('PASS Fox\'s copy: a press takes Fox\'s page into the panel; after Fox\'s turn it stays until closed; without one Fox works in the panel');
  }
  {
   // The World window goes away for the desktop Companion while Fox works: the host shows Fox's page
@@ -183,7 +244,7 @@ const heldByFox=(page:Page)=>page.waitForFunction(()=>{const b=(window as any).s
   await foxStep(page);
   await page.waitForFunction(()=>(window as any).surface.at(-1)?.fox);
   const working=await last(page);
-  assert.equal(working.action,'browserLayout');assert.deepEqual(working.rect,shown);assert.equal(working.page,undefined);
+  assert.equal(working.action,'browserLayout');assert.deepEqual(working.rect,shown);assert.equal(working.page,undefined);assert.equal(working.copy,undefined,'no copy');
   assert.equal(await appletOpen(page),true,'the Applet stays open');
   assert.equal(await page.locator('.browser-task-pip').count(),0,'no task window');
   assert.deepEqual(errors,[]);

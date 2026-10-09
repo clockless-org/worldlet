@@ -36,7 +36,7 @@ export function installBrowser(host:Host){
  const object=(value:unknown):Row=>value&&typeof value==='object'&&!Array.isArray(value)?value as Row:{};
  host.register({
   browserShow:request=>{hookDetach();if(!desktop()?.isDesktop)device.show(request);return {ok:true};},
-  browserLayout:request=>{device.layout(object(request.rect),request.fox,request.page,request.press===true);return {ok:true};},
+  browserLayout:request=>{device.layout(object(request.rect),request.fox,request.page,request.press===true,request.copy,request.takeCopy===true);return {ok:true};},
   browserHide:request=>{device.hide(request.live);return {ok:true};},
   browserPip:request=>{hookDetach();if(!desktop()?.isDesktop)device.pip(String(request.applet??''),request.rect,request.live);return {ok:true};},
   browserCommand:request=>device.command(typeof request.operation==='string'?request.operation:'',object(request.args),request.agent===true),

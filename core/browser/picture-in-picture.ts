@@ -123,3 +123,31 @@ export function taskPictureInPictureAspect(page:{width:number;height:number}):nu
  const aspect=page.width>0&&page.height>0?page.width/page.height:PICTURE_IN_PICTURE.aspect;
  return Math.min(maxAspect,Math.max(minAspect,aspect));
 }
+/**
+ * Fox's copy of the page (owner request 2026-10-09). When Fox starts working on a website page while
+ * the person has its Applet open, Fox gets a copy of the page instead of taking the person's: the
+ * same address in the same website engine, so the same sign-in, shown smaller in the panel's
+ * top-right corner. The person's own page stays as it was and keeps working.
+ * - The copy keeps the panel's size as its own layout size (`page`) and only shows smaller, so the
+ *   site lays out as it does for the person and Fox's element references stay valid.
+ * - Fox's glow, pointer and the page's one status (its steps, then its result) go to the copy; the
+ *   person's page carries none of them.
+ * - It takes no input: a press on it brings Fox's page into the panel in place of the person's
+ *   (to see Fox's result or step in), and Fox goes on there. Once Fox's turn has ended it also
+ *   offers a close control, which leaves the person's page as it is.
+ * - Leaving the Applet while Fox works takes the copy along to the screen over the Applet's device
+ *   (task picture in picture above); leaving after Fox's turn closes it.
+ * - Hosts that draw pages smaller than their own size offer it (`browserTaskPictureInPicture`), and
+ *   only for pages on that engine. Where the panel is too small for a copy beside the page
+ *   (`minPanel`), Fox works on the person's page as before.
+ */
+export const FOX_COPY=Object.freeze({share:0.3,minWidth:280,maxWidth:460,margin:12,minPanel:720});
+/** Where Fox's copy shows: the panel's top-right corner, `share` of its width between `minWidth` and
+ * `maxWidth`, in the page's own shape. Null when the panel has no room for it. */
+export function foxCopyPlacement({panel,page}:{panel:SurfaceRect;page:{width:number;height:number}}):SurfaceRect|null {
+ const {share,minWidth,maxWidth,margin,minPanel}=FOX_COPY;
+ if(![panel.x,panel.y,panel.width,panel.height].every(Number.isFinite)||!(panel.width>=minPanel&&page.width>0&&page.height>0))return null;
+ const width=Math.round(Math.min(maxWidth,Math.max(minWidth,panel.width*share))),height=Math.round(width/taskPictureInPictureAspect(page));
+ if(height+2*margin>panel.height)return null;
+ return {x:Math.floor(panel.x+panel.width-margin-width),y:Math.ceil(panel.y+margin),width,height};
+}

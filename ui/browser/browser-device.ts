@@ -2,7 +2,7 @@ import type {BrowserSurfaceAction,BrowserSurfaceBodies,SurfaceRect} from '../../
 import {appletForWebsite} from './applet-match.ts';
 import {getApp,siteAppletPage} from '../../core/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
-import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,livePagePlan,pictureInPictureApplet,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../core/browser/index.ts';
+import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../core/browser/index.ts';
 import {createPictureInPictureOffer,createPictureInPictureWindow} from './picture-in-picture.ts';
 import {createAppletTaskScreen} from './applet-task-screen.ts';
 
@@ -51,10 +51,20 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // takes the control over; only the turn's end or the quiet timeout end it.
  const FOX_RING=6,FOX_BAND=28,FOX_LABEL='Fox is working on this page';let foxControl=false,foxTimer=0,foxTurnStart:CSSNumberish|null=null;
  const hostGlow=()=>!!native?.browser?.foxOverlay?.();
+ // Fox's copy of the page (owner request 2026-10-09, core/browser/picture-in-picture.ts FOX_COPY): when Fox
+ // starts working on the page in view, the host makes Fox a copy of it in the panel's top-right corner,
+ // and the person keeps their own page. `copyPage` is the copy's own size while there is one; the
+ // glow, Fox's pointer and the steps card go to the copy, and the panel's frame stays plain.
+ // `copyOff` keeps Fox on the panel's page for the rest of the turn (the host had no copy, or the
+ // person took Fox's page into the panel); `copyTake` asks the host to make the copy the panel's page.
+ let copyPage:{width:number,height:number}|null=null,copyOff=false,copyTake=false;
+ const foxOnPanel=()=>foxControl&&!copyPage;
+ // Fox's next step makes a copy: the page is in view in a panel with room for one, on a host that draws pages smaller.
+ const copyWanted=()=>!copyOff&&!taskPip&&taskHost()&&pageInPanel()&&!!panelRect&&!!foxCopyPlacement({panel:panelRect,page:panelRect});
  function markFoxControl(){
-  if(!slot)return;slot.classList.toggle('is-fox-control',foxControl);
-  if(foxControl)slot.dataset.foxLabel=foxLabel();else delete slot.dataset.foxLabel;
-  if(foxControl&&hostGlow())slot.dataset.foxOverlay='host';else delete slot.dataset.foxOverlay;
+  if(!slot)return;const on=foxOnPanel();slot.classList.toggle('is-fox-control',on);
+  if(on)slot.dataset.foxLabel=foxLabel();else delete slot.dataset.foxLabel;
+  if(on&&hostGlow())slot.dataset.foxOverlay='host';else delete slot.dataset.foxOverlay;
  }
  // Applet tasks Fox handed off run beside the conversation: the conversation's turn ending does not
  // end Fox's control of the page while one runs; the last task's end does.
@@ -86,6 +96,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  function setFoxControl(active:boolean){
   clearTimeout(foxTimer);if(active)foxTimer=window.setTimeout(()=>setFoxControl(!!appletTasks.size),90000);
   if(foxControl===active)return;foxControl=active;foxTurnStart=null;foxStepText='';
+  // A new turn may have its copy again; one already showing goes on as Fox's.
+  if(!active)copyOff=false;
   // A new turn on the page starts a new list, whatever the last turn's card still showed.
   if(active){clearTimeout(finishTimer);finishTimer=0;if(foxSteps.finished)foxSteps=foxStepsStart();}
   // The turn is over: Fox's steps become its finished card with the reply as the result; a turn
@@ -427,6 +439,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  window.addEventListener('worldlet:desktop-companion',(event:any)=>{
   const next=event.detail===true;if(next===away)return;
   if(next)keptAway=showing&&(!!taskPip||foxControl);
+  // The host takes Fox's copy along beside the Companion while Fox works, and closes it otherwise.
+  if(next&&copyPage){copyPage=null;if(foxControl)copyOff=true;markFoxControl();}
   // Back in the World: a page the host stopped opens again; Fox's page is placed where it was.
   else if(showing&&!keptAway)showing=false;
   away=next;lastRect='';geometry();
@@ -439,7 +453,9 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  const screen=createAppletTaskScreen({root,openApplet,place:rect=>{if(!taskPip)return;screenRect=rect;geometry();}});
  const taskWindow=()=>({show(key:string){screen.show(key,taskPage!);announce(key,foxControl);},working(busy:boolean){if(!taskPip)return;screen.working(busy);announce(taskPip,busy);}});
  function enterTask(rect:SurfaceRect){
-  taskPip=taskApplet=appletKey;taskPage={width:rect.width,height:rect.height};screenRect=null;
+  // Fox's copy goes to the screen in place of the person's page, at its own size (FOX_COPY).
+  if(copyPage){copyTake=true;copyOff=true;}
+  taskPip=taskApplet=appletKey;taskPage=copyPage??{width:rect.width,height:rect.height};screenRect=null;copyPage=null;
   taskWindow().show(appletKey);taskWindow().working(foxControl);
  }
  // Fox's turn ended with its page out of sight: the page is left and its device says Fox is done.
@@ -487,10 +503,13 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
     // device is not drawn), while Fox works on it.
     const rect=screenRect??{x:0,y:0,width:0,height:0},glow=foxGlow(),fox=glow?{fox:glow}:{};
     const key=JSON.stringify({task:rect,fox:glow&&{...glow,phaseSeconds:undefined}});
-    if(key!==lastRect){lastRect=key;void queue('browserLayout',{rect,page:taskPage,press:true,...fox});}
+    const take=copyTake?{takeCopy:true}:{};copyTake=false;
+    if(key!==lastRect||take.takeCopy){lastRect=key;void queue('browserLayout',{rect,page:taskPage,press:true,...fox,...take});}
     syncPipOffer();return;
    }
    if(!visible){
+    // A page put away takes Fox's copy with it (the host closes the copy).
+    if(copyPage){copyPage=null;markFoxControl();}
     if(showing){showing=false;lastRect='';
      // Chosen picture in picture: the page leaves the panel for the small window, still playing.
      if(wanted&&wanted===resumeKey&&pipHost())startPip(wanted);
@@ -507,21 +526,26 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    const r=slot.getBoundingClientRect(),p=content.getBoundingClientRect(),style=getComputedStyle(content);
    const x=Math.ceil(Math.max(r.left,p.left+parseFloat(style.borderLeftWidth)+parseFloat(style.paddingLeft))),y=Math.ceil(Math.max(r.top,p.top+parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop)));
    const right=Math.floor(Math.min(r.right,p.right-parseFloat(style.borderRightWidth)-parseFloat(style.paddingRight))),bottom=Math.floor(Math.min(r.bottom,p.bottom-parseFloat(style.borderBottomWidth)-parseFloat(style.paddingBottom)));
-   const glow=foxGlow(),ring=foxControl&&!glow,inset=ring?FOX_RING:0,top=ring?FOX_BAND:0;
-   const rect={x:x+inset,y:y+top,width:Math.max(0,right-x-2*inset),height:Math.max(0,bottom-y-top-inset)},fox=glow?{fox:glow}:{},key=JSON.stringify({rect,fox:glow&&{...glow,phaseSeconds:undefined}});
+   const glow=foxGlow(),ring=foxOnPanel()&&!glow,inset=ring?FOX_RING:0,top=ring?FOX_BAND:0;
+   const rect={x:x+inset,y:y+top,width:Math.max(0,right-x-2*inset),height:Math.max(0,bottom-y-top-inset)};
    if(rect.width<1||rect.height<1)return;
    panelRect=rect;
+   // Fox's copy in the panel's corner; a panel grown too small for it takes Fox's page in instead.
+   const copyRect=copyPage?foxCopyPlacement({panel:rect,page:copyPage}):null;
+   if(copyPage&&!copyRect){copyPage=null;copyTake=true;copyOff=true;markFoxControl();}
+   const copy=copyPage&&copyRect?{copy:{rect:copyRect,page:copyPage}}:{},take=copyTake&&showing?{takeCopy:true}:{};copyTake=false;
+   const fox=glow?{fox:glow}:{},key=JSON.stringify({rect,fox:glow&&{...glow,phaseSeconds:undefined},...copy,...take});
    if(showsFinished()&&!finishTimer)finishTimer=window.setTimeout(clearFinished,FINISHED_MS);
    if(!showing){
     showing=true;lastRect=key;hidden.delete(resumeKey);const restored=restoring?resumeKey:'',show=++shows;settled=false;syncPipOffer();
     // Until the host confirms, page reports may still describe the previous Applet's page.
-    void queue('browserShow',{rect,platform,...address?{url:address}:{},...resumeKey?{applet:resumeKey,resume:resuming}:{},...restored?{hold:true}:{},live:livePages(),...fox}).then(()=>{if(show===shows)settled=true;},e=>{
+    void queue('browserShow',{rect,platform,...address?{url:address}:{},...resumeKey?{applet:resumeKey,resume:resuming}:{},...restored?{hold:true}:{},live:livePages(),...fox,...copy}).then(()=>{if(show===shows)settled=true;},e=>{
      // A remembered page the host no longer opens is forgotten; the Applet opens its start page.
      if(restored){forget(restored);renderTabs();if(restored===resumeKey&&restoring){restoring=false;address=fallback;showing=false;lastRect='';geometry();}return;}
      caption.textContent='';notify(e.message);
     });
    }
-   else if(key!==lastRect){lastRect=key;void queue('browserLayout',{rect,...fox});}
+   else if(key!==lastRect){lastRect=key;void queue('browserLayout',{rect,...fox,...copy,...take});}
   }finally{syncRefresh();syncFocus();syncHistory();resolve();}};
    flushGeometry=update;if(immediate)update();else{animation=requestAnimationFrame(update);timer=window.setTimeout(update,80);}
   });
@@ -536,6 +560,15 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    // The host closed Fox's page beside the desktop Companion after Fox's turn.
    else if(value.event==='closed'){endTask();taskApplet='';keptAway=false;if(showing){showing=false;lastRect='';}syncPipOffer();}
    return;
+  }
+  // Fox's copy: a press takes Fox's page into the panel, its close (after Fox's turn) leaves the
+  // person's page, and the host says when there is no copy.
+  if(value?.phase==='fox-copy'){
+   if(value.event==='press'&&copyPage){copyPage=null;copyTake=true;copyOff=true;}
+   else if(value.event==='close'&&copyPage&&!foxControl)copyPage=null;
+   else if(value.event==='ended'&&copyPage){copyPage=null;if(foxControl)copyOff=true;}
+   else return;
+   markFoxControl();geometry();return;
   }
   if(value?.phase==='pip'){if(pip&&value.applet===pip){if(value.event==='press')restorePip();else if(value.event==='ended'){pip='';pipWindow.hide();}}return;}
   if(!opened||value.platform&&value.platform!==platform)return;
@@ -556,12 +589,13 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
     const before=visits.get(appletKey),page={title:String(value.title).slice(0,120),url:url.href};
     visits.set(appletKey,page);if(visits.size>32)visits.delete(visits.keys().next().value);
     // Each website is its own place to talk with Fox: the World hears when the page changes.
-    if(before?.url!==page.url||before?.title!==page.title)onPage(appletKey,page,foxNavigating||foxControl||!!taskPip);
+    if(before?.url!==page.url||before?.title!==page.title)onPage(appletKey,page,!copyPage&&(foxNavigating||foxControl)||!!taskPip);
    }}catch{}
    // Remember only pages the person reached; a page Fox navigated to stays Fox's, as does any page
    // the task window shows (it takes no input there).
    if(resumeKey&&settled){
-    if(foxNavigating||foxControl||taskPip)foxPage(value.url);
+    // Beside Fox's copy the panel's page is the person's own.
+    if(!copyPage&&(foxNavigating||foxControl)||taskPip)foxPage(value.url);
     else{let href='';try{href=new URL(value.url).href;}catch{}if(!foxPages.has(href))remember(resumeKey,href);}
     // The tab's label follows the page it shows, Fox's pages too.
     if(isBrowserTab(resumeKey)&&appletKey==='browser'){tabs.note(resumeKey,{title:String(value.title||'')},false);renderTabs();}
@@ -598,6 +632,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    const previous=appletKey;
    // The same Applet drawn again keeps what the host said about its page (Focus): the host says it
    // again only when the page itself changes.
+   // Another Applet's page leaves Fox's copy behind (the host closes it with the page).
+   if(previous!==key){copyPage=null;copyTake=false;}
    appletKey=key;matchedApplet=null;signInBlocked=false;page={title:'',url:''};if(previous!==key)focusState=null;if(slot)resize.unobserve(slot);videoPlaying=false;
    // The window's own Applet takes its page back into the panel (browserShow), still playing,
    // on the platform it had: a page opened from a link in the Applet is a web page there.
@@ -637,13 +673,19 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    caption=document.createElement('p');caption.className='browser-caption';caption.setAttribute('role','status');caption.textContent='Loading '+title+'…';
    slot=document.createElement('div');slot.className='browser-viewport';slot.setAttribute('aria-label','Native '+title+' browser');markFoxControl();content.append(caption,...key==='browser'?[tabStrip]:[],slot);renderTabs();resize.observe(slot);syncAppletOffer(destination||home);syncMakeOffer();geometry();
   },
-  async automate(args){if(!['receipts'].includes(args?.operation)){setFoxControl(true);foxNavigating=true;if(args?.operation==='open')foxPage(args.url);}await geometryReady;await pending.catch(()=>{});return command('automate',args,true);},
+  async automate(args){if(!['receipts'].includes(args?.operation)){
+   // Fox's first step on the page in view: Fox works on a copy, and the person keeps the page (FOX_COPY).
+   if(!copyPage&&copyWanted()&&panelRect){copyPage={width:panelRect.width,height:panelRect.height};markFoxControl();geometry();}
+   setFoxControl(true);foxNavigating=true;if(args?.operation==='open')foxPage(args.url);}await geometryReady;await pending.catch(()=>{});return command('automate',args,true);},
   foxControl(active:boolean){setFoxControl(active);},
   /** Fox's page is in the task picture-in-picture window: it is still open for Fox's steps. */
   inTaskPicture(){return !!taskPip;},
   /** Fox's steps reach its page wherever the person is in the World: the page is in the task window,
    * or the person took it back from there into the panel this turn (companion-ai's view guard). */
-  foxPageHeld(){return !!taskPip||!!taskApplet&&taskApplet===appletKey&&showing;},
+  foxPageHeld(){return !!taskPip||!!taskApplet&&taskApplet===appletKey&&showing||!!copyPage;},
+  /** Fox works on its copy of the page in view (FOX_COPY): there is one, or Fox's next step makes one.
+   * Pages Fox opens then load in the copy, never in the person's page. */
+  foxCopy(){return !!copyPage||copyWanted();},
   async agent(args){
    // Pages Fox reaches this turn are Fox's, including the one it is opening right now.
    if(!['history','saved','records','record','outline','focus'].includes(args.operation)){foxNavigating=true;if(args.operation==='open')foxPage(args.url);}

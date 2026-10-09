@@ -247,7 +247,7 @@ Checks:
 - `node scripts/browser-tabs-check.ts`: tab keys, add up to eight, select and step, close hand-over and the last
   tab, remembered addresses and labels, stored tabs revalidated. `node scripts/browser-tabs-ui-check.ts` (in
   `test:ui`) drives the strip and the menu's keys through the World UI with a faked host.
-- `node scripts/applet-task-pip-check.ts`: Fox's page stays in its Applet, out of sight with a badge when the person leaves.
+- `node scripts/applet-task-pip-check.ts`: Fox works on a copy of the page in the panel's corner, and its page goes out of sight with a badge when the person leaves.
 - The engine check (`npm run test:electron -- modules/browser/engine`):
   - two pages render and take typing each on its own;
   - two Fox drivers run at once on separate pages, each answered by its own page;
@@ -255,15 +255,29 @@ Checks:
 
 ## Task picture in picture
 
-Fox's pages stay in their Applet (owner feedback 2026-10-02, replacing the window of #1175): when Fox
-starts driving a website page, the page stays full size in the panel, so the person sees Fox work
-and can step in, for example to sign in. Picture in picture at the World's bottom-right is for
-videos only. Hosts that declare `browserTaskPictureInPicture` (the CEF website engine, which draws
+Fox's pages stay in their Applet (owner feedback 2026-10-02, replacing the window of #1175). Picture in
+picture at the World's bottom-right is for videos only. Hosts that declare `browserTaskPictureInPicture` (the CEF website engine, which draws
 a page as a texture at any size) keep Fox's page working when the person leaves; elsewhere leaving
 hides the page as before. The Browser panel (`ui/browser/browser-device.ts`) applies it.
 
-- **Still Fox's, over its device.** If the person leaves the Applet while Fox works, the page is
-  never hidden. A small live screen sits over that Applet's device in the World, with a tail pointing
+- **Fox's copy (owner request 2026-10-09).** When Fox starts working on the page in view, it gets a copy
+  of that page in the panel's top-right corner, and the person keeps their own page and goes on using
+  it (`FOX_COPY`, `foxCopyPlacement` in `core/browser/picture-in-picture.ts`).
+  - The host opens the copy at the page's address on the same CEF engine, so it has the same cookies
+    and sign-in, and plays it muted.
+  - The copy keeps the panel's size as its layout size and is drawn smaller, about a third of the
+    panel's width, so the site lays out as it does for the person.
+  - Fox's steps go to the copy, including pages Fox opens. Fox's glow, pointer and steps card are
+    drawn over the copy, never over the person's page.
+  - A transparent overlay takes the copy's input. A press brings Fox's page into the panel in place of
+    the person's, which closes, and Fox goes on there. Once Fox's turn has ended, a close control also
+    shows; it closes the copy and leaves the person's page as it is.
+  - Each layout carries `copy` while it lasts ([contract](../../contracts/browser-surface.ts)).
+  - Without a copy, Fox drives the person's page in the panel as before. That happens when the page
+    runs on Electron's views (X, Douyin, Twitch) or the panel is narrower than 720 pixels.
+
+- **Still Fox's, over its device.** If the person leaves the Applet while Fox works, Fox's page (its
+  copy, which takes the person's page's place) is never hidden. A small live screen sits over that Applet's device in the World, with a tail pointing
   down at it (owner decision 2026-10-02, `ui/browser/applet-task-screen.ts`), and the panel sends
   `browserLayout` with the screen's slot as `rect`, the panel's size as `page` and `press`. The page
   keeps its layout size, so Fox's references stay valid, and its next steps reach it; the engine
