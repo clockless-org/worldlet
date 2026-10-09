@@ -1,4 +1,4 @@
-import {ACTIVE_THEME,THEMES,activateTheme,switchTheme} from '../themes/index.ts';
+import {BUILD_THEMES,activeBuildTheme,switchBuildTheme} from '../themes/index.ts';
 import {displayReleaseVersion} from '../../core/distribution/index.ts';
 import {connectionLive,getApp} from '../../core/applets/index.ts';
 import {BROWSER_HOME,createBrowserHome} from '../../core/browser/index.ts';
@@ -234,11 +234,15 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
   {id:'approvals',label:'Approvals',hint:'What your Agent may do without asking',show:target=>{const turn=ticket;return showApprovalRules(target,call,()=>turn===ticket&&target.isConnected);}},
   {id:'theme',label:'Theme',hint:'Your world’s scenery and companion',show(target){
    const said=status();target.append(note('Choose the world you work in.'),said);
-   for(const entry of THEMES.values())target.append(action(entry.pack.title,async button=>{
-    said.textContent='Preparing '+entry.pack.title+'…';
-    const result=await switchTheme(entry.pack.id,{current:ACTIVE_THEME.pack.id,apply:activateTheme});
-    said.textContent='error' in result?result.error:entry.pack.title+' is ready.';
-   },{id:'theme-'+entry.pack.id}));
+   // Every bundled theme package (ui/themes/build-theme.ts); one click switches the whole World in place.
+   const buttons:HTMLButtonElement[]=[];
+   const mark=()=>{for(const b of buttons)b.setAttribute('aria-pressed',String(b.dataset.action==='theme-'+activeBuildTheme().id));};
+   for(const entry of BUILD_THEMES.values()){const button=action(entry.title,async()=>{
+    said.textContent='Preparing '+entry.title+'…';
+    const result=await switchBuildTheme(entry.id);
+    said.textContent='error' in result?result.error:entry.title+' is ready.';mark();
+   },{id:'theme-'+entry.id});buttons.push(button);target.append(button);}
+   mark();
   }},
   {id:'integrations',label:'Integrations',hint:'Connected accounts',show:async target=>{
    const turn=ticket,state=await call('snapshot').catch(()=>null);if(turn!==ticket)return;

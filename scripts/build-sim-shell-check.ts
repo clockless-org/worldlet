@@ -10,5 +10,19 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.locator('.village-map').isVisible(),false);
  const overlap=await page.evaluate(()=>{const a=document.querySelector('[data-sim-slot=content]')!.getBoundingClientRect(),b=document.querySelector('.ui-theme-speech')!.getBoundingClientRect();return Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top);});assert.equal(overlap,false,'Fox speech stays outside Applet content');
  await page.evaluate(()=>(window as any).worldletUI.dispatch({version:1,action:'overview'}));await page.locator('.village-map').waitFor({state:'visible'});
- assert.deepEqual(errors,[]);console.log('PASS full World shell: boot, Sim world, public navigation to mail and back, no runtime errors');
+ // One step: Settings → Theme → Blueprint replaces the whole World in place, with the same Applet still reachable.
+ await page.locator('.companion-panel-button').click();await page.locator('#companionInfo [data-setting=theme]').click();
+ await page.locator('#companionInfo [data-action=theme-blueprint]').click();
+ await page.locator('.blueprint-plan').waitFor({state:'visible'});assert.equal(await page.locator('.village-map').count(),0,'the old theme is disposed');
+ assert.equal(await page.evaluate(()=>document.documentElement.dataset.buildTheme),'blueprint');
+ assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll<HTMLLinkElement>('link[data-theme-style]')].map(l=>l.dataset.themeStyle)),['blueprint'],'only the active theme stylesheet is attached');
+ await page.locator('#companionInfo [data-action=theme-blueprint][aria-pressed=true]').waitFor();
+ await page.keyboard.press('Escape');await page.screenshot({path:'/tmp/worldlet-sim-shell-blueprint-world.png'});
+ await page.evaluate(()=>(window as any).worldletUI.dispatch({version:1,action:'activate',id:'app-gmail'}));
+ await page.locator('.blueprint-sheet').waitFor({state:'visible'});await page.screenshot({path:'/tmp/worldlet-sim-shell-blueprint-mail.png'});
+ const sheetOverlap=await page.evaluate(()=>{const a=document.querySelector('[data-sim-slot=content]')!.getBoundingClientRect(),b=document.querySelector('.ui-theme-speech')!.getBoundingClientRect();return Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top);});assert.equal(sheetOverlap,false,'Fox speech stays outside Blueprint content');
+ // The choice is saved on this computer: a reload starts in Blueprint.
+ await page.reload();await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.theme==='blueprint');
+ await page.evaluate(()=>(window as any).worldletUI.dispatch({version:1,action:'overview'}));await page.locator('.blueprint-plan').waitFor({state:'visible'});
+ assert.deepEqual(errors,[]);console.log('PASS full World shell: boot, Sim world, public navigation to mail and back, Settings → Theme switches Village to Blueprint in place and after reload, no runtime errors');
 });

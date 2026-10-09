@@ -1,4 +1,5 @@
-/** Authoritative, build-time Sim API. Source packages and consumers compile against this file. */
+/** The one Theme contract (Sim contract v2). Every theme package and the host compile against this file.
+ * Worldlet bundles any number of packages; the person switches between them in one step (build-theme.ts). */
 export const BUILD_THEME_CONTRACT_VERSION = 2;
 export type ThemeRect = readonly [number,number,number,number];
 export type ThemeRecord = Readonly<Record<string,unknown>>;
@@ -32,6 +33,8 @@ export interface ThemeAppletContext {
  invalidate():void;
  /** Optional richer host reader; presentation owns its placement. */
  renderDefault(target:HTMLElement):void;
+ /** Published URL of a package-relative `assets/...` path. Packages never hard-code where the host serves them. */
+ asset(path:string):string;
 }
 export interface ThemeMount {dispose():void}
 export interface ThemeWorldApplet {id:string;key:string;title:string;region:string;visible:boolean;status?:string;count?:number}
@@ -49,6 +52,8 @@ export interface ThemeWorldContext {
  navigate(target:{kind:'applet'|'area';id:string}):void;
  menu(id:string,x:number,y:number):void;
  moveApplet(id:string,area:string,slot?:number):void;
+ /** Published URL of a package-relative `assets/...` path. */
+ asset(path:string):string;
 }
 export interface ThemeWorldMount extends ThemeMount {
  update(state:ThemeWorldState):void;

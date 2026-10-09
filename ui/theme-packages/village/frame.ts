@@ -7,4 +7,3 @@ export function frame(host:HTMLElement,scene:ThemeScene){
  const place=(element:HTMLElement,name:string)=>{element.dataset.simSlot=name;const r=scene.slots[name];if(!r)throw Error('Missing scene slot '+name);Object.assign(element.style,{position:'absolute',left:r[0]*100+'%',top:r[1]*100+'%',width:r[2]*100+'%',height:r[3]*100+'%'});};
  return {canvas,place,dispose(){observer.disconnect();canvas.remove();}};
 }
-export const asset=(path:string)=>path.replace(/^assets\//,'theme-assets/');

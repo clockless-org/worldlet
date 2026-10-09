@@ -1,9 +1,10 @@
 import type {ThemeWorldContext,ThemeWorldState,ThemeWorldApplet} from '@worldlet/theme';
 import map from './map.json' with {type:'json'};
-import {frame,asset} from './frame.ts';
+import {frame} from './frame.ts';
 import {placeApplets} from './placements.ts';
 /** Map geometry, navigation, placement and overflow browsing are entirely theme-owned. */
 export function renderWorld(context:ThemeWorldContext){
+ const asset=context.asset;
  const mounted=frame(context.host,context.scene),canvas=mounted.canvas;canvas.classList.add('village-map');
  const plate=document.createElement('img');plate.className='village-map-plate';plate.alt='';canvas.append(plate);
  const layer=document.createElement('div');layer.className='village-map-layer';canvas.append(layer);

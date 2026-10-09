@@ -1,11 +1,13 @@
-# Build-time Sim contract v2
+# Theme contract (Sim contract v2)
 
-A Sim is a trusted, self-contained **presentation source package**. Worldlet copies one package at development/build time and compiles it. The main repository owns the executable [TypeScript contract](../../ui/themes/build-theme-contract.ts), [import validator](../../scripts/build-theme-source.ts) and consumer adapters. Copies in an authoring repository are references, not another authority. There is no runtime download or theme switcher.
+Every Worldlet theme implements this one interface. A theme is a trusted, self-contained **presentation source package**. Worldlet bundles every package in `ui/theme-packages/<id>/` and the person switches between them in one step (Settings → Theme). The main repository owns the executable [TypeScript contract](../../ui/themes/build-theme-contract.ts), [import validator](../../scripts/build-theme-source.ts), [registry and switch](../../ui/themes/build-theme.ts) and consumer adapters. Copies in an authoring repository are references, not another authority. Packages are compiled into the app; nothing is downloaded or evaluated at runtime.
 
 ```mermaid
 flowchart LR
   D[Host records, navigation and capabilities] --> C[Versioned Sim context]
-  P[Selected source package] --> W[renderWorld]
+  R[Bundled packages] --> S[Active theme, switched in one step]
+  S --> P[Active source package]
+  P --> W[renderWorld]
   P --> A[renderApplet]
   C --> W
   C --> A
@@ -29,7 +31,7 @@ package/
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-09T23:14:20Z`); it is informational, not a compatibility gate. `contractVersion` alone controls interface compatibility; source hashes identify the copied contents.
 
-The importer validates contract compatibility, paths, unique Applet IDs, mandatory render functions, browser compilation, scene rectangles, font declarations and referenced assets. It rejects symlinks, unresolved LFS pointers, missing assets, CSS imports, external CSS URLs, private host imports and Node dependencies. Only local source and **type-only** `@worldlet/theme` imports are supported. Source is compiled without executing it during validation. Validated staged bytes replace `ui/selected-theme` atomically; hashes are recorded, failed imports keep the previous selection, and builds remove stale output assets.
+The importer validates contract compatibility, paths, unique Applet IDs, mandatory render functions, browser compilation, scene rectangles, font declarations and referenced assets. It rejects symlinks, unresolved LFS pointers, missing assets, CSS imports, external CSS URLs, private host imports and Node dependencies. Only local source and **type-only** `@worldlet/theme` imports are supported. Source is compiled without executing it during validation. Validated staged bytes replace `ui/theme-packages/<id>` atomically and regenerate the registry `ui/theme-packages/index.ts`; other packages are untouched, hashes are recorded in each `source-lock.json`, failed imports keep the previous copy, and builds remove stale output assets. Removing a theme is deleting its directory and re-running the import of any package (or `writeThemeRegistry`).
 
 This is trusted reviewed application source, not a sandbox. Static validation cannot prove accessibility, resource references constructed by code, or renderer behavior. The UI acceptance checks below are also required.
 
@@ -56,6 +58,7 @@ export default sim;
 | `actions.records` | Optional save/remove methods, supplied only for supported writes. Current host exposes local Calendar operations. A theme cannot create unavailable account capabilities. |
 | `renderDefault` | Mount the host's richer reader inside a theme-owned content slot, e.g. the full Calendar grid. |
 | `invalidate` | Request a fresh render from current host data. |
+| `asset(path)` | Published URL of a package-relative `assets/...` path, on both World and Applet contexts. Packages never hard-code where the host serves their files. |
 | `dispose` | Remove listeners, observers, timers, animations and mounted nodes. Applet disposal runs before replacement, hide and host destruction. World disposal runs on host destruction. |
 
 Records cross the boundary as readonly display fields and `Record<string, unknown>`, not an untyped calendar-only API. Source-specific records require narrowing in the theme. Treat all records as immutable; presentation may keep transient selection, search, draft and camera state. Navigation, persistence, accounts, authorization and external websites stay in the host. Busy/error states reflect the actual supplied action result.
@@ -82,7 +85,23 @@ Required semantic tokens: `bodyFont`, `displayFont`, `bodySize`, `titleSize`, `i
 
 Buttons must be real controls with default, hover, pressed, focus-visible, disabled and busy states. Keep keyboard navigation, accessible names and visible focus. `aria-busy` represents pending operations; errors preserve drafts and offer retry. Backgrounds never replace live text or controls with screenshot hotspots. User content uses text nodes or the host's sanitized reader.
 
-Assets at `assets/...` are published to `theme-assets/...`; source packages must ship every required asset. Theme CSS is appended after shared styles and should scope presentation rules to its owned roots or the public shell classes. The generic shared component/companion artwork remains available as host UI; a package does not need to duplicate product behavior.
+Assets at `assets/...` are published to `theme-assets/<id>/...`; resolve them with `context.asset(path)` in code and `url('theme-assets/…')` in CSS (the build rewrites it per theme). Source packages must ship every required asset. Each theme's CSS is published as its own `theme-<id>.css`, loaded after the shared styles; only the active theme's stylesheet is attached, so two themes never style each other. Scope presentation rules to the theme's owned roots or the public shell classes. The generic shared component/companion artwork remains available as host UI; a package does not need to duplicate product behavior.
+
+## Switching themes
+
+`ui/themes/build-theme.ts` validates every bundled package when the app loads and keeps one active theme. `switchBuildTheme(id)` is the single step behind Settings → Theme:
+
+1. Prepare the target: attach its stylesheet without applying it, decode every scene painting and warm its fonts. If any of that fails, the current theme stays and nothing is saved.
+2. Make it active: apply its stylesheet and tokens, remove the old stylesheet and save the choice on this computer (`worldlet-theme-v2`).
+3. Dispatch `worldlet:theme` (`{from,to}`). The World disposes the old theme's World and Applet mounts and renders the same view with the new theme: what is open, records, web sessions and background tasks stay. Pinned places are kept per theme (`ui/themes/theme-placements.ts`).
+
+An unknown or removed saved theme falls back to Village, the default.
+
+## Adding a theme
+
+1. Write a package that satisfies this contract (`npm run theme:source-check -- <dir>`).
+2. `npm run theme:import -- <dir>` copies it to `ui/theme-packages/<id>/` and adds it to the registry. No host file needs editing.
+3. `npm run build:native-ui && npm run test:sim-ui` runs the shared acceptance check against every bundled theme, switching between them in place.
 
 ## Authoring and acceptance
 
@@ -95,10 +114,10 @@ npm run test:sim-ui
 npm run theme:preview
 ```
 
-`test:sim-ui` uses the production World adapter and Applet stage with fictional records in a hidden Electron window. It checks World → Applet → original action → World, an unknown Applet, loading/error, slot registration under resize and disposal. `test:theme-ui` adds the Village four-scene and Calendar save checks. `node scripts/build-sim-shell-check.ts` checks actual application boot, shared shell and public navigation with a stub host. These do not claim authenticated account coverage or acceptance of every Applet.
+`test:sim-ui` uses the production World adapter and Applet stage with fictional records in a hidden Electron window. For every bundled theme, switched in place, it checks that only that theme's stylesheet is attached, World → Applet → original action → World, an unknown Applet, loading/error, slot registration under resize and disposal. `test:theme-ui` adds the Village four-scene and Calendar save checks. `node scripts/build-sim-shell-check.ts` checks actual application boot, shared shell and public navigation with a stub host. These do not claim authenticated account coverage or acceptance of every Applet.
 
-Before a theme is marked production-ready, inspect the full shared shell at 1500 × 844: HUD and companion overlap, text clipping, long content, empty/loading/error, keyboard focus, busy/failed edits and reduced motion. Capture both map and Applet evidence. Run the same consumer with a second package, without source edits, to verify replacement. Village is the artwork-rich implementation; Blueprint is a deliberately small independent reference implementation proving the contract, not a replacement for production visual acceptance. The legacy Hogwarts overlay is not a v2 package.
+Before a theme is marked production-ready, inspect the full shared shell at 1500 × 844: HUD and companion overlap, text clipping, long content, empty/loading/error, keyboard focus, busy/failed edits and reduced motion. Capture both map and Applet evidence. Run the same consumer with a second package, without source edits, to verify replacement. Village is the artwork-rich implementation and the default; Blueprint (`ui/theme-packages/blueprint/`) is a deliberately small independent implementation, drawn entirely from vector art and the host's own readers, that proves replacement and switching. It is not a replacement for production visual acceptance. The legacy Hogwarts overlay is not a v2 package.
 
 ## Compatibility
 
-V2 replaces the Applet-only v1 interface and requires migration; incompatible versions fail before copying. Changes that remove fields, change coordinate meanings or lifecycle semantics require a major contract version. Additive optional capabilities can remain on v2. Main-repository adapters absorb product data changes so packages can change independently. The old data-only `ThemePack` remains a compatibility owner for shared built-in UI assets; it is not the Sim source API or a runtime switching mechanism.
+V2 replaces the Applet-only v1 interface and requires migration; incompatible versions fail before copying. Changes that remove fields, change coordinate meanings or lifecycle semantics require a major contract version. Additive optional capabilities can remain on v2. Main-repository adapters absorb product data changes so packages can change independently. The old data-only `ThemePack` remains the internal owner of shared built-in UI assets (companion, HUD material, sounds); it is not a theme API and not how themes are switched.

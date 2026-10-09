@@ -1,6 +1,6 @@
 import {WORLD_LAYOUT} from './world-layout.ts';
 import {AREA_LAYOUT_VERSION,migrateAreaLayout} from '../../core/applets/index.ts';
-import {ACTIVE_THEME,selectThemePins,storedThemePins,type ThemePins} from '../themes/index.ts';
+import {activeBuildTheme,selectThemePins,storedThemePins,type ThemePins} from '../themes/index.ts';
 
 export const regionId=(id:string)=>id?.replace(/^building-/,'')==='people'?'travel':id?.replace(/^building-/,'');
 export const REGION_THEMES={home:'Cottage',library:'Reading garden',money:'Fountain',health:'Shade garden',work:'Workshop',travel:'Riverside'};
@@ -17,7 +17,7 @@ export const lastUse=(room:any,layout?:RegionLayout)=>Math.max(layout?.lastUsedA
 export function recentlyUsedFirst(a:any,b:any,layout:RegionLayout){return lastUse(b,layout)-lastUse(a,layout)||a.title.localeCompare(b.title);}
 /** A saved layout, from the World (`onboarding.regionLayout`) or an older page's storage; anything unexpected is dropped.
  * Its pins become `themeId`'s; every other theme's stay in `themePins`. */
-export function parseRegionLayout(saved:any,themeId=ACTIVE_THEME.pack.id):RegionLayout{
+export function parseRegionLayout(saved:any,themeId=activeBuildTheme().id):RegionLayout{
  const result=emptyRegionLayout();if(!saved||typeof saved!=='object')return selectThemePins(result,{},themeId);
  saved=migrateAreaLayout(saved);
  const entries=(value:any)=>value&&typeof value==='object'&&!Array.isArray(value)?Object.entries(value):[];
@@ -29,11 +29,11 @@ export function parseRegionLayout(saved:any,themeId=ACTIVE_THEME.pack.id):Region
  for(const [id,time] of entries(saved.lastUsedAt))if(typeof time==='number'&&Number.isFinite(time)&&time>0)result.lastUsedAt[id]=time;
  return selectThemePins(result,saved.version===AREA_LAYOUT_VERSION?saved:{},themeId);
 }
-export function readRegionLayout(key:string,themeId=ACTIVE_THEME.pack.id):RegionLayout{
+export function readRegionLayout(key:string,themeId=activeBuildTheme().id):RegionLayout{
  try{return parseRegionLayout(JSON.parse(localStorage.getItem(key)||'{}'),themeId);}catch{return parseRegionLayout({},themeId);}
 }
 /** What `readRegionLayout` reads back: the active theme's pins and every other theme's kept apart. */
-export function storedRegionLayout(layout:RegionLayout,themeId=ACTIVE_THEME.pack.id):RegionLayout{return storedThemePins(layout,themeId);}
+export function storedRegionLayout(layout:RegionLayout,themeId=activeBuildTheme().id):RegionLayout{return storedThemePins(layout,themeId);}
 export function applyRegionLayout(world:any,layout:RegionLayout){
  if(!world.buildings?.length)return;
  for(const room of world.spaces||[]){const id=regionId(layout.assignments[room.moduleId]||room.region||room.buildingId||'home');room.region=id;room.buildingId='building-'+id;}

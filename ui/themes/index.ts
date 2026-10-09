@@ -13,4 +13,5 @@ export {themeAmbientTrack} from './theme-audio.ts';
 
 export * from './build-theme-contract.ts';
 
-export {renderBuildTheme,renderBuildWorld,applyBuildThemeScene,BUILD_THEME_PRESENTATION,BUILD_THEME_ID} from './build-theme.ts';
+// The one Theme contract: bundled packages, the active one and the one-step switch.
+export {renderBuildTheme,renderBuildWorld,applyBuildThemeScene,activeBuildTheme,switchBuildTheme,readBuildThemePreference,themeAssetURL,BUILD_THEMES,DEFAULT_BUILD_THEME_ID,BUILD_THEME_PREFERENCE_KEY,type InstalledTheme} from './build-theme.ts';

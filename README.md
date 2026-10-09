@@ -156,7 +156,7 @@ No account, secret or hosted service is needed to build. Checks: `npm run check:
 | `ios/`, `android/` | Phone companions |
 | `scripts/`, `docs/` | Build, validation and contributor guidance |
 
-Build-time presentation packages implement the [Sim contract](resources/themes/CONTRACT.md). Import one package with `npm run theme:import -- /path/to/theme/package`; it owns World rendering, Applet scenes and registered HTML layouts while the host supplies data and actions.
+Themes implement one [Theme contract](resources/themes/CONTRACT.md). Worldlet bundles every package in `ui/theme-packages/` (Village and Blueprint today), and Settings → Theme switches between them in one step. Add or update a package with `npm run theme:import -- /path/to/theme/package`; it owns World rendering, Applet scenes and registered HTML layouts while the host supplies data and actions.
 
 ## Documentation
 

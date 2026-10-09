@@ -14,12 +14,15 @@ for(const name of Object.keys(keys)){const b=document.createElement('button');b.
 
 // Exercise the production World adapter as well as individual Applet stages.
 import {createModuleScene} from '../../../ui/world/build-theme-world.ts';
+import {BUILD_THEMES,switchBuildTheme} from '../../../ui/themes/build-theme.ts';
 const rooms=Object.entries(keys).map(([title,key])=>({id:'place-'+key,moduleId:'app-'+key,key,title,region:'home',entity:'app'}));
 rooms.push({id:'place-future',moduleId:'app-future',key:'future',title:'Future applet',region:'home',entity:'app'});
 let worldScene:any,worldHost:HTMLElement;
-global.simFixture={events,
+global.simFixture={events,themes:[...BUILD_THEMES.keys()],
+ async use(id:string){const result=await switchBuildTheme(id);if('error' in result)throw Error(result.error);},
  open(){stage.render(current,value,false);worldScene?.destroy();worldHost?.remove();worldHost=document.createElement('div');worldHost.id='sim-world-fixture';Object.assign(worldHost.style,{position:'absolute',inset:'0'});root.append(worldHost);
   worldScene=createModuleScene(worldHost,rooms,event=>{events.push(event);if(event.action==='space'){const room=rooms.find(r=>r.id===event.id)!;worldScene.setAppStage(room.moduleId,{sample:true,items:[{id:'sim-record',title:'Contract record'}]});worldScene.focus(room.moduleId,'object');}else if(event.action==='building')worldScene.focus(event.id,'building');},()=>{},new Map(),{buildings:[{id:'building-home',title:'Home'}]});
  },home(){worldScene.focus('overview');},get scene(){return worldScene;},get host(){return worldHost;},destroy(){worldScene.destroy();worldHost.remove();}
 };
 const worldButton=document.createElement('button');worldButton.textContent='World';worldButton.onclick=()=>global.simFixture.open();document.querySelector('#theme-preview-nav')?.append(worldButton);
+for(const id of BUILD_THEMES.keys()){const b=document.createElement('button');b.textContent=BUILD_THEMES.get(id)!.title;b.onclick=async()=>{await global.simFixture.use(id);global.simFixture.open();};document.querySelector('#theme-preview-nav')?.append(b);}

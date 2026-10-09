@@ -1,4 +1,4 @@
-import {renderBuildWorld,applyBuildThemeScene,BUILD_THEME_PRESENTATION,type ThemeWorldState} from '../themes/index.ts';
+import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState} from '../themes/index.ts';
 import {createAppletStage} from './pixi-stage.ts';
 /** Compatibility adapter from the product's scene controller to the public Sim data interface. */
 export function createModuleScene(host,rooms,onPick,onProject,_pages,options):any {
@@ -18,7 +18,7 @@ export function createModuleScene(host,rooms,onPick,onProject,_pages,options):an
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
   if(room)stage.render(room,stages.get(room.moduleId)||{items:[]},view.level==='applet');
   else stage.render({key:'',moduleId:'',title:''},{items:[]},false);
-  if(view.level!=='applet')applyBuildThemeScene(BUILD_THEME_PRESENTATION.world);
+  if(view.level!=='applet')applyBuildThemeScene(activeBuildTheme().presentation.world);
   // Sim renders its own accessible map buttons. No duplicate legacy pins.
   onProject({});
  }
@@ -39,7 +39,7 @@ export function createModuleScene(host,rooms,onPick,onProject,_pages,options):an
   setPlacementArea(id){interaction.placementArea=id;refresh();},frameArea(id,inset=0){interaction.framedArea=id;interaction.inset=inset;refresh();},
   setHoveredApplet(id){interaction.hoveredApplet=id;refresh();},setHoveredArea(id){interaction.hoveredArea=id;refresh();},
   prepareArrival(ids){mount.event({type:'applet.arrived',ids:ids||[]});},deliverMail(){return mount.event({type:'mail.received',ids:[]});},
-  get metrics(){return {renderer:'sim-dom',level:view.level==='applet'?'object':view.level,active:view.id,environment,
+  get metrics(){return {renderer:'sim-dom',theme:activeBuildTheme().id,level:view.level==='applet'?'object':view.level,active:view.id,environment,
    buildings:options.buildings||[],modules:state().applets.map(a=>({...a,unlocked:a.visible,visible:a.visible&&view.level!=='applet',peekBounds:mount.bounds(a.id),arrivalBounds:mount.bounds(a.id),arrivalVisible:a.visible})),presentation:{id:view.level==='applet'?view.id:null,stage:stage.metrics}};},
   destroy(){if(disposed)return;disposed=true;mount.dispose();stage.destroy();world.remove();}
  };
