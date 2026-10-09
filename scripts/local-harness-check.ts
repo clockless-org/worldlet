@@ -238,13 +238,13 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   assert.ok(lane instanceof LocalHarnessRuntime,'an Applet task is a Claude Code turn beside the conversation');
   codex=false;
   assert.equal(withBackground.background()?.id,'local-claude-code','with or without a built-in model');
-  // A chosen Hermes Agent: the built-in runtime in the person's profile, while that profile has a model.
+  // A chosen Hermes Agent: background work runs on it like any Harness (its own `hermes acp`), never the built-in runtime.
   const hermes=new LocalHarnessAdapter(context,{...claude,id:'hermes',title:'Hermes Agent'},unix,()=>ready,()=>codex);
-  assert.equal(hermes.supportsBackgroundChecks,false,'no model: background work reports itself unavailable');
-  assert.equal(hermes.makeTask,undefined);
+  assert.equal(hermes.supportsBackgroundChecks,true,'checks run on the person\'s Hermes Agent, whatever the built-in has');
+  assert.equal(hermes.background()?.id,'local-hermes','background work runs on the person\'s Hermes Agent');
+  assert.ok(hermes.makeTask?.() instanceof LocalHarnessRuntime,'an Applet task is a Hermes Agent turn beside the conversation');
+  assert.notEqual(hermes.makeTask?.(),task,'not the built-in runtime');
   fs.writeFileSync(path.join(builtInHome,'config.yaml'),'model:\n  provider: openrouter\n  default: some/model\n');
-  assert.equal(hermes.supportsBackgroundChecks,true,'a model saved in the profile');
-  assert.equal(hermes.background()?.id,'hermes');assert.equal(hermes.makeTask?.(),task);
   fs.writeFileSync(path.join(builtInHome,'config.yaml'),'model:\n  provider: openai-codex\n  worldlet_source: local-codex\n');
   assert.equal(builtInModel(builtInHome,false),false,'a host-chosen Codex source without a sign-in is no model');
   assert.equal(new LocalHarnessAdapter(context,claude,unix,()=>({...ready,available:false}),()=>true).supportsBackgroundChecks,false,'not while the built-in Agent is still installing');

@@ -501,7 +501,7 @@ interface TurnPipe {events:AgentEventWait;emit:(event:Row)=>Promise<unknown>;say
  * account connections stay with the built-in Agent's World service, which reads them without a model. Background
  * model work (the Attention check, Applet tasks, the day's plan and Fox's quiet-moment asks) runs on the person's
  * Harness too, beside the conversation (owner decision 2026-10-07 18:18 PDT: the conversation and background work
- * both run on the underlying Harness). A chosen Hermes Agent is the built-in runtime in their own profile;
+ * both run on the underlying Harness), a chosen Hermes Agent too (owner decision 2026-10-09);
  * routines made earlier keep running on the built-in Agent while it has a model. */
 export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  readonly install:LocalHarnessInstall;
@@ -518,15 +518,15 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   * choosing this Harness is the same connection, and opening Mail without one still goes straight
   * to Google sign-in. Without a built-in Agent they report themselves unavailable. */
  accountOwner():Adapter {return this.builtIn()??this;}
- /** The built-in Agent while it has a model of the person's to run on. */
+ /** The built-in Agent while it has a model of the person's to run on: routines made on it earlier. */
  private builtInBackground():Adapter|null {
   const builtIn=this.builtIn();
   return builtIn?.available&&builtInModel(builtIn.home('private'),this.codex())?builtIn:null;
  }
  /** Background work runs on the person's own Harness (owner decision 2026-10-07: the conversation and background
-  * work alike). Chosen Hermes Agent: the built-in runtime, which then runs in their own Hermes profile
-  * (attachChosenHermes) with its sessions and routines, while that profile has a model; otherwise none. */
- background():Adapter|null {return this.install.id==='hermes'?this.builtInBackground():this;}
+  * work alike), a chosen Hermes Agent too: its own `hermes acp` beside the conversation, on its own model (owner
+  * decision 2026-10-09: Worldlet customizes nothing below the Harness contract). */
+ background():Adapter|null {return this;}
  /** Mail and Attention checks read accounts through the built-in Agent's World service, which needs no model. */
  override get supportsBackgroundChecks(){return this.background()!==null&&this.builtIn()?.available===true;}
  get id(){return localHarnessAdapterId(this.install.id);}
