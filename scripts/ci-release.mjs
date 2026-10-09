@@ -217,7 +217,15 @@ async function main(){
   if(process.env.GITHUB_STEP_SUMMARY)writeFileSync(process.env.GITHUB_STEP_SUMMARY,`- ${line}\n`,{flag:'a'});
   console.log(line);return;
  }
- throw Error('Usage: ci-release.mjs identity … | publish …');
+ if(command==='analytics'){
+  // Writes the PostHog project key (POSTHOG_PROJECT_KEY, a release secret) into the app's analytics config. This
+  // repository keeps the key empty; a build without it would send no crash or usage events (owner decision 2026-10-09).
+  const key=(process.env.POSTHOG_PROJECT_KEY||'').trim(),file=path.join(root,'platform/electron/distribution/Analytics.json');
+  if(!/^phc_\w+$/.test(key))throw Error('POSTHOG_PROJECT_KEY is not a PostHog project key.');
+  writeFileSync(file,JSON.stringify({...JSON.parse(readFileSync(file,'utf8')),projectKey:key},null,2)+'\n');
+  console.log('Analytics.json carries the PostHog project key.');return;
+ }
+ throw Error('Usage: ci-release.mjs identity … | manifest … | publish … | analytics');
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))main().catch(error=>{
  console.error(error.message);

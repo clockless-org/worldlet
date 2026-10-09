@@ -58,6 +58,7 @@ Signing and publishing secrets live only in the repository's `release` environme
 | `APPLE_API_ISSUER_ID` | The key's issuer ID |
 | `SPARKLE_PRIVATE_KEY` | The Ed25519 update key whose public half is `publicKey` in [Updates.json](../platform/electron/distribution/Updates.json) (`generate_keys -x`) |
 | `GOOGLE_OAUTH_CLIENT_JSON` | The Google Desktop OAuth client registration bundled into the app |
+| `POSTHOG_PROJECT_KEY` | The PostHog project key that the build writes into `Analytics.json` (kept empty in this repository), so crashes and usage events reach PostHog |
 
 Publishing to GitHub Releases uses the workflow's own token, so it needs no secret. Windows installers are unsigned today, so there is no Windows signing secret.
 
