@@ -377,6 +377,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  let renderPending=false;
  // A route updates context, visibility and HUD synchronously. Paint their final
  // state once, rather than measuring/re-paginating each intermediate state.
+ let cornerObserved=false;
  function scheduleRender(){if(renderPending)return;renderPending=true;queueMicrotask(()=>{if(renderPending)render();});}
  function render(){
   rememberThreadPosition();
@@ -519,6 +520,15 @@ export function createNativeChat(call){return function({button,input,status,exec
   // A card or guide taller than its room scrolls inside it and fades out at the bottom over the arrow; neither
   // pages (owner Order 2026-10-07). Only a guide written as explicit pages, a sequence of steps, has arrows.
   log.dataset.scrollable=String(!panel.hidden&&log.scrollHeight>log.clientHeight+2);markLogScroll();
+  // Over an Applet the corner artifact yields to Fox's words (owner Order 2026-10-09: with Show all it squeezed the reply
+  // under it to two lines): the front card keeps room for its reply, up to about seven lines
+  // (five once the person asked the artifact to Show all), and the artifact ends above it.
+  const corner=root.querySelector('#foxArtifact');
+  if(corner&&!cornerObserved){cornerObserved=true;new ResizeObserver(scheduleRender).observe(corner);}
+  if(corner&&!corner.hidden&&!panel.hidden&&(root.dataset.depth==='object'||root.dataset.depth==='note')){
+   const wanted=Math.min(log.scrollHeight,corner.dataset.expanded==='true'?130:180)+parseFloat(panelStyle.paddingTop)+parseFloat(panelStyle.paddingBottom)+(asked.hidden?0:asked.offsetHeight+6)+actionBar.offsetHeight+12;
+   root.style.setProperty('--fox-column-reserve',Math.round(rootBounds.bottom-panel.getBoundingClientRect().bottom+wanted+16)+'px');
+  }else root.style.removeProperty('--fox-column-reserve');
   panel.dataset.expandable=String(!guided&&!panel.hidden&&!active&&!onboarding&&(expanded||(!beside&&!!earlier.length)));
   earlierButton.hidden=guided||active||onboarding||beside||!(expanded||earlier.length);
   // Expand and Fold, a quiet word on the card's edge (owner request 2026-10-05: not History, not loud).
