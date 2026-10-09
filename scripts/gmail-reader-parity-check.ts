@@ -6,6 +6,7 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {workspace} from './dev-workspace.ts';
 import {GoogleRestError,MailText,compactMessage,contentImage,discover,htmlUnescape,jsonSize,readPage,tidyMail,type GoogleRest} from '../core/accounts/index.ts';
 import {HTML5_ENTITIES} from '../core/accounts/google/html-entities.ts';
 
@@ -13,22 +14,49 @@ const root=fileURLToPath(new URL('..',import.meta.url));
 /** The port reads mail as current CPython does. Python's HTMLParser changed in patch releases (2025: HTML5 comments
  * such as `<!-->` and references without `;` in attribute values), so an older one (Ubuntu 24.04's 3.12.3) answers
  * differently: compare with the first Python here that has those changes, from PATH, the Windows launcher (`py`, where
- * `python3` is often another install) or the CI runner's tool cache. The error names each Python tried and its answer. */
+ * `python3` is often another install) or the CI runner's tool cache. A computer with none (a release host's Python can be
+ * older; uv's own builds got the changes only in 3.13.15 and 3.14.7) installs REFERENCE_PYTHON with uv, the way
+ * scripts/setup-hermes.ts installs Hermes's Python, into the primary checkout's .local. The error names each Python tried. */
 function referencePython():string[] {
+ // true when its parser has the changes, else its version and answer (null when it does not run).
+ const works=([command,...prefix]:string[]):true|string|null=>{
+  try{
+   const [answer,version]=execFileSync(command,[...prefix,'-I','-c',probe],{encoding:'utf8',stdio:['ignore','pipe','ignore'],windowsHide:true}).trim().split(/\r?\n/);
+   return answer==='C|D|E|?a&copy=1'||`${version}: ${answer}`;
+  }catch{return null;}
+ };
  const probe='from html.parser import HTMLParser as P\nclass H(P):\n def __init__(s):super().__init__();s.out=[]\n def handle_data(s,d):s.out.append(d)\n def handle_starttag(s,t,a):s.out.extend(v or "" for _,v in a)\nimport sys\nh=H();h.feed(\'C<!-->D<!--->E<a href="?a&copy=1">\');h.close();print("|".join(h.out));print(sys.version.split()[0])';
  const cache='/opt/hostedtoolcache/Python';
  const cached=fs.existsSync(cache)?fs.readdirSync(cache).filter(v=>/^3\.\d+\.\d+$/.test(v)).sort((a,b)=>b.localeCompare(a,undefined,{numeric:true})).map(v=>path.join(cache,v,'x64','bin','python3')):[];
  const launcher=process.platform==='win32'?['-3.15','-3.14','-3.13','-3'].map(version=>['py',version]).concat([['python']]):[];
  const tried:string[]=[];
  for(const [command,...prefix] of [['python3'],['python3.14'],['python3.13'],...launcher,...cached.map(file=>[file])]){
-  try{
-   const [answer,version]=execFileSync(command,[...prefix,'-I','-c',probe],{encoding:'utf8',stdio:['ignore','pipe','ignore'],windowsHide:true}).trim().split(/\r?\n/);
-   if(answer==='C|D|E|?a&copy=1')return [command,...prefix];
-   tried.push(`${[command,...prefix].join(' ')} ${version}: ${answer}`);
-  }catch{}
+  const answer=works([command,...prefix]);
+  if(answer===true)return [command,...prefix];
+  if(answer)tried.push(`${[command,...prefix].join(' ')} ${answer}`);
  }
- throw new Error('Gmail reader parity needs a Python whose html.parser has the 2025 HTML5 changes (3.13.6 or newer, or a patched 3.12); found '+(tried.join('; ')||'none')+'.');
+ const installed=installReference(tried);
+ if(installed&&works([installed])===true)return [installed];
+ throw new Error('Gmail reader parity needs a Python whose html.parser has the 2025 HTML5 changes (3.13.15, 3.14.7 or newer, or a patched 3.12); found '+(tried.join('; ')||'none')+'.');
 }
+/** REFERENCE_PYTHON through uv (UV_VERSION, scripts/setup-hermes.ts's bootstrap, shared with it), or null. */
+function installReference(tried:string[]):string|null {
+ const windows=process.platform==='win32',bin=windows?'Scripts':'bin';
+ let home=root;try{home=workspace(root).primary;}catch{}
+ const bootstrap=path.join(home,'.local/bootstrap'),uv=path.join(bootstrap,bin,windows?'uv.exe':'uv');
+ const env={...process.env,UV_PYTHON_INSTALL_DIR:path.join(home,'.local/hermes-python')};
+ const step=(command:string,args:string[])=>{try{execFileSync(command,args,{env,stdio:['ignore','ignore','inherit'],windowsHide:true,timeout:600000});return true;}catch{tried.push(`${path.basename(command)} ${args.slice(0,3).join(' ')} failed`);return false;}};
+ if(!fs.existsSync(uv)){
+  const python=process.env.WORLDLET_SETUP_PYTHON||(windows?'python':'python3');
+  if(!step(python,['-m','venv',bootstrap])||!step(path.join(bootstrap,bin,windows?'python.exe':'python3'),['-m','pip','install','-q',UV_VERSION]))return null;
+ }
+ const find=()=>{try{return execFileSync(uv,['python','find','--managed-python',REFERENCE_PYTHON],{env,encoding:'utf8',stdio:['ignore','pipe','ignore'],windowsHide:true}).trim()||null;}catch{return null;}};
+ const found=find();if(found)return found;
+ console.log(`Gmail reader parity: installing Python ${REFERENCE_PYTHON} with uv for the reference reader`);
+ return step(uv,['python','install','--no-bin',REFERENCE_PYTHON])?find():null;
+}
+/** uv's first CPython builds with the parser changes are 3.13.15 and 3.14.7; the version pinned, so every host compares alike. */
+const REFERENCE_PYTHON='3.14.7',UV_VERSION='uv==0.12.15';
 const b64=(text:string|Uint8Array)=>Buffer.from(text).toString('base64url');
 
 // Real-world shapes, fictional content.
