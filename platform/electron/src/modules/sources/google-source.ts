@@ -52,7 +52,7 @@ export class GoogleSourceAccess implements AgentRuntime {
   const provider=typeof body.provider==='string'?body.provider:'';
   if(body.action==='sourceTool'){
    const name=String(body.name??''),args=body.args&&typeof body.args==='object'?body.args as Row:{};
-   const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source'&&['gmail','google-calendar'].includes(String(args.provider));
+   const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source'&&(['gmail','google-calendar'].includes(String(args.provider))||args.provider==='notion'&&this.google.notionConnected());
    // Journaled as every Agent runtime's runs are: the tools it calls back (`_source_result` among them) are the turn's record.
    return ours?ExecutionJournal.run(body,home,onEvent,observed=>this.google.tool(name,args,observed,()=>this.cancelled)):this.other().run(body,home,onEvent);
   }
@@ -139,7 +139,9 @@ const failureCode=(error:unknown)=>error instanceof GoogleRestError?({400:'inval
 
 export interface GoogleSourceOptions {account:GoogleAccount;development:boolean;openExternal(url:string):Promise<void>;
  /** Fox's own Hermes profile, whose Google files go when the World disconnects, and where earlier mail receipts were kept. */
- ownProfile:()=>string|null;legacyHomes:()=>string[];now?:()=>number}
+ ownProfile:()=>string|null;legacyHomes:()=>string[];now?:()=>number;
+ /** Notion, read for `read_world_source` through the World's MCP connection when it has one (mcp-source.ts). */
+ notion?:{connected():boolean;read(body:Row):Promise<Row>}}
 /** Google's reads, mail drafts and sends for the World (host.py `_google` and `_google_reads`, world_service.py). */
 export class GoogleSource {
  readonly account:GoogleAccount;
@@ -147,6 +149,7 @@ export class GoogleSource {
  private readonly options:GoogleSourceOptions;
  constructor(options:GoogleSourceOptions){this.options=options;this.account=options.account;this.development=options.development;}
  openExternal(url:string){return this.options.openExternal(url);}
+ notionConnected(){return this.options.notion?.connected()===true;}
  ownProfile(){return this.options.ownProfile();}
  private get marker(){return path.join(this.account.folder,MOCK_MARKER);}
  /** Development builds only: rehearse onboarding on the fictional account (true), or leave it for a real sign-in. */
@@ -222,11 +225,13 @@ export class GoogleSource {
  private async readSource(args:Row,cancelled:()=>boolean){
   if(cancelled())throw new WorldletError('Source read was cancelled.');
   const provider=String(args.provider);
-  if(!['gmail','google-calendar'].includes(provider))throw new WorldletError('Unsupported backend source.');
+  if(!['gmail','google-calendar','notion'].includes(provider))throw new WorldletError('Unsupported backend source.');
   if(provider!=='gmail'&&(args.unreadOnly||(args.pageToken&&provider!=='google-calendar')||args.query||args.metadataOnly||args.discovery))throw new WorldletError('Unread filtering and paging are available for Gmail only.');
   let result:Row;
   try{
-   result=await this.request({operation:'read',service:provider,threads:provider==='gmail',limit:args.limit??20,id:args.id??'',unreadOnly:args.unreadOnly??false,pageToken:args.pageToken??'',
+   const notion=this.options.notion;
+   if(provider==='notion'){if(!notion)throw new WorldletError('Unsupported backend source.');result=await notion.read({operation:args.id?'fetch':'list',id:args.id??''});}
+   else result=await this.request({operation:'read',service:provider,threads:provider==='gmail',limit:args.limit??20,id:args.id??'',unreadOnly:args.unreadOnly??false,pageToken:args.pageToken??'',
     query:args.query??'',metadataOnly:args.metadataOnly??false,discovery:args.discovery??false,scanMessages:args.scanMessages??false,windowStart:args.windowStart,windowDays:args.windowDays??30});
   }catch(error){throw new WorldletError(sourceFailure([{type:'error',code:failureCode(error)}]));}
   return {scannedCount:result.scannedCount??(Array.isArray(result.records)?result.records.length:0),records:normalize(provider,result),scope:result.scope??'Bounded results, not the entire account.',
