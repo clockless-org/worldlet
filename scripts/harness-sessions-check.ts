@@ -328,7 +328,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   const channel:any[]=[];
   const standing=await openStandingWorldTools({channel:async(name,args)=>{channel.push([name,args]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
   const entry=standing.server(profile);
-  assert.equal(fs.statSync(path.join(profile,'worldlet-mcp-endpoint.json')).mode&0o777,0o600,'the endpoint and its token: owner-only');
+  if(process.platform!=='win32')assert.equal(fs.statSync(path.join(profile,'worldlet-mcp-endpoint.json')).mode&0o777,0o600,'the endpoint and its token: owner-only');
   // Hermes' MCP client: the registered stdio server, one call.
   const mcp=(name:string,args:object)=>new Promise<any>((resolve,reject)=>{
    const child=spawn(entry.command,entry.args,{env:{PATH:process.env.PATH,...entry.env},stdio:['pipe','pipe','inherit']});let out='';
@@ -462,7 +462,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   assert.equal(await keepHermesResident(fresh,command('fresh')),null);assert.equal(ran.fresh.length,2,'once per profile and app run');
   const created=profile('created','model:\n  provider: openrouter\n');
   await keepHermesResident(created,command('created'));
-  assert.equal(fs.statSync(path.join(created,'.env')).mode&0o777,0o600,'a new .env is the owner\'s only');
+  if(process.platform!=='win32')assert.equal(fs.statSync(path.join(created,'.env')).mode&0o777,0o600,'a new .env is the owner\'s only');
   // The person's own key and port: read, never replaced; started, not restarted.
   const own=profile('own','model:\n  provider: openrouter\n','API_SERVER_KEY=person-own-key-123456\nAPI_SERVER_PORT=9300\n'),ownBefore=fs.readFileSync(path.join(own,'.env'),'utf8');
   assert.equal(await keepHermesResident(own,command('own')),null);
@@ -622,7 +622,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
    for(let i=0;i<50&&sockets.size;i++)await new Promise(resolve=>setTimeout(resolve,10));
    assert.equal(sockets.size,0,'the socket closes when no turn listens');
    const device=JSON.parse(fs.readFileSync(path.join(turnHome,'openclaw-device.json'),'utf8'));
-   assert.match(device.privateKey,/BEGIN PRIVATE KEY/);assert.equal(fs.statSync(path.join(turnHome,'openclaw-device.json')).mode&0o777,0o600,'Worldlet\'s own device key, in its own folder');
+   assert.match(device.privateKey,/BEGIN PRIVATE KEY/);if(process.platform!=='win32')assert.equal(fs.statSync(path.join(turnHome,'openclaw-device.json')).mode&0o777,0o600,'Worldlet\'s own device key, in its own folder');
    assert.equal(new Set(connects.map(f=>f.params.device.id)).size,1,'the same device every time');
    // A Gateway that refuses the device: the turn still runs, and Fox says once why approvals cannot reach it.
    {
