@@ -106,3 +106,6 @@
 .village-map[data-night=true] .village-map-applet img{filter:brightness(.72) drop-shadow(0 2px 5px #f8d98640)}
 .village-map-library :focus-visible{outline:3px solid #386747;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.village-map-plate,.village-map-layer{transition:none}}
+
+/* The area browser temporarily owns the shared left HUD lane. */
+html:has(.village-map-library:not([hidden])) .ui-theme-attention{visibility:hidden!important;pointer-events:none!important}
