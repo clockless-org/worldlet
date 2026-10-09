@@ -31,6 +31,8 @@ export function installBrowser(host:Host){
   const companion=desktop();if(!companion)return;
   detachHooked=true;companion.beforeDetach(()=>{device.detach();player.stop();});
   companion.onPresentation(away=>{if(away)device.placeTask(companion.panelBounds());else device.attach();});
+  // Switching to another app must not close a website, a video or a call the person has open in the World.
+  companion.keepInWorld(()=>device.visiblePage!==null||player.playing||device.inCall);
  };
  device.restoreWorld=()=>desktop()?.restoreWorld();
  host.onPageLoaded(hookDetach);

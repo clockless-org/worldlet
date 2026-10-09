@@ -1,6 +1,6 @@
 import {WorldletError} from '../../files.ts';
 import {ExecutionJournal} from './journal.ts';
-import {AgentCancelled,UnsupportedRuntime,agentEvent} from './protocol.ts';
+import {AgentCancelled,agentEvent} from './protocol.ts';
 import type {RemoteAgentLink} from '../phone/remote.ts';
 import type {HarnessApprovalChoice} from '../../../../../contracts/harness-services.ts';
 import type {Adapter,AgentEventHandler,AgentRuntime,Row} from './types.ts';
@@ -9,16 +9,20 @@ import type {Adapter,AgentEventHandler,AgentRuntime,Row} from './types.ts';
 // the person's always-on computer runs Worldlet with their Agent, and this Worldlet is paired with it. Fox's turns go
 // there (the main conversation, an item card's and an Applet's thread, each its own session there) with this
 // companion's instructions and the current view, and their World tool calls come back to run here, so Fox still acts in
-// this World. Accounts, Attention checks, Applet tasks and routines stay with the built-in Agent on this computer (and
-// run only while it has a model of the person's). Every other part of the Adapter is the built-in one's.
+// this World. Its background work runs there too (owner decision 2026-10-09: the Harness runs the conversation and the
+// background work alike, wherever it is): Attention checks, Applet tasks and Fox's own look-arounds go to the other
+// computer's background lane, beside its conversation, when its Worldlet runs them (`lanes`). Accounts are read in this
+// computer's Platform. Every other part of the Adapter is the built-in one's.
 export const REMOTE_HARNESS_ID='remote';
 export class RemoteHarnessRuntime implements AgentRuntime {
  private controller:AbortController|null=null;
  private readonly link:RemoteAgentLink;
  private readonly onActivity:(running:boolean)=>void;
- /** The built-in Agent here, for what is not the person's line in Fox's conversation (setup, practice, background). */
+ /** The built-in Agent here, for what is not a chat turn. */
  private readonly local:()=>AgentRuntime;
- constructor(link:RemoteAgentLink,local:()=>AgentRuntime,onActivity:(running:boolean)=>void=()=>{}){this.link=link;this.local=local;this.onActivity=onActivity;}
+ /** `background`: a lane beside the conversation (makeLane), not the person's turn. */
+ private readonly lane:'background'|undefined;
+ constructor(link:RemoteAgentLink,local:()=>AgentRuntime,onActivity:(running:boolean)=>void=()=>{},lane?:'background'){this.link=link;this.local=local;this.onActivity=onActivity;this.lane=lane;}
  get isRunning(){return this.controller!==null;}
  /** Stops the turn: here at once, and on the host with a `cancel` message. */
  cancel(){this.controller?.abort();}
@@ -32,23 +36,24 @@ export class RemoteHarnessRuntime implements AgentRuntime {
  run(body:Row,home:string,onEvent?:AgentEventHandler):Promise<Row> {
   if(body.action==='status')return Promise.resolve(this.status());
   if(body.action==='warmup'){void this.link.heartbeat();return Promise.resolve({});}
-  // Only what the person says to Fox (in any thread) goes to the other computer, never work Worldlet starts here.
-  if(body.action!=='chat'||body._background===true||body.mode!=='chat'||body.sample===true||typeof body.text!=='string'||!body.text.trim())return this.local().run(body,home,onEvent);
+  // Every chat turn goes to the other computer: the person's, and background work on a lane (or one Worldlet started).
+  if(body.action!=='chat'||typeof body.text!=='string'||!body.text.trim())return this.local().run(body,home,onEvent);
   return ExecutionJournal.run(body,home,onEvent,observed=>this.execute(body,observed));
  }
  private async execute(body:Row,onEvent:AgentEventHandler):Promise<Row> {
   if(this.controller)throw new WorldletError('Fox is already working.');
-  const controller=new AbortController();this.controller=controller;this.onActivity(true);
+  const controller=new AbortController(),lane=this.lane??(body._background===true||body.mode==='setup'?'background':undefined);
+  this.controller=controller;if(!lane)this.onActivity(true);
   // A `tool` event is a World tool call from the Agent there: the World here answers it, as for a local Agent.
-  try{return await this.link.turn(body,event=>onEvent(agentEvent(event as Row)),controller.signal);}
+  try{return await this.link.turn(body,event=>onEvent(agentEvent(event as Row)),controller.signal,lane);}
   catch(error){if(controller.signal.aborted)throw new AgentCancelled();throw error;}
-  finally{this.controller=null;this.onActivity(false);}
+  finally{this.controller=null;if(!lane)this.onActivity(false);}
  }
 }
 
-/** An Agent elsewhere that answers only Fox's conversation: everything else (accounts, background work, Applet tasks,
- * routines, the companion's files) stays with the built-in Agent on this computer. RemoteHarnessAdapter and the direct
- * remote Gateway (remote-gateway.ts) share it. */
+/** An Agent elsewhere that runs Fox's conversation and its background work (Attention checks, Applet tasks) on a lane
+ * of its own (`makeLane`); the companion's files and other non-chat work stay with the built-in Agent on this computer.
+ * RemoteHarnessAdapter and the direct remote Gateway (remote-gateway.ts) share it. */
 export abstract class ElsewhereAdapter {
  readonly available=true;
  private readonly makeBuiltIn:()=>Adapter;
@@ -59,12 +64,13 @@ export abstract class ElsewhereAdapter {
  /** Counts the conversation's turns running there, for `hasInteractiveWork`. */
  protected activity=(running:boolean)=>{this.running+=running?1:-1;};
  get memoryAuthority(){return this.b.memoryAuthority;}
- get supportsBackgroundChecks(){return this.b.supportsBackgroundChecks;}
- hasInteractiveWork(){return this.running>0||this.b.hasInteractiveWork();}
- /** Background work and Applet tasks stay on this computer's built-in Agent. */
- background(){return this.b.available?this.b:null;}
- makeLane():AgentRuntime {return this.b.makeLane?.()??new UnsupportedRuntime('Background work runs on this computer’s own Agent.');}
- get makeTask(){const b=this.b;return b.makeTask?()=>b.makeTask!():undefined;}
+ /** Mail and Attention checks read accounts in this computer's Platform and think on the Agent elsewhere. */
+ get supportsBackgroundChecks(){return true;}
+ hasInteractiveWork(){return this.running>0||this.builtInAdapter?.hasInteractiveWork()===true;}
+ /** Background work and Applet tasks run on the Agent elsewhere, beside its conversation. */
+ background(){return this;}
+ abstract makeLane():AgentRuntime;
+ get makeTask(){return ()=>this.makeLane();}
  accountOwner(){return this.b;}
  makeModelAccess(){return this.b.makeModelAccess();}
  makeSourceAccess(){return this.b.makeSourceAccess();}
@@ -98,6 +104,7 @@ export class RemoteHarnessAdapter extends ElsewhereAdapter implements Adapter {
   this.heartbeat=setInterval(()=>void link.heartbeat(),60_000);this.heartbeat.unref?.();void link.heartbeat();
  }
  make():AgentRuntime {return new RemoteHarnessRuntime(this.link,()=>this.b.make(),this.activity);}
+ makeLane():AgentRuntime {return new RemoteHarnessRuntime(this.link,()=>this.b.make(),()=>{},'background');}
  /** Permission prompts of the Agent there, answered on this computer's approval card. */
  approvals(){const link=this.link;return {answer:(id:string,choice:HarnessApprovalChoice)=>link.answer(id,choice)};}
  /** The person's agents on the other computer (its `desktop` slot), so an Applet's thread can be answered by one. */

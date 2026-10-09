@@ -26,7 +26,7 @@ import {createHarnessApprovalRules} from './harness-approvals.ts';
 import {createHarnessConnections} from './harness-connections.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
@@ -1012,8 +1012,11 @@ export function installFox(host:Host){
    // A few words for each fact setup's second page shows, from its own files.
    const summary=summarizeLocalAgent(request.id,memory);
    if(!memory&&!brought)return {name:null,memories:[],model:null,summary};
-   const longTerm=[memory?.longTerm??'',brought?.note??''].filter(Boolean).join('\n\n');
-   const result=companion.adoptMemory({name:memory?.name??null,soul:memory?.soul??'',user:memory?.user??'',longTerm,source:MIGRATION_SOURCE_TITLES[request.id]+' on this computer'});
+   // Fox talks through this very Agent: its memory already is Fox's, so only its name is taken (copying it into
+   // a memory Fox does not use failed setup's bring, 2026-10-09).
+   const through=runtime.id===localHarnessAdapterId(request.id as any);
+   const longTerm=through?'':[memory?.longTerm??'',brought?.note??''].filter(Boolean).join('\n\n');
+   const result=companion.adoptMemory({name:memory?.name??null,soul:through?'':memory?.soul??'',user:through?'':memory?.user??'',longTerm,source:MIGRATION_SOURCE_TITLES[request.id]+' on this computer'});
    if(result.name)page.event('worldlet:companion-appearance',{name:style.name()});
    return {...result,summary,model:own&&memory?.model?await adoptModel(request.id):null,...brought?{history:{conversations:brought.conversations,messages:brought.messages,notes:brought.notes,skills:brought.skills.length,routines:brought.routines.length,stayed:brought.stayed,partial:brought.partial,list:brought.list,...brought.older?{older:brought.older.remaining}:{}}}:{}};
   }

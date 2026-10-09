@@ -5,7 +5,11 @@ import {companionStill} from '../themes/index.ts';
 export function installDesktopCompanion(){
  // Native may preserve the inactive world's last frame while the one live
  // page moves to the desktop. Exclude the portable cluster from that frame.
- (window as any).worldletCompanionBackdrop=(enabled:boolean)=>document.documentElement.classList.toggle('companion-backdrop-capture',enabled);
+ // Resolves once the change could paint, so the snapshot taken next shows it.
+ (window as any).worldletCompanionBackdrop=async(enabled:boolean)=>{
+  document.documentElement.classList.toggle('companion-backdrop-capture',enabled);
+  await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
+ };
  const fallback=document.createElement('aside');fallback.className='desktop-companion-setup';
  const portrait=document.createElement('img');portrait.src=companionStill();portrait.alt='Fox';
  const note=document.createElement('p');note.textContent='Open World to finish setting up Fox.';

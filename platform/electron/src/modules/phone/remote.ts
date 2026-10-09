@@ -30,15 +30,16 @@ const REMOTE_PAIR_SETTLE_MS=3_000;
 const cancelled=()=>Object.assign(new Error('Cancelled.'),{name:'AbortError'});
 export function createRemoteAgentLink(options:RemoteAgentOptions){
  let saved:Saved|null=null,keys:PairKeys|null=null,cursor=0,seenAt:number|null=null,error='',info:RemoteHostInfo|null=null;
- // Messages from the host for the turn waiting now; reads that overlap (a heartbeat during a turn) are told apart by id.
- let waiting:string|null=null;
- // The host Agent's permission prompts open in the turn waiting now, until answered or expired.
- const asking=new Map<string,number>();
- const inbox:RemoteToClient[]=[],taken=new Set<string>(),parts=remoteAssembler();
+ // The turns waiting now (the person's, and background work beside it): each its messages from the host and the host
+ // Agent's permission prompts open in it, until answered or expired. Reads that overlap are told apart by id.
+ type Waiting={lane:'person'|'background',inbox:RemoteToClient[],asking:Map<string,number>};
+ const waiting=new Map<string,Waiting>();
+ const LANES=2;
+ const taken=new Set<string>(),parts=remoteAssembler();
  try{const raw=options.vault.get(VAULT_ID);if(raw)saved=JSON.parse(raw);}catch{saved=null;}
  const save=()=>{if(saved)options.vault.set(VAULT_ID,JSON.stringify(saved));else options.vault.delete(VAULT_ID);};
  const ensureKeys=async()=>keys??=saved?await pairKeys(fromBase64url(saved.secret)):null;
- const forget=()=>{saved=null;keys=null;cursor=0;seenAt=null;info=null;inbox.length=0;save();};
+ const forget=()=>{saved=null;keys=null;cursor=0;seenAt=null;info=null;for(const turn of waiting.values())turn.inbox.length=0;save();};
  const status=():RemoteAgentStatus=>!saved?{state:'none'}:{state:'paired',computer:saved.computer,...saved.version?{version:saved.version}:{},seenAt,...error?{error}:{}};
  async function request(path:string,init:RequestInit={},timeout=20_000,signal?:AbortSignal){
   const k=await ensureKeys();if(!k||!saved)throw new Error('Pair with Worldlet on your other computer first.');
@@ -58,7 +59,7 @@ export function createRemoteAgentLink(options:RemoteAgentOptions){
   for(const piece of remoteParts(message))await request(`/api/pair/${k.id}/messages`,{method:'POST',body:JSON.stringify({box:await sealBox(k,boxPlace('to','desktop'),piece)})},20_000,signal);
  }
  /** One read of the host's slots and messages after the cursor (`wait` seconds at most); returns the slots that opened.
-  * Messages for the turn waiting now join its inbox; any other is dropped (a turn this side stopped waiting for). */
+  * Messages for a turn waiting now join its inbox; any other is dropped (a turn this side stopped waiting for). */
  async function read(wait=0,signal?:AbortSignal){
   const k=(await ensureKeys())!;
   const view=await request(`/api/pair/${k.id}?after=${cursor}${wait?`&wait=${wait}`:''}`,{},wait*1000+15_000,signal);
@@ -79,7 +80,7 @@ export function createRemoteAgentLink(options:RemoteAgentOptions){
    const message=whole&&whole.type!=='part'?whole:null;
    if(!message||taken.has(message.id))continue;
    taken.add(message.id);if(taken.size>2000)taken.delete(taken.values().next().value!);
-   if(message.turn===waiting)inbox.push(message);
+   waiting.get(message.turn)?.inbox.push(message);
   }
   cursor=Math.max(cursor,Number(view.version)||0);
   return opened;
@@ -123,19 +124,24 @@ export function createRemoteAgentLink(options:RemoteAgentOptions){
   return status();
  }
  /** One of Fox's turns on the host's Agent: `body` is the chat body agentChat gives the Agent. Events stream as the host
-  * sends them; a `tool` event is a World tool call, and what `onEvent` returns for it goes back as its answer. */
- async function turn(body:Row,onEvent:(event:RemoteAgentEvent)=>unknown,signal?:AbortSignal){
+  * sends them; a `tool` event is a World tool call, and what `onEvent` returns for it goes back as its answer.
+  * `lane` background: work beside the conversation (an Attention check, an Applet task), up to two at once, run on the
+  * host's background lane; a host that does not say it runs them (`lanes`) is sent none. */
+ async function turn(body:Row,onEvent:(event:RemoteAgentEvent)=>unknown,signal?:AbortSignal,lane?:'background'){
   const k=await ensureKeys();
   if(!k||!saved)throw new Error('Pair with Worldlet on your other computer first.');
-  if(waiting)throw new Error('Fox is already working.');
+  const kind=lane==='background'?'background':'person',busy=[...waiting.values()].filter(turn=>turn.lane===kind).length;
+  if(kind==='person'?busy>0:busy>=LANES)throw new Error(kind==='person'?'Fox is already working.':'Fox is busy with other background work. Try again later.');
   await read(0,signal);
   const computer=saved.computer;
   if(!seenAt||Date.now()-seenAt>REMOTE_HOST_AWAY_MS)throw new Error(`Worldlet on ${computer} is away${seenAt?' (last seen '+new Date(seenAt).toLocaleString([],{weekday:'short',hour:'numeric',minute:'2-digit'})+')':''}. Wake it and open Worldlet there, then try again.`);
   if(!info)throw new Error(`Worldlet on ${computer} is too old to run Fox for this computer. Update it there.`);
-  const id=crypto.randomUUID(),turnRequest=remoteTurnRequest(body,{id,at:Date.now()});
+  if(kind==='background'&&!info.lanes)throw new Error(`Worldlet on ${computer} needs an update to run Fox’s background work. Update it there.`);
+  const id=crypto.randomUUID(),turnRequest=remoteTurnRequest(body,{id,at:Date.now(),...lane?{lane}:{}});
   if(!turnRequest.text.trim())throw new Error('Fox needs a message.');
   const stop=()=>void post({type:'cancel',id:crypto.randomUUID(),at:Date.now(),turn:id}).catch(()=>{});
-  waiting=id;inbox.length=0;asking.clear();
+  const mine:Waiting={lane:kind,inbox:[],asking:new Map()},{inbox,asking}=mine;
+  waiting.set(id,mine);
   let last=Date.now(),heard=false,said='',started=false,finished:Extract<RemoteToClient,{type:'done'}>|null=null;
   try{
    await post(turnRequest,signal);
@@ -165,23 +171,26 @@ export function createRemoteAgentLink(options:RemoteAgentOptions){
      }
     }
    }
-  }finally{waiting=null;inbox.length=0;asking.clear();}
+  }finally{waiting.delete(id);}
   if(finished.cancelled)throw cancelled();
   if(finished.error)throw new Error(finished.error);
   const message=finished.message||said;
   if(!started&&message){await onEvent({type:'response_start'});await onEvent({type:'delta',text:message});}
   return {message};
  }
- /** The person's answer on this computer's card to a prompt of the host's Agent in the turn running now. */
+ /** The person's answer on this computer's card to a prompt of the host's Agent in a turn running now. */
  async function answer(approval:string,choice:HarnessApprovalChoice){
-  const turnId=waiting,until=asking.get(approval);
-  if(!turnId||!until||until<Date.now())throw new Error('This request was already answered or has expired.');
-  asking.delete(approval);
+  const [turnId,turn]=[...waiting].find(([,turn])=>turn.asking.has(approval))??[];
+  const until=turn?.asking.get(approval);
+  if(!turnId||!turn||!until||until<Date.now())throw new Error('This request was already answered or has expired.');
+  turn.asking.delete(approval);
   await post({type:'approval-answer',id:crypto.randomUUID(),at:Date.now(),turn:turnId,approval,choice});
  }
  return {status,pair,end,heartbeat,turn,answer,
   /** The person's agents on the host (its `agents` service), from its last `desktop` slot. */
   agents:()=>(info?.agents??saved?.agents??[]).map(a=>({...a})),
+  /** Whether the host runs background work beside the conversation (`lanes`). */
+  get lanes(){return info?.lanes===true;},
   get paired(){return !!saved;}};
 }
 export type RemoteAgentLink=ReturnType<typeof createRemoteAgentLink>;
