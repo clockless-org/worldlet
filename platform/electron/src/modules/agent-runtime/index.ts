@@ -32,6 +32,8 @@ import type {HarnessVoice} from '../../../../../contracts/harness-services.ts';
 import {bundledResource} from '../../resources.ts';
 import {GoogleAccount} from '../sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../sources/google-source.ts';
+import {McpAccounts} from '../sources/mcp-account.ts';
+import {McpSource,McpSourceAccess,McpSourceConnections} from '../sources/mcp-source.ts';
 
 /** Selects the Agent adapter at launch (Mac AgentRuntimeProvider): WORLDLET_AGENT_CONFIG names an
  * external Harness; otherwise the Agent on another computer this Worldlet is paired with (`remote`);
@@ -57,18 +59,24 @@ export function selectAdapter(context:RuntimeContext,configuration=process.env.W
  * registered with the execution journal; sample and setup homes never are. */
 /** The World's own Google connection (owner decision 2026-10-09: a connection made through Worldlet is kept by the
  * Platform): Gmail, Calendar and Drive work the same whichever Agent Fox uses. Fox's Hermes profile's earlier grant is adopted. */
-export function worldGoogle(context:RuntimeContext,vault:VaultService,accountsHome:()=>string):GoogleSource {
+/** The World's account connections: Google, and the MCP connectors (Notion, Todoist, Linear, PayPal, Supabase,
+ * GitHub), each used from the Agent's own profile when it already has it, else kept by the World. */
+export interface WorldSources {google:GoogleSource;mcp:McpSource}
+export function worldSources(context:RuntimeContext,vault:VaultService,accountsHome:()=>string):WorldSources {
  const own=()=>path.join(context.root,'agent','private','hermes');
  const homes=()=>[...new Set([accountsHome(),own()])];
+ const openExternal=(url:string)=>context.openExternal(url);
+ const mcp=new McpSource({accounts:new McpAccounts({vault,agentHomes:homes}),openExternal,reviews:path.join(context.root,'accounts','notion-reviews')});
  const account=new GoogleAccount({folder:path.join(context.root,'accounts','google'),vault,clientFile:()=>bundledResource(context.profile,'googleClient'),adoptFrom:homes});
- return new GoogleSource({account,development:context.development,openExternal:url=>context.openExternal(url),ownProfile:own,legacyHomes:homes});
+ const google=new GoogleSource({account,development:context.development,openExternal,ownProfile:own,legacyHomes:homes,notion:{connected:()=>mcp.connected('notion'),read:body=>mcp.read('notion',body)}});
+ return {google,mcp};
 }
 
-export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],google:((accountsHome:()=>string)=>GoogleSource)|null=null):AgentService {
+export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],sources:((accountsHome:()=>string)=>WorldSources)|null=null):AgentService {
  const current=typeof selected==='function'?selected:()=>selected;
  const accounts=()=>{const adapter=current();return adapter.accountOwner?.()??adapter;};
  const journal=(home:string,enabled:boolean)=>ExecutionJournal.register(home,enabled,context.record);
- const worldGoogle=google?.(()=>accounts().home('private'))??null;
+ const world=sources?.(()=>accounts().home('private'))??null,worldGoogle=world?.google??null;
  // Fox's Harness's own text-to-speech, found once per Harness (locating it reads the PATH).
  let voice:{id:string;service:HarnessVoice|null}|null=null;
  return {
@@ -84,8 +92,8 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   makeModelAccess:()=>current().makeModelAccess(),
   get accountsId(){return accounts().id;},
   accountsHome:()=>journal(accounts().home('private'),true),
-  makeSourceAccess:()=>worldGoogle?new GoogleSourceAccess(worldGoogle,()=>accounts().makeSourceAccess()):accounts().makeSourceAccess(),
-  makeSourceConnections:()=>worldGoogle?new GoogleSourceConnections(worldGoogle,()=>accounts().makeSourceConnections(),()=>accounts().id):accounts().makeSourceConnections(),
+  makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new McpSourceAccess(world.mcp,()=>accounts().makeSourceAccess())):accounts().makeSourceAccess(),
+  makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new McpSourceConnections(world.mcp,()=>accounts().makeSourceConnections(),()=>accounts().id),()=>accounts().id):accounts().makeSourceConnections(),
   googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),
   get harness(){return current().harness??null;},
@@ -363,7 +371,7 @@ export function installAgentRuntime(host:Host){
   context.changed('agent-changed');
  };
  const builtIn=()=>adapter.id==='hermes'?adapter:new HermesAdapter(context);
- const service=createAgentService(context,()=>adapter,listeners,home=>worldGoogle(context,vault,home));
+ const service=createAgentService(context,()=>adapter,listeners,home=>worldSources(context,vault,home));
  // Reset Fox starts onboarding on its first page, where the local Agent is chosen again.
  service.forgetSetupChoice=async()=>{
   if(process.env.WORLDLET_AGENT_CONFIG!==undefined)return;

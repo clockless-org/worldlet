@@ -1,5 +1,5 @@
 import {WorldletError} from '../../files.ts';
-import type {McpSession,McpToolResult} from '../../../../../core/accounts/mcp/session.ts';
+import type {McpSession,McpTool,McpToolResult} from '../../../../../core/accounts/index.ts';
 
 /** The MCP protocol revision the World asks for; a server answers with the one it speaks. */
 export const MCP_PROTOCOL='2025-06-18';
@@ -34,17 +34,19 @@ export class McpHttpClient implements McpSession {
   if(!result||typeof result!=='object')throw new WorldletError(`${this.options.title} returned an invalid tool result.`);
   return result as McpToolResult;
  }
- /** The names of the server's tools, every page. */
- async tools(timeoutMs=30_000):Promise<string[]> {
-  const names:string[]=[];let cursor:string|undefined;
+ /** The server's tools, every page. */
+ async listTools(timeoutMs=30_000):Promise<{tools:McpTool[]}> {
+  const tools:McpTool[]=[];let cursor:string|undefined;
   for(let page=0;page<20;page++){
    const result=await this.request('tools/list',cursor?{cursor}:{},timeoutMs);
-   for(const tool of Array.isArray(result?.tools)?result.tools:[])if(typeof tool?.name==='string')names.push(tool.name);
+   for(const tool of Array.isArray(result?.tools)?result.tools:[])if(typeof tool?.name==='string')tools.push(tool);
    cursor=typeof result?.nextCursor==='string'&&result.nextCursor?result.nextCursor:undefined;
    if(!cursor)break;
   }
-  return names;
+  return {tools};
  }
+ /** The names of the server's tools. */
+ async tools(timeoutMs=30_000):Promise<string[]> {return (await this.listTools(timeoutMs)).tools.map(tool=>tool.name);}
  /** Ends the session on the server when it gave one. */
  async close(){
   const session=this.session;this.session=null;
