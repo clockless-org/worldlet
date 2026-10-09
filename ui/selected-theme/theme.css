@@ -94,3 +94,15 @@
 .village-map-applet[data-hovered=true],.village-arriving{filter:drop-shadow(0 0 8px #ffe59a)}
 @media(prefers-reduced-motion:reduce){.village-arriving{filter:none}}
 .village-map-overflow{position:absolute;left:2%;top:82%;width:74%;max-height:14%;overflow:auto;display:flex;gap:8px;flex-wrap:wrap;z-index:2}.village-map-overflow[hidden]{display:none}.village-map-overflow button{position:static;min-height:40px;background:#fff8e8;border:1px solid #a58b58;border-radius:8px;padding:8px 14px}
+/* An area has a finite number of authored places. Extra Applets stay in a live, searchable tray. */
+.village-map-plate,.village-map-layer{transition:transform 420ms cubic-bezier(.2,.7,.3,1)}
+.village-map[data-motion=false] :is(.village-map-plate,.village-map-layer){transition:none}
+.village-map-library{position:absolute;left:2%;top:18%;width:27%;max-height:60%;padding:20px;box-sizing:border-box;overflow:auto;background:linear-gradient(135deg,#fff8eaf5,#ecdcbcfa);border:1px solid #a58b58;border-radius:14px;box-shadow:0 5px 0 #9b8050,0 12px 24px #24372735;z-index:4;color:#203b30;font:15px/1.5 Inter,system-ui,sans-serif}
+.village-map-library[hidden]{display:none}.village-map-library h2{font:500 27px Georgia,serif;margin:0}.village-map-library p{font:13px/1.5 Inter,system-ui,sans-serif;margin:8px 0}
+.village-map-library input{box-sizing:border-box;width:100%;padding:10px 12px;min-height:42px;border:1px solid #a58b58;border-radius:7px;background:#fffaf0;color:#203b30;font:inherit;margin:8px 0 14px}
+.village-library-list{display:flex;flex-direction:column;gap:8px}.village-map .village-library-applet{position:relative;display:flex;align-items:center;gap:12px;min-height:54px;padding:7px 12px;background:#fff8e8;border:1px solid #bba878;border-radius:8px;text-align:left}
+.village-library-applet img{width:40px;height:40px;object-fit:contain}.village-library-applet .village-map-generic{flex:none;width:32px;height:34px;margin:0;font-size:12px}.village-library-title{flex:1;min-width:0;overflow-wrap:anywhere}
+.village-map-count{position:absolute;right:-2px;top:-2px;min-width:16px;padding:2px 4px;border-radius:12px;background:#315f48;color:#fff8e8;font:11px Inter,system-ui,sans-serif}.village-library-applet .village-map-count{position:static}
+.village-map[data-night=true] .village-map-applet img{filter:brightness(.72) drop-shadow(0 2px 5px #f8d98640)}
+.village-map-library :focus-visible{outline:3px solid #386747;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.village-map-plate,.village-map-layer{transition:none}}

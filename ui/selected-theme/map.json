@@ -40,7 +40,8 @@
           0.512
         ],
         "width": 0.08203125,
-        "asset": "assets/landmark-home.png"
+        "asset": "assets/landmark-home.png",
+        "night": "assets/landmark-home-night.png"
       }
     },
     {
@@ -83,7 +84,8 @@
           0.642
         ],
         "width": 0.06640625,
-        "asset": "assets/landmark-work.png"
+        "asset": "assets/landmark-work.png",
+        "night": "assets/landmark-work-night.png"
       }
     },
     {
@@ -126,7 +128,8 @@
           0.377
         ],
         "width": 0.06770833333333333,
-        "asset": "assets/landmark-library.png"
+        "asset": "assets/landmark-library.png",
+        "night": "assets/landmark-library-night.png"
       }
     },
     {
@@ -169,7 +172,8 @@
           0.376
         ],
         "width": 0.042317708333333336,
-        "asset": "assets/landmark-money.png"
+        "asset": "assets/landmark-money.png",
+        "night": "assets/landmark-money-night.png"
       }
     },
     {
@@ -212,7 +216,8 @@
           0.49
         ],
         "width": 0.07942708333333333,
-        "asset": "assets/landmark-health.png"
+        "asset": "assets/landmark-health.png",
+        "night": "assets/landmark-health-night.png"
       }
     },
     {
@@ -255,7 +260,8 @@
           0.67
         ],
         "width": 0.05078125,
-        "asset": "assets/landmark-travel.png"
+        "asset": "assets/landmark-travel.png",
+        "night": "assets/landmark-travel-night.png"
       }
     }
   ],
@@ -264,5 +270,6 @@
     "google-calendar": "assets/google-calendar-icon.png",
     "apple-notes": "assets/apple-notes-icon.png",
     "apple-reminders": "assets/apple-reminders-icon.png"
-  }
+  },
+  "night": "assets/world-night.png"
 }
