@@ -53,18 +53,16 @@
 .world-startup .startup-fox{animation:none}
 .world-startup[data-failed]:not(.has-setup)>.startup-status,.world-startup[data-delayed]:not(.has-setup)>.startup-status{display:flex}
 .world-startup:not(.has-setup) .startup-progress{display:none}
-/* First-use setup is one page (owner requests 2026-10-09): the Agents found here as cards in the upper middle,
-   everything else folded under More options, one big button in the lower middle, and the brand as a small mark at
-   the bottom centre. Choosing brings the Agent in on
+/* First-use setup is one page (owner requests 2026-10-09): the brand on top, and in the middle the Agents found
+   here as cards, everything else folded under More options, and one big button below them. Choosing brings the Agent in on
    the same page: its card on the left, what comes along arriving as tiles on the right. The World it is
    about to get is painted softly behind; Fox waits for the World. */
-.world-startup.has-setup{justify-content:flex-start;gap:0;padding:clamp(24px,12vh,150px) 24px clamp(72px,13vh,140px);box-sizing:border-box;overflow:hidden}
+.world-startup.has-setup{justify-content:safe center;gap:0;padding:clamp(104px,14vh,160px) 24px clamp(24px,5vh,56px);box-sizing:border-box;overflow:hidden}
 /* Bringing an Agent in uses the height for its tiles. */
-.world-startup.has-setup[data-setup-step="1"]{padding-top:clamp(20px,6vh,60px)}
 .world-startup.has-setup::before{content:'';position:absolute;left:0;right:0;bottom:0;height:62%;background:var(--setup-world,none) center 70%/cover no-repeat;opacity:.5;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 78%);mask-image:linear-gradient(to bottom,transparent,#000 78%);pointer-events:none}
 .has-setup>.startup-scene,.has-setup>.startup-status{display:none}
-.world-startup.has-setup>.startup-brand{position:absolute;left:50%;bottom:clamp(14px,3vh,28px);transform:translateX(-50%);z-index:1;display:flex;margin:0;--brand-wordmark-size:17px;--brand-mark-size:26px;gap:6px;opacity:.85}
-.startup-setup{position:relative;flex:1;min-height:0;width:min(1040px,100%);display:flex;flex-direction:column;align-items:center;color:var(--brand-ink);text-align:center;animation:setup-enter .4s ease both}
+.world-startup.has-setup>.startup-brand{position:absolute;left:50%;top:clamp(20px,5vh,52px);transform:translateX(-50%);z-index:1;display:flex;margin:0;--brand-wordmark-size:36px;--brand-mark-size:60px;gap:10px}
+.startup-setup{position:relative;flex:none;min-height:0;width:min(1040px,100%);display:flex;flex-direction:column;align-items:center;color:var(--brand-ink);text-align:center;animation:setup-enter .4s ease both}
 @keyframes setup-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .setup-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .startup-setup button{font:inherit;cursor:pointer;border:0;margin:0;color:var(--brand-ink);transition:background .2s,transform .2s,opacity .2s,box-shadow .2s}
@@ -143,7 +141,7 @@
 .setup-passport-facts .setup-agent-fact{display:grid;grid-template-columns:auto 1fr;gap:12px}
 .setup-passport-facts dt{color:var(--brand-muted)}
 .setup-passport-facts dd{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.setup-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(74px,calc((87dvh - 300px)/4),118px);grid-auto-flow:row dense;gap:10px}
+.setup-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(64px,calc((75dvh - 180px)/4),110px);grid-auto-flow:row dense;gap:10px}
 .setup-tile{position:relative;min-width:0;padding:12px 14px;border-radius:18px;background:#fffffff0;box-shadow:0 4px 14px #203b300f;overflow:hidden;box-sizing:border-box}
 .setup-tile.is-arriving{animation:setup-tile-in .42s cubic-bezier(.22,.7,.2,1) both}
 @keyframes setup-tile-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
@@ -170,13 +168,37 @@
 .setup-tile-none{margin:6px 0 0;font-size:14px;color:var(--brand-muted)}
 .setup-passport .setup-choose-again{margin-top:10px}
 .setup-tile-done::after{content:'✓';display:block;color:#fff;font:700 11px/18px sans-serif;text-align:center}
+/* Each tile has its own colour and a quiet drawing of what it holds (owner request 2026-10-09). */
+.setup-tile-profile{--tile-accent:#4f6f9a;background:linear-gradient(150deg,#f8fbff,#e7eef8)}
+.setup-tile-profile::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%234f6f9a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><rect x='8' y='14' width='48' height='36' rx='6'/><circle cx='24' cy='30' r='6'/><path d='M15 44c2-6 16-6 18 0M38 27h12M38 35h9'/></svg>")}
+.setup-tile-conversations{--tile-accent:#4f7a5c;background:linear-gradient(150deg,#f9fcf7,#e6efe4)}
+.setup-tile-conversations::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%234f7a5c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M8 14h34a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6H24l-9 8v-8H8a6 6 0 0 1-6-6V20a6 6 0 0 1 6-6z'/><path d='M52 24h4a6 6 0 0 1 6 6v12a6 6 0 0 1-6 6h-3v7l-8-7H36'/></svg>")}
+.setup-tile-notes{--tile-accent:#a07a22;background:linear-gradient(150deg,#fffbef,#fbf1d4)}
+.setup-tile-notes::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23a07a22' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M14 6h28l12 12v40H14z'/><path d='M42 6v12h12M22 30h22M22 38h22M22 46h14'/></svg>")}
+.setup-tile-skills{--tile-accent:#6f5a9c;background:linear-gradient(150deg,#fbf9ff,#ece6f6)}
+.setup-tile-skills::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%236f5a9c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M30 6l5 15 15 5-15 5-5 15-5-15-15-5 15-5z'/><path d='M50 40l2.5 7.5L60 50l-7.5 2.5L50 60l-2.5-7.5L40 50l7.5-2.5z'/></svg>")}
+.setup-tile-routines{--tile-accent:#a85f3c;background:linear-gradient(150deg,#fffaf6,#f9e6dc)}
+.setup-tile-routines::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23a85f3c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><circle cx='32' cy='34' r='22'/><path d='M32 20v14l9 6M24 6h16'/></svg>")}
+.setup-tile-connections{--tile-accent:#3f7c7c;background:linear-gradient(150deg,#f7fcfc,#dfeeee)}
+.setup-tile-connections::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%233f7c7c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M26 38l12-12'/><path d='M30 18l6-6a10 10 0 0 1 14 14l-6 6M34 46l-6 6a10 10 0 0 1-14-14l6-6'/></svg>")}
+.setup-tile-apps{--tile-accent:#6a7350;background:linear-gradient(150deg,#fcfdf8,#eef0e6)}
+.setup-tile-apps::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%236a7350' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><rect x='8' y='8' width='20' height='20' rx='5'/><rect x='36' y='8' width='20' height='20' rx='5'/><rect x='8' y='36' width='20' height='20' rx='5'/><rect x='36' y='36' width='20' height='20' rx='5'/></svg>")}
+.setup-tile:not(.is-tall):not(.setup-tile-reading)::before{content:'';position:absolute;right:-8px;bottom:-10px;width:clamp(48px,9vh,76px);height:clamp(48px,9vh,76px);background-repeat:no-repeat;background-size:contain;opacity:.22;transform:rotate(-8deg);pointer-events:none}
+.setup-tile.is-big::before{width:clamp(70px,13vh,110px);height:clamp(70px,13vh,110px)}
+.setup-tile>:not(.setup-tile-fox,.setup-tile-done){position:relative}
+.setup-tile .setup-tile-done{position:absolute;background:var(--tile-accent,var(--brand-sage))}
+.setup-tile-count,.setup-tile-lead{color:var(--tile-accent,var(--brand-ink))}
+.setup-tile-title{color:color-mix(in srgb,var(--tile-accent,var(--brand-muted)) 70%,var(--brand-muted))}
+.setup-tile-notes{background-image:repeating-linear-gradient(to bottom,transparent 0 21px,#a07a2214 21px 22px),linear-gradient(150deg,#fffbef,#fbf1d4)}
+.setup-tile-conversations .setup-tile-titles li{background:#ffffffc0;border-left:3px solid #4f7a5c66}
+.setup-tile.is-empty{background:#ffffffa6;box-shadow:none}.setup-tile.is-empty::before{opacity:.1;filter:grayscale(1)}.setup-tile.is-empty .setup-tile-title{color:var(--brand-muted)}
 .setup-tile-reading{display:flex;align-items:center;gap:10px;grid-column:span 2;background:#ffffff99;box-shadow:none}
 .setup-tile-spinner{width:16px;height:16px;flex:none;border:2px solid var(--brand-line);border-top-color:var(--brand-forest);border-radius:50%;animation:setup-spin .8s linear infinite}
 .setup-tile-line{margin:0;font-size:13px;color:var(--brand-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;animation:setup-tile-pulse 1.4s ease-in-out infinite}
 @keyframes setup-tile-pulse{50%{opacity:.5}}
 
-/* One big button in the lower middle, narrower than the content above it. */
-.startup-setup .setup-footer{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;flex:none;margin-top:auto;padding-top:clamp(14px,3vh,28px)}
+/* One big button right below the choices, narrower than they are. */
+.startup-setup .setup-footer{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;flex:none;padding-top:clamp(10px,2.5vh,24px)}
 .setup-status-slot{min-height:28px;width:100%;display:flex;align-items:flex-end;justify-content:center}
 .setup-status-slot p{margin:0 0 6px}
 .startup-setup button.setup-primary{width:min(340px,100%);min-height:clamp(50px,7.5vh,60px);padding:0 24px;border-radius:30px;background:var(--brand-forest);color:var(--brand-on-forest);font-size:clamp(16px,2.4vh,18px);font-weight:650;letter-spacing:.01em;box-shadow:0 12px 28px #315f4850}
