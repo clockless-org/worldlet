@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {BrowserWindow,type BaseWindow} from 'electron';
 import {WorldLedger} from '../store/ledger.ts';
-import {createDiagnostics} from '../host/diagnostics.ts';
+import {createDiagnostics,type DiagnosticNote} from '../host/diagnostics.ts';
 import {ExecutionJournal} from '../modules/agent-runtime/journal.ts';
 import {DEMO_HOST} from '../modules/browser/page.ts';
 import {BROWSER,COMPANION,DESKTOP_COMPANION,FOX,USER_ACTIVITY,type BrowserService,type CompanionService,type DesktopCompanionService,type FoxService,type UserActivityService} from '../host/services.ts';
@@ -54,7 +54,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  await press('Use mock Google (Dev)');
  await press('Enter my World',120);
  await wait('world arrival',"document.querySelector('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl'",60);
- noRecordedFailures(store.root,store.ledger(),'world arrival');
+ noRecordedFailures(host,'world arrival');
  // A real mouse click at the middle of an element: the tour's spotlight catches every click and
  // acts only on one inside its box (ui/onboarding/tour-spotlight.ts).
  const clickAt=async(what:string,selector:string)=>{
@@ -112,7 +112,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  if(process.env.WORLDLET_FOX_GLOW_SHOT){await sleep(2000);capture(window,process.env.WORLDLET_FOX_GLOW_SHOT);}
  await wait('Fox narrates while it plans',dialogue('/On it:|reading the saved details|working out the steps/'),8);
  // Attention results and the suggestion came from background S/M and synthesis runs.
- noRecordedFailures(store.root,store.ledger(),'Fox’s first suggestion');
+ noRecordedFailures(host,'Fox’s first suggestion');
  // While Fox works the only question is the Go ahead before the last step, here Confirm
  // attendance (owner decision 2026-10-03); any other approval or a confirmation afterwards
  // fails the journey.
@@ -168,7 +168,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   if(!db.records('runtime-runs').some(run=>run.status==='running')&&db.attentionBudget().lastStatus!=='running')break;
   await sleep(1000);
  }
- for(const line of noRecordedFailures(store.root,store.ledger(),'after the first win'))console.log('  self-corrected: '+line);
+ for(const line of noRecordedFailures(host,'after the first win'))console.log('  self-corrected: '+line);
  // The tour replays on demand from the Tutorial switch in the World's corner (#1327) and leaves the finished journey
  // alone; Esc ends it. It waits while Fox works, so allow for a turn still finishing.
  await wait('the Tutorial switch in the corner, off',"(()=>{const b=document.querySelector('.world-environment .world-tutorial[aria-checked=false]');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
@@ -254,7 +254,7 @@ async function mailConversation({host,js,wait,mark,press,seen}:MailContext){
   }
   if(failure)throw Error(`${scenario.name}: ${failure}`);
  }
- noRecordedFailures(store.root,store.ledger(),'after the mail conversation');
+ noRecordedFailures(host,'after the mail conversation');
 }
 
 /** Fox's glow window: a child of the World window whose page (glow.ts PAGE) draws the glow. FoxGlow
@@ -297,10 +297,18 @@ async function coveredWindowCheck(window:BaseWindow,page:WebPage){
 /** The journey fails when background work failed, even if its data was saved: #766 made Core
  * reject every background reply, runs were recorded as failed and Mail showed "An operation
  * failed", yet the journey still passed (#787). Returns the repaired self-corrections. */
-function noRecordedFailures(root:string,db:WorldLedger,checkpoint:string){
- const found=recordedFailures(root,db);
- if(found.failures.length)throw Error(`Background work failed (checked at ${checkpoint}):\n  - `+found.failures.join('\n  - '));
+function noRecordedFailures(host:CheckContext['host'],checkpoint:string){
+ const found=recordedFailures(host.store.root,host.store.ledger(),host.diagnostics.recent?.()??[]);
+ if(found.failures.length)throw Error(failureReport(checkpoint,found.failures));
  return found.repaired;
+}
+/** The report's first line is all a release host keeps of a failed gate (its Issue shows that line, cut at 240
+ * characters; Alpha 4036 kept only "Background work failed (checked at world arrival):", #49), so it names how many
+ * failed and the first one with its error text; every failure follows, one per line. Home folders read `~`. */
+export function failureReport(checkpoint:string,failures:string[]){
+ const home=os.homedir(),mask=(line:string)=>home.length>1?line.split(home).join('~'):line;
+ const lines=failures.map(line=>mask(line).replace(/\s+/g,' ').trim());
+ return `Background work failed at ${checkpoint} (${lines.length}): ${lines[0]}`+(lines.length>1?'\n  - '+lines.join('\n  - '):'');
 }
 
 /** The detector itself, on records the app's own writers put in a scratch library: the #787
@@ -337,14 +345,20 @@ async function detectorCheck(){
   // memory as designed, not failed background work.
   diagnostics.record(Error('Kept page released under memory pressure (lowMemory).'),'keptPageRelease');
   diagnostics.record(Error('Kept page released under memory pressure (appFootprint).'),'keptPageRelease');
-  const found=recordedFailures(root,db);
+  // An operation Core keeps no name for, whose text only the host's memory has (diagnostics.recent).
+  diagnostics.record(Error('Detector history unreadable.'),'historySync');
+  const found=recordedFailures(root,db,diagnostics.recent());
   const report=found.failures.join('\n'),repaired=found.repaired.join('\n');
   if(report.includes('keptPageRelease'))throw Error(`The failure detector reported a kept-page release under memory pressure:\n${report}`);
   for(const expected of ['Agent run failed: appletAnalysis (google-calendar), session applet-detector','Agent returned an invalid final reply.','Runtime run failed for '+task,'diagnostics.jsonl: appletAnalysis',
-   'diagnostics.jsonl: worldItemSave operationFailed at ',`— upsert_world_items rejected in appletAnalysis (google-calendar), session ${unrepaired}, never repaired in that run, which ended run.succeeded: Detector rejected item.`])
+   'diagnostics.jsonl: worldItemSave operationFailed at ','diagnostics.jsonl: historySync operationFailed at ','Z: Detector history unreadable.',`— upsert_world_items rejected in appletAnalysis (google-calendar), session ${unrepaired}, never repaired in that run, which ended run.succeeded: Detector rejected item.`])
    if(!report.includes(expected))throw Error(`The failure detector missed “${expected}” in:\n${report}`);
   if(report.includes(repairedTurn)||!repaired.includes(`(request ${repairedTurn}) — upsert_world_items rejected in attentionSynthesis, session attention-${repairedTurn}, repaired by a later accepted upsert_world_items in the same run: Detector rejected item.`))
    throw Error(`The failure detector did not treat a repaired item save as a self-correction.\nFailures:\n${report}\nRepaired:\n${repaired}`);
+  // The first line alone names the count and the first failure with its text.
+  const first=failureReport('the detector',found.failures).split('\n')[0];
+  if(!first.startsWith(`Background work failed at the detector (${found.failures.length}): Agent run failed: `)||!first.includes('Agent returned an invalid final reply.'))
+   throw Error(`The failure report's first line does not say what failed: ${first}`);
  }finally{db.close();fs.rmSync(root,{recursive:true,force:true});}
 }
 
@@ -360,8 +374,10 @@ function persistedDiagnostics(root:string):Record<string,string>[] {
 
 /** Every failure the library recorded, one line each, naming the operation and its error text so
  * the check output alone is diagnosable. Reads through the host's own accessors: the execution
- * journal (World history), runtime and execution runs, the Attention budget and persisted diagnostics. */
-export function recordedFailures(root:string,db:WorldLedger):{failures:string[],repaired:string[]} {
+ * journal (World history), runtime and execution runs, the Attention budget and persisted diagnostics.
+ * A diagnostics row keeps no error text and only the operations Core knows, so `notes` (the host's
+ * `diagnostics.recent()`, the same failures with their text, from memory) supplies both, matched by time. */
+export function recordedFailures(root:string,db:WorldLedger,notes:DiagnosticNote[]=[]):{failures:string[],repaired:string[]} {
  const events=(args:Row):Row[]=>db.queryWorldHistory(args).events??[];
  // A journal payload, read in history content chunks when it is too large to inline.
  const payload=(seq:number):any=>{
@@ -457,17 +473,23 @@ export function recordedFailures(root:string,db:WorldLedger):{failures:string[],
  // the host relieving memory as designed, not failed work. A tool-level rejection (the tool reply told the model to correct and resubmit) is a normal
  // self-correction only when a later call of that tool in the same run was accepted and the run
  // succeeded; otherwise the work was never saved and it fails.
- const toolLevel=['worldItemSave'];
+ const toolLevel=['worldItemSave'],used=new Set<DiagnosticNote>();
  for(const row of persistedDiagnostics(root)){
+  const request=row.requestId||undefined;
+  // Rows and notes are written in the same order, so each row, exempt ones included, takes the first note of its
+  // time it has not used.
+  const same=notes.filter(note=>!used.has(note)&&note.at===row.at&&(!row.operation||note.operation===row.operation||note.operation==='hermesChat'&&row.operation==='agentChat'));
+  const note=same.find(note=>!!request&&note.requestId===request)??same[0];
+  if(note)used.add(note);
   if(row.code==='cancelled')continue;
   if(row.operation==='keptPageRelease'&&(row.code==='lowMemory'||row.code==='appFootprint'))continue;
-  const request=row.requestId||undefined;
   const candidates=toolLevel.includes(row.operation??'')?rejections(row,request):[];
-  const line=`diagnostics.jsonl: ${row.operation??row.area??'unknown operation'} ${row.code??'failed'} at ${row.at??'?'}${request?` (request ${request})`:''}`;
+  const line=`diagnostics.jsonl: ${note?.operation||row.operation||row.area||'unknown operation'} ${row.code??'failed'} at ${row.at??'?'}${request?` (request ${request})`:''}`;
   // Exempt only when every candidate rejection was repaired: never guess in the row's favor.
   if(candidates.length&&candidates.every(candidate=>candidate.repaired)){repaired.push(line+candidates[0].text);continue;}
   const host=request?hostRuns.get(request):undefined;
-  failures.push(line+(candidates.find(candidate=>!candidate.repaired)?.text??(host?agentError(host.startedAt,host.finishedAt):'')));
+  const said=note?': '+note.message:'';
+  failures.push(line+(candidates.find(candidate=>!candidate.repaired)?.text??said+(host?agentError(host.startedAt,host.finishedAt):'')));
  }
  return {failures,repaired};
 }

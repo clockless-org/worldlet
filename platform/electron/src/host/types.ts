@@ -37,5 +37,6 @@ export interface Host {
  onQuit(listener:()=>void|Promise<void>):void;
  /** Called once the World page finished loading. */
  onPageLoaded(listener:()=>void):void;
- diagnostics:{record(error:unknown,operation?:string,requestId?:string):void;log(line:string):void};
+ /** `recent`: the last failures this process recorded, with their error text, from memory only (host/diagnostics.ts). */
+ diagnostics:{record(error:unknown,operation?:string,requestId?:string):void;log(line:string):void;recent?():{at:string;operation:string;requestId:string;message:string}[]};
 }
