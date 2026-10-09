@@ -1,7 +1,8 @@
 /** The person reads why setup stopped, in plain words, from the step install.sh last
- * announced and its exit code; the full output stays in `setup.log` beside the runtime. */
-export function setupFailure(step:string,detail:string){
- const code=Number(/exit (\d+)\)/.exec(detail)?.[1]??NaN);
+ * announced (or Windows setup was on) and its exit code; the full output stays in `setup.log`
+ * beside the runtime. Exit codes 12 and 13 are install.sh's own, so a Windows tool's are not read. */
+export function setupFailure(step:string,detail:string,installScript=true){
+ const code=installScript?Number(/exit (\d+)\)/.exec(detail)?.[1]??NaN):NaN;
  const safe=' Your world and accounts are safe.';
  if(code===13)return 'Fox setup could not start because another Worldlet window is still setting up. Wait a moment and ask Fox to try again.'+safe;
  if(step==='download')return 'Fox could not download its setup files from GitHub. Check your internet connection and ask Fox to try again.'+safe;

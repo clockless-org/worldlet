@@ -73,7 +73,7 @@ export class HermesInstallation {
     if(!exists(path.join(bootstrap,'install.sh')))throw new WorldletError(MISSING);
     // The shell installer serializes app instances and builds at this final path because
     // editable installs record absolute paths.
-    let step='start';
+    let step='files';
     try{
      await run('/bin/bash',[path.join(bootstrap,'install.sh'),this.root,bootstrap],posixEnvironment(path.join(path.dirname(this.root),'cache')),path.dirname(this.root),true,text=>{for(const match of text.matchAll(/^worldlet-setup-step: (\w+)$/gm))step=match[1];});
     }catch(error){
@@ -147,6 +147,9 @@ ${versions.map(([name,version])=>`assert m.version(${JSON.stringify(name)}) == $
   const root=this.root,identity=this.manifest.identity;
   fs.mkdirSync(path.dirname(root),{recursive:true});
   if(!await acquire(root+'.lock',()=>this.ready,15*60_000))return;
+  // The step that failed reaches the person, `setup.log` beside the runtime and, as a fixed tag, telemetry
+  // (core/diagnostics/report.ts setupStep): one catch covers every step, and until 2026-10-09 it threw the same text for all.
+  let step='files';
   try{
    if(this.ready)return;
    const uv=path.join(bootstrap,'uv.exe');
@@ -159,24 +162,34 @@ ${versions.map(([name,version])=>`assert m.version(${JSON.stringify(name)}) == $
    await fs.promises.rm(root,{recursive:true,force:true});
    fs.mkdirSync(root,{recursive:true});
    const archive=path.join(root,'source.zip');
+   step='download';
    await download('https://codeload.github.com/NousResearch/hermes-agent/zip/'+spec.revision,archive,256*1024*1024,4*60_000);
+   step='verify';
    verifyFile(archive,path.join(bootstrap,'source.sha256'));
+   step='extract';
    await extractZip(archive,path.join(root,'source'),'hermes-agent-'+spec.revision);
    fs.rmSync(archive);
+   step='python';
    const environment=windowsSetupEnvironment(root);
    const managed=path.join(root,'python','cpython-3.12.14-windows-x86_64-none','python.exe');
    try{await check(uv,['python','install','3.12.14','--no-bin','--no-registry'],environment,root);}
    catch(error){if(!(String((error as Error).message).includes('Missing expected target directory for Python minor version link')&&exists(managed)))throw error;}
    await check(managed,['-I','-B','-c','import sys,ssl; assert sys.version_info[:3]==(3,12,14)'],environment,root);
+   step='dependencies';
    await check(uv,['sync','--project',path.join(root,'source'),'--python',managed,'--no-managed-python','--no-python-downloads','--extra','mcp','--extra','google','--no-dev','--frozen'],environment,root);
    await check(uv,['pip','install','--python',this.python,'--require-hashes','--only-binary',':all:','-r',requirements],environment,root);
+   step='validate';
    const versions=['sessionSDK','webSearchDependency'].map(key=>{const [name,version]=String(spec[key]).split('==');return `assert m.version('${name}')=='${version}'`;}).join('; ');
    await check(this.python,['-I','-B','-c','import sys,importlib.metadata as m; assert sys.version_info[:2]==(3,12); from run_agent import AIAgent; from tui_gateway import server; from hermes_state import SessionDB; from hermes_cli.config import load_config; import mcp,google.auth,claude_agent_sdk,ddgs; '+versions],environment,root);
    if(!exists(this.python))throw new WorldletError('Fox setup did not produce a Python runtime.');
    fs.writeFileSync(path.join(root,'.ready'),identity);
   }catch(error){
-   process.stderr.write('Fox setup: '+(error as Error)?.message+'\n');
-   throw new WorldletError('Background setup could not finish. Check your connection and try connecting again. Your saved world is safe.');
+   const detail=String((error as Error)?.message??error);
+   process.stderr.write(`Fox setup (${step}): ${detail}\n`);
+   writeSetupLog(path.dirname(root),step,detail);
+   // The bundled files' own checks already say what is wrong (missing, mismatched or altered setup files).
+   if(step==='files'&&error instanceof WorldletError)throw error;
+   throw new WorldletError(setupFailure(step,detail,false));
   }finally{fs.rmSync(root+'.lock',{recursive:true,force:true});}
  }
 }
