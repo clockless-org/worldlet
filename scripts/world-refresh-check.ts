@@ -54,7 +54,10 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await tracker.locator('.world-task-heading').innerText(),'WORTH DOING','the heading names the group and nothing else');
  assert.deepEqual(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.framing.viewport),before.viewport,'showing Attention Center must not move or shrink the world');
  const shortBacking=await page.locator('.world-task-list').boundingBox();
- assert.ok(Math.abs(shortBacking.y+shortBacking.height/2-page.viewportSize().height/2)<2,'short Attention Center stays vertically centered');
+ // Today's date heads the Attention Center (#2235): the panel starts below that corner and centers what it holds in the room left under it.
+ const room=await tracker.boundingBox(),today=await page.locator('#notionWorld>.world-today').boundingBox();
+ assert.ok(today&&today.y+today.height<=room.y,'the Attention Center starts below the Today corner: '+JSON.stringify({today,room}));
+ assert.ok(Math.abs(shortBacking.y+shortBacking.height/2-(room.y+room.height/2))<2,'short Attention Center stays vertically centered');
  // An event says when it is, beside its name, in both the forms a person uses.
  await page.evaluate(()=>{const at=new Date(Date.now()+2*3600*1000).toISOString();
   fixture.worldItems=[...fixture.worldItems,{id:'item-2',kind:'event',provider:'google-calendar',status:'open',title:'Dentist',context:'Bring the referral letter.',start:at,sources:[{provider:'google-calendar',id:'e1',quote:'Dentist 3:00 PM'}],createdAt:1,updatedAt:2}];});
@@ -122,7 +125,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(panel.scroll<=panel.client+1,'27 items and the panel still does not scroll: '+JSON.stringify(panel));
  const tallBacking=await page.locator('.world-task-list').boundingBox();
  assert.ok(tallBacking.height>shortBacking.height*2,'backing grows with the content');
- assert.ok(Math.abs(tallBacking.y+tallBacking.height/2-page.viewportSize().height/2)<2,'long Attention Center stays vertically centered');
+ assert.ok(Math.abs(tallBacking.y+tallBacking.height/2-(room.y+room.height/2))<2,'long Attention Center stays vertically centered');
  assert.equal(panel.cut,false,'copy written to the contract fits the row it is given, uncut');
  assert.equal(panel.groups,3,'every kind keeps a place; one kind does not crowd the others out');
  assert.ok(panel.rows>=3&&panel.rows<27,'the panel holds what fits and drops the rest: '+JSON.stringify(panel));

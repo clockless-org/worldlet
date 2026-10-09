@@ -1140,7 +1140,10 @@ if(typing)el.blur();return typing;`,{},{timeoutSeconds:2}).catch(()=>false);
    case 'bookmarks':browser.load('https://x.com/i/bookmarks');break;
    case 'open':{
     const url=parse(args.url);
-    if(!url||!(this.platform==='web'?publicPage(url):this.platform==='notion'?isNotion(url):isX(url)&&!url.search&&!url.hash))throw new WorldletError('Use a valid page URL for this Applet.');
+    // Site-locked Applets (YouTube, TikTok, Airbnb, Maps) open their own site, as browserShow does: the
+    // panel's Home button opens the Applet's home page this way (owner report 2026-10-08, YouTube).
+    const allowed=!!url&&(this.platform==='web'?publicPage(url):this.platform==='notion'?isNotion(url):this.platform==='x'?isX(url)&&!url.search&&!url.hash:sitePage(this.platform,url.href));
+    if(!url||!allowed)throw new WorldletError('Use a valid page URL for this Applet.');
     // browserShow may already have started this exact navigation. Do not cancel and restart it
     // when the opening tool command follows.
     if(this.requestedURL?.href!==url.href||(!browser.isLoading&&!sameURL(browser.url,url.href))){this.requestedURL=url;browser.load(url.href);}

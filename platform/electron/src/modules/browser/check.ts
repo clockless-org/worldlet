@@ -85,6 +85,18 @@ try{
  assert.equal(emitted[0]?.phase,'page','after the refusal YouTube is an ordinary page again');
  state.browser=null;
  console.log('PASS Google’s refusal page becomes an explained error with a system-browser action to YouTube');
+ // The panel's Home button opens a site-locked Applet's own home page (owner report 2026-10-08:
+ // YouTube's Home said 'Use a valid page URL for this Applet.'); other sites stay refused.
+ const loads:string[]=[];
+ state.browser={url:'https://www.youtube.com/watch?v=x',title:'',isLoading:false,hidden:false,canGoBack:true,canGoForward:false,load(url:string){loads.push(url);},close(){}};
+ state.platform='youtube';state.requestedURL=null;
+ assert.deepEqual(await device.command('open',{url:HOMES.youtube},false),{ok:true});
+ assert.deepEqual(loads,[HOMES.youtube],'YouTube Home loads youtube.com');
+ await assert.rejects(device.command('open',{url:'https://example.com/'},false),/valid page URL/,'YouTube does not open another site');
+ state.platform='tiktok';assert.deepEqual(await device.command('open',{url:HOMES.tiktok},false),{ok:true});
+ state.platform='x';await assert.rejects(device.command('open',{url:'https://x.com/home?ref=1'},false),/valid page URL/,'X keeps its plain-page rule');
+ state.browser=null;
+ console.log('PASS Home opens a site-locked Applet’s own home page, never another site');
 
  assert.deepEqual(chromiumBrands('152.0.7977.130'),[{brand:'Not?A_Brand',version:'24'},{brand:'Chromium',version:'152'}]);
  assert.deepEqual(chromiumBrands('153.0.1.2').map(item=>item.brand),['Chromium','Not_A Brand'],'odd majors put Chromium first');

@@ -167,8 +167,10 @@ const shot=(page:Page,name:string,height=96)=>shots?page.screenshot({path:path.j
   // World stands left of Fox and returns to the World.
   const world=page.locator('.fox-action-left [data-slot=home]');
   // The dock gains World on the HUD's next sync after the page's Back shows (Mac RC 3198 measured before it: null).
+  // Every HUD sync rebuilds the dock's buttons, so both boxes are read in one frame from the live nodes: a separate
+  // boundingBox() can land on a button a later sync already replaced (Windows RC 0027de2e measured that: null).
   await world.waitFor({state:'visible'});
-  const [worldBox,foxBox]=await Promise.all([world.boundingBox(),page.locator('.companion-avatar').boundingBox()]);
+  const {worldBox,foxBox}=await page.evaluate(()=>{const box=(s:string)=>{const e=document.querySelector<HTMLElement>(s),r=e?.getBoundingClientRect();return e?.checkVisibility()&&r.width&&r.height?{x:r.x,y:r.y,width:r.width,height:r.height}:null;};return {worldBox:box('.fox-action-left [data-slot=home]'),foxBox:box('.companion-avatar')};});
   assert.ok(worldBox&&foxBox&&worldBox.x+worldBox.width<=foxBox.x,'World is left of Fox '+JSON.stringify({worldBox,foxBox}));
   await world.click();
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.depth==='overview');
