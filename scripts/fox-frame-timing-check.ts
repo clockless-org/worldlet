@@ -135,6 +135,18 @@ for(const operation of ['appletCheck','appletAnalysis','appletAnalysisQueue','ap
  assert.ok(!JSON.stringify(event).includes('private'));
 }
 assert.equal(diagnosticError({operation:'private@example.com',message:'error'}).operation,undefined);
+// Any operation name the host uses survives, and an unclassified failure keeps a fixed kind and its error type.
+{
+ const event=diagnosticError({operation:'localAgent',name:'WorldletError',message:'/Users/alex/.hermes/config.yaml is missing'});
+ assert.deepEqual(event,{at:undefined,area:'native',code:'operationFailed',operation:'localAgent',rule:'missing',errorType:'WorldletError'});
+ assert.deepEqual(diagnosticReport({recentErrors:[event]}).recentErrors[0],event);
+ assert.equal(diagnosticError({message:'hermes exited with code 2'}).rule,'processExit');
+ assert.equal(diagnosticError({message:'EACCES: permission denied'}).rule,'permission');
+ assert.equal(diagnosticError({message:'something private'}).rule,'other');
+ assert.equal(diagnosticError({message:'rate limit'}).rule,undefined);
+ assert.equal(diagnosticError({message:'x',name:'alex@example.com'}).errorType,undefined);
+ assert.equal(diagnosticReport({recentErrors:[{code:'operationFailed',rule:'private text'}]}).recentErrors[0].rule,undefined);
+}
 
 for(const message of ['Attention title must be concise','Attention reason must be at most 8 words','Non-Calendar events need eventDisposition','Invalid item ownership']){
  const error=diagnosticError({message:message+' private@example.com',operation:'worldItemSave'});

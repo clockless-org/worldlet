@@ -46,7 +46,7 @@ export function createDiagnostics(root:string){
    notes.push({at,operation:String(operation),requestId:String(requestId??''),message});
    if(notes.length>RECENT_NOTES)notes.splice(0,notes.length-RECENT_NOTES);
    // Core classifies the failure; the time is the host's fact (Core's row has no clock).
-   try{append(JSON.stringify({at,...core('diagnosticError',{operation,requestId,message,cancelled:(error as Error)?.name==='AbortError',platform:process.platform})}));}
+   try{append(JSON.stringify({at,...core('diagnosticError',{operation,requestId,message,name:(error as Error)?.name,cancelled:(error as Error)?.name==='AbortError',platform:process.platform})}));}
    catch{append(JSON.stringify({operation,requestId,message,at}));}
   },
   /** The last failures recorded in this process, oldest first, with their error text. */

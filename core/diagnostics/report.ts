@@ -1,7 +1,10 @@
 import {foxTiming} from './fox-timing.ts';
 const providers=new Set(['gmail','google-calendar','google-drive','notion','github','apple-notes','apple-reminders','youtube','doordash','codex','claude-code','folder','file','obsidian','paypal','stripe']);
 const states=new Set(['connected','connecting','authorizing','syncing','reading','sync_error','disconnected','error']);
-const operations=new Set(['agentChat','connect','appContent','worldItemSave','other','appletCheck','appletAnalysis','appletAnalysisQueue','appletBackpressure','attentionWake','attentionSynthesis','keptPageRelease','webEngineStall']);
+/** Operation names are host code literals (`localAgent`, `foxReport`, …): any short identifier is kept, anything else
+ * (an address, a path, text) is dropped. A fixed list dropped new operations, so a failed Agent adoption in onboarding
+ * reached the log as a bare operationFailed (2026-10-09). */
+const operationName=value=>typeof value==='string'&&/^[A-Za-z][A-Za-z0-9]{0,40}$/.test(value)?value:undefined;
 /** Classified failure codes; analytics may report these and never the error text. */
 export const ERROR_CODES=['offline','timeout','cancelled','authentication','quota','unavailable','operationFailed','evidenceMismatch','outputValidation','lowMemory','appFootprint','nativeCrash'];
 const codes=new Set(ERROR_CODES);
@@ -10,7 +13,9 @@ const rows=value=>Array.isArray(value)?value:[];
 function errorRow(row){
  const result:Record<string,unknown>={at:timestamp(row?.at),area:['native','browser','agent','connection'].includes(row?.area)?row.area:'native',code:codes.has(row?.code)?row.code:'operationFailed'};
  const id=foxTiming({id:row?.requestId})?.id;if(id)result.requestId=id;
- if(operations.has(row?.operation))result.operation=row.operation;
+ const operation=operationName(row?.operation);if(operation)result.operation=operation;
+ if(typeof row?.rule==='string'&&RULES.has(row.rule))result.rule=row.rule;
+ if(typeof row?.errorType==='string'&&/^[A-Z][A-Za-z]{0,40}$/.test(row.errorType))result.errorType=row.errorType;
  if(typeof row?.nativeCode==='string'&&/^-?\d{1,12}$/.test(row.nativeCode))result.nativeCode=row.nativeCode;
  if(['NSURLErrorDomain','WebKitErrorDomain','WKErrorDomain','other'].includes(row?.nativeDomain))result.nativeDomain=row.nativeDomain;
  return result;
@@ -62,6 +67,22 @@ export function setupStep(message:string){
  const text=message.toLowerCase();
  return SETUP_STEPS.find(([pattern])=>pattern.test(text))?.[1];
 }
+/** What kind of failure an otherwise unclassified error was, as a fixed tag, so `operationFailed` still says where
+ * to look. The message is classification input only. */
+const FAILURE_KINDS:[RegExp,string][]=[
+ [/\benoent\b|no such file|not found|(?:is|are) missing|does not exist/,'missing'],
+ [/\beacces\b|\beperm\b|permission denied|not permitted|access is denied/,'permission'],
+ [/\bexited (?:with )?(?:code )?-?\d+|exit code|exit status/,'processExit'],
+ [/\b(?:http|error code:?) 4\d\d\b/,'httpClient'],
+ [/unexpected token|in json|json at position|is not valid json/,'invalidData'],
+ [/\beaddrinuse\b|\bebusy\b|already running|another worldlet window/,'busy'],
+ [/not supported|unsupported/,'unsupported'],
+];
+export function failureKind(message:string){
+ const text=message.toLowerCase();
+ return FAILURE_KINDS.find(([pattern])=>pattern.test(text))?.[1]??'other';
+}
+const RULES=new Set([...ITEM_RULES.map(([,rule])=>rule),'evidence','other',...SETUP_STEPS.map(([,step])=>step),...FAILURE_KINDS.map(([,kind])=>kind)]);
 /** Raw text is classification input only and never part of the returned record. */
 export function diagnosticError(value){
  const message=typeof value.message==='string'?value.message.toLowerCase():'';
@@ -78,7 +99,8 @@ export function diagnosticError(value){
   // A kept website page released under memory pressure (core/browser/page-resume.ts PAGE_MEMORY).
   message.includes('memory pressure (lowmemory)')?'lowMemory':message.includes('memory pressure (appfootprint)')?'appFootprint':'operationFailed';
  const operation=value.operation==='hermesChat'?'agentChat':value.operation;
- return errorRow({code,operation,requestId:value.requestId,area:value.area});
+ const rule=code==='operationFailed'?setupStep(message)??failureKind(message):code==='outputValidation'?itemRule(message):undefined;
+ return errorRow({code,operation,requestId:value.requestId,area:value.area,rule,errorType:value.name});
 }
 
 const ENVIRONMENTAL=new Set(['offline','timeout','cancelled','authentication','quota','unavailable','lowMemory','appFootprint']);
