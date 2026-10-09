@@ -1,7 +1,10 @@
 name: RC
-# The release candidate (docs/RELEASING.md): every push to main runs the release gate (scripts/gate.mjs) on Mac and
-# Windows runners, split into parts that run side by side so the RC stays within 30 minutes, beside the Release workflow that builds the same commit for Dev. A Build is promoted to Alpha or
-# Beta only when both platforms passed here. A failure opens (or adds to) one Issue per platform and failing gates
+# The release candidate (docs/RELEASING.md): every push to main runs the release gate (scripts/gate.mjs), split into
+# parts that run side by side so the RC stays within 30 minutes, beside the Release workflow that builds the same commit
+# for Dev. Every check runs on Linux runners; Mac and Windows runners run only what needs their platform: the Electron
+# host and its web engine, iOS, Android (owner decision 2026-10-09: "默认所有测试都在linux上做，只有必须平台相关的才上mac或windows";
+# the free Mac and Windows runners were too slow for the rest). A Build is promoted to Alpha or Beta only when every
+# part passed here. A failure opens (or adds to) one Issue per platform and failing gates
 # (scripts/ci-rc-report.mjs), which a cloud AI session fixes with a normal pull request; a pass closes them. Hosted
 # runners are free for this public repository. Nothing here runs for pull requests, and nothing reads a secret.
 # Only clockless-org/worldlet runs it: forks and the operations repository, which imports this tree, skip every job.
@@ -26,8 +29,7 @@ concurrency:
   group: rc
   cancel-in-progress: false
 jobs:
-  # Mac: the gate without test:ui and test:ios, test:ios alone, and test:ui in three shares (it alone took 22 minutes on
-  # one hosted Mac, with world startups timing out under four browsers at once).
+  # Mac: the Electron host on macOS, and the iPhone app.
   mac:
     name: Mac ${{ matrix.part.name }}
     if: github.repository == 'clockless-org/worldlet'
@@ -37,11 +39,8 @@ jobs:
       fail-fast: false
       matrix:
         part:
-          - {name: base, skip: 'test:ui,test:ios'}
+          - {name: electron, only: 'test:electron'}
           - {name: ios, only: 'test:ios'}
-          - {name: ui-1, only: 'test:ui', shard: 1/3}
-          - {name: ui-2, only: 'test:ui', shard: 2/3}
-          - {name: ui-3, only: 'test:ui', shard: 3/3}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -64,20 +63,11 @@ jobs:
       - run: npm ci
       # The UI checks' headless Chromium, at the version package-lock.json pins for Playwright.
       - run: npx playwright install chromium
-      # test:harness, test:hermes and test:ui's world-gateway-check run in Hermes' Python, as Fox does.
-      - if: matrix.part.name != 'ios'
-        run: npm run setup:hermes
-      # test:harness and test:hermes read the interface that test:ui builds, which runs in other parts here.
-      - if: matrix.part.name == 'base'
-        run: npm run build:native-ui
       - name: Gate
         env:
           WORLDLET_CODEX_GATES_SKIP: ${{ env.CODEX_SKIP }}
           WORLDLET_GATE_RESULTS: ${{ runner.temp }}/gate.json
           WORLDLET_GATE_ONLY: ${{ matrix.part.only }}
-          WORLDLET_GATE_SKIP: ${{ matrix.part.skip }}
-          WORLDLET_TEST_UI_SHARD: ${{ matrix.part.shard }}
-          WORLDLET_TEST_UI_CONCURRENCY: 3
         run: npm run gate
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -87,8 +77,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # Windows: the gate without test:ui and test:android (whose emulator setup alone took a quarter of an hour), test:android
-  # alone, and test:ui in three shares.
+  # Windows: the Electron host on Windows, and the Android app (whose emulator runs on Windows here).
   windows:
     name: Windows ${{ matrix.part.name }}
     if: github.repository == 'clockless-org/worldlet'
@@ -98,11 +87,8 @@ jobs:
       fail-fast: false
       matrix:
         part:
-          - {name: base, skip: 'test:ui,test:android'}
+          - {name: electron, only: 'test:electron'}
           - {name: android, only: 'test:android'}
-          - {name: ui-1, only: 'test:ui', shard: 1/3}
-          - {name: ui-2, only: 'test:ui', shard: 2/3}
-          - {name: ui-3, only: 'test:ui', shard: 3/3}
     env:
       WORLDLET_SETUP_PYTHON: python
     steps:
@@ -128,9 +114,6 @@ jobs:
           restore-keys: windows-rc-
       - run: npm ci
       - run: npx playwright install chromium
-      # test:ui's world-gateway-check runs the World tools in Hermes' Python, as Fox does.
-      - if: matrix.part.only == 'test:ui'
-        run: npm run setup:hermes
       # PowerShell, as on the Windows release host: Git Bash's tools would shadow Windows' own on PATH.
       - name: Gate
         shell: pwsh
@@ -138,9 +121,6 @@ jobs:
           WORLDLET_CODEX_GATES_SKIP: ${{ env.CODEX_SKIP }}
           WORLDLET_GATE_RESULTS: ${{ runner.temp }}\gate.json
           WORLDLET_GATE_ONLY: ${{ matrix.part.only }}
-          WORLDLET_GATE_SKIP: ${{ matrix.part.skip }}
-          WORLDLET_TEST_UI_SHARD: ${{ matrix.part.shard }}
-          WORLDLET_TEST_UI_CONCURRENCY: 2
         run: npm run gate
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -150,9 +130,77 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # Linux: every other gate, and test:ui in twelve shares, two checks at a time: each check drives headless Chromium on
+  # software WebGL, which keeps a core busy (a local four-core run: world-tour-check took over five minutes beside one
+  # other check). Twelve keeps the RC within the free plan's 20 jobs at once beside the Mac, Windows and Dev build jobs.
+  # The Electron host's Linux checks need a display: Xvfb.
+  linux:
+    name: Linux ${{ matrix.part.name }}
+    if: github.repository == 'clockless-org/worldlet'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        part:
+          - {name: base, skip: 'test:ui'}
+          - {name: ui-1, only: 'test:ui', shard: 1/12}
+          - {name: ui-2, only: 'test:ui', shard: 2/12}
+          - {name: ui-3, only: 'test:ui', shard: 3/12}
+          - {name: ui-4, only: 'test:ui', shard: 4/12}
+          - {name: ui-5, only: 'test:ui', shard: 5/12}
+          - {name: ui-6, only: 'test:ui', shard: 6/12}
+          - {name: ui-7, only: 'test:ui', shard: 7/12}
+          - {name: ui-8, only: 'test:ui', shard: 8/12}
+          - {name: ui-9, only: 'test:ui', shard: 9/12}
+          - {name: ui-10, only: 'test:ui', shard: 10/12}
+          - {name: ui-11, only: 'test:ui', shard: 11/12}
+          - {name: ui-12, only: 'test:ui', shard: 12/12}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+          cache: npm
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cache/WorldletBuild
+            .local/browser-driver
+            .local/bootstrap
+            .local/hermes-source
+          key: linux-rc-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'harness/hermes/runtime.json', 'scripts/package-agent-browser.ts') }}
+          restore-keys: linux-rc-
+      - run: npm ci
+      # Chromium with the system libraries it needs on a fresh Ubuntu runner.
+      - run: npx playwright install --with-deps chromium
+      # test:harness, test:hermes and test:ui's world-gateway-check run in Hermes' Python, as Fox does.
+      - run: npm run setup:hermes
+      # test:harness and test:hermes read the interface that test:ui builds, which runs in other parts here.
+      - if: matrix.part.name == 'base'
+        run: npm run build:native-ui
+      - name: Gate
+        env:
+          WORLDLET_CODEX_GATES_SKIP: ${{ env.CODEX_SKIP }}
+          WORLDLET_GATE_RESULTS: ${{ runner.temp }}/gate.json
+          WORLDLET_GATE_ONLY: ${{ matrix.part.only }}
+          WORLDLET_GATE_SKIP: ${{ matrix.part.skip }}
+          WORLDLET_TEST_UI_SHARD: ${{ matrix.part.shard }}
+          WORLDLET_TEST_UI_CONCURRENCY: 2
+        run: xvfb-run -a npm run gate
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rc-linux-${{ matrix.part.name }}
+          path: ${{ runner.temp }}/gate.json
+          if-no-files-found: ignore
+          retention-days: 7
+
   report:
     name: Report
-    needs: [mac, windows]
+    needs: [mac, windows, linux]
     if: github.repository == 'clockless-org/worldlet' && always() && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -178,3 +226,6 @@ jobs:
       - name: Windows
         if: always()
         run: node scripts/ci-rc-report.mjs --platform windows --job "${{ needs.windows.result }}" --results "$RUNNER_TEMP/rc" --sha "$GITHUB_SHA" --run "$RUN"
+      - name: Linux
+        if: always()
+        run: node scripts/ci-rc-report.mjs --platform linux --job "${{ needs.linux.result }}" --results "$RUNNER_TEMP/rc" --sha "$GITHUB_SHA" --run "$RUN"
