@@ -11,7 +11,7 @@ await mkdir(base,{recursive:true});const temp=await mkdtemp(path.join(base,'.ins
 try{
  const response=await fetch(`https://github.com/doordash-oss/doordash-cli/releases/download/v${version}/${name}.tar.gz`);if(!response.ok)throw Error('Could not download the official CLI.');
  const bytes=Buffer.from(await response.arrayBuffer());if(createHash('sha256').update(bytes).digest('hex')!=='996c3519eb67e48872f546f2e14fd4d2058f81e051182219f91c5260ca50725b')throw Error('DoorDash download checksum mismatch.');
- const archive=path.join(temp,'cli.tar.gz');await writeFile(archive,bytes);execFileSync(process.platform==='win32'?path.join(process.env.SystemRoot??'C:\\Windows','System32','tar.exe'):'tar',['-xzf',archive,'-C',temp]);
+ const archive=path.join(temp,'cli.tar.gz');await writeFile(archive,bytes);execFileSync('tar',['-xzf',archive,'-C',temp]);
  const folder=path.join(temp,name);await chmod(path.join(folder,name),0o755);await rename(folder,dest);
  console.log(`Installed DoorDash CLI ${version}. Open the bridge-side Applet to sign in. Early-access approval is required.`);
 }finally{await rm(temp,{recursive:true,force:true});}
