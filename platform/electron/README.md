@@ -94,7 +94,9 @@ Fox's first browser task and the first win, two real conversations about the moc
 fetches the unread mail and names who needs a reply, then drafts a reply that is shown for review
 and cancelled), then the failure detector over the execution
 journal, runtime runs, Attention budget and `logs/diagnostics.jsonl` (a kept page released
-under memory pressure is the host relieving memory, not a failure). Its log is
+under memory pressure is the host relieving memory, not a failure). A failure's first line names how many failed and
+the first one with its error text; the diagnostics file keeps no error text, so the check reads it from the host's
+memory (`diagnostics.recent()`, never written to disk). Its log is
 `.local/electron-checks/onboarding-flow.log`; a failed run keeps its library for diagnosis.
 `npm run test:onboarding:paths` (no RC gate; the RC package smoke runs it on the signed app) runs `--check onboarding-paths` once per phase
 on one disposable library through a local Agent (a fixture OpenClaw when the host has none): quit on the apps page
