@@ -1,0 +1,118 @@
+name: RC
+# The release candidate (docs/RELEASING.md): every push to main runs the release gate (scripts/gate.mjs) on a Mac and
+# a Windows runner, beside the Release workflow that builds the same commit for Dev. A Build is promoted to Alpha or
+# Beta only when both platforms passed here. A failure opens (or adds to) one Issue per platform and failing gates
+# (scripts/ci-rc-report.mjs), which a cloud AI session fixes with a normal pull request; a pass closes them. Hosted
+# runners are free for this public repository. Nothing here runs for pull requests, and nothing reads a secret.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+# One RC at a time; while one runs, only the newest push waits (GitHub replaces an older pending run).
+concurrency:
+  group: rc
+  cancel-in-progress: false
+jobs:
+  mac:
+    name: Mac
+    runs-on: macos-15
+    timeout-minutes: 120
+    outputs:
+      results: ${{ steps.results.outputs.results }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+          cache: npm
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/Library/Caches/WorldletBuild
+            .local/browser-driver
+            .local/imsg
+            .local/bootstrap
+            .local/hermes-source
+          key: mac-rc-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'harness/hermes/runtime.json', 'scripts/package-agent-browser.ts', 'scripts/package-imsg.ts') }}
+          restore-keys: mac-rc-
+      - run: npm ci
+      - run: npm run setup:hermes
+      - name: Gate
+        env:
+          WORLDLET_GATE_RESULTS: ${{ runner.temp }}/gate.json
+        run: npm run gate
+      - id: results
+        if: always()
+        run: echo "results=$(cat "$RUNNER_TEMP/gate.json" 2>/dev/null)" >> "$GITHUB_OUTPUT"
+
+  windows:
+    name: Windows
+    runs-on: windows-2025
+    timeout-minutes: 120
+    outputs:
+      results: ${{ steps.results.outputs.results }}
+    env:
+      WORLDLET_SETUP_PYTHON: python
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.1'
+          cache: npm
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~\AppData\Local\WorldletBuild
+            .local/browser-driver
+            .local/bootstrap
+          key: windows-rc-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'scripts/package-agent-browser.ts') }}
+          restore-keys: windows-rc-
+      - run: npm ci
+      # PowerShell, as on the Windows release host: Git Bash's tools would shadow Windows' own on PATH.
+      - name: Gate
+        shell: pwsh
+        env:
+          WORLDLET_GATE_RESULTS: ${{ runner.temp }}\gate.json
+        run: npm run gate
+      - id: results
+        if: always()
+        shell: bash
+        run: echo "results=$(cat "$RUNNER_TEMP/gate.json" 2>/dev/null)" >> "$GITHUB_OUTPUT"
+
+  report:
+    name: Report
+    needs: [mac, windows]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/ci-rc-report.mjs
+          sparse-checkout-cone-mode: false
+      - name: Mac
+        env:
+          RC_RESULTS: ${{ needs.mac.outputs.results }}
+        run: node scripts/ci-rc-report.mjs --platform mac --job "${{ needs.mac.result }}" --sha "$GITHUB_SHA" --run "$RUN"
+      - name: Windows
+        if: always()
+        env:
+          RC_RESULTS: ${{ needs.windows.outputs.results }}
+        run: node scripts/ci-rc-report.mjs --platform windows --job "${{ needs.windows.result }}" --sha "$GITHUB_SHA" --run "$RUN"

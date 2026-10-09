@@ -100,4 +100,5 @@ for(const job of jobs){
  if(/secrets\./.test(job))assert(/\n    environment: release\n/.test(job),`${name}: secrets only in the release environment`);
 }
 assert(/if: github\.ref == 'refs\/heads\/main'/.test(workflow));
+assert(/actions\/workflows\/rc\.yml\/runs\?head_sha=/.test(workflow),'a promotion requires a passing RC');
 console.log('ci-release checks passed');

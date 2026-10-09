@@ -282,6 +282,13 @@ jobs:
             [[ -n "$run" ]] || { echo "No $platform artifact for Build $BUILD (artifacts are kept 30 days)." >&2; exit 1; }
             gh run download "$run" -n "$name" -D "dist/ci/$platform"
           done
+      # Only a Build whose commit passed the release candidate on both platforms (rc.yml) leaves Dev.
+      - name: Check the RC
+        run: |
+          set -euo pipefail
+          sha="$(node -p 'require("./dist/ci/mac/release.json").sourceCommit')"
+          passed="$(gh api "repos/$GH_REPO/actions/workflows/rc.yml/runs?head_sha=$sha&status=success&per_page=1" --jq .total_count)"
+          [[ "$passed" -gt 0 ]] || { echo "Build $BUILD ($sha) has no passing RC; promote a Build whose RC passed." >&2; exit 1; }
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
