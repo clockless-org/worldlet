@@ -14,6 +14,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+# The gates that drive a real Codex CLI (test:onboarding, test:agent:local, test:ui:review) need a signed-in Codex,
+# which a hosted runner has none of (its refresh tokens are single-use, so no secret copy either); they report SKIP.
+env:
+  CODEX_SKIP: no Codex sign-in on a hosted runner
 # One RC at a time; while one runs, only the newest push waits (GitHub replaces an older pending run).
 concurrency:
   group: rc
@@ -42,12 +46,16 @@ jobs:
             .local/imsg
             .local/bootstrap
             .local/hermes-source
+            ~/Library/Caches/ms-playwright
           key: mac-rc-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'harness/hermes/runtime.json', 'scripts/package-agent-browser.ts', 'scripts/package-imsg.ts') }}
           restore-keys: mac-rc-
       - run: npm ci
+      # The UI checks' headless Chromium, at the version package-lock.json pins for Playwright.
+      - run: npx playwright install chromium
       - run: npm run setup:hermes
       - name: Gate
         env:
+          WORLDLET_CODEX_GATES_SKIP: ${{ env.CODEX_SKIP }}
           WORLDLET_GATE_RESULTS: ${{ runner.temp }}/gate.json
         run: npm run gate
       - id: results
@@ -77,13 +85,16 @@ jobs:
             ~\AppData\Local\WorldletBuild
             .local/browser-driver
             .local/bootstrap
+            ~\AppData\Local\ms-playwright
           key: windows-rc-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'scripts/package-agent-browser.ts') }}
           restore-keys: windows-rc-
       - run: npm ci
+      - run: npx playwright install chromium
       # PowerShell, as on the Windows release host: Git Bash's tools would shadow Windows' own on PATH.
       - name: Gate
         shell: pwsh
         env:
+          WORLDLET_CODEX_GATES_SKIP: ${{ env.CODEX_SKIP }}
           WORLDLET_GATE_RESULTS: ${{ runner.temp }}\gate.json
         run: npm run gate
       - id: results
