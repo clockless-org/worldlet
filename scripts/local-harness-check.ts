@@ -310,6 +310,19 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   setTimeout(()=>slow.cancel(),300);
   await assert.rejects(pending,(error:Error)=>error.name==='AbortError');
   assert.equal(slow.isRunning,false);
+  // A Harness whose own helper outlives it and keeps its output open (a launcher's child, a server it started) still
+  // stops on cancel: the turn ends with the Harness, not when the last process holding its output does.
+  script(path.join(bin,'claude'),'sleep 30 &\nsleep 30\n');
+  const stuck=new LocalHarnessRuntime(found[0],unix),stuckAt=Date.now();
+  const holding=stuck.run({action:'chat',text:'Hi'},agentHome);
+  setTimeout(()=>stuck.cancel(),300);
+  await assert.rejects(holding,(error:Error)=>error.name==='AbortError');
+  assert.ok(Date.now()-stuckAt<5000,'cancel answers promptly');
+  // One that exits but leaves a helper holding its output is answered as an exit, not waited on.
+  script(path.join(bin,'claude'),'sleep 30 &\necho "Error: not logged in" >&2\nexit 1\n');
+  const leftAt=Date.now();
+  await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: not logged in/);
+  assert.ok(Date.now()-leftAt<5000,'an exit answers promptly');
 
   // Hermes Agent over ACP, end to end: the session gets Worldlet's MCP server, the fixture Agent starts it and calls a
   // World tool, which reaches Fox as an ordinary tool event; the answer streams back and the process is ended.

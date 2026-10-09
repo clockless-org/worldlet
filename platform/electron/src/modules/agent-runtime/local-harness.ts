@@ -150,6 +150,8 @@ export function openClawConfigFile({env,home}:HarnessEnvironment):string {
 }
 
 /** `<command> --version`, proving the executable starts; null when it does not. */
+/** How long a Harness's output is still read after it exits. */
+const EXIT_READ_MS=300;
 export function harnessVersion(install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),timeout=10000):Promise<string|null> {
  return new Promise(resolve=>{
   let output='';
@@ -159,7 +161,8 @@ export function harnessVersion(install:LocalHarnessInstall,environment:HarnessEn
   const timer=setTimeout(()=>{stopChild(child);resolve(null);},timeout);
   child.stdout?.on('data',(chunk:Buffer)=>{if(output.length<4000)output+=chunk.toString('utf8');});
   child.once('error',()=>{clearTimeout(timer);resolve(null);});
-  child.once('close',code=>{clearTimeout(timer);resolve(code===0?output.trim().split('\n')[0].slice(0,80):null);});
+  // On its exit, not when its output closes: a helper it started may hold that open (its last output read first).
+  child.once('exit',code=>{clearTimeout(timer);setTimeout(()=>resolve(code===0?output.trim().split('\n')[0].slice(0,80):null),EXIT_READ_MS);});
  });
 }
 
@@ -191,7 +194,7 @@ export class SpareTurns {
   timer.unref?.();
   this.spare={turn,timer};
   // A spare that exits by itself (signed out, updated) is simply gone; the next turn starts its own.
-  turn.child.once('close',()=>{if(this.spare?.turn===turn){clearTimeout(timer);this.spare=null;turn.bridge?.close();}});
+  turn.child.once('exit',()=>{if(this.spare?.turn===turn){clearTimeout(timer);this.spare=null;turn.bridge?.close();}});
  }
  get waiting(){return this.spare!==null;}
  clear(){const entry=this.spare;if(!entry)return;this.spare=null;clearTimeout(entry.timer);discardTurn(entry.turn);}
@@ -356,9 +359,12 @@ export class LocalHarnessRuntime implements AgentRuntime {
   // A conversation over stdin (Hermes Agent's ACP) keeps it open for the replies the stream asks for.
   if(invocation.acp)child.stdin!.write(invocation.stdin??'');
   else if(invocation.stdin!==null)child.stdin!.end(invocation.stdin);else child.stdin!.end();
-  const exited=new Promise<number|null>(resolve=>{child.once('close',code=>resolve(code));child.once('error',()=>resolve(null));});
+  const exited=new Promise<number|null>(resolve=>{child.once('exit',code=>resolve(code));child.once('error',()=>resolve(null));});
   const reader=new LineReader(child.stdout);
   child.once('error',()=>reader.end());
+  // The turn ends with the Harness itself, stopped or not: a helper it started (a launcher's child, a server) may keep
+  // its output open long after, and a stop must not wait for that (owner report 2026-10-09: setup stayed on Connecting).
+  child.once('exit',()=>{setTimeout(()=>reader.end(),EXIT_READ_MS).unref();});
   let timedOut=false;
   const stopped=()=>{if(this.cancelled)throw new AgentCancelled();if(timedOut)throw new WorldletError(`${this.install.title} took too long to answer. Try again.`);};
   let standing=()=>{};

@@ -123,7 +123,8 @@ export class AcpConversation implements ResidentConversation,HarnessApprovals {
    for(const session of [...this.sessions.values()])session.closed(error);
   };
   child.once('error',error=>exited(new WorldletError(`${this.title} could not start: ${error.message}`)));
-  child.once('close',()=>{const detail=proc.stderr.text.trim().split('\n').filter(Boolean).pop();exited(new WorldletError(detail?`${this.title} stopped: ${detail.slice(0,300)}`:`${this.title} stopped.`));});
+  // On its exit, its last output read first: a helper it started may keep its output open long after.
+  child.once('exit',()=>setTimeout(()=>{const detail=proc.stderr.text.trim().split('\n').filter(Boolean).pop();exited(new WorldletError(detail?`${this.title} stopped: ${detail.slice(0,300)}`:`${this.title} stopped.`));},300).unref());
   proc.ready=this.request('initialize',{protocolVersion:1,clientCapabilities:{fs:{readTextFile:false,writeTextFile:false},terminal:false}}).then(result=>{
    proc.loadSession=result.agentCapabilities?.loadSession===true;
   });
