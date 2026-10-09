@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 // Changed task evidence a background pass found waits on the task's Attention card as one line of text-link
 // choices, never over Fox's dialog (owner Order 2026-10-07). Bundled UI, faked bridge, fictional mail.
 await withBrowser(fileAccess,async browser=>{
@@ -25,7 +25,7 @@ await withBrowser(fileAccess,async browser=>{
  const row=(id:string)=>page.locator('.world-matter[data-world-item-id="'+id+'"]');
  const preview=page.locator('#attentionPreview'),line=preview.locator('.attention-preview-review');
  await row('Verify identity').waitFor();
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  await row('Pay invoice').click();await preview.waitFor({state:'visible'});
  assert.equal(await line.isVisible(),false,'another task’s card has no review line');
  await row('Verify identity').click();

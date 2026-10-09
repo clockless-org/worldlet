@@ -2,7 +2,7 @@
 // conversation and what each other Agent brought, grouped and collapsible, every skill with when it last ran, and Fox's
 // offer to save a task it repeats (companion-skills.ts). Fixture data only.
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {withBrowser,fileAccess,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1380,height:900},reducedMotion:'reduce'});
@@ -22,7 +22,7 @@ await withBrowser(fileAccess,async browser=>{
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  await openCompanionPanel(page);
  const panel=page.locator('#companionInfo'),block=panel.locator('.companion-profile-knowledge');
  await block.getByRole('heading',{name:'What Nova knows'}).waitFor();

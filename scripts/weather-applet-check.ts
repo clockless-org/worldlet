@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import {normalizeWeather,environmentAt,forecastParams} from '../ui/world/environment/world-environment.ts';
 import {forecastStage,weatherGlyph} from '../ui/world/environment/weather-forecast.ts';
 assert.equal(new Set([0,1,3,61,71,95,45,null].map(code=>weatherGlyph(code))).size,8,'Weather family has distinct condition artwork');
@@ -30,7 +30,7 @@ await withBrowser(fileAccess,async browser=>{
   await refresh.click();
   await page.locator('.weather-panel[aria-busy=false]').waitFor();
  }
- await page.goto(url+'?fresh');await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(url+'?fresh');await waitForWorld(page);
  await page.getByRole('button',{name:'Check weather',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#worldWeather')?.textContent.includes('18°'));
  assert.equal(await page.locator('#notionDialog').isVisible(),false);
  assert.equal(await page.locator('#worldWeather').textContent(),'Clear 18°','HUD reads condition then temperature without a separator');

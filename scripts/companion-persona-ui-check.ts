@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {withBrowser,fileAccess,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 import {companionPersona} from '../core/companion/index.ts';
 
 await withBrowser(fileAccess,async browser=>{
@@ -14,7 +14,7 @@ await withBrowser(fileAccess,async browser=>{
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  for(const personality of ['', 'Formal, precise, and calm.', '']){
   await page.evaluate(value=>{(window as any).persona=value;},personality);
   await openCompanionPanel(page);

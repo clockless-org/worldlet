@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:900},reducedMotion:'reduce'});page.setDefaultTimeout(15000);
  const errors=pageErrors(page);
@@ -25,7 +25,7 @@ await withBrowser(fileAccess,async browser=>{
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached',timeout:30000});
+ await waitForWorld(page);
  await page.evaluate(()=>location.hash='object=app-claude-code');
  await page.getByRole('button',{name:/Resume this project/}).click();
  await page.getByText('Saved Claude reply.',{exact:true}).waitFor();

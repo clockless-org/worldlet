@@ -4,7 +4,7 @@
 // earlier is still a device of its own, which opens on its kind's page and latest messages.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl} from './browser-test.ts';
+import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce',timezoneId:'America/Los_Angeles'}),errors=pageErrors(page);
@@ -29,7 +29,7 @@ try{
   }
   return {ok:true};
  }}}};});
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  // A thing kept earlier is a device of its own.
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any)?.appletLayout?.has('app-job-fooddiary001'));
  // The two food conversations are one theme in Worth Doing, after the items; one of no kind offers nothing.

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import path from 'node:path';
 import {mkdir} from 'node:fs/promises';
 // Fox's chat is one visible thread per context over one session. A thread reads bottom-up
@@ -69,7 +69,7 @@ await withBrowser(fileAccess,async browser=>{
  async function ask(text:string){await type(text);await idle(text);}
  const cardTexts=()=>list.locator('.companion-thread-card').allTextContents();
  const top=async(locator:any)=>(await locator.boundingBox())?.y??NaN;
- await page.goto(url);await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(url);await waitForWorld(page);
 
  // The World is one context with its own thread.
  await ask('world one');
@@ -199,7 +199,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await fold.getAttribute('aria-expanded'),'false','the keyboard collapses too');
 
  // The preference and the thread survive a reload.
- await page.reload();await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.reload();await waitForWorld(page);
  await enterBrowser();
  await page.waitForFunction(()=>document.querySelector('#worldConversation')?.textContent.includes('Reply to wait draft a short birthday message for grandma tonight'));
  assert.equal(await fold.getAttribute('aria-expanded'),'false','still collapsed after a reload');

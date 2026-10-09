@@ -3,7 +3,7 @@
 // laid over the panel's slot, Back hides that view, and Delete goes to the host. There is no Widgets Applet.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl} from './browser-test.ts';
+import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import {READY_APPLETS,widgetDocument,readWidgetConsole} from '../core/widgets/index.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
@@ -20,7 +20,7 @@ try{
   if(b.action==='widgets')return b.operation==='list'?{now:[getty],finished:[]}:{ok:true};
   return {ok:true};
  }}}};});
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  // Its own device on the Home ground, never waiting to be unlocked; no catalog "Widgets" device.
  await page.waitForFunction(()=>((document.querySelector('#notionWorld') as any)?.sceneMetrics?.modules||[]).some(m=>m.id==='app-wgt-getty2abcd'&&m.visible!==false));
  const modules=await page.evaluate(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.modules.map(m=>m.id));

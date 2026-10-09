@@ -1,6 +1,6 @@
 // Applet artwork is static (4c6b36d1): hover stays interactive and foreground presentations settle without rig motion.
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce',...(process.env.MOTION_VIDEO?{recordVideo:{dir:process.env.MOTION_VIDEO,size:{width:1280,height:850}}}:{})}),errors=pageErrors(page);
@@ -25,7 +25,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.goto(worldUrl());
  await page.waitForFunction(n=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length===n,WORLD_APPS.length);
 
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  await page.evaluate(()=>location.hash='building=building-home');
  await page.emulateMedia({reducedMotion:'no-preference'});
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.camera.settled);

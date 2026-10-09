@@ -2,7 +2,7 @@
 // arriving exact duplicate becomes its lead (Core picks leads by ID): the card is not new (#929).
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl} from './browser-test.ts';
+import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1372,height:720},reducedMotion:'reduce'});
@@ -19,7 +19,7 @@ try{
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  // Work hours: Mail's quiet updates are not relevant now, so only the initial floor seats them.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:attention-focus',{detail:{mode:'work'}})));
  const rows=()=>page.locator('.world-task-list .world-task-group:not([data-group=later]) .world-matter[data-world-item-id]').evaluateAll(n=>n.map(e=>e.getAttribute('data-world-item-id')));

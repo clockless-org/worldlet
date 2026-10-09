@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel,SETTINGS_BUTTON} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel,SETTINGS_BUTTON,waitForWorld} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{const w=window as any;w.calls=[];w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
@@ -8,7 +8,7 @@ await withBrowser(fileAccess,async browser=>{
   if(b.action==='agentChat'){w.turn=b.id;w.worldletAgentEvent(b.id,{type:'status',stage:'waiting'});await new Promise(resolve=>w.finish=resolve);return {message:'Done.'};}
   return {ok:true};
  }}}};});
- const url=worldUrl();await page.goto(url);await page.locator('#worldStartup').waitFor({state:'detached'});
+ const url=worldUrl();await page.goto(url);await waitForWorld(page);
  const avatar=page.locator('.companion-avatar'),type=page.locator('#notionInput'),mic=page.locator('.companion-speech-button'),panel=page.locator('#companionInfo'),form=page.locator('#notionCommand');
  const typing=()=>page.evaluate(()=>(document.querySelector('.notion-world') as HTMLElement).dataset.entryExpanded==='true');
  // One bar under Fox (owner decision 2026-10-04): the field and Send; the microphone is its own round button on the bar's right (owner 2026-10-07).
@@ -74,10 +74,10 @@ await withBrowser(fileAccess,async browser=>{
  await avatar.evaluate((el,[x,y])=>{const at=(type:string,dx:number,dy:number)=>el.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:1,pointerType:'mouse',isPrimary:true,button:0,buttons:type==='pointerup'?0:1,clientX:x+dx,clientY:y+dy}));
   at('pointerdown',0,0);for(let i=1;i<=12;i++)at('pointermove',-15*i,-160/12*i);at('pointerup',-180,-160);},[before.x+60,before.y+60]);assert(!await panel.isVisible());
  const saved=await page.evaluate(()=>localStorage.getItem('worldlet.companion.position'));assert(saved);
- const moved=await avatar.boundingBox();assert(moved.x<before.x-100);await page.reload();await page.locator('#worldStartup').waitFor({state:'detached'});await page.waitForFunction(()=>document.querySelector('#notionHUD').getAttribute('data-positioned')==='true');
+ const moved=await avatar.boundingBox();assert(moved.x<before.x-100);await page.reload();await waitForWorld(page);await page.waitForFunction(()=>document.querySelector('#notionHUD').getAttribute('data-positioned')==='true');
  assert(Math.abs((await avatar.boundingBox()).x-moved.x)<3,'Restart retains drag position');
  // Dragged to the bottom, Fox stops where the message bar and its buttons still fit in the window (owner Order 2026-10-08).
- {const restore=async(anchor:string)=>{await page.evaluate(a=>localStorage.setItem('worldlet.companion.position',a),anchor);await page.reload();await page.locator('#worldStartup').waitFor({state:'detached'});await page.waitForFunction(()=>document.querySelector('#notionHUD').getAttribute('data-positioned')==='true');await page.waitForTimeout(200);};
+ {const restore=async(anchor:string)=>{await page.evaluate(a=>localStorage.setItem('worldlet.companion.position',a),anchor);await page.reload();await waitForWorld(page);await page.waitForFunction(()=>document.querySelector('#notionHUD').getAttribute('data-positioned')==='true');await page.waitForTimeout(200);};
   await restore(JSON.stringify([JSON.parse(saved)[0],1]));
   const lowest=await page.evaluate(()=>Math.max(...[...document.querySelectorAll('#notionCommand,.companion-controls')].map(e=>e.getBoundingClientRect().bottom)));
   assert(lowest<=850-12,`the bar stays inside the window when Fox is dragged down (bottom ${lowest})`);

@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import path from 'node:path';
 import {worldLogKeeps,worldLogLines,worldLogNext,worldLogNow,WORLD_LOG_KINDS} from '../core/activity/index.ts';
-import {pageErrors,worldUrl} from './browser-test.ts';
+import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 
 const t=1_800_000_000;
 const rows=[
@@ -81,7 +81,7 @@ try{
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  const log=page.locator('.world-log');
  // The corner keeps only the next scheduled check; the live log is gone from it (owner Order 2026-10-06).
  await log.locator('.world-log-next').waitFor();

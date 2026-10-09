@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import sharp from 'sharp';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import {BUILTIN_STYLE} from '../ui/components/style.ts';
 import {LANDMARK_KEYS} from '../ui/world/region-landmarks.ts';
 import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
@@ -19,7 +19,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.addInitScript(ids=>{window.webkit={messageHandlers:{worldlet:{async postMessage(b){if(b.action==='snapshot')return {platform:'macos',workspaceId:'landmark-night-check',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true,unlockedApplets:ids},sampleEnabled:false};if(b.action==='appContent')return {pages:[]};return {ok:true};}}}};},APP_DEFINITIONS.map(a=>a.id));
  await page.goto(worldUrl());
  await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl');
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  const metrics=()=>page.evaluate(()=>document.querySelector<any>('#notionWorld').sceneMetrics);
  await page.evaluate(()=>window.worldletExecute('set_scene_lighting',{lighting:'day'}));
  await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.landmarks.every(l=>l.nightAmount===0));

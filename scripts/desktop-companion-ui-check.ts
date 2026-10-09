@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel,SETTINGS_BUTTON} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel,SETTINGS_BUTTON,waitForWorld} from './browser-test.ts';
 import path from 'node:path';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1380,height:900},reducedMotion:'reduce'}),errors=pageErrors(page);
@@ -16,7 +16,7 @@ await withBrowser(fileAccess,async browser=>{
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  await page.waitForFunction(()=>typeof (window as any).worldletDesktopCompanion==='function');
  // Wait for the CSS transitions themselves, not a wall-clock guess: a busy main thread (Fox's
  // Rive frames under software rendering) can hold a transition at its start for over 300 ms.

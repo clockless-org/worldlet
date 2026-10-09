@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 
 // Browser plugin unavailable. Existing local bundle, mocked host, no accounts.
 await withBrowser(fileAccess,async browser=>{
@@ -16,7 +16,7 @@ await withBrowser(fileAccess,async browser=>{
   }}}};
  });
  await page.goto(worldUrl());
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  await page.waitForFunction(()=>typeof (window as any).worldletDesktopCompanion==='function');
  for(let cycle=0;cycle<3;cycle++){
   await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));

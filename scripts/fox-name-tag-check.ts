@@ -3,7 +3,7 @@
 // work outside the chat (the day's plan) shows there through `worldlet:fox-status` and leaves when it ends; selecting
 // it opens the message bar like selecting Fox.
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 const fixture=()=>{const w=window as any;w.webkit={messageHandlers:{worldlet:{postMessage(b:any){
  if(b.action==='snapshot')return Promise.resolve({workspaceId:'name-tag-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true});
  if(b.action==='modelStatus')return Promise.resolve({available:true,cloudAllowed:true});
@@ -13,7 +13,7 @@ const fixture=()=>{const w=window as any;w.webkit={messageHandlers:{worldlet:{po
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(fixture);
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  const tag=page.locator('.companion-pet .fox-name-tag'),status=tag.locator('.fox-name-tag-status');
  await tag.waitFor({state:'visible'});
  assert.equal((await tag.innerText()).trim(),'Fox','the name at rest');assert.equal(await status.isVisible(),false);

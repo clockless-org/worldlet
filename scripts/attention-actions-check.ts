@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {mkdir} from 'node:fs/promises';
@@ -32,7 +32,7 @@ await withBrowser(fileAccess,async browser=>{
  const row=id=>page.locator('.world-matter[data-world-item-id="'+id+'"]');
  const preview=page.locator('#attentionPreview'),dialogue=page.locator('#companionDialogue');
  await row('Confirmed meeting').waitFor();
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  const mailPin=page.locator('.notion-pin[data-page="place-app-gmail"]');
  assert.equal(await mailPin.locator('.applet-attention').count(),0,'Ordinary findings do not require an Applet intervention');
  await page.evaluate(()=>{const w=window as any;w.savedMailPin=document.querySelector('.notion-pin[data-page="place-app-gmail"]');w.savedMailMarker=w.savedMailPin.querySelector('.applet-attention');w.fixture.connections[0].running=true;w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});

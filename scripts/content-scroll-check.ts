@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:800},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{(window as any).webkit={messageHandlers:{worldlet:{async postMessage(b){
   if(b.action==='snapshot')return {workspaceId:'scroll-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},cloudConsent:false,sampleEnabled:true};
   if(b.action==='modelStatus')return {available:true};return {ok:true};
  }}}};});
- const url=worldUrl();await page.goto(url);await page.locator('#worldStartup').waitFor({state:'detached'});assert.equal(page.url(),url);assert.equal(await page.title(),'Worldlet');
+ const url=worldUrl();await page.goto(url);await waitForWorld(page);assert.equal(page.url(),url);assert.equal(await page.title(),'Worldlet');
  // The companion panel no longer lists Applets (owner feedback 2026-10-03): they live in their areas.
  await openCompanionPanel(page);assert.equal(await page.getByRole('tab',{name:'Applets',exact:true}).count(),0);
  await page.getByRole('button',{name:'Close companion panel',exact:true}).click();

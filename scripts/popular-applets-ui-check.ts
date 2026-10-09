@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 const platform=process.platform==='win32'?'windows':'macos';
@@ -16,7 +16,7 @@ await withBrowser(fileAccess,async browser=>{
  },{ids:APP_DEFINITIONS.map(a=>a.id),platform});
  await page.goto(worldUrl());
  await page.waitForFunction(n=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.modules.length===n,APP_DEFINITIONS.length);
- await page.locator('#worldStartup').waitFor({state:'detached'});
+ await waitForWorld(page);
  for(const app of [...POPULAR_APPS,...WEB_GAME_APPLETS]){
   const region=await page.evaluate(id=>document.querySelector<any>('#notionWorld').sceneMetrics.modules.find(module=>module.id===id).region,app.id);
   await page.evaluate(region=>{location.hash='building='+region;window.dispatchEvent(new HashChangeEvent('hashchange'));},region);

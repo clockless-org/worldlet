@@ -1,7 +1,7 @@
 // The world's energy in the page: no battery in the World (owner 2026-10-04), Fox's low-energy line and the Energy page.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {pageErrors,worldUrl,openCompanionPanel} from './browser-test.ts';
+import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
@@ -23,7 +23,7 @@ try{
   if(b.action==='codexSession')return {rateLimits:{primary:{usedPercent:30,windowDurationMins:300,resetsAt:Math.floor(Date.now()/1000)+3600},secondary:{usedPercent:55,windowDurationMins:10080,resetsAt:Math.floor(Date.now()/1000)+86400}}};
   return {ok:true};
  }}}};});
- await page.goto(worldUrl());await page.locator('#worldStartup').waitFor({state:'detached'});
+ await page.goto(worldUrl());await waitForWorld(page);
  await page.getByText('Your world is running low on energy. Charge it to keep going.').waitFor();
  await page.getByRole('button',{name:'Charge',exact:true}).waitFor();
  assert.equal(await page.locator('.world-energy,.world-environment .energy-cell').count(),0,'no battery in the World\'s top-right corner');
