@@ -26,7 +26,7 @@ const node=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.t
  * brings the Agent in on the same page: its card moves left while what comes along appears on the right, tile by tile,
  * and the button becomes "Enter your world". No model turn or source read gates entry. */
 /** `move`: someone who used Fox's own Hermes chooses the Agent Fox runs on from now on (owner decisions 2026-10-09: no
- * built-in Hermes); the same page, without the apps, and Back to your world returns to the World as it was. */
+ * built-in Hermes); the same page, and Enter your world returns to the World as it was. */
 export function mountStartupSetup({state:initial,call,complete,move=false}:{state:any,call:any,complete:(next:any,icons?:Record<string,string>)=>Promise<void>,move?:boolean}){
  let state=initial,step=0,busy=false,disposed=false,error='',notice='',signingIn=false,entering=false;
  // Agents already on this computer (Claude Code, Codex, …): choosing one replaces Google sign-in.
@@ -182,12 +182,12 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(importingAgent()){
    if(!draft.brought)return list;
    list.push('profile','conversations','notes','skills','routines');
-   if(!porting)list.push('connections',...move?[]:['apps']);
+   if(!porting)list.push('connections','apps');
    return list;
   }
   // Google brings Mail and Calendar; an API key or an Agent on another computer brings only the World.
   if(connected()&&typeof draft.remoteAgent!=='string'&&draft.ownModel!==true)list.push('connections');
-  return detecting||move?list:[...list,'apps'];
+  return detecting?list:[...list,'apps'];
  }
  const settled=()=>!importingAgent()||(!!draft.brought&&!bringing&&!porting&&shownTiles>=tiles().length);
  // One tile at a time; with Reduce Motion, all at once.
@@ -360,15 +360,14 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   delete draft.ownModel;delete draft.remoteAgent;
   step=0;notice='';error='';persist();render();
  }
- /** The chosen Agent on the left: its mark, its own name, where it comes from and its model. */
+ /** The chosen Agent on the left: its mark, its own name, and where it comes from. */
  function passport(){
   const agentId=draft.agent as string,brought=draft.brought,found=agents.find(a=>a.id===agentId);
   let icon='',name='',from='',rows:[string,string][]=[];
   if(importingAgent()){
-   const product=found?.title||LOCAL_HARNESSES.find(h=>h.id===agentId)?.title||agentId,summary=brought?.summary||{};
+   const product=found?.title||LOCAL_HARNESSES.find(h=>h.id===agentId)?.title||agentId;
    icon=AGENT_ICONS[agentId]||'';name=brought?.name||draft.agentName||product;from=name!==product?product:'';
-   const model=!brought?'':brought.model?(brought.modelName||summary.model||t('Its own')):summary.model&&(agentId==='codex'||brought.energy==='chatgpt')?summary.model+' · '+t('Your ChatGPT plan'):agentId==='codex'||brought.energy==='chatgpt'?t('Your ChatGPT plan'):brought.energy==='none'?t('Choose one in Settings'):summary.model||t('Its own sign-in');
-   if(model)rows.push(['Model',model]);
+   // The Agent keeps its own model, so the card shows none (owner request 2026-10-09).
    if(found?.worldTools===false)rows.push(['World tools',t('Chat only')]);
   }else if(draft.ownModel===true){
    icon=AGENT_ICONS.hermes;name='Hermes Agent';from=t('Set up by Worldlet');
@@ -393,7 +392,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  function tile(kind:string,fresh:boolean){
   const brought=draft.brought||{},summary=brought.summary||{};
   const build=(title:string,cls:string,fill:(el:HTMLElement)=>void)=>()=>{
-   const el=node('article','','setup-tile setup-tile-'+kind+' '+cls);if(fresh&&!reduced())el.classList.add('is-arriving');
+   const el=node('article','','setup-tile setup-tile-'+kind+' '+cls);
+   // Arrives once: a later render re-inserts the same tile, which would replay the entrance and make every tile flash.
+   if(fresh&&!reduced()){el.classList.add('is-arriving');el.addEventListener('animationend',()=>el.classList.remove('is-arriving'),{once:true});}
    el.append(node('h3',t(title),'setup-tile-title'));fill(el);
    const done=node('span','','setup-tile-done');done.setAttribute('aria-hidden','true');el.append(done);
    return el;
@@ -553,6 +554,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const card=passport();
    const list=tiles(),shown=Math.min(shownTiles,list.length);
    const bento=node('div','','setup-tiles');bento.setAttribute('aria-label',t('What comes along'));
+   // Each tile has its own place, so the grid stays full while every tile shows, empty ones included.
+   const has=(kind:string)=>list.includes(kind);
+   const layout=has('profile')?(has('apps')?'agent':has('connections')?'agent-no-apps':'agent-only'):list.length>1?(has('connections')?'world':'world-apps'):'';
+   if(layout)bento.dataset.layout=layout;
    for(let i=0;i<shown;i++)bento.append(tile(list[i],i===shown-1&&shownTiles<=list.length));
    // While the host still copies, one tile says what is happening.
    if(arriving&&(bringing||porting||!draft.brought)){
@@ -563,7 +568,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    stage.append(card,bento);parts.push(stage);
    if(entering)primary=button('Entering your world…',async()=>{},true);
    else if(!done)primary=button(agentText('Moving {agent} in…',AGENT_SHORT[draft.agent]&&!draft.brought?.name?AGENT_SHORT[draft.agent]:name),async()=>{},true);
-   else primary=button(move?'Back to your world':'Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
+   else primary=button('Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
    primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering||!done);primary.setAttribute('aria-busy',String(entering||!done));if(!done||entering)primary.disabled=true;
    if(error||notice)status.append(node('p',t(error||notice),error?'setup-error':'setup-note'));
   }else{

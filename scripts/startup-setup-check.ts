@@ -264,7 +264,10 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('.setup-passport-name').textContent(),'Nova');
   assert.equal(await page.locator('.setup-passport-from').textContent(),'OpenClaw');
   // Worldlet provides no model (owner request 2026-10-05): setup says where to choose one.
-  assert.deepEqual(await page.locator('.setup-passport .setup-agent-fact').allTextContents(),['ModelChoose one in Settings']);
+  assert.equal(await page.locator('.setup-passport .setup-agent-fact').count(),0,'The Agent keeps its own model, so its card shows none (owner request 2026-10-09)');
+  // The tiles fill their grid with no gap (owner request 2026-10-09).
+  const fill=await page.locator('.setup-tiles').evaluate(grid=>{const box=grid.getBoundingClientRect(),gap=10;let area=0;for(const tile of grid.querySelectorAll('.setup-tile')){const r=tile.getBoundingClientRect();area+=(r.width+gap)*(r.height+gap);}return area/((box.width+gap)*(box.height+gap));});
+  assert.ok(Math.abs(fill-1)<.01,'The tiles fill the grid: '+fill);
   await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Model.',{exact:true}).waitFor();
   // Only what came over gets a tile (owner request 2026-10-09), in the order it arrives.
   assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-connections','setup-tile-apps']);
@@ -486,8 +489,8 @@ await withBrowser(fileAccess,async browser=>{
  }
  // Moving off Fox's own Hermes (ui/onboarding/README.md#moving-off-foxs-own-hermes-2026-10-09): a finished World whose Fox
  // still runs on it gets the first page once; Google does not stand in for an Agent, an Agent it only copied from is not
- // taken as chosen, the pick answers for Fox itself, nothing about apps or onboarding is redone, and Back to your world
- // opens the World as it was.
+ // taken as chosen, the pick answers for Fox itself, the right side shows every tile, nothing about
+ // onboarding is redone, and Enter your world opens the World as it was.
  {
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform})=>{
@@ -513,8 +516,9 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Give Nova a world',exact:true}).click();
   await page.getByRole('heading',{name:/^Nova moved in$/}).waitFor();
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>[c.id,c.direct])),[['openclaw',true]],'the pick answers for Fox itself');
-  assert.equal(await page.locator('.setup-tile-apps').count(),0,'no apps to choose again');
-  await page.getByRole('button',{name:'Back to your world',exact:true}).click();
+  assert.equal(await page.locator('.setup-tile-apps').count(),1,'Apps and Connections show here too (owner request 2026-10-09)');
+  assert.equal(await page.locator('.setup-tile-connections').count(),1);
+  await page.getByRole('button',{name:'Enter your world',exact:true}).click();
   await page.waitForFunction(()=>!document.querySelector('.startup-setup')&&!document.getElementById('worldStartup'));
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.operation==='setup')),false,'onboarding setup is not redone');
   assert.deepEqual(errors,[]);await page.close();
