@@ -17,7 +17,7 @@ flowchart LR
 
 ```text
 package/
-  theme.json          # contractVersion: 2, id, version, title, applets
+  theme.json          # contractVersion: 2, id, title, applets, optional updatedAt
   presentation.json   # validated scenes, coordinate systems, slots, tokens, fonts
   entry.ts            # default export implements BuildTheme
   theme.css
@@ -27,7 +27,9 @@ package/
 
 `theme.json` fixes `entry: "entry.ts"`, `stylesheet: "theme.css"`, `assets: "assets"`, and `presentation: "presentation.json"`. `applets` lists bespoke scenes; each ID must have a matching presentation. IDs not listed use `fallback`, including future Applets. There is no inherited Village requirement or host registry edit per package.
 
-The importer validates version, paths, unique Applet IDs, mandatory render functions, browser compilation, scene rectangles, font declarations and referenced assets. It rejects symlinks, unresolved LFS pointers, missing assets, CSS imports, external CSS URLs, private host imports and Node dependencies. Only local source and **type-only** `@worldlet/theme` imports are supported. Source is compiled without executing it during validation. Validated staged bytes replace `ui/selected-theme` atomically; hashes are recorded, failed imports keep the previous selection, and builds remove stale output assets.
+Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-09T23:14:20Z`); it is informational, not a compatibility gate. `contractVersion` alone controls interface compatibility; source hashes identify the copied contents.
+
+The importer validates contract compatibility, paths, unique Applet IDs, mandatory render functions, browser compilation, scene rectangles, font declarations and referenced assets. It rejects symlinks, unresolved LFS pointers, missing assets, CSS imports, external CSS URLs, private host imports and Node dependencies. Only local source and **type-only** `@worldlet/theme` imports are supported. Source is compiled without executing it during validation. Validated staged bytes replace `ui/selected-theme` atomically; hashes are recorded, failed imports keep the previous selection, and builds remove stale output assets.
 
 This is trusted reviewed application source, not a sandbox. Static validation cannot prove accessibility, resource references constructed by code, or renderer behavior. The UI acceptance checks below are also required.
 

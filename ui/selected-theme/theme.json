@@ -1,7 +1,6 @@
 {
   "contractVersion": 2,
   "id": "village",
-  "version": "2.1.1",
   "title": "Village",
   "entry": "entry.ts",
   "stylesheet": "theme.css",
@@ -12,5 +11,6 @@
     "apple-notes",
     "apple-reminders"
   ],
-  "presentation": "presentation.json"
+  "presentation": "presentation.json",
+  "updatedAt": "2026-10-09T23:14:20Z"
 }

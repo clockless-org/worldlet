@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import {parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
+import {parseBuildThemeManifest,parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
 import {validateBuildTheme,importBuildTheme,buildThemeSource} from './build-theme-source.ts';
 const tmp=await fs.mkdtemp(path.join(os.tmpdir(),'worldlet-theme-contract-'));
 try{
- const manifest={contractVersion:2,id:'first',version:'1.0.0',title:'First',entry:'entry.ts',stylesheet:'theme.css',assets:'assets',presentation:'presentation.json',applets:[]};
+ const manifest={contractVersion:2,id:'first',updatedAt:'2026-10-09T23:14:20Z',title:'First',entry:'entry.ts',stylesheet:'theme.css',assets:'assets',presentation:'presentation.json',applets:[]};
+ assert.doesNotThrow(()=>parseBuildThemeManifest({...manifest,updatedAt:undefined}));
+ assert.throws(()=>parseBuildThemeManifest({...manifest,updatedAt:'yesterday'}),/updatedAt/);
  const source=path.join(tmp,'source'),consumer=path.join(tmp,'consumer');await fs.mkdir(path.join(source,'assets'),{recursive:true});await fs.mkdir(path.join(consumer,'ui'),{recursive:true});
  const write=async(id:string)=>{await fs.writeFile(path.join(source,'theme.json'),JSON.stringify({...manifest,id}));await fs.writeFile(path.join(source,'entry.ts'),`import type {BuildTheme} from '@worldlet/theme'; const theme:BuildTheme={contractVersion:2,id:'${id}',renderWorld:()=>({dispose(){},update(){},event(){return false;},anchor(){return null;},bounds(){return null;}}),renderApplet:()=>({dispose(){}})};export default theme;`);await fs.writeFile(path.join(source,'theme.css'),`:root{--theme-ink:#123456}`);};
  const presentation=JSON.parse(await fs.readFile(new URL('../ui/selected-theme/presentation.json',import.meta.url),'utf8'));
@@ -14,6 +16,7 @@ try{
  assert.throws(()=>parseThemePresentation({...presentation,world:{...scene,slots:{content:[.9,0,.2,1]}}}),/bounded|content/);
  await write('first');await fs.writeFile(path.join(source,'assets','test.txt'),'fixture');
  await importBuildTheme(source,consumer);const initial=await fs.readFile(path.join(consumer,'ui/selected-theme/source-lock.json'),'utf8');
+ assert.equal(JSON.parse(initial).updatedAt,manifest.updatedAt);assert.equal('version' in JSON.parse(initial),false);
  await importBuildTheme(source,consumer);assert.equal(await fs.readFile(path.join(consumer,'ui/selected-theme/source-lock.json'),'utf8'),initial);
  await fs.writeFile(path.join(source,'theme.json'),JSON.stringify({...manifest,contractVersion:99}));await assert.rejects(importBuildTheme(source,consumer),/Invalid build theme/);assert.equal(await fs.readFile(path.join(consumer,'ui/selected-theme/source-lock.json'),'utf8'),initial);
  await write('second');await importBuildTheme(source,consumer);assert.equal(JSON.parse(await fs.readFile(path.join(consumer,'ui/selected-theme/theme.json'),'utf8')).id,'second');

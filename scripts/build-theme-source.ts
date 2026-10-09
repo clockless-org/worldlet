@@ -79,7 +79,7 @@ export async function importBuildTheme(source:string,root:string){
   const staged=await validateBuildTheme(stage);
   if(JSON.stringify(staged.hashes)!==JSON.stringify(checked.hashes))throw Error('Theme changed during import; retry');
   await fs.writeFile(path.join(stage,'index.ts'),"export {default} from './entry.ts';\nexport {default as manifest} from './theme.json' with {type:'json'};\nexport {default as presentation} from './presentation.json' with {type:'json'};\n");
-  await fs.writeFile(path.join(stage,'source-lock.json'),JSON.stringify({contractVersion:2,id:checked.manifest.id,version:checked.manifest.version,sha256:checked.hashes},null,2)+'\n');
+  await fs.writeFile(path.join(stage,'source-lock.json'),JSON.stringify({contractVersion:2,id:checked.manifest.id,updatedAt:checked.manifest.updatedAt,sha256:checked.hashes},null,2)+'\n');
   try{await fs.rename(dest,backup);moved=true;}catch(error){if(error.code!=='ENOENT')throw error;}
   try{await fs.rename(stage,dest);}catch(error){if(moved)await fs.rename(backup,dest);throw error;}
   if(moved)await fs.rm(backup,{recursive:true});

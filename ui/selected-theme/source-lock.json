@@ -1,7 +1,7 @@
 {
   "contractVersion": 2,
   "id": "village",
-  "version": "2.1.1",
+  "updatedAt": "2026-10-09T23:14:20Z",
   "sha256": {
     "assets/INTER-LICENSE.txt": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
     "assets/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
@@ -39,7 +39,7 @@
     "presentation.json": "976369ec67e72eb4f50118164fd2828c427ea87a3488e0d0f07a48d66f522ddf",
     "surface.ts": "9e294d52679230db4f7f9a34999c8a18884fbdef55e386b3e9c2419446d44c25",
     "theme.css": "58d0bfbe532297bcf607108e7b3a02b81119f4f1b76aca74c3f0f7d169f91f82",
-    "theme.json": "9355c6448010d6d0fcded0b63101edde280f6fcf1b45bbaad51987145195c248",
+    "theme.json": "0d36eeac8fc851baa398f032b143f93b8914d5bc573d5f6ad0ae3c043146ed66",
     "world.ts": "0a0450e3bc097ca9a54948380ac7194e4a6b37718bd468ddb9e45db13fb92b12"
   }
 }

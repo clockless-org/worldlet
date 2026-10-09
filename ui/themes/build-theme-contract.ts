@@ -64,7 +64,7 @@ export interface BuildTheme {
  renderApplet(context:ThemeAppletContext):ThemeMount;
 }
 export interface BuildThemeManifest {
- contractVersion:2;id:string;version:string;title:string;
+ contractVersion:2;id:string;updatedAt?:string;title:string;
  entry:'entry.ts';stylesheet:'theme.css';assets:'assets';presentation:'presentation.json';
  applets:string[];
 }
@@ -76,7 +76,8 @@ export function themeAssetPath(v:unknown):string {
 }
 export function parseBuildThemeManifest(value:unknown):BuildThemeManifest {
  const t=value as BuildThemeManifest;
- need(t&&t.contractVersion===2&&id(t.id)&&/^\d+\.\d+\.\d+$/.test(t.version)&&text(t.title),'identity / contract v2');
+ need(t&&t.contractVersion===2&&id(t.id)&&text(t.title),'identity / contract v2');
+ need(t.updatedAt===undefined||(typeof t.updatedAt==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(t.updatedAt)&&Number.isFinite(Date.parse(t.updatedAt))),'updatedAt UTC timestamp');
  need(t.entry==='entry.ts'&&t.stylesheet==='theme.css'&&t.assets==='assets'&&t.presentation==='presentation.json','package entry points');
  need(Array.isArray(t.applets)&&t.applets.every(id)&&new Set(t.applets).size===t.applets.length,'applet IDs');return t;
 }
