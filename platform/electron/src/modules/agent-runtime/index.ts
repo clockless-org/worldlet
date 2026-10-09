@@ -165,7 +165,7 @@ export function forgetSetupChoice(root:string){writeSelection(root,null);writeAd
  * connections, background checks, Applet tasks and routines run on its profile, so whatever it is connected to
  * keeps working in the World and a new connection is made in that profile. Any other choice ends the attachment. */
 export function attachChosenHermes(root:string,id:string,failure:(error:unknown)=>void=()=>{}){
- // Fox's own profile, reached through the standard location (standardHermes), is not another Agent to attach.
+ // Fox's own profile, reached through the standard location (Worldlet once linked it there), is not another Agent to attach.
  const profile=id==='hermes'?discoverOtherHermes(root):null;
  if(!profile){unbindHermes(root);return;}
  if(attachedHermes(root)===profile)return;
@@ -206,7 +206,7 @@ export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<v
  if(!home)return null;
  const install=adapter.install,environment=currentEnvironment();
  return (standing??=openStandingWorldTools({channel:(name,args)=>channelTool?channelTool(name,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})})).then(tools=>
-  keepHermesResident(home,(args,stdin)=>runHarnessCommand(install,environment,args,{timeout:120_000,...stdin!==undefined?{stdin}:{}}),{runtime:null,worldTools:home=>tools.server(home)})).then(
+  keepHermesResident(home,(args,stdin)=>runHarnessCommand(install,environment,args,{timeout:120_000,...stdin!==undefined?{stdin}:{}}),{worldTools:home=>tools.server(home)})).then(
   reason=>{if(reason)context.failure(new WorldletError(`Hermes Agent is not kept running for Fox: ${reason}`),'hermesResident');},
   error=>context.failure(error,'hermesResident'));
 }

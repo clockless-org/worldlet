@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
-import {execFileSync,spawn,spawnSync} from 'node:child_process';
+import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {WebSocketServer} from 'ws';
 import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionThread,hermesBorrowsCodex,hermesConversationIncluded,HERMES_CHANNEL_READ_ONLY,hermesAcpAnnouncement,hermesChannelToolAllowed,HermesOwnCalls,hermesStandingWriteApproval,hermesStreamAnnouncement,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,localHarnessStream,localHarnessTurn,openClawApprovalFor,openClawApprovalRequest,openClawConnect,openClawSessionIs,openClawDecision,openClawDeviceProof,
@@ -10,7 +10,7 @@ import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionT
 import {phoneLive,readPhoneMessage} from '../core/phone/index.ts';
 import {mountHarnessApproval} from '../ui/companion/fox-harness-approval.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
-import {ServerFirstRuntime,hermesCodexBorrowHook,hermesServer,keepHermesResident} from '../platform/electron/src/modules/agent-runtime/hermes-service.ts';
+import {hermesServer,keepHermesResident} from '../platform/electron/src/modules/agent-runtime/hermes-service.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {withTempDir} from './test-temp.ts';
 
@@ -447,20 +447,6 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   }finally{server.close();server.closeAllConnections?.();standing.close();}
  }
 
- // The standard Hermes Agent's conversation (ServerFirstRuntime): the API server while it answers, else the built-in runtime.
- {
-  const calls:string[]=[],noted:string[]=[];let reason:string|null='its API server is not running on port 8642 (hermes gateway)';
-  const fake=(name:string)=>({cancel(){},steer:async()=>false,run:async(body:any)=>{calls.push(name+':'+body.text);return {message:name};}});
-  const conversation={noted:null as string|null,unavailable:async()=>reason};
-  const runtime=new ServerFirstRuntime(fake('built-in'),fake('server'),conversation,text=>noted.push(text));
-  await runtime.run({action:'chat',text:'a'},'home');await runtime.run({action:'chat',text:'b'},'home');
-  reason=null;
-  await runtime.run({action:'chat',text:'c'},'home');
-  await runtime.run({action:'chat',text:'d',_background:true},'home');await runtime.run({action:'chat',text:'e',sample:true},'home');await runtime.run({action:'chat',text:'f',mode:'setup'},'home');
-  assert.deepEqual(calls,['built-in:a','built-in:b','server:c','built-in:d','built-in:e','built-in:f'],'only the private World\'s foreground conversation goes to the server');
-  assert.deepEqual(noted,['its API server is not running on port 8642 (hermes gateway)'],'why, recorded once');
- }
-
  // Kept running: `hermes gateway install` and `start` through Hermes' own command line, the key added only when there is none.
  {
   const profile=(name:string,config:string,env?:string)=>{const dir=path.join(scratch,'resident',name);fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(path.join(dir,'config.yaml'),config);if(env!==undefined)fs.writeFileSync(path.join(dir,'.env'),env);return dir;};
@@ -500,32 +486,10 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   await keepHermesResident(kept,hermesAdd('kept',kept),{worldTools:server});assert.deepEqual(ran.kept.map(a=>a[1]),['install','start'],'already there: nothing to add, nothing to restart');
   const theirs=profile('tools-theirs','model:\n  provider: openrouter\nmcp_servers:\n  worldlet:\n    command: npx\n    args:\n    - their-world\n','API_SERVER_KEY=person-own-key-123456\n');
   await keepHermesResident(theirs,hermesAdd('theirs',theirs),{worldTools:server});assert.deepEqual(ran.theirs.map(a=>a[1]),['install','start'],'their own `worldlet` server is theirs');
-  // The borrowed Codex sign-in: the standard profile on Worldlet's runtime gets the read-only borrow hook in that venv,
-  // then is kept running (restarted, so a running gateway has it); a person's own Hermes, on their own Python, is not.
-  const codexConfig='model:\n  provider: openai-codex\n  worldlet_source: local-codex\n',codex=profile('codex',codexConfig);
+  // A profile still set to Worldlet's earlier read-only Codex borrowing has no model stock Hermes Agent can use: not kept running.
+  const codexConfig='model:\n  provider: openai-codex\n  worldlet_source: local-codex\n';
   assert.match(String(await keepHermesResident(profile('their-codex',codexConfig),command('their-codex'))),/Codex sign-in/);
   assert.equal(ran['their-codex'],undefined);
-  const venv=path.join(scratch,'runtime','.venv'),[real,version]=execFileSync('python3',['-c','import os,sys;print(os.path.realpath(sys.executable));print("python%d.%d"%sys.version_info[:2])'],{encoding:'utf8'}).trim().split('\n');
-  const site=path.join(venv,'lib',version,'site-packages'),python=path.join(venv,'bin','python3'),launcher=path.resolve('harness/hermes/hermes_command.py');
-  fs.mkdirSync(path.join(site,'hermes_cli'),{recursive:true});fs.mkdirSync(path.dirname(python),{recursive:true});
-  fs.writeFileSync(path.join(venv,'pyvenv.cfg'),`home = ${path.dirname(real)}\ninclude-system-site-packages = false\n`);fs.symlinkSync(real,python);
-  // A fixture Hermes: config read from HERMES_HOME, the auth modules the borrow replaces, and a main that reports them.
-  const fixture:Record<string,string>={'hermes_constants.py':'import os\nfrom pathlib import Path\nget_hermes_home=lambda: Path(os.environ["HERMES_HOME"])\n',
-   'hermes_cli/__init__.py':'','hermes_cli/auth.py':'','hermes_cli/auth_codex.py':'','hermes_cli/runtime_provider.py':'','hermes_cli/auth_constants.py':'class AuthError(Exception):\n    def __init__(self, *a, **k): super().__init__(*a)\n',
-   'hermes_cli/config.py':'import os\ndef load_config():\n    text = open(os.path.join(os.environ["HERMES_HOME"], "config.yaml")).read()\n    return {"model": {"provider": "openai-codex", "worldlet_source": "local-codex"} if "local-codex" in text else {"provider": "openrouter"}}\n',
-   'hermes_cli/main.py':'import json, os, sys\nfrom hermes_cli import auth_codex\nprint(json.dumps({"source": os.environ.get("WORLDLET_MODEL_SOURCE"), "readOnly": hasattr(auth_codex, "_save_codex_tokens")}))\n'};
-  for(const [name,text] of Object.entries(fixture))fs.writeFileSync(path.join(site,name),text);
-  assert.equal(await keepHermesResident(codex,command('codex'),{runtime:{python,launcher}}),null);
-  assert.deepEqual(ran.codex.map(a=>a[1]),['install','restart']);
-  assert.equal(fs.readFileSync(path.join(site,'worldlet_codex_borrow.pth'),'utf8'),'import worldlet_codex_borrow\n');
-  const gateway=(home:string,...args:string[])=>{const env:NodeJS.ProcessEnv={PATH:process.env.PATH,HOME:scratch,HERMES_HOME:home};const result=spawnSync(python,['-m','hermes_cli.main',...args,'gateway','run','--external-supervisor'],{env,encoding:'utf8'});return result.status===0?JSON.parse(result.stdout):{status:result.status,stderr:result.stderr};};
-  const linked=path.join(scratch,'resident','standard-link');fs.symlinkSync(codex,linked);
-  assert.deepEqual(gateway(linked),{source:'local-codex',readOnly:true},'the service, as Hermes launches it, borrows read-only');
-  assert.deepEqual(gateway(fresh),{source:null,readOnly:false},'another profile on the same runtime keeps its own model');
-  assert.deepEqual(gateway(linked,'--profile','other'),{source:null,readOnly:false},'so does one named with --profile');
-  fs.writeFileSync(path.join(site,'worldlet_codex_borrow.py'),hermesCodexBorrowHook(path.join(scratch,'gone.py'),codex));
-  const stopped=gateway(linked);
-  assert.equal(stopped.status,78,'a borrow that fails stops Hermes rather than run unborrowed');assert.match(stopped.stderr,/could not borrow the Codex sign-in read-only/);
   // Hermes' own command fails: rejected with its last line, never the key; the next app run tries again.
   const failing=profile('failing','model:\n  provider: openrouter\n');
   await assert.rejects(keepHermesResident(failing,command('failing',1)),(error:Error)=>/hermes gateway install did not finish: PermissionError: launchctl refused/.test(error.message)&&!error.message.includes(fs.readFileSync(path.join(failing,'.env'),'utf8').match(/API_SERVER_KEY=(\w+)/)![1]));

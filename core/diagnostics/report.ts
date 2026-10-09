@@ -49,8 +49,7 @@ export function itemRule(message:string){
  const text=message.toLowerCase();
  return text.includes('source evidence')?'evidence':ITEM_RULES.find(([pattern])=>pattern.test(text))?.[1]??'other';
 }
-/** Which Fox setup step stopped, as a fixed tag, from the plain-words message the setup threw (setup-failure.ts and
- * installation.ts). The first Windows person to fail setup (3199, 2026-10-09) reached PostHog only as operationFailed
+/** Which Fox setup step stopped, as a fixed tag, from the plain-words message the setup threw (Worldlet's earlier built-in setup). The first Windows person to fail setup (3199, 2026-10-09) reached PostHog only as operationFailed
  * thrown from installWindows, which every step shares. */
 const SETUP_STEPS:[RegExp,string][]=[
  [/^fox setup could not start because another worldlet window/,'setupLock'],
