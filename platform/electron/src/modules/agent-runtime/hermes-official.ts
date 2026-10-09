@@ -24,7 +24,7 @@ export function ownHermesAgent(environment:HarnessEnvironment):LocalHarnessInsta
  return found;
 }
 
-/** Removes what Worldlet once put at Hermes' standard locations for Fox's own profile (standardHermes): the link at
+/** Removes what Worldlet once put at Hermes' standard locations for Fox's own profile: the link at
  * ~/.hermes (a junction on Windows) and its own `hermes` launcher. Only Worldlet's: a real folder or another command stays. */
 export function releaseStandardHermes(root:string,environment:HarnessEnvironment){
  const home=standardHermesHome(environment.home,environment.env,environment.platform);

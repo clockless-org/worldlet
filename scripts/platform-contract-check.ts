@@ -66,9 +66,9 @@ assert.deepEqual([consent,'http://accounts.google.com/o/oauth2/auth','https://ac
  assert.ok(/onStage:\(stage,url\)=>host\.page\.event\('([^']+)',url\?\{stage,url\}:stage\)/.exec(connections)?.[1]===GOOGLE_SIGN_IN_EVENT,'the Electron host relays sign-in stages to the World page');
  assert.match(source('platform/electron/src/host/page.ts'),/new CustomEvent\(/,'page events carry their detail');
  // The host emits only stages the page understands, and `browser` among them.
- const emitted=[...source('platform/electron/src/modules/agent-runtime/hermes.ts').matchAll(/onStage\('(\w+)'[,)]/g)].map(match=>match[1]);
+ const emitted=[...source('platform/electron/src/modules/sources/google-source.ts').matchAll(/onStage\('(\w+)'[,)]/g)].map(match=>match[1]);
  assert.ok(emitted.includes('browser')&&emitted.every(stage=>googleSignInStage(stage)),'unknown host sign-in stage: '+emitted);
- assert.match(source('platform/electron/src/modules/agent-runtime/hermes.ts'),/onStage\('browser',handoff\.url\)/,'the browser stage carries the consent address the host validated and opened');
+ assert.match(source('platform/electron/src/modules/sources/google-source.ts'),/onStage\('browser',handoff\.url\)/,'the browser stage carries the consent address the host validated and opened');
 }
 console.log('PASS Google sign-in stages: the Electron host declares and relays them, neutral until consent opens, legacy hosts keep the browser steps');
 

@@ -1,10 +1,11 @@
 // npm run test:onboarding: the whole first-run journey on real code (Mac release gate), as the
 // Electron host's development check `--check onboarding-flow` (platform/electron/src/checks).
 // Builds the host (and the interface when missing), runs it on a disposable library with this
-// computer's Codex sign-in and the project Hermes runtime, and propagates the check's exit code.
+// computer's Codex CLI as Fox's Agent (there is no built-in Agent, owner decisions 2026-10-09; test:agent:local runs
+// Fox on it too), and propagates the check's exit code.
 // A failed run keeps its library for diagnosis (logs/diagnostics.jsonl, world.sqlite).
 import {spawn,spawnSync} from 'node:child_process';
-import {accessSync,constants,cpSync,createWriteStream,existsSync,mkdirSync,mkdtempSync,readdirSync,rmSync,writeFileSync} from 'node:fs';
+import {cpSync,createWriteStream,existsSync,mkdirSync,mkdtempSync,readdirSync,rmSync,writeFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
@@ -18,17 +19,10 @@ if(process.env.WORLDLET_CODEX_GATES_SKIP){console.log('SKIP onboarding flow: '+p
 const electron=createRequire(import.meta.url)('electron') as unknown as string;
 const TIMEOUT_MS=Number(process.env.WORLDLET_ONBOARDING_TIMEOUT_MS||25*60_000);
 const fail=(text:string):never=>{console.error('FAIL onboarding flow: '+text);process.exit(1);};
-const executable=(file:string)=>{try{accessSync(file,constants.X_OK);return true;}catch{return false;}};
 
-// Development builds run every tier on this computer's Codex sign-in (scripts/DEVELOPMENT.md, Fox model and Hermes).
+// Fox answers on this computer's Codex CLI and its sign-in.
 const codexHome=process.env.CODEX_HOME||path.join(os.homedir(),'.codex');
-const python=process.platform==='win32'?'Scripts/python.exe':'bin/python3';
-const hermes=[process.env.WORLDLET_HERMES_PYTHON,path.join(root,'.local/hermes-source/.venv',python),path.join(workspace(root).primary,'.local/hermes-source/.venv',python)].find(file=>!!file&&executable(file));
-const missing=[
- ...existsSync(path.join(codexHome,'auth.json'))?[]:[`the local Codex sign-in (${path.join(codexHome,'auth.json')}); sign in with the Codex app or CLI`],
- ...hermes?[]:['the Hermes runtime (.local/hermes-source/.venv here or in the primary checkout, or WORLDLET_HERMES_PYTHON); run npm run setup:hermes']
-];
-if(missing.length)fail('missing '+missing.join(' and '));
+if(!existsSync(path.join(codexHome,'auth.json')))fail(`missing the local Codex sign-in (${path.join(codexHome,'auth.json')}); sign in with the Codex app or CLI`);
 
 // Each phase's time is printed, so a slow gate run shows where its minutes went (#41).
 const began=Date.now(),seconds=(since:number)=>`${Math.round((Date.now()-since)/1000)}s`;
@@ -42,16 +36,19 @@ console.log(`Onboarding setup (builds, browser driver): ${seconds(began)}`);
 const profile=mkdtempSync(path.join(os.tmpdir(),'worldlet-onboarding-flow-'));
 // An empty preferences file: a disposable library never imports this Mac's Worldlet settings.
 writeFileSync(path.join(profile,'preferences.json'),'{}\n',{mode:0o600});
+// Codex as Fox's Agent, as setup saves a choice (platform/electron/src/store/agent-settings.ts).
+mkdirSync(path.join(profile,'agent'),{recursive:true});
+writeFileSync(path.join(profile,'agent','local-harness.json'),JSON.stringify({version:1,id:'codex'}),{mode:0o600});
 const logs=path.join(root,'.local/electron-checks');mkdirSync(logs,{recursive:true});
 const logFile=path.join(logs,'onboarding-flow.log'),log=createWriteStream(logFile);
 // RC 录像: pictures of the run for scripts/ui-review.ts (platform/electron/src/checks/index.ts).
-const env:NodeJS.ProcessEnv={...process.env,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile,WORLDLET_HERMES_PYTHON:hermes!};
+const env:NodeJS.ProcessEnv={...process.env,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile};
 // The tour's phone step waits two minutes after the first win; here it waits WORLDLET_TOUR_CODA_MS (default 20 s), still
 // proven to wait and to come at a calm moment, so the gate's budget is not spent idle (#41). world-tour-check.ts (test:ui)
 // holds the two minutes on a moved clock.
 env.WORLDLET_TOUR_CODA_MS=process.env.WORLDLET_TOUR_CODA_MS||'20000';
 for(const key of ['ELECTRON_RUN_AS_NODE','WORLDLET_DEV_MODEL','WORLDLET_AGENT_CONFIG','WORLDLET_WORKTREE_PROFILE','WORLDLET_WEB_ROOT','WORLDLET_CAPTURE'])delete env[key];
-console.log(`Onboarding flow: library ${profile}, Hermes ${hermes}, log ${path.relative(root,logFile)}`);
+console.log(`Onboarding flow: library ${profile}, Codex home ${codexHome}, log ${path.relative(root,logFile)}`);
 const started=Date.now();
 const child=spawn(electron,[path.join(root,'dist/electron'),'--check','onboarding-flow'],{cwd:root,env,stdio:['ignore','pipe','pipe']});
 for(const [stream,out] of [[child.stdout,process.stdout],[child.stderr,process.stderr]] as const)stream.on('data',data=>{out.write(data);log.write(data);});

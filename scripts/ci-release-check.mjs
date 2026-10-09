@@ -124,7 +124,11 @@ assert.deepEqual(devTests([job('Static checks','completed','failure'),job('Fast 
 
 // The workflow: never on pull requests, secrets only in jobs of the protected `release` environment on main.
 const workflow=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');
-assert(/cancel-in-progress: \$\{\{ github\.event_name == 'push' \}\}/.test(workflow),'a newer push cancels an older Dev run; promotions are never cancelled');
+// Nothing cancels a running build: each platform's build waits in its own group, where a newer push replaces only a
+// waiting build (2026-10-09: whole-run cancelling starved Mac Dev for over an hour).
+assert(!/cancel-in-progress: (true|\$\{\{)/.test(workflow),'no run or build is cancelled once it runs; promotions are never cancelled');
+for(const [platform,group] of [['mac','release-dev-mac'],['windows','release-dev-windows']])
+ assert(new RegExp(`\\n  ${platform}:\\n(?:    .*\\n)*?    concurrency:\\n      group: ${group}\\n      cancel-in-progress: false\\n`).test(workflow),`${platform}: one build at a time, the newest waiting`);
 assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow),'release.yml never runs for pull requests');
 const jobs=workflow.split(/\n  (?=[a-z][\w-]*:\n)/).slice(1);
 for(const job of jobs){

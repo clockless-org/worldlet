@@ -7,25 +7,22 @@ import {AGENT,ANALYTICS,VAULT,type AgentService,type AnalyticsService,type Vault
 import type {Host} from '../../host/types.ts';
 import {installationRoot,type Profile} from '../../profile.ts';
 import {ExecutionJournal} from './journal.ts';
-import {HermesAdapter} from './hermes.ts';
-import {attachedHermes,bindHermes,discoverOtherHermes,isOwnHermes,standardHermes,standardHermesHome,unbindHermes} from './hermes-files.ts';
-import {keepHermesResident,type HermesRuntime} from './hermes-service.ts';
+import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './hermes-files.ts';
+import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
-import {endSetup} from './installation.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {endHermesInstall,installHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
-import {ExternalAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
-import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
+import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
+import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,readSelection,selectedInstall,writeSelection} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
 import {connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
-import {codexSignedIn,readModelSource,writeModelSource} from './model-access.ts';
 import {surveyOpenClaw} from './openclaw-files.ts';
 import {surveyAgentHistory} from './agent-files.ts';
-import {isAdoptable,readAdopted,readLocalAgentMemory,writeAdopted} from './local-memory.ts';
+import {readLocalAgentMemory,writeAdopted} from './local-memory.ts';
 import {RemoteHarnessAdapter} from './remote-harness.ts';
 import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from './remote-gateway.ts';
 import {createRemoteAgentLink,type RemoteAgentLink} from '../phone/remote.ts';
@@ -42,19 +39,19 @@ import {DoorDash,DoorDashSourceAccess} from '../sources/doordash.ts';
  * external Harness; otherwise the Agent on another computer this Worldlet is paired with (`remote`);
  * otherwise the Gateway on another computer Fox uses directly (`remote-openclaw`, its address and token in `vault`);
  * otherwise a local Harness the person chose at setup, while it is still installed;
- * otherwise the official Hermes composition. A bad configuration yields an unavailable adapter that
- * explains itself. */
+ * otherwise none yet (NoAgentAdapter: owner decisions 2026-10-09, no built-in Hermes). A bad configuration yields an
+ * unavailable adapter that explains itself. */
 export function selectAdapter(context:RuntimeContext,configuration=process.env.WORLDLET_AGENT_CONFIG,remote:RemoteAgentLink|null=null,vault:VaultService|null=null):Adapter {
  try{
   if(configuration!==undefined)return new ExternalAgentAdapter(context,loadAgentConfiguration(configuration));
-  if(remote?.paired)return new RemoteHarnessAdapter(remote,()=>new HermesAdapter(context));
+  if(remote?.paired)return new RemoteHarnessAdapter(context,remote);
   const gateway=vault?readRemoteGateway(vault):null;
-  if(gateway?.active)return new RemoteGatewayAdapter(gateway,()=>new HermesAdapter(context));
+  if(gateway?.active)return new RemoteGatewayAdapter(context,gateway);
   const local=selectedInstall(context.root);
   // A Hermes Agent chosen before its profile became the World's Harness is attached on the next launch.
   if(local?.id==='hermes')try{attachChosenHermes(context.root,local.id,error=>context.failure(error,'foxMove'));}catch{}
-  if(local)return new LocalHarnessAdapter(context,local,undefined,()=>new HermesAdapter(context));
-  return new HermesAdapter(context);
+  if(local)return new LocalHarnessAdapter(context,local);
+  return new NoAgentAdapter(context);
  }catch(error){return new UnavailableAgentAdapter(context,error instanceof Error?error:new WorldletError(String(error)));}
 }
 
@@ -79,9 +76,12 @@ export function worldSources(context:RuntimeContext,vault:VaultService,accountsH
 
 export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],sources:((accountsHome:()=>string)=>WorldSources)|null=null):AgentService {
  const current=typeof selected==='function'?selected:()=>selected;
- const accounts=()=>{const adapter=current();return adapter.accountOwner?.()??adapter;};
  const journal=(home:string,enabled:boolean)=>ExecutionJournal.register(home,enabled,context.record);
- const world=sources?.(()=>accounts().home('private'))??null,worldGoogle=world?.google??null;
+ // The World's connections keep one owner whichever Agent Fox uses (connections carry transport `hermes`, the name they
+ // have always had): their files live in Fox's earlier Hermes profile folder, and a chosen Hermes Agent's own profile
+ // is read first, so what it is already connected to is used as it is (owner decision 2026-10-09).
+ const accountsHome=()=>attachedHermes(context.root)??path.join(context.root,'agent','private','hermes');
+ const world=sources?.(accountsHome)??null,worldGoogle=world?.google??null;
  // Fox's Harness's own text-to-speech, found once per Harness (locating it reads the PATH).
  let voice:{id:string;service:HarnessVoice|null}|null=null;
  return {
@@ -95,12 +95,12 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   get makeTask(){const adapter=current();return adapter.makeTask?()=>adapter.makeTask!():undefined;},
   makeBackground:()=>{const adapter=current(),background=adapter.background?.()??adapter;return background.makeLane?.()??background.make();},
   makeModelAccess:()=>current().makeModelAccess(),
-  get accountsId(){return accounts().id;},
-  accountsHome:()=>journal(accounts().home('private'),true),
+  accountsId:'hermes',
+  accountsHome:()=>journal(accountsHome(),true),
   // Every source the World reads runs in the Platform; anything else is the Agent's own (a person's own Harness
-  // reads none, so nothing falls through to the built-in Hermes).
-  makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess()))):accounts().makeSourceAccess(),
-  makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new McpSourceConnections(world.mcp,()=>accounts().makeSourceConnections(),()=>accounts().id),()=>accounts().id):accounts().makeSourceConnections(),
+  // reads none).
+  makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess()))):current().makeSourceAccess(),
+  makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new McpSourceConnections(world.mcp,()=>current().makeSourceConnections(),()=>'hermes'),()=>'hermes'):current().makeSourceConnections(),
   googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),
   get harness(){return current().harness??null;},
@@ -158,14 +158,14 @@ export function runtimeContext(profile:Profile,options:Omit<RuntimeContext,'prof
 
 type AgentChange='runtime-ready'|'model-changed'|'agent-changed';
 
-/** Forgets the local Agent, adopted Agent and Codex model chosen on setup's first page, and a Hermes Agent's attachment. */
-export function forgetSetupChoice(root:string){writeSelection(root,null);writeAdopted(root,null);writeModelSource(root,null);unbindHermes(root);}
+/** Forgets the local Agent chosen on setup's first page (and an earlier adopted one), and a Hermes Agent's attachment. */
+export function forgetSetupChoice(root:string){writeSelection(root,null);writeAdopted(root,null);unbindHermes(root);}
 
 /** The person's own Hermes Agent is the World's Harness (owner decision 2026-10-07): the World's account
  * connections, background checks, Applet tasks and routines run on its profile, so whatever it is connected to
  * keeps working in the World and a new connection is made in that profile. Any other choice ends the attachment. */
 export function attachChosenHermes(root:string,id:string,failure:(error:unknown)=>void=()=>{}){
- // Fox's own profile, reached through the standard location (standardHermes), is not another Agent to attach.
+ // Fox's own profile, reached through the standard location (Worldlet once linked it there), is not another Agent to attach.
  const profile=id==='hermes'?discoverOtherHermes(root):null;
  if(!profile){unbindHermes(root);return;}
  if(attachedHermes(root)===profile)return;
@@ -188,40 +188,25 @@ export function setsUpThisComputer(context:RuntimeContext):boolean {
  return profile.channel==='release'&&!profile.rcCheck&&!profile.smoke&&process.env.WORLDLET_AGENT_CONFIG===undefined&&path.resolve(context.root)===path.resolve(installationRoot(profile));
 }
 
-/** Someone who used Fox's own Hermes (no Agent chosen, none elsewhere) chooses an Agent once (owner decisions 2026-10-09:
- * no built-in Hermes; no Agent → stock Hermes Agent, with what Fox's profile learned moved into it, fox-move.ts). Only in
- * the library this app opens by default, never a release check's, a smoke run's or a configured Agent's. */
+/** Someone without an Agent (Fox's own Hermes before, or one that is no longer installed) chooses one once (owner
+ * decisions 2026-10-09: no built-in Hermes; no Agent → stock Hermes Agent, with what Fox's profile learned moved into it,
+ * fox-move.ts). Only in the library this app opens by default, never a release check's, a smoke run's or a configured Agent's. */
 export function foxNeedsAgent(context:RuntimeContext,adapter:Adapter):boolean {
  const profile=context.profile;
- return adapter instanceof HermesAdapter&&!profile.rcCheck&&!profile.smoke&&process.env.WORLDLET_AGENT_CONFIG===undefined&&path.resolve(context.root)===path.resolve(installationRoot(profile));
+ return adapter instanceof NoAgentAdapter&&!profile.rcCheck&&!profile.smoke&&process.env.WORLDLET_AGENT_CONFIG===undefined&&path.resolve(context.root)===path.resolve(installationRoot(profile));
 }
 
-/** Fox's own Hermes profile becomes the person's standard Hermes Agent (`standardHermes`) while Fox runs on it:
- * only for the library this installed app opens by default, never a release check's, a smoke run's or another one. */
-export function offerStandardHermes(context:RuntimeContext,adapter:Adapter){
- if(!(adapter instanceof HermesAdapter)||!adapter.available||attachedHermes(context.root)||!setsUpThisComputer(context))return null;
- try{return standardHermes(context.root,{python:adapter.python,launcher:path.join(context.profile.webRoot,'hermes','hermes_command.py')});}
- catch(error){context.failure(error,'standardHermes');return null;}
-}
-
-/** The Hermes Agent Fox uses, whichever it is (owner decision 2026-10-08: the standard one Worldlet set up and the
- * person's own are one path), is kept running as a login service with its API server on this computer
- * (hermes-service.ts): the standard Hermes Agent once Fox's own profile is linked at the standard location, or the
- * person's own Hermes Agent chosen as Fox's Agent; the standard one on Worldlet's runtime, whose hook borrows this
- * computer's Codex sign-in read-only in the service as Fox does. In the background, never blocking start; a failure is recorded in
- * diagnostics and Fox keeps its current path. Worldlet never stops it, also not on Quit. */
+/** The person's Hermes Agent, chosen as Fox's Agent, is kept running as a login service with its API server on this
+ * computer (hermes-service.ts), with World tools on its registered `worldlet` server. In the background, never
+ * blocking start; a failure is recorded in diagnostics and Fox keeps its current path. Worldlet never stops it, also
+ * not on Quit. */
 export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<void>|null {
- if(!setsUpThisComputer(context))return null;
- let target:{home:string;install:LocalHarnessInstall;runtime:HermesRuntime|null}|null=null;
- if(adapter instanceof HermesAdapter&&adapter.available&&!attachedHermes(context.root)&&isOwnHermes(context.root,standardHermesHome())){
-  const install=adapter.standardInstall;
-  target={home:adapter.privateHome(),install,runtime:{python:install.command,launcher:install.prefix[0]}};
- }
- else if(adapter instanceof LocalHarnessAdapter&&adapter.install.id==='hermes'){const home=discoverOtherHermes(context.root);if(home)target={home,install:adapter.install,runtime:null};}
- if(!target)return null;
- const {home,install,runtime}=target,environment=currentEnvironment();
+ if(!setsUpThisComputer(context)||!(adapter instanceof LocalHarnessAdapter)||adapter.install.id!=='hermes')return null;
+ const home=discoverOtherHermes(context.root);
+ if(!home)return null;
+ const install=adapter.install,environment=currentEnvironment();
  return (standing??=openStandingWorldTools({channel:(name,args)=>channelTool?channelTool(name,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})})).then(tools=>
-  keepHermesResident(home,(args,stdin)=>runHarnessCommand(install,environment,args,{timeout:120_000,...stdin!==undefined?{stdin}:{}}),{runtime,worldTools:home=>tools.server(home)})).then(
+  keepHermesResident(home,(args,stdin)=>runHarnessCommand(install,environment,args,{timeout:120_000,...stdin!==undefined?{stdin}:{}}),{worldTools:home=>tools.server(home)})).then(
   reason=>{if(reason)context.failure(new WorldletError(`Hermes Agent is not kept running for Fox: ${reason}`),'hermesResident');},
   error=>context.failure(error,'hermesResident'));
 }
@@ -232,17 +217,10 @@ let channelTool:((name:string,args:Row)=>Promise<Row>)|null=null;
 
 /** Setup's local Agent choice (`agentHarness`): `detect` lists Harnesses installed here by ID and
  * title, never paths; `select` proves the chosen one answers before Fox switches to it, so a
- * Harness that is not signed in leaves setup's first page in place; `clear` returns to the built-in Agent
- * on this computer's Codex sign-in. Worldlet provides no model (owner decision 2026-10-05). Codex is a model,
- * not a second Agent (owner decision 2026-10-02):
- * choosing it keeps the built-in Hermes Harness, with connections, background checks, routines and
- * memory, and pays for every model tier with the person's own Codex sign-in (`local-codex`).
- * OpenClaw, Claude Code, pi and Hermes Agent are whole Agents with their own name, memory and
- * history: choosing one keeps the built-in Harness too, and Fox's module copies them in through one
- * flow (`localAgent` `adopt`, owner request 2026-10-03). Hermes Agent, OpenClaw and pi answer for Fox
- * themselves (`LocalHarnessAdapter`, `connect` in Core, owner decision 2026-10-07), with World tools, while the
- * World's background work stays on the built-in Harness. Claude Code keeps the built-in Harness when Fox has a
- * model to run it on (a Codex sign-in here, or an API key); without one it answers directly on its own sign-in.
+ * Harness that is not signed in leaves setup's first page in place; `clear` leaves Fox without an Agent. Worldlet
+ * provides no model (owner decision 2026-10-05) and customizes nothing below the Harness contract (owner decision
+ * 2026-10-09): Hermes Agent, OpenClaw, pi and Claude Code answer for Fox themselves (`LocalHarnessAdapter`), with
+ * World tools, and run the World's background work too. Codex alone is no Agent; stock Hermes Agent is offered instead.
  * `pair` (with a `worldlet://agent` code) makes the Agent on another computer Fox's Agent instead (Harness location
  * remote, core/phone/README.md#another-computers-agent); `select` or `clear` ends that pairing.
  * `gateway` (an address and token, core/phone/README.md#an-agent-gateway-on-another-computer) proves an OpenClaw
@@ -252,7 +230,7 @@ let channelTool:((name:string,args:Row)=>Promise<Row>)|null=null;
  * `requested` hands over, once, the Agent a `--connect=<id>` launch named (`takeRequested`). */
 /** What setup hears while Hermes Agent is installed (`install-hermes`) or signs in to ChatGPT (`sign-in-hermes`). */
 export type HermesSetupEvent=({stage:'install'}&HermesInstallProgress)|{stage:'sign-in';url:string;code:string|null};
-export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,builtIn:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{}){
+export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,noAgent:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{}){
  let signingIn:AbortController|null=null;
  const remoteStatus=()=>{const s=remote?.status();return s?.state==='paired'?{computer:s.computer,seenAt:s.seenAt??null,...s.error?{error:s.error}:{}}:null;};
  const gateway=()=>vault?readRemoteGateway(vault):null;
@@ -269,13 +247,13 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    if(remote?.paired)await remote.end();
    writeSelection(context.root,null);writeAdopted(context.root,null);unbindHermes(context.root);
    writeRemoteGateway(vault,{v:1,url:checked.url,token:checked.token,active:true});
-   await switchTo(new RemoteGatewayAdapter(checked,()=>new HermesAdapter(context)));
+   await switchTo(new RemoteGatewayAdapter(context,checked));
    return {ok:true,gateway:{host:checked.host}};
   }
   if(request.operation==='forget-gateway'){
    const saved=gateway();
    if(vault)writeRemoteGateway(vault,null);
-   if(saved?.active)await switchTo(builtIn());
+   if(saved?.active)await switchTo(noAgent());
    return {ok:true};
   }
   if(request.operation==='pair'){
@@ -283,31 +261,31 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    if(typeof request.link!=='string'||request.link.length>1000)throw new WorldletError('Paste the code from Worldlet on your other computer.');
    const status=await remote.pair(request.link);
    setAside();
-   // A local Agent chosen before is set aside; this computer's model source stays for its background work.
+   // A local Agent chosen before is set aside.
    writeSelection(context.root,null);writeAdopted(context.root,null);unbindHermes(context.root);
-   await switchTo(new RemoteHarnessAdapter(remote,()=>new HermesAdapter(context)));
+   await switchTo(new RemoteHarnessAdapter(context,remote));
    return {ok:true,remote:{computer:status.computer}};
   }
   if(request.operation==='detect'){
    // The `hermes` command and ~/.hermes Worldlet set up for Fox's own profile are Fox, not another Agent to choose.
    // Codex alone is no Agent: its sign-in is not borrowed for one (owner decision 2026-10-09 11:51 PDT), stock Hermes Agent is.
    const found=locateLocalHarnesses().filter(item=>item.id!=='codex'&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
-   // Codex runs Fox on the built-in Harness, so World tools come with it; the rest get them through Worldlet's MCP server.
-   // Only whether an Agent has a name or memory to bring is reported, never its contents or paths.
+   // World tools come through Worldlet's MCP server. Only whether an Agent has a name or memory to bring is reported,
+   // never its contents or paths.
    const agents=found.map(({id,title,configured})=>{
     const memory=isMigrationSource(id)?readLocalAgentMemory(id):null;
     // Each also reports how much history it holds (counts only), which it brings along.
     const history=isMigrationSource(id)?(()=>{try{return id==='openclaw'?surveyOpenClaw():surveyAgentHistory(id);}catch{return null;}})():null,brings=history&&(history.conversations||history.notes||history.skills||history.jobs)?history:null;
-    // `model`: it can pay for Fox's models (a Codex sign-in, or an API-key model Fox copies).
-    const model=id==='codex'?codexSignedIn():!!memory?.model;
-    return {id,title,configured,model,worldTools:id==='codex'||isAdoptable(id)||localHarness(id).worldTools,...memory||brings?{memory:{name:memory?.name??null,user:!!memory?.user,longTerm:!!memory?.longTerm,model:!!memory?.model,...brings?{history:brings}:{}}}:{}};
+    // `model`: it has a model of its own set up.
+    const model=!!memory?.model;
+    return {id,title,configured,model,worldTools:localHarness(id).worldTools,...memory||brings?{memory:{name:memory?.name??null,user:!!memory?.user,longTerm:!!memory?.longTerm,model:!!memory?.model,...brings?{history:brings}:{}}}:{}};
    });
    // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Model.
    for(const agent of agents as Row[]){const summary=harnessToolsSummary(await harnessTools(agent.id)?.list()??[]);if(summary)agent.canAlso=summary;}
    // Setup preselects the recommended one (owner request 2026-10-04: the local option is the default).
    if(remote?.paired)await remote.heartbeat();
    const elsewhere=remote?.paired||gateway()?.active===true;
-   return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root)??readAdopted(context.root)??(readModelSource(context.root)?'codex':null),remote:remoteStatus(),gateway:remoteGatewayView(gateway())};
+   return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root),remote:remoteStatus(),gateway:remoteGatewayView(gateway())};
   }
   // No Agent here (Codex alone included, owner decision 2026-10-09 11:51 PDT): stock Hermes Agent, installed the official
   // way to its default location, or the one already here as it is (12:11 PDT). The person then picks it like any other.
@@ -330,43 +308,22 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   if(request.operation==='requested')return {id:takeRequested()};
   if(request.operation==='select'){
    if(!isLocalHarnessId(request.id))throw new WorldletError('Choose an Agent found on this computer.');
-   const install=locateLocalHarnesses().find(item=>item.id===request.id&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
+   const install=locateLocalHarnesses().find(item=>item.id===request.id&&item.id!=='codex'&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
    if(!install)throw new WorldletError('That Agent is no longer on this computer.');
    if(remote?.paired)await remote.end();
    setAside();
-   // Worldlet provides no model (owner decision 2026-10-05). An Agent whose API-key model Fox copies, or a
-   // Codex sign-in here, powers the built-in Harness; otherwise the Agent answers itself below, on its own sign-in.
-   const own=codexSignedIn();
-   // Hermes Agent, OpenClaw and pi are the person's own Agents: Fox talks through them directly, with World tools,
-   // and only the World's background work stays on the built-in Agent (owner decision 2026-10-07).
+   // Fox talks through it directly, with World tools, and it runs the World's background work too (owner decisions
+   // 2026-10-07 and 2026-10-09). Its models and sign-ins are its own.
    const connect=localHarness(install.id).connect;
-   // `direct`: Fox talks through it, never Fox's own Hermes (moving off it, foxNeedsAgent).
-   if(request.direct!==true&&!connect&&isAdoptable(install.id)&&(own||readLocalAgentMemory(install.id)?.model)){
-    // Its CLI is not run. Its own model settings stay with it; Fox pays with the Codex sign-in here when there is one.
-    writeSelection(context.root,null);writeAdopted(context.root,install.id);writeModelSource(context.root,own?'local-codex':null);unbindHermes(context.root);
-    await switchTo(builtIn());
-    context.changed('model-changed');
-    return {ok:true,id:install.id,title:install.title,model:true};
-   }
    if(!await harnessVersion(install))throw new WorldletError(`${install.title} did not start. Open it once in Terminal, then try again.`);
-   if(install.id==='codex'){
-    // Only the app's own copy here (no separate command line): signing in happens in that app.
-    if(!codexSignedIn())throw new WorldletError(install.app?`Sign in to Codex in the ${install.app} app on this computer first, then try again.`:'Sign in to Codex on this computer first (open Codex, or run codex login), then try again.');
-    writeSelection(context.root,null);writeAdopted(context.root,null);writeModelSource(context.root,'local-codex');unbindHermes(context.root);
-    await switchTo(builtIn());
-    context.changed('model-changed');
-    return {ok:true,id:install.id,title:install.title,model:true};
-   }
    // One short turn proves the sign-in; its answer is not shown.
-   const adapter=new LocalHarnessAdapter(context,install,undefined,()=>new HermesAdapter(context));
+   const adapter=new LocalHarnessAdapter(context,install);
    const probe=new LocalHarnessRuntime(install);
    const timer=setTimeout(()=>probe.cancel(),90_000);
    try{await probe.run({action:'chat',text:'Reply with the single word: ready',_background:true},adapter.home('setup'));}
    catch(error){throw new WorldletError((error as Error)?.name==='AbortError'?`${install.title} did not answer in time. Check that it is signed in, then try again.`:(error as Error)?.message||`${install.title} did not answer.`);}
    finally{clearTimeout(timer);}
    writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id,error=>context.failure(error,'foxMove'));
-   // Background work runs on the built-in Agent with this computer's Codex sign-in when there is one.
-   writeModelSource(context.root,own?'local-codex':null);
    await switchTo(adapter);
    return {ok:true,id:install.id,title:install.title,...connect?{connected:true}:{}};
   }
@@ -374,7 +331,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    if(remote?.paired)await remote.end();
    setAside();
    forgetSetupChoice(context.root);
-   await switchTo(builtIn());
+   await switchTo(noAgent());
    return {ok:true};
   }
   throw new WorldletError('Unknown local Agent operation.');
@@ -394,21 +351,21 @@ export function installAgentRuntime(host:Host){
  // The pairing with Worldlet on another computer whose Agent Fox uses (core/phone/README.md#another-computers-agent).
  const remote=createRemoteAgentLink({fetch:(input,init)=>fetch(input,init),vault:host.use<VaultService>(VAULT),
   name:()=>os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer',version:app.getVersion(),userAgent:`Worldlet/${app.getVersion()} (agent pairing)`,
-  // Unpaired on the other computer: Fox goes back to the built-in Agent here.
-  onEnded:()=>{if(adapter instanceof RemoteHarnessAdapter)void switchTo(builtIn()).catch(error=>host.diagnostics.record(error,'agentRuntime'));}});
+  // Unpaired on the other computer: Fox has no Agent until one is chosen.
+  onEnded:()=>{if(adapter instanceof RemoteHarnessAdapter)void switchTo(noAgent()).catch(error=>host.diagnostics.record(error,'agentRuntime'));}});
  const vault=host.use<VaultService>(VAULT);
  let adapter=selectAdapter(context,undefined,remote,vault);
  // Once the runtime is ready and Fox's profile exists (after its first turn), and again whenever Fox changes Agent.
- listeners.push(()=>{offerStandardHermes(context,adapter);void residentHermes(context,adapter);});
- offerStandardHermes(context,adapter);void residentHermes(context,adapter);
+ listeners.push(()=>{void residentHermes(context,adapter);});
+ void residentHermes(context,adapter);
  const switchTo=async(next:Adapter)=>{
   const previous=adapter;
-  if(previous.id===next.id&&next.id==='hermes')return;
+  if(previous instanceof NoAgentAdapter&&next instanceof NoAgentAdapter)return;
   await previous.shutdown();
   adapter=next;
   context.changed('agent-changed');
  };
- const builtIn=()=>adapter.id==='hermes'?adapter:new HermesAdapter(context);
+ const noAgent=()=>adapter instanceof NoAgentAdapter?adapter:new NoAgentAdapter(context);
  const service=createAgentService(context,()=>adapter,listeners,home=>worldSources(context,vault,home));
  // Reset Fox starts onboarding on its first page, where the local Agent is chosen again.
  service.forgetSetupChoice=async()=>{
@@ -416,7 +373,7 @@ export function installAgentRuntime(host:Host){
   if(remote.paired)await remote.end().catch(()=>{});
   writeRemoteGateway(vault,null);
   forgetSetupChoice(context.root);
-  await switchTo(builtIn());
+  await switchTo(noAgent());
  };
  host.provide<AgentService>(AGENT,service);
  const extras=host.store.snapshotExtras;
@@ -425,6 +382,6 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
- host.register({agentHarness:localHarnessActions(context,switchTo,builtIn,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event))});
- host.onQuit(()=>{endSetup();endHermesInstall();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
+ host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event))});
+ host.onQuit(()=>{endHermesInstall();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
 }
