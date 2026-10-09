@@ -87,6 +87,8 @@ export class PageView {
  get url(){return this.contents?.getURL()??'';}
  get title(){return this.contents?.getTitle()??'';}
  get isLoading(){return this.contents?.isLoading()??false;}
+ /** Only the top document is loading; iframe loads after it finished do not count. */
+ get isLoadingMainFrame(){return this.contents?.isLoadingMainFrame()??false;}
  get canGoBack(){return !!this.contents?.navigationHistory.canGoBack()||this.views.length>1;}
  get canGoForward(){return !!this.contents?.navigationHistory.canGoForward();}
  get hasPopup(){return this.views.length>1;}
