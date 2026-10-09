@@ -96,10 +96,16 @@ export function ensureHermesRuntime(check,setup,env=process.env){
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const dir=path.dirname(process.execPath),cli=[path.join(dir,'node_modules/npm/bin/npm-cli.js'),path.join(dir,'../lib/node_modules/npm/bin/npm-cli.js')].find(existsSync);
  const root=fileURLToPath(new URL('../',import.meta.url)),commands=gateCommands(),runtime=commands.some(c=>runtimeGates.includes(c))?hermesRuntime(root,process.env,spawnSync,workspace(root).primary):null;
+ // WORLDLET_GATE_BUDGET_MINUTES caps the whole gate (the CI RC sets it, owner decision 2026-10-09: an RC takes at most
+ // 20 minutes): the gate running when it runs out is stopped and the rest are not run, all reported as failures.
+ const budget=Number(process.env.WORLDLET_GATE_BUDGET_MINUTES)||0,deadline=budget?Date.now()+budget*60_000:0;
  const results=commands.map(command=>{
   if(runtimeGates.includes(command)&&!runtime.ok){console.error(runtime.reason);return {command,ok:false};}
   const env=hermesGates.includes(command)?hermesEnvironment(process.env,runtime.python):process.env;
-  const r=cli?spawnSync(process.execPath,[cli,'run',command],{stdio:'inherit',env}):spawnSync('npm',['run',command],{stdio:'inherit',env,shell:process.platform==='win32'});
+  const timeout=deadline?deadline-Date.now():undefined;
+  if(timeout<=0){console.error(`${command} not run: the gate's ${budget} minutes are used up.`);return {command,ok:false,timedOut:true};}
+  const r=cli?spawnSync(process.execPath,[cli,'run',command],{stdio:'inherit',env,timeout,killSignal:'SIGKILL'}):spawnSync('npm',['run',command],{stdio:'inherit',env,shell:process.platform==='win32',timeout,killSignal:'SIGKILL'});
+  if(r.error?.code==='ETIMEDOUT'){console.error(`${command} stopped: the gate's ${budget} minutes ran out.`);return {command,ok:false,timedOut:true};}
   return {command,ok:r.status===0&&!r.error};
  });
  console.log('\nGate ('+process.platform+'):\n'+results.map(r=>(r.ok?'PASS ':'FAIL ')+r.command).join('\n'));
