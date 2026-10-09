@@ -4,6 +4,8 @@
 // passing RC closes that platform's open RC Issues. A cloud AI session picks the Issues up and fixes them with a
 // normal pull request.
 import {spawnSync} from 'node:child_process';
+import {existsSync,readdirSync,readFileSync} from 'node:fs';
+import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 export const LABEL='rc-failure';
@@ -14,9 +16,18 @@ const platformMarker=platform=>`<!-- rc-failure platform=${platform} `;
 // The outcome of one platform's RC job: its gate results when the gate ran, otherwise the job's own result.
 export function outcome({results,job}){
  if(job==='cancelled'||job==='skipped')return {state:'none'};
- const failing=(results?.results||[]).filter(r=>!r.ok).map(r=>r.command).sort();
+ const failing=[...new Set((results?.results||[]).filter(r=>!r.ok).map(r=>r.command))].sort();
  if(job==='success'&&!failing.length)return {state:'pass'};
  return {state:'fail',failing,signature:failing.length?failing.join(','):'setup'};
+}
+
+// The gate results of one platform's parts (each part's gate.json, downloaded under `dir`), as one result list; null
+// when no part's gate ran.
+export function partResults(dir,platform){
+ const files=[],walk=d=>{for(const e of readdirSync(d,{withFileTypes:true})){const f=path.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.json'))files.push(f);}};
+ if(dir&&existsSync(dir))walk(dir);
+ const parts=files.map(f=>JSON.parse(readFileSync(f,'utf8'))).filter(r=>PLATFORMS[r.platform]===platform);
+ return parts.length?{platform,results:parts.flatMap(r=>r.results||[])}:null;
 }
 
 export function issueBody({platform,failing,signature,sha,runURL}){
@@ -52,8 +63,8 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const arg=name=>{const i=process.argv.indexOf('--'+name);return i>0?process.argv[i+1]:'';};
  const platform=PLATFORMS[arg('platform')];
  if(!platform)throw Error('--platform mac|windows');
- // The gate's results file, passed through the platform job's output (RC_RESULTS); empty when the gate never ran.
- const results=process.env.RC_RESULTS?JSON.parse(process.env.RC_RESULTS):null;
+ // The gate results of the platform's parts, downloaded into --results; none when no gate ran.
+ const results=partResults(arg('results'),platform);
  const gh=args=>{const r=spawnSync('gh',args,{encoding:'utf8'});if(r.status!==0)throw Error(`gh ${args.slice(0,2).join(' ')}: ${r.stderr.trim()}`);return r.stdout;};
  const o=outcome({results,job:arg('job')});
  console.log(JSON.stringify({platform,...o,...report({platform,...o,sha:arg('sha'),runURL:arg('run'),gh})}));

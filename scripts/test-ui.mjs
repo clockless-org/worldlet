@@ -151,6 +151,15 @@ export function onlyArgument(argv=process.argv,env=process.env){
  const i=argv.indexOf('--only');
  return i>=0?argv[i+1]||'':argv.find(a=>a.startsWith('--only='))?.slice(7)??(env.WORLDLET_TEST_UI_ONLY||null);
 }
+// One share of the checks, WORLDLET_TEST_UI_SHARD="i/n" (the CI RC runs test:ui on several runners at once): every
+// n-th check of the parallel and the serial lists, starting at the i-th, so the shares are about equal.
+export function shardChecks({parallel,serial},value=process.env.WORLDLET_TEST_UI_SHARD){
+ if(!value)return {parallel,serial};
+ const [i,n]=String(value).split('/').map(Number);
+ if(!Number.isInteger(i)||!Number.isInteger(n)||i<1||i>n)throw Error('WORLDLET_TEST_UI_SHARD must be i/n with 1 ≤ i ≤ n, not '+JSON.stringify(value));
+ const all=[...parallel,...serial],mine=new Set(all.filter((_,k)=>k%n===i-1));
+ return {parallel:parallel.filter(c=>mine.has(c)),serial:serial.filter(c=>mine.has(c))};
+}
 export const checkStep=file=>({name:file,bin:file.endsWith('.py')?'python3':process.execPath,args:[file]});
 const running=new Set();
 // A check that has not finished after this long fails on its own, so a hung check is named instead of eating
@@ -199,5 +208,5 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  // A stopped gate (its timeout, Ctrl-C) stops the running checks too, not only this process.
  for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{for(const child of running)child.kill();process.exit(1);});
  const only=onlyArgument();
- process.exitCode=await testUi(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):{});
+ process.exitCode=await testUi(shardChecks(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):{parallel:parallelChecks,serial:serialChecks}));
 }
