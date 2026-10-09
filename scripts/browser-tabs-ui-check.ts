@@ -37,7 +37,7 @@ await withBrowser(fileAccess,async browser=>{
  const go=async(key:string,url:string)=>{await page.waitForFunction(()=>!(window as any).opening);await page.evaluate(([key,url,title])=>{const w=window as any;(w.kept||={})[key]=url;w.worldletBrowser({phase:'page',platform:'web',loading:false,url,title});},[key,url,titles[url]]);};
  const tabKeys=()=>page.evaluate(()=>[...document.querySelectorAll<HTMLElement>('.browser-tabs .browser-tab')].map(t=>t.dataset.tab));
 
- // The Browser always shows its strip: one tab and +, above the page and outside the page's rect.
+ // The Browser always shows its strip: one tab and +, above its toolbar and the page, outside the page's rect.
  let shows=await w();
  await page.evaluate(()=>{location.hash='object=app-browser';});
  await page.locator('#notionContent[data-applet=browser] .browser-tabs').waitFor();
@@ -45,9 +45,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(show.applet,'browser');
  await page.waitForFunction(()=>document.querySelector('.browser-tabs .browser-tab-pick')?.textContent==='Google');
  assert.deepEqual(await labels(),['*Google']);
- const geometry=await page.evaluate(()=>{const strip=document.querySelector('.browser-tabs').getBoundingClientRect(),rect=(window as any).calls.filter((c:any)=>['browserShow','browserLayout'].includes(c.action)).at(-1).rect;return {stripBottom:strip.bottom,stripTop:strip.top,height:strip.height,rectY:rect.y};});
- assert.ok(geometry.rectY>=geometry.stripBottom,'the native page starts below the strip '+JSON.stringify(geometry));
- assert.ok(geometry.rectY-geometry.stripTop<=36,'the strip is slim '+JSON.stringify(geometry));
+ const geometry=await page.evaluate(()=>{const strip=document.querySelector('.browser-tabs').getBoundingClientRect(),bar=document.querySelector('.browser-toolbar').getBoundingClientRect(),rect=(window as any).calls.filter((c:any)=>['browserShow','browserLayout'].includes(c.action)).at(-1).rect;return {stripBottom:strip.bottom,stripTop:strip.top,height:strip.height,barBottom:bar.bottom,rectY:rect.y};});
+ assert.ok(geometry.rectY>=geometry.barBottom&&geometry.barBottom>geometry.stripBottom,'the native page starts below the strip and the toolbar '+JSON.stringify(geometry));
+ assert.ok(geometry.height<=36,'the strip is slim '+JSON.stringify(geometry));
  await go('browser','https://flights.example.com/sfo');
  await page.waitForFunction(()=>document.querySelector('.browser-tabs .browser-tab-pick')?.textContent.startsWith('Flights'));
 
@@ -139,18 +139,18 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>{location.hash='object=app-youtube';});
  await page.locator('#notionContent[data-applet=youtube] .browser-viewport').waitFor();
  assert.equal(await page.locator('.browser-tabs').count(),0,'YouTube has no tab strip');
- // Each website Applet has its home page, the address it opens at; Home shows only away from it and goes back there
+ // Each website Applet has its home page, the address it opens at; Home in its toolbar works only away from it and goes back there
  // (owner request 2026-10-08: a kid on 小红书 could not get back).
  await nextShow(shows);
  const youtubeAt=async(url:string)=>{await page.waitForFunction(()=>!(window as any).opening);await page.evaluate(url=>(window as any).worldletBrowser({phase:'page',platform:'youtube',loading:false,url,title:'YouTube'}),url);};
  await youtubeAt('https://www.youtube.com/?app=desktop');
- assert.equal(await page.locator('.browser-home').isHidden(),true,'no Home on YouTube’s home page');
+ assert.equal(await page.locator('.browser-home').isDisabled(),true,'Home rests on YouTube’s home page');
  await youtubeAt('https://www.youtube.com/watch?v=abc');
- assert.equal(await page.locator('.applet-bar-left>.browser-home:not([hidden])').count(),1,'Home stands on the left with Back and Forward (owner request 2026-10-08)');
- await page.locator('.browser-home:not([hidden])').click();
+ assert.equal(await page.locator('.browser-toolbar>.browser-home:not([disabled])').count(),1,'Home stands in the toolbar with Back and Forward (owner requests 2026-10-08, 2026-10-09)');
+ await page.locator('.browser-home:not([disabled])').click();
  await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='browserCommand'&&c.operation==='open'&&c.args?.url==='https://www.youtube.com/'));
  await youtubeAt('https://www.youtube.com/');
- await page.locator('.browser-home[hidden]').waitFor({state:'attached'});
+ await page.locator('.browser-home[disabled]').waitFor({state:'attached'});
 
  shows=await w();
  await page.evaluate(()=>{location.hash='object=app-browser';});

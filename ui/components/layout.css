@@ -220,16 +220,14 @@
 /* Keep context readable over every sky; brand remains the original Applet asset. */
 .native-console>.companion-context,.native-console>.companion-context .companion-name{color:var(--ui-hud-ink);text-shadow:var(--ui-hud-shadow)}
 .native-console>.companion-context .companion-name{min-width:0}
-/* A website page's address takes the name's place while the pointer is on the title (owner request 2026-10-08,
-   browser/browser-device.ts): same ink, a quieter weight, one line cut with an ellipsis; a click copies it. */
-.native-console>.companion-context .browser-address{display:none;min-width:0;max-width:100%;margin:0;padding:2px 6px;border:0;border-radius:8px;background:none;color:var(--ui-hud-ink);text-shadow:var(--ui-hud-shadow);font:500 var(--ui-text-label)/1.4 var(--ui-font-ui);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:copy;pointer-events:auto}
-.native-console>.companion-context .browser-address>span{display:inline}
-.native-console>.companion-context .browser-address[data-copied]>span{display:none}
-.native-console>.companion-context .browser-address[data-copied]::before{content:'Copied'}
-.native-console>.companion-context .browser-address:focus-visible{outline:2px solid currentColor;outline-offset:1px}
-.native-console[data-web-address]>.companion-context{pointer-events:auto;min-height:var(--applet-bar-height)}
-.native-console[data-web-address]>.companion-context:is(:hover,:has(.browser-address:focus-visible)) .companion-name{display:none}
-.native-console[data-web-address]>.companion-context:is(:hover,:has(.browser-address:focus-visible)) .browser-address{display:block}
+/* A website page's toolbar (owner request 2026-10-09, browser/browser-device.ts): one plain row on the panel above the
+   page: Back, Forward, Refresh and Home, the address in a white field, and Focus at the end (their look: controls.css). */
+:is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-toolbar{flex:none;align-self:stretch;max-width:none;width:auto;display:flex;align-items:center;gap:4px;height:44px;margin:0 0 6px;padding:0 4px;border-radius:12px;background:#f4efe2;box-shadow:inset 0 0 0 1px #785a322e}
+.browser-toolbar[hidden]{display:none!important}
+.browser-toolbar>.browser-address{flex:1;min-width:0;margin:0 4px}
+.browser-toolbar>.browser-address>input{box-sizing:border-box;width:100%;height:32px;padding:0 14px;border:0;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px #785a3238;color:#2d261e;font:400 13.5px/1 var(--ui-font-ui,system-ui);text-overflow:ellipsis}
+.browser-toolbar>.browser-address>input:focus{outline:2px solid #6d8f5a;outline-offset:0}
+.browser-toolbar>.browser-address>input::placeholder{color:#8a8073}
 .native-console .companion-app-logo{width:28px;height:28px;object-fit:contain;flex:none;border-radius:7px;filter:drop-shadow(0 1px 3px #12251f66)}
 
 /* External content sits in a real object: a timber frame lit from above, with a bevelled rim,

@@ -8,7 +8,7 @@ import {observeWorldActivity,recordWorldActivity} from '../../platform/bridge/ac
 import {curatedOriginal,renderCuratedTable} from './curated-source-applet.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
 import {firstValueRequest,firstValueLinks} from '../../core/onboarding/index.ts';
-import {worldSpeechTerms} from '../../core/companion/index.ts';
+import {carriesConversation,worldSpeechTerms} from '../../core/companion/index.ts';
 import {helpNarration,narrateHelp,foxStepWords} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement} from './product-analytics.ts';
@@ -76,7 +76,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import {roomObjects} from '../world/index.ts';
 import { createWorldTools } from './live-world-tools.ts';
-import {mountNativeHUD} from '../hud/index.ts';
+import {mountNativeHUD,mountAppletShelf} from '../hud/index.ts';
 
 const element:(tag:string,cls?:string,text?:unknown)=>any=node;
 const button=textButton;
@@ -115,6 +115,7 @@ export function mountNotionWorld(data: World, native: any) {
   const memberOf=new Map(sections.flatMap(s=>(s.virtual?s.children:[s.id]).map(id=>[id,s.id])));
   const sectionFor=id=>{let p=pages.get(id),seen=new Set();while(p&&!seen.has(p.id)){seen.add(p.id);if(sections.some(s=>s.id===p.id))return p.id;if(memberOf.has(p.id))return memberOf.get(p.id);p=pages.get(p.parent)}return sections[0]?.id};
   const trails=id=>{let p=pages.get(id),out=[],seen=new Set();while(p&&!seen.has(p.id)){seen.add(p.id);out.unshift(p);p=pages.get(p.parent)}return out};
+  let appletShelf:ReturnType<typeof mountAppletShelf>|null=null;
   let voice,environmentController,nativeHUD,travelExperiment,weatherPanel,picturesAsked='';
   let attentionPage:any=null;
   let arrivals=[];
@@ -175,7 +176,9 @@ export function mountNotionWorld(data: World, native: any) {
    void openArtifact(String(detail.id||'')).then(result=>{if(result?.error)notify(result.error);});
   });
   root.addEventListener('click',e=>{
-   if(foxArtifact.visible&&!(e.target as Element).closest('#foxArtifact,#notionHUD,button,a,input,textarea,select,[role="button"],.world-task-tracker')){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
+   // A click elsewhere in the World puts the card away into the Journal. Over an Applet the card stays pinned in the
+   // top-right corner until its × (owner Order 2026-10-09: a click beside it made it vanish with no way back).
+   if(foxArtifact.visible&&!insideApplet()&&!(e.target as Element).closest('#foxArtifact,#notionHUD,button,a,input,textarea,select,[role="button"],.world-task-tracker')){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
    if(!attentionPage||(e.target as Element).closest('#attentionPreview,#notionHUD,button,a,input,textarea,select,[role="button"],.notion-pin,.world-task-tracker,.notion-content,.notion-dialog'))return;
    e.preventDefault();e.stopPropagation();flyIntoJournal(root,$('attentionPreview'));closeAttentionPreview(false);voice?.hidePreview?.(true);
   },true);
@@ -187,7 +190,10 @@ export function mountNotionWorld(data: World, native: any) {
   // The page an item's help opens before Fox's turn (`previewActions`) is already the item's place while it
   // loads: Fox's turn starts there, and a place change mid-turn stops Fox's page steps ("The user changed views").
   let attentionOrigin:{key:string,title:string,at:number}|null=null,attentionOpening:{key:string,title:string,site:string}|null=null;
-  const siteThreads=new Map<string,{key:string,title:string}>();
+  // A carried thread (`carried`) is the conversation the page brought from the place it left (carryConversation).
+  const siteThreads=new Map<string,{key:string,title:string,carried?:boolean}>();
+  // The website each Applet's page was last on, to see the page move to another one.
+  const pageSites=new Map<string,string>();
   const browserPanel=createBrowserPanel({root,content,native,notify,openApplet:id=>visitObject(id),openPage:url=>openWorldURL(url),leave:()=>back(),sample:!!data.sample,
     // A page opened from something in its Applet (a link in an email, a meeting) goes back there from its first page.
     canReturn:()=>!!libraryWebReturn&&depth==='object'&&current===libraryWebReturn.app.moduleId,
@@ -200,9 +206,46 @@ export function mountNotionWorld(data: World, native: any) {
       const site=webSite(page.url);
       if(site&&byFox&&attentionOrigin&&Date.now()-attentionOrigin.at<15*60000){siteThreads.set(applet+'|'+site,{key:attentionOrigin.key,title:attentionOrigin.title});attentionOrigin=null;}
       if(site&&byFox)attentionOpening=null;
+      const before=pageSites.get(applet);if(site)pageSites.set(applet,site);
+      if(site&&before&&before!==site)carryConversation(applet,before,site,page,byFox);
       nativeHUD?.sync();
     }});
-  window.addEventListener('worldlet:fox-idle',()=>{attentionOrigin=null;attentionOpening=null;});
+  window.addEventListener('worldlet:fox-idle',()=>{attentionOrigin=null;attentionOpening=null;if(carryPending){const next=carryPending;carryPending=null;setTimeout(()=>carryToApplet(next.from,next.to),0);}});
+  /** The page in an Applet moved from one website to another (a link, or Fox's step). While the person and Fox are
+   * talking (core/companion/conversation-place.ts, carriesConversation) the conversation goes with it: the new site
+   * continues the place it came from instead of starting its own (owner Order 2026-10-09). A page that belongs to
+   * another website Applet in the World moves there, with its background and title; Fox's turn finishes first, so
+   * its steps on the page are never cut off by the move. */
+  let carryPending:{from:string,to:string}|null=null;
+  function carryConversation(applet:string,before:string,site:string,page:{url:string,title:string},byFox:boolean){
+    const r=sections.find(s=>s.key===applet&&s.entity==='app');if(!r)return;
+    const from=siteThreads.get(applet+'|'+before)||{key:'web:'+before,title:r.title+' · '+before};
+    const last=voice?.threadOf?.(from.key,1)?.[0];
+    const bound=siteThreads.get(applet+'|'+site);
+    if((!bound||bound.carried)&&carriesConversation({byFox,working:last?.status==='working',lastTurnAt:last?.at??null,now:Date.now()}))
+      siteThreads.set(applet+'|'+site,{key:from.key,title:from.title,carried:true});
+    // Only a website Applet (or one made from a site) hands its page on; the Browser offers the switch instead.
+    if(applet==='browser'||applet==='web'||depth!=='object'||current!==r.moduleId)return;
+    const own=pageApplet(page.url);
+    if(!own||own===r.moduleId)return;
+    if(byFox&&voice?.active){carryPending={from:r.moduleId,to:own};return;}
+    setTimeout(()=>carryToApplet(r.moduleId,own),0);
+  }
+  const pageApplet=(url:string)=>websiteAppletFor(url,sections.filter(s=>s.entity==='app').map(s=>({id:s.moduleId,web:s.fullView?.kind==='web',siteHost:s.site?.host})));
+  function carryToApplet(from:string,to:string){
+    const r=sections.find(s=>s.moduleId===from),target=sections.find(s=>s.moduleId===to);
+    // Only while the person is still on that page in that Applet.
+    if(!r||!target||depth!=='object'||current!==from||content.hidden||content.dataset.template!=='browser')return;
+    const page=browserPanel.lastVisit(r.key),site=page?webSite(page.url):'';
+    if(!page||pageApplet(page.url)!==to)return;
+    const thread=siteThreads.get(r.key+'|'+site);
+    if(thread)siteThreads.set(target.key+'|'+site,thread);
+    pageSites.set(target.key,site);
+    visitObject(target.moduleId,{enter:false});
+    // The Applet it left lets the page go and starts on its own website next time.
+    header(target.title,'Website',{applet:true});browserPanel.mount(target.key,{url:page.url,platform:'web',release:true});
+    sceneState();
+  }
   /** The place a browsing Applet's open page is: its Attention item's, or the website's own. The
    * title stays the Applet's name: it is the top bar's title (#951), and a page title or address
    * shown there would reach the World's activity record (applet-resume-check). Only Fox's turn
@@ -212,7 +255,12 @@ export function mountNotionWorld(data: World, native: any) {
     const page=browserPanel.lastVisit(r.key),site=page?webSite(page.url):'';
     if(attentionOpening)return {key:attentionOpening.key,title:r.title,detail:'Opening '+attentionOpening.site+' in '+r.title+' for the Attention item "'+attentionOpening.title+'". Read the page before acting.'};
     if(!page||!site)return null;
-    const bound=siteThreads.get(r.key+'|'+site);
+    let bound=siteThreads.get(r.key+'|'+site);
+    if(bound?.carried){
+      const last=voice?.threadOf?.(bound.key,1)?.[0];
+      if(!carriesConversation({working:last?.status==='working',lastTurnAt:last?.at??null,now:Date.now()})){siteThreads.delete(r.key+'|'+site);bound=undefined;}
+      else return {key:bound.key,title:r.title,detail:'Website open in '+r.title+': '+page.url+' ('+page.title+'). The conversation continues here from '+bound.title+': the page moved on while you were talking, so the earlier turns still apply. Read the page or the browser\'s recordings before answering about it.'};
+    }
     if(bound)return {key:bound.key,title:r.title,detail:'Working on the Attention item "'+bound.title+'" in '+r.title+' on '+page.url+' ('+page.title+'). Read the page before acting.'};
     return {key:'web:'+site,title:r.title,detail:'Website open in '+r.title+': '+page.url+' ('+page.title+'). Read the page or the browser\'s recordings before answering about it.'};
   }
@@ -673,7 +721,7 @@ export function mountNotionWorld(data: World, native: any) {
   function syncSoundScene(){root.dataset.soundTrack=themeAmbientTrack(ACTIVE_THEME.pack,depth,current||'');}
   // An area panel belongs to the place it was opened in: entering an Applet by any path, or moving to another
   // place (as after Back reopens it, #2054), closes it, so it never covers what comes next.
-  function sceneState(){syncSoundScene();recordLocationActivity();if(regionShelf&&(insideApplet()||regionShelfPlace!==depth+':'+current))closeRegionShelf();if(regionsReorder&&depth==='overview'){regionsReorder=false;scene?.refreshRegions();}if(attentionPage&&!restoringWorld)closeAttentionPreview(false);if(memoReader&&(content.hidden||current!=='app-voice-memos'||content.dataset.template!=='app-source')){memoReader.dispose();memoReader=null;}if(messagesReader&&(content.hidden||current!=='app-messages'||content.dataset.template!=='app-source')){messagesReader.dispose();messagesReader=null;}if(root.dataset.onboarding!=='true'&&foregroundGuide&&(depth!=='object'||current!==foregroundGuide||!content.hidden)){foregroundGuide=null;voice?.setGuide?.(null,{forget:true});}if(depth!=='object'||!sections.some(r=>r.moduleId===current&&r.entity==='app'))deviceInventory?.hide();const place=describe(sections.find(s=>s.id===currentSpace)?.theme);root.dataset.depth=depth;root.dataset.viewLevel=data.matterCatalog?({overview:'world',building:'region',room:'matter',object:sections.find(r=>r.id===currentSpace)?.entity||'matter',note:'detail'}[depth]||depth):data.moduleCatalog?({overview:'world',building:'region',room:'module',object:'module',note:'detail'}[depth]||depth):data.personal?({overview:'world',room:'region',object:'object',note:'detail'}[depth]||depth):depth;root.dataset.page=current||'';if(native)$('notionStage').inert=depth==='note'||depth==='search';$('notionBack').hidden=depth==='overview';$('notionNext').textContent=({overview:'Go home →',place:place.enter+' →',room:place.browse+' →',shelf:'Read a book →',note:'Next book →',search:'Back to my world →'})[depth];breadcrumbs();syncAppletMode();writeLocation();voice?.sync();updateCapsule();travelExperiment?.sync()}
+  function sceneState(){syncSoundScene();recordLocationActivity();if(regionShelf&&(insideApplet()||regionShelfPlace!==depth+':'+current))closeRegionShelf();if(regionsReorder&&depth==='overview'){regionsReorder=false;scene?.refreshRegions();}if(attentionPage&&!restoringWorld)closeAttentionPreview(false);if(memoReader&&(content.hidden||current!=='app-voice-memos'||content.dataset.template!=='app-source')){memoReader.dispose();memoReader=null;}if(messagesReader&&(content.hidden||current!=='app-messages'||content.dataset.template!=='app-source')){messagesReader.dispose();messagesReader=null;}if(root.dataset.onboarding!=='true'&&foregroundGuide&&(depth!=='object'||current!==foregroundGuide||!content.hidden)){foregroundGuide=null;voice?.setGuide?.(null,{forget:true});}if(depth!=='object'||!sections.some(r=>r.moduleId===current&&r.entity==='app'))deviceInventory?.hide();const place=describe(sections.find(s=>s.id===currentSpace)?.theme);root.dataset.depth=depth;appletShelf?.sync(depth==='object'?current:null);root.dataset.viewLevel=data.matterCatalog?({overview:'world',building:'region',room:'matter',object:sections.find(r=>r.id===currentSpace)?.entity||'matter',note:'detail'}[depth]||depth):data.moduleCatalog?({overview:'world',building:'region',room:'module',object:'module',note:'detail'}[depth]||depth):data.personal?({overview:'world',room:'region',object:'object',note:'detail'}[depth]||depth):depth;root.dataset.page=current||'';if(native)$('notionStage').inert=depth==='note'||depth==='search';$('notionBack').hidden=depth==='overview';$('notionNext').textContent=({overview:'Go home →',place:place.enter+' →',room:place.browse+' →',shelf:'Read a book →',note:'Next book →',search:'Back to my world →'})[depth];breadcrumbs();syncAppletMode();writeLocation();voice?.sync();updateCapsule();travelExperiment?.sync()}
   function home(){focusEntryReturn=null;pageLayer=null;$('notionDialog').close();if(!restoringWorld)dismissFox();readerReturns=[];current=null;currentSpace=null;depth='overview';searching=false;history=[];content.hidden=true;hud.classList.remove('is-reading');$('notionWorldTitle').hidden=false;$('notionWorldTitle').textContent='This is your little world.';$('notionWorldMeta').textContent='Come home, read, and do what you love';scene?.focus('overview');sceneState();if(data.sample){$('notionWorldTitle').textContent='A place for everything in your life.';$('notionWorldMeta').textContent='Explore or type “show my mail”'}}
   function visitArea(id){
     const area=areas.find(a=>a.id===id);if(!area)return;if(buildings.length&&areas.length===1){home();return;}readerReturns=[];current=id;currentSpace=id;depth='area';searching=false;content.hidden=true;hud.classList.remove('is-reading');scene?.focus(id,'area');sceneState();
@@ -1940,6 +1988,14 @@ export function mountNotionWorld(data: World, native: any) {
     window.addEventListener('worldlet:ongoing',()=>void loadOngoing());
     void loadOngoing();
     nativeHUD=mountNativeHUD({root,onAttention:view=>phone?.attention(view),calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:()=>widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
+    // The Applet shelf above an open Applet (ui/hud/applet-shelf.ts): the recently used Applets, the open one in the middle.
+    const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[r.key]||appLogoSource(r)||''};};
+    appletShelf=mountAppletShelf({root,applet:shelfApp,lastUsed:id=>regionLayout.lastUsedAt[id]||0,
+     recent:()=>sections.filter(r=>r.entity==='app'&&(regionLayout.lastUsedAt[r.moduleId]||0)>0).sort((a,b)=>(regionLayout.lastUsedAt[b.moduleId]||0)-(regionLayout.lastUsedAt[a.moduleId]||0)).map(r=>r.moduleId),
+     open:id=>visitObject(id),leave:()=>home(),
+     // + enters the Browser with its address ready to type, or opens a new tab when the Browser is already open (ui/browser/browser-device.ts).
+     newPage:()=>{const inside=current==='app-browser';if(!inside)visitObject('app-browser');requestAnimationFrame(()=>window.dispatchEvent(new CustomEvent('worldlet:browser-navigate',{detail:inside?'new-tab':'address',cancelable:true})));}});
+    appletShelf.sync(depth==='object'?current:null);
     if(data.sample&&buildings.length){travelExperiment=mountTravelExperiment({root,room:sections.find(s=>s.trip),pages,visit:visitObject,refresh:()=>{scene?.refreshContent();nativeHUD?.sync();},open:dialog,state:worldState,storage:native.storage,onContext:()=>nativeHUD?.sync()});scene?.refreshContent();}saveRegions();
     let searchTimer;const input=$('notionInput');
     input.addEventListener('input',()=>{clearTimeout(searchTimer);if(input.isComposing||root.classList.contains('companion-console'))return;const value=input.value.trim();searchTimer=setTimeout(()=>{if(document.activeElement!==input||voice.active)return;if(value&&value.length<100&&[...pages.values()].some(p=>!p.virtual&&(p.title+' '+p.text).toLocaleLowerCase().includes(value.toLocaleLowerCase())))showSearch(value);else if(searching){home();if(!value)input.focus();}},180);});

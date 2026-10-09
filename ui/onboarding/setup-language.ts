@@ -63,7 +63,6 @@ const copy:Record<string,string[]>={
  'Choose again':['重新选择','選び直す','Elegir de nuevo'],
  'None':['没有','なし','Ninguno'],
  'Enter your world':['进入你的世界','あなたの世界へ','Entra en tu mundo'],
- 'Back to your world':['回到你的世界','あなたの世界へ戻る','Vuelve a tu mundo'],
  'Fox now runs on your own agent. What Fox has learned comes along.':['Fox 现在运行在你自己的 Agent 上，它学到的东西会一起带过去。','Fox はこれからあなた自身のエージェントで動きます。Fox が覚えたことも一緒に移ります。','Fox ahora funciona con tu propio agente. Lo que Fox ha aprendido viene con él.'],
  'Sign-in wasn’t completed. Please try again.':['登录尚未完成，请重试。','ログイン未完了です。もう一度お試しください。','No se completó el inicio. Inténtalo de nuevo.'],
  'Connect Google to enter your world.':['请先连接 Google。','まず Google を接続してください。','Conecta Google para entrar.'],

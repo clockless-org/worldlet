@@ -142,6 +142,21 @@
 .setup-passport-facts dt{color:var(--brand-muted)}
 .setup-passport-facts dd{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .setup-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(64px,calc((75dvh - 180px)/4),110px);grid-auto-flow:row dense;gap:10px}
+/* The tiles fill the grid with no gaps (owner request 2026-10-09): each kind has its place, and an empty tile keeps it. */
+.setup-tiles[data-layout]{grid-auto-flow:row}
+.setup-tiles[data-layout=agent]{grid-template-areas:'avatar profile profile notes' 'avatar conversations conversations skills' 'avatar conversations conversations routines' 'connections connections apps apps';grid-template-rows:repeat(4,clamp(64px,calc((75dvh - 180px)/4),110px))}
+.setup-tiles[data-layout=agent-no-apps]{grid-template-areas:'avatar profile profile notes' 'avatar conversations conversations skills' 'avatar conversations conversations routines' 'connections connections connections connections';grid-template-rows:repeat(4,clamp(64px,calc((75dvh - 180px)/4),110px))}
+.setup-tiles[data-layout=agent-only]{grid-template-areas:'avatar profile profile notes' 'avatar conversations conversations skills' 'avatar conversations conversations routines';grid-template-rows:repeat(3,clamp(64px,calc((75dvh - 180px)/4),110px))}
+.setup-tiles[data-layout=world]{grid-template-areas:'avatar connections connections connections' 'avatar apps apps apps';grid-template-rows:repeat(2,clamp(64px,calc((75dvh - 180px)/4),110px))}
+.setup-tiles[data-layout=world-apps]{grid-template-areas:'avatar apps apps apps' 'avatar apps apps apps';grid-template-rows:repeat(2,clamp(64px,calc((75dvh - 180px)/4),110px))}
+.setup-tiles[data-layout] .setup-tile-avatar{grid-area:avatar}
+.setup-tiles[data-layout] .setup-tile-profile{grid-area:profile}
+.setup-tiles[data-layout] .setup-tile-conversations{grid-area:conversations}
+.setup-tiles[data-layout] .setup-tile-notes{grid-area:notes}
+.setup-tiles[data-layout] .setup-tile-skills{grid-area:skills}
+.setup-tiles[data-layout] .setup-tile-routines{grid-area:routines}
+.setup-tiles[data-layout] .setup-tile-connections{grid-area:connections}
+.setup-tiles[data-layout] .setup-tile-apps{grid-area:apps}
 .setup-tile{position:relative;min-width:0;padding:12px 14px;border-radius:18px;background:#fffffff0;box-shadow:0 4px 14px #203b300f;overflow:hidden;box-sizing:border-box}
 .setup-tile.is-arriving{animation:setup-tile-in .42s cubic-bezier(.22,.7,.2,1) both}
 @keyframes setup-tile-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}

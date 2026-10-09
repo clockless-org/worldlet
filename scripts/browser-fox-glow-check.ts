@@ -93,22 +93,15 @@ async function opened(page){
   await foxWorks(page);await page.waitForFunction(()=>(window as any).surface.at(-1)?.fox);
   await page.evaluate(()=>window.dispatchEvent(new Event('worldlet:fox-idle')));
   await page.waitForFunction(()=>!(window as any).surface.at(-1)?.fox);
-  // A website page's Back is a control like Fox's three below it: the same darker frosted material and ink. It shows
-  // once the page has somewhere to go back to (owner request 2026-10-07).
+  // A website page's Back is its toolbar's (owner request 2026-10-09): in the panel above the page, left of the address.
+  // It works once the page has somewhere to go back to.
   await page.evaluate(()=>(window as any).worldletBrowser({phase:'page',platform:'web',loading:false,title:'Page',url:'https://example.com/next',canBack:true,canForward:false}));
-  await page.locator('.browser-back:not([hidden])').waitFor();
-  const props=['backgroundColor','color','borderTopColor','borderTopWidth','textShadow','backdropFilter','boxShadow','height'];
-  await page.mouse.move(2,830);
-  const controls=await page.evaluate(props=>{
-   const pick=(e:Element)=>{const c=getComputedStyle(e);return Object.fromEntries([...props.map(p=>[p,c[p]]),['glyph',getComputedStyle(e.querySelector('svg')).filter]]);};
-   return {back:pick(document.querySelector('.browser-back')),fox:pick(document.querySelector('.companion-controls>.companion-world-button'))};
-  },props);
-  assert.deepEqual(controls.back,controls.fox,'Back uses the darker frosted control style of Fox\'s controls');
-  assert.match(controls.back.backdropFilter,/blur/);
-  {const back=await page.locator('.browser-back').boundingBox(),title=await page.locator('.companion-context').boundingBox();assert.ok(back.x+back.width<title.x,'Back sits on the title\'s left (owner feedback 2026-10-03)');}
+  await page.waitForFunction(()=>!document.querySelector<HTMLButtonElement>('.browser-toolbar>.browser-back').disabled);
+  {const back=await page.locator('.browser-back').boundingBox(),address=await page.locator('.browser-toolbar>.browser-address').boundingBox(),page_=await page.locator('.browser-viewport').boundingBox();
+   assert.ok(back.x+back.width<address.x&&back.y+back.height<=page_.y,'Back sits left of the address, above the page '+JSON.stringify({back,address,page:page_}));}
   if(shots){const box=await page.locator('.browser-back').boundingBox();await page.screenshot({path:path.join(shots,'back-button.png'),clip:{x:Math.max(0,box.x-40),y:0,width:box.width+400,height:box.y+box.height+40}});}
   assert.deepEqual(errors,[]);await page.close();
-  console.log('PASS Fox working: page keeps its rect, the frame turns colorful, the host gets the steps card, ticks each step, shows Fox\'s result when Fox finishes, then clears; Back matches Fox\'s controls.');
+  console.log('PASS Fox working: page keeps its rect, the frame turns colorful, the host gets the steps card, ticks each step, shows Fox\'s result when Fox finishes, then clears; the toolbar\'s Back sits above the page.');
  }
  {
   const {page,errors}=await open({reducedMotion:'no-preference'});

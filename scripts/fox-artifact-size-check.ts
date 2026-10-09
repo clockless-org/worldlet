@@ -77,6 +77,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(art.height<=380,'It is a small card '+JSON.stringify(art));
  assert.equal(await card.locator('.fox-artifact-size').isVisible(),false,'The corner card has no size control');
  await shot(page,'artifact-in-applet');
+ // It stays pinned there: a click beside it in the Applet leaves it in place; only its × puts it away (owner Order 2026-10-09).
+ await page.mouse.click(600,700);await page.waitForTimeout(200);
+ assert.equal(await card.isVisible(),true,'A click beside the corner card leaves it pinned over the Applet');
  await page.evaluate(()=>{location.hash='';});
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as HTMLElement).dataset.depth!=='object');
  await ask('table');
@@ -95,5 +98,5 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await world.getAttribute('data-artifact-size'),null,'Closing clears the size');
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as HTMLElement).dataset.foxLane==='false');
  assert.deepEqual(errors,[]);
- console.log('PASS artifact sizes: small and medium above Fox in the middle, large on the main stage with Fox in the right-hand column, Fox\'s choice or a default from the content, the card\'s own size control, a small card in the top-right corner over an Applet, a narrow window stacking, close clearing the size');
+ console.log('PASS artifact sizes: small and medium above Fox in the middle, large on the main stage with Fox in the right-hand column, Fox\'s choice or a default from the content, the card\'s own size control, a small card pinned in the top-right corner over an Applet, a narrow window stacking, close clearing the size');
 });

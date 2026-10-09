@@ -24,7 +24,7 @@ export const parallelChecks=available([
  // The slowest first (Mac RC 2026.1005.2887 times), so no lane is left running one alone at the end. The Attention Center's browser checks moved here from npm test (test:attention), where they ran one by one.
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
  'scripts/applet-focus-check.ts','gatehouse/board-browser-check.mjs','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
- 'scripts/attention-idle-check.ts','scripts/world-log-check.ts','scripts/world-energy-ui-check.ts','scripts/world-history-ui-check.ts','scripts/startup-check.ts','scripts/curated-source-applet-check.ts','scripts/browser-fox-glow-check.ts','scripts/demo-walkthrough-check.ts','scripts/applet-top-bar-check.ts','scripts/text-reader-hud-check.ts',
+ 'scripts/attention-idle-check.ts','scripts/world-log-check.ts','scripts/world-energy-ui-check.ts','scripts/world-history-ui-check.ts','scripts/startup-check.ts','scripts/curated-source-applet-check.ts','scripts/browser-fox-glow-check.ts','scripts/demo-walkthrough-check.ts','scripts/applet-top-bar-check.ts','scripts/applet-shelf-ui-check.ts','scripts/text-reader-hud-check.ts',
  'scripts/world-readability-check.ts','scripts/feature-audit-check.ts','scripts/ongoing-ui-check.ts','scripts/phone-pairing-ui-check.ts','scripts/desktop-companion-ui-check.ts','scripts/fox-mac-controls-check.ts','scripts/sample-world-check.ts','scripts/widgets-ui-check.ts',
  'scripts/order-ui-check.ts','scripts/companion-entry-check.ts','scripts/attention-group-identity-check.ts','scripts/fox-name-tag-check.ts',
  // Entering and leaving an Applet zooms, and Back from an area's Applet returns to its panel (owner Order 2026-10-07).
@@ -91,7 +91,7 @@ export const serialChecks=available([
  'scripts/meetings-check.ts','scripts/meeting-transcript-check.ts', // live transcripts from a real WebRTC call's audio
  // A playing video's picture-in-picture offer: beside the pool it missed its 15-second wait for the window in two Mac
  // RCs in a row (2026.1005.2909 and 2911); alone it passes.
- 'scripts/applet-pip-check.ts',
+ 'scripts/applet-pip-check.ts','scripts/applet-carry-check.ts',
 ]);
 // No longer in the RC (owner request 2026-10-05: an RC finishes within 20 minutes, without checks of how things look
 // or move): exact hover and motion pixels, weather animation timing, the painted Fox's blink, frame times while an

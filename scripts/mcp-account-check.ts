@@ -82,7 +82,7 @@ await withTempDir('worldlet-mcp-account-',async temp=>{
  assert.equal(state.tokens.at(-1).grant_type,'refresh_token');assert.equal(state.tokens.at(-1).client_id,'agent-client');assert.equal(state.tokens.at(-1).refresh_token,'agent-refresh');
  const written=JSON.parse(fs.readFileSync(path.join(hermes,'mcp-tokens','notion.json'),'utf8'));
  assert.equal(written.access_token,'access-1');assert.equal(written.refresh_token,'refresh-1');assert.equal(written.expires_at,clock/1000+3600);
- assert.equal(fs.statSync(path.join(hermes,'mcp-tokens','notion.json')).mode&0o777,0o600);
+if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tokens','notion.json')).mode&0o777,0o600);
  // A refused token refreshes once; a revoked refresh says the person must sign in again.
  state.valid.delete('access-1');
  await session.callTool('fetch',{id:'w'});

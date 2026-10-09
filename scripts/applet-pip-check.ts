@@ -89,13 +89,13 @@ try{
   // The page has one before it, so its Back shows (owner request 2026-10-07: only with somewhere to go).
   await host(page,{phase:'page',platform:'youtube',loading:false,url:'https://www.youtube.com/watch?v=pip',title:'Page',canBack:true});
   await page.locator('.browser-back:not([hidden])').waitFor();
-  // Right of the title after Focus and Refresh, on Back's row, in Back's own control style.
-  const props=['backgroundColor','color','borderTopColor','borderTopWidth','borderTopLeftRadius','paddingTop','paddingLeft','fontSize','fontWeight','height','columnGap','backdropFilter','boxShadow'];
-  const style=await page.evaluate(props=>{const pick=(e:Element)=>Object.fromEntries(props.map(p=>[p,getComputedStyle(e)[p]]));return {back:pick(document.querySelector('.browser-back')),offer:pick(document.querySelector('.browser-pip-offer'))};},props);
-  assert.deepEqual(style.offer,style.back,'the offer is the same control as Back');
+  // At the end of the bar's row, above the panel, in the material of Fox's round controls (the page's Back, Focus and
+  // Refresh are its toolbar's, in the panel, owner request 2026-10-09).
+  const props=['backgroundColor','color','borderTopColor','borderTopWidth','height','backdropFilter','boxShadow'];
+  const style=await page.evaluate(props=>{const pick=(e:Element)=>Object.fromEntries(props.map(p=>[p,getComputedStyle(e)[p]]));return {fox:pick(document.querySelector('.companion-controls>.companion-world-button')),offer:pick(document.querySelector('.browser-pip-offer'))};},props);
+  assert.deepEqual(style.offer,style.fox,'the offer is the same control as Fox\'s');
   let r=await rects(page);
-  const title=await page.evaluate(()=>{const t=document.querySelector('.companion-context').getBoundingClientRect();return {x:t.x,y:t.y,width:t.width,height:t.height};});
-  assert.ok(r.offer.x>title.x+title.width&&r.offer.x-(title.x+title.width)<=114&&Math.abs(r.offer.y-r.back.y)<=1&&r.offer.x+r.offer.width<=r.panel.x+r.panel.width,'the offer sits right of the title after Focus and Refresh, on Back\'s row, above the panel: '+JSON.stringify({back:r.back,title,offer:r.offer,panel:r.panel}));
+  assert.ok(r.offer.y+r.offer.height<=r.panel.y&&r.offer.x+r.offer.width<=r.panel.x+r.panel.width&&r.offer.x+r.offer.width>=r.panel.x+r.panel.width-24,'the offer ends the bar\'s row above the panel: '+JSON.stringify({offer:r.offer,panel:r.panel}));
   assert.equal(await offer(page).textContent(),'Picture in picture');
   if(shots)await page.screenshot({path:path.join(shots,'pip-offer.png')});
   // Fox driving the page keeps it in the panel.
@@ -107,7 +107,7 @@ try{
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('.browser-pip-offer').hidden);
   await host(page,{phase:'video',platform:'youtube',playing:true});
   await offer(page).waitFor();
-  console.log('PASS the offer shows at the end of the Applet\'s top bar, in Back\'s control style, only while a video plays and Fox is not driving the page.');
+  console.log('PASS the offer shows at the end of the Applet\'s top bar, in Fox\'s control style, only while a video plays and Fox is not driving the page.');
 
   // Choosing it returns to the World with the page as the window, not hidden.
   const hides=await count(page,'browserHide');
