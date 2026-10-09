@@ -18,6 +18,9 @@ permissions:
 # which a hosted runner has none of (its refresh tokens are single-use, so no secret copy either); they report SKIP.
 env:
   CODEX_SKIP: no Codex sign-in on a hosted runner
+  # An RC takes at most 20 minutes (owner decision 2026-10-09): the gate gets what is left after setup, and when it runs
+  # out the gate still running is stopped and reported as failing, so the timeout opens an Issue like any failure.
+  WORLDLET_GATE_BUDGET_MINUTES: 16
 # One RC at a time; while one runs, only the newest push waits (GitHub replaces an older pending run).
 concurrency:
   group: rc
@@ -27,7 +30,7 @@ jobs:
     name: Mac
     if: github.repository == 'clockless-org/worldlet'
     runs-on: macos-15
-    timeout-minutes: 120
+    timeout-minutes: 20
     outputs:
       results: ${{ steps.results.outputs.results }}
     steps:
@@ -66,7 +69,7 @@ jobs:
     name: Windows
     if: github.repository == 'clockless-org/worldlet'
     runs-on: windows-2025
-    timeout-minutes: 120
+    timeout-minutes: 20
     outputs:
       results: ${{ steps.results.outputs.results }}
     env:

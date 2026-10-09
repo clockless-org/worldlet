@@ -27,7 +27,7 @@ Everything lives on this repository's GitHub Releases:
 
 ## Release candidate
 
-[The RC workflow](../.github/workflows/rc.yml) runs the release gate (`npm run gate`, [gate.mjs](../scripts/gate.mjs)) on a Mac and a Windows runner for every push to `main`, beside the Dev build of the same commit. A Build is promoted to Alpha or Beta only when its commit passed the RC on both platforms; the promotion run checks this itself.
+[The RC workflow](../.github/workflows/rc.yml) runs the release gate (`npm run gate`, [gate.mjs](../scripts/gate.mjs)) on a Mac and a Windows runner for every push to `main`, beside the Dev build of the same commit. A Build is promoted to Alpha or Beta only when its commit passed the RC on both platforms; the promotion run checks this itself. An RC takes at most 20 minutes: the gate gets 16 of them (`WORLDLET_GATE_BUDGET_MINUTES`), and a gate still running when they run out is stopped and reported as failing, so a hang opens an Issue like any other failure.
 
 A failing RC opens one Issue per platform and set of failing gates, labelled `rc-failure` and `platform:mac` or `platform:windows`, with the failing gates and the run ([ci-rc-report.mjs](../scripts/ci-rc-report.mjs)). The same failure on a later push adds a comment instead of another Issue, and the next passing RC on that platform closes it. A cloud AI session fixes these Issues with ordinary pull requests.
 
