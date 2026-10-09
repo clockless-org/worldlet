@@ -25,7 +25,9 @@ const node=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.t
  * found here as cards, every other way in folded under More options, and one big "Give {agent} a world". Choosing
  * brings the Agent in on the same page: its card moves left while what comes along appears on the right, tile by tile,
  * and the button becomes "Enter your world". No model turn or source read gates entry. */
-export function mountStartupSetup({state:initial,call,complete}){
+/** `move`: someone who used Fox's own Hermes chooses the Agent Fox runs on from now on (owner decisions 2026-10-09: no
+ * built-in Hermes); the same page, without the apps, and Back to your world returns to the World as it was. */
+export function mountStartupSetup({state:initial,call,complete,move=false}:{state:any,call:any,complete:(next:any,icons?:Record<string,string>)=>Promise<void>,move?:boolean}){
  let state=initial,step=0,busy=false,disposed=false,error='',notice='',signingIn=false,entering=false;
  // Agents already on this computer (Claude Code, Codex, …): choosing one replaces Google sign-in.
  // Each Agent here reports whether it has a name, memory or history Fox can bring (never its text).
@@ -69,11 +71,11 @@ export function mountStartupSetup({state:initial,call,complete}){
  window.addEventListener('worldlet:connect-agent',onConnectRequest);
  const languages=['en','zh','ja','es'];
  const systemLanguage=navigator.language.split('-')[0];
- const key='worldlet-startup-setup:'+state.workspaceId;
+ const key=(move?'worldlet-agent-move:':'worldlet-startup-setup:')+state.workspaceId;
  let draft:any={step:0,language:languages.includes(systemLanguage)?systemLanguage:'en',applets:['app-gmail','app-google-calendar','app-browser'],touched:[],consent:true};
  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&Array.isArray(saved.applets))draft={...draft,...saved};}catch{}
  // Resume from account facts (or the chosen local Agent), not old draft indices.
- step=typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string'||['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)))?1:0;
+ step=typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string'||!move&&['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)))?1:0;
  const selected=new Set<string>(draft.applets.filter(id=>WORLD_APPS.some(a=>a.id===id)));
  let detected=new Set<string>(),nativeIcons:Record<string,string>={},detecting=true;
  const t=(text:string)=>setupText(text,draft.language);
@@ -91,7 +93,8 @@ export function mountStartupSetup({state:initial,call,complete}){
  window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_started'}));
  if(step===1)window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
  const persist=()=>localStorage.setItem(key,JSON.stringify({...draft,step,applets:[...selected],touched:[...touched]}));
- const connected=()=>['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)));
+ // Moving to an Agent is about the Agent alone: a Google connection the World already has does not stand in for one.
+ const connected=()=>!move&&['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)));
  // Google, a chosen local Agent, an API key or an Agent on another computer opens the second half of the page.
  const ready=()=>connected()||typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string';
  const agentText=(text:string,agent:string)=>t(text).replace('{agent}',agent);
@@ -111,7 +114,7 @@ export function mountStartupSetup({state:initial,call,complete}){
   try{
    // The host proves the Agent answers before Fox uses it; a failure leaves the person on the first half.
    let chosen;
-   try{chosen=await call('agentHarness',{operation:'select',id:agent.id});}
+   try{chosen=await call('agentHarness',{operation:'select',id:agent.id,...move?{direct:true}:{}});}
    catch(e){productEvent('local_agent_select_failed',{local_agent:agent.id,error_code:failureCode(e)},timingBucket(performance.now()-started));throw e;}
    await call('foxPreferences',{cloudConsent:true});
    // Back then the same Agent again shows what already came over instead of reading it again (owner request
@@ -175,16 +178,16 @@ export function mountStartupSetup({state:initial,call,complete}){
   const list=['avatar'];
   if(importingAgent()){
    const brought=draft.brought;
-   if(!brought||brought.failed)return brought&&!porting?[...list,...connectionsTile(),'apps']:list;
+   if(!brought||brought.failed)return brought&&!porting?[...list,...connectionsTile(),...move?[]:['apps']]:list;
    if(brought.name||brought.summary?.personality||brought.summary?.about)list.push('profile');
    if(brought.conversations)list.push('conversations');
    for(const kind of ['notes','skills','routines'])if(brought[kind])list.push(kind);
-   if(!porting)list.push(...connectionsTile(),'apps');
+   if(!porting)list.push(...connectionsTile(),...move?[]:['apps']);
    return list;
   }
   // Google brings Mail and Calendar; an API key or an Agent on another computer brings only the World.
   if(connected()&&typeof draft.remoteAgent!=='string'&&draft.ownModel!==true)list.push('connections');
-  return detecting?list:[...list,'apps'];
+  return detecting||move?list:[...list,'apps'];
  }
  const connectionsTile=()=>(draft.integrations||[]).some(item=>item.outcome!=='stays')?['connections']:[];
  const settled=()=>!importingAgent()||(!!draft.brought&&!bringing&&!porting&&shownTiles>=tiles().length);
@@ -273,6 +276,14 @@ export function mountStartupSetup({state:initial,call,complete}){
  }
  async function finish(){
   if(!ready())throw Error('Connect Google to enter your world.');
+  if(move){
+   const snapshot=await call('snapshot');
+   localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);
+   loader.classList.add('setup-entering');
+   document.dispatchEvent(new Event('worldlet:setup-complete'));
+   await complete(snapshot);
+   return;
+  }
   // Preserve existing personality when setting an explicit response language.
   if(draft.language!=='auto'){
    const info=await call('foxPreferences');
@@ -536,7 +547,7 @@ export function mountStartupSetup({state:initial,call,complete}){
    stage.append(card,bento);parts.push(stage);
    if(entering)primary=button('Entering your world…',async()=>{},true);
    else if(!done)primary=button(agentText('Moving {agent} in…',AGENT_SHORT[draft.agent]&&!draft.brought?.name?AGENT_SHORT[draft.agent]:name),async()=>{},true);
-   else primary=button('Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
+   else primary=button(move?'Back to your world':'Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
    primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering||!done);primary.setAttribute('aria-busy',String(entering||!done));if(!done||entering)primary.disabled=true;
    // Back keeps what came over, so coming back to the same Agent does not read it again; Google has nothing to go back to.
    if(arriving&&!bringing&&!porting)back=()=>{clearTimeout(revealTimer);delete draft.agent;delete draft.agentName;step=0;notice='';error='';persist();render();};
@@ -549,6 +560,7 @@ export function mountStartupSetup({state:initial,call,complete}){
    const formOpen=remoteForm,hermesBusy=hermesSetup!=='idle'&&!agents.length;
    const lede=node('p',detectingAgents?t('Looking for agents on this computer…'):remoteForm?t('Your agent on another computer'):agents.length?t('Found on this computer'):t('No agent on this computer yet'),'setup-lede');
    choose.append(lede);
+   if(move&&!remoteForm)choose.append(node('p',t('Fox now runs on your own agent. What Fox has learned comes along.'),'setup-note setup-move-note'));
    if(remoteForm)choose.append(remotePanel());
    else if(agents.length)choose.append(agentCards());
    else if(!detectingAgents){
@@ -602,7 +614,8 @@ export function mountStartupSetup({state:initial,call,complete}){
    const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'&&a.id!=='codex'):[];
    // A choice the host no longer has (removed, or reset) returns to the first half.
    if(typeof draft.agent==='string'&&result?.selected!==draft.agent){delete draft.agent;persist();if(step===1&&!ready()){step=0;}}
-   else if(typeof result?.selected==='string'&&step===0&&found.some(a=>a.id===result.selected)){draft.agent=result.selected;draft.agentName=agentName(found.find(a=>a.id===result.selected));step=1;persist();}
+   // Moving off Fox's own Hermes: an Agent it only copied from (or Codex it paid with) is not yet Fox's Agent.
+   else if(!move&&typeof result?.selected==='string'&&step===0&&found.some(a=>a.id===result.selected)){draft.agent=result.selected;draft.agentName=agentName(found.find(a=>a.id===result.selected));step=1;persist();}
    // A pairing with another computer that ended (unpaired there) returns to the first half too.
    if(typeof draft.remoteAgent==='string'&&!result?.remote){delete draft.remoteAgent;persist();if(step===1&&!ready())step=0;}
    agents=found;detectingAgents=false;
