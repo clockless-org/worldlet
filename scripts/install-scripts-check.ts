@@ -31,4 +31,7 @@ assert.match(sh,/\/downloads\/appcast\.xml/);
 assert.match(ps,/\/downloads\/windows-preview\.json/);
 assert.match(sh,/target="\$\{WORLDLET_INSTALL_DIR:-\/Applications\}"/,'Mac installs into WORLDLET_INSTALL_DIR when set (release machines\' Beta install check)');
 assert.ok(!/sudo/.test(sh),'never asks for an administrator password');
-console.log('PASS one-line installers: syntax, Agent ids, checksum and signature before install, --connect hand-off');
+const acceptance=readFileSync('platform/install/install-acceptance.ps1','utf8');
+assert.match(acceptance,/irm \$site\/install\.ps1 \| iex/,'acceptance runs the published one-liner');
+assert.match(acceptance,/windows-preview\.json/,'acceptance compares with the public manifest');
+console.log('PASS one-line installers: syntax, Agent ids, checksum and signature before install, --connect hand-off, real-device acceptance');
