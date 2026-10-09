@@ -76,6 +76,9 @@ await assert.rejects(publish({channel:'beta',platform:'mac',dir,live:true,store:
 const staged=store();
 await publish({channel:'beta',platform:'mac',dir,live:false,store:staged,updates});
 assert(staged.writes.every(w=>!w.includes('channel-')&&!w.startsWith('promote')),'a channel that is not live writes only to its staging release');
+const superseded=Object.assign(store(),{superseded:async()=>'.github/workflows/rc.yml'});
+assert.match((await publish({channel:'dev',platform:'mac',dir,live:true,store:superseded,updates})).skipped,/rc\.yml/,'a Dev build whose tag GitHub would refuse is skipped');
+assert.deepEqual(superseded.writes,[]);
 
 // The GitHub store: reads only listed assets, never replaces an installer with other bytes, tolerates a parallel create.
 {
@@ -89,6 +92,10 @@ assert(staged.writes.every(w=>!w.includes('channel-')&&!w.startsWith('promote'))
  assert.equal(await gh.read('v0','appcast.xml'),'');
  assert.throws(()=>gh.upload('v1',dmg),/different bytes/);
  gh.close();
+ const compare=(stdout,exists=false)=>githubStore('example/worldlet',args=>args[1].startsWith('repos/example/worldlet/releases/')?(exists?{status:0,stdout:'{}'}:{status:1,stderr:'HTTP 404'}):{status:0,stdout});
+ assert.equal(compare('.github/workflows/rc.yml\n').superseded('v9','abc'),'.github/workflows/rc.yml');
+ assert.equal(compare('').superseded('v9','abc'),'');
+ assert.equal(compare('.github/workflows/rc.yml',true).superseded('v9','abc'),'','a tag that already exists needs no new ref');
 }
 
 // The workflow: never on pull requests, secrets only in jobs of the protected `release` environment on main.
