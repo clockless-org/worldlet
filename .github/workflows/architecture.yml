@@ -3,12 +3,15 @@ name: Architecture contracts
 # only the basic checks, the required `Architecture` check green within three minutes of a push. The checks below run
 # as three jobs side by side (about a minute and a half each) so the whole run stays under three minutes; together they
 # are exactly the former single fast job. The UI checks (test:ui, including test:ui:core), the iPhone and Android apps,
-# Electron, Harness/Hermes, browser and packaging suites run in the RC on 01/02 (scripts/gate.mjs). No macOS or Windows
+# Electron, Harness/Hermes, browser and packaging suites run in Alpha and Beta on 01/02 (scripts/gate.mjs). No macOS or Windows
 # runner runs here. `npm run ci:time` reports how long PR CI takes and what it spent.
 on:
   pull_request:
   merge_group:
   workflow_dispatch:
+  # Every push to main runs the same checks again as the Dev tests, before its Dev build is published (release.yml,
+  # owner decision 2026-10-09: CI runs only the Dev tests, within three minutes; Alpha and Beta test on 01 and 02).
+  workflow_call:
 permissions:
   contents: read
 # No `parallel:` steps (GitHub Actions 2026-06): #2009 moved the checks into two runners with them and, on 2026-10-07,
@@ -21,7 +24,7 @@ permissions:
 # them took about 30 s per job and, on 2026-10-05, 86 s and 153 s, which pushed two runs past three minutes. The PR
 # checks only test that media files exist (`access`/`stat`, never a read), so each skipped file is stood in for by an
 # empty file at its path; only files the commit has get one, so a missing image still fails. A check that reads image
-# bytes belongs in the RC, which has the full tree.
+# bytes belongs in Alpha, which has the full tree.
 env:
   SKIP_MEDIA: |
     /*
@@ -93,6 +96,8 @@ jobs:
   # PR's older runs, then waits for the other jobs of this run.
   architecture:
     name: Architecture
+    # Only for pull requests: as the Dev tests, release.yml waits for the three jobs itself.
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

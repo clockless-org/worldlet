@@ -1,17 +1,17 @@
 # Releasing from GitHub Actions
 
-This repository builds, signs and publishes the desktop apps itself, from [the Release workflow](../.github/workflows/release.yml). It replaces the release machines described in [Release guidelines](RELEASE-GUIDELINES.md) once the comparison runs below match; until then both run side by side.
+This repository builds, signs and publishes the desktop apps itself, from [the Release workflow](../.github/workflows/release.yml). The release machines 01 and 02 test those builds for Alpha and Beta and promote them; they no longer build their own.
 
 ## Channels
 
-The channels are the in-app update channels ([update-channel.ts](../core/distribution/update-channel.ts)):
+The channels are the in-app update channels ([update-channel.ts](../core/distribution/update-channel.ts)). Each one adds tests to the one before it (owner decision 2026-10-09):
 
-| Channel | What it gets | How |
-| --- | --- | --- |
-| Dev | Every push to `main` (documentation-only pushes excepted) | Automatic: build, sign, notarize, publish to Dev |
-| Alpha | A Dev build a maintainer promotes | Run the workflow with `channel: alpha` and the Build |
-| Beta | An Alpha build a maintainer promotes; the public download and the default channel | Run the workflow with `channel: beta` and the Build |
-| Production | Not open on the desktop yet | — |
+| Channel | Tests | Where, how long | What ships |
+| --- | --- | --- | --- |
+| Dev | The Dev tests: the pull request checks again (`check:pr`, the fast tests, the operational checks), no UI test | GitHub Actions on Linux, within three minutes, on every push to `main` (documentation-only pushes excepted) | The commit's signed, notarized build, once the Dev tests passed |
+| Alpha | The Dev tests, the quick UI checks (`test:ui:quick`) and the platform tests (Electron, iOS on the Mac, Android on Windows, Harness and Hermes) | The release machines, 01 (Windows) and 02 (Mac), within 20 minutes, on each new Dev build | That Dev build, once both machines passed |
+| Beta | Alpha's tests and the whole UI suite (`test:ui`) | 01 and 02, every night at 1:00 Pacific, within an hour | The newest Alpha build, once both machines passed; the public download and the default channel |
+| GA (Production) | — | Not open on the desktop yet; a maintainer decides | — |
 
 Promotion never rebuilds. It names the exact installer and signed Sparkle item that the Dev build produced in another channel's feed, so what was tried on Dev is byte for byte what ships.
 
@@ -23,15 +23,17 @@ Everything lives on this repository's GitHub Releases:
 | `channel-dev`, `channel-alpha`, `channel-beta` | Each channel's update feeds, replaced in place so their addresses never change: `appcast-dev.xml` and `windows-dev.json`; `appcast-alpha.xml` and `windows-alpha.json`; `appcast.xml`, `appcast-intel.xml` (with history) and `windows-preview.json`. |
 | `staging-<channel>` | The same feeds for a channel that is not live yet. |
 
-[Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. While the release machines still run Alpha and Beta, CI publishes those to their staging releases, which nothing reads, so both can run side by side; a pull request adds a channel to the list when CI takes it over. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
+[Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. A channel not on the list publishes to its staging release, which nothing reads; a pull request adds Alpha and Beta to the list once the release machines promote these builds. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
 
-## Release candidate
+## Tests and failures
 
-[The RC workflow](../.github/workflows/rc.yml) runs the release gate (`npm run gate`, [gate.mjs](../scripts/gate.mjs)) for every push to `main`, beside the Dev build of the same commit, split into parts that run side by side (`WORLDLET_GATE_ONLY`, `WORLDLET_GATE_SKIP`, `WORLDLET_TEST_UI_SHARD`). Every check runs on Linux runners: the gate without `test:ui`, and `test:ui` in twelve shares. Mac and Windows runners run only what needs their platform: `test:electron` and `test:ios` on the Mac, `test:electron` and `test:android` on Windows. A Build is promoted to Alpha or Beta only when its commit passed every part of the RC; the promotion run checks this itself. An RC takes at most 30 minutes: each part's gate gets 26 of them (`WORLDLET_GATE_BUDGET_MINUTES`), and a gate still running when they run out is stopped and reported as failing, so a hang opens an Issue like any other failure.
+The Dev tests run in [the Release workflow](../.github/workflows/release.yml) as its `checks` job, which reuses the pull request workflow ([architecture.yml](../.github/workflows/architecture.yml)). The Mac and Windows builds start beside them and publish to Dev only once they passed (`node scripts/ci-release.mjs dev-tests`).
 
-A failing RC opens one Issue per platform and set of failing gates, labelled `rc-failure` and `platform:linux`, `platform:mac` or `platform:windows`, with the failing gates and the run ([ci-rc-report.mjs](../scripts/ci-rc-report.mjs)). The same failure on a later push adds a comment instead of another Issue, and the next passing RC on that platform closes it. A cloud AI session fixes these Issues with ordinary pull requests.
+A release machine records a passed channel on the commit as the status `worldlet/alpha-mac`, `worldlet/alpha-windows`, `worldlet/beta-mac` or `worldlet/beta-windows`, and promotion checks for both platforms' status before it publishes.
 
-Gates that need a signed-in Codex CLI (`test:onboarding`, `test:agent:local`, `test:ui:review`) are not part of the CI RC, since a hosted runner has no Codex sign-in, and `test:android` stays advisory. The checks of the installed, signed package that the release machines ran (permission prompts, the login item, updating from the published release) are not part of the CI RC yet.
+A failure opens one Issue per channel, platform and set of failing gates or jobs, labelled `test-failure`, `stage:dev|alpha|beta` and `platform:linux|mac|windows`, with the run ([ci-failure-report.mjs](../scripts/ci-failure-report.mjs)). The same failure again adds a comment instead of another Issue, and the next pass closes it. A cloud AI session fixes these Issues with ordinary pull requests.
+
+Gates that need a signed-in Codex CLI (`test:onboarding`, `test:agent:local`, `test:ui:review`) report SKIP where no Codex is signed in, and `test:android` stays advisory.
 
 ## Build numbers
 
@@ -64,4 +66,4 @@ Publishing to GitHub Releases uses the workflow's own token, so it needs no secr
 
 ## Checks
 
-`node scripts/ci-release-check.mjs` (part of `npm run check:pr`) checks build numbers, channel keys, feed rewriting, Sparkle signature verification, publication order, that a promotion requires a passing RC and that the workflow never runs for pull requests or reads secrets outside the `release` environment. `node scripts/ci-rc-report-check.mjs` checks how RC results open, update and close Issues.
+`node scripts/ci-release-check.mjs` (part of `npm run check:pr`) checks build numbers, channel keys, feed rewriting, Sparkle signature verification, publication order, that a promotion requires both release machines' pass for its channel, that a Dev build waits for the Dev tests and that the workflow never runs for pull requests or reads secrets outside the `release` environment. `node scripts/ci-failure-report-check.mjs` checks how test results open, update and close Issues.

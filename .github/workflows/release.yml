@@ -1,7 +1,8 @@
 name: Release
 run-name: ${{ github.event_name == 'push' && format('Dev · {0}', github.event.head_commit.message) || format('{0} {1}', inputs.channel, inputs.build) }}
-# Desktop releases (docs/RELEASING.md). Every push to main builds a signed, numbered Mac and Windows build and
-# publishes it on this repository's GitHub Releases to the Dev channel; a manual run promotes a Dev build's exact bytes to Alpha or Beta. Nothing here runs
+# Desktop releases (docs/RELEASING.md). Every push to main runs the Dev tests, builds a signed, numbered Mac and Windows
+# build and, once the tests passed, publishes it on this repository's GitHub Releases to the Dev channel; a manual run
+# promotes a Dev build's exact bytes to Alpha or Beta once the release machines passed that channel's tests. Nothing here runs
 # for pull requests: signing and publishing secrets live only in the protected `release` environment, which only main
 # can use. Pull request CI stays in architecture.yml (Linux only). Only clockless-org/worldlet releases: forks and the
 # operations repository, which imports this tree, skip every job.
@@ -50,6 +51,43 @@ jobs:
       - id: identity
         run: node scripts/ci-release.mjs identity --count "$(git rev-list --count HEAD)" --committed-at "$(git log -1 --format=%cI HEAD)"
 
+  # The Dev tests (owner decision 2026-10-09): the pull request checks again, on Linux, within three minutes, no UI test.
+  # The builds start beside them and publish only once they passed; a failure opens an Issue for the cloud fixers.
+  checks:
+    name: Dev tests
+    needs: identity
+    permissions:
+      contents: read
+      actions: write
+    uses: ./.github/workflows/architecture.yml
+
+  report:
+    name: Report
+    needs: checks
+    if: always() && !cancelled() && needs.checks.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/ci-failure-report.mjs
+          sparse-checkout-cone-mode: false
+      - name: Report the Dev tests
+        run: |
+          set -euo pipefail
+          failed="$(gh api "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" \
+            --jq '[.jobs[] | select((.name | startswith("Dev tests / ")) and .conclusion != "success" and .conclusion != "skipped") | .name | ltrimstr("Dev tests / ")] | join(",")')"
+          node scripts/ci-failure-report.mjs --stage dev --platform linux --job "${{ needs.checks.result }}" --failed "$failed" --sha "$GITHUB_SHA" --run "$RUN"
+
   # Until the release secrets are set, the builds are skipped instead of failing every push to main.
   ready:
     name: Secrets
@@ -80,6 +118,7 @@ jobs:
     environment: release
     permissions:
       contents: write
+      actions: read
     env:
       VERSION: ${{ needs.identity.outputs.version }}
       BUILD: ${{ needs.identity.outputs.build }}
@@ -152,6 +191,10 @@ jobs:
           path: dist/ci/mac/
           retention-days: 30
           compression-level: 0
+      - name: Wait for the Dev tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/ci-release.mjs dev-tests
       - name: Publish to Dev
         env:
           GH_TOKEN: ${{ github.token }}
@@ -171,6 +214,7 @@ jobs:
     environment: release
     permissions:
       contents: write
+      actions: read
     defaults:
       run:
         shell: bash
@@ -238,6 +282,10 @@ jobs:
           path: dist/ci/windows/
           retention-days: 30
           compression-level: 0
+      - name: Wait for the Dev tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/ci-release.mjs dev-tests
       - name: Publish to Dev
         env:
           GH_TOKEN: ${{ github.token }}
@@ -257,6 +305,7 @@ jobs:
     permissions:
       contents: write
       actions: read
+      statuses: read
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -289,13 +338,17 @@ jobs:
             [[ -n "$run" ]] || { echo "No $platform artifact for Build $BUILD (artifacts are kept 30 days)." >&2; exit 1; }
             gh run download "$run" -n "$name" -D "dist/ci/$platform"
           done
-      # Only a Build whose commit passed the release candidate on both platforms (rc.yml) leaves Dev.
-      - name: Check the RC
+      # Only a Build whose commit passed this channel's tests on both release machines leaves Dev: Alpha's on 01 and 02,
+      # recorded as the commit statuses worldlet/alpha-mac and worldlet/alpha-windows, Beta's as worldlet/beta-* (owner
+      # decision 2026-10-09, docs/RELEASING.md).
+      - name: Check the channel's tests
         run: |
           set -euo pipefail
           sha="$(node -p 'require("./dist/ci/mac/release.json").sourceCommit')"
-          passed="$(gh api "repos/$GH_REPO/actions/workflows/rc.yml/runs?head_sha=$sha&status=success&per_page=1" --jq .total_count)"
-          [[ "$passed" -gt 0 ]] || { echo "Build $BUILD ($sha) has no passing RC; promote a Build whose RC passed." >&2; exit 1; }
+          for platform in mac windows; do
+            state="$(gh api "repos/$GH_REPO/commits/$sha/status" --jq "[.statuses[] | select(.context == \"worldlet/$CHANNEL-$platform\")][0].state // \"\"")"
+            [[ "$state" == success ]] || { echo "Build $BUILD ($sha) has not passed the $CHANNEL tests on $platform (worldlet/$CHANNEL-$platform: ${state:-none})." >&2; exit 1; }
+          done
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}

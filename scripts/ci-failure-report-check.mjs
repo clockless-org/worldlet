@@ -1,9 +1,9 @@
-// Checks the CI release candidate's Issue reporting (scripts/ci-rc-report.mjs) without GitHub.
+// Checks the release stages' Issue reporting (scripts/ci-failure-report.mjs) without GitHub.
 import assert from 'node:assert/strict';
-import {mkdirSync,mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
+import {existsSync,mkdirSync,mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {LABEL,issueBody,outcome,partResults,report} from './ci-rc-report.mjs';
+import {LABEL,issueBody,outcome,partResults,report} from './ci-failure-report.mjs';
 import {gatePart} from './gate.mjs';
 import {shardChecks} from './test-ui.mjs';
 
@@ -13,7 +13,7 @@ assert.deepEqual(outcome({job:'failure',results:null}),{state:'fail',failing:[],
 assert.equal(outcome({job:'cancelled'}).state,'none','a superseded run reports nothing');
 assert.deepEqual(outcome({job:'failure',results:{results:[{command:'test:ui',ok:false},{command:'test:ui',ok:false}]}}).failing,['test:ui'],'two failing test:ui shares are one failing gate');
 
-// The RC runs each platform's gate in parts; the report joins one platform's parts and leaves the other's.
+// A machine may run a platform's gate in parts; the report joins one platform's parts and leaves the other's.
 {
  const dir=mkdtempSync(path.join(os.tmpdir(),'rc-parts-'));
  const part=(name,platform,results)=>{mkdirSync(path.join(dir,name));writeFileSync(path.join(dir,name,'gate.json'),JSON.stringify({platform,results}));};
@@ -36,36 +36,41 @@ const github=(issues=[])=>{const calls=[];return {calls,gh:args=>{calls.push(arg
  if(args[0]==='issue'&&args[1]==='list')return JSON.stringify(issues);
  if(args[0]==='issue'&&args[1]==='create')return 'https://github.com/example/worldlet/issues/9\n';
  return '';}};};
-const fail={platform:'mac',state:'fail',failing:['test:ui'],signature:'test:ui',sha:'abc',runURL:'https://example.com/run/1'};
+const fail={stage:'alpha',platform:'mac',state:'fail',failing:['test:ui'],signature:'test:ui',sha:'abc',runURL:'https://example.com/run/1'};
 
 // A new failure opens one Issue, labelled for the cloud fixers, naming the gate and the run.
 let g=github();
 assert.equal(report({...fail,gh:g.gh}).created,'https://github.com/example/worldlet/issues/9');
 const create=g.calls.find(c=>c[0]==='issue'&&c[1]==='create');
-assert(create.includes(LABEL)&&create.includes('platform:mac'));
+assert(create.includes(LABEL)&&create.includes('platform:mac')&&create.includes('stage:alpha'));
+assert.match(create[create.indexOf('--title')+1],/^\[Alpha\]\[mac\] test:ui failing$/);
 assert(create.at(-1).includes('npm run test:ui')&&create.at(-1).includes('https://example.com/run/1'));
 
-// The same failure again comments on that Issue; another platform's or another signature's Issue is left alone.
+// The same failure again comments on that Issue; another stage's, platform's or signature's Issue is left alone.
 const body=issueBody({...fail});
-g=github([{number:3,body},{number:4,body:issueBody({...fail,platform:'windows'})}]);
+g=github([{number:3,body},{number:4,body:issueBody({...fail,platform:'windows'})},{number:5,body:issueBody({...fail,stage:'beta'})}]);
 assert.deepEqual(report({...fail,gh:g.gh}),{commented:3});
 assert(!g.calls.some(c=>c[0]==='issue'&&c[1]==='create'));
 g=github([{number:3,body}]);
 assert(report({...fail,failing:['check'],signature:'check',gh:g.gh}).created,'a different failure is a new Issue');
 
-// A pass closes only that platform's RC Issues.
-g=github([{number:3,body},{number:4,body:issueBody({...fail,platform:'windows'})}]);
-assert.deepEqual(report({platform:'mac',state:'pass',sha:'def',runURL:'u',gh:g.gh}),{closed:[3]});
+// A pass closes only that stage and platform's Issues.
+g=github([{number:3,body},{number:4,body:issueBody({...fail,platform:'windows'})},{number:5,body:issueBody({...fail,stage:'beta'})}]);
+assert.deepEqual(report({stage:'alpha',platform:'mac',state:'pass',sha:'def',runURL:'u',gh:g.gh}),{closed:[3]});
+assert.throws(()=>report({stage:'rc',platform:'mac',state:'pass',gh:g.gh}),/stage/);
 
-// The workflow: never on pull requests, no secrets, and only the report job may write Issues.
-const workflow=readFileSync(new URL('../.github/workflows/rc.yml',import.meta.url),'utf8');
-assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow),'rc.yml never runs for pull requests');
-assert(!/secrets\./.test(workflow),'the RC needs no secret');
-assert.equal((workflow.match(/issues: write/g)||[]).length,1);
-assert(/fail-fast: false/.test(workflow),'one failing part does not cancel the others');
-assert.equal((workflow.match(/timeout-minutes: 30/g)||[]).length,3,'every part ends within 30 minutes');
-// Every check runs on Linux; the Mac and Windows parts run only what needs their platform (owner decision 2026-10-09).
-for(const job of ['mac','windows','linux'])assert(new RegExp(`\\n  ${job}:\\n`).test(workflow),job);
-assert(!/only: 'test:ui'/.test(workflow.split('\n  linux:\n')[0]),'no UI suite on the Mac and Windows runners');
-assert.match(workflow,/--platform linux/,'a Linux failure opens its own Issue');
-console.log('ci-rc-report checks passed');
+// The Dev tests in CI report the names of their failed jobs.
+assert.deepEqual(outcome({job:'failure',failed:['Static checks','Fast checks']}),{state:'fail',failing:['Fast checks','Static checks'],signature:'Fast checks,Static checks'});
+assert.match(issueBody({stage:'dev',platform:'linux',failing:['Static checks'],signature:'Static checks',sha:'abc',runURL:'u'}),/The Dev tests on linux failed at abc\.\n\nFailing:\n- Static checks\n/);
+
+// The Dev tests: release.yml runs the pull request checks (architecture.yml) on every push to main, publishes a Dev
+// build only after they pass, and reports a failure as an Issue; no UI test and no RC workflow (owner decision 2026-10-09).
+const release=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');
+assert.match(release,/\n  checks:\n    name: Dev tests\n[^]*?uses: \.\/\.github\/workflows\/architecture\.yml\n/);
+assert.equal((release.match(/name: Wait for the Dev tests/g)||[]).length,2,'neither build publishes before the Dev tests pass');
+assert.match(release,/ci-failure-report\.mjs --stage dev --platform linux/);
+assert(!existsSync(new URL('../.github/workflows/rc.yml',import.meta.url)),'no RC workflow');
+const architecture=readFileSync(new URL('../.github/workflows/architecture.yml',import.meta.url),'utf8');
+assert.match(architecture,/\n  workflow_call:\n/);
+assert(!/test:ui/.test(architecture.split('\njobs:\n')[1]),'the Dev tests run no UI test');
+console.log('ci-failure-report checks passed');

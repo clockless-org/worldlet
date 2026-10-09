@@ -119,7 +119,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   return {command,ok:r.status===0&&!r.error};
  });
  console.log('\nGate ('+process.platform+'):\n'+results.map(r=>(r.ok?'PASS ':'FAIL ')+r.command).join('\n'));
- // The CI release candidate (.github/workflows/rc.yml) reads the outcome from this file to report a failure as an Issue.
+ // The release machines read the outcome from this file to report a failure as an Issue (scripts/ci-failure-report.mjs).
  if(process.env.WORLDLET_GATE_RESULTS)writeFileSync(process.env.WORLDLET_GATE_RESULTS,JSON.stringify({platform:process.platform,results})+'\n');
  if(results.some(r=>!r.ok))process.exitCode=1;
 }

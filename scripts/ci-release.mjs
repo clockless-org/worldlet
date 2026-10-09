@@ -186,6 +186,16 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
   return result;
  }finally{if(!store)own.close();}
 }
+// The Dev tests (release.yml's `checks` job, the pull request checks of architecture.yml) as seen in this run's job list:
+// 'pass' once all of them succeeded, 'fail' once one failed, 'wait' meanwhile. A build publishes to Dev only after
+// 'pass' (owner decision 2026-10-09: CI runs the Dev tests, within three minutes, before each Dev release).
+export const DEV_TESTS='Dev tests / ',DEV_TEST_JOBS=3;
+export function devTests(jobs){
+ const mine=jobs.filter(j=>j.name.startsWith(DEV_TESTS)&&j.conclusion!=='skipped');
+ const failed=mine.filter(j=>j.status==='completed'&&j.conclusion!=='success').map(j=>j.name.slice(DEV_TESTS.length));
+ if(failed.length)return {state:'fail',failed};
+ return mine.length>=DEV_TEST_JOBS&&mine.every(j=>j.status==='completed')?{state:'pass',failed:[]}:{state:'wait',failed:[]};
+}
 function readdirOne(dir,pattern){
  const found=readdirSync(dir).filter(n=>pattern.test(n));
  if(found.length!==1)throw Error(`Expected one ${pattern} in ${dir}, found ${found.length}.`);
@@ -228,7 +238,19 @@ async function main(){
   if(r.status!==0)throw Error(`git update-index failed: ${(r.stderr||'').trim()}`);
   console.log('Analytics.json carries the PostHog project key.');return;
  }
- throw Error('Usage: ci-release.mjs identity … | manifest … | publish … | analytics');
+ if(command==='dev-tests'){
+  // Waits for this run's Dev tests; fails when one of them failed or they took longer than --minutes (default 20).
+  const repo=process.env.GITHUB_REPOSITORY,run=process.env.GITHUB_RUN_ID,attempt=process.env.GITHUB_RUN_ATTEMPT||'1',limit=Date.now()+Number(arg('minutes')||20)*60_000;
+  for(;;){
+   const r=spawnSync('gh',['api',`repos/${repo}/actions/runs/${run}/attempts/${attempt}/jobs?per_page=100`,'--jq','.jobs'],{encoding:'utf8'});
+   const result=r.status===0?devTests(JSON.parse(r.stdout||'[]')):{state:'wait',failed:[]};
+   if(result.state==='pass'){console.log('The Dev tests passed.');return;}
+   if(result.state==='fail')throw Error('The Dev tests failed ('+result.failed.join(', ')+'): nothing is published.');
+   if(Date.now()>limit)throw Error('The Dev tests did not finish in time: nothing is published.');
+   await new Promise(resolve=>setTimeout(resolve,10_000));
+  }
+ }
+ throw Error('Usage: ci-release.mjs identity … | manifest … | publish … | analytics | dev-tests');
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))main().catch(error=>{
  console.error(error.message);

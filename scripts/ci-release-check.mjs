@@ -4,7 +4,7 @@ import {generateKeyPairSync,sign} from 'node:crypto';
 import {mkdtempSync,readFileSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {BUILD_OFFSET,channelKeys,githubStore,labelOf,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
+import {BUILD_OFFSET,channelKeys,devTests,githubStore,labelOf,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
 
 // Build = offset + commit position; the label is the commit's Pacific day.
 const id=releaseIdentity(12,'2026-10-09T05:30:00Z');
@@ -98,6 +98,12 @@ assert.deepEqual(superseded.writes,[]);
  assert.equal(compare('.github/workflows/rc.yml',true).superseded('v9','abc'),'','a tag that already exists needs no new ref');
 }
 
+// A Dev build publishes only after this run's Dev tests passed.
+const job=(name,status,conclusion=null)=>({name:'Dev tests / '+name,status,conclusion});
+assert.equal(devTests([job('Static checks','completed','success')]).state,'wait','all three must finish');
+assert.equal(devTests([job('Static checks','completed','success'),job('Fast checks','completed','success'),job('Operational checks','completed','success'),job('Architecture','completed','skipped'),{name:'Mac',status:'in_progress'}]).state,'pass');
+assert.deepEqual(devTests([job('Static checks','completed','failure'),job('Fast checks','in_progress')]),{state:'fail',failed:['Static checks']});
+
 // The workflow: never on pull requests, secrets only in jobs of the protected `release` environment on main.
 const workflow=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');
 assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow),'release.yml never runs for pull requests');
@@ -107,7 +113,7 @@ for(const job of jobs){
  if(/secrets\./.test(job))assert(/\n    environment: release\n/.test(job),`${name}: secrets only in the release environment`);
 }
 assert(/if: github\.repository == 'clockless-org\/worldlet' && github\.ref == 'refs\/heads\/main'/.test(workflow),'only clockless-org/worldlet main releases');
-assert(/actions\/workflows\/rc\.yml\/runs\?head_sha=/.test(workflow),'a promotion requires a passing RC');
+assert(/worldlet\/\$CHANNEL-\$platform/.test(workflow)&&/for platform in mac windows/.test(workflow),'a promotion requires both release machines to have passed the channel\'s tests');
 assert.equal((workflow.match(/node scripts\/ci-release\.mjs analytics/g)||[]).length,2,'both platform builds carry the PostHog key');
 assert.equal((workflow.match(/secrets\.POSTHOG_PROJECT_KEY != ''/g)||[]).length,2,'no build without the PostHog key');
 console.log('ci-release checks passed');
