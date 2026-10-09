@@ -223,6 +223,9 @@ async function main(){
   const key=(process.env.POSTHOG_PROJECT_KEY||'').trim(),file=path.join(root,'platform/electron/distribution/Analytics.json');
   if(!/^phc_\w+$/.test(key))throw Error('POSTHOG_PROJECT_KEY is not a PostHog project key.');
   writeFileSync(file,JSON.stringify({...JSON.parse(readFileSync(file,'utf8')),projectKey:key},null,2)+'\n');
+  // The build still counts as a clean commit (ci-build.sh refuses a dirty checkout; sourceDirty in build-info).
+  const r=spawnSync('git',['update-index','--skip-worktree',path.relative(root,file)],{cwd:root,encoding:'utf8'});
+  if(r.status!==0)throw Error(`git update-index failed: ${(r.stderr||'').trim()}`);
   console.log('Analytics.json carries the PostHog project key.');return;
  }
  throw Error('Usage: ci-release.mjs identity … | manifest … | publish … | analytics');
