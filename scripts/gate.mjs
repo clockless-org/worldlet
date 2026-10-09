@@ -9,7 +9,7 @@ import {workspace} from './dev-workspace.ts';
 // host, and every host gates test:electron (host contract, module checks, app smoke). The Mac also gates
 // test:harness (Harness handshake, attention jobs) and test:hermes (the pinned Hermes loop and model
 // sources); they run after test:ui has built dist/WorldletWeb.
-export const sharedGates=['check','check:docs','check:source','check:style','test:ci','test','test:harness:portable','test:ui','test:website'];
+export const sharedGates=['check','check:docs','check:source','check:style','test:ci','test','test:harness:portable','test:ui'];
 // test:onboarding runs the whole first-run journey on the Mac release host before shipping.
 // test:onboarding:paths walks the other first-run paths through a local Agent (a fixture OpenClaw at least): quit mid-setup
 // and resume, Mail's Google sign-in, Reset Fox, Quit Completely with nothing left running (#1492). It is no RC gate

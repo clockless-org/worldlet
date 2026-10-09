@@ -31,7 +31,7 @@ Everything lives on this repository's GitHub Releases:
 
 A failing RC opens one Issue per platform and set of failing gates, labelled `rc-failure` and `platform:mac` or `platform:windows`, with the failing gates and the run ([ci-rc-report.mjs](../scripts/ci-rc-report.mjs)). The same failure on a later push adds a comment instead of another Issue, and the next passing RC on that platform closes it. A cloud AI session fixes these Issues with ordinary pull requests.
 
-Gates that need a signed-in Codex CLI (`test:agent:local`, `test:ui:review`) report SKIP on the hosted runners, and `test:android` stays advisory. The checks of the installed, signed package that the release machines ran (permission prompts, the login item, updating from the published release) are not part of the CI RC yet.
+Gates that need a signed-in Codex CLI (`test:onboarding`, `test:agent:local`, `test:ui:review`) report SKIP on the hosted runners, and `test:android` stays advisory. The checks of the installed, signed package that the release machines ran (permission prompts, the login item, updating from the published release) are not part of the CI RC yet.
 
 ## Build numbers
 
