@@ -9,6 +9,7 @@ import {harnessAuthHandoff} from '../../../../../core/agent/index.ts';
 import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as normalize,prepareMail as prepare,readCalendar,readDrive,readDriveList,readPage,reconcileMail as reconcile,sendMail as send,sourceFailure,type GoogleRest} from '../../../../../core/accounts/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
+import {ExecutionJournal} from '../agent-runtime/journal.ts';
 import type {GoogleAccount,GoogleService} from './google-account.ts';
 
 const GOOGLE=['gmail','google-calendar','google-drive'];
@@ -52,21 +53,23 @@ export class GoogleSourceAccess implements AgentRuntime {
   if(body.action==='sourceTool'){
    const name=String(body.name??''),args=body.args&&typeof body.args==='object'?body.args as Row:{};
    const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source'&&['gmail','google-calendar'].includes(String(args.provider));
-   return ours?this.google.tool(name,args,onEvent,()=>this.cancelled):this.other().run(body,home,onEvent);
+   // Journaled as every Agent runtime's runs are: the tools it calls back (`_source_result` among them) are the turn's record.
+   return ours?ExecutionJournal.run(body,home,onEvent,observed=>this.google.tool(name,args,observed,()=>this.cancelled)):this.other().run(body,home,onEvent);
   }
   const request=googleRequest(body);
-  if(request&&(request.operation!=='read'||body.action!=='sourceRefresh'||this.google.authorized())){
-   // Gmail send access, asked from a mail review: the same sign-in with the send scope added.
-   if(request.operation==='connect'){
-    await this.google.account.connect(request.services,url=>this.google.openExternal(url),()=>this.cancelled);
-    const own=this.google.ownProfile();if(own)this.google.account.mirror(own);
-    return {ok:true};
-   }
-   const result=await this.google.request(request);
-   if(request.operation==='read'&&!Array.isArray(result?.records))throw new WorldletError('The source returned no valid records. Previous content is kept.');
-   return result;
-  }
+  if(request&&(request.operation!=='read'||body.action!=='sourceRefresh'||this.google.authorized()))return ExecutionJournal.run(body,home,onEvent,()=>this.request(request));
   return this.other().run(body,home,onEvent);
+ }
+ private async request(request:Row):Promise<Row> {
+  // Gmail send access, asked from a mail review: the same sign-in with the send scope added.
+  if(request.operation==='connect'){
+   await this.google.account.connect(request.services,url=>this.google.openExternal(url),()=>this.cancelled);
+   const own=this.google.ownProfile();if(own)this.google.account.mirror(own);
+   return {ok:true};
+  }
+  const result=await this.google.request(request);
+  if(request.operation==='read'&&!Array.isArray(result?.records))throw new WorldletError('The source returned no valid records. Previous content is kept.');
+  return result;
  }
 }
 
