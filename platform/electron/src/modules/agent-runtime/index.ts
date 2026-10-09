@@ -35,6 +35,7 @@ import {GoogleAccount} from '../sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../sources/google-source.ts';
 import {McpAccounts} from '../sources/mcp-account.ts';
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../sources/mcp-source.ts';
+import {DoorDash,DoorDashSourceAccess} from '../sources/doordash.ts';
 
 /** Selects the Agent adapter at launch (Mac AgentRuntimeProvider): WORLDLET_AGENT_CONFIG names an
  * external Harness; otherwise the Agent on another computer this Worldlet is paired with (`remote`);
@@ -61,8 +62,9 @@ export function selectAdapter(context:RuntimeContext,configuration=process.env.W
 /** The World's own Google connection (owner decision 2026-10-09: a connection made through Worldlet is kept by the
  * Platform): Gmail, Calendar and Drive work the same whichever Agent Fox uses. Fox's Hermes profile's earlier grant is adopted. */
 /** The World's account connections: Google, and the MCP connectors (Notion, Todoist, Linear, PayPal, Supabase,
- * GitHub), each used from the Agent's own profile when it already has it, else kept by the World. */
-export interface WorldSources {google:GoogleSource;mcp:McpSource}
+ * GitHub), each used from the Agent's own profile when it already has it, else kept by the World; and DoorDash's
+ * official CLI. */
+export interface WorldSources {google:GoogleSource;mcp:McpSource;doordash:DoorDash}
 export function worldSources(context:RuntimeContext,vault:VaultService,accountsHome:()=>string):WorldSources {
  const own=()=>path.join(context.root,'agent','private','hermes');
  const homes=()=>[...new Set([accountsHome(),own()])];
@@ -70,7 +72,8 @@ export function worldSources(context:RuntimeContext,vault:VaultService,accountsH
  const mcp=new McpSource({accounts:new McpAccounts({vault,agentHomes:homes}),openExternal,reviews:path.join(context.root,'accounts','notion-reviews')});
  const account=new GoogleAccount({folder:path.join(context.root,'accounts','google'),vault,clientFile:()=>bundledResource(context.profile,'googleClient'),adoptFrom:homes});
  const google=new GoogleSource({account,development:context.development,openExternal,ownProfile:own,legacyHomes:homes,notion:{connected:()=>mcp.connected('notion'),read:body=>mcp.read('notion',body)}});
- return {google,mcp};
+ const doordash=new DoorDash({folder:path.join(context.root,'accounts','doordash'),legacyHomes:homes});
+ return {google,mcp,doordash};
 }
 
 export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],sources:((accountsHome:()=>string)=>WorldSources)|null=null):AgentService {
@@ -93,7 +96,9 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   makeModelAccess:()=>current().makeModelAccess(),
   get accountsId(){return accounts().id;},
   accountsHome:()=>journal(accounts().home('private'),true),
-  makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new McpSourceAccess(world.mcp,()=>accounts().makeSourceAccess())):accounts().makeSourceAccess(),
+  // Every source the World reads runs in the Platform; anything else is the Agent's own (a person's own Harness
+  // reads none, so nothing falls through to the built-in Hermes).
+  makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess()))):accounts().makeSourceAccess(),
   makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new McpSourceConnections(world.mcp,()=>accounts().makeSourceConnections(),()=>accounts().id),()=>accounts().id):accounts().makeSourceConnections(),
   googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),

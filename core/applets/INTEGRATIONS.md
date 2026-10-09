@@ -409,7 +409,7 @@ DoorDash belongs to no Region; it is a direct child of the World. Its current de
 ```mermaid
 flowchart LR
     W[Bicycle by the bridge] --> F[Fox]
-    F --> H[Local Hermes]
+    F --> H[Worldlet on this computer]
     H --> C[Official dd-cli]
     C --> D[DoorDash account and services]
     C --> Q[Cart, quote, checkout link]
@@ -421,7 +421,7 @@ flowchart LR
 | Install | `npm run setup:doordash` (`scripts/setup-doordash.ts`): official v0.2.4, darwin-arm64 only, fixed SHA-256, stored under `~/.local/share/worldlet/dd-cli/0.2.4/` |
 | Connect | Fox: Sign in to DoorDash. The connection is saved only after the browser sign-in and a successful account verification through the CLI |
 | Access | The official CLI still requires an early-access account; without approval nothing is marked successful |
-| Search and menus | Hermes tool `use_doordash`: `addresses`, `search`, `menu`, `item`; the user picks a saved address first, no device location request; bounded results |
+| Search and menus | World tool `use_doordash`, for whichever Agent Fox uses: `addresses`, `search`, `menu`, `item`; the user picks a saved address first, no device location request; bounded results |
 | Cart | `cart_list`, `cart_show`, `cart_add`, `cart_remove`, `preview` (quote). Existing carts are checked first; adding is additive; partial failures or timeouts are never retried blindly |
 | Order | `checkout` returns the official HTTPS checkout URL; the user reviews address, fees and payment in DoorDash. CLI `order submit` is not exposed |
 | Orders | `history` (default 10 orders, 30 days) and `order_status` only when the user asks; no polling or background order mirroring |
@@ -434,13 +434,13 @@ CLI features outside this list are not available through Worldlet. The adapter a
 - Sign-in is handled by the CLI itself; Worldlet never reads passwords or exports Keychain tokens.
 - Each request carries the CLI's fixed food-ordering purpose text. DoorDash may use it for research and product improvement; the user is told before connecting.
 - The `--intent` text never includes the user's prompt, Fox history, memory or other source context. Menu queries and cart parameters are sent to DoorDash.
-- Results return only to the current Hermes conversation and may be processed by the model the user allowed; Hermes manages its own session and memory. Worldlet creates no source copy.
+- Results return only to the current Fox conversation and may be processed by the model of the Agent Fox uses; that Agent manages its own session and memory. Worldlet creates no source copy.
 - Opening the Applet reads only the local install and enable state; that is not an account health check. Real service errors surface through Fox.
 
 ### Verification
 
-- `node scripts/applet-focus-check.ts` covers the DoorDash route and its single Back. The host side is `platform/electron/src/modules/sources/content.ts`; DoorDash operations go through Hermes (`modules/agent-runtime/hermes.ts`).
-- `python3 scripts/doordash-outcome-check.py` passes mocked timeout, nonzero exit, malformed/oversized response and partial-item failures: all potentially applied cart changes are uncertain, execute once and require cart inspection before another mutation. Private stderr stays out of results; payment submission remains unavailable and checkout hosts are constrained.
+- `node scripts/applet-focus-check.ts` covers the DoorDash route and its single Back. The host side is `platform/electron/src/modules/sources/content.ts`; DoorDash operations run in the Platform with no Agent (`modules/sources/doordash.ts`, rules in `core/accounts/doordash.ts`).
+- `node scripts/doordash-check.ts` (and `python3 scripts/doordash-outcome-check.py` for the earlier Hermes adapter) passes mocked timeout, nonzero exit, malformed/oversized response and partial-item failures: all potentially applied cart changes are uncertain, execute once and require cart inspection before another mutation. Private stderr stays out of results; payment submission remains unavailable and checkout hosts are constrained. It also covers a connection marked earlier in Fox's Hermes profile staying connected, and `use_doordash` being admitted by its turn before the CLI runs.
 - Not yet accepted: real early-access account, browser sign-in, real menus, carts, quotes and checkout. No order has been created and nothing has been spent.
 
 Official basis: [repository and install notes](https://github.com/doordash-oss/doordash-cli), [pinned release](https://github.com/doordash-oss/doordash-cli/releases/tag/v0.2.4), [early-access form](https://forms.gle/gvCQZvu9C1EKA6aM6). Worldlet uses the official consumer CLI, not a similarly named third-party npm package.

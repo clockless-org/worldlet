@@ -36,7 +36,7 @@ const MOCK_MARKER='mock.json';
 /** The World's own Google connection as the source-access runtime every Agent's account owner hands out: Gmail,
  * Calendar and Drive requests and the World service tools that read them (`read_world_source` for Mail and
  * Calendar, `read_connected_google`, `prepare_email`) run here, in the Platform, with no Harness and no model; every
- * other source still goes to `fallback` (the account owner's own runtime) until it moves too. */
+ * other source goes to `fallback` (the MCP connectors, DoorDash). */
 export class GoogleSourceAccess implements AgentRuntime {
  private readonly google:GoogleSource;
  private readonly fallback:()=>AgentRuntime;
@@ -51,7 +51,9 @@ export class GoogleSourceAccess implements AgentRuntime {
   const provider=typeof body.provider==='string'?body.provider:'';
   if(body.action==='sourceTool'){
    const name=String(body.name??''),args=body.args&&typeof body.args==='object'?body.args as Row:{};
-   const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source'&&(['gmail','google-calendar'].includes(String(args.provider))||args.provider==='notion'&&this.google.notionConnected());
+   // read_world_source for every provider: Mail, Calendar and Notion are read here, and the rest are the World's own
+   // local records, which its permit carries.
+   const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source';
    return ours?this.google.tool(name,args,onEvent,()=>this.cancelled):this.other().run(body,home,onEvent);
   }
   const request=googleRequest(body);
@@ -123,7 +125,8 @@ export class GoogleSourceConnections implements AgentSourceConnections {
 }
 
 const validators=new Map<string,ReturnType<typeof Compile>>();
-function validate(name:string,args:Row){
+/** A World service tool's arguments against its schema (core/tools). */
+export function validateWorldTool(name:string,args:Row){
  let validator=validators.get(name);
  if(!validator){
   const definition=listWorldTools().find((tool:Row)=>tool.name===name);
@@ -137,7 +140,7 @@ const failureCode=(error:unknown)=>error instanceof GoogleRestError?({400:'inval
 export interface GoogleSourceOptions {account:GoogleAccount;development:boolean;openExternal(url:string):Promise<void>;
  /** Fox's own Hermes profile, whose Google files go when the World disconnects, and where earlier mail receipts were kept. */
  ownProfile:()=>string|null;legacyHomes:()=>string[];now?:()=>number;
- /** Notion, read for `read_world_source` through the World's MCP connection when it has one (mcp-source.ts). */
+ /** Notion, read for `read_world_source` through the MCP connection the World or the person's Agent has (mcp-source.ts). */
  notion?:{connected():boolean;read(body:Row):Promise<Row>}}
 /** Google's reads, mail drafts and sends for the World (host.py `_google` and `_google_reads`, world_service.py). */
 export class GoogleSource {
@@ -146,7 +149,6 @@ export class GoogleSource {
  private readonly options:GoogleSourceOptions;
  constructor(options:GoogleSourceOptions){this.options=options;this.account=options.account;this.development=options.development;}
  openExternal(url:string){return this.options.openExternal(url);}
- notionConnected(){return this.options.notion?.connected()===true;}
  ownProfile(){return this.options.ownProfile();}
  private get marker(){return path.join(this.account.folder,MOCK_MARKER);}
  /** Development builds only: rehearse onboarding on the fictional account (true), or leave it for a real sign-in. */
@@ -195,7 +197,7 @@ export class GoogleSource {
   * Its calls back into the World (`_world_authorize`, `_source_begin`, `_source_result`, `_email_review`) go through
   * the turn that asked, under its trust. */
  async tool(name:string,args:Row,onEvent:AgentEventHandler|undefined,cancelled:()=>boolean):Promise<Row> {
-  validate(name,args);
+  validateWorldTool(name,args);
   if(cancelled())throw new WorldletError('Task stopped.');
   const call=async(tool:string,values:Row)=>{
    const reply=await onEvent?.({type:'tool',id:'world-'+crypto.randomUUID(),name:tool,args:values});
