@@ -48,7 +48,7 @@ console.log('PASS fragmented 4 MB Codex conversation; seconds:',elapsed.toFixed(
 `);
  await build({entryPoints:[path.join(dir,'main.ts')],outfile:path.join(dir,'check.mjs'),bundle:true,platform:'node',format:'esm',target:'node22',logLevel:'error',
   // Plain Node runs the module; the Electron APIs it imports are not reached on this path.
-  plugins:[{name:'electron-stub',setup(stub){stub.onResolve({filter:/^electron$/},()=>({path:'electron',namespace:'electron-stub'}));stub.onLoad({filter:/.*/,namespace:'electron-stub'},()=>({contents:'export const shell={};',loader:'js'}));}}]});
+  plugins:[{name:'electron-stub',setup(stub){stub.onResolve({filter:/^electron$/},()=>({path:'electron',namespace:'electron-stub'}));stub.onLoad({filter:/.*/,namespace:'electron-stub'},()=>({contents:'export const shell={},app={};',loader:'js'}));}}]});
  const r=spawnSync(process.execPath,[path.join(dir,'check.mjs')],{cwd:dir,encoding:'utf8',timeout:30000,env:{...process.env,WORLDLET_TOOLS_PYTHON:python}});
  if(r.stdout)console.log(r.stdout.trim());
  if(r.status!==0)throw Error(r.error?.message||r.stderr.slice(-2000)||'Stream regression failed');

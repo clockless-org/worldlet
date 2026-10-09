@@ -1,8 +1,9 @@
 import {WorldletError} from '../../files.ts';
 import {bundledResource} from '../../resources.ts';
-import {AGENT,BROWSER,DESKTOP_COMPANION,type AgentService,type BrowserService,type DesktopCompanionService} from '../../host/services.ts';
+import {BROWSER,DESKTOP_COMPANION,type BrowserService,type DesktopCompanionService} from '../../host/services.ts';
 import {BrowserDevice} from './device.ts';
 import {agentScript} from './agent.ts';
+import {toolsPython} from '../media/local-tools.ts';
 import {discoverBookmarks} from './bookmarks.ts';
 import {websiteSession} from './surface.ts';
 import {YouTubePlayer,YouTubeService} from './youtube.ts';
@@ -15,7 +16,7 @@ export function installBrowser(host:Host){
  const {store}=host;
  const device=new BrowserDevice(host,{
   binary:()=>bundledResource(host.profile,'agentBrowser'),
-  python:()=>host.use<AgentService>(AGENT).helperPython(),
+  python:()=>toolsPython(host).path(),
   script:agentScript(host.profile.webRoot)
  });
  const youtube=new YouTubeService(host);

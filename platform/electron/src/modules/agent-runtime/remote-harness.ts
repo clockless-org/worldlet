@@ -70,7 +70,6 @@ export abstract class ElsewhereAdapter {
  makeSourceAccess(){return this.b.makeSourceAccess();}
  makeSourceConnections(){return this.b.makeSourceConnections();}
  makeRoutines(){return this.b.makeRoutines();}
- helperPython(){return this.b.helperPython();}
  prepare(){return this.b.prepare?.()??Promise.resolve();}
  home(scope:'private'|'sample'|'setup'){return this.b.home(scope);}
  async shutdown(){await this.builtInAdapter?.shutdown();}

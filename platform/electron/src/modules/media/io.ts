@@ -2,8 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
 import {WorldletError} from '../../files.ts';
-import {AGENT,type AgentService} from '../../host/services.ts';
-import type {Host} from '../../host/types.ts';
 
 export class TooLarge extends Error {}
 /** Reads at most `limit` bytes; a larger body is abandoned, never buffered whole. */
@@ -81,16 +79,6 @@ export function run(executable:string,args:string[],options:RunOptions):Promise<
  });
 }
 
-/** Python for local helpers comes from the Agent runtime; a host without one still honors
- * an explicit WORLDLET_TOOLS_PYTHON (and the Mac system Python), like the custom adapter. */
-export async function helperPython(host:Host):Promise<string> {
- const agent=host.optional<AgentService>(AGENT);
- if(agent)return agent.helperPython();
- const explicit=process.env.WORLDLET_TOOLS_PYTHON;
- const candidate=explicit??(process.platform==='darwin'?'/usr/bin/python3':'');
- if(!candidate||!path.isAbsolute(candidate)||!executable(candidate))throw new WorldletError('Local tools need an executable Python path in WORLDLET_TOOLS_PYTHON.');
- return candidate;
-}
 export function executable(file:string){try{const stat=fs.statSync(file);if(!stat.isFile())return false;if(process.platform==='win32')return true;fs.accessSync(file,fs.constants.X_OK);return true;}catch{return false;}}
 export function which(name:string){
  const names=process.platform==='win32'?[name+'.exe',name]:[name];

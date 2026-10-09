@@ -15,7 +15,7 @@ const library=()=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-res
 const left=(root:string)=>files.filter(file=>fs.existsSync(path.join(root,file)));
 const retained=new Set(['agent/private/hermes/.env',...HOST_RETAINED]);
 
-for(const folder of ['runtime','speech','model-access'])assert(HOST_RETAINED.includes(folder),'Reset keeps the installation folder '+folder);
+for(const folder of ['runtime','speech','tools','model-access'])assert(HOST_RETAINED.includes(folder),'Reset keeps the installation folder '+folder);
 const root=library();
 try{
  removeExceptRetained(root,retained);

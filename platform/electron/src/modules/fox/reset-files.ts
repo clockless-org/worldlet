@@ -5,7 +5,7 @@ import {ensureDirectory,INSTALLATION_FOLDERS,WorldletError} from '../../files.ts
 
 /** Host files that are not World data: Electron's preferences file, Chromium's live profile (its
  * site data is cleared through the sessions instead of under its feet), and the installation's own folders
- * (`INSTALLATION_FOLDERS`: Fox's Hermes runtime, local speech, the model credential). The runtime can be
+ * (`INSTALLATION_FOLDERS`: Fox's Hermes runtime, local speech, the local tools' Python, the model credential). The runtime can be
  * mid-install while Reset runs, and its open files would make the move fail with EPERM, so Reset never
  * finished (#1568). Since 2026-10-04 the Mac keeps them in the library too. */
 export const HOST_RETAINED=['preferences.json','Browser',...INSTALLATION_FOLDERS];
