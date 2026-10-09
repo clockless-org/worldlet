@@ -64,7 +64,8 @@ jobs:
       - run: npm ci
       # The UI checks' headless Chromium, at the version package-lock.json pins for Playwright.
       - run: npx playwright install chromium
-      - if: matrix.part.name == 'base'
+      # test:harness, test:hermes and test:ui's world-gateway-check run in Hermes' Python, as Fox does.
+      - if: matrix.part.name != 'ios'
         run: npm run setup:hermes
       # test:harness and test:hermes read the interface that test:ui builds, which runs in other parts here.
       - if: matrix.part.name == 'base'
@@ -86,6 +87,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # Windows: the gate without test:ui and test:android (whose emulator setup alone took a quarter of an hour), test:android
+  # alone, and test:ui in three shares.
   windows:
     name: Windows ${{ matrix.part.name }}
     if: github.repository == 'clockless-org/worldlet'
@@ -95,7 +98,8 @@ jobs:
       fail-fast: false
       matrix:
         part:
-          - {name: base, skip: 'test:ui'}
+          - {name: base, skip: 'test:ui,test:android'}
+          - {name: android, only: 'test:android'}
           - {name: ui-1, only: 'test:ui', shard: 1/3}
           - {name: ui-2, only: 'test:ui', shard: 2/3}
           - {name: ui-3, only: 'test:ui', shard: 3/3}
@@ -118,11 +122,15 @@ jobs:
             ~\AppData\Local\WorldletBuild
             .local/browser-driver
             .local/bootstrap
+            .local/hermes-source
             ~\AppData\Local\ms-playwright
-          key: windows-rc-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'scripts/package-agent-browser.ts') }}
+          key: windows-rc-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'harness/hermes/runtime.json', 'scripts/package-agent-browser.ts') }}
           restore-keys: windows-rc-
       - run: npm ci
       - run: npx playwright install chromium
+      # test:ui's world-gateway-check runs the World tools in Hermes' Python, as Fox does.
+      - if: matrix.part.only == 'test:ui'
+        run: npm run setup:hermes
       # PowerShell, as on the Windows release host: Git Bash's tools would shadow Windows' own on PATH.
       - name: Gate
         shell: pwsh

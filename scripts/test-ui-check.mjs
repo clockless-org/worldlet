@@ -47,10 +47,15 @@ for(const n of serial){const i=events.indexOf('start '+n);assert(i>drained,n+' w
 assert.deepEqual(lines.filter(l=>/^PASS /.test(l)).map(l=>l.split(/\s+/).at(-1)).sort(),['build:native-ui',...parallel,...serial].sort(),'one line per step');
 assert.match(lines.at(-1),/9 of 9 checks passed/);assert(!lines.some(l=>l.includes('quiet pass')),'passing output stays quiet');
 // A failing check fails the suite; the summary names it and its whole output follows.
-lines.length=0;events.length=0;assert.equal(await testUi({parallel,serial,limit:4,cli:'npm-cli.js',run:fake(['p2','s1']),log}),1);
+lines.length=0;events.length=0;assert.equal(await testUi({parallel,serial,limit:4,cli:'npm-cli.js',run:fake(['p2','s1']),log,inline:false}),1);
 assert(lines.some(l=>/^FAIL .* p2$/.test(l)));const summary=lines.findIndex(l=>/7 of 9 checks passed.*Failed: p2, s1/.test(l));
 const output=lines.findIndex(l=>l.includes('AssertionError: p2 broke'));assert(summary>0&&output>summary,'failed output follows the summary');
 assert.match(lines[output],/===== p2 failed after 0\.0s\. Its output: =====\nfixture output\nAssertionError: p2 broke/);assert.equal(lines.at(-1),'\ntest:ui failed: p2, s1');
+// On GitHub Actions the output also follows the FAIL line at once, folded, in case the RC's time limit stops the suite.
+lines.length=0;assert.equal(await testUi({parallel,serial,cli:'npm-cli.js',run:fake(['p2']),log,inline:true}),1);
+const failLine=lines.findIndex(l=>/^FAIL .* p2$/.test(l));
+assert.equal(lines[failLine+1],'::group::p2 output\nfixture output\nAssertionError: p2 broke\n::endgroup::');
+assert(!lines.some(l=>l.startsWith('::group::p1')),'passing checks print nothing more');
 // A failed build runs no check.
 lines.length=0;events.length=0;assert.equal(await testUi({parallel,serial,cli:'npm-cli.js',run:fake(['build:native-ui']),log}),1);
 assert.deepEqual(events,['start build:native-ui','end build:native-ui']);assert.match(lines.find(l=>l.includes('checks passed')),/0 of 9 checks passed.*no check ran without the build/);
