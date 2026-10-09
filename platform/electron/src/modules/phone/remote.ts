@@ -25,6 +25,8 @@ export type RemoteAgentOptions={
 const VAULT_ID='remote-agent';
 /** A host that has not reached the relay for this long is away: a line is not queued for it. */
 export const REMOTE_HOST_AWAY_MS=90_000;
+/** How long pairing waits for a newer `desktop` slot after one that does not name the turn protocol. */
+const REMOTE_PAIR_SETTLE_MS=3_000;
 const cancelled=()=>Object.assign(new Error('Cancelled.'),{name:'AbortError'});
 export function createRemoteAgentLink(options:RemoteAgentOptions){
  let saved:Saved|null=null,keys:PairKeys|null=null,cursor=0,seenAt:number|null=null,error='',info:RemoteHostInfo|null=null;
@@ -92,8 +94,12 @@ export function createRemoteAgentLink(options:RemoteAgentOptions){
    const k=(await ensureKeys())!;
    await read();
    await request(`/api/pair/${k.id}/slots/phone`,{method:'PUT',body:JSON.stringify({box:await sealBox(k,boxPlace('slot','phone'),{v:1,name:options.name().slice(0,60),version:options.version,kind:'agent'})})});
-   let answered=false;
-   for(const until=Date.now()+30_000;!answered&&Date.now()<until;)answered=(await read(10)).some(slot=>slot.name==='desktop');
+   // A host sends its slots' last values again when a pairing completes, just before its fresh ones, so the first
+   // `desktop` slot can be one it kept from before (relay.ts publish). One without the turn protocol gets a moment for
+   // a newer one before the host counts as too old.
+   let answered=0;
+   for(const until=Date.now()+30_000;!info&&Date.now()<(answered?Math.min(until,answered+REMOTE_PAIR_SETTLE_MS):until);)
+    if((await read(answered?1:10)).some(slot=>slot.name==='desktop'))answered||=Date.now();
    if(!answered)throw new Error(`Worldlet on ${saved.computer} did not answer. Open Worldlet there, make a new code and try again.`);
    if(!info)throw new Error(`Worldlet on ${saved.computer} is too old to run Fox for this computer. Update it there, then make a new code.`);
   }catch(e){
