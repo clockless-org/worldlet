@@ -503,8 +503,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
 
 /** One turn's ordered event path to the page (LocalHarnessRuntime.execute). */
 interface TurnPipe {events:AgentEventWait;emit:(event:Row)=>Promise<unknown>;say:(text:string)=>Promise<void>;started:()=>boolean}
-/** Fox's Agent is the person's own Harness: Worldlet keeps the companion memory and conversations;
- * account connections stay with the built-in Agent's World service, which reads them without a model. Background
+/** Fox's Agent is the person's own Harness: Worldlet keeps the companion memory and conversations; the World's
+ * account connections are read in the Platform, without a model (agent-runtime/index.ts `worldSources`). Background
  * model work (the Attention check, Applet tasks, the day's plan and Fox's quiet-moment asks) runs on the person's
  * Harness too, beside the conversation (owner decision 2026-10-07 18:18 PDT: the conversation and background work
  * both run on the underlying Harness), a chosen Hermes Agent too (owner decision 2026-10-09);
@@ -533,8 +533,8 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   * work alike), a chosen Hermes Agent too: its own `hermes acp` beside the conversation, on its own model (owner
   * decision 2026-10-09: Worldlet customizes nothing below the Harness contract). */
  background():Adapter|null {return this;}
- /** Mail and Attention checks read accounts through the built-in Agent's World service, which needs no model. */
- override get supportsBackgroundChecks(){return this.background()!==null&&this.builtIn()?.available===true;}
+ /** Mail and Attention checks read accounts in the Platform (the World's connections) and think on this Harness. */
+ override get supportsBackgroundChecks(){return this.background()!==null;}
  get id(){return localHarnessAdapterId(this.install.id);}
  hasInteractiveWork(){return this.running.size>0||this.builtInAdapter?.hasInteractiveWork()===true;}
  private readonly spares=new SpareTurns();

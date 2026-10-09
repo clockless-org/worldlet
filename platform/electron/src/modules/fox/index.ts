@@ -335,9 +335,9 @@ export function installFox(host:Host){
   };
   return handle;
  }
- /** A local Agent's (or a Hermes channel's) call to a World service the built-in Hermes owns (Gmail, Calendar and Drive reads, mail
-  * drafts, source reads, DoorDash): the accounts' Hermes runs it with no model, and the calls it makes back into
-  * the World go through this same turn, under its trust. Hermes itself runs these inside its own turn. */
+ /** A local Agent's (or a Hermes channel's) call to a World service (Gmail, Calendar and Drive reads, mail drafts,
+  * source reads, DoorDash): the Platform runs it with no model (the agent service's source access), and the calls it
+  * makes back into the World go through this same turn, under its trust. The built-in Hermes runs these inside its own turn. */
  async function accountServiceReply(event:Row,turn:string,scope:Scope,handle:(event:Row)=>Promise<Row|null>):Promise<Row|null> {
   const runtime=agent();
   // The built-in Hermes runs these inside its own turn and never sends them as tool events; a turn on the standard Hermes
