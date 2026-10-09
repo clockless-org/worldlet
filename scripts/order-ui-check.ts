@@ -2,7 +2,7 @@
 // standing on its own just left of Fox's message bar on every channel (owner 2026-10-06, kept there 2026-10-07), with
 // the microphone as its twin on the bar's right and a Send button that stands out inside the bar (owner 2026-10-07).
 // Where the host says this copy may send (Alpha or Dev on an enrolled computer) it is Order: one click (or ⌘B / Ctrl+B)
-// starts Fox's voice mode (button pressed and red) with nothing else on screen changing, not even when pointed at, the
+// starts Fox's voice mode (button pressed and red) with a sound wave in the message bar's place (2026-10-09) and nothing else on screen changing, not even when pointed at, the
 // second click stops it and the button turns a spinner, and the final words go to the host's send with the place, then
 // Fox says it was sent. A second page plays Beta: the same button is Feedback and opens Fox's Feedback page, never an
 // Order. A third plays a failed instant post: Fox says plainly that it did not reach Claude right away, and why. A fourth
@@ -42,9 +42,15 @@ await withBrowser(fileAccess,async browser=>{
  await tell.click();
  await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='speechStart'&&c.purpose==='order'));
  await page.waitForTimeout(300);
- // Nothing else changes while it listens: the bar, its hint, Fox's card and Fox stay as they were.
- assert.equal(await barWidth(),restWidth,'the bar keeps its width while it listens');assert.equal(await entry.getAttribute('data-quiet'),restQuiet);
- assert.notEqual(await page.locator('#notionInput').getAttribute('placeholder'),'Listening…','the bar does not switch to voice mode');
+ // While it listens a sound wave of the bar's size stands in the bar's place (owner request 2026-10-09); Fox's card
+ // and Fox stay as they were.
+ const wave=page.locator('.companion-input-wave');
+ assert.equal(await bar.isVisible(),false,'the bar gives way to the wave');assert.equal(await entry.getAttribute('data-voice'),'true');
+ {const w=(await wave.boundingBox())!;assert(Math.abs(w.width-restWidth)<1,'the wave is as wide as the bar was');
+  const t=(await tell.boundingBox())!;assert(t.x+t.width<=w.x&&w.x-(t.x+t.width)<16,'just right of the button');}
+ await page.evaluate(()=>(window as any).worldletSpeech({phase:'level',text:'0.8'}));
+ assert.equal(await wave.evaluate(e=>getComputedStyle(e).getPropertyValue('--voice-level').trim()),'0.8','the wave follows the voice');
+ assert.equal(await entry.getAttribute('data-quiet'),restQuiet);
  assert.equal(await cardShown(),restCard,'Fox’s card neither opens nor closes');
  assert.equal(await root.evaluate(e=>e.classList.contains('is-listening')),false,'Fox does not switch to listening');
  assert.equal(await root.getAttribute('data-order'),'listening','the visible sign while it listens');assert.equal(await tell.getAttribute('aria-pressed'),'true');
@@ -55,7 +61,7 @@ await withBrowser(fileAccess,async browser=>{
  // Once it stops listening, the button alone turns a spinner until the Order is sent.
  assert.equal(await root.getAttribute('data-order'),'sending');assert.equal(await tell.getAttribute('aria-busy'),'true');
  assert.equal(await tell.evaluate(e=>getComputedStyle(e,'::after').animationName),'order-sending','a turning ring in place of the bug');
- assert.equal(await barWidth(),restWidth,'the bar still keeps its width');
+ assert.equal(await barWidth(),restWidth,'the bar comes back at its width');assert.equal(await page.locator('.companion-input-wave').isVisible(),false);
  await page.evaluate(()=>(window as any).worldletSpeech({phase:'final',text:'把设置里的按钮改大一点'}));
  await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='order'&&c.operation==='send'));
  const sent=await page.evaluate(()=>(window as any).calls.find((c:any)=>c.action==='order'&&c.operation==='send'));

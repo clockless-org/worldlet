@@ -45,13 +45,13 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.locator('.companion-text-entry').getAttribute('data-quiet'),'true','The bar rests quiet');
  await form.hover();await page.waitForTimeout(400);
  assert.deepEqual(await form.locator('button').evaluateAll(b=>b.filter(e=>(e as HTMLElement).offsetParent).map(e=>e.id||e.className)),[],'No Send while there is nothing to send; the microphone is its own button on the bar\'s right');assert(await mic.isVisible());
- assert.equal((await form.boundingBox()).width,200,'The resting bar is small (two sizes, owner Order 2026-10-08)');assert.match(await type.getAttribute('placeholder'),/Click to type · hold to speak/);
+ assert.equal((await form.boundingBox()).width,160,'The resting bar is small (two sizes, owner Order 2026-10-08)');assert.match(await type.getAttribute('placeholder'),/Click to type · hold to speak/);
  assert.match(await form.evaluate(e=>getComputedStyle(e).backdropFilter),/blur/,'The bar is frosted');
  await openCompanionPanel(page);assert(await panel.isVisible(),'The settings button opens the companion panel');assert(!await typing(),'Opening the panel does not start typing');
  await page.keyboard.press('Escape');assert.equal(await panel.isVisible(),false);
  assert(await entry.evaluate(e=>e===document.activeElement),'The panel returns keyboard focus to its button');
  await type.click();assert(await typing());assert(await type.evaluate(e=>e===document.activeElement),'Clicking the bar focuses the input');
- await page.waitForFunction(()=>Math.round(document.querySelector('#notionCommand').getBoundingClientRect().width)===360);
+ await page.waitForFunction(()=>Math.round(document.querySelector('#notionCommand').getBoundingClientRect().width)===300);
  await page.keyboard.press('Escape');assert(!await typing(),'Escape returns the bar to rest');
  const originalPet=await page.locator('.companion-pet').boundingBox(),originalEntry=await page.locator('.companion-text-entry').boundingBox();
  const hudShape=()=>page.evaluate(()=>['#notionHUD','.companion-pet','.companion-avatar canvas','.companion-text-entry','#notionCommand','.companion-dock'].map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return {selector,x:r.x,y:r.y,width:r.width,height:r.height,display:s.display,font:s.fontSize};}));
@@ -134,7 +134,7 @@ await withBrowser(fileAccess,async browser=>{
   assert(bar.y>=a.y+a.height/2&&bar.x>=0&&bar.x+bar.width<=size.width&&bar.y+bar.height<=size.height,'The bar sits below Fox and fits the viewport');
   assert(Math.abs(bar.x+bar.width/2-(a.x+a.width/2))<=2,'The bar is centered under Fox');
   await type.click();const input=await form.boundingBox();assert(input&&input.x>=0&&input.x+input.width<=size.width&&input.y+input.height<=size.height,'Input fits viewport');
-  await page.waitForTimeout(300);assert((await form.boundingBox()).width<=360,'Editor is compact');
+  await page.waitForTimeout(300);assert((await form.boundingBox()).width<=300,'Editor is compact');
   if(size.width===1380)await page.screenshot({path:'/tmp/worldlet-companion-card.png'});
   await page.keyboard.press('Escape');await page.waitForTimeout(300);await settle(); // The bar narrows back to its resting width.
   const shared=await hudShape();await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();
@@ -163,7 +163,7 @@ await withBrowser(fileAccess,async browser=>{
  // Focus and sample in one step so a slow runner cannot finish the .22s widening first. It widens from
  // the low-key resting bar (owner request 2026-10-05).
  const widths=await form.evaluate(async e=>{e.querySelector<HTMLTextAreaElement>('#notionInput')!.focus();const animation=e.getAnimations()[0];if(!animation)throw Error('Missing bar widening');animation.pause();const result=[];for(const time of [0,110,220]){animation.currentTime=time;result.push(e.getBoundingClientRect().width);}animation.finish();return result;});
- assert(widths[0]>=140&&widths[0]<widths[1]&&widths[1]<widths[2]&&widths[2]<=360,'The bar widens smoothly from rest to typing');
+ assert(widths[0]>=140&&widths[0]<widths[1]&&widths[1]<widths[2]&&widths[2]<=300,'The bar widens smoothly from rest to typing');
  await page.screenshot({path:'/tmp/worldlet-companion-input-short.png'});
  await page.keyboard.press('Escape');
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));
