@@ -31,6 +31,9 @@ assert.match(sh,/\/downloads\/appcast\.xml/);
 assert.match(ps,/\/downloads\/windows-preview\.json/);
 assert.match(sh,/target="\$\{WORLDLET_INSTALL_DIR:-\/Applications\}"/,'Mac installs into WORLDLET_INSTALL_DIR when set (release machines\' Beta install check)');
 assert.ok(!/sudo/.test(sh),'never asks for an administrator password');
+// macOS /bin/sh is bash 3.2: in a UTF-8 Terminal it reads a non-ASCII byte right after `$name` as part of the name
+// (`$file…` failed as `file?: unbound variable` under `set -u`), so such variables are written `${name}`.
+for(const [name,text] of [['install.sh',sh],['install.ps1',ps]])assert.doesNotMatch(text,/\$[A-Za-z_][A-Za-z0-9_]*[^\x00-\x7f]/,`${name} braces a variable that is followed by a non-ASCII character`);
 const acceptance=readFileSync('platform/install/install-acceptance.ps1','utf8');
 assert.match(acceptance,/irm \$site\/install\.ps1 \| iex/,'acceptance runs the published one-liner');
 assert.match(acceptance,/windows-preview\.json/,'acceptance compares with the public manifest');

@@ -36,7 +36,7 @@ mount="$work/volume"
 cleanup() { hdiutil detach "$mount" -quiet >/dev/null 2>&1 || true; rm -rf "$work"; }
 trap cleanup EXIT INT TERM
 
-echo "Downloading $file…"
+echo "Downloading ${file}…"
 curl -fL --progress-bar "$SITE/downloads/$file" -o "$work/$file"
 expected="$(curl -fsSL "$SITE/downloads/$file.sha256" | awk '{print $1}')"
 actual="$(shasum -a 256 "$work/$file" | awk '{print $1}')"
@@ -55,7 +55,7 @@ if pgrep -xq Worldlet; then
   osascript -e 'quit app "Worldlet"' >/dev/null 2>&1 || true
   sleep 2
 fi
-echo "Installing into $target…"
+echo "Installing into ${target}…"
 rm -rf "$target/Worldlet.app"
 ditto "$mount/Worldlet.app" "$target/Worldlet.app"
 
