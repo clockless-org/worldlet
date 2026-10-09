@@ -115,7 +115,10 @@ export abstract class Updates implements AppUpdatesService {
  /** The version the updater names in its User-Agent (worker/update-checks.ts). */
  protected get agentVersion(){return versionText(this.host)||String(buildNumber(this.host));}
  /** `update_failed` at most once per stage per launch: an offline computer's hourly checks are one failure. */
- protected failed(stage:'check'|'folder'|'download'|'prepare'|'install'){if(this.failures.has(stage))return;this.failures.add(stage);this.report('update_failed','',{update_stage:stage});}
+ protected failed(stage:'check'|'folder'|'download'|'prepare'|'install',error?:unknown){
+  if(this.failures.has(stage))return;this.failures.add(stage);
+  this.report('update_failed','',stage==='prepare'?{update_stage:stage,update_error:prepareError(error)}:{update_stage:stage});
+ }
  private failures=new Set<string>();
 }
 
@@ -123,6 +126,14 @@ const WORTH_SHOWING=new Set(['available','ready','installing','error']);
 const FINISH_LATEST='worldlet.update.finishLatest',ATTEMPTED_BUILD='worldlet.update.attemptedBuild';
 interface FeedItem {build:number;version:string;url:string;length:number;signature:string;minimumSystemVersion:string}
 interface Staged {build:number;version:string;app:string;executable:string}
+/** A failed Mac prepare names its check, so `update_failed` says which one (`update_error`), never the error text. */
+class PrepareError extends WorldletError {readonly check:string;constructor(check:string,message:string){super(message);this.check=check;}}
+function prepareError(error:unknown,check='other'){
+ if(error instanceof PrepareError)return error.check;
+ const failure=error as NodeJS.ErrnoException&{killed?:boolean};
+ if(failure?.code==='ENOSPC'||/No space left on device/i.test(String(failure?.message)))return 'disk';
+ return failure?.killed?'timeout':check;
+}
 const entity=(text:string)=>text.replace(/&(amp|lt|gt|quot|apos);/g,(_m,name)=>({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'"} as Record<string,string>)[name]);
 /** Items of a Sparkle appcast that this app could install. `loopback` (the #1140 acceptance feed's origin)
  * also admits archives served by that same local origin. */
@@ -263,7 +274,7 @@ export class MacUpdates extends Updates {
    else this.show('ready','Update',`Worldlet ${item.version}${item.build<this.current?' ('+this.channel[0].toUpperCase()+this.channel.slice(1)+')':''} is ready. Update restarts into it now.`);
   }catch(error){
    if(this.abort.signal.aborted||this.state==='installing')return;
-   if(!this.acceptance)this.failed(stage);
+   if(!this.acceptance)this.failed(stage,error);
    this.requestedInstall=false;
    // A prepared update stays ready when preparing a newer one fails.
    if(this.staged){this.show('ready','Update',`Worldlet ${this.staged.version} is ready. Update restarts into it now.`);return;}
@@ -328,24 +339,24 @@ export class MacUpdates extends Updates {
   const mount=fs.mkdtempSync(path.join(updates,'mount-'));
   const target=path.join(staging,path.basename(this.bundle));
   try{
-   await run('/usr/bin/hdiutil',['attach','-nobrowse','-readonly','-noautoopen','-mountpoint',mount,file],300_000).catch(()=>{throw new WorldletError('The update disk image could not be opened.');});
+   await run('/usr/bin/hdiutil',['attach','-nobrowse','-readonly','-noautoopen','-mountpoint',mount,file],300_000).catch(error=>{throw new PrepareError(prepareError(error,'open'),'The update disk image could not be opened.');});
    try{
     const apps=fs.readdirSync(mount).filter(name=>name.endsWith('.app')&&fs.lstatSync(path.join(mount,name)).isDirectory());
-    if(apps.length!==1)throw new WorldletError('The update does not contain one Worldlet app.');
-    await run('/usr/bin/ditto',[path.join(mount,apps[0]),target],600_000);
+    if(apps.length!==1)throw new PrepareError('contents','The update does not contain one Worldlet app.');
+    await run('/usr/bin/ditto',[path.join(mount,apps[0]),target],600_000).catch(error=>{throw new PrepareError(prepareError(error,'copy'),'The update could not be unpacked.');});
    }finally{await run('/usr/bin/hdiutil',['detach',mount,'-force']).catch(()=>{});}
   }finally{fs.rmSync(mount,{recursive:true,force:true});fs.rmSync(file,{force:true});}
   const plist=(bundle:string,key:string)=>run('/usr/bin/plutil',['-extract',key,'raw','-o','-',path.join(bundle,'Contents/Info.plist')]).then(r=>r.stdout.trim(),()=>'');
   const team=(bundle:string)=>run('/usr/bin/codesign',['-dv','--verbose=2',bundle]).then(r=>/TeamIdentifier=([A-Z0-9]{10})/.exec(r.stderr)?.[1]??'',()=>'');
   try{
-   if(Number(await plist(target,'CFBundleVersion'))!==item.build)throw new WorldletError('The update does not match its published release.');
+   if(Number(await plist(target,'CFBundleVersion'))!==item.build)throw new PrepareError('build','The update does not match its published release.');
    const identifier=await plist(target,'CFBundleIdentifier');
-   if(!identifier||identifier!==await plist(this.bundle,'CFBundleIdentifier'))throw new WorldletError('The update belongs to a different app.');
-   await run('/usr/bin/codesign',['--verify','--deep','--strict',target],300_000).catch(()=>{throw new WorldletError('The update is not correctly signed.');});
+   if(!identifier||identifier!==await plist(this.bundle,'CFBundleIdentifier'))throw new PrepareError('identity','The update belongs to a different app.');
+   await run('/usr/bin/codesign',['--verify','--deep','--strict',target],300_000).catch(error=>{throw new PrepareError(prepareError(error,'signature'),'The update is not correctly signed.');});
    const expected=await team(this.bundle);
-   if(expected&&await team(target)!==expected)throw new WorldletError('The update is signed by a different developer.');
+   if(expected&&await team(target)!==expected)throw new PrepareError('team','The update is signed by a different developer.');
    const executable=await plist(target,'CFBundleExecutable');
-   if(!executable||executable.includes('/'))throw new WorldletError('The update app is incomplete.');
+   if(!executable||executable.includes('/'))throw new PrepareError('incomplete','The update app is incomplete.');
    return {build:item.build,version:item.version,app:target,executable};
   }catch(error){fs.rmSync(staging,{recursive:true,force:true});throw error;}
  }
