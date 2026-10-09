@@ -129,6 +129,15 @@ export function githubStore(repo=process.env.GITHUB_REPOSITORY,gh=(args,input)=>
    if(this.read(tag,name)!==body)throw Error(`The stored feed differs: ${tag}/${name}`);
   },
   promote(tag){run('release','edit',tag,'--repo',repo,'--prerelease=false','--latest');},
+  // GitHub refuses this workflow's token a new tag on a commit whose .github/workflows differ from main's ("Resource
+  // not accessible by integration": a new tag counts as a workflow change). That happens only after a newer push
+  // changed a workflow, and that push runs its own Dev build, so the older build is superseded. Names the changes.
+  superseded(tag,sha){
+   if(release(tag))return '';
+   const r=gh(['api',`repos/${repo}/compare/${sha}...main`,'--jq','[.files[]?.filename|select(startswith(".github/workflows/"))]|join(", ")']);
+   if(r.status!==0)throw Error(`Could not compare ${sha} with main: ${(r.stderr||'').trim().slice(0,300)}`);
+   return r.stdout.trim();
+  },
   close(){rmSync(scratch,{recursive:true,force:true});},
  };
 }
@@ -139,6 +148,8 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
  const keys=channelKeys(channel,live),own=store||githubStore();
  const identity=JSON.parse(readFileSync(path.join(dir,'release.json'),'utf8')),label=labelOf(identity.version),tag='v'+label;
  try{
+  const changed=channel==='dev'&&own.superseded?await own.superseded(tag,identity.sourceCommit):'';
+  if(changed)return {skipped:`main has changed ${changed} since ${identity.sourceCommit}, so GitHub refuses a tag there; the newer push publishes a newer Dev build`};
   await own.ensure(tag,{title:`Worldlet v${label}`,target:identity.sourceCommit,notes:`Build ${identity.build} of ${identity.sourceCommit}.`});
   await own.ensure(keys.feedTag,{title:`Worldlet ${channel} channel${live?'':' (staging)'}`,notes:`The ${channel} channel's update feeds. Installed apps read them here; the installers are in each build's release.`});
   let result;
