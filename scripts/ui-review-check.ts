@@ -36,7 +36,7 @@ await withTempDir('worldlet-ui-review-check-',async logs=>{
  assert.deepEqual(freshRuns(logs).map(r=>path.basename(r.dir)),['onboarding-flow-frames'],'only pictures from this gate run');
  // The whole run below uses a fake Codex CLI as a script with a shebang, which Windows cannot run directly.
  if(process.platform==='win32'){console.log('PASS UI review (selection and parsing; the fake-CLI run is skipped on Windows)');process.exit(0);}
- // A fake Codex CLI: checks the read-only invocation and the pictures, answers with the scenario's JSON.
+ // A fake Codex CLI (the runs clear the hosted-runner skip, WORLDLET_CODEX_GATES_SKIP): checks the read-only invocation and the pictures, answers with the scenario's JSON.
  const fake=path.join(logs,'codex.mjs'),answer=path.join(logs,'answer.json');
  writeFileSync(fake,`#!/usr/bin/env node
 import fs from 'node:fs';
@@ -48,7 +48,7 @@ const prompt=fs.readFileSync(0,'utf8');if(!prompt.includes('PASS sign-in'))proce
 const v=fs.readFileSync(${JSON.stringify(answer)},'utf8');if(v==='crash')process.exit(9);
 fs.writeFileSync(get('--output-last-message'),v);
 `);chmodSync(fake,0o755);
- const run=(review:unknown)=>{writeFileSync(answer,typeof review==='string'?review:JSON.stringify(review));return spawnSync(process.execPath,['scripts/ui-review.ts'],{encoding:'utf8',env:{...process.env,WORLDLET_CHECK_LOGS:logs,WORLDLET_UI_REVIEW_CODEX:fake,WORLDLET_MACHINE_SERVICE_CONFIG:path.join(logs,'not-enrolled.json')}});};
+ const run=(review:unknown)=>{writeFileSync(answer,typeof review==='string'?review:JSON.stringify(review));return spawnSync(process.execPath,['scripts/ui-review.ts'],{encoding:'utf8',env:{...process.env,WORLDLET_CODEX_GATES_SKIP:'',WORLDLET_CHECK_LOGS:logs,WORLDLET_UI_REVIEW_CODEX:fake,WORLDLET_MACHINE_SERVICE_CONFIG:path.join(logs,'not-enrolled.json')}});};
  let r=run({summary:'Looks fine.',findings:[{severity:'nit',frame:'frame-0003.jpg',title:'Tight padding',detail:'The chat bubble padding is tight.'},{severity:'issue',frame:'frame-0005.jpg',title:'Clipped label',detail:'A region label is cut off.'}]});
  assert.equal(r.status,0,r.stderr+r.stdout);assert.match(r.stdout,/ISSUE frame-0005\.jpg: Clipped label/);assert.match(r.stdout,/PASS UI review/);
  assert.equal(JSON.parse(readFileSync(path.join(logs,'ui-review.json'),'utf8')).results[0].findings.length,2,'findings are saved');
@@ -62,7 +62,7 @@ fs.writeFileSync(get('--output-last-message'),v);
  await new Promise<void>(ok=>admin.listen(0,'127.0.0.1',ok));
  const config=path.join(logs,'machine-service.json');
  writeFileSync(config,JSON.stringify({url:`http://127.0.0.1:${(admin.address() as any).port}`,token:'t'.repeat(40),machine:'mac-release'}));
- const send=()=>new Promise<{code:number;out:string}>(ok=>execFile(process.execPath,['scripts/ui-review.ts'],{env:{...process.env,WORLDLET_CHECK_LOGS:logs,WORLDLET_UI_REVIEW_CODEX:fake,WORLDLET_MACHINE_SERVICE_CONFIG:config}},(e,out,err)=>ok({code:e?Number(e.code)||1:0,out:out+err})));
+ const send=()=>new Promise<{code:number;out:string}>(ok=>execFile(process.execPath,['scripts/ui-review.ts'],{env:{...process.env,WORLDLET_CODEX_GATES_SKIP:'',WORLDLET_CHECK_LOGS:logs,WORLDLET_UI_REVIEW_CODEX:fake,WORLDLET_MACHINE_SERVICE_CONFIG:config}},(e,out,err)=>ok({code:e?Number(e.code)||1:0,out:out+err})));
  writeFileSync(answer,JSON.stringify({summary:'One clipped label.',findings:[{severity:'issue',frame:'frame-0005.jpg',title:'Clipped label',detail:'A region label is cut off.'},{severity:'nit',frame:'frame-0003.jpg',title:'Tight',detail:'Tight padding.'}]}));
  let s=await send();assert.equal(s.code,0,s.out);assert.match(s.out,/sent to the admin requirement inbox \(1 pictures\)/);
  assert.equal(posts.length,1);assert.equal(posts[0].path,'/api/machine/inbox');assert.equal(posts[0].auth,'Bearer '+'t'.repeat(40));
