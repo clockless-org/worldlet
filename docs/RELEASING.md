@@ -23,7 +23,7 @@ Everything lives on this repository's GitHub Releases:
 | `channel-dev`, `channel-alpha`, `channel-beta` | Each channel's update feeds, replaced in place so their addresses never change: `appcast-dev.xml` and `windows-dev.json`; `appcast-alpha.xml` and `windows-alpha.json`; `appcast.xml`, `appcast-intel.xml` (with history) and `windows-preview.json`. |
 | `staging-<channel>` | The same feeds for a channel that is not live yet. |
 
-[Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. A channel not on the list publishes to its staging release, which nothing reads. Dev and Alpha are live (Alpha since 2026-10-09, owner decision, after Build 4028 passed both release machines); a pull request adds Beta once its nightly runs promote builds. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
+[Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. A channel not on the list publishes to its staging release, which nothing reads. Dev, Alpha and Beta are live (Alpha since 2026-10-09 after Build 4028 passed both release machines, Beta the same day after Build 4034 passed the nightly run on both; owner decisions). When a channel is added, the release machines promote the newest build that already passed that stage to it. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
 
 ## Tests and failures
 
