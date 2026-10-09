@@ -4,6 +4,7 @@ name: RC
 # Beta only when both platforms passed here. A failure opens (or adds to) one Issue per platform and failing gates
 # (scripts/ci-rc-report.mjs), which a cloud AI session fixes with a normal pull request; a pass closes them. Hosted
 # runners are free for this public repository. Nothing here runs for pull requests, and nothing reads a secret.
+# Only clockless-org/worldlet runs it: forks and the operations repository, which imports this tree, skip every job.
 on:
   push:
     branches: [main]
@@ -20,6 +21,7 @@ concurrency:
 jobs:
   mac:
     name: Mac
+    if: github.repository == 'clockless-org/worldlet'
     runs-on: macos-15
     timeout-minutes: 120
     outputs:
@@ -54,6 +56,7 @@ jobs:
 
   windows:
     name: Windows
+    if: github.repository == 'clockless-org/worldlet'
     runs-on: windows-2025
     timeout-minutes: 120
     outputs:
@@ -91,7 +94,7 @@ jobs:
   report:
     name: Report
     needs: [mac, windows]
-    if: always() && !cancelled()
+    if: github.repository == 'clockless-org/worldlet' && always() && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

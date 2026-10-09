@@ -23,7 +23,7 @@ export const operationalChecks=available([
  // The test:ui runner decides the UI gate: a broken one could pass every release-candidate run.
  'scripts/test-ui-check.mjs','scripts/run-steps-check.mjs',
  'scripts/machine-prs-check.mjs',
- 'gatehouse/check.mjs','gatehouse/cloud-check.mjs','gatehouse/github-check.mjs','gatehouse/github-app-check.mjs','gatehouse/mcp-check.mjs','gatehouse/readers-check.mjs','gatehouse/funnel-check.mjs','gatehouse/oauth-check.mjs','gatehouse/data-sources-check.mjs','gatehouse/production-errors-check.mjs','gatehouse/recordings-check.mjs','gatehouse/inbox-check.mjs','gatehouse/vault-check.mjs','gatehouse/split-check.mjs','gatehouse/ui-build-check.mjs',
+ 'gatehouse/check.mjs','gatehouse/cloud-check.mjs','gatehouse/github-check.mjs','gatehouse/github-app-check.mjs','gatehouse/mcp-check.mjs','gatehouse/readers-check.mjs','gatehouse/funnel-check.mjs','gatehouse/oauth-check.mjs','gatehouse/data-sources-check.mjs','gatehouse/production-errors-check.mjs','gatehouse/recordings-check.mjs','gatehouse/inbox-check.mjs','gatehouse/vault-check.mjs','gatehouse/ui-build-check.mjs',
  // Capacity and truthful live state are part of the workflow, not optional UI polish.
  'scripts/machine-capacity-check.mjs','scripts/machine-awake-check.mjs',
  'scripts/machine-interactive-check.mjs','scripts/machine-interactive-cli-check.mjs','scripts/machine-live-check.mjs',

@@ -91,7 +91,8 @@ await withBrowser(fileAccess,async browser=>{
  // Closing a panel is clicking away from it, which is why Done was dropped: it
  // took a line of a narrow bubble to offer what the rest of the screen already was.
  assert.equal(await bubble.getByRole('button',{name:'Done',exact:true}).count(),0,'no panel spends a line on Done');
- await page.locator('#notionStage').click({position:{x:60,y:120}});
+ // Empty world in the top-right; the top-left now holds the Today corner, whose date opens the Journal (#2235).
+ await page.locator('#notionStage').click({position:{x:1320,y:120}});
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue')?.hidden===true,null,{timeout:8000});
  await page.evaluate(()=>(document.activeElement as HTMLElement).blur());await page.keyboard.press('Space');assert.equal(await typing(),true,'tapping Space opens typing (owner 2026-10-07)');await input.press('Escape');await page.evaluate(()=>(document.activeElement as HTMLElement).blur());
  await handle.click();assert.equal(await typing(),true,'clicking the bar starts typing');assert.equal(await input.inputValue(),'');
@@ -134,7 +135,7 @@ await withBrowser(fileAccess,async browser=>{
  // connection uses, and no Back to world, which is what clicking the world is.
  assert.equal(await bubble.getByRole('button',{name:'Back to world',exact:true}).count(),0,'setup spends a line on leaving');
  assert.doesNotMatch(await bubble.innerText(),/Connections use Hermes/,'setup explains its own plumbing');
- assert.doesNotMatch(await bubble.innerText(),/Bring .* to life/,'setup repeats the region already on screen');await checkTextActions();await page.screenshot({path:'output/fox-mac/source-actions.png'});await page.locator('#notionStage').click({position:{x:60,y:120}});
+ assert.doesNotMatch(await bubble.innerText(),/Bring .* to life/,'setup repeats the region already on screen');await checkTextActions();await page.screenshot({path:'output/fox-mac/source-actions.png'});await page.locator('#notionStage').click({position:{x:1320,y:120}});
  await page.evaluate(()=>worldletShowControls('model'));await bubble.getByRole('button',{name:'Choose a model'}).waitFor();assert.equal(await bubble.getByRole('button',{name:'Choose a model'}).count(),1);assert.equal(await bubble.getByRole('button',{name:'Keep talking on this Mac'}).count(),0);assert.equal(await page.evaluate(()=>calls.some(c=>c.action==='modelSettings')),false);
  await bubble.getByRole('button',{name:'Choose a model'}).click();await bubble.locator('.fox-model-catalog').waitFor();await bubble.getByRole('button',{name:'Codex',exact:true}).waitFor();assert.equal(await bubble.getByRole('button',{name:'Qwen Cloud'}).count(),0);assert.equal(await bubble.getByRole('button',{name:'Ollama'}).count(),0);assert.equal(await bubble.getByRole('button',{name:'LM Studio'}).count(),0);assert.equal(await bubble.locator('.fox-model-catalog').evaluate(e=>getComputedStyle(e).flexDirection),'column');
  await checkTextActions();await page.screenshot({path:'output/fox-mac/model.png'});await bubble.getByRole('button',{name:'Back',exact:true}).click();await bubble.getByRole('button',{name:'Keep chatting',exact:true}).click();await input.press('Escape');await page.screenshot({path:'output/fox-mac/actions.png'});

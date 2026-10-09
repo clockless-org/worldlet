@@ -41,8 +41,9 @@ await withBrowser(fileAccess,async browser=>{
  // taken evenly from the three groups, every one of them an authored item.
  for(const g of groups){assert.ok(g.rows.length>=1,g.group+' holds a row');for(const t of g.rows)assert.ok(titles.has(t),'row is an authored item: '+t);}
  const shown=groups.flatMap(g=>g.rows);assert.ok(shown.length>=4&&shown.length<dataset.items.length,'the panel shows what fits: '+shown.length);
- assert.deepEqual(groups.map(g=>g.rows.length),[2,2,3],'two meetings, two tasks and three updates');
- await page.setViewportSize({width:1280,height:850});
+ assert.deepEqual(groups.map(g=>g.rows.length),[2,2,2],'two meetings, two tasks and two updates');
+ // 924 = 850 plus the 74 px the Today corner takes above the Attention Center (#2235): the room the panel had at 850 before.
+ await page.setViewportSize({width:1280,height:924});
  await page.waitForTimeout(300);
  // A shorter window trims the largest trimmable group first: Worth Knowing gives way, meetings and tasks stay.
  assert.deepEqual((await rows()).map(g=>g.rows.length),[2,2,1],'a shorter desktop window keeps meetings and tasks and trims updates');

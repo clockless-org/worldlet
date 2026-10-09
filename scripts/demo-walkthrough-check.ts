@@ -110,9 +110,10 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>calls.some(c=>c.action==='copyAppletPrototype'&&c.html.includes('Quiet focus timer')));
  assert.match(await page.locator('#notionContent').textContent(),/Version: 2/);
  assert.equal(await page.evaluate(()=>calls.filter(c=>['codexTask','codexSession'].includes(c.action)).length),0,'Practice delegation never runs native Codex');
+ // The weather line lives in the World's Today corner, which an open Applet hides (#2235): read it from the World.
+ await run('move_view',{direction:'overview'});
  const rain=await run('set_scene_weather',{weather:'rain'});assert.equal(rain.ok,true);await page.getByText('Rain scene',{exact:true}).waitFor();
  await run('set_scene_weather',{weather:'actual'});assert.equal(await page.locator('#notionWorld').getAttribute('data-scene-weather'),'actual');
- await run('move_view',{direction:'overview'});
  await page.locator('.world-task-group .world-matter',{hasText:'Tennis with Sam'}).waitFor();
  // The Attention preview's action asks Fox; the authored practice review lives in Calendar.
  await run('open_applet',{id:'app-google-calendar'});

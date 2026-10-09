@@ -21,7 +21,7 @@ const ABILITIES:[icon:string,title:string,say:string,does:string][]=[
  ['calendar','Calendar','“What’s coming up this week?”','Keeps Coming Up current and gets you ready before meetings.'],
  ['compass','Websites','“Find a short cooking video on YouTube.”','Works on a site in the background and shows each step. It asks before paying, sending or deleting.'],
  ['book','Remembers you','“Remember I’m vegetarian.”','Keeps what matters to you and uses it next time. You can view and correct it.'],
- ['clock','Routines','“Every morning at 8, tell me the weather and my first meeting.”','Runs on a schedule, also while Worldlet is closed once Hermes Agent runs as a service here.'],
+ ['clock','Routines','“Every morning at 8, tell me the weather and my first meeting.”','Runs on a schedule, also while Worldlet is closed once your Agent runs as a service here.'],
  ['file','Notes and files','“Find my notes about the Tokyo trip.”','Searches your notes, Obsidian vault and the files you brought in.'],
  ['spark','Code','“How is my Codex session going?”','Follows Claude Code and Codex sessions and your GitHub pull requests.'],
  ['chat','Talk or type','Hold Fox to talk, click it to type.','Any language. Fox answers in the conversation, or out loud if you turn that on.'],
