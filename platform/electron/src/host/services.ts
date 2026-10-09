@@ -48,6 +48,8 @@ export interface AgentService {
  accountsHome():string;
  makeSourceAccess():AgentRuntime;
  makeSourceConnections():AgentSourceConnections;
+ /** The World's own Google connection, when this build has one: the signed-in account for analytics and greetings. */
+ googleAccount?():{authorized():boolean;profile():{email:string;user_id:string;name?:string}|null}|null;
  makeRoutines():AgentRoutines;
  /** The Harness Fox talks through (contracts/harness-services.ts; its services are core `harnessService(id, …)`), or
   * null for the built-in Agent. */

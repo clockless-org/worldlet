@@ -1,6 +1,6 @@
 # 02 · Data and rules
 
-Platform-independent product behavior. Components: items, companion, context, scheduling, applets, attention, tools, browser, onboarding, agent, games, widgets, ongoing, artifacts.
+Platform-independent product behavior. Components: accounts, items, companion, context, scheduling, applets, attention, tools, browser, onboarding, agent, games, widgets, ongoing, artifacts.
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 

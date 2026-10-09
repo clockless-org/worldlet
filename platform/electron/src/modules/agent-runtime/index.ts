@@ -29,6 +29,9 @@ import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayV
 import {createRemoteAgentLink,type RemoteAgentLink} from '../phone/remote.ts';
 import type {Adapter,Row,RuntimeContext} from './types.ts';
 import type {HarnessVoice} from '../../../../../contracts/harness-services.ts';
+import {bundledResource} from '../../resources.ts';
+import {GoogleAccount} from '../sources/google-account.ts';
+import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../sources/google-source.ts';
 
 /** Selects the Agent adapter at launch (Mac AgentRuntimeProvider): WORLDLET_AGENT_CONFIG names an
  * external Harness; otherwise the Agent on another computer this Worldlet is paired with (`remote`);
@@ -52,10 +55,20 @@ export function selectAdapter(context:RuntimeContext,configuration=process.env.W
 
 /** The Agent runtime service over the selected adapter. Private and isolated homes are
  * registered with the execution journal; sample and setup homes never are. */
-export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[]):AgentService {
+/** The World's own Google connection (owner decision 2026-10-09: a connection made through Worldlet is kept by the
+ * Platform): Gmail, Calendar and Drive work the same whichever Agent Fox uses. Fox's Hermes profile's earlier grant is adopted. */
+export function worldGoogle(context:RuntimeContext,vault:VaultService,accountsHome:()=>string):GoogleSource {
+ const own=()=>path.join(context.root,'agent','private','hermes');
+ const homes=()=>[...new Set([accountsHome(),own()])];
+ const account=new GoogleAccount({folder:path.join(context.root,'accounts','google'),vault,clientFile:()=>bundledResource(context.profile,'googleClient'),adoptFrom:homes});
+ return new GoogleSource({account,development:context.development,openExternal:url=>context.openExternal(url),ownProfile:own,legacyHomes:homes});
+}
+
+export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],google:((accountsHome:()=>string)=>GoogleSource)|null=null):AgentService {
  const current=typeof selected==='function'?selected:()=>selected;
  const accounts=()=>{const adapter=current();return adapter.accountOwner?.()??adapter;};
  const journal=(home:string,enabled:boolean)=>ExecutionJournal.register(home,enabled,context.record);
+ const worldGoogle=google?.(()=>accounts().home('private'))??null;
  // Fox's Harness's own text-to-speech, found once per Harness (locating it reads the PATH).
  let voice:{id:string;service:HarnessVoice|null}|null=null;
  return {
@@ -71,8 +84,9 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   makeModelAccess:()=>current().makeModelAccess(),
   get accountsId(){return accounts().id;},
   accountsHome:()=>journal(accounts().home('private'),true),
-  makeSourceAccess:()=>accounts().makeSourceAccess(),
-  makeSourceConnections:()=>accounts().makeSourceConnections(),
+  makeSourceAccess:()=>worldGoogle?new GoogleSourceAccess(worldGoogle,()=>accounts().makeSourceAccess()):accounts().makeSourceAccess(),
+  makeSourceConnections:()=>worldGoogle?new GoogleSourceConnections(worldGoogle,()=>accounts().makeSourceConnections(),()=>accounts().id):accounts().makeSourceConnections(),
+  googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),
   get harness(){return current().harness??null;},
   schedule:()=>current().schedule?.()??null,
@@ -349,7 +363,7 @@ export function installAgentRuntime(host:Host){
   context.changed('agent-changed');
  };
  const builtIn=()=>adapter.id==='hermes'?adapter:new HermesAdapter(context);
- const service=createAgentService(context,()=>adapter,listeners);
+ const service=createAgentService(context,()=>adapter,listeners,home=>worldGoogle(context,vault,home));
  // Reset Fox starts onboarding on its first page, where the local Agent is chosen again.
  service.forgetSetupChoice=async()=>{
   if(process.env.WORLDLET_AGENT_CONFIG!==undefined)return;

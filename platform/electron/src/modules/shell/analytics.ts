@@ -117,6 +117,14 @@ export class UsageAnalytics implements AnalyticsService {
  enabled(){return this.prefs.get(ENABLED)!==false;}
  private profile():Record<string,string> {
   const agent=this.host.optional<AgentService>(AGENT);
+  const google=agent?.googleAccount?.();
+  // The World's own Google connection; until it has read the mailbox once, the profile Fox's Hermes wrote before.
+  const value=google?.authorized()?google.profile():null;
+  if(google&&!google.authorized())return {};
+  if(value){
+   if(!value.email.includes('@')||value.email.length>320||!/^google-[a-f0-9]{64}$/.test(value.user_id))return {};
+   return {email:value.email,user_id:value.user_id,...value.name?{name:value.name.slice(0,200)}:{}};
+  }
   const home=agent?agent.home('private'):path.join(this.host.profile.root,'agent/private/hermes');
   try{
    if(!fs.existsSync(path.join(home,'google_token.json')))return {};
