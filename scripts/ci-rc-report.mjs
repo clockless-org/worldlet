@@ -9,7 +9,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 export const LABEL='rc-failure';
-export const PLATFORMS={darwin:'mac',win32:'windows',mac:'mac',windows:'windows'};
+export const PLATFORMS={darwin:'mac',win32:'windows',linux:'linux',mac:'mac',windows:'windows'};
 const marker=(platform,signature)=>`<!-- rc-failure platform=${platform} signature=${signature} -->`;
 const platformMarker=platform=>`<!-- rc-failure platform=${platform} `;
 
@@ -62,7 +62,7 @@ export function report({platform,state,failing=[],signature,sha,runURL,gh}){
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const arg=name=>{const i=process.argv.indexOf('--'+name);return i>0?process.argv[i+1]:'';};
  const platform=PLATFORMS[arg('platform')];
- if(!platform)throw Error('--platform mac|windows');
+ if(!platform)throw Error('--platform mac|windows|linux');
  // The gate results of the platform's parts, downloaded into --results; none when no gate ran.
  const results=partResults(arg('results'),platform);
  const gh=args=>{const r=spawnSync('gh',args,{encoding:'utf8'});if(r.status!==0)throw Error(`gh ${args.slice(0,2).join(' ')}: ${r.stderr.trim()}`);return r.stdout;};

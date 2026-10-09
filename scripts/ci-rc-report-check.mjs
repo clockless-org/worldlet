@@ -63,5 +63,9 @@ assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow)
 assert(!/secrets\./.test(workflow),'the RC needs no secret');
 assert.equal((workflow.match(/issues: write/g)||[]).length,1);
 assert(/fail-fast: false/.test(workflow),'one failing part does not cancel the others');
-assert.equal((workflow.match(/timeout-minutes: 30/g)||[]).length,2,'every part ends within 30 minutes');
+assert.equal((workflow.match(/timeout-minutes: 30/g)||[]).length,3,'every part ends within 30 minutes');
+// Every check runs on Linux; the Mac and Windows parts run only what needs their platform (owner decision 2026-10-09).
+for(const job of ['mac','windows','linux'])assert(new RegExp(`\\n  ${job}:\\n`).test(workflow),job);
+assert(!/only: 'test:ui'/.test(workflow.split('\n  linux:\n')[0]),'no UI suite on the Mac and Windows runners');
+assert.match(workflow,/--platform linux/,'a Linux failure opens its own Issue');
 console.log('ci-rc-report checks passed');

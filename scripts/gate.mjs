@@ -28,8 +28,10 @@ export const sharedGates=['check','check:docs','check:source','check:style','tes
 // test:android runs the Android app's protocol and JVM UI tests, then its instrumented UI tests on an emulator
 // (Windows: 01 tests Windows and Android, 02 Mac and iOS, owner decision 2026-10-03); pull requests run nothing
 // for it (owner decision 2026-10-04). Advisory until it has passed on 01.
+// Linux gates test:harness and test:hermes too: the CI RC runs every check on Linux and only what needs the platform on
+// the Mac and Windows runners (owner decision 2026-10-09).
 // test:ui:review (last) has Codex look at the pictures those real-app runs kept; only a blocker fails it.
-export const platformGates={darwin:['test:electron','test:harness','test:hermes','test:onboarding','test:agent:local','test:ios','test:ui:review'],win32:['test:electron','test:agent:local','test:android','test:ui:review'],linux:['test:electron']};
+export const platformGates={darwin:['test:electron','test:harness','test:hermes','test:onboarding','test:agent:local','test:ios','test:ui:review'],win32:['test:electron','test:agent:local','test:android','test:ui:review'],linux:['test:electron','test:harness','test:hermes']};
 // The RC's second lane (owner request 2026-10-05, RCs within 20 minutes): these gates start no app, browser or emulator
 // that the others could meet, and build nothing the others use (dist/, the native interface), so an RC runs them one
 // after another in a process of their own at below-normal priority while the rest run (runGates, machine-nightly.mjs).
