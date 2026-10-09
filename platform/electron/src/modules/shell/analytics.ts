@@ -56,6 +56,7 @@ const ALLOWED:Record<string,string[]>={
  page_engine:['cef','electron'],
  // Updates (modules/shell/updates.ts): how long a prepared update waited for Update, and which step failed.
  update_wait:[...UPDATE_WAIT_BUCKETS],update_stage:['check','folder','download','prepare','install'],
+ update_error:['open','contents','copy','build','identity','signature','team','incomplete','disk','timeout','other'],
  // Fox's speak-first ask (modules/fox proactiveRunTurn): the moment and whether Fox spoke, never the line.
  proactive_moment:[...PROACTIVE_MOMENTS],proactive_status:['spoke','passed'],
  // fox_browse_changed: Browse with me turned on or Don't bother chosen in Fox's card.
