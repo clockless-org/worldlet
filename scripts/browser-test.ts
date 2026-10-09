@@ -86,9 +86,9 @@ export async function openCompanionPanel(page:Page,tab='Profile'){
  await panel.getByRole('tab',{name:'Settings',exact:true}).and(page.locator('[aria-selected=true]')).waitFor({timeout:5000});
  if(tab!=='Settings')await panel.getByRole('tab',{name:tab,exact:true}).click();
 }
-// Leaves the open Applet the way a person does: Back in its top bar, or on a website page, whose Back and Forward
-// move through the page's own history, World beside Fox (owner request 2026-10-06).
+// Leaves the open Applet the way a person does: Back in its top bar, or on a website page, whose toolbar's Back and
+// Forward move through the page's own history, World beside Fox (owner request 2026-10-06).
 export async function leaveApplet(page:Page){
- if(await page.locator('.applet-bar-left>.browser-back[data-web-page]').count())await page.locator('.fox-action-left [data-slot=home]').click();
+ if(await page.locator('.browser-toolbar>.browser-back[data-web-page]').count())await page.locator('.fox-action-left [data-slot=home]').click();
  else await page.getByRole('button',{name:'Back to previous level'}).click();
 }

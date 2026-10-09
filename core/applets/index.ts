@@ -12,6 +12,7 @@ export {WEB_GAME_APPLETS} from './definitions/web-games.ts';
 export * from './presentation.ts';
 export * from './read-recovery.ts';
 export * from './regions.ts';
+export {SHELF_SIZE,seedShelf,enterShelf,closeOnShelf,shelfRing,type ShelfState,type ShelfRing} from './shelf.ts';
 export * from './runtime.ts';
 export {connectionFacts,connectionLive,sourcesReading,appletStatus,appletIndicator} from './status.ts';
 export * from './website-matching.ts';

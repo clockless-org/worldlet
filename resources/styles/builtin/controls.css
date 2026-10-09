@@ -286,6 +286,14 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 /* A website page's Back at its first page, or Forward with nothing ahead, rests. */
 #notionWorld.native-console .scene-control:is(.browser-back,.browser-forward):disabled{opacity:.45;cursor:default;background:var(--system-glass-fill)}
 /* Make Applet at the top of the Browser says what it does: icon and words on one pill. */
+/* A website page's toolbar (ui/browser/browser-device.ts) sits on the panel's paper, not over the World: flat ink buttons. */
+#notionWorld.native-console .browser-toolbar .scene-control{width:34px;height:34px;min-width:34px;min-height:34px;border:0;border-radius:17px;background:transparent;box-shadow:none;color:#4a3f33;-webkit-backdrop-filter:none;backdrop-filter:none}
+#notionWorld.native-console .browser-toolbar .scene-control svg{width:18px;height:18px;filter:none}
+#notionWorld.native-console .browser-toolbar .scene-control:is(:hover,[aria-pressed=true]):not(:disabled){background:#785a3224}
+#notionWorld.native-console .browser-toolbar .scene-control:disabled{opacity:.32;cursor:default;background:transparent}
+#notionWorld.native-console .browser-toolbar .browser-focus{width:auto;margin-left:2px;padding:0 12px 0 9px;gap:6px;border-radius:15px;box-shadow:inset 0 0 0 1px #785a3240}
+#notionWorld.native-console .browser-toolbar .browser-focus>span{position:static;width:auto;height:auto;overflow:visible;clip-path:none;font-size:13px}
+#notionWorld.native-console .browser-toolbar .browser-focus svg{width:15px;height:15px}
 #notionWorld.native-console .scene-control.browser-make-applet{width:auto;padding:0 16px 0 13px;gap:7px}
 #notionWorld.native-console .scene-control.browser-make-applet>span{position:static;width:auto;height:auto;overflow:visible;clip-path:none}
 #notionWorld.native-console .scene-control.browser-make-applet:disabled{opacity:.6;cursor:wait}
@@ -324,6 +332,8 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 /* Native readers keep their reading gutter; browser frames own their tighter inset. */
 @media(min-width:801px){
  #notionWorld.native-console #notionContent:not([data-template=browser]){top:64px!important;left:64px!important;bottom:64px!important}
+ /* Inside an Applet the Applet shelf stands above the panel (ui/hud/applet-shelf.ts). */
+ #notionWorld.native-console[data-applet-shelf] #notionContent{top:150px!important}
  #notionWorld.native-console #notionContent:not([data-template=browser]):is([data-template=weather],[data-applet=gmail]){--weather-shell-padding:0px;padding:0!important}
  #notionWorld.native-console #notionContent[data-template=weather]>.notion-reader-head{display:none}
  #notionWorld.native-console #notionContent .weather-panel{max-width:none;margin:0}

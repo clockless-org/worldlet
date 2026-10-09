@@ -74,19 +74,19 @@ await withBrowser(async browser=>{
  assert.deepEqual([...errors,...appErrors],[]);
  console.log('PASS page focus script: the article alone over a still page and the whole page back when off, app sites keep their page minus their rules, editors stay pages, a new address drops the old article, and the outline lists the side parts for Fox.');
 
- // The Focus switch, first of the Applet's controls right of the title (the page's Back and Forward hold its left, 2026-10-06).
+ // The Focus switch, at the end of the page's toolbar (owner request 2026-10-09), after Back, Forward, Refresh, Home and the address.
  const bar=await browser.newPage();await bar.setContent('<style>.browser-viewport{height:400px}</style><main><dialog id="notionDialog"></dialog><div class="applet-bar-left"><button id="notionBack">Back</button></div><div class="applet-bar-controls"></div><section style="width:700px;height:600px"></section></main>');await bar.addScriptTag({content:panel});
  await bar.evaluate(()=>{const w=window as any,root:any=document.querySelector('main'),content=document.querySelector('section');w.commands=[];w.answer={ok:true,on:false,reader:false};root.appletLayout={available:()=>true,has:()=>false,add:async()=>{}};
   w.panel=w.BrowserPanel.createBrowserPanel({root,content,native:{browser:{call:async()=>({}),command:async(operation:string,args:any)=>{w.commands.push([operation,args]);return w.answer;}}},notify:()=>{}});
   w.panel.mount('browser',{url:'https://news.example/2026/bridge',platform:'web'});});
- const button=bar.locator('.applet-bar-controls>.browser-focus');
+ const button=bar.locator('.browser-toolbar>.browser-focus');
  await bar.locator('.browser-refresh').waitFor({state:'visible'});
  assert.equal(await button.isVisible(),false,'no switch until the host says what Focus does on the page');
- assert.equal(await button.evaluate(b=>(b as HTMLElement).hidden),false,'its place before Refresh is kept meanwhile, so Refresh does not jump when it shows');
+ assert.equal(await button.evaluate(b=>(b as HTMLElement).hidden),false,'its place is kept meanwhile, so nothing beside it jumps when it shows');
  const report=(detail:object)=>bar.evaluate(detail=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'focus',platform:'web',...detail}})),detail);
  await report({available:true,on:true,reader:true});
  await button.waitFor({state:'visible'});
- assert.deepEqual(await bar.evaluate(()=>[...document.querySelectorAll('.applet-bar-controls>button:not([hidden])')].map(b=>b.textContent)),['Focus','Refresh'],'first right of the title, before Refresh (Home joins them once the page leaves its home page)');
+ assert.deepEqual(await bar.evaluate(()=>[...document.querySelectorAll('.browser-toolbar>button:not([hidden])')].map(b=>b.textContent)),['Back','Forward','Refresh','Home','Focus'],'Focus ends the toolbar');
  assert.equal(await bar.getByRole('button',{name:'Focus'}).getAttribute('aria-pressed'),'true','pressed while Focus is on');
  assert.match((await button.getAttribute('title'))!,/only the article/);
  // The same Applet drawn again (a World update re-visits it) keeps the bar as it is: nothing flashes off
@@ -112,5 +112,5 @@ await withBrowser(async browser=>{
  assert.deepEqual(await bar.evaluate(()=>(window as any).commands),[['outline',{}],['focus',{hide:['#secondary']}]],'Fox\'s outline and rules go to the host');
  await report({available:false,on:false});
  await button.waitFor({state:'hidden'});
- console.log('PASS Focus switch: first right of the title once the host reports, pressed while on, the choice sent, back on after Fox, gone where Focus does not apply.');
+ console.log('PASS Focus switch: at the end of the toolbar once the host reports, pressed while on, the choice sent, back on after Fox, gone where Focus does not apply.');
 });

@@ -36,13 +36,13 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const titleIcon=el('span','companion-context-icon');titleIcon.setAttribute('aria-hidden','true');titleIcon.hidden=true;
  root.querySelector('.companion-context')?.prepend(titleIcon);root.querySelector('.companion-context')?.prepend(titleLogo);
  // Inside an Applet its top bar holds its controls as icon circles beside the title: one Back on
- // its left (owner feedback 2026-10-04: no second World button), or a website page's own Back and Forward
- // (owner request 2026-10-06); the Applet's own controls (Focus and Refresh on website pages, Picture in
- // picture, the Native / Web switch, which find .applet-bar-controls) on its right.
+ // its left (owner feedback 2026-10-04: no second World button); the Applet's own controls (Picture in
+ // picture, the Native / Web switch, which find .applet-bar-controls) on its right. A website page's Back,
+ // Forward, Refresh, Home, address and Focus are its toolbar's, in the panel (owner request 2026-10-09).
  // What Fox can do here, such as Summarize in Mail, sits beside Fox in its dock, not in the bar.
  const barLeft=el('div','applet-bar-side applet-bar-left'),barRight=el('div','applet-bar-side applet-bar-right'),barControls=el('div','applet-bar-controls');
  barRight.setAttribute('aria-label','Applet controls');barRight.append(barControls);
- const barTitle=root.querySelector('.companion-context');if(barTitle)barTitle.after(barLeft,barRight);else root.append(barLeft,barRight);barLeft.append(...root.querySelectorAll(':scope>.browser-back,:scope>.browser-forward,:scope>.browser-home'));barControls.append(...root.querySelectorAll(':scope>.browser-focus'),...root.querySelectorAll(':scope>.browser-refresh,:scope>.browser-pip-offer,:scope>.browser-make-applet,:scope>.applet-mode-toggle'));
+ const barTitle=root.querySelector('.companion-context');if(barTitle)barTitle.after(barLeft,barRight);else root.append(barLeft,barRight);barControls.append(...root.querySelectorAll(':scope>.browser-pip-offer,:scope>.browser-make-applet,:scope>.applet-mode-toggle'));
  // The sides sit against the title wherever it is drawn (its centering is a transform), on its
  // row; when a narrow window stacks the title below the bar they start the bar instead.
  function placeBar(){
@@ -54,6 +54,13 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
   // the title's old box, a control that just appeared would jump a frame later, under the pointer.
   root.style.setProperty('--applet-bar-side',Math.max(Math.max(leftWidth,44)+start,barRight.offsetWidth+16)+10+'px');
   const box=root.getBoundingClientRect(),t=title?.getBoundingClientRect();
+  // Under the Applet shelf (ui/hud/applet-shelf.ts) the title gives way to the shelf: Back starts the bar's row and the
+  // Applet's controls end it at the edge of the Applet's side; the shelf's + stands just before them.
+  if(root.hasAttribute('data-applet-shelf')){
+   const lane=Math.max(box.width/3,464),end=box.width-lane-16;
+   Object.assign(barLeft.style,{left:start+'px',top:top+'px'});Object.assign(barRight.style,{left:Math.max(start,end-barRight.offsetWidth)+'px',top:top+'px'});
+   root.style.setProperty('--applet-shelf-controls',(barRight.offsetWidth?barRight.offsetWidth+8:0)+16+'px');return;
+  }
   const stacked=!t?.width||t.top-box.top>=top+height,y=stacked?top:t.top-box.top+t.height/2-height/2;
   Object.assign(barLeft.style,{left:(stacked?start:t.left-box.left-10-leftWidth)+'px',top:y+'px'});
   Object.assign(barRight.style,{left:(stacked?start+(leftWidth?leftWidth+8:0):t.right-box.left+10)+'px',top:y+'px'});
@@ -62,7 +69,7 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  if(typeof ResizeObserver!=='undefined'){
   const watch=new ResizeObserver(queueBar);for(const e of [root,barLeft,barRight,root.querySelector('.companion-context')])if(e)watch.observe(e);
   // A new depth moves the title by its stylesheet: place the sides before that frame paints.
-  new MutationObserver(placeBar).observe(root,{attributes:true,attributeFilter:['data-depth','data-detail-open','class']});
+  new MutationObserver(placeBar).observe(root,{attributes:true,attributeFilter:['data-depth','data-detail-open','data-applet-shelf','class']});
  }
  const tracker=el('nav','world-task-tracker');tracker.setAttribute('aria-label','Attention Center: Coming Up, Worth Doing and Worth Knowing');
  const trackerList=el('div','world-task-list');tracker.append(trackerList);root.append(tracker);
@@ -148,7 +155,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   const s=snapshot(),next=nextMatter(s);
   // On a website Applet's page World leaves it for the World where it was opened (its region, or the overview), since
   // the page's own Back only moves through its history (owner request 2026-10-06).
-  const webPage=!!barLeft.querySelector(':scope>.browser-back[data-web-page]');
+  const webPage=!!root.querySelector('.browser-toolbar>.browser-back[data-web-page]');
   const common: any[]=[{id:'utility:home',label:'World',icon:'home',kind:'navigation',placement:'utility',slot:'home',run:webPage?leaveApplet:home},{id:'utility:next',label:next?({needsAction:'Review',event:'View event',unseen:'Read update'}[next.state]||'Do Work'):'Do Work',description:next?.fullAction||next?.actionTitle,icon:'spark',kind:'navigation',placement:'utility',slot:'next',side:'right',disabled:!next,run:nextFocus}];
 
   // Desktop return is the fourth small Companion control, not a dock action.
@@ -416,11 +423,11 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   if(isDesktopCompanion()){if(backButton.parentElement!==context)context.append(backButton);}
   else if(barLeft.firstElementChild!==backButton)barLeft.prepend(backButton);
   // Inside an Applet (or reading one of its items) Back alone leads the left of the title: it already leads up a level,
-  // so the World button stays out of the bar. On a website Applet's page the page's own Back and Forward take Back's
-  // place (browser-device.ts), and World stands left of Fox in the dock (owner request 2026-10-06).
+  // so the World button stays out of the bar. On a website Applet's page its toolbar's Back and Forward stand in for
+  // Back (browser-device.ts), and World stands left of Fox in the dock (owner request 2026-10-06).
   const inBar=!isDesktopCompanion()&&(snapshot().depth==='object'||root.dataset.detailOpen==='true');
-  const webPage=!!barLeft.querySelector(':scope>.browser-back[data-web-page]');
-  for(const e of [...barLeft.children])if(e!==backButton&&!e.matches('.browser-back,.browser-forward,.browser-home'))e.remove();
+  const webPage=!!root.querySelector('.browser-toolbar>.browser-back[data-web-page]');
+  for(const e of [...barLeft.children])if(e!==backButton)e.remove();
   choices.forEach(action=>{if(inBar&&action.slot==='home'&&!webPage)return;(action.side==='right'?right:left).append(button(action));});
   actionsRow.replaceChildren(left,right);placeBar();
   if(restoreBackFocus)(backButton.hidden?left.querySelector('[data-slot=home]'):backButton)?.focus({preventScroll:true});
