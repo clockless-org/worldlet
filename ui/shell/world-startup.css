@@ -500,7 +500,7 @@
 .world-startup.has-setup .startup-setup .setup-signin-group.is-new .setup-cancel-slot{top:calc(100% + 66px);height:0;min-height:0;overflow:visible}
 @media(max-height:760px){.world-startup.has-setup{--setup-body:clamp(240px,calc(100dvh - 362px),380px)}}
 @media(min-height:761px){.world-startup.has-setup{--setup-body:clamp(300px,calc(100dvh - 480px),440px);padding:28px 24px 92px}.world-startup.has-setup[data-setup-step]>.startup-scene{width:88px;height:88px}.world-startup.has-setup .startup-setup .setup-signin{gap:24px}.world-startup.has-setup>.startup-brand,.world-startup.has-setup:has(.is-bringing)>.startup-brand{bottom:22px}}
-/* No Agent on this computer: Check again, or an API key for the built-in Agent (owner decision 2026-10-07). */
+/* No Agent on this computer: Worldlet installs Hermes Agent, then ChatGPT is signed in inside it (owner decisions 2026-10-09). */
 .startup-setup .setup-agent-needed{display:flex;flex-direction:column;align-items:center;gap:6px}
 .startup-setup .setup-agent-needed .setup-note{margin:6px auto 0;text-align:center;max-width:420px}
 .startup-setup .setup-signin-head{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 2px}
@@ -511,7 +511,6 @@
 .startup-setup .setup-agent-remote .setup-note{margin:0 auto;text-align:center;max-width:420px}
 .startup-setup .setup-remote-code{width:min(420px,100%);font:12px ui-monospace,monospace;padding:8px 10px;border:1px solid #d9cbae;border-radius:10px;background:#fffdf6;color:#354132}
 .startup-setup .setup-agent-fallback{display:flex;gap:18px;justify-content:center}
-.startup-setup .setup-key-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:min(520px,100%)}
-.startup-setup .setup-key-field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--brand-muted)}
-.startup-setup .setup-key-field input,.startup-setup .setup-key-field select{font:inherit;font-size:13px;padding:7px 9px;border-radius:8px;border:1px solid color-mix(in srgb,var(--brand-muted) 40%,transparent);background:rgba(255,255,255,.75);color:inherit;min-width:0}
-.startup-setup .setup-signin.is-key-form .setup-signin-group.is-new{display:none}
+.startup-setup .setup-signin.is-hermes-setup .setup-signin-group.is-new{display:none}
+.startup-setup .setup-agent-needed .setup-hermes-code strong{font:600 15px ui-monospace,monospace;letter-spacing:.08em;margin-left:4px}
+

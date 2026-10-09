@@ -56,7 +56,7 @@ await withBrowser(fileAccess,async browser=>{
    const frame=async()=>{const [h1,next]=await Promise.all([page.locator('.startup-setup h1').boundingBox(),page.locator('.setup-next').boundingBox()]);return [h1.y,next.x,next.y,next.width,next.height].map(Math.round);};
    await page.locator('.setup-agent-button.is-missing').first().waitFor();
    const firstFrame=await frame();
-   assert.equal(await page.getByRole('button',{name:'Continue',exact:true}).isDisabled(),true,'Nothing to continue with without a local Agent');
+   assert.equal(await page.getByRole('button',{name:'Install Hermes Agent',exact:true}).isEnabled(),true,'Without a local Agent, Worldlet installs Hermes Agent');
    assert.equal(await page.locator('.setup-back').isVisible(),false,'The first page has nothing to go back to');
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-'+platform+'.png')});
    assert.equal(await page.locator('[data-kind=region-add]:visible').count(),0,'No area add controls during onboarding');
@@ -67,17 +67,18 @@ await withBrowser(fileAccess,async browser=>{
    assert.deepEqual(await page.locator('.setup-signin-heading').allTextContents(),['Bring your local agent','Bring your cloud agent']);
    assert.equal(await page.locator('.setup-agent-default').count(),0,'No default Agent when none is on this computer');
    // Cloud agents are coming soon and Muse is gone; Worldlet provides no model, so Google is greyed even with no Agent
-   // here (owner requests 2026-10-05), and the page says what to install, with Check again and an API key (2026-10-07).
+   // here (owner requests 2026-10-05), and Worldlet installs Hermes Agent, with Check again (2026-10-09). Codex alone is
+   // no Agent (2026-10-09), so it has no tile.
    assert.deepEqual(await page.locator('.is-new .setup-signin-option').allTextContents(),['Continue with GoogleComing soon','Continue with ChatGPTComing soon']);
    assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is greyed for everyone');
-   await page.getByText('No agent found on this computer. Install Hermes Agent, OpenClaw, pi, Codex or Claude Code and check again, or use an API key and Worldlet sets up Hermes Agent with it.',{exact:true}).waitFor();
-   assert.deepEqual(await page.locator('.setup-agent-button').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['Hermes Agent','OpenClaw','pi','Codex','Claude Code']);
-   assert.equal(await page.locator('.setup-agent-button.is-missing').count(),5,'Agents not on this computer stay listed, greyed');
-   assert.equal(await page.locator('.setup-signin-option:disabled').count(),7,'Nothing can be chosen without a local Agent');
-   assert.equal(await page.locator('.setup-signin-option .setup-signin-icon').count(),7,'Each choice carries its icon');
+   await page.getByText('No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',{exact:true}).waitFor();
+   assert.deepEqual(await page.locator('.setup-agent-button').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['Hermes Agent','OpenClaw','pi','Claude Code']);
+   assert.equal(await page.locator('.setup-agent-button.is-missing').count(),4,'Agents not on this computer stay listed, greyed');
+   assert.equal(await page.locator('.setup-signin-option:disabled').count(),6,'Nothing can be chosen without a local Agent');
+   assert.equal(await page.locator('.setup-signin-option .setup-signin-icon').count(),6,'Each choice carries its icon');
    // One square tile per local Agent in one row; the cloud buttons stack under each other below them (owner request 2026-10-06).
    const tiles=await page.locator('.setup-agent-tile').evaluateAll(list=>list.map(e=>{const r=e.getBoundingClientRect();return [Math.round(r.width),Math.round(r.height),Math.round(r.top)];}));
-   assert.ok(tiles.length===5&&tiles.every(([w,h,top])=>Math.abs(w-h)<=1&&top===tiles[0][2]),'Agent tiles are squares in one row: '+JSON.stringify(tiles));
+   assert.ok(tiles.length===4&&tiles.every(([w,h,top])=>Math.abs(w-h)<=1&&top===tiles[0][2]),'Agent tiles are squares in one row: '+JSON.stringify(tiles));
    const [googleBox,chatgptBox,grid]=await Promise.all([page.locator('.setup-google-button').boundingBox(),page.locator('.setup-chatgpt-button').boundingBox(),page.locator('.setup-agent-grid').boundingBox()]);
    assert.ok(chatgptBox.y>=googleBox.y+googleBox.height&&Math.abs(googleBox.x-chatgptBox.x)<1&&Math.abs((googleBox.x+googleBox.width/2)-(grid.x+grid.width/2))<2&&googleBox.y>grid.y+grid.height,'Google and ChatGPT stack under each other, centred under the tiles: '+JSON.stringify({googleBox,chatgptBox,grid}));
    // The bars carry no words (owner request 2026-10-06), and the page sits together: Fox just above the heading,
@@ -233,7 +234,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'claude-code',title:'Claude Code',configured:true,worldTools:true},{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,memory:{name:'Nova',user:true,longTerm:true,model:false,history:{conversations:6,notes:31,skills:2,jobs:3}}},{id:'pi',title:'pi',configured:true,worldTools:false}],recommended:'claude-code',selected:sessionStorage.getItem('fixture-agent')};
     if(b.action==='agentHarness'&&b.operation==='select'){
      await new Promise(resolve=>setTimeout(resolve,300));
-     if(b.id==='codex')throw Error('Codex did not answer. Open it once in Terminal to finish signing in, then try again.');
+     if(b.id==='claude-code')throw Error('Claude Code did not answer. Open it once in Terminal to finish signing in, then try again.');
      sessionStorage.setItem('fixture-agent',b.id);return {ok:true,id:b.id,title:'Claude Code'};
     }
     // Bringing Nova in: its conversations for the second page, then the integrations it had.
@@ -255,16 +256,17 @@ await withBrowser(fileAccess,async browser=>{
   // Cloud agents are coming soon once an Agent here can be brought (owner request 2026-10-05).
   assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is coming soon');
   assert.equal(await page.locator('.setup-google-button .setup-signin-tag').textContent(),'Coming soon');
-  // Picked for the person (owner request 2026-10-06): Hermes, OpenClaw, pi first, then Codex, then Claude Code. Hermes
-  // isn't here, so OpenClaw is picked, first and forest; Google comes after the local Agents.
+  // Picked for the person (owner request 2026-10-06): Hermes, OpenClaw, pi first, then Claude Code; Codex alone is no
+  // Agent (owner decision 2026-10-09). Hermes isn't here, so OpenClaw is picked, first and forest; Google comes after the local Agents.
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
   assert.equal(await page.locator('.setup-agent-default').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.setup-agent-tile .setup-signin-tag',{hasText:'Recommended'}).count(),0,'The pick is the recommendation');
   // Agents found here in that order, then supported ones not found here, listed but greyed.
-  assert.deepEqual(await page.locator('.setup-agent-button').evaluateAll(list=>list.map(b=>b.dataset.agent)),['openclaw','pi','codex','claude-code','hermes']);
+  assert.deepEqual(await page.locator('.setup-agent-button').evaluateAll(list=>list.map(b=>b.dataset.agent)),['openclaw','pi','claude-code','hermes']);
   const order=await page.locator('.setup-agent-default,.setup-google-button').evaluateAll(list=>list.map(e=>e.getBoundingClientRect().top));
   assert.ok(order[0]<order[1],'the default Agent comes before Google');
-  for(const id of ['claude-code','codex','openclaw','pi'])assert.equal(await page.locator(`[data-agent="${id}"]`).isEnabled(),true,id);
+  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex has no tile');
+  for(const id of ['claude-code','openclaw','pi'])assert.equal(await page.locator(`[data-agent="${id}"]`).isEnabled(),true,id);
   assert.equal(await page.locator('[data-agent="hermes"]').isDisabled(),true);
   assert.equal(await page.locator('[data-agent="hermes"]').getAttribute('title'),'Hermes Agent isn’t installed on this computer.');
   assert.equal(await page.locator('[data-agent="hermes"].is-missing').count(),1);
@@ -275,16 +277,15 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('[data-agent="openclaw"] small').textContent(),'OpenClaw · 6 conversations');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-local-agent-'+platform+'.png')});
   const firstFrame=await page.locator('.setup-next').boundingBox();
-  assert.equal(await page.locator('[data-agent="codex"] .setup-signin-tag').count(),0,'Codex can use World tools');
   // Only some command lines can call World tools; the tile says so before the choice.
   assert.equal(await page.locator('[data-agent="pi"] .setup-signin-tag').textContent(),'Chat only');
   assert.equal(await page.locator('[data-agent="pi"]').getAttribute('title'),'With pi, Fox can talk with you but can’t act in your world yet.');
   // Clicking a tile only picks it; the one Continue brings it. An Agent that is not signed in leaves the person on the first page.
-  await page.getByRole('button',{name:'Codex',exact:true}).click();
-  assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'codex');
+  await page.getByRole('button',{name:'Claude Code',exact:true}).click();
+  assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'claude-code');
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='select')),false,'Picking a tile brings nothing yet');
   await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByText(/Codex did not answer/).waitFor();
+  await page.getByText(/Claude Code did not answer/).waitFor();
   assert.equal(await page.getByRole('heading',{name:'Give your agent a World'}).count(),1);
   // Choosing Nova brings it in on the second page, named by its own name: its card reads it while what is happening scrolls past.
   await page.getByRole('button',{name:'OpenClaw',exact:true}).click();
@@ -308,7 +309,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('.setup-gallery').count(),0,'No app gallery while bringing an Agent');
   assert.equal(await page.getByRole('button',{name:'Enter my World',exact:true}).count(),0,'The apps come after the Agent');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-bring-'+platform+'.png')});
-  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['codex','openclaw']);
+  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='agentIntegrations'));
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),'No Google sign-in');
@@ -457,22 +458,37 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='requested').length>=1),true);
   assert.deepEqual(errors,[]);await page.close();
  }
- // No Agent on this computer is no dead end (owner decision 2026-10-07): Check again asks the host again, and an API key
- // for the built-in Agent goes straight on to the apps page; the key reaches only modelConfigure.
+ // No Agent on this computer is no dead end (owner decisions 2026-10-07, 2026-10-09): Check again asks the host again,
+ // Worldlet installs stock Hermes Agent (its installer's steps show as they run), ChatGPT is signed in inside Hermes
+ // (the code its device page asks for shows here), and Hermes is then brought like any Agent found here.
  {
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform})=>{
-   const w=window as any;w.calls=[];w.detects=0;
+   const w=window as any;w.calls=[];w.detects=0;w.installed=false;w.signedIn=false;
    w.fixture={platform,workspaceId:'setup-no-agent-test',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:false,unlockedApplets:[]},connections:[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
+   const event=(detail:unknown)=>window.dispatchEvent(new CustomEvent('worldlet:hermes-setup',{detail}));
    w.webkit={messageHandlers:{worldlet:{async postMessage(b){
-    w.calls.push(b.action==='modelConfigure'?{...b,apiKey:b.apiKey?'<key>':''}:b);
+    w.calls.push(b);
     if(b.action==='snapshot')return structuredClone(w.fixture);
     if(b.action==='installedApplets')return {keys:[]};
-    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:[],recommended:null,selected:null};}
-    if(b.action==='modelCatalog')return {providers:[{id:'openai-codex',name:'ChatGPT',provider:'openai-codex',nativeSetup:true,model:'gpt'},{id:'openrouter',name:'OpenRouter',provider:'openrouter',nativeSetup:true,model:'openrouter/auto',baseURL:'https://openrouter.ai/api/v1'},{id:'anthropic',name:'Anthropic',provider:'anthropic',nativeSetup:true,model:'claude-sonnet-5',baseURL:''},{id:'custom',name:'Custom',provider:'custom',nativeSetup:true}]};
-    if(b.action==='modelConfigure'){const key=b.apiKey;w.calls.push({action:'modelConfigureKey'});if(key!=='sk-test')throw Error('Wrong key');return {ok:true,provider:b.provider,model:b.model};}
+    // Codex alone is no Agent; Hermes appears once it is installed and signed in.
+    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[],recommended:null,selected:sessionStorage.getItem('fixture-agent')};}
+    if(b.action==='agentHarness'&&b.operation==='install-hermes'){
+     event({stage:'install',step:3,steps:7,title:'Create Python environment'});
+     await new Promise<void>(resolve=>{w.finishInstall=resolve;});
+     w.installed=true;return {ok:true,id:'hermes',title:'Hermes Agent'};
+    }
+    if(b.action==='agentHarness'&&b.operation==='sign-in-hermes'){
+     if(!w.installed)throw Error('Hermes Agent is not on this computer. Install it first.');
+     event({stage:'sign-in',url:'https://auth.openai.com/codex/device',code:'ABCD-1234'});
+     await new Promise<void>(resolve=>{w.finishSignIn=resolve;});
+     w.signedIn=true;return {ok:true};
+    }
+    if(b.action==='agentHarness'&&b.operation==='select'){sessionStorage.setItem('fixture-agent',b.id);return {ok:true,id:b.id,title:'Hermes Agent',connected:true};}
+    if(b.action==='localAgent'&&b.operation==='adopt')return {name:null,memories:[],model:{ok:false},summary:{},history:{conversations:0,notes:0,skills:0,routines:0,list:[]}};
+    if(b.action==='agentIntegrations')return {integrations:[]};
+    if(b.action==='foxEnergy')return {source:'own'};
     if(b.action==='foxPreferences'){if(b.cloudConsent)w.fixture.cloudConsent=true;return {companionStyle:'',model:{ready:true}};}
-    if(b.action==='onboarding'&&b.operation==='setup'){Object.assign(w.fixture.onboarding,{completed:true,introStep:3,unlockedApplets:b.applets});w.fixture.revision++;return {ok:true};}
     if(b.action==='appContent')return {pages:[]};return {ok:true};
    }}}};
    if(platform==='windows')w.worldletHost={version:1,platform:'windows',request:w.webkit.messageHandlers.worldlet.postMessage};
@@ -482,29 +498,23 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Check again'}).click();
   await page.waitForFunction(()=>(window as any).detects>=2);
   await page.getByText(/No agent found on this computer/).waitFor();
-  await page.getByRole('button',{name:'Use an API key'}).click();
-  const provider=page.getByLabel('Provider',{exact:true});
-  await page.waitForFunction(()=>(document.querySelector('.setup-key-form select') as HTMLSelectElement)?.options.length===2);
-  assert.deepEqual(await provider.evaluate((select:HTMLSelectElement)=>[...select.options].map(o=>o.textContent)),['Anthropic','OpenRouter'],'API-key providers only, the featured ones first');
-  assert.equal(await page.getByLabel('Model ID',{exact:true}).inputValue(),'claude-sonnet-5','the provider\'s default model');
-  const connect=page.getByRole('button',{name:'Connect',exact:true});
-  assert.equal(await connect.isDisabled(),true,'nothing to connect without a key');
-  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-api-key-'+platform+'.png')});
-  assert.deepEqual(await page.evaluate(()=>[document.getElementById('worldStartup'),...document.querySelectorAll('#worldStartup .setup-content')].filter(e=>e&&e.scrollHeight>e.clientHeight+1).map(e=>e!.className)),[],'the form fits without scrolling');
-  // A key the provider refuses says why on this page, and the form stays.
-  await page.getByLabel('API key',{exact:true}).fill('sk-wrong');
-  await connect.click();
-  await page.getByRole('alert').filter({hasText:'Wrong key'}).waitFor();
-  assert.equal(await page.getByLabel('API key',{exact:true}).inputValue(),'','the refused key is not kept');
-  await page.getByLabel('API key',{exact:true}).fill('sk-test');
-  assert.equal(await connect.isEnabled(),true);
-  await connect.click();
-  await page.getByRole('heading',{name:'Bring your apps into your World'}).waitFor();
-  const configured=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='modelConfigure'));
-  assert.deepEqual(configured.map(c=>[c.provider,c.model,c.apiKey]),[['anthropic','claude-sonnet-5','<key>'],['anthropic','claude-sonnet-5','<key>']]);
-  assert.equal(await page.evaluate(()=>JSON.stringify(localStorage)).then(text=>text.includes('sk-test')),false,'the key is never stored');
+  await page.getByRole('button',{name:'Install Hermes Agent',exact:true}).click();
+  await page.getByText('Step 3 of 7: Create Python environment',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Installing Hermes Agent…',exact:true}).isDisabled(),true,'nothing else while it installs');
+  assert.equal(await page.getByRole('button',{name:'Check again'}).count(),0,'nothing to check while it installs');
+  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-hermes-install-'+platform+'.png')});
+  await page.evaluate(()=>(window as any).finishInstall());
+  await page.getByText(/Hermes Agent is installed\. Sign in to ChatGPT in it\./).waitFor();
+  await page.getByRole('button',{name:'Sign in with ChatGPT',exact:true}).click();
+  await page.locator('.setup-hermes-code strong',{hasText:'ABCD-1234'}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Cancel sign-in'}).isVisible(),true);
+  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-hermes-sign-in-'+platform+'.png')});
+  assert.deepEqual(await page.evaluate(()=>[document.getElementById('worldStartup'),...document.querySelectorAll('#worldStartup .setup-content')].filter(e=>e&&e.scrollHeight>e.clientHeight+1).map(e=>e!.className)),[],'the sign-in fits without scrolling');
+  await page.evaluate(()=>(window as any).finishSignIn());
+  await page.getByRole('heading',{name:/^Bring your/}).waitFor();
+  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&!['detect','requested'].includes(c.operation)).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','sign-in-hermes','select:hermes']);
+  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>['modelConfigure','modelCatalog'].includes(c.action))),false,'no model is configured in Worldlet');
   assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true);
-  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-no-agent-'+platform+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
  // My Agent is on another computer (core/phone/README.md#another-computers-agent): the code from Worldlet there pairs

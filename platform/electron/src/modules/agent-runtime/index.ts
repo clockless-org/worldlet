@@ -12,6 +12,7 @@ import {attachedHermes,bindHermes,discoverOtherHermes,isOwnHermes,standardHermes
 import {keepHermesResident,type HermesRuntime} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {endSetup} from './installation.ts';
+import {endHermesInstall,installHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {ExternalAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
 import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
@@ -234,7 +235,10 @@ let channelTool:((name:string,args:Row)=>Promise<Row>)|null=null;
  * the one saved for that address again. `pair`, `select` and `clear` set it aside (kept, to use again);
  * `forget-gateway` deletes it. `detect` reports its address and whether it is in use, never its token.
  * `requested` hands over, once, the Agent a `--connect=<id>` launch named (`takeRequested`). */
-export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,builtIn:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null){
+/** What setup hears while Hermes Agent is installed (`install-hermes`) or signs in to ChatGPT (`sign-in-hermes`). */
+export type HermesSetupEvent=({stage:'install'}&HermesInstallProgress)|{stage:'sign-in';url:string;code:string|null};
+export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,builtIn:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{}){
+ let signingIn:AbortController|null=null;
  const remoteStatus=()=>{const s=remote?.status();return s?.state==='paired'?{computer:s.computer,seenAt:s.seenAt??null,...s.error?{error:s.error}:{}}:null;};
  const gateway=()=>vault?readRemoteGateway(vault):null;
  const setAside=()=>{const saved=gateway();if(saved?.active)writeRemoteGateway(vault!,{...saved,active:false});};
@@ -271,7 +275,8 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   }
   if(request.operation==='detect'){
    // The `hermes` command and ~/.hermes Worldlet set up for Fox's own profile are Fox, not another Agent to choose.
-   const found=locateLocalHarnesses().filter(item=>item.id!=='hermes'||discoverOtherHermes(context.root)!==null);
+   // Codex alone is no Agent: its sign-in is not borrowed for one (owner decision 2026-10-09 11:51 PDT), stock Hermes Agent is.
+   const found=locateLocalHarnesses().filter(item=>item.id!=='codex'&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
    // Codex runs Fox on the built-in Harness, so World tools come with it; the rest get them through Worldlet's MCP server.
    // Only whether an Agent has a name or memory to bring is reported, never its contents or paths.
    const agents=found.map(({id,title,configured})=>{
@@ -289,6 +294,23 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    const elsewhere=remote?.paired||gateway()?.active===true;
    return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root)??readAdopted(context.root)??(readModelSource(context.root)?'codex':null),remote:remoteStatus(),gateway:remoteGatewayView(gateway())};
   }
+  // No Agent here (Codex alone included, owner decision 2026-10-09 11:51 PDT): stock Hermes Agent, installed the official
+  // way to its default location, or the one already here as it is (12:11 PDT). The person then picks it like any other.
+  if(request.operation==='install-hermes'){
+   const install=await installHermes(context.root,{environment:currentEnvironment(),progress:step=>onHermesSetup({stage:'install',...step})});
+   return {ok:true,id:install.id,title:install.title};
+  }
+  // ChatGPT as Hermes Agent's model, signed in inside Hermes with its own command; `cancel-sign-in` stops it.
+  if(request.operation==='sign-in-hermes'){
+   const install=ownHermesAgent(currentEnvironment());
+   if(!install)throw new WorldletError('Hermes Agent is not on this computer. Install it first.');
+   signingIn?.abort();
+   const controller=signingIn=new AbortController();
+   try{await signInHermes(install,currentEnvironment(),prompt=>{void context.openExternal(prompt.url).catch(()=>{});onHermesSetup({stage:'sign-in',...prompt});},controller.signal);}
+   finally{if(signingIn===controller)signingIn=null;}
+   return {ok:true};
+  }
+  if(request.operation==='cancel-sign-in'){signingIn?.abort();return {ok:true};}
   // The Agent an install script named (`--connect=<id>`), handed to first-run setup once; setup decides what it means.
   if(request.operation==='requested')return {id:takeRequested()};
   if(request.operation==='select'){
@@ -385,6 +407,6 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
- host.register({agentHarness:localHarnessActions(context,switchTo,builtIn,remote,vault,()=>{const id=requested;requested=null;return id;})});
- host.onQuit(()=>{endSetup();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
+ host.register({agentHarness:localHarnessActions(context,switchTo,builtIn,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event))});
+ host.onQuit(()=>{endSetup();endHermesInstall();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
 }
