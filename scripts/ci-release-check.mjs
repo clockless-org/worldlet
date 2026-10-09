@@ -108,4 +108,6 @@ for(const job of jobs){
 }
 assert(/if: github\.repository == 'clockless-org\/worldlet' && github\.ref == 'refs\/heads\/main'/.test(workflow),'only clockless-org/worldlet main releases');
 assert(/actions\/workflows\/rc\.yml\/runs\?head_sha=/.test(workflow),'a promotion requires a passing RC');
+assert.equal((workflow.match(/node scripts\/ci-release\.mjs analytics/g)||[]).length,2,'both platform builds carry the PostHog key');
+assert.equal((workflow.match(/secrets\.POSTHOG_PROJECT_KEY != ''/g)||[]).length,2,'no build without the PostHog key');
 console.log('ci-release checks passed');

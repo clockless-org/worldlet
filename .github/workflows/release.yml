@@ -63,13 +63,13 @@ jobs:
     steps:
       - id: check
         env:
-          MAC: ${{ secrets.MAC_CERTIFICATE_P12 != '' && secrets.MAC_CERTIFICATE_PASSWORD != '' && secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.SPARKLE_PRIVATE_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
-          GOOGLE: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
+          MAC: ${{ secrets.POSTHOG_PROJECT_KEY != '' && secrets.MAC_CERTIFICATE_P12 != '' && secrets.MAC_CERTIFICATE_PASSWORD != '' && secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.SPARKLE_PRIVATE_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
+          WINDOWS: ${{ secrets.POSTHOG_PROJECT_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
         run: |
           echo "mac=$MAC" >> "$GITHUB_OUTPUT"
-          echo "windows=$GOOGLE" >> "$GITHUB_OUTPUT"
+          echo "windows=$WINDOWS" >> "$GITHUB_OUTPUT"
           [[ $MAC == true ]] || echo '::warning::Release secrets are missing in the release environment (docs/RELEASING.md); the Mac build is skipped.'
-          [[ $GOOGLE == true ]] || echo '::warning::GOOGLE_OAUTH_CLIENT_JSON is missing in the release environment; the Windows build is skipped.'
+          [[ $WINDOWS == true ]] || echo '::warning::POSTHOG_PROJECT_KEY or GOOGLE_OAUTH_CLIENT_JSON is missing in the release environment; the Windows build is skipped.'
 
   mac:
     name: Mac
@@ -112,9 +112,11 @@ jobs:
           APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
           GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON }}
+          POSTHOG_PROJECT_KEY: ${{ secrets.POSTHOG_PROJECT_KEY }}
         run: |
           set -euo pipefail
           umask 077
+          node scripts/ci-release.mjs analytics
           KEYS="$RUNNER_TEMP/release-keys"; mkdir -p "$KEYS"
           KEYCHAIN="$KEYS/release.keychain-db" PASSWORD="$(openssl rand -hex 24)"
           security create-keychain -p "$PASSWORD" "$KEYCHAIN"
@@ -210,8 +212,10 @@ jobs:
       - name: Release identity and keys
         env:
           GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON }}
+          POSTHOG_PROJECT_KEY: ${{ secrets.POSTHOG_PROJECT_KEY }}
         run: |
           set -euo pipefail
+          node scripts/ci-release.mjs analytics
           KEYS="$RUNNER_TEMP/release-keys"; mkdir -p "$KEYS"
           node scripts/ci-release.mjs manifest --version "$VERSION" --build "$BUILD" --built-at "$BUILT_AT" --sha "$GITHUB_SHA" --out "$KEYS/release.json"
           echo "WORLDLET_RELEASE_MANIFEST=$KEYS/release.json" >> "$GITHUB_ENV"
