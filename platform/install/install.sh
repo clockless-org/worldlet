@@ -38,13 +38,17 @@ trap cleanup EXIT INT TERM
 
 echo "Downloading ${file}…"
 curl -fL --progress-bar "$SITE/downloads/$file" -o "$work/$file"
+echo "Checking the download…"
 expected="$(curl -fsSL "$SITE/downloads/$file.sha256" | awk '{print $1}')"
 actual="$(shasum -a 256 "$work/$file" | awk '{print $1}')"
 [ -n "$expected" ] && [ "$expected" = "$actual" ] || fail "the download did not match its checksum."
 
+echo "Opening the disk image…"
 mkdir -p "$mount"
-hdiutil attach "$work/$file" -nobrowse -readonly -quiet -mountpoint "$mount" || fail "could not open the disk image."
+# </dev/null: under `curl … | sh` this shell reads the rest of the script from stdin, so nothing it runs may read it.
+hdiutil attach "$work/$file" -nobrowse -readonly -quiet -mountpoint "$mount" </dev/null || fail "could not open the disk image."
 [ -d "$mount/Worldlet.app" ] || fail "the disk image has no Worldlet.app."
+echo "Checking the app's signature…"
 codesign --verify --deep --strict "$mount/Worldlet.app" 2>/dev/null || fail "the app's signature did not verify."
 
 # WORLDLET_INSTALL_DIR installs somewhere else (the release machines' install check uses a temporary folder).
