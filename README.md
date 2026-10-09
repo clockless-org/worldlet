@@ -97,20 +97,6 @@ Mail, Calendar, Notes, GitHub, Notion, YouTube and over a hundred more, each a s
   <a href="docs/APPLET-RUNTIME.md"><img src="docs/assets/readme/applet-notes.jpg" alt="The Notes Applet listing notes, with Fox offering to find or summarize one" width="100%" /></a>
 </td>
 </tr>
-<tr>
-<td width="50%" valign="middle">
-
-### Your Agent, your model
-
-Worldlet provides no model of its own. It talks through your Agent and borrows its sign-ins, connections, skills and memory, and gives the Agent World tools over the `worldlet` MCP server. Switch Agents and your World stays.
-
-[Docs →](core/agent/PORTABILITY.md)
-
-</td>
-<td width="50%">
-  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.svg" alt="The personal computer stack beside the personal assistant stack: Worldlet is the missing World UI above the Harness" width="100%" /></a>
-</td>
-</tr>
 </table>
 
 **Also in the box:**
@@ -121,7 +107,13 @@ Worldlet provides no model of its own. It talks through your Agent and borrows i
 - **[Your Agent on another computer](core/agent/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
 
-## The stack in computer terms
+## Your Agent, your model: the stack in computer terms
+
+<p align="center">
+  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.svg" alt="The personal computer stack beside the personal assistant stack: Worldlet is the missing World UI above the Harness" width="960" /></a>
+</p>
+
+Worldlet provides no model of its own. It talks through your Agent and borrows its sign-ins, connections, skills and memory, and gives the Agent World tools over the `worldlet` MCP server. Switch Agents and your World stays.
 
 | Computer | AI era | Who owns it |
 | --- | --- | --- |
