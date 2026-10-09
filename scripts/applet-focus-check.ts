@@ -108,8 +108,13 @@ await withBrowser(fileAccess,async browser=>{
   assert.match(await page.locator('.world-context').innerText(),new RegExp(app.title));
   // Pointer release schedules HUD context separately from the reduced-motion camera.
   await page.waitForFunction(title=>document.querySelector('.companion-context .companion-name')?.textContent===title,app.title);
-  await page.locator('.companion-app-logo').waitFor({state:appHudIcon(app).source?'visible':'hidden'});
-  assert.equal(await page.locator('.companion-app-logo').isVisible(),!!appHudIcon(app).source,app.key+' shows a title icon only for a genuine brand');
+  // On a wide window the Applet shelf names the open Applet in the title's place (ui/hud/applet-shelf.ts); the title,
+  // with its brand icon, names it where the shelf does not stand.
+  if(await page.locator('.applet-shelf').isVisible())assert.equal(await page.locator('.applet-shelf-tab[data-current] .applet-shelf-name').innerText(),app.title,app.key+' stands in the middle of the shelf');
+  else{
+   await page.locator('.companion-app-logo').waitFor({state:appHudIcon(app).source?'visible':'hidden'});
+   assert.equal(await page.locator('.companion-app-logo').isVisible(),!!appHudIcon(app).source,app.key+' shows a title icon only for a genuine brand');
+  }
   if(['gmail','google-calendar','apple-notes','apple-reminders','weather','browser'].includes(app.key))assert.equal(appHudIcon(app).source,'','generic Applets have no identity icon');
   if(app.key==='weather')await page.screenshot({path:'output/applet-layout/weather-focus.png'});
   if(app.key==='airbnb')await page.screenshot({path:'/tmp/applet-airbnb-full-view.png'});
@@ -285,10 +290,10 @@ await withBrowser(fileAccess,async browser=>{
  const frame=await page.evaluate(()=>{
   const panel=document.querySelector<HTMLElement>('#notionContent'),p=panel.getBoundingClientRect(),slot=panel.querySelector('.browser-viewport').getBoundingClientRect();
   const rect=(window as any).calls.filter(c=>c.action==='browserShow'||c.action==='browserLayout').at(-1).rect;
-  return {titleBottom:document.querySelector('.companion-context').getBoundingClientRect().bottom,left:p.left,top:p.top,bottom:innerHeight-p.bottom,inside:rect.x>=p.left+7&&rect.y>=p.top+7&&rect.x+rect.width<=p.right-7&&rect.y+rect.height<=p.bottom-7,slotRight:slot.right,panelRight:p.right};
+  return {titleBottom:document.querySelector('.applet-shelf-tab[data-current] .applet-shelf-name')?.getBoundingClientRect().bottom??document.querySelector('.companion-context').getBoundingClientRect().bottom,left:p.left,top:p.top,bottom:innerHeight-p.bottom,inside:rect.x>=p.left+7&&rect.y>=p.top+7&&rect.x+rect.width<=p.right-7&&rect.y+rect.height<=p.bottom-7,slotRight:slot.right,panelRight:p.right};
  });
  assert.equal(frame.left,16,'browser frame stays near the window edge');
- assert.ok(frame.top>=frame.titleBottom+8,'browser frame leaves the context title visible');
+ assert.ok(frame.top>=frame.titleBottom+8,'browser frame leaves the shelf\'s name (or the context title) visible');
  assert.ok(Math.abs(frame.bottom-frame.left)<1,'browser bottom and left margins match');
  assert.ok(frame.inside&&frame.slotRight<frame.panelRight,'native web surface stays inside the painted rim');
  await page.screenshot({path:'output/applet-layout/youtube-focus.png'});

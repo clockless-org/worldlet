@@ -78,15 +78,15 @@ await withBrowser(fileAccess,async browser=>{
  await page.locator('#notionContent[data-applet=browser]').waitFor();
  await page.waitForFunction(n=>window.calls.filter(c=>c.action==='browserShow').length>n,shows);
  assert.equal(await page.evaluate(()=>window.calls.filter(c=>c.action==='browserShow').at(-1).url),'https://www.google.com/','pages opened elsewhere never become the Browser’s page');
- // Home shows only once the page has left its home page, and takes the page itself there (owner request 2026-10-07).
+ // Home in the toolbar is ready only once the page has left its home page, and takes the page itself there (owner request 2026-10-07).
  const pageAt=(url:string)=>page.evaluate(url=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',loading:false,url,title:'Google'}})),url);
  await pageAt('https://www.google.com/');
- assert.equal(await page.locator('.browser-home').isHidden(),true,'no Home on the home page');
+ assert.equal(await page.locator('.browser-home').isDisabled(),true,'Home rests on the home page');
  await pageAt('https://www.google.com/search?q=worldlet');
- await page.locator('.browser-home:not([hidden])').click();
+ await page.locator('.browser-home:not([disabled])').click();
  await page.waitForFunction(()=>window.calls.some(c=>c.action==='browserCommand'&&c.operation==='open'&&c.args?.url==='https://www.google.com/'));
  await pageAt('https://www.google.com/#home');
- await page.locator('.browser-home[hidden]').waitFor({state:'attached'});
+ await page.locator('.browser-home[disabled]').waitFor({state:'attached'});
  // Fox's panel (Settings) opens over the page: the native page, drawn over the World, puts itself away
  // meanwhile and comes back when the panel closes (owner report 2026-10-07: Settings stood behind it).
  const hidesBefore=await page.evaluate(()=>window.calls.filter(c=>c.action==='browserHide').length);

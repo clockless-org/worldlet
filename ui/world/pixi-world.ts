@@ -192,7 +192,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  /** Something on screen is still easing toward where it is going: the detail framing,
   * an arrival, a shadow, a presence fade, a hover glow or a dragged Applet. */
  function moving(detail:number){
-  if(!cameraSettled||areaScenery?.metrics&&!areaScenery.metrics.settled||Math.abs(framing-detail)>.002||(dragDevice&&dragged))return true;
+  if(!cameraSettled||focusScenery?.fading||areaScenery?.metrics&&!areaScenery.metrics.settled||Math.abs(framing-detail)>.002||(dragDevice&&dragged))return true;
   const now=performance.now();
   for(const d of devices){
    if(d.arrivalPending||d.arrivalLogo||d.shadowRevealAt!=null||(d.revealAt!=null&&now-d.revealAt<3000))return true;

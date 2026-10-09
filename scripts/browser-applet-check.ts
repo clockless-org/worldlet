@@ -36,14 +36,14 @@ await withBrowser(async browser=>{
  await made.evaluate(()=>(window as any).panel.mount('youtube',{url:'https://www.youtube.com/',platform:'web'}));
  assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'only the generic Browser offers Make Applet');
  console.log('PASS Make Applet: any public site, the page sent as is, a made site opens, catalog sites and website Applets excluded.');
- // Refresh in the top bar of every website Applet and the Browser (owner request 2026-10-05): it reloads the page shown.
+ // Refresh in the toolbar of every website Applet and the Browser (owner requests 2026-10-05 and 2026-10-09): it reloads the page shown.
  const fresh=await browser.newPage();await fresh.setContent('<style>.browser-viewport{height:400px}</style><main><dialog id="notionDialog"></dialog><div class="applet-bar-controls"></div><section style="width:700px;height:600px"></section></main>');await fresh.addScriptTag({content:bundle});
  await fresh.evaluate(()=>{const w=window as any,root:any=document.querySelector('main'),content=document.querySelector('section');w.commands=[];root.appletLayout={available:()=>true,has:()=>false,add:async()=>{}};
   w.panel=w.BrowserPanel.createBrowserPanel({root,content,native:{browser:{call:async()=>({}),command:async(operation:string)=>{w.commands.push(operation);return {ok:true};}}},notify:()=>{}});});
  assert.equal(await fresh.locator('.browser-refresh').isVisible(),false,'no Refresh before a page shows');
  for(const [key,url] of [['app-xiaohongshu','https://www.xiaohongshu.com/explore'],['browser','https://www.google.com/']]){
   await fresh.evaluate(([key,url])=>(window as any).panel.mount(key,{url,platform:'web'}),[key,url]);
-  const button=fresh.locator('.applet-bar-controls>.browser-refresh');
+  const button=fresh.locator('.browser-toolbar>.browser-refresh');
   await button.waitFor({state:'visible'});
   assert.equal(await fresh.getByRole('button',{name:'Refresh'}).count(),1,'one Refresh, named for screen readers: '+key);
   await button.click();
@@ -51,5 +51,5 @@ await withBrowser(async browser=>{
  assert.deepEqual(await fresh.evaluate(()=>(window as any).commands),['reload','reload'],'Refresh reloads the page shown');
  await fresh.evaluate(()=>{document.querySelector('section')!.hidden=true;});
  await fresh.locator('.browser-refresh').waitFor({state:'hidden'});
- console.log('PASS Refresh: in the top bar of website Applets and the Browser while a page shows, reloading it.');
+ console.log('PASS Refresh: in the toolbar of website Applets and the Browser while a page shows, reloading it.');
 });

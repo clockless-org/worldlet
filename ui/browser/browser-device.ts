@@ -2,7 +2,7 @@ import type {BrowserSurfaceAction,BrowserSurfaceBodies,SurfaceRect} from '../../
 import {appletForWebsite} from './applet-match.ts';
 import {getApp,siteAppletPage} from '../../core/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
-import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../core/browser/index.ts';
+import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,typedAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../core/browser/index.ts';
 import {createPictureInPictureOffer,createPictureInPictureWindow} from './picture-in-picture.ts';
 import {createAppletTaskScreen} from './applet-task-screen.ts';
 
@@ -161,11 +161,15 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   finally{adding=false;syncAppletOffer();}
  };
  root.addEventListener('worldlet:applet-layout',()=>syncAppletOffer());
+ // The page's toolbar (owner request 2026-10-09: "website based，下面多个框，显示url，前进后退，home之类的按钮"): one plain row
+ // along the top of the panel, above the page, in every website Applet and the Browser, under the Applet shelf
+ // (ui/hud/applet-shelf.ts) that now names the Applet: Back, Forward, Refresh, Home, the page's address and Focus.
+ // It sits in the panel above the page, since the host draws the page over anything placed on it.
+ const toolbar=document.createElement('div');toolbar.className='browser-toolbar';toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Page');
  // Refresh, in the top bar of every website Applet and the Browser (owner request 2026-10-05): the page showing
  // in the panel loads again, also one stuck on a blank page. A bar control like Back: its icon, its name the label.
  const refresh=document.createElement('button');refresh.type='button';refresh.className='scene-control browser-refresh';refresh.hidden=true;
  refresh.innerHTML=uiIcon('refresh');refresh.append(Object.assign(document.createElement('span'),{textContent:'Refresh'}));refresh.title='Refresh this page';
- (root.querySelector('.applet-bar-controls')||root).append(refresh);
  // The bar's page controls follow the panel, not each show of its page: a re-render of the open Applet
  // (a World update re-visits it) replaces the viewport and shows the page again a frame later, and
  // the controls flashing off and on for it read as a flicker (owner report 2026-10-06, YouTube).
@@ -181,37 +185,31 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   if(refresh.hidden===visible)refresh.hidden=!visible;
   // Home shows once the page has gone somewhere other than the home page (owner request 2026-10-07): the Browser's,
   // or a website Applet's own (owner request 2026-10-08).
+  // In the toolbar it stays, resting while the page is already its home page.
   const start=visible&&!!page.url?appletHome():'';
-  const home=!!start&&(appletKey==='browser'?!atBrowserHome(page.url,start):!atAppletHome(page.url,[start,landedHomes.get(appletKey)||'']));
-  // It stands with Back and Forward, so the bar's left side is laid out again when it comes or goes.
-  if(homeButton.hidden===home){homeButton.hidden=!home;root.dispatchEvent(new CustomEvent('worldlet:page-controls'));}
+  const away=!!start&&(appletKey==='browser'?!atBrowserHome(page.url,start):!atAppletHome(page.url,[start,landedHomes.get(appletKey)||'']));
+  homeButton.hidden=!visible||!appletHome();homeButton.disabled=!away;
+  const bar=visible&&appletKey!=='web';if(toolbar.hidden===bar){toolbar.hidden=!bar;root.dispatchEvent(new CustomEvent('worldlet:page-controls'));}
   syncAddress(visible?page.url:'');
  }
- // Where the page is (owner request 2026-10-08: in a website Applet nothing said which address showed). With the pointer on
- // the title, the page's address opens in the name's place beside the Applet's mark, widening the title as far as the bar
- // allows; a click copies the whole address. It lives in the bar's row, as the native page covers anything over the page.
- const addressLine=document.createElement('button');addressLine.type='button';addressLine.className='browser-address';
- const addressText=document.createElement('span');addressLine.append(addressText);
- let addressCopied=0;
- // The title is the conversation's (companion/native-chat.ts), made after the panel: the address joins it when a page first shows.
- // The title keeps at least its width while the address shows, so a short address never pulls it out from under the pointer.
- function placeAddress(){
-  const titleBox=root.querySelector(':scope>.companion-context') as HTMLElement|null;if(!titleBox||addressLine.parentElement===titleBox)return;
-  titleBox.append(addressLine);
-  titleBox.addEventListener('pointerenter',()=>{if(root.hasAttribute('data-web-address'))titleBox.style.minWidth=titleBox.offsetWidth+'px';});
-  titleBox.addEventListener('pointerleave',()=>{titleBox.style.minWidth='';});
- }
+ // Where the page is (owner request 2026-10-08), now in the toolbar's address field (owner request 2026-10-09): the page's
+ // address while it is read, the whole address to edit once the field is clicked. Enter opens what was typed here: an
+ // address (core/browser/typed-address.ts), or a search for anything else.
+ const addressForm=document.createElement('form');addressForm.className='browser-address';
+ const addressField=document.createElement('input');addressField.type='text';addressField.spellcheck=false;addressField.autocomplete='off';
+ addressField.setAttribute('aria-label','Page address');addressField.placeholder='Type an address or search';addressForm.append(addressField);
+ let addressUrl='';
  function syncAddress(url:string){
-  const shown=url?pageAddress(url):'';if(shown)placeAddress();
-  root.toggleAttribute('data-web-address',!!shown);
-  if(addressLine.dataset.url===url)return;
-  addressLine.dataset.url=url;addressText.textContent=shown;addressLine.title=url?'Copy '+url:'';
-  addressLine.setAttribute('aria-label',url?'Page address '+shown+'. Copy':'');clearTimeout(addressCopied);delete addressLine.dataset.copied;
+  addressUrl=url;if(document.activeElement===addressField)return;
+  const shown=url?pageAddress(url):'';if(addressField.value!==shown)addressField.value=shown;addressField.title=url;
  }
- addressLine.onclick=async event=>{
-  event.stopPropagation();const url=addressLine.dataset.url;if(!url)return;
-  try{await navigator.clipboard.writeText(url);}catch{notify('Could not copy the address.');return;}
-  addressLine.dataset.copied='true';clearTimeout(addressCopied);addressCopied=window.setTimeout(()=>{delete addressLine.dataset.copied;},1600);
+ addressField.onfocus=()=>{addressField.value=addressUrl;addressField.select();};
+ addressField.onblur=()=>syncAddress(addressUrl);
+ addressField.onkeydown=event=>{if(event.key==='Escape'){event.stopPropagation();addressField.value=addressUrl;addressField.blur();}};
+ addressForm.onsubmit=event=>{
+  event.preventDefault();const text=addressField.value.trim();if(!text)return;
+  const url=typedAddress(text)||'https://www.google.com/search?q='+encodeURIComponent(text);
+  addressField.blur();void command('open',{url});
  };
  // Each website Applet's home page is the address it opens at (core/browser/page-resume.ts appletSite); the Browser's is
  // the one in Settings › Browser. A page over the World ('web') has none. Where that address first lands (a redirect,
@@ -234,24 +232,26 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  for(const [button,name,label,tip] of [[pageBack,'back','Back','Go back a page'],[pageForward,'forward','Forward','Go forward a page']] as const){
   button.type='button';button.className='scene-control browser-'+name;button.hidden=true;button.disabled=true;
   button.innerHTML=uiIcon(name);button.append(Object.assign(document.createElement('span'),{textContent:label}));button.title=tip;
-  (root.querySelector('.applet-bar-left')||root).append(button);
+  toolbar.append(button);
  }
- // Home stands on the left after Back and Forward (owner request 2026-10-08), not beside Refresh.
- (root.querySelector('.applet-bar-left')||root).append(homeButton);
+ toolbar.append(refresh,homeButton,addressForm);
  let pageHistory={back:false,forward:false};
  function syncHistory(){
   const visible=pageInPanel()&&appletKey!=='web',back=visible&&(pageHistory.back||canReturn()),forward=visible&&pageHistory.forward;
   // `data-web-page` marks a website page even while both rest hidden: the Applet's own Back stays away (World beside
   // Fox leaves the page, ui/hud/native-hud.ts) instead of standing in for the page's Back.
-  if(pageBack.hidden===back||pageForward.hidden===forward||pageBack.hasAttribute('data-web-page')!==visible){pageBack.hidden=!back;pageForward.hidden=!forward;pageBack.toggleAttribute('data-web-page',visible);root.dispatchEvent(new CustomEvent('worldlet:page-controls'));}
+  // In the toolbar both stay, resting while there is nowhere to go.
+  if(pageBack.hidden===visible||pageBack.hasAttribute('data-web-page')!==visible){pageBack.hidden=pageForward.hidden=!visible;pageBack.toggleAttribute('data-web-page',visible);root.dispatchEvent(new CustomEvent('worldlet:page-controls'));}
   pageBack.disabled=!back;pageForward.disabled=!forward;
  }
- function goBack(){if(pageBack.hidden)return;if(pageHistory.back)void command('back');else if(canReturn())leave();}
- function goForward(){if(!pageForward.hidden&&pageHistory.forward)void command('forward');}
+ function goBack(){if(pageBack.disabled)return;if(pageHistory.back)void command('back');else if(canReturn())leave();}
+ function goForward(){if(!pageForward.disabled&&pageHistory.forward)void command('forward');}
  pageBack.onclick=event=>{event.stopPropagation();goBack();};
  pageForward.onclick=event=>{event.stopPropagation();goForward();};
  window.addEventListener('worldlet:browser-navigate',(event:any)=>{
   if(event.detail==='back')goBack();else if(event.detail==='forward')goForward();
+  // The Applet shelf's + (ui/hud/applet-shelf.ts) entering the Browser: its address is ready to type.
+  else if(event.detail==='address'){if(toolbar.isConnected&&!toolbar.hidden)addressField.focus();}
   // The File menu's tab keys (⌘T, ⌘W, ⌘⇧] and ⌘⇧[; Ctrl+T, Ctrl+W, Ctrl+Tab and Ctrl+Shift+Tab elsewhere) act on the Browser's tabs
   // while it shows; taken, the menu does nothing else (⌘W closes the window anywhere else).
   else if(typeof event.detail==='string'&&event.detail.endsWith('-tab')&&tabsInPanel()){
@@ -296,7 +296,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   renderTabs();geometry(true);
  }
  function pickTab(key:string){if(!tabsInPanel()||key===resumeKey&&tabs.state.active===key)return;tabs.select(key);showTab(key);}
- function newTab(){if(!tabsInPanel()||!canAddTab(tabs.state))return;showTab(tabs.add().active);}
+ function newTab(){if(!tabsInPanel()||!canAddTab(tabs.state))return;showTab(tabs.add().active);addressField.focus();}
  // A link the page opened for a new tab (target=_blank, ⌘-click; owner request 2026-10-08): the next tab, in front or,
  // for a background click, behind the page. Away from the strip (the task window) the link opens in this page.
  function openTab(url:string,background:boolean){
@@ -319,7 +319,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // and the site keeps that choice. The host says what Focus does on each page it shows (`focus` reports).
  const focusButton=document.createElement('button');focusButton.type='button';focusButton.className='scene-control browser-focus';focusButton.hidden=true;
  focusButton.innerHTML=uiIcon('focus');focusButton.append(Object.assign(document.createElement('span'),{textContent:'Focus'}));
- {const controls=root.querySelector('.applet-bar-controls');if(controls)controls.prepend(focusButton);else root.append(focusButton);}
+ toolbar.append(focusButton);
  let focusState:{on:boolean,reader:boolean,paused:boolean,available?:boolean}|null=null,focusBusy=false;
  // Its place is kept while the host has not yet said what Focus does on the page, so the controls beside it
  // do not jump aside when the answer comes (owner report 2026-10-06).
@@ -671,7 +671,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    if(key!=='web')content.querySelector('.notion-reader-head')?.remove();
    if(!native?.browser){const p=document.createElement('p');p.textContent='Open the Mac app to browse '+title+' here. Browsing does not connect account sync.';const link=document.createElement('a');link.href=address||home;link.target='_blank';link.rel='noopener noreferrer';link.textContent=title+' ↗';content.append(p,link);return;}
    caption=document.createElement('p');caption.className='browser-caption';caption.setAttribute('role','status');caption.textContent='Loading '+title+'…';
-   slot=document.createElement('div');slot.className='browser-viewport';slot.setAttribute('aria-label','Native '+title+' browser');markFoxControl();content.append(caption,...key==='browser'?[tabStrip]:[],slot);renderTabs();resize.observe(slot);syncAppletOffer(destination||home);syncMakeOffer();geometry();
+   slot=document.createElement('div');slot.className='browser-viewport';slot.setAttribute('aria-label','Native '+title+' browser');markFoxControl();content.append(caption,...key==='browser'?[tabStrip]:[],...key!=='web'?[toolbar]:[],slot);renderTabs();resize.observe(slot);syncAppletOffer(destination||home);syncMakeOffer();geometry();
   },
   async automate(args){if(!['receipts'].includes(args?.operation)){
    // Fox's first step on the page in view: Fox works on a copy, and the person keeps the page (FOX_COPY).
