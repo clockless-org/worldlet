@@ -50,7 +50,7 @@ export default sim;
 | Interface | Inputs / responsibility |
 | --- | --- |
 | `renderWorld` | Owned host element, scene, world snapshot, navigation, menu and move capabilities. Theme draws the map, areas, Applet icons, hover and drop targets. |
-| World `update` | Current view, stable Applet IDs and titles, availability, counts, regions, pinned slots, environment, motion and interaction hints. No credentials or host DOM internals. |
+| World `update` | Current view, stable Applet IDs and titles, the host's picture of each Applet (`icon`, to show wherever the theme has no art of its own), availability, counts, regions, pinned slots, environment, motion and interaction hints. No credentials or host DOM internals. |
 | World `event` | `mail.received` and `applet.arrived`; return whether the theme presented the cue. Respect reduced motion. |
 | World `anchor` / `bounds` | Applet anchor and hit rectangle in CSS pixels relative to the host, or null. Background, button and anchor must use the same transform. |
 | `renderApplet` | Applet identity, selected scene, display records, loading/connection/error state and capabilities. Every ID must render, using the generic scene when necessary. |
