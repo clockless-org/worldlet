@@ -276,6 +276,20 @@ jobs:
           mkdir -p dist/ci/windows
           cp dist/windows-installers/Worldlet-*-windows-x64-unsigned.exe* "$WORLDLET_RELEASE_MANIFEST" dist/ci/windows/
           ls -l dist/ci/windows
+      # The Microsoft Store MSIX of the same commit, published beside the installer; release machine 01 submits it in
+      # Partner Center once the Build reaches Beta. A failed Store package never holds the installer back.
+      - name: Build the Store package
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          WORLDLET_DISTRIBUTION_CHANNEL=microsoft-store node scripts/windows.ts package
+          sdk="$(ls -d '/c/Program Files (x86)/Windows Kits/10/bin/'10.*/x64 | sort -V | tail -1)"
+          WORLDLET_WINDOWS_SDK_BIN="$(cygpath -m "$sdk")" node scripts/windows-msix.ts
+          msix="$(ls -t dist/windows-msix/store-*.msix | head -1)"
+          exe="$(basename dist/ci/windows/Worldlet-*-windows-x64-unsigned.exe)"
+          cp "$msix" "dist/ci/windows/${exe%-unsigned.exe}-store.msix"
+          cp "$msix.json" "dist/ci/windows/${exe%-unsigned.exe}-store.msix.json"
+          ls -l dist/ci/windows
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: worldlet-windows-${{ env.BUILD }}

@@ -1,7 +1,7 @@
 // Checks the CI release pipeline (scripts/ci-release.mjs, .github/workflows/release.yml) without signing or storage.
 import assert from 'node:assert/strict';
-import {generateKeyPairSync,sign} from 'node:crypto';
-import {mkdtempSync,readFileSync,writeFileSync} from 'node:fs';
+import {createHash,generateKeyPairSync,sign} from 'node:crypto';
+import {mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {BUILD_OFFSET,channelKeys,devTests,githubStore,labelOf,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
@@ -79,6 +79,24 @@ assert(staged.writes.every(w=>!w.includes('channel-')&&!w.startsWith('promote'))
 const superseded=Object.assign(store(),{superseded:async()=>'.github/workflows/rc.yml'});
 assert.match((await publish({channel:'dev',platform:'mac',dir,live:true,store:superseded,updates})).skipped,/rc\.yml/,'a Dev build whose tag GitHub would refuse is skipped');
 assert.deepEqual(superseded.writes,[]);
+
+// Windows: the installer, then the Store MSIX of the same Build when it was built, then the feed.
+{
+ const wdir=mkdtempSync(path.join(os.tmpdir(),'ci-release-windows-'));
+ writeFileSync(path.join(wdir,'release.json'),JSON.stringify(releaseManifest(id,'c'.repeat(40))));
+ const exe=path.join(wdir,'Worldlet-2026.1008.4012-4012-windows-x64-unsigned.exe');writeFileSync(exe,Buffer.alloc(200000,1));writeFileSync(exe+'.sha256','x');
+ const digest=f=>createHash('sha256').update(readFileSync(f)).digest('hex');
+ writeFileSync(exe+'.json',JSON.stringify({version:'2026.1008.4012',build:4012,sha256:digest(exe),googleSignIn:true}));
+ const plain=store();await publish({channel:'dev',platform:'windows',dir:wdir,live:true,store:plain});
+ assert.deepEqual(plain.writes.slice(2),['v2026.1008.4012/'+path.basename(exe),'v2026.1008.4012/'+path.basename(exe)+'.sha256','channel-dev/windows-dev.json'],'no Store MSIX: the installer alone');
+ const msix=exe.replace(/-unsigned\.exe$/,'-store.msix');writeFileSync(msix,'store package bytes');
+ writeFileSync(msix+'.json',JSON.stringify({build:4012,distributionChannel:'microsoft-store',sha256:digest(msix)}));
+ const withStore=store();await publish({channel:'dev',platform:'windows',dir:wdir,live:true,store:withStore});
+ assert.deepEqual(withStore.writes.slice(4),['v2026.1008.4012/'+path.basename(msix),'v2026.1008.4012/'+path.basename(msix)+'.json','channel-dev/windows-dev.json'],'the Store MSIX goes beside the installer, before the feed');
+ writeFileSync(msix,'other bytes');
+ await assert.rejects(publish({channel:'dev',platform:'windows',dir:wdir,live:true,store:store()}),/Store MSIX differs/);
+ rmSync(wdir,{recursive:true,force:true});
+}
 
 // The GitHub store: reads only listed assets, never replaces an installer with other bytes, tolerates a parallel create.
 {

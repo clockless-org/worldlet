@@ -19,7 +19,7 @@ Everything lives on this repository's GitHub Releases:
 
 | Release | What it holds |
 | --- | --- |
-| `v<label>` | One per Build: the Mac DMG, the Windows installer and their checksums. A prerelease until the Build reaches Beta, which makes it the latest release. |
+| `v<label>` | One per Build: the Mac DMG, the Windows installer and their checksums, and the Microsoft Store MSIX with its record (`-store.msix`, `.msix.json`) when it built. A prerelease until the Build reaches Beta, which makes it the latest release. |
 | `channel-dev`, `channel-alpha`, `channel-beta` | Each channel's update feeds, replaced in place so their addresses never change: `appcast-dev.xml` and `windows-dev.json`; `appcast-alpha.xml` and `windows-alpha.json`; `appcast.xml`, `appcast-intel.xml` (with history) and `windows-preview.json`. |
 | `staging-<channel>` | The same feeds for a channel that is not live yet. |
 
@@ -42,7 +42,7 @@ Build = 4000 + the commit's position on `main` (`git rev-list --count`). The off
 ## What a build does
 
 - **Mac** (`macos-15`): [ci-build.sh](../platform/electron/distribution/mac/ci-build.sh) packages one universal app signed with the Developer ID certificate, puts it in a signed DMG, notarizes the DMG with an App Store Connect API key, staples it, and writes the Sparkle item signed with the update key. Apple notarizes the app inside the DMG in the same submission, so there is one notarization wait instead of two.
-- **Windows** (`windows-2025`): `npm run installer:windows`, the unsigned NSIS installer the Windows updater already reads.
+- **Windows** (`windows-2025`): `npm run installer:windows`, the unsigned NSIS installer the Windows updater already reads, then the Microsoft Store MSIX of the same commit (`windows-msix.ts`, the runner's Windows SDK). Release machine 01 submits that MSIX in Partner Center once the Build reaches Beta. A failed MSIX never holds the installer back.
 - Both then publish to Dev with `node scripts/ci-release.mjs publish`, which uploads the installer and its checksum to the Build's release, then replaces the channel's feed, and refuses to replace a channel's newer build. A Dev build whose commit is behind a later push that changed a workflow is skipped: GitHub does not let the workflow's token tag a commit whose workflows differ from `main`'s, and that later push publishes its own, newer Dev build.
 
 How long it takes: Dev cannot be ready three minutes after a push. Building the universal app with its Chromium engine takes several minutes on a hosted Mac, and Apple's notarization usually takes a few minutes more, sometimes much longer. The Build number is fixed the moment the commit lands; the job summary of each run records how long each part took.
