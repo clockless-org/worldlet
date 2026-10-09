@@ -31,6 +31,20 @@ url="$(curl -fsSL "$SITE/downloads/appcast.xml" | grep -o '<enclosure[^>]*url="[
 file="${url##*/}"
 case "$file" in Worldlet-*-macos-*.dmg) ;; *) fail "unexpected release file: $file" ;; esac
 
+# A Worldlet already at this Build or newer (an Alpha or Dev copy, say) is kept and opened: replacing it would go back
+# to an older app over newer data.
+build="${file%-macos-*}"; build="${build##*-}"
+for app in "${WORLDLET_INSTALL_DIR:-/Applications}/Worldlet.app" "$HOME/Applications/Worldlet.app"; do
+  [ -z "${WORLDLET_INSTALL_DIR:-}" ] || [ "$app" = "$WORLDLET_INSTALL_DIR/Worldlet.app" ] || continue
+  have="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$app/Contents/Info.plist" 2>/dev/null || true)"
+  case "$have:$build" in *[!0-9:]*|:*|*:) continue ;; esac
+  if [ "$have" -ge "$build" ]; then
+    echo "Worldlet (Build ${have}) is already installed in ${app%/Worldlet.app}, as new as the release (Build ${build}). Opening it…"
+    if [ -n "$AGENT" ]; then open "$app" --args "--connect=$AGENT"; else open "$app"; fi
+    exit 0
+  fi
+done
+
 work="$(mktemp -d)"
 mount="$work/volume"
 cleanup() { hdiutil detach "$mount" -quiet >/dev/null 2>&1 || true; rm -rf "$work"; }
