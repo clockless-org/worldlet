@@ -232,4 +232,22 @@ export class UnavailableAgentAdapter extends PortableAdapter implements Adapter 
  home(_scope:'private'|'sample'|'setup'){return path.join(this.context.root,'agent/unavailable');}
  async shutdown(){}
 }
+
+/** No Agent chosen yet (owner decisions 2026-10-09: Worldlet customizes nothing below the Harness contract, so there is
+ * no built-in Hermes; someone without an Agent gets stock Hermes Agent at setup). Fox waits for one: every Agent call
+ * says so, and the World asks for an Agent once (index.ts `foxNeedsAgent`). */
+export const NO_AGENT_ID='none';
+export const NO_AGENT='Fox needs an Agent. Choose one in Settings › Model.';
+export class NoAgentAdapter extends PortableAdapter implements Adapter {
+ readonly id=NO_AGENT_ID;
+ readonly available=false;
+ hasInteractiveWork(){return false;}
+ make():AgentRuntime {return new UnsupportedRuntime(NO_AGENT);}
+ makeModelAccess(){return this.make();}
+ makeSourceAccess(){return this.make();}
+ makeRoutines(){return NO_ROUTINES;}
+ async status(_home:string):Promise<Row> {return {ready:false,name:'No Agent',provider:NO_AGENT_ID,error:NO_AGENT,capabilities:{streaming:false,tools:false,cancel:false,steer:false,memory:false,sessions:false,routines:false}};}
+ home(scope:'private'|'sample'|'setup'){return path.join(this.context.root,'agent',scope,this.id);}
+ async shutdown(){}
+}
 export {NO_ROUTINES};

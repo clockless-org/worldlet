@@ -1,7 +1,6 @@
 import path from 'node:path';
 import {AGENT,FOX,type AgentService,type FoxService} from '../host/services.ts';
 import {LocalHarnessRuntime,readSelection} from '../modules/agent-runtime/local-harness.ts';
-import {readModelSource} from '../modules/agent-runtime/model-access.ts';
 import type {AgentEventHandler,Row} from '../modules/agent-runtime/types.ts';
 import type {CheckContext} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -28,7 +27,7 @@ export async function localAgentFlow({host,view}:CheckContext){
  const disposable=process.env.WORLDLET_PROFILE_ROOT;
  if(!disposable||path.resolve(disposable)!==path.resolve(store.root))throw Error('needs a disposable library: start with WORLDLET_PROFILE_ROOT (npm run test:agent:local)');
  const agent=host.use<AgentService>(AGENT);
- // The launcher saved Codex as the chosen Harness; the host keeps the built-in Agent when Codex is not installed here.
+ // The launcher saved Codex as the chosen Harness; Fox has no Agent when Codex is not installed here.
  // Even a SKIP ends after the World has started: quitting while the page still boots crashes Electron on Windows (0xC0000005).
  if(agent.id!=='local-codex'){
   for(let i=0;i<450&&await view.webContents.executeJavaScript("!!document.querySelector('#notionWorld')?.sceneMetrics?.renderer",true).catch(()=>false)!==true;i++)await sleep(200);
@@ -126,7 +125,7 @@ export async function localAgentFlow({host,view}:CheckContext){
  // (owner report 2026-10-03: after Reset Fox, setup reopened on its apps page).
  await agent.forgetSetupChoice?.();
  const after:string=agent.id;
- if(after!=='hermes'||readSelection(store.root)||readModelSource(store.root))throw Error(`Reset left the local Agent chosen: Fox's Agent is ${after}`);
+ if(after!=='none'||readSelection(store.root))throw Error(`Reset left the local Agent chosen: Fox's Agent is ${after}`);
  mark('PASS reset forgets the local Agent chosen at setup');
  console.log(`PASS local agent flow: Fox on the local Codex CLI talked, read practice mail, opened an Applet and drafted a reply through World tools (${Math.round((Date.now()-started)/1000)}s)`);
 }
