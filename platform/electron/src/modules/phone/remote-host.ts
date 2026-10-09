@@ -7,13 +7,16 @@ import {REMOTE_TURN_LIMITS,readRemoteToHost,remoteAssembler,remoteParts,remoteSe
 // instructions and view. Its words and steps go back as `events` (gathered for a quarter second), each World tool call
 // goes to the client as `tool` and the turn waits for the client's `tool-result` (the client runs it in its own World),
 // a permission prompt of the Agent here goes as `approval` to the client's approval card and is answered by its
-// `approval-answer` (Deny when none comes in time or the turn ends), and `done` ends it; `cancel` stops it. One turn at a time. Nothing else the client may send is carried out.
+// `approval-answer` (Deny when none comes in time or the turn ends), and `done` ends it; `cancel` stops it. One of the
+// person's turns at a time, and beside it up to two background turns (`lane`: an Attention check or Applet task of the
+// client's, run on this computer's background lane). Nothing else the client may send is carried out.
 type Row=Record<string,unknown>;
 export type RemoteHostOptions={
  /** Queues a message to the client (the agent pairing's `send`); throws when the relay refuses it. */
  send:(message:unknown)=>Promise<void>,
- /** Runs a chat body on this computer's Agent. Each event's answer goes back to the Agent; `signal` stops it. */
- run:(body:Row,onEvent:(event:Row)=>Promise<Row|null>,signal:AbortSignal)=>Promise<Row>,
+ /** Runs a chat body on this computer's Agent (its background lane for `background`). Each event's answer goes back to
+  * the Agent; `signal` stops it. */
+ run:(body:Row,onEvent:(event:Row)=>Promise<Row|null>,signal:AbortSignal,lane?:'background')=>Promise<Row>,
  /** The client's name (its `phone` slot), which keeps its threads' sessions apart from this computer's own. */
  client:()=>string,
  /** This computer's name, said in a refusal. */
@@ -31,7 +34,9 @@ export type RemoteHostOptions={
 const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 export function createRemoteAgentHost(options:RemoteHostOptions){
  const parts=remoteAssembler(),gather=options.gather??250;
- let current:{id:string,controller:AbortController,calls:Map<string,(result:Row)=>void>,approvals:Map<string,(choice:HarnessApprovalChoice)=>void>}|null=null;
+ type Run={id:string,lane:'person'|'background',controller:AbortController,calls:Map<string,(result:Row)=>void>,approvals:Map<string,(choice:HarnessApprovalChoice)=>void>};
+ const runs=new Map<string,Run>();
+ const LANES=2;
  // Messages go one at a time, in order; a full inbox at the relay (429) is tried again while the client catches up.
  let chain:Promise<unknown>=Promise.resolve();
  async function deliver(message:unknown){
@@ -47,12 +52,13 @@ export function createRemoteAgentHost(options:RemoteHostOptions){
  };
  const message=(turn:string,fields:Row)=>({...fields,id:crypto.randomUUID(),at:Date.now(),turn});
  async function start(turn:RemoteTurnRequest){
-  if(current)return void post(message(turn.id,{type:'done',error:`Fox on ${options.name()} is still answering your other message. Try again when it has finished.`})).catch(()=>{});
+  const lane=turn.lane==='background'?'background':'person',busy=[...runs.values()].filter(run=>run.lane===lane).length;
+  if(lane==='person'?busy>0:busy>=LANES)return void post(message(turn.id,{type:'done',error:lane==='person'?`Fox on ${options.name()} is still answering your other message. Try again when it has finished.`:`Fox on ${options.name()} is busy with other background work. Try again later.`})).catch(()=>{});
   // The client stops waiting for a turn that has not started by then (and sends `cancel`); one sealed long before this
   // computer read it (it slept) does not run, allowing for the two clocks to differ.
   if(Date.now()-turn.at>REMOTE_TURN_LIMITS.startMs+REMOTE_TURN_LIMITS.skewMs)return;
-  const controller=new AbortController(),calls=new Map<string,(result:Row)=>void>(),approvals=new Map<string,(choice:HarnessApprovalChoice)=>void>(),run={id:turn.id,controller,calls,approvals};
-  current=run;
+  const controller=new AbortController(),calls=new Map<string,(result:Row)=>void>(),approvals=new Map<string,(choice:HarnessApprovalChoice)=>void>(),run:Run={id:turn.id,lane,controller,calls,approvals};
+  runs.set(turn.id,run);
   let pending:RemoteTurnEvent[]=[],timer:ReturnType<typeof setTimeout>|null=null,count=0;
   const flush=()=>{
    if(timer){clearTimeout(timer);timer=null;}
@@ -99,7 +105,7 @@ export function createRemoteAgentHost(options:RemoteHostOptions){
   };
   try{
    const agents=await options.agents().catch(()=>[] as string[]);
-   const result=await options.run(remoteTurnBody(turn,{world:remoteSessionWorld(options.client()),agents}),onEvent,controller.signal);
+   const result=await options.run(remoteTurnBody(turn,{world:remoteSessionWorld(options.client()),agents}),onEvent,controller.signal,lane==='background'?'background':undefined);
    await flush();
    await post(message(turn.id,controller.signal.aborted?{type:'done',cancelled:true}:{type:'done',message:typeof result?.message==='string'?result.message:''}));
   }catch(error){
@@ -111,7 +117,7 @@ export function createRemoteAgentHost(options:RemoteHostOptions){
    if(timer)clearTimeout(timer);
    // A prompt still open when the turn ends is declined.
    for(const settle of [...approvals.values()])settle('deny');
-   if(current===run)current=null;
+   if(runs.get(turn.id)===run)runs.delete(turn.id);
   }
  }
  /** One opened message from the client (core/phone readRemoteToHost); resolves true once taken. */
@@ -121,14 +127,15 @@ export function createRemoteAgentHost(options:RemoteHostOptions){
    return whole&&whole.type!=='part'?receive(whole):true;
   }
   if(value.type==='turn'){void start(value).catch(error=>options.onError?.(error));return true;}
-  // A cancel or a tool's answer counts only for the turn running now.
-  if(value.type==='cancel'){if(current?.id===value.turn)current.controller.abort();return true;}
-  if(value.type==='tool-result'&&current?.id===value.turn)current.calls.get(value.call)?.(value.result);
-  if(value.type==='approval-answer'&&current?.id===value.turn)current.approvals.get(value.approval)?.(value.choice);
+  // A cancel or a tool's answer counts only for a turn running now.
+  const run=runs.get(value.turn);
+  if(value.type==='cancel')run?.controller.abort();
+  if(value.type==='tool-result')run?.calls.get(value.call)?.(value.result);
+  if(value.type==='approval-answer')run?.approvals.get(value.approval)?.(value.choice);
   return true;
  }
- return {receive,get busy(){return current!==null;},
-  /** Stops the running turn (the pairing ended or the app quits). */
-  stop(){current?.controller.abort();}};
+ return {receive,get busy(){return runs.size>0;},
+  /** Stops the running turns (the pairing ended or the app quits). */
+  stop(){for(const run of runs.values())run.controller.abort();}};
 }
 export type RemoteAgentHost=ReturnType<typeof createRemoteAgentHost>;
