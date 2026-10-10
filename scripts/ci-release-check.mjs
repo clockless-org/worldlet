@@ -116,6 +116,8 @@ assert.deepEqual(superseded.writes,[]);
  assert.equal(withStore.got.length,10,'the Store MSIX and its record when they built');
  await assert.rejects(fetchBuild({build:4012,dir:fdir,store:fake(all.filter(n=>!n.endsWith('.appcast.xml')))}),/appcast\.xml/,'a Build published without its records is refused');
  await assert.rejects(fetchBuild({build:4013,dir:fdir,store:fake(all)}),/No release for Build 4013/);
+ const macOnly=fake(all.filter(n=>!n.includes('windows')));
+ assert.deepEqual(Object.keys(await fetchBuild({build:4012,dir:fdir,store:macOnly,platforms:['mac']})),['tag','mac'],'one platform needs only its own files');
  rmSync(fdir,{recursive:true,force:true});
 }
 
@@ -159,5 +161,6 @@ for(const job of jobs){
  if(/secrets\./.test(job))assert(/\n    environment: release\n/.test(job),`${name}: secrets only in the release environment`);
 }
 assert(/if: github\.repository == 'clockless-org\/worldlet' && github\.ref == 'refs\/heads\/main'/.test(workflow),'only clockless-org/worldlet main releases');
-assert(/worldlet\/\$CHANNEL-\$platform/.test(workflow)&&/for platform in mac windows/.test(workflow),'a promotion requires both release machines to have passed the channel\'s tests');
+assert(/worldlet\/\$CHANNEL-\$platform/.test(workflow)&&/for platform in \$PLATFORMS; do\n            sha=/.test(workflow),'a promotion requires the platform\'s release machine to have passed the channel\'s tests on that platform\'s own commit');
+assert(/options: \[both, mac, windows\]/.test(workflow)&&/PLATFORMS: \$\{\{ inputs\.platform == 'both' && 'mac windows' \|\| inputs\.platform \}\}/.test(workflow),'each platform is promoted on its own (owner decision 2026-10-10)');
 console.log('ci-release checks passed');

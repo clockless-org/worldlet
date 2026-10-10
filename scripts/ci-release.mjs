@@ -209,7 +209,7 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
  * installer, its checksum, its build records (the Sparkle item, the Windows record, release.json) and the Store MSIX when
  * there is one. Promotion uses it: the release machines build the Dev packages (owner decision 2026-10-10), so there is no
  * workflow artifact. Throws when the release lacks a record (a Build published before the records were kept). */
-export async function fetchBuild({build,dir,store}){
+export async function fetchBuild({build,dir,store,platforms=['mac','windows']}){
  const own=store||githubStore();
  try{
   const found=await own.findBuild(build);
@@ -220,7 +220,7 @@ export async function fetchBuild({build,dir,store}){
    windows:[[/-windows-x64-unsigned\.exe$/,''],[/-windows-x64-unsigned\.exe$/,'.sha256'],[/-windows-x64-unsigned\.exe$/,'.json'],[/-windows-x64-unsigned\.exe$/,'.release.json','release.json'],[/-windows-x64-store\.msix$/,'',null,true],[/-windows-x64-store\.msix$/,'.json',null,true]],
   };
   const out={};
-  for(const [platform,list] of Object.entries(files)){
+  for(const [platform,list] of Object.entries(files).filter(([p])=>platforms.includes(p))){
    const target=path.join(dir,platform);mkdirSync(target,{recursive:true});
    for(const [pattern,suffix,as,optional] of list){
     const base=found.assets.find(n=>pattern.test(n));
@@ -275,10 +275,10 @@ async function main(){
   console.log(line);return;
  }
  if(command==='fetch'){
-  // --build <n> --dir <dir>: the Build's files from its release, for a promotion.
-  const build=Number(arg('build')),dir=path.resolve(arg('dir')||'');
-  if(!Number.isSafeInteger(build)||!arg('dir'))throw Error('Usage: ci-release.mjs fetch --build <n> --dir <dir>');
-  const r=await fetchBuild({build,dir});console.log(`Fetched Build ${build} from ${r.tag} into ${dir}`);return;
+  // --build <n> --dir <dir> [--platform mac,windows]: the Build's files from its release, for a promotion.
+  const build=Number(arg('build')),dir=path.resolve(arg('dir')||''),platforms=(arg('platform')||'mac,windows').split(',');
+  if(!Number.isSafeInteger(build)||!arg('dir')||!platforms.every(p=>['mac','windows'].includes(p)))throw Error('Usage: ci-release.mjs fetch --build <n> --dir <dir> [--platform mac,windows]');
+  const r=await fetchBuild({build,dir,platforms});console.log(`Fetched Build ${build} from ${r.tag} into ${dir}`);return;
  }
  if(command==='analytics'){
   // Writes the PostHog project key (POSTHOG_PROJECT_KEY, a release secret) into the app's analytics config. This
