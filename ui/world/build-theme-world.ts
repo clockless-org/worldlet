@@ -1,7 +1,7 @@
 import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeWorldApplet,type ThemeLampState} from '../themes/index.ts';
 import {createAppletStage} from './theme-applet-stage.ts';
 import {createAppletStage as createVillageStage} from './pixi-stage.ts';
-import {renderVillageWorld,type VillageWorldMount} from './village-world.ts';
+import {renderVillageWorld,type VillageWorldMount} from './village/village-world.ts';
 import {createAppletImageLamps} from './applet-image-lamps.ts';
 import {createLampLabel,stackLampLabels} from './applet-lamp-label.ts';
 import {createLevelZoom} from './level-zoom.ts';

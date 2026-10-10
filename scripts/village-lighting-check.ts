@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {villageLightingState} from '../ui/world/village-lighting-state.ts';
+import {villageLightingState} from '../ui/world/village/village-lighting-state.ts';
 const day=villageLightingState({daylight:1,progress:.5,kind:'clear',cloud:0});
 const night=villageLightingState({daylight:0,progress:1,kind:'clear',cloud:0});
 assert.equal(day.smoke,true,'chimney smoke is a daytime detail');

@@ -1,9 +1,9 @@
 import {ACTIVE_THEME,onThemeApplied,theme} from '../themes/index.ts';
-import {villageLightingState} from './village-lighting-state.ts';
-import {createVillageLighting} from './village-lighting.ts';
-import {createVillageAmbience,VILLAGE_WATER_PATH} from './village-ambience.ts';
-import {villageCamera,approachVillageCamera,OVERVIEW_CENTER} from './village-camera.ts';
-import {VILLAGE_SITES} from './village-sites.ts';
+import {villageLightingState} from './village/village-lighting-state.ts';
+import {createVillageLighting} from './village/village-lighting.ts';
+import {createVillageAmbience,VILLAGE_WATER_PATH} from './village/village-ambience.ts';
+import {villageCamera,approachVillageCamera,OVERVIEW_CENTER} from './village/village-camera.ts';
+import {VILLAGE_SITES} from './village/village-sites.ts';
 
 // The renderer half of a theme: camera, light, ambient motion and the sites devices stand on. The
 // theme's data (ui/themes) says what exists; these trusted adapters draw it. One per registered theme.

@@ -477,7 +477,7 @@ flowchart LR
 
 | Part | Implementation |
 | --- | --- |
-| Device | `resources/styles/builtin/assets/world/devices/youtube.png`: a television with wooden feet, antenna and knobs, drawn at its authored Explore slot in `ui/world/applet-sprites.ts`. The brand mark stays in `ui/applets/youtube/logo.ts` and is used for the HUD icon, not painted on the device |
+| Device | `resources/styles/builtin/assets/world/devices/youtube.png`: a television with wooden feet, antenna and knobs, drawn at its authored Explore slot in `ui/world/village/applet-sprites.ts`. The brand mark stays in `ui/applets/youtube/logo.ts` and is used for the HUD icon, not painted on the device |
 | UI | `ui/applets/youtube/panel.ts` and `panel.css`: a link field, the player and queue cards with loading, empty and error states |
 | Data | `YouTubeService` (`platform/electron/src/modules/browser/youtube.ts`): link parsing, the local queue and Open on YouTube. No Google API call and no network request of its own |
 | Credentials | None. The service holds no token, and `forgetAccount()` deletes anything an earlier build stored |

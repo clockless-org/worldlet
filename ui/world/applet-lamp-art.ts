@@ -1,7 +1,7 @@
 import registry from '../../resources/styles/builtin/applet-lamps.json' with {type:'json'};
 import {Sprite,Texture} from 'pixi.js';
 import {ACTIVE_THEME,themeAppletArt,type ThemeDeviceFeature} from '../themes/index.ts';
-import {deviceFeature} from './device-feature.ts';
+import {deviceFeature} from './village/device-feature.ts';
 import {lampSurface,LAMP_SURFACE_EXTENT} from './applet-lamp-surface.ts';
 const lampTextures=new Map<number,Texture>();
 import {lampColors,lampOpacity,type LampState} from './applet-lamp.ts';

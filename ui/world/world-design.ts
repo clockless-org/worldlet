@@ -1,4 +1,4 @@
-import opticalScales from './applet-optical-scales.json' with {type:'json'};
+import opticalScales from './village/applet-optical-scales.json' with {type:'json'};
 // Shared logical design coordinates. Texture pixels and devicePixelRatio do not
 // change layout. Positions persist as normalized 0–1 anchors across asset sizes.
 export const WORLD_DESIGN = Object.freeze({width:1920,height:1080});

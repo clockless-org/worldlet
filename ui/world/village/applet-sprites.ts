@@ -1,7 +1,7 @@
-import {onThemeApplied} from '../themes/index.ts';
-import {WORLD_WIDTH} from './world-design.ts';
-import {POPULAR_APPS,WEB_GAME_APPLETS} from '../../core/applets/index.ts';
-import {WORLD_LAYOUT} from './world-layout.ts';
+import {onThemeApplied} from '../../themes/index.ts';
+import {WORLD_WIDTH} from '../world-design.ts';
+import {POPULAR_APPS,WEB_GAME_APPLETS} from '../../../core/applets/index.ts';
+import {WORLD_LAYOUT} from '../world-layout.ts';
 // Named slots keep placements independent of catalog ordering.
 const sprites=()=>Object.fromEntries([
  ...Object.entries(WORLD_LAYOUT.regions).flatMap(([region,r])=>Object.entries(r.slots).map(([key,s])=>[key,{region,anchor:s.anchor,width:s.width}])),

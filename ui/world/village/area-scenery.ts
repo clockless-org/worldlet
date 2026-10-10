@@ -1,8 +1,8 @@
 import {Container,Graphics,Rectangle,Sprite,Texture} from 'pixi.js';
-import {WORLD_WIDTH,WORLD_HEIGHT} from './world-design.ts';
+import {WORLD_WIDTH,WORLD_HEIGHT} from '../world-design.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
 import {createSceneAmbience} from './scene-ambience.ts';
-import {attachAppletLamp} from './applet-lamp-art.ts';
+import {attachAppletLamp} from '../applet-lamp-art.ts';
 
 /** Reframe the painted support surface; only its independent instruments tighten horizontally. */
 function areaFrame(spec,width:number,height:number){

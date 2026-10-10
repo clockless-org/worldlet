@@ -1,5 +1,5 @@
 import {Container,Graphics,Rectangle,Sprite,Texture,VideoSource} from 'pixi.js';
-import type {ThemeMailDelivery} from '../themes/index.ts';
+import type {ThemeMailDelivery} from '../../themes/index.ts';
 
 /** Decorative playback only. The caller owns mail evidence and event deduplication. */
 export function createRoomMailDelivery(parent:Container,plate:Texture,spec:ThemeMailDelivery){

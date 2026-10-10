@@ -1,5 +1,5 @@
 import {Graphics,type Sprite} from 'pixi.js';
-import {ACTIVE_THEME,themeAppletArt,type ThemeDeviceEffects} from '../themes/index.ts';
+import {ACTIVE_THEME,themeAppletArt,type ThemeDeviceEffects} from '../../themes/index.ts';
 import {deviceFeature} from './device-feature.ts';
 
 /** Decorative accents follow registered painted features, independently of runtime lamps. */
