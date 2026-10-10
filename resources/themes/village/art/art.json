@@ -1,0 +1,2014 @@
+{
+ "world": {
+  "day": "world/day.webp",
+  "night": "world/night.webp"
+ },
+ "landmarks": {
+  "home": {
+   "day": "landmarks/home.webp",
+   "night": "landmarks/home-night.webp"
+  },
+  "library": {
+   "day": "landmarks/library.webp",
+   "night": "landmarks/library-night.webp"
+  },
+  "money": {
+   "day": "landmarks/money.webp",
+   "night": "landmarks/money-night.webp"
+  },
+  "health": {
+   "day": "landmarks/health.webp",
+   "night": "landmarks/health-night.webp"
+  },
+  "work": {
+   "day": "landmarks/work.webp",
+   "night": "landmarks/work-night.webp"
+  },
+  "travel": {
+   "day": "landmarks/travel.webp",
+   "night": "landmarks/travel-night.webp"
+  }
+ },
+ "devices": {
+  "gmail": {
+   "src": "devices/gmail.webp",
+   "box": [
+    127,
+    57,
+    678,
+    738,
+    768,
+    768
+   ]
+  },
+  "google-calendar": {
+   "src": "devices/google-calendar.webp",
+   "box": [
+    17,
+    39,
+    759,
+    760,
+    768,
+    768
+   ]
+  },
+  "apple-notes": {
+   "src": "devices/apple-notes.webp",
+   "box": [
+    40,
+    47,
+    729,
+    749,
+    768,
+    768
+   ]
+  },
+  "apple-reminders": {
+   "src": "devices/apple-reminders.webp",
+   "box": [
+    57,
+    55,
+    723,
+    757,
+    768,
+    768
+   ]
+  },
+  "weather": {
+   "src": "devices/weather.webp",
+   "box": [
+    137,
+    15,
+    717,
+    759,
+    768,
+    768
+   ]
+  },
+  "meetings": {
+   "src": "devices/meetings.webp",
+   "box": [
+    35,
+    73,
+    753,
+    659,
+    768,
+    768
+   ]
+  },
+  "github": {
+   "src": "devices/github.webp",
+   "box": [
+    65,
+    41,
+    694,
+    743,
+    768,
+    768
+   ]
+  },
+  "codex": {
+   "src": "devices/codex.webp",
+   "box": [
+    74,
+    45,
+    714,
+    759,
+    768,
+    768
+   ]
+  },
+  "claude-code": {
+   "src": "devices/claude-code.webp",
+   "box": [
+    45,
+    32,
+    714,
+    751,
+    768,
+    768
+   ]
+  },
+  "notion": {
+   "src": "devices/notion.webp",
+   "box": [
+    96,
+    39,
+    699,
+    757,
+    768,
+    768
+   ]
+  },
+  "obsidian": {
+   "src": "devices/obsidian.webp",
+   "box": [
+    127,
+    5,
+    657,
+    766,
+    768,
+    768
+   ]
+  },
+  "voice-memos": {
+   "src": "devices/voice-memos.webp",
+   "box": [
+    87,
+    57,
+    742,
+    722,
+    768,
+    768
+   ]
+  },
+  "messages": {
+   "src": "devices/messages.webp",
+   "box": [
+    48,
+    25,
+    735,
+    751,
+    768,
+    768
+   ]
+  },
+  "plaid": {
+   "src": "devices/plaid.webp",
+   "box": [
+    86,
+    37,
+    676,
+    758,
+    768,
+    768
+   ]
+  },
+  "stripe": {
+   "src": "devices/stripe.webp",
+   "box": [
+    96,
+    24,
+    672,
+    749,
+    768,
+    768
+   ]
+  },
+  "paypal": {
+   "src": "devices/paypal.webp",
+   "box": [
+    108,
+    47,
+    659,
+    742,
+    768,
+    768
+   ]
+  },
+  "todoist": {
+   "src": "devices/todoist.webp",
+   "box": [
+    69,
+    25,
+    701,
+    754,
+    768,
+    768
+   ]
+  },
+  "linear": {
+   "src": "devices/linear.webp",
+   "box": [
+    104,
+    47,
+    681,
+    725,
+    768,
+    768
+   ]
+  },
+  "supabase": {
+   "src": "devices/supabase.webp",
+   "box": [
+    139,
+    47,
+    638,
+    718,
+    768,
+    768
+   ]
+  },
+  "docker": {
+   "src": "devices/docker.webp",
+   "box": [
+    35,
+    46,
+    759,
+    748,
+    768,
+    768
+   ]
+  },
+  "google-drive": {
+   "src": "devices/google-drive.webp",
+   "box": [
+    37,
+    60,
+    732,
+    748,
+    768,
+    768
+   ]
+  },
+  "google-docs": {
+   "src": "devices/google-docs.webp",
+   "box": [
+    76,
+    52,
+    726,
+    728,
+    768,
+    768
+   ]
+  },
+  "google-sheets": {
+   "src": "devices/google-sheets.webp",
+   "box": [
+    109,
+    29,
+    670,
+    755,
+    768,
+    768
+   ]
+  },
+  "google-slides": {
+   "src": "devices/google-slides.webp",
+   "box": [
+    125,
+    33,
+    643,
+    748,
+    768,
+    768
+   ]
+  },
+  "oura": {
+   "src": "devices/oura.webp",
+   "box": [
+    93,
+    22,
+    678,
+    747,
+    768,
+    768
+   ]
+  },
+  "strava": {
+   "src": "devices/strava.webp",
+   "box": [
+    66,
+    20,
+    707,
+    747,
+    768,
+    768
+   ]
+  },
+  "fitbit": {
+   "src": "devices/fitbit.webp",
+   "box": [
+    78,
+    19,
+    690,
+    749,
+    768,
+    768
+   ]
+  },
+  "google-maps": {
+   "src": "devices/google-maps.webp",
+   "box": [
+    71,
+    36,
+    698,
+    759,
+    768,
+    768
+   ]
+  },
+  "airbnb": {
+   "src": "devices/airbnb.webp",
+   "box": [
+    58,
+    40,
+    716,
+    738,
+    768,
+    768
+   ]
+  },
+  "tripit": {
+   "src": "devices/tripit.webp",
+   "box": [
+    39,
+    60,
+    735,
+    728,
+    768,
+    768
+   ]
+  },
+  "x": {
+   "src": "devices/x.webp",
+   "box": [
+    84,
+    51,
+    741,
+    739,
+    768,
+    768
+   ]
+  },
+  "youtube": {
+   "src": "devices/youtube.webp",
+   "box": [
+    28,
+    23,
+    739,
+    752,
+    768,
+    768
+   ]
+  },
+  "tiktok": {
+   "src": "devices/tiktok.webp",
+   "box": [
+    126,
+    38,
+    652,
+    747,
+    768,
+    768
+   ]
+  },
+  "discord": {
+   "src": "devices/discord.webp",
+   "box": [
+    20,
+    45,
+    756,
+    743,
+    768,
+    768
+   ]
+  },
+  "browser": {
+   "src": "devices/browser.webp",
+   "box": [
+    100,
+    23,
+    675,
+    744,
+    768,
+    768
+   ]
+  },
+  "ongoing": {
+   "src": "devices/ongoing.webp",
+   "box": [
+    53,
+    50,
+    692,
+    732,
+    768,
+    768
+   ]
+  },
+  "doordash": {
+   "src": "devices/doordash.webp",
+   "box": [
+    55,
+    60,
+    721,
+    702,
+    768,
+    768
+   ]
+  },
+  "game-2048": {
+   "src": "devices/game-2048.webp",
+   "box": [
+    105,
+    77,
+    662,
+    690,
+    768,
+    768
+   ]
+  },
+  "snake": {
+   "src": "devices/snake.webp",
+   "box": [
+    76,
+    114,
+    689,
+    690,
+    768,
+    768
+   ]
+  },
+  "minesweeper": {
+   "src": "devices/minesweeper.webp",
+   "box": [
+    77,
+    85,
+    690,
+    690,
+    768,
+    768
+   ]
+  },
+  "sudoku": {
+   "src": "devices/sudoku.webp",
+   "box": [
+    93,
+    77,
+    674,
+    690,
+    768,
+    768
+   ]
+  },
+  "random-game": {
+   "src": "devices/random-game.webp",
+   "box": [
+    84,
+    77,
+    683,
+    689,
+    768,
+    768
+   ]
+  },
+  "wordle": {
+   "src": "devices/wordle.webp",
+   "box": [
+    77,
+    246,
+    690,
+    690,
+    768,
+    768
+   ]
+  },
+  "nyt-connections": {
+   "src": "devices/nyt-connections.webp",
+   "box": [
+    84,
+    77,
+    682,
+    690,
+    768,
+    768
+   ]
+  },
+  "slither-io": {
+   "src": "devices/slither-io.webp",
+   "box": [
+    103,
+    77,
+    664,
+    690,
+    768,
+    768
+   ]
+  },
+  "agar-io": {
+   "src": "devices/agar-io.webp",
+   "box": [
+    108,
+    77,
+    659,
+    691,
+    768,
+    768
+   ]
+  },
+  "krunker-io": {
+   "src": "devices/krunker-io.webp",
+   "box": [
+    97,
+    77,
+    670,
+    690,
+    768,
+    768
+   ]
+  },
+  "skribbl-io": {
+   "src": "devices/skribbl-io.webp",
+   "box": [
+    87,
+    77,
+    679,
+    690,
+    768,
+    768
+   ]
+  },
+  "infinite-craft": {
+   "src": "devices/infinite-craft.webp",
+   "box": [
+    77,
+    114,
+    690,
+    690,
+    768,
+    768
+   ]
+  },
+  "little-alchemy-2": {
+   "src": "devices/little-alchemy-2.webp",
+   "box": [
+    145,
+    77,
+    622,
+    690,
+    768,
+    768
+   ]
+  },
+  "cookie-clicker": {
+   "src": "devices/cookie-clicker.webp",
+   "box": [
+    103,
+    77,
+    665,
+    690,
+    768,
+    768
+   ]
+  },
+  "lichess": {
+   "src": "devices/lichess.webp",
+   "box": [
+    91,
+    77,
+    676,
+    690,
+    768,
+    768
+   ]
+  },
+  "drive-mad": {
+   "src": "devices/drive-mad.webp",
+   "box": [
+    94,
+    77,
+    673,
+    690,
+    768,
+    768
+   ]
+  },
+  "subway-surfers": {
+   "src": "devices/subway-surfers.webp",
+   "box": [
+    77,
+    77,
+    690,
+    690,
+    768,
+    768
+   ]
+  },
+  "sekai": {
+   "src": "devices/sekai.webp",
+   "box": [
+    117,
+    77,
+    650,
+    690,
+    768,
+    768
+   ]
+  },
+  "sekai-rogue-ai-tic-tac-toe": {
+   "src": "devices/sekai-rogue-ai-tic-tac-toe.webp",
+   "box": [
+    136,
+    77,
+    631,
+    690,
+    768,
+    768
+   ]
+  },
+  "sekai-sketch-racer": {
+   "src": "devices/sekai-sketch-racer.webp",
+   "box": [
+    105,
+    78,
+    662,
+    690,
+    768,
+    768
+   ]
+  },
+  "sekai-mixing-colors": {
+   "src": "devices/sekai-mixing-colors.webp",
+   "box": [
+    89,
+    77,
+    679,
+    691,
+    768,
+    768
+   ]
+  },
+  "sekai-roller-coaster": {
+   "src": "devices/sekai-roller-coaster.webp",
+   "box": [
+    126,
+    78,
+    640,
+    690,
+    768,
+    768
+   ]
+  },
+  "sekai-3d-uno": {
+   "src": "devices/sekai-3d-uno.webp",
+   "box": [
+    100,
+    77,
+    666,
+    690,
+    768,
+    768
+   ]
+  },
+  "sekai-devil-level": {
+   "src": "devices/sekai-devil-level.webp",
+   "box": [
+    104,
+    77,
+    663,
+    690,
+    768,
+    768
+   ]
+  },
+  "pokemon-showdown": {
+   "src": "devices/pokemon-showdown.webp",
+   "box": [
+    77,
+    263,
+    690,
+    690,
+    768,
+    768
+   ]
+  },
+  "chatgpt": {
+   "src": "devices/chatgpt.webp",
+   "box": [
+    99,
+    33,
+    685,
+    749,
+    768,
+    768
+   ]
+  },
+  "claude": {
+   "src": "devices/claude.webp",
+   "box": [
+    70,
+    54,
+    694,
+    736,
+    768,
+    768
+   ]
+  },
+  "gemini": {
+   "src": "devices/gemini.webp",
+   "box": [
+    120,
+    48,
+    684,
+    712,
+    768,
+    768
+   ]
+  },
+  "perplexity": {
+   "src": "devices/perplexity.webp",
+   "box": [
+    78,
+    49,
+    701,
+    738,
+    768,
+    768
+   ]
+  },
+  "deepseek": {
+   "src": "devices/deepseek.webp",
+   "box": [
+    61,
+    51,
+    748,
+    706,
+    768,
+    768
+   ]
+  },
+  "whatsapp": {
+   "src": "devices/whatsapp.webp",
+   "box": [
+    84,
+    43,
+    702,
+    762,
+    768,
+    768
+   ]
+  },
+  "telegram": {
+   "src": "devices/telegram.webp",
+   "box": [
+    75,
+    39,
+    683,
+    747,
+    768,
+    768
+   ]
+  },
+  "slack": {
+   "src": "devices/slack.webp",
+   "box": [
+    108,
+    49,
+    693,
+    721,
+    768,
+    768
+   ]
+  },
+  "teams": {
+   "src": "devices/teams.webp",
+   "box": [
+    96,
+    47,
+    674,
+    740,
+    768,
+    768
+   ]
+  },
+  "zoom": {
+   "src": "devices/zoom.webp",
+   "box": [
+    53,
+    42,
+    695,
+    720,
+    768,
+    768
+   ]
+  },
+  "dropbox": {
+   "src": "devices/dropbox.webp",
+   "box": [
+    85,
+    60,
+    735,
+    730,
+    768,
+    768
+   ]
+  },
+  "onedrive": {
+   "src": "devices/onedrive.webp",
+   "box": [
+    118,
+    62,
+    672,
+    736,
+    768,
+    768
+   ]
+  },
+  "microsoft-word": {
+   "src": "devices/microsoft-word.webp",
+   "box": [
+    48,
+    43,
+    728,
+    764,
+    768,
+    768
+   ]
+  },
+  "microsoft-excel": {
+   "src": "devices/microsoft-excel.webp",
+   "box": [
+    56,
+    39,
+    756,
+    729,
+    768,
+    768
+   ]
+  },
+  "microsoft-powerpoint": {
+   "src": "devices/microsoft-powerpoint.webp",
+   "box": [
+    112,
+    30,
+    680,
+    741,
+    768,
+    768
+   ]
+  },
+  "figma": {
+   "src": "devices/figma.webp",
+   "box": [
+    170,
+    47,
+    645,
+    737,
+    768,
+    768
+   ]
+  },
+  "canva": {
+   "src": "devices/canva.webp",
+   "box": [
+    97,
+    80,
+    677,
+    710,
+    768,
+    768
+   ]
+  },
+  "spotify": {
+   "src": "devices/spotify.webp",
+   "box": [
+    104,
+    35,
+    677,
+    740,
+    768,
+    768
+   ]
+  },
+  "apple-music": {
+   "src": "devices/apple-music.webp",
+   "box": [
+    73,
+    41,
+    699,
+    746,
+    768,
+    768
+   ]
+  },
+  "reddit": {
+   "src": "devices/reddit.webp",
+   "box": [
+    116,
+    31,
+    678,
+    729,
+    768,
+    768
+   ]
+  },
+  "instagram": {
+   "src": "devices/instagram.webp",
+   "box": [
+    69,
+    34,
+    742,
+    738,
+    768,
+    768
+   ]
+  },
+  "linkedin": {
+   "src": "devices/linkedin.webp",
+   "box": [
+    51,
+    48,
+    730,
+    729,
+    768,
+    768
+   ]
+  },
+  "amazon": {
+   "src": "devices/amazon.webp",
+   "box": [
+    63,
+    58,
+    718,
+    726,
+    768,
+    768
+   ]
+  },
+  "netflix": {
+   "src": "devices/netflix.webp",
+   "box": [
+    61,
+    39,
+    710,
+    728,
+    768,
+    768
+   ]
+  },
+  "outlook": {
+   "src": "devices/outlook.webp",
+   "box": [
+    79,
+    45,
+    704,
+    734,
+    768,
+    768
+   ]
+  },
+  "apple-podcasts": {
+   "src": "devices/apple-podcasts.webp",
+   "box": [
+    108,
+    49,
+    675,
+    736,
+    768,
+    768
+   ]
+  },
+  "google-photos": {
+   "src": "devices/google-photos.webp",
+   "box": [
+    106,
+    5,
+    679,
+    762,
+    768,
+    768
+   ]
+  },
+  "pinterest": {
+   "src": "devices/pinterest.webp",
+   "box": [
+    98,
+    37,
+    716,
+    715,
+    768,
+    768
+   ]
+  },
+  "facebook": {
+   "src": "devices/facebook.webp",
+   "box": [
+    111,
+    26,
+    681,
+    736,
+    768,
+    768
+   ]
+  },
+  "threads": {
+   "src": "devices/threads.webp",
+   "box": [
+    77,
+    43,
+    688,
+    733,
+    768,
+    768
+   ]
+  },
+  "capcut": {
+   "src": "devices/capcut.webp",
+   "box": [
+    22,
+    53,
+    744,
+    737,
+    768,
+    768
+   ]
+  },
+  "uber": {
+   "src": "devices/uber.webp",
+   "box": [
+    86,
+    49,
+    695,
+    734,
+    768,
+    768
+   ]
+  },
+  "uber-eats": {
+   "src": "devices/uber-eats.webp",
+   "box": [
+    74,
+    27,
+    737,
+    735,
+    768,
+    768
+   ]
+  },
+  "booking": {
+   "src": "devices/booking.webp",
+   "box": [
+    47,
+    50,
+    733,
+    747,
+    768,
+    768
+   ]
+  },
+  "feishu": {
+   "src": "devices/feishu.webp",
+   "box": [
+    68,
+    54,
+    729,
+    731,
+    768,
+    768
+   ]
+  },
+  "bilibili": {
+   "src": "devices/bilibili.webp",
+   "box": [
+    58,
+    20,
+    725,
+    734,
+    768,
+    768
+   ]
+  },
+  "xiaohongshu": {
+   "src": "devices/xiaohongshu.webp",
+   "box": [
+    81,
+    48,
+    688,
+    732,
+    768,
+    768
+   ]
+  },
+  "baidu-netdisk": {
+   "src": "devices/baidu-netdisk.webp",
+   "box": [
+    40,
+    70,
+    722,
+    714,
+    768,
+    768
+   ]
+  },
+  "twitch": {
+   "src": "devices/twitch.webp",
+   "box": [
+    111,
+    53,
+    681,
+    726,
+    768,
+    768
+   ]
+  },
+  "copilot": {
+   "src": "devices/copilot.webp",
+   "box": [
+    109,
+    45,
+    701,
+    738,
+    768,
+    768
+   ]
+  },
+  "acrobat": {
+   "src": "devices/acrobat.webp",
+   "box": [
+    90,
+    33,
+    706,
+    747,
+    768,
+    768
+   ]
+  },
+  "wikipedia": {
+   "src": "devices/wikipedia.webp",
+   "box": [
+    54,
+    55,
+    712,
+    737,
+    768,
+    768
+   ]
+  },
+  "doubao": {
+   "src": "devices/doubao.webp",
+   "box": [
+    131,
+    30,
+    683,
+    739,
+    768,
+    768
+   ]
+  },
+  "taobao": {
+   "src": "devices/taobao.webp",
+   "box": [
+    64,
+    19,
+    686,
+    748,
+    768,
+    768
+   ]
+  },
+  "alipay": {
+   "src": "devices/alipay.webp",
+   "box": [
+    58,
+    72,
+    718,
+    704,
+    768,
+    768
+   ]
+  },
+  "douyin": {
+   "src": "devices/douyin.webp",
+   "box": [
+    126,
+    38,
+    652,
+    747,
+    768,
+    768
+   ]
+  },
+  "posthog": {
+   "src": "devices/posthog.webp",
+   "box": [
+    55,
+    111,
+    728,
+    666,
+    768,
+    768
+   ]
+  },
+  "cloudflare": {
+   "src": "devices/cloudflare.webp",
+   "box": [
+    78,
+    39,
+    698,
+    730,
+    768,
+    768
+   ]
+  },
+  "vercel": {
+   "src": "devices/vercel.webp",
+   "box": [
+    96,
+    60,
+    694,
+    695,
+    768,
+    768
+   ]
+  },
+  "netlify": {
+   "src": "devices/netlify.webp",
+   "box": [
+    71,
+    34,
+    703,
+    728,
+    768,
+    768
+   ]
+  },
+  "firebase": {
+   "src": "devices/firebase.webp",
+   "box": [
+    149,
+    33,
+    686,
+    745,
+    768,
+    768
+   ]
+  },
+  "sentry": {
+   "src": "devices/sentry.webp",
+   "box": [
+    93,
+    23,
+    674,
+    749,
+    768,
+    768
+   ]
+  },
+  "railway": {
+   "src": "devices/railway.webp",
+   "box": [
+    77,
+    28,
+    692,
+    735,
+    768,
+    768
+   ]
+  },
+  "render": {
+   "src": "devices/render.webp",
+   "box": [
+    103,
+    45,
+    673,
+    743,
+    768,
+    768
+   ]
+  },
+  "gitlab": {
+   "src": "devices/gitlab.webp",
+   "box": [
+    106,
+    34,
+    686,
+    737,
+    768,
+    768
+   ]
+  },
+  "jira": {
+   "src": "devices/jira.webp",
+   "box": [
+    38,
+    51,
+    732,
+    719,
+    768,
+    768
+   ]
+  },
+  "moment": {
+   "src": "devices/moment.webp",
+   "box": [
+    53,
+    50,
+    692,
+    732,
+    768,
+    768
+   ]
+  }
+ },
+ "motion": {
+  "google-calendar": {
+   "sheet": "motion/google-calendar.png",
+   "frames": [
+    "motion/google-calendar-0.webp",
+    "motion/google-calendar-1.webp",
+    "motion/google-calendar-2.webp",
+    "motion/google-calendar-3.webp",
+    "motion/google-calendar-4.webp",
+    "motion/google-calendar-5.webp"
+   ]
+  },
+  "apple-notes": {
+   "sheet": "motion/apple-notes.png",
+   "frames": [
+    "motion/apple-notes-0.webp",
+    "motion/apple-notes-1.webp",
+    "motion/apple-notes-2.webp",
+    "motion/apple-notes-3.webp",
+    "motion/apple-notes-4.webp",
+    "motion/apple-notes-5.webp"
+   ]
+  },
+  "apple-reminders": {
+   "sheet": "motion/apple-reminders.png",
+   "frames": [
+    "motion/apple-reminders-0.webp",
+    "motion/apple-reminders-1.webp",
+    "motion/apple-reminders-2.webp",
+    "motion/apple-reminders-3.webp",
+    "motion/apple-reminders-4.webp",
+    "motion/apple-reminders-5.webp"
+   ]
+  },
+  "weather": {
+   "sheet": "motion/weather.png",
+   "frames": [
+    "motion/weather-0.webp",
+    "motion/weather-1.webp",
+    "motion/weather-2.webp",
+    "motion/weather-3.webp",
+    "motion/weather-4.webp",
+    "motion/weather-5.webp"
+   ]
+  }
+ },
+ "open": {
+  "gmail": "open/gmail.png",
+  "google-calendar": "open/google-calendar.png",
+  "apple-notes": "open/apple-notes.png",
+  "apple-reminders": "open/apple-reminders.png",
+  "github": "devices/github.webp",
+  "codex": "devices/codex.webp",
+  "claude-code": "devices/claude-code.webp",
+  "notion": "devices/notion.webp",
+  "obsidian": "devices/obsidian.webp",
+  "voice-memos": "devices/voice-memos.webp",
+  "stripe": "devices/stripe.webp",
+  "paypal": "devices/paypal.webp"
+ },
+ "logos": {
+  "youtube": "logos/youtube.png"
+ },
+ "mail": {
+  "envelope": "mail/envelope.png",
+  "bin": "mail/bin.png",
+  "bin-front": "mail/bin-front.png",
+  "sign": "mail/sign.png",
+  "flight": "mail/flight.png",
+  "attention": "mail/attention.png",
+  "board": "mail/board.png",
+  "archive-bin": "mail/archive-bin.png",
+  "offers-bin": "mail/offers-bin.png",
+  "spam-bin": "mail/spam-bin.png",
+  "archive-bin-front": "mail/archive-bin-front.png",
+  "offers-bin-front": "mail/offers-bin-front.png",
+  "spam-bin-front": "mail/spam-bin-front.png",
+  "pinned-envelope": "mail/pinned-envelope.png"
+ },
+ "focus": {
+  "gmail": {
+   "image": "focus/gmail.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "google-calendar": {
+   "image": "focus/google-calendar.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.66
+  },
+  "apple-notes": {
+   "image": "focus/apple-notes.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "apple-reminders": {
+   "image": "focus/apple-reminders.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "weather": {
+   "image": "focus/weather.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.61
+  },
+  "meetings": {
+   "image": "focus/meetings.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.68
+  },
+  "github": {
+   "image": "focus/github.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "codex": {
+   "image": "focus/codex.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.63
+  },
+  "claude-code": {
+   "image": "focus/claude-code.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "notion": {
+   "image": "focus/notion.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "obsidian": {
+   "image": "focus/obsidian.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.61
+  },
+  "voice-memos": {
+   "image": "focus/voice-memos.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.58
+  },
+  "messages": {
+   "image": "focus/messages.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "plaid": {
+   "image": "focus/plaid.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "stripe": {
+   "image": "focus/stripe.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "paypal": {
+   "image": "focus/paypal.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "todoist": {
+   "image": "focus/todoist.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "linear": {
+   "image": "focus/linear.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.57
+  },
+  "supabase": {
+   "image": "focus/supabase.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "docker": {
+   "image": "focus/docker.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "google-drive": {
+   "image": "focus/google-drive.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.63
+  },
+  "google-docs": {
+   "image": "focus/google-docs.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "google-sheets": {
+   "image": "focus/google-sheets.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "google-slides": {
+   "image": "focus/google-slides.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "oura": {
+   "image": "focus/oura.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "strava": {
+   "image": "focus/strava.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "fitbit": {
+   "image": "focus/fitbit.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "google-maps": {
+   "image": "focus/google-maps.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "airbnb": {
+   "image": "focus/airbnb.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.66
+  },
+  "tripit": {
+   "image": "focus/tripit.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "x": {
+   "image": "focus/x.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "youtube": {
+   "image": "focus/youtube.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "tiktok": {
+   "image": "focus/tiktok.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "discord": {
+   "image": "focus/discord.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "browser": {
+   "image": "focus/browser.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "ongoing": {
+   "image": "focus/ongoing.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.59
+  },
+  "doordash": {
+   "image": "focus/doordash.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "game-2048": {
+   "image": "focus/game-2048.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "snake": {
+   "image": "focus/snake.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "minesweeper": {
+   "image": "focus/minesweeper.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "sudoku": {
+   "image": "focus/sudoku.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "random-game": {
+   "image": "focus/random-game.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "wordle": {
+   "image": "focus/wordle.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "nyt-connections": {
+   "image": "focus/nyt-connections.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.61
+  },
+  "slither-io": {
+   "image": "focus/slither-io.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "agar-io": {
+   "image": "focus/agar-io.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "krunker-io": {
+   "image": "focus/krunker-io.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "skribbl-io": {
+   "image": "focus/skribbl-io.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "infinite-craft": {
+   "image": "focus/infinite-craft.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "little-alchemy-2": {
+   "image": "focus/little-alchemy-2.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "cookie-clicker": {
+   "image": "focus/cookie-clicker.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "lichess": {
+   "image": "focus/lichess.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "drive-mad": {
+   "image": "focus/drive-mad.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "subway-surfers": {
+   "image": "focus/subway-surfers.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "sekai": {
+   "image": "focus/sekai.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "sekai-rogue-ai-tic-tac-toe": {
+   "image": "focus/sekai-rogue-ai-tic-tac-toe.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.64
+  },
+  "sekai-sketch-racer": {
+   "image": "focus/sekai-sketch-racer.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "sekai-mixing-colors": {
+   "image": "focus/sekai-mixing-colors.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "sekai-roller-coaster": {
+   "image": "focus/sekai-roller-coaster.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "sekai-3d-uno": {
+   "image": "focus/sekai-3d-uno.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "sekai-devil-level": {
+   "image": "focus/sekai-devil-level.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "pokemon-showdown": {
+   "image": "focus/pokemon-showdown.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.52
+  },
+  "chatgpt": {
+   "image": "focus/chatgpt.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "claude": {
+   "image": "focus/claude.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.59
+  },
+  "gemini": {
+   "image": "focus/gemini.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.55
+  },
+  "perplexity": {
+   "image": "focus/perplexity.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "deepseek": {
+   "image": "focus/deepseek.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "whatsapp": {
+   "image": "focus/whatsapp.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "telegram": {
+   "image": "focus/telegram.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "slack": {
+   "image": "focus/slack.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "teams": {
+   "image": "focus/teams.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "zoom": {
+   "image": "focus/zoom.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.63
+  },
+  "dropbox": {
+   "image": "focus/dropbox.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "onedrive": {
+   "image": "focus/onedrive.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "microsoft-word": {
+   "image": "focus/microsoft-word.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.5299999999999999
+  },
+  "microsoft-excel": {
+   "image": "focus/microsoft-excel.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.58
+  },
+  "microsoft-powerpoint": {
+   "image": "focus/microsoft-powerpoint.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "figma": {
+   "image": "focus/figma.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "canva": {
+   "image": "focus/canva.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "spotify": {
+   "image": "focus/spotify.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "apple-music": {
+   "image": "focus/apple-music.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.64
+  },
+  "reddit": {
+   "image": "focus/reddit.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.6
+  },
+  "instagram": {
+   "image": "focus/instagram.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.59
+  },
+  "linkedin": {
+   "image": "focus/linkedin.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.5499999999999999
+  },
+  "amazon": {
+   "image": "focus/amazon.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.63
+  },
+  "netflix": {
+   "image": "focus/netflix.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "outlook": {
+   "image": "focus/outlook.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.51
+  },
+  "apple-podcasts": {
+   "image": "focus/apple-podcasts.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.5499999999999999
+  },
+  "google-photos": {
+   "image": "focus/google-photos.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.5499999999999999
+  },
+  "pinterest": {
+   "image": "focus/pinterest.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.49000000000000005
+  },
+  "facebook": {
+   "image": "focus/facebook.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "threads": {
+   "image": "focus/threads.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "capcut": {
+   "image": "focus/capcut.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "uber": {
+   "image": "focus/uber.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.44
+  },
+  "uber-eats": {
+   "image": "focus/uber-eats.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.5399999999999999
+  },
+  "booking": {
+   "image": "focus/booking.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.59
+  },
+  "feishu": {
+   "image": "focus/feishu.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "bilibili": {
+   "image": "focus/bilibili.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.6
+  },
+  "xiaohongshu": {
+   "image": "focus/xiaohongshu.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.51
+  },
+  "baidu-netdisk": {
+   "image": "focus/baidu-netdisk.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "twitch": {
+   "image": "focus/twitch.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.5399999999999999
+  },
+  "copilot": {
+   "image": "focus/copilot.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "acrobat": {
+   "image": "focus/acrobat.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.7
+  },
+  "wikipedia": {
+   "image": "focus/wikipedia.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.48000000000000004
+  },
+  "doubao": {
+   "image": "focus/doubao.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.58
+  },
+  "taobao": {
+   "image": "focus/taobao.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.52
+  },
+  "alipay": {
+   "image": "focus/alipay.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.68
+  },
+  "douyin": {
+   "image": "focus/douyin.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.65
+  },
+  "posthog": {
+   "image": "focus/posthog.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.57
+  },
+  "cloudflare": {
+   "image": "focus/cloudflare.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.54
+  },
+  "vercel": {
+   "image": "focus/vercel.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.64
+  },
+  "netlify": {
+   "image": "focus/netlify.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.62
+  },
+  "firebase": {
+   "image": "focus/firebase.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.64
+  },
+  "sentry": {
+   "image": "focus/sentry.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.67
+  },
+  "railway": {
+   "image": "focus/railway.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.55
+  },
+  "render": {
+   "image": "focus/render.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.59
+  },
+  "gitlab": {
+   "image": "focus/gitlab.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.65
+  },
+  "jira": {
+   "image": "focus/jira.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.59
+  }
+ }
+}
