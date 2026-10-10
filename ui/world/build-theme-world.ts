@@ -3,21 +3,13 @@ import {createAppletStage} from './theme-applet-stage.ts';
 import {appletStatus,myAppletKind} from '../../core/applets/index.ts';
 import {appletLamp,appletLampContent,lampDisplayState} from './applet-lamp.ts';
 import {appletConnectionGuide} from './applet-attention.ts';
+import {shellInteraction,worldPaused as paused} from './shell-interaction.ts';
 /** The host's picture of an Applet: a person's own Applet's icon, else its shared device art. */
 function appletIcon(room):string|undefined {
  if(myAppletKind(room)&&typeof room.icon==='string')return room.icon;
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[room.art||room.key];
  const src=typeof art==='string'?art:art?.src;return typeof src==='string'&&src?src:undefined;
 }
-/** The shell's own state the World follows: first use, what covers it, what the open Applet shows. */
-function shellInteraction(host:HTMLElement){
- const shell=host.closest('.notion-world');
- return {locked:shell?.getAttribute('data-onboarding-locked')==='true',
-  covered:!!document.querySelector('.tour-spotlight:not([hidden])')||(shell as HTMLElement|null)?.dataset.attentionPreview==='true'||!!shell?.querySelector('dialog[open]'),
-  detailOpen:shell?.getAttribute('data-detail-open')==='true',
-  website:!!shell?.querySelector('#notionContent[data-template=browser]:not([hidden])')};
-}
-const paused=()=>document.documentElement.classList.contains('desktop-companion')||document.hidden;
 /** Compatibility adapter from the product's scene controller to the public Sim data interface. */
 export function createModuleScene(host,rooms,onPick,onProject,pages,options):any {
  const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer='sim-dom';Object.assign(world.style,{position:'absolute',inset:'0'});host.append(world);
