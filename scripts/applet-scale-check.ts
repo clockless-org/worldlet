@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import manifest from '../resources/styles/builtin/manifest.json' with {type:'json'};
 import audit from '../resources/styles/builtin/drafts/remaining-bold/scale-audit.json' with {type:'json'};
-import scales from '../ui/world/village/applet-optical-scales.json' with {type:'json'};
+import scales from '../ui/world/applet-optical-scales.json' with {type:'json'};
 assert.deepEqual(Object.keys(scales).sort(),Object.keys(manifest.applets).sort());
 for(const [key,scale] of Object.entries(scales)){
  assert(scale>=.75&&scale<=1.2,key+' bounded optical scale');

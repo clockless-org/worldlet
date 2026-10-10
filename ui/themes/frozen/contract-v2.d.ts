@@ -248,6 +248,9 @@ export interface ThemeWorldMount extends ThemeMount {
     picture?(): HTMLCanvasElement | null;
     /** Renderer facts for the product's own checks. */
     metrics?(): ThemeRecord;
+    /** Settles once the World's first frame is drawn; until then the host keeps its loading page. A rejection is the host's
+     * "could not open" state. Without it the World counts as ready as soon as it is mounted. */
+    ready?: Promise<void>;
 }
 export interface BuildTheme {
     contractVersion: 2;

@@ -1,0 +1,3167 @@
+{
+ "world": {
+  "schemaVersion": 1,
+  "id": "village",
+  "title": "Village",
+  "version": "1.7.1",
+  "style": {
+   "id": "cozy-miniature",
+   "version": "1.0.0"
+  },
+  "artStatus": "approved",
+  "canvas": {
+   "width": 3840,
+   "height": 2160,
+   "coordinates": "normalized",
+   "origin": "top-left"
+  },
+  "camera": {
+   "projection": "fixed-oblique",
+   "overview": [
+    0.145,
+    0.12,
+    0.77,
+    0.78
+   ]
+  },
+  "layers": [
+   {
+    "id": "day-environment",
+    "kind": "environment",
+    "src": "images/day-six-regions-sunburst-4k.png",
+    "lighting": "day",
+    "bounds": [
+     0,
+     0,
+     1,
+     1
+    ]
+   },
+   {
+    "id": "night",
+    "kind": "environment",
+    "src": "images/night-six-regions-sunburst-4k.png",
+    "lighting": "night",
+    "bounds": [
+     0,
+     0,
+     1,
+     1
+    ]
+   }
+  ],
+  "hudSafeAreas": [
+   [
+    0.36,
+    0.82,
+    0.3,
+    0.18
+   ]
+  ],
+  "areas": [
+   {
+    "id": "home",
+    "title": "Home",
+    "legacyIds": [
+     "home"
+    ],
+    "purpose": "Personal mail, calendars, reminders, notes, photos and the browser",
+    "bounds": [
+     0.435,
+     0.46,
+     0.18,
+     0.125
+    ],
+    "focus": [
+     0.523,
+     0.529
+    ],
+    "label": [
+     0.525,
+     0.585
+    ],
+    "slots": [
+     {
+      "id": "home-seat-1",
+      "anchor": [
+       0.477,
+       0.522
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.522
+     },
+     {
+      "id": "home-seat-2",
+      "anchor": [
+       0.525,
+       0.522
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.522
+     },
+     {
+      "id": "home-seat-3",
+      "anchor": [
+       0.573,
+       0.522
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.522
+     },
+     {
+      "id": "home-seat-4",
+      "anchor": [
+       0.501,
+       0.562
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.562
+     },
+     {
+      "id": "home-seat-5",
+      "anchor": [
+       0.549,
+       0.562
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.562
+     }
+    ]
+   },
+   {
+    "id": "work",
+    "title": "Work",
+    "legacyIds": [
+     "work"
+    ],
+    "purpose": "Office, projects, meetings, collaboration, software development, notes, documents, design and media production",
+    "bounds": [
+     0.59,
+     0.6,
+     0.22,
+     0.14
+    ],
+    "focus": [
+     0.699,
+     0.689
+    ],
+    "label": [
+     0.7,
+     0.727
+    ],
+    "slots": [
+     {
+      "id": "work-seat-1",
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.664
+     },
+     {
+      "id": "work-seat-2",
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.664
+     },
+     {
+      "id": "work-seat-3",
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.664
+     },
+     {
+      "id": "work-seat-4",
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.704
+     },
+     {
+      "id": "work-seat-5",
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.704
+     }
+    ]
+   },
+   {
+    "id": "create",
+    "title": "Social",
+    "legacyIds": [
+     "library"
+    ],
+    "purpose": "Social networks, communities and messaging",
+    "bounds": [
+     0.348,
+     0.33,
+     0.15,
+     0.107
+    ],
+    "focus": [
+     0.428,
+     0.392
+    ],
+    "label": [
+     0.43,
+     0.445
+    ],
+    "slots": [
+     {
+      "id": "create-seat-1",
+      "anchor": [
+       0.382,
+       0.382
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.382
+     },
+     {
+      "id": "create-seat-2",
+      "anchor": [
+       0.43,
+       0.382
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.382
+     },
+     {
+      "id": "create-seat-3",
+      "anchor": [
+       0.478,
+       0.382
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.382
+     },
+     {
+      "id": "create-seat-4",
+      "anchor": [
+       0.406,
+       0.422
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.422
+     },
+     {
+      "id": "create-seat-5",
+      "anchor": [
+       0.454,
+       0.422
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.422
+     }
+    ]
+   },
+   {
+    "id": "finance",
+    "title": "Life",
+    "legacyIds": [
+     "money"
+    ],
+    "purpose": "Banking, payments, budgets, investments and bills",
+    "bounds": [
+     0.542,
+     0.33,
+     0.15,
+     0.11
+    ],
+    "focus": [
+     0.62,
+     0.399
+    ],
+    "label": [
+     0.62,
+     0.449
+    ],
+    "slots": [
+     {
+      "id": "finance-seat-1",
+      "anchor": [
+       0.572,
+       0.386
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.386
+     },
+     {
+      "id": "finance-seat-2",
+      "anchor": [
+       0.62,
+       0.386
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.386
+     },
+     {
+      "id": "finance-seat-3",
+      "anchor": [
+       0.668,
+       0.386
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.386
+     },
+     {
+      "id": "finance-seat-4",
+      "anchor": [
+       0.596,
+       0.426
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.426
+     },
+     {
+      "id": "finance-seat-5",
+      "anchor": [
+       0.644,
+       0.426
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.426
+     }
+    ]
+   },
+   {
+    "id": "health",
+    "title": "Games",
+    "legacyIds": [
+     "health"
+    ],
+    "purpose": "Small games to play in the world",
+    "bounds": [
+     0.675,
+     0.46,
+     0.16,
+     0.113
+    ],
+    "focus": [
+     0.754,
+     0.527
+    ],
+    "label": [
+     0.753,
+     0.574
+    ],
+    "slots": [
+     {
+      "id": "health-seat-1",
+      "anchor": [
+       0.705,
+       0.511
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.511
+     },
+     {
+      "id": "health-seat-2",
+      "anchor": [
+       0.753,
+       0.511
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.511
+     },
+     {
+      "id": "health-seat-3",
+      "anchor": [
+       0.801,
+       0.511
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.511
+     },
+     {
+      "id": "health-seat-4",
+      "anchor": [
+       0.729,
+       0.551
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.551
+     },
+     {
+      "id": "health-seat-5",
+      "anchor": [
+       0.777,
+       0.551
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.551
+     }
+    ]
+   },
+   {
+    "id": "tools",
+    "title": "Entertainment",
+    "legacyIds": [
+     "travel",
+     "people"
+    ],
+    "purpose": "Video, music, live streams and short video",
+    "bounds": [
+     0.275,
+     0.565,
+     0.235,
+     0.14
+    ],
+    "focus": [
+     0.397,
+     0.635
+    ],
+    "label": [
+     0.396,
+     0.679
+    ],
+    "slots": [
+     {
+      "id": "tools-seat-1",
+      "anchor": [
+       0.348,
+       0.616
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.616
+     },
+     {
+      "id": "tools-seat-2",
+      "anchor": [
+       0.396,
+       0.616
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.616
+     },
+     {
+      "id": "tools-seat-3",
+      "anchor": [
+       0.444,
+       0.616
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.616
+     },
+     {
+      "id": "tools-seat-4",
+      "anchor": [
+       0.372,
+       0.656
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.656
+     },
+     {
+      "id": "tools-seat-5",
+      "anchor": [
+       0.42,
+       0.656
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.656
+     }
+    ]
+   }
+  ],
+  "provenance": {
+   "mode": "image-api",
+   "model": "gpt-image-2.5-sunburst",
+   "size": "3840x2160",
+   "quality": "high",
+   "prompt": "drafts/sunburst-4k/day.prompt.txt",
+   "generatedAt": "2026-09-25",
+   "upscaled": false,
+   "requests": [
+    "drafts/sunburst-4k/day.request.json",
+    "drafts/sunburst-4k/night.request.json"
+   ]
+  }
+ },
+ "layout": {
+  "version": 2,
+  "style": {
+   "id": "cozy-miniature",
+   "version": "1.0.0"
+  },
+  "theme": {
+   "id": "village",
+   "version": "1.0.0"
+  },
+  "coordinateSpace": {
+   "width": 1920,
+   "height": 1080,
+   "units": "normalized ground anchors",
+   "plateExtent": [
+    0,
+    0,
+    1920,
+    1080
+   ]
+  },
+  "plates": {
+   "day": "resources/worlds/village/images/day-six-regions-sunburst-4k.png",
+   "night": "resources/worlds/village/images/night-six-regions-sunburst-4k.png",
+   "hiresDay": "resources/worlds/village/images/day-six-regions-sunburst-4k.png",
+   "hiresNight": "resources/worlds/village/images/night-six-regions-sunburst-4k.png"
+  },
+  "regions": {
+   "home": {
+    "title": "Home",
+    "center": [
+     0.523,
+     0.529
+    ],
+    "label": [
+     0.525,
+     0.585
+    ],
+    "bounds": [
+     0.435,
+     0.46,
+     0.18,
+     0.125
+    ],
+    "placements": [
+     {
+      "id": "home-seat-1",
+      "anchor": [
+       0.477,
+       0.522
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.522
+     },
+     {
+      "id": "home-seat-2",
+      "anchor": [
+       0.525,
+       0.522
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.522
+     },
+     {
+      "id": "home-seat-3",
+      "anchor": [
+       0.573,
+       0.522
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.522
+     },
+     {
+      "id": "home-seat-4",
+      "anchor": [
+       0.501,
+       0.562
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.562
+     },
+     {
+      "id": "home-seat-5",
+      "anchor": [
+       0.549,
+       0.562
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.562
+     }
+    ],
+    "slots": {
+     "gmail": {
+      "anchor": [
+       0.477,
+       0.522
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-1"
+     },
+     "google-calendar": {
+      "anchor": [
+       0.525,
+       0.522
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-2"
+     },
+     "apple-notes": {
+      "anchor": [
+       0.573,
+       0.522
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-3"
+     },
+     "apple-reminders": {
+      "anchor": [
+       0.501,
+       0.562
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-4"
+     },
+     "weather": {
+      "anchor": [
+       0.549,
+       0.562
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-5"
+     },
+     "browser": {
+      "anchor": [
+       0.477,
+       0.522
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-1"
+     },
+     "outlook": {
+      "anchor": [
+       0.525,
+       0.522
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-2"
+     },
+     "google-photos": {
+      "anchor": [
+       0.573,
+       0.522
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "home-seat-3"
+     }
+    }
+   },
+   "work": {
+    "title": "Work",
+    "center": [
+     0.699,
+     0.689
+    ],
+    "label": [
+     0.7,
+     0.727
+    ],
+    "bounds": [
+     0.59,
+     0.6,
+     0.22,
+     0.14
+    ],
+    "placements": [
+     {
+      "id": "work-seat-1",
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.664
+     },
+     {
+      "id": "work-seat-2",
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.664
+     },
+     {
+      "id": "work-seat-3",
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.664
+     },
+     {
+      "id": "work-seat-4",
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.704
+     },
+     {
+      "id": "work-seat-5",
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.704
+     }
+    ],
+    "slots": {
+     "meetings": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "github": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "codex": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "claude-code": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "notion": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "obsidian": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "voice-memos": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "todoist": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "linear": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "supabase": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "docker": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "google-drive": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "google-docs": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "google-sheets": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "google-slides": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "ongoing": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "chatgpt": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "claude": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "gemini": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "perplexity": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "deepseek": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "slack": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "teams": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "zoom": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "dropbox": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "onedrive": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "microsoft-word": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "microsoft-excel": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "microsoft-powerpoint": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "figma": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "canva": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "linkedin": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "capcut": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "feishu": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "baidu-netdisk": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "copilot": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "acrobat": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "doubao": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "posthog": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "cloudflare": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "vercel": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "netlify": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "firebase": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     },
+     "sentry": {
+      "anchor": [
+       0.676,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-4"
+     },
+     "railway": {
+      "anchor": [
+       0.724,
+       0.704
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-5"
+     },
+     "render": {
+      "anchor": [
+       0.652,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-1"
+     },
+     "gitlab": {
+      "anchor": [
+       0.7,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-2"
+     },
+     "jira": {
+      "anchor": [
+       0.748,
+       0.664
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "work-seat-3"
+     }
+    }
+   },
+   "library": {
+    "title": "Social",
+    "center": [
+     0.428,
+     0.392
+    ],
+    "label": [
+     0.43,
+     0.445
+    ],
+    "bounds": [
+     0.348,
+     0.33,
+     0.15,
+     0.107
+    ],
+    "placements": [
+     {
+      "id": "create-seat-1",
+      "anchor": [
+       0.382,
+       0.382
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.382
+     },
+     {
+      "id": "create-seat-2",
+      "anchor": [
+       0.43,
+       0.382
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.382
+     },
+     {
+      "id": "create-seat-3",
+      "anchor": [
+       0.478,
+       0.382
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.382
+     },
+     {
+      "id": "create-seat-4",
+      "anchor": [
+       0.406,
+       0.422
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.422
+     },
+     {
+      "id": "create-seat-5",
+      "anchor": [
+       0.454,
+       0.422
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.422
+     }
+    ],
+    "slots": {
+     "messages": {
+      "anchor": [
+       0.382,
+       0.382
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-1"
+     },
+     "x": {
+      "anchor": [
+       0.43,
+       0.382
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-2"
+     },
+     "discord": {
+      "anchor": [
+       0.478,
+       0.382
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-3"
+     },
+     "whatsapp": {
+      "anchor": [
+       0.406,
+       0.422
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-4"
+     },
+     "telegram": {
+      "anchor": [
+       0.454,
+       0.422
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-5"
+     },
+     "reddit": {
+      "anchor": [
+       0.382,
+       0.382
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-1"
+     },
+     "instagram": {
+      "anchor": [
+       0.43,
+       0.382
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-2"
+     },
+     "pinterest": {
+      "anchor": [
+       0.478,
+       0.382
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-3"
+     },
+     "facebook": {
+      "anchor": [
+       0.406,
+       0.422
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-4"
+     },
+     "threads": {
+      "anchor": [
+       0.454,
+       0.422
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-5"
+     },
+     "xiaohongshu": {
+      "anchor": [
+       0.382,
+       0.382
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "create-seat-1"
+     }
+    }
+   },
+   "money": {
+    "title": "Life",
+    "center": [
+     0.62,
+     0.399
+    ],
+    "label": [
+     0.62,
+     0.449
+    ],
+    "bounds": [
+     0.542,
+     0.33,
+     0.15,
+     0.11
+    ],
+    "placements": [
+     {
+      "id": "finance-seat-1",
+      "anchor": [
+       0.572,
+       0.386
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.386
+     },
+     {
+      "id": "finance-seat-2",
+      "anchor": [
+       0.62,
+       0.386
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.386
+     },
+     {
+      "id": "finance-seat-3",
+      "anchor": [
+       0.668,
+       0.386
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.386
+     },
+     {
+      "id": "finance-seat-4",
+      "anchor": [
+       0.596,
+       0.426
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.426
+     },
+     {
+      "id": "finance-seat-5",
+      "anchor": [
+       0.644,
+       0.426
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.426
+     }
+    ],
+    "slots": {
+     "plaid": {
+      "anchor": [
+       0.572,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-1"
+     },
+     "stripe": {
+      "anchor": [
+       0.62,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-2"
+     },
+     "paypal": {
+      "anchor": [
+       0.668,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-3"
+     },
+     "oura": {
+      "anchor": [
+       0.596,
+       0.426
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-4"
+     },
+     "strava": {
+      "anchor": [
+       0.644,
+       0.426
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-5"
+     },
+     "fitbit": {
+      "anchor": [
+       0.572,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-1"
+     },
+     "google-maps": {
+      "anchor": [
+       0.62,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-2"
+     },
+     "airbnb": {
+      "anchor": [
+       0.668,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-3"
+     },
+     "tripit": {
+      "anchor": [
+       0.596,
+       0.426
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-4"
+     },
+     "doordash": {
+      "anchor": [
+       0.644,
+       0.426
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-5"
+     },
+     "amazon": {
+      "anchor": [
+       0.572,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-1"
+     },
+     "uber": {
+      "anchor": [
+       0.62,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-2"
+     },
+     "uber-eats": {
+      "anchor": [
+       0.668,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-3"
+     },
+     "booking": {
+      "anchor": [
+       0.596,
+       0.426
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-4"
+     },
+     "taobao": {
+      "anchor": [
+       0.644,
+       0.426
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-5"
+     },
+     "alipay": {
+      "anchor": [
+       0.572,
+       0.386
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "finance-seat-1"
+     }
+    }
+   },
+   "health": {
+    "title": "Games",
+    "center": [
+     0.754,
+     0.527
+    ],
+    "label": [
+     0.753,
+     0.574
+    ],
+    "bounds": [
+     0.675,
+     0.46,
+     0.16,
+     0.113
+    ],
+    "placements": [
+     {
+      "id": "health-seat-1",
+      "anchor": [
+       0.705,
+       0.511
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.511
+     },
+     {
+      "id": "health-seat-2",
+      "anchor": [
+       0.753,
+       0.511
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.511
+     },
+     {
+      "id": "health-seat-3",
+      "anchor": [
+       0.801,
+       0.511
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.511
+     },
+     {
+      "id": "health-seat-4",
+      "anchor": [
+       0.729,
+       0.551
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.551
+     },
+     {
+      "id": "health-seat-5",
+      "anchor": [
+       0.777,
+       0.551
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "open stone court",
+      "depth": 0.551
+     }
+    ],
+    "slots": {
+     "game-2048": {
+      "anchor": [
+       0.705,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-1"
+     },
+     "snake": {
+      "anchor": [
+       0.753,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-2"
+     },
+     "minesweeper": {
+      "anchor": [
+       0.801,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-3"
+     },
+     "sudoku": {
+      "anchor": [
+       0.729,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-4"
+     },
+     "random-game": {
+      "anchor": [
+       0.777,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-5"
+     },
+     "wordle": {
+      "anchor": [
+       0.705,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-1"
+     },
+     "nyt-connections": {
+      "anchor": [
+       0.753,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-2"
+     },
+     "slither-io": {
+      "anchor": [
+       0.801,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-3"
+     },
+     "agar-io": {
+      "anchor": [
+       0.729,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-4"
+     },
+     "krunker-io": {
+      "anchor": [
+       0.777,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-5"
+     },
+     "skribbl-io": {
+      "anchor": [
+       0.705,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-1"
+     },
+     "infinite-craft": {
+      "anchor": [
+       0.753,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-2"
+     },
+     "little-alchemy-2": {
+      "anchor": [
+       0.801,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-3"
+     },
+     "cookie-clicker": {
+      "anchor": [
+       0.729,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-4"
+     },
+     "lichess": {
+      "anchor": [
+       0.777,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-5"
+     },
+     "drive-mad": {
+      "anchor": [
+       0.705,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-1"
+     },
+     "subway-surfers": {
+      "anchor": [
+       0.753,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-2"
+     },
+     "sekai": {
+      "anchor": [
+       0.801,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-3"
+     },
+     "sekai-rogue-ai-tic-tac-toe": {
+      "anchor": [
+       0.729,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-4"
+     },
+     "sekai-sketch-racer": {
+      "anchor": [
+       0.777,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-5"
+     },
+     "sekai-mixing-colors": {
+      "anchor": [
+       0.705,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-1"
+     },
+     "sekai-roller-coaster": {
+      "anchor": [
+       0.753,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-2"
+     },
+     "sekai-3d-uno": {
+      "anchor": [
+       0.801,
+       0.511
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-3"
+     },
+     "sekai-devil-level": {
+      "anchor": [
+       0.729,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-4"
+     },
+     "pokemon-showdown": {
+      "anchor": [
+       0.777,
+       0.551
+      ],
+      "width": 72.96,
+      "surface": "open stone court",
+      "slotId": "health-seat-5"
+     }
+    }
+   },
+   "travel": {
+    "title": "Entertainment",
+    "center": [
+     0.397,
+     0.635
+    ],
+    "label": [
+     0.396,
+     0.679
+    ],
+    "bounds": [
+     0.275,
+     0.565,
+     0.235,
+     0.14
+    ],
+    "placements": [
+     {
+      "id": "tools-seat-1",
+      "anchor": [
+       0.348,
+       0.616
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.616
+     },
+     {
+      "id": "tools-seat-2",
+      "anchor": [
+       0.396,
+       0.616
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.616
+     },
+     {
+      "id": "tools-seat-3",
+      "anchor": [
+       0.444,
+       0.616
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.616
+     },
+     {
+      "id": "tools-seat-4",
+      "anchor": [
+       0.372,
+       0.656
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.656
+     },
+     {
+      "id": "tools-seat-5",
+      "anchor": [
+       0.42,
+       0.656
+      ],
+      "maxSize": [
+       0.038,
+       0.067
+      ],
+      "surface": "river landing",
+      "depth": 0.656
+     }
+    ],
+    "slots": {
+     "youtube": {
+      "anchor": [
+       0.348,
+       0.616
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-1"
+     },
+     "tiktok": {
+      "anchor": [
+       0.396,
+       0.616
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-2"
+     },
+     "spotify": {
+      "anchor": [
+       0.444,
+       0.616
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-3"
+     },
+     "apple-music": {
+      "anchor": [
+       0.372,
+       0.656
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-4"
+     },
+     "netflix": {
+      "anchor": [
+       0.42,
+       0.656
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-5"
+     },
+     "apple-podcasts": {
+      "anchor": [
+       0.348,
+       0.616
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-1"
+     },
+     "bilibili": {
+      "anchor": [
+       0.396,
+       0.616
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-2"
+     },
+     "twitch": {
+      "anchor": [
+       0.444,
+       0.616
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-3"
+     },
+     "wikipedia": {
+      "anchor": [
+       0.372,
+       0.656
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-4"
+     },
+     "douyin": {
+      "anchor": [
+       0.42,
+       0.656
+      ],
+      "width": 72.96,
+      "surface": "river landing",
+      "slotId": "tools-seat-5"
+     }
+    }
+   }
+  },
+  "worldSlots": {}
+ },
+ "sprites": {
+  "gmail": {
+   "region": "home",
+   "anchor": [
+    0.477,
+    0.522
+   ],
+   "width": 72.96
+  },
+  "google-calendar": {
+   "region": "home",
+   "anchor": [
+    0.525,
+    0.522
+   ],
+   "width": 72.96
+  },
+  "apple-notes": {
+   "region": "home",
+   "anchor": [
+    0.573,
+    0.522
+   ],
+   "width": 72.96
+  },
+  "apple-reminders": {
+   "region": "home",
+   "anchor": [
+    0.501,
+    0.562
+   ],
+   "width": 72.96
+  },
+  "weather": {
+   "region": "home",
+   "anchor": [
+    0.549,
+    0.562
+   ],
+   "width": 72.96
+  },
+  "browser": {
+   "region": "home",
+   "anchor": [
+    0.477,
+    0.522
+   ],
+   "width": 72.96
+  },
+  "outlook": {
+   "region": "home",
+   "anchor": [
+    0.525,
+    0.522
+   ],
+   "width": 72.96
+  },
+  "google-photos": {
+   "region": "home",
+   "anchor": [
+    0.573,
+    0.522
+   ],
+   "width": 72.96
+  },
+  "meetings": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "github": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "codex": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "claude-code": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "notion": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "obsidian": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "voice-memos": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "todoist": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "linear": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "supabase": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "docker": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "google-drive": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "google-docs": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "google-sheets": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "google-slides": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "ongoing": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "chatgpt": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "claude": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "gemini": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "perplexity": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "deepseek": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "slack": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "teams": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "zoom": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "dropbox": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "onedrive": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "microsoft-word": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "microsoft-excel": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "microsoft-powerpoint": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "figma": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "canva": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "linkedin": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "capcut": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "feishu": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "baidu-netdisk": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "copilot": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "acrobat": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "doubao": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "posthog": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "cloudflare": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "vercel": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "netlify": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "firebase": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "sentry": {
+   "region": "work",
+   "anchor": [
+    0.676,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "railway": {
+   "region": "work",
+   "anchor": [
+    0.724,
+    0.704
+   ],
+   "width": 72.96
+  },
+  "render": {
+   "region": "work",
+   "anchor": [
+    0.652,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "gitlab": {
+   "region": "work",
+   "anchor": [
+    0.7,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "jira": {
+   "region": "work",
+   "anchor": [
+    0.748,
+    0.664
+   ],
+   "width": 72.96
+  },
+  "messages": {
+   "region": "library",
+   "anchor": [
+    0.382,
+    0.382
+   ],
+   "width": 72.96
+  },
+  "x": {
+   "region": "library",
+   "anchor": [
+    0.43,
+    0.382
+   ],
+   "width": 72.96
+  },
+  "discord": {
+   "region": "library",
+   "anchor": [
+    0.478,
+    0.382
+   ],
+   "width": 72.96
+  },
+  "whatsapp": {
+   "region": "library",
+   "anchor": [
+    0.406,
+    0.422
+   ],
+   "width": 72.96
+  },
+  "telegram": {
+   "region": "library",
+   "anchor": [
+    0.454,
+    0.422
+   ],
+   "width": 72.96
+  },
+  "reddit": {
+   "region": "library",
+   "anchor": [
+    0.382,
+    0.382
+   ],
+   "width": 72.96
+  },
+  "instagram": {
+   "region": "library",
+   "anchor": [
+    0.43,
+    0.382
+   ],
+   "width": 72.96
+  },
+  "pinterest": {
+   "region": "library",
+   "anchor": [
+    0.478,
+    0.382
+   ],
+   "width": 72.96
+  },
+  "facebook": {
+   "region": "library",
+   "anchor": [
+    0.406,
+    0.422
+   ],
+   "width": 72.96
+  },
+  "threads": {
+   "region": "library",
+   "anchor": [
+    0.454,
+    0.422
+   ],
+   "width": 72.96
+  },
+  "xiaohongshu": {
+   "region": "library",
+   "anchor": [
+    0.382,
+    0.382
+   ],
+   "width": 72.96
+  },
+  "plaid": {
+   "region": "money",
+   "anchor": [
+    0.572,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "stripe": {
+   "region": "money",
+   "anchor": [
+    0.62,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "paypal": {
+   "region": "money",
+   "anchor": [
+    0.668,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "oura": {
+   "region": "money",
+   "anchor": [
+    0.596,
+    0.426
+   ],
+   "width": 72.96
+  },
+  "strava": {
+   "region": "money",
+   "anchor": [
+    0.644,
+    0.426
+   ],
+   "width": 72.96
+  },
+  "fitbit": {
+   "region": "money",
+   "anchor": [
+    0.572,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "google-maps": {
+   "region": "money",
+   "anchor": [
+    0.62,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "airbnb": {
+   "region": "money",
+   "anchor": [
+    0.668,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "tripit": {
+   "region": "money",
+   "anchor": [
+    0.596,
+    0.426
+   ],
+   "width": 72.96
+  },
+  "doordash": {
+   "region": "money",
+   "anchor": [
+    0.644,
+    0.426
+   ],
+   "width": 72.96
+  },
+  "amazon": {
+   "region": "money",
+   "anchor": [
+    0.572,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "uber": {
+   "region": "money",
+   "anchor": [
+    0.62,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "uber-eats": {
+   "region": "money",
+   "anchor": [
+    0.668,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "booking": {
+   "region": "money",
+   "anchor": [
+    0.596,
+    0.426
+   ],
+   "width": 72.96
+  },
+  "taobao": {
+   "region": "money",
+   "anchor": [
+    0.644,
+    0.426
+   ],
+   "width": 72.96
+  },
+  "alipay": {
+   "region": "money",
+   "anchor": [
+    0.572,
+    0.386
+   ],
+   "width": 72.96
+  },
+  "game-2048": {
+   "region": "health",
+   "anchor": [
+    0.705,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "snake": {
+   "region": "health",
+   "anchor": [
+    0.753,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "minesweeper": {
+   "region": "health",
+   "anchor": [
+    0.801,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "sudoku": {
+   "region": "health",
+   "anchor": [
+    0.729,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "random-game": {
+   "region": "health",
+   "anchor": [
+    0.777,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "wordle": {
+   "region": "health",
+   "anchor": [
+    0.705,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "nyt-connections": {
+   "region": "health",
+   "anchor": [
+    0.753,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "slither-io": {
+   "region": "health",
+   "anchor": [
+    0.801,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "agar-io": {
+   "region": "health",
+   "anchor": [
+    0.729,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "krunker-io": {
+   "region": "health",
+   "anchor": [
+    0.777,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "skribbl-io": {
+   "region": "health",
+   "anchor": [
+    0.705,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "infinite-craft": {
+   "region": "health",
+   "anchor": [
+    0.753,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "little-alchemy-2": {
+   "region": "health",
+   "anchor": [
+    0.801,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "cookie-clicker": {
+   "region": "health",
+   "anchor": [
+    0.729,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "lichess": {
+   "region": "health",
+   "anchor": [
+    0.777,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "drive-mad": {
+   "region": "health",
+   "anchor": [
+    0.705,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "subway-surfers": {
+   "region": "health",
+   "anchor": [
+    0.753,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "sekai": {
+   "region": "health",
+   "anchor": [
+    0.801,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "sekai-rogue-ai-tic-tac-toe": {
+   "region": "health",
+   "anchor": [
+    0.729,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "sekai-sketch-racer": {
+   "region": "health",
+   "anchor": [
+    0.777,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "sekai-mixing-colors": {
+   "region": "health",
+   "anchor": [
+    0.705,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "sekai-roller-coaster": {
+   "region": "health",
+   "anchor": [
+    0.753,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "sekai-3d-uno": {
+   "region": "health",
+   "anchor": [
+    0.801,
+    0.511
+   ],
+   "width": 72.96
+  },
+  "sekai-devil-level": {
+   "region": "health",
+   "anchor": [
+    0.729,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "pokemon-showdown": {
+   "region": "health",
+   "anchor": [
+    0.777,
+    0.551
+   ],
+   "width": 72.96
+  },
+  "youtube": {
+   "region": "travel",
+   "anchor": [
+    0.348,
+    0.616
+   ],
+   "width": 72.96
+  },
+  "tiktok": {
+   "region": "travel",
+   "anchor": [
+    0.396,
+    0.616
+   ],
+   "width": 72.96
+  },
+  "spotify": {
+   "region": "travel",
+   "anchor": [
+    0.444,
+    0.616
+   ],
+   "width": 72.96
+  },
+  "apple-music": {
+   "region": "travel",
+   "anchor": [
+    0.372,
+    0.656
+   ],
+   "width": 72.96
+  },
+  "netflix": {
+   "region": "travel",
+   "anchor": [
+    0.42,
+    0.656
+   ],
+   "width": 72.96
+  },
+  "apple-podcasts": {
+   "region": "travel",
+   "anchor": [
+    0.348,
+    0.616
+   ],
+   "width": 72.96
+  },
+  "bilibili": {
+   "region": "travel",
+   "anchor": [
+    0.396,
+    0.616
+   ],
+   "width": 72.96
+  },
+  "twitch": {
+   "region": "travel",
+   "anchor": [
+    0.444,
+    0.616
+   ],
+   "width": 72.96
+  },
+  "wikipedia": {
+   "region": "travel",
+   "anchor": [
+    0.372,
+    0.656
+   ],
+   "width": 72.96
+  },
+  "douyin": {
+   "region": "travel",
+   "anchor": [
+    0.42,
+    0.656
+   ],
+   "width": 72.96
+  }
+ }
+}

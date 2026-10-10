@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import {moonPixels,skyBodyPlacement} from '../ui/world/village/celestial-art.ts';
-import {villageCamera} from '../ui/world/village/village-camera.ts';
+import {moonPixels,skyBodyPlacement} from '../ui/theme-packages/village/celestial-art.ts';
+import {villageCamera} from '../ui/theme-packages/village/village-camera.ts';
 import {celestialAt,lunarLightAngle,lunarPhaseAt} from '../ui/world/environment/celestial.ts';
 import {environmentAt} from '../ui/world/environment/world-environment.ts';
-import {environmentPresentation} from '../ui/world/village/environment-presentation.ts';
+import {environmentPresentation} from '../ui/theme-packages/village/environment-presentation.ts';
 for(const [w,h]of [[2560,1440],[1440,900],[800,900],[375,812]]){
  const view=villageCamera(w,h,1,[.5,.5]);
  for(const altitude of [1,38,80]){

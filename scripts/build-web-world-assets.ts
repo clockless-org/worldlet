@@ -1,4 +1,4 @@
-import {LANDMARK_KEYS} from '../ui/world/village/region-landmarks.ts';
+import {LANDMARK_KEYS} from '../ui/theme-packages/village/region-landmarks.ts';
 import path from 'node:path';
 import sharp from 'sharp';
 import {deviceSource,paintedBox} from './build-world-assets.ts';

@@ -1,7 +1,6 @@
 import {themeAppletIcon,hostAppletPages,renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeWorldApplet,type ThemeLampState} from '../themes/index.ts';
 import {createAppletStage} from './theme-applet-stage.ts';
 import {createAppletStage as createVillageStage} from './pixi-stage.ts';
-import {renderVillageWorld,type VillageWorldMount} from './village/village-world.ts';
 import {createAppletImageLamps} from './applet-image-lamps.ts';
 import {createLampLabel,stackLampLabels} from './applet-lamp-label.ts';
 import {createLevelZoom} from './level-zoom.ts';
@@ -18,13 +17,13 @@ function appletIcon(room):string|undefined {
  return themeAppletIcon(room.art||room.key);
 }
 /** Compatibility adapter from the product's scene controller to the public Sim data interface. Every theme's World,
- * the built-in Village's too, is drawn through it; the host draws what is the same in every theme: the pins, lamp
+ * the Village's too, is drawn through it; the host draws what is the same in every theme: the pins, lamp
  * labels and lamps on device pictures, and the zoom between the World and an Applet. */
 export function createModuleScene(host,rooms,onPick,onProject,pages,options):any {
  // A theme in the host's Applet pages (the Village) draws the World under the shell's pins and opens Applets in the
  // host's own stage; any other package draws its own buttons over the pins and its own Applet scenes.
- const builtIn=!activeBuildTheme().package,hostPages=hostAppletPages(),shellRoot=(host.closest('.notion-world')||host) as HTMLElement;
- const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer=builtIn?'village':'sim-dom';Object.assign(world.style,{position:'absolute',inset:'0'});
+ const hostPages=hostAppletPages(),shellRoot=(host.closest('.notion-world')||host) as HTMLElement;
+ const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer=hostPages?'village':'sim-dom';Object.assign(world.style,{position:'absolute',inset:'0'});
  if(hostPages)host.prepend(world);else host.append(world);
  const stage=hostPages?createVillageStage(host,onPick):createAppletStage(host,onPick),stages=new Map(),activities=new Map<string,any>();
  const imageLamps=hostPages?createAppletImageLamps(shellRoot,(globalThis as any).__WORLDLET_25D_ASSETS__):null,lampLabels=new Map<string,ReturnType<typeof createLampLabel>>();
@@ -79,7 +78,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    out[key]=point;
   }
   onProject(out);
-  if(builtIn)drawLamps(out);
+  if(hostPages)drawLamps(out);
  };
  /** Lamp labels and the lamps on device pictures, where the marks put them (applet-lamp-label.ts, applet-image-lamps.ts). */
  function drawLamps(points:Record<string,any>){
@@ -103,8 +102,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  },moveApplet:(id,area,slot)=>{if(rooms.some(r=>r.moduleId===id)&&state().areas.some(a=>a.id==='building-'+area))options.onMoveApplet?.(id,area,slot);},menu:(id,x,y)=>{if(state().applets.some(a=>a.id===id&&a.visible))options.onAppletMenu?.(id,x,y);},
   marks,back:()=>{if(!disposed&&view.level!=='overview')onPick({action:'back'});},
   openArea:id=>{if(!disposed&&state().areas.some(a=>a.id===id))onPick({action:'region-more',id});}};
- const village:VillageWorldMount|null=builtIn?renderVillageWorld(context):null;
- const mount=village||renderBuildWorld(context);
+ const mount=renderBuildWorld(context);
  function refresh(){if(disposed)return;mount.update(state());world.hidden=view.level==='applet'&&!mount.behindApplet;
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
   if(hostPages){
@@ -123,8 +121,10 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const follow=()=>{if(checking||disposed)return;checking=true;requestAnimationFrame(()=>{checking=false;const next=JSON.stringify(shellInteraction(host))+paused();if(next!==shellKey){shellKey=next;refresh();}});};
  const observer=new MutationObserver(follow);observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','open','data-onboarding-locked','data-detail-open','data-attention-preview','data-template']});
  document.addEventListener('visibilitychange',follow);window.addEventListener('worldlet:desktop-companion',follow);
- // The Village says it is ready itself, once its first frame is drawn (pixi-world.ts).
- queueMicrotask(()=>{if(!disposed){refresh();if(!village)host.dispatchEvent(new Event('worldlet:world-ready',{bubbles:true}));}});
+ // The World says when it is drawn (ThemeWorldMount.ready); the shell's loading page waits for it.
+ queueMicrotask(()=>{if(!disposed){refresh();
+  // Ready once the theme's first frame is drawn (ThemeWorldMount.ready), or at once when it does not say.
+  Promise.resolve(mount.ready).then(()=>{if(!disposed)host.dispatchEvent(new Event('worldlet:world-ready',{bubbles:true}));},()=>{if(!disposed)host.dispatchEvent(new Event('worldlet:world-error',{bubbles:true}));});}});
  /** Where an Applet's device is on screen, for the zoom between the World and an Applet. */
  const center=(id:string)=>{const b=mount.bounds(id);if(!b||!(b.width>0))return null;const r=world.getBoundingClientRect();return {x:r.left+b.x+b.width/2,y:r.top+b.y+b.height/2};};
  return {
@@ -150,7 +150,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    if(landing.length)await mount.event({type:'applet.arrived',ids:landing,...(fromCenter?{from:'center' as const,icons}:{}),settled});
   },
   setEnvironment(value){environment=value||{};refresh();},setConnections(list){connections=list||[];signalsAt=-Infinity;refresh();},
-  setAppActivity(id,value){activities.set(id,value);signalsAt=-Infinity;if(!builtIn){const r=rooms.find(r=>r.moduleId===id);if(r)r.status={...r.status,...value};}refresh();},
+  setAppActivity(id,value){activities.set(id,value);signalsAt=-Infinity;if(!hostPages){const r=rooms.find(r=>r.moduleId===id);if(r)r.status={...r.status,...value};}refresh();},
   devicePoint(id){return mount.anchor(id);},
   setDevicePresence(id,value){if(value)hidden.delete(id);else hidden.add(id);refresh();return true;},
   toggleMotion(){motion=!motion;stage.setMotion(motion);refresh();return motion;},
@@ -161,7 +161,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   deliverMail(){const played=mount.event({type:'mail.received',ids:[]});return typeof played==='boolean'?played:true;},
   picture(){return mount.picture?.()||null;},
   get metrics(){
-   if(village){const m=village.metrics?.() as any||{};return {...m,theme:activeBuildTheme().id,presentation:{...m.presentation,stage:stage.metrics},levelZoom:levelZoom?.metrics};}
+   if(hostPages&&mount.metrics){const m=mount.metrics() as any||{};return {...m,theme:activeBuildTheme().id,presentation:{...m.presentation,stage:stage.metrics},levelZoom:levelZoom?.metrics};}
    return {renderer:'sim-dom',theme:activeBuildTheme().id,level:view.level==='applet'?'object':view.level,active:view.id,environment,
    buildings:options.buildings||[],modules:state().applets.map(a=>({...a,unlocked:a.visible,visible:a.visible&&view.level!=='applet',peekBounds:mount.bounds(a.id),arrivalBounds:mount.bounds(a.id),arrivalVisible:a.visible})),presentation:{id:view.level==='applet'?view.id:null,stage:stage.metrics},
    ...(mount.metrics?.()||{})};},

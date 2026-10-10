@@ -1,12 +1,12 @@
 import {areaCameraFrame} from './village-camera.ts';
 import {createAreaScenery} from './area-scenery.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
-import {WORLD_WIDTH,WORLD_HEIGHT,APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE} from '../world-design.ts';
+import {WORLD_WIDTH,WORLD_HEIGHT,APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE} from './space/world-design.ts';
 import {REGION_LANDMARKS} from './region-landmarks.ts';
 import {createLandmarkSprite} from './landmark-sprite.ts';
 import {createSceneryTone} from './scenery-tone.ts';
-import {WORLD_LAYOUT} from '../world-layout.ts';
-import {regionId} from '../region-layout.ts';
+import {WORLD_LAYOUT} from './space/world-layout.ts';
+import {regionId} from './space/region-core.ts';
 import {guardFilterResolution} from './pixi-filter-resolution.ts';
 import {viewportFilterArea as updateViewportFilterArea} from './viewport-filter-area.ts';
 import {createRegisteredPlate} from './registered-plate.ts';
@@ -16,16 +16,17 @@ import {createWorkMotion} from './work-motion.ts';
 import 'pixi.js/unsafe-eval';
 import {Application,Container,Sprite,Texture,Graphics,Rectangle,BlurFilter,ColorMatrixFilter,Matrix} from 'pixi.js';
 import {createFocusScenery} from './pixi-focus.ts';
-import {extraPlacements,resolvePlacements,type PlacementSlot} from '../slot-placement.ts';
-import {APPLET_SPRITES} from '../applet-sprites.ts';
+import {extraPlacements,resolvePlacements,type PlacementSlot} from './space/slot-placement.ts';
+import {APPLET_SPRITES} from './space/applet-sprites.ts';
 import {myAppletMark} from './my-applet-mark.ts';
-import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from '../frame-budget.ts';
+import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from './space/frame-budget.ts';
 import {attachAppletLamp,type LampState} from './village-lamp.ts';
-import type {RegionLayout} from '../region-layout.ts';
+import type {RegionLayout} from './space/region-core.ts';
 
 // Authored image coordinates, not camera-dependent guesses. The internal
 // "people" key remains stable while its displayed region is Explore.
 import {VILLAGE_SCENE} from './village-scene.ts';
+import {villagePayload} from './village-payload.ts';
 // The Village's camera, light, ambience and sites (village-scene.ts).
 
 /** A texture's RGBA pixels, read back through a 2D canvas. */
@@ -34,7 +35,7 @@ function alphaOf(tex:Texture):Uint8ClampedArray {
  const ctx=canvas.getContext('2d',{willReadFrequently:true})!;ctx.drawImage(tex.source.resource as HTMLImageElement,tex.frame.x,tex.frame.y,tex.frame.width,tex.frame.height,0,0,canvas.width,canvas.height);
  return ctx.getImageData(0,0,canvas.width,canvas.height).data;
 }
-/** The opaque box (alpha > 32) of `alpha`, as scripts/build-world-assets.ts paintedBox measures it at build time. */
+/** The opaque box (alpha > 32) of `alpha`, as scripts/painted-box.ts measures it when scripts/village-art.ts encodes the devices. */
 function paintedBox(alpha:Uint8ClampedArray,width:number,height:number):number[] {
  let left=width,top=height,right=-1,bottom=-1;
  for(let y=0;y<height;y++){const row=y*width*4;for(let x=0;x<width;x++)if(alpha[row+x*4+3]>32){if(x<left)left=x;if(x>right)right=x;if(y<top)top=y;bottom=y;}}
@@ -51,7 +52,7 @@ export interface VillageOptions {
 }
 export function createModuleScene(host,rooms,onProject,options:VillageOptions):any{
  const {areaZoom,camera:themeCamera,approachCamera,overviewCenter:OVERVIEW_CENTER,sites:THEME_SITES,lightingState,createLighting,createAmbience,workPath}=VILLAGE_SCENE;
- const payload=(globalThis as any).__WORLDLET_25D_ASSETS__;
+ const payload:any=villagePayload();
  // The shell's own state (shell-interaction.ts), handed in by the host: the World never reads the shell's elements.
  const shell=()=>options.interaction();
  // Lamps as the host shows them (Theme contract ThemeWorldApplet.lamp): the host draws their labels and actions.
@@ -72,6 +73,9 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
  let framedRegion:string|null=null,extra:Record<string,PlacementSlot>={},extraKey='';
  let framing=0,hoveredRegion=null,focusScenery=null,focusSceneryVisible=false;
  let areaScenery:Awaited<ReturnType<typeof createAreaScenery>>|null=null,closeArea:any=null;
+ // Settles with the first drawn frame (the Theme contract's ThemeWorldMount.ready).
+ const firstFrame={} as {promise:Promise<void>;resolve():void;reject(error:unknown):void};
+ firstFrame.promise=new Promise<void>((resolve,reject)=>{firstFrame.resolve=resolve;firstFrame.reject=reject;});firstFrame.promise.catch(()=>{});
  let closed=false,ready=false,motion=true,active='overview',level='overview',time=0,frames=0;
  let wakeUntil=0,frameRate=0;
  // Input, camera moves and scene changes draw at the full rate for a moment (frame-budget.ts).
@@ -356,7 +360,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
   workMotion=createWorkMotion(world,workPath);
   const smoke=Array.from({length:8},()=>{const p=new Graphics().circle(0,0,6.25).fill({color:0xfff7e7,alpha:.24});p.eventMode='none';p.zIndex=2000;world.addChild(p);return p;});
   refreshContent();observer=new ResizeObserver(()=>{wake();transform();});observer.observe(host);transform();ready=true;focus(active,level);
-  host.dispatchEvent(new Event('worldlet:world-ready',{bubbles:true}));pace(WORLD_FRAME_RATE.moving);wake();
+  firstFrame.resolve();pace(WORLD_FRAME_RATE.moving);wake();
   app.ticker.add(tick=>{frames++;const animate=motion&&!reduced.matches&&windowActive()&&!document.hidden;
    if(animate)time+=Math.min(tick.deltaMS,100)*.001;
    // Projection writes DOM pin positions. Read dimensions before those writes,
@@ -384,8 +388,8 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
   });
   desktopPresentation();
  }
- initialize().catch(error=>{if(closed)return;console.error('2.5D world failed',error);host.dispatchEvent(new Event('worldlet:world-error',{bubbles:true}));});
- return {picture,focus,syncPaused:desktopPresentation,refreshContent,setPlacementArea(id:string|null){placementArea=id;project();},frameArea(id:string|null,inset=0){shelfArea=id;shelfInset=Math.max(0,inset);wake();if(reduced.matches)transform();},refreshRegions(){wake();refreshPlacements();updateThemes();transform();},setHoveredApplet(id){for(const d of devices){d.labelHovered=d.room.id===id;if(d.labelHovered)focusScenery?.preload(d.room.key);}},prepareArrival(ids){const selected=new Set<string>(ids);const planned=resolvePlacements(rooms,positions,r=>selected.has(r.moduleId),regionPages);for(const d of devices){const slot=planned[d.room.moduleId];if(slot)d.anchor=d.baseAnchor=[...slot.anchor];d.onArrivalPage=!!slot;}transform();},setHoveredArea(id){hoveredRegion=id;project();},/** Which Applets show changed (VillageOptions.visible): place them again. */
+ initialize().catch(error=>{if(closed)return;console.error('2.5D world failed',error);firstFrame.reject(error);});
+ return {ready:firstFrame.promise,picture,focus,syncPaused:desktopPresentation,refreshContent,setPlacementArea(id:string|null){placementArea=id;project();},frameArea(id:string|null,inset=0){shelfArea=id;shelfInset=Math.max(0,inset);wake();if(reduced.matches)transform();},refreshRegions(){wake();refreshPlacements();updateThemes();transform();},setHoveredApplet(id){for(const d of devices){d.labelHovered=d.room.id===id;if(d.labelHovered)focusScenery?.preload(d.room.key);}},prepareArrival(ids){const selected=new Set<string>(ids);const planned=resolvePlacements(rooms,positions,r=>selected.has(r.moduleId),regionPages);for(const d of devices){const slot=planned[d.room.moduleId];if(slot)d.anchor=d.baseAnchor=[...slot.anchor];d.onArrivalPage=!!slot;}transform();},setHoveredArea(id){hoveredRegion=id;project();},/** Which Applets show changed (VillageOptions.visible): place them again. */
  syncVisible(){wake();refreshPlacements();for(const d of devices)d.root.eventMode=allowed(d.room)?'static':'none';for(const r of regions){r.root.eventMode=regionAllowed(r.b.id)?'static':'none';if(r.landmark)r.landmark.root.eventMode=r.root.eventMode;}transform();},
  /** Applets that just became visible land (Theme contract `applet.arrived`). */
  async arrive(ids:readonly string[],fromCenter=false,icons:Readonly<Record<string,string>>={},settled=false){wake();

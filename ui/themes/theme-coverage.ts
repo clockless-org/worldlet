@@ -37,7 +37,7 @@ export const THEME_SURFACES=[
 ] as const;
 export type ThemeSurface=typeof THEME_SURFACES[number][0];
 
-/** Cues a theme renderer actually draws. Village's cues are the shared work motion (ui/world/village/work-motion.ts). */
+/** Cues a theme renderer actually draws. Village's cues are the shared work motion (ui/theme-packages/village/work-motion.ts). */
 export const DRAWN_CUES:Record<string,readonly string[]>={village:['device-reveal','lamp-breathe','done-mark','stop-at-step']};
 
 type StyleManifest={world:Record<string,string>;applets:Record<string,{peek?:string;open?:string;focus?:string}>;attention:Record<string,string>;hud:Record<string,string>};

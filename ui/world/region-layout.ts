@@ -1,20 +1,11 @@
 import {WORLD_LAYOUT} from './world-layout.ts';
 import {AREA_LAYOUT_VERSION,migrateAreaLayout} from '../../core/applets/index.ts';
-import {activeBuildTheme,selectThemePins,storedThemePins,type ThemePins} from '../themes/index.ts';
+import {activeBuildTheme,selectThemePins,storedThemePins} from '../themes/index.ts';
 
-export const regionId=(id:string)=>id?.replace(/^building-/,'')==='people'?'travel':id?.replace(/^building-/,'');
+export {regionId,lastUse,recentlyUsedFirst,type RegionLayout} from './region-core.ts';
+import {regionId,lastUse,type RegionLayout} from './region-core.ts';
 export const REGION_THEMES={home:'Cottage',library:'Reading garden',money:'Fountain',health:'Shade garden',work:'Workshop',travel:'Riverside'};
-/** Each area's five ground places hold its most recently used Applets, refilled as they are used (owner request
- * 2026-10-04); `pins` are only the places the person pinned an Applet to, which keep it there. Version 1 wrote
- * every filled place into `pins`, so its pins are not read: they were not the person's choice. Version 3 is the
- * regroup of 2026-10-08 (`migrateAreaLayout`): Create's Applets, name and pins moved to Work. */
-export type RegionLayout={version:3;names:Record<string,string>;themes:Record<string,string>;assignments:Record<string,string>;pins:Record<string,(string|null)[]>;usage:Record<string,number>;lastUsedAt:Record<string,number>;
- /** Pinned places of the themes not shown now; `pins` is the active theme's (ui/themes/theme-placements.ts). */
- themePins?:Record<string,ThemePins>};
 export function emptyRegionLayout():RegionLayout{return {version:AREA_LAYOUT_VERSION,names:{},themes:{},assignments:{},pins:{},usage:{},lastUsedAt:{}};}
-/** When an Applet was last opened; one that came into the World on its own (a moment or ongoing Applet) counts its arrival. */
-export const lastUse=(room:any,layout?:RegionLayout)=>Math.max(layout?.lastUsedAt[room.moduleId]||0,Number(room.arrivedAt)||0);
-export function recentlyUsedFirst(a:any,b:any,layout:RegionLayout){return lastUse(b,layout)-lastUse(a,layout)||a.title.localeCompare(b.title);}
 /** A saved layout, from the World (`onboarding.regionLayout`) or an older page's storage; anything unexpected is dropped.
  * Its pins become `themeId`'s; every other theme's stay in `themePins`. */
 export function parseRegionLayout(saved:any,themeId=activeBuildTheme().id):RegionLayout{

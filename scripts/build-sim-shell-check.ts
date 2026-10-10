@@ -4,9 +4,10 @@ await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'reduce'});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{(window as any).webkit={messageHandlers:{worldlet:{async postMessage(b){if(b.action==='snapshot')return {platform:'macos',workspaceId:'sim-contract-check',sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail','app-google-calendar','app-apple-notes','app-apple-reminders','app-weather'],hiddenApplets:[]},sampleEnabled:false};if(b.action==='appContent')return {pages:[]};return {ok:true};}}}};});
  await page.goto(worldUrl());await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl');
- // The default theme is the built-in Village: the animated Pixi World, with no theme package stylesheet or scene slots.
+ // The default theme is the Village package: the animated Pixi World in the host's own Applet pages, so only its
+ // stylesheet is attached and no scene slot restyles the shared HUD.
  assert.equal(await page.evaluate(()=>document.documentElement.dataset.buildTheme),undefined);
- assert.equal(await page.locator('link[data-theme-style]').count(),0);
+ assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll<HTMLLinkElement>('link[data-theme-style]')].map(l=>l.dataset.themeStyle)),['village']);
  // What the companion and HUD read. Fox is the host's in every theme; HUD material and sounds come from the theme.
  const companion=()=>page.evaluate(()=>{const env=(globalThis as any).__WORLDLET_ENV_ASSETS__;return {name:document.querySelector('#companionDialogue')?.getAttribute('aria-label'),rive:!!env.companionRive,portrait:env.companionPortrait,skin:document.documentElement.dataset.themeSkin||null,mail:env.surfaces?.sounds?.events?.['mail.received']||null};});
  const fox=await companion();assert.equal(fox.name,'Fox reply');
@@ -38,9 +39,9 @@ await withBrowser(fileAccess,async browser=>{
  // The choice is saved on this computer: a reload starts in Blueprint.
  await page.reload();await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.theme==='blueprint');
  await page.evaluate(()=>(window as any).worldletUI.dispatch({version:1,action:'overview'}));await page.locator('.blueprint-plan').waitFor({state:'visible'});
- // Back to the built-in Village: the Pixi World returns and no package stylesheet or scene slot is left behind.
+ // Back to the Village: the Pixi World returns and no other package's stylesheet or scene slot is left behind.
  await pick('village');await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any)?.sceneMetrics?.renderer==='pixi-webgl');
- assert.equal(await page.locator('.blueprint-plan').count(),0);assert.equal(await page.locator('link[data-theme-style]').count(),0);
+ assert.equal(await page.locator('.blueprint-plan').count(),0);assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll<HTMLLinkElement>('link[data-theme-style]')].map(l=>l.dataset.themeStyle)),['village']);
  assert.deepEqual(await companion(),fox,'Fox and the built-in HUD come back');
  assert.deepEqual(await page.evaluate(()=>({theme:document.documentElement.dataset.buildTheme,slots:[...document.documentElement.style].filter(name=>name.startsWith('--sim-'))})),{theme:undefined,slots:[]});
  assert.deepEqual(errors,[]);console.log('PASS full World shell: Village boots the Pixi World, Settings → Theme switches to Village Map and Blueprint in place (Blueprint with its own HUD material and sound and the same Fox, kept after reload) and back to Village, no runtime errors');

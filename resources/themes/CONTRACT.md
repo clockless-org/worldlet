@@ -117,7 +117,7 @@ Not part of a theme: the companion (Fox, its rig and portrait, where it stands, 
 2. Make it active: apply its stylesheet and tokens, remove the old stylesheet and save the choice on this computer (`worldlet-theme-v2`).
 3. Dispatch `worldlet:theme` (`{from,to}`). The World disposes the old theme's World and Applet mounts and renders the same view with the new theme: what is open, records, web sessions and background tasks stay. Pinned places are kept per theme (`ui/themes/theme-placements.ts`).
 
-The default theme, Village, is built in: it is the animated Pixi World (`ui/world/village/pixi-world.ts`) and carries no package, stylesheet or scene slots. Like every package it is drawn through the contract's World mount (`ui/world/village/village-world.ts`, behind `ui/world/build-theme-world.ts`), reports marks and reads everything it shows from the World state; the host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet for it. What it still takes from outside the contract (its art from the built-in style pack, two catalog lists of Applet keys, and its Applet stage) goes as it becomes a package. Choosing it removes the last package's stylesheet and scene variables. An unknown or removed saved theme falls back to Village. A package cannot use the id `village`.
+The default theme, Village, is a package like the others (`ui/theme-packages/village`). It draws the animated Pixi World (`pixi-world.ts`) behind the contract's World mount (`village-world.ts`) and sets `appletPages: "host"`, so its Applets open in the host's own Applet pages and no scene slot restyles the shared HUD. It reads everything it shows from the World state and its own files: its art in `assets/` (`art.json` indexes it; `scripts/village-art.ts` encodes it from the painted sources), Applet `icons` for every catalog Applet, and copies of the host's space code in `space/` (`scripts/village-space.ts` keeps them equal). The host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet for it. An unknown or removed saved theme falls back to Village.
 
 ## Adding a theme
 
@@ -149,4 +149,4 @@ Contract v2 is frozen. `ui/themes/frozen/contract-v2.d.ts` holds its declaration
 
 An additive, optional change passes; refresh the snapshot in the same PR with `node scripts/theme-contract-check.ts --freeze` (it refuses while the change is incompatible). Anything else needs contract v3 with its own snapshot and frozen package. Incompatible versions fail at import before copying. Main-repository adapters absorb product data changes so packages can change independently.
 
-The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the built-in Village's assets; it is not a theme API and not how themes are switched.
+The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the Village's source art and companion; it is not a theme API and not how themes are switched.
