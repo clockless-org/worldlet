@@ -221,6 +221,12 @@
 .native-console .fox-work-done:focus-visible{outline:2px solid var(--ui-hud-focus);outline-offset:3px}
 @keyframes fox-work-pulse{0%,100%{opacity:.35}50%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.native-console .fox-work{transition:none}.native-console .fox-work-dot{animation:none}}
+/* The routines that run on their own (ui/hud/routines-line.ts): one quiet line under the work line, in the same ink.
+   It shows from the first moment, the first run included: setup's Routines tile flies here on entry. */
+.native-console .fox-routines{order:21;justify-self:end;display:flex;align-items:center;justify-content:flex-end;gap:6px;min-height:24px;max-width:min(360px,34vw);font:500 var(--ui-text-label)/1.5 var(--ui-font-ui);color:inherit;text-shadow:inherit;opacity:.85;cursor:default}
+.native-console .fox-routines[hidden]{display:none}
+.native-console .fox-routines svg{flex:none;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;filter:var(--ui-hud-glyph-shadow)}
+.native-console .fox-routines-text{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
 /* The first run belongs to the person and the tour: Fox's background work stays out of the corner. */
 .notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step],[data-tour-coda]) .fox-work{display:none}
 /* Playing is carried by brightness alone; no icon moves, on or off. */

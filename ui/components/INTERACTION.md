@@ -208,7 +208,7 @@ Bound in `ui/hud/native-hud.ts`.
 | --- | --- |
 | Top center | Current context title; icon only for an Applet. Inside an Applet, centered over the left two-thirds |
 | Top bar | Back at the start when a previous level exists; inside an Applet, the Applet shelf and the Applet's own controls at the end of its side |
-| Top right | The Tutorial switch, then what Fox is doing right now and, briefly, what it just made (`ui/hud/fox-work-line.ts`); aligned to the same right edge |
+| Top right | The Tutorial switch, then what Fox is doing right now and, briefly, what it just made (`ui/hud/fox-work-line.ts`), then the routines that run on their own, how many and which runs next, from the person's Agent's scheduler (`ui/hud/routines-line.ts`, shown during the first run too, where setup's Routines tile lands); aligned to the same right edge |
 | Left | The Attention Center: Coming Up / Worth Doing / Worth Knowing, drawing only the groups that hold something. No heading over it; it is what it holds |
 | Beside Fox, left | World |
 | Beside Fox, right | At most three: the next item action (Review task / View event / Check update), Connect, Have Fun |

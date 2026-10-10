@@ -309,8 +309,16 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='localAgent').length),0,'Coming back to the same Agent reads nothing again');
   assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
+  // On entry, what came along goes into Fox at the bottom, but Routines go up to the top-right corner, where the
+  // World shows background work (owner request 2026-10-10): record where each tile's flight ends.
+  await page.evaluate(()=>{const w=window as any,animate=Element.prototype.animate;w.parcelEnds={};Element.prototype.animate=function(frames:any,options:any){
+   if(this.classList?.contains('setup-parcel')&&Array.isArray(frames)){const r=this.getBoundingClientRect(),m=/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(String(frames.at(-1).transform));if(m)w.parcelEnds[this.className.split(' ')[1]]={x:r.left+r.width/2+Number(m[1]),y:r.top+r.height/2+Number(m[2])};}
+   return animate.call(this,frames,options);};});
   await page.getByRole('button',{name:'Enter your world',exact:true}).click();
   await page.waitForFunction(()=>!document.getElementById('worldStartup'),{},{timeout:30000});
+  const ends=await page.evaluate(()=>({ends:(window as any).parcelEnds,width:innerWidth,height:innerHeight}));
+  assert.ok(ends.ends['setup-tile-routines']&&ends.ends['setup-tile-routines'].x>ends.width*.8&&ends.ends['setup-tile-routines'].y<ends.height*.2,'Routines fly to the top-right: '+JSON.stringify(ends));
+  for(const kind of ['setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills'])assert.ok(ends.ends[kind]&&ends.ends[kind].y>ends.height*.6,kind+' goes into Fox at the bottom: '+JSON.stringify(ends));
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
   assert.ok(!result.calls.some(c=>c.action==='connect'),'No Google sign-in');
   assert.equal(result.state.onboarding.completed,true);
