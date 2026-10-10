@@ -4,7 +4,8 @@
 // `*`, lists, ranges and steps, read in the computer's local time like the schedulers that run them.
 import type {HarnessJob} from '../../contracts/harness-services.ts';
 
-export type RoutineLine={count:number;next:{name:string;at:number}|null;names:string[]};
+export type RoutineRow={name:string;at:number|null;everySeconds:number|null};
+export type RoutineLine={count:number;next:{name:string;at:number}|null;names:string[];rows:RoutineRow[]};
 
 function field(text:string,min:number,max:number):Set<number>|null {
  const values=new Set<number>();
@@ -36,13 +37,12 @@ export function nextCronRun(expression:string,now:number):number|null {
  }
  return null;
 }
-/** The active jobs, and which runs next (a one-time job still ahead counts; an interval job has no fixed time). */
+/** The active jobs, soonest first (an interval job has no fixed time and comes after the timed ones), and which runs
+ * next (a one-time job still ahead counts). */
 export function routineLine(jobs:readonly HarnessJob[],now:number):RoutineLine {
  const active=jobs.filter(job=>!job.paused&&!('at' in job.when&&job.when.at<=now));
- let next:RoutineLine['next']=null;
- for(const job of active){
-  const at='cron' in job.when?nextCronRun(job.when.cron,now):'at' in job.when?job.when.at:null;
-  if(at!==null&&(!next||at<next.at))next={name:job.name,at};
- }
- return {count:active.length,next,names:active.map(job=>job.name)};
+ const rows:RoutineRow[]=active.map(job=>({name:job.name,at:'cron' in job.when?nextCronRun(job.when.cron,now):'at' in job.when?job.when.at:null,everySeconds:'everySeconds' in job.when?job.when.everySeconds:null}));
+ rows.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity));
+ const first=rows[0]?.at!=null?rows[0]:null;
+ return {count:active.length,next:first?{name:first.name,at:first.at!}:null,names:active.map(job=>job.name),rows};
 }

@@ -20,6 +20,8 @@ const jobs=[
  {id:'d',name:'Call the dentist',kind:'prompt',paused:false,when:{at:at('2026-10-10T07:50:00')}},
  {id:'e',name:'Done already',kind:'prompt',paused:false,when:{at:at('2026-10-09T07:50:00')}}
 ] as any;
-assert.deepEqual(routineLine(jobs,now),{count:3,next:{name:'Call the dentist',at:at('2026-10-10T07:50:00')},names:['Morning brief','Flight prices','Call the dentist']},'paused and past one-time jobs are left out; the soonest is next');
-assert.deepEqual(routineLine([],now),{count:0,next:null,names:[]});
+assert.deepEqual(routineLine(jobs,now),{count:3,next:{name:'Call the dentist',at:at('2026-10-10T07:50:00')},names:['Morning brief','Flight prices','Call the dentist'],
+ rows:[{name:'Call the dentist',at:at('2026-10-10T07:50:00'),everySeconds:null},{name:'Morning brief',at:at('2026-10-10T08:00:00'),everySeconds:null},{name:'Flight prices',at:null,everySeconds:3600}]},
+ 'paused and past one-time jobs are left out; listed soonest first, an interval job last');
+assert.deepEqual(routineLine([],now),{count:0,next:null,names:[],rows:[]});
 console.log('PASS routines line: cron next run (lists, ranges, steps, weekdays), paused and past jobs left out, the soonest named');
