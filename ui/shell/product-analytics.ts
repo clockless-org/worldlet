@@ -67,6 +67,22 @@ export function withToolAnalytics(run,host,enabled=()=>true){
   return !enabled()?step():measured(step,'world_tool',(event,duration,extra={})=>report(event,duration,{...extra,tool_category}));
  };
 }
+/** PostHog's standard web capture in the World page (owner 2026-10-10: follow PostHog's best practice): the host
+ * answers `analyticsConfig` only in a release app with sharing on, and then the page loads posthog-web.js
+ * (ui/shell/posthog-web.ts) with it. Sharing switched off stops it at once; switched on starts it again. */
+export function startWebAnalytics(host:HostCall,load=(src:string)=>{const script=document.createElement('script');script.src=src;document.head.appendChild(script);}){
+ const scope=window as any;
+ const sync=async()=>{
+  let config:unknown=null;
+  try{config=await host('analyticsConfig',{});}catch{/* Not the app, or the host is busy: nothing loads. */}
+  scope.worldletWebAnalyticsConfig=config&&typeof config==='object'?config:null;
+  if(scope.worldletWebAnalytics)scope.worldletWebAnalytics.update(scope.worldletWebAnalyticsConfig);
+  else if(scope.worldletWebAnalyticsConfig&&!scope.worldletWebAnalyticsLoading){scope.worldletWebAnalyticsLoading=true;load('posthog-web.js');}
+ };
+ void sync();
+ // Sharing changed, or the person signed in or out since: the identity the host reports may have moved.
+ for(const name of ['worldlet:analytics-changed','worldlet:app-active'])window.addEventListener(name,()=>void sync());
+}
 export function withProductAnalytics(host:HostCall,enabled=()=>true){
  const track=reporter(host,enabled);
  const call:HostCall=async(action:string,body:any={})=>{

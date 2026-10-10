@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {app,BaseWindow,type WebContents} from 'electron';
+import {PostHog} from 'posthog-node';
 import {core} from '../../core.ts';
 import {isoSeconds,uuid} from '../../files.ts';
 import {platformName} from '../../profile.ts';
@@ -11,13 +12,28 @@ import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,LOCAL_AGENT_IDS,UPDATE_WAIT_BUCKE
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
-// Explicit product events and account/installation profiles; no private content or autocapture.
+// Explicit product events and account/installation profiles from the host. The World page adds PostHog's standard web
+// capture (webConfig and ingest below; ui/shell/posthog-web.ts): autocapture, pageleave, sessions and session replay,
+// with every text, input and attribute masked, so mail, chat and Fox content never leave the device readable.
 // Identity and delivery markers keep the Mac host's UserDefaults names in preferences.json.
 const ENABLED='WorldletUsageAnalyticsEnabled',ACCOUNT='WorldletUsageAccount',ANONYMOUS='WorldletUsageAnonymousID',INSTALLATION='WorldletUsageInstallID';
 // Download tracking (website/README.md#download-tracking): the opaque token of the download press this installation came
 // from, and whether this installation has asked. Never an email.
 const INVITE='WorldletInviteToken',INVITE_ASKED='WorldletInviteClaimAsked',LAST_DAY='WorldletUsageLastDay';
 export const INSTALL_CLAIM_URL='https://worldlet.ai/api/install/claim';
+/** The World page sends its PostHog web traffic to worldlet://app/ingest/…, which the host forwards to the project's
+ * ingestion host (PostHog's reverse-proxy setup), so the page itself keeps no network access. Only these paths pass:
+ * events, batches, session replay snapshots, and the flags/remote config answer replay needs (JSON, never a script). */
+export const INGEST_PREFIX='/ingest';
+const INGEST_PATHS=[/^\/e\/?$/,/^\/i\/v0\/e\/?$/,/^\/batch\/?$/,/^\/s\/?$/,/^\/flags\/?$/,/^\/decide\/?$/,/^\/array\/phc_[A-Za-z0-9_-]+\/config$/];
+export function ingestPath(pathname:string){
+ if(!pathname.startsWith(INGEST_PREFIX+'/'))return null;
+ const rest=pathname.slice(INGEST_PREFIX.length);
+ return INGEST_PATHS.some(pattern=>pattern.test(rest))?rest:null;
+}
+/** What the World page's PostHog web client starts with (ui/shell/posthog-web.ts): the same project, identity and
+ * properties as the host's own events, so both count as one person on one installation. */
+export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string,identified:boolean,properties:Row}
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
 export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
 const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','fox_browse_changed','order_sent','order_stopped']);
@@ -83,7 +99,7 @@ export function personInput(type:unknown,{focused,automated}:{focused:boolean,au
 const CHANNELS=['website','homebrew','steam','microsoft-store','mac-app-store','itch','setapp','winget'];
 
 /** Module checks replace the release configuration, the network, the focus test and the clock. */
-export interface AnalyticsOverrides {config?:{key:string,url:string,version:string,build:string,channel:string},fetch?:typeof fetch,focused?:()=>boolean,now?:()=>number,system?:NodeJS.Platform}
+export interface AnalyticsOverrides {config?:{key:string,url:string,version:string,build:string,channel:string,host?:string},fetch?:typeof fetch,focused?:()=>boolean,now?:()=>number,system?:NodeJS.Platform}
 export class UsageAnalytics implements AnalyticsService {
  private host:Host;
  private send:typeof fetch;
@@ -93,8 +109,11 @@ export class UsageAnalytics implements AnalyticsService {
  private engagedCheckedAt=-Infinity;
  private session=uuid();
  private sending=new Map<string,AbortController>();
+ private client:PostHog|null=null;
+ private inflight=new Map<string,AbortController>();
+ private accepted=new Set<string>();
  private exceptions=new Set<string>();
- private config:{key:string,url:string,version:string,build:string,channel:string}|null=null;
+ private config:{key:string,url:string,version:string,build:string,channel:string,host?:string}|null=null;
  private listeners:(()=>void)[]=[];
  constructor(host:Host,overrides:AnalyticsOverrides={}){
   this.host=host;
@@ -108,7 +127,7 @@ export class UsageAnalytics implements AnalyticsService {
   const settings=distribution(host,'Analytics.json');
   if(releaseBuild(host)&&settings&&typeof settings.projectKey==='string'&&settings.projectKey.startsWith('phc_')&&settings.projectKey.length>4&&['https://us.i.posthog.com','https://eu.i.posthog.com'].includes(settings.host)){
    const info=buildInfo(host);
-   this.config={key:settings.projectKey,url:settings.host+'/capture/',version:typeof info.version==='string'?info.version:app.getVersion(),build:info.build==null?'':String(info.build),
+   this.config={key:settings.projectKey,url:settings.host+'/capture/',host:settings.host,version:typeof info.version==='string'?info.version:app.getVersion(),build:info.build==null?'':String(info.build),
     channel:CHANNELS.includes(info.distributionChannel)?info.distributionChannel:'unknown'};
   }
   if(overrides.config)this.config=overrides.config;
@@ -151,6 +170,28 @@ export class UsageAnalytics implements AnalyticsService {
   return account||anonymous;
  }
  modelAnalyticsID(){return this.config&&this.enabled()?this.identity(this.profile()):'';}
+ /** The World page's PostHog web client: null in development builds, command-line checks and with sharing off, so
+  * the page then loads no client at all. */
+ webConfig():WebAnalyticsConfig|null {
+  const config=this.config;
+  if(!config?.host||!this.enabled())return null;
+  const account=this.profile(),identified=Object.keys(account).length>0;
+  return {key:config.key,apiHost:INGEST_PREFIX,distinctId:this.identity(account),identified,properties:{
+   surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),
+   analytics_schema:4,installation_id:this.installationID(),app_build:config.build,platform:platformName(),app_version:config.version,$geoip_disable:true}};
+ }
+ /** Forwards one World page request under /ingest to PostHog. Anything else, or anything with sharing off, is dropped. */
+ async ingest(request:Request):Promise<Response> {
+  const config=this.config,url=new URL(request.url),target=ingestPath(url.pathname);
+  if(!config?.host||!this.enabled()||!target||!['GET','POST'].includes(request.method))return new Response(null,{status:204});
+  if(target.startsWith('/array/')&&target!=='/array/'+config.key+'/config')return new Response(null,{status:204});
+  try{
+   const headers:Record<string,string>={};
+   for(const name of ['content-type','content-encoding'])if(request.headers.get(name))headers[name]=request.headers.get(name)!;
+   const response=await this.send(config.host+target+url.search,{method:request.method,headers,...(request.method==='POST'?{body:await request.arrayBuffer()}:{}),signal:AbortSignal.timeout(20_000)});
+   return new Response(await response.arrayBuffer(),{status:response.status,headers:{'Content-Type':response.headers.get('content-type')||'application/json'}});
+  }catch{return new Response(null,{status:204});}
+ }
  private claiming:Promise<void>|null=null;
  /** A fresh installation (it never reported a day) asks worldlet.ai once whether a browser on this network
   * pressed a download for this system in the last three days; the answer is that person's opaque token, sent with
@@ -272,18 +313,36 @@ export class UsageAnalytics implements AnalyticsService {
   if(persist)this.prefs.set(pendingKey,envelope);
   if(envelope.dimensions&&typeof envelope.dimensions==='object')dimensions=envelope.dimensions;
   const properties:Row={
-   surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),distinct_id:id,$session_id:this.session,analytics_schema:4,installation_id:this.installationID(),
+   surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),$session_id:this.session,analytics_schema:4,installation_id:this.installationID(),
    app_build:config.build,platform,app_version:config.version,duration_bucket:duration,os_version:process.getSystemVersion(),
    language:(app.getPreferredSystemLanguages()[0]??'und').split('-')[0]||'und',$set:person,$set_once:{first_profile_seen_at:isoSeconds(),...(invite?{invite_token:invite}:{})},$process_person_profile:identified,$geoip_disable:true,
    ...(invite?{invite_token:invite}:{}),...dimensions
   };
   if(event==='$identify'&&identified&&this.prefs.string(ANONYMOUS))properties.$anon_distinct_id=this.prefs.string(ANONYMOUS);
-  const controller=new AbortController();
-  this.sending.set(marker,controller);
-  void this.send(config.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:config.key,event,timestamp:envelope.timestamp,uuid:envelope.uuid,properties}),signal:AbortSignal.any([controller.signal,AbortSignal.timeout(10_000)])})
-   .then(response=>{if(persist&&response.ok&&!controller.signal.aborted&&this.enabled()){this.prefs.set(marker,value);this.prefs.remove(pendingKey);}})
+  const controller=new AbortController(),eventID=String(envelope.uuid);
+  this.sending.set(marker,controller);this.inflight.set(eventID,controller);
+  void this.posthog(config).captureImmediate({distinctId:id,event,uuid:eventID,timestamp:new Date(String(envelope.timestamp)),properties})
+   .then(()=>{if(persist&&this.accepted.has(eventID)&&!controller.signal.aborted&&this.enabled()){this.prefs.set(marker,value);this.prefs.remove(pendingKey);}})
    // Analytics never interrupts the app; a later activation retries.
    .catch(()=>{})
-   .finally(()=>{if(this.sending.get(marker)===controller)this.sending.delete(marker);});
+   .finally(()=>{this.accepted.delete(eventID);this.inflight.delete(eventID);if(this.sending.get(marker)===controller)this.sending.delete(marker);});
+ }
+ /** PostHog's Node SDK, one event per request and no retries of its own: the pending markers above retry on a later
+  * activation. Uncompressed, so delivery can tell which events PostHog accepted; it resolves even when sending fails. */
+ private posthog(config:{key:string,url:string}){
+  if(this.client)return this.client;
+  const client=new PostHog(config.key,{host:new URL(config.url).origin,flushAt:1,flushInterval:0,fetchRetryCount:0,requestTimeout:10_000,disableGeoip:true,disableCompression:true,
+   fetch:(url,options)=>this.deliver(url,options) as any});
+  client.on('error',()=>{});
+  return this.client=client;
+ }
+ private async deliver(url:string,options:{body?:unknown,signal?:AbortSignal}&Row){
+  let ids:string[]=[];
+  try{ids=(JSON.parse(String(options.body)).batch??[]).map((event:Row)=>String(event.uuid));}catch{}
+  const controllers=ids.flatMap(id=>this.inflight.get(id)??[]);
+  // Switching sharing off aborts what is still on its way.
+  const response=await this.send(url,{...options,signal:AbortSignal.any([...(options.signal?[options.signal]:[]),...controllers.map(c=>c.signal)])} as RequestInit);
+  if(response.ok)for(const id of ids)this.accepted.add(id);
+  return response;
  }
 }

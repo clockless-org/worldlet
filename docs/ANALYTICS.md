@@ -27,7 +27,9 @@ best-effort and must not block startup, conversation or shutdown.
 
 User identity may include the authorized user's email and available display name;
 connected third-party content, prompts, replies, page bodies, browsing history,
-credentials and recordings are excluded. No session replay or broad autocapture.
+credentials and recordings are excluded. The World page uses PostHog's standard web
+capture (autocapture, sessions, heatmaps and session replay) with all text, attributes
+and inputs masked and media blocked ([details](../core/diagnostics/ANALYTICS.md#world-page-web-capture)).
 Diagnostics and voluntarily submitted support feedback remain separate flows.
 
 ## AI observability

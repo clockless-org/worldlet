@@ -45,6 +45,7 @@
     "mailAvatar",
     "attentionImage",
     "usageEvent",
+    "analyticsConfig",
     "reportException",
     "phonePublish",
     "foxEnergy",

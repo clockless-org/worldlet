@@ -46,6 +46,8 @@ export function installShell(host:Host){
  store.snapshotExtras=()=>({...extras(),appUpdate:updates.snapshot()});
  updates.onChange(()=>{void page.call('worldletAppUpdate',updates.snapshot());});
  analytics.onChange(buildMenus);
+ // Sharing switched on or off: the World page starts or stops its PostHog web client (ui/shell/web-analytics.ts).
+ analytics.onChange(()=>host.page.event('worldlet:analytics-changed'));
  loginItem.onChange(buildMenus);
  // Crashed renderer, GPU and helper processes reach PostHog as an allowlisted type and Electron reason only.
  const processGone=(type:string,reason:string)=>{if(reason!=='clean-exit')analytics.recordProductEvent('app_process_gone','',{process_type:type,exit_reason:reason});};
@@ -151,6 +153,8 @@ export function installShell(host:Host){
    analytics.recordException({name:request.name,message:typeof request.message==='string'?request.message.slice(0,2000):'',stack:typeof request.stack==='string'?request.stack.slice(0,20000):''},'renderer');
    return {ok:true};
   },
+  // The World page's PostHog web client settings (autocapture, sessions, masked replay), null when it must not load.
+  analyticsConfig:()=>analytics.webConfig(),
   usageEvent:request=>{
    // Real use counts in the practice world too; other product events leave it out.
    if(request.event==='user_engaged'||!store.sampleEnabled())analytics.recordProductEvent(typeof request.event==='string'?request.event:'',typeof request.duration==='string'?request.duration:'',request);

@@ -2,7 +2,7 @@ import {mountHomeReview} from './companion/index.ts';
 import {snapshotInbox} from './shell/index.ts';
 import {mountMemoryManager} from './companion/index.ts';
 import {connectionLive} from '../core/applets/index.ts';
-import {withProductAnalytics} from './shell/index.ts';
+import {startWebAnalytics,withProductAnalytics} from './shell/index.ts';
 import {settleItemPage} from '../core/items/index.ts';
 import {installDesktopCompanion} from './companion/index.ts';
 import {mountDesktopCompanionHint,mountFirstValue,mountLoginItemOffer,mountWorldTour} from './onboarding/index.ts';
@@ -35,6 +35,8 @@ const {call,track}=withProductAnalytics(callHost,()=>!sample);
 const reportException=(error:any)=>{if(error&&typeof error==='object')void Promise.resolve(callHost('reportException',{name:String(error.name??''),message:String(error.message??''),stack:String(error.stack??'')})).catch(()=>{});};
 window.addEventListener('error',event=>reportException(event.error));
 window.addEventListener('unhandledrejection',event=>reportException(event.reason));
+// PostHog's standard web capture (autocapture, sessions, masked replay): only in a release app with sharing on.
+startWebAnalytics(callHost);
 // Only allowlisted dimensions pass (the host allowlists them again): an Applet key, `trigger` user|background,
 // setup's `dimensions` (core/diagnostics/setup-events.ts) with a `duration` bucket and, for user_engaged, its kind. user_engaged is reported in the practice world too: a person exploring it is using the app.
 window.addEventListener('worldlet:product-event',(e:Event)=>{const detail=(e as CustomEvent).detail;if(typeof detail==='string')track(detail);else if(detail?.event==='user_engaged')void Promise.resolve(callHost('usageEvent',{event:'user_engaged',engagement_kind:detail.engagement_kind})).catch(()=>{});else if(detail)track(detail.event,typeof detail.duration==='string'?detail.duration:'',{...(detail.dimensions&&typeof detail.dimensions==='object'?detail.dimensions:{}),...(detail.applet?{applet:detail.applet}:{}),...(detail.trigger?{trigger:detail.trigger}:{})});});
