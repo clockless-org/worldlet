@@ -1,12 +1,11 @@
 # Theme contract (Sim contract v2)
 
-Every Worldlet theme implements this one interface. A theme is a trusted, self-contained **presentation source package**. Worldlet bundles every package in `ui/theme-packages/<id>/` and the person switches between them in one step (Settings → Theme). The main repository owns the executable [TypeScript contract](../../ui/themes/build-theme-contract.ts), [import validator](../../scripts/build-theme-source.ts), [registry and switch](../../ui/themes/build-theme.ts) and consumer adapters. Copies in an authoring repository are references, not another authority. Packages are compiled into the app; nothing is downloaded or evaluated at runtime.
+Every Worldlet theme implements this one interface. A theme is a trusted, self-contained **presentation source package**. Worldlet bundles one theme, the Village, in `ui/theme-packages/village/`; there is no theme picker (owner decision 2026-10-10: themes are static resources, and the main repository keeps only the Village). The main repository owns the executable [TypeScript contract](../../ui/themes/build-theme-contract.ts), [import validator](../../scripts/build-theme-source.ts), [registry](../../ui/themes/build-theme.ts) and consumer adapters. Copies in an authoring repository are references, not another authority. Packages are compiled into the app; nothing is downloaded or evaluated at runtime.
 
 ```mermaid
 flowchart LR
   D[Host records, navigation and capabilities] --> C[Versioned Sim context]
-  R[Bundled packages] --> S[Active theme, switched in one step]
-  S --> P[Active source package]
+  R[The bundled package] --> P[Active source package]
   P --> W[renderWorld]
   P --> A[renderApplet]
   C --> W
@@ -76,7 +75,7 @@ Each world, bespoke Applet and fallback declares:
 
 | Field | Meaning |
 | --- | --- |
-| `size: [width, height]` | Authored reference canvas in pixels; Village Map uses 1500 × 844. |
+| `size: [width, height]` | Authored reference canvas in pixels, e.g. 1500 × 844. |
 | `background` | Package-relative asset path, e.g. `assets/mail-scene.png`. |
 | `slots.content` | Required normalized `[x, y, width, height]` rectangle on that canvas. |
 | Other `slots` | Theme-defined regions, e.g. `header`, `week`, `reader`, `toolbar`. |
@@ -107,38 +106,21 @@ A theme implements four parts. Everything else is the host's and looks the same 
 
 Not part of a theme: the companion (Fox, its rig and portrait, where it stands, its reply bubble, panel and nameplate) and pages a theme cannot replace, such as the loading and first-use pages. `hud.companion` and `hud.speech` only reserve room the theme's content stays clear of.
 
-`hud.skin` gives nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). `sound.events` gives an audio file per business event (`applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`). `icons` gives the theme's own picture of an Applet by Applet key (`png`, `webp` or `svg`); the host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. Brand logos (the HUD title bar, picture-in-picture) stay the host's. Anything left out keeps the shared look, sounds and pictures, and switching back to Village restores them.
+`hud.skin` gives nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). `sound.events` gives an audio file per business event (`applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`). `icons` gives the theme's own picture of an Applet by Applet key (`png`, `webp` or `svg`); the host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. Brand logos (the HUD title bar, picture-in-picture) stay the host's. Anything left out keeps the shared look, sounds and pictures.
 
-## Switching themes
+## The Village
 
-`ui/themes/build-theme.ts` validates every bundled package when the app loads and keeps one active theme. `switchBuildTheme(id)` is the single step behind Settings → Theme:
+The one theme, Village, is a package (`ui/theme-packages/village`). It draws the animated Pixi World (`pixi-world.ts`) behind the contract's World mount (`village-world.ts`) and sets `appletPages: "host"`, so its Applets open in the host's own Applet pages and no scene slot restyles the shared HUD. It reads everything it shows from the World state and its own files: its art in `assets/` (`art.json` indexes it; `scripts/village-art.ts` encodes it from the painted sources), Applet `icons` for every catalog Applet, and copies of the host's space code in `space/` (`scripts/village-space.ts` keeps them equal). The host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet for it.
 
-1. Prepare the target: attach its stylesheet without applying it, decode every scene painting and warm its fonts. If any of that fails, the current theme stays and nothing is saved.
-2. Make it active: apply its stylesheet and tokens, remove the old stylesheet and save the choice on this computer (`worldlet-theme-v2`).
-3. Dispatch `worldlet:theme` (`{from,to}`). The World disposes the old theme's World and Applet mounts and renders the same view with the new theme: what is open, records, web sessions and background tasks stay. Pinned places are kept per theme (`ui/themes/theme-placements.ts`).
-
-The default theme, Village, is a package like the others (`ui/theme-packages/village`). It draws the animated Pixi World (`pixi-world.ts`) behind the contract's World mount (`village-world.ts`) and sets `appletPages: "host"`, so its Applets open in the host's own Applet pages and no scene slot restyles the shared HUD. It reads everything it shows from the World state and its own files: its art in `assets/` (`art.json` indexes it; `scripts/village-art.ts` encodes it from the painted sources), Applet `icons` for every catalog Applet, and copies of the host's space code in `space/` (`scripts/village-space.ts` keeps them equal). The host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet for it. An unknown or removed saved theme falls back to Village.
-
-## Adding a theme
-
-1. Write a package that satisfies this contract (`npm run theme:source-check -- <dir>`).
-2. `npm run theme:import -- <dir>` copies it to `ui/theme-packages/<id>/` and adds it to the registry. No host file needs editing.
-3. `npm run build:native-ui && npm run test:sim-ui` runs the shared acceptance check against every bundled theme, switching between them in place.
-
-## Authoring and acceptance
+## Checking a package
 
 ```sh
 npm run theme:source-check -- /path/to/themes/your-theme/package
 npm run theme:import -- /path/to/themes/your-theme/package
-npm run build:native-ui
 npm run test:theme-source
-npm run test:sim-ui
-npm run theme:preview
 ```
 
-`test:sim-ui` uses the production World adapter and Applet stage with fictional records in a hidden Electron window. For every bundled theme, switched in place, it checks that only that theme's stylesheet is attached, World → Applet → original action → World, an unknown Applet, loading/error, slot registration under resize and disposal. `test:theme-ui` adds the Village Map four-scene and Calendar save checks. `node scripts/build-sim-shell-check.ts` checks actual application boot, shared shell and public navigation with a stub host. These do not claim authenticated account coverage or acceptance of every Applet.
-
-Before a theme is marked production-ready, inspect the full shared shell at 1500 × 844: HUD and companion overlap, text clipping, long content, empty/loading/error, keyboard focus, busy/failed edits and reduced motion. Capture both map and Applet evidence. Run the same consumer with a second package, without source edits, to verify replacement. Village Map (`ui/theme-packages/village-map/`) is the artwork-rich package; Blueprint (`ui/theme-packages/blueprint/`) is a deliberately small independent implementation, drawn entirely from vector art and the host's own readers, that proves replacement and switching. It is not a replacement for production visual acceptance. The legacy Hogwarts overlay is not a v2 package.
+`theme:import` replaces the bundled package with a checked copy. Before a theme change ships, inspect the full shared shell at 1500 × 844: HUD and companion overlap, text clipping, long content, empty/loading/error, keyboard focus and reduced motion.
 
 ## Compatibility
 
@@ -149,4 +131,4 @@ Contract v2 is frozen. `ui/themes/frozen/contract-v2.d.ts` holds its declaration
 
 An additive, optional change passes; refresh the snapshot in the same PR with `node scripts/theme-contract-check.ts --freeze` (it refuses while the change is incompatible). Anything else needs contract v3 with its own snapshot and frozen package. Incompatible versions fail at import before copying. Main-repository adapters absorb product data changes so packages can change independently.
 
-The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the Village's source art and companion; it is not a theme API and not how themes are switched.
+The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the Village's source art and companion; it is not a theme API.

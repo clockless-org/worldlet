@@ -1,5 +1,5 @@
 import {createMailArrival} from '../world/index.ts';
-import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,switchThemePins,createMailArrivalObserver} from '../themes/index.ts';
+import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,createMailArrivalObserver} from '../themes/index.ts';
 import {renderHomeFocus} from '../applets/index.ts';
 import {mailMetadata} from '../applets/index.ts';
 import {safeAttentionURL as safeAttentionSourceURL} from '../../core/attention/index.ts';
@@ -677,16 +677,10 @@ export function mountNotionWorld(data: World, native: any) {
   }
   buildScene();saveRegions();askForPictures();
   const mailArrivals=createMailArrivalObserver();mailArrivals([]);
-  let arrival=createMailArrival(()=>scene?.deliverMail()||false);
+  const arrival=createMailArrival(()=>scene?.deliverMail()||false);
   const observeMail=(world)=>{const connection=world.moduleConnections?.find(c=>c.provider==='gmail');if(!connection?.records)return;deliverMail(connection.records);};
   const deliverMail=(records)=>{const arrivals=mailArrivals(records);if(arrivals.length)arrival.arrive(arrivals.join('|'));};
   observeMail(data);
-  window.addEventListener('worldlet:theme',(event:Event)=>{
-   const detail=(event as CustomEvent).detail;arrival.destroy();arrival=createMailArrival(()=>scene?.deliverMail()||false);
-   switchThemePins(regionLayout,detail.from,detail.to);saveRegions();
-   const stages=scene?.stageState()||new Map();scene?.destroy();$('notionPins').replaceChildren();for(const key of Object.keys(pins))delete pins[key];
-   buildScene();syncSoundScene();for(const [id,stage] of stages)scene?.setAppStage(id,stage);scene?.focus(current||'overview',depth);nativeHUD?.sync();
-  });
   // The sample's weather Open shows its sample records; a late environment load must not replace them.
   environmentController=mountWorldEnvironment({root,dialog,recording:!!data.sample,close:()=>$('notionDialog').close(),onOpenWeather:()=>visitObject('app-weather'),onChange:(value,actual)=>{scene?.setEnvironment(value);if(current==='app-weather'){if(weatherPanel?.element.isConnected)weatherPanel.update(actual);else if(!data.sample)scene?.setAppStage?.(current,forecastStage(actual));}},...(native?.weather?{adapter:native.weather}:{})});
   Object.defineProperty(root,'sceneMetrics',{get:()=>scene?.metrics});

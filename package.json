@@ -89,10 +89,7 @@
     "package": "node scripts/package-electron.ts",
     "theme:import": "node scripts/build-theme-source.ts import",
     "theme:source-check": "node scripts/build-theme-source.ts check",
-    "theme:preview": "node scripts/build-theme-preview.ts",
-    "test:theme-source": "node scripts/build-theme-source-check.ts",
-    "test:theme-ui": "node scripts/build-theme-preview.ts --build-only && electron scripts/build-theme-ui-check.cjs",
-    "test:sim-ui": "node scripts/build-theme-preview.ts --build-only && electron scripts/build-sim-ui-check.cjs"
+    "test:theme-source": "node scripts/build-theme-source-check.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1141.0",

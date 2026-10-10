@@ -165,7 +165,7 @@ await withBrowser(fileAccess,async browser=>{
  // Settings work like a settings window (owner feedback 2026-10-03): the list on the left, the chosen
  // setting's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
  assert.deepEqual(await panel.locator('.companion-settings-item strong').allTextContents(),
-  ['Model','Approvals','Theme','Integrations','Browser','Background tasks','Data','Sample world','Sounds','Voice','Privacy','Open at login','Updates','Troubleshoot','Reset']);
+  ['Model','Approvals','Integrations','Browser','Background tasks','Data','Sample world','Sounds','Voice','Privacy','Open at login','Updates','Troubleshoot','Reset']);
  assert.equal(await panel.getByRole('button',{name:/Animation timing|Preview animation/}).count(),0);
  const detail=panel.locator('.companion-settings-detail');
  await panel.locator('[data-setting=data]').click();
