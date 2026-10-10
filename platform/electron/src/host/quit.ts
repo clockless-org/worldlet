@@ -66,20 +66,27 @@ export function processTrees(rows:readonly ProcessRow[],pids:readonly number[]):
 const run=(file:string,args:string[],timeout:number)=>new Promise<string>(resolve=>{
  try{execFile(file,args,{timeout,windowsHide:true,maxBuffer:8_000_000},(error,stdout)=>resolve(error?'':String(stdout)));}catch{resolve('');}
 });
-async function processRows(platform:NodeJS.Platform):Promise<ProcessRow[]> {
- const text=platform==='win32'
-  ?await run('powershell.exe',['-NoProfile','-NonInteractive','-Command','Get-CimInstance Win32_Process | ForEach-Object { "$($_.ProcessId) $($_.ParentProcessId)" }'],4000)
-  :await run('/bin/ps',['-A','-o','pid=,ppid='],2000);
+/** This app's direct children. Windows asks WMI for them alone: listing every process through PowerShell took
+ * longer than its deadline on a busy release host, the list came back empty and nothing was ended (Windows
+ * Alpha 4153: two processes outlived Quit Completely). An unanswered query is asked once more. */
+export async function processRows(platform:NodeJS.Platform,parent=process.pid,read=run):Promise<ProcessRow[]> {
+ const ask=()=>platform==='win32'
+  ?read('powershell.exe',['-NoProfile','-NonInteractive','-Command',`Get-CimInstance Win32_Process -Filter "ParentProcessId=${parent}" | ForEach-Object { "$($_.ProcessId) $($_.ParentProcessId)" }`],8000)
+  :read('/bin/ps',['-A','-o','pid=,ppid='],2000);
+ let text=await ask();
+ if(!text.trim())text=await ask();
  return text.split(/\r?\n/).map(line=>line.trim().split(/\s+/).map(Number)).filter(([pid,ppid])=>Number.isInteger(pid)&&Number.isInteger(ppid)&&pid>0).map(([pid,ppid])=>({pid,ppid}));
 }
 
 /** Ends every process this app spawned that outlived its quit work; Electron's own helpers end with the app
- * and processes marked with outliveQuit are left running. */
-export async function endStrayChildren(platform:NodeJS.Platform=process.platform){
+ * and processes marked with outliveQuit are left running. `known` are children the app tracks itself (the
+ * website engine): they are ended even when the process table cannot be read. */
+export async function endStrayChildren(platform:NodeJS.Platform=process.platform,known:readonly (number|null|undefined)[]=[]){
  let helpers:number[]=[];
  try{helpers=app.getAppMetrics().map(metric=>metric.pid);}catch{}
  const rows=await processRows(platform);
- const strays=strayChildren(rows,process.pid,keptOnQuit(helpers));
+ const kept=keptOnQuit(helpers);
+ const strays=[...new Set([...strayChildren(rows,process.pid,kept),...known.filter((pid):pid is number=>!!pid&&!kept.has(pid))])];
  if(!strays.length)return;
  if(platform==='win32'){
   const taskkill=`${process.env.SystemRoot||'C:\\Windows'}\\System32\\taskkill.exe`;

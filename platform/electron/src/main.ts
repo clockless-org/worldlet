@@ -1,4 +1,4 @@
-import {stopSharedEngine,websiteEngine} from './modules/browser/engine/process.ts';
+import {sharedEnginePid,stopSharedEngine,websiteEngine} from './modules/browser/engine/process.ts';
 import {readMemory,refreshMemory} from './modules/browser/memory.ts';
 import {browserBudget} from '../../../core/browser/index.ts';
 import fs from 'node:fs';
@@ -193,7 +193,8 @@ async function start(){
    try{world?.view.webContents.session.flushStorageData();}catch{}
    try{store.closeLedger();}catch(error){diagnostics.record(error,'quit');}
    // Nothing the app spawned outlives it: a Hermes worker, the website engine or a tool still running is ended.
-   await withDeadline(endStrayChildren(),5000);
+   // Windows reads its children through PowerShell, which can take seconds on a busy computer.
+   await withDeadline(endStrayChildren(process.platform,[sharedEnginePid()]),process.platform==='win32'?20_000:5000);
    // Electron's relauncher is a child too: a restart or installed update asked for during quit starts only now.
    try{startPendingRelaunch();}catch(error){diagnostics.record(error,'quit');}
    let exited=false;const exit=()=>{if(!exited){exited=true;app.exit(code);}};

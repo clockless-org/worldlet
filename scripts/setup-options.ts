@@ -20,7 +20,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {SETUP_OPTIONS} from '../platform/electron/src/checks/setup-option-names.ts';
 import {workspace} from './dev-workspace.ts';
-import {holders} from './onboarding-paths.ts';
+import {leftoverReason,leftovers} from './onboarding-paths.ts';
 import {FIXTURE_EXPECTATIONS,launchEnvironment,writeSetupFixtures,type FixtureAgent} from './setup-fixtures.ts';
 
 export const BLOCKING=false;
@@ -87,10 +87,10 @@ export async function setupOptions(options:string[]){
    console.log(`Setup option ${option}: library ${library}`);
    const result=await launch(electron,[path.join(root,'dist/electron'),'--check','setup-options'],env,path.join(evidence,option+'.log'));
    const outcome=optionOutcome(option,result.code,result.output,result.timedOut);
-   let left=holders(library);
-   for(let waited=0;waited<20_000&&left.length;waited+=500){await sleep(500);left=holders(library);}
-   for(const pid of left)try{process.kill(pid,'SIGKILL');}catch{}
-   const reason=outcome.reason??(left.length?`${option}: Quit Completely left ${left.length} process${left.length>1?'es':''} running with the library (pid ${left.join(', ')})`:null);
+   let left=leftovers(library);
+   for(let waited=0;waited<20_000&&left.length;waited+=500){await sleep(500);left=leftovers(library);}
+   for(const {pid} of left)try{process.kill(pid,'SIGKILL');}catch{}
+   const reason=outcome.reason??(left.length?leftoverReason(option,left):null);
    record.options.push({option,code:result.code,seconds:result.seconds,library,leftovers:left,...outcome,ok:!reason,reason});
    if(reason)record.reasons.push(reason+`; library kept at ${library}`);
    else for(let attempt=0;attempt<10;attempt++){try{fs.rmSync(library,{recursive:true,force:true});break;}catch{await sleep(1000);}}

@@ -20,7 +20,7 @@ import {worldMenu,worldMenuState} from './world-menu.ts';
 import {DesktopCompanion} from './companion.ts';
 import {companionEntry,trayIcon,type TrayFactory} from './companion-tray.ts';
 import type {ActionHandler,Host} from '../../host/types.ts';
-import {keptOnQuit,outliveQuit,processTrees,relaunchAfterQuit,startPendingRelaunch,strayChildren,wantsQuit,withDeadline} from '../../host/quit.ts';
+import {keptOnQuit,outliveQuit,processRows,processTrees,relaunchAfterQuit,startPendingRelaunch,strayChildren,wantsQuit,withDeadline} from '../../host/quit.ts';
 
 const scratch=fs.mkdtempSync(path.join(process.env.WORLDLET_CHECK_ROOT??os.tmpdir(),'worldlet-shell-'));
 const root=path.join(scratch,'library');fs.mkdirSync(root,{recursive:true});
@@ -64,7 +64,14 @@ try{
   const started=Date.now();await withDeadline(new Promise(()=>{}),50);
   assert(Date.now()-started<1000,'a hanging quit listener cannot hold the app open');
   assert(wantsQuit(['Worldlet.exe','--quit'])&&!wantsQuit(['Worldlet.exe']));
-  console.log('PASS Quit Completely: strays end with their trees, the update installer survives, a relaunch starts after the strays end, quit work has a deadline, --quit quits');
+  // Windows asks WMI for the app's own children only, and asks again when the first query came back empty
+  // (a timeout on a busy computer left two processes running after Quit Completely, Windows Alpha 4153).
+  const asked:string[]=[];
+  const answers=['','4321 10\r\n4322 10\r\n'];
+  const children=await processRows('win32',10,async(_file,args)=>{asked.push(args.at(-1)!);return answers.shift()??'';});
+  assert.deepEqual(children,[{pid:4321,ppid:10},{pid:4322,ppid:10}],'an unanswered query is asked once more');
+  assert(asked.length===2&&asked.every(query=>query.includes('-Filter "ParentProcessId=10"')),'only the app\'s own children are listed');
+  console.log('PASS Quit Completely: strays end with their trees, the update installer survives, a relaunch starts after the strays end, quit work has a deadline, --quit quits, Windows lists only the app\'s children');
  }
  assert(app.isReady(),'runs in an Electron main process');
  const imported=identity();
