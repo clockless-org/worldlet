@@ -41,7 +41,7 @@ for(const a of WORLD_APPS){
 }
 // Intentional visual changes must explicitly update this reviewed extraction baseline.
 assert.equal(createHash('sha256').update(JSON.stringify(STYLE_TOKENS)).digest('hex'),'f934fb6e28867e4fc8c97b4a21b719a44748a8043386b353c7cdb194896df8b7','Visual tokens changed; review before updating snapshot');
-const village=JSON.parse(await readFile('resources/worlds/village/manifest.json','utf8'));
+const village=JSON.parse(await readFile('ui/theme-packages/village/world.json','utf8'));
 assert.equal(parseWorldPack(village).artStatus,'approved','Live Village is reviewed for integration');
 for(const change of [x=>delete x.style,x=>x.style.id='other',x=>x.style.version='99.0.0',x=>delete x.artStatus]){
  const broken=structuredClone(village);change(broken);assert.throws(()=>parseWorldPack(broken));

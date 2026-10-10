@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {parseWorldPack,worldPackPath} from '../ui/world/world-pack.ts';
-const source=JSON.parse(await readFile('resources/worlds/village/manifest.json','utf8'));
+const source=JSON.parse(await readFile('ui/theme-packages/village/world.json','utf8'));
 const p=parseWorldPack(source);
 assert.deepEqual(p.areas.map(a=>a.title).sort(),['Home','Work','Social','Life','Games','Entertainment'].sort());
 assert.equal(p.canvas.width,3840);assert.equal(p.canvas.height,2160);

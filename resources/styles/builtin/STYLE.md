@@ -16,7 +16,7 @@ The manifest's `landmarks` registry pairs day and night artwork for the cottage,
 
 ## Applet and Fox baselines
 
-Use each Applet's existing `peek`, `open` and `focus` resources from `manifest.json` for new related artwork. Fox uses the registered expression atlas, animation sheets and rig; brand/HUD uses the existing mark master and `tokens.json`. A world layout change does not authorize reinterpreting those components.
+Use each Applet's existing `peek`, `open` and `focus` resources from `style.json` (the Village theme package) for new related artwork. Fox uses the registered expression atlas, animation sheets and rig; brand/HUD uses the existing mark master and `tokens.json` (the Village theme package). A world layout change does not authorize reinterpreting those components.
 
 HUD controls also use the registered [warm paper material family](assets/hud/README.md):
 ivory painted surfaces, moss ink, honey emphasis and shallow rounded forms. Fox's
@@ -48,7 +48,7 @@ within the existing 28px row; other environment rows retain their spacing.
 
 ### Scenery grading
 
-`tokens.json.sceneryTone` is the shared runtime scenery grade: Pixi saturation
+`tokens.json.sceneryTone` (in the Village theme package) is the shared runtime scenery grade: Pixi saturation
 -0.18 and contrast -0.16. Terrain and independent day/night landmarks use this
 same restrained treatment. Applet artwork, Fox, HUD and Focus content do not.
 Filters inherit renderer resolution: this is color grading, never overview blur
@@ -72,7 +72,7 @@ Painted cast shadows cannot physically rotate with the sun. Registered day/night
 
 ## Ownership
 
-`manifest.json` registers references and World/Applet/companion/brand resources. `tokens.json` holds world/HUD appearance values. `../../../ui/components/style.ts` is the shared immutable code entry point. Functional render/interaction code, capability adapters, permissions and user records remain outside the pack.
+[`style.json`](../../../ui/theme-packages/village/style.json) registers references and World/Applet/companion/brand resources. [`tokens.json`](../../../ui/theme-packages/village/tokens.json) holds world/HUD appearance values. `../../../ui/components/style.ts` is the shared immutable code entry point. Functional render/interaction code, capability adapters, permissions and user records remain outside the pack.
 
 Only this built-in style is supported. No user style loader, executable pack or override mechanism is enabled.
 

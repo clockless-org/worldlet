@@ -25,5 +25,5 @@ export function publishVillageArt(asset:(path:string)=>string):VillagePayload{
 type VillageArtFocus=Record<string,{image:string;framing?:string;subjectLeft?:number;logo?:number[]}>;
 /** The art published for the World now showing. */
 export function villagePayload():VillagePayload{if(!current)throw Error('Village art is not published');return current;}
-/** Where each device's lamp sits (applet-lamps.json, the host's copy; scripts/applet-lamp-check.ts keeps them equal). */
+/** Where each device's lamp sits (the theme package's lamps.json, which the host's lamps read too). */
 export const villageLamps=themeData<{applets:Record<string,{center:[number,number];radius:[number,number]}>}>('lamps.json').applets;

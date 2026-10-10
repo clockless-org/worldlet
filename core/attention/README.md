@@ -24,7 +24,7 @@ contained, with a small soft halo and clearly distinct colors. Mail also aligns 
 The generic HUD dot remains hidden; unregistered devices and painted Focus
 backgrounds do not receive guessed overlays. See the
 [Applet design guide](../../ui/applets/DESIGN-GUIDE.md) and the style pack's
-`applet-lamps.json` for approved socket coordinates.
+the Village theme package's `lamps.json` for approved socket coordinates.
 
 The Applet lamp has four states:
 an empty dark socket means signed out and not usable; steady white means

@@ -17,7 +17,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-/** Colors from the built-in cozy-miniature style (resources/styles/builtin/tokens.json and UI.md), the same values the
+/** Colors from the built-in cozy-miniature style (ui/theme-packages/village/tokens.json and UI.md), the same values the
  * computer's world and the iPhone app use, so the phone reads as the same Worldlet. */
 object Palette {
     val paper = Color(0xFFF4F0E5)

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import manifest from '../resources/styles/builtin/manifest.json' with {type:'json'};
+import manifest from '../ui/theme-packages/village/style.json' with {type:'json'};
 import audit from '../resources/styles/builtin/drafts/remaining-bold/scale-audit.json' with {type:'json'};
 import scales from '../ui/world/applet-optical-scales.json' with {type:'json'};
 assert.deepEqual(Object.keys(scales).sort(),Object.keys(manifest.applets).sort());

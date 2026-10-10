@@ -55,7 +55,7 @@ logo, functional props and timber base intact. The socket belongs at the center
 of the visible front face, following its perspective; it is not necessarily at
 the horizontal center of the PNG. Do not paint a glow into the artwork.
 
-The style pack's `applet-lamps.json` records each updated Applet's `center` and
+The Village theme package's `lamps.json` records each updated Applet's `center` and
 `radius` in normalized full-texture coordinates (top-left origin), with
 `defaultState: "off"`. These describe the black lens, excluding its brass rim.
 Runtime emission uses this authored ellipse and the same sprite transform,

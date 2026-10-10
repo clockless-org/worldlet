@@ -2,7 +2,7 @@
 
 World and device dimensions follow the [UI sizing standard](../../../ui/DESIGN-STANDARDS.md): 1920 × 1080 design reference; 96px overview Applet width.
 
-`tokens.json` owns palette, type and spacing. `controls.css` owns interaction
+`tokens.json` (the Village theme package) owns palette, type and spacing. `controls.css` owns interaction
 materials. Native Applets and marketing consume the same pack. Do not create a
 per-Applet palette or draw text and controls into bitmap assets.
 
