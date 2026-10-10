@@ -8,7 +8,7 @@ The channels are the in-app update channels ([update-channel.ts](../core/distrib
 
 | Channel | Tests | Where, how long | What ships |
 | --- | --- | --- | --- |
-| Dev | The Dev tests: the pull request checks again (`check:pr`, the fast tests, the operational checks) and the fastest UI checks (`test:ui:pr`) | GitHub Actions on Linux, within five minutes, on every push to `main` (documentation-only pushes excepted) | The signed, notarized package 01 or 02 built of `main`'s newest commit when it was free, once that commit's Dev tests passed; a build that started always runs to the end |
+| Dev | The Dev tests: the pull request checks again (`check:pr`, the fast tests, the operational checks) and the fastest UI checks (`test:ui:pr`) | GitHub Actions on Linux, within five minutes, on every push to `main` (documentation-only pushes excepted) | Nothing to users (owner decision 2026-10-10: only Alpha packages are needed). 01 or 02 builds the signed, notarized package of `main`'s newest commit when it is free and, once that commit's Dev tests passed, uploads it to the Build's release for Alpha to test, with its feeds on `staging-dev`, which nothing reads; a build that started always runs to the end. The Dev app on the development Mac follows `main` from its own checkout. |
 | Alpha | The Dev tests, the quick UI checks (`test:ui:quick`) and the platform tests (Electron, iOS on the Mac, Android on Windows, Harness and Hermes) | The release machines, 01 (Windows) and 02 (Mac), within 20 minutes, on each new Dev build | That Dev build, once both machines passed |
 | Beta | Alpha's tests and the whole UI suite (`test:ui`) | 01 and 02, every night at 1:00 Pacific, within an hour | The newest Alpha build, once both machines passed; the public download and the default channel |
 | GA (Production) | — | Not open on the desktop yet; a maintainer decides | — |
@@ -20,10 +20,10 @@ Everything lives on this repository's GitHub Releases:
 | Release | What it holds |
 | --- | --- |
 | `v<label>` | One per Build: the Mac DMG, the Windows installer, their checksums and records (`.appcast.xml`, the Sparkle item; `.json`, the Windows record; `.release.json`, the identity), and the Microsoft Store MSIX with its record (`-store.msix`, `.msix.json`) when it built. A prerelease until the Build reaches Beta, which makes it the latest release. |
-| `channel-dev`, `channel-alpha`, `channel-beta` | Each channel's update feeds, replaced in place so their addresses never change: `appcast-dev.xml` and `windows-dev.json`; `appcast-alpha.xml` and `windows-alpha.json`; `appcast.xml`, `appcast-intel.xml` (with history) and `windows-preview.json`. |
+| `channel-alpha`, `channel-beta` | Each channel's update feeds, replaced in place so their addresses never change: `appcast-alpha.xml` and `windows-alpha.json`; `appcast.xml`, `appcast-intel.xml` (with history) and `windows-preview.json`. |
 | `staging-<channel>` | The same feeds for a channel that is not live yet. |
 
-[Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. A channel not on the list publishes to its staging release, which nothing reads. Dev, Alpha and Beta are live (Alpha since 2026-10-09 after Build 4028 passed both release machines, Beta the same day after Build 4034 passed the nightly run on both; owner decisions). When a channel is added, the release machines promote the newest build that already passed that stage to it. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
+[Channels.json](../platform/electron/distribution/Channels.json) lists the live channels. A channel not on the list publishes to its staging release, which nothing reads. Alpha and Beta are live (Dev was live from 2026-10-08 to 2026-10-10, when the owner decided only Alpha packages are needed; Alpha since 2026-10-09 after Build 4028 passed both release machines, Beta the same day after Build 4034 passed the nightly run on both; owner decisions). When a channel is added, the release machines promote the newest build that already passed that stage to it. Apps already installed read their feeds from the website's `/downloads/` addresses, which forward to these releases. Release assets can be downloaded without signing in only once the repository is public.
 
 ## Tests and failures
 
@@ -45,9 +45,9 @@ A release machine takes `main`'s newest commit whenever it has no Beta or Alpha 
 
 - **Mac**: [ci-build.sh](../platform/electron/distribution/mac/ci-build.sh) packages one universal app signed with the Developer ID certificate, puts it in a signed DMG, notarizes the DMG, staples it, and writes the Sparkle item signed with the update key. Apple notarizes the app inside the DMG in the same submission, so there is one notarization wait instead of two.
 - **Windows**: `npm run installer:windows`, the unsigned NSIS installer the Windows updater already reads, then the Microsoft Store MSIX of the same commit (`windows-msix.ts`, the machine's Windows SDK). Release machine 01 submits that MSIX in Partner Center once the Build reaches Beta. A failed MSIX never holds the installer back.
-- Both then publish to Dev with `node scripts/ci-release.mjs publish`, which uploads the installer, its checksum and its records to the Build's release, then replaces the channel's feed, and refuses to replace a channel's newer build. A Dev build whose commit is behind a later push that changed a workflow is skipped (GitHub refuses a workflow's token such a tag); that later push gets its own, newer Dev build.
+- Both then publish to Dev (its staging feed) with `node scripts/ci-release.mjs publish`, which uploads the installer, its checksum and its records to the Build's release, then replaces the channel's feed, and refuses to replace a channel's newer build. A Dev build whose commit is behind a later push that changed a workflow is skipped (GitHub refuses a workflow's token such a tag); that later push gets its own, newer Dev build.
 
-How long it takes: Dev cannot be ready three minutes after a push. Building the universal app with its Chromium engine takes several minutes, and Apple's notarization usually takes a few minutes more, sometimes much longer. The Build number is fixed the moment the commit lands.
+How long it takes: a package cannot be ready three minutes after a push. Building the universal app with its Chromium engine takes several minutes, and Apple's notarization usually takes a few minutes more, sometimes much longer. The Build number is fixed the moment the commit lands.
 
 ## Secrets
 
