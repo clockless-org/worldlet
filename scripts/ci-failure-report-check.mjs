@@ -15,6 +15,15 @@ assert.deepEqual(outcome({job:'failure',results:{results:[{command:'test:ui',ok:
 const withError=outcome({job:'failure',results:{results:[{command:'test:onboarding',ok:false,error:'FAIL onboarding flow: missing the `Hermes` runtime\nmore'},{command:'test',ok:true,error:'ignored'}]}});
 assert.deepEqual(withError.errors,{'test:onboarding':"FAIL onboarding flow: missing the 'Hermes' runtime"},'a release machine\'s first error line per failed gate, without backticks');
 assert.equal(withError.signature,'test:onboarding','the error line never changes the signature');
+// The whole failing block, when the machine sends one, goes into the Issue fenced and capped.
+const block=['AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:','+ actual - expected','','+ 3','- 4','    at file:///w/scripts/x-check.ts:12:8','```',...Array.from({length:80},(_,i)=>'line '+i)].join('\n');
+const withDetails=outcome({job:'failure',results:{results:[{command:'test:ui',ok:false,error:'AssertionError',details:block}]}});
+const shown=withDetails.details['test:ui'].split('\n');
+assert.equal(shown.length,61,'60 lines and the cut mark');assert.equal(shown.at(-1),'…');assert.ok(!withDetails.details['test:ui'].includes('```'),'no fence breaks out');
+assert.equal(withDetails.signature,'test:ui','details never change the signature');
+const detailed=issueBody({stage:'alpha',platform:'mac',failing:['test:ui'],signature:'test:ui',sha:'abc',runURL:'r',errors:withDetails.errors,details:withDetails.details});
+assert.match(detailed,/<details open><summary>test:ui<\/summary>\n\n```text\nAssertionError \[ERR_ASSERTION\][\s\S]*\+ actual - expected[\s\S]*x-check\.ts:12:8[\s\S]*\n```\n<\/details>/);
+assert.ok(!/<details/.test(issueBody({stage:'alpha',platform:'mac',failing:['test:ui'],signature:'test:ui',sha:'abc',runURL:'r'})),'no section without details');
 assert.match(issueBody({stage:'alpha',platform:'mac',...withError,sha:'abc',runURL:'r'}),/- `npm run test:onboarding`: FAIL onboarding flow: missing the 'Hermes' runtime\n/);
 
 // A machine may run a platform's gate in parts; the report joins one platform's parts and leaves the other's.
