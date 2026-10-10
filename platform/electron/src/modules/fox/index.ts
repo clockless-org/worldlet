@@ -54,8 +54,8 @@ class Cancelled extends Error {constructor(){super('The request was cancelled.')
 const WORLD_TOOL_NAMES=['read_companion_archive','meeting_decisions','_source_begin','_source_result','query_world_items','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','read_world_history'];
 const CONTROL_SCREENS=['preferences','sources','organize','model','privacy','voice','style','world','data','login'];
 const STREAM_EVENTS=['delta','response_start','progress','steered','status'];
-/** World services the built-in Hermes runs itself (harness/hermes/world_service.py), on the accounts it owns.
- * When Fox talks through a local Agent, its call goes to that Hermes's World service without a model. */
+/** World services that run without a model on the accounts in this computer's Platform.
+ */
 const ACCOUNT_SERVICES=['read_connected_google','read_world_source','prepare_email','use_doordash'];
 /** Applet tasks running at once, across Applets; one per Applet. */
 const MAX_APPLET_TASKS=3;
@@ -293,7 +293,7 @@ export function installFox(host:Host){
   * their own turn id; `record` keeps stream events in the conversation's record. */
  function turnEvents(id:string,scope:Scope,{active,allowActions,reads,record}:{active:()=>boolean,allowActions:boolean,reads?:(event:Row)=>boolean,record:boolean}){
   const handle=async(event:Row):Promise<Row|null>=>{
-   // `status: waiting` only keeps a long model wait alive (harness/hermes/desktop.py); it is not conversation.
+   // `status: waiting` only keeps a long model wait alive; it is not conversation.
    if(record&&typeof event.type==='string'&&STREAM_EVENTS.includes(event.type)&&!(event.type==='status'&&event.stage==='waiting'))companion.recordEvent(id,event.type,scope,typeof event.text==='string'?event.text:null);
    if(!active()||!page.ready())throw new Cancelled();
    if(event.type==='model_required'){showControls('model');return null;}

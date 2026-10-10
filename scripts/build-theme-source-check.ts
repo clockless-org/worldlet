@@ -4,6 +4,8 @@ import path from 'node:path';
 import os from 'node:os';
 import {parseBuildThemeManifest,parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
 import {validateBuildTheme,importBuildTheme,buildThemeSource} from './build-theme-source.ts';
+import ts from 'typescript';
+import {withVirtualFile} from './ts-virtual-file.ts';
 const tmp=await fs.mkdtemp(path.join(os.tmpdir(),'worldlet-theme-contract-'));
 try{
  const manifest={contractVersion:2,id:'first',updatedAt:'2026-10-09T23:14:20Z',title:'First',entry:'entry.ts',stylesheet:'theme.css',assets:'assets',presentation:'presentation.json',applets:[]};
@@ -34,5 +36,8 @@ try{
  await fs.writeFile(path.join(source,'entry.ts'),"export default {contractVersion:1,id:'bad',renderApplet:()=>true}");await assert.rejects(validateBuildTheme(source),/not assignable|renderWorld/);
  await write('second');await fs.writeFile(path.join(tmp,'private.ts'),'export type Private=string');await fs.appendFile(path.join(source,'entry.ts'),"\nimport type {Private} from '../private.ts';");await assert.rejects(validateBuildTheme(source),/import escapes/);
  await write('second');await fs.symlink(path.join(source,'theme.json'),path.join(source,'assets','escape.json'));await assert.rejects(validateBuildTheme(source),/symlink/);
- console.log('PASS theme contract: typed source, duplicate, side-by-side packages and registry, replacement, failed import preservation, per-theme assets and stylesheets, version and boundary rejection');
+ // Windows: path.join gives '\' but TypeScript asks for '/'; the in-memory check file must still be found (Release 4080–4087 failed here).
+ const windowsPath=path.join(tmp,'windows')+'\\__check__.ts',options={noEmit:true,types:[]};
+ assert.deepEqual(ts.getPreEmitDiagnostics(ts.createProgram([windowsPath],options,withVirtualFile(ts.createCompilerHost(options),windowsPath,'export const ok=1;'))).map(d=>d.code),[]);
+ console.log('PASS theme contract: Windows-style in-memory check path, typed source, duplicate, side-by-side packages and registry, replacement, failed import preservation, per-theme assets and stylesheets, version and boundary rejection');
 }finally{await fs.rm(tmp,{recursive:true,force:true});}

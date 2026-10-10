@@ -14,10 +14,10 @@ assert.deepEqual(selectChecks(['README.md','docs/RELEASE-GUIDELINES.md']),[]);
 assert.deepEqual(selectChecks(['ui/companion/motion.ts']),trustChecks);
 for(const file of ['scripts/machine-capacity.mjs','scripts/dev-workspace.ts','gatehouse/auth.mjs',
  '.github/workflows/architecture.yml','package-lock.json','package.json','release.json','new-root/config',
- 'platform/electron/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts','harness/hermes/runtime.json']){
+ 'platform/electron/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts']){
  assert.deepEqual(selectChecks([file]),all,file);
 }
-for(const file of ['core/agent/turn-trust.ts','harness/hermes/turn_trust.py','contracts/agent.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
+for(const file of ['core/agent/turn-trust.ts','harness/example/agent.py','contracts/agent.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
 const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 for(const platform of ['darwin','win32','linux']){
  const gates=gateCommands(platform);

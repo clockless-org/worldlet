@@ -83,7 +83,7 @@ so an IP collaboration and an original theme can be told apart.
 Village is the reference look: every part another theme does not draw itself shows Village's.
 `ui/themes/theme-coverage.ts` reports the same four parts (World; Applets; HUD look; sound and event animations),
 each gathered from its surfaces (world plates, zoomed areas, ambient motion and transitions; Applet devices, rooms,
-inner surfaces and Mail parts; HUD material and colors, fonts, the world log and Attention art; event cues and
+inner surfaces (Mail's included); HUD material and colors, fonts, the world log and Attention art; event cues and
 sound), and computes, from the pack itself, whether each part is the theme's **own**, **partial** (some surfaces
 borrowed, repeated art, recolored Village parts, a plate too small to zoom) or **village**. The companion and the
 loading and first-use pages are not counted: they are not a theme's to replace.

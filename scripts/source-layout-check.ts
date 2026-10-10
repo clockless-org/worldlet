@@ -24,14 +24,14 @@ assert.equal(packageScripts.test,'node scripts/run-steps.mjs test:core && npm ru
 if(website)assert.match(await readFile('scripts/build-app.ts','utf8'),/WORKERS_CI==='1'/,'Cloudflare Git builds must compile the website, not the desktop app');
 const hostWatcher=await readFile('scripts/dev-electron.ts','utf8');
 if(website)assert((await readFile('scripts/dev-website.ts','utf8')).includes("['website','ui','core','contracts','resources']"));
-assert(hostWatcher.includes("['ui','core','contracts','resources','platform/bridge','platform/electron','harness/hermes','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
+assert(hostWatcher.includes("['ui','core','contracts','resources','platform/bridge','platform/electron','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
 // Ignore old local caches, but never retain executable sources in retired roots.
 const {execFileSync}=await import('node:child_process');
 const tracked=execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{encoding:'utf8'}).split('\0');
 for(const file of tracked.filter(f=>/^(app|shared|adapters|applets|worlds|services)\//.test(f))){
  assert.equal(await access(file).then(()=>true,()=>false),false,`Retired source root: ${file}`);
 }
-await access('harness/hermes/host.py');await access('harness/example/agent.py');
+await access('harness/example/agent.py');
 console.log('PASS website/native source boundaries, shared scene reuse and independent development watchers.');
 
 // Shared business/contracts must compile without a browser, Node or native host.

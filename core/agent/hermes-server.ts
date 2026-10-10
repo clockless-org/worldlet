@@ -42,8 +42,8 @@ export function hermesServerEnvLines(secret:string):string {
  return '# Hermes Agent API server for Fox on this computer only, added by Worldlet (owner decision 2026-10-08).\nAPI_SERVER_KEY='+secret+'\nAPI_SERVER_HOST=127.0.0.1\n';
 }
 /** A profile whose model is this computer's Codex sign-in, borrowed read-only (`worldlet_source`/`worldlet_route`
- * local-codex, harness/hermes/model_tiers.py configured_source): its gateway service would run Hermes' own command line
- * without that borrow (harness/hermes/hermes_command.py), and refreshing the single-use Codex token there would sign the
+ * local-codex, as Worldlet's former built-in Hermes set it): its gateway service would run Hermes' own command line
+ * without that borrow, and refreshing the single-use Codex token there would sign the
  * Codex app out. Such a profile is not made a service. */
 export function hermesBorrowsCodex(yaml:string):boolean {
  const model=record(hermesConfigValues(String(yaml??'')).model);

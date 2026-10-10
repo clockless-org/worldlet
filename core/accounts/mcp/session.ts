@@ -1,5 +1,5 @@
 /** One connected MCP server, as the World's account connections reach it (the Platform's MCP client). Readers in
- * this folder are ports of harness/hermes/*_mcp.py: they call tools on it and shape the answers, nothing else. */
+ * this folder (ported from Worldlet's former built-in Hermes) call tools on it and shape the answers, nothing else. */
 export interface McpContent {type:string;text?:string;[key:string]:unknown}
 /** A tool answer. A missing `isError` is a success and missing `content` is empty, as in the MCP SDKs. */
 export interface McpToolResult {isError?:boolean;content?:McpContent[];structuredContent?:unknown}
