@@ -70,8 +70,8 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   mark(`click on ${what}`);
  };
  const spotlit="document.querySelector('#notionWorld')?.dataset.tourSpotlight==='true'";
- // The tour (ui/onboarding/world-tour.ts): hello, Fox, Applets (Mail, connected by mock Google)
- // and the Attention Center, each telling step proven by its spotlight and moved on with Continue; the phone
+ // The tour (ui/onboarding/world-tour.ts): hello, Applets (Mail, connected by mock Google)
+ // and the Attention Center (no step introducing Fox since owner decision 2026-10-10), each telling step proven by its spotlight and moved on with Continue; the phone
  // comes last, after the first win (owner request 2026-10-06).
  const step=(key:string,seconds=30)=>wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
  await step('hello',60);
@@ -79,7 +79,6 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // one way out (owner Order 2026-10-07); this journey goes on.
  await wait('the Tutorial switch, on, in the bottom-right corner',"(()=>{const s=document.querySelector('.tour-switch:not([hidden])');const r=s?.getBoundingClientRect();return !!r&&r.width>0&&s.getAttribute('aria-checked')==='true'&&r.right>innerWidth*.6&&r.bottom>innerHeight*.6&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.tour-switch')!==null;})()",10);
  await press('Continue');
- await step('fox');await press('Continue');
  await step('applets');await press('Continue');
  await step('attention');await press('Continue');
  // First value (ui/onboarding/first-value.ts). 5. Fox boxes the item it picked; a click on it opens its card.
