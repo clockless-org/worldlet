@@ -417,6 +417,10 @@ export class AttentionCenter {
      }
      return result;
     });
+    // A cancellation from a World tool call comes back to an Agent on the per-turn MCP bridge as the call's error
+    // (world-tool-bridge.ts), so the Agent ends its turn instead of the run stopping: the run was cancelled all the same.
+    checkCancellation(signal);
+    if(this.store.attentionEpoch!==epoch||!this.consent||!this.connected(provider))throw new Cancelled();
     if(!submitted)throw new WorldletError('Applet analysis ended without a verified result.');
     checkCancellation(signal);
     if(!requiredIDs.every(id=>processedIDs.includes(id))){
@@ -491,7 +495,8 @@ export class AttentionCenter {
      const decided=core('runtimeFailure',{message:message(error),cancelled,madeProgress,now:now(),failures:prior});
      failure=isRow(decided)?decided:{};
      if(madeProgress&&failure.code==='incomplete_coverage'||failure.code==='source_changed')outcome='yielded';
-     else this.persist(error,'appletAnalysis',turn);
+     // A cancellation is the World moving on, not a failure to report.
+     else if(!cancelled)this.persist(error,'appletAnalysis',turn);
      // Best effort: accounting must never skip settling the claim below.
      if(outcome!=='cancelled')try{this.recordAppletAnalysisFailure(provider,records,taskID,turn,failure.code);}catch{}
     }
