@@ -2,7 +2,7 @@ import path from 'node:path';
 import {setTimeout as sleep} from 'node:timers/promises';
 import type {HarnessExternalEvent,HarnessHistory} from '../../../../../contracts/harness-services.ts';
 import {harnessService,isMigrationSource,migrationSession,openClawSessionIs,type MigrationSource} from '../../../../../core/agent/index.ts';
-import {channelMessageEvent} from '../../../../../core/ongoing/index.ts';
+import {channelMessageEvent} from '../../../../../core/tasks/index.ts';
 import {isoSeconds} from '../../files.ts';
 import {AGENT,ONGOING,type AgentService,type OngoingService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
@@ -22,7 +22,7 @@ import {boundBytes,broughtTurnId} from './migration.ts';
 // conversations again and the page (and with it the paired phone) is told. A source whose history can be watched
 // (`watch`) is checked a moment after its Agent writes, so a channel message arrives within seconds; every few minutes
 // each source is checked anyway. A new message in a shared thread that asks something, names a date or mentions
-// someone also goes to Attention as a `channel` event (core/ongoing channelMessageEvent), where the Center's
+// someone also goes to Attention as a `channel` event (core/tasks channelMessageEvent), where the Center's
 // ordinary synthesis decides whether it needs the person: no model reads it here.
 
 /** How often each source is checked, how much a check re-reads before the last one (a file written during a check),

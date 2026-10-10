@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {runtimeTaskReport} from '../core/scheduling/runtime-report.ts';
+import {runtimeTaskReport} from '../core/tasks/runtime-report.ts';
 const row={id:'applet:gmail:analyze',ownerId:'gmail',pool:'source-analysis',status:'waiting',waitReason:'retry_at',nextAt:100,lastSuccessAt:50,text:'private',account:'private@example.com',error:'private error'};
 let report=runtimeTaskReport({tasks:[row],checks:[{provider:'gmail',enabled:false}],deliveries:[{consumerId:'attention:center',provider:'gmail',status:'pending'}]});
 assert.equal(report.rows[0].status,'paused');

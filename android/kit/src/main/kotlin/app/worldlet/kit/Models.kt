@@ -360,7 +360,7 @@ sealed interface PhoneMessage {
     data class Attention(override val id: String, val action: AttentionAction) : PhoneMessage
     data class Connect(override val id: String, val provider: String) : PhoneMessage
     /** The entries the person changed in a widget on the phone, stamped with this phone's clock; the computer merges
-     * them newest-wins (core/widgets mergeWidgetState). */
+     * them newest-wins (core/artifacts mergeWidgetState). */
     data class Widget(override val id: String, val widget: String, val state: WidgetState) : PhoneMessage
     /** What the person said with the Order button: the computer sends it to the team's Claude as an Order, never to Fox. */
     data class Order(override val id: String, val said: String) : PhoneMessage

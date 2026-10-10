@@ -92,7 +92,7 @@ enum Demo {
                                steps: ["Reading your calendar", "Checking your mail"],
                                text: "You have the **design review** at 10:45, then a quiet afternoon. Sam is waiting on the venue", done: false)
 
-    /// A small widget at the top of Now. A real page carries the computer's prelude (core/widgets widgetDocument); this
+    /// A small widget at the top of Now. A real page carries the computer's prelude (core/artifacts widgetDocument); this
     /// one has a few lines that stand in for it: storage from the seed, reported back to the app.
     static let widgets = [PhoneWidget(
         id: "wgt-demogetty1", title: "Getty Center", blurb: "Today's tour: the tram, three pavilions and the garden.",

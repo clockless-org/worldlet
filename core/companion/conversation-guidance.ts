@@ -1,5 +1,5 @@
 import {APP_DEFINITIONS} from '../applets/index.ts';
-import {READY_APPLETS} from '../widgets/index.ts';
+import {READY_APPLETS} from '../artifacts/index.ts';
 /** Host capabilities are facts, not grants. Actual reads/writes remain authorized by the host. */
 export function conversationGuidance(input:{scope:string;localOriginals?:boolean;connectedSources?:string[];backgroundSources?:string[];routines?:boolean;driveMetadata?:boolean}):string {
  if(input.scope!=='private')return '';

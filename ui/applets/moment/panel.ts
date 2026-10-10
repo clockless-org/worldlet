@@ -1,10 +1,10 @@
 import {node,textButton as button} from '../../components/index.ts';
-import {widgetUntil,type Widget} from '../../../core/widgets/index.ts';
+import {widgetUntil,type Widget} from '../../../core/artifacts/index.ts';
 
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;
 export const momentLine=(moment:Pick<Widget,'pinned'|'archivedAt'|'endsAt'>)=>widgetUntil({archivedAt:null,...moment} as Widget,Date.now()/1000);
 
-// A moment Applet (core/widgets/README.md): the page Fox made, in its own sandboxed view that the host lays over the
+// A moment Applet (core/artifacts/README.md): the page Fox made, in its own sandboxed view that the host lays over the
 // slot this panel reserves (never an iframe: the World page allows none), with its end, Pin, a change and Delete.
 // One panel serves every moment Applet; `open` points it at one.
 export function createMomentApplet({native,content,ask=(_text:string)=>{}}){

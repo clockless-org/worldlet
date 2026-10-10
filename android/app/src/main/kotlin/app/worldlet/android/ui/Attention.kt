@@ -99,7 +99,7 @@ internal val worldShadow = Shadow(Palette.inkShadow, Offset(0f, 1.5f), 3f)
  * down on Now while its content is at the top rises to the Applet world, and swiping up turns to Later; from Later a
  * swipe down at the top of its list, and from the Applet world a swipe up, come back to Now. Each page scrolls on its
  * own and hands the gesture to the pager only at its end. Tapping a row opens its card; a long press offers Done,
- * Later and Remove. The computer settles the item and sends the new Center. The widgets for now (core/widgets) lead
+ * Later and Remove. The computer settles the item and sends the new Center. The widgets for now (core/artifacts) lead
  * Now; tapping one, or its tile in the Applet world, opens its page over everything.
  */
 @Composable

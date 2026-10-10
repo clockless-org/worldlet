@@ -1,5 +1,5 @@
 import {dialog} from 'electron';
-import {artifactPage,readWidgetData,readyApplet,widgetWithData,WIDGET_APPLET,WIDGET_LIMITS,checkWidgetSource,mergeWidgetState,orderWidgets,readWidget,readWidgetConsole,readWidgetState,validWidgetId,widgetActive,widgetDocument,widgetHousekeeping,widgetId,widgetRecord,widgetStateChanges,widgetTask,widgetTrialProblems,widgetValues,type Widget,type WidgetState} from '../../../../../core/widgets/index.ts';
+import {artifactPage,readWidgetData,readyApplet,widgetWithData,WIDGET_APPLET,WIDGET_LIMITS,checkWidgetSource,mergeWidgetState,orderWidgets,readWidget,readWidgetConsole,readWidgetState,validWidgetId,widgetActive,widgetDocument,widgetHousekeeping,widgetId,widgetRecord,widgetStateChanges,widgetTask,widgetTrialProblems,widgetValues,type Widget,type WidgetState} from '../../../../../core/artifacts/index.ts';
 import {phoneWidgets} from '../../../../../core/phone/index.ts';
 import {readArtifact,validArtifactId} from '../../../../../core/artifacts/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -13,7 +13,7 @@ import {WidgetPlayer} from './player.ts';
 interface Job {idea:string;replaces:string|null;saved:string|null;endsAt:string|null}
 const MINUTE=60_000;
 
-/** Widgets (core/widgets/README.md). Fox hands a widget to the Widgets Applet as an Applet task; its model saves
+/** Widgets (core/artifacts/README.md). Fox hands a widget to the Widgets Applet as an Applet task; its model saves
  * one HTML page, which is checked, tried at phone size and kept in this World's `widgets` table. A widget plays
  * in its own sandboxed view, stands at the top of Now and goes to the paired phone until its moment is over;
  * what the person ticks on either side is merged key by key and sent to the other. */

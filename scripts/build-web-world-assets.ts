@@ -25,7 +25,7 @@ export async function webWorldAssetsSource(root:string){
  // keeping it means ui/world/ needs no website-only branch.
  const payload={landmarks:{},landmarkNights:{},surroundings:await plate(WORLD_LAYOUT.plates.day,80),night:await plate(WORLD_LAYOUT.plates.night,72),devices:{},deviceBoxes:{},logos:{},focus:{},open:{},regions:{},studies:[]};
  for(const key of LANDMARK_KEYS)for(const [target,phase] of [['landmarks','day'],['landmarkNights','night']])payload[target][key]=dataUri(await sharp(path.join(root,BUILTIN_STYLE.landmarks[key][phase])).resize({width:384,withoutEnlargement:true}).webp({quality:90,alphaQuality:100}).toBuffer());
- // Every catalog Applet's device, and the one every moment Applet stands on (core/widgets/README.md).
+ // Every catalog Applet's device, and the one every moment Applet stands on (core/artifacts/README.md).
  const DEVICE_ART=[...WORLD_APPS.map(({key})=>({key})),{key:MOMENT_ART}];
  for(const applet of DEVICE_ART){const device=await sharp(deviceSource(root,applet.key)).resize({width:DEVICE_WIDTH,withoutEnlargement:true}).webp({quality:84,alphaQuality:92,effort:6}).toBuffer();payload.devices[applet.key]=dataUri(device);payload.deviceBoxes[applet.key]=await paintedBox(device);}
  return 'globalThis.__WORLDLET_25D_ASSETS__='+JSON.stringify(payload)+';';

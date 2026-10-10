@@ -126,7 +126,7 @@ export function hermesHarnessTools(yaml:string):HarnessTool[] {
 
 /** The one line Worldlet adds to a turn's instructions, or '' when the Agent has nothing to add. `calls`: the Harness
  * also provides the `calls` service, so a call placed from this conversation is reported back in it when it ends
- * (core/ongoing/harness-calls.ts). */
+ * (core/tasks/harness-calls.ts). */
 export function harnessToolsLine(tools:readonly HarnessTool[],{calls=false}:{calls?:boolean}={}):string {
  const titles=[...new Set(tools.map(tool=>tool.title).filter(Boolean))].slice(0,10);
  if(!titles.length)return '';

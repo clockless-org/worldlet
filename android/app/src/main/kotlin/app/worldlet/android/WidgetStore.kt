@@ -8,7 +8,7 @@ import java.io.File
 
 /** The widgets as this phone last had them, each with its page and the phone's own merged state, kept in the app's
  * private files (left out of cloud backups and device transfers like the pairing, res/xml) so they open after a relaunch while the computer sleeps
- * (core/widgets/README.md, Phone). Pages are up to about 120 KB each. */
+ * (core/artifacts/README.md, Phone). Pages are up to about 120 KB each. */
 class WidgetStore(context: Context) {
     private val file = AtomicFile(File(context.filesDir, "widgets.json"))
 

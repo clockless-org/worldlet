@@ -134,7 +134,7 @@ fun WidgetScreen(model: AppModel, widget: PhoneWidget, close: () -> Unit) {
 }
 
 /**
- * The widget's page in a sandboxed web view (core/widgets/README.md, Sandbox): no network, file or content access,
+ * The widget's page in a sandboxed web view (core/artifacts/README.md, Sandbox): no network, file or content access,
  * navigation and new windows refused, loaded from a string with no base URL, WebRTC taken out of its window before its
  * own code runs ([widgetDocument]). Its only channel is `WorldletAndroid`:
  * `seed()` gives the stored values and scroll, `post(json)` reports all of its storage, its scroll or an error. When

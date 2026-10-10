@@ -1129,7 +1129,7 @@ export class WorldLedger {
   catch{throw new WorldletError('Could not keep the pictures.');}
  }
 
- // Pages Fox made (core/widgets): `page` rows of the person's own Applets.
+ // Pages Fox made (core/artifacts): `page` rows of the person's own Applets.
  widgetRows():{record:Row;state:Row}[] {return this.myApplets('page').map(({record,state})=>({record,state}));}
  widgetPage(id:string):string|null {return this.myAppletPage(id);}
  /** Saves a page's record, and its page and state when given; a new page needs both. */
@@ -1186,7 +1186,7 @@ export class WorldLedger {
  }
 
  // Ongoing things --------------------------------------------------------------------------------
- // Brought conversations the person made into Applets (core/ongoing): `conversation` rows of the person's own
+ // Brought conversations the person made into Applets (core/tasks): `conversation` rows of the person's own
  // Applets, one record per thing. The conversation itself stays in companion_turns.
  ongoingRows():Row[] {return this.myApplets('conversation').map(row=>row.record);}
  /** Saves and forgets records in one transaction. */
@@ -1206,7 +1206,7 @@ export class WorldLedger {
    .map(row=>({source:String(row.source),session:String(row.session),turns:Number(row.turns),userTurns:Number(row.userTurns??0),first:String(row.first),last:String(row.last)}));
  }
  /** The person's own newest `limit` messages in one brought conversation, oldest first, one per line (to tell what
-  * it is about, core/ongoing kinds). */
+  * it is about, core/tasks kinds). */
  ownText(source:string,session:string,limit:number):string {
   this.ensureCompanion();
   return this.all(`SELECT text FROM (SELECT text,created_at,rowid AS r FROM companion_turns WHERE source=? AND session=? AND role='user' ORDER BY created_at DESC,rowid DESC LIMIT ?) ORDER BY created_at,r`,source,session,limit)

@@ -14,7 +14,7 @@ import {installAttention} from './index.ts';
 import {installOngoing} from '../ongoing/index.ts';
 import {installWorld} from '../world.ts';
 import {ONGOING,type OngoingService} from '../../host/services.ts';
-import {conversationAttentionId} from '../../../../../core/ongoing/index.ts';
+import {conversationAttentionId} from '../../../../../core/tasks/index.ts';
 import {errorMessage} from '../../files.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -271,7 +271,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
  }finally{await env.close();}
 }
 
-// Brought conversations (core/ongoing/attention.ts): with no mail connected, a conversation active lately reaches the
+// Brought conversations (core/tasks/attention.ts): with no mail connected, a conversation active lately reaches the
 // Center through the Ongoing module, its finding cites it and stays current, and its original opens the conversation.
 {
  const env=environment();

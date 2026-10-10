@@ -1,5 +1,5 @@
-import {attentionAdmission} from '../scheduling/index.ts';
-import type {Delivery} from '../scheduling/index.ts';
+import {attentionAdmission} from '../tasks/index.ts';
+import type {Delivery} from '../tasks/index.ts';
 import type {AttentionRegistration,AttentionFact,AttentionObservation,AttentionDependency,AttentionBudget,AttentionPlan} from '../../contracts/attention.ts';
 import type {WorldItem} from '../../contracts/world-item.ts';
 import {attentionWorkflow,combinedWorkflow} from './attention-rank.ts';

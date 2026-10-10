@@ -80,7 +80,7 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
    if(!appletTask)return {error:'Only the Game Factory\'s own task can do this. Use make_game to ask it for a game.'};
    result=call?await call(name==='save_game'?'gameFactorySave':'madeGameSource',{...args,task:operationId}):{error:'The Game Factory is unavailable here.'};
   }else if(name==='make_applet'){
-   // Moment Applets are made by an Applet task (core/widgets): only the person's own words start one.
+   // Moment Applets are made by an Applet task (core/artifacts): only the person's own words start one.
    if(appletTask)return {error:'This is already an Applet task. Finish it here.'};
    if(!authority.trim())return {error:'The person did not ask for a new Applet in their own words this turn. Ask them first.'};
    // A website made into an Applet is a record, not a page to write (core/applets/site-applet.ts): it is added at once.

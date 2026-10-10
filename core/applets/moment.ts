@@ -1,5 +1,5 @@
 import type {WorldApp} from './catalog.ts';
-// Moment Applets (core/widgets/README.md): an Applet Fox makes for one moment of the person's day, such as a guide
+// Moment Applets (core/artifacts/README.md): an Applet Fox makes for one moment of the person's day, such as a guide
 // for today's museum visit. None is in the catalog; each made one becomes its own Applet in the World until its
 // moment is over. Their records are kept in the `widgets` table (an older name for the same thing).
 

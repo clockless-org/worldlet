@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {reconcileDeliveries as reconcile,acknowledgeDeliveries as ack} from '../core/scheduling/deliveries.ts';
+import {reconcileDeliveries as reconcile,acknowledgeDeliveries as ack} from '../core/tasks/deliveries.ts';
 const fact={id:'gmail:1',provider:'gmail',revision:'a',expiresAt:999};
 let rows=reconcile([], [fact],{},1);
 assert.equal(rows[0].status,'pending');
@@ -27,7 +27,7 @@ assert.equal(reconcile(centerAck,[fact],{},3,[{...subscribers[0],enabled:false}]
 assert.equal(reconcile([], [fact,fact],{},1,subscribers).length,2,'duplicate inputs must not duplicate deliveries');
 assert.throws(()=>reconcile([], [fact],{},1,[subscribers[0],subscribers[0]]));
 console.log('PASS subscriber isolation, provider matching, registration removal and Center-only migration');
-const {failDeliveries:fail,retryQuarantinedDeliveries:retry}=await import('../core/scheduling/deliveries.ts');
+const {failDeliveries:fail,retryQuarantinedDeliveries:retry}=await import('../core/tasks/deliveries.ts');
 const seeds=[{id:fact.id,revision:'a'}];
 let failed=fail(fresh,seeds,'attention:center','unverified_output',false);
 assert.equal(failed[0].isolate,true);assert.equal(failed[0].attempts,0);
@@ -56,7 +56,7 @@ assert.equal(singlePlan.facts.length,1);
 assert.equal(planAttention([contexts[0]],{},20,['gmail'],[],failed),null);
 console.log('PASS bounded singleton quarantine, independent healthy work, manual retry and revision recovery');
 
-const {attentionCoverage}=await import('../core/scheduling/deliveries.ts');
+const {attentionCoverage}=await import('../core/tasks/deliveries.ts');
 const input={available:['a','b'],required:['a','b'],previous:[],processed:['a']};
 assert.deepEqual(attentionCoverage(input),{processed:['a'],remaining:['b'],complete:false});
 assert.equal(attentionCoverage({...input,previous:['a'],processed:['b']}).complete,true);
@@ -89,7 +89,7 @@ assert.deepEqual(fail(fresh,[{id:fact.id,revision:'older'}],'attention:center','
 console.log('PASS incomplete coverage isolates stalled inputs without consuming them or blocking healthy deliveries');
 
 {
- const {attentionCoverage:cover,withheldContextIds}=await import('../core/scheduling/deliveries.ts');
+ const {attentionCoverage:cover,withheldContextIds}=await import('../core/tasks/deliveries.ts');
  const context=[{id:'["gmail","a"]',provider:'gmail',sourceId:'a'},{id:'["gmail","b"]',provider:'gmail',sourceId:'b'},{id:'["google-calendar","c"]',provider:'google-calendar',sourceId:'c'}];
  const withheld=withheldContextIds({context,rejected:[{sources:[{provider:'gmail',id:'b'}]}]});
  assert.deepEqual(withheld,['["gmail","b"]']);

@@ -17,7 +17,7 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
 | UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Core | `core/agent`, `core/applets`, `core/attention`, `core/scheduling`, `core/companion`, `core/context`, `core/items`, `core/browser`, `core/tools`, `core/diagnostics`, `core/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| Core | `core/agent`, `core/applets`, `core/attention`, `core/tasks`, `core/companion`, `core/context`, `core/items`, `core/browser`, `core/tools`, `core/diagnostics`, `core/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
 | Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
@@ -125,7 +125,7 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 
 - **Applet definitions:** `core/applets/catalog.ts` and `core/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
 - **Companion:** `core/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/fox/companion.ts`, `src/vault.ts`).
-- **Schedules:** `core/scheduling/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
+- **Schedules:** `core/tasks/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
 - **Host persistence:** `platform/electron/src/store/world-store.ts`, `store/ledger.ts` and the companion records in `modules/fox/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
 - **Local execution:** `platform/local-tools/` supplies speech and coding CLI helpers independently of the selected Harness.
 - **Connectors:** Hermes-bound readers/authentication remain in `harness/hermes/`. There is no empty generic connectors folder or claim that these modules are independent. Do not put source connectors in `models/`; that directory owns only the hosted model API.
@@ -149,9 +149,9 @@ Business behavior is shared by default. A new condition, state transition, retry
 
 | Concern | Single rule owner | Host responsibility |
 | --- | --- | --- |
-| Source completion and retry | `core/scheduling/source-checks.ts` | Clock, authorized read, persist result |
-| Queue priority, admission and preemption | `core/scheduling/agent-work.ts` | Reservations, process handles, cancellation and draining |
-| Execution deadlines | `core/scheduling/agent-deadline.ts` | Timers and process termination |
+| Source completion and retry | `core/tasks/source-checks.ts` | Clock, authorized read, persist result |
+| Queue priority, admission and preemption | `core/tasks/agent-work.ts` | Reservations, process handles, cancellation and draining |
+| Execution deadlines | `core/tasks/agent-deadline.ts` | Timers and process termination |
 | Onboarding transitions | `core/onboarding/onboarding.ts` | Account authorization and persistence |
 | Model status and product guidance | `core/companion/model-status.ts`, `conversation-guidance.ts` | Provider facts, capability facts and IO |
 | Trace/report projection and privacy | `core/diagnostics/` | OS/build facts, bounded file IO, export picker |
@@ -198,7 +198,7 @@ Shared companion limits and timestamp/UUID policy live in
 | UI Attention | Item projections and explicit item actions | Render Coming Up, Do Something, Worth Knowing |
 | UI Companion | Conversation/activity events and Host requests | Dialogue, steering, progress and action presentation |
 | Core Applets | `core/applets/index.ts` | Catalog, runtime definitions, read plans, capabilities and device state |
-| Core Scheduling | `core/scheduling/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
+| Core Scheduling | `core/tasks/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
 | Core Attention | `core/attention/index.ts` | Visibility, relevance inputs, suppression, synthesis budgets |
 | Core Activity | `core/activity/index.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
 | Core Items | `core/items/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval |

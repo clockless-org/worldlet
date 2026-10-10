@@ -2,7 +2,7 @@
 // it runs as, what the host reads back, the energy it needs, and that making stays closed for now.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {widgetDocument,WIDGET_POLICY} from '../core/widgets/index.ts';
+import {widgetDocument,WIDGET_POLICY} from '../core/artifacts/index.ts';
 import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryEnergy,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../core/games/index.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
 import {worldActions,listWorldTools} from '../core/tools/index.ts';

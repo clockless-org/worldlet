@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import {CHANNEL_REPLY,channelReplyText,isMigrationSource} from '../../../../../core/agent/index.ts';
-import {conversationAttentionId,ongoingName} from '../../../../../core/ongoing/index.ts';
+import {conversationAttentionId,ongoingName} from '../../../../../core/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';

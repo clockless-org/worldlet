@@ -92,7 +92,7 @@ object Demo {
     ))
 
     /** A small widget, a guide for a day at the Getty Center, ticked off in its own local storage. Its page carries a
-     * short stand-in for the computer's prelude (core/widgets/widgets.ts widgetDocument): storage from
+     * short stand-in for the computer's prelude (core/artifacts/widgets.ts widgetDocument): storage from
      * `WorldletAndroid.seed()`, reports through `WorldletAndroid.post`. */
     fun widgets() = listOf(PhoneWidget(
         id = "wgt-gettydemo1", title = "Getty Center today", blurb = "Four stops, from the tram to the Central Garden.",

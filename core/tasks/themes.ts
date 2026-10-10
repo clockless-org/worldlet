@@ -2,7 +2,7 @@
 // applet 了"). What Fox offers from the conversations brought from other Agents is no longer one conversation made into an
 // Applet. Conversations about the same part of life (fitness, food, study, money, travel, a project) are one theme, and
 // Fox offers to pull what is worth keeping from them into one artifact, laid out like every other artifact, with a name
-// Fox gives it. A conversation of no kind offers nothing. Pure rules; the World page asks Fox (core/ongoing/README.md#themes).
+// Fox gives it. A conversation of no kind offers nothing. Pure rules; the World page asks Fox (core/tasks/README.md#themes).
 import {ONGOING_KINDS,type OngoingKind} from './kinds.ts';
 import {ARTIFACT_ONE_CARD_RULE} from '../artifacts/index.ts';
 import {ongoingAgo,ongoingKindOf,ongoingOpen,type OngoingThing} from './ongoing.ts';

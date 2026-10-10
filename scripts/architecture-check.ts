@@ -1,16 +1,16 @@
 import assert from 'node:assert/strict';
 import {checkEdge,checkSource,checkRepository} from './architecture-boundaries.ts';
-checkEdge('ui/hud/example.ts','core/scheduling/index.ts');
-checkEdge('core/scheduling/example.ts','core/scheduling/runtime-tasks.ts');
+checkEdge('ui/hud/example.ts','core/tasks/index.ts');
+checkEdge('core/tasks/example.ts','core/tasks/runtime-tasks.ts');
 for(const source of [
- "import x from '../../core/scheduling/runtime-tasks.ts'",
- "export * from 'core/scheduling/runtime-tasks'",
- "const x=import('core/scheduling/runtime-tasks')",
- "type T=import('core/scheduling/runtime-tasks').T",
- "const x=require('../../core/scheduling/index.ts')",
- "import x = require('../../core/scheduling/index.ts')",
+ "import x from '../../core/tasks/runtime-tasks.ts'",
+ "export * from 'core/tasks/runtime-tasks'",
+ "const x=import('core/tasks/runtime-tasks')",
+ "type T=import('core/tasks/runtime-tasks').T",
+ "const x=require('../../core/tasks/index.ts')",
+ "import x = require('../../core/tasks/index.ts')",
  "const x=import(name)",
- '/// <reference path="../../core/scheduling/index.ts" />',
+ '/// <reference path="../../core/tasks/index.ts" />',
 ])assert.throws(()=>checkSource('ui/hud/example.ts',source),undefined,source);
 assert.throws(()=>checkEdge('core/agent/example.ts','platform/bridge/index.ts'),/Forbidden/);
 assert.throws(()=>checkEdge('ui/hud/example.ts','harness/example/agent.ts'),/Forbidden/);

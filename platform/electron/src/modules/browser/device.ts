@@ -25,7 +25,7 @@ import {blockedMediaDevices,explainBlockedMedia,mediaDevices,type MediaDevice} f
 import {HOMES,SIGN_IN_HOSTS,signInPage,isGoogleMaps,isNotion,isX,parse,publicPage,sameURL} from './rules.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
-import {userIdle} from '../../../../../core/scheduling/index.ts';
+import {userIdle} from '../../../../../core/tasks/index.ts';
 import {timingBucket} from '../../../../../core/diagnostics/index.ts';
 import {GAME_REVIEW_APPLET} from '../../../../../core/games/index.ts';
 

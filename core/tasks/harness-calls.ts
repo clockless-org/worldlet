@@ -1,6 +1,6 @@
 // Phone calls through the person's own Agent (Kelvin 2026-10-08), from whichever Harness reports them (the `calls`
 // service, contracts/harness-services.ts). Each ended call is Attention context of the `conversations` provider beside
-// brought conversations and outside events (core/ongoing/attention.ts, external-events.ts), so the Center's ordinary
+// brought conversations and outside events (core/tasks/attention.ts, external-events.ts), so the Center's ordinary
 // synthesis shows it: a missed call, or one that left the person something to do, as Worth Doing; any other finished
 // call as Worth Knowing. A call Fox placed from a thread is reported back there in one line. These rules know no
 // Harness by name.

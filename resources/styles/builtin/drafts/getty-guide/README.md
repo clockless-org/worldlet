@@ -1,6 +1,6 @@
 # Getty Center guide pictures
 
-The pictures inside the ready-made [Getty Center guide](../../../../../core/widgets/README.md#ready-made-applets) (owner request 2026-10-04: "in our own style, with generated images and a 3D look"). A made Applet's page can load nothing from outside itself, so each picture travels in the page as a data URI: `core/widgets/ready/getty-center-art.ts`, generated here.
+The pictures inside the ready-made [Getty Center guide](../../../../../core/artifacts/README.md#ready-made-applets) (owner request 2026-10-04: "in our own style, with generated images and a 3D look"). A made Applet's page can load nothing from outside itself, so each picture travels in the page as a data URI: `core/artifacts/ready/getty-center-art.ts`, generated here.
 
 - **The miniature** is the campus as a tabletop model on a timber base, in the `cozy-miniature` direction of [STYLE.md](../../STYLE.md): the travertine plateau with the four pavilions, the round Entrance Hall and the Exhibitions Pavilion, the Central Garden's azalea maze in its pool, the cactus promontory, the café umbrellas and the tram climbing from its station. It is a real 3D scene (`scene.html`, three.js 0.169) rendered offline by [scripts/getty-guide/render.mjs](../../../../../scripts/getty-guide/render.mjs), which also writes where each stop lands (`pins.json`) for the page's numbered pins. The layout is simplified, not a survey.
 - **Fox** is the waving pose of the registered expression atlas (`assets/companion/expressions`).

@@ -2,7 +2,7 @@
 // 学习 财务"). A kept conversation that is about one of a few fixed kinds of life (fitness, food, study, money, travel,
 // a project) opens on a ready-made page for that kind, filled from the conversation itself: the workouts, meals,
 // questions, amounts, trip plans or to-dos the person wrote. Anything else keeps the plain page. Pure rules; the
-// host reads the turns and the page draws them (core/ongoing/README.md#kinds).
+// host reads the turns and the page draws them (core/tasks/README.md#kinds).
 
 export type OngoingKind='food'|'fitness'|'study'|'finance'|'travel'|'project';
 export type OngoingKindOrGeneral=OngoingKind|'general';

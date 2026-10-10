@@ -44,7 +44,7 @@ import {createClaudeSession} from './claude-session.ts';
 import {forecastStage,weatherGlyph} from '../world/index.ts';
 import {createWeatherPanel} from '../applets/index.ts';
 import {createGameApplet} from '../applets/index.ts';
-import {ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,type OngoingThing} from '../../core/ongoing/index.ts';
+import {ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,type OngoingThing} from '../../core/tasks/index.ts';
 import {loadMoney,readMoneyItem} from './money-applets.ts';
 import {WORK_APPLETS,workItems,workError,renderWorkDetail,sampleWork,sampleWorkDetail} from './work-applets.ts';
 import {attentionIcon} from '../attention/index.ts';
@@ -989,7 +989,7 @@ export function mountNotionWorld(data: World, native: any) {
    if(!data.sample&&page.sourceProvider==='gmail'&&String(page.sourceId||'').startsWith('world-item:')&&ref.provider==='gmail'&&ref.local!==true&&String(ref.id).startsWith('thread:')&&mailRef?.id===ref.id){focusContent(page.id);return;}
    const url=safeAttentionSourceURL(ref.url);
    if(url){openWorldURL(url);return;}
-   // A brought conversation opens back to itself (core/ongoing/attention.ts), read from the World like a local original.
+   // A brought conversation opens back to itself (core/tasks/attention.ts), read from the World like a local original.
    const originalId=ref.local===true?ref.id:ref.provider==='conversations'&&!data.sample?'conversation:'+ref.id:'';
    if(originalId&&native?.original){
     const request=++originalRequest,body=dialog(ref.title||'Source');body.append(element('p','ui-caption','Reading original…'));
@@ -1653,7 +1653,7 @@ export function mountNotionWorld(data: World, native: any) {
     const show=new Map<string,(r:any)=>void>([...WORK_APPLETS.map(key=>[key,showWork] as const),['voice-memos',r=>showVoiceMemos(r)],['messages',r=>showMessages(r)],['obsidian',r=>showObsidian(r)],...CURATED_READERS.map(key=>[key,r=>showCuratedSource(r)] as const),...MONEY_READERS.map(key=>[key,r=>showMoney(r)] as const)]).get(r.key);if(show){show(r);return;}
 
     const panelContext={native,content,notify,call:!data.sample&&native?.doorDash,ask:text=>voice?.ask(text),onChange:()=>scene?.refreshContent()};
-    // An Applet Fox made for a moment (core/widgets/README.md): one panel shows whichever is opened.
+    // An Applet Fox made for a moment (core/artifacts/README.md): one panel shows whichever is opened.
     if(r.moment&&native){
       let applet=appletPanels.get('moment');if(!applet){applet=createAppletPanel('moment',panelContext);appletPanels.set('moment',applet);}
       header(r.title,buildingFor(r.id)?.title||'World');content.querySelector('.notion-reader-head')?.remove();content.dataset.template='moment';content.append(applet.element);sceneState();
@@ -1931,11 +1931,11 @@ export function mountNotionWorld(data: World, native: any) {
   if(native){
     // The paired iPhone mirrors the Center and talks to Fox through this page (core/phone/README.md).
     let widgetsNow:any[]=[],phoneWorldLog:{lines:any[],now:any[]}={lines:[],now:[]};
-    // Ongoing things (core/ongoing/README.md): proposals stand in Worth Doing as themes; each one kept earlier is an Applet of
+    // Ongoing things (core/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is an Applet of
     // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Applet world and its own thread.
     let ongoingProposals:OngoingThing[]=[],ongoingKept:(OngoingThing&{recent:{text:string,at:string}[]})[]=[];
     const ongoingDecide=async(id:string,operation:'later'|'decline')=>{if(native.ongoing)await native.ongoing({operation,id});};
-    // What Fox offers from them is a theme, never one conversation (core/ongoing/themes.ts): the conversations about one part
+    // What Fox offers from them is a theme, never one conversation (core/tasks/themes.ts): the conversations about one part
     // of life, pulled together by Fox into one artifact laid out like every other (Kelvin 2026-10-07).
     const themesNow=()=>ongoingThemes(ongoingProposals,Date.now()/1000);
     const decideTheme=async(id:string,operation:'later'|'decline')=>{
@@ -1987,7 +1987,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(phone)root.addEventListener('worldlet:fox-live',(event:any)=>phone.live(event.detail));
     if(phone)window.addEventListener('worldlet:harness-approval',(event:any)=>phone.approval(event.detail));
     if(phone){root.addEventListener('worldlet:source-issues',(event:any)=>phone.accounts(event.detail||[]));sourceIssueSignature='';publishSourceIssues();}
-    // Widgets for now lead the Center (core/widgets/README.md); the first one Fox makes puts the Widgets Applet on the
+    // Widgets for now lead the Center (core/artifacts/README.md); the first one Fox makes puts the Widgets Applet on the
     // ground, and the panel opens it next.
 
     const loadWidgets=()=>{if(data.sample||!native.widgets)return;void native.widgets({operation:'list'}).then(result=>{widgetsNow=Array.isArray(result?.now)?result.now:[];nativeHUD?.sync();phone?.world();}).catch(()=>{});};

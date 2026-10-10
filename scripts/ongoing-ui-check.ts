@@ -1,4 +1,4 @@
-// Ongoing things on the World page (core/ongoing/README.md): the brought conversations about one subject stand in Worth
+// Ongoing things on the World page (core/tasks/README.md): the brought conversations about one subject stand in Worth
 // Doing as one theme; opening it lays out why with Show me, Not now and Don't ask again; Show me puts the theme off and
 // asks Fox, who shows one artifact (Kelvin 2026-10-07: an artifact, not an Applet). A conversation kept as an Applet
 // earlier is still a device of its own, which opens on its kind's page and latest messages.

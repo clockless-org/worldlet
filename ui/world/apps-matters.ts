@@ -70,7 +70,7 @@ export function applyAppsMatters(world: World){
  // its records, its items are what it published, and its status says "Sample" so the
  // device lights up without a single account being claimed.
  const sampleLinks=[];
- // An Applet Fox made for a moment (core/widgets/README.md) is in the World from the moment it is made, so it is
+ // An Applet Fox made for a moment (core/artifacts/README.md) is in the World from the moment it is made, so it is
  // never waiting to be unlocked or hidden, and it leaves when its moment is over.
  // So is a website the person made an Applet of from the Browser (core/applets/site-applet.ts).
  const moments=catalog.filter(a=>a.moment||a.site).map(a=>a.id);

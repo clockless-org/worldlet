@@ -131,7 +131,7 @@ export class WorldStore {
  setCloudConsent(allowed:boolean){if(!this.writable)throw new WorldletError('The library is read-only.');this.state.cloudConsent=allowed;this.changed();}
 
  // Snapshot ----------------------------------------------------------------------------
- // Weather and brought conversations need no account: the World holds them (core/ongoing/attention.ts).
+ // Weather and brought conversations need no account: the World holds them (core/tasks/attention.ts).
  get attentionProviders(){return [...this.state.connections.filter(canBuild).map(c=>c.provider),'weather','conversations'];}
  projectAttention(items:Row[]){return core<Row[]>('attentionProject',{items,facts:this.ledger().attentionFacts(),now:Date.now()/1000,providers:this.attentionProviders});}
  worldItems(){return core<Row[]>('worldItemsVisible',{items:this.projectAttention(this.ledger().records('items')),enabledSourceIDs:this.state.sources.filter(s=>s.enabled!==false).map(s=>s.id)});}

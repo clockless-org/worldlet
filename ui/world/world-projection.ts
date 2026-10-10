@@ -4,7 +4,7 @@ import type {World} from '../../contracts/world.ts';
 import {applyPersonalWorld} from './world-presets.ts';
 import {applyModuleWorld} from './world-modules.ts';
 import {attachBrowserDevice} from './browser-sample.ts';
-import {ongoingApplet,readOngoing} from '../../core/ongoing/index.ts';
+import {ongoingApplet,readOngoing} from '../../core/tasks/index.ts';
 import {isMyApplet,momentApplet,readSiteApplet,siteApplet} from '../../core/applets/index.ts';
 
 /** Data-only World presentation projection. No DOM, storage or Host access. */
@@ -17,9 +17,9 @@ export function projectNativeWorld(state):World{
  for(const s of world.spaces){const place=state.layout?.places.find(p=>p.theme===s.theme);if(place){s.layout=place;s.title=place.title;}}
  applyPersonalWorld(world,state);projectWorldItems(world,state.worldItems||[]);
  world.taskReviews=Array.isArray(state.taskReviews)?state.taskReviews:[];
- // Conversations the person kept as ongoing things are Applets of their own (core/ongoing/README.md).
+ // Conversations the person kept as ongoing things are Applets of their own (core/tasks/README.md).
  world.dynamicApplets=(Array.isArray(state.ongoing)?state.ongoing:[]).flatMap(row=>{const thing=readOngoing({...row,state:'kept'});return thing?[ongoingApplet(thing)]:[];});
- // So is each Applet Fox made for a moment that is now (core/widgets/README.md).
+ // So is each Applet Fox made for a moment that is now (core/artifacts/README.md).
  world.dynamicApplets.push(...(Array.isArray(state.momentApplets)?state.momentApplets:[]).map(momentApplet));
  // And each website the person made an Applet of from the Browser (core/applets/site-applet.ts).
  world.dynamicApplets.push(...(Array.isArray(state.siteApplets)?state.siteApplets:[]).flatMap(row=>{const record=readSiteApplet(row);return record?[siteApplet(record)]:[];}));

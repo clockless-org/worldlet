@@ -135,7 +135,7 @@ export interface WorldToolsService {
  readConnectedApps():void;
  startOnboardingMailCheck():void;
  observeWeather(value:Row):void;
- /** Brought conversations recently active, as Attention context (core/ongoing/attention.ts). */
+ /** Brought conversations recently active, as Attention context (core/tasks/attention.ts). */
  observeConversations(records:Row[]):void;
  runtimeTaskReport():Row;
  /** Cancels a provider's background reader and analysis lane (a check was paused/removed). */
@@ -227,14 +227,14 @@ export interface UserActivityService {
 }
 export const USER_ACTIVITY='userActivity';
 export interface WidgetsService {
- /** Merges what the person changed in a widget on the phone (core/widgets mergeWidgetState). */
+ /** Merges what the person changed in a widget on the phone (core/artifacts mergeWidgetState). */
  applyPhoneState(widget:string,state:unknown):void;
 }
 export const WIDGETS='widgets';
 export interface OngoingService {
- /** Reads the brought conversations again and proposes what looks like one job (core/ongoing ongoingRefresh). */
+ /** Reads the brought conversations again and proposes what looks like one job (core/tasks ongoingRefresh). */
  refresh():void;
- /** New channel messages that may need the person (core/ongoing channelMessageEvent), as Attention context. */
+ /** New channel messages that may need the person (core/tasks channelMessageEvent), as Attention context. */
  channelEvents?(events:import('../../../../contracts/harness-services.ts').HarnessExternalEvent[]):void;
 }
 export const ONGOING='ongoing';

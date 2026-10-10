@@ -1,5 +1,5 @@
 import type {AttentionExecutionPlan} from '../../contracts/attention-jobs.ts';
-import {agentRequestDeadline} from '../scheduling/index.ts';
+import {agentRequestDeadline} from '../tasks/index.ts';
 import {attentionReads} from './attention-reads.ts';
 
 /** Product instructions and budgets supplied to the replaceable executor. */

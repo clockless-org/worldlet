@@ -1,10 +1,10 @@
-// Moment Applets on the World page (core/widgets/README.md): an Applet Fox made for today stands on the Home ground
+// Moment Applets on the World page (core/artifacts/README.md): an Applet Fox made for today stands on the Home ground
 // as its own device under its own name, leads the Attention Center's Now, opens its page in the host's sandboxed view
 // laid over the panel's slot, Back hides that view, and Delete goes to the host. There is no Widgets Applet.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-import {READY_APPLETS,widgetDocument,readWidgetConsole} from '../core/widgets/index.ts';
+import {READY_APPLETS,widgetDocument,readWidgetConsole} from '../core/artifacts/index.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  // A fixed morning in a fixed zone: the end three hours later reads the same on every host at any hour.

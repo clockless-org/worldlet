@@ -1,12 +1,12 @@
 import crypto from 'node:crypto';
 import type {HarnessCall,HarnessCalls} from '../../../../../contracts/harness-services.ts';
 import {harnessChatThread,harnessNoCallsNote} from '../../../../../core/agent/index.ts';
-import {HARNESS_CALLS,callAttentionId,callBrief,callLine,callLive,callMatters,callObservation,callOpening,callReportDue,callsForAttention,callThread,externalEventPush,type CallBrief} from '../../../../../core/ongoing/index.ts';
+import {HARNESS_CALLS,callAttentionId,callBrief,callLine,callLive,callMatters,callObservation,callOpening,callReportDue,callsForAttention,callThread,externalEventPush,type CallBrief} from '../../../../../core/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {AGENT,FOX,PHONE,WORLD_TOOLS,type AgentService,type FoxService,type PhoneService,type WorldToolsService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 
-/** Phone calls through the person's own Agent (core/ongoing/harness-calls.ts), from its Harness's `calls` service
+/** Phone calls through the person's own Agent (core/tasks/harness-calls.ts), from its Harness's `calls` service
  * whichever Harness that is. Each ended call becomes Attention context the Center shows as a World item; once a Worth
  * Knowing item cites a call someone made to the Agent, the paired phone hears of it; a call one of Fox's resident
  * sessions placed is reported back to that thread in one line, once (world.sqlite `harness-calls-reported:<id>`).
