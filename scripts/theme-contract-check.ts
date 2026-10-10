@@ -14,6 +14,7 @@ import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
 import {BUILD_THEME_CONTRACT_VERSION} from '../ui/themes/build-theme-contract.ts';
 import {validateBuildTheme} from './build-theme-source.ts';
+import {withVirtualFile} from './ts-virtual-file.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const contract=path.join(root,'ui/themes/build-theme-contract.ts');
@@ -45,8 +46,7 @@ const probe=path.join(root,'ui/themes/__theme_contract_probe__.ts');
 const source=`import type * as F from './frozen/contract-v${BUILD_THEME_CONTRACT_VERSION}.d.ts';\nimport type * as C from './build-theme-contract.ts';\n`+
  fromPackage.map(name=>`export const from_${name}=(v:F.${name}):C.${name}=>v;\n`).join('')+
  toPackage.map(name=>`export const to_${name}=(v:C.${name}):F.${name}=>v;\n`).join('');
-const host=ts.createCompilerHost(options),read=host.readFile,exists=host.fileExists;
-host.readFile=file=>file===probe?source:read(file);host.fileExists=file=>file===probe||exists(file);
+const host=withVirtualFile(ts.createCompilerHost(options),probe,source);
 const program=ts.createProgram([probe],{...options,noEmit:true},host);
 // Only the probe's own assignments are judged; the contract's implementation is type-checked by `npm run check`.
 const diagnostics=ts.getPreEmitDiagnostics(program,program.getSourceFile(probe));
