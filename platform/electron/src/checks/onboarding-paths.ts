@@ -11,7 +11,7 @@ import {setTimeout as sleep} from 'node:timers/promises';
 // --app, from the RC package smoke). A release build has no mock Google and no Codex model source, so every
 // path here enters through a local Agent, as the 10-03 demo did. One launch per phase, all on one disposable
 // library; each phase ends with Quit Completely and the launcher proves nothing was left running:
-// - choose: the setup page → a local Agent → Give it a world → the same page bringing it in → Enter your world on; close the window there, mid-onboarding,
+// - choose: the setup page → a local Agent → Build your world → the same page bringing it in → Enter your world on; close the window there, mid-onboarding,
 //   which quits the app instead of leaving Fox on the desktop (owner request 2026-10-04; ADVISORY until it
 //   has passed on the Mac and Windows hosts, falling back to Quit Completely).
 // - resume: the relaunch opens with the Agent brought in → Enter your world → the tour's Mail step → Google sign-in
