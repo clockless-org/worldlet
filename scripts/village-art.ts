@@ -8,7 +8,7 @@ import {theme,themeAppletArt} from '../ui/themes/index.ts';
 import {paintedBox} from './painted-box.ts';
 
 /**
- * The Village's runtime art, encoded once and committed under resources/themes/village/art: World plates and
+ * The Village's runtime art, encoded once and committed under ui/theme-packages/village/assets: World plates and
  * landmarks, every Applet's device (its icon), open pictures, motion, logos, Mail parts and Focus rooms. The
  * build reads these files as they are, and the Village theme package will carry the same tree. The painted
  * originals stay where they are as authoring sources; `art.lock.json` ties each output to its source bytes.
@@ -16,7 +16,7 @@ import {paintedBox} from './painted-box.ts';
  *   node scripts/village-art.ts           re-encode everything (after changing a source)
  *   node scripts/village-art.ts --check   every output exists and matches its source; no encoding
  */
-export const VILLAGE_ART='resources/themes/village/art';
+export const VILLAGE_ART='ui/theme-packages/village/assets';
 export interface VillageArtIndex {
  world:{day:string;night:string};
  landmarks:Record<string,{day:string;night:string}>;

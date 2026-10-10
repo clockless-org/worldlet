@@ -1,4 +1,5 @@
-import type {ThemeWorldApplet,ThemeWorldContext,ThemeWorldMark,ThemeWorldMount,ThemeWorldState} from '../../themes/index.ts';
+import type {ThemeWorldApplet,ThemeWorldContext,ThemeWorldMark,ThemeWorldMount,ThemeWorldState} from '@worldlet/theme';
+import {publishVillageArt} from './village-payload.ts';
 import {createModuleScene as createPixiWorld} from './pixi-world.ts';
 import {villageDevice} from './village-art.ts';
 import {regionId,type RegionLayout} from './space/region-core.ts';
@@ -14,7 +15,8 @@ function roomOf(a:ThemeWorldApplet,room:any={}){
   mine:a.mine,icon:a.icon,device:villageDevice(a.art||a.key),status:{state:a.status,count:a.count,connected:a.connected},allowance:a.allowance});
 }
 /** The animated Village World (pixi-world.ts) behind the Theme contract's World mount. It reads only the contract. */
-export function renderVillageWorld(context:Omit<ThemeWorldContext,'scene'|'asset'>):VillageWorldMount {
+export function renderVillageWorld(context:ThemeWorldContext):VillageWorldMount {
+ publishVillageArt(context.asset);
  let state:ThemeWorldState=context.state;
  const byId=new Map<string,ThemeWorldApplet>(),records=new Map<string,any>(),rooms:any[]=[];
  const sync=()=>{
@@ -51,7 +53,7 @@ export function renderVillageWorld(context:Omit<ThemeWorldContext,'scene'|'asset
  const key=(s:ThemeWorldState)=>{const i=s.interaction;return {view:s.view.level+'|'+s.view.id,placement:i.placementArea,framed:i.framedArea+'|'+i.inset,hoveredApplet:i.hoveredApplet,hoveredArea:i.hoveredArea,motion:s.motion,paused:s.paused,
   environment:JSON.stringify(s.environment),places:JSON.stringify([s.pins,s.areas.map(a=>a.look),s.applets.map(a=>a.region)]),visible:s.applets.filter(a=>a.visible).map(a=>a.id).join(),arriving:(s.arriving||[]).join()};};
  let shown=key(state);
- return {scene,behindApplet:true,
+ return {scene,behindApplet:true,ready:scene.ready,
   update(next){
    state=next;sync();scene.refreshContent();
    const i=next.interaction,now=key(next);

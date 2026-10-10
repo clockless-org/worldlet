@@ -1,8 +1,8 @@
 import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import assert from 'node:assert/strict';
-import {villageCamera,approachVillageCamera,WORLD_EXTENT,WORLD_OVERVIEW,OVERVIEW_CENTER} from '../ui/world/village/village-camera.ts';
-import {VILLAGE_SITES} from '../ui/world/village/village-sites.ts';
+import {villageCamera,approachVillageCamera,WORLD_EXTENT,WORLD_OVERVIEW,OVERVIEW_CENTER} from '../ui/theme-packages/village/village-camera.ts';
+import {VILLAGE_SITES} from '../ui/theme-packages/village/village-sites.ts';
 // The design reference is independent from texture resolution and Retina scale.
 assert.equal(WORLD_EXTENT.width,1920);assert.equal(WORLD_EXTENT.height,1080);
 const exact=villageCamera(1920,1080,1,OVERVIEW_CENTER);
@@ -54,7 +54,7 @@ for(const [w,h] of [[1440,960],[1920,1080],[800,900]])for(const site of Object.v
 console.log('PASS all Region exit paths: no reversal or exposed terrain edges');
 
 // Retired render-target textures must not crash a window resize.
-const {guardFilterResolution}=await import('../ui/world/village/pixi-filter-resolution.ts');
+const {guardFilterResolution}=await import('../ui/theme-packages/village/pixi-filter-resolution.ts');
 const filter={_filterStackIndex:2,_filterStack:[{}, {skip:false,inputTexture:{source:null}}],_findFilterResolution(root){return this._filterStack[1].inputTexture.source._resolution;}};
 guardFilterResolution(filter);
 assert.equal(filter._findFilterResolution(2),2,'retired source inherits renderer resolution');

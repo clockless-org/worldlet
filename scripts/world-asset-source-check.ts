@@ -12,19 +12,17 @@ try {
  await buildWorldAssets(process.cwd(),output);
  const payload=await readFile(path.join(output,'environment-assets.js'),'utf8');
  const context:any={};vm.runInNewContext(payload,context);
- const keys=['surroundings','night','hiresDay','hiresNight'];
- for(const [index,file] of [BUILTIN_STYLE.world.day,BUILTIN_STYLE.world.night,BUILTIN_STYLE.world.hiresDay,BUILTIN_STYLE.world.hiresNight].entries()){
-  const source=await readFile(path.join(process.cwd(),file));
-  const url=context.__WORLDLET_25D_ASSETS__[keys[index]]||context.__WORLDLET_25D_ASSETS__[index===2?'surroundings':'night'];
-  assert.match(url,/^assets\/world\/[0-9a-f]{20}\.webp$/,file+' is a bundled file, not an inline data URI');
-  const actual=await readFile(path.join(output,url));
+ // The Village package ships its plates (ui/theme-packages/village/assets); the payload's loading-page plate names its copy.
+ assert.equal(context.__WORLDLET_25D_ASSETS__.surroundings,'theme-assets/village/world/day.webp');
+ for(const [file,plate] of [[BUILTIN_STYLE.world.day,'world/day.webp'],[BUILTIN_STYLE.world.night,'world/night.webp']]){
+  const source=await readFile(path.join(process.cwd(),file)),actual=await readFile(path.join(process.cwd(),'ui/theme-packages/village/assets',plate));
   const decode=async b=>sharp(b).ensureAlpha().raw().toBuffer({resolveWithObject:true});
   const expected=await decode(source),rendered=await decode(actual);
   assert.deepEqual(rendered.info,expected.info,file+' retains dimensions');
   assert.deepEqual(rendered.data,expected.data,file+' retains every decoded pixel');
  }
  assert.ok(!payload.includes('data:image/'),'the payload script carries no inline images');
- console.log('PASS world assets: lossless bundled day/night plates preserve every authored pixel at native resolution, as files the payload names.');
+ console.log('PASS world assets: the Village package\'s lossless day/night plates preserve every authored pixel at native resolution, and the payload names files, not inline images.');
 } finally {
  await rm(output,{recursive:true,force:true});
 }

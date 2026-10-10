@@ -4,7 +4,9 @@ await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);let missing=false;
  page.on('console',m=>{if(m.text().includes('Focus scenery unavailable youtube'))missing=true;});
  await page.addInitScript(()=>{
-  let payload;Object.defineProperty(globalThis,'__WORLDLET_25D_ASSETS__',{configurable:true,get:()=>payload,set(v){payload=v;if(v.focus?.youtube)v.focus.youtube.image='assets/world/deliberately-missing.webp';}});
+  // The Village package's YouTube room fails to load.
+  const src=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src')!;
+  Object.defineProperty(HTMLImageElement.prototype,'src',{...src,set(v){src.set!.call(this,/\/focus\/youtube\.webp$/.test(String(v))?'theme-assets/village/focus/deliberately-missing.webp':v);}});
   window.webkit={messageHandlers:{worldlet:{async postMessage(b){if(b.action==='snapshot')return {workspaceId:'missing-background',revision:0,sources:[],knowledge:[],connections:[],onboarding:{completed:true},sampleEnabled:false};if(b.action==='modelStatus')return {available:true};return {ok:true};}}}};
  });
  await page.goto(worldUrl());await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.modules.length>0);

@@ -15,12 +15,12 @@ for(const name of Object.keys(keys)){const b=document.createElement('button');b.
 
 // Exercise the production World adapter as well as individual Applet stages.
 import {createModuleScene} from '../../../ui/world/build-theme-world.ts';
-import {BUILD_THEMES,switchBuildTheme} from '../../../ui/themes/build-theme.ts';
+import {BUILD_THEMES,hostAppletPages,switchBuildTheme} from '../../../ui/themes/build-theme.ts';
 const rooms=Object.entries(keys).map(([title,key])=>({id:'place-'+key,moduleId:'app-'+key,key,title,region:'home',entity:'app'}));
 rooms.push({id:'place-future',moduleId:'app-future',key:'future',title:'Future applet',region:'home',entity:'app'});
 let worldScene:any,worldHost:HTMLElement;
-// The built-in Village is the Pixi World, not a package; the fixture exercises every package through the contract.
-const packages=[...BUILD_THEMES.values()].filter(theme=>theme.package);
+// The fixture exercises every package that draws its own Applet scenes; the Village opens the host's own pages.
+const packages=[...BUILD_THEMES.values()].filter(theme=>!hostAppletPages(theme));
 global.simFixture={events,themes:packages.map(theme=>theme.id),
  async use(id:string){const result=await switchBuildTheme(id);if('error' in result)throw Error(result.error);},
  open(){stage.render(current,value,false);worldScene?.destroy();worldHost?.remove();worldHost=document.createElement('div');worldHost.id='sim-world-fixture';Object.assign(worldHost.style,{position:'absolute',inset:'0'});root.append(worldHost);

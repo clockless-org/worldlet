@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 /**
  * The Village draws its World from its own copies of the host's space code, so it can live in a theme package that
- * imports only its own files. ui/world/village/space holds:
+ * imports only its own files. ui/theme-packages/village/space holds:
  * - copies of the host's pure modules, equal to them except that every import names a sibling file;
  * - space.json: the Village's areas, places and Applet sites as the host lays them out (ui/world/world-layout.ts,
  *   applet-sprites.ts), so the package needs neither the Applet catalog nor the theme registry.
@@ -13,7 +13,7 @@ import {fileURLToPath} from 'node:url';
  *   node scripts/village-space.ts           refresh the copies and space.json (after changing any of them)
  *   node scripts/village-space.ts --check   fail when a copy or space.json differs from the host's
  */
-const root=fileURLToPath(new URL('../',import.meta.url)),SPACE='ui/world/village/space';
+const root=fileURLToPath(new URL('../',import.meta.url)),SPACE='ui/theme-packages/village/space';
 export const SHARED=['ui/world/world-design.ts','ui/world/applet-optical-scales.json','ui/world/frame-budget.ts','ui/themes/scene-motion.ts','ui/world/region-core.ts','ui/world/slot-placement.ts'];
 /** A host module as the Village keeps it: each import names its sibling copy. */
 export const localImports=(source:string)=>source.replace(/(from\s+|import\s+)'(?:\.{1,2}\/)+(?:[^']*\/)?([^'/]+)'/g,"$1'./$2'");

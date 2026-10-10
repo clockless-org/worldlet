@@ -6,7 +6,7 @@ import {cachedEncode} from './build-cache.ts';
 import {ACTIVE_THEME,theme,themeAppletArt,type RegisteredTheme} from '../ui/themes/index.ts';
 import type {WorldPack} from '../ui/world/world-pack.ts';
 import {buildCompanionPresentation} from './build-companion-presentation.ts';
-import {readVillageArt,VILLAGE_ART} from './village-art.ts';
+import {readVillageArt} from './village-art.ts';
 
 // Lossless encoding keeps the authored pixels and full native resolution.
 async function plate(file:string){return 'data:image/webp;base64,'+(await cachedEncode(file,'plate:webp-lossless-6',()=>sharp(file).webp({lossless:true,effort:6}).toBuffer())).toString('base64');}
@@ -59,7 +59,7 @@ export async function externalizeImages(payloads:object[],output:string){
  for(const payload of payloads)await visit(payload);
  return written.size;
 }
-// The Village payload: its committed art (resources/themes/village/art), its world package and the companion.
+// The Village payload: its committed art (ui/theme-packages/village/assets), its world package and the companion.
 export async function buildWorldAssets(root:string,output:string,channel='release',themeId=ACTIVE_THEME.pack.id){
 const entry=theme(themeId);
 await mkdir(path.join(output,'assets'),{recursive:true});
@@ -75,21 +75,15 @@ for(const area of (entry.world as WorldPack).areas){if(!area.closeView)continue;
  for(const [key,file] of Object.entries(spec.devices||{})){const bytes=await readFile(path.join(base,file));devices[key]=await dataFile(path.join(base,file));deviceBoxes[key]=await paintedBox(bytes);deviceEffects[key]=structuredClone(entry.pack.applets.deviceEffects?.['resources/worlds/'+entry.pack.space.world+'/'+file]||{});}
  spritePayload.areaViews[area.legacyIds[0]||area.id]={...spec,image:await plate(path.join(base,spec.src)),devices,deviceBoxes,deviceEffects};
 }
-// The Village's runtime art is committed already encoded (scripts/village-art.ts): the build reads it as it is.
+// The host's own Applet pages, the loading page and host surfaces draw the Village package's art where the package
+// publishes it (theme-assets/village/, ui/theme-packages/village/assets/art.json); the Village World reads it itself.
 if(themeId!=='village')throw Error('Only the Village is built into the payload: '+themeId);
-const art=await readVillageArt(root),file=(name:string)=>dataFile(path.join(root,VILLAGE_ART,name));
-for(const [key,pair] of Object.entries(art.landmarks)){spritePayload.landmarks[key]=await file(pair.day);spritePayload.landmarkNights[key]=await file(pair.night);}
-// A registered pair: fixtures and their light pools are painted into the plates.
-spritePayload.surroundings=spritePayload.sceneryLayers?.find(l=>l.kind==='environment'&&l.lighting==='day').image||await file(art.world.day);
-spritePayload.night=spritePayload.sceneryLayers?.find(l=>l.kind==='environment'&&l.lighting==='night').image||await file(art.world.night);
-// Every catalog Applet's device, and the one every moment Applet stands on (core/widgets/README.md).
-for(const [key,device] of Object.entries(art.devices)){spritePayload.devices[key]=await file(device.src);spritePayload.deviceBoxes[key]=[...device.box];spritePayload.deviceEffects[key]={};}
-for(const [key,motion] of Object.entries(art.motion)){spritePayload.motion[key]=await file(motion.sheet);if(motion.frames)spritePayload.motionFrames[key]=await Promise.all(motion.frames.map(file));}
-for(const [key,name] of Object.entries(art.open))spritePayload.open[key]=await file(name);
-for(const [key,name] of Object.entries(art.logos))spritePayload.logos[key]=await file(name);
-for(const [key,name] of Object.entries(art.mail))spritePayload.mailParts[key]=await file(name);
-// Focus rooms are plain files beside the payload, decoded only when their Applet opens.
-for(const [key,{image,...framing}] of Object.entries(art.focus))spritePayload.focus[key]={image:await file(image),...framing};
+const art=await readVillageArt(root),file=(name:string)=>'theme-assets/village/'+name;
+spritePayload.surroundings=file(art.world.day);
+for(const [key,device] of Object.entries(art.devices)){spritePayload.devices[key]=file(device.src);spritePayload.deviceBoxes[key]=[...device.box];spritePayload.deviceEffects[key]={};}
+for(const [key,motion] of Object.entries(art.motion)){spritePayload.motion[key]=file(motion.sheet);if(motion.frames)spritePayload.motionFrames[key]=motion.frames.map(file);}
+for(const [key,name] of Object.entries(art.open))spritePayload.open[key]=file(name);
+for(const [key,name] of Object.entries(art.mail))spritePayload.mailParts[key]=file(name);
 const portrait='assets/'+entry.pack.id+'-portrait.png';await copyFile(path.join(root,entry.pack.companion.portrait),path.join(output,portrait));
 const companionExpressions=entry.pack.companion.renderer==='sprite-rig'?undefined:'data:image/png;base64,'+(await readFile(path.join(root,entry.style.manifest.companion.expressions))).toString('base64');
 const companionPresentation=await buildCompanionPresentation(root,channel,entry);
