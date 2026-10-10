@@ -1,0 +1,10 @@
+import {build} from 'esbuild';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createServer} from 'node:http';
+const root=fileURLToPath(new URL('../',import.meta.url)),out=path.join(root,'dist/WorldletWeb');
+await fs.access(path.join(out,'worldlet-ui.css'));
+await build({entryPoints:[path.join(root,'scripts/fixtures/build-theme/entry.ts')],bundle:true,format:'iife',outfile:path.join(out,'theme-preview.js')});
+await fs.writeFile(path.join(out,'theme-preview.html'),`<!doctype html><html lang="en" data-world-theme="village"><head><meta charset="utf-8"><title>Build theme · host preview</title><link rel="stylesheet" href="worldlet-ui.css"><link rel="stylesheet" href="pixi-world.css"><style>html,body,#notionWorld{margin:0;position:absolute;inset:0;overflow:hidden}#notionWorld{display:block!important;visibility:visible!important}#theme-preview-nav{position:fixed;top:10px;left:24px;z-index:999;display:flex;gap:8px}#theme-preview-nav button{padding:7px 12px;border-radius:8px;border:1px solid #b49b6a;background:#f4ecd9;color:#31452d}#theme-preview-label{position:fixed;bottom:8px;left:16px;color:white;background:#463c29;padding:4px;font:12px sans-serif;z-index:999}</style></head><body><main id="notionWorld"></main><nav id="theme-preview-nav"></nav><span id="theme-preview-label">Shared host stage · Fictional records</span><script src="theme-preview.js"></script></body></html>`);
+if(!process.argv.includes('--build-only'))createServer(async(req,res)=>{try{const url=new URL(req.url||'/', 'http://localhost');const file=path.resolve(out,'.'+decodeURIComponent(url.pathname==='/'?'/theme-preview.html':url.pathname));if(!file.startsWith(out+path.sep))throw Error('Invalid path');const data=await fs.readFile(file);res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.webp':'image/webp','.woff2':'font/woff2'} as Record<string,string>)[path.extname(file)]||'application/octet-stream');res.end(data);}catch{res.statusCode=404;res.end('Not found');}}).listen(4177,'127.0.0.1',()=>console.log('Theme preview: http://127.0.0.1:4177'));

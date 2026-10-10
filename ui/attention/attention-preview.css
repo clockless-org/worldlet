@@ -467,20 +467,24 @@ body:has(.attention-preview:not([hidden]),.region-shelf:not([hidden]),dialog[ope
  #notionWorld.native-console[data-fox-lane=true] .fox-artifact{left:378px;right:calc(var(--reader-companion-lane) + 12px);width:auto;top:84px;bottom:28px;height:auto;max-height:none}
  #notionWorld.native-console.radial-pet-console.companion-console[data-fox-lane=true] .companion-dialogue{width:min(440px,calc(var(--reader-companion-lane) - 32px));max-width:min(440px,calc(var(--reader-companion-lane) - 32px))}
 }
-/* Over an Applet an artifact is a small card in the top-right corner, at the head of Fox's column, so the Applet stays
-   in view while Fox talks about it (owner Order 2026-10-07). It keeps its one style; the size control has no meaning
-   there; it shows what fits the corner, and Show all lets it reach down Fox's column. */
+/* Over an Applet an artifact opens as a small card in the top-right corner, at the head of Fox's column, so the Applet
+   stays in view while Fox talks about it (owner Order 2026-10-07). The same size control as in the World has three
+   sizes there (owner Order 2026-10-09): small in the corner, medium down Fox's column to the reply, large over the Applet. */
 @media(min-width:801px){
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact{left:auto;right:16px;width:calc(var(--reader-companion-lane,464px) - 32px);top:var(--applet-bar-top);bottom:auto;height:auto;max-height:min(380px,calc(100dvh - 500px),max(160px,calc(100dvh - var(--applet-bar-top,72px) - var(--fox-column-reserve,0px))));min-height:0;padding:16px 20px 14px;gap:8px;border-radius:18px 20px 19px 21px}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>:is(.fox-artifact-art,.fox-artifact-scrim){display:none}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-art]>:is(h2,.fox-artifact-origin){max-width:none}
- #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>h2{font-size:var(--ui-text-section,18px);margin-right:44px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
- #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.fox-artifact-origin{margin-right:44px}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>h2{font-size:var(--ui-text-section,18px);margin-right:80px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.fox-artifact-origin{margin-right:80px}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>:is(h2,.fox-artifact-origin){flex-shrink:0}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact .artifact-option-pick{padding:2px 6px;font-size:10px;letter-spacing:0}
- #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.fox-artifact-size{display:none}
- #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.attention-preview-control{top:6px;right:10px}
- #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-expanded=true]{max-height:max(160px,calc(100dvh - var(--applet-bar-top,72px) - max(140px,var(--fox-column-reserve,140px))))}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.fox-artifact-size{top:6px;right:46px}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact>.attention-preview-control:not(.fox-artifact-size){top:6px;right:10px}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-size=medium]{max-height:max(160px,calc(100dvh - var(--applet-bar-top,72px) - max(140px,var(--fox-column-reserve,140px))))}
+ /* Large covers the Applet, left of Fox's column (owner Order 2026-10-09), so Fox and the conversation stay in view. */
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-size=large]{left:16px;right:calc(var(--reader-companion-lane,464px) + 4px);width:auto;top:var(--applet-bar-top);bottom:28px;max-height:none;padding:24px 30px 20px;gap:12px;border-radius:24px 28px 26px 30px}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-size=large]>h2{font-size:var(--ui-text-title,24px);-webkit-line-clamp:3}
+ #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-size=large] .fox-artifact-body{font-size:16px;line-height:1.5}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact-body{font-size:14px;line-height:1.45}
 }
 /* Close stays visible over the brightest corner of a picture. */

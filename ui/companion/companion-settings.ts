@@ -1,4 +1,4 @@
-import {ACTIVE_THEME,THEMES,activateTheme,switchTheme} from '../themes/index.ts';
+import {BUILD_THEMES,activeBuildTheme,switchBuildTheme} from '../themes/index.ts';
 import {displayReleaseVersion} from '../../core/distribution/index.ts';
 import {connectionLive,getApp} from '../../core/applets/index.ts';
 import {BROWSER_HOME,createBrowserHome} from '../../core/browser/index.ts';
@@ -134,13 +134,44 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
  // This is the one place to connect it and to see and fix what is wrong with it (owner request 2026-10-06):
  // which path is in use, its model, the last reply's problem in plain words, and the fix for it.
  async function modelSetting(target:HTMLElement){
-  const turn=ticket,said=status(),now=el('div','companion-settings-row companion-settings-model-now'),words=el('div'),fixes=el('div','companion-settings-actions'),agents=el('div','companion-settings-rows');
+  const turn=ticket,said=status(),now=el('div','companion-settings-row companion-settings-model-now'),words=el('div'),fixes=el('div','companion-settings-actions'),agents=el('div','companion-settings-rows'),providers=el('div','companion-settings-rows');
   now.append(words);
   const fixButton=(fix:ModelFix)=>fix==='connect'?action('Sign in to Codex or add an API key',async()=>{await preferences.show('model');},{primary:true,id:'fix-connect'})
    :fix==='models'?action('Check available models',async()=>{said.textContent='Checking which models your ChatGPT account can use…';try{const r=await call('modelRepair');said.textContent='Fox now uses '+(r?.model||'a model your account can use')+'.';await draw();}catch(e){said.textContent=modelFailure(e)?.message.split('\n\n')[0]||(e as Error).message||'Could not check the models.';}},{primary:true,id:'fix-models'})
    :fix==='update'?action('Show updates',()=>show('updates'),{primary:true,id:'fix-update'})
    :action('Restart Fox',async()=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}},{primary:true,id:'fix-restart'});
+  // The provider the Agent in use answers with (core/agent/model-providers.ts, owner decisions 2026-10-10): only a
+  // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced
+  // one. Every provider the Agent supports is listed, signed in or not; signing in happens in the Agent itself.
+  const drawProviders=async()=>{
+   const found=await call('agentHarness',{operation:'providers'}).catch(()=>null);
+   if(turn!==ticket)return;
+   providers.replaceChildren();
+   const list=Array.isArray(found?.providers)?found.providers.filter((p:any)=>typeof p?.id==='string'&&typeof p?.name==='string'):[];
+   if(typeof found?.agent!=='string'||!list.length)return;
+   const title=typeof found.title==='string'?found.title:'your Agent',chosen=typeof found.chosen==='string'?found.chosen:null;
+   const choose=(id:string|null,name:string)=>async()=>{
+    said.textContent='';
+    try{await call('agentHarness',{operation:'provider',id});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent=id?`Fox now answers with ${name}.`:`Fox now answers with ${title}’s own setting.`;await drawProviders();}
+    catch(e){said.textContent=(e as Error).message||'Could not change the provider.';}
+   };
+   providers.append(el('h5','companion-settings-subhead','Provider'));
+   const own=el('div','companion-settings-row'),ownText=el('div');own.dataset.provider='own';
+   ownText.append(el('strong','',`${title}’s own setting`+(chosen===null?' · In use':'')),el('span','',`Whatever ${title} is set to use.`));
+   own.append(ownText,...chosen===null?[]:[action('Use',choose(null,title),{id:'provider-own'})]);providers.append(own);
+   for(const p of list){
+    const row=el('div','companion-settings-row'),text=el('div'),on=chosen===p.id,signedOut=p.signedIn===false;row.dataset.provider=p.id;
+    text.append(el('strong','',p.name+(on?' · In use':'')),el('span','',signedOut?`Not signed in to it in ${title} yet.`:typeof p.account==='string'?p.account:''));
+    const button=signedOut?p.signIn===true?action('Sign in',async()=>{
+     said.textContent=`${title} opens in Terminal to sign in to ${p.name}. When it is done, choose Check connection.`;
+     try{await call('agentHarness',{operation:'provider-sign-in',id:p.id});}catch(e){said.textContent=(e as Error).message||'Could not open the sign-in.';}
+    },{id:'sign-in-'+p.id}):null:on?null:action('Use',choose(p.id,p.name),{id:'provider-'+p.id});
+    row.append(text,...button?[button]:signedOut?[el('span','companion-settings-quiet',`Sign in to it in ${title}.`)]:[]);
+    providers.append(row);
+   }
+  };
   const draw=async()=>{
+   void drawProviders();
    const [health,found]=await Promise.all([call('modelHealth').catch(()=>null),call('agentHarness',{operation:'detect'}).catch(()=>null)]);
    if(turn!==ticket)return;
    const list=Array.isArray(found?.agents)?found.agents.filter((a:any)=>typeof a?.id==='string'&&typeof a?.title==='string'):[];
@@ -173,6 +204,8 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
     },{id:'use-'+agent.id});
     row.append(text,b);agents.append(row);
    }
+   // The provider of the Agent in use comes right under the Agents here.
+   agents.append(providers);
    // An Agent on another computer (core/phone/README.md#another-computers-agent): the code from Worldlet there pairs
    // this one with it, and Fox's conversation runs on it; this World stays here.
    agents.append(el('h5','companion-settings-subhead','On another computer'));
@@ -234,11 +267,15 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
   {id:'approvals',label:'Approvals',hint:'What your Agent may do without asking',show:target=>{const turn=ticket;return showApprovalRules(target,call,()=>turn===ticket&&target.isConnected);}},
   {id:'theme',label:'Theme',hint:'Your world’s scenery and companion',show(target){
    const said=status();target.append(note('Choose the world you work in.'),said);
-   for(const entry of THEMES.values())target.append(action(entry.pack.title,async button=>{
-    said.textContent='Preparing '+entry.pack.title+'…';
-    const result=await switchTheme(entry.pack.id,{current:ACTIVE_THEME.pack.id,apply:activateTheme});
-    said.textContent='error' in result?result.error:entry.pack.title+' is ready.';
-   },{id:'theme-'+entry.pack.id}));
+   // Every bundled theme package (ui/themes/build-theme.ts); one click switches the whole World in place.
+   const buttons:HTMLButtonElement[]=[];
+   const mark=()=>{for(const b of buttons)b.setAttribute('aria-pressed',String(b.dataset.action==='theme-'+activeBuildTheme().id));};
+   for(const entry of BUILD_THEMES.values()){const button=action(entry.title,async()=>{
+    said.textContent='Preparing '+entry.title+'…';
+    const result=await switchBuildTheme(entry.id);
+    said.textContent='error' in result?result.error:entry.title+' is ready.';mark();
+   },{id:'theme-'+entry.id});buttons.push(button);target.append(button);}
+   mark();
   }},
   {id:'integrations',label:'Integrations',hint:'Connected accounts',show:async target=>{
    const turn=ticket,state=await call('snapshot').catch(()=>null);if(turn!==ticket)return;

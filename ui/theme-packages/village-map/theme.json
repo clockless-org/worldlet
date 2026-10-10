@@ -1,0 +1,16 @@
+{
+  "contractVersion": 2,
+  "id": "village-map",
+  "title": "Village Map",
+  "entry": "entry.ts",
+  "stylesheet": "theme.css",
+  "assets": "assets",
+  "applets": [
+    "gmail",
+    "google-calendar",
+    "apple-notes",
+    "apple-reminders"
+  ],
+  "presentation": "presentation.json",
+  "updatedAt": "2026-10-09T23:14:20Z"
+}
