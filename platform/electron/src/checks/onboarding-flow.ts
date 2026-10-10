@@ -106,6 +106,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // The card's own Done takes clicks too (owner request 2026-10-04), with Dismiss and Later hidden until
  // the tour is over; this journey goes on with Fox, so Done is only proven reachable, not pressed.
  await wait('the card’s Done reachable, Dismiss and Later hidden',"(()=>{const b=document.querySelector('#attentionPreview .attention-preview-action-primary'),r=b?.getBoundingClientRect();return !!r&&r.width>0&&b.textContent.trim()==='Done'&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===b&&![...document.querySelectorAll('#attentionPreview .attention-preview-action:not(.attention-preview-action-primary)')].some(e=>e.offsetParent);})()",5);
+ const doing=Date.now()/1000;
  await press('Do it for me');
  await wait('browser open under Fox’s glow',"!!document.querySelector('.browser-viewport.is-fox-control')",8);
  // The glow is a separate transparent window above the page (modules/browser/glow.ts): FoxGlow
@@ -125,7 +126,8 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  try{
   // 7. The page stays full size in the Applet while Fox works, so the person can watch and step in
   // (owner feedback 2026-10-02: no picture in picture for Fox's pages).
-  await wait('Fox asks once before the last step',`${dialogue('/Last step:/')}&&!!${button('Go ahead')}`,300);
+  try{await wait('Fox asks once before the last step',`${dialogue('/Last step:/')}&&!!${button('Go ahead')}`,300);}
+  catch(error){throw Error((error as Error).message+'\n'+toolTrail(store.ledger(),doing));}
   // While Fox waits for the Go ahead its page still shows, not a blank slot, also while the window is covered (the
   // person is often in another app when Fox finishes): in the panel, or on the CEF engine in the
   // task picture-in-picture window at the World's bottom-right (#1175). Pages kept for other
@@ -301,6 +303,26 @@ async function coveredWindowCheck(window:BaseWindow,page:WebPage){
 /** The journey fails when background work failed, even if its data was saved: #766 made Core
  * reject every background reply, runs were recorded as failed and Mail showed "An operation
  * failed", yet the journey still passed (#787). Returns the repaired self-corrections. */
+/** Fox's World tool calls since `since` (seconds), oldest first: each tool, its target and action, and the error it got
+ * back, so a browser task that stalls says why in the Alpha Issue (Mac 4096: "the browser kept reporting it wasn't
+ * ready"). Names and error text only, never what a page or a mail says. */
+export function toolTrail(db:WorldLedger,since:number,limit=24){
+ const payload=(seq:number):any=>db.queryWorldHistory({seq}).events?.[0]?.payload;
+ const names=new Map<string,string>(),lines:string[]=[];
+ const steps=db.history({since:Math.floor(since)-1,kinds:['tool.requested','tool.result','tool.failed'],limit:400}).reverse();
+ for(const step of steps){
+  const body=payload(step.seq);if(!body||typeof body!=='object')continue;
+  const id=typeof body.id==='string'?body.id:'';
+  if(step.kind==='tool.requested'){
+   const args=body.args&&typeof body.args==='object'?body.args:{};
+   const what=[body.name,args.target,args.action,args.name].filter(value=>typeof value==='string'&&value).join(' ');
+   names.set(id,what||'unknown tool');continue;
+  }
+  const error=step.kind==='tool.failed'?body.error:body.result?.error;
+  lines.push(`${new Date(step.at*1000).toISOString().slice(11,19)} ${names.get(id)??'unknown tool'}: ${typeof error==='string'?'error '+error.replace(/\s+/g,' ').slice(0,200):'ok'}`);
+ }
+ return lines.length?`  Fox's World tool calls (last ${Math.min(limit,lines.length)}):\n`+lines.slice(-limit).map(line=>'   '+line).join('\n'):'  Fox made no World tool calls.';
+}
 function noRecordedFailures(host:CheckContext['host'],checkpoint:string){
  const found=recordedFailures(host.store.root,host.store.ledger(),host.diagnostics.recent?.()??[]);
  if(found.failures.length)throw Error(failureReport(checkpoint,found.failures));
