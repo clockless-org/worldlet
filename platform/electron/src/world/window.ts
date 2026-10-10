@@ -12,6 +12,8 @@ export interface WorldWindowHooks {
  closing():boolean;
  activated(active:boolean):void;
  resized(bounds:Rectangle):void;
+ /** The page's product analytics requests (worldlet://app/ingest/…), forwarded by the host. */
+ ingest?(request:Request):Promise<Response>;
 }
 /** Every World window opens at the shared 1920×1080 logical design size (content area), scaled down
  * with the same aspect to fit the display's usable area. The size is not remembered between launches. */
@@ -39,7 +41,7 @@ export class WorldWindow {
    ...(mac?{titleBarStyle:'hiddenInset' as const,trafficLightPosition:{x:18,y:18}}:{})
   });
   const worldSession=session.fromPartition('persist:world');
-  serveWorld(worldSession,()=>profile.webRoot);
+  serveWorld(worldSession,()=>profile.webRoot,hooks.ingest?request=>hooks.ingest!(request):undefined);
   // The World needs no device or notification permissions; speech capture is host-owned.
   worldSession.setPermissionRequestHandler((_contents,_permission,answer)=>answer(false));
   worldSession.setPermissionCheckHandler(()=>false);

@@ -324,6 +324,10 @@ export interface AnalyticsService {
  installation():string;
  setEnabled(enabled:boolean):void;
  enabled():boolean;
+ /** The World page's PostHog web client settings, or null when it must not load (modules/shell/analytics.ts). */
+ webConfig():Row|null;
+ /** The World page's worldlet://app/ingest/… requests, forwarded to PostHog. */
+ ingest(request:Request):Promise<Response>;
 }
 export const ANALYTICS='analytics';
 

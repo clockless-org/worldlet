@@ -25,7 +25,7 @@ import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
-import {VAULT} from './host/services.ts';
+import {ANALYTICS,VAULT,type AnalyticsService} from './host/services.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {startBackgroundLaunch} from './background-launch.ts';
@@ -167,7 +167,8 @@ async function start(){
   navigating:()=>{for(const listener of reloadListeners)try{listener();}catch(error){diagnostics.record(error,'pageReload');}},
   closing:()=>host.optional<{shouldKeepOpen():boolean}>('desktopCompanion')?.shouldKeepOpen()??false,
   activated:active=>page.event(active?'worldlet:app-active':'worldlet:app-inactive'),
-  resized:()=>{}
+  resized:()=>{},
+  ingest:request=>host.optional<AnalyticsService>(ANALYTICS)?.ingest(request)??Promise.resolve(new Response(null,{status:204}))
  },{quiet});
  if(profile.channel==='dev')installCapture(world.view.webContents);
  if(!fs.existsSync(path.join(profile.webRoot,'index.html'))){

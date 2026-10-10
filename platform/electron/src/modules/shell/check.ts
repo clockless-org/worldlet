@@ -12,7 +12,7 @@ import {app,BaseWindow,Menu,WebContentsView} from 'electron';
 import {core} from '../../core.ts';
 import {Preferences} from '../../preferences.ts';
 import {WorldStore} from '../../store/world-store.ts';
-import {UsageAnalytics,INSTALLATION_KEYS,INSTALL_CLAIM_URL,personInput} from './analytics.ts';
+import {UsageAnalytics,INSTALLATION_KEYS,INSTALL_CLAIM_URL,ingestPath,personInput} from './analytics.ts';
 import {minidumpCrash,nativeCrashes} from './native-crashes.ts';
 import {nativeCrashFromIps} from '../../../../../core/diagnostics/index.ts';
 import {capture,decode,dispose,encode,restore,validate,PREFERENCE_KEYS,type Archive} from './backup.ts';
@@ -141,7 +141,7 @@ try{
   const engagedHost:Host={...host,preferences:Preferences.at(engagedRoot),profile:{...host.profile,root:engagedRoot}};
   const sent:any[]=[];let focused=true,clock=Date.parse('2026-10-03T10:00:00Z'),fail=false;
   const analytics=new UsageAnalytics(engagedHost,{config:{key:'phc_check',url:'https://us.i.posthog.com/capture/',version:'2026.1003.1',build:'1',channel:'website'},
-   fetch:(async(_url:unknown,init?:{body?:unknown})=>{sent.push(JSON.parse(String(init?.body)));return new Response('{}',{status:fail?503:200});}) as unknown as typeof fetch,
+   fetch:(async(_url:unknown,init?:{body?:unknown})=>{sent.push(...JSON.parse(String(init?.body)).batch);return new Response('{}',{status:fail?503:200});}) as unknown as typeof fetch,
    focused:()=>focused,now:()=>clock});
   const engaged=()=>sent.filter(event=>event.event==='user_engaged');
   const settle=()=>new Promise(resolve=>setTimeout(resolve,30));
@@ -164,7 +164,7 @@ try{
   assert.equal(engaged().length,1,'the person\'s click sends user_engaged');
   const first=engaged()[0];
   assert.equal(first.properties.engagement_kind,'input');assert.equal(first.properties.environment,'production');
-  assert.equal(first.timestamp,'2026-10-03T10:00:00Z');
+  assert.equal(first.timestamp,'2026-10-03T10:00:00.000Z');
   clock+=60_000;native('keyDown');native('mouseWheel');analytics.recordProductEvent('user_engaged','',{engagement_kind:'fox_message'});await settle();
   assert.equal(engaged().length,1,'once a day');
   // The next UTC day: the World page reports the person's Fox message first; a failed delivery is retried with the
@@ -196,7 +196,7 @@ try{
   const analytics=new UsageAnalytics(inviteHost,{config:{key:'phc_check',url:'https://us.i.posthog.com/capture/',version:'2026.1003.1',build:'1',channel:'website'},
    fetch:(async(url:unknown,init?:{body?:unknown})=>{
     if(String(url)===INSTALL_CLAIM_URL){claims.push(JSON.parse(String(init?.body)));return Response.json({token:'0123456789abcdef0123456789abcdef'});}
-    events.push(JSON.parse(String(init?.body)));return new Response('{}');
+    events.push(...JSON.parse(String(init?.body)).batch);return new Response('{}');
    }) as unknown as typeof fetch,focused:()=>true,system:'darwin'});
   analytics.recordActiveDay();
   await new Promise(resolve=>setTimeout(resolve,50));
@@ -229,6 +229,25 @@ try{
   assert.deepEqual(events.slice(-3).map(event=>[event.event,event.properties.order_result??event.properties.order_stop]),[['order_sent','stored'],['order_stopped','left_app'],['order_stopped','other']]);
   assert.ok(!JSON.stringify(events.slice(-3)).includes('private'),'never the words or a free-text reason');
   console.log('PASS invite tracking: a fresh installation claims its invited download once and reports only the opaque token');
+ }
+
+ // World page web capture: the host hands the page PostHog's settings only with sharing on and forwards only PostHog's
+ // ingestion paths for this project; anything else, or anything after sharing is switched off, goes nowhere.
+ {
+  const webRoot=path.join(scratch,'web-capture');fs.mkdirSync(webRoot,{recursive:true});
+  const forwarded:string[]=[];
+  const analytics=new UsageAnalytics({...host,preferences:Preferences.at(webRoot),profile:{...host.profile,root:webRoot}},{config:{key:'phc_check',url:'https://us.i.posthog.com/capture/',host:'https://us.i.posthog.com',version:'2026.1010.1',build:'1',channel:'website'},
+   fetch:(async(url:unknown)=>{if(!String(url).endsWith('/batch/'))forwarded.push(String(url));return new Response('{}');}) as unknown as typeof fetch,focused:()=>true,system:'darwin'});
+  assert.deepEqual(['/ingest/e/','/ingest/s/','/ingest/flags/','/ingest/array/phc_check/config','/ingest/capture/','/ingest/../api','/other/e/'].map(ingestPath),['/e/','/s/','/flags/','/array/phc_check/config',null,null,null]);
+  const config=analytics.webConfig() as any;
+  assert.equal(config.key,'phc_check');assert.equal(config.apiHost,'/ingest');assert.equal(config.properties.$geoip_disable,true);
+  for(const url of ['worldlet://app/ingest/e/?ip=0','worldlet://app/ingest/array/phc_other/config','worldlet://app/ingest/decide/../../api/projects'])await analytics.ingest(new Request(url,{method:'POST',body:'{}'}));
+  assert.deepEqual(forwarded,['https://us.i.posthog.com/e/?ip=0']);
+  analytics.setEnabled(false);
+  assert.equal(analytics.webConfig(),null);
+  assert.equal((await analytics.ingest(new Request('worldlet://app/ingest/e/',{method:'POST',body:'{}'}))).status,204);
+  assert.deepEqual(forwarded,['https://us.i.posthog.com/e/?ip=0']);
+  console.log('PASS web capture: the World page gets PostHog settings only with sharing on; the host forwards only this project\'s ingestion paths');
  }
 
  // Native crashes (core/diagnostics/ANALYTICS.md#native-crashes): the next launch finds the system's report of a Mac
@@ -268,7 +287,7 @@ try{
   assert.equal(minidumpCrash(new Uint8Array(64)),null,'not a minidump');
   const events:any[]=[];
   const analytics=new UsageAnalytics({...host,preferences:Preferences.at(crashRoot),profile:{...host.profile,root:crashRoot}},{config:{key:'phc_check',url:'https://us.i.posthog.com/capture/',version:'2026.1008.3168',build:'3168',channel:'website'},
-   fetch:(async(_url:unknown,init?:{body?:unknown})=>{events.push(JSON.parse(String(init?.body)));return new Response('{}');}) as unknown as typeof fetch,focused:()=>true,system:'darwin'});
+   fetch:(async(_url:unknown,init?:{body?:unknown})=>{events.push(...JSON.parse(String(init?.body)).batch);return new Response('{}');}) as unknown as typeof fetch,focused:()=>true,system:'darwin'});
   analytics.recordNativeCrash(nativeCrashFromIps(fs.readFileSync(found[0].file,'utf8'))!);analytics.recordNativeCrash(dump!);
   await new Promise(resolve=>setTimeout(resolve,30));
   const [mac,win]=events.map(event=>event.properties);
