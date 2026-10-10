@@ -131,9 +131,10 @@ export function githubStore(repo=process.env.GITHUB_REPOSITORY,gh=(args,input)=>
   promote(tag){run('release','edit',tag,'--repo',repo,'--prerelease=false','--latest');},
   // The release of a Build (v<label>) and its asset names, or null.
   findBuild(build){
-   const r=gh(['api',`repos/${repo}/releases?per_page=100`,'--jq',`[.[]|select(.tag_name|test("^v[0-9]{4}\\.[0-9]{4}\\.${Number(build)}$"))|{tag:.tag_name,assets:[.assets[].name]}][0]`]);
+   const r=gh(['api',`repos/${repo}/releases?per_page=100`,'--jq','[.[]|{tag:.tag_name,assets:[.assets[].name]}]']);
    if(r.status!==0)throw Error(`Could not list releases: ${(r.stderr||'').trim().slice(0,300)}`);
-   const found=(r.stdout||'').trim();return found&&found!=='null'?JSON.parse(found):null;
+   const tag=new RegExp(`^v\\d{4}\\.\\d{4}\\.${Number(build)}$`);
+   return JSON.parse((r.stdout||'').trim()||'[]').find(x=>tag.test(x.tag))||null;
   },
   download(tag,name,out){rmSync(out,{force:true});run('release','download',tag,'--repo',repo,'--pattern',name,'--output',out);},
   // GitHub refuses this workflow's token a new tag on a commit whose .github/workflows differ from main's ("Resource
