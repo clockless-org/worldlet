@@ -19,10 +19,10 @@ export function agentRequestDeadline(body:Record<string,unknown>):number {
  }
  if(action==='mcp')return ['configure','login'].includes(String(operation))?360:operation==='remove'?25:145;
  if(action==='notion')return 145;
- // Hermes stops a routine whose model goes quiet for 150 s (HERMES_CRON_TIMEOUT, harness/hermes/routines.py); this
+ // Hermes stops a routine whose model goes quiet for 150 s (HERMES_CRON_TIMEOUT); this
  // only bounds one that keeps working, so a long routine finishes instead of being cut off and lost every time.
  if(action==='routine_tick')return 600;
- // Hermes bounds a conversation summary at 600 s itself (harness/hermes/desktop.py COMPACTION_SECONDS) and keeps
+ // Hermes bounds a conversation summary at 600 s itself (as Worldlet's former built-in Hermes did) and keeps
  // reporting while it runs.
  if(action==='compact')return 720;
  if(action==='attention_tick'||body.monitor===true||action==='chat'&&body.mode==='context_analysis')return 600;

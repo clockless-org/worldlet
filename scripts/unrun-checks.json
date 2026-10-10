@@ -2,7 +2,6 @@
  "note": "Checks no PR CI or RC net runs yet (scripts/check-reach-check.mjs). This list only shrinks: put a check in a net, or delete it if what it guards is gone.",
  "checks": [
   "scripts/browser-driver-integration-check.ts",
-  "scripts/hermes-desktop-check.py",
   "scripts/onboarding-model-check.py",
   "scripts/popular-applets-ui-check.ts",
   "scripts/windows-installer-check.py"

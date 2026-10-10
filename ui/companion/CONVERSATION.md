@@ -9,7 +9,7 @@ Chapters:
 
 Fox is the user-facing assistant. Hermes (pinned 0.21.3, upstream commit `416a8177c25d87aa9929dfcf31f7964137d7fcdd`, no fork) is the agent kernel: model calls, tool loop, sessions, memory, skills and MCP. Worldlet owns the world, the host bridge, permissions, the persistent items in `world.sqlite` and the check schedule. Hermes runs as an app-owned resident Python process; it cannot run in a browser, so the marketing site's `/demo/` has no chat.
 
-Related docs: [Agent architecture](../../core/agent/PORTABILITY.md) (layer contract), [Hermes desktop runtime](../../harness/hermes/README.md) (JSON-RPC bridge, mid-run steering), [Search, browser and routines](../../harness/hermes/README.md), [Fox performance](CONVERSATION.md#fox-performance), [Model onboarding](CONVERSATION.md#model-onboarding), [World interaction contract](../../core/items/STORAGE.md#world-interaction).
+Related docs: [Agent architecture](../../core/agent/PORTABILITY.md) (layer contract), Hermes desktop runtime (removed with the built-in Hermes on 2026-10-09) (JSON-RPC bridge, mid-run steering), Search, browser and routines, [Fox performance](CONVERSATION.md#fox-performance), [Model onboarding](CONVERSATION.md#model-onboarding), [World interaction contract](../../core/items/STORAGE.md#world-interaction).
 
 ```mermaid
 flowchart TD
@@ -65,7 +65,7 @@ In a website, Fox's input is also the address bar (owner request 2026-10-04): a 
 | Current view context | `ui/companion/fox-context.ts` trims location, state, setup, view id / title and the last four actions to fixed string sizes, and the app appends the last eight world events as identifiers (`WorldStore.recentHistory`); `world_context.py` validates the same shape and injects it into the outgoing request through Hermes request middleware, not into history |
 | Coding tasks | `delegate_codex` runs `codex exec --sandbox read-only` (`platform/electron/src/modules/media/coding.ts`); the request must contain a coding keyword, only excerpts read this turn are shared, one delegation per turn, output is never installed or deployed. There is no Claude Code delegation |
 | Model | Included DeepSeek V4 Flash via Worldlet's Worker and AI Gateway; anonymous installation access uses an owner-only token file (DPAPI-encrypted on Windows). Optional BYO providers stay in Hermes. See [Model onboarding](CONVERSATION.md#model-onboarding) |
-| Routines | `manage_routines` (`routines.py`) over Hermes cron; the host's `HermesRoutines` (`modules/agent-runtime/hermes.ts`) ticks every 60 s while the app is open, consent is on and Sample Mode is off; with Hermes Agent kept running as a service ([kept running](../../core/agent/PORTABILITY.md#hermes-agent-kept-running)), its gateway runs them also while Worldlet is closed, through Hermes' same claim, so never twice. See [Search, browser and routines](../../harness/hermes/README.md) |
+| Routines | `manage_routines` (`routines.py`) over Hermes cron; the host's `HermesRoutines` (`modules/agent-runtime/hermes.ts`) ticks every 60 s while the app is open, consent is on and Sample Mode is off; with Hermes Agent kept running as a service ([kept running](../../core/agent/PORTABILITY.md#hermes-agent-kept-running)), its gateway runs them also while Worldlet is closed, through Hermes' same claim, so never twice. See Search, browser and routines |
 | Voice | See "Live voice" below |
 
 Hermes decides whether a request is a coding request, a navigation or a music command; Worldlet has no keyword intent router. Buttons still execute locally and immediately.

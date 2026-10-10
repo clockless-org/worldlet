@@ -3,7 +3,7 @@ import {attentionEventError} from '../items/index.ts';
 import type {WorldItem} from '../../contracts/world-item.ts';
 /** Card copy limits in Unicode code points. The upsert_world_items schema mirrors them so models see the same limits. */
 export const ATTENTION_CONTENT_LIMITS={title:40,reason:56,reasonWords:8,summary:1200,actionLabel:32,locationName:80,location:240} as const;
-/** Reason words as Core counts them: runs of JavaScript whitespace split the trimmed reason. harness/hermes/source_batch.py mirrors this for its in-batch repair; scripts/source-batch-check.py compares them. */
+/** Reason words as Core counts them: runs of JavaScript whitespace split the trimmed reason. */
 export const attentionReasonWords=(reason:string)=>reason.trim().split(/\s+/u).length;
 /** The model writes the public brief. Original titles and quotes stay in source evidence. */
 export function processedAttentionContent(item:WorldItem):WorldItem {

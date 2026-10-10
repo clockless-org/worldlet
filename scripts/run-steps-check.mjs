@@ -26,9 +26,8 @@ assert.deepEqual(events.filter(e=>e.startsWith('start')).map(e=>e.slice(6)),['np
 // The RC gates it serves: their chains parse, and npm test keeps the worktree checks (git worktrees) one by one after it.
 const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).scripts;
 assert.equal(pkg.test,'node scripts/run-steps.mjs test:core && npm run test:worktrees');
-assert.equal(pkg['test:hermes'],'node scripts/run-steps.mjs test:hermes:checks');
 // The open-source export has no website/, so it has no test:website.
 const website=existsSync(new URL('../website',import.meta.url));
 if(website)assert.equal(pkg['test:website'],'node scripts/run-steps.mjs test:website:checks');
-for(const name of ['test:core','test:hermes:checks',...(website?['test:website:checks']:[])])assert.ok(chainSteps(name,pkg,'/n/npm-cli.js').length>3,name);
-console.log('PASS run-steps: chain steps side by side, npm steps first and what follows them after them; failures fail with their output; npm test, test:hermes and test:website use it');
+for(const name of ['test:core',...(website?['test:website:checks']:[])])assert.ok(chainSteps(name,pkg,'/n/npm-cli.js').length>3,name);
+console.log('PASS run-steps: chain steps side by side, npm steps first and what follows them after them; failures fail with their output; npm test and test:website use it');

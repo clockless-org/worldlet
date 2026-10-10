@@ -72,7 +72,7 @@ libraries are not migrated automatically.
 | `npm run installer:windows` | On Windows: package, then build the NSIS installer (`distribution/windows/installer.nsi`) |
 
 Development launches read `WORLDLET_REPO_ROOT`, `WORLDLET_WEB_ROOT`,
-`WORLDLET_HERMES_PYTHON` and, for linked worktrees, `WORLDLET_WORKTREE_PROFILE`.
+`WORLDLET_UV` and, for linked worktrees, `WORLDLET_WORKTREE_PROFILE`.
 `WORLDLET_PROFILE_ROOT` (development only) points a run at a disposable library.
 `WORLDLET_CAPTURE=<png>` (development only) waits for the World, evaluates
 `WORLDLET_CAPTURE_PROBE` in the page, saves a frame, prints JSON and quits.

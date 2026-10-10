@@ -45,6 +45,6 @@ the release or acceptance Issue. Do not regenerate a growing per-build docs dire
 A green fixture suite cannot substitute for real permissions, account contents or
 human assessment of relevance. Incomplete checks remain explicit.
 
-[Release policy](RELEASE-GUIDELINES.md), [Google review](../harness/hermes/GOOGLE-OAUTH-REVIEW.md),
+[Release policy](RELEASE-GUIDELINES.md), [Google review](GOOGLE-OAUTH-REVIEW.md),
 [Mac distribution](../platform/electron/DISTRIBUTION.md) and
 [Windows delivery](../platform/electron/DISTRIBUTION.md#windows) own their operational gates.
