@@ -389,9 +389,10 @@ await withBrowser(fileAccess,async browser=>{
  }
 // One-click install (`--connect=<id>`, core/agent/PORTABILITY.md#local-harnesses-chosen-at-setup): the Agent the
  // host hands over is connected with the same select as the big button and brought in by itself; one not
- // found here, or a select that fails, leaves the first half with it picked and the error shown; a second launch while
- // setup is open (`worldlet:connect-agent`) does the same.
- for(const scenario of ['found','missing','fails','second-launch']){
+ // found here, or a select that fails, leaves the first half with it picked and the error shown; so does a select that
+ // moved on before its answer check (`checkLater`) and hears that check failed; a second launch while setup is open
+ // (`worldlet:connect-agent`) does the same.
+ for(const scenario of ['found','missing','fails','check-fails','second-launch']){
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform,scenario})=>{
    const w=window as any;w.calls=[];w.requested=scenario==='missing'?'hermes':scenario==='second-launch'?null:'openclaw';
@@ -402,7 +403,9 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='installedApplets')return {keys:[]};
     if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,memory:{name:'Nova',user:true,longTerm:true,model:false}}],recommended:'codex',selected:sessionStorage.getItem('fixture-agent')};
     if(b.action==='agentHarness'&&b.operation==='requested'){const id=w.requested;w.requested=null;return {id};}
-    if(b.action==='agentHarness'&&b.operation==='select'){if(scenario==='fails')throw Error('OpenClaw did not answer.');sessionStorage.setItem('fixture-agent',b.id);return {ok:true,id:b.id,title:'OpenClaw',connected:true};}
+    if(b.action==='agentHarness'&&b.operation==='select'){if(scenario==='fails')throw Error('OpenClaw did not answer.');sessionStorage.setItem('fixture-agent',b.id);
+     if(scenario==='check-fails')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,message:'OpenClaw did not answer.'}})),300);
+     return {ok:true,id:b.id,title:'OpenClaw',connected:true,...b.checkLater?{checking:true}:{}};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Nova',memories:[{kind:'soul'}],model:{ok:false},summary:{},history:{conversations:2,notes:0,skills:0,routines:0,list:[{title:'Trip plan',messages:4}]}};
     if(b.action==='agentIntegrations')return {integrations:[]};
     if(b.action==='foxEnergy')return {source:'none'};
@@ -428,7 +431,8 @@ await withBrowser(fileAccess,async browser=>{
    await page.getByText(message,{exact:true}).waitFor();
    assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1,'The normal first half stays');
    assert.deepEqual(await selects(),scenario==='missing'?[]:['openclaw']);
-   if(scenario==='fails')assert.equal(await page.locator('.setup-agent-default[data-agent="openclaw"]').count(),1,'The named Agent stays picked');
+   if(scenario!=='missing')assert.equal(await page.locator('.setup-agent-default[data-agent="openclaw"]').count(),1,'The named Agent stays picked');
+   if(scenario==='check-fails')assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.checkLater)),[true],'Setup does not wait for the answer check');
   }
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='requested').length>=1),true);
   assert.deepEqual(errors,[]);await page.close();

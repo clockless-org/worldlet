@@ -260,8 +260,10 @@ function installedVersion(install:LocalHarnessInstall,fresh=false):Promise<strin
  return line;
 }
 /** What setup hears while Hermes Agent is installed (`install-hermes`) or signs in to ChatGPT (`sign-in-hermes`). */
+/** How the short turn that proves a chosen Agent answers ended, when setup let it run after the switch (`checkLater`). */
+export type AgentCheckEvent={id:LocalHarnessId;ok:true}|{id:LocalHarnessId;ok:false;message:string};
 export type HermesSetupEvent=({stage:'install'}&HermesInstallProgress)|{stage:'sign-in';url:string;code:string|null};
-export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,noAgent:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{},release:(id:LocalHarnessId)=>Promise<void>=async()=>{}){
+export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,noAgent:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{},release:(id:LocalHarnessId)=>Promise<void>=async()=>{},onAgentCheck:(event:AgentCheckEvent)=>void=()=>{}){
  let signingIn:AbortController|null=null;
  const remoteStatus=()=>{const s=remote?.status();return s?.state==='paired'?{computer:s.computer,seenAt:s.seenAt??null,...s.error?{error:s.error}:{}}:null;};
  const gateway=()=>vault?readRemoteGateway(vault):null;
@@ -357,14 +359,21 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    if(version.outdated)throw new WorldletError(agentTooOldMessage(install.title,version));
    // One short turn proves the sign-in; its answer is not shown.
    const adapter=new LocalHarnessAdapter(context,install);
-   const probe=new LocalHarnessRuntime(install);
-   const timer=setTimeout(()=>probe.cancel(),90_000);
-   try{await probe.run({action:'chat',text:'Reply with the single word: ready',_background:true},adapter.home('setup'));}
-   catch(error){throw new WorldletError((error as Error)?.name==='AbortError'?`${install.title} did not answer in time. Check that it is signed in, then try again.`:(error as Error)?.message||`${install.title} did not answer.`);}
-   finally{clearTimeout(timer);}
+   const prove=async()=>{
+    const probe=new LocalHarnessRuntime(install);
+    const timer=setTimeout(()=>probe.cancel(),90_000);
+    try{await probe.run({action:'chat',text:'Reply with the single word: ready',_background:true},adapter.home('setup'));}
+    catch(error){throw new WorldletError((error as Error)?.name==='AbortError'?`${install.title} did not answer in time. Check that it is signed in, then try again.`:(error as Error)?.message||`${install.title} did not answer.`);}
+    finally{clearTimeout(timer);}
+   };
+   // That turn cold-starts the Agent and waits for its model, which takes half a minute for a large Hermes Agent. Setup
+   // (`checkLater`) moves on at once and hears how it ended (`onAgentCheck`); anything else waits for it as before.
+   const later=request.checkLater===true;
+   if(!later)await prove();
    writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id,error=>context.failure(error,'foxMove'));
    await switchTo(adapter);
-   return {ok:true,id:install.id,title:install.title,...connect?{connected:true}:{}};
+   if(later)void prove().then(()=>onAgentCheck({id:install.id,ok:true}),error=>onAgentCheck({id:install.id,ok:false,message:(error as Error).message}));
+   return {ok:true,id:install.id,title:install.title,...connect?{connected:true}:{},...later?{checking:true}:{}};
   }
   // The provider Fox's Agent answers with (core/agent/model-providers.ts): `providers` lists the ones it supports, which
   // it is signed in to and the chosen one; `provider` chooses one (null: the Agent's own default); `provider-sign-in`
@@ -459,6 +468,6 @@ export function installAgentRuntime(host:Host){
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
-  async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});})});
+  async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>host.page.event('worldlet:agent-check',event))});
  host.onQuit(()=>{endHermesInstall();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
 }
