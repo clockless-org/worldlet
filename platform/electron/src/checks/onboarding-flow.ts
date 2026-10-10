@@ -369,6 +369,8 @@ async function detectorCheck(){
   const repairedTurn=crypto.randomUUID().toUpperCase(),unrepaired='applet-'+crypto.randomUUID().toUpperCase();
   await saves({action:'chat',mode:'chat',monitor:true,attentionSynthesis:true,session:'attention-'+repairedTurn},'monitor',['save-1','save-2'],repairedTurn);
   await saves({action:'chat',mode:'chat',monitor:true,sourceAnalysis:true,analysisLane:'google-calendar',session:unrepaired},'applet-analysis',['save-1'],unrepaired);
+  // A source tool call refused within a turn (attention/tools.ts _source_begin) is that call's result, not failed work.
+  try{await ExecutionJournal.run({action:'sourceTool',name:'read_world_source',args:{}},home('source'),undefined,async()=>{throw Error('Source is unavailable or this turn reached its read limit.');});}catch{}
   // A kept page released under memory pressure (modules/browser/device.ts) is the host relieving
   // memory as designed, not failed background work.
   diagnostics.record(Error('Kept page released under memory pressure (lowMemory).'),'keptPageRelease');
@@ -378,6 +380,7 @@ async function detectorCheck(){
   const found=recordedFailures(root,db,diagnostics.recent());
   const report=found.failures.join('\n'),repaired=found.repaired.join('\n');
   if(report.includes('keptPageRelease'))throw Error(`The failure detector reported a kept-page release under memory pressure:\n${report}`);
+  if(report.includes('read limit')||!repaired.includes('Source tool read_world_source refused'))throw Error(`The failure detector reported a refused source tool call as failed work:\n${report}`);
   for(const expected of ['Agent run failed: appletAnalysis (google-calendar), session applet-detector','Agent returned an invalid final reply.','Runtime run failed for '+task,'diagnostics.jsonl: appletAnalysis',
    'diagnostics.jsonl: worldItemSave operationFailed at ','diagnostics.jsonl: historySync operationFailed at ','Z: Detector history unreadable.',`— upsert_world_items rejected in appletAnalysis (google-calendar), session ${unrepaired}, never repaired in that run, which ended run.succeeded: Detector rejected item.`])
    if(!report.includes(expected))throw Error(`The failure detector missed “${expected}” in:\n${report}`);
@@ -437,8 +440,12 @@ export function recordedFailures(root:string,db:WorldLedger,notes:DiagnosticNote
   const runID=typeof row.body?.runId==='string'?row.body.runId:row.key??'';
   const error=payload(row.seq)?.error;
   const text=typeof error==='string'?error:`no error text (history seq ${row.seq})`;
+  const request=startedRequest(runID);
+  // A source tool run (no model) answers one tool call of a turn: its refusal, such as a turn's read limit, is that
+  // call's result, and the turn goes on. Background collection that cannot go on fails its own run, reported below.
+  if(request?.action==='sourceTool'){repaired.push(`Source tool ${typeof request.name==='string'?request.name:'call'} refused (run ${runID}), returned to its turn: ${text}`);continue;}
   agentErrors.push({at:row.at,text});
-  failures.push(`Agent run failed: ${operation(startedRequest(runID))} (run ${runID}): ${text}`);
+  failures.push(`Agent run failed: ${operation(request)} (run ${runID}): ${text}`);
  }
  // The Agent error behind a host-side run, matched by time.
  const agentError=(started:unknown,finished:unknown)=>{
