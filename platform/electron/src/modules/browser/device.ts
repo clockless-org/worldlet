@@ -370,6 +370,8 @@ export class BrowserDevice {
   const recording=()=>this.store.writable&&!this.sample;
   // page_load_timing: from the page's document starting to load to it loaded or failed; buckets and the engine only.
   // An Electron page counts its main frame only: an iframe loading after the document finished would run until the next navigation.
+  // A CEF page's loading state counts its frames too, but CEF sends it false only after every load end, so a page that stops
+  // loading with no 'loaded' still open was an iframe loading later: that load is dropped, not timed.
   let loadStart=0;
   const documentLoading=()=>view instanceof CefPageView?view.isLoading:view.isLoadingMainFrame;
   const loadEnded=(outcome:'complete'|'error')=>{
@@ -406,7 +408,11 @@ export class BrowserDevice {
    if(!visible()||view.hidden||view.isLoading||view.hasPopup||this.sample||!this.store.writable||page.url!==view.url)return;
    this.activity.observe({page,active:this.surface.appActive()&&!view.hidden});
   };
-  view.onChange=()=>{if(documentLoading()&&!loadStart)loadStart=Date.now();if(visible())this.status();};
+  view.onChange=()=>{
+   if(documentLoading()){if(!loadStart)loadStart=Date.now();}
+   else if(view instanceof CefPageView)loadStart=0;
+   if(visible())this.status();
+  };
   view.onError=code=>{loadEnded('error');if(visible())this.navigationFailed(code);};
   view.onBookmark=value=>{
    if(!visible()||!isX(view.url)||value.kind!=='bookmark')return;
