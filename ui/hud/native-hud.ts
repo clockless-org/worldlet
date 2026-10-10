@@ -71,6 +71,9 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
   const watch=new ResizeObserver(queueBar);for(const e of [root,barLeft,barRight,root.querySelector('.companion-context')])if(e)watch.observe(e);
   // A new depth moves the title by its stylesheet: place the sides before that frame paints.
   new MutationObserver(placeBar).observe(root,{attributes:true,attributeFilter:['data-depth','data-detail-open','data-applet-shelf','class']});
+  // A control that appears or leaves (Picture in picture while a video plays) moves its side at once, not a frame later,
+  // and also where frames are held back (an occluded window, a headless check).
+  new MutationObserver(placeBar).observe(barRight,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
  }
  const tracker=el('nav','world-task-tracker ui-theme-attention');tracker.setAttribute('aria-label','Attention Center: Coming Up, Worth Doing and Worth Knowing');
  const trackerList=el('div','world-task-list');tracker.append(trackerList);root.append(tracker);
