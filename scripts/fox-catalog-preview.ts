@@ -1,10 +1,10 @@
 import {build} from 'esbuild';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {buildCompanionPresentation} from './build-companion-presentation.ts';
-import {FOX_STATES} from '../ui/companion/fox-state-catalog.ts';
+import {FOX_STATES} from '../ui/companion/animation/fox-state-catalog.ts';
 const sources=(await buildCompanionPresentation(process.cwd(),'dev')).companionAnatomy;
 const bundle=await build({stdin:{resolveDir:process.cwd(),contents:`
-import {loadAnatomyFox} from './ui/companion/fox-anatomy-runtime.ts';
+import {loadAnatomyFox} from './ui/companion/animation/fox-anatomy-runtime.ts';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
 const rig=await loadAnatomyFox(globalThis.sources,canvas),states=globalThis.states;
 const select=document.querySelector('select'),slider=document.querySelector('#time'),status=document.querySelector('#status'),play=document.querySelector('#play');

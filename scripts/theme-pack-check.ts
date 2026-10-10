@@ -7,7 +7,7 @@ import {ACTIVE_THEME,DEFAULT_THEME_ID,companionPerformance,createThemeEvents,par
 import {BUILTIN_STYLE,STYLE_TOKENS} from '../ui/components/style.ts';
 import {WORLD_LAYOUT,THEME_WORLD} from '../ui/world/world-layout.ts';
 import {villageCamera} from '../ui/world/village/village-camera.ts';
-import {FOX_STATES} from '../ui/companion/fox-state-catalog.ts';
+import {FOX_STATES} from '../ui/companion/animation/fox-state-catalog.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import {MOMENT_ART} from '../core/applets/moment.ts';
 import village from '../ui/theme-packages/village/pack.json' with {type:'json'};

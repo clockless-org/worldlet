@@ -11,7 +11,7 @@ try{
  // A secure origin, as in the app, for crypto.randomUUID.
  await page.route('http://localhost/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><main id="notionWorld" style="position:relative;width:1440px;height:900px"></main>'}));await page.goto('http://localhost/');
  await page.addStyleTag({content:readFileSync('ui/attention/attention-preview.css','utf8')+'\n#notionWorld .fox-artifact{position:absolute;left:400px;width:470px;flex-direction:column;padding:20px}#notionWorld .fox-artifact[data-size=small]{max-height:340px}#notionWorld .fox-artifact[data-size=large]{max-height:820px}'});
- await page.addScriptTag({content:await bundleScript({entryPoints:['ui/companion/fox-artifact.ts'],globalName:'artifact'})});
+ await page.addScriptTag({content:await bundleScript({entryPoints:['ui/artifacts/fox-artifact.ts'],globalName:'artifact'})});
  const result=await page.evaluate(async()=>{
   const errors:string[]=[];window.addEventListener('error',e=>errors.push(e.message));
   const frame=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));

@@ -37,7 +37,7 @@ for(const name of ['pixi-world.css','world-startup.css'])await copyFile(path.joi
 await copyFile(path.join(root,'ui/applets/gmail/focus.css'),path.join(output,'mail-focus.css'));
 // Draft Fox anatomy performances ship only with the dev resource pack (build-companion-presentation.ts),
 // so every other channel bundles an inert runtime instead of ~150 KB of unreachable studies.
-const draftAnatomy:Plugin={name:'dev-only-fox-anatomy',setup(build){build.onResolve({filter:/\/fox-anatomy-runtime\.ts$/},()=>({path:path.join(root,'ui/companion/fox-anatomy-runtime-release.ts')}));}};
+const draftAnatomy:Plugin={name:'dev-only-fox-anatomy',setup(build){build.onResolve({filter:/\/fox-anatomy-runtime\.ts$/},()=>({path:path.join(root,'ui/companion/animation/fox-anatomy-runtime-release.ts')}));}};
 // The Rive Fox (runtime ~2.7 MB) also ships only with the dev resource pack for now.
 const devChannel=JSON.parse(defines.__WORLDLET_CHANNEL__)==='dev';
 const projectionWorker=await build({entryPoints:[path.join(root,'ui/world/world-projection-worker.ts')],bundle:true,format:'iife',minify:true,write:false});

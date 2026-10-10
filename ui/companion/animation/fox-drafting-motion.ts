@@ -1,5 +1,5 @@
 import {rotatePoint as rotate,type RigPoint} from './fox-anatomy.ts';
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/drafting-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/drafting-rig.json' with {type:'json'};
 import {draftingArmPoint,draftingPaperPoint} from './fox-drafting-registration.ts';
 import {solveReadingArm} from './fox-reading-page.ts';
 import {idleSupport} from './fox-idle-support.ts';

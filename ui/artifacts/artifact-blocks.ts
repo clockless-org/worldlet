@@ -2,7 +2,7 @@ import {scaledAmount,type ArtifactBlock,type ArtifactAction} from '../../core/ar
 import {uiIcon} from '../components/index.ts';
 import {attentionSceneArt,attentionSceneIds} from '../attention/index.ts';
 import {ACTIVE_THEME,attentionPicture} from '../themes/index.ts';
-/** An answer's picture, as an Attention card's (ui/attention/CARD-SYSTEM.md): the painted scene Fox named, else the one
+/** An answer's picture, as an Attention card's (ui/artifacts/CARD-SYSTEM.md): the painted scene Fox named, else the one
  * its title and body match, else the general picture of its tone; none when Fox asked for a plain card. */
 export function artifactPicture({title='',body='',art,tone}:{title?:string;body?:string;art?:string|null;tone?:string|null}):string|null {
  if(art==='none')return null;
@@ -10,7 +10,7 @@ export function artifactPicture({title='',body='',art,tone}:{title?:string;body?
  const name=art&&attentionSceneIds.has(art)?'scene-'+art:attentionSceneArt({title,summary:String(body).slice(0,400),image:fallback});
  return attentionPicture(name,ACTIVE_THEME.pack.id,fallback);
 }
-// A fact row's icon is the Attention card's own line icon for its time and venue lines (ui/attention/CARD-SYSTEM.md).
+// A fact row's icon is the Attention card's own line icon for its time and venue lines (ui/artifacts/CARD-SYSTEM.md).
 const FACT_ICONS={time:'clock',place:'map',cost:'coins',person:'people',link:'link',note:'note'};
 // The parts of an artifact the person works with in place (core/artifacts/README.md#blocks). They are Worldlet's own
 // components in the Attention card's design (owner Order 2026-10-08: "attention card就是我们标准的design system"): the
@@ -71,7 +71,7 @@ export function renderArtifactBlocks(blocks:ArtifactBlock[],{live=false,onChange
    if(live){names.setAttribute('role','group');names.setAttribute('aria-labelledby',id);names.addEventListener('keydown',e=>{const k=(e as KeyboardEvent).key;if(k!=='ArrowRight'&&k!=='ArrowLeft')return;e.preventDefault();const i=(chosen+(k==='ArrowRight'?1:tabs.length-1))%tabs.length;choose(i);tabs[i].focus();});}
    choose(0);part.append(names,detail);
   }
-  // Showing blocks (ui/attention/CARD-SYSTEM.md): the same in the World and the Journal.
+  // Showing blocks (ui/artifacts/CARD-SYSTEM.md): the same in the World and the Journal.
   if(block.type==='callout'){part.dataset.tone=block.tone;part.append(el('p','artifact-callout',block.text));}
   if(block.type==='stats'){const tiles=el('div','artifact-stats');for(const item of block.items){const tile=el('div','artifact-stat');tile.append(el('strong','artifact-stat-value',item.value),el('span','artifact-stat-label',item.label));if(item.note)tile.append(el('span','artifact-stat-note',item.note));tiles.append(tile);}part.append(tiles);}
   if(block.type==='facts'){const rows=el('ul','artifact-facts');for(const row of block.rows){const li=el('li'),icon=el('span','artifact-fact-icon');icon.innerHTML=uiIcon(FACT_ICONS[row.icon]);li.dataset.icon=row.icon;li.append(icon,el('span','',row.text));rows.append(li);}part.append(rows);}

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {sourceReadAction,readRetryDelay} from '../core/applets/read-recovery.ts';
-import {quietSourceReader} from '../ui/shell/quiet-source-reader.ts';
+import {quietSourceReader} from '../ui/applets/_shared/quiet-source-reader.ts';
 assert.equal(sourceReadAction(Error('Network timed out')),null);
 assert.equal(sourceReadAction(Error('Fox is working. Try again when it finishes.')),null);
 assert.equal(sourceReadAction(Error('Your Google sign-in expired or was revoked. Reconnect with Fox.')),'reconnect');

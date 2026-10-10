@@ -1,7 +1,5 @@
 /** Public UI component interface. Keep implementation imports inside this component. */
 export {installDesktopCompanion} from './desktop-companion.ts';
-export {mountFoxArtifact} from './fox-artifact.ts';
-export {flyIntoJournal} from './journal-book.ts';
 export {createFoxDevPreviewControls} from './fox-dev-preview.ts';
 export {FOX_WORKING,foxDoing} from './fox-doing.ts';
 export {FOX_STATUS_EVENT} from './fox-name-tag.ts';

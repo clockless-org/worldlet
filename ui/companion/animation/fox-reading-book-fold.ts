@@ -1,5 +1,5 @@
 import type {RigPoint} from './fox-anatomy.ts';
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
 /** Orthographic projection of a hinged cover, not a shrinking whole sprite.
  * The book translates toward the supporting paw while its left cover closes.
  * Keep the spine and right cover rigid; cloth has no directional lettering. */

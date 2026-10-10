@@ -1,4 +1,4 @@
-import {localPathName} from '../../core/context/index.ts';
+import {localPathName} from '../../../core/context/index.ts';
 // Codex owns conversation history and execution. Only the selected session gets
 // the user's next Fox message; no Hermes prompt or unrelated world data is sent.
 export function createCodexApplet({call,renderMarkdown,onSelect,onState,onRequest,onRequestDone,isVisible}){

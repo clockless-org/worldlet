@@ -1,4 +1,4 @@
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/drafting-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/drafting-rig.json' with {type:'json'};
 import type {RigPoint} from './fox-anatomy.ts';
 
 /** Pixel-space similarity, not independent normalized x/y scaling: the source

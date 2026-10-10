@@ -179,7 +179,7 @@
 .fox-artifact>.fox-artifact-size{right:52px;top:14px;display:grid;place-items:center;opacity:.7}.fox-artifact>.fox-artifact-size:hover{opacity:1}
 .fox-artifact>.fox-artifact-origin{margin:0 84px -6px 0}
 /* An artifact never pages (owner Order 2026-10-07) and never scrolls (owner Order 2026-10-09): the card shows the fullest
-   version that fits (ui/companion/artifact-fit.ts), down to the one-sentence brief, and Show all gives it more room. */
+   version that fits (ui/artifacts/artifact-fit.ts), down to the one-sentence brief, and Show all gives it more room. */
 .fox-artifact-body{font:400 16px/1.5 var(--ui-font-ui);overflow-wrap:anywhere;flex:0 1 auto;min-height:0;overflow:hidden}
 .fox-artifact-body .fox-artifact-brief{margin:0;font-size:1.125em;line-height:1.45}
 .fox-artifact>.fox-artifact-more{display:flex;flex-shrink:0}.fox-artifact>.fox-artifact-more[hidden]{display:none}
@@ -198,7 +198,7 @@
 .fox-artifact .fox-artifact-body hr{display:none}
 .fox-artifact .fox-artifact-body p{margin:0 0 12px}.fox-artifact-body figure{margin:0 0 18px}.fox-artifact-body figcaption{font-weight:600;margin-bottom:8px}
 .fox-artifact-bar{display:grid;grid-template-columns:100px 1fr 80px;align-items:center;gap:8px;margin:7px 0}.fox-artifact-bar i{height:12px;background:color-mix(in srgb,var(--attention-accent) 70%,transparent);border-radius:3px}.fox-artifact-bar span:last-child{text-align:right;font-size:13px}
-/* The card system (ui/attention/CARD-SYSTEM.md, owner Order 2026-10-08). Tones are the Attention card's own accents,
+/* The card system (ui/artifacts/CARD-SYSTEM.md, owner Order 2026-10-08). Tones are the Attention card's own accents,
    one per kind of thing; a card, a Journal card or one block sets its tone and everything inside follows it. */
 :is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=moss]{--attention-accent:#315f48}
 :is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=teal]{--attention-accent:#28718a}

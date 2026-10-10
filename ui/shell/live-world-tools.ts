@@ -1,4 +1,4 @@
-import {searchNotes} from './note-search.ts';
+import {searchNotes} from '../applets/index.ts';
 import {WORLD_APPS} from '../../core/applets/index.ts';
 import {turnWriteAdmission} from '../../core/agent/index.ts';
 // All model actions stay within this allowlist. No code evaluation or external writes.

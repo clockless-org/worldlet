@@ -7,8 +7,9 @@ Shared rendering and interaction. Components, by [feature](../docs/UI-CORE-PLATF
 - World: world, hud, themes, theme-packages
 - Applets: applets, browser, games, practice
 - Companion: companion
-- Attention: attention (the Attention Center; it also holds the card system for now)
-- Tasks and Artifacts & Journal have no UI folder yet; see the [feature table](../docs/UI-CORE-PLATFORM.md#features)
+- Attention: attention (the Attention Center)
+- Artifacts & Journal: artifacts (the card system and the Journal book)
+- Tasks has no UI folder: its status shows in Fox and on Applets
 - Base: shell, components, onboarding, distribution
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).

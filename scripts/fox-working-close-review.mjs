@@ -1,9 +1,9 @@
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
-import {anatomyMatrices,anatomyArmVertex} from '../ui/companion/fox-anatomy.ts';
-import {workingCloseStudy,WORKING_CLOSE_CONTACT} from '../ui/companion/fox-working-close-study.ts';
-import {workingLidPoint} from '../ui/companion/fox-working-device.ts';
+import {anatomyMatrices,anatomyArmVertex} from '../ui/companion/animation/fox-anatomy.ts';
+import {workingCloseStudy,WORKING_CLOSE_CONTACT} from '../ui/companion/animation/fox-working-close-study.ts';
+import {workingLidPoint} from '../ui/companion/animation/fox-working-device.ts';
 // Browser plugin not available. Reproduce the isolated contact study, not live QA.
 let previousClosure=0,contactSamples=0;
 for(let i=0;i<=528;i++){
@@ -28,7 +28,7 @@ const require=createRequire(root+'/package.json'),{build}=require('esbuild'),{ch
 const img=async path=>'data:image/png;base64,'+(await readFile(root+'/'+path)).toString('base64');
 const draft='resources/styles/builtin/drafts/fox-states-v1/';
 const args=await Promise.all(['resources/styles/builtin/assets/companion/rig/fallback.png',draft+'body-underpaint.png',draft+'complete-forelimbs.png',draft+'ear-root-underpaint.png',draft+'neck-underpaint.png',draft+'working-device.png',draft+'working-base-complete-v1.png'].map(img));
-const bundle=await build({stdin:{resolveDir:root,contents:`import {createAnatomyInspector} from './ui/companion/fox-anatomy-inspector.ts';import {workingCloseStudy} from './ui/companion/fox-working-close-study.ts';import {workingHandlingReview} from './ui/companion/fox-working-handling.ts';import {registerWorkingDevice,workingLidPoint} from './ui/companion/fox-working-device.ts';import {drawAnatomySkin} from './ui/companion/fox-anatomy-skin.ts';globalThis.api={createAnatomyInspector,sample:${handling?'workingHandlingReview':'workingCloseStudy'},registerWorkingDevice,workingLidPoint,drawAnatomySkin};`},bundle:true,write:false,format:'iife'});
+const bundle=await build({stdin:{resolveDir:root,contents:`import {createAnatomyInspector} from './ui/companion/animation/fox-anatomy-inspector.ts';import {workingCloseStudy} from './ui/companion/animation/fox-working-close-study.ts';import {workingHandlingReview} from './ui/companion/animation/fox-working-handling.ts';import {registerWorkingDevice,workingLidPoint} from './ui/companion/animation/fox-working-device.ts';import {drawAnatomySkin} from './ui/companion/animation/fox-anatomy-skin.ts';globalThis.api={createAnatomyInspector,sample:${handling?'workingHandlingReview':'workingCloseStudy'},registerWorkingDevice,workingLidPoint,drawAnatomySkin};`},bundle:true,write:false,format:'iife'});
 const browser=await chromium.launch();try{
  const page=await browser.newPage({viewport:{width:1120,height:850}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));

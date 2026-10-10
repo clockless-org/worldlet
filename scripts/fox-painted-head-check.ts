@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {paintedPose,paintedVertex,type PaintedPose} from '../ui/companion/fox-painted-idle.ts';
-import {paintedAction} from '../ui/companion/fox-painted-actions.ts';
+import {paintedPose,paintedVertex,type PaintedPose} from '../ui/companion/animation/fox-painted-idle.ts';
+import {paintedAction} from '../ui/companion/animation/fox-painted-actions.ts';
 import {FOX_ACTIONS} from '../ui/companion/fox-actions.ts';
 
 const neutral=paintedPose(0,true);

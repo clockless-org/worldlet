@@ -29,7 +29,7 @@ const dev=await buildCompanionPresentation(process.cwd(),'dev');
 const dir=await mkdtemp(path.join(tmpdir(),'companion-look-'));
 const browser=await launchTestBrowser({args:['--allow-file-access-from-files']});
 try{
- const bundle=await build({stdin:{resolveDir:process.cwd(),contents:`import {loadRiveFox} from './ui/companion/fox-rive.ts';import {parseCompanionLook} from './core/companion/index.ts';Object.assign(globalThis,{loadRiveFox,parseCompanionLook});`},bundle:true,format:'iife',write:false});
+ const bundle=await build({stdin:{resolveDir:process.cwd(),contents:`import {loadRiveFox} from './ui/companion/animation/fox-rive.ts';import {parseCompanionLook} from './core/companion/index.ts';Object.assign(globalThis,{loadRiveFox,parseCompanionLook});`},bundle:true,format:'iife',write:false});
  await writeFile(path.join(dir,'test.js'),bundle.outputFiles[0].text);
  await writeFile(path.join(dir,'assets.js'),'globalThis.riv='+JSON.stringify(dev.companionRive)+';');
  const csp="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; worker-src blob:";

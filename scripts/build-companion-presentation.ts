@@ -1,8 +1,8 @@
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {ACTIVE_THEME,type RegisteredTheme} from '../ui/themes/index.ts';
-import type {AnatomyRuntimeSources} from '../ui/companion/fox-anatomy-runtime.ts';
-import type {ThemeSpriteRig} from '../ui/companion/theme-sprite-rig.ts';
+import type {AnatomyRuntimeSources} from '../ui/companion/animation/fox-anatomy-runtime.ts';
+import type {ThemeSpriteRig} from '../ui/companion/animation/theme-sprite-rig.ts';
 
 /** Every channel plays the Rive Fox in the portrait, with the accepted painted
  * renderer as its fallback. Development also carries the draft anatomy rig as

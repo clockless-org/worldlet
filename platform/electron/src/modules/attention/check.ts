@@ -11,7 +11,7 @@ import {WORLD_TOOLS} from '../../host/services.ts';
 import type {WorldToolsService} from '../../host/services.ts';
 import type {ActionHandler,Host,Row} from '../../host/types.ts';
 import {installAttention} from './index.ts';
-import {installOngoing} from '../ongoing/index.ts';
+import {installOngoing} from '../tasks/index.ts';
 import {installWorld} from '../world.ts';
 import {ONGOING,type OngoingService} from '../../host/services.ts';
 import {conversationAttentionId} from '../../../../../core/tasks/index.ts';

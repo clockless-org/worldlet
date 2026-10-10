@@ -202,14 +202,14 @@ export interface FoxService {
  appletTask(id:string):string|null;
  /** Which source charges the world now (`foxEnergy`). */
  energy():Promise<{source:'chatgpt'|'own'|'none'}>;
- /** Fox says one line in a chat thread unasked (how a call it placed went, modules/ongoing/harness-calls.ts): it joins
+ /** Fox says one line in a chat thread unasked (how a call it placed went, modules/tasks/harness-calls.ts): it joins
   * that thread's history in the person's own world, shows in the Fox bar when the person is there, and reaches the
   * paired phone. False when there is no own world to say it in (setup, the practice world). */
  report?(line:string,thread:string):boolean;
 }
 export const FOX='fox';
 
-// Phone pairing (modules/phone) and widgets (modules/widgets) ------------------------------------
+// Phone pairing (modules/phone) and widgets (modules/artifacts) ------------------------------------
 export interface PhoneService {
  /** Sends a desktop slot to the paired phone when it changed (kept for a phone that pairs later). */
  publish(slot:'widgets',value:unknown):Promise<boolean>;

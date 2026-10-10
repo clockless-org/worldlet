@@ -1,6 +1,6 @@
 import {drawAnatomySkin} from './fox-anatomy-skin.ts';
 import type {RigPoint} from './fox-anatomy.ts';
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
 import {readingPagePhase,readingPagePoint,readingPageHandTarget,solveReadingArm} from './fox-reading-page.ts';
 import {readingBookFold,readingBookPlacement} from './fox-reading-book-fold.ts';
 import {smooth} from './fox-skeleton.ts';

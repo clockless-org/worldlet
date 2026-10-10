@@ -29,7 +29,7 @@ body.setAttribute('aria-label','Artifact contents');
  };
  // Next steps Fox offered: a click asks Fox in the person's name (core/artifacts/README.md#actions).
  const actions=document.createElement('div');actions.className='attention-preview-actions fox-artifact-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label','Next steps');actions.hidden=true;
- // The card system (ui/attention/CARD-SYSTEM.md): an answer has the Attention card's painted picture, here a band across
+ // The card system (ui/artifacts/CARD-SYSTEM.md): an answer has the Attention card's painted picture, here a band across
  // its head behind the paper scrim, and a tone that colours its labels, rules and buttons.
  const art=document.createElement('img');art.className='attention-preview-art fox-artifact-art';art.alt='';art.setAttribute('aria-hidden','true');
  const scrim=document.createElement('div');scrim.className='attention-preview-scrim fox-artifact-scrim';scrim.setAttribute('aria-hidden','true');

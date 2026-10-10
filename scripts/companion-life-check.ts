@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import {activityPose,ambientPose} from '../ui/companion/companion-life.ts';
-import {companionPose} from '../ui/companion/companion-frames.ts';
+import {companionPose} from '../ui/companion/animation/companion-frames.ts';
 assert.equal(companionPose('idle',180000),'idle');
 assert.equal(ambientPose(7400),null);
 assert.equal(ambientPose(8000),'looking');

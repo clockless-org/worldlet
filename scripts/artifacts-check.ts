@@ -215,7 +215,7 @@ assert.deepEqual(madeArtifacts({}),[]);
  assert.equal(defaultArtifactSize('Fluffy.',null,[steps]),'medium','A card with blocks is at least medium');
  assert.ok(artifactWeight('x',null,[recipe,steps])>artifactWeight('x',null),'Blocks count toward the one-card budget');
 }
-// The card system (ui/attention/CARD-SYSTEM.md): tones, a picture, and the showing blocks.
+// The card system (ui/artifacts/CARD-SYSTEM.md): tones, a picture, and the showing blocks.
 {
  const {readArtifactBlocks}=await import('../core/artifacts/index.ts');
  const callout={type:'callout',label:'Before you pay',text:'Run the self-scan first.',tone:'clay'};

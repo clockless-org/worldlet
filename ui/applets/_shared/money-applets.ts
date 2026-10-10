@@ -1,4 +1,4 @@
-import {stripeMoney} from '../applets/index.ts';
+import {stripeMoney} from '../index.ts';
 const amounts=values=>values?.length?values.map(v=>stripeMoney(v.amount,v.currency)).join(' · '):'No amounts in this read';
 // Provider adapters return plain text, never provider HTML or model-generated totals.
 export function stripeOverview(value){

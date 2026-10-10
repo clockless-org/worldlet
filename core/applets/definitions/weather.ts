@@ -1,6 +1,6 @@
 import type {AppletMotion} from '../../../contracts/world.ts';
 // Not an account Applet. The forecast, refresh and staleness rules already run in
-// Weather.swift and ui/shell/world-environment.ts; this gives that data a body.
+// Weather.swift and ui/world/world-environment.ts; this gives that data a body.
 export default {
  attention:{version:1,provider:'weather',reader:'observation',intervalMinutes:30,freshnessMinutes:120} as const,
  motion:{version:2,kind:'sprite-frames',columns:3,rows:2,frames:6,fps:8,ambient:false} satisfies AppletMotion,

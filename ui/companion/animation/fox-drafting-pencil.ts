@@ -1,4 +1,4 @@
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/drafting-release-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/drafting-release-rig.json' with {type:'json'};
 import type {RigPoint} from './fox-anatomy.ts';
 /** Restore the independently painted pencil to the held atlas coordinates.
  * Both endpoints constrain one rotation/uniform scale, never a warped shaft. */

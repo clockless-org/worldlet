@@ -1,6 +1,6 @@
 import {anatomyArmVertex} from './fox-anatomy.ts';
 import type {RigPoint,RigMatrix} from './fox-anatomy.ts';
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/search-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/search-rig.json' with {type:'json'};
 export const SEARCH_PROP={...definition,grip:definition.grip as unknown as RigPoint,paw:definition.paw as unknown as RigPoint};
 /** Preserve the dock painting's aspect ratio; the groove meets the parked
  * handle tip. Its registration belongs to the draft style resource pack. */

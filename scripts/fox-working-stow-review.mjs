@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {build} from 'esbuild';
 import {chromium} from 'playwright';
-import {workingStowStudy,WORKING_STOW_CONTACTS,WORKING_STOW_DURATION} from '../ui/companion/fox-working-stow-study.ts';
-import {anatomyMatrices,anatomyArmVertex,transform} from '../ui/companion/fox-anatomy.ts';
-import {placeWorkingPoint} from '../ui/companion/fox-working-device.ts';
-import {seatedBodyVertex} from '../ui/companion/fox-seated-support.ts';
+import {workingStowStudy,WORKING_STOW_CONTACTS,WORKING_STOW_DURATION} from '../ui/companion/animation/fox-working-stow-study.ts';
+import {anatomyMatrices,anatomyArmVertex,transform} from '../ui/companion/animation/fox-anatomy.ts';
+import {placeWorkingPoint} from '../ui/companion/animation/fox-working-device.ts';
+import {seatedBodyVertex} from '../ui/companion/animation/fox-seated-support.ts';
 
 let maxContact=0,maxStep=0,minArea=Infinity,maxArea=0,previous;
 for(let t=0;t<=WORKING_STOW_DURATION;t+=10){
@@ -42,7 +42,7 @@ assert.deepEqual(workingStowStudy(0,true),workingStowStudy(5400));
 for(const t of [-1,NaN,Infinity])assert.throws(()=>workingStowStudy(t));
 const handling=process.argv.includes('--handling'),root=process.cwd(),draft='resources/styles/builtin/drafts/fox-states-v1/';
 const assets=await Promise.all(['resources/styles/builtin/assets/companion/rig/fallback.png',draft+'body-underpaint.png',draft+'complete-forelimbs.png',draft+'ear-root-underpaint.png',draft+'neck-underpaint.png',draft+'working-device.png',draft+'working-base-complete-v1.png'].map(async p=>'data:image/png;base64,'+(await readFile(p)).toString('base64')));
-const bundle=await build({stdin:{resolveDir:root,contents:`import {createAnatomyInspector} from './ui/companion/fox-anatomy-inspector.ts';import {workingStowStudy} from './ui/companion/fox-working-stow-study.ts';import {workingStowReview} from './ui/companion/fox-working-stow-player.ts';import {registerWorkingDevice,workingLidPoint,placeWorkingPoint} from './ui/companion/fox-working-device.ts';import {drawAnatomySkin} from './ui/companion/fox-anatomy-skin.ts';globalThis.api={createAnatomyInspector,registerWorkingDevice,workingLidPoint,placeWorkingPoint,drawAnatomySkin,sample:${handling?'workingStowReview':'workingStowStudy'}};`},bundle:true,write:false,format:'iife'});
+const bundle=await build({stdin:{resolveDir:root,contents:`import {createAnatomyInspector} from './ui/companion/animation/fox-anatomy-inspector.ts';import {workingStowStudy} from './ui/companion/animation/fox-working-stow-study.ts';import {workingStowReview} from './ui/companion/animation/fox-working-stow-player.ts';import {registerWorkingDevice,workingLidPoint,placeWorkingPoint} from './ui/companion/animation/fox-working-device.ts';import {drawAnatomySkin} from './ui/companion/animation/fox-anatomy-skin.ts';globalThis.api={createAnatomyInspector,registerWorkingDevice,workingLidPoint,placeWorkingPoint,drawAnatomySkin,sample:${handling?'workingStowReview':'workingStowStudy'}};`},bundle:true,write:false,format:'iife'});
 if(handling)assert(!bundle.outputFiles[0].text.includes('function grip('),'Iterative IK leaked into the playback bundle');
 // Browser plugin not available; existing Playwright renders the isolated study.
 const browser=await chromium.launch();try{

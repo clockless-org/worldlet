@@ -26,7 +26,7 @@ export type ArtifactBlock=
  |{type:'steps';label:string;items:{title:string;detail:string;when:string}[]}
  |{type:'compare';label:string;options:{name:string;note:string;points:string[];pick:boolean}[]}
  |{type:'tags';label:string;items:string[]};
-/** The card system's tones (ui/attention/CARD-SYSTEM.md): the Attention card's own accents, one per kind of thing, so a
+/** The card system's tones (ui/artifacts/CARD-SYSTEM.md): the Attention card's own accents, one per kind of thing, so a
  * card's colour says what it is about. Moss is an answer's default. */
 export const ARTIFACT_TONES=['moss','teal','honey','sage','clay','plum'] as const;
 export type ArtifactTone=typeof ARTIFACT_TONES[number];
@@ -229,7 +229,7 @@ function readBlock(b:any):ArtifactBlock|null {
 const list=(value:unknown,min:number,max:number)=>Array.isArray(value)&&value.length>=min&&value.length<=max?value:null;
 const tone=(value:unknown):ArtifactTone|null=>ARTIFACT_TONES.includes(value as ArtifactTone)?value as ArtifactTone:null;
 const every=<T>(items:(T|null)[]):items is T[]=>items.every(i=>i!==null);
-/** The card system's showing blocks (ui/attention/CARD-SYSTEM.md): a callout, figures, fact rows, steps, a comparison
+/** The card system's showing blocks (ui/artifacts/CARD-SYSTEM.md): a callout, figures, fact rows, steps, a comparison
  * and tags. Optional text is '' when there is none. */
 function readShowingBlock(b:any,label:string):ArtifactBlock|null {
  const L=ARTIFACT_LIMITS,optional=(value:unknown,count:number)=>value===''||value==null?'':text(value,count);

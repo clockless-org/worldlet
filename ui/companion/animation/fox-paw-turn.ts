@@ -2,7 +2,7 @@ import {FOX_ANATOMY,anatomyArmVertex} from './fox-anatomy.ts';
 import type {RigMatrix,RigPoint} from './fox-anatomy.ts';
 import type {AnatomicalTexture} from './fox-anatomy-art.ts';
 import {smoother as smooth} from './fox-skeleton.ts';
-import sideSpec from '../../resources/styles/builtin/drafts/fox-states-v1/paw-side.json' with {type:'json'};
+import sideSpec from '../../../resources/styles/builtin/drafts/fox-states-v1/paw-side.json' with {type:'json'};
 
 /** Use the registered painted open paw from the explaining-pose derivative. Only
  * this local sprite is registered; no generated head/body pixels are used.

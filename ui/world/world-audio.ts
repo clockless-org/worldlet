@@ -9,7 +9,7 @@
 import {celebrationSound} from './celebration-sound.ts';
 import {uiIcon} from '../components/index.ts';
 import {ACTIVE_THEME,themeAmbientTrack,syncThemeSounds} from '../themes/index.ts';
-import {windowActive} from '../world/index.ts';
+import {windowActive} from './index.ts';
 
 const AMBIENCE_ICONS={ocean:'wave',rain:'drop',forest:'tree',village:'breeze'};
 const QUIET_ICON='breeze';

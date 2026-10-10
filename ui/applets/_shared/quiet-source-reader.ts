@@ -1,4 +1,4 @@
-import {readRetryDelay,sourceReadAction} from '../../core/applets/index.ts';
+import {readRetryDelay,sourceReadAction} from '../../../core/applets/index.ts';
 // Inventory reads only. Never retries sends, writes, bookings, or Agent turns.
 export function quietSourceReader({read,enabled,onSuccess,onIssue,schedule=(fn:()=>void,delay:number):any=>setTimeout(fn,delay),cancel=(timer:any)=>clearTimeout(timer)}){
  const entries=new Map();let stopped=false;

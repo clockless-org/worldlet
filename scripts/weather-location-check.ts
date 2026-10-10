@@ -4,7 +4,7 @@ declare global {var WeatherFixture:any;}
 
 await withBrowser(async browser=>{
  const page=await browser.newPage(),errors=pageErrors(page);
- const bundle=await bundleScript({stdin:{contents:`export {mountWorldEnvironment} from './ui/shell/world-environment.ts';export {createWorldToolRuntime} from './platform/bridge/world-tool-runtime.ts';`,resolveDir:process.cwd()},globalName:'WeatherFixture'});
+ const bundle=await bundleScript({stdin:{contents:`export {mountWorldEnvironment} from './ui/world/world-environment.ts';export {createWorldToolRuntime} from './platform/bridge/world-tool-runtime.ts';`,resolveDir:process.cwd()},globalName:'WeatherFixture'});
  await page.route('https://weather-check.invalid/',route=>route.fulfill({contentType:'text/html',body:'<main><div class="notion-top"></div></main>'}));
  await page.goto('https://weather-check.invalid/');await page.addScriptTag({content:bundle});
  const results=await page.evaluate(async()=>{

@@ -8,7 +8,7 @@ built-in manifest registers the original `rig/fallback.png` plus the half-closed
 and closed eyelid paintings here. The original illustration is not regenerated.
 Generation prompts and provenance remain in `../../../drafts/fox-painted-idle/README.md`.
 
-`ui/companion/fox-painted-idle.ts` keeps the original pixels outside feathered eye
+`ui/companion/animation/fox-painted-idle.ts` keeps the original pixels outside feathered eye
 patches and continuously deforms a 64 × 64 mesh. `fox-painted-actions.ts` layers
 seated body-weight shifts, shoulder raises, forepaw flexes, head gestures and tail
 motion over it. `fox-pose-transition.ts` preserves pose and velocity on interrupted
