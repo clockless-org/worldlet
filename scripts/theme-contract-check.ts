@@ -39,12 +39,14 @@ const frozen=await fs.readFile(snapshot,'utf8').catch(async()=>{
 });
 
 // What a package produces flows to the host: frozen → current. What the host provides flows to a package: current → frozen.
-const fromPackage=['BuildTheme','BuildThemeManifest','ThemePresentation','ThemeScene','ThemeHud','ThemeSound','ThemeMount','ThemeWorldMount'];
-const toPackage=['ThemeAppletContext','ThemeWorldContext','ThemeWorldState','ThemeWorldApplet','ThemeItem','ThemeActions','ThemeScene','ThemePresentation','ThemeRecord'];
+const fromPackage=['BuildTheme','BuildThemeManifest','ThemePresentation','ThemeScene','ThemeHud','ThemeSound','ThemeMount','ThemeWorldMount','ThemeWorldMark'];
+const toPackage=['ThemeAppletContext','ThemeWorldContext','ThemeWorldState','ThemeWorldApplet','ThemeWorldEvent','ThemeItem','ThemeActions','ThemeScene','ThemePresentation','ThemeRecord'];
+// A type added since the freeze has nothing frozen to compare with; the next --freeze adds it.
+const shipped=(name:string)=>new RegExp(`export (interface|type) ${name}\\b`).test(frozen);
 const probe=path.join(root,'ui/themes/__theme_contract_probe__.ts');
 const source=`import type * as F from './frozen/contract-v${BUILD_THEME_CONTRACT_VERSION}.d.ts';\nimport type * as C from './build-theme-contract.ts';\n`+
- fromPackage.map(name=>`export const from_${name}=(v:F.${name}):C.${name}=>v;\n`).join('')+
- toPackage.map(name=>`export const to_${name}=(v:C.${name}):F.${name}=>v;\n`).join('');
+ fromPackage.filter(shipped).map(name=>`export const from_${name}=(v:F.${name}):C.${name}=>v;\n`).join('')+
+ toPackage.filter(shipped).map(name=>`export const to_${name}=(v:C.${name}):F.${name}=>v;\n`).join('');
 const host=ts.createCompilerHost(options),read=host.readFile,exists=host.fileExists;
 host.readFile=file=>file===probe?source:read(file);host.fileExists=file=>file===probe||exists(file);
 const program=ts.createProgram([probe],{...options,noEmit:true},host);

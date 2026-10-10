@@ -51,10 +51,15 @@ export default sim;
 | --- | --- |
 | `renderWorld` | Owned host element, scene, world snapshot, navigation, menu and move capabilities. Theme draws the map, areas, Applet icons, hover and drop targets. |
 | World `update` | Current view, stable Applet IDs and titles, the host's picture of each Applet (`icon`, to show wherever the theme has no art of its own), availability, counts, regions, pinned slots, environment, motion and interaction hints. No credentials or host DOM internals. |
-| World `event` | `mail.received` and `applet.arrived`; return whether the theme presented the cue. Respect reduced motion. |
+| World `event` | `mail.received` and `applet.arrived` (fired when Applets are unlocked; optional `from: 'center'` with their `icons`, or `settled` when they are already in place); return whether the theme presented the cue, or a promise for an arrival that settles when the Applets have landed. Respect reduced motion. |
 | World `anchor` / `bounds` | Applet anchor and hit rectangle in CSS pixels relative to the host, or null. Background, button and anchor must use the same transform. |
+| World `marks` (optional) | Report where the host draws its shared overlays (`applet`, `area`, `area-add` and `slot` marks: position, visibility, name, lamp and attention offsets). A theme that calls it draws no buttons, names or lamp labels of its own; the host draws the same ones in every theme. |
+| World state, optional fields | Per Applet: `lamp` (`off`, `ready`, `processing`, `error`, as the host shows it), `connected`, `mine`, `object`. Interaction: `locked` (first use), `covered` (tour, dialog or preview over the World), `detailOpen`, `website`. `paused` when nobody can see the World. |
+| World `back` (optional) | Leave the open area or Applet, as the host's Back does. |
+| Mount `behindApplet`, `picture`, `metrics` (optional) | Keep the World drawn behind an open Applet; a picture of the screen for the zoom between World and Applet; renderer facts for checks. |
 | `renderApplet` | Applet identity, selected scene, display records, loading/connection/error state and capabilities. Every ID must render, using the generic scene when necessary. |
 | `actions.openItem` | Open a supplied ID through the original host reader. Unknown IDs are ignored. |
+| `actions.loadMore`, `data.scope` (optional) | Read more items, when the host can; what the items cover when it is not everything. |
 | `actions.records` | Optional save/remove methods, supplied only for supported writes. Current host exposes local Calendar operations. A theme cannot create unavailable account capabilities. |
 | `renderDefault` | Mount the host's richer reader inside a theme-owned content slot, e.g. the full Calendar grid. |
 | `invalidate` | Request a fresh render from current host data. |
