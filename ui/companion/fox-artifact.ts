@@ -12,17 +12,18 @@ export function mountFoxArtifact(root,renderMarkdown,onClose,onLink,onResize:(si
  const close=document.createElement('button');close.className='attention-preview-control';close.textContent='×';close.setAttribute('aria-label','Close artifact');close.onclick=onClose;
  const category=document.createElement('span');category.className='attention-preview-category fox-artifact-origin';category.textContent='From this conversation';
  const resize=document.createElement('button');resize.type='button';resize.className='attention-preview-control fox-artifact-size';
- // The control grows a card a step at a time (small, medium, large); a large one shrinks back to medium.
- resize.onclick=()=>{setSize(panel.dataset.size==='large'?'medium':panel.dataset.size==='small'?'medium':'large');onResize(panel.dataset.size);layout();};
+ // One control for every card, in the World and over an Applet (owner Order 2026-10-09): it grows a card a step at a
+ // time (small, medium, large); a large one shrinks back to small.
+ resize.onclick=()=>{delete panel.dataset.expanded;setSize(panel.dataset.size==='small'?'medium':panel.dataset.size==='medium'?'large':'small');onResize(panel.dataset.size);layout();};
  const body=document.createElement('div');body.className='fox-artifact-body';
 body.setAttribute('aria-label','Artifact contents');
- // Shown when the card left something out: in the World it makes the card large; in an Applet's corner, where the card
- // has no size control, it lets the card reach down Fox's column, and Show less gives the room back.
+ // Shown when the card left something out: in the World it makes the card large; over an Applet it grows the card one
+ // size, so the corner card reaches down Fox's column before it covers the Applet.
  const moreRow=document.createElement('div');moreRow.className='fox-artifact-more';moreRow.hidden=true;
  const more=document.createElement('button');more.type='button';more.className='attention-preview-action';moreRow.append(more);
  more.onclick=()=>{
   if(panel.dataset.expanded==='true')delete panel.dataset.expanded;
-  else if(sizeable()&&panel.dataset.size!=='large'){setSize('large');onResize('large');}
+  else if(sizeable()&&panel.dataset.size!=='large'){const next=inApplet()&&panel.dataset.size==='small'?'medium':'large';setSize(next);onResize(next);}
   else panel.dataset.expanded='true';
   layout();
  };
@@ -52,8 +53,9 @@ body.setAttribute('aria-label','Artifact contents');
   if(step.blocks)content.append(renderArtifactBlocks(blocks.slice(0,step.blocks),{live:true,onRequest:onAction,onChange:next=>{blocks=[...next,...blocks.slice(next.length)];onBlocks(blocks);}}));
   return content;
  }
- // The size control is the World card's; the corner card over an Applet has none.
+ // The size control is on every desktop card. Over an Applet a card opens small, in the corner, whatever size Fox named.
  const sizeable=()=>getComputedStyle(resize).display!=='none';
+ const inApplet=()=>root.dataset.depth==='object'||root.dataset.depth==='note';
  // The card grows with its content up to its cap (a large one to the height it has beside Fox) and shows the fullest
  // step that fits there. It fits again when its room changes or what it shows no longer fits, not when its own content
  // makes it taller.
@@ -80,7 +82,7 @@ body.setAttribute('aria-label','Artifact contents');
  new MutationObserver(refit).observe(root,{attributes:true,attributeFilter:['data-fox-lane','data-depth']});
  return {show(args){
   const problem=artifactInputProblem(args);if(problem)return {error:problem};const c=args.chart;
-  source=args.body;detail=typeof args.detail==='string'?args.detail:'';brief=typeof args.brief==='string'?args.brief:'';chart=c;blocks=readArtifactBlocks(args.blocks);delete panel.dataset.expanded;panel.dataset.tone=ARTIFACT_TONES.includes(args.tone)?args.tone:'moss';{const picture=artifactPicture({title:args.title,body:args.body,art:args.art,tone:args.tone});art.hidden=scrim.hidden=!picture;if(picture){art.src=picture;panel.dataset.art='illustration';}else{art.removeAttribute('src');delete panel.dataset.art;}}title.textContent=args.title;panel.dataset.sourceId='artifact:'+(typeof args.id==='string'?args.id:crypto.randomUUID());category.textContent=typeof args.label==='string'&&args.label?args.label:'From this conversation';setSize(artifactSizeFor(args.size,args.body,c,blocks));
+  source=args.body;detail=typeof args.detail==='string'?args.detail:'';brief=typeof args.brief==='string'?args.brief:'';chart=c;blocks=readArtifactBlocks(args.blocks);delete panel.dataset.expanded;panel.dataset.tone=ARTIFACT_TONES.includes(args.tone)?args.tone:'moss';{const picture=artifactPicture({title:args.title,body:args.body,art:args.art,tone:args.tone});art.hidden=scrim.hidden=!picture;if(picture){art.src=picture;panel.dataset.art='illustration';}else{art.removeAttribute('src');delete panel.dataset.art;}}title.textContent=args.title;panel.dataset.sourceId='artifact:'+(typeof args.id==='string'?args.id:crypto.randomUUID());category.textContent=typeof args.label==='string'&&args.label?args.label:'From this conversation';setSize(inApplet()?'small':artifactSizeFor(args.size,args.body,c,blocks));
   actions.replaceChildren(...readArtifactActions(args.actions).map((action,i)=>{const b=document.createElement('button');b.type='button';b.className='attention-preview-action'+(i===0?' attention-preview-action-primary':'');b.textContent=action.label;b.onclick=()=>onAction(action);return b;}));
   actions.hidden=!actions.childElementCount;
   panel.hidden=false;layout();return {ok:true,id:panel.dataset.sourceId,title:args.title,size:panel.dataset.size,shows:shown?.step.text,leftOut:!!shown?.index};

@@ -57,7 +57,7 @@ await withBrowser(fileAccess,async browser=>{
 
  await card.getByRole('button',{name:'Make artifact smaller'}).click();
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as HTMLElement).dataset.foxLane==='false');
- assert.equal(await card.getAttribute('data-size'),'medium');
+ assert.equal(await card.getAttribute('data-size'),'small','A large card shrinks back to small: the one control cycles three sizes');
 
  await ask('table');
  assert.equal(await card.getAttribute('data-size'),'medium','A small table is a medium artifact unless Fox says otherwise');
@@ -75,8 +75,21 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(art.x>=1440-Math.max(1440/3,464),'It stays in Fox\'s column and leaves the Applet in view '+JSON.stringify(art));
  assert.ok(art.y+art.height<=fox.y,'It sits above Fox\'s words '+JSON.stringify({art,fox}));
  assert.ok(art.height<=380,'It is a small card '+JSON.stringify(art));
- assert.equal(await card.locator('.fox-artifact-size').isVisible(),false,'The corner card has no size control');
+ assert.equal(await card.getAttribute('data-size'),'small','Over an Applet a card opens small');
  await shot(page,'artifact-in-applet');
+ // The same control has three sizes over an Applet (owner Order 2026-10-09): medium down Fox's column, large over the Applet.
+ await card.getByRole('button',{name:'Make artifact larger'}).click();
+ assert.equal(await card.getAttribute('data-size'),'medium');
+ ({art,fox}=await boxes());
+ assert.ok(art.x>=1440-Math.max(1440/3,464)&&art.y+art.height<=fox.y,'A medium card stays in Fox\'s column above Fox\'s words '+JSON.stringify({art,fox}));
+ await card.getByRole('button',{name:'Make artifact larger'}).click();
+ assert.equal(await card.getAttribute('data-size'),'large');
+ ({art,fox}=await boxes());
+ assert.ok(art.x<40&&art.width>800&&art.height>600,'A large card covers the Applet '+JSON.stringify(art));
+ assert.ok(art.x+art.width<=fox.x,'It ends left of Fox\'s column '+JSON.stringify({art,fox}));
+ await shot(page,'artifact-large-in-applet');
+ await card.getByRole('button',{name:'Make artifact smaller'}).click();
+ assert.equal(await card.getAttribute('data-size'),'small');
  // It stays pinned there: a click beside it in the Applet leaves it in place; only its × puts it away (owner Order 2026-10-09).
  await page.mouse.click(600,700);await page.waitForTimeout(200);
  assert.equal(await card.isVisible(),true,'A click beside the corner card leaves it pinned over the Applet');
@@ -98,5 +111,5 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await world.getAttribute('data-artifact-size'),null,'Closing clears the size');
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as HTMLElement).dataset.foxLane==='false');
  assert.deepEqual(errors,[]);
- console.log('PASS artifact sizes: small and medium above Fox in the middle, large on the main stage with Fox in the right-hand column, Fox\'s choice or a default from the content, the card\'s own size control, a small card pinned in the top-right corner over an Applet, a narrow window stacking, close clearing the size');
+ console.log('PASS artifact sizes: small and medium above Fox in the middle, large on the main stage with Fox in the right-hand column, Fox\'s choice or a default from the content, the card\'s own size control, a small card pinned in the top-right corner over an Applet that the same control grows down Fox\'s column and over the Applet, a narrow window stacking, close clearing the size');
 });

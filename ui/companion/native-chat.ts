@@ -476,7 +476,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   // below it, so the bubble and its history stop under any that stand over Fox's column (#1652).
   const topBar=root.querySelector('.notion-top'),column=panel.getBoundingClientRect();
   const topFloor=Math.max(topBar.getBoundingClientRect().bottom,...[...topBar.children].map(child=>{const r=child.getBoundingClientRect();return r.width&&r.height&&r.left<column.right&&r.right>column.left?r.bottom:0;}));
-  const ceiling=Math.max(rootBounds.top+64,topFloor+16,attention&&!attention.hidden&&!sheet&&!lane?attention.getBoundingClientRect().bottom+16:0);
+  const ceiling=Math.max(rootBounds.top+64,topFloor+16,attention&&!attention.hidden&&!sheet&&!lane&&!(attention.id==='foxArtifact'&&attention.dataset.size==='large'&&(root.dataset.depth==='object'||root.dataset.depth==='note'))?attention.getBoundingClientRect().bottom+16:0);
   // In Open/Focus, the right-hand bubble may cover the device above Fox.
   const readerRoom=parseFloat(getComputedStyle(root).getPropertyValue('--fox-reader-room'))||Infinity;
   const available=Math.min(readerRoom,Math.max(100,panel.getBoundingClientRect().bottom-ceiling));
@@ -521,12 +521,13 @@ export function createNativeChat(call){return function({button,input,status,exec
   // pages (owner Order 2026-10-07). Only a guide written as explicit pages, a sequence of steps, has arrows.
   log.dataset.scrollable=String(!panel.hidden&&log.scrollHeight>log.clientHeight+2);markLogScroll();
   // Over an Applet the corner artifact yields to Fox's words (owner Order 2026-10-09: with Show all it squeezed the reply
-  // under it to two lines): the front card keeps room for its reply, up to about seven lines
-  // (five once the person asked the artifact to Show all), and the artifact ends above it.
+  // under it to two lines): the front card keeps room for its reply, up to about six lines
+  // (four while the artifact is medium, down the column), and the artifact ends above it; a large one covers the Applet instead.
   const corner=root.querySelector('#foxArtifact');
   if(corner&&!cornerObserved){cornerObserved=true;new ResizeObserver(scheduleRender).observe(corner);}
-  if(corner&&!corner.hidden&&!panel.hidden&&(root.dataset.depth==='object'||root.dataset.depth==='note')){
-   const wanted=Math.min(log.scrollHeight,corner.dataset.expanded==='true'?130:180)+parseFloat(panelStyle.paddingTop)+parseFloat(panelStyle.paddingBottom)+(asked.hidden?0:asked.offsetHeight+6)+actionBar.offsetHeight+12;
+  if(corner&&!corner.hidden&&corner.dataset.size!=='large'&&!panel.hidden&&(root.dataset.depth==='object'||root.dataset.depth==='note')){
+   // The same room the card's height takes below: its paddings, the 86px it keeps for the rest of the card and the question.
+   const wanted=Math.min(log.scrollHeight,corner.dataset.size==='medium'?104:156)+parseFloat(panelStyle.paddingTop)+parseFloat(panelStyle.paddingBottom)+86+(asked.hidden?0:asked.offsetHeight);
    root.style.setProperty('--fox-column-reserve',Math.round(rootBounds.bottom-panel.getBoundingClientRect().bottom+wanted+16)+'px');
   }else root.style.removeProperty('--fox-column-reserve');
   panel.dataset.expandable=String(!guided&&!panel.hidden&&!active&&!onboarding&&(expanded||(!beside&&!!earlier.length)));
