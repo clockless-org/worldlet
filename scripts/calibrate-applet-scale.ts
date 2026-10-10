@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
-import manifest from '../resources/styles/builtin/manifest.json' with {type:'json'};
+import manifest from '../ui/theme-packages/village/style.json' with {type:'json'};
 // Alpha mass + central silhouette bounds: thin antennas and source padding must
 // not determine scale. Inspect the resulting contact sheet before accepting it.
 async function measure(key:string,entry:any){

@@ -17,9 +17,9 @@ material, sounds, world declarations) that every theme draws over. It is not a t
 
 | Part | Field | What it holds |
 | --- | --- | --- |
-| Space | `space` | The world package (`resources/worlds/<id>/`), scenes, rooms (one per product group), entrances, connections, hit areas and placement slots |
+| Space | `space` | The world (`world.json` in the theme package; painted plates in `resources/worlds/<id>/`), scenes, rooms (one per product group), entrances, connections, hit areas and placement slots |
 | Layout | `layout` | Content areas in the overview, a room and reading, and the companion's safe area in each |
-| HUD | `hud` | Colors, type, material, borders, icons and short transitions, from the theme's Style Pack (`resources/styles/<id>/`) |
+| HUD | `hud` | Colors, type, material, borders, icons and short transitions, from the theme's Style Pack (`style.json` and `tokens.json` in the theme package; painted sources in `resources/styles/<id>/`) |
 | Applet presentation | `applets` | Each Applet's Peek/Open/Focus art; an Applet without its own stands in the theme's generic room (`fallback`) |
 | Motion and sound | `motion` | Ambient loops with their stop rules, the cue each business event plays, its reduced-motion form and sounds |
 | Companion | `companion` | Its own rig and portrait, a mapping from the shared performance states (`ui/companion/fox-state-catalog.ts`) to the rig's, a still fallback pose for states it lacks, and where it perches (`stable` or a repository PNG/WebP path per overview/room/reading context) |

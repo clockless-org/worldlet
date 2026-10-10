@@ -85,7 +85,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     }
 }
 
-/// Colors from the built-in cozy-miniature style (resources/styles/builtin/tokens.json and UI.md), the same values the
+/// Colors from the built-in cozy-miniature style (ui/theme-packages/village/tokens.json and UI.md), the same values the
 /// computer's world uses, so the phone reads as the same Worldlet.
 enum Palette {
     static let paper = Color(hex: 0xF4F0E5)

@@ -16,9 +16,9 @@ The 1.6.1 revision clarifies low stone terrace edges and reduces grass detail an
 
 ## Runtime
 
-The manifest drives the six installation courts and overview. `ui/world/village/region-landmarks.ts` owns rear anchors for the independent landmark sprites. The day/night terrain layers share coordinates; landmarks receive ambient tint, while interactive Applets remain readable. New plates have basic visual review; this is not a claim of final high-resolution nighttime art acceptance.
+The World's description is the Village theme package's [`world.json`](../../../ui/theme-packages/village/world.json); its image paths are relative to this folder, which keeps the painted plates. It drives the six installation courts and overview. `ui/world/village/region-landmarks.ts` owns rear anchors for the independent landmark sprites. The day/night terrain layers share coordinates; landmarks receive ambient tint, while interactive Applets remain readable. New plates have basic visual review; this is not a claim of final high-resolution nighttime art acceptance.
 
-Region names, memberships, usage and pins are per-profile UI preferences, not artwork data. See [region customization](../../../ui/world/ENVIRONMENT.md#area-taxonomy). No user data or credentials are in this package. The region count opens an in-place shelf with frequently used Applets first and Add applets below; empty regions show a plus. Old People navigation resolves to Entertainment.
+Region names, memberships, usage and pins are per-profile UI preferences, not artwork data. See [region customization](../../../ui/world/ENVIRONMENT.md#area-taxonomy). No user data or credentials are in these files. The region count opens an in-place shelf with frequently used Applets first and Add applets below; empty regions show a plus. Old People navigation resolves to Entertainment.
 
 ## Focused validation
 

@@ -9,7 +9,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-const manifest=JSON.parse(readFileSync(path.join(root,'resources/styles/builtin/manifest.json'),'utf8'));
+const manifest=JSON.parse(readFileSync(path.join(root,'ui/theme-packages/village/style.json'),'utf8'));
 const folder=path.join(root,'ios/App/Assets.xcassets/Applets');
 const SIZE=180,INFO={author:'xcode',version:1};
 const keys=Object.keys(manifest.applets).filter(k=>manifest.applets[k]?.peek).sort();

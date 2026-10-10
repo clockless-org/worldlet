@@ -32,7 +32,7 @@ Call goes through the person's own Agent, never through Messages or FaceTime: th
 
 ## Identity and art
 
-The title icon is the installed publisher icon recorded in [brand assets](../brand-assets.json) (`com.apple.MobileSMS`); the painted device is the one recorded for `messages` in the [built-in style](../../../resources/styles/builtin/manifest.json).
+The title icon is the installed publisher icon recorded in [brand assets](../brand-assets.json) (`com.apple.MobileSMS`); the painted device is the one recorded for `messages` in the [built-in style](../../../ui/theme-packages/village/style.json).
 
 ## Acceptance
 

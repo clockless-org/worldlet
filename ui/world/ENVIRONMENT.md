@@ -8,7 +8,7 @@ Chapters:
 - [Art verification](#art-quality)
 
 
-`resources/worlds/village/manifest.json` owns region bounds, camera centers, labels and named Applet ground slots; `ui/world/world-layout.ts` projects that portable pack for rendering and navigation. Persisted region and slot IDs remain stable.
+`ui/theme-packages/village/world.json` owns region bounds, camera centers, labels and named Applet ground slots; `ui/world/world-layout.ts` projects that portable pack for rendering and navigation. Persisted region and slot IDs remain stable.
 
 Current defaults: Home central; Social upper-left; Life upper-right; Games right; Work lower-right; Entertainment at the left dock. Region names and assignments are customizable.
 

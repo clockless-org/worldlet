@@ -3,7 +3,7 @@ import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import {withBrowser,fileAccess,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
 const evidence='output/immersive-v5/acceptance';await mkdir(evidence,{recursive:true});
-const manifest=JSON.parse(await readFile('resources/styles/builtin/manifest.json','utf8'));
+const manifest=JSON.parse(await readFile('ui/theme-packages/village/style.json','utf8'));
 const coverage=JSON.parse(await readFile('resources/styles/builtin/references/immersive/use-cases.json','utf8'));
 const composition=JSON.parse(await readFile('resources/styles/builtin/references/immersive/composition.json','utf8')),selection=process.env.APPLETS?.split(',')|| (process.env.APPLET?[process.env.APPLET]:process.env.FINAL?null:['youtube','uber','pokemon-showdown','gmail','google-calendar','apple-notes','apple-reminders','meetings','snake','game-2048']);
 const ready=new Set(coverage.items.filter(a=>a.integration==='complete').map(a=>a.key));

@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
 import * as villageLamp from '../ui/world/village/village-lamp.ts';
 import {appletLamp,appletLampContent,lampColors,lampLabels,lampOpacity,lampDisplayState,LAMP_BREATH_MS} from '../ui/world/applet-lamp.ts';
 import {appletStatus} from '../core/applets/status.ts';
@@ -72,5 +71,4 @@ console.log('Lamp notice stacking passed');
 assert.deepEqual(villageLamp.lampColors,lampColors,'Village lamp colors match the host');
 assert.equal(villageLamp.LAMP_BREATH_MS,LAMP_BREATH_MS);
 for(const state of ['off','ready','processing','error'] as const)for(const now of [0,600,1200])for(const reduced of [false,true])assert.equal(villageLamp.lampOpacity(state,now,reduced),lampOpacity(state,now,reduced));
-assert.equal(readFileSync('ui/theme-packages/village/lamps.json','utf8'),readFileSync('resources/styles/builtin/applet-lamps.json','utf8'),'Village lamp positions match the host\'s applet-lamps.json');
 console.log('PASS the Village World\'s lamp copies match the host\'s');

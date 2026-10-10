@@ -5,11 +5,13 @@ import {spawnSync} from 'node:child_process';
 import sharp from 'sharp';
 import {parseWorldPack,worldPackPath} from '../ui/world/world-pack.ts';
 
-const root=await realpath(path.resolve(process.argv[2]||'resources/worlds/village'));
-const pack=parseWorldPack(JSON.parse(await readFile(path.join(root,'manifest.json'),'utf8')));
+// The Village theme package holds the world's description (world.json); its painted plates stay in resources/worlds/village.
+const manifest=await realpath(path.resolve(process.argv[2]||'ui/theme-packages/village/world.json'));
+const root=await realpath(path.resolve(process.argv[3]||'resources/worlds/village'));
+const pack=parseWorldPack(JSON.parse(await readFile(manifest,'utf8')));
 if(pack.artStatus!=='approved')console.warn('DRAFT artwork: retained for review, not approved for runtime. Style: '+pack.style.id+'@'+pack.style.version);
-const relativeFiles=[...new Set(['manifest.json','README.md',pack.provenance.prompt,...pack.layers.flatMap(l=>[l.src,...(l.prompt?[l.prompt]:[])]),...pack.areas.flatMap(a=>a.closeView?[a.closeView.src,...Object.values(a.closeView.devices||{})]:[])])];
-const checksums={};
+const relativeFiles=[...new Set(['README.md',pack.provenance.prompt,...pack.layers.flatMap(l=>[l.src,...(l.prompt?[l.prompt]:[])]),...pack.areas.flatMap(a=>a.closeView?[a.closeView.src,...Object.values(a.closeView.devices||{})]:[])])];
+const checksums={'world.json':createHash('sha256').update(await readFile(manifest)).digest('hex')};
 for(const relative of relativeFiles){
  worldPackPath(relative);const absolute=await realpath(path.join(root,relative));
  if(!absolute.startsWith(root+path.sep))throw Error('Package file escapes root: '+relative);
@@ -20,6 +22,7 @@ const output=path.resolve('output/world-packs');await mkdir(output,{recursive:tr
 const base=pack.id+'-'+pack.version,archive=path.join(output,base+'.zip');
 // Archive is allowlisted: credentials, arbitrary neighboring files and draft art never enter it.
 const zipped=spawnSync('zip',['-q','-FS',archive,...relativeFiles],{cwd:root,encoding:'utf8'});if(zipped.status!==0)throw Error(zipped.stderr||'zip failed');
+const described=spawnSync('zip',['-q','-j',archive,manifest],{encoding:'utf8'});if(described.status!==0)throw Error(described.stderr||'zip failed');
 await writeFile(path.join(output,base+'.sha256.json'),JSON.stringify(checksums,null,2)+'\n');
 const scenery=(await Promise.all(pack.layers.filter(l=>l.lighting==='day').map(async l=>{
  const image='data:image/png;base64,'+(await readFile(path.join(root,l.src))).toString('base64'),[x,y,w,h]=l.bounds;

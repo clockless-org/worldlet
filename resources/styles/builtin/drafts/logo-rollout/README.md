@@ -60,7 +60,7 @@ support. The existing device identity and functional props remain intact.
 WhatsApp received a connecting timber foot so its lens sits on the base rather
 than the message pocket. No runtime glow is baked into these sprites.
 
-`../../applet-lamps.json` records normalized ellipse centers/radii, texture
+The Village theme package's `lamps.json` records normalized ellipse centers/radii, texture
 sizes and SHA-256 fingerprints. The coordinates exclude the brass bezel and
 are tied to those exact source images; regenerate registration when replacing
 artwork. Runtime uses distinct lens colors with a small soft halo for registered sprites and the separate Mail Open/Focus device; no glow is added to authored scene backgrounds. Transparent source images,
@@ -78,6 +78,6 @@ review is retained as historical reference; this extension adds the remaining
 the generated source and any correction. Word and Excel received a low timber
 support so their lamp is on the base rather than on the logo.
 
-The shared runtime reads `applet-lamps.json`; newly registered devices inherit
+The shared runtime reads the package's `lamps.json`; newly registered devices inherit
 the same black/white/yellow/green/red behavior and small soft halo. Catalog
 availability and installed ground positions are unchanged.

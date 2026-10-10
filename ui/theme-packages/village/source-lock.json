@@ -305,7 +305,11 @@
     "assets/world/day.webp": "5add5153c97e3ce96a1bfd5a8cde2ba480d28fbab02cd20906d80854f5979ef8",
     "assets/world/night.webp": "2b073aa2e2173ff56db29069ab1378fc34680da97d1cfd974d0d3c44b6b010b0",
     "lamps.json": "cdac834f10e2af71670ed83af0c3b91eb44addffad9969e3babc331fd5b50c52",
+    "pack.json": "170253831a36247a3afec65218d8eae3493e8842c11a24e10ba1e7ca3f001770",
     "presentation.json": "cfe041a1a09544c7b93b410e40055681e5356be14b7cd736ee995e68f97f7c2d",
-    "theme.json": "de630cbd561a2b1621e50e38bf647723784846bbc63daf0fa6e28ec1ef46d608"
+    "style.json": "89aec5f29671c3f6ca989f70a9f5191ab06706e1bea8fa5dbf288f205f4c55d7",
+    "theme.json": "de630cbd561a2b1621e50e38bf647723784846bbc63daf0fa6e28ec1ef46d608",
+    "tokens.json": "3475420e827d9b9ea3d4e191eba092b5d2c7eb7e4ad6f11476fbeff206e83aa8",
+    "world.json": "fe82d319d24897bf2c7da33cc0ac5ed05e05d5c10e80336c373020ec531f12ed"
   }
 }

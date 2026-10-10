@@ -1,12 +1,13 @@
-import villageTheme from '../../resources/themes/village/theme.json' with {type:'json'};
-import cozyManifest from '../../resources/styles/builtin/manifest.json' with {type:'json'};
-import cozyTokens from '../../resources/styles/builtin/tokens.json' with {type:'json'};
-import villageWorld from '../../resources/worlds/village/manifest.json' with {type:'json'};
+import {THEME_PACKAGES} from '../theme-packages/index.ts';
 import {parseThemePack,type ThemePack} from './theme-pack.ts';
 import {applyThemeSurfaces} from './theme-surfaces.ts';
 
-// The host's own look: the Village Style Pack (tokens, HUD material, Applet and companion art) and the Village
-// space. It is not a theme a person picks; themes are packages (ui/themes/build-theme.ts, resources/themes/CONTRACT.md).
+// The host's own look, read from the Village theme package (ui/theme-packages/village): its pack (pack.json), Style
+// Pack (style.json, tokens.json: HUD material, Applet and companion art) and space (world.json).
+type VillageData=typeof THEME_PACKAGES[number]['data'];
+const village=THEME_PACKAGES.find(entry=>entry.manifest.id==='village');
+if(!village)throw Error('The Village theme package is missing');
+const {'pack.json':villageTheme,'style.json':cozyManifest,'tokens.json':cozyTokens,'world.json':villageWorld}=village.data as VillageData;
 export type AppletArt={peek:string;open?:string;focus?:string;motion?:string};
 export interface RegisteredTheme {
  pack:ThemePack;
