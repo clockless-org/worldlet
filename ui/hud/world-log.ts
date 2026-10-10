@@ -2,7 +2,7 @@ import {worldLogLines,worldLogNext,worldLogNow,type WorldLogLine} from '../../co
 import {node} from '../components/index.ts';
 import {isDesktopCompanion} from '../companion/index.ts';
 /** The bottom-right corner of the World: one quiet line with the next scheduled check
- * ("Next · Mail check at 23:52"); selecting it opens the companion panel's History page. The
+ * ("Next sync · Mail at 23:52", when a connected source is next read); selecting it opens the companion panel's History page. The
  * live log of what the World and the person did used to scroll above it; it is gone from the
  * corner (owner Order 2026-10-06) and lives on only in History. The lines are still read here
  * and handed to `onLines`, because the phone's Applet world shows them. Lines are Core's.
@@ -46,7 +46,7 @@ export function mountWorldLog({root,call,sample=()=>false,connections=()=>[],onL
   // there once the World comes back.
   section.hidden=isDesktopCompanion()||sample()||!upcoming;
   if(section.hidden)return;
-  next.textContent=`Next · ${upcoming!.title} check at ${clock(upcoming!.at)}`;
+  next.textContent=`Next sync · ${upcoming!.title} at ${clock(upcoming!.at)}`;
   refit();
  }
  async function refresh(){

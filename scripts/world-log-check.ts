@@ -85,10 +85,16 @@ try{
  const log=page.locator('.world-log');
  // The corner keeps only the next scheduled check; the live log is gone from it (owner Order 2026-10-06).
  await log.locator('.world-log-next').waitFor();
- assert.match(await log.locator('.world-log-next').textContent(),/^Next · Mail check at \d\d:\d\d$/);
+ assert.match(await log.locator('.world-log-next').textContent(),/^Next sync · Mail at \d\d:\d\d$/);
  assert.equal(await page.locator('.world-log-lines,.world-log-line').count(),0,'no live log lines in the corner');
  const box=(await log.boundingBox())!;
- assert(box.x+box.width>1380&&box.y+box.height>860,'the line sits bottom right: '+JSON.stringify(box));
+ assert(box.x+box.width>1380&&box.y+box.height>800,'the line sits bottom right, above the Tutorial switch: '+JSON.stringify(box));
+ // The corner Tutorial switch sits bottom right too; the line steps above it, never under it.
+ const corner=page.locator('.world-tutorial-corner');
+ if(!await corner.isVisible())await page.evaluate(()=>{const spot=document.createElement('div');spot.className='world-tutorial-corner';const b=document.createElement('button');b.className='world-tutorial';b.textContent='Tutorial';spot.append(b);document.querySelector('.native-console')!.append(spot);});
+ await corner.waitFor();await page.waitForTimeout(100);
+ const lifted=(await log.boundingBox())!,tutorial=(await corner.boundingBox())!;
+ assert(lifted.y+lifted.height<=tutorial.y,'the line clears the Tutorial switch: '+JSON.stringify({lifted,tutorial}));
  assert.equal(await page.locator('.world-watermark').isVisible(),false,'the brand stays hidden without a build to apply');
  // Quieter than when hovered, but readable at rest over any scenery (RC UI reviews 2737/2743, #1699).
  const opacity=()=>log.evaluate(e=>Number(getComputedStyle(e).opacity));
@@ -157,7 +163,7 @@ try{
   await page.locator('.world-actions .world-capsule',{hasText:'Check mail'}).waitFor();await settle();
   const mail=await clash();
   assert.deepEqual(mail.hits,[],`${width}: inside Mail the log is never behind Check mail, the message bar or Fox`);
-  if(width===1440)assert.equal(mail.shown,false,'inside Mail Check mail takes the corner, so the log steps aside');
+  // Above the Tutorial switch the line clears the Check mail row, so it may stay; it is never behind it (checked above).
   await toWorld();
  }
  await page.setViewportSize({width:1440,height:900});
