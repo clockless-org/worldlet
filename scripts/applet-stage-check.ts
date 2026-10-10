@@ -36,6 +36,8 @@ await withBrowser(fileAccess,async browser=>{
   const dock=await page.locator('.notion-hud').boundingBox();
   assert.ok(dock.x+dock.width/2>1280*.7,key+' places Fox on the right in Open');
   const view=await stage();
+  const deviceScale=()=>page.evaluate(id=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(m=>m.id===id)?.scale,id);
+  const openScale=await deviceScale();
   const backBox=await page.locator('#notionBack').boundingBox(),titleBox=await page.locator('.companion-context').boundingBox();assert.ok(backBox.x>=70&&backBox.y<24&&backBox.x<titleBox.x,key+': Back is on the title\'s left, clear of the Mac traffic lights (x 10-62, y 8-20): '+JSON.stringify({backBox,titleBox}));
   assert.equal(view.stage.items,items,key+' exposes its saved local records');
   assert.equal(await page.locator('.pixi-applet-stage '+itemSelector).count(),items,key+' renders each record as a selectable Open item');
@@ -88,9 +90,10 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByText('The complete original from this Mac.').waitFor();
   // The narrow-window step above resizes the World back to 1280 px; the device settles on the World's next frames.
   if(key!=='gmail'){
-   await page.waitForFunction(width=>Math.abs(document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.presentation.foregroundWidth-width)<1,view.foregroundWidth,{timeout:5000}).catch(()=>{});
-   const now=(await stage()).foregroundWidth;
-   assert.ok(Math.abs(now-view.foregroundWidth)<1,'Open and Focus keep device scale: '+JSON.stringify({open:view.foregroundWidth,focus:now}));
+   // Compare the device's own scale: its painted bounds (foregroundWidth) move by a pixel or two as the scene animates.
+   await page.waitForFunction(([id,scale])=>JSON.stringify(document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(m=>m.id===id)?.scale)===JSON.stringify(scale),[id,openScale],{timeout:5000}).catch(()=>{});
+   const now=await deviceScale();
+   assert.ok(openScale&&now&&openScale.every((v,i)=>Math.abs(v-now[i])<1e-6),'Open and Focus keep device scale: '+JSON.stringify({open:openScale,focus:now}));
   }
   await page.locator('.pixi-applet-stage').waitFor({state:'hidden'});
   await page.locator('.pixi-selected-item').waitFor({state:key==='gmail'?'hidden':'visible'});
