@@ -1,11 +1,10 @@
 import {Graphics,type Sprite} from 'pixi.js';
-import {ACTIVE_THEME,themeAppletArt,type ThemeDeviceEffects} from '../../themes/index.ts';
+import type {DeviceEffects} from './village-pack.ts';
 import {deviceFeature} from './device-feature.ts';
 
 /** Decorative accents follow registered painted features, independently of runtime lamps. */
-export function createAppletEnchantments(sprite:Sprite,key:string,spec?:ThemeDeviceEffects['idle']){
+export function createAppletEnchantments(sprite:Sprite,key:string,spec?:DeviceEffects['idle']){
  if(!spec)return null;
- const family=themeAppletArt(ACTIVE_THEME,key).peek.split('/').pop()!.replace('.png','');
  const ink=new Graphics();ink.eventMode='none';sprite.addChild(ink);
  const {x,y,rx,ry}=deviceFeature(sprite,spec),unit=sprite.texture.source.width*.003;
  const seed=[...key].reduce((n,c)=>n+c.charCodeAt(0),0)%31/5,color=Number.parseInt(spec.color.slice(1),16);
@@ -31,5 +30,5 @@ export function createAppletEnchantments(sprite:Sprite,key:string,spec?:ThemeDev
    const pulse=Math.pow(Math.max(0,Math.sin(phase*.65)),6);
    star(x,y,unit*(1+2*pulse),.6*pulse);
   }
- },get metrics(){const p=sprite.toGlobal({x,y});return {family,kind:spec.kind,active,phase,center:{x:p.x,y:p.y}};}};
+ },get metrics(){const p=sprite.toGlobal({x,y});return {family:key,kind:spec.kind,active,phase,center:{x:p.x,y:p.y}};}};
 }

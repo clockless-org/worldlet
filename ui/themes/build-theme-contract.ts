@@ -72,7 +72,7 @@ export interface ThemeWorldApplet {id:string;key:string;title:string;region:stri
  art?:string;
  /** When the person last used it or it arrived (ms since 1970). Themes that place Applets put recent ones first. */
  usedAt?:number;
- /** The host's Applet stage shows its contents while it is open. A theme can stop drawing its device behind them. */
+ /** While it is open, the host's Applet stage draws this Applet's own picture in front. A theme can stop drawing its device behind it. */
  staged?:boolean;
  /** Coding Applets: the weekly allowance left. `remaining` is a percentage; neither is set while it is unknown. */
  allowance?:{remaining?:number;resetsAt?:number;unavailable?:boolean}}

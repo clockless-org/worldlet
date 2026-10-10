@@ -6,7 +6,7 @@ import {createAppletImageLamps} from './applet-image-lamps.ts';
 import {createLampLabel,stackLampLabels} from './applet-lamp-label.ts';
 import {createLevelZoom} from './level-zoom.ts';
 import type {LampSignal} from './applet-lamp.ts';
-import {appletStatus,myAppletKind,CODING_SESSIONS} from '../../core/applets/index.ts';
+import {appletStatus,myAppletKind,CODING_SESSIONS,HOME_NATIVE} from '../../core/applets/index.ts';
 import {lastUse,regionId} from './region-layout.ts';
 import {weeklyQuota} from './weekly-allowance.ts';
 import {appletLamp,appletLampContent,lampDisplayState} from './applet-lamp.ts';
@@ -50,7 +50,10 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   areas:(options.buildings||[]).filter(b=>b.id!=='building-people').map(b=>{const look=options.regionLayout?.themes?.[regionId(b.id)]||b.visualTheme;return {id:b.id,title:b.title,...(look?{look}:{})};}),
   applets:rooms.map(r=>({id:r.moduleId||r.id,key:r.key||r.id,title:r.title,region:r.region||String(r.buildingId||'').replace(/^building-/,''),visible:visible(r),status:r.status?.state,count:r.status?.count,icon:appletIcon(r),
    lamp:lamp(r,shell),connected:r.entity==='matter'?undefined:!!appletStatus(r,connections)?.connected,mine:myAppletKind(r)||undefined,object:r.entity==='matter'||undefined,
-   art:r.art&&r.art!==r.key?r.art:undefined,usedAt:lastUse(r,options.regionLayout)||undefined,staged:stages.has(r.moduleId)||undefined,allowance:allowance(r)}))};};
+   art:r.art&&r.art!==r.key?r.art:undefined,usedAt:lastUse(r,options.regionLayout)||undefined,staged:staged(r)||undefined,allowance:allowance(r)}))};};
+ /** The Village's Applet stage draws the Applet's own open picture in front of the World (pixi-stage.ts): not for coding
+  * sessions or the Home Applets drawn natively, and only once its contents arrived. */
+ const staged=r=>stages.has(r.moduleId)&&!!(globalThis as any).__WORLDLET_25D_ASSETS__?.open?.[r.key]&&!CODING_SESSIONS.includes(r.key)&&!HOME_NATIVE.includes(r.key);
  /** A coding Applet's weekly allowance, from the usage its sessions last reported (setAppActivity). */
  function allowance(r):ThemeWorldApplet['allowance'] {
   if(!CODING_SESSIONS.includes(r.key))return undefined;

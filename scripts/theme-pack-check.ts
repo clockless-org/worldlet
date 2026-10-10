@@ -7,6 +7,7 @@ import {ACTIVE_THEME,DEFAULT_THEME_ID,THEMES,THEME_PREFERENCE_KEY,companionPerfo
 import {BUILTIN_STYLE,STYLE_TOKENS} from '../ui/components/style.ts';
 import {WORLD_LAYOUT,THEME_WORLD} from '../ui/world/world-layout.ts';
 import {villageCamera} from '../ui/world/village/village-camera.ts';
+import {ROOM_FOREGROUND,SCENERY_TONE} from '../ui/world/village/village-pack.ts';
 import {FOX_STATES} from '../ui/companion/fox-state-catalog.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import {MOMENT_ART} from '../core/applets/moment.ts';
@@ -256,4 +257,11 @@ console.log('PASS Theme Pack: Village registered behind the contract (six parts 
   const bad=structuredClone(pack);mutate(bad.motion.sound.presentation);assert.throws(()=>parseThemePack(bad),/Invalid theme pack/);
  }
  console.log('PASS scene sound selection, manual-source ownership, visibility and sound manifest validation');
+}
+{
+ // The Village World keeps its own copy of these settings (ui/world/village/village-pack.ts); they must match the pack.
+ const village=THEMES.get('village')!;
+ assert.deepEqual([...ROOM_FOREGROUND],[...village.pack.layout.room.foreground],'Village room foreground matches its pack');
+ assert.deepEqual({...SCENERY_TONE},{...STYLE_TOKENS.sceneryTone},'Village scenery tone matches the style tokens');
+ console.log('PASS the Village World\'s own settings match its pack and style tokens');
 }

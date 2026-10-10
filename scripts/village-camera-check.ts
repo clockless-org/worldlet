@@ -1,4 +1,4 @@
-import {APPLET_SPRITES} from '../ui/world/village/applet-sprites.ts';
+import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import assert from 'node:assert/strict';
 import {villageCamera,approachVillageCamera,WORLD_EXTENT,WORLD_OVERVIEW,OVERVIEW_CENTER} from '../ui/world/village/village-camera.ts';

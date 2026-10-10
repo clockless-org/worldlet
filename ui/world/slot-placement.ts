@@ -1,6 +1,6 @@
 import {WORLD_WIDTH,WORLD_HEIGHT} from './world-design.ts';
 import {WORLD_LAYOUT} from './world-layout.ts';
-import {APPLET_SPRITES} from './village/applet-sprites.ts';
+import {APPLET_SPRITES} from './applet-sprites.ts';
 import {lastUse,recentlyUsedFirst,regionId,type RegionLayout} from './region-layout.ts';
 export type PlacementSlot={id:string;anchor:number[];maxSize?:number[]};
 /** Fit the painted footprint, not transparent atlas padding, inside a reserved place. */

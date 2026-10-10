@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
-import {APPLET_SPRITES} from '../ui/world/village/applet-sprites.ts';
+import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
 import {WORLD_PRESETS} from '../ui/world/world-presets.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import {extraPlacements,resolvePlacements} from '../ui/world/slot-placement.ts';
