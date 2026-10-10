@@ -32,6 +32,16 @@ export function themeAppletIcon(key:string):string|undefined{
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
  return typeof src==='string'&&src?src:undefined;
 }
+/** The active theme's Artifact look (presentation.json `artifact`) with every file as a published URL, or null when the
+ * theme leaves Artifacts to the host's card. Package paths stay alongside, for a reader that loads the files itself. */
+export function themeArtifact(){
+ const a=active.package.presentation.artifact;if(!a)return null;
+ const url=(path:string)=>themeAssetURL(active.id,path);
+ return {theme:active.id,style:url(a.style),prompt:url(a.prompt),
+  references:a.references.map(r=>({...r,url:url(r.image)})),
+  materials:(a.materials??[]).map(m=>({...m,url:url(m.image)})),
+  colors:{...a.colors}};
+}
 /**
  * The HUD material and sounds a package declares (presentation.json `hud`, `sound`) replace the shared ones in the
  * surfaces the HUD already reads. Anything a package leaves out keeps the shared one, and a package with neither (the

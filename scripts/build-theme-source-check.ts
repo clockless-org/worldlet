@@ -31,6 +31,16 @@ try{
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.png'}}));
  assert.throws(()=>parseThemePresentation({...presentation,icons:{Gmail:'assets/gmail.png'}}),/applet icons/);
  assert.throws(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.txt'}}),/applet icons/);
+ // A theme's Artifact look is static files it names: rules and prompt in Markdown, reference pictures, materials, colours.
+ const artifact={style:'assets/artifact/STYLE.md',prompt:'assets/artifact/PROMPT.md',references:[{image:'assets/artifact/a.webp',role:'Primary'}],materials:[{id:'paper',image:'assets/artifact/paper.webp',usage:'Paper'}],colors:{paper:'#f7efdc',moss:'#315f48'}};
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,artifact}));
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,artifact:{style:artifact.style,prompt:artifact.prompt,references:artifact.references}}));
+ assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,render:'assets/artifact/render.md'}}),/artifact fields/);
+ assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,style:'assets/artifact/style.css'}}),/artifact style/);
+ assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,references:[]}}),/artifact references/);
+ assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,materials:[artifact.materials[0],artifact.materials[0]]}}),/artifact materials/);
+ assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,colors:{gold:'#aa7b35'}}}),/artifact colors/);
+ assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,colors:{ink:'green'}}}),/artifact colors/);
  await write('first');await fs.writeFile(path.join(source,'assets','test.txt'),'fixture');
  await importBuildTheme(source,consumer);const lock=path.join(consumer,'ui/theme-packages/first/source-lock.json'),initial=await fs.readFile(lock,'utf8');
  assert.equal(JSON.parse(initial).updatedAt,manifest.updatedAt);assert.equal(JSON.parse(initial).contractVersion,3);assert.equal('version' in JSON.parse(initial),false);
@@ -50,5 +60,5 @@ try{
  // Windows: path.join gives '\' but TypeScript asks for '/'; the in-memory check file must still be found (Release 4080–4087 failed here).
  const windowsPath=path.join(tmp,'windows')+'\\__check__.ts',options={noEmit:true,types:[]};
  assert.deepEqual(ts.getPreEmitDiagnostics(ts.createProgram([windowsPath],options,withVirtualFile(ts.createCompilerHost(options),windowsPath,'export const ok=1;'))).map(d=>d.code),[]);
- console.log('PASS theme contract: Windows-style in-memory check path, static manifest and presentation, duplicate, side-by-side packages and registry, replacement, failed import preservation, per-theme assets, code and stylesheet rejection');
+ console.log('PASS theme contract: Windows-style in-memory check path, static manifest and presentation, the Artifact look, duplicate, side-by-side packages and registry, replacement, failed import preservation, per-theme assets, code and stylesheet rejection');
 }finally{await fs.rm(tmp,{recursive:true,force:true});}

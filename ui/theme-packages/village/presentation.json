@@ -132,5 +132,47 @@
     "gitlab": "assets/devices/gitlab.webp",
     "jira": "assets/devices/jira.webp",
     "moment": "assets/devices/moment.webp"
+  },
+  "artifact": {
+    "style": "assets/artifact/STYLE.md",
+    "prompt": "assets/artifact/HOST-PROMPT.md",
+    "references": [
+      {
+        "image": "assets/artifact/references/outing.webp",
+        "role": "Primary visual standard: the first complete Artifact, an afternoon outing"
+      },
+      {
+        "image": "assets/artifact/references/recipe.webp",
+        "role": "A second composition in the same style: a recipe with a servings control"
+      }
+    ],
+    "materials": [
+      {
+        "id": "paper",
+        "image": "assets/artifact/materials/paper.webp",
+        "usage": "Text-free paper material for the card's sheets"
+      },
+      {
+        "id": "garden",
+        "image": "assets/artifact/materials/garden.webp",
+        "usage": "Optional glasshouse object with transparent edges; give it enough visual weight"
+      },
+      {
+        "id": "soup",
+        "image": "assets/artifact/materials/soup.webp",
+        "usage": "Optional soup bowl object with transparent edges; not a fixed header slot"
+      }
+    ],
+    "colors": {
+      "paper": "#f7efdc",
+      "ink": "#243e32",
+      "brass": "#aa7b35",
+      "moss": "#315f48",
+      "teal": "#28718a",
+      "honey": "#946e2b",
+      "sage": "#557955",
+      "clay": "#a04e33",
+      "plum": "#6c4a78"
+    }
   }
 }
