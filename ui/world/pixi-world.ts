@@ -50,6 +50,8 @@ function paintedBox(alpha:Uint8ClampedArray,width:number,height:number):number[]
 export function createModuleScene(host,rooms,onPick,onProject,pages,options):any{
  const {areaZoom,camera:themeCamera,approachCamera,overviewCenter:OVERVIEW_CENTER,sites:THEME_SITES,lightingState,createLighting,createAmbience,workPath}=themeScene(ACTIVE_THEME.pack.id);
  const payload=(globalThis as any).__WORLDLET_25D_ASSETS__;
+ // The shell's own state (shell-interaction.ts), handed in by the host: the World never reads the shell's elements.
+ const shell=():{locked?:boolean;covered?:boolean;detailOpen?:boolean;website?:boolean;paused?:boolean}=>options.interaction?.()||{};
  const lampRoot=host.closest('.notion-world')||host;
  const imageLamps=createAppletImageLamps(lampRoot,payload);
  const lampLabels=new Map<string,ReturnType<typeof createLampLabel>>();
@@ -76,7 +78,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const wake=(ms:number=WORLD_FRAME_RATE.wakeMs)=>{wakeUntil=Math.max(wakeUntil,performance.now()+ms);if(ready&&frameRate!==WORLD_FRAME_RATE.moving)pace(WORLD_FRAME_RATE.moving);};
  // Pixi compares whole milliseconds against 1000/maxFPS, so a cap at exactly the rate drops every other frame.
  const pace=(fps:number)=>{frameRate=fps;app.ticker.maxFPS=fps*25/24;};
- const desktopPresentation=()=>{if(!ready||closed)return;if(document.documentElement.classList.contains('desktop-companion'))app.ticker.stop();else{wake();app.ticker.start();}};
+ const desktopPresentation=()=>{if(!ready||closed)return;if(shell().paused&&!document.hidden)app.ticker.stop();else{wake();app.ticker.start();}};
  window.addEventListener('worldlet:desktop-companion',desktopPresentation);
  let workMotion:ReturnType<typeof createWorkMotion>|null=null;
  let smokeTime=0,smokeAt=0;
@@ -105,8 +107,8 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  }
  // Pixi follows the pointer across the whole document, under the tour's click catcher too: while the
  // spotlight shows, no device lights up or names itself (owner feedback 2026-10-02).
- const tourCovers=()=>!!document.querySelector('.tour-spotlight:not([hidden])');
- const regionAllowed=id=>!unlocked||host.closest('.notion-world')?.getAttribute('data-onboarding-locked')!=='true'||rooms.some(r=>r.buildingId===id&&allowed(r));
+ const tourCovers=()=>!!shell().covered;
+ const regionAllowed=id=>!unlocked||!shell().locked||rooms.some(r=>r.buildingId===id&&allowed(r));
  const contentStage=createAppletStage(host,onPick);
 
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -120,8 +122,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const appletWidth=APPLET_OVERVIEW_WIDTH/themeCamera(WORLD_WIDTH,WORLD_HEIGHT,1,OVERVIEW_CENTER).scale;
  const toWorld=(point:number[])=>[point[0]*WORLD_WIDTH,point[1]*WORLD_HEIGHT];
  function transform(amount=1){
-  const shell=host.closest('.notion-world') as HTMLElement,stageVisible=String(level==='object'&&stages.has(active));
-  if(shell&&shell.getAttribute('data-pixi-stage')!==stageVisible)shell.setAttribute('data-pixi-stage',stageVisible);
+  const interaction=shell();
   if(ready)app.stage.hitArea=new Rectangle(0,0,host.clientWidth,host.clientHeight);
   // An open area panel zooms its area into the World left of the panel (owner request 2026-10-06).
   const shelf=shelfArea&&level!=='object'?shelfArea:null,visibleWidth=Math.max(1,host.clientWidth-(shelf?shelfInset:0));
@@ -138,17 +139,15 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   if(!shelf&&framedRegion&&(cameraSettled||level==='object')){framedRegion=null;refreshExtra(null,1);}
   const framedZoom=framedRegion&&level!=='object'?view.scale/overviewScale:1,extraShown=Math.max(0,Math.min(1,(framedZoom-1)/Math.max(.05,Number(extraKey.split('|')[1])-1||.6)));
   closeArea=areaScenery?.update(level==='building'?active.replace('building-',''):null,host.clientWidth,host.clientHeight,reduced.matches?1:amount,time,motion&&!reduced.matches&&windowActive()&&!document.hidden)||null;
-  if(shell){if(closeArea)shell.setAttribute('data-area-view',closeArea.id);else shell.removeAttribute('data-area-view');shell.toggleAttribute('data-area-compact',!!closeArea?.compact);}
-  if(shell&&closeArea){const width=closeArea.frame.labelWidth+'px';if(shell.style.getPropertyValue('--area-label-width')!==width)shell.style.setProperty('--area-label-width',width);}
-  const browserFocused=host.closest('.notion-world')?.querySelector('#notionContent[data-template=browser]:not([hidden])');
+  const browserFocused=interaction.website;
   const activeKey=level==='object'?devices.find(d=>d.room.moduleId===active)?.room.key:null;
   const immersive=payload.focus?.[activeKey]?.framing==='scene-fit';
   const focusKey=activeKey&&(browserFocused||immersive)?activeKey:null;
   focusSceneryVisible=focusScenery?.update(focusKey==='gmail'&&ACTIVE_THEME.pack.id==='village'&&!immersive?null:focusKey,host.clientWidth,host.clientHeight,immersive&&level==='object'?1:framing,time,motion&&!reduced.matches&&windowActive()&&!document.hidden)||false;
-  if(shell){shell.toggleAttribute('data-immersive-background',focusSceneryVisible&&immersive);const content=focusSceneryVisible?focusScenery.content:null;if(content){shell.dataset.readingSurface=content.key;for(const key of ['x','y','width','height'])shell.style.setProperty('--reading-'+key,content[key]+'px');}else delete shell.dataset.readingSurface;}
+  host.toggleAttribute('data-immersive-background',focusSceneryVisible&&immersive);
   world.scale.set(view.scale);world.position.set(view.x,view.y);
   // Mail has one HTML device in Open, Focus and Web, including before source data arrives.
-  for(const d of devices){const foreground=level==='object'&&d.room.moduleId===active,openInstallation=foreground&&stages.has(active)&&!!payload.open?.[d.room.key]&&!CODING_SESSIONS.includes(d.room.key)&&!d.nativeDevice&&host.closest('.notion-world')?.getAttribute('data-detail-open')!=='true';d.root.alpha+=( (d.presence??1)-d.root.alpha)*.12;d.root.visible=!(areaZoom&&level==='building'&&d.room.buildingId!==active)&&!d.arrivalPending&&allowed(d.room)&&d.root.alpha>.01&&(d.room.entity!=='matter'||foreground)&&!(foreground&&focusSceneryVisible)&&!openInstallation&&!(foreground&&d.room.key==='gmail');
+  for(const d of devices){const foreground=level==='object'&&d.room.moduleId===active,openInstallation=foreground&&stages.has(active)&&!!payload.open?.[d.room.key]&&!CODING_SESSIONS.includes(d.room.key)&&!d.nativeDevice&&!interaction.detailOpen;d.root.alpha+=( (d.presence??1)-d.root.alpha)*.12;d.root.visible=!(areaZoom&&level==='building'&&d.room.buildingId!==active)&&!d.arrivalPending&&allowed(d.room)&&d.root.alpha>.01&&(d.room.entity!=='matter'||foreground)&&!(foreground&&focusSceneryVisible)&&!openInstallation&&!(foreground&&d.room.key==='gmail');
    const closeSlot=closeArea?.slots.find(s=>s.id===assigned[d.room.moduleId]?.id);
    const closeVisual=closeSlot?areaScenery.visual(d,closeArea):null;
    d.body.visible=!closeVisual;for(const visual of d.closeVisuals?.values()||[])visual.body.visible=visual===closeVisual;d.closeVisual=closeVisual;
@@ -207,7 +206,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   const providerPages=provider=>{if(!byProvider){byProvider=new Map();for(const p of pages.values()){const own=byProvider.get(p.sourceProvider);if(own)own.push(p);else byProvider.set(p.sourceProvider,[p]);}}return byProvider.get(provider)||[];};
   const add=(key,id,title,anchor,action,kind)=>{const [px,py]=toWorld(anchor),x=world.x+px*world.scale.x,y=world.y+py*world.scale.y;points[key]={id,title,action,kind,level:action==='space'?'room':'building',x,y,visible:x>15&&x<host.clientWidth-15&&y>40&&y<host.clientHeight-85};};
 
-  const lampActionsVisible=lampRoot.dataset.attentionPreview!=='true'&&!lampRoot.querySelector('dialog[open]');
+  const interaction=shell(),lampActionsVisible=!interaction.covered;
   const lampSignals=new Map<string,LampSignal>(),lampStill=!motion||reduced.matches||!windowActive()||document.hidden;
   for(const d of devices){
    const content=appletLampContent(d.room.provider,providerPages(d.room.provider),!!(d.room.children?.length||d.room.sampleRecords?.length));
@@ -237,8 +236,8 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    const key='region-slot:'+index;add(key,placementArea,'+',slot.anchor,'placement','region-slot');points[key].slot=index;points[key].description='Place applet in slot '+(index+1);
    const closeSlot=closeArea?.slots.find(s=>s.id===slot.id);if(closeSlot){const p=closeArea.group.toGlobal({x:closeSlot.anchor[0]*WORLD_WIDTH,y:closeSlot.anchor[1]*WORLD_HEIGHT});points[key].x=p.x;points[key].y=p.y;points[key].visible=true;}
   });
-  const website=!!host.closest('.notion-world')?.querySelector('#notionContent[data-template=browser]:not([hidden])');
-  const currentDevice=devices.find(d=>d.room.moduleId===active);contentStage.render(currentDevice?.room||{},stages.get(active),!website&&level==='object'&&stages.has(active)&&host.closest('.notion-world')?.getAttribute('data-detail-open')!=='true',level==='object'&&stages.has(active)&&host.closest('.notion-world')?.getAttribute('data-detail-open')==='true'&&!website,level==='object');
+  const website=interaction.website;
+  const currentDevice=devices.find(d=>d.room.moduleId===active);contentStage.render(currentDevice?.room||{},stages.get(active),!website&&level==='object'&&stages.has(active)&&!interaction.detailOpen,level==='object'&&stages.has(active)&&interaction.detailOpen&&!website,level==='object');
   imageLamps.update(lampSignals,level==='object'?currentDevice?.room.key:null,lampActionsVisible,time*1000,lampStill);
   for(const d of devices){
    const signal=lampSignals.get(d.room.key);if(!signal)continue;
@@ -308,7 +307,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   const surroundings=await createRegisteredPlate(extended,payload.hiresDay,image);if(closed)return;surroundings.eventMode='static';surroundings.on('pointertap',e=>{if(e.button===0&&!dragged&&level==='building'&&!areaZoom)onPick({action:'back'});});world.addChild(surroundings);
   // Ground, landmark and name share entry; independent devices keep their own taps.
   const areaTarget=(target:Container,b)=>{
-   const open=()=>level==='overview'&&!tourCovers()&&host.closest('.notion-world')?.getAttribute('data-onboarding-locked')!=='true';
+   const open=()=>level==='overview'&&!tourCovers()&&!shell().locked;
    target.cursor='pointer';
    target.on('pointertap',e=>{e.stopPropagation();if(e.button!==0||dragged)return;if(level==='building'){if(!areaZoom)onPick({action:'back'});}else if(open())onPick({action:'region-more',id:b.id});});
    target.on('pointerover',()=>{if(!open())return;wake();hoveredRegion=b.id;project();});
@@ -371,7 +370,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    root.hitArea={contains(x,y){if(root.parent===world&&lighting?.occludes?.(root.x+x*root.scale.x,root.y+y*root.scale.y,root.zIndex))return false;const px=Math.floor((x/width+.5)*mask.width),py=Math.floor((y-sprite.y+sprite.height)/sprite.height*mask.height);if(px<firstOpaqueColumn||py<firstOpaqueRow||px>lastOpaqueColumn||py>lastOpaqueRow)return false;alpha??=alphaOf(tex);return alpha[(py*mask.width+px)*4+3]>32;}};
    root.on('rightclick',e=>{e.stopPropagation();if(room.entity==='app'&&allowed(room)&&['overview','building'].includes(level)){const rect=app.canvas.getBoundingClientRect();options.onAppletMenu?.(room.moduleId,e.global.x+rect.left,e.global.y+rect.top);}});
    if(room.key==='youtube')root.on('pointerdown',e=>{(e.nativeEvent as any).worldletKeepFox=true;});
-   root.on('pointerdown',e=>{if(e.button!==0||level==='object'||!eligible(room)||host.closest('.notion-world')?.getAttribute('data-onboarding-locked')==='true')return;dragDevice={id:room.moduleId,start:[e.global.x,e.global.y],root};});
+   root.on('pointerdown',e=>{if(e.button!==0||level==='object'||!eligible(room)||shell().locked)return;dragDevice={id:room.moduleId,start:[e.global.x,e.global.y],root};});
    root.on('pointertap',e=>{e.stopPropagation();if(e.button!==0||dragged||!allowed(room)||level==='object')return;onPick({action:'space',id:room.id,level:'room'});});root.on('pointermove',e=>{if(!tourCovers())showName(e,room);});root.on('pointerover',e=>{if(tourCovers())return;focusScenery?.preload(room.key);showName(e,room);(root as any).isHovered=true;hoveredRegion=devices.find(d=>d.root===root)?.region?.b.id||null;outlines.forEach(s=>s.visible=true);});root.on('pointerout',()=>{hideName();(root as any).isHovered=false;hoveredRegion=null;outlines.forEach(s=>s.visible=false);});
    const workSignal=CODING_SESSIONS.includes(room.key)?createWorkSignal(host,room.key,root,width,visibleTop):null;
    const spark=new Graphics();for(let n=0;n<5;n++){const a=n*Math.PI*2/5,x=Math.cos(a)*width*.65,y=Math.sin(a)*width*.4-width*.45;spark.moveTo(x-3,y).lineTo(x+3,y).moveTo(x,y-3).lineTo(x,y+3);}spark.stroke({color:0xffe4a0,width:1.8});spark.alpha=0;spark.eventMode='none';body.addChild(spark);
@@ -392,7 +391,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    // Projection writes DOM pin positions. Read dimensions before those writes,
    // not between projection and lighting, which forces a second frame layout.
    const width=host.clientWidth,height=host.clientHeight;
-   const amount=reduced.matches?1:1-Math.exp(-tick.deltaMS/100);const detail=host.closest('.notion-world')?.getAttribute('data-detail-open')==='true'&&host.clientWidth>800?1:0;framing+=(detail-framing)*amount;transform(amount);
+   const amount=reduced.matches?1:1-Math.exp(-tick.deltaMS/100);const detail=shell().detailOpen&&host.clientWidth>800?1:0;framing+=(detail-framing)*amount;transform(amount);
    // The overview's atmosphere never leaks into an authored room.
    ambience?.update(time,animate&&level!=='object'&&!closeArea,lightingState(environment).lamps);
    // Working devices liven the World (work-motion.ts); not while an Applet is open.
