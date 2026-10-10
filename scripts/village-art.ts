@@ -35,7 +35,10 @@ export async function encodeVillageArt(root:string){
  const out=path.join(root,VILLAGE_ART),entry=theme('village'),STYLE=entry.style.manifest,lock:Lock={};
  const {WORLD_APPS}=await import('../core/applets/catalog.ts');
  const {MOMENT_ART}=await import('../core/applets/moment.ts');
+ // Re-encode from scratch, keeping the folder's README.
+ const readme=await readFile(path.join(out,'README.md')).catch(()=>null);
  await rm(out,{recursive:true,force:true});
+ if(readme){await mkdir(out,{recursive:true});await writeFile(path.join(out,'README.md'),readme);}
  /** Writes one output from one source with the named settings and records it in the lock. */
  const emit=async(name:string,source:string,settings:string,encode:(file:string)=>Promise<Buffer>)=>{
   const file=path.join(root,source),bytes=settings==='copy'?await readFile(file):await cachedEncode(file,settings,()=>encode(file));
