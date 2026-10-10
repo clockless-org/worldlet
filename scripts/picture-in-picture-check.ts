@@ -86,4 +86,20 @@ console.log('PASS task picture in picture: the page\'s own shape (square to 2.2:
  assert.equal(foxCopyPlacement({panel:{...panel,height:100},page:{width:900,height:900}}),null,'no room for its height');
  assert.equal(foxCopyPlacement({panel,page:{width:0,height:0}}),null);
  console.log('PASS Fox\'s copy: the panel\'s top-right corner, a share of its width within limits, in the page\'s shape, none in a small panel');
+ // Owner Order 2026-10-10: at the window's top right, above Fox's conversation box, not over the page.
+ const page={width:1030,height:720},aspect=1030/720,left={x:20,y:130,width:1030,height:740};
+ const dialogue={x:1140,y:330,width:385,height:440},above=foxCopyPlacement({panel:left,page,dialogue})!;
+ assert.equal(above.y,FOX_COPY.margin,'at the window\'s top');
+ assert.equal(above.x+above.width,dialogue.x+dialogue.width,'right-aligned with the conversation box');
+ assert.equal(above.width,dialogue.width,'as wide as the box');
+ assert.ok(above.y+above.height<=dialogue.y-FOX_COPY.gap,'clear of the box');
+ assert.equal(above.height,Math.floor(above.width/aspect),'in the page\'s shape');
+ const low=foxCopyPlacement({panel:left,page,dialogue:{...dialogue,y:240}})!;
+ assert.ok(low.width<dialogue.width&&low.width>=FOX_COPY.minAbove&&low.y+low.height<=240-FOX_COPY.gap,'a tall box narrows it to fit above: '+JSON.stringify(low));
+ assert.equal(foxCopyPlacement({panel:left,page,dialogue:{...dialogue,y:500,width:900}})!.width,FOX_COPY.maxWidth,'never wider than maxWidth');
+ const corner=foxCopyPlacement({panel:left,page})!;
+ assert.deepEqual(foxCopyPlacement({panel:left,page,dialogue:{...dialogue,y:120}}),corner,'no room above the box: the panel\'s corner');
+ assert.deepEqual(foxCopyPlacement({panel:left,page,dialogue:{...dialogue,width:0,height:0}}),corner,'no box showing: the panel\'s corner');
+ assert.equal(foxCopyPlacement({panel:{...left,width:FOX_COPY.minPanel-1},page,dialogue}),null,'a narrow panel still keeps Fox on the person\'s page');
+ console.log('PASS Fox\'s copy above the conversation box: window top, right-aligned with it, clear of it, the panel\'s corner without room');
 }

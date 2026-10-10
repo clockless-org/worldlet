@@ -1,7 +1,8 @@
 // Fox's page out of sight (#1175, owner feedback 2026-10-02), driven through the real World UI with
 // a faked native bridge that declares browserTaskPictureInPicture (the CEF website engine).
 // - When Fox starts working on the page, the person keeps it full size in the Applet, and Fox gets a
-//   copy of it in the panel's top-right corner (owner request 2026-10-09, FOX_COPY): the copy keeps
+//   copy of it above Fox's conversation box at the window's top right (owner requests 2026-10-09 and
+//   2026-10-10, FOX_COPY; the panel's top-right corner without room there): the copy keeps
 //   the panel's size as its own and carries Fox's glow. No window moves the page to the World's
 //   bottom-right. A press on the copy takes Fox's page into the panel; after Fox's turn the copy
 //   stays until closed; a host without a copy leaves Fox on the panel's page.
@@ -68,12 +69,16 @@ const heldByFox=(page:Page)=>page.waitForFunction(()=>{const b=(window as any).s
   await page.waitForTimeout(400);
   const working=await last(page);
   assert.equal(working.action,'browserLayout');assert.deepEqual(working.rect,shown,'the person keeps the page in the panel');assert.equal(working.page,undefined);
-  // Fox's copy sits in the panel's top-right corner, smaller, at the panel's size as its own.
+  // Fox's copy sits at the window's top right above Fox's conversation box (owner Order 2026-10-10), or in the
+  // panel's top-right corner when the box is not showing or has no room above it; smaller, at the panel's size as its own.
   const copy=working.copy;
   assert.ok(copy,'Fox works on a copy of the page: '+JSON.stringify(working));
   assert.deepEqual(copy.page,{width:shown.width,height:shown.height},'the copy lays out at the panel\'s size');
-  assert.ok(copy.rect.width<shown.width/2&&copy.rect.width>=280,'the copy is small: '+JSON.stringify(copy.rect));
-  assert.ok(copy.rect.x+copy.rect.width<=shown.x+shown.width&&shown.x+shown.width-(copy.rect.x+copy.rect.width)<=16&&copy.rect.y-shown.y<=16&&copy.rect.y>=shown.y,'in the panel\'s top-right corner');
+  assert.ok(copy.rect.width<=460&&copy.rect.width<shown.width*0.6&&copy.rect.width>=220,'the copy is small: '+JSON.stringify(copy.rect));
+  const box=await page.evaluate(()=>{const b=document.querySelector<HTMLElement>('#companionDialogue');if(!b||b.hidden)return null;const r=b.getBoundingClientRect();return r.width>0&&r.height>0?{x:r.x,y:r.y,width:r.width,height:r.height}:null;});
+  const aboveBox=!!box&&copy.rect.y+copy.rect.height<=box.y&&Math.abs(copy.rect.x+copy.rect.width-(box.x+box.width))<=1&&copy.rect.y<=16;
+  const inCorner=copy.rect.x+copy.rect.width<=shown.x+shown.width&&shown.x+shown.width-(copy.rect.x+copy.rect.width)<=16&&copy.rect.y-shown.y<=16&&copy.rect.y>=shown.y;
+  assert.ok(aboveBox||inCorner,'above the conversation box, else in the panel\'s top-right corner: '+JSON.stringify({copy:copy.rect,box,shown}));
   assert.ok(working.fox,'Fox\'s glow goes with the copy');
   assert.equal(await page.evaluate(()=>document.querySelector('.browser-viewport')!.classList.contains('is-fox-control')),false,'the person\'s page carries no Fox frame');
   assert.equal(await appletOpen(page),true,'the Applet stays open for the person to watch and step in');
@@ -143,7 +148,7 @@ const heldByFox=(page:Page)=>page.waitForFunction(()=>{const b=(window as any).s
   assert.equal(await page.locator('.applet-task-done').count(),0,'opening the Applet clears the Done mark');
   assert.deepEqual(errors,[]);
   await page.close();
-  console.log('PASS Fox works on a copy in the panel\'s corner while the person keeps the page; leaving shows it live in a small screen over the device; the screen returns to it; after Fox\'s turn the device shows Done until opened');
+  console.log('PASS Fox works on a copy above the conversation box (or in the panel\'s corner) while the person keeps the page; leaving shows it live in a small screen over the device; the screen returns to it; after Fox\'s turn the device shows Done until opened');
  }
  {
   // Fox's copy in the panel: pressed, Fox's page takes the panel; after Fox's turn it stays until its close.

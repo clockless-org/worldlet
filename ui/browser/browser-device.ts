@@ -530,8 +530,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    const rect={x:x+inset,y:y+top,width:Math.max(0,right-x-2*inset),height:Math.max(0,bottom-y-top-inset)};
    if(rect.width<1||rect.height<1)return;
    panelRect=rect;
-   // Fox's copy in the panel's corner; a panel grown too small for it takes Fox's page in instead.
-   const copyRect=copyPage?foxCopyPlacement({panel:rect,page:copyPage}):null;
+   // Fox's copy above Fox's conversation box (else the panel's corner); a panel grown too small for it takes Fox's page in instead.
+   const copyRect=copyPage?foxCopyPlacement({panel:rect,page:copyPage,dialogue:dialogueRect()}):null;
    if(copyPage&&!copyRect){copyPage=null;copyTake=true;copyOff=true;markFoxControl();}
    const copy=copyPage&&copyRect?{copy:{rect:copyRect,page:copyPage}}:{},take=copyTake&&showing?{takeCopy:true}:{};copyTake=false;
    const fox=glow?{fox:glow}:{},key=JSON.stringify({rect,fox:glow&&{...glow,phaseSeconds:undefined},...copy,...take});
@@ -551,7 +551,15 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   });
  }
  const observer=new MutationObserver(()=>geometry(content.hidden));observer.observe(content,{attributes:true,childList:true});observer.observe(root.querySelector('#notionDialog'),{attributes:true,attributeFilter:['open']});
- const resize=new ResizeObserver(geometry);resize.observe(content);content.addEventListener('animationend',geometry);content.addEventListener('transitionend',geometry);window.addEventListener('resize',geometry);content.addEventListener('scroll',geometry);
+ const resize=new ResizeObserver(geometry);resize.observe(content);
+ // Fox's conversation box, which Fox's copy sits above (FOX_COPY): it is watched once it exists, as it grows with Fox's reply.
+ let dialogue:HTMLElement|null=null;
+ function dialogueRect():SurfaceRect|null {
+  const node=root.querySelector('#companionDialogue') as HTMLElement|null;
+  if(node&&node!==dialogue){if(dialogue)resize.unobserve(dialogue);dialogue=node;resize.observe(node);observer.observe(node,{attributes:true,attributeFilter:['hidden','class','style']});}
+  if(!node||node.hidden||getComputedStyle(node).visibility==='hidden')return null;
+  const r=node.getBoundingClientRect();return r.width>0&&r.height>0?{x:r.x,y:r.y,width:r.width,height:r.height}:null;
+ }content.addEventListener('animationend',geometry);content.addEventListener('transitionend',geometry);window.addEventListener('resize',geometry);content.addEventListener('scroll',geometry);
  window.addEventListener('worldlet:browser',(event: any)=>{
   const value=event.detail;
   // The window's page reports a press on it, or that the host closed it.

@@ -17,7 +17,8 @@ context, permissions, portable records and how work is presented.
 
 Talking with Fox never waits for an Applet (owner decision 2026-10-03). Background checks and
 analysis already run in lanes of their own. Work that takes several steps in one Applet (searching a
-website, comparing, filling a form, preparing an order) goes to that Applet as a task:
+website, comparing, filling a form, preparing an order, and reading through a site's pages, posts or
+recorded visits so the person can keep talking meanwhile, owner Order 2026-10-10) goes to that Applet as a task:
 
 - Fox calls `applets/delegate` (`start_applet_task`) with the Applet and the whole task. Only the
   person's own words in that turn can start one, and the task's tools run under that request; page,
