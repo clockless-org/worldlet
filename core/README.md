@@ -1,6 +1,12 @@
 # 02 · Data and rules
 
-Platform-independent product behavior. Components: accounts, items, companion, context, scheduling, applets, attention, tools, browser, onboarding, agent, games, widgets, ongoing, artifacts.
+Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-PLATFORM.md#features):
+
+- World: activity
+- Applets: applets, browser, games
+- Companion: companion, scheduling, ongoing (Fox and its background work)
+- Attention: attention, artifacts, widgets (ranking and every output Fox prepares)
+- Base: agent, accounts, tools, phone, items, context, onboarding, diagnostics, distribution
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 

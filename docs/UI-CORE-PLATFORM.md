@@ -8,12 +8,36 @@ Platform host thin; the Harness and model service are replaceable through explic
 | UI | `ui/` | Shared Web presentation, navigation, Fox and Applet interactions |
 | Core | `core/` | Pure product rules, records, scheduling decisions and validation |
 | Platform | `platform/` | Electron desktop shell, permissions, persistence, processes and browser IO |
-| Harness | `harness/` | Agent planning, tool loop and admitted job execution |
-| Models/services | `models/` and provider APIs | Inference access, quotas and usage |
+| Harness | The person's own Agent (`harness/` holds the reference adapter example and the `worldlet` skill) | Agent planning, tool loop and admitted job execution; Worldlet never customizes it |
+| Models/services | The person's provider, reached through their Agent | Inference access, quotas and usage; Worldlet provides no model |
 
 `contracts/` supplies interfaces across layers; it is not a sixth runtime layer or
 an extra execution hop. Resources contain assets and declarations, not product logic.
 See the [diagram](architecture.html).
+
+<a id="features"></a>
+## Four features and the base
+
+Layers cut the product across; features cut it down. Each feature is a vertical
+slice with its own UI, Core and (when it needs one) Platform part. Every `ui/` and
+`core/` component belongs to exactly one row below; `npm run check:docs` fails when a
+component is missing or listed twice.
+
+| Feature | What it is | UI | Core | Platform |
+| --- | --- | --- | --- | --- |
+| World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `core/activity/` | Trusted World view |
+| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `core/applets/` `core/browser/` `core/games/` | Website views, agent-browser |
+| Companion | Fox: the one conversation in front, and the background work (routines, checks, drafts) that keeps going while the person is away | `ui/companion/` | `core/companion/` `core/scheduling/` `core/ongoing/` | Agent processes, conversation journal |
+| Attention | What needs the person now (Attention Center) and what is past (Journal); every output Fox prepares is one artifact shown in both | `ui/attention/` | `core/attention/` `core/artifacts/` `core/widgets/` | Phone pushes |
+| Base | What every feature stands on: the connection to the person's Agent (adapters, World tools over the `worldlet` MCP server, phone pairing), local records, setup and the app shell | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `core/agent/` `core/accounts/` `core/tools/` `core/phone/` `core/items/` `core/context/` `core/onboarding/` `core/diagnostics/` `core/distribution/` | Electron host, storage, `contracts/` |
+
+Work flows Applets → Companion → Attention: sources and Applet records feed Fox's
+background work, and what it prepares waits in Attention for the person's decision.
+Background results never reach the person except through Attention.
+
+Known misplacements, to move when that code is next changed: the Journal book is
+`ui/companion/journal-book.ts` (Attention), and Fox animation studies
+(`ui/companion/fox-*-study.ts`, `fox-anatomy-*`, `fox-drafting-*`) sit beside product code.
 
 ## Dependency rules
 
