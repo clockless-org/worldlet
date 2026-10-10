@@ -206,7 +206,11 @@ const copy:Record<string,string[]>={
  'Its own':['它自己的','そのまま','La suya'],
  'What it knew':['它知道的','知っていたこと','Lo que sabía'],
  'Nothing yet':['还没有','まだありません','Nada aún'],
- '{agent} moved in.':['{agent} 搬进来了。','{agent} が引っ越してきました。','{agent} se mudó.']
+ '{agent} moved in.':['{agent} 搬进来了。','{agent} が引っ越してきました。','{agent} se mudó.'],
+ 'Needs version {version} or newer':['需要 {version} 或更新版本','バージョン {version} 以降が必要です','Necesita la versión {version} o posterior'],
+ 'Update {agent}':['更新 {agent}','{agent} を更新','Actualizar {agent}'],
+ '{agent} is updating in Terminal. When it is done, choose Check again.':['{agent} 正在终端里更新，完成后点「重新检测」。','{agent} をターミナルで更新しています。終わったら「もう一度確認」を選んでください。','{agent} se está actualizando en Terminal. Cuando termine, elige Volver a comprobar.'],
+ '{agent} is still older than Worldlet needs.':['{agent} 的版本还是比 Worldlet 需要的旧。','{agent} はまだ Worldlet に必要なバージョンより古いです。','{agent} sigue siendo más antiguo de lo que Worldlet necesita.']
 };
 export function setupText(text:string,language:string){const i=['zh','ja','es'].indexOf(language);return i<0?text:copy[text]?.[i]||text;}
 export function setInterfaceLanguage(language:string){

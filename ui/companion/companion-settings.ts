@@ -189,6 +189,15 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
     text.append(el('strong','',agent.title+(using?' · In use':'')),el('span','',agent.id==='codex'?(agent.model===false?'Sign in to Codex on this computer first.':'Your ChatGPT plan through Codex.'):agent.memory?.model?'Runs on its own API key.':'Answers for Fox on its own sign-in.'),
      // What the Agent can do beyond World tools, which Fox offers in conversation (its own tools, under its own approvals).
      ...using&&typeof agent.canAlso==='string'&&agent.canAlso?[el('span','companion-settings-quiet',agent.canAlso)]:[]);
+    // Older than Worldlet works with (core/agent/agent-versions.ts): its own update command opens in Terminal instead of
+    // Use; Worldlet never updates it by itself. Check again reads its version afresh.
+    const version=agent.version&&typeof agent.version==='object'?agent.version:null,old=version?.outdated===true;
+    if(old)text.append(el('span','companion-settings-model-problem',`Version ${version.current} is too old. Worldlet needs ${version.minimum} or newer.`),...version.update?[]:[el('span','companion-settings-quiet',String(version.howTo||''))]);
+    const update=old&&version.update?action('Update',async()=>{
+     said.textContent=`${agent.title} opens in Terminal to update. When it is done, choose Check again.`;
+     try{await call('agentHarness',{operation:'update',id:agent.id});}catch(e){said.textContent=(e as Error).message||'Could not open the update.';}
+    },{primary:true,id:'update-'+agent.id}):null;
+    const recheck=old?action('Check again',async()=>{said.textContent='Checking…';await call('agentHarness',{operation:'detect',fresh:true}).catch(()=>null);said.textContent='';await draw();},{id:'recheck-'+agent.id}):null;
     const b=using?action('Stop using',async()=>{
      said.textContent='Fox goes back to its own model connection…';
      try{await call('agentHarness',{operation:'clear'});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent='';await draw();}
@@ -202,7 +211,7 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
       window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent='';await draw();
      }catch(e){said.textContent=(e as Error).message||'Could not switch.';}
     },{id:'use-'+agent.id});
-    row.append(text,b);agents.append(row);
+    row.append(text,...update?[update]:[],...recheck?[recheck]:[],...using||!old?[b]:[]);agents.append(row);
    }
    // The provider of the Agent in use comes right under the Agents here.
    agents.append(providers);

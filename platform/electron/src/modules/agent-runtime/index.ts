@@ -12,7 +12,7 @@ import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {endHermesInstall,hermesSessionModels,installHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
-import {openSignIn} from './provider-sign-in.ts';
+import {UPDATED,openSignIn} from './provider-sign-in.ts';
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -20,7 +20,7 @@ import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentCon
 import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
-import {PROVIDER_SETTING,agentProviders,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
@@ -246,10 +246,22 @@ let channelTool:((name:string,args:Row)=>Promise<Row>)|null=null;
  * Gateway on another computer answers, keeps its token in the vault and makes it Fox's Agent; without a token it uses
  * the one saved for that address again. `pair`, `select` and `clear` set it aside (kept, to use again);
  * `forget-gateway` deletes it. `detect` reports its address and whether it is in use, never its token.
- * `requested` hands over, once, the Agent a `--connect=<id>` launch named (`takeRequested`). */
+ * `requested` hands over, once, the Agent a `--connect=<id>` launch named (`takeRequested`). `detect` also reports each
+ * Agent's version against the oldest Worldlet works with (core/agent/agent-versions.ts); `select` turns an older one
+ * away and `update` opens its own update command in Terminal. */
+/** Each Agent's `--version` line, kept for a minute so Settings and setup do not start every Agent on each redraw;
+ * `fresh` reads it again (choosing an Agent, or after its update). */
+const versionLines=new Map<string,{at:number;line:Promise<string|null>}>();
+function installedVersion(install:LocalHarnessInstall,fresh=false):Promise<string|null> {
+ const key=[install.command,...install.prefix].join('\0'),known=versionLines.get(key);
+ if(known&&!fresh&&Date.now()-known.at<60_000)return known.line;
+ const line=harnessVersion(install);
+ versionLines.set(key,{at:Date.now(),line});
+ return line;
+}
 /** What setup hears while Hermes Agent is installed (`install-hermes`) or signs in to ChatGPT (`sign-in-hermes`). */
 export type HermesSetupEvent=({stage:'install'}&HermesInstallProgress)|{stage:'sign-in';url:string;code:string|null};
-export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,noAgent:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{}){
+export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,noAgent:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{},release:(id:LocalHarnessId)=>Promise<void>=async()=>{}){
  let signingIn:AbortController|null=null;
  const remoteStatus=()=>{const s=remote?.status();return s?.state==='paired'?{computer:s.computer,seenAt:s.seenAt??null,...s.error?{error:s.error}:{}}:null;};
  const gateway=()=>vault?readRemoteGateway(vault):null;
@@ -301,6 +313,10 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    });
    // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Model.
    for(const agent of agents as Row[]){const summary=harnessToolsSummary(await harnessTools(agent.id)?.list()??[]);if(summary)agent.canAlso=summary;}
+   // Its version against the oldest Worldlet works with (core/agent/agent-versions.ts), so a too-old one says so before it
+   // is chosen; `fresh` reads it again, after the person updated it.
+   const versions=await Promise.all(found.map(install=>installedVersion(install,request.fresh===true)));
+   (agents as Row[]).forEach((agent,i)=>{agent.version=agentVersionStatus(found[i].id,versions[i]);});
    // Setup preselects the recommended one (owner request 2026-10-04: the local option is the default).
    if(remote?.paired)await remote.heartbeat();
    const elsewhere=remote?.paired||gateway()?.active===true;
@@ -334,7 +350,11 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // Fox talks through it directly, with World tools, and it runs the World's background work too (owner decisions
    // 2026-10-07 and 2026-10-09). Its models and sign-ins are its own.
    const connect=localHarness(install.id).connect;
-   if(!await harnessVersion(install))throw new WorldletError(`${install.title} did not start. Open it once in Terminal, then try again.`);
+   const line=await installedVersion(install,true);
+   if(!line)throw new WorldletError(`${install.title} did not start. Open it once in Terminal, then try again.`);
+   // Older than Worldlet works with: the person updates it with its own command (`update`); Worldlet never does.
+   const version=agentVersionStatus(install.id,line);
+   if(version.outdated)throw new WorldletError(agentTooOldMessage(install.title,version));
    // One short turn proves the sign-in; its answer is not shown.
    const adapter=new LocalHarnessAdapter(context,install);
    const probe=new LocalHarnessRuntime(install);
@@ -369,6 +389,18 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    const install=selectedInstall(context.root),args=install&&isModelProviderId(request.id)?providerSignIn(install.id,request.id):null;
    if(!install||!args)throw new WorldletError('Sign in to this provider in your Agent.');
    await openSignIn(install,args,file=>shell.openPath(file));
+   return {ok:true};
+  }
+  // The Agent's own update command, opened in Terminal like a sign-in, for one older than Worldlet works with
+  // (core/agent/agent-versions.ts). The person runs it; Worldlet never updates an Agent by itself.
+  if(request.operation==='update'){
+   const install=isLocalHarnessId(request.id)?locateLocalHarnesses().find(item=>item.id===request.id):undefined,args=install?AGENT_VERSIONS[install.id].update:null;
+   if(!install)throw new WorldletError('That Agent is no longer on this computer.');
+   if(!args)throw new WorldletError(AGENT_VERSIONS[install.id].howTo);
+   // Windows will not replace files a running process holds (Hermes Agent's updater refuses while its venv is in use),
+   // so Fox's own resident process of this Agent stops first; the next turn starts it again.
+   await release(install.id);
+   await openSignIn(install,args,file=>shell.openPath(file),process.platform,UPDATED);
    return {ok:true};
   }
   if(request.operation==='clear'){
@@ -426,6 +458,7 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
- host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event))});
+ host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
+  async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});})});
  host.onQuit(()=>{endHermesInstall();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
 }
