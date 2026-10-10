@@ -137,7 +137,6 @@ Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它�
 
 ```sh
 npm ci
-npm run setup:hermes   # 没选其他 Agent 时 Fox 用的固定版本 Hermes 运行时
 npm run dev            # 带监视的开发构建
 npm run build          # 构建一次界面和 Electron 宿主
 npm run package        # 为当前系统打包桌面 App（不签名）

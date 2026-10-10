@@ -195,7 +195,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
 }
 
 interface MailContext {host:CheckContext['host'];js:(code:string)=>Promise<any>;wait:(what:string,code:string,seconds:number)=>Promise<void>;mark:(step:string)=>void;press:(label:string,seconds?:number)=>Promise<void>;seen:()=>Promise<string>}
-/** After the journey, two real conversations about the mock Gmail inbox (harness/hermes/mock_google.py:
+/** After the journey, two real conversations about the mock Gmail inbox (core/accounts/google/mock.ts:
  * only the Google API client is fictional; paging, normalization and Fox are the real ones): Fox
  * fetches the unread mail and names who needs a reply, then drafts a reply that waits for review
  * and is cancelled, never sent. Judged on the tools the turn used and their effects, not wording;
@@ -214,7 +214,7 @@ async function mailConversation({host,js,wait,mark,press,seen}:MailContext){
   }
   return calls;
  };
- /** read_world_source's receipt (harness/hermes/source_reader.py): Mail records were returned to Fox,
+ /** read_world_source's receipt: Mail records were returned to Fox,
   * whether Fox called the tool directly or through call_world_tool. */
  const readMail=(calls:{name:string,args:Row}[])=>calls.some(call=>call.name==='_source_result'&&call.args.provider==='gmail'&&call.args.failed!==true);
  /** Types to Fox as a person does; resolves to Fox's answer and the tools its turn used. */

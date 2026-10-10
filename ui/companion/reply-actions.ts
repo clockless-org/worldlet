@@ -1,5 +1,4 @@
 // Deliberately finite: model text cannot name arbitrary native methods or arguments.
-// scripts/build-hermes.ts emits the same IDs into tools.json for the Hermes prompt.
 const actions={};
 for(const track of ['ocean','rain','forest','village'])actions['ambience.'+track]={method:'backgroundMusic',args:{channel:'ambience',operation:'play',track}};
 for(const channel of ['music','ambience'])for(const operation of ['play','pause','resume','stop','quieter','louder'])actions[channel+'.'+operation]={method:'backgroundMusic',args:{channel,operation}};

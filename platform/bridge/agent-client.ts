@@ -49,7 +49,7 @@ export function createAgentClient(call,{sample=false}={}){
     if(signal?.aborted)return;
     partial=reduceAgentResponse(partial,event);
     if(event.type==='status'){const mark={starting:'nativeStartingMs',waiting:'nativeWaitingMs',model:'nativeModelMs',connections:'nativeConnectionsMs'}[event.stage];if(mark)trace?.mark(mark);}
-    // Once the model has the turn, `waiting` is only Hermes Desktop's keep-alive (harness/hermes/desktop.py):
+    // Once the model has the turn, `waiting` is only a keep-alive:
     // it must not replace "Thinking…" or the long-conversation notice with the queue's "Waiting…".
     if(event.type==='status'&&!(event.stage==='waiting'&&started))onStatus?.(stageMessages[event.stage]||'Working…',undefined,{activity:stageAnimationActivity(event.stage),source:'stage'});
     if(event.type==='status'&&(event.stage==='model'||event.stage==='compacting'))started=true;

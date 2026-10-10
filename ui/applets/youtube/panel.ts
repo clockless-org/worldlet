@@ -6,7 +6,7 @@ export function videoID(input){
 }
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;
 const clock=n=>{n=Math.max(0,Math.floor(n||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')};
-// The Applet holds no YouTube account; harness/hermes/GOOGLE-OAUTH-REVIEW.md says why. Public links
+// The Applet holds no YouTube account; docs/GOOGLE-OAUTH-REVIEW.md says why. Public links
 // play in the official player and the queue stays on this Mac.
 export function createYouTubeApplet({native,content,onMedia=(_media: any)=>{},notify=(_text: string)=>{}}){
  const root=el('section','youtube-applet'),top=el('div','yt-top'),brand=el('div','yt-brand'),img=el('img');img.src=logo;img.alt='';brand.append(img,el('strong','','YouTube'));

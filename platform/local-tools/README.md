@@ -4,4 +4,4 @@ Harness-independent coding session readers/runners, subprocess transports and sp
 
 Native hosts retain consent, process control and credential filtering. They run on Worldlet's own tools Python (`platform/electron/src/modules/media/tools-python.ts`), set up on first use with the bundled uv: a pinned CPython, a virtual environment with pip (speech installs its own packages with it) and the hash-pinned `requirements.txt` here. No helper uses an Agent's Python. `WORLDLET_TOOLS_PYTHON` may select an existing tool runtime instead.
 
-Provider-specific source connectors remain in `harness/hermes/`.
+Provider-specific source connectors live in the Platform (`platform/electron/src/modules/sources/`).

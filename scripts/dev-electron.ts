@@ -19,10 +19,9 @@ if((!checkout.linked&&checkout.branch!=='main')||(process.argv.includes('--main'
 // The main Dev app builds only from the primary checkout's main, so keep it there (scripts/primary-guard.mjs).
 if(!checkout.linked)try{installPrimaryGuard(root);}catch(error){console.error('Primary guard not installed: '+error.message);}
 const home=path.join(root,'.local/dev/electron'),appDir=path.join(home,'app'),webDir=path.join(home,'WorldletWeb'),pidFile=path.join(home,'app.pid');
-const hermesPython=process.env.WORLDLET_HERMES_PYTHON||path.join(checkout.primary,'.local/hermes-source/.venv',process.platform==='win32'?'Scripts/python.exe':'bin/python3');
 const updates=new DeferredDevUpdate(appDir,webDir);
 // Worldlet's own tools Python (platform/electron/src/modules/media/tools-python.ts) is set up with uv, which a packaged
-// app bundles. Dev uses the primary checkout's, the one `npm run setup:hermes` installs, and installs it here when a
+// app bundles. Dev uses the primary checkout's (`.local/bootstrap`), installed here when a
 // fresh checkout has none, so local speech, coding sessions and the browser driver work in Dev too.
 const uvBin=path.join(checkout.primary,'.local/bootstrap',process.platform==='win32'?'Scripts':'bin'),uv=path.join(uvBin,process.platform==='win32'?'uv.exe':'uv');
 function ensureUv(){
@@ -31,7 +30,7 @@ function ensureUv(){
  console.log('Installing uv for Worldlet’s local tools…');
  const venv=spawnSync(python,['-m','venv',bootstrap],{stdio:'inherit'});
  const pip=venv.status===0&&spawnSync(path.join(uvBin,process.platform==='win32'?'python.exe':'python3'),['-m','pip','install','uv==0.12.15'],{stdio:'inherit'});
- if(!pip||pip.status!==0)console.error('uv could not be installed; Worldlet Dev’s local tools stay unavailable until npm run setup:hermes succeeds.');
+ if(!pip||pip.status!==0)console.error('uv could not be installed; Worldlet Dev’s local tools stay unavailable until uv is installed in .local/bootstrap.');
 }
 if(process.argv.includes('--apply-ready')){const c=await updates.requestCurrent();console.log(`Requested Apply and restart for ${c.revision}.`);process.exit(0);}
 const releaseLock=lock(path.join(root,'.local/dev-watcher.lock'));process.on('exit',releaseLock);
@@ -107,7 +106,7 @@ async function launch(){
  ensureUv();
  const env:NodeJS.ProcessEnv={...process.env,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_WEB_ROOT:webDir,WORLDLET_DEV_UPDATE_DIR:home,WORLDLET_DEV_PID_FILE:pidFile,
   WORLDLET_WINDOW_TITLE:checkout.linked?`Worldlet Dev — ${checkout.label}`:'Worldlet Dev',...(checkout.linked?{WORLDLET_WORKTREE_PROFILE:checkout.id}:{}),
-  ...(existsSync(hermesPython)?{WORLDLET_HERMES_PYTHON:hermesPython}:{}),...(existsSync(uv)?{WORLDLET_UV:uv}:{})};
+  ...(existsSync(uv)?{WORLDLET_UV:uv}:{})};
  delete env.ELECTRON_RUN_AS_NODE;
  const binary=await devRuntime();
  if(process.platform==='darwin'){
@@ -178,7 +177,7 @@ if(check){updates.state.online=false;await updates.publish();const head=git(root
  console.log(`Candidate ${head.slice(0,7)} prepared; current app and published web resources unchanged.`);process.exit(0);}
 // Feature previews react to edits, but main only prepares committed, clean changes.
 if(checkout.linked){
- for(const name of ['ui','core','contracts','resources','platform/bridge','platform/electron','harness/hermes','platform/local-tools','platform/browser','platform/web-engine','scripts'])watchers.push(watch(path.join(root,name),{recursive:true},(_event,file)=>{if(!String(file??'').includes('node_modules'))schedule();}));
+ for(const name of ['ui','core','contracts','resources','platform/bridge','platform/electron','platform/local-tools','platform/browser','platform/web-engine','scripts'])watchers.push(watch(path.join(root,name),{recursive:true},(_event,file)=>{if(!String(file??'').includes('node_modules'))schedule();}));
  for(const name of ['release.json','package.json','package-lock.json'])watchers.push(watch(path.join(root,name),()=>schedule()));
 }
 headTimer=setInterval(()=>{

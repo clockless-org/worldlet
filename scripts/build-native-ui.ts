@@ -67,7 +67,6 @@ await buildUI(root,output);
 
 await writeFile(path.join(output,'build-info.json'),defines.__WORLDLET_BUILD__);
 
-await import('./build-hermes.ts');
 await import('./build-local-tools.ts');
 await mkdir(path.join(output,'browser'),{recursive:true});
 await copyFile(path.join(root,'platform/browser/agent_browser.py'),path.join(output,'browser/agent_browser.py'));

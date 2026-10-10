@@ -5,6 +5,7 @@ import {createHash,randomUUID} from 'node:crypto';
 import {build} from 'esbuild';
 import ts from 'typescript';
 import {parseBuildThemeManifest,parseThemePresentation,themeAssetPath} from '../ui/themes/build-theme-contract.ts';
+import {withVirtualFile} from './ts-virtual-file.ts';
 
 export async function themeFiles(root:string,prefix=''):Promise<string[]> {
  const result:string[]=[];
@@ -59,9 +60,7 @@ export async function validateBuildTheme(source:string){
  if(!result.outputFiles.length)throw Error('Theme entry did not compile');
  const virtual=path.join(source,'__theme_contract_check__.ts');
  const options:ts.CompilerOptions={target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext,moduleResolution:ts.ModuleResolutionKind.Bundler,strict:true,noImplicitAny:false,strictNullChecks:false,noEmit:true,allowImportingTsExtensions:true,skipLibCheck:true,resolveJsonModule:true,types:[],baseUrl:source,paths:{'@worldlet/theme':[fileURLToPath(new URL('../ui/themes/build-theme-contract.ts',import.meta.url))]}};
- const compiler=ts.createCompilerHost(options),originalRead=compiler.readFile,originalExists=compiler.fileExists;
- compiler.fileExists=file=>file===virtual||originalExists(file);
- compiler.readFile=file=>file===virtual?"import theme from './entry.ts'; import type {BuildTheme} from '@worldlet/theme'; const checked:BuildTheme=theme;":originalRead(file);
+ const compiler=withVirtualFile(ts.createCompilerHost(options),virtual,"import theme from './entry.ts'; import type {BuildTheme} from '@worldlet/theme'; const checked:BuildTheme=theme;");
  const program=ts.createProgram([virtual],options,compiler),diagnostics=ts.getPreEmitDiagnostics(program);
  if(diagnostics.length)throw Error(ts.formatDiagnosticsWithColorAndContext(diagnostics,{getCurrentDirectory:()=>source,getCanonicalFileName:f=>f,getNewLine:()=>"\n"}));
 
