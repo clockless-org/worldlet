@@ -29,6 +29,6 @@ Use placeholders instead: `alex@example.com`, `example.com`, `192.0.2.10` (or `1
 
 ## Changes and pull requests
 
-- Keep each pull request to one change. Run `npm run check:pr` and `npm test` before pushing; pull request CI runs the same checks on Linux and should finish within about three minutes.
+- Keep each pull request to one change. Run `npm run check:pr` and `npm test` before pushing, and `npm run test:ui:quick` when the change touches the interface; pull request CI runs the same checks and the fastest UI checks (`test:ui:pr`) on Linux and should finish within about five minutes.
 - Update the documentation a change affects in the same pull request (`npm run check:docs` checks links and the inventory in [docs/README.md](docs/README.md)).
 - Describe the change in plain language: what a reader sees before and after, and how it works.

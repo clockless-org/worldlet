@@ -125,6 +125,15 @@ export const quickChecks=available([
  'scripts/artifacts-ui-check.ts','scripts/order-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
  'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts',
 ]);
+// The pull request set (`npm run test:ui:pr`, owner decision 2026-10-10: PR CI runs quick checks within five minutes):
+// the quick checks that finish in seconds on a GitHub Linux runner. Those that draw the World took 2 to 8 minutes there
+// on software WebGL, four at a time, and timed out clicking it (PR #125's first run), so they stay in Alpha.
+export const prChecks=quickChecks.filter(c=>[
+ 'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
+ 'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/web-record-check.ts',
+ 'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',
+ 'scripts/meetings-check.ts',
+].includes(c));
 // Windows release host 01 is slower: four browsers at once pushed world startup past a check's
 // 15-30 s waits (fox-mac-controls, voice-memos). Two at a time took 12.5 minutes on 01, most of a
 // Windows RC; the owner asked for three (2026-10-01, #1099).
@@ -160,7 +169,18 @@ export function shardChecks({parallel,serial},value=process.env.WORLDLET_TEST_UI
  const all=[...parallel,...serial],mine=new Set(all.filter((_,k)=>k%n===i-1));
  return {parallel:parallel.filter(c=>mine.has(c)),serial:serial.filter(c=>mine.has(c))};
 }
-export const checkStep=file=>({name:file,bin:file.endsWith('.py')?'python3':process.execPath,args:[file]});
+// Node checks load scripts/test-browser-preload.mjs when WORLDLET_TEST_BROWSER is set, so every check launches that Chromium.
+export const checkStep=(file,env=process.env)=>({name:file,bin:file.endsWith('.py')?'python3':process.execPath,
+ args:file.endsWith('.py')||!env.WORLDLET_TEST_BROWSER?[file]:['--import',pathToFileURL(path.join(root,'scripts/test-browser-preload.mjs')).href,file]});
+// The Chromium the checks launch when Playwright's own is not installed but a preinstalled one is (a cloud session's
+// image, PLAYWRIGHT_BROWSERS_PATH with an older revision), else nothing: the checks then use Playwright's own.
+export async function fallbackBrowser(env=process.env,exists=existsSync){
+ if(env.WORLDLET_TEST_BROWSER)return env.WORLDLET_TEST_BROWSER;
+ let own;try{own=(await import('playwright')).chromium.executablePath();}catch{return null;}
+ if(own&&exists(own))return null;
+ const preinstalled=env.PLAYWRIGHT_BROWSERS_PATH&&path.join(env.PLAYWRIGHT_BROWSERS_PATH,'chromium');
+ return preinstalled&&exists(preinstalled)?preinstalled:null;
+}
 const running=new Set();
 // A check that has not finished after this long fails on its own, so a hung check is named instead of eating
 // the gate's 30 minutes (Mac RC 2026.1005.2844 on the stand-in: all 163 pool checks passed in about six
@@ -195,9 +215,9 @@ export async function testUi({parallel=parallelChecks,serial=serialChecks,limit=
  log(`test:ui: build:native-ui, then ${parallel.length} checks ${limit} at a time and ${serial.length} alone`);
  if(!cli){log('FAIL build:native-ui: npm-cli.js not found beside '+process.execPath+'; run npm run test:ui');return 1;}
  const build=report(await run({name:'build:native-ui',bin:process.execPath,args:[cli,'run','build:native-ui']}));
- const results=build.ok?[...await pool(parallel.map(checkStep),limit,step=>run(step).then(report)),
+ const results=build.ok?[...await pool(parallel.map(file=>checkStep(file)),limit,step=>run(step).then(report)),
   // Serial checks say when they start, so a log cut short still names the one that was running.
-  ...await pool(serial.map(checkStep),1,step=>{log('START   '+step.name);return run(step).then(report);})]:[];
+  ...await pool(serial.map(file=>checkStep(file)),1,step=>{log('START   '+step.name);return run(step).then(report);})]:[];
  const failed=[build,...results].filter(r=>!r.ok),names=failed.map(r=>r.name).join(', ');
  log(`\ntest:ui: ${results.filter(r=>r.ok).length} of ${total} checks passed in ${duration((Date.now()-started)/1000)}`+
   (build.ok?'':' (no check ran without the build)')+(failed.length?'. Failed: '+names:''));
@@ -209,6 +229,8 @@ export async function testUi({parallel=parallelChecks,serial=serialChecks,limit=
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  // A stopped gate (its timeout, Ctrl-C) stops the running checks too, not only this process.
  for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{for(const child of running)child.kill();process.exit(1);});
+ const browser=await fallbackBrowser();
+ if(browser&&!process.env.WORLDLET_TEST_BROWSER){process.env.WORLDLET_TEST_BROWSER=browser;console.log('test:ui: Playwright\'s Chromium is not installed; the checks use '+browser);}
  const only=onlyArgument();
- process.exitCode=await testUi(shardChecks(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):{parallel:parallelChecks,serial:serialChecks}));
+ process.exitCode=await testUi(shardChecks(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):process.argv.includes('--pr')?onlyChecks(prChecks.join(',')):{parallel:parallelChecks,serial:serialChecks}));
 }

@@ -24,6 +24,7 @@
     "test:ui": "node scripts/test-ui.mjs",
     "test:ui:core": "node scripts/test-ui.mjs --core",
     "test:ui:quick": "node scripts/test-ui.mjs --quick",
+    "test:ui:pr": "node scripts/test-ui.mjs --pr",
     "test:render": "npm run build:native-ui && node scripts/celestial-art-check.ts && node scripts/landmark-night-check.ts && node scripts/night-interaction-check.ts",
     "test:world": "npm run build:native-ui && node scripts/world-filter-area-check.ts && node scripts/world-layout-check.ts && node scripts/world-plate-registration-check.ts && node scripts/world-projection-worker-check.ts && node scripts/world-history-ui-check.ts && node scripts/world-readability-check.ts && node scripts/content-store-incremental-check.ts && python3 scripts/world-storage-check.py",
     "gate": "node scripts/gate.mjs",

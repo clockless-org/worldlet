@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
-import {coreChecks,parallelChecks,serialChecks,testUiConcurrency,npmCli,checkStep,runStep,testUi,onlyChecks,onlyArgument,quickChecks} from './test-ui.mjs';
+import {coreChecks,parallelChecks,serialChecks,testUiConcurrency,npmCli,checkStep,fallbackBrowser,runStep,testUi,onlyChecks,onlyArgument,quickChecks,prChecks} from './test-ui.mjs';
 import {withTempDir} from './test-temp.ts';
 
 const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
@@ -18,7 +18,14 @@ assert.equal(testUiConcurrency('','darwin'),4);assert.equal(testUiConcurrency(''
 assert.equal(testUiConcurrency('','win32'),3);assert.equal(testUiConcurrency('2','win32'),2);
 for(const bad of ['0','-1','1.5','four'])assert.throws(()=>testUiConcurrency(bad),/WORLDLET_TEST_UI_CONCURRENCY/);
 assert.deepEqual(checkStep('scripts/x-check.py'),{name:'scripts/x-check.py',bin:'python3',args:['scripts/x-check.py']},'Python runs as python3');
-assert.deepEqual(checkStep('scripts/x-check.ts'),{name:'scripts/x-check.ts',bin:process.execPath,args:['scripts/x-check.ts']},'node runs as this node, without a shell');
+assert.deepEqual(checkStep('scripts/x-check.ts',{}),{name:'scripts/x-check.ts',bin:process.execPath,args:['scripts/x-check.ts']},'node runs as this node, without a shell');
+{const {args}=checkStep('scripts/x-check.ts',{WORLDLET_TEST_BROWSER:'/b/chromium'});assert.deepEqual([args[0],args[2]],['--import','scripts/x-check.ts'],'a named browser is preloaded into node checks');}
+assert.match(checkStep('scripts/x-check.ts',{WORLDLET_TEST_BROWSER:'/b/chromium'}).args[1],/^file:.*scripts\/test-browser-preload\.mjs$/,'the preload is a file URL, which Windows needs');
+assert.deepEqual(checkStep('scripts/x-check.py',{WORLDLET_TEST_BROWSER:'/b/chromium'}).args,['scripts/x-check.py'],'Python checks get no node preload');
+assert.equal(await fallbackBrowser({WORLDLET_TEST_BROWSER:'/b/chromium'}),'/b/chromium','a named browser wins');
+assert.equal(await fallbackBrowser({PLAYWRIGHT_BROWSERS_PATH:'/pw'},file=>file==='/pw/chromium'),'/pw/chromium','without Playwright\'s own Chromium the preinstalled one is used');
+assert.equal(await fallbackBrowser({PLAYWRIGHT_BROWSERS_PATH:'/pw'},()=>true),null,'Playwright\'s own Chromium, when installed, is used');
+assert.equal(await fallbackBrowser({},()=>false),null,'no preinstalled Chromium: nothing changes');
 assert.equal(npmCli({npm_execpath:'/n/npm-cli.js'},f=>f==='/n/npm-cli.js'),'/n/npm-cli.js');assert.equal(npmCli({},()=>false),null);
 // --only: just the named checks, each kept in its group (the RC recheck and repair sessions); unknown names fail.
 assert.deepEqual(onlyChecks(`${serialChecks[0]}, ${parallelChecks[1]},${parallelChecks[1]}`),{parallel:[parallelChecks[1]],serial:[serialChecks[0]]});
@@ -28,6 +35,9 @@ assert.equal(onlyArgument(['node','t','--only','a,b'],{}),'a,b');assert.equal(on
 assert.equal(onlyArgument(['node','t'],{WORLDLET_TEST_UI_ONLY:'c'}),'c');assert.equal(onlyArgument(['node','t'],{}),null);
 // The quick set the RC runs between release slots: listed checks, each once, the whole suite still the release's.
 assert.equal(pkg.scripts['test:ui:quick'],'node scripts/test-ui.mjs --quick');
+// The pull request set: quick checks only, the ones that finish in seconds on a CI runner.
+assert.equal(pkg.scripts['test:ui:pr'],'node scripts/test-ui.mjs --pr');
+assert(prChecks.length>=8&&prChecks.every(c=>quickChecks.includes(c)),'every pull request UI check is a quick check');
 assert(quickChecks.length>=20&&quickChecks.length<all.length/3&&new Set(quickChecks).size===quickChecks.length,'a short list, each once');
 assert.deepEqual([...onlyChecks(quickChecks.join(',')).parallel,...onlyChecks(quickChecks.join(',')).serial].sort(),[...quickChecks].sort(),'every quick check is a test:ui check');
 for(const c of ['scripts/world-scene-check.ts','scripts/startup-setup-check.ts','gatehouse/board-browser-check.mjs','scripts/library-applet-check.ts'].filter(c=>existsSync(new URL('../'+c,import.meta.url))))assert(quickChecks.includes(c),c+' (the checks RCs failed on 2026-10-06)');
@@ -78,4 +88,4 @@ await withTempDir('worldlet-test-ui-',async dir=>{
  const hung=await runStep({name:'hang',bin:process.execPath,args:[hang]},{timeoutMs:1500});
  assert.equal(hung.ok,false,'a hung check fails');assert.match(hung.output,/waiting forever[\s\S]*No result after 2 s: stopped/);assert(hung.seconds<10,'and stops at its limit');
 });
-console.log('PASS test:ui runner: complete lists, --only selects named checks, bounded concurrency, serial checks alone, failures fail with readable output, real child processes.');
+console.log('PASS test:ui runner: complete lists, --only selects named checks, bounded concurrency, serial checks alone, failures fail with readable output, real child processes; the cloud Chromium stand-in.');
