@@ -1,0 +1,1790 @@
+{
+ "devices/acrobat.webp": {
+  "source": "resources/styles/builtin/assets/applets/acrobat/peek-logo-v3.png",
+  "sourceSha256": "9811748ca3ea77887b829b1591181b5406f4847a7f967c60e3cc92c95d59b6a1",
+  "settings": "device:768:webp-92-100",
+  "sha256": "cb6aefc7becff0186ddbbdbf7b309bfd4efed138210418cb1b95186ea4043912"
+ },
+ "devices/agar-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/agar-io/peek-logo-v4.png",
+  "sourceSha256": "f697dbf87b81e7b0453e8f80ddd5476b9cbab4e68a362eb81ca0e1a20755a660",
+  "settings": "device:768:webp-92-100",
+  "sha256": "af530cc7a0b1c51587cdb1572161e8d125ae97855c0e6bd5b253964eabe03f48"
+ },
+ "devices/airbnb.webp": {
+  "source": "resources/styles/builtin/assets/applets/airbnb/peek-logo-v3.png",
+  "sourceSha256": "f6bd8da6e3d1be0636806fe0b8127125ce43a3f672a2dba2867174e8e1a89f8d",
+  "settings": "device:768:webp-92-100",
+  "sha256": "dc36aa75b53fe8b01f6432ac3ba080446908fd673994f30697c2c98cc5442a88"
+ },
+ "devices/alipay.webp": {
+  "source": "resources/styles/builtin/assets/applets/alipay/peek-logo-v3.png",
+  "sourceSha256": "a1c617c1bf26dcd6f6947c4dd18c8d2b005945942df1c64f0f3991dce84c47d3",
+  "settings": "device:768:webp-92-100",
+  "sha256": "562cab879f4d1812ec70560d18ce801a733b5d3a0a169d2ff34f332f2b4f5da8"
+ },
+ "devices/amazon.webp": {
+  "source": "resources/styles/builtin/assets/applets/amazon/peek-logo-v3.png",
+  "sourceSha256": "3b1cfdd5f4378c81b7ed5fa2efb44cf18c5322be1745a0d6e8312116ab160317",
+  "settings": "device:768:webp-92-100",
+  "sha256": "6f6b11c1501401194d432bb8080f14fdf4de94fdb163117b5d605ab6edc89f9d"
+ },
+ "devices/apple-music.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-music/peek-logo-v3.png",
+  "sourceSha256": "61cd55da43f3f167920ec0ab01f84b393a1d83435b93488e5d47479140bde746",
+  "settings": "device:768:webp-92-100",
+  "sha256": "27a0fe2ba4aa245a85c8573e65a8b7e0634e51b77838d991effbc0a9c52b63eb"
+ },
+ "devices/apple-notes.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-notes/peek-logo-v4.png",
+  "sourceSha256": "24e45c8b7db05732076d6211f3b52f907d0ef57df6a5499b8325c8b080a9941e",
+  "settings": "device:768:webp-92-100",
+  "sha256": "8ffefec768667adace6646067f52e386a9b9c201b9a37ebb0ea3fcfcfc92151a"
+ },
+ "devices/apple-podcasts.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-podcasts/peek-logo-v3.png",
+  "sourceSha256": "9120387741118933753798c13b26f03dc45b5ee077d7e1c1fa90ed8be3d4d55b",
+  "settings": "device:768:webp-92-100",
+  "sha256": "5c633f9854077535f55b9fae3d5d579d733d6c2b9f7f0c6e1d455a4727b8048e"
+ },
+ "devices/apple-reminders.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-reminders/peek-logo-v3.png",
+  "sourceSha256": "3b761cc894effd72f86976c935aa8c6e5b2d5aa55d9efa6046d102748a942a8e",
+  "settings": "device:768:webp-92-100",
+  "sha256": "b29a9e3bc16b92ad63a9275e7afba653a21704701e954a2a844f202eb3a5257b"
+ },
+ "devices/baidu-netdisk.webp": {
+  "source": "resources/styles/builtin/assets/applets/baidu-netdisk/peek-logo-v3.png",
+  "sourceSha256": "fde33726a3abf5a0cb149a03b92a18418ffa4d3d98a54be72d0a7f6736586992",
+  "settings": "device:768:webp-92-100",
+  "sha256": "325d7045ea14eda5559829ddb0e79ff25e75f93ee70c04add7461878c31846ef"
+ },
+ "devices/bilibili.webp": {
+  "source": "resources/styles/builtin/assets/applets/bilibili/peek-logo-v3.png",
+  "sourceSha256": "65f4846daa936075e0a1b1a13a1ebf520fef4078adf3e9b1943ac20c8feb8c03",
+  "settings": "device:768:webp-92-100",
+  "sha256": "90827c42187a0d623fc38a964a32e58cebf6e28fae5070acab75a7f3c66ad2b8"
+ },
+ "devices/booking.webp": {
+  "source": "resources/styles/builtin/assets/applets/booking/peek-logo-v3.png",
+  "sourceSha256": "3ee07240a01c9ba085383ec8dcab4c54eb870bd252251bb9d64e3057c88fc1c6",
+  "settings": "device:768:webp-92-100",
+  "sha256": "81a44ffe2946e4adfee91903635f05583d7fd5cc13312f02e511ee23beb47f2f"
+ },
+ "devices/browser.webp": {
+  "source": "resources/styles/builtin/assets/applets/browser/peek-logo-v3.png",
+  "sourceSha256": "cb1bf4b4fa77efa7b8ea4a772c9b0109943b25b9eff0ebec3457306f67a377bc",
+  "settings": "device:768:webp-92-100",
+  "sha256": "90523c7473ab13761208ec107b5f6223b4a4f919230bf8fdf7403dec20339400"
+ },
+ "devices/canva.webp": {
+  "source": "resources/styles/builtin/assets/applets/canva/peek-logo-v3.png",
+  "sourceSha256": "97afc82e2fefcde5ddad24789ed5f204dead7186c010ccee8c68786ddb05cdc3",
+  "settings": "device:768:webp-92-100",
+  "sha256": "c7d6d432628918ee414dd6f82fa887c5c48c61ab5fc534cdb4055cb7ec73ceb1"
+ },
+ "devices/capcut.webp": {
+  "source": "resources/styles/builtin/assets/applets/capcut/peek-logo-v3.png",
+  "sourceSha256": "47aa28b173c6364cbf3cf6644b11f3d388bd48111f5c6941a37c06205469ae2d",
+  "settings": "device:768:webp-92-100",
+  "sha256": "e16cd8e2ec3dfb16faf52d6678f43967a2f839165aee79f332c00c925f4b30ce"
+ },
+ "devices/chatgpt.webp": {
+  "source": "resources/styles/builtin/assets/applets/chatgpt/peek-logo-v3.png",
+  "sourceSha256": "4a7922124b6dcab88977bebd97a847fa0659fbde3d0a937260a253a9e9ddd3f5",
+  "settings": "device:768:webp-92-100",
+  "sha256": "c8175f17b6b17a60ca45e60b4cbf3d0c528aa59e6b2a1d4cdc22c7b3da31fcd8"
+ },
+ "devices/claude-code.webp": {
+  "source": "resources/styles/builtin/assets/applets/claude-code/peek-logo-v3.png",
+  "sourceSha256": "5d77c422fe7d54032bc964ab6561568656287d7995ef719d648c32520cfab699",
+  "settings": "device:768:webp-92-100",
+  "sha256": "d33f1efd8e2b6b566771d9a38d0a5329926b4faa99ed7e6adbaebba9fe8f7a59"
+ },
+ "devices/claude.webp": {
+  "source": "resources/styles/builtin/assets/applets/claude/peek-logo-v3.png",
+  "sourceSha256": "76b022c919dd873e9c36f145ea3136381674e78f4980b419111f1f64d7083eb5",
+  "settings": "device:768:webp-92-100",
+  "sha256": "328e80eb30087d28cfb733aab6bb2288fa0a2684bea128fe98f7ed018c16667b"
+ },
+ "devices/cloudflare.webp": {
+  "source": "resources/styles/builtin/assets/applets/cloudflare/peek-logo-v3.png",
+  "sourceSha256": "68c0beaaeb33eb7595c34b6584911ef6021172cd539455b2740b102fbfb10b44",
+  "settings": "device:768:webp-92-100",
+  "sha256": "397a1265addce7d149ec5f0304091d151649705d93ee2c02788eaa94fb24f4ce"
+ },
+ "devices/codex.webp": {
+  "source": "resources/styles/builtin/assets/applets/codex/peek-logo-v3.png",
+  "sourceSha256": "83f8aa7951273bd6059ee863d18e34d443475b984d7869f15a036df151d7547c",
+  "settings": "device:768:webp-92-100",
+  "sha256": "81564825a97b24e89b204c31c0d4ebc8cf9743c1fe43a4e175ba950e1e1b0d2e"
+ },
+ "devices/cookie-clicker.webp": {
+  "source": "resources/styles/builtin/assets/applets/cookie-clicker/peek-logo-v4.png",
+  "sourceSha256": "642815bd2705c3688d1df39ec96f028a54fb6a29bd37712c0db90a51f50a00fc",
+  "settings": "device:768:webp-92-100",
+  "sha256": "316807a9917f1f2d9badab06e9f8b879ea7a48d6fa679ae948c1e72a50ee792f"
+ },
+ "devices/copilot.webp": {
+  "source": "resources/styles/builtin/assets/applets/copilot/peek-logo-v3.png",
+  "sourceSha256": "6970577e86c4a229c5104111c90fd9a395b42cf618de9d56ceed5444b6865a64",
+  "settings": "device:768:webp-92-100",
+  "sha256": "3d58e8e1791e6ae3c9dae0657c02a2997bd2760168bab460a9f31b0a421fa9ee"
+ },
+ "devices/deepseek.webp": {
+  "source": "resources/styles/builtin/assets/applets/deepseek/peek-logo-v3.png",
+  "sourceSha256": "eb408da44e31832c24a4501c5b9cf82a51a41fc3d6d258ed7594f0f09c55bc09",
+  "settings": "device:768:webp-92-100",
+  "sha256": "47cf01a8df83f76de099a4bc9a8bf10a5eb0299836154d17a2777a88c1b4921c"
+ },
+ "devices/discord.webp": {
+  "source": "resources/styles/builtin/assets/applets/discord/peek-logo-v3.png",
+  "sourceSha256": "3af453a8adad40ef46069bc1c5963d8091e58fb1b70bda62952fae706e81c637",
+  "settings": "device:768:webp-92-100",
+  "sha256": "11a79de41f485cbe137f9600ef450ef3cfaac9bede3b50aea77cac6e49dc1e89"
+ },
+ "devices/docker.webp": {
+  "source": "resources/styles/builtin/assets/applets/docker/peek-logo-v3.png",
+  "sourceSha256": "88eeebf16716d5a07b5ab21cb5c4ee0b60e669e8029af7ee90613796039e689c",
+  "settings": "device:768:webp-92-100",
+  "sha256": "7de0e6119481f7505b02ad01343e8b5060725f8119056cb758c359f9ada26c02"
+ },
+ "devices/doordash.webp": {
+  "source": "resources/styles/builtin/assets/applets/doordash/peek-logo-v3.png",
+  "sourceSha256": "3dae6b8de555fc9a5e1a241878d676881445038bacdaf87a59c4e0dd0dc7e98a",
+  "settings": "device:768:webp-92-100",
+  "sha256": "64a4f2273f96bed12c7655fe52241d4a8a3ca8871deca36cc8fbf4b2a8ed8043"
+ },
+ "devices/doubao.webp": {
+  "source": "resources/styles/builtin/assets/applets/doubao/peek-logo-v3.png",
+  "sourceSha256": "db4c1a43b92aa734573a2acbac79cea8181a8f621db0ca269bc619a47ff22064",
+  "settings": "device:768:webp-92-100",
+  "sha256": "1bdff89a5cc2e970aa7e10d8ca85c0d345fbca8258aa829ce6afcf4a5f947f3a"
+ },
+ "devices/douyin.webp": {
+  "source": "resources/styles/builtin/assets/applets/douyin/peek-logo-v3.png",
+  "sourceSha256": "4953410ca90071ff0dbbb6a596f0a67d54342b31707eac0a68ae7f5492c0cde9",
+  "settings": "device:768:webp-92-100",
+  "sha256": "4aab4870b54f7e036db400ba8984d90bed39c0743dca4704f0456b45f8b8c241"
+ },
+ "devices/drive-mad.webp": {
+  "source": "resources/styles/builtin/assets/applets/drive-mad/peek-logo-v4.png",
+  "sourceSha256": "b9eb3687420b2ca0dfb801e98ebf08c208d68a38e6f6a38408d4547e796744ae",
+  "settings": "device:768:webp-92-100",
+  "sha256": "20ad9eb7cf57784d1684a0dedcd62572e46ffa47213b2f752605d5e93822762e"
+ },
+ "devices/dropbox.webp": {
+  "source": "resources/styles/builtin/assets/applets/dropbox/peek-logo-v3.png",
+  "sourceSha256": "dc9d5008aef04e764e91ed714a79bb0164810182aab96b87f68e4b87bc6b852e",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f3abdd80f95cd11d896b6f0d96f49b1c7d5c036abe9244cb7f3bfcde1287bafb"
+ },
+ "devices/facebook.webp": {
+  "source": "resources/styles/builtin/assets/applets/facebook/peek-logo-v3.png",
+  "sourceSha256": "5c16cb96f7b0ff7d766850f7a5ae724f6c98ae7e2599e0baa3ea80f39f213a7b",
+  "settings": "device:768:webp-92-100",
+  "sha256": "8b2b4e002593486dc05bf12276dd5c2be9d6ea9f0d0c025ca9484c5c8d2f6649"
+ },
+ "devices/feishu.webp": {
+  "source": "resources/styles/builtin/assets/applets/feishu/peek-logo-v3.png",
+  "sourceSha256": "41292bde417906479ebaf015f1ff45d4ab0894fc7c0d0ae2a78387fbfb3a9f25",
+  "settings": "device:768:webp-92-100",
+  "sha256": "9370906a7276e6060f3ad3aa60db859a2c3aba54ae70c924b945f8f0ebdc517d"
+ },
+ "devices/figma.webp": {
+  "source": "resources/styles/builtin/assets/applets/figma/peek-logo-v3.png",
+  "sourceSha256": "133734f7cd3005d2c07afbf33436f17c370f6cfeb682270e80d1613095e0815f",
+  "settings": "device:768:webp-92-100",
+  "sha256": "d7d6654695358fdb25da117d1d78a549fe1a04446988004a61185339835cc75a"
+ },
+ "devices/firebase.webp": {
+  "source": "resources/styles/builtin/assets/applets/firebase/peek-logo-v3.png",
+  "sourceSha256": "e077a0c998e7122b316cf368e7cd2ec2a7e76ae3d3d1eb8991fef4db48e404e0",
+  "settings": "device:768:webp-92-100",
+  "sha256": "011049dc5fd6ffcf0a3f46261c7298bd7f6094f980ca7c1c049b2ddac7671da4"
+ },
+ "devices/fitbit.webp": {
+  "source": "resources/styles/builtin/assets/applets/fitbit/peek-logo-v3.png",
+  "sourceSha256": "0f9681d3925ea9f8c4cf0090b37ca22d4ff409f0363c48266a4569b358114153",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f84d3a5fcf6149e433eb9c9b64be20e1440547a0f3d52995cb561d5ca7147256"
+ },
+ "devices/game-2048.webp": {
+  "source": "resources/styles/builtin/assets/applets/game-2048/peek-logo-v4.png",
+  "sourceSha256": "ca4150a583b080036004be6ddddeb76762c49e7ac51a4768a2804a1061d0c7c7",
+  "settings": "device:768:webp-92-100",
+  "sha256": "a03552f28bf57a047b273743279563636f50b6255e3005fdaae34aef8452d89b"
+ },
+ "devices/gemini.webp": {
+  "source": "resources/styles/builtin/assets/applets/gemini/peek-logo-v3.png",
+  "sourceSha256": "b127ff07a9c017dab365514050d2ea9982404abd47a8d69e1fcb0b10da0d76f7",
+  "settings": "device:768:webp-92-100",
+  "sha256": "daa2bafdcd27ac32c35bbf27ebb6b09ff168f3a46f164a236e03461d2eae688d"
+ },
+ "devices/github.webp": {
+  "source": "resources/styles/builtin/assets/applets/github/peek-logo-v3.png",
+  "sourceSha256": "46d606281949c04c6316805f59b74cadf1aa6d5b6a3a48505995e5789350bba7",
+  "settings": "device:768:webp-92-100",
+  "sha256": "6b0bc978ca0e1f0cbcef3ae07d0487d8d47e253a2674ac7cba4a66696aff0572"
+ },
+ "devices/gitlab.webp": {
+  "source": "resources/styles/builtin/assets/applets/gitlab/peek-logo-v3.png",
+  "sourceSha256": "7fe7f1ee3cd752db4717803b86defabb8ee80da7dc3b5854b2fc815e4a347855",
+  "settings": "device:768:webp-92-100",
+  "sha256": "000939a5d5ed363abd09ec49815f27a042bc7c5d6cc83cdffe830ac1afdb38f3"
+ },
+ "devices/gmail.webp": {
+  "source": "resources/styles/builtin/assets/applets/gmail/peek-logo-v4.png",
+  "sourceSha256": "60867b26dd76981d5d0fe2a3f65317b875cd48c883cf5bbf8cff515c6cf36bde",
+  "settings": "device:768:webp-92-100",
+  "sha256": "0c4ae37957101d53d32faac9c0d093d0caa08d6e7e0d23c524150e308492e8ea"
+ },
+ "devices/google-calendar.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-calendar/peek-logo-v3.png",
+  "sourceSha256": "0aec778f98b520b2a7d8642f8131d44b019945c6bbc56ecb48bfe0bd454b3788",
+  "settings": "device:768:webp-92-100",
+  "sha256": "8d2de692b23f492128928b7b2185ee4c3e741c1669049ef246e853f1ec8e31cd"
+ },
+ "devices/google-docs.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-docs/peek-logo-v3.png",
+  "sourceSha256": "b5b981985fece26d089b123aa7f92cfa2801c234481ae3f63bc7963be5edaba4",
+  "settings": "device:768:webp-92-100",
+  "sha256": "04f5688301a4e2f20f9c6e239d1a50717a18c106a9a20ed273647f6b0d7d9a7e"
+ },
+ "devices/google-drive.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-drive/peek-logo-v3.png",
+  "sourceSha256": "d585ccee2811870ef289281dfe3878c47de9153bb52694311e4a0c1d943b9b1d",
+  "settings": "device:768:webp-92-100",
+  "sha256": "5cf2e34ac0f72e9cae1b89cfef2dd7c4d1b6c2fd5c6f5a296c3f841ab21d5b5f"
+ },
+ "devices/google-maps.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-maps/peek-logo-v3.png",
+  "sourceSha256": "ec8db4421b43e8c6c4c9d40534d25ca13b369716f8ad45ed2c63b5a49f6d142d",
+  "settings": "device:768:webp-92-100",
+  "sha256": "d648335f7b91ea5b036c3339f4fd2141e627937e4e79990d38d5dfa6051bbe32"
+ },
+ "devices/google-photos.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-photos/peek-logo-v3.png",
+  "sourceSha256": "3b1874cdbaea7c53bf2ab0ecec8154592e3b1eb467074d7c65d12e3b251b9a23",
+  "settings": "device:768:webp-92-100",
+  "sha256": "4b360eb61ce712f29c778107227fa8d01a119436b9416c1c40a151c1a80abe8a"
+ },
+ "devices/google-sheets.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-sheets/peek-logo-v3.png",
+  "sourceSha256": "147f830ab9bb6c26fd4b99a6cc3c5caeb689b1b04657c889e17c59773d777e9e",
+  "settings": "device:768:webp-92-100",
+  "sha256": "915296937307c426975c01703b0562d9608966eeda922bc480b2368933dcc75d"
+ },
+ "devices/google-slides.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-slides/peek-logo-v3.png",
+  "sourceSha256": "32a5ad49531ebdfd5a7d4f8aba4ea3310daa5f5230fec0f78f2ed586dc1efb25",
+  "settings": "device:768:webp-92-100",
+  "sha256": "bc5552ce7c903b237e63d722b9fa7e7420296efaf7e380118b33c9d3c034a37e"
+ },
+ "devices/infinite-craft.webp": {
+  "source": "resources/styles/builtin/assets/applets/infinite-craft/peek-logo-v4.png",
+  "sourceSha256": "a3ebf0591503da9441a43db1d740c2b3fe664a110b6ad1a14ec4bee59e1238b2",
+  "settings": "device:768:webp-92-100",
+  "sha256": "8bb8efdca9b04a506843acc9560bfa9f5a2174dbbfbab244f3d2bdb5194e9948"
+ },
+ "devices/instagram.webp": {
+  "source": "resources/styles/builtin/assets/applets/instagram/peek-logo-v3.png",
+  "sourceSha256": "364d0edc7f3600aa95702df35e8ed1adad51328507b88cdb64468db582dbb199",
+  "settings": "device:768:webp-92-100",
+  "sha256": "03b333fae0bcb0f128ee3d1d9b2f9ef986af64353597f7806f972f36ec946f6f"
+ },
+ "devices/jira.webp": {
+  "source": "resources/styles/builtin/assets/applets/jira/peek-logo-v3.png",
+  "sourceSha256": "e230ca8c4c1a1b2c92b1d5730f34e0e9615b80eac18efad5493a68042ad74dca",
+  "settings": "device:768:webp-92-100",
+  "sha256": "4d8e7b74c9fef150772893b5aaa591e5f7dcc7dc153d61ebb8575918df60455d"
+ },
+ "devices/krunker-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/krunker-io/peek-logo-v4.png",
+  "sourceSha256": "f9d96c22abe30ceb26d4bcfe74f05a27454a76ad4942931801cc1ff314354fcc",
+  "settings": "device:768:webp-92-100",
+  "sha256": "60f4b30843c062af222296a65ac90e68d7df283faf63cbaeabee139357059e26"
+ },
+ "devices/lichess.webp": {
+  "source": "resources/styles/builtin/assets/applets/lichess/peek-logo-v4.png",
+  "sourceSha256": "fbfbebf37d3cf4bfbf7fe2cc9bfffb41cf3d9059ac02aedba76d8d222e0618d8",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f1f62a289046c6236ee20268ea83b2bb5b7263dd88a940da9160e11b3ecb7a5a"
+ },
+ "devices/linear.webp": {
+  "source": "resources/styles/builtin/assets/applets/linear/peek-logo-v3.png",
+  "sourceSha256": "ce1c61096f60ff4c483b2f44d6ec81e7780db7b3655a075243cd567ccb7fc6f2",
+  "settings": "device:768:webp-92-100",
+  "sha256": "0336c06ed91f16230c22ac26f4d325a3ff8349adc92624e8c9f8073a57eea073"
+ },
+ "devices/linkedin.webp": {
+  "source": "resources/styles/builtin/assets/applets/linkedin/peek-logo-v3.png",
+  "sourceSha256": "543ea94b32df21f0f6c91317b4b8f0197b4fdd36e519a75151510c94416b90a3",
+  "settings": "device:768:webp-92-100",
+  "sha256": "d609e986c9cc9346479f6da1b36fc7eda8fbb3784dba4149b1f4f3629ff5ea31"
+ },
+ "devices/little-alchemy-2.webp": {
+  "source": "resources/styles/builtin/assets/applets/little-alchemy-2/peek-logo-v4.png",
+  "sourceSha256": "0a440865b199bfd4647880e38a3e022ed967efa4de0487efa5ae68ffa630b7d3",
+  "settings": "device:768:webp-92-100",
+  "sha256": "a6db1c84519490ff8f01443acc81cc18fe5855ddf676f0066d37ea69ed7d91f1"
+ },
+ "devices/meetings.webp": {
+  "source": "resources/styles/builtin/assets/applets/meetings/peek-logo-v4.png",
+  "sourceSha256": "614caae2ae7d71a3022005497b7a3a1a22761adbc7ff9c490e506db065ff6b1b",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f0d6289c97154e9d84f5ad125254fde23987edd5e8b5d1daa0daa791ae1d6a68"
+ },
+ "devices/messages.webp": {
+  "source": "resources/styles/builtin/assets/applets/messages/peek-logo-v3.png",
+  "sourceSha256": "135f64e911dc999b44ce41c9ca22fb7f21857a105adf119246633abedd13aeb7",
+  "settings": "device:768:webp-92-100",
+  "sha256": "3e186428d4f78658d76b6d87c7542a9ab4ddb0b098b7b9fddd2fd98f71a9949f"
+ },
+ "devices/microsoft-excel.webp": {
+  "source": "resources/styles/builtin/assets/applets/microsoft-excel/peek-logo-v3.png",
+  "sourceSha256": "16292d3659c942eb5b3c9af89b174ed03643943b7f8f4d8ae1105ae9c4c61409",
+  "settings": "device:768:webp-92-100",
+  "sha256": "13a85030b68737d2f248494d5c523fa08d46fc6ea939867e52e2e1392084a81c"
+ },
+ "devices/microsoft-powerpoint.webp": {
+  "source": "resources/styles/builtin/assets/applets/microsoft-powerpoint/peek-logo-v3.png",
+  "sourceSha256": "c048f054db3ecce2d49c5698fe03a3f62ee311aba8ae659bd2e18feb495f34d3",
+  "settings": "device:768:webp-92-100",
+  "sha256": "000cf02f4ef4281c76af6ccc506e206c7e4aca0ed4fe676accad78d4c1d6b065"
+ },
+ "devices/microsoft-word.webp": {
+  "source": "resources/styles/builtin/assets/applets/microsoft-word/peek-logo-v3.png",
+  "sourceSha256": "ec6dcc29e0be876b28740f8f64eb4514da81f5161f15ac0e8df8ac752129b2ba",
+  "settings": "device:768:webp-92-100",
+  "sha256": "20853b7aa4cab90a00400133b9cbad6a3267d7473984a7c52537391f144e3184"
+ },
+ "devices/minesweeper.webp": {
+  "source": "resources/styles/builtin/assets/applets/minesweeper/peek-logo-v4.png",
+  "sourceSha256": "beb9d6a0121afd280975b50c13b80451d085e74f64e195e181e69a841684e607",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f25bdeeb8a76a6dbfd353dd9a7031d2561f5ef51ef132082b59b3b3e139b77a7"
+ },
+ "devices/moment.webp": {
+  "source": "resources/styles/builtin/assets/applets/moment/peek-logo-v3.png",
+  "sourceSha256": "a6f7c2ec76150bbb2b47a975b6556044a21b83a01fcd5707752650605085f1e1",
+  "settings": "device:768:webp-92-100",
+  "sha256": "037476343a809bfe7326189b15a14da9ac4bf0d91b44c18b20f245f8baf5737a"
+ },
+ "devices/netflix.webp": {
+  "source": "resources/styles/builtin/assets/applets/netflix/peek-logo-v3.png",
+  "sourceSha256": "138fcbe749ebf12ff0741c4c56ca68c9229184f2886f7fbb69d8083fc0e77fc3",
+  "settings": "device:768:webp-92-100",
+  "sha256": "7002b2e7b74b96f56b1161dcef98619de4eeda6b85a3fc321c9422baa33f1381"
+ },
+ "devices/netlify.webp": {
+  "source": "resources/styles/builtin/assets/applets/netlify/peek-logo-v3.png",
+  "sourceSha256": "081b354b7ec9f4acb55784b4f5c03c0ff1920a0eab7a482bd1c2bf7b527ccbdb",
+  "settings": "device:768:webp-92-100",
+  "sha256": "3717b4232438ac61510cf6f2a7a72bb2925fd9a85a09cbdd3fd3dff02d77a209"
+ },
+ "devices/notion.webp": {
+  "source": "resources/styles/builtin/assets/applets/notion/peek-logo-v3.png",
+  "sourceSha256": "10bc6233806533bf05bc4a46060555106afc1abc46bde91ab31db7374bb8da4d",
+  "settings": "device:768:webp-92-100",
+  "sha256": "4f6ba7e7d33f5fda3f011bd3699240d221dcef4182ee9b1af6d78bed7bf331e3"
+ },
+ "devices/nyt-connections.webp": {
+  "source": "resources/styles/builtin/assets/applets/nyt-connections/peek-logo-v4.png",
+  "sourceSha256": "e35153623e1a39c70c009f948e6907902f41acdb35f684fbd7feab3879505ff5",
+  "settings": "device:768:webp-92-100",
+  "sha256": "8b6c48a14f280abb358b8ac17e7ac054f12716f87379036733a8141683f0a32f"
+ },
+ "devices/obsidian.webp": {
+  "source": "resources/styles/builtin/assets/applets/obsidian/peek-logo-v3.png",
+  "sourceSha256": "4c418cd0def50f537757a22c46bc841898b3ad6cd6ea86a62df63566805308ca",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f4a5d027ca9714fa2bffab6100d70dc0da33079f1277327477ae8484dd44df4b"
+ },
+ "devices/onedrive.webp": {
+  "source": "resources/styles/builtin/assets/applets/onedrive/peek-logo-v3.png",
+  "sourceSha256": "9aeb5f57fa05e53c16a006739a86876598284b2962ae238179732f09f900bd69",
+  "settings": "device:768:webp-92-100",
+  "sha256": "dafb8c863a777bc82f0e134d3046324bf7740043b79e9f19655646a95ce59ee5"
+ },
+ "devices/ongoing.webp": {
+  "source": "resources/styles/builtin/assets/applets/ongoing/peek-logo-v3.png",
+  "sourceSha256": "85a47632fd64da8a830b9f7de9c9ff6c8a58c7525dde1ea0e4b50485ebb0f783",
+  "settings": "device:768:webp-92-100",
+  "sha256": "12f55522d8f4d8d63a6a330565464960a43d81a9e40f5d6518cee981289b3494"
+ },
+ "devices/oura.webp": {
+  "source": "resources/styles/builtin/assets/applets/oura/peek-logo-v3.png",
+  "sourceSha256": "5e0caa7a82dcfa2771990cc6ebb36e088ba2645e72d9747251eb2d1f791e6aa0",
+  "settings": "device:768:webp-92-100",
+  "sha256": "0a06375a59582941dcebc278311a2da7e3cd6d76f4adb31f3090d43636130e11"
+ },
+ "devices/outlook.webp": {
+  "source": "resources/styles/builtin/assets/applets/outlook/peek-logo-v3.png",
+  "sourceSha256": "d0b70a82ea72f71c586927ed86ae71e6666af1aea86e01d93caf26d13d95d923",
+  "settings": "device:768:webp-92-100",
+  "sha256": "331e0f987e188cf4cce97849c53808b379ea9423fb8f68895fde267cd0438c32"
+ },
+ "devices/paypal.webp": {
+  "source": "resources/styles/builtin/assets/applets/paypal/peek-logo-v3.png",
+  "sourceSha256": "c32d9726505a31f8eb6f6901109627d0062b9f10ee591f4752e0dd523f2e260c",
+  "settings": "device:768:webp-92-100",
+  "sha256": "234ea9d7bee980904fdec467be5886fabe130eb16521723015c3f117fa69bf52"
+ },
+ "devices/perplexity.webp": {
+  "source": "resources/styles/builtin/assets/applets/perplexity/peek-logo-v3.png",
+  "sourceSha256": "4d0f847a64767b238fb12f455f6e651ce179fe859100872e5293d852ac45be31",
+  "settings": "device:768:webp-92-100",
+  "sha256": "497bfa8544adba514cb07b21f3ab1923576a4ca301355385600ceed165a568ee"
+ },
+ "devices/pinterest.webp": {
+  "source": "resources/styles/builtin/assets/applets/pinterest/peek-logo-v3.png",
+  "sourceSha256": "69dc1e7b1688646516297679f14b435e4f8f1e8bec7ef378ba98134b93b6b567",
+  "settings": "device:768:webp-92-100",
+  "sha256": "212e72b82a48822d0691eaf6c4af73a8235c6ee81d69799496c5c7c2975329ac"
+ },
+ "devices/plaid.webp": {
+  "source": "resources/styles/builtin/assets/applets/plaid/peek-logo-v3.png",
+  "sourceSha256": "dfc9fe37220df200ce33266949d6a2dba6c6c1475c08faf865ec75055cc0c1ed",
+  "settings": "device:768:webp-92-100",
+  "sha256": "70a227dc24cc37c6f1e6ef39c92348f3b7c93a428bcc479e6e2ebbf96163f27c"
+ },
+ "devices/pokemon-showdown.webp": {
+  "source": "resources/styles/builtin/assets/applets/pokemon-showdown/peek-logo-v4.png",
+  "sourceSha256": "4b1596b094bbb84e72c053c9dfcbba704795a6a574a617cd35100d143077ffa0",
+  "settings": "device:768:webp-92-100",
+  "sha256": "a665fe5fc8e529e96e2a9723c8b1fc079c863782682c3af297a7db6b24fb3840"
+ },
+ "devices/posthog.webp": {
+  "source": "resources/styles/builtin/assets/applets/posthog/peek-logo-v3.png",
+  "sourceSha256": "e8a80ec8620154e2a50974fd056a73720f3f8b78f625e1c6628cac144b23cc44",
+  "settings": "device:768:webp-92-100",
+  "sha256": "46837e5a6bda9b44c71b3fad74e223e56e8281f8ddf68180aaa7ad73f1a8e7fe"
+ },
+ "devices/railway.webp": {
+  "source": "resources/styles/builtin/assets/applets/railway/peek-logo-v3.png",
+  "sourceSha256": "60a45432169fdc133a420155bf999c2224792932afa76bf28c47faf5e1707139",
+  "settings": "device:768:webp-92-100",
+  "sha256": "05cde80f6729e78ee8ee1f423fdcf511b596502cf30c66ac07f3c5405c12737e"
+ },
+ "devices/random-game.webp": {
+  "source": "resources/styles/builtin/assets/applets/random-game/peek-logo-v4.png",
+  "sourceSha256": "3ec2b0f635e02e82a466d83b3cd59408d15a5f43f6e164c9b6b9ebb872a9a116",
+  "settings": "device:768:webp-92-100",
+  "sha256": "1dcc460106bda6fa731b727909f854efa64f7ed09bce8c0f381301504d1b22ef"
+ },
+ "devices/reddit.webp": {
+  "source": "resources/styles/builtin/assets/applets/reddit/peek-logo-v3.png",
+  "sourceSha256": "f36c0acdb3762d9e46e633727e482a9f4975e2b20d4ea7c1bd8362237280c7ab",
+  "settings": "device:768:webp-92-100",
+  "sha256": "398405a111853dbf81d579a2741867aa0338eeb2f882b1b322f04194d55eb406"
+ },
+ "devices/render.webp": {
+  "source": "resources/styles/builtin/assets/applets/render/peek-logo-v3.png",
+  "sourceSha256": "ac64b5c228b71fc35e69fe1fe4bd443152ad73352ccabae0b28cf34fd75d58b3",
+  "settings": "device:768:webp-92-100",
+  "sha256": "9b424e558f31be6d4b2d8fffcf98bba8a18a993a05c949124ce4e6e96827c7d9"
+ },
+ "devices/sekai-3d-uno.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-3d-uno/peek-logo-v4.png",
+  "sourceSha256": "0dcb5632b636ea614b13083755e11c38fd396165d3d1837bd2cd5e8a338efd28",
+  "settings": "device:768:webp-92-100",
+  "sha256": "a8938bacd4ff6ac41d5fa80b3a001829936909113e15803521aa7aef966ba1b0"
+ },
+ "devices/sekai-devil-level.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-devil-level/peek-logo-v4.png",
+  "sourceSha256": "9ff115dea95ee7852baebfde10f7941ed4c83683e3509c99ece1ffa09edbbd64",
+  "settings": "device:768:webp-92-100",
+  "sha256": "c778e13739ddad7ba61f70c736fd31e6d6c1c290f6afae3f0f80ed37b48280fe"
+ },
+ "devices/sekai-mixing-colors.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-mixing-colors/peek-logo-v4.png",
+  "sourceSha256": "56a802287226054e47582cea4ae71a2cbb249e7e87e5df0d91530048bfce9bd7",
+  "settings": "device:768:webp-92-100",
+  "sha256": "37bfd6661cf51f9df5b9a682f96f5bd6840e44e2512dd0c1c8c6a8f425231f79"
+ },
+ "devices/sekai-rogue-ai-tic-tac-toe.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-rogue-ai-tic-tac-toe/peek-logo-v4.png",
+  "sourceSha256": "323a7e497bc8c94d0896d60d7fb39d6fcb78f6e6658c3d24e9b133b2149991a5",
+  "settings": "device:768:webp-92-100",
+  "sha256": "bc52365b9f2037d63883fc9d32aad041c2e551dd9cef3593d3c768579da90c6a"
+ },
+ "devices/sekai-roller-coaster.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-roller-coaster/peek-logo-v4.png",
+  "sourceSha256": "c6eb4b6107641c0a8e8d042d92b74f93cfe4627a618007f98e20c2c3cc0345fe",
+  "settings": "device:768:webp-92-100",
+  "sha256": "40ce38c3f0099db5827adb809f5d6c3564a38256d8d3c38a7833cde33bfe26a7"
+ },
+ "devices/sekai-sketch-racer.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-sketch-racer/peek-logo-v4.png",
+  "sourceSha256": "3f8294630ccdba4f9847c431dd49841eda49d5a217666d3061fddbeed40e9349",
+  "settings": "device:768:webp-92-100",
+  "sha256": "2bcae0e2617c6489dd31c117da9ac1da38087ceaf8e79e6ab0bdfb5d02f02306"
+ },
+ "devices/sekai.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai/peek-logo-v4.png",
+  "sourceSha256": "48cd1b47a186d8a61d8ace4779b2b6e562c90ec50b1ba787e1dc3a170f6ba1c1",
+  "settings": "device:768:webp-92-100",
+  "sha256": "29b600b1dae30adbb0bfe979d60c2534ac02587403b200c0938189c3a01b6f28"
+ },
+ "devices/sentry.webp": {
+  "source": "resources/styles/builtin/assets/applets/sentry/peek-logo-v3.png",
+  "sourceSha256": "38e6275320dd8f1b1b10ad8ad2b5d16937b1eead18bddf912433059ca2391110",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f90f0cbd0aec79c77d9c5381642a469eb297a537d4552db0b04b03a3692a86af"
+ },
+ "devices/skribbl-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/skribbl-io/peek-logo-v4.png",
+  "sourceSha256": "c45b022714157e512877baaa5f098ede7088f7f4ab388c9320f2208433dd2802",
+  "settings": "device:768:webp-92-100",
+  "sha256": "f186fd2e60825acef419c8ebb530782c2f7eb87c13b876b6a6d5acdcf9d82bb2"
+ },
+ "devices/slack.webp": {
+  "source": "resources/styles/builtin/assets/applets/slack/peek-logo-v3.png",
+  "sourceSha256": "ec374e906d323aa0fce16897a6c086a2a7c2270cf3926e6009e2af793755d37f",
+  "settings": "device:768:webp-92-100",
+  "sha256": "6b7e31753b9e829238af2d628ea719c880dbaf90f0f28f6c5b9159f251d35a9a"
+ },
+ "devices/slither-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/slither-io/peek-logo-v4.png",
+  "sourceSha256": "b1c5732578d7a469535e0da5fb7c51bf8be211dbb3b65f74ead5cb3ed87a1ed8",
+  "settings": "device:768:webp-92-100",
+  "sha256": "aefced09e7d088fbb8a9c7b407cfc28cac69e1f2190a39c97b6e86503d41536c"
+ },
+ "devices/snake.webp": {
+  "source": "resources/styles/builtin/assets/applets/snake/peek-logo-v4.png",
+  "sourceSha256": "25f89e2577f59d5944e211f4496a8f7cd99835843c3030724afee9294d30551f",
+  "settings": "device:768:webp-92-100",
+  "sha256": "93d680f2da9c4daf639dca15997ffacf4d60d7e50a92c9f3da45ca90211b50fb"
+ },
+ "devices/spotify.webp": {
+  "source": "resources/styles/builtin/assets/applets/spotify/peek-logo-v3.png",
+  "sourceSha256": "8a3a34202a41c3fce6cce57b9e1225e0ede61144f3918bd6c45506489ade8b06",
+  "settings": "device:768:webp-92-100",
+  "sha256": "98c76b39b261fc43effb38b27779d270731e3e6c2928a78cda9e66320a377d1f"
+ },
+ "devices/strava.webp": {
+  "source": "resources/styles/builtin/assets/applets/strava/peek-logo-v3.png",
+  "sourceSha256": "4e68f73883ca755cac15ff2170249f3b2563a9e137722796c16eeeb927c1cf21",
+  "settings": "device:768:webp-92-100",
+  "sha256": "aa0b3b9fcaf1338654b3d9db227eb9bac8abdd334dafbc0c678f00e30bfc9d76"
+ },
+ "devices/stripe.webp": {
+  "source": "resources/styles/builtin/assets/applets/stripe/peek-logo-v3.png",
+  "sourceSha256": "b4f3d501e88ad7c08a172d4a002586d6ef608de453b30b2f352adaaa17992fcd",
+  "settings": "device:768:webp-92-100",
+  "sha256": "184d2278007574d98b894297da1f9b879930139a0edb0ea0ab694e0bd962954d"
+ },
+ "devices/subway-surfers.webp": {
+  "source": "resources/styles/builtin/assets/applets/subway-surfers/peek-logo-v4.png",
+  "sourceSha256": "bbfcbc578518c29977d6d1a284ba0bf379b9b7e3921aab634866969f70814495",
+  "settings": "device:768:webp-92-100",
+  "sha256": "c32d787cac31cfbfe858f324cf8a9e4ae84bb6b2f4f7c149a6e07be393bdf4c8"
+ },
+ "devices/sudoku.webp": {
+  "source": "resources/styles/builtin/assets/applets/sudoku/peek-logo-v4.png",
+  "sourceSha256": "805e98a2a7acab589394e1fe2885333778f8b7760655e1754b63c555f20f6ea9",
+  "settings": "device:768:webp-92-100",
+  "sha256": "71cea6cbbe96c35182bf867579f7161ba7f94d1e8ad09233f0d6ee8aef3e9912"
+ },
+ "devices/supabase.webp": {
+  "source": "resources/styles/builtin/assets/applets/supabase/peek-logo-v3.png",
+  "sourceSha256": "00ee5d852873da78f5d50a37278e15b7969a5287820402e23e7d5fcfcc8d4832",
+  "settings": "device:768:webp-92-100",
+  "sha256": "ea768f593ccd3261b5f8d4dc0c54c748496814e3ae870dc2dc9ed28c009407d3"
+ },
+ "devices/taobao.webp": {
+  "source": "resources/styles/builtin/assets/applets/taobao/peek-logo-v3.png",
+  "sourceSha256": "8bd230ea3296574d0606964006aa97aea99acb213fea2534ab6887a0bc037e85",
+  "settings": "device:768:webp-92-100",
+  "sha256": "b77417dc793320f3f8fb4c5c408a06965c410ffb9da1b9c9c26acaf105e4d5e4"
+ },
+ "devices/teams.webp": {
+  "source": "resources/styles/builtin/assets/applets/teams/peek-logo-v3.png",
+  "sourceSha256": "0de857ff30fa58090ed4e39c7c04513bc7454e66d1ab34f0f7807cf1a7297b2d",
+  "settings": "device:768:webp-92-100",
+  "sha256": "c974fad6f18f3f1bf0729f07b99c316d45bec72e9a81d2942e55fa32799993c2"
+ },
+ "devices/telegram.webp": {
+  "source": "resources/styles/builtin/assets/applets/telegram/peek-logo-v3.png",
+  "sourceSha256": "a30082ef46311904bbe1eacabf7ccdea4d99e8b42106998a2e0d2f79556b3799",
+  "settings": "device:768:webp-92-100",
+  "sha256": "54c53b66699c14bee0f34bde71dd3a86b826e06cee2fd64fbd8dbba6fa44d18d"
+ },
+ "devices/threads.webp": {
+  "source": "resources/styles/builtin/assets/applets/threads/peek-logo-v3.png",
+  "sourceSha256": "ac31515fa73f63293d63663b4459b2c0096510d9bb2eac4edd978e11b1ff2a65",
+  "settings": "device:768:webp-92-100",
+  "sha256": "d6b31df70114826a6c114c6f76d8527ce1014b895ed54cf22f456056c2b4f0bf"
+ },
+ "devices/tiktok.webp": {
+  "source": "resources/styles/builtin/assets/applets/tiktok/peek-logo-v3.png",
+  "sourceSha256": "4953410ca90071ff0dbbb6a596f0a67d54342b31707eac0a68ae7f5492c0cde9",
+  "settings": "device:768:webp-92-100",
+  "sha256": "4aab4870b54f7e036db400ba8984d90bed39c0743dca4704f0456b45f8b8c241"
+ },
+ "devices/todoist.webp": {
+  "source": "resources/styles/builtin/assets/applets/todoist/peek-logo-v3.png",
+  "sourceSha256": "4447c3099691c850b42ddc332146055a60b565bb86649c22ee421aefec6da812",
+  "settings": "device:768:webp-92-100",
+  "sha256": "10b5e3cb0ffb152f1e9faee87826ab10e1d6c9e5a7eb46920e66d88730d74154"
+ },
+ "devices/tripit.webp": {
+  "source": "resources/styles/builtin/assets/applets/tripit/peek-logo-v3.png",
+  "sourceSha256": "c7d9fedaec67f1b03dc4334af7eb79d56a9cd07cb695b6a3d115c2c0c2adb5bd",
+  "settings": "device:768:webp-92-100",
+  "sha256": "135aad597b521fcf74d8547f8c10acf71d7a7d3310ea02cf2b20b068b5597129"
+ },
+ "devices/twitch.webp": {
+  "source": "resources/styles/builtin/assets/applets/twitch/peek-logo-v3.png",
+  "sourceSha256": "e2fe2aab3df61416162c845ff971552d3145ab232f0ea0550fbbdd5821abe890",
+  "settings": "device:768:webp-92-100",
+  "sha256": "384ee9a5bcf9c707e8c7facfa198946a05739a30719afade5f295df31c3bfafd"
+ },
+ "devices/uber-eats.webp": {
+  "source": "resources/styles/builtin/assets/applets/uber-eats/peek-logo-v3.png",
+  "sourceSha256": "bbb7d84bf8a7e1d4bd7b9a82a88396b2ec3481d70005b378b88c9f53f85580a1",
+  "settings": "device:768:webp-92-100",
+  "sha256": "8846650d45939e61fb3861eefe13638c62d83e53e58daee95e7373dd88a497c9"
+ },
+ "devices/uber.webp": {
+  "source": "resources/styles/builtin/assets/applets/uber/peek-logo-v3.png",
+  "sourceSha256": "0b63f620151fa6378f921faefe801eb3da1f22f8c2098a81f34c03458a1210b8",
+  "settings": "device:768:webp-92-100",
+  "sha256": "ba7b567e25b2581d5b9ff40a2d2416dc0e0d26566a39525546fddd3558ebd5ab"
+ },
+ "devices/vercel.webp": {
+  "source": "resources/styles/builtin/assets/applets/vercel/peek-logo-v3.png",
+  "sourceSha256": "c47d3118c5a9a10c36e25ca8247d6466d45885d019fe95c5e032f803818e7dc5",
+  "settings": "device:768:webp-92-100",
+  "sha256": "e631b11445f7ffb5e8b7ff407b3641defd74a94e3a98c6eab709c2d914ff598f"
+ },
+ "devices/voice-memos.webp": {
+  "source": "resources/styles/builtin/assets/applets/voice-memos/peek-logo-v3.png",
+  "sourceSha256": "7522cebb08ac5f40a9c26d5d1919957ecbc7a07c4928db9656285b3517c73bc6",
+  "settings": "device:768:webp-92-100",
+  "sha256": "538e5659145eb68637dd2b0da83b6ae6bc57ee0ec804042d522fe5bf616859df"
+ },
+ "devices/weather.webp": {
+  "source": "resources/styles/builtin/assets/applets/weather/peek-logo-v3.png",
+  "sourceSha256": "ec09ee5a7d806a8cfca00c8f2ea1a6f168724d472c3bbdc91800bd7f4e2e71ea",
+  "settings": "device:768:webp-92-100",
+  "sha256": "a819366df95a94f49d0691a79b511629f2228f76c6faf4fa1d4ee713c856464c"
+ },
+ "devices/whatsapp.webp": {
+  "source": "resources/styles/builtin/assets/applets/whatsapp/peek-logo-v3.png",
+  "sourceSha256": "c831fdb8d4339dd0bd8d205c075998b114a57315d095af48e949eb599dcd3f3a",
+  "settings": "device:768:webp-92-100",
+  "sha256": "7600015bf177e75bdfe1383b62e07dd0b08091e0ce7618666701c375be214f35"
+ },
+ "devices/wikipedia.webp": {
+  "source": "resources/styles/builtin/assets/applets/wikipedia/peek-logo-v3.png",
+  "sourceSha256": "f9a2722e81da05dbd9c0f19170f5ad66d5b5ab2da3d1771a491c88df5c4dfcc9",
+  "settings": "device:768:webp-92-100",
+  "sha256": "fbae84fcb97b544ffcb8836df486f02c0169127f5df81d8d37c0c1d173d625aa"
+ },
+ "devices/wordle.webp": {
+  "source": "resources/styles/builtin/assets/applets/wordle/peek-logo-v4.png",
+  "sourceSha256": "0f778a9604bd25ca8fd44bdac6be01c01ada114c6bdb9a8213efe090e5a908cd",
+  "settings": "device:768:webp-92-100",
+  "sha256": "d2d11cf3f2c805ffc9826ab539d076d77aeafaea0e1ae91c0fd8329b3bf769a3"
+ },
+ "devices/x.webp": {
+  "source": "resources/styles/builtin/assets/applets/x/peek-logo-v3.png",
+  "sourceSha256": "1362890572eca560448a91431f25b95348619eb62d698b4dbcc7136dd4665f37",
+  "settings": "device:768:webp-92-100",
+  "sha256": "532bc7ae8943be715357e2dbfcc3ce43036d4705f9b7202b2aa2c791d81375e5"
+ },
+ "devices/xiaohongshu.webp": {
+  "source": "resources/styles/builtin/assets/applets/xiaohongshu/peek-logo-v3.png",
+  "sourceSha256": "f99957b5ccd0cba6ac973c85e0c7b3e4ee423a8f1b697e9d7becd38347f10382",
+  "settings": "device:768:webp-92-100",
+  "sha256": "3b7ea816dd90878913bf3e38e00432493ba63ae404481b113c5ef8910049f885"
+ },
+ "devices/youtube.webp": {
+  "source": "resources/styles/builtin/assets/applets/youtube/peek-logo-v3.png",
+  "sourceSha256": "77b24d017f872c2e26a08432da46574be1bccfd7a12c3885a5044d1485f718e8",
+  "settings": "device:768:webp-92-100",
+  "sha256": "6a77d3c45f9ec739304c0237619061d30d0ba5256eadd3abd7af3bbbe420470c"
+ },
+ "devices/zoom.webp": {
+  "source": "resources/styles/builtin/assets/applets/zoom/peek-logo-v3.png",
+  "sourceSha256": "32bc4fa1de00046c3a3a9a621f11bb6d901f29679159a3ed858eeedc5e676804",
+  "settings": "device:768:webp-92-100",
+  "sha256": "bc042432de9a6e48a85c02c0366391cecff7194de12bfdea52e6df4693ae0e9d"
+ },
+ "focus/acrobat.webp": {
+  "source": "resources/styles/builtin/assets/applets/acrobat/immersive.webp",
+  "sourceSha256": "2c94b29348e6de6b674498fee6ab8d6f3893fd8576e13ce7f3fa9daac1b89e2e",
+  "settings": "copy",
+  "sha256": "2c94b29348e6de6b674498fee6ab8d6f3893fd8576e13ce7f3fa9daac1b89e2e"
+ },
+ "focus/agar-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/agar-io/immersive.webp",
+  "sourceSha256": "8ca253f01bab1c46abe363d2d405f431f5a092e5ddaff119e4237110bf496f17",
+  "settings": "copy",
+  "sha256": "8ca253f01bab1c46abe363d2d405f431f5a092e5ddaff119e4237110bf496f17"
+ },
+ "focus/airbnb.webp": {
+  "source": "resources/styles/builtin/assets/applets/airbnb/immersive.webp",
+  "sourceSha256": "51ee713e04ca8bbce924a810303a751034c83395bf316be8077445384c8506ec",
+  "settings": "copy",
+  "sha256": "51ee713e04ca8bbce924a810303a751034c83395bf316be8077445384c8506ec"
+ },
+ "focus/alipay.webp": {
+  "source": "resources/styles/builtin/assets/applets/alipay/immersive.webp",
+  "sourceSha256": "1f8ed57f0c0544087d68d4e5660116c9107f9ffc56d67c07445b71c0ded86b52",
+  "settings": "copy",
+  "sha256": "1f8ed57f0c0544087d68d4e5660116c9107f9ffc56d67c07445b71c0ded86b52"
+ },
+ "focus/amazon.webp": {
+  "source": "resources/styles/builtin/assets/applets/amazon/immersive.webp",
+  "sourceSha256": "bd7f04b130059b09edd7b05e9694e42512bc8819d10e67ab21eddb0495a3e5ac",
+  "settings": "copy",
+  "sha256": "bd7f04b130059b09edd7b05e9694e42512bc8819d10e67ab21eddb0495a3e5ac"
+ },
+ "focus/apple-music.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-music/immersive.webp",
+  "sourceSha256": "e274a1ea361cbb7722e1cda0ce92d71ca4308ab6b87247c3c84d4d5757af05c1",
+  "settings": "copy",
+  "sha256": "e274a1ea361cbb7722e1cda0ce92d71ca4308ab6b87247c3c84d4d5757af05c1"
+ },
+ "focus/apple-notes.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-notes/immersive.webp",
+  "sourceSha256": "1d28fa77f8f2a6876d496c6a9bfd863e29021c62fd8dfe81e60e253361f2a845",
+  "settings": "copy",
+  "sha256": "1d28fa77f8f2a6876d496c6a9bfd863e29021c62fd8dfe81e60e253361f2a845"
+ },
+ "focus/apple-podcasts.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-podcasts/immersive.webp",
+  "sourceSha256": "1aa14603a14625f6f1011251be8a103312558971ff9c9bd63fec115c3a30bac3",
+  "settings": "copy",
+  "sha256": "1aa14603a14625f6f1011251be8a103312558971ff9c9bd63fec115c3a30bac3"
+ },
+ "focus/apple-reminders.webp": {
+  "source": "resources/styles/builtin/assets/applets/apple-reminders/immersive.webp",
+  "sourceSha256": "8178daa12f1ee295146d2d366d0ef1ae75b64d490df187e1a29248e5c4eb0864",
+  "settings": "copy",
+  "sha256": "8178daa12f1ee295146d2d366d0ef1ae75b64d490df187e1a29248e5c4eb0864"
+ },
+ "focus/baidu-netdisk.webp": {
+  "source": "resources/styles/builtin/assets/applets/baidu-netdisk/immersive.webp",
+  "sourceSha256": "c8734053405e0d1e1d91f417a87646169931e23f7205eca41dc8b32e19494467",
+  "settings": "copy",
+  "sha256": "c8734053405e0d1e1d91f417a87646169931e23f7205eca41dc8b32e19494467"
+ },
+ "focus/bilibili.webp": {
+  "source": "resources/styles/builtin/assets/applets/bilibili/immersive.webp",
+  "sourceSha256": "2f949395c3e9ccb9783cd452ad9fabc69c75c5ce149ae6fc2f9f8facecb978b7",
+  "settings": "copy",
+  "sha256": "2f949395c3e9ccb9783cd452ad9fabc69c75c5ce149ae6fc2f9f8facecb978b7"
+ },
+ "focus/booking.webp": {
+  "source": "resources/styles/builtin/assets/applets/booking/immersive.webp",
+  "sourceSha256": "131b67db7fb423f55a3233239dc2b847d837921b616a1c91f823f6775e7278c7",
+  "settings": "copy",
+  "sha256": "131b67db7fb423f55a3233239dc2b847d837921b616a1c91f823f6775e7278c7"
+ },
+ "focus/browser.webp": {
+  "source": "resources/styles/builtin/assets/applets/browser/immersive.webp",
+  "sourceSha256": "43936346af26af92fe2e6ef3323be5ff6d7bc4d92ac222b2098ec351bd0c8526",
+  "settings": "copy",
+  "sha256": "43936346af26af92fe2e6ef3323be5ff6d7bc4d92ac222b2098ec351bd0c8526"
+ },
+ "focus/canva.webp": {
+  "source": "resources/styles/builtin/assets/applets/canva/immersive.webp",
+  "sourceSha256": "c8310f35f29f0a5ee2203e662de8edd7087899a0cef603cb9df55c4ce133d69b",
+  "settings": "copy",
+  "sha256": "c8310f35f29f0a5ee2203e662de8edd7087899a0cef603cb9df55c4ce133d69b"
+ },
+ "focus/capcut.webp": {
+  "source": "resources/styles/builtin/assets/applets/capcut/immersive.webp",
+  "sourceSha256": "708fa63c9691f22ab5c92917a9bb2408ac326c3e195c28c6c06707bcdf8240f8",
+  "settings": "copy",
+  "sha256": "708fa63c9691f22ab5c92917a9bb2408ac326c3e195c28c6c06707bcdf8240f8"
+ },
+ "focus/chatgpt.webp": {
+  "source": "resources/styles/builtin/assets/applets/chatgpt/immersive.webp",
+  "sourceSha256": "32d31049da6e9500d40a196746f2358f11d723313bd20657268515f57260ac8f",
+  "settings": "copy",
+  "sha256": "32d31049da6e9500d40a196746f2358f11d723313bd20657268515f57260ac8f"
+ },
+ "focus/claude-code.webp": {
+  "source": "resources/styles/builtin/assets/applets/claude-code/immersive.webp",
+  "sourceSha256": "3bad1333ed0ee5f305325e434f5aef9689c26fc8af1ed75bc0530cfeed32a744",
+  "settings": "copy",
+  "sha256": "3bad1333ed0ee5f305325e434f5aef9689c26fc8af1ed75bc0530cfeed32a744"
+ },
+ "focus/claude.webp": {
+  "source": "resources/styles/builtin/assets/applets/claude/immersive.webp",
+  "sourceSha256": "ea0196e93cbe80fd1094d933ddb8748ce8718ebd686eeacbfa13f369c5d81150",
+  "settings": "copy",
+  "sha256": "ea0196e93cbe80fd1094d933ddb8748ce8718ebd686eeacbfa13f369c5d81150"
+ },
+ "focus/cloudflare.webp": {
+  "source": "resources/styles/builtin/assets/applets/cloudflare/immersive.webp",
+  "sourceSha256": "17108ab57c601089644cb5ab976192ae0f4e20ac07e2da9d1e77cef10de168b5",
+  "settings": "copy",
+  "sha256": "17108ab57c601089644cb5ab976192ae0f4e20ac07e2da9d1e77cef10de168b5"
+ },
+ "focus/codex.webp": {
+  "source": "resources/styles/builtin/assets/applets/codex/immersive.webp",
+  "sourceSha256": "b7c588a4a091eb19967314a36f364d81245f404fae035da40de324a295d2f495",
+  "settings": "copy",
+  "sha256": "b7c588a4a091eb19967314a36f364d81245f404fae035da40de324a295d2f495"
+ },
+ "focus/cookie-clicker.webp": {
+  "source": "resources/styles/builtin/assets/applets/cookie-clicker/immersive.webp",
+  "sourceSha256": "483fc402ad1ddcadcc645ccab834aa023e82a9e71bfdd10abad770020b2d3fa5",
+  "settings": "copy",
+  "sha256": "483fc402ad1ddcadcc645ccab834aa023e82a9e71bfdd10abad770020b2d3fa5"
+ },
+ "focus/copilot.webp": {
+  "source": "resources/styles/builtin/assets/applets/copilot/immersive.webp",
+  "sourceSha256": "ffda2ea1a756fb66eecb1aff644202e92fe81557c34af0709fca7406e20493fd",
+  "settings": "copy",
+  "sha256": "ffda2ea1a756fb66eecb1aff644202e92fe81557c34af0709fca7406e20493fd"
+ },
+ "focus/deepseek.webp": {
+  "source": "resources/styles/builtin/assets/applets/deepseek/immersive.webp",
+  "sourceSha256": "767cc3cc5b0038a4bbd6ff39f4f02b031a9dd95f6d96ac8277eac31c17bffc91",
+  "settings": "copy",
+  "sha256": "767cc3cc5b0038a4bbd6ff39f4f02b031a9dd95f6d96ac8277eac31c17bffc91"
+ },
+ "focus/discord.webp": {
+  "source": "resources/styles/builtin/assets/applets/discord/immersive.webp",
+  "sourceSha256": "e45528adc1fb3ca642ff322c16ff52c15425a47e04f42f2721614615d73a05a6",
+  "settings": "copy",
+  "sha256": "e45528adc1fb3ca642ff322c16ff52c15425a47e04f42f2721614615d73a05a6"
+ },
+ "focus/docker.webp": {
+  "source": "resources/styles/builtin/assets/applets/docker/immersive.webp",
+  "sourceSha256": "3b386f2a5829173783735a7bb669eb55fe28835ed5b42a870c939c68333f7930",
+  "settings": "copy",
+  "sha256": "3b386f2a5829173783735a7bb669eb55fe28835ed5b42a870c939c68333f7930"
+ },
+ "focus/doordash.webp": {
+  "source": "resources/styles/builtin/assets/applets/doordash/immersive.webp",
+  "sourceSha256": "90fe2526a2a2f3f4aa6eb4c1700f6389eda42094276114658c972b69d89cbf8e",
+  "settings": "copy",
+  "sha256": "90fe2526a2a2f3f4aa6eb4c1700f6389eda42094276114658c972b69d89cbf8e"
+ },
+ "focus/doubao.webp": {
+  "source": "resources/styles/builtin/assets/applets/doubao/immersive.webp",
+  "sourceSha256": "c51e4817aa6cb824f4123a6b8c5009be3682dc745002551bdfc2decc347b185b",
+  "settings": "copy",
+  "sha256": "c51e4817aa6cb824f4123a6b8c5009be3682dc745002551bdfc2decc347b185b"
+ },
+ "focus/douyin.webp": {
+  "source": "resources/styles/builtin/assets/applets/douyin/immersive.webp",
+  "sourceSha256": "4b70c35591133335fb986cdcbeaca90f6a59d766ac738cc2ca2bc6743c3f371a",
+  "settings": "copy",
+  "sha256": "4b70c35591133335fb986cdcbeaca90f6a59d766ac738cc2ca2bc6743c3f371a"
+ },
+ "focus/drive-mad.webp": {
+  "source": "resources/styles/builtin/assets/applets/drive-mad/immersive.webp",
+  "sourceSha256": "8d3110143dde482fc5b5a3d7c28059410b5c3beca85cdf01c7d6e560de88f6a8",
+  "settings": "copy",
+  "sha256": "8d3110143dde482fc5b5a3d7c28059410b5c3beca85cdf01c7d6e560de88f6a8"
+ },
+ "focus/dropbox.webp": {
+  "source": "resources/styles/builtin/assets/applets/dropbox/immersive.webp",
+  "sourceSha256": "a9be122e1c3dc868524cfa35cc9b1711acf77443b070598d89dc8208557ae22b",
+  "settings": "copy",
+  "sha256": "a9be122e1c3dc868524cfa35cc9b1711acf77443b070598d89dc8208557ae22b"
+ },
+ "focus/facebook.webp": {
+  "source": "resources/styles/builtin/assets/applets/facebook/immersive.webp",
+  "sourceSha256": "8ae2c82ca4c076bbb02b2d347c3318a6c3a794eb1fe22e06a65fb625148ef3a6",
+  "settings": "copy",
+  "sha256": "8ae2c82ca4c076bbb02b2d347c3318a6c3a794eb1fe22e06a65fb625148ef3a6"
+ },
+ "focus/feishu.webp": {
+  "source": "resources/styles/builtin/assets/applets/feishu/immersive.webp",
+  "sourceSha256": "1adad6896c6e738ae15ebe82b7eb3a98381f48a9ace9a98d801b6790e6fffdbe",
+  "settings": "copy",
+  "sha256": "1adad6896c6e738ae15ebe82b7eb3a98381f48a9ace9a98d801b6790e6fffdbe"
+ },
+ "focus/figma.webp": {
+  "source": "resources/styles/builtin/assets/applets/figma/immersive.webp",
+  "sourceSha256": "a104cba236281c8918091f27c41fb062976768e4ae2b12fd644bf026af5db089",
+  "settings": "copy",
+  "sha256": "a104cba236281c8918091f27c41fb062976768e4ae2b12fd644bf026af5db089"
+ },
+ "focus/firebase.webp": {
+  "source": "resources/styles/builtin/assets/applets/firebase/immersive.webp",
+  "sourceSha256": "d089463f727123803fae7f6d0409eafad3a43e3b00fe4571d69d18f5cf2af663",
+  "settings": "copy",
+  "sha256": "d089463f727123803fae7f6d0409eafad3a43e3b00fe4571d69d18f5cf2af663"
+ },
+ "focus/fitbit.webp": {
+  "source": "resources/styles/builtin/assets/applets/fitbit/immersive.webp",
+  "sourceSha256": "4f9d3fcc4b9abab87d93d9a4940e12eb812855f0e05824d5deac2449c9baccaf",
+  "settings": "copy",
+  "sha256": "4f9d3fcc4b9abab87d93d9a4940e12eb812855f0e05824d5deac2449c9baccaf"
+ },
+ "focus/game-2048.webp": {
+  "source": "resources/styles/builtin/assets/applets/game-2048/immersive.webp",
+  "sourceSha256": "746b0c0426c92ad00e5cbfb0bfd74fa1f5f2f5c5b6d96a1f30ca0545cf3e750b",
+  "settings": "copy",
+  "sha256": "746b0c0426c92ad00e5cbfb0bfd74fa1f5f2f5c5b6d96a1f30ca0545cf3e750b"
+ },
+ "focus/gemini.webp": {
+  "source": "resources/styles/builtin/assets/applets/gemini/immersive.webp",
+  "sourceSha256": "1a01f4c81e95d9394d1d04f1310c942b93087333034d5a449ee71e566a9db7db",
+  "settings": "copy",
+  "sha256": "1a01f4c81e95d9394d1d04f1310c942b93087333034d5a449ee71e566a9db7db"
+ },
+ "focus/github.webp": {
+  "source": "resources/styles/builtin/assets/applets/github/immersive.webp",
+  "sourceSha256": "bf9ff6d9dc8c74ccb5d585f56d396efb1426e5f857880b4af436a879002dfa50",
+  "settings": "copy",
+  "sha256": "bf9ff6d9dc8c74ccb5d585f56d396efb1426e5f857880b4af436a879002dfa50"
+ },
+ "focus/gitlab.webp": {
+  "source": "resources/styles/builtin/assets/applets/gitlab/immersive.webp",
+  "sourceSha256": "8d0c0224be2949ad0dd8b145a6f71af7f242cd2277d0e7d32a30f22553e33d90",
+  "settings": "copy",
+  "sha256": "8d0c0224be2949ad0dd8b145a6f71af7f242cd2277d0e7d32a30f22553e33d90"
+ },
+ "focus/gmail.webp": {
+  "source": "resources/styles/builtin/assets/applets/gmail/immersive.webp",
+  "sourceSha256": "ed6ff1b7753873e8941dc0accb9d2cf23d33b49aa900ce9920bd9b3fa40a05d3",
+  "settings": "copy",
+  "sha256": "ed6ff1b7753873e8941dc0accb9d2cf23d33b49aa900ce9920bd9b3fa40a05d3"
+ },
+ "focus/google-calendar.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-calendar/immersive.webp",
+  "sourceSha256": "b4aa5eaa02d9a415eb4bc08a89a45bb958dd44be9d665c67174162979af67444",
+  "settings": "copy",
+  "sha256": "b4aa5eaa02d9a415eb4bc08a89a45bb958dd44be9d665c67174162979af67444"
+ },
+ "focus/google-docs.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-docs/immersive.webp",
+  "sourceSha256": "4cf98d317f5fa4fe02f4f1c869af195fc16910370f50e7a2c73aa567600661ad",
+  "settings": "copy",
+  "sha256": "4cf98d317f5fa4fe02f4f1c869af195fc16910370f50e7a2c73aa567600661ad"
+ },
+ "focus/google-drive.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-drive/immersive.webp",
+  "sourceSha256": "821a43aaad10c80025dcf314fe1ef582be55263309d9f5cf20a647242dd1c23b",
+  "settings": "copy",
+  "sha256": "821a43aaad10c80025dcf314fe1ef582be55263309d9f5cf20a647242dd1c23b"
+ },
+ "focus/google-maps.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-maps/immersive.webp",
+  "sourceSha256": "06e2870ce009be571a1135c137bc38991214097fc8fbab40fc5f43ad7ccdadd7",
+  "settings": "copy",
+  "sha256": "06e2870ce009be571a1135c137bc38991214097fc8fbab40fc5f43ad7ccdadd7"
+ },
+ "focus/google-photos.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-photos/immersive.webp",
+  "sourceSha256": "9984d0852f2b2e49a4d3a4eab679d19af4870204229a181a457876215009a4e1",
+  "settings": "copy",
+  "sha256": "9984d0852f2b2e49a4d3a4eab679d19af4870204229a181a457876215009a4e1"
+ },
+ "focus/google-sheets.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-sheets/immersive.webp",
+  "sourceSha256": "f43285d5842637527319428444698f7321166130b78b941c8147a1ca562f8ba6",
+  "settings": "copy",
+  "sha256": "f43285d5842637527319428444698f7321166130b78b941c8147a1ca562f8ba6"
+ },
+ "focus/google-slides.webp": {
+  "source": "resources/styles/builtin/assets/applets/google-slides/immersive.webp",
+  "sourceSha256": "3a4ddb5e9fa0571b52df00eae000315c9e3f2ce246b971d58457220c8dc347b8",
+  "settings": "copy",
+  "sha256": "3a4ddb5e9fa0571b52df00eae000315c9e3f2ce246b971d58457220c8dc347b8"
+ },
+ "focus/infinite-craft.webp": {
+  "source": "resources/styles/builtin/assets/applets/infinite-craft/immersive.webp",
+  "sourceSha256": "a3b9968dfa1bb8687c7352e50be427fba021b4c97da83bd0b0e2c999d20c95a9",
+  "settings": "copy",
+  "sha256": "a3b9968dfa1bb8687c7352e50be427fba021b4c97da83bd0b0e2c999d20c95a9"
+ },
+ "focus/instagram.webp": {
+  "source": "resources/styles/builtin/assets/applets/instagram/immersive.webp",
+  "sourceSha256": "16e1792078543eb3f7056c4e135d6a45a1e5933aa3ec0ba0849df0b6b6a95e9b",
+  "settings": "copy",
+  "sha256": "16e1792078543eb3f7056c4e135d6a45a1e5933aa3ec0ba0849df0b6b6a95e9b"
+ },
+ "focus/jira.webp": {
+  "source": "resources/styles/builtin/assets/applets/jira/immersive.webp",
+  "sourceSha256": "7062554fdfcbb1c35fc1b8589e4b40b56db89659c8db8d5d9154e291c1d592df",
+  "settings": "copy",
+  "sha256": "7062554fdfcbb1c35fc1b8589e4b40b56db89659c8db8d5d9154e291c1d592df"
+ },
+ "focus/krunker-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/krunker-io/immersive.webp",
+  "sourceSha256": "349e01984e36037039b85b68a8290819b5a4d4e58bb1c2554fa388e12ad60ac1",
+  "settings": "copy",
+  "sha256": "349e01984e36037039b85b68a8290819b5a4d4e58bb1c2554fa388e12ad60ac1"
+ },
+ "focus/lichess.webp": {
+  "source": "resources/styles/builtin/assets/applets/lichess/immersive.webp",
+  "sourceSha256": "0ee330e9cf3b70b6648bae683d20ab7baad9895e058c8955f5b36a08e65fe44c",
+  "settings": "copy",
+  "sha256": "0ee330e9cf3b70b6648bae683d20ab7baad9895e058c8955f5b36a08e65fe44c"
+ },
+ "focus/linear.webp": {
+  "source": "resources/styles/builtin/assets/applets/linear/immersive.webp",
+  "sourceSha256": "f4c0a932e3d6b437ee71fe11e308a70aefd9e493692a6741b64d3b5e18c8a105",
+  "settings": "copy",
+  "sha256": "f4c0a932e3d6b437ee71fe11e308a70aefd9e493692a6741b64d3b5e18c8a105"
+ },
+ "focus/linkedin.webp": {
+  "source": "resources/styles/builtin/assets/applets/linkedin/immersive.webp",
+  "sourceSha256": "cb9460af4196ef6649817bfd7519b1836505f2f721c90597e8250916a65e51c7",
+  "settings": "copy",
+  "sha256": "cb9460af4196ef6649817bfd7519b1836505f2f721c90597e8250916a65e51c7"
+ },
+ "focus/little-alchemy-2.webp": {
+  "source": "resources/styles/builtin/assets/applets/little-alchemy-2/immersive.webp",
+  "sourceSha256": "c1ae5295f9ab15a2f7e90842adb044af1e716f3fd0905a83eea6f61ec671cde0",
+  "settings": "copy",
+  "sha256": "c1ae5295f9ab15a2f7e90842adb044af1e716f3fd0905a83eea6f61ec671cde0"
+ },
+ "focus/meetings.webp": {
+  "source": "resources/styles/builtin/assets/applets/meetings/immersive.webp",
+  "sourceSha256": "7cdfc36e83e0b9f5373712565890aecf963b4ff08822ac90a3c8c7128fba06ca",
+  "settings": "copy",
+  "sha256": "7cdfc36e83e0b9f5373712565890aecf963b4ff08822ac90a3c8c7128fba06ca"
+ },
+ "focus/messages.webp": {
+  "source": "resources/styles/builtin/assets/applets/messages/immersive.webp",
+  "sourceSha256": "3b6e242db188e176d173399177633aebc1ed6e5e039d784ff364b3728e27c778",
+  "settings": "copy",
+  "sha256": "3b6e242db188e176d173399177633aebc1ed6e5e039d784ff364b3728e27c778"
+ },
+ "focus/microsoft-excel.webp": {
+  "source": "resources/styles/builtin/assets/applets/microsoft-excel/immersive.webp",
+  "sourceSha256": "7a52fb4d65e8dffb4dc90219f59b4799de44abca30f88cb3b4ef5e23b3c9661a",
+  "settings": "copy",
+  "sha256": "7a52fb4d65e8dffb4dc90219f59b4799de44abca30f88cb3b4ef5e23b3c9661a"
+ },
+ "focus/microsoft-powerpoint.webp": {
+  "source": "resources/styles/builtin/assets/applets/microsoft-powerpoint/immersive.webp",
+  "sourceSha256": "477dd568014a2db272b5da10e21b9029925e8304f1466d675117939650bbf604",
+  "settings": "copy",
+  "sha256": "477dd568014a2db272b5da10e21b9029925e8304f1466d675117939650bbf604"
+ },
+ "focus/microsoft-word.webp": {
+  "source": "resources/styles/builtin/assets/applets/microsoft-word/immersive.webp",
+  "sourceSha256": "7b3123880f7ee8acca37b1945fd5716ffd147891261bc5bd5acf2de20498776b",
+  "settings": "copy",
+  "sha256": "7b3123880f7ee8acca37b1945fd5716ffd147891261bc5bd5acf2de20498776b"
+ },
+ "focus/minesweeper.webp": {
+  "source": "resources/styles/builtin/assets/applets/minesweeper/immersive.webp",
+  "sourceSha256": "92129132cdfdb6a0436bc10f2b782c9bed654d68357d24375d5488b40525c0bb",
+  "settings": "copy",
+  "sha256": "92129132cdfdb6a0436bc10f2b782c9bed654d68357d24375d5488b40525c0bb"
+ },
+ "focus/netflix.webp": {
+  "source": "resources/styles/builtin/assets/applets/netflix/immersive.webp",
+  "sourceSha256": "4e35891114961fa8a20742b892a2bfb4d7419741fb41856ad9e255ab88de6e31",
+  "settings": "copy",
+  "sha256": "4e35891114961fa8a20742b892a2bfb4d7419741fb41856ad9e255ab88de6e31"
+ },
+ "focus/netlify.webp": {
+  "source": "resources/styles/builtin/assets/applets/netlify/immersive.webp",
+  "sourceSha256": "25560298090d058375d71d29a2489870c4903cae8e45c773013f1ec73f80c7db",
+  "settings": "copy",
+  "sha256": "25560298090d058375d71d29a2489870c4903cae8e45c773013f1ec73f80c7db"
+ },
+ "focus/notion.webp": {
+  "source": "resources/styles/builtin/assets/applets/notion/immersive.webp",
+  "sourceSha256": "9359d8300c9ae79002546e9c24f8248befc68475df84e5e69d910bd2092b0880",
+  "settings": "copy",
+  "sha256": "9359d8300c9ae79002546e9c24f8248befc68475df84e5e69d910bd2092b0880"
+ },
+ "focus/nyt-connections.webp": {
+  "source": "resources/styles/builtin/assets/applets/nyt-connections/immersive.webp",
+  "sourceSha256": "c099f8a72c9cf4d07be3ece24063a07d95b33cb7a65ab175fc5633ab6cecad46",
+  "settings": "copy",
+  "sha256": "c099f8a72c9cf4d07be3ece24063a07d95b33cb7a65ab175fc5633ab6cecad46"
+ },
+ "focus/obsidian.webp": {
+  "source": "resources/styles/builtin/assets/applets/obsidian/immersive.webp",
+  "sourceSha256": "16bbf2f7de94678d106882c1ca41c52c8a0676327f600d67c7c240b2cc4141b7",
+  "settings": "copy",
+  "sha256": "16bbf2f7de94678d106882c1ca41c52c8a0676327f600d67c7c240b2cc4141b7"
+ },
+ "focus/onedrive.webp": {
+  "source": "resources/styles/builtin/assets/applets/onedrive/immersive.webp",
+  "sourceSha256": "e09d307207c6c4f45c38ac1c3e4a96b5dc711da73b540953a9e942d1b99ba59d",
+  "settings": "copy",
+  "sha256": "e09d307207c6c4f45c38ac1c3e4a96b5dc711da73b540953a9e942d1b99ba59d"
+ },
+ "focus/ongoing.webp": {
+  "source": "resources/styles/builtin/assets/applets/ongoing/immersive.webp",
+  "sourceSha256": "fc0d447708e7a42e5d34a993fca5ddcc91cce0fde4606be1db0fd789d7bfb921",
+  "settings": "copy",
+  "sha256": "fc0d447708e7a42e5d34a993fca5ddcc91cce0fde4606be1db0fd789d7bfb921"
+ },
+ "focus/oura.webp": {
+  "source": "resources/styles/builtin/assets/applets/oura/immersive.webp",
+  "sourceSha256": "992b5fb181b86952c34de0ab760cb6306bf00f6c436f77533e4cbc57f4cde3ef",
+  "settings": "copy",
+  "sha256": "992b5fb181b86952c34de0ab760cb6306bf00f6c436f77533e4cbc57f4cde3ef"
+ },
+ "focus/outlook.webp": {
+  "source": "resources/styles/builtin/assets/applets/outlook/immersive.webp",
+  "sourceSha256": "f93a86848dc0ec2f0f878e68eef89cfb007cf975d5c4ef5a5cad3f4582f95cfe",
+  "settings": "copy",
+  "sha256": "f93a86848dc0ec2f0f878e68eef89cfb007cf975d5c4ef5a5cad3f4582f95cfe"
+ },
+ "focus/paypal.webp": {
+  "source": "resources/styles/builtin/assets/applets/paypal/immersive.webp",
+  "sourceSha256": "758d7ebfdf0b17258a923505cbc939f45883704a8101ec70c3b83b007e452f67",
+  "settings": "copy",
+  "sha256": "758d7ebfdf0b17258a923505cbc939f45883704a8101ec70c3b83b007e452f67"
+ },
+ "focus/perplexity.webp": {
+  "source": "resources/styles/builtin/assets/applets/perplexity/immersive.webp",
+  "sourceSha256": "57afa47d0101996efad3688c1601f1e9f2507bd81621b0f9f99378969aab503b",
+  "settings": "copy",
+  "sha256": "57afa47d0101996efad3688c1601f1e9f2507bd81621b0f9f99378969aab503b"
+ },
+ "focus/pinterest.webp": {
+  "source": "resources/styles/builtin/assets/applets/pinterest/immersive.webp",
+  "sourceSha256": "b4de9a6d3db4f20cadca67b91636cbe540739d984b93b1d7ba47d8fba6716baf",
+  "settings": "copy",
+  "sha256": "b4de9a6d3db4f20cadca67b91636cbe540739d984b93b1d7ba47d8fba6716baf"
+ },
+ "focus/plaid.webp": {
+  "source": "resources/styles/builtin/assets/applets/plaid/immersive.webp",
+  "sourceSha256": "c6a957a10ccfcd422b79c195ea9cfcb9b1a99d1be6d4dd7fcb73b1f3c4690f6e",
+  "settings": "copy",
+  "sha256": "c6a957a10ccfcd422b79c195ea9cfcb9b1a99d1be6d4dd7fcb73b1f3c4690f6e"
+ },
+ "focus/pokemon-showdown.webp": {
+  "source": "resources/styles/builtin/assets/applets/pokemon-showdown/immersive.webp",
+  "sourceSha256": "85032e3556691ad0f0df6ffa4844d20cdd57ffd88031932cf794379b835a7970",
+  "settings": "copy",
+  "sha256": "85032e3556691ad0f0df6ffa4844d20cdd57ffd88031932cf794379b835a7970"
+ },
+ "focus/posthog.webp": {
+  "source": "resources/styles/builtin/assets/applets/posthog/immersive.webp",
+  "sourceSha256": "9dfb125c3fa9fb892d27a6d8f6a370e08edbd04eeae197124caecfc71b23f1e8",
+  "settings": "copy",
+  "sha256": "9dfb125c3fa9fb892d27a6d8f6a370e08edbd04eeae197124caecfc71b23f1e8"
+ },
+ "focus/railway.webp": {
+  "source": "resources/styles/builtin/assets/applets/railway/immersive.webp",
+  "sourceSha256": "b6b17888fef9d78ed9143c775735d5d77aaf50b53f501ab96229f0231c636ded",
+  "settings": "copy",
+  "sha256": "b6b17888fef9d78ed9143c775735d5d77aaf50b53f501ab96229f0231c636ded"
+ },
+ "focus/random-game.webp": {
+  "source": "resources/styles/builtin/assets/applets/random-game/immersive.webp",
+  "sourceSha256": "26c7b3fd19087b4c3b4c29bf2fc0a026fcb5a8adf33f29c29f2141fa5e14aa7f",
+  "settings": "copy",
+  "sha256": "26c7b3fd19087b4c3b4c29bf2fc0a026fcb5a8adf33f29c29f2141fa5e14aa7f"
+ },
+ "focus/reddit.webp": {
+  "source": "resources/styles/builtin/assets/applets/reddit/immersive.webp",
+  "sourceSha256": "dc3c1ce3dc4072d932d05c03d3fb26d798d8e31b26623189c3b0e8a0659cf49e",
+  "settings": "copy",
+  "sha256": "dc3c1ce3dc4072d932d05c03d3fb26d798d8e31b26623189c3b0e8a0659cf49e"
+ },
+ "focus/render.webp": {
+  "source": "resources/styles/builtin/assets/applets/render/immersive.webp",
+  "sourceSha256": "d7cabc1281ab4bb5ada94c9378259e43c44d6af61898e8a1738967c423a44289",
+  "settings": "copy",
+  "sha256": "d7cabc1281ab4bb5ada94c9378259e43c44d6af61898e8a1738967c423a44289"
+ },
+ "focus/sekai-3d-uno.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-3d-uno/immersive.webp",
+  "sourceSha256": "42fba49749942010e6ef56a7ab5180f694362a268b6a3ee58014d20fc19418f1",
+  "settings": "copy",
+  "sha256": "42fba49749942010e6ef56a7ab5180f694362a268b6a3ee58014d20fc19418f1"
+ },
+ "focus/sekai-devil-level.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-devil-level/immersive.webp",
+  "sourceSha256": "0945e561813162c8e87a7d0524c0ec254e74388b5092c861a8a06bd31daffe74",
+  "settings": "copy",
+  "sha256": "0945e561813162c8e87a7d0524c0ec254e74388b5092c861a8a06bd31daffe74"
+ },
+ "focus/sekai-mixing-colors.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-mixing-colors/immersive.webp",
+  "sourceSha256": "a117c6c6a62a11a932d9e8fb63945a5ba845132799dda1051d32d8941b42e07e",
+  "settings": "copy",
+  "sha256": "a117c6c6a62a11a932d9e8fb63945a5ba845132799dda1051d32d8941b42e07e"
+ },
+ "focus/sekai-rogue-ai-tic-tac-toe.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-rogue-ai-tic-tac-toe/immersive.webp",
+  "sourceSha256": "a170bb46c6a93d51eb4cc708ead241e4b7e3dbf246a7551406becb0144261a34",
+  "settings": "copy",
+  "sha256": "a170bb46c6a93d51eb4cc708ead241e4b7e3dbf246a7551406becb0144261a34"
+ },
+ "focus/sekai-roller-coaster.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-roller-coaster/immersive.webp",
+  "sourceSha256": "87b198c8ac6ebd8f82f4758a25a76c6bcc3ce1f8029a05fe992533e8399a5252",
+  "settings": "copy",
+  "sha256": "87b198c8ac6ebd8f82f4758a25a76c6bcc3ce1f8029a05fe992533e8399a5252"
+ },
+ "focus/sekai-sketch-racer.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai-sketch-racer/immersive.webp",
+  "sourceSha256": "3f004a9f3245af2c29eb14b0f336b45eb8d356b34b0f5da1b8f5e83dc3d355a8",
+  "settings": "copy",
+  "sha256": "3f004a9f3245af2c29eb14b0f336b45eb8d356b34b0f5da1b8f5e83dc3d355a8"
+ },
+ "focus/sekai.webp": {
+  "source": "resources/styles/builtin/assets/applets/sekai/immersive.webp",
+  "sourceSha256": "7cf2634dab1c5ad9ed58fd0430fdcd060bfcf5b78e891eb1043652c89c6cb80d",
+  "settings": "copy",
+  "sha256": "7cf2634dab1c5ad9ed58fd0430fdcd060bfcf5b78e891eb1043652c89c6cb80d"
+ },
+ "focus/sentry.webp": {
+  "source": "resources/styles/builtin/assets/applets/sentry/immersive.webp",
+  "sourceSha256": "e1c31e83b16132776d6daf4debab46696c3748cb6886c458025068ed8e970fb5",
+  "settings": "copy",
+  "sha256": "e1c31e83b16132776d6daf4debab46696c3748cb6886c458025068ed8e970fb5"
+ },
+ "focus/skribbl-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/skribbl-io/immersive.webp",
+  "sourceSha256": "15480b878c4c0a46bb13cfa21151180b9f88ad8c8c1b21ca1d2a498997aad895",
+  "settings": "copy",
+  "sha256": "15480b878c4c0a46bb13cfa21151180b9f88ad8c8c1b21ca1d2a498997aad895"
+ },
+ "focus/slack.webp": {
+  "source": "resources/styles/builtin/assets/applets/slack/immersive.webp",
+  "sourceSha256": "ec4331f2a23bd6b54e7d2d42c056729568b54bdecb214f880d6c2be275d4079d",
+  "settings": "copy",
+  "sha256": "ec4331f2a23bd6b54e7d2d42c056729568b54bdecb214f880d6c2be275d4079d"
+ },
+ "focus/slither-io.webp": {
+  "source": "resources/styles/builtin/assets/applets/slither-io/immersive.webp",
+  "sourceSha256": "27ce6f11ad82a17db29e4bc6a1dbd6a23a952823d48f04330320dd5ad467098b",
+  "settings": "copy",
+  "sha256": "27ce6f11ad82a17db29e4bc6a1dbd6a23a952823d48f04330320dd5ad467098b"
+ },
+ "focus/snake.webp": {
+  "source": "resources/styles/builtin/assets/applets/snake/immersive.webp",
+  "sourceSha256": "34b4887538302913b879218a6c9cae13d0825c2063309a221536958d809f829d",
+  "settings": "copy",
+  "sha256": "34b4887538302913b879218a6c9cae13d0825c2063309a221536958d809f829d"
+ },
+ "focus/spotify.webp": {
+  "source": "resources/styles/builtin/assets/applets/spotify/immersive.webp",
+  "sourceSha256": "54734b16a664332d6a5ea516ecc3b7964589e2828a8a8f1c48e4804eda126fa5",
+  "settings": "copy",
+  "sha256": "54734b16a664332d6a5ea516ecc3b7964589e2828a8a8f1c48e4804eda126fa5"
+ },
+ "focus/strava.webp": {
+  "source": "resources/styles/builtin/assets/applets/strava/immersive.webp",
+  "sourceSha256": "e3afb6dd7027c1cec4de025ba7a15ba3ec57b9e6cd604261b7be09b029fdb039",
+  "settings": "copy",
+  "sha256": "e3afb6dd7027c1cec4de025ba7a15ba3ec57b9e6cd604261b7be09b029fdb039"
+ },
+ "focus/stripe.webp": {
+  "source": "resources/styles/builtin/assets/applets/stripe/immersive.webp",
+  "sourceSha256": "802e967435a615ecdfa709fffbb488a39b0b8ec4186d623562753b371cb6cb63",
+  "settings": "copy",
+  "sha256": "802e967435a615ecdfa709fffbb488a39b0b8ec4186d623562753b371cb6cb63"
+ },
+ "focus/subway-surfers.webp": {
+  "source": "resources/styles/builtin/assets/applets/subway-surfers/immersive.webp",
+  "sourceSha256": "217d5b214a2d8d12c0ccb30027724df1885e6d49374283c6b1a5d0bbeb469d02",
+  "settings": "copy",
+  "sha256": "217d5b214a2d8d12c0ccb30027724df1885e6d49374283c6b1a5d0bbeb469d02"
+ },
+ "focus/sudoku.webp": {
+  "source": "resources/styles/builtin/assets/applets/sudoku/immersive.webp",
+  "sourceSha256": "1bbdc153c7ddc967193ba92fadd5f26e0741a59f3a729b0fca3b60c843118052",
+  "settings": "copy",
+  "sha256": "1bbdc153c7ddc967193ba92fadd5f26e0741a59f3a729b0fca3b60c843118052"
+ },
+ "focus/supabase.webp": {
+  "source": "resources/styles/builtin/assets/applets/supabase/immersive.webp",
+  "sourceSha256": "cbe06f82539e611972cc65fb5adba0785efb5ac07d3e1860370dce644784c64d",
+  "settings": "copy",
+  "sha256": "cbe06f82539e611972cc65fb5adba0785efb5ac07d3e1860370dce644784c64d"
+ },
+ "focus/taobao.webp": {
+  "source": "resources/styles/builtin/assets/applets/taobao/immersive.webp",
+  "sourceSha256": "a7a034ee18b5e2f6bf57a4924ee933bb5ac0a1f0f56ce2b916030b46b0042384",
+  "settings": "copy",
+  "sha256": "a7a034ee18b5e2f6bf57a4924ee933bb5ac0a1f0f56ce2b916030b46b0042384"
+ },
+ "focus/teams.webp": {
+  "source": "resources/styles/builtin/assets/applets/teams/immersive.webp",
+  "sourceSha256": "1dc5eba9d6d8910d9b48af08085e5b9d9628d3b6703507d42c107b86d530f6d9",
+  "settings": "copy",
+  "sha256": "1dc5eba9d6d8910d9b48af08085e5b9d9628d3b6703507d42c107b86d530f6d9"
+ },
+ "focus/telegram.webp": {
+  "source": "resources/styles/builtin/assets/applets/telegram/immersive.webp",
+  "sourceSha256": "9e3c0a5d681888b65b3f0b3b9561ab2c1a2c3d10444c285c2b51098d0d196811",
+  "settings": "copy",
+  "sha256": "9e3c0a5d681888b65b3f0b3b9561ab2c1a2c3d10444c285c2b51098d0d196811"
+ },
+ "focus/threads.webp": {
+  "source": "resources/styles/builtin/assets/applets/threads/immersive.webp",
+  "sourceSha256": "abaedf282db7b81d44be2ef09e6c11b169e04fb3379de6d8800aa957df7c9289",
+  "settings": "copy",
+  "sha256": "abaedf282db7b81d44be2ef09e6c11b169e04fb3379de6d8800aa957df7c9289"
+ },
+ "focus/tiktok.webp": {
+  "source": "resources/styles/builtin/assets/applets/tiktok/immersive.webp",
+  "sourceSha256": "a3d0b4d705ca7dea9bbdd572b809ab92bfc190335ba54ca1c0719056707f938f",
+  "settings": "copy",
+  "sha256": "a3d0b4d705ca7dea9bbdd572b809ab92bfc190335ba54ca1c0719056707f938f"
+ },
+ "focus/todoist.webp": {
+  "source": "resources/styles/builtin/assets/applets/todoist/immersive.webp",
+  "sourceSha256": "a419ab37db4a4e583f55885f192636f74cd39dfb287ed793c63e5b110e0dac16",
+  "settings": "copy",
+  "sha256": "a419ab37db4a4e583f55885f192636f74cd39dfb287ed793c63e5b110e0dac16"
+ },
+ "focus/tripit.webp": {
+  "source": "resources/styles/builtin/assets/applets/tripit/immersive.webp",
+  "sourceSha256": "4478520048de9d675a737f04f59142f2c25af627c99e7c3fa845755854c8c65e",
+  "settings": "copy",
+  "sha256": "4478520048de9d675a737f04f59142f2c25af627c99e7c3fa845755854c8c65e"
+ },
+ "focus/twitch.webp": {
+  "source": "resources/styles/builtin/assets/applets/twitch/immersive.webp",
+  "sourceSha256": "7a0c84e680d491ab05fe5ae59860bca8993bed9657ef29a1413bad8f83f4fd87",
+  "settings": "copy",
+  "sha256": "7a0c84e680d491ab05fe5ae59860bca8993bed9657ef29a1413bad8f83f4fd87"
+ },
+ "focus/uber-eats.webp": {
+  "source": "resources/styles/builtin/assets/applets/uber-eats/immersive.webp",
+  "sourceSha256": "0e73b14ebabc005bedf8b798f2ff3f1e28e477b1ee03de9c9a6fe37eb0881aa8",
+  "settings": "copy",
+  "sha256": "0e73b14ebabc005bedf8b798f2ff3f1e28e477b1ee03de9c9a6fe37eb0881aa8"
+ },
+ "focus/uber.webp": {
+  "source": "resources/styles/builtin/assets/applets/uber/immersive.webp",
+  "sourceSha256": "fd18ab40929f2b9f7dfaecd07f0e6830da0dbbb0b132353f8eb125dba6ed0239",
+  "settings": "copy",
+  "sha256": "fd18ab40929f2b9f7dfaecd07f0e6830da0dbbb0b132353f8eb125dba6ed0239"
+ },
+ "focus/vercel.webp": {
+  "source": "resources/styles/builtin/assets/applets/vercel/immersive.webp",
+  "sourceSha256": "eb061ffb0a29b7788bd7222e5f8f1855cace28a9479a1c47b9b4a5194ed5efa7",
+  "settings": "copy",
+  "sha256": "eb061ffb0a29b7788bd7222e5f8f1855cace28a9479a1c47b9b4a5194ed5efa7"
+ },
+ "focus/voice-memos.webp": {
+  "source": "resources/styles/builtin/assets/applets/voice-memos/immersive.webp",
+  "sourceSha256": "02ed643f949618f96010339d65bdbc152b7e790dfb24a84c9c066285cb10ae2f",
+  "settings": "copy",
+  "sha256": "02ed643f949618f96010339d65bdbc152b7e790dfb24a84c9c066285cb10ae2f"
+ },
+ "focus/weather.webp": {
+  "source": "resources/styles/builtin/assets/applets/weather/immersive.webp",
+  "sourceSha256": "b6c4d859211e4e2f0efa72317b72ae7a5c73bb7c5fef2624256aad9a8f93bea5",
+  "settings": "copy",
+  "sha256": "b6c4d859211e4e2f0efa72317b72ae7a5c73bb7c5fef2624256aad9a8f93bea5"
+ },
+ "focus/whatsapp.webp": {
+  "source": "resources/styles/builtin/assets/applets/whatsapp/immersive.webp",
+  "sourceSha256": "969f2ae067073c8eacc75973e90aabf74171c225dafc6d986f2f07fa54ec0864",
+  "settings": "copy",
+  "sha256": "969f2ae067073c8eacc75973e90aabf74171c225dafc6d986f2f07fa54ec0864"
+ },
+ "focus/wikipedia.webp": {
+  "source": "resources/styles/builtin/assets/applets/wikipedia/immersive.webp",
+  "sourceSha256": "68e6acd7efa045aa5d4a54b4c62c2a5b67b10d9f856d9c51250a862dd458431e",
+  "settings": "copy",
+  "sha256": "68e6acd7efa045aa5d4a54b4c62c2a5b67b10d9f856d9c51250a862dd458431e"
+ },
+ "focus/wordle.webp": {
+  "source": "resources/styles/builtin/assets/applets/wordle/immersive.webp",
+  "sourceSha256": "20c99a75f2ac1872832707d1564eb2f8d78f978cefe875a01ed3d476fa470d36",
+  "settings": "copy",
+  "sha256": "20c99a75f2ac1872832707d1564eb2f8d78f978cefe875a01ed3d476fa470d36"
+ },
+ "focus/x.webp": {
+  "source": "resources/styles/builtin/assets/applets/x/immersive.webp",
+  "sourceSha256": "2536552d836fa0c36266bb8bd3856ecfd5a29f10810b1c7ea8717f159f000306",
+  "settings": "copy",
+  "sha256": "2536552d836fa0c36266bb8bd3856ecfd5a29f10810b1c7ea8717f159f000306"
+ },
+ "focus/xiaohongshu.webp": {
+  "source": "resources/styles/builtin/assets/applets/xiaohongshu/immersive.webp",
+  "sourceSha256": "321b421661aeae6198e0c5127307393dae0cb48d0e9557dbc89c24ff8349f70b",
+  "settings": "copy",
+  "sha256": "321b421661aeae6198e0c5127307393dae0cb48d0e9557dbc89c24ff8349f70b"
+ },
+ "focus/youtube.webp": {
+  "source": "resources/styles/builtin/assets/applets/youtube/immersive.webp",
+  "sourceSha256": "7ec40ea4d7039f20a94375fa8133f15a546b9022d06c9f5c1ae2cf3675ee2c48",
+  "settings": "copy",
+  "sha256": "7ec40ea4d7039f20a94375fa8133f15a546b9022d06c9f5c1ae2cf3675ee2c48"
+ },
+ "focus/zoom.webp": {
+  "source": "resources/styles/builtin/assets/applets/zoom/immersive.webp",
+  "sourceSha256": "cb97ecd150f52bb87491190832aa52735941db985021807bb42ab11c04f74069",
+  "settings": "copy",
+  "sha256": "cb97ecd150f52bb87491190832aa52735941db985021807bb42ab11c04f74069"
+ },
+ "landmarks/health-night.webp": {
+  "source": "resources/worlds/village/images/landmarks/health-night.png",
+  "sourceSha256": "5831b2b3111325bd9080ec372c398381531f80b3ebdd4926d1994b1076d98d8a",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "927c91e7e3574563e1a4439a6a0b554e0e38f8829905bc48217a6a42e9c2010d"
+ },
+ "landmarks/health.webp": {
+  "source": "resources/worlds/village/images/landmarks/health.png",
+  "sourceSha256": "c177497edfc59142ced91ee765988d4b531f21b0522473258181a5a82c2b25b9",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "81dbf9d8d7f1f6439019683b916d55194591dcc4ea6c41e30c27c902758c36ac"
+ },
+ "landmarks/home-night.webp": {
+  "source": "resources/worlds/village/images/landmarks/home-night.png",
+  "sourceSha256": "94b1567f4bd865d0dcceaa331c8072187968fac2a68a423340d6218a20de9a2c",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "b77cc5bce9f37a42ce9c7edb025e9299ea447284ab873a11ad0944f10421ea14"
+ },
+ "landmarks/home.webp": {
+  "source": "resources/worlds/village/images/landmarks/home.png",
+  "sourceSha256": "bc0e9c96a70541134207e09a12d5276d3794918250d1e40b9fe77d59cd2c75bc",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "1ba8dbb1ddc8f7141069f1c809144449e7c0e21fd3810dec23425a0c9673d233"
+ },
+ "landmarks/library-night.webp": {
+  "source": "resources/worlds/village/images/landmarks/library-night.png",
+  "sourceSha256": "bcca2587eb1d5de4697dc90b09c6fac76fe1bb9d9125290cc2ab1f8ce9fe79be",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "16ce67377932a6a8ee701ff2aedf85b34a8f8fd6a4b2d82413055bc0ccf65e58"
+ },
+ "landmarks/library.webp": {
+  "source": "resources/worlds/village/images/landmarks/library.png",
+  "sourceSha256": "23804bada6b77344c2841e553b3431c0e7d02cf490543855db7b774ebfdbfce0",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "dd1d48d4cac1d272f8920f54d40f42292813f876960037f49b564b037b14023e"
+ },
+ "landmarks/money-night.webp": {
+  "source": "resources/worlds/village/images/landmarks/money-night.png",
+  "sourceSha256": "c71346c6fb4f7a27397c470886cd8947fbbd8c8a122df00c00bf69bde8b29672",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "c8de510683d0c01f71e34ae78576e7636492dfb0396c01feaec0b5098c09e5c8"
+ },
+ "landmarks/money.webp": {
+  "source": "resources/worlds/village/images/landmarks/money.png",
+  "sourceSha256": "da58f7ea4d2488b81df5150b652481be6410a52dee9396ebec5f650c17979020",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "57b87c0fed8290d2ff595ed3272df1be6422093f062858150cb9b419eb366a2b"
+ },
+ "landmarks/travel-night.webp": {
+  "source": "resources/worlds/village/images/landmarks/travel-night.png",
+  "sourceSha256": "b2b17901784930b63874283ede7a90f462f4877bff4a73df5a8d198851c4ee31",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "0a143f0cb38487b0a8efb5cf8a8176324f49e84c400b905a7dd8848be16845ac"
+ },
+ "landmarks/travel.webp": {
+  "source": "resources/worlds/village/images/landmarks/travel.png",
+  "sourceSha256": "cff93510da6e0abd063b089fc3a267d31b8a336061acb7d5234b6a22babd17e6",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "8bb1b2e36d84912a327bc6210477ba1ad3966ebcd8e218f456e5695f7599d9fb"
+ },
+ "landmarks/work-night.webp": {
+  "source": "resources/worlds/village/images/landmarks/work-night.png",
+  "sourceSha256": "7ca761c1b178dd4896e3d82d5ce8268ab5f8c31621f86773e1f9d563788ab995",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "5a65855396da1c09fd1abf32c7b8d6e0e1fa173fcb4b366c6d909065281c22f2"
+ },
+ "landmarks/work.webp": {
+  "source": "resources/worlds/village/images/landmarks/work.png",
+  "sourceSha256": "0fe2c701099ef988754196e44a05cab4172fa4e9e10f5ba0157cbb9906a78d32",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "f8b2baad215b5852960709fd3ca5587fe8b39d541c440417bf3eef55c3d42113"
+ },
+ "logos/youtube.png": {
+  "source": "ui/applets/youtube/logo.png",
+  "sourceSha256": "e39dc3d8c2f82ad2375132a8efcf521c232d5e2cf08abeb9bebe1ad94afb2157",
+  "settings": "copy",
+  "sha256": "e39dc3d8c2f82ad2375132a8efcf521c232d5e2cf08abeb9bebe1ad94afb2157"
+ },
+ "mail/archive-bin-front.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/archive-bin-front.png",
+  "sourceSha256": "3b64c0a06021b79982acd3664aff03d019edcccacde2443bf0f7fdbbaf8c48b1",
+  "settings": "copy",
+  "sha256": "3b64c0a06021b79982acd3664aff03d019edcccacde2443bf0f7fdbbaf8c48b1"
+ },
+ "mail/archive-bin.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/archive-bin.png",
+  "sourceSha256": "eb0f2992cfd121d538a8e86ee83d18a86712e93054911ac8bd58f342ea456f62",
+  "settings": "copy",
+  "sha256": "eb0f2992cfd121d538a8e86ee83d18a86712e93054911ac8bd58f342ea456f62"
+ },
+ "mail/attention.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/attention.png",
+  "sourceSha256": "552dc29926346564dfe67ef4522ec397b88a3a1985ffcf271132dc1d8b21ce8d",
+  "settings": "copy",
+  "sha256": "552dc29926346564dfe67ef4522ec397b88a3a1985ffcf271132dc1d8b21ce8d"
+ },
+ "mail/bin-front.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/bin-front.png",
+  "sourceSha256": "76f07230039ee86d4dd333febc5466e19d434734de734974f67f0fcf3c9eb698",
+  "settings": "copy",
+  "sha256": "76f07230039ee86d4dd333febc5466e19d434734de734974f67f0fcf3c9eb698"
+ },
+ "mail/bin.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/bin.png",
+  "sourceSha256": "a8774fcb6539b8187a8cf4c96ba29bb341239374200dbe634822d25577544aa2",
+  "settings": "copy",
+  "sha256": "a8774fcb6539b8187a8cf4c96ba29bb341239374200dbe634822d25577544aa2"
+ },
+ "mail/board.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/wall-board-v5.png",
+  "sourceSha256": "90dd0570ccc45f18b85aad2e9b2c6b793f6bd0ed27a9714c1f2b53497dfeb15b",
+  "settings": "copy",
+  "sha256": "90dd0570ccc45f18b85aad2e9b2c6b793f6bd0ed27a9714c1f2b53497dfeb15b"
+ },
+ "mail/envelope.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/envelope.png",
+  "sourceSha256": "b4ff0019712b9cefc10763999509b68987dce0e0b14809622df920802cc47f9c",
+  "settings": "copy",
+  "sha256": "b4ff0019712b9cefc10763999509b68987dce0e0b14809622df920802cc47f9c"
+ },
+ "mail/flight.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/flight.png",
+  "sourceSha256": "1a68546e8febd689e3ca1d0c6e13c627000c90b5124c16fd79708e4f650f7787",
+  "settings": "copy",
+  "sha256": "1a68546e8febd689e3ca1d0c6e13c627000c90b5124c16fd79708e4f650f7787"
+ },
+ "mail/offers-bin-front.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/offers-bin-front.png",
+  "sourceSha256": "dca3578c649867b0dba31b829a167c008957411d7a9d47197adb46a432b5672b",
+  "settings": "copy",
+  "sha256": "dca3578c649867b0dba31b829a167c008957411d7a9d47197adb46a432b5672b"
+ },
+ "mail/offers-bin.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/offers-bin.png",
+  "sourceSha256": "c7203def53831973169cb61691fddb1cc6d9b15b1c2bb1d820c9402b95d70bea",
+  "settings": "copy",
+  "sha256": "c7203def53831973169cb61691fddb1cc6d9b15b1c2bb1d820c9402b95d70bea"
+ },
+ "mail/pinned-envelope.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/pinned-envelope-v2.png",
+  "sourceSha256": "dea690b1c8b3061e409a0fcec00b4917191cf224288f5a7fed0f5bb9ead30e26",
+  "settings": "copy",
+  "sha256": "dea690b1c8b3061e409a0fcec00b4917191cf224288f5a7fed0f5bb9ead30e26"
+ },
+ "mail/sign.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/sign.png",
+  "sourceSha256": "948009c0f49c401700bb00514f06dbaf7bf5e5576aaabe96e5b750c082dc6c66",
+  "settings": "copy",
+  "sha256": "948009c0f49c401700bb00514f06dbaf7bf5e5576aaabe96e5b750c082dc6c66"
+ },
+ "mail/spam-bin-front.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/spam-bin-front.png",
+  "sourceSha256": "71ee610905b72e9e4b8b4e9b4c9ba62fb9f90dffdcc27bc3e70407b2d399631e",
+  "settings": "copy",
+  "sha256": "71ee610905b72e9e4b8b4e9b4c9ba62fb9f90dffdcc27bc3e70407b2d399631e"
+ },
+ "mail/spam-bin.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/mail-parts/spam-bin.png",
+  "sourceSha256": "f973b441f2c1fa35dd69e80473da98854c817194351a03de31ebc2f0171626ba",
+  "settings": "copy",
+  "sha256": "f973b441f2c1fa35dd69e80473da98854c817194351a03de31ebc2f0171626ba"
+ },
+ "motion/apple-notes-0.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+  "sourceSha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037",
+  "settings": "frame:3x2:0:webp-lossless",
+  "sha256": "819c1c9ba87087b815eafd23c0ea51fc0bc6ce5f5f4da162270a193ca96c8017"
+ },
+ "motion/apple-notes-1.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+  "sourceSha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037",
+  "settings": "frame:3x2:1:webp-lossless",
+  "sha256": "6556fab366e79c1a6c57d93a3632ba2fb64e89db94cf1d7f598c758f19cc5974"
+ },
+ "motion/apple-notes-2.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+  "sourceSha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037",
+  "settings": "frame:3x2:2:webp-lossless",
+  "sha256": "a40153b877282bd20f02a178ea1a9ae515e41b73ecb8841b8248c811c3cc5649"
+ },
+ "motion/apple-notes-3.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+  "sourceSha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037",
+  "settings": "frame:3x2:3:webp-lossless",
+  "sha256": "6187c2889f770e9967efab934556fedcad01241fe2109fdd24907904924aeff3"
+ },
+ "motion/apple-notes-4.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+  "sourceSha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037",
+  "settings": "frame:3x2:4:webp-lossless",
+  "sha256": "52b8c01b5b7b1957b9d59ace1cd11ab487be3adf16d2f5eb57fa0cd015b9d6a2"
+ },
+ "motion/apple-notes-5.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+  "sourceSha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037",
+  "settings": "frame:3x2:5:webp-lossless",
+  "sha256": "356227f9b13fb727fd47229cad2a3a72ffb427976ff61c47541ee5644a1fd981"
+ },
+ "motion/apple-notes.png": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-notes.png",
+  "sourceSha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037",
+  "settings": "copy",
+  "sha256": "605a430fbe519b4617d5c8ae51b324e6ce40540d1e9ff29c3dbef046e70b1037"
+ },
+ "motion/apple-reminders-0.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+  "sourceSha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665",
+  "settings": "frame:3x2:0:webp-lossless",
+  "sha256": "118fa6be916e527c25605b2f7d96e5c10cceab4c75e096d0d5e8c621adb25105"
+ },
+ "motion/apple-reminders-1.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+  "sourceSha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665",
+  "settings": "frame:3x2:1:webp-lossless",
+  "sha256": "10cbd3cc9fe9c58ae0ea2a19cfd41d11156904f28963da66897b92b7f889ad9c"
+ },
+ "motion/apple-reminders-2.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+  "sourceSha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665",
+  "settings": "frame:3x2:2:webp-lossless",
+  "sha256": "ddb9a3282c95b041057f0cb1e2e0055cbdd06bc28325f3c119ad62a26760344c"
+ },
+ "motion/apple-reminders-3.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+  "sourceSha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665",
+  "settings": "frame:3x2:3:webp-lossless",
+  "sha256": "65380765ab55b707eeb21016f948e0efe686ebd73233dec2136e9ba11e768380"
+ },
+ "motion/apple-reminders-4.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+  "sourceSha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665",
+  "settings": "frame:3x2:4:webp-lossless",
+  "sha256": "4c1ea6e5d44b504ac7f817f421d1914951cf7b881fe4e19121f03b531eeb96c6"
+ },
+ "motion/apple-reminders-5.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+  "sourceSha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665",
+  "settings": "frame:3x2:5:webp-lossless",
+  "sha256": "1387544a7211b1df9df9be38a45021c2eebb01754e974663be86c20a60efbe8e"
+ },
+ "motion/apple-reminders.png": {
+  "source": "resources/styles/builtin/assets/animations/home/apple-reminders.png",
+  "sourceSha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665",
+  "settings": "copy",
+  "sha256": "700d3c9735fb234e5ee845a3f937c6c91abace9ab3de76ca2fd26d4d647f4665"
+ },
+ "motion/google-calendar-0.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+  "sourceSha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597",
+  "settings": "frame:3x2:0:webp-lossless",
+  "sha256": "1a306adf331e239be05a7fb925cddfecf6f5abe4fd7d292b5b1791d683e79acd"
+ },
+ "motion/google-calendar-1.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+  "sourceSha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597",
+  "settings": "frame:3x2:1:webp-lossless",
+  "sha256": "ec5d5ad0a92f7980cb426029cd395072d05acb84e15954b44cd3f869c955563f"
+ },
+ "motion/google-calendar-2.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+  "sourceSha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597",
+  "settings": "frame:3x2:2:webp-lossless",
+  "sha256": "b8259e794982fe557da8fb13c6e529a94a8f10a61f4ff0d31b22aaade3c3c122"
+ },
+ "motion/google-calendar-3.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+  "sourceSha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597",
+  "settings": "frame:3x2:3:webp-lossless",
+  "sha256": "86bfec46c5a43e9c1d89c03007519a353489efab623f204322a207f127209293"
+ },
+ "motion/google-calendar-4.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+  "sourceSha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597",
+  "settings": "frame:3x2:4:webp-lossless",
+  "sha256": "48ab7d25bbe4696fe204675f38157c20625d928965a8c9520fee5883d29b5346"
+ },
+ "motion/google-calendar-5.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+  "sourceSha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597",
+  "settings": "frame:3x2:5:webp-lossless",
+  "sha256": "75eed19f997495aa232d7dd6ae09c31445c58782c1adf577c1b7a3c582c6360b"
+ },
+ "motion/google-calendar.png": {
+  "source": "resources/styles/builtin/assets/animations/home/google-calendar.png",
+  "sourceSha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597",
+  "settings": "copy",
+  "sha256": "e11178326c05f5c6849bf034891a0962a92646e2480bbad5c934630d474db597"
+ },
+ "motion/weather-0.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/weather.png",
+  "sourceSha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197",
+  "settings": "frame:3x2:0:webp-lossless",
+  "sha256": "8ae0c7abf1f642ab552fc05799a0fd8e4e985b2ac2b79066f929db312a771585"
+ },
+ "motion/weather-1.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/weather.png",
+  "sourceSha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197",
+  "settings": "frame:3x2:1:webp-lossless",
+  "sha256": "8e90402ae28ae09d99048a936f07a4b9a8d5f6a75de743be740943d144f857d0"
+ },
+ "motion/weather-2.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/weather.png",
+  "sourceSha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197",
+  "settings": "frame:3x2:2:webp-lossless",
+  "sha256": "0c078575ab06df8475036aa0ee04cd6c1e291e6963c89b0404cbf03272df763c"
+ },
+ "motion/weather-3.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/weather.png",
+  "sourceSha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197",
+  "settings": "frame:3x2:3:webp-lossless",
+  "sha256": "836e294bec3707f788f48ccf5f1dd2ad0173f98600d0d57ac3c081a3679becf5"
+ },
+ "motion/weather-4.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/weather.png",
+  "sourceSha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197",
+  "settings": "frame:3x2:4:webp-lossless",
+  "sha256": "c00dba53cf41369cfbda7c4492755111e50091f5f34e35e6245b440b9fdb7ff9"
+ },
+ "motion/weather-5.webp": {
+  "source": "resources/styles/builtin/assets/animations/home/weather.png",
+  "sourceSha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197",
+  "settings": "frame:3x2:5:webp-lossless",
+  "sha256": "e5584fe123a4b1022b516607ce702505e3bfe30604ea40644a2c15e71c11bb48"
+ },
+ "motion/weather.png": {
+  "source": "resources/styles/builtin/assets/animations/home/weather.png",
+  "sourceSha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197",
+  "settings": "copy",
+  "sha256": "7f1cccbd875a531a54fb1461238d45b52d4310159d0973d58e90e5f3a19bd197"
+ },
+ "open/apple-notes.png": {
+  "source": "resources/styles/builtin/assets/applets/apple-notes/open.png",
+  "sourceSha256": "6a591d8183eb9ec998bdfbb01752cbdff1f28f43a9a51c0bab82f81dad494de0",
+  "settings": "copy",
+  "sha256": "6a591d8183eb9ec998bdfbb01752cbdff1f28f43a9a51c0bab82f81dad494de0"
+ },
+ "open/apple-reminders.png": {
+  "source": "resources/styles/builtin/assets/applets/apple-reminders/open.png",
+  "sourceSha256": "dae6cb56c1ecdc5d41a3db23d4da82a67dd2ce831c6c3fe39e108f70a91d5484",
+  "settings": "copy",
+  "sha256": "dae6cb56c1ecdc5d41a3db23d4da82a67dd2ce831c6c3fe39e108f70a91d5484"
+ },
+ "open/gmail.png": {
+  "source": "resources/styles/builtin/assets/applets/gmail/open.png",
+  "sourceSha256": "5af305cbbea9eec0c11119f3487fe1d93958a7ebf88e166900639215691e191b",
+  "settings": "copy",
+  "sha256": "5af305cbbea9eec0c11119f3487fe1d93958a7ebf88e166900639215691e191b"
+ },
+ "open/google-calendar.png": {
+  "source": "resources/styles/builtin/assets/applets/google-calendar/open-v2.png",
+  "sourceSha256": "477c968ca83b1498b78d2bde2e059d326875214535678590c08fa2db6f0d55c3",
+  "settings": "copy",
+  "sha256": "477c968ca83b1498b78d2bde2e059d326875214535678590c08fa2db6f0d55c3"
+ },
+ "world/day.webp": {
+  "source": "resources/worlds/village/images/day-six-regions-sunburst-4k.png",
+  "sourceSha256": "aa1b454ae1e8104fac4401c01f40cdb35a3b92fb64caa2eb3cbe994cab7fe1d8",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "5add5153c97e3ce96a1bfd5a8cde2ba480d28fbab02cd20906d80854f5979ef8"
+ },
+ "world/night.webp": {
+  "source": "resources/worlds/village/images/night-six-regions-sunburst-4k.png",
+  "sourceSha256": "65a4de26e9cac6a4414bb46c8b99bec2c1d2f2ee5636a50fc1a55af6cb55813c",
+  "settings": "plate:webp-lossless-6",
+  "sha256": "2b073aa2e2173ff56db29069ab1378fc34680da97d1cfd974d0d3c44b6b010b0"
+ }
+}

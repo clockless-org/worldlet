@@ -38,14 +38,14 @@ async function prepareThemeAssets(id:string){
  }
  const payload=g.__WORLDLET_THEME_ASSETS__?.[id];if(!payload)throw Error('Theme assets missing');
  // Prepare every directly authored image, including transparent scenery planes and HUD.
- // Lazy Focus scripts and selected Attention illustrations keep their own loading contracts.
+ // Focus rooms load when their Applet opens; selected Attention illustrations keep their own loading contracts.
  const {world,environment:env}=payload,sources=new Set<string>();
  const add=(source:unknown)=>{if(typeof source==='string'&&source)sources.add(source);};
  const addMap=(map:Record<string,unknown>|undefined)=>Object.values(map||{}).forEach(add);
  [world.surroundings,world.night,world.hiresDay,world.hiresNight,env.companionPortrait,env.companionExpressions,env.companionSpriteRig?.image,env.surfaces?.startup].forEach(add);
  for(const map of [world.devices,world.open,world.mailParts,world.landmarks,world.landmarkNights,world.logos,world.motion,env.companionPainted,env.companionAnatomy,env.companionSpriteRig?.perches])addMap(map);
  for(const frames of Object.values<any>(world.motionFrames||{}))frames.forEach(add);
- for(const spec of [...(world.sceneryLayers||[]),...(world.studies||[]),...Object.values<any>(world.regions||{}),...Object.values<any>(world.focus||{}),...Object.values<any>(env.surfaces?.skin||{})])add(spec.image);
+ for(const spec of [...(world.sceneryLayers||[]),...(world.studies||[]),...Object.values<any>(world.regions||{}),...Object.values<any>(env.surfaces?.skin||{})])add(spec.image);
  for(const view of Object.values<any>(world.areaViews||{})){add(view.image);addMap(view.devices);}
  for(const src of sources){const image=new Image();image.src=src;try{await image.decode();}catch(error){throw Error('Theme artwork could not load. Try again.',{cause:error});}}
  await prepareThemeFonts(env.surfaces||null);
