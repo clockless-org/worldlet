@@ -4,7 +4,7 @@ import {createHash,generateKeyPairSync,sign} from 'node:crypto';
 import {mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {BUILD_OFFSET,channelKeys,devTests,githubStore,labelOf,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
+import {BUILD_OFFSET,channelKeys,devTests,fetchBuild,githubStore,labelOf,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
 
 // Build = offset + commit position; the label is the commit's Pacific day.
 const id=releaseIdentity(12,'2026-10-09T05:30:00Z');
@@ -63,7 +63,7 @@ await assert.rejects(publish({channel:'dev',platform:'mac',dir,live:true,store:s
 const dev=store();
 assert.equal((await publish({channel:'dev',platform:'mac',dir,live:true,store:dev,updates})).build,4012);
 const name=path.basename(dmg);
-assert.deepEqual(dev.writes,['ensure v2026.1008.4012','ensure channel-dev','v2026.1008.4012/'+name,'v2026.1008.4012/'+name+'.sha256','channel-dev/appcast-dev.xml']);
+assert.deepEqual(dev.writes,['ensure v2026.1008.4012','ensure channel-dev','v2026.1008.4012/'+name,'v2026.1008.4012/'+name+'.sha256','v2026.1008.4012/'+name+'.appcast.xml','v2026.1008.4012/'+name+'.release.json','channel-dev/appcast-dev.xml'],'the installer and its records go up before the feed');
 assert(dev.assets['channel-dev/appcast-dev.xml'].includes(url));
 const newer=store({'channel-alpha/appcast-alpha.xml':'<item><sparkle:version>4013</sparkle:version></item>'});
 assert.match((await publish({channel:'alpha',platform:'mac',dir,live:true,store:newer,updates})).skipped,/4013/);
@@ -88,14 +88,35 @@ assert.deepEqual(superseded.writes,[]);
  const digest=f=>createHash('sha256').update(readFileSync(f)).digest('hex');
  writeFileSync(exe+'.json',JSON.stringify({version:'2026.1008.4012',build:4012,sha256:digest(exe),googleSignIn:true}));
  const plain=store();await publish({channel:'dev',platform:'windows',dir:wdir,live:true,store:plain});
- assert.deepEqual(plain.writes.slice(2),['v2026.1008.4012/'+path.basename(exe),'v2026.1008.4012/'+path.basename(exe)+'.sha256','channel-dev/windows-dev.json'],'no Store MSIX: the installer alone');
+ assert.deepEqual(plain.writes.slice(2),['v2026.1008.4012/'+path.basename(exe),'v2026.1008.4012/'+path.basename(exe)+'.sha256','v2026.1008.4012/'+path.basename(exe)+'.json','v2026.1008.4012/'+path.basename(exe)+'.release.json','channel-dev/windows-dev.json'],'no Store MSIX: the installer and its records alone');
  const msix=exe.replace(/-unsigned\.exe$/,'-store.msix');writeFileSync(msix,'store package bytes');
  writeFileSync(msix+'.json',JSON.stringify({build:4012,distributionChannel:'microsoft-store',sha256:digest(msix)}));
  const withStore=store();await publish({channel:'dev',platform:'windows',dir:wdir,live:true,store:withStore});
- assert.deepEqual(withStore.writes.slice(4),['v2026.1008.4012/'+path.basename(msix),'v2026.1008.4012/'+path.basename(msix)+'.json','channel-dev/windows-dev.json'],'the Store MSIX goes beside the installer, before the feed');
+ assert.deepEqual(withStore.writes.slice(6),['v2026.1008.4012/'+path.basename(msix),'v2026.1008.4012/'+path.basename(msix)+'.json','channel-dev/windows-dev.json'],'the Store MSIX goes beside the installer, before the feed');
  writeFileSync(msix,'other bytes');
  await assert.rejects(publish({channel:'dev',platform:'windows',dir:wdir,live:true,store:store()}),/Store MSIX differs/);
  rmSync(wdir,{recursive:true,force:true});
+}
+
+// Promotion takes a Build from its release, laid out as publish reads it; the release machines leave no workflow artifact.
+{
+ const name=path.basename(dmg),exe='Worldlet-2026.1008.4012-4012-windows-x64-unsigned.exe';
+ const all=[name,name+'.sha256',name+'.appcast.xml',name+'.release.json',exe,exe+'.sha256',exe+'.json',exe+'.release.json'];
+ const fake=(assets,tag='v2026.1008.4012')=>{const got=[];return {got,findBuild:async build=>build===4012?{tag,assets}:null,
+  download:async(t,n,out)=>{got.push(t+'/'+n+' > '+path.relative(fdir,out));writeFileSync(out,n);}};};
+ const fdir=mkdtempSync(path.join(os.tmpdir(),'ci-release-fetch-'));
+ const plain=fake(all);
+ assert.deepEqual(await fetchBuild({build:4012,dir:fdir,store:plain}),{tag:'v2026.1008.4012',mac:path.join(fdir,'mac'),windows:path.join(fdir,'windows')});
+ assert(plain.got.includes(`v2026.1008.4012/${name}.appcast.xml > ${path.join('mac','appcast.xml')}`),'the Sparkle item lands where publish reads it');
+ assert(plain.got.includes(`v2026.1008.4012/${exe}.release.json > ${path.join('windows','release.json')}`));
+ assert(plain.got.includes(`v2026.1008.4012/${exe}.json > ${path.join('windows',exe+'.json')}`));
+ assert.equal(plain.got.length,8,'no Store MSIX when it did not build');
+ const store=exe.replace(/-unsigned\.exe$/,'-store.msix'),withStore=fake([...all,store,store+'.json']);
+ await fetchBuild({build:4012,dir:fdir,store:withStore});
+ assert.equal(withStore.got.length,10,'the Store MSIX and its record when they built');
+ await assert.rejects(fetchBuild({build:4012,dir:fdir,store:fake(all.filter(n=>!n.endsWith('.appcast.xml')))}),/appcast\.xml/,'a Build published without its records is refused');
+ await assert.rejects(fetchBuild({build:4013,dir:fdir,store:fake(all)}),/No release for Build 4013/);
+ rmSync(fdir,{recursive:true,force:true});
 }
 
 // The GitHub store: reads only listed assets, never replaces an installer with other bytes, tolerates a parallel create.
@@ -125,12 +146,13 @@ assert.deepEqual(devTests([job('Static checks','completed','failure'),job('Fast 
 
 // The workflow: never on pull requests, secrets only in jobs of the protected `release` environment on main.
 const workflow=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');
-// Nothing cancels a running build: each platform's build waits in its own group, where a newer push replaces only a
-// waiting build (2026-10-09: whole-run cancelling starved Mac Dev for over an hour).
-assert(!/cancel-in-progress: (true|\$\{\{)/.test(workflow),'no run or build is cancelled once it runs; promotions are never cancelled');
-for(const [platform,group] of [['mac','release-dev-mac'],['windows','release-dev-windows']])
- assert(new RegExp(`\\n  ${platform}:\\n(?:    .*\\n)*?    concurrency:\\n      group: ${group}\\n      cancel-in-progress: false\\n`).test(workflow),`${platform}: one build at a time, the newest waiting`);
+// Promotions are never cancelled, and push runs (the Dev tests) are not grouped.
+assert(!/cancel-in-progress: (true|\$\{\{)/.test(workflow),'no run is cancelled once it runs; promotions are never cancelled');
 assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow),'release.yml never runs for pull requests');
+// The release machines build the Dev packages (owner decision 2026-10-10): GitHub's runners build none, by push or by hand.
+assert(!/runs-on: (macos|windows)-/.test(workflow)&&!/ci-build\.sh|windows\.ts installer|upload-artifact/.test(workflow),'no package is built here');
+assert(/options: \[alpha, beta\]/.test(workflow),'a manual run only promotes');
+assert(/node scripts\/ci-release\.mjs fetch --build "\$BUILD" --dir dist\/ci/.test(workflow),'a promotion takes the Build from its release');
 const jobs=workflow.split(/\n  (?=[a-z][\w-]*:\n)/).slice(1);
 for(const job of jobs){
  const name=job.split(':')[0];
@@ -138,6 +160,4 @@ for(const job of jobs){
 }
 assert(/if: github\.repository == 'clockless-org\/worldlet' && github\.ref == 'refs\/heads\/main'/.test(workflow),'only clockless-org/worldlet main releases');
 assert(/worldlet\/\$CHANNEL-\$platform/.test(workflow)&&/for platform in mac windows/.test(workflow),'a promotion requires both release machines to have passed the channel\'s tests');
-assert.equal((workflow.match(/node scripts\/ci-release\.mjs analytics/g)||[]).length,2,'both platform builds carry the PostHog key');
-assert.equal((workflow.match(/secrets\.POSTHOG_PROJECT_KEY != ''/g)||[]).length,2,'no build without the PostHog key');
 console.log('ci-release checks passed');

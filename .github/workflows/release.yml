@@ -1,10 +1,11 @@
 name: Release
 run-name: ${{ github.event_name == 'push' && format('Dev · {0}', github.event.head_commit.message) || format('{0} {1}', inputs.channel, inputs.build) }}
-# Desktop releases (docs/RELEASING.md). Every push to main runs the Dev tests, builds a signed, numbered Mac and Windows
-# build and, once the tests passed, publishes it on this repository's GitHub Releases to the Dev channel; a manual run
-# promotes a Dev build's exact bytes to Alpha or Beta once the release machines passed that channel's tests. Nothing here runs
-# for pull requests: signing and publishing secrets live only in the protected `release` environment, which only main
-# can use. Pull request CI stays in architecture.yml (Linux only). Only clockless-org/worldlet releases: forks and the
+# Desktop releases (docs/RELEASING.md). Every push to main runs the Dev tests. The release machines 01 (Windows) and 02
+# (Mac) build the signed, numbered Dev packages themselves and publish them to this repository's releases once a
+# commit's Dev tests passed; GitHub's runners build no package (owner decision 2026-10-10). A manual alpha or beta run
+# promotes a Dev build's exact bytes, taken from its release, once the release machines passed that channel's tests.
+# Nothing here runs for pull requests: publishing runs only in the protected `release` environment, which only main can
+# use. Pull request CI stays in architecture.yml (Linux only). Only clockless-org/worldlet releases: forks and the
 # operations repository, which imports this tree, skip every job.
 on:
   push:
@@ -15,29 +16,24 @@ on:
   workflow_dispatch:
     inputs:
       channel:
-        description: 'dev builds this commit; alpha or beta promotes an existing build'
+        description: 'The channel to promote a Dev build to'
         type: choice
-        options: [dev, alpha, beta]
-        default: dev
+        options: [alpha, beta]
+        default: alpha
       build:
-        description: 'Build to promote (alpha or beta), for example 4012'
-        required: false
+        description: 'Build to promote, for example 4012'
+        required: true
 permissions:
   contents: read
-# Dev packages the newest commit (owner decision 2026-10-09), and a Mac or Windows build that has started runs to the
-# end. Each platform's build job has its own concurrency group: one build runs, the newest push's build waits, and a
-# newer push replaces an older waiting build (never a running one). Until 2026-10-09 a newer push cancelled the whole
-# older run; that afternoon ten merges in 52 minutes cancelled every Mac build (about 15 minutes each) and Mac Dev stood
-# still for over an hour while Windows kept publishing. Push runs themselves are no longer grouped, so every push runs
-# its Dev tests (Linux, about two minutes). Publishing never replaces a newer Build in a channel, and installers go up
-# before feeds. Promotions (alpha, beta) are never cancelled: each runs to the end in turn.
+# Push runs are not grouped, so every push runs its Dev tests (Linux, about two minutes). Promotions are never cancelled:
+# each runs to the end in turn. Publishing never replaces a newer Build in a channel, and installers go up before feeds.
 concurrency:
   group: release-${{ github.event_name == 'push' && format('push-{0}', github.run_id) || inputs.channel }}
   cancel-in-progress: false
 jobs:
   identity:
     name: Identity
-    if: github.repository == 'clockless-org/worldlet' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || inputs.channel == 'dev')
+    if: github.repository == 'clockless-org/worldlet' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -58,7 +54,7 @@ jobs:
         run: node scripts/ci-release.mjs identity --count "$(git rev-list --count HEAD)" --committed-at "$(git log -1 --format=%cI HEAD)"
 
   # The Dev tests (owner decision 2026-10-09): the pull request checks again, on Linux, within five minutes, the pull request UI checks included.
-  # The builds start beside them and publish only once they passed; a failure opens an Issue for the cloud fixers.
+  # The release machines publish a commit's packages only once they passed; a failure opens an Issue for the cloud fixers.
   checks:
     name: Dev tests
     needs: identity
@@ -94,237 +90,11 @@ jobs:
             --jq '[.jobs[] | select((.name | startswith("Dev tests / ")) and .conclusion != "success" and .conclusion != "skipped") | .name | ltrimstr("Dev tests / ")] | join(",")')"
           node scripts/ci-failure-report.mjs --stage dev --platform linux --job "${{ needs.checks.result }}" --failed "$failed" --sha "$GITHUB_SHA" --run "$RUN"
 
-  # Until the release secrets are set, the builds are skipped instead of failing every push to main.
-  ready:
-    name: Secrets
-    needs: identity
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    environment: release
-    outputs:
-      mac: ${{ steps.check.outputs.mac }}
-      windows: ${{ steps.check.outputs.windows }}
-    steps:
-      - id: check
-        env:
-          MAC: ${{ secrets.POSTHOG_PROJECT_KEY != '' && secrets.MAC_CERTIFICATE_P12 != '' && secrets.MAC_CERTIFICATE_PASSWORD != '' && secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.SPARKLE_PRIVATE_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
-          WINDOWS: ${{ secrets.POSTHOG_PROJECT_KEY != '' && secrets.GOOGLE_OAUTH_CLIENT_JSON != '' }}
-        run: |
-          echo "mac=$MAC" >> "$GITHUB_OUTPUT"
-          echo "windows=$WINDOWS" >> "$GITHUB_OUTPUT"
-          [[ $MAC == true ]] || echo '::warning::Release secrets are missing in the release environment (docs/RELEASING.md); the Mac build is skipped.'
-          [[ $WINDOWS == true ]] || echo '::warning::POSTHOG_PROJECT_KEY or GOOGLE_OAUTH_CLIENT_JSON is missing in the release environment; the Windows build is skipped.'
-
-  mac:
-    name: Mac
-    needs: [identity, ready]
-    concurrency:
-      group: release-dev-mac
-      cancel-in-progress: false
-    if: needs.ready.outputs.mac == 'true'
-    runs-on: macos-15
-    timeout-minutes: 120
-    environment: release
-    permissions:
-      contents: write
-      actions: read
-    env:
-      VERSION: ${{ needs.identity.outputs.version }}
-      BUILD: ${{ needs.identity.outputs.build }}
-      BUILT_AT: ${{ needs.identity.outputs.builtAt }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: '22.22.1'
-          cache: npm
-      # Chromium (CEF) archives, the browser driver, imsg, uv and the DMG tools, keyed by their pins.
-      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: |
-            ~/Library/Caches/WorldletBuild
-            .local/browser-driver
-            .local/imsg
-            .local/bootstrap
-            .local/dmg-tools
-            .local/sparkle
-          key: mac-build-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'scripts/package-agent-browser.ts', 'scripts/package-imsg.ts', 'scripts/bundle-hermes-bootstrap.py', 'scripts/sparkle-tools.ts') }}
-          restore-keys: mac-build-
-      - run: npm ci
-      - name: Signing keychain and keys
-        env:
-          MAC_CERTIFICATE_P12: ${{ secrets.MAC_CERTIFICATE_P12 }}
-          MAC_CERTIFICATE_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
-          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
-          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
-          GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON }}
-          POSTHOG_PROJECT_KEY: ${{ secrets.POSTHOG_PROJECT_KEY }}
-        run: |
-          set -euo pipefail
-          umask 077
-          node scripts/ci-release.mjs analytics
-          KEYS="$RUNNER_TEMP/release-keys"; mkdir -p "$KEYS"
-          KEYCHAIN="$KEYS/release.keychain-db" PASSWORD="$(openssl rand -hex 24)"
-          security create-keychain -p "$PASSWORD" "$KEYCHAIN"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN"
-          security unlock-keychain -p "$PASSWORD" "$KEYCHAIN"
-          printf '%s' "$MAC_CERTIFICATE_P12" | base64 --decode > "$KEYS/certificate.p12"
-          security import "$KEYS/certificate.p12" -k "$KEYCHAIN" -P "$MAC_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-          rm -f "$KEYS/certificate.p12"
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$PASSWORD" "$KEYCHAIN" >/dev/null
-          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
-          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)"
-          [[ -n "$IDENTITY" ]] || { echo 'MAC_CERTIFICATE_P12 holds no Developer ID Application identity.' >&2; exit 1; }
-          echo "::add-mask::$IDENTITY"
-          printf '%s' "$APPLE_API_KEY_P8" > "$KEYS/notary.p8"
-          printf '%s' "$SPARKLE_PRIVATE_KEY" > "$KEYS/sparkle.key"
-          [[ -z "$GOOGLE_OAUTH_CLIENT_JSON" ]] || printf '%s' "$GOOGLE_OAUTH_CLIENT_JSON" > "$KEYS/google-oauth-client.json"
-          node scripts/ci-release.mjs manifest --version "$VERSION" --build "$BUILD" --built-at "$BUILT_AT" --sha "$GITHUB_SHA" --out "$KEYS/release.json"
-          {
-            echo "WORLDLET_SIGN_IDENTITY=$IDENTITY"
-            echo "WORLDLET_RELEASE_MANIFEST=$KEYS/release.json"
-            echo "WORLDLET_SPARKLE_KEY_FILE=$KEYS/sparkle.key"
-            echo "NOTARY_KEY_FILE=$KEYS/notary.p8"
-            [[ -z "$GOOGLE_OAUTH_CLIENT_JSON" ]] || echo "WORLDLET_GOOGLE_CLIENT_FILE=$KEYS/google-oauth-client.json"
-          } >> "$GITHUB_ENV"
-      - name: Build, sign and notarize
-        env:
-          NOTARY_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          NOTARY_ISSUER: ${{ secrets.APPLE_API_ISSUER_ID }}
-        run: bash platform/electron/distribution/mac/ci-build.sh
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: worldlet-mac-${{ env.BUILD }}
-          path: dist/ci/mac/
-          retention-days: 30
-          compression-level: 0
-      - name: Wait for the Dev tests
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/ci-release.mjs dev-tests
-      - name: Publish to Dev
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/ci-release.mjs publish --channel dev --platform mac --dir dist/ci/mac
-      - name: Remove the keychain and keys
-        if: always()
-        run: |
-          security delete-keychain "$RUNNER_TEMP/release-keys/release.keychain-db" 2>/dev/null || true
-          rm -rf "$RUNNER_TEMP/release-keys"
-
-  windows:
-    name: Windows
-    needs: [identity, ready]
-    concurrency:
-      group: release-dev-windows
-      cancel-in-progress: false
-    if: needs.ready.outputs.windows == 'true'
-    runs-on: windows-2025
-    timeout-minutes: 90
-    environment: release
-    permissions:
-      contents: write
-      actions: read
-    defaults:
-      run:
-        shell: bash
-    env:
-      VERSION: ${{ needs.identity.outputs.version }}
-      BUILD: ${{ needs.identity.outputs.build }}
-      BUILT_AT: ${{ needs.identity.outputs.builtAt }}
-      WORLDLET_SETUP_PYTHON: python
-      WORLDLET_TARGET_PLATFORM: windows
-    steps:
-      # The build packages the repository's LF line endings (shell scripts included), as on the Windows release host.
-      - run: git config --global core.autocrlf false
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: '22.22.1'
-          cache: npm
-      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: |
-            ~/AppData/Local/WorldletBuild
-            .local/browser-driver
-            .local/bootstrap
-            .local/tools
-          key: windows-build-${{ hashFiles('platform/web-engine/cef.json', 'package-lock.json', 'scripts/package-agent-browser.ts', 'scripts/bundle-hermes-windows.py') }}-nsis-3.12
-          restore-keys: windows-build-
-      - run: npm ci
-      # The installer needs exactly NSIS 3.12 (scripts/windows-installer.ts checks makensis /VERSION).
-      - name: NSIS 3.12
-        run: |
-          set -euo pipefail
-          if [[ ! -x .local/tools/nsis-3.12/makensis.exe ]]; then
-            mkdir -p .local/tools
-            curl -fsSL --retry 3 -o "$RUNNER_TEMP/nsis.zip" 'https://downloads.sourceforge.net/project/nsis/NSIS%203/3.12/nsis-3.12.zip'
-            unzip -q "$RUNNER_TEMP/nsis.zip" -d .local/tools
-          fi
-          # -VERSION, not /VERSION: Git Bash rewrites a leading slash into a Windows path.
-          .local/tools/nsis-3.12/makensis.exe -VERSION
-      - name: Release identity and keys
-        env:
-          GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT_JSON }}
-          POSTHOG_PROJECT_KEY: ${{ secrets.POSTHOG_PROJECT_KEY }}
-        run: |
-          set -euo pipefail
-          node scripts/ci-release.mjs analytics
-          KEYS="$RUNNER_TEMP/release-keys"; mkdir -p "$KEYS"
-          node scripts/ci-release.mjs manifest --version "$VERSION" --build "$BUILD" --built-at "$BUILT_AT" --sha "$GITHUB_SHA" --out "$KEYS/release.json"
-          echo "WORLDLET_RELEASE_MANIFEST=$KEYS/release.json" >> "$GITHUB_ENV"
-          if [[ -n "$GOOGLE_OAUTH_CLIENT_JSON" ]]; then
-            printf '%s' "$GOOGLE_OAUTH_CLIENT_JSON" > "$KEYS/google-oauth-client.json"
-            echo "WORLDLET_GOOGLE_CLIENT_FILE=$KEYS/google-oauth-client.json" >> "$GITHUB_ENV"
-          fi
-      - name: Build the installer
-        run: |
-          set -euo pipefail
-          node scripts/windows.ts installer
-          mkdir -p dist/ci/windows
-          cp dist/windows-installers/Worldlet-*-windows-x64-unsigned.exe* "$WORLDLET_RELEASE_MANIFEST" dist/ci/windows/
-          ls -l dist/ci/windows
-      # The Microsoft Store MSIX of the same commit, published beside the installer; release machine 01 submits it in
-      # Partner Center once the Build reaches Beta. A failed Store package never holds the installer back.
-      - name: Build the Store package
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          WORLDLET_DISTRIBUTION_CHANNEL=microsoft-store node scripts/windows.ts package
-          sdk="$(ls -d '/c/Program Files (x86)/Windows Kits/10/bin/'10.*/x64 | sort -V | tail -1)"
-          WORLDLET_WINDOWS_SDK_BIN="$(cygpath -m "$sdk")" node scripts/windows-msix.ts
-          msix="$(ls -t dist/windows-msix/store-*.msix | head -1)"
-          exe="$(basename dist/ci/windows/Worldlet-*-windows-x64-unsigned.exe)"
-          cp "$msix" "dist/ci/windows/${exe%-unsigned.exe}-store.msix"
-          cp "$msix.json" "dist/ci/windows/${exe%-unsigned.exe}-store.msix.json"
-          ls -l dist/ci/windows
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: worldlet-windows-${{ env.BUILD }}
-          path: dist/ci/windows/
-          retention-days: 30
-          compression-level: 0
-      - name: Wait for the Dev tests
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/ci-release.mjs dev-tests
-      - name: Publish to Dev
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/ci-release.mjs publish --channel dev --platform windows --dir dist/ci/windows
-      - name: Remove the keys
-        if: always()
-        run: rm -rf "$RUNNER_TEMP/release-keys"
-
   # Alpha or Beta: the named Dev build's exact bytes, no rebuild. On live Beta its release v<label> becomes the
   # repository's latest release.
   promote:
     name: Promote
-    if: github.repository == 'clockless-org/worldlet' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.channel != 'dev'
+    if: github.repository == 'clockless-org/worldlet' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: release
@@ -355,13 +125,18 @@ jobs:
         with:
           node-version: '22.22.1'
       - run: npm ci --ignore-scripts
+      # The release machines upload each Build's installers with their records to its release v<label>. Builds made here
+      # before 2026-10-10 have no records there and come from their Actions artifacts (kept 30 days).
       - name: Download the build
         run: |
           set -euo pipefail
+          node scripts/ci-release.mjs fetch --build "$BUILD" --dir dist/ci && exit 0
+          echo "Build $BUILD has no records on its release; trying its Actions artifacts."
           for platform in mac windows; do
             name="worldlet-$platform-$BUILD"
             run="$(gh api "repos/$GH_REPO/actions/artifacts?name=$name&per_page=1" --jq '.artifacts[0].workflow_run.id // empty')"
-            [[ -n "$run" ]] || { echo "No $platform artifact for Build $BUILD (artifacts are kept 30 days)." >&2; exit 1; }
+            [[ -n "$run" ]] || { echo "No $platform package for Build $BUILD." >&2; exit 1; }
+            rm -rf "dist/ci/$platform"
             gh run download "$run" -n "$name" -D "dist/ci/$platform"
           done
       # Only a Build whose commit passed this channel's tests on both release machines leaves Dev: Alpha's on 01 and 02,
