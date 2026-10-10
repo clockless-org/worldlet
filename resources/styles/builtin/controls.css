@@ -259,7 +259,7 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console[data-talk=speaking] .companion-speech-button.companion-speech-button{animation:talk-speaking 1.6s ease-in-out infinite}
 @keyframes talk-speaking{50%{box-shadow:0 0 0 9px #e3b04b26,var(--system-glass-shadow)}}
 @media (prefers-reduced-motion:reduce){#notionWorld.native-console[data-talk=speaking] .companion-speech-button.companion-speech-button{animation:none}}
-/* The wake word ("Hey Fox", platform modules/media/wake.ts): while it listens, a small lantern light sits on the
+/* The wake word ("Hey Fox", platform modules/voice/wake.ts): while it listens, a small lantern light sits on the
    microphone's shoulder, beside the system's own microphone indicator. */
 #notionWorld.native-console[data-wake=listening] .companion-speech-button.companion-speech-button{position:relative}
 #notionWorld.native-console[data-wake=listening] .companion-speech-button.companion-speech-button::after{content:"";position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:#ffd27a;box-shadow:0 0 0 1px #00000040,0 0 6px #ffd27acc;pointer-events:none}

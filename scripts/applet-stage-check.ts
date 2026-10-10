@@ -86,7 +86,12 @@ await withBrowser(fileAccess,async browser=>{
   await page.locator(itemSelector).first().click();
   if(key==='gmail')await page.locator('.mail-paper').waitFor();
   await page.getByText('The complete original from this Mac.').waitFor();
-  if(key!=='gmail')assert.ok(Math.abs((await stage()).foregroundWidth-view.foregroundWidth)<1,'Open and Focus keep device scale');
+  // The narrow-window step above resizes the World back to 1280 px; the device settles on the World's next frames.
+  if(key!=='gmail'){
+   await page.waitForFunction(width=>Math.abs(document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.presentation.foregroundWidth-width)<1,view.foregroundWidth,{timeout:5000}).catch(()=>{});
+   const now=(await stage()).foregroundWidth;
+   assert.ok(Math.abs(now-view.foregroundWidth)<1,'Open and Focus keep device scale: '+JSON.stringify({open:view.foregroundWidth,focus:now}));
+  }
   await page.locator('.pixi-applet-stage').waitFor({state:'hidden'});
   await page.locator('.pixi-selected-item').waitFor({state:key==='gmail'?'hidden':'visible'});
   assert.equal(await page.locator('.pixi-selected-item strong').textContent(),selectedTitle,'Focus preserves the selected Open item');

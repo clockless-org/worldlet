@@ -48,6 +48,7 @@
     "reportException",
     "phonePublish",
     "foxEnergy",
+    "foxRoutines",
     "foxProactive",
     "foxProactiveShown",
     "foxBrowse"

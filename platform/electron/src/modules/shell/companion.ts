@@ -170,12 +170,13 @@ export class DesktopCompanion implements DesktopCompanionService {
    this.panel?.contentView.removeChildView(view);
    view.setBackgroundColor(WORLD_BACKGROUND);
    world.contentView.addChildView(view);
-   // The last frame stays above the returning view until the page has painted the whole World again.
+   // The last frame stays above the returning view until the page has painted the whole World again
+   // (worldletRestoreWorld waits for the World's own frames, up to 1.5 s).
    const backdrop=this.backdrop;this.backdrop=null;
    if(backdrop){
     world.contentView.addChildView(backdrop);
     const remove=()=>{try{world.contentView.removeChildView(backdrop);}catch{}};
-    void Promise.race([this.host.page.call('worldletRestoreWorld').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,500))]).then(remove);
+    void Promise.race([this.host.page.call('worldletRestoreWorld').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,2000))]).then(remove);
    }
    const [width,height]=world.getContentSize();
    view.setBounds({x:0,y:0,width,height});

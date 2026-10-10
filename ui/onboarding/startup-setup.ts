@@ -70,6 +70,18 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // and setup looks again.
  const onConnectRequest=()=>{if(!disposed)void detectAgents();};
  window.addEventListener('worldlet:connect-agent',onConnectRequest);
+ // The short turn that proves the chosen Agent answers runs after setup moves on (`checkLater`): a half-minute cold start
+ // for a large Hermes Agent no longer holds the button. If it fails while that Agent is still the one being set up, the
+ // person is back on the first half with the reason, as when the check held the button.
+ let checkStarted=0;
+ const onAgentCheck=(event:Event)=>{
+  const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.ok!==false||detail.id!==draft.agent)return;
+  productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
+  delete draft.agent;delete draft.agentName;draft.connected=false;step=0;notice='';
+  error=String(detail.message||'').slice(0,300);
+  persist();render();
+ };
+ window.addEventListener('worldlet:agent-check',onAgentCheck);
  const languages=['en','zh','ja','es'];
  const systemLanguage=navigator.language.split('-')[0];
  const key=(move?'worldlet-agent-move:':'worldlet-startup-setup:')+state.workspaceId;
@@ -121,7 +133,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   try{
    // The host proves the Agent answers before Fox uses it; a failure leaves the person on the first half.
    let chosen;
-   try{chosen=await call('agentHarness',{operation:'select',id:agent.id,...move?{direct:true}:{}});}
+   try{checkStarted=started;chosen=await call('agentHarness',{operation:'select',id:agent.id,checkLater:true,...move?{direct:true}:{}});}
    catch(e){productEvent('local_agent_select_failed',{local_agent:agent.id,error_code:failureCode(e)},timingBucket(performance.now()-started));throw e;}
    await call('foxPreferences',{cloudConsent:true});
    // Back then the same Agent again shows what already came over instead of reading it again (owner request
@@ -286,7 +298,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(!ready())throw Error('Connect Google to enter your world.');
   if(move){
    const snapshot=await call('snapshot');
-   localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);
+   localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('worldlet:agent-check',onAgentCheck);
    loader.classList.add('setup-entering');
    document.dispatchEvent(new Event('worldlet:setup-complete'));
    await complete(snapshot);
@@ -338,12 +350,16 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    return copy.animate([{left:x+'px',top:y+'px',opacity:visible?1:0,transform:'translate(-50%,-50%) scale(1)'},{left:targetX+'px',top:targetY+'px',opacity:1,transform:'translate(-50%,-50%) scale(.85)'}],{duration:still?0:650,easing:'cubic-bezier(.22,.7,.2,1)',fill:'forwards'}).finished;
   });
   loader.classList.add('is-gathering');await Promise.all([...flights,foxFlight]);
-  // What came along drifts down into Fox, one after another; Fox brightens a little as each arrives.
+  // What came along drifts down into Fox, one after another; Fox brightens a little as each arrives. Routines run on
+  // their own, so they go to the World's top-right instead, where background work shows (owner request 2026-10-10).
+  const corner=(document.querySelector('.fox-routines:not([hidden])')||document.querySelector('.notion-top .world-environment'))?.getBoundingClientRect();
+  const cornerX=corner&&corner.width?corner.right-24:innerWidth-56,cornerY=corner&&corner.height?corner.top+24:48;
   await Promise.all(parcels.map(async (parcel,i)=>{
-   const r=parcel.getBoundingClientRect(),dx=foxX-(r.left+r.width/2),dy=foxY-(r.top+r.height/2),delay=still?0:i*110;
+   const toCorner=parcel.classList.contains('setup-tile-routines');
+   const r=parcel.getBoundingClientRect(),dx=(toCorner?cornerX:foxX)-(r.left+r.width/2),dy=(toCorner?cornerY:foxY)-(r.top+r.height/2),delay=still?0:i*110;
    await parcel.animate([{transform:'none',opacity:1},{transform:`translate(${dx*.55}px,${dy*.55}px) scale(.45)`,opacity:.9,offset:.6},{transform:`translate(${dx}px,${dy}px) scale(.04)`,opacity:0}],{duration:still?0:620,delay,easing:'cubic-bezier(.55,0,.35,1)',fill:'forwards'}).finished;
    parcel.remove();
-   if(!still)fox.animate([{filter:'brightness(1)'},{filter:'brightness(1.25) drop-shadow(0 0 14px #ffe4a0)'},{filter:'brightness(1)'}],{duration:320});
+   if(!still&&!toCorner)fox.animate([{filter:'brightness(1)'},{filter:'brightness(1.25) drop-shadow(0 0 14px #ffe4a0)'},{filter:'brightness(1)'}],{duration:320});
   }));
   // Let the user see each familiar flat icon become its actual device before opening.
   await Promise.all(Array.from(gathering.querySelectorAll<HTMLImageElement>('img')).map(async (logo,i)=>{
@@ -361,7 +377,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    ]);logo.remove();
   }));
   gathering.id='setupArrivingDevices';document.body.append(gathering);
-  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);
+  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('worldlet:agent-check',onAgentCheck);
   // Keep the final setup surface until the first world frame is ready.
   loader.classList.add('setup-entering');
   document.dispatchEvent(new Event('worldlet:setup-complete'));

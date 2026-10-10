@@ -31,12 +31,13 @@ await withBrowser(fileAccess,async browser=>{
  assert(await page.locator('.companion-pet').isVisible(),'Cancelled capture restores live Fox');
  const painted=await page.evaluate(async()=>{
   const w=window as any;w.worldletDesktopCompanion(true);
+  const frames=()=>(document.querySelector('#notionWorld') as any).sceneMetrics.performance.frames;
   let resolved=false;const ready=w.worldletRestoreWorld().then(()=>resolved=true);
-  const worldVisible=!document.documentElement.classList.contains('desktop-companion');
+  const worldVisible=!document.documentElement.classList.contains('desktop-companion'),from=frames();
   await new Promise(requestAnimationFrame);const firstFramePending=!resolved;
-  await ready;return {worldVisible,firstFramePending,resolved};
+  await ready;return {worldVisible,firstFramePending,resolved,worldDrew:frames()>=from+2};
  });
- assert.deepEqual(painted,{worldVisible:true,firstFramePending:true,resolved:true},'World restore waits beyond DOM changes for a paint opportunity');
+ assert.deepEqual(painted,{worldVisible:true,firstFramePending:true,resolved:true,worldDrew:true},'World restore waits beyond DOM changes until the World itself has drawn again');
  const entry=page.locator(SETTINGS_BUTTON),type=page.locator('#notionInput'),mic=page.locator('.companion-speech-button'),controls=page.locator('.companion-controls>button:visible:not(.companion-order-button,.companion-speech-button)'),form=page.locator('#notionCommand'),panel=page.locator('#companionInfo');
  const typing=()=>page.evaluate(()=>(document.querySelector('.notion-world') as HTMLElement).dataset.entryExpanded==='true');
  // One message bar under Fox (owner decision 2026-10-04): the field and Send, the microphone on its right (2026-10-07); the settings button beside Fox opens the panel.

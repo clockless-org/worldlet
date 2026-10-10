@@ -8,7 +8,8 @@ import path from 'node:path';
 import {build} from 'esbuild';
 import {withTempDir} from './test-temp.ts';
 const windows=process.platform==='win32';
-// Local tools need an absolute Python; on Windows, the installation behind `python3` (the gate's shim).
+// Local tools need an absolute Python; on Windows, the installation behind `python3` (the gate's shim). The fake profile
+// still names its folders: Windows places the tools Python under the profile's root (media/local-tools.ts).
 const python=process.env.WORLDLET_TOOLS_PYTHON||(windows?execFileSync('python3',['-c','import os,sys;print(os.path.join(sys.base_prefix,"python.exe"))'],{encoding:'utf8'}).trim():'/usr/bin/python3');
 await withTempDir('worldlet-codex-stream-',async dir=>{
  const codex=windows?path.join(dir,'fake','Scripts','codex.exe'):path.join(dir,'codex');
@@ -30,7 +31,7 @@ for line in sys.stdin:
  await mkdir(path.join(dir,'local-tools'));
  for(const name of ['codex_sessions.py','sessions.py','json_rpc_process.py','async_stdio.py'])await copyFile(path.join('platform/local-tools',name),path.join(dir,'local-tools',name));
  await writeFile(path.join(dir,'main.ts'),`import {CodexSessions} from ${JSON.stringify(path.resolve('platform/electron/src/modules/applet-tools/coding.ts'))};
-const host:any={profile:{webRoot:${JSON.stringify(dir)}},optional:()=>undefined};
+const host:any={profile:{root:${JSON.stringify(dir)},webRoot:${JSON.stringify(dir)}},optional:()=>undefined};
 const connection=new CodexSessions(host);let ticks=0,longestGap=0,previous=performance.now();
 const heartbeat=setInterval(()=>{const now=performance.now();longestGap=Math.max(longestGap,now-previous);previous=now;ticks+=1;},10);
 // The first read also starts Python and the fake Codex, which a loaded host slows by seconds
