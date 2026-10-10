@@ -8,7 +8,7 @@ import {pathToFileURL,fileURLToPath} from 'node:url';
 // host, and every host gates test:electron (host contract, module checks, app smoke). The Mac also gates
 // test:harness (the Harness handshake). Worldlet has no built-in Hermes since the owner decisions of 2026-10-09,
 // so no gate prepares or tests one.
-export const sharedGates=['check','check:docs','check:source','check:style','test:ci','test','test:harness:portable','test:ui'];
+export const sharedGates=['check','check:docs','check:source','check:style','test:ci','test','test:harness:portable','test:ui:smoke','test:ui'];
 // test:onboarding runs the whole first-run journey on the Mac release host before shipping.
 // test:onboarding:paths walks the other first-run paths through a local Agent (a fixture OpenClaw at least): quit mid-setup
 // and resume, Mail's Google sign-in, Reset Fox, Quit Completely with nothing left running (#1492). It is no RC gate
@@ -45,6 +45,14 @@ export const afterBesideGates=['test:ui:review'];
 // stayed "running" past a two-minute wait (Mac RCs 2963, 2965, 2968, 2971).
 export const besideAfter={'test:ci':'test:ui','test:ios':'test:ui','test:android':'test:ui'};
 export function gateCommands(platform=process.platform){return [...sharedGates,...(platformGates[platform]||[])];}
+// Only these gates hold back Alpha and Beta (owner decision 2026-10-10: the interface still changes a lot, so a release
+// waits only on smoke checks). The app starts (test:electron), the World draws, Fox answers and an Applet opens
+// (test:ui:smoke), first-run setup reaches the World (test:onboarding, Mac) and Fox answers through a real local Agent
+// (test:agent:local). The release machines add the installed-package smoke (it opens and updates) and, for Beta, the
+// one-line install. Every other gate still runs and reports: a failure opens its Issue to be fixed, but the platform is
+// promoted. The release machines read this list from main, so it applies to builds made before it changed too.
+export const blockingGates=['test:electron','test:ui:smoke','test:onboarding','test:agent:local'];
+export const blocks=command=>blockingGates.includes(command);
 // One part of the gate (the CI RC splits it over several runners to stay within 30 minutes): WORLDLET_GATE_ONLY names
 // the gates to run, WORLDLET_GATE_SKIP the ones to leave to another part. A name this platform's gate lacks is an error.
 export function gatePart(commands,{only=process.env.WORLDLET_GATE_ONLY,skip=process.env.WORLDLET_GATE_SKIP}={}){
@@ -71,8 +79,10 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   if(r.error?.code==='ETIMEDOUT'){console.error(`${command} stopped: the gate's ${budget} minutes ran out.`);return {command,ok:false,timedOut:true};}
   return {command,ok:r.status===0&&!r.error};
  });
- console.log('\nGate ('+process.platform+'):\n'+results.map(r=>(r.ok?'PASS ':'FAIL ')+r.command).join('\n'));
+ const marked=results.map(r=>blocks(r.command)?r:{...r,advisory:true});
+ console.log('\nGate ('+process.platform+'):\n'+marked.map(r=>(r.ok?'PASS ':r.advisory?'FAIL (reports only) ':'FAIL ')+r.command).join('\n'));
  // The release machines read the outcome from this file to report a failure as an Issue (scripts/ci-failure-report.mjs).
- if(process.env.WORLDLET_GATE_RESULTS)writeFileSync(process.env.WORLDLET_GATE_RESULTS,JSON.stringify({platform:process.platform,results})+'\n');
- if(results.some(r=>!r.ok))process.exitCode=1;
+ if(process.env.WORLDLET_GATE_RESULTS)writeFileSync(process.env.WORLDLET_GATE_RESULTS,JSON.stringify({platform:process.platform,results:marked})+'\n');
+ // Only a smoke gate fails the gate; the others' failures are reported above.
+ if(marked.some(r=>!r.ok&&!r.advisory))process.exitCode=1;
 }

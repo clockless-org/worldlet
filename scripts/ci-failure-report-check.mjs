@@ -25,6 +25,11 @@ const detailed=issueBody({stage:'alpha',platform:'mac',failing:['test:ui'],signa
 assert.match(detailed,/<details open><summary>test:ui<\/summary>\n\n```text\nAssertionError \[ERR_ASSERTION\][\s\S]*\+ actual - expected[\s\S]*x-check\.ts:12:8[\s\S]*\n```\n<\/details>/);
 assert.ok(!/<details/.test(issueBody({stage:'alpha',platform:'mac',failing:['test:ui'],signature:'test:ui',sha:'abc',runURL:'r'})),'no section without details');
 assert.match(issueBody({stage:'alpha',platform:'mac',...withError,sha:'abc',runURL:'r'}),/- `npm run test:onboarding`: FAIL onboarding flow: missing the 'Hermes' runtime\n/);
+// A gate that only reports (scripts/gate.mjs blockingGates) still opens its Issue, marked as not holding the release.
+const reportsOnly=outcome({job:'success',results:{results:[{command:'test:ui:review',ok:false,advisory:true},{command:'test:ui:smoke',ok:true}]}});
+assert.deepEqual(reportsOnly,{state:'fail',failing:['test:ui:review'],signature:'test:ui:review',advisory:['test:ui:review']});
+assert.match(issueBody({stage:'beta',platform:'mac',...reportsOnly,sha:'abc',runURL:'r'}),/- `npm run test:ui:review` \(reports only\)\n\nThese checks only report: the Beta release on mac was not held back by them\./);
+assert.ok(!/only report/.test(issueBody({stage:'beta',platform:'mac',failing:['test:ui:review','test:ui:smoke'],signature:'s',sha:'abc',runURL:'r',advisory:['test:ui:review']})),'a smoke failure held the release');
 
 // A machine may run a platform's gate in parts; the report joins one platform's parts and leaves the other's.
 {

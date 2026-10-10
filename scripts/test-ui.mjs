@@ -80,6 +80,8 @@ export const parallelChecks=available([
  'scripts/website-matching-check.ts','scripts/tennis-demo-check.ts',
  // Browser checks no net ran until check-reach looked past scripts/*-check.{ts,mjs,py} (2026-10-04).
  'scripts/dev-build-ui-check.ts',
+ // The UI smoke check (smokeChecks below) runs with the rest too.
+ 'scripts/smoke-ui-check.ts',
 ]);
 // Alone, after the pool: they judge rendering against the wall clock, and the pool's browsers
 // competing for CPU and GPU could make them miss a frame or a deadline.
@@ -134,6 +136,9 @@ export const prChecks=quickChecks.filter(c=>[
  'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',
  'scripts/meetings-check.ts',
 ].includes(c));
+// The smoke set (`npm run test:ui:smoke`, owner decision 2026-10-10): the only UI checks that hold back Alpha and Beta
+// (scripts/gate.mjs blockingGates). The World draws, Fox answers, an Applet opens; nothing about how they look.
+export const smokeChecks=['scripts/smoke-ui-check.ts'];
 // Windows release host 01 is slower: four browsers at once pushed world startup past a check's
 // 15-30 s waits (fox-mac-controls, voice-memos). Two at a time took 12.5 minutes on 01, most of a
 // Windows RC; the owner asked for three (2026-10-01, #1099).
@@ -232,5 +237,5 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const browser=await fallbackBrowser();
  if(browser&&!process.env.WORLDLET_TEST_BROWSER){process.env.WORLDLET_TEST_BROWSER=browser;console.log('test:ui: Playwright\'s Chromium is not installed; the checks use '+browser);}
  const only=onlyArgument();
- process.exitCode=await testUi(shardChecks(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):process.argv.includes('--pr')?onlyChecks(prChecks.join(',')):{parallel:parallelChecks,serial:serialChecks}));
+ process.exitCode=await testUi(shardChecks(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):process.argv.includes('--smoke')?onlyChecks(smokeChecks.join(',')):process.argv.includes('--pr')?onlyChecks(prChecks.join(',')):{parallel:parallelChecks,serial:serialChecks}));
 }
