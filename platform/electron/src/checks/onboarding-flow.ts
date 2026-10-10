@@ -179,6 +179,8 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // alone; Esc ends it. It waits while Fox works, so allow for a turn still finishing.
  await wait('the Tutorial switch in the corner, off',"(()=>{const b=document.querySelector('.world-environment .world-tutorial[aria-checked=false]');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
  await step('hello',120);
+ // A key reaches the page only while it has keyboard focus, which another window on the test computer can take.
+ web.focus();
  web.sendInputEvent({type:'keyDown',keyCode:'Escape'});web.sendInputEvent({type:'keyUp',keyCode:'Escape'});
  await wait('the replay ends on Esc',"document.querySelector('#notionWorld')?.dataset.tourStep===undefined&&document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined",10);
  if(store.state.onboarding?.journeyStage!=='finish')throw Error('Replaying the tour moved the journey: '+(store.state.onboarding?.journeyStage??'none'));

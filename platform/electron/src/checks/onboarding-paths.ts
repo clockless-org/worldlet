@@ -69,9 +69,10 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   for(let i=0;i<50&&store.state.onboarding?.journeyStage!=='finish';i++)await sleep(200);
   if(store.state.onboarding?.journeyStage!=='finish')throw Error('Turning the Tutorial switch off did not finish the journey: '+(store.state.onboarding?.journeyStage??'none'));
  };
- // Agent detection is done once a tile is choosable or marked missing (ui/onboarding/startup-setup.ts).
+ // Agent detection is done once the loading cards are gone and a tile is choosable or marked missing
+ // (ui/onboarding/startup-setup.ts): while it runs, More options already lists every Agent as missing.
  const available="[...document.querySelectorAll(':is(.setup-agent-default,.setup-agent-button):not(.is-missing)')].filter(b=>!b.disabled).map(b=>b.dataset.agent)";
- const detected=`(${available}.length>0||!!document.querySelector('.setup-agent-button.is-missing'))`;
+ const detected=`(!document.querySelector('.setup-agent-cards.is-loading')&&(${available}.length>0||!!document.querySelector('.setup-agent-button.is-missing')))`;
  const quitCompletely=async(what:string)=>{
   // The menu item a person picks (app menu, Dock and tray menus share app.quit()).
   const find=(items:MenuItem[]):MenuItem|undefined=>{for(const item of items){if(item.label==='Quit Completely')return item;const inner=item.submenu&&find(item.submenu.items);if(inner)return inner;}return undefined;};

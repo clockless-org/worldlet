@@ -56,7 +56,8 @@ export async function setupOptions({host,view}:CheckContext){
   const live=['gmail','google-calendar'].filter(provider=>store.state.connections.some((c:any)=>c.provider===provider));
   if(live.length!==2)throw Error('mock Google reached Enter your world without Mail and Calendar connected: '+JSON.stringify(store.state.connections.map((c:any)=>c.provider)));
  }else{
-  await wait('local Agent detection',`(${available}.length>0||!!document.querySelector('.setup-agent-button.is-missing'))`,90);
+  // Done once the loading cards are gone: while detection runs, More options lists every Agent as missing.
+  await wait('local Agent detection',`(!document.querySelector('.setup-agent-cards.is-loading')&&(${available}.length>0||!!document.querySelector('.setup-agent-button.is-missing')))`,90);
   const found=await js(available) as string[];
   if(!found.includes(agent)){
    if(agent==='codex'){console.log('SKIP setup options codex: Codex is not installed where Worldlet looks for it');return;}
