@@ -228,8 +228,17 @@ export async function desktopCompanion(companion:DesktopCompanionService,window:
  if(window.contentView.children.includes(view))throw Error('the World view stayed in the closed World window instead of moving to the Companion');
  mark('closing the World window left Fox on the desktop');
  await onDesktop?.();
+ const frames=()=>view.webContents.executeJavaScript("document.querySelector('#notionWorld')?.sceneMetrics?.performance?.frames??null",false).catch(()=>null) as Promise<number|null>;
+ const before=await frames();
  await companion.restoreWorld();
  for(let i=0;i<50&&!(window.isVisible()&&!companion.isDesktop);i++)await sleep(200);
  if(companion.isDesktop||!window.isVisible()||!window.contentView.children.includes(view))throw Error(`Back to World did not bring the World window back (${JSON.stringify({desktop:companion.isDesktop,worldVisible:window.isVisible()})})`);
+ // The World stops drawing while Fox is on the desktop; back in its window it draws again (Mac Alpha 4132, #182: the
+ // last picture showed the bare sky and labels without the World's art).
+ if(typeof before==='number'){
+  let after=await frames();
+  for(let i=0;i<25&&!(typeof after==='number'&&after>=before+2);i++){await sleep(200);after=await frames();}
+  if(!(typeof after==='number'&&after>=before+2))throw Error(`Back to World showed the window but the World did not draw again (frames ${before} → ${after})`);
+ }
  mark('Back to World restored the World window');
 }
