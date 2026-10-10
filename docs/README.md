@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **265 Markdown documents** and **43 supporting documentation files**.
+Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -61,7 +61,7 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 24 |
-| Resource and artwork records | 67 |
+| Resource and artwork records | 68 |
 | Module and service documentation | 33 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 43 |
@@ -251,7 +251,7 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (67)</summary>
+<details><summary>Resource and artwork records (68)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -316,6 +316,7 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 - [resources/styles/builtin/references/youtube-web/README.md](../resources/styles/builtin/references/youtube-web/README.md)
 - [resources/themes/CONTRACT.md](../resources/themes/CONTRACT.md)
 - [resources/themes/README.md](../resources/themes/README.md)
+- [resources/themes/village/art/README.md](../resources/themes/village/art/README.md)
 - [resources/worlds/README.md](../resources/worlds/README.md)
 - [resources/worlds/village/README.md](../resources/worlds/village/README.md)
 - [resources/worlds/village/drafts/six-regions/README.md](../resources/worlds/village/drafts/six-regions/README.md)
