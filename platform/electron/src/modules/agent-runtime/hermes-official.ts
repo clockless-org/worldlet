@@ -86,14 +86,14 @@ export async function signInHermes(install:LocalHarnessInstall,environment:Harne
   if(run.code!==0)throw new WorldletError(`Hermes Agent could not use ChatGPT: ${(run.stderr.trim().split('\n').pop()||'its settings did not change').slice(0,300)}`);
  };
  await set('model.provider','openai-codex');
- const models=await acpModels(install,environment);
+ const models=await hermesSessionModels(install,environment);
  const model=hermesChatGptModel(models.current,models.available);
  if(!model)throw new WorldletError('Hermes Agent lists no ChatGPT model. Choose one with `hermes model` in Terminal, then try again.');
  if(models.current!=='openai-codex:'+model)await set('model.default',model);
 }
 
 /** The models a new `hermes acp` session offers (ACP `session/new` `models`) and the current one. */
-function acpModels(install:LocalHarnessInstall,environment:HarnessEnvironment):Promise<{current:unknown;available:unknown[]}> {
+export function hermesSessionModels(install:LocalHarnessInstall,environment:HarnessEnvironment):Promise<{current:unknown;available:unknown[]}> {
  return new Promise((resolve,reject)=>{
   const child=spawn(install.command,[...install.prefix,'acp'],{env:harnessEnvironment(install,environment),cwd:environment.home||undefined,stdio:['pipe','pipe','ignore'],windowsHide:true});
   let buffer='',settled=false;

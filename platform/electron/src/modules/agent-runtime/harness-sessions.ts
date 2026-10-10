@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {WORLD_TOOL_SERVER,acpApprovalOutcome,acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,isHarnessModelId,usageSince,acpChangesAsked,acpChangesUpdate,approvalChanges,changesAnswered,changesAsked,isHarnessAgentId,acpApprovalRequest,harnessSessionName,openClawApprovalFor,openClawApprovalRequest,openClawChangesEvent,openClawConnect,openClawDecision,openClawDeviceProof,
+import {hermesRequestModel,WORLD_TOOL_SERVER,acpApprovalOutcome,acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,isHarnessModelId,usageSince,acpChangesAsked,acpChangesUpdate,approvalChanges,changesAnswered,changesAsked,isHarnessAgentId,acpApprovalRequest,harnessSessionName,openClawApprovalFor,openClawApprovalRequest,openClawChangesEvent,openClawConnect,openClawDecision,openClawDeviceProof,
  harnessTurnText,openClawResponsesBody,openClawSessionIs,openClawUserInput,readOpenClawFrame,hermesAcpAnnouncement,readResponsesChunk,remoteGatewaySocketUrl,responsesBody,responsesStream,type ApprovalChanges,type HermesAnnouncedCall,type ResponsesTool,type ResponsesTurn} from '../../../../../core/agent/index.ts';
 import {worldGatewayTools} from '../../../../../core/tools/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest,HarnessApprovalResult,HarnessApprovals,HarnessConversation,HarnessModel,HarnessSession,HarnessSessionKey,HarnessTurnEvent,HarnessTurnInput,HarnessUsage} from '../../../../../contracts/harness-services.ts';
@@ -537,7 +537,7 @@ export class GatewayConversation implements ResidentConversation {
  }
  /** The headers that name a turn's session, agent and model: OpenClaw's `x-openclaw-*`. */
  turnHeaders(session:string,agent:string|null,model:string|null):Record<string,string> {return {'x-openclaw-session-key':session,...agent?{'x-openclaw-agent-id':agent}:{},...model?{'x-openclaw-model':model}:{}};}
- turnBody(turn:ResponsesTurn,agent:string|null):Record<string,unknown> {return openClawResponsesBody({...turn,agent});}
+ turnBody(turn:ResponsesTurn,agent:string|null,_model:string|null=null):Record<string,unknown> {return openClawResponsesBody({...turn,agent});}
  /** The Gateway refused a request: check it again before the next turn. */
  failed(){this.checked=0;}
  forget(session:GatewaySession){if(this.sessions.get(session.name)===session)this.sessions.delete(session.name);}
@@ -572,7 +572,7 @@ class GatewaySession implements ResidentSession {
    for(let round=0;round<TOOL_ROUNDS;round++){
     const response=await fetch(this.owner.url('/v1/responses'),{method:'POST',signal:controller.signal,redirect:'error',
      headers:this.owner.headers({'content-type':'application/json',accept:'text/event-stream',...this.owner.turnHeaders(this.name,agent,model)}),
-     body:JSON.stringify(this.owner.turnBody({input:items,instructions:input.instructions,tools,previous},agent))});
+     body:JSON.stringify(this.owner.turnBody({input:items,instructions:input.instructions,tools,previous},agent,model))});
     if(!response.ok){
      let detail='';try{const body=await response.json();detail=typeof body?.error?.message==='string'?body.error.message:'';}catch{}
      throw new WorldletError(detail?`${this.owner.title} could not answer: ${detail.slice(0,300)}`:`${this.owner.title}'s Gateway answered ${response.status}.`);
@@ -629,7 +629,9 @@ export class HermesServerConversation extends GatewayConversation {
  override readonly clientTools=false;
  constructor(title:string,server:()=>GatewaySettings,own:OwnSession=()=>{},timeoutMs=1500){super(title,server,own,timeoutMs);this.approvals?.close();this.approvals=null;}
  override turnHeaders(session:string):Record<string,string> {return {'X-Hermes-Session-Key':session};}
- override turnBody(turn:ResponsesTurn):Record<string,unknown> {return responsesBody(turn);}
+ /** A chosen model ("provider:model", model-providers.ts) goes as the explicit `provider` and `model` its API server
+  * honours for one request (gateway/platforms/api_server.py `_request_agent_overrides`); its own default otherwise. */
+ override turnBody(turn:ResponsesTurn,_agent:string|null=null,model:string|null=null):Record<string,unknown> {return {...responsesBody(turn),...hermesRequestModel(model)};}
  override async unavailable(){
   if(Date.now()-this.checked<30_000)return null;
   const {port,secret,worldTools}=this.gateway();

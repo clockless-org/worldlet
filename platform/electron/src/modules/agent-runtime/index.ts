@@ -11,12 +11,16 @@ import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './herm
 import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {moveFoxProfile} from './fox-move.ts';
-import {endHermesInstall,installHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
+import {endHermesInstall,hermesSessionModels,installHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
+import {openSignIn} from './provider-sign-in.ts';
+import {codexHome} from './agent-files.ts';
+import {parseJSON5} from './openclaw-files.ts';
+import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
-import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,readSelection,selectedInstall,writeSelection} from './local-harness.ts';
+import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
-import {connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {PROVIDER_SETTING,agentProviders,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
@@ -34,6 +38,21 @@ import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../source
 import {McpAccounts} from '../sources/mcp-account.ts';
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../sources/mcp-source.ts';
 import {DoorDash,DoorDashSourceAccess} from '../sources/doordash.ts';
+
+/** Which providers `install` is signed in to, as the Agent itself says (null: it does not say): Hermes Agent lists them
+ * in a new ACP session, OpenClaw names their models in openclaw.json; Codex is signed in to ChatGPT when it has a
+ * sign-in; Claude Code answers on its own Anthropic sign-in. */
+async function providerSignIns(install:LocalHarnessInstall):Promise<ModelProviderId[]|null> {
+ const environment=currentEnvironment();
+ if(install.id==='codex')return fs.existsSync(path.join(codexHome(environment.home,environment.env),'auth.json'))?['chatgpt']:[];
+ if(install.id==='claude-code')return ['anthropic'];
+ let listed:{id:string}[]=[];
+ try{
+  if(install.id==='hermes')listed=(await hermesSessionModels(install,environment)).available.filter((id):id is string=>typeof id==='string').map(id=>({id}));
+  if(install.id==='openclaw')listed=openClawModels(parseJSON5(fs.readFileSync(openClawConfigFile(environment),'utf8')));
+ }catch{return null;}
+ return signedInProviders(install.id,listed);
+}
 
 /** Selects the Agent adapter at launch (Mac AgentRuntimeProvider): WORLDLET_AGENT_CONFIG names an
  * external Harness; otherwise the Agent on another computer this Worldlet is paired with (`remote`);
@@ -326,6 +345,31 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id,error=>context.failure(error,'foxMove'));
    await switchTo(adapter);
    return {ok:true,id:install.id,title:install.title,...connect?{connected:true}:{}};
+  }
+  // The provider Fox's Agent answers with (core/agent/model-providers.ts): `providers` lists the ones it supports, which
+  // it is signed in to and the chosen one; `provider` chooses one (null: the Agent's own default); `provider-sign-in`
+  // opens the Agent's own sign-in for one in Terminal.
+  if(request.operation==='providers'){
+   const install=selectedInstall(context.root);
+   if(!install||remote?.paired||gateway()?.active)return {agent:null,providers:[],chosen:null};
+   const signedIn=await providerSignIns(install);
+   return {agent:install.id,title:install.title,chosen:readProviderChoices(readAgentSetting(context.root,PROVIDER_SETTING)).choices[install.id]??null,
+    providers:agentProviders(install.id).map(provider=>({id:provider.id,name:provider.name,account:provider.account,signedIn:signedIn?signedIn.includes(provider.id):null,signIn:providerSignIn(install.id,provider.id)!==null}))};
+  }
+  if(request.operation==='provider'){
+   const install=selectedInstall(context.root);
+   if(!install)throw new WorldletError('Choose an Agent first.');
+   const provider=request.id===null?null:isModelProviderId(request.id)?request.id:undefined;
+   if(provider===undefined)throw new WorldletError('Choose a provider.');
+   try{writeAgentSetting(context.root,PROVIDER_SETTING,chooseProvider(readAgentSetting(context.root,PROVIDER_SETTING),install.id,provider) as unknown as Row);}
+   catch(error){throw new WorldletError((error as Error).message);}
+   return {ok:true,chosen:provider};
+  }
+  if(request.operation==='provider-sign-in'){
+   const install=selectedInstall(context.root),args=install&&isModelProviderId(request.id)?providerSignIn(install.id,request.id):null;
+   if(!install||!args)throw new WorldletError('Sign in to this provider in your Agent.');
+   await openSignIn(install,args,file=>shell.openPath(file));
+   return {ok:true};
   }
   if(request.operation==='clear'){
    if(remote?.paired)await remote.end();
