@@ -23,7 +23,9 @@ assert.deepEqual(checkStep('scripts/x-check.ts',{}),{name:'scripts/x-check.ts',b
 assert.match(checkStep('scripts/x-check.ts',{WORLDLET_TEST_BROWSER:'/b/chromium'}).args[1],/^file:.*scripts\/test-browser-preload\.mjs$/,'the preload is a file URL, which Windows needs');
 assert.deepEqual(checkStep('scripts/x-check.py',{WORLDLET_TEST_BROWSER:'/b/chromium'}).args,['scripts/x-check.py'],'Python checks get no node preload');
 assert.equal(await fallbackBrowser({WORLDLET_TEST_BROWSER:'/b/chromium'}),'/b/chromium','a named browser wins');
-assert.equal(await fallbackBrowser({PLAYWRIGHT_BROWSERS_PATH:'/pw'},file=>file==='/pw/chromium'),'/pw/chromium','without Playwright\'s own Chromium the preinstalled one is used');
+// path.join gives the platform's separator, a backslash on Windows (Alpha 4096).
+{const preinstalled=path.join('/pw','chromium');
+ assert.equal(await fallbackBrowser({PLAYWRIGHT_BROWSERS_PATH:'/pw'},file=>file===preinstalled),preinstalled,'without Playwright\'s own Chromium the preinstalled one is used');}
 assert.equal(await fallbackBrowser({PLAYWRIGHT_BROWSERS_PATH:'/pw'},()=>true),null,'Playwright\'s own Chromium, when installed, is used');
 assert.equal(await fallbackBrowser({},()=>false),null,'no preinstalled Chromium: nothing changes');
 assert.equal(npmCli({npm_execpath:'/n/npm-cli.js'},f=>f==='/n/npm-cli.js'),'/n/npm-cli.js');assert.equal(npmCli({},()=>false),null);
