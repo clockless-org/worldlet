@@ -99,7 +99,7 @@ export function mountWorldAudio(call){
   void call('worldAudio',{operation:'presentation',track,active}).then(value=>{if(!disposed&&generation===presentationGeneration)render(value);}).catch(()=>{if(!disposed&&generation===presentationGeneration){lastPresentation='';status.textContent='Sound unavailable';}});
  };
  const sceneObserver=new MutationObserver(present);if(world)sceneObserver.observe(world,{attributes:true,attributeFilter:['data-sound-track']});
- const projectionEvents=['worldlet:theme','worldlet:app-active','worldlet:app-inactive','worldlet:desktop-companion','focus','blur'];
+ const projectionEvents=['worldlet:app-active','worldlet:app-inactive','worldlet:desktop-companion','focus','blur'];
  for(const event of projectionEvents)window.addEventListener(event,present);document.addEventListener('visibilitychange',present);
  call('worldAudio',{operation:'start'}).then(value=>{if(!disposed){render(value);present();}})
   .catch(()=>{status.textContent='Sound unavailable'});

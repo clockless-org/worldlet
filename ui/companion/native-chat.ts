@@ -144,7 +144,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  const themeName=()=>{const id=ACTIVE_THEME.pack.companion.id;return id==='fox'?'Fox':id[0].toUpperCase()+id.slice(1);};
  let companionName=themeName(),customCompanionName=false;
  const themeNameChanged=()=>{if(!customCompanionName)companionName=themeName();topic.textContent=companionName;topic.title=companionName;panel.setAttribute('aria-label',companionName+' reply');input.setAttribute('aria-label','Message '+companionName);};
- themeNameChanged();window.addEventListener('worldlet:theme',themeNameChanged);
+ themeNameChanged();
  const log=make('section','native-conversation');log.id='worldConversation';log.setAttribute('role','status');log.setAttribute('aria-label','Current reply');log.setAttribute('aria-live','polite');log.setAttribute('aria-atomic','true');log.tabIndex=0;
  window.addEventListener('worldlet:companion-appearance',(e: any)=>{const requested=String(e.detail?.name||'Fox').trim().slice(0,24);customCompanionName=requested!=='Fox';const name=customCompanionName?requested:themeName();companionName=name;panel.setAttribute('aria-label',name+' reply');input.setAttribute('aria-label','Message '+name);avatar.dataset.requestedPose=e.detail?.expression||'idle';});
  const replyNav=make('nav','companion-reply-nav');replyNav.setAttribute('aria-label','Browse guide pages');

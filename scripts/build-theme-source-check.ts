@@ -17,7 +17,8 @@ try{
  assert.throws(()=>parseBuildThemeManifest({...manifest,appletPages:'theme'}),/appletPages/);
  const source=path.join(tmp,'source'),consumer=path.join(tmp,'consumer');await fs.mkdir(path.join(source,'assets'),{recursive:true});await fs.mkdir(path.join(consumer,'ui'),{recursive:true});
  const write=async(id:string)=>{await fs.writeFile(path.join(source,'theme.json'),JSON.stringify({...manifest,id}));await fs.writeFile(path.join(source,'entry.ts'),`import type {BuildTheme} from '@worldlet/theme'; const theme:BuildTheme={contractVersion:2,id:'${id}',renderWorld:()=>({dispose(){},update(){},event(){return false;},anchor(){return null;},bounds(){return null;}}),renderApplet:()=>({dispose(){}})};export default theme;`);await fs.writeFile(path.join(source,'theme.css'),`:root{--theme-ink:#123456}`);};
- const presentation=JSON.parse(await fs.readFile(new URL('../ui/theme-packages/village-map/presentation.json',import.meta.url),'utf8'));
+ const presentation:any={tokens:{bodyFont:'Inter, system-ui, sans-serif',displayFont:'Georgia, serif',bodySize:16,titleSize:34,ink:'#203b30',paper:'#fff8e8',accent:'#315f48',focus:'#386747',radius:8,controlHeight:40},fonts:[],
+  fallback:{size:[1500,844],background:'assets/notes-scene.png',slots:{content:[.193,.205,.545,.552],header:[.208,.102,.53,.056]},hud:{top:[.015,.01,.97,.09],companion:[.81,.8,.175,.18],attention:'shared',today:'shared',dialog:'shared',speech:[.805,.12,.18,.56]}}};
  const scene={...presentation.fallback,background:'assets/test.txt'};presentation.world=scene;presentation.fallback=scene;presentation.applets={};presentation.fonts=[];delete presentation.icons;await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  assert.throws(()=>parseThemePresentation({...presentation,world:{...scene,slots:{content:[.9,0,.2,1]}}}),/bounded|content/);
  // HUD material and sound are optional; a malformed one fails before it is shown. The companion is not a theme's.

@@ -12,8 +12,7 @@ import {isDesktopCompanion} from './world-surface.ts';
 import {FOX_DEV_PREVIEW_EVENT} from './fox-dev-preview.ts';
 // The Rive Fox, with the painted Fox and then the expression atlas as fallbacks. No per-frame model calls.
 export function mountCompanionPortrait(host,options={}){
- let dispose=mountPortrait(host,options);const change=()=>{dispose();dispose=mountPortrait(host,options);};
- window.addEventListener('worldlet:theme',change);return ()=>{window.removeEventListener('worldlet:theme',change);dispose();};
+ return mountPortrait(host,options);
 }
 function mountPortrait(host,{bust=false}={}){
  const assets=(globalThis as any).__WORLDLET_ENV_ASSETS__||{};

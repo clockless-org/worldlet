@@ -4,14 +4,13 @@ A Theme Pack describes how Worldlet presents the shared product: where things ar
 how they move. It never owns data. Mail keeps its ID, accounts, messages and background tasks whatever
 room shows it; the person's area names, Applet membership and last use are the same in every theme.
 
-**Themes are packages of the one [Theme contract](CONTRACT.md).** Worldlet bundles every package in
-`ui/theme-packages/` (Village Map and Blueprint) beside the built-in default, Village, and Settings → Theme
-switches between them in one step, including an already opened Applet. A theme implements four parts: World,
+**Themes are packages of the one [Theme contract](CONTRACT.md).** Worldlet bundles one, the Village
+(`ui/theme-packages/village/`); there is no theme picker. A theme implements four parts: World,
 Applets, HUD look, and sound with event animations ([What a theme implements](CONTRACT.md#what-a-theme-implements)).
-The companion and the loading and first-use pages are not part of a theme. New themes are added there with `npm run theme:import`, not here.
+The companion and the loading and first-use pages are not part of a theme.
 
 The data-only ThemePack described below is the host's own look: Village's shared assets (companion rig, HUD
-material, sounds, world declarations) that every theme draws over. It is not a theme API and cannot be switched:
+material, sounds, world declarations) that every theme draws over. It is not a theme API:
 `ui/themes/theme-registry.ts` holds the one pack, and theme packages decide which theme is shown.
 
 ## The parts
@@ -64,15 +63,13 @@ so an IP collaboration and an original theme can be told apart.
 - **Slot placement is stored per theme.** Pinned places are indices into one theme's slots, so they are
   kept per theme (`ui/themes/theme-placements.ts`). Village keeps them in the layout's `pins`, as before
   themes existed; another theme's wait in `themePins`.
-- **A switch changes presentation only.** What is open, web sessions and background tasks stay. Theme
-  packages switch through `switchBuildTheme`; see [Switching themes](CONTRACT.md#switching-themes).
 - **Data only.** A pack is JSON validated by `ui/themes/theme-pack.ts`; paths stay inside the repository.
   The renderer half (camera, light, ambient motion) is trusted code registered per theme in
   `ui/world/theme-scene.ts`.
 
 ## Pack fields
 
-New themes are [theme packages](CONTRACT.md#adding-a-theme). The fields below describe the host's pack.
+Themes are [theme packages](CONTRACT.md). The fields below describe the host's pack.
 
 A theme can register `applets.deviceEffects[deviceImagePath]` against each original image, including
 Area-specific replacements. `lamp` gives the normalized center and radii of its runtime signal;
