@@ -1,10 +1,10 @@
 import {APP_DEFINITIONS} from '../../core/applets/index.ts';
 import {WORLD_WIDTH,WORLD_HEIGHT} from './world-design.ts';
 import {BUILTIN_STYLE,BUILTIN_STYLE_REF} from '../components/index.ts';
-import {ACTIVE_THEME,onThemeApplied} from '../themes/index.ts';
+import {ACTIVE_THEME} from '../themes/index.ts';
 import {parseWorldPack} from './world-pack.ts';
 // The active theme's space (ui/themes): its areas, slots, camera frame and HUD-safe areas.
-export let THEME_WORLD=parseWorldPack(ACTIVE_THEME.world);
+export const THEME_WORLD=parseWorldPack(ACTIVE_THEME.world);
 // One order for rendering, pin indices, drag targets and the resident shelf:
 // rear row left-to-right, then front row left-to-right. Never mutate the pack.
 const orderedSlots=(slots:typeof THEME_WORLD.areas[number]['slots'])=>[...slots].sort((a,b)=>a.anchor[1]-b.anchor[1]||a.anchor[0]-b.anchor[0]);
@@ -25,7 +25,6 @@ function layout(){return {
  worldSlots:{}
 };}
 export const WORLD_LAYOUT=layout();
-onThemeApplied(()=>{THEME_WORLD=parseWorldPack(ACTIVE_THEME.world);Object.assign(WORLD_LAYOUT,layout());Object.defineProperty(WORLD_LAYOUT.regions,'people',{value:WORLD_LAYOUT.regions.travel,enumerable:false});});
 
 // Legacy Explore links/catalog entries resolve to the riverside Explore court (pack id `tools`).
 Object.defineProperty(WORLD_LAYOUT.regions,'people',{value:WORLD_LAYOUT.regions.travel,enumerable:false});

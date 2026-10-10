@@ -5,7 +5,6 @@ import {readFile,writeFile,mkdir,copyFile} from 'node:fs/promises';
 import path from 'node:path';
 import {UI_TOKENS,uiTokenCSS} from '../ui/components/tokens.ts';
 import {BUILTIN_STYLE} from '../ui/components/style.ts';
-import {THEMES} from '../ui/themes/index.ts';
 export async function buildUI(root,output){
  // Every bundled theme package: its own stylesheet (theme-<id>.css) and assets (theme-assets/<id>/).
  const themes=await buildThemeSource(root,output);
@@ -14,8 +13,8 @@ export async function buildUI(root,output){
  const layers=await Promise.all(['foundations','components','layout','states','hud'].map(async n=>`@layer ${n}{\n${await readFile(path.join(root,'ui/components',n+'.css'),'utf8')}
 ${n==='components'?(await Promise.all([...['youtube','stripe','weather','moment','ongoing'].map(key=>key+'/panel.css'),'_shared/games.css'].map(file=>readFile(path.join(root,'ui/applets',file),'utf8')))).join('\n'):''}\n}`));
  const builtinControls='resources/styles/builtin/controls.css';
- // Each other registered theme's controls (Village's are the built-in layer below), then the surfaces every theme can paint (ui/themes/theme-surfaces.css).
- const themeControls=(await Promise.all([...THEMES.values()].filter(t=>t.pack.hud.controls!==builtinControls).map(t=>readFile(path.join(root,t.pack.hud.controls),'utf8')))).join('\n')+'\n'+await readFile(path.join(root,'ui/themes/theme-surfaces.css'),'utf8')+'\n'+await readFile(path.join(root,'ui/themes/build-theme.css'),'utf8');
+ // The surfaces a theme can paint (ui/themes/theme-surfaces.css); the host's controls are the layer below.
+ const themeControls=await readFile(path.join(root,'ui/themes/theme-surfaces.css'),'utf8')+'\n'+await readFile(path.join(root,'ui/themes/build-theme.css'),'utf8');
  const controls=await readFile(path.join(root,builtinControls),'utf8');
  await writeFile(path.join(output,'worldlet-ui.css'),`@layer legacy,foundations,components,layout,states,hud,controls;\n@layer legacy{${legacy}}\n@layer foundations{${uiTokenCSS()}}\n${layers.join('\n')}\n@layer controls{${controls}}\n${await readFile(path.join(root,'ui/attention/attention-preview.css'),'utf8')}\n${themeControls}`);
  await mkdir(path.join(output,'hud'),{recursive:true});

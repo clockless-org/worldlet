@@ -1,4 +1,4 @@
-import {THEMES,validateSceneMotion,type SceneMotion} from '../themes/index.ts';
+import {ACTIVE_THEME,validateSceneMotion,type SceneMotion} from '../themes/index.ts';
 export type {SceneMotion} from '../themes/index.ts';
 // Data-only portable world packages; never execute code from a world archive.
 export type WorldPoint=[number,number];
@@ -53,7 +53,7 @@ export function parseWorldPack(value:unknown):WorldPack {
  requireValid(/^[a-z][a-z0-9-]*$/.test(p.id),'id');
  requireValid(typeof p.title==='string'&&p.title.length>0,'title');
  requireValid(/^\d+\.\d+\.\d+$/.test(p.version),'version');
- requireValid([...THEMES.values()].some(t=>t.pack.style.id===p.style?.id&&t.pack.style.version===p.style?.version),'registered style');
+ requireValid(ACTIVE_THEME.pack.style.id===p.style?.id&&ACTIVE_THEME.pack.style.version===p.style?.version,'registered style');
  requireValid(p.artStatus==='draft'||p.artStatus==='approved','art review status');
  requireValid(p.canvas?.coordinates==='normalized'&&p.canvas.origin==='top-left','coordinate system');
  requireValid(Number.isInteger(p.canvas.width)&&Number.isInteger(p.canvas.height)&&p.canvas.width>0&&p.canvas.height>0,'canvas dimensions');

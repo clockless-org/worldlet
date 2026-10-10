@@ -5,7 +5,7 @@ import {attentionPictureFits,attentionPreviewData,attentionSourceImage,safeAtten
 import {attentionSceneArt} from './scene-art.ts';
 import {attentionTimeRows,attentionGroupWhen,attentionTimeline} from './time.ts';
 import {modelMarkdown,uiIcon} from '../components/index.ts';
-import {ACTIVE_THEME,attentionPicture,onThemeApplied} from '../themes/index.ts';
+import {ACTIVE_THEME,attentionPicture} from '../themes/index.ts';
 const make=(tag:string,cls:string,text?:string)=>{const el=document.createElement(tag);el.className=cls;if(text)el.textContent=text;return el;};
 type ImageLookup=(url:string)=>Promise<{image?:string}|null>;
 let imageLookup:ImageLookup|null=null;
@@ -47,8 +47,6 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
    };probe.src=image;
   }).catch(()=>{});
  };
- // Preserve the selected finding, actions and focus while its presentation changes.
- onThemeApplied(refreshArt);
  const heading=make('div','attention-preview-heading');heading.append(category,title);hero.append(heading);
  const when=make('div','attention-preview-when'),date=make('span','attention-preview-date'),clock=make('span','attention-preview-clock'),age=make('span','attention-preview-age');const timeIcon=make('span','attention-preview-location-icon');timeIcon.innerHTML=uiIcon('clock');when.append(timeIcon,date,clock,age);
  const summary=make('div','attention-preview-summary'),venue=make('div','attention-preview-venue');

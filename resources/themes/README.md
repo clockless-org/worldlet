@@ -10,9 +10,9 @@ switches between them in one step, including an already opened Applet. A theme i
 Applets, HUD look, and sound with event animations ([What a theme implements](CONTRACT.md#what-a-theme-implements)).
 The companion and the loading and first-use pages are not part of a theme. New themes are added there with `npm run theme:import`, not here.
 
-The data-only ThemePack described below is the internal record of Village's shared built-in assets
-(companion rig, HUD material, sounds, world declarations). It is not a theme API: only Village is
-registered, and it does not decide which theme is shown. The Hogwarts theme was removed on 2026-10-06.
+The data-only ThemePack described below is the host's own look: Village's shared assets (companion rig, HUD
+material, sounds, world declarations) that every theme draws over. It is not a theme API and cannot be switched:
+`ui/themes/theme-registry.ts` holds the one pack, and theme packages decide which theme is shown.
 
 ## The parts
 
@@ -64,44 +64,15 @@ so an IP collaboration and an original theme can be told apart.
 - **Slot placement is stored per theme.** Pinned places are indices into one theme's slots, so they are
   kept per theme (`ui/themes/theme-placements.ts`). Village keeps them in the layout's `pins`, as before
   themes existed; another theme's wait in `themePins`.
-- **A switch changes presentation only.** What is open, web sessions and background tasks stay.
-  `switchTheme` prepares the target first; if preparing or applying fails, the current theme stays and
-  nothing is saved (`worldlet-theme-v1`). Theme packages switch through `switchBuildTheme` instead; see
-  [Switching themes](CONTRACT.md#switching-themes).
-  Preparation decodes the directly bundled scene images: all day/night depth planes, landmarks,
-  devices and their motion frames, Area and Focus art, Mail parts, companion paintings/perches,
-  event artwork and HUD skins. It also loads the display and label fonts before changing the live
-  theme. Repeated image/font references share the preparation, and a failed font can retry.
-  A slow decode leaves the previous scene in place. Village's lazy web-Focus scripts and selected
-  Attention illustrations retain their own on-demand loading and fallback behavior.
+- **A switch changes presentation only.** What is open, web sessions and background tasks stay. Theme
+  packages switch through `switchBuildTheme`; see [Switching themes](CONTRACT.md#switching-themes).
 - **Data only.** A pack is JSON validated by `ui/themes/theme-pack.ts`; paths stay inside the repository.
   The renderer half (camera, light, ambient motion) is trusted code registered per theme in
   `ui/world/theme-scene.ts`.
 
-## Coverage
+## Pack fields
 
-Village is the reference look: every part another theme does not draw itself shows Village's.
-`ui/themes/theme-coverage.ts` reports the same four parts (World; Applets; HUD look; sound and event animations),
-each gathered from its surfaces (world plates, zoomed areas, ambient motion and transitions; Applet devices, rooms,
-inner surfaces (Mail's included); HUD material and colors, fonts, the world log and Attention art; event cues and
-sound), and computes, from the pack itself, whether each part is the theme's **own**, **partial** (some surfaces
-borrowed, repeated art, recolored Village parts, a plate too small to zoom) or **village**. The companion and the
-loading and first-use pages are not counted: they are not a theme's to replace.
-
-Each theme other than Village keeps `coverage.json`, the parts it still borrows. `scripts/theme-pack-check.ts`
-fails when the computed coverage and that record disagree, so a gap is never silent and closing one updates
-the record. `npm run theme:coverage [id]` prints the report.
-
-## Adding a ThemePack (legacy)
-
-New themes are [theme packages](CONTRACT.md#adding-a-theme). The steps below only apply to the internal data-only record.
-
-1. Add `resources/themes/<id>/theme.json`, its world package under `resources/worlds/` and its Style Pack.
-2. Register it in `ui/themes/theme-registry.ts`, with `prepare` (fetch and decode its art) and
-   `loadRoom` (per-room lazy loading; Village ships every room in its first payload, so both resolve at once).
-3. Register its scene adapters in `ui/world/theme-scene.ts`.
-4. Write its `coverage.json` from `npm run theme:coverage <id>`. Extend `scripts/theme-pack-check.ts`; `npm run test:core` runs it. Add a focused browser check to
-   `scripts/test-ui.mjs`.
+New themes are [theme packages](CONTRACT.md#adding-a-theme). The fields below describe the host's pack.
 
 A theme can register `applets.deviceEffects[deviceImagePath]` against each original image, including
 Area-specific replacements. `lamp` gives the normalized center and radii of its runtime signal;
