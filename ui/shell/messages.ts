@@ -1,4 +1,4 @@
-import {conversationCallBrief} from '../../core/ongoing/index.ts';
+import {conversationCallBrief} from '../../core/tasks/index.ts';
 
 // One Messages conversation (or a new message): its recent words, the files in it and a box to write in.
 // New messages arrive while it is open. Only the person's Send click sends, through the Messages app on

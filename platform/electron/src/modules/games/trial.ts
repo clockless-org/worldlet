@@ -53,7 +53,7 @@ export function closeGameView(surface:Surface,view:WebContentsView){
 
 /** Plays the game for a few seconds out of sight: it must load, draw something and survive a few keys
  * and a click without a script error. Returns the problems for the model to fix (none when it passed).
- * Widgets (core/widgets) are tried the same way at phone size, with their own report reader and verdict. */
+ * Widgets (core/artifacts) are tried the same way at phone size, with their own report reader and verdict. */
 export async function tryMadeGame(document:string,{width=900,height=600,read=readMadeGameReport,problems=madeGameTrialProblems}:{width?:number;height?:number;read?:(line:string)=>{error?:string}|null;problems?:typeof madeGameTrialProblems}={}):Promise<string[]> {
  const window=new BrowserWindow({show:false,width,height,webPreferences:{...gameWebPreferences(),offscreen:true}});
  const contents=window.webContents,errors:string[]=[];

@@ -1,5 +1,5 @@
 import getty from './ready/getty-center.ts';
-// Ready-made moment Applets (core/widgets/README.md#ready-made-applets): pages written and checked here, which Fox
+// Ready-made moment Applets (core/artifacts/README.md#ready-made-applets): pages written and checked here, which Fox
 // adds at once instead of writing one. Each is offered when the person's words name its place.
 export interface ReadyApplet {key:string;title:string;blurb:string;color:string;html:string;
  /** What it is for, as Fox's guidance names it. */

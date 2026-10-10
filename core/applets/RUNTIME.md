@@ -294,7 +294,7 @@ This snapshot distinguishes implementation from acceptance; historical progress 
 
 ### Current implementation gap and rollout
 
-Baseline inspected for this design: `f7686e54`. Source of truth was `core/applets/runtime.ts`, `core/scheduling/`, `core/attention/attention-center.ts`, the native Mac host's runtime, Attention Center, World interaction and Hermes worker, and [Attention jobs](../../contracts/HARNESS.md#bundled-attention-extension) for the Harness path. Their Electron owners are `platform/electron/src/modules/attention/center.ts`, `modules/attention/tools.ts` and `modules/agent-runtime/hermes-worker.ts`.
+Baseline inspected for this design: `f7686e54`. Source of truth was `core/applets/runtime.ts`, `core/tasks/`, `core/attention/attention-center.ts`, the native Mac host's runtime, Attention Center, World interaction and Hermes worker, and [Attention jobs](../../contracts/HARNESS.md#bundled-attention-extension) for the Harness path. Their Electron owners are `platform/electron/src/modules/attention/center.ts`, `modules/attention/tools.ts` and `modules/agent-runtime/hermes-worker.ts`.
 
 | Phase | Existing foundation | Required implementation and exit evidence |
 | --- | --- | --- |

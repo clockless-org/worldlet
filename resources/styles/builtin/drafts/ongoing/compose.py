@@ -1,4 +1,4 @@
-# The Ongoing Applet's device (core/ongoing/README.md): the painted screen stand of the dormant `things` Peek sprite,
+# The Ongoing Applet's device (core/tasks/README.md): the painted screen stand of the dormant `things` Peek sprite,
 # its frame repainted a sage green and its face redrawn as a conversation carried on: two speech bubbles over a
 # thread of days with the latest one lit. No image model was used and no third-party artwork was added. Run with
 # Pillow and NumPy:

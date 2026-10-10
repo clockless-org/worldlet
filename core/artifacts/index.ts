@@ -5,3 +5,7 @@ export type {DailyArtifactsState,DailyArtifactKind} from './daily.ts';
 export {PREPARED_REPLIES_PER_DAY,PREPARED_REPLY_RECENT_HOURS,PREPARED_REPLIES_WAITING,PREPARED_REPLY_SETTLE_MINUTES,FOX_WORK_DONE_SECONDS,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone} from './replies.ts';
 export type {PreparedRepliesState,BackgroundMoment,ReplyItem,ReplyCandidate,FoxWorkKind} from './replies.ts';
 export type {JournalEntry,JournalPage,Artifact,ArtifactFitStep,ArtifactKind,ArtifactSize,ArtifactChart,ArtifactOrigin,ArtifactAction,ArtifactBlock,ArtifactTone,ArtifactFactIcon,MadeArtifact} from './artifacts.ts';
+export {artifactPage,artifactPageBody} from './artifact-page.ts';
+export {READY_APPLETS,readyApplet,type ReadyApplet} from './ready.ts';
+export {WIDGET_APPLET,WIDGET_LIMITS,WIDGET_POLICY,WIDGET_REPORT,widgetId,validWidgetId,readWidgetData,widgetWithData,widgetEnd,widgetRecord,readWidget,widgetActive,orderWidgets,widgetHousekeeping,widgetUntil,readWidgetState,widgetValues,widgetStateChanges,mergeWidgetState,widgetDocument,readWidgetReport,readWidgetConsole,checkWidgetSource,widgetTrialProblems,widgetTask} from './widgets.ts';
+export type {Widget,WidgetData,WidgetState,WidgetStateEntry,WidgetSeed} from './widgets.ts';

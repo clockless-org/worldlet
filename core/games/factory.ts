@@ -66,7 +66,7 @@ const FORBIDDEN:[RegExp,string][]=[
  [/<\s*meta[^>]*http-equiv\s*=\s*["']?refresh/i,'meta refresh'],[/(?<![\w$.])(?:window\.)?(?:top|parent|opener)\.(?:location|postMessage|document)\b|(?<![\w$])(?:window|document)\.location\s*=[^=]|\blocation\.(?:href\s*=[^=]|assign\s*\(|replace\s*\()/,'navigating away or reaching other windows'],
 ];
 /** The static rules a sandboxed page Fox's model wrote must pass before it is tried (a made game, or a widget,
- * core/widgets): one self-contained page, small, and nothing that reaches the network or another document.
+ * core/artifacts): one self-contained page, small, and nothing that reaches the network or another document.
  * Problems are written for the model to fix. */
 export function offlinePageProblems(html:unknown,{noun,bytes}:{noun:string;bytes:number}):string[] {
  const The='The '+noun;

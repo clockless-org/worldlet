@@ -1,5 +1,5 @@
 // The ready-made Getty Center guide (owner requests 2026-10-04): a moment Applet Fox offers whenever the person
-// mentions the Getty Center, added at once without writing a page (core/widgets/README.md#ready-made-applets).
+// mentions the Getty Center, added at once without writing a page (core/artifacts/README.md#ready-made-applets).
 // Drawn in Worldlet's own style: the campus as a miniature on a timber base, Fox telling what is now, painted
 // pictures for each stop and artworks that turn over when seen. Its pictures are generated into getty-center-art.ts
 // (resources/styles/builtin/drafts/getty-guide).

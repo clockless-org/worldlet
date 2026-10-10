@@ -3,7 +3,7 @@ import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
 import {AGENT_BINDING_SCOPES,agentAnswerReason,agentBindingInstructions,agentBindingPlace,answeringAgent,bindAgent,harnessService,harnessSessionThread,isHarnessAgentId,noteAgentPlace,readAgentBindings,type AgentBindingScope,type AgentPlaces} from '../../../../../core/agent/index.ts';
 import {APPLET_REGION_TITLES,getApp,migrateAreaLayout} from '../../../../../core/applets/index.ts';
-import {conversationAttentionId,readOngoing} from '../../../../../core/ongoing/index.ts';
+import {conversationAttentionId,readOngoing} from '../../../../../core/tasks/index.ts';
 import type {HarnessAgent} from '../../../../../contracts/harness-services.ts';
 
 // Which of the person's own agents answers in a thread, and what extra it is told (owner goal 2026-10-08: what

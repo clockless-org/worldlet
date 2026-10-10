@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {harnessService,harnessToolsLine,harnessToolsSummary,hermesConfigValues,hermesExternalEvent,hermesHarnessTools,localHarnessTurn,openClawExternalEvent,openClawHarnessTools} from '../core/agent/index.ts';
-import {channelMessageAsks,channelMessageEvent,externalEventAttentionId,externalEventMatters,externalEventObservation,externalEventPush,externalEventsForAttention,validExternalEventAttentionId} from '../core/ongoing/index.ts';
+import {channelMessageAsks,channelMessageEvent,externalEventAttentionId,externalEventMatters,externalEventObservation,externalEventPush,externalEventsForAttention,validExternalEventAttentionId} from '../core/tasks/index.ts';
 import {harnessEvents,harnessTools,readHarnessEvents} from '../platform/electron/src/modules/agent-runtime/harness-services.ts';
 import {withTempDir} from './test-temp.ts';
 

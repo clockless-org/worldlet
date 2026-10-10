@@ -338,7 +338,7 @@ export function findArtifacts(list:Artifact[],query='',limit=12){
   .map(({id,kind,title,category,size,updatedAt,body})=>({id,kind,title,...(category?{category}:{}),size,shownAt:new Date(updatedAt*1000).toISOString(),preview:body.replace(/\s+/g,' ').slice(0,160)}));
 }
 
-/** A page Fox made for a moment (core/widgets) as the Artifacts page lists it: the most interactive artifact, which
+/** A page Fox made for a moment (core/artifacts) as the Artifacts page lists it: the most interactive artifact, which
  * is already an Applet while its moment lasts or once the person keeps it. Its record stays in the `widgets` table. */
 export type MadeArtifact={id:string;kind:'made';title:string;body:string;state:'now'|'kept'|'finished';endsAt:number;createdAt:number;updatedAt:number};
 export function madeArtifacts(lists:{now?:unknown[];finished?:unknown[]}):MadeArtifact[] {

@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **266 Markdown documents** and **43 supporting documentation files**.
+Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -62,7 +62,7 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 25 |
 | Resource and artwork records | 67 |
-| Module and service documentation | 33 |
+| Module and service documentation | 32 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 43 |
 
@@ -324,7 +324,7 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (33)</summary>
+<details><summary>Module and service documentation (32)</summary>
 
 - [android/README.md](../android/README.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
@@ -340,9 +340,8 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 - [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
 - [core/games/README.md](../core/games/README.md)
 - [core/items/STORAGE.md](../core/items/STORAGE.md)
-- [core/ongoing/README.md](../core/ongoing/README.md)
 - [core/phone/README.md](../core/phone/README.md)
-- [core/widgets/README.md](../core/widgets/README.md)
+- [core/tasks/README.md](../core/tasks/README.md)
 - [harness/README.md](../harness/README.md)
 - [harness/example/README.md](../harness/example/README.md)
 - [harness/skills/README.md](../harness/skills/README.md)

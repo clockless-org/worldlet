@@ -1,5 +1,5 @@
 // What the desktop shows the paired phone, and what the phone may ask of the desktop (README.md in this folder).
-import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../widgets/index.ts';
+import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../artifacts/index.ts';
 import {worldLogApplet} from '../activity/index.ts';
 import {httpsAddress} from './phone-web.ts';
 // The phone renders exactly these shapes (ios/Worldlet/Models.swift); bump PAIR_PROTOCOL in pairing.ts when one
@@ -21,7 +21,7 @@ export type PhoneItemFox={say:string,option:string,turns:{user:string,text:strin
 export type PhoneAccount={provider:string,title:string,action:'reconnect'|'permissions'};
 /** One Applet in the phone's Applet world (owner decision 2026-10-03: swipe down from Now). `section` is where the
  * grid shows it: `live` (working now, holding Now items, or a widget for now), `accounts` (a connected source) or
- * `jobs` (an ongoing thing the person made into an Applet, core/ongoing; its key is `job-…`) or `places` (every other
+ * `jobs` (an ongoing thing the person made into an Applet, core/tasks; its key is `job-…`) or `places` (every other
  * Applet in the World). `state` is its lamp: busy (working), ready, failed or off. `line` says what
  * it is doing or its status, `recent` its latest world log lines (newest last), `widget` the widget a moment Applet opens,
  * `fox` its own thread of Fox's conversation (what was said inside it), and `mine` where one of the person's own Applets
@@ -47,13 +47,13 @@ export type PhoneLive={v:1,at:string,id:string,item?:string,applet?:string,user:
  * Order button (owner request 2026-10-06). */
 export type PhoneDesktop={v:1,at:string,name:string,version:string,order?:true};
 export type PhoneAction='done'|'later'|'remove';
-/** A widget for now (core/widgets): `page` is the whole document with the widget prelude but no seed (the phone
+/** A widget for now (core/artifacts): `page` is the whole document with the widget prelude but no seed (the phone
  * injects its stored values); it is absent when the slot has no room for it, and the phone keeps the page it has. */
 export type PhoneWidget={id:string,title:string,blurb:string,color:string,endsAt:string,pinned:boolean,updatedAt:string,version:number,page?:string,state:WidgetState};
 export type PhoneWidgets={v:1,at:string,widgets:PhoneWidget[]};
 // A chat line with `item` was said with that item's card open and joins its conversation; `option` chooses the option
 // Fox offers on the item's card.
-// `widget` carries the entries the person changed in a widget on the phone (core/widgets mergeWidgetState).
+// `widget` carries the entries the person changed in a widget on the phone (core/artifacts mergeWidgetState).
 // A chat line with `applet` was said inside that Applet's page on the phone: the computer opens the Applet, so the line
 // joins its thread. `applet` with action `open` opens the Applet on the computer.
 // `order` is what the person said with the phone's Order button: it goes to Claude as an Order from this computer, never
@@ -111,7 +111,7 @@ export function phoneAttention({now,later,accounts=[],world}:{now:any[],later:an
  * (key, title, provider, lamp `state`, status `label`, `source` true for one that reads an account, `url` the website
  * the phone opens, phoneWebAddress; a place without one stays on the computer); `now` what each is
  * doing this moment ("Reading Mail…", core/activity worldLogNow); `log` the world log (core/activity WorldLogLine);
- * `widgets` the widgets for now; `jobs` the ongoing things kept (core/ongoing: id, title, line and the conversation's latest
+ * `widgets` the widgets for now; `jobs` the ongoing things kept (core/tasks: id, title, line and the conversation's latest
  * lines); `thread` an Applet's own turns of Fox's conversation (native-chat threadOf). */
 export type PhoneWorld={places:any[],now?:{applet:string,text:string}[],log?:{at:number,text:string,applet?:string}[],
  widgets?:{id:string,title:string}[],jobs?:{id:string,title:string,line:string,recent:{text:string,at:string}[]}[],thread?:(key:string)=>any[]};

@@ -20,7 +20,7 @@ assert.throws(()=>validateConversationHistory([null],false));
 validateConversationHistory([{}],false); // Preserve existing read compatibility; strict validation applies on write.
 assert.throws(()=>validateConversationHistory([{}],true));
 console.log('PASS shared context placement, previous-layout preservation, overlap rejection and conversation bounds');
-const {defaultSourceChecks,dueSourceCheck,startSourceCheck,reconcileSourceCheck}=await import('../core/scheduling/source-checks.ts');
+const {defaultSourceChecks,dueSourceCheck,startSourceCheck,reconcileSourceCheck}=await import('../core/tasks/source-checks.ts');
 const paused={id:'gmail',provider:'gmail',enabled:false,intervalMinutes:60,nextAt:9000};
 assert.deepEqual(defaultSourceChecks([paused],['gmail','notion'],100),[{id:'notion',provider:'notion',enabled:true,intervalMinutes:30,nextAt:100}]);
 assert.deepEqual(defaultSourceChecks([],['notion'],100,[{provider:'notion',intervalMinutes:45}]),[{id:'notion',provider:'notion',enabled:true,intervalMinutes:45,nextAt:100}],'new checks use the Applet registration interval');
@@ -176,7 +176,7 @@ let yieldingActivity=receiveAppletActivity(undefined,{callId:'partial',phase:'re
 yieldingActivity=receiveAppletActivity(yieldingActivity,{callId:'partial',phase:'yielded'},'yield-turn')!;
 assert.equal(yieldingActivity.failed,false);assert.equal(yieldingActivity.succeeded,false);assert.equal(yieldingActivity.calls.length,0);
 
-const {configureSourceCheck}=await import('../core/scheduling/index.ts');
+const {configureSourceCheck}=await import('../core/tasks/index.ts');
 const runningCheck={id:'gmail',provider:'gmail',enabled:true,intervalMinutes:60,lastStatus:'running',lastSuccessAt:12,nextAt:5000};
 assert.deepEqual(configureSourceCheck(runningCheck,{provider:'gmail',enabled:false},['gmail'],200),{...runningCheck,enabled:false,lastStatus:'cancelled',nextAt:200});
 assert.deepEqual(configureSourceCheck(undefined,{provider:'gmail',enabled:true},['gmail'],200),{id:'gmail',provider:'gmail',enabled:true,intervalMinutes:30,nextAt:200});

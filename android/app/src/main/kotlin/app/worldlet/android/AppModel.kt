@@ -89,7 +89,7 @@ class AppModel(
     /** A pairing link opened while this phone follows another computer: it replaces that pairing only once the person
      * confirms ([replacePairing]). */
     var replacement by mutableStateOf<PairLink?>(null); private set
-    /** The widgets for now (core/widgets), newest first: each with its page (kept from an earlier slot when the latest
+    /** The widgets for now (core/artifacts), newest first: each with its page (kept from an earlier slot when the latest
      * one left it out) and this phone's merged state. Kept on the device so they open while the computer sleeps. */
     var widgets by mutableStateOf(listOf<PhoneWidget>()); private set
     /** Where a tapped notification opens the app (MainActivity): HomeScreen opens it and calls [opened]. */

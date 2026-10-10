@@ -6,8 +6,8 @@ Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-
 - Applets: applets, browser, games
 - Companion: companion
 - Attention: attention
-- Tasks: scheduling, ongoing (work that runs without the person)
-- Artifacts & Journal: artifacts, widgets (everything work produces, kept by day)
+- Tasks: tasks (work that runs without the person)
+- Artifacts & Journal: artifacts (everything work produces, kept by day)
 - Base: agent, accounts, tools, phone, items, context, onboarding, diagnostics, distribution
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).

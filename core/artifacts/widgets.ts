@@ -1,7 +1,7 @@
 // Moment Applets (owner requests 2026-10-04): an Applet made for one moment. The person asks Fox for something
 // they need right now ("make me a guide for the Getty today"), Fox's model writes it as one self-contained HTML
 // page, and Worldlet tries it, keeps it in this World and stands it in the World and on the paired phone as its own
-// Applet until its moment is over. These are the rules every host applies (core/widgets/README.md). In code and
+// Applet until its moment is over. These are the rules every host applies (core/artifacts/README.md). In code and
 // storage a made Applet's record is still called a widget.
 import {offlinePageProblems,madeGameTrialProblems,sandboxDocument,SANDBOX_POLICY} from '../games/index.ts';
 

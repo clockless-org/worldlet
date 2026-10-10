@@ -38,3 +38,10 @@ export function validateAgentDescriptor(value:unknown):AgentDescriptor {
  if(d.protocolVersion!==AGENT_PROTOCOL_VERSION||typeof d.id!=='string'||!(/^[a-z][a-z0-9-]{0,63}$/).test(d.id)||typeof d.name!=='string'||!d.name.trim()||d.name.length>160)throw Error('Agent adapter requires Worldlet protocol version 1 and a valid identity.');
  return {protocolVersion:1,id:d.id,name:d.name,capabilities:validateAgentCapabilities(d.capabilities)};
 }
+
+/** Agents a person can bring into Worldlet, and what each is called. Shared here so Core components
+ * that only need the names (Tasks, for brought conversations) do not import the Agent component. */
+export type MigrationSource='openclaw'|'claude-code'|'pi'|'hermes'|'codex';
+export const MIGRATION_SOURCES:MigrationSource[]=['openclaw','claude-code','pi','hermes','codex'];
+export const isMigrationSource=(value:unknown):value is MigrationSource=>MIGRATION_SOURCES.includes(value as MigrationSource);
+export const MIGRATION_SOURCE_TITLES:Record<MigrationSource,string>={openclaw:'OpenClaw','claude-code':'Claude Code',pi:'pi',hermes:'Hermes Agent',codex:'Codex'};

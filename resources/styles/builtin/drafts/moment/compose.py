@@ -1,4 +1,4 @@
-# Every moment Applet's device (core/widgets/README.md): the painted screen stand of the dormant `things` Peek sprite,
+# Every moment Applet's device (core/artifacts/README.md): the painted screen stand of the dormant `things` Peek sprite,
 # its frame repainted a warm amber and its face redrawn as a small page for the moment: a map with a path and a pin
 # over two ticked rows. No image model was used and no third-party artwork was added. Run with Pillow and NumPy:
 #   python3 resources/styles/builtin/drafts/moment/compose.py

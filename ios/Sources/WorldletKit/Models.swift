@@ -424,7 +424,7 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
     case attention(id: String, action: AttentionAction)
     case connect(id: String, provider: String)
     /// The entries the person changed in a widget on the phone, stamped with the phone's clock; the computer merges
-    /// them newest-wins (core/widgets mergeWidgetState), so sending one again is harmless.
+    /// them newest-wins (core/artifacts mergeWidgetState), so sending one again is harmless.
     case widget(id: String, widget: String, state: WidgetState)
     /// What the person said with the Order button: the computer sends it to the team's Claude as an Order, never to Fox.
     case order(id: String, said: String)
@@ -743,7 +743,7 @@ public struct WebReportBuffer: Sendable {
 
 // MARK: Widgets
 
-/// One key a widget keeps through its local storage (core/widgets WidgetStateEntry): its value, nil once removed, and
+/// One key a widget keeps through its local storage (core/artifacts WidgetStateEntry): its value, nil once removed, and
 /// when it was written (milliseconds since 1970), so the computer and the phone merge edits key by key, newest wins.
 public struct WidgetStateEntry: Codable, Hashable, Sendable {
     public let v: String?
@@ -772,7 +772,7 @@ public struct WidgetStateEntry: Codable, Hashable, Sendable {
 
 public typealias WidgetState = [String: WidgetStateEntry]
 
-/// What a widget may keep (core/widgets WIDGET_LIMITS): keys, one value and all of it, in UTF-16 code units.
+/// What a widget may keep (core/artifacts WIDGET_LIMITS): keys, one value and all of it, in UTF-16 code units.
 public enum WidgetLimits {
     public static let stateKeys = 300
     public static let stateValue = 4000
@@ -841,7 +841,7 @@ public struct WidgetsSnapshot: Codable, Sendable, Equatable {
     public static let empty = WidgetsSnapshot(v: 1, at: "", widgets: [])
 }
 
-/// A widget state, cleaned as core/widgets readWidgetState cleans it: valid keys and values within the limits, times
+/// A widget state, cleaned as core/artifacts readWidgetState cleans it: valid keys and values within the limits, times
 /// rounded to whole milliseconds; anything else is dropped. Keys are taken in order so the limits cut the same keys
 /// every time.
 public func cleanWidgetState(_ state: WidgetState) -> WidgetState {
@@ -874,7 +874,7 @@ public func widgetStateChanges(_ state: WidgetState, values: [String: String], a
     return cleanWidgetState(changes)
 }
 
-/// Merges the other side's entries key by key (core/widgets mergeWidgetState): the newer write wins, on a tie the
+/// Merges the other side's entries key by key (core/artifacts mergeWidgetState): the newer write wins, on a tie the
 /// stored value stays, and a removal of a key this side never had is ignored.
 public func mergeWidgetState(_ state: WidgetState, _ incoming: WidgetState) -> (state: WidgetState, changed: Bool) {
     var merged = state

@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-/** The widget rules of core/widgets/widgets.ts (checked there by scripts/widgets-check.ts), as the phone applies them. */
+/** The widget rules of core/artifacts/widgets.ts (checked there by scripts/widgets-check.ts), as the phone applies them. */
 class WidgetsTest {
     private fun e(v: String?, at: Double) = WidgetStateEntry(v, at)
 

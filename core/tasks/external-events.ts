@@ -1,6 +1,6 @@
 // External events (owner parity plan 2026-10-07, item 8): a webhook, a mail trigger or a hook that started the
 // person's own Agent, from whichever Harness reports them (the `events` service, contracts/harness-services.ts). Each
-// is Attention context of the `conversations` provider beside brought conversations (core/ongoing/attention.ts), so
+// is Attention context of the `conversations` provider beside brought conversations (core/tasks/attention.ts), so
 // the Center's ordinary synthesis shows it, usually as Worth Knowing, quoting what the Agent was asked and answered;
 // once an item cites one that matters, the phone hears of it. A new message in a shared channel thread that may need the
 // person (it asks something, names a date, mentions someone) joins them as a `channel` event as soon as the World reads

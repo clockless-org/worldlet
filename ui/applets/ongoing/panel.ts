@@ -1,19 +1,19 @@
 import {node,textButton as button} from '../../components/index.ts';
-import {ONGOING_KINDS,ongoingKindOf,ongoingLine,type OngoingTemplate,type OngoingThing} from '../../../core/ongoing/index.ts';
+import {ONGOING_KINDS,ongoingKindOf,ongoingLine,type OngoingTemplate,type OngoingThing} from '../../../core/tasks/index.ts';
 
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;
 // The thing to open next time the panel shows: one opened from the phone's Applet world.
 let pending='';
 export function requestOngoing(id:string){pending=typeof id==='string'?id:'';window.dispatchEvent(new CustomEvent('worldlet:ongoing-request',{detail:{id:pending}}));}
 /** What Fox is asked from its panel: the conversation named, so Fox reads it from its past conversations; a thing of a
- * kind asks what that kind needs (core/ongoing kinds: the next workout, a quiz, the trip plan…). */
+ * kind asks what that kind needs (core/tasks kinds: the next workout, a quiz, the trip plan…). */
 export const ongoingAsk=(thing:Pick<OngoingThing,'source'|'title'|'where'|'session'|'kind'>)=>{
  const kind=ongoingKindOf(thing);
  return kind==='general'?`Let's pick up “${thing.title}” (${thing.where}). Look at our past conversation “${thing.session}” and tell me where it stands and what comes next.`
   :`Let's pick up “${thing.title}” (${thing.where}). Look at our past conversation “${thing.session}” and ${ONGOING_KINDS[kind].ask}.`;
 };
 
-// Ongoing (core/ongoing/README.md): the conversations brought from other Agents that the person made into Applets.
+// Ongoing (core/tasks/README.md): the conversations brought from other Agents that the person made into Applets.
 // Each kept thing is a device of its own whose panel (`thing`) shows that conversation's latest turns; without one,
 // the panel lists them all.
 export function createOngoingApplet({native,ask=(_text:string)=>{},thing:only=''}:{native:any,ask?:(text:string)=>unknown,thing?:string}){
@@ -62,7 +62,7 @@ export function createOngoingApplet({native,ask=(_text:string)=>{},thing:only=''
   }
   if(!turns.children.length)turns.append(el('li','ongoing-empty','No messages to show.'));
  }
- // The kind's page (core/ongoing kinds): its counts, then the person's own messages that belong in it, newest first.
+ // The kind's page (core/tasks kinds): its counts, then the person's own messages that belong in it, newest first.
  function drawKind(page:any,template:OngoingTemplate,thing:OngoingThing){
   page.hidden=false;page.dataset.kind=template.kind;
   const stats=el('dl','ongoing-stats');

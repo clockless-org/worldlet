@@ -2,8 +2,8 @@ import Foundation
 import XCTest
 import WorldletKit
 
-/// Widgets on the phone (core/widgets/README.md): the slot decodes, edits merge key by key the way
-/// core/widgets/widgets.ts merges them, and the `widget` message keeps a removal as an explicit null.
+/// Widgets on the phone (core/artifacts/README.md): the slot decodes, edits merge key by key the way
+/// core/artifacts/widgets.ts merges them, and the `widget` message keeps a removal as an explicit null.
 final class WidgetTests: XCTestCase {
     private let slot = #"""
     {"v":1,"at":"2026-10-04T17:00:00.000Z","widgets":[

@@ -123,7 +123,7 @@ the box surrounds its Later row. Turning the page does not change the Center's f
 manufacture fallback news, or override the Center's relevance decision. Someone who brought an Agent
 already has work in progress (owner request 2026-10-06: the target customer already uses OpenClaw,
 Claude Code or Hermes Agent): with no such item yet, Fox starts with what the person keeps talking about with it, the
-[theme](../../core/ongoing/README.md#themes) the Center shows in Worth Doing. Step 5 boxes its row,
+[theme](../../core/tasks/README.md#themes) the Center shows in Worth Doing. Step 5 boxes its row,
 Fox names it (“You keep talking about what you eat with OpenClaw: “#diet-and-health”, … Want me to pull
 what matters out of it and put it on one page?”), and **Show me** (or a click on the row) asks Fox for
 the theme's artifact; the artifact Fox shows is the first win (owner request 2026-10-07: an artifact, not

@@ -306,7 +306,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   tracked=[...all,...later.filter(m=>m.snoozed)];resolvePlaces(s);
   const groups=ATTENTION_GROUPS.map(([state,title])=>({state,title,items:s.data.sample?items.filter(m=>m.state===state).sort((a,b)=>attentionLevel(b)-attentionLevel(a)):attentionOrder(items.filter(m=>m.state===state),{mode:root.dataset.attentionFocus||'auto',region:m=>matterRegion(s,m),importance:attentionLevel})}));
   // The paired phone mirrors the same Now and Later (ui/companion/phone-bridge.ts); it dedupes unchanged views.
-  // Ongoing proposals (core/ongoing/README.md): Fox asks whether a brought conversation that looks like one job
+  // Ongoing proposals (core/tasks/README.md): Fox asks whether a brought conversation that looks like one job
   // should become an Applet. They are Worth Doing, after the items, here and on the phone (as `ongoing:<id>`).
   const proposals:any[]=s.data.sample?[]:(ongoing()||[]);
   const proposalItems=proposals.map(p=>({id:'ongoing:'+p.id,worldItemId:'ongoing:'+p.id,state:'needsAction',title:p.title,actionTitle:p.title,fullAction:p.title,context:p.context,fullContext:p.context,provider:'ongoing',level:2}));
@@ -318,7 +318,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   // Keep the live model fresh, but do not rebuild or measure identical rows on
   // every navigation/status sync. Click handlers resolve the latest model by ID.
   const reading=introducing&&!items.length&&sourcesReading(s.data.moduleConnections||[]);
-  // Applets Fox made for this moment (core/widgets/README.md) lead Now; each row opens its Applet.
+  // Applets Fox made for this moment (core/artifacts/README.md) lead Now; each row opens its Applet.
   const forNow=s.data.sample?[]:(widgets()||[]);
   const signature=JSON.stringify([ownItems.map(m=>[m.id,m.title,m.context,m.when?.factor,m.level]),proposals.map(p=>[p.id,p.title,p.context]),forNow.map(w=>[w.id,w.title,w.blurb,w.color,momentLine(w)]),expanded,introducing,reading,later.map(m=>m.id+':'+(m.snoozed?1:0)+':'+(m.when?.factor||'')),groups.map(g=>[g.state,g.items.map(m=>[m.id,m.worldItemId,m.actionTitle,m.context,m.fullAction,m.fullContext,m.title,m.state,m.when,m.requiresChoice,m.priority,attentionLevel(m),s.attentionItemId?m.worldItemId===s.attentionItemId:m.active])])]);
   if(signature===matterSignature)return;

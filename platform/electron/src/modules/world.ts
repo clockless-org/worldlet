@@ -3,7 +3,7 @@ import type {Host} from '../host/types.ts';
 import {SOURCES,WORLD_TOOLS} from '../host/services.ts';
 import type {SourcesService,WorldToolsService} from '../host/services.ts';
 import {WORLD_LOG_KINDS,worldLogKeeps} from '../../../../core/activity/index.ts';
-import {CONVERSATION_ATTENTION,callOriginal,conversationAttentionId,conversationOriginal,externalEventOriginal,validCallAttentionId,validConversationAttentionId,validExternalEventAttentionId} from '../../../../core/ongoing/index.ts';
+import {CONVERSATION_ATTENTION,callOriginal,conversationAttentionId,conversationOriginal,externalEventOriginal,validCallAttentionId,validConversationAttentionId,validExternalEventAttentionId} from '../../../../core/tasks/index.ts';
 // The World library itself: snapshot, presentation, items, history and onboarding.
 export function installWorld(host:Host){
  const {store}=host;
@@ -42,16 +42,16 @@ export function installWorld(host:Host){
     if(!sources)throw new WorldletError('Saved item originals are unavailable in this build.');
     return sources.itemOriginal(request.id.slice(11));
    }
-   // An Attention item found in a brought conversation opens back to it (core/ongoing/attention.ts).
+   // An Attention item found in a brought conversation opens back to it (core/tasks/attention.ts).
    if(request.id.startsWith('conversation:')){
     const id=request.id.slice(13),ledger=store.ledger();
-    // One found in an outside event that started the person's Agent opens what it was asked and answered (core/ongoing/external-events.ts).
+    // One found in an outside event that started the person's Agent opens what it was asked and answered (core/tasks/external-events.ts).
     if(validExternalEventAttentionId(id)){
      const record=(ledger.find('applet-observations','conversations')?.records??[]).find((row:any)=>row?.id===id);
      if(!record)throw new WorldletError('That event is no longer in this world.');
      return externalEventOriginal(record);
     }
-    // One found in a phone call through the person's Agent opens the call: who, when, how it went and its transcript (core/ongoing/harness-calls.ts).
+    // One found in a phone call through the person's Agent opens the call: who, when, how it went and its transcript (core/tasks/harness-calls.ts).
     if(validCallAttentionId(id)){
      const record=(ledger.find('applet-observations','conversations')?.records??[]).find((row:any)=>row?.id===id);
      if(!record)throw new WorldletError('That call is no longer in this world.');

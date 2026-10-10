@@ -8,10 +8,8 @@
 // Kept ES-compatible for JavaScriptCore and Jint.
 import {agentRoleSkill,openClawSkillMarkdown,openClawSkillName,openClawTurn,type AgentRole,type OpenClawRoutine,type OpenClawRoutineResult,type OpenClawTurn} from './openclaw-migration.ts';
 
-export type MigrationSource='openclaw'|'claude-code'|'pi'|'hermes'|'codex';
-export const MIGRATION_SOURCES:MigrationSource[]=['openclaw','claude-code','pi','hermes','codex'];
-export const isMigrationSource=(value:unknown):value is MigrationSource=>MIGRATION_SOURCES.includes(value as MigrationSource);
-export const MIGRATION_SOURCE_TITLES:Record<MigrationSource,string>={openclaw:'OpenClaw','claude-code':'Claude Code',pi:'pi',hermes:'Hermes Agent',codex:'Codex'};
+import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,isMigrationSource,type MigrationSource} from '../../contracts/agent.ts';
+export {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,isMigrationSource,type MigrationSource};
 export type MigrationTurn=OpenClawTurn;
 export type MigrationRoutine=OpenClawRoutine;
 export type MigrationRoutineResult=OpenClawRoutineResult;

@@ -1,5 +1,5 @@
-import {WIDGET_LIMITS,READY_APPLETS} from '../widgets/index.ts';
-// Moment Applets (core/widgets/README.md). make_applet hands the work to an Applet task that makes it;
+import {WIDGET_LIMITS,READY_APPLETS} from '../artifacts/index.ts';
+// Moment Applets (core/artifacts/README.md). make_applet hands the work to an Applet task that makes it;
 // save_applet and read_applet belong to that task only.
 const id={type:'string',pattern:'^wgt-[a-z0-9]{10}$'};
 const data={type:'string',minLength:2,maxLength:WIDGET_LIMITS.dataBytes,description:'What the page shows, as JSON text (an object or array): the events, items, numbers or lines that may change. The page reads it as window.worldlet.data.'};

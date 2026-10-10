@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {claimRuntimeTask,finishRuntimeTask,runtimeClaimCanWrite} from '../core/scheduling/runtime-tasks.ts';
+import {claimRuntimeTask,finishRuntimeTask,runtimeClaimCanWrite} from '../core/tasks/runtime-tasks.ts';
 const args={taskId:'mail:sync',ownerId:'mail',pool:'source-io' as const,generation:1,runId:'one',now:100,leaseSeconds:30};
 const a=claimRuntimeTask(args)!;
 assert.equal(claimRuntimeTask({...args,task:a.task,runId:'duplicate'}),null);
@@ -28,7 +28,7 @@ assert.equal(runtimeClaimCanWrite({...b,generation:1,now:161}),false);
 assert.equal(runtimeClaimCanWrite({...done,generation:1,now:133}),false);
 assert.equal(runtimeClaimCanWrite({...b,task:{...b.task,enabled:false},generation:1,now:132}),false);
 
-const {setRuntimeTaskEnabled}=await import('../core/scheduling/runtime-tasks.ts');
+const {setRuntimeTaskEnabled}=await import('../core/tasks/runtime-tasks.ts');
 const paused=setRuntimeTaskEnabled(a.task,false);
 assert.equal(paused.status,'paused');assert.equal(paused.nextAt,a.task.nextAt);
 assert.equal(runtimeClaimCanWrite({task:paused,run:a.run,generation:1,now:101}),false);
@@ -59,7 +59,7 @@ assert.throws(()=>claimRuntimeTask({...args,task:a.task,previousRun:a.run,now:13
 assert.equal(claimRuntimeTask({...args,task:a.task,previousRun:a.run,generation:2,runId:'new-account',now:110})!.supersededRun?.errorCode,'generation_changed');
 console.log('PASS replacement claims retire matched old runs without admitting duplicate identities');
 
-const {configureRuntimeSource}=await import('../core/scheduling/index.ts');
+const {configureRuntimeSource}=await import('../core/tasks/index.ts');
 const scheduled=configureRuntimeSource({...a.task,nextAt:9000},{provider:'mail',enabled:true,nextAt:120});
 assert.equal(scheduled.nextAt,120);assert.equal(scheduled.token,a.task.token);assert.equal(scheduled.runId,a.task.runId);
 assert.throws(()=>configureRuntimeSource(a.task,{provider:'other',enabled:true,nextAt:120}));

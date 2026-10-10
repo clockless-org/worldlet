@@ -1,8 +1,8 @@
-// Fox routines after the computer slept (core/scheduling/routine-catch-up.ts): each routine whose
+// Fox routines after the computer slept (core/tasks/routine-catch-up.ts): each routine whose
 // time passed runs once, not once per missed slot, and the world log says it ran late.
 // The Electron wiring (powerMonitor resume wakes the clock) is module `fox` in test:electron.
 import assert from 'node:assert/strict';
-import {ROUTINE_LATE_MS,routinesDueAfterGap} from '../core/scheduling/index.ts';
+import {ROUTINE_LATE_MS,routinesDueAfterGap} from '../core/tasks/index.ts';
 import {worldLogLines} from '../core/activity/index.ts';
 
 const now=Date.parse('2026-10-04T09:30:00Z'),at=(ms:number)=>new Date(now-ms).toISOString();

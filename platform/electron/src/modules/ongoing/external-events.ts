@@ -1,9 +1,9 @@
 import type {HarnessExternalEvent} from '../../../../../contracts/harness-services.ts';
-import {EXTERNAL_EVENTS,externalEventAttentionId,externalEventMatters,externalEventObservation,externalEventPush,externalEventsForAttention} from '../../../../../core/ongoing/index.ts';
+import {EXTERNAL_EVENTS,externalEventAttentionId,externalEventMatters,externalEventObservation,externalEventPush,externalEventsForAttention} from '../../../../../core/tasks/index.ts';
 import {AGENT,PHONE,WORLD_TOOLS,type AgentService,type PhoneService,type WorldToolsService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 
-/** External events (core/ongoing/external-events.ts): webhooks, mail triggers and hooks that started the person's own
+/** External events (core/tasks/external-events.ts): webhooks, mail triggers and hooks that started the person's own
  * Agent, from its Harness's `events` service whichever Harness that is, and new channel messages that may need the
  * person, handed over by the history sync as it reads them (`channel`). Each becomes Attention context the Center
  * shows as a World item; once a Worth Knowing item cites one that matters, the paired phone hears of it. A Harness

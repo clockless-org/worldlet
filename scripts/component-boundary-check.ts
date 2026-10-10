@@ -31,10 +31,10 @@ async function scan(dir:string):Promise<void>{
   visit(ast);
  }
 }
-assert.throws(()=>assertComponentImport('ui/hud/example.ts','../../core/scheduling/runtime-tasks.ts'),/bypasses/);
-assert.throws(()=>assertComponentImport('core/attention/example.ts','../scheduling/runtime-tasks.ts'),/bypasses/);
-assertComponentImport('core/scheduling/example.ts','./runtime-tasks.ts');
-assertComponentImport('ui/hud/example.ts','../../core/scheduling/index.ts');
+assert.throws(()=>assertComponentImport('ui/hud/example.ts','../../core/tasks/runtime-tasks.ts'),/bypasses/);
+assert.throws(()=>assertComponentImport('core/attention/example.ts','../tasks/runtime-tasks.ts'),/bypasses/);
+assertComponentImport('core/tasks/example.ts','./runtime-tasks.ts');
+assertComponentImport('ui/hud/example.ts','../../core/tasks/index.ts');
 assert.throws(()=>assertComponentImport('ui/companion/example.ts','../browser/browser-device.ts'),/bypasses/);
 assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-world.ts'),/bypasses/);
 assertComponentImport('ui/companion/example.ts','../browser/index.ts');

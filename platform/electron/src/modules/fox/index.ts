@@ -987,7 +987,7 @@ export function installFox(host:Host){
    // Bringing again starts over, older conversations included (older-history.ts).
    older.reset(request.id);
    const brought=request.id!=='hermes'?await bringAgent(request.id,{companion,world:store.ledger(),ownFolders:[path.join(host.profile.root,'agent')],own:ownHarnessSession(request.id,store.ledger().ownHarnessSessions(request.id)),hermesHome:null,importRoutines:null}):null;
-   // A brought conversation that looks like one job carried on is proposed as an Applet (core/ongoing), and the
+   // A brought conversation that looks like one job carried on is proposed as an Applet (core/tasks), and the
    // recent ones are read for the Attention Center; a large history's older part follows in the background.
    if(brought)host.optional<OngoingService>(ONGOING)?.refresh();
    older.start(request.id,brought?.older);

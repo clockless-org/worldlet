@@ -21,10 +21,10 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.put
 
-// Widgets (core/widgets/README.md): pages made for the moment that the computer sends in the `widgets` slot. These are
-// the rules core/widgets/widgets.ts applies to their state, so the computer and the phone merge edits the same way.
+// Widgets (core/artifacts/README.md): pages made for the moment that the computer sends in the `widgets` slot. These are
+// the rules core/artifacts/widgets.ts applies to their state, so the computer and the phone merge edits the same way.
 
-/** The widget limits the phone applies (core/widgets/widgets.ts WIDGET_LIMITS). */
+/** The widget limits the phone applies (core/artifacts/widgets.ts WIDGET_LIMITS). */
 object WidgetLimits {
     const val STATE_KEYS = 300
     const val STATE_KEY = 200
@@ -159,7 +159,7 @@ fun mergeWidgetState(state: WidgetState, incoming: Map<String, WidgetStateEntry>
     return WidgetMerge(cleanWidgetState(merged), changed)
 }
 
-/** One report from a widget's page (core/widgets/widgets.ts readWidgetReport): all of its storage, where it is
+/** One report from a widget's page (core/artifacts/widgets.ts readWidgetReport): all of its storage, where it is
  * scrolled, or a script error. */
 data class WidgetReport(val state: Map<String, String>? = null, val scroll: Int? = null, val error: String? = null) {
     companion object {
@@ -193,14 +193,14 @@ fun widgetSeed(values: Map<String, String>, scroll: Int): String = buildJsonObje
 const val WIDGET_NO_WEBRTC = "for(const k of[\"RTCPeerConnection\",\"webkitRTCPeerConnection\",\"RTCDataChannel\"]){try{delete window[k]}catch(e){}try{Object.defineProperty(window,k,{value:undefined,writable:false,configurable:false})}catch(e){}}"
 
 /** The page as the phone loads it: [WIDGET_NO_WEBRTC] as its first script, just after a leading doctype (where the
- * computer puts the prelude, core/widgets/widgets.ts), so it runs before anything of the page's. */
+ * computer puts the prelude, core/artifacts/widgets.ts), so it runs before anything of the page's. */
 fun widgetDocument(page: String): String {
     val script = "<script>$WIDGET_NO_WEBRTC</script>"
     val doctype = Regex("^\\s*<!doctype[^>]*>", RegexOption.IGNORE_CASE).find(page) ?: return script + page
     return doctype.value + script + page.substring(doctype.value.length)
 }
 
-/** How the end reads beside a widget's name (core/widgets/widgets.ts widgetUntil): "Pinned", "Until 6:00 PM",
+/** How the end reads beside a widget's name (core/artifacts/widgets.ts widgetUntil): "Pinned", "Until 6:00 PM",
  * "Until tomorrow 9:00 AM", "Until Oct 9". */
 fun widgetUntil(widget: PhoneWidget, now: Instant, zone: ZoneId): String {
     if (widget.pinned) return "Pinned"

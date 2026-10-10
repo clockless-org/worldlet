@@ -14,8 +14,8 @@ An Applet is either **built in** (the [catalog](catalog.ts): Gmail, Calendar, th
 | Kind (`mine`) | Made from | How |
 | --- | --- | --- |
 | `site` | A website | **Make Applet** at the top of the Browser ([site-applet.ts](site-applet.ts)), or asking Fox ("把这个网站做成 Applet": `make_applet` with `website`, added at once) |
-| `page` | A page Fox made, or any card from the conversation | Asking Fox ("make me a packing list for Tahoe"): the person's own Applet while its moment lasts, and **Keep it** keeps it ([made pages](../widgets/README.md)). Or **★ Keep as Applet** on a card Fox laid out in conversation: the card becomes a kept page Applet at once (below) |
-| `conversation` | A conversation brought from another Agent | Fox proposes it; the person's yes makes it one ([ongoing](../ongoing/README.md)) |
+| `page` | A page Fox made, or any card from the conversation | Asking Fox ("make me a packing list for Tahoe"): the person's own Applet while its moment lasts, and **Keep it** keeps it ([made pages](../artifacts/README.md)). Or **★ Keep as Applet** on a card Fox laid out in conversation: the card becomes a kept page Applet at once (below) |
+| `conversation` | A conversation brought from another Agent | Fox proposes it; the person's yes makes it one ([ongoing](../tasks/README.md)) |
 
 Each is placed in the World beside the catalog's Applets (`world.dynamicApplets`, built in `ui/world/world-projection.ts`) and carries `mine` with its kind (`myAppletKind`, `isMyApplet`). Everything stays local: nothing about them goes to a server, and a World backup carries them all.
 
@@ -27,7 +27,7 @@ Until 2026-10-06 they lived in four places: the `widgets` and `ongoing` tables a
 
 ## Keeping an artifact
 
-Set aside since 2026-10-07 (owner request: not on the card; if it comes back, the button stands beside Fox): the cards Fox lays out in conversation no longer show **★ Keep as Applet**. The host request remains: it keeps the card as one of the person's own page Applets, with no end, and opens it in the World; the artifact itself stays in its list. The World page sends the card's body as it renders it (Markdown and the chart Fox verified); the host turns it into one self-contained page (`artifactPage` in [artifact-page.ts](../widgets/artifact-page.ts)) that keeps only plain reading markup (no scripts, links, pictures, frames, forms or handlers, and addresses lose their scheme), checks it by the same offline rules as any page Fox makes, and saves it as a made Applet (the `widgets` request `keepArtifact`). Keeping the same card again opens the Applet it already became. Attention cards have no such button: their World item stays the truth.
+Set aside since 2026-10-07 (owner request: not on the card; if it comes back, the button stands beside Fox): the cards Fox lays out in conversation no longer show **★ Keep as Applet**. The host request remains: it keeps the card as one of the person's own page Applets, with no end, and opens it in the World; the artifact itself stays in its list. The World page sends the card's body as it renders it (Markdown and the chart Fox verified); the host turns it into one self-contained page (`artifactPage` in [artifact-page.ts](../artifacts/artifact-page.ts)) that keeps only plain reading markup (no scripts, links, pictures, frames, forms or handlers, and addresses lose their scheme), checks it by the same offline rules as any page Fox makes, and saves it as a made Applet (the `widgets` request `keepArtifact`). Keeping the same card again opens the Applet it already became. Attention cards have no such button: their World item stays the truth.
 
 ## Data and page
 
@@ -37,7 +37,7 @@ A page Applet keeps what it shows apart from how it shows it (owner request 2026
 | --- | --- | --- |
 | Page | One self-contained HTML page | Fox's model when making or changing the Applet (`save_applet`) |
 | Data | One JSON object or array, at most 40 KB (`WIDGET_LIMITS.dataBytes`), in the Applet's record | Fox, with `save_applet`'s `data` or later with `update_applet_data` (`moments/data`) |
-| State | What the person ticks or types (its `localStorage`) | The person, merged between computer and phone ([state and sync](../widgets/README.md#state-and-sync)) |
+| State | What the person ticks or types (its `localStorage`) | The person, merged between computer and phone ([state and sync](../artifacts/README.md#state-and-sync)) |
 
 The page reads its data as `window.worldlet.data` (null when it has none). The host writes the data in a script of its own just after Worldlet's prelude and before the page's code (`widgetWithData`), on the computer and in the page the phone receives, so the phones need nothing new. `save_applet` asks the model to put whatever may change (events, items, prices, numbers) in data and draw it from there, so Fox can keep the Applet current without rewriting it: when the person asks ("把今天的日程更新一下"), or in a routine they set up ("每天早上更新"), Fox reads the current data (`read_applet_data`, `moments/read`), gathers what it needs with its own tools and sends the whole new data. The page loads again with it, keeping what was ticked; its version rises so the phone takes the new page. The page stays sandboxed: it sees only the data Fox gave it, never the World.
 

@@ -1,7 +1,7 @@
-// Ongoing things' rules (core/ongoing/README.md) without a host: what looks like one job carried on, proposing and
+// Ongoing things' rules (core/tasks/README.md) without a host: what looks like one job carried on, proposing and
 // its limits, decisions, forgetting, names and lines, and how the phone receives kept things and proposals.
 import assert from 'node:assert/strict';
-import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/ongoing/index.ts';
+import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
 import {phoneAttention,readPhoneMessage} from '../core/phone/index.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
 

@@ -149,7 +149,7 @@ export class AttentionCenter {
   if(typeof text!=='string')throw new WorldletError('Invalid weather observation.');
   this.observeAttention('weather',[{id:'current',title:'Current weather',observedAt:observed/1000,text,url:''}]);
  }
- /** Brought conversations active lately (core/ongoing/attention.ts), read again by the Ongoing module after each
+ /** Brought conversations active lately (core/tasks/attention.ts), read again by the Ongoing module after each
   * bring and every hour. An unchanged conversation renews its freshness without a model pass; one no longer
   * offered expires with its freshness, and items it supported leave the Center without being called done. */
  observeConversations(records:Row[]){
