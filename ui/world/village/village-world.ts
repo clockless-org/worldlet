@@ -10,7 +10,7 @@ const LEVELS={overview:'overview',area:'building',applet:'object'} as const;
 function roomOf(a:ThemeWorldApplet,room:any={}){
  const region=regionId(a.region||'home');
  return Object.assign(room,{id:a.id,moduleId:a.id,key:a.key,art:a.art,title:a.title,region,buildingId:'building-'+region,entity:a.object?'matter':'app',
-  mine:a.mine,icon:a.icon,status:{state:a.status,count:a.count,connected:a.connected},allowance:a.allowance});
+  mine:a.mine,icon:a.icon,device:a.device,status:{state:a.status,count:a.count,connected:a.connected},allowance:a.allowance});
 }
 /** The animated Village World (pixi-world.ts) behind the Theme contract's World mount. It reads only the contract. */
 export function renderVillageWorld(context:Omit<ThemeWorldContext,'scene'|'asset'>):VillageWorldMount {

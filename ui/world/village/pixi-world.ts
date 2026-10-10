@@ -20,8 +20,7 @@ import {extraPlacements,resolvePlacements,type PlacementSlot} from '../slot-plac
 import {APPLET_SPRITES} from '../applet-sprites.ts';
 import {myAppletMark} from './my-applet-mark.ts';
 import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from '../frame-budget.ts';
-import {attachAppletLamp} from '../applet-lamp-art.ts';
-import type {LampState} from '../applet-lamp.ts';
+import {attachAppletLamp,type LampState} from './village-lamp.ts';
 import type {RegionLayout} from '../region-layout.ts';
 
 // Authored image coordinates, not camera-dependent guesses. The internal
@@ -305,7 +304,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    // The person's own Applet shows its icon over its device: the one painted for it, or a website's own
    // (core/applets/MY-APPLETS.md#pictures).
    const icon=room.mine&&typeof room.icon==='string'?await image(room.icon).catch(()=>null):null;
-   return {room,icon,tex:await image(payload.devices[room.art||room.key]||payload.devices['apple-notes']),};
+   return {room,icon,tex:room.device?await image(room.device.src):null};
   }));
   if(closed)return;
   for(const {room,icon,tex}of loaded){if(!tex)continue;const region=regions.find(r=>r.b.id===room.buildingId),i=devices.filter(d=>d.region===region&&d.room.entity===room.entity).length;
@@ -328,10 +327,10 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    if(study){const tones=new ColorMatrixFilter();tones.saturate(-.2);tones.brightness(1.08,true);sprite.filters=[tones];shadowShape.clear().ellipse(-width*.25,-sprite.height*.29,5,1.4).ellipse(width*.28,-sprite.height*.05,5,1.5).fill({color:0x625c39,alpha:.34});shadowShape.filters=[new BlurFilter({strength:.8,quality:3})];}
    const outlines=[[1,0],[-1,0],[0,1],[0,-1]].map(([x,y])=>{const edge=new Sprite(tex);edge.anchor.copyFrom(sprite.anchor);edge.width=sprite.width;edge.height=sprite.height;edge.position.set(x,y);const solid=new ColorMatrixFilter();solid.matrix=[0,0,0,0,1,0,0,0,0,.84,0,0,0,0,.42,0,0,0,1,0];edge.filters=[solid];edge.visible=false;body.addChildAt(edge,1);return edge;});
    root.eventMode=study?'dynamic':'static';root.cursor='pointer';
-   const deviceKey=payload.devices[room.art||room.key]?room.art||room.key:'apple-notes',mask={width:tex.frame.width,height:tex.frame.height};
+   const mask={width:tex.frame.width,height:tex.frame.height};
    // The build measures each device's painted box; hit testing reads the pixels only once the pointer
    // is inside it.
-   const box=payload.deviceBoxes?.[deviceKey];let alpha:Uint8ClampedArray|null=null;
+   const box=room.device?.box;let alpha:Uint8ClampedArray|null=null;
    const [firstOpaqueColumn,firstOpaqueRow,lastOpaqueColumn,lastOpaqueRow]=box&&box[4]===mask.width&&box[5]===mask.height?box:paintedBox(alpha=alphaOf(tex),mask.width,mask.height);
    let visibleLeft=(firstOpaqueColumn/mask.width-.5)*sprite.width,visibleWidth=(lastOpaqueColumn-firstOpaqueColumn+1)/mask.width*sprite.width;
    let visibleBottom=-sprite.height+(lastOpaqueRow+1)/mask.height*sprite.height;
@@ -347,8 +346,8 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    const workSignal=room.allowance?createWorkSignal(host,room.key,root,width,visibleTop):null;
    const spark=new Graphics();for(let n=0;n<5;n++){const a=n*Math.PI*2/5,x=Math.cos(a)*width*.65,y=Math.sin(a)*width*.4-width*.45;spark.moveTo(x-3,y).lineTo(x+3,y).moveTo(x,y-3).lineTo(x,y+3);}spark.stroke({color:0xffe4a0,width:1.8});spark.alpha=0;spark.eventMode='none';body.addChild(spark);
    root.visible=allowed(room);root.eventMode=allowed(room)?'static':'none';
-   const lamp=room.entity==='app'?attachAppletLamp(sprite,deviceKey,payload.deviceEffects?.[deviceKey]?.lamp):null;
-   const enchantment=createAppletEnchantments(sprite,room.key,payload.deviceEffects?.[deviceKey]?.idle);
+   const lamp=room.entity==='app'?attachAppletLamp(sprite,room.device?.lamp):null;
+   const enchantment=createAppletEnchantments(sprite,room.key,undefined);
    world.addChild(root);devices.push({body,overviewHit:root.hitArea,overviewBounds:{visibleLeft,visibleTop,visibleBottom,visibleWidth},enchantment,outlines,lamp,spark,revealAt:allowed(room)?performance.now():null,workSignal,room,region,anchor,root,sprite,shadow,shadowRevealAt:null,width,visibleBottom,visibleTop,visibleLeft,visibleWidth,study:!!study,baseAnchor:[...anchor],rideStart:null,rideOffset:0,status:room.status});
   }
   lighting=await createLighting({stage:app.stage,host,payload,image,dayLayers:[surroundings]});if(closed){lighting?.destroy();return;}

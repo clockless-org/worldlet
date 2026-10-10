@@ -2,7 +2,7 @@ import {Container,Graphics,Rectangle,Sprite,Texture} from 'pixi.js';
 import {WORLD_WIDTH,WORLD_HEIGHT} from '../world-design.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
 import {createSceneAmbience} from './scene-ambience.ts';
-import {attachAppletLamp} from '../applet-lamp-art.ts';
+import {attachAppletLamp} from './village-lamp.ts';
 
 /** Reframe the painted support surface; only its independent instruments tighten horizontally. */
 function areaFrame(spec,width:number,height:number){
@@ -60,14 +60,14 @@ export async function createAreaScenery(payload,image){
   visual(d,view){
    const cache=d.closeVisuals??=new Map();if(cache.has(view.id))return cache.get(view.id);
    const key=d.room.art||d.room.key,texture=view.textures[key]||d.sprite.texture;
-   const box=view.spec.deviceBoxes[key]||payload.deviceBoxes[key];
+   const box=view.spec.deviceBoxes[key]||d.room.device?.box;
    const [l,t,r,b]=box||[0,0,texture.width-1,texture.height-1];
    const cut=new Texture({source:texture.source,frame:new Rectangle(l,t,r-l+1,b-t+1)});cropped.push(cut);
    const body=new Container(),sprite=new Sprite(cut);sprite.anchor.set(.5,1);sprite.width=200;sprite.height=200*cut.height/cut.width;
    const shadow=new Graphics().ellipse(0,-1,sprite.width*.34,4).fill({color:0x24170e,alpha:.27}).ellipse(0,-.5,sprite.width*.21,1.5).fill({color:0x170f09,alpha:.4});
    shadow.eventMode='none';body.addChild(shadow,sprite);d.root.addChild(body);
-   const effects=view.textures[key]?view.spec.deviceEffects?.[key]:payload.deviceEffects?.[key];
-   const enchantment=createAppletEnchantments(sprite,d.room.key,effects?.idle),lamp=attachAppletLamp(sprite,key,effects?.lamp);
+   const effects=view.textures[key]?view.spec.deviceEffects?.[key]:{lamp:d.room.device?.lamp};
+   const enchantment=createAppletEnchantments(sprite,d.room.key,effects?.idle),lamp=attachAppletLamp(sprite,effects?.lamp);
    const hit=new Rectangle(-sprite.width/2,-sprite.height,sprite.width,sprite.height);
    const visual={body,sprite,enchantment,lamp,hit,width:sprite.width,height:sprite.height};cache.set(view.id,visual);return visual;
   },

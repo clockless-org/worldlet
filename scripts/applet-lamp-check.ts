@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import * as villageLamp from '../ui/world/village/village-lamp.ts';
 import {appletLamp,appletLampContent,lampColors,lampLabels,lampOpacity,lampDisplayState,LAMP_BREATH_MS} from '../ui/world/applet-lamp.ts';
 import {appletStatus} from '../core/applets/status.ts';
 import {stackLampBoxes} from '../ui/world/applet-lamp-label.ts';
@@ -66,3 +68,9 @@ assert.equal(appletLamp({phase:'unknown'}),'off','Unknown is not successful or r
  assert.deepEqual(stackLampBoxes(three),stackLampBoxes(three),'Stacking is deterministic between frames');
 }
 console.log('Lamp notice stacking passed');
+// The Village World's copies of the lamp look (ui/world/village) stay equal to the host's.
+assert.deepEqual(villageLamp.lampColors,lampColors,'Village lamp colors match the host');
+assert.equal(villageLamp.LAMP_BREATH_MS,LAMP_BREATH_MS);
+for(const state of ['off','ready','processing','error'] as const)for(const now of [0,600,1200])for(const reduced of [false,true])assert.equal(villageLamp.lampOpacity(state,now,reduced),lampOpacity(state,now,reduced));
+assert.equal(readFileSync('ui/world/village/lamp-surface.ts','utf8'),readFileSync('ui/world/applet-lamp-surface.ts','utf8'),'Village lamp surface is a copy of the host\'s');
+console.log('PASS the Village World\'s lamp copies match the host\'s');

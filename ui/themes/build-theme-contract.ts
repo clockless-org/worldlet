@@ -72,6 +72,10 @@ export interface ThemeWorldApplet {id:string;key:string;title:string;region:stri
  usedAt?:number;
  /** While it is open, the host's Applet stage draws this Applet's own picture in front. A theme can stop drawing its device behind it. */
  staged?:boolean;
+ /** The host's shared device picture this Applet is drawn as: its painted box (left, top, right, bottom, width, height in
+  * image pixels) and where its lamp sits (centre and radius as fractions of the image). Themes with no art of their own can
+  * stand it in their World. */
+ device?:{src:string;box?:readonly number[];lamp?:{center:readonly [number,number];radius:readonly [number,number]}};
  /** Coding Applets: the weekly allowance left. `remaining` is a percentage; neither is set while it is unknown. */
  allowance?:{remaining?:number;resetsAt?:number;unavailable?:boolean}}
 export type ThemeLampState='off'|'ready'|'processing'|'error';
