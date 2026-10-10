@@ -369,11 +369,10 @@ export class BrowserDevice {
   const visible=()=>this.browser===view;
   const recording=()=>this.store.writable&&!this.sample;
   // page_load_timing: from the page's document starting to load to it loaded or failed; buckets and the engine only.
-  // An Electron page counts its main frame only: an iframe loading after the document finished would run until the next navigation.
-  // A CEF page's loading state counts its frames too, but CEF sends it false only after every load end, so a page that stops
-  // loading with no 'loaded' still open was an iframe loading later: that load is dropped, not timed.
+  // Both engines count the main frame only (isLoadingMainFrame): an iframe loading after the document finished would run
+  // until the next navigation. CEF sends its loading state false only after every load end, so a CEF page that stops
+  // loading with no 'loaded' still open is dropped, not timed.
   let loadStart=0;
-  const documentLoading=()=>view instanceof CefPageView?view.isLoading:view.isLoadingMainFrame;
   const loadEnded=(outcome:'complete'|'error')=>{
    if(!loadStart)return;
    const ms=Date.now()-loadStart;loadStart=0;
@@ -409,8 +408,8 @@ export class BrowserDevice {
    this.activity.observe({page,active:this.surface.appActive()&&!view.hidden});
   };
   view.onChange=()=>{
-   if(documentLoading()){if(!loadStart)loadStart=Date.now();}
-   else if(view instanceof CefPageView)loadStart=0;
+   if(view.isLoadingMainFrame){if(!loadStart)loadStart=Date.now();}
+   else if(view instanceof CefPageView&&!view.isLoading)loadStart=0;
    if(visible())this.status();
   };
   view.onError=code=>{loadEnded('error');if(visible())this.navigationFailed(code);};
@@ -923,17 +922,18 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
   const canonical='https://x.com'+url.pathname;
   return this.store.ingest({title,text:text+'\n\nSource: '+canonical,origin:'x-bookmark',externalId:canonical,sourceURL:canonical});
  }
- /** Waits (after `startMs`) while the page loads, up to LOAD_WAIT_MS. True when it is loaded and still shown. */
+ /** Waits (after `startMs`) while the page's document loads, up to LOAD_WAIT_MS. True when it is loaded and still shown.
+  * The document only: iframes (ads, widgets, chat) that keep loading after it would hold every step for the whole wait. */
  private async settled(browser:WebPage,startMs=0){
   if(startMs)await new Promise(resolve=>setTimeout(resolve,startMs));
   const loadedBy=Date.now()+LOAD_WAIT_MS;
-  while(browser.isLoading&&!browser.isClosed&&this.foxPage()===browser&&Date.now()<loadedBy)await new Promise(resolve=>setTimeout(resolve,100));
-  return this.foxPage()===browser&&!browser.hidden&&!browser.isClosed&&!browser.isLoading;
+  while(browser.isLoadingMainFrame&&!browser.isClosed&&this.foxPage()===browser&&Date.now()<loadedBy)await new Promise(resolve=>setTimeout(resolve,100));
+  return this.foxPage()===browser&&!browser.hidden&&!browser.isClosed&&!browser.isLoadingMainFrame;
  }
  /** `result` with the page as it stands after Fox's step, as a fresh snapshot in `page`, when that
   * page loads and Fox may read it; otherwise `result` unchanged, and Fox takes a snapshot itself. */
  private async withPageAfter(browser:WebPage,result:Row):Promise<Row> {
-  if(!await this.settled(browser,PAGE_AFTER_MS))return {...result,loading:browser.isLoading};
+  if(!await this.settled(browser,PAGE_AFTER_MS))return {...result,loading:browser.isLoadingMainFrame};
   const current=parse(browser.url);
   if(!current||!publicPage(current)||SIGN_IN_HOSTS.includes(current.hostname))return result;
   try{
@@ -1074,7 +1074,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    // rather than spending a whole model turn on being told to try again.
    await this.settled(browser);
    if(this.foxPage()!==browser||browser.hidden||browser.isClosed)throw new WorldletError('Open the Worldlet browser first.');
-   if(browser.isLoading)return {error:'The page is still loading. Request another snapshot shortly.'};
+   if(browser.isLoadingMainFrame)return {error:'The page is still loading. Request another snapshot shortly.'};
    const current=parse(browser.url);
    if(!current||!publicPage(current))throw new WorldletError('Open a public HTTPS page and wait for it to load before using browser automation.');
    if(SIGN_IN_HOSTS.includes(current.hostname))throw new WorldletError('Finish signing in manually before using browser automation.');
