@@ -24,7 +24,7 @@ import {Surface,websiteSession} from './surface.ts';
 import {blockedMediaDevices,explainBlockedMedia,mediaDevices,type MediaDevice} from './media-access.ts';
 import {HOMES,SIGN_IN_HOSTS,signInPage,isGoogleMaps,isNotion,isX,parse,publicPage,sameURL} from './rules.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {AGENT,ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AgentService,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
+import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
 import {userIdle} from '../../../../../core/scheduling/index.ts';
 import {timingBucket} from '../../../../../core/diagnostics/index.ts';
 import {GAME_REVIEW_APPLET} from '../../../../../core/games/index.ts';
@@ -1074,29 +1074,6 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    if(SIGN_IN_HOSTS.includes(current.hostname))throw new WorldletError('Finish signing in manually before using browser automation.');
    if(operation==='back'){if(browser.canGoBack)browser.goBack();return {ok:true};}
    if(operation==='forward'){if(browser.canGoForward)browser.goForward();return {ok:true};}
-   if(operation==='pick'){
-    // One step said in words becomes one control and operation, chosen in one quick request
-    // by the Agent's small model tier. Fox's own model never has to
-    // read the page to find a ref; the step itself then runs through the ordinary path.
-    const step=typeof args.step==='string'?args.step.trim():'';
-    if(!step||[...step].length>500)throw new WorldletError('Say the step in one short sentence.');
-    const page=await browser.automation.run({operation:'snapshot'}) as Row;
-    if(page.ok!==true)return page;
-    const refs=browser.automation.controls();
-    let choice:Row;
-    try{
-     const agent=this.host.use<AgentService>(AGENT);
-     choice=await agent.makeModelAccess().run({action:'browser_pick',step,url:browser.url,page:page.text,refs},agent.home('private'));
-    }catch(error){
-     if(error instanceof Cancelled)throw error;
-     return {error:'Quick steps are not available right now. Use page (a fresh snapshot) and act by ref.',page,untrustedContent:true};
-    }
-    const chosen=typeof choice.operation==='string'?choice.operation:'none';
-    if(['click','fill','submit'].includes(chosen)&&typeof choice.ref==='string'&&refs.includes(choice.ref)&&(chosen!=='fill'||typeof choice.text==='string'))
-     return {ok:true,operation:chosen,ref:choice.ref,documentId:page.documentId,...chosen==='fill'?{text:choice.text}:{},page,untrustedContent:true};
-    if(chosen==='scroll_down'||chosen==='scroll_up')return {ok:true,operation:'scroll',direction:chosen==='scroll_up'?'up':'down',page,untrustedContent:true};
-    return {error:'No control on this page matches “'+step.slice(0,120)+'”'+(typeof choice.reason==='string'&&choice.reason?' ('+choice.reason.slice(0,120)+')':'')+'. Read page and act by ref, or say the step differently.',page,untrustedContent:true};
-   }
    if(operation==='outcome'){
     if(typeof args.receiptId!=='string')throw new WorldletError('Choose a browser receipt first.');
     const id=args.receiptId;

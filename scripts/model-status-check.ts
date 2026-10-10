@@ -22,7 +22,7 @@ console.log('PASS shared model freshness, coalesced reads, stale-generation reje
 
 assert.equal(changesModelStatus('foxPreferences',{cloudConsent:false}),true);
 assert.equal(changesModelStatus('foxPreferences',{}),false);
-assert.equal(changesModelStatus('modelConfigure',{}),true);
+assert.equal(changesModelStatus('restartFox',{}),true);
 assert.equal(changesModelStatus('modelCatalog',{}),false);
 const {callHost}=await import('../platform/bridge/host.ts');
 const events:string[]=[];
@@ -30,7 +30,7 @@ const events:string[]=[];
 await callHost('foxPreferences',{cloudConsent:true});
 assert.deepEqual(events,['worldlet:model-invalidated','worldlet:model-invalidated']);
 events.length=0;(globalThis as any).window.worldletHost.request=async()=>{throw Error('configuration failed');};
-await assert.rejects(callHost('modelConfigure'),/configuration failed/);assert.equal(events.length,2);
+await assert.rejects(callHost('restartFox'),/configuration failed/);assert.equal(events.length,2);
 delete (globalThis as any).window;
 console.log('PASS bridge invalidates before and after scope/model changes, including failed configuration.');
 

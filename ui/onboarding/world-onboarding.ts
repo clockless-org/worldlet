@@ -11,7 +11,7 @@ const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google
 const suggestions={home:[...HOME_NATIVE],work:['github'],library:['notion'],money:[],health:[],travel:[],people:[]};
 
 // Source authorization is owned by the native Agent adapter. Never build on a click or a timer.
-export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,showModel,applySnapshot}){
+export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,applySnapshot}){
  let state=initial,screen='closed',region='home',moduleKey=null,saving=false,lastSource=null,guideText='';
  const panel=el('section',null,'world-onboarding');panel.setAttribute('aria-label','Set up your world');
  const notice=el('p','','onboarding-error');notice.setAttribute('role','alert');

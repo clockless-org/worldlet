@@ -154,7 +154,7 @@ async function applyReceivedSnapshot(state,isCurrent=()=>true){
  if(!sample){if(!desktopHint)desktopHint=mountDesktopCompanionHint({root:document.getElementById('notionWorld'),view,state});else desktopHint.update(state);}
  if(!sample&&!reportedWorld){reportedWorld=true;track('world_entered');}
  if(setupFinished&&!onboarding)document.getElementById('notionWorld').dispatchEvent(new CustomEvent('worldlet:intro-devices',{detail:[]}));
- if(!sample){if(!onboarding)onboarding=mountWorldOnboarding({root:document.getElementById('notionWorld'),call,view,state,toggleSample,showModel:onConnected=>preferences?.show('model',undefined,onConnected),applySnapshot:receive});else onboarding.update(state);}
+ if(!sample){if(!onboarding)onboarding=mountWorldOnboarding({root:document.getElementById('notionWorld'),call,view,state,toggleSample,applySnapshot:receive});else onboarding.update(state);}
  if(!preferences)preferences=createFoxPreferences({call,view,root:document.getElementById('notionWorld'),toggleSample,setup:(screen,provider)=>onboarding?.show(provider?(screen==='connection'?'connection':'app'):screen,'home',provider)});
  document.title=world.appName;
  // The rendered world may contain transient Hermes results; never export it automatically.

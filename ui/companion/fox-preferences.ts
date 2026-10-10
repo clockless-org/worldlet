@@ -2,19 +2,17 @@ import {hostFeatures,hostCopy} from '../../platform/bridge/features.ts';
 import {companionPersona} from '../../core/companion/index.ts';
 import {loginItemText} from '../../core/distribution/index.ts';
 
-import {createFoxModelGuide} from './fox-model-guide.ts';
 import {connectionLive} from '../../core/applets/index.ts';
 import {getApp} from '../../core/applets/index.ts';
 // Preferences and credential setup stay in Fox’s existing bubble, or, `embedded`, in a Settings
 // page of the companion panel, where its own page list replaces Back and Done.
 export function createFoxPreferences({call,view,root,setup,toggleSample,embedded=false}:{call:any;view:any;root?:any;setup:any;toggleSample?:any;embedded?:boolean}){
  let generation=0;
- const modelGuide=createFoxModelGuide({call,view,setup});
  const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=async()=>{b.disabled=true;try{await action();}catch(e){view.setGuide({text:e.message,actions:[button('Back',()=>show())],takeover:true});}finally{b.disabled=false;}};return b;};
  const close=()=>{generation++;view.setGuide(null);};
- async function show(screen='preferences',provider?: string,onConnected?: ()=>any){
-  if(screen==='model'){generation++;return modelGuide.show(onConnected);}
-  modelGuide.stop();
+ async function show(screen='preferences',provider?: string){
+  // Fox's model is the Agent's: choosing the Agent and its provider happens in Settings › Model (core/agent/model-providers.ts).
+  if(screen==='model'){generation++;if(!embedded)setup?.('closed');view.setGuide(null);window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}}));return;}
   view.revealGuide?.();
   const turn=++generation;
   if(screen==='tasks'){

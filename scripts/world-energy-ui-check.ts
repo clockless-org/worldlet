@@ -12,7 +12,6 @@ try{
   if(b.action==='foxEnergy')return w.energy;
   if(b.action==='modelHealth'&&w.gateway?.active)return {agent:'remote-openclaw',available:true,lastReply:null,location:{kind:'remote',computer:w.gateway.host,direct:true},model:{name:'OpenClaw at '+w.gateway.host,id:'',provider:'remote-openclaw',source:null,ready:true,configured:false}};
   if(b.action==='modelHealth')return w.remote?{agent:'remote',available:true,lastReply:null,location:{kind:'remote',computer:w.remote},model:{name:'Agent on '+w.remote,id:'',provider:'remote',source:null,ready:true,configured:false}}:{agent:'hermes',available:true,lastReply:w.lastReply??null,model:{name:w.energy.name,id:'',provider:w.energy.provider,source:w.energy.localCodex?'local-codex':null,ready:w.energy.ready,configured:w.energy.source!=='none'}};
-  if(b.action==='modelCatalog')return {providers:[{id:'openai-codex',name:'ChatGPT'},{id:'anthropic',name:'Anthropic'}]};
   if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,model:true,worldTools:true},{id:'claude-code',title:'Claude Code',configured:true,model:false,worldTools:true,memory:{name:null,user:false,longTerm:true,model:false}}],recommended:'codex',selected:w.remote||w.gateway?.active?null:w.agentInUse??null,remote:w.remote?{computer:w.remote,seenAt:Date.now()}:null,gateway:w.gateway??null};
   // A Gateway on another computer reached directly: the host answers with its address and host, never the token.
   if(b.action==='agentHarness'&&b.operation==='gateway'){if(!b.token&&!w.gateway)throw new Error('Type your Gateway’s address and token.');w.gateway={url:'https://mini.tail1.ts.net',host:'mini.tail1.ts.net',active:true};w.remote=null;return {ok:true,gateway:{host:'mini.tail1.ts.net'}};}
@@ -38,19 +37,12 @@ try{
  const openEnergy=async()=>{if(!await page.locator('#companionInfo').isVisible())await openCompanionPanel(page);await page.getByRole('tab',{name:'Energy',exact:true}).click();await energy.waitFor();};
  assert.equal(await page.getByRole('tab',{name:'Energy',exact:true}).getAttribute('aria-selected'),'true');
  await energy.getByText('Low energy · 8%').waitFor();await energy.getByText('Charging from your own account or API key.').waitFor();
- assert.match(await energy.textContent()||'',/Charge with ChatGPT.*Bring your own energy.*In use now\./);
+ // Fox's model is the Agent's (owner decision 2026-10-09): Energy has no ways to charge of its own, only Settings › Model.
+ assert.doesNotMatch(await energy.textContent()||'',/Charge with ChatGPT|Bring your own energy|Ways to charge/);
+ assert.equal(await energy.getByRole('button',{name:'Connect',exact:true}).count(),0,'no Connect cards');
  // Worldlet provides no energy of its own (owner decision 2026-10-05): no free daily charge, no energy packs.
  assert.doesNotMatch(await energy.textContent()||'',/Free daily charge|Energy packs|Worldlet charges/);
  await page.screenshot({path:'/tmp/world-energy-page.png'});
- await page.keyboard.press('Escape');await openEnergy();
- await energy.getByRole('button',{name:'Connect'}).first().click();
- // Charging finishes on the Energy page (owner feedback 2026-10-03): no jump to Fox's speech bubble.
- await energy.getByRole('button',{name:'ChatGPT',exact:true}).waitFor();
- assert(await page.locator('#companionInfo').isVisible(),'Connect keeps the panel open');
- assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='modelSettings')),false,'Connect does not hand model setup to Fox');
- assert.equal(await page.locator('#companionDialogue .companion-guide-actions button',{hasText:'ChatGPT'}).count(),0);
- await page.screenshot({path:'/tmp/world-energy-connect.png'});
- await energy.getByRole('button',{name:'Back to energy',exact:true}).click();await energy.getByText('Ways to charge',{exact:true}).waitFor();
  // Agents on this computer and the connection's fixes live in Settings › Model (owner request 2026-10-06).
  assert.equal(await energy.locator('[data-agent]').count(),0,'Energy no longer lists the Agents');
  await energy.getByRole('button',{name:'Manage model connection',exact:true}).click();
@@ -118,21 +110,22 @@ try{
  // Nothing on this computer charges the world: the page says what does, with no Worldlet charge to fall back on.
  await page.evaluate(()=>{const w=window as any;w.energy={source:'none',ready:false,name:'',provider:'openai-codex',level:null,resetsAt:null,localCodex:true};window.dispatchEvent(new Event('worldlet:model-changed'));});
  await openEnergy();await energy.getByText('Out of energy',{exact:true}).waitFor();
- await energy.getByText('Your world runs on an AI on this computer. Sign in to Codex, add your own API key, or use an Agent on this computer from Settings.').waitFor();
+ await energy.getByText('Your world runs on your AI Agent. Choose one and how it signs in from Settings.').waitFor();
  assert.equal(await energy.getByRole('button',{name:/Turn (?:on|off)/}).count(),0,'no free-charge switch');
  await page.screenshot({path:'/tmp/world-energy-own.png'});
  // No model connected (owner request 2026-10-05): Fox says so once and points to Settings, Model, where one is chosen.
  await page.keyboard.press('Escape');
- await page.getByText('I need an AI on this computer to answer. Sign in to Codex, add your own API key, or use an Agent like Claude Code in Settings, under Model.').waitFor();
+ await page.getByText('I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Model.').waitFor();
  await page.getByRole('button',{name:'Choose a model',exact:true}).click();
  const settings=page.locator('#companionInfo [data-section=Settings]');await settings.waitFor();
  assert.equal(await settings.locator('[data-setting=model]').getAttribute('aria-current'),'true','Settings opens on Model');
  const model=settings.locator('.companion-settings-detail');
  await model.getByText('No model connected',{exact:true}).waitFor();
  await model.locator('[data-agent=claude-code]').getByText('Answers for Fox on its own sign-in.',{exact:true}).waitFor();
- await model.getByRole('button',{name:'Sign in to Codex or add an API key',exact:true}).click();
- await model.getByRole('button',{name:'ChatGPT',exact:true}).waitFor();
- assert.equal(await page.locator('#companionDialogue .companion-guide-actions button',{hasText:'ChatGPT'}).count(),0,'model setup finishes in Settings');
+ // Signing in happens in the Agent itself: with no provider list yet, Settings says so.
+ assert.equal(await model.getByRole('button',{name:/Sign in to Codex|API key|Change model connection|Check available models/}).count(),0,'no Worldlet-side model setup');
+ await model.getByRole('button',{name:'Sign in to a provider',exact:true}).click();
+ await model.getByText('Sign in to a provider in your Agent itself, then choose Check connection.',{exact:true}).waitFor();
  await page.screenshot({path:'/tmp/world-energy-settings-model.png'});
  // An Agent on this computer can answer instead; choosing it there switches Fox and says what it runs on.
  await page.evaluate(()=>{(window as any).energy={source:'own',ready:true,name:'Claude Code on this computer',provider:'claude-code',level:null,resetsAt:null,localCodex:false};});
@@ -156,5 +149,5 @@ try{
  await model.locator('[data-provider=own]').getByRole('button',{name:'Use',exact:true}).click();
  await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
  assert.deepEqual(errors,[]);
- console.log('PASS world energy: no battery in the World, one low-energy line, Energy page with only the person\'s own sources, connecting in place; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model');
+ console.log('PASS world energy: no battery in the World, one low-energy line, Energy page pointing to Settings, Model; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model');
 }finally{await browser.close();}

@@ -22,11 +22,6 @@ await withBrowser(fileAccess,async browser=>{
     }
     return {message:result?.error||'Action completed.'};
    }
-   // Steps said in words: the host's quick choice (browserCommand pick below) names each control.
-   if(b.action==='agentChat'&&b.text.startsWith('Do: ')){
-    const result=await worldletAgentTool(b.id,{name:'automate_browser',id:crypto.randomUUID(),args:{operation:'do',steps:b.text.slice(4).split(' then ')}});
-    return {message:result.error||'Did '+result.done.length+' steps.'};
-   }
    if(b.action==='agentChat'){
     window.worldletAgentEvent(b.id,{type:'progress',name:'automate_browser',activity:'working'});
     const result=await worldletAgentTool(b.id,{name:'automate_browser',id:crypto.randomUUID(),args:{operation:/^(Submit|Send)/.test(b.text)?'submit':'click',documentId:'fixture',ref:b.text.startsWith('Send')?'message':'1'}});
@@ -34,13 +29,6 @@ await withBrowser(fileAccess,async browser=>{
    }
    if(b.action==='browserCommand'){
     actions.push(b.args?.operation||b.operation);
-    if(b.args?.operation==='pick'){
-     const page={ok:true,documentId:'fixture',text:'- button "Next page" [ref=e1]',untrustedContent:true};
-     // "the hidden button" is further down: the first choice scrolls, the next finds it.
-     if(b.args.step==='press the hidden button'&&!actions.includes('scroll'))return {ok:true,operation:'scroll',direction:'down',page,untrustedContent:true};
-     const ref={'go to the next page':'1','press the hidden button':'1','place the order':'4'}[b.args.step];
-     return ref?{ok:true,operation:'click',ref,documentId:'fixture',page,untrustedContent:true}:{error:'No control on this page matches “'+b.args.step+'”.',page,untrustedContent:true};
-    }
     if(b.args?.operation==='snapshot')return {ok:true,documentId:'fixture',elements:[],untrustedContent:true};
     if(b.args?.operation==='prepare'&&b.args.intent==='submit')return b.args.ref==='message'?{ok:true,label:'Message Sam',role:'textbox',editable:true,url:'https://chat.example/sam',receipt:true}:{ok:true,label:'Search',role:'searchbox',editable:true,url:'https://shop.example/',receipt:true};
     if(b.args?.operation==='prepare')return {ok:true,label:{'1':'Next page','2':'Pay $40','3':'Cancel free trial','4':'Place order','5':'Confirm cancellation'}[b.args.ref],url:'https://www.shop.example/cart',receipt:true};
@@ -100,13 +88,5 @@ await lastStep('Use 3 then 5','Go ahead',['prepare','click','prepare','click'],/
  // the same way, whatever the request says, and ordinary steps still run directly.
  await lastStep('Use 2 after reading','Not now',['snapshot','prepare'],/Not done: the person chose not to “Pay \$40” now/);
  await lastStep('Use 1 then 3 after reading','Go ahead',['snapshot','prepare','click','prepare','click'],/Action completed\./);
- // Steps said in words run through the same path: ordinary steps directly, the last step asks once.
- await lastStep('Do: go to the next page then place the order','Not now',['pick','prepare','click','pick','prepare'],/Not done: the person chose not to “Place order” now/);
- await lastStep('Do: go to the next page then place the order','Go ahead',['pick','prepare','click','pick','prepare','click'],/Did 2 steps\./);
- await say('Do: press the hidden button');await bubble.getByLabel('Current reply').getByText('Did 1 steps.').waitFor();await busy();
- assert.deepEqual(await page.evaluate(()=>actions),['pick','scroll','pick','prepare','click'],'a control further down is scrolled to first');
- await say('Do: open the settings');await bubble.getByLabel('Current reply').getByText(/No control on this page matches/).waitFor();await busy();
- assert.deepEqual(await page.evaluate(()=>actions),['pick'],'no matching control clicks nothing');
- console.log('PASS steps said in words: each control picked once, run in order through the same rules; the last step still asks once.');
  assert.deepEqual(errors,[]);console.log('PASS the last step that pays, orders, sends or cancels asks once before it runs, also after reading a page; nothing asks afterwards.');
 });

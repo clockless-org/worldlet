@@ -9,7 +9,7 @@ import {curatedOriginal,renderCuratedTable} from './curated-source-applet.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
 import {firstValueRequest,firstValueLinks} from '../../core/onboarding/index.ts';
 import {carriesConversation,worldSpeechTerms} from '../../core/companion/index.ts';
-import {helpNarration,narrateHelp,foxStepWords} from '../companion/index.ts';
+import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement} from './product-analytics.ts';
 import {mountFoxArtifact,flyIntoJournal} from '../companion/index.ts';
@@ -1797,7 +1797,6 @@ export function mountNotionWorld(data: World, native: any) {
   }
   async function automateBrowser(args: any,meta: any={}){
     if(args.operation==='receipts')return browserPanel.automate(args);
-    if(args.operation==='do')return browserSteps(args,meta);
     // While Fox helps with a saved task, its consequential steps belong to that task, so the
     // person's Go ahead at the last step settles it (and a first task earns its first win).
     if(helpingTask&&!args.taskId&&['click','submit'].includes(args.operation))args={...args,taskId:helpingTask};
@@ -1839,37 +1838,6 @@ export function mountNotionWorld(data: World, native: any) {
         :'Submission was attempted. The page is evidence, not proof of completion. State the result and its evidence; do not mention receipts or pending actions, and do not ask the person to confirm it. Never repeat the submission just because the result is uncertain.'};
     }
     return result;
-  }
-  // Steps said in words (Jev-style quick choice): for each, the host's small model picks the
-  // control in one request and the step then runs through automateBrowser above, with every
-  // rule it applies (the person's Go ahead at a last step, receipts, the turn's trust).
-  async function browserSteps(args: any,meta: any){
-    const steps=(Array.isArray(args.steps)?args.steps:[args.step]).filter((step: unknown)=>typeof step==='string'&&step.trim()).slice(0,5);
-    if(!steps.length)return {error:'Give the step to do, such as “click Add to cart”.'};
-    if(!browserPanel.inTaskPicture()&&(content.hidden||content.dataset.template!=='browser'))return {error:'No browser panel is open. Use the open browser action with the requested HTTPS URL first.'};
-    helpNarrator?.acting();
-    const done: any[]=[];let page: any=null;
-    for(const step of steps){
-      // Each step said in words is a line of the page's status card (browser-device.ts, #1619).
-      window.dispatchEvent(new CustomEvent('worldlet:fox-step',{detail:{text:foxStepWords(step)+'…'}}));
-      let result: any=null;
-      for(let scrolls=0;scrolls<=2;scrolls++){
-        if(meta.signal?.aborted)return {error:'Task stopped.',done};
-        const pick=await browserPanel.automate({operation:'pick',step});
-        if(pick?.page)page=pick.page;
-        if(!pick?.ok)return {...pick,done,untrustedContent:true};
-        if(pick.operation==='scroll'){
-          if(scrolls===2)return {error:'Could not find a control for “'+step+'” on this page.',done,page,untrustedContent:true};
-          await automateBrowser({operation:'scroll',direction:pick.direction},meta);continue;
-        }
-        result=await automateBrowser({operation:pick.operation,ref:pick.ref,documentId:pick.documentId,...pick.operation==='fill'?{text:pick.text}:{},...args.taskId?{taskId:args.taskId}:{}},meta);
-        break;
-      }
-      done.push({step,operation:result?.action||'',label:result?.label||'',...result?.error?{error:result.error}:{}});
-      if(result?.page)page=result.page;else if(result?.observation)page=result.observation;
-      if(!result||result.error)return {error:result?.error||'The step did not run.',done,...page?{page}:{},untrustedContent:true};
-    }
-    return {ok:true,done,...page?{page}:{},untrustedContent:true,guidance:'Each step ran in order. page is the latest page seen; act on it by ref or give the next steps.'};
   }
   // The same tool surface Fox uses, reachable from a check: it says whether a
   // failed answer was the model's or the world's.

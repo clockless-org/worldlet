@@ -12,7 +12,7 @@ assert.equal(view.state,'attention');assert.deepEqual(view.fixes,['restart']);as
 view=modelHealthView({...codex,lastReply:{ok:false,at,error:'HTTP 401 Unauthorized'}});
 assert.deepEqual(view.fixes,['connect']);
 view=modelHealthView({...codex,lastReply:{ok:false,at,error:'model_not_found'}});
-assert.deepEqual(view.fixes,['models','connect']);
+assert.deepEqual(view.fixes,['connect']);
 view=modelHealthView({...codex,lastReply:{ok:false,at,error:'Something odd'}});
 assert.deepEqual(view.fixes,['restart','connect']);assert.match(view.problem,/Something odd/);
 // A missing or expired Codex sign-in, no connection at all, an Agent that does not run, and a chosen Agent.

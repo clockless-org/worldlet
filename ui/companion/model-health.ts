@@ -5,7 +5,7 @@ import type {HarnessLocation} from '../../contracts/harness-services.ts';
 // see and fix every connection problem there). The host's `modelHealth` reads the Agent's model status and
 // how the last reply ended; this turns that into plain words and the fixes that fit.
 export type ModelPath='codex'|'key'|'agent'|'remote'|'none';
-export type ModelFix='connect'|'models'|'restart'|'update';
+export type ModelFix='connect'|'restart'|'update';
 export interface ModelHealth {
  agent:string|null;available:boolean;error?:string;
  model:{name:string;id:string;provider:string;source:string|null;ready:boolean;configured:boolean};
@@ -36,13 +36,13 @@ export function modelHealthView(health:ModelHealth|null,agentTitle:string|null=n
  const named=model.id&&model.id!==model.name?`${model.name} (${model.id})`:model.name||model.id;
  const how=path==='agent'?`${agentTitle} on this computer answers for Fox.`:path==='codex'?'Your ChatGPT plan, through the Codex sign-in on this computer.':path==='key'?`Your own API key${model.provider&&model.provider!=='custom'?' with '+model.provider:''}.`:'';
  if(path==='none'||!model.ready&&path!=='agent')return {path,state:'none',title:path==='key'?'Fox’s API key is missing':'No model connected',
-  detail:'Fox needs an AI on this computer to answer. Sign in to Codex, add your own API key, or use an Agent below.',
-  problem:path==='codex'?'The Codex sign-in on this computer is missing or expired.':path==='key'?'Add the API key again.':'',fixes:['connect']};
+  detail:'Fox needs an AI Agent signed in to a provider to answer. Choose one below.',
+  problem:path==='codex'?'The Codex sign-in on this computer is missing or expired.':path==='key'?'Sign in to the provider again.':'',fixes:['connect']};
  const detail=[how,named?'Model: '+named+'.':''].filter(Boolean).join(' ');
  const last=health.lastReply;
  if(last&&!last.ok){
   const failure=modelFailure(last.error||'');
-  const fixes:ModelFix[]=!failure?['restart','connect']:failure.code==='authentication'||failure.code==='no_local_model'?['connect']:failure.code==='model'?(codex?['models','connect']:['connect'])
+  const fixes:ModelFix[]=!failure?['restart','connect']:failure.code==='authentication'||failure.code==='no_local_model'?['connect']:failure.code==='model'?['connect']
    :failure.code==='update_required'?['update']:['quota','rate_limit','paused','included_allowance'].includes(failure.code)?['connect']:['restart'];
   return {path,state:'attention',title:'Fox’s last reply did not finish',detail,
    problem:`At ${time(last.at)}: `+(failure?plain(failure.message):`Fox could not finish the reply${last.error?' ('+last.error+')':''}. Restart Fox and send it again.`),fixes};

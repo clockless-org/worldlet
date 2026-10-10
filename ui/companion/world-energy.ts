@@ -37,7 +37,7 @@ export async function readEnergy(call):Promise<Energy> {
  return energy;
 }
 /** What Fox says when nothing on this computer can answer for it. */
-export const NO_MODEL_TEXT='I need an AI on this computer to answer. Sign in to Codex, add your own API key, or use an Agent like Claude Code in Settings, under Model.';
+export const NO_MODEL_TEXT='I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Model.';
 export function rechargeText(energy:Energy|null):string {
  if(!energy?.resetsAt||energy.level===null||energy.level>=100)return '';
  const at=new Date(energy.resetsAt);
