@@ -266,6 +266,9 @@ export interface BuildThemeManifest {
     assets: 'assets';
     presentation: 'presentation.json';
     applets: string[];
+    /** `host`: the theme draws the World only. Applets open in the host's own Applet pages, so `renderApplet` is never
+     * called, `applets` is empty, and the shared HUD keeps its own layout (scene slots and HUD rectangles are not applied). */
+    appletPages?: 'host';
 }
 export declare function themeAssetPath(v: unknown): string;
 export declare function parseBuildThemeManifest(value: unknown): BuildThemeManifest;

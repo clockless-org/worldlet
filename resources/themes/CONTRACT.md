@@ -19,7 +19,7 @@ flowchart LR
 
 ```text
 package/
-  theme.json          # contractVersion: 2, id, title, applets, optional updatedAt
+  theme.json          # contractVersion: 2, id, title, applets, optional updatedAt and appletPages
   presentation.json   # validated scenes, coordinate systems, slots, tokens, fonts
   entry.ts            # default export implements BuildTheme
   theme.css
@@ -28,6 +28,8 @@ package/
 ```
 
 `theme.json` fixes `entry: "entry.ts"`, `stylesheet: "theme.css"`, `assets: "assets"`, and `presentation: "presentation.json"`. `applets` lists bespoke scenes; each ID must have a matching presentation. IDs not listed use `fallback`, including future Applets. There is no inherited Village requirement or host registry edit per package.
+
+A theme that draws only the World sets `appletPages: "host"` with an empty `applets`: Applets then open in the host's own Applet pages, `renderApplet` is never called, and the shared HUD keeps its own layout, so its scene slots and HUD rectangles are not applied. Its HUD material, sounds and Applet `icons` still apply. The Village is this kind of theme.
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-09T23:14:20Z`); it is informational, not a compatibility gate. `contractVersion` alone controls interface compatibility; source hashes identify the copied contents.
 
