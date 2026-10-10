@@ -1,9 +1,9 @@
 import {WORLD_WIDTH,WORLD_HEIGHT} from '../world-design.ts';
 import {THEME_WORLD} from '../world-layout.ts';
-import {ACTIVE_THEME,onThemeApplied} from '../../themes/index.ts';
+import {ROOM_FOREGROUND} from './village-pack.ts';
 // Placement coordinates cover the full plate; overview is only its inner frame.
 export const WORLD_EXTENT={x:0,y:0,width:WORLD_WIDTH,height:WORLD_HEIGHT};
-export let WORLD_OVERVIEW=THEME_WORLD.camera.overview;
+export const WORLD_OVERVIEW=THEME_WORLD.camera.overview;
 export const OVERVIEW_CENTER=[WORLD_OVERVIEW[0]+WORLD_OVERVIEW[2]/2,WORLD_OVERVIEW[1]+WORLD_OVERVIEW[3]/2];
 export function villageCamera(width:number,height:number,zoom:number,anchor:number[]){
  const base=Math.max(width/(WORLD_WIDTH*WORLD_OVERVIEW[2]),height/(WORLD_HEIGHT*WORLD_OVERVIEW[3]));
@@ -13,7 +13,7 @@ export function villageCamera(width:number,height:number,zoom:number,anchor:numb
  const x=clamp(width*.5-anchor[0]*w,width-w,0);
  const y=clamp(height*.5-anchor[1]*h,height-h,0);
  // The opened Applet stands where the theme's room layout puts it (Village: right of centre).
- const [fx,fy]=ACTIVE_THEME.pack.layout.room.foreground;
+ const [fx,fy]=ROOM_FOREGROUND;
  return {scale,x,y,left:0,foregroundX:width*fx,foregroundY:height*fy};
 }
 
@@ -24,8 +24,6 @@ export function approachVillageCamera(current:ReturnType<typeof villageCamera>|n
  const t=Math.max(0,Math.min(1,amount));
  return {...target,scale:current.scale+(target.scale-current.scale)*t,x:current.x+(target.x-current.x)*t,y:current.y+(target.y-current.y)*t};
 }
-
-onThemeApplied(()=>{WORLD_OVERVIEW=THEME_WORLD.camera.overview;OVERVIEW_CENTER.splice(0,2,WORLD_OVERVIEW[0]+WORLD_OVERVIEW[2]/2,WORLD_OVERVIEW[1]+WORLD_OVERVIEW[3]/2);});
 
 /** Frame a dimensional area with its props above their ground anchors and HUD breathing room. */
 export function areaCameraFrame(id:string,width:number,height:number){

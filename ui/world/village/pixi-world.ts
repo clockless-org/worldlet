@@ -1,7 +1,6 @@
 import {areaCameraFrame} from './village-camera.ts';
 import {createAreaScenery} from './area-scenery.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
-import {ACTIVE_THEME} from '../../themes/index.ts';
 import {WORLD_WIDTH,WORLD_HEIGHT,APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE} from '../world-design.ts';
 import {REGION_LANDMARKS} from './region-landmarks.ts';
 import {createLandmarkSprite} from './landmark-sprite.ts';
@@ -18,8 +17,7 @@ import 'pixi.js/unsafe-eval';
 import {Application,Container,Sprite,Texture,Graphics,Rectangle,BlurFilter,ColorMatrixFilter,Matrix} from 'pixi.js';
 import {createFocusScenery} from './pixi-focus.ts';
 import {extraPlacements,resolvePlacements,type PlacementSlot} from '../slot-placement.ts';
-import {APPLET_SPRITES} from './applet-sprites.ts';
-import {HOME_NATIVE,CODING_SESSIONS} from '../../../core/applets/index.ts';
+import {APPLET_SPRITES} from '../applet-sprites.ts';
 import {myAppletMark} from './my-applet-mark.ts';
 import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from '../frame-budget.ts';
 import {attachAppletLamp} from '../applet-lamp-art.ts';
@@ -28,8 +26,8 @@ import type {RegionLayout} from '../region-layout.ts';
 
 // Authored image coordinates, not camera-dependent guesses. The internal
 // "people" key remains stable while its displayed region is Explore.
-import {themeScene} from '../theme-scene.ts';
-// The active theme's camera, light, ambience and sites (theme-scene.ts).
+import {VILLAGE_SCENE} from './village-scene.ts';
+// The Village's camera, light, ambience and sites (village-scene.ts).
 
 /** A texture's RGBA pixels, read back through a 2D canvas. */
 function alphaOf(tex:Texture):Uint8ClampedArray {
@@ -53,7 +51,7 @@ export interface VillageOptions {
  navigate(applet:string):void;back():void;openArea(id:string):void;moveApplet(id:string,area:string,slot?:number):void;menu(id:string,x:number,y:number):void;
 }
 export function createModuleScene(host,rooms,onProject,options:VillageOptions):any{
- const {areaZoom,camera:themeCamera,approachCamera,overviewCenter:OVERVIEW_CENTER,sites:THEME_SITES,lightingState,createLighting,createAmbience,workPath}=themeScene(ACTIVE_THEME.pack.id);
+ const {areaZoom,camera:themeCamera,approachCamera,overviewCenter:OVERVIEW_CENTER,sites:THEME_SITES,lightingState,createLighting,createAmbience,workPath}=VILLAGE_SCENE;
  const payload=(globalThis as any).__WORLDLET_25D_ASSETS__;
  // The shell's own state (shell-interaction.ts), handed in by the host: the World never reads the shell's elements.
  const shell=()=>options.interaction();
@@ -142,11 +140,11 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
   const activeKey=level==='object'?devices.find(d=>d.room.moduleId===active)?.room.key:null;
   const immersive=payload.focus?.[activeKey]?.framing==='scene-fit';
   const focusKey=activeKey&&(browserFocused||immersive)?activeKey:null;
-  focusSceneryVisible=focusScenery?.update(focusKey==='gmail'&&ACTIVE_THEME.pack.id==='village'&&!immersive?null:focusKey,host.clientWidth,host.clientHeight,immersive&&level==='object'?1:framing,time,motion&&!reduced.matches&&windowActive()&&!document.hidden)||false;
+  focusSceneryVisible=focusScenery?.update(focusKey==='gmail'&&!immersive?null:focusKey,host.clientWidth,host.clientHeight,immersive&&level==='object'?1:framing,time,motion&&!reduced.matches&&windowActive()&&!document.hidden)||false;
   host.toggleAttribute('data-immersive-background',focusSceneryVisible&&immersive);
   world.scale.set(view.scale);world.position.set(view.x,view.y);
   // Mail has one HTML device in Open, Focus and Web, including before source data arrives.
-  for(const d of devices){const foreground=level==='object'&&d.room.moduleId===active,openInstallation=foreground&&options.staged(active)&&!!payload.open?.[d.room.key]&&!CODING_SESSIONS.includes(d.room.key)&&!d.nativeDevice&&!interaction.detailOpen;d.root.alpha+=(1-d.root.alpha)*.12;d.root.visible=!(areaZoom&&level==='building'&&d.room.buildingId!==active)&&!d.arrivalPending&&allowed(d.room)&&d.root.alpha>.01&&(d.room.entity!=='matter'||foreground)&&!(foreground&&focusSceneryVisible)&&!openInstallation&&!(foreground&&d.room.key==='gmail');
+  for(const d of devices){const foreground=level==='object'&&d.room.moduleId===active,openInstallation=foreground&&options.staged(active)&&!interaction.detailOpen;d.root.alpha+=(1-d.root.alpha)*.12;d.root.visible=!(areaZoom&&level==='building'&&d.room.buildingId!==active)&&!d.arrivalPending&&allowed(d.room)&&d.root.alpha>.01&&(d.room.entity!=='matter'||foreground)&&!(foreground&&focusSceneryVisible)&&!openInstallation&&!(foreground&&d.room.key==='gmail');
    const closeSlot=closeArea?.slots.find(s=>s.id===assigned[d.room.moduleId]?.id);
    const closeVisual=closeSlot?areaScenery.visual(d,closeArea):null;
    d.body.visible=!closeVisual;for(const visual of d.closeVisuals?.values()||[])visual.body.visible=visual===closeVisual;d.closeVisual=closeVisual;
@@ -346,12 +344,12 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    if(room.key==='youtube')root.on('pointerdown',e=>{(e.nativeEvent as any).worldletKeepFox=true;});
    root.on('pointerdown',e=>{if(e.button!==0||level==='object'||!eligible(room)||shell().locked)return;dragDevice={id:room.moduleId,start:[e.global.x,e.global.y],root};});
    root.on('pointertap',e=>{e.stopPropagation();if(e.button!==0||dragged||!allowed(room)||level==='object')return;options.navigate(room.moduleId);});root.on('pointermove',e=>{if(!tourCovers())showName(e,room);});root.on('pointerover',e=>{if(tourCovers())return;focusScenery?.preload(room.key);showName(e,room);(root as any).isHovered=true;hoveredRegion=devices.find(d=>d.root===root)?.region?.b.id||null;outlines.forEach(s=>s.visible=true);});root.on('pointerout',()=>{hideName();(root as any).isHovered=false;hoveredRegion=null;outlines.forEach(s=>s.visible=false);});
-   const workSignal=CODING_SESSIONS.includes(room.key)?createWorkSignal(host,room.key,root,width,visibleTop):null;
+   const workSignal=room.allowance?createWorkSignal(host,room.key,root,width,visibleTop):null;
    const spark=new Graphics();for(let n=0;n<5;n++){const a=n*Math.PI*2/5,x=Math.cos(a)*width*.65,y=Math.sin(a)*width*.4-width*.45;spark.moveTo(x-3,y).lineTo(x+3,y).moveTo(x,y-3).lineTo(x,y+3);}spark.stroke({color:0xffe4a0,width:1.8});spark.alpha=0;spark.eventMode='none';body.addChild(spark);
    root.visible=allowed(room);root.eventMode=allowed(room)?'static':'none';
    const lamp=room.entity==='app'?attachAppletLamp(sprite,deviceKey,payload.deviceEffects?.[deviceKey]?.lamp):null;
    const enchantment=createAppletEnchantments(sprite,room.key,payload.deviceEffects?.[deviceKey]?.idle);
-   world.addChild(root);devices.push({body,overviewHit:root.hitArea,overviewBounds:{visibleLeft,visibleTop,visibleBottom,visibleWidth},enchantment,outlines,lamp,nativeDevice:HOME_NATIVE.includes(room.key),spark,revealAt:allowed(room)?performance.now():null,workSignal,room,region,anchor,root,sprite,shadow,shadowRevealAt:null,width,visibleBottom,visibleTop,visibleLeft,visibleWidth,study:!!study,baseAnchor:[...anchor],rideStart:null,rideOffset:0,status:room.status});
+   world.addChild(root);devices.push({body,overviewHit:root.hitArea,overviewBounds:{visibleLeft,visibleTop,visibleBottom,visibleWidth},enchantment,outlines,lamp,spark,revealAt:allowed(room)?performance.now():null,workSignal,room,region,anchor,root,sprite,shadow,shadowRevealAt:null,width,visibleBottom,visibleTop,visibleLeft,visibleWidth,study:!!study,baseAnchor:[...anchor],rideStart:null,rideOffset:0,status:room.status});
   }
   lighting=await createLighting({stage:app.stage,host,payload,image,dayLayers:[surroundings]});if(closed){lighting?.destroy();return;}
   if(lighting){surroundings.filters=[lighting.sceneryGrade];for(const child of world.children)if(child instanceof Sprite)child.filters=[...(child.filters||[]),lighting.grade];}
