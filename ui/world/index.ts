@@ -16,7 +16,7 @@ export {WORLD_PRESETS,applyPersonalWorld} from './world-presets.ts';
 export {attachBrowserDevice} from './browser-sample.ts';
 export {createWorldProjector} from './world-projection-client.ts';
 
-export {lampLabels} from './applet-lamp.ts';
+export {lampLabels,lampNeeds} from './applet-lamp.ts';
 export {FOX_FRAME_RATE,WORLD_FRAME_RATE,foxFrameRate,frameDue,windowActive,worldFrameRate} from './frame-budget.ts';
 
 export {createMailArrival} from './mail-arrival.ts';

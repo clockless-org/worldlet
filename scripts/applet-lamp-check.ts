@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as villageLamp from '../ui/world/village/village-lamp.ts';
-import {appletLamp,appletLampContent,lampColors,lampLabels,lampOpacity,lampDisplayState,LAMP_BREATH_MS} from '../ui/world/applet-lamp.ts';
+import {appletLamp,appletLampContent,lampColors,lampLabels,lampNeeds,lampOpacity,lampDisplayState,LAMP_BREATH_MS} from '../ui/world/applet-lamp.ts';
 import {appletStatus} from '../core/applets/status.ts';
 import {stackLampBoxes} from '../ui/world/applet-lamp-label.ts';
 assert.equal(appletLamp(),'off');
@@ -13,25 +13,34 @@ assert.equal(appletLamp({},undefined,{available:true}),'ready');
 const finding={sourceProvider:'gmail',worldItemId:'one',worldItemStatus:'open',worldItemKind:'task',worldItemSignal:{priority:'urgent'}};
 for(const worldItemStatus of ['open','read'])assert.equal(appletLamp({},undefined,appletLampContent('gmail',[{...finding,worldItemStatus}])),'ready','A saved finding only shows that the Applet holds content');
 assert.equal(appletLamp({connected:true},undefined,appletLampContent('gmail',[finding])),'ready','An unread finding never lights the lamp');
-assert.equal(appletLamp({failed:true},undefined,appletLampContent('gmail',[finding])),'error','A failure still shows over saved findings');
+assert.equal(appletLamp({failed:true,needs:'reconnect'},undefined,appletLampContent('gmail',[finding])),'error','A failure the person must fix still shows over saved findings');
 assert.equal(appletLampContent('discord',[finding]).available,false);
 assert.equal(appletLampContent(undefined,[{...finding,sourceProvider:undefined}]).available,false);
 assert.deepEqual(Object.keys(lampLabels),['off','ready','processing','error'],'Four states: no saved-result state');
 assert.deepEqual(Object.keys(lampColors),Object.keys(lampLabels),'Every color belongs to a state, so there is no green');
 for(const phase of ['reading','syncing','connecting'])assert.equal(appletLamp({phase}),'processing');
-assert.equal(appletLamp({failed:true}),'error');
-assert.equal(appletLamp({phase:'reading',failed:true}),'processing');
+assert.equal(appletLamp({failed:true}),'off','A failed check, read or analysis retries by itself: no red lamp, no notice');
+assert.equal(appletLamp({connected:true,failed:true}),'ready');
+assert.equal(appletLamp({failed:true,needs:'permissions'}),'error');
+assert.equal(appletLamp({phase:'reading',failed:true,needs:'reconnect'}),'processing');
 assert.equal(appletLamp({}, {sessions:[{status:'Running'}]}),'processing');
 assert.equal(appletLamp({}, {sessions:[{status:'Failed'}]}),'error');
 assert.equal(appletLamp({}, {sessions:[{status:'Completed'}]}),'ready');
 const app={provider:'gmail'};
-assert.equal(appletLamp(appletStatus(app,[{provider:'gmail',connected:true,failed:true}])),'error');
+// Mail's analysis ended without a result on 2026-10-10 (Alpha 4146): the World showed "An operation failed · Check connection"
+// although nothing was wrong with the connection and the next try was already scheduled.
+assert.equal(appletLamp(appletStatus(app,[{provider:'gmail',connected:true,failed:true}])),'ready','A failure with nothing for the person to do stays quiet');
+assert.equal(appletStatus(app,[{provider:'gmail',connected:true,failed:true,requiredAction:'reconnect'}]).needs,'reconnect');
+assert.equal(appletLamp(appletStatus(app,[{provider:'gmail',connected:true,failed:true,requiredAction:'reconnect'}])),'error','An expired sign-in needs the person');
+assert.equal(appletLamp(appletStatus(app,[{provider:'gmail',connected:true,failed:true,syncError:'Folder access expired. Choose the folder again.'}])),'error');
+assert.equal(appletStatus(app,[{provider:'gmail',connected:true,failed:true,syncError:'Network timed out'}]).needs,null);
 assert.equal(appletLamp(appletStatus(app,[{provider:'gmail',connected:true,failed:false}])),'ready');
 assert.equal(appletLamp({usableWithoutLogin:true}),'ready');
 for(const key of ['browser','youtube','google-maps','airbnb','github'])assert.equal(appletLamp(appletStatus({key,capability:'browser'})),'ready',key+' supports public use');
 assert.equal(appletLamp(appletStatus({key:'netflix',capability:'browser'})),'off');
 assert.equal(appletLamp(appletStatus({key:'netflix',capability:'browser'},[{provider:'netflix',connected:true}])),'ready');
 assert.equal(appletLamp(appletStatus({key:'browser',capability:'planned'})),'off');
+assert.ok(!Object.values({...lampLabels,...lampNeeds}).some(text=>/operation failed/i.test(text)),'A notice says what is needed, never a bare failure');
 console.log('Applet lamp states passed');
 
 assert.equal(lampColors.ready,0xffffff);

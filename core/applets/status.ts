@@ -1,3 +1,4 @@
+import {sourceReadAction} from './read-recovery.ts';
 // Public entry points whose core browsing function works without an account.
 // Do not infer this from an arbitrary URL or from having opened a website.
 const PUBLIC_APPLETS=new Set(['browser','youtube','google-maps','airbnb','github','random-game']);
@@ -34,10 +35,12 @@ function connectionSummary(link,facts){
 
 export function appletStatus(app,connections=[]){
  const support=appletSupport(app),link=connections.find(c=>c.provider===(app.provider||app.key)),facts=connectionFacts(link);
+ // A failure needs the person only when it names what they must do (read-recovery.ts); anything else retries quietly.
+ const needs=link?sourceReadAction(link):null;
  const count=Number.isInteger(link?.resultCount)?link.resultCount:Array.isArray(link?.records)&&link.records.length?link.records.length:null;
  const noun=app.content?.noun||['record','records'];
  const countText=count===null?'':Number.isInteger(link?.resultCount)?`${count} in last result`:`${count} ${count===1?noun[0]:noun[1]}`;
- const result=(state: string,phase: string,title: string,extra: {connected?: boolean;activity?: string}={})=>({state,phase,connected:!!facts?.connected,usableWithoutLogin:!['unavailable','planned'].includes(support.level)&&PUBLIC_APPLETS.has(app.key),failed:!!facts?.failed,support:support.level,count,label:[title,countText,link&&connectionSummary(link,facts)].filter(Boolean).join(' · '),...extra});
+ const result=(state: string,phase: string,title: string,extra: {connected?: boolean;activity?: string}={})=>({state,phase,connected:!!facts?.connected,usableWithoutLogin:!['unavailable','planned'].includes(support.level)&&PUBLIC_APPLETS.has(app.key),failed:!!facts?.failed,needs,support:support.level,count,label:[title,countText,link&&connectionSummary(link,facts)].filter(Boolean).join(' · '),...extra});
  // The sample world's Applets hold authored records and items. They read as alive,
  // Keep fictional records distinct from a connected account.
  if(link?.sample)return result('sample','sample','Preset content',{connected:true});

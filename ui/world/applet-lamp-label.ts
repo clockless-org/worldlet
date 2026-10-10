@@ -56,14 +56,14 @@ export function createLampLabel(root:HTMLElement,key:string){
   size(){const key=element.dataset.state+'\u0000'+element.textContent+'\u0000'+root.clientWidth;if(measured!==key){measured=key;box={width:element.offsetWidth,height:element.offsetHeight};}return box;},
   shift(value:number){if(!label.anchor||value===offset)return;offset=value;place(label.anchor.top+offset);},
   update(signal:LampSignal,title:string,visible:boolean,x:number,y:number,foreground=false){
-  current=signal;const alert=signal.state==='error';
+  current=signal;const alert=signal.state==='error'&&!!signal.action;
   // Work in progress has no notice of its own: the lamp breathes and the world log says
   // what is happening ("Reading Mail…"). Only a failure with something to do gets one.
   const hidden=!visible||!alert;if(element.hidden!==hidden)element.hidden=hidden;
   if(hidden){label.anchor=null;offset=0;return;}
   if(element.dataset.state!==signal.state)element.dataset.state=signal.state;
   if(element.dataset.foreground!==String(foreground))element.dataset.foreground=String(foreground);
-  const text=lampLabels[signal.state];if(copy.textContent!==text)copy.textContent=text;
+  const text=signal.action?.notice||lampLabels[signal.state];if(copy.textContent!==text)copy.textContent=text;
   if(mark.hidden===alert)mark.hidden=!alert;if(action.hidden===!!signal.action)action.hidden=!signal.action;
   const actionText=signal.action?.label||'';if(action.textContent!==actionText)action.textContent=actionText;
   const accessible=title+': '+text+(signal.action?'. '+signal.action.label:'');

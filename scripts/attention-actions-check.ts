@@ -42,10 +42,14 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>{const w=window as any;w.fixture.connections[0].running=false;w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
  await page.waitForFunction(()=>(window as any).savedMailPin.dataset.running==='false');
  assert.equal(await page.locator('.notion-pin[data-page="place-app-gmail"]').getAttribute('data-lamp-state'),'ready','Unread findings stay in the Center; the lamp shows no result state');
+ // A failure that retries by itself leaves the lamp alone; one the person must fix turns it red.
  await page.evaluate(()=>{const w=window as any;w.fixture.connections[0].failed=true;w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
+ await page.waitForTimeout(700);
+ assert.equal(await page.locator('.notion-pin[data-page="place-app-gmail"]').getAttribute('data-lamp-state'),'ready','A failed read with nothing to fix shows no failure');
+ await page.evaluate(()=>{const w=window as any;w.fixture.connections[0].requiredAction='reconnect';w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
  await page.waitForFunction(()=>(window as any).savedMailPin.dataset.lampState==='error');
  await page.screenshot({path:evidence+'/applet-error-lamp.png'});
- await page.evaluate(()=>{const w=window as any;w.fixture.connections[0].failed=false;w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
+ await page.evaluate(()=>{const w=window as any;w.fixture.connections[0].failed=false;delete w.fixture.connections[0].requiredAction;w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
  await page.waitForFunction(()=>(window as any).savedMailPin.dataset.lampState==='ready');
  assert(await page.evaluate(()=>{const w=window as any;return w.savedMailPin===document.querySelector('.notion-pin[data-page="place-app-gmail"]')&&w.savedMailMarker===w.savedMailPin.querySelector('.applet-attention');}),'Routine reads preserve the pin and do not replay Attention arrival');
  assert.equal(await row('Confirmed meeting').getAttribute('data-matter-state'),'event');
