@@ -20,7 +20,7 @@ import {WorldStore} from '../../../store/world-store.ts';
 import {writeAgentSetting,readAgentSetting} from '../../../store/agent-settings.ts';
 import {ExecutionJournal} from '../../agent-runtime/journal.ts';
 import {MailReviews} from '../../sources/reviews.ts';
-import {CodexTasks} from '../../media/coding.ts';
+import {CodexTasks} from '../../applet-tools/coding.ts';
 import {decode,exportTo,restore} from '../backup.ts';
 import type {Host,Row} from '../../../host/types.ts';
 

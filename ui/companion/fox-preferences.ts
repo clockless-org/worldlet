@@ -89,7 +89,7 @@ export function createFoxPreferences({call,view,root,setup,toggleSample,embedded
     text+='\n\n**Talk with Fox**: right-click the microphone and choose Talk with Fox. Fox listens, answers each thing you say'+(info.talkReplies?' out loud':'')+' and listens again; talk over Fox or click the microphone while it speaks to interrupt, say "be quiet" to keep Talk going without the voice, and press Escape to end it.';
     actions.push(button(info.talkReplies?'Talk without reading replies':'Read replies in Talk',async()=>{await call('foxPreferenceChange',{setting:'talk_replies',value:!info.talkReplies});await show('voice');}));
    }
-   // The wake word (platform modules/media/wake.ts), where local Whisper runs: off by default.
+   // The wake word (platform modules/voice/wake.ts), where local Whisper runs: off by default.
    if(typeof info.wakeWord==='boolean'){
     const state=info.wakeState==='unavailable'&&info.wakeWord?' It is waiting for the microphone: allow Worldlet to use it in your computer’s privacy settings.':info.wakeState==='paused'?' It rests while Fox listens or Talk is on, during a call in Meetings, and while the screen is locked.':'';
     text+='\n\n**Hey Fox**: '+(info.wakeWord?'on. Say "Hey Fox" (or 「嘿 Fox」, 「小狐」) to start Talk with Fox; the microphone stays open and shows a small light while it listens.'+state:'off. Turn it on to start Talk with Fox by saying "Hey Fox" (or 「嘿 Fox」, 「小狐」).')+' Short phrases are checked by local Whisper on this computer, a few seconds of work each; nothing is recorded or sent.';

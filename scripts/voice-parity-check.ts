@@ -31,7 +31,7 @@ assert.ok(prompt.startsWith('Fox, Kelvin Ren, ')&&prompt.endsWith('.')&&prompt.l
 assert.equal(speechPrompt([]),'');
 assert.equal(speechPrompt(Array.from({length:60},(_,i)=>'Someone Longname'+i)).length<=SPEECH_VOCABULARY.characters,true);
 // The hint reaches Whisper as its initial prompt from a file, on both computers, and an echo of it is not speech.
-const host=fs.readFileSync(new URL('../platform/electron/src/modules/media/speech.ts',import.meta.url),'utf8');
+const host=fs.readFileSync(new URL('../platform/electron/src/modules/voice/speech.ts',import.meta.url),'utf8');
 assert.match(host,/this\.local\.transcribe\(pcm,this\.language,controller\.signal,this\.prompt\)/,'Fox and field dictation pass the World\'s names');
 assert.match(host,/fs\.writeFileSync\(hint,prompt,\{mode:0o600\}\)/,'the names go in a private file, never on the command line');
 const mac=fs.readFileSync(new URL('../platform/local-tools/whisper_local.py',import.meta.url),'utf8');

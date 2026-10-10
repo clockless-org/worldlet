@@ -260,7 +260,12 @@ export interface BrowserService {
 }
 export const BROWSER='browser';
 
-// Media, speech and coding tools (modules/media) ----------------------------------------------
+// The media surface (modules/media) ------------------------------------------------------------
+/** The host-owned playback and capture surface the World's sound, Fox's voice and Voice Memos share. */
+export interface MediaService {readonly surface:import('../modules/media/surface.ts').MediaSurface}
+export const MEDIA='media';
+
+// World sound (modules/world-audio) and Fox's voice (modules/voice) -----------------------------
 export interface AudioService {setDucked(active:boolean,reason:'live'|'recording'|'spoken-reply'):void;snapshot():Row;stop():void}
 export const AUDIO='audio';
 export interface SpeechService {
@@ -274,7 +279,7 @@ export interface SpeechService {
  voices():Promise<{id:string,name:string,language:string}[]>;
  /** Whether local Whisper runs on this computer (Mac and Windows). */
  readonly localSupported:boolean;
- /** The wake word ("Hey Fox", modules/media/wake.ts): what it does now, and Settings › Voice turning it on or off
+ /** The wake word ("Hey Fox", modules/voice/wake.ts): what it does now, and Settings › Voice turning it on or off
   * (resolves with the state after asking for the microphone where the OS asks). */
  readonly wakeState:'off'|'listening'|'paused'|'unavailable';
  setWakeWord(on:boolean):Promise<'off'|'listening'|'paused'|'unavailable'>;

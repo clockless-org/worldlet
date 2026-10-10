@@ -37,7 +37,7 @@ assert.equal(speechLanguage(),'multi');
 store.set('worldlet-speech-language','zh;rm -rf');
 assert.equal(speechLanguage(),'multi','a malformed saved value is ignored');
 
-const host=readFileSync(new URL('../platform/electron/src/modules/media/speech.ts',import.meta.url),'utf8');
+const host=readFileSync(new URL('../platform/electron/src/modules/voice/speech.ts',import.meta.url),'utf8');
 assert.match(host,/\^\(multi\|\[a-z\]\{2,3\}\)\$/,'the host accepts every language code the app sends');
 const mac=readFileSync(new URL('../platform/local-tools/whisper_local.py',import.meta.url),'utf8');
 assert.match(mac,/MODEL = 'mlx-community\/whisper-large-v3-turbo'/,'Mac uses Large v3 Turbo');

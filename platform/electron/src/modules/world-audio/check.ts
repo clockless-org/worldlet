@@ -4,7 +4,7 @@ import path from 'node:path';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {app} from 'electron';
 import {WorldAudio} from './audio.ts';
-import {MediaSurface} from './surface.ts';
+import {MediaSurface} from '../media/surface.ts';
 import {Preferences} from '../../preferences.ts';
 
 // Actual Chromium decoding and playback, at a very quiet test volume; no network or accounts.

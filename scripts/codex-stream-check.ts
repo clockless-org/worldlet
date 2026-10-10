@@ -1,5 +1,5 @@
 // Regression: a fragmented large Codex RPC line must arrive whole without blocking the Electron
-// host's event loop (platform/electron/src/modules/media/coding.ts over platform/local-tools).
+// host's event loop (platform/electron/src/modules/applet-tools/coding.ts over platform/local-tools).
 // Uses a fake `codex`, no account or network. Windows runs only executables, so there the fake is a
 // venv launcher named codex.exe that runs the same Python as the `app-server` script in the check's cwd.
 import {writeFile,chmod,mkdir,copyFile} from 'node:fs/promises';
@@ -29,7 +29,7 @@ for line in sys.stdin:
  else await chmod(codex,0o755);
  await mkdir(path.join(dir,'local-tools'));
  for(const name of ['codex_sessions.py','sessions.py','json_rpc_process.py','async_stdio.py'])await copyFile(path.join('platform/local-tools',name),path.join(dir,'local-tools',name));
- await writeFile(path.join(dir,'main.ts'),`import {CodexSessions} from ${JSON.stringify(path.resolve('platform/electron/src/modules/media/coding.ts'))};
+ await writeFile(path.join(dir,'main.ts'),`import {CodexSessions} from ${JSON.stringify(path.resolve('platform/electron/src/modules/applet-tools/coding.ts'))};
 const host:any={profile:{webRoot:${JSON.stringify(dir)}},optional:()=>undefined};
 const connection=new CodexSessions(host);let ticks=0,longestGap=0,previous=performance.now();
 const heartbeat=setInterval(()=>{const now=performance.now();longestGap=Math.max(longestGap,now-previous);previous=now;ticks+=1;},10);

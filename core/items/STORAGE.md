@@ -117,7 +117,7 @@ Everything Worldlet keeps on the computer is in that one folder; the installed a
 | `logs/` | Owner-only diagnostics and Fox timing logs, each rotated once past 1 MB. |
 | `updates/` | Mac update downloads and the staged app. |
 | `runtime/` | Fox's Hermes program: Python, its packages and the uv cache (`agent-runtime/installation.ts`). Windows `runtime/hermes-<digest>/`, Mac and Linux `runtime/<revision>-<digest>/`. |
-| `speech/` | Local dictation packages and the Whisper model (`media/speech.ts`), created the first time someone speaks to Fox. |
+| `speech/` | Local dictation packages and the Whisper model (`voice/speech.ts`), created the first time someone speaks to Fox. |
 | `model-access/` | This installation's anonymous model-service token (`agent-runtime/model-access.ts`): an owner-only file on Mac and Linux, DPAPI-encrypted on Windows. |
 
 `runtime/`, `speech/` and `model-access/` belong to the installation (`INSTALLATION_FOLDERS` in `platform/electron/src/files.ts`): Reset keeps them, and backups neither carry nor replace them. A release on Mac and Linux takes them from its own library (`installationRoot`), even when an RC check opens a disposable one. Until 2026-10-04 the Mac kept them beside the library in `Worldlet Runtime`, `Worldlet Speech` and `Worldlet Model Access`, and Windows kept its token in `Worldlet Model Access`. On first use the token and the speech folder move in. The runtime's virtual environment records absolute paths, so it is installed again in `runtime/`, reusing the old uv download cache, and the old folder is removed once the new runtime is ready. `scripts/installation-folders-check.ts` checks this on the release layout.
