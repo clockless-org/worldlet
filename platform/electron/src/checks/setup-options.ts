@@ -65,7 +65,7 @@ export async function setupOptions({host,view}:CheckContext){
   }
   await js(`document.querySelector(':is(.setup-agent-default,.setup-agent-button)[data-agent=${JSON.stringify(agent)}]').click();true`);
   mark('picked '+agent);
-  // Give {agent} a world brings the picked Agent on the same page; Enter your world turns on once everything came over.
+  // Build your world brings the picked Agent on the same page; Enter your world turns on once everything came over.
   await js("document.querySelector('.setup-next').click();true");
   await wait('the Agent moving in',shown('.setup-import'),300);
   await wait('the Agent brought in',appsPage,300);

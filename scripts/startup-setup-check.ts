@@ -62,7 +62,7 @@ await withBrowser(fileAccess,async browser=>{
    // No Agent here (owner decisions 2026-10-07, 2026-10-09): Hermes Agent is offered, and the big button gives it a world.
    await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
    assert.equal(await page.locator('.setup-agent-card.is-install strong').textContent(),'Hermes Agent');
-   assert.equal(await page.getByRole('button',{name:'Give Hermes a world',exact:true}).isEnabled(),true);
+   assert.equal(await page.getByRole('button',{name:'Build your world',exact:true}).isEnabled(),true);
    assert.equal(await page.locator('.setup-choose-again').count(),0,'The first half has nothing to choose again');
    // The main part is centred, so it may slide as it grows; the big button keeps its size and its column.
    const frame=async()=>{const next=await page.locator('.setup-next').boundingBox();return [next.x,next.width,next.height].map(Math.round);};
@@ -232,7 +232,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex has no card');
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
   assert.equal(await page.locator('.setup-agent-default').getAttribute('aria-pressed'),'true');
-  assert.equal(await page.locator('.setup-next').textContent(),'Give Nova a world');
+  assert.equal(await page.locator('.setup-next').textContent(),'Build your world');
   // Each card shows its own name, then where it comes from and what comes along.
   assert.equal(await page.locator('[data-agent="openclaw"] .setup-agent-name').textContent(),'Nova');
   assert.equal(await page.locator('[data-agent="openclaw"] .setup-agent-sub').textContent(),'OpenClaw');
@@ -254,12 +254,12 @@ await withBrowser(fileAccess,async browser=>{
   await page.locator('.setup-agent-card[data-agent="claude-code"]').click();
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'claude-code');
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='select')),false,'Picking a card brings nothing yet');
-  await page.getByRole('button',{name:'Give Claude Code a world',exact:true}).click();
+  await page.getByRole('button',{name:'Build your world',exact:true}).click();
   await page.getByText(/Claude Code did not answer/).waitFor();
   assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1);
   // Choosing Nova brings it in on the same page: its card on the left, what came along arriving on the right.
   await page.locator('.setup-agent-card[data-agent="openclaw"]').click();
-  await page.getByRole('button',{name:'Give Nova a world',exact:true}).click();
+  await page.getByRole('button',{name:'Build your world',exact:true}).click();
   await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
   assert.equal(await page.locator('.setup-passport-name').textContent(),'Nova');
   assert.equal(await page.locator('.setup-passport-from').textContent(),'OpenClaw');
@@ -305,7 +305,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   await page.waitForFunction(()=>!(document.querySelector('[data-agent="openclaw"]') as HTMLButtonElement)?.disabled);
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
-  await page.getByRole('button',{name:'Give Nova a world',exact:true}).click();
+  await page.getByRole('button',{name:'Build your world',exact:true}).click();
   await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='localAgent').length),0,'Coming back to the same Agent reads nothing again');
   assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
@@ -368,7 +368,7 @@ await withBrowser(fileAccess,async browser=>{
   await noScroll('More options');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-1-more-'+host+'.png')});
   await page.locator('.setup-more-toggle').click();
-  await page.getByRole('button',{name:'Give Elon North a world',exact:true}).click();
+  await page.getByRole('button',{name:'Build your world',exact:true}).click();
   await page.getByRole('heading',{name:'Elon North moved in'}).waitFor();
   await noScroll('Bringing the Agent in');
   if(host==='macos')assert.ok(await page.locator('.setup-tile-apps .setup-app').count()>=10,'The apps found here show in the Apps tile');
@@ -446,14 +446,14 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:/^Update /}).click();
   await page.getByText(/is updating in Terminal/).waitFor();
   await page.getByRole('button',{name:'Check again',exact:true}).click();
-  await page.getByRole('button',{name:/^Give .* a world$/}).waitFor();
+  await page.getByRole('button',{name:'Build your world',exact:true}).waitFor();
   assert.equal(await page.locator('.setup-agent-card.is-outdated').count(),0,'Updated, the card is an ordinary one again');
   const harness=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation!=='requested').map(c=>c.operation+(c.id?':'+c.id:'')+(c.fresh?':fresh':'')));
   assert.deepEqual(harness,['detect','update:openclaw','detect:fresh'],'Nothing is connected while it is too old');
   assert.deepEqual(errors,[]);await page.close();
  }
  // No Agent on this computer is no dead end (owner decisions 2026-10-07, 2026-10-09): Check again asks the host again,
- // Give Hermes a world installs stock Hermes Agent (its installer's steps show as they run), ChatGPT is signed in inside
+ // Build your world installs stock Hermes Agent (its installer's steps show as they run), ChatGPT is signed in inside
  // Hermes (the code its device page asks for shows here), and Hermes then moves in like any Agent found here.
  {
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
@@ -494,7 +494,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Check again'}).click();
   await page.waitForFunction(()=>(window as any).detects>=2);
   await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
-  await page.getByRole('button',{name:'Give Hermes a world',exact:true}).click();
+  await page.getByRole('button',{name:'Build your world',exact:true}).click();
   await page.getByText('Step 3 of 7: Create Python environment',{exact:true}).waitFor();
   assert.equal(await page.getByRole('button',{name:'Installing Hermes Agent…',exact:true}).isDisabled(),true,'nothing else while it installs');
   assert.equal(await page.getByRole('button',{name:'Check again'}).count(),0,'nothing to check while it installs');
@@ -542,7 +542,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.goto(worldUrl());
   await page.getByText('Fox now runs on your own agent. What Fox has learned comes along.',{exact:true}).waitFor();
   await page.locator('[data-agent="openclaw"]').waitFor();
-  await page.getByRole('button',{name:'Give Nova a world',exact:true}).click();
+  await page.getByRole('button',{name:'Build your world',exact:true}).click();
   await page.getByRole('heading',{name:/^Nova moved in$/}).waitFor();
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>[c.id,c.direct])),[['openclaw',true]],'the pick answers for Fox itself');
   assert.equal(await page.locator('.setup-tile-apps').count(),1,'Apps and Connections show here too (owner request 2026-10-09)');
@@ -594,5 +594,5 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS: one-page setup: the brand large on top, the main part in the middle, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Give {agent} a world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
+ console.log('PASS: one-page setup: the brand large on top, the main part in the middle, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Build your world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
 });

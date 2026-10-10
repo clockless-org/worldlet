@@ -11,7 +11,7 @@ import {setTimeout as sleep} from 'node:timers/promises';
 // --app, from the RC package smoke). A release build has no mock Google and no Codex model source, so every
 // path here enters through a local Agent, as the 10-03 demo did. One launch per phase, all on one disposable
 // library; each phase ends with Quit Completely and the launcher proves nothing was left running:
-// - choose: the setup page → a local Agent → Give it a world → the same page bringing it in → Enter your world on; close the window there, mid-onboarding,
+// - choose: the setup page → a local Agent → Build your world → the same page bringing it in → Enter your world on; close the window there, mid-onboarding,
 //   which quits the app instead of leaving Fox on the desktop (owner request 2026-10-04; ADVISORY until it
 //   has passed on the Mac and Windows hosts, falling back to Quit Completely).
 // - resume: the relaunch opens with the Agent brought in → Enter your world → the tour's Mail step → Google sign-in
@@ -95,7 +95,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   if(await js("(()=>{const d=document.querySelector('.setup-agent-default');return !!d&&d.checkVisibility()&&!d.closest('.setup-more');})()")!==true)throw Error(`no default local Agent above More options\n  screen: ${await seen()}`);
   await js(`document.querySelector(':is(.setup-agent-default,.setup-agent-button)[data-agent=${JSON.stringify(choice)}]').click();true`);
   mark(`picked the local Agent ${choice}`);
-  // The page's one big button, Give {agent} a world, brings the picked Agent (owner requests 2026-10-06, 2026-10-09): the host
+  // The page's one big button, Build your world, brings the picked Agent (owner requests 2026-10-06, 2026-10-09): the host
   // proves it answers before Fox uses it, then the same page brings it in (its own files are only read); Enter your world turns on once it came over.
   await js("document.querySelector('.setup-next').click();true");
   await wait('the Agent moving in',shown('.setup-import'),300);

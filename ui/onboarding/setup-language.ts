@@ -3,7 +3,7 @@ import {purposeCopy} from './setup-purposes.ts';
 const copy:Record<string,string[]>={
  ...purposeCopy,
  'Give your agent a world':['给你的 Agent 一个世界','あなたのエージェントに世界を','Dale un mundo a tu agente'],
- 'Give {agent} a world':['给 {agent} 一个世界','{agent} に世界を','Dale un mundo a {agent}'],
+ 'Build your world':['建造你的世界','あなたの世界をつくる','Construye tu mundo'],
  'your agent':['你的 Agent','あなたのエージェント','tu agente'],
  'Found on this computer':['在这台电脑上找到','このコンピュータで見つかりました','Encontrados en este equipo'],
  'Looking for agents on this computer…':['正在查找这台电脑上的 Agent…','このコンピュータのエージェントを探しています…','Buscando agentes en este equipo…'],
