@@ -40,7 +40,7 @@ const frozen=await fs.readFile(snapshot,'utf8').catch(async()=>{
 });
 
 // What a package declares flows to the host: frozen → current. The host hands a static package nothing.
-const fromPackage=['BuildThemeManifest','ThemePresentation','ThemeTokens','ThemeHud','ThemeSound'];
+const fromPackage=['BuildThemeManifest','ThemePresentation','ThemeTokens','ThemeHud','ThemeSound','ThemeArtifact'];
 const toPackage:string[]=[];
 // A type added since the freeze has nothing frozen to compare with; the next --freeze adds it.
 const shipped=(name:string)=>new RegExp(`export (interface|type) ${name}\\b`).test(frozen);

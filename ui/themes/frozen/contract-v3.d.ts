@@ -22,6 +22,31 @@ export interface ThemeHud {
 export interface ThemeSound {
     events: Partial<Record<ThemeSoundEvent, string>>;
 }
+/** The colour roles an Artifact uses: paper, ink and brass, and one accent per tone (what a card is about). */
+export declare const THEME_ARTIFACT_COLORS: readonly ["paper", "ink", "brass", "moss", "teal", "honey", "sage", "clay", "plum"];
+export type ThemeArtifactColor = typeof THEME_ARTIFACT_COLORS[number];
+/** How the theme's Artifacts look (core/artifacts/README.md#theme-driven-artifacts), as static files: the host's
+ * generator reads the rules and prompt, sees the reference pictures and may place the materials in a page it writes;
+ * the host's own card fills its template with the same colours. Nothing here runs. */
+export interface ThemeArtifact {
+    /** Design rules for a generated Artifact (Markdown). */
+    style: string;
+    /** The prompt the generator receives with the content, the room and the capabilities (Markdown). */
+    prompt: string;
+    /** Pictures of finished Artifacts, the visual standard; the first is the primary one. */
+    references: readonly {
+        image: string;
+        role: string;
+    }[];
+    /** Pictures a generated Artifact may place, by id. */
+    materials?: readonly {
+        id: string;
+        image: string;
+        usage: string;
+    }[];
+    /** `#rrggbb` per colour role; a role left out keeps the host's. */
+    colors?: Partial<Record<ThemeArtifactColor, string>>;
+}
 /** The theme's type and colours. */
 export interface ThemeTokens {
     bodyFont: string;
@@ -45,6 +70,8 @@ export interface ThemePresentation {
     sound?: ThemeSound;
     /** The theme's own picture of each Applet, by Applet key. The host shows it wherever it pictures that Applet (the World, lists, history, onboarding); an Applet left out keeps the host's picture. */
     icons?: Readonly<Record<string, string>>;
+    /** How the theme's Artifacts look. Left out, Artifacts keep the host's card. */
+    artifact?: ThemeArtifact;
 }
 /** theme.json. Every other file in the package is a picture, a sound, a font, a licence text or JSON. */
 export interface BuildThemeManifest {

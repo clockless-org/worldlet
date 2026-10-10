@@ -23,7 +23,7 @@ package/
   *.json              # other data the host's World code reads (the Village's lamps.json, assets/art.json)
 ```
 
-`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound` and `icons`; a field that would place the World, an Applet page or the HUD is refused, because the host lays them out.
+`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons` and `artifact`; a field that would place the World, an Applet page or the HUD is refused, because the host lays them out.
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-10T07:10:00Z`); it is informational. `contractVersion` alone controls compatibility; source hashes identify the copied contents.
 
@@ -38,8 +38,23 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 | `hud.skin` (optional) | Nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). |
 | `sound.events` (optional) | An audio file per business event: `applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`. |
 | `icons` (optional) | The theme's picture of an Applet by Applet key (`png`, `webp` or `svg`). The host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. |
+| `artifact` (optional) | How the theme's Artifacts look, as static files ([Artifacts](#artifacts)). |
 
-Anything left out keeps the shared look, sounds and pictures. Brand logos (the HUD title bar, picture-in-picture) stay the host's.
+Anything left out keeps the shared look, sounds and pictures.
+
+### Artifacts
+
+An Artifact is a card Fox puts in front of the person ([core/artifacts](../../core/artifacts/README.md)). The theme says how it looks; the host makes it. The section holds no template, stylesheet or script, only files a person or a model reads:
+
+| Field | What it is |
+| --- | --- |
+| `style` | Design rules for an Artifact in this theme (`.md` under `assets/`): material, layout, type, colour, illustration, interaction and acceptance |
+| `prompt` | The prompt the host's generator receives with the content, the room it has and the capabilities the host gives (`.md`) |
+| `references` | 1 to 6 pictures of finished Artifacts, each with its `role`; the first is the visual standard |
+| `materials` (optional) | Up to 12 pictures a generated Artifact may place, each with an `id` and its `usage` |
+| `colors` (optional) | `#rrggbb` per colour role: `paper`, `ink`, `brass` and one accent per tone (`moss`, `teal`, `honey`, `sage`, `clay`, `plum`) |
+
+The host reads it with `themeArtifact()` (`ui/themes/build-theme.ts`). The same look serves both ways the host makes an Artifact: filling its own card with the words Fox wrote, and having the Agent write a whole page, which the host shows isolated. A theme without the section keeps the host's card. Brand logos (the HUD title bar, picture-in-picture) stay the host's.
 
 Assets at `assets/...` are published to `theme-assets/<id>/...`; the host resolves them with `themeAssetURL`.
 
@@ -47,7 +62,7 @@ Not part of a theme: how the World and Applet pages are drawn (the host's code),
 
 ## The Village
 
-The Village package is the one description of the Village: its art in `assets/` (`art.json` indexes it; `scripts/village-art.ts` encodes it from the painted sources), `lamps.json` (where each device's lamp sits), Applet `icons` for every catalog Applet, and the host's pack of it: `pack.json` (space, layout, motion, companion and surfaces; `ui/themes/theme-pack.ts`), `style.json` and `tokens.json` (its Style Pack; `ui/components/style.ts`) and `world.json` (areas, slots and plates; `ui/world/world-pack.ts`). The painted sources these name stay in `resources/styles/builtin` and `resources/worlds/village`. The animated Pixi World that draws it is the host's code in `ui/world/village/` (`village-world.ts` behind the host's World mount, `ui/world/world-renderer.ts`). Its Applets open in the host's own Applet pages, and the host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet. Two folders in the package are reference material the host does not read and the app does not ship (only `assets/` is published): `artifact-style/` (the look a generated Artifact should have, with its prompt and reference pictures) and `areas/` (painted day and night close views of the six places, not used yet).
+The Village package is the one description of the Village: its art in `assets/` (`art.json` indexes it; `scripts/village-art.ts` encodes it from the painted sources), `lamps.json` (where each device's lamp sits), Applet `icons` for every catalog Applet, and the host's pack of it: `pack.json` (space, layout, motion, companion and surfaces; `ui/themes/theme-pack.ts`), `style.json` and `tokens.json` (its Style Pack; `ui/components/style.ts`) and `world.json` (areas, slots and plates; `ui/world/world-pack.ts`). The painted sources these name stay in `resources/styles/builtin` and `resources/worlds/village`. The animated Pixi World that draws it is the host's code in `ui/world/village/` (`village-world.ts` behind the host's World mount, `ui/world/world-renderer.ts`). Its Applets open in the host's own Applet pages, and the host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet. Its Artifact look is in `assets/artifact/` ([the style pack](../../ui/theme-packages/village/assets/artifact/README.md)), declared in `presentation.json`. One folder in the package is reference material the host does not read and the app does not ship (only `assets/` is published): `areas/` (painted day and night close views of the six places, not used yet).
 
 ## Checking a package
 

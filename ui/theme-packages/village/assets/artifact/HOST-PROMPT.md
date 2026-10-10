@@ -1,6 +1,6 @@
 # Prompt for a host generator
 
-Give the generator this prompt together with [STYLE.md](STYLE.md), [manifest.json](manifest.json), the preferred reference picture, the real content for this card and a description of the host's capabilities. Pass the pictures as actual visual input; a file name is no substitute for seeing them.
+Give the generator this prompt together with [STYLE.md](STYLE.md), the theme's `artifact` section in [presentation.json](../../presentation.json) (reference pictures, materials and colours), the preferred reference picture, the real content for this card and a description of the host's capabilities. Pass the pictures as actual visual input; a file name is no substitute for seeing them.
 
 ---
 
