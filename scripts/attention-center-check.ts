@@ -291,6 +291,7 @@ assert.equal(attentionCompletion({...input,deliveries:[],facts:facts.map(f=>({..
 const {attentionExecution,attentionFollowupReads}=await import('../core/attention/index.ts');
 assert.equal(attentionExecution('synthesis').timeoutSeconds,600);
 assert.ok(attentionExecution('synthesis').prompt?.includes('Reuse existing IDs'));
+assert.match(attentionExecution('synthesis').prompt!,/read it[\s\S]*using query_world_items, then submit with upsert_world_items/,'the synthesis prompt names the tools that read and submit the context');
 assert.deepEqual(attentionExecution('collection','gmail').reads,reads);
 assert.equal(attentionExecution('collection','gmail').timeoutSeconds,240);
 assert.throws(()=>attentionExecution('unknown'));
