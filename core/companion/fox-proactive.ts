@@ -152,10 +152,15 @@ export function proactiveToolAllowed(event:{name?:unknown;args?:unknown}):boolea
  return (PROACTIVE_READS as readonly unknown[]).includes(name);
 }
 
-/** The line to show from Fox's answer, or null when Fox passed. */
+/** Hermes Agent answers a provider failure with its error as the reply (a completed response, not a failed one), e.g.
+ * "ChatGPT or Codex Subscription rejected the request and retrying won't help. Pick another model with /model, …"
+ * (owner Order 2026-10-10, Discord). */
+const AGENT_FAILURE=/rejected the request and retrying won['’]t help|^\W*\s*(?:non-retryable (?:client )?error|api (?:call )?failed|provider authentication failed|rate limited after \d+ retries|the model provider (?:rejected|failed|is rate-limiting))/i;
+/** The line to show from Fox's answer, or null when Fox passed or the Agent answered with its own error: nobody
+ * asked, so a failed ask ends quietly instead of showing the error as Fox's line. */
 export function proactiveLine(message:unknown):string|null {
  const text=String(message??'').trim().replace(/^["“「]|["”」]$/g,'').trim();
- if(!text||/^PASS\b/i.test(text)||/\bPASS\s*\.?$/.test(text)&&characters(text).length<12)return null;
+ if(!text||AGENT_FAILURE.test(text)||/^PASS\b/i.test(text)||/\bPASS\s*\.?$/.test(text)&&characters(text).length<12)return null;
  const line=text.split(/\n+/).map(part=>part.trim()).filter(Boolean)[0]??'';
  if(!line||/^PASS\b/i.test(line))return null;
  const all=characters(line);

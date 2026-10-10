@@ -127,6 +127,10 @@ for(const message of ['PASS','pass.','  PASS  ','"PASS"','',null])assert.equal(p
 assert.equal(proactiveLine('“连赢三局，手感不错。”'),'连赢三局，手感不错。');
 assert.equal(proactiveLine('That Thursday call clashes with your dentist.\nWant me to move it?'),'That Thursday call clashes with your dentist.');
 assert.equal([...proactiveLine('长'.repeat(400))!].length,PROACTIVE.lineCharacters);
+// An Agent's own error is not Fox's line (owner Order 2026-10-10: Hermes' Codex rejection showed in the browse card).
+for(const message of ["ChatGPT or Codex Subscription rejected the request and retrying won't help. Pick another model with /model, or check the details in ~/.hermes/logs/agent.log.",
+ '❌ Non-retryable error (HTTP 400): context too long','⚠️ API call failed after 3 retries: timeout','⏱️ The model provider is rate-limiting requests. Please wait a moment and try again.'])assert.equal(proactiveLine(message),null,message);
+assert.equal(proactiveLine('The API call failed twice in this thread; want me to look?'),'The API call failed twice in this thread; want me to look?');
 
 // The ask names the moment, the lines already said and the person's words, and is read only with PASS.
 const task=proactiveTask({moment:'long-stay',place:'Games · 2048',local:'Tue 23:10',minutes:47,recent:['Nice run.'],lastWords:'再来一局'});
