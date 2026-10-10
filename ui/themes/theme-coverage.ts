@@ -13,7 +13,7 @@ export type SurfaceCoverage={state:CoverageState;detail:string};
  */
 export const THEME_PARTS=[
  ['world','World: map, zoomed areas, ambient motion and entering an area or room'],
- ['applets','Applets: devices, rooms, cards and frames, Mail parts'],
+ ['applets','Applets: devices, rooms, cards and frames'],
  ['hud','HUD look: material, colors, type, fonts, world log and Attention art'],
  ['sound','Sound and event animations'],
 ] as const;
@@ -27,7 +27,6 @@ export const THEME_SURFACES=[
  ['applet-devices','Applet devices on the ground','applets'],
  ['applet-rooms','Applet rooms behind an open Applet','applets'],
  ['applet-surfaces','Cards, lists and frames inside an Applet','applets'],
- ['mail-parts','Mail envelopes, bins and board','applets'],
  ['hud-material','HUD material: paper, frames, buttons','hud'],
  ['hud-controls','HUD colors, borders and type','hud'],
  ['fonts','Display and label fonts','hud'],
@@ -41,7 +40,7 @@ export type ThemeSurface=typeof THEME_SURFACES[number][0];
 /** Cues a theme renderer actually draws. Village's cues are the shared work motion (ui/world/work-motion.ts). */
 export const DRAWN_CUES:Record<string,readonly string[]>={village:['device-reveal','lamp-breathe','done-mark','stop-at-step']};
 
-type StyleManifest={world:Record<string,string>;applets:Record<string,{peek?:string;open?:string;focus?:string}>;mailParts:Record<string,string>;attention:Record<string,string>;hud:Record<string,string>};
+type StyleManifest={world:Record<string,string>;applets:Record<string,{peek?:string;open?:string;focus?:string}>;attention:Record<string,string>;hud:Record<string,string>};
 type WorldManifest={canvas:{width:number;height:number};layers:Array<{kind:string;lighting:string}>;occlusion?:unknown[];landmarks?:unknown;areas?:Array<{closeView?:{src:string}}>};
 export type CoverageInput={pack:ThemePack;style:StyleManifest;world:WorldManifest;reference:string};
 
@@ -84,7 +83,6 @@ export function themeSurfaceCoverage(input:CoverageInput):Record<ThemeSurface,Su
   'applet-devices':variety(pack,style,'peek','device images'),
   'applet-rooms':variety(pack,style,'focus','room plates'),
   'applet-surfaces':pieces(pack,['card','frame'],'Applet pieces (cards, web frame)'),
-  'mail-parts':share(pack,Object.values(style.mailParts),'Mail parts'),
   'attention-art':share(pack,Object.values(style.attention),'Attention pictures'),
   'hud-material':hud,
   'hud-controls':{state:hud.state==='own'&&Object.keys(pack.surfaces.tokens).length?'own':'partial',detail:Object.keys(pack.surfaces.tokens).length+' theme tokens; recolored by '+pack.hud.controls},

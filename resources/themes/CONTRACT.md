@@ -99,7 +99,7 @@ A theme implements four parts. Everything else is the host's and looks the same 
 | Part | Covers | Where in the package |
 | --- | --- | --- |
 | World | Map, zoomed areas, ambient motion, entering an area or room | `renderWorld`, `presentation.world` |
-| Applets | Applet devices, rooms behind an open Applet, cards and frames, Mail parts | `renderApplet`, `presentation.applets` and `fallback` |
+| Applets | Applet devices, rooms behind an open Applet (Mail's included), cards and frames | `renderApplet`, `presentation.applets` and `fallback` |
 | HUD look | HUD material, colors, type, fonts, world log, Attention art | `tokens`, `fonts`, `theme.css`, optional `hud.skin` |
 | Sound and event animations | Business-event sounds and the animations for them | optional `sound.events`, `ThemeWorldMount.event` |
 
