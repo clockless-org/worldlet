@@ -1,4 +1,4 @@
-import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeLampState} from '../themes/index.ts';
+import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeWorldApplet,type ThemeLampState} from '../themes/index.ts';
 import {createAppletStage} from './theme-applet-stage.ts';
 import {createAppletStage as createVillageStage} from './pixi-stage.ts';
 import {renderVillageWorld,type VillageWorldMount} from './village-world.ts';
@@ -6,7 +6,9 @@ import {createAppletImageLamps} from './applet-image-lamps.ts';
 import {createLampLabel,stackLampLabels} from './applet-lamp-label.ts';
 import {createLevelZoom} from './level-zoom.ts';
 import type {LampSignal} from './applet-lamp.ts';
-import {appletStatus,myAppletKind} from '../../core/applets/index.ts';
+import {appletStatus,myAppletKind,CODING_SESSIONS} from '../../core/applets/index.ts';
+import {lastUse,regionId} from './region-layout.ts';
+import {weeklyQuota} from './weekly-allowance.ts';
 import {appletLamp,appletLampContent,lampDisplayState} from './applet-lamp.ts';
 import {appletConnectionGuide} from './applet-attention.ts';
 import {shellInteraction,worldPaused as paused} from './shell-interaction.ts';
@@ -29,7 +31,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const levelZoom=builtIn?createLevelZoom(shellRoot,host):null;
  let view:ThemeWorldState['view']={id:'overview',level:'overview'},environment={},motion=true,disposed=false,connections=options.connections||[],marked=false;
  const interaction={placementArea:null as string|null,framedArea:null as string|null,inset:0,hoveredApplet:null as string|null,hoveredArea:null as string|null};
- let hidden=new Set(options.hiddenApplets||[]),unlocked=options.unlockedApplets?new Set(options.unlockedApplets):null;
+ let arriving:string[]=[],hidden=new Set(options.hiddenApplets||[]),unlocked=options.unlockedApplets?new Set(options.unlockedApplets):null;
  const visible=r=>!hidden.has(r.moduleId)&&(unlocked?unlocked.has(r.moduleId):r.installByDefault!==false);
  /** Each Applet's lamp (applet-lamp.ts), read again at most twice a second: pins move every frame, records do not. */
  let signals=new Map<string,LampSignal>(),signalsAt=-Infinity;
@@ -45,16 +47,25 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const lamp=(r,shell:ReturnType<typeof shellInteraction>):ThemeLampState|undefined=>{
   const signal=signalOf(r);return signal?lampDisplayState(signal,!shell.covered&&(view.level!=='applet'||view.id===r.moduleId)):undefined;
  };
- const state=():ThemeWorldState=>{const shell=shellInteraction(host);return {view:{...view},environment:{...environment},motion,paused:paused(),interaction:{...interaction,...shell},pins:structuredClone(options.regionLayout?.pins||{}),
-  areas:(options.buildings||[]).filter(b=>b.id!=='building-people').map(b=>({id:b.id,title:b.title})),
+ const state=():ThemeWorldState=>{const shell=shellInteraction(host);return {view:{...view},environment:{...environment},motion,paused:paused(),...(arriving.length?{arriving:[...arriving]}:{}),interaction:{...interaction,...shell},pins:structuredClone(options.regionLayout?.pins||{}),
+  areas:(options.buildings||[]).filter(b=>b.id!=='building-people').map(b=>{const look=options.regionLayout?.themes?.[regionId(b.id)]||b.visualTheme;return {id:b.id,title:b.title,...(look?{look}:{})};}),
   applets:rooms.map(r=>({id:r.moduleId||r.id,key:r.key||r.id,title:r.title,region:r.region||String(r.buildingId||'').replace(/^building-/,''),visible:visible(r),status:r.status?.state,count:r.status?.count,icon:appletIcon(r),
-   lamp:lamp(r,shell),connected:r.entity==='matter'?undefined:!!appletStatus(r,connections)?.connected,mine:myAppletKind(r)||undefined,object:r.entity==='matter'||undefined}))};};
+   lamp:lamp(r,shell),connected:r.entity==='matter'?undefined:!!appletStatus(r,connections)?.connected,mine:myAppletKind(r)||undefined,object:r.entity==='matter'||undefined,
+   art:r.art&&r.art!==r.key?r.art:undefined,usedAt:lastUse(r,options.regionLayout)||undefined,staged:stages.has(r.moduleId)||undefined,allowance:allowance(r)}))};};
+ /** A coding Applet's weekly allowance, from the usage its sessions last reported (setAppActivity). */
+ function allowance(r):ThemeWorldApplet['allowance'] {
+  if(!CODING_SESSIONS.includes(r.key))return undefined;
+  const usage=activities.get(r.moduleId)?.usage;if(usage?.placeholder===true)return {unavailable:true};
+  const quota=weeklyQuota(usage);return quota?{remaining:quota.remaining,resetsAt:quota.resetsAt}:{};
+ }
  /** The theme's marks as the shell's pins: the shell draws the buttons, names, lamps and attention marks. */
  const marks=(points:Readonly<Record<string,ThemeWorldMark>>)=>{
   if(disposed)return;marked=true;const out={},action={applet:'space',area:'region-more','area-add':'region-more',slot:'placement'},kind={applet:'app',area:'region-more','area-add':'region-add',slot:'region-slot'};
-  for(const [key,m] of Object.entries(points)){
+  for(const m of Object.values(points)){
    const room=m.kind==='applet'?rooms.find(r=>(r.moduleId||r.id)===m.id):null,area=(options.buildings||[]).find(b=>b.id===m.id);
    if(m.kind==='applet'&&!room)continue;
+   // The shell's pins keep one key per place, whichever theme marks it.
+   const key=m.kind==='applet'?'space:'+room.id:m.kind==='slot'?'region-slot:'+m.slot:kind[m.kind]+':'+regionId(m.id);
    const point:any={id:room?room.id:m.id,title:m.kind==='area-add'||m.kind==='slot'?'+':room?.title||area?.title||m.id,action:action[m.kind],kind:kind[m.kind],level:m.kind==='applet'?'room':'building',x:m.x,y:m.y,visible:m.visible,hovered:!!m.hovered};
    if(m.kind==='slot'){point.slot=m.slot;point.description='Place applet in slot '+((m.slot||0)+1);}
    if(m.kind==='area'){point.caption='';point.description='Manage '+(area?.title||m.id);}
@@ -87,8 +98,9 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   if(target.kind==='applet'){const r=rooms.find(r=>(r.moduleId||r.id)===target.id);if(r&&state().applets.find(a=>a.id===target.id)?.visible)onPick({action:'space',id:r.id,level:'room'});}
   else if((options.buildings||[]).some(b=>b.id===target.id))onPick({action:'building',id:target.id});
  },moveApplet:(id,area,slot)=>{if(rooms.some(r=>r.moduleId===id)&&state().areas.some(a=>a.id==='building-'+area))options.onMoveApplet?.(id,area,slot);},menu:(id,x,y)=>{if(state().applets.some(a=>a.id===id&&a.visible))options.onAppletMenu?.(id,x,y);},
-  marks,back:()=>{if(!disposed&&view.level!=='overview')onPick({action:'back'});}};
- const village:VillageWorldMount|null=builtIn?renderVillageWorld(context,{rooms,pages,options,onPick,hasStage:id=>stages.has(id),levelZoom}):null;
+  marks,back:()=>{if(!disposed&&view.level!=='overview')onPick({action:'back'});},
+  openArea:id=>{if(!disposed&&state().areas.some(a=>a.id===id))onPick({action:'region-more',id});}};
+ const village:VillageWorldMount|null=builtIn?renderVillageWorld(context):null;
  const mount=village||renderBuildWorld(context);
  function refresh(){if(disposed)return;mount.update(state());world.hidden=view.level==='applet'&&!mount.behindApplet;
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
@@ -110,29 +122,38 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  document.addEventListener('visibilitychange',follow);window.addEventListener('worldlet:desktop-companion',follow);
  // The Village says it is ready itself, once its first frame is drawn (pixi-world.ts).
  queueMicrotask(()=>{if(!disposed){refresh();if(!village)host.dispatchEvent(new Event('worldlet:world-ready',{bubbles:true}));}});
- const scene=village?.scene;
+ /** Where an Applet's device is on screen, for the zoom between the World and an Applet. */
+ const center=(id:string)=>{const b=mount.bounds(id);if(!b||!(b.width>0))return null;const r=world.getBoundingClientRect();return {x:r.left+b.x+b.width/2,y:r.top+b.y+b.height/2};};
  return {
-  focus(id,level='building'){view={id,level:id==='overview'?'overview':level==='object'?'applet':'area'};scene?.focus(id,level);refresh();},
-  refreshContent(){scene?.refreshContent();refresh();},refreshRegions(){scene?.refreshRegions();refresh();},stageState:()=>new Map(stages),
+  focus(id,level='building'){
+   const next:ThemeWorldState['view']=id==='overview'?{id,level:'overview'}:level==='object'?{id:rooms.find(r=>r.moduleId===id||r.id===id)?.moduleId||id,level:'applet'}:{id,level:'area'};
+   // Moving between the World (or an open area) and an Applet zooms (level-zoom.ts); moving between two Applets does not.
+   const entering=view.level!=='applet'&&next.level==='applet',leaving=view.level==='applet'&&next.level!=='applet';
+   const shot=levelZoom&&(entering||leaving)&&motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!document.hidden?mount.picture?.()||null:null;
+   const origin=shot?entering?levelZoom!.enter(next.id,center(next.id)):levelZoom!.leave(view.id,center(view.id)):null;
+   if(!shot&&(entering||leaving))levelZoom?.finish();
+   view=next;refresh();
+   if(shot&&origin)levelZoom!.run(entering?'in':'out',shot,origin,{settle:()=>!interaction.framedArea});
+  },
+  refreshContent(){refresh();},refreshRegions(){refresh();},stageState:()=>new Map(stages),
   setAppStage(id,value){stages.set(id,value);refresh();},
   setFocusItem(id,item){const room=rooms.find(r=>r.moduleId===id);if(room)stage.setSelected(room,item);},
   selectStageItem(_id,id){return stage.select(id);},
-  setAppletLayout(ids,points){hidden=new Set(ids||[]);scene?.setAppletLayout(ids,points);refresh();},
+  setAppletLayout(ids){hidden=new Set(ids||[]);refresh();},
   async setUnlockedApplets(ids,fromCenter=false,icons={},settled=false){
-   const before=new Set(rooms.filter(visible).map(r=>r.moduleId)),had=!!unlocked;unlocked=ids?new Set(ids):null;refresh();
-   if(scene)return scene.setUnlockedApplets(ids,fromCenter,icons,settled);
-   const arriving=had?rooms.filter(r=>visible(r)&&!before.has(r.moduleId)).map(r=>r.moduleId):[];
-   if(arriving.length)await mount.event({type:'applet.arrived',ids:arriving,...(fromCenter?{from:'center' as const,icons}:{}),settled});
+   const before=new Set(rooms.filter(visible).map(r=>r.moduleId)),had=!!unlocked;unlocked=ids?new Set(ids):null;arriving=[];refresh();
+   const landing=had?rooms.filter(r=>visible(r)&&!before.has(r.moduleId)).map(r=>r.moduleId):[];
+   if(landing.length)await mount.event({type:'applet.arrived',ids:landing,...(fromCenter?{from:'center' as const,icons}:{}),settled});
   },
-  setEnvironment(value){environment=value||{};refresh();},setConnections(list){connections=list||[];signalsAt=-Infinity;scene?.setConnections(list);refresh();},
-  setAppActivity(id,value){activities.set(id,value);signalsAt=-Infinity;if(scene)scene.setAppActivity(id,value);else{const r=rooms.find(r=>r.moduleId===id);if(r)r.status={...r.status,...value};}refresh();},
+  setEnvironment(value){environment=value||{};refresh();},setConnections(list){connections=list||[];signalsAt=-Infinity;refresh();},
+  setAppActivity(id,value){activities.set(id,value);signalsAt=-Infinity;if(!builtIn){const r=rooms.find(r=>r.moduleId===id);if(r)r.status={...r.status,...value};}refresh();},
   devicePoint(id){return mount.anchor(id);},
-  setDevicePresence(id,value){if(scene)return scene.setDevicePresence(id,value);if(value)hidden.delete(id);else hidden.add(id);refresh();return true;},
+  setDevicePresence(id,value){if(value)hidden.delete(id);else hidden.add(id);refresh();return true;},
   toggleMotion(){motion=!motion;stage.setMotion(motion);refresh();return motion;},
   setPlacementArea(id){interaction.placementArea=id;refresh();},frameArea(id,inset=0){interaction.framedArea=id;interaction.inset=inset;refresh();},
-  setHoveredApplet(id){interaction.hoveredApplet=id;refresh();},setHoveredArea(id){interaction.hoveredArea=id;refresh();},
+  setHoveredApplet(id){interaction.hoveredApplet=id==null?null:rooms.find(r=>r.id===id||r.moduleId===id)?.moduleId||id;refresh();},setHoveredArea(id){interaction.hoveredArea=id;refresh();},
   // Arrivals play when the Applets are unlocked (setUnlockedApplets); preparing only places them.
-  prepareArrival(ids){scene?.prepareArrival(ids);refresh();},
+  prepareArrival(ids){arriving=[...ids||[]];refresh();},
   deliverMail(){const played=mount.event({type:'mail.received',ids:[]});return typeof played==='boolean'?played:true;},
   picture(){return mount.picture?.()||null;},
   get metrics(){
