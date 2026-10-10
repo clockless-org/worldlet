@@ -935,6 +935,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  },true);
  window.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&(root.querySelector('#companionInfo')?.open||root.querySelector('#notionDialog')?.open))return;
+  // A tour on screen takes Esc first (tour-spotlight.ts ends a replay), even over a reply preview it covers.
+  if(e.key==='Escape'&&root.dataset.tourSpotlight==='true')return;
   if(e.key==='Escape'&&expanded&&!active){e.preventDefault();e.stopImmediatePropagation();toggleThread(false);return;}
   if(e.key==='Escape'&&(active||recording||starting||transcribing||preview||editing||avatarPress||keyPress)){e.preventDefault();e.stopImmediatePropagation();clearKeyPress();clearAvatarPress();editing=false;input.blur();if(active||recording||starting||transcribing)stop();else hidePreview();}
  },true);
