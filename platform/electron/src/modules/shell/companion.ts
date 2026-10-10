@@ -46,6 +46,7 @@ export class DesktopCompanion implements DesktopCompanionService {
  private inactive:ReturnType<typeof setTimeout>|null=null;
  /** The World's last frame, shown in the World window while Fox is out because another app is in front. */
  private backdrop:ImageView|null=null;
+ private backdropFrame:NativeImage|null=null;
  /** Windows only: the notification-area way back while the World is hidden. */
  private entry:CompanionTray|null;
  private quit:()=>void;
@@ -64,6 +65,7 @@ export class DesktopCompanion implements DesktopCompanionService {
  onPresentation(listener:(desktop:boolean)=>void){this.presentation.push(listener);}
  keepInWorld(check:()=>boolean){this.holds.push(check);}
  panelBounds(){return this.desktop&&this.panel&&!this.panel.isDestroyed()?this.panel.getBounds():null;}
+ backdropImage(){return this.desktop?this.backdropFrame:null;}
  private presented(desktop:boolean){for(const listener of this.presentation)try{listener(desktop);}catch(error){this.host.diagnostics.record(error,'desktopCompanion');}}
  /** The World window exists only after modules install; attach once it loaded. */
  attach(){
@@ -154,7 +156,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   world.contentView.removeChildView(view);
   if(image){
    const backdrop=this.backdrop??new ImageView();this.backdrop=backdrop;
-   backdrop.setImage(image);
+   backdrop.setImage(image);this.backdropFrame=image;
    const [width,height]=world.getContentSize();
    backdrop.setBounds({x:0,y:0,width,height});
    world.contentView.addChildView(backdrop);
@@ -180,7 +182,7 @@ export class DesktopCompanion implements DesktopCompanionService {
    world.contentView.addChildView(view);
    // The last frame stays above the returning view until the page has painted the whole World again
    // (worldletRestoreWorld waits for the World's own frames, up to 1.5 s).
-   const backdrop=this.backdrop;this.backdrop=null;
+   const backdrop=this.backdrop;this.backdrop=null;this.backdropFrame=null;
    if(backdrop){
     world.contentView.addChildView(backdrop);
     const remove=()=>{try{world.contentView.removeChildView(backdrop);}catch{}};

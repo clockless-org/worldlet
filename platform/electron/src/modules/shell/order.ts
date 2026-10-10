@@ -11,7 +11,7 @@ import {ORDER_FRAMES,ORDER_FRAME_BYTES,ORDER_LOG,orderAvailable,orderItem,orderL
 import {buildNumber,versionText} from './release.ts';
 import {machineCredential} from './machine-credential.ts';
 import {orderDiagnostics,orderLogFiles} from './diagnostics.ts';
-import {ANALYTICS,BROWSER,type AnalyticsService,type BrowserService} from '../../host/services.ts';
+import {ANALYTICS,BROWSER,DESKTOP_COMPANION,type AnalyticsService,type BrowserService,type DesktopCompanionService} from '../../host/services.ts';
 
 /** This computer's Claude Code CLI (the places its installers use; Electron's PATH is the system's). */
 function claudeCLI():string {
@@ -89,7 +89,10 @@ async function pictures(host:Host):Promise<{label:string;jpeg:string}[]> {
  // engine (CEF) the page is drawn by a view of its own whose address is not the site's (owner report 2026-10-06).
  const page=host.optional<BrowserService>(BROWSER)?.visiblePage(),shown=page&&!page.hidden&&!page.isClosed?page.pictureContents:null;
  const pageShot=shown?await capture(shown):null;
- let worldShot=world?await capture(world.webContents):null;
+ // Fox on the desktop: the World view is see-through around Fox and captures as black, so the picture is the
+ // World the window behind Fox shows (owner Order 2026-10-10).
+ const behind=host.optional<DesktopCompanionService>(DESKTOP_COMPANION)?.backdropImage?.()??null;
+ let worldShot=behind??(world?await capture(world.webContents):null);
  const worldAt=world?boundsOf(root,world.webContents):null,pageAt=shown?boundsOf(root,shown):null;
  if(worldShot&&pageShot&&worldAt&&pageAt)worldShot=withPage(worldShot,worldAt,pageShot,pageAt);
  const worldJpeg=worldShot?jpegOf(worldShot):null;if(worldJpeg)out.push({label:'the Worldlet window',jpeg:worldJpeg});

@@ -1,3 +1,4 @@
+import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
 import type {PhonePushRequest} from '../../../../core/phone/index.ts';
@@ -306,6 +307,8 @@ export interface DesktopCompanionService {
  keepInWorld(check:()=>boolean):void;
  /** The Companion's floating window on screen while on the desktop. */
  panelBounds():{x:number;y:number;width:number;height:number}|null;
+ /** While Fox is on the desktop because another app is in front: the World as the window behind Fox shows it. */
+ backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}
