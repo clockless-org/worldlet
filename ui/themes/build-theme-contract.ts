@@ -159,6 +159,9 @@ export interface BuildThemeManifest {
  contractVersion:2;id:string;updatedAt?:string;title:string;
  entry:'entry.ts';stylesheet:'theme.css';assets:'assets';presentation:'presentation.json';
  applets:string[];
+ /** `host`: the theme draws the World only. Applets open in the host's own Applet pages, so `renderApplet` is never
+  * called, `applets` is empty, and the shared HUD keeps its own layout (scene slots and HUD rectangles are not applied). */
+ appletPages?:'host';
 }
 const need=(ok:unknown,message:string)=>{if(!ok)throw Error('Invalid build theme: '+message);};
 const id=(v:unknown)=>typeof v==='string'&&/^[a-z][a-z0-9-]*$/.test(v);
@@ -171,7 +174,8 @@ export function parseBuildThemeManifest(value:unknown):BuildThemeManifest {
  need(t&&t.contractVersion===2&&id(t.id)&&text(t.title),'identity / contract v2');
  need(t.updatedAt===undefined||(typeof t.updatedAt==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(t.updatedAt)&&Number.isFinite(Date.parse(t.updatedAt))),'updatedAt UTC timestamp');
  need(t.entry==='entry.ts'&&t.stylesheet==='theme.css'&&t.assets==='assets'&&t.presentation==='presentation.json','package entry points');
- need(Array.isArray(t.applets)&&t.applets.every(id)&&new Set(t.applets).size===t.applets.length,'applet IDs');return t;
+ need(Array.isArray(t.applets)&&t.applets.every(id)&&new Set(t.applets).size===t.applets.length,'applet IDs');
+ need(t.appletPages===undefined||(t.appletPages==='host'&&t.applets.length===0),'appletPages');return t;
 }
 export function parseThemePresentation(value:unknown):ThemePresentation {
  const p=value as ThemePresentation;

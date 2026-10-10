@@ -20,6 +20,9 @@ export function readBuildThemePreference():string{
 }
 let active:InstalledTheme=BUILD_THEMES.get(readBuildThemePreference())!;
 export function activeBuildTheme():InstalledTheme{return active;}
+/** Whether Applets open in the host's own Applet pages: the built-in Village, or a package that declares `appletPages: 'host'`.
+ * Such a theme draws only the World, and the shared HUD keeps its own layout. */
+export const hostAppletPages=(theme:InstalledTheme=active)=>!theme.package||theme.package.manifest.appletPages==='host';
 /** Package assets are published per theme, so two themes never collide on a file name. */
 export const themeAssetURL=(id:string,path:string)=>'theme-assets/'+id+'/'+path.replace(/^assets\//,'');
 /**
@@ -62,7 +65,7 @@ function attach(next:InstalledTheme){
  const link=next.package?stylesheet(next.id):null;if(link)link.media='all';
  for(const other of document.querySelectorAll<HTMLLinkElement>('link[data-theme-style]'))if(other!==link)other.remove();
  const root=document.documentElement;
- if(link){root.dataset.buildTheme=next.id;return;}
+ if(link&&!hostAppletPages(next)){root.dataset.buildTheme=next.id;return;}
  delete root.dataset.buildTheme;
  for(const key of Object.keys(root.dataset))if(/^sim[A-Z]/.test(key))delete root.dataset[key];
  for(const name of [...root.style].filter(name=>name.startsWith('--sim-')))root.style.removeProperty(name);
@@ -78,7 +81,7 @@ export function applyBuildThemeScene(scene:ThemeScene){
 }
 export function renderBuildWorld(context:Omit<ThemeWorldContext,'scene'|'asset'>){
  const {theme,presentation}=pkg(),{id}=active;
- applyBuildThemeScene(presentation.world);
+ if(!hostAppletPages())applyBuildThemeScene(presentation.world);
  return theme.renderWorld({...context,scene:presentation.world,asset:path=>themeAssetURL(id,path)});
 }
 export function renderBuildTheme(context:Omit<ThemeAppletContext,'scene'|'asset'>){
@@ -92,8 +95,9 @@ async function prepare(next:InstalledTheme){
  if(typeof document==='undefined'||!next.package)return;
  const link=stylesheet(next.id);
  if(!link.sheet)await new Promise<void>((resolve,reject)=>{link.addEventListener('load',()=>resolve(),{once:true});link.addEventListener('error',()=>reject(Error(next.title+' could not load. Try again.')),{once:true});});
- const {world,fallback,applets,fonts}=next.package.presentation;
- const pictures=[...[world,fallback,...Object.values(applets)].map(scene=>scene.background),...Object.values(next.package.presentation.hud?.skin||{}).map(piece=>piece.image),...Object.values(next.package.presentation.icons||{})];
+ const {world,fallback,applets,fonts,hud,icons}=next.package.presentation,scenes=!hostAppletPages(next);
+ // A theme in the host's Applet pages has no scene paintings, and its many Applet icons load as they are shown.
+ const pictures=[...(scenes?[world,fallback,...Object.values(applets)].map(scene=>scene.background):[]),...Object.values(hud?.skin||{}).map(piece=>piece.image),...(scenes?Object.values(icons||{}):[])];
  const images=[...new Set(pictures.map(path=>themeAssetURL(next.id,path)))];
  await Promise.all(images.map(async src=>{const image=new Image();image.src=src;try{await image.decode();}catch(error){throw Error(next.title+' artwork could not load. Try again.',{cause:error});}}));
  await Promise.all(fonts.map(font=>fetch(themeAssetURL(next.id,font.file)).catch(()=>null)));

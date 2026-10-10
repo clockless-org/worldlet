@@ -1,4 +1,4 @@
-import {themeAppletIcon,renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeWorldApplet,type ThemeLampState} from '../themes/index.ts';
+import {themeAppletIcon,hostAppletPages,renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeWorldApplet,type ThemeLampState} from '../themes/index.ts';
 import {createAppletStage} from './theme-applet-stage.ts';
 import {createAppletStage as createVillageStage} from './pixi-stage.ts';
 import {renderVillageWorld,type VillageWorldMount} from './village/village-world.ts';
@@ -21,13 +21,14 @@ function appletIcon(room):string|undefined {
  * the built-in Village's too, is drawn through it; the host draws what is the same in every theme: the pins, lamp
  * labels and lamps on device pictures, and the zoom between the World and an Applet. */
 export function createModuleScene(host,rooms,onPick,onProject,pages,options):any {
- const builtIn=!activeBuildTheme().package,shellRoot=(host.closest('.notion-world')||host) as HTMLElement;
+ // A theme in the host's Applet pages (the Village) draws the World under the shell's pins and opens Applets in the
+ // host's own stage; any other package draws its own buttons over the pins and its own Applet scenes.
+ const builtIn=!activeBuildTheme().package,hostPages=hostAppletPages(),shellRoot=(host.closest('.notion-world')||host) as HTMLElement;
  const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer=builtIn?'village':'sim-dom';Object.assign(world.style,{position:'absolute',inset:'0'});
- // The Village draws under the shell's pins; a package draws its own buttons over them.
- if(builtIn)host.prepend(world);else host.append(world);
- const stage=builtIn?createVillageStage(host,onPick):createAppletStage(host,onPick),stages=new Map(),activities=new Map<string,any>();
- const imageLamps=builtIn?createAppletImageLamps(shellRoot,(globalThis as any).__WORLDLET_25D_ASSETS__):null,lampLabels=new Map<string,ReturnType<typeof createLampLabel>>();
- const levelZoom=builtIn?createLevelZoom(shellRoot,host):null;
+ if(hostPages)host.prepend(world);else host.append(world);
+ const stage=hostPages?createVillageStage(host,onPick):createAppletStage(host,onPick),stages=new Map(),activities=new Map<string,any>();
+ const imageLamps=hostPages?createAppletImageLamps(shellRoot,(globalThis as any).__WORLDLET_25D_ASSETS__):null,lampLabels=new Map<string,ReturnType<typeof createLampLabel>>();
+ const levelZoom=hostPages?createLevelZoom(shellRoot,host):null;
  let view:ThemeWorldState['view']={id:'overview',level:'overview'},environment={},motion=true,disposed=false,connections=options.connections||[],marked=false;
  const interaction={placementArea:null as string|null,framedArea:null as string|null,inset:0,hoveredApplet:null as string|null,hoveredArea:null as string|null};
  let arriving:string[]=[],hidden=new Set(options.hiddenApplets||[]),unlocked=options.unlockedApplets?new Set(options.unlockedApplets):null;
@@ -106,14 +107,14 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const mount=village||renderBuildWorld(context);
  function refresh(){if(disposed)return;mount.update(state());world.hidden=view.level==='applet'&&!mount.behindApplet;
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
-  if(village){
-   // The Village's Applet stage: its reader stays put while the item's detail or the website is open.
+  if(hostPages){
+   // The host's Applet stage: its reader stays put while the item's detail or the website is open.
    const shell=shellInteraction(host),open=view.level==='applet'&&!!room&&stages.has(room.moduleId);
    stage.render(room||{},room?stages.get(room.moduleId):undefined,open&&!shell.website&&!shell.detailOpen,open&&shell.detailOpen&&!shell.website,view.level==='applet');
   }
   else if(room)stage.render(room,stages.get(room.moduleId)||{items:[]},view.level==='applet');
   else stage.render({key:'',moduleId:'',title:''},{items:[]},false);
-  if(!village&&view.level!=='applet')applyBuildThemeScene(activeBuildTheme().package!.presentation.world);
+  if(!hostPages&&view.level!=='applet')applyBuildThemeScene(activeBuildTheme().package!.presentation.world);
   // A theme that marks nothing renders its own accessible map buttons. No duplicate pins.
   if(!marked)onProject({});
  }

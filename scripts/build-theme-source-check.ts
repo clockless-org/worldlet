@@ -11,6 +11,10 @@ try{
  const manifest={contractVersion:2,id:'first',updatedAt:'2026-10-09T23:14:20Z',title:'First',entry:'entry.ts',stylesheet:'theme.css',assets:'assets',presentation:'presentation.json',applets:[]};
  assert.doesNotThrow(()=>parseBuildThemeManifest({...manifest,updatedAt:undefined}));
  assert.throws(()=>parseBuildThemeManifest({...manifest,updatedAt:'yesterday'}),/updatedAt/);
+ // A theme that draws only the World opens Applets in the host's own pages, so it names no Applet scenes.
+ assert.doesNotThrow(()=>parseBuildThemeManifest({...manifest,appletPages:'host'}));
+ assert.throws(()=>parseBuildThemeManifest({...manifest,appletPages:'host',applets:['gmail']}),/appletPages/);
+ assert.throws(()=>parseBuildThemeManifest({...manifest,appletPages:'theme'}),/appletPages/);
  const source=path.join(tmp,'source'),consumer=path.join(tmp,'consumer');await fs.mkdir(path.join(source,'assets'),{recursive:true});await fs.mkdir(path.join(consumer,'ui'),{recursive:true});
  const write=async(id:string)=>{await fs.writeFile(path.join(source,'theme.json'),JSON.stringify({...manifest,id}));await fs.writeFile(path.join(source,'entry.ts'),`import type {BuildTheme} from '@worldlet/theme'; const theme:BuildTheme={contractVersion:2,id:'${id}',renderWorld:()=>({dispose(){},update(){},event(){return false;},anchor(){return null;},bounds(){return null;}}),renderApplet:()=>({dispose(){}})};export default theme;`);await fs.writeFile(path.join(source,'theme.css'),`:root{--theme-ink:#123456}`);};
  const presentation=JSON.parse(await fs.readFile(new URL('../ui/theme-packages/village-map/presentation.json',import.meta.url),'utf8'));
