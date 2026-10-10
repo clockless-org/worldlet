@@ -136,8 +136,9 @@ export function taskPictureInPictureAspect(page:{width:number;height:number}):nu
  * - Fox's glow, pointer and the page's one status (its steps, then its result) go to the copy; the
  *   person's page carries none of them.
  * - It takes no input: a press on it brings Fox's page into the panel in place of the person's
- *   (to see Fox's result or step in), and Fox goes on there. Once Fox's turn has ended it also
- *   offers a close control, which leaves the person's page as it is.
+ *   (to see Fox's step), and Fox goes on there. When Fox's turn (or the Applet task working on it)
+ *   ends, the copy closes by itself and Fox's reply carries the result (owner Order 2026-10-10:
+ *   "when the task is done, its little window can close"); the person's page stays as it is.
  * - Leaving the Applet while Fox works takes the copy along to the screen over the Applet's device
  *   (task picture in picture above); leaving after Fox's turn closes it.
  * - Hosts that draw pages smaller than their own size offer it (`browserTaskPictureInPicture`), and
