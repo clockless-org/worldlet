@@ -476,15 +476,23 @@ export function installFox(host:Host){
   const id='proactive-'+crypto.randomUUID().toUpperCase();
   const run={id,runtime:make(),cancelled:false};
   proactiveRun=run;trusts.set(id,{untrusted:true,sources:['browse_web']});
-  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0))});
+  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0)),environment:proactiveEnvironment(request.environment)});
   return {started:true,id};
  }
- async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes}:{moment:ProactiveMoment;thread:string;place:string;minutes:number}){
+ /** What the page says the place shows (location, state, view, the World's facts), as a turn of the person's own
+  * carries it; without it an ask in a native Applet saw only the place's name and passed (owner 2026-10-10). The
+  * host's own keys win, and a page that sends too much sends nothing. */
+ function proactiveEnvironment(value:unknown):Row {
+  if(!value||typeof value!=='object'||Array.isArray(value))return {};
+  const {history:_h,here:_p,browsing:_b,page:_g,proactive:_m,...rest}=value as Row;
+  try{return JSON.stringify(rest).length<=6000?rest:{};}catch{return {};}
+ }
+ async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,environment={}}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;environment?:Row}){
   let line:string|null=null;
   try{
    const profile=companion.archive(scope);
    const said=[...profile.conversations].reverse().find((turn:Row)=>turn.role==='user'&&typeof turn.text==='string');
-   const context:Row={history:recentHistory(),proactive:{moment}};
+   const context:Row={...environment,history:recentHistory(),proactive:{moment}};
    try{const here=companion.place(scope,thread);if(here)context.here=here;}catch(error){host.diagnostics.record(error,'foxPlace');}
    try{
     const page=browser()?.visiblePage(),shown=page&&!page.hidden&&!page.isClosed?page.recorder:null;

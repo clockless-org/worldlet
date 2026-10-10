@@ -7,9 +7,9 @@ import {characters} from './companion-text.ts';
  * model pays for every ask, so the limits below also cap the cost. */
 export const PROACTIVE={
  /** Between two lines Fox says first; doubles for each line in a row the person let pass (at most ×8). */
- minGapSeconds:15*60,
+ minGapSeconds:10*60,
  /** Lines Fox says first per local day, and per place per day. */
- perDay:8,perPlace:2,
+ perDay:12,perPlace:3,
  /** A reply within this long after Fox spoke counts as an answer. */
  answeredSeconds:10*60,
  /** "Be quiet" holds this long. */
@@ -23,10 +23,12 @@ export const PROACTIVE={
  /** The longest line shown. */
  lineCharacters:240,
  /** Browse with me (owner request 2026-10-08: 「做 Applet 的时候小狐狸在旁边时不时地说话，给一些 context，提供一些帮助」):
-  * once the person has looked at an Applet or page this long, Fox may say one line about it. At most one line
-  * per visit, these lines at least `gapSeconds` apart (doubling like the others when let pass) and `perDay` a
-  * day, counted apart from the other moments so browsing never uses up the day's other lines. */
- browse:{settleSeconds:30,gapSeconds:4*60,perDay:20}
+  * once the person has looked at an Applet or page this long, Fox may say one line about it. At most `perVisit` asks
+  * per visit (the next one `againSeconds` after the first, for when Fox passed or the screen changed), these
+  * lines at least `gapSeconds` apart (doubling like the others when let pass) and `perDay` a day, counted apart
+  * from the other moments so browsing never uses up the day's other lines. Owner 2026-10-10 「让它提供的更勤一点」:
+  * 88 asks in 4 days ended in 2 lines, so a look is shorter, asks come twice per visit and the bar is lower. */
+ browse:{settleSeconds:20,againSeconds:3*60,gapSeconds:2*60,perDay:30,perVisit:2}
 } as const;
 
 /** Why Worldlet asks: the person settled into a place, has stayed in it a long time, is up late, or is
@@ -40,13 +42,13 @@ export interface ProactiveState {
  /** Browse with me: on unless the person chose Don't bother in Fox's card (kept by the host). Off, Fox never speaks first. */
  browse:boolean;
  /** Browse lines today, when the last browse ask ran, and the visit it was for (one line per visit). */
- browsed:number;browseAt:number;browseVisit:string;
+ browsed:number;browseAt:number;browseVisit:string;browseVisitAsks:number;
  /** The line said last, until the person answers it or lets it pass. */
  pending:{at:number;place:string}|null;
  /** Recent lines, newest last, so Fox never says the same thing twice. */
  recent:string[];
 }
-export const proactiveState=():ProactiveState=>({day:'',spoken:0,places:{},moments:[],lastAt:0,ignored:0,quietUntil:0,browse:true,browsed:0,browseAt:0,browseVisit:'',pending:null,recent:[]});
+export const proactiveState=():ProactiveState=>({day:'',spoken:0,places:{},moments:[],lastAt:0,ignored:0,quietUntil:0,browse:true,browsed:0,browseAt:0,browseVisit:'',browseVisitAsks:0,pending:null,recent:[]});
 
 function settle(state:ProactiveState,now:number,day:string){
  if(state.day!==day){state.day=day;state.spoken=0;state.places={};state.moments=[];state.browsed=0;}
@@ -62,7 +64,7 @@ export function proactiveDue(state:ProactiveState,{now,day,moment,place,visit=''
  if(!state.browse)return {due:false,reason:'off'};
  if(now<state.quietUntil)return {due:false,reason:'quiet'};
  if(moment==='browsing'){
-  if(!visit||visit===state.browseVisit)return {due:false,reason:'visit'};
+  if(!visit||visit===state.browseVisit&&state.browseVisitAsks>=PROACTIVE.browse.perVisit)return {due:false,reason:'visit'};
   if(state.browsed>=PROACTIVE.browse.perDay)return {due:false,reason:'day'};
   if(state.pending)return {due:false,reason:'waiting'};
   if(now-Math.max(state.browseAt,state.lastAt)<PROACTIVE.browse.gapSeconds*2**state.ignored)return {due:false,reason:'gap'};
@@ -81,7 +83,7 @@ export function proactiveDue(state:ProactiveState,{now,day,moment,place,visit=''
 export function proactiveAsked(state:ProactiveState,{now,day,moment,visit=''}:{now:number;day:string;moment:ProactiveMoment;visit?:string}){
  settle(state,now,day);
  // A browse ask keeps its own clock, so looking around never pushes back the other moments.
- if(moment==='browsing'){state.browseAt=now;state.browseVisit=visit;return;}
+ if(moment==='browsing'){state.browseVisitAsks=visit===state.browseVisit?state.browseVisitAsks+1:1;state.browseAt=now;state.browseVisit=visit;return;}
  state.lastAt=now;
  if(moment==='late'&&!state.moments.includes('late'))state.moments.push('late');
 }
@@ -123,10 +125,11 @@ export function proactiveTask({moment,place,local,minutes,recent,lastWords}:{mom
  return [
   '(Not the person\'s words: Worldlet is asking at a quiet moment whether you have one thing worth saying first.)',
   `${why} It is ${local}.`,
-  'Look at where they are and what is in front of them (here, showing, browsing, history; on a website, page.text is what the page on screen says right now) and what you know about their day (query_world_items for what is coming up or due). Do not try to open, snapshot or read the page with a tool: page.text is all of it this ask gets.',
+  'Look at where they are and what is in front of them (location, state and view are the place and what it shows; here, browsing, history; on a website, page.text is what the page on screen says right now) and what you know about their day (query_world_items for what is coming up or due). Do not try to open, snapshot or read the page with a tool: page.text is all of it this ask gets.',
   'Speak only for one of three reasons: useful (something they will need soon: a clash, a deadline, the thing they were just looking for), insight (a concrete, opinionated take on what they are doing right now: a move, a draft, a plan) or warmth (what a friend would say: they just finished something, it is late, they have been at it a long time).',
-  moment==='browsing'?'Browsing along, a fourth reason counts: context (something about what is on screen they may not see at a glance: what it means for them, how it ties to their day, a catch, the one thing worth doing here). Talk about this screen, not about browsing.':'',
-  'First think of up to three candidate lines and rate each 0 to 10 for how glad the person would be to get it right now. Say the best one only if it rates 7 or more and is not a repeat of anything below; otherwise answer exactly PASS. When in doubt, PASS.',
+  moment==='browsing'?'Browsing along, a fourth reason counts: context (something about what is on screen they may not see at a glance: what it means for them, how it ties to their day, a catch, the one thing worth doing here, or what you could do for them here). Talk about this screen, not about browsing.':'',
+  // Owner 2026-10-10 「让它提供的更勤一点」: at 7 and "when in doubt, PASS" Fox passed 86 of 88 asks.
+  `First think of up to three candidate lines and rate each 0 to 10 for how glad the person would be to get it right now. Say the best one if it rates ${moment==='browsing'?5:6} or more and is not a repeat of anything below; otherwise answer exactly PASS. A specific, helpful line beats silence; a vague or generic one does not.`,
   'The line: one or two short sentences, in the language of their latest words, like a friend\'s text. No greeting, no "need help?", no list, no emoji unless they use them. Answer with the line alone, nothing before or after it.',
   'This turn is read only: do not open, click, send, save or change anything. If something should be done, mention it in the line; they can ask.',
   recent.length?`Lines you already said first today (do not repeat them): ${JSON.stringify(recent)}`:'',

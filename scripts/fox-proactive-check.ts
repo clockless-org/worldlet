@@ -56,14 +56,18 @@ assert.deepEqual(ask(state,t0+3600),{due:false,reason:'quiet'});
 assert.deepEqual(ask(state,t0+PROACTIVE.quietSeconds+PROACTIVE.minGapSeconds),{due:true});
 
 // Browse with me (owner request 2026-10-08): in an Applet or page Fox may say one line per visit after a short
-// look, on its own clock (4 minutes, doubling when let pass, 20 a day) apart from the other moments' limits.
+// look, asked at most twice per visit, on its own clock (2 minutes, doubling when let pass, 30 a day) apart from the
+// other moments' limits (owner 2026-10-10 「让它提供的更勤一点」).
 const browse=(state:ReturnType<typeof proactiveState>,now:number,visit:string,place='Mail')=>proactiveDue(state,{now,day,moment:'browsing',place,visit});
 state=proactiveState();
 assert.equal(state.browse,true,'on unless the person chose Don\'t bother');
 assert.deepEqual(browse(state,t0,''),{due:false,reason:'visit'},'a browse ask names its visit');
 assert.deepEqual(browse(state,t0,'mail@1'),{due:true});
 proactiveAsked(state,{now:t0,day,moment:'browsing',visit:'mail@1'});
-assert.deepEqual(browse(state,t0+3600,'mail@1'),{due:false,reason:'visit'},'one line per visit');
+assert.deepEqual(browse(state,t0+PROACTIVE.browse.againSeconds,'mail@1'),{due:true},'a second look in the same visit');
+proactiveAsked(state,{now:t0+PROACTIVE.browse.againSeconds,day,moment:'browsing',visit:'mail@1'});
+assert.deepEqual(browse(state,t0+3600,'mail@1'),{due:false,reason:'visit'},'at most two asks per visit');
+state.browseAt=t0;
 assert.deepEqual(browse(state,t0+60,'x@2','X'),{due:false,reason:'gap'});
 assert.deepEqual(browse(state,t0+PROACTIVE.browse.gapSeconds,'x@2','X'),{due:true});
 // A browse ask leaves the other moments' clock alone, and its lines do not use up their per-place or per-day counts.
@@ -76,10 +80,11 @@ now=t0+PROACTIVE.browse.gapSeconds+PROACTIVE.answeredSeconds+1;
 assert.deepEqual(browse(state,now,'y@3','Y'),{due:true});
 assert.equal(state.ignored,1);
 proactiveAsked(state,{now,day,moment:'browsing',visit:'y@3'});proactiveSpoke(state,{now,day,place:'Y',line:'Two',moment:'browsing'});
-now+=PROACTIVE.answeredSeconds+1;
-assert.deepEqual(browse(state,now,'w@4','W'),{due:false,reason:'gap'});
+const spokeAt=now;now+=PROACTIVE.answeredSeconds+1;
+browse(state,now,'w@4','W');
 assert.equal(state.ignored,2);
-assert.deepEqual(browse(state,now-PROACTIVE.answeredSeconds-1+4*PROACTIVE.browse.gapSeconds,'w@4','W'),{due:true});
+assert.deepEqual(browse(state,spokeAt+4*PROACTIVE.browse.gapSeconds-1,'w@4','W'),{due:false,reason:'gap'});
+assert.deepEqual(browse(state,spokeAt+4*PROACTIVE.browse.gapSeconds,'w@4','W'),{due:true});
 // The day's browse lines run out on their own count.
 state=proactiveState();
 for(let i=0;i<PROACTIVE.browse.perDay;i++)proactiveSpoke(state,{now:t0,day,place:'p',line:String(i),moment:'browsing'});
@@ -108,7 +113,13 @@ const chat=fs.readFileSync('ui/companion/native-chat.ts','utf8');
 assert.match(chat,/make\('button','','Browse with me'\),browseOff=make\('button','','Don’t bother'\)/);
 assert.match(chat,/browseSwitch\.hidden=browsing===null\|\|onDesktop\(\)\|\|root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true'\|\|\(context\.key\.split\(':'\)\[0\]==='overview'&&!contentIdentity\(\)\)\|\|!\(browsing===false\|\|guided&&shownGuide\.browsing===true\)/);
 const pageSource=fs.readFileSync('ui/companion/fox-proactive.ts','utf8');
-assert.match(pageSource,/if\(!settled&&!world\(\)&&here>=PROACTIVE\.browse\.settleSeconds&&quiet>=5\)\{settled=true;void ask\('browsing',key\);return;\}/);
+assert.match(pageSource,/const due=looks===0\?here>=PROACTIVE\.browse\.settleSeconds:looks<PROACTIVE\.browse\.perVisit&&\(now-lookedAt\)\/1000>=PROACTIVE\.browse\.againSeconds;/);
+assert.match(pageSource,/if\(due&&quiet>=5\)\{settled=true;looks\+\+;lookedAt=now;void ask\('browsing',key\);return;\}/);
+// The ask sees what the place shows, as the person's own turn would (a native Applet has no page text).
+assert.match(pageSource,/environment:context/);
+assert.match(chat,/environment:\(\)=>\(\{key:context\.key,location:context\.title,state:context\.detail,/);
+assert.match(hostSource,/const context:Row=\{\.\.\.environment,history:recentHistory\(\),proactive:\{moment\}\};/);
+assert(browseTask.includes('rates 5 or more')&&proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:''}).includes('rates 6 or more'),'the bar is lower while browsing');
 assert(policyIncludes('foxBrowse'),'the switch is plumbing, never World history');
 
 // Fox's answer: PASS shows nothing; a line is one line, unquoted and clipped.
