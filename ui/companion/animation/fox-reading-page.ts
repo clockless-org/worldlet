@@ -1,4 +1,4 @@
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
 import type {RigPoint} from './fox-anatomy.ts';
 import {smoother as ease} from './fox-skeleton.ts';
 export function readingPagePhase(t:number,reduced=false){

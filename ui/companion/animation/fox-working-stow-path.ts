@@ -1,6 +1,6 @@
 import type {JointControl} from './fox-anatomy.ts';
 import {workingStowLayout,WORKING_STOW_DURATION} from './fox-working-stow-study.ts';
-import baked from '../../resources/styles/builtin/drafts/fox-states-v1/working-stow-path.json' with {type:'json'};
+import baked from '../../../resources/styles/builtin/drafts/fox-states-v1/working-stow-path.json' with {type:'json'};
 
 /** Six precomputed rotation channels; no iterative IK solve in playback.
  * Uniform cubic B-spline gives continuous position/velocity/acceleration.

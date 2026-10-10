@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import {createPoseTransition} from '../ui/companion/fox-pose-transition.ts';
-import {paintedAction} from '../ui/companion/fox-painted-actions.ts';
+import {createPoseTransition} from '../ui/companion/animation/fox-pose-transition.ts';
+import {paintedAction} from '../ui/companion/animation/fox-painted-actions.ts';
 import {FOX_ACTIONS} from '../ui/companion/fox-actions.ts';
-import {paintedVertex} from '../ui/companion/fox-painted-idle.ts';
+import {paintedVertex} from '../ui/companion/animation/fox-painted-idle.ts';
 const controls=['lean','shoulders','nod','pawL','pawR','look','tail'] as const;
 for(const a of FOX_ACTIONS)for(const b of FOX_ACTIONS){
  const blend=createPoseTransition(paintedAction);blend.sample(a,0,0);

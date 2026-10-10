@@ -22,7 +22,7 @@ material, sounds, world declarations) that every theme draws over. It is not a t
 | HUD | `hud` | Colors, type, material, borders, icons and short transitions, from the theme's Style Pack (`style.json` and `tokens.json` in the theme package; painted sources in `resources/styles/<id>/`) |
 | Applet presentation | `applets` | Each Applet's Peek/Open/Focus art; an Applet without its own stands in the theme's generic room (`fallback`) |
 | Motion and sound | `motion` | Ambient loops with their stop rules, the cue each business event plays, its reduced-motion form and sounds |
-| Companion | `companion` | Its own rig and portrait, a mapping from the shared performance states (`ui/companion/fox-state-catalog.ts`) to the rig's, a still fallback pose for states it lacks, and where it perches (`stable` or a repository PNG/WebP path per overview/room/reading context) |
+| Companion | `companion` | Its own rig and portrait, a mapping from the shared performance states (`ui/companion/animation/fox-state-catalog.ts`) to the rig's, a still fallback pose for states it lacks, and where it perches (`stable` or a repository PNG/WebP path per overview/room/reading context) |
 | Surfaces | `surfaces` | The rest of the shared UI: `tokens` (CSS custom properties named `--theme-*`, plain values only), `fonts` (display and label font files with their license), `skin` (ten nine-slice HUD pieces: `attention`, `note`, `nameplate`, `back`, `bubble`, `panel`, `log`, `button`, `card`, `frame`) and `startup` (the loading picture, or the companion portrait) |
 
 Motion also holds `transitions` (`area`: `zoom` or `shared`; `room`: `fade`, `door` or `shared`; `ms`) and `sound`

@@ -20,29 +20,27 @@ See the [diagram](architecture.html).
 
 Layers cut the product across; features cut it down. Each feature is a vertical
 slice with its own UI, Core and (when it needs one) Platform part. Every `ui/` and
-`core/` component belongs to exactly one row below; `npm run check:docs` fails when a
+`core/` component and every Electron host module (`platform/electron/src/modules/`) belongs to exactly one row below; `npm run check:docs` fails when a
 component is missing or listed twice.
 
 | Feature | What it is | UI | Core | Platform |
 | --- | --- | --- | --- | --- |
-| World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `core/activity/` | Trusted World view |
-| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `core/applets/` `core/browser/` `core/games/` | Website views, agent-browser |
-| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `core/companion/` | Agent processes, conversation journal |
-| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `core/attention/` | Phone pushes |
-| Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (status shows in Companion and on Applets) | `core/tasks/` | Claims, leases, Agent runs |
-| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | (cards: `ui/attention/CARD-SYSTEM.md`) | `core/artifacts/` | world.sqlite |
-| Base | What every feature stands on: the connection to the person's Agent (adapters, World tools over the `worldlet` MCP server, phone pairing), local records, setup and the app shell | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `core/agent/` `core/accounts/` `core/tools/` `core/phone/` `core/items/` `core/context/` `core/onboarding/` `core/diagnostics/` `core/distribution/` | Electron host, storage, `contracts/` |
+| World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `core/activity/` | `platform/electron/src/modules/world.ts` |
+| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `core/applets/` `core/browser/` `core/games/` | `platform/electron/src/modules/applet-art/` `platform/electron/src/modules/browser/` `platform/electron/src/modules/calendar/` `platform/electron/src/modules/games/` `platform/electron/src/modules/sources/` |
+| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `core/companion/` | `platform/electron/src/modules/fox/` |
+| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `core/attention/` | `platform/electron/src/modules/attention/` |
+| Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (status shows in Companion and on Applets) | `core/tasks/` | `platform/electron/src/modules/tasks/` |
+| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `core/artifacts/` | `platform/electron/src/modules/artifacts/` |
+| Base | What every feature stands on: the connection to the person's Agent (adapters, World tools over the `worldlet` MCP server, phone pairing), local records, setup and the app shell | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `core/agent/` `core/accounts/` `core/tools/` `core/phone/` `core/items/` `core/context/` `core/onboarding/` `core/diagnostics/` `core/distribution/` | `platform/electron/src/modules/agent-runtime/` `platform/electron/src/modules/phone/` `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (device services: audio, speech, weather, local tools), `contracts/` |
 
 Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
 Applets start tasks, each task's result is an artifact, an artifact that needs the
 person waits in Attention, and every artifact stays in the Journal. Task results
 never reach the person except as artifacts.
 
-Known misplacements, to move when that code is next changed: Tasks and Artifacts &
-Journal have no `ui/` folder yet, so the Journal book (`ui/companion/journal-book.ts`),
-artifact blocks (`ui/companion/artifact-blocks.ts`) and the card system
-(`ui/attention/`) sit in other features' folders; Fox animation studies
-(`ui/companion/fox-*-study.ts`, `fox-anatomy-*`, `fox-drafting-*`) sit beside product code.
+Known misplacements, to move when that code is next changed: Tasks has no `ui/` folder
+(its status shows in Fox and on Applets), artifact styles still sit in
+`ui/attention/attention-preview.css` and `ui/components/states.css`. Fox's animation (anatomy, poses, studies and players) is in `ui/companion/animation/`.
 
 ## Dependency rules
 

@@ -1,4 +1,4 @@
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/anatomy.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/anatomy.json' with {type:'json'};
 import {createEyeGazeStudy} from './fox-eye-gaze-study.ts';
 import {smooth} from './fox-skeleton.ts';
 

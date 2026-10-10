@@ -388,7 +388,7 @@
 .companion-artifact[data-size=large]{grid-column:span 2;grid-row:span 2}
 .companion-artifact[data-kind=attention]{--attention-accent:#946e2b}
 .companion-artifact-open{position:absolute;inset:0;display:flex;flex-direction:column;gap:4px;text-align:left;border:0;background:none;color:inherit;padding:12px 14px;cursor:pointer;font:inherit;border-radius:inherit;overflow:hidden;mask-image:linear-gradient(#000 calc(100% - 22px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 22px),transparent)}
-/* The Journal keeps the card as it was shown (owner request 2026-10-08, ui/attention/CARD-SYSTEM.md#in-the-journal):
+/* The Journal keeps the card as it was shown (owner request 2026-10-08, ui/artifacts/CARD-SYSTEM.md#in-the-journal):
    the World card's paper and corners, its painted picture across the head, and its parts. It never scrolls (owner
    Order 2026-10-09): it shows the fullest version its cell holds, down to the one-sentence brief, and says More when it
    left something out; opening it shows the rest. */

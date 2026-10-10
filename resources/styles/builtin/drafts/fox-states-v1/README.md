@@ -232,7 +232,7 @@ afterwards and are kept in Git as history.
   `exec-1a375b94-2022-4b53-8ce5-aa7c2e75ef85`. Initial explaining output
   `exec-a0e7dc2d-5e8d-4d7e-b07f-8f90f405df8a` moved the head and was rejected;
   the correction uses the original as base and that output only as arm reference.
-- `ui/companion/fox-state-catalog.ts` is the single 32-state production catalog,
+- `ui/companion/animation/fox-state-catalog.ts` is the single 32-state production catalog,
   with triggers, performances, timing and explicit art readiness. Missing artwork
   is never advertised as a finished animation.
 - `fox-authored-study.ts` supplies pose-specific mesh controls. Writing has

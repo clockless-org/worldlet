@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {workingStowStudy,WORKING_STOW_DURATION} from '../ui/companion/fox-working-stow-study.ts';
+import {workingStowStudy,WORKING_STOW_DURATION} from '../ui/companion/animation/fox-working-stow-study.ts';
 
 // Prints generated data for review/patching; --check only reads the saved pack.
 const channels=['upperArmL','forearmL','pawL','upperArmR','forearmR','pawR'],stepMs=20;

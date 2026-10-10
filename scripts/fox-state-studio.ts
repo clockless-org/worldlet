@@ -1,15 +1,15 @@
 import {build} from 'esbuild';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
-import {AUTHORED_STUDY_STATES} from '../ui/companion/fox-authored-study.ts';
+import {AUTHORED_STUDY_STATES} from '../ui/companion/animation/fox-authored-study.ts';
 const dir='resources/styles/builtin/drafts/fox-states-v1',painted='resources/styles/builtin/assets/companion/painted';
 const files={idle:'resources/styles/builtin/assets/companion/rig/fallback.png',// Greeting is layered (body + arm), so it has no single study plate.
 ...Object.fromEntries(AUTHORED_STUDY_STATES.filter(id=>id!=='greeting').map(id=>[id,dir+'/'+id+'.png'])),greetingBody:dir+'/greeting-body.png',greetingArm:dir+'/greeting-arm.png',half:painted+'/half-eye.png',closed:painted+'/closed-eye.png'};
 const sources=Object.fromEntries(await Promise.all(Object.entries(files).map(async([id,file])=>[id,'data:image/png;base64,'+(await readFile(file)).toString('base64')])));
 const result=await build({stdin:{resolveDir:process.cwd(),contents:`
-import {FOX_STATES} from './ui/companion/fox-state-catalog.ts';
-import {createPaintedIdle} from './ui/companion/fox-painted-idle.ts';
-import {authoredStudyPose,authoredStudyVertex} from './ui/companion/fox-authored-study.ts';
-import {createGreetingStudy} from './ui/companion/fox-greeting-study.ts';
+import {FOX_STATES} from './ui/companion/animation/fox-state-catalog.ts';
+import {createPaintedIdle} from './ui/companion/animation/fox-painted-idle.ts';
+import {authoredStudyPose,authoredStudyVertex} from './ui/companion/animation/fox-authored-study.ts';
+import {createGreetingStudy} from './ui/companion/animation/fox-greeting-study.ts';
 const sources=globalThis.sources,stage=document.querySelector('#stage'),catalog=document.querySelector('#catalog'),title=document.querySelector('#stateTitle'),description=document.querySelector('#description'),status=document.querySelector('#status'),play=document.querySelector('#play'),slider=document.querySelector('#time');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),renderers=new Map();
 let active='idle',time=0,paused=false,last=performance.now(),generation=0;

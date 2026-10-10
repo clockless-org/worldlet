@@ -1,4 +1,4 @@
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/anatomy.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/anatomy.json' with {type:'json'};
 import {smooth} from './fox-skeleton.ts';
 
 /** Draft anatomical rig. This is NOT registered as live artwork. No scale/shear

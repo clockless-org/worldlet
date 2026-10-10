@@ -2,7 +2,7 @@ import {readingFinish,type ReadingFinishStart} from './fox-reading-finish.ts';
 import {readingHandPoint} from './fox-reading-study.ts';
 import {anatomyHold} from './fox-anatomy-hold.ts';
 import type {ReadingPresentation} from './fox-anatomy-transition.ts';
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
 import {createAnatomyTransition} from './fox-anatomy-transition.ts';
 import {smootherUnit as ease} from './fox-skeleton.ts';
 export function readingReplyGesture(t:number,reduced=false){

@@ -1,4 +1,4 @@
-import {dissolveWorldSurface,WORLD_REVEAL_MS} from './world-reveal.ts';
+import {dissolveWorldSurface,WORLD_REVEAL_MS} from '../world/index.ts';
 import {startupWalk} from './startup-walk.ts';
 // Tiny boot script: paint an accessible loader before evaluating the world bundle.
 const loader=document.getElementById('worldStartup'),retry=document.getElementById('worldStartupRetry');

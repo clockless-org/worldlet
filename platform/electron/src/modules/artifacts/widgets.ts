@@ -7,7 +7,7 @@ import {FOX,PHONE,WIDGETS,type FoxService,type PhoneService,type WidgetsService}
 import type {Host,Row} from '../../host/types.ts';
 import {Surface} from '../browser/surface.ts';
 import {tryMadeGame} from '../games/trial.ts';
-import {WidgetPlayer} from './player.ts';
+import {WidgetPlayer} from './widget-player.ts';
 
 /** One widget request in flight: the Applet task that works on it and what it may replace. */
 interface Job {idea:string;replaces:string|null;saved:string|null;endsAt:string|null}

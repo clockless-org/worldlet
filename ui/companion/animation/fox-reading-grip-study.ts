@@ -2,8 +2,8 @@ import {rotatePoint as rotate,type RigPoint} from './fox-anatomy.ts';
 import {readingArmPoint} from './fox-reading-study.ts';
 import {solveReadingArm} from './fox-reading-page.ts';
 import {drawAnatomySkin} from './fox-anatomy-skin.ts';
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
-import parts from '../../resources/styles/builtin/drafts/fox-states-v1/reading-grip-parts-v1.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/reading-rig.json' with {type:'json'};
+import parts from '../../../resources/styles/builtin/drafts/fox-states-v1/reading-grip-parts-v1.json' with {type:'json'};
 
 /** Two rigid bones registered to the existing left holding-arm contacts.
  * Original-cut ownership remains a diagnostic, not the Dev painted surface. */

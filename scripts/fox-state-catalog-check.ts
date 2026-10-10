@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {FOX_STATES,foxState} from '../ui/companion/fox-state-catalog.ts';
+import {FOX_STATES,foxState} from '../ui/companion/animation/fox-state-catalog.ts';
 assert.equal(FOX_STATES.length,32);assert.equal(new Set(FOX_STATES.map(s=>s.id)).size,32);
 const plan=await readFile('ui/companion/ANIMATION.md','utf8');
 // ANIMATION.md lists the approved scope; the catalog may also hold experimental states.

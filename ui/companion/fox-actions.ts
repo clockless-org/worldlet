@@ -1,4 +1,4 @@
-import {smooth} from './fox-skeleton.ts';
+import {smooth} from './animation/fox-skeleton.ts';
 export const FOX_ACTIONS=['idle','listening','thinking','reading','drafting','searching','working','talking','happy','waving','yawning','sleeping','stretching'] as const;
 export function foxAction(state:string,elapsed:number,reduced=false){
  const t=reduced?0:Math.max(0,elapsed)/1000,breath=reduced?0:Math.sin(t*1.8);

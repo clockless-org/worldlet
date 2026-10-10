@@ -8,7 +8,7 @@ anatomy joints (rig.JOINTS): 'neck', the prop bones 'desk' and 'bookHold', and
 the body. Paw positions can be given as targets through `reach`, a two-bone
 solve in the chest's frame.
 
-The acting follows ui/companion/fox-state-catalog.ts. Hold states loop; brief
+The acting follows ui/companion/animation/fox-state-catalog.ts. Hold states loop; brief
 states play once and keep their last pose until the portrait asks for another.
 """
 from __future__ import annotations

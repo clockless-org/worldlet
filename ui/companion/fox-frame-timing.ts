@@ -1,5 +1,5 @@
-import {FOX_STATES} from './fox-state-catalog.ts';
-import {foxAnimationPhase} from './fox-animation-phase.ts';
+import {FOX_STATES} from './animation/fox-state-catalog.ts';
+import {foxAnimationPhase} from './animation/fox-animation-phase.ts';
 const knownRoutes=new Set(FOX_STATES.map(state=>'anatomy-v1:'+state.id));
 /** Local Dev diagnostics only. Bounded numeric timings, never user content or
  * network telemetry. RAF delivery and synchronous draw cost are distinct:

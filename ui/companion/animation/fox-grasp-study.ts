@@ -1,4 +1,4 @@
-import spec from '../../resources/styles/builtin/drafts/fox-states-v1/paw-grasp-parts.json' with {type:'json'};
+import spec from '../../../resources/styles/builtin/drafts/fox-states-v1/paw-grasp-parts.json' with {type:'json'};
 import {drawAnatomySkin} from './fox-anatomy-skin.ts';
 import {createAnatomyGPUSkin} from './fox-anatomy-gpu-skin.ts';
 import {anatomyArmVertex,type RigPoint,type RigMatrix} from './fox-anatomy.ts';

@@ -35,7 +35,7 @@ export function frameDue(now:number,last:number,fps:number):boolean {
 
 /** Whether a new environment changes the scene enough to draw it at the full rate for a moment: a
  * lighting preview or a weather change does; the clock re-sending the same sky every 15 seconds
- * (ui/shell/world-environment.ts) does not, and used to wake an idle World each time. */
+ * (ui/world/world-environment.ts) does not, and used to wake an idle World each time. */
 export function environmentShifted(before:any,after:any):boolean {
  const near=(key:string,by:number)=>{const a=before?.[key],b=after?.[key];return a===b||Math.abs(a-b)<=by;};
  return before?.kind!==after?.kind||before?.night!==after?.night||!near('daylight',.01)||!near('progress',.01)||!near('cloud',.01)||!near('wind',1)||!near('windFrom',5);

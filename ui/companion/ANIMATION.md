@@ -56,7 +56,7 @@ is the compiled `fox.riv` and `states.json`. The intermediate `fox.rml` (the Riv
 source the editor or MCP can open) and textures are rebuilt locally and not
 committed; no Rive account is involved.
 
-`ui/companion/fox-rive.ts` loads it with the Canvas2D low-level runtime and draws
+`ui/companion/animation/fox-rive.ts` loads it with the Canvas2D low-level runtime and draws
 into the existing portrait canvas on the portrait's own frame clock, so the
 idle frame budget, hidden-page pause and reduced-motion still pose are
 unchanged. Every bundle carries the runtime and file, and the page policy allows
@@ -98,7 +98,7 @@ The approved painted Fox uses original-art mesh deformation, attached eyelid/paw
 layers and continuous body controls. An offscreen WebGL mesh feeds the existing
 Canvas2D presentation; World rendering remains Pixi. Assets and registration live
 in `resources/styles/builtin/assets/companion/`; runtime composition lives in
-`ui/companion/fox-anatomy-runtime.ts`, `fox-task-performance.ts` and
+`ui/companion/animation/fox-anatomy-runtime.ts`, `fox-task-performance.ts` and
 `fox-anatomy-performance.ts`. The task detail layer preserves the physical
 player's contact points during transitions, then uses registered task key
 contacts and lifts. Review pauses stop typing. Prop ownership stays unchanged.
@@ -132,7 +132,7 @@ cluster while preserving click/hold semantics; native desktop drag remains host 
 
 ## Validation and remaining limits
 
-A theme's own companion (`renderer: 'sprite-rig'`, `ui/companion/theme-sprite-rig.ts`) plays one
+A theme's own companion (`renderer: 'sprite-rig'`, `ui/companion/animation/theme-sprite-rig.ts`) plays one
 painted pose per performance state through the same portrait and state owner.
 
 Run `node scripts/fox-catalog-preview.ts` for the standalone 32-state player at

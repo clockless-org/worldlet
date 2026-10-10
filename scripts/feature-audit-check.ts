@@ -13,7 +13,7 @@ assert.deepEqual(attentionOrder(things,{mode:'personal',region:x=>x.region,impor
 const browser=await launchTestBrowser(fileAccess);
 try {
  const page=await browser.newPage(),errors=pageErrors(page);
- const envBundle=await bundleScript({entryPoints:['ui/shell/world-environment.ts'],globalName:'Env'});
+ const envBundle=await bundleScript({entryPoints:['ui/world/world-environment.ts'],globalName:'Env'});
  await page.setContent('<main><div class="notion-top"></div></main>');
  await page.addScriptTag({content:envBundle});
  await page.evaluate(async()=>{

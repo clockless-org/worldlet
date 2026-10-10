@@ -1,9 +1,9 @@
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/drafting-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/drafting-rig.json' with {type:'json'};
 import {draftingArmPoint,draftingPaperPoint} from './fox-drafting-registration.ts';
 import {draftingWritingArm} from './fox-drafting-motion.ts';
 import type {RigPoint} from './fox-anatomy.ts';
 import type {drawAnatomySkin} from './fox-anatomy-skin.ts';
-import releaseDefinition from '../../resources/styles/builtin/drafts/fox-states-v1/drafting-release-rig.json' with {type:'json'};
+import releaseDefinition from '../../../resources/styles/builtin/drafts/fox-states-v1/drafting-release-rig.json' with {type:'json'};
 import {draftingPencilPoint} from './fox-drafting-pencil.ts';
 import {draftingRelease} from './fox-drafting-release.ts';
 import {draftingNotebookRest} from './fox-drafting-notebook-rest.ts';

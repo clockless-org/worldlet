@@ -33,7 +33,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Where Applet code lives | [Worldlet Applets](../ui/applets/README.md) |
 | How an Applet should look and behave | [Applet design guide](../ui/applets/DESIGN-GUIDE.md) · [motion](../ui/applets/MOTION.md) |
 | How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../core/applets/INTEGRATIONS.md) |
-| Cards Fox makes | [Card system](../ui/attention/CARD-SYSTEM.md) |
+| Cards Fox makes | [Card system](../ui/artifacts/CARD-SYSTEM.md) |
 | Worlds, styles and artwork | [Resources](../resources/README.md) · [Village world](../resources/worlds/village/README.md) |
 
 ## Contributing and releasing
@@ -53,14 +53,14 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **265 Markdown documents** and **43 supporting documentation files**.
+Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
 | Root entry points | 6 |
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
-| UI and Applet authoring references | 25 |
+| UI and Applet authoring references | 26 |
 | Resource and artwork records | 67 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
@@ -222,7 +222,7 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>UI and Applet authoring references (25)</summary>
+<details><summary>UI and Applet authoring references (26)</summary>
 
 - [ui/DESIGN-STANDARDS.md](../ui/DESIGN-STANDARDS.md)
 - [ui/README.md](../ui/README.md)
@@ -237,7 +237,8 @@ Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 - [ui/applets/meetings/README.md](../ui/applets/meetings/README.md)
 - [ui/applets/messages/README.md](../ui/applets/messages/README.md)
 - [ui/applets/voice-memos/README.md](../ui/applets/voice-memos/README.md)
-- [ui/attention/CARD-SYSTEM.md](../ui/attention/CARD-SYSTEM.md)
+- [ui/artifacts/CARD-SYSTEM.md](../ui/artifacts/CARD-SYSTEM.md)
+- [ui/artifacts/README.md](../ui/artifacts/README.md)
 - [ui/companion/ANIMATION.md](../ui/companion/ANIMATION.md)
 - [ui/companion/CONVERSATION.md](../ui/companion/CONVERSATION.md)
 - [ui/components/INTERACTION.md](../ui/components/INTERACTION.md)

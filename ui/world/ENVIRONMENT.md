@@ -110,7 +110,7 @@ Games (owner request 2026-10-03) replaced Tools in the same court: its AI assist
 <a id="sky-and-weather"></a>
 ## Local sky and weather
 
-The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/shell/world-environment.ts`. The desktop host's location and forecast transport is `platform/electron/src/modules/media/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
+The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/world/world-environment.ts`. The desktop host's location and forecast transport is `platform/electron/src/modules/media/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
 
 ### Location and time
 

@@ -1,6 +1,6 @@
 import {inPolygon} from './fox-anatomy.ts';
 import type {RigPoint} from './fox-anatomy.ts';
-import definition from '../../resources/styles/builtin/drafts/fox-states-v1/working-rig.json' with {type:'json'};
+import definition from '../../../resources/styles/builtin/drafts/fox-states-v1/working-rig.json' with {type:'json'};
 export const FOX_WORKING_RIG=definition;
 export type WorkingPlacement={x:number;y:number;angle:number};
 /** One rigid transform for the complete base, lid and contact targets. */

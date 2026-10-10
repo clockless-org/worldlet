@@ -3,8 +3,8 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 const root='resources/styles/builtin/assets/companion/painted';
 const sources=await Promise.all(['resources/styles/builtin/assets/companion/rig/fallback.png',root+'/half-eye.png',root+'/closed-eye.png'].map(async p=>'data:image/png;base64,'+(await readFile(p)).toString('base64')));
 const result=await build({stdin:{resolveDir:process.cwd(),contents:`
-import {createPaintedIdle} from './ui/companion/fox-painted-idle.ts';
-import {paintedAction} from './ui/companion/fox-painted-actions.ts';
+import {createPaintedIdle} from './ui/companion/animation/fox-painted-idle.ts';
+import {paintedAction} from './ui/companion/animation/fox-painted-actions.ts';
 import {FOX_ACTIONS} from './ui/companion/fox-actions.ts';
 const canvas=document.querySelector('canvas'),rig=await createPaintedIdle(canvas,globalThis.sources);
 let paused=false,time=0,last=performance.now();const reduced=matchMedia('(prefers-reduced-motion: reduce)');

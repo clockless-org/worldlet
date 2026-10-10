@@ -394,7 +394,7 @@
 /* The person's own Applet on the background painted for it (core/applets/MY-APPLETS.md#pictures): a cream wash keeps its words readable. */
 [data-own-background]{background:linear-gradient(#fbf7ecd9,#fbf7ecf2),var(--own-applet-background) center/cover no-repeat;border-radius:14px}
 
-/* The computer's own music (ui/shell/local-music.ts) takes the World's sound line itself: the same note,
+/* The computer's own music (ui/world/local-music.ts) takes the World's sound line itself: the same note,
    ink and halo, its title and who made it, and three small controls. Nothing else: no cover, no card. */
 .native-console .world-audio[data-local=true] .world-audio-current{display:none}
 .native-console .world-now-playing{position:relative;display:inline-flex;align-items:center;gap:0;max-width:100%;height:24px;padding-left:6px;color:var(--ui-hud-ink)}

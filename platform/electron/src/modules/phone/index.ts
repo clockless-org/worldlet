@@ -35,7 +35,7 @@ export function installPhone(host:Host){
   fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (phone pairing)`,
   relay:process.env.WORLDLET_PAIR_RELAY||undefined,
   deliver:async(message:PhoneMessage,key:string)=>{
-   // A widget edit is the host's own (modules/widgets): it is merged and saved even while the page reloads.
+   // A widget edit is the host's own (modules/artifacts): it is merged and saved even while the page reloads.
    if(message.type==='widget'){
     lastActive=Date.now();
     const widgets=host.optional<WidgetsService>(WIDGETS);if(!widgets)return false;

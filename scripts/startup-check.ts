@@ -8,7 +8,7 @@ import {build} from 'esbuild';
 // Production startup HTML/CSS/bundle, with the world bundle held at the boot boundary.
 const root=path.resolve('dist/WorldletWeb');
 // The welcome celebration alone, served same-origin for the zero-size window pass below.
-const celebration=(await build({stdin:{contents:"import {celebrateWorld} from './ui/shell/world-celebration.ts';Object.assign(window,{celebrateWorld});",resolveDir:path.resolve('.'),loader:'ts'},bundle:true,format:'iife',write:false})).outputFiles[0].text;
+const celebration=(await build({stdin:{contents:"import {celebrateWorld} from './ui/world/world-celebration.ts';Object.assign(window,{celebrateWorld});",resolveDir:path.resolve('.'),loader:'ts'},bundle:true,format:'iife',write:false})).outputFiles[0].text;
 const server=createServer(async(req,res)=>{
  const name=new URL(req.url,'http://localhost').pathname;
  if(name==='/worldlet.js'){res.setHeader('Content-Type','text/javascript');res.end('');return;}

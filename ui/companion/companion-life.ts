@@ -1,8 +1,8 @@
 import {isFoxForegroundActivity} from '../../contracts/companion-activity.ts';
 import type {FoxActivitySignal} from '../../contracts/companion-activity.ts';
-import {anatomyRuntimeState,anatomyRuntimeDuration} from './fox-anatomy-runtime.ts';
-import {riveFoxState} from './fox-rive.ts';
-import {FOX_STATES,foxState} from './fox-state-catalog.ts';
+import {anatomyRuntimeState,anatomyRuntimeDuration} from './animation/fox-anatomy-runtime.ts';
+import {riveFoxState} from './animation/fox-rive.ts';
+import {FOX_STATES,foxState} from './animation/fox-state-catalog.ts';
 import {FOX_ACTIONS} from './fox-actions.ts';
 const authoredState=(state:string)=>anatomyRuntimeState(state)??riveFoxState(state);
 const authoredPreview=Object.freeze(FOX_STATES.filter(s=>authoredState(s.id)===s.id).map(s=>s.id));
