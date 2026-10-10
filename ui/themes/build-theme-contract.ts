@@ -41,6 +41,8 @@ export interface ThemePresentation {
  fallback:ThemeScene;
  hud?:ThemeHud;
  sound?:ThemeSound;
+ /** The theme's own picture of each Applet, by Applet key. The host shows it wherever it pictures that Applet (the World, lists, history, onboarding); an Applet left out keeps the host's picture. */
+ icons?:Readonly<Record<string,string>>;
 }
 export interface ThemeAppletContext {
  host:HTMLElement; applet:{id:string;title:string}; scene:ThemeScene;
@@ -57,7 +59,7 @@ export interface ThemeAppletContext {
 }
 export interface ThemeMount {dispose():void}
 export interface ThemeWorldApplet {id:string;key:string;title:string;region:string;visible:boolean;status?:string;count?:number;
- /** The host's own picture of this Applet (its shared device art, or the icon a person's own Applet carries). Themes without their own art for an Applet show this rather than a placeholder. */
+ /** This Applet's picture: the icon a person's own Applet carries, else this theme's `icons` entry, else the host's device art. Show it rather than a placeholder. */
  icon?:string;
  /** The Applet's lamp as the host shows it. A theme with lamps in its art lights them; the host draws the lamp's label and action. */
  lamp?:ThemeLampState;
@@ -187,5 +189,6 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
   need((object(h.skin)&&Object.entries(h.skin).every(([part,piece])=>(THEME_HUD_PARTS as readonly string[]).includes(part)&&object(piece)&&picture(piece.image)&&Array.isArray(piece.slice)&&piece.slice.length===4&&piece.slice.every(n=>Number.isInteger(n)&&n>=0)&&Number.isFinite(piece.width)&&piece.width>0&&piece.width<=64)),'hud skin');
  }
  if(p.sound!==undefined)need(object(p.sound)&&object(p.sound.events)&&Object.entries(p.sound.events).every(([event,file])=>(THEME_SOUND_EVENTS as readonly string[]).includes(event)&&/\.(mp3|ogg|m4a|wav)$/.test(themeAssetPath(file))),'sound events');
+ if(p.icons!==undefined)need(object(p.icons)&&Object.entries(p.icons).every(([key,file])=>id(key)&&picture(file)),'applet icons');
  return p;
 }

@@ -282,5 +282,11 @@
         0.56
       ]
     }
+  },
+  "icons": {
+    "gmail": "assets/gmail-icon.png",
+    "google-calendar": "assets/google-calendar-icon.png",
+    "apple-notes": "assets/apple-notes-icon.png",
+    "apple-reminders": "assets/apple-reminders-icon.png"
   }
 }

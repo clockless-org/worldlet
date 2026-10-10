@@ -1,4 +1,4 @@
-import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeWorldApplet,type ThemeLampState} from '../themes/index.ts';
+import {themeAppletIcon,renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeWorldApplet,type ThemeLampState} from '../themes/index.ts';
 import {createAppletStage} from './theme-applet-stage.ts';
 import {createAppletStage as createVillageStage} from './pixi-stage.ts';
 import {renderVillageWorld,type VillageWorldMount} from './village/village-world.ts';
@@ -12,11 +12,10 @@ import {weeklyQuota} from './weekly-allowance.ts';
 import {appletLamp,appletLampContent,lampDisplayState} from './applet-lamp.ts';
 import {appletConnectionGuide} from './applet-attention.ts';
 import {shellInteraction,worldPaused as paused} from './shell-interaction.ts';
-/** The host's picture of an Applet: a person's own Applet's icon, else its shared device art. */
+/** The picture of an Applet: a person's own Applet's icon, else the active theme's. */
 function appletIcon(room):string|undefined {
  if(myAppletKind(room)&&typeof room.icon==='string')return room.icon;
- const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[room.art||room.key];
- const src=typeof art==='string'?art:art?.src;return typeof src==='string'&&src?src:undefined;
+ return themeAppletIcon(room.art||room.key);
 }
 /** Compatibility adapter from the product's scene controller to the public Sim data interface. Every theme's World,
  * the built-in Village's too, is drawn through it; the host draws what is the same in every theme: the pins, lamp
