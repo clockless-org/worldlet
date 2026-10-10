@@ -5,14 +5,15 @@
  * - The lock: whenever the World is in front and no spotlight is up (Fox still reading, Fox busy, a
  *   step between boxes), a clear layer takes every click, wheel, key and focus outside Fox's bubble,
  *   so nothing in the World, the corner controls or Fox's input responds. It draws nothing.
- * - **Tutorial**, a switch in the World's top-right corner under the sound line (owner Order
- *   2026-10-07; Settings beside Fox now opens Settings directly). Off, it reopens the tour; on, it is the
- *   one way out of the first run, and a replayed tour uses it too. While the tour runs, the lock's own
- *   copy of the switch, turned on, stands exactly over the corner's and stays above the spotlight and the
- *   lock; without a corner (a World without its date and weather line) it stands in the window's top-right.
+ * - **Tutorial**, a switch in the World's bottom-right corner (owner Order 2026-10-07; moved from the
+ *   top-right, which now holds background work and routines, owner request 2026-10-10; Settings beside Fox
+ *   opens Settings directly). Off, it reopens the tour; on, it is the one way out of the first run, and a
+ *   replayed tour uses it too. While the tour runs, the lock's own copy of the switch, turned on, stands
+ *   exactly over the corner's and stays above the spotlight and the lock; without a corner (a World not
+ *   drawn yet) it stands in the window's bottom-right.
  */
 import {uiIcon} from '../components/index.ts';
-const BUBBLE='#companionDialogue',CORNER='.world-environment',GAP=8,EDGE=12;
+const BUBBLE='#companionDialogue',GAP=8,EDGE=12;
 const visible=(e:Element|null)=>{if(!e)return null;const r=e.getBoundingClientRect();return r.width>0&&r.height>0?r:null;};
 function tutorialSwitch(className:string,on:boolean){
  const b=document.createElement('button');b.type='button';b.className=className+' tutorial-switch';b.setAttribute('role','switch');b.setAttribute('aria-checked',String(on));
@@ -29,7 +30,9 @@ export function createTourLock(root:HTMLElement,{locked,skippable,offered,turnOn
  const button=tutorialSwitch('tour-switch',true);button.hidden=true;
  button.onclick=event=>{event.preventDefault();event.stopPropagation();turnOff();};
  document.body.append(layer,button);
- const attach=()=>{if(corner.isConnected)return;const parent=root.querySelector(CORNER);if(parent)parent.append(corner);};
+ // The corner's own place in the World's bottom-right, in the corner controls' ink.
+ const spot=document.createElement('div');spot.className='world-tutorial-corner';spot.append(corner);
+ const attach=()=>{if(!spot.isConnected)root.append(spot);};
  let on=false,frame=0,cut='',destroyed=false;
  const allowed=(node:EventTarget|null)=>node instanceof Node&&(button.contains(node)||!!root.querySelector(BUBBLE)?.contains(node));
  const swallow=(event:Event)=>{event.preventDefault();event.stopPropagation();};
@@ -52,13 +55,13 @@ export function createTourLock(root:HTMLElement,{locked,skippable,offered,turnOn
  }
  // The corner keeps its place while the tour runs (hidden under the tour's copy), so the switch never jumps.
  function syncCorner(skipping:boolean){attach();const show=skipping||offered();if(corner.hidden===show)corner.hidden=!show;}
- // Over the corner's own switch; without one, in the window's top-right.
+ // Over the corner's own switch; without one, in the window's bottom-right.
  function place(){
   if(button.hidden){button.hidden=false;root.dataset.tourSkippable='true';}
   const own=visible(corner),w=button.offsetWidth,h=button.offsetHeight;
   // It wears the corner's colours, so the switch only flips when the tour starts and ends.
   if(own){const look=getComputedStyle(corner);if(button.style.color!==look.color)button.style.color=look.color;if(button.style.textShadow!==look.textShadow)button.style.textShadow=look.textShadow;}
-  const x=own?own.right-w:innerWidth-EDGE-w,y=own?own.top+(own.height-h)/2:EDGE+GAP;
+  const x=own?own.right-w:innerWidth-EDGE-w,y=own?own.top+(own.height-h)/2:innerHeight-EDGE-GAP-h;
   button.style.transform=`translate(${Math.round(Math.max(EDGE,x))}px,${Math.round(Math.max(EDGE,Math.min(innerHeight-EDGE-h,y)))}px)`;
  }
  const hide=()=>{if(!button.hidden){button.hidden=true;delete root.dataset.tourSkippable;}};
@@ -81,6 +84,6 @@ export function createTourLock(root:HTMLElement,{locked,skippable,offered,turnOn
   /** The Tutorial switch in sight: the tour's copy while the tour runs, else the corner's own. */
   get button(){return button.hidden?corner:button;},
   refresh(){cancelAnimationFrame(frame);draw();},
-  destroy(){destroyed=true;clearInterval(poll);cancelAnimationFrame(frame);lock(false);hide();layer.remove();button.remove();corner.remove();},
+  destroy(){destroyed=true;clearInterval(poll);cancelAnimationFrame(frame);lock(false);hide();layer.remove();button.remove();spot.remove();},
  };
 }

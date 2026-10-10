@@ -18,7 +18,7 @@ import {phoneApps} from '../distribution/index.ts';
  * they do. It resumes from the persisted journey stage and hands over to first value
  * (first-value.ts), where the person gives Fox one thing to do.
  *
- * The Tutorial switch in the World's top-right corner (owner Order 2026-10-07, tour-lock.ts) is on while
+ * The Tutorial switch in the World's bottom-right corner (owner Order 2026-10-07, tour-lock.ts) is on while
  * the tour runs; turning it off skips (owner requests 2026-10-04 and 2026-10-05) and ends the first run at
  * any step: the journey finishes, the World is free, and the switch stays in the corner, off.
  *

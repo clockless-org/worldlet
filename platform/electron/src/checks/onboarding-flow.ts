@@ -75,9 +75,9 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // comes last, after the first win (owner request 2026-10-06).
  const step=(key:string,seconds=30)=>wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
  await step('hello',60);
- // The Tutorial switch stays on in the World's top-right corner through the first run, above the spotlight, the
+ // The Tutorial switch stays on in the World's bottom-right corner through the first run, above the spotlight, the
  // one way out (owner Order 2026-10-07); this journey goes on.
- await wait('the Tutorial switch, on, in the top-right corner',"(()=>{const s=document.querySelector('.tour-switch:not([hidden])');const r=s?.getBoundingClientRect();return !!r&&r.width>0&&s.getAttribute('aria-checked')==='true'&&r.right>innerWidth*.6&&r.top<innerHeight*.4&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.tour-switch')!==null;})()",10);
+ await wait('the Tutorial switch, on, in the bottom-right corner',"(()=>{const s=document.querySelector('.tour-switch:not([hidden])');const r=s?.getBoundingClientRect();return !!r&&r.width>0&&s.getAttribute('aria-checked')==='true'&&r.right>innerWidth*.6&&r.bottom>innerHeight*.6&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.tour-switch')!==null;})()",10);
  await press('Continue');
  await step('fox');await press('Continue');
  await step('applets');await press('Continue');
@@ -177,7 +177,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  for(const line of noRecordedFailures(host,'after the first win'))console.log('  self-corrected: '+line);
  // The tour replays on demand from the Tutorial switch in the World's corner (#1327) and leaves the finished journey
  // alone; Esc ends it. It waits while Fox works, so allow for a turn still finishing.
- await wait('the Tutorial switch in the corner, off',"(()=>{const b=document.querySelector('.world-environment .world-tutorial[aria-checked=false]');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
+ await wait('the Tutorial switch in the corner, off',"(()=>{const b=document.querySelector('.world-tutorial-corner .world-tutorial[aria-checked=false]');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
  await step('hello',120);
  // A key reaches the page only while it has keyboard focus, which another window on the test computer can take
  // (Mac Alpha 4139, #191: the replay stayed on its first step). So the page counts the Esc it receives: a press that never
