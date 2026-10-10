@@ -179,10 +179,21 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // alone; Esc ends it. It waits while Fox works, so allow for a turn still finishing.
  await wait('the Tutorial switch in the corner, off',"(()=>{const b=document.querySelector('.world-environment .world-tutorial[aria-checked=false]');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
  await step('hello',120);
- // A key reaches the page only while it has keyboard focus, which another window on the test computer can take.
- web.focus();
- web.sendInputEvent({type:'keyDown',keyCode:'Escape'});web.sendInputEvent({type:'keyUp',keyCode:'Escape'});
- await wait('the replay ends on Esc',"document.querySelector('#notionWorld')?.dataset.tourStep===undefined&&document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined",10);
+ // A key reaches the page only while it has keyboard focus, which another window on the test computer can take
+ // (Mac Alpha 4139, #191: the replay stayed on its first step). So the page counts the Esc it receives: a press that never
+ // arrived is pressed again with the World window focused, and one that arrived but left the replay running fails at once.
+ const ended="document.querySelector('#notionWorld')?.dataset.tourStep===undefined&&document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined";
+ await js("window.__checkEscapes=0;window.addEventListener('keydown',e=>{if(e.key==='Escape')window.__checkEscapes++;},true);true");
+ for(let attempt=1;;attempt++){
+  window.focus();web.focus();
+  web.sendInputEvent({type:'keyDown',keyCode:'Escape'});web.sendInputEvent({type:'keyUp',keyCode:'Escape'});
+  for(let i=0;i<10&&await js(`window.__checkEscapes>0||(${ended})`).catch(()=>false)!==true;i++)await sleep(200);
+  const arrived=await js('window.__checkEscapes>0').catch(()=>false)===true;
+  if(arrived)break;
+  if(attempt>=3)throw Error(`Esc never reached the page in ${attempt} presses (page focused: ${await js('document.hasFocus()').catch(()=>'unknown')}, World window focused: ${window.isFocused()})\n  screen: ${await seen()}`);
+  mark(`Esc did not reach the page (page focused: ${await js('document.hasFocus()').catch(()=>'unknown')}); pressing it again`);
+ }
+ await wait('the replay ends on Esc',ended,10);
  if(store.state.onboarding?.journeyStage!=='finish')throw Error('Replaying the tour moved the journey: '+(store.state.onboarding?.journeyStage??'none'));
  await mailConversation({host,js,wait,mark,press,seen});
  // Closing the finished World (demo feedback 2026-10-03: a person force-quit instead): Fox stays on the
