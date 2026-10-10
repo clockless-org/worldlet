@@ -13,6 +13,7 @@ import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,SOURCES,SP
 import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
 import {readLocalAgentMemory,summarizeLocalAgent} from '../agent-runtime/local-memory.ts';
+import {hermesThreads} from '../agent-runtime/agent-files.ts';
 import {readFoxEnergy} from './energy.ts';
 import {bringAgent} from './migration.ts';
 import {createOlderHistory} from './older-history.ts';
@@ -993,14 +994,17 @@ export function installFox(host:Host){
    older.start(request.id,brought?.older);
    // A few words for each fact setup's second page shows, from its own files.
    const summary=summarizeLocalAgent(request.id,memory);
-   if(!memory&&!brought)return {name:null,memories:[],model:null,summary};
+   // A Hermes Agent's history stays where it is, so setup's Conversations tile lists its newest few from its own
+   // files instead (title and when it was last written to); they are shown on this computer only.
+   const recent=request.id==='hermes'?(()=>{try{return (hermesThreads()??[]).sort((a,b)=>b.last-a.last).slice(0,8).map(chain=>({title:chain.title,at:chain.last*1000}));}catch{return [];}})():[];
+   if(!memory&&!brought)return {name:null,memories:[],model:null,summary,...recent.length?{recent}:{}};
    // Fox talks through this very Agent: its memory already is Fox's, so only its name is taken (copying it into
    // a memory Fox does not use failed setup's bring, 2026-10-09).
    const through=runtime.id===localHarnessAdapterId(request.id as any);
    const longTerm=through?'':[memory?.longTerm??'',brought?.note??''].filter(Boolean).join('\n\n');
    const result=companion.adoptMemory({name:memory?.name??null,soul:through?'':memory?.soul??'',user:through?'':memory?.user??'',longTerm,source:MIGRATION_SOURCE_TITLES[request.id]+' on this computer'});
    if(result.name)page.event('worldlet:companion-appearance',{name:style.name()});
-   return {...result,summary,model:null,...brought?{history:{conversations:brought.conversations,messages:brought.messages,notes:brought.notes,skills:brought.skills.length,routines:brought.routines.length,stayed:brought.stayed,partial:brought.partial,list:brought.list,...brought.older?{older:brought.older.remaining}:{}}}:{}};
+   return {...result,summary,model:null,...recent.length?{recent}:{},...brought?{history:{conversations:brought.conversations,messages:brought.messages,notes:brought.notes,skills:brought.skills.length,routines:brought.routines.length,stayed:brought.stayed,partial:brought.partial,list:brought.list,...brought.older?{older:brought.older.remaining}:{}}}:{}};
   }
   return runtime.profile(true);
  }

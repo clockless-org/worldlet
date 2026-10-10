@@ -150,7 +150,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    // An Agent Fox talks through keeps its own history, so nothing is copied; the tiles count what it holds (detect).
    const own=agents.find(a=>a.id===id)?.memory?.history;
    const history=adopted?.history||(own?{conversations:own.conversations,notes:own.notes,skills:own.skills,routines:own.jobs}:{});
-   const list=Array.isArray(history.list)?history.list.filter(item=>typeof item?.title==='string').slice(0,60).map(item=>({title:String(item.title).slice(0,160),messages:Number(item.messages)||0})):[];
+   // What it brought, or for an Agent that keeps its own history (Hermes Agent) its newest conversations, with when.
+   const items=Array.isArray(history.list)&&history.list.length?history.list:Array.isArray(adopted?.recent)?adopted.recent:[];
+   const list=items.filter(item=>typeof item?.title==='string').slice(0,60).map(item=>({title:String(item.title).slice(0,160),messages:Number(item.messages)||0,...Number.isFinite(item.at)&&item.at>0?{at:Number(item.at)}:{}}));
    // What came along besides history: its name, and which of personality, about-you and long-term memory.
    const kinds=Array.isArray(adopted?.memories)?adopted.memories.map(m=>typeof m==='string'?m:m?.kind).filter(k=>typeof k==='string'):[];
    // A few words each for its personality, what it knows about the person and its model, read from its own files.
@@ -416,6 +418,12 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    return card;
   });
  }
+ /** "3 hr. ago" in setup's language, for the Conversations tile. */
+ function ago(at:number){
+  const seconds=(at-Date.now())/1000,abs=Math.abs(seconds);
+  const [unit,size]:[Intl.RelativeTimeFormatUnit,number]=abs<3600?['minute',60]:abs<86400?['hour',3600]:abs<30*86400?['day',86400]:abs<365*86400?['month',30*86400]:['year',365*86400];
+  try{return new Intl.RelativeTimeFormat(draft.language,{numeric:'auto',style:'short'}).format(Math.round(seconds/size),unit);}catch{return '';}
+ }
  /** One tile on the right. */
  function tile(kind:string,fresh:boolean){
   const brought=draft.brought||{},summary=brought.summary||{};
@@ -441,11 +449,14 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    }));
   }
   if(kind==='conversations'){
-   const titles=(brought.list||[]).slice(0,4).map(item=>item.title);
-   return keep('tile:conversations',JSON.stringify([brought.conversations,titles,draft.language]),build('Conversations','is-big',el=>{
+   // The newest few, each with when it was last written to; the list keeps the rows that fit, so the tile never scrolls.
+   const rows=(brought.list||[]).slice(0,8).map(item=>[item.title,item.at?ago(item.at):''] as [string,string]);
+   return keep('tile:conversations',JSON.stringify([brought.conversations,rows,draft.language]),build('Conversations','is-big',el=>{
     if(!brought.conversations)return none(el);
     el.append(node('strong',String(brought.conversations),'setup-tile-count'));
-    const list=node('ul','','setup-tile-titles');for(const title of titles)list.append(node('li',title));el.append(list);
+    const list=node('ul','','setup-tile-titles');
+    for(const [title,when] of rows){const row=node('li','');row.title=title;row.append(node('span',title,'setup-tile-titles-name'));if(when)row.append(node('span',when,'setup-tile-titles-when'));list.append(row);}
+    el.append(list);
    }));
   }
   if(kind==='notes')return keep('tile:notes',String(brought.notes)+draft.language,build('Notes','',big(brought.notes,'notes')));

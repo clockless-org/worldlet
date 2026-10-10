@@ -335,7 +335,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='installedApplets')return {keys:found};
     if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true,memory:{name:'Elon North',user:true,longTerm:true,model:true,history:{conversations:278,notes:0,skills:160,jobs:4}}},{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'claude-code',title:'Claude Code',configured:true,worldTools:true}],recommended:'hermes',selected:sessionStorage.getItem('fixture-agent')};
     if(b.action==='agentHarness'&&b.operation==='select'){sessionStorage.setItem('fixture-agent',b.id);return {ok:true,id:b.id,title:'Hermes Agent',model:true};}
-    if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Elon North',memories:[{kind:'soul'},{kind:'user'},{kind:'longTerm'}],model:{ok:false},summary:{personality:'A blunt first-principles operator',about:'Kelvin runs Worldlet from San Francisco',model:'deepseek-v4-flash'},history:{conversations:15,older:258,notes:0,skills:160,routines:4,list:Array.from({length:40},(_,i)=>({title:'Conversation '+(i+1)+' about the launch plan',messages:10+i}))}};
+    if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Elon North',memories:[{kind:'soul'},{kind:'user'},{kind:'longTerm'}],model:{ok:false},summary:{personality:'A blunt first-principles operator',about:'Kelvin runs Worldlet from San Francisco',model:'deepseek-v4-flash'},recent:Array.from({length:8},(_,i)=>({title:'Conversation '+(i+1)+' about the launch plan, with a title long enough to be cut',at:Date.now()-(i+1)*3_600_000}))};
     if(b.action==='agentIntegrations')return {integrations:[]};
     if(b.action==='foxEnergy')return {source:'chatgpt',ready:true};
     if(b.action==='foxPreferences'){if(b.cloudConsent)w.fixture.cloudConsent=true;return {companionStyle:'',model:{ready:true}};}
@@ -371,6 +371,16 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Build your world',exact:true}).click();
   await page.getByRole('heading',{name:'Elon North moved in'}).waitFor();
   await noScroll('Bringing the Agent in');
+  // A Hermes Agent keeps its history, so the Conversations tile lists its newest from its own files, with when; as many
+  // as fit, each row whole and inside the tile (it never scrolls).
+  for(const [width,height] of [[1024,700],[1440,900],[1920,1080]]){
+   await page.setViewportSize({width,height});await page.waitForTimeout(50);
+   const rows=await page.locator('.setup-tile-conversations').evaluate(tile=>{const box=tile.getBoundingClientRect();return [...tile.querySelectorAll('li')].map(li=>li.getBoundingClientRect()).filter(r=>r.height>0&&r.top<box.bottom).map(r=>({inside:r.bottom<=box.bottom+.5&&r.height>=25}));});
+   assert.ok(rows.length>=2&&rows.every(row=>row.inside),'The newest conversations fit their tile at '+width+'x'+height+': '+JSON.stringify(rows));
+  }
+  await page.setViewportSize({width:1024,height:700});
+  assert.equal(await page.locator('.setup-tile-conversations .setup-tile-count').textContent(),'278');
+  assert.deepEqual(await page.locator('.setup-tile-conversations li').first().evaluate(li=>[li.querySelector('.setup-tile-titles-name')!.textContent!.slice(0,14),li.querySelector('.setup-tile-titles-when')!.textContent]),['Conversation 1','1 hr. ago']);
   if(host==='macos')assert.ok(await page.locator('.setup-tile-apps .setup-app').count()>=10,'The apps found here show in the Apps tile');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-2-'+host+'.png')});
   await page.setViewportSize({width:1440,height:900});await page.waitForTimeout(50);
