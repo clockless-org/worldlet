@@ -1,4 +1,5 @@
-/* Public Sim shell slots. The scene owns positions; business controls retain their handlers. */
+/* Public Sim shell slots. The scene owns positions; business controls retain their handlers.
+   Fox's speech is not placed here: it keeps the shared Fox layout around artifact cards and Applets (CONTRACT.md). */
 html[data-build-theme] .ui-theme-top{left:var(--sim-top-x)!important;top:var(--sim-top-y)!important;width:var(--sim-top-width)!important;max-height:var(--sim-top-height);right:auto!important}
 html[data-build-theme] .ui-theme-companion{left:var(--sim-companion-x)!important;top:var(--sim-companion-y)!important;width:var(--sim-companion-width)!important;max-height:var(--sim-companion-height);right:auto!important;bottom:auto!important;transform:none!important;translate:none!important}
 html[data-build-theme] :is(.ui-theme-top,.ui-theme-companion,.ui-theme-dialog){font-family:var(--sim-body-font);color:var(--sim-ink)}
@@ -11,4 +12,3 @@ html[data-sim-attention=placed] .ui-theme-attention{left:var(--sim-attention-x)!
 html[data-sim-today=placed] .ui-theme-today{left:var(--sim-today-x)!important;top:var(--sim-today-y)!important;width:var(--sim-today-width)!important;max-height:var(--sim-today-height)!important}
 html[data-sim-dialog=placed] .ui-theme-dialog{left:var(--sim-dialog-x)!important;top:var(--sim-dialog-y)!important;width:var(--sim-dialog-width)!important;max-height:var(--sim-dialog-height)!important;margin:0!important}
 
-html[data-build-theme] .ui-theme-speech{position:fixed!important;left:var(--sim-speech-x)!important;top:var(--sim-speech-y)!important;width:var(--sim-speech-width)!important;max-width:var(--sim-speech-width)!important;max-height:var(--sim-speech-height)!important;right:auto!important;bottom:auto!important;transform:none!important;translate:none!important;overflow:auto}
