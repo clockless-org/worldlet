@@ -129,7 +129,7 @@ assert.deepEqual(ongoingThemes([...work,gym],now).map(t=>t.id),['fitness'],'a pr
 const launch=conversation('Claude Code · worldlet · Launch plan',{source:'claude-code'});
 assert.deepEqual(ongoingRefresh([],[launch],now).save,[],'a project conversation is not proposed');
 assert.equal(ongoingRefresh(work,[...work.map(t=>conversation(t.session,{userTurns:30})),conversation('OpenClaw · Discord · #gym')],now).save.filter(t=>t.kind==='fitness').length,1,'waiting project proposals leave room for one that is offered');
-assert.equal(themes[0].title,'Your training, on one page');assert.equal(themes[0].option,'Show me');
+assert.equal(themes[0].title,'Your training, on one page');assert.equal(themes[0].label,'Fitness · from 2 conversations');assert.equal(themes[0].option,'Show me');
 assert.equal(themes[0].context,'Fitness · 2 conversations with OpenClaw · 28 of your messages');
 assert.match(themes[0].say,/You keep talking about your training with OpenClaw: “#run-club”, “#gym”, 28 of your messages, the last yesterday\. Want me to pull what matters out of them/);
 const ask=ongoingThemeRequest(themes[0]);

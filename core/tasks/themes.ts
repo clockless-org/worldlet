@@ -19,6 +19,8 @@ export interface OngoingTheme {
  /** Its conversations, busiest first. */
  things:OngoingThing[];
  title:string;context:string;say:string;option:string;
+ /** The line over its artifact's title: where the page came from, not "this conversation" (owner Order 2026-10-10). */
+ label:string;
 }
 export const isOngoingThemeId=(value:unknown):value is ThemeKind=>typeof value==='string'&&Object.hasOwn(THEME_SUBJECT,value);
 const names=(things:OngoingThing[])=>{const shown=things.slice(0,3).map(t=>'“'+t.title+'”');return shown.join(', ')+(things.length>3?' and '+(things.length-3)+' more':'');};
@@ -41,7 +43,8 @@ export function ongoingThemes(things:OngoingThing[],now:number):OngoingTheme[] {
    title:subject.charAt(0).toUpperCase()+subject.slice(1)+', on one page',
    context:spec.title+' · '+count+' with '+agents+' · '+mine+' of your messages',
    say:`You keep talking about ${subject} with ${agents}: ${names(sorted)}, ${mine} of your messages, the last ${ongoingAgo(last,now)||'recently'}. Want me to pull what matters out of ${sorted.length===1?'it':'them'} and put it on one page?`,
-   option:'Show me'};
+   option:'Show me',
+   label:spec.title+' · from '+count};
  });
  return themes.sort((a,b)=>b.things.reduce((s,t)=>s+t.userTurns,0)-a.things.reduce((s,t)=>s+t.userTurns,0)||a.id.localeCompare(b.id));
 }
