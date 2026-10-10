@@ -19,7 +19,7 @@
 // apps keep updating; the label is YYYY.MMDD.<build>, the date being the commit's day in Pacific time.
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
-import {createReadStream,existsSync,mkdtempSync,readdirSync,readFileSync,rmSync,statSync,writeFileSync} from 'node:fs';
+import {createReadStream,existsSync,mkdirSync,mkdtempSync,readdirSync,readFileSync,rmSync,statSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
@@ -129,6 +129,13 @@ export function githubStore(repo=process.env.GITHUB_REPOSITORY,gh=(args,input)=>
    if(this.read(tag,name)!==body)throw Error(`The stored feed differs: ${tag}/${name}`);
   },
   promote(tag){run('release','edit',tag,'--repo',repo,'--prerelease=false','--latest');},
+  // The release of a Build (v<label>) and its asset names, or null.
+  findBuild(build){
+   const r=gh(['api',`repos/${repo}/releases?per_page=100`,'--jq',`[.[]|select(.tag_name|test("^v[0-9]{4}\\.[0-9]{4}\\.${Number(build)}$"))|{tag:.tag_name,assets:[.assets[].name]}][0]`]);
+   if(r.status!==0)throw Error(`Could not list releases: ${(r.stderr||'').trim().slice(0,300)}`);
+   const found=(r.stdout||'').trim();return found&&found!=='null'?JSON.parse(found):null;
+  },
+  download(tag,name,out){rmSync(out,{force:true});run('release','download',tag,'--repo',repo,'--pattern',name,'--output',out);},
   // GitHub refuses this workflow's token a new tag on a commit whose .github/workflows differ from main's ("Resource
   // not accessible by integration": a new tag counts as a workflow change). That happens only after a newer push
   // changed a workflow, and that push runs its own Dev build, so the older build is superseded. Names the changes.
@@ -161,6 +168,9 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
    const current=feedBuild('mac',await own.read(keys.feedTag,keys.mac[0]));
    if(current>=build&&!keys.history)return {skipped:`${keys.feedTag}/${keys.mac[0]} already has Build ${current}`};
    await own.upload(tag,dmg);await own.upload(tag,dmg+'.sha256');
+   // The build's own records beside it, so a promotion fetches everything from the release (fetchBuild).
+   writeFileSync(dmg+'.appcast.xml',appcast);await own.upload(tag,dmg+'.appcast.xml');
+   writeFileSync(dmg+'.release.json',readFileSync(path.join(dir,'release.json')));await own.upload(tag,dmg+'.release.json');
    // Feeds go last, so a feed never names an installer that is not there.
    for(const name of keys.mac){
     const old=keys.history?await own.read(keys.feedTag,name):'';
@@ -178,6 +188,8 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
    const current=feedBuild('windows',await own.read(keys.feedTag,keys.windows));
    if(current>identity.build||current===identity.build&&!keys.history)return {skipped:`${keys.feedTag}/${keys.windows} already has Build ${current}`};
    await own.upload(tag,exe);await own.upload(tag,exe+'.sha256');
+   await own.upload(tag,exe+'.json');
+   writeFileSync(exe+'.release.json',readFileSync(path.join(dir,'release.json')));await own.upload(tag,exe+'.release.json');
    // The Store MSIX of the same Build, when its build succeeded (release machine 01 submits it once the Build is on Beta).
    const msix=exe.replace(/-unsigned\.exe$/,'-store.msix');
    if(existsSync(msix)&&existsSync(msix+'.json')){
@@ -193,6 +205,34 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
   return result;
  }finally{if(!store)own.close();}
 }
+/** A published Build's files from its release, laid out as `publish` reads them (`<dir>/mac`, `<dir>/windows`): the
+ * installer, its checksum, its build records (the Sparkle item, the Windows record, release.json) and the Store MSIX when
+ * there is one. Promotion uses it: the release machines build the Dev packages (owner decision 2026-10-10), so there is no
+ * workflow artifact. Throws when the release lacks a record (a Build published before the records were kept). */
+export async function fetchBuild({build,dir,store}){
+ const own=store||githubStore();
+ try{
+  const found=await own.findBuild(build);
+  if(!found)throw Error(`No release for Build ${build}.`);
+  const has=new Set(found.assets);
+  const files={
+   mac:[[/-macos-universal\.dmg$/,''],[/-macos-universal\.dmg$/,'.sha256'],[/-macos-universal\.dmg$/,'.appcast.xml','appcast.xml'],[/-macos-universal\.dmg$/,'.release.json','release.json']],
+   windows:[[/-windows-x64-unsigned\.exe$/,''],[/-windows-x64-unsigned\.exe$/,'.sha256'],[/-windows-x64-unsigned\.exe$/,'.json'],[/-windows-x64-unsigned\.exe$/,'.release.json','release.json'],[/-windows-x64-store\.msix$/,'',null,true],[/-windows-x64-store\.msix$/,'.json',null,true]],
+  };
+  const out={};
+  for(const [platform,list] of Object.entries(files)){
+   const target=path.join(dir,platform);mkdirSync(target,{recursive:true});
+   for(const [pattern,suffix,as,optional] of list){
+    const base=found.assets.find(n=>pattern.test(n));
+    if(!base||!has.has(base+suffix)){if(optional)continue;throw Error(`Build ${build}'s release has no ${base?base+suffix:pattern.source} for ${platform}.`);}
+    await own.download(found.tag,base+suffix,path.join(target,as||base+suffix));
+   }
+   out[platform]=target;
+  }
+  return {tag:found.tag,...out};
+ }finally{if(!store)own.close?.();}
+}
+
 // The Dev tests (release.yml's `checks` job, the pull request checks of architecture.yml) as seen in this run's job list:
 // 'pass' once all of them succeeded, 'fail' once one failed, 'wait' meanwhile. A build publishes to Dev only after
 // 'pass' (owner decision 2026-10-09: CI runs the Dev tests before each Dev release; within five minutes since 2026-10-10).
@@ -234,6 +274,12 @@ async function main(){
   if(process.env.GITHUB_STEP_SUMMARY)writeFileSync(process.env.GITHUB_STEP_SUMMARY,`- ${line}\n`,{flag:'a'});
   console.log(line);return;
  }
+ if(command==='fetch'){
+  // --build <n> --dir <dir>: the Build's files from its release, for a promotion.
+  const build=Number(arg('build')),dir=path.resolve(arg('dir')||'');
+  if(!Number.isSafeInteger(build)||!arg('dir'))throw Error('Usage: ci-release.mjs fetch --build <n> --dir <dir>');
+  const r=await fetchBuild({build,dir});console.log(`Fetched Build ${build} from ${r.tag} into ${dir}`);return;
+ }
  if(command==='analytics'){
   // Writes the PostHog project key (POSTHOG_PROJECT_KEY, a release secret) into the app's analytics config. This
   // repository keeps the key empty; a build without it would send no crash or usage events (owner decision 2026-10-09).
@@ -257,7 +303,7 @@ async function main(){
    await new Promise(resolve=>setTimeout(resolve,10_000));
   }
  }
- throw Error('Usage: ci-release.mjs identity … | manifest … | publish … | analytics | dev-tests');
+ throw Error('Usage: ci-release.mjs identity … | manifest … | publish … | fetch … | analytics | dev-tests');
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))main().catch(error=>{
  console.error(error.message);
