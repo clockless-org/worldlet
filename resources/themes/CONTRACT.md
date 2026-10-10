@@ -115,7 +115,7 @@ Not part of a theme: the companion (Fox, its rig and portrait, where it stands, 
 2. Make it active: apply its stylesheet and tokens, remove the old stylesheet and save the choice on this computer (`worldlet-theme-v2`).
 3. Dispatch `worldlet:theme` (`{from,to}`). The World disposes the old theme's World and Applet mounts and renders the same view with the new theme: what is open, records, web sessions and background tasks stay. Pinned places are kept per theme (`ui/themes/theme-placements.ts`).
 
-The default theme, Village, is built in: it is the animated Pixi World (`ui/world/pixi-world.ts`) and carries no package, stylesheet or scene slots. Choosing it removes the last package's stylesheet and scene variables. An unknown or removed saved theme falls back to Village. A package cannot use the id `village`.
+The default theme, Village, is built in: it is the animated Pixi World (`ui/world/pixi-world.ts`) and carries no package, stylesheet or scene slots. Like every package it is drawn through the contract's World mount (`ui/world/village-world.ts`, behind `ui/world/build-theme-world.ts`), reports marks and reads lamps and the shell's interaction from the World state; the host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet for it. What it still takes from the host outside the contract (`VillageHost`: Applet records, the shell's own place names, a few scene calls and its Applet stage) goes as it becomes a package. Choosing it removes the last package's stylesheet and scene variables. An unknown or removed saved theme falls back to Village. A package cannot use the id `village`.
 
 ## Adding a theme
 
