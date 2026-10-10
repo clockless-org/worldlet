@@ -24,7 +24,7 @@ import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
 import {artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,journalWaiting,journalSeen,dayKey,dailyArtifactDue,dailyArtifactRequest,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
-import {resolvePlacements,lampLabels} from '../world/index.ts';
+import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE} from '../world/index.ts';
 import {createLocationWriter} from './navigation-history.ts';
 import {renderMailFocus} from '../applets/index.ts';
@@ -628,17 +628,13 @@ export function mountNotionWorld(data: World, native: any) {
   function lampAction(room,state,activity){
    if(state!=='error')return;
    const failed=activity?.sessions?.find(session=>['Error','Failed'].includes(session.status));
-   if(failed?.sessionId&&CODING_SESSIONS.includes(room.key)&&(data.sample||(room.key==='codex'?native?.codexSession:native?.developmentSessions)))return {label:'Review failed run',run:()=>{
+   if(failed?.sessionId&&CODING_SESSIONS.includes(room.key)&&(data.sample||(room.key==='codex'?native?.codexSession:native?.developmentSessions)))return {label:'Review failed run',notice:lampNeeds.run,run:()=>{
     visitObject(room.moduleId,{enter:false});
     const item=workItems(room.key,{sessions:[failed]})[0];if(item)openWorkItem(room,item);
    }};
-   if(native.setup&&!data.sample&&room.capability==='connect')return {label:'Check connection',run:()=>native.setup('connection',room.region,room.key)};
-   // A failure flag without diagnostics is not evidence for reauthorization or retry.
-   return {label:'Inspect app status',run:()=>{
-    const body=dialog(room.title+' status');
-    body.append(element('p','','The app reported a failed operation. No diagnostic details are available here. Open the app to inspect its current content and available controls.'),button('Open '+room.title,()=>{$('notionDialog').close();visitObject(room.moduleId);}));
-    $('notionDialogClose').focus();
-   }};
+   // Only a failure that names what the person must do reaches here (appletLamp); the action does exactly that.
+   const needs=appStatus(room,data.moduleConnections||[]).needs;
+   if(native.setup&&!data.sample&&needs)return {label:needs==='permissions'?'Allow access':'Reconnect',notice:lampNeeds[needs],run:()=>native.setup('connection',room.region,room.key)};
   }
   function buildScene(){scene=createModuleScene($('notionStage'),sections,spatialAction,points=>{
     for(const key of Object.keys(pins))if(!points[key]){const pin=pins[key];delete pins[key];pin?.remove();}

@@ -45,7 +45,10 @@ Attention subscription does not disable the Applet's independent work.
 
 Devices distinguish disconnected, ready, processing, paused and failed. Lamps are
 dark (disconnected), steady white (ready), breathing white (processing) and red
-(failed); paused devices retain content without implying work. Unread findings have
+(failed); paused devices retain content without implying work. Red, and the notice
+over the device, mean the person must act: sign in again, allow access, or review
+a run that failed. A check, read or analysis that failed for any other reason
+retries by itself and leaves the lamp as it was (`core/applets/read-recovery.ts`). Unread findings have
 no lamp state: they belong to the Attention Center. Reduced motion uses steady
 indicators. Unknown counts and outcomes stay unknown.
 
