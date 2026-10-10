@@ -120,9 +120,10 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
    assert.deepEqual(await frame(),firstFrame,'The big button stays where it was');
    // The apps the World starts with, the ones found here first (the fixture Mac has Notion); starter games arrive unshown.
+   // Only the Applets in use (owner decision 2026-10-10): setup's draft and the apps found here, no featured starters.
    const shelf=await page.locator('.setup-tile-apps .setup-app').evaluateAll((list:HTMLElement[])=>list.map(e=>e.dataset.appletId));
    if(platform==='macos')assert.equal(shelf[0],'app-notion','Apps found here come first: '+shelf.join(' '));
-   assert.ok(shelf.length>=8&&!shelf.includes('app-game-2048'),'Starters show, games arrive unshown: '+shelf.join(' '));
+   assert.deepEqual([...shelf].sort(),[...(platform==='macos'?['app-notion']:[]),'app-browser','app-gmail','app-google-calendar'].sort(),'Only the Applets in use show, games arrive unshown: '+shelf.join(' '));
    assert.equal(await page.locator('.setup-choose-again').count(),0,'Google has nothing to choose again');
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-world-'+platform+'.png')});
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='google_connect_failed')),'Saved native connections recover even when the original bridge reply fails');
@@ -176,7 +177,7 @@ await withBrowser(fileAccess,async browser=>{
 
   if(mode!=='existing'){
    const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
-   assert.ok(result.state.onboarding.unlockedApplets.includes('app-youtube'));
+   assert.ok(!result.state.onboarding.unlockedApplets.includes('app-youtube')&&['app-gmail','app-google-calendar','app-browser','app-game-2048'].every(id=>result.state.onboarding.unlockedApplets.includes(id)),'A first run unlocks the Applets in use and the starter games, no featured starters: '+result.state.onboarding.unlockedApplets.join(' '));
    assert.equal(result.state.cloudConsent,mode==='google'&&platform==='macos','Only supported background source preparation saves consent during setup');
    if(platform==='macos')assert.ok(result.calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'),'Google sign-in starts background source checks before entering');
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.modules?.some(m=>m.id==='app-gmail'&&m.unlocked));
@@ -322,7 +323,7 @@ await withBrowser(fileAccess,async browser=>{
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
   assert.ok(!result.calls.some(c=>c.action==='connect'),'No Google sign-in');
   assert.equal(result.state.onboarding.completed,true);
-  assert.ok(result.state.onboarding.unlockedApplets.includes('app-youtube'));
+  assert.ok(result.state.onboarding.unlockedApplets.includes('app-github')&&!result.state.onboarding.unlockedApplets.includes('app-youtube'),'The app brought from the Agent comes along; featured starters do not: '+result.state.onboarding.unlockedApplets.join(' '));
   assert.ok(!result.calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'),'No Google sources to read');
   const analytics=result.calls.filter(c=>c.action==='usageEvent').map(c=>c.event);
   assert.ok(analytics.includes('onboarding_apps_viewed')&&!analytics.some(e=>e.startsWith('google_connect_')),JSON.stringify(analytics));

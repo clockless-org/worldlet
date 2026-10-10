@@ -186,7 +186,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   try{const result=await call('agentIntegrations',{operation:'port',id});draft.integrations=Array.isArray(result?.integrations)?result.integrations.filter(item=>typeof item?.title==='string'&&typeof item?.outcome==='string').slice(0,20):[];}
   catch{draft.integrations=[];}
   finally{
-   porting=false;clearInterval(chatterTimer);persist();if(!disposed&&!busy)render();
+   // The apps the Agent brought join the World's selection (owner decision 2026-10-10: the Applets in use).
+   porting=false;clearInterval(chatterTimer);seed();if(!disposed&&!busy)render();
    // Counts and outcomes only, once the whole bring (history and integrations) is over.
    if(!draft.brought.failed)productEvent('agent_bring_completed',agentBringDimensions(id,draft.brought,draft.integrations),timingBucket(performance.now()-started));
   }
@@ -716,7 +717,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  }
  void detectAgents();
  if(step===1)void prepareGoogleSources();
- const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched);persist();};
+ // Setup selects only the Applets in use (owner decision 2026-10-10): its draft (Mail, Calendar, Browser), the apps
+ // found here and the apps the person's Agent brought (core/applets/regions.ts).
+ const brought=()=>new Set<string>((draft.integrations||[]).map((item:any)=>item?.provider).filter((p:unknown):p is string=>typeof p==='string'));
+ const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched,brought());persist();};
  if(hostFeatures(state).installedAppDetection){
   void call('installedApplets').then(result=>{
    if(disposed)return;detected=new Set(result.keys||[]);nativeIcons=result.icons||{};
