@@ -14,6 +14,11 @@ try{
  const presentation=JSON.parse(await fs.readFile(new URL('../ui/theme-packages/village-map/presentation.json',import.meta.url),'utf8'));
  const scene={...presentation.fallback,background:'assets/test.txt'};presentation.world=scene;presentation.fallback=scene;presentation.applets={};presentation.fonts=[];await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  assert.throws(()=>parseThemePresentation({...presentation,world:{...scene,slots:{content:[.9,0,.2,1]}}}),/bounded|content/);
+ // HUD material and sound are optional; a malformed one fails before it is shown. The companion is not a theme's.
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,hud:{skin:{log:{image:'assets/p.svg',slice:[4,4,4,4],width:4}}},sound:{events:{'mail.received':'assets/m.wav'}}}));
+ assert.throws(()=>parseThemePresentation({...presentation,hud:{skin:{bubble:{image:'assets/p.svg',slice:[4,4,4,4],width:4}}}}),/hud skin/);
+ assert.throws(()=>parseThemePresentation({...presentation,hud:{skin:{log:{image:'https://example.com/p.png',slice:[4,4,4,4],width:4}}}}),/asset path/);
+ assert.throws(()=>parseThemePresentation({...presentation,sound:{events:{'mail.sent':'assets/m.wav'}}}),/sound events/);
  await write('first');await fs.writeFile(path.join(source,'assets','test.txt'),'fixture');
  await importBuildTheme(source,consumer);const lock=path.join(consumer,'ui/theme-packages/first/source-lock.json'),initial=await fs.readFile(lock,'utf8');
  assert.equal(JSON.parse(initial).updatedAt,manifest.updatedAt);assert.equal('version' in JSON.parse(initial),false);

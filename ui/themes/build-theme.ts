@@ -1,4 +1,5 @@
 import {THEME_PACKAGES} from '../theme-packages/index.ts';
+import {applyThemeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
 import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildTheme,type BuildThemeManifest,type ThemeAppletContext,type ThemePresentation,type ThemeWorldContext,type ThemeScene} from './build-theme-contract.ts';
 /** One bundled theme package, validated against the contract when the bundle loads. */
 export interface ThemePackage {theme:BuildTheme;manifest:BuildThemeManifest;presentation:ThemePresentation}
@@ -27,8 +28,27 @@ function stylesheet(id:string):HTMLLinkElement{
  if(!link){link=document.createElement('link');link.rel='stylesheet';link.href='theme-'+id+'.css';link.dataset.themeStyle=id;link.media='not all';document.head.append(link);}
  return link;
 }
+let builtIn:any;
+/**
+ * The HUD material and sounds a package declares (presentation.json `hud`, `sound`) replace the shared ones in the
+ * surfaces the HUD already reads. Anything a package leaves out keeps the shared one, and the built-in Village restores
+ * them all. The companion and the loading page stay the host's.
+ */
+function applyPresentation(next:InstalledTheme){
+ const g=globalThis as any;builtIn??=g.__WORLDLET_ENV_ASSETS__;
+ if(!builtIn)return;
+ const p=next.package?.presentation;
+ if(!p||!(p.hud||p.sound)){g.__WORLDLET_ENV_ASSETS__=builtIn;applyThemeSurfaces();return;}
+ const url=(path:string)=>themeAssetURL(next.id,path);
+ const shared:BuiltSurfaces=builtIn.surfaces||{tokens:{},fonts:{},skin:{},sounds:{events:{},ambient:{}},attention:[],transitions:{area:'shared',room:'shared',ms:0}};
+ g.__WORLDLET_ENV_ASSETS__={...builtIn,surfaces:{...shared,
+  skin:p.hud?Object.fromEntries(Object.entries(p.hud.skin).map(([part,piece])=>[part,{image:url(piece.image),slice:[...piece.slice],width:piece.width}])):shared.skin,
+  sounds:p.sound?{events:Object.fromEntries(Object.entries(p.sound.events).map(([event,file])=>[event,url(file)])),ambient:{}}:shared.sounds}};
+ applyThemeSurfaces();
+}
 /** The built-in Village carries no theme stylesheet or scene variables; a package's are removed when it is left. */
 function attach(next:InstalledTheme){
+ applyPresentation(next);
  if(typeof document==='undefined')return;
  const link=next.package?stylesheet(next.id):null;if(link)link.media='all';
  for(const other of document.querySelectorAll<HTMLLinkElement>('link[data-theme-style]'))if(other!==link)other.remove();
@@ -64,7 +84,8 @@ async function prepare(next:InstalledTheme){
  const link=stylesheet(next.id);
  if(!link.sheet)await new Promise<void>((resolve,reject)=>{link.addEventListener('load',()=>resolve(),{once:true});link.addEventListener('error',()=>reject(Error(next.title+' could not load. Try again.')),{once:true});});
  const {world,fallback,applets,fonts}=next.package.presentation;
- const images=[...new Set([world,fallback,...Object.values(applets)].map(scene=>themeAssetURL(next.id,scene.background)))];
+ const pictures=[...[world,fallback,...Object.values(applets)].map(scene=>scene.background),...Object.values(next.package.presentation.hud?.skin||{}).map(piece=>piece.image)];
+ const images=[...new Set(pictures.map(path=>themeAssetURL(next.id,path)))];
  await Promise.all(images.map(async src=>{const image=new Image();image.src=src;try{await image.decode();}catch(error){throw Error(next.title+' artwork could not load. Try again.',{cause:error});}}));
  await Promise.all(fonts.map(font=>fetch(themeAssetURL(next.id,font.file)).catch(()=>null)));
 }

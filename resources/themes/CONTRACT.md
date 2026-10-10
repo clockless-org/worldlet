@@ -87,6 +87,21 @@ Buttons must be real controls with default, hover, pressed, focus-visible, disab
 
 Assets at `assets/...` are published to `theme-assets/<id>/...`; resolve them with `context.asset(path)` in code and `url('theme-assets/…')` in CSS (the build rewrites it per theme). Source packages must ship every required asset. Each theme's CSS is published as its own `theme-<id>.css`, loaded after the shared styles; only the active theme's stylesheet is attached, so two themes never style each other. Scope presentation rules to the theme's owned roots or the public shell classes. The generic shared component/companion artwork remains available as host UI; a package does not need to duplicate product behavior.
 
+## What a theme implements
+
+A theme implements four parts. Everything else is the host's and looks the same in every theme.
+
+| Part | Covers | Where in the package |
+| --- | --- | --- |
+| World | Map, zoomed areas, ambient motion, entering an area or room | `renderWorld`, `presentation.world` |
+| Applets | Applet devices, rooms behind an open Applet, cards and frames, Mail parts | `renderApplet`, `presentation.applets` and `fallback` |
+| HUD look | HUD material, colors, type, fonts, world log, Attention art | `tokens`, `fonts`, `theme.css`, optional `hud.skin` |
+| Sound and event animations | Business-event sounds and the animations for them | optional `sound.events`, `ThemeWorldMount.event` |
+
+Not part of a theme: the companion (Fox, its rig and portrait, where it stands, its reply bubble, panel and nameplate) and pages a theme cannot replace, such as the loading and first-use pages. `hud.companion` and `hud.speech` only reserve room the theme's content stays clear of.
+
+`hud.skin` gives nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). `sound.events` gives an audio file per business event (`applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`). Anything left out keeps the shared look and sounds, and switching back to Village restores them.
+
 ## Switching themes
 
 `ui/themes/build-theme.ts` validates every bundled package when the app loads and keeps one active theme. `switchBuildTheme(id)` is the single step behind Settings → Theme:
@@ -114,10 +129,17 @@ npm run test:sim-ui
 npm run theme:preview
 ```
 
-`test:sim-ui` uses the production World adapter and Applet stage with fictional records in a hidden Electron window. For every bundled theme, switched in place, it checks that only that theme's stylesheet is attached, World → Applet → original action → World, an unknown Applet, loading/error, slot registration under resize and disposal. `test:theme-ui` adds the Village four-scene and Calendar save checks. `node scripts/build-sim-shell-check.ts` checks actual application boot, shared shell and public navigation with a stub host. These do not claim authenticated account coverage or acceptance of every Applet.
+`test:sim-ui` uses the production World adapter and Applet stage with fictional records in a hidden Electron window. For every bundled theme, switched in place, it checks that only that theme's stylesheet is attached, World → Applet → original action → World, an unknown Applet, loading/error, slot registration under resize and disposal. `test:theme-ui` adds the Village Map four-scene and Calendar save checks. `node scripts/build-sim-shell-check.ts` checks actual application boot, shared shell and public navigation with a stub host. These do not claim authenticated account coverage or acceptance of every Applet.
 
-Before a theme is marked production-ready, inspect the full shared shell at 1500 × 844: HUD and companion overlap, text clipping, long content, empty/loading/error, keyboard focus, busy/failed edits and reduced motion. Capture both map and Applet evidence. Run the same consumer with a second package, without source edits, to verify replacement. Village is the artwork-rich implementation and the default; Blueprint (`ui/theme-packages/blueprint/`) is a deliberately small independent implementation, drawn entirely from vector art and the host's own readers, that proves replacement and switching. It is not a replacement for production visual acceptance. The legacy Hogwarts overlay is not a v2 package.
+Before a theme is marked production-ready, inspect the full shared shell at 1500 × 844: HUD and companion overlap, text clipping, long content, empty/loading/error, keyboard focus, busy/failed edits and reduced motion. Capture both map and Applet evidence. Run the same consumer with a second package, without source edits, to verify replacement. Village Map (`ui/theme-packages/village-map/`) is the artwork-rich package; Blueprint (`ui/theme-packages/blueprint/`) is a deliberately small independent implementation, drawn entirely from vector art and the host's own readers, that proves replacement and switching. It is not a replacement for production visual acceptance. The legacy Hogwarts overlay is not a v2 package.
 
 ## Compatibility
 
-V2 replaces the Applet-only v1 interface and requires migration; incompatible versions fail before copying. Changes that remove fields, change coordinate meanings or lifecycle semantics require a major contract version. Additive optional capabilities can remain on v2. Main-repository adapters absorb product data changes so packages can change independently. The old data-only `ThemePack` remains the internal owner of shared built-in UI assets (companion, HUD material, sounds); it is not a theme API and not how themes are switched.
+Contract v2 is frozen. `ui/themes/frozen/contract-v2.d.ts` holds its declarations and `scripts/fixtures/theme-contract-v2/` is a package that uses every part of it. `node scripts/theme-contract-check.ts` runs in PR CI (`npm run check:contracts`) and fails when a change would break a package written against v2:
+
+- What a package hands the host (theme, manifest, presentation, mounts) must still be accepted, and what the host hands a package (contexts, state, items, actions) must still carry every field a package may read. No frozen field may be removed.
+- The frozen package must still compile and pass import validation.
+
+An additive, optional change passes; refresh the snapshot in the same PR with `node scripts/theme-contract-check.ts --freeze` (it refuses while the change is incompatible). Anything else needs contract v3 with its own snapshot and frozen package. Incompatible versions fail at import before copying. Main-repository adapters absorb product data changes so packages can change independently.
+
+The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the built-in Village's assets; it is not a theme API and not how themes are switched.

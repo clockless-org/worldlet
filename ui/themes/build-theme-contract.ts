@@ -18,12 +18,27 @@ export interface ThemeScene {
  slots:Record<string,ThemeRect>;
  hud:{top:ThemeRect;companion:ThemeRect;speech:ThemeRect;attention:ThemeRect|'shared';today:ThemeRect|'shared';dialog:ThemeRect|'shared'};
 }
+/** Business events a theme may give a sound. Adding one is a product decision, not a theme's. */
+export const THEME_SOUND_EVENTS=['applet.arrived','mail.received','task.working','task.succeeded','task.failed','task.cancelled'] as const;
+export type ThemeSoundEvent=typeof THEME_SOUND_EVENTS[number];
+/** The shared HUD pieces a theme may paint, each a nine-slice image laid over the shared element (ui/themes/theme-surfaces.css).
+ * The companion (Fox, its bubble, panel and nameplate) and the loading and first-use pages are not a theme's to replace. */
+export const THEME_HUD_PARTS=['attention','note','back','log','button','card','frame'] as const;
+export type ThemeHudPart=typeof THEME_HUD_PARTS[number];
+/** The shared HUD's material. A piece left out keeps the shared look. */
+export interface ThemeHud {
+ /** Nine-slice images: slice insets (top, right, bottom, left) in image pixels, drawn at `width` CSS pixels. */
+ skin:Partial<Record<ThemeHudPart,{image:string;slice:readonly [number,number,number,number];width:number}>>;
+}
+export interface ThemeSound {events:Partial<Record<ThemeSoundEvent,string>>}
 export interface ThemePresentation {
  tokens:{bodyFont:string;displayFont:string;bodySize:number;titleSize:number;ink:string;paper:string;accent:string;focus:string;radius:number;controlHeight:number};
  fonts:readonly {file:string;license:string}[];
  world:ThemeScene;
  applets:Record<string,ThemeScene>;
  fallback:ThemeScene;
+ hud?:ThemeHud;
+ sound?:ThemeSound;
 }
 export interface ThemeAppletContext {
  host:HTMLElement; applet:{id:string;title:string}; scene:ThemeScene;
@@ -97,5 +112,12 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  for(const k of ['bodySize','titleSize','radius','controlHeight'])need(Number.isFinite(t[k])&&t[k]>0,'token '+k);
  need(t.bodySize>=12&&t.controlHeight>=32,'readable type and controls');
  need(Array.isArray(p.fonts),'fonts');for(const f of p.fonts){themeAssetPath(f.file);themeAssetPath(f.license);}
- scene(p.world);scene(p.fallback);for(const [key,s] of Object.entries(p.applets)){need(id(key),'scene applet ID');scene(s);}return p;
+ scene(p.world);scene(p.fallback);for(const [key,s] of Object.entries(p.applets)){need(id(key),'scene applet ID');scene(s);}
+ const object=(v:unknown)=>!!v&&typeof v==='object'&&!Array.isArray(v),picture=(v:unknown)=>/\.(png|webp|svg)$/.test(themeAssetPath(v));
+ if(p.hud!==undefined){
+  const h=p.hud;need(object(h),'hud');
+  need((object(h.skin)&&Object.entries(h.skin).every(([part,piece])=>(THEME_HUD_PARTS as readonly string[]).includes(part)&&object(piece)&&picture(piece.image)&&Array.isArray(piece.slice)&&piece.slice.length===4&&piece.slice.every(n=>Number.isInteger(n)&&n>=0)&&Number.isFinite(piece.width)&&piece.width>0&&piece.width<=64)),'hud skin');
+ }
+ if(p.sound!==undefined)need(object(p.sound)&&object(p.sound.events)&&Object.entries(p.sound.events).every(([event,file])=>(THEME_SOUND_EVENTS as readonly string[]).includes(event)&&/\.(mp3|ogg|m4a|wav)$/.test(themeAssetPath(file))),'sound events');
+ return p;
 }
