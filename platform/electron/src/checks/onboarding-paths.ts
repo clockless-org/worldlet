@@ -61,7 +61,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
  const shown=(selector:string)=>`[...document.querySelectorAll(${JSON.stringify(selector)})].some(e=>e.checkVisibility())`;
  const signInPage=shown('.setup-choose'),appsPage=`!!${button('Enter your world')}`;
  const tourOn="!!document.querySelector('.tour-switch:not([hidden])')";
- // The Tutorial switch in the World's top-right corner, on while the tour runs, turned off ends the first run (owner Order 2026-10-07).
+ // The Tutorial switch in the World's bottom-right corner, on while the tour runs, turned off ends the first run (owner Order 2026-10-07).
  const skipTutorial=async()=>{
   await wait('the Tutorial switch, on',`${shown('.tour-switch[aria-checked=true]')}`,30);
   await js("document.querySelector('.tour-switch').click();true");

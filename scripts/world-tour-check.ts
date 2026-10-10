@@ -2,7 +2,7 @@
 // itself from where it always stands (no hop to the middle, owner feedback 2026-10-04) (and take a new name), shows an Applet at work,
 // then boxes the Attention Center; once first value is over, the tour's last step offers Fox on the phone (owner request 2026-10-06). Esc does nothing: a click anywhere (blank space included), Enter
 // or → moves a step that only tells, and nothing beneath responds, also between steps (the lock).
-// The Tutorial switch in the World's top-right corner (owner Order 2026-10-07) is on while the tour runs; turning it
+// The Tutorial switch in the World's bottom-right corner (owner Order 2026-10-07; bottom-right since 2026-10-10) is on while the tour runs; turning it
 // off ends the first run, and it stays in the corner, off, to turn the tour on again. Mail that
 // still needs signing in is boxed and waits for Connect Mail in Fox's bubble (or Not now, which moves on). Visiting a place lifts
 // the spotlight and resumes the same step on return. The tour hands over to first value, which
@@ -59,14 +59,14 @@ try{
   assert.equal(await root(page,'tourFox'),undefined,'Fox does not hop to the middle');
   assert.equal(await page.locator('.tour-spotlight:not([hidden])').count(),1,'the spotlight covers the World');
   assert.equal(await page.locator('.tour-spotlight:not([hidden]) .tour-spotlight-ring:not(.is-guide)').isVisible(),false,'hello boxes nothing but Fox');
-  // The Tutorial switch, on, stands in the World's top-right corner above the spotlight, over the corner's own;
+  // The Tutorial switch, on, stands in the World's bottom-right corner above the spotlight, over the corner's own;
   // nothing else offers a way out, and Settings beside Fox steps aside.
   const skip=page.locator('.tour-switch');
   await skip.waitFor({state:'visible',timeout:5000});
   assert.equal(await page.getByRole('button',{name:/^Skip/}).count(),0,'no other Skip');
   assert.equal(await page.locator('.companion-side .companion-panel-button').isVisible()&&await page.locator('.companion-side .companion-panel-button').evaluate(e=>getComputedStyle(e).visibility!=='hidden'),false,'Settings steps aside during the tour');
   {const [s,c]=[await skip.boundingBox(),await page.locator('.world-tutorial').boundingBox()];
-   assert.ok(s.x+s.width>1372*.75&&s.y<895*.25,'the switch sits in the top-right corner '+JSON.stringify(s));
+   assert.ok(s.x+s.width>1372*.75&&s.y>895*.75,'the switch sits in the bottom-right corner '+JSON.stringify(s));
    assert.ok(c&&Math.abs(c.x+c.width-(s.x+s.width))<=2&&Math.abs(c.y+c.height/2-(s.y+s.height/2))<=2,'over the corner\'s own switch '+JSON.stringify({s,c}));
    const top=await page.evaluate(({x,y})=>document.elementFromPoint(x,y)?.closest('.tour-switch')!==null,{x:s.x+s.width/2,y:s.y+s.height/2});
    assert.ok(top,'the switch takes clicks above the spotlight');}
@@ -361,7 +361,7 @@ try{
   const focusable=await focusFox();
   // The keyboard reaches the corner's switch; while the tour runs it is on, so no second one starts.
   assert.equal(await entry.getAttribute('aria-checked'),'false',label+': the switch is off after the first run');
-  {const c=await entry.boundingBox();assert.ok(c&&c.x+c.width>viewport.width*.6&&c.y<viewport.height*.4,label+': the switch is in the top-right corner '+JSON.stringify(c));}
+  {const c=await entry.boundingBox();assert.ok(c&&c.x+c.width>viewport.width*.6&&c.y+c.height>viewport.height*.6,label+': the switch is in the bottom-right corner '+JSON.stringify(c));}
   await entry.focus();await page.keyboard.press('Enter');
   await waitStep(page,'hello');
   assert.equal(await root(page,'tourReplay'),'true');
@@ -410,6 +410,6 @@ try{
   assert.equal(await tutorialOn(page),true,'the switch is on during the first run');
   await page.close();
  }
- console.log('PASS world tour replay: the Tutorial switch in the World\'s top-right corner replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
+ console.log('PASS world tour replay: the Tutorial switch in the World\'s bottom-right corner replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
  console.log('PASS world tour: Fox says hello where it stands (no hop to the middle), takes a new name, boxes Mail (offering Connect Mail, which signs in from the World, or Not now in its bubble when it is not connected) and the Attention Center, and closes with the phone a couple of minutes after the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the World\'s top-right corner, turned off, ends it and stays there, off, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; renaming is a Change my name action; only key words are bold');
 }finally{await browser.close();}

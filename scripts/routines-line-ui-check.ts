@@ -3,7 +3,7 @@ import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 // The World's top-right shows the person's routines (owner request 2026-10-10, ui/hud/routines-line.ts): under what Fox
-// is doing, each routine on its own line with when it runs next, read from their Agent's scheduler
+// is doing, a short timeline, each routine under the day it runs with its time, read from their Agent's scheduler
 // (`foxRoutines`); a routine that ran makes it read again, and with none the line is gone. Bundled UI, faked bridge,
 // fixed clock, fictional routines.
 const t0=new Date(2026,9,10,7,30);
@@ -38,17 +38,21 @@ await withBrowser(fileAccess,async browser=>{
  await page.goto(worldUrl());
  await page.locator('.companion-avatar').waitFor();
  const line=page.locator('.notion-top .world-environment .fox-routines');
- // Each routine on its own line, soonest first, with when it runs next; paused ones are left out; five, then "+N more".
+ // A timeline: Now, then each routine soonest first under the day it runs, with its time; paused ones are left out;
+ // five, then "+N more".
  await line.locator('.fox-routine').first().waitFor();
- const rows=await line.locator('.fox-routine').evaluateAll(list=>list.map(li=>[li.querySelector('.fox-routine-name')?.textContent??li.textContent,li.querySelector('.fox-routine-when')?.textContent??'']));
- assert.deepEqual(rows,[['Morning brief','8:00 AM'],['Water the plants','7:00 PM'],['Sunday plan','tomorrow 6:00 PM'],['Gym','Mon 6:30 AM'],['Weekly review','Fri 5:00 PM'],['+2 more','']],JSON.stringify(rows));
+ const rows=await line.locator('.fox-timeline>li').evaluateAll(list=>list.map(li=>li.classList.contains('fox-routine')&&!li.classList.contains('fox-routine-more')?li.querySelector('.fox-routine-name')!.textContent+' | '+li.querySelector('.fox-routine-when')!.textContent:li.textContent));
+ assert.deepEqual(rows,['Now','Today','Morning brief | 8:00 AM','Water the plants | 7:00 PM','Tomorrow','Sunday plan | 6:00 PM','Mon','Gym | 6:30 AM','Fri','Weekly review | 5:00 PM','+2 more'],JSON.stringify(rows));
  assert.equal(await line.locator('.fox-routine-more').getAttribute('title'),'Flight prices\nPay rent','the rest are named on hover; those with no time in the next week come last');
+ // The dots sit on one rail.
+ const rail=await line.locator('.fox-timeline>li.fox-routine').evaluateAll(list=>list.map(li=>{const r=li.getBoundingClientRect(),dot=getComputedStyle(li,'::after');return Math.round(r.right-parseFloat(dot.right)-parseFloat(dot.width)/2);}));
+ assert.ok(rail.every(x=>Math.abs(x-rail[0])<=1),'one rail: '+JSON.stringify(rail));
  const box=await line.boundingBox();
  assert.ok(box&&box.x+box.width>1440*.7&&box.y<900*.25,'it sits in the top-right corner: '+JSON.stringify(box));
- await page.screenshot({path:path.join(tmpdir(),'worldlet-routines-line.png'),clip:{x:900,y:0,width:540,height:200}});
+ await page.screenshot({path:path.join(tmpdir(),'worldlet-routines-line.png'),clip:{x:940,y:0,width:500,height:340}});
  // A routine ran: the line reads again; with none left it is gone.
  await page.evaluate(()=>{(window as any).jobs=[];window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{ran:true,job:{name:'Morning brief',last_status:'ok'}}}));});
  await line.waitFor({state:'hidden'});
  assert.deepEqual(errors,[]);
 });
-console.log('PASS routines line UI: top-right list of routines soonest first with their next time, five then +N more, paused left out, reread after a run, hidden with none');
+console.log('PASS routines line UI: top-right timeline of routines by day, soonest first, on one rail, five then +N more, paused left out, reread after a run, hidden with none');

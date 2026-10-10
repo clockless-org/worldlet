@@ -27,7 +27,7 @@ await withBrowser(fileAccess,async browser=>{
  {const waiting=await page.locator('.dev-build-update-label').boundingBox();
   await page.mouse.click(waiting.x+waiting.width/2,waiting.y+waiting.height/2);await page.waitForTimeout(300);
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='devBuildApply')),false,'the World is locked while Fox waits');}
- // The Tutorial switch in the World's top-right corner, on, is the way out meanwhile (owner Order 2026-10-07).
+ // The Tutorial switch in the World's bottom-right corner, on, is the way out meanwhile (owner Order 2026-10-07).
  assert.equal(await page.locator('.tour-switch').getAttribute('aria-checked'),'true','the Tutorial switch, on, is the way out meanwhile');
  assert.equal(await page.locator('.tour-switch').isVisible(),true);
  await page.evaluate(()=>{const w=window as any;w.fixture.activityRevision++;
