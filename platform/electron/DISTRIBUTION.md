@@ -18,7 +18,7 @@ The public Mac download is one universal DMG for Apple silicon and Intel. Both e
 | Release | 2026.9.28 / Build 1072; exact publication evidence in Issue #189 |
 | Platform | Apple silicon (arm64) or a macOS 14-compatible Intel Mac (x86_64), macOS 14.0 or later |
 | Website | https://worldlet.clockless.workers.dev/ (`/download/` has install instructions) |
-| Update feed | https://worldlet.clockless.workers.dev/downloads/appcast.xml (`platform/electron/distribution/Updates.json`) |
+| Update feed | https://worldlet.ai/downloads/appcast.xml (`platform/electron/distribution/Updates.json`). Earlier builds read the same feed through `worldlet.clockless.workers.dev`, which forwards to it; newer builds read it directly, so a network that blocks `workers.dev` can still check for updates. |
 | Installers | One `Worldlet-<version>-<build>-macos-universal.dmg`, ULMO (LZMA) compressed |
 | Bundle ID | `app.worldlet.mac`, app name `Worldlet` |
 | Signature | `Developer ID Application: Chuan Ren (N9KJV72CSL)` |
