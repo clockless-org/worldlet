@@ -195,8 +195,8 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
 }
 // The Dev tests (release.yml's `checks` job, the pull request checks of architecture.yml) as seen in this run's job list:
 // 'pass' once all of them succeeded, 'fail' once one failed, 'wait' meanwhile. A build publishes to Dev only after
-// 'pass' (owner decision 2026-10-09: CI runs the Dev tests, within three minutes, before each Dev release).
-export const DEV_TESTS='Dev tests / ',DEV_TEST_JOBS=3;
+// 'pass' (owner decision 2026-10-09: CI runs the Dev tests before each Dev release; within five minutes since 2026-10-10).
+export const DEV_TESTS='Dev tests / ',DEV_TEST_JOBS=6; // Static, Fast and Operational checks and the three UI checks jobs
 export function devTests(jobs){
  const mine=jobs.filter(j=>j.name.startsWith(DEV_TESTS)&&j.conclusion!=='skipped');
  const failed=mine.filter(j=>j.status==='completed'&&j.conclusion!=='success').map(j=>j.name.slice(DEV_TESTS.length));

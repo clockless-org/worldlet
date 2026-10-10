@@ -31,18 +31,22 @@ const basic=pkg.scripts['check:pr'];
 // PR CI runs every check (owner, 2026-10-05: "记好check和test的区别，pr ci就跑check"); the fast browser-free and operational
 // checks stay because together they finish within three minutes ("3分钟内的话可以改名check，继续跑").
 for(const required of ['npm run check &&','check:source','check:contracts','scripts/browser-surface-contract-check.ts','check:docs','check:style'])assert(basic.includes(required),required);
-assert(!/\bnpm (run )?test\b/.test(basic+workflow),'no product test suite runs on a pull request');
+assert(!/\bnpm (run )?test\b(?!:ui:quick)/.test(basic+workflow),'no product test suite runs on a pull request but the quick UI checks');
+// The quick UI checks run on pull requests, on Linux, in three jobs (owner decision 2026-10-10: quick checks within five
+// minutes); the whole UI suite stays in Beta.
+assert.equal((workflow.match(/npm run test:ui:quick/g)||[]).length,1,'the UI jobs run test:ui:quick');
+assert.match(workflow,/WORLDLET_TEST_UI_SHARD: \$\{\{ matrix\.shard \}\}\/3/);
 // Every third-party action is pinned to a commit, never a moving tag.
 for(const file of readdirSync(new URL('../.github/workflows/',import.meta.url)).filter(f=>/\.ya?ml$/.test(f)))
  for(const [,action] of readFileSync(new URL('../.github/workflows/'+file,import.meta.url),'utf8').matchAll(/^\s*(?:-\s+)?uses:\s*(\S+)/gm))
   assert(/^\.\/|@[0-9a-f]{40}$/.test(action),`${file}: ${action} is pinned to a commit SHA`);
 // PR CI runs on Linux only, basic checks only (owner decision 2026-10-04): no workflow a pull request triggers may use a
-// non-Linux runner or build the iPhone/Android apps; those run in the RC.
+// non-Linux runner or build the iPhone/Android apps; those run in Alpha and Beta.
 for(const file of readdirSync(new URL('../.github/workflows/',import.meta.url)).filter(f=>/\.ya?ml$/.test(f))){
  const text=readFileSync(new URL('../.github/workflows/'+file,import.meta.url),'utf8');
  if(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(text))continue;
  for(const [,runner] of text.matchAll(/^\s*runs-on:\s*(.+)$/gm))assert(/^ubuntu-[\w.]+$/.test(runner.trim()),`${file}: pull request CI runs on Linux only, not ${runner.trim()}`);
- assert(!/xcodebuild|swift test|gradlew|test:ios|test:android|test:ui/.test(text.replace(/#.*$/gm,'')),`${file}: iPhone, Android and UI tests run in the RC, not on pull requests`);
+ assert(!/xcodebuild|swift test|gradlew|test:ios|test:android|test:ui(?!:quick)/.test(text.replace(/#.*$/gm,'')),`${file}: iPhone, Android and the whole UI suite run on the release machines, not on pull requests`);
 }
 // A host popup-rule change (#781 shape) selects only the trust checks, not all operational checks.
 const popupPaths=['contracts/README.md','contracts/fixtures/parity/browser-popup.json',
