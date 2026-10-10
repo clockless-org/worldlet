@@ -6,7 +6,7 @@ import {access} from 'node:fs/promises';
 import {ACTIVE_THEME,DEFAULT_THEME_ID,THEMES,THEME_PREFERENCE_KEY,companionPerformance,createThemeEvents,parseThemePack,readThemePreference,selectThemePins,storedThemePins,switchTheme,switchThemePins,themeAppletArt,type RegisteredTheme,type ThemePlacementLayout} from '../ui/themes/index.ts';
 import {BUILTIN_STYLE,STYLE_TOKENS} from '../ui/components/style.ts';
 import {WORLD_LAYOUT,THEME_WORLD} from '../ui/world/world-layout.ts';
-import {villageCamera} from '../ui/world/village-camera.ts';
+import {villageCamera} from '../ui/world/village/village-camera.ts';
 import {FOX_STATES} from '../ui/companion/fox-state-catalog.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import {MOMENT_ART} from '../core/applets/moment.ts';

@@ -17,9 +17,9 @@ Authoring currently follows the design guide above. Use ordinary guidelines in `
 - `panels.ts`: service-specific working panels.
 - `<key>/logo.ts` and optional panel/controller files: visual presentation only.
 - `resources/styles/builtin/assets/world/devices/<key>.png`: independent device image, shared by real and Sample data.
-- `ui/world/village-sites.ts`: reference-image anchors and region slots.
-- `ui/world/applet-sprites.ts`: the fixed anchor, width and ground origin of every device.
-- `ui/world/pixi-world.ts`, `pixi-stage.ts`: shared rendering and accessible content.
+- `ui/world/village/village-sites.ts`: reference-image anchors and region slots.
+- `ui/world/village/applet-sprites.ts`: the fixed anchor, width and ground origin of every device.
+- `ui/world/village/pixi-world.ts`, `pixi-stage.ts`: shared rendering and accessible content.
 
 The old mesh models and 3D stages have been removed. Catalog `scene.template`, `scene.renderer` and legacy placement coordinates remain serialized metadata for compatibility; they do not select a 3D renderer. Add new image assets and an authored anchor explicitly. Do not reintroduce Three.js. The render engine must never branch on Sample mode.
 

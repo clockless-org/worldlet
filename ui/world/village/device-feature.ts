@@ -1,5 +1,5 @@
 import type {Sprite} from 'pixi.js';
-import type {ThemeDeviceFeature} from '../themes/index.ts';
+import type {ThemeDeviceFeature} from '../../themes/index.ts';
 
 /** Texture frame offsets retain the same feature when an Area trims transparent padding. */
 export function deviceFeature(sprite:Sprite,feature:ThemeDeviceFeature){

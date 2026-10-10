@@ -4,7 +4,7 @@ import {updateOnboarding} from '../core/onboarding/onboarding.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import {recommendForArea,appletHost,AREA_RECOMMEND_LIMIT} from '../core/applets/area-recommend.ts';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
-import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
+import {APPLET_SPRITES} from '../ui/world/village/applet-sprites.ts';
 import {resolvePlacements,freePlacements,nearestPlacement,sameAnchor,slotsForApplet} from '../ui/world/slot-placement.ts';
 const rooms=WORLD_APPS.map(a=>({key:a.key,moduleId:a.id,entity:'app'}));
 const all=resolvePlacements(rooms,{},()=>true);
