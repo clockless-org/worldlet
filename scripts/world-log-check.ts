@@ -1,7 +1,6 @@
 // The world log: Core turns saved history into plain lines and finds the next scheduled check.
-// The World's bottom-right corner shows only that next check (owner Order 2026-10-06), quiet but
-// readable until hovered and clear of Fox's lane; it opens the History page, a running feed of the
-// lines, each going to its Applet or site. The brand stays hidden unless a development build is ready to apply.
+// Nothing of it shows in the World's corner (owner Orders 2026-10-06 and 2026-10-10); the History
+// page is a running feed of the lines, each going to its Applet or site. The brand stays hidden unless a development build is ready to apply.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import path from 'node:path';
@@ -82,43 +81,14 @@ try{
  });
  await page.goto(worldUrl());
  await waitForWorld(page);
- const log=page.locator('.world-log');
- // The corner keeps only the next scheduled check; the live log is gone from it (owner Order 2026-10-06).
- await log.locator('.world-log-next').waitFor();
- assert.match(await log.locator('.world-log-next').textContent(),/^Next sync · Mail at \d\d:\d\d$/);
- assert.equal(await page.locator('.world-log-lines,.world-log-line').count(),0,'no live log lines in the corner');
- const box=(await log.boundingBox())!;
- assert(box.x+box.width>1380&&box.y+box.height>800,'the line sits bottom right, above the Tutorial switch: '+JSON.stringify(box));
- // The corner Tutorial switch sits bottom right too; the line steps above it, never under it.
- const corner=page.locator('.world-tutorial-corner');
- if(!await corner.isVisible())await page.evaluate(()=>{const spot=document.createElement('div');spot.className='world-tutorial-corner';const b=document.createElement('button');b.className='world-tutorial';b.textContent='Tutorial';spot.append(b);document.querySelector('.native-console')!.append(spot);});
- await corner.waitFor();await page.waitForTimeout(100);
- const lifted=(await log.boundingBox())!,tutorial=(await corner.boundingBox())!;
- assert(lifted.y+lifted.height<=tutorial.y,'the line clears the Tutorial switch: '+JSON.stringify({lifted,tutorial}));
+ // Nothing of the log shows in the World: the bottom-right next-check line is gone too (owner Order 2026-10-10).
+ await page.waitForFunction(()=>(window as any).logCalls.length>=1);
+ assert.equal(await page.locator('.world-log,.world-log-next,.world-log-lines,.world-log-line').count(),0,'no log in the World corner');
  assert.equal(await page.locator('.world-watermark').isVisible(),false,'the brand stays hidden without a build to apply');
- // Quieter than when hovered, but readable at rest over any scenery (RC UI reviews 2737/2743, #1699).
- const opacity=()=>log.evaluate(e=>Number(getComputedStyle(e).opacity));
- assert(await opacity()<1,'quieter at rest');
- const legible=await log.evaluate(e=>{
-  const rgba=(c:string)=>{const [r,g,b,a=1]=c.match(/[\d.]+/g)!.map(Number);return {rgb:[r,g,b],a};};
-  const mix=(a:number[],b:number[],t:number)=>a.map((v,i)=>t*v+(1-t)*b[i]);
-  const lum=(c:number[])=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4;});return .2126*r+.7152*g+.0722*b;};
-  const ratio=(a:number[],b:number[])=>{const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return (x+.05)/(y+.05);};
-  const s=getComputedStyle(e),group=Number(s.opacity),back=rgba(s.backgroundColor),white=[255,255,255];
-  const behind=mix(back.rgb,white,back.a*group);
-  const t=e.querySelector('.world-log-next')!,ink=rgba(getComputedStyle(t).color),line=Number(getComputedStyle(t).opacity)*ink.a;
-  const cover=line+back.a*(1-line),color=ink.rgb.map((v,i)=>(line*v+back.a*(1-line)*back.rgb[i])/cover);
-  return {contrast:ratio(mix(color,white,cover*group),behind),size:parseFloat(s.fontSize)};
- });
- assert(legible.size>=13,'large enough to read: '+legible.size);
- assert(legible.contrast>=4.5,'readable over a white landscape at rest: '+legible.contrast);
- await log.hover();await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('.world-log')!).opacity)>.95);
- await page.screenshot({path:'output/world-log/next.png'}).catch(()=>{});
- // New events and what an Applet is doing now stay out of the corner; they reach History.
+ // New events and what an Applet is doing now reach History.
  await page.evaluate(()=>{const w=window as any;w.entries.push({seq:6,at:Date.now()/1000,kind:'activity.page.opened',key:'',body:{id:'6',data:{url:'https://news.example.org/a'}}});});
  await page.evaluate(()=>{const w=window as any;w.fixture.connections=[{provider:'gmail',connected:true,running:true}];w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
  await page.waitForFunction(()=>(window as any).logCalls.length>=3,null,{timeout:12000});
- assert.equal(await page.locator('.world-log-lines,.world-log-line').count(),0,'still no live lines in the corner');
  assert.equal(await page.locator('.applet-lamp-label:not([hidden])').count(),0,'no Running badge over the device');
  await page.evaluate(()=>{const w=window as any;w.fixture.connections=[{provider:'gmail',connected:true}];w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
  // An Applet working on a task Fox handed it: when it is done, Fox says the result.
@@ -129,10 +99,8 @@ try{
  await page.waitForFunction(()=>!!document.querySelector('.applet-task-done:not([hidden])'),null,{timeout:5000});
  await page.screenshot({path:'output/world-log/task-done.png'}).catch(()=>{});
  await page.keyboard.press('Escape');
- // The line opens the companion panel's History page, a running feed of the plain lines.
- await page.evaluate(()=>window.addEventListener('worldlet:companion-info',(e:any)=>{(window as any).opened=e.detail?.tab;}));
- await log.hover();await log.locator('.world-log-next').click();
- await page.waitForFunction(()=>(window as any).opened==='History');
+ // The companion panel's History page is a running feed of the plain lines.
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'History'}})));
  const recent=page.locator('#companionInfo .companion-world-log');
  await recent.getByText('You visited news.example.org',{exact:true}).waitFor({timeout:10000});
  assert(await recent.locator('button').count()>=6,'every line in History goes somewhere');
@@ -140,37 +108,7 @@ try{
  await page.screenshot({path:'output/world-log/history.png'}).catch(()=>{});
  await recent.locator('button').first().click();
  await page.locator('#companionInfo').waitFor({state:'hidden'});
- // Fox's lane: the log never draws behind the actions beside Fox, the message bar or Fox (#1699).
- // Inside an Applet Fox's dock moves to the right third and Check mail sits where the log was, so
- // the log steps aside; back in the World it returns.
- const clash=()=>page.evaluate(()=>{
-  const e=document.querySelector<HTMLElement>('.world-log')!,r=e.getBoundingClientRect();
-  const shown=!e.hidden&&r.width>0&&getComputedStyle(e).visibility!=='hidden'&&getComputedStyle(e).display!=='none';
-  const hits=shown?[...document.querySelectorAll('.world-actions :is(button,.world-capsule),.companion-text-entry,.companion-pet')].filter(o=>{const b=o.getBoundingClientRect();return b.width&&b.height&&b.left<r.right&&b.right>r.left&&b.top<r.bottom&&b.bottom>r.top;}).map(o=>o.textContent?.trim()||o.className):[];
-  return {shown,hits};
- });
- const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
- const toWorld=async()=>{
-  await page.evaluate(()=>{location.hash='';});
-  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as HTMLElement)?.dataset.depth==='overview'&&document.querySelector('.world-log')?.getAttribute('data-crowded')==='false',null,{timeout:8000});
- };
- await page.mouse.move(2,2);
- for(const [width,height] of [[1440,900],[1024,700],[820,620]]){
-  await page.setViewportSize({width,height});await toWorld();await settle();
-  const world=await clash();
-  assert(world.shown&&!world.hits.length,`${width}: the log shows in the World, clear of Fox's lane `+JSON.stringify(world));
-  await page.evaluate(()=>{location.hash='object=app-gmail';});
-  await page.locator('.world-actions .world-capsule',{hasText:'Check mail'}).waitFor();await settle();
-  const mail=await clash();
-  assert.deepEqual(mail.hits,[],`${width}: inside Mail the log is never behind Check mail, the message bar or Fox`);
-  // Above the Tutorial switch the line clears the Check mail row, so it may stay; it is never behind it (checked above).
-  await toWorld();
- }
- await page.setViewportSize({width:1440,height:900});
- // The practice world has no log of its own.
- await page.evaluate(()=>{(window as any).sample=true;});
- await log.waitFor({state:'hidden',timeout:12000});
  assert(await page.evaluate(()=>(window as any).logCalls.every(b=>typeof b.tasks==='boolean')),'every read says whether it needs the schedule');
  assert.deepEqual(errors,[]);
- console.log('PASS world log: the corner holds only the next scheduled check, readable at rest and brighter when hovered, clear of Fox\'s actions and message bar, opens History (a running feed of plain lines), brand hidden, Applet task result');
+ console.log('PASS world log: nothing in the World corner, History is a running feed of plain lines, brand hidden, Applet task result');
 }finally{await browser.close();}
