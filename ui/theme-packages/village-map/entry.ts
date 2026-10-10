@@ -29,5 +29,5 @@ function renderApplet(context:ThemeAppletContext){
  return {dispose:mounted.dispose};
 }
 
-const theme:BuildTheme={contractVersion:2,id:"village",renderWorld,renderApplet};
+const theme:BuildTheme={contractVersion:2,id:"village-map",renderWorld,renderApplet};
 export default theme;

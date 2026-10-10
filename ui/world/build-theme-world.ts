@@ -1,5 +1,5 @@
 import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState} from '../themes/index.ts';
-import {createAppletStage} from './pixi-stage.ts';
+import {createAppletStage} from './theme-applet-stage.ts';
 import {myAppletKind} from '../../core/applets/index.ts';
 /** The host's picture of an Applet: a person's own Applet's icon, else its shared device art. */
 function appletIcon(room):string|undefined {
@@ -25,7 +25,7 @@ export function createModuleScene(host,rooms,onPick,onProject,_pages,options):an
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
   if(room)stage.render(room,stages.get(room.moduleId)||{items:[]},view.level==='applet');
   else stage.render({key:'',moduleId:'',title:''},{items:[]},false);
-  if(view.level!=='applet')applyBuildThemeScene(activeBuildTheme().presentation.world);
+  if(view.level!=='applet')applyBuildThemeScene(activeBuildTheme().package!.presentation.world);
   // Sim renders its own accessible map buttons. No duplicate legacy pins.
   onProject({});
  }

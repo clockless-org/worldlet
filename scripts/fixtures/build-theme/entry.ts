@@ -1,5 +1,6 @@
 /** Background acceptance fixture using the actual upstream Applet stage and theme adapter. */
-import {createAppletStage} from '../../../ui/world/pixi-stage.ts';
+import './start-theme.ts';
+import {createAppletStage} from '../../../ui/world/theme-applet-stage.ts';
 import {demoItems,demoNow} from './data.ts';
 type VillageKind='mail'|'calendar'|'notes'|'reminders';
 const global=globalThis as any;global.__WORLDLET_25D_ASSETS__={devices:{},open:{}};
@@ -18,11 +19,13 @@ import {BUILD_THEMES,switchBuildTheme} from '../../../ui/themes/build-theme.ts';
 const rooms=Object.entries(keys).map(([title,key])=>({id:'place-'+key,moduleId:'app-'+key,key,title,region:'home',entity:'app'}));
 rooms.push({id:'place-future',moduleId:'app-future',key:'future',title:'Future applet',region:'home',entity:'app'});
 let worldScene:any,worldHost:HTMLElement;
-global.simFixture={events,themes:[...BUILD_THEMES.keys()],
+// The built-in Village is the Pixi World, not a package; the fixture exercises every package through the contract.
+const packages=[...BUILD_THEMES.values()].filter(theme=>theme.package);
+global.simFixture={events,themes:packages.map(theme=>theme.id),
  async use(id:string){const result=await switchBuildTheme(id);if('error' in result)throw Error(result.error);},
  open(){stage.render(current,value,false);worldScene?.destroy();worldHost?.remove();worldHost=document.createElement('div');worldHost.id='sim-world-fixture';Object.assign(worldHost.style,{position:'absolute',inset:'0'});root.append(worldHost);
   worldScene=createModuleScene(worldHost,rooms,event=>{events.push(event);if(event.action==='space'){const room=rooms.find(r=>r.id===event.id)!;worldScene.setAppStage(room.moduleId,{sample:true,items:[{id:'sim-record',title:'Contract record'}]});worldScene.focus(room.moduleId,'object');}else if(event.action==='building')worldScene.focus(event.id,'building');},()=>{},new Map(),{buildings:[{id:'building-home',title:'Home'}]});
  },home(){worldScene.focus('overview');},get scene(){return worldScene;},get host(){return worldHost;},destroy(){worldScene.destroy();worldHost.remove();}
 };
 const worldButton=document.createElement('button');worldButton.textContent='World';worldButton.onclick=()=>global.simFixture.open();document.querySelector('#theme-preview-nav')?.append(worldButton);
-for(const id of BUILD_THEMES.keys()){const b=document.createElement('button');b.textContent=BUILD_THEMES.get(id)!.title;b.onclick=async()=>{await global.simFixture.use(id);global.simFixture.open();};document.querySelector('#theme-preview-nav')?.append(b);}
+for(const {id,title} of packages){const b=document.createElement('button');b.textContent=title;b.onclick=async()=>{await global.simFixture.use(id);global.simFixture.open();};document.querySelector('#theme-preview-nav')?.append(b);}

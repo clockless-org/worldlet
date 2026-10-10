@@ -11,7 +11,8 @@ app.whenReady().then(async()=>{await fs.mkdir(out,{recursive:true});app.dock?.hi
  assert.equal(await run(()=>{const b=simFixture.host.querySelector('button'),r=b.getBoundingClientRect();return b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),true);
  await run(()=>[...simFixture.host.querySelectorAll('button')].find(b=>b.textContent==='mail'||b.getAttribute('aria-label')==='mail').click());
  assert.equal(await run(()=>simFixture.scene.metrics.active),'app-gmail');assert.equal(await run(()=>!!simFixture.host.querySelector('[data-theme-rendered=true]')),true);
- await run(()=>[...simFixture.host.querySelectorAll('button')].find(b=>b.textContent==='Open original'||b.textContent==='Contract record').click());assert.match(await run(()=>JSON.stringify(simFixture.events)),/applet-item/);
+ // Open the record's original. A theme may first show the record in its reader (Blueprint), then offer Open original.
+ await run(async()=>{simFixture.events.length=0;const find=t=>[...simFixture.host.querySelectorAll('button')].find(b=>b.textContent===t);if(!find('Open original'))find('Contract record')?.click();await new Promise(r=>requestAnimationFrame(r));(find('Open original')||find('Contract record')).click();});assert.match(await run(()=>JSON.stringify(simFixture.events)),/applet-item/);
  await run(()=>simFixture.home());assert.equal(await run(()=>simFixture.scene.metrics.active),'overview');
  await run(()=>[...simFixture.host.querySelectorAll('button')].find(b=>b.textContent==='Future applet'||b.getAttribute('aria-label')==='Future applet').click());
  assert.equal(await run(()=>simFixture.host.textContent.includes('Contract record')),true);

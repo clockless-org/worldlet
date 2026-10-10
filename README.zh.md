@@ -175,4 +175,4 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 
 Worldlet 以 [Apache License 2.0](LICENSE) 免费开源。第三方声明见 [NOTICE](NOTICE)。
 
-所有主题都实现同一个 [Theme contract](resources/themes/CONTRACT.md)。Worldlet 打包 `ui/theme-packages/` 里的每个主题包（目前是 Village 和 Blueprint），在 设置 → 主题 里一步切换。用 `npm run theme:import -- /path/to/theme/package` 添加或更新一个包；主题负责 World 渲染、Applet 场景和 HTML 布局，主仓库提供数据和操作。
+所有主题都实现同一个 [Theme contract](resources/themes/CONTRACT.md)。默认主题 Village 是内置的动态 World。Worldlet 还打包 `ui/theme-packages/` 里的每个主题包（目前是 Village Map 和 Blueprint），在 设置 → 主题 里一步切换所有主题。用 `npm run theme:import -- /path/to/theme/package` 添加或更新一个包；主题负责 World 渲染、Applet 场景和 HTML 布局，主仓库提供数据和操作。

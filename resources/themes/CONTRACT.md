@@ -69,7 +69,7 @@ Each world, bespoke Applet and fallback declares:
 
 | Field | Meaning |
 | --- | --- |
-| `size: [width, height]` | Authored reference canvas in pixels; current Village uses 1500 × 844. |
+| `size: [width, height]` | Authored reference canvas in pixels; Village Map uses 1500 × 844. |
 | `background` | Package-relative asset path, e.g. `assets/mail-scene.png`. |
 | `slots.content` | Required normalized `[x, y, width, height]` rectangle on that canvas. |
 | Other `slots` | Theme-defined regions, e.g. `header`, `week`, `reader`, `toolbar`. |
@@ -95,7 +95,7 @@ Assets at `assets/...` are published to `theme-assets/<id>/...`; resolve them wi
 2. Make it active: apply its stylesheet and tokens, remove the old stylesheet and save the choice on this computer (`worldlet-theme-v2`).
 3. Dispatch `worldlet:theme` (`{from,to}`). The World disposes the old theme's World and Applet mounts and renders the same view with the new theme: what is open, records, web sessions and background tasks stay. Pinned places are kept per theme (`ui/themes/theme-placements.ts`).
 
-An unknown or removed saved theme falls back to Village, the default.
+The default theme, Village, is built in: it is the animated Pixi World (`ui/world/pixi-world.ts`) and carries no package, stylesheet or scene slots. Choosing it removes the last package's stylesheet and scene variables. An unknown or removed saved theme falls back to Village. A package cannot use the id `village`.
 
 ## Adding a theme
 
