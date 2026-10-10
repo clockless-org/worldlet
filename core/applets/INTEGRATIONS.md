@@ -33,7 +33,7 @@ The provider chapters below retain unique adapter behavior, permissions and limi
 
 - Google uses direct OAuth and API reads; Notion uses its MCP authorization and
   explicit original-page access. Public Google distribution review remains in
-  [Google OAuth review](../../harness/hermes/GOOGLE-OAUTH-REVIEW.md).
+  [Google OAuth review](../../docs/GOOGLE-OAUTH-REVIEW.md).
 - Apple adapters use OS-authorized local access. Their platform limitations and
   actual account/device acceptance must remain explicit.
 - GitHub structured reads and local Codex/Claude Code sessions use their own
@@ -54,7 +54,7 @@ The provider chapters below retain unique adapter behavior, permissions and limi
 
 Provider-specific chapters link their official basis. Requirements can change;
 verify them against the provider before expanding scopes or declaring public
-availability. Google distribution review has its own [submission record](../../harness/hermes/GOOGLE-OAUTH-REVIEW.md).
+availability. Google distribution review has its own [submission record](../../docs/GOOGLE-OAUTH-REVIEW.md).
 
 <a id="core-applet-content"></a>
 ## Core Applet content and presentation
@@ -450,7 +450,7 @@ Official basis: [repository and install notes](https://github.com/doordash-oss/d
 
 YouTube is a dedicated Applet rather than a plain website entry: a painted outdoor cinema sprite, the official player, a local queue and a Fox tool. Public-video playback, pause and close were verified by the retired native host's live check, which is not yet ported to Electron. Support status: Building.
 
-**There is no YouTube account connection:** the shared OAuth client is submitted for Gmail and Calendar only; see [Google OAuth review](../../harness/hermes/GOOGLE-OAUTH-REVIEW.md). The Applet plays the links you bring, and Open on YouTube hands a video to youtube.com.
+**There is no YouTube account connection:** the shared OAuth client is submitted for Gmail and Calendar only; see [Google OAuth review](../../docs/GOOGLE-OAUTH-REVIEW.md). The Applet plays the links you bring, and Open on YouTube hands a video to youtube.com.
 
 ### User flow
 

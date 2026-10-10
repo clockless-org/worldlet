@@ -137,7 +137,6 @@ Requirements: Node.js 22.19 or later.
 
 ```sh
 npm ci
-npm run setup:hermes   # pinned Hermes runtime for Fox when no other Agent is chosen
 npm run dev            # development build with a watcher
 npm run build          # build the interface and the Electron host once
 npm run package        # package the desktop app for this OS (unsigned)

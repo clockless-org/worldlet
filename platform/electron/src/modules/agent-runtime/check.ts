@@ -40,7 +40,7 @@ else:
     send(type='result', requestId=rid, value=dict(message='echo:' + text))
 `;
 
-// Speaks the resident host.py --serve frames (harness/hermes/host.py) without Hermes.
+// Speaks the resident host.py --serve frames of Worldlet's former built-in Hermes, without Hermes.
 const python=process.platform==='win32'
  ?[process.env.WORLDLET_TOOLS_PYTHON,process.env.WORLDLET_SETUP_PYTHON,...(process.env.PATH??'').split(path.delimiter).filter(dir=>dir&&!/\\WindowsApps\\?$/i.test(dir)).map(dir=>path.join(dir,'python.exe'))]
   .find((file):file is string=>!!file&&path.isAbsolute(file)&&file.toLowerCase().endsWith('.exe')&&fs.existsSync(file))??'python.exe'

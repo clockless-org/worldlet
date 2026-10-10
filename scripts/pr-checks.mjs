@@ -46,7 +46,7 @@ export const operationalChecks=available([
  // browser check is in test:ui: PR CI runs these when scripts change and has no browser).
  'gatehouse/live-status-check.mjs','gatehouse/release-check.mjs',
 ]);
-export const trustChecks=['scripts/turn-trust-check.ts','scripts/turn-trust-check.py','scripts/routine-permissions-check.py'];
+export const trustChecks=['scripts/turn-trust-check.ts'];
 // Product fixture/native-source changes do not exercise allocator, reporting or publication.
 // Keep build/publish/control scripts and unknown paths conservative.
 export function productPath(p){
@@ -57,7 +57,7 @@ export function productPath(p){
 export function selectChecks(files){
  // Unknown paths and unavailable diffs run everything. Markdown alone does not change execution.
  const operational=files===null||files.some(p=>!p.endsWith('.md')&&!productPath(p)&&(
-  /^(scripts|gatehouse|\.github|platform)\//.test(p)||p==='harness/hermes/runtime.json'||
+  /^(scripts|gatehouse|\.github|platform)\//.test(p)||
   !/^(ui|core|contracts|resources|harness|models|worker|website|migrations)\//.test(p)));
  const trust=files===null||files.some(p=>!p.endsWith('.md')&&/^(ui|core|contracts|platform|harness|scripts)\//.test(p))||operational;
  return [...(operational?operationalChecks:[]),...(trust?trustChecks:[])];

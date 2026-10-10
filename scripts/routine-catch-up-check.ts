@@ -14,7 +14,7 @@ assert.deepEqual(routinesDueAfterGap([{id:'news',name:'Morning news',nextRunAt:a
 // seventy-odd missed slots still come out as one run.
 assert.deepEqual(routinesDueAfterGap([{id:'flights',name:'Flight prices',nextRunAt:at(3*day)}],now).map(r=>[r.id,r.late]),[['flights',true]],'many missed slots: runs once');
 // "Remind me at 9am", slept from 07:00 to 09:30: the one-time routine runs once, late, instead of
-// being dropped (harness/hermes/routines.py `rearm_missed_once`); once run, Hermes marks it completed.
+// being dropped; once run, Hermes marks it completed.
 assert.deepEqual(routinesDueAfterGap([{id:'remind',name:'Call the dentist',state:'scheduled',nextRunAt:at(30*60_000)}],now).map(r=>[r.id,r.late]),[['remind',true]],'missed one-time routine: runs once, late');
 assert.deepEqual(routinesDueAfterGap([{id:'remind',state:'completed',nextRunAt:null}],now),[],'one-time routine already run: nothing');
 // Nothing missed: the next run is still ahead.

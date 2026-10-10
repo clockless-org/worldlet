@@ -86,7 +86,7 @@ gives Worldlet personality priority over conflicting legacy Harness/SOUL tone,
 without changing permissions or memory ownership. SOUL files, live memory writers,
 credentials and attached external profiles are not rewritten, except that a `SOUL.md`
 Hermes seeded itself in Worldlet's own Hermes becomes the companion's default persona
-([default persona](../../harness/hermes/README.md)). This is prompt-level
+(the default persona). This is prompt-level
 precedence, not a guarantee about how every third-party model follows instructions.
 Existing nonempty/imported preferences remain overrides, including legacy text;
 they are never guessed to be disposable defaults.

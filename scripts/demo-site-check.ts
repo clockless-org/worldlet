@@ -6,16 +6,16 @@ import {chromium} from 'playwright';
 
 const native=await readFile('platform/electron/src/modules/browser/page.ts','utf8');
 const device=await readFile('platform/electron/src/modules/browser/device.ts','utf8');
-const mock=await readFile('harness/hermes/mock_google.py','utf8');
+const mock=await readFile('core/accounts/google/mock.ts','utf8');
 const host=native.match(/export const DEMO_HOST='([^']+)'/)?.[1];
 assert.equal(host,'demo.worldlet.test');
 assert.ok(host.endsWith('.test'),'Rehearsal origin must be a reserved, never-routable domain');
 assert.ok(device.includes("const demo=this.host.profile.channel==='dev';"),'Only development builds may serve the rehearsal origin');
 assert.ok(device.includes('webRoot:this.webRoot,demo,url,')&&device.includes('this.webRoot,demo,url,early)'),'Both website engines (CEF and Electron) get the development-only rehearsal switch');
-assert.ok(mock.includes(`DEMO_SITE = 'https://${host}'`),'Mock mail links to the origin the website panel serves');
+assert.ok(mock.includes(`const DEMO_SITE='https://${host}'`),'Mock mail links to the origin the website panel serves');
 const pages=Object.fromEntries([...(native.match(/const DEMO_PAGES[^=]*=\{([^}]*)\}/)?.[1]??'').matchAll(/'(\/[a-z]+)':'([a-z]+\.html)'/g)].map(m=>[m[1],m[2]]));
 assert.deepEqual(pages,{'/brightsmile':'brightsmile.html','/streambox':'streambox.html','/citywater':'citywater.html'});
-for(const path of Object.keys(pages))assert.ok(mock.includes(`DEMO_SITE + '${path}'`),`Mock mail links ${path}`);
+for(const path of Object.keys(pages))assert.ok(mock.includes('${DEMO_SITE}'+path),`Mock mail links ${path}`);
 const html=Object.fromEntries(await Promise.all(Object.entries(pages).map(async([path,file])=>[path,await readFile('platform/browser/demo/'+file,'utf8')])));
 
 const browser=await chromium.launch();

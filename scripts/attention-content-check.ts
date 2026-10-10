@@ -81,7 +81,7 @@ assert.equal(processedAttentionContent({...brief,reason:'  Pack for the early Fr
 assert.equal(processedAttentionContent({...brief,reason:` ${'界'.repeat(56)} `}).reason,'界'.repeat(56),'Surrounding whitespace does not count toward the limit');
 console.log('PASS model-facing schema mirrors Core card limits; only surrounding whitespace is normalized');
 
-// Core counts reason words over whitespace runs; the Harness batch mirrors attentionReasonWords (scripts/source-batch-check.py).
+// Core counts reason words over whitespace runs.
 const nineWords='Reply to Ms. Alvarez about pickup by Thursday noon';
 assert.equal(attentionReasonWords(nineWords),ATTENTION_CONTENT_LIMITS.reasonWords+1);
 assert.throws(()=>processedAttentionContent({...brief,reason:nineWords}),new RegExp(`at most ${ATTENTION_CONTENT_LIMITS.reasonWords} words`));

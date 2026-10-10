@@ -139,9 +139,6 @@ assert(long.startsWith('HEAD')&&long.endsWith('NEWEST POST')&&[...long].length<=
 // The host puts it in the ask's context, and Hermes forwards it within the same bound.
 const fox=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
 assert.match(fox,/context\.page=\{site:visit\.site,title:visit\.title,text:pageText\}/);
-const hermes=fs.readFileSync('harness/hermes/world_context.py','utf8');
-assert.match(hermes,new RegExp('PAGE_TEXT = '+PLACE.pageCharacters));
-assert.match(hermes,/out\["page"\]/);
 
 // Fox's voice rides with every Fox turn, whatever its personality, and is Worldlet's own text.
 const prompt=companionPrompt({format:'worldlet.companion',version:1,identity:{id:'fixture',name:'Fox',createdAt:'2026-09-24T00:00:00Z'},personality:'Formal',memoryAuthority:'worldlet',memories:[],conversations:[]} as any);

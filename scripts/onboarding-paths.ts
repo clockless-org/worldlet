@@ -65,12 +65,9 @@ function target(app:string|undefined,library:string,token:string,fixture:ReturnT
   if(!fs.existsSync(path.join(root,'dist/WorldletWeb/index.html')))build('scripts/build-native-ui.ts');
   build('scripts/build-electron.ts');
   const electron=createRequire(import.meta.url)('electron') as unknown as string;
-  // Fox's built-in Agent signs in to Google, as in test:onboarding: the project Hermes runtime when there is one.
-  const python=process.platform==='win32'?'Scripts/python.exe':'bin/python3';
-  const hermes=[process.env.WORLDLET_HERMES_PYTHON,path.join(root,'.local/hermes-source/.venv',python),path.join(workspace(root).primary,'.local/hermes-source/.venv',python)].find(file=>!!file&&fs.existsSync(file));
-  // Its Google Desktop registration (resources.ts googleClient): a task worktree has none of its own, as with Hermes.
+  // The Google Desktop registration (resources.ts googleClient): a task worktree has none of its own.
   const google=[process.env.WORLDLET_GOOGLE_CLIENT_FILE,path.join(root,'.local/google-oauth-client.json'),path.join(workspace(root).primary,'.local/google-oauth-client.json')].find(file=>!!file&&fs.existsSync(file));
-  return {executable:electron,args:[path.join(root,'dist/electron'),'--check','onboarding-paths'],cwd:root,env:{...clean,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_PROFILE_ROOT:library,...hermes?{WORLDLET_HERMES_PYTHON:hermes}:{},...google?{WORLDLET_GOOGLE_CLIENT_FILE:google}:{}}};
+  return {executable:electron,args:[path.join(root,'dist/electron'),'--check','onboarding-paths'],cwd:root,env:{...clean,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_PROFILE_ROOT:library,...google?{WORLDLET_GOOGLE_CLIENT_FILE:google}:{}}};
  }
  let executable=app;
  if(app.endsWith('.app')){

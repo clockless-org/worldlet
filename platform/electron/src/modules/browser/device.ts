@@ -1076,7 +1076,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    if(operation==='forward'){if(browser.canGoForward)browser.goForward();return {ok:true};}
    if(operation==='pick'){
     // One step said in words becomes one control and operation, chosen in one quick request
-    // by the small model tier (harness/hermes/browser_pick.py). Fox's own model never has to
+    // by the Agent's small model tier. Fox's own model never has to
     // read the page to find a ref; the step itself then runs through the ordinary path.
     const step=typeof args.step==='string'?args.step.trim():'';
     if(!step||[...step].length>500)throw new WorldletError('Say the step in one short sentence.');
