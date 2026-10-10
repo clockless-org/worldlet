@@ -29,7 +29,10 @@ export function outcome({results,job,failed=[]}){
   if(!r.ok&&typeof r.error==='string'&&r.error.trim()&&!errors[r.command])errors[r.command]=errorLine(r.error);
   if(!r.ok&&typeof r.details==='string'&&r.details.trim()&&!details[r.command])details[r.command]=detailBlock(r.details);
  }
- return {state:'fail',failing,signature:failing.length?failing.join(','):'setup',...(Object.keys(errors).length?{errors}:{}),...(Object.keys(details).length?{details}:{})};
+ // A gate that only reports (scripts/gate.mjs blockingGates, owner decision 2026-10-10) still opens its Issue, marked as not
+ // holding the release.
+ const advisory=failing.filter(g=>(results?.results||[]).some(r=>r.command===g&&!r.ok&&r.advisory)&&!(results?.results||[]).some(r=>r.command===g&&!r.ok&&!r.advisory));
+ return {state:'fail',failing,signature:failing.length?failing.join(','):'setup',...(Object.keys(errors).length?{errors}:{}),...(Object.keys(details).length?{details}:{}),...(advisory.length?{advisory}:{})};
 }
 
 // The gate results of one platform's parts (each part's gate.json, downloaded under `dir`), as one result list; null
@@ -47,20 +50,21 @@ const errorNote=(g,errors)=>errors?.[g]?`: ${errors[g]}`:'';
 export const DETAIL_LINES=60,DETAIL_CHARS=4000;
 const detailBlock=text=>{const lines=String(text).replace(/\r/g,'').replace(/```/g,"'''").trimEnd().split('\n');const kept=lines.slice(0,DETAIL_LINES).join('\n').slice(0,DETAIL_CHARS);return kept+(lines.length>DETAIL_LINES||kept.length===DETAIL_CHARS?'\n…':'');};
 const detailSection=(failing,details)=>failing.filter(g=>details?.[g]).map(g=>`\n<details open><summary>${g}</summary>\n\n\`\`\`text\n${details[g]}\n\`\`\`\n</details>`).join('\n');
-export function issueBody({stage,platform,failing,signature,sha,runURL,errors,details}){
- const gates=failing.length?failing.map(g=>(/^[\w:-]+$/.test(g)?`- \`npm run ${g}\``:`- ${g}`)+errorNote(g,errors)).join('\n'):'- Nothing ran: the job failed while preparing (checkout, install, Hermes runtime). See the run log.';
+export function issueBody({stage,platform,failing,signature,sha,runURL,errors,details,advisory=[]}){
+ const held=failing.length&&failing.every(g=>advisory.includes(g))?`\nThese checks only report: the ${Stage(stage)} release on ${platform} was not held back by them.\n`:'';
+ const gates=failing.length?failing.map(g=>(/^[\w:-]+$/.test(g)?`- \`npm run ${g}\``:`- ${g}`)+(advisory.includes(g)?' (reports only)':'')+errorNote(g,errors)).join('\n'):'- Nothing ran: the job failed while preparing (checkout, install, Hermes runtime). See the run log.';
  return `${marker(stage,platform,signature)}
 The ${Stage(stage)} tests on ${platform} failed at ${sha}.
 
 Failing:
 ${gates}
-${detailSection(failing,details)}
+${held}${detailSection(failing,details)}
 Run: ${runURL}
 
 Fix it with a normal pull request (AGENTS.md): reproduce from the run log, find the cause, change the code or the check, and run \`npm run check:pr\`. Never skip, disable or quarantine a check to make it pass. This Issue closes itself when the ${Stage(stage)} tests on ${platform} pass again.`;
 }
 
-export function report({stage='dev',platform,state,failing=[],signature,sha,runURL,errors,details,gh}){
+export function report({stage='dev',platform,state,failing=[],signature,sha,runURL,errors,details,advisory,gh}){
  if(!STAGES.includes(stage))throw Error('stage must be one of '+STAGES.join(', '));
  const open=JSON.parse(gh(['issue','list','--label',LABEL,'--state','open','--limit','100','--json','number,body'])||'[]');
  const mine=open.filter(i=>(i.body||'').includes(platformMarker(stage,platform)));
@@ -73,7 +77,7 @@ export function report({stage='dev',platform,state,failing=[],signature,sha,runU
  if(same){gh(['issue','comment',String(same.number),'--body',`Still failing at ${sha}: ${runURL}`+failing.filter(g=>errors?.[g]).map(g=>`\n- ${g}${errorNote(g,errors)}`).join('')+detailSection(failing,details)]);return {commented:same.number};}
  for(const [name,color] of [[LABEL,'d73a4a'],[`stage:${stage}`,'5319e7'],[`platform:${platform}`,'0e8a16']])gh(['label','create',name,'--color',color,'--force']);
  const title=`[${Stage(stage)}][${platform}] ${failing.length?failing.join(', '):'setup'} failing`;
- const url=gh(['issue','create','--title',title,'--label',LABEL,'--label',`stage:${stage}`,'--label',`platform:${platform}`,'--body',issueBody({stage,platform,failing,signature,sha,runURL,errors,details})]);
+ const url=gh(['issue','create','--title',title,'--label',LABEL,'--label',`stage:${stage}`,'--label',`platform:${platform}`,'--body',issueBody({stage,platform,failing,signature,sha,runURL,errors,details,advisory})]);
  return {created:url.trim()};
 }
 

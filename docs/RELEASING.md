@@ -27,6 +27,8 @@ Everything lives on this repository's GitHub Releases:
 
 ## Tests and failures
 
+Only smoke checks hold a release back (owner decision 2026-10-10: the interface still changes a lot, so Alpha and Beta wait only on the big things). On each platform these block: the app starts (`test:electron`), the World draws, Fox answers and an Applet opens (`test:ui:smoke`), first-run setup reaches the World (`test:onboarding`, Mac), Fox answers through a real local Agent (`test:agent:local`), and the downloaded installer installs, opens and updates (the release machine's package smoke); Beta adds the one-line install. [scripts/gate.mjs](../scripts/gate.mjs) lists them as `blockingGates`, and the release machines read that list from `main`, so a change applies at once. Every other test in the table above still runs and reports: its failure opens an Issue marked "reports only" and is fixed like any other, but the platform is promoted.
+
 The Dev tests run in [the Release workflow](../.github/workflows/release.yml) as its `checks` job, which reuses the pull request workflow ([architecture.yml](../.github/workflows/architecture.yml)). A release machine publishes its package to Dev only once that commit's Dev tests passed.
 
 A release machine records a passed channel on the commit as the status `worldlet/alpha-mac`, `worldlet/alpha-windows`, `worldlet/beta-mac` or `worldlet/beta-windows`, and promotion checks that platform's status before it publishes it. Each platform is promoted on its own (`platform` input of the Release workflow; owner decision 2026-10-10), so Mac and Windows can serve different Builds.

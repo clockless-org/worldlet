@@ -3,7 +3,7 @@ import {writeFileSync,mkdirSync,readFileSync,readdirSync} from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {selectChecks,changedFiles,runChecks,operationalChecks,trustChecks,repairDeletions,protectedPath} from './pr-checks.mjs';
-import {gateCommands} from './gate.mjs';
+import {gateCommands,blockingGates} from './gate.mjs';
 import {withTempDir} from './test-temp.ts';
 
 const all=[...operationalChecks,...trustChecks];
@@ -21,8 +21,12 @@ for(const file of ['core/agent/turn-trust.ts','harness/example/agent.py','contra
 const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 for(const platform of ['darwin','win32','linux']){
  const gates=gateCommands(platform);
- for(const command of ['check','check:docs','check:source','check:style','test:ci','test','test:harness:portable','test:ui','test:electron'])assert(gates.includes(command),platform+': '+command);
+ for(const command of ['check','check:docs','check:source','check:style','test:ci','test','test:harness:portable','test:ui:smoke','test:ui','test:electron'])assert(gates.includes(command),platform+': '+command);
 }
+// Only smoke gates hold a release back (owner decision 2026-10-10); each is a real gate with an npm script.
+assert.deepEqual([...blockingGates].sort(),['test:agent:local','test:electron','test:onboarding','test:ui:smoke']);
+for(const command of blockingGates)assert(pkg.scripts[command]&&['darwin','win32','linux'].some(p=>gateCommands(p).includes(command)),command);
+for(const command of ['test:ui','test:ui:quick','test:ui:review','check','test'])assert(!blockingGates.includes(command),command+' reports without holding a release');
 assert.equal(pkg.scripts['test:ci'],'node scripts/pr-checks-check.mjs && node scripts/pr-checks.mjs --all');
 const workflow=readFileSync(new URL('../.github/workflows/architecture.yml',import.meta.url),'utf8').replace(/\r\n/g,'\n');
 for(const step of ['name: Architecture\n','fetch-depth: 2','npm run check:pr','node scripts/pr-checks-check.mjs','node scripts/pr-checks.mjs'])assert(workflow.includes(step),step);
