@@ -260,12 +260,11 @@ document.getElementById('sized').addEventListener('click',()=>{window.open('abou
   // surfaces of the new size (Windows measured 43 once; Mac RC d804640b, beside the iOS build and the
   // package build, 11 for two seconds back from out of sight), so the best of up to five seconds
   // counts, ending at the first at full rate.
-  // A capped rate dips the same way under load (Mac Alpha 4090 measured 8 for the 15 a scaled page draws at), so each
-  // rate counts its best second; a page drawing faster than its cap still fails.
+  // Each rate counts its best second; a page drawing faster than its cap still fails.
   // Each second measured, for the failure message: whether a rate never got there or got there late.
   const samples:Record<string,number[]>={};
   const steady=async(wanted=full,name='panel',seconds=5)=>{let best=0;const seen:number[]=samples[name]=[];for(let second=0;second<seconds&&!near(best,wanted);second++){const rate=await frames();seen.push(rate);best=Math.max(best,rate);}return best;};
-  const panelRate=await steady();
+  const panelRate=await steady(full,'panel',10);
   let presses=0;page.onPress=()=>{presses++;};
   const clicksBefore=await page.evaluate('return window.clicks;',{},{isolated:false});
   page.setFrame({x:500,y:380,width:320,height:240},{width:800,height:600},true);
@@ -291,10 +290,13 @@ document.getElementById('sized').addEventListener('click',()=>{window.open('abou
   page.setFrame({x:0,y:0,width:0,height:0},{width:800,height:600},true);
   const waitingRate=await steady(fps.waiting,'waiting');
   page.setFrame({x:40,y:30,width:800,height:600});
-  // Back from out of sight is where a loaded host is slowest to reach full rate again (Mac Alpha 4088 and 4096 on a 75 Hz
-  // display: best 16 and 34 within five seconds), so it gets ten.
+  // A loaded host can take longer than five seconds to reach full rate again, most often back from out of sight (Mac
+  // Alpha 4088 and 4096 on a 75 Hz display: best 16 and 34 within five seconds), so full rate gets ten.
   const backRate=await steady(full,'back',10);
-  assert.ok(near(panelRate,full)&&near(windowRate,fps.scaled)&&near(waitingRate,fps.waiting)&&near(backRate,full),
+  // A scaled or waiting page is held to at most its rate, and still draws: under load the Mac host drew a scaled page at
+  // 8 to 10 for its 15 every second of five (Alpha 4100), the cap holding all the same.
+  const capped=(rate:number,cap:number)=>rate>0&&rate<=cap+Math.max(2,cap*0.15);
+  assert.ok(near(panelRate,full)&&capped(windowRate,fps.scaled)&&capped(waitingRate,fps.waiting)&&near(backRate,full),
    'frame rates follow pageFrameRate: '+JSON.stringify({panel:panelRate,window:windowRate,waiting:waitingRate,back:backRate,full,refresh:displayRefresh(window.getContentBounds())??null,samples}));
   // The surface hears of the mode change over IPC; a click sent at once could still count as a press.
   await wait(300);
