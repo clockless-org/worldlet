@@ -8,13 +8,23 @@
 # at first launch; the DMG itself carries the stapled ticket).
 #
 # Inputs: WORLDLET_RELEASE_MANIFEST (scripts/ci-release.mjs identity), WORLDLET_SIGN_IDENTITY, WORLDLET_SPARKLE_KEY_FILE,
-# WORLDLET_GOOGLE_CLIENT_FILE, NOTARY_KEY_FILE, NOTARY_KEY_ID, NOTARY_ISSUER. Output: dist/ci/mac/ with the DMG, its
-# checksum, appcast.xml, the notary record and release.json (the identity).
+# WORLDLET_GOOGLE_CLIENT_FILE, and either NOTARY_KEY_FILE, NOTARY_KEY_ID and NOTARY_ISSUER (CI) or NOTARY_PROFILE, a
+# notarytool keychain profile, with NOTARY_KEYCHAIN when it is not in the default keychain (release machine 02, which
+# builds the same way). Output: dist/ci/mac/ with the DMG, its checksum, appcast.xml, the notary record and release.json
+# (the identity).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"
 cd "$REPO_ROOT"
-for name in WORLDLET_RELEASE_MANIFEST WORLDLET_SIGN_IDENTITY WORLDLET_SPARKLE_KEY_FILE NOTARY_KEY_FILE NOTARY_KEY_ID NOTARY_ISSUER; do
+if [[ -n "${NOTARY_PROFILE:-}" ]]; then
+  NOTARY=(--keychain-profile "$NOTARY_PROFILE")
+  [[ -z "${NOTARY_KEYCHAIN:-}" ]] || NOTARY+=(--keychain "$NOTARY_KEYCHAIN")
+  required=()
+else
+  NOTARY=(--key "${NOTARY_KEY_FILE:-}" --key-id "${NOTARY_KEY_ID:-}" --issuer "${NOTARY_ISSUER:-}")
+  required=(NOTARY_KEY_FILE NOTARY_KEY_ID NOTARY_ISSUER)
+fi
+for name in WORLDLET_RELEASE_MANIFEST WORLDLET_SIGN_IDENTITY WORLDLET_SPARKLE_KEY_FILE ${required[@]+"${required[@]}"}; do
   [[ -n "${!name:-}" ]] || { echo "Missing $name." >&2; exit 2; }
 done
 [[ "$WORLDLET_SIGN_IDENTITY" == "Developer ID Application: "* ]] || { echo 'WORLDLET_SIGN_IDENTITY is not a Developer ID Application identity.' >&2; exit 2; }
@@ -23,13 +33,13 @@ step() { echo "::group::$1"; local start=$SECONDS; shift; "$@"; local code=$?; e
 summary() { [[ -z "${GITHUB_STEP_SUMMARY:-}" ]] || echo "- $1" >> "$GITHUB_STEP_SUMMARY"; }
 notarize() {
   local file="$1" record="$2" id status
-  xcrun notarytool submit "$file" --key "$NOTARY_KEY_FILE" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER" \
+  xcrun notarytool submit "$file" "${NOTARY[@]}" \
     --wait --timeout 75m --output-format json > "$record" || true
   id="$(plutil -extract id raw -o - "$record" 2>/dev/null || true)"
   status="$(plutil -extract status raw -o - "$record" 2>/dev/null || true)"
   if [[ "$status" != Accepted ]]; then
     echo "Notarization of $(basename "$file") ended as '${status:-unknown}' (submission ${id:-none})." >&2
-    [[ -z "$id" ]] || xcrun notarytool log "$id" --key "$NOTARY_KEY_FILE" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER" >&2 || true
+    [[ -z "$id" ]] || xcrun notarytool log "$id" "${NOTARY[@]}" >&2 || true
     return 1
   fi
 }
