@@ -148,8 +148,9 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   },
   refreshContent(){refresh();},refreshRegions(){refresh();},stageState:()=>new Map(stages),
   setAppStage(id,value){stages.set(id,value);refresh();},
-  setFocusItem(id,item){const room=rooms.find(r=>r.moduleId===id);if(room)stage.setSelected(room,item);},
-  selectStageItem(_id,id){return stage.select(id);},
+  // A new selection shows at once; nothing else redraws the stage until the shell changes.
+  setFocusItem(id,item){const room=rooms.find(r=>r.moduleId===id);if(room){stage.setSelected(room,item);refresh();}},
+  selectStageItem(_id,id){const item=stage.select(id);refresh();return item;},
   setAppletLayout(ids){hidden=new Set(ids||[]);refresh();},
   async setUnlockedApplets(ids,fromCenter=false,icons={},settled=false){
    const before=new Set(rooms.filter(visible).map(r=>r.moduleId)),had=!!unlocked;unlocked=ids?new Set(ids):null;arriving=[];refresh();

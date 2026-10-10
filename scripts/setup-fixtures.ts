@@ -38,12 +38,14 @@ const jsonl=(...lines:object[])=>lines.map(line=>JSON.stringify(line)).join('\n'
 /** A command that only starts: choosing one of these Agents at setup never runs its command line
  * (agent-runtime/index.ts `select`), it only has to be found. On Windows it is an npm-style shim
  * the host runs with Node (local-harness.ts `windowsShim`). */
+// Each fixture prints a version at or above every minimum in core/agent/agent-versions.ts, so setup never turns it away
+// as too old (#121).
 function command(bin:string,name:string,platform:NodeJS.Platform){
  if(platform==='win32'){
-  write(path.join(bin,'fixture-agent.js'),"console.log('fixture agent 1.0.0');\n");
+  write(path.join(bin,'fixture-agent.js'),"console.log('fixture agent 2026.10.0');\n");
   write(path.join(bin,name+'.cmd'),`@ECHO off\r\nnode "%~dp0\\fixture-agent.js" %*\r\n`);
  }else{
-  write(path.join(bin,name),"#!/bin/sh\necho 'fixture agent 1.0.0'\n");
+  write(path.join(bin,name),"#!/bin/sh\necho 'fixture agent 2026.10.0'\n");
   fs.chmodSync(path.join(bin,name),0o755);
  }
 }
