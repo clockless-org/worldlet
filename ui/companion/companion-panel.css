@@ -185,8 +185,6 @@
 .companion-history-feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;border-top:1px solid #d9cbae80;border-bottom:1px solid #d9cbae80;mask-image:linear-gradient(transparent,#000 28px)}
 .companion-history .companion-history-feed ol.companion-world-log{margin:24px 0 8px}
 .companion-history .companion-world-log li[data-live=true] span{color:#4f6b45;font-style:italic}
-.companion-history-next{margin-top:8px!important;color:#656651}
-.companion-history-next[hidden]{display:none}
 .companion-history-records{max-height:280px;overflow-y:auto;margin-top:8px;padding-right:6px}
 .native-console .companion-info-panel .companion-info-main>.companion-settings:not([hidden]){display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;margin:0}
 .companion-settings-list{display:flex;flex-direction:column;gap:2px;overflow-y:auto;min-height:0;padding-right:4px;border-right:1px solid #d9cbae80}

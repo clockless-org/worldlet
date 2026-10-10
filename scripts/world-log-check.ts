@@ -104,6 +104,7 @@ try{
  const recent=page.locator('#companionInfo .companion-world-log');
  await recent.getByText('You visited news.example.org',{exact:true}).waitFor({timeout:10000});
  assert(await recent.locator('button').count()>=6,'every line in History goes somewhere');
+ assert.equal(await page.locator('#companionInfo').getByText(/Next sync|check at/).count(),0,'History has no next-sync line either (owner Order 2026-10-10)');
  assert.equal(await page.locator('#companionInfo [data-section=History] .companion-history-records').count(),0,'raw records stay out of History (Settings › Troubleshoot)');
  await page.screenshot({path:'output/world-log/history.png'}).catch(()=>{});
  await recent.locator('button').first().click();
