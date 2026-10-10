@@ -6,6 +6,9 @@ import {build} from 'esbuild';
 import ts from 'typescript';
 import {parseBuildThemeManifest,parseThemePresentation,themeAssetPath} from '../ui/themes/build-theme-contract.ts';
 import {withVirtualFile} from './ts-virtual-file.ts';
+/** Shared runtime libraries a package may import by name. The host bundles one copy for every theme; anything else a
+ * package needs it ships itself. pixi.js/unsafe-eval keeps Pixi's shaders free of eval under the native CSP. */
+export const THEME_SHARED_MODULES=['pixi.js','pixi.js/unsafe-eval'];
 
 export async function themeFiles(root:string,prefix=''):Promise<string[]> {
  const result:string[]=[];
@@ -42,7 +45,7 @@ export async function validateBuildTheme(source:string){
    inspect(JSON.parse(bytes.toString()));
   }
   if(file.endsWith('.ts'))for(const ref of ts.preProcessFile(bytes.toString(),true,true).importedFiles){
-   if(ref.fileName==='@worldlet/theme')continue; // Value imports are rejected by the bundler below.
+   if(ref.fileName==='@worldlet/theme'||THEME_SHARED_MODULES.includes(ref.fileName))continue; // Value imports of @worldlet/theme are rejected by the bundler below.
    if(!ref.fileName.startsWith('.'))throw Error('Theme imports only local files and public types: '+ref.fileName);
    const resolved=await fs.realpath(path.resolve(source,path.dirname(file),ref.fileName));
    if(!resolved.startsWith(source+path.sep))throw Error('Theme type or value import escapes its directory');
@@ -52,14 +55,15 @@ export async function validateBuildTheme(source:string){
  // Compile for the browser without running the entry. Imports stay inside this source package.
  const result=await build({entryPoints:[path.join(source,'entry.ts')],bundle:true,write:false,platform:'browser',format:'esm',logLevel:'silent',plugins:[{name:'theme-boundary',setup(b){b.onResolve({filter:/.*/},async args=>{
   if(args.kind==='entry-point')return;
-  if(!args.path.startsWith('.'))throw Error('Theme code imports only local modules; @worldlet/theme is type-only: '+args.path);
+  if(THEME_SHARED_MODULES.includes(args.path))return {path:args.path,external:true};
+  if(!args.path.startsWith('.'))throw Error('Theme code imports only local modules and '+THEME_SHARED_MODULES[0]+'; @worldlet/theme is type-only: '+args.path);
   const resolved=await fs.realpath(path.resolve(args.resolveDir,args.path));
   if(!resolved.startsWith(source+path.sep))throw Error('Theme import escapes its directory');
   return {path:resolved};
  });}}]});
  if(!result.outputFiles.length)throw Error('Theme entry did not compile');
  const virtual=path.join(source,'__theme_contract_check__.ts');
- const options:ts.CompilerOptions={target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext,moduleResolution:ts.ModuleResolutionKind.Bundler,strict:true,noImplicitAny:false,strictNullChecks:false,noEmit:true,allowImportingTsExtensions:true,skipLibCheck:true,resolveJsonModule:true,types:[],baseUrl:source,paths:{'@worldlet/theme':[fileURLToPath(new URL('../ui/themes/build-theme-contract.ts',import.meta.url))]}};
+ const options:ts.CompilerOptions={target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext,moduleResolution:ts.ModuleResolutionKind.Bundler,strict:true,noImplicitAny:false,strictNullChecks:false,noEmit:true,allowImportingTsExtensions:true,skipLibCheck:true,resolveJsonModule:true,types:[],baseUrl:source,paths:{'@worldlet/theme':[fileURLToPath(new URL('../ui/themes/build-theme-contract.ts',import.meta.url))],'pixi.js':[fileURLToPath(new URL('../node_modules/pixi.js/lib/index.d.ts',import.meta.url))],'pixi.js/unsafe-eval':[fileURLToPath(new URL('../node_modules/pixi.js/lib/unsafe-eval/init.d.ts',import.meta.url))]}};
  const compiler=withVirtualFile(ts.createCompilerHost(options),virtual,"import theme from './entry.ts'; import type {BuildTheme} from '@worldlet/theme'; const checked:BuildTheme=theme;");
  const program=ts.createProgram([virtual],options,compiler),diagnostics=ts.getPreEmitDiagnostics(program);
  if(diagnostics.length)throw Error(ts.formatDiagnosticsWithColorAndContext(diagnostics,{getCurrentDirectory:()=>source,getCanonicalFileName:f=>f,getNewLine:()=>"\n"}));
