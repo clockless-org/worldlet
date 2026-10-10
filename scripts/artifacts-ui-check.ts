@@ -147,7 +147,8 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await book.evaluate(e=>(e as HTMLDialogElement).open),false,'The Journal steps aside');
  assert.equal(await card.locator('h2').textContent(),'Dinner at Nopa');
  assert.equal(await card.locator('.fox-artifact-origin').textContent(),'Coming Up · earlier');
- assert.equal(await card.getAttribute('data-size'),'medium');
+ // Still over the moment's Applet: a card opens small in its corner there (ui/companion/fox-artifact.ts, #108).
+ assert.equal(await card.getAttribute('data-size'),'small');
  await card.getByRole('button',{name:'Close artifact'}).click();
 
  // Fox finds an earlier one and opens it.
@@ -156,7 +157,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>(window as any).reopened.ok),true);
  assert.equal(await card.locator('h2').textContent(),'Three CASA labs');
  assert.equal(await card.locator('.fox-artifact-origin').textContent(),'From an earlier conversation');
- assert.equal(await card.getAttribute('data-size'),'large','It opens at the size it was kept');
+ assert.equal(await card.getAttribute('data-size'),'small','Over an Applet it opens small, whatever size it was kept at');
  await card.getByRole('button',{name:'Close artifact'}).click();
 
  // × forgets it.
@@ -174,8 +175,11 @@ await withBrowser(fileAccess,async browser=>{
  await card.waitFor({state:'visible'});
  // Three blocks are more than a medium card holds: it leaves out the last (owner Order 2026-10-09, no scrolling), and
  // Show all makes it large with every block.
- {const drawn=await card.locator('.artifact-block').count();assert.ok(drawn>=1&&drawn<3&&await card.locator('.artifact-block[data-type=callout]').count()===0,'A medium card leaves out its last blocks '+drawn);}
+ {const drawn=await card.locator('.artifact-block').count();assert.ok(drawn>=1&&drawn<3&&await card.locator('.artifact-block[data-type=callout]').count()===0,'A small card leaves out its last blocks '+drawn);}
+ // Over an Applet Show all grows the card one size at a time until every block shows.
  await card.getByRole('button',{name:'Show all'}).click();
+ assert.equal(await card.getAttribute('data-size'),'medium');
+ if(await card.getByRole('button',{name:'Show all'}).isVisible())await card.getByRole('button',{name:'Show all'}).click();
  assert.equal(await card.getAttribute('data-size'),'large');
  assert.equal(await card.getAttribute('data-tone'),'honey');
  assert.equal(await card.evaluate(c=>getComputedStyle(c).getPropertyValue('--attention-accent').trim()),'#946e2b','The tone is the card\'s accent');
@@ -186,10 +190,9 @@ await withBrowser(fileAccess,async browser=>{
  if(shots)await page.screenshot({path:shots+'/card-system-compare.png'});
  await card.getByRole('button',{name:'Close artifact'}).click();
  await ask('trip','Safe travels.');
- // Over an Applet the card is in the corner and shows what fits there; Show all lets it reach down Fox's column.
- await card.getByRole('button',{name:'Show all'}).click();
- await card.locator('.artifact-steps').waitFor();
- assert.equal(await card.getAttribute('data-expanded'),'true');
+ // Over an Applet the card is in the corner and shows what fits there; Show all grows it a size at a time (#108).
+ while(!await card.locator('.artifact-steps').isVisible())await card.getByRole('button',{name:'Show all'}).click();
+ assert.notEqual(await card.getAttribute('data-size'),'small');
  assert.match(await card.locator('.fox-artifact-art').getAttribute('src')||'',/flight\.webp$/,'Fox can name the scene');
  assert.equal(await card.locator('.artifact-facts li').count(),3);
  assert.equal(await card.locator('.artifact-step-when').first().textContent(),'3:15 PM');
@@ -200,8 +203,13 @@ await withBrowser(fileAccess,async browser=>{
  // checklist work in place and are kept, parts show one at a time, a choice drafts the person's answer.
  await ask('pancakes','Here you go.');
  await card.waitFor({state:'visible'});
- if(await card.locator('.fox-artifact-more').isVisible())await card.getByRole('button',{name:'Show all'}).click();
- assert.equal(await card.getAttribute('data-size'),'large','A card sizes to its blocks: a scale and a checklist need a large one');
+ // Over an Applet it opens small; Show all grows it a size at a time until its blocks fit (#108).
+ assert.equal(await card.getAttribute('data-size'),'small');
+ while(await card.locator('.fox-artifact-more').isVisible())await card.getByRole('button',{name:'Show all'}).click();
+ assert.notEqual(await card.getAttribute('data-size'),'small','A scale and a checklist need more than the small corner card');
+ // The person makes it large, and the Journal keeps it at that size (below).
+ if(await card.getAttribute('data-size')!=='large')await card.getByRole('button',{name:'Make artifact larger'}).click();
+ assert.equal(await card.getAttribute('data-size'),'large');
  const amounts=async()=>card.locator('.artifact-scale-amount').allTextContents();
  assert.deepEqual(await amounts(),['250 g','300 ml','2']);
  await card.getByRole('button',{name:'More guests'}).click();await card.getByRole('button',{name:'More guests'}).click();

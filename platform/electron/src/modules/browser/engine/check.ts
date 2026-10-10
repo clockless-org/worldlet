@@ -260,7 +260,9 @@ document.getElementById('sized').addEventListener('click',()=>{window.open('abou
   // surfaces of the new size (Windows measured 43 once; Mac RC d804640b, beside the iOS build and the
   // package build, 11 for two seconds back from out of sight), so the best of up to five seconds
   // counts, ending at the first at full rate.
-  const steady=async()=>{let best=0;for(let second=0;second<5&&!near(best,full);second++)best=Math.max(best,await frames());return best;};
+  // A capped rate dips the same way under load (Mac Alpha 4090 measured 8 for the 15 a scaled page draws at), so each
+  // rate counts its best second; a page drawing faster than its cap still fails.
+  const steady=async(wanted=full)=>{let best=0;for(let second=0;second<5&&!near(best,wanted);second++)best=Math.max(best,await frames());return best;};
   const panelRate=await steady();
   let presses=0;page.onPress=()=>{presses++;};
   const clicksBefore=await page.evaluate('return window.clicks;',{},{isolated:false});
@@ -282,10 +284,10 @@ document.getElementById('sized').addEventListener('click',()=>{window.open('abou
   assert.equal(await page.evaluate('return document.activeElement?.id;',{},{isolated:false}),'field','Fox\'s click lands on the field');
   assert.equal(presses,1,'Fox\'s steps are not the person\'s presses');
   page.driver=null;
-  const windowRate=await frames();
+  const windowRate=await steady(fps.scaled);
   // Out of sight (the window waits while the person is in an Applet): low, never zero.
   page.setFrame({x:0,y:0,width:0,height:0},{width:800,height:600},true);
-  const waitingRate=await frames();
+  const waitingRate=await steady(fps.waiting);
   page.setFrame({x:40,y:30,width:800,height:600});
   const backRate=await steady();
   assert.ok(near(panelRate,full)&&near(windowRate,fps.scaled)&&near(waitingRate,fps.waiting)&&near(backRate,full),

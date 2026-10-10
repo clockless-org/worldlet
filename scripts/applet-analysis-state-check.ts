@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {appletAnalysisCommit,appletAnalysisPending,appletObservations,appletAnalysisItems} from '../core/applets/index.ts';
+import {appletAnalysisCommit,appletAnalysisPending,appletObservations,appletAnalysisItems,appletAnalysisRequest} from '../core/applets/index.ts';
 const records=[{id:'one',text:'Original fixture',metadataOnly:false},{id:'two',text:'Other fixture',metadataOnly:false}];
 const base={provider:'gmail',records,latest:records,saved:{},items:[],processed:['one'],now:100};
 const saved=appletAnalysisCommit(base);
@@ -49,3 +49,7 @@ assert.deepEqual(appletAnalysisItems(records,[item,{...item,sources:[{id:'unrela
  assert.deepEqual(appletAnalysisFailed({records:[],saved:committed,latest:[rows[1]]}).failures,{},'removed sources drop failure state');
  console.log('PASS repeated S failures run alone, then park until the source changes; healthy mail keeps flowing');
 }
+// The batch reaches a person's Agent only through query_world_items, so the request says to read it there (Mac Alpha
+// 4090: Codex answered "No source batch was supplied" and every analysis failed).
+assert.match(appletAnalysisRequest(60).text,/read it with query_world_items[\s\S]*submit with upsert_world_items/);
+console.log('PASS an analysis turn is told to read its batch with query_world_items');
