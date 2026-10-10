@@ -1,5 +1,11 @@
 import {renderBuildWorld,applyBuildThemeScene,activeBuildTheme,type ThemeWorldState,type ThemeWorldMark,type ThemeLampState} from '../themes/index.ts';
 import {createAppletStage} from './theme-applet-stage.ts';
+import {createAppletStage as createVillageStage} from './pixi-stage.ts';
+import {renderVillageWorld,type VillageWorldMount} from './village-world.ts';
+import {createAppletImageLamps} from './applet-image-lamps.ts';
+import {createLampLabel,stackLampLabels} from './applet-lamp-label.ts';
+import {createLevelZoom} from './level-zoom.ts';
+import type {LampSignal} from './applet-lamp.ts';
 import {appletStatus,myAppletKind} from '../../core/applets/index.ts';
 import {appletLamp,appletLampContent,lampDisplayState} from './applet-lamp.ts';
 import {appletConnectionGuide} from './applet-attention.ts';
@@ -10,20 +16,34 @@ function appletIcon(room):string|undefined {
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[room.art||room.key];
  const src=typeof art==='string'?art:art?.src;return typeof src==='string'&&src?src:undefined;
 }
-/** Compatibility adapter from the product's scene controller to the public Sim data interface. */
+/** Compatibility adapter from the product's scene controller to the public Sim data interface. Every theme's World,
+ * the built-in Village's too, is drawn through it; the host draws what is the same in every theme: the pins, lamp
+ * labels and lamps on device pictures, and the zoom between the World and an Applet. */
 export function createModuleScene(host,rooms,onPick,onProject,pages,options):any {
- const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer='sim-dom';Object.assign(world.style,{position:'absolute',inset:'0'});host.append(world);
- const stage=createAppletStage(host,onPick),stages=new Map(),activities=new Map<string,any>();
+ const builtIn=!activeBuildTheme().package,shellRoot=(host.closest('.notion-world')||host) as HTMLElement;
+ const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer=builtIn?'village':'sim-dom';Object.assign(world.style,{position:'absolute',inset:'0'});
+ // The Village draws under the shell's pins; a package draws its own buttons over them.
+ if(builtIn)host.prepend(world);else host.append(world);
+ const stage=builtIn?createVillageStage(host,onPick):createAppletStage(host,onPick),stages=new Map(),activities=new Map<string,any>();
+ const imageLamps=builtIn?createAppletImageLamps(shellRoot,(globalThis as any).__WORLDLET_25D_ASSETS__):null,lampLabels=new Map<string,ReturnType<typeof createLampLabel>>();
+ const levelZoom=builtIn?createLevelZoom(shellRoot,host):null;
  let view:ThemeWorldState['view']={id:'overview',level:'overview'},environment={},motion=true,disposed=false,connections=options.connections||[],marked=false;
  const interaction={placementArea:null as string|null,framedArea:null as string|null,inset:0,hoveredApplet:null as string|null,hoveredArea:null as string|null};
  let hidden=new Set(options.hiddenApplets||[]),unlocked=options.unlockedApplets?new Set(options.unlockedApplets):null;
  const visible=r=>!hidden.has(r.moduleId)&&(unlocked?unlocked.has(r.moduleId):r.installByDefault!==false);
- /** The lamp as the host shows it (applet-lamp.ts): an error only shows while its action can be reached. */
- const lamp=(r,shell:ReturnType<typeof shellInteraction>):ThemeLampState|undefined=>{
+ /** Each Applet's lamp (applet-lamp.ts), read again at most twice a second: pins move every frame, records do not. */
+ let signals=new Map<string,LampSignal>(),signalsAt=-Infinity;
+ const signalOf=(r):LampSignal|undefined=>{
   if(r.entity==='matter')return undefined;
-  const own=r.provider?[...(pages?.values?.()||[])].filter(p=>p.sourceProvider===r.provider):[],activity=activities.get(r.moduleId);
-  const state=appletLamp(appletStatus(r,connections)||{},activity,appletLampContent(r.provider,own,!!(r.children?.length||r.sampleRecords?.length)));
-  return lampDisplayState({state,action:options.lampAction?.(r,state,activity)},!shell.covered&&(view.level!=='applet'||view.id===r.moduleId));
+  if(performance.now()-signalsAt>500){signalsAt=performance.now();signals=new Map();const byProvider=new Map<string,any[]>();
+   for(const p of pages?.values?.()||[]){const own=byProvider.get(p.sourceProvider);if(own)own.push(p);else byProvider.set(p.sourceProvider,[p]);}
+   for(const room of rooms)if(room.entity!=='matter'){const activity=activities.get(room.moduleId),state=appletLamp(appletStatus(room,connections)||{},activity,appletLampContent(room.provider,byProvider.get(room.provider)||[],!!(room.children?.length||room.sampleRecords?.length)));
+    signals.set(room.moduleId,{state,action:options.lampAction?.(room,state,activity)});}}
+  return signals.get(r.moduleId);
+ };
+ /** The lamp as the host shows it: an error only shows while its action can be reached. */
+ const lamp=(r,shell:ReturnType<typeof shellInteraction>):ThemeLampState|undefined=>{
+  const signal=signalOf(r);return signal?lampDisplayState(signal,!shell.covered&&(view.level!=='applet'||view.id===r.moduleId)):undefined;
  };
  const state=():ThemeWorldState=>{const shell=shellInteraction(host);return {view:{...view},environment:{...environment},motion,paused:paused(),interaction:{...interaction,...shell},pins:structuredClone(options.regionLayout?.pins||{}),
   areas:(options.buildings||[]).filter(b=>b.id!=='building-people').map(b=>({id:b.id,title:b.title})),
@@ -39,23 +59,47 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    if(m.kind==='slot'){point.slot=m.slot;point.description='Place applet in slot '+((m.slot||0)+1);}
    if(m.kind==='area'){point.caption='';point.description='Manage '+(area?.title||m.id);}
    if(m.kind==='area-add')point.description='Add applets to '+(area?.title||m.id);
-   if(room){const lampState=lamp(room,shellInteraction(host))||'off',status=appletStatus(room,connections)||{};
+   if(room){const lampState=signalOf(room)?.state||'off',status=appletStatus(room,connections)||{};
     Object.assign(point,{labelVisible:!!m.label,running:lampState==='processing',lampState,lampX:m.lamp?.x||0,lampY:m.lamp?.y||0,attentionX:m.attention?.x||0,attentionOffset:-(m.attention?.y||0),
      attention:lampState==='error'||!['overview','area'].includes(view.level)?null:appletConnectionGuide(room.provider,status)});}
    out[key]=point;
   }
   onProject(out);
+  if(builtIn)drawLamps(out);
  };
- const mount=renderBuildWorld({host:world,state:state(),navigate:target=>{
+ /** Lamp labels and the lamps on device pictures, where the marks put them (applet-lamp-label.ts, applet-image-lamps.ts). */
+ function drawLamps(points:Record<string,any>){
+  const covered=shellInteraction(host).covered,current=view.level==='applet'?rooms.find(r=>r.moduleId===view.id):null;
+  const byKey=new Map<string,LampSignal>();for(const r of rooms){const s=signalOf(r);if(s)byKey.set(r.key,s);}
+  const still=!motion||matchMedia('(prefers-reduced-motion: reduce)').matches||document.hidden;
+  imageLamps?.update(byKey,current?.key,!covered,performance.now(),still);
+  for(const r of rooms){
+   const signal=byKey.get(r.key);if(!signal)continue;
+   const point=points['space:'+r.id],foreground=current===r,visible=!covered&&(foreground||!!point?.visible);
+   let label=lampLabels.get(r.key);
+   if(!label&&visible&&['processing','error'].includes(signal.state)){label=createLampLabel(shellRoot,r.key);lampLabels.set(r.key,label);}
+   // Foreground includes website Focus, where the live device can be hidden.
+   label?.update(signal,r.title,visible,foreground?shellRoot.clientWidth*.75:point?.x+(point?.attentionX||0),foreground?72:point?.y-(point?.attentionOffset||0),foreground);
+  }
+  stackLampLabels(shellRoot);
+ }
+ const context={host:world,state:state(),navigate:target=>{
   if(target.kind==='applet'){const r=rooms.find(r=>(r.moduleId||r.id)===target.id);if(r&&state().applets.find(a=>a.id===target.id)?.visible)onPick({action:'space',id:r.id,level:'room'});}
   else if((options.buildings||[]).some(b=>b.id===target.id))onPick({action:'building',id:target.id});
  },moveApplet:(id,area,slot)=>{if(rooms.some(r=>r.moduleId===id)&&state().areas.some(a=>a.id==='building-'+area))options.onMoveApplet?.(id,area,slot);},menu:(id,x,y)=>{if(state().applets.some(a=>a.id===id&&a.visible))options.onAppletMenu?.(id,x,y);},
-  marks,back:()=>{if(!disposed&&view.level!=='overview')onPick({action:'back'});}});
+  marks,back:()=>{if(!disposed&&view.level!=='overview')onPick({action:'back'});}};
+ const village:VillageWorldMount|null=builtIn?renderVillageWorld(context,{rooms,pages,options,onPick,hasStage:id=>stages.has(id),levelZoom}):null;
+ const mount=village||renderBuildWorld(context);
  function refresh(){if(disposed)return;mount.update(state());world.hidden=view.level==='applet'&&!mount.behindApplet;
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
-  if(room)stage.render(room,stages.get(room.moduleId)||{items:[]},view.level==='applet');
+  if(village){
+   // The Village's Applet stage: its reader stays put while the item's detail or the website is open.
+   const shell=shellInteraction(host),open=view.level==='applet'&&!!room&&stages.has(room.moduleId);
+   stage.render(room||{},room?stages.get(room.moduleId):undefined,open&&!shell.website&&!shell.detailOpen,open&&shell.detailOpen&&!shell.website,view.level==='applet');
+  }
+  else if(room)stage.render(room,stages.get(room.moduleId)||{items:[]},view.level==='applet');
   else stage.render({key:'',moduleId:'',title:''},{items:[]},false);
-  if(view.level!=='applet')applyBuildThemeScene(activeBuildTheme().package!.presentation.world);
+  if(!village&&view.level!=='applet')applyBuildThemeScene(activeBuildTheme().package!.presentation.world);
   // A theme that marks nothing renders its own accessible map buttons. No duplicate pins.
   if(!marked)onProject({});
  }
@@ -64,33 +108,38 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const follow=()=>{if(checking||disposed)return;checking=true;requestAnimationFrame(()=>{checking=false;const next=JSON.stringify(shellInteraction(host))+paused();if(next!==shellKey){shellKey=next;refresh();}});};
  const observer=new MutationObserver(follow);observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','open','data-onboarding-locked','data-detail-open','data-attention-preview','data-template']});
  document.addEventListener('visibilitychange',follow);window.addEventListener('worldlet:desktop-companion',follow);
- queueMicrotask(()=>{if(!disposed){refresh();host.dispatchEvent(new Event('worldlet:world-ready',{bubbles:true}));}});
+ // The Village says it is ready itself, once its first frame is drawn (pixi-world.ts).
+ queueMicrotask(()=>{if(!disposed){refresh();if(!village)host.dispatchEvent(new Event('worldlet:world-ready',{bubbles:true}));}});
+ const scene=village?.scene;
  return {
-  focus(id,level='building'){view={id,level:id==='overview'?'overview':level==='object'?'applet':'area'};refresh();},
-  refreshContent:refresh,refreshRegions:refresh,stageState:()=>new Map(stages),
+  focus(id,level='building'){view={id,level:id==='overview'?'overview':level==='object'?'applet':'area'};scene?.focus(id,level);refresh();},
+  refreshContent(){scene?.refreshContent();refresh();},refreshRegions(){scene?.refreshRegions();refresh();},stageState:()=>new Map(stages),
   setAppStage(id,value){stages.set(id,value);refresh();},
   setFocusItem(id,item){const room=rooms.find(r=>r.moduleId===id);if(room)stage.setSelected(room,item);},
   selectStageItem(_id,id){return stage.select(id);},
-  setAppletLayout(ids){hidden=new Set(ids||[]);refresh();},
+  setAppletLayout(ids,points){hidden=new Set(ids||[]);scene?.setAppletLayout(ids,points);refresh();},
   async setUnlockedApplets(ids,fromCenter=false,icons={},settled=false){
    const before=new Set(rooms.filter(visible).map(r=>r.moduleId)),had=!!unlocked;unlocked=ids?new Set(ids):null;refresh();
+   if(scene)return scene.setUnlockedApplets(ids,fromCenter,icons,settled);
    const arriving=had?rooms.filter(r=>visible(r)&&!before.has(r.moduleId)).map(r=>r.moduleId):[];
    if(arriving.length)await mount.event({type:'applet.arrived',ids:arriving,...(fromCenter?{from:'center' as const,icons}:{}),settled});
   },
-  setEnvironment(value){environment=value||{};refresh();},setConnections(list){connections=list||[];refresh();},
-  setAppActivity(id,value){activities.set(id,value);const r=rooms.find(r=>r.moduleId===id);if(r)r.status={...r.status,...value};refresh();},
+  setEnvironment(value){environment=value||{};refresh();},setConnections(list){connections=list||[];signalsAt=-Infinity;scene?.setConnections(list);refresh();},
+  setAppActivity(id,value){activities.set(id,value);signalsAt=-Infinity;if(scene)scene.setAppActivity(id,value);else{const r=rooms.find(r=>r.moduleId===id);if(r)r.status={...r.status,...value};}refresh();},
   devicePoint(id){return mount.anchor(id);},
-  setDevicePresence(id,value){if(value)hidden.delete(id);else hidden.add(id);refresh();return true;},
+  setDevicePresence(id,value){if(scene)return scene.setDevicePresence(id,value);if(value)hidden.delete(id);else hidden.add(id);refresh();return true;},
   toggleMotion(){motion=!motion;stage.setMotion(motion);refresh();return motion;},
   setPlacementArea(id){interaction.placementArea=id;refresh();},frameArea(id,inset=0){interaction.framedArea=id;interaction.inset=inset;refresh();},
   setHoveredApplet(id){interaction.hoveredApplet=id;refresh();},setHoveredArea(id){interaction.hoveredArea=id;refresh();},
-  // Arrivals play when the Applets are unlocked (setUnlockedApplets); preparing only refreshes their places.
-  prepareArrival(){refresh();},
+  // Arrivals play when the Applets are unlocked (setUnlockedApplets); preparing only places them.
+  prepareArrival(ids){scene?.prepareArrival(ids);refresh();},
   deliverMail(){const played=mount.event({type:'mail.received',ids:[]});return typeof played==='boolean'?played:true;},
   picture(){return mount.picture?.()||null;},
-  get metrics(){return {renderer:'sim-dom',theme:activeBuildTheme().id,level:view.level==='applet'?'object':view.level,active:view.id,environment,
+  get metrics(){
+   if(village){const m=village.metrics?.() as any||{};return {...m,theme:activeBuildTheme().id,presentation:{...m.presentation,stage:stage.metrics},levelZoom:levelZoom?.metrics};}
+   return {renderer:'sim-dom',theme:activeBuildTheme().id,level:view.level==='applet'?'object':view.level,active:view.id,environment,
    buildings:options.buildings||[],modules:state().applets.map(a=>({...a,unlocked:a.visible,visible:a.visible&&view.level!=='applet',peekBounds:mount.bounds(a.id),arrivalBounds:mount.bounds(a.id),arrivalVisible:a.visible})),presentation:{id:view.level==='applet'?view.id:null,stage:stage.metrics},
    ...(mount.metrics?.()||{})};},
-  destroy(){if(disposed)return;disposed=true;observer.disconnect();document.removeEventListener('visibilitychange',follow);window.removeEventListener('worldlet:desktop-companion',follow);mount.dispose();stage.destroy();world.remove();}
+  destroy(){if(disposed)return;disposed=true;observer.disconnect();document.removeEventListener('visibilitychange',follow);window.removeEventListener('worldlet:desktop-companion',follow);mount.dispose();stage.destroy();imageLamps?.destroy();for(const label of lampLabels.values())label.destroy();levelZoom?.dispose();world.remove();}
  };
 }
