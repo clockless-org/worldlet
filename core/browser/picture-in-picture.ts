@@ -126,8 +126,11 @@ export function taskPictureInPictureAspect(page:{width:number;height:number}):nu
 /**
  * Fox's copy of the page (owner request 2026-10-09). When Fox starts working on a website page while
  * the person has its Applet open, Fox gets a copy of the page instead of taking the person's: the
- * same address in the same website engine, so the same sign-in, shown smaller in the panel's
- * top-right corner. The person's own page stays as it was and keeps working.
+ * same address in the same website engine, so the same sign-in, shown smaller at the top right of
+ * the window, right above Fox's conversation box (owner Order 2026-10-10: "top right, above the
+ * conversation box, not the web page's top right"). The person's own page stays as it was and keeps working, uncovered.
+ * Where there is no room above the conversation box (`minAbove`), or it is not showing, the copy
+ * goes to the panel's top-right corner as before.
  * - The copy keeps the panel's size as its own layout size (`page`) and only shows smaller, so the
  *   site lays out as it does for the person and Fox's element references stay valid.
  * - Fox's glow, pointer and the page's one status (its steps, then its result) go to the copy; the
@@ -141,13 +144,20 @@ export function taskPictureInPictureAspect(page:{width:number;height:number}):nu
  *   only for pages on that engine. Where the panel is too small for a copy beside the page
  *   (`minPanel`), Fox works on the person's page as before.
  */
-export const FOX_COPY=Object.freeze({share:0.3,minWidth:280,maxWidth:460,margin:12,minPanel:720});
-/** Where Fox's copy shows: the panel's top-right corner, `share` of its width between `minWidth` and
- * `maxWidth`, in the page's own shape. Null when the panel has no room for it. */
-export function foxCopyPlacement({panel,page}:{panel:SurfaceRect;page:{width:number;height:number}}):SurfaceRect|null {
- const {share,minWidth,maxWidth,margin,minPanel}=FOX_COPY;
+export const FOX_COPY=Object.freeze({share:0.3,minWidth:280,maxWidth:460,margin:12,minPanel:720,gap:20,minAbove:220});
+/** Where Fox's copy shows: at the window's top (`margin`), right-aligned with Fox's conversation box
+ * (`dialogue`, in the same viewport pixels) and ending at least `gap` above it, as wide as the box between
+ * `minAbove` and `maxWidth`, in the page's own shape. Without room there, the panel's top-right corner,
+ * `share` of its width between `minWidth` and `maxWidth`. Null when the panel has no room for it. */
+export function foxCopyPlacement({panel,page,dialogue}:{panel:SurfaceRect;page:{width:number;height:number};dialogue?:SurfaceRect|null}):SurfaceRect|null {
+ const {share,minWidth,maxWidth,margin,minPanel,gap,minAbove}=FOX_COPY;
  if(![panel.x,panel.y,panel.width,panel.height].every(Number.isFinite)||!(panel.width>=minPanel&&page.width>0&&page.height>0))return null;
- const width=Math.round(Math.min(maxWidth,Math.max(minWidth,panel.width*share))),height=Math.round(width/taskPictureInPictureAspect(page));
+ const aspect=taskPictureInPictureAspect(page);
+ if(dialogue&&[dialogue.x,dialogue.y,dialogue.width,dialogue.height].every(Number.isFinite)&&dialogue.width>0&&dialogue.height>0){
+  const room=dialogue.y-gap-margin,wide=Math.floor(Math.min(maxWidth,Math.max(minAbove,dialogue.width),room*aspect));
+  if(wide>=minAbove){const height=Math.floor(wide/aspect);return {x:Math.max(margin,Math.floor(dialogue.x+dialogue.width-wide)),y:margin,width:wide,height};}
+ }
+ const width=Math.round(Math.min(maxWidth,Math.max(minWidth,panel.width*share))),height=Math.round(width/aspect);
  if(height+2*margin>panel.height)return null;
  return {x:Math.floor(panel.x+panel.width-margin-width),y:Math.ceil(panel.y+margin),width,height};
 }
