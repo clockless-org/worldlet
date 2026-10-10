@@ -40,31 +40,10 @@ export interface ThemeScene {
 /** Business events a theme may give a sound. Adding one is a product decision, not a theme's. */
 export declare const THEME_SOUND_EVENTS: readonly ["applet.arrived", "mail.received", "task.working", "task.succeeded", "task.failed", "task.cancelled"];
 export type ThemeSoundEvent = typeof THEME_SOUND_EVENTS[number];
-/** The shared HUD pieces a theme may paint, each a nine-slice image laid over the shared element (ui/themes/theme-surfaces.css). */
-export declare const THEME_HUD_PARTS: readonly ["attention", "note", "nameplate", "back", "bubble", "panel", "log", "button", "card", "frame"];
+/** The shared HUD pieces a theme may paint, each a nine-slice image laid over the shared element (ui/themes/theme-surfaces.css).
+ * The companion (Fox, its bubble, panel and nameplate) and the loading and first-use pages are not a theme's to replace. */
+export declare const THEME_HUD_PARTS: readonly ["attention", "note", "back", "log", "button", "card", "frame"];
 export type ThemeHudPart = typeof THEME_HUD_PARTS[number];
-/** Where the companion stands: the World overview, an area, or beside an open Applet. */
-export type ThemeCompanionPlace = 'overview' | 'room' | 'reading';
-/**
- * The companion a theme draws in Fox's place. The host keeps Fox's behaviour (when it talks, listens, works or sleeps,
- * where it stands, what it says); a theme only names and paints it. A theme without one keeps Fox.
- */
-export interface ThemeCompanion {
-    /** Shown in the companion's reply and input labels. */
-    name: string;
-    /** Still picture for the loading screen, History and other small places. */
-    portrait: string;
-    /** A sprite sheet: one frame per pose, picked by the host's performance state. Without it the portrait stands still. */
-    rig?: {
-        image: string;
-        frames: readonly ThemeRect[];
-        feet?: readonly (readonly [number, number])[];
-        scale?: number;
-        /** Host performance state (idle, talking, thinking, working, sleeping, ...) → frame index. A missing state shows frame 0. */
-        performances: Readonly<Record<string, number>>;
-        perches?: Partial<Record<ThemeCompanionPlace, string>>;
-    };
-}
 /** The shared HUD's material. A piece left out keeps the shared look. */
 export interface ThemeHud {
     /** Nine-slice images: slice insets (top, right, bottom, left) in image pixels, drawn at `width` CSS pixels. */
@@ -97,7 +76,6 @@ export interface ThemePresentation {
     world: ThemeScene;
     applets: Record<string, ThemeScene>;
     fallback: ThemeScene;
-    companion?: ThemeCompanion;
     hud?: ThemeHud;
     sound?: ThemeSound;
 }

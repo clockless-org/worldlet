@@ -5,8 +5,10 @@ how they move. It never owns data. Mail keeps its ID, accounts, messages and bac
 room shows it; the person's area names, Applet membership and last use are the same in every theme.
 
 **Themes are packages of the one [Theme contract](CONTRACT.md).** Worldlet bundles every package in
-`ui/theme-packages/` (Village, the default, and Blueprint) and Settings → Theme switches between them in one
-step, including an already opened Applet. New themes are added there with `npm run theme:import`, not here.
+`ui/theme-packages/` (Village Map and Blueprint) beside the built-in default, Village, and Settings → Theme
+switches between them in one step, including an already opened Applet. A theme implements four parts: World,
+Applets, HUD look, and sound with event animations ([What a theme implements](CONTRACT.md#what-a-theme-implements)).
+The companion and the loading and first-use pages are not part of a theme. New themes are added there with `npm run theme:import`, not here.
 
 The data-only ThemePack described below is the internal record of Village's shared built-in assets
 (companion rig, HUD material, sounds, world declarations). It is not a theme API: only Village is
@@ -78,14 +80,15 @@ so an IP collaboration and an original theme can be told apart.
 
 ## Coverage
 
-Village is the reference look: every surface another theme does not draw itself shows Village's.
-`ui/themes/theme-coverage.ts` lists every surface of the World (world plates, zoomed areas, Applet devices,
-rooms and inner surfaces, Mail parts, Attention art, HUD material and colors, fonts, the companion's bubble,
-panel, rig and perches, the world log, loading and first-use pages, ambient motion, event cues, sound and
-transitions) and computes, from the pack itself, whether each one is the theme's **own**, **partial**
-(repeated art, recolored Village parts, too few poses, a plate too small to zoom) or **village**.
+Village is the reference look: every part another theme does not draw itself shows Village's.
+`ui/themes/theme-coverage.ts` reports the same four parts (World; Applets; HUD look; sound and event animations),
+each gathered from its surfaces (world plates, zoomed areas, ambient motion and transitions; Applet devices, rooms,
+inner surfaces and Mail parts; HUD material and colors, fonts, the world log and Attention art; event cues and
+sound), and computes, from the pack itself, whether each part is the theme's **own**, **partial** (some surfaces
+borrowed, repeated art, recolored Village parts, a plate too small to zoom) or **village**. The companion and the
+loading and first-use pages are not counted: they are not a theme's to replace.
 
-Each theme other than Village keeps `coverage.json`, the surfaces it still borrows. `scripts/theme-pack-check.ts`
+Each theme other than Village keeps `coverage.json`, the parts it still borrows. `scripts/theme-pack-check.ts`
 fails when the computed coverage and that record disagree, so a gap is never silent and closing one updates
 the record. `npm run theme:coverage [id]` prints the report.
 

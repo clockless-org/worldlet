@@ -174,7 +174,7 @@ assert.deepEqual(ok,{ok:true,theme:'castle'});assert.deepEqual(order,['prepare',
 
 // Coverage: every surface a theme does not draw itself shows Village's, and its coverage.json records which.
 // A gap never goes unrecorded, and closing one updates the record (`npm run theme:coverage` lists them).
-const {themeCoverage,borrowedSurfaces,THEME_SURFACES}=await import('../ui/themes/theme-coverage.ts');
+const {themeCoverage,themeSurfaceCoverage,borrowedSurfaces,THEME_SURFACES,THEME_PARTS}=await import('../ui/themes/theme-coverage.ts');
 const {coverageInput}=await import('./theme-coverage.ts');
 const {readFile}=await import('node:fs/promises');
 assert(Object.values(themeCoverage(await coverageInput('village'))).every(c=>c.state==='own'),'Village is the reference look');
@@ -184,27 +184,29 @@ for(const id of [...THEMES.keys()].filter(id=>id!==DEFAULT_THEME_ID)){
  assert.deepEqual(record.borrowed,borrowedSurfaces(themeCoverage(await coverageInput(id))),id+' coverage changed: update resources/themes/'+id+'/coverage.json (npm run theme:coverage '+id+')');
 }
 const surfaces=THEME_SURFACES.map(([id])=>id);assert.equal(new Set(surfaces).size,surfaces.length);
+// Four parts, each with surfaces; the companion and the loading page are not a theme's to replace.
+assert.equal(THEME_PARTS.length,4);for(const [part] of THEME_PARTS)assert(THEME_SURFACES.some(s=>s[2]===part),part+' has surfaces');
+assert(!surfaces.some(id=>/companion|startup/.test(id)),'no companion or loading surfaces');
 // A fixture theme stands in for a second registered theme: what it draws decides each surface.
 const reference=await coverageInput('village'),art=(name:string)=>'resources/themes/castle/'+name+'.webp';
 const areaIds=['home','work','library','money','health','travel'];
 const castleSound={events:{},ambient:{'water-glints':'resources/themes/castle/lake.wav','chimney-smoke':'resources/themes/castle/hearth.wav'},presentation:{overview:'water-glints',room:'chimney-smoke',areas:{home:'chimney-smoke'},applets:{gmail:'chimney-smoke'},labels:{'water-glints':{title:'Lake',icon:'wave'},'chimney-smoke':{title:'Hearth',icon:'flame'}}}};
 const castlePack=parseThemePack({...structuredClone(village),id:'castle',space:{...structuredClone(village.space),world:'castle'},motion:{...structuredClone(village.motion),sound:castleSound},companion:{...structuredClone(village.companion),renderer:'sprite-rig',rig:'resources/themes/castle/rig.json',portrait:art('portrait').replace('.webp','.png')}},states);
-const registeredCastle={...reference,pack:castlePack,rigFrames:states.length,
+const registeredCastle={...reference,pack:castlePack,
  style:{...reference.style,world:{day:art('day'),night:art('night')},applets:Object.fromEntries(Array.from({length:8},(_,i)=>['applet-'+i,{peek:art('peek-'+i),focus:art('room-'+i)}])),mailParts:{board:art('board')},attention:{coming:art('coming')}},
  world:{canvas:{width:1920,height:1080},layers:['environment','architecture','foreground'].flatMap(kind=>['day','night'].map(lighting=>({kind,lighting}))),areas:areaIds.map(id=>({closeView:{src:art('area-'+id)}}))}},
  castleInput={...registeredCastle,pack:{...castlePack,surfaces:{...castlePack.surfaces,skin:Object.fromEntries(Object.keys(castlePack.surfaces.skin).map(k=>[k,'shared'])) as typeof castlePack.surfaces.skin}}},piece={image:art('mail-board'),slice:[40,40,40,40] as [number,number,number,number],width:24};
-assert.equal(themeCoverage(registeredCastle)['area-zoom'].state,'own','six distinct composed Areas cover the close view');
-assert.equal(themeCoverage(registeredCastle).world.state,'own','day/night depth planes cover the World');
-for(const kind of ['architecture','foreground'])assert.equal(themeCoverage({...registeredCastle,world:{...registeredCastle.world,layers:registeredCastle.world.layers.filter(l=>l.kind!==kind||l.lighting!=='night')}}).world.state,'partial','unpaired '+kind+' does not cover the World');
-assert.equal(themeCoverage({...registeredCastle,world:{...registeredCastle.world,layers:registeredCastle.world.layers.map(l=>({...l,kind:'environment'}))}}).world.state,'partial','extra flat plates are not depth layers');
-assert.equal(themeCoverage({...registeredCastle,world:{...registeredCastle.world,areas:registeredCastle.world.areas.map((a,i)=>i?{}:a)}})['area-zoom'].state,'partial','one authored room does not cover six Areas');
-assert.equal(themeCoverage({...registeredCastle,world:{...registeredCastle.world,areas:registeredCastle.world.areas.map(()=>registeredCastle.world.areas[0])}})['area-zoom'].state,'partial','repeating one room does not cover distinct places');
-assert.equal(themeCoverage(castleInput)['companion-bubble'].state,'village','a shared bubble is borrowed');
-assert.equal(themeCoverage(registeredCastle).companion.state,'own','a pose for every performance owns the companion');
-assert.equal(themeCoverage({...registeredCastle,rigFrames:8}).companion.state,'partial','eight whole-body drawings remain partial');
-assert.equal(themeCoverage({...registeredCastle,rigFrames:undefined}).companion.state,'partial','unknown rig detail never silently qualifies as complete');
-const painted=themeCoverage({...castleInput,pack:{...castleInput.pack,surfaces:{...castleInput.pack.surfaces,skin:{...castleInput.pack.surfaces.skin,bubble:piece,note:piece}}}});
-assert.equal(painted['companion-bubble'].state,'own');assert.equal(painted['hud-material'].state,'partial','one of five HUD pieces');
+assert.equal(themeSurfaceCoverage(registeredCastle)['area-zoom'].state,'own','six distinct composed Areas cover the close view');
+assert.equal(themeSurfaceCoverage(registeredCastle).world.state,'own','day/night depth planes cover the World');
+for(const kind of ['architecture','foreground'])assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,layers:registeredCastle.world.layers.filter(l=>l.kind!==kind||l.lighting!=='night')}}).world.state,'partial','unpaired '+kind+' does not cover the World');
+assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,layers:registeredCastle.world.layers.map(l=>({...l,kind:'environment'}))}}).world.state,'partial','extra flat plates are not depth layers');
+assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,areas:registeredCastle.world.areas.map((a,i)=>i?{}:a)}})['area-zoom'].state,'partial','one authored room does not cover six Areas');
+assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,areas:registeredCastle.world.areas.map(()=>registeredCastle.world.areas[0])}})['area-zoom'].state,'partial','repeating one room does not cover distinct places');
+const painted=themeSurfaceCoverage({...castleInput,pack:{...castleInput.pack,surfaces:{...castleInput.pack.surfaces,skin:{...castleInput.pack.surfaces.skin,note:piece}}}});
+assert.equal(painted['hud-material'].state,'partial','one of five HUD pieces');
+{const parts=themeCoverage(registeredCastle),each=themeSurfaceCoverage(registeredCastle);
+ for(const [part] of THEME_PARTS){const members=THEME_SURFACES.filter(s=>s[2]===part).map(([id])=>each[id].state);
+  assert.equal(parts[part].state,members.every(m=>m==='own')?'own':members.every(m=>m==='village')?'village':'partial',part+' is own only when every surface in it is');}}
 
 // Surfaces reach the shared UI as --theme-* properties and data attributes; a shared surface sets nothing,
 // and switching away clears the previous theme's.

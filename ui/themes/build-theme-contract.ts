@@ -21,26 +21,10 @@ export interface ThemeScene {
 /** Business events a theme may give a sound. Adding one is a product decision, not a theme's. */
 export const THEME_SOUND_EVENTS=['applet.arrived','mail.received','task.working','task.succeeded','task.failed','task.cancelled'] as const;
 export type ThemeSoundEvent=typeof THEME_SOUND_EVENTS[number];
-/** The shared HUD pieces a theme may paint, each a nine-slice image laid over the shared element (ui/themes/theme-surfaces.css). */
-export const THEME_HUD_PARTS=['attention','note','nameplate','back','bubble','panel','log','button','card','frame'] as const;
+/** The shared HUD pieces a theme may paint, each a nine-slice image laid over the shared element (ui/themes/theme-surfaces.css).
+ * The companion (Fox, its bubble, panel and nameplate) and the loading and first-use pages are not a theme's to replace. */
+export const THEME_HUD_PARTS=['attention','note','back','log','button','card','frame'] as const;
 export type ThemeHudPart=typeof THEME_HUD_PARTS[number];
-/** Where the companion stands: the World overview, an area, or beside an open Applet. */
-export type ThemeCompanionPlace='overview'|'room'|'reading';
-/**
- * The companion a theme draws in Fox's place. The host keeps Fox's behaviour (when it talks, listens, works or sleeps,
- * where it stands, what it says); a theme only names and paints it. A theme without one keeps Fox.
- */
-export interface ThemeCompanion {
- /** Shown in the companion's reply and input labels. */
- name:string;
- /** Still picture for the loading screen, History and other small places. */
- portrait:string;
- /** A sprite sheet: one frame per pose, picked by the host's performance state. Without it the portrait stands still. */
- rig?:{image:string;frames:readonly ThemeRect[];feet?:readonly (readonly [number,number])[];scale?:number;
-  /** Host performance state (idle, talking, thinking, working, sleeping, ...) → frame index. A missing state shows frame 0. */
-  performances:Readonly<Record<string,number>>;
-  perches?:Partial<Record<ThemeCompanionPlace,string>>};
-}
 /** The shared HUD's material. A piece left out keeps the shared look. */
 export interface ThemeHud {
  /** Nine-slice images: slice insets (top, right, bottom, left) in image pixels, drawn at `width` CSS pixels. */
@@ -53,7 +37,6 @@ export interface ThemePresentation {
  world:ThemeScene;
  applets:Record<string,ThemeScene>;
  fallback:ThemeScene;
- companion?:ThemeCompanion;
  hud?:ThemeHud;
  sound?:ThemeSound;
 }
@@ -131,17 +114,6 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  need(Array.isArray(p.fonts),'fonts');for(const f of p.fonts){themeAssetPath(f.file);themeAssetPath(f.license);}
  scene(p.world);scene(p.fallback);for(const [key,s] of Object.entries(p.applets)){need(id(key),'scene applet ID');scene(s);}
  const object=(v:unknown)=>!!v&&typeof v==='object'&&!Array.isArray(v),picture=(v:unknown)=>/\.(png|webp|svg)$/.test(themeAssetPath(v));
- if(p.companion!==undefined){
-  const c=p.companion;need(object(c)&&text(c.name)&&c.name.length<=24&&picture(c.portrait),'companion name and portrait');
-  if(c.rig!==undefined){
-   const r=c.rig,frame=(f:unknown)=>Array.isArray(f)&&f.length===4&&f.every(n=>Number.isFinite(n)&&n>=0)&&f[2]>0&&f[3]>0;
-   need(object(r)&&picture(r.image)&&Array.isArray(r.frames)&&r.frames.length>0&&r.frames.every(frame),'companion rig frames');
-   need(object(r.performances)&&Object.values(r.performances).every(n=>Number.isInteger(n)&&n>=0&&n<r.frames.length),'companion rig performances');
-   need(r.feet===undefined||(Array.isArray(r.feet)&&r.feet.every(f=>Array.isArray(f)&&f.length===2&&f.every(n=>Number.isFinite(n)&&n>=0&&n<=1))),'companion rig feet');
-   need(r.scale===undefined||(Number.isFinite(r.scale)&&r.scale>0),'companion rig scale');
-   need(r.perches===undefined||(object(r.perches)&&Object.entries(r.perches).every(([k,v])=>['overview','room','reading'].includes(k)&&picture(v))),'companion perches');
-  }
- }
  if(p.hud!==undefined){
   const h=p.hud;need(object(h),'hud');
   need((object(h.skin)&&Object.entries(h.skin).every(([part,piece])=>(THEME_HUD_PARTS as readonly string[]).includes(part)&&object(piece)&&picture(piece.image)&&Array.isArray(piece.slice)&&piece.slice.length===4&&piece.slice.every(n=>Number.isInteger(n)&&n>=0)&&Number.isFinite(piece.width)&&piece.width>0&&piece.width<=64)),'hud skin');

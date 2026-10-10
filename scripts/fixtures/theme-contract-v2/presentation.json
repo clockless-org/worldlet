@@ -143,37 +143,9 @@
    "dialog": "shared"
   }
  },
- "companion": {
-  "name": "Frozen",
-  "portrait": "assets/plate.svg",
-  "rig": {
-   "image": "assets/plate.svg",
-   "frames": [
-    [
-     0,
-     0,
-     100,
-     100
-    ]
-   ],
-   "feet": [
-    [
-     0.5,
-     1
-    ]
-   ],
-   "scale": 1,
-   "performances": {
-    "idle": 0
-   },
-   "perches": {
-    "overview": "assets/plate.svg"
-   }
-  }
- },
  "hud": {
   "skin": {
-   "panel": {
+   "log": {
     "image": "assets/plate.svg",
     "slice": [
      4,

@@ -1,4 +1,4 @@
-import {ACTIVE_THEME,themeCompanionName} from '../themes/index.ts';
+import {ACTIVE_THEME} from '../themes/index.ts';
 import {firstWinCandidate} from '../onboarding/index.ts';
 import {mountCompanionLife} from './companion-life.ts';
 import {companionPosition} from './companion-position.ts';
@@ -140,8 +140,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  const panel=make('section','companion-dialogue ui-theme-speech');panel.id='companionDialogue';panel.setAttribute('aria-label','Fox reply');
  const topic=make('span','companion-topic');topic.hidden=true;
  const guideHint=make('span','companion-guide-hint');guideHint.hidden=true;
- // A theme package's companion is called by its contract name; Village's is Fox.
- const themeName=()=>{const named=themeCompanionName();if(named)return named;const id=ACTIVE_THEME.pack.companion.id;return id==='fox'?'Fox':id[0].toUpperCase()+id.slice(1);};
+ // A theme's own companion is called by its id; Village's is Fox.
+ const themeName=()=>{const id=ACTIVE_THEME.pack.companion.id;return id==='fox'?'Fox':id[0].toUpperCase()+id.slice(1);};
  let companionName=themeName(),customCompanionName=false;
  const themeNameChanged=()=>{if(!customCompanionName)companionName=themeName();topic.textContent=companionName;topic.title=companionName;panel.setAttribute('aria-label',companionName+' reply');input.setAttribute('aria-label','Message '+companionName);};
  themeNameChanged();window.addEventListener('worldlet:theme',themeNameChanged);

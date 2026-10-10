@@ -39,7 +39,7 @@ const frozen=await fs.readFile(snapshot,'utf8').catch(async()=>{
 });
 
 // What a package produces flows to the host: frozen → current. What the host provides flows to a package: current → frozen.
-const fromPackage=['BuildTheme','BuildThemeManifest','ThemePresentation','ThemeScene','ThemeCompanion','ThemeHud','ThemeSound','ThemeMount','ThemeWorldMount'];
+const fromPackage=['BuildTheme','BuildThemeManifest','ThemePresentation','ThemeScene','ThemeHud','ThemeSound','ThemeMount','ThemeWorldMount'];
 const toPackage=['ThemeAppletContext','ThemeWorldContext','ThemeWorldState','ThemeWorldApplet','ThemeItem','ThemeActions','ThemeScene','ThemePresentation','ThemeRecord'];
 const probe=path.join(root,'ui/themes/__theme_contract_probe__.ts');
 const source=`import type * as F from './frozen/contract-v${BUILD_THEME_CONTRACT_VERSION}.d.ts';\nimport type * as C from './build-theme-contract.ts';\n`+

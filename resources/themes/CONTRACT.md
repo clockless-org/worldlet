@@ -87,19 +87,20 @@ Buttons must be real controls with default, hover, pressed, focus-visible, disab
 
 Assets at `assets/...` are published to `theme-assets/<id>/...`; resolve them with `context.asset(path)` in code and `url('theme-assets/…')` in CSS (the build rewrites it per theme). Source packages must ship every required asset. Each theme's CSS is published as its own `theme-<id>.css`, loaded after the shared styles; only the active theme's stylesheet is attached, so two themes never style each other. Scope presentation rules to the theme's owned roots or the public shell classes. The generic shared component/companion artwork remains available as host UI; a package does not need to duplicate product behavior.
 
-## Companion, HUD material and sound
+## What a theme implements
 
-A package may declare three optional parts in `presentation.json`. Anything it leaves out keeps the built-in one (Fox, the shared HUD look, the shared sounds), and switching back to Village restores them all.
+A theme implements four parts. Everything else is the host's and looks the same in every theme.
 
-| Field | Meaning |
-| --- | --- |
-| `companion.name` | The companion's name in its reply, input and labels (at most 24 characters). |
-| `companion.portrait` | Still picture (`png`, `webp` or `svg`) for the loading screen, History and other small places. |
-| `companion.rig` | Optional sprite sheet: `image`, `frames` (`[x, y, width, height]` in image pixels), optional `feet` and `scale`, `performances` (host performance state → frame index; a missing state shows frame 0) and optional `perches` per place (`overview`, `room`, `reading`). |
-| `hud.skin` | Nine-slice pictures for the shared HUD pieces (`attention`, `note`, `nameplate`, `back`, `bubble`, `panel`, `log`, `button`, `card`, `frame`): `image`, `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). |
-| `sound.events` | An audio file per business event (`applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`). |
+| Part | Covers | Where in the package |
+| --- | --- | --- |
+| World | Map, zoomed areas, ambient motion, entering an area or room | `renderWorld`, `presentation.world` |
+| Applets | Applet devices, rooms behind an open Applet, cards and frames, Mail parts | `renderApplet`, `presentation.applets` and `fallback` |
+| HUD look | HUD material, colors, type, fonts, world log, Attention art | `tokens`, `fonts`, `theme.css`, optional `hud.skin` |
+| Sound and event animations | Business-event sounds and the animations for them | optional `sound.events`, `ThemeWorldMount.event` |
 
-The companion's behaviour stays the host's: when it talks, listens, works or sleeps, where it stands and what it says. A theme only names and paints it. Blueprint's Compass is the worked example.
+Not part of a theme: the companion (Fox, its rig and portrait, where it stands, its reply bubble, panel and nameplate) and pages a theme cannot replace, such as the loading and first-use pages. `hud.companion` and `hud.speech` only reserve room the theme's content stays clear of.
+
+`hud.skin` gives nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). `sound.events` gives an audio file per business event (`applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`). Anything left out keeps the shared look and sounds, and switching back to Village restores them.
 
 ## Switching themes
 

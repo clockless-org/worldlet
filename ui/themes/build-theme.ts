@@ -28,36 +28,24 @@ function stylesheet(id:string):HTMLLinkElement{
  if(!link){link=document.createElement('link');link.rel='stylesheet';link.href='theme-'+id+'.css';link.dataset.themeStyle=id;link.media='not all';document.head.append(link);}
  return link;
 }
-const COMPANION_ART=['companionRive','companionPainted','companionAnatomy','companionExpressions','companionSpriteRig','companionPortrait'];
 let builtIn:any;
 /**
- * The companion, HUD material and sounds a package declares (presentation.json `companion`, `hud`, `sound`) replace
- * Fox's art and the shared surfaces in the environment the companion and HUD already read. Anything a package leaves
- * out keeps the built-in one, and the built-in Village restores them all.
+ * The HUD material and sounds a package declares (presentation.json `hud`, `sound`) replace the shared ones in the
+ * surfaces the HUD already reads. Anything a package leaves out keeps the shared one, and the built-in Village restores
+ * them all. The companion and the loading page stay the host's.
  */
 function applyPresentation(next:InstalledTheme){
  const g=globalThis as any;builtIn??=g.__WORLDLET_ENV_ASSETS__;
  if(!builtIn)return;
  const p=next.package?.presentation;
- if(!p||!(p.companion||p.hud||p.sound)){g.__WORLDLET_ENV_ASSETS__=builtIn;applyThemeSurfaces();return;}
- const url=(path:string)=>themeAssetURL(next.id,path),env={...builtIn};
- const c=p.companion;
- if(c){
-  for(const key of COMPANION_ART)delete env[key];
-  env.companionPortrait=url(c.portrait);
-  if(c.rig)env.companionSpriteRig={...c.rig,image:url(c.rig.image),perches:Object.fromEntries(Object.entries(c.rig.perches||{}).map(([place,image])=>[place,url(image)]))};
- }
- if(p.hud||p.sound||c){
-  const shared:BuiltSurfaces=builtIn.surfaces||{tokens:{},fonts:{},skin:{},sounds:{events:{},ambient:{}},attention:[],transitions:{area:'shared',room:'shared',ms:0}};
-  env.surfaces={...shared,
-   skin:p.hud?Object.fromEntries(Object.entries(p.hud.skin).map(([part,piece])=>[part,{image:url(piece.image),slice:[...piece.slice],width:piece.width}])):shared.skin,
-   sounds:p.sound?{events:Object.fromEntries(Object.entries(p.sound.events).map(([event,file])=>[event,url(file)])),ambient:{}}:shared.sounds,
-   startup:c?url(c.portrait):shared.startup};
- }
- g.__WORLDLET_ENV_ASSETS__=env;applyThemeSurfaces();
+ if(!p||!(p.hud||p.sound)){g.__WORLDLET_ENV_ASSETS__=builtIn;applyThemeSurfaces();return;}
+ const url=(path:string)=>themeAssetURL(next.id,path);
+ const shared:BuiltSurfaces=builtIn.surfaces||{tokens:{},fonts:{},skin:{},sounds:{events:{},ambient:{}},attention:[],transitions:{area:'shared',room:'shared',ms:0}};
+ g.__WORLDLET_ENV_ASSETS__={...builtIn,surfaces:{...shared,
+  skin:p.hud?Object.fromEntries(Object.entries(p.hud.skin).map(([part,piece])=>[part,{image:url(piece.image),slice:[...piece.slice],width:piece.width}])):shared.skin,
+  sounds:p.sound?{events:Object.fromEntries(Object.entries(p.sound.events).map(([event,file])=>[event,url(file)])),ambient:{}}:shared.sounds}};
+ applyThemeSurfaces();
 }
-/** The companion's name in the active theme, or null where the theme keeps the built-in companion. */
-export function themeCompanionName():string|null{return active.package?.presentation.companion?.name??null;}
 /** The built-in Village carries no theme stylesheet or scene variables; a package's are removed when it is left. */
 function attach(next:InstalledTheme){
  applyPresentation(next);
@@ -96,8 +84,7 @@ async function prepare(next:InstalledTheme){
  const link=stylesheet(next.id);
  if(!link.sheet)await new Promise<void>((resolve,reject)=>{link.addEventListener('load',()=>resolve(),{once:true});link.addEventListener('error',()=>reject(Error(next.title+' could not load. Try again.')),{once:true});});
  const {world,fallback,applets,fonts}=next.package.presentation;
- const {companion,hud}=next.package.presentation;
- const pictures=[...[world,fallback,...Object.values(applets)].map(scene=>scene.background),...(companion?[companion.portrait,...(companion.rig?[companion.rig.image,...Object.values(companion.rig.perches||{})]:[])]:[]),...Object.values(hud?.skin||{}).map(piece=>piece.image)];
+ const pictures=[...[world,fallback,...Object.values(applets)].map(scene=>scene.background),...Object.values(next.package.presentation.hud?.skin||{}).map(piece=>piece.image)];
  const images=[...new Set(pictures.map(path=>themeAssetURL(next.id,path)))];
  await Promise.all(images.map(async src=>{const image=new Image();image.src=src;try{await image.decode();}catch(error){throw Error(next.title+' artwork could not load. Try again.',{cause:error});}}));
  await Promise.all(fonts.map(font=>fetch(themeAssetURL(next.id,font.file)).catch(()=>null)));
