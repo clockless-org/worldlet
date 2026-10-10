@@ -1,7 +1,12 @@
 /* Public Sim shell slots. The scene owns positions; business controls retain their handlers.
    Fox's speech is not placed here: it keeps the shared Fox layout around artifact cards and Applets (CONTRACT.md). */
 html[data-build-theme] .ui-theme-top{left:var(--sim-top-x)!important;top:var(--sim-top-y)!important;width:var(--sim-top-width)!important;max-height:var(--sim-top-height);right:auto!important}
-html[data-build-theme] .ui-theme-companion{left:var(--sim-companion-x)!important;top:var(--sim-companion-y)!important;width:var(--sim-companion-width)!important;max-height:var(--sim-companion-height);right:auto!important;bottom:auto!important;transform:none!important;translate:none!important}
+/* The companion slot is for a desktop-width window; a narrow one keeps the message bar's own narrow layout. */
+@media(min-width:801px){
+ html[data-build-theme] .ui-theme-companion{left:var(--sim-companion-x)!important;top:var(--sim-companion-y)!important;width:var(--sim-companion-width)!important;max-height:var(--sim-companion-height);right:auto!important;bottom:auto!important;transform:none!important}
+ /* Where the person dragged Fox (ui/companion/companion-position.ts) moves the slot from there (owner Order 2026-10-08). */
+ html[data-build-theme] .ui-theme-companion:not([data-positioned]){translate:none!important}
+}
 html[data-build-theme] :is(.ui-theme-top,.ui-theme-companion,.ui-theme-dialog){font-family:var(--sim-body-font);color:var(--sim-ink)}
 html[data-build-theme] .ui-button{min-height:var(--sim-control-height);border-radius:var(--sim-radius)}
 html[data-build-theme] :is(.ui-theme-top,.ui-theme-companion,.ui-theme-dialog) :focus-visible{outline:3px solid var(--sim-focus);outline-offset:2px}
