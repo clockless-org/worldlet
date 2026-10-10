@@ -1,12 +1,12 @@
 import {areaCameraFrame} from './village-camera.ts';
 import {createAreaScenery} from './area-scenery.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
-import {WORLD_WIDTH,WORLD_HEIGHT,APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE} from '../world-design.ts';
+import {WORLD_WIDTH,WORLD_HEIGHT,APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE} from './space/world-design.ts';
 import {REGION_LANDMARKS} from './region-landmarks.ts';
 import {createLandmarkSprite} from './landmark-sprite.ts';
 import {createSceneryTone} from './scenery-tone.ts';
-import {WORLD_LAYOUT} from '../world-layout.ts';
-import {regionId} from '../region-layout.ts';
+import {WORLD_LAYOUT} from './space/world-layout.ts';
+import {regionId} from './space/region-core.ts';
 import {guardFilterResolution} from './pixi-filter-resolution.ts';
 import {viewportFilterArea as updateViewportFilterArea} from './viewport-filter-area.ts';
 import {createRegisteredPlate} from './registered-plate.ts';
@@ -16,12 +16,12 @@ import {createWorkMotion} from './work-motion.ts';
 import 'pixi.js/unsafe-eval';
 import {Application,Container,Sprite,Texture,Graphics,Rectangle,BlurFilter,ColorMatrixFilter,Matrix} from 'pixi.js';
 import {createFocusScenery} from './pixi-focus.ts';
-import {extraPlacements,resolvePlacements,type PlacementSlot} from '../slot-placement.ts';
-import {APPLET_SPRITES} from '../applet-sprites.ts';
+import {extraPlacements,resolvePlacements,type PlacementSlot} from './space/slot-placement.ts';
+import {APPLET_SPRITES} from './space/applet-sprites.ts';
 import {myAppletMark} from './my-applet-mark.ts';
-import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from '../frame-budget.ts';
+import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from './space/frame-budget.ts';
 import {attachAppletLamp,type LampState} from './village-lamp.ts';
-import type {RegionLayout} from '../region-layout.ts';
+import type {RegionLayout} from './space/region-core.ts';
 
 // Authored image coordinates, not camera-dependent guesses. The internal
 // "people" key remains stable while its displayed region is Explore.

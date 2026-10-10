@@ -1,7 +1,7 @@
 import type {ThemeWorldApplet,ThemeWorldContext,ThemeWorldMark,ThemeWorldMount,ThemeWorldState} from '../../themes/index.ts';
 import {createModuleScene as createPixiWorld} from './pixi-world.ts';
 import {villageDevice} from './village-art.ts';
-import {regionId,type RegionLayout} from '../region-layout.ts';
+import {regionId,type RegionLayout} from './space/region-core.ts';
 
 export type VillageWorldMount=ThemeWorldMount&{scene:any};
 

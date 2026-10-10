@@ -16,7 +16,7 @@
     "check:contracts": "node scripts/theme-contract-check.ts && node scripts/harness-contract-check.ts && node scripts/browser-driver-flow-check.ts",
     "check:docs": "node scripts/docs-check.ts",
     "check:public": "node scripts/public-safety-check.mjs",
-    "check:style": "node scripts/builtin-style-check.ts && node scripts/world-pack-check.ts && node scripts/village-art.ts --check",
+    "check:style": "node scripts/builtin-style-check.ts && node scripts/world-pack-check.ts && node scripts/village-art.ts --check && node scripts/village-space.ts --check",
     "check:source": "node scripts/source-layout-check.ts && node scripts/ts-specifiers.ts --check",
     "check:syntax": "python3 scripts/quick-check.py",
     "test": "node scripts/run-steps.mjs test:core && npm run test:worktrees",

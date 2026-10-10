@@ -28,6 +28,8 @@ const scales=Object.fromEntries(Object.entries(measurements).map(([key,m])=>{
  const massScale=target/m.mass*(adjustments[key]??1);
  return [key,Math.floor(Math.max(.75,Math.min(1.2,massScale,bodyLimit/Math.max(...m.body)))*1000)/1000];
 }));
-await fs.writeFile('ui/world/village/applet-optical-scales.json',JSON.stringify(scales,null,2)+'\n');
+await fs.writeFile('ui/world/applet-optical-scales.json',JSON.stringify(scales,null,2)+'\n');
+// The Village's copy (ui/world/village/space) follows; scripts/village-space.ts checks it.
+await fs.writeFile('ui/world/village/space/applet-optical-scales.json',JSON.stringify(scales,null,2)+'\n');
 await fs.writeFile('resources/styles/builtin/drafts/remaining-bold/scale-audit.json',JSON.stringify({reference:'youtube',bodyLimit,adjustments,measurements,scales},null,2)+'\n');
 console.log('Calibrated '+Object.keys(scales).length+' Applets, static sprites.');
