@@ -228,6 +228,11 @@
 /* Entering: the chosen apps gather and become their devices while the page fades. */
 .setup-gathering{position:fixed;inset:0;pointer-events:none;z-index:2}
 .setup-gathering img{position:absolute;width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 3px 5px #35453025)}
+.setup-gathering .setup-parcel{position:absolute;margin:0;transform-origin:50% 50%;will-change:transform,opacity}
+.setup-gathering .setup-parcel img{position:static;width:28px;height:28px;filter:none}
+.setup-gathering img.setup-gathering-fox{transform:translate(-50%,-50%);filter:drop-shadow(0 6px 10px #35453030)}
+/* The setup's entrance animation holds its opacity, so it stops before everything else fades (owner request 2026-10-10). */
+.world-startup.is-gathering .startup-setup{animation:none}
 .world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::before{opacity:0;transition:opacity .4s}
 .world-startup.setup-entering{transition:opacity .7s ease}
 @media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::before{transition:none}}

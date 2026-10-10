@@ -16,14 +16,14 @@ import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
 // Local Agent marks: Claude Code and Codex reuse their Applet logos; the rest ship in resources/brands.
 const AGENT_ICONS:Record<string,string>={'claude-code':appLogoSource({key:'claude-code'})||'','codex':appLogoSource({key:'codex'})||'',hermes:'brands/hermes.png',openclaw:'brands/openclaw.svg',pi:'brands/pi.svg'};
-// The name the big button gives an Agent without a name of its own: "Give Hermes a world".
+// The short name for an Agent without a name of its own: "Moving Hermes in…".
 const AGENT_SHORT:Record<string,string>={hermes:'Hermes',openclaw:'OpenClaw',pi:'pi',codex:'Codex','claude-code':'Claude Code'};
 // The page picks one local Agent for the person, in this order (owner request 2026-10-06): Hermes, OpenClaw and pi
 // first, then Codex, then Claude Code.
 const AGENT_PRIORITY=['hermes','openclaw','pi','codex','claude-code'];
 const node=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.textContent=text;e.className=cls;return e;};
 /** First-use setup lives on the loading curtain, as one page (owner request 2026-10-09): the brand on top, the Agents
- * found here as cards, every other way in folded under More options, and one big "Give {agent} a world". Choosing
+ * found here as cards, every other way in folded under More options, and one big "Build your world" (owner request 2026-10-10). Choosing
  * brings the Agent in on the same page: its card moves left while what comes along appears on the right, tile by tile,
  * and the button becomes "Enter your world". No model turn or source read gates entry. */
 /** `move`: someone who used Fox's own Hermes chooses the Agent Fox runs on from now on (owner decisions 2026-10-09: no
@@ -304,23 +304,45 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   await call('onboarding',{operation:'setup',applets:[...selected]});
   const snapshot=await call('snapshot');
   const gathering=node('div','','setup-gathering');loader.append(gathering);
-  // Every chosen app gathers: an icon shown in the Apps tile flies from its place, the rest come in from the middle.
+  // Enter your world (owner request 2026-10-10): everything else fades; the apps line up on top and become the World's
+  // icons; Fox goes to the bottom and draws in what came along (Profile, Conversations, Skills…); then the icons and Fox
+  // go into the World together.
+  const still=reduced();
+  const foxFrom=panel.querySelector('.setup-tile-fox')?.getBoundingClientRect();
+  const fox=image('assets/fox-startup.png','setup-gathering-fox');
+  const foxSize=Math.round(Math.min(170,innerHeight*.22)),foxX=innerWidth/2,foxY=innerHeight-foxSize*.62-Math.min(48,innerHeight*.05);
+  Object.assign(fox.style,{left:foxX+'px',top:foxY+'px',width:foxSize+'px',height:foxSize+'px'});gathering.append(fox);
+  const parcels=Array.from(panel.querySelectorAll<HTMLElement>('.setup-tile:not(.setup-tile-avatar):not(.setup-tile-apps):not(.is-empty)')).map(tile=>{
+   const r=tile.getBoundingClientRect(),copy=tile.cloneNode(true) as HTMLElement;
+   copy.classList.remove('is-arriving');copy.classList.add('setup-parcel');copy.removeAttribute('data-key');
+   Object.assign(copy.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});gathering.append(copy);
+   return copy;
+  });
+  const foxFlight=fox.animate([foxFrom?{left:foxFrom.left+foxFrom.width/2+'px',top:foxFrom.top+foxFrom.height/2+'px',width:foxFrom.width+'px',height:foxFrom.width+'px'}:{opacity:0},{left:foxX+'px',top:foxY+'px',width:foxSize+'px',height:foxSize+'px',opacity:1}],{duration:still?0:650,easing:'cubic-bezier(.22,.7,.2,1)'}).finished;
+  // Every chosen app gathers on top: an icon shown in the Apps tile flies from its place, the rest come in from the middle.
   const shelf=panel.querySelector('.setup-tile-apps');
   const iconsToGather=WORLD_APPS.filter(a=>selected.has(a.id)).map(app=>{
    const shown=panel.querySelector<HTMLImageElement>('.setup-app[data-applet-id="'+CSS.escape(app.id)+'"] .setup-app-logo');
    const img=shown||image(appIcon(app),'setup-app-logo');img.dataset.appletId=app.id;return img;
   });
-  const still=reduced();
   const tile=(shelf||panel).getBoundingClientRect();
   const flights=iconsToGather.map((img,i)=>{
    const r=img.getBoundingClientRect(),copy=img.cloneNode() as HTMLImageElement;gathering.append(copy);
    const visible=img.isConnected&&r.width>0&&r.top>=tile.top&&r.bottom<=tile.bottom;
    const x=visible?r.left+r.width/2:innerWidth/2,y=visible?r.top+r.height/2:innerHeight*.5;
-   const columns=Math.min(6,iconsToGather.length),rows=Math.ceil(iconsToGather.length/columns),spacing=Math.min(140,(innerWidth-80)/columns,(innerHeight-140)/rows);
-   const targetX=innerWidth*.5+((i%columns)-(columns-1)/2)*spacing,targetY=innerHeight*.45+(Math.floor(i/columns)-(rows-1)/2)*spacing;
+   const columns=Math.min(8,iconsToGather.length),rows=Math.ceil(iconsToGather.length/columns),spacing=Math.min(120,(innerWidth-80)/columns,(innerHeight*.42)/rows);
+   const row=Math.floor(i/columns),inRow=row<rows-1?columns:iconsToGather.length-columns*row;
+   const targetX=innerWidth*.5+((i%columns)-(inRow-1)/2)*spacing,targetY=innerHeight*.3+(Math.floor(i/columns)-(rows-1)/2)*spacing;
    return copy.animate([{left:x+'px',top:y+'px',opacity:visible?1:0,transform:'translate(-50%,-50%) scale(1)'},{left:targetX+'px',top:targetY+'px',opacity:1,transform:'translate(-50%,-50%) scale(.85)'}],{duration:still?0:650,easing:'cubic-bezier(.22,.7,.2,1)',fill:'forwards'}).finished;
   });
-  loader.classList.add('is-gathering');await Promise.all(flights);
+  loader.classList.add('is-gathering');await Promise.all([...flights,foxFlight]);
+  // What came along drifts down into Fox, one after another; Fox brightens a little as each arrives.
+  await Promise.all(parcels.map(async (parcel,i)=>{
+   const r=parcel.getBoundingClientRect(),dx=foxX-(r.left+r.width/2),dy=foxY-(r.top+r.height/2),delay=still?0:i*110;
+   await parcel.animate([{transform:'none',opacity:1},{transform:`translate(${dx*.55}px,${dy*.55}px) scale(.45)`,opacity:.9,offset:.6},{transform:`translate(${dx}px,${dy}px) scale(.04)`,opacity:0}],{duration:still?0:620,delay,easing:'cubic-bezier(.55,0,.35,1)',fill:'forwards'}).finished;
+   parcel.remove();
+   if(!still)fox.animate([{filter:'brightness(1)'},{filter:'brightness(1.25) drop-shadow(0 0 14px #ffe4a0)'},{filter:'brightness(1)'}],{duration:320});
+  }));
   // Let the user see each familiar flat icon become its actual device before opening.
   await Promise.all(Array.from(gathering.querySelectorAll<HTMLImageElement>('img')).map(async (logo,i)=>{
    const app=WORLD_APPS.find(a=>a.id===logo.dataset.appletId);
@@ -603,7 +625,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    if(remoteForm){primary=button(pairingRemote?'Connecting to your other computer…':'Connect',pairRemote,true);primary.classList.toggle('is-loading',pairingRemote);if(!remoteCode.trim()||pairingRemote||signingIn)primary.disabled=true;}
    else if(!agents.length&&!detectingAgents&&!connectingAgent){
     const working=hermesSetup==='installing'||hermesSetup==='signing-in';
-    primary=button(hermesSetup==='installing'?'Installing Hermes Agent…':hermesSetup==='signing-in'?'Waiting for ChatGPT…':hermesSetup==='installed'?'Sign in with ChatGPT':agentText('Give {agent} a world','Hermes'),hermesSetup==='installed'?signInHermes:installHermes,true);
+    primary=button(hermesSetup==='installing'?'Installing Hermes Agent…':hermesSetup==='signing-in'?'Waiting for ChatGPT…':hermesSetup==='installed'?'Sign in with ChatGPT':'Build your world',hermesSetup==='installed'?signInHermes:installHermes,true);
     primary.classList.toggle('is-loading',working);if(working||signingIn)primary.disabled=true;
    }
    else if(outdated(picked)&&!going){
@@ -613,7 +635,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     if(signingIn)primary.disabled=true;
    }
    else{
-    primary=button(going?agentText('Connecting to {agent}…',going.title):agentText('Give {agent} a world',picked?giveName(picked):t('your agent')),()=>chooseAgent(picked),true);
+    primary=button(going?agentText('Connecting to {agent}…',going.title):'Build your world',()=>chooseAgent(picked),true);
     primary.classList.toggle('is-loading',!!going);if(!picked||!agents.some(a=>a.id===picked)||signingIn)primary.disabled=true;
    }
    if((error||notice)&&!formOpen){const feedback=node('p',t(error||notice),error?'setup-error':'setup-note');if(error)feedback.setAttribute('role','alert');status.append(feedback);}

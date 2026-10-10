@@ -95,7 +95,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   if(await js("(()=>{const d=document.querySelector('.setup-agent-default');return !!d&&d.checkVisibility()&&!d.closest('.setup-more');})()")!==true)throw Error(`no default local Agent above More options\n  screen: ${await seen()}`);
   await js(`document.querySelector(':is(.setup-agent-default,.setup-agent-button)[data-agent=${JSON.stringify(choice)}]').click();true`);
   mark(`picked the local Agent ${choice}`);
-  // The page's one big button, Give {agent} a world, brings the picked Agent (owner requests 2026-10-06, 2026-10-09): the host
+  // The page's one big button, Build your world, brings the picked Agent (owner requests 2026-10-06, 2026-10-09): the host
   // proves it answers before Fox uses it, then the same page brings it in (its own files are only read); Enter your world turns on once it came over.
   await js("document.querySelector('.setup-next').click();true");
   await wait('the Agent moving in',shown('.setup-import'),300);
