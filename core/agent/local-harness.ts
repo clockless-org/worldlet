@@ -6,6 +6,8 @@ import type {HarnessApprovalResult,HarnessTool} from '../../contracts/harness-se
 import {harnessToolsLine} from './harness-tools.ts';
 import {acpChangesUpdate,approvalChanges,type ApprovalChanges} from './harness-approvals.ts';
 import {hermesAcpAnnouncement,type HermesAnnouncedCall} from './hermes-server.ts';
+import {piModelArguments} from './model-providers.ts';
+import {acpModels} from './harness-models.ts';
 
 export type LocalHarnessId='claude-code'|'codex'|'hermes'|'openclaw'|'pi';
 export interface LocalHarnessDefinition {
@@ -132,7 +134,7 @@ const toml=(value:string)=>JSON.stringify(value);
 /** `acp`: the turn is a conversation over stdin and stdout (Hermes Agent's Agent Client Protocol), not one prompt:
  * stdin stays open, the stream's replies (`outbox`) are written back as they come, and `prompt` is sent once the
  * session exists. `cwd` is the turn's working folder, which that protocol names explicitly. */
-export interface LocalHarnessInvocation {args:string[];stdin:string|null;acp?:{prompt:string}}
+export interface LocalHarnessInvocation {args:string[];stdin:string|null;acp?:{prompt:string;model?:string}}
 const rpc=(id:number,method:string,params:Record<string,unknown>)=>JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n';
 
 /** OpenClaw reads one configuration file; this one for a single turn includes the person's own (`$include`, which
@@ -146,7 +148,8 @@ export function openClawToolConfig(include:string|null,server:WorldToolServer):s
 /** `config`: an OpenClaw configuration for this turn (openClawToolConfig); `workspace`: the person's OpenClaw
  * workspace, so its own persona, memory and instructions come along. `agent`: one of the person's other agents
  * (HarnessSessionKey.agent): Hermes Agent's profile (`-p`); OpenClaw's `agent exec` has no agent flag, so that
- * agent's `workspace` and `model` stand for it; `model` is also the one chosen for an Applet's thread (`--model`). */
+ * agent's `workspace` and `model` stand for it; `model` is also the one chosen for an Applet's thread (`--model`), or the
+ * chosen provider's model (model-providers.ts), on each Harness's own per-turn switch. */
 export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;prompt:string},server:WorldToolServer|null=null,{cwd='.',config=null,workspace=null,agent=null,model=null}:{cwd?:string;config?:string|null;workspace?:string|null;agent?:string|null;model?:string|null}={}):LocalHarnessInvocation {
  if(server&&worldToolSecretInEnv(server.env))throw Error('World tool secrets must be passed by file, not on the command line.');
  const combined=turn.system+'\n\n'+turn.prompt;
@@ -159,7 +162,7 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
   // Only Worldlet's MCP server starts (the person's own servers would start every turn for tools Fox
   // cannot use), and Fox's turns stay out of the person's Claude Code history.
   case 'claude-code':return {args:['-p','--input-format','stream-json','--output-format','stream-json','--verbose','--include-partial-messages','--tools','',
-   '--strict-mcp-config','--no-session-persistence',
+   '--strict-mcp-config','--no-session-persistence',...model?['--model',model]:[],
    ...server?['--mcp-config',JSON.stringify({mcpServers:{[WORLD_TOOL_SERVER]:server}}),'--allowedTools',...WORLD_GATEWAY_TOOLS.map(name=>`mcp__${WORLD_TOOL_SERVER}__${name}`)]:[],
    '--append-system-prompt',turn.system],stdin:JSON.stringify({type:'user',message:{role:'user',content:turn.prompt}})+'\n'};
   // `codex exec -` reads the prompt from stdin; a read-only sandbox outside any repository.
@@ -167,7 +170,7 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
   // `codex exec` has no one to answer an approval prompt and cancels a tool call that would ask
   // ("user cancelled MCP tool call", openai/codex#16685, #24135); Worldlet's gateway already
   // decides permissions, so its two tools are pre-approved (codex#16632's per-tool approval_mode).
-  case 'codex':return {args:['exec','--json','--skip-git-repo-check','--sandbox','read-only',
+  case 'codex':return {args:['exec','--json','--skip-git-repo-check','--sandbox','read-only',...model?['--model',model]:[],
    ...server?['-c',`mcp_servers.${WORLD_TOOL_SERVER}.command=${toml(server.command)}`,'-c',`mcp_servers.${WORLD_TOOL_SERVER}.args=[${server.args.map(toml).join(',')}]`,
     '-c',`mcp_servers.${WORLD_TOOL_SERVER}.env={${Object.entries(server.env).map(([key,value])=>`${key}=${toml(value)}`).join(',')}}`,'-c',`mcp_servers.${WORLD_TOOL_SERVER}.tool_timeout_sec=600`,
     ...WORLD_GATEWAY_TOOLS.flatMap(name=>['-c',`mcp_servers.${WORLD_TOOL_SERVER}.tools.${name}.approval_mode="approve"`])]:[],
@@ -178,7 +181,7 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
   case 'hermes':return {args:[...agent?['-p',agent]:[],'acp'],
    stdin:rpc(1,'initialize',{protocolVersion:1,clientCapabilities:{fs:{readTextFile:false,writeTextFile:false},terminal:false}})
     +rpc(2,'session/new',{cwd,mcpServers:server?[{name:WORLD_TOOL_SERVER,command:server.command,args:server.args,env:Object.entries(server.env).map(([name,value])=>({name,value}))}]:[]}),
-   acp:{prompt:combined}};
+   acp:{prompt:combined,...model?{model}:{}}};
   // `agent exec` runs one embedded turn without a running Gateway (its own throwaway session and state, the
   // person's model and sign-in); `-` reads the message from stdin. `--cwd` makes the person's workspace the
   // Agent's own, `--config` adds World tools for this turn without editing their openclaw.json.
@@ -186,7 +189,7 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
   // pi has no MCP client, so the two tools come as an extension file for this run (`-e`). `--tools` allows only
   // those two (`--no-tools` would drop extension tools too) and keeps its own coding tools off; the person's
   // own extensions are not loaded, explicit `-e` paths still are.
-  case 'pi':return {args:['--mode','json','--no-session',
+  case 'pi':return {args:['--mode','json','--no-session',...model?piModelArguments(model):[],
    ...server?.extension?['--no-extensions','-e',server.extension,'--tools',WORLD_GATEWAY_TOOLS.join(',')]:['--no-tools'],
    '--append-system-prompt',turn.system,argument],stdin:null};
  }
@@ -198,8 +201,8 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
  * reading and ends the process; `asks`: permission prompts the host puts to the person (null: declined at once);
  * `changes`: their tool calls, so `results` says what an allowed one changed (core/agent/harness-approvals.ts). */
 /** `announced`: calls to Worldlet's standing server Hermes announced before running them (HermesOwnCalls). */
-export interface LocalHarnessStream {text:string;final:string|null;error:string|null;buffered:string;outbox:string[];done:boolean;acp:{prompt:string;session:string|null}|null;asks:{rpc:unknown;params:unknown}[]|null;changes:ApprovalChanges|null;results:HarnessApprovalResult[];announced:HermesAnnouncedCall[]}
-export const localHarnessStream=(acp?:{prompt:string},{ask=false}:{ask?:boolean}={}):LocalHarnessStream=>({text:'',final:null,error:null,buffered:'',outbox:[],done:false,acp:acp?{prompt:acp.prompt,session:null}:null,asks:ask?[]:null,changes:ask?approvalChanges():null,results:[],announced:[]});
+export interface LocalHarnessStream {text:string;final:string|null;error:string|null;buffered:string;outbox:string[];done:boolean;acp:{prompt:string;model:string|null;session:string|null}|null;asks:{rpc:unknown;params:unknown}[]|null;changes:ApprovalChanges|null;results:HarnessApprovalResult[];announced:HermesAnnouncedCall[]}
+export const localHarnessStream=(acp?:{prompt:string;model?:string},{ask=false}:{ask?:boolean}={}):LocalHarnessStream=>({text:'',final:null,error:null,buffered:'',outbox:[],done:false,acp:acp?{prompt:acp.prompt,model:acp.model??null,session:null}:null,asks:ask?[]:null,changes:ask?approvalChanges():null,results:[],announced:[]});
 /** The answer to a permission prompt the host held (`asks`), as the line written back to the Harness. */
 export const acpPermissionReply=(rpc:unknown,outcome:unknown)=>JSON.stringify({jsonrpc:'2.0',id:rpc,result:outcome})+'\n';
 
@@ -256,12 +259,23 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
     }else reply({error:{code:-32601,message:'Method not found'}});
     return '';
    }
+   const prompt=()=>state.outbox.push(rpc(3,'session/prompt',{sessionId:state.acp!.session,prompt:[{type:'text',text:state.acp!.prompt}]}));
+   // 4 session/set_model, before the prompt, when a provider is chosen: a Hermes Agent too old to switch (no such
+   // method) answers with its own default; a model it refuses ends the turn with its reason.
+   if(event.id===4&&state.acp){
+    const failure=record(event.error);
+    if(event.error!==undefined&&failure.code!==-32601){state.error=errorText(event.error,'Hermes Agent could not switch its model.');state.done=true;return '';}
+    prompt();return '';
+   }
    if(event.error!==undefined){state.error=errorText(event.error,'Hermes Agent could not answer.');state.done=true;return '';}
    const result=record(event.result);
    if(event.id===2&&state.acp){
     if(typeof result.sessionId!=='string'){state.error='Hermes Agent did not start a conversation.';state.done=true;return '';}
     state.acp.session=result.sessionId;
-    state.outbox.push(rpc(3,'session/prompt',{sessionId:result.sessionId,prompt:[{type:'text',text:state.acp.prompt}]}));
+    // Only a model its session lists: a provider the Agent is not signed in to leaves its own default.
+    const listed=acpModels(result);
+    if(state.acp.model&&(!listed.length||listed.some(model=>model.id===state.acp!.model)))state.outbox.push(rpc(4,'session/set_model',{sessionId:result.sessionId,modelId:state.acp.model}));
+    else prompt();
    }
    if(event.id===3){
     if(result.stopReason==='refusal')state.error='Hermes Agent declined to answer.';

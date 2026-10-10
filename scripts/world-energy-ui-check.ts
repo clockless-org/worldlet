@@ -19,6 +19,11 @@ try{
   if(b.action==='agentHarness'&&b.operation==='forget-gateway'){w.gateway=null;return {ok:true};}
   if(b.action==='agentHarness'&&b.operation==='pair'){w.remote='Mac mini';return {ok:true,remote:{computer:'Mac mini'}};}
   if(b.action==='agentHarness'&&b.operation==='select'){w.agentInUse=b.id;return {ok:true,id:b.id};}
+  // The provider the Agent in use answers with (core/agent/model-providers.ts): every one it supports, signed in or not.
+  if(b.action==='agentHarness'&&b.operation==='providers')return w.agentInUse?{agent:'hermes',title:'Hermes Agent',chosen:w.provider??null,providers:[
+   {id:'chatgpt',name:'ChatGPT',account:'Your ChatGPT plan',signedIn:true,signIn:true},{id:'anthropic',name:'Anthropic',account:'Your Claude plan or Anthropic API key',signedIn:false,signIn:true},
+   {id:'opencode-go',name:'OpenCode Go',account:'Your OpenCode Go subscription',signedIn:true,signIn:true}]}:{agent:null,providers:[],chosen:null};
+  if(b.action==='agentHarness'&&b.operation==='provider'){w.provider=b.id;return {ok:true,chosen:b.id};}
   if(b.action==='agentHarness'&&b.operation==='clear'){w.agentInUse=null;w.remote=null;if(w.gateway)w.gateway.active=false;return {ok:true};}
   if(b.action==='codexSession')return {rateLimits:{primary:{usedPercent:30,windowDurationMins:300,resetsAt:Math.floor(Date.now()/1000)+3600},secondary:{usedPercent:55,windowDurationMins:10080,resetsAt:Math.floor(Date.now()/1000)+86400}}};
   return {ok:true};
@@ -134,6 +139,22 @@ try{
  await model.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await model.locator('[data-agent=claude-code]').getByRole('button',{name:'Stop using',exact:true}).waitFor();
  await model.getByText('Claude Code on this computer answers for Fox.').waitFor();
+ // Only a provider is chosen, never a model (owner decisions 2026-10-10); one not signed in yet signs in in the Agent.
+ await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
+ const anthropic=model.locator('[data-provider=anthropic]');
+ await anthropic.getByText('Not signed in to it in Hermes Agent yet.',{exact:true}).waitFor();
+ assert.equal(await anthropic.getByRole('button',{name:'Use',exact:true}).count(),0,'a provider not signed in cannot be used yet');
+ await anthropic.getByRole('button',{name:'Sign in',exact:true}).click();
+ await model.getByText('Hermes Agent opens in Terminal to sign in to Anthropic. When it is done, choose Check connection.',{exact:true}).waitFor();
+ assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='provider-sign-in'&&c.id==='anthropic')));
+ await model.locator('[data-provider=opencode-go]').getByRole('button',{name:'Use',exact:true}).click();
+ await model.locator('[data-provider=opencode-go]').getByText('OpenCode Go · In use',{exact:true}).waitFor();
+ await model.getByText('Fox now answers with OpenCode Go.',{exact:true}).waitFor();
+ assert.equal(await model.getByText(/gpt-|claude-|glm-|S\/M\/L/).count(),0,'no model names are shown');
+ await model.locator('[data-provider=own]').scrollIntoViewIfNeeded();await model.locator('[data-provider=opencode-go]').evaluate(e=>e.scrollIntoView({block:'end'}));
+ await page.screenshot({path:'/tmp/world-energy-providers.png'});
+ await model.locator('[data-provider=own]').getByRole('button',{name:'Use',exact:true}).click();
+ await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
  assert.deepEqual(errors,[]);
- console.log('PASS world energy: no battery in the World, one low-energy line, Energy page with only the person\'s own sources, connecting in place; Settings, Model switches Agents and shows the last reply\'s problem with its fix; with no model, Fox points to Settings, Model');
+ console.log('PASS world energy: no battery in the World, one low-energy line, Energy page with only the person\'s own sources, connecting in place; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model');
 }finally{await browser.close();}

@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,LOCAL_HARNESS_SPARE,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,chosenModel,LOCAL_HARNESS_SPARE,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -235,8 +235,10 @@ export class LocalHarnessRuntime implements AgentRuntime {
  /** Where a conversation turn's own process puts its permission prompts (null: they are declined). */
  private readonly approvals:TurnApprovals|null;
  private asking:string[]=[];
- constructor(install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),onActivity:(runtime:LocalHarnessRuntime,running:boolean)=>void=()=>{},spares:SpareTurns|null=null,conversation:ResidentConversation|null=null,approvals:TurnApprovals|null=null){
-  this.install=install;this.environment=environment;this.onActivity=onActivity;
+ /** The chosen provider's model for this Agent's turns (model-providers.ts), null for its own default. */
+ private readonly route:()=>string|null;
+ constructor(install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),onActivity:(runtime:LocalHarnessRuntime,running:boolean)=>void=()=>{},spares:SpareTurns|null=null,conversation:ResidentConversation|null=null,approvals:TurnApprovals|null=null,route:()=>string|null=()=>null){
+  this.install=install;this.environment=environment;this.onActivity=onActivity;this.route=route;
   this.spares=LOCAL_HARNESS_SPARE.includes(install.id)?spares:null;
   this.conversation=conversation;this.approvals=approvals;
  }
@@ -260,7 +262,6 @@ export class LocalHarnessRuntime implements AgentRuntime {
     const found=openClawAgents(this.environment.home,this.environment.env,(settings&&typeof settings==='object'?settings:{}) as Record<string,any>).find(item=>item.id===agent);
     workspace=found?.workspace??workspace;model=openClawAgentModel(settings,agent)??null;
    }
-   if(chosen)model=chosen;
    if(bridge){
     config=path.join(home,`worldlet-openclaw-${crypto.randomUUID().slice(0,8)}.json`);
     writeAtomic(config,openClawToolConfig(fs.existsSync(own)?own:null,bridge.server),0o600);
@@ -269,6 +270,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
     const close=bridge.close,file=config;bridge.close=()=>{close();fs.rmSync(file,{force:true});};
    }
   }
+  if(chosen)model=chosen;
   try{
    const invocation=localHarnessInvocation(this.install.id,turn,bridge?.server??null,{cwd:home,config,workspace,agent,model});
    child=spawn(this.install.command,[...this.install.prefix,...invocation.args],{cwd:home,env,stdio:['pipe','pipe','pipe'],windowsHide:true});
@@ -299,13 +301,20 @@ export class LocalHarnessRuntime implements AgentRuntime {
  private async warm(body:Row,home:string):Promise<Row> {
   const conversation=this.conversation&&body._background!==true&&body.mode!=='setup'?this.conversation:null;
   if(!conversation||this.session||this.child)return {warm:false};
-  const agent=isHarnessAgentId(body.harnessAgent)?body.harnessAgent:null,model=isHarnessModelId(body.harnessModel)?body.harnessModel:undefined;
+  const agent=isHarnessAgentId(body.harnessAgent)?body.harnessAgent:null,model=this.model(body,agent)??undefined;
   try{
    if(await conversation.unavailable(agent??undefined)!==null)return {warm:false};
    const session=await conversation.open({world:this.world(body),thread:harnessSessionThread(body.thread),...agent?{agent}:{}},{home,sample:body.sample===true});
    await session.prepare(model);
    return {warm:true};
   }catch{return {warm:false};}
+ }
+ /** The model a turn uses: the one chosen for its thread (an Applet's), else the chosen provider's for the person's own
+  * Agent (not another of their agents, which keeps its own), else null and the Agent's own default. */
+ private model(body:Row,agent:string|null):string|null {
+  if(isHarnessModelId(body.harnessModel))return body.harnessModel;
+  if(agent)return null;
+  try{return this.route();}catch{return null;}
  }
  /** `harnessWorld`: a turn another Worldlet sent (core/phone remoteTurnBody) keeps its threads apart from this World's. */
  private world(body:Row){return body.sample!==true&&typeof body.harnessWorld==='string'&&/^remote:[A-Za-z0-9._-]{1,60}$/.test(body.harnessWorld)?body.harnessWorld:body.sample===true?'sample':'private';}
@@ -334,7 +343,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   const conversation=this.conversation&&body._background!==true&&body.mode!=='setup'?this.conversation:null;
   // The person's other agent and the model chosen for this thread (an Applet's), in the session and the per-turn
   // fallback alike.
-  const agent=isHarnessAgentId(body.harnessAgent)?body.harnessAgent:null,model=isHarnessModelId(body.harnessModel)?body.harnessModel:null;
+  const agent=isHarnessAgentId(body.harnessAgent)?body.harnessAgent:null,model=this.model(body,agent);
   if(conversation){
    const reason=await conversation.unavailable(agent??undefined);
    if(reason===null){conversation.noted=null;return this.converse(conversation,body,home,tools,sample,agent,model,harnessTools,{events,emit,say,started:()=>started});}
@@ -354,7 +363,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
    return answer&&typeof answer==='object'?answer as Row:{error:'World tool is unavailable.'};
   };
   const {child,bridge}=harness;
-  const invocation=localHarnessInvocation(id,turn,bridge?.server??null,{cwd:home,agent});
+  const invocation=localHarnessInvocation(id,turn,bridge?.server??null,{cwd:home,agent,model});
   this.child=child;this.onActivity(this,true);
   // A conversation over stdin (Hermes Agent's ACP) keeps it open for the replies the stream asks for.
   if(invocation.acp)child.stdin!.write(invocation.stdin??'');
@@ -569,8 +578,10 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  make():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{
   if(running)this.running.add(runtime);else this.running.delete(runtime);
   if(!running&&!this.running.size&&this.restartWhenIdle){this.restartWhenIdle=false;this.conversation?.shutdown();}
- },this.spares,this.resident(),this.turnApprovals);}
- makeLane():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{if(running)this.lanes.add(runtime);else this.lanes.delete(runtime);});}
+ },this.spares,this.resident(),this.turnApprovals,this.route);}
+ makeLane():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{if(running)this.lanes.add(runtime);else this.lanes.delete(runtime);},null,null,null,this.route);}
+ /** The provider chosen for this Agent in Settings › Model (model-providers.ts): its chat-tier model, read per turn. */
+ private readonly route=()=>chosenModel(readAgentSetting(this.context.root,PROVIDER_SETTING),this.install.id);
  /** Applet tasks run beside the conversation on the background Agent. */
  get makeTask(){
   const background=this.background();
