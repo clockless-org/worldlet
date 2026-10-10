@@ -84,7 +84,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>document.querySelector('#notionWorld')!.scrollTop),0,'the World never scrolls out of place');
   await restore(saved);}
  await page.evaluate(()=>location.hash='object=app-browser');await page.locator('#notionContent[data-template=browser]').waitFor();await page.waitForTimeout(400);assert((await avatar.boundingBox()).x>moved.x+100,'Applet reader positions Fox in its reserved right lane');
- const reader=await page.locator('#notionContent').boundingBox();assert.equal(reader.x,16);assert.equal(reader.y,64);assert.equal(850-reader.y-reader.height,16);
+ const reader=await page.locator('#notionContent').boundingBox();assert.equal(reader.x,16);assert.equal(reader.y,150,'the panel starts below the Applet shelf (ui/hud/applet-shelf.ts)');assert.equal(850-reader.y-reader.height,16);
  assert(!await page.locator(SETTINGS_BUTTON).isVisible()&&!await page.locator('.world-today-open').isVisible(),'Journal and Settings step aside inside an Applet');
  await page.screenshot({path:'/tmp/companion-bar.png'});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
