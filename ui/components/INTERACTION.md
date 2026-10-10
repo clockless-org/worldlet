@@ -56,7 +56,7 @@ its records and isolation belong to the [demo guide](../practice/DEMO.md#sample-
 | Left | The Attention Center — Coming Up / Worth Doing / Worth Knowing as a game HUD; during Focus the left two thirds hold the reader, website or native panel |
 | Top center | Current context as plain text: region, Applet, Matter or original; genuine brand logos may accompany Applet titles, with no generic emoji fallback. Inside an Applet it is centered over the left two-thirds, the Applet's side of Fox's column |
 | Top bar | Back (World left of Fox on a website page); inside an Applet on a wide window the [Applet shelf](#applet-shelf) of recent Applets above it, and its own controls (Picture in picture, the Native / Web switch). A website page's Back, Forward, Refresh, Home, address and Focus are its toolbar's, in the panel above the page. The Applet's actions sit beside Fox. All bar controls are in the darker frosted material of Fox's round controls ([top bar](#top-bar)) |
-| Top right | Date and time, weather on the second line, the ambience and music icons below: greyer and fainter when off, still while playing, with a stable source label |
+| Top right | What Fox is doing right now (owner decision 2026-10-08): the Tutorial switch, and under it one quiet line while background work runs ("Making your morning brief…", "Drafting a reply: …") and, for a few seconds after, what is ready ("2 replies ready · Journal"), which opens the Journal ([Fox's background work](../companion/CONVERSATION.md#how-fox-talks-and-when-it-speaks-first)). The date, weather and sound head the Attention Center on the left |
 | Around Fox | World on the left; on the right at most three actions: the next item action, Connect, Have Fun. Fox keeps a reserved lane of its own in both widths: centred between its two wings, with a gutter, so no action is ever pressed against the avatar. Action titles always stay on one line, including Focus and enlarged text; overflow uses an ellipsis, with the full title available in the tooltip and accessible name |
 | Bottom center | Fox bust, input, reply bubble |
 | Bottom right | Faint Worldlet mark, version and build |
@@ -208,7 +208,7 @@ Bound in `ui/hud/native-hud.ts`.
 | --- | --- |
 | Top center | Current context title; icon only for an Applet. Inside an Applet, centered over the left two-thirds |
 | Top bar | Back at the start when a previous level exists; inside an Applet, the Applet shelf and the Applet's own controls at the end of its side |
-| Top right | Date/time, weather, audio; aligned to the same right edge, with stable source labels |
+| Top right | The Tutorial switch, then what Fox is doing right now and, briefly, what it just made (`ui/hud/fox-work-line.ts`); aligned to the same right edge |
 | Left | The Attention Center: Coming Up / Worth Doing / Worth Knowing, drawing only the groups that hold something. No heading over it; it is what it holds |
 | Beside Fox, left | World |
 | Beside Fox, right | At most three: the next item action (Review task / View event / Check update), Connect, Have Fun |

@@ -10,8 +10,8 @@ import {artifactBrief,artifactFitSteps,journalPages,madeArtifacts,readArtifact,t
  * the page corners and the day tabs on the book's edge turn the pages; a day with more cards than the book holds scrolls
  * inside its right leaf, and a narrow window shows one leaf. Opening one shows it again in the World; × forgets it (a made page's own
  * Applet deletes it). It reads again while it is open and something changes.
- * The morning brief (owner Order 2026-10-07) leaves a reply draft for each mail that waits for the person, a card of
- * its own on today's page: Send sends that exact draft, Edit changes its words in place, Skip drops it. Morning brief
+ * The morning brief (owner Order 2026-10-07), and Fox by itself for a new mail task (owner decision 2026-10-09,
+ * core/artifacts/replies.ts), leave a reply draft for each mail that waits for the person, a card of its own on today's page: Send sends that exact draft, Edit changes its words in place, Skip drops it. Morning brief
  * in the head says, in the person's words, what the 6 AM brief holds. */
 type Reply={id:string;kind:'reply';title:string;to:string;draft:Record<string,string>;createdAt:number;updatedAt:number};
 type Entry=Artifact|MadeArtifact|Reply;

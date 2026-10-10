@@ -61,9 +61,14 @@ export function dailyArtifactDue(state:DailyArtifactsState,now:Date):{kind:Daily
  if(hour>=DAILY_SUMMARY_HOUR){
   return usedToday&&!state.summary.includes(today)?{kind:'summary',day:today}:null;
  }
- const recent=dayKey(nextDay(today,-DAILY_PLAN_RECENT_DAYS));
- if(hour>=DAILY_PLAN_HOUR&&hour<DAILY_PLAN_UNTIL_HOUR&&Object.keys(state.used).some(k=>k>=recent)&&!state.plan.includes(today))return {kind:'plan',day:today};
+ if(hour>=DAILY_PLAN_HOUR&&hour<DAILY_PLAN_UNTIL_HOUR&&usedRecently(state,now)&&!state.plan.includes(today))return {kind:'plan',day:today};
  return null;
+}
+/** The person used Worldlet themselves in the last `DAILY_PLAN_RECENT_DAYS` days: the condition for any work Fox does
+ * on its own (the morning brief, replies prepared in the background), so an abandoned install spends nothing. */
+export function usedRecently(state:DailyArtifactsState,now:Date){
+ const recent=dayKey(nextDay(dayKey(now),-DAILY_PLAN_RECENT_DAYS));
+ return Object.keys(state.used).some(k=>k>=recent);
 }
 
 /** Local time with its UTC offset, as Fox's history and Calendar reads take it. */
@@ -79,9 +84,11 @@ const ground='Use only what you find in my World; skip a source that is not conn
 
 /** What the morning brief holds, in the person's own words, one part a line (owner Order 2026-10-07: "早报内容用户是可以
  * config的"). They write it under Morning brief in the Journal or tell Fox ("早报加上…"); empty means this default:
- * what was done overnight and today's schedule, nothing more (owner Order 2026-10-08: "早报里面就说今天的安排就行了，
- * 昨天夜里做了什么、今天的安排"). */
-export const MORNING_BRIEF_DEFAULT='What was done overnight\nToday’s schedule';
+ * what was done overnight, today's schedule (owner Order 2026-10-08: "早报里面就说今天的安排就行了，
+ * 昨天夜里做了什么、今天的安排"), and the replies Fox prepared for the mail that waits for the person, each a card to
+ * approve (owner decision 2026-10-09: Fox keeps working without being asked and the person only approves, so the brief
+ * also brings what Fox prepared, waiting for their approval). */
+export const MORNING_BRIEF_DEFAULT='What was done overnight\nToday’s schedule\nReplies ready for my mail';
 export const MORNING_BRIEF_LIMIT=240;
 /** At most this many reply drafts a morning, each a card of its own. */
 export const MORNING_BRIEF_REPLIES=5;

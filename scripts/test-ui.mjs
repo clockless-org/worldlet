@@ -36,7 +36,7 @@ export const parallelChecks=available([
  'scripts/world-asset-source-check.ts',
  'scripts/applet-resume-check.ts','scripts/applet-task-pip-check.ts',
  'scripts/fox-reader-controls-check.ts',
- 'scripts/fox-chat-fold-check.ts','scripts/fox-browse-ui-check.ts','scripts/fox-artifact-size-check.ts','scripts/artifacts-ui-check.ts','scripts/daily-plan-ui-check.ts',
+ 'scripts/fox-chat-fold-check.ts','scripts/fox-browse-ui-check.ts','scripts/fox-artifact-size-check.ts','scripts/artifacts-ui-check.ts','scripts/daily-plan-ui-check.ts','scripts/prepared-reply-ui-check.ts',
  'scripts/applet-stage-check.ts','scripts/calendar-events-ui-check.ts','scripts/calendar-attention-ui-check.ts','scripts/fox-tap-greeting-check.ts','scripts/work-applet-check.ts',
  'scripts/world-refresh-check.ts','scripts/world-scene-check.ts','scripts/feedback-ui-check.ts',
  'scripts/applet-preview-check.ts','scripts/world-audio-check.ts','scripts/local-music-check.ts',

@@ -355,6 +355,10 @@ Clicking an attention item opens its saved HUD preview without navigation or rem
 
 The HUD preview keeps facts in the card and proactive help beside Fox. The card settles with Done (tasks) or Got it (events and updates), and Later snoozes; its Dismiss only closes the card and leaves the item in the Center. Inside an item's Applet, Fox's options offer Snooze and Remove, which stores the `dismissed` status. Worth Knowing is acknowledged after its saved preview renders, without closing the card. Status changes use the existing `worldItemStatus` / `worldItemRead` bridge and preserve user-origin settlement. This is local state only: nothing is completed, archived or sent in the original service, and a later agent review cannot undo it. See [Attention Center](README.md) for entry actions and quiet recovery.
 
+### A reply Fox prepared
+
+A new Worth Doing item whose evidence is a Gmail thread (`sources` entry `thread:<id>`) can get a reply Fox prepares by itself (owner decision 2026-10-09, [replies Fox prepares](../artifacts/README.md#replies-fox-prepares)). The item is matched to its draft by that thread: the stored draft keeps the `threadId` it replies in (`emailAction` `list`), and while one waits the item's card shows "Fox drafted a reply · Review", which opens the Journal on it. Preparing never settles the item; the person still marks it Done.
+
 ### Which account is connected
 
 A connected account Applet opens its website, so the account itself is managed from the gear's **Accounts** entry: it lists every live connection with the account it is reading, and opens that Applet's panel to reconnect or disconnect. The connect confirmation and the Applet panel both name the account. Google authorization asks which account to use, so a browser already signed in as someone else cannot connect that account silently. Reconnect reuses a still-valid Google grant without opening the browser and keeps the same account, so the Accounts screen says to disconnect Google first to use a different Google account.

@@ -82,7 +82,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(!dialogue.includes('Your brief is ready'),'Fox says nothing about it');
   assert.ok(!dialogue.includes('Morning brief'),'no “You · Morning brief” line in Fox’s card');
   assert.ok(!dialogue.includes('Good morning'),'the request never shows');
-  assert.deepEqual(await page.evaluate(()=>(window as any).statuses),[{source:'daily',text:'Making your morning brief…'},{source:'daily',text:''}],'what Fox is doing is announced for a status line, then cleared');
+  assert.deepEqual(await page.evaluate(()=>(window as any).statuses),[{source:'daily',text:'Making your morning brief…'},{source:'daily',text:'',done:'Morning brief and 1 reply ready'}],'what Fox is doing is announced for a status line, then cleared with what was made');
   await page.waitForTimeout(31000);
   assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='agentChat').length),1,'once a day');
 

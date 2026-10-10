@@ -22,7 +22,7 @@ import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../core/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
-import {artifactFitProblem,artifactId,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,journalWaiting,journalSeen,dayKey,dailyArtifactDue,dailyArtifactRequest} from '../../core/artifacts/index.ts';
+import {artifactFitProblem,artifactId,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,journalWaiting,journalSeen,dayKey,dailyArtifactDue,dailyArtifactRequest,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE} from '../world/index.ts';
@@ -1048,8 +1048,14 @@ export function mountNotionWorld(data: World, native: any) {
    // Changed evidence for this task, found by a background pass, is decided here, not in Fox's dialog (owner Order 2026-10-07).
    attentionPreview.setReview(native?.taskReview?taskReviewLine(data.taskReviews,id,(review,choice,candidate)=>native.taskReview(review,choice,candidate)
     .then(result=>{if(result?.error)throw Error(result.error);attentionPreview.setReview(null);}).catch(e=>notify(e.message))):null);
+   // A reply Fox prepared for this item waits in the Journal (owner decision 2026-10-09): one line says so and opens it.
+   showDraftLine(page);if(native?.emailReviews&&kind==='task')void readDrafts().then(()=>{if(attentionPage===page)showDraftLine(page);}).catch(()=>{});
    voice?.setAttentionActions?.([]);
    voice?.setGuide?.({source:'attention-preview:'+id,takeover:true,text:attentionPreviewData(page).suggestion,remember:true,actions:primary});voice?.revealGuide?.();
+  }
+  function showDraftLine(page){
+   const thread=page.worldItemKind==='task'?replyThread({sources:page.worldItemSources}):'',draft=thread?waitingDrafts.find(d=>d.thread===thread):null;
+   attentionPreview.setDraft(draft?{text:'Fox drafted a reply',label:'Review',run:()=>{closeAttentionPreview(false);window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day:dayKey(new Date(draft.createdAt*1000||Date.now()))}}));}}:null);
   }
   const itemPage=(id:string)=>[...pages.values()].find(p=>p.worldItemId===id);
   function previewAttention(item){
@@ -1354,14 +1360,28 @@ export function mountNotionWorld(data: World, native: any) {
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)arrived();setTimeout(openWaitingJournal,400);});
   // The person opened the book themselves: today's page is seen.
   document.addEventListener('worldlet:journal-opened',()=>{if(daily.journal){daily=journalSeen(daily);saveDaily();}},true);
+  // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
+  // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
+  const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep||!!root.dataset.tourCoda,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking});
   const dailyPoll=setInterval(()=>{
     if(!root.isConnected){clearInterval(dailyPoll);return;}
     openWaitingJournal();
-    if(data.sample||navigator.webdriver||dailyAsking||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||foxArtifact.visible||$('notionDialog').open||voice?.active||native?.firstRun?.()||!!root.dataset.tourStep||!!root.dataset.tourCoda)return;
-    const due=dailyArtifactDue(daily,new Date());if(!due)return;
+    if(backgroundMoment()||foxArtifact.visible||$('notionDialog').open||voice?.active)return;
+    const due=dailyArtifactDue(daily,new Date());
+    if(!due){void prepareReply();return;}
     if(due.kind==='summary'&&(document.hidden||insideApplet()||inPageLayer()))return;
     void askDaily(due);
   },30000);
+  // What Fox is doing, for its name tag and the World's top-right (worldlet:fox-status): the step while it works, then
+  // empty with what was done, which the top-right shows briefly (ui/hud/fox-work-line.ts). Reply drafts made meanwhile
+  // are counted from the host's worldlet:email-drafted.
+  function backgroundWork(source:string,kind:FoxWorkKind,text:string){
+    let drafted=0;const count=()=>{drafted++;};
+    window.addEventListener('worldlet:email-drafted',count);
+    window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text}}));
+    return {drafted:()=>drafted,end(ok:boolean){window.removeEventListener('worldlet:email-drafted',count);
+     window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text:'',...(ok?{done:foxWorkDone(kind,drafted)}:{})}}));}};
+  }
   async function askDaily(due:{kind:'plan'|'summary';day:string}){
     dailyAsking=true;
     // What the brief holds, as the person wrote it (Morning brief in the Journal, or told to Fox).
@@ -1370,13 +1390,51 @@ export function mountNotionWorld(data: World, native: any) {
     const request=dailyArtifactRequest(due.kind,due.day,brief);
     // Made quietly in a background session beside the conversation (owner Orders 2026-10-07): no message in Fox's card
     // and no reply line, the person can talk to Fox meanwhile, and the long request never fills the conversation.
-    // What Fox is doing, for a status line beside Fox (worldlet:fox-status); empty when done.
-    const status=(text:string)=>window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source:'daily',text}}));
-    status(due.kind==='plan'?'Making your morning brief…':'Writing the day’s summary…');
+    const work=backgroundWork('daily',due.kind,due.kind==='plan'?'Making your morning brief…':'Writing the day’s summary…');
+    let ok=true;
     // Other background work still running: asked again at the next poll.
     await Promise.resolve(voice?.background?.(request.text,{displayText:request.displayText}))
-     .catch(error=>{if(/busy/i.test(String(error?.message||''))){daily=before;saveDaily();}})
-     .finally(()=>{status('');dailyAsking=false;});
+     .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||''))){daily=before;saveDaily();}})
+     .finally(()=>{work.end(ok);dailyAsking=false;});
+  }
+  // Replies Fox prepares by itself (owner decision 2026-10-09; rules in core/artifacts/replies.ts): a new Worth Doing
+  // item from a Gmail thread that waits for the person gets a reply draft in a background session, a reply card in
+  // today's Journal that only the person sends. Each item once, a few a day, for someone who used Worldlet lately.
+  const repliesKey='worldlet-prepared-replies-'+(data.workspaceId||data.workspace);
+  let replies=readPreparedRepliesState(null);try{replies=readPreparedRepliesState(JSON.parse(localStorage.getItem(repliesKey)||'null'));}catch{}
+  const saveReplies=()=>{try{localStorage.setItem(repliesKey,JSON.stringify(replies));}catch{}};
+  let replyAsking=false;
+  // The drafts waiting for review, by Gmail thread, so an Attention card can point at the draft made for it.
+  let waitingDrafts:{id:string;thread:string;createdAt:number}[]=[];
+  async function readDrafts(){
+    if(!native?.emailReviews)return waitingDrafts=[];
+    const list=await native.emailReviews();
+    return waitingDrafts=(Array.isArray(list)?list:[]).filter(r=>r&&!r.attempted&&typeof r.id==='string').map(r=>({id:r.id,thread:String(r.draft?.threadId||''),createdAt:Number(r.createdAt)||0}));
+  }
+  window.addEventListener('worldlet:email-drafted',()=>{void readDrafts().then(()=>{if(attentionPage)showDraftLine(attentionPage);}).catch(()=>{});});
+  async function prepareReply(){
+    if(replyAsking||!native?.emailReviews||!voice?.background)return;
+    const now=new Date();
+    if(!replies.since){replies=preparedRepliesSettling(replies,now);saveReplies();return;}
+    const items=[...pages.values()].filter(p=>p.worldItemId).map(p=>({id:p.worldItemId,kind:p.worldItemKind,status:p.worldItemStatus,snoozedUntil:p.worldItemSnoozedUntil,ready:p.worldItemContentReady,title:p.worldItemSignal?.title||p.title,sources:p.worldItemSources,receivedAt:p.worldItemSignal?.receivedAt,occurredAt:p.worldItemSignal?.occurredAt,sourceUpdatedAt:p.worldItemSignal?.sourceUpdatedAt}));
+    if(!replyCandidates(items,replies,{now}).length)return;
+    replyAsking=true;
+    try{
+     const drafts=await readDrafts();
+     if(!replyPrepareDue(replies,{now,daily,waiting:drafts.length}).due)return;
+     const candidates=replyCandidates(items,replies,{now,drafted:drafts.map(d=>d.thread)});
+     // An item whose thread already has a draft waiting (the morning brief's, say) counts as prepared, without asking.
+     for(const item of items)if(!candidates.some(c=>c.id===item.id)&&drafts.some(d=>d.thread&&d.thread===replyThread(item))&&!replies.prepared.includes(item.id))replies=markReplyPrepared(replies,item.id,now,{asked:false,thread:replyThread(item)});
+     saveReplies();
+     const next=candidates[0];if(!next)return;
+     const before=replies;replies=markReplyPrepared(replies,next.id,now,{thread:next.thread});saveReplies();
+     const request=replyPrepareRequest(next),work=backgroundWork('reply','reply',replyPrepareStatus(next));
+     let ok=true;
+     // Busy with other background work: the item is asked again at the next poll.
+     await Promise.resolve(voice.background(request.text,{displayText:request.displayText}))
+      .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||''))){replies=before;saveReplies();}})
+      .finally(()=>work.end(ok));
+    }catch{}finally{replyAsking=false;}
   }
   window.addEventListener('pagehide',()=>clearInterval(meetingPoll),{once:true});
   const workPoll=setInterval(()=>{if(!document.hidden&&current==='building-work'){const r=sections.find(s=>s.key==='claude-code');if(r&&!data.sample&&native?.developmentSessions)void loadWork(r);}},15000);

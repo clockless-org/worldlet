@@ -4,6 +4,7 @@ export {mountFoxArtifact} from './fox-artifact.ts';
 export {flyIntoJournal} from './journal-book.ts';
 export {createFoxDevPreviewControls} from './fox-dev-preview.ts';
 export {FOX_WORKING,foxDoing} from './fox-doing.ts';
+export {FOX_STATUS_EVENT} from './fox-name-tag.ts';
 export {mountEmailReview,presentEmailReview} from './fox-email-review.ts';
 export {renderFoxFrameTiming} from './fox-frame-timing.ts';
 export {mountMemoryManager} from './fox-memory-manager.ts';
