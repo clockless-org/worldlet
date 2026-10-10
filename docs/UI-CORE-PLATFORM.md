@@ -16,7 +16,7 @@ an extra execution hop. Resources contain assets and declarations, not product l
 See the [diagram](architecture.html).
 
 <a id="features"></a>
-## Four features and the base
+## Six features and the base
 
 Layers cut the product across; features cut it down. Each feature is a vertical
 slice with its own UI, Core and (when it needs one) Platform part. Every `ui/` and
@@ -27,16 +27,21 @@ component is missing or listed twice.
 | --- | --- | --- | --- | --- |
 | World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `core/activity/` | Trusted World view |
 | Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `core/applets/` `core/browser/` `core/games/` | Website views, agent-browser |
-| Companion | Fox: the one conversation in front, and the background work (routines, checks, drafts) that keeps going while the person is away | `ui/companion/` | `core/companion/` `core/scheduling/` `core/ongoing/` | Agent processes, conversation journal |
-| Attention | What needs the person now (Attention Center) and what is past (Journal); every output Fox prepares is one artifact shown in both | `ui/attention/` | `core/attention/` `core/artifacts/` `core/widgets/` | Phone pushes |
+| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `core/companion/` | Agent processes, conversation journal |
+| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `core/attention/` | Phone pushes |
+| Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (status shows in Companion and on Applets) | `core/scheduling/` `core/ongoing/` | Claims, leases, Agent runs |
+| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | (cards: `ui/attention/CARD-SYSTEM.md`) | `core/artifacts/` `core/widgets/` | world.sqlite |
 | Base | What every feature stands on: the connection to the person's Agent (adapters, World tools over the `worldlet` MCP server, phone pairing), local records, setup and the app shell | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `core/agent/` `core/accounts/` `core/tools/` `core/phone/` `core/items/` `core/context/` `core/onboarding/` `core/diagnostics/` `core/distribution/` | Electron host, storage, `contracts/` |
 
-Work flows Applets → Companion → Attention: sources and Applet records feed Fox's
-background work, and what it prepares waits in Attention for the person's decision.
-Background results never reach the person except through Attention.
+Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
+Applets start tasks, each task's result is an artifact, an artifact that needs the
+person waits in Attention, and every artifact stays in the Journal. Task results
+never reach the person except as artifacts.
 
-Known misplacements, to move when that code is next changed: the Journal book is
-`ui/companion/journal-book.ts` (Attention), and Fox animation studies
+Known misplacements, to move when that code is next changed: Tasks and Artifacts &
+Journal have no `ui/` folder yet, so the Journal book (`ui/companion/journal-book.ts`),
+artifact blocks (`ui/companion/artifact-blocks.ts`) and the card system
+(`ui/attention/`) sit in other features' folders; Fox animation studies
 (`ui/companion/fox-*-study.ts`, `fox-anatomy-*`, `fox-drafting-*`) sit beside product code.
 
 ## Dependency rules

@@ -4,8 +4,10 @@ Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-
 
 - World: activity
 - Applets: applets, browser, games
-- Companion: companion, scheduling, ongoing (Fox and its background work)
-- Attention: attention, artifacts, widgets (ranking and every output Fox prepares)
+- Companion: companion
+- Attention: attention
+- Tasks: scheduling, ongoing (work that runs without the person)
+- Artifacts & Journal: artifacts, widgets (everything work produces, kept by day)
 - Base: agent, accounts, tools, phone, items, context, onboarding, diagnostics, distribution
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
