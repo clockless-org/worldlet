@@ -1,6 +1,7 @@
 import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT} from '../world/index.ts';
 import {seedAppletSelection} from '../../core/applets/index.ts';
 import {xAppIcon} from '../applets/index.ts';
+import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {WORLD_APPS} from '../../core/applets/index.ts';
 import {appletSupport} from '../../core/applets/index.ts';
@@ -321,10 +322,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   });
   loader.classList.add('is-gathering');await Promise.all(flights);
   // Let the user see each familiar flat icon become its actual device before opening.
-  const payload=(globalThis as any).__WORLDLET_25D_ASSETS__;
   await Promise.all(Array.from(gathering.querySelectorAll<HTMLImageElement>('img')).map(async (logo,i)=>{
    const app=WORLD_APPS.find(a=>a.id===logo.dataset.appletId);
-   const src=payload?.devices?.[app?.key];
+   const src=app&&themeAppletIcon(app.key);
    if(!src)return;
    const device=image(src) as HTMLImageElement;device.dataset.appletId=logo.dataset.appletId;
    try{await device.decode();}catch{return;}

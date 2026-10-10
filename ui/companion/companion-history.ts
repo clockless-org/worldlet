@@ -1,5 +1,5 @@
 import {uiIcon} from '../components/index.ts';
-import {companionStill} from '../themes/index.ts';
+import {companionStill,themeAppletIcon} from '../themes/index.ts';
 import {WORLD_APPS} from '../../core/applets/index.ts';
 import {journalPayload} from '../../core/items/index.ts';
 import {worldLogLines,worldLogNext,worldLogNow,type WorldLogLine} from '../../core/activity/index.ts';
@@ -37,7 +37,7 @@ export function createCompanionHistory({call,openApplet,openSite,connections=()=
    if(Number.isFinite(date.getTime())){time.dateTime=date.toISOString();time.textContent=date.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});time.title='Event time · '+date.toISOString();}else time.textContent='Event time unknown';
    const source=b.appletId||b.provider||b.moduleId||row.key,app=WORLD_APPS.find(app=>app.key===source||app.id===source),owner=labels[source]||app?.title||source||'World';
    const icon=el('span');icon.className='companion-history-source';icon.setAttribute('role','img');
-   const actor=row.kind==='conversation.message'||!source?b.actor:null,assets=(globalThis as any).__WORLDLET_25D_ASSETS__,art=app&&(assets?.studies?.find(s=>s.key===app.key)?.body||assets?.devices?.[app.key]);
+   const actor=row.kind==='conversation.message'||!source?b.actor:null,assets=(globalThis as any).__WORLDLET_25D_ASSETS__,art=app&&(assets?.studies?.find(s=>s.key===app.key)?.body||themeAppletIcon(app.key));
    icon.setAttribute('aria-label',actor==='user'?'You':actor==='fox'?'Fox':owner);
    if(actor==='fox'||(!actor&&art)){const img=el('img');img.alt='';img.src=actor==='fox'?companionStill():art;icon.append(img);}
    else icon.innerHTML=uiIcon(actor==='user'?'people':({gmail:'mail','google-calendar':'calendar','apple-notes':'file','apple-reminders':'file',weather:'breeze',browser:'compass'})[app?.key||source]||'spark');

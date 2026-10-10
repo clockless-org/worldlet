@@ -22,6 +22,15 @@ let active:InstalledTheme=BUILD_THEMES.get(readBuildThemePreference())!;
 export function activeBuildTheme():InstalledTheme{return active;}
 /** Package assets are published per theme, so two themes never collide on a file name. */
 export const themeAssetURL=(id:string,path:string)=>'theme-assets/'+id+'/'+path.replace(/^assets\//,'');
+/**
+ * The active theme's picture of an Applet: the package's own (presentation.json `icons`), else the built-in Village
+ * device art. Every host surface that pictures an Applet reads it here, so switching theme switches them all.
+ */
+export function themeAppletIcon(key:string):string|undefined{
+ const own=active.package?.presentation.icons?.[key];if(own)return themeAssetURL(active.id,own);
+ const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
+ return typeof src==='string'&&src?src:undefined;
+}
 /** Each package's stylesheet is its own file (theme-<id>.css); only the active one is attached. */
 function stylesheet(id:string):HTMLLinkElement{
  let link=document.querySelector<HTMLLinkElement>(`link[data-theme-style="${id}"]`);
@@ -84,7 +93,7 @@ async function prepare(next:InstalledTheme){
  const link=stylesheet(next.id);
  if(!link.sheet)await new Promise<void>((resolve,reject)=>{link.addEventListener('load',()=>resolve(),{once:true});link.addEventListener('error',()=>reject(Error(next.title+' could not load. Try again.')),{once:true});});
  const {world,fallback,applets,fonts}=next.package.presentation;
- const pictures=[...[world,fallback,...Object.values(applets)].map(scene=>scene.background),...Object.values(next.package.presentation.hud?.skin||{}).map(piece=>piece.image)];
+ const pictures=[...[world,fallback,...Object.values(applets)].map(scene=>scene.background),...Object.values(next.package.presentation.hud?.skin||{}).map(piece=>piece.image),...Object.values(next.package.presentation.icons||{})];
  const images=[...new Set(pictures.map(path=>themeAssetURL(next.id,path)))];
  await Promise.all(images.map(async src=>{const image=new Image();image.src=src;try{await image.decode();}catch(error){throw Error(next.title+' artwork could not load. Try again.',{cause:error});}}));
  await Promise.all(fonts.map(font=>fetch(themeAssetURL(next.id,font.file)).catch(()=>null)));

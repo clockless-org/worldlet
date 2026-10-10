@@ -80,6 +80,8 @@ export interface ThemePresentation {
     fallback: ThemeScene;
     hud?: ThemeHud;
     sound?: ThemeSound;
+    /** The theme's own picture of each Applet, by Applet key. The host shows it wherever it pictures that Applet (the World, lists, history, onboarding); an Applet left out keeps the host's picture. */
+    icons?: Readonly<Record<string, string>>;
 }
 export interface ThemeAppletContext {
     host: HTMLElement;
@@ -116,7 +118,7 @@ export interface ThemeWorldApplet {
     visible: boolean;
     status?: string;
     count?: number;
-    /** The host's own picture of this Applet (its shared device art, or the icon a person's own Applet carries). Themes without their own art for an Applet show this rather than a placeholder. */
+    /** This Applet's picture: the icon a person's own Applet carries, else this theme's `icons` entry, else the host's device art. Show it rather than a placeholder. */
     icon?: string;
     /** The Applet's lamp as the host shows it. A theme with lamps in its art lights them; the host draws the lamp's label and action. */
     lamp?: ThemeLampState;

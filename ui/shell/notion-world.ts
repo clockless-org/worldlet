@@ -1,5 +1,5 @@
 import {createMailArrival} from '../world/index.ts';
-import {ACTIVE_THEME,themeAmbientTrack,switchThemePins,createMailArrivalObserver} from '../themes/index.ts';
+import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,switchThemePins,createMailArrivalObserver} from '../themes/index.ts';
 import {renderHomeFocus} from '../applets/index.ts';
 import {mailMetadata} from '../applets/index.ts';
 import {safeAttentionURL as safeAttentionSourceURL} from '../../core/attention/index.ts';
@@ -483,7 +483,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(!app){const empty=element('div','region-shelf-slot','Empty place');empty.setAttribute('aria-label','Empty place '+(index+1));dropTarget(empty,index);grid.append(empty);continue;}
     const own=root.appletLayout.has(app.moduleId)&&app.region===id;
     const tile=button('',()=>{closeRegionShelf();if(!own&&!root.appletLayout.has(app.moduleId))placeInArea(app.moduleId,id);visitObject(app.moduleId);if(appletEntryReturn)appletEntryReturn.area=id;},'region-shelf-applet');tile.setAttribute('aria-label',app.title);
-    const img=element('img');img.src=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[app.key]||'';img.alt='';tile.append(img,element('span','',app.title));
+    const img=element('img');img.src=themeAppletIcon(app.key)||'';img.alt='';tile.append(img,element('span','',app.title));
     tile.draggable=true;tile.ondragstart=e=>{if(dropping){e.preventDefault();return;}dragged=app.moduleId;requestAnimationFrame(()=>{if(dragged&&regionShelf===shelf)shelf.classList.add('is-dragging');});scene?.setPlacementArea(id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('application/worldlet-applet',app.moduleId);};tile.ondragend=()=>{dragged=null;shelf.classList.remove('is-dragging');clearDrop();scene?.setPlacementArea(null);};
     if(!own){
      // Recommended and All: Place here adds it to this Area without opening it.
@@ -1957,7 +1957,7 @@ export function mountNotionWorld(data: World, native: any) {
     void loadOngoing();
     nativeHUD=mountNativeHUD({root,onAttention:view=>phone?.attention(view),calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:()=>widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
     // The Applet shelf above an open Applet (ui/hud/applet-shelf.ts): the recently used Applets, the open one in the middle.
-    const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[r.key]||appLogoSource(r)||''};};
+    const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:themeAppletIcon(r.key)||appLogoSource(r)||''};};
     appletShelf=mountAppletShelf({root,applet:shelfApp,lastUsed:id=>regionLayout.lastUsedAt[id]||0,
      recent:()=>sections.filter(r=>r.entity==='app'&&(regionLayout.lastUsedAt[r.moduleId]||0)>0).sort((a,b)=>(regionLayout.lastUsedAt[b.moduleId]||0)-(regionLayout.lastUsedAt[a.moduleId]||0)).map(r=>r.moduleId),
      open:id=>visitObject(id),leave:()=>home(),

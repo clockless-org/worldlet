@@ -50,7 +50,7 @@ export default sim;
 | Interface | Inputs / responsibility |
 | --- | --- |
 | `renderWorld` | Owned host element, scene, world snapshot, navigation, menu and move capabilities. Theme draws the map, areas, Applet icons, hover and drop targets. |
-| World `update` | Current view, stable Applet IDs and titles, the host's picture of each Applet (`icon`, to show wherever the theme has no art of its own), availability, counts, regions, pinned slots, environment, motion and interaction hints. No credentials or host DOM internals. |
+| World `update` | Current view, stable Applet IDs and titles, each Applet's picture (`icon`: a person's own Applet's icon, else the theme's `icons` entry, else the host's device art), availability, counts, regions, pinned slots, environment, motion and interaction hints. No credentials or host DOM internals. |
 | World `event` | `mail.received` and `applet.arrived` (fired when Applets are unlocked; optional `from: 'center'` with their `icons`, or `settled` when they are already in place); return whether the theme presented the cue, or a promise for an arrival that settles when the Applets have landed. Respect reduced motion. |
 | World `anchor` / `bounds` | Applet anchor and hit rectangle in CSS pixels relative to the host, or null. Background, button and anchor must use the same transform. |
 | World `marks` (optional) | Report where the host draws its shared overlays (`applet`, `area`, `area-add` and `slot` marks: position, visibility, name, lamp and attention offsets). A theme that calls it draws no buttons, names or lamp labels of its own; the host draws the same ones in every theme. |
@@ -99,13 +99,13 @@ A theme implements four parts. Everything else is the host's and looks the same 
 | Part | Covers | Where in the package |
 | --- | --- | --- |
 | World | Map, zoomed areas, ambient motion, entering an area or room | `renderWorld`, `presentation.world` |
-| Applets | Applet devices, rooms behind an open Applet (Mail's included), cards and frames | `renderApplet`, `presentation.applets` and `fallback` |
+| Applets | Applet icons and devices, rooms behind an open Applet (Mail's included), cards and frames | `renderApplet`, `presentation.applets` and `fallback`, optional `icons` |
 | HUD look | HUD material, colors, type, fonts, world log, Attention art | `tokens`, `fonts`, `theme.css`, optional `hud.skin` |
 | Sound and event animations | Business-event sounds and the animations for them | optional `sound.events`, `ThemeWorldMount.event` |
 
 Not part of a theme: the companion (Fox, its rig and portrait, where it stands, its reply bubble, panel and nameplate) and pages a theme cannot replace, such as the loading and first-use pages. `hud.companion` and `hud.speech` only reserve room the theme's content stays clear of.
 
-`hud.skin` gives nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). `sound.events` gives an audio file per business event (`applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`). Anything left out keeps the shared look and sounds, and switching back to Village restores them.
+`hud.skin` gives nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). `sound.events` gives an audio file per business event (`applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`). `icons` gives the theme's own picture of an Applet by Applet key (`png`, `webp` or `svg`); the host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. Brand logos (the HUD title bar, picture-in-picture) stay the host's. Anything left out keeps the shared look, sounds and pictures, and switching back to Village restores them.
 
 ## Switching themes
 
