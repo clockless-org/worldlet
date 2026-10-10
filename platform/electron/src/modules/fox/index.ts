@@ -739,6 +739,14 @@ export function installFox(host:Host){
     model:{name:String(model.name??''),id:String(model.model??''),provider:String(model.provider??''),source:typeof model.source==='string'?model.source:null,ready:model.ready===true,configured:model.configured===true}};
   },
   foxEnergy:()=>readFoxEnergy(requireAgent(),error=>host.diagnostics.record(error,'foxEnergy')),
+  // The person's scheduled jobs on their own Agent's scheduler (its `schedule` service), for the World's top-right:
+  // names and schedules only, never prompts. None when the Agent declares no scheduler.
+  foxRoutines:async()=>{
+   const schedule=agent()?.schedule?.();
+   if(!schedule||store.sampleEnabled())return {jobs:[]};
+   const jobs=await schedule.jobs().catch(error=>{host.diagnostics.record(error,'foxRoutines');return [];});
+   return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when}))};
+  },
   foxProactive:request=>proactiveStart(request),
   foxProactiveShown:request=>proactiveShown(request),
   foxBrowse:request=>proactiveBrowse(request),

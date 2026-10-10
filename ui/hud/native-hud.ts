@@ -5,6 +5,7 @@ import {sourcesReading} from '../../core/applets/index.ts';
 import {fitAttentionPanel} from './fit-attention-panel.ts';
 import {mountWorldLog} from './world-log.ts';
 import {mountFoxWorkLine} from './fox-work-line.ts';
+import {mountRoutinesLine} from './routines-line.ts';
 import {summarizeRequest} from '../../core/agent/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
@@ -95,6 +96,8 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  if(today.childElementCount)root.append(today);
  // The top-right says what Fox is doing right now (owner decision 2026-10-08), out of the reading side's way.
  mountFoxWorkLine(root);
+ // Under it, the routines that run on their own (owner request 2026-10-10).
+ mountRoutinesLine(root);
  // The last child of the list: trimming keeps it, and the panel stays centered as one.
  const trackerMore=el('div','world-task-more');trackerMore.hidden=true;
  const previousBrand=root.querySelector('#notionHome'),brand=el('div','world-watermark');brand.id='notionHome';previousBrand.remove();
