@@ -41,7 +41,6 @@
     "version:windows": "node scripts/windows-build-number.ts",
     "test:windows": "node scripts/local-deletion-check.ts && node scripts/windows.ts check",
     "build:native-ui": "node scripts/build-native-ui.ts",
-    "theme:coverage": "node scripts/theme-coverage.ts",
     "test:codex:stream": "node scripts/codex-stream-check.ts",
     "test:demo": "npm run build:native-ui && node scripts/sample-persona-check.ts && node scripts/tennis-demo-check.ts && node scripts/sample-world-check.ts && node scripts/demo-walkthrough-check.ts",
     "test:execution": "node scripts/mail-review-recovery-check.ts && python3 scripts/claude-session-check.py && node scripts/tennis-demo-check.ts && node scripts/fox-execution-check.ts && python3 scripts/work-cli-check.py",

@@ -60,8 +60,8 @@ export async function externalizeImages(payloads:object[],output:string){
  return written.size;
 }
 // The Village payload: its committed art (ui/theme-packages/village/assets), its world package and the companion.
-export async function buildWorldAssets(root:string,output:string,channel='release',themeId=ACTIVE_THEME.pack.id){
-const entry=theme(themeId);
+export async function buildWorldAssets(root:string,output:string,channel='release'){
+const entry=ACTIVE_THEME;
 await mkdir(path.join(output,'assets'),{recursive:true});
 await copyFile(path.join(root,'node_modules/pixi.js/LICENSE'),path.join(output,'PIXI-LICENSE.txt'));
 const spritePayload:any={theme:{id:entry.pack.id,version:entry.pack.version,title:entry.pack.title},landmarks:{},landmarkNights:{},surroundings:'',night:'',hiresDay:'',hiresNight:'',devices:{},deviceBoxes:{},motion:{},motionFrames:{},logos:{},focus:{},open:{},mailParts:{},regions:{},studies:[]};
@@ -77,7 +77,6 @@ for(const area of (entry.world as WorldPack).areas){if(!area.closeView)continue;
 }
 // The host's own Applet pages, the loading page and host surfaces draw the Village package's art where the package
 // publishes it (theme-assets/village/, ui/theme-packages/village/assets/art.json); the Village World reads it itself.
-if(themeId!=='village')throw Error('Only the Village is built into the payload: '+themeId);
 const art=await readVillageArt(root),file=(name:string)=>'theme-assets/village/'+name;
 spritePayload.surroundings=file(art.world.day);
 for(const [key,device] of Object.entries(art.devices)){spritePayload.devices[key]=file(device.src);spritePayload.deviceBoxes[key]=[...device.box];spritePayload.deviceEffects[key]={};}
@@ -89,9 +88,9 @@ const companionExpressions=entry.pack.companion.renderer==='sprite-rig'?undefine
 const companionPresentation=await buildCompanionPresentation(root,channel,entry);
 const envPayload={companionPortrait:portrait,companionExpressions,...companionPresentation,surfaces:await buildSurfaces(root,output,entry)};
 const files=await externalizeImages([spritePayload,envPayload],output);
-await writeFile(path.join(output,'environment-assets.js'),'globalThis.__WORLDLET_25D_ASSETS__='+JSON.stringify(spritePayload)+';globalThis.__WORLDLET_ENV_ASSETS__='+JSON.stringify(envPayload)+';');
-const registration='globalThis.__WORLDLET_THEME_ASSETS__??={};globalThis.__WORLDLET_THEME_ASSETS__['+JSON.stringify(themeId)+']='+JSON.stringify({world:spritePayload,environment:envPayload})+';';
-await writeFile(path.join(output,'environment-'+themeId+'.js'),registration);
-return {files,registration};
+// The page's first script: the payload, and the loading page's Fox still before the World bundle runs.
+await writeFile(path.join(output,'environment-assets.js'),'globalThis.__WORLDLET_25D_ASSETS__='+JSON.stringify(spritePayload)+';globalThis.__WORLDLET_ENV_ASSETS__='+JSON.stringify(envPayload)+';'+
+ `{const p=globalThis.__WORLDLET_ENV_ASSETS__;document.documentElement.dataset.worldTheme=${JSON.stringify(entry.pack.id)};const still=p.surfaces?.startup||(!p.companionRive&&p.companionPortrait),img=document.querySelector('.startup-fox');if(still&&img)img.src=still;}`);
+return {files};
 
 }

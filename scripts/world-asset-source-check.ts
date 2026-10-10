@@ -11,7 +11,9 @@ const output=await mkdtemp(path.join(tmpdir(),'worldlet-assets-'));
 try {
  await buildWorldAssets(process.cwd(),output);
  const payload=await readFile(path.join(output,'environment-assets.js'),'utf8');
- const context:any={};vm.runInNewContext(payload,context);
+ // The page's first script also marks the theme and sets the loading page's Fox still.
+ const context:any={document:{documentElement:{dataset:{}},querySelector:()=>null}};vm.runInNewContext(payload,context);
+ assert.equal(context.document.documentElement.dataset.worldTheme,'village');
  // The Village package ships its plates (ui/theme-packages/village/assets); the payload's loading-page plate names its copy.
  assert.equal(context.__WORLDLET_25D_ASSETS__.surroundings,'theme-assets/village/world/day.webp');
  for(const [file,plate] of [[BUILTIN_STYLE.world.day,'world/day.webp'],[BUILTIN_STYLE.world.night,'world/night.webp']]){

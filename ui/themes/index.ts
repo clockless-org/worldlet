@@ -1,5 +1,5 @@
 /** Public Theme Pack interface: the registry, the contract and its presentation helpers. */
-export {activateTheme,onThemeApplied,ACTIVE_THEME,DEFAULT_THEME_ID,THEMES,THEME_PREFERENCE_KEY,readThemePreference,switchTheme,theme,themeAppletArt,type AppletArt,type RegisteredTheme} from './theme-registry.ts';
+export {ACTIVE_THEME,DEFAULT_THEME_ID,theme,themeAppletArt,type AppletArt,type RegisteredTheme} from './theme-registry.ts';
 export {THEME_EVENTS,THEME_SKIN_PARTS,companionPerformance,parseThemePack,themePath,type ThemeEvent,type ThemePack,type ThemeSkinPart} from './theme-pack.ts';
 export {createThemeEvents,type ThemeCue,type ThemeOccurrence} from './theme-events.ts';
 export {PINS_THEME,selectThemePins,storedThemePins,switchThemePins,type ThemePins,type ThemePlacementLayout} from './theme-placements.ts';

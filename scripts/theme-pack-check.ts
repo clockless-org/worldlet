@@ -1,9 +1,9 @@
-// The Theme Pack contract (ui/themes): Village is registered behind it with nothing changed, a broken
-// pack is rejected, business events play each cue once and never success on failure, slot pins are kept
-// per theme, and a theme switch keeps the old theme when the new one cannot be prepared.
+// The host's Theme Pack (ui/themes/theme-registry.ts): the Village look the host draws with, a broken pack is
+// rejected, business events play each cue once and never success on failure, and slot pins are kept per theme.
+// Themes a person picks are packages (resources/themes/CONTRACT.md; scripts/build-theme-source-check.ts).
 import assert from 'node:assert/strict';
 import {access} from 'node:fs/promises';
-import {ACTIVE_THEME,DEFAULT_THEME_ID,THEMES,THEME_PREFERENCE_KEY,companionPerformance,createThemeEvents,parseThemePack,readThemePreference,selectThemePins,storedThemePins,switchTheme,switchThemePins,themeAppletArt,type RegisteredTheme,type ThemePlacementLayout} from '../ui/themes/index.ts';
+import {ACTIVE_THEME,DEFAULT_THEME_ID,companionPerformance,createThemeEvents,parseThemePack,selectThemePins,storedThemePins,switchThemePins,themeAppletArt,type ThemePlacementLayout} from '../ui/themes/index.ts';
 import {BUILTIN_STYLE,STYLE_TOKENS} from '../ui/components/style.ts';
 import {WORLD_LAYOUT,THEME_WORLD} from '../ui/world/world-layout.ts';
 import {villageCamera} from '../ui/theme-packages/village/village-camera.ts';
@@ -17,8 +17,7 @@ const store=new Map<string,string>();
 (globalThis as any).localStorage={getItem:(k:string)=>store.has(k)?store.get(k):null,setItem:(k:string,v:string)=>{store.set(k,String(v));},removeItem:(k:string)=>{store.delete(k);}};
 const states=FOX_STATES.map(s=>s.id);
 
-// Village is the one registered theme, and everything the World draws comes through it.
-assert.deepEqual([...THEMES.keys()],['village']);
+// The host draws with the Village pack.
 assert.equal(DEFAULT_THEME_ID,'village');
 assert.equal(ACTIVE_THEME.pack.id,'village');
 const pack=parseThemePack(structuredClone(village),states);
@@ -136,79 +135,10 @@ const inWorld=updateOnboarding({version:1,presets:['home'],completed:true},{oper
 assert.deepEqual(parseRegionLayout(inWorld,'castle').pins,{home:['app-notion']});assert.deepEqual(parseRegionLayout(inWorld,'village').pins,{home:['app-gmail']});
 assert.deepEqual(parseRegionLayout(inWorld,'castle').lastUsedAt,{'app-gmail':1000});
 
-// Switching: prepared first; a failure keeps the current theme and saves nothing.
-assert.equal(readThemePreference(),'village');
-store.set(THEME_PREFERENCE_KEY,'not-a-theme');assert.equal(readThemePreference(),'village','an unknown saved theme falls back');store.delete(THEME_PREFERENCE_KEY);
-assert.deepEqual(await switchTheme('castle',{apply:()=>assert.fail('never applied')}),{ok:false,theme:'village',error:'Unknown theme'});
-let applied=0;
-assert.deepEqual(await switchTheme('village',{apply:()=>{applied++;}}),{ok:true,theme:'village'});assert.equal(applied,0,'the current theme is not re-applied');
-const castle=(prepare:()=>Promise<void>):RegisteredTheme=>({...ACTIVE_THEME,pack:{...ACTIVE_THEME.pack,id:'castle'},prepare});
-const registry=(entry:RegisteredTheme)=>new Map([['village',ACTIVE_THEME],['castle',entry]]);
-const notReady=await switchTheme('castle',{registry:registry(castle(()=>Promise.reject(Error('art missing')))),apply:()=>{applied++;}});
-assert.deepEqual(notReady,{ok:false,theme:'village',error:'art missing'});assert.equal(applied,0);assert.equal(store.has(THEME_PREFERENCE_KEY),false);
-const applyFails=await switchTheme('castle',{registry:registry(castle(()=>Promise.resolve())),apply:()=>{throw Error('scene failed');}});
-assert.deepEqual(applyFails,{ok:false,theme:'village',error:'scene failed'});assert.equal(store.has(THEME_PREFERENCE_KEY),false);
-let order:string[]=[];
-const ok=await switchTheme('castle',{registry:registry(castle(async()=>{order.push('prepare');})),apply:()=>{order.push('apply');}});
-assert.deepEqual(ok,{ok:true,theme:'castle'});assert.deepEqual(order,['prepare','apply']);assert.equal(store.get(THEME_PREFERENCE_KEY),'castle');
-
-// Real registered preparation must reject a missing scenery layer before applying the theme.
-{
- const g=globalThis as any,decoded:string[]=[];
- g.document={};g.Image=class{src='';async decode(){decoded.push(this.src);if(this.src==='missing-layer.webp')throw Error('missing layer');}};
- g.__WORLDLET_THEME_ASSETS__={village:{world:{surroundings:'far.webp',night:'night.webp',devices:{book:'book.webp'},focus:{notes:{image:'room.webp'}},sceneryLayers:[{image:'missing-layer.webp'}]},environment:{}}};
- try{
-  const result=await switchTheme('village',{current:'castle',apply:()=>assert.fail('incomplete art must never apply')});
-  assert.equal(result.ok,false);assert(decoded.includes('missing-layer.webp'),'the actual registered preflight decodes every scenery layer');
-  assert.equal(store.get(THEME_PREFERENCE_KEY),'castle','failure leaves the saved preference intact');
-  const payload=g.__WORLDLET_THEME_ASSETS__.village;payload.world.sceneryLayers[0].image='book.webp';decoded.length=0;
-  await THEMES.get('village')!.prepare();assert.equal(decoded.filter(src=>src==='book.webp').length,1,'a shared image is decoded once per preparation');
-  let failFont=true,attempts=0,registered=0;
-  g.document.fonts={add(){registered++;}};
-  g.FontFace=class{async load(){attempts++;if(failFont)throw Error('font unavailable');return this;}};
-  const font={family:'ThemeFixture',src:'same-font.woff2'};payload.environment.surfaces={fonts:{display:font,label:font}};
-  await assert.rejects(THEMES.get('village')!.prepare(),/lettering could not load/);assert.equal(registered,0,'failed font is never registered');assert.equal(attempts,1,'two roles share one font load');
-  failFont=false;await THEMES.get('village')!.prepare();assert.equal(attempts,2,'failed font retries the same source');assert.equal(registered,1);
-  await THEMES.get('village')!.prepare();assert.equal(attempts,2,'successful font can be reused');
- }finally{delete g.document;delete g.Image;delete g.FontFace;delete g.__WORLDLET_THEME_ASSETS__;}
-}
-
-// Coverage: every surface a theme does not draw itself shows Village's, and its coverage.json records which.
-// A gap never goes unrecorded, and closing one updates the record (`npm run theme:coverage` lists them).
-const {themeCoverage,themeSurfaceCoverage,borrowedSurfaces,THEME_SURFACES,THEME_PARTS}=await import('../ui/themes/theme-coverage.ts');
-const {coverageInput}=await import('./theme-coverage.ts');
-const {readFile}=await import('node:fs/promises');
-assert(Object.values(themeCoverage(await coverageInput('village'))).every(c=>c.state==='own'),'Village is the reference look');
-for(const id of [...THEMES.keys()].filter(id=>id!==DEFAULT_THEME_ID)){
- const record=JSON.parse(await readFile('resources/themes/'+id+'/coverage.json','utf8'));
- assert.equal(record.schemaVersion,1);
- assert.deepEqual(record.borrowed,borrowedSurfaces(themeCoverage(await coverageInput(id))),id+' coverage changed: update resources/themes/'+id+'/coverage.json (npm run theme:coverage '+id+')');
-}
-const surfaces=THEME_SURFACES.map(([id])=>id);assert.equal(new Set(surfaces).size,surfaces.length);
-// Four parts, each with surfaces; the companion and the loading page are not a theme's to replace.
-assert.equal(THEME_PARTS.length,4);for(const [part] of THEME_PARTS)assert(THEME_SURFACES.some(s=>s[2]===part),part+' has surfaces');
-assert(!surfaces.some(id=>/companion|startup/.test(id)),'no companion or loading surfaces');
-// A fixture theme stands in for a second registered theme: what it draws decides each surface.
-const reference=await coverageInput('village'),art=(name:string)=>'resources/themes/castle/'+name+'.webp';
-const areaIds=['home','work','library','money','health','travel'];
+// A second pack, for the parts that read a pack other than the host's (sound projection).
+const art=(name:string)=>'resources/themes/castle/'+name+'.webp';
 const castleSound={events:{},ambient:{'water-glints':'resources/themes/castle/lake.wav','chimney-smoke':'resources/themes/castle/hearth.wav'},presentation:{overview:'water-glints',room:'chimney-smoke',areas:{home:'chimney-smoke'},applets:{gmail:'chimney-smoke'},labels:{'water-glints':{title:'Lake',icon:'wave'},'chimney-smoke':{title:'Hearth',icon:'flame'}}}};
 const castlePack=parseThemePack({...structuredClone(village),id:'castle',space:{...structuredClone(village.space),world:'castle'},motion:{...structuredClone(village.motion),sound:castleSound},companion:{...structuredClone(village.companion),renderer:'sprite-rig',rig:'resources/themes/castle/rig.json',portrait:art('portrait').replace('.webp','.png')}},states);
-const registeredCastle={...reference,pack:castlePack,
- style:{...reference.style,world:{day:art('day'),night:art('night')},applets:Object.fromEntries(Array.from({length:8},(_,i)=>['applet-'+i,{peek:art('peek-'+i),focus:art('room-'+i)}])),mailParts:{board:art('board')},attention:{coming:art('coming')}},
- world:{canvas:{width:1920,height:1080},layers:['environment','architecture','foreground'].flatMap(kind=>['day','night'].map(lighting=>({kind,lighting}))),areas:areaIds.map(id=>({closeView:{src:art('area-'+id)}}))}},
- castleInput={...registeredCastle,pack:{...castlePack,surfaces:{...castlePack.surfaces,skin:Object.fromEntries(Object.keys(castlePack.surfaces.skin).map(k=>[k,'shared'])) as typeof castlePack.surfaces.skin}}},piece={image:art('mail-board'),slice:[40,40,40,40] as [number,number,number,number],width:24};
-assert.equal(themeSurfaceCoverage(registeredCastle)['area-zoom'].state,'own','six distinct composed Areas cover the close view');
-assert.equal(themeSurfaceCoverage(registeredCastle).world.state,'own','day/night depth planes cover the World');
-for(const kind of ['architecture','foreground'])assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,layers:registeredCastle.world.layers.filter(l=>l.kind!==kind||l.lighting!=='night')}}).world.state,'partial','unpaired '+kind+' does not cover the World');
-assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,layers:registeredCastle.world.layers.map(l=>({...l,kind:'environment'}))}}).world.state,'partial','extra flat plates are not depth layers');
-assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,areas:registeredCastle.world.areas.map((a,i)=>i?{}:a)}})['area-zoom'].state,'partial','one authored room does not cover six Areas');
-assert.equal(themeSurfaceCoverage({...registeredCastle,world:{...registeredCastle.world,areas:registeredCastle.world.areas.map(()=>registeredCastle.world.areas[0])}})['area-zoom'].state,'partial','repeating one room does not cover distinct places');
-const painted=themeSurfaceCoverage({...castleInput,pack:{...castleInput.pack,surfaces:{...castleInput.pack.surfaces,skin:{...castleInput.pack.surfaces.skin,note:piece}}}});
-assert.equal(painted['hud-material'].state,'partial','one of five HUD pieces');
-{const parts=themeCoverage(registeredCastle),each=themeSurfaceCoverage(registeredCastle);
- for(const [part] of THEME_PARTS){const members=THEME_SURFACES.filter(s=>s[2]===part).map(([id])=>each[id].state);
-  assert.equal(parts[part].state,members.every(m=>m==='own')?'own':members.every(m=>m==='village')?'village':'partial',part+' is own only when every surface in it is');}}
-
 // Surfaces reach the shared UI as --theme-* properties and data attributes; a shared surface sets nothing,
 // and switching away clears the previous theme's.
 {
@@ -239,13 +169,13 @@ assert.equal(painted['hud-material'].state,'partial','one of five HUD pieces');
  w.document.hidden=false;w.document.documentElement.dataset.worldSoundVolume='0';playThemeSound('task.succeeded');assert.equal(played.length,1,'zero volume suppresses event sounds');
  delete w.Audio;delete w.document;delete w.__WORLDLET_ENV_ASSETS__;
 }
-console.log('PASS Theme Pack: Village registered behind the contract (six parts plus surfaces) unchanged, broken packs rejected, cues once per event and never success on failure, pins per theme, switches prepared first with the old theme kept on failure, every theme\'s borrowed surfaces recorded');
+console.log('PASS Theme Pack: the host draws with the Village pack, broken packs rejected, cues once per event and never success on failure, pins per theme, surfaces projected');
 
 // Theme sound projection and the platform-independent selection policy.
 {
  const {themeAmbientTrack}=await import('../ui/themes/index.ts');
  const {createAmbientSelection}=await import('../core/tools/index.ts');
- const pack=registeredCastle.pack;
+ const pack=castlePack;
  assert.equal(themeAmbientTrack(pack),'theme:castle:water-glints');
  assert.equal(themeAmbientTrack(pack,'building','building-home'),'theme:castle:chimney-smoke');
  assert.equal(themeAmbientTrack(pack,'building','building-money'),'theme:castle:chimney-smoke','an Area without its own loop plays the room loop');
@@ -260,7 +190,7 @@ console.log('PASS Theme Pack: Village registered behind the contract (six parts 
 }
 {
  // The Village World keeps its own copy of these settings (ui/theme-packages/village/village-pack.ts); they must match the pack.
- const village=THEMES.get('village')!;
+ const village=ACTIVE_THEME;
  assert.deepEqual([...ROOM_FOREGROUND],[...village.pack.layout.room.foreground],'Village room foreground matches its pack');
  assert.deepEqual({...SCENERY_TONE},{...STYLE_TOKENS.sceneryTone},'Village scenery tone matches the style tokens');
  console.log('PASS the Village World\'s own settings match its pack and style tokens');
