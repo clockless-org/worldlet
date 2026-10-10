@@ -97,12 +97,15 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   clearTimeout(foxTimer);if(active)foxTimer=window.setTimeout(()=>setFoxControl(!!appletTasks.size),90000);
   if(foxControl===active)return;foxControl=active;foxTurnStart=null;foxStepText='';
   // A new turn may have its copy again; one already showing goes on as Fox's.
-  if(!active)copyOff=false;
+  // Fox's work done, its copy closes by itself (owner Order 2026-10-10: 「任务做完，自己的小窗口就可以关了」);
+  // the result is Fox's reply, so no finished card moves onto the person's page.
+  const closesCopy=!active&&!!copyPage;
+  if(!active){copyOff=false;copyPage=null;}
   // A new turn on the page starts a new list, whatever the last turn's card still showed.
   if(active){clearTimeout(finishTimer);finishTimer=0;if(foxSteps.finished)foxSteps=foxStepsStart();}
   // The turn is over: Fox's steps become its finished card with the reply as the result; a turn
   // that never reached a page step leaves no card.
-  else if(foxStepsWorthShowing(foxSteps)){foxSteps=foxStepsFinish(foxSteps,{ok:foxReply.ok,result:foxReply.message});finishedApplet=taskPip||appletKey;finishedAt=Date.now();}
+  else if(!closesCopy&&foxStepsWorthShowing(foxSteps)){foxSteps=foxStepsFinish(foxSteps,{ok:foxReply.ok,result:foxReply.message});finishedApplet=taskPip||appletKey;finishedAt=Date.now();}
   else foxSteps=foxStepsStart();
   foxReply={message:'',ok:true};
   markFoxControl();syncPipOffer();renderTabs();
