@@ -53,14 +53,14 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **266 Markdown documents** and **43 supporting documentation files**.
+Indexed: **270 Markdown documents** and **43 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
 | Root entry points | 6 |
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
-| UI and Applet authoring references | 26 |
+| UI and Applet authoring references | 30 |
 | Resource and artwork records | 67 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
@@ -222,7 +222,7 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>UI and Applet authoring references (26)</summary>
+<details><summary>UI and Applet authoring references (30)</summary>
 
 - [ui/DESIGN-STANDARDS.md](../ui/DESIGN-STANDARDS.md)
 - [ui/README.md](../ui/README.md)
@@ -246,6 +246,10 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 - [ui/onboarding/README.md](../ui/onboarding/README.md)
 - [ui/practice/DEMO.md](../ui/practice/DEMO.md)
 - [ui/shell/README.md](../ui/shell/README.md)
+- [ui/theme-packages/village/areas/README.md](../ui/theme-packages/village/areas/README.md)
+- [ui/theme-packages/village/artifact-style/HOST-PROMPT.md](../ui/theme-packages/village/artifact-style/HOST-PROMPT.md)
+- [ui/theme-packages/village/artifact-style/README.md](../ui/theme-packages/village/artifact-style/README.md)
+- [ui/theme-packages/village/artifact-style/STYLE.md](../ui/theme-packages/village/artifact-style/STYLE.md)
 - [ui/theme-packages/village/assets/README.md](../ui/theme-packages/village/assets/README.md)
 - [ui/world/COMPOSITION.md](../ui/world/COMPOSITION.md)
 - [ui/world/ENVIRONMENT.md](../ui/world/ENVIRONMENT.md)

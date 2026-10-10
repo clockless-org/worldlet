@@ -1,0 +1,60 @@
+{
+  "id": "village-artifact-style",
+  "updatedAt": "2026-10-10",
+  "purpose": "Host generation of complete Artifact pages; flexible layouts under one visual standard",
+  "status": "design-guidance; host-page-runtime-not-integrated",
+  "entrypoints": {
+    "style": "STYLE.md",
+    "prompt": "HOST-PROMPT.md"
+  },
+  "references": [
+    {
+      "file": "references/outing.webp",
+      "role": "primary visual standard; first complete Artifact"
+    },
+    {
+      "file": "references/recipe.webp",
+      "role": "secondary composition example"
+    }
+  ],
+  "materials": [
+    {
+      "id": "paper",
+      "file": "materials/paper.webp",
+      "usage": "text-free paper material"
+    },
+    {
+      "id": "garden-object",
+      "file": "materials/garden.webp",
+      "usage": "optional transparent object; compose with sufficient visual weight"
+    },
+    {
+      "id": "soup-object",
+      "file": "materials/soup.webp",
+      "usage": "optional transparent object; not a mandatory header slot"
+    }
+  ],
+  "hostContext": [
+    {
+      "file": "../assets/world/day.webp",
+      "role": "style context only; host owns world backdrop"
+    }
+  ],
+  "tokens": {
+    "paper": "#f7efdc",
+    "ink": "#243e32",
+    "brass": "#aa7b35",
+    "moss": "#315f48",
+    "teal": "#28718a",
+    "honey": "#946e2b",
+    "sage": "#557955",
+    "clay": "#a04e33",
+    "plum": "#6c4a78"
+  },
+  "runtime": {
+    "definesHostProtocol": false,
+    "requiresFixedRenderer": false,
+    "requiresHostCapabilities": true,
+    "referenceImagesAreStaticConcepts": true
+  }
+}
