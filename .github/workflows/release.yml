@@ -57,7 +57,7 @@ jobs:
       - id: identity
         run: node scripts/ci-release.mjs identity --count "$(git rev-list --count HEAD)" --committed-at "$(git log -1 --format=%cI HEAD)"
 
-  # The Dev tests (owner decision 2026-10-09): the pull request checks again, on Linux, within five minutes, the quick UI checks included.
+  # The Dev tests (owner decision 2026-10-09): the pull request checks again, on Linux, within five minutes, the pull request UI checks included.
   # The builds start beside them and publish only once they passed; a failure opens an Issue for the cloud fixers.
   checks:
     name: Dev tests

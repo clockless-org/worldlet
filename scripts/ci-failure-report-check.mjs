@@ -77,8 +77,8 @@ assert.deepEqual(outcome({job:'failure',failed:['Static checks','Fast checks']})
 assert.match(issueBody({stage:'dev',platform:'linux',failing:['Static checks'],signature:'Static checks',sha:'abc',runURL:'u'}),/The Dev tests on linux failed at abc\.\n\nFailing:\n- Static checks\n/);
 
 // The Dev tests: release.yml runs the pull request checks (architecture.yml) on every push to main, publishes a Dev
-// build only after they pass, and reports a failure as an Issue; no RC workflow (owner decision 2026-10-09); the quick UI
-// checks are among them since 2026-10-10.
+// build only after they pass, and reports a failure as an Issue; no RC workflow (owner decision 2026-10-09); the pull request
+// UI checks are among them since 2026-10-10.
 const release=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');
 assert.match(release,/\n  checks:\n    name: Dev tests\n[^]*?uses: \.\/\.github\/workflows\/architecture\.yml\n/);
 assert.equal((release.match(/name: Wait for the Dev tests/g)||[]).length,2,'neither build publishes before the Dev tests pass');
@@ -86,5 +86,5 @@ assert.match(release,/ci-failure-report\.mjs --stage dev --platform linux/);
 assert(!existsSync(new URL('../.github/workflows/rc.yml',import.meta.url)),'no RC workflow');
 const architecture=readFileSync(new URL('../.github/workflows/architecture.yml',import.meta.url),'utf8');
 assert.match(architecture,/\n  workflow_call:\n/);
-assert(!/test:ui(?!:quick)/.test(architecture.split('\njobs:\n')[1]),'the Dev tests run the quick UI checks, not the whole UI suite');
+assert(!/test:ui(?!:pr)/.test(architecture.split('\njobs:\n')[1]),'the Dev tests run the pull request UI checks, not the whole UI suite');
 console.log('ci-failure-report checks passed');

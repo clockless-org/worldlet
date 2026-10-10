@@ -2,7 +2,7 @@ name: Architecture contracts
 # Pull request CI (owner decision 2026-10-04, after Actions spend went from about $3 a day to about $60): Linux only,
 # the required `Architecture` check green within five minutes of a push (three until 2026-10-10, when the owner added
 # the quick UI checks so a UI change breaks them before it merges, not in Alpha). The basic checks run as three jobs
-# side by side (about a minute and a half each); the quick UI checks (test:ui:quick) as three more. The whole UI suite,
+# side by side (about a minute and a half each); the quick UI checks that fit (test:ui:pr) as a fourth. The whole UI suite,
 # the iPhone and Android apps, Electron, Harness/Hermes, browser and packaging suites run in Alpha and Beta on 01/02
 # (scripts/gate.mjs). No macOS or Windows runner runs here. `npm run ci:time` reports how long PR CI takes and what it spent.
 on:
@@ -90,20 +90,14 @@ jobs:
       - run: node scripts/pr-checks-check.mjs
       - run: node scripts/pr-checks.mjs
       - run: node scripts/pr-checks.mjs --all
-  # The quick UI checks (`test:ui:quick`, owner decision 2026-10-10: PR CI runs quick checks within five minutes): the
-  # World, setup and tour, the Applets most changes break, Fox's chat, Attention, Mail and the Browser, headless on
-  # software WebGL, split into three jobs (WORLDLET_TEST_UI_SHARD) so each finishes in time. A UI change breaks them
-  # before it merges instead of first in Alpha. These checks draw real images, so this checkout keeps the media files.
+  # The pull request UI checks (`test:ui:pr`, owner decision 2026-10-10: PR CI runs quick UI checks within five
+  # minutes): startup, the first Applet, onboarding's first task, the Browser and Mail Applets, Meetings and the Applet
+  # catalogue, headless. The quick checks that draw the World take minutes each on a runner's software WebGL and stay in
+  # Alpha. These checks read real images, so this checkout keeps the media files.
   ui:
-    name: UI checks ${{ matrix.shard }}/3
+    name: UI checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-    env:
-      WORLDLET_TEST_UI_SHARD: ${{ matrix.shard }}/3
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -113,7 +107,7 @@ jobs:
           node-version: '22.22.1'
       - run: npm ci --ignore-scripts
       - run: npx playwright install chromium-headless-shell
-      - run: npm run test:ui:quick
+      - run: npm run test:ui:pr
   # The required check, green only when every other job of this run passed. It starts with the other three instead of
   # after them (`needs`): a job that only starts once the others finish waits for a runner on the critical path, which
   # usually takes 3 s but took 5:04 on 2026-10-05 (#1829) and 37–39 s three more times that day. It first cancels this
@@ -145,7 +139,7 @@ jobs:
         run: |
           while :; do
             jobs=$(gh api "repos/$GH_REPO/actions/runs/$RUN/attempts/$ATTEMPT/jobs?per_page=100" --jq '[.jobs[] | select(.name != "Architecture")]') || { sleep 4; continue; }
-            if [ "$(jq 'length >= 6 and all(.status == "completed")' <<<"$jobs")" = true ]; then
+            if [ "$(jq 'length >= 4 and all(.status == "completed")' <<<"$jobs")" = true ]; then
               jq -r '.[] | "\(.name): \(.conclusion)"' <<<"$jobs"
               jq -e 'all(.conclusion == "success")' <<<"$jobs" >/dev/null
               exit

@@ -125,6 +125,15 @@ export const quickChecks=available([
  'scripts/artifacts-ui-check.ts','scripts/order-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
  'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts',
 ]);
+// The pull request set (`npm run test:ui:pr`, owner decision 2026-10-10: PR CI runs quick checks within five minutes):
+// the quick checks that finish in seconds on a GitHub Linux runner. Those that draw the World took 2 to 8 minutes there
+// on software WebGL, four at a time, and timed out clicking it (PR #125's first run), so they stay in Alpha.
+export const prChecks=quickChecks.filter(c=>[
+ 'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
+ 'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/web-record-check.ts',
+ 'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',
+ 'scripts/meetings-check.ts',
+].includes(c));
 // Windows release host 01 is slower: four browsers at once pushed world startup past a check's
 // 15-30 s waits (fox-mac-controls, voice-memos). Two at a time took 12.5 minutes on 01, most of a
 // Windows RC; the owner asked for three (2026-10-01, #1099).
@@ -223,5 +232,5 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const browser=await fallbackBrowser();
  if(browser&&!process.env.WORLDLET_TEST_BROWSER){process.env.WORLDLET_TEST_BROWSER=browser;console.log('test:ui: Playwright\'s Chromium is not installed; the checks use '+browser);}
  const only=onlyArgument();
- process.exitCode=await testUi(shardChecks(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):{parallel:parallelChecks,serial:serialChecks}));
+ process.exitCode=await testUi(shardChecks(process.argv.includes('--core')?{parallel:coreChecks,serial:[]}:only!==null?onlyChecks(only):process.argv.includes('--quick')?onlyChecks(quickChecks.join(',')):process.argv.includes('--pr')?onlyChecks(prChecks.join(',')):{parallel:parallelChecks,serial:serialChecks}));
 }

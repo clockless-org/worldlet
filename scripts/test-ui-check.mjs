@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
-import {coreChecks,parallelChecks,serialChecks,testUiConcurrency,npmCli,checkStep,fallbackBrowser,runStep,testUi,onlyChecks,onlyArgument,quickChecks} from './test-ui.mjs';
+import {coreChecks,parallelChecks,serialChecks,testUiConcurrency,npmCli,checkStep,fallbackBrowser,runStep,testUi,onlyChecks,onlyArgument,quickChecks,prChecks} from './test-ui.mjs';
 import {withTempDir} from './test-temp.ts';
 
 const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
@@ -35,6 +35,9 @@ assert.equal(onlyArgument(['node','t','--only','a,b'],{}),'a,b');assert.equal(on
 assert.equal(onlyArgument(['node','t'],{WORLDLET_TEST_UI_ONLY:'c'}),'c');assert.equal(onlyArgument(['node','t'],{}),null);
 // The quick set the RC runs between release slots: listed checks, each once, the whole suite still the release's.
 assert.equal(pkg.scripts['test:ui:quick'],'node scripts/test-ui.mjs --quick');
+// The pull request set: quick checks only, the ones that finish in seconds on a CI runner.
+assert.equal(pkg.scripts['test:ui:pr'],'node scripts/test-ui.mjs --pr');
+assert(prChecks.length>=8&&prChecks.every(c=>quickChecks.includes(c)),'every pull request UI check is a quick check');
 assert(quickChecks.length>=20&&quickChecks.length<all.length/3&&new Set(quickChecks).size===quickChecks.length,'a short list, each once');
 assert.deepEqual([...onlyChecks(quickChecks.join(',')).parallel,...onlyChecks(quickChecks.join(',')).serial].sort(),[...quickChecks].sort(),'every quick check is a test:ui check');
 for(const c of ['scripts/world-scene-check.ts','scripts/startup-setup-check.ts','gatehouse/board-browser-check.mjs','scripts/library-applet-check.ts'].filter(c=>existsSync(new URL('../'+c,import.meta.url))))assert(quickChecks.includes(c),c+' (the checks RCs failed on 2026-10-06)');

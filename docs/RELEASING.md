@@ -8,7 +8,7 @@ The channels are the in-app update channels ([update-channel.ts](../core/distrib
 
 | Channel | Tests | Where, how long | What ships |
 | --- | --- | --- | --- |
-| Dev | The Dev tests: the pull request checks again (`check:pr`, the fast tests, the operational checks) and the quick UI checks (`test:ui:quick`) | GitHub Actions on Linux, within five minutes, on every push to `main` (documentation-only pushes excepted); a newer push replaces an older build that is still waiting, never one already running | The newest commit's signed, notarized build, once the Dev tests passed |
+| Dev | The Dev tests: the pull request checks again (`check:pr`, the fast tests, the operational checks) and the fastest UI checks (`test:ui:pr`) | GitHub Actions on Linux, within five minutes, on every push to `main` (documentation-only pushes excepted); a newer push replaces an older build that is still waiting, never one already running | The newest commit's signed, notarized build, once the Dev tests passed |
 | Alpha | The Dev tests, the quick UI checks (`test:ui:quick`) and the platform tests (Electron, iOS on the Mac, Android on Windows, Harness and Hermes) | The release machines, 01 (Windows) and 02 (Mac), within 20 minutes, on each new Dev build | That Dev build, once both machines passed |
 | Beta | Alpha's tests and the whole UI suite (`test:ui`) | 01 and 02, every night at 1:00 Pacific, within an hour | The newest Alpha build, once both machines passed; the public download and the default channel |
 | GA (Production) | — | Not open on the desktop yet; a maintainer decides | — |

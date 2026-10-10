@@ -118,9 +118,9 @@ assert.deepEqual(superseded.writes,[]);
 
 // A Dev build publishes only after this run's Dev tests passed.
 const job=(name,status,conclusion=null)=>({name:'Dev tests / '+name,status,conclusion});
-assert.equal(devTests([job('Static checks','completed','success')]).state,'wait','all six must finish');
+assert.equal(devTests([job('Static checks','completed','success')]).state,'wait','all four must finish');
 assert.equal(devTests([job('Static checks','completed','success'),job('Fast checks','completed','success'),job('Operational checks','completed','success'),job('Architecture','completed','skipped'),{name:'Mac',status:'in_progress'}]).state,'wait','the UI checks too');
-assert.equal(devTests([job('Static checks','completed','success'),job('Fast checks','completed','success'),job('Operational checks','completed','success'),...[1,2,3].map(i=>job(`UI checks ${i}/3`,'completed','success')),job('Architecture','completed','skipped'),{name:'Mac',status:'in_progress'}]).state,'pass');
+assert.equal(devTests([job('Static checks','completed','success'),job('Fast checks','completed','success'),job('Operational checks','completed','success'),job('UI checks','completed','success'),job('Architecture','completed','skipped'),{name:'Mac',status:'in_progress'}]).state,'pass');
 assert.deepEqual(devTests([job('Static checks','completed','failure'),job('Fast checks','in_progress')]),{state:'fail',failed:['Static checks']});
 
 // The workflow: never on pull requests, secrets only in jobs of the protected `release` environment on main.
