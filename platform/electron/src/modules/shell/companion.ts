@@ -1,4 +1,4 @@
-import {app,BaseWindow,ImageView,Menu,screen,type NativeImage,type Rectangle,type WebContentsView} from 'electron';
+import {app,BaseWindow,ImageView,Menu,nativeImage,screen,type NativeImage,type Rectangle,type WebContentsView} from 'electron';
 import {WorldletError} from '../../files.ts';
 import type {Host,Row} from '../../host/types.ts';
 import type {DesktopCompanionService} from '../../host/services.ts';
@@ -10,6 +10,14 @@ const WORLD_BACKGROUND='#20251d';
 const CHECK_FLAGS=['--check','--window-capture','--host-contract-check','--smoke-check'];
 const personalLaunch=(host:Host)=>!backgroundLaunch()&&!host.profile.smoke&&!host.profile.rcCheck&&!process.argv.some(arg=>CHECK_FLAGS.includes(arg));
 interface Crop {x:number;y:number;width:number;height:number}
+/** capturePage returns device pixels marked as 1x, so an ImageView would draw a Retina frame at twice the
+ * window's size: the World seemed to zoom in whenever another app came to the front (owner Order 2026-10-10).
+ * Mark the pixels with the display's scale so the frame covers exactly the view it was taken from. */
+const atViewScale=(image:NativeImage,width:number)=>{
+ const size=image.getSize(),scaleFactor=width>0?size.width/width:1;
+ if(!(scaleFactor>1.01))return image;
+ return nativeImage.createFromBitmap(image.toBitmap(),{width:size.width,height:size.height,scaleFactor});
+};
 
 /** Closing or minimizing the World keeps Fox on the desktop, and so does any other app coming to the
  * foreground (owner Order 2026-10-09): Fox floats on top whenever the World window is not in front. The same live World view moves
@@ -131,7 +139,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   try{
    await settle(this.host.page.call('worldletCompanionBackdrop',true));
    const image=await view.webContents.capturePage();
-   return image.isEmpty()?null:image;
+   return image.isEmpty()?null:atViewScale(image,view.getBounds().width);
   }catch{return null;}
   finally{void this.host.page.call('worldletCompanionBackdrop',false).catch(()=>{});}
  }
