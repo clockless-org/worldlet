@@ -137,8 +137,10 @@ assert.deepEqual(madeArtifacts({}),[]);
  assert.equal(readMorningBrief(null),MORNING_BRIEF_DEFAULT);
  assert.equal(readMorningBrief('  今天的日程 \r\n\n 把邮件都看一遍起草回复  '),'今天的日程\n把邮件都看一遍起草回复','One part a line, blank lines dropped');
  assert.equal(Array.from(readMorningBrief('长'.repeat(500))).length,MORNING_BRIEF_LIMIT,'Kept short');
- // By default only what was done overnight and today's schedule (owner Order 2026-10-08: "早报里面就说今天的安排就行了，昨天夜里做了什么、今天的安排").
- assert.equal(morningBriefWantsReplies(MORNING_BRIEF_DEFAULT),false,'The default drafts no mail');
+ // By default what was done overnight, today's schedule (owner Order 2026-10-08) and the replies Fox prepared for the
+ // mail that waits, for the person to approve (owner decision 2026-10-09).
+ assert.equal(MORNING_BRIEF_DEFAULT,'What was done overnight\nToday’s schedule\nReplies ready for my mail');
+ assert.ok(morningBriefWantsReplies(MORNING_BRIEF_DEFAULT),'The default drafts replies to the mail that waits');
  assert.ok(morningBriefWantsOvernight(MORNING_BRIEF_DEFAULT),'The default tells what was done overnight');
  assert.ok(morningBriefWantsOvernight('昨天夜里做了什么\n今天的安排'));
  assert.equal(morningBriefWantsOvernight('今天的日程\n今晚的安排'),false,'Tonight is not overnight');
@@ -146,7 +148,8 @@ assert.deepEqual(madeArtifacts({}),[]);
  assert.equal(morningBriefWantsReplies('今天的日程\nX 上的 AI 新闻'),false,'No mail asked for: the inbox is not read');
  const plan=dailyPlanRequest('2026-10-06','Today’s schedule\nReply drafts for the mail that needs me'),summary=dailySummaryRequest('2026-10-06');
  const morning=dailyPlanRequest('2026-10-06');
- assert.ok(morning.includes(JSON.stringify(MORNING_BRIEF_DEFAULT))&&!morning.includes('prepare_email')&&!morning.includes('provider gmail'),'The default brief neither reads nor drafts mail');
+ assert.ok(morning.includes(JSON.stringify(MORNING_BRIEF_DEFAULT))&&morning.includes('prepare_email')&&morning.includes('provider gmail'),'The default brief reads the inbox and drafts replies');
+ assert.ok(morning.includes('at most '+MORNING_BRIEF_REPLIES)&&morning.includes('how many are waiting and for whom')&&/never send one/.test(morning),'…a few, said on the brief by count and recipient, never sent');
  assert.match(morning,/read_world_history \(since "2026-10-05T18:00:00[+-]\d{2}:\d{2}", until now/,'Overnight is the World history from yesterday evening until now');
  assert.ok(!plan.includes('read_world_history'),'A brief that does not ask about the night does not read it');
  assert.match(plan,/show_artifact, titled "Plan · Tue, Oct 6", size large/);
@@ -163,15 +166,16 @@ assert.deepEqual(madeArtifacts({}),[]);
  const world=await readFile(new URL('../ui/shell/notion-world.ts',import.meta.url),'utf8');
  const poll=world.slice(world.indexOf("const dailyKey="),world.indexOf('const workPoll='));
  assert.match(poll,/event\.detail\?\.event!=='user_engaged'/,'Only the person\'s own use counts');
- assert.match(poll,/data\.sample\|\|navigator\.webdriver\|\|dailyAsking\|\|root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true'\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active/,'Never over a card, a dialog or a turn, one at a time');
+ // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked, checked in fox-proactive-check).
+ assert.match(poll,/backgroundBlocked\(\{sample:!!data\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep\|\|!!root\.dataset\.tourCoda,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\}\)/,'Never in the practice world, an automated browser, onboarding or the tour (its phone step after the first win included, Mac RCs 2983, 2985, 3035), one at a time');
+ assert.match(poll,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active\)return;/,'Never over a card, a dialog or a turn');
  assert.match(poll,/due\.kind==='summary'&&\(document\.hidden\|\|insideApplet\(\)\|\|inPageLayer\(\)\)\)return;/,'The summary waits for the World; the brief is made with the window hidden or an Applet open');
- assert.match(poll,/voice\?\.active\|\|native\?\.firstRun\?\.\(\)\|\|!!root\.dataset\.tourStep\|\|!!root\.dataset\.tourCoda\)return;/,'Never before the first-run tour, its phone step after the first win included, is over (Mac RCs 2983, 2985, 3035)');
  assert.match(await readFile(new URL('../ui/index.ts',import.meta.url),'utf8'),/firstRun:\(\)=>!sample&&onboardingUnfinished\(current\?\.onboarding\)/,'The World learns whether onboarding is over');
  assert.match(poll,/brief=await native\?\.morningBrief\?\.\(\)[\s\S]*daily=markDailyMade\(daily,due\.kind,due\.day\);saveDaily\(\);[\s\S]*dailyArtifactRequest\(due\.kind,due\.day,brief\)[\s\S]*voice\?\.background\?\.\(request\.text/,'The person\'s brief, then marked made before asking, so a failed turn never repeats all day');
- assert.match(poll,/voice\?\.background\?\.\(request\.text,\{displayText:request\.displayText\}\)\)[\s\S]*\/busy\/i[\s\S]*daily=before;saveDaily\(\);[\s\S]*\.finally\(\(\)=>\{status\(''\);dailyAsking=false;\}\)/,'Made quietly in a background session beside the conversation; asked again only while other background work runs (owner Orders 2026-10-07)');
+ assert.match(poll,/voice\?\.background\?\.\(request\.text,\{displayText:request\.displayText\}\)\)[\s\S]*\/busy\/i[\s\S]*daily=before;saveDaily\(\);[\s\S]*\.finally\(\(\)=>\{work\.end\(ok\);dailyAsking=false;\}\)/,'Made quietly in a background session beside the conversation; asked again only while other background work runs (owner Orders 2026-10-07)');
  const {journalPages:pagesOf}=await import('../core/artifacts/index.ts'),t=at(7,6,5).getTime()/1000;
  assert.deepEqual(pagesOf([{id:'r1',kind:'reply',title:'Re: Q4',createdAt:t+60,updatedAt:t+60},{id:'p',kind:'answer',title:'Plan · Wed, Oct 7',size:'large',createdAt:t,updatedAt:t}],at(7,9))[0].entries.map(e=>[e.artifact.id,e.size]),[['p','large'],['r1','medium']],'A reply draft is a medium card after the brief');
- console.log('PASS daily artifacts: the morning brief at 6 AM (or on waking, before noon) for someone who used Worldlet lately, holding the parts they asked for with reply drafts only when mail is asked; the summary from 9 PM or caught up the next day, never on a day nobody used');
+ console.log('PASS daily artifacts: the morning brief at 6 AM (or on waking, before noon) for someone who used Worldlet lately, holding the parts they asked for, reply drafts by default and only when mail is asked for; the summary from 9 PM or caught up the next day, never on a day nobody used');
 }
 
 // The Journal: a page a day, newest day first; time order with the plan first and the summary last on the day they

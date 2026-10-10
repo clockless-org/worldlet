@@ -107,7 +107,14 @@ Dismiss only closes the card: the item stays in the Center, unsettled (owner dec
 Removing an item without an outcome is Remove in Fox's options for the item inside its Applet.
 Fox's options are what Fox says and the replies to it, drawn as bold underlined words, never
 as item controls; choosing one shows as the person's reply (a reply mark and its name). Opening its original is an
-explicit next step. Fox provides contextual help and authorized actions; content
+explicit next step.
+
+Results arrive prepared (owner decision 2026-10-09): for a new Worth Doing item from a Gmail
+thread that waits for the person's reply, Fox prepares a reply in the background without being
+asked, a reply card in today's Journal that only the person sends. While a draft for the item's
+thread waits, its card carries one quiet line, "Fox drafted a reply · Review", which opens the
+Journal on the draft. Which items qualify and how many is in
+[replies Fox prepares](../core/artifacts/README.md#replies-fox-prepares). Fox provides contextual help and authorized actions; content
 text itself cannot grant execution rights. Keep reading and external writes distinct.
 
 ## Acceptance

@@ -61,7 +61,9 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
  const syncFooter=()=>{footer.hidden=!sourceIcons.childElementCount&&!actions.childElementCount;};
  // Changed evidence for this task waits here as one quiet line of text-link choices (ui/attention/task-review.ts).
  const review=make('p','attention-preview-review');review.hidden=true;review.setAttribute('role','group');
- panel.append(art,scrim,tools,hero,summary,review,footer);root.append(panel);
+ // A reply Fox prepared for this item waits in the Journal (owner decision 2026-10-09): one quiet line that opens it.
+ const drafted=make('p','attention-preview-review attention-preview-drafted');drafted.hidden=true;
+ panel.append(art,scrim,tools,hero,summary,review,drafted,footer);root.append(panel);
  panel.addEventListener('keydown',e=>{if(!panel.hidden&&e.key==='Escape'){e.preventDefault();e.stopPropagation();onClose();}});
  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden&&!e.defaultPrevented){e.preventDefault();onClose();}});
  panel.addEventListener('pointerdown',e=>{(e as any).worldletKeepFox=true;});
@@ -71,7 +73,7 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
    if(panel.hidden){returnFocus=document.activeElement as HTMLElement;returnItem=returnFocus?.closest('[data-world-item-id]')?.getAttribute('data-world-item-id');}
    selected=page;const data=attentionPreviewData(page),signal=page.worldItemSignal||{};
    panel.dataset.sourceId='attention:'+page.worldItemId;panel.dataset.kind=data.kind;root.dataset.attentionPreview='true';root.dataset.attentionKind=data.kind;
-   review.hidden=true;review.replaceChildren();
+   review.hidden=true;review.replaceChildren();drafted.hidden=true;drafted.replaceChildren();
    const sources=attentionSources(page);provenance.textContent=sources.length===1?'Source':sources.length+' sources';provenance.hidden=!sources.length;sourceIcons.replaceChildren();actions.replaceChildren();
    sources.forEach((source,index)=>{const label='Open '+source.label+(sources.filter(s=>s.label===source.label).length>1?' · '+(index+1):'');const button=control(label,()=>onOriginal(page,source.ref),source.icon);button.classList.add('attention-preview-original');sourceIcons.append(button);});
    // The "Source" word opens it too (owner feedback 2026-10-02: clicking Source did nothing); with several, the icons choose.
@@ -117,6 +119,12 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
    const buttons=value.choices.map(choice=>{const b=make('button','attention-preview-review-choice',choice.label) as HTMLButtonElement;b.type='button';b.dataset.reviewChoice=choice.key;
     b.onclick=async()=>{buttons.forEach(x=>x.disabled=true);try{await choice.run();}finally{buttons.forEach(x=>x.disabled=false);}};return b;});
    review.setAttribute('aria-label',value.text);review.append(make('span','attention-preview-review-text',value.text),...buttons);
+  },
+  /** A reply Fox prepared for this item, waiting in the Journal, or null. */
+  setDraft(value:{text:string;label:string;run:()=>void}|null){
+   drafted.replaceChildren();drafted.hidden=!value;if(!value)return;
+   const b=make('button','attention-preview-review-choice',value.label) as HTMLButtonElement;b.type='button';b.dataset.draftChoice='review';b.onclick=()=>value.run();
+   drafted.append(make('span','attention-preview-review-text',value.text),b);
   },
   close({restoreFocus=true}={}){selected=null;artRequest++;panel.hidden=true;delete root.dataset.attentionPreview;delete root.dataset.attentionKind;if(restoreFocus){const target=returnFocus?.isConnected?returnFocus:returnItem?root.querySelector('[data-world-item-id="'+CSS.escape(returnItem)+'"]'):null;(target as HTMLElement)?.focus({preventScroll:true});}},
  };
