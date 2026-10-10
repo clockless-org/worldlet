@@ -43,7 +43,8 @@ export class AgentBrowser implements AgentLink {
    const binary=this.environment.binary();
    if(!binary)throw new WorldletError('The browser driver is missing. Rebuild or reinstall Worldlet.');
    let python:string;
-   try{python=await this.environment.python();}catch{throw new WorldletError('Fox is preparing the local runtime. Try again shortly.');}
+   // Setup in progress is awaited, so a rejection is a real failure: its reason, not "try again".
+   try{python=await this.environment.python();}catch(error){throw error instanceof WorldletError?error:new WorldletError('Fox could not start the local runtime: '+((error as Error)?.message??String(error)));}
    if(this.starting!==task)throw new Cancelled();
    const env:Record<string,string>={PYTHONUNBUFFERED:'1'};
    for(const key of ['PATH','HOME','LANG','TMPDIR','TEMP','TMP','SYSTEMROOT'])if(process.env[key])env[key]=process.env[key]!;

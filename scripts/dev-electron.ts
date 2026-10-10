@@ -10,6 +10,7 @@ import {createRequire} from 'node:module';
 import {devChange} from './dev-change-policy.ts';
 import {workspace,git,lock,locked,waitForLock,processAlive} from './dev-workspace.ts';
 import {installPrimaryGuard} from './primary-guard.mjs';
+import {checkoutUv} from './checkout-uv.ts';
 import {DeferredDevUpdate,failureDetail,pullRequestNumber} from './dev-deferred-update.ts';
 import {devInfoPlistEntries,devLaunchConfig,devLauncherFiles,devOpenArguments,devRuntimeStamp,devSigningIdentity} from './mac-app-info.ts';
 
@@ -20,18 +21,6 @@ if((!checkout.linked&&checkout.branch!=='main')||(process.argv.includes('--main'
 if(!checkout.linked)try{installPrimaryGuard(root);}catch(error){console.error('Primary guard not installed: '+error.message);}
 const home=path.join(root,'.local/dev/electron'),appDir=path.join(home,'app'),webDir=path.join(home,'WorldletWeb'),pidFile=path.join(home,'app.pid');
 const updates=new DeferredDevUpdate(appDir,webDir);
-// Worldlet's own tools Python (platform/electron/src/modules/media/tools-python.ts) is set up with uv, which a packaged
-// app bundles. Dev uses the primary checkout's (`.local/bootstrap`), installed here when a
-// fresh checkout has none, so local speech, coding sessions and the browser driver work in Dev too.
-const uvBin=path.join(checkout.primary,'.local/bootstrap',process.platform==='win32'?'Scripts':'bin'),uv=path.join(uvBin,process.platform==='win32'?'uv.exe':'uv');
-function ensureUv(){
- if(existsSync(uv))return;
- const bootstrap=path.dirname(uvBin),python=process.env.WORLDLET_SETUP_PYTHON||(process.platform==='win32'?'python':'python3');
- console.log('Installing uv for Worldlet’s local tools…');
- const venv=spawnSync(python,['-m','venv',bootstrap],{stdio:'inherit'});
- const pip=venv.status===0&&spawnSync(path.join(uvBin,process.platform==='win32'?'python.exe':'python3'),['-m','pip','install','uv==0.12.15'],{stdio:'inherit'});
- if(!pip||pip.status!==0)console.error('uv could not be installed; Worldlet Dev’s local tools stay unavailable until uv is installed in .local/bootstrap.');
-}
 if(process.argv.includes('--apply-ready')){const c=await updates.requestCurrent();console.log(`Requested Apply and restart for ${c.revision}.`);process.exit(0);}
 const releaseLock=lock(path.join(root,'.local/dev-watcher.lock'));process.on('exit',releaseLock);
 // Under the daemon (scripts/machine-dev.mjs) the primary checkout's dependencies follow package-lock.json,
@@ -103,10 +92,11 @@ async function stopApp(){
 async function launch(){
  if(runningPid())return;
  const logFile=path.join(home,'worldlet.log');
- ensureUv();
+ // Worldlet's own tools Python needs uv (scripts/checkout-uv.ts), the primary checkout's, shared by every worktree.
+ const uv=checkoutUv(checkout.primary);
  const env:NodeJS.ProcessEnv={...process.env,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_WEB_ROOT:webDir,WORLDLET_DEV_UPDATE_DIR:home,WORLDLET_DEV_PID_FILE:pidFile,
   WORLDLET_WINDOW_TITLE:checkout.linked?`Worldlet Dev — ${checkout.label}`:'Worldlet Dev',...(checkout.linked?{WORLDLET_WORKTREE_PROFILE:checkout.id}:{}),
-  ...(existsSync(uv)?{WORLDLET_UV:uv}:{})};
+  ...(uv?{WORLDLET_UV:uv}:{})};
  delete env.ELECTRON_RUN_AS_NODE;
  const binary=await devRuntime();
  if(process.platform==='darwin'){

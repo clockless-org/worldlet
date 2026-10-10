@@ -262,7 +262,9 @@ document.getElementById('sized').addEventListener('click',()=>{window.open('abou
   // counts, ending at the first at full rate.
   // A capped rate dips the same way under load (Mac Alpha 4090 measured 8 for the 15 a scaled page draws at), so each
   // rate counts its best second; a page drawing faster than its cap still fails.
-  const steady=async(wanted=full)=>{let best=0;for(let second=0;second<5&&!near(best,wanted);second++)best=Math.max(best,await frames());return best;};
+  // Each second measured, for the failure message: whether a rate never got there or got there late.
+  const samples:Record<string,number[]>={};
+  const steady=async(wanted=full,name='panel',seconds=5)=>{let best=0;const seen:number[]=samples[name]=[];for(let second=0;second<seconds&&!near(best,wanted);second++){const rate=await frames();seen.push(rate);best=Math.max(best,rate);}return best;};
   const panelRate=await steady();
   let presses=0;page.onPress=()=>{presses++;};
   const clicksBefore=await page.evaluate('return window.clicks;',{},{isolated:false});
@@ -284,14 +286,16 @@ document.getElementById('sized').addEventListener('click',()=>{window.open('abou
   assert.equal(await page.evaluate('return document.activeElement?.id;',{},{isolated:false}),'field','Fox\'s click lands on the field');
   assert.equal(presses,1,'Fox\'s steps are not the person\'s presses');
   page.driver=null;
-  const windowRate=await steady(fps.scaled);
+  const windowRate=await steady(fps.scaled,'window');
   // Out of sight (the window waits while the person is in an Applet): low, never zero.
   page.setFrame({x:0,y:0,width:0,height:0},{width:800,height:600},true);
-  const waitingRate=await steady(fps.waiting);
+  const waitingRate=await steady(fps.waiting,'waiting');
   page.setFrame({x:40,y:30,width:800,height:600});
-  const backRate=await steady();
+  // Back from out of sight is where a loaded host is slowest to reach full rate again (Mac Alpha 4088 and 4096 on a 75 Hz
+  // display: best 16 and 34 within five seconds), so it gets ten.
+  const backRate=await steady(full,'back',10);
   assert.ok(near(panelRate,full)&&near(windowRate,fps.scaled)&&near(waitingRate,fps.waiting)&&near(backRate,full),
-   'frame rates follow pageFrameRate: '+JSON.stringify({panel:panelRate,window:windowRate,waiting:waitingRate,back:backRate}));
+   'frame rates follow pageFrameRate: '+JSON.stringify({panel:panelRate,window:windowRate,waiting:waitingRate,back:backRate,full,refresh:displayRefresh(window.getContentBounds())??null,samples}));
   // The surface hears of the mode change over IPC; a click sent at once could still count as a press.
   await wait(300);
   click(700,500);

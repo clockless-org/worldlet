@@ -12,6 +12,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {workspace} from './dev-workspace.ts';
 import {cachedAgentBrowser} from './package-agent-browser.ts';
+import {checkoutUv} from './checkout-uv.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 // A stand-in release host on the owner's own Mac skips this Codex-backed check (owner decision 2026-10-05; scripts/release-hosts.mjs codexGateSkip).
@@ -31,6 +32,8 @@ if(!existsSync(path.join(root,'dist/WorldletWeb/index.html')))build('scripts/bui
 build('scripts/build-electron.ts');
 // Fox finishes the journey's task in the browser, so the pinned driver is required here.
 if(!process.env.WORLDLET_AGENT_BROWSER)await cachedAgentBrowser(root).catch(error=>fail('the browser driver: '+error.message));
+// The driver runs on Worldlet's own tools Python, which uv sets up (scripts/checkout-uv.ts).
+const uv=process.env.WORLDLET_UV||checkoutUv(workspace(root).primary)||fail('uv for Worldlet’s local tools could not be installed');
 console.log(`Onboarding setup (builds, browser driver): ${seconds(began)}`);
 
 const profile=mkdtempSync(path.join(os.tmpdir(),'worldlet-onboarding-flow-'));
@@ -42,7 +45,7 @@ writeFileSync(path.join(profile,'agent','local-harness.json'),JSON.stringify({ve
 const logs=path.join(root,'.local/electron-checks');mkdirSync(logs,{recursive:true});
 const logFile=path.join(logs,'onboarding-flow.log'),log=createWriteStream(logFile);
 // RC 录像: pictures of the run for scripts/ui-review.ts (platform/electron/src/checks/index.ts).
-const env:NodeJS.ProcessEnv={...process.env,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile};
+const env:NodeJS.ProcessEnv={...process.env,WORLDLET_UV:uv,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile};
 // The tour's phone step waits two minutes after the first win; here it waits WORLDLET_TOUR_CODA_MS (default 20 s), still
 // proven to wait and to come at a calm moment, so the gate's budget is not spent idle (#41). world-tour-check.ts (test:ui)
 // holds the two minutes on a moved clock.
