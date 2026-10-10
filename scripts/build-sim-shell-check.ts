@@ -17,6 +17,8 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/worldlet-sim-shell-world.png'});
  // An Applet the theme has no art of its own for shows the host's picture, never a two-letter placeholder.
  assert.equal(await page.locator('.village-map-generic').count(),0,'every Applet has a picture');assert.equal(await page.locator('[data-sim-id=app-weather] img').count(),1);
+ // The theme's own icon (presentation.json `icons`) reaches the World through the host, as it does every host surface.
+ assert.match(await page.locator('[data-sim-id=app-gmail] img').getAttribute('src')||'',/theme-assets\/village-map\/gmail-icon\.png$/);
  await page.evaluate(()=>(window as any).worldletUI.dispatch({version:1,action:'activate',id:'app-gmail'}));
  await page.locator('.village-surface[data-kind=mail]').waitFor({state:'visible'});await page.screenshot({path:'/tmp/worldlet-sim-shell-mail.png'});
  assert.equal(await page.locator('.village-map').isVisible(),false);

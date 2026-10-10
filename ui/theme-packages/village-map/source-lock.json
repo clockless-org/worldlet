@@ -1,7 +1,7 @@
 {
   "contractVersion": 2,
   "id": "village-map",
-  "updatedAt": "2026-10-09T23:14:20Z",
+  "updatedAt": "2026-10-10T04:30:34Z",
   "sha256": {
     "assets/INTER-LICENSE.txt": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
     "assets/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
@@ -34,12 +34,12 @@
     "assets/world-night.png": "65a4de26e9cac6a4414bb46c8b99bec2c1d2f2ee5636a50fc1a55af6cb55813c",
     "entry.ts": "b075760713525e55c5dc58d2c7db59fe02daff58fd8322b64e9ef49a34983d60",
     "frame.ts": "6531aedbdf8a18687a25f42265007db8d1feb125a0ffba24d09022013dee8d19",
-    "map.json": "1fb2c825ab0fcd13b47625181e63563c9a144d0737903c0602954edc9278e013",
+    "map.json": "cfb448aeaff44ad7622f2082a316c0b7ee09b9f83b71977457bf14523466e19b",
     "placements.ts": "16fa5a966af66f7956f82c788d4fb54d0510a500d31c1e6ad29525b8bcb1db54",
-    "presentation.json": "976369ec67e72eb4f50118164fd2828c427ea87a3488e0d0f07a48d66f522ddf",
+    "presentation.json": "075bde38cdb56a1b7a85629e94e055cd1f890e07a3bf938fb94ae0c1c59876d1",
     "surface.ts": "9e294d52679230db4f7f9a34999c8a18884fbdef55e386b3e9c2419446d44c25",
     "theme.css": "58d0bfbe532297bcf607108e7b3a02b81119f4f1b76aca74c3f0f7d169f91f82",
-    "theme.json": "7320579fc7475861cffbeeef1e64fad991524aab58ff10d6ad1acdf62d3d1c41",
-    "world.ts": "3f66680236f1df477c7754cf899730df314fd66bbad0cc6821df4fd631a9d0b2"
+    "theme.json": "a70bffb74d56e93c015b5092ac437eedbf700cd215242f40baff839e5b63987a",
+    "world.ts": "31618d1d5dd86cdb30b96943b1df98aea454bc30354f0ac24de9ff2a6858fa4e"
   }
 }

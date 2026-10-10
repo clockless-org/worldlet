@@ -1,3 +1,4 @@
+import {themeAppletIcon} from '../themes/index.ts';
 // Bounded, locally persisted practice artifacts. No remote services or CLI calls.
 export function createPracticeWalkthrough({root,scene,home,storage,show}){
  const key='worldlet-practice-walkthrough-v1';
@@ -38,7 +39,7 @@ export function createPracticeWalkthrough({root,scene,home,storage,show}){
  function place(){
   device?.remove();if(!state.applet?.visible)return;
   const a=state.applet;device=document.createElement('button');device.type='button';device.className='practice-local-device';device.setAttribute('aria-label',a.title);device.style.cssText='position:absolute;left:62%;top:60%;width:128px;border:0;background:transparent;color:#284131;z-index:40;cursor:pointer;font:600 14px system-ui;filter:drop-shadow(0 6px 5px #32452230)';
-  const img=document.createElement('img');img.src=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.['apple-notes']||'';img.alt='';img.style.cssText='display:block;width:100%;height:104px;object-fit:contain';device.append(img,make('span',a.title,'display:inline-block;background:#f5f2e8e8;border-radius:8px;padding:5px 9px'));device.onclick=card;root.append(device);device.animate([{opacity:0,transform:'translateY(12px) scale(.9)'},{opacity:1,transform:'none'}],{duration:700,easing:'ease-out'});
+  const img=document.createElement('img');img.src=themeAppletIcon('apple-notes')||'';img.alt='';img.style.cssText='display:block;width:100%;height:104px;object-fit:contain';device.append(img,make('span',a.title,'display:inline-block;background:#f5f2e8e8;border-radius:8px;padding:5px 9px'));device.onclick=card;root.append(device);device.animate([{opacity:0,transform:'translateY(12px) scale(.9)'},{opacity:1,transform:'none'}],{duration:700,easing:'ease-out'});
  }
  async function iteration(meta){
   if(running)return {error:'The practice iteration is already running.'};running=true;home();panel?.remove();

@@ -15,7 +15,7 @@ export function renderWorld(context:ThemeWorldContext){
  const position=(el:HTMLElement,p:number[])=>{el.style.left=p[0]*100+'%';el.style.top=p[1]*100+'%';};
  function appletButton(applet:ThemeWorldApplet,ground:boolean){
   const b=document.createElement('button');b.type='button';b.className=ground?'village-map-applet':'village-library-applet';b.dataset.simId=applet.id;b.dataset.appletKey=applet.key;b.setAttribute('aria-label',applet.title+(applet.count?' · '+applet.count:''));b.title=applet.title;
-  const own=map.icons[applet.key],icon=own?asset(own):applet.icon;if(icon){const img=document.createElement('img');img.src=icon;img.alt='';b.append(img);}else{const mark=document.createElement('span');mark.className='village-map-generic';mark.textContent=applet.title.slice(0,2);b.append(mark);}
+  const icon=applet.icon;if(icon){const img=document.createElement('img');img.src=icon;img.alt='';b.append(img);}else{const mark=document.createElement('span');mark.className='village-map-generic';mark.textContent=applet.title.slice(0,2);b.append(mark);}
   const caption=document.createElement('span');caption.className=ground?'village-map-caption':'village-library-title';caption.textContent=applet.title;b.append(caption);
   if(applet.count){const count=document.createElement('small');count.className='village-map-count';count.textContent=String(applet.count);b.append(count);}
   b.draggable=true;b.ondragstart=e=>e.dataTransfer?.setData('application/worldlet-applet',applet.id);
