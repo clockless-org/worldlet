@@ -44,19 +44,30 @@ export function phaseOutcome(phase:string,code:number|null,output:string,timedOu
  if(!new RegExp(`^PASS onboarding paths ${phase}: `,'m').test(output))return {ok:false,reason:`${phase}: exited without its PASS line (did Quit Completely run?)`};
  return {ok:true,reason:null};
 }
+/** A leftover named without its paths: the program and, for Chromium's own processes, their --type. */
+export function leftoverName(command:string,name?:string){
+ const program=name||path.basename(command.split(/\s--/)[0].trim().replace(/^"|"$/g,'')).replace(/"/g,'');
+ const type=/--type=([\w-]+)/.exec(command)?.[1];
+ return type?`${program} ${type}`:program;
+}
 /** Processes whose command line names the library (Chromium and the website engine pass it to every helper),
  * never this process or, on Windows, the PowerShell running the query: its own command line names the library too. */
-export function holders(library:string,{platform=process.platform,run=execFileSync,self=process.pid}={}):number[] {
+export function leftovers(library:string,{platform=process.platform,run=execFileSync,self=process.pid}={}):{pid:number,name:string}[] {
  const names=[...new Set([library,(()=>{try{return fs.realpathSync(library);}catch{return library;}})()])];
  try{
   if(platform==='win32'){
-   const script=`Get-CimInstance Win32_Process | Where-Object { $c=$_.CommandLine; $_.ProcessId -ne $PID -and $c -and (${names.map(n=>`$c.Contains('${n.replace(/'/g,"''")}')`).join(' -or ')}) } | ForEach-Object { $_.ProcessId }`;
-   return String(run('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{encoding:'utf8',windowsHide:true,timeout:60_000})).split(/\r?\n/).map(Number).filter(pid=>pid>0&&pid!==self);
+   const script=`Get-CimInstance Win32_Process | Where-Object { $c=$_.CommandLine; $_.ProcessId -ne $PID -and $c -and (${names.map(n=>`$c.Contains('${n.replace(/'/g,"''")}')`).join(' -or ')}) } | ForEach-Object { "$($_.ProcessId)\`t$($_.Name)\`t$($_.CommandLine)" }`;
+   return String(run('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{encoding:'utf8',windowsHide:true,timeout:60_000})).split(/\r?\n/)
+    .map(line=>{const [pid,name,...command]=line.split('\t');return {pid:Number(pid),name:leftoverName(command.join('\t'),name)};}).filter(row=>row.pid>0&&row.pid!==self);
   }
   return String(run('ps',['-axww','-o','pid=,command='],{encoding:'utf8'})).split('\n')
-   .filter(line=>names.some(name=>line.includes(name))).map(line=>Number(line.trim().split(/\s+/)[0])).filter(pid=>pid>0&&pid!==self);
+   .filter(line=>names.some(name=>line.includes(name))).map(line=>{const [pid,...command]=line.trim().split(/\s+/);return {pid:Number(pid),name:leftoverName(command.join(' '))};}).filter(row=>row.pid>0&&row.pid!==self);
  }catch{return [];}
 }
+export const holders=(library:string,options:Parameters<typeof leftovers>[1]={})=>leftovers(library,options).map(row=>row.pid);
+/** What the launcher reports: how many, which programs, and their process ids. */
+export const leftoverReason=(what:string,left:readonly {pid:number,name:string}[])=>
+ `${what}: Quit Completely left ${left.length} process${left.length>1?'es':''} running with the library (${left.map(row=>`${row.name} pid ${row.pid}`).join(', ')})`;
 // The app to launch: this checkout's development build, or the package's own executable.
 function target(app:string|undefined,library:string,token:string,fixture:ReturnType<typeof writeOpenClawFixture>){
  const clean=launchEnvironment(process.env,fixture,{});
@@ -109,12 +120,12 @@ export async function onboardingPaths({app,out}:{app?:string,out?:string}){
    const result=await launch(run,phase,minutes,path.join(evidence,phase+'.log'));
    const outcome=phaseOutcome(phase,result.code,result.output,result.timedOut);
    // Quit Completely leaves nothing running: helpers get a moment to exit, then the rest are named and ended.
-   let left=holders(library);
-   for(let waited=0;waited<20_000&&left.length;waited+=500){await sleep(500);left=holders(library);}
-   for(const pid of left)try{process.kill(pid,'SIGKILL');}catch{}
+   let left=leftovers(library);
+   for(let waited=0;waited<20_000&&left.length;waited+=500){await sleep(500);left=leftovers(library);}
+   for(const {pid} of left)try{process.kill(pid,'SIGKILL');}catch{}
    record.phases.push({phase,code:result.code,seconds:result.seconds,timedOut:result.timedOut,leftovers:left,...outcome});
    if(!outcome.ok){record.reason=outcome.reason;break;}
-   if(left.length){record.reason=`${phase}: Quit Completely left ${left.length} process${left.length>1?'es':''} running with the library (pid ${left.join(', ')})`;break;}
+   if(left.length){record.reason=leftoverReason(phase,left);break;}
   }
   record.ok=!record.reason;
  }catch(error){record.reason=String((error as Error)?.message||error);}

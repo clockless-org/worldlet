@@ -8,7 +8,7 @@ import path from 'node:path';
 import {locateLocalHarnesses} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {readLocalAgentMemory} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
 import {rcCheckRoot,RC_CHECK_MARKER,RELEASE_CHECKS} from '../platform/electron/src/rc-check.ts';
-import {holders,parseArgs,phaseOutcome,PHASES,BLOCKING} from './onboarding-paths.ts';
+import {holders,leftoverReason,leftovers,parseArgs,phaseOutcome,PHASES,BLOCKING} from './onboarding-paths.ts';
 import {launchEnvironment,writeOpenClawFixture} from './setup-fixtures.ts';
 
 const tmp=fs.realpathSync(os.tmpdir()),library=fs.mkdtempSync(path.join(tmp,'worldlet-rc-')),token='ab'.repeat(32);
@@ -67,5 +67,11 @@ try{
  assert.match(script,/Win32_Process/);assert.ok(script.includes(`'${library}'`),'the library path, quoted for PowerShell');
  assert.ok(script.includes('$_.ProcessId -ne $PID'),'the query never counts its own PowerShell, whose command line names the library');
  assert.deepEqual(holders(library,{platform:'darwin',run:(()=>{throw Error('ps missing');}) as any}),[],'an unreadable process table finds nothing');
+ // A failure names the programs left running, without their paths, so the next run says what to fix.
+ const windows=`2860\tWorldlet.exe\t"C:\\Program Files\\Worldlet\\Worldlet.exe" --type=crashpad-handler --database=${library}\\logs\\crashes\r\n15012\tworldlet-web-engine.exe\tworldlet-web-engine.exe --type=gpu-process --worldlet-cache=${library}\r\n`;
+ const left=leftovers(library,{platform:'win32',run:(()=>windows) as any});
+ assert.deepEqual(left,[{pid:2860,name:'Worldlet.exe crashpad-handler'},{pid:15012,name:'worldlet-web-engine.exe gpu-process'}]);
+ assert.equal(leftoverReason('resume',left),'resume: Quit Completely left 2 processes running with the library (Worldlet.exe crashpad-handler pid 2860, worldlet-web-engine.exe gpu-process pid 15012)');
+ assert.deepEqual(leftovers(library,{platform:'darwin',run:(()=>table) as any}),[{pid:101,name:'x'}]);
 }finally{fs.rmSync(library,{recursive:true,force:true});}
 console.log('PASS onboarding paths: a release build opens the RC library only with the check, a worldlet-rc-* folder in the temporary folder and its token; the fixture OpenClaw is a local Agent to choose; phases need their own PASS line and a clean Quit Completely; leftover processes are found by the library path');
