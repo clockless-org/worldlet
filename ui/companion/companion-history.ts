@@ -67,7 +67,7 @@ export function createCompanionHistory({call,openApplet,openSite,connections=()=
   const now=sample?[]:worldLogNow(connections(),[]).map((l,i)=>({seq:-1-i,at:Date.now()/1000,who:'world',text:l.text,applet:l.applet,live:true} as WorldLogLine&{live?:true}));
   const all=[...lines,...now],key=all.map(l=>l.seq+':'+l.text).join('|');
   const next=sample?null:worldLogNext(tasks,Date.now()/1000);
-  coming.textContent=next?`Next · ${next.title} check at ${clock(next.at)}`:'';coming.hidden=!next;
+  coming.textContent=next?`Next sync · ${next.title} at ${clock(next.at)}`:'';coming.hidden=!next;
   if(key===plain)return;
   // Stay with the newest line unless the person scrolled up to read.
   const pinned=feed.scrollHeight-feed.scrollTop-feed.clientHeight<24,before=new Set(Array.from(recent.querySelectorAll('li[data-key]'),(li:HTMLElement)=>li.dataset.key));
