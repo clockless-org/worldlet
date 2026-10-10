@@ -4,7 +4,7 @@
 // Applet on the computer and has its own tile in the phone's Applet world. These are the rules every host applies
 // (core/tasks/README.md).
 import {MIGRATION_SOURCE_TITLES,isMigrationSource} from '../../contracts/agent.ts';
-import {ONGOING_KINDS,isOngoingKind,ongoingKind,type OngoingKindOrGeneral} from './kinds.ts';
+import {ONGOING_KINDS,isOngoingKind,ongoingKind,ongoingOffered,type OngoingKindOrGeneral} from './kinds.ts';
 
 /** The Applet whose panel shows an ongoing thing (and whose device art each one's device wears). */
 export const ONGOING_APPLET='app-ongoing';
@@ -117,13 +117,14 @@ export function ongoingRefresh(things:OngoingThing[],conversations:BroughtConver
   if(c.turns!==thing.turns||c.last!==thing.last||c.userTurns!==thing.userTurns||c.first!==thing.first||kind.kind)save.push({...thing,turns:c.turns,userTurns:c.userTurns,first:c.first,last:c.last,...kind});
  }
  const known=new Set(things.map(t=>t.id));
- // Only a conversation with a subject is offered (core/tasks/themes.ts), so one of no kind neither waits nor is proposed.
- const waiting=things.filter(t=>t.state==='proposed'&&!forget.includes(t.id)&&ongoingKindOf(t)!=='general').length;
+ // Only a conversation of a kind Fox offers is proposed (core/tasks/themes.ts): one of no kind, or a project, neither
+ // waits nor takes a place from one that is offered.
+ const waiting=things.filter(t=>t.state==='proposed'&&!forget.includes(t.id)&&ongoingOffered(ongoingKindOf(t))).length;
  const room=Math.max(0,ONGOING_LIMITS.proposals-waiting);
  if(room&&things.filter(t=>t.state==='kept').length<ONGOING_LIMITS.kept){
   const fresh=conversations.filter(c=>!known.has(ongoingId(c.source,c.session))&&ongoingLooksLikeJob(c,now))
    .sort((a,b)=>ongoingScore(b,now)-ongoingScore(a,now)||a.session.localeCompare(b.session));
-  save.push(...fresh.map(c=>ongoingProposal(c,now,textOf?.(c)??'')).filter(t=>t.kind!=='general').slice(0,room));
+  save.push(...fresh.map(c=>ongoingProposal(c,now,textOf?.(c)??'')).filter(t=>ongoingOffered(t.kind??'general')).slice(0,room));
  }
  return {save,forget};
 }

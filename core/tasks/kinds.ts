@@ -61,6 +61,12 @@ export const ONGOING_KINDS:Readonly<Record<OngoingKind,OngoingKindSpec>>=Object.
   ask:'list what is done, what is still open, and the next step'},
 });
 export const ONGOING_KIND_IDS=Object.keys(ONGOING_KINDS) as OngoingKind[];
+/** The kinds Fox offers to pull onto one page (core/tasks/themes.ts): the parts of life where the conversations are the
+ * person's own record (what they ate, lifted, learned, spent, planned). A project is not one (owner Order 2026-10-10:
+ * a page joining three unrelated work threads into their "status" had no subject and told old news as current): each
+ * work thread is its own matter and where it stands lives in the work itself, not in what was said about it weeks ago. */
+export const ONGOING_THEME_KINDS:readonly OngoingKind[]=Object.freeze(ONGOING_KIND_IDS.filter(kind=>kind!=='project'));
+export const ongoingOffered=(kind:OngoingKindOrGeneral):kind is OngoingKind=>(ONGOING_THEME_KINDS as readonly string[]).includes(kind);
 export const isOngoingKind=(value:unknown):value is OngoingKindOrGeneral=>value==='general'||ONGOING_KIND_IDS.includes(value as OngoingKind);
 
 /** Most of the person's own messages read to tell the kind, and how many must speak for one kind before it counts. */
