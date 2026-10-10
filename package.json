@@ -13,7 +13,7 @@
     "check": "npm run check:arch && npm run check:types && npm run check:syntax",
     "check:arch": "node scripts/architecture-check.ts && node scripts/component-boundary-check.ts && node scripts/platform-contract-check.ts && node scripts/fox-host-contract-check.ts && node scripts/item-host-contract-check.ts && node scripts/browser-surface-contract-check.ts && node scripts/presentation-contract-check.ts && npm run check:contracts && node scripts/execution-events-check.ts && node scripts/runtime-tasks-check.ts && node scripts/execution-journal-check.ts && node scripts/activity-check.ts && node scripts/world-history-query-check.ts && node scripts/world-history-durability-check.ts && node scripts/conversation-journal-check.ts && node scripts/parity-vectors.ts && node scripts/parity-core-usage.ts",
     "check:types": "tsc -p tsconfig.json && tsc -p scripts/tsconfig.json && tsc -p platform/electron/tsconfig.json",
-    "check:contracts": "node scripts/harness-contract-check.ts && node scripts/browser-driver-flow-check.ts",
+    "check:contracts": "node scripts/theme-contract-check.ts && node scripts/harness-contract-check.ts && node scripts/browser-driver-flow-check.ts",
     "check:docs": "node scripts/docs-check.ts",
     "check:public": "node scripts/public-safety-check.mjs",
     "check:style": "node scripts/builtin-style-check.ts && node scripts/world-pack-check.ts",

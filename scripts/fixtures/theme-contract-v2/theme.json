@@ -1,11 +1,11 @@
 {
   "contractVersion": 2,
-  "id": "blueprint",
-  "title": "Blueprint",
+  "id": "frozen-v2",
+  "title": "Frozen v2",
   "entry": "entry.ts",
   "stylesheet": "theme.css",
   "assets": "assets",
-  "applets": [],
   "presentation": "presentation.json",
-  "updatedAt": "2026-10-10T00:45:00Z"
+  "applets": ["gmail"],
+  "updatedAt": "2026-10-10T01:00:00Z"
 }

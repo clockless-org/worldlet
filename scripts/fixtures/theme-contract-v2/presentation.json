@@ -1,0 +1,193 @@
+{
+ "tokens": {
+  "bodyFont": "system-ui",
+  "displayFont": "Georgia",
+  "bodySize": 15,
+  "titleSize": 24,
+  "ink": "#111",
+  "paper": "#fff",
+  "accent": "#06c",
+  "focus": "#f90",
+  "radius": 6,
+  "controlHeight": 36
+ },
+ "fonts": [],
+ "world": {
+  "size": [
+   1500,
+   844
+  ],
+  "background": "assets/plate.svg",
+  "slots": {
+   "content": [
+    0.05,
+    0.15,
+    0.6,
+    0.7
+   ]
+  },
+  "hud": {
+   "top": [
+    0,
+    0,
+    1,
+    0.1
+   ],
+   "companion": [
+    0.8,
+    0.8,
+    0.2,
+    0.2
+   ],
+   "speech": [
+    0.7,
+    0.15,
+    0.25,
+    0.5
+   ],
+   "attention": "shared",
+   "today": [
+    0.01,
+    0.11,
+    0.02,
+    0.02
+   ],
+   "dialog": "shared"
+  }
+ },
+ "applets": {
+  "gmail": {
+   "size": [
+    1500,
+    844
+   ],
+   "background": "assets/plate.svg",
+   "slots": {
+    "content": [
+     0.05,
+     0.15,
+     0.6,
+     0.7
+    ]
+   },
+   "hud": {
+    "top": [
+     0,
+     0,
+     1,
+     0.1
+    ],
+    "companion": [
+     0.8,
+     0.8,
+     0.2,
+     0.2
+    ],
+    "speech": [
+     0.7,
+     0.15,
+     0.25,
+     0.5
+    ],
+    "attention": "shared",
+    "today": [
+     0.01,
+     0.11,
+     0.02,
+     0.02
+    ],
+    "dialog": "shared"
+   }
+  }
+ },
+ "fallback": {
+  "size": [
+   1500,
+   844
+  ],
+  "background": "assets/plate.svg",
+  "slots": {
+   "content": [
+    0.05,
+    0.15,
+    0.6,
+    0.7
+   ]
+  },
+  "hud": {
+   "top": [
+    0,
+    0,
+    1,
+    0.1
+   ],
+   "companion": [
+    0.8,
+    0.8,
+    0.2,
+    0.2
+   ],
+   "speech": [
+    0.7,
+    0.15,
+    0.25,
+    0.5
+   ],
+   "attention": "shared",
+   "today": [
+    0.01,
+    0.11,
+    0.02,
+    0.02
+   ],
+   "dialog": "shared"
+  }
+ },
+ "companion": {
+  "name": "Frozen",
+  "portrait": "assets/plate.svg",
+  "rig": {
+   "image": "assets/plate.svg",
+   "frames": [
+    [
+     0,
+     0,
+     100,
+     100
+    ]
+   ],
+   "feet": [
+    [
+     0.5,
+     1
+    ]
+   ],
+   "scale": 1,
+   "performances": {
+    "idle": 0
+   },
+   "perches": {
+    "overview": "assets/plate.svg"
+   }
+  }
+ },
+ "hud": {
+  "skin": {
+   "panel": {
+    "image": "assets/plate.svg",
+    "slice": [
+     4,
+     4,
+     4,
+     4
+    ],
+    "width": 4
+   }
+  }
+ },
+ "sound": {
+  "events": {
+   "mail.received": "assets/tick.wav"
+  }
+ }
+}

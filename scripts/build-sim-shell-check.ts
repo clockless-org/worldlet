@@ -7,6 +7,9 @@ await withBrowser(fileAccess,async browser=>{
  // The default theme is the built-in Village: the animated Pixi World, with no theme package stylesheet or scene slots.
  assert.equal(await page.evaluate(()=>document.documentElement.dataset.buildTheme),undefined);
  assert.equal(await page.locator('link[data-theme-style]').count(),0);
+ // What the companion and HUD read: Fox's name and art, and the built-in surfaces.
+ const companion=()=>page.evaluate(()=>{const env=(globalThis as any).__WORLDLET_ENV_ASSETS__;return {name:document.querySelector('#companionDialogue')?.getAttribute('aria-label'),rig:env.companionSpriteRig?.image||null,rive:!!env.companionRive,skin:document.documentElement.dataset.themeSkin||null,mail:env.surfaces?.sounds?.events?.['mail.received']||null};});
+ const fox=await companion();assert.equal(fox.name,'Fox reply');
  const pick=async(id:string)=>{await page.locator('.companion-panel-button').click();await page.locator('#companionInfo [data-setting=theme]').click();
   await page.locator(`#companionInfo [data-action=theme-${id}]`).click();await page.locator(`#companionInfo [data-action=theme-${id}][aria-pressed=true]`).waitFor();await page.keyboard.press('Escape');};
  await pick('village-map');
@@ -23,6 +26,9 @@ await withBrowser(fileAccess,async browser=>{
  await pick('blueprint');
  await page.locator('.blueprint-plan').waitFor({state:'visible'});assert.equal(await page.locator('.village-map').count(),0,'the old theme is disposed');
  assert.equal(await page.evaluate(()=>document.documentElement.dataset.buildTheme),'blueprint');
+ // Blueprint declares its own companion, HUD material and mail sound through the contract.
+ assert.deepEqual(await companion(),{name:'Compass reply',rig:'theme-assets/blueprint/compass-rig.svg',rive:false,skin:'bubble panel attention',mail:'theme-assets/blueprint/mail-chime.wav'});
+ await page.locator('.companion-avatar canvas.companion-sprite').waitFor();
  assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll<HTMLLinkElement>('link[data-theme-style]')].map(l=>l.dataset.themeStyle)),['blueprint'],'only the active theme stylesheet is attached');
  await page.screenshot({path:'/tmp/worldlet-sim-shell-blueprint-world.png'});
  await page.evaluate(()=>(window as any).worldletUI.dispatch({version:1,action:'activate',id:'app-gmail'}));
@@ -34,6 +40,7 @@ await withBrowser(fileAccess,async browser=>{
  // Back to the built-in Village: the Pixi World returns and no package stylesheet or scene slot is left behind.
  await pick('village');await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any)?.sceneMetrics?.renderer==='pixi-webgl');
  assert.equal(await page.locator('.blueprint-plan').count(),0);assert.equal(await page.locator('link[data-theme-style]').count(),0);
+ assert.deepEqual(await companion(),fox,'Fox and the built-in HUD come back');
  assert.deepEqual(await page.evaluate(()=>({theme:document.documentElement.dataset.buildTheme,slots:[...document.documentElement.style].filter(name=>name.startsWith('--sim-'))})),{theme:undefined,slots:[]});
- assert.deepEqual(errors,[]);console.log('PASS full World shell: Village boots the Pixi World, Settings → Theme switches to Village Map and Blueprint in place (Blueprint kept after reload) and back to Village, no runtime errors');
+ assert.deepEqual(errors,[]);console.log('PASS full World shell: Village boots the Pixi World, Settings → Theme switches to Village Map and Blueprint in place (Blueprint with its own companion, HUD and sound, kept after reload) and back to Village with Fox, no runtime errors');
 });
