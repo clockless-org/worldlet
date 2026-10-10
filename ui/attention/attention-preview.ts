@@ -60,7 +60,7 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
  // Changed evidence for this task waits here as one quiet line of text-link choices (ui/attention/task-review.ts).
  const review=make('p','attention-preview-review');review.hidden=true;review.setAttribute('role','group');
  // A reply Fox prepared for this item waits in the Journal (owner decision 2026-10-09): one quiet line that opens it.
- const drafted=make('p','attention-preview-review attention-preview-drafted');drafted.hidden=true;
+ const drafted=make('p','attention-preview-drafted');drafted.hidden=true;
  panel.append(art,scrim,tools,hero,summary,review,drafted,footer);root.append(panel);
  panel.addEventListener('keydown',e=>{if(!panel.hidden&&e.key==='Escape'){e.preventDefault();e.stopPropagation();onClose();}});
  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden&&!e.defaultPrevented){e.preventDefault();onClose();}});
