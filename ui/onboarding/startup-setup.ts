@@ -31,7 +31,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  let state=initial,step=0,busy=false,disposed=false,error='',notice='',signingIn=false,entering=false;
  // Agents already on this computer (Claude Code, Codex, …): choosing one replaces Google sign-in.
  // Each Agent here reports whether it has a name, memory or history Fox can bring (never its text).
- let agents:{id:string,title:string,worldTools?:boolean,model?:boolean,memory?:{name:string|null,user:boolean,longTerm:boolean,model?:boolean,history?:{conversations:number,notes:number,skills:number,jobs:number}}}[]=[],detectingAgents=true,connectingAgent:string|null=null;
+ let agents:{id:string,title:string,worldTools?:boolean,model?:boolean,memory?:{name:string|null,user:boolean,longTerm:boolean,model?:boolean,history?:{conversations:number,notes:number,skills:number,jobs:number}},version?:{current:string|null,minimum:string,outdated:boolean,update:boolean,howTo:string}}[]=[],detectingAgents=true,connectingAgent:string|null=null,updatingAgent:string|null=null;
  // The local Agent picked: the first found in AGENT_PRIORITY until the person picks another; the big button brings it.
  let picked:string|null=null;
  // More options (owner request 2026-10-09): the Agents not on this computer, Google and ChatGPT (coming soon), an Agent
@@ -106,6 +106,12 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // The Agent's own name where it has one (OpenClaw's Nova), else its product name.
  const agentName=(agent:{title:string,memory?:{name:string|null}})=>agent.memory?.name||agent.title;
  const giveName=(id:string|null)=>{const found=agents.find(a=>a.id===id);return found?.memory?.name||AGENT_SHORT[id||'']||found?.title||id||'';};
+ /** The picked Agent when its version is older than Worldlet works with (core/agent/agent-versions.ts). */
+ const outdated=(id:string|null)=>agents.find(a=>a.id===id&&a.version?.outdated===true)||null;
+ async function updateAgent(agent:{id:string,title:string}){
+  await call('agentHarness',{operation:'update',id:agent.id});
+  updatingAgent=agent.id;notice=agentText('{agent} is updating in Terminal. When it is done, choose Check again.',giveName(agent.id));
+ }
  async function chooseAgent(id:string|null){
   const agent=agents.find(a=>a.id===id);
   if(!agent)return;
@@ -457,7 +463,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    card.append(image(AGENT_ICONS[found.id]||'','setup-agent-icon'),node('strong',agentName(found),'setup-agent-name'));
    // Where it comes from when it has its own name, else what it runs on.
    const sub=found.memory?.name?title:found.id==='codex'?t(found.model===false?'Sign in to Codex first':'Your ChatGPT plan'):t(found.memory?'Its memory comes along':'On this computer');
-   card.append(node('small',connecting?agentText('Connecting to {agent}…',title):sub,'setup-agent-sub'));
+   // Older than Worldlet works with (core/agent/agent-versions.ts): the card says which version it needs.
+   const old=found.version?.outdated===true;card.classList.toggle('is-outdated',old);
+   card.append(node('small',connecting?agentText('Connecting to {agent}…',title):old?t('Needs version {version} or newer').replace('{version}',found.version!.minimum):sub,'setup-agent-sub'));
    const history=found.memory?.history,chips=node('span','','setup-agent-chips');
    for(const [n,label] of [[history?.conversations,'{count} conversations'],[history?.notes,'{count} notes'],[history?.skills,'{count} skills'],[history?.jobs,'{count} routines']] as [number|undefined,string][])if(n)chips.append(node('span',count(label,n),'setup-agent-chip'));
    if(chips.childElementCount)card.append(chips);
@@ -598,6 +606,12 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     primary=button(hermesSetup==='installing'?'Installing Hermes Agent…':hermesSetup==='signing-in'?'Waiting for ChatGPT…':hermesSetup==='installed'?'Sign in with ChatGPT':agentText('Give {agent} a world','Hermes'),hermesSetup==='installed'?signInHermes:installHermes,true);
     primary.classList.toggle('is-loading',working);if(working||signingIn)primary.disabled=true;
    }
+   else if(outdated(picked)&&!going){
+    // A too-old Agent is updated with its own command in Terminal (Worldlet never updates it), then looked at again.
+    const agent=outdated(picked)!;
+    primary=updatingAgent===agent.id||!agent.version!.update?button('Check again',()=>detectAgents(true),true):button(agentText('Update {agent}',giveName(agent.id)),()=>updateAgent(agent),true);
+    if(signingIn)primary.disabled=true;
+   }
    else{
     primary=button(going?agentText('Connecting to {agent}…',going.title):agentText('Give {agent} a world',picked?giveName(picked):t('your agent')),()=>chooseAgent(picked),true);
     primary.classList.toggle('is-loading',!!going);if(!picked||!agents.some(a=>a.id===picked)||signingIn)primary.disabled=true;
@@ -620,9 +634,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  if(draft.brought)shownTiles=99;
  setInterfaceLanguage(draft.language);render();
  // Hosts without local Agent support answer with an error or nothing; More options stays the way in.
- function detectAgents(){
+ function detectAgents(fresh=false){
   detectingAgents=true;
-  return Promise.resolve().then(()=>call('agentHarness',{operation:'detect'})).then(result=>{
+  return Promise.resolve().then(()=>call('agentHarness',{operation:'detect',...fresh?{fresh:true}:{}})).then(result=>{
    if(disposed)return;
    // Codex alone is no Agent for Fox (owner decision 2026-10-09).
    const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'&&a.id!=='codex'):[];
@@ -633,6 +647,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    // A pairing with another computer that ended (unpaired there) returns to the first half too.
    if(typeof draft.remoteAgent==='string'&&!result?.remote){delete draft.remoteAgent;persist();if(step===1&&!ready())step=0;}
    agents=found;detectingAgents=false;
+   if(fresh){updatingAgent=null;const still=outdated(picked);error=still?agentText('{agent} is still older than Worldlet needs.',giveName(still.id)):'';notice='';}
    picked=AGENT_PRIORITY.find(id=>found.some(a=>a.id===id))||found[0]?.id||null;
    // Only when the first half is what the person sees: how many supported Agents are here, and the one picked for them.
    if(step===0)productEvent('local_agents_detected',agentsDetectedDimensions(found,picked));

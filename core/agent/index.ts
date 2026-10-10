@@ -12,6 +12,7 @@ export * from './harness-services.ts';
 export * from './harness-agents.ts';
 export * from './harness-models.ts';
 export * from './model-providers.ts';
+export * from './agent-versions.ts';
 export * from './harness-usage.ts';
 export * from './harness-schedule.ts';
 export * from './harness-sessions.ts';
