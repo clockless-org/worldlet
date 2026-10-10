@@ -148,8 +148,8 @@ const silence=(seconds:number)=>new Int16Array(Math.round(seconds*RATE));
  const read=(file:string)=>fs.readFileSync(new URL('../'+file,import.meta.url),'utf8');
  const device=read('platform/electron/src/modules/browser/device.ts');
  assert.match(device,/if\(agent\)throw new WorldletError\('Only the person can transcribe a meeting/,'Fox can never start a transcript');
- assert.match(device,/private close\(\)\{\n  this\.endTranscript\(\);/,'closing the call ends its transcript');
- assert.match(device,/private park\(live\?:string\[\]\)\{\n  this\.endTranscript\(\);/,'leaving the call ends its transcript');
+ assert.match(device,/private close\(\)\{\n  (this\.closeCopy\(\);)?this\.endTranscript\(\);/,'closing the call ends its transcript');
+ assert.match(device,/private park\(live\?:string\[\]\)\{\n  (this\.closeCopy\(\);)?this\.endTranscript\(\);/,'leaving the call ends its transcript');
  const page=read('platform/electron/src/modules/browser/engine/page.ts');
  // Every website page (a meeting page among them) starts blank and is loaded through load().
  assert.match(page,/const deferred=!!parsed&&publicPage\(parsed\);\n  const start='about:blank';/,'a meeting page starts blank');

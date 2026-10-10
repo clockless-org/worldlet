@@ -51,7 +51,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll<HTMLElement>('.matter-icon svg')].map(s=>[s.firstElementChild.tagName,s.children.length])),[['rect',1]],'a task wears a plain square, once, in the panel');
  assert.equal(await page.evaluate(()=>document.querySelectorAll<HTMLElement>('.world-roof-action').length),0,'the world carries no second set of marks over the Applet');
  assert.equal(await active(),'building-home','a background check does not move the view');
- await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(m=>m.id==='app-gmail')?.presentation.phase==='attention');
+ // The World hears of the connection through the Theme contract: Mail's lamp is lit. Its finding is no lamp color
+ // or mark of its own; the Attention Center is its only reminder (ui/world/applet-lamp.ts).
+ await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(m=>m.id==='app-gmail')?.lamp?.state==='ready');
 
  // Connected and disconnected Peek entries take the same route into Mail's
  // authored Open; the account's website stays behind View original.

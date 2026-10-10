@@ -189,6 +189,8 @@ const heldByFox=(page:Page)=>page.waitForFunction(()=>{const b=(window as any).s
   await page.waitForFunction(()=>(window as any).surface.at(-1)?.copy);
   await host(page,{phase:'fox-copy',event:'ended'});
   await page.waitForFunction(()=>document.querySelector('.browser-viewport')!.classList.contains('is-fox-control'));
+  // The layout without the copy follows the class change; a loaded host can send it a frame later.
+  await page.waitForFunction(()=>{const b=(window as any).surface.at(-1);return b?.action==='browserLayout'&&!b.copy;});
   assert.equal((await last(page)).copy,undefined);
   assert.deepEqual(errors,[]);
   await page.close();

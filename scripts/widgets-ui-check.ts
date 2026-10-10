@@ -44,7 +44,8 @@ try{
  assert.match(await panel.locator('.moment-until').textContent()||'',/Until 1:00 PM/);
  // It sits on the background painted for it.
  await page.waitForFunction(()=>document.querySelector('.moment-applet')?.hasAttribute('data-own-background'));
- await page.getByText('Getty Center today',{exact:true}).first().waitFor();
+ // Its title shows where the open Applet is named (the Applet shelf hides Fox's context line while it stands).
+ await page.getByText('Getty Center today',{exact:true}).filter({visible:true}).first().waitFor();
  assert.doesNotMatch(await page.locator('#notionContent').textContent()||'',/[Ww]idget/);
  await page.screenshot({path:'/tmp/moment-open.png'});
  // Keeping it and deleting it go to the host.
