@@ -3,7 +3,7 @@ import {mkdir} from 'node:fs/promises';
 import sharp from 'sharp';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 import {BUILTIN_STYLE} from '../ui/components/style.ts';
-import {LANDMARK_KEYS} from '../ui/theme-packages/village/region-landmarks.ts';
+import {LANDMARK_KEYS} from '../ui/world/village/region-landmarks.ts';
 import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
 
 assert.deepEqual(Object.keys(BUILTIN_STYLE.landmarks).sort(),[...LANDMARK_KEYS].sort());

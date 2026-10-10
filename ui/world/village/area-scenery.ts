@@ -1,5 +1,5 @@
 import {Container,Graphics,Rectangle,Sprite,Texture} from 'pixi.js';
-import {WORLD_WIDTH,WORLD_HEIGHT} from './space/world-design.ts';
+import {WORLD_WIDTH,WORLD_HEIGHT} from '../world-design.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
 import {createSceneAmbience} from './scene-ambience.ts';
 import {attachAppletLamp} from './village-lamp.ts';

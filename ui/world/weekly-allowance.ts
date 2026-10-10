@@ -1,4 +1,4 @@
-/** A coding agent's weekly allowance from its reported rate limits (Theme contract ThemeWorldApplet.allowance); null once
+/** A coding agent's weekly allowance from its reported rate limits (world-renderer.ts WorldApplet.allowance); null once
  * the report is over five minutes old or has no weekly window. */
 export function weeklyQuota(value,now=Date.now()){
  if(value?.observedAt&&now-value.observedAt>300000)return null;

@@ -4,8 +4,8 @@ import {bundleScript} from './browser-test.ts';
 
 const bundle=await bundleScript({stdin:{contents:`
  import {Application,Container,Graphics,Rectangle,ColorMatrixFilter,BlurFilter} from 'pixi.js';
- import {viewportFilterArea} from './ui/theme-packages/village/viewport-filter-area.ts';
- import {guardFilterResolution} from './ui/theme-packages/village/pixi-filter-resolution.ts';
+ import {viewportFilterArea} from './ui/world/village/viewport-filter-area.ts';
+ import {guardFilterResolution} from './ui/world/village/pixi-filter-resolution.ts';
  export async function check(){
   let cases=0,oldClips=0;
   for(const resolution of [1,2]){

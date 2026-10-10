@@ -4,14 +4,14 @@ A Theme Pack describes how Worldlet presents the shared product: where things ar
 how they move. It never owns data. Mail keeps its ID, accounts, messages and background tasks whatever
 room shows it; the person's area names, Applet membership and last use are the same in every theme.
 
-**Themes are packages of the one [Theme contract](CONTRACT.md).** Worldlet bundles one, the Village
-(`ui/theme-packages/village/`); there is no theme picker. A theme implements four parts: World,
-Applets, HUD look, and sound with event animations ([What a theme implements](CONTRACT.md#what-a-theme-implements)).
+**Themes are static packages of the one [Theme contract](CONTRACT.md).** Worldlet bundles one, the Village
+(`ui/theme-packages/village/`); there is no theme picker. A theme is pictures, sounds, fonts and JSON
+([What the theme declares](CONTRACT.md#what-the-theme-declares)); the host draws the World and the Applet pages.
 The companion and the loading and first-use pages are not part of a theme.
 
 The data-only ThemePack described below is the host's own look: Village's shared assets (companion rig, HUD
 material, sounds, world declarations) that every theme draws over. It is not a theme API:
-`ui/themes/theme-registry.ts` holds the one pack, and theme packages decide which theme is shown.
+`ui/themes/theme-registry.ts` holds the one pack.
 
 ## The parts
 

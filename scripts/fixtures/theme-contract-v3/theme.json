@@ -1,0 +1,8 @@
+{
+  "contractVersion": 3,
+  "id": "frozen-v3",
+  "title": "Frozen v3",
+  "updatedAt": "2026-10-10T07:10:00Z",
+  "assets": "assets",
+  "presentation": "presentation.json"
+}

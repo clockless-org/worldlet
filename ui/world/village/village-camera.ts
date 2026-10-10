@@ -1,5 +1,5 @@
-import {WORLD_WIDTH,WORLD_HEIGHT} from './space/world-design.ts';
-import {THEME_WORLD} from './space/world-layout.ts';
+import {WORLD_WIDTH,WORLD_HEIGHT} from '../world-design.ts';
+import {THEME_WORLD} from '../world-layout.ts';
 import {ROOM_FOREGROUND} from './village-pack.ts';
 // Placement coordinates cover the full plate; overview is only its inner frame.
 export const WORLD_EXTENT={x:0,y:0,width:WORLD_WIDTH,height:WORLD_HEIGHT};

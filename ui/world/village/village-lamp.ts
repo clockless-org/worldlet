@@ -1,10 +1,10 @@
 import {Sprite,Texture} from 'pixi.js';
 import {deviceFeature} from './device-feature.ts';
-import {lampSurface,LAMP_SURFACE_EXTENT} from './lamp-surface.ts';
+import {lampSurface,LAMP_SURFACE_EXTENT} from '../applet-lamp-surface.ts';
 import type {DeviceFeature} from './village-pack.ts';
 
-/** The lamp states and their look, as the host's own lamps (ui/world/applet-lamp.ts) show them. lamp-surface.ts is a copy of
- * ui/world/applet-lamp-surface.ts. scripts/applet-lamp-check.ts keeps both equal to the host's. */
+/** The lamp states and their look, as the host's own lamps (ui/world/applet-lamp.ts) show them; scripts/applet-lamp-check.ts
+ * keeps them equal to the host's. */
 export type LampState='off'|'ready'|'processing'|'error';
 export const lampColors={off:0x171c19,ready:0xffffff,processing:0xffffff,error:0xff4141};
 export const LAMP_BREATH_MS=2400;
@@ -12,7 +12,7 @@ export function lampOpacity(state:LampState,now:number,reduced=false){return sta
 const lampTextures=new Map<number,Texture>();
 // Child coordinates are texture pixels, including the sprite anchor. The same
 // transform follows foot alignment, camera zoom, foreground scale and motion.
-/** The lamp painted on a device, where the host says it sits (Theme contract ThemeWorldApplet.device.lamp). */
+/** The lamp painted on a device, where the host says it sits (world-renderer.ts WorldMark.lamp). */
 export function attachAppletLamp(sprite:Sprite,art:DeviceFeature|undefined){
  if(!art)return null;
  const g=new Sprite(Texture.EMPTY);g.anchor.set(.5);g.eventMode='none';sprite.addChild(g);let state:LampState='off';

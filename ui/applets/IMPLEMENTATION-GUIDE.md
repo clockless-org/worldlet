@@ -113,7 +113,7 @@ using the same shell, with live data and explicit unavailable/error states.
 | Catalog and stable IDs | `core/applets/definitions/<key>.ts`, `core/applets/catalog.ts` |
 | Brand assets | `ui/applets/BRAND-ASSETS.md`, `ui/applets/brand-assets.json` |
 | Placement and world slots | `ui/world/world-layout.ts`, `ui/world/world-pack.ts`, `resources/worlds/`; retain compatible stored IDs |
-| Sprite rendering and Open items | `ui/theme-packages/village/pixi-world.ts`, `ui/world/pixi-stage.ts`, Applet-specific renderers |
+| Sprite rendering and Open items | `ui/world/village/pixi-world.ts`, `ui/world/pixi-stage.ts`, Applet-specific renderers |
 | Asset packaging | `scripts/build-world-assets.ts`; inspect the active asset paths before registering files |
 | Connections | `ui/applets/connection-guide.ts`, host adapters in `platform/electron/src/modules/sources/` (`connections.ts`, `apple.ts`, `local.ts`) and `harness/hermes/` |
 | Routing and selected originals | `ui/shell/notion-world.ts` |

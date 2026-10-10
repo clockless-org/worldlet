@@ -155,7 +155,7 @@ No account, secret or hosted service is needed to build. Checks: `npm run check:
 | `ios/`, `android/` | Phone companions |
 | `scripts/`, `docs/` | Build, validation and contributor guidance |
 
-Worldlet has one theme, the Village, the animated World ([Theme contract](resources/themes/CONTRACT.md)). There is no theme picker.
+Worldlet has one theme, the Village. A theme is static pictures, sounds and JSON ([Theme contract](resources/themes/CONTRACT.md)); Worldlet draws the animated World from it. There is no theme picker.
 
 ## Documentation
 

@@ -1,6 +1,6 @@
 import {Container,Graphics,Sprite,Texture} from 'pixi.js';
-import type {SceneMotion} from './space/scene-motion.ts';
-import {WORLD_WIDTH,WORLD_HEIGHT} from './space/world-design.ts';
+import type {SceneMotion} from '../../themes/index.ts';
+import {WORLD_WIDTH,WORLD_HEIGHT} from '../world-design.ts';
 
 /** Authored atmosphere is clipped to the part of the painting it belongs to.
  * One small texture serves all soft glows; no blur filter or per-frame texture uploads. */

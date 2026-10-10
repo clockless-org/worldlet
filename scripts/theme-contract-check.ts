@@ -1,10 +1,10 @@
 // The Theme contract is frozen per version. A change that would break a theme package written against the frozen
 // version fails here, in PR CI, before it ships:
 // 1. Types: the frozen declarations (ui/themes/frozen/contract-v<N>.d.ts) and the current contract must agree in both
-//    directions. What a package hands the host (theme, manifest, presentation, mounts) must still be accepted, and what
-//    the host hands a package (contexts, state, items, actions) must still carry every field the package may read.
+//    directions. A theme is static, so everything flows from the package to the host: its manifest and presentation
+//    must still be accepted.
 // 2. Behaviour: a frozen package (scripts/fixtures/theme-contract-v<N>/) that uses every part of the contract must
-//    still compile and validate.
+//    still validate.
 // Additive, optional changes pass; update the snapshot with `node scripts/theme-contract-check.ts --freeze` in the same
 // PR. Anything else needs a new contract version (BUILD_THEME_CONTRACT_VERSION) with its own snapshot and fixture.
 import assert from 'node:assert/strict';
@@ -39,9 +39,9 @@ const frozen=await fs.readFile(snapshot,'utf8').catch(async()=>{
  await freezeTo();process.exit(0);
 });
 
-// What a package produces flows to the host: frozen → current. What the host provides flows to a package: current → frozen.
-const fromPackage=['BuildTheme','BuildThemeManifest','ThemePresentation','ThemeScene','ThemeHud','ThemeSound','ThemeMount','ThemeWorldMount','ThemeWorldMark'];
-const toPackage=['ThemeAppletContext','ThemeWorldContext','ThemeWorldState','ThemeWorldApplet','ThemeWorldEvent','ThemeItem','ThemeActions','ThemeScene','ThemePresentation','ThemeRecord'];
+// What a package declares flows to the host: frozen → current. The host hands a static package nothing.
+const fromPackage=['BuildThemeManifest','ThemePresentation','ThemeTokens','ThemeHud','ThemeSound'];
+const toPackage:string[]=[];
 // A type added since the freeze has nothing frozen to compare with; the next --freeze adds it.
 const shipped=(name:string)=>new RegExp(`export (interface|type) ${name}\\b`).test(frozen);
 const probe=path.join(root,'ui/themes/__theme_contract_probe__.ts');
@@ -79,11 +79,11 @@ for(const [name,symbol] of frozenExports){
  walk(checker.getDeclaredTypeOfSymbol(symbol),checker.getDeclaredTypeOfSymbol(current),name,0);
 }
 
-// The frozen package still compiles against the current contract and passes import validation.
+// The frozen package still passes import validation.
 const checked=await validateBuildTheme(fixture);
 assert.equal(checked.manifest.contractVersion,BUILD_THEME_CONTRACT_VERSION);
 
 if(freeze){await freezeTo();process.exit(0);}
 // A compatible change still keeps the snapshot current, so the next change is compared with what shipped.
 assert.equal(frozen,declarations(),'The Theme contract changed compatibly. Run node scripts/theme-contract-check.ts --freeze and commit the snapshot.');
-console.log(`PASS Theme contract v${BUILD_THEME_CONTRACT_VERSION}: frozen types accepted both ways, no frozen field removed, the frozen package compiles and validates, snapshot current`);
+console.log(`PASS Theme contract v${BUILD_THEME_CONTRACT_VERSION}: frozen types accepted both ways, no frozen field removed, the frozen package validates, snapshot current`);

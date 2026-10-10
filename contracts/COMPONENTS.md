@@ -394,4 +394,4 @@ completed visible messages; interrupted streams live in the World ledger.
 
 ## Theme packages
 
-`ui/theme-packages/index.ts` is the generated registry of the trusted source packages copied by `theme:import`, one directory per theme. Each package implements the type-only `@worldlet/theme` API exported by `ui/themes/index.ts`. It owns no host data or native IO. See the [build theme contract](../resources/themes/CONTRACT.md).
+`ui/theme-packages/index.ts` is the generated registry of the static packages copied by `theme:import`, one directory per theme. A package is pictures, sounds, fonts and JSON; it holds no code, host data or native IO, and the host reads it through `ui/themes/index.ts`. See the [build theme contract](../resources/themes/CONTRACT.md).
