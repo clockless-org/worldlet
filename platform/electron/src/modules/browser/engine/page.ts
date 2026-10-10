@@ -15,7 +15,7 @@ import type {WebRecordLink} from '../web-page.ts';
 // The agent's DevTools ids are remapped above the panel's own.
 const AGENT_IDS=1_000_000_000;
 // `ready` settles once the engine has made the page (or it is gone); until then the engine drops what is sent to it.
-interface Entry {id:number;url:string;title:string;loading:boolean;back:boolean;forward:boolean;shielded:boolean;created:boolean;ready:Promise<void>;settle:()=>void;pending:string|null}
+interface Entry {id:number;url:string;title:string;loading:boolean;documentLoaded:boolean;back:boolean;forward:boolean;shielded:boolean;created:boolean;ready:Promise<void>;settle:()=>void;pending:string|null}
 export interface CefPageOptions {
  engine:WebEngine;parent:View;window:()=>BaseWindow|null;scope:'personal'|'practice';
  webRoot:string;demo:boolean;url:string;preload:string;onDownload:(message:string)=>void;
@@ -144,6 +144,9 @@ export class CefPageView {
  get url(){return this.top?.url??'';}
  get title(){return this.top?.title??'';}
  get isLoading(){return this.top?.loading??false;}
+ /** Only the top document is loading. CEF's loading state counts every frame, so an ad or widget iframe
+  * that keeps loading after the document finished would hold it true; `loaded` and `failed` here are the main frame's. */
+ get isLoadingMainFrame(){const top=this.top;return !!top&&top.loading&&!top.documentLoaded;}
  get canGoBack(){return !!this.top?.back||this.stack.length>1;}
  get canGoForward(){return !!this.top?.forward;}
  get hasPopup(){return this.stack.length>1;}
@@ -160,7 +163,7 @@ export class CefPageView {
  // Engine pages ---------------------------------------------------------------------------------
  private track(id:number,url:string){
   let settle=()=>{};const ready=new Promise<void>(resolve=>{settle=resolve;});
-  const entry:Entry={id,url,title:'',loading:true,back:false,forward:false,shielded:signInPage(url),created:false,ready,settle,pending:null};
+  const entry:Entry={id,url,title:'',loading:true,documentLoaded:false,back:false,forward:false,shielded:signInPage(url),created:false,ready,settle,pending:null};
   this.stack.push(entry);owners.set(id,this);
   this.engine.listen(id,message=>this.handle(entry,message));
   return entry;
@@ -195,7 +198,7 @@ export class CefPageView {
     entry.settle();
     if(active&&this.focused)this.refocus();
     break;
-   case 'navigate':if(signInPage(message.url))entry.shielded=true;break;
+   case 'navigate':entry.documentLoaded=false;if(signInPage(message.url))entry.shielded=true;break;
    case 'shield':entry.shielded=!!message.on;break;
    case 'tab':if(active&&typeof message.url==='string')this.onOpenTab(message.url,message.background===true);break;
    case 'refused':if(active)this.onRefused({kind:String(message.kind??''),reason:String(message.reason??''),scheme:String(message.scheme??''),host:String(message.host??'')});break;
@@ -206,12 +209,15 @@ export class CefPageView {
    case 'loading':entry.loading=!!message.loading;entry.back=!!message.back;entry.forward=!!message.forward;if(active)this.onChange();break;
    case 'title':entry.title=String(message.title??'');if(active)this.onChange();break;
    case 'loaded':
+    entry.documentLoaded=true;
     if(!active)break;
     if(this.blankStart&&entry===this.stack[0]&&entry.url!=='about:blank'){this.blankStart=false;void this.forgetBlank(entry);}
     this.isolatedContext=null;this.contextTask=null;this.onChange();this.onLoaded();
     void this.context().catch(()=>{});
     break;
    case 'failed':
+    // An aborted load (-3) is usually replaced by the next navigation, which is still loading.
+    if(message.main&&message.code!==-3)entry.documentLoaded=true;
     if(!message.main||message.code===-3||!active||this.demoInstalling)break;
     this.failPending();this.onActivityEnd('unavailable');this.onError(message.code);
     break;
@@ -405,6 +411,7 @@ export class CefPageView {
  }
  /** Loads `url` in the page, or once the engine has made it (it drops a load sent before). */
  private navigate(entry:Entry,url:string){
+  entry.documentLoaded=false;
   if(entry.created)this.engine.send({t:'load',id:entry.id,url});else entry.pending=url;
  }
  goBack(){
