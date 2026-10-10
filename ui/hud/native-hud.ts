@@ -127,8 +127,8 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  // sample world switch and which host features exist.
  root.companionSettingsHost={toggleSample,sample:()=>!!sample(),localDataDeletion:()=>!!hostFeatures(snapshot().data).localDataDeletion};
  root.append(brand);
- // The next scheduled check, bottom right; the full log is the companion panel's History page.
- const worldLog=mountWorldLog({root,call:callHost,sample,connections:()=>snapshot().data.moduleConnections||[],
+ // The full log is the companion panel's History page; nothing of it shows in the World.
+ const worldLog=mountWorldLog({call:callHost,sample,connections:()=>snapshot().data.moduleConnections||[],
   // The phone's Applet world shows each Applet's latest lines and what it is doing now.
   onLines:(lines,now)=>window.dispatchEvent(new CustomEvent('worldlet:world-log',{detail:{lines,now}}))});
  root.querySelector('#notionAccount').innerHTML=hudIcon('spark');
