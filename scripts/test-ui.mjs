@@ -43,9 +43,9 @@ export const parallelChecks=available([
  'scripts/browser-history-check.ts','scripts/browser-tabs-ui-check.ts','scripts/browser-sign-in-check.ts','scripts/voice-memos-check.ts','scripts/messages-check.ts','scripts/attention-later-check.ts','scripts/applet-first-entry-check.ts',
  'scripts/demo-site-check.ts','scripts/mail-open-check.ts','scripts/weather-location-check.ts',
  'scripts/mail-focus-check.ts','scripts/retired-mail-tour-check.ts','scripts/core-applet-content-check.ts',
- 'scripts/mock-google-check.py','scripts/sample-persona-check.ts','scripts/work-signal-check.py',
+ 'scripts/sample-persona-check.ts','scripts/work-signal-check.py',
  'scripts/attention-level-check.ts','scripts/attention-brief-markdown-check.ts','scripts/village-camera-check.ts','scripts/fox-visible-text-check.ts',
- 'scripts/village-lighting-check.ts','scripts/native-actions-check.ts','scripts/unread-mail-check.py','scripts/game-hud-check.ts',
+ 'scripts/village-lighting-check.ts','scripts/native-actions-check.ts','scripts/game-hud-check.ts',
  // They guard fixes for problems people hit in owner meetings (2026-09-24 to 10-03) and had sat in
  // opt-in suites no RC ran: two-page setup and each app's purpose, Google consent and its unverified-app help, the
  // first task Fox does, and Fox's one conversation across Applets.
@@ -69,7 +69,7 @@ export const parallelChecks=available([
  'scripts/applet-stage-idle-check.ts','scripts/ui-material-check.ts','scripts/activity-browser-check.ts','scripts/web-record-check.ts','scripts/saved-logins-check.ts','scripts/browser-applet-check.ts','scripts/page-focus-ui-check.ts',
  'scripts/windows-folder-ui-check.ts','scripts/windows-notion-ui-check.ts','scripts/onboarding-reservation-check.ts','scripts/home-review-check.ts',
  'scripts/windows-backup-ui-check.ts','scripts/attention-time-ui-check.ts','scripts/artifact-fit-check.ts','scripts/windows-companion-transfer-ui-check.ts',
- 'scripts/world-projection-worker-check.ts','scripts/world-tool-runtime-check.ts','scripts/world-gateway-check.ts','scripts/codex-stream-check.ts',
+ 'scripts/world-projection-worker-check.ts','scripts/codex-stream-check.ts',
  'scripts/recorded-speech-lifecycle-check.ts','scripts/home-actions-check.ts','scripts/streaming-speech-lifecycle-check.ts','scripts/world-plate-registration-check.ts',
  'scripts/obsidian-vault-check.ts','scripts/popular-applets-check.ts','scripts/celestial-art-check.ts','scripts/quiet-source-read-check.ts',
  'scripts/content-store-incremental-check.ts','scripts/world-palette-check.ts','scripts/model-worker-check.ts','scripts/source-analysis-check.ts',

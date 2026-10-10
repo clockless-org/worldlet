@@ -715,7 +715,7 @@ body:has(#notionWorld[data-fox-entering])>:is(.tour-switch,.tour-spotlight){anim
 #notionWorld .world-tour-phone small{font-size:12px;color:#5c6a5f;text-align:center}
 
 /* Dedicated Applet landscapes already paint the identity; live contents stay above them. */
-#notionWorld[data-immersive-background] :is(.pixi-open-art,.mail-shared-device){display:none}
+#notionStage[data-immersive-background] :is(.pixi-open-art,.mail-shared-device){display:none}
 
 /* Calendar's day and week time grid (ui/applets/google-calendar/grid.ts): hours, an all-day strip, and the
    person's own events in terracotta beside the synced ones in sage. Explicit ink: the page is painted paper day and night. */

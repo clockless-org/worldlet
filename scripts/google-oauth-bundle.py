@@ -44,7 +44,6 @@ def stage(contents, root, required=False):
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(result))
     # App identity, not an account secret: every macOS user of the installed app must read it.
-    # Each user's Hermes copy stays owner-only (harness/hermes/google_mcp.py).
     target.chmod(0o644)
     return True
 

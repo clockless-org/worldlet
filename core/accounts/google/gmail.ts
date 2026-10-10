@@ -1,8 +1,8 @@
 import {HtmlParser,WS,pyStrip,type HtmlAttrs} from './html-parser.ts';
 import type {GoogleRest} from './rest.ts';
-/** Bounded read-only Gmail pages. Unread queries have no arbitrary age cutoff. A port of the Hermes Gmail reader
- * (harness/hermes/gmail_reader.py) that answers the same pages, errors and excerpts byte for byte
- * (scripts/gmail-reader-parity-check.ts runs both). Lengths count characters as Python does (code points). */
+/** Bounded read-only Gmail pages. Unread queries have no arbitrary age cutoff. Ported from the Gmail reader of
+ * Worldlet's former built-in Hermes, whose pages, errors and excerpts it keeps byte for byte. Lengths count characters
+ * as Python does (code points). */
 
 const space=new RegExp(`${WS}+`,'g'),isSpace=new RegExp(`^${WS}$`);
 const word='\\p{L}\\p{N}_';

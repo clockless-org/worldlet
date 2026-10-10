@@ -53,16 +53,16 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **266 Markdown documents** and **43 supporting documentation files**.
+Indexed: **265 Markdown documents** and **43 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
 | Root entry points | 6 |
-| Product, architecture and operations guides | 15 |
+| Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 24 |
 | Resource and artwork records | 67 |
-| Module and service documentation | 35 |
+| Module and service documentation | 33 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 43 |
 
@@ -77,7 +77,7 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Product, architecture and operations guides (15)</summary>
+<details><summary>Product, architecture and operations guides (16)</summary>
 
 - [docs/AGENT-PORTABILITY.md](AGENT-PORTABILITY.md)
 - [docs/ANALYTICS.md](ANALYTICS.md)
@@ -87,6 +87,7 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 - [docs/DESIGN.md](DESIGN.md)
 - [docs/DEVELOPMENT.md](DEVELOPMENT.md)
 - [docs/FOX-AGENT.md](FOX-AGENT.md)
+- [docs/GOOGLE-OAUTH-REVIEW.md](GOOGLE-OAUTH-REVIEW.md)
 - [docs/LAUNCH-READINESS.md](LAUNCH-READINESS.md)
 - [docs/README.md](README.md)
 - [docs/RELEASE-GUIDELINES.md](RELEASE-GUIDELINES.md)
@@ -322,7 +323,7 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (35)</summary>
+<details><summary>Module and service documentation (33)</summary>
 
 - [android/README.md](../android/README.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
@@ -343,8 +344,6 @@ Indexed: **266 Markdown documents** and **43 supporting documentation files**.
 - [core/widgets/README.md](../core/widgets/README.md)
 - [harness/README.md](../harness/README.md)
 - [harness/example/README.md](../harness/example/README.md)
-- [harness/hermes/GOOGLE-OAUTH-REVIEW.md](../harness/hermes/GOOGLE-OAUTH-REVIEW.md)
-- [harness/hermes/README.md](../harness/hermes/README.md)
 - [harness/skills/README.md](../harness/skills/README.md)
 - [harness/skills/worldlet/SKILL.md](../harness/skills/worldlet/SKILL.md)
 - [ios/README.md](../ios/README.md)

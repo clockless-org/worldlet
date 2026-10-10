@@ -406,10 +406,9 @@ extraction recovery, real self-uninstall and preservation of fixture data and un
 files. The contract check loads host modules without a window; it is not UI, first-run
 or clean-machine acceptance.
 
-**First-launch Hermes preparation** (removed from the app on 2026-10-09 with the built-in Hermes; the package still
-carries its files until the packaging follows). The package carries
-only a bootstrap: `uv.exe` with its SHA-256, `runtime.json`, the Hermes source ZIP
-SHA-256 and [`windows-requirements.txt`](../../harness/hermes/windows-requirements.txt).
+**First-launch Hermes preparation** (removed on 2026-10-09 with the built-in Hermes; since then the package's
+`HermesBootstrap` folder carries only `uv.exe` and its SHA-256, for Worldlet's own tools Python). Before that the package carried
+a bootstrap: `uv.exe` with its SHA-256, `runtime.json`, the Hermes source ZIP SHA-256 and `windows-requirements.txt`.
 When Fox first needs Hermes, the app prepares it in the background under
 `<library>\runtime\hermes-<manifest digest>`: it checks the bootstrap against the
 bundled interface manifest, downloads the pinned Hermes revision and verifies its hash,

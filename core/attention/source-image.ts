@@ -1,6 +1,6 @@
 import {mailRemoteHostAllowed} from '../applets/index.ts';
 // An email's own picture may replace the illustration on its Attention card (owner Order 2026-10-08).
-// The reader keeps one candidate per thread (harness/hermes/gmail_reader.py `content_image`); this is the
+// The reader keeps one candidate per thread (`contentImage`, core/accounts/google/gmail.ts); this is the
 // address rule every later step repeats: HTTPS on the default port to a public host, no credentials, and no
 // address that names itself a pixel, beacon, logo or icon. The host reads it without cookies or referrer, only
 // when the card opens, and the card uses it only when it is large enough to be a picture (`attentionPictureFits`).

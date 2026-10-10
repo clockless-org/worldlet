@@ -68,9 +68,6 @@ export async function setupOptions(options:string[]){
   if(!fs.existsSync(path.join(root,'dist/WorldletWeb/index.html')))build('scripts/build-native-ui.ts');
   build('scripts/build-electron.ts');
   const electron=createRequire(import.meta.url)('electron') as unknown as string;
-  // Fox's built-in Agent: the project Hermes runtime when there is one, as in test:onboarding.
-  const python=process.platform==='win32'?'Scripts/python.exe':'bin/python3';
-  const hermes=[process.env.WORLDLET_HERMES_PYTHON,path.join(root,'.local/hermes-source/.venv',python),path.join(workspace(root).primary,'.local/hermes-source/.venv',python)].find(file=>!!file&&fs.existsSync(file));
   const codexSignedIn=fs.existsSync(path.join(process.env.CODEX_HOME||path.join(os.homedir(),'.codex'),'auth.json'));
   const began=Date.now();
   for(const option of options){
@@ -86,7 +83,7 @@ export async function setupOptions(options:string[]){
    fs.writeFileSync(path.join(library,'preferences.json'),'{}\n',{mode:0o600});
    const agent=option==='google'||option==='codex'?null:option as FixtureAgent;
    const env=launchEnvironment(process.env,fixtures,{WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_PROFILE_ROOT:library,WORLDLET_SETUP_OPTION:option,
-    ...agent?{WORLDLET_SETUP_EXPECT:JSON.stringify(FIXTURE_EXPECTATIONS[agent])}:{},...hermes?{WORLDLET_HERMES_PYTHON:hermes}:{}});
+    ...agent?{WORLDLET_SETUP_EXPECT:JSON.stringify(FIXTURE_EXPECTATIONS[agent])}:{}});
    console.log(`Setup option ${option}: library ${library}`);
    const result=await launch(electron,[path.join(root,'dist/electron'),'--check','setup-options'],env,path.join(evidence,option+'.log'));
    const outcome=optionOutcome(option,result.code,result.output,result.timedOut);

@@ -87,6 +87,7 @@
 .setup-agent-icon{width:clamp(48px,8vh,72px);height:clamp(48px,8vh,72px);border-radius:18px;object-fit:contain;margin-bottom:8px}
 .setup-agent-name{font-size:17px;font-weight:650;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .setup-agent-sub{font-size:12px;color:var(--brand-muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-agent-card.is-outdated .setup-agent-sub{color:#8a3b25}
 .setup-agent-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:10px}
 .setup-agent-chip{padding:2px 9px;border-radius:99px;background:var(--brand-surface);font-size:11.5px;white-space:nowrap}
 .setup-signin-tag{display:inline-block;margin-top:8px;padding:2px 8px;border-radius:99px;background:#efe7d3;color:#7a6a46;font-size:10.5px;font-weight:600}

@@ -82,5 +82,4 @@ opportunity and completion without conflating clocks or nested stages. Cancellat
 worker restart and expired credentials must preserve user records and reject stale events.
 
 [Conversation, model setup and speech details](../ui/companion/CONVERSATION.md),
-[animation](../ui/companion/ANIMATION.md), [desktop Companion lifecycle](../platform/electron/COMPANION.md)
-and [Hermes implementation](../harness/hermes/README.md) own execution specifics.
+[animation](../ui/companion/ANIMATION.md), and [desktop Companion lifecycle](../platform/electron/COMPANION.md) own execution specifics.

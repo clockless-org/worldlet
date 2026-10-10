@@ -423,6 +423,35 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='requested').length>=1),true);
   assert.deepEqual(errors,[]);await page.close();
  }
+ // An Agent older than Worldlet works with (core/agent/agent-versions.ts): its card says which version it needs, the big
+ // button opens its own update in Terminal instead of connecting it, and Check again reads its version afresh.
+ {
+  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
+  await page.addInitScript(platform=>{
+   const w=window as any;w.calls=[];w.updated=false;
+   w.fixture={platform,workspaceId:'setup-outdated',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:false,unlockedApplets:[]},connections:[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
+   w.webkit={messageHandlers:{worldlet:{async postMessage(b){
+    w.calls.push(b);
+    if(b.action==='snapshot')return structuredClone(w.fixture);
+    if(b.action==='installedApplets')return {keys:[]};
+    if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,version:{current:w.updated?'2026.9.8':'2026.7.1',minimum:'2026.8.1',outdated:!w.updated,update:true,howTo:'Run `openclaw update` in Terminal.'}}],recommended:'openclaw',selected:null};
+    if(b.action==='agentHarness'&&b.operation==='update'){w.updated=true;return {ok:true};}
+    if(b.action==='agentHarness'&&b.operation==='requested')return {id:null};
+    return {ok:true};
+   }}}};
+   if(platform==='windows')w.worldletHost={version:1,platform:'windows',request:w.webkit.messageHandlers.worldlet.postMessage};
+  },platform);
+  await page.goto(worldUrl());
+  await page.locator('.setup-agent-card.is-outdated[data-agent="openclaw"]').getByText('Needs version 2026.8.1 or newer').waitFor();
+  await page.getByRole('button',{name:/^Update /}).click();
+  await page.getByText(/is updating in Terminal/).waitFor();
+  await page.getByRole('button',{name:'Check again',exact:true}).click();
+  await page.getByRole('button',{name:/^Give .* a world$/}).waitFor();
+  assert.equal(await page.locator('.setup-agent-card.is-outdated').count(),0,'Updated, the card is an ordinary one again');
+  const harness=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation!=='requested').map(c=>c.operation+(c.id?':'+c.id:'')+(c.fresh?':fresh':'')));
+  assert.deepEqual(harness,['detect','update:openclaw','detect:fresh'],'Nothing is connected while it is too old');
+  assert.deepEqual(errors,[]);await page.close();
+ }
  // No Agent on this computer is no dead end (owner decisions 2026-10-07, 2026-10-09): Check again asks the host again,
  // Give Hermes a world installs stock Hermes Agent (its installer's steps show as they run), ChatGPT is signed in inside
  // Hermes (the code its device page asks for shows here), and Hermes then moves in like any Agent found here.

@@ -19,12 +19,12 @@ export function createAppletStage(host,onPick){
   if(!shown){if(mount)dispose();signature='';return;}
   if(owner!==room.moduleId){owner=room.moduleId;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;}
   items=(value?.items||[]).filter(i=>!['done','dismissed'].includes(i.status));
-  const next=JSON.stringify([owner,room.key,items,value?.connected,value?.reading,value?.error,value?.sample,value?.loaded,!!value?.calendar,motion,new Date(value?.now||Date.now()).toDateString()]);
+  const next=JSON.stringify([owner,room.key,items,value?.connected,value?.reading,value?.error,value?.sample,value?.loaded,!!value?.calendar,value?.scope,!!value?.loadMore,motion,new Date(value?.now||Date.now()).toDateString()]);
   if(next===signature)return;signature=next;dispose();const epoch=generation;
   panel.dataset.applet=room.key||'';panel.dataset.themeRendered='true';
   mount=renderBuildTheme({host:panel,applet:{id:room.key,title:room.title},items:items.map(i=>({...i,record:i.record?{...i.record}:undefined})),
-   data:{now:value?.now,sample:value?.sample,connected:value?.connected,reading:value?.reading,error:value?.error},
-   actions:{records:value?.calendar,openItem:pick},
+   data:{now:value?.now,sample:value?.sample,connected:value?.connected,reading:value?.reading,error:value?.error,...(typeof value?.scope==='string'?{scope:value.scope}:{})},
+   actions:{records:value?.calendar,openItem:pick,...(typeof value?.loadMore==='function'?{loadMore:()=>value.loadMore()}:{})},
    invalidate:()=>{if(epoch===generation)redraw();},
    renderDefault:target=>{
     target.classList.add('ui-theme-default');
