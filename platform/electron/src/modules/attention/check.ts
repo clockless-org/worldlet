@@ -151,7 +151,7 @@ try{
 
 // A scripted Agent for the background pipeline: page collection → Applet analysis → Center synthesis.
 // `requests` records every background request, each of which would be a model call in a real install.
-function scriptedAgent(store:WorldStore,services:Map<string,unknown>){
+function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce=false}={}){
  const homes:string[]=[],requests:Row[]=[];
  const quote='Please review the project proposal by Friday.';
  const row={provider:'gmail',id:'thread:def456',title:'Proposal',text:'Subject: Proposal\n\n'+quote,url:''};
@@ -174,6 +174,14 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>){
   make:()=>runtime(async(body,onEvent)=>{
    assert.equal(body._background,true);assert.equal(body.monitor,true);
    if(body.sourceAnalysis){
+    if(cancelOnce){
+     // The World moves on mid-run; the per-turn MCP bridge hands the cancelled call back as its error (worldGateway in
+     // agent-runtime/world-tool-bridge.ts), and the Agent ends its turn with nothing submitted.
+     cancelOnce=false;store.attentionEpoch+=1;
+     const answer=await tool(onEvent,'query_world_items',{}).catch((error:Error)=>({error:error.message}));
+     assert.equal(answer.error,'Cancelled.');
+     return {message:'Stopped.'};
+    }
     assert.equal((await tool(onEvent,'upsert_world_items',{items:[],processedContextIds:[]})).error,'Query context, then submit Applet candidates only.');
     const context=await tool(onEvent,'query_world_items',{});
     for(const fact of context.context){
@@ -239,6 +247,27 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>){
   assert.deepEqual(history.map(entry=>entry.body?.status).reverse(),['started','complete']);
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron background pipeline: page collection, Applet analysis lane, Center synthesis and settlement.');
+ }finally{await env.close();}
+}
+
+// A run the World cancelled while the Agent was on it is a cancellation, not a failed analysis: a local Agent's World
+// tool calls answer through the MCP bridge, so the Agent ends its turn instead of the run stopping (Mac Alpha 4078:
+// applet:google-calendar:analyze failed with "ended without a verified result"). The next pass analyses the page.
+{
+ const env=environment();
+ const {store,services,tools}=env;
+ scriptedAgent(store,services,{cancelOnce:true});
+ try{
+  store.state.cloudConsent=true;
+  store.state.connections=[{id:'hermes-gmail',provider:'gmail',target:'person@example.com',transport:'hermes',connector:'oauth',syncStatus:'connected'}];
+  store.changed();
+  await tools.checkWorldIfDue('gmail');
+  const deadline=Date.now()+20_000;
+  while(Date.now()<deadline&&!store.ledger().records('items').some(item=>item.provider==='gmail'))await sleep(100);
+  assert.equal(store.ledger().records('items').filter(item=>item.provider==='gmail').length,1,'The next pass analysed the page: '+JSON.stringify(env.errors));
+  assert.deepEqual(store.ledger().records('runtime-runs').filter(run=>run.status==='failed'),[],'No failed run');
+  assert.deepEqual(env.errors,[],'No unexpected diagnostics');
+  console.log('PASS Electron Applet analysis cancelled mid-run: recorded as a cancellation, analysed on the next pass.');
  }finally{await env.close();}
 }
 
