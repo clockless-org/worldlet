@@ -67,7 +67,7 @@ export function mountWorldLog({root,call,sample=()=>false,connections=()=>[],onL
  // Applets working on a task Fox handed them, by task id, for the phone's live lines.
  const appletTasks=new Map<string,{applet:string}>();
  const task=(event:any)=>{
-  const {id,applet,status}=event.detail||{};if(typeof id!=='string')return;
+  const {id,applet,status,quiet}=event.detail||{};if(typeof id!=='string'||quiet===true)return;
   if(status==='started')appletTasks.set(id,{applet});else appletTasks.delete(id);
   draw();soon();
  };

@@ -28,13 +28,13 @@ export function installArtifacts(host:Host){
     if(!next)throw new WorldletError('That is not an artifact.');
     const list=all(),saved=mergeArtifact(list.find(a=>a.id===next.id),next,now);
     const {forget}=orderArtifacts([saved,...list.filter(a=>a.id!==saved.id)]);
-    store.ledger().saveArtifacts([saved as any],forget);changed(saved.id);
+    store.ledger().saveArtifacts([saved as any],forget);if(forget.length)store.ledger().deleteArtifactPages(forget);changed(saved.id);
     return {ok:true,artifact:saved};
    }
    if(operation==='delete'){
     const id=String(request.id??'');
     if(!validArtifactId(id))throw new WorldletError('That is not an artifact.');
-    store.ledger().saveArtifacts([],[id]);changed(id);
+    store.ledger().saveArtifacts([],[id]);store.ledger().deleteArtifactPages([id]);changed(id);
     return {ok:true};
    }
    throw new WorldletError('Unknown request.');

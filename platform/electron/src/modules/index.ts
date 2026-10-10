@@ -15,8 +15,9 @@ import {installGames} from './games/index.ts';
 import {installWidgets} from './artifacts/widgets.ts';
 import {installOngoing} from './tasks/index.ts';
 import {installArtifacts} from './artifacts/index.ts';
+import {installArtifactPages} from './artifacts/artifact-pages.ts';
 import {installSiteApplets} from './browser/site-applets.ts';
 import {installCalendar} from './calendar/index.ts';
 import {installAppletArt} from './applet-art/index.ts';
 /** Every host domain, installed in order. Each registers its own actions and services. */
-export const modules:((host:Host)=>void)[]=[installWorld,installFox,installAttention,installAgentRuntime,installShell,installSources,installMedia,installWorldAudio,installVoice,installAppletTools,installMediaClose,installBrowser,installPhone,installGames,installWidgets,installOngoing,installArtifacts,installSiteApplets,installCalendar,installAppletArt];
+export const modules:((host:Host)=>void)[]=[installWorld,installFox,installAttention,installAgentRuntime,installShell,installSources,installMedia,installWorldAudio,installVoice,installAppletTools,installMediaClose,installBrowser,installPhone,installGames,installWidgets,installOngoing,installArtifacts,installArtifactPages,installSiteApplets,installCalendar,installAppletArt];

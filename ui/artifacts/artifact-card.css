@@ -32,12 +32,12 @@
 .fox-artifact-bar{display:grid;grid-template-columns:100px 1fr 80px;align-items:center;gap:8px;margin:7px 0}.fox-artifact-bar i{height:12px;background:color-mix(in srgb,var(--attention-accent) 70%,transparent);border-radius:3px}.fox-artifact-bar span:last-child{text-align:right;font-size:13px}
 /* The card system (ui/artifacts/CARD-SYSTEM.md, owner Order 2026-10-08). Tones are the Attention card's own accents,
    one per kind of thing; a card, a Journal card or one block sets its tone and everything inside follows it. */
-:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=moss]{--attention-accent:#315f48}
-:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=teal]{--attention-accent:#28718a}
-:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=honey]{--attention-accent:#946e2b}
-:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=sage]{--attention-accent:#557955}
-:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=clay]{--attention-accent:#a04e33}
-:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=plum]{--attention-accent:#6c4a78}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=moss]{--attention-accent:var(--artifact-moss,#315f48)}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=teal]{--attention-accent:var(--artifact-teal,#28718a)}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=honey]{--attention-accent:var(--artifact-honey,#946e2b)}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=sage]{--attention-accent:var(--artifact-sage,#557955)}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=clay]{--attention-accent:var(--artifact-clay,#a04e33)}
+:is(.fox-artifact,.companion-artifact,.artifact-block)[data-tone=plum]{--attention-accent:var(--artifact-plum,#6c4a78)}
 .artifact-blocks{--card-wash:color-mix(in srgb,var(--attention-accent) 8%,transparent);--card-line:color-mix(in srgb,var(--attention-accent) 30%,transparent);--card-rule:#38564420;--card-radius:12px}
 /* An answer's picture is a band across its head, under the same paper scrim as the Attention card's. */
 .native-console .fox-artifact{isolation:isolate}
@@ -129,3 +129,7 @@
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact-body{font-size:14px;line-height:1.45}
 }
 /* Close stays visible over the brightest corner of a picture. */
+/* Page mode (core/artifacts/README.md#theme-driven-artifacts): the page the Agent laid out shows in a sandboxed view of its
+   own over the card, below the row of the card's controls; the card keeps its full room and draws only that row. */
+#notionWorld .fox-artifact[data-render=page]{height:min(440px,calc(100dvh - 460px))}
+.fox-artifact[data-render=page]>:is(h2,.fox-artifact-body,.fox-artifact-more,.fox-artifact-actions,.fox-artifact-art,.fox-artifact-scrim){visibility:hidden}

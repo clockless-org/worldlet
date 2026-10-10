@@ -1162,6 +1162,36 @@ export class WorldLedger {
   }catch{throw new WorldletError('Could not save the artifact.');}
  }
 
+ // A page the Agent wrote for an artifact (core/artifacts/artifact-render.ts), kept apart from the record so listing
+ // artifacts never reads the documents.
+ private artifactPagesReady=false;
+ private ensureArtifactPages(){
+  if(this.artifactPagesReady)return;
+  this.exec('CREATE TABLE IF NOT EXISTS artifact_pages (id TEXT PRIMARY KEY, record TEXT NOT NULL, at REAL NOT NULL);');
+  this.artifactPagesReady=true;
+ }
+ artifactPage(id:string):Row|null {
+  this.ensureArtifactPages();
+  const row=this.all('SELECT record FROM artifact_pages WHERE id=?',id)[0];
+  return row?JSON.parse(String(row.record)):null;
+ }
+ /** The IDs of every kept page, newest first. */
+ artifactPageIds():string[] {
+  this.ensureArtifactPages();
+  return this.all('SELECT id FROM artifact_pages ORDER BY at DESC').map(row=>String(row.id));
+ }
+ saveArtifactPage(record:Row){
+  this.ensureArtifactPages();
+  try{this.run('INSERT INTO artifact_pages(id,record,at) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record,at=excluded.at',String(record.id),JSON.stringify(record),Number(record.createdAt)||0);}
+  catch{throw new WorldletError('Could not save the artifact page.');}
+ }
+ deleteArtifactPages(ids:string[]){
+  if(!ids.length)return;
+  this.ensureArtifactPages();
+  try{this.transaction(()=>{for(const id of ids)this.run('DELETE FROM artifact_pages WHERE id=?',id);});}
+  catch{throw new WorldletError('Could not forget the artifact page.');}
+ }
+
  // Local calendar events ---------------------------------------------------------------------------
  // Events the person made in the Calendar Applet (core/applets/calendar-events.ts): one row each.
  private calendarReady=false;
