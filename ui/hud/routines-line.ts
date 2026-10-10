@@ -20,26 +20,43 @@ export function routineWhen(at:number,now=Date.now(),locale?:string){
  return new Intl.DateTimeFormat(locale,{weekday:'short'}).format(at)+' '+clock;
 }
 
+/** "every hour", "every 30 min", "every 2 days". */
+export function routineEvery(seconds:number){
+ const [n,unit]=seconds%86400===0?[seconds/86400,'day']:seconds%3600===0?[seconds/3600,'hour']:[Math.max(1,Math.round(seconds/60)),'min'];
+ return n===1?'every '+unit:'every '+n+' '+unit+(unit==='min'?'':'s');
+}
+/** Rows shown before "+N more". */
+const SHOWN=5;
+
 export function mountRoutinesLine(root:HTMLElement,{call=callHost}:{call?:(action:string,body?:object)=>Promise<any>}={}){
- const line=document.createElement('div');line.className='fox-routines';line.hidden=true;
- line.innerHTML=uiIcon('clock');
- const text=document.createElement('span');text.className='fox-routines-text';line.append(text);
- const corner=root.querySelector('.notion-top .world-environment')||root.querySelector('.notion-top')||root;corner.append(line);
+ const box=document.createElement('div');box.className='fox-routines';box.hidden=true;box.setAttribute('aria-label','Routines');
+ const list=document.createElement('ul');list.className='fox-routines-list';box.append(list);
+ const corner=root.querySelector('.notion-top .world-environment')||root.querySelector('.notion-top')||root;corner.append(box);
  let timer=0;
  async function refresh(){
   clearTimeout(timer);timer=window.setTimeout(refresh,REFRESH_MS);
   let jobs:any[]=[];
   try{jobs=(await call('foxRoutines'))?.jobs??[];}catch{return;}
   const now=Date.now(),summary=routineLine(Array.isArray(jobs)?jobs:[],now);
-  line.hidden=summary.count===0;
-  if(!summary.count)return;
-  const count=summary.count===1?'1 routine':summary.count+' routines';
-  text.textContent=summary.next?count+' · '+summary.next.name+' at '+routineWhen(summary.next.at,now):count;
-  line.title=summary.names.join('\n');
-  line.setAttribute('aria-label',text.textContent);
+  box.hidden=summary.count===0;
+  list.replaceChildren();
+  // Each routine on its own line, soonest first: its name, then when it runs next.
+  for(const row of summary.rows.slice(0,SHOWN)){
+   const item=document.createElement('li');item.className='fox-routine';
+   item.innerHTML=uiIcon('clock');
+   const name=document.createElement('span');name.className='fox-routine-name';name.textContent=row.name;
+   const when=document.createElement('span');when.className='fox-routine-when';when.textContent=row.at!==null?routineWhen(row.at,now):row.everySeconds?routineEvery(row.everySeconds):'';
+   item.append(name);if(when.textContent)item.append(when);
+   item.title=row.name+(when.textContent?' · '+when.textContent:'');
+   list.append(item);
+  }
+  if(summary.rows.length>SHOWN){
+   const more=document.createElement('li');more.className='fox-routine fox-routine-more';more.textContent='+'+(summary.rows.length-SHOWN)+' more';
+   more.title=summary.rows.slice(SHOWN).map(row=>row.name).join('\n');list.append(more);
+  }
  }
  // A routine ran (notion-world's `worldlet:routines`), or one was added or changed: read again.
  window.addEventListener('worldlet:routines',()=>void refresh());
  void refresh();
- return line;
+ return box;
 }
