@@ -183,7 +183,6 @@
 .companion-energy-now .energy-fill{left:2px;top:2px;bottom:2px;border-radius:3px}
 .companion-energy-now h4{margin:0 0 3px;font-size:15px;color:#354132}
 .companion-info-panel .companion-energy-intro{margin:-6px 0 12px}
-.companion-info-section h4.companion-energy-ways{margin:0 0 10px;font-size:13px;color:#354132}
 .companion-info-panel .companion-phone-intro{margin:-6px 0 12px}
 .companion-phone-body{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px}
 .companion-phone-body>.companion-info-note{flex-basis:100%;margin:0}
@@ -238,7 +237,6 @@
 .companion-panel-guide table{font-size:12px}
 .companion-energy-page{display:flex;flex-direction:column}
 .companion-energy-page>.companion-panel-guide{flex:1}
-.companion-energy-back{align-self:flex-start;margin-top:10px}
 .companion-history{display:flex;flex-direction:column;padding-top:0}
 .companion-history-feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;border-top:1px solid #d9cbae80;border-bottom:1px solid #d9cbae80;mask-image:linear-gradient(transparent,#000 28px)}
 .companion-history .companion-history-feed ol.companion-world-log{margin:24px 0 8px}
@@ -297,8 +295,6 @@
 .companion-panel-guide .fox-model-catalog button{width:100%;text-align:left}
 .companion-panel-guide .fox-model-catalog-wrap{display:flex;flex-direction:column;gap:8px}
 .companion-settings-body .world-recovery-switch{display:flex;align-items:center;gap:16px}
-.native-console .companion-info-panel .companion-energy-back{all:unset;align-self:flex-start;margin-top:12px;color:#656651;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-.native-console .companion-info-panel .companion-energy-back:focus-visible{outline:2px solid #a38048;outline-offset:2px}
 /* Profile: what the World holds about the companion, grouped and collapsible (companion-info.ts). */
 .companion-info-panel .companion-profile-knowledge{grid-column:1/-1;margin:24px 0 0;text-align:left}
 .companion-profile-knowledge h3{margin:0 0 8px;font-size:15px;color:#354132}

@@ -4,7 +4,6 @@ import {connectionLive,getApp} from '../../core/applets/index.ts';
 import {BROWSER_HOME,createBrowserHome} from '../../core/browser/index.ts';
 import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
-import {modelFailure} from './model-failure.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showApprovalRules} from './approval-rules.ts';
 import {showAgentConnections} from './agent-connections.ts';
@@ -129,15 +128,18 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
  }
  // A Fox preference screen, drawn in the details instead of the bubble.
  const screen=(name:string)=>async(target:HTMLElement)=>{target.append(guide.element);await preferences.show(name);};
- // The model Fox thinks with (owner request 2026-10-05). Worldlet provides none, so it is one on this computer:
- // the Codex sign-in (a ChatGPT plan), the person's own API key, or an Agent here answering on its own sign-in.
+ // The model Fox thinks with (owner request 2026-10-05). Worldlet provides none: it is the person's Agent, answering
+ // on its own sign-in with the provider chosen below.
  // This is the one place to connect it and to see and fix what is wrong with it (owner request 2026-10-06):
  // which path is in use, its model, the last reply's problem in plain words, and the fix for it.
  async function modelSetting(target:HTMLElement){
   const turn=ticket,said=status(),now=el('div','companion-settings-row companion-settings-model-now'),words=el('div'),fixes=el('div','companion-settings-actions'),agents=el('div','companion-settings-rows'),providers=el('div','companion-settings-rows');
   now.append(words);
-  const fixButton=(fix:ModelFix)=>fix==='connect'?action('Sign in to Codex or add an API key',async()=>{await preferences.show('model');},{primary:true,id:'fix-connect'})
-   :fix==='models'?action('Check available models',async()=>{said.textContent='Checking which models your ChatGPT account can use…';try{const r=await call('modelRepair');said.textContent='Fox now uses '+(r?.model||'a model your account can use')+'.';await draw();}catch(e){said.textContent=modelFailure(e)?.message.split('\n\n')[0]||(e as Error).message||'Could not check the models.';}},{primary:true,id:'fix-models'})
+  // Signing in happens in the Agent itself, from its provider list below (Worldlet sets nothing up under the Agent).
+  const fixButton=(fix:ModelFix)=>fix==='connect'?action('Sign in to a provider',async()=>{
+    if(!providers.childElementCount){said.textContent='Sign in to a provider in your Agent itself, then choose Check connection.';return;}
+    providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
+   },{primary:true,id:'fix-connect'})
    :fix==='update'?action('Show updates',()=>show('updates'),{primary:true,id:'fix-update'})
    :action('Restart Fox',async()=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}},{primary:true,id:'fix-restart'});
   // The provider the Agent in use answers with (core/agent/model-providers.ts, owner decisions 2026-10-10): only a
@@ -180,8 +182,7 @@ export function createCompanionSettings({call,host,history,close}:{call:(action:
    now.dataset.state=view.state==='ok'?'ready':view.state;now.dataset.path=view.path;
    words.replaceChildren(el('strong','',view.title),el('span','',view.detail),...view.problem?[el('span','companion-settings-model-problem',view.problem)]:[]);
    fixes.replaceChildren(...view.fixes.map(fixButton),
-    action('Check connection',async()=>{said.textContent='Checking…';await draw();said.textContent='Checked just now.';},{id:'check-model'}),
-    ...view.fixes.includes('connect')?[]:[action(view.path==='none'?'Sign in to Codex or add an API key':'Change model connection',async()=>{await preferences.show('model');},{id:'choose-model'})]);
+    action('Check connection',async()=>{said.textContent='Checking…';await draw();said.textContent='Checked just now.';},{id:'check-model'}));
    agents.replaceChildren();
    if(list.length)agents.append(el('h5','companion-settings-subhead','On this computer'));
    for(const agent of list){

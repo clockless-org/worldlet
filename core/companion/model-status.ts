@@ -5,6 +5,6 @@ export function modelStatusFresh(input:{ready:boolean;ageMs:number;sameScope:boo
 
 /** These requests can change readiness or the private/setup scope returned with it. */
 export function changesModelStatus(action:string,body:Record<string,unknown>):boolean {
- return ['modelConfigure','modelLogin','modelRepair','restartFox','resetFox','setSampleEnabled'].includes(action)
+ return ['restartFox','resetFox','setSampleEnabled'].includes(action)
   || action==='foxPreferences'&&typeof body.cloudConsent==='boolean';
 }

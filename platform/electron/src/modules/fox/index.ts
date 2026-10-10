@@ -12,9 +12,9 @@ import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,SOURCES,SP
  ONGOING,PHONE,type PhoneService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../host/services.ts';
 import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
-import {ownAgentHome,readLocalAgentMemory,summarizeLocalAgent} from '../agent-runtime/local-memory.ts';
+import {readLocalAgentMemory,summarizeLocalAgent} from '../agent-runtime/local-memory.ts';
 import {readFoxEnergy} from './energy.ts';
-import {bringAgent,restoreBrought} from './migration.ts';
+import {bringAgent} from './migration.ts';
 import {createOlderHistory} from './older-history.ts';
 import {createHistorySync,ownHarnessSession} from './history-sync.ts';
 import {createHarnessJobs} from './harness-jobs.ts';
@@ -87,9 +87,8 @@ export function installFox(host:Host){
  const analytics=()=>host.optional<AnalyticsService>(ANALYTICS);
  const browser=()=>host.optional<BrowserService>(BROWSER);
 
- let chat:AgentRuntime|null=null,modelAccess:AgentRuntime|null=null,routines:AgentRoutines|null=null;
+ let chat:AgentRuntime|null=null,routines:AgentRoutines|null=null;
  const chatRuntime=()=>chat??=requireAgent().make();
- const modelRuntime=()=>modelAccess??=requireAgent().makeModelAccess();
  let agentTurn:string|null=null;
  /** Each running turn's shared trust state (the conversation's and every Applet task's), and this
   * session's undoable Fox writes. */
@@ -151,8 +150,8 @@ export function installFox(host:Host){
  /** Setup chose another Agent (a local Harness, or back to the built-in one): the old adapter's
   * lanes are already shut down, so the next turn makes new ones. */
  function agentChanged(){
-  cancelCloud();cancelAppletTasks();modelAccess?.cancel();stopRoutines();
-  chat=null;modelAccess=null;routines=null;
+  cancelCloud();cancelAppletTasks();stopRoutines();
+  chat=null;routines=null;
   if(store.state.cloudConsent===true&&!store.sampleEnabled())startRoutines();
   page.event('worldlet:model-changed');
  }
@@ -169,7 +168,7 @@ export function installFox(host:Host){
  }
  /** Mac `store.stop()` + runtime shutdown around restart, reset, memory saves and transfer. */
  async function stopFox({world=true}:{world?:boolean}={}){
-  speech()?.stopSpeaking();speech()?.cancelCapture();stopRoutines();modelAccess?.cancel();cancelCloud();cancelAppletTasks();
+  speech()?.stopSpeaking();speech()?.cancelCapture();stopRoutines();cancelCloud();cancelAppletTasks();
   if(world){worldTools()?.stop();sources()?.cancel();}
   await Promise.all([agent()?.shutdown(),speech()?.stopLocal()]);
  }
@@ -836,23 +835,6 @@ export function installFox(host:Host){
    finally{worldTools()?.start();startRoutines();}
    return {ok:true};
   },
-  modelCancel:()=>{modelAccess?.cancel();return {ok:true};},
-  ...Object.fromEntries(['modelConfigure','modelLogin','modelCatalog','modelRepair'].map(action=>[action,async(request:Row)=>{
-   if(!store.writable||store.sampleEnabled())throw new WorldletError('Open your own world to connect Fox.');
-   if(action==='modelConfigure'){
-    const {provider,apiKey}=request;
-    if(typeof provider!=='string'||!provider||Buffer.byteLength(provider)>100||typeof apiKey!=='string'||Buffer.byteLength(apiKey)>8192||/[\r\n]/.test(apiKey))throw new WorldletError('Invalid model connection.');
-   }
-   const value=await modelRuntime().run(request,home({sample:false,setup:false}),event=>{
-    if(event.type==='authorization'&&typeof event.code==='string'&&typeof event.url==='string'){
-     let url:URL|null=null;try{url=new URL(event.url);}catch{}
-     if(url?.protocol==='https:'){page.event('worldlet:model-auth',{code:event.code});void shell.openExternal(url.toString());}
-    }
-    return null;
-   });
-   if(action!=='modelCatalog')modelChanged();
-   return value;
-  }])),
   localAgent:request=>localAgent(request),
   localHermes:request=>localAgent(request),
   companionMemory:async request=>{
@@ -1000,12 +982,11 @@ export function installFox(host:Host){
    // memory, then its conversations, notes, skills and scheduled jobs, the same way for each.
    if(!isMigrationSource(request.id))throw new WorldletError('Choose an Agent on this computer.');
    const memory=readLocalAgentMemory(request.id);
-   // Skills and routines go only into Worldlet's own Hermes, never an attached Hermes profile; an
-   // attached Hermes Agent already is Fox, so its history needs no copy.
-   const own=runtime.id==='hermes'&&runtime.profile(false)?.bound!==true;
+   // Its skills and scheduled jobs stay with that Agent: Worldlet sets nothing up below the Agent (owner decision
+   // 2026-10-09). A Hermes Agent's history needs no copy: it is the Agent Fox can talk through.
    // Bringing again starts over, older conversations included (older-history.ts).
    older.reset(request.id);
-   const brought=own||request.id!=='hermes'?await bringAgent(request.id,{companion,world:store.ledger(),ownFolders:[path.join(host.profile.root,'agent')],own:ownHarnessSession(request.id,store.ledger().ownHarnessSessions(request.id)),hermesHome:own?home({sample:false,setup:false}):null,importRoutines:own?routines=>modelRuntime().run({action:'routineImport',routines},home({sample:false,setup:false})):null}):null;
+   const brought=request.id!=='hermes'?await bringAgent(request.id,{companion,world:store.ledger(),ownFolders:[path.join(host.profile.root,'agent')],own:ownHarnessSession(request.id,store.ledger().ownHarnessSessions(request.id)),hermesHome:null,importRoutines:null}):null;
    // A brought conversation that looks like one job carried on is proposed as an Applet (core/ongoing), and the
    // recent ones are read for the Attention Center; a large history's older part follows in the background.
    if(brought)host.optional<OngoingService>(ONGOING)?.refresh();
@@ -1019,22 +1000,10 @@ export function installFox(host:Host){
    const longTerm=through?'':[memory?.longTerm??'',brought?.note??''].filter(Boolean).join('\n\n');
    const result=companion.adoptMemory({name:memory?.name??null,soul:through?'':memory?.soul??'',user:through?'':memory?.user??'',longTerm,source:MIGRATION_SOURCE_TITLES[request.id]+' on this computer'});
    if(result.name)page.event('worldlet:companion-appearance',{name:style.name()});
-   return {...result,summary,model:own&&memory?.model?await adoptModel(request.id):null,...brought?{history:{conversations:brought.conversations,messages:brought.messages,notes:brought.notes,skills:brought.skills.length,routines:brought.routines.length,stayed:brought.stayed,partial:brought.partial,list:brought.list,...brought.older?{older:brought.older.remaining}:{}}}:{}};
+   return {...result,summary,model:null,...brought?{history:{conversations:brought.conversations,messages:brought.messages,notes:brought.notes,skills:brought.skills.length,routines:brought.routines.length,stayed:brought.stayed,partial:brought.partial,list:brought.list,...brought.older?{older:brought.older.remaining}:{}}}:{}};
   }
   return runtime.profile(true);
  }
- /** Its API-key model becomes the built-in Fox's model (the energy it brought); a sign-in model stays with that Agent,
-  * and an Agent Fox talks through keeps its own. Best effort: Fox keeps the model it had when this cannot be copied. */
- async function adoptModel(id:MigrationSource):Promise<Row|null> {
-  const from=ownAgentHome(id);
-  if(!from)return null;
-  try{
-   const value=await modelRuntime().run({action:'modelAdopt',kind:id,home:from},home({sample:false,setup:false}));
-   if(value?.ok===true)modelChanged();
-   return value?.ok===true?{ok:true,provider:String(value.provider??''),model:String(value.model??'')}:{ok:false,reason:String(value?.reason??'none')};
-  }catch(error){host.diagnostics.record(error,'adoptModel');return {ok:false,reason:'unavailable'};}
- }
-
  host.onPageLoaded(()=>{
   subscribe();
   agent()?.onChannelTool?.(channelToolReply);
@@ -1043,13 +1012,8 @@ export function installFox(host:Host){
   if(store.state.cloudConsent===true&&!store.sampleEnabled())startRoutines();
   const runtime=agent();
   try{runtime?.warm(home(foxScope()));}catch(error){host.diagnostics.record(error,'warm');}
-  // Skills and routines an Agent brought live in the World; a new or reset Harness gets them back.
-  if(runtime?.id==='hermes'&&runtime.profile(false)?.bound!==true&&store.writable&&!store.sampleEnabled()){
-   const own=home({sample:false,setup:false});
-   Promise.resolve().then(()=>restoreBrought(store.ledger(),{hermesHome:own,importRoutines:routines=>modelRuntime().run({action:'routineImport',routines},own)})).catch(error=>host.diagnostics.record(error,'restoreBrought'));
-  }
  });
  // The page that started a turn is gone; its tools and stream have no listener left.
  host.onPageReload(()=>{if(agentTurn!==null)cancelCloud();cancelAppletTasks();});
- host.onQuit(()=>{older.stop();history.stop();powerMonitor.off('resume',resumed);stopRoutines();chat?.cancel();cancelAppletTasks();modelAccess?.cancel();companion.closeLedgers();});
+ host.onQuit(()=>{older.stop();history.stop();powerMonitor.off('resume',resumed);stopRoutines();chat?.cancel();cancelAppletTasks();companion.closeLedgers();});
 }

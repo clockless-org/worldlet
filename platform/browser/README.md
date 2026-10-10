@@ -60,19 +60,6 @@ it too. A snapshot's text already names every control with its `[ref=…]`, so `
 lists only controls the 24,000-character text cut off, which made a typical snapshot about
 45% smaller.
 
-Fox can also say routine steps in words with `do` ("click Add to cart under Product 3",
-up to five in order), the idea behind decision models such as Jev, done with Worldlet's own
-model access so page content goes nowhere new. For each step the host takes a snapshot and
-the small model tier picks the operation and ref in one request with no tools, memory or
-session (`harness/hermes/browser_pick.py`, Hermes action `browser_pick` on its own worker
-lane). The answer must name a ref on that page; the step then runs as an ordinary `click`,
-`fill` or `submit` through `automateBrowser`, so sensitive fields, receipts and the person's
-Go ahead at a last step apply unchanged, and the turn counts as one that acts. A control
-further down is scrolled to (twice at most); when nothing matches, or quick steps are
-unavailable, the result carries `page` for Fox to act on by ref. Fox's own model then
-never reads a page just to find a ref (`scripts/browser-pick-check.py`,
-`scripts/browser-automation-check.ts`).
-
 If its socket is lost,
 the adapter fails instead of auto-launching another Chrome. Navigation invalidates
 refs; a popup opening or closing, closing the page or cancelling stops its driver.

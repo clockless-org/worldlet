@@ -10,8 +10,6 @@ import {createCompanionPhone} from './companion-phone.ts';
 import {companionStill} from '../themes/index.ts';
 import {createCompanionSettings} from './companion-settings.ts';
 import {readFoxSkills,skillList,skillOffers,type FoxSkills} from './companion-skills.ts';
-import {createFoxModelGuide} from './fox-model-guide.ts';
-import {createPanelGuide} from './panel-guide.ts';
 import {COMPANION_LOOK_PRESETS,COMPANION_SCARF_COLORS,companionLookIsClassic,companionLookKey,normalizeCompanionLook,recolorCompanionPixels,type CompanionLook} from '../../core/companion/index.ts';
 import {ENERGY_LABEL,energySourceLabel,energyState,readEnergy,rechargeText,type Energy} from './world-energy.ts';
 
@@ -73,9 +71,6 @@ export function mountCompanionInfo({root,pet,call,getName}){
  // Settings finish in the panel; the World view lends the sample switch and host features.
  const settings=createCompanionSettings({call,host:()=>root.companionSettingsHost,history,close:()=>dismiss()});
  root.companionSettings=settings.element;
- // Charging (choosing a model source) happens on the Energy page, in place of its ways to charge.
- const charging=createPanelGuide({onClear:()=>{if(panel.open&&!busy)render();}});
- const modelGuide=createFoxModelGuide({call,view:charging.view,setup:undefined});
  let anchorFrame=0,anchorKey='';
  function anchorPanel(){
   if(!panel.open)return;
@@ -101,7 +96,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  }
  function button(label,action){const b=el('button','companion-info-action',label);b.type='button';b.onclick=action;return b;}
  async function run(action){if(busy)return;busy=true;error='';render();try{await action();}catch(e){error=e.message||'Please try again.';}finally{busy=false;render();}}
- function dismiss(focus=false){generation++;history.stop();modelGuide.stop();charging.element.hidden=true;charging.element.replaceChildren();cancelAnimationFrame(anchorFrame);void feedback.cancelVoice();panel.close();root.classList.remove('companion-info-open');badge.setAttribute('aria-expanded','false');if(focus)(badge.isConnected?badge:pet.querySelector('.companion-panel-button')||badge).focus();root.dispatchEvent(new Event('worldlet:companion-info-closed'));}
+ function dismiss(focus=false){generation++;history.stop();cancelAnimationFrame(anchorFrame);void feedback.cancelVoice();panel.close();root.classList.remove('companion-info-open');badge.setAttribute('aria-expanded','false');if(focus)(badge.isConnected?badge:pet.querySelector('.companion-panel-button')||badge).focus();root.dispatchEvent(new Event('worldlet:companion-info-closed'));}
  window.addEventListener('worldlet:desktop-companion',event=>{if((event as CustomEvent).detail&&root.classList.contains('companion-info-open'))dismiss();syncEntry();});
  function render(){
   const close=button('×',()=>dismiss(true));close.className='companion-info-close';close.setAttribute('aria-label','Close companion panel');
@@ -197,21 +192,10 @@ export function mountCompanionInfo({root,pet,call,getName}){
    const recharge=rechargeText(energy);if(recharge)summary.append(el('p','companion-info-note',recharge));
    if(energy?.level===null&&energy.source!=='none')summary.append(el('p','companion-info-note','Your provider keeps the balance, so the world shows charged until it says otherwise.'));
    now.append(meter,summary);section.append(now);
-   // Connecting a source happens right here: the ways to charge give way to the steps.
-   if(!charging.element.hidden){
-    const back=button('Back to energy',()=>{modelGuide.stop();charging.view.setGuide(null);});back.classList.add('companion-energy-back');
-    section.append(charging.element,back);return section;
-   }
-   section.append(el('h4','companion-energy-ways','Ways to charge'));
-   grid=el('div','companion-info-grid');section.append(grid);
-   const inUse=(source:string)=>energy?.source===source?' In use now.':'';
-   const connect=async()=>{charging.element.hidden=false;render();await modelGuide.show();};
-   // Worldlet provides no energy of its own (owner decision 2026-10-05): the world runs on the person's computer.
-   if(energy?.source==='none')summary.append(el('p','companion-info-note companion-energy-needed','Your world runs on an AI on this computer. Sign in to Codex, add your own API key, or use an Agent on this computer from Settings.'));
-   card('chat','Charge with ChatGPT','Use your ChatGPT plan through Codex on this computer.'+inUse('chatgpt'),'Connect',connect);
-   card('plug','Bring your own energy','Use an API key from OpenAI, Anthropic and others.'+inUse('own'),'Connect',connect);
-   // Agents on this computer, the connection's status and its fixes live in Settings › Model (owner request
-   // 2026-10-06: one place to connect models and fix their problems); Energy only points there.
+   // Worldlet provides no energy of its own (owner decision 2026-10-05): the world runs on the person's Agent, and
+   // Worldlet sets nothing up below it (owner decision 2026-10-09). Choosing the Agent and its provider, the
+   // connection's status and its fixes live in Settings › Model; Energy only points there.
+   if(energy?.source==='none')summary.append(el('p','companion-info-note companion-energy-needed','Your world runs on your AI Agent. Choose one and how it signs in from Settings.'));
    const manage=button('Manage model connection',()=>void open('Settings','model'));manage.classList.add('companion-energy-manage');
    section.append(el('p','companion-info-note',localAgents.length?'Use an Agent on this computer, check the connection or fix a problem in Settings.':'Check the connection or fix a problem in Settings.'),manage);
    if(energy?.name)section.append(el('p','companion-info-note','Details: '+energy.name));

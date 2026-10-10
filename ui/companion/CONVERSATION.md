@@ -64,7 +64,7 @@ In a website, Fox's input is also the address bar (owner request 2026-10-04): a 
 | Persistent items | Schemas in `core/tools/services.json`, executed by `harness/hermes/world_service.py` (`world_items.py` only names the background tool sets): `read_world_source`, `upsert_world_items`, `query_world_items`, `update_world_item`, `archive_world_items`. Hermes writes through these tools only; no source mirroring |
 | Current view context | `ui/companion/fox-context.ts` trims location, state, setup, view id / title and the last four actions to fixed string sizes, and the app appends the last eight world events as identifiers (`WorldStore.recentHistory`); `world_context.py` validates the same shape and injects it into the outgoing request through Hermes request middleware, not into history |
 | Coding tasks | `delegate_codex` runs `codex exec --sandbox read-only` (`platform/electron/src/modules/media/coding.ts`); the request must contain a coding keyword, only excerpts read this turn are shared, one delegation per turn, output is never installed or deployed. There is no Claude Code delegation |
-| Model | Included DeepSeek V4 Flash via Worldlet's Worker and AI Gateway; anonymous installation access uses an owner-only token file (DPAPI-encrypted on Windows). Optional BYO providers stay in Hermes. See [Model onboarding](CONVERSATION.md#model-onboarding) |
+| Model | The person's own Agent's, chosen in Settings › Model; Worldlet provides none. See [Model connection](CONVERSATION.md#model-onboarding) |
 | Routines | `manage_routines` (`routines.py`) over Hermes cron; the host's `HermesRoutines` (`modules/agent-runtime/hermes.ts`) ticks every 60 s while the app is open, consent is on and Sample Mode is off; with Hermes Agent kept running as a service ([kept running](../../core/agent/PORTABILITY.md#hermes-agent-kept-running)), its gateway runs them also while Worldlet is closed, through Hermes' same claim, so never twice. See Search, browser and routines |
 | Voice | See "Live voice" below |
 
@@ -197,69 +197,11 @@ Validation: `python3 scripts/hermes-attachment-check.py [built-checkout]` runs o
 <a id="model-onboarding"></a>
 ## Model connection
 
-Fox guides the connection; Hermes owns provider configuration, OAuth storage, refresh and inference. Connecting a model does not grant private-source processing; that is a separate consent.
+Fox's model is the person's own Agent's (owner decisions 2026-10-05 and 2026-10-09): Worldlet provides no model, ships no provider key, and sets nothing up below the Agent. The Agent owns provider configuration, sign-in, refresh and inference. Connecting an Agent does not grant private-source processing; that is a separate consent.
 
-### Default model and credentials
+**Settings › Model** is the one place to choose the Agent and its provider and to see and fix problems (owner request 2026-10-06). It names the Agent in use, its model, and how Fox's last reply ended, in plain words (`modelHealth` in `platform/electron/src/modules/fox/index.ts`, worded by `ui/companion/model-health.ts`). Each problem gets its fix as a button (Sign in to a provider, Restart Fox or Show updates), plus Check connection, Use or Stop using for each Agent, and the provider list from `core/agent/model-providers.ts`, where signing in opens the Agent's own sign-in command. The last reply is kept in memory for this run, with addresses removed. The Energy page shows charge only and links to Settings › Model, as do Fox's **Choose a model** and the model screen of `open_controls`. Worldlet never asks for an API key and runs no model sign-in of its own. [Onboarding](../onboarding/README.md) owns the first-run sequence.
 
-Fox uses pinned Hermes 0.21.3. Worldlet provides no model of its own (owner decision 2026-10-05): Fox runs on this computer's Codex sign-in, on the person's own provider (an API key, or the API-key model a local Agent brought), or, when setup chose an Agent and neither exists, on that Agent answering itself. The Cloudflare-hosted DeepSeek V4 Flash through the `worldlet-model` Worker is retired and paused, and the app no longer enrolls an installation token with it (model service). No Cloudflare/provider key ships in the app, and no credential enters the web view.
-
-- The default is the `local-codex` source in [`contracts/model-sources.json`](../../contracts/model-sources.json). Empty profiles, profiles saved on the retired Worldlet service and the former bundled OpenCode Go preset move to it. Explicit BYO providers and attached external Hermes profiles remain unchanged. With no Codex sign-in, Fox answers that it needs an AI on this computer, with the way to connect one.
-- Every build, development included, uses this computer's Codex sign-in; `WORLDLET_DEV_MODEL` is retired. Setup/sample/monitor profiles share only the private profile's model selection, not its records.
-- Fox offers custom remote HTTPS endpoints. Local HTTP endpoints and on-device inference are not offered in this preview. Changing the endpoint clears the previous key unless a new one is supplied.
-- Before private consent, chat runs in the `agent/setup/hermes` profile with no private context, memory, source tools or history; only controls, preference and music tools. Sample Mode reuses the model configuration but no private data.
-- Fox uses this computer's Codex sign-in, a user-connected provider or a local Agent. The [first-run flow](../onboarding/README.md) brings a local Agent, then Applet selection. If model access is unavailable, Fox shows an error and a connection path.
-
-### Entry points in Fox
-
-Model connection uses the Fox model guide (`ui/companion/fox-model-guide.ts`), in the bubble or embedded in **Settings › Model**. Settings › Model is the one place to connect a model and to see and fix its problems (owner request 2026-10-06): it names the path in use (the Codex sign-in, the person's own API key, or an Agent on this computer), the model, whether the sign-in or key is there, and how Fox's last reply ended, in plain words (`modelHealth` in `platform/electron/src/modules/fox/index.ts`, worded by `ui/companion/model-health.ts`). Each problem gets its fix as a button: sign in or add a key, Check available models, Restart Fox or Show updates, plus Check connection, and Use or Stop using for each Agent. The last reply is kept in memory for this run, with addresses removed. The Energy page shows charge only and links to Settings › Model. [Onboarding](../onboarding/README.md) owns the first-run sequence. Model selection is optional, not an onboarding prerequisite.
-
-- **Codex**: declared by Hermes's provider catalog as an external OAuth login. Fox shows the device code, waits and can cancel; the browser completes sign-in. After login the model is chosen from the account's live catalog (Hermes ordering and hidden-model filter, no synthesized forward-compat entries); an empty or failed catalog keeps the previous configuration and offers retry. An existing Codex connection can run **Check available models** to repair an unavailable selection.
-- **Choose a model**: both the first **Connect a model** and later **Choose a model** go straight to provider selection. Fox reads Hermes's canonical provider catalog and keeps its provider IDs, auth types, key environment variables and endpoints. A short featured list (Codex, OpenCode Go, Anthropic, OpenAI API, compatible endpoint) is shown first; **More providers** opens the rest in a scrollable list. API-key providers are saved through Hermes's registry, not rewritten as a custom configuration.
-- **Switching keeps the conversation**: when a Hermes session is resumed, the desktop adapter syncs the profile's current model with `config.set`, so a resumed session cannot bring back an earlier Codex model. Regression checks assert the model name in the actual HTTP request.
-- Providers with other OAuth, device-code, cloud-platform or external-process auth are listed with their real auth type and a note that the Fox bridge does not yet implement their secure callback; no key form that would fail is shown.
-- The key exists only in a password field inside the bubble and is handed to Hermes through the trusted main-frame bridge; it never passes through chat, replies, memory or UI storage. Submit, back, cancel and dismiss clear the field.
-- After saving, Fox offers **Say hello** to send the first real request. A saved key is not proof of a valid key or remaining quota.
-- Recognised first-chat failures (invalid key or unauthenticated, no quota, rate limit, model unavailable, no network, a model that took too long) get their own message and a **Change model connection** action (`ui/companion/model-failure.ts`) without echoing keys or URLs. Network failures are never replayed automatically. A slow model is not called a connection problem: while Hermes Desktop waits on the model it sends `status: waiting` every 30 seconds (`harness/hermes/desktop.py`), so the host's 120-second idle stop only ends a Hermes that stopped answering; the turn is bounded by `CHAT_DEADLINE_SECONDS` and Hermes' own stale-call limits. Once the model has the turn, that keep-alive does not replace "Thinking…" with the queue's "Waiting…" (`platform/bridge/agent-client.ts`). A conversation past Hermes' compression threshold is summarized before the model answers, which can take minutes: Hermes reports it as `status.update` `compacting`, the adapter sends `status: compacting` once, Fox says it is catching up on a long conversation, and the turn gets Hermes' own compaction ceiling (600 seconds) on top of its normal budget, so the summary is never cut off and then retried on every message. So the person rarely waits for that summary at all, a reply that leaves the conversation within 15% of the threshold (and 10% past the last summary) is followed at once by the same summary while Fox is idle: the adapter reports `compactSoon`, the host sends `compact` (Hermes `session.compress`, `harness/hermes/desktop.py`), and Fox's name tag says "Tidying up our long conversation…" with no card (`platform/electron/src/modules/fox/index.ts`). A message sent meanwhile waits in the same lane, saying it is catching up on the conversation; the summary is never preempted or cut off (`core/scheduling/agent-work.ts`), and Hermes' own preflight still covers anything it missed. The same rule holds for every Agent limit on this path (owner request 2026-10-06: limits stay for stability but must never leave Fox stuck): Hermes Desktop keeps the keep-alive running during its own slow calls (a cold session resume may take Hermes' 600-second build budget), the idle stop does not count time the host itself spends on a World tool or event, a World page that does not answer in time fails that one step instead of the turn, and Claude Code, Codex and other local or external Agents get the same idle stop instead of a fixed two-minute cut-off. Waiting for another process's profile lock is not counted against a request's hard limit (Hermes reports `lock_wait` and `lock_held`, and the wait ends when the request is cancelled). A Hermes process the request itself started gets up to 120 seconds to answer first, so a short status read does not kill every cold start. A status read does not queue behind a long turn or sign-in on its worker: it answers with that home's last status, which a model change clears. Routines run in their own lane, which the person's chat does not preempt, with a 600-second limit; Hermes stops a routine whose model goes quiet. Codex Applet session errors do not redirect to Fox's model settings.
-
-### Hermes provider surface and what Fox exposes
-
-| Type | Hermes | Fox entry today |
-| --- | --- | --- |
-| Account login | Nous Portal, Codex, Copilot and other OAuth / device-code flows | Codex only; others show their real auth type, callback not yet bridged |
-| API key | Claude, OpenRouter, DeepSeek, Gemini, OpenCode and more | All API-key providers in the Hermes registry; the key is written to the provider's environment variable |
-| Local / self-hosted | Ollama, LM Studio, custom servers | Not offered in Fox's model guide in this preview; existing Hermes profiles are not deleted |
-| Cloud platforms and special protocols | Bedrock, Vertex, Azure | Not adapted; not to be presented as plain compatible endpoints |
-
-Hermes supports more than Fox exposes. Each additional account provider needs its auth adapter reused and verified before it counts as available.
-
-### Subscription agents
-
-A subscription agent is not an API provider: it uses a local CLI's own login and tool permissions.
-
-| Agent | Status | Path |
-| --- | --- | --- |
-| Codex | Hermes device-login provider for Fox; the Codex Applet separately continues local sessions | Current |
-| Claude Code | Not a Fox model provider | Local Applet session discovery/continuation is a separate integration; see [Work adapters](../../core/applets/INTEGRATIONS.md#work-applets) for its implemented scope and permissions |
-
-### Apple Foundation Models
-
-Apple Foundation Models are not a Hermes provider and are not offered as a Fox fallback. Fox chat needs the included Hermes service or a user-connected cloud provider. The former Apple transport code and Pi runtime have been removed.
-
-### Credentials and cancel
-
-Codex authorization is stored in Worldlet's own `agent/private/hermes/auth.json`, never copied from `~/.codex/auth.json`. Setup, sample and monitor profiles keep separate history and memory and read the same model authorization through Hermes's credential fallback; refresh uses one lock and one file. The host receives only the short code and the fixed login URL; access and refresh tokens never reach the web view, chat or diagnostics. Closing or cancelling the guide stops its request. A network or authorization failure never replaces the current model first.
-
-### Included preview allowance
-
-See model service for anonymous registration, atomic quotas and production verification. No Worldlet account is required. These controls bound total usage but do not prove that a device is a genuine installation; device attestation, paid plans and account recovery are not implemented.
-
-### Verification
-
-The separate first-run preview bundle of the retired Mac host is not yet ported to Electron. To rehearse a first run, launch a development build with `WORLDLET_PROFILE_ROOT` pointing at a disposable library ([Electron host](../../platform/electron/README.md#build-run-and-package)); model authorization lives in that library's `agent/` profiles.
-
-`npm run test:hermes` checks the model, endpoint, auth header the real client sends, streaming, setup-profile model access, key cleanup on endpoint change and the fixture-based provider flows. Real Codex browser login through to a first reply has succeeded on one account; token refresh, quota errors and first chats on other providers are not yet verified and fixtures alone do not make a provider Ready.
-
-References: [OpenAI Codex sign-in and device code](https://developers.openai.com/codex/auth), [Hermes providers](https://hermes-agent.nousresearch.com/docs/integrations/providers), [Hermes model configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuring-models), [OpenCode Go](https://opencode.ai/docs/go/#where-can-i-use-it), [Claude authentication and credential use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use).
+Recognised reply failures (unauthenticated, no quota, rate limit, model unavailable, no network, a model that took too long) get their own message and a **Change model connection** link to Settings › Model (`ui/companion/model-failure.ts`), without echoing keys or URLs. Network failures are never replayed automatically. A slow model is not called a connection problem. Agent limits stay for stability but never leave Fox stuck (owner request 2026-10-06): local and external Agents get an idle stop instead of a fixed cut-off, the idle stop does not count time the host spends on a World tool or event, and a World page that does not answer in time fails that one step instead of the turn.
 
 <a id="fox-performance"></a>
 ## Fox performance and end-to-end timing

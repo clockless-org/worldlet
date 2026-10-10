@@ -3,7 +3,7 @@ export {installDesktopCompanion} from './desktop-companion.ts';
 export {mountFoxArtifact} from './fox-artifact.ts';
 export {flyIntoJournal} from './journal-book.ts';
 export {createFoxDevPreviewControls} from './fox-dev-preview.ts';
-export {FOX_WORKING,foxDoing,foxStepWords} from './fox-doing.ts';
+export {FOX_WORKING,foxDoing} from './fox-doing.ts';
 export {mountEmailReview,presentEmailReview} from './fox-email-review.ts';
 export {renderFoxFrameTiming} from './fox-frame-timing.ts';
 export {mountMemoryManager} from './fox-memory-manager.ts';
