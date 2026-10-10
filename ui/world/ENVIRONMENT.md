@@ -92,7 +92,7 @@ This revision deliberately leaves the native source schema and existing stable c
 
 ### Default Applet membership
 
-Each Applet definition's `region` (`core/applets/definitions/*.ts` and the website catalog JSON in `core/applets/`) is the canonical catalog assignment; `core/applets/regions.ts` holds only area titles and onboarding starters. Stable storage IDs remain unchanged; custom names, assignments and pins take precedence. Onboarding selects all supported detected apps, then fills each area to three curated starters. Explicit unchecks are respected. Each area still shows five devices at most; additional members live in its shelf.
+Each Applet definition's `region` (`core/applets/definitions/*.ts` and the website catalog JSON in `core/applets/`) is the canonical catalog assignment; `core/applets/regions.ts` holds only area titles and setup's selection rules. Stable storage IDs remain unchanged; custom names, assignments and pins take precedence. Onboarding selects only the Applets the person uses (owner decision 2026-10-10): Mail, Calendar and the Browser, every supported app detected on this computer and the apps brought from the person's Agent; the Games area gets its three starter games. It no longer fills each area with curated starters: the rest of the catalog stays one click away in each area's panel (Recommended, All <area> Applets). Explicit unchecks are respected. Each area still shows five devices at most; additional members live in its shelf.
 
 | Area | Includes |
 | --- | --- |

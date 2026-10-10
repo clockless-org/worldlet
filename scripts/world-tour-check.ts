@@ -1,10 +1,11 @@
-// The guided tour after first arrival (ui/onboarding/world-tour.ts): Fox says hello and introduces
-// itself from where it always stands (no hop to the middle, owner feedback 2026-10-04) (and take a new name), shows an Applet at work,
-// then boxes the Attention Center; once first value is over, the tour's last step offers Fox on the phone (owner request 2026-10-06). Esc does nothing: a click anywhere (blank space included), Enter
-// or → moves a step that only tells, and nothing beneath responds, also between steps (the lock).
+// The guided tour after first arrival (ui/onboarding/world-tour.ts): Fox says hello from where it always stands (no hop
+// to the middle, owner feedback 2026-10-04), shows an Applet at work, then boxes the Attention Center; once first value is
+// over, the tour's last step offers Fox on the phone (owner request 2026-10-06). The tour is short and never asks to sign
+// in (owner decision 2026-10-10): no Connect Mail, even when Mail is not connected, and no rename step. Esc does nothing:
+// a click anywhere (blank space included), Enter or → moves a step that only tells, and nothing beneath responds, also
+// between steps (the lock).
 // The Tutorial switch in the World's bottom-right corner (owner Order 2026-10-07; bottom-right since 2026-10-10) is on while the tour runs; turning it
-// off ends the first run, and it stays in the corner, off, to turn the tour on again. Mail that
-// still needs signing in is boxed and waits for Connect Mail in Fox's bubble (or Not now, which moves on). Visiting a place lifts
+// off ends the first run, and it stays in the corner, off, to turn the tour on again. Visiting a place lifts
 // the spotlight and resumes the same step on return. The tour hands over to first value, which
 // boxes the item for the person to click.
 import assert from 'node:assert/strict';
@@ -88,37 +89,19 @@ try{
   // Esc does not end the tour.
   await page.keyboard.press('Escape');await page.waitForTimeout(300);
   assert.equal(await step(page),'hello','Esc does not leave the tour');
-  // A click on blank sky moves on; it reaches nothing beneath.
+  // A click on blank sky moves on; it reaches nothing beneath. There is no step introducing Fox (owner decision
+  // 2026-10-10): the hello goes straight to the Applets.
   await page.mouse.click(686,120);
-  // 2. Fox, back in its circle: the box surrounds Fox and the bubble takes a new name.
-  await waitStep(page,'fox');
-  assert.equal(await root(page,'tourFox'),undefined,'Fox is still in its place');
-  {const now=await page.locator('.companion-avatar').boundingBox();assert.ok(Math.abs(now.x-foxBox.x)<=2&&Math.abs(now.y-foxBox.y)<=2,'Fox said hello from the same place '+JSON.stringify({now,foxBox}));}
-  assert.equal(await depth(page),'overview','a click never opens a place');
-  assert.match(await dialogue.innerText(),/I’m Fox, your companion/);
-  assert.ok(contains(await guide(page),await page.locator('.companion-avatar').boundingBox()),'the lit area surrounds Fox');
-  assert.ok(contains(await guide(page),await page.locator('#companionDialogue').boundingBox()),'and its bubble');
-  assert.equal(await page.locator('.tour-spotlight:not([hidden]) .tour-spotlight-ring:not(.is-guide)').isVisible(),false,'Fox needs no second box');
-  {const look=(name:string)=>page.getByRole('button',{name,exact:true}).evaluate(b=>{const c=getComputedStyle(b);return {background:c.backgroundColor,colour:c.color};});
-   const [main,quiet]=[await look('Continue'),await look('Change my name')];
-   assert.equal(await page.getByRole('button',{name:'Change my name',exact:true}).getAttribute('class'),'world-tour-quiet');
-   assert.equal(main.background,quiet.background,'neither choice is filled: '+JSON.stringify({main,quiet}));
-   assert.notEqual(main.colour,quiet.colour,'the second choice is muted beside the main one: '+JSON.stringify({main,quiet}));}
-  const typed=await page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();return document.activeElement===input;});
-  assert.equal(typed,false,'Fox\'s message input does not take focus during the tour');
-  // Renaming is an action under the bubble; the name field shows only once it is chosen.
-  assert.equal(await page.getByRole('textbox',{name:'Fox’s name'}).count(),0,'no name field until Change my name');
-  await page.getByRole('button',{name:'Change my name',exact:true}).click();
-  const name=page.getByRole('textbox',{name:'Fox’s name'});
-  await name.fill('Rusty');
-  await name.press('Enter');
-  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='foxPreferenceChange'&&c.setting==='companion_name'&&c.value==='Rusty'));
-  // Saving returns to Fox's introduction under its new name; Continue moves on from there.
-  await page.waitForFunction(()=>/I’m Rusty, your companion/.test(document.querySelector('#companionDialogue')?.textContent||''));
-  assert.equal(await step(page),'fox','Save stays on Fox');
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
   // 3. Applets: Mail is boxed, and Fox points at its lights.
   await waitStep(page,'applets');
+  assert.equal(await root(page,'tourFox'),undefined,'Fox is still in its place');
+  {const now=await page.locator('.companion-avatar').boundingBox();assert.ok(Math.abs(now.x-foxBox.x)<=2&&Math.abs(now.y-foxBox.y)<=2,'Fox stays in the same place '+JSON.stringify({now,foxBox}));}
+  assert.equal(await depth(page),'overview','a click never opens a place');
+  assert.ok(contains(await guide(page),await page.locator('.companion-avatar').boundingBox()),'the lit area surrounds Fox');
+  assert.ok(contains(await guide(page),await page.locator('#companionDialogue').boundingBox()),'and its bubble');
+  assert.equal(await page.getByRole('button',{name:'Change my name',exact:true}).count(),0,'the tour offers no rename');
+  const typed=await page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();return document.activeElement===input;});
+  assert.equal(typed,false,'Fox\'s message input does not take focus during the tour');
   assert.match(await dialogue.innerText(),/Mail/);
   assert.ok((await page.locator('#companionDialogue strong').allInnerTexts()).includes('Mail'),'the Applet\'s name is bold');
   const mail=await page.evaluate(()=>{const root=document.querySelector<any>('#notionWorld'),m=root.sceneMetrics.modules.find(m=>m.id==='app-gmail'),c=root.querySelector('canvas[data-renderer="pixi-webgl"]').getBoundingClientRect();return m&&m.visible!==false?{x:c.left+m.peekBounds.x,y:c.top+m.peekBounds.y,width:m.peekBounds.width,height:m.peekBounds.height}:null;});
@@ -214,6 +197,10 @@ try{
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.operation==='start')),'no pairing starts before it is asked for');
   assert.equal(await page.getByRole('button',{name:'Show pairing code',exact:true}).getAttribute('class'),'world-tour-primary');
   assert.equal(await page.getByRole('button',{name:'Not now',exact:true}).getAttribute('class'),'world-tour-quiet');
+  {const look=(name:string)=>page.getByRole('button',{name,exact:true}).evaluate(b=>{const c=getComputedStyle(b);return {background:c.backgroundColor,colour:c.color};});
+   const [main,quiet]=[await look('Show pairing code'),await look('Not now')];
+   assert.equal(main.background,quiet.background,'neither choice is filled: '+JSON.stringify({main,quiet}));
+   assert.notEqual(main.colour,quiet.colour,'the second choice is muted beside the main one: '+JSON.stringify({main,quiet}));}
   await page.mouse.click(686,120);await page.waitForTimeout(400);
   assert.equal(await step(page),'phone','blank space does not skip the phone');
   await page.screenshot({path:'/tmp/worldlet-tour-phone.png'});
@@ -308,31 +295,22 @@ try{
   await page.close();
  }
  {
-  // Mail that is not connected: Fox offers Connect Mail or Not now in its bubble, and blank space waits. Not now moves
-  // on, and with nothing connected Fox never waits on an empty Attention Center (owner request 2026-10-06).
+  // Mail that is not connected: the Applets step only tells, with Continue, and never offers to sign in (owner decision
+  // 2026-10-10); with nothing connected Fox never waits on an empty Attention Center (owner request 2026-10-06).
   const {page,errors}=await open([]);
   await waitStep(page,'hello');
   await page.mouse.click(686,120);
-  await waitStep(page,'fox');
-  await page.keyboard.press('Enter');
   await waitStep(page,'applets');
-  await page.waitForFunction(()=>/isn’t connected yet\. Connect Mail/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:10000});
-  assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).getAttribute('class'),'world-tour-primary');
-  assert.equal(await page.getByRole('button',{name:'Not now',exact:true}).getAttribute('class'),'world-tour-quiet');
-  await page.mouse.click(686,120);await page.waitForTimeout(400);
-  assert.equal(await step(page),'applets','blank space does not skip signing in');
-  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='foxPreferenceChange')),false,'an unchanged name is not saved');
-  // Connect Mail in the bubble goes straight to the sign-in from the World, without opening the Mail Applet (owner
-  // feedback 2026-10-06); when the sign-in ends (here it does not finish) the step asks again.
-  await page.getByRole('button',{name:'Connect Mail',exact:true}).click();
-  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='connect'&&c.provider==='gmail'),null,{timeout:10000});
-  assert.equal(await depth(page),'overview','Connect Mail does not open the Mail Applet');
-  await page.getByRole('button',{name:'Not now',exact:true}).waitFor({timeout:10000});
-  assert.equal(await step(page),'applets','the step returns after the sign-in');
-  assert.equal(await depth(page),'overview');
-  // Not now keeps the choice with the person and moves on.
-  await page.getByRole('button',{name:'Not now',exact:true}).click();
+  assert.match(await page.locator('#companionDialogue').innerText(),/This is your Applet, Mail\. Each one is a real app/);
+  assert.doesNotMatch(await page.locator('#companionDialogue').innerText(),/connected|Connect Mail/,'no sign-in in the tour');
+  assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).count(),0,'no Connect Mail in the tour');
+  assert.equal(await page.getByRole('button',{name:'Not now',exact:true}).count(),0,'no Not now on the Applets step');
+  assert.equal(await page.getByRole('button',{name:'Continue',exact:true}).getAttribute('class'),'world-tour-primary');
+  // A telling step: blank space moves on, and nothing asks the host to sign in.
+  await page.mouse.click(686,120);
   await waitStep(page,'attention');
+  assert.equal(await depth(page),'overview');
+  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),false,'the tour starts no sign-in');
   assert.match(await page.locator('#companionDialogue').innerText(),/fills up once your mail or calendar is connected/);
   // Nothing will arrive: first value does not wait on the Center, the tour ends and the phone closes it.
   await page.waitForTimeout(Math.max(0,18000-await page.evaluate(()=>performance.now())));
@@ -368,8 +346,6 @@ try{
   assert.equal(await tutorialOn(page),true,label+': one tour at a time, and a replay can be turned off');
   assert.equal(await page.locator('.tour-spotlight:not([hidden])').count(),1,label+': one tour, one spotlight');
   await page.mouse.click(Math.round(viewport.width/2),60);
-  await waitStep(page,'fox');
-  await page.keyboard.press('Enter');
   // A replay never asks to sign in: Mail (not connected) is only told about.
   await waitStep(page,'applets');
   assert.doesNotMatch(await page.locator('#companionDialogue').innerText(),/Connect Mail/,label+': no sign-in in a replay');
@@ -392,7 +368,7 @@ try{
   // Played through to the end: the journey is left as it was.
   await turn(page,true);
   await waitStep(page,'hello');
-  for(const key of ['fox','applets','attention','phone']){await page.getByRole('button',{name:'Continue',exact:true}).click();await waitStep(page,key);}
+  for(const key of ['applets','attention','phone']){await page.getByRole('button',{name:'Continue',exact:true}).click();await waitStep(page,key);}
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourStep===undefined,null,{timeout:10000});
   const calls=await page.evaluate(n=>(window as any).calls.slice(n).map(c=>c.action),before);
@@ -411,5 +387,5 @@ try{
   await page.close();
  }
  console.log('PASS world tour replay: the Tutorial switch in the World\'s bottom-right corner replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
- console.log('PASS world tour: Fox says hello where it stands (no hop to the middle), takes a new name, boxes Mail (offering Connect Mail, which signs in from the World, or Not now in its bubble when it is not connected) and the Attention Center, and closes with the phone a couple of minutes after the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the World\'s top-right corner, turned off, ends it and stays there, off, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; renaming is a Change my name action; only key words are bold');
+ console.log('PASS world tour: Fox says hello where it stands (no hop to the middle), boxes an Applet (only telling, never offering Connect Mail, even when Mail is not connected; no rename step) and the Attention Center, and closes with the phone a couple of minutes after the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the World\'s bottom-right corner, turned off, ends it and stays there, off, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; only key words are bold');
 }finally{await browser.close();}

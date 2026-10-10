@@ -69,14 +69,16 @@ await withBrowser(fileAccess,async browser=>{
    // The page settles in first (its short entrance), then the big button keeps its shape.
    await page.locator('.startup-setup').evaluate(e=>Promise.all(e.getAnimations().map(a=>a.finished)));
    const firstFrame=await frame();
-   // More options holds the rest, folded: Agents not on this computer greyed, Google and ChatGPT coming soon (owner request 2026-10-09).
+   // More options holds the rest, folded: Agents not on this computer greyed (owner request 2026-10-09); no "Coming soon"
+   // Google or ChatGPT rows (owner decision 2026-10-10). This development host's mock Google keeps its own row.
    assert.equal(await toggle.getAttribute('aria-expanded'),'false');
    assert.equal(await page.locator('#setupMore').isVisible(),false);
    await toggle.click();
    assert.equal(await page.locator('#setupMore').isVisible(),true);
    assert.deepEqual(await page.locator('.setup-more .setup-agent-button.is-missing').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['OpenClaw','pi','Claude Code'],'Hermes Agent is the card, the rest wait in More options');
-   assert.deepEqual(await page.locator('.setup-more :is(.setup-google-button,.setup-chatgpt-button)').allTextContents(),['Continue with GoogleComing soon','Continue with ChatGPTComing soon']);
-   assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is greyed for everyone');
+   assert.deepEqual(await page.locator('.setup-more :is(.setup-google-button,.setup-chatgpt-button)').allTextContents(),['Continue with Google'],'only the mock\'s row, no ChatGPT');
+   assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'the mock signs in from its own link');
+   assert.equal(await page.locator('.setup-signin-tag',{hasText:'Coming soon'}).count(),0,'nothing coming soon');
    assert.deepEqual(await frame(),firstFrame,'Opening More options keeps the big button as it was');
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-'+platform+'.png')});
    // Nothing around Google moves at any sign-in stage (#1615): connecting, the browser step with its help and consent
@@ -118,9 +120,10 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
    assert.deepEqual(await frame(),firstFrame,'The big button stays where it was');
    // The apps the World starts with, the ones found here first (the fixture Mac has Notion); starter games arrive unshown.
+   // Only the Applets in use (owner decision 2026-10-10): setup's draft and the apps found here, no featured starters.
    const shelf=await page.locator('.setup-tile-apps .setup-app').evaluateAll((list:HTMLElement[])=>list.map(e=>e.dataset.appletId));
    if(platform==='macos')assert.equal(shelf[0],'app-notion','Apps found here come first: '+shelf.join(' '));
-   assert.ok(shelf.length>=8&&!shelf.includes('app-game-2048'),'Starters show, games arrive unshown: '+shelf.join(' '));
+   assert.deepEqual([...shelf].sort(),[...(platform==='macos'?['app-notion']:[]),'app-browser','app-gmail','app-google-calendar'].sort(),'Only the Applets in use show, games arrive unshown: '+shelf.join(' '));
    assert.equal(await page.locator('.setup-choose-again').count(),0,'Google has nothing to choose again');
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-world-'+platform+'.png')});
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='google_connect_failed')),'Saved native connections recover even when the original bridge reply fails');
@@ -174,7 +177,7 @@ await withBrowser(fileAccess,async browser=>{
 
   if(mode!=='existing'){
    const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
-   assert.ok(result.state.onboarding.unlockedApplets.includes('app-youtube'));
+   assert.ok(!result.state.onboarding.unlockedApplets.includes('app-youtube')&&['app-gmail','app-google-calendar','app-browser','app-game-2048'].every(id=>result.state.onboarding.unlockedApplets.includes(id)),'A first run unlocks the Applets in use and the starter games, no featured starters: '+result.state.onboarding.unlockedApplets.join(' '));
    assert.equal(result.state.cloudConsent,mode==='google'&&platform==='macos','Only supported background source preparation saves consent during setup');
    if(platform==='macos')assert.ok(result.calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'),'Google sign-in starts background source checks before entering');
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.modules?.some(m=>m.id==='app-gmail'&&m.unlocked));
@@ -240,13 +243,11 @@ await withBrowser(fileAccess,async browser=>{
   // Only some command lines can call World tools; the card says so before the choice.
   assert.equal(await page.locator('[data-agent="pi"] .setup-signin-tag').textContent(),'Chat only');
   assert.equal(await page.locator('[data-agent="pi"]').getAttribute('title'),'With pi, Fox can talk with you but can’t act in your world yet.');
-  // Hermes isn't here: it waits in More options, greyed, with Google and ChatGPT coming soon.
+  // Hermes isn't here: it waits in More options, greyed. No Google or ChatGPT row (owner decision 2026-10-10).
   await page.locator('.setup-more-toggle').click();
   assert.equal(await page.locator('.setup-more [data-agent="hermes"]').isDisabled(),true);
   assert.equal(await page.locator('.setup-more [data-agent="hermes"]').getAttribute('title'),'Hermes Agent isn’t installed on this computer.');
-  assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'Google is coming soon');
-  assert.equal(await page.locator('.setup-google-button .setup-signin-tag').textContent(),'Coming soon');
-  assert.equal(await page.locator('.setup-chatgpt-button').isDisabled(),true,'ChatGPT is coming soon');
+  assert.equal(await page.locator('.setup-more :is(.setup-google-button,.setup-chatgpt-button)').count(),0,'nothing coming soon in a release build');
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-local-agent-'+platform+'.png')});
   await page.locator('.setup-more-toggle').click();
   const firstFrame=await page.locator('.setup-next').boundingBox();
@@ -322,7 +323,7 @@ await withBrowser(fileAccess,async browser=>{
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
   assert.ok(!result.calls.some(c=>c.action==='connect'),'No Google sign-in');
   assert.equal(result.state.onboarding.completed,true);
-  assert.ok(result.state.onboarding.unlockedApplets.includes('app-youtube'));
+  assert.ok(result.state.onboarding.unlockedApplets.includes('app-github')&&!result.state.onboarding.unlockedApplets.includes('app-youtube'),'The app brought from the Agent comes along; featured starters do not: '+result.state.onboarding.unlockedApplets.join(' '));
   assert.ok(!result.calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'),'No Google sources to read');
   const analytics=result.calls.filter(c=>c.action==='usageEvent').map(c=>c.event);
   assert.ok(analytics.includes('onboarding_apps_viewed')&&!analytics.some(e=>e.startsWith('google_connect_')),JSON.stringify(analytics));
@@ -616,5 +617,5 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Give your agent a world'}).waitFor();
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS: one-page setup: the brand large on top, the main part in the middle, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options with Google and ChatGPT coming soon, one big Build your world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
+ console.log('PASS: one-page setup: the brand large on top, the main part in the middle, the Agents found here as cards (Hermes/OpenClaw/pi first), the rest under More options (nothing coming soon), one big Build your world; the chosen Agent moves left while what came along arrives as tiles, then Enter your world; Google retry, background checks, existing-user bypass, one-click install, no-Agent Hermes install, moving off Fox’s own Hermes, Agent on another computer, no scrolling at desktop sizes');
 });

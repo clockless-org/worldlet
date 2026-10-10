@@ -147,17 +147,15 @@ await withBrowser(fileAccess,async browser=>{
    }}}};
   },stagesHost);
   await app.goto(worldUrl());
-  // Setup's Continue with Google is greyed (owner request 2026-10-05): Worldlet provides no model, so a Google
-  // sign-in alone gives Fox nothing to run on. Google stays connectable from Mail and Calendar above.
-  // It sits under More options with the other ways in (owner request 2026-10-09).
+  // Setup offers no Google sign-in (owner request 2026-10-05: Worldlet provides no model, so a Google sign-in alone gives
+  // Fox nothing to run on), and no greyed "Coming soon" row either (owner decision 2026-10-10). Google stays connectable
+  // from Mail and Calendar above.
   await app.locator('.setup-more-toggle').click();
-  const google=app.locator('.setup-google-button');await google.waitFor();
-  assert.equal(await google.isDisabled(),true,'setup\'s Google is greyed');
-  assert.equal(await google.locator('.setup-signin-tag').textContent(),'Coming soon');
-  await google.click({force:true});
-  assert.equal(await app.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),false,'a greyed Google asks nothing');
+  await app.locator('#setupMore').waitFor();
+  assert.equal(await app.locator('.setup-google-button').count(),0,'setup shows no Google row');
+  assert.equal(await app.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),false,'setup asks nothing of Google');
   assert.deepEqual(errors,[]);
   await app.close();
  }
- console.log('PASS Google connection: Mail entry (setup\'s Google greyed), one request, browser steps only once consent opens (neutral for a reused grant), Cancel throughout, brief success, retry on failure, unchanged privacy permission; Open again and Copy link reuse the validated consent address when the browser never came up; first-use setup follows the same rule; older hosts keep the browser steps; Accounts says to disconnect Google to switch accounts; Mac Calendar stays local.');
+ console.log('PASS Google connection: Mail entry (no Google row in setup), one request, browser steps only once consent opens (neutral for a reused grant), Cancel throughout, brief success, retry on failure, unchanged privacy permission; Open again and Copy link reuse the validated consent address when the browser never came up; first-use setup follows the same rule; older hosts keep the browser steps; Accounts says to disconnect Google to switch accounts; Mac Calendar stays local.');
 });

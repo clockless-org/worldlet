@@ -186,7 +186,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   try{const result=await call('agentIntegrations',{operation:'port',id});draft.integrations=Array.isArray(result?.integrations)?result.integrations.filter(item=>typeof item?.title==='string'&&typeof item?.outcome==='string').slice(0,20):[];}
   catch{draft.integrations=[];}
   finally{
-   porting=false;clearInterval(chatterTimer);persist();if(!disposed&&!busy)render();
+   // The apps the Agent brought join the World's selection (owner decision 2026-10-10: the Applets in use).
+   porting=false;clearInterval(chatterTimer);seed();if(!disposed&&!busy)render();
    // Counts and outcomes only, once the whole bring (history and integrations) is over.
    if(!draft.brought.failed)productEvent('agent_bring_completed',agentBringDimensions(id,draft.brought,draft.integrations),timingBucket(performance.now()-started));
   }
@@ -523,8 +524,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   }
   return cards;
  }
- /** Everything else, folded (owner request 2026-10-09): the Agents not on this computer, Google and ChatGPT (both
-  * coming soon), an Agent on another computer, and an API key for the Hermes Agent Worldlet sets up. */
+ /** Everything else, folded (owner request 2026-10-09): the Agents not on this computer, an Agent on another computer,
+  * and an API key for the Hermes Agent Worldlet sets up. The greyed Google and ChatGPT "Coming soon" rows are gone (owner
+  * decision 2026-10-10: nothing the person cannot use sits on the first page). */
  function moreOptions(){
   const wrap=node('div','','setup-more-wrap');wrap.classList.toggle('is-open',more);
   // Codex alone is no Agent for Fox (owner decision 2026-10-09), so it is not offered.
@@ -532,7 +534,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   const toggle=node('button','','setup-more-toggle') as HTMLButtonElement;toggle.type='button';toggle.setAttribute('aria-expanded',String(more));toggle.setAttribute('aria-controls','setupMore');
   toggle.append(node('span','','setup-more-chevron'),node('span',t('More options'),'setup-more-label'));
   const peek=node('span','','setup-more-peek');peek.setAttribute('aria-hidden','true');
-  for(const src of [...missing.map(h=>AGENT_ICONS[h.id]),'brands/google.png',appLogoSource({key:'chatgpt'})||''].filter(Boolean).slice(0,6))peek.append(image(src));
+  for(const src of missing.map(h=>AGENT_ICONS[h.id]).filter(Boolean).slice(0,6))peek.append(image(src));
   toggle.append(peek);
   toggle.onclick=()=>{more=!more;render();};
   wrap.append(toggle);
@@ -548,10 +550,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const b=option(harness.title,AGENT_ICONS[harness.id],'setup-agent-button is-missing','',detectingAgents?'':t('Not on this computer'));
    b.dataset.agent=harness.id;b.setAttribute('aria-label',harness.title);if(!detectingAgents)b.title=agentText('{agent} isn’t installed on this computer.',harness.title);
   }
-  // Cloud agents are coming soon (owner request 2026-10-05): Google, then ChatGPT. Google is greyed for everyone, since a
-  // Google sign-in brings no model (only the development build's mock rehearses it).
-  const go=option(signingIn?({connecting:'Connecting to Google…',browser:'Waiting for Google…'}[googleStage]||'Finishing setup…'):t('Continue with Google'),'brands/google.png','setup-google-button',signingIn?'':'Coming soon');go.classList.toggle('is-connecting',signingIn);
-  option(t('Continue with ChatGPT'),appLogoSource({key:'chatgpt'})||'','setup-chatgpt-button','Coming soon');
+  // Only the development build's mock Google signs in here; its row shows the sign-in's progress (#1615).
+  if(state.mockGoogleAvailable===true||signingIn){const go=option(signingIn?({connecting:'Connecting to Google…',browser:'Waiting for Google…'}[googleStage]||'Finishing setup…'):t('Continue with Google'),'brands/google.png','setup-google-button');go.classList.toggle('is-connecting',signingIn);}
   const remote=option(t('My Agent is on another computer'),'','setup-remote-toggle');remote.disabled=busy||pairingRemote||signingIn;remote.prepend(node('span','⇄','setup-more-glyph'));
   remote.onclick=()=>{remoteForm=true;error='';render();};
   wrap.append(grid);
@@ -717,7 +717,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  }
  void detectAgents();
  if(step===1)void prepareGoogleSources();
- const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched);persist();};
+ // Setup selects only the Applets in use (owner decision 2026-10-10): its draft (Mail, Calendar, Browser), the apps
+ // found here and the apps the person's Agent brought (core/applets/regions.ts).
+ const brought=()=>new Set<string>((draft.integrations||[]).map((item:any)=>item?.provider).filter((p:unknown):p is string=>typeof p==='string'));
+ const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched,brought());persist();};
  if(hostFeatures(state).installedAppDetection){
   void call('installedApplets').then(result=>{
    if(disposed)return;detected=new Set(result.keys||[]);nativeIcons=result.icons||{};

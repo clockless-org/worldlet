@@ -123,7 +123,6 @@ const copy:Record<string,string[]>={
  'Start fresh':['重新开始','新しく始める','Empezar de cero'],
  'Fox couldn’t bring {agent}’s memory. You can tell Fox about yourself instead.':['Fox 没能带来 {agent} 的记忆，你可以直接告诉 Fox 你的情况。','Fox は {agent} の記憶を引き継げませんでした。Fox に直接教えてください。','Fox no pudo traer la memoria de {agent}. Puedes contarle a Fox sobre ti.'],
  'Connecting to {agent}…':['正在连接 {agent}…','{agent} に接続しています…','Conectando con {agent}…'],
- 'Continue with ChatGPT':['使用 ChatGPT 继续','ChatGPT で続ける','Continuar con ChatGPT'],
  'Coming soon':['即将推出','近日公開','Próximamente'],
  'Not installed':['未安装','未インストール','No instalado'],
  'Chat only':['仅聊天','会話のみ','Solo chat'],

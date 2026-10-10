@@ -14,12 +14,12 @@ import {setTimeout as sleep} from 'node:timers/promises';
 // - choose: the setup page → a local Agent → Build your world → the same page bringing it in → Enter your world on; close the window there, mid-onboarding,
 //   which quits the app instead of leaving Fox on the desktop (owner request 2026-10-04; ADVISORY until it
 //   has passed on the Mac and Windows hosts, falling back to Quit Completely).
-// - resume: the relaunch opens with the Agent brought in → Enter your world → the tour's Mail step → Google sign-in
-//   starts (google_connect_started, never google_connect_failed) → Cancel → Reset Fox → the setup page.
-//   Before Reset: Not now, the tour's first half ends and, with nothing connected, Fox waits on nothing: the tour
-//   closes with the phone step (owner request 2026-10-06), which turning the Tutorial switch off ends, and then opening Mail from the World starts Google sign-in again
-//   (the 10-03 meeting: a later click must offer to connect too); closing the World keeps Fox on the
-//   desktop and Back to World restores it. Both are ADVISORY (a failure prints ADVISORY FAIL) until they
+// - resume: the relaunch opens with the Agent brought in → Enter your world → the tour (hello, Applets, Attention
+//   Center; it never offers Mail sign-in, owner decision 2026-10-10) and, with nothing connected, Fox waits on nothing:
+//   the tour closes with the phone step (owner request 2026-10-06), which turning the Tutorial switch off ends → opening
+//   Mail from the World starts Google sign-in (google_connect_started, never google_connect_failed; the 10-03 meeting) →
+//   Cancel → Reset Fox → the setup page. Before Reset, closing the World keeps Fox on the desktop and Back to World
+//   restores it. Mail from the World and the desktop Companion are ADVISORY (a failure prints ADVISORY FAIL) until they
 //   have passed on the Mac and Windows hosts, except the desktop Companion on the Mac, which always blocked.
 // - after-reset: the relaunch after Reset Fox opens on the setup page's choices with no local Agent chosen.
 // The launcher puts a fixture OpenClaw on this computer's path (scripts/setup-fixtures.ts), so there is
@@ -28,7 +28,7 @@ export const ONBOARDING_PATH_PHASES=['choose','resume','after-reset'] as const;
 // Agents RC hosts have signed in first (test:agent:local uses Codex), then any other one found here.
 const PREFERRED=['codex','claude-code','hermes','openclaw','pi'];
 // New steps report ADVISORY FAIL until they have passed on the Mac and Windows hosts; then these turn on.
-const MAIL_AGAIN_BLOCKING=false,COMPANION_ELSEWHERE_BLOCKING=false,CLOSE_QUITS_BLOCKING=false;
+const MAIL_FROM_WORLD_BLOCKING=false,COMPANION_ELSEWHERE_BLOCKING=false,CLOSE_QUITS_BLOCKING=false;
 /** The local Agent setup chose, however it was kept: Fox's Harness, or an Agent adopted before there was none built in. */
 const chosen=(root:string)=>readSelection(root)??readAdopted(root);
 
@@ -128,25 +128,16 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   await wait('world arrival',"!!document.querySelector('#notionWorld')?.sceneMetrics?.renderer",90);
   const step=(key:string,seconds=30)=>wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
   await step('hello',90);await press('Continue');
-  await step('fox');await press('Continue');
+  // The tour never offers to sign in to Mail and has no rename step (owner decision 2026-10-10): the Applets step and the
+  // Attention Center only tell.
   await step('applets');
-  // With a local Agent and no Google, the Applets step offers Connect Mail in Fox's bubble (ui/onboarding/world-tour.ts),
-  // which starts Google's sign-in from the World without opening the Mail Applet (owner feedback 2026-10-06).
-  await wait('Fox offers to sign in to Mail',"/isn’t connected yet/.test(document.querySelector('#companionDialogue')?.innerText||'')",15);
-  const ring='.tour-spotlight:not([hidden]) .tour-spotlight-ring:not(.is-guide):not([hidden])';
-  await wait('Mail in the spotlight',`document.querySelector('#notionWorld')?.dataset.tourSpotlight==='true'&&!!document.querySelector(${JSON.stringify(ring)})`,30);
-  await press('Connect Mail');
-  mark('Connect Mail');
-  // The 10-03 demo: Mail after a local Agent failed Google sign-in at once (google_connect_failed).
-  for(let i=0;i<150&&!events.includes('google_connect_started');i++)await sleep(200);
-  if(!events.includes('google_connect_started'))throw Error(`Connect Mail did not start Google sign-in (no google_connect_started)\n  screen: ${await seen()}\n  events: ${events.join(', ')||'none'}`);
-  for(let i=0;i<50&&!events.includes('google_connect_failed');i++)await sleep(200);
-  if(events.includes('google_connect_failed'))throw Error(`Google sign-in failed right after it started (google_connect_failed)\n  screen: ${await seen()}`);
-  mark('Google sign-in started and is waiting for the person');
-  await press('Cancel',30);
-  for(let i=0;i<150&&!events.some(event=>/^google_connect_(cancelled|failed|completed)$/.test(event));i++)await sleep(200);
-  if(events.includes('google_connect_failed'))throw Error('cancelling Google sign-in reported google_connect_failed');
-  mark('Cancel stopped the sign-in');
+  if(await js(`!!${button('Connect Mail')}`)===true)throw Error(`the tour offered Connect Mail\n  screen: ${await seen()}`);
+  await press('Continue');
+  await step('attention');await press('Continue');
+  // Nothing is connected, so first value waits on nothing: the tour closes with the phone step, or Fox offers a page
+  // on what the person keeps talking about with the brought Agent (Show me). Turning the Tutorial switch off ends either and frees the World.
+  await wait('the phone step, or a brought conversation',`document.querySelector('#notionWorld')?.dataset.tourStep==='phone'||!!${button('Show me')}`,60);
+  await skipTutorial();
   // A failed advisory step leaves no sign-in waiting, so Reset Fox still runs as before.
   const advisory=async(what:string,blocking:boolean,run:()=>Promise<void>)=>{
    try{await run();}catch(error){
@@ -154,29 +145,25 @@ export async function onboardingPaths({host,window,view}:CheckContext){
     await js(`${button('Cancel')}?.click();true`).catch(()=>false);
    }
   };
-  await advisory('Mail from the World after the tour',MAIL_AGAIN_BLOCKING,async()=>{
-   // Back in the World (its World button, if Mail is still in front), the tour asks again: Not now.
-   for(let i=0;i<25&&await js(`!${button('Not now')}`).catch(()=>true);i++)await sleep(200);
-   if(await js(`!${button('Not now')}`).catch(()=>true))await press('World');
-   // Not now moves on (owner request 2026-10-06).
-   await press('Not now');
-   await step('attention');await press('Continue');
-   // Nothing is connected, so first value waits on nothing: the tour closes with the phone step, or Fox offers a page
-   // on what the person keeps talking about with the brought Agent (Show me). Turning the Tutorial switch off ends either and frees the World.
-   await wait('the phone step, or a brought conversation',`document.querySelector('#notionWorld')?.dataset.tourStep==='phone'||!!${button('Show me')}`,60);
-   await skipTutorial();
+  // Opening Mail from the World is now the tour's only way to Google (owner decision 2026-10-10); it stays ADVISORY,
+  // as it was, until it has passed on the Mac and Windows hosts.
+  await advisory('Mail from the World',MAIL_FROM_WORLD_BLOCKING,async()=>{
+   // Opening Mail from the World offers to connect (the 10-03 meeting): it starts Google's sign-in.
    const starts=()=>events.filter(event=>event==='google_connect_started').length,before=starts();
    // Mail's Applet in the World, where ui/onboarding/tour-spotlight.ts appletBox finds it.
    await clickAt(web,js,'Mail in the World',"(()=>{const r=document.querySelector('#notionWorld'),m=(r?.sceneMetrics?.modules||[]).find(m=>m.id==='app-gmail'&&m.visible!==false),b=m?.peekBounds,c=r?.querySelector('canvas[data-renderer=\"pixi-webgl\"]');if(!b||!c||!(b.width>0&&b.height>0))return null;const base=c.getBoundingClientRect(),sx=c.clientWidth?base.width/c.clientWidth:1,sy=c.clientHeight?base.height/c.clientHeight:1;return {x:base.left+b.x*sx,y:base.top+b.y*sy,width:b.width*sx,height:b.height*sy};})()");
    mark('opened Mail from the World');
    for(let i=0;i<150&&starts()===before;i++)await sleep(200);
-   if(starts()===before)throw Error(`opening Mail from the World after the tour did not start Google sign-in again\n  screen: ${await seen()}\n  events: ${events.join(', ')}`);
-   mark('Google sign-in started again');
+   if(starts()===before)throw Error(`opening Mail from the World did not start Google sign-in (no google_connect_started)\n  screen: ${await seen()}\n  events: ${events.join(', ')||'none'}`);
+   // The 10-03 demo: Mail after a local Agent failed Google sign-in at once (google_connect_failed).
    const ended=()=>events.slice(events.lastIndexOf('google_connect_started')).find(event=>/^google_connect_(cancelled|failed|completed)$/.test(event));
+   for(let i=0;i<50&&ended()!=='google_connect_failed';i++)await sleep(200);
+   if(ended()==='google_connect_failed')throw Error(`Google sign-in failed right after it started (google_connect_failed)\n  screen: ${await seen()}`);
+   mark('Google sign-in started and is waiting for the person');
    await press('Cancel',30);
    for(let i=0;i<150&&!ended();i++)await sleep(200);
-   if(ended()==='google_connect_failed')throw Error('Google sign-in from the World reported google_connect_failed');
-   mark('Cancel stopped it again');
+   if(ended()==='google_connect_failed')throw Error('cancelling Google sign-in from the World reported google_connect_failed');
+   mark('Cancel stopped the sign-in');
   });
   // The same code keeps Fox on the desktop on every OS (COMPANION.md), once onboarding is over; Windows
   // returns through the tray icon. During the tour closing quits, so the tour is skipped first.

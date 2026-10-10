@@ -665,9 +665,6 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 [data-tour-spotlight] #attentionPreview .attention-preview-action:not(.attention-preview-action-primary){display:none}
 /* Fox never moves during the tour: no hop to the middle, no lift under the card (owner feedback 2026-10-04 and 2026-10-06). */
 /* Fox's name, in its bubble while it introduces itself. */
-#notionWorld .world-tour-name{display:block;margin-top:8px}
-#notionWorld .world-tour-name input{box-sizing:border-box;width:min(220px,100%);padding:7px 10px;border-radius:10px;border:1px solid #c9c2a8;background:#fffdf4;color:#2c3a33;font:500 15px/1.2 var(--ui-font-ui,system-ui)}
-#notionWorld .world-tour-name input:focus-visible{outline:2px solid #e9a63c;outline-offset:1px}
 
 /* The welcome belongs to the world (owner feedback 2026-10-02): Fox, its bubble and its buttons stay
    out of it, and Fox comes in for the tour's hello where it always stands. */

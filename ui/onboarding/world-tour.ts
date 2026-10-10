@@ -7,15 +7,15 @@ import {phoneApps} from '../distribution/index.ts';
 
 /** The first half of the first-run tour (owner design 2026-10-02, ui/onboarding/README.md):
  * once the welcome celebration ends, Fox says hello from where it always stands (owner feedback
- * 2026-10-04: it no longer hops to the middle), introduces itself (and takes a new name), shows an Applet at work
- * (offering Connect Mail or Not now in its bubble when Mail isn't connected), then boxes the Attention Center.
+ * 2026-10-04: it no longer hops to the middle), shows an Applet at work, then boxes the Attention Center.
+ * The tour is short and never asks to sign in (owner decision 2026-10-10): the person's existing Agent is fully
+ * connected at setup, so there is no Mail sign-in step, and no rename step (Fox's name stays changeable in Settings).
  * The tour's very last step, once first value is over, says Fox can be used on the phone too (owner request
  * 2026-10-06): a code to get the app, then the pairing code. After a first win it waits a couple of minutes for a calm
  * moment instead of following the fireworks (owner feedback 2026-10-06). A spotlight keeps the
  * person on the step, and until the whole first run is over (this half and first value) nothing
  * else in the World responds (tour-lock.ts, owner request 2026-10-04). Steps that only tell move on
- * with Continue or a click anywhere; a step that asks the person to use something moves on when
- * they do. It resumes from the persisted journey stage and hands over to first value
+ * with Continue or a click anywhere; the phone step waits for a choice. It resumes from the persisted journey stage and hands over to first value
  * (first-value.ts), where the person gives Fox one thing to do.
  *
  * The Tutorial switch in the World's bottom-right corner (owner Order 2026-10-07, tour-lock.ts) is on while
@@ -40,24 +40,22 @@ const CODA_AFTER_WIN=120000,CODA_AFTER_END=3000,CODA_RETRY=5000;
 const CODA_MIN=10000;
 const codaAfterWin=(state:any)=>{const ms=state?.tourCodaAfterWinMs;return typeof ms==='number'&&Number.isFinite(ms)&&ms>=CODA_MIN&&ms<CODA_AFTER_WIN?ms:CODA_AFTER_WIN;};
 export function mountWorldTour({root,view,call,state:initial,arriving=false}){
- let state=initial,step=0,started=false,replaying=false,skipped=false,deferred=false,destroyed=false,waitingForArrival=arriving,shown='',name='',renaming=false,timer:ReturnType<typeof setTimeout>|undefined;
+ let state=initial,step=0,started=false,replaying=false,skipped=false,deferred=false,destroyed=false,waitingForArrival=arriving,shown='',timer:ReturnType<typeof setTimeout>|undefined;
  // The phone step closes the first run after first value (`coda`); it is not saved, as pairing stays in Settings.
  let coda=false,codaTimer:ReturnType<typeof setTimeout>|undefined;
  const spotlight=createTourSpotlight(root);
  const stage=()=>String(state.onboarding?.journeyStage||'');
  const active=()=>replaying||coda||stage()==='world-tour';
- // Choices are underlined words in Fox's bubble (owner feedback 2026-10-06); a second choice (Not now, Change my name) is muted beside the main one.
+ // Choices are underlined words in Fox's bubble (owner feedback 2026-10-06); a second choice (Not now) is muted beside the main one.
  const button=(label:string,run:()=>unknown,quiet=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.className=quiet?'world-tour-quiet':'world-tour-primary';b.onclick=()=>void run();return b;};
  const modules=()=>((root as any).sceneMetrics?.modules||[]).filter((m:any)=>m.visible!==false&&m.unlocked!==false);
- const mail=()=>(state.connections||[]).find((c:any)=>c.provider==='gmail');
- // The Applet to show: Mail when it still needs signing in, otherwise one whose lights are on.
- function applet():{id:string,title:string,running:boolean,signIn:boolean}|null {
-  const list=modules(),hasMail=list.some((m:any)=>m.id===MAIL);
-  if(hasMail&&!connectionLive(mail())&&!signInDeclined&&!replaying)return {id:MAIL,title:'Mail',running:false,signIn:true};
+ // The Applet to show: one whose lights are on, else Mail, else the first one in the World. The step only tells; it never
+ // offers to sign in (owner decision 2026-10-10).
+ function applet():{id:string,title:string,running:boolean}|null {
+  const list=modules();
   const busy=list.find((m:any)=>RUNNING.includes(m.presentation?.phase))||list.find((m:any)=>m.id===MAIL)||list[0];
-  return busy?{id:busy.id,title:getApp(busy.id)?.title||'This Applet',running:RUNNING.includes(busy.presentation?.phase),signIn:false}:null;
+  return busy?{id:busy.id,title:getApp(busy.id)?.title||'This Applet',running:RUNNING.includes(busy.presentation?.phase)}:null;
  }
- let signInDeclined=false;
  // Phone pairing (core/phone/README.md): the host owns it (`phonePair`) and reports changes as `worldlet:phone-status`.
  // Pairing starts only on Show pairing code, so a skipped step registers nothing with the relay; a host without phone
  // pairing leaves the step out.
@@ -82,38 +80,26 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   try{phone=await call('phonePair',{operation:'start'});}catch{}finally{phoneBusy=false;}
   if(!destroyed&&STEPS[step].key==='phone')show();
  }
- // Connect Mail, in Fox's bubble (or a click on Mail), goes straight to Google's sign-in from the World, without opening
- // the Mail Applet, where people did not know how to get back (owner feedback 2026-10-06). The step returns when it ends.
- function connectMail(){spotlight.hide();view.connectApplet?.(MAIL);}
  // Not now ends a code nobody scanned; pairing stays in Fox's panel, under Mobile.
  function skipPhone(){if(phoneState()==='waiting')void call('phonePair',{operation:'end'}).catch(()=>{});next();}
- type Step={key:string,text:()=>string,target?:()=>Box,actions?:()=>HTMLElement[],act?:()=>void,body?:()=>HTMLElement|null,tell?:boolean,center?:boolean};
+ type Step={key:string,text:()=>string,target?:()=>Box,actions?:()=>HTMLElement[],body?:()=>HTMLElement|null,tell?:boolean,center?:boolean};
  const STEPS:Step[]=[
   {key:'hello',tell:true,text:()=>'Welcome! This is your **World**. Everything you have can live here now.'},
-  // Renaming is an action under the bubble; only after it is chosen does a name field show.
-  {key:'fox',tell:true,target:()=>elementBox(root,'.companion-avatar'),body:()=>renaming?nameField():null,
-   text:()=>renaming?'What should I be called?':`I’m **${currentName()}**, your companion. I’m always here, working for you.`,
-   // Save returns to Fox's introduction under its new name; Continue moves on from there.
-   actions:()=>renaming?[button('Save',()=>void rename())]:[button('Change my name',()=>{renaming=true;show();},true),button('Continue',next)]},
-  {key:'applets',target:()=>{const a=applet();return a?appletBox(root,a.id):null;},text:()=>{
+  {key:'applets',tell:true,target:()=>{const a=applet();return a?appletBox(root,a.id):null;},text:()=>{
    const a=applet();
    // The word the step teaches and the Applet's name are bold (owner feedback 2026-10-06).
    if(!a)return 'These are your **Applets**. Each one is a real app you can open and use right here.';
-   if(a.signIn)return 'This is your **Applet**, **Mail**. It isn’t connected yet. Connect Mail, and I’ll read your mail and calendar and pick out what matters for you.';
    return a.running?`This is your **Applet**, **${a.title}**. See its lights blinking? It’s working for you right now${a.id===MAIL?', collecting your new mail':''}. Every Applet here is a real app you can open and use.`
     :`This is your **Applet**, **${a.title}**. Each one is a real app you can open and use right here, and they keep working in the background.`;
-  },
-   // Signing in is the person's choice, made in Fox's bubble (owner request 2026-10-06); Not now moves on.
-   act:()=>{if(applet()?.signIn)connectMail();},
-   actions:()=>applet()?.signIn?[button('Not now',()=>{signInDeclined=true;next();},true),button('Connect Mail',connectMail)]:[button('Continue',next)]},
+  }},
   {key:'attention',tell:true,center:true,target:()=>elementBox(root,'.world-task-tracker'),text:()=>(state.connections||[]).some(connectionLive)||replaying
    ?'On the left is your **Attention Center**. I keep everything that needs you here: what’s coming up, what’s worth doing and what’s worth knowing. Pick anything, and I’ll show you how I can take care of it.'
-   // Nothing connected (Not now on Mail): nothing will arrive to wait for, so the step only says what the Center is for.
+   // Nothing connected: nothing will arrive to wait for, so the step only says what the Center is for.
    :'On the left is your **Attention Center**. I keep everything that needs you here: what’s coming up, what’s worth doing and what’s worth knowing. It fills up once your mail or calendar is connected.'},
   // The tour's last step (owner request 2026-10-06): Fox can be used on the phone too. Get the app, then pair it. It waits
   // for a choice, never a click anywhere. In the first run it follows first value (`coda`); a replay shows it last.
   {key:'phone',tell:false,body:()=>replaying?null:phoneCode(),text:()=>{
-   // A replay only tells, as it does for Mail.
+   // A replay only tells.
    if(replaying)return 'You can also use me on your **phone**: it shows your Attention Center and me wherever you go. Pair it any time from Settings, under Mobile.';
    const state=phoneState();
    if(state==='paired')return `You’re all set: ${phone.phone?.name?phone.phone.name+' is':'your phone is'} paired. Your Attention Center and I are on your **phone** now, wherever you go.`;
@@ -123,19 +109,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   },
    actions:()=>{if(replaying)return [button('Continue',next)];const state=phoneState();return state==='paired'?[button('Continue',next)]:state==='waiting'?[button('Not now',skipPhone,true)]:[button('Not now',skipPhone,true),button('Show pairing code',()=>void pairPhone())];}},
  ];
- function nameField(){
-  const field=document.createElement('label');field.className='world-tour-name';
-  const input=document.createElement('input');input.type='text';input.maxLength=24;input.value=name||currentName();input.setAttribute('aria-label','Fox’s name');input.spellcheck=false;
-  input.oninput=()=>{name=input.value;};input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();void rename();}};
-  field.append(input);return field;
- }
- let savedName='';
- const currentName=()=>savedName||String((root.querySelector('#companionDialogue') as HTMLElement)?.getAttribute('aria-label')||'Fox reply').replace(/ reply$/,'')||'Fox';
- async function saveName(){
-  const value=name.trim();if(!value||value===currentName())return;
-  try{await call('foxPreferenceChange',{setting:'companion_name',value});savedName=value;}catch{}
- }
- async function rename(){renaming=false;await saveName();if(!destroyed&&STEPS[step].key==='fox')show();}
+ const TOUR_STEP:Record<string,number>={hello:1,applets:3,attention:4};
  function introduce(on:boolean){
   if((root.dataset.attentionIntroduced==='true')===on)return;
   if(on)root.dataset.attentionIntroduced='true';else delete root.dataset.attentionIntroduced;
@@ -158,7 +132,6 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   root.dispatchEvent(new CustomEvent('worldlet:world-tour-done'));
  }
  function next(){
-  if(STEPS[step].key==='fox')renaming=false;
   if(coda){endCoda();return;}
   // The first run hands over to first value after the Attention Center; the phone comes after it (coda). A replay shows it last.
   const last=replaying?STEPS.length-1:STEPS.findIndex(s=>s.key==='attention');
@@ -177,7 +150,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
    if(destroyed||replaying||coda||phoneMissing||tourInProgress(state.onboarding)){cancelCoda();return;}
    // Only at a calm moment: in the World overview, Fox idle and saying nothing else, no card open.
    if(!calm()){startCoda(CODA_RETRY);return;}
-   cancelCoda();coda=true;renaming=false;step=STEPS.findIndex(s=>s.key==='phone');show();lock.refresh();
+   cancelCoda();coda=true;step=STEPS.findIndex(s=>s.key==='phone');show();lock.refresh();
   },delay);
  }
  const calm=()=>overview()&&!view.busy&&!view.pageOpen&&root.dataset.attentionPreview!=='true'&&['','first-value','world-tour'].includes(view.guideSource||'');
@@ -196,10 +169,9 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   const actions=current.actions?.()||[button('Continue',next)];
   view.setGuide({source:'world-tour',takeover:false,text,...body?{body}:{},actions});
   view.revealGuide?.();
-  // The Applet step only waits for a click when it asks the person to sign in to Mail.
-  const tell=current.key==='applets'?!applet()?.signIn:current.key==='phone'?replaying:current.tell!==false;
-  spotlight.show({target:()=>current.target?.()??null,...tell?{next}:{act:current.act},...replaying?{exit:stop}:{}});
-  if(body)setTimeout(()=>body.querySelector('input')?.focus(),50);
+  // The phone step waits for a choice in the first run; a replay only tells.
+  const tell=current.key==='phone'?replaying:current.tell!==false;
+  spotlight.show({target:()=>current.target?.()??null,...tell?{next}:{},...replaying?{exit:stop}:{}});
  }
  // The step survives a restart of this instance, so a transient state never rewinds the tour.
  function start(){if(destroyed||started||coda||!active()||waitingForArrival)return;started=true;checkPhone();show();lock.refresh();}
@@ -207,7 +179,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
  // Skip, Esc or the last Continue of a replay: the World is as it was, input included.
  function stop(){
   if(!replaying)return;
-  replaying=false;started=false;renaming=false;leave();view.setGuide(null);
+  replaying=false;started=false;leave();view.setGuide(null);
   root.dispatchEvent(new CustomEvent('worldlet:world-tour-replay-done'));
   lock.refresh();// The corner's switch, off, is back at once, not at the lock's next frame.
  }
@@ -226,7 +198,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   }
   deferred=false;coach.hide();
   view.showOverview?.();
-  replaying=true;step=0;signInDeclined=false;root.dataset.tourReplay='true';start();
+  replaying=true;step=0;root.dataset.tourReplay='true';start();
   lock.refresh();// The tour's switch, on, shows with the first step, not at the lock's next poll.
  }
  const idle=()=>{if(deferred&&!view.busy){deferred=false;coach.hide();replay();}};
@@ -246,10 +218,12 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   if(coda){endCoda();return;}
   if(!tourInProgress(state.onboarding))return;
   cancelCoda();
-  // The step of the README's eight it was skipped on: 1–4 here, 5–7 in first value (8, the phone, comes after).
-  const stage=String(state.onboarding?.journeyStage||''),at=stage==='world-tour'?step+1:stage==='first-value'?5:stage==='first-value-review'?6:7;
+  // The step of the README's eight it was skipped on, by its number before the tour was shortened (owner decision
+  // 2026-10-10), so `tour_step` keeps its meaning: hello 1, Applets 3, Attention Center 4 here (2, Fox's introduction, is
+  // gone), 5–7 in first value (8, the phone, comes after).
+  const stage=String(state.onboarding?.journeyStage||''),at=stage==='world-tour'?TOUR_STEP[STEPS[step].key]:stage==='first-value'?5:stage==='first-value-review'?6:7;
   window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event:'tour_skipped',dimensions:{tour_step:String(at)}}}));
-  skipped=true;renaming=false;
+  skipped=true;
   if(started){leave();started=false;}
   state={...state,onboarding:{...state.onboarding,journeyStage:'finish',journeyItemId:undefined}};
   view.setGuide(null);
@@ -276,7 +250,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
  const arrived=()=>{waitingForArrival=false;clearTimeout(timer);timer=setTimeout(start,600);};
  root.addEventListener('worldlet:celebration-done',arrived);
  if(!arriving)timer=setTimeout(start,2000);
- // Something else in front (signing in to Mail, a reply) lifts the spotlight; back in the overview
+ // Something else in front (a place opened another way, a reply) lifts the spotlight; back in the overview
  // the tour shows the same step again, with its text brought up to date.
  const watch=setInterval(()=>{
   if(destroyed||!started&&!coda||!active())return;

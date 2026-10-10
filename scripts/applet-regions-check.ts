@@ -1,19 +1,26 @@
 import assert from 'node:assert/strict';
 import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
 import {setupText} from '../ui/onboarding/setup-language.ts';
-import {APPLET_REGION_TITLES,AREA_LAYOUT_VERSION,FEATURED_STARTERS,SETUP_SUGGESTIONS,migrateAreaLayout,seedAppletSelection,setupOffers} from '../core/applets/regions.ts';
+import {APPLET_REGION_TITLES,AREA_LAYOUT_VERSION,GAME_STARTERS,SETUP_SUGGESTIONS,migrateAreaLayout,seedAppletSelection,setupOffers} from '../core/applets/regions.ts';
 const keys=APP_DEFINITIONS.map(a=>a.key);
 assert.equal(new Set(keys).size,keys.length,'Each app has one definition');
 for(const app of APP_DEFINITIONS)assert.ok(Object.hasOwn(APPLET_REGION_TITLES,app.region||''),app.key+' definition names one of the six areas');
+// A first run selects only the Applets in use (owner decision 2026-10-10): setup's draft (Mail, Calendar, Browser), the
+// apps found here and the apps the Agent brought; no featured starters, no filling areas. Games keep their three starters.
+const draft=['app-gmail','app-google-calendar','app-browser'],games=APP_DEFINITIONS.filter(a=>a.region==='health');
 for(const detected of [new Set<string>(),new Set(APP_DEFINITIONS.map(a=>a.key)),new Set(['whatsapp','strava','cloudflare'])]){
- const selected=new Set<string>();seedAppletSelection(APP_DEFINITIONS,detected,selected,new Set());
- for(const region of Object.keys(APPLET_REGION_TITLES))assert.ok(APP_DEFINITIONS.filter(a=>a.region===region&&selected.has(a.id)).length>=3,region);
- for(const key of FEATURED_STARTERS)assert.ok(selected.has('app-'+key),'Featured default: '+key);
- for(const key of detected)assert.ok(selected.has('app-'+key));
+ const selected=new Set<string>(draft);seedAppletSelection(APP_DEFINITIONS,detected,selected,new Set());
+ for(const key of detected)assert.ok(selected.has('app-'+key),'Found here: '+key);
+ for(const app of APP_DEFINITIONS)if(app.region!=='health'&&!draft.includes(app.id))assert.equal(selected.has(app.id),detected.has(app.key),'Only what is found here joins: '+app.key);
+ assert.ok(games.filter(a=>selected.has(a.id)).length>=3,'The Games area keeps its starters');
 }
-const selected=new Set<string>();seedAppletSelection(APP_DEFINITIONS,new Set(['whatsapp']),selected,new Set(['app-whatsapp','app-youtube']));assert.ok(!selected.has('app-whatsapp')&&!selected.has('app-youtube'));
-const unchecked=new Set<string>();seedAppletSelection(APP_DEFINITIONS,new Set(),unchecked,new Set(FEATURED_STARTERS.map(key=>'app-'+key)));
-for(const key of FEATURED_STARTERS)assert.ok(!unchecked.has('app-'+key),'Respect uncheck: '+key);
+const fresh=new Set<string>(draft);seedAppletSelection(APP_DEFINITIONS,new Set(),fresh,new Set());
+assert.deepEqual([...fresh],[...draft,...GAME_STARTERS.map(key=>'app-'+key)],'A fresh computer starts with Mail, Calendar, Browser and the three starter games: '+[...fresh].join(' '));
+const withAgent=new Set<string>(draft);seedAppletSelection(APP_DEFINITIONS,new Set(['notion']),withAgent,new Set(),new Set(['github','google']));
+assert.ok(withAgent.has('app-github')&&withAgent.has('app-notion')&&!withAgent.has('app-youtube')&&!withAgent.has('app-x'),'Apps brought from the Agent and found here join; starters do not');
+const selected=new Set<string>();seedAppletSelection(APP_DEFINITIONS,new Set(['whatsapp']),selected,new Set(['app-whatsapp','app-github']),new Set(['github']));assert.ok(!selected.has('app-whatsapp')&&!selected.has('app-github'),'Explicit unchecks are respected');
+const unchecked=new Set<string>();seedAppletSelection(APP_DEFINITIONS,new Set(),unchecked,new Set(GAME_STARTERS.map(key=>'app-'+key)));
+for(const key of GAME_STARTERS)assert.ok(!unchecked.has('app-'+key),'Respect uncheck: '+key);
 // Setup offers chosen apps plus a few suggestions per area; games and the rest wait behind Show all apps.
 for(const keys of Object.values(SETUP_SUGGESTIONS))for(const key of keys)assert.ok(keys.length<=4&&APP_DEFINITIONS.some(a=>a.key===key),'Suggestion is a catalog app: '+key);
 const offer=new Set<string>();seedAppletSelection(APP_DEFINITIONS,new Set(),offer,new Set());
@@ -45,4 +52,4 @@ assert.deepEqual(after.pins,{work:['app-github','app-slack','app-notion','app-fi
 assert.deepEqual(after.themePins,{castle:{work:['app-canva',null,null,null,null]}});
 assert.equal(migrateAreaLayout(after),after,'a regrouped layout is left alone');
 assert.deepEqual(migrateAreaLayout({version:3,assignments:{'app-x':'library'}}).assignments,{'app-x':'library'},'Social choices are kept');
-console.log('PASS complete, exclusive six-area catalog; the 2026-10-08 regroup and its layout migration; installed selection; three starters per area; explicit unchecks; short setup offer; purposes in every setup language');
+console.log('PASS complete, exclusive six-area catalog; the 2026-10-08 regroup and its layout migration; first run selects only the Applets in use (draft, found here, brought from the Agent) plus the starter games; explicit unchecks; short setup offer; purposes in every setup language');

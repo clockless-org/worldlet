@@ -1,7 +1,8 @@
 /** Product groups use stable world storage IDs; each Applet definition owns its catalog region and custom region assignments win.
  * Owner request 2026-10-08: Create merged into Work, its `library` slot became Social, and Explore (`travel`) became Entertainment. */
 export const APPLET_REGION_TITLES={home:'Home',work:'Work',library:'Social',money:'Life',health:'Games',travel:'Entertainment'};
-export const REGION_STARTERS={home:['gmail','google-calendar','apple-reminders'],work:['github','codex','notion'],library:['x','instagram','reddit'],money:['google-maps','amazon','paypal'],health:['game-2048','snake','minesweeper'],travel:['youtube','netflix','spotify']};
+/** The Games area's starters: setup unlocks three games (2048, Snake, Minesweeper first) without showing them. */
+export const GAME_STARTERS=['game-2048','snake','minesweeper'];
 /** Saved area layouts before the regroup are version 2: what was put in Create (`library`) moves to Work, and Create's
  * own name and pins go with it, since `library` is now Social. Version 1 pins were never read. */
 export const AREA_LAYOUT_VERSION=3;
@@ -28,7 +29,6 @@ export function migrateAreaLayout<T extends SavedLayout>(saved:T):T{
  }
  return out;
 }
-export const FEATURED_STARTERS=['youtube','x','tiktok','netflix','doordash','instagram','reddit'];
 /** Setup offers a few common apps per area instead of the whole catalog (owner feedback 2026-10-03); the rest wait behind Show all apps and search. */
 export const SETUP_SUGGESTIONS={home:['apple-notes','outlook','browser','google-photos'],work:['chatgpt','claude','slack','google-drive'],library:['whatsapp','telegram','discord','facebook'],money:['uber','airbnb','strava','booking'],travel:['tiktok','twitch','apple-music','bilibili']};
 /** Games never take room on the setup page: the Games area starts with its starters and the shelf holds the rest. */
@@ -39,11 +39,14 @@ export function setupOffers(app:{id:string;key:string;region?:string},chosen:boo
  if(SETUP_HIDDEN_REGIONS.includes(app.region||''))return false;
  return chosen||(SETUP_SUGGESTIONS[app.region||'']||[]).includes(app.key);
 }
-/** Featured and installed apps are selected; curated choices fill each area to three. */
-export function seedAppletSelection(apps:readonly {id:string;key:string;region?:string}[],detected:Set<string>,selected:Set<string>,touched:Set<string>){
- for(const app of apps)if((detected.has(app.key)||FEATURED_STARTERS.includes(app.key))&&!touched.has(app.id))selected.add(app.id);
- for(const [region,starters]of Object.entries(REGION_STARTERS)){
-  const candidates=[...starters.map(key=>apps.find(a=>a.key===key)).filter(Boolean),...apps.filter(a=>a.region===region&&!starters.includes(a.key))];
-  for(const app of candidates){if(apps.filter(a=>a.region===region&&selected.has(a.id)).length>=3)break;if(!touched.has(app.id))selected.add(app.id);}
- }
+/** What setup selects before the person changes anything (owner decision 2026-10-10, Kelvin: a first run shows only the
+ * Applets the person uses). Mail, Calendar and the Browser are setup's own draft; this adds the apps installed on this
+ * computer (`detected`) and the apps brought from the person's Agent (`brought`, its integrations' providers). No
+ * featured starters and no filling each area to three any more: the rest of the catalog stays one click away in each
+ * area's panel (Recommended, All <area> Applets). The Games area still gets its three starters, as before. Explicit
+ * unchecks (`touched`) are respected. */
+export function seedAppletSelection(apps:readonly {id:string;key:string;region?:string}[],detected:Set<string>,selected:Set<string>,touched:Set<string>,brought:Set<string>=new Set()){
+ for(const app of apps)if((detected.has(app.key)||brought.has(app.key))&&!touched.has(app.id))selected.add(app.id);
+ const games=[...GAME_STARTERS.map(key=>apps.find(a=>a.key===key)).filter(Boolean),...apps.filter(a=>a.region==='health'&&!GAME_STARTERS.includes(a.key))] as {id:string;region?:string}[];
+ for(const app of games){if(apps.filter(a=>a.region==='health'&&selected.has(a.id)).length>=3)break;if(!touched.has(app.id))selected.add(app.id);}
 }
