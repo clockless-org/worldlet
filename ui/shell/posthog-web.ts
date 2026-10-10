@@ -33,7 +33,11 @@ function start(config:Config){
   mask_personal_data_properties:true,
   save_referrer:false,
   ip:false,
-  session_recording:{maskAllInputs:true,maskTextSelector:'*',blockSelector:'img,video,canvas,iframe,image,[data-private]'},
+  session_recording:{maskAllInputs:true,maskTextSelector:'*',blockSelector:'img,video,canvas,iframe,image,[data-private]',recordHeaders:false,recordBody:false},
+  // Whatever the project settings say: console lines can carry text, and request timings carry URLs (a mail picture's
+  // address, for one). Web vitals are numbers only.
+  enable_recording_console_log:false,
+  capture_performance:{network_timing:false,web_vitals:true},
   disable_external_dependency_loading:true,
   disable_surveys:true,
   disable_product_tours:true,
