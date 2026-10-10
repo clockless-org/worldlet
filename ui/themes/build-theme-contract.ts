@@ -9,6 +9,8 @@ export interface ThemeItem {
 }
 export interface ThemeActions {
  openItem(id:string):void;
+ /** Present only when the host can read more items for this Applet. */
+ loadMore?():void;
  /** Present only when the host actually supports writes for this applet. */
  records?:{save(record:ThemeRecord):Promise<void>|void;remove(id:string):Promise<void>|void};
 }
@@ -43,7 +45,9 @@ export interface ThemePresentation {
 export interface ThemeAppletContext {
  host:HTMLElement; applet:{id:string;title:string}; scene:ThemeScene;
  items:readonly Readonly<ThemeItem>[];
- data:{now?:number;sample?:boolean;connected?:boolean;reading?:boolean;error?:string};
+ data:{now?:number;sample?:boolean;connected?:boolean;reading?:boolean;error?:string;
+  /** What the items cover when it is not everything (for example "Last 30 days"). */
+  scope?:string};
  actions:ThemeActions;
  invalidate():void;
  /** Optional richer host reader; presentation owns its placement. */
@@ -54,15 +58,46 @@ export interface ThemeAppletContext {
 export interface ThemeMount {dispose():void}
 export interface ThemeWorldApplet {id:string;key:string;title:string;region:string;visible:boolean;status?:string;count?:number;
  /** The host's own picture of this Applet (its shared device art, or the icon a person's own Applet carries). Themes without their own art for an Applet show this rather than a placeholder. */
- icon?:string}
+ icon?:string;
+ /** The Applet's lamp as the host shows it. A theme with lamps in its art lights them; the host draws the lamp's label and action. */
+ lamp?:ThemeLampState;
+ connected?:boolean;
+ /** Set for the person's own Applets (core/applets/MY-APPLETS.md): which kind it is. */
+ mine?:string;
+ /** A thing that is not an Applet (a trip, a parcel). It is shown only while it is open. */
+ object?:boolean}
+export type ThemeLampState='off'|'ready'|'processing'|'error';
 export interface ThemeWorldState {
  view:{id:string;level:'overview'|'area'|'applet'};
  applets:readonly ThemeWorldApplet[];
  areas:readonly {id:string;title:string}[];
- interaction:{placementArea:string|null;framedArea:string|null;inset:number;hoveredApplet:string|null;hoveredArea:string|null};
+ interaction:{placementArea:string|null;framedArea:string|null;inset:number;hoveredApplet:string|null;hoveredArea:string|null;
+  /** First use: areas and Applets can't be opened or moved yet. */
+  locked?:boolean;
+  /** Something sits over the World (the tour, a dialog, an attention preview): no hover, no lamp actions. */
+  covered?:boolean;
+  /** The open Applet shows an item's detail beside it. */
+  detailOpen?:boolean;
+  /** The open Applet shows its website instead of its own contents. */
+  website?:boolean};
  pins:Readonly<Record<string,readonly (string|null)[]>>;
  environment:ThemeRecord;
  motion:boolean;
+ /** Nobody can see the World right now (Fox floats on the desktop, or the window is hidden). Stop drawing. */
+ paused?:boolean;
+}
+/** A place the World marks for the host's shared overlays: the accessible button, the name, the lamp label and the
+ * attention mark the host draws there. CSS pixels relative to the World's host element. */
+export interface ThemeWorldMark {
+ kind:'applet'|'area'|'area-add'|'slot';id:string;x:number;y:number;visible:boolean;
+ /** Slot marks: the place's index in its area, as moveApplet takes it. */
+ slot?:number;
+ /** Applet marks: show the name beside the Applet. */
+ label?:boolean;
+ hovered?:boolean;
+ /** Applet marks: where the lamp sits and where the attention mark hangs, relative to x and y. */
+ lamp?:{x:number;y:number};
+ attention?:{x:number;y:number};
 }
 export interface ThemeWorldContext {
  host:HTMLElement;scene:ThemeScene;state:ThemeWorldState;
@@ -71,13 +106,32 @@ export interface ThemeWorldContext {
  moveApplet(id:string,area:string,slot?:number):void;
  /** Published URL of a package-relative `assets/...` path. */
  asset(path:string):string;
+ /** Report where the host draws its shared overlays. A theme that calls it draws no buttons, names or lamp labels of its own. */
+ marks?(marks:Readonly<Record<string,ThemeWorldMark>>):void;
+ /** Leave the open area or Applet, as the host's Back does. */
+ back?():void;
+}
+export interface ThemeWorldEvent {
+ type:'mail.received'|'applet.arrived';ids:readonly string[];
+ /** Arrivals: they fly in from the middle of the window, each starting as its icon. */
+ from?:'center';
+ icons?:Readonly<Record<string,string>>;
+ /** Arrivals: they are already in place; only settle them (their shadows), don't fly them in. */
+ settled?:boolean;
 }
 export interface ThemeWorldMount extends ThemeMount {
  update(state:ThemeWorldState):void;
- event(event:{type:'mail.received'|'applet.arrived';ids:readonly string[]}):boolean;
+ /** Whether the theme played it. An arrival may return a promise that settles when the Applets have landed. */
+ event(event:ThemeWorldEvent):boolean|Promise<boolean>;
  /** CSS pixels relative to host. Used by the companion and host accessibility surfaces. */
  anchor(id:string):{x:number;y:number}|null;
  bounds(id:string):{x:number;y:number;width:number;height:number}|null;
+ /** The World stays drawn behind an open Applet (blurred, its device in front). Otherwise the host hides it. */
+ behindApplet?:boolean;
+ /** What is on screen now, for the zoom between the World and an Applet. */
+ picture?():HTMLCanvasElement|null;
+ /** Renderer facts for the product's own checks. */
+ metrics?():ThemeRecord;
 }
 export interface BuildTheme {
  contractVersion:2;id:string;
