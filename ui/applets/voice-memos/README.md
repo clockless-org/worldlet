@@ -16,7 +16,7 @@ If macOS denies access, Fox's Allow access action opens Privacy & Security → F
 
 Existing `tsrp` transcript metadata is read from bounded media boxes without re-transcription. Missing or unrecognized transcripts are shown as unavailable. No audio is uploaded. Asking Fox about visible text uses the normal context/model consent flow.
 
-Choose recordings remains a fallback for exported audio folders, remembered by path in the World store (folders chosen with the retired Swift host's security-scoped bookmark must be chosen again). M4A, MP3, WAV, AAC, CAF, AIF and AIFF are accepted; a file plays when Chromium in the host's media surface can decode it (`platform/electron/src/modules/media/voice-memos.ts`). Files above 512 MB and paths outside the selected root are rejected. Folder listing excludes hidden files, packages and symlinks. A matching UTF-8 `.txt` (up to 128 KB) is optional for exports.
+Choose recordings remains a fallback for exported audio folders, remembered by path in the World store (folders chosen with the retired Swift host's security-scoped bookmark must be chosen again). M4A, MP3, WAV, AAC, CAF, AIF and AIFF are accepted; a file plays when Chromium in the host's media surface can decode it (`platform/electron/src/modules/applet-tools/voice-memos.ts`). Files above 512 MB and paths outside the selected root are rejected. Folder listing excludes hidden files, packages and symlinks. A matching UTF-8 `.txt` (up to 128 KB) is optional for exports.
 
 Implementation references: [Swift CLI](https://github.com/harryf/voice-memos) and [local export adapter](https://github.com/polarity-dev/macos-voice-memos-export). Database and media parsing are implemented locally; no external CLI installation is needed.
 

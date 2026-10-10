@@ -37,7 +37,7 @@ export function libraryName(channel:Channel,worktree:string){
  * credential live in it, beside the World data and never mixed into it (`INSTALLATION_FOLDERS`). */
 export const installationRoot=({channel,worktree}:Pick<Profile,'channel'|'worktree'>)=>path.join(libraryBase(),libraryName(channel,worktree));
 /** Folders Worldlet kept beside the library before everything moved into it (2026-10-04); the new
- * location adopts or retires them (`installation.ts`, `model-access.ts`, `media/speech.ts`). */
+ * location adopts or retires them (`installation.ts`, `model-access.ts`, `voice/speech.ts`). */
 export const legacyFolder=(name:'Worldlet Runtime'|'Worldlet Speech'|'Worldlet Model Access')=>path.join(libraryBase(),name);
 export function resolveProfile(argv=process.argv,env=process.env):Profile {
  // A packaged app is always the release channel: no environment variable unlocks development

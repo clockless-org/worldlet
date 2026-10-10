@@ -5,9 +5,9 @@ import {pathToFileURL} from 'node:url';
 import {WorldletError,errorMessage} from '../../files.ts';
 import type {Preferences} from '../../preferences.ts';
 import type {Row} from '../../host/types.ts';
-import type {MediaSurface} from './surface.ts';
+import type {MediaSurface} from '../media/surface.ts';
 import {PodcastBookmarks,PodcastDirectory,RadioDirectory,streamURL,type RadioStation} from './directory.ts';
-import {cancelled} from './io.ts';
+import {cancelled} from '../media/io.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 export const TOGGLE_DURATION=0.7;

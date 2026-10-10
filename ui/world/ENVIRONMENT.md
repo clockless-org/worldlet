@@ -110,7 +110,7 @@ Games (owner request 2026-10-03) replaced Tools in the same court: its AI assist
 <a id="sky-and-weather"></a>
 ## Local sky and weather
 
-The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/world/world-environment.ts`. The desktop host's location and forecast transport is `platform/electron/src/modules/media/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
+The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/world/world-environment.ts`. The desktop host's location and forecast transport is `platform/electron/src/modules/applet-tools/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
 
 ### Location and time
 
@@ -221,7 +221,7 @@ Stations change over time; one successful run does not guarantee long-term avail
 - `operation: podcast, episode: latest` is the default and always refreshes the directory/feed, bypassing old bookmarks and the already-playing shortcut. `episode: resume` keeps a verified unfinished episode; generic Resume preserves the current podcast channel. Legacy bookmarks without a verified podcast identity are not automatically resumed.
 - Normal playback attempts only the selected episode. Failure never advances silently. Explicit Next selects another dated episode from the same show. The receipt carries canonical show ID, show/publisher/episode title and publication timestamp; only real playback yields `playing`.
 
-Verification: the retired Mac host's `--radio-check` covered All-In versus LDS Living ambiguity, publisher/host qualification, unrelated search results, unsorted RSS, CDATA, future/trailer/undated exclusion, malformed feeds and latest bypassing a saved episode, and a live read of All-In's Apple entry and full feed passed. Neither is ported to Electron yet, so the Electron directory (`modules/media/directory.ts`, `audio.ts`) has no recorded check; end-to-end audible content recognition was never performed.
+Verification: the retired Mac host's `--radio-check` covered All-In versus LDS Living ambiguity, publisher/host qualification, unrelated search results, unsorted RSS, CDATA, future/trailer/undated exclusion, malformed feeds and latest bypassing a saved episode, and a live read of All-In's Apple entry and full feed passed. Neither is ported to Electron yet, so the Electron directory (`modules/world-audio/directory.ts`, `audio.ts`) has no recorded check; end-to-end audible content recognition was never performed.
 
 Identity reference: [All-In's Apple listing](https://podcasts.apple.com/ca/podcast/all-in-with-chamath-jason-sacks-friedberg/id1502871393) and the distinct [LDS Living All In listing](https://podcasts.apple.com/us/podcast/all-in/id1439975046).
 

@@ -2,7 +2,7 @@
 
 Every artifact is drawn in one design system, the Attention card's (owner Orders 2026-10-08: "artifact一定一定一定要统一设计system，attention card就是我们标准的design system" and "你要做一套 design system，比较丰富的，用来渲染这个 artifact"). An Attention card, an answer Fox shows, a meeting's summary, the day's plan and a card in the Journal are all made of the parts below, and nothing on an artifact brings a look of its own. Fox chooses parts and fills them with words and numbers; Worldlet draws them. Fox never writes HTML or styles.
 
-The card is defined in [attention-preview.css](../attention/attention-preview.css) (in the World) and [states.css](../components/states.css) (the Journal's smaller version). The parts are drawn by [artifact-blocks.ts](artifact-blocks.ts) and [fox-artifact.ts](fox-artifact.ts). The rules for what Fox may send are in [core/artifacts](../../core/artifacts/README.md#blocks).
+The card is defined in [artifact-card.css](artifact-card.css) (in the World, on the Attention card's parts in [attention-preview.css](../attention/attention-preview.css)) and [journal.css](journal.css) (the Journal's smaller version). The parts are drawn by [artifact-blocks.ts](artifact-blocks.ts) and [fox-artifact.ts](fox-artifact.ts). The rules for what Fox may send are in [core/artifacts](../../core/artifacts/README.md#blocks).
 
 ## Foundations
 

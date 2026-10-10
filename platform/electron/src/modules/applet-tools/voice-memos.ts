@@ -7,9 +7,9 @@ import {app,dialog,shell} from 'electron';
 import {WorldletError} from '../../files.ts';
 import {relaunchAfterQuit} from '../../host/quit.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {SurfaceAudio} from './audio.ts';
-import type {MediaSurface} from './surface.ts';
-import {cancelled} from './io.ts';
+import {SurfaceAudio} from '../world-audio/audio.ts';
+import type {MediaSurface} from '../media/surface.ts';
+import {cancelled} from '../media/io.ts';
 
 const EXTENSIONS=new Set(['m4a','mp3','wav','aac','caf','aif','aiff']);
 const extension=(file:string)=>path.extname(file).slice(1).toLowerCase();

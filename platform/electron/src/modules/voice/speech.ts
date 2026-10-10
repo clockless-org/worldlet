@@ -6,9 +6,9 @@ import {systemPreferences} from 'electron';
 import {WorldletError,adoptFolder,ensureDirectory} from '../../files.ts';
 import {installationRoot,legacyFolder} from '../../profile.ts';
 import type {Host} from '../../host/types.ts';
-import type {MediaSurface} from './surface.ts';
-import {WINDOWS_BASE,cancelled,environment,run} from './io.ts';
-import {helperPython} from './local-tools.ts';
+import type {MediaSurface} from '../media/surface.ts';
+import {WINDOWS_BASE,cancelled,environment,run} from '../media/io.ts';
+import {helperPython} from '../media/local-tools.ts';
 import {talkSpokenText} from '../../../../../core/companion/index.ts';
 import type {HarnessVoice} from '../../../../../contracts/harness-services.ts';
 

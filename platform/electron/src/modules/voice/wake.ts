@@ -1,6 +1,6 @@
 import {powerMonitor,systemPreferences} from 'electron';
 import {WAKE,wakeGate,wakeMatch,wakeState,type WakeState} from '../../../../../core/companion/index.ts';
-import type {MediaSurface} from './surface.ts';
+import type {MediaSurface} from '../media/surface.ts';
 import type {LocalSpeech,SpeechInput} from './speech.ts';
 
 export type {WakeState};
