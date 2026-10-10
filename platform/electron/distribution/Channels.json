@@ -1,7 +1,6 @@
 {
  "comment": "Update channels that scripts/ci-release.mjs publishes to their live feeds. A channel not listed publishes its feeds to the GitHub release staging-<channel>, which installed apps and the download page never read (docs/RELEASING.md).",
  "live": [
-  "dev",
   "alpha",
   "beta"
  ]
