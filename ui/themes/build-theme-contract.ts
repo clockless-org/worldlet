@@ -65,12 +65,22 @@ export interface ThemeWorldApplet {id:string;key:string;title:string;region:stri
  /** Set for the person's own Applets (core/applets/MY-APPLETS.md): which kind it is. */
  mine?:string;
  /** A thing that is not an Applet (a trip, a parcel). It is shown only while it is open. */
- object?:boolean}
+ object?:boolean;
+ /** The catalog Applet whose picture this one shares, when it is not its own `key`. */
+ art?:string;
+ /** When the person last used it or it arrived (ms since 1970). Themes that place Applets put recent ones first. */
+ usedAt?:number;
+ /** The host's Applet stage shows its contents while it is open. A theme can stop drawing its device behind them. */
+ staged?:boolean;
+ /** Coding Applets: the weekly allowance left. `remaining` is a percentage; neither is set while it is unknown. */
+ allowance?:{remaining?:number;resetsAt?:number;unavailable?:boolean}}
 export type ThemeLampState='off'|'ready'|'processing'|'error';
 export interface ThemeWorldState {
  view:{id:string;level:'overview'|'area'|'applet'};
  applets:readonly ThemeWorldApplet[];
- areas:readonly {id:string;title:string}[];
+ areas:readonly {id:string;title:string;
+  /** The look the person chose for the area, when the theme offers several. */
+  look?:string}[];
  interaction:{placementArea:string|null;framedArea:string|null;inset:number;hoveredApplet:string|null;hoveredArea:string|null;
   /** First use: areas and Applets can't be opened or moved yet. */
   locked?:boolean;
@@ -85,6 +95,8 @@ export interface ThemeWorldState {
  motion:boolean;
  /** Nobody can see the World right now (Fox floats on the desktop, or the window is hidden). Stop drawing. */
  paused?:boolean;
+ /** Applets that arrive next, before `applet.arrived` shows them: a theme that places Applets puts them where they will land. */
+ arriving?:readonly string[];
 }
 /** A place the World marks for the host's shared overlays: the accessible button, the name, the lamp label and the
  * attention mark the host draws there. CSS pixels relative to the World's host element. */
@@ -110,6 +122,8 @@ export interface ThemeWorldContext {
  marks?(marks:Readonly<Record<string,ThemeWorldMark>>):void;
  /** Leave the open area or Applet, as the host's Back does. */
  back?():void;
+ /** Open an area's own panel (its Applets and places), as its area mark does. */
+ openArea?(id:string):void;
 }
 export interface ThemeWorldEvent {
  type:'mail.received'|'applet.arrived';ids:readonly string[];
