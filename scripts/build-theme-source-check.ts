@@ -11,7 +11,7 @@ try{
  assert.throws(()=>parseBuildThemeManifest({...manifest,updatedAt:'yesterday'}),/updatedAt/);
  const source=path.join(tmp,'source'),consumer=path.join(tmp,'consumer');await fs.mkdir(path.join(source,'assets'),{recursive:true});await fs.mkdir(path.join(consumer,'ui'),{recursive:true});
  const write=async(id:string)=>{await fs.writeFile(path.join(source,'theme.json'),JSON.stringify({...manifest,id}));await fs.writeFile(path.join(source,'entry.ts'),`import type {BuildTheme} from '@worldlet/theme'; const theme:BuildTheme={contractVersion:2,id:'${id}',renderWorld:()=>({dispose(){},update(){},event(){return false;},anchor(){return null;},bounds(){return null;}}),renderApplet:()=>({dispose(){}})};export default theme;`);await fs.writeFile(path.join(source,'theme.css'),`:root{--theme-ink:#123456}`);};
- const presentation=JSON.parse(await fs.readFile(new URL('../ui/theme-packages/village/presentation.json',import.meta.url),'utf8'));
+ const presentation=JSON.parse(await fs.readFile(new URL('../ui/theme-packages/village-map/presentation.json',import.meta.url),'utf8'));
  const scene={...presentation.fallback,background:'assets/test.txt'};presentation.world=scene;presentation.fallback=scene;presentation.applets={};presentation.fonts=[];await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  assert.throws(()=>parseThemePresentation({...presentation,world:{...scene,slots:{content:[.9,0,.2,1]}}}),/bounded|content/);
  await write('first');await fs.writeFile(path.join(source,'assets','test.txt'),'fixture');
