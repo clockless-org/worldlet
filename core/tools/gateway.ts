@@ -22,7 +22,7 @@ export function worldActions({sample=false}={}):WorldAction[]{
   for(const action of only||def?.parameters.properties[field]?.enum||[])add(target,action,tool,{[field]:action});
  };
  for(const [target,action,tool] of [
-  ['artifact','show','show_artifact'],['artifact','list','list_artifacts'],['artifact','open','open_artifact'],['world','inspect','inspect_world'],['world','open','visit_context'],['world','navigate','move_view'],['world','act','perform_action'],
+  ['artifact','show','show_artifact'],['artifact','list','list_artifacts'],['artifact','open','open_artifact'],['artifact','brief','read_artifact_brief'],['artifact','page','save_artifact_page'],['world','inspect','inspect_world'],['world','open','visit_context'],['world','navigate','move_view'],['world','act','perform_action'],
   ['world','lighting','set_scene_lighting'],['world','weather','set_scene_weather'],['applets','open','open_applet'],['applets','delegate','start_applet_task'],
   ['content','search','find_content'],['content','open','open_content'],['content','read','read_content_page'],
   ['content','create','create_content'],['content','update','patch_content'],['content','delete','delete_content'],

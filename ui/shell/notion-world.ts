@@ -12,7 +12,7 @@ import {carriesConversation,worldSpeechTerms} from '../../core/companion/index.t
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement} from './product-analytics.ts';
-import {mountFoxArtifact,flyIntoJournal} from '../artifacts/index.ts';
+import {mountFoxArtifact,flyIntoJournal,artifactPageSpec} from '../artifacts/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../core/applets/index.ts';
 import {attentionRequest} from '../../core/agent/index.ts';
@@ -22,7 +22,7 @@ import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../core/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
-import {artifactFitProblem,artifactId,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,journalWaiting,journalSeen,dayKey,dailyArtifactDue,dailyArtifactRequest,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
+import {artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,journalWaiting,journalSeen,dayKey,dailyArtifactDue,dailyArtifactRequest,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE} from '../world/index.ts';
@@ -141,13 +141,39 @@ export function mountNotionWorld(data: World, native: any) {
   const attentionPreview=mountAttentionPreview({root,onClose:()=>{flyIntoJournal(root,$('attentionPreview'));closeAttentionPreview();},onOriginal:openAttentionOriginal,onLink:href=>{const page=attentionPage;closeAttentionPreview(false);openWorldURL(href,{attention:page});}});
   // Every card Fox shows is kept as an artifact (core/artifacts/README.md); the person finds it again in Fox's panel.
   let shownArtifact:any=null,artifactsShown=0;
-  const keepArtifact=(artifact)=>{if(native?.artifacts)void Promise.resolve(native.artifacts({operation:'save',artifact})).catch(()=>{});};
+  // The last save, so a page is asked for only once its artifact is kept.
+  let keeping:Promise<unknown>=Promise.resolve();
+  const keepArtifact=(artifact)=>{if(native?.artifacts)keeping=Promise.resolve(native.artifacts({operation:'save',artifact})).catch(()=>{});};
   const foxArtifact=mountFoxArtifact(root,renderMarkdown,()=>{flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();},href=>openWorldURL(href),size=>{if(shownArtifact){shownArtifact={...shownArtifact,size};keepArtifact(shownArtifact);}},
    // A next step on the card drafts the person's request in Fox's message bar; it goes to Fox only when they send it,
    // so a card made from untrusted content can never speak for them (core/artifacts/README.md#actions).
-   action=>{const input=root.querySelector('#notionInput') as HTMLTextAreaElement|HTMLInputElement|null;if(!input)return;input.value=action.request;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange?.(input.value.length,input.value.length);},
+   action=>draftRequest(action),
    // What the person ticks or sets on the card's blocks is kept with it, so the Journal and a reopened card show it.
-   blocks=>{if(shownArtifact){shownArtifact={...shownArtifact,blocks};keepArtifact(shownArtifact);}});
+   blocks=>{if(shownArtifact){shownArtifact={...shownArtifact,blocks};keepArtifact(shownArtifact);}},
+   native?.artifactPages);
+  function draftRequest(action:{request:string}){const input=root.querySelector('#notionInput') as HTMLTextAreaElement|HTMLInputElement|null;if(!input)return;input.value=action.request;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange?.(input.value.length,input.value.length);}
+  // Theme-driven Artifacts (core/artifacts/README.md#theme-driven-artifacts): an answer shown at medium or large size in
+  // the World is laid out as a page in the theme's style by a quiet background task; the template card shows until then.
+  async function requestArtifactPage(artifact:{id:string;kind:'answer'|'attention';size:'small'|'medium'|'large'},inApplet=insideApplet()){
+   if(!native?.artifactPages||artifactRenderMode(artifact,{theme:true,generator:true,inApplet})!=='page')return;
+   // Work Fox starts by itself waits out the practice world, onboarding, the tour, the first run and automated browsers.
+   if(backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep||!!root.dataset.tourCoda,firstRun:!!native?.firstRun?.(),asking:false}))return;
+   const look=await artifactPageSpec();if(!look)return;
+   await keeping;
+   const result:any=await native.artifactPages({operation:'make',id:artifact.id,size:artifact.size,spec:look.spec,materials:look.materials}).catch(()=>null);
+   if(result?.ready)foxArtifact.page(artifact.id);
+  }
+  async function showKeptPage(id:string){
+   if(!native?.artifactPages)return;
+   const result:any=await native.artifactPages({operation:'get',id}).catch(()=>null);
+   if(result?.page)foxArtifact.page(id);
+  }
+  // A page became ready, or the person clicked one of its actions: it drafts Fox's own request, as a next step does.
+  window.addEventListener('worldlet:artifact-page',(event:any)=>{
+   const {id,ready,action}=event.detail||{};if(typeof id!=='string')return;
+   if(ready===true)foxArtifact.page(id);
+   if(typeof action==='number'&&shownArtifact?.id===id&&foxArtifact.shownId===id){const chosen=artifactPageActions(shownArtifact)[action];if(chosen)draftRequest(chosen);}
+  });
   function showArtifact(args,artifact){
    const result=foxArtifact.show(args);
    if(result.ok){artifactsShown++;closeAttentionPreview(false);root.dataset.attentionPreview='true';voice?.sync();shownArtifact=artifact?{...artifact,size:result.size}:null;if(shownArtifact)keepArtifact(shownArtifact);}
@@ -160,7 +186,9 @@ export function mountNotionWorld(data: World, native: any) {
    // An Attention card opens on its item while the item is in the World, with its outcomes.
    if(artifact.origin.type==='attention'&&previewAttention({worldItemId:artifact.origin.item}))return {ok:true,id:artifact.id,title:artifact.title};
    const label=artifact.kind==='attention'?(artifact.category||'Attention')+' · earlier':'From an earlier conversation';
-   return showArtifact({id:artifact.id,title:artifact.title,body:artifact.body||' ',brief:artifact.brief||null,detail:artifact.detail||null,chart:artifact.chart,size:artifact.size,actions:artifact.actions,blocks:artifact.blocks||null,tone:artifact.tone||null,art:artifact.art||null,label},artifact.kind==='answer'?artifact:null);
+   const shown=showArtifact({id:artifact.id,title:artifact.title,body:artifact.body||' ',brief:artifact.brief||null,detail:artifact.detail||null,chart:artifact.chart,size:artifact.size,actions:artifact.actions,blocks:artifact.blocks||null,tone:artifact.tone||null,art:artifact.art||null,label},artifact.kind==='answer'?artifact:null);
+   if(shown.ok&&artifact.kind==='answer')void showKeptPage(artifact.id);
+   return shown;
   }
   // A page Fox made is an Applet while its moment lasts or once kept; a finished one comes back when the person keeps it.
   async function openMade(widget:string,keep:boolean){
@@ -1346,7 +1374,7 @@ export function mountNotionWorld(data: World, native: any) {
   };
   function showDailyInJournal(artifact){
    daily=journalWaiting(daily,dayKey(new Date()));saveDaily();
-   void Promise.resolve(native?.artifacts?.({operation:'save',artifact})).catch(()=>{}).then(()=>{window.dispatchEvent(new Event('worldlet:artifacts'));openWaitingJournal();});
+   void Promise.resolve(native?.artifacts?.({operation:'save',artifact})).catch(()=>{}).then(()=>{window.dispatchEvent(new Event('worldlet:artifacts'));openWaitingJournal();void requestArtifactPage(artifact,false);});
    return {ok:true,id:artifact.id,size:artifact.size,shown:'journal'};
   }
   const arrived=()=>{const away=!present();lastPresence=Date.now();if(away&&daily.journal)setTimeout(openWaitingJournal,300);};
@@ -1903,7 +1931,7 @@ export function mountNotionWorld(data: World, native: any) {
     ? execute('visit_context',{id:command.id})
     : execute('move_view',{direction:command.action}));
 
-  const executeAction=(name: string,args: any,meta?: any)=>{if(name==='show_artifact'){const tooLong=artifactFitProblem(args);if(tooLong)return {error:tooLong};const id=artifactId();if(DAILY_ARTIFACT.test(String(args.title||'')))return showDailyInJournal({id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,size:args.size||'large',origin:{type:'conversation',place:current||'world'}});return showArtifact({...args,id},{id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,origin:{type:'conversation',place:current||'world'}});}
+  const executeAction=(name: string,args: any,meta?: any)=>{if(name==='show_artifact'){const tooLong=artifactFitProblem(args);if(tooLong)return {error:tooLong};const id=artifactId();if(DAILY_ARTIFACT.test(String(args.title||'')))return showDailyInJournal({id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,size:args.size||'large',origin:{type:'conversation',place:current||'world'}});{const shown=showArtifact({...args,id},{id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,origin:{type:'conversation',place:current||'world'}});if(shown.ok)void requestArtifactPage({id,kind:'answer',size:shown.size as 'small'|'medium'|'large'});return shown;}}
    if(name==='open_artifact')return openArtifact(String(args.id||''));
    if(name==='list_artifacts'){if(!native?.artifacts)return {artifacts:[],scope:'The practice world keeps no artifacts.'};return Promise.resolve(native.artifacts({operation:'list'})).then(r=>({artifacts:findArtifacts((r?.artifacts||[]).map(readArtifact).filter(Boolean),args.query||'',args.limit||12)}));}if(['run_practice_iteration','practice_applet'].includes(name))return practiceWalkthrough?practiceWalkthrough.execute(name,args,meta):{error:'Only available in the practice world.'};if(name==='customize_companion'){if(!data.sample)return {error:'This control belongs to the practice world.'};const name=String(args.name||'').trim();if(!name||name.length>24||!['idle','happy','waving','sleeping'].includes(args.expression))return {error:'Choose a short name and an available expression.'};window.dispatchEvent(new CustomEvent('worldlet:companion-appearance',{detail:{name,expression:args.expression}}));return {ok:true,name,expression:args.expression};}if(data.sample&&['delegate_codex','list_codex_tasks','read_codex_task','show_codex_task'].includes(name))return practiceCoding(name,args);if(name==='manage_weather_location')return environmentController.manageLocation(args,meta?.signal);if(name==='set_scene_lighting')return environmentController.setSceneLighting(args.lighting);if(name==='set_scene_weather')return environmentController.setSceneWeather(args.weather);if(name==='prepare_email')return preparePracticeEmail(args);const panelTool=PANEL_TOOLS.get(name);if(panelTool){const [key,title]=panelTool;if(current!=='app-'+key||content.hidden)visitObject('app-'+key);return appletPanels.get(key)?.agent(args)||{error:title+' is unavailable.'};}if(name==='review_email_drafts'){window.dispatchEvent(new Event('worldlet:email-drafts'));return {ok:true,status:'user_review'};}if(name==='review_notion_drafts'){window.dispatchEvent(new Event('worldlet:notion-reviews'));return {ok:true,status:'user_review'};}if(name==='manage_companion_memory'){window.dispatchEvent(new Event('worldlet:memory-manager'));return {ok:true,status:'user_review',guidance:'Memory management opened. The user makes changes directly.'};}if(name==='automate_browser')return automateBrowser(args,meta);if(name==='browse_web'){if(['records','record'].includes(args.operation)){if(data.sample)return {visits:[],scope:'The practice world records no browsing.'};return browserPanel.agent(args);}if(args.operation==='history'){if(data.sample)return {items:[],scope:'Practice world has no personal browsing history. Use find_content for authored history notes.'};return browserPanel.agent(args);}if(args.operation==='open'){if(!openWorldURL(args.url))return {error:'Use a valid HTTPS website URL.'};return browserPanel.agent(args);}if(['outline','focus'].includes(args.operation)&&(content.hidden||content.dataset.template!=='browser'))return {error:'Open the website first: Focus rules are for the site open in a website Applet.'};if(data.sample&&args.operation==='saved'){const terms=String(args.query||'').toLowerCase().split(/\s+/).filter(Boolean);const records=[...pages.values()].filter(p=>['sample-web-research-history','sample-web-shoes-history'].includes(p.id)&&terms.every(t=>(p.title+' '+p.markdown).toLowerCase().includes(t)));return {ok:true,fictional:true,results:records.map(p=>({id:p.id,title:p.title,text:p.markdown,url:p.markdown.match(/^URL: (.+)$/m)?.[1]}))};}if(args.operation!=='saved'&&(content.hidden||content.dataset.template!=='browser')){if(pages.has('device-x'))open('device-x');else {showModulePanel('module-browser');header('Browser','Library');browserPanel.mount();sceneState();}}return browserPanel.agent(args);}return executeWorld(name,args,meta);};
   const execute=(name: string,args: any,meta?: any)=>{toolNavigation=true;try{return native&&!data.sample?recordWorldCommand(name,args,()=>executeAction(name,args,meta)):executeAction(name,args,meta);}finally{toolNavigation=false;}};

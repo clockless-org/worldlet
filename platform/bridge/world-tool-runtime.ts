@@ -91,6 +91,10 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
   }else if(name==='save_applet'||name==='read_applet'){
    if(!appletTask)return {error:'Only the Applet-making task can do this. Use make_applet to ask for a new Applet.'};
    result=call?await call(name==='save_applet'?'widgetSave':'widgetSource',{...args,task:operationId}):{error:'Making Applets is unavailable here.'};
+  }else if(name==='read_artifact_brief'||name==='save_artifact_page'){
+   // Artifact pages are written by a task Worldlet starts itself (core/artifacts/artifact-render.ts); the host checks the task.
+   if(!appletTask)return {error:'Only the Artifact page task can do this. Show a card with show_artifact instead.'};
+   result=call?await call(name==='save_artifact_page'?'artifactPageSave':'artifactPageBrief',{...args,task:operationId}):{error:'Artifact pages are unavailable here.'};
   }else if(name==='manage_calendar'){
    // Deleting an event takes the person's own words this turn, never page or mail text.
    if(args.operation==='delete'&&!authority.trim())return {error:'The person did not ask to delete this event in their own words this turn. Ask them first.'};

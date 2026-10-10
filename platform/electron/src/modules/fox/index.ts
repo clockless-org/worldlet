@@ -30,7 +30,7 @@ import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
 import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
-import {MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
+import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
 import {companionLookIsClassic,normalizeCompanionLook,parseCompanionLook,placeKey,proactiveAsked,proactiveDue,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -94,7 +94,7 @@ export function installFox(host:Host){
  /** Each running turn's shared trust state (the conversation's and every Applet task's), and this
   * session's undoable Fox writes. */
  const trusts=new Map<string,Row>();
- type AppletTask={id:string,applet:string,key:string,title:string,runtime:AgentRuntime,startedAt:number,cancelled:boolean,proactive?:boolean};
+ type AppletTask={id:string,applet:string,key:string,title:string,runtime:AgentRuntime,startedAt:number,cancelled:boolean,proactive?:boolean,quiet?:boolean};
  /** Applet tasks running now, by id (see Applet tasks below). */
  const appletTasks=new Map<string,AppletTask>();
  const writeUndos=new Map<string,Row>();
@@ -393,13 +393,13 @@ export function installFox(host:Host){
   * lane, beside the conversation, under the request the person made in the turn that started it.
   * The page runs its tools like a turn's and the world log says the Applet is working; when it ends,
   * its result is kept in Fox's conversation and the world history, and the page says it. */
- function appletTaskStart(request:Row,proactive=false){
+ function appletTaskStart(request:Row,proactive=false,quiet=false){
   const scope=foxScope(),runtime=agent();
   if(scope.sample||scope.setup||store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true)throw new WorldletError('Applet tasks run in your own world. Do this in the current turn.');
   const make=runtime?.makeTask;
   if(!runtime||!make)throw new WorldletError('This Agent cannot run Applet tasks in the background. Do this in the current turn.');
   // The maker of moment Applets works as an Applet task without a device of its own.
-  const app=WORLD_APPS.find(app=>app.id===request.applet)??(request.applet===MOMENT_MAKER.id?MOMENT_MAKER:null);
+  const app=WORLD_APPS.find(app=>app.id===request.applet)??(request.applet===MOMENT_MAKER.id?MOMENT_MAKER:request.applet===ARTIFACT_PAGE_MAKER.id&&quiet?ARTIFACT_PAGE_MAKER:null);
   if(!app)throw new WorldletError('Unknown Applet.');
   if(typeof request.task!=='string'||!request.task.trim()||characterCount(request.task)>2000||typeof request.request!=='string'||!request.request.trim()||characterCount(request.request)>32000)throw new WorldletError('Invalid Applet task.');
   const tasks=[...appletTasks.values()];
@@ -411,10 +411,10 @@ export function installFox(host:Host){
   // A review Worldlet starts by itself (a game session ended, #1598) has no person's words behind it: it
   // starts untrusted, so it can read and answer but never make a guarded write.
   const trust=proactive?{untrusted:true,sources:['browse_web']}:core<Row>('turnTrustInherit',{state:typeof request.parent==='string'?trusts.get(request.parent)??{}:{}})??{untrusted:false,sources:[]};
-  const task:AppletTask={id,applet:app.id,key:app.key,title:app.title,runtime:make(),startedAt:Date.now()/1000,cancelled:false,...proactive?{proactive:true}:{}};
+  const task:AppletTask={id,applet:app.id,key:app.key,title:app.title,runtime:make(),startedAt:Date.now()/1000,cancelled:false,...proactive?{proactive:true}:{},...quiet?{quiet:true}:{}};
   appletTasks.set(id,task);trusts.set(id,trust);
   store.recordHistory({id:id+':started',kind:'applet.task',at:task.startedAt,actor:'fox',status:'started',runId:id},app.key);
-  page.event('worldlet:applet-task',{id,applet:app.id,status:'started',request:request.request,...trust.untrusted===true?{trust}:{}});
+  page.event('worldlet:applet-task',{id,applet:app.id,status:'started',request:request.request,...trust.untrusted===true?{trust}:{},...quiet?{quiet:true}:{}});
   // Analytics: the catalog key only, never the task, request, page or result.
   analytics()?.recordProductEvent('applet_task_started','',{applet:app.key});
   void runAppletTask(task,request.task.trim(),request.request.trim());
@@ -442,8 +442,9 @@ export function installFox(host:Host){
   analytics()?.recordProductEvent('applet_task_'+(status==='complete'?'completed':status),taskDuration(Date.now()/1000-task.startedAt),{applet:task.key,...code?{error_code:code}:{}});
   store.recordHistory({id:task.id+':finished',kind:'applet.task',at:Date.now()/1000,actor:'fox',status,runId:task.id},task.key);
   // The result joins Fox's conversation, so Fox knows it in the next turn.
-  if(message)try{companion.recordTurn(`${task.title}: ${message}`,'assistant',companion.session(scope),scope);}catch(error){host.diagnostics.record(error,'appletTask');}
-  page.event('worldlet:applet-task',{id:task.id,applet:task.applet,status,...message?{message}:{}});
+  // A quiet task (an Artifact page Worldlet asked for by itself) keeps its result out of the conversation.
+  if(message&&!task.quiet)try{companion.recordTurn(`${task.title}: ${message}`,'assistant',companion.session(scope),scope);}catch(error){host.diagnostics.record(error,'appletTask');}
+  page.event('worldlet:applet-task',{id:task.id,applet:task.applet,status,...message?{message}:{},...task.quiet?{quiet:true}:{}});
  }
 
  // Fox speaks first ----------------------------------------------------------------------------
@@ -732,7 +733,7 @@ export function installFox(host:Host){
   recall:args=>companion.recall(args)
  });
  host.provide<FoxService>(FOX,{scope:foxScope,turnActive:()=>agentTurn!==null,cancel:cancelCloud,stopRoutines,startRoutines,
-  startAppletTask:request=>appletTaskStart(request),reviewGames:request=>appletTaskStart(request,true),appletTask:id=>appletTasks.get(id)?.applet??null,
+  startAppletTask:request=>appletTaskStart(request),reviewGames:request=>appletTaskStart(request,true),makeArtifactPage:request=>appletTaskStart({...request,applet:ARTIFACT_PAGE_MAKER.id},true,true),appletTask:id=>appletTasks.get(id)?.applet??null,
   energy:()=>readFoxEnergy(requireAgent(),error=>host.diagnostics.record(error,'foxEnergy')),report});
 
  host.register({

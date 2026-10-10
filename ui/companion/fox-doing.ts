@@ -52,7 +52,9 @@ const DOING = {
  save_applet:'Trying the new Applet',
  read_applet:'Reading the Applet',
  update_applet_data:'Updating the Applet',
- read_applet_data:'Reading the Applet'
+ read_applet_data:'Reading the Applet',
+ read_artifact_brief:'Laying out the card',
+ save_artifact_page:'Laying out the card'
 };
 // Hermes' own tools are named by family rather than one by one: it owns them and
 // renames them, and a stale exact match would read as a lie.

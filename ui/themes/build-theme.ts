@@ -49,6 +49,9 @@ export function themeArtifact(){
  */
 function applyPresentation(theme:InstalledTheme){
  const g=globalThis as any,builtIn=g.__WORLDLET_ENV_ASSETS__,p=theme.package.presentation;
+ // The theme's Artifact colours colour the host's card too (ui/artifacts/CARD-SYSTEM.md): one look in both modes.
+ const style=g.document?.documentElement?.style;
+ if(style)for(const [role,hex] of Object.entries(p.artifact?.colors??{}))style.setProperty('--artifact-'+role,hex);
  if(!builtIn)return;
  if(!(p.hud||p.sound)){applyThemeSurfaces();return;}
  const url=(path:string)=>themeAssetURL(theme.id,path);

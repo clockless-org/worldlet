@@ -57,7 +57,7 @@ An artifact can go beyond reading at four levels (owner decision 2026-10-06; blo
 
 ## Blocks
 
-An answer is drawn in the [card system](../../ui/artifacts/CARD-SYSTEM.md) (owner Orders 2026-10-08): `show_artifact` names its `tone` (moss, teal, honey, sage, clay or plum, by what it is about) and its `art` (a painted scene, `none`, or null for the card to choose), and under a short body it takes up to three **blocks**. These are Worldlet's own components, drawn by the host. Fox only fills them in, never with HTML:
+An answer is drawn in the [card system](../../ui/artifacts/CARD-SYSTEM.md) (owner Orders 2026-10-08): `show_artifact` names its `tone` (moss, teal, honey, sage, clay or plum, by what it is about) and its `art` (a painted scene, `none`, or null for the card to choose), and under a short body it takes up to three **blocks**. These are Worldlet's own components, drawn by the host. Fox only fills them in, never with HTML; a [page](#theme-driven-artifacts) is laid out from the same content by a separate task:
 
 | Block | What Fox gives | On the card |
 | --- | --- | --- |
@@ -73,6 +73,33 @@ An answer is drawn in the [card system](../../ui/artifacts/CARD-SYSTEM.md) (owne
 | `parts` | A label and 2 to 6 parts, each a name and a detail | One part's detail at a time; ← → move between them |
 
 Optional texts are empty strings. Nothing on a block changes the World, and a choice reaches Fox only when the person sends it. Blocks count toward the one-card budget (`artifactWeight`, measured by the room each takes) and make a card at least medium when Fox names no size; Fox lists them most important first, since a smaller card leaves out the last ones. A block the card cannot draw is refused (`artifactInputProblem`) or, when stored, dropped (`readArtifactBlocks`). The tone, picture and blocks are kept with the artifact; the Journal shows them still, as the person left them, and opened again in the World they work again. Attention cards have none. Pages that need more than this (timers, maps, games) are still [Moment Applets](../artifacts/README.md).
+
+## Theme-driven Artifacts
+
+Owner decision 2026-10-10: the theme says how an Artifact looks, the host makes it, and there is one way to make every card: "现在的 html attention 模板算个特例 生成文字然后填进去 也是一样的逻辑". Fox writes the content, as above. The theme's look (`artifact` in its presentation, [Theme contract](../../resources/themes/CONTRACT.md#artifacts); the Village's is [its style pack](../../ui/theme-packages/village/assets/artifact/README.md)) then drives one of two modes (`core/artifacts/artifact-render.ts`):
+
+| Mode | What makes the card | Used for |
+| --- | --- | --- |
+| Template | The host fills its own card, the [card system](../../ui/artifacts/CARD-SYSTEM.md), with the words Fox wrote. It shows at once | Attention cards, small cards, the corner card over an Applet, the Journal, the phone, the practice world, a theme without a look, an Agent that cannot work in the background, and every card until its page is ready |
+| Page | The Agent writes the whole card as one HTML page from the same content, following the theme's rules, prompt, reference pictures and materials | An answer shown at medium or large size in the World |
+
+```mermaid
+flowchart LR
+  F[Fox: show_artifact content] --> T[Template card, at once]
+  F --> Q[Quiet background task]
+  L[Theme look: rules, prompt, pictures, materials, colours] --> Q
+  Q --> C[Checks and a trial at the card's room]
+  C --> P[Page kept beside the artifact]
+  P --> V[Sandboxed view over the card]
+```
+
+**Making the page.** Once an answer at medium or large size is kept (the day's plan and summary too), the World asks for its page (`artifactPages` `make`), except where work Fox starts by itself waits (`backgroundBlocked`: the practice world, onboarding, the tour, the first run, automated browsers). Worldlet starts a quiet Applet task of its own (`ARTIFACT_PAGE_MAKER`, no device): untrusted like a game review, so its guarded writes are refused, and quiet, so it says nothing and its result never joins the conversation. The task reads `artifact/brief` (`read_artifact_brief`): the content exactly as Fox wrote it, the room (720 × 420 for medium, 940 × 680 for large), the theme's rules, prompt, picture roles, material ids and colours, and the host's rules: use the words as they are and add no facts; never scroll; draw no origin, size control, close button, Fox or World; one self-contained page with no network; materials only as `worldlet-material:<id>`; state in `localStorage`; and actions only through `window.worldlet.act(n)`. It sends the page with `artifact/page` (`save_artifact_page`). One page is written at a time (the newest card waiting goes next), at most 30 a day on the person's own model. The model sees the reference pictures' roles but not the pictures themselves until a Harness can take pictures as input.
+
+**Checks.** The page must pass the offline rules every made page does (under 120 KB, no network, frames, forms, workers or navigation) and may name only the theme's materials. It is then shown out of sight at its room for a few seconds: it must load, draw, survive a click without a script error and fit without scrolling. Problems go back to the model, which fixes them and saves again. The kept document has the materials in place as data addresses.
+
+**Showing it.** When the card on screen has a page, at medium or large size and not over an Applet, the page shows in a sandboxed view of its own over the card, below the card's row of controls (origin, size, ×), which stay the host's. The view is the made games' offline session: no network, no storage of its own, no navigation or windows, no WebRTC and no bridge. Its only channel is its console lines: what the person sets is kept with the page and comes back when it opens again; an action they click drafts Fox's own request for that action in the message bar, exactly as a next step does (a page can neither invent a request nor act without a click); and the room it needs, so a page taller than its card is scaled down (to half at most) rather than scrolled. Making the card small, opening an Applet or closing the card puts the template back.
+
+**Kept.** The page is kept beside its artifact in `world.sqlite` (`artifact_pages`) and forgotten with it, at most 200 per World. The Journal and the phone show the template card.
 
 ## Kept in the World
 
@@ -133,6 +160,7 @@ Local first. The `artifacts` table in `world.sqlite` holds each artifact's recor
 - `node scripts/prepared-replies-check.ts` (in `test:core`) checks the rules for replies Fox prepares, the shared background gate and the top-right's lines; `node scripts/prepared-reply-ui-check.ts` (in `test:ui`) the reply prepared in a background session, the top-right line, the Journal card and the Attention card's line.
 - `node scripts/fox-artifact-size-check.ts` (in `test:ui`) checks the desktop sizes, the default, the size control, the small card in an Applet's top-right corner and its three sizes there, a narrow window and closing.
 - `node scripts/artifact-fit-check.ts` (in `test:ui`) checks that a card never scrolls: the fullest version that fits, fewer blocks, then the brief, Show all, and fitting again when its room changes.
+- `node scripts/artifact-pages-check.ts` (in `test:core`) checks [theme-driven Artifacts](#theme-driven-artifacts): which mode a card takes, the Village's look, the brief and task, the static rules and materials, the page's prelude and reports, fitting and scaling, the kept page and the day's budget.
 - `node scripts/artifacts-ui-check.ts` (in `test:ui`) checks keeping, Journal cards fitting their cells, next steps, the Journal (a page a day, sizes, the plan first and the summary last) with pages Fox made, opening again, Fox finding and opening one, and forgetting.
 
 ## Moment Applets

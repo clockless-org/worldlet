@@ -15,8 +15,9 @@ export function mountAppletTaskResults({busy,say}:{busy:()=>boolean;say:(line:{i
  const waiting:{id:string;applet:string;text:string;open:string}[]=[];
  const next=()=>{if(!busy()&&waiting.length)say(waiting.shift()!);};
  window.addEventListener('worldlet:applet-task',(event:any)=>{
-  const {id,applet,status,message}=event.detail||{};
-  if(typeof id!=='string'||status==='started'||status==='cancelled')return;
+  const {id,applet,status,message,quiet}=event.detail||{};
+  // A quiet task (an Artifact page Worldlet asked for by itself) shows its result on the card, never as a line.
+  if(typeof id!=='string'||status==='started'||status==='cancelled'||quiet===true)return;
   const app=getApp(applet),title=app?.title||'The Applet';
   const text=status==='complete'?(typeof message==='string'&&message.trim()?`${title}: ${reportLine(message)}`:`${title} finished the task.`):`${title} couldn’t finish the task. Ask me to try again.`;
   waiting.push({id,applet:app?.id||String(applet||''),text,open:`Open ${title}`});
