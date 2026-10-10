@@ -38,4 +38,4 @@ await withBrowser(fileAccess,async browser=>{
 });
 await writeFile(`${evidence}/report.json`,JSON.stringify(report,null,2));
 console.log({applets:keys.length,rendered:report.filter(r=>r.status==='rendered').length,failed:report.filter(r=>r.status==='failed')});
-assert.equal(report.filter(r=>r.status==='failed').length,0);
+assert.equal(report.filter(r=>r.status==='failed').length,0,'Applets whose focus scene failed: '+JSON.stringify(report.filter(r=>r.status==='failed')));
