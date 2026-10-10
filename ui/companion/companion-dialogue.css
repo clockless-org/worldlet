@@ -1,0 +1,174 @@
+/* Fox's conversation card: the dialogue, its action bar, the thread of earlier turns and its deck. */
+/* One dialogue footer; task choices and item management share the same controls: bold underlined
+   words, the way Fox's replies offer them (owner decision). */
+.native-console.fox-first-console .companion-action-bar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:4px}
+.native-console.fox-first-console .companion-action-bar[hidden],.companion-attention-actions[hidden]{display:none}
+.native-console.fox-first-console .companion-action-bar :is(.companion-guide-actions,.companion-action-footer){display:contents}
+.native-console.fox-first-console .companion-action-bar :is(.companion-guide-actions,.companion-action-footer)[hidden]{display:none}
+.native-console.fox-first-console .companion-action-bar :is(.companion-guide-actions,.companion-action-footer)>:first-child{margin-left:0}
+.companion-attention-actions{display:contents}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar :is(button,a){display:inline-flex;align-items:center;justify-content:center;min-height:28px;box-sizing:border-box;padding:3px 7px;margin:0;border:0;border-radius:4px;font:700 14px/1.3 var(--ui-font-ui);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-shadow:none;background:transparent;color:var(--attention-accent,#385644);box-shadow:none;cursor:pointer;white-space:normal;transition:background .16s,filter .16s}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-attention-actions button{background:transparent;color:var(--attention-accent,#385644)}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar :is(button,a):hover{filter:brightness(.95);text-decoration-thickness:2px}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar :is(button,a):focus-visible{outline:2px solid var(--attention-accent,#385644);outline-offset:3px}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar button:disabled{opacity:.45;cursor:default}
+/* Browse with me | Don't bother: one small two-way switch at the footer's left, quieter than the card's actions;
+   the choice in force is the filled half (native-chat.ts browseSwitch). */
+#notionWorld.native-console .companion-browse{display:inline-flex;margin-right:auto;padding:2px;border-radius:999px;background:#38564414;gap:2px}
+#notionWorld.native-console .companion-browse[hidden]{display:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar .companion-browse button{min-height:24px;padding:2px 10px;border-radius:999px;font:600 12px/1.3 var(--ui-font-ui);text-decoration:none;color:#5d6b60;background:transparent}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-action-bar .companion-browse button[aria-pressed=true]{background:#fffdf8;color:var(--attention-accent,#385644);box-shadow:0 1px 2px #2a3a2e26;cursor:default}
+
+/* Use the same compact speech surface in ordinary conversation and Attention. */
+/* One steady width: the card never grows or shrinks with its words. In the World it is a little wider than a
+   third of the window (owner Order 2026-10-08); beside an Applet it keeps to Fox's lane. No filter here: it would
+   stop the frosted cards below from blurring the World. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{width:min(460px,calc(100vw / 3));min-width:0;max-width:calc(100vw / 3)}
+@media(min-width:801px){#notionWorld.native-console.fox-first-console:not([data-detail-open=true]):not([data-depth=object]) .companion-dialogue{width:min(560px,calc(100vw * .4));max-width:calc(100vw * .4)}}
+@media(max-width:800px){
+ #notionWorld.native-console.fox-first-console .companion-dialogue{min-width:min(320px,calc(100vw - 40px));max-width:calc(100vw - 40px)}
+}
+
+@media(min-width:801px){#notionWorld.native-console.fox-first-console .companion-action-bar{min-width:min(320px,calc(100vw / 3 - 48px))}}
+
+/* The conversation is a regular paper panel; transient activity floats over its edge. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{border-radius:22px;padding-bottom:24px}
+#notionWorld.native-console.fox-first-console .companion-dialogue::before{inset:0;border-radius:inherit;mask:none;-webkit-mask:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue::after{display:none}
+
+/* Fox's name badge sits on the card's top edge, outside the reply flow. */
+#notionWorld.native-console .companion-topic{position:absolute;left:24px;top:-18px;z-index:2;display:block;box-sizing:border-box;max-width:calc(100% - 48px);margin:0;padding:5px 14px;border-radius:13px 11px 14px 10px;background:#f0c27a;color:#4a3413;box-shadow:0 2px 6px #5a3a1033;font:650 14px/1.5 var(--ui-font-ui);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transform:none}
+#notionWorld.native-console .companion-topic[hidden]{display:none}
+/* Expand and Fold: one quiet paper tab on the card's top edge, muted ink that darkens when
+   pointed at (owner request 2026-10-05: the control should not be loud). */
+#notionWorld.native-console :is(.companion-earlier,.companion-fold){all:unset;position:absolute;right:22px;top:-13px;z-index:3;box-sizing:border-box;display:inline-flex;align-items:center;gap:3px;min-height:24px;padding:2px 10px 2px 7px;border:1px solid #e3d9b8;border-radius:999px;background:#fff9e7;color:#6c7a70;font:600 12px/1.3 var(--ui-font-ui,system-ui);box-shadow:0 1px 3px #162a3214;cursor:pointer;white-space:nowrap}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold):hover{color:#24402f;border-color:#cdbf95}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold):focus-visible{outline:2px solid #315f48;outline-offset:2px}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold)[hidden]{display:none}
+#notionWorld.native-console :is(.companion-earlier,.companion-fold)>svg{flex:0 0 12px;width:12px;height:12px}
+#notionWorld.native-console .companion-dialogue:has(>.companion-earlier:not([hidden])){padding-top:24px}
+#notionWorld.native-console .companion-dialogue:has(>:is(.companion-earlier,.companion-fold):not([hidden]))>.companion-topic{max-width:calc(100% - 150px)}
+/* Expanded in the world: the cards stand taller over the World and any open card, earlier turns stacked
+   above the latest and scrolling; no box around them (owner requests 2026-10-05). They keep the card's one
+   width: expanding no longer widens it, so the card does not change width from message to message (owner Order 2026-10-07). */
+#notionWorld[data-fox-chat-sheet=true] .notion-hud{z-index:72}
+#notionWorld.native-console .companion-dialogue:has(>.companion-earlier:not([hidden])){padding-top:24px}
+#notionWorld.native-console .companion-dialogue:has(>.companion-earlier:not([hidden]))>.companion-topic{max-width:calc(100% - 170px)}
+#notionWorld.native-console .companion-dialogue:has(>.companion-topic:not([hidden])){padding-top:24px}
+
+/* Opaque speech paper and a small tail point to Fox; activity stays above both. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{background:none;isolation:isolate;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 6px 16px #162a321c}
+#notionWorld.native-console.fox-first-console .companion-dialogue::before{background:#fff9e7;backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid #efe6cc}
+#notionWorld.native-console.fox-first-console .companion-dialogue::after{display:block;content:'';position:absolute;left:calc(50% - 8px);bottom:-11px;top:auto;width:18px;height:12px;border:0;background:#fff9e7;clip-path:polygon(0 0,100% 0,50% 100%);transform:none;z-index:0;pointer-events:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation{min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#55795555 transparent;flex:0 1 auto;padding-right:4px}
+/* Content and its buttons are told apart by space alone, in Fox's bubble and the Attention card alike
+   (owner feedback 2026-10-02: two dividers read as repetition). */
+#notionWorld.native-console .companion-dialogue>.companion-action-bar{flex-shrink:0}
+
+/* A reply or guide only scrolls once it is taller than its room (data-scrollable, below); otherwise it shows whole. */
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation{overflow:hidden}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav{position:absolute;inset:-18px 22px auto auto;z-index:3;display:flex;flex-direction:row;align-items:center;justify-content:center;width:auto;height:31px;gap:4px;margin:0;padding:0 5px;transform:none;background:#e6e8dc;border:0;border-radius:12px;box-shadow:0 2px 5px #233d301c;color:var(--hud-paper-ink)}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav[hidden]{display:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav button{width:28px;height:24px;font:400 23px/1 var(--ui-font-ui);color:inherit;transform:none;border-radius:8px;background:transparent}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav button::before{display:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-reply-nav button:disabled{visibility:visible;opacity:.25}
+/* A rounded card of frosted paper, slightly see-through over the World (owner Order 2026-10-08); a small
+   triangle points from it to Fox. The blur keeps its text at reading contrast whatever is behind it. */
+#notionWorld.native-console.fox-first-console .companion-dialogue{padding:18px 22px 20px;gap:6px;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue:has(>.companion-topic:not([hidden])){padding-top:22px}
+#notionWorld.native-console.fox-first-console .companion-dialogue::before{inset:0;border:1px solid #ebe5cc;border-radius:20px;clip-path:none;background:var(--fox-glass,#f9f6e4f2);backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);box-shadow:0 4px 12px #162a321c}
+#notionWorld.native-console.fox-first-console .companion-dialogue::after{display:block;content:'';position:absolute;left:calc(var(--fox-tail-x,50%) - 9px);bottom:-10px;top:auto;width:18px;height:11px;border:0;background:var(--fox-glass,#f9f6e4f2);backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);clip-path:polygon(0 0,100% 0,50% 100%);transform:none;z-index:0;pointer-events:none}
+#notionWorld.native-console.fox-first-console .companion-action-bar{margin-top:4px;padding-top:4px}
+
+/* Navigation shares the context badge line. */
+#notionWorld.native-console .companion-dialogue:has(.companion-reply-nav:not([hidden]))>.companion-topic{max-width:calc(100% - 128px)}
+#notionWorld.native-console .companion-pet{z-index:6}
+
+#notionWorld.native-console.fox-first-console .companion-dialogue{filter:drop-shadow(0 6px 10px #20362930)}
+
+#notionWorld.native-console.fox-first-console .companion-dialogue .companion-attention-actions :is(button,a){color:#657068}
+
+/* One Fox thread across places, one card per turn. The front card shows the question it
+   answers above the answer; this place's earlier turns wait behind it as a deck whose top
+   edges peek out; a click expands them upward into a scrolling column of whole cards. */
+#notionWorld.native-console .companion-asked{margin:0 0 2px;font:600 12px/1.4 var(--ui-font-ui,system-ui);color:var(--ui-ink,#1f3a2a);opacity:.62;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+#notionWorld.native-console .companion-asked::before{content:'You · ';font-weight:400}
+#notionWorld.native-console .companion-asked[hidden]{display:none}
+#notionWorld.native-console .companion-dialogue[data-expandable=true]{cursor:pointer}
+/* While Fox works, its card holds one lighter line, the current step, typed in as it
+   arrives, so it never reads as the answer. */
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-working=true]{color:#7b857c;font-style:italic}
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-working=true]>p{animation:fox-step-stream .6s steps(28,end) both}
+@keyframes fox-step-stream{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console .companion-dialogue>#worldConversation[data-working=true]>p{animation:none}}
+/* A long reply scrolls inside its card, without a scrollbar: its foot fades and a small
+   down arrow says more waits below, until the end is in view (owner feedback 2026-10-04). */
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation[data-scrollable=true]{overflow-y:auto;scrollbar-width:none}
+#notionWorld.native-console.fox-first-console .companion-dialogue>#worldConversation[data-scrollable=true]::-webkit-scrollbar{display:none}
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-more=true]{-webkit-mask-image:linear-gradient(#000 calc(100% - 30px),transparent);mask-image:linear-gradient(#000 calc(100% - 30px),transparent)}
+/* A last line over two hours old fades down the card under a gradient, so it reads as from earlier (owner Order 2026-10-07). */
+#notionWorld.native-console .companion-dialogue>#worldConversation[data-stale=true]{-webkit-mask-image:linear-gradient(#000a,#0002);mask-image:linear-gradient(#000a,#0002)}
+#notionWorld.native-console .companion-scroll-hint{position:relative;display:block;flex:0 0 8px;width:12px;height:8px;margin:-14px 4px 0 auto;pointer-events:none;z-index:2}
+#notionWorld.native-console .companion-scroll-hint[hidden]{display:none}
+#notionWorld.native-console .companion-scroll-hint::before{content:'';position:absolute;left:0;top:-4px;border-style:solid;border-width:7px 6px 0;border-color:var(--ui-reply-success,#2f6b45) transparent transparent;opacity:.75;animation:companion-scroll-hint 1.6s ease-in-out infinite}
+@keyframes companion-scroll-hint{50%{transform:translateY(3px)}}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console .companion-scroll-hint::before{animation:none}}
+/* The deck is one card edge behind the front card, with a darker paper rule and a shadow on its top edge:
+   two cards in all, however many turns wait (owner Order 2026-10-07: three edges were too busy). */
+#notionWorld.native-console .companion-deck{position:absolute;left:0;right:0;bottom:calc(100% - 18px);height:42px;z-index:-2;pointer-events:none}
+#notionWorld.native-console .companion-deck[hidden]{display:none}
+#notionWorld.native-console .companion-deck>i{position:absolute;left:16px;right:16px;bottom:0;z-index:2;height:30px;border-radius:16px 20px 0 0;background:#f1e7c9;border:1px solid #cbbb8c;box-shadow:0 -2px 6px #162a3226;transition:transform .2s ease}
+#notionWorld.native-console .companion-dialogue[data-expandable=true]:hover .companion-deck>i:first-child{transform:translateY(-2px)}
+@media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-deck>i{transition:none}#notionWorld.native-console .companion-dialogue[data-expandable=true]:hover .companion-deck>i{transform:none}}
+/* Beside an Applet the column folds to its front card: the deck is the way back up, and the
+   toggle on the card's top edge is a small capsule in the family of World and Summarize. */
+#notionWorld.native-console .companion-deck[data-unfold=true]{bottom:calc(100% - 14px);height:40px;pointer-events:auto;cursor:pointer}
+#notionWorld.native-console .companion-deck[data-unfold=true]>i{left:14px;right:14px;bottom:0;height:22px;z-index:3;background:#f4ecd4;border-color:#d8cca6;box-shadow:0 -2px 6px #162a3212}
+#notionWorld.native-console .companion-deck[data-unfold=true]:hover>i:first-child{transform:translateY(-2px)}
+/* Scene-capsule ink, line, shadow and blur (the dark glass of the controls under Fox). It sits
+   half on the paper card, so its glass is the deeper forest tint that keeps the label legible there. */
+#notionWorld.native-console .companion-dialogue:has(>.companion-fold:not([hidden]))>.companion-topic{max-width:calc(100% - 170px)}
+@media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-deck[data-unfold=true]:hover>i{transform:none}}
+#notionWorld.native-console .companion-thread{position:absolute;left:0;right:0;bottom:calc(100% + 28px);display:flex;flex-direction:column;gap:8px;margin:0;padding:0;border:0;cursor:default;pointer-events:auto}
+#notionWorld.native-console .companion-thread[hidden]{display:none}
+#notionWorld.native-console .companion-thread-list{box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow-y:auto;overflow-anchor:none;overscroll-behavior:contain;scrollbar-width:none;padding:2px 2px 4px}
+#notionWorld.native-console .companion-thread-list::-webkit-scrollbar{display:none}
+#notionWorld.native-console .companion-thread-list[hidden]{display:none}
+#notionWorld.native-console .companion-thread-list[data-cramped=true]{visibility:hidden}
+/* Earlier turns sit over World art, so the list never fades them into the scenery (#1652): its
+   edges clip the opaque cards cleanly and a thin scrollbar says more turns are above or below. */
+#notionWorld.native-console .companion-thread-list:is([data-overflow=true],[data-more=true]){scrollbar-width:thin;scrollbar-color:#55795588 transparent}
+#notionWorld.native-console .companion-thread-list:is([data-overflow=true],[data-more=true])::-webkit-scrollbar{display:block;width:6px}
+#notionWorld.native-console .companion-thread-list:is([data-overflow=true],[data-more=true])::-webkit-scrollbar-thumb{background:#55795588;border-radius:3px}
+/* The current card stays whole; earlier ones step back on the same frosted paper, paler with
+   age, the oldest the palest, while their text keeps normal reading contrast (#1652). */
+#notionWorld.native-console.fox-first-console{--fox-glass:#f9f6e4f2;--fox-glass-blur:blur(28px) saturate(1.2)}
+/* On the desktop nothing of the World is behind the card to blur, so it stays opaque paper there. */
+.desktop-companion #notionWorld.native-console.fox-first-console{--fox-glass:#f9f6e4;--fox-glass-blur:none}
+#notionWorld.native-console .companion-thread-card{box-sizing:border-box;display:grid;gap:4px;flex-shrink:0;width:100%;padding:12px 16px;border-radius:20px;--fade:calc(min(var(--age,0),4) * 18% + 14%);background:color-mix(in srgb,#ecebe4e3 var(--fade),var(--fox-glass,#f9f6e4f2));backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);border:1px solid color-mix(in srgb,#dedcd3 var(--fade),#ebe5cc);box-shadow:0 3px 10px #162a3218;color:color-mix(in srgb,#56625a var(--fade),var(--ui-ink,#1f3a2a));font:400 14px/1.45 var(--ui-font-ui,system-ui)}
+/* A topic of several turns is one stack (owner Order 2026-10-08): its name and count on top, its newest turn,
+   and two card edges peeking out under it; the name opens it into its turns and folds it again. */
+#notionWorld.native-console .companion-thread-card.is-topic-stack{margin-bottom:10px;box-shadow:0 5px 0 -1px color-mix(in srgb,#e4ddc6 80%,transparent),0 10px 0 -3px color-mix(in srgb,#d9d1b6 70%,transparent),0 3px 10px #162a3218}
+#notionWorld.native-console .companion-topic-head{all:unset;box-sizing:border-box;display:flex;align-items:baseline;gap:8px;min-width:0;margin:-2px 0 2px;cursor:pointer;color:#5d6b60;font:600 12px/1.4 var(--ui-font-ui,system-ui)}
+#notionWorld.native-console .companion-topic-name{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#notionWorld.native-console .companion-topic-count{flex:none;padding:0 7px;border:1px solid #d8cfb2;border-radius:999px;font-weight:600;color:#6c7a70}
+#notionWorld.native-console .companion-topic-head:hover .companion-topic-count{background:#efe7cf}
+#notionWorld.native-console .companion-topic-head:focus-visible{outline:2px solid var(--ui-reply-success,#3d7a52);outline-offset:2px;border-radius:4px}
+#notionWorld.native-console .companion-thread-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px}
+#notionWorld.native-console .companion-thread-foot:not(:has(>:not([hidden]))){display:none}
+#notionWorld.native-console .companion-thread-user{margin:0;font:600 12px/1.4 var(--ui-font-ui,system-ui)}
+#notionWorld.native-console .companion-thread-user::before{content:'You · ';font-weight:400}
+/* An action's or a choice's icon before its title, so it reads as an action, not typed words. */
+#notionWorld.native-console :is(.companion-asked,.companion-thread-user) .companion-user-icon{display:inline-flex;vertical-align:-2px;margin-right:4px}
+#notionWorld.native-console :is(.companion-asked,.companion-thread-user) .companion-user-icon svg{width:13px;height:13px;stroke-width:2.2}
+#notionWorld.native-console .companion-thread-reply>*{margin:0 0 6px}
+#notionWorld.native-console .companion-thread-reply>:last-child{margin-bottom:0}
+#notionWorld.native-console .companion-thread-reply :is(ul,ol){padding-left:18px}
+#notionWorld.native-console .companion-thread-card[data-status=error] .companion-thread-reply{color:#8a3b2b}
+#notionWorld.native-console :is(.companion-thread-running,.companion-thread-agent)[hidden]{display:none}
+#notionWorld.native-console .companion-thread-agent{margin:0;padding:2px 10px;color:var(--ui-muted,#5d6b62);font:500 11px/1.4 var(--ui-font-ui,system-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* What the place's thread used, as the person's Agent reported it: quiet, at the start of the foot. */
+#notionWorld.native-console .companion-thread-usage{margin:0 auto 0 4px;color:#6c7a70;font:500 11px/1.4 var(--ui-font-ui,system-ui);white-space:nowrap}
+#notionWorld.native-console .companion-thread-usage[hidden]{display:none}
+#notionWorld.native-console .companion-thread-running{margin:0;padding:5px 10px;border-radius:999px;background:#1f2a24;color:#fff;font:600 11px/1.4 var(--ui-font-ui,system-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:reduce){#notionWorld.native-console .companion-deck>i{transition:none}}

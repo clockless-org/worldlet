@@ -1,0 +1,145 @@
+/* The Journal (journal-book.ts) and the smaller cards it keeps. Loaded in the states layer. */
+/* The Journal is a book (owner requests 2026-10-07 and 2026-10-08): every card Fox showed, a page a day, open over the
+   World in the country materials of the HUD and Mail stationery (resources/styles/builtin/STYLE.md): a timber-leather
+   cover with gold stitching and brass corners, ivory leaves with a faint dot grid and a spine shadow, a moss ribbon, day
+   tabs on the fore-edge and a pressed sage sprig. Physical only at the edges; the cards stay the artifact card. */
+.native-console .journal-book{--journal-row:118px;--journal-paper:#f7f0df;--journal-dot:#ad986d3d;--journal-ink:#34483f;--journal-moss:#315f48;
+ position:fixed;inset:0;margin:auto;z-index:91;box-sizing:border-box;width:min(1120px,calc(100vw - 72px));height:min(700px,calc(100dvh - 48px));padding:18px 18px 24px;border:0;border-radius:18px;color:var(--journal-ink);overflow:visible;
+ background:repeating-linear-gradient(115deg,#ffffff08 0 2px,#00000008 2px 5px),radial-gradient(130% 100% at 30% 15%,#a77a52,#87603f 55%,#6f4d32);
+ box-shadow:0 2px 3px #3b2f1d40,0 24px 50px -16px #2a1f1294,inset 0 1px 0 #e8c99a66,inset 0 -2px 4px #3b2a1a80}
+.native-console .journal-book:not([open]){display:none}
+/* Gold stitching just inside the cover's edge, brass caps on its corners. */
+.native-console .journal-book::before{content:'';position:absolute;inset:8px;border:1.5px dashed #e0c08a8c;border-radius:12px;pointer-events:none}
+.native-console .journal-book::after{content:'';position:absolute;inset:-3px;pointer-events:none;border-radius:20px;
+ background:radial-gradient(circle at 0 0,#e4c37e 0 8px,#b48a45 13px,#0000 14px),radial-gradient(circle at 100% 0,#e4c37e 0 8px,#b48a45 13px,#0000 14px),radial-gradient(circle at 0 100%,#e4c37e 0 8px,#b48a45 13px,#0000 14px),radial-gradient(circle at 100% 100%,#e4c37e 0 8px,#b48a45 13px,#0000 14px)}
+.journal-book .companion-journal{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;min-height:0}
+/* The page block: two leaves meeting at the spine, with the edges of the other pages showing underneath. */
+.journal-book .companion-journal-spread{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;border-radius:6px;
+ box-shadow:0 1px 0 #e7dcc4,0 3px 0 #f2e9d6,0 4px 0 #ddd0b2,0 6px 0 #efe5cf,0 7px 0 #d6c8a8,0 9px 8px -4px #2a1f1266}
+.journal-book .companion-journal-leaf{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;padding:22px 26px 40px;
+ background-color:var(--journal-paper);background-image:radial-gradient(var(--journal-dot) 1px,#0000 1.3px);background-size:18px 18px;background-position:9px 9px}
+.journal-book .companion-journal-leaf-left{border-radius:6px 0 0 6px;box-shadow:inset -30px 0 32px -26px #6b4a2a5c,inset 1px 0 0 #fffaf0}
+.journal-book .companion-journal-leaf-right{border-radius:0 6px 6px 0;box-shadow:inset 30px 0 32px -26px #6b4a2a5c}
+.journal-book .companion-journal[data-leaves='1'] .companion-journal-spread{grid-template-columns:1fr}
+.journal-book .companion-journal[data-leaves='1'] .companion-journal-leaf-left{border-radius:6px;box-shadow:inset 1px 0 0 #fffaf0}
+.journal-book .companion-journal[data-leaves='1'] .companion-journal-leaf-right>.companion-journal-page{display:none}
+.journal-book .companion-journal[data-leaves='1'] .companion-journal-leaf-right{position:absolute;inset:auto 0 0 auto;width:80px;height:44px;padding:0;background:none;box-shadow:none}
+/* The day written at the top of the left leaf: a large numeral, then the date in words. */
+.journal-book .companion-journal-head{display:flex;align-items:flex-end;gap:12px;margin:0 0 14px;padding-bottom:8px;border-bottom:1.5px solid #34483fb3}
+.journal-book .companion-journal-numeral{font:600 44px/0.9 var(--ui-font-ui);letter-spacing:-.02em;color:var(--journal-moss);font-variant-numeric:tabular-nums}
+.journal-book .companion-journal-dated{flex:1;min-width:0}
+.journal-book .companion-journal-head h3{margin:0;font:600 13px/1.3 var(--ui-font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--journal-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.journal-book .companion-journal-turn{display:flex;gap:6px}
+.journal-book .companion-journal-page{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px 4px 6px 2px}
+.journal-book .companion-journal-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:var(--journal-row);grid-auto-flow:row dense;gap:12px}
+/* Cards lie on the paper like clippings: square-cut, a hair of shadow. */
+.journal-book .companion-artifact{border-radius:3px;border-color:#b4a17d40;box-shadow:0 1px 2px #6b4a2a24,0 6px 12px -8px #6b4a2a52}
+.journal-book .companion-journal>.companion-info-note{margin:0}
+.journal-book .companion-journal-leaf>.companion-info-note{margin:8px 0;font-size:14px;color:#6e7364}
+/* ‹ › turn the page from its bottom corners. */
+.journal-book .companion-journal-arrow{position:absolute;bottom:8px;width:32px;height:32px;border:0;border-radius:16px;background:#38564414;color:var(--journal-moss);font-size:20px;line-height:1;cursor:pointer}
+.journal-book .companion-journal-older{left:18px}.journal-book .companion-journal-newer{right:18px}
+.journal-book .companion-journal-arrow:hover:not(:disabled){background:#38564426}
+.journal-book .companion-journal-arrow:disabled{opacity:.3;cursor:default}
+/* Day tabs stand out of the book's fore-edge, the open day's in the page's own paper. */
+.journal-book .companion-journal-days{position:absolute;z-index:0;top:170px;left:100%;margin-left:16px;display:flex;flex-direction:column;gap:5px}
+.journal-book .companion-journal-day{display:block;min-width:58px;min-height:0;height:auto;padding:7px 10px 7px 8px;border:0;border-radius:0 7px 7px 0;background:#e9dcbf;color:#5d5a46;font:600 11.5px/1 var(--ui-font-ui);text-align:left;white-space:nowrap;cursor:pointer;box-shadow:1px 1px 0 #3b2f1d2e,inset 3px 0 4px -2px #6b4a2a40}
+.journal-book .companion-journal-day:hover{background:#efe4cb}
+.journal-book .companion-journal-day[aria-pressed=true]{background:var(--journal-paper);color:var(--journal-moss);min-width:66px;box-shadow:1px 1px 0 #3b2f1d2e}
+.journal-book .companion-journal-day:focus-visible,.journal-book .companion-journal-arrow:focus-visible,.journal-book-close:focus-visible{outline:2px solid var(--ui-focus,#edc47d);outline-offset:2px}
+/* A moss ribbon hangs out of the book's foot beside the spine; a sage sprig is pressed in the right leaf's corner. */
+.journal-book-ribbon{position:absolute;z-index:0;bottom:-58px;left:calc(50% + 34px);width:14px;height:74px;pointer-events:none;background:linear-gradient(90deg,#24493a,#3a6b53 50%,#24493a);clip-path:polygon(0 0,100% 0,100% 100%,50% 88%,0 100%);box-shadow:0 2px 3px #0003}
+.journal-book-sprig-holder{position:absolute;z-index:2;right:68px;bottom:27px;width:38px;height:38px;pointer-events:none;opacity:.85;transform:rotate(-6deg)}
+.journal-book-sprig{width:100%;height:100%}
+.native-console .journal-book .journal-book-close{position:absolute;z-index:3;top:-14px;right:-14px;width:36px;height:36px;border:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f0d697,#c49a52 60%,#99733a);color:#3b2a14;font:600 20px/1 var(--ui-font-ui);cursor:pointer;box-shadow:0 2px 4px #2a1f1266,inset 0 1px 0 #fff3cf}
+.native-console .journal-book .journal-book-close:hover{filter:brightness(1.06)}
+@media(max-width:800px){.native-console .journal-book{width:calc(100vw - 88px);margin-left:16px;padding:12px 12px 18px}.journal-book .companion-journal-days{top:28px}}
+@media(forced-colors:active){.journal-book-ribbon,.journal-book-sprig-holder,.native-console .journal-book::after{display:none}}
+.companion-artifact{position:relative;min-width:0;background:#fffdf6;border:1px solid #b4a17d38;border-radius:16px 18px 17px 19px;box-shadow:0 3px 0 #b4a17d30;overflow:hidden;--attention-accent:#315f48}
+.companion-artifact[data-size=small]{grid-column:span 1}
+.companion-artifact[data-size=medium]{grid-column:span 2}
+.companion-artifact[data-size=large]{grid-column:span 2;grid-row:span 2}
+.companion-artifact[data-kind=attention]{--attention-accent:#946e2b}
+.companion-artifact-open{position:absolute;inset:0;display:flex;flex-direction:column;gap:4px;text-align:left;border:0;background:none;color:inherit;padding:12px 14px;cursor:pointer;font:inherit;border-radius:inherit;overflow:hidden;mask-image:linear-gradient(#000 calc(100% - 22px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 22px),transparent)}
+/* The Journal keeps the card as it was shown (owner request 2026-10-08, ui/artifacts/CARD-SYSTEM.md#in-the-journal):
+   the World card's paper and corners, its painted picture across the head, and its parts. It never scrolls (owner
+   Order 2026-10-09): it shows the fullest version its cell holds, down to the one-sentence brief, and says More when it
+   left something out; opening it shows the rest. */
+.journal-book .companion-artifact[data-kind=answer]{background:var(--ui-paper,#f6efdc) var(--hud-paper-art) center/cover;border-radius:12px 14px 13px 15px}
+.companion-artifact>.companion-artifact-art{position:absolute;inset:0 0 auto auto;width:58%;height:min(96px,44%);object-fit:cover;object-position:right 42%;pointer-events:none;
+ -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 50%),linear-gradient(180deg,#000 25%,transparent 100%);-webkit-mask-composite:source-in;
+ mask-image:linear-gradient(90deg,transparent 0%,#000 50%),linear-gradient(180deg,#000 25%,transparent 100%);mask-composite:intersect}
+.companion-artifact[data-size=small]>.companion-artifact-art{width:50%;height:min(64px,40%)}
+.companion-artifact-open[data-fit]{mask-image:none;-webkit-mask-image:none}
+.companion-artifact-content{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.companion-artifact-brief{margin:0;font-size:13.5px;line-height:1.4;overflow-wrap:anywhere;color:var(--hud-paper-ink,#22362b)}
+.companion-artifact-open[data-shortened=true]::after{content:'More';position:absolute;right:14px;bottom:2px;font:600 10px/1 var(--ui-font-ui);letter-spacing:.02em;text-transform:uppercase;color:var(--attention-accent)}
+.companion-artifact[data-art] .companion-artifact-title{max-width:70%}
+.companion-artifact[data-art] .companion-artifact-origin time{position:relative;padding:0 5px;border-radius:6px;background:color-mix(in srgb,var(--ui-paper,#f6efdc) 82%,transparent)}
+.companion-artifact[data-art]>.companion-artifact-forget{background:color-mix(in srgb,var(--ui-paper,#f6efdc) 80%,transparent)}
+/* The origin and title never give way to the body. */
+.companion-artifact-open>:is(.companion-artifact-origin,.companion-artifact-title){flex-shrink:0}
+.companion-artifact-open:hover,.companion-artifact-open:focus-visible{background:#e6dbc433}
+.companion-artifact-open:disabled{cursor:default;opacity:.75}
+.companion-artifact-origin{display:flex;justify-content:space-between;gap:8px;padding-right:18px;font:600 10.5px/1.3 var(--ui-font-ui);letter-spacing:.02em;text-transform:uppercase;color:var(--attention-accent)}
+.companion-artifact-origin time{font-weight:500;text-transform:none;letter-spacing:0;color:#7d816c}
+.companion-artifact-title{font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.companion-artifact[data-size=large] .companion-artifact-title{font-size:18px}
+.companion-journal-body strong{font-weight:600}
+.companion-artifact-preview{font-size:12.5px;color:#5d6457;line-height:1.4}
+.companion-journal-body{font-size:12.5px;line-height:1.42;overflow-wrap:anywhere;color:var(--hud-paper-ink,#22362b)}
+.companion-journal-body p{margin:0 0 5px}.companion-journal-body :is(ul,ol){margin:0 0 5px;padding-left:18px}.companion-journal-body li{margin:1px 0}
+.companion-journal-body :is(h1,h2,h3,h4,h5,h6){margin:6px 0 2px;color:var(--attention-accent);font:600 10.5px/1.3 var(--ui-font-ui);text-transform:uppercase;letter-spacing:.015em}
+.companion-journal-body>:first-child{margin-top:0}
+.companion-journal-body table{width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 5px}.companion-journal-body :is(td,th){padding:3px 4px;border-bottom:1px solid #38564420;text-align:left;vertical-align:top}
+/* The card system's showing blocks in the Journal, smaller, the same shapes and tone. */
+.companion-artifact .artifact-callout{margin:0;padding:5px 8px;border-left:2px solid var(--attention-accent);background:color-mix(in srgb,var(--attention-accent) 8%,transparent);border-radius:0 7px 7px 0;font-weight:500}
+.companion-artifact .artifact-stats{display:flex;gap:6px;flex-wrap:wrap}.companion-artifact .artifact-stat{display:flex;flex-direction:column;padding:4px 8px;border:1px solid color-mix(in srgb,var(--attention-accent) 30%,transparent);border-radius:7px}
+.companion-artifact .artifact-stat-value{font-weight:600;font-size:15px;color:var(--attention-accent)}.companion-artifact .artifact-stat-label{font-size:11px}.companion-artifact .artifact-stat-note{font-size:10.5px;opacity:.7}
+.companion-artifact .artifact-facts{list-style:none;margin:0;padding:0}.companion-artifact .artifact-facts li{display:flex;gap:5px;align-items:center}.companion-artifact .artifact-fact-icon{display:flex;color:var(--attention-accent)}.companion-artifact .artifact-fact-icon svg{width:12px;height:12px}
+.companion-artifact .artifact-steps{list-style:none;margin:0;padding:0}.companion-artifact .artifact-steps li{display:flex;gap:6px;padding:1px 0}.companion-artifact .artifact-step-mark{flex:none;width:14px;height:14px;border-radius:50%;background:var(--attention-accent);color:#fffdf5;font-size:9px;display:grid;place-items:center}.companion-artifact .artifact-step-head{display:flex;gap:6px}.companion-artifact .artifact-step-text{flex:1;min-width:0}.companion-artifact .artifact-step-when{margin-left:auto;font-size:11px;font-weight:600;color:var(--attention-accent)}.companion-artifact .artifact-step-detail{display:block;font-size:11px;opacity:.72}
+.companion-artifact .artifact-compare{display:grid;grid-template-columns:repeat(var(--columns,2),minmax(0,1fr));gap:4px}.companion-artifact .artifact-option{display:flex;flex-direction:column;padding:4px 6px;border:1px solid #38564420;border-radius:7px}.companion-artifact .artifact-option[data-pick=true]{border-color:var(--attention-accent);background:color-mix(in srgb,var(--attention-accent) 8%,transparent)}.companion-artifact .artifact-option-pick{color:var(--attention-accent);font-size:9.5px;font-weight:600;text-transform:uppercase}.companion-artifact .artifact-option-note{font-size:11px;opacity:.72}.companion-artifact .artifact-option ul{margin:2px 0 0;padding-left:14px;font-size:11px}
+.companion-artifact .artifact-tags{display:flex;flex-wrap:wrap;gap:3px}.companion-artifact .artifact-tag{padding:0 6px;border-radius:999px;border:1px solid color-mix(in srgb,var(--attention-accent) 30%,transparent);color:var(--attention-accent);font-size:11px}
+/* Its blocks in the Journal, still, in the same style as on the card. */
+.companion-artifact .artifact-blocks{display:grid;gap:6px;margin-top:4px;font-size:12.5px;line-height:1.4;color:var(--hud-paper-ink,#22362b)}
+.companion-artifact .artifact-block-label{display:flex;gap:8px;margin:0 0 2px;color:var(--attention-accent);font:600 10.5px/1.3 var(--ui-font-ui);text-transform:uppercase;letter-spacing:.015em}
+.companion-artifact .artifact-block-count{margin-left:auto;font-weight:500}
+.companion-artifact .artifact-checklist{list-style:none;margin:0;padding:0}.companion-artifact .artifact-checklist li{display:flex;gap:6px;align-items:flex-start;padding:2px 0}
+.companion-artifact .artifact-check-mark{flex:none;width:11px;height:11px;margin-top:2px;box-sizing:border-box;border:1.5px solid color-mix(in srgb,var(--attention-accent) 55%,transparent);border-radius:3px}
+.companion-artifact .artifact-checklist li[data-done=true] .artifact-check-mark{background:var(--attention-accent);border-color:var(--attention-accent)}
+.companion-artifact .artifact-checklist li[data-done=true] .artifact-check-text{opacity:.6;text-decoration:line-through}
+.companion-artifact .artifact-scale-value{font-weight:600;color:var(--attention-accent)}
+.companion-artifact .artifact-scale-rows{width:100%;border-collapse:collapse}.companion-artifact .artifact-scale-rows td{padding:2px 0;border-bottom:1px solid #38564420}.companion-artifact .artifact-scale-amount{text-align:right}
+.companion-artifact :is(.artifact-choice,.artifact-parts){display:flex;flex-wrap:wrap;gap:4px}
+.companion-artifact :is(.artifact-choice,.artifact-parts) span{padding:1px 8px;border:1px solid color-mix(in srgb,var(--attention-accent) 35%,transparent);border-radius:7px;color:var(--attention-accent);font-size:11.5px}
+.companion-artifact .artifact-parts .attention-preview-action-primary{background:var(--attention-accent);color:#fffdf5}
+.companion-artifact .artifact-part-detail{margin:3px 0 0}
+.companion-journal-body th{color:var(--attention-accent);font-size:10.5px;font-weight:600}
+.companion-artifact-forget{position:absolute;top:6px;right:6px;z-index:1;border:0;background:none;color:#656651;font-size:16px;line-height:1;padding:4px 6px;cursor:pointer;border-radius:8px;opacity:.55}
+.companion-artifact:hover .companion-artifact-forget,.companion-artifact-forget:focus-visible{opacity:1}
+.companion-artifact-forget:hover{color:#8a3b25}
+.companion-artifact-keep{position:absolute;right:10px;bottom:10px;z-index:1;border:1px solid #315f48;border-radius:999px;background:#fffdf6;color:#315f48;font:600 12px/1 var(--ui-font-ui);padding:7px 12px;cursor:pointer}
+.companion-artifact-keep:hover,.companion-artifact-keep:focus-visible{background:#315f48;color:#fff}
+/* A reply draft the morning brief left (owner Order 2026-10-07): the draft itself, then Send, Edit and Skip. */
+.companion-reply{grid-row:span 2;display:flex;flex-direction:column;gap:5px;padding:12px 14px}
+.companion-reply-text{margin:0;flex:1;min-height:0;overflow-y:auto;white-space:pre-wrap;font-size:12.5px;line-height:1.42;overflow-wrap:anywhere;color:var(--hud-paper-ink,#22362b)}
+.companion-reply-edit{flex:1;min-height:0;resize:none;border:1px solid #38564433;border-radius:10px;padding:6px 8px;background:#fff;font:12.5px/1.42 var(--ui-font-ui);color:var(--hud-paper-ink,#22362b)}
+.companion-reply-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.companion-reply-actions button{border:1px solid #315f48;border-radius:999px;background:#fffdf6;color:#315f48;font:600 12px/1 var(--ui-font-ui);padding:7px 12px;cursor:pointer}
+.companion-reply-actions .companion-reply-send{background:#315f48;color:#fff}
+.companion-reply-actions button:disabled{opacity:.5;cursor:default}
+.companion-reply-note{font-size:12px;color:#7d816c}
+.companion-journal-brief-open{border:0;border-radius:999px;background:#38564412;color:#315f48;font:600 12px/1 var(--ui-font-ui);padding:0 12px;height:32px;cursor:pointer;white-space:nowrap}
+.companion-journal-brief-open[aria-expanded=true]{background:#315f48;color:#fff}
+.companion-journal-brief{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:end;margin:0 0 12px;padding:12px 14px;background:#fffdf6;border:1px solid #b4a17d38;border-radius:16px}
+.companion-journal-brief[hidden]{display:none}
+.companion-journal-brief-label{grid-column:1/-1;font-size:12.5px;color:#5d6457}
+.companion-journal-brief-text{resize:vertical;border:1px solid #38564433;border-radius:10px;padding:6px 8px;background:#fff;font:13px/1.45 var(--ui-font-ui);color:var(--hud-paper-ink,#22362b)}
+.companion-journal-brief-save{border:0;border-radius:999px;background:#315f48;color:#fff;font:600 12px/1 var(--ui-font-ui);padding:9px 16px;cursor:pointer}
+.companion-journal-brief-note{grid-column:1/-1;font-size:12px;color:#7d816c}
+/* A closed card on its way into the Journal (journal-book.ts) and the button taking it. */
+.journal-fly{position:fixed;z-index:95;box-sizing:border-box;margin:0;padding:18px 20px;pointer-events:none;border-radius:6px;transform-origin:center;background:#f7f0df;border:1px solid #b4a17d66;box-shadow:0 10px 24px -10px #2a1f1280;color:#34483f;overflow:hidden}
+.journal-fly strong{display:block;font:600 18px/1.3 var(--ui-font-ui)}
+.world-today-open.is-receiving{transform-origin:left center;animation:journal-receive .6s ease-out}
+@keyframes journal-receive{0%{transform:scale(1)}35%{transform:scale(1.16)}70%{transform:scale(.96)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.world-today-open.is-receiving{animation:none}}
