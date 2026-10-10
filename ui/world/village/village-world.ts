@@ -1,24 +1,24 @@
-import type {ThemeWorldApplet,ThemeWorldContext,ThemeWorldMark,ThemeWorldMount,ThemeWorldState} from '@worldlet/theme';
+import type {WorldApplet,WorldContext,WorldMark,WorldMount,WorldState} from '../world-renderer.ts';
 import {publishVillageArt} from './village-payload.ts';
 import {createModuleScene as createPixiWorld} from './pixi-world.ts';
 import {villageDevice} from './village-art.ts';
-import {regionId,type RegionLayout} from './space/region-core.ts';
+import {regionId,type RegionLayout} from '../region-core.ts';
 
-export type VillageWorldMount=ThemeWorldMount&{scene:any};
+export type VillageWorldMount=WorldMount&{scene:any};
 
-const KINDS:Record<string,ThemeWorldMark['kind']>={app:'applet','region-more':'area','region-add':'area-add','region-slot':'slot'};
+const KINDS:Record<string,WorldMark['kind']>={app:'applet','region-more':'area','region-add':'area-add','region-slot':'slot'};
 const LEVELS={overview:'overview',area:'building',applet:'object'} as const;
 /** The Village's own record of an Applet, kept as the same object while the host's state changes (pixi-world.ts holds it). */
-function roomOf(a:ThemeWorldApplet,room:any={}){
+function roomOf(a:WorldApplet,room:any={}){
  const region=regionId(a.region||'home');
  return Object.assign(room,{id:a.id,moduleId:a.id,key:a.key,art:a.art,title:a.title,region,buildingId:'building-'+region,entity:a.object?'matter':'app',
   mine:a.mine,icon:a.icon,device:villageDevice(a.art||a.key),status:{state:a.status,count:a.count,connected:a.connected},allowance:a.allowance});
 }
-/** The animated Village World (pixi-world.ts) behind the Theme contract's World mount. It reads only the contract. */
-export function renderVillageWorld(context:ThemeWorldContext):VillageWorldMount {
+/** The animated Village World (pixi-world.ts) behind the host's World mount (world-renderer.ts). */
+export function renderVillageWorld(context:WorldContext):VillageWorldMount {
  publishVillageArt(context.asset);
- let state:ThemeWorldState=context.state;
- const byId=new Map<string,ThemeWorldApplet>(),records=new Map<string,any>(),rooms:any[]=[];
+ let state:WorldState=context.state;
+ const byId=new Map<string,WorldApplet>(),records=new Map<string,any>(),rooms:any[]=[];
  const sync=()=>{
   byId.clear();for(const a of state.applets)byId.set(a.id,a);
   rooms.splice(0,rooms.length,...state.applets.map(a=>{const room=roomOf(a,records.get(a.id));records.set(a.id,room);return room;}));
@@ -26,7 +26,7 @@ export function renderVillageWorld(context:ThemeWorldContext):VillageWorldMount 
  sync();
  // The Pixi World's pins become the contract's marks; the host draws the buttons, names, lamps and attention marks.
  const marks=(points:Record<string,any>)=>{
-  const out:Record<string,ThemeWorldMark>={};
+  const out:Record<string,WorldMark>={};
   for(const [key,p] of Object.entries(points)){
    const kind=KINDS[p.kind];if(!kind)continue;
    out[key]={kind,id:p.id,x:p.x,y:p.y,visible:!!p.visible,...(p.slot!=null?{slot:p.slot}:{}),...(p.labelVisible?{label:true}:{}),...(p.hovered?{hovered:true}:{}),
@@ -50,7 +50,7 @@ export function renderVillageWorld(context:ThemeWorldContext):VillageWorldMount 
   openArea:id=>context.openArea?.(id),
   moveApplet:(id,area,slot)=>context.moveApplet(id,area,slot),
   menu:(id,x,y)=>context.menu(id,x,y)});
- const key=(s:ThemeWorldState)=>{const i=s.interaction;return {view:s.view.level+'|'+s.view.id,placement:i.placementArea,framed:i.framedArea+'|'+i.inset,hoveredApplet:i.hoveredApplet,hoveredArea:i.hoveredArea,motion:s.motion,paused:s.paused,
+ const key=(s:WorldState)=>{const i=s.interaction;return {view:s.view.level+'|'+s.view.id,placement:i.placementArea,framed:i.framedArea+'|'+i.inset,hoveredApplet:i.hoveredApplet,hoveredArea:i.hoveredArea,motion:s.motion,paused:s.paused,
   environment:JSON.stringify(s.environment),places:JSON.stringify([s.pins,s.areas.map(a=>a.look),s.applets.map(a=>a.region)]),visible:s.applets.filter(a=>a.visible).map(a=>a.id).join(),arriving:(s.arriving||[]).join()};};
  let shown=key(state);
  return {scene,behindApplet:true,ready:scene.ready,

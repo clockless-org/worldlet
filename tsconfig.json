@@ -23,8 +23,6 @@
     "allowJs": true,
     "checkJs": false,
     "types": [],
-    "baseUrl": ".",
-    "paths": {"@worldlet/theme": ["ui/themes/index.ts"]},
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true
   },

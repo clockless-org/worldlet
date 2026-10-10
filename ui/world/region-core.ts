@@ -1,4 +1,4 @@
-/** An area layout's pure parts: the Village theme package keeps a copy (scripts/village-space.ts checks it). */
+/** An area layout's pure parts. */
 export const regionId=(id:string)=>id?.replace(/^building-/,'')==='people'?'travel':id?.replace(/^building-/,'');
 /** Each area's five ground places hold its most recently used Applets, refilled as they are used (owner request
  * 2026-10-04); `pins` are only the places the person pinned an Applet to, which keep it there. Version 1 wrote

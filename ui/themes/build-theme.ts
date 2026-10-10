@@ -1,23 +1,26 @@
 import {THEME_PACKAGES} from '../theme-packages/index.ts';
 import {applyThemeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
-import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildTheme,type BuildThemeManifest,type ThemeAppletContext,type ThemePresentation,type ThemeWorldContext,type ThemeScene} from './build-theme-contract.ts';
-/** One bundled theme package, validated against the contract when the bundle loads. */
-export interface ThemePackage {theme:BuildTheme;manifest:BuildThemeManifest;presentation:ThemePresentation}
+import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildThemeManifest,type ThemePresentation} from './build-theme-contract.ts';
+/** One bundled theme package, validated against the contract when the bundle loads. A theme is static: its manifest,
+ * its presentation, the assets they name and any other JSON it ships (`data`, by package path). */
+export interface ThemePackage {manifest:BuildThemeManifest;presentation:ThemePresentation;data:Readonly<Record<string,unknown>>}
 /** The bundled theme: one package. */
 export interface InstalledTheme {id:string;title:string;package:ThemePackage}
 export const DEFAULT_BUILD_THEME_ID='village';
 /** Every bundled package: the Village only (owner decision 2026-10-10: one theme, no picker). */
 export const BUILD_THEMES:ReadonlyMap<string,InstalledTheme>=new Map<string,InstalledTheme>(THEME_PACKAGES.map(entry=>{
- const manifest=parseBuildThemeManifest(entry.manifest),presentation=parseThemePresentation(entry.presentation),theme=entry.theme as BuildTheme;
- if(theme.contractVersion!==BUILD_THEME_CONTRACT_VERSION||theme.id!==manifest.id)throw Error('Unsupported theme contract: '+manifest.id);
- return [manifest.id,Object.freeze({id:manifest.id,title:manifest.title,package:Object.freeze({theme,manifest,presentation})})] as const;
+ const manifest=parseBuildThemeManifest(entry.manifest),presentation=parseThemePresentation(entry.presentation),data=Object.freeze({...(entry as {data?:Record<string,unknown>}).data});
+ if(manifest.contractVersion!==BUILD_THEME_CONTRACT_VERSION)throw Error('Unsupported theme contract: '+manifest.id);
+ return [manifest.id,Object.freeze({id:manifest.id,title:manifest.title,package:Object.freeze({manifest,presentation,data})})] as const;
 }).sort(([a],[b])=>Number(b===DEFAULT_BUILD_THEME_ID)-Number(a===DEFAULT_BUILD_THEME_ID)));
 if(!BUILD_THEMES.has(DEFAULT_BUILD_THEME_ID))throw Error('The default theme package is missing: '+DEFAULT_BUILD_THEME_ID);
 const active:InstalledTheme=BUILD_THEMES.get(DEFAULT_BUILD_THEME_ID)!;
 export function activeBuildTheme():InstalledTheme{return active;}
-/** Whether Applets open in the host's own Applet pages: a package that declares `appletPages: 'host'`, as the Village does.
- * Such a theme draws only the World, and the shared HUD keeps its own layout. */
-export const hostAppletPages=(theme:InstalledTheme=active)=>theme.package.manifest.appletPages==='host';
+/** A JSON file the active theme ships, by package path (`assets/art.json`). The host's World code reads its own data here. */
+export function themeData<T=unknown>(path:string):T{
+ if(!Object.hasOwn(active.package.data,path))throw Error('Theme '+active.id+' has no '+path);
+ return active.package.data[path] as T;
+}
 /** Package assets are published per theme, so two themes never collide on a file name. */
 export const themeAssetURL=(id:string,path:string)=>'theme-assets/'+id+'/'+path.replace(/^assets\//,'');
 /**
@@ -29,59 +32,20 @@ export function themeAppletIcon(key:string):string|undefined{
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
  return typeof src==='string'&&src?src:undefined;
 }
-/** Each package's stylesheet is its own file (theme-<id>.css); only the active one is attached. */
-function stylesheet(id:string):HTMLLinkElement{
- let link=document.querySelector<HTMLLinkElement>(`link[data-theme-style="${id}"]`);
- if(!link){link=document.createElement('link');link.rel='stylesheet';link.href='theme-'+id+'.css';link.dataset.themeStyle=id;link.media='not all';document.head.append(link);}
- return link;
-}
-let builtIn:any;
 /**
  * The HUD material and sounds a package declares (presentation.json `hud`, `sound`) replace the shared ones in the
  * surfaces the HUD already reads. Anything a package leaves out keeps the shared one, and a package with neither (the
- * Village) restores them all. The companion and the loading page stay the host's.
+ * Village) keeps them all. The companion and the loading page stay the host's.
  */
-function applyPresentation(next:InstalledTheme){
- const g=globalThis as any;builtIn??=g.__WORLDLET_ENV_ASSETS__;
+function applyPresentation(theme:InstalledTheme){
+ const g=globalThis as any,builtIn=g.__WORLDLET_ENV_ASSETS__,p=theme.package.presentation;
  if(!builtIn)return;
- const p=next.package.presentation;
- if(!p||!(p.hud||p.sound)){g.__WORLDLET_ENV_ASSETS__=builtIn;applyThemeSurfaces();return;}
- const url=(path:string)=>themeAssetURL(next.id,path);
+ if(!(p.hud||p.sound)){applyThemeSurfaces();return;}
+ const url=(path:string)=>themeAssetURL(theme.id,path);
  const shared:BuiltSurfaces=builtIn.surfaces||{tokens:{},fonts:{},skin:{},sounds:{events:{},ambient:{}},attention:[],transitions:{area:'shared',room:'shared',ms:0}};
  g.__WORLDLET_ENV_ASSETS__={...builtIn,surfaces:{...shared,
   skin:p.hud?Object.fromEntries(Object.entries(p.hud.skin).map(([part,piece])=>[part,{image:url(piece.image),slice:[...piece.slice],width:piece.width}])):shared.skin,
   sounds:p.sound?{events:Object.fromEntries(Object.entries(p.sound.events).map(([event,file])=>[event,url(file)])),ambient:{}}:shared.sounds}};
  applyThemeSurfaces();
 }
-/** The active package's stylesheet; its scene variables are removed when it is left or when it uses the host's pages. */
-function attach(next:InstalledTheme){
- applyPresentation(next);
- if(typeof document==='undefined')return;
- const link=stylesheet(next.id);link.media='all';
- for(const other of document.querySelectorAll<HTMLLinkElement>('link[data-theme-style]'))if(other!==link)other.remove();
- const root=document.documentElement;
- if(!hostAppletPages(next)){root.dataset.buildTheme=next.id;return;}
- delete root.dataset.buildTheme;
- for(const key of Object.keys(root.dataset))if(/^sim[A-Z]/.test(key))delete root.dataset[key];
- for(const name of [...root.style].filter(name=>name.startsWith('--sim-')))root.style.removeProperty(name);
-}
-attach(active);
-/** The active package; the World and Applet renderers call into it. */
-const pkg=():ThemePackage=>active.package;
-const sceneOf=(applet:string)=>pkg().presentation.applets[applet]||pkg().presentation.fallback;
-export function applyBuildThemeScene(scene:ThemeScene){
- const root=document.documentElement;root.dataset.buildTheme=active.id;
- for(const [key,value] of Object.entries(pkg().presentation.tokens))root.style.setProperty('--sim-'+key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase()),typeof value==='number'?value+'px':value);
- for(const [name,rect] of Object.entries(scene.hud)){root.dataset['sim'+name[0].toUpperCase()+name.slice(1)]=rect==='shared'?'shared':'placed';if(rect==='shared')continue;for(const [i,axis] of ['x','y','width','height'].entries())root.style.setProperty(`--sim-${name}-${axis}`,rect[i]*100+'%');}
-}
-export function renderBuildWorld(context:Omit<ThemeWorldContext,'scene'|'asset'>){
- const {theme,presentation}=pkg(),{id}=active;
- if(!hostAppletPages())applyBuildThemeScene(presentation.world);
- return theme.renderWorld({...context,scene:presentation.world,asset:path=>themeAssetURL(id,path)});
-}
-export function renderBuildTheme(context:Omit<ThemeAppletContext,'scene'|'asset'>){
- const {theme}=pkg(),{id}=active,scene=sceneOf(context.applet.id);
- applyBuildThemeScene(scene);
- try{return theme.renderApplet({...context,scene,asset:path=>themeAssetURL(id,path)});}
- catch(error){console.error('Theme applet renderer failed',error);context.host.replaceChildren();const message=document.createElement('p');message.setAttribute('role','alert');message.textContent='This scene could not be displayed.';context.host.append(message);return {dispose(){message.remove();}};}
-}
+applyPresentation(active);

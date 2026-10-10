@@ -1,0 +1,42 @@
+{
+  "tokens": {
+    "bodyFont": "system-ui",
+    "displayFont": "Georgia",
+    "bodySize": 15,
+    "titleSize": 24,
+    "ink": "#111",
+    "paper": "#fff",
+    "accent": "#06c",
+    "focus": "#f90",
+    "radius": 6,
+    "controlHeight": 36
+  },
+  "fonts": [
+    {
+      "file": "assets/fixture.woff2",
+      "license": "assets/LICENSE.txt"
+    }
+  ],
+  "hud": {
+    "skin": {
+      "log": {
+        "image": "assets/plate.svg",
+        "slice": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "width": 4
+      }
+    }
+  },
+  "sound": {
+    "events": {
+      "mail.received": "assets/tick.wav"
+    }
+  },
+  "icons": {
+    "gmail": "assets/plate.svg"
+  }
+}

@@ -245,7 +245,7 @@ Owner request 2026-10-09: 「applet之间要可以丝滑切换，进入applet后
 - **As many as fit** beside the middle on the Applet's side (three to six); the ones used longest ago wait behind **+N** at the left end, which lists them.
 - **Close** on the open Applet takes it off the shelf and opens its neighbour; closing the last returns to the World.
 - **+** at the right end opens a new page in the Browser with its address ready to type (a new tab when already there).
-- **Switching is smooth.** The panel switches in place, an open website page is kept rather than loaded again, and the background scene crossfades from one Applet's to the next (`ui/theme-packages/village/pixi-focus.ts`).
+- **Switching is smooth.** The panel switches in place, an open website page is kept rather than loaded again, and the background scene crossfades from one Applet's to the next (`ui/world/village/pixi-focus.ts`).
 
 `ui/hud/applet-shelf.ts` draws it; `node scripts/applet-shelf-check.ts` (in `npm test`) covers the ring and `node scripts/applet-shelf-ui-check.ts` (in `npm run test:ui`) the shelf in the World.
 

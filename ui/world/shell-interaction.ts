@@ -1,4 +1,4 @@
-/** The shell's own state a World follows (Theme contract `ThemeWorldState.interaction` and `paused`): first use, what
+/** The shell's own state a World follows (world-renderer.ts `WorldState.interaction` and `paused`): first use, what
  * covers the World, what the open Applet shows, and whether anyone can see the World. Worlds never read the shell's
  * elements themselves. */
 export function shellInteraction(host:HTMLElement){

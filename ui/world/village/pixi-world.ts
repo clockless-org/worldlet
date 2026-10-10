@@ -1,12 +1,12 @@
 import {areaCameraFrame} from './village-camera.ts';
 import {createAreaScenery} from './area-scenery.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
-import {WORLD_WIDTH,WORLD_HEIGHT,APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE} from './space/world-design.ts';
+import {WORLD_WIDTH,WORLD_HEIGHT,APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE} from '../world-design.ts';
 import {REGION_LANDMARKS} from './region-landmarks.ts';
 import {createLandmarkSprite} from './landmark-sprite.ts';
 import {createSceneryTone} from './scenery-tone.ts';
-import {WORLD_LAYOUT} from './space/world-layout.ts';
-import {regionId} from './space/region-core.ts';
+import {WORLD_LAYOUT} from '../world-layout.ts';
+import {regionId} from '../region-core.ts';
 import {guardFilterResolution} from './pixi-filter-resolution.ts';
 import {viewportFilterArea as updateViewportFilterArea} from './viewport-filter-area.ts';
 import {createRegisteredPlate} from './registered-plate.ts';
@@ -16,12 +16,12 @@ import {createWorkMotion} from './work-motion.ts';
 import 'pixi.js/unsafe-eval';
 import {Application,Container,Sprite,Texture,Graphics,Rectangle,BlurFilter,ColorMatrixFilter,Matrix} from 'pixi.js';
 import {createFocusScenery} from './pixi-focus.ts';
-import {extraPlacements,resolvePlacements,type PlacementSlot} from './space/slot-placement.ts';
-import {APPLET_SPRITES} from './space/applet-sprites.ts';
+import {extraPlacements,resolvePlacements,type PlacementSlot} from '../slot-placement.ts';
+import {APPLET_SPRITES} from '../applet-sprites.ts';
 import {myAppletMark} from './my-applet-mark.ts';
-import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from './space/frame-budget.ts';
+import {WORLD_FRAME_RATE,environmentShifted,windowActive,worldFrameRate} from '../frame-budget.ts';
 import {attachAppletLamp,type LampState} from './village-lamp.ts';
-import type {RegionLayout} from './space/region-core.ts';
+import type {RegionLayout} from '../region-core.ts';
 
 // Authored image coordinates, not camera-dependent guesses. The internal
 // "people" key remains stable while its displayed region is Explore.
@@ -55,7 +55,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
  const payload:any=villagePayload();
  // The shell's own state (shell-interaction.ts), handed in by the host: the World never reads the shell's elements.
  const shell=()=>options.interaction();
- // Lamps as the host shows them (Theme contract ThemeWorldApplet.lamp): the host draws their labels and actions.
+ // Lamps as the host shows them (world-renderer.ts WorldApplet.lamp): the host draws their labels and actions.
  const lampOf=(room):LampState=>options.lampState(room)||'off';
  const hoverName=document.createElement('div');hoverName.className='applet-hover-name';hoverName.setAttribute('role','tooltip');hoverName.hidden=true;document.body.append(hoverName);
  const hideName=()=>{hoverName.hidden=true;};
@@ -73,7 +73,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
  let framedRegion:string|null=null,extra:Record<string,PlacementSlot>={},extraKey='';
  let framing=0,hoveredRegion=null,focusScenery=null,focusSceneryVisible=false;
  let areaScenery:Awaited<ReturnType<typeof createAreaScenery>>|null=null,closeArea:any=null;
- // Settles with the first drawn frame (the Theme contract's ThemeWorldMount.ready).
+ // Settles with the first drawn frame (world-renderer.ts WorldMount.ready).
  const firstFrame={} as {promise:Promise<void>;resolve():void;reject(error:unknown):void};
  firstFrame.promise=new Promise<void>((resolve,reject)=>{firstFrame.resolve=resolve;firstFrame.reject=reject;});firstFrame.promise.catch(()=>{});
  let closed=false,ready=false,motion=true,active='overview',level='overview',time=0,frames=0;

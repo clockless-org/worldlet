@@ -174,4 +174,4 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 
 Worldlet 以 [Apache License 2.0](LICENSE) 免费开源。第三方声明见 [NOTICE](NOTICE)。
 
-Worldlet 只有一个主题，就是 Village 这个动态 World（[Theme contract](resources/themes/CONTRACT.md)）。没有主题选择。
+Worldlet 只有一个主题，就是 Village。主题只是静态的图片、声音和 JSON（[Theme contract](resources/themes/CONTRACT.md)），动态的 World 由 Worldlet 自己根据它画出来。没有主题选择。
