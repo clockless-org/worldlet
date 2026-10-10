@@ -131,6 +131,9 @@ assert(!/cancel-in-progress: (true|\$\{\{)/.test(workflow),'no run or build is c
 for(const [platform,group] of [['mac','release-dev-mac'],['windows','release-dev-windows']])
  assert(new RegExp(`\\n  ${platform}:\\n(?:    .*\\n)*?    concurrency:\\n      group: ${group}\\n      cancel-in-progress: false\\n`).test(workflow),`${platform}: one build at a time, the newest waiting`);
 assert(!/^\s*(pull_request|pull_request_target|merge_group)\s*:/m.test(workflow),'release.yml never runs for pull requests');
+// The release machines build the Dev packages (owner decision 2026-10-10): a push runs the Dev tests only, a manual dev run builds.
+for(const platform of ['mac','windows'])
+ assert(new RegExp(`\\n  ${platform}:\\n(?:    .*\\n)*?    if: needs\\.ready\\.outputs\\.${platform} == 'true' && github\\.event_name == 'workflow_dispatch'\\n`).test(workflow),`${platform}: built here only by a manual run`);
 const jobs=workflow.split(/\n  (?=[a-z][\w-]*:\n)/).slice(1);
 for(const job of jobs){
  const name=job.split(':')[0];

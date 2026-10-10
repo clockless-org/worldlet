@@ -1,8 +1,10 @@
 name: Release
 run-name: ${{ github.event_name == 'push' && format('Dev · {0}', github.event.head_commit.message) || format('{0} {1}', inputs.channel, inputs.build) }}
-# Desktop releases (docs/RELEASING.md). Every push to main runs the Dev tests, builds a signed, numbered Mac and Windows
-# build and, once the tests passed, publishes it on this repository's GitHub Releases to the Dev channel; a manual run
-# promotes a Dev build's exact bytes to Alpha or Beta once the release machines passed that channel's tests. Nothing here runs
+# Desktop releases (docs/RELEASING.md). Every push to main runs the Dev tests. The release machines 01 (Windows) and 02
+# (Mac) build the Dev packages themselves and publish them here once a commit's Dev tests passed (owner decision
+# 2026-10-10); a manual `dev` run builds the signed, numbered Mac and Windows packages here instead, when the machines
+# cannot. A manual alpha or beta run promotes a Dev build's exact bytes once the release machines passed that channel's
+# tests. Nothing here runs
 # for pull requests: signing and publishing secrets live only in the protected `release` environment, which only main
 # can use. Pull request CI stays in architecture.yml (Linux only). Only clockless-org/worldlet releases: forks and the
 # operations repository, which imports this tree, skip every job.
@@ -121,7 +123,8 @@ jobs:
     concurrency:
       group: release-dev-mac
       cancel-in-progress: false
-    if: needs.ready.outputs.mac == 'true'
+    # The release machines build the Dev packages; a push builds none here (owner decision 2026-10-10).
+    if: needs.ready.outputs.mac == 'true' && github.event_name == 'workflow_dispatch'
     runs-on: macos-15
     timeout-minutes: 120
     environment: release
@@ -220,7 +223,7 @@ jobs:
     concurrency:
       group: release-dev-windows
       cancel-in-progress: false
-    if: needs.ready.outputs.windows == 'true'
+    if: needs.ready.outputs.windows == 'true' && github.event_name == 'workflow_dispatch'
     runs-on: windows-2025
     timeout-minutes: 90
     environment: release

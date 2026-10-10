@@ -1,6 +1,6 @@
 # Releasing from GitHub Actions
 
-This repository builds, signs and publishes the desktop apps itself, from [the Release workflow](../.github/workflows/release.yml). The release machines 01 and 02 test those builds for Alpha and Beta and promote them; they no longer build their own.
+The desktop apps are built, signed and published to this repository's GitHub Releases with its own release scripts. The release machines 01 (Windows) and 02 (Mac) build the Dev packages, test them for Alpha and Beta and promote them (owner decision 2026-10-10: they build much faster than GitHub's runners, and not every commit needs a package). [The Release workflow](../.github/workflows/release.yml) runs the Dev tests on every push, builds the same packages when started by hand with `dev` (for when the machines cannot), and carries out promotions.
 
 ## Channels
 
@@ -8,7 +8,7 @@ The channels are the in-app update channels ([update-channel.ts](../core/distrib
 
 | Channel | Tests | Where, how long | What ships |
 | --- | --- | --- | --- |
-| Dev | The Dev tests: the pull request checks again (`check:pr`, the fast tests, the operational checks) and the fastest UI checks (`test:ui:pr`) | GitHub Actions on Linux, within five minutes, on every push to `main` (documentation-only pushes excepted); a newer push replaces an older build that is still waiting, never one already running | The newest commit's signed, notarized build, once the Dev tests passed |
+| Dev | The Dev tests: the pull request checks again (`check:pr`, the fast tests, the operational checks) and the fastest UI checks (`test:ui:pr`) | GitHub Actions on Linux, within five minutes, on every push to `main` (documentation-only pushes excepted) | The signed, notarized package 01 or 02 built of `main`'s newest commit when it was free, once that commit's Dev tests passed; a build that started always runs to the end |
 | Alpha | The Dev tests, the quick UI checks (`test:ui:quick`) and the platform tests (Electron, iOS on the Mac, Android on Windows, Harness and Hermes) | The release machines, 01 (Windows) and 02 (Mac), within 20 minutes, on each new Dev build | That Dev build, once both machines passed |
 | Beta | Alpha's tests and the whole UI suite (`test:ui`) | 01 and 02, every night at 1:00 Pacific, within an hour | The newest Alpha build, once both machines passed; the public download and the default channel |
 | GA (Production) | — | Not open on the desktop yet; a maintainer decides | — |
@@ -27,7 +27,7 @@ Everything lives on this repository's GitHub Releases:
 
 ## Tests and failures
 
-The Dev tests run in [the Release workflow](../.github/workflows/release.yml) as its `checks` job, which reuses the pull request workflow ([architecture.yml](../.github/workflows/architecture.yml)). The Mac and Windows builds start beside them and publish to Dev only once they passed (`node scripts/ci-release.mjs dev-tests`).
+The Dev tests run in [the Release workflow](../.github/workflows/release.yml) as its `checks` job, which reuses the pull request workflow ([architecture.yml](../.github/workflows/architecture.yml)). A release machine publishes its package to Dev only once that commit's Dev tests passed; a manual `dev` run waits for its own (`node scripts/ci-release.mjs dev-tests`).
 
 A release machine records a passed channel on the commit as the status `worldlet/alpha-mac`, `worldlet/alpha-windows`, `worldlet/beta-mac` or `worldlet/beta-windows`, and promotion checks for both platforms' status before it publishes.
 
@@ -41,8 +41,10 @@ Build = 4000 + the commit's position on `main` (`git rev-list --count`). The off
 
 ## What a build does
 
-- **Mac** (`macos-15`): [ci-build.sh](../platform/electron/distribution/mac/ci-build.sh) packages one universal app signed with the Developer ID certificate, puts it in a signed DMG, notarizes the DMG with an App Store Connect API key, staples it, and writes the Sparkle item signed with the update key. Apple notarizes the app inside the DMG in the same submission, so there is one notarization wait instead of two.
-- **Windows** (`windows-2025`): `npm run installer:windows`, the unsigned NSIS installer the Windows updater already reads, then the Microsoft Store MSIX of the same commit (`windows-msix.ts`, the runner's Windows SDK). Release machine 01 submits that MSIX in Partner Center once the Build reaches Beta. A failed MSIX never holds the installer back.
+A release machine takes `main`'s newest commit whenever it has no Beta or Alpha run to do and that commit has no Dev package for its platform yet, never in the half hour before Beta. It builds in its own checkout with the steps below and its own keys (02 notarizes through a notarytool keychain profile, `NOTARY_PROFILE`), and publishes with its own GitHub sign-in. A manual `dev` run of the Release workflow does the same on GitHub's `macos-15` and `windows-2025` runners. A newer commit never stops a build that has started; the next build takes the newest commit then.
+
+- **Mac**: [ci-build.sh](../platform/electron/distribution/mac/ci-build.sh) packages one universal app signed with the Developer ID certificate, puts it in a signed DMG, notarizes the DMG with an App Store Connect API key, staples it, and writes the Sparkle item signed with the update key. Apple notarizes the app inside the DMG in the same submission, so there is one notarization wait instead of two.
+- **Windows**: `npm run installer:windows`, the unsigned NSIS installer the Windows updater already reads, then the Microsoft Store MSIX of the same commit (`windows-msix.ts`, the runner's Windows SDK). Release machine 01 submits that MSIX in Partner Center once the Build reaches Beta. A failed MSIX never holds the installer back.
 - Both then publish to Dev with `node scripts/ci-release.mjs publish`, which uploads the installer and its checksum to the Build's release, then replaces the channel's feed, and refuses to replace a channel's newer build. A Dev build whose commit is behind a later push that changed a workflow is skipped: GitHub does not let the workflow's token tag a commit whose workflows differ from `main`'s, and that later push publishes its own, newer Dev build.
 
 How long it takes: Dev cannot be ready three minutes after a push. Building the universal app with its Chromium engine takes several minutes on a hosted Mac, and Apple's notarization usually takes a few minutes more, sometimes much longer. The Build number is fixed the moment the commit lands; the job summary of each run records how long each part took.
@@ -66,4 +68,4 @@ Publishing to GitHub Releases uses the workflow's own token, so it needs no secr
 
 ## Checks
 
-`node scripts/ci-release-check.mjs` (part of `npm run check:pr`) checks build numbers, channel keys, feed rewriting, Sparkle signature verification, publication order, that a promotion requires both release machines' pass for its channel, that a Dev build waits for the Dev tests and that the workflow never runs for pull requests or reads secrets outside the `release` environment. `node scripts/ci-failure-report-check.mjs` checks how test results open, update and close Issues.
+`node scripts/ci-release-check.mjs` (part of `npm run check:pr`) checks build numbers, channel keys, feed rewriting, Sparkle signature verification, publication order, that a promotion requires both release machines' pass for its channel, that a Dev build waits for the Dev tests, that a push builds no package here (the release machines do) and that the workflow never runs for pull requests or reads secrets outside the `release` environment. `node scripts/ci-failure-report-check.mjs` checks how test results open, update and close Issues.
