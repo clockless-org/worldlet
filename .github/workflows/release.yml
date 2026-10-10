@@ -1,5 +1,5 @@
 name: Release
-run-name: ${{ github.event_name == 'push' && format('Dev · {0}', github.event.head_commit.message) || format('{0} {1}', inputs.channel, inputs.build) }}
+run-name: ${{ github.event_name == 'push' && format('Dev · {0}', github.event.head_commit.message) || format('{0} {1} {2}', inputs.channel, inputs.build, inputs.platform) }}
 # Desktop releases (docs/RELEASING.md). Every push to main runs the Dev tests. The release machines 01 (Windows) and 02
 # (Mac) build the signed, numbered Dev packages themselves and publish them to this repository's releases once a
 # commit's Dev tests passed; GitHub's runners build no package (owner decision 2026-10-10). A manual alpha or beta run
@@ -23,6 +23,11 @@ on:
       build:
         description: 'Build to promote, for example 4012'
         required: true
+      platform:
+        description: 'The platform to promote; each platform moves on its own once its release machine passed'
+        type: choice
+        options: [both, mac, windows]
+        default: both
 permissions:
   contents: read
 # Push runs are not grouped, so every push runs its Dev tests (Linux, about two minutes). Promotions are never cancelled:
@@ -107,6 +112,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       CHANNEL: ${{ inputs.channel }}
       BUILD: ${{ inputs.build }}
+      PLATFORMS: ${{ inputs.platform == 'both' && 'mac windows' || inputs.platform }}
     steps:
       - name: Check the input
         run: '[[ "$BUILD" =~ ^[0-9]{1,5}$ ]] || { echo "Name the Build to promote, for example 4012." >&2; exit 2; }'
@@ -130,23 +136,24 @@ jobs:
       - name: Download the build
         run: |
           set -euo pipefail
-          node scripts/ci-release.mjs fetch --build "$BUILD" --dir dist/ci && exit 0
+          node scripts/ci-release.mjs fetch --build "$BUILD" --dir dist/ci --platform "${PLATFORMS// /,}" && exit 0
           echo "Build $BUILD has no records on its release; trying its Actions artifacts."
-          for platform in mac windows; do
+          for platform in $PLATFORMS; do
             name="worldlet-$platform-$BUILD"
             run="$(gh api "repos/$GH_REPO/actions/artifacts?name=$name&per_page=1" --jq '.artifacts[0].workflow_run.id // empty')"
             [[ -n "$run" ]] || { echo "No $platform package for Build $BUILD." >&2; exit 1; }
             rm -rf "dist/ci/$platform"
             gh run download "$run" -n "$name" -D "dist/ci/$platform"
           done
-      # Only a Build whose commit passed this channel's tests on both release machines leaves Dev: Alpha's on 01 and 02,
-      # recorded as the commit statuses worldlet/alpha-mac and worldlet/alpha-windows, Beta's as worldlet/beta-* (owner
-      # decision 2026-10-09, docs/RELEASING.md).
+      # Only a Build whose commit passed this channel's tests on that platform's release machine leaves Dev: Alpha's on 01
+      # (Windows) or 02 (Mac), recorded as the commit statuses worldlet/alpha-windows and worldlet/alpha-mac, Beta's as
+      # worldlet/beta-*. Each platform moves on its own (owner decision 2026-10-10; until then both had to pass one
+      # commit, docs/RELEASING.md).
       - name: Check the channel's tests
         run: |
           set -euo pipefail
-          sha="$(node -p 'require("./dist/ci/mac/release.json").sourceCommit')"
-          for platform in mac windows; do
+          for platform in $PLATFORMS; do
+            sha="$(node -p "require('./dist/ci/$platform/release.json').sourceCommit")"
             state="$(gh api "repos/$GH_REPO/commits/$sha/status" --jq "[.statuses[] | select(.context == \"worldlet/$CHANNEL-$platform\")][0].state // \"\"")"
             [[ "$state" == success ]] || { echo "Build $BUILD ($sha) has not passed the $CHANNEL tests on $platform (worldlet/$CHANNEL-$platform: ${state:-none})." >&2; exit 1; }
           done
@@ -154,5 +161,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform mac --dir dist/ci/mac
-          node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform windows --dir dist/ci/windows
+          set -euo pipefail
+          for platform in $PLATFORMS; do
+            node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform "$platform" --dir "dist/ci/$platform"
+          done
