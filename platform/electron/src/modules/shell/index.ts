@@ -17,6 +17,7 @@ import {worldMenu,worldMenuState,type WorldMenuState} from './world-menu.ts';
 import {createLoginItem} from './login-item.ts';
 import {order} from './order.ts';
 import {wantsQuit} from '../../host/quit.ts';
+import {onStall,watchMainStalls} from '../../host/busy.ts';
 import {foxTimingEvent,nativeCrashFromIps} from '../../../../../core/diagnostics/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -58,6 +59,10 @@ export function installShell(host:Host){
  process.on('uncaughtExceptionMonitor',error=>analytics.recordException(error,'main'));
  const recordDiagnostic=host.diagnostics.record.bind(host.diagnostics);
  host.diagnostics.record=(error,operation,requestId)=>{recordDiagnostic(error,operation,requestId);analytics.recordException(error,'host',operation);};
+ // A second or more the main process held everything up: what ran and for how long, in logs/main.log and PostHog.
+ onStall(stall=>{host.diagnostics.log(`main stall ${stall.task} ${stall.ms} ms`);analytics.recordMainStall(stall);});
+ const stopStallWatch=watchMainStalls(()=>BaseWindow.getFocusedWindow()!==null);
+ host.onQuit(stopStallWatch);
  // A run that never reached a clean quit (native crash, force quit, power loss) leaves its marker for the next launch.
  const runMarker=path.join(host.profile.root,'logs','running.json');
  const uncleanExit=fs.existsSync(runMarker);
