@@ -36,6 +36,8 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  element.append(side,detail);
  const guide=createPanelGuide();
   let selected='',ticket=0;
+ // Run when the page on show is left, so its window listeners go with it.
+ const leaving:(()=>void)[]=[];
  const note=(text:string)=>el('p','companion-info-note',text);
  const subhead=(text:string)=>el('h5','companion-settings-subhead',text);
  const modelRefresh=()=>window.dispatchEvent(new Event('worldlet:model-refresh'));
@@ -131,7 +133,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    }
   };
   const changed=(event:Event)=>{if(turn!==ticket||!target.isConnected){window.removeEventListener('worldlet:app-update',changed);return;}state={...state,...(event as CustomEvent).detail};draw();};
-  window.addEventListener('worldlet:app-update',changed);
+  window.addEventListener('worldlet:app-update',changed);leaving.push(()=>window.removeEventListener('worldlet:app-update',changed));
   draw();
   target.append(about,rows,...state?.switchable?[note('Moving to a steadier channel installs its newest build at the next update, even when it is older than this one. Your world and accounts stay as they are.')]:[],
    action('Check for updates',async()=>{said.textContent='Checking…';try{state=await call('appUpdate',{operation:'check'});draw();}catch(e){said.textContent=(e as Error).message||'Could not check for updates.';}},{id:'check-updates'}),said);
@@ -382,6 +384,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  async function show(id:string){
   const moved=MOVED[id],part=moved?.part??'';
   const item=items.find(i=>i.id===(moved?.section??id))??items[0];selected=item.id;const turn=++ticket;
+  for(const leave of leaving.splice(0))leave();
   for(const b of list.querySelectorAll<HTMLElement>('button'))if(b.dataset.setting===selected)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');
   guide.view.setGuide(null);onShow(item.id);
   // A companion page brings its own heading.
