@@ -26,7 +26,7 @@ const CJK_STOP=new Set(['一个','这个','那个','我们','你们','他们','�
  * pairs of neighbouring Chinese, Japanese or Korean characters. */
 export function topicWords(text:string):Set<string>{
  const words=new Set<string>(),value=String(text||'').toLowerCase();
- for(const word of value.match(/[a-z][a-z0-9'-]{2,}/g)||[])if(!STOP.has(word))words.add(word.replace(/'s$/,''));
+ for(const word of value.match(LATIN)||[])if(!STOP.has(word))words.add(word.replace(/'s$/,''));
  for(const run of value.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]{2,}/gu)||[])
   for(let i=0;i<run.length-1;i++){const pair=run.slice(i,i+2);if(!CJK_STOP.has(pair))words.add(pair);}
  return words;
