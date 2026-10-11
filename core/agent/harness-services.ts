@@ -30,7 +30,7 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  // run from its own `skills/.usage.json`; a skill the person saves is a new `skills/<name>/SKILL.md`, where its own
  // `skill_manage` creates one, since its command line installs only from a hub or a URL (agent-runtime/harness-skills.ts).
  hermes:row('hermes',{conversation:'native',history:'files',schedule:'files',approvals:'native',events:'files',tools:'files',agents:'files',models:'native',send:'native',connections:'files',skills:'files'},
-  {rules:'files',revoke:'restart',revokeNote:'Hermes Agent reads its allowlist when it starts, so Worldlet restarts its own conversation with it. If `hermes gateway` runs, restart it too.',changes:'diffs'}),
+  {rules:'files',revoke:'restart',revokeNote:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it. If Hermes Agent also runs for your chat apps, restart that too.',changes:'diffs'}),
  // A session per Fox thread on its running Gateway (`/v1/responses`, World tools as client function tools), else
  // `openclaw agent exec` per turn in the person's workspace; history from openclaw-agent.sqlite; its automations run in
  // its Gateway, each run read from task_runs in state/openclaw.sqlite; hook, Gmail and IMAP runs from its `hook:` sessions;
@@ -56,7 +56,7 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  // there; a skill the person saves goes in with its own `openclaw skills install <folder> --as <name> --agent <id>`.
  // It records a skill's use only behind its Gateway (`skills curator status`), so the World's synced turns say when.
  openclaw:row('openclaw',{conversation:'native',history:'files',schedule:'files',approvals:'native',events:'files',calls:'files',tools:'files',agents:'files',models:'native',send:'native',voice:'native',connections:'native',skills:'native'},
-  {rules:'native',revoke:'live',revokeNote:'A revoked MCP tool grant stops in OpenClaw’s next session.',changes:'output'}),
+  {rules:'native',revoke:'live',revokeNote:'A tool you take back stops being allowed in OpenClaw’s next session.',changes:'output'}),
  // Claude Code and pi: their session files; Codex: its rollout files and session_index.jsonl.
  'claude-code':row('claude-code',{conversation:'native',history:'files'}),
  codex:row('codex',{conversation:'native',history:'files'}),

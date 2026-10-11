@@ -1,10 +1,10 @@
 import {displayReleaseVersion} from '../../core/distribution/index.ts';
-import {connectionLive,getApp} from '../../core/applets/index.ts';
 import {BROWSER_HOME,createBrowserHome} from '../../core/browser/index.ts';
 import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
-import {showAgentConnections} from './agent-connections.ts';
+import {showAgentPermissions} from './agent-permissions.ts';
+import {showWorldletAccounts} from './worldlet-accounts.ts';
 
 /** What the World view lends Settings: the sample world switch and which host features exist. */
 export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=>boolean;localDataDeletion:()=>boolean};
@@ -13,8 +13,9 @@ export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement};
 type Item={id:string;label:string;hint:string;page?:boolean;show:(detail:HTMLElement)=>void|Promise<void>};
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
-// Disconnect exists for these; Google's three share one sign-in.
-const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive'];
+// Entry points that name a section Settings no longer has open the page that took it in, at its part: Accounts became
+// Your Agent's last part (owner plan 2026-10-11), and the standing rules Approvals listed are its Permissions part.
+const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'model',part:'accounts'},accounts:{section:'model',part:'accounts'},approvals:{section:'model',part:'permissions'},permissions:{section:'model',part:'permissions'}};
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
@@ -276,30 +277,18 @@ export function createCompanionSettings({call,host,pages,records,onShow,close}:{
   // The connection steps open under the buttons; a new connection redraws what Fox runs on.
   const changed=()=>{if(turn!==ticket||!target.isConnected){for(const name of MODEL_EVENTS)window.removeEventListener(name,changed);return;}void draw();};
   for(const name of MODEL_EVENTS)window.addEventListener(name,changed);
-  target.append(now,fixes,guide.element,agents,said);
-  await draw();
+  // Your Agent's own settings that Worldlet only shows and changes its way, after what Fox runs on: what it may do
+  // without asking (its standing rules) and, last, the accounts and tools (Worldlet's own, then the Agent's).
+  const live=()=>turn===ticket&&target.isConnected;
+  const part=(id:string,heading:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading));return box;};
+  const permissions=part('permissions','Things it may do without asking'),accounts=part('accounts','Accounts and tools');
+  target.append(now,fixes,guide.element,agents,said,permissions,accounts);
+  await Promise.all([draw(),showAgentPermissions(permissions,call,live),showWorldletAccounts(accounts,call,live)]);
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical).
  const items:Item[]=[
   {id:'fox',label:'Fox',hint:'Profile and what it knows',page:true,show:target=>{target.append(pages.fox);}},
-  {id:'model',label:'Your Agent',hint:'What Fox runs on',show:modelSetting},
-  {id:'integrations',label:'Accounts',hint:'Signed-in accounts and tools',show:async target=>{
-   const turn=ticket,state=await call('snapshot').catch(()=>null);if(turn!==ticket)return;
-   const live=(state?.connections||[]).filter(connectionLive),rows=el('div','companion-settings-rows'),said=status();
-   if(!live.length)rows.append(note('No accounts are connected yet. Open an Applet in the world to connect it.'));
-   for(const c of live){
-    const app=getApp(c.provider),google=c.transport!=='native'&&['gmail','google-calendar','google-drive'].includes(c.provider);
-    const row=el('div','companion-settings-row'),text=el('div');
-    text.append(el('strong','',app?.title||c.provider),el('span','',c.label||'Connected'));row.append(text);
-    row.append(action('Reconnect',async()=>{said.textContent='Opening sign-in…';try{await call('connect',{provider:c.provider});said.textContent='';}catch(e){said.textContent=(e as Error).message||'Could not reconnect.';}}));
-    if(DISCONNECTABLE.includes(c.provider))row.append(action(google?'Disconnect Google':'Disconnect',async()=>{try{await call('disconnectSource',{provider:c.provider});await show('integrations');}catch(e){said.textContent=(e as Error).message||'Could not disconnect.';}}));
-    rows.append(row);
-   }
-   target.append(rows,said);
-   if(live.some(c=>c.transport!=='native'&&['gmail','google-calendar','google-drive'].includes(c.provider)))target.append(note('Disconnect Google signs out Mail, Calendar and Drive together. To use a different Google account, disconnect Google first. What was already saved is kept.'));
-   // The Agent's own MCP servers and chat accounts, with Add and Remove through its own commands (agent-connections.ts).
-   await showAgentConnections(target,call,()=>turn===ticket&&target.isConnected);
-  }},
+  {id:'model',label:'Your Agent',hint:'What it runs on and may use',show:modelSetting},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
   {id:'general',label:'General',hint:'Updates, Browser, usage counts',show:async target=>{
    target.append(subhead('Updates'));await updates(target);
@@ -370,12 +359,14 @@ export function createCompanionSettings({call,host,pages,records,onShow,close}:{
   b.append(el('strong','',item.label),el('span','',item.hint));b.onclick=()=>void show(item.id);list.append(b);
  }
  async function show(id:string){
-  const item=items.find(i=>i.id===id)??items[0];selected=item.id;const turn=++ticket;
+  const moved=MOVED[id],part=moved?.part??'';
+  const item=items.find(i=>i.id===(moved?.section??id))??items[0];selected=item.id;const turn=++ticket;
   for(const b of list.querySelectorAll<HTMLElement>('button'))if(b.dataset.setting===selected)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');
   guide.view.setGuide(null);onShow(item.id);
   // A companion page brings its own heading.
   const body=el('div','companion-settings-body');detail.replaceChildren(...item.page?[]:[el('h4','',item.label)],body);detail.classList.toggle('is-page',!!item.page);
   try{await item.show(body);}catch(e){if(turn===ticket)body.append(note((e as Error).message||'This setting is unavailable right now.'));}
+  if(part&&turn===ticket)body.querySelector<HTMLElement>(`[data-part="${part}"]`)?.scrollIntoView({block:'start'});
  }
  return {element,
   /** The panel opened: show `setting`, else the section last chosen, or the first. */

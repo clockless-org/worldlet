@@ -1,5 +1,6 @@
 // Settings › Your Agent: what Fox runs on, the Agents on this computer and elsewhere, the provider, and the last reply's
-// problem with its fix. There is no energy, charge or battery anywhere (owner request 2026-10-10).
+// problem with its fix; then what it may do without asking (with Revoke, asked once more) and, last, the accounts and
+// tools that were the Accounts section, which old entry points now open. There is no energy, charge or battery anywhere (owner request 2026-10-10).
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {pageErrors,worldUrl,waitForWorld,SETTINGS_BUTTON} from './browser-test.ts';
@@ -7,8 +8,12 @@ const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{const w=window as any;w.calls=[];w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
+  w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
-  if(b.action==='snapshot')return {workspaceId:'your-agent-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
+  if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
+  if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules}]};
+  if(b.action==='harnessConnections')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,changes:true,connections:[{id:'conn-00000000000000c1',kind:'mcp',name:'github',where:'https://tools.example.com/github/',enabled:true,sign:'token',agent:'default',main:true,removable:true}]}]};
+  if(b.action==='snapshot')return {workspaceId:'your-agent-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[{provider:'gmail',status:'connected',label:'alex@example.com'}],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
   if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
   if(b.action==='modelSource')return w.source;
   if(b.action==='modelHealth'&&w.gateway?.active)return {agent:'remote-openclaw',available:true,lastReply:null,location:{kind:'remote',computer:w.gateway.host,direct:true},model:{name:'OpenClaw at '+w.gateway.host,id:'',provider:'remote-openclaw',source:null,ready:true,configured:false}};
@@ -36,6 +41,31 @@ try{
  assert.equal(await page.locator('#companionInfo [data-section=Energy]').count(),0,'no Energy page');
  const local=settingsPage.locator('.companion-settings-detail');
  await local.getByText('Fox’s model is connected',{exact:true}).waitFor();
+ // The Accounts section is part of this page now: Settings lists no section of its own for it.
+ assert.equal(await settingsPage.locator('[data-setting=integrations]').count(),0,'no Accounts section');
+ const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
+ await permissions.getByRole('heading',{name:'Things it may do without asking',exact:true}).waitFor();
+ await accounts.getByRole('heading',{name:'Accounts and tools',exact:true}).waitFor();
+ assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['permissions','accounts'],'Permissions, then Accounts and tools last');
+ await accounts.locator('[data-account=gmail]').getByText('alex@example.com',{exact:true}).waitFor();
+ await accounts.locator('[data-account=gmail]').getByRole('button',{name:'Disconnect Google',exact:true}).waitFor();
+ await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool · https:\/\/tools\.example\.com/).waitFor();
+ const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
+ await rule.getByText('npm test',{exact:true}).waitFor();
+ await rule.getByText(/^Main agent · allowed .*2026, in Fox’s main conversation\.$/).waitFor();
+ await permissions.locator('[data-rule=rule-00000000000000a2]').getByText('Use the tool github › search_issues').waitFor();
+ // Plain words: tools and things it may do, never MCP, allowlist or cron.
+ assert.doesNotMatch(await permissions.innerText()+'\n'+await accounts.innerText(),/\bMCP\b|allowlist|cron/i,'plain words only');
+ // Revoke asks once more in the page, says what happens, and only then the Agent forgets it.
+ await rule.getByRole('button',{name:'Revoke',exact:true}).click();
+ await rule.getByText('Hermes Agent will ask you again before it does this. It takes effect the next time it starts; Worldlet restarts it for you.',{exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessApprovalRules'&&c.operation==='revoke').length),0,'Revoke asks first');
+ await permissions.scrollIntoViewIfNeeded();
+ await page.screenshot({path:'/tmp/your-agent-permissions.png'});
+ await rule.locator('[data-action=confirm-revoke]').click();
+ await rule.waitFor({state:'detached'});
+ await permissions.getByText(/^Hermes Agent will ask again before: npm test/).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessApprovalRules'&&c.operation==='revoke').map(c=>[c.harness,c.id])),[['hermes','rule-00000000000000a1']]);
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='claude-code'));
  await local.getByText('Claude Code on this computer answers for Fox.').waitFor();
@@ -124,6 +154,12 @@ try{
  await page.screenshot({path:'/tmp/your-agent-providers.png'});
  await model.locator('[data-provider=own]').getByRole('button',{name:'Use',exact:true}).click();
  await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
+ // Old entry points that open Accounts land on Your Agent, at Accounts and tools.
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'integrations'}})));
+ await settings.locator('[data-setting=model][aria-current=true]').waitFor();
+ await settings.locator('.companion-settings-detail [data-part=accounts]').waitFor();
+ await page.waitForFunction(()=>{const part=document.querySelector('#companionInfo .companion-settings-detail [data-part=accounts]'),pane=document.querySelector('#companionInfo .companion-settings-detail');if(!part||!pane)return false;const a=part.getBoundingClientRect(),b=pane.getBoundingClientRect();return a.top>=b.top-1&&a.top<b.bottom-40&&pane.scrollTop>0;});
+ await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Your Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model');
+ console.log('PASS Your Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; Things it may do without asking lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts and tools is the page\'s last part and old Accounts entry points land on it');
 }finally{await browser.close();}
