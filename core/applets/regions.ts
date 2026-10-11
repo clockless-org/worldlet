@@ -39,14 +39,21 @@ export function setupOffers(app:{id:string;key:string;region?:string},chosen:boo
  if(SETUP_HIDDEN_REGIONS.includes(app.region||''))return false;
  return chosen||(SETUP_SUGGESTIONS[app.region||'']||[]).includes(app.key);
 }
-/** What setup selects before the person changes anything (owner decision 2026-10-10, Kelvin: a first run shows only the
- * Applets the person uses). Mail, Calendar and the Browser are setup's own draft; this adds the apps installed on this
- * computer (`detected`) and the apps brought from the person's Agent (`brought`, its integrations' providers). No
- * featured starters and no filling each area to three any more: the rest of the catalog stays one click away in each
- * area's panel (Recommended, All <area> Applets). The Games area still gets its three starters, as before. Explicit
- * unchecks (`touched`) are respected. */
+/** Popular Applets a first World starts with (owner decision 2026-10-11, Kelvin: a first World holds what this computer
+ * already has plus some popular ones, not the whole catalog). Common across areas, every one opens on any computer. */
+export const POPULAR_STARTERS=['chatgpt','youtube','slack','notion','spotify','whatsapp','github','discord'];
+/** Popular starters only fill a first World up to this many non-game Applets, so a computer with many apps found stays uncrowded. */
+export const FIRST_WORLD_SIZE=12;
+/** What setup selects before the person changes anything (owner decision 2026-10-11, replacing 2026-10-10's "only the
+ * Applets in use"). Mail, Calendar and the Browser are setup's own draft; this adds the apps installed on this computer
+ * (`detected`), the apps brought from the person's Agent or already connected (`brought`, by provider), then the popular
+ * starters until the World holds FIRST_WORLD_SIZE. The rest of the catalog stays one click away in each area's panel
+ * (Recommended, All <area> Applets). The Games area still gets its three starters. Explicit unchecks (`touched`) are
+ * respected. */
 export function seedAppletSelection(apps:readonly {id:string;key:string;region?:string}[],detected:Set<string>,selected:Set<string>,touched:Set<string>,brought:Set<string>=new Set()){
  for(const app of apps)if((detected.has(app.key)||brought.has(app.key))&&!touched.has(app.id))selected.add(app.id);
+ const size=()=>apps.filter(a=>a.region!=='health'&&selected.has(a.id)).length;
+ for(const key of POPULAR_STARTERS){const app=apps.find(a=>a.key===key);if(size()>=FIRST_WORLD_SIZE)break;if(app&&!touched.has(app.id))selected.add(app.id);}
  const games=[...GAME_STARTERS.map(key=>apps.find(a=>a.key===key)).filter(Boolean),...apps.filter(a=>a.region==='health'&&!GAME_STARTERS.includes(a.key))] as {id:string;region?:string}[];
  for(const app of games){if(apps.filter(a=>a.region==='health'&&selected.has(a.id)).length>=3)break;if(!touched.has(app.id))selected.add(app.id);}
 }

@@ -56,7 +56,7 @@ await withBrowser(fileAccess,async browser=>{
   const onGround=await pin.waitFor({timeout:8000}).then(()=>true,()=>false);
   let tapped=null;const direct=!onGround&&!inAppletCatalog(app);
   if(onGround)tapped=await tapDevice(app.id);
-  // A frozen website Applet is no longer offered in the Area panel; it still opens directly (as Fox opens it).
+  // An Applet outside the catalog opens directly (as Fox opens it); every Applet is in the catalog now.
   else if(direct)await page.evaluate(id=>{location.hash='object='+id;},app.id);
   else {
    // Beyond a region's five ground places, the Area panel lists the person's other Applets under Recently used, and

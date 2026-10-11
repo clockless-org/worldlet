@@ -29,17 +29,17 @@ await withBrowser(async browser=>{
  assert.deepEqual(await made.evaluate(()=>(window as any).opened),['app-site-abc123'],'a site already made opens its Applet');
  await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://github.com/a',title:'GitHub',loading:false}})));
  assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'a catalog site keeps its own offer');
- // A frozen website Applet's site (Reddit) is not offered as that Applet; it can be made into one like any site.
+ // A website Applet's site (Reddit) is offered as that Applet too (owner decision 2026-10-11: every Applet can be recommended).
  await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://www.reddit.com/r/test',title:'Reddit',loading:false}})));
- await made.getByRole('button',{name:'Make Applet'}).waitFor({state:'visible'});
- assert.equal(await made.locator('.browser-applet-offer:not(.browser-sign-in-offer)').isVisible(),false,'a frozen website Applet is not offered');
+ await made.getByRole('button',{name:'Add Reddit to World'}).waitFor({state:'visible'});
+ assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'a website Applet\'s site keeps its own offer');
  // A game's site is not the game (owner Order 2026-10-06): worldlet.ai itself gets Make Applet, not the Random game.
  await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://worldlet.ai/',title:'Worldlet',loading:false}})));
  await made.getByRole('button',{name:'Make Applet'}).waitFor({state:'visible'});
  assert.equal(await made.locator('.browser-applet-offer:not(.browser-sign-in-offer)').isVisible(),false,'a game Applet does not claim the rest of its site');
  await made.evaluate(()=>(window as any).panel.mount('youtube',{url:'https://www.youtube.com/',platform:'web'}));
  assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'only the generic Browser offers Make Applet');
- console.log('PASS Make Applet: any public site, the page sent as is, a made site opens, catalog sites and website Applets excluded.');
+ console.log('PASS Make Applet: any public site, the page sent as is, a made site opens, catalog sites (website Applets included) keep their own offer.');
  // Refresh in the toolbar of every website Applet and the Browser (owner requests 2026-10-05 and 2026-10-09): it reloads the page shown.
  const fresh=await browser.newPage();await fresh.setContent('<style>.browser-viewport{height:400px}</style><main><dialog id="notionDialog"></dialog><div class="applet-bar-controls"></div><section style="width:700px;height:600px"></section></main>');await fresh.addScriptTag({content:bundle});
  await fresh.evaluate(()=>{const w=window as any,root:any=document.querySelector('main'),content=document.querySelector('section');w.commands=[];root.appletLayout={available:()=>true,has:()=>false,add:async()=>{}};

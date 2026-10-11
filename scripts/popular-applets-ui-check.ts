@@ -29,7 +29,7 @@ await withBrowser(fileAccess,async browser=>{
    const p=await page.evaluate(id=>{const d=document.querySelector<any>('#notionWorld').sceneMetrics.modules.find(d=>d.id===id),stage=document.querySelector('#notionStage').getBoundingClientRect();return {x:stage.x+d.peekHit.x,y:stage.y+d.peekHit.y};},app.id);
    await page.mouse.click(p.x,p.y);
   }
-  // A frozen website Applet is no longer offered in the Area panel; it still opens directly (as Fox opens it).
+  // An Applet outside the catalog opens directly (as Fox opens it); every Applet is in the catalog now.
   else if(!inAppletCatalog(app))await page.evaluate(id=>{location.hash='object='+id;},app.id);
   else {
    await page.evaluate(()=>{location.hash='';});

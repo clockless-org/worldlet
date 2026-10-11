@@ -1,7 +1,5 @@
 import type {HostFeatures} from '../../contracts/platform.ts';
 import {APP_DEFINITIONS} from './catalog.ts';
-import {GAME_APPLETS} from './definitions/games.ts';
-import {WEB_GAME_APPLETS} from './definitions/web-games.ts';
 
 /** System-service requirements belong to Applet identity (`requiresHostFeature`
  * in each definition), not OS detection. No requirement means this rule does
@@ -14,12 +12,9 @@ export function appletSupport(provider:string,features:HostFeatures):{supported:
  return !feature||features[feature]?{supported:true}:{supported:false,reason:'This device does not support this system Applet. Your saved information is kept.'};
 }
 
-/** What the Applet catalog offers (an Area's Recommended and All lists, the Browser's "Add to World" offer): Applets
- * that work once added, meaning they connect an account or read this computer, plus the Browser and the games.
- * Website-only Applets are frozen: one already in someone's World stays and Fox can still open any of them, but the
- * catalog no longer offers them. */
-const GAMES=new Set([...GAME_APPLETS,...WEB_GAME_APPLETS].map(app=>app.key));
-export function inAppletCatalog(app:{key:string;connection?:{capability?:string}}|null|undefined):boolean {
- if(!app)return false;
- return ['connect','local','read'].includes(app.connection?.capability||'')||app.key==='browser'||GAMES.has(app.key);
+/** What the Applet catalog offers (an Area's Recommended and All lists, the Browser's "Add to World" offer): every
+ * Applet (owner decision 2026-10-11: all 100+ can be recommended), website Applets included. The moving `ongoing`
+ * placeholder is not an Applet anyone adds. */
+export function inAppletCatalog(app:{key:string}|null|undefined):boolean {
+ return !!app&&app.key!=='ongoing';
 }

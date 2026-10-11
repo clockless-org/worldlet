@@ -150,8 +150,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  });
  // The panel is open on its page's viewport (it may still be covered).
  function browserInPanel(){return opened&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser';}
- // A frozen website Applet (core/applets/applet-support.ts) is offered only to open, when it is already in the World;
- // otherwise its site is treated as one without an Applet, so Make Applet below stays available.
+ // A catalog Applet (core/applets/applet-support.ts), or one already in the World, is offered for its site; a site
+ // with no Applet gets Make Applet below instead.
  const offeredMatch=()=>matchedApplet&&(inAppletCatalog(matchedApplet)||root.appletLayout?.has(matchedApplet.id))?matchedApplet:null;
  function syncAppletOffer(url?:string){
   if(url!==undefined)matchedApplet=appletForWebsite(url);
