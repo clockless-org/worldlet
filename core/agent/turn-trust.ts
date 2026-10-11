@@ -2,11 +2,11 @@ import policy from './turn-trust.json' with {type:'json'};
 import {worldToolCatalog} from '../tools/index.ts';
 /** One model turn's trust. Once any tool returns untrusted content, writes in that turn are denied without a prompt. */
 export type TurnTrust={untrustedSource:string|null};
-const matches=(pattern:string,value:string)=>new RegExp('^'+pattern.split('*').map(part=>part.replace(/[.+?^${}()|[\]\\]/g,'\\$&')).join('.*')+'$').test(value);
+const TRUSTED_WORLD_ACTIONS=policy.trustedWorldActions.map(pattern=>new RegExp('^'+pattern.split('*').map(part=>part.replace(/[.+?^${}()|[\]\\]/g,'\\$&')).join('.*')+'$'));
 /** Fail closed: every tool result is untrusted unless the policy names it as local, user-owned data. */
 export function readsUntrusted(tool:string,args:Record<string,unknown>={}):boolean{
  if(policy.trustedTools.includes(tool))return false;
- if(tool===policy.worldGatewayTool)return !policy.trustedWorldActions.some(pattern=>matches(pattern,`${args.target}/${args.action}`));
+ if(tool===policy.worldGatewayTool){const action=`${args.target}/${args.action}`;return !TRUSTED_WORLD_ACTIONS.some(pattern=>pattern.test(action));}
  return true;
 }
 /** Memory and skill writes persist into later turns, so they follow the same rule as external writes. */
@@ -49,6 +49,7 @@ const UNTRUSTED_SERVICES=['read_world_source','read_connected_google','use_doord
 /** Host tools that return source text. `query_world_items` is excluded: it returns
  * Worldlet's own saved items and is how a direct request finds item IDs. */
 const UNTRUSTED_TOOLS=['read_content','read_content_page','open_content','read_world_history','meeting_decisions','read_companion_archive'];
+const GUARDED_WRITES=new Set<string>([...GUARDED_WRITE_TOOLS,...TURN_GUARDED_WRITES]);
 /** Tools the host routes itself; their tool events above classify them precisely. */
 const HOST_ROUTED=new Set<string>([policy.worldGatewayTool,...worldToolCatalog.map(tool=>tool.name)]);
 
@@ -106,7 +107,7 @@ export function turnGuardedWrite(event:Event):string|null {
  if(target==='manage_routines'&&args.action!==undefined&&!ROUTINE_WRITES.includes(text(args.action)))return null;
  if(target==='use_doordash'&&args.operation!==undefined&&!DOORDASH_WRITES.includes(text(args.operation)))return null;
  if(target==='set_worldlet_preference'&&!PREFERENCE_WRITES.includes(text(args.setting)))return null;
- return [...GUARDED_WRITE_TOOLS,...TURN_GUARDED_WRITES].includes(target as never)?target:null;
+ return GUARDED_WRITES.has(target)?target:null;
 }
 
 /** One admission rule for every guarded write. `tool` is set only for the host writes

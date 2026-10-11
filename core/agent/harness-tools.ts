@@ -4,8 +4,8 @@
 // is listed; calls stay inside the Harness under its own approvals. The host reads the files read-only; these are the
 // rules. Kept ES-compatible for JavaScriptCore and Jint.
 import type {HarnessTool} from '../../contracts/harness-services.ts';
+import {record} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 const list=(value:unknown):string[]=>Array.isArray(value)?value.filter((item):item is string=>typeof item==='string'&&!!item.trim()).map(item=>item.trim()):typeof value==='string'&&value.trim()?[value.trim()]:[];
 
 // OpenClaw ------------------------------------------------------------------------------------

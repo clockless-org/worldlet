@@ -5,6 +5,7 @@
 // is; the host reads and writes the Agent's folder (agent-runtime/harness-skills.ts). Kept ES-compatible for
 // JavaScriptCore and Jint.
 import type {HarnessSkill,HarnessSkillDraft} from '../../contracts/harness-services.ts';
+import {clip,fnv1a} from './values.ts';
 
 const DAY=86_400_000;
 /** How sure a repeat must be before Fox offers it: the same steps at least `times` times over `days` distinct days in
@@ -100,9 +101,8 @@ const STOP=new Set('the and for with that this from what your you have can pleas
 const words=(text:string)=>(text.toLowerCase().match(/[\p{L}\p{N}]{3,}/gu)??[]).filter(word=>!STOP.has(word));
 const stepKey=(step:string)=>step.toLowerCase().replace(/[“”"'‘’«»]/g,'').replace(/\d+/g,'#').replace(/[^\p{L}\p{N}#]+/gu,' ').trim();
 /** A short stable id for a repeat (FNV-1a over its steps). */
-const fnv=(text:string)=>{let h=0x811c9dc5;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(36);};
+const fnv=(text:string)=>fnv1a(text).toString(36);
 const slug=(parts:string[])=>parts.join('-').normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40).replace(/-+$/,'');
-const clip=(value:string,limit:number)=>value.length>limit?value.slice(0,limit-1).trimEnd()+'…':value;
 const day=(at:number)=>{const d=new Date(at);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');};
 
 /** Fox's tasks that repeat, conservatively (SKILL_REPEAT): the same steps in the same order, again and again on

@@ -7,6 +7,7 @@
 // command-line server reads) can become the same Worldlet connection with that token. One signed in
 // through the other app's own OAuth cannot: its grant belongs to that app's client, so the person
 // reconnects it in Worldlet. Servers Worldlet has no connection for stay with that Agent.
+import {record} from './values.ts';
 
 /** One MCP server as an Agent configures it, in the shape Claude Code, OpenClaw and Hermes share. */
 export interface AgentMcpServer {name:string;url?:string;headers?:Record<string,string>;command?:string;args?:string[];env?:Record<string,string>;bearerTokenEnv?:string}
@@ -26,7 +27,6 @@ const RECOGNIZERS:Recognizer[]=[
 ];
 const GOOGLE=/gmail|google[-_ ]?(calendar|workspace|drive|mail)|gcal|gdrive|workspace-mcp/i;
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 const strings=(value:unknown):Record<string,string>=>Object.fromEntries(Object.entries(record(value)).filter(([,v])=>typeof v==='string')) as Record<string,string>;
 const host=(url:string)=>{const match=/^https?:\/\/([^/:?#]+)/i.exec(url);return match?match[1].toLowerCase():'';};
 

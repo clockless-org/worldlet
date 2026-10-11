@@ -8,15 +8,14 @@
 // JavaScriptCore and Jint.
 import type {HarnessApprovalChoice,HarnessApprovalResult,HarnessChangedFile,HarnessStandingRule} from '../../contracts/harness-services.ts';
 import {hermesConfigValues} from './harness-tools.ts';
+import {record,fnv1a} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 const clip=(text:string,limit:number)=>text.length>limit?text.slice(0,limit)+'…':text;
 const text=(value:unknown)=>typeof value==='string'?value:'';
 const time=(value:unknown)=>typeof value==='number'&&Number.isFinite(value)&&value>0?Math.round(value):undefined;
 /** A rule's id: short, printable and stable for the same rule (FNV-1a over its parts). */
 export function standingRuleId(...parts:string[]):string {
- const joined=parts.join('\u0000');let hash=0x811c9dc5;
- for(let i=0;i<joined.length;i++){hash^=joined.charCodeAt(i);hash=Math.imul(hash,0x01000193)>>>0;}
+ const joined=parts.join('\u0000'),hash=fnv1a(joined);
  let second=0x01000193;for(let i=joined.length-1;i>=0;i--){second^=joined.charCodeAt(i);second=Math.imul(second,0x811c9dc5)>>>0;}
  return 'rule-'+hash.toString(16).padStart(8,'0')+second.toString(16).padStart(8,'0');
 }

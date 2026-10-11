@@ -5,9 +5,8 @@
 // brought copies Worldlet's own routines leave to the Harness. Kept ES-compatible for JavaScriptCore and Jint.
 import type {HarnessJob,HarnessJobKind,HarnessJobRun,HarnessServiceMode} from '../../contracts/harness-services.ts';
 import {processedAttentionContent} from '../attention/index.ts';
+import {record,text} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
-const text=(value:unknown)=>typeof value==='string'?value.trim():'';
 const clip=(value:string,limit:number)=>[...value].length>limit?[...value].slice(0,limit-1).join('').trimEnd()+'…':value;
 const firstLine=(value:string)=>clip(value.replace(/\s+/g,' ').trim(),60);
 const ms=(value:unknown):number|null=>{
@@ -112,9 +111,13 @@ export function scheduleElsewhere(harness:string,mode:HarnessServiceMode|null):s
 /** Runs ended before Worldlet first watched this Harness are history, not news. */
 export const SCHEDULE_PUSH_MAX=3,SCHEDULE_PUSH_FRESH_MS=12*3600_000,SCHEDULE_ITEMS_MAX=20;
 const collapseKey=(job:string)=>('job-'+job.replace(/[^A-Za-z0-9_.-]+/g,'-')).slice(0,64);
-const itemFor=(harness:ScheduleHarness,{kind,title,reason,summary,source,quote,at}:{kind:'task'|'update';title:string;reason:string;summary:string;source:string;quote:string;at:number})=>processedAttentionContent({
- provider:'harness:'+harness.id,kind,title:clip(title,40),reason,summary:clip(summary,1200),...kind==='task'?{priority:'elevated'}:{},occurredAt:new Date(at).toISOString(),
- sources:[{provider:'harness:'+harness.id,id:clip(source,500),quote:clip(quote,1000)}]});
+type ItemFacts={kind:'task'|'update';title:string;reason:string;summary:string;source:string;quote:string;at:number};
+const scheduleItem=(provider:string,{kind,title,reason,summary,source,quote,at}:ItemFacts)=>processedAttentionContent({
+ provider,kind,title:clip(title,40),reason,summary:clip(summary,1200),...kind==='task'?{priority:'elevated'}:{},occurredAt:new Date(at).toISOString(),
+ sources:[{provider,id:clip(source,500),quote:clip(quote,1000)}]});
+const itemFor=(harness:ScheduleHarness,facts:ItemFacts)=>scheduleItem('harness:'+harness.id,facts);
+/** A run's phone line: what it said on one line, else that it finished or why not. */
+const runBody=(failed:boolean,output:string)=>clip((failed?'Did not finish: ':'')+(output?output.replace(/\s+/g,' ').trim():failed?'It stopped without saying why.':'Finished.'),240);
 /** One run as an Attention item: a result is Worth Knowing, a failure Worth Doing; a silent run is nothing. */
 export function scheduleRunResult(harness:ScheduleHarness,job:HarnessJob|undefined,run:HarnessJobRun,now:number):ScheduleResult|null {
  if(run.status==='silent')return null;
@@ -123,7 +126,7 @@ export function scheduleRunResult(harness:ScheduleHarness,job:HarnessJob|undefin
  const item=itemFor(harness,{kind:failed?'task':'update',title:name,reason:failed?`${harness.title} could not finish it`:`From ${harness.title}'s scheduled job`,
   summary:(output||(failed?'It stopped without saying why.':'It finished without a message.'))+also,source:run.id,quote:output||name,at:run.at});
  const fresh=now-run.at<=SCHEDULE_PUSH_FRESH_MS;
- return {item,push:fresh?{kind:'routine',title:clip(name,80),body:clip((failed?'Did not finish: ':'')+(firstLine(output)?output.replace(/\s+/g,' ').trim():failed?'It stopped without saying why.':'Finished.'),240),collapse:collapseKey(run.job)}:null};
+ return {item,push:fresh?{kind:'routine',title:clip(name,80),body:runBody(failed,output),collapse:collapseKey(run.job)}:null};
 }
 /** One poll: new runs after the remembered cursor become results (at most SCHEDULE_PUSH_MAX of them push), and a
  * Harness whose scheduler is not running while it has jobs to run is noted once until it runs again. The first poll
@@ -168,9 +171,7 @@ export function scheduleStep(input:{harness:ScheduleHarness;state:ScheduleState|
 export const WORLDLET_SCHEDULE='worldlet';
 const DAY=/^\d{4}-\d{2}-\d{2}$/;
 const JOURNAL_SOURCE=/^journal:(\d{4}-\d{2}-\d{2})(?::(.{1,200}))?$/;
-const worldletItem=({kind,title,reason,summary,source,quote,at}:{kind:'task'|'update';title:string;reason:string;summary:string;source:string;quote:string;at:number})=>processedAttentionContent({
- provider:WORLDLET_SCHEDULE,kind,title:clip(title,40),reason,summary:clip(summary,1200),...kind==='task'?{priority:'elevated'}:{},occurredAt:new Date(at).toISOString(),
- sources:[{provider:WORLDLET_SCHEDULE,id:clip(source,500),quote:clip(quote,1000)}]});
+const worldletItem=(facts:ItemFacts)=>scheduleItem(WORLDLET_SCHEDULE,facts);
 const dayLabel=(day:string)=>{const [y,m,d]=day.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric'});};
 /** The opening lines of a card's Markdown, for the item's summary: no headings (a lone bold label counts), tables,
  * rules or code. */
@@ -214,7 +215,7 @@ export function routineScheduleResult(value:unknown,at:number,now:number):Schedu
  const item=worldletItem({kind:failed?'task':'update',title:name,reason:failed?'Your routine did not finish':late?'It ran when your computer woke':'From your scheduled routine',
   summary:output||(failed?'It stopped without saying why. Ask Fox to check your routines.':late?'It ran late, after your computer woke. Ask Fox what it found.':'It finished. Ask Fox what it found.'),
   source:'routine:'+id+':'+Math.round(at),quote:output||name,at});
- return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:clip(name,80),body:clip((failed?'Did not finish: ':'')+(output?output.replace(/\s+/g,' ').trim():failed?'It stopped without saying why.':'Finished.'),240),collapse:collapseKey('routine-'+id)}:null};
+ return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:clip(name,80),body:runBody(failed,output),collapse:collapseKey('routine-'+id)}:null};
 }
 /** Where an item opens the Journal, from its sources: the day and the card, or null for any other item. */
 export function journalTarget(sources:unknown):{day:string;card?:string}|null {

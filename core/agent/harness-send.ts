@@ -5,6 +5,7 @@
 // the platform, chat and thread on each `state.db` session and sends with `hermes send --to <platform>:<chat>[:<thread>]`,
 // the text on stdin. Neither runs a model: the text goes out as approved. The host runs the command; these are the rules.
 // Kept ES-compatible for JavaScriptCore and Jint.
+import {record} from './values.ts';
 
 export const CHANNEL_REPLY=Object.freeze({
  /** The longest reply offered (Discord's own limit is 2,000 per message; the Agents split longer ones). */
@@ -17,7 +18,6 @@ const CHANNELS:Record<string,string>={discord:'Discord',telegram:'Telegram',slac
 const OPENCLAW_CHANNELS=['discord','googlechat','imessage','matrix','mattermost','msteams','signal','slack','telegram','whatsapp'];
 const HERMES_PLATFORMS=['telegram','discord','slack','signal','whatsapp','matrix','mattermost','sms','feishu','weixin'];
 const text=(value:unknown)=>typeof value==='string'?value.trim():typeof value==='number'&&Number.isFinite(value)?String(value):'';
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 /** One command-line value: short, one line, nothing a shell or parser could read as something else. */
 const plain=(value:string,limit=200)=>value&&value.length<=limit&&!/[\u0000-\u001f\u007f]/.test(value)?value:'';
 

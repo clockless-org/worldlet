@@ -7,12 +7,12 @@ import type {HarnessApprovalChoice,HarnessApprovalRequest,HarnessApprovalResult,
 import type {LocalHarnessId} from './local-harness.ts';
 import {responsesUsage} from './harness-usage.ts';
 import {hermesStreamAnnouncement,type HermesAnnouncedCall} from './hermes-server.ts';
+import {record,fnv1a} from './values.ts';
 
 /** Harnesses with a resident interface: Hermes Agent's `hermes acp` (one process, a session per thread) and OpenClaw's
  * Gateway (`/v1/responses`, a session key per thread). Others keep one process per turn. */
 export const LOCAL_HARNESS_RESIDENT:readonly LocalHarnessId[]=['hermes','openclaw'];
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 const clip=(text:string,limit:number)=>text.length>limit?text.slice(0,limit):text;
 
 /** The Fox thread a turn is said in, from the chat's place thread (ui/attention contextThread `["<place>","<view>"]`):
@@ -44,9 +44,7 @@ export function harnessThreadPlace(thread:string):string {
 export const harnessTurnText=(input:{text:string;world?:string}):string=>(typeof input.world==='string'&&input.world.trim()?input.world.trim()+'\n\n':'')+input.text;
 /** A stable printable name for a session key (FNV-1a over world and thread, so any thread text fits a header). */
 export function harnessSessionName(key:HarnessSessionKey):string {
- const text=key.world+'\u0000'+key.thread+'\u0000'+(key.agent??'');
- let hash=0x811c9dc5;
- for(let i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,0x01000193)>>>0;}
+ const hash=fnv1a(key.world+'\u0000'+key.thread+'\u0000'+(key.agent??''));
  const label=(key.world+'-'+key.thread).replace(/[^A-Za-z0-9._-]+/g,'-').slice(0,80);
  return 'worldlet-'+label+'-'+hash.toString(16).padStart(8,'0');
 }
@@ -135,10 +133,10 @@ export interface ResponsesStream {buffered:string;text:string;id:string|null;cal
 export const responsesStream=():ResponsesStream=>({buffered:'',text:'',id:null,calls:[],announced:[],error:null,done:false,final:null,usage:null});
 /** Reads a chunk of the server-sent event stream; returns the answer text to show now. */
 export function readResponsesChunk(state:ResponsesStream,chunk:string):string {
- state.buffered+=chunk.replace(/\r\n/g,'\n');
- let shown='',end:number;
- while((end=state.buffered.indexOf('\n\n'))>=0){
-  const frame=state.buffered.slice(0,end);state.buffered=state.buffered.slice(end+2);
+ const buffered=state.buffered+chunk.replace(/\r\n/g,'\n');
+ let shown='',start=0,end:number;
+ while((end=buffered.indexOf('\n\n',start))>=0){
+  const frame=buffered.slice(start,end);start=end+2;
   let type='',data='';
   for(const line of frame.split('\n')){if(line.startsWith('event:'))type=line.slice(6).trim();else if(line.startsWith('data:'))data+=(data?'\n':'')+line.slice(5).replace(/^ /,'');}
   if(data==='[DONE]'){state.done=true;continue;}
@@ -164,6 +162,7 @@ export function readResponsesChunk(state:ResponsesStream,chunk:string):string {
    state.done=true;
   }
  }
+ state.buffered=buffered.slice(start);
  return shown;
 }
 

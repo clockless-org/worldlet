@@ -8,8 +8,8 @@
 // harness-sessions.ts HermesServerConversation). Kept ES-compatible for JavaScriptCore and Jint.
 import {hermesConfigValues} from './harness-tools.ts';
 import {turnGuardedWrite} from './turn-trust.ts';
+import {record} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 /** Hermes Agent's API server port when nothing sets one (gateway/platforms/api_server.py DEFAULT_PORT). */
 export const HERMES_SERVER_PORT=8642;
 /** What Hermes refuses as an API_SERVER_KEY (hermes_cli/auth.py has_usable_secret, min_length 16, and its placeholders):
@@ -65,16 +65,17 @@ export function hermesWorldTools(yaml:string,server:HermesWorldToolsServer):Herm
  const entry=worldToolsEntry(yaml);
  if(!Object.keys(entry).length)return 'missing';
  const args:unknown[]=Array.isArray(entry.args)?entry.args:[];
- if(!args.some(arg=>String(arg).slice(-HERMES_WORLD_TOOLS_SHIM.length)===HERMES_WORLD_TOOLS_SHIM))return 'theirs';
+ if(!runsShim(args))return 'theirs';
  if(String(entry.enabled).toLowerCase()==='false')return 'off';
  const env=record(entry.env),same=entry.command===server.command&&args.join('\n')===server.args.join('\n')&&Object.keys(server.env).every(key=>String(env[key]??'')===server.env[key]);
  return same?'current':'outdated';
 }
 const worldToolsEntry=(yaml:string)=>record(record(hermesConfigValues(String(yaml??'')).mcp_servers)[HERMES_WORLD_TOOLS]);
+const runsShim=(args:unknown[])=>args.some(arg=>String(arg).slice(-HERMES_WORLD_TOOLS_SHIM.length)===HERMES_WORLD_TOOLS_SHIM);
 /** Whether the profile can reach World tools through Worldlet's entry (Fox's conversation on its API server needs it). */
 export function hermesWorldToolsRegistered(yaml:string):boolean {
- const entry=worldToolsEntry(yaml),args:unknown[]=Array.isArray(entry.args)?entry.args:[];
- return String(entry.enabled).toLowerCase()!=='false'&&args.some(arg=>String(arg).slice(-HERMES_WORLD_TOOLS_SHIM.length)===HERMES_WORLD_TOOLS_SHIM);
+ const entry=worldToolsEntry(yaml);
+ return String(entry.enabled).toLowerCase()!=='false'&&runsShim(Array.isArray(entry.args)?entry.args:[]);
 }
 /** Hermes' own `hermes mcp add` for it (it connects first and saves only this entry; other entries are never touched),
  * answered on stdin: overwrite Worldlet's outdated entry, enable every tool it lists. Null when nothing is to change. */
