@@ -64,15 +64,6 @@
 .companion-info-panel::after{display:none}
 .companion-info-panel .companion-info-profile{flex-basis:172px;max-height:100%;overflow:auto;padding:4px;box-sizing:border-box}
 .companion-info-panel .companion-info-profile img{display:block;width:112px;height:128px;margin:0 auto;object-fit:contain;background:#e6dbc438;border:1px solid #d9cbae80;border-radius:14px;padding:8px;box-sizing:border-box}
-.companion-look{text-align:left}
-.companion-look h4{margin:0 0 8px;font-size:13px;color:#656651;font-weight:600}
-.companion-look-row{display:flex;flex-wrap:wrap;gap:7px}
-.companion-look-label{display:block;margin:12px 0 6px;font-size:12px;color:#77745e}
-.companion-info-panel .companion-look-swatch{flex:0 0 auto;width:26px;height:26px;min-width:0;min-height:0;box-sizing:border-box;padding:0;border-radius:50%;border:1px solid #00000026;background:radial-gradient(circle at 70% 75%,var(--look-accent,transparent) 0 30%,transparent 32%),var(--look-fill);cursor:pointer}
-.companion-info-panel .companion-look-scarves .companion-look-swatch{width:20px;height:20px}
-.companion-look-swatch[aria-pressed=true]{outline:2px solid #3f5a3a;outline-offset:2px}
-.companion-look-swatch:focus-visible{outline:2px solid #2f6fb0;outline-offset:2px}
-.companion-look-hint{margin:12px 0 0;font-size:12px;color:#77745e}
 .companion-profile-facts{margin:18px 0 0;text-align:left;font-size:12px;overflow-wrap:anywhere}
 .companion-profile-facts dt{color:#656651;margin-top:12px;font-size:11px}
 .companion-profile-facts dd{margin:3px 0 0;white-space:pre-wrap}
@@ -92,7 +83,6 @@
 
 .companion-info-panel .companion-info-profile:not([hidden]){display:block;flex:none;width:min(100%,480px);max-height:none;min-height:0;align-self:center;overflow:visible;padding:16px 24px;position:static;text-align:center}
 .companion-info-panel .companion-info-profile img{position:static;width:112px;height:128px;margin:0 auto;padding:8px}
-.companion-info-panel .companion-info-profile.has-look:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:36px;align-items:center;width:min(100%,660px)}
 .companion-info-panel .companion-profile-facts{margin:20px auto 0;max-width:320px;display:grid;grid-template-columns:80px 1fr;gap:12px 16px;text-align:left}
 .companion-info-panel .companion-profile-facts dt,.companion-info-panel .companion-profile-facts dd{margin:0;font-size:13px}
 .companion-history li{display:flex;gap:12px;border:0;padding:12px 0;align-items:flex-start}
@@ -116,29 +106,12 @@
 .companion-phone-computers p{margin:0}
 .companion-phone-code{max-width:100%;overflow-wrap:anywhere;font-size:11px;padding:6px 8px;border-radius:8px;background:#fffdf7;border:1px solid #d9cbae80;user-select:all}
 /* History leads with what happened, one plain line each, newest first and grouped by day. */
-.companion-history ol.companion-world-log{margin:12px 0 20px}
-.companion-history .companion-world-log li{display:block;border:0;padding:0}
-.companion-history .companion-world-log li.companion-world-log-day{margin:14px 0 4px;color:#656651;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.companion-history .companion-world-log :is(button,div){all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:4px 8px;border-radius:8px;font-size:13px}
-.companion-history .companion-world-log button{cursor:pointer}
-.companion-history .companion-world-log button:hover{background:#203b300f}
-.companion-history .companion-world-log button:focus-visible{outline:2px solid var(--ui-focus,#edc47d)}
-.companion-history .companion-world-log span:not(.world-log-icon){flex:1;min-width:0}
-.companion-history .companion-world-log time{display:inline;margin:0;flex:none}
-.companion-history .companion-world-log .world-log-icon{flex:none;display:grid;place-items:center;width:22px;height:22px}
-.companion-history .companion-world-log .world-log-icon img{width:22px;height:22px;object-fit:contain}
-.companion-history .companion-world-log .world-log-icon svg{width:15px;height:15px}
-.companion-history .companion-world-log [data-failed=true] span{color:#9a4b36}
-@media(max-width:600px){.companion-info-panel .companion-info-profile.has-look:not([hidden]){grid-template-columns:1fr;gap:16px}}
 /* Companion panel, redone (owner feedback 2026-10-03): larger, every page fits. */
 .native-console .companion-info-panel{width:min(1040px,calc(100vw - 32px));height:min(660px,calc(100dvh - 32px))}
 /* Profile page: the companion on the left, what it can do scrolling on the right. */
 .companion-info-panel .companion-profile-page:not([hidden]){display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:28px;min-height:0}
-.companion-info-panel .companion-profile-page>.companion-info-profile,.companion-info-panel .companion-profile-page>.companion-info-profile.has-look{display:block;width:auto;max-height:none;min-height:0;align-self:stretch;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:4px 12px 8px 4px;position:static;text-align:center}
-.companion-profile-page .companion-profile-identity{margin-bottom:18px}
 .companion-profile-page .companion-abilities{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:0 8px 8px 0}
 .companion-profile-page .companion-abilities h3{margin-top:4px}
-.companion-profile-page .companion-look-hint{margin-top:12px}
 .companion-info-panel .companion-abilities-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media(max-width:700px){.companion-info-panel .companion-profile-page:not([hidden]){display:block}.companion-info-panel .companion-profile-page>.companion-info-profile,.companion-profile-page .companion-abilities{overflow:visible}.companion-profile-page .companion-abilities{margin-top:16px}}
 .companion-abilities .companion-info-card{flex-wrap:nowrap;padding:12px}
@@ -152,9 +125,6 @@
 .companion-panel-guide :is(input,select){box-sizing:border-box;max-width:100%;min-height:36px;border:1px solid #cbb998;border-radius:8px;background:#fffaf0;padding:6px 10px;font:inherit}
 .companion-panel-guide table{font-size:12px}
 .companion-history{display:flex;flex-direction:column;padding-top:0}
-.companion-history-feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;border-top:1px solid #d9cbae80;border-bottom:1px solid #d9cbae80;mask-image:linear-gradient(transparent,#000 28px)}
-.companion-history .companion-history-feed ol.companion-world-log{margin:24px 0 8px}
-.companion-history .companion-world-log li[data-live=true] span{color:#4f6b45;font-style:italic}
 .companion-history-records{max-height:280px;overflow-y:auto;margin-top:8px;padding-right:6px}
 .native-console .companion-info-panel .companion-info-body>.companion-settings{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;margin:0;flex:1;min-height:0}
 .companion-settings-list{display:flex;flex-direction:column;gap:2px;overflow-y:auto;min-height:0;padding-right:4px;border-right:1px solid #d9cbae80}
@@ -257,3 +227,15 @@
 .companion-settings-elsewhere>summary{cursor:pointer;font-size:13px;font-weight:600;color:#354132;padding:6px 0}
 .companion-settings-elsewhere[open]>summary{margin-bottom:8px}
 .companion-settings-elsewhere>.companion-settings-row+.companion-settings-row{margin-top:8px}
+/* Feedback: a button in the World's bottom-right corner and a small panel above it (owner request 2026-10-10). */
+#notionWorld .world-feedback-corner{position:absolute;right:24px;bottom:22px;z-index:30;pointer-events:auto}
+.world-feedback-button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 12px;border-radius:18px;cursor:pointer;color:var(--ui-chrome,#fffdf4);text-shadow:var(--ui-shadow-text,0 1px 2px #14251bb3);font-size:13px;font-weight:600}
+.world-feedback-button svg{width:18px;height:18px}
+.world-feedback-button:hover,.world-feedback-button[aria-expanded=true]{background:#14251b33}
+.world-feedback-button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+[data-onboarding=true] .world-feedback-corner,.companion-info-open .world-feedback-corner{display:none}
+.native-console .companion-feedback-panel{position:fixed;inset:auto 24px 70px auto;margin:0;width:min(420px,calc(100vw - 32px));max-height:calc(100dvh - 110px);box-sizing:border-box;padding:24px;z-index:91;overflow:auto;box-shadow:0 18px 50px #1f2b2240}
+.native-console .companion-feedback-panel:not([open]){display:none}
+.companion-feedback-panel .companion-feedback{margin:0;min-height:0;padding-top:0}
+.companion-feedback-panel .companion-info-close{position:absolute;right:10px;top:8px;width:32px;height:32px;border:0;background:none;font-size:24px;color:#78694f;cursor:pointer}
+@media(max-width:600px){#notionWorld .world-feedback-corner{right:10px;bottom:14px}.world-feedback-button{padding:9px}.world-feedback-button span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.native-console .companion-feedback-panel{inset:auto 16px 60px 16px;width:auto}}

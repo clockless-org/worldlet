@@ -4,7 +4,7 @@ import {WorldletError} from '../../files.ts';
 import {approvalGrantFor,approvalThreadLabel,harnessApprovalFeatures,harnessService,isStandingRuleId,readApprovalGrants,rememberApprovalGrant} from '../../../../../core/agent/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest} from '../../../../../contracts/harness-services.ts';
 
-// Settings › Approvals (owner goal 2026-10-08: approvals better than OpenClaw / Hermes Agent): one list of the standing
+// Standing approvals (owner goal 2026-10-08: approvals better than OpenClaw / Hermes Agent; no Settings section since 2026-10-10): one list of the standing
 // rules an Always left in each Harness on this computer, with which agent, when and from which Fox thread it was
 // granted, each revoked in one click the Harness's own way (agent-runtime/harness-approvals.ts). The Harness keeps what
 // is allowed; the World keeps who said Always and where (world.sqlite setting `approval-grants`, core

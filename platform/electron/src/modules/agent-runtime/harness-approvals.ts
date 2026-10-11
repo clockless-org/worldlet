@@ -12,7 +12,7 @@ import {harnessEnvironment,type HarnessEnvironment,type LocalHarnessInstall} fro
 // revoked only the way its own documentation gives: Hermes Agent's `command_allowlist` in each profile's config.yaml,
 // changed with its own `hermes config set`; OpenClaw's approvals document and automation grants through its own
 // `openclaw approvals` commands. Worldlet never edits either file itself. What the entries mean is Core's
-// (core/agent/harness-approvals.ts); Settings › Approvals (fox `harnessApprovalRules`) never asks which Harness it is.
+// (core/agent/harness-approvals.ts); fox `harnessApprovalRules` never asks which Harness it is.
 
 const OUTPUT=4_000_000;
 type Run={code:number|null;stdout:string;stderr:string};

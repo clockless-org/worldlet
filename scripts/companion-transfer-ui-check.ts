@@ -18,7 +18,7 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  await page.screenshot({path:'/tmp/companion-profile-tab.png'});
  // One list of sections on the left, the chosen one's details on the right, no tabs (owner request 2026-10-10).
  assert.equal(await panel.getByRole('tab').count(),0,'no tabs');
- assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Fox','Your Agent','Approvals','Accounts','Phone','History','Sounds and voice','Privacy and data','General','Help','Feedback'],'Fox first, Feedback last, no Energy, no Journal');
+ assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Fox','Your Agent','Accounts','Phone','General','Help'],'Fox first, no Energy, Journal, Approvals, History, Sounds, Privacy or Feedback');
  const wheel=()=>detail.dispatchEvent('wheel',{deltaY:120,bubbles:true,cancelable:true});
  await wheel();await page.waitForTimeout(260);await wheel();assert.equal(await panel.getAttribute('data-section'),'Profile','the wheel never turns the page');
  assert.equal(await panel.getByRole('button',{name:/^(Import|Export)$/}).count(),0);
@@ -26,7 +26,7 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  const viewport=page.viewportSize();assert(Math.abs(box.x+box.width/2-viewport.width/2)<2&&Math.abs(box.y+box.height/2-viewport.height/2)<2,'Panel is independent and centered');
  assert.equal(await panel.evaluate(e=>getComputedStyle(e,'::after').display),'none','Panel has no Fox connector');
  // Every section opens beside the list, which stays where it is.
- for(const id of ['fox','model','approvals','integrations','phone','history','sounds','privacy','general','help','feedback']){
+ for(const id of ['fox','model','integrations','phone','general','help']){
   await list.locator(`[data-setting="${id}"]`).click();await list.locator(`[data-setting="${id}"][aria-current=true]`).waitFor();
   const d=await detail.boundingBox(),l=await list.boundingBox();assert(d&&l&&l.x+l.width<=d.x,id+' opens right of the list');
   assert(await panel.evaluate(e=>e.scrollHeight<=e.clientHeight+1),id+' fits the panel');
@@ -50,5 +50,5 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  await page.setViewportSize({width:375,height:812});await page.screenshot({path:'/tmp/companion-panel-small.png'});
  await page.keyboard.press('Escape');assert.equal(await panel.isVisible(),false);
  assert.equal(await page.evaluate(()=>calls.some(c=>c.action==='companionArchive')),false);
- console.log('PASS companion panel: larger layout, one list of sections with Feedback last and no tabs, pages that fit, no transfer controls, fixed section list, responsive scroll and Escape');
+ console.log('PASS companion panel: larger layout, one list of six sections and no tabs, pages that fit, no transfer controls, fixed section list, responsive scroll and Escape');
 });

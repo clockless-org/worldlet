@@ -32,7 +32,7 @@ import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
-import {companionLookIsClassic,normalizeCompanionLook,parseCompanionLook,placeKey,proactiveAsked,proactiveDue,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
+import {placeKey,proactiveAsked,proactiveDue,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 /** What the World holds about the companion, for the Profile page: its saved memory and, in the
@@ -802,12 +802,6 @@ export function installFox(host:Host){
     preferences.set('worldlet.spokenVoice',value);
    }else if(setting==='companion_name'&&typeof value==='string'&&value.trim()&&characterCount(value)<=24){
     companion.update({name:value.trim()});preferences.set('worldlet.companionName',value.trim());
-   }else if(setting==='companion_look'&&typeof value==='string'){
-    // Colors only: the rig, performances and identity stay the same.
-    let look;try{look=parseCompanionLook(value);}catch(error){throw new WorldletError(error.message);}
-    if(companionLookIsClassic(look))preferences.remove('worldlet.companionLook');else preferences.set('worldlet.companionLook',look);
-    page.event('worldlet:companion-appearance',{name:style.name(),look});
-    return {ok:true,look,companionStyle:style.current()};
    }else if(setting==='morning_brief'&&typeof value==='string'){
     // What the 6 AM brief holds, in the person's words (core/artifacts/daily.ts); empty or the default keeps the default.
     const brief=readMorningBrief(value);
@@ -898,7 +892,7 @@ export function installFox(host:Host){
    const sample=store.sampleEnabled(),profile=companion.archive({sample,setup:false});
    let knowledge;
    try{knowledge=knowledgeOf(profile,!sample&&store.writable?store.ledger():null);}catch{knowledge=knowledgeOf(profile,null);}
-   return {name:profile.identity.name,createdAt:profile.identity.createdAt,personality:profile.personality,attentionFocus:preferences.string('worldlet.attentionFocus')||'auto',look:normalizeCompanionLook(preferences.get('worldlet.companionLook')),
+   return {name:profile.identity.name,createdAt:profile.identity.createdAt,personality:profile.personality,attentionFocus:preferences.string('worldlet.attentionFocus')||'auto',
     knowledge};
   },
   speakReply:async request=>{
@@ -906,7 +900,7 @@ export function installFox(host:Host){
    if(request.stop===true){voice?.stopSpeaking();return {ok:true};}
    if(typeof request.text==='string'&&characterCount(request.text)<=12000){
     if(!voice)throw new WorldletError('Spoken replies are unavailable in this build.');
-    // Talk with Fox reads its replies unless Settings › Sounds and voice turned that off; elsewhere Spoken replies decides.
+    // Talk with Fox reads its replies unless `worldlet.talkReplies` is off; elsewhere Spoken replies decides.
     const enabled=request.talk===true?preferences.bool('worldlet.talkReplies',true):preferences.bool('worldlet.spokenReplies');
     return {ok:true,spoken:await voice.speak(request.text,enabled,preferences.string('worldlet.spokenVoice'),agent()?.voice?.()??null)};
    }
@@ -953,7 +947,7 @@ export function installFox(host:Host){
   foxSkills:request=>skills.request(request),
   /** The person started typing or opened Fox in `thread` (the chat's place thread): open its session now. */
   agentWarm:async request=>({warm:await warmThread(typeof request.thread==='string'?request.thread:'fox-main')}),
-  /** Settings › Approvals: every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
+  /** Every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
   harnessApprovalRules:request=>request.operation==='revoke'?approvalRules.revoke(request.harness,request.id):approvalRules.list(),
   /** Settings › Accounts: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */

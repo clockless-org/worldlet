@@ -4,13 +4,12 @@ import {BROWSER_HOME,createBrowserHome} from '../../core/browser/index.ts';
 import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
-import {showApprovalRules} from './approval-rules.ts';
 import {showAgentConnections} from './agent-connections.ts';
 
 /** What the World view lends Settings: the sample world switch and which host features exist. */
 export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=>boolean;localDataDeletion:()=>boolean};
-/** The companion pages that are sections of their own in the one list: Fox's profile, Phone, History and Feedback. */
-export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement;history:HTMLElement;feedback:HTMLElement};
+/** The companion pages that are sections of their own in the one list: Fox's profile and Phone. */
+export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement};
 type Item={id:string;label:string;hint:string;page?:boolean;show:(detail:HTMLElement)=>void|Promise<void>};
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
@@ -19,7 +18,7 @@ const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-re
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
-export function createCompanionSettings({call,host,pages,history,onShow,close}:{call:(action:string,body?:any)=>Promise<any>;host:()=>CompanionSettingsHost|undefined;pages:CompanionSettingsPages;history:{records:HTMLElement;showRecords:()=>void};onShow:(id:string)=>void;close:()=>void}){
+export function createCompanionSettings({call,host,pages,records,onShow,close}:{call:(action:string,body?:any)=>Promise<any>;host:()=>CompanionSettingsHost|undefined;pages:CompanionSettingsPages;records:{records:HTMLElement;showRecords:()=>void};onShow:(id:string)=>void;close:()=>void}){
  const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const element=el('section','companion-info-section companion-settings');element.dataset.section='Settings';
  const list=el('nav','companion-settings-list'),detail=el('div','companion-settings-detail');
@@ -127,7 +126,7 @@ export function createCompanionSettings({call,host,pages,history,onShow,close}:{
    action('Check for updates',async()=>{said.textContent='Checking…';try{state=await call('appUpdate',{operation:'check'});draw();}catch(e){said.textContent=(e as Error).message||'Could not check for updates.';}},{id:'check-updates'}),said);
  }
  // A Fox preference screen, drawn in the details instead of the bubble.
- // Each screen has a guide of its own, so one section can show two of them (Privacy and data).
+ // Each screen has a guide of its own, so one section can show two of them.
  const screen=(name:string)=>async(target:HTMLElement)=>{
   const own=createPanelGuide();target.append(own.element);
   await createFoxPreferences({call,view:own.view,setup:()=>{},toggleSample:()=>host()?.toggleSample?.(),embedded:true}).show(name);
@@ -282,10 +281,8 @@ export function createCompanionSettings({call,host,pages,history,onShow,close}:{
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical).
  const items:Item[]=[
-  {id:'fox',label:'Fox',hint:'Profile, look and what it knows',page:true,show:target=>{target.append(pages.fox);}},
+  {id:'fox',label:'Fox',hint:'Profile and what it knows',page:true,show:target=>{target.append(pages.fox);}},
   {id:'model',label:'Your Agent',hint:'What Fox runs on',show:modelSetting},
-  // The standing rules Always left in each Agent here, with Revoke (approval-rules.ts).
-  {id:'approvals',label:'Approvals',hint:'What it may do without asking',show:target=>{const turn=ticket;return showApprovalRules(target,call,()=>turn===ticket&&target.isConnected);}},
   {id:'integrations',label:'Accounts',hint:'Signed-in accounts and tools',show:async target=>{
    const turn=ticket,state=await call('snapshot').catch(()=>null);if(turn!==ticket)return;
    const live=(state?.connections||[]).filter(connectionLive),rows=el('div','companion-settings-rows'),said=status();
@@ -304,29 +301,20 @@ export function createCompanionSettings({call,host,pages,history,onShow,close}:{
    await showAgentConnections(target,call,()=>turn===ticket&&target.isConnected);
   }},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
-  {id:'history',label:'History',hint:'What happened in your world',page:true,show:target=>{target.append(pages.history);}},
-  {id:'sounds',label:'Sounds and voice',hint:'Music, talking and spoken replies',show:async target=>{
-   const turn=ticket;let audio=await call('worldAudio',{operation:'status'}).catch(()=>({}));if(turn!==ticket)return;
-   const playing=(key:string)=>['playing','loading','buffering'].includes(audio?.[key]?.state);
-   const rows=el('div','companion-settings-rows');
-   const draw=()=>{rows.replaceChildren();for(const [key,title,text] of [['music','Music','Quiet background music while you work.'],['ambience','World sounds','The atmosphere of the place you’re in.']] as const){
-    const row=el('div','companion-settings-row'),words=el('div');words.append(el('strong','',title),el('span','',text));
-    row.append(words,action(playing(key)?'Turn off':'Turn on',async()=>{audio=await call('worldAudio',{operation:key,enabled:!playing(key)});draw();}));rows.append(row);
-   }};
-   draw();target.append(subhead('Sounds'),rows);
-   if(turn===ticket)await screen('voice')(target);
-  }},
-  {id:'privacy',label:'Privacy and data',hint:'What Fox may share, backups',show:async target=>{
-   await screen('privacy')(target);
-   if(!host()?.sample())await recordings(target);
-   await screen('data')(target);
-   if(!host()?.localDataDeletion())return;
-   const said=status();
-   target.append(el('h5','companion-settings-subhead','Delete saved data'),note('Deletes every item and imported copy Worldlet saved on this computer. Connections, model setup and Fox’s memory are kept.'),
-    action('Delete saved data',async()=>{said.textContent='';try{const result=await call('clearWorldContent');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not delete: '+((e as Error).message||'reopen Worldlet and try again.');}}),said);
-  }},
-  {id:'general',label:'General',hint:'Updates, login, Browser home',show:async target=>{
+  {id:'general',label:'General',hint:'Updates, Browser, usage counts',show:async target=>{
    target.append(subhead('Updates'));await updates(target);
+   // The one privacy choice left after the Privacy section went (owner request 2026-10-10): the website's privacy page
+   // promises that usage counts can be turned off, and off stops all reporting.
+   {
+    const turn=ticket,said=status(),row=el('div','companion-settings-row'),words=el('div');row.dataset.setting='usage-analytics';
+    const draw=async()=>{
+     const info=await call('foxPreferences').catch(()=>null);if(turn!==ticket)return;
+     const on=info?.usageAnalyticsEnabled===true;
+     words.replaceChildren(el('strong','',on?'Sharing basic usage counts':'Not sharing usage counts'),el('span','',on?'Setup, connection and feature counts, never what you write, read or browse. Turning it off stops all reporting.':'Nothing about how you use Worldlet leaves this computer.'));
+     row.replaceChildren(words,action(on?'Stop sharing':'Share',async()=>{said.textContent='';try{await call('foxPreferenceChange',{setting:'usage_analytics',value:!on});await draw();}catch(e){said.textContent=(e as Error).message||'Could not change it.';}},{id:'usage-analytics'}));
+    };
+    target.append(subhead('Usage counts'),row,said);await draw();
+   }
    target.append(subhead('Open at login'));await screen('login')(target);
    {
     target.append(subhead('Browser home page'));
@@ -337,6 +325,8 @@ export function createCompanionSettings({call,host,pages,history,onShow,close}:{
     target.append(note('Opening the Browser after '+BROWSER_HOME.idleMs/60_000+' minutes away starts on this page; within that time it is where you left it. Home in the Browser’s top bar goes here too.'),
      input,action('Save',save,{primary:true,id:'browser-home-save'}),action('Use Google',()=>{input.value=home.set('')||'';said.textContent='The Browser starts on Google.';},{id:'browser-home-reset'}),said);
     void savedLogins(target);
+    // What the built-in browser recorded, with Delete, sits with the Browser now the Privacy section is gone.
+    if(!host()?.sample())await recordings(target);
    }
    {
     target.append(subhead('Sample world'));
@@ -353,8 +343,8 @@ export function createCompanionSettings({call,host,pages,history,onShow,close}:{
    const team=el('details','companion-settings-elsewhere') as HTMLDetailsElement;
    team.append(el('summary','','For the Worldlet team'),
     action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}}),
-    el('h5','companion-settings-subhead','Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),history.records);
-   team.ontoggle=()=>{if(team.open)history.showRecords();};
+    el('h5','companion-settings-subhead','Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
+   team.ontoggle=()=>{if(team.open)records.showRecords();};
    target.append(
     subhead('Restart Fox'),note('If Fox stops answering or seems stuck, restart it. Fox stops what it is doing and starts again; conversations, memory and connections are kept.'),
     action('Restart Fox',async()=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'restart'}),
@@ -364,7 +354,6 @@ export function createCompanionSettings({call,host,pages,history,onShow,close}:{
     subhead('Reset'),note('Reset erases Fox’s memory, your saved items and account connections on this computer, keeps your model setup, and starts setup again. You will be asked to confirm first.'),
     action('Reset',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not reset: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'}),said);
   }},
-  {id:'feedback',label:'Feedback',hint:'Tell the Worldlet team',page:true,show:target=>{target.append(pages.feedback);}},
  ];
  // The version at a glance under the list (owner request 2026-10-04): 2026.MMDD.BUILD and the update channel.
  const version=el('div','companion-settings-version');version.setAttribute('aria-label','Version');

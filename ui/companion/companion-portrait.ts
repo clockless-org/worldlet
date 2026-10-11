@@ -4,7 +4,6 @@ import {ambientPose,companionPreviewDuration,companionPreviewActions} from './co
 import {loadPaintedFox} from './animation/fox-painted-actions.ts';
 import {loadAnatomyFox} from './animation/fox-anatomy-runtime.ts';
 import {loadRiveFox} from './animation/fox-rive.ts';
-import {companionLook,followCompanionLook} from './companion-look.ts';
 import {isFoxForegroundActivity} from '../../contracts/companion-activity.ts';
 import {createFoxSurfaceTiming,registerFoxFrameTiming} from './fox-frame-timing.ts';
 import {WORLD_FRAME_RATE,foxFrameRate,frameDue,windowActive} from '../world/index.ts';
@@ -154,12 +153,10 @@ function mountPortrait(host,{bust=false}={}){
    const fallback=await loadPaintedFox(assets.companionPainted);
    try{
     // Rive first; the draft anatomy rig stays as the development fallback.
-    const anatomy=await (assets.companionRive?loadRiveFox(assets.companionRive,canvas,companionLook()).catch(error=>{
+    const anatomy=await (assets.companionRive?loadRiveFox(assets.companionRive,canvas).catch(error=>{
      canvas.dataset.animationFallback='rive-load';if(!assets.companionAnatomy)throw error;return loadAnatomyFox(assets.companionAnatomy,canvas);
     }):loadAnatomyFox(assets.companionAnatomy,canvas));
     if(!disposed){canvas.width=640;canvas.height=640;}
-    // The Rive Fox wears the companion's look; a change shows on the next frame.
-    const unfollow='setLook' in anatomy?followCompanionLook(look=>void anatomy.setLook(look).then(()=>tick())):()=>{};
     let wasSupported=true;
     return {draw(ctx,state,elapsed,now,reduced){
      const supported=anatomy.supports(state);
@@ -167,7 +164,7 @@ function mountPortrait(host,{bust=false}={}){
      wasSupported=supported;
      canvas.dataset.anatomyFallback=supported?'':state;
      return (supported?anatomy:fallback).draw(ctx,state,elapsed,now,reduced);
-    },restartPreview(){anatomy.reset();},dispose(){unfollow();anatomy.dispose();fallback.dispose();}};
+    },restartPreview(){anatomy.reset();},dispose(){anatomy.dispose();fallback.dispose();}};
    }catch{canvas.dataset.animationFallback='anatomy-load';return fallback;}
   }
   try{const painted=await loadPaintedFox(assets.companionPainted);if(!disposed){canvas.width=640;canvas.height=640;}return painted;}catch{canvas.dataset.animationFallback='true';return null;}

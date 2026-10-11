@@ -57,7 +57,7 @@ export const parallelChecks=available([
  'scripts/companion-life-check.ts','scripts/companion-knowledge-ui-check.ts','scripts/companion-persona-ui-check.ts',
  'scripts/fox-animation-schedule-check.ts','scripts/fox-applet-navigation-check.ts','scripts/fox-rive-check.ts',
  'scripts/fox-reply-action-check.ts','scripts/fox-painted-check.ts','scripts/fox-painted-render-check.ts',
- 'scripts/companion-look-check.ts','scripts/fox-activity-routing-check.ts','scripts/fox-timing-panel-check.ts',
+ 'scripts/fox-activity-routing-check.ts','scripts/fox-timing-panel-check.ts',
  'scripts/fox-audio-capability-check.ts','scripts/fox-pose-transition-check.ts','scripts/fox-frame-timing-check.ts',
  'scripts/fox-painted-head-check.ts','scripts/fox-state-catalog-check.ts',
  // The rest of those suites, then their fixture checks without a browser, which take about a second each.

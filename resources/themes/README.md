@@ -43,7 +43,7 @@ Any surface may be `shared`, which leaves the shared look (Village's) in place. 
 applies the rest: tokens and pieces become `--theme-*` properties with `data-theme-skin`, `data-theme-fonts` and
 `data-theme-room-transition` on `<html>`, which `ui/themes/theme-surfaces.css` keys on; fonts load through
 `FontFace`; the loading picture is set before the World starts; sounds play only while World sounds are on
-(Settings › Sounds). Attention pictures and Mail parts come from the theme's Style Pack; the build ships a theme's
+(asking Fox turns them on or off). Attention pictures and Mail parts come from the theme's Style Pack; the build ships a theme's
 own Attention pictures under `attention/<theme>/`. A preview with no theme-specific scene uses its
 themed category illustration when supplied. Sprite-rig companion perches are bundled as images and
 rendered underneath the character.
