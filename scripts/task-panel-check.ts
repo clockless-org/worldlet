@@ -1,5 +1,5 @@
-// The World's Task panel (core/tasks/task-panel.ts, core/tasks/next-run.ts): which rows go under Routines and Doing now,
-// their order, every row kept (the panel scrolls as one column), no finished work (it lives in the Journal), and the
+// The World's tasks beside Fox (core/tasks/task-panel.ts, core/tasks/next-run.ts): which rows go under Next and Doing now,
+// their order, every row kept (a side lists them all), no finished work (it lives in the Journal), and the
 // time text. Fixed clock, fictional jobs; no browser.
 import assert from 'node:assert/strict';
 import {nextCronRun,taskPanel,taskHowOften,routineEvery,routineDay,TASK_PANEL_KINDS} from '../core/tasks/index.ts';
@@ -29,9 +29,9 @@ assert.equal(taskHowOften({everySeconds:3600}),'Every hour');assert.equal(taskHo
 
 // Empty: nothing to show.
 const empty=taskPanel({},now,L);
-assert.equal(empty.empty,true);assert.equal(empty.chip,'');
+assert.equal(empty.empty,true);
 assert.deepEqual([empty.routines.total,empty.now.total],[0,0]);
-assert.deepEqual(Object.keys(empty).sort(),['chip','empty','now','routines'],'two groups: no Done list');
+assert.deepEqual(Object.keys(empty).sort(),['empty','now','routines'],'two groups: no Done list');
 
 // Routines: the Agent's jobs and the next source checks, soonest first; repeating ones without a time last; all of them.
 const jobs=[
@@ -50,7 +50,7 @@ const tasks=[
 ];
 const planned=taskPanel({jobs,tasks,harness:'OpenClaw'},now,L);
 assert.deepEqual(planned.routines.rows.map(r=>[r.title,r.when]),[['Check Mail','7:40 AM'],['Call the dentist','7:50 AM'],['Morning brief','8:00 AM'],['Gym','Mon 6:30 AM'],['Flight prices','every hour']],JSON.stringify(planned.routines.rows));
-assert.equal(planned.routines.total,5,'no "+N more": the column scrolls');
+assert.equal(planned.routines.total,5,'every routine kept: the side’s list shows them all');
 assert.ok(planned.routines.rows.every(r=>r.group==='routines'));
 const brief=planned.routines.rows.find(r=>r.id==='job:a')!;
 assert.deepEqual([brief.source,brief.every,brief.by,brief.open],['agent-job','Every day','OpenClaw’s scheduler',{routine:'a'}]);
@@ -61,11 +61,11 @@ assert.equal(taskPanel({jobs:[{id:'t',name:'Weather',kind:'prompt',paused:false,
 assert.equal(taskPanel({jobs:[{id:'t',name:'Weather',kind:'prompt',paused:false,when:{everySeconds:3600}}] as any},now,L).routines.rows[0].when,'every hour');
 // A running check is Doing now, never a routine.
 assert.deepEqual(planned.now.rows.map(r=>[r.title,r.when,r.source]),[['Checking Notes','In progress','check']]);
-assert.equal(planned.chip,'Routines 5 · Doing now 1');
+assert.deepEqual(planned.routines.rows.map(r=>[r.name,r.status,r.icon]),[['Check Mail','7:40 AM','clock'],['Call the dentist','7:50 AM','clock'],['Morning brief','8:00 AM','clock'],['Gym','Mon 6:30 AM','clock'],['Flight prices','every hour','clock']],'each card: its name, when it runs, a clock');
 // The timeline's day and time beside each dot.
 assert.deepEqual(planned.routines.rows.map(r=>[r.day,r.clock]),[['Today','7:40 AM'],['Today','7:50 AM'],['Today','8:00 AM'],['Mon','6:30 AM'],['Repeating','every hour']]);
 
-// Doing now: Fox's work, Applets working, checks running and older conversations coming in, newest first, one window each.
+// Doing now: Fox's work, Applets working, checks running and older conversations coming in, newest first, one card each.
 const doing=taskPanel({
  fox:[{source:'reply',text:'Drafting a reply: Answer Sam about the venue…',at:now-60_000}],
  working:[{id:'task-1',applet:'youtube',at:s('2026-10-10T07:25:00')},{id:'task-2',applet:'not-an-applet',at:s('2026-10-10T07:25:00')}],
@@ -73,17 +73,20 @@ const doing=taskPanel({
  history:[{seq:1,at:s('2026-10-10T07:00:00'),kind:'brought.older',body:{agent:'hermes',status:'bringing',brought:200,remaining:1300}}],
 },now,L);
 assert.deepEqual(doing.now.rows.map(r=>r.title),['Drafting a reply: Answer Sam about the venue…','Checking Notes','YouTube is working on a task','Bringing older Hermes Agent conversations'],JSON.stringify(doing.now.rows));
-assert.equal(doing.now.total,4,'every running task has its own window');
+assert.equal(doing.now.total,4,'every running task has its own card');
 assert.deepEqual(doing.now.rows[2].open,{applet:'app-youtube'});
 assert.equal(doing.now.rows[0].open,undefined,'Fox’s own work opens nothing here');
 assert.deepEqual(doing.now.rows.map(r=>[r.who,r.lines]),[['Fox',['Drafting a reply: Answer Sam about the venue…']],['Worldlet',['Reading Notes for anything new']],['YouTube',['Fox handed YouTube a task','YouTube is working on it']],['Worldlet',['Brought 200 conversations so far · 1,300 to go']]]);
 assert.equal(doing.now.rows[3].when,'1,300 to go');
-assert.equal(doing.chip,'Routines 1 · Doing now 4','the next Mail check is a routine');
+assert.equal(doing.routines.total,1,'the next Mail check is a routine');
+// Each running card: a short name, what it is doing, its picture, and how far along only when that is known.
+assert.deepEqual(doing.now.rows.map(r=>[r.name,r.status,r.icon,r.progress]),[['Fox','Drafting a reply: Answer Sam about the venue…','fox',undefined],['Checking Notes','Reading it for anything new','apple-notes',undefined],['YouTube','Working on a task from Fox','youtube',undefined],['Older Hermes Agent chats','1,300 to go','fox',200/1500]]);
 // A page Fox drives comes first, its steps as lines.
 const driving=taskPanel({page:{url:'https://www.example.com/courts?x=1',title:'Book a court',steps:[{text:'Opening the booking page',done:true},{text:'Choosing a court time',done:false}]},working:[{id:'task-1',applet:'youtube',at:s('2026-10-10T07:29:00')}]},now,L);
 assert.deepEqual(driving.now.rows.map(r=>r.id),['page:example.com','applet:task-1'],'the page Fox drives first');
 assert.deepEqual([driving.now.rows[0].title,driving.now.rows[0].detail,driving.now.rows[0].lines,driving.now.rows[0].open],['Fox is working on example.com','Choosing a court time',['✓ Opening the booking page','› Choosing a court time'],{url:'https://www.example.com/courts?x=1'}]);
-assert.equal(taskPanel({page:{url:'about:blank',title:''}},now,L).now.total,0,'not a web page: no window for it');
+assert.deepEqual([driving.now.rows[0].name,driving.now.rows[0].status,driving.now.rows[0].progress],['example.com','Choosing a court time',.5],'one of two steps done');
+assert.equal(taskPanel({page:{url:'about:blank',title:''}},now,L).now.total,0,'not a web page: no card for it');
 
 // Finished work is not in the panel: it lives in the Journal. Only older conversations still coming in are read from
 // today's history, from today's newest report.
@@ -103,6 +106,5 @@ assert.equal(taskPanel({history:[{seq:1,at:s('2026-10-10T06:00:00'),kind:'brough
  const daily=taskPanel({daily:[{kind:'summary',at:at('2026-10-10T18:00:00')},{kind:'plan',at:at('2026-10-11T07:00:00')},{kind:'plan',at:now-1}]},now,L);
  assert.deepEqual(daily.routines.rows.map(r=>[r.id,r.title,r.day,r.clock,r.by]),[['daily:summary','Wrap up today','Today','6:00 PM','Worldlet, with your Agent'],['daily:plan','Today’s prep','Tomorrow','7:00 AM','Worldlet, with your Agent']],'the summary tonight, the brief tomorrow; one due now is not planned');
  assert.equal(daily.routines.rows[1].every,'Every morning, while you use Worldlet');
- assert.equal(daily.chip,'Routines 2');
 }
-console.log('PASS task panel: Routines and Doing now grouped and sorted with every row kept (one scrolling column), one Doing now window per running task, no finished work (the Journal keeps it), cron next runs and time text, Today’s prep and Wrap up today among the routines');
+console.log('PASS task panel: Routines and Doing now grouped and sorted with every row kept, one card each with its name, line and picture, no finished work (the Journal keeps it), cron next runs and time text, Today’s prep and Wrap up today among the routines');

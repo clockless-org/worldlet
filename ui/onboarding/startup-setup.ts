@@ -355,10 +355,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   });
   loader.classList.add('is-gathering');await Promise.all([...flights,foxFlight]);
   // What came along drifts down into Fox, one after another; Fox brightens a little as each arrives. Routines run on
-  // their own, so they go to the Task panel on the right instead, to Routines at its top (owner layout 2026-10-10); before the
+  // their own, so they go to the Routines beside Fox on its right instead (owner request 2026-10-11); before the
   // panel has read them, to where it stands.
   const corner=(document.querySelector('.task-panel:not([hidden]) .task-group[data-group=routines]')||document.querySelector('.task-panel:not([hidden])'))?.getBoundingClientRect();
-  const cornerX=corner&&corner.width?corner.right-24:innerWidth-56,cornerY=corner&&corner.height?corner.top+24:innerHeight*.4;
+  const cornerX=corner&&corner.width?corner.left+24:innerWidth/2+260,cornerY=corner&&corner.height?corner.top+24:innerHeight-40;
   await Promise.all(parcels.map(async (parcel,i)=>{
    const toCorner=parcel.classList.contains('setup-tile-routines');
    const r=parcel.getBoundingClientRect(),dx=(toCorner?cornerX:foxX)-(r.left+r.width/2),dy=(toCorner?cornerY:foxY)-(r.top+r.height/2),delay=still?0:i*110;
