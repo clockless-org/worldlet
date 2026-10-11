@@ -253,7 +253,7 @@ export interface BrowserService {
  endPictureInPicture():void;
  /** True once private context from a personal browser page was read into the sample world. */
  privateContextWasRead():boolean;
- /** A Meetings call is on: its transcript runs or a meeting page holds the microphone (the wake word rests). */
+ /** A Meetings call is on: its transcript runs or a meeting page holds the microphone . */
  inCall():boolean;
  resetHistory():void;
  /** What a website page's recorder saved: kept in the World and followed for game reviews (the release-gate
@@ -283,10 +283,6 @@ export interface SpeechService {
  voices():Promise<{id:string,name:string,language:string}[]>;
  /** Whether local Whisper runs on this computer (Mac and Windows). */
  readonly localSupported:boolean;
- /** The wake word ("Hey Fox", modules/voice/wake.ts): what it does now, and its preference turning it on or off
-  * (resolves with the state after asking for the microphone where the OS asks). */
- readonly wakeState:'off'|'listening'|'paused'|'unavailable';
- setWakeWord(on:boolean):Promise<'off'|'listening'|'paused'|'unavailable'>;
  /** Local Whisper on up to 45 s of 16 kHz mono PCM16 (meeting transcripts); sets it up first when needed. */
  transcribe(pcm:Buffer,language:string,signal:AbortSignal):Promise<string>;
 }

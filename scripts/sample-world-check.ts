@@ -24,7 +24,7 @@ await withBrowser(fileAccess,async browser=>{
  const metrics=()=>page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics);
  assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('.native-console').dataset.sample),'true','the world knows it is the sample');
  await openCompanionPanel(page,'Settings');
- // The sample switch lives in Settings › General.
+ // Inside the sample world, Settings › General has the switch back to one's own.
  await page.locator('.companion-settings-list [data-setting=general]').click();
  assert.equal(await page.locator('.companion-settings-detail .world-recovery-switch').getAttribute('aria-checked'),'true','the switch in Settings reads On');
  await page.getByRole('button',{name:'Close companion panel',exact:true}).click();

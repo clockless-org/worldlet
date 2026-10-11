@@ -1,10 +1,10 @@
 // Talk with Fox (owner parity plan item 7): when an utterance ends (core/companion/fox-talk.ts), and the rhythm on the
 // computer (ui/companion/fox-talk.ts): listen, send, read the reply, listen again; a press or the person's voice over
-// Fox's echo interrupts it (barge-in), "be quiet" keeps Talk without the voice; and the wake word's gate and match.
+// Fox's echo interrupts it (barge-in), "be quiet" keeps Talk without the voice.
 // Fakes only: no microphone, voice or model. The phones' pause, quiet and barge-in rules are in WorldletKit's
 // TalkRulesTests and the Android kit's TalkRulesTest.
 import assert from 'node:assert/strict';
-import {TALK,WAKE,talkBargeIn,talkEndpoint,talkQuietRequest,talkSpeakingLimit,talkSpokenText,wakeGate,wakeMatch,wakeState} from '../core/companion/index.ts';
+import {TALK,talkBargeIn,talkEndpoint,talkQuietRequest,talkSpeakingLimit,talkSpokenText} from '../core/companion/index.ts';
 import {createFoxTalk} from '../ui/companion/fox-talk.ts';
 
 // Endpointing from the capture's levels, one every 60 ms as the host sends them.
@@ -29,31 +29,6 @@ assert.ok(barge([...Array(20).fill(0).map((_,i)=>echo[i%echo.length]),...Array(1
 assert.equal(barge([...Array(20).fill(0).map((_,i)=>echo[i%echo.length]),...Array(10).fill(0.3)]),0,'a voice no louder than the echo does not');
 assert.equal(barge(Array(Math.floor(TALK.bargeSettleMs/60)).fill(0.6)),0,'the reply’s first moment only learns the echo');
 {const e=talkEndpoint(0);e.reset(0,TALK.bargeMs);let last='';for(let t=60;t<=TALK.pauseMs+60;t+=60)last=e.feed(0.01,t);assert.equal(last,'ended','a barge-in’s speech already counts toward the utterance');}
-
-// The wake word: short standalone phrases go to Whisper, and what it heard starts with the wake phrase.
-const gate=(levels:number[],start=0)=>{const g=wakeGate(start);let t=start;const found:number[]=[];for(const level of levels){t+=60;const ms=g.feed(level,t);if(ms)found.push(ms);}return found;};
-const quiet=(ms:number)=>Array(Math.ceil(ms/60)).fill(0.01),voice=(ms:number)=>Array(Math.ceil(ms/60)).fill(0.3);
-assert.equal(gate([...quiet(1000),...voice(700),...quiet(800)]).length,1,'"Hey Fox" on its own is checked');
-assert.ok(gate([...quiet(1000),...voice(700),...quiet(800)])[0]<=4000,'its audio fits the rolling capture');
-assert.equal(gate([...quiet(1000),...voice(200),...quiet(800)]).length,0,'a click is not checked');
-assert.equal(gate([...quiet(1000),...voice(4000),...quiet(800)]).length,0,'long talk (a call, a video) is never checked');
-assert.equal(gate([...quiet(1000),...voice(700),...quiet(800),...voice(700),...quiet(800)]).length,1,'at most one check per gapMs');
-assert.equal(gate([...quiet(1000),...voice(700),...quiet(800),...quiet(WAKE.gapMs),...voice(700),...quiet(800)]).length,2);
-assert.equal(gate(Array(400).fill(0.01)).length,0,'silence costs nothing');
-for(const [text,rest] of [['Hey Fox.',''],['hey, fox!',''],['Hey Fox, what is on today?','what is on today?'],['OK Fox','' ],['嘿 Fox',''],['嘿，小狐狸。',''],['小狐，明天几点开会？','明天几点开会？'],['嗨狐狸',''],['Hey Momo, hi','hi']] as const)
- assert.deepEqual(wakeMatch(text,'Momo'),{rest},text);
-for(const text of ['hey folks','Hey foxes are cute','the fox jumped','fox','','hey','Hey Momo'])assert.equal(wakeMatch(text),null,text);
-assert.deepEqual(wakeMatch('嘿 小白','小白'),{rest:''},'a renamed Fox answers to its name');
-// When the wake listener listens: only when on, permitted and nothing else has the person's voice (a Meetings call too).
-const ready={enabled:true,supported:true,permitted:true,busy:false,talking:false,inCall:false,locked:false};
-assert.equal(wakeState(ready),'listening');
-assert.equal(wakeState({...ready,inCall:true}),'paused','a call in Meetings pauses it');
-assert.equal(wakeState({...ready,inCall:false}),'listening','and it listens again once the call ends');
-for(const key of ['busy','talking','locked'] as const)assert.equal(wakeState({...ready,[key]:true}),'paused',key);
-assert.equal(wakeState({...ready,enabled:false,inCall:true}),'off','off stays off');
-assert.equal(wakeState({...ready,permitted:false}),'unavailable');
-assert.equal(wakeState({...ready,supported:false}),'unavailable','no local Whisper (Linux)');
-assert.equal(wakeMatch('Hey a','a'),null,'a one-letter name is too easy to hear');
 
 // The quiet rule is Fox's own (core/companion/fox-proactive.ts).
 for(const text of ['安静点','be quiet','闭嘴','Fox 别说话了'])assert.ok(talkQuietRequest(text),text);
@@ -152,7 +127,7 @@ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
  talk.heard('z');await talk.replied('W.');talk.stop();assert.equal(log.at(-1),'cancel');
 }
 {
- // The wake word starts Talk; a request said with it is the first turn.
+ // Talk can start with a request already heard: it is the first turn.
  const {talk,log}=harness();
  talk.start('what is on today?');assert.equal(talk.phase,'thinking');assert.equal(log.at(-1),'send:what is on today?');talk.stop();
 }

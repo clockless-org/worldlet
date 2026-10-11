@@ -88,13 +88,7 @@ export function createFoxPreferences({call,view,root,setup,toggleSample,embedded
    if(typeof info.talkReplies==='boolean'){
     text+='\n\n**Talk with Fox**: right-click the microphone and choose Talk with Fox. Fox listens, answers each thing you say'+(info.talkReplies?' out loud':'')+' and listens again; talk over Fox or click the microphone while it speaks to interrupt, say "be quiet" to keep Talk going without the voice, and press Escape to end it.';
     actions.push(button(info.talkReplies?'Talk without reading replies':'Read replies in Talk',async()=>{await call('foxPreferenceChange',{setting:'talk_replies',value:!info.talkReplies});await show('voice');}));
-   }
-   // The wake word (platform modules/voice/wake.ts), where local Whisper runs: off by default.
-   if(typeof info.wakeWord==='boolean'){
-    const state=info.wakeState==='unavailable'&&info.wakeWord?' It is waiting for the microphone: allow Worldlet to use it in your computer’s privacy settings.':info.wakeState==='paused'?' It rests while Fox listens or Talk is on, during a call in Meetings, and while the screen is locked.':'';
-    text+='\n\n**Hey Fox**: '+(info.wakeWord?'on. Say "Hey Fox" (or 「嘿 Fox」, 「小狐」) to start Talk with Fox; the microphone stays open and shows a small light while it listens.'+state:'off. Turn it on to start Talk with Fox by saying "Hey Fox" (or 「嘿 Fox」, 「小狐」).')+' Short phrases are checked by local Whisper on this computer, a few seconds of work each; nothing is recorded or sent.';
     text+='\n\n**Dictation**: in any text field of the World, press '+(/Mac/i.test(navigator.platform)?'⌘⇧D':'Ctrl+Shift+D')+' to speak into it, and again to stop. Local Whisper hears your World’s names (its people, Applets and places) so it spells them your way.';
-    actions.push(button(info.wakeWord?'Stop listening for “Hey Fox”':'Listen for “Hey Fox”',async()=>{await call('foxPreferenceChange',{setting:'wake_word',value:!info.wakeWord});await show('voice');}));
    }
    const select=document.createElement('select');select.setAttribute('aria-label','Spoken reply voice');
    // The first choice is the Agent's own voice when Fox's Agent has one (its Harness `voice` service), read by a system
@@ -102,24 +96,6 @@ export function createFoxPreferences({call,view,root,setup,toggleSample,embedded
    for(const voice of [{id:'',name:info.agentVoice?'Your Agent’s own voice':'Automatic language',language:''},...(info.voices||[])]){const option=document.createElement('option');option.value=voice.id;option.textContent=voice.name+(voice.language?' · '+voice.language:'');option.selected=voice.id===(info.spokenVoice||'');select.append(option);}
    select.onchange=async()=>{await call('foxPreferenceChange',{setting:'spoken_voice',value:select.value});};
    view.setGuide({text,actions,body:select,takeover:true});return;
-  }else if(screen==='data'){
-   text='**Your data**\n\nExport sources, world items, browsing history, Fox memory and conversations to a private local backup. Provider credential files, browser logins and executable skills are excluded. Restore checks the package first and keeps your previous library for recovery; reconnect accounts and allow context again afterwards.';
-   if(hostCopy(info).backup)text=hostCopy(info).backup;
-   if(hostFeatures(info).deferredBackupRestore&&info.backupPending){view.setGuide({text:'Your backup is ready to restore. Close and reopen Worldlet to finish. Your current library will be kept for recovery.',takeover:true,actions:[button('Cancel scheduled restore',async()=>{await call('dataBackup',{operation:'cancelRestore'});await show('data');})]});return;}
-   actions.push(button('Transfer companion',()=>show('companion-transfer')));
-   actions.push(button('Export backup',async()=>{const result=await call('dataBackup',{operation:'export'});if(result.ok)view.setGuide({text:'Backup saved on your device. Keep it private.',takeover:true,actions:embedded?[button('Back to data',()=>show('data'))]:[]});}));
-   actions.push(button('Restore backup',async()=>{const result=await call('dataBackup',{operation:'choose'});if(result.cancelled)return;view.setGuide({text:'Restore the backup from '+result.createdAt+' ('+result.count+' files)? Your current library will be kept as a recovery copy. Account grants are not restored.'+(hostFeatures(info).deferredBackupRestore?' Restoration happens when you next open Worldlet.':''),takeover:true,actions:[button(hostFeatures(info).deferredBackupRestore?'Restore when I reopen':'Restore this backup',async()=>{await call('dataBackup',{operation:'restore',id:result.id});if(hostFeatures(info).deferredBackupRestore)await show('data');}),button('Cancel',async()=>{if(hostFeatures(info).deferredBackupRestore)await call('dataBackup',{operation:'cancel'});await show('data');})]});}));
-  }else if(screen==='companion-transfer'){
-   text='**Take your companion with you**\n\nExport identity, personality, memories and conversation history to use with another Agent. Accounts, credentials, world layout and running tasks are not included. Import replaces this companion after you review the file; the previous profile is kept for recovery.';
-   if(hostCopy(info).companion)text=hostCopy(info).companion;
-   actions.push(button('Export companion',async()=>{const result=await call('companionArchive',{operation:'export'});if(result.ok)view.setGuide({text:'Companion saved on your device. It contains private memories and conversations; keep it private.',actions:[button('Back to data',()=>show('data'))],takeover:true});}));
-   actions.push(button('Import companion',async()=>{
-    const result=await call('companionArchive',{operation:'choose'});if(result.cancelled)return;
-    view.setGuide({text:'Replace this companion with '+result.name+'? The archive contains '+result.memories+' memories and '+result.messages+' messages. Your current companion is kept as a recovery copy. Connected accounts are unchanged.',takeover:true,actions:[
-     button('Use this companion',async()=>{await call('companionArchive',{operation:'import',id:result.id});}),
-     button('Cancel',async()=>{if(hostFeatures(info).cancellableTransferReview)await call('companionArchive',{operation:'cancel'});await show('companion-transfer');})]});
-   }));
-   actions.push(button('Back to data',()=>show('data')));
   }else if(screen==='login'){
    // What the system reports, not what was last asked for (#1229).
    const login=await call('loginItem');if(turn!==generation)return;

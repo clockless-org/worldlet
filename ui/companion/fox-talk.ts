@@ -34,7 +34,7 @@ export function createFoxTalk({listen,finishListening,cancelListening,listenWhil
  function stop(){if(phase==='off')return;wait();token++;const was=phase;phase='off';barge=null;if(was==='speaking')stopSpeaking();if(was==='listening'||overhearing)cancelListening();overhearing=false;changed();}
  return {
   get phase(){return phase;},get on(){return phase!=='off';},get quiet(){return quiet;},
-  /** Starts Talk; `first` is a request already heard (said with the wake word), sent as the first turn. */
+  /** Starts Talk; `first` is a request already heard , sent as the first turn. */
   start(first=''){if(phase!=='off')return;quiet=false;if(String(first??'').trim()){token++;set('thinking');submit(first);}else void hear();},
   stop,
   toggle(){if(phase==='off')this.start();else stop();},

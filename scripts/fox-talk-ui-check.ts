@@ -2,7 +2,7 @@
 // does): the microphone menu turns Talk on, the capture's levels end an utterance, the transcript goes to Fox, the reply
 // is read with `talk: true` while a barge capture stays open, the "spoken" event keeps that capture as the next
 // utterance, a click on the microphone or the person's voice over Fox's echo interrupts the voice, "安静点" keeps Talk
-// without reading, Escape ends it, and the host's wake word shows on the microphone and starts Talk. Rhythm and endpointing details: scripts/fox-talk-check.ts.
+// without reading, Escape ends it. Rhythm and endpointing details: scripts/fox-talk-check.ts.
 import assert from 'node:assert/strict';
 import {fileAccess,launchTestBrowser,pageErrors,worldUrl} from './browser-test.ts';
 
@@ -90,15 +90,9 @@ try{
  assert.equal(await menu.getByRole('menuitemcheckbox',{name:'Talk with Fox'}).getAttribute('aria-checked'),'false');
  await app.keyboard.press('Escape');
 
- // The wake word: its light on the microphone while the host listens, and "Hey Fox, …" starting Talk with that request.
- await host({phase:'wake-state',text:'listening'});
- assert.equal(await root.getAttribute('data-wake'),'listening');
- assert.match(await mic.getAttribute('title')||'',/Listening for “Hey /);
- await host({phase:'wake',text:'what is on tomorrow?'});await until('agentChat',5);
- assert.ok(await app.evaluate(()=>/what is on tomorrow/.test(JSON.stringify((window as any).calls.filter(c=>c.action==='agentChat').at(-1)))),'the request said with the wake word is the first turn');
- assert.notEqual(await talk(),'off','the wake word started Talk');
- await app.keyboard.press('Escape');
- await app.waitForFunction(()=>document.querySelector('#notionWorld')?.getAttribute('data-talk')==='off');
+ // No wake word (owner request 2026-10-10): the host's old wake events change nothing.
+ await host({phase:'wake',text:'what is on tomorrow?'});await app.waitForTimeout(300);
+ assert.equal(await talk(),'off','no wake word starts Talk');assert.equal(await root.getAttribute('data-wake'),null);
  assert.deepEqual(errors,[]);
- console.log('PASS Talk with Fox: menu toggle, level endpointing, turn, spoken reply with talk, open microphone while speaking, click and voice barge-in, quiet, silence, Escape, wake word');
+ console.log('PASS Talk with Fox: menu toggle, level endpointing, turn, spoken reply with talk, open microphone while speaking, click and voice barge-in, quiet, silence, Escape, no wake word');
 }finally{await browser.close();}

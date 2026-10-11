@@ -1,13 +1,12 @@
-import {app,BaseWindow,systemPreferences} from 'electron';
+import {app,BaseWindow} from 'electron';
 import {SPEECH_VOCABULARY,TALK,speechPrompt,speechTerms} from '../../../../../core/companion/index.ts';
 import {WorldletError} from '../../files.ts';
 import {AUDIO,BROWSER,DESKTOP_COMPANION,MEDIA,SPEECH,type AudioService,type BrowserService,type DesktopCompanionService,type MediaService,type SpeechService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {LocalSpeech,SpeechInput,SpeechOutput} from './speech.ts';
-import {WakeListener} from './wake.ts';
 import {CompanionCloud} from './cloud.ts';
 
-/** Fox's voice: dictation and Talk capture, local Whisper, the wake word, spoken replies, and Fox's cloud endpoints.
+/** Fox's voice: dictation and Talk capture, local Whisper, spoken replies, and Fox's cloud endpoints.
  * Capture and spoken replies run on the media surface; the World's sound ducks under them. */
 export function installVoice(host:Host){
  const {store,preferences,page}=host;
@@ -16,24 +15,8 @@ export function installVoice(host:Host){
  const local=new LocalSpeech(host);
  local.cleanAbandoned();
  const speech=new SpeechInput(surface,local);
- // The wake word (wake.ts) listens only while Fox's own voice input does not.
- const wake=new WakeListener(surface,local,speech);
- const wakeRefresh=()=>setImmediate(()=>wake.refresh());
- speech.onCaptureChanged=active=>{audio.setDucked(active,'recording');wakeRefresh();};
- speech.onEvent=value=>{void page.call('worldletSpeech',value);if(value.phase==='final'||value.phase==='error')wakeRefresh();};
- wake.name=()=>preferences.string('worldlet.companionName');
- wake.inCall=()=>host.optional<BrowserService>(BROWSER)?.inCall()??false;
- wake.onState=state=>{if(page.ready())void page.call('worldletSpeech',{phase:'wake-state',text:state});};
- // "Hey Fox": Worldlet comes forward and the page starts Talk with Fox (and sends what followed the wake word).
- wake.onWake=rest=>void (async()=>{
-  const view=host.worldView(),window=view?BaseWindow.getAllWindows().find(w=>w.contentView.children.includes(view))??host.window():host.window();
-  if(process.platform==='darwin')app.focus({steal:true});
-  if(window){if(window.isMinimized())window.restore();window.show();window.focus();}
-  view?.webContents.focus();
-  for(let i=0;i<10&&!appActive();i++)await new Promise(resolve=>setTimeout(resolve,100));
-  if(page.ready())void page.call('worldletSpeech',{phase:'wake',text:rest});
- })();
- const unwatchPower=wake.watchPower();
+ speech.onCaptureChanged=active=>audio.setDucked(active,'recording');
+ speech.onEvent=value=>void page.call('worldletSpeech',value);
  surface.onEvent(event=>{if(event.type==='devices'&&page.ready())void page.call('worldletSpeech',{phase:'devices',text:''});});
  const spoken=new SpeechOutput(surface);
  spoken.onDuck=active=>audio.setDucked(active,'spoken-reply');
@@ -41,12 +24,7 @@ export function installVoice(host:Host){
  const cloud=new CompanionCloud();
  host.provide<SpeechService>(SPEECH,{cancelCapture:()=>speech.cancel(),stopSpeaking:()=>spoken.stop(),warm:()=>local.warm(),stopLocal:()=>local.stop(),speak:(text,enabled,voiceId,agent)=>spoken.speak(text,enabled,voiceId,agent),voices:()=>spoken.voices(),
   get localSupported(){return local.supported;},
-  get wakeState(){return wake.state;},
-  setWakeWord:async on=>{
-   // Turning it on is the person's own choice: ask for the microphone then, never from the listener.
-   if(on&&process.platform==='darwin'&&systemPreferences.getMediaAccessStatus('microphone')==='not-determined')await systemPreferences.askForMediaAccess('microphone');
-   wake.set(on);return wake.state;
-  },transcribe:async(pcm,language,signal)=>{await local.prepare();return local.transcribe(pcm,language,signal);}});
+  transcribe:async(pcm,language,signal)=>{await local.prepare();return local.transcribe(pcm,language,signal);}});
 
  const sample=()=>store.sampleEnabled();
  // Setup scope: no cloud consent yet, unless a practice world already read private browser context.
@@ -76,7 +54,7 @@ export function installVoice(host:Host){
   },
   // The person talked over Fox (`preroll`, keeping their first words) or Fox finished: the capture is the utterance.
   speechKeep:request=>{if(request.preroll===true)spoken.stop();speech.keep(request.preroll===true?TALK.bargePrerollMs:0);return {ok:true};},
-  speechTalk:request=>{wake.setTalking(request.active===true);return {ok:true};},
+  speechTalk:()=>({ok:true}),
   microphones:async()=>({microphones:await speech.microphones()}),
   speechStop:()=>{speech.finish();return {ok:true};},
   speechCancel:()=>{speech.cancel();return {ok:true};},
@@ -95,7 +73,6 @@ export function installVoice(host:Host){
  if(process.platform==='darwin')app.on('did-resign-active',leave);
  const watched=new WeakSet<BaseWindow>();
  host.onPageLoaded(()=>{
-  wake.set(preferences.bool('worldlet.wakeWord'));wake.setTalking(false);void page.call('worldletSpeech',{phase:'wake-state',text:wake.state});
   const window=host.window();
   if(window&&!watched.has(window)&&process.platform!=='darwin'){
    watched.add(window);
@@ -105,5 +82,5 @@ export function installVoice(host:Host){
  });
  // A reloaded World page no longer holds the controls of a capture.
  host.onPageReload(()=>speech.cancel());
- host.onQuit(()=>{wake.stop();unwatchPower();speech.cancel();spoken.stop();cloud.cancel();});
+ host.onQuit(()=>{speech.cancel();spoken.stop();cloud.cancel();});
 }
