@@ -7,8 +7,7 @@ import {claudeCodeHome,codexHome,directories,inside,json,piHome,readFile} from '
 import {runSendCommand,type SendCommand} from './harness-send.ts';
 import {discoverHermes} from './hermes-files.ts';
 import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
-import {openClawState} from './local-memory.ts';
-import {openClawAgents,readOpenClawConfig} from './openclaw-files.ts';
+import {openClawAgents,openClawSkillRoots,readOpenClawConfig} from './openclaw-files.ts';
 
 // The `skills` Harness service (contracts/harness-services.ts HarnessSkills) for the local Harnesses that declare it
 // (core/agent/harness-services.ts), as each keeps its skills (core/agent/PORTABILITY.md#the-agents-skills-in-the-world).
@@ -122,11 +121,10 @@ function hermesSkills(environment:HarnessEnvironment,{locate,run}:{locate:Locate
 function openClawSkills(environment:HarnessEnvironment,{locate,run}:{locate:Locate;run:SendCommand}):HarnessSkills {
  const {home,env}=environment;
  const list=():HarnessSkill[]=>{
-  const state=openClawState(home||undefined,env),seen=new Set<string>(),found:HarnessSkill[]=[];
-  // Each agent's workspace skills come before the shared ones, as OpenClaw loads them (docs/tools/skills.md).
-  const roots=[...openClawAgents(home||undefined,env).flatMap(agent=>agent.workspace?[agent.workspace]:[]),state];
+  const seen=new Set<string>(),found:HarnessSkill[]=[];
+  // Each agent's workspace skills come before the shared ones, as OpenClaw loads them (docs/concepts/agent.md#skills).
   const config=readOpenClawConfig(home||undefined,env);
-  for(const root of roots)for(const skill of skillFolders(root,path.join(root,'skills'),1)){
+  for(const {root,folder} of openClawSkillRoots(home||undefined,env,config))for(const skill of skillFolders(root,folder,1)){
    if(seen.has(skill.name))continue;seen.add(skill.name);
    const key=openClawSkillKey(skill.name,skill.text);
    found.push({name:skill.name,description:skill.description,where:skill.folder,...key?{enabled:openClawSkillEnabled(config,key)}:{},removable:false});
