@@ -108,7 +108,7 @@ export function sandboxDocument(html:string,prelude:string):string {
 }
 /** Lines the game's page writes to the console for the host: its best score and any script error. */
 export const MADE_GAME_REPORT='⁣worldlet-game:';
-const prelude=()=>`<meta http-equiv="Content-Security-Policy" content="${MADE_GAME_POLICY}"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(()=>{'use strict';
+const PRELUDE=`<meta http-equiv="Content-Security-Policy" content="${MADE_GAME_POLICY}"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(()=>{'use strict';
 const report=value=>{try{console.log(${JSON.stringify(MADE_GAME_REPORT)}+JSON.stringify(value));}catch{}};
 addEventListener('error',event=>report({error:String(event.message||'Error')+(event.lineno?' (line '+event.lineno+')':'')}));
 addEventListener('unhandledrejection',event=>report({error:'Unhandled promise rejection: '+String(event.reason&&event.reason.message||event.reason)}));
@@ -119,7 +119,7 @@ Object.defineProperty(window,'worldlet',{value:Object.freeze({best:score=>{if(ty
 /** The document the host loads: the model's page with the policy, the report channel and an in-memory
  * stand-in for local storage placed before any of its own code. */
 export function madeGameDocument(html:string):string {
- return sandboxDocument(html,prelude());
+ return sandboxDocument(html,PRELUDE);
 }
 /** One console line from the game's page, if it is one of ours. */
 export function readMadeGameReport(line:unknown):{best?:number;error?:string}|null {
