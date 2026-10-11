@@ -137,7 +137,8 @@ export async function openWorldToolBridge(home:string,{sample,dispatch,runner=pr
  const server=await serveWorldTools(token,route,sample,dispatch),port=portOf(server);
  // Each bridge has its own token file: a turn's and the spare process waiting for the next (SpareTurns) can share a home.
  const script=path.join(home,'worldlet-mcp.cjs'),tokenFile=path.join(home,`worldlet-mcp-${route.slice(1,9)}.token`);
- writeAtomic(script,WORLD_TOOL_SERVER_SOURCE);
+ // The stdio server's source is the same every turn: written only when the home has none or an older one.
+ if(readText(script)!==WORLD_TOOL_SERVER_SOURCE)writeAtomic(script,WORLD_TOOL_SERVER_SOURCE);
  writeAtomic(tokenFile,token,0o600);
  const url=`http://127.0.0.1:${port}${route}`,extension=path.join(home,`worldlet-pi-${route.slice(1,9)}.cjs`);
  writeAtomic(extension,piExtensionSource(url,tokenFile));

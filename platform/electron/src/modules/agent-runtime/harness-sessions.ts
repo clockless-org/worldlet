@@ -60,9 +60,6 @@ export interface ResidentConversation extends HarnessConversation {
  * turns out instead of bringing them back as another conversation. */
 export type OwnSession=(session:string,thread:string)=>void;
 const unavailableTool=async():Promise<Row>=>({error:'World tool is unavailable.'});
-/** How long an unused helper process (a source read, an Applet task's lane) waits before it is stopped. The
- * conversation's own Agent never idles out: it stays up while the app is open (owner 2026-10-08, "Hermes 不应该一直在线吗"). */
-export const RESIDENT_IDLE_MS=30*60_000;
 const SESSIONS_FILE='harness-sessions.json';
 function savedSessions(home:string):Record<string,string> {
  try{const value=JSON.parse(fs.readFileSync(path.join(home,SESSIONS_FILE),'utf8'));return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}
@@ -90,7 +87,6 @@ export class AcpConversation implements ResidentConversation,HarnessApprovals {
  /** The models the last `session/new` or `session/load` listed (`models.availableModels`). */
  private known:HarnessModel[]=[];
  private readonly asks=new Map<string,Approval>();
- private idle:NodeJS.Timeout|null=null;
  readonly title:string;
  private readonly command:{command:string;args:string[];env:()=>Record<string,string>};
  private readonly own:OwnSession;
@@ -172,7 +168,6 @@ export class AcpConversation implements ResidentConversation,HarnessApprovals {
  }
  private async create(key:HarnessSessionKey,name:string,place:SessionPlace):Promise<ResidentSession> {
   await this.start(place.home);
-  this.touch();
   const session=new AcpSession(this,key,name);
   const bridge=await openWorldToolBridge(place.home,{sample:place.sample,dispatch:(tool,args)=>session.call(tool,args)});
   session.bridge=bridge;
@@ -223,9 +218,7 @@ export class AcpConversation implements ResidentConversation,HarnessApprovals {
  forget(session:AcpSession){if(this.sessions.get(session.name)===session)this.sessions.delete(session.name);}
  /** The resident process carries the conversation, so it stays up while the app is open; it stops on shutdown or
   * when the Agent changes. */
- touch(){if(this.idle)clearTimeout(this.idle);this.idle=null;}
  shutdown(){
-  if(this.idle)clearTimeout(this.idle);this.idle=null;
   for(const session of [...this.sessions.values()])session.closed(new AgentCancelled());
   const proc=this.process;this.process=null;
   if(proc){for(const pending of proc.pending.values())pending.reject(new AgentCancelled());stopChild(proc.child);}
@@ -284,7 +277,7 @@ class AcpSession implements ResidentSession {
    const usage=addHarnessUsage(usageSince(this.totals,totals),this.context?.context?{context:this.context.context}:null);
    if(totals)this.totals=totals;
    return {text:this.turn.text,...usage?{usage}:{}};
-  }finally{this.owner.settleAll(this);this.turn=null;this.owner.touch();}
+  }finally{this.owner.settleAll(this);this.turn=null;}
  }
  update(value:unknown){
   const update=value&&typeof value==='object'?value as Row:{},content=update.content&&typeof update.content==='object'?update.content as Row:{};

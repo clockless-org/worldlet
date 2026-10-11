@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import {core} from '../../core.ts';
 import {readHarnessApprovalRequest,readHarnessApprovalResult} from '../../../../../core/agent/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -23,7 +22,6 @@ export class AgentCancelled extends Error {
 }
 export const isCancellation=(error:unknown)=>error instanceof AgentCancelled||(error as Error)?.name==='AbortError';
 export const uptime=()=>performance.now()/1000;
-export const exists=(file:string)=>{try{fs.statSync(file);return true;}catch{return false;}};
 
 /** Adapter transport stays native; shared contracts normalize public events. */
 export function agentEvent(raw:Row):Row {

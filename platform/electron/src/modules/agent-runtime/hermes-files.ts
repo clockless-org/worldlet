@@ -60,7 +60,6 @@ export function bindHermes(root:string,expectedPath:string):string {
  if(!home||home!==expectedPath)throw new WorldletError('The local Hermes profile changed or is unavailable. Please check again.');
  ensureDirectory(root);
  writeJSON(path.join(root,'hermes-attachment.json'),{home},0o644);
- attachedHermes(root);
  return home;
 }
 /** Ends the attachment, so Worldlet's own Hermes home is the private profile again; the person's profile is untouched. */
