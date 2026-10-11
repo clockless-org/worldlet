@@ -11,7 +11,7 @@ import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './herm
 import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {moveFoxProfile} from './fox-move.ts';
-import {endHermesInstall,hermesSessionModels,installHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
+import {endHermesInstall,hermesSessionModels,installHermes,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,openSignIn} from './provider-sign-in.ts';
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
@@ -354,7 +354,9 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    if(!install)throw new WorldletError('Hermes Agent is not on this computer. Install it first.');
    signingIn?.abort();
    const controller=signingIn=new AbortController();
-   try{await signInHermes(install,currentEnvironment(),prompt=>{void context.openExternal(prompt.url).catch(()=>{});onHermesSetup({stage:'sign-in',...prompt});},controller.signal);}
+   // Only a Hermes Agent Worldlet installed gets its model set; one that was already here keeps the person's.
+   const setModel=installedHermes(context.root);
+   try{await signInHermes(install,currentEnvironment(),prompt=>{void context.openExternal(prompt.url).catch(()=>{});onHermesSetup({stage:'sign-in',...prompt});},controller.signal,{setModel});}
    finally{if(signingIn===controller)signingIn=null;}
    return {ok:true};
   }
