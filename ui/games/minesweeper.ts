@@ -54,7 +54,9 @@ export function createMinesweeper(host:GameHost){
  board.addEventListener('keydown',e=>{const b=(e.target as Element).closest<HTMLButtonElement>('.mines-cell');if(b&&e.key.toLowerCase()==='f'){e.preventDefault();flag(Number(b.dataset.index));}});
  // Long-press flags on touch screens; the click that follows is swallowed.
  let press=0,pressed=false;
- board.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;const b=(e.target as Element).closest<HTMLButtonElement>('.mines-cell');if(!b)return;pressed=false;press=window.setTimeout(()=>{pressed=true;flag(Number(b.dataset.index));},420);});
+ // Every new press starts clean: an older timer is cancelled and a long press that was not followed by its click
+ // (the finger slid off, the press was cancelled) no longer swallows the next real tap or mouse click.
+ board.addEventListener('pointerdown',e=>{clearTimeout(press);pressed=false;if(e.pointerType!=='touch')return;const b=(e.target as Element).closest<HTMLButtonElement>('.mines-cell');if(!b)return;press=window.setTimeout(()=>{pressed=true;flag(Number(b.dataset.index));},420);});
  for(const name of ['pointerup','pointercancel','pointerleave'])board.addEventListener(name,()=>clearTimeout(press));
  board.addEventListener('click',e=>{if(pressed){pressed=false;e.stopImmediatePropagation();}},true);
  restart();
