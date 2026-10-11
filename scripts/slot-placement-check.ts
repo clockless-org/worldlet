@@ -100,11 +100,10 @@ assert.throws(()=>updateOnboarding({version:1,presets:['home'],completed:true},{
  assert.ok(moved.includes('app-youtube')&&moved.indexOf('app-youtube')>moved.indexOf('app-zoom'),'moved-in categories follow the Area\'s own');
  assert.ok(!recommendForArea({area:'work',apps,mine,limit:200}).includes('app-youtube'),'unrelated categories stay out');
 }
-// The catalog offers only Applets that work once added: connected or local ones, the Browser and the games. Website-only
-// Applets are frozen (no longer offered), though one already in a World stays.
+// The catalog offers every Applet, website Applets included (owner decision 2026-10-11), but not the moving ongoing placeholder.
 {
  const offered=new Set(WORLD_APPS.filter(inAppletCatalog).map(a=>a.key));
- for(const key of ['gmail','google-calendar','github','linear','notion','stripe','codex','claude-code','browser','game-2048','wordle'])assert.ok(offered.has(key),key+' is offered');
- for(const key of ['slack','reddit','spotify','airbnb','chatgpt','tiktok'])assert.ok(!offered.has(key),key+' is frozen');
+ for(const key of ['gmail','google-calendar','github','linear','notion','stripe','codex','claude-code','browser','game-2048','wordle','slack','reddit','spotify','airbnb','chatgpt','tiktok'])assert.ok(offered.has(key),key+' is offered');
+ assert.ok(WORLD_APPS.length>100&&offered.size===WORLD_APPS.length-1&&!offered.has('ongoing'),'Every Applet but ongoing is offered: '+offered.size);
 }
 console.log('PASS ground follows recent use: most recent first, pins hold, moments arrive in front, kept in the World.');
