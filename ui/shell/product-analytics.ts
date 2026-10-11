@@ -79,7 +79,9 @@ export function startWebAnalytics(host:HostCall,load=(src:string)=>{const script
  const sync=async()=>{
   let config:unknown=null;
   try{config=await host('analyticsConfig',{});}catch{/* Not the app, or the host is busy: nothing loads. */}
-  scope.worldletWebAnalyticsConfig=config&&typeof config==='object'?config:null;
+  // Only a config that carries a project key loads PostHog: anything else (a host or fixture answering `{ok:true}`)
+  // would start it keyless.
+  scope.worldletWebAnalyticsConfig=config&&typeof config==='object'&&typeof (config as any).key==='string'&&(config as any).key?config:null;
   if(scope.worldletWebAnalytics)scope.worldletWebAnalytics.update(scope.worldletWebAnalyticsConfig);
   else if(scope.worldletWebAnalyticsConfig&&!scope.worldletWebAnalyticsLoading){scope.worldletWebAnalyticsLoading=true;load('posthog-web.js');}
  };

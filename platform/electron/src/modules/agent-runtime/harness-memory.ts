@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import {harnessService,isMigrationSource,memoryEntries} from '../../../../../core/agent/index.ts';
 import type {HarnessMemory,HarnessMemoryEntry} from '../../../../../contracts/harness-services.ts';
@@ -20,8 +21,14 @@ function memoryFiles(id:string,home:string|undefined,env:NodeJS.ProcessEnv):{roo
  if(id==='pi')return {root:piHome(home,env),user:'',memory:'AGENTS.md'};
  return null;
 }
-/** A file's place said the short way: under the person's home as `~/…`. */
-const shortPath=(file:string,home:string)=>home&&file.startsWith(home+path.sep)?'~'+file.slice(home.length):file;
+/** A file's place said the short way: under the person's home as `~/…`. Hermes Agent's folder is found by its real
+ * path, so a home reached through a link (macOS `/var` → `/private/var`) is matched by its real path too. */
+function shortPath(file:string,home:string):string {
+ if(!home)return file;
+ let real=home;try{real=fs.realpathSync.native(home);}catch{}
+ const base=[home,real].find(base=>file.startsWith(base+path.sep));
+ return base?'~'+file.slice(base.length):file;
+}
 
 export function harnessMemory(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessMemory|null {
  const id=install.id;
