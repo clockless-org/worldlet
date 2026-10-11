@@ -1,0 +1,14 @@
+// The Agent line in the World's bottom-right corner, from the host's Agent detection (`agentHarness` detect):
+// the chosen local Agent's name and version ("Hermes 0.21.4"), its name alone when the version could not be read,
+// "OpenClaw" for an OpenClaw Gateway on another computer, and nothing when no Agent is chosen.
+export function agentVersionLine(found:any):string {
+ if(!found||typeof found!=='object')return '';
+ const agents=Array.isArray(found.agents)?found.agents:[];
+ const chosen=typeof found.selected==='string'?agents.find((a:any)=>a?.id===found.selected&&typeof a.title==='string'):null;
+ if(chosen){
+  const version=typeof chosen.version?.current==='string'?chosen.version.current:'';
+  return [chosen.title,version].filter(Boolean).join(' ');
+ }
+ if(found.gateway?.active===true)return 'OpenClaw';
+ return '';
+}
