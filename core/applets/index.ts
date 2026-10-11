@@ -31,7 +31,7 @@ export {appletCandidateContent,canonicalSourceQuotes} from './candidate-content.
 export {mailSenderAddress,mailOrganizationDomain,mailAvatarPlan,gravatarURL,mailIconURL,bimiLogoURL,mailLogoURL,mailRemoteHostAllowed,PERSONAL_MAIL_DOMAINS,type MailAvatarPlan} from './mail-avatar.ts';
 export {APPLET_ART_LIMITS,appletArtPrompt,artToPaint,codexArtTask,readAppletArt,readArtSubject,validArtApplet,type AppletArt,type AppletArtAttempt,type AppletArtSubject} from './applet-art.ts';
 export {MY_APPLET_KINDS,MY_APPLET_LABELS,isMyApplet,myAppletKind,type MyAppletKind} from './mine.ts';
-export {MOMENT_MAKER,MOMENT_ART,momentApplet,momentAppletId,momentRecordId,type MomentSummary} from './moment.ts';
+export {MOMENT_MAKER,MOMENT_ART,momentApplet,momentAppletId,type MomentSummary} from './moment.ts';
 export {SITE_APPLET_ART,SITE_APPLET_LIMITS,readSiteApplet,siteApplet,siteAppletFor,siteAppletId,siteAppletName,siteAppletPage,siteAppletRecord,validSiteAppletId,type SiteAppletRecord} from './site-applet.ts';
 export {MESSAGES_LIMITS,messagesConversation,messagesConversationTitle,messagesLine,messagesOutgoingText,messagesRecipient,messagesSendFailure,messagesSnippet,validSentMessageId,type MessagesAttachment,type MessagesConversation,type MessagesLine,type SentMessageRecord} from './messages.ts';
 export {APPLE_MUSIC_BUNDLE,LOCAL_MUSIC_COMMANDS,LOCAL_MUSIC_LIMITS,MEDIA_REMOTE_COMMANDS,localMusicCommand,localMusicQuery,localPlayerName,nowPlayingLine,readNowPlaying,worldletPlayer,readPlaylists,readTracks,type LocalMusicCommand,type LocalMusicState,type LocalPlaylist,type LocalTrack,type NowPlaying} from './local-music.ts';
