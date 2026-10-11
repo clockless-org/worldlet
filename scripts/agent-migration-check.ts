@@ -13,6 +13,7 @@ import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '..
 import {allowed as inBackup,validate as validateBackup} from '../platform/electron/src/modules/shell/backup.ts';
 import {digest} from '../platform/electron/src/files.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {journalOrigin,readArtifact} from '../core/artifacts/index.ts';
 // What the World's database receives, as one list: each conversation's messages, then the notes.
 const flat=(history:any)=>[...history.conversations.flatMap((c:any)=>c.turns.map((t:any)=>({...t,session:c.session}))),...history.notes.map((n:any)=>({...n,role:'assistant',text:n.date?`Notes for ${n.date}\n\n${n.text}`:n.text}))];
 
@@ -201,6 +202,14 @@ try{
  assert.equal(fs.existsSync(path.join(skills,'budget','scripts')),false,'scripts stay behind');
  assert.match(brought.note,/Discord · #diet-and-health/);assert.match(brought.note,/Routines: Morning news, Flight prices\./);
  assert.deepEqual(fs.readdirSync(state).sort(),['agents','openclaw.json','skills','state','workspace','workspace-chef'],'nothing written into OpenClaw');
+ // Its daily notes are also the Journal's pages for those days, one each; bringing it again replaces them.
+ const notePages=()=>world.artifactRows().map(row=>readArtifact(row)!).filter(a=>a.origin.type==='conversation'&&a.origin.place==='OpenClaw daily notes').sort((a,b)=>a.createdAt-b.createdAt);
+ assert.deepEqual(notePages().map(a=>[a.title,a.brief,new Date(a.createdAt*1000).getDate(),journalOrigin(a)]),[['Daily note · OpenClaw','Weighed in at 70 kg.',1,'Daily note'],['Daily note · OpenClaw','Booked dentist.',2,'Daily note']]);
+ const firstIds=notePages().map(a=>a.id);
+ fs.rmSync(path.join(state,'workspace','memory','2026-09-01.md'));
+ await bringAgent('openclaw',{companion,world,hermesHome:hermes,importRoutines:async routines=>({ok:true,routines:routines.map(r=>r.name),failed:[]}),now,home,environment:env});
+ assert.deepEqual(notePages().map(a=>a.id),[firstIds[1]],'the same day keeps its page; a day no longer there goes');
+ write(path.join(state,'workspace','memory','2026-09-01.md'),'Weighed in at 70 kg.');
 
  // The World keeps the skills and routines; a new or reset Harness gets them back from there.
  const kept=readBrought(world);

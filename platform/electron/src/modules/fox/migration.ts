@@ -2,8 +2,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {MIGRATION_SOURCES,migrationMemoryNote,migrationNotesSession,migrationSession,migrationSkillMarkdown,migrationSkillName,migrationSkillPath,openClawAgentSkill,openClawChannelPrompts,openClawConversationSkill,openClawPromptFor,openClawRoutine,
+import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,migrationMemoryNote,migrationNotesSession,migrationSession,migrationSkillMarkdown,migrationSkillName,migrationSkillPath,openClawAgentSkill,openClawChannelPrompts,openClawConversationSkill,openClawPromptFor,openClawRoutine,
  type MigrationRoutine,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {dailyNoteArtifacts,journalOrigin,orderArtifacts,readArtifact} from '../../../../../core/artifacts/index.ts';
 import {ensureDirectory,isLink,isoSeconds,writeAtomic} from '../../files.ts';
 import {readClaudeCode,readCodex,readOwnHermes,readPi,type AgentHistory,type BroughtSkill} from '../agent-runtime/agent-files.ts';
 import {readOpenClaw,type OpenClawData} from '../agent-runtime/openclaw-files.ts';
@@ -15,6 +16,7 @@ import type {Row} from '../../host/types.ts';
 // Agent and Codex through one flow). Name, About you and long-term memory come through `adoptMemory`; this
 // adds the rest, all copied and kept on this computer:
 //  - every conversation and note, as Fox's past conversations that `read_companion_archive` searches;
+//  - OpenClaw's daily notes also as Journal pages, one per day (`journalNotes`);
 //  - skills (and OpenClaw's channel instructions and extra agents), as Hermes skills Fox loads on demand;
 //  - scheduled jobs, as Fox routines (Hermes cron), which Hermes Agent's resident gateway runs also while Worldlet is closed.
 // The Agent's own files are only read. Bringing it again replaces what it brought last time.
@@ -35,7 +37,8 @@ const boundBytes=(text:string)=>Buffer.byteLength(text)<=TURN_LIMIT?text:Buffer.
 /** What one Agent brought beyond memory and conversations, as the World keeps it. */
 export interface BroughtStore {version:1;source:MigrationSource;skills:Record<string,Record<string,string>>;routines:MigrationRoutine[]}
 /** Where the World keeps them: its database (`WorldLedger`). */
-export type BroughtShelf={readonly root:string;broughtStores():{source:string;skills:Record<string,Record<string,string>>;routines:Row[]}[];replaceBrought(source:string,skills:Record<string,Record<string,string>>,routines:Row[]):void};
+export type BroughtShelf={readonly root:string;broughtStores():{source:string;skills:Record<string,Record<string,string>>;routines:Row[]}[];replaceBrought(source:string,skills:Record<string,Record<string,string>>,routines:Row[]):void;
+ artifactRows?():Row[];saveArtifacts?(save:Row[],forget?:string[]):void;deleteArtifactPages?(ids:string[]):void};
 /** Before 2026-10-03 the World kept them as `companion/brought/<agent>.json`. */
 export const broughtFile=(root:string,source:MigrationSource)=>path.join(root,'companion','brought',source+'.json');
 /** Moves the earlier files in once; each stays as `<agent>.json.before-database`. */
@@ -174,6 +177,24 @@ export function broughtConversations(source:MigrationSource,conversations:AgentH
 export const broughtTurnId=(source:MigrationSource,key:string,index:string)=>stableID(source,key,index);
 export {boundBytes};
 
+/** The Agent's daily notes as Journal pages (core `dailyNoteArtifacts`). Bringing it again replaces its pages: the
+ * days it no longer has go. A page the World's limit would forget is not kept. */
+function journalNotes(world:BroughtShelf,source:MigrationSource,notes:{date:string;text:string}[]){
+ if(!world.artifactRows||!world.saveArtifacts)return;
+ const title=MIGRATION_SOURCE_TITLES[source],place=title+' daily notes';
+ const pages=dailyNoteArtifacts(title,notes,{
+  idFor:date=>'art-'+crypto.createHash('sha256').update(source+'\u0000daily-note\u0000'+date).digest('hex').slice(0,12),
+  at:date=>{const [y,m,d]=date.split('-').map(Number);return Math.floor(new Date(y,m-1,d,12).getTime()/1000);}});
+ const ids=new Set(pages.map(page=>page.id));
+ const kept=world.artifactRows().flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});
+ const earlier=kept.filter(a=>!ids.has(a.id)&&a.origin.type==='conversation'&&a.origin.place===place&&journalOrigin(a)==='Daily note').map(a=>a.id);
+ const {forget}=orderArtifacts([...pages,...kept.filter(a=>!ids.has(a.id)&&!earlier.includes(a.id))]);
+ const gone=[...earlier,...forget];
+ if(!pages.length&&!gone.length)return;
+ world.saveArtifacts(pages.filter(page=>!forget.includes(page.id)) as unknown as Row[],gone);
+ if(gone.length)world.deleteArtifactPages?.(gone);
+}
+
 /** `world`: the World's database, which keeps the skills and routines. */
 export async function bringAgent(source:MigrationSource,{companion,world,hermesHome,importRoutines,now=Date.now(),home=os.homedir(),environment=process.env,ownFolders=[],own}:{companion:Companion;world:BroughtShelf|null;hermesHome:string|null;importRoutines:((routines:MigrationRoutine[])=>Promise<Row>)|null;now?:number;home?:string;environment?:NodeJS.ProcessEnv;ownFolders?:string[];own?:(session:string)=>boolean}):Promise<BroughtAgent|null> {
  const data=readAgentHistory(source,{now,home,environment,ownFolders,own});
@@ -186,6 +207,9 @@ export async function bringAgent(source:MigrationSource,{companion,world,hermesH
  // Each part is best effort: one that cannot be copied leaves the others in place.
  let partial=data.truncated||data.problems.length>0;
  if(conversations.some(c=>c.turns.length)||notes.length){try{companion.replaceImportedHistory(source,{conversations:conversations.filter(c=>c.turns.length),notes});}catch{partial=true;}}
+
+ // OpenClaw's daily notes, one per day, are also that day's page in the Journal.
+ if(world&&source==='openclaw'){try{journalNotes(world,source,data.notes);}catch{partial=true;}}
 
  // Skills go under one folder per source, named so they never clash with each other.
  const skills:Record<string,Record<string,string>>={};

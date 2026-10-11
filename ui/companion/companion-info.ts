@@ -134,7 +134,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
    for(const agent of knowledge.brought){
     const parts=[[agent.conversations,'message'],[agent.notes,'daily note']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
     if(!parts.length)continue;
-    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and daily notes when you ask.')));
+    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and daily notes when you ask.'+(agent.source==='openclaw'&&Number(agent.notes)>0?' Each day’s note is also that day’s page in your Journal.':''))));
    }
    // Fox's offers to save a task it keeps repeating, answered right here; the skills themselves are in Settings › Agent.
    if(skills&&!snapshot?.sampleEnabled){
