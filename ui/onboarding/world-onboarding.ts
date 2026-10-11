@@ -1,4 +1,4 @@
-import {appletSupport,CURATED_READERS,HOME_NATIVE} from '../../core/applets/index.ts';
+import {appletSupport,inAppletCatalog,CURATED_READERS,HOME_NATIVE} from '../../core/applets/index.ts';
 import {hostFeatures,hostCopy,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
@@ -128,7 +128,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
    if(built)panel.append(button('Explore '+preset().title,explore,true));
    const list=el('div',null,'onboarding-sources');
    for(const provider of suggestions[region])list.append(button('Connect '+(providerTitle(provider)),()=>connect(provider),!built&&list.children.length===0));
-   for(const app of WORLD_APPS.filter(a=>a.region===region&&!suggestions[region].includes(a.provider)))list.append(button(app.title,()=>show('app',region,app.key)));
+   for(const app of WORLD_APPS.filter(a=>a.region===region&&inAppletCatalog(a)&&!suggestions[region].includes(a.provider)))list.append(button(app.title,()=>show('app',region,app.key)));
    list.append(button('Google Drive',()=>show('connection',region,'google-drive')));
    panel.append(list);
    const existing=sources();

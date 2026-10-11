@@ -88,7 +88,7 @@ Fox is the companion you talk to, by text or voice. It does the work through you
 
 ### Applets
 
-Mail, Calendar, Notes, GitHub, Notion, YouTube and over a hundred more, each a small place in the World. An Applet shows your own records in a calm, readable view, and the real website when you want it.
+Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect your accounts or read this computer, plus the Browser and games, each a small place in the World. An Applet shows your own records in a calm, readable view, and the real website when you want it.
 
 [Docs →](docs/APPLET-RUNTIME.md)
 

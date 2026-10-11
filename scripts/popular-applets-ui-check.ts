@@ -6,6 +6,7 @@ const platform=process.platform==='win32'?'windows':'macos';
 import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
 import {POPULAR_APPS} from '../core/applets/popular-apps.ts';
 import {WEB_GAME_APPLETS} from '../core/applets/definitions/web-games.ts';
+import {inAppletCatalog} from '../core/applets/applet-support.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1440,height:940},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(({ids,platform})=>{
@@ -28,6 +29,8 @@ await withBrowser(fileAccess,async browser=>{
    const p=await page.evaluate(id=>{const d=document.querySelector<any>('#notionWorld').sceneMetrics.modules.find(d=>d.id===id),stage=document.querySelector('#notionStage').getBoundingClientRect();return {x:stage.x+d.peekHit.x,y:stage.y+d.peekHit.y};},app.id);
    await page.mouse.click(p.x,p.y);
   }
+  // A frozen website Applet is no longer offered in the Area panel; it still opens directly (as Fox opens it).
+  else if(!inAppletCatalog(app))await page.evaluate(id=>{location.hash='object='+id;},app.id);
   else {
    await page.evaluate(()=>{location.hash='';});
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');

@@ -3,6 +3,7 @@ import {mkdir} from 'node:fs/promises';
 await mkdir('output/applet-layout',{recursive:true});
 import {withBrowser,fileAccess,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {inAppletCatalog} from '../core/applets/applet-support.ts';
 import {appHudIcon} from '../ui/applets/visuals.ts';
 const OPENED=['gmail','google-calendar','apple-notes','apple-reminders','weather','messages','github','notion','youtube','airbnb','browser','game-2048'];
 await withBrowser(fileAccess,async browser=>{
@@ -55,6 +56,8 @@ await withBrowser(fileAccess,async browser=>{
   const onGround=await pin.waitFor({timeout:8000}).then(()=>true,()=>false);
   let tapped=null;
   if(onGround)tapped=await tapDevice(app.id);
+  // A frozen website Applet is no longer offered in the Area panel; it still opens directly (as Fox opens it).
+  else if(!inAppletCatalog(app))await page.evaluate(id=>{location.hash='object='+id;},app.id);
   else {
    // Beyond a region's five ground places, the Area panel lists the person's other Applets under Recently used, and
    // catalog Applets they do not have under Recommended or, behind one button, All.
@@ -167,7 +170,8 @@ await withBrowser(fileAccess,async browser=>{
  const discordShows=await page.evaluate(()=>calls.filter(c=>c.action==='browserShow'&&c.url==='https://discord.com/app').length);
  const discordPin=page.locator('.notion-pin[data-page="place-app-discord"]');
  if(await discordPin.count())await tapDevice('app-discord');
- else {await page.evaluate(()=>{location.hash='';});await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');await page.locator('[data-action="region-more"][data-page="'+discordRegion+'"]').click();const discord=page.locator('.region-shelf-grid').getByRole('button',{name:'Discord',exact:true});if(!await discord.count())await page.locator('.region-shelf-all').click();await discord.click();}
+ // Discord is a frozen website Applet: no longer in the Area panel, it still opens directly.
+ else await page.evaluate(()=>{location.hash='object=app-discord';});
  await page.waitForFunction(n=>calls.filter(c=>c.action==='browserShow'&&c.url==='https://discord.com/app').length>n,discordShows);
  assert.equal(await panel.locator('.browser-caption.is-error').count(),0,'reopen clears the failed page');
  // A stage that hides the website, then the website again before the next frame (a slow host): it is shown anew.
