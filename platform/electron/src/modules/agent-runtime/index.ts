@@ -22,6 +22,7 @@ import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
+import {harnessMemory} from './harness-memory.ts';
 import {AGENT_VERSIONS,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
@@ -146,6 +147,10 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   harnessSkillSets:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
    const skills=harnessSkills(install.id,currentEnvironment(),{locate:()=>[install]});
    return skills?[{harness:install.id,title:install.title,skills}]:[];
+  }),
+  harnessMemories:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+   const memory=harnessMemory(install,currentEnvironment());
+   return memory?[{harness:install.id,title:install.title,memory}]:[];
   }),
   harnessEvents:()=>current().harnessEvents?.()??null,
   harnessCalls:()=>current().harnessCalls?.()??null,

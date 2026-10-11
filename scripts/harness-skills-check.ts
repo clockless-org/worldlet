@@ -12,10 +12,12 @@ import {withTempDir} from './test-temp.ts';
 // against fixture Hermes Agent and OpenClaw homes with a fake `openclaw` command, and the Harness-neutral World module
 // on a real world.sqlite with a fake Agent. No real Agent runs and no real home is touched.
 
-// Declarations: Hermes Agent from its folder, OpenClaw through its command line; the others declare none.
+// Declarations: Hermes Agent from its folder, OpenClaw through its command line; Claude Code, Codex and pi list their
+// skills folder only (scripts/harness-memory-check.ts); an Agent on another computer declares none.
 assert.equal(harnessService('hermes','skills'),'files');
 assert.equal(harnessService('openclaw','skills'),'native');
-for(const id of ['claude-code','codex','pi','remote','remote-openclaw']){assert.equal(harnessService(id,'skills'),null,id);assert.equal(harnessSkills(id),null,id);}
+for(const id of ['claude-code','codex','pi'])assert.equal(harnessService(id,'skills'),'files',id);
+for(const id of ['remote','remote-openclaw']){assert.equal(harnessService(id,'skills'),null,id);assert.equal(harnessSkills(id),null,id);}
 
 // Core: a skill file ---------------------------------------------------------------------------------------------
 const draft={name:'mail-replies',description:'Use when asked to draft mail replies.',body:'1. Read the inbox\n2. Draft replies'};

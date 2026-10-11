@@ -70,6 +70,8 @@ export interface AgentService {
   * (Settings › Your Agent); a change runs that Harness's own command. */
  harnessSchedules?():{harness:string;title:string;schedule:import('../../../../contracts/harness-services.ts').HarnessSchedule}[];
  harnessSkillSets?():{harness:string;title:string;skills:HarnessSkills}[];
+ /** The same Agents' memory (Settings › Your Agent › Memory), read only. */
+ harnessMemories?():{harness:string;title:string;memory:import('../../../../contracts/harness-services.ts').HarnessMemory}[];
  /** The person's Harness's `events`, `calls` and `tools` services (contracts/harness-services.ts), null when it provides none. */
  harnessEvents?():HarnessEvents|null;
  harnessCalls?():HarnessCalls|null;

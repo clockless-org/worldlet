@@ -19,7 +19,7 @@ import {withTempDir} from './test-temp.ts';
 
 // Declarations ------------------------------------------------------------------------------------------------------
 assert.equal(harnessService('hermes','connections'),'files');assert.equal(harnessService('openclaw','connections'),'native');
-assert.deepEqual(Object.keys(HARNESS_SERVICES).filter(id=>harnessService(id,'connections')).sort(),['hermes','openclaw'],'only Agents whose connections Worldlet can read declare them');
+assert.deepEqual(Object.keys(HARNESS_SERVICES).filter(id=>harnessService(id,'connections')).sort(),['claude-code','codex','hermes','openclaw'],'only Agents whose connections Worldlet can read declare them (Claude Code and Codex read-only)');
 
 // Never a secret ----------------------------------------------------------------------------------------------------
 assert.equal(maskSecrets('https://user:pw@mcp.example.com/mcp?api_key=abc123&x=1'),'https://•••@mcp.example.com/mcp?api_key=•••&x=•••');
@@ -141,7 +141,7 @@ if(args[0]==='mcp'&&args[1]==='add'){
  assert.deepEqual(called().at(-1),{hermes:['mcp','remove','jira'],home:fs.realpathSync(work)},'removed in that profile\'s home');
  assert.ok(!(await service.list()).some(c=>c.name==='jira'));
  await assert.rejects(service.change!({remove:jira.id}),/no longer has this server/);
- assert.ok(harnessConnections(hermesInstall,env));assert.equal(harnessConnections({...hermesInstall,id:'codex'},env),null,'a Harness that declares none has none');
+ assert.ok(harnessConnections(hermesInstall,env));assert.equal(harnessConnections({...hermesInstall,id:'pi'},env),null,'a Harness that declares none has none');
 
  // OpenClaw: `mcp status --json`, `channels list --json`, `mcp add` (connects first, exits 1 when it cannot or the name
  // is taken) and `mcp unset`, its own store; tool results in its per-agent transcripts.

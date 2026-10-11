@@ -23,8 +23,9 @@ import {withTempDir} from './test-temp.ts';
 // Declarations ------------------------------------------------------------------------------------------------------
 assert.deepEqual(harnessApprovalFeatures('hermes'),{rules:'files',revoke:'restart',revokeNote:HARNESS_SERVICES.hermes.approvalFeatures!.revokeNote,changes:'diffs'});
 assert.deepEqual([harnessApprovalFeatures('openclaw').rules,harnessApprovalFeatures('openclaw').revoke,harnessApprovalFeatures('openclaw').changes],['native','live','output']);
-assert.deepEqual(harnessApprovalFeatures('remote'),{},'an Agent on another computer keeps its rules there');assert.deepEqual(harnessApprovalFeatures('codex'),{});
-assert.throws(()=>validateHarnessServices({version:2,harness:'x',services:{},approvalFeatures:{rules:'files'}}),/approvals service/,'features need the service');
+assert.deepEqual(harnessApprovalFeatures('remote'),{},'an Agent on another computer keeps its rules there');assert.deepEqual(harnessApprovalFeatures('pi'),{});
+assert.equal(harnessApprovalFeatures('codex').revoke,undefined,'Codex’s rules are shown read-only (scripts/harness-memory-check.ts)');
+assert.throws(()=>validateHarnessServices({version:2,harness:'x',services:{},approvalFeatures:{rules:'files',revoke:'live'}}),/approvals service/,'revoking needs the service');
 assert.throws(()=>validateHarnessServices({version:2,harness:'x',services:{approvals:'native'},approvalFeatures:{revoke:'live'}}),/readable rules/);
 assert.throws(()=>validateHarnessServices({version:2,harness:'x',services:{approvals:'native'},approvalFeatures:{rules:'files',revoke:'sometimes'}}));
 assert.throws(()=>validateHarnessServices({version:2,harness:'x',services:{approvals:'native'},approvalFeatures:{changes:'everything'}}));
@@ -156,7 +157,7 @@ process.exit(2);
  assert.deepEqual((await rulesOf.list()).map(r=>r.allows),['podman *','systemctl']);
  await rulesOf.revoke(listed[2].id);assert.equal(called().at(-1).home,fs.realpathSync(work));
  await assert.rejects(rulesOf.revoke(listed[0].id),/no longer has this rule/);
- assert.ok(standingRules(hermesInstall,env),'declared, so offered');assert.equal(standingRules({...hermesInstall,id:'codex'},env),null,'a Harness that keeps none has none');
+ assert.ok(standingRules(hermesInstall,env),'declared, so offered');assert.equal(standingRules({...hermesInstall,id:'pi'},env),null,'a Harness that keeps none has none');
 
  // OpenClaw: `approvals get --json`, `set --stdin`, `grants list/revoke --json`; its own command keeps the document.
  const store=path.join(scratch,'claw-approvals.json');fs.writeFileSync(store,JSON.stringify(doc));

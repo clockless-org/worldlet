@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {isConnectionId,readConnectionAdd} from '../../../../../core/agent/index.ts';
+import {harnessReadOnlyNote,isConnectionId,readConnectionAdd} from '../../../../../core/agent/index.ts';
 import type {HarnessConnectionChange} from '../../../../../contracts/harness-services.ts';
 
 // Settings › Your Agent › Accounts, the Agent's part (owner approval 2026-10-08: manage the Agent's MCP connections through its
@@ -26,7 +26,8 @@ export function createHarnessConnections(host:Host){
    return {harnesses:await Promise.all(harnesses().map(async({harness,title,connections})=>{
     let listed:Row[]=[],error='';
     try{listed=(await connections.list()).slice(0,300) as unknown as Row[];}catch(e){error=(e as Error)?.message||`${title} did not list its connections.`;}
-    return {harness,title,connections:listed,changes:!!connections.change,inUse:current===harness,...error?{error}:{}};
+    const note=connections.change?'':harnessReadOnlyNote(harness,'connections');
+    return {harness,title,connections:listed,changes:!!connections.change,inUse:current===harness,...note?{note}:{},...error?{error}:{}};
    }))};
   },
   /** The exact command a change would run, and the confirmation `change` needs. */

@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {commandLine,commandReason,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesConversationTitle,hermesMcpPrefixes,openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,withLastUse,type ConnectionUse,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {agentServerConnections,commandLine,commandReason,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesConversationTitle,hermesMcpPrefixes,openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,withLastUse,type ConnectionUse,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import type {HarnessConnection,HarnessConnectionChange,HarnessConnections} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
 import {inside,readFile} from './agent-files.ts';
+import {readAgentIntegrations} from './agent-integrations.ts';
 import {runHarnessCommand} from './harness-approvals.ts';
 import {hermesHomes} from './harness-agents.ts';
 import {openClawThreads,openClawToolUses} from './openclaw-files.ts';
@@ -115,8 +116,13 @@ export function openClawConnectionsService(install:LocalHarnessInstall,environme
  };
 }
 
+/** Claude Code (.claude.json) and Codex (config.toml): the MCP servers their own settings name, the same reader setup
+ * uses to bring them over (agent-integrations.ts), shown masked and read-only; no `change`. */
+function readOnlyConnections(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessConnections {
+ return {list:async()=>{try{return agentServerConnections(install.id,readAgentIntegrations(install.id as 'claude-code'|'codex',environment.home||undefined,environment.env).servers);}catch{return [];}}};
+}
 /** The Harnesses whose connections Worldlet reads (`connections` in core/agent/harness-services.ts). */
-export const HARNESS_CONNECTIONS:Partial<Record<LocalHarnessId,(install:LocalHarnessInstall,environment:HarnessEnvironment)=>HarnessConnections>>={hermes:hermesConnectionsService,openclaw:openClawConnectionsService};
+export const HARNESS_CONNECTIONS:Partial<Record<LocalHarnessId,(install:LocalHarnessInstall,environment:HarnessEnvironment)=>HarnessConnections>>={hermes:hermesConnectionsService,openclaw:openClawConnectionsService,'claude-code':readOnlyConnections,codex:readOnlyConnections};
 export function harnessConnections(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessConnections|null {
  return harnessService(install.id,'connections')?HARNESS_CONNECTIONS[install.id]?.(install,environment)??null:null;
 }

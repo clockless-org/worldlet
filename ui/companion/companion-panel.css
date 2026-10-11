@@ -172,6 +172,12 @@
 .companion-settings-agent-connections .companion-settings-row{flex-wrap:wrap}
 .companion-settings-agent-skills,.companion-settings-agent-routines,.companion-settings-agent-memory{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-agent-skills .companion-settings-row,.companion-settings-agent-routines .companion-settings-row,.companion-settings-agent-memory .companion-settings-row{flex-wrap:wrap}
+.companion-settings-memory{display:flex;flex-direction:column;align-items:flex-start;gap:10px;align-self:stretch}
+.companion-settings-memory-group{font-size:13px;color:#354132}
+.companion-settings-memory-text{white-space:pre-line;overflow-wrap:anywhere;font-size:13px;color:#354132}
+.companion-settings-agent-memory .companion-settings-row>div{flex:1 1 260px;min-width:0}
+.companion-settings-memory .companion-settings-rows>button{align-self:flex-start}
+.companion-settings-memory .companion-settings-rows>.companion-settings-quiet{font-size:12px;color:#656651}
 .companion-settings-row .companion-settings-tag{display:inline-block;margin-left:2px;padding:0 6px;border-radius:8px;background:#d9cbae80;font-size:11px;font-weight:500;color:#5b5440;vertical-align:1px}
 .companion-settings-agent-routines code{font-size:12px;overflow-wrap:anywhere}
 .companion-settings-row>.companion-settings-actions{flex:0 0 auto;flex-direction:row;align-items:center;justify-content:flex-end}

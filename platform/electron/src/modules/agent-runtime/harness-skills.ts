@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import type {HarnessSkill,HarnessSkillChange,HarnessSkillDraft,HarnessSkills} from '../../../../../contracts/harness-services.ts';
 import {commandLine,commandReason,harnessService,hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesSkillCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,skillDraftProblem,skillFrontmatter,skillMarkdown} from '../../../../../core/agent/index.ts';
-import {directories,inside,json,readFile} from './agent-files.ts';
+import {claudeCodeHome,codexHome,directories,inside,json,piHome,readFile} from './agent-files.ts';
 import {runSendCommand,type SendCommand} from './harness-send.ts';
 import {discoverHermes} from './hermes-files.ts';
 import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
@@ -20,6 +20,8 @@ import {openClawAgents,readOpenClawConfig} from './openclaw-files.ts';
 // confirmed it (core/agent/harness-controls.ts says where each was checked): Hermes Agent's `hermes config set
 // skills.disabled` and `hermes skills uninstall` (hub-installed skills only), OpenClaw's `openclaw config set
 // skills.entries.<key>.enabled`; OpenClaw has no command of its own that removes a skill, so it offers none.
+// Claude Code, Codex and pi keep a skill as `<home>/skills/<name>/SKILL.md` (CLAUDE_CONFIG_DIR, CODEX_HOME and
+// PI_CODING_AGENT_DIR move the home): listed only, since none has a command that turns one off or removes it.
 // The World asks for the service, never for a Harness by name: one that declares no `skills` gets null.
 
 const SKILL_FILE=256_000;
@@ -164,8 +166,16 @@ function openClawSkills(environment:HarnessEnvironment,{locate,run}:{locate:Loca
  };
 }
 
+// Claude Code, Codex, pi ---------------------------------------------------------------------------------------
+
+function folderSkills(root:string):HarnessSkills {
+ return {list:async()=>{try{return skillFolders(root,path.join(root,'skills'),0).map(skill=>({name:skill.name,description:skill.description,where:skill.folder}));}catch{return [];}}};
+}
+
 /** The `skills` service of the person's `id` Agent on this computer, or null when it declares none. */
 export function harnessSkills(id:string,environment:HarnessEnvironment=currentEnvironment(),{locate=locateLocalHarnesses,run=runSendCommand}:{locate?:(environment:HarnessEnvironment)=>LocalHarnessInstall[];run?:SendCommand}={}):HarnessSkills|null {
  if(!harnessService(id,'skills'))return null;
- return id==='hermes'?hermesSkills(environment,{locate,run}):id==='openclaw'?openClawSkills(environment,{locate,run}):null;
+ const home=environment.home||undefined,env=environment.env;
+ return id==='hermes'?hermesSkills(environment,{locate,run}):id==='openclaw'?openClawSkills(environment,{locate,run})
+  :id==='claude-code'?folderSkills(claudeCodeHome(home,env)):id==='codex'?folderSkills(codexHome(home,env)):id==='pi'?folderSkills(piHome(home,env)):null;
 }

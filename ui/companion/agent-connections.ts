@@ -5,7 +5,7 @@
  * and commands arrive masked. An Agent whose connections cannot be changed from here lists them only. Plain words
  * only: the page never says MCP. */
 type Connection={id:string;kind:'mcp'|'account';name:string;where:string;enabled:boolean;sign?:string;agent?:string;main?:boolean;removable?:boolean;lastUsed?:{at:number;tool?:string;thread?:string}};
-type Harness={harness:string;title:string;connections:Connection[];changes:boolean;inUse?:boolean;error?:string};
+type Harness={harness:string;title:string;connections:Connection[];changes:boolean;inUse?:boolean;error?:string;note?:string};
 const day=(at:number)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 const SIGN:Record<string,string>={oauth:'signs in with OAuth',token:'uses a token kept in your Agent','needs-sign-in':'needs sign-in in your Agent'};
 /** The line under a connection: what it is, where, how it signs in, and its profile when not the main one. */
@@ -62,7 +62,7 @@ export async function showAgentConnections(target:HTMLElement,call:(action:strin
     if(harness.changes&&c.removable)row.append(button('Remove','remove-connection',()=>confirmChange(row,harness,{remove:c.id},'Remove',`remove ${c.name}`,`${c.name} was removed from ${harness.title}.`)));
     rows.append(row);
    }
-   if(!harness.changes){rows.append(el('p','companion-info-note',`Change these in ${harness.title} itself.`));continue;}
+   if(!harness.changes){rows.append(el('p','companion-info-note',harness.note||`Change these in ${harness.title} itself.`));continue;}
    const form=el('div','companion-settings-row'),fields=el('div');form.dataset.add=harness.harness;
    const name=el('input','companion-settings-input') as HTMLInputElement;name.placeholder='Name, like github';name.setAttribute('aria-label','Tool name');name.spellcheck=false;name.autocomplete='off';
    const where=el('input','companion-settings-input') as HTMLInputElement;where.placeholder='https://… or npx -y @scope/server';where.setAttribute('aria-label','Tool address or command');where.spellcheck=false;where.autocomplete='off';

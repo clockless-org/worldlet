@@ -1,9 +1,10 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-import {harnessApprovalFeatures,hermesAllowlistWithout,hermesConfigValues,hermesStandingRules,openClawApprovalsWithout,openClawGrantRules,openClawStandingRules,standingRuleId,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {claudeCodeStandingRules,codexStandingRules,harnessApprovalFeatures,hermesAllowlistWithout,hermesConfigValues,hermesStandingRules,openClawApprovalsWithout,openClawGrantRules,openClawStandingRules,standingRuleId,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import type {HarnessStandingRule,HarnessStandingRules} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
-import {readFile} from './agent-files.ts';
+import {claudeCodeHome,codexHome,json,readFile} from './agent-files.ts';
 import {hermesHomes} from './harness-agents.ts';
 import {harnessEnvironment,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
 
@@ -101,8 +102,25 @@ export function openClawStandingRulesService(install:LocalHarnessInstall,environ
  };
 }
 
+/** Claude Code (settings.json `permissions.allow`) and Codex (`rules/*.rules`): read only, shown with where to change
+ * them (their `revokeNote`); Worldlet never edits either. */
+function readOnlyRules(read:(environment:HarnessEnvironment)=>HarnessStandingRule[]){
+ return (install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessStandingRules=>({
+  async list(){try{return read(environment);}catch{return [];}},
+  async revoke(){throw new WorldletError(`${install.title}’s rules can be changed only in ${install.title} itself.`);},
+ });
+}
+const claudeCodeRules=readOnlyRules(({home,env})=>{
+ const root=claudeCodeHome(home||undefined,env);
+ return claudeCodeStandingRules(json(readFile(root,path.join(root,'settings.json'),OUTPUT)));
+});
+const codexRules=readOnlyRules(({home,env})=>{
+ const root=codexHome(home||undefined,env),folder=path.join(root,'rules');
+ let names:string[]=[];try{names=fs.readdirSync(folder).filter(name=>name.endsWith('.rules')).sort().slice(0,50);}catch{}
+ return codexStandingRules(names.map(name=>readFile(root,path.join(folder,name),OUTPUT)).join('\n'));
+});
 /** The Harnesses whose standing rules Worldlet reads (`approvalFeatures.rules` in core/agent/harness-services.ts). */
-export const HARNESS_STANDING_RULES:Partial<Record<LocalHarnessId,(install:LocalHarnessInstall,environment:HarnessEnvironment)=>HarnessStandingRules>>={hermes:hermesStandingRulesService,openclaw:openClawStandingRulesService};
+export const HARNESS_STANDING_RULES:Partial<Record<LocalHarnessId,(install:LocalHarnessInstall,environment:HarnessEnvironment)=>HarnessStandingRules>>={hermes:hermesStandingRulesService,openclaw:openClawStandingRulesService,'claude-code':claudeCodeRules,codex:codexRules};
 export function standingRules(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessStandingRules|null {
  return harnessApprovalFeatures(install.id).rules?HARNESS_STANDING_RULES[install.id]?.(install,environment)??null:null;
 }

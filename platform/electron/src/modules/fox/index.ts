@@ -975,6 +975,8 @@ export function installFox(host:Host){
    * a change would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessSchedule:request=>agentControls.scheduleRequest(request),
   harnessSkills:request=>agentControls.skillRequest(request),
+  /** Settings › Your Agent › Memory: what each Agent here remembers, read only. */
+  harnessMemory:()=>agentControls.memoryRequest(),
   harnessApproval:async request=>{
    const approvals=agent()?.approvals?.()??null;
    if(!approvals||typeof request.id!=='string'||!isHarnessApprovalChoice(request.choice))throw new WorldletError('This request can no longer be answered.');

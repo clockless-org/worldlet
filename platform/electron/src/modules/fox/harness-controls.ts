@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {readJobChange,readSkillChange,skillLastRuns} from '../../../../../core/agent/index.ts';
+import {harnessReadOnlyNote,readJobChange,readSkillChange,skillLastRuns} from '../../../../../core/agent/index.ts';
 import type {HarnessJobChange,HarnessJobRun,HarnessSkillChange} from '../../../../../contracts/harness-services.ts';
 
 // Settings › Your Agent › Skills and Routines (owner plan 2026-10-11, PR 2; “做”): each Agent on this computer
@@ -13,6 +13,8 @@ import type {HarnessJobChange,HarnessJobRun,HarnessSkillChange} from '../../../.
 // what the person saw and confirmed. Nothing here knows which Harness it is: whether one can be changed is whether its
 // service offers `change`. Never in the practice world; never a job's prompt or a skill's steps on the page. The page
 // names the change `change` (pause, resume, run, remove; disable, enable, remove): `action` is the host action's own name.
+// Memory (PR 3, owner decision 2026-10-11): what each Agent remembers, read only; forgetting is a request in Fox's
+// conversation, which the page sends for the Agent in use (core/agent/harness-memory.ts memoryForgetRequest).
 
 const CONFIRM_MS=5*60_000;
 type Pending<C>={harness:string;change:C;command:string;until:number};
@@ -88,7 +90,8 @@ export function createHarnessControls(host:Host){
     try{listed=(await skills.list()).slice(0,300).map(s=>{const at=Math.max(s.lastUsedAt??0,runs.get(s.name.toLowerCase())??0);
      return {name:s.name,description:s.description,lastRanAt:at||null,...s.enabled!==undefined?{enabled:s.enabled}:{},removable:!!s.removable&&!!skills.change};});}
     catch(e){error=(e as Error)?.message||`${title} did not list its skills.`;}
-    return {harness,title,skills:listed,changes:!!skills.change,inUse:current===harness,...error?{error}:{}};
+    const note=skills.change?'':harnessReadOnlyNote(harness,'skills');
+    return {harness,title,skills:listed,changes:!!skills.change,inUse:current===harness,...note?{note}:{},...error?{error}:{}};
    }))};
   },
   async preview(harness:unknown,request:Row):Promise<Row> {
@@ -107,7 +110,19 @@ export function createHarnessControls(host:Host){
    return {ok:true,command:item.command};
   },
  };
+ const memories=()=>agent()?.harnessMemories?.()??[];
+ const memory={
+  /** `harnessMemory`: every Agent's memory entries, each with its file; never in the practice world. */
+  async list():Promise<Row> {
+   const current=agent()?.harness?.id;
+   return {current:inUse(),harnesses:own()?await Promise.all(memories().map(async({harness,title,memory})=>{
+    let entries:Row[]=[],error='';
+    try{entries=(await memory.list()).slice(0,300) as unknown as Row[];}catch(e){error=(e as Error)?.message||`${title} did not show its memory.`;}
+    return {harness,title,entries,inUse:current===harness,...error?{error}:{}};
+   })):[]};
+  },
+ };
  /** `harnessSchedule` and `harnessSkills`: `list` (the default), `preview` a change, or the confirmed `change`. */
  const route=(service:typeof schedule|typeof skill)=>(request:Row)=>request.operation==='preview'?service.preview(request.harness,request):request.operation==='change'?service.change(request.confirm):service.list();
- return {schedule,skill,scheduleRequest:route(schedule),skillRequest:route(skill)};
+ return {schedule,skill,memory,scheduleRequest:route(schedule),skillRequest:route(skill),memoryRequest:()=>memory.list()};
 }
