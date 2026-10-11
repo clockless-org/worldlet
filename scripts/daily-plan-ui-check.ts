@@ -1,13 +1,19 @@
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {dailyScheduleResult} from '../core/agent/index.ts';
 // The morning brief on the World page (core/artifacts/README.md#the-days-plan-and-summary): made at 6 AM by itself,
 // quietly, in a background session beside the conversation (owner Orders 2026-10-07). For someone who used Worldlet
 // lately, Fox is asked once in the morning, with the window hidden and before the person touches anything; the
 // request carries the parts they wrote under Morning brief; its card never opens, no "You · Morning brief" line and no
-// reply line show, the request reaches the host with its label for the archive, and the plan opens the Journal on
-// today's page when the person wakes the screen (owner request 2026-10-08). The evening asks nothing. Then the Journal: each reply draft the brief left is a card on today's page, and
-// Edit, Send and Skip act on that exact draft; Morning brief saves the person's own list. Bundled UI with a faked
-// native bridge and a fixed clock (the ask polls every 30 s); fictional turns, mail and drafts, no model or account.
+// reply line show, and the request reaches the host with its label for the archive. The kept brief arrives as an
+// Attention item in Worth Knowing (the host saves it with the card, core dailyScheduleResult, as the fake host here
+// does); the Journal never opens by itself, neither when the screen wakes nor at the first touch, and the item's
+// "In your Journal · Open" opens it on the brief's card (docs/ATTENTION-CENTER.md#scheduled-results). The Task panel's
+// Routines timeline shows the next brief and the evening's summary. The evening asks nothing. Then the Journal: each
+// reply draft the brief left is a card on today's page, and Edit, Send and Skip act on that exact draft; Morning brief
+// saves the person's own list. Bundled UI with a faked native bridge and a fixed clock (the ask polls every 30 s);
+// fictional turns, mail and drafts, no model or account. WORLDLET_ATTENTION_BRIEF_SCREEN saves the brief's card.
 const run=async(browser,hour:number,hidden=false)=>{
  const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});page.setDefaultTimeout(15000);
  const errors=pageErrors(page);
@@ -21,9 +27,10 @@ const run=async(browser,hour:number,hidden=false)=>{
   localStorage.setItem('worldlet-daily-artifacts-daily-fixture',JSON.stringify({used:{'2026-10-06':new Date(2026,9,6,20).getTime()},plan:[],summary:['2026-10-06']}));
   const w=window as any;w.calls=[];w.kept=new Map();w.statuses=[];w.prefs=[];window.addEventListener('worldlet:fox-status',(e:any)=>w.statuses.push(e.detail));
   w.reviews=[];
+  w.fixture={workspaceId:'daily-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){
    w.calls.push(b);
-   if(b.action==='snapshot')return {workspaceId:'daily-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
+   if(b.action==='snapshot')return structuredClone(w.fixture);
    if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
    if(b.action==='foxPreferences')return {model:{name:'M',ready:true},cloudConsent:true,autoSync:true,morningBrief:'今天的日程\n把邮件都看一遍起草回复'};
    if(b.action==='foxPreferenceChange'){w.prefs.push(b);return {ok:true,morningBrief:String(b.value).trim()};}
@@ -50,6 +57,7 @@ const run=async(browser,hour:number,hidden=false)=>{
     }
     return {message:'Short answer to '+b.text};
    }
+   if(b.action==='worldItemStatus'){const item=w.fixture.worldItems.find(i=>i.id===b.id);if(item)item.status=b.status;return {ok:true};}
    if(b.action==='cloudRequest')return {status:200,body:{configured:false,authorized:false}};
    return {ok:true};
   }}}};
@@ -58,6 +66,19 @@ const run=async(browser,hour:number,hidden=false)=>{
  await page.locator('.companion-avatar').waitFor();
  return {page,errors};
 };
+/** The host's side of keeping the brief: Core's item for the saved card, then the World as the host sends it. */
+async function hostKeeps(page){
+ await page.waitForFunction(()=>(window as any).kept.size===1,null,{timeout:45000});
+ const save=await page.evaluate(()=>(window as any).calls.find((c:any)=>c.action==='artifacts'&&c.operation==='save'));
+ assert.equal(save.scheduled,'plan','the card is saved as the morning brief');assert.equal(save.day,'2026-10-07','for today');
+ const at=await page.evaluate(()=>Date.now());
+ const result=dailyScheduleResult({kind:save.scheduled,day:save.day,artifact:save.artifact,at,now:at});
+ assert.ok(result,'Core makes it an Attention item');
+ const item={...result.item,id:'brief-item',status:'open',observedAt:new Date(at).toISOString()};
+ await page.evaluate(item=>{const w=window as any;w.fixture.worldItems=[item];w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));},item);
+ return {item,card:save.artifact.id};
+}
+const plannedTitles=page=>page.locator('.task-panel .task-group[data-group=routines] .task-title').allTextContents();
 await withBrowser(fileAccess,async browser=>{
  {
   const {page,errors}=await run(browser,6,true);
@@ -66,17 +87,36 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(sent.shown,'Morning brief','the host archives the label, never the long request in the person’s name');
   assert.equal(sent.background,true,'it runs in a background session beside the conversation, never in it (owner Order 2026-10-07)');
   assert.ok(sent.text.includes(JSON.stringify('今天的日程\n把邮件都看一遍起草回复'))&&sent.text.includes('prepare_email'),'the brief holds the parts the person wrote, mail drafts included');
-  // The brief is kept, and waits for the person: no card, and the Journal stays shut while the screen sleeps.
-  await page.waitForFunction(()=>(window as any).kept.size===1);
+  // The brief is kept and arrives as an Attention item: no card, and the Journal stays shut.
+  const {card}=await hostKeeps(page);
   assert.equal(await page.locator('#foxArtifact').isVisible(),false,'the brief opens no card (owner request 2026-10-08)');
   assert.equal(await page.locator('#journalBook').isVisible(),false,'nothing opens while the screen sleeps');
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('worldlet-daily-artifacts-daily-fixture')||'{}').journal),'2026-10-07','today’s page waits for the person, across a restart too');
-  // Waking up, the Journal lies open on today's page with the brief first.
+  // Waking up and the first touch open nothing either: the brief waits in Worth Knowing.
   await page.evaluate(()=>{(window as any).asleep=false;document.dispatchEvent(new Event('visibilitychange'));});
+  await page.mouse.move(700,400);
+  const row=page.locator('.world-matter[data-world-item-id="brief-item"]');
+  await row.waitFor({timeout:20000});
+  assert.equal(await row.evaluate(el=>el.closest('.world-task-group')?.getAttribute('aria-label')),'Worth Knowing','the brief is Worth Knowing');
+  await page.waitForTimeout(1500);
+  assert.equal(await page.locator('#journalBook').isVisible(),false,'the Journal does not open by itself, awake or touched');
+  assert.equal(await page.evaluate(()=>'journal' in JSON.parse(localStorage.getItem('worldlet-daily-artifacts-daily-fixture')||'{}')),false,'nothing waits to open it');
+  assert.deepEqual(await plannedTitles(page),['Morning brief'],'the next brief, tomorrow at 6, is planned');
+  // Its card says it is in the Journal; Open opens the Journal on the brief's card.
+  await row.click();
+  const preview=page.locator('#attentionPreview');
+  await preview.waitFor({state:'visible'});
+  const drafted=preview.locator('.attention-preview-drafted');
+  await drafted.waitFor({state:'visible'});
+  assert.equal((await drafted.innerText()).replace(/\s+/g,' ').trim(),'In your Journal Open');
+  assert.match(await preview.innerText(),/Morning brief · Oct 7/);
+  if(process.env.WORLDLET_ATTENTION_BRIEF_SCREEN)await page.screenshot({path:path.resolve(process.env.WORLDLET_ATTENTION_BRIEF_SCREEN)});
+  await drafted.getByRole('button',{name:'Open'}).click();
   await page.locator('#journalBook').waitFor({state:'visible'});
-  await page.locator('#journalBook .companion-artifact-title').first().waitFor();
-  assert.equal(await page.locator('#journalBook .companion-artifact-title').first().textContent(),'Plan · Wed, Oct 7','the morning brief opens the Journal on its page');
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('worldlet-daily-artifacts-daily-fixture')||'{}').journal),undefined,'seen: it opens once');
+  assert.equal(await preview.isVisible(),false,'the card gives way to the Journal');
+  const focused=page.locator('#journalBook .companion-artifact[data-focused=true]');
+  await focused.waitFor();
+  assert.equal(await focused.getAttribute('data-artifact-id'),card,'the Journal opens on the brief’s own card');
+  assert.equal(await focused.locator('.companion-artifact-title').textContent(),'Plan · Wed, Oct 7');
   await page.waitForTimeout(1500);
   const dialogue=await page.locator('#companionDialogue').innerText().catch(()=>'');
   assert.ok(!dialogue.includes('Your brief is ready'),'Fox says nothing about it');
@@ -121,15 +161,14 @@ await withBrowser(fileAccess,async browser=>{
   await page.close();
  }
  {
-  // The screen is on at 6 but nobody is at the computer (owner Order 2026-10-08): the book waits for the person's
-  // first touch, then lies open on today's first page.
+  // The screen is on at 6 but nobody is at the computer: the brief waits in Attention, and the person's first touch
+  // opens nothing.
   const {page,errors}=await run(browser,6);
-  await page.waitForFunction(()=>(window as any).kept.size===1,null,{timeout:45000});
-  await page.waitForTimeout(1000);
-  assert.equal(await page.locator('#journalBook').isVisible(),false,'nothing opens for an empty room');
+  await hostKeeps(page);
+  await page.locator('.world-matter[data-world-item-id="brief-item"]').waitFor({timeout:20000});
   await page.mouse.move(700,400);
-  await page.locator('#journalBook').waitFor({state:'visible'});
-  assert.equal(await page.locator('#journalBook .companion-artifact-title').first().textContent(),'Plan · Wed, Oct 7','the first touch of the morning opens the Journal on the brief');
+  await page.waitForTimeout(1500);
+  assert.equal(await page.locator('#journalBook').isVisible(),false,'the first touch of the morning opens nothing');
   assert.deepEqual(errors,[]);
   await page.close();
  }
@@ -138,8 +177,9 @@ await withBrowser(fileAccess,async browser=>{
   await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event:'user_engaged'}})));
   await page.waitForTimeout(33000);
   assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='agentChat').length),0,'no brief in the evening');
+  assert.deepEqual(await plannedTitles(page),['Day summary','Morning brief'],'a day used: tonight’s summary at 9, then tomorrow’s brief, are planned');
   assert.deepEqual(errors,[]);
   await page.close();
  }
 });
-console.log('PASS daily plan UI: the morning brief made once at 6 AM with the screen asleep and nobody at it, from the person’s own list, quietly (no Fox card, no reply line, archived by its label), opening the Journal on today’s page when the screen wakes or at the first touch, never for an empty room; its reply drafts as Journal cards that Edit, Send and Skip; Morning brief saved; none in the evening');
+console.log('PASS daily plan UI: the morning brief made once at 6 AM with the screen asleep and nobody at it, from the person’s own list, quietly (no Fox card, no reply line, archived by its label), arriving as a Worth Knowing item whose Open shows its Journal card, the Journal never opening by itself; the next brief and the summary planned; its reply drafts as Journal cards that Edit, Send and Skip; Morning brief saved; none in the evening');

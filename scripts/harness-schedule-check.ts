@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX} from '../core/agent/index.ts';
+import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX,dailyScheduleResult,routineScheduleResult,journalTarget,WORLDLET_SCHEDULE} from '../core/agent/index.ts';
 import {hermesSchedule,openClawSchedule} from '../platform/electron/src/modules/agent-runtime/harness-schedule.ts';
 import {createHarnessJobs} from '../platform/electron/src/modules/fox/harness-jobs.ts';
 import {AGENT,PHONE} from '../platform/electron/src/host/services.ts';
@@ -204,4 +204,27 @@ try{
  assert.equal(digestOf(hermes),hermesBefore,'Hermes Agent’s folder is only read');
  assert.equal(hm.start,'hermes gateway install');
 }finally{fs.rmSync(scratch,{recursive:true,force:true});}
-console.log('PASS scheduled jobs on the person’s own Agent, host: OpenClaw task_runs, cron_run_logs and JSONL run logs, its Gateway lock, Hermes Agent run documents and heartbeat, read-only; the World’s consumer turns a new run into one item and one push and notes a stopped scheduler once');
+// Worldlet's own scheduled results, by the same rule: the morning brief, the day's summary and a routine run.
+{
+ const at=Date.parse('2026-10-11T06:02:00Z'),now=at+60_000;
+ const brief=dailyScheduleResult({kind:'plan',day:'2026-10-11',artifact:{id:'artifact-brief',title:'Plan · Sun, Oct 11',body:'## Today\n| Time | What |\n|---|---|\nA calm **Sunday** with one call.\n- 10:00 Call with Dana'},at,now})!;
+ assert.equal(brief.item.provider,WORLDLET_SCHEDULE);assert.equal(brief.item.kind,'update','A brief is Worth Knowing');
+ assert.equal(brief.item.title,'Morning brief · Oct 11');assert.equal(brief.item.attentionContentVersion,1,'It passes the Attention content contract');
+ assert.match(String(brief.item.summary),/^A calm \*\*Sunday\*\* with one call\.\n- 10:00 Call with Dana\n\nIt is kept in your Journal\.$/,'Its summary is the card’s opening lines, without headings or tables');
+ assert.deepEqual(journalTarget(brief.item.sources),{day:'2026-10-11',card:'artifact-brief'},'It opens the Journal on its card');
+ assert.deepEqual(brief.push,{kind:'routine',title:'Morning brief · Oct 11',body:'A calm Sunday with one call. 10:00 Call with Dana',collapse:'daily-plan'});
+ const summary=dailyScheduleResult({kind:'summary',day:'2026-10-10',artifact:{id:'artifact-day',brief:'A full day.'},at,now:at+13*3600_000})!;
+ assert.equal(summary.item.title,'Day summary · Oct 10');assert.equal(summary.push,null,'An old result does not push');
+ assert.equal(dailyScheduleResult({kind:'plan',day:'soon',artifact:{id:'x'},at,now}),null);
+ assert.equal(journalTarget([{provider:'gmail',id:'journal:2026-10-11:x'}]),null,'Only Worldlet’s own items open the Journal');
+ const ran=routineScheduleResult({ran:true,late:true,job:{id:'news',name:'Morning news',last_status:'ok'}},at,now)!;
+ assert.equal(ran.item.kind,'update');assert.equal(ran.item.title,'Morning news');assert.match(String(ran.item.summary),/ran late/);
+ assert.equal(journalTarget(ran.item.sources),null,'A routine has no Journal card');
+ assert.equal(ran.push?.body,'Finished.');
+ const failed=routineScheduleResult({ran:true,job:{id:'news',name:'Morning news',last_status:'error'},output:'The site was down.'},at,now)!;
+ assert.equal(failed.item.kind,'task');assert.equal(failed.item.priority,'elevated','A routine that did not finish is Worth Doing');
+ assert.equal(failed.item.summary,'The site was down.');assert.equal(failed.push?.body,'Did not finish: The site was down.');
+ assert.equal(routineScheduleResult({error:'A scheduled task could not finish.'},at,now),null);
+ assert.equal(routineScheduleResult({ok:true,executed:0},at,now),null,'Nothing ran: nothing to say');
+}
+console.log('PASS scheduled jobs on the person’s own Agent, host: OpenClaw task_runs, cron_run_logs and JSONL run logs, its Gateway lock, Hermes Agent run documents and heartbeat, read-only; the World’s consumer turns a new run into one item and one push and notes a stopped scheduler once; Worldlet’s own brief, summary and routine runs become items the same way');

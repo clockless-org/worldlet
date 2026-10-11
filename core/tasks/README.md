@@ -12,7 +12,7 @@ The World's right side (owner layout 2026-10-10: Attention on the left, tasks on
 
 | Group | Rows | Order |
 | --- | --- | --- |
-| Routines | The person's Agent's scheduled jobs, Worldlet's routines among them (`nextCronRun` here in `next-run.ts`), and each Applet's next source check | Soonest first, repeating jobs with no fixed time last; every row kept |
+| Routines | The person's Agent's scheduled jobs, Worldlet's routines among them (`nextCronRun` here in `next-run.ts`), each Applet's next source check, and Fox's next morning brief and day summary (core/artifacts `dailyPlanned`, from the page's daily state) | Soonest first, repeating jobs with no fixed time last; every row kept |
 | Doing now | A web page Fox drives, Fox's background work (its step, from `worldlet:fox-status`), Applets working on a task Fox handed them, source checks running, older Hermes Agent conversations still coming in | The page first, then newest first; one window each, every one kept |
 
 - **Time text.** Doing now says "In progress" (or how many older conversations are still to come); Routines say the clock today, else the day and the clock ("Tomorrow 6:00 AM", "Mon 6:30 AM"), or "every hour" for an interval job. A routine's popover adds how often (`taskHowOften`: "Every day", "Every weekday", "Every 15 min") and who runs it (the Agent's scheduler, or Worldlet for checks).

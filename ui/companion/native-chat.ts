@@ -975,7 +975,12 @@ export function createNativeChat(call){return function({button,input,status,exec
   world:()=>context.key.split(':')[0]==='overview'&&!contentIdentity(),
   busy:()=>active||streamingReply||recording||starting||transcribing||editing||!!input.value.trim()||!!guideShown||guideHere(guide)||root.classList.contains('companion-info-open'),
   environment:()=>({key:context.key,location:context.title,state:context.detail,recentActions:recentActions.slice(-4),view:visibleContent(),...worldNow(root)}),
-  say:line=>{api.setGuide({source:'proactive:'+line.id,takeover:false,text:line.text,remember:true,actions:[],browsing:line.browsing});api.revealGuide();}
+  // A line about something waiting on the person opens its Attention card, the one place to act on it.
+  say:line=>{
+   const open=make('button','','Open card');open.type='button';
+   open.onclick=()=>{api.setGuide(null,{only:'proactive:'+line.id});window.dispatchEvent(new CustomEvent('worldlet:attention-open',{detail:{id:line.card}}));};
+   api.setGuide({source:'proactive:'+line.id,takeover:false,text:line.text,remember:true,actions:line.card?[open]:[],browsing:line.browsing});api.revealGuide();
+  }
  });
  void call('foxBrowse',{}).then(r=>showBrowse(r?.on),()=>{});
  const backToWorld=make('button','companion-world-button');backToWorld.type='button';backToWorld.innerHTML=uiIcon('home');backToWorld.title='Back to World';backToWorld.setAttribute('aria-label','Back to World');

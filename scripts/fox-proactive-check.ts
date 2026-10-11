@@ -3,7 +3,7 @@
 // Fox's PASS hides the answer, and that Fox's voice rides with every turn. No model, no browser.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {FOX_VOICE,PLACE,PROACTIVE,companionPrompt,onScreenText,proactiveAsked,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../core/companion/index.ts';
+import {FOX_VOICE,PLACE,PROACTIVE,companionPrompt,onScreenText,proactiveAsked,proactiveCard,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../core/companion/index.ts';
 
 const day='2026-10-06',t0=1_800_000_000;
 const policyIncludes=(action:string)=>JSON.parse(fs.readFileSync('contracts/world-event-policy.json','utf8')).plumbing.includes(action);
@@ -108,7 +108,7 @@ const hostSource=fs.readFileSync('platform/electron/src/modules/fox/index.ts','u
 assert.match(hostSource,/proactive\.browse=preferences\.bool\('worldlet\.foxBrowse',true\)/);
 assert.match(hostSource,/foxBrowse:request=>proactiveBrowse\(request\)/);
 assert.match(hostSource,/preferences\.set\('worldlet\.foxBrowse',false\);proactiveCancel\(\);/);
-assert.match(hostSource,/page\.event\('worldlet:fox-proactive',\{id:run\.id,line,thread,moment\}\)/);
+assert.match(hostSource,/page\.event\('worldlet:fox-proactive',\{id:run\.id,line,thread,moment,\.\.\.card\?\{card\}:\{\}\}\)/);
 const chat=fs.readFileSync('ui/companion/native-chat.ts','utf8');
 assert.match(chat,/make\('button','','Browse with me'\),browseOff=make\('button','','Don’t bother'\)/);
 assert.match(chat,/browseSwitch\.hidden=browsing===null\|\|onDesktop\(\)\|\|root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true'\|\|\(context\.key\.split\(':'\)\[0\]==='overview'&&!contentIdentity\(\)\)\|\|!\(browsing===false\|\|guided&&shownGuide\.browsing===true\)/);
@@ -131,6 +131,21 @@ assert.equal([...proactiveLine('长'.repeat(400))!].length,PROACTIVE.lineCharact
 for(const message of ["ChatGPT or Codex Subscription rejected the request and retrying won't help. Pick another model with /model, or check the details in ~/.hermes/logs/agent.log.",
  '❌ Non-retryable error (HTTP 400): context too long','⚠️ API call failed after 3 retries: timeout','⏱️ The model provider is rate-limiting requests. Please wait a moment and try again.'])assert.equal(proactiveLine(message),null,message);
 assert.equal(proactiveLine('The API call failed twice in this thread; want me to look?'),'The API call failed twice in this thread; want me to look?');
+// A line about something waiting on the person points to its Attention card (owner decision 2026-10-10): the mark names
+// the item and never shows in the line; a line without one points nowhere, and PASS stays PASS.
+assert.match(proactiveTask({moment:'settled',place:'World',local:'Fri 15:00',minutes:2,recent:[],lastWords:''}),/end it with \[card:ID\], that item's exact id/);
+assert.equal(proactiveLine('Priya still needs the venue answer by Friday. [card:venue-reply]'),'Priya still needs the venue answer by Friday.');
+assert.equal(proactiveCard('Priya still needs the venue answer by Friday. [card:venue-reply]'),'venue-reply');
+assert.equal(proactiveLine('“周五前要回 Priya 场地的事。” [card: venue-reply ]'),'周五前要回 Priya 场地的事。');
+assert.equal(proactiveCard('“周五前要回 Priya 场地的事。” [card: venue-reply ]'),'venue-reply');
+assert.equal(proactiveLine('Nice run.\n[card:x]'),'Nice run.');
+assert.equal(proactiveCard('Nice run.'),null);
+assert.equal(proactiveLine('PASS [card:venue-reply]'),null);
+assert.equal(proactiveLine('[card:venue-reply]'),null);
+// The host keeps the id only while that item is open in the World, and the page offers its card.
+const foxHost=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+assert.match(foxHost,/card=line\?openItem\(proactiveCard\(result\.message\)\):''/);
+assert.match(foxHost,/item\.id===id&&\(item\.status\?\?'open'\)==='open'/);
 
 // The ask names the moment, the lines already said and the person's words, and is read only with PASS.
 const task=proactiveTask({moment:'long-stay',place:'Games · 2048',local:'Tue 23:10',minutes:47,recent:['Nice run.'],lastWords:'再来一局'});

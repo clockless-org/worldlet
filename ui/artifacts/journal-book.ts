@@ -3,21 +3,22 @@
  * a faint dot grid, a moss ribbon, day tabs on the fore-edge and a pressed sage sprig (journal-book.css). The pages
  * themselves are the Journal (companion-artifacts.ts). It closes with ×, Escape or a click outside, and steps aside
  * when a card in it opens in the World. */
-export type JournalBook={open(day?:string):void;close(focus?:boolean):void;toggle():void;readonly isOpen:boolean;readonly element:HTMLDialogElement};
+export type JournalBook={open(day?:string,card?:string):void;close(focus?:boolean):void;toggle():void;readonly isOpen:boolean;readonly element:HTMLDialogElement};
 // A pressed sage sprig: one stem, paired leaves along it, one at the tip (drawn here, no image asset).
 const LEAF='M0 0C7-8 22-8 30 0C22 8 7 8 0 0Z';
 const SPRIG='<svg class="journal-book-sprig" viewBox="0 0 120 120" aria-hidden="true" focusable="false"><path d="M14 112Q52 70 100 22" fill="none" stroke="#6f7f5c" stroke-width="2.2" stroke-linecap="round"/>'
  +[[30,95,-95],[30,95,15],[46,78,-100],[46,78,10],[62,61,-102],[62,61,8],[78,45,-104],[78,45,6]].map(([x,y,r])=>`<path d="${LEAF}" transform="translate(${x} ${y}) rotate(${r})" fill="#93a882" stroke="#6b8160" stroke-width="1"/>`).join('')
  +`<path d="${LEAF}" transform="translate(98 24) rotate(-48) scale(.9)" fill="#a0b48e" stroke="#6b8160" stroke-width="1"/></svg>`;
-export function mountJournalBook({root,pages,start,stop,returnFocus}:{root:HTMLElement;pages:HTMLElement;start:(day:string)=>void;stop:()=>void;returnFocus?:()=>HTMLElement|null}):JournalBook{
+export function mountJournalBook({root,pages,start,stop,returnFocus}:{root:HTMLElement;pages:HTMLElement;start:(day:string,card?:string)=>void;stop:()=>void;returnFocus?:()=>HTMLElement|null}):JournalBook{
  const book=document.createElement('dialog');book.id='journalBook';book.className='journal-book';book.setAttribute('aria-label','Journal');
  const close=document.createElement('button');close.type='button';close.className='journal-book-close';close.textContent='×';close.setAttribute('aria-label','Close journal');
  const ribbon=document.createElement('span');ribbon.className='journal-book-ribbon';ribbon.setAttribute('aria-hidden','true');
  const sprig=document.createElement('span');sprig.className='journal-book-sprig-holder';sprig.innerHTML=SPRIG;
  book.append(ribbon,pages,sprig,close);root.append(book);
- function open(day=''){
+ /** Opens on `day` (today when empty) and, given one, brings `card` into view on that page. */
+ function open(day='',card=''){
   if(root.dataset.onboardingLocked==='true')return;
-  start(day);
+  start(day,card);
   if(book.open)return;
   book.show();root.classList.add('journal-book-open');root.dispatchEvent(new Event('worldlet:journal-opened'));
   close.focus({preventScroll:true});

@@ -5,7 +5,8 @@
 // finished lives only in the Journal. Core decides every row (core/tasks/task-panel.ts); this only draws them and goes
 // where a row points:
 // - Routines: a timeline going down from Now, each row's time beside its dot, under the day it runs; a row opens a
-//   small read-only popover saying when, how often and who runs it (view only in this first version).
+//   small read-only popover saying when, how often and who runs it (view only in this first version). Fox's next
+//   morning brief and today's summary stand there too, from the page that asks for them (`worldlet:daily-planned`).
 // - Doing now: one small window per running task, stacked. When Fox drives a web page its window shows that page,
 //   small, refreshed every few seconds (host `taskPanelPage`), and a click opens the page; any other task is a dark
 //   terminal window with Fox in its corner and the last few status lines, and a click opens its whole log (the step,
@@ -39,6 +40,7 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  let input:TaskPanelInput={},timer=0,pageTimer=0,loading=false,model:TaskPanel|null=null,expanded='';
  let page:{url:string;title:string;image:string;steps:{text:string;done:boolean}[]}|null=null;
  const fox=new Map<string,{source:string;text:string;at:number}>();
+ let daily:{kind:'plan'|'summary';at:number}[]=[];
  /** What each running task has said, oldest first, kept while it runs: its window's lines and its open log. */
  const logs=new Map<string,{at:number;text:string}[]>();
 
@@ -144,7 +146,7 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   return part;
  }
  function render(){
-  model=taskPanel({...input,page,fox:[...fox.values()]},Date.now());
+  model=taskPanel({...input,page,fox:[...fox.values()],daily},Date.now());
   for(const row of model.now.rows)remember(row);
   const live=new Set(model.now.rows.map(row=>row.id));for(const id of logs.keys())if(!live.has(id))logs.delete(id);
   if(expanded&&!live.has(expanded))expanded='';
@@ -187,6 +189,11 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   const source=String(e.detail?.source||'work'),said=String(e.detail?.text||'').trim();
   if(said)fox.set(source,{source,text:said,at:fox.get(source)?.at??Date.now()});else fox.delete(source);
   render();
+ });
+ // When Fox makes the next morning brief and today's summary, from the page that asks for them (ui/shell/notion-world.ts).
+ window.addEventListener('worldlet:daily-planned',(e:any)=>{
+  const next=(Array.isArray(e.detail?.planned)?e.detail.planned:[]).filter((p:any)=>(p?.kind==='plan'||p?.kind==='summary')&&Number.isFinite(p.at)).slice(0,2);
+  if(JSON.stringify(next)!==JSON.stringify(daily)){daily=next;render();}
  });
  for(const name of ['worldlet:routines','worldlet:job','worldlet:applet-task'])window.addEventListener(name,soon);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden){void refresh();void readPage();}});
