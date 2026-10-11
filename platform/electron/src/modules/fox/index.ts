@@ -89,6 +89,8 @@ export function installFox(host:Host){
  const sources=()=>host.optional<SourcesService>(SOURCES);
  const speech=()=>host.optional<SpeechService>(SPEECH);
  const analytics=()=>host.optional<AnalyticsService>(ANALYTICS);
+ /** A change in Settings › Agent went through (a failed one throws first): which part, never what it became. */
+ const settingChanged=<T,>(setting:'model'|'permission'|'account'|'routine'|'skill',result?:T)=>{analytics()?.recordProductEvent('agent_settings_changed','',{agent_setting:setting});return result as T;};
  const browser=()=>host.optional<BrowserService>(BROWSER);
 
  let chat:AgentRuntime|null=null,routines:AgentRoutines|null=null;
@@ -134,6 +136,7 @@ export function installFox(host:Host){
   const job=value?.job;
   if(value?.ran===true&&typeof job?.id==='string'){
    const at=Date.now()/1000;
+   analytics()?.recordProductEvent('routine_completed','',{routine_source:'worldlet',routine_status:job.last_status==='ok'?'ok':'failed',routine_late:value.late===true?'yes':'no'});
    store.recordHistory({id:`routine:${job.id}:${at}`,kind:'routine.run',at,actor:'fox',status:job.last_status==='ok'?'complete':'failed',name:typeof job.name==='string'?job.name.slice(0,80):'',late:value.late===true,...typeof value.scheduledAt==='string'?{scheduledAt:value.scheduledAt}:{}});
    const result=store.writable&&!store.sampleEnabled()?routineScheduleResult(value,at*1000,Date.now()):null;
    if(result)try{
@@ -960,21 +963,24 @@ export function installFox(host:Host){
    * answers there. */
   harnessModels:async request=>{
    const agent=typeof request.applet==='string'?(await harnessAgents.forTurn(JSON.stringify(['object:'+request.applet,'']))).agent:undefined;
-   return request.operation==='choose'?harnessModels.choose(request.applet,request.model??null,agent):harnessModels.list(request.applet,agent);
+   if(request.operation!=='choose')return harnessModels.list(request.applet,agent);
+   const chosen=await harnessModels.choose(request.applet,request.model??null,agent);
+   settingChanged('model');
+   return chosen;
   },
   /** The skills the World shows and Fox's offers to save one (`list`), or an offer saved or declined. */
   foxSkills:request=>skills.request(request),
   /** The person started typing or opened Fox in `thread` (the chat's place thread): open its session now. */
   agentWarm:async request=>({warm:await warmThread(typeof request.thread==='string'?request.thread:'fox-main')}),
   /** Every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
-  harnessApprovalRules:request=>request.operation==='revoke'?approvalRules.revoke(request.harness,request.id):approvalRules.list(),
+  harnessApprovalRules:async request=>request.operation==='revoke'?settingChanged('permission',await approvalRules.revoke(request.harness,request.id)):approvalRules.list(),
   /** Settings › Agent › Accounts: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */
-  harnessConnections:request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?agentConnections.change(request.confirm):agentConnections.list(),
+  harnessConnections:async request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?settingChanged('account',await agentConnections.change(request.confirm)):agentConnections.list(),
   /** Settings › Agent › Routines and Skills: each Agent's own jobs or skills here (`list`), the exact command
    * a change would run with its confirmation (`preview`), or that confirmed change run (`change`). */
-  harnessSchedule:request=>agentControls.scheduleRequest(request),
-  harnessSkills:request=>agentControls.skillRequest(request),
+  harnessSchedule:async request=>request.operation==='change'?settingChanged('routine',await agentControls.scheduleRequest(request)):agentControls.scheduleRequest(request),
+  harnessSkills:async request=>request.operation==='change'?settingChanged('skill',await agentControls.skillRequest(request)):agentControls.skillRequest(request),
   /** Settings › Agent › Memory: what each Agent here remembers, read only. */
   harnessMemory:()=>agentControls.memoryRequest(),
   harnessApproval:async request=>{

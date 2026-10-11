@@ -36,7 +36,8 @@ export function ingestPath(pathname:string){
 export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string,identified:boolean,properties:Row}
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
 export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
-const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','fox_browse_changed','order_sent','order_stopped']);
+const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','fox_browse_changed','order_sent','order_stopped',
+ 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed']);
 /** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
  * Fox and startup timings (`timingBucket` in core/diagnostics). */
 const DURATIONS=['under_1s','1_5s','5_15s','over_15s','15_60s','1_5m','5_15m','over_15m'];
@@ -83,7 +84,16 @@ const ALLOWED:Record<string,string[]>={
  order_result:['woke','stored','failed'],
  order_stop:['cancelled','stopped_early','left_app','speech_error','no_speech','page_closed'],
  // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/onboarding/README.md).
- tour_step:['1','2','3','4','5','6','7','8']
+ tour_step:['1','2','3','4','5','6','7','8'],
+ // attention_shown: how many items the Center showed (at most nine). attention_approved: where the person settled one
+ // (its card or row on this computer, or the phone) and the item's kind. Never a title or a source.
+ attention_count:['1','2','3','4','5','6','7','8','9'],approval_surface:['computer','phone'],item_kind:['task','event','update'],
+ // phone_approved: what the person approved on the phone, an Attention item or the Agent's permission prompt.
+ approval_kind:['attention','agent_permission'],
+ // routine_completed: whose scheduler ran it (Worldlet's own routines or the Agent's), how it ended, and whether it ran late.
+ routine_source:['worldlet','agent'],routine_status:['ok','failed'],routine_late:['yes','no'],
+ // agent_settings_changed: which part of Settings › Agent changed; never what it changed to.
+ agent_setting:['model','permission','account','routine','skill']
 };
 export function safeDimensions(input:Row):Record<string,string> {
  const result:Record<string,string>={};
@@ -252,6 +262,12 @@ export class UsageAnalytics implements AnalyticsService {
   // The World page reports the person's own Fox message or Applet opening; only when this app is focused.
   if(event==='user_engaged'){if(this.focused())this.recordUserEngaged(typeof dimensions?.engagement_kind==='string'?dimensions.engagement_kind:'');return;}
   if(!EVENTS.has(event))return;
+  // attention_shown: once per identity per UTC day, so the share of active days with an Attention card can be counted.
+  if(event==='attention_shown'){
+   if(!this.config||!this.enabled())return;
+   const id=this.identity(this.profile());
+   this.record(event,'WorldletUsageAttentionDay',id+':'+isoSeconds(new Date(this.now())).slice(0,10),true,'',safeDimensions(dimensions??{}));return;
+  }
   if(['google_connect_completed','google_connection_present','google_connection_absent'].includes(event))this.recordActiveDay();
   const timing=DURATIONS.includes(duration)?duration:'';
   const safe=safeDimensions(dimensions??{});
