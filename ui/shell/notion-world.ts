@@ -143,7 +143,7 @@ export function mountNotionWorld(data: World, native: any) {
   let shownArtifact:any=null,artifactsShown=0,nextArtifactLabel:string|null=null;
   // The last save, so a page is asked for only once its artifact is kept.
   let keeping:Promise<unknown>=Promise.resolve();
-  const keepArtifact=(artifact)=>{if(native?.artifacts)keeping=Promise.resolve(native.artifacts({operation:'save',artifact})).catch(()=>{});};
+  const keepArtifact=(artifact)=>{if(native?.artifacts)keeping=Promise.resolve(native.artifacts({operation:'save',artifact})).then(()=>window.dispatchEvent(new Event('worldlet:journal-changed'))).catch(()=>{});};
   const foxArtifact=mountFoxArtifact(root,renderMarkdown,putArtifactAway,href=>openWorldURL(href),size=>{if(shownArtifact){shownArtifact={...shownArtifact,size};keepArtifact(shownArtifact);}},
    // A next step on the card drafts the person's request in Fox's message bar; it goes to Fox only when they send it,
    // so a card made from untrusted content can never speak for them (core/artifacts/README.md#actions).
@@ -2000,6 +2000,11 @@ export function mountNotionWorld(data: World, native: any) {
     // Ongoing things (core/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is an Applet of
     // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Applet world and its own thread.
     let ongoingProposals:OngoingThing[]=[],ongoingKept:(OngoingThing&{recent:{text:string,at:string}[]})[]=[];
+    // Every other brought conversation that looks like one job (core/tasks ongoingCandidates): the phone lists each as a
+    // thing of its own, and the first line said in one keeps it here (owner request 2026-10-11).
+    let ongoingOthers:(OngoingThing&{recent:{text:string,at:string}[]})[]=[];
+    // Today's Journal cards and the Task panel's cards, for the phone's Today and Tasks tabs.
+    let journalToday:any[]=[],taskPanelNow:any=null;
     const ongoingDecide=async(id:string,operation:'later'|'decline')=>{if(native.ongoing)await native.ongoing({operation,id});};
     // What Fox offers from them is a theme, never one conversation (core/tasks/themes.ts): the conversations about one part
     // of life, pulled together by Fox into one artifact laid out like every other (Kelvin 2026-10-07).
@@ -2042,14 +2047,23 @@ export function mountNotionWorld(data: World, native: any) {
      itemFox:id=>{if(id.startsWith('ongoing:')){const theme=themesNow().find(t=>'ongoing:'+t.id===id);if(!theme)return null;return {say:theme.say,option:theme.option,turns:[]};}const page=itemPage(id);if(!page)return null;return {say:attentionPreviewData(page).suggestion,option:previewActions(page)[0]?.label||'',turns:voice?.threadOf?.('attention:'+id)||[]};},
      // The Applet world (core/phone phoneApplets): the Applets in this World with their lamps, what each is doing, the
      // world log, the widgets for now and each Applet's thread. A line said in an Applet's page opens it here first.
-     askApplet:(key,text)=>{const r=sections.find(s=>s.entity==='app'&&s.key===key);if(r&&root.appletLayout.has(r.moduleId))visitObject(r.moduleId);return voice?.ask(text,{origin:'user',displayText:text});},
+     askApplet:async(key,text)=>{
+      let r=sections.find(s=>s.entity==='app'&&s.key===key);
+      // A thing not kept yet becomes an Applet first, so the line joins its own thread; its device arrives with the
+      // World update keeping it sends.
+      if(!r&&ongoingOthers.some(t=>t.id===key)&&native.ongoing){
+       try{await native.ongoing({operation:'keep',id:key});}catch{}
+       for(let i=0;i<40&&!(r=sections.find(s=>s.entity==='app'&&s.key===key));i++)await new Promise(resolve=>setTimeout(resolve,150));
+      }
+      if(r&&root.appletLayout.has(r.moduleId))visitObject(r.moduleId);return voice?.ask(text,{origin:'user',displayText:text});},
      openApplet:key=>{const r=sections.find(s=>s.entity==='app'&&s.key===key);if(r&&root.appletLayout.has(r.moduleId))visitObject(r.moduleId);},
      order:said=>voice?.order?.(said),
      world:()=>({places:sections.filter(r=>r.entity==='app'&&r.key&&!r.ongoing&&!r.moment&&root.appletLayout.has(r.moduleId)).sort((a,b)=>lastUse(b,regionLayout)-lastUse(a,regionLayout)).map(r=>{const status=appStatus(r,data.moduleConnections||[]),phase=status.phase;
        return {key:r.key,title:r.title,provider:r.provider||r.key,label:status.label,source:!['browser','local','unavailable','planned'].includes(phase),mine:myAppletKind(r)??undefined,url:phoneWebAddress(r),
         state:['reading','syncing'].includes(phase)?'busy':status.failed?'failed':status.connected||status.usableWithoutLogin||['browser','local'].includes(phase)?'ready':'off'};}),
-      now:phoneWorldLog.now,log:phoneWorldLog.lines,widgets:widgetsNow.map(w=>({id:w.id,title:w.title})),jobs:ongoingKept.map(t=>({id:t.id,title:t.title,line:ongoingLine(t,Date.now()/1000),recent:t.recent})),thread:key=>voice?.threadOf?.('object:app-'+key)||[]}),
+      now:phoneWorldLog.now,log:phoneWorldLog.lines,widgets:widgetsNow.map(w=>({id:w.id,title:w.title})),jobs:[...ongoingKept,...ongoingOthers].map(t=>({id:t.id,title:t.title,line:ongoingLine(t,Date.now()/1000),recent:t.recent})),thread:key=>voice?.threadOf?.('object:app-'+key)||[]}),
      // On the phone, Done asks Fox for a theme's page, Later is Not now and Remove is Don't ask again.
+     tasks:()=>taskPanelNow,journal:()=>journalToday,
      settle:(item,status,until)=>{if(!item.worldItemId.startsWith('ongoing:'))return settleAttention(item,status,until,{surface:'phone'});const id=item.worldItemId.slice(8);return status==='dismissed'?decideTheme(id,'decline'):until?decideTheme(id,'later'):makeTheme(id);},kindOf:id=>itemPage(id)?.worldItemKind,ready:()=>!!voice&&root.dataset.onboardingLocked!=='true'}):null;
     if(phone)root.addEventListener('worldlet:fox-thread',()=>phone.refresh());
     window.addEventListener('worldlet:world-log',(event:any)=>{phoneWorldLog=event.detail||phoneWorldLog;phone?.world();});
@@ -2069,13 +2083,23 @@ export function mountNotionWorld(data: World, native: any) {
       const result=await native.ongoing({operation:'list'});
       ongoingProposals=Array.isArray(result?.proposals)?result.proposals.filter(t=>!(t.laterUntil>Date.now()/1000)):[];
       const kept:OngoingThing[]=Array.isArray(result?.kept)?result.kept:[];
-      ongoingKept=await Promise.all(kept.map(async t=>{const r=await native.ongoing({operation:'turns',id:t.id,limit:4}).catch(()=>null);
+      const withRecent=(list:OngoingThing[])=>Promise.all(list.map(async t=>{const r=await native.ongoing({operation:'turns',id:t.id,limit:4}).catch(()=>null);
        return {...t,recent:Array.isArray(r?.recent)?r.recent:[]};}));
+      ongoingKept=await withRecent(kept);
+      ongoingOthers=phone?await withRecent(Array.isArray(result?.candidates)?result.candidates:[]):[];
       nativeHUD?.sync();phone?.world();
      }catch{}
     };
     window.addEventListener('worldlet:ongoing',()=>void loadOngoing());
     void loadOngoing();
+    if(phone){
+     window.addEventListener('worldlet:task-panel',(event:any)=>{taskPanelNow=event.detail??null;phone.world();});
+     // Today's Journal, read again when a card is kept and every few minutes (the day turns over, the host keeps the
+     // morning brief and the day's summary itself).
+     const loadJournal=()=>{if(!native.artifacts)return;void Promise.resolve(native.artifacts({operation:'list'})).then(r=>{journalToday=(r?.artifacts||[]).map(readArtifact).filter(Boolean);phone.world();}).catch(()=>{});};
+     window.addEventListener('worldlet:journal-changed',()=>loadJournal());
+     setInterval(loadJournal,5*60_000);loadJournal();
+    }
     nativeHUD=mountNativeHUD({root,onAttention:view=>{phone?.attention(view);if(!data.sample&&view?.now?.length)reportProductEvent('attention_shown',{attention_count:String(Math.min(9,view.now.length))});},calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:()=>widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
     // The Applet shelf above an open Applet (ui/hud/applet-shelf.ts): the recently used Applets, the open one in the middle.
     const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:themeAppletIcon(r.key)||appLogoSource(r)||''};};

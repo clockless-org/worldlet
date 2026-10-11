@@ -160,7 +160,7 @@ class PairingTest {
         assertEquals("Saved Sam's venue question", mail.recent?.single()?.text)
         assertEquals("Only Sam.", mail.fox?.turns?.single()?.text)
         assertEquals(PhoneApplet.State.Off, snapshot.applet("notion")?.state)
-        // A section or lamp from a newer computer reads as In your World and off.
+        // A section or lamp from a newer computer reads as More and off.
         assertEquals(PhoneApplet.Section.Places to PhoneApplet.State.Off, applets[3].section to applets[3].state)
         assertEquals("mail", snapshot.now.single().applet)
         assertNull(snapshot.later.single().applet, "an item without a home has no applet")

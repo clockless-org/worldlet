@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -79,10 +80,16 @@ class DemoUiTest {
     }
 
     @Test
-    fun attentionNowAndFox() {
+    fun todayAndFox() {
         show(demo())
-        compose.onNodeWithTag("tabNow").assertIsSelected()
-        compose.onNodeWithText("COMING UP").assertIsDisplayed()
+        // Today is where the app opens (owner request 2026-10-11): the date, today's Journal, then what Now held.
+        compose.onNodeWithTag("tabToday").assertIsSelected()
+        compose.onNodeWithTag("todayDate").assertIsDisplayed()
+        compose.onNodeWithText(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE", java.util.Locale.getDefault()))).assertIsDisplayed()
+        compose.onNodeWithText("JOURNAL").assertIsDisplayed()
+        compose.onNodeWithTag("journal-journal-answer").assertIsDisplayed()
+        compose.onNodeWithTag("journalEmpty").assertDoesNotExist()
+        compose.onNodeWithText("COMING UP").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Reply to Sam about the venue").assertIsDisplayed()
         compose.onNodeWithText("Connect Calendar on your computer").assertIsDisplayed()
         compose.onNodeWithTag("foxDialogue").assertIsDisplayed()
@@ -93,8 +100,8 @@ class DemoUiTest {
     fun widgetOnNow() {
         val model = demo()
         show(model)
-        compose.onNodeWithTag("widget-row").assertIsDisplayed()
-        // The widget's tile in the Applet world (the layer above) has the same name.
+        compose.onNodeWithTag("widget-row").performScrollTo().assertIsDisplayed()
+        // The widget's row in the Applets tab has the same name.
         compose.onNode(hasTestTag("widget-row") and hasText("Getty Center today")).assertIsDisplayed()
         compose.onNodeWithText("Until", substring = true).assertIsDisplayed()
         compose.onNodeWithTag("widget-row").performClick()
@@ -109,42 +116,86 @@ class DemoUiTest {
     }
 
     @Test
-    fun laterPage() {
+    fun laterBelowNowOnToday() {
         show(demo())
-        compose.onNodeWithTag("tabLater").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithTag("tabLater").assertIsSelected()
-        compose.onNodeWithText("Renew the passport").assertIsDisplayed()
+        // Later is further down Today's one scroll, under its own heading (owner request 2026-10-11).
+        compose.onNodeWithTag("laterSection").performScrollTo()
+        compose.onNodeWithText("Renew the passport").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("tabToday").assertIsSelected()
         shot("later")
     }
 
     @Test
-    fun laterPageAtStart() {
+    fun oldLayersOpenOnToday() {
         show(demo(page = "later"))
         compose.waitForIdle()
-        compose.onNodeWithTag("tabLater").assertIsSelected()
-        compose.onNodeWithText("Renew the passport").assertIsDisplayed()
+        compose.onNodeWithTag("tabToday").assertIsSelected()
+        compose.onNodeWithTag("todayPage").assertIsDisplayed()
     }
 
     @Test
-    fun appletWorld() {
+    fun journalEntryOpensInASheet() {
+        show(demo())
+        compose.onNodeWithTag("journal-journal-weather").performScrollTo().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("journalSheet").assertIsDisplayed()
+        compose.onNodeWithText("Worth Knowing", substring = true).assertIsDisplayed()
+        // The sheet has the whole text; the row above it only its first line.
+        compose.onNode(hasText("Keep the windows closed", substring = true) and hasAnyAncestor(hasTestTag("journalSheet"))).assertIsDisplayed()
+        shot("journal")
+    }
+
+    @Test
+    fun appletList() {
         show(demo())
         compose.onNodeWithTag("tabApplets").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("tabApplets").assertIsSelected()
-        // Only Applets that work on the phone, the person's own first (owner request 2026-10-07).
-        compose.onNodeWithText("YOURS").assertIsDisplayed()
-        compose.onNodeWithText("APPLETS").assertIsDisplayed()
-        compose.onNodeWithTag("applet-site-demotldraw01").assertIsDisplayed()
-        compose.onNodeWithTag("applet-mail").assertIsDisplayed()
+        compose.onNodeWithTag("appletList").assertIsDisplayed()
+        // A list in four sections (owner request 2026-10-11): Things, Working now, Accounts and More.
+        compose.onNodeWithText("THINGS").assertIsDisplayed()
+        compose.onNodeWithText("WORKING NOW").assertIsDisplayed()
+        compose.onNodeWithText("ACCOUNTS").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("MORE").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("applet-site-demotldraw01").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("applet-mail").performScrollTo().assertIsDisplayed()
         // Mail holds one Now item (Sam's venue), Calendar two but its lamp failed, so it shows the red dot instead. The
-        // badge sits inside the clickable tile, whose semantics merge it away.
+        // badge sits inside the clickable row, whose semantics merge it away.
         compose.onNodeWithTag("appletBadge-mail", useUnmergedTree = true).assertIsDisplayed()
         compose.onNodeWithTag("appletBadge-calendar", useUnmergedTree = true).assertDoesNotExist()
+        // A row says when its latest world log line came.
+        compose.onNodeWithTag("appletAgo-mail", useUnmergedTree = true).assertExists()
+        // Things: a conversation the person kept (one of their own) and one not kept yet.
+        compose.onNodeWithTag("applet-job-dietdemo0001").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("appletMine-job-dietdemo0001", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("applet-job-spanishdemo1").assertIsDisplayed()
+        compose.onNodeWithTag("appletMine-job-spanishdemo1", useUnmergedTree = true).assertDoesNotExist()
         shot("applets")
-        // A brought conversation the person kept is one of their own.
-        compose.onNodeWithText("#diet-and-health").assertExists()
-        compose.onNodeWithText("WORKING NOW").assertDoesNotExist()
+    }
+
+    @Test
+    fun tasksTab() {
+        val model = demo(page = "tasks")
+        show(model)
+        compose.waitForIdle()
+        compose.onNodeWithTag("tabTasks").assertIsSelected()
+        compose.onNodeWithText("DOING NOW").assertIsDisplayed()
+        compose.onNodeWithTag("task-task-flights").assertIsDisplayed()
+        compose.onNodeWithTag("taskBar-task-flights", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("ROUTINES").assertIsDisplayed()
+        compose.onNodeWithText("Daily news digest").assertIsDisplayed()
+        compose.onNodeWithText("Every day · Fox").assertIsDisplayed()
+        compose.onNodeWithText("Tomorrow 7:00 AM").assertIsDisplayed()
+        compose.onNodeWithTag("tasksNowEmpty").assertDoesNotExist()
+        shot("tasks")
+        // A task with no Applet here opens to show what it said; one whose Applet is here opens that Applet's page.
+        compose.onNodeWithTag("task-task-flights").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Checking baggage rules").assertIsDisplayed()
+        compose.onNodeWithTag("task-task-inbox").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("appletPage").assertIsDisplayed()
+        compose.onNodeWithText("In Mail").assertIsDisplayed()
     }
 
     @Test
@@ -152,7 +203,7 @@ class DemoUiTest {
         val model = demo(page = "applets")
         show(model)
         compose.waitForIdle()
-        compose.onNodeWithTag("applet-youtube").performClick()
+        compose.onNodeWithTag("applet-youtube").performScrollTo().performClick()
         compose.waitForIdle()
         // The website opens in Worldlet's own browser, never another app (owner request 2026-10-07).
         compose.onNodeWithTag("browser").assertIsDisplayed()
@@ -163,8 +214,8 @@ class DemoUiTest {
         compose.waitForIdle()
         compose.onNodeWithTag("browser").assertDoesNotExist()
         compose.onNodeWithTag("appletPage").assertDoesNotExist()
-        // An ongoing thing has no website: its tile opens its page.
-        compose.onNodeWithTag("applet-job-dietdemo0001").performClick()
+        // A thing has no website: its row opens its page.
+        compose.onNodeWithTag("applet-job-dietdemo0001").performScrollTo().performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("appletPage").assertIsDisplayed()
         compose.onNodeWithTag("appletOpen").performClick()
@@ -178,7 +229,7 @@ class DemoUiTest {
         val model = demo(page = "applets")
         show(model)
         compose.waitForIdle()
-        compose.onNodeWithTag("applet-mail").performTouchInput { longClick() }
+        compose.onNodeWithTag("applet-mail").performScrollTo().performTouchInput { longClick() }
         compose.waitForIdle()
         compose.onNodeWithTag("appletPage").assertIsDisplayed()
         compose.onNodeWithTag("appletWebsite").assertIsDisplayed()
@@ -198,7 +249,7 @@ class DemoUiTest {
         compose.onNodeWithTag("foxContextClose").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("appletPage").assertDoesNotExist()
-        compose.onNodeWithTag("applet-mail").assertIsDisplayed()
+        compose.onNodeWithTag("applet-mail").assertExists()
     }
 
     @Test
@@ -256,7 +307,7 @@ class DemoUiTest {
     @Test
     fun cardWithFoxsDialogue() {
         show(demo())
-        compose.onNodeWithTag("row-t1").performClick()
+        compose.onNodeWithTag("row-t1").performScrollTo().performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("card-t1").assertIsDisplayed()
         compose.onNodeWithText("Help me do it").assertIsDisplayed()
@@ -279,7 +330,7 @@ class DemoUiTest {
     fun doneSettlesTheItemAndOpensTheNext() {
         val model = demo()
         show(model)
-        compose.onNodeWithTag("row-t1").performClick()
+        compose.onNodeWithTag("row-t1").performScrollTo().performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("cardDone").performClick()
         compose.mainClock.advanceTimeBy(1_000)

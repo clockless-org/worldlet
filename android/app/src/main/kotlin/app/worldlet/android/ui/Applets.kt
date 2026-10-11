@@ -9,6 +9,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -77,43 +77,38 @@ import kotlinx.coroutines.launch
 private val failedRed = Color(0xFFD9534F)
 
 /**
- * The Applet world, the layer above Now (owner decision 2026-10-03): the World behind the Center comes forward as a
- * grid of the Applets that work on the phone, in the computer's own order (owner request 2026-10-07): the person's own
- * under Yours, then the others, those at work or holding Now items first; Applets that work only on the computer are
- * not sent. A tile breathes a lantern ring while its Applet works, like the device's lamp on the computer, shows a red
- * dot when it failed and fades when it is off; its badge counts the Now items it holds. A tile with a website opens it
- * in this app's own browser (Browser.kt), and a long press opens the Applet's page; a widget's tile opens its page
- * and an ongoing thing's tile its page.
+ * The Applets tab (owner request 2026-10-11): the World's Applets that work on the phone (owner request 2026-10-07) as a
+ * list, in four sections: Things (conversations brought from other Agents, kept or not yet), Working now (at work,
+ * holding Now items, or a widget for now), Accounts and More, each in the computer's own order. A row's glyph breathes
+ * a lantern ring while its Applet works, like the device's lamp on the computer, shows a red dot when it failed and
+ * fades when it is off; its badge counts the Now items it holds. A row with a website opens it in this app's own
+ * browser (Browser.kt) and offers the Applet's page as Details on a long press; a widget's row opens the widget, and
+ * any other the Applet's page.
  */
 @Composable
-fun AppletWorld(model: AppModel, openWidget: (String) -> Unit, openApplet: (PhoneApplet) -> Unit) {
+fun AppletList(model: AppModel, scroll: ScrollState, openWidget: (String) -> Unit, openApplet: (PhoneApplet) -> Unit) {
     val applets = model.attention.applets.orEmpty()
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp).padding(top = 10.dp, bottom = 24.dp).testTag("appletWorld"),
+        Modifier.fillMaxSize().verticalScroll(scroll).padding(horizontal = 14.dp).padding(top = 10.dp, bottom = 24.dp).testTag("appletList"),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         if (applets.isEmpty()) {
             Text("Your Applets appear here when your computer sends them.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 14.sp,
                 style = TextStyle(shadow = worldShadow), modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp))
         }
-        listOf(true, false).forEach { mine ->
-            val tiles = applets.filter { (it.mine != null) == mine }
-            if (tiles.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Heading(if (mine) "Yours" else "Applets")
-                    tiles.chunked(4).forEach { row ->
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            row.forEach { applet ->
-                                AppletCell(model, applet, Modifier.weight(1f), details = { openApplet(applet) }) {
-                                    val widget = applet.widget
-                                    when {
-                                        widget != null -> openWidget(widget)
-                                        applet.website != null -> model.browse(applet)
-                                        else -> openApplet(applet)
-                                    }
-                                }
+        listOf(PhoneApplet.Section.Jobs, PhoneApplet.Section.Live, PhoneApplet.Section.Accounts, PhoneApplet.Section.Places).forEach { section ->
+            val rows = applets.filter { it.section == section }
+            if (rows.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Heading(section.title)
+                    rows.forEach { applet ->
+                        AppletRow(model, applet, details = { openApplet(applet) }) {
+                            val widget = applet.widget
+                            when {
+                                widget != null -> openWidget(widget)
+                                applet.website != null -> model.browse(applet)
+                                else -> openApplet(applet)
                             }
-                            repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
                         }
                     }
                 }
@@ -122,61 +117,71 @@ fun AppletWorld(model: AppModel, openWidget: (String) -> Unit, openApplet: (Phon
     }
 }
 
-/** A small uppercase heading over a faint rule, like the Center's group headings. */
+/** One Applet in the list: its glyph with its marks, its name, what it is doing (or its lamp in a word) and when its
+ * latest world log line came. A row with a website offers its page on a long press. */
 @Composable
-private fun Heading(title: String) {
-    Column(Modifier.fillMaxWidth()) {
-        Text(title.uppercase(), color = Palette.muted.copy(alpha = 0.75f), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.3.sp,
-            style = TextStyle(shadow = worldShadow), modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 6.dp))
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.ink.copy(alpha = 0.14f)))
-    }
-}
-
-/** One Applet in the grid: its tile, its name below, and its marks. A tile with a website offers its page on a long
- * press. */
-@Composable
-private fun AppletCell(model: AppModel, applet: PhoneApplet, modifier: Modifier, details: () -> Unit, open: () -> Unit) {
+private fun AppletRow(model: AppModel, applet: PhoneApplet, details: () -> Unit, open: () -> Unit) {
     val held = model.attention.now.count { it.applet == applet.key }
-    Column(
-        modifier.alpha(if (applet.state == PhoneApplet.State.Off) 0.45f else 1f)
+    val line = applet.line?.takeIf { it.isNotEmpty() } ?: stateWord(applet.state)
+    Row(
+        Modifier.fillMaxWidth()
             .then(if (applet.website != null) {
                 Modifier.combinedClickable(onClickLabel = "Open ${applet.title}", onLongClickLabel = "Details", onLongClick = details, onClick = open)
             } else Modifier.clickable(onClickLabel = "Open the Applet", onClick = open))
-            .semantics {
+            .semantics(mergeDescendants = true) {
                 contentDescription = applet.title
-                stateDescription = listOfNotNull(if (applet.mine != null) "Yours" else null, applet.line, if (held > 0) "$held in Now" else null).joinToString(", ")
+                stateDescription = listOfNotNull(if (applet.mine != null) "Yours" else null, line, if (held > 0) "$held in Now" else null).joinToString(", ")
             }
             .testTag("applet-${applet.key}")
-            .padding(vertical = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box {
-            AppletTile(model, applet, 52.dp)
-            // The person's own Applet carries the honey star its device has on the computer (core/applets/MY-APPLETS.md).
-            if (applet.mine != null) {
-                Box(
-                    Modifier.align(Alignment.BottomEnd).offset(x = 5.dp, y = 5.dp).size(17.dp)
-                        .background(Color(0xFFD9A441), CircleShape).border(1.5.dp, Color(0xFFFFF8EA), CircleShape)
-                        .testTag("appletMine-${applet.key}"),
-                    contentAlignment = Alignment.Center,
-                ) { Text("★", color = Color(0xFFFFFAF0), fontSize = 9.sp, fontWeight = FontWeight.Bold) }
-            }
-            if (applet.state == PhoneApplet.State.Failed) {
-                Box(Modifier.align(Alignment.TopEnd).offset(x = 4.dp, y = (-4).dp).size(11.dp).background(failedRed, CircleShape)
-                    .border(1.dp, Color.Black.copy(alpha = 0.3f), CircleShape))
-            } else if (held > 0) {
-                Text(
-                    "$held", color = Color(0xFF3A2C10), fontSize = 11.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-6).dp)
-                        .background(Palette.group(app.worldlet.kit.AttentionGroup.NeedsAction), CircleShape)
-                        .widthIn(min = 18.dp).padding(horizontal = 5.dp, vertical = 1.dp).testTag("appletBadge-${applet.key}"),
-                )
-            }
+        AppletGlyph(model, applet, 36.dp, held)
+        Column(Modifier.weight(1f).alpha(if (applet.state == PhoneApplet.State.Off) 0.45f else 1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(applet.title, color = Palette.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                style = TextStyle(shadow = worldShadow))
+            Text(line, color = if (applet.state == PhoneApplet.State.Failed) Color(0xFFF08A84) else Palette.muted.copy(alpha = 0.85f), fontSize = 13.sp,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, style = TextStyle(shadow = worldShadow))
         }
-        Text(applet.title, color = Palette.ink, fontSize = 12.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            style = TextStyle(shadow = worldShadow))
+        applet.recent?.lastOrNull()?.let { ago(it.at) }?.let {
+            Text(it, color = Palette.muted.copy(alpha = 0.7f), fontSize = 12.sp, style = TextStyle(shadow = worldShadow), modifier = Modifier.testTag("appletAgo-${applet.key}"))
+        }
     }
+}
+
+/** An Applet's glyph with its marks: the honey star of the person's own, a red dot when it failed, else the count of
+ * the Now items it holds; faded when it is off. */
+@Composable
+fun AppletGlyph(model: AppModel, applet: PhoneApplet, size: Dp, held: Int = 0) {
+    Box(Modifier.alpha(if (applet.state == PhoneApplet.State.Off) 0.45f else 1f)) {
+        AppletTile(model, applet, size)
+        // The person's own Applet carries the honey star its device has on the computer (core/applets/MY-APPLETS.md).
+        if (applet.mine != null) {
+            Box(
+                Modifier.align(Alignment.BottomEnd).offset(x = 4.dp, y = 4.dp).size(15.dp)
+                    .background(Color(0xFFD9A441), CircleShape).border(1.5.dp, Color(0xFFFFF8EA), CircleShape)
+                    .testTag("appletMine-${applet.key}"),
+                contentAlignment = Alignment.Center,
+            ) { Text("★", color = Color(0xFFFFFAF0), fontSize = 8.sp, fontWeight = FontWeight.Bold) }
+        }
+        if (applet.state == PhoneApplet.State.Failed) {
+            Box(Modifier.align(Alignment.TopEnd).offset(x = 4.dp, y = (-4).dp).size(10.dp).background(failedRed, CircleShape)
+                .border(1.dp, Color.Black.copy(alpha = 0.3f), CircleShape))
+        } else if (held > 0) {
+            Text(
+                "$held", color = Color(0xFF3A2C10), fontSize = 10.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-6).dp)
+                    .background(Palette.group(app.worldlet.kit.AttentionGroup.NeedsAction), CircleShape)
+                    .widthIn(min = 16.dp).padding(horizontal = 4.dp).testTag("appletBadge-${applet.key}"),
+            )
+        }
+    }
+}
+
+/** How long ago a world log line came, as the Applet page's Recent writes it ("5 min. ago"). */
+internal fun ago(at: String): String? = runCatching { Instant.parse(at) }.getOrNull()?.let {
+    DateUtils.getRelativeTimeSpanString(it.toEpochMilli(), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString()
 }
 
 /** An Applet's face: its initial on frosted glass, or a widget's initial on its own colour. While the Applet works a
@@ -298,10 +303,7 @@ fun AppletPage(model: AppModel, applet: PhoneApplet, open: (AttentionItem) -> Un
                     recent.forEach { line ->
                         Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(line.text, color = Palette.ink, fontSize = 14.sp, modifier = Modifier.weight(1f))
-                            runCatching { Instant.parse(line.at) }.getOrNull()?.let { at ->
-                                Text(DateUtils.getRelativeTimeSpanString(at.toEpochMilli(), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString(),
-                                    color = Palette.muted.copy(alpha = 0.7f), fontSize = 12.sp)
-                            }
+                            ago(line.at)?.let { Text(it, color = Palette.muted.copy(alpha = 0.7f), fontSize = 12.sp) }
                         }
                     }
                 }

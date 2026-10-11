@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
  * where it came from, the saved brief, and the person's own controls at its foot: one prominent outcome (Done for a
  * task, Got it otherwise), Later and Dismiss (the item stays). Each sends the card flying the way it points (Later
  * up, Dismiss left, Done right) and brings down the next item's card. The close button, a swipe up or a tap anywhere
- * beside it closes it. When the item's home Applet is in the Applet world, "From <Applet> ›" by the source opens that
+ * beside it closes it. When the item's home Applet is in the Applets tab, "From <Applet> ›" by the source opens that
  * Applet's page in the card's place.
  */
 @Composable
@@ -201,7 +201,7 @@ private fun Hero(name: String) {
 
 /** The brief's Markdown: paragraphs and bullet points, with bold key points. */
 @Composable
-private fun Brief(text: String) {
+internal fun Brief(text: String) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         text.lines().map { it.trim() }.filter { it.isNotEmpty() }.forEach { line ->
             val bullet = listOf("- ", "* ", "• ").firstOrNull { line.startsWith(it) }

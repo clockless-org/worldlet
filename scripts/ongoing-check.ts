@@ -1,8 +1,8 @@
 // Ongoing things' rules (core/tasks/README.md) without a host: what looks like one job carried on, proposing and
 // its limits, decisions, forgetting, names and lines, and how the phone receives kept things and proposals.
 import assert from 'node:assert/strict';
-import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
-import {phoneAttention,readPhoneMessage} from '../core/phone/index.ts';
+import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
+import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
 
 const DAY=86400,now=Date.parse('2026-10-04T12:00:00Z')/1000;
@@ -172,6 +172,30 @@ assert.deepEqual(readPhoneMessage({type:'chat',id:'m1',text:'Where are we?',appl
 assert.deepEqual(readPhoneMessage({type:'applet',id:'m2',applet:kept.id,action:'open'}),{type:'applet',id:'m2',applet:kept.id,action:'open'});
 assert.deepEqual(readPhoneMessage({type:'option',id:'m3',item:item.id}),{type:'option',id:'m3',item:item.id});
 
+// Things on the phone (owner request 2026-10-11): every conversation that looks like a job, of any kind (a project too)
+// and not recorded yet, busiest first; recorded ones (kept, proposed, declined) are not listed again.
+const house=conversation('OpenClaw · Discord · #house-build',{userTurns:30}),food=conversation('OpenClaw · Discord · #diet',{userTurns:9});
+const recorded=ongoingProposal(food,now);
+const candidates=ongoingCandidates([recorded],[house,food,conversation('OpenClaw · Discord · #once',{userTurns:2})],now);
+assert.deepEqual(candidates.map(t=>[t.title,t.state]),[['#house-build','proposed']],'a project is a thing; a recorded or one-off conversation is not listed');
+assert.equal(ongoingCandidates([],Array.from({length:40},(_,i)=>conversation('OpenClaw · Discord · #c'+i)),now).length,ONGOING_LIMITS.kept);
+
+// The Tasks tab and today's Journal ride with the Center.
+const tasks=phoneTasks({now:{rows:[{id:'page:united.com',name:'united.com',status:'Comparing fares',when:'In progress',icon:'fox',progress:1.4,lines:['✓ a','› b']},
+ {id:'applet:7',name:'YouTube',status:'Working',when:'In progress',icon:'youtube',open:{applet:'app-youtube'}},{id:'',name:'nameless'}]},
+ routines:{rows:[{id:'job:d',name:'Daily news digest',status:'Tomorrow 7:00 AM',when:'Tomorrow 7:00 AM',icon:'clock',every:'Every day',by:'OpenClaw’s scheduler',open:{routine:'d'}}]}});
+assert.deepEqual(tasks.now.map(t=>[t.id,t.progress,t.applet]),[['page:united.com',1,undefined],['applet:7',undefined,'youtube']]);
+assert.deepEqual(tasks.now[0].lines,['✓ a','› b']);
+assert.deepEqual(tasks.routines[0],{id:'job:d',name:'Daily news digest',status:'Tomorrow 7:00 AM',when:'Tomorrow 7:00 AM',icon:'clock',every:'Every day',by:'OpenClaw’s scheduler'});
+const noon=new Date(2026,9,11,12).getTime(),secs=(h:number)=>new Date(2026,9,11,h).getTime()/1000;
+const journal=phoneJournal([{id:'art-aaaaaaaaaaaa',kind:'answer',title:'Today\'s prep',body:'Long body',brief:'Short',createdAt:secs(7)},
+ {id:'attention-x',kind:'attention',title:'Fares dropped',body:'Down $120',category:'Worth Knowing',createdAt:secs(9)},
+ {id:'art-bbbbbbbbbbbb',kind:'answer',title:'Yesterday',body:'Old',createdAt:secs(7)-DAY}],noon);
+assert.deepEqual(journal.map(e=>[e.title,e.text,e.category]),[['Fares dropped','Down $120','Worth Knowing'],['Today\'s prep','Short',undefined]],'today only, newest first, the brief before the body');
+const withTabs=phoneAttention({now:[],later:[],tasks:{now:{rows:[]},routines:{rows:[]}},journal:[]},noon);
+assert.deepEqual([withTabs.tasks,withTabs.journal],[{now:[],routines:[]},[]]);
+assert.ok(!('tasks' in phoneAttention({now:[],later:[]},noon)),'left out when the page has none, so an older phone sees nothing new');
+
 // A chat gateway's reply pointer and thread context are its Agent's context, not the person's words (Order 2026-10-07).
 const slack='[Replying to: "prod release的cron怎么没有了"]\n\n[Thread context — prior messages in this thread (not yet in conversation history):]\n[thread parent] Kelvin: prod release的cron怎么没有了\n[assistant] 全部信息齐了。\n[End of thread context]\n\n打开 发一下最新的prd release消息';
 assert.equal(ongoingTurnText(slack),'打开 发一下最新的prd release消息');
@@ -179,4 +203,4 @@ assert.equal(ongoingTurnText('[Replying to your previous message: "ok"]\n\nNext:
 assert.equal(ongoingTurnText('[Thread context — unfinished block'),'[Thread context — unfinished block','an unclosed block is kept as written');
 assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
 
-console.log('PASS Ongoing things: what looks like a job, proposing and its limits, themes and the page Fox is asked for, decisions, forgetting, names and lines, kinds and their pages, and the phone\'s tiles and proposals.');
+console.log('PASS Ongoing things: what looks like a job, proposing and its limits, themes and the page Fox is asked for, decisions, forgetting, names and lines, kinds and their pages, the phone\'s tiles, things and proposals, and its Tasks and Journal.');

@@ -536,7 +536,7 @@ final class AppModel {
         let moved = action == .later ? [item] : []
         attention = AttentionSnapshot(v: attention.v, at: attention.at, now: attention.now.filter(keep),
                                       later: attention.later.filter(keep) + moved, accounts: attention.accounts ?? [],
-                                      applets: attention.applets)
+                                      applets: attention.applets, tasks: attention.tasks, journal: attention.journal)
         guard let session else { return }
         Task {
             do { try await session.send(.attention(id: item.id, action: action)) } catch { self.error = error.localizedDescription }

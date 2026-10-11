@@ -31,7 +31,7 @@ final class WorldletUITests: XCTestCase {
         start.press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: to)))
     }
 
-    /// A segment of the layer tabs at the top, the system's segmented control: 0 the Applet world, 1 Now, 2 Later.
+    /// A tab at the top, the system's segmented control: 0 Today, 1 Applets, 2 Tasks.
     private func tab(_ app: XCUIApplication, _ index: Int) -> XCUIElement {
         app.segmentedControls.firstMatch.buttons.element(boundBy: index)
     }
@@ -107,44 +107,47 @@ final class WorldletUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Help me do it"].exists, "the dialogue returns to the main conversation")
     }
 
-    /// Later slides up what can wait, and Now comes back.
-    func testLaterPage() {
+    /// Today heads with the date and today's Journal (a row opens its card in full), and Later waits below Now in the
+    /// same scroll (owner request 2026-10-11).
+    func testToday() {
         let app = launch(["-demo"])
         XCTAssert(element(app, "Reply to Sam about the venue").waitForExistence(timeout: 10))
-        tab(app, 2).tap()
-        XCTAssert(element(app, "Renew the passport").waitForExistence(timeout: 5))
-        tab(app, 1).tap()
-        let row = element(app, "Reply to Sam about the venue")
-        XCTAssert(row.waitForExistence(timeout: 5))
-        // Swiping up on Now brings Later up; pulling Later down past its top returns to Now.
-        swipe(app, from: 0.55, to: 0.2)
-        XCTAssert(hittable(element(app, "Renew the passport")), "a swipe up shows Later")
-        swipe(app, from: 0.25, to: 0.7)
-        XCTAssert(hittable(row), "pulling Later down returns to Now")
+        XCTAssert(element(app, "todayDate").exists, "the date heads Today")
+        let entry = app.buttons["journal-art-demotoday001"]
+        XCTAssert(entry.exists, "today's Journal is under the date")
+        entry.tap()
+        let done = app.buttons["Done"]
+        XCTAssert(done.waitForExistence(timeout: 5), "a Journal row opens in full")
+        done.tap()
+        XCTAssert(waitGone(done))
+        let later = element(app, "Renew the passport")
+        for _ in 0..<4 where !later.isHittable { swipe(app, from: 0.6, to: 0.25) }
+        XCTAssert(hittable(later), "Later is further down Today")
     }
 
-    /// Swiping down on Now brings the Applet world down, the person's own Applets first (owner request 2026-10-07). A
-    /// tile with a website opens it in the app's own browser; holding it offers Details, the Applet's page above Fox, which says where it is.
-    /// An ongoing thing's tile opens its page, and a card's "From" opens the item's Applet.
-    func testAppletWorld() {
+    /// The Applets tab lists the Applets that work on the phone, the person's things first (owner request 2026-10-11). A
+    /// row with a website opens it in the app's own browser; holding it offers Details, the Applet's page above Fox,
+    /// which says where it is. A thing's row opens its page, and a card's "From" opens the item's Applet.
+    func testApplets() {
         let app = launch(["-demo"])
         let row = element(app, "Reply to Sam about the venue")
         XCTAssert(row.waitForExistence(timeout: 10))
-        swipe(app, from: 0.3, to: 0.7)
+        tab(app, 1).tap()
         let mail = app.buttons["applet-gmail"]
-        XCTAssert(hittable(mail), "a swipe down shows the Applet world")
-        XCTAssert(element(app, "YOURS").exists, "the person's own Applets have their own group")
-        XCTAssert(element(app, "APPLETS").exists)
+        XCTAssert(hittable(mail), "the Applets tab lists them")
+        XCTAssert(element(app, "THINGS").exists, "the person's things have their own group")
+        XCTAssertLessThan(app.buttons["applet-job-dietdemo0001"].frame.minY, mail.frame.minY, "things come first")
         XCTAssertFalse(app.buttons["applet-apple-notes"].exists, "an Applet that works only on the computer is not here")
         let job = app.buttons["applet-job-dietdemo0001"]
         XCTAssert(hittable(job))
         job.tap()
-        XCTAssert(element(app, "appletPage").waitForExistence(timeout: 5), "an ongoing thing opens its page")
+        XCTAssert(element(app, "appletPage").waitForExistence(timeout: 5), "a thing opens its page")
+        XCTAssert(element(app, "In #diet-and-health").exists, "Fox talks in that thing")
         app.buttons["leaveApplet"].tap()
         XCTAssert(waitGone(element(app, "appletPage")))
         mail.press(forDuration: 1)
         let details = app.buttons["Details"]
-        XCTAssert(details.waitForExistence(timeout: 5), "holding a website's tile offers its page")
+        XCTAssert(details.waitForExistence(timeout: 5), "holding a website's row offers its page")
         details.tap()
         XCTAssert(element(app, "appletPage").waitForExistence(timeout: 5), "Details opens the Applet's page")
         XCTAssert(app.buttons["openWebsite"].exists, "the page opens the website too")
@@ -158,7 +161,7 @@ final class WorldletUITests: XCTestCase {
         XCTAssert(element(app, "Reply to Sam about the venue").exists, "the page lists the items it brought")
         app.buttons["leaveApplet"].tap()
         XCTAssert(waitGone(element(app, "appletPage")), "the pill's ✕ leaves the page")
-        tab(app, 1).tap()
+        tab(app, 0).tap()
         XCTAssert(hittable(row))
         row.tap()
         let from = app.buttons["cardApplet"]
@@ -166,6 +169,19 @@ final class WorldletUITests: XCTestCase {
         from.tap()
         XCTAssert(element(app, "appletPage").waitForExistence(timeout: 5), "and opens it")
         XCTAssert(waitGone(app.buttons["Dismiss"]), "in the card's place")
+    }
+
+    /// The Tasks tab says what the Agent is doing now and its Routines; an Applet's task opens its Applet.
+    func testTasks() {
+        let app = launch(["-demo"])
+        XCTAssert(element(app, "Reply to Sam about the venue").waitForExistence(timeout: 10))
+        tab(app, 2).tap()
+        XCTAssert(element(app, "DOING NOW").waitForExistence(timeout: 5))
+        XCTAssert(element(app, "Comparing fares").exists, "what is running and its step")
+        XCTAssert(element(app, "routine-job:digest").exists, "the Agent's Routines")
+        XCTAssert(element(app, "Daily news digest").exists)
+        app.buttons["task-applet:yt1"].tap()
+        XCTAssert(element(app, "appletPage").waitForExistence(timeout: 5), "an Applet's task opens its page")
     }
 
     /// Fox sits at the bottom in one input bar under its dialogue box, with the microphone and Send; a tap on the bar

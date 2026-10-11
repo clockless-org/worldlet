@@ -14,7 +14,7 @@ import {attentionSceneArt} from '../attention/index.ts';
 const LIVE_GAP=250;
 type Settle=(item:{worldItemId:string},status:string,snoozedUntil:string|null)=>Promise<unknown>;
 type Account={provider:string,title:string,action:string,run:()=>unknown};
-export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>false,ask,askItem=(_id,text)=>ask(text),askApplet=(_key,text)=>ask(text),openApplet=()=>false,order=()=>false,world=()=>null,choose=()=>false,itemFox=()=>null,settle,kindOf,ready=()=>true}:{
+export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>false,ask,askItem=(_id,text)=>ask(text),askApplet=(_key,text)=>ask(text),openApplet=()=>false,order=()=>false,world=()=>null,tasks=()=>null,journal=()=>null,choose=()=>false,itemFox=()=>null,settle,kindOf,ready=()=>true}:{
  publish:(value:unknown)=>Promise<unknown>,
  /** Sends the turn Fox is streaming (core/phone phoneLive). */
  publishLive?:(value:unknown)=>Promise<unknown>,
@@ -31,6 +31,10 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  order?:(said:string)=>unknown,
  /** The Applet world (core/phone PhoneWorld), or null where there is none. */
  world?:()=>PhoneWorld|null,
+ /** The Task panel's cards (core/tasks TaskPanel), for the phone's Tasks tab; null until the panel has read them. */
+ tasks?:()=>unknown,
+ /** The Journal's cards (core/artifacts Artifact); the phone gets today's (core/phone phoneJournal). */
+ journal?:()=>any[]|null,
  /** The option Fox offers on an item's card (its primary help), chosen on the phone. */
  choose?:(id:string)=>unknown,
  /** What Fox says on an item's card and that item's latest turns (core/phone/payloads.ts PhoneItemFox). */
@@ -44,7 +48,7 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  async function flush(){
   timer=null;if(!view)return;
   pending={now:view.now.map(withItem),later:view.later.map(withItem)};
-  const value=phoneAttention({...pending,accounts,world:world()??undefined},Date.now()),text=JSON.stringify({...value,at:''});
+  const value=phoneAttention({...pending,accounts,world:world()??undefined,tasks:tasks()??undefined,journal:journal()??undefined},Date.now()),text=JSON.stringify({...value,at:''});
   if(text===sent)return;
   sent=text;
   try{await publish(value);}catch{sent='';}
@@ -93,7 +97,8 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
   approval(request:any){if(!request?.id)return;if(request.settled){if(asking?.id!==request.id)return;asking=null;}else asking=request;if(lastTurn&&!lastTurn.done)this.live(lastTurn);},
   /** The Center's current Now and Later rows (native-hud onAttention); sent at most every 1.5 seconds. */
   attention(next:{now:any[],later:any[]}){view=next;soon();},
-  /** The Applet world changed (a world log line, a lamp, a widget): send it again if it differs. */
+  /** The Applet world, the Task panel or the Journal changed (a world log line, a lamp, a widget, a task, a kept card):
+   * send it again if it differs. */
   world(){if(view)soon();},
   /** Fox's conversation changed (a turn started or finished): send the items' dialogue again. */
   refresh(){soon();},

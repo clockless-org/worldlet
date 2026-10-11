@@ -160,6 +160,8 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  }
  function render(){
   model=taskPanel({...input,page,fox:[...fox.values()],daily},Date.now());
+  // The paired phone's Tasks tab shows the same cards (ui/companion/phone-bridge.ts).
+  window.dispatchEvent(new CustomEvent('worldlet:task-panel',{detail:model}));
   for(const row of model.now.rows)remember(row);
   const live=new Set(model.now.rows.map(row=>row.id));for(const id of logs.keys())if(!live.has(id))logs.delete(id);
   // An open window or list is drawn again with what is new, or closes when its task has ended.

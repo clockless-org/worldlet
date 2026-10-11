@@ -1,60 +1,57 @@
 import SwiftUI
 import WorldletKit
 
-/// The Attention Center in three layers, one above the other (owner decision 2026-10-03): the **Applet world** on top,
-/// **Now** in the middle, where the app opens, and **Later** below. Swiping down on Now brings the Applet world down;
-/// swiping up turns to Later. Later's list and the Applet world scroll on their own; pulling Later down past its top, or
-/// the Applet world up past its end, comes back to Now. The tabs at the top go to any layer. Tapping a row opens its
-/// card; holding it offers Done, Later and Remove. The computer settles the item and sends the new Center. Widgets for
-/// now lead Now and are moment Applets in the Applet world; one opens over everything.
+/// The phone in three tabs (owner request 2026-10-11), chosen with the system's segmented control at the top; Fox stays
+/// below on every tab and talks about wherever the person is. **Today** is the computer's left side: the date, today's
+/// Journal and the Attention Center, with Later below Now. **Applets** lists the Applets that work on the phone, the
+/// person's things first (each OpenClaw channel or long conversation is a thing of its own, AppletWorld.swift).
+/// **Tasks** is what sits either side of Fox on the computer: what the person's Agent is doing now and its Routines.
+/// Tapping a row opens its card; holding it offers Done, Later and Remove. Widgets for now lead Today; one opens over
+/// everything.
 struct AttentionCenter: View {
     @Environment(AppModel.self) private var model
     let open: (AttentionItem) -> Void
     let openApplet: (PhoneApplet) -> Void
-    @State private var page = Layer.now
+    @State private var tab = Tab.today
     @State private var widget: OpenWidget?
-    /// Now is too long for the screen even as titles, so it scrolls and turns the layer itself at either end.
-    @State private var nowScrolls = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var entry: JournalEntry?
 
-    enum Layer: String, CaseIterable {
-        case applets, now, later
-        var index: Int { Self.allCases.firstIndex(of: self)! }
+    enum Tab: String, CaseIterable {
+        case today, applets, tasks
+
+        var title: String {
+            switch self {
+            case .today: "Today"
+            case .applets: "Applets"
+            case .tasks: "Tasks"
+            }
+        }
     }
 
     var body: some View {
         VStack(spacing: 6) {
-            PageTabs(page: page) { turn(to: $0) }
-                .zIndex(1)
-            GeometryReader { box in
-                let height = box.size.height
-                // The finger's drag lives in LayerStack, so following it moves the layers without rebuilding them.
-                LayerStack(index: page.index, height: height, swipes: page == .now && !nowScrolls, turn: { turn(to: $0) }) {
-                    // Only the layer in view takes touches and is read out; the others show only while one slides in.
-                    AppletWorld(open: openTile, details: { openApplet($0) }, back: { turn(to: .now) }, shown: page == .applets).frame(height: height)
-                        .allowsHitTesting(page == .applets)
-                    NowPage(open: open, openWidget: { widget = OpenWidget(id: $0.id) }, scrolls: $nowScrolls, turn: turn(to:), shown: page == .now)
-                        .frame(height: height, alignment: .top)
-                        // A Now taller than its layer must not show through Later or the Applet world.
-                        .clipped()
-                        .contentShape(Rectangle())
-                        .allowsHitTesting(page == .now)
-                    LaterPage(open: open, back: { turn(to: .now) }, shown: page == .later).frame(height: height)
-                        .allowsHitTesting(page == .later)
-                }
-                .accessibilityScrollAction { edge in
-                    if edge == .top, page != .applets { turn(to: page == .later ? .now : .applets) }
-                    if edge == .bottom, page != .later { turn(to: page == .applets ? .now : .later) }
+            Picker("Worldlet", selection: $tab) {
+                ForEach(Tab.allCases, id: \.self) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 252)
+            .padding(.top, 6)
+            .accessibilityIdentifier("tabs")
+            Group {
+                switch tab {
+                case .today: TodayPage(open: open, openWidget: { widget = OpenWidget(id: $0.id) }, openEntry: { entry = $0 })
+                case .applets: AppletList(open: openTile, details: { openApplet($0) })
+                case .tasks: TasksPage(openApplet: openApplet)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .fullScreenCover(item: $widget) { WidgetScreen(id: $0.id) }
+        .sheet(item: $entry) { JournalSheet(entry: $0) }
         .task {
             if let id = Demo.argument("-widget") { widget = OpenWidget(id: id) }
             if let key = Demo.argument("-applet"), let applet = model.attention.applet(key) { openApplet(applet) }
-            guard let start = Demo.argument("-page").flatMap(Layer.init(rawValue:)) else { return }
-            try? await Task.sleep(for: .milliseconds(300))
-            turn(to: start)
+            if let start = Demo.argument("-page").flatMap(Tab.init(rawValue:)) { tab = start }
         }
     }
 
@@ -62,139 +59,105 @@ struct AttentionCenter: View {
     private func openTile(_ applet: PhoneApplet) {
         if let id = applet.widget { widget = OpenWidget(id: id) } else if applet.url != nil { model.browse(applet) } else { openApplet(applet) }
     }
-
-    private func turn(to target: Layer) {
-        // A little bounce as the layer slides in, while the segmented control moves its selection.
-        withAnimation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(response: 0.45, dampingFraction: 0.82)) {
-            page = target
-        }
-    }
 }
 
-/// The three layers stacked one above the other, moved as one: the layer in view sits in the frame, and on Now the
-/// finger pulls the Applet world down or Later up. Only the offset changes while the finger moves, so the pages inside
-/// are not rebuilt and laid out again for every frame of a swipe.
-private struct LayerStack<Layers: View>: View {
-    let index: Int
-    let height: CGFloat
-    /// Now is in view and does not scroll on its own, so a vertical swipe turns the layer.
-    let swipes: Bool
-    let turn: (AttentionCenter.Layer) -> Void
-    @ViewBuilder let layers: Layers
-    @State private var drag: CGFloat = 0
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        VStack(spacing: 0) { layers }
-            .offset(y: -CGFloat(index) * height + drag)
-            .frame(height: height, alignment: .top)
-            .clipped()
-            .gesture(swipe, including: swipes ? .all : .subviews)
-    }
-
-    /// Down shows the Applet world coming down, up shows Later rising; a short or slow swipe springs back.
-    private var swipe: some Gesture {
-        DragGesture(minimumDistance: 14)
-            .onChanged { value in
-                guard abs(value.translation.height) > abs(value.translation.width) else { return }
-                drag = value.translation.height
-            }
-            .onEnded { value in
-                let travel = value.predictedEndTranslation.height
-                let target: AttentionCenter.Layer? = travel > height * 0.3 || value.translation.height > 90 ? .applets
-                    : travel < -height * 0.3 || value.translation.height < -90 ? .later : nil
-                withAnimation(target == nil ? .snappy : reduceMotion ? .easeInOut(duration: 0.2) : .spring(response: 0.45, dampingFraction: 0.82)) {
-                    drag = 0
-                }
-                if let target { turn(target) }
-            }
-    }
-}
-
-/// The three layers as the system's segmented control at the top (owner request 2026-10-04: native controls): the
-/// Applet world's grid mark, then Now and Later with how many they hold. On iOS 26 and later its selection is the
-/// system's own drop of Liquid Glass, flowing to the next segment as the layer slides in.
-private struct PageTabs: View {
-    let page: AttentionCenter.Layer
-    let choose: (AttentionCenter.Layer) -> Void
-
-    var body: some View {
-        Picker("Attention Center", selection: Binding(get: { page }, set: { choose($0) })) {
-            Image(systemName: "square.grid.2x2").accessibilityLabel("Applets").tag(AttentionCenter.Layer.applets)
-            Text("Now").tag(AttentionCenter.Layer.now)
-            Text("Later").tag(AttentionCenter.Layer.later)
-        }
-        .pickerStyle(.segmented)
-        .frame(width: 252)
-        .padding(.top, 6)
-        .accessibilityIdentifier("layerTabs")
-    }
-}
-
-/// What matters now, in the Center's three groups.
-private struct NowPage: View {
+/// Today, as the computer's left side shows it (owner request 2026-10-11): the date, today's Journal, then what matters
+/// now in the Center's three groups, and further down what can wait (Later), all in one scroll.
+private struct TodayPage: View {
     @Environment(AppModel.self) private var model
     let open: (AttentionItem) -> Void
     let openWidget: (PhoneWidget) -> Void
-    @Binding var scrolls: Bool
-    let turn: (AttentionCenter.Layer) -> Void
-    /// In view: off screen, its rows are hidden from VoiceOver and UI tests.
-    var shown = true
-    @State private var length: CGFloat = 0
+    let openEntry: (JournalEntry) -> Void
 
     var body: some View {
-        // Now is one screen, so a swipe up always turns to Later. A long Now first drops its rows' second line,
-        // then the reasons, as the computer trims what does not fit. If even the titles are too tall (a small
-        // iPhone, a busy day), they scroll, and pulling past the top or the end turns to the Applet world or Later.
-        ViewThatFits(in: .vertical) {
-            content(.full)
-            content(.oneLine)
-            content(.titles)
-            scrolling
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                DateHeader()
+                journal
+                let widgets = model.activeWidgets
+                if !widgets.isEmpty {
+                    VStack(spacing: 8) { ForEach(widgets) { widget in WidgetRow(widget: widget, compact: false) { openWidget(widget) } } }
+                }
+                if !model.computerOnline, model.phase == .paired { ComputerOffline() }
+                if let accounts = model.attention.accounts, !accounts.isEmpty {
+                    VStack(spacing: 8) { ForEach(accounts) { AccountRow(account: $0) } }
+                }
+                ForEach(model.attention.nowGroups) { section in
+                    GroupSection(title: section.group.title, color: Palette.group(section.group)) {
+                        ForEach(section.items) { HUDRow(item: $0, open: open) }
+                    }
+                }
+                if model.attention.now.isEmpty, widgets.isEmpty { empty }
+                later
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+            .padding(.bottom, 32)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.bottom, 8)
+        .scrollIndicators(.hidden)
     }
 
-    private var scrolling: some View {
-        GeometryReader { view in
-            ScrollView {
-                content(.titles)
-                    .background { GeometryReader { box in Color.clear.onAppear { length = box.size.height }.onChange(of: box.size.height) { _, h in length = h } } }
-                    .overlay(alignment: .top) {
-                        PullMark(space: "now") { y in
-                            if y > 90 { turn(.applets) } else if y < -max(0, length - view.size.height) - 90 { turn(.later) }
+    /// Today's Journal: what Fox made and the cards the person closed, newest first; each opens in full.
+    @ViewBuilder private var journal: some View {
+        let entries = model.attention.journal ?? []
+        VStack(alignment: .leading, spacing: 4) {
+            Heading(title: "Journal")
+            if entries.isEmpty {
+                Text("Nothing in your Journal yet today.")
+                    .font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.7))
+                    .padding(.horizontal, 10)
+            }
+            ForEach(entries) { entry in
+                Button { openEntry(entry) } label: {
+                    HStack(alignment: .top, spacing: 9) {
+                        Image(systemName: entry.kind == "attention" ? "rectangle.on.rectangle" : "book.closed")
+                            .font(.system(size: 15)).foregroundStyle(Palette.lantern)
+                            .frame(width: 24, height: 20)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(entry.title).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.ink)
+                                .multilineTextAlignment(.leading)
+                            if let text = entry.text, !text.isEmpty {
+                                Text(text).font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.82)).lineLimit(1)
+                            }
+                        }
+                        Spacer(minLength: 6)
+                        if let at = FoxDialogueDates.date(entry.at) {
+                            Text(at, format: .dateTime.hour().minute()).font(.system(size: 12)).foregroundStyle(Palette.muted.opacity(0.7))
                         }
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(RowPress())
+                .accessibilityIdentifier("journal-\(entry.id)")
             }
-            .coordinateSpace(name: "now")
-            .scrollBounceBehavior(.always)
-            .scrollIndicators(.hidden)
         }
-        .onAppear { scrolls = true }
-        .onDisappear { scrolls = false }
     }
 
-    private func content(_ fit: HUDRow.Fit) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            let widgets = model.activeWidgets
-            if !widgets.isEmpty {
-                VStack(spacing: 8) { ForEach(widgets) { widget in WidgetRow(widget: widget, compact: fit != .full) { openWidget(widget) } } }
+    /// Below Now, what can wait, in the same three groups: rows a little smaller, with a dashed rule in their kind's
+    /// colour.
+    @ViewBuilder private var later: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Heading(title: "Later")
+            Text("These can wait. Each moves up when it needs you.")
+                .font(.system(size: 12)).foregroundStyle(Palette.muted.opacity(0.6))
+                .padding(.horizontal, 10)
+            if model.attention.later.isEmpty {
+                Text("Nothing is waiting.").font(.system(size: 14)).foregroundStyle(Palette.muted.opacity(0.85))
+                    .padding(.horizontal, 10)
             }
-            if !model.computerOnline, model.phase == .paired { ComputerOffline() }
-            if let accounts = model.attention.accounts, !accounts.isEmpty {
-                VStack(spacing: 8) { ForEach(accounts) { AccountRow(account: $0) } }
-            }
-            ForEach(model.attention.nowGroups) { section in
-                GroupSection(title: section.group.title, color: Palette.group(section.group)) {
-                    ForEach(section.items) { HUDRow(item: $0, open: open, fit: fit) }
+            ForEach(AttentionGroup.allCases, id: \.self) { group in
+                let items = model.attention.later.filter { $0.group == group }
+                if !items.isEmpty {
+                    GroupSection(title: group.title, color: Palette.group(group), spacing: 0) {
+                        ForEach(items) { HUDRow(item: $0, open: open, later: true) }
+                    }
                 }
             }
-            if model.attention.now.isEmpty, widgets.isEmpty { empty }
         }
-        .padding(.horizontal, 14)
-        .padding(.top, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityHidden(!shown)
+        .padding(.top, 14)
     }
 
     @ViewBuilder private var empty: some View {
@@ -205,7 +168,7 @@ private struct NowPage: View {
             } else {
                 Text("Connecting to \(model.computerName.isEmpty ? "your computer" : model.computerName)…")
                     .font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.ink)
-                Text("Keep Worldlet open on your computer. The Attention Center appears here in a moment.")
+                Text("Keep Worldlet open on your computer. Today appears here in a moment.")
                     .font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.85))
             }
         }
@@ -214,60 +177,177 @@ private struct NowPage: View {
     }
 }
 
-/// What can wait, in the same three groups as Now: rows a little smaller and closer together, with a dashed rule
-/// in their kind's colour, but just as readable. A quiet note says what Later is. The list scrolls freely.
-private struct LaterPage: View {
-    @Environment(AppModel.self) private var model
-    let open: (AttentionItem) -> Void
-    /// Pulled down past the top: back to Now.
-    let back: () -> Void
-    /// In view: off screen, its rows are hidden from VoiceOver and UI tests.
-    var shown = true
+/// The day at the top of Today, as the computer's left panel heads it: the weekday large, the date below.
+private struct DateHeader: View {
+    var body: some View {
+        TimelineView(.everyMinute) { context in
+            VStack(alignment: .leading, spacing: 0) {
+                Text(context.date, format: .dateTime.weekday(.wide))
+                    .font(.system(size: 28, weight: .bold, design: .rounded)).foregroundStyle(Palette.ink)
+                Text(context.date, format: .dateTime.month(.wide).day())
+                    .font(.system(size: 15, weight: .medium)).foregroundStyle(Palette.muted.opacity(0.8))
+            }
+            .padding(.horizontal, 10)
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("todayDate")
+        }
+    }
+}
+
+/// A Journal card in full, from Today.
+private struct JournalSheet: View {
+    let entry: JournalEntry
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("These can wait. Each moves up to Now when it needs you.")
-                    .font(.system(size: 12)).foregroundStyle(Palette.muted.opacity(0.6))
-                    .padding(.horizontal, 10)
-                if model.attention.later.isEmpty {
-                    Text("Nothing is waiting.").font(.system(size: 14)).foregroundStyle(Palette.muted.opacity(0.85))
-                        .padding(.horizontal, 10)
-                }
-                ForEach(AttentionGroup.allCases, id: \.self) { group in
-                    let items = model.attention.later.filter { $0.group == group }
-                    if !items.isEmpty {
-                        GroupSection(title: group.title, color: Palette.group(group), spacing: 0) {
-                            ForEach(items) { HUDRow(item: $0, open: open, later: true) }
-                        }
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(entry.title).font(.system(size: 22, weight: .bold))
+                    HStack(spacing: 6) {
+                        if let category = entry.category { Text(category) }
+                        if let at = FoxDialogueDates.date(entry.at) { Text(at, format: .dateTime.hour().minute()) }
                     }
+                    .font(.system(size: 13)).foregroundStyle(.secondary)
+                    if let text = entry.text { Text(markdown(text)).font(.system(size: 16)) }
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("Journal")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+        .presentationDetents([.medium, .large])
+    }
+}
+
+/// What the person's Agent is doing now and what it runs next (owner request 2026-10-11): the cards either side of Fox
+/// on the computer (core/tasks task-panel.ts), as lists. A running task's row opens its Applet when the phone has it,
+/// otherwise it unfolds what the task has said.
+private struct TasksPage: View {
+    @Environment(AppModel.self) private var model
+    let openApplet: (PhoneApplet) -> Void
+    @State private var unfolded: Set<String> = []
+
+    var body: some View {
+        let tasks = model.attention.tasks
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Heading(title: "Doing now")
+                    if tasks?.now.isEmpty ?? true { quiet("Nothing running right now.") }
+                    ForEach(tasks?.now ?? []) { task in running(task) }
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Heading(title: "Routines")
+                    if tasks?.routines.isEmpty ?? true { quiet("No Routines yet. Ask \(model.conversation.name) to set one up.") }
+                    ForEach(tasks?.routines ?? []) { task in routine(task) }
                 }
             }
             .padding(.horizontal, 14)
             .padding(.top, 10)
-            .padding(.bottom, 40)
+            .padding(.bottom, 32)
             .frame(maxWidth: .infinity, alignment: .leading)
-            // Inside the scroll view: iOS 27 does not hide a scroll view's contents from outside it.
-            .accessibilityHidden(!shown)
-            .overlay(alignment: .top) { PullMark(space: "later") { if $0 > 90 { back() } } }
         }
-        .coordinateSpace(name: "later")
-        .scrollBounceBehavior(.always)
         .scrollIndicators(.hidden)
+    }
+
+    private func running(_ task: PhoneTask) -> some View {
+        let applet = model.attention.applet(task.applet)
+        return Button { tap(task, applet: applet) } label: {
+            HStack(alignment: .top, spacing: 10) {
+                picture(task, applet: applet)
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(task.name).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.ink).lineLimit(1)
+                        Spacer(minLength: 6)
+                        Text(task.when).font(.system(size: 12)).foregroundStyle(Palette.lantern)
+                    }
+                    if !task.status.isEmpty {
+                        Text(task.status).font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.85)).lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    if let progress = task.progress {
+                        ProgressView(value: progress).tint(Palette.lantern)
+                    } else {
+                        ProgressView().progressViewStyle(.linear).tint(Palette.lantern)
+                    }
+                    if unfolded.contains(task.id), let lines = task.lines {
+                        ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                            Text(line).font(.system(size: 12, design: .monospaced)).foregroundStyle(Palette.muted.opacity(0.8))
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(RowPress())
+        .accessibilityIdentifier("task-\(task.id)")
+    }
+
+    /// An Applet's task opens its Applet; any other running task unfolds or folds what it has said.
+    private func tap(_ task: PhoneTask, applet: PhoneApplet?) {
+        if let applet {
+            openApplet(applet)
+        } else if unfolded.contains(task.id) {
+            unfolded.remove(task.id)
+        } else {
+            unfolded.insert(task.id)
+        }
+    }
+
+    private func routine(_ task: PhoneTask) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            picture(task, applet: nil)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(task.name).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.ink).lineLimit(1)
+                    Spacer(minLength: 6)
+                    Text(task.when).font(.system(size: 12, weight: .semibold)).foregroundStyle(Palette.lantern)
+                }
+                let about = [task.every, task.by].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+                if !about.isEmpty { Text(about).font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.8)).lineLimit(2) }
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("routine-\(task.id)")
+    }
+
+    /// Fox for Fox's own work, a clock for a routine, the Applet's device for an Applet's task.
+    @ViewBuilder private func picture(_ task: PhoneTask, applet: PhoneApplet?) -> some View {
+        if let applet {
+            AppletGlyph(applet: applet, size: 30)
+        } else {
+            Image(systemName: task.icon == "clock" ? "clock" : task.icon == "fox" ? "pawprint.fill" : "square.grid.2x2")
+                .font(.system(size: 15)).foregroundStyle(Palette.lantern)
+                .frame(width: 30, height: 30)
+                .background(Palette.ink.opacity(0.1), in: RoundedRectangle(cornerRadius: 9))
+        }
+    }
+
+    private func quiet(_ text: String) -> some View {
+        Text(text).font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.7)).padding(.horizontal, 10)
     }
 }
 
-/// How far a list is pulled past its top: a zero-height mark at the top of its content, read in the list's own
-/// coordinate space (positive while the list bounces down).
-struct PullMark: View {
-    let space: String
-    let pulled: (CGFloat) -> Void
+/// A heading on Today, Applets and Tasks: small capitals over a faint rule.
+struct Heading: View {
+    let title: String
 
     var body: some View {
-        GeometryReader { mark in
-            Color.clear.onChange(of: mark.frame(in: .named(space)).minY) { _, y in pulled(y) }
-        }
-        .frame(height: 0)
+        Text(title.uppercased())
+            .font(.system(size: 11, weight: .semibold))
+            .tracking(0.3)
+            .foregroundStyle(Palette.muted.opacity(0.75))
+            .padding(.horizontal, 8)
+            .padding(.bottom, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .bottom) { Rectangle().fill(Palette.ink.opacity(0.14)).frame(height: 1) }
     }
 }
 
