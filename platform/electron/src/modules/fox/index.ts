@@ -945,7 +945,7 @@ export function installFox(host:Host){
   agentWarm:async request=>({warm:await warmThread(typeof request.thread==='string'?request.thread:'fox-main')}),
   /** Every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
   harnessApprovalRules:request=>request.operation==='revoke'?approvalRules.revoke(request.harness,request.id):approvalRules.list(),
-  /** Settings › Accounts: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
+  /** Settings › Your Agent › Accounts and tools: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessConnections:request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?agentConnections.change(request.confirm):agentConnections.list(),
   harnessApproval:async request=>{

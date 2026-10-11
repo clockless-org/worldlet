@@ -9,6 +9,7 @@ import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/
 import {createHarnessApprovalRules} from '../platform/electron/src/modules/fox/harness-approvals.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {permissionLine,showAgentPermissions} from '../ui/companion/agent-permissions.ts';
 import {approvalResultBody,approvalResultText} from '../ui/companion/fox-harness-approval.ts';
 import {withTempDir} from './test-temp.ts';
 
@@ -16,8 +17,8 @@ import {withTempDir} from './test-temp.ts';
 // the declared approval features, reading Hermes Agent's `command_allowlist` and OpenClaw's approvals document and
 // grants, the documents without one rule, the World's record of who said Always and where, the tracker that ties an
 // approval to its tool call, the host services against fixture `hermes` and `openclaw` commands (their own commands
-// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, and the
-// approval card's diff. scripts/harness-sessions-check.ts drives the trackers through the resident sessions.
+// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, Settings › Your Agent ›
+// Things it may do without asking, and the approval card's diff. scripts/harness-sessions-check.ts drives the trackers through the resident sessions.
 
 // Declarations ------------------------------------------------------------------------------------------------------
 assert.deepEqual(harnessApprovalFeatures('hermes'),{rules:'files',revoke:'restart',revokeNote:HARNESS_SERVICES.hermes.approvalFeatures!.revokeNote,changes:'diffs'});
@@ -105,9 +106,9 @@ class Node {
  children:Node[]=[];className='';type='';disabled=false;dataset:Record<string,string>={};attributes:Record<string,string>={};onclick:any=null;isConnected=true;private own='';
  get textContent():string {return this.own+this.children.map(c=>c.textContent).join('');}
  set textContent(value:string){this.own=String(value);this.children=[];}
- append(...nodes:Node[]){this.children.push(...nodes);}replaceChildren(...nodes:Node[]){this.children=nodes;this.own='';}
+ append(...nodes:Node[]){this.children.push(...nodes);}replaceChildren(...nodes:Node[]){this.children=nodes;this.own='';}remove(){this.isConnected=false;}
  setAttribute(name:string,value:string){this.attributes[name]=value;}
- all(test:(n:Node)=>boolean):Node[] {return [...(test(this)?[this]:[]),...this.children.flatMap(c=>c.all(test))];}
+ all(test:(n:Node)=>boolean):Node[] {return [...(test(this)?[this]:[]),...this.children.filter(c=>c.isConnected).flatMap(c=>c.all(test))];}
 }
 (globalThis as any).document={createElement:()=>new Node()};
 {
@@ -219,6 +220,35 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
  await assert.rejects(rules.revoke('hermes',outside.id),/your own world/);
  host.store.sampleEnabled=()=>false;
 
+ // Settings › Your Agent › Things it may do without asking: a row per rule with its agent, when and where, and Revoke,
+ // which asks once more in the page before the Agent forgets it; an Agent that cannot revoke says how.
+ const requests:any[]=[];
+ let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:harnessApprovalFeatures('hermes').revokeNote,rules:[{id:granted.id,allows:'recursive delete',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In the gmail Applet',inWorld:true},{id:outside.id,allows:'podman *',agent:'work',kind:'command'}]},
+  {harness:'other',title:'Other Agent',revoke:null,rules:[{id:'rule-0000000000000000',allows:'x',agent:'*',kind:'tool'}]}],elsewhere:'Agent on Mac mini'};
+ const call=async(action:string,args:any)=>{requests.push([action,args]);if(args.operation==='revoke'){answer={harnesses:[{...answer.harnesses[0],rules:answer.harnesses[0].rules.slice(1)}]};return {ok:true};}return answer;};
+ const target=new Node();
+ await showAgentPermissions(target as any,call,()=>true);
+ const rows=target.all(n=>!!n.dataset.rule);
+ assert.deepEqual(rows.map(r=>r.dataset.rule),[granted.id,outside.id,'rule-0000000000000000']);
+ assert.match(rows[0].textContent,/^Run recursive delete[\s\S]*Main agent · allowed .*2026, in the gmail Applet\./);
+ assert.match(rows[1].textContent,/Agent “work” · allowed outside Worldlet; Hermes Agent keeps no date\./);
+ assert.match(rows[2].textContent,/^Use the tool x/);
+ assert.equal(rows[2].all(n=>n.dataset.action==='revoke-rule').length,0,'no Revoke where the Agent cannot have it revoked');
+ assert.match(target.textContent,/Worldlet cannot take these back\. Change them in Other Agent itself\./);
+ assert.match(target.textContent,/Agent on Mac mini keeps these where it runs/);
+ assert.doesNotMatch(target.textContent,/allowlist|MCP|cron|standing rule/i,'plain words only');
+ await rows[1].all(n=>n.dataset.action==='revoke-rule')[0].onclick();
+ await rows[1].all(n=>n.dataset.action==='keep-rule')[0].onclick();
+ assert.match(target.textContent,/Nothing was changed\./);
+ await rows[0].all(n=>n.dataset.action==='revoke-rule')[0].onclick();
+ assert.equal(requests.filter(([,a])=>a.operation==='revoke').length,0,'Revoke only asks first');
+ assert.match(rows[0].textContent,/Hermes Agent will ask you again before it does this\. It takes effect the next time it starts; Worldlet restarts it for you\./);
+ await rows[0].all(n=>n.dataset.action==='confirm-revoke')[0].onclick();
+ assert.deepEqual(requests.filter(([,a])=>a.operation==='revoke'),[['harnessApprovalRules',{operation:'revoke',harness:'hermes',id:granted.id}]]);
+ assert.deepEqual(target.all(n=>!!n.dataset.rule).map(r=>r.dataset.rule),[outside.id],'the list is read again after a revoke');
+ assert.match(target.textContent,/Hermes Agent will ask again before: recursive delete Hermes Agent reads these when it starts/);
+ assert.equal(permissionLine({id:'r',allows:'x',agent:'*',kind:'command'},'OpenClaw'),'All agents · allowed outside Worldlet; OpenClaw keeps no date.');
+
 });
 delete (globalThis as any).document;
-console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs and the approval card\'s diff');
+console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Your Agent › Things it may do without asking and the approval card\'s diff');

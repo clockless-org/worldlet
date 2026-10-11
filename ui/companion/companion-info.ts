@@ -81,8 +81,9 @@ export function mountCompanionInfo({root,pet,call,getName}){
   anchorFrame=requestAnimationFrame(anchorPanel);
  }
  // Old section names still open their section: the old Energy page is Your Agent now, the Journal is a book of its own (owner request
- // 2026-10-08) and Feedback a panel of its own; History, Approvals, Sounds and Privacy are gone (owner request 2026-10-10).
- const SECTION_ID:Record<string,string>={Profile:'fox',Energy:'model',Mobile:'phone',iPhone:'phone',Phone:'phone'};
+ // 2026-10-08) and Feedback a panel of its own; History, Sounds and Privacy are gone (owner request 2026-10-10). Accounts and
+ // the standing rules Approvals listed are parts of Your Agent now: Settings opens it at that part (companion-settings.ts MOVED).
+ const SECTION_ID:Record<string,string>={Profile:'fox',Energy:'model',Mobile:'phone',iPhone:'phone',Phone:'phone',Accounts:'integrations',Integrations:'integrations',Approvals:'approvals'};
  let model:any=null,snapshot:any=null,profile:Partial<CompanionProfile>={},error='',busy=false,generation=0;
  const openGroups=new Set<string>(['user']);
  // The skills the World shows and Fox's offers to save a repeated task (companion-skills.ts).

@@ -131,7 +131,7 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
    const rules=standingRules(install,currentEnvironment());
    return rules?[{harness:install.id,title:install.title,rules:{list:()=>rules.list(),revoke:async(id:string)=>{await rules.revoke(id);current().forgetApprovals?.(install.id);}}}]:[];
   }),
-  // The same Harnesses' connections (Settings › Accounts); Fox's own Hermes profile is not the person's Hermes Agent.
+  // The same Harnesses' connections (Settings › Your Agent › Accounts and tools); Fox's own Hermes profile is not the person's Hermes Agent.
   harnessConnections:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
    const connections=harnessConnections(install,currentEnvironment());
    return connections?[{harness:install.id,title:install.title,connections}]:[];
