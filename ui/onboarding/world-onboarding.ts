@@ -1,11 +1,9 @@
-import {appletSupport,inAppletCatalog,CURATED_READERS,HOME_NATIVE} from '../../core/applets/index.ts';
+import {appletSupport,inAppletCatalog,CURATED_READERS,HOME_NATIVE,WORLD_APPS,getApp,connectionLive} from '../../core/applets/index.ts';
 import {hostFeatures,hostCopy,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 import {connectionGuide} from '../applets/index.ts';
-import {WORLD_APPS,getApp} from '../../core/applets/index.ts';
 import {WORLD_PRESETS} from '../world/index.ts';
-import {connectionLive} from '../../core/applets/index.ts';
 const el=(tag: string,text?: string,cls?: string): any=>Object.assign(document.createElement(tag),{...(text==null?{}:{textContent:text}),className:cls||''});
 const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google Drive',folder:'Local folder'}[p];
 const suggestions={home:[...HOME_NATIVE],work:['github'],library:['notion'],money:[],health:[],travel:[],people:[]};
@@ -20,7 +18,8 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
  const ready=id=>(state.onboarding?.establishedRegions||[]).includes(id)||view.metrics?.buildings.some(b=>b.id==='building-'+id&&!b.unbuilt);
  const preset=()=>WORLD_PRESETS.find(p=>p.id===region)||WORLD_PRESETS[0];
  const button=(label,fn,primary=false)=>{const b=el('button',label,primary?'onboarding-primary':'');b.type='button';b.onclick=()=>run(fn);return b;};
- async function run(fn){if(saving)return;saving=true;notice.textContent='';panel.setAttribute('aria-busy','true');root.querySelectorAll('.world-onboarding button,.companion-guide-actions button').forEach(b=>b.disabled=true);try{await fn();}catch(e){notice.textContent=e.message;if(screen==='start')render(true);}finally{saving=false;panel.removeAttribute('aria-busy');root.querySelectorAll('.world-onboarding button,.companion-guide-actions button').forEach(b=>b.disabled=false);}}
+ const disableButtons=(disabled:boolean)=>root.querySelectorAll('.world-onboarding button,.companion-guide-actions button').forEach(b=>b.disabled=disabled);
+ async function run(fn){if(saving)return;saving=true;notice.textContent='';panel.setAttribute('aria-busy','true');disableButtons(true);try{await fn();}catch(e){notice.textContent=e.message;if(screen==='start')render(true);}finally{saving=false;panel.removeAttribute('aria-busy');disableButtons(false);}}
  function head(title,description){guideText='**'+title+'**\n\n'+description;panel.replaceChildren();}
  function checkSupport(provider){const support=appletSupport(provider,hostFeatures(state));if(support.supported)return true;view.revealGuide?.();view.setGuide({text:support.reason,takeover:true,actions:[]});return false;}
  function show(next,id=region,key=moduleKey){if(next==='closed')view.setGuide(null,{forget:true});if(['app','connection'].includes(next)&&!checkSupport(WORLD_APPS.find(a=>a.key===key)?.provider||key))return;const target=['app','connection'].includes(next)?WORLD_APPS.find(a=>a.key===key):null;if(next==='connection'&&target&&target.capability==='connect'&&target.connection?.flow!=='in-applet'&&!connectionLive(state.connections.find(c=>c.provider===target.provider))){screen='closed';render();void run(()=>connect(target.provider));return;}if(next==='app'&&target&&(target.connection?.flow==='in-applet'||['web','scene','launcher'].includes(target.fullView?.kind))){screen='closed';render();view.openApplet?.(target.id);return;}view.revealGuide?.();screen=next;moduleKey=key;region=WORLD_PRESETS.some(p=>p.id===id)?id:'home';notice.textContent='';render(true);}

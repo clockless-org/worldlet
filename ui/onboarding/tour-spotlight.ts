@@ -94,8 +94,8 @@ export function createTourSpotlight(root:HTMLElement){
   shown=focus;
   const bubble=visible(root.querySelector(BUBBLE)),guided=guideBox(root),guide=guided&&grow(guided,GUIDE_PAD);
   // What Fox shows inside its own area (Fox itself) needs no second box.
-  const lit=focus&&!(guide&&inside(guide,focus))?focus:null;
-  const key=JSON.stringify([lit,guide,bubble,openBoxes(),innerWidth,innerHeight]);
+  const lit=focus&&!(guide&&inside(guide,focus))?focus:null,open=openBoxes();
+  const key=JSON.stringify([lit,guide,bubble,open,innerWidth,innerHeight]);
   if(key!==drawn){
    drawn=key;
    hole(0,lit&&(step.flush?lit:grow(lit,4)),step.flush?FLUSH_RADIUS:RADIUS);hole(1,guide&&grow(guide,4),32);
@@ -103,7 +103,7 @@ export function createTourSpotlight(root:HTMLElement){
    if(lit)Object.assign(ring.style,{left:lit.x+'px',top:lit.y+'px',width:lit.width+'px',height:lit.height+'px'});
    if(guide)Object.assign(guideRing.style,{left:guide.x+'px',top:guide.y+'px',width:guide.width+'px',height:guide.height+'px'});
    // The bubble is cut out of the layer itself, so its buttons take clicks; nothing else does.
-   const cut=[bubble&&grow(bubble,4),...openBoxes()].filter(Boolean) as Box[];
+   const cut=[bubble&&grow(bubble,4),...open].filter(Boolean) as Box[];
    catcher.style.clipPath=cut.length?`path(evenodd,"M0 0H${innerWidth}V${innerHeight}H0Z${cut.map(b=>` M${Math.round(b.x)} ${Math.round(b.y)}h${Math.round(b.width)}v${Math.round(b.height)}h${-Math.round(b.width)}Z`).join('')}")`:'';
   }
   frame=requestAnimationFrame(draw);

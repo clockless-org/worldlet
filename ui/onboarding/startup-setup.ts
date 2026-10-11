@@ -1,13 +1,8 @@
 import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT} from '../world/index.ts';
-import {seedAppletSelection} from '../../core/applets/index.ts';
-import {xAppIcon} from '../applets/index.ts';
+import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../core/applets/index.ts';
+import {xAppIcon,appLogoSource,CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
 import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
-import {WORLD_APPS} from '../../core/applets/index.ts';
-import {appletSupport} from '../../core/applets/index.ts';
-import {connectionLive} from '../../core/applets/index.ts';
-import {appLogoSource} from '../applets/index.ts';
-import {CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
 import {LOCAL_HARNESSES,connectRequestPlan} from '../../core/agent/index.ts';
@@ -21,6 +16,7 @@ const AGENT_SHORT:Record<string,string>={hermes:'Hermes',openclaw:'OpenClaw',pi:
 // The page picks one local Agent for the person, in this order (owner request 2026-10-06): Hermes, OpenClaw and pi
 // first, then Codex, then Claude Code.
 const AGENT_PRIORITY=['hermes','openclaw','pi','codex','claude-code'];
+const byPriority=(x:{id:string},y:{id:string})=>AGENT_PRIORITY.indexOf(x.id)-AGENT_PRIORITY.indexOf(y.id);
 const node=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.textContent=text;e.className=cls;return e;};
 /** First-use setup lives on the loading curtain, as one page (owner request 2026-10-09): the brand on top, the Agents
  * found here as cards, every other way in folded under More options, and one big "Build your world" (owner request 2026-10-10). Choosing
@@ -87,8 +83,12 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  const key=(move?'worldlet-agent-move:':'worldlet-startup-setup:')+state.workspaceId;
  let draft:any={step:0,language:languages.includes(systemLanguage)?systemLanguage:'en',applets:['app-gmail','app-google-calendar','app-browser'],touched:[],consent:true};
  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&Array.isArray(saved.applets))draft={...draft,...saved};}catch{}
+ // Moving to an Agent is about the Agent alone: a Google connection the World already has does not stand in for one.
+ const connected=()=>!move&&['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)));
+ // Google, a chosen local Agent, an API key or an Agent on another computer opens the second half of the page.
+ const ready=()=>connected()||typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string';
  // Resume from account facts (or the chosen local Agent), not old draft indices.
- step=typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string'||!move&&['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)))?1:0;
+ step=ready()?1:0;
  const selected=new Set<string>(draft.applets.filter(id=>WORLD_APPS.some(a=>a.id===id)));
  let detected=new Set<string>(),nativeIcons:Record<string,string>={},detecting=true;
  const t=(text:string)=>setupText(text,draft.language);
@@ -106,10 +106,6 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_started'}));
  if(step===1)window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
  const persist=()=>localStorage.setItem(key,JSON.stringify({...draft,step,applets:[...selected],touched:[...touched]}));
- // Moving to an Agent is about the Agent alone: a Google connection the World already has does not stand in for one.
- const connected=()=>!move&&['gmail','google-calendar'].every(provider=>state.connections?.some(c=>c.provider===provider&&connectionLive(c)));
- // Google, a chosen local Agent, an API key or an Agent on another computer opens the second half of the page.
- const ready=()=>connected()||typeof draft.agent==='string'||draft.ownModel===true||typeof draft.remoteAgent==='string';
  const agentText=(text:string,agent:string)=>t(text).replace('{agent}',agent);
  // Setup's product events (core/diagnostics/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
  const productEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
@@ -295,11 +291,15 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
   return true;
  }
+ // Setup is over: its draft, timers and listeners go.
+ function dispose(){
+  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('worldlet:agent-check',onAgentCheck);
+ }
  async function finish(){
   if(!ready())throw Error('Connect Google to enter your world.');
   if(move){
    const snapshot=await call('snapshot');
-   localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('worldlet:agent-check',onAgentCheck);
+   dispose();
    loader.classList.add('setup-entering');
    document.dispatchEvent(new Event('worldlet:setup-complete'));
    await complete(snapshot);
@@ -343,11 +343,11 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const img=shown||image(appIcon(app),'setup-app-logo');img.dataset.appletId=app.id;return img;
   });
   const tile=(shelf||panel).getBoundingClientRect();
+  const columns=Math.min(8,iconsToGather.length),rows=Math.ceil(iconsToGather.length/columns),spacing=Math.min(120,(innerWidth-80)/columns,(innerHeight*.42)/rows);
   const flights=iconsToGather.map((img,i)=>{
    const r=img.getBoundingClientRect(),copy=img.cloneNode() as HTMLImageElement;gathering.append(copy);
    const visible=img.isConnected&&r.width>0&&r.top>=tile.top&&r.bottom<=tile.bottom;
    const x=visible?r.left+r.width/2:innerWidth/2,y=visible?r.top+r.height/2:innerHeight*.5;
-   const columns=Math.min(8,iconsToGather.length),rows=Math.ceil(iconsToGather.length/columns),spacing=Math.min(120,(innerWidth-80)/columns,(innerHeight*.42)/rows);
    const row=Math.floor(i/columns),inRow=row<rows-1?columns:iconsToGather.length-columns*row;
    const targetX=innerWidth*.5+((i%columns)-(inRow-1)/2)*spacing,targetY=innerHeight*.3+(Math.floor(i/columns)-(rows-1)/2)*spacing;
    return copy.animate([{left:x+'px',top:y+'px',opacity:visible?1:0,transform:'translate(-50%,-50%) scale(1)'},{left:targetX+'px',top:targetY+'px',opacity:1,transform:'translate(-50%,-50%) scale(.85)'}],{duration:still?0:650,easing:'cubic-bezier(.22,.7,.2,1)',fill:'forwards'}).finished;
@@ -381,7 +381,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    ]);logo.remove();
   }));
   gathering.id='setupArrivingDevices';document.body.append(gathering);
-  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('worldlet:agent-check',onAgentCheck);
+  dispose();
   // Keep the final setup surface until the first world frame is ready.
   loader.classList.add('setup-entering');
   document.dispatchEvent(new Event('worldlet:setup-complete'));
@@ -506,8 +506,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  /** The Agents found here as cards, picked one first-class (owner request 2026-10-09). */
  function agentCards(){
   const cards=node('div','','setup-agent-cards');cards.setAttribute('role','group');cards.setAttribute('aria-label',t('Your agents'));
-  const rank=(id:string)=>AGENT_PRIORITY.indexOf(id);
-  for(const found of [...agents].sort((x,y)=>rank(x.id)-rank(y.id))){
+  for(const found of [...agents].sort(byPriority)){
    const harness=LOCAL_HARNESSES.find(h=>h.id===found.id),title=found.title||harness?.title||found.id,connecting=connectingAgent===found.id,chosen=found.id===picked;
    const card=node('button','','setup-agent-card setup-agent-button') as HTMLButtonElement;card.type='button';card.dataset.agent=found.id;
    card.disabled=busy||signingIn||!!connectingAgent;card.setAttribute('aria-pressed',String(chosen));card.setAttribute('aria-label',title);
@@ -533,7 +532,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  function moreOptions(){
   const wrap=node('div','','setup-more-wrap');wrap.classList.toggle('is-open',more);
   // Codex alone is no Agent for Fox (owner decision 2026-10-09), so it is not offered.
-  const missing=LOCAL_HARNESSES.filter(h=>h.id!=='codex'&&!agents.some(a=>a.id===h.id)&&(agents.length>0||detectingAgents||h.id!=='hermes')).sort((x,y)=>AGENT_PRIORITY.indexOf(x.id)-AGENT_PRIORITY.indexOf(y.id));
+  const missing=LOCAL_HARNESSES.filter(h=>h.id!=='codex'&&!agents.some(a=>a.id===h.id)&&(agents.length>0||detectingAgents||h.id!=='hermes')).sort(byPriority);
   const toggle=node('button','','setup-more-toggle') as HTMLButtonElement;toggle.type='button';toggle.setAttribute('aria-expanded',String(more));toggle.setAttribute('aria-controls','setupMore');
   toggle.append(node('span','','setup-more-chevron'),node('span',t('More options'),'setup-more-label'));
   const peek=node('span','','setup-more-peek');peek.setAttribute('aria-hidden','true');
