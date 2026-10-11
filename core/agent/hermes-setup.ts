@@ -1,3 +1,4 @@
+import {modelProvider} from './model-providers.ts';
 // Hermes Agent for a person with no Agent (owner decisions 2026-10-09: anyone without an Agent, Codex-only included,
 // gets stock Hermes Agent and signs in to a model inside Hermes; a person who already has Hermes gets nothing installed;
 // otherwise it is installed the official way, to the official default location, never into Worldlet's library).
@@ -52,13 +53,15 @@ export function hermesSignInPrompt(text:string):{url:string;code:string|null}|nu
 }
 
 /** The model Hermes Agent answers with once ChatGPT is its provider: the one it already has when ChatGPT accepts it,
- * else the first ChatGPT model Hermes itself lists (ACP `session/new` `models`, "openai-codex:<model>", in Hermes'
- * own order). A vendor-prefixed name ("anthropic/…", the starter config's OpenRouter default) is never a ChatGPT
- * model. Null when Hermes lists none. */
+ * else ChatGPT's everyday model (model-providers.ts, tier M) when Hermes lists it, else the first ChatGPT model Hermes
+ * itself lists (ACP `session/new` `models`, "openai-codex:<model>", in Hermes' own order). Hermes' first can be one a
+ * ChatGPT account does not accept (gpt-6-astra, HTTP 400 on every turn, one Mac 2026-10-10). A vendor-prefixed name
+ * ("anthropic/…", the starter config's OpenRouter default) is never a ChatGPT model. Null when Hermes lists none. */
 export function hermesChatGptModel(current:unknown,available:unknown[]):string|null {
  const own=(id:unknown)=>typeof id==='string'&&/^openai-codex:[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(id)?id.slice('openai-codex:'.length):null;
  const now=own(current);
  const listed=available.map(own).filter((id):id is string=>id!==null);
  if(now&&listed.indexOf(now)>=0)return now;
- return listed[0]??null;
+ const everyday=modelProvider('chatgpt').tiers.M;
+ return listed.includes(everyday)?everyday:listed[0]??null;
 }

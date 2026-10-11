@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
 import {HERMES_INSTALLERS,hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt} from '../../../../../core/agent/index.ts';
-import {WorldletError} from '../../files.ts';
+import {WorldletError,writeJSON} from '../../files.ts';
 import {hermesCommandPath,isOwnHermes,standardHermesHome} from './hermes-files.ts';
 import {runHarnessCommand} from './harness-approvals.ts';
 import {harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
@@ -33,6 +33,9 @@ export function releaseStandardHermes(root:string,environment:HarnessEnvironment
  try{if(fs.readFileSync(command,'utf8').includes('worldlet-hermes-command'))fs.rmSync(command,{force:true});}catch{}
 }
 
+/** Marks, in the library, a Hermes Agent that Worldlet installed (not one that was already here). */
+const INSTALLED='hermes-installed.json';
+export function installedHermes(root:string):boolean {return fs.existsSync(path.join(root,INSTALLED));}
 /** Installs stock Hermes Agent the official way when none is here, then returns it. `progress` hears each step. */
 export async function installHermes(root:string,{environment,progress,fetch:get=fetch}:{environment:HarnessEnvironment;progress:(step:HermesInstallProgress)=>void;fetch?:typeof fetch}):Promise<LocalHarnessInstall> {
  const existing=ownHermesAgent(environment);
@@ -72,15 +75,19 @@ export async function installHermes(root:string,{environment,progress,fetch:get=
  }finally{fs.rmSync(folder,{recursive:true,force:true});}
  const installed=ownHermesAgent(environment);
  if(!installed)throw new WorldletError(FAILED);
+ writeJSON(path.join(root,INSTALLED),{installedAt:new Date().toISOString()});
  return installed;
 }
 
 /** ChatGPT as Hermes Agent's model, set up with Hermes' own commands: its sign-in (`hermes auth add openai-codex`,
  * browser authorization; `open` gets the address it prints, with the code to type when it falls back to its device
  * page), then, as Hermes says to configure it without its wizard, `hermes config set model.provider openai-codex` and
- * `model.default` to a ChatGPT model Hermes lists. Hermes keeps the sign-in; Worldlet never sees the token. */
-export async function signInHermes(install:LocalHarnessInstall,environment:HarnessEnvironment,open:(prompt:{url:string;code:string|null})=>void,signal?:AbortSignal):Promise<void> {
+ * `model.default` to a ChatGPT model Hermes lists. Hermes keeps the sign-in; Worldlet never sees the token.
+ * `setModel` false: a Hermes Agent that was already here is the person's own, and its model stays theirs (it is only
+ * signed in). Setup once switched such a Hermes to a model its ChatGPT account refused (2026-10-10). */
+export async function signInHermes(install:LocalHarnessInstall,environment:HarnessEnvironment,open:(prompt:{url:string;code:string|null})=>void,signal?:AbortSignal,{setModel=true}:{setModel?:boolean}={}):Promise<void> {
  await hermesSignIn(install,environment,open,signal);
+ if(!setModel)return;
  const set=async(key:string,value:string)=>{
   const run=await runHarnessCommand(install,environment,['config','set',key,value],{timeout:60_000});
   if(run.code!==0)throw new WorldletError(`Hermes Agent could not use ChatGPT: ${(run.stderr.trim().split('\n').pop()||'its settings did not change').slice(0,300)}`);

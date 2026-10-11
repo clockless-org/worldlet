@@ -1,13 +1,13 @@
 // Stock Hermes Agent for a person with no Agent (platform/electron/src/modules/agent-runtime/hermes-official.ts,
 // core/agent/hermes-setup.ts): the official installer runs stage by stage without a person (the ones that need input
-// are Hermes' own), its steps are reported, a failed step says which, a Hermes Agent already here installs nothing,
+// are Hermes' own), its steps are reported, a failed step says which, a Hermes Agent already here installs nothing and keeps its model,
 // Worldlet's old links at the standard locations are removed first and never the person's own; ChatGPT is signed in
 // with Hermes' own command, the address it prints is opened, and Hermes is set to ChatGPT with a model it lists.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../core/agent/index.ts';
-import {installHermes,ownHermesAgent,releaseStandardHermes,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
+import {installHermes,installedHermes,ownHermesAgent,releaseStandardHermes,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Core: the manifest, a stage's result frame, what the sign-in prints, and the model.
@@ -24,6 +24,7 @@ assert.equal(hermesSignInPrompt('Open https://evil.example.com/auth'),null,'only
 assert.equal(hermesChatGptModel('openai-codex:anthropic/claude-opus-4.6',['openai-codex:anthropic/claude-opus-4.6','openai-codex:gpt-6-sol','openai-codex:gpt-5.5']),'gpt-6-sol','the starter OpenRouter default is replaced by Hermes’ first ChatGPT model');
 assert.equal(hermesChatGptModel('openai-codex:gpt-5.5',['openai-codex:gpt-6-sol','openai-codex:gpt-5.5']),'gpt-5.5','a ChatGPT model already chosen stays');
 assert.equal(hermesChatGptModel('nous:x',['nous:x']),null);
+assert.equal(hermesChatGptModel('nous:x',['openai-codex:gpt-6-astra','openai-codex:gpt-5.6-terra']),'gpt-5.6-terra','ChatGPT’s everyday model before Hermes’ first, which a ChatGPT account may refuse');
 assert.ok(HERMES_INSTALLERS.posix.startsWith('https://hermes-agent.nousresearch.com/')&&HERMES_INSTALLERS.windows.startsWith('https://hermes-agent.nousresearch.com/'));
 
 if(process.platform==='win32'){console.log('PASS Hermes Agent setup rules (the installer run is checked on macOS and Linux)');process.exit(0);}
@@ -58,12 +59,14 @@ esac
  assert.equal(fs.existsSync(path.join(home,'.hermes')),false,'the link to Fox’s profile is gone');
  assert.equal(fs.existsSync(path.join(home,'.local','bin','hermes')),false,'Worldlet’s launcher is gone');
  assert.ok(fs.existsSync(path.join(root,'agent','private','hermes','config.yaml')),'Fox’s profile itself stays');
+ assert.equal(installedHermes(root),false,'a failed install is not Worldlet’s Hermes');
  // Then the whole run: every stage that needs no person, in order, reported as it runs; HERMES_HOME never reaches it.
  steps.length=0;fs.writeFileSync(log,'');
  const install=await installHermes(root,{environment,progress:step=>steps.push(`${step.step}/${step.steps} ${step.title}`),fetch:serve()});
  assert.deepEqual(steps,['1/2 Download Hermes Agent','2/2 Install command and app']);
  assert.deepEqual(fs.readFileSync(log,'utf8').trim().split('\n'),['--manifest','--stage repository --json --non-interactive','--stage products --json --non-interactive']);
  assert.equal(install.command,path.join(home,'.local','bin','hermes'));
+ assert.equal(installedHermes(root),true,'Worldlet installed this one');
  assert.ok(fetched.every(url=>url===HERMES_INSTALLERS.posix));
  // A Hermes Agent already here: nothing is downloaded or run.
  fetched.length=0;
@@ -97,6 +100,10 @@ fi
  await signInHermes(fake,environment,prompt=>opened.push(prompt));
  assert.deepEqual(opened,[{url:'https://auth.openai.com/oauth/authorize?state=s',code:null}]);
  assert.deepEqual(fs.readFileSync(calls,'utf8').trim().split('\n'),['auth add openai-codex --type oauth --browser --no-browser','config set model.provider openai-codex','acp','config set model.default gpt-6-sol']);
+ // A Hermes Agent that was already here is only signed in: its model stays the person's.
+ fs.writeFileSync(calls,'');
+ await signInHermes(fake,environment,()=>{},undefined,{setModel:false});
+ assert.deepEqual(fs.readFileSync(calls,'utf8').trim().split('\n'),['auth add openai-codex --type oauth --browser --no-browser']);
  // A refused sign-in says why, and nothing is configured.
  fs.writeFileSync(calls,'');
  await assert.rejects(signInHermes(fake,{...environment,env:{...environment.env,FAIL_LOGIN:'1'}},()=>{}),/ChatGPT sign-in did not finish: access denied/);
