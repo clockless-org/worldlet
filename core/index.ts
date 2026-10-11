@@ -11,7 +11,7 @@ import {browserDriverStart,browserDriverNext} from './browser/index.ts';
 import {harnessHandshake,harnessReceive,harnessAuthHandoff,turnTrustObserve,turnTrustInherit,turnWriteAdmission,turnWriteNotice,worldItemSnapshot,worldItemRestore} from './agent/index.ts';
 import {sourceEvidenceIssues,sourceEvidenceContext,attentionBatchInput} from './attention/index.ts';
 import {analysisSourceContent,mergeAnalysisCandidates,orderAnalysisRecords,analysisBatch} from './applets/index.ts';
-import {appletChangedSources,appletInvalidateFacts,appletObservations,appletAnalysisPending,appletAnalysisRetrying,appletAnalysisParked,appletAnalysisFailed,appletAnalysisCommit,appletAnalysisRequest,appletAnalysisItems,appletAnalysisInput,appletAnalysisRefresh,appletCandidateContent,canonicalSourceQuotes} from './applets/index.ts';
+import {appletChangedSources,appletInvalidateFacts,appletObservations,appletAnalysisPending,appletAnalysisRetrying,appletAnalysisParked,appletAnalysisFailed,appletAnalysisCommit,appletAnalysisRequest,appletAnalysisUnsubmitted,appletAnalysisItems,appletAnalysisInput,appletAnalysisRefresh,appletCandidateContent,canonicalSourceQuotes} from './applets/index.ts';
 import {browserElementPolicy,browserDriverSnapshot} from './browser/index.ts';
 import {browserWorkflowReport,prepareOperation,transitionOperation,operationReport,notionOperationOutcome} from './tasks/index.ts';
 import {runtimeTaskLease,runtimeRunPrune,runtimeFailure,analysisPlan,nextSourceWake,sourceReadProviders} from './tasks/index.ts';
@@ -86,6 +86,7 @@ export function invoke(operation:string,input:string):string {
   if(operation==='appletAnalysisRefresh')return JSON.stringify({ok:true,value:appletAnalysisRefresh(value.records,value.saved,value.revisions)});
   if(operation==='attentionBatchInput')return JSON.stringify({ok:true,value:attentionBatchInput(value)});
   if(operation==='appletAnalysisItems')return JSON.stringify({ok:true,value:appletAnalysisItems(value.records,value.items)});
+  if(operation==='appletAnalysisUnsubmitted')return JSON.stringify({ok:true,value:appletAnalysisUnsubmitted(value.reply)});
   if(operation==='appletAnalysisRequest')return JSON.stringify({ok:true,value:appletAnalysisRequest(value.timeoutSeconds,value.instructions)});
   if(operation==='runtimeAnalysisPlan')return JSON.stringify({ok:true,value:analysisPlan(value)});
   if(operation==='runtimeTaskReport')return JSON.stringify({ok:true,value:runtimeTaskReport(value)});

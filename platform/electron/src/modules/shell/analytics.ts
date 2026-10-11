@@ -284,6 +284,7 @@ export class UsageAnalytics implements AnalyticsService {
   const raw=error instanceof Error||(error&&typeof error==='object')?error as Row:{message:String(error)};
   let report:Row;
   try{report=core<Row>('exceptionReport',{name:raw.name,message:typeof raw.message==='string'?raw.message:'',stack:raw.stack,area,operation});}catch{return;}
+  if(!report)return;
   const frames=Array.isArray(report.frames)?report.frames:[];
   const key=[report.area,report.type,report.code,report.operation,...frames.slice(-5).map((f:Row)=>f.filename+':'+f.function+':'+f.lineno)].join('|');
   if(this.exceptions.has(key))return;

@@ -69,6 +69,10 @@ export function setupStep(message:string){
 /** What kind of failure an otherwise unclassified error was, as a fixed tag, so `operationFailed` still says where
  * to look. The message is classification input only. */
 const FAILURE_KINDS:[RegExp,string][]=[
+ // Applet page analysis (platform attention/center.ts analyzeAppletPage): an Agent turn that never saved a checked
+ // batch, or saved only part of it. Both reached PostHog for a week as a bare `other` (2026-10-04 to 10-11).
+ [/applet analysis ended without a verified result/,'noResult'],
+ [/did not cover every supplied source record/,'partialCoverage'],
  [/\benoent\b|no such file|not found|(?:is|are) missing|does not exist/,'missing'],
  [/\beacces\b|\beperm\b|permission denied|not permitted|access is denied/,'permission'],
  [/\bexited (?:with )?(?:code )?-?\d+|exit code|exit status/,'processExit'],
@@ -114,15 +118,21 @@ function stackFrame(line:string){
  return {platform:'node:javascript',filename:/^[\w.-]{1,80}$/.test(name)?name:'other',function:/^[\w$.<>]{1,100}$/.test(fn)?fn:'?',
   lineno:Number(match[3]),colno:Number(match[4]),in_app:!/^(node:|internal\/)|node_modules|electron\/js2c|<anonymous>/.test(location)};
 }
+/** Recorded on purpose, not failures: a kept website page released under memory pressure is the browser relieving
+ * memory as designed (core/browser/page-resume.ts PAGE_MEMORY). diagnostics.jsonl keeps them; error tracking does not. */
+const NOT_EXCEPTIONS=new Set(['keptPageRelease']);
 /** An uncaught or recorded error as a PostHog `$exception` projection: its type, Core's failure code and sanitized
- * frames (oldest first, as error tracking expects). The message is classification input only and is never returned. */
+ * frames (oldest first, as error tracking expects), or null for an operation recorded on purpose. The message is
+ * classification input only and is never returned. */
 export function exceptionReport(value){
+ if(NOT_EXCEPTIONS.has(value?.operation))return null;
  const message=typeof value?.message==='string'?value.message:'';
  const code=diagnosticError({message,operation:value?.operation}).code as string;
  const type=typeof value?.name==='string'&&/^[A-Z][A-Za-z]{0,40}$/.test(value.name)?value.name:'Error';
  const frames=(typeof value?.stack==='string'?value.stack.split('\n').slice(1,41):[]).map(stackFrame).filter(Boolean).reverse();
  const area=['main','renderer','host'].includes(value?.area)?value.area:'host';
  const operation=typeof value?.operation==='string'&&/^[A-Za-z][\w:-]{0,60}$/.test(value.operation)?value.operation:'';
- const rule=operation==='worldItemSave'?itemRule(message):setupStep(message);
+ const kind=code==='operationFailed'?failureKind(message):'other';
+ const rule=operation==='worldItemSave'?itemRule(message):setupStep(message)??(kind==='other'?undefined:kind);
  return {type,code,area,operation,level:ENVIRONMENTAL.has(code)?'warning':'error',handled:area==='host',frames,...(rule?{rule}:{})};
 }
