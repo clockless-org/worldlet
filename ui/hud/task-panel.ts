@@ -4,7 +4,7 @@
 // its picture, a short name and one line of what it is doing or when it runs. A running card has a turning ring and a
 // thin bar under it (how far along when that is known); a coming routine has a clock. What is finished lives only in
 // the Journal. Core decides every row and its words (core/tasks/task-panel.ts); this only draws them:
-// - Up to two cards a side in a wide World, one in a narrower one, then "+N" for the rest; under 860px wide only the
+// - Up to two cards a side in a wide World, one in a narrower one, then "+N" for the rest; under 820px wide only the
 //   count, which opens the whole list.
 // - A running card opens a small window above it with everything that task said (the step, when it started, who does
 //   it), or, while Fox drives a web page, the page itself. A routine opens a read-only popover saying when, how often
@@ -24,7 +24,7 @@ const PAGE_MS=3000;
 /** Status lines kept for a running task's window. */
 const LOG_MAX=40;
 /** Cards a side: two in a wide World, one in a narrower one, none (only the count) in a narrow one. */
-const cardsASide=()=>innerWidth>=1300?2:innerWidth>=860?1:0;
+const cardsASide=()=>innerWidth>=1260?2:innerWidth>=820?1:0;
 const CLOCK='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
 const el=<K extends keyof HTMLElementTagNameMap>(tag:K,cls='',text?:string)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;};
 

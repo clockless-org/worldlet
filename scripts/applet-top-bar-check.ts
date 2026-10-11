@@ -74,7 +74,7 @@ async function bar(page:Page){
 function side(r:any,width:number){const lane=2*(width-center(r.hud));return {width:width-lane,center:(width-lane)/2};}
 // Back and the Applet's controls wear the material of Fox's round controls (the microphone).
 const MATERIAL=['backgroundColor','color','borderTopColor','borderTopWidth','borderTopStyle','backdropFilter','textShadow','boxShadow'];
-const material=(page:Page,selector:string)=>page.evaluate(([selector,props])=>{const pick=(e:Element)=>Object.fromEntries((props as string[]).map(p=>[p,getComputedStyle(e)[p]]));return {control:pick(document.querySelector(selector as string)),fox:pick(document.querySelector('.companion-controls>.companion-speech-button'))};},[selector,MATERIAL] as const);
+const material=(page:Page,selector:string)=>page.evaluate(([selector,props])=>{const pick=(e:Element)=>Object.fromEntries((props as string[]).map(p=>[p,getComputedStyle(e)[p]]));return {control:pick(document.querySelector(selector as string)),fox:(()=>{/* Fox's round control, as it stands outside the message bar (the microphone itself is a plain icon inside it since 2026-10-11). */const probe=document.createElement('button');probe.className='companion-speech-button';const group=document.querySelector('.companion-controls:not(.companion-voice-controls)')!;group.append(probe);const picked=pick(probe);probe.remove();return picked;})()};},[selector,MATERIAL] as const);
 async function assertMaterial(page:Page,selector:string,label:string){
  const {control,fox}=await material(page,selector);
  assert.deepEqual(control,fox,label+' is a darker frosted control, like Fox\'s');

@@ -45,8 +45,8 @@ await withBrowser(fileAccess,async browser=>{
  // At rest the bar is low-key (owner request 2026-10-05); pointing at it shows the microphone, Send and the hint.
  assert.equal(await page.locator('.companion-text-entry').getAttribute('data-quiet'),'true','The bar rests quiet');
  await form.hover();await page.waitForTimeout(400);
- assert.deepEqual(await form.locator('button').evaluateAll(b=>b.filter(e=>(e as HTMLElement).offsetParent).map(e=>e.id||e.className)),[],'No Send while there is nothing to send; the microphone is its own button on the bar\'s right');assert(await mic.isVisible());
- assert.equal((await form.boundingBox()).width,160,'The resting bar is small (two sizes, owner Order 2026-10-08)');assert.match(await type.getAttribute('placeholder'),/Click to type · hold to speak/);
+ assert.deepEqual(await form.locator('button').evaluateAll(b=>b.filter(e=>(e as HTMLElement).offsetParent).map(e=>e.id||e.className)),[],'No Send while there is nothing to send; the microphone stands inside the bar\'s right end');assert(await mic.isVisible());
+ assert.equal((await form.boundingBox()).width,168,'The resting bar is small, the microphone inside it (two sizes, owner Orders 2026-10-08 and 2026-10-11)');assert.match(await type.getAttribute('placeholder'),/Click to type · hold to speak/);
  assert.match(await form.evaluate(e=>getComputedStyle(e).backdropFilter),/blur/,'The bar is frosted');
  await openCompanionPanel(page);assert(await panel.isVisible(),'The settings button opens the companion panel');assert(!await typing(),'Opening the panel does not start typing');
  await page.keyboard.press('Escape');assert.equal(await panel.isVisible(),false);
@@ -68,7 +68,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await controls.count(),0,'No button stands beside the bar on the desktop');
  assert.equal(await page.getByRole('button',{name:'Back to World',exact:true}).count(),0,'No return button: right-click Fox, the Dock or the tray goes back');
  sameLine(await form.boundingBox(),originalBar,'The bar keeps its center and bottom edge on the desktop');
- assert.equal((await form.boundingBox()).width,200,'The desktop bar rests a little wider, since it holds the microphone');
+ assert.equal((await form.boundingBox()).width,168,'The desktop bar is the World\'s, the microphone inside it (owner request 2026-10-11)');
  async function assertDesktopRow(){
   const bar=await form.boundingBox(),pet=await fox.boundingBox(),micBox=await mic.boundingBox();
   assert.equal(await page.locator(SETTINGS_BUTTON).isVisible(),false,'No Settings beside desktop Fox');
@@ -155,20 +155,21 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
  {const world=await form.boundingBox();await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();sameLine(await form.boundingBox(),world,'The bar keeps its place on the desktop');}
  await assertDesktopRow();
- // When Orders can be sent, the bug stands left of the bar in the World and joins the microphone inside it on the desktop.
+ // When Orders can be sent, the bug joins the microphone inside the bar, in the World and on the desktop alike (owner
+ // request 2026-10-11).
  const order=page.locator('.companion-order-button');
  await page.evaluate(()=>{(window as any).worldletDesktopCompanion(false);(window as any).orderReady=true;window.dispatchEvent(new Event('worldlet:app-update'));});
  await order.waitFor();await settle();
- {const bug=await order.boundingBox(),bar=await form.boundingBox();assert(bug.x+bug.width<=bar.x&&bug.width===44,'In the World the bug stands left of the bar');}
+ {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();assert(bug.width===36&&bug.x>=bar.x&&bug.x+bug.width<=micBox.x,'In the World the bug sits inside the bar just left of the microphone '+JSON.stringify({bug,micBox,bar}));}
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();
  {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();
   assert.equal(await order.evaluate(e=>e.parentElement===document.querySelector('.companion-speech-button').parentElement),true,'The bug and the microphone are one group on the desktop');
   assert(bug.width===36&&bug.x>=bar.x&&bug.x+bug.width<=micBox.x&&micBox.x-(bug.x+bug.width)<=4&&Math.abs(bug.y-micBox.y)<1,'The bug sits inside the bar just left of the microphone '+JSON.stringify({bug,micBox,bar}));
-  assert.equal(bar.width,200);
+  assert.equal(bar.width,168);
   const crop=await page.evaluate(()=>(window as any).worldletCompanionGeometry());assert(crop.x<=bar.x&&crop.x+crop.width>=bar.x+bar.width);
   await page.screenshot({path:'/tmp/worldlet-companion-desktop-order.png',omitBackground:true,clip:crop});}
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
- {const bug=await order.boundingBox(),bar=await form.boundingBox();assert(bug.x+bug.width<=bar.x&&bug.width===44,'Back in the World the bug is left of the bar again');}
+ {const bug=await order.boundingBox(),bar=await form.boundingBox();assert(bug.x>=bar.x&&bug.x+bug.width<=bar.x+bar.width,'Back in the World the bug is still inside the bar');}
  await page.evaluate(()=>{(window as any).orderReady=false;window.dispatchEvent(new Event('worldlet:app-update'));});
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('.companion-order-button').hidden);
  await page.emulateMedia({reducedMotion:'no-preference'});

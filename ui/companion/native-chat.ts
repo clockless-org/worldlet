@@ -81,8 +81,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  const restack=()=>{if(!stackFrame)stackFrame=requestAnimationFrame(countStack);};
  new MutationObserver(restack).observe(hud,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
  new MutationObserver(restack).observe(root,{attributes:true,attributeFilter:['class','data-entry-expanded','data-depth','data-detail-open']});mountCompanionPortrait(avatar,{bust:root.classList.contains('fox-first-console')});
- // Order and Feedback (core/distribution/order.ts): one round bug button standing on its own just left of Fox's message
- // bar (owner request 2026-10-06; kept there 2026-10-07) on every channel; on the desktop it sits inside the bar beside the microphone (2026-10-11). In the Alpha and Dev apps on a computer
+ // Order and Feedback (core/distribution/order.ts): one bug button inside Fox's message bar, beside the microphone
+ // (owner request 2026-10-11), on every channel. In the Alpha and Dev apps on a computer
  // enrolled with the admin service it is Order: a click (or ⌘B / Ctrl+B) starts Fox's voice mode (the button turns red;
  // nothing is captured before the click); what is said then goes to the owner's Claude project as a task, with pictures
  // of the window and the recent operation log. A second click finishes early. Nothing else on screen changes while it
@@ -135,9 +135,10 @@ export function createNativeChat(call){return function({button,input,status,exec
  // One message bar under Fox (owner decision 2026-10-04, like Claude's composer): click to type, hold to speak,
  // a microphone and Send inside it. Clicking Fox does the same as clicking the bar.
  const entry=make('div','companion-text-entry'),inputState=make('span','companion-input-state');inputState.setAttribute('role','status');const waveform=make('span','companion-input-wave');waveform.setAttribute('aria-hidden','true');for(let i=0;i<17;i++)waveform.append(make('i',''));entry.append(form,inputState,waveform);hud.append(entry);
- const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);controls.append(orderButton);
- // The microphone is the bug's twin on the bar's right, a round button of its own (owner 2026-10-07); on the desktop both stand inside the bar.
- const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');voiceControls.append(speechButton);entry.append(voiceControls);
+ const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);
+ // The bug and the microphone stand inside the bar's right end, in the World and on the desktop alike (owner request
+ // 2026-10-11: "把那个报 bug 的按钮和语音的按钮都融到那个 input box 里面去").
+ const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');voiceControls.append(orderButton,speechButton);entry.append(voiceControls);
  const send=form.querySelector('#notionSend');send.classList.add('companion-send-button');
  input.maxLength=3000;input.removeAttribute('placeholder');input.setAttribute('aria-label','Message Fox');
  send.setAttribute('aria-label','Send message');
@@ -1038,10 +1039,8 @@ export function createNativeChat(call){return function({button,input,status,exec
   openText:focusInput,sync:scheduleRender,submit,ask:(text: string,{origin='user',displayText,icon,quiet=false}: {origin?: 'user'|'system';displayText?:string;icon?:string;quiet?:boolean}={})=>submit(text,undefined,false,origin,displayText,icon,quiet)
  };
  // On the desktop Fox stands with its message bar alone (owner request 2026-10-11): nothing beside Fox or the bar
- // (Settings, the dock's actions; right-click Fox, the Dock or tray icon goes back to the World), and the bug joins the
- // microphone as one group inside the bar's right end (desktop-companion.css). The World keeps the bug left of the bar.
- const placeOrderButton=()=>{if(onDesktop())voiceControls.prepend(orderButton);else controls.append(orderButton);};
- window.addEventListener('worldlet:desktop-companion',()=>{placeOrderButton();api.setContext(worldContext);});
- if(onDesktop()){placeOrderButton();api.setContext(worldContext);}
+ // (Settings, the dock's actions; right-click Fox, the Dock or tray icon goes back to the World).
+ window.addEventListener('worldlet:desktop-companion',()=>api.setContext(worldContext));
+ if(onDesktop())api.setContext(worldContext);
  return api;
 }}

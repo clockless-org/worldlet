@@ -12,20 +12,9 @@ html.desktop-companion,html.desktop-companion body{background:transparent!import
 .desktop-companion .notion-world>:not(#notionHUD){display:none!important}
 .desktop-companion #notionHUD>:not(.companion-pet):not(.companion-dialogue):not(.companion-text-entry){display:none!important}
 /* On the desktop Fox stands with its message bar alone (owner request 2026-10-11): no Settings beside Fox and none of
-   the dock's actions; right-click Fox (or the Dock or tray icon) goes back to the World. The microphone and, when
-   Orders can be sent, the bug are one group inside the bar's right end, plain icons like Send (native-chat.ts moves
-   the bug into the microphone's group). The bar rests wider than in the World, since it now holds them. */
+   the dock's actions; right-click Fox (or the Dock or tray icon) goes back to the World. The bar is the World's, with
+   the microphone and the bug inside its right end (resources/styles/builtin/controls.css). */
 .desktop-companion #notionWorld .companion-pet .companion-side{display:none!important}
-.desktop-companion #notionWorld.native-console .companion-text-entry{--companion-bar-width:200px;--companion-bar-tools:36px}
-.desktop-companion #notionWorld.native-console[data-entry-expanded=true] .companion-text-entry{--companion-bar-width:300px}
-.desktop-companion #notionWorld.native-console .companion-text-entry:has(>.companion-voice-controls>.companion-order-button:not([hidden])){--companion-bar-tools:74px}
-.desktop-companion #notionWorld.native-console .companion-text-entry #notionCommand{padding-right:calc(var(--companion-bar-tools) + 8px)}
-.desktop-companion #notionWorld.native-console .companion-input-wave{padding-right:calc(var(--companion-bar-tools) + 12px)}
-.desktop-companion #notionWorld.native-console .companion-controls.companion-voice-controls{left:auto;right:calc(50% - min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 4px);gap:2px;z-index:1;transition:right .22s ease-out}
-.desktop-companion #notionWorld.native-console .companion-voice-controls>button{flex:0 0 36px;width:36px;height:36px;min-height:36px}
-.desktop-companion #notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button,.desktop-companion #notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button{border-color:transparent;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-.desktop-companion #notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button:is(:hover,:focus-visible),.desktop-companion #notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button:is(:hover,:focus-visible){background:var(--system-glass-hover)}
-@media(prefers-reduced-motion:reduce){.desktop-companion #notionWorld.native-console .companion-controls.companion-voice-controls{transition:none}}
 .desktop-companion #notionHUD{transform:var(--companion-desktop-transform,translateX(-50%))!important;transition:none!important}
 .desktop-companion .companion-avatar{cursor:grab}
 .desktop-companion .is-dragging-fox .companion-avatar{cursor:grabbing}

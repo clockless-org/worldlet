@@ -23,13 +23,13 @@ await withBrowser(fileAccess,async browser=>{
  const tell=page.locator('.companion-order-button'),bar=page.locator('#notionCommand'),root=page.locator('.notion-world');
  await tell.waitFor({state:'visible'});
  assert.equal(await page.locator('.companion-side .companion-order-button').count(),0,'no longer beside Fox');
- // On its own just left of the bar, outside it; the microphone mirrors it on the right (owner 2026-10-07).
+ // Inside the bar's right end, just left of the microphone (owner request 2026-10-11: both inside the message bar).
  {const t=(await tell.boundingBox())!,b=(await bar.boundingBox())!,m=(await page.locator('.companion-speech-button').boundingBox())!;
-  assert(t.x+t.width<=b.x&&b.x-(t.x+t.width)<16,'just left of the message bar, outside it');
-  assert(m.x>=b.x+b.width&&m.x-(b.x+b.width)<16,'the microphone just right of the bar, outside it');
+  assert(t.x>=b.x&&t.x+t.width<=b.x+b.width,'inside the message bar: '+JSON.stringify({t,b}));
+  assert(m.x>=t.x+t.width&&m.x+m.width<=b.x+b.width,'the microphone just right of it, inside the bar');
   assert.equal(await page.locator('#notionCommand .companion-speech-button').count(),0,'no microphone inside the bar');
   assert(Math.abs(m.width-t.width)<1&&Math.abs(m.y-t.y)<1,'the twin of the bug');
-  assert(Math.abs((t.y+t.height)-(b.y+b.height))<2,'level with the bar');
+  assert(Math.abs((t.y+t.height/2)-(b.y+b.height/2))<2,'centred in the bar');
   assert(Math.abs(t.width-t.height)<1&&await tell.evaluate(e=>getComputedStyle(e).borderRadius)==='50%','round');}
  assert.equal((await tell.innerText()).trim(),'','an icon only');assert.equal(await tell.getAttribute('aria-label'),'Order');assert.equal(await tell.locator('svg').count(),1,'the bug icon');
  // Pointing at it leaves the bar as it is: a widening bar would slide the button out from under the pointer (owner Order 2026-10-07).
@@ -38,7 +38,7 @@ await withBrowser(fileAccess,async browser=>{
  const restWidth=await barWidth(),restCard=await cardShown(),restQuiet=await entry.getAttribute('data-quiet');
  await tell.hover();await page.waitForTimeout(400);
  assert.equal(await barWidth(),restWidth,'pointing at the button does not widen the bar');
- {const t=(await tell.boundingBox())!,b=(await bar.boundingBox())!;assert(t.x+t.width<=b.x,'the button stays where the pointer is');}
+ {const t=(await tell.boundingBox())!,b=(await bar.boundingBox())!;assert(t.x>=b.x&&t.x+t.width<=b.x+b.width,'the button stays where the pointer is');}
  await tell.click();
  await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='speechStart'&&c.purpose==='order'));
  await page.waitForTimeout(300);
@@ -47,7 +47,7 @@ await withBrowser(fileAccess,async browser=>{
  const wave=page.locator('.companion-input-wave');
  assert.equal(await bar.isVisible(),false,'the bar gives way to the wave');assert.equal(await entry.getAttribute('data-voice'),'true');
  {const w=(await wave.boundingBox())!;assert(Math.abs(w.width-restWidth)<1,'the wave is as wide as the bar was');
-  const t=(await tell.boundingBox())!;assert(t.x+t.width<=w.x&&w.x-(t.x+t.width)<16,'just right of the button');}
+  const t=(await tell.boundingBox())!;assert(t.x>=w.x&&t.x+t.width<=w.x+w.width,'the button stays in the wave’s right end');}
  await page.evaluate(()=>(window as any).worldletSpeech({phase:'level',text:'0.8'}));
  assert.equal(await wave.evaluate(e=>getComputedStyle(e).getPropertyValue('--voice-level').trim()),'0.8','the wave follows the voice');
  assert.equal(await entry.getAttribute('data-quiet'),restQuiet);
@@ -114,4 +114,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await away.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='order'&&c.operation==='stopped').map((c:any)=>c.reason)),['cancelled'],'the host hears why, as one bucket');
  assert.deepEqual(awayErrors,[]);
 });
-console.log('PASS Order UI: a round bug left of Fox’s message bar where Orders can be sent, the microphone its twin on the right, Space opens typing, ⌘B/Ctrl+B presses the bug; where the host allows it an Order: pointing at it changes nothing, click starts listening with only the button showing it, second click stops and the button spins until sent, the words go to Claude with the place and Fox confirms, or says plainly the instant post failed and why; on Beta there is no bug button and Feedback is the World’s corner button.');
+console.log('PASS Order UI: the bug inside Fox’s message bar beside the microphone where Orders can be sent, Space opens typing, ⌘B/Ctrl+B presses the bug; where the host allows it an Order: pointing at it changes nothing, click starts listening with only the button showing it, second click stops and the button spins until sent, the words go to Claude with the place and Fox confirms, or says plainly the instant post failed and why; on Beta there is no bug button and Feedback is the World’s corner button.');
