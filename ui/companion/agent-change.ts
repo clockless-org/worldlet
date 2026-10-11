@@ -1,6 +1,6 @@
 /** The in-page second ask Settings › Agent uses before any change to the person's Agent (its skills and scheduled
  * tasks, like its tools in agent-connections.ts): the host's `preview` returns the exact command and a one-time
- * confirmation; the page says in plain words what will happen, with the command folded under Details, and only the
+ * confirmation; the page says in plain words what will happen (never the command itself), and only the
  * person's own button runs it (`change` with that confirmation). Cancel changes nothing. */
 export type AgentCall=(action:string,body?:any)=>Promise<any>;
 export const agentEl=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
@@ -21,13 +21,12 @@ export async function confirmAgentChange({call,action,harness,title,request,wher
  if(!current())return;
  for(const open of where.closest('.companion-settings-part')?.querySelectorAll?.('.companion-settings-confirm')??[])open.remove();
  const ask=agentEl('div','companion-settings-confirm');ask.setAttribute('role','group');ask.dataset.confirm=harness;
- const details=agentEl('details','companion-settings-command');details.append(agentEl('summary','','Details'),agentEl('code','',preview.command));
  ask.append(agentEl('span','',question),
   agentButton(verb,'confirm-change',async()=>{
    said.textContent=working;
    try{const result=await call(action,{operation:'change',confirm:preview.confirm});if(ask.isConnected)ask.remove();await done(String(result?.command??preview.command));}
    catch(e){said.textContent=`${title} did not do it: `+((e as Error).message||'try again.').replace(new RegExp('^'+title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+' did not do it: '),'');if(ask.isConnected)ask.remove();}
   },true),
-  agentButton('Cancel','cancel-change',()=>{ask.remove();said.textContent='Nothing was changed.';}),details);
+  agentButton('Cancel','cancel-change',()=>{ask.remove();said.textContent='Nothing was changed.';}));
  where.append(ask);
 }

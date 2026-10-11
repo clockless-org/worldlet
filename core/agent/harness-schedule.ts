@@ -152,7 +152,7 @@ export function scheduleStep(input:{harness:ScheduleHarness;state:ScheduleState|
  else if(input.running===false&&waiting.length&&!state.stoppedNoted){
   state.stoppedNoted=true;
   const names=waiting.slice(0,5).map(job=>job.name).join(', ')+(waiting.length>5?` and ${waiting.length-5} more`:'');
-  const how=input.start?` Start it with \`${input.start}\`.`:'';
+  const how=input.start?' Start it in Settings › Agent › Routines.':'';
   stopped={item:itemFor(harness,{kind:'task',title:`Start ${harness.title}'s scheduler`,reason:'Its scheduled jobs are not running',
    summary:`${names} run on ${harness.title}'s own scheduler, which is not running.${how} Worldlet does not run them itself, so they never run twice; each result shows here and on your phone once it runs.`,
    source:'scheduler-stopped:'+now,quote:`${harness.title}'s scheduler is not running`,at:now}),

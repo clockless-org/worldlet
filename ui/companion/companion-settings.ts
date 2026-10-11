@@ -274,7 +274,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    }else{
     const address=document.createElement('input');address.className='companion-settings-input';address.placeholder='https://gateway.example.com';address.spellcheck=false;address.autocomplete='off';address.value=gateway?.url??'';address.setAttribute('aria-label','Gateway address');
     const token=document.createElement('input');token.className='companion-settings-input';token.type='password';token.placeholder=gateway?'Saved token (type a new one to replace it)':'Gateway token';token.autocomplete='off';token.setAttribute('aria-label','Gateway token');
-    gText.append(el('strong','','My OpenClaw Gateway is on another computer'),el('span','','Its address (HTTPS, or a Tailscale address) and its token, gateway.auth.token in its openclaw.json. Its /v1/responses endpoint must be on.'),address,token);
+    gText.append(el('strong','','My OpenClaw Gateway is on another computer'),el('span','','Its address and its access token, both from that OpenClaw.'),address,token);
     gRow.append(gText,action(gateway?'Use':'Connect',()=>connect({url:address.value.trim(),token:token.value}),{id:'connect-gateway'}),...gateway?[forget]:[]);
    }
    elsewhere.append(gRow);elsewhere.open=showElsewhere||!!(remote&&typeof remote.computer==='string')||!!gateway?.active;

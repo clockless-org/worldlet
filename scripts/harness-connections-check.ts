@@ -221,7 +221,7 @@ else process.exit(2);
  host.store.sampleEnabled=()=>true;await assert.rejects(world.preview('hermes',{remove:docs.id}),/your own world/);host.store.sampleEnabled=()=>false;
 
  // Settings › Agent › Accounts: a row per connection with its last use; Remove and Add each say what they
- // do in plain words, with the exact command under Details, and run it on Confirm.
+ // do in plain words (never the command itself), and run it on Confirm.
  (globalThis as any).document={createElement:()=>new Node()};
  const requests:any[]=[];
  let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,changes:true,connections:[{id:listed[0].id,kind:'mcp',name:'github',where:'https://api.githubcopilot.com/mcp/',enabled:true,sign:'token',agent:'default',main:true,removable:true,lastUsed:{at:Date.UTC(2026,9,8,12),tool:'search_issues',thread:'Discord · Release notes'}},
@@ -232,15 +232,15 @@ else process.exit(2);
  await showAgentConnections(target as any,call,()=>true);
  const rows=target.all(n=>!!n.dataset.connection);
  assert.deepEqual(rows.map(r=>r.dataset.connection),[listed[0].id,listed[4].id,'conn-0000000000000000']);
- assert.match(rows[0].textContent,/github.*Tool · https:\/\/api\.githubcopilot\.com\/mcp\/ · uses a token kept in your Agent.*Last used .*2026 for search_issues in “Discord · Release notes”\./);
- assert.match(rows[1].textContent,/Chat account · uses a token kept in your Agent/);assert.equal(rows[1].all(n=>n.dataset.action==='remove-connection').length,0,'an account is listed, not removed');
+ assert.match(rows[0].textContent,/githubTool.*Last used .*2026 for search_issues in “Discord · Release notes”\./);
+ assert.match(rows[1].textContent,/TelegramChat account/);assert.doesNotMatch(target.textContent,/githubcopilot|token|OAuth|profile/,'no address, sign-in method or profile');assert.equal(rows[1].all(n=>n.dataset.action==='remove-connection').length,0,'an account is listed, not removed');
  assert.equal(rows[2].all(n=>n.dataset.action==='remove-connection').length,0,'no Remove where the Agent cannot be changed from here');
  assert.match(target.textContent,/Change these in Other Agent itself\./);
  await rows[0].all(n=>n.dataset.action==='remove-connection')[0].onclick();
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(requests.filter(([,a])=>a.operation==='change').length,0,'Remove only shows the command');
- assert.match(rows[0].textContent,/Hermes Agent will remove github\.RemoveCancelDetailshermes mcp remove github/);
- assert.doesNotMatch(target.textContent.replace(/Detailshermes mcp [^.]*/g,''),/MCP\b/,'plain words: tools, never MCP, outside the folded command');
+ assert.match(rows[0].textContent,/Hermes Agent will remove github\.RemoveCancel/);
+ assert.doesNotMatch(target.textContent,/MCP\b|hermes mcp/,'plain words: tools, never MCP or the command');
  rows[0].all(n=>n.dataset.action==='confirm-connection')[0].onclick();
  await new Promise(resolve=>setTimeout(resolve,10));
  assert.deepEqual(requests.filter(([,a])=>a.operation!=='list'),[['harnessConnections',{operation:'preview',harness:'hermes',remove:listed[0].id}],['harnessConnections',{operation:'change',confirm:'c-1'}]]);
@@ -253,7 +253,7 @@ else process.exit(2);
  form.all(n=>n.dataset.action==='cancel-connection')[0].onclick();
  assert.match(target.textContent,/Nothing was changed\./);assert.equal(requests.filter(([,a])=>a.operation==='change').length,1,'Cancel runs nothing');
  assert.equal(connectionUseLine({id:'c',kind:'mcp',name:'x',where:'',enabled:true}),'Not used in your Agent’s recent history.');
- assert.equal(connectionLine({id:'c',kind:'mcp',name:'x',where:'node s.js',enabled:false,agent:'work',sign:'needs-sign-in'}),'Tool · node s.js · needs sign-in in your Agent · profile “work” · turned off');
+ assert.equal(connectionLine({id:'c',kind:'mcp',name:'x',where:'node s.js',enabled:false,agent:'work',sign:'needs-sign-in'}),'Tool · needs sign-in in your Agent · turned off');
  delete (globalThis as any).document;
 });
 console.log('PASS Agent connections: declared per Harness, Hermes Agent and OpenClaw MCP servers and chat accounts listed with no secret and their last use from the Agent\'s own history, added and removed only through fixture `hermes mcp add/remove` and `openclaw mcp add/unset` after a confirmed preview, Settings › Agent › Accounts');

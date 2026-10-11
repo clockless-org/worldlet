@@ -1,18 +1,17 @@
 /** Settings › Agent › Accounts, the Agent's part: the MCP servers (shown as tools) and chat accounts the
  * person set up in each Agent on this computer (host `harnessConnections`, contracts/harness-services.ts
  * HarnessConnections), what each was last used for, and Add or Remove for a tool, each run as that Agent's own command
- * only after the person confirmed it in plain words, with the exact command under Details. Never a secret: addresses
- * and commands arrive masked. An Agent whose connections cannot be changed from here lists them only. Plain words
+ * only after the person confirmed it in plain words. Never a secret, and no address, command, sign-in method or
+ * profile on the page (owner request 2026-10-11: hide technical details). An Agent whose connections cannot be changed from here lists them only. Plain words
  * only: the page never says MCP. */
 import {agentEl as el} from './agent-change.ts';
 type Connection={id:string;kind:'mcp'|'account';name:string;where:string;enabled:boolean;sign?:string;agent?:string;main?:boolean;removable?:boolean;lastUsed?:{at:number;tool?:string;thread?:string}};
 type Harness={harness:string;title:string;connections:Connection[];changes:boolean;inUse?:boolean;error?:string;note?:string};
 const day=(at:number)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
-const SIGN:Record<string,string>={oauth:'signs in with OAuth',token:'uses a token kept in your Agent','needs-sign-in':'needs sign-in in your Agent'};
-/** The line under a connection: what it is, where, how it signs in, and its profile when not the main one. */
+/** The line under a connection: what it is, and only what the person may need to act on (a sign-in, turned off). */
 export function connectionLine(c:Connection):string {
  const what=c.kind==='mcp'?'Tool':'Chat account';
- const parts=[what,...c.where&&c.kind==='mcp'?[c.where]:[],...c.sign&&SIGN[c.sign]?[SIGN[c.sign]]:[],...c.agent&&!c.main&&c.agent!=='default'?[`profile “${c.agent}”`]:[],...c.enabled?[]:['turned off']];
+ const parts=[what,...c.sign==='needs-sign-in'?['needs sign-in in your Agent']:[],...c.enabled?[]:['turned off']];
  return parts.join(' · ');
 }
 /** What it was last used for, from the Agent's own history. */
@@ -39,8 +38,7 @@ export async function showAgentConnections(target:HTMLElement,call:(action:strin
    try{await call('harnessConnections',{operation:'change',confirm:preview.confirm});await draw();said.textContent=done;}
    catch(e){said.textContent=(e as Error).message||'It did not work.';if(ask.isConnected)ask.remove();}
   },true);
-  const details=el('details','companion-settings-command');details.append(el('summary','','Details'),el('code','',preview.command));
-  ask.append(el('span','',`${harness.title} will ${what}.`),go,button('Cancel','cancel-connection',()=>{ask.remove();said.textContent='Nothing was changed.';}),details);
+  ask.append(el('span','',`${harness.title} will ${what}.`),go,button('Cancel','cancel-connection',()=>{ask.remove();said.textContent='Nothing was changed.';}));
   where.querySelector?.('.companion-settings-confirm')?.remove();
   where.append(ask);
  }
@@ -66,7 +64,7 @@ export async function showAgentConnections(target:HTMLElement,call:(action:strin
    const form=el('div','companion-settings-row'),fields=el('div');form.dataset.add=harness.harness;
    const name=el('input','companion-settings-input') as HTMLInputElement;name.placeholder='Name, like github';name.setAttribute('aria-label','Tool name');name.spellcheck=false;name.autocomplete='off';
    const where=el('input','companion-settings-input') as HTMLInputElement;where.placeholder='https://… or npx -y @scope/server';where.setAttribute('aria-label','Tool address or command');where.spellcheck=false;where.autocomplete='off';
-   fields.append(el('strong','',`Add a tool to ${harness.title}`),el('span','','Its address, or the command that starts it. A tool that needs a token or a sign-in is added in your Agent itself.'),name,where);
+   fields.append(el('strong','',`Add a tool to ${harness.title}`),el('span','','Its web address, or the line its maker gives to start it. A tool that needs a sign-in is added in your Agent itself.'),name,where);
    form.append(fields,button('Add','add-connection',()=>{
     const value=where.value.trim(),add=/^https?:\/\//i.test(value)?{name:name.value.trim(),url:value}:{name:name.value.trim(),command:value};
     return confirmChange(form,harness,{add},'Add',`add ${add.name||'this tool'}`,`${add.name} was added to ${harness.title}. It is used from your Agent’s next conversation.`);

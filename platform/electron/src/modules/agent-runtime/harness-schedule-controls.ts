@@ -83,6 +83,15 @@ export function harnessScheduleControls(install:LocalHarnessInstall,environment:
    if(!base)return [];
    return (hermes?hermesLatest(base):openClawLatest(base))??newestByPaging(read);
   },
+  // The scheduler's own install command (`hermes gateway install`, `openclaw gateway install`), which also starts it and
+  // keeps it running when the computer starts; only on the person's own Start in Settings › Agent › Routines.
+  ...read.start?{async startScheduler(){
+   const base=root();
+   if(hermes&&!base)throw new WorldletError(`${install.title}’s home was not found on this computer.`);
+   const result=await run(install,environment,read.start!.split(' ').slice(1),{env:hermes?{HERMES_HOME:base!}:{},timeout:120_000});
+   if(result.code!==0)throw new WorldletError(`${install.title} did not start it: `+(commandReason(result.stderr+'\n'+result.stdout)||(result.code===null?'it did not answer in time':'it stopped with code '+result.code)));
+   for(const wait of [...settle,3000,5000]){if(await read.running().catch(()=>null)!==false)return;await new Promise(resolve=>setTimeout(resolve,wait));}
+  }}:{},
   async preview(change){await plan(change);return commandLine(hermes?'hermes':'openclaw',args(change));},
   async change(change){
    await plan(change);

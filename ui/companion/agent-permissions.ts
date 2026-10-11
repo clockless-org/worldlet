@@ -10,13 +10,12 @@ const day=(at:number)=>new Date(at).toLocaleDateString(undefined,{year:'numeric'
 const KIND:Record<string,string>={command:'Run',tool:'Use the tool',automation:'In a routine, run'};
 /** What a rule lets the Agent do, as the start of a sentence: “Run”, “Use the tool”. */
 export function permissionVerb(rule:Rule):string {return KIND[rule.kind]??'Do';}
-/** The one line under a rule: its agent, when and where it was granted, when it was last used. */
+/** The one line under a rule: when and where it was granted, when it was last used (no profile: owner request 2026-10-11). */
 export function permissionLine(rule:Rule,title:string):string {
- const who=rule.agent==='*'?'All agents':rule.main?'Main agent':`Agent “${rule.agent}”`;
  const when=rule.grantedAt?`allowed ${day(rule.grantedAt)}`:`allowed outside Worldlet; ${title} keeps no date`;
  const where=rule.thread?`, ${rule.thread[0].toLowerCase()+rule.thread.slice(1)}`:'';
  const used=rule.lastUsedAt?`. Last used ${day(rule.lastUsedAt)}`:'';
- return `${who} · ${when}${where}${used}.`;
+ return `${when[0].toUpperCase()+when.slice(1)}${where}${used}.`;
 }
 export async function showAgentPermissions(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const box=el('div','companion-settings-approvals'),said=el('p','companion-settings-status');said.setAttribute('role','status');
@@ -48,7 +47,7 @@ export async function showAgentPermissions(target:HTMLElement,call:(action:strin
    if(!harness.rules.length)rows.append(el('p','companion-info-note','Nothing yet. It asks you every time.'));
    for(const rule of harness.rules){
     const row=el('div','companion-settings-row'),words=el('div'),allows=el('strong','',permissionVerb(rule)+' ');row.dataset.rule=rule.id;
-    allows.append(el('code','',rule.allows));
+    allows.append(el('span','',rule.allows));
     words.append(allows,...rule.note&&rule.note!==rule.allows?[el('span','companion-settings-quiet',rule.note)]:[],el('span','',permissionLine(rule,harness.title)));
     row.append(words);
     if(harness.revoke)row.append(button('Revoke','revoke-rule',()=>confirmRevoke(row,harness,rule)));

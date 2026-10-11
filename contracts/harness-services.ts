@@ -61,6 +61,9 @@ export interface HarnessSchedule {
  running():Promise<boolean|null>;
  /** How the person starts that scheduler (a command), for the World's note when it is not running. */
  readonly start?:string;
+ /** Runs that start command as the Agent's own (only on the person's own Start in Settings), then reads `running`
+  * again; rejects with the Agent's reason. */
+ startScheduler?():Promise<void>;
  /** The newest finished run of each job, for Settings › Agent; absent: the World pages through `runs`. */
  latest?():Promise<HarnessJobRun[]>;
  /** The Agent's own command a change to one job runs, as the person sees it before confirming; absent with `change`:
