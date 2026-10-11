@@ -13,29 +13,32 @@ const rank=(m:AttentionEventMember)=>Math.max(0,PRIORITY.indexOf(m.priority||'no
 const pressing=(m:AttentionEventMember)=>rank(m)>=3;
 const separate=(m:AttentionEventMember)=>pressing(m)&&(m.state==='needsAction'||m.kind==='task'||m.kind==='decision');
 const topicKey=(m:AttentionEventMember)=>{const topic=norm(m.event?.topic),subject=norm(m.event?.subject);return topic&&subject?[m.provider,m.kind,topic,subject].join('|'):'';};
-const sameSources=(a:AttentionEventMember,b:AttentionEventMember)=>{const x=new Set(a.sources.map(attentionSourceKey)),y=b.sources.map(attentionSourceKey);return x.size===new Set(y).size&&y.every(k=>x.has(k));};
 function hash(text:string){let h=0x811c9dc5;for(const c of text.normalize('NFC')){h^=c.codePointAt(0)!;h=Math.imul(h,0x01000193)>>>0;}return h.toString(36).padStart(7,'0');}
 const snoozed=(value:string|undefined,now:number)=>!!value&&Date.parse(value)>now;
+const within=(keys:Set<string>,other:Set<string>)=>{for(const k of keys)if(!other.has(k))return false;return true;};
+const shares=(keys:Set<string>,other:Set<string>)=>{for(const k of keys)if(other.has(k))return true;return false;};
 /** Group saved Attention items into stable events. Pure and deterministic: the same
  * members and records always yield the same IDs, order, counts and state. */
 export function groupAttentionEvents(input:AttentionEventMember[],{previous=[],now}:{previous?:AttentionEventRecord[];now:number}):AttentionEvent[] {
  const members=[...new Map(input.map(m=>[m.id,m])).values()];
  const parent=members.map((_,i)=>i),find=(i:number):number=>parent[i]===i?i:(parent[i]=find(parent[i]));
+ // Each member's keys, read once rather than once per pair.
+ const topics=members.map(topicKey),keySets=members.map(m=>new Set(m.sources.map(attentionSourceKey))),apart=members.map(separate);
  // A keyless message may never bridge two different explicit subjects.
- const subject=members.map(topicKey);
+ const subject=[...topics];
  const join=(a:number,b:number)=>{const x=find(a),y=find(b);if(x===y||subject[x]&&subject[y]&&subject[x]!==subject[y])return;const [low,high]=x<y?[x,y]:[y,x];parent[high]=low;subject[low]||=subject[high];};
  for(let i=0;i<members.length;i++)for(let j=i+1;j<members.length;j++){
   const a=members[i],b=members[j];
   if(a.provider!==b.provider||a.kind!==b.kind)continue;
-  if(separate(a)||separate(b)){if(sameSources(a,b))join(i,j);continue;}
+  const keys=keySets[i],others=keySets[j];
+  if(apart[i]||apart[j]){if(keys.size===others.size&&within(others,keys))join(i,j);continue;}
   // Two explicit, different subjects are separate incidents even if they cite one digest.
-  const key=topicKey(a),other=topicKey(b);
+  const key=topics[i],other=topics[j];
   if(key&&other&&key!==other)continue;
-  const keys=new Set(a.sources.map(attentionSourceKey));
-  if(b.sources.some(r=>keys.has(attentionSourceKey(r))))join(i,j);
+  if(shares(others,keys))join(i,j);
  }
  const clusters=new Map<number,AttentionEventMember[]>();
- members.forEach((m,i)=>{const root=find(i);clusters.set(root,[...(clusters.get(root)||[]),m]);});
+ members.forEach((m,i)=>{const root=find(i),cluster=clusters.get(root);if(cluster)cluster.push(m);else clusters.set(root,[m]);});
  const used=new Set<string>();
  return [...clusters.values()].map(group=>{
   group.sort((a,b)=>(STATE[a.state]??3)-(STATE[b.state]??3)||rank(b)-rank(a)||a.id.localeCompare(b.id));

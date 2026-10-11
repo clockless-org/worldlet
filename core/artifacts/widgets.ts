@@ -88,11 +88,12 @@ export function readWidget(value:unknown):Widget|null {
  if(!value||typeof value!=='object')return null;
  const row=value as Record<string,unknown>;
  if(!validWidgetId(row.id)||typeof row.title!=='string'||typeof row.createdAt!=='number'||typeof row.updatedAt!=='number'||typeof row.endsAt!=='number')return null;
+ const data=storedData(row.data);
  return {id:row.id,title:clip(row.title,WIDGET_LIMITS.title)||'For now',blurb:clip(row.blurb,WIDGET_LIMITS.blurb),
   color:typeof row.color==='string'&&/^#[0-9a-f]{6}$/i.test(row.color)?row.color:'#5c7f9e',
   ideas:Array.isArray(row.ideas)?row.ideas.filter((idea):idea is string=>typeof idea==='string').slice(-8):[],
   createdAt:row.createdAt,updatedAt:row.updatedAt,version:typeof row.version==='number'?row.version:1,endsAt:row.endsAt,
-  pinned:row.pinned===true,archivedAt:typeof row.archivedAt==='number'?row.archivedAt:null,...storedData(row.data)!==undefined?{data:storedData(row.data)}:{}};
+  pinned:row.pinned===true,archivedAt:typeof row.archivedAt==='number'?row.archivedAt:null,...data!==undefined?{data}:{}};
 }
 
 /** A widget is for now until its end, or for as long as it is pinned; then it is put away. */
@@ -126,7 +127,7 @@ export function widgetUntil(widget:Widget,now:number,timeZone?:string):string {
 export function readWidgetState(value:unknown):WidgetState {
  const state:WidgetState={};
  if(!value||typeof value!=='object'||Array.isArray(value))return state;
- let total=0;
+ let total=0,kept=0;
  for(const [key,entry] of Object.entries(value as Record<string,unknown>).slice(0,WIDGET_LIMITS.stateKeys*2)){
   if(!key||key.length>200||!entry||typeof entry!=='object')continue;
   const {v,at}=entry as {v?:unknown;at?:unknown};
@@ -134,8 +135,10 @@ export function readWidgetState(value:unknown):WidgetState {
   if(v!==null&&(typeof v!=='string'||v.length>WIDGET_LIMITS.stateValue))continue;
   const value=v as string|null;
   total+=key.length+(value?.length??0);
-  if(total>WIDGET_LIMITS.stateTotal||Object.keys(state).length>=WIDGET_LIMITS.stateKeys)break;
+  if(total>WIDGET_LIMITS.stateTotal||kept>=WIDGET_LIMITS.stateKeys)break;
   state[key]={v:value,at:Math.round(at)};
+  // Counted as Object.keys(state) would count it (a `__proto__` key sets no own key).
+  if(Object.hasOwn(state,key))kept++;
  }
  return state;
 }

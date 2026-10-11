@@ -5,16 +5,19 @@ export function attentionFocus(mode='auto',now=new Date()){
  return now.getDay()>=1&&now.getDay()<=5&&now.getHours()>=9&&now.getHours()<18?'work':'personal';
 }
 export function attentionOrder(items,{mode='auto',now=new Date(),region,importance}){
- const focus=attentionFocus(mode,now),score=item=>{
+ const focus=attentionFocus(mode,now),rankScore=item=>{
   // Timeliness adjusts the level it ranks at: due soon ranks with important work, stale or over ranks lower.
   const level=attentionTimelyLevel(attentionRankSignals(item),importance(item),+now);
   if(item.state==='event'||level>=4)return level*100;
   const area=region(item),relevant=area==='work'?focus==='work':!!area&&focus==='personal';
   return (relevant&&level>0?30:0)+level;
  };
- const start=item=>{const value=item.signals?.[0]?.start??item.start;const time=typeof value==='number'?value:Date.parse(value);return Number.isFinite(time)?time:Infinity;};
+ const startAt=item=>{const value=item.signals?.[0]?.start??item.start;const time=typeof value==='number'?value:Date.parse(value);return Number.isFinite(time)?time:Infinity;};
  // Deadlines and the user's mail workflow combine below importance and context (#1152).
- const signals=item=>attentionSignalScore(attentionRankSignals(item),+now);
+ const signalScore=item=>attentionSignalScore(attentionRankSignals(item),+now);
+ // Each item's keys are worked out once, not again in every comparison of the sort.
+ const keys=new Map<unknown,{score:number;signals:number;start:number}>(items.map(item=>[item,{score:rankScore(item),signals:signalScore(item),start:startAt(item)}]));
+ const score=item=>keys.get(item)!.score,signals=item=>keys.get(item)!.signals,start=item=>keys.get(item)!.start;
  // Events keep start order, except that one already over goes last.
  const over=item=>score(item)===0;
  return [...items].sort((a,b)=>a.state==='event'&&b.state==='event'?(Number(over(a))-Number(over(b))||start(a)-start(b)||score(b)-score(a)):score(b)-score(a)||signals(b)-signals(a));
@@ -76,8 +79,8 @@ export function attentionFocusSet(input:{items:FocusItem[];saved?:Partial<Attent
  // just overdue. Stale evidence with nothing upcoming, a lapsed deadline or a finished event ranks lower.
  const rank=(item:FocusItem)=>item.state==='event'&&item.soon===true&&item.level>0?Math.max(item.level,3):item.level;
  const signals=(item:FocusItem)=>attentionSignalScore(item,now);
- const ranked=items.map((item,index)=>({item,index})).sort((a,b)=>
-  rank(b.item)-rank(a.item)||Number(!!b.item.relevant)-Number(!!a.item.relevant)||(kindRank[a.item.state]??3)-(kindRank[b.item.state]??3)||signals(b.item)-signals(a.item)||a.index-b.index).map(r=>r.item);
+ const ranked=items.map((item,index)=>({item,index,signals:signals(item)})).sort((a,b)=>
+  rank(b.item)-rank(a.item)||Number(!!b.item.relevant)-Number(!!a.item.relevant)||(kindRank[a.item.state]??3)-(kindRank[b.item.state]??3)||b.signals-a.signals||a.index-b.index).map(r=>r.item);
  const reviewedAt=Number.isFinite(input.saved?.reviewedAt)?input.saved!.reviewedAt!:0;
  const initial=!input.saved;
  const observed={...input.saved?.observed};
@@ -85,18 +88,21 @@ export function attentionFocusSet(input:{items:FocusItem[];saved?:Partial<Attent
  const eligible=(item:FocusItem)=>!held.has(item.id)||changed(item);
  // Snoozed members keep their seat; settled members leave for good.
  const members=new Set(saved.filter(id=>snoozed.has(id)&&!live.has(id)));
- const visible=()=>items.filter(i=>members.has(i.id)).length;
- const admit=(item:FocusItem)=>{if(visible()<limit)members.add(item.id);};
+ // How many items are members, kept as members join rather than counted again for every admission.
+ const copies=new Map<string,number>();for(const item of items)copies.set(item.id,(copies.get(item.id)??0)+1);
+ let shown=0;
+ const join=(id:string)=>{if(!members.has(id)){members.add(id);shown+=copies.get(id)??0;}};
+ const admit=(item:FocusItem)=>{if(shown<limit)join(item.id);};
  // Initial selection gives every kind a place: one kind (say, a busy calendar) never crowds the others out.
  // Like pressing items this may exceed the soft limit; the screen trims the longest group.
- const represent=(pool:FocusItem[])=>{for(const state of Object.keys(kindRank)){const best=pool.find(i=>i.state===state&&i.level>0);if(best&&!items.some(i=>i.state===state&&members.has(i.id)))members.add(best.id);}};
+ const represent=(pool:FocusItem[])=>{for(const state of Object.keys(kindRank)){const best=pool.find(i=>i.state===state&&i.level>0);if(best&&!items.some(i=>i.state===state&&members.has(i.id)))join(best.id);}};
  if(initial){
   represent(ranked);
   for(const item of ranked)if(attentionWorthy(item))admit(item);
   // Initial selection at a quiet moment shows a few best items rather than an empty panel.
-  for(const item of ranked){if(visible()>=attentionFocusFloor)break;if(item.level>0)admit(item);}
+  for(const item of ranked){if(shown>=attentionFocusFloor)break;if(item.level>0)admit(item);}
  }else{
-  for(const id of saved)if(live.has(id))members.add(id);
+  for(const id of saved)if(live.has(id))join(id);
   // New results may take a free seat; the held-back backlog waits for an explicit request or material change.
   // Warm-up: a Center that started empty (first sign-in, a reset) fills
   // with results as they arrive, during the initial warm-up window.
@@ -106,7 +112,7 @@ export function attentionFocusSet(input:{items:FocusItem[];saved?:Partial<Attent
   for(const item of ranked)if(!members.has(item.id)&&eligible(item)&&(attentionWorthy(item)||floor))admit(item);
  }
  // New or newly pressing items join even beyond the soft capacity; fitted backlog stays held.
- for(const item of ranked)if(attentionPressing(item)&&eligible(item))members.add(item.id);
+ for(const item of ranked)if(attentionPressing(item)&&eligible(item))join(item.id);
  for(const item of items)observed[item.id]={level:item.level,state:item.state,...(item.evidence?{evidence:item.evidence}:{})};
  return {ids:items.filter(i=>members.has(i.id)).map(i=>i.id),queued:items.filter(i=>!members.has(i.id)).length,
   saved:{ids:[...members],held:[...new Set([...held,...items.filter(i=>!members.has(i.id)).map(i=>i.id)])].filter(id=>!members.has(id)),observed,reviewedAt:initial?now:reviewedAt,

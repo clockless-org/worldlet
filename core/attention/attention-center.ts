@@ -154,12 +154,16 @@ export function planAttention(facts:AttentionFact[],budget:AttentionBudget,now:n
  if(!attentionAdmission(budget,now).ready)return null;
  const receipts=new Map(deliveries.filter(r=>r.consumerId==='attention:center').map(r=>[r.entityId,r]));
  const delivery=(f:AttentionFact)=>{const r=receipts.get(f.id);return r?.revision===f.revision?r:undefined;};
- const isolated=(f:AttentionFact)=>delivery(f)?.status==='pending'&&delivery(f)?.isolate===true;
+ const isolated=(f:AttentionFact)=>{const r=delivery(f);return r?.status==='pending'&&r.isolate===true;};
  const available=facts.filter(f=>f.attributes.analysisPending!==true&&f.expiresAt>now&&providers.includes(f.provider)&&delivery(f)?.status!=='quarantined');
  // Completed/cancelled history needs synthesis only when it supports a saved matter.
  const referenced=referencedAttentionFacts(available,items);
  const timeSensitive=(f:AttentionFact)=>{const start=Date.parse(String(f.attributes.start||''))/1000,end=Date.parse(String(f.attributes.end||''))/1000;return !f.removed&&Number.isFinite(start)&&(Number.isFinite(end)?end:start)>=now&&start<=now+7*86400;};
- const changed=available.filter(f=>(!f.removed||referenced.has(f.id))&&(budget.contentVersion!==1||budget.seen?.[f.id]!==f.revision)).sort((a,b)=>Number(timeSensitive(b))-Number(timeSensitive(a))||(timeSensitive(a)&&timeSensitive(b)?Date.parse(String(a.attributes.start))-Date.parse(String(b.attributes.start)):0)||a.changedAt-b.changedAt||a.id.localeCompare(b.id));
+ const unseen=available.filter(f=>(!f.removed||referenced.has(f.id))&&(budget.contentVersion!==1||budget.seen?.[f.id]!==f.revision));
+ // Sort keys read once per fact, not in every comparison: a time-sensitive fact's start (NaN for any other).
+ const soon=new Map(unseen.map(f=>[f,timeSensitive(f)?Date.parse(String(f.attributes.start)):NaN]));
+ const sensitive=(f:AttentionFact)=>!Number.isNaN(soon.get(f));
+ const changed=unseen.sort((a,b)=>Number(sensitive(b))-Number(sensitive(a))||(sensitive(a)&&sensitive(b)?soon.get(a)!-soon.get(b)!:0)||a.changedAt-b.changedAt||a.id.localeCompare(b.id));
  const sweep=!changed.length&&now-(budget.lastSweepAt||0)>=21600;
  if(!changed.length&&!sweep)return null;
  // Rotation through least recently examined sources during sweeps.

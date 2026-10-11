@@ -67,7 +67,7 @@ export const TASK_PANEL_KINDS=['brought.older'] as const;
 const AHEAD_MS=8*86_400_000;
 
 const obj=(v:unknown):Record<string,any>=>v&&typeof v==='object'&&!Array.isArray(v)?v as Record<string,any>:{};
-const clip=(value:string,limit=80)=>{const text=value.replace(/\s+/g,' ').trim();return [...text].length>limit?[...text].slice(0,limit-1).join('').trimEnd()+'…':text;};
+const clip=(value:string,limit=80)=>{const text=value.replace(/\s+/g,' ').trim(),chars=[...text];return chars.length>limit?chars.slice(0,limit-1).join('').trimEnd()+'…':text;};
 const seconds=(v:unknown):number|null=>typeof v==='number'&&Number.isFinite(v)&&v>0?v:null;
 const appletOpen=(key:string):TaskOpen|undefined=>{const id=getApp(key)?.id;return id?{applet:id}:undefined;};
 
@@ -86,8 +86,12 @@ export function routineEvery(secondsBetween:number){
 }
 /** A planned time: the clock today, else the day and the clock ("Tomorrow 6:00 AM", "Mon 6:30 AM"). */
 export function taskPlannedWhen(at:number,now:number,locale?:string){
+ return planned(at,now,locale).when;
+}
+/** A planned row's three time texts at once: each formats the day and the clock only once. */
+function planned(at:number,now:number,locale?:string){
  const day=routineDay(at,now,locale),clock=routineClock(at,locale);
- return new Date(at).toDateString()===new Date(now).toDateString()?clock:day+' '+clock;
+ return {when:new Date(at).toDateString()===new Date(now).toDateString()?clock:day+' '+clock,day,clock};
 }
 const WEEKDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 /** How often a job runs, in plain words, for the planned row's popover. */
@@ -125,8 +129,9 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   if(job.paused||'at' in job.when&&job.when.at<=now)continue;
   const at='cron' in job.when?nextCronRun(job.when.cron,now):'at' in job.when?job.when.at:null;
   const every='everySeconds' in job.when?routineEvery(job.when.everySeconds):'';
-  routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:at!==null?taskPlannedWhen(at,now,locale):every,at,every:taskHowOften(job.when),by,open:{routine:job.id},
-   day:at!==null?routineDay(at,now,locale):'Repeating',clock:at!==null?routineClock(at,locale):every});
+  const time=at!==null?planned(at,now,locale):{when:every,day:'Repeating',clock:every};
+  routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:time.when,at,every:taskHowOften(job.when),by,open:{routine:job.id},
+   day:time.day,clock:time.clock});
  }
  const reports=(Array.isArray(input.tasks)?input.tasks:[]).map(obj);
  for(const task of reports){
@@ -135,17 +140,18 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   if(!applet||next===null)continue;
   const at=Math.max(now,next*1000);
   if(at-now>AHEAD_MS)continue;
-  routines.push({id:'check:'+applet.key,group:'routines',source:'check',title:`Check ${applet.title}`,detail:'',when:taskPlannedWhen(at,now,locale),at,every:'Regularly, for anything new',by:'Worldlet',open:appletOpen(applet.key),
-   day:routineDay(at,now,locale),clock:routineClock(at,locale)});
+  const {when,day,clock}=planned(at,now,locale);
+  routines.push({id:'check:'+applet.key,group:'routines',source:'check',title:`Check ${applet.title}`,detail:'',when,at,every:'Regularly, for anything new',by:'Worldlet',open:appletOpen(applet.key),
+   day,clock});
  }
 
  // The two default Routines (Today's prep, Wrap up today; core/artifacts/daily.ts), from the page's daily state: Worldlet
  // asks the person's Agent at that time. A paused one is not planned, so it is not here.
  for(const made of input.daily??[]){
   if(made.kind!=='plan'&&made.kind!=='summary'||!Number.isFinite(made.at)||made.at<=now||made.at-now>AHEAD_MS)continue;
-  const plan=made.kind==='plan';
-  routines.push({id:'daily:'+made.kind,group:'routines',source:'fox',title:DAILY_ROUTINE_NAMES[made.kind],detail:'',when:taskPlannedWhen(made.at,now,locale),at:made.at,
-   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Worldlet, with your Agent',day:routineDay(made.at,now,locale),clock:routineClock(made.at,locale)});
+  const plan=made.kind==='plan',{when,day,clock}=planned(made.at,now,locale);
+  routines.push({id:'daily:'+made.kind,group:'routines',source:'fox',title:DAILY_ROUTINE_NAMES[made.kind],detail:'',when,at:made.at,
+   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Worldlet, with your Agent',day,clock});
  }
 
  // Doing now: one window each ---------------------------------------------------------------------------------------
