@@ -1,4 +1,4 @@
-/** Settings › Your Agent › Memory (owner decision 2026-10-11): what each Agent on this computer remembers, read where it
+/** Settings › Agent › Memory (owner decision 2026-10-11): what each Agent on this computer remembers, read where it
  * keeps it (host `harnessMemory`, contracts/harness-services.ts HarnessMemory), as About you and What it remembers, the
  * first few of each with Show all. Read only: Worldlet never edits an Agent's memory. For the Agent Fox talks through,
  * Ask it to forget closes Settings and asks it in Fox's conversation, where its own memory does it; another Agent is

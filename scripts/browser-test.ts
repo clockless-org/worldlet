@@ -77,7 +77,7 @@ export const worldUrl=()=>fileUrl('dist/WorldletWeb/index.html');
 export async function bundleScript(options:BuildOptions):Promise<string>{
  return (await build({bundle:true,write:false,format:'iife',...options})).outputFiles![0].text;
 }
-// Settings beside Fox opens the companion panel, one list of sections (owner request 2026-10-10), on Your Agent or the
+// Settings beside Fox opens the companion panel, one list of sections (owner request 2026-10-10), on Agent or the
 // section last chosen; the checks that read another page name it by its old tab name or its section id.
 export const SETTINGS_BUTTON='.companion-side .companion-panel-button';
 export const COMPANION_SECTION:Record<string,string>={Profile:'fox',Energy:'model',Mobile:'phone'};

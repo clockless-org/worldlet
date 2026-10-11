@@ -1,4 +1,4 @@
-/** Settings › Your Agent › Skills: each Agent's own skills on this computer (host `harnessSkills`,
+/** Settings › Agent › Skills: each Agent's own skills on this computer (host `harnessSkills`,
  * contracts/harness-services.ts HarnessSkills), each with its one-line description, when it last ran (the Agent's own
  * record or the World's synced conversations) and an Off mark; Turn off or Turn on, and Remove where the Agent has its
  * own command for it, each run as that Agent's own command after the person confirmed it (agent-change.ts). Fox's offer

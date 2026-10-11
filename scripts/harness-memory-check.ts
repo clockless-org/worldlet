@@ -11,7 +11,7 @@ import {createHarnessControls} from '../platform/electron/src/modules/fox/harnes
 import {createHarnessConnections} from '../platform/electron/src/modules/fox/harness-connections.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Settings › Your Agent › Memory and the read-only parts for Claude Code, Codex and pi (owner plan 2026-10-11, PR 3;
+// Settings › Agent › Memory and the read-only parts for Claude Code, Codex and pi (owner plan 2026-10-11, PR 3;
 // core/agent/harness-memory.ts): what each Agent remembers, read where it keeps it and never written; forgetting is a
 // plain request in Fox's conversation. Claude Code's and Codex's skills, MCP servers and standing rules, and pi's
 // skills, are listed with where to change them, never changed. Fixture homes only; no real Agent or home is touched.

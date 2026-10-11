@@ -83,7 +83,7 @@ await withBrowser(fileAccess,async browser=>{
   }
  };
  assert.deepEqual(await dock.getByRole('button').allTextContents(),[],'an empty overview does not invent suggested actions');
- assert.deepEqual(await page.getByRole('button',{name:'Settings',exact:true}).evaluateAll(b=>b.map(e=>!!e.closest('.companion-side'))),[true],'Settings is Fox\'s own button beside it, not a world gear');assert.equal(await page.locator('.world-recovery-toggle,.world-recovery-menu').count(),0);
+ assert.deepEqual(await page.getByRole('button',{name:'Agent',exact:true}).evaluateAll(b=>b.map(e=>!!e.closest('.companion-side'))),[true],'Agent (Settings) is Fox\'s own button beside it, not a world gear');assert.equal(await page.locator('.world-recovery-toggle,.world-recovery-menu').count(),0);
  assert.equal(await dock.getByRole('button',{name:'Do Work',exact:true}).count(),0,'An empty world has no next task');
  assert.equal(await page.locator('#notionDialog').evaluate((e: HTMLDialogElement)=>e.open),false);
  await page.evaluate(()=>worldletShowControls('privacy'));await revealAction('Allow selected context');await bubble.getByRole('button',{name:'Allow selected context'}).click();assert.equal(await page.evaluate(()=>privateConsent),true);
@@ -136,7 +136,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await bubble.getByRole('button',{name:'Back to world',exact:true}).count(),0,'setup spends a line on leaving');
  assert.doesNotMatch(await bubble.innerText(),/Connections use Hermes/,'setup explains its own plumbing');
  assert.doesNotMatch(await bubble.innerText(),/Bring .* to life/,'setup repeats the region already on screen');await checkTextActions();await page.screenshot({path:'output/fox-mac/source-actions.png'});await page.locator('#notionStage').click({position:{x:1320,y:120}});
- // Fox's model is the Agent's: the model screen is Settings › Your Agent, never a model guide in the bubble.
+ // Fox's model is the Agent's: the model screen is Settings › Agent, never a model guide in the bubble.
  await page.evaluate(()=>worldletShowControls('model'));await page.locator('#companionInfo [data-section=Settings] [data-setting=model][aria-current=true]').waitFor();
  assert.equal(await bubble.locator('.fox-model-catalog').count(),0,'no model guide in the bubble');assert.equal(await page.evaluate(()=>calls.some(c=>['modelCatalog','modelConfigure','modelLogin'].includes(c.action))),false);
  await page.screenshot({path:'output/fox-mac/model.png'});await page.keyboard.press('Escape');await page.locator('#companionInfo').waitFor({state:'hidden'});await page.screenshot({path:'output/fox-mac/actions.png'});
@@ -165,7 +165,7 @@ await withBrowser(fileAccess,async browser=>{
  // Settings work like a settings window (owner feedback 2026-10-03, one list since 2026-10-10): the list on the left,
  // the chosen section's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
  assert.deepEqual(await panel.locator('.companion-settings-item strong').allTextContents(),
-  ['Fox','Your Agent','Phone','General','Help']);
+  ['Fox','Agent','Phone','General','Help']);
  assert.equal(await panel.getByRole('button',{name:/Animation timing|Preview animation/}).count(),0);
  const detail=panel.locator('.companion-settings-detail');
  // The one privacy choice left is the usage counts switch in General (owner request 2026-10-10).

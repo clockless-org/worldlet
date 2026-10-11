@@ -1,6 +1,6 @@
 // The Profile page shows what the World holds about the companion: saved memory by kind, Fox's own conversation and
 // the conversations and notes each other Agent brought, grouped and collapsible, and Fox's offer to save a task it
-// repeats (companion-skills.ts). The Agent's own skills and scheduled tasks are only in Settings › Your Agent (owner
+// repeats (companion-skills.ts). The Agent's own skills and scheduled tasks are only in Settings › Agent (owner
 // decision 2026-10-11), never listed twice. Fixture data only.
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
@@ -50,5 +50,5 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await page.evaluate(()=>(window as any).skillCalls.filter((c:string)=>c!=='list')),['save']);
  await block.getByRole('button',{name:'Edit memory'}).click();
  assert.deepEqual(await page.evaluate(()=>(window as any).events),['memory-manager']);
- console.log('PASS companion profile: saved memory by kind, own conversation and the conversations and notes other Agents brought, grouped and collapsible; Fox’s offer to save a repeated task; the Agent’s skills and scheduled tasks only in Your Agent');
+ console.log('PASS companion profile: saved memory by kind, own conversation and the conversations and notes other Agents brought, grouped and collapsible; Fox’s offer to save a repeated task; the Agent’s skills and scheduled tasks only in Settings › Agent');
 });

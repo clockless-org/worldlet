@@ -18,7 +18,7 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  await page.screenshot({path:'/tmp/companion-profile-tab.png'});
  // One list of sections on the left, the chosen one's details on the right, no tabs (owner request 2026-10-10).
  assert.equal(await panel.getByRole('tab').count(),0,'no tabs');
- assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Fox','Your Agent','Phone','General','Help'],'Fox first, no Energy, Journal, Accounts, Approvals, History, Sounds, Privacy or Feedback');
+ assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Fox','Agent','Phone','General','Help'],'Fox first, no Energy, Journal, Accounts, Approvals, History, Sounds, Privacy or Feedback');
  const wheel=()=>detail.dispatchEvent('wheel',{deltaY:120,bubbles:true,cancelable:true});
  await wheel();await page.waitForTimeout(260);await wheel();assert.equal(await panel.getAttribute('data-section'),'Profile','the wheel never turns the page');
  assert.equal(await panel.getByRole('button',{name:/^(Import|Export)$/}).count(),0);

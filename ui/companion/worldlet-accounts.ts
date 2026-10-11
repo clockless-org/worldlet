@@ -5,7 +5,7 @@ import {showAgentConnections} from './agent-connections.ts';
 const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive'];
 const GOOGLE=['gmail','google-calendar','google-drive'];
 
-/** Settings › Your Agent › Accounts (it was a section of its own, Accounts, until the Your Agent page took it
+/** Settings › Agent › Accounts (it was a section of its own, Accounts, until the Agent page took it
  * in): Worldlet's own signed-in accounts first, with Reconnect and Disconnect, then the tools and chat accounts in the
  * person's Agent (agent-connections.ts). */
 export async function showWorldletAccounts(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){

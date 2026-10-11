@@ -16,7 +16,7 @@ import {openClawAgents,readOpenClawConfig} from './openclaw-files.ts';
 // `openclaw skills install <folder> --as <name> --agent <id>` (docs/cli/skills.md, OpenClaw 2026.9.8), Hermes Agent's
 // `skills/<name>/SKILL.md` where its own `skill_manage` tool creates one (tools/skill_manager_tool.py `_create_skill`),
 // since `hermes skills install` takes only a hub identifier or a URL. Saving never changes or removes a skill already there.
-// Settings › Your Agent turns one off or on, or removes it, only with the Agent's own command after the person
+// Settings › Agent turns one off or on, or removes it, only with the Agent's own command after the person
 // confirmed it (core/agent/harness-controls.ts says where each was checked): Hermes Agent's `hermes config set
 // skills.disabled` and `hermes skills uninstall` (hub-installed skills only), OpenClaw's `openclaw config set
 // skills.entries.<key>.enabled`; OpenClaw has no command of its own that removes a skill, so it offers none.

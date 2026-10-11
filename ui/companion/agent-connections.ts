@@ -1,4 +1,4 @@
-/** Settings › Your Agent › Accounts, the Agent's part: the MCP servers (shown as tools) and chat accounts the
+/** Settings › Agent › Accounts, the Agent's part: the MCP servers (shown as tools) and chat accounts the
  * person set up in each Agent on this computer (host `harnessConnections`, contracts/harness-services.ts
  * HarnessConnections), what each was last used for, and Add or Remove for a tool, each run as that Agent's own command
  * only after the person confirmed it in plain words, with the exact command under Details. Never a secret: addresses

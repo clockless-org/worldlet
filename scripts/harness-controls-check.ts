@@ -8,7 +8,7 @@ import {createHarnessControls} from '../platform/electron/src/modules/fox/harnes
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Settings › Your Agent's controls for the Agent's own skills and scheduled tasks (owner plan 2026-10-11, PR 2;
+// Settings › Agent's controls for the Agent's own skills and scheduled tasks (owner plan 2026-10-11, PR 2;
 // core/agent/harness-controls.ts): every change is one of the Agent's own commands, checked against its source at the
 // oldest supported version, run only after the person confirmed the exact preview, and read back from the Agent's own
 // files. Fixture homes and fake `hermes` / `openclaw` commands that do what the real ones do to their files; no real
@@ -191,4 +191,4 @@ await withTempDir('worldlet-controls-',async scratch=>{
  assert.deepEqual((await controls.scheduleRequest({operation:'list'}) as any).harnesses,[],'never in the practice world');
  await assert.rejects(controls.skillRequest({operation:'preview',harness:'hermes',skill:'seed-swap',change:'disable'}),/your own world/);
 });
-console.log('PASS Your Agent controls: scheduled tasks paused, resumed, run or removed and skills turned off, on or removed only with each Agent’s own command (Hermes Agent `hermes cron …`, `hermes config set skills.disabled`, `hermes skills uninstall` for hub skills; OpenClaw `openclaw cron disable|enable|run|rm`, `openclaw config set skills.entries.<key>.enabled`, no remove), previewed, confirmed once and read back');
+console.log('PASS Agent controls: scheduled tasks paused, resumed, run or removed and skills turned off, on or removed only with each Agent’s own command (Hermes Agent `hermes cron …`, `hermes config set skills.disabled`, `hermes skills uninstall` for hub skills; OpenClaw `openclaw cron disable|enable|run|rm`, `openclaw config set skills.entries.<key>.enabled`, no remove), previewed, confirmed once and read back');

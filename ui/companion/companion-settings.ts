@@ -17,7 +17,7 @@ type Item={id:string;label:string;hint:string;page?:boolean;show:(detail:HTMLEle
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
 // Entry points that name a section Settings no longer has open the page that took it in, at its part: Accounts became
-// Your Agent's last part (owner plan 2026-10-11), and the standing rules Approvals listed are its Permissions part.
+// Agent's last part (owner plan 2026-10-11), and the standing rules Approvals listed are its Permissions part.
 const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'model',part:'accounts'},accounts:{section:'model',part:'accounts'},approvals:{section:'model',part:'permissions'},permissions:{section:'model',part:'permissions'}};
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
@@ -305,7 +305,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical).
  const items:Item[]=[
   {id:'fox',label:'Fox',hint:'Profile and what it knows',page:true,show:target=>{target.append(pages.fox);}},
-  {id:'model',label:'Your Agent',hint:'What it runs on and may use',show:modelSetting},
+  {id:'model',label:'Agent',hint:'What it runs on and may use',show:modelSetting},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
   {id:'general',label:'General',hint:'Updates, Browser, usage counts',show:async target=>{
    target.append(subhead('Updates'));await updates(target);

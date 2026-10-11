@@ -1,9 +1,9 @@
-// What the person's Agent remembers (contracts/harness-services.ts `memory`), shown read-only in Settings › Your Agent ›
+// What the person's Agent remembers (contracts/harness-services.ts `memory`), shown read-only in Settings › Agent ›
 // Memory (owner decision 2026-10-11): each entry of the files it keeps, and the plain request Fox's conversation gets
 // when the person asks it to forget one. No Agent here has a command that forgets one entry (Hermes Agent's `hermes
 // memory` sets up, shows, turns off or resets its provider; OpenClaw's `memory forget` drops a session's index, `memory
 // reset` everything), so Worldlet never edits these files: the Agent's own memory tool does it when asked. Also the
-// read-only views of Claude Code’s and Codex’s own settings that Settings › Your Agent shows with a note on where to change
+// read-only views of Claude Code’s and Codex’s own settings that Settings › Agent shows with a note on where to change
 // them: their standing rules and their MCP servers. Reading the files is the host's job (agent-runtime/harness-memory.ts).
 // Kept ES-compatible for JavaScriptCore and Jint.
 import type {HarnessConnection,HarnessMemoryEntry,HarnessStandingRule} from '../../contracts/harness-services.ts';
@@ -75,7 +75,7 @@ export function agentServerConnections(harness:string,servers:readonly AgentMcpS
   return {id:connectionId(harness,'mcp','',server.name),kind:'mcp' as const,name:server.name,where:clip(where,160),enabled:true,sign,removable:false};
  });
 }
-/** Where the person changes what Settings › Your Agent shows read-only for an Agent with no command Worldlet uses for
+/** Where the person changes what Settings › Agent shows read-only for an Agent with no command Worldlet uses for
  * it: one plain sentence per Agent and part, or '' when the page says nothing more. */
 const READ_ONLY:Readonly<Record<string,Partial<Record<'skills'|'connections',string>>>>=Object.freeze({
  'claude-code':{skills:'Claude Code keeps these in the skills folder of its home (~/.claude/skills). Change them there.',connections:'Claude Code keeps these in its own settings. Change them in Claude Code itself.'},

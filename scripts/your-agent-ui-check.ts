@@ -1,4 +1,4 @@
-// Settings › Your Agent: what Fox runs on, the Agents on this computer and elsewhere, the provider, and the last reply's
+// Settings › Agent: what Fox runs on, the Agents on this computer and elsewhere, the provider, and the last reply's
 // problem with its fix; then the Agent's own skills and routines (each change its own command, asked once more
 // in plain words, the Task panel read again after a schedule change), what it may do without asking (with Revoke, asked
 // once more) and, last, the accounts and tools that were the Accounts section, which old entry points now open. There is no energy, charge or battery anywhere (owner request 2026-10-10).
@@ -59,7 +59,7 @@ try{
  await page.waitForTimeout(500);assert.doesNotMatch(await page.locator('body').innerText(),/energy|Charge/i,'no energy or charge anywhere');
  await page.locator(SETTINGS_BUTTON).click();
  const settingsPage=page.locator('#companionInfo [data-section=Settings]');await settingsPage.waitFor();
- assert.equal(await settingsPage.locator('[data-setting=model]').getAttribute('aria-current'),'true','Settings opens on Your Agent');
+ assert.equal(await settingsPage.locator('[data-setting=model]').getAttribute('aria-current'),'true','Settings opens on Agent');
  assert.equal(await page.locator('#companionInfo [data-section=Energy]').count(),0,'no Energy page');
  const local=settingsPage.locator('.companion-settings-detail');
  await local.getByText('Fox’s model is connected',{exact:true}).waitFor();
@@ -214,7 +214,7 @@ try{
  await page.evaluate(()=>{const w=window as any;w.source={source:'none',ready:false,name:'',provider:'openai-codex'};window.dispatchEvent(new Event('worldlet:model-changed'));});
  // No model connected (owner request 2026-10-05): Fox says so once and points to Settings, Model, where one is chosen.
  await page.keyboard.press('Escape');
- await page.getByText('I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Your Agent.').waitFor();
+ await page.getByText('I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Agent.').waitFor();
  await page.getByRole('button',{name:'Choose an Agent',exact:true}).click();
  const settings=page.locator('#companionInfo [data-section=Settings]');await settings.waitFor();
  assert.equal(await settings.locator('[data-setting=model]').getAttribute('aria-current'),'true','Settings opens on Model');
@@ -261,12 +261,12 @@ try{
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
  await settingsNow.locator('[data-part=routines]').getByText('pi has no routines of its own.',{exact:true}).waitFor();
  await page.evaluate(()=>{(window as any).current={harness:'hermes',title:'Hermes Agent'};});
- // Old entry points that open Accounts land on Your Agent, at Accounts.
+ // Old entry points that open Accounts land on Agent, at Accounts.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'integrations'}})));
  await settings.locator('[data-setting=model][aria-current=true]').waitFor();
  await settings.locator('.companion-settings-detail [data-part=accounts]').waitFor();
  await page.waitForFunction(()=>{const part=document.querySelector('#companionInfo .companion-settings-detail [data-part=accounts]'),pane=document.querySelector('#companionInfo .companion-settings-detail');if(!part||!pane)return false;const a=part.getBoundingClientRect(),b=pane.getBoundingClientRect();return a.top>=b.top-1&&a.top<b.bottom-40&&pane.scrollTop>0;});
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Your Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; six named sections (Model, Memory, Skills, Routines, Permissions, Accounts) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts is the page\'s last part and old Accounts entry points land on it');
+ console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; six named sections (Model, Memory, Skills, Routines, Permissions, Accounts) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts is the page\'s last part and old Accounts entry points land on it');
 }finally{await browser.close();}
