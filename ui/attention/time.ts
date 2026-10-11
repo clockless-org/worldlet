@@ -42,7 +42,9 @@ export function attentionTimeRows(signal,context:AttentionTimeContext={}){
    tooltip+=' — '+(allDay?endValue.slice(0,10)+' (exclusive end)':exact.format(end)+' ['+timeZone+']');
   }
   let delta=(+at-+now)/1000;
-  if(allDay){const parts=Object.fromEntries(format({year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now).map(p=>[p.type,p.value]));delta=(Date.parse(value.slice(0,10)+'T00:00:00Z')-Date.UTC(+parts.year,+parts.month-1,+parts.day))/1000;}
+  // An all-day value is a calendar date: compare it with today's calendar date in the viewer's zone.
+  const today=allDay?Object.fromEntries(format({year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now).map(p=>[p.type,p.value])):null;
+  if(today)delta=(Date.parse(value.slice(0,10)+'T00:00:00Z')-Date.UTC(+today.year,+today.month-1,+today.day))/1000;
   const unit=allDay?'day':relativeUnit(delta);
   const amount=Math.round(delta/UNIT_SECONDS[unit]);
   const ongoing=key==='start'&&!allDay&&validAttentionTime(endValue)&&+at<=+now&&Date.parse(endValue)>+now;
@@ -52,7 +54,7 @@ export function attentionTimeRows(signal,context:AttentionTimeContext={}){
   // so it never takes room from the title; its meaning stays in the tooltip.
   const soon=ongoing||!amount&&!allDay?'Now':amount?relativeIn('narrow','always'):relativeIn('narrow','auto');
   if(key==='observedAt')tooltip+=' · First saved observation of this finding; not when the event occurred.';
-  const headingDate=allDay?cached(Intl.DateTimeFormat,locale,{month:'short',day:'numeric',...(at.getUTCFullYear()!==now.getFullYear()?{year:'numeric' as const}:{}),timeZone:'UTC'}).format(at):format({month:'short',day:'numeric',...(date.formatToParts(at).find(p=>p.type==='year')?.value!==date.formatToParts(now).find(p=>p.type==='year')?.value?{year:'numeric' as const}:{})}).format(at);
+  const headingDate=allDay?cached(Intl.DateTimeFormat,locale,{month:'short',day:'numeric',...(+value.slice(0,4)!==+today!.year?{year:'numeric' as const}:{}),timeZone:'UTC'}).format(at):format({month:'short',day:'numeric',...(date.formatToParts(at).find(p=>p.type==='year')?.value!==date.formatToParts(now).find(p=>p.type==='year')?.value?{year:'numeric' as const}:{})}).format(at);
   // The row's key-facts line under the title says it in words: "Due tomorrow · 5:00 PM",
   // "Starts in 2 hr. · 3:00 PM", "Updated 3 days ago" (owner decision 2026-10-02, #1281).
   const timed=!allDay&&(key==='dueAt'||key==='start')&&Math.abs(delta)<7*86400?' · '+clockText:'';
