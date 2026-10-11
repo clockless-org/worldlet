@@ -1,0 +1,22 @@
+# TEMPORARY (test:ios investigation, removed before merge)
+name: iOS debug
+on:
+  push:
+    branches: [claude/project-thread-zgjyoo]
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: xcodebuild -version; xcrun simctl list devices available | grep -i iphone | head
+      - name: test:ios
+        run: |
+          mkdir -p .local/ios-build
+          (sleep 5; while [ ! -f .local/ios-build/test.log ]; do sleep 2; done; tail -n +1 -F .local/ios-build/test.log) &
+          date; node scripts/ios-check.mjs; s=$?; date; exit $s
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: {name: ios-build, path: .local/ios-build/UITests.xcresult}

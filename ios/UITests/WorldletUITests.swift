@@ -162,6 +162,7 @@ final class WorldletUITests: XCTestCase {
         app.buttons["leaveApplet"].tap()
         XCTAssert(waitGone(element(app, "appletPage")), "the pill's ✕ leaves the page")
         tab(app, 0).tap()
+        if !hittable(row) { print("DEBUG-TREE-BEGIN\n" + app.debugDescription + "\nDEBUG-TREE-END") }
         XCTAssert(hittable(row))
         row.tap()
         let from = app.buttons["cardApplet"]
