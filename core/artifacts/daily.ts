@@ -18,9 +18,10 @@ export const DAILY_PLAN_UNTIL_HOUR=12;
 /** The evening summary is made from this hour, local time, or at the first use the next day. */
 export const DAILY_SUMMARY_HOUR=21;
 
-/** Kept per World in the page's storage. `used` is the last time the person used Worldlet on each day; `journal` is
- * the day whose brief or summary was kept and waits for the person to see the Journal open on it. */
-export type DailyArtifactsState={used:Record<string,number>;plan:string[];summary:string[];journal?:string};
+/** Kept per World in the page's storage. `used` is the last time the person used Worldlet on each day. A kept brief or
+ * summary does not open the Journal by itself: it arrives as an Attention item (core/agent/harness-schedule.ts
+ * `dailyScheduleResult`), so an older `journal` field is dropped. */
+export type DailyArtifactsState={used:Record<string,number>;plan:string[];summary:string[]};
 export type DailyArtifactKind='plan'|'summary';
 
 const pad=(n:number)=>String(n).padStart(2,'0');
@@ -35,12 +36,8 @@ export function readDailyArtifactsState(value:unknown):DailyArtifactsState {
  const used:Record<string,number>={};
  if(v.used&&typeof v.used==='object')for(const [k,at] of Object.entries(v.used))if(KEY.test(k)&&Number.isFinite(at))used[k]=Number(at);
  const days=(list:unknown)=>Array.isArray(list)?list.filter((k):k is string=>typeof k==='string'&&KEY.test(k)):[];
- return {used,plan:days(v.plan),summary:days(v.summary),...(typeof v.journal==='string'&&KEY.test(v.journal)?{journal:v.journal}:{})};
+ return {used,plan:days(v.plan),summary:days(v.summary)};
 }
-/** The brief or summary was kept on `day`: the Journal opens on it when the person is next at the computer that day. */
-export function journalWaiting(state:DailyArtifactsState,day:string):DailyArtifactsState {return {...state,journal:day};}
-/** The person saw the Journal open (or the day is over). */
-export function journalSeen(state:DailyArtifactsState):DailyArtifactsState {const {journal,...rest}=state;return rest;}
 /** The person used Worldlet themselves (a message to Fox, an Applet they opened). Only the last few days are kept. */
 export function markDailyUse(state:DailyArtifactsState,now:Date):DailyArtifactsState {
  const used={...state.used,[dayKey(now)]:now.getTime()};
@@ -63,6 +60,17 @@ export function dailyArtifactDue(state:DailyArtifactsState,now:Date):{kind:Daily
  }
  if(hour>=DAILY_PLAN_HOUR&&hour<DAILY_PLAN_UNTIL_HOUR&&usedRecently(state,now)&&!state.plan.includes(today))return {kind:'plan',day:today};
  return null;
+}
+/** When the next brief and today's summary will be made, for the Task panel's Planned timeline (ms): the brief at
+ * 6 AM today, or tomorrow once today's is made or its morning is under way, while the person still counts as using
+ * Worldlet then; the summary at the evening hour of a day they used it, until it is made. Due now is not planned. */
+export function dailyPlanned(state:DailyArtifactsState,now:Date):{kind:DailyArtifactKind;at:number}[] {
+ const today=dayKey(now),hour=now.getHours(),planned:{kind:DailyArtifactKind;at:number}[]=[];
+ const at=(key:string,h:number)=>{const d=dayStart(key);d.setHours(h);return d;};
+ const brief=hour<DAILY_PLAN_HOUR&&!state.plan.includes(today)?at(today,DAILY_PLAN_HOUR):at(dayKey(nextDay(today)),DAILY_PLAN_HOUR);
+ if(usedRecently(state,brief))planned.push({kind:'plan',at:brief.getTime()});
+ if(hour<DAILY_SUMMARY_HOUR&&(state.used[today]??0)>=dayStart(today).getTime()&&!state.summary.includes(today))planned.push({kind:'summary',at:at(today,DAILY_SUMMARY_HOUR).getTime()});
+ return planned.sort((a,b)=>a.at-b.at);
 }
 /** The person used Worldlet themselves in the last `DAILY_PLAN_RECENT_DAYS` days: the condition for any work Fox does
  * on its own (the morning brief, replies prepared in the background), so an abandoned install spends nothing. */

@@ -62,6 +62,8 @@ export type TaskPanelInput={
  /** Fox's background work the page heard of: running now, and what it finished (ms). */
  fox?:readonly {source:string;text:string;at:number}[];
  foxDone?:readonly {source:string;text:string;at:number}[];
+ /** When Fox makes the next morning brief and today's summary (core/artifacts `dailyPlanned`, ms). */
+ daily?:readonly {kind:'plan'|'summary';at:number}[];
 };
 /** Rows shown in each group before "+N more". */
 export const TASK_PANEL_LIMITS={now:3,planned:4,done:4} as const;
@@ -233,6 +235,13 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   if(at-now>AHEAD_MS)continue;
   planned.push({id:'check:'+applet.key,group:'planned',source:'check',title:`Check ${applet.title}`,detail:'',when:taskPlannedWhen(at,now,locale),at,every:'Regularly, for anything new',by:'Worldlet',open:appletOpen(applet.key),
    day:routineDay(at,now,locale),clock:routineClock(at,locale)});
+ }
+
+ for(const made of input.daily??[]){
+  if(made.kind!=='plan'&&made.kind!=='summary'||!Number.isFinite(made.at)||made.at<=now||made.at-now>AHEAD_MS)continue;
+  const plan=made.kind==='plan';
+  planned.push({id:'daily:'+made.kind,group:'planned',source:'fox',title:plan?'Morning brief':'Day summary',detail:'',when:taskPlannedWhen(made.at,now,locale),at:made.at,
+   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Fox',day:routineDay(made.at,now,locale),clock:routineClock(made.at,locale)});
  }
 
  doing.sort((a,b)=>(b.at??0)-(a.at??0));

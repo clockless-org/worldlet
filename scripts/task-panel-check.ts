@@ -126,4 +126,11 @@ const failures=taskPanel({history:history.filter(r=>r.kind==='applet.check')},no
 assert.deepEqual(failures,['check-failed:google-calendar'],'only a failure newer than the last success');
 assert.deepEqual(done.done.rows[0].open,{journal:'2026-10-10'},'what Fox made opens the Journal on today’s page');
 assert.deepEqual(done.done.rows[1].open,{attention:'w2'},'a scheduled job’s result points at its Attention item');
-console.log('PASS task panel: Doing now, Planned and Done today grouped, sorted and capped (3, 4, 4 then +N or the day’s total), a day of one Applet’s checks folded, retried failures dropped, failed rows marked, today only, cron next runs and time text');
+// Fox's own morning brief and day summary stand on the Planned timeline (core/artifacts dailyPlanned).
+{
+ const daily=taskPanel({daily:[{kind:'summary',at:at('2026-10-10T21:00:00')},{kind:'plan',at:at('2026-10-11T06:00:00')},{kind:'plan',at:now-1}]},now,L);
+ assert.deepEqual(daily.planned.rows.map(r=>[r.id,r.title,r.day,r.clock,r.by]),[['daily:summary','Day summary','Today','9:00 PM','Fox'],['daily:plan','Morning brief','Tomorrow','6:00 AM','Fox']],'the summary tonight, the brief tomorrow; one due now is not planned');
+ assert.equal(daily.planned.rows[1].every,'Every morning, while you use Worldlet');
+ assert.equal(daily.chip,'Planned 2');
+}
+console.log('PASS task panel: Doing now, Planned and Done today grouped, sorted and capped (3, 4, 4 then +N or the day’s total), a day of one Applet’s checks folded, retried failures dropped, failed rows marked, today only, cron next runs and time text, Fox’s brief and summary planned');

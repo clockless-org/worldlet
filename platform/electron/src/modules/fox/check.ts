@@ -211,6 +211,14 @@ try{
   routineResult({ran:true,late:true,scheduledAt:'2026-10-04T08:00:00.000Z',job:{id:'news',name:'Morning news',last_status:'ok'}});
   assert.deepEqual(events.filter(([name])=>name==='worldlet:routines').at(-1)?.[1].late,true);
   assert.deepEqual(worldLogLines(store.ledger().history({kinds:['routine.run'],limit:5})).map(line=>line.text),['Fox ran Morning news late'],'the world log says the missed routine ran late');
+  // Its result is an Attention item (Worth Knowing), not a passing notice; one that did not finish is Worth Doing.
+  const routineItems=()=>store.ledger().records('items').filter(item=>item.provider==='worldlet');
+  assert.deepEqual(routineItems().map(item=>[item.kind,item.title,item.status]),[['update','Morning news','open']],'a routine run arrives in Attention');
+  assert.ok(store.worldItems().some(item=>item.provider==='worldlet'),'and the World shows it');
+  routineResult({ran:true,job:{id:'news',name:'Morning news',last_status:'error'}});
+  assert.ok(routineItems().some(item=>item.kind==='task'&&item.priority==='elevated'),'a routine that did not finish is Worth Doing');
+  routineResult({error:'A scheduled task could not finish. Ask Fox to check your routines.'});
+  assert.equal(routineItems().length,2,'an error before any run is no item');
   const request={applet:'app-youtube',task:'Find three cooking videos under ten minutes',request:'Find me short cooking videos on YouTube',parent:'turn-1'};
   const started=actions.appletTaskStart(request) as Row;
   assert.equal(started.ok,true);assert.match(started.id,/^task-/);
@@ -337,6 +345,6 @@ try{
   preferences.remove('worldlet.sampleEnabled');
   services.set(AGENT,agent);
  }
- pass('applet tasks: the conversation answers while an Applet works; tools, history and result; routines wake on resume and a late run is logged; a local Agent reads Gmail through the built-in Hermes');
+ pass('applet tasks: the conversation answers while an Applet works; tools, history and result; routines wake on resume, a late run is logged and each run arrives in Attention; a local Agent reads Gmail through the built-in Hermes');
  console.log(`PASS fox companion: ${passed.length} checks`);
 }finally{for(const quit of quits)await quit();store.closeLedger();fs.rmSync(root,{recursive:true,force:true});}

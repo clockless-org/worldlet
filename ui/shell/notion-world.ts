@@ -15,14 +15,14 @@ import {eventTrigger,reportAppletOpened,reportEngagement} from './product-analyt
 import {mountFoxArtifact,flyIntoJournal,artifactPageSpec} from '../artifacts/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../core/applets/index.ts';
-import {attentionRequest} from '../../core/agent/index.ts';
+import {attentionRequest,journalTarget} from '../../core/agent/index.ts';
 import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../core/browser/index.ts';
 import {quietSourceReader} from '../applets/index.ts';
 import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../core/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
-import {artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,journalWaiting,journalSeen,dayKey,dailyArtifactDue,dailyArtifactRequest,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
+import {artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE} from '../world/index.ts';
@@ -210,7 +210,9 @@ export function mountNotionWorld(data: World, native: any) {
    if(!attentionPage||(e.target as Element).closest('#attentionPreview,#notionHUD,button,a,input,textarea,select,[role="button"],.notion-pin,.world-task-tracker,.notion-content,.notion-dialog'))return;
    e.preventDefault();e.stopPropagation();flyIntoJournal(root,$('attentionPreview'));closeAttentionPreview(false);voice?.hidePreview?.(true);
   },true);
-  window.addEventListener('worldlet:routines',(event: any)=>{const r=event.detail;if(r.error)notify(r.error);else if(r.ran)notify((r.job?.last_status==='ok'?(r.late?'Finished late: ':'Finished: '):'Check routine: ')+(r.job?.name||'Scheduled task')+'. Ask Fox for the result.');});
+  // A routine's result arrives as an Attention item (core routineScheduleResult on the host), never a passing notice;
+  // only a routine clock that could not reach the Agent at all says so here.
+  window.addEventListener('worldlet:routines',(event: any)=>{const r=event.detail;if(r?.error)notify(r.error);});
   const appletPanels=new Map();
   // Spatial context switching (owner decision 2026-10-04): each website in a browsing Applet is its own
   // place to talk with Fox (`web:<site>`). A page Fox opens while helping with an Attention item stays
@@ -1003,6 +1005,9 @@ export function mountNotionWorld(data: World, native: any) {
   }
   function openAttentionOriginal(page,ref=null){
    closeAttentionPreview(false);
+   // A scheduled result's source is its card in the Journal.
+   const journal=ref&&journalTarget([ref]);
+   if(journal){window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:journal}));return;}
    if(!ref){focusContent(page.id);return;}
    // Resolve this exact reference; never send every icon to the primary original.
    const note=pages.get(ref.id)||[...pages.values()].find(p=>p.sourceId===ref.id&&(!p.sourceProvider||p.sourceProvider===ref.provider));
@@ -1072,6 +1077,9 @@ export function mountNotionWorld(data: World, native: any) {
    voice?.setGuide?.({source:'attention-preview:'+id,takeover:true,text:attentionPreviewData(page).suggestion,remember:true,actions:primary});voice?.revealGuide?.();
   }
   function showDraftLine(page){
+   // A scheduled result kept in the Journal (the morning brief, the day's summary) opens it on its card.
+   const target=journalTarget(page.worldItemSources);
+   if(target){attentionPreview.setDraft({text:'In your Journal',label:'Open',run:()=>{closeAttentionPreview(false);window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:target}));}});return;}
    const thread=page.worldItemKind==='task'?replyThread({sources:page.worldItemSources}):'',draft=thread?waitingDrafts.find(d=>d.thread===thread):null;
    attentionPreview.setDraft(draft?{text:'Fox drafted a reply',label:'Review',run:()=>{closeAttentionPreview(false);window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day:dayKey(new Date(draft.createdAt*1000||Date.now()))}}));}}:null);
   }
@@ -1080,7 +1088,8 @@ export function mountNotionWorld(data: World, native: any) {
    const page=[...pages.values()].find(p=>p.worldItemId&&p.worldItemId===item.worldItemId);if(!page)return false;
    foxArtifact.close();shownArtifact=null;attentionPage=page;attentionPreview.open({...page,attentionTimeMembers:(item.pageIds||[page.id]).map(id=>pages.get(id)).filter(Boolean).map(p=>p.worldItemSignal||{})});nativeHUD?.sync();showAttentionGuide(page);
    const card=attentionPreviewData(page);
-   keepArtifact({id:attentionArtifactId(item.worldItemId),kind:'attention',title:card.title,body:card.summary,chart:null,size:'medium',category:card.category,origin:{type:'attention',item:item.worldItemId}});
+   // A scheduled result already kept in the Journal (the morning brief) is not kept a second time as its Attention card.
+   if(!journalTarget(page.worldItemSources))keepArtifact({id:attentionArtifactId(item.worldItemId),kind:'attention',title:card.title,body:card.summary,chart:null,size:'medium',category:card.category,origin:{type:'attention',item:item.worldItemId}});
    // Previewing is not a settlement: keep this row available until an explicit action.
    return true;
   }
@@ -1352,38 +1361,27 @@ export function mountNotionWorld(data: World, native: any) {
   const DAILY_ARTIFACT=/^(Plan|Summary) · /;
   const dailyKey='worldlet-daily-artifacts-'+(data.workspaceId||data.workspace);
   let daily=readDailyArtifactsState(null);try{daily=readDailyArtifactsState(JSON.parse(localStorage.getItem(dailyKey)||'null'));}catch{}
-  const saveDaily=()=>{try{localStorage.setItem(dailyKey,JSON.stringify(daily));}catch{}};
+  const saveDaily=()=>{try{localStorage.setItem(dailyKey,JSON.stringify(daily));}catch{}announceDaily();};
   window.addEventListener('worldlet:product-event',(event:any)=>{if(event.detail?.event!=='user_engaged'||data.sample)return;daily=markDailyUse(daily,new Date());saveDaily();});
-  let dailyAsking=false;
-  // The morning brief and the day's summary open the Journal on their day rather than a card (owner request
-  // 2026-10-08): kept first, then the book opens on today's page for the person, not for an empty room (owner Order
-  // 2026-10-08, "早上起来的时候…直接把那个 journal 打开就是今天今早的第一页"): at once when they are at the computer,
-  // otherwise at their first touch, key or screen wake that day, even after Worldlet restarts in between.
-  let lastPresence=0;
-  const present=()=>Date.now()-lastPresence<120000;
-  const journalMoment=()=>!document.hidden&&!insideApplet()&&!inPageLayer()&&!attentionPage&&!foxArtifact.visible&&!$('notionDialog').open&&!voice?.active&&root.dataset.onboarding!=='true'&&root.dataset.onboardingLocked!=='true'&&!root.dataset.tourStep&&!root.dataset.tourCoda;
-  const openWaitingJournal=()=>{
-   if(!daily.journal)return;
-   if(daily.journal!==dayKey(new Date())){daily=journalSeen(daily);saveDaily();return;}
-   if(!present()||!journalMoment())return;
-   daily=journalSeen(daily);saveDaily();window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{}}));
-  };
+  let dailyAsking=false,dailyAsked:{kind:'plan'|'summary';day:string}|null=null;
+  // The morning brief and the day's summary are kept as cards in the Journal and arrive as an Attention item (Worth
+  // Knowing) that opens the Journal on that card: the host saves it with the card (core dailyScheduleResult), by the
+  // rule every scheduled result follows (docs/ATTENTION-CENTER.md). The Journal never opens by itself.
   function showDailyInJournal(artifact){
-   daily=journalWaiting(daily,dayKey(new Date()));saveDaily();
-   void Promise.resolve(native?.artifacts?.({operation:'save',artifact})).catch(()=>{}).then(()=>{window.dispatchEvent(new Event('worldlet:artifacts'));openWaitingJournal();void requestArtifactPage(artifact,false);});
+   const due=dailyAsked??{kind:/^Summary · /.test(String(artifact.title||''))?'summary':'plan',day:dayKey(new Date())};
+   void Promise.resolve(native?.artifacts?.({operation:'save',artifact,scheduled:due.kind,day:due.day})).catch(()=>{}).then(()=>{window.dispatchEvent(new Event('worldlet:artifacts'));void requestArtifactPage(artifact,false);});
    return {ok:true,id:artifact.id,size:artifact.size,shown:'journal'};
   }
-  const arrived=()=>{const away=!present();lastPresence=Date.now();if(away&&daily.journal)setTimeout(openWaitingJournal,300);};
-  for(const type of ['pointermove','pointerdown','keydown','wheel'])window.addEventListener(type,arrived,{capture:true,passive:true});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)arrived();setTimeout(openWaitingJournal,400);});
-  // The person opened the book themselves: today's page is seen.
-  document.addEventListener('worldlet:journal-opened',()=>{if(daily.journal){daily=journalSeen(daily);saveDaily();}},true);
+  // When the next brief and today's summary will be made, for the Task panel's Planned timeline (ui/hud/task-panel.ts);
+  // nothing in the practice world or before the first run is over, which makes neither.
+  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date())}}));};
+  setTimeout(announceDaily,0);
   // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
   // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
   const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep||!!root.dataset.tourCoda,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking});
   const dailyPoll=setInterval(()=>{
     if(!root.isConnected){clearInterval(dailyPoll);return;}
-    openWaitingJournal();
+    announceDaily();
     if(backgroundMoment()||foxArtifact.visible||$('notionDialog').open||voice?.active)return;
     const due=dailyArtifactDue(daily,new Date());
     if(!due){void prepareReply();return;}
@@ -1401,7 +1399,7 @@ export function mountNotionWorld(data: World, native: any) {
      window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text:'',...(ok?{done:foxWorkDone(kind,drafted)}:{})}}));}};
   }
   async function askDaily(due:{kind:'plan'|'summary';day:string}){
-    dailyAsking=true;
+    dailyAsking=true;dailyAsked=due;
     // What the brief holds, as the person wrote it (Morning brief in the Journal, or told to Fox).
     let brief:string|undefined;if(due.kind==='plan')try{brief=await native?.morningBrief?.();}catch{}
     const before=daily;daily=markDailyMade(daily,due.kind,due.day);saveDaily();
@@ -1413,7 +1411,7 @@ export function mountNotionWorld(data: World, native: any) {
     // Other background work still running: asked again at the next poll.
     await Promise.resolve(voice?.background?.(request.text,{displayText:request.displayText}))
      .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||''))){daily=before;saveDaily();}})
-     .finally(()=>{work.end(ok);dailyAsking=false;});
+     .finally(()=>{work.end(ok);dailyAsking=false;dailyAsked=null;});
   }
   // Replies Fox prepares by itself (owner decision 2026-10-09; rules in core/artifacts/replies.ts): a new Worth Doing
   // item from a Gmail thread that waits for the person gets a reply draft in a background session, a reply card in
