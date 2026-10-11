@@ -2,18 +2,17 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-// The World's Task panel on the right (owner layout 2026-10-10 and feedback 2026-10-11, ui/hud/task-panel.ts,
-// core/tasks/task-panel.ts): it floats on the World beside the Attention Center without touching it. Routines come
-// first, a timeline going down from Now whose rows open a read-only popover. Below them, Doing now is one small window
-// per running task, stacked: a dark terminal with Fox in its corner and the last status lines, which a click opens to
-// the whole log, or, while Fox drives a web page, that page small, which a click opens. There is no Done list and no
-// Journal link: finished work lives in the Journal. The whole column scrolls as one when it is taller than the World.
-// On the left, the date and Journal corner stands on the Attention Center's edge, width and backing. During the tour
-// only Routines show; beside an open Applet it is hidden; at 800px wide it is a chip that opens the panel, and in a
-// window 560px tall it is gone. Bundled UI, faked bridge, fixed clock, fictional jobs, mail and page.
+// The World's tasks beside Fox (owner request 2026-10-11, ui/hud/task-panel.ts, core/tasks/task-panel.ts): what the
+// Agent is doing now on Fox's left and the Routines about to run on its right, on the message bar's line, each one small
+// card in the same style (a picture, a name, one line), Fox and its message bar between them. Two cards a side in a wide
+// World, then "+N", which opens the whole list. A running card opens its window above it (the step, when it started, who
+// does it and every line it said), or the page Fox drives, which a click opens; a routine card opens a read-only
+// popover. Nothing finished shows: it lives in the Journal. They never cover the Attention Center or the message bar;
+// during the tour only Routines show; they step aside beside an open Applet and while the person talks with Fox; at
+// 800px wide each side is only its count, and in a window 540px tall they are gone. Bundled UI, faked bridge, fixed
+// clock, fictional jobs, mail and page.
 const t0=new Date(2026,9,10,9,30);
 const SCREEN=process.env.WORLDLET_TASK_PANEL_SCREEN||path.join(tmpdir(),'worldlet-task-panel.png');
-const LEFT_SCREEN=process.env.WORLDLET_TOP_LEFT_SCREEN||path.join(tmpdir(),'worldlet-top-left.png');
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});page.setDefaultTimeout(15000);
  const errors=pageErrors(page);
@@ -60,132 +59,111 @@ await withBrowser(fileAccess,async browser=>{
  await page.goto(worldUrl());
  await page.locator('.companion-avatar').waitFor();
  const panel=page.locator('.task-panel');
- const windows=panel.locator('.task-window');
- await windows.first().waitFor();
- // Routines on top, then Doing now; nothing else (owner request 2026-10-11: finished work lives only in the Journal).
- const groups=async()=>panel.locator('.task-group').evaluateAll(list=>list.map(g=>(g as HTMLElement).dataset.group+':'+g.querySelector('.task-group-heading')!.textContent));
- assert.deepEqual(await groups(),['routines:Routines','now:Doing now']);
- assert.equal(await panel.locator('.task-more,.task-journal,.task-row,.task-group[data-group=done]').count(),0,'no Done list, no Journal link, no "+N more"');
- // Routines: a timeline going down from Now, each time beside its dot, the day where it changes; paused jobs left out.
- const timeline=await panel.locator('.task-timeline>li').evaluateAll(list=>list.map(li=>li.classList.contains('task-timeline-item')?li.querySelector('.task-time')!.textContent+' · '+li.querySelector('.task-title')!.textContent:li.textContent));
- assert.deepEqual(timeline,['Now','9:50 AM · Check Mail','7:00 PM · Water the plants','Tomorrow','6:00 AM · Morning news','Fri','5:00 PM · Weekly review','Repeating','every hour · Flight prices'],JSON.stringify(timeline));
- const dots=await panel.locator('.task-step .task-dot').evaluateAll(list=>list.map(d=>{const r=d.getBoundingClientRect();return Math.round(r.x+r.width/2);}));
- assert.ok(dots.every(x=>Math.abs(x-dots[0])<=1),'one rail: '+JSON.stringify(dots));
- const times=await panel.locator('.task-step .task-time').evaluateAll(list=>list.map(t=>t.getBoundingClientRect().right));
- assert.ok(times.every(x=>x<dots[0]),'times on the left of the line');
- // Doing now: the Applet's task in its own dark terminal window, Fox in its corner, its status lines.
- assert.equal(await windows.count(),1);
- const youtube=panel.locator('.task-window[data-task-id="applet:task-1"]');
- assert.equal(await youtube.getAttribute('data-mode'),'terminal');
- assert.equal(await youtube.locator('.task-terminal-fox').count(),1,'Fox works in the window');
- const lines=async(win=youtube)=>win.locator('.task-terminal-line').evaluateAll(list=>list.map(l=>l.lastChild!.textContent));
- assert.deepEqual(await lines(),['Fox handed YouTube a task','YouTube is working on it']);
- const terminalLook=await youtube.locator('.task-terminal').evaluate(e=>{const c=getComputedStyle(e);return {font:c.fontFamily,bg:getComputedStyle(e.closest('.task-window')!).backgroundColor};});
- assert.match(terminalLook.font,/mono|Menlo|Consolas/i,'monospace');assert.equal(terminalLook.bg,'rgb(12, 16, 14)','near-black');
- const [routinesBox,nowBox]=await panel.evaluate(p=>['routines','now'].map(g=>{const r=p.querySelector(`.task-group[data-group=${g}]`)?.getBoundingClientRect();return r?{y:r.y,height:r.height}:null;}));
- assert.ok(routinesBox&&nowBox&&routinesBox.y+routinesBox.height<=nowBox.y,'Routines above Doing now');
- // Only rows and windows take the pointer: a tap on the Now marker, a day label or a gap reaches the World beneath
- // (Alpha 4176: the column's Now marker caught a tap meant for an Applet's device).
- const through=await panel.evaluate(p=>[...p.querySelectorAll('.task-timeline-now,.task-timeline-day,.task-group-heading')].map(e=>{const r=e.getBoundingClientRect();const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !!hit&&!hit.closest('.task-panel');}));
- assert.ok(through.length&&through.every(Boolean),'labels and the Now marker let taps through: '+JSON.stringify(through));
- // It floats beside the Attention Center, on the same kind of soft backing, and never overlaps it.
- const tracker=page.locator('.world-task-tracker');
- await tracker.locator('.world-matter[data-world-item-id="flight-run"]').waitFor();
- const [right,left]=[await panel.boundingBox(),await tracker.boundingBox()];
- assert.ok(right&&left&&right.x>left.x+left.width,'beside, not over, the Attention Center: '+JSON.stringify({right,left}));
- assert.ok(right!.x+right!.width<=1440-20&&right!.x+right!.width>=1440-30,'24px from the right edge: '+JSON.stringify(right));
- const backing=await panel.locator('.task-panel-body').evaluate(e=>getComputedStyle(e,'::before').backgroundColor);
- assert.notEqual(backing,'rgba(0, 0, 0, 0)','a soft dark backing like the Attention Center’s, a little deeper');
- // Fox's own background work gets a window of its own, newest first, stacked above the Applet's.
+ const now=panel.locator('.task-group[data-group=now]'),next=panel.locator('.task-group[data-group=routines]');
+ await now.locator('.task-card').first().waitFor();
+ const cards=async(side=next)=>side.locator('.task-cards>.task-card').evaluateAll(list=>list.map(c=>c.querySelector('.task-title')!.textContent+' · '+c.querySelector('.task-when')!.textContent));
+ // Next: the two soonest routines, then "+3" for the rest; paused jobs left out.
+ assert.deepEqual(await cards(),['Check Mail · 9:50 AM','Water the plants · 7:00 PM']);
+ assert.equal((await next.locator('.task-more').innerText()).trim(),'+3');
+ // Doing now: the Applet's task, a turning ring, a bar that moves on its own while how far along is not known.
+ assert.deepEqual(await cards(now),['YouTube · Working on a task from Fox']);
+ assert.equal(await now.locator('.task-card-bar[data-unknown=true]').count(),1);
+ assert.equal(await now.locator('.task-more').isVisible(),false,'nothing more to show');
+ // Either side of Fox on the message bar's line, the same card on both sides, clear of the Attention Center.
+ const geometry=()=>page.evaluate(()=>{
+  const box=(q:string)=>{const r=document.querySelector(q)!.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+  return {fox:box('.companion-avatar'),now:box('.task-group[data-group=now] .task-card'),next:box('.task-group[data-group=routines] .task-card'),
+   tracker:box('.world-task-tracker'),cards:[...document.querySelectorAll('.task-panel .task-card')].map(c=>{const r=c.getBoundingClientRect();return [r.width,r.height];})};
+ });
+ await page.locator('.world-task-tracker .world-matter[data-world-item-id="flight-run"]').waitFor();
+ {
+  const g=await geometry();
+  assert.ok(g.now.right<g.fox.x&&g.next.x>g.fox.right,'one side on Fox’s left, the other on its right: '+JSON.stringify(g));
+  assert.ok(g.now.bottom<=900-8&&g.now.bottom>=900-40&&Math.abs(g.now.bottom-g.next.bottom)<1,'at the bottom, on one line: '+JSON.stringify(g));
+  assert.ok(g.cards.every(([w,h])=>w===g.cards[0][0]&&h===g.cards[0][1]),'one card size: '+JSON.stringify(g.cards));
+  assert.ok(g.now.y>=g.tracker.bottom,'below the Attention Center: '+JSON.stringify(g));
+ }
+ // Only the cards take the pointer: the strip between them lets a tap reach the World.
+ const through=await page.evaluate(()=>{const r=document.querySelector('.task-group[data-group=now] .task-card')!.getBoundingClientRect(),hit=document.elementFromPoint(r.right+40,r.y+r.height/2);return !hit?.closest('.task-panel');});
+ assert.ok(through,'a tap beside a card reaches what is under it');
+ // Fox's own background work gets a card of its own, newest nearest Fox.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source:'reply',text:'Reading the thread with Sam…'}})));
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source:'reply',text:'Drafting a reply: Answer Sam about the venue…'}})));
- const foxWin=panel.locator('.task-window[data-task-id="fox:reply"]');
- await foxWin.waitFor();
- assert.deepEqual(await windows.evaluateAll(list=>list.map(w=>(w as HTMLElement).dataset.taskId+':'+w.querySelector('.task-window-title')!.textContent)),['fox:reply:Fox','applet:task-1:YouTube'],'one window per task, stacked');
- assert.deepEqual(await lines(foxWin),['Reading the thread with Sam…','Drafting a reply: Answer Sam about the venue…']);
- // Both boxes in one read: a refresh redraws the windows, so two separate reads could fall either side of it.
- const [a,b]=await panel.evaluate(p=>['fox:reply','applet:task-1'].map(id=>{const r=p.querySelector(`.task-window[data-task-id="${id}"]`)?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null;}));
- assert.ok(a&&b&&a.y+a.height<=b.y&&Math.abs(a.x-b.x)<1&&Math.abs(a.width-b.width)<1,'one under the other, the same width: '+JSON.stringify({a,b}));
- // A click opens that window's whole status: the step, when it started, who does it; the other stays closed.
- await foxWin.click();
- await foxWin.locator('.task-terminal-facts').waitFor();
- assert.deepEqual(await foxWin.locator('.task-terminal-fact').allTextContents(),['step: Drafting a reply: Answer Sam about the venue…','started: 9:30 AM','by: Fox']);
- assert.equal(await foxWin.getAttribute('aria-expanded'),'true');
- assert.equal(await youtube.getAttribute('aria-expanded'),'false');
- await foxWin.click();
- await foxWin.locator('.task-terminal-facts').waitFor({state:'detached'});
- // Fox drives a web page: a window that shows that page small, with Fox's step, first in the stack; a click opens it.
+ const foxCard=now.locator('.task-card[data-task-id="fox:reply"]');
+ await foxCard.waitFor();
+ assert.deepEqual(await cards(now),['Fox · Drafting a reply: Answer Sam about the venue…','YouTube · Working on a task from Fox']);
+ {
+  const [a,b]=await now.locator('.task-cards>.task-card').evaluateAll(list=>list.map(c=>c.getBoundingClientRect().x));
+  assert.ok(a>b,'the newest stands nearest Fox');
+ }
+ // A click opens its window above it: the step, when it started, who does it, and every line it said.
+ const popover=page.locator('.task-popover');
+ await foxCard.click();
+ await popover.locator('.task-terminal-facts').waitFor();
+ assert.deepEqual(await popover.locator('.task-terminal-fact').allTextContents(),['step: Drafting a reply: Answer Sam about the venue…','started: 9:30 AM','by: Fox']);
+ assert.deepEqual(await popover.locator('.task-terminal-line').evaluateAll(list=>list.map(l=>l.lastChild!.textContent)),['Reading the thread with Sam…','Drafting a reply: Answer Sam about the venue…']);
+ assert.match(await popover.locator('.task-terminal').evaluate(e=>getComputedStyle(e).fontFamily),/mono|Menlo|Consolas/i,'monospace');
+ {
+  const [p,c]=[await popover.boundingBox(),await foxCard.boundingBox()];
+  assert.ok(p&&c&&p.y+p.height<=c.y,'above the card: '+JSON.stringify({p,c}));
+ }
+ assert.equal(await foxCard.getAttribute('aria-expanded'),'true');
+ await foxCard.click();
+ await popover.waitFor({state:'hidden'});
+ // Fox drives a web page: its card first, the page's picture beside its step, the bar showing the steps done.
  await page.evaluate(()=>{(window as any).foxPage={url:'https://www.example.com/courts',title:'Book a court',steps:[{text:'Opening the booking page',done:true},{text:'Choosing a court time',done:false}],
   image:'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200"><rect width="320" height="200" fill="#f6f1e4"/><rect x="0" y="0" width="320" height="34" fill="#2f6b4f"/><text x="14" y="23" font-family="sans-serif" font-size="15" fill="#fff">Example Courts</text><rect x="20" y="56" width="130" height="56" rx="8" fill="#d9e8d2"/><rect x="170" y="56" width="130" height="56" rx="8" fill="#e9d8b8"/><rect x="20" y="126" width="280" height="44" rx="8" fill="#2f6b4f"/><text x="118" y="154" font-family="sans-serif" font-size="15" fill="#fff">Book 6 PM</text></svg>')};});
- const pageWin=panel.locator('.task-window[data-mode=page]');
- await pageWin.waitFor({timeout:10000});
- assert.deepEqual(await windows.evaluateAll(list=>list.map(w=>(w as HTMLElement).dataset.mode)),['page','terminal','terminal']);
- assert.equal(await pageWin.locator('.task-window-title').textContent(),'example.com');
- assert.equal(await pageWin.locator('.task-window-step').textContent(),'Fox · Choosing a court time');
- assert.ok(await pageWin.locator('.task-window-page img').evaluate(img=>(img as HTMLImageElement).complete&&(img as HTMLImageElement).naturalWidth>0),'the page, small');
+ const pageCard=now.locator('.task-card[data-task-id="page:example.com"]');
+ await pageCard.waitFor({timeout:10000});
+ assert.deepEqual(await cards(now),['example.com · Choosing a court time','Fox · Drafting a reply: Answer Sam about the venue…']);
+ assert.equal((await now.locator('.task-more').innerText()).trim(),'+1');
+ assert.equal(await pageCard.locator('.task-card-icon').getAttribute('data-icon'),'page');
+ assert.equal(await pageCard.locator('.task-card-bar i').evaluate(i=>(i as HTMLElement).style.width),'50%','one of two steps done');
  await page.screenshot({path:SCREEN});
- // Today's corner heads the Task panel's column in the top-right (owner request 2026-10-11): the same right edge and
- // width, above it, on the same light backing.
- {
-  const corner=page.locator('.world-today'),[c,p]=[await corner.boundingBox(),await panel.boundingBox()];
-  assert.ok(c&&p&&Math.abs(c.x+c.width-(p.x+p.width))<1&&Math.abs(c.width-p.width)<1,'the corner on the Task panel’s right edge and width: '+JSON.stringify({c,p}));
-  const top=await panel.evaluate(e=>e.querySelector('.task-group')!.getBoundingClientRect().top);
-  assert.ok(c!.y+c!.height<=top+1,'above the column: '+JSON.stringify({c,top}));
-  const look=await page.evaluate(()=>{const s=(q:string)=>getComputedStyle(document.querySelector(q)!,'::before').backgroundColor;return {corner:s('.world-today'),panel:s('.task-panel-body')};});
-  assert.equal(look.corner,look.panel,'the same light backing');
-  await page.screenshot({path:LEFT_SCREEN,clip:{x:960,y:0,width:480,height:900}});
- }
- await pageWin.click();
+ await pageCard.click();
+ await popover.locator('.task-page img').waitFor();
+ assert.equal(await popover.locator('.task-page-step').textContent(),'Fox · Choosing a court time');
+ await popover.locator('.task-page').click();
  assert.deepEqual(await page.evaluate(()=>(window as any).opened),['https://www.example.com/courts'],'a click opens the page');
  await page.evaluate(()=>{(window as any).foxPage=null;});
- await pageWin.waitFor({state:'detached',timeout:10000});
- // When Fox's work ends its window goes; what it made is in the Journal, not here.
+ await pageCard.waitFor({state:'detached',timeout:10000});
+ // When Fox's work ends its card goes; what it made is in the Journal, not here.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source:'reply',text:'',done:'1 reply ready'}})));
- await foxWin.waitFor({state:'detached'});
- assert.equal(await panel.getByText('1 reply ready').count(),0,'no Done row');
- assert.equal(await windows.count(),1);
- // A routine: a read-only popover with when, how often and who runs it; no buttons.
- await panel.locator('.task-step',{hasText:'Morning news'}).click();
- const popover=panel.locator('.task-popover');
- await popover.waitFor({state:'visible'});
+ await foxCard.waitFor({state:'detached'});
+ assert.equal(await panel.getByText('1 reply ready').count(),0,'nothing finished');
+ // "+3" opens every routine, soonest first; a routine opens a read-only popover with when, how often and who runs it.
+ await next.locator('.task-more').click();
+ await popover.locator('.task-list').waitFor();
+ assert.deepEqual(await popover.locator('.task-list .task-title').allTextContents(),['Check Mail','Water the plants','Morning news','Weekly review','Flight prices']);
+ await popover.locator('.task-list .task-card',{hasText:'Morning news'}).click();
+ await popover.locator('.task-popover-facts').waitFor();
  assert.equal((await popover.innerText()).replace(/\s+/g,' ').trim(),'Morning news When Tomorrow 6:00 AM How often Every day Runs on OpenClaw’s scheduler');
  assert.equal(await popover.locator('button').count(),0,'view only');
  await page.keyboard.press('Escape');
  await popover.waitFor({state:'hidden'});
- // A routine paused in Settings › Agent leaves the timeline at once: Settings announces `worldlet:routines` after the
- // Agent's own command ran (ui/companion/agent-routines.ts), and the panel reads its jobs again; resumed, it is back.
+ // A routine paused in Settings › Agent leaves at once: Settings announces `worldlet:routines` after the Agent's own
+ // command ran (ui/companion/agent-routines.ts), and the panel reads its jobs again; resumed, it is back.
  const pause=(paused:boolean)=>page.evaluate(paused=>{const w=window as any;w.panel={...w.panel,jobs:w.panel.jobs.map((j:any)=>j.id==='b'?{...j,paused}:j)};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));},paused);
  await pause(true);
- await panel.locator('.task-step',{hasText:'Water the plants'}).waitFor({state:'detached'});
+ await next.locator('.task-card',{hasText:'Water the plants'}).waitFor({state:'detached'});
+ assert.deepEqual(await cards(),['Check Mail · 9:50 AM','Morning news · Tomorrow 6:00 AM']);
  await pause(false);
- await panel.locator('.task-step',{hasText:'Water the plants'}).waitFor();
+ await next.locator('.task-card',{hasText:'Water the plants'}).waitFor();
  // During the tour only Routines show.
  const shown=async()=>panel.locator('.task-group:visible').evaluateAll(list=>list.map(g=>(g as HTMLElement).dataset.group));
  await page.evaluate(()=>{(document.querySelector('.native-console') as HTMLElement).dataset.tourStep='hello';});
  assert.deepEqual(await shown(),['routines'],'Doing now waits for the tour to end');
  await page.evaluate(()=>{delete (document.querySelector('.native-console') as HTMLElement).dataset.tourStep;});
- assert.deepEqual(await shown(),['routines','now']);
- // More than the World holds: the column scrolls as one, its backing still, nothing cut to "+N more".
- await page.evaluate(()=>{const w=window as any;w.panel={...w.panel,jobs:[...w.panel.jobs,...Array.from({length:10},(_,i)=>({id:'x'+i,name:'Extra routine '+(i+1),kind:'prompt',paused:false,when:{cron:`0 ${8+i} * * 1`}}))],
-  working:[...w.panel.working,{id:'task-2',applet:'gmail',at:Date.now()/1000-60},{id:'task-3',applet:'google-calendar',at:Date.now()/1000-30}]};window.dispatchEvent(new CustomEvent('worldlet:applet-task',{detail:{}}));});
- await panel.locator('.task-step',{hasText:'Extra routine 10'}).waitFor({state:'attached'});
- await page.waitForFunction(()=>document.querySelectorAll('.task-panel .task-window').length===3);
- const scroller=panel.locator('.task-panel-scroll');
- const fit=await scroller.evaluate(e=>({scroll:e.scrollHeight,client:e.clientHeight,top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom}));
- assert.ok(fit.scroll>fit.client+40,'taller than the World: it scrolls '+JSON.stringify(fit));
- assert.ok(fit.top>=60&&fit.bottom<=900-60,'inside the World’s right side: '+JSON.stringify(fit));
- const last=panel.locator('.task-window').last();
- const hiddenAtFirst=await last.evaluate((w,bottom)=>w.getBoundingClientRect().top>bottom,fit.bottom);
- assert.ok(hiddenAtFirst,'the last window is further down');
- await scroller.hover();await page.mouse.wheel(0,2000);
- await page.waitForFunction(()=>{const s=document.querySelector('.task-panel-scroll')!;return s.scrollTop+s.clientHeight>=s.scrollHeight-2;});
- const seen=await last.evaluate((w,bottom)=>w.getBoundingClientRect().bottom<=bottom+1,fit.bottom);
- assert.ok(seen,'scrolling the column brings the last window into view');
- assert.equal(await panel.locator('.task-more').count(),0);
- // Beside an open Applet the panel leaves the right third to Fox.
+ assert.deepEqual(await shown(),['now','routines']);
+ // While the person talks with Fox, the conversation has the bottom of the World.
+ await page.evaluate(()=>document.querySelector('.native-console')!.classList.add('companion-talking'));
+ await panel.waitFor({state:'hidden'});
+ await page.evaluate(()=>document.querySelector('.native-console')!.classList.remove('companion-talking'));
+ await now.waitFor({state:'visible'});
+ // Beside an open Applet they step aside.
  await page.evaluate(()=>{const r=document.querySelector('.native-console') as HTMLElement;r.dataset.depth='object';r.dataset.page='app-gmail';});
  await panel.waitFor({state:'hidden'});
- // At 800px wide it is a chip in the top-right that opens the same panel; a click outside closes it.
+ // At 800px wide each side is only its count, beside the message bar, which opens the whole list; a click outside closes it.
  const narrow=await browser.newPage({viewport:{width:800,height:900},reducedMotion:'reduce'});narrow.setDefaultTimeout(15000);
  const narrowErrors=pageErrors(narrow);
  await narrow.clock.setFixedTime(t0);
@@ -203,22 +181,18 @@ await withBrowser(fileAccess,async browser=>{
  });
  await narrow.goto(worldUrl());
  await narrow.locator('.companion-avatar').waitFor();
- const chip=narrow.locator('.task-panel-chip');
- await chip.waitFor({state:'visible'});
- assert.equal((await chip.innerText()).trim(),'Routines 2 · Doing now 1');
- const chipBox=await chip.boundingBox();
- const todayBox=await page.locator('.world-today').boundingBox();
- assert.ok(chipBox&&todayBox&&chipBox.x+chipBox.width>800-40&&chipBox.y>=todayBox.y+todayBox.height-1&&chipBox.y<todayBox.y+todayBox.height+60,'top-right, under today’s corner: '+JSON.stringify({chipBox,todayBox}));
- assert.equal(await narrow.locator('.task-panel-body').isVisible(),false,'closed until asked');
- await chip.click();
- await narrow.locator('.task-panel-body .task-step',{hasText:'Morning news'}).waitFor();
- await narrow.locator('.task-panel-body .task-window').waitFor();
- await narrow.mouse.click(400,450);
- await narrow.locator('.task-panel-body').waitFor({state:'hidden'});
+ const counts=narrow.locator('.task-panel .task-more:visible');
+ await counts.first().waitFor();
+ assert.deepEqual((await counts.allInnerTexts()).map(t=>t.trim()),['Doing now 1','Next 2']);
+ assert.equal(await narrow.locator('.task-panel .task-card:visible').count(),0,'no cards in a narrow World');
+ await narrow.locator('.task-group[data-group=routines] .task-more').click();
+ await narrow.locator('.task-popover .task-list .task-title',{hasText:'Morning news'}).waitFor();
+ await narrow.mouse.click(400,300);
+ await narrow.locator('.task-popover').waitFor({state:'hidden'});
  // In a window 560px tall it is gone, like the Attention Center.
  await narrow.setViewportSize({width:1200,height:540});
  await narrow.locator('.task-panel').waitFor({state:'hidden'});
  assert.deepEqual(narrowErrors,[]);
  assert.deepEqual(errors,[]);
 });
-console.log('PASS task panel UI: floats beside the Attention Center on its backing; Routines on top as a timeline down from Now with a read-only popover, read again when Settings pauses or resumes one; below them one window per running task, a terminal with Fox and its status lines that a click opens to the whole log, or the page Fox drives shown small that a click opens; no Done list or Journal link; one column that scrolls as one; the date and Journal corner heading the column in the top-right; only Routines in the tour, hidden beside an open Applet, a chip at 800px wide and gone at 560px tall');
+console.log('PASS tasks beside Fox: doing now on its left and the next Routines on its right, on the message bar’s line, one card style, two a side then +N for the whole list; a running card opens its window or the page Fox drives, a routine its read-only facts, read again when Settings pauses or resumes one; nothing finished; only Routines in the tour, aside while talking or beside an Applet, counts only at 800px wide and gone at 540px tall');

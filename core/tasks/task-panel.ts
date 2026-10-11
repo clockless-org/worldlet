@@ -1,7 +1,7 @@
-// The World's Task panel on the right (ui/hud/task-panel.ts): the person's Agent's routines and what it is doing now,
-// in one column that scrolls as one (owner request 2026-10-11: Routines on top, then one small window per running task;
-// finished work lives only in the Journal). The panel only draws; every decision is here: which rows, in which group
-// and order, and the time text of each row.
+// The World's tasks beside Fox (ui/hud/task-panel.ts): what the person's Agent is doing now on Fox's left and the
+// Routines about to run on its right, each one small card in the same style (owner request 2026-10-11: tasks either
+// side of Fox, Fox and its message bar between them as the way to talk to the Agent; finished work lives only in the
+// Journal). The panel only draws; every decision is here: which rows, in which group and order, and each card's text.
 //
 // Inputs are what the host already keeps (the `taskPanel` host action): the person's Agent's scheduled jobs (its
 // `schedule` service), today's history rows (only `brought.older`, for older conversations still coming in), the
@@ -38,12 +38,15 @@ export type TaskRow={
  /** For its Doing now window: who is doing it ("Fox", "YouTube", "Worldlet"), the status lines it shows now, and for
   * a page Fox drives, that page's address. */
  who?:string;lines?:string[];url?:string;
+ /** Its card: a short name, one line of what it is doing or when it runs, and the picture beside them (`fox`, `clock`
+  * for a routine, or an Applet's catalog key). */
+ name:string;status:string;icon:string;
+ /** How far along a running task is (0 to 1), only when it is known; the card's bar moves on its own otherwise. */
+ progress?:number;
 };
-/** Every row of a group: the panel scrolls as one column, so nothing is cut to "+N more". */
+/** Every row of a group; the panel decides how many cards fit beside Fox. */
 export type TaskSection={rows:TaskRow[];total:number};
-export type TaskPanel={routines:TaskSection;now:TaskSection;empty:boolean;
- /** The narrow-window chip: "Routines 3 · Doing now 1". */
- chip:string};
+export type TaskPanel={routines:TaskSection;now:TaskSection;empty:boolean};
 export type TaskPanelInput={
  jobs?:readonly HarnessJob[];
  /** The Agent whose scheduler runs the jobs ("OpenClaw"). */
@@ -131,7 +134,7 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   const every='everySeconds' in job.when?routineEvery(job.when.everySeconds):'';
   const time=at!==null?planned(at,now,locale):{when:every,day:'Repeating',clock:every};
   routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:time.when,at,every:taskHowOften(job.when),by,open:{routine:job.id},
-   day:time.day,clock:time.clock});
+   day:time.day,clock:time.clock,name:clip(job.name,40),status:time.when,icon:'clock'});
  }
  const reports=(Array.isArray(input.tasks)?input.tasks:[]).map(obj);
  for(const task of reports){
@@ -142,7 +145,7 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   if(at-now>AHEAD_MS)continue;
   const {when,day,clock}=planned(at,now,locale);
   routines.push({id:'check:'+applet.key,group:'routines',source:'check',title:`Check ${applet.title}`,detail:'',when,at,every:'Regularly, for anything new',by:'Worldlet',open:appletOpen(applet.key),
-   day,clock});
+   day,clock,name:`Check ${applet.title}`,status:when,icon:'clock'});
  }
 
  // The two default Routines (Today's prep, Wrap up today; core/artifacts/daily.ts), from the page's daily state: Worldlet
@@ -151,7 +154,8 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   if(made.kind!=='plan'&&made.kind!=='summary'||!Number.isFinite(made.at)||made.at<=now||made.at-now>AHEAD_MS)continue;
   const plan=made.kind==='plan',{when,day,clock}=planned(made.at,now,locale);
   routines.push({id:'daily:'+made.kind,group:'routines',source:'fox',title:DAILY_ROUTINE_NAMES[made.kind],detail:'',when,at:made.at,
-   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Worldlet, with your Agent',day,clock});
+   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Worldlet, with your Agent',day,clock,
+   name:DAILY_ROUTINE_NAMES[made.kind],status:when,icon:'clock'});
  }
 
  // Doing now: one window each ---------------------------------------------------------------------------------------
@@ -159,26 +163,30 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
  const page=input.page,site=page?taskSite(page.url):'';
  if(page&&site){
   const steps=(page.steps??[]).filter(step=>typeof step?.text==='string'&&step.text.trim()).slice(-8);
-  const current=steps.find(step=>!step.done);
+  const current=steps.find(step=>!step.done),done=steps.filter(step=>step.done).length;
   doing.push({id:'page:'+site,group:'now',source:'fox',title:`Fox is working on ${site}`,detail:current?clip(current.text,60):'',when:inProgress,at:now+1,who:'Fox',url:page.url,open:{url:page.url},
+   name:site,status:current?clip(current.text,60):'Fox is working on this page',icon:'fox',...(steps.length?{progress:done/steps.length}:{}),
    lines:steps.length?steps.map(step=>(step.done?'✓ ':'› ')+clip(step.text,80)):[`Working on ${clip(page.title||site,60)}`]});
  }
  for(const work of input.fox??[]){
   const text=clip(String(work.text??''));if(!text)continue;
-  doing.push({id:'fox:'+work.source,group:'now',source:'fox',title:text,detail:'',when:inProgress,at:work.at,who:'Fox',lines:[text]});
+  doing.push({id:'fox:'+work.source,group:'now',source:'fox',title:text,detail:'',when:inProgress,at:work.at,who:'Fox',lines:[text],
+   name:'Fox',status:text,icon:'fox'});
  }
  for(const task of input.working??[]){
   const applet=worldLogApplet(task.applet);if(!applet)continue;
   const at=seconds(task.at);
   doing.push({id:'applet:'+task.id,group:'now',source:'applet',title:`${applet.title} is working on a task`,detail:'',when:inProgress,at:at===null?now:at*1000,open:appletOpen(applet.key),
-   who:applet.title,lines:[`Fox handed ${applet.title} a task`,`${applet.title} is working on it`]});
+   who:applet.title,lines:[`Fox handed ${applet.title} a task`,`${applet.title} is working on it`],
+   name:applet.title,status:'Working on a task from Fox',icon:applet.key});
  }
  for(const task of reports){
   if(typeof task.id!=='string'||!task.id.endsWith(':check')||task.status!=='running')continue;
   const applet=worldLogApplet(task.owner);if(!applet)continue;
   const at=seconds(obj(task.execution).startedAt);
   doing.push({id:'check:'+applet.key,group:'now',source:'check',title:`Checking ${applet.title}`,detail:'',when:inProgress,at:at===null?now:at*1000,open:appletOpen(applet.key),
-   who:'Worldlet',lines:[`Reading ${applet.title} for anything new`]});
+   who:'Worldlet',lines:[`Reading ${applet.title} for anything new`],
+   name:`Checking ${applet.title}`,status:'Reading it for anything new',icon:applet.key});
  }
  // Older Hermes Agent conversations still coming in: today's newest report, while it is still bringing them.
  let older:{at:number;body:Record<string,any>}|null=null;
@@ -189,12 +197,12 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
  }
  if(older?.body.status==='bringing'){
   const {body,at}=older,brought=Number(body.brought),left=Number(body.remaining),many=(n:number)=>n.toLocaleString('en-US')+(n===1?' conversation':' conversations');
-  doing.push({id:'older:hermes',group:'now',source:'worldlet',title:'Bringing older Hermes Agent conversations',detail:'',when:Number.isFinite(left)&&left>0?left.toLocaleString('en-US')+' to go':inProgress,at,
+  const known=Number.isFinite(brought)&&Number.isFinite(left)&&brought+left>0;
+  doing.push({name:'Older Hermes Agent chats',status:Number.isFinite(left)&&left>0?left.toLocaleString('en-US')+' to go':'Bringing them in',icon:'fox',...(known?{progress:brought/(brought+left)}:{}),id:'older:hermes',group:'now',source:'worldlet',title:'Bringing older Hermes Agent conversations',detail:'',when:Number.isFinite(left)&&left>0?left.toLocaleString('en-US')+' to go':inProgress,at,
    who:'Worldlet',lines:[`Brought ${many(Number.isFinite(brought)?brought:0)} so far`+(Number.isFinite(left)&&left>0?` · ${left.toLocaleString('en-US')} to go`:'')]});
  }
 
  routines.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity));
  doing.sort((a,b)=>(b.at??0)-(a.at??0));
- const chip=[routines.length?'Routines '+routines.length:'',doing.length?'Doing now '+doing.length:''].filter(Boolean).join(' · ');
- return {routines:{rows:routines,total:routines.length},now:{rows:doing,total:doing.length},empty:!doing.length&&!routines.length,chip};
+ return {routines:{rows:routines,total:routines.length},now:{rows:doing,total:doing.length},empty:!doing.length&&!routines.length};
 }
