@@ -60,6 +60,8 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  await wait('no Routines row beside Enter your world',"!!document.querySelector('.setup-footer .setup-next')&&!document.querySelector('.setup-routines')",120);
  await press('Enter your world',120);
  await wait('world arrival',"document.querySelector('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl'",60);
+ // One continuous move into the World (owner request 2026-10-11): setup's Fox and icons land and their layer goes.
+ await wait('setup Fox and icons landed in the World',"!document.getElementById('setupArrivingDevices')",30);
  if(!host.preferences.bool('worldlet.dailyPrep',true)||!host.preferences.bool('worldlet.dailyWrapUp',true))throw Error('Setup left the default Routines off');
  mark('Today’s prep and Wrap up today are on');
  noRecordedFailures(host,'world arrival');

@@ -1,4 +1,4 @@
-import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT} from '../world/index.ts';
+import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT,environmentAt} from '../world/index.ts';
 import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../core/applets/index.ts';
 import {xAppIcon,appLogoSource,CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
 import {themeAppletIcon} from '../themes/index.ts';
@@ -335,50 +335,73 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   await call('foxPreferenceChange',{setting:'daily_routines',value:true}).catch(()=>{});
   const snapshot=await call('snapshot');
   const gathering=node('div','','setup-gathering');loader.append(gathering);
-  // Enter your world (owner request 2026-10-10): everything else fades; the apps line up on top and become the World's
-  // icons; Fox goes to the bottom and draws in what came along (Profile, Conversations, Skills…); then the icons and Fox
-  // go into the World together.
+  // Enter your world (owner requests 2026-10-10, 2026-10-11): one continuous move. Everything else fades while, at the
+  // same time, Fox walks down to its place at the bottom and takes in what came along (Profile, Conversations, Notes,
+  // Skills), the apps and the connections float up like umbrellas and become the World's icons, and Routines go to the
+  // dock beside Fox; then the icons and Fox go into the World.
   const still=reduced();
   const foxFrom=panel.querySelector('.setup-tile-fox')?.getBoundingClientRect();
-  const fox=image('assets/fox-startup.png','setup-gathering-fox');
+  const fox=image('assets/fox-startup.png','setup-gathering-fox');fox.dataset.fox='true';
   const foxSize=Math.round(Math.min(170,innerHeight*.22)),foxX=innerWidth/2,foxY=innerHeight-foxSize*.62-Math.min(48,innerHeight*.05);
   Object.assign(fox.style,{left:foxX+'px',top:foxY+'px',width:foxSize+'px',height:foxSize+'px'});gathering.append(fox);
-  const parcels=Array.from(panel.querySelectorAll<HTMLElement>('.setup-tile:not(.setup-tile-avatar):not(.setup-tile-apps):not(.is-empty)')).map(tile=>{
+  const parcels=Array.from(panel.querySelectorAll<HTMLElement>('.setup-tile:not(.setup-tile-avatar):not(.setup-tile-apps):not(.setup-tile-connections):not(.is-empty)')).map(tile=>{
    const r=tile.getBoundingClientRect(),copy=tile.cloneNode(true) as HTMLElement;
    copy.classList.remove('is-arriving');copy.classList.add('setup-parcel');copy.removeAttribute('data-key');
    Object.assign(copy.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});gathering.append(copy);
    return copy;
   });
   const foxFlight=fox.animate([foxFrom?{left:foxFrom.left+foxFrom.width/2+'px',top:foxFrom.top+foxFrom.height/2+'px',width:foxFrom.width+'px',height:foxFrom.width+'px'}:{opacity:0},{left:foxX+'px',top:foxY+'px',width:foxSize+'px',height:foxSize+'px',opacity:1}],{duration:still?0:650,easing:'cubic-bezier(.22,.7,.2,1)'}).finished;
-  // Every chosen app gathers on top: an icon shown in the Apps tile flies from its place, the rest come in from the middle.
+  // Every chosen app gathers on top: an icon shown in the Apps tile floats up from its place, the rest come in from the middle.
   const shelf=panel.querySelector('.setup-tile-apps');
-  const iconsToGather=WORLD_APPS.filter(a=>selected.has(a.id)).map(app=>{
+  const chosenApps=WORLD_APPS.filter(a=>selected.has(a.id));
+  const iconsToGather=chosenApps.map(app=>{
    const shown=panel.querySelector<HTMLImageElement>('.setup-app[data-applet-id="'+CSS.escape(app.id)+'"] .setup-app-logo');
    const img=shown||image(appIcon(app),'setup-app-logo');img.dataset.appletId=app.id;return img;
   });
   const tile=(shelf||panel).getBoundingClientRect();
-  const columns=Math.min(8,iconsToGather.length),rows=Math.ceil(iconsToGather.length/columns),spacing=Math.min(120,(innerWidth-80)/columns,(innerHeight*.42)/rows);
+  const columns=Math.min(8,Math.max(1,iconsToGather.length)),rows=Math.ceil(iconsToGather.length/columns),spacing=Math.min(120,(innerWidth-80)/columns,(innerHeight*.42)/rows);
+  const slot=(i:number)=>{const row=Math.floor(i/columns),inRow=row<rows-1?columns:iconsToGather.length-columns*row;return {x:innerWidth*.5+((i%columns)-(inRow-1)/2)*spacing,y:innerHeight*.3+(row-(rows-1)/2)*spacing};};
+  // Floating up under an umbrella: a slow rise that sways one way, then the other, and settles without a bounce.
+  const float=(el:HTMLElement,x:number,y:number,to:{x:number,y:number},i:number,{visible=true,end={opacity:1,scale:.85}}={})=>{
+   const dx=to.x-x,dy=to.y-y,sway=(i%2?1:-1)*Math.min(36,14+Math.abs(dy)*.08),at=(f:number,s:number,r:number,o=1)=>({left:x+dx*f+s+'px',top:y+dy*f+'px',opacity:o,transform:`translate(-50%,-50%) rotate(${r}deg) scale(${1-(1-end.scale)*f})`});
+   return el.animate([{...at(0,0,0,visible?1:0)},{...at(.35,sway,sway>0?7:-7)},{...at(.72,-sway*.45,sway>0?-4:4)},{...at(1,0,0,end.opacity),offset:1}],{duration:still?0:1100,delay:still?0:120+i*55,easing:'cubic-bezier(.3,.6,.3,1)',fill:'forwards'}).finished;
+  };
   const flights=iconsToGather.map((img,i)=>{
    const r=img.getBoundingClientRect(),copy=img.cloneNode() as HTMLImageElement;gathering.append(copy);
    const visible=img.isConnected&&r.width>0&&r.top>=tile.top&&r.bottom<=tile.bottom;
-   const x=visible?r.left+r.width/2:innerWidth/2,y=visible?r.top+r.height/2:innerHeight*.5;
-   const row=Math.floor(i/columns),inRow=row<rows-1?columns:iconsToGather.length-columns*row;
-   const targetX=innerWidth*.5+((i%columns)-(inRow-1)/2)*spacing,targetY=innerHeight*.3+(Math.floor(i/columns)-(rows-1)/2)*spacing;
-   return copy.animate([{left:x+'px',top:y+'px',opacity:visible?1:0,transform:'translate(-50%,-50%) scale(1)'},{left:targetX+'px',top:targetY+'px',opacity:1,transform:'translate(-50%,-50%) scale(.85)'}],{duration:still?0:650,easing:'cubic-bezier(.22,.7,.2,1)',fill:'forwards'}).finished;
+   return float(copy,visible?r.left+r.width/2:innerWidth/2,visible?r.top+r.height/2:innerHeight*.5,slot(i),i,{visible});
   });
-  loader.classList.add('is-gathering');await Promise.all([...flights,foxFlight]);
-  // What came along drifts down into Fox, one after another; Fox brightens a little as each arrives. Routines run on
-  // their own, so they go to the Routines beside Fox on its right instead (owner request 2026-10-11); before the
-  // panel has read them, to where it stands.
+  // The connections float up with them and become the icon of the app they open (Google: Mail), or fade on top.
+  const connectionFlights=Array.from(panel.querySelectorAll<HTMLElement>('.setup-tile-connections .setup-tile-logos>*')).map((mark,i)=>{
+   const r=mark.getBoundingClientRect(),copy=mark.cloneNode(true) as HTMLElement;copy.classList.add('setup-gathering-mark');gathering.append(copy);
+   const provider=mark.dataset.provider==='google'?'gmail':mark.dataset.provider,index=chosenApps.findIndex(a=>a.key===provider);
+   return float(copy,r.left+r.width/2,r.top+r.height/2,index>=0?slot(index):{x:innerWidth/2,y:innerHeight*.18},iconsToGather.length+i,{end:{opacity:0,scale:.7}}).then(()=>copy.remove());
+  });
+  // The World comes forward as it will open, by day or by night from the same clock the World reads before it knows a
+  // place, so the painting and the World match when one hands over to the other.
+  // A theme without its own night painting gets its day painting dimmed for the night.
+  const assets=(globalThis as any).__WORLDLET_25D_ASSETS__,night=environmentAt().night,now=night&&assets?.night?assets.night:assets?.surroundings;
+  if(now&&typeof now==='string')loader.style.setProperty('--setup-world-now','url("'+now.replace(/"/g,'%22')+'")');
+  if(night&&!assets?.night)loader.dataset.setupNight='dimmed';
+  loader.classList.add('is-gathering');
+  // What came along drifts into Fox while it walks down; Fox swells and glows a little as it takes in each one. Routines
+  // run on their own, so they go to the dock beside Fox instead, to Next on its right (owner layout 2026-10-11); before
+  // the dock has read them, to where it stands.
   const corner=(document.querySelector('.task-panel:not([hidden]) .task-group[data-group=routines]')||document.querySelector('.task-panel:not([hidden])'))?.getBoundingClientRect();
   const cornerX=corner&&corner.width?corner.left+24:innerWidth/2+260,cornerY=corner&&corner.height?corner.top+24:innerHeight-40;
-  await Promise.all(parcels.map(async (parcel,i)=>{
+  const absorbed=Promise.all(parcels.map(async (parcel,i)=>{
    const toCorner=parcel.classList.contains('setup-tile-routines');
-   const r=parcel.getBoundingClientRect(),dx=(toCorner?cornerX:foxX)-(r.left+r.width/2),dy=(toCorner?cornerY:foxY)-(r.top+r.height/2),delay=still?0:i*110;
-   await parcel.animate([{transform:'none',opacity:1},{transform:`translate(${dx*.55}px,${dy*.55}px) scale(.45)`,opacity:.9,offset:.6},{transform:`translate(${dx}px,${dy}px) scale(.04)`,opacity:0}],{duration:still?0:620,delay,easing:'cubic-bezier(.55,0,.35,1)',fill:'forwards'}).finished;
+   const r=parcel.getBoundingClientRect(),dx=(toCorner?cornerX:foxX)-(r.left+r.width/2),dy=(toCorner?cornerY:foxY)-(r.top+r.height/2),delay=still?0:220+i*120;
+   await parcel.animate([{transform:'none',opacity:1,filter:'none'},{transform:`translate(${dx*.55}px,${dy*.55}px) scale(.4)`,opacity:.95,filter:'brightness(1.08)',offset:.6},{transform:`translate(${dx}px,${dy}px) scale(.03)`,opacity:0,filter:'brightness(1.6) blur(2px)'}],{duration:still?0:720,delay,easing:'cubic-bezier(.55,0,.35,1)',fill:'forwards'}).finished;
    parcel.remove();
-   if(!still&&!toCorner)fox.animate([{filter:'brightness(1)'},{filter:'brightness(1.25) drop-shadow(0 0 14px #ffe4a0)'},{filter:'brightness(1)'}],{duration:320});
-  }));
+   if(!still&&!toCorner)fox.animate([{transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1)'},{transform:'translate(-50%,-50%) scale(1.07)',filter:'brightness(1.25) drop-shadow(0 0 16px #ffe4a0)'},{transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1) drop-shadow(0 6px 10px #35453030)'}],{duration:360,easing:'ease-out'});
+  })).then(()=>{
+   // Fox has taken everything in: one soft ring of light, and it is ready to go.
+   if(still||!parcels.some(p=>!p.classList.contains('setup-tile-routines')))return;
+   const ring=node('div','','setup-gathering-ring');Object.assign(ring.style,{left:foxX+'px',top:foxY+'px',width:foxSize+'px',height:foxSize+'px'});gathering.append(ring);
+   return ring.animate([{transform:'translate(-50%,-50%) scale(.6)',opacity:.9},{transform:'translate(-50%,-50%) scale(1.6)',opacity:0}],{duration:520,easing:'ease-out',fill:'forwards'}).finished.then(()=>ring.remove());
+  });
+  await Promise.all([...flights,...connectionFlights,foxFlight,absorbed]);
   // Let the user see each familiar flat icon become its actual device before opening.
   await Promise.all(Array.from(gathering.querySelectorAll<HTMLImageElement>('img')).map(async (logo,i)=>{
    const app=WORLD_APPS.find(a=>a.id===logo.dataset.appletId);
@@ -388,7 +411,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    try{await device.decode();}catch{return;}
    const size=APPLET_OVERVIEW_WIDTH*(APPLET_OPTICAL_SCALE[app.key]??1)*Math.max(innerWidth/WORLD_WIDTH,innerHeight/WORLD_HEIGHT);
    const r=logo.getBoundingClientRect();Object.assign(device.style,{left:(r.left+r.width/2)+'px',top:(r.top+r.height/2)+'px',width:size+'px',height:size+'px',transform:'translate(-50%,-50%)',opacity:'0'});gathering.append(device);
-   const duration=still?0:650,delay=still?0:i*140;
+   const duration=still?0:650,delay=still?0:i*70;
    await Promise.all([
     logo.animate([{opacity:1,filter:'brightness(1)'},{opacity:.6,filter:'brightness(2)',offset:.35},{opacity:0,filter:'brightness(1)'}],{duration,delay,fill:'forwards'}).finished,
     device.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.45)',filter:'brightness(2) drop-shadow(0 0 12px #ffe4a0)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.7},{opacity:1,transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1) drop-shadow(0 3px 5px #35453025)'}],{duration,delay,fill:'forwards'}).finished
@@ -497,13 +520,13 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(kind==='skills')return keep('tile:skills',String(brought.skills)+draft.language,build('Skills','',big(brought.skills,'skills it learned')));
   if(kind==='routines')return keep('tile:routines',String(brought.routines)+draft.language,build('Routines','',big(brought.routines,'run on their own')));
   if(kind==='connections'){
-   const items:{title:string,logo:string,again:boolean}[]=importingAgent()
-    ?(draft.integrations||[]).filter(item=>item.outcome!=='stays').map(item=>({title:item.title,logo:item.provider==='google'?'brands/google.png':logoOf(item.provider),again:item.outcome==='reconnect'}))
-    :[{title:'Gmail',logo:logoOf('gmail'),again:false},{title:'Google Calendar',logo:logoOf('google-calendar'),again:false}];
+   const items:{title:string,provider?:string,logo:string,again:boolean}[]=importingAgent()
+    ?(draft.integrations||[]).filter(item=>item.outcome!=='stays').map(item=>({title:item.title,provider:typeof item.provider==='string'?item.provider:'',logo:item.provider==='google'?'brands/google.png':logoOf(item.provider),again:item.outcome==='reconnect'}))
+    :[{title:'Gmail',provider:'gmail',logo:logoOf('gmail'),again:false},{title:'Google Calendar',provider:'google-calendar',logo:logoOf('google-calendar'),again:false}];
    return keep('tile:connections',JSON.stringify([items,draft.language]),build('Connections','is-wide',el=>{
     if(!items.length)return none(el);
     const row=node('div','','setup-tile-logos');
-    for(const item of items){const mark=item.logo?image(item.logo,'setup-tile-logo'):node('span',item.title,'setup-tile-chip');mark.title=item.title+(item.again?' · '+t('Sign in again after setup'):'');row.append(mark);}
+    for(const item of items){const mark=item.logo?image(item.logo,'setup-tile-logo'):node('span',item.title,'setup-tile-chip');if(item.provider)mark.dataset.provider=item.provider;mark.title=item.title+(item.again?' · '+t('Sign in again after setup'):'');row.append(mark);}
     el.append(row);
     const again=items.filter(item=>item.again).length;
     el.append(node('p',again?count('{count} to sign in again after setup',again):items.map(item=>item.title).join(' · '),'setup-tile-note'));
