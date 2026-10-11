@@ -7,7 +7,6 @@
 import type {LocalHarnessId} from './local-harness.ts';
 
 export type ModelTier='S'|'M'|'L';
-export const MODEL_TIERS:readonly ModelTier[]=['S','M','L'];
 /** The tier Fox's conversation uses. */
 export const CHAT_TIER:ModelTier='M';
 
