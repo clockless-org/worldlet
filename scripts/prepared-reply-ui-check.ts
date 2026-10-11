@@ -64,8 +64,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(sent.text.includes('id "thread:18c2a1"')&&sent.text.includes('prepare_email once with threadId "18c2a1"')&&sent.text.includes('you never send it'),'it reads the item’s own thread and prepares one draft, never sending');
  // The Task panel on the right says what Fox is doing.
  const panel=page.locator('.task-panel');
- const working=panel.locator('.task-group[data-group=now] .task-row[data-source=fox]');
- await working.filter({hasText:'Drafting a reply: Answer Priya about the venue…'}).waitFor();
+ // Doing now is a small window with Fox working in it, its status lines like a terminal.
+ const working=panel.locator('.task-window[data-task-id="fox:reply"]');
+ await working.locator('.task-terminal-line',{hasText:'Drafting a reply: Answer Priya about the venue…'}).waitFor();
  const box=await working.boundingBox(),view=page.viewportSize()!;
  assert.ok(box&&box.x+box.width>=view.width-60&&box.x>view.width*.6,'on the World’s right side: '+JSON.stringify(box));
  assert.equal(await page.locator('#foxArtifact').isVisible(),false,'no card opens');
@@ -75,7 +76,7 @@ await withBrowser(fileAccess,async browser=>{
  const done=panel.locator('.task-group[data-group=done] .task-row[data-source=fox]');
  await done.waitFor({state:'visible'});
  assert.equal(await done.locator('.task-title').innerText(),'1 reply ready');
- assert.equal(await working.count(),0,'nothing is left under Doing now');
+ assert.equal(await working.count(),0,'nothing is left in the Doing now window');
  assert.deepEqual(await page.evaluate(()=>(window as any).statuses),[{source:'reply',text:'Drafting a reply: Answer Priya about the venue…'},{source:'reply',text:'',done:'1 reply ready'}]);
  await page.screenshot({path:path.join(tmpdir(),'worldlet-prepared-reply-done.png'),clip:{x:view.width-420,y:0,width:420,height:view.height}}).catch(()=>{});
  const dialogue=await page.locator('#companionDialogue').innerText().catch(()=>'');

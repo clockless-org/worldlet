@@ -18,7 +18,7 @@ export type TaskGroup='now'|'planned'|'done';
  * check, or one of Worldlet's routines. */
 export type TaskSource='agent-job'|'fox'|'applet'|'check'|'worldlet';
 /** Where selecting a row goes, at most one place. */
-export type TaskOpen={applet:string}|{journal:string;card?:string}|{attention:string}|{routine:string};
+export type TaskOpen={applet:string}|{journal:string;card?:string}|{attention:string}|{routine:string}|{url:string};
 export type TaskRow={
  /** Stable: the source's prefix and its own id. */
  id:string;group:TaskGroup;source:TaskSource;title:string;
@@ -34,6 +34,12 @@ export type TaskRow={
  open?:TaskOpen;
  /** For a planned row's popover: how often and who runs it. */
  every?:string;by?:string;
+ /** For the Planned timeline: the day it stands under ("Today", "Tomorrow", "Mon", "Repeating") and the time beside
+  * its dot ("8:00 AM", "every hour"). */
+ day?:string;clock?:string;
+ /** For the Doing now window: who is doing it ("Fox", "YouTube", "Worldlet"), the status lines it shows now, and for
+  * a page Fox drives, that page's address. */
+ who?:string;lines?:string[];url?:string;
 };
 export type TaskSection={rows:TaskRow[];more:number;total:number};
 export type TaskPanel={now:TaskSection;planned:TaskSection;done:TaskSection;empty:boolean;
@@ -51,6 +57,8 @@ export type TaskPanelInput={
  runs?:readonly {id:string;title:string;at:number;failed?:boolean}[];
  /** Applet tasks working now: catalog key and start (seconds). */
  working?:readonly {id:string;applet:string;at:number}[];
+ /** The web page Fox is driving now, if any: its address, title and the steps its status lists. */
+ page?:{url:string;title:string;steps?:readonly {text:string;done:boolean}[]}|null;
  /** Fox's background work the page heard of: running now, and what it finished (ms). */
  fox?:readonly {source:string;text:string;at:number}[];
  foxDone?:readonly {source:string;text:string;at:number}[];
@@ -104,6 +112,11 @@ export function taskHowOften(when:HarnessJob['when']):string {
  return 'On its own schedule';
 }
 
+/** A page's host without "www.", or '' for an address that is not a web page. */
+export function taskSite(url:string):string {
+ const m=typeof url==='string'?/^https?:\/\/(?:[^@/?#]*@)?([^/:?#]+)/i.exec(url):null;
+ return m?m[1].toLowerCase().replace(/^www\./,''):'';
+}
 /** Today's scheduled-job results among the World's items (core/agent/harness-schedule.ts writes them with the provider
  * `harness:<id>`): each run's name, time and whether it failed, for the Done group. The note that a scheduler is not
  * running is not a run. */
@@ -129,21 +142,31 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
  const inProgress='In progress';
 
  // Doing now ------------------------------------------------------------------------------------------------------
+ // A page Fox drives comes first: it is what the person can watch.
+ const page=input.page,site=page?taskSite(page.url):'';
+ if(page&&site){
+  const steps=(page.steps??[]).filter(step=>typeof step?.text==='string'&&step.text.trim()).slice(-8);
+  const current=steps.find(step=>!step.done);
+  doing.push({id:'page:'+site,group:'now',source:'fox',title:`Fox is working on ${site}`,detail:current?clip(current.text,60):'',when:inProgress,at:now+1,who:'Fox',url:page.url,open:{url:page.url},
+   lines:steps.length?steps.map(step=>(step.done?'✓ ':'› ')+clip(step.text,80)):[`Working on ${clip(page.title||site,60)}`]});
+ }
  for(const work of input.fox??[]){
   const text=clip(String(work.text??''));if(!text)continue;
-  doing.push({id:'fox:'+work.source,group:'now',source:'fox',title:text,detail:'',when:inProgress,at:work.at});
+  doing.push({id:'fox:'+work.source,group:'now',source:'fox',title:text,detail:'',when:inProgress,at:work.at,who:'Fox',lines:[text]});
  }
  for(const task of input.working??[]){
   const applet=worldLogApplet(task.applet);if(!applet)continue;
   const at=seconds(task.at);
-  doing.push({id:'applet:'+task.id,group:'now',source:'applet',title:`${applet.title} is working on a task`,detail:'',when:inProgress,at:at===null?now:at*1000,open:appletOpen(applet.key)});
+  doing.push({id:'applet:'+task.id,group:'now',source:'applet',title:`${applet.title} is working on a task`,detail:'',when:inProgress,at:at===null?now:at*1000,open:appletOpen(applet.key),
+   who:applet.title,lines:[`Fox handed ${applet.title} a task`,`${applet.title} is working on it`]});
  }
  const reports=(Array.isArray(input.tasks)?input.tasks:[]).map(obj);
  for(const task of reports){
   if(typeof task.id!=='string'||!task.id.endsWith(':check')||task.status!=='running')continue;
   const applet=worldLogApplet(task.owner);if(!applet)continue;
   const at=seconds(obj(task.execution).startedAt);
-  doing.push({id:'check:'+applet.key,group:'now',source:'check',title:`Checking ${applet.title}`,detail:'',when:inProgress,at:at===null?now:at*1000,open:appletOpen(applet.key)});
+  doing.push({id:'check:'+applet.key,group:'now',source:'check',title:`Checking ${applet.title}`,detail:'',when:inProgress,at:at===null?now:at*1000,open:appletOpen(applet.key),
+   who:'Worldlet',lines:[`Reading ${applet.title} for anything new`]});
  }
 
  // Today's history, oldest first ----------------------------------------------------------------------------------
@@ -180,7 +203,8 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
  }
  if(older){
   const {body,at}=older,brought=Number(body.brought),left=Number(body.remaining),many=(n:number)=>n.toLocaleString('en-US')+(n===1?' conversation':' conversations');
-  if(body.status==='bringing')doing.push({id:'older:hermes',group:'now',source:'worldlet',title:'Bringing older Hermes Agent conversations',detail:'',when:Number.isFinite(left)&&left>0?left.toLocaleString('en-US')+' to go':inProgress,at});
+  if(body.status==='bringing')doing.push({id:'older:hermes',group:'now',source:'worldlet',title:'Bringing older Hermes Agent conversations',detail:'',when:Number.isFinite(left)&&left>0?left.toLocaleString('en-US')+' to go':inProgress,at,
+   who:'Worldlet',lines:[`Brought ${many(Number.isFinite(brought)?brought:0)} so far`+(Number.isFinite(left)&&left>0?` · ${left.toLocaleString('en-US')} to go`:'')]});
   else done.push({id:'older:hermes',group:'done',source:'worldlet',title:'Brought older Hermes Agent conversations',detail:body.status==='complete'?many(brought):'the oldest stayed behind',when:'',at});
  }
  for(const run of input.runs??[]){
@@ -198,7 +222,8 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   if(job.paused||'at' in job.when&&job.when.at<=now)continue;
   const at='cron' in job.when?nextCronRun(job.when.cron,now):'at' in job.when?job.when.at:null;
   const every='everySeconds' in job.when?routineEvery(job.when.everySeconds):'';
-  planned.push({id:'job:'+job.id,group:'planned',source:'agent-job',title:clip(job.name),detail:'',when:at!==null?taskPlannedWhen(at,now,locale):every,at,every:taskHowOften(job.when),by,open:{routine:job.id}});
+  planned.push({id:'job:'+job.id,group:'planned',source:'agent-job',title:clip(job.name),detail:'',when:at!==null?taskPlannedWhen(at,now,locale):every,at,every:taskHowOften(job.when),by,open:{routine:job.id},
+   day:at!==null?routineDay(at,now,locale):'Repeating',clock:at!==null?routineClock(at,locale):every});
  }
  for(const task of reports){
   if(typeof task.id!=='string'||!task.id.endsWith(':check')||task.enabled===false||task.status==='paused'||task.status==='running')continue;
@@ -206,7 +231,8 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   if(!applet||next===null)continue;
   const at=Math.max(now,next*1000);
   if(at-now>AHEAD_MS)continue;
-  planned.push({id:'check:'+applet.key,group:'planned',source:'check',title:`Check ${applet.title}`,detail:'',when:taskPlannedWhen(at,now,locale),at,every:'Regularly, for anything new',by:'Worldlet',open:appletOpen(applet.key)});
+  planned.push({id:'check:'+applet.key,group:'planned',source:'check',title:`Check ${applet.title}`,detail:'',when:taskPlannedWhen(at,now,locale),at,every:'Regularly, for anything new',by:'Worldlet',open:appletOpen(applet.key),
+   day:routineDay(at,now,locale),clock:routineClock(at,locale)});
  }
 
  doing.sort((a,b)=>(b.at??0)-(a.at??0));

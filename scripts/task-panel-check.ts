@@ -74,6 +74,16 @@ assert.equal(doing.now.more,1,'the older conversations are the fourth');assert.e
 assert.deepEqual(doing.now.rows[2].open,{applet:'app-youtube'});
 assert.equal(doing.now.rows[0].open,undefined,'Fox’s own work opens nothing here');
 
+// The window's details: who does each, its status lines; a page Fox drives comes first, its steps as lines.
+assert.deepEqual(doing.now.rows.map(r=>[r.who,r.lines]),[['Fox',['Drafting a reply: Answer Sam about the venue…']],['Worldlet',['Reading Notes for anything new']],['YouTube',['Fox handed YouTube a task','YouTube is working on it']]]);
+const driving=taskPanel({page:{url:'https://www.example.com/courts?x=1',title:'Book a court',steps:[{text:'Opening the booking page',done:true},{text:'Choosing a court time',done:false}]},working:[{id:'task-1',applet:'youtube',at:s('2026-10-10T07:29:00')}]},now,L);
+assert.deepEqual(driving.now.rows.map(r=>r.id),['page:example.com','applet:task-1'],'the page Fox drives first');
+assert.deepEqual([driving.now.rows[0].title,driving.now.rows[0].detail,driving.now.rows[0].lines,driving.now.rows[0].open],['Fox is working on example.com','Choosing a court time',['✓ Opening the booking page','› Choosing a court time'],{url:'https://www.example.com/courts?x=1'}]);
+assert.equal(taskPanel({page:{url:'about:blank',title:''}},now,L).now.total,0,'not a web page: no window for it');
+// The timeline's day and time beside each dot.
+assert.deepEqual(planned.planned.rows.map(r=>[r.day,r.clock]),[['Today','7:40 AM'],['Today','7:50 AM'],['Today','8:00 AM'],['Mon','6:30 AM']]);
+assert.deepEqual(taskPanel({jobs:[{id:'t',name:'Weather',kind:'prompt',paused:false,when:{everySeconds:3600}}] as any},now,L).planned.rows.map(r=>[r.day,r.clock]),[['Repeating','every hour']]);
+
 // Done today: newest first, a day of one Applet's checks folded, failures marked, yesterday left out, four then the total.
 const history=[
  {seq:1,at:s('2026-10-09T23:00:00'),kind:'routine.run',body:{status:'complete',name:'Yesterday’s job'}},

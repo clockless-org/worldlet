@@ -39,7 +39,8 @@
 #notionWorld .world-task-tracker{width:330px;max-width:30%;top:76px;bottom:76px;height:auto;max-height:none;justify-content:center;text-shadow:0 1px 3px #25332680;--ui-matter-ink:#fff9e9;--ui-matter-muted:#f4eedc;--ui-matter-hover:#fff6df14}
 #notionWorld .world-task-tracker::before{display:none}
 #notionWorld .world-task-list{position:relative;isolation:isolate;overflow:visible;padding:16px 12px;border:0;border-radius:0;background:none;box-shadow:none;max-height:100%}
-#notionWorld .world-task-list::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:#0000007a;box-shadow:0 0 48px 24px #00000022;filter:blur(48px)}
+/* The Task panel on the right floats on the same backing (ui/hud/task-panel.ts). */
+#notionWorld :is(.world-task-list,.task-panel-body)::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:#0000007a;box-shadow:0 0 48px 24px #00000022;filter:blur(48px)}
 #notionWorld .world-task-list:empty{display:none}
 /* Today heads the Attention Center (owner request 2026-10-08): the date opens today's plan in the Journal, the weather its forecast. */
 #notionWorld:has(>.world-today) .world-task-tracker{top:124px}
