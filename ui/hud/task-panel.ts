@@ -23,8 +23,9 @@ import {callHost} from '../../platform/bridge/host.ts';
 const REFRESH_MS=30_000;
 /** How often the window's picture of Fox's page is taken again while Fox drives one. */
 const PAGE_MS=3000;
-/** Status lines a closed terminal window shows; an open one keeps up to LOG_MAX. */
-const TERMINAL_LINES=3,LOG_MAX=40;
+/** Status lines a closed terminal window shows, enough to know what Fox is doing (owner feedback 2026-10-11); an open
+ * one keeps up to LOG_MAX. */
+const TERMINAL_LINES=2,LOG_MAX=40;
 const el=<K extends keyof HTMLElementTagNameMap>(tag:K,cls='',text?:string)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;};
 
 export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:string)=>{}}:{call?:(action:string,body?:object)=>Promise<any>;openApplet?:(id:string)=>void}={}){

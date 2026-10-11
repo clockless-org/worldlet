@@ -41,6 +41,8 @@
 #notionWorld .world-task-list{position:relative;isolation:isolate;overflow:visible;padding:16px 12px;border:0;border-radius:0;background:none;box-shadow:none;max-height:100%}
 /* The Task panel on the right (ui/hud/task-panel.ts) and today's corner above the Attention Center float on the same backing. */
 #notionWorld :is(.world-task-list,.task-panel-body,.world-today)::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:#0000007a;box-shadow:0 0 48px 24px #00000022;filter:blur(48px)}
+/* The Task panel's backing is lighter: it only says what Fox is doing (owner feedback 2026-10-11). */
+#notionWorld .task-panel-body::before{background:#0000004d;box-shadow:0 0 40px 16px #00000014}
 #notionWorld .world-task-list:empty{display:none}
 /* Today heads the Attention Center (owner request 2026-10-08): the date opens today's plan in the Journal, the weather its
    forecast. It is the column's first section (owner request 2026-10-11: line it up with the Attention Center): the same
