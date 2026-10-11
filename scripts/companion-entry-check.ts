@@ -49,11 +49,11 @@ await withBrowser(fileAccess,async browser=>{
  await panel.locator('.companion-settings-list [data-setting=phone][aria-current=true]').waitFor();
  await page.screenshot({path:'/tmp/companion-phone.png'});
  await page.getByRole('button',{name:'Close companion panel'}).click();await panel.waitFor({state:'hidden'});
- // The Journal lives in the World's top-left corner, today's date at the head of the Attention Center; Fox keeps
- // only Settings beside it (owner request 2026-10-08).
+ // The Journal lives in the World's top-right corner with today's date, over the Task panel (owner request
+ // 2026-10-11).
  {assert.deepEqual(await page.locator('.companion-side .fox-side-button').allInnerTexts(),['Agent','Phone'],'Agent and Phone are Fox\'s side buttons');
   const journal=page.locator('.world-today-open'),j=await journal.boundingBox();
-  assert(j&&j.x<200&&j.y<120,'the Journal is the top-left corner');
+  assert(j&&j.x>700&&j.y<120,'the Journal is the top-right corner: '+JSON.stringify(j));
   assert.match(await journal.innerText(),/Journal/i,'it is named the Journal');
   const book=page.locator('#journalBook');await journal.click();await book.waitFor();assert(!await panel.isVisible(),'it opens the Journal, a book of its own');
   await page.getByRole('button',{name:'Close journal'}).click();await book.waitFor({state:'hidden'});}
@@ -101,5 +101,5 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/companion-bar.png'});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
  await type.click();const f=await form.boundingBox();assert(f.x>=0&&f.x+f.width<=390);await page.screenshot({path:'/tmp/companion-entry-narrow.png'});
- assert.deepEqual(errors,[]);console.log('PASS Companion: one message bar (click to type, hold to speak, Send) with the mic on its right, clicking Fox types, the top-left Journal corner opens the Journal, Fox’s side buttons Agent and Phone open Settings at Agent and at Phone (all hidden inside an Applet), hold-to-speak on Fox and the mic, retained draft, no bubble over Fox’s head, drag/reload/Applet persistence and narrow bounds. Mock speech only.');
+ assert.deepEqual(errors,[]);console.log('PASS Companion: one message bar (click to type, hold to speak, Send) with the mic on its right, clicking Fox types, the top-right Journal corner opens the Journal, Fox’s side buttons Agent and Phone open Settings at Agent and at Phone (all hidden inside an Applet), hold-to-speak on Fox and the mic, retained draft, no bubble over Fox’s head, drag/reload/Applet persistence and narrow bounds. Mock speech only.');
 });

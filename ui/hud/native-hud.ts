@@ -77,8 +77,8 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  }
  const tracker=el('nav','world-task-tracker ui-theme-attention');tracker.setAttribute('aria-label','Attention Center: Coming Up, Worth Doing and Worth Knowing');
  const trackerList=el('div','world-task-list');tracker.append(trackerList);root.append(tracker);
- // Today heads the Attention Center, standing above it even when it is empty (owner request 2026-10-08, "把今天的日期、天气之类的放到左边去，放到左边 Attention Center
- // 上面，然后你随时一点就可以看到今天的计划"): the date and clock open the Journal on today's page, where the morning
+ // Today's corner stands in the World's top-right, heading the Task panel's column (owner request 2026-10-11, back from
+ // the head of the Attention Center, where it stood from 2026-10-08): the date and clock open the Journal on today's page, where the morning
  // brief stands first, and the weather beside them keeps opening the forecast. The live nodes move here from the World's
  // corner, so the clock and the weather go on updating themselves; the sound comes too (owner request 2026-10-08).
  const today=el('div','world-today ui-theme-today'),todayOpen=el('button','world-today-open');todayOpen.type='button';

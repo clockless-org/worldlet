@@ -32,7 +32,7 @@ export function soundIcon(value: any={},key=sounding(value)) {
 }
 
 export function mountWorldAudio(call){
- // The World's sound stands in the top-left corner with today's date and weather (owner request 2026-10-08: "声音也改左边吧").
+ // The World's sound stands in the top-right corner with today's date and weather (owner requests 2026-10-08 and 2026-10-11).
  const parent=document.querySelector('.world-today')||document.querySelector('.world-environment');if(!parent)return;
  const row=document.createElement('div');row.className='world-audio';row.setAttribute('aria-label','World audio');
  const status=document.createElement('span');status.className='world-audio-error';status.setAttribute('role','status');

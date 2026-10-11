@@ -60,7 +60,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const artifacts=createCompanionArtifacts({call,open:id=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:artifact-open',{detail:{id}}));},openMade:(made,keep)=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:artifact-open',{detail:{made,keep}}));},
   // A reply card that needs send access or a delivery check goes on in Fox's email review.
   review:detail=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:email-review',{detail}));}});
- // The Journal is a book of its own over the World (owner request 2026-10-08), opened by today's date in the World's top-left corner.
+ // The Journal is a book of its own over the World (owner request 2026-10-08), opened by today's date in the World's top-right corner.
  const journal=mountJournalBook({root,pages:artifacts.element,start:(day,card)=>artifacts.start(day,card),stop:()=>artifacts.stop(),returnFocus:()=>document.querySelector<HTMLElement>('.world-today-open')});
  async function openJournal(day='',card=''){
   const trigger=eventTrigger();

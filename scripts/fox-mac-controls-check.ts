@@ -91,8 +91,9 @@ await withBrowser(fileAccess,async browser=>{
  // Closing a panel is clicking away from it, which is why Done was dropped: it
  // took a line of a narrow bubble to offer what the rest of the screen already was.
  assert.equal(await bubble.getByRole('button',{name:'Done',exact:true}).count(),0,'no panel spends a line on Done');
- // Empty world in the top-right; the top-left now holds the Today corner, whose date opens the Journal (#2235).
- await page.locator('#notionStage').click({position:{x:1320,y:120}});
+ // Empty sky between the Attention Center and the title; the top-right holds the Today corner, whose date opens the
+ // Journal (owner request 2026-10-11).
+ await page.locator('#notionStage').click({position:{x:440,y:150}});
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue')?.hidden===true,null,{timeout:8000});
  await page.evaluate(()=>(document.activeElement as HTMLElement).blur());await page.keyboard.press('Space');assert.equal(await typing(),true,'tapping Space opens typing (owner 2026-10-07)');await input.press('Escape');await page.evaluate(()=>(document.activeElement as HTMLElement).blur());
  await handle.click();assert.equal(await typing(),true,'clicking the bar starts typing');assert.equal(await input.inputValue(),'');

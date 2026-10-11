@@ -54,9 +54,10 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await tracker.locator('.world-task-heading').innerText(),'WORTH DOING','the heading names the group and nothing else');
  assert.deepEqual(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.framing.viewport),before.viewport,'showing Attention Center must not move or shrink the world');
  const shortBacking=await page.locator('.world-task-list').boundingBox();
- // Today's date heads the Attention Center (#2235): the panel starts below that corner and centers what it holds in the room left under it.
+ // Today's corner stands in the top-right (owner request 2026-10-11), clear of the Attention Center on the left, which
+ // centers what it holds in its own room.
  const room=await tracker.boundingBox(),today=await page.locator('#notionWorld>.world-today').boundingBox();
- assert.ok(today&&today.y+today.height<=room.y,'the Attention Center starts below the Today corner: '+JSON.stringify({today,room}));
+ assert.ok(today&&today.x>=room.x+room.width,'the Today corner is clear of the Attention Center: '+JSON.stringify({today,room}));
  assert.ok(Math.abs(shortBacking.y+shortBacking.height/2-(room.y+room.height/2))<2,'short Attention Center stays vertically centered');
  // An event says when it is, beside its name, in both the forms a person uses.
  await page.evaluate(()=>{const at=new Date(Date.now()+2*3600*1000).toISOString();
