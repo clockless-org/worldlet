@@ -12,5 +12,5 @@ assert.ok(!attentionBrief({...page,worldItemSignal:{start:'invalid'}}).includes(
 // with no original to open, since it lives in the Journal.
 const kept:any=dailyScheduleResult({kind:'plan',day:'2026-10-07',artifact:{id:'art-brief0000001',title:'Plan · Wed, Oct 7',body:'**Today**\n\nA quiet day. Two replies wait for you.'},at:Date.parse('2026-10-07T13:05:00Z'),now:Date.parse('2026-10-07T13:06:00Z')})?.item;
 const scheduled=attentionBrief({title:kept.title,sourceProvider:kept.provider,sourceURL:'',worldItemKind:kept.kind,worldItemSources:kept.sources,worldItemSignal:{summary:kept.summary}});
-assert.equal(scheduled,'**Morning brief · Oct 7**\n\n**Key point:** A quiet day.','a scheduled brief: its title and the card’s first point, no source link: '+scheduled);
+assert.equal(scheduled,'**Today’s prep · Oct 7**\n\n**Key point:** A quiet day.','a scheduled brief: its title and the card’s first point, no source link: '+scheduled);
 console.log('PASS bounded evidence summaries, paragraphs, emphasis, dates and safe source links; a scheduled brief has no original to open');

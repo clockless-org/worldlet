@@ -71,17 +71,17 @@ assert.ok(!/\bsend_email\b|\bsend it\b(?! )/.test(request.text.replace('you neve
 // The Task panel's lines.
 assert.equal(replyPrepareStatus({id:'a',thread:'1',title:'Confirm school pickup'}),'Drafting a reply: Confirm school pickup…');
 assert.equal(Array.from(replyPrepareStatus({id:'a',thread:'1',title:'长'.repeat(80)})).length<=60,true,'It fits the corner');
-assert.equal(foxWorkDone('plan',2),'Morning brief and 2 replies ready');
-assert.equal(foxWorkDone('plan',0),'Morning brief ready');
+assert.equal(foxWorkDone('plan',2),'Today’s prep and 2 replies ready');
+assert.equal(foxWorkDone('plan',0),'Today’s prep ready');
 assert.equal(foxWorkDone('reply',1),'1 reply ready');
 assert.equal(foxWorkDone('reply',0),'','No draft made: nothing to say');
-assert.equal(foxWorkDone('summary',0),'Day summary ready');
+assert.equal(foxWorkDone('summary',0),'Wrap up today: ready');
 
 // The page executes these rules: the shared gate before any unasked request (the daily ask and the reply), the busy
 // retry, each item marked before asking, and the Task panel's Doing now hidden in onboarding and the tour.
 const world=fs.readFileSync('ui/shell/notion-world.ts','utf8');
 assert.match(world,/const backgroundMoment=\(\)=>backgroundBlocked\(\{sample:!!data\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep\|\|!!root\.dataset\.tourCoda,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\}\);/);
-assert.match(world,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active\)return;\n\s*const due=dailyArtifactDue\(daily,new Date\(\)\);\n\s*if\(!due\)\{void prepareReply\(\);return;\}/,'The reply is prepared only past the same gate, when no brief or summary is due');
+assert.match(world,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active\)return;\n\s*const due=dailyArtifactDue\(daily,new Date\(\),routinesOn\);\n\s*if\(!due\)\{void prepareReply\(\);return;\}/,'The reply is prepared only past the same gate, when no brief or summary is due');
 assert.match(world,/replyPrepareDue\(replies,\{now,daily,waiting:drafts\.length\}\)\.due\)return;/);
 assert.match(world,/replies=markReplyPrepared\(replies,next\.id,now,\{thread:next\.thread\}\);saveReplies\(\);[\s\S]*voice\.background\(request\.text,\{displayText:request\.displayText\}\)[\s\S]*\/busy\/i[\s\S]*replies=before;saveReplies\(\);/,'Marked before asking; asked again only when other background work held it');
 assert.match(fs.readFileSync('ui/index.ts','utf8'),/emailReviews:sample\?undefined:/,'No drafts are read in the practice world');

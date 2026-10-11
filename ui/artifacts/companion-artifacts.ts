@@ -30,7 +30,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  const leaf=el('div','companion-journal-leaf');
  // What the 6 AM brief holds, one part a line, in the person's words; empty restores the default.
  const brief=el('form','companion-journal-brief') as HTMLFormElement;brief.hidden=true;
- const briefLabel=el('label','companion-journal-brief-label','Every morning at 6, Fox makes your brief with these parts, one a line.') as HTMLLabelElement;
+ const briefLabel=el('label','companion-journal-brief-label','Every morning at 7, Today’s prep holds these parts, one a line.') as HTMLLabelElement;
  const briefText=el('textarea','companion-journal-brief-text') as HTMLTextAreaElement;briefText.rows=4;briefText.maxLength=240;briefText.id='companionMorningBrief';briefLabel.htmlFor=briefText.id;
  const briefSave=el('button','companion-journal-brief-save','Save') as HTMLButtonElement,briefNote=el('span','companion-journal-brief-note');
  briefNote.setAttribute('role','status');

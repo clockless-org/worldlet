@@ -284,7 +284,15 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('.setup-next').textContent(),'Enter your world');
   assert.equal(await page.locator('.setup-passport .setup-choose-again').isVisible(),true,'The chosen Agent\'s card can choose again (owner request 2026-10-09: no Back button)');
   assert.equal(await page.getByRole('button',{name:'Back',exact:true}).count(),0,'No Back button');
-  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-bring-'+platform+'.png')});
+  // The two default Routines (core/artifacts/daily.ts): one row beside Enter your world, ticked by default; no step of its own.
+  const routinesRow=page.locator('.setup-footer .setup-routines');
+  assert.equal(await routinesRow.textContent(),'Each morning and evening, your Agent prepares a card for you');
+  assert.equal(await routinesRow.locator('input[type=checkbox]').isChecked(),true,'On by default');
+  await routinesRow.click();assert.equal(await routinesRow.locator('input').isChecked(),false,'One click turns it off');
+  await routinesRow.click();assert.equal(await routinesRow.locator('input').isChecked(),true);
+  const rowBox=await routinesRow.boundingBox(),nextBox=await page.locator('.setup-next').boundingBox();
+  assert.ok(rowBox&&nextBox&&rowBox.y+rowBox.height<=nextBox.y&&nextBox.y+nextBox.height<=850,'The row sits above the button, both on screen');
+  await page.screenshot({path:process.env.WORLDLET_SETUP_ROUTINES_SCREEN||path.join(tmpdir(),'worldlet-setup-bring-'+platform+'.png')});
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),'No Google sign-in');
@@ -325,6 +333,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(result.state.onboarding.completed,true);
   assert.ok(result.state.onboarding.unlockedApplets.includes('app-github')&&!result.state.onboarding.unlockedApplets.includes('app-youtube'),'The app brought from the Agent comes along; featured starters do not: '+result.state.onboarding.unlockedApplets.join(' '));
   assert.ok(!result.calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'),'No Google sources to read');
+  assert.deepEqual(result.calls.filter(c=>c.action==='foxPreferenceChange'&&c.setting==='daily_routines').map(c=>c.value),[true],'Today’s prep and Wrap up today are on');
   const analytics=result.calls.filter(c=>c.action==='usageEvent').map(c=>c.event);
   assert.ok(analytics.includes('onboarding_apps_viewed')&&!analytics.some(e=>e.startsWith('google_connect_')),JSON.stringify(analytics));
   assert.deepEqual(errors,[]);await page.close();

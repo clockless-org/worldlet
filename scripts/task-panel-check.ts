@@ -98,11 +98,11 @@ assert.equal(taskPanel({history},now,L).empty,true,'finished checks, tasks, runs
 assert.equal(taskPanel({history:[{seq:1,at:s('2026-10-09T23:00:00'),kind:'brought.older',body:{agent:'hermes',status:'bringing',brought:5,remaining:9}}]},now,L).now.total,0,'yesterday’s report is not today’s work');
 assert.equal(taskPanel({history:[{seq:1,at:s('2026-10-10T06:00:00'),kind:'brought.older',body:{agent:'hermes',status:'bringing',brought:5,remaining:9}},history[3]]},now,L).now.total,0,'brought since: nothing still coming in');
 
-// Fox's own morning brief and day summary stand on the Routines timeline (core/artifacts dailyPlanned).
+// The two default Routines, Today's prep and Wrap up today, stand on the Routines timeline (core/artifacts dailyPlanned).
 {
- const daily=taskPanel({daily:[{kind:'summary',at:at('2026-10-10T21:00:00')},{kind:'plan',at:at('2026-10-11T06:00:00')},{kind:'plan',at:now-1}]},now,L);
- assert.deepEqual(daily.routines.rows.map(r=>[r.id,r.title,r.day,r.clock,r.by]),[['daily:summary','Day summary','Today','9:00 PM','Fox'],['daily:plan','Morning brief','Tomorrow','6:00 AM','Fox']],'the summary tonight, the brief tomorrow; one due now is not planned');
+ const daily=taskPanel({daily:[{kind:'summary',at:at('2026-10-10T18:00:00')},{kind:'plan',at:at('2026-10-11T07:00:00')},{kind:'plan',at:now-1}]},now,L);
+ assert.deepEqual(daily.routines.rows.map(r=>[r.id,r.title,r.day,r.clock,r.by]),[['daily:summary','Wrap up today','Today','6:00 PM','Worldlet, with your Agent'],['daily:plan','Today’s prep','Tomorrow','7:00 AM','Worldlet, with your Agent']],'the summary tonight, the brief tomorrow; one due now is not planned');
  assert.equal(daily.routines.rows[1].every,'Every morning, while you use Worldlet');
  assert.equal(daily.chip,'Routines 2');
 }
-console.log('PASS task panel: Routines and Doing now grouped and sorted with every row kept (one scrolling column), one Doing now window per running task, no finished work (the Journal keeps it), cron next runs and time text, Fox’s brief and summary among the routines');
+console.log('PASS task panel: Routines and Doing now grouped and sorted with every row kept (one scrolling column), one Doing now window per running task, no finished work (the Journal keeps it), cron next runs and time text, Today’s prep and Wrap up today among the routines');

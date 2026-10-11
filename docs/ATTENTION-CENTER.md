@@ -126,7 +126,7 @@ the same result reaches the paired phone while it is fresh (twelve hours):
 
 | Result | Becomes | Opens |
 | --- | --- | --- |
-| The morning brief and the day's summary ([the day's plan and summary](../core/artifacts/README.md#the-days-plan-and-summary)) | Worth Knowing, "Morning brief · Oct 7", owned by `worldlet` | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
+| The morning brief and the day's summary ([the day's plan and summary](../core/artifacts/README.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`; a run that made no card is Worth Doing, saying so | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
 | A run of Worldlet's own routine | Worth Knowing; one that did not finish, Worth Doing | Its card, with what the Agent returned when it returned text |
 | A run of a job on the person's Agent's own scheduler ([scheduled jobs](../core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)) | Worth Knowing with its output; a failed run, Worth Doing; a silent run, nothing | Its card |
 

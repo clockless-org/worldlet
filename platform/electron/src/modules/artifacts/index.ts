@@ -1,5 +1,5 @@
 import {mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../../core/artifacts/index.ts';
-import {dailyScheduleResult} from '../../../../../core/agent/index.ts';
+import {dailyScheduleFailure,dailyScheduleResult,type ScheduleResult} from '../../../../../core/agent/index.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE,type PhoneService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
@@ -20,8 +20,10 @@ export function installArtifacts(host:Host){
   * Journal on it, and on the phone while fresh. Core decides what it says (core/agent/harness-schedule.ts). */
  function scheduledResult(kind:unknown,day:unknown,artifact:Artifact,at:number){
   if(kind!=='plan'&&kind!=='summary'||typeof day!=='string')return;
+  keep(dailyScheduleResult({kind,day,artifact:artifact as any,at,now:Date.now()}));
+ }
+ function keep(result:ScheduleResult|null){
   try{
-   const result=dailyScheduleResult({kind,day,artifact:artifact as any,at,now:Date.now()});
    if(!result)return;
    const id=store.ledger().upsert([result.item as Row],'worldlet-schedule')[0]??'';
    store.worldChanged();
@@ -45,6 +47,12 @@ export function installArtifacts(host:Host){
     store.ledger().saveArtifacts([saved as any],forget);if(forget.length)store.ledger().deleteArtifactPages(forget);changed(saved.id);
     if(request.scheduled)scheduledResult(request.scheduled,request.day,saved,now*1000);
     return {ok:true,artifact:saved};
+   }
+   // Today's prep or Wrap up today ran and made no card: a Worth Doing item says so (core dailyScheduleFailure).
+   if(operation==='scheduleFailed'){
+    const kind=request.scheduled,day=request.day;
+    if((kind==='plan'||kind==='summary')&&typeof day==='string')keep(dailyScheduleFailure({kind,day,reason:typeof request.reason==='string'?request.reason:'',at:Date.now(),now:Date.now()}));
+    return {ok:true};
    }
    if(operation==='delete'){
     const id=String(request.id??'');

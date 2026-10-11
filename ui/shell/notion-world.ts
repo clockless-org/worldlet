@@ -22,7 +22,7 @@ import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../core/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
-import {artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
+import {artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE} from '../world/index.ts';
@@ -1360,7 +1360,9 @@ export function mountNotionWorld(data: World, native: any) {
     voice?.revealGuide?.();
   }
   // The day's plan in the morning and its summary in the evening (owner request 2026-10-06), each asked of Fox
-  // once a day. The plan is the morning brief, made at 6 AM before the person sits down (owner Order 2026-10-07), so
+  // once a day: the two default Routines, Today's prep at 7 AM and Wrap up today at 6 PM (owner decision 2026-10-11),
+  // each on unless the person turned it off (host `dailyRoutines`, `worldlet:daily-routines`). The plan is the morning
+  // brief, made before the person sits down (owner Order 2026-10-07), so
   // a hidden window or an open Applet does not hold it back; the summary waits for a day they used and for the World.
   // Neither runs beside a dialog or a turn in progress, nor before the first-run tour is over (Fox stays quiet
   // through it, #1948; Mac RCs 2983 and 2985 saw the plan take Fox's bubble from the first win). Automated
@@ -1371,18 +1373,22 @@ export function mountNotionWorld(data: World, native: any) {
   let daily=readDailyArtifactsState(null);try{daily=readDailyArtifactsState(JSON.parse(localStorage.getItem(dailyKey)||'null'));}catch{}
   const saveDaily=()=>{try{localStorage.setItem(dailyKey,JSON.stringify(daily));}catch{}announceDaily();};
   window.addEventListener('worldlet:product-event',(event:any)=>{if(event.detail?.event!=='user_engaged'||data.sample)return;daily=markDailyUse(daily,new Date());saveDaily();});
-  let dailyAsking=false,dailyAsked:{kind:'plan'|'summary';day:string}|null=null;
+  let dailyAsking=false,dailyAsked:{kind:'plan'|'summary';day:string}|null=null,dailyShown=false;
+  let routinesOn=DAILY_ROUTINES_ON;
+  const setRoutines=(value:unknown)=>{routinesOn=readDailyRoutines(value);announceDaily();};
+  if(!data.sample)void Promise.resolve(native?.dailyRoutines?.()).then(value=>{if(value)setRoutines(value);}).catch(()=>{});
+  window.addEventListener('worldlet:daily-routines',(event:any)=>setRoutines(event.detail));
   // The morning brief and the day's summary are kept as cards in the Journal and arrive as an Attention item (Worth
   // Knowing) that opens the Journal on that card: the host saves it with the card (core dailyScheduleResult), by the
   // rule every scheduled result follows (docs/ATTENTION-CENTER.md). The Journal never opens by itself.
   function showDailyInJournal(artifact){
-   const due=dailyAsked??{kind:/^Summary · /.test(String(artifact.title||''))?'summary':'plan',day:dayKey(new Date())};
+   const due=dailyAsked??{kind:/^Summary · /.test(String(artifact.title||''))?'summary':'plan',day:dayKey(new Date())};dailyShown=true;
    void Promise.resolve(native?.artifacts?.({operation:'save',artifact,scheduled:due.kind,day:due.day})).catch(()=>{}).then(()=>{window.dispatchEvent(new Event('worldlet:artifacts'));void requestArtifactPage(artifact,false);});
    return {ok:true,id:artifact.id,size:artifact.size,shown:'journal'};
   }
   // When the next brief and today's summary will be made, for the Task panel's Planned timeline (ui/hud/task-panel.ts);
   // nothing in the practice world or before the first run is over, which makes neither.
-  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date())}}));};
+  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn)}}));};
   setTimeout(announceDaily,0);
   // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
   // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
@@ -1391,7 +1397,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(!root.isConnected){clearInterval(dailyPoll);return;}
     announceDaily();
     if(backgroundMoment()||foxArtifact.visible||$('notionDialog').open||voice?.active)return;
-    const due=dailyArtifactDue(daily,new Date());
+    const due=dailyArtifactDue(daily,new Date(),routinesOn);
     if(!due){void prepareReply();return;}
     if(due.kind==='summary'&&(document.hidden||insideApplet()||inPageLayer()))return;
     void askDaily(due);
@@ -1407,19 +1413,22 @@ export function mountNotionWorld(data: World, native: any) {
      window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text:'',...(ok?{done:foxWorkDone(kind,drafted)}:{})}}));}};
   }
   async function askDaily(due:{kind:'plan'|'summary';day:string}){
-    dailyAsking=true;dailyAsked=due;
+    dailyAsking=true;dailyAsked=due;dailyShown=false;
     // What the brief holds, as the person wrote it (Morning brief in the Journal, or told to Fox).
     let brief:string|undefined;if(due.kind==='plan')try{brief=await native?.morningBrief?.();}catch{}
     const before=daily;daily=markDailyMade(daily,due.kind,due.day);saveDaily();
     const request=dailyArtifactRequest(due.kind,due.day,brief);
     // Made quietly in a background session beside the conversation (owner Orders 2026-10-07): no message in Fox's card
     // and no reply line, the person can talk to Fox meanwhile, and the long request never fills the conversation.
-    const work=backgroundWork('daily',due.kind,due.kind==='plan'?'Making your morning brief…':'Writing the day’s summary…');
-    let ok=true;
-    // Other background work still running: asked again at the next poll.
+    const work=backgroundWork('daily',due.kind,due.kind==='plan'?DAILY_ROUTINE_NAMES.plan+': preparing your day…':DAILY_ROUTINE_NAMES.summary+': writing it up…');
+    let ok=true,failed='';
+    // Other background work still running: asked again at the next poll. Any other failure, or a turn that ended with
+    // no card, is said plainly as a Worth Doing item (host `artifacts` scheduleFailed), never silently dropped.
     await Promise.resolve(voice?.background?.(request.text,{displayText:request.displayText}))
-     .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||''))){daily=before;saveDaily();}})
+     .then(()=>{if(!dailyShown)failed='It finished without making the card.';})
+     .catch(error=>{ok=false;const said=String(error?.message||'');if(/busy/i.test(said)){daily=before;saveDaily();}else failed=said||'Your Agent stopped.';})
      .finally(()=>{work.end(ok);dailyAsking=false;dailyAsked=null;});
+    if(failed)void Promise.resolve(native?.artifacts?.({operation:'scheduleFailed',scheduled:due.kind,day:due.day,reason:failed})).catch(()=>{});
   }
   // Replies Fox prepares by itself (owner decision 2026-10-09; rules in core/artifacts/replies.ts): a new Worth Doing
   // item from a Gmail thread that waits for the person gets a reply draft in a background session, a reply card in
