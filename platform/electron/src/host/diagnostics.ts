@@ -6,7 +6,7 @@ import {ensureDirectory,errorMessage} from '../files.ts';
 export function appendRotated(file:string,text:string){
  try{
   ensureDirectory(path.dirname(file));
-  if(fs.existsSync(file)&&fs.statSync(file).size>1_000_000){const ext=path.extname(file);fs.renameSync(file,file.slice(0,-ext.length)+'.previous'+ext);}
+  if((fs.statSync(file,{throwIfNoEntry:false})?.size??0)>1_000_000){const ext=path.extname(file);fs.renameSync(file,file.slice(0,-ext.length)+'.previous'+ext);}
   fs.appendFileSync(file,text,{mode:0o600});
  }catch{}
 }
@@ -33,13 +33,7 @@ const RECENT_NOTES=100;
 export function createDiagnostics(root:string){
  const file=path.join(root,'logs','diagnostics.jsonl');
  const notes:DiagnosticNote[]=[];
- const append=(line:string)=>{
-  try{
-   ensureDirectory(path.dirname(file));
-   if(fs.existsSync(file)&&fs.statSync(file).size>1_000_000)fs.renameSync(file,file.replace(/\.jsonl$/,'.previous.jsonl'));
-   fs.appendFileSync(file,line+'\n',{mode:0o600});
-  }catch{}
- };
+ const append=(line:string)=>appendRotated(file,line+'\n');
  return {
   record(error:unknown,operation='host',requestId=''){
    const message=errorMessage(error),at=new Date().toISOString();
