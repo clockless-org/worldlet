@@ -211,6 +211,11 @@ const errorText=(value:unknown,fallback:string)=>{const item=record(value);retur
 /** OpenClaw cannot read a key its configuration names (docs.openclaw.ai/gateway/secrets: a `store` SecretRef with no
  * entry, or an `env` one with no value): one plain line with the key's name and its own command to save it, never the
  * raw resolver text. Only names reach here, never values. Null when the text is not that. */
+/** Claude Code's own sign-in ran out ("Failed to authenticate: OAuth session expired and could not be refreshed",
+ * 2026-10-11): one plain line with how to sign in again, never the raw text. Null when the text is not that. */
+export function claudeCodeSignInExpired(text:string):string|null {
+ return /Failed to authenticate|OAuth (?:session|token)[^.]*expired|invalid_grant/i.test(text)?'Claude Code’s sign-in has expired. Open Terminal, run claude and sign in again with /login.':null;
+}
 export function openClawMissingKey(text:string):string|null {
  const name=/Secret store entry "([A-Z][A-Z0-9_]{0,127})" was not found/.exec(text)?.[1]??/Environment variable "([A-Z][A-Z0-9_]{0,127})" is missing or empty/.exec(text)?.[1];
  return name?`OpenClaw can’t find its key ${name}, so its model can’t answer. Save it in Terminal with: openclaw secrets store set ${name}`:null;
@@ -322,10 +327,11 @@ export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,ex
   }
   if(exit.code===0&&text&&!envelope)return {message:text};
  }
- if(state.error)return {error:state.error};
+ if(state.error)return {error:(id==='claude-code'?claudeCodeSignInExpired(state.error):null)??state.error};
  const message=(state.final??state.text).trim();
  if(message&&exit.code===0)return {message};
  const detail=exit.stderr.trim().split('\n').filter(Boolean).pop()??'';
  if(id==='openclaw'){const missing=openClawMissingKey(exit.stderr);if(missing)return {error:missing};}
+ if(id==='claude-code'){const expired=claudeCodeSignInExpired(exit.stderr+'\n'+(state.final??state.text));if(expired)return {error:expired};}
  return {error:detail?`${title} could not answer: ${clip(detail,300)}`:`${title} did not answer. Open it once in Terminal to finish signing in, then try again.`};
 }
