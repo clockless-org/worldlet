@@ -144,13 +144,14 @@ export function mountNotionWorld(data: World, native: any) {
   // The last save, so a page is asked for only once its artifact is kept.
   let keeping:Promise<unknown>=Promise.resolve();
   const keepArtifact=(artifact)=>{if(native?.artifacts)keeping=Promise.resolve(native.artifacts({operation:'save',artifact})).catch(()=>{});};
-  const foxArtifact=mountFoxArtifact(root,renderMarkdown,()=>{flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();},href=>openWorldURL(href),size=>{if(shownArtifact){shownArtifact={...shownArtifact,size};keepArtifact(shownArtifact);}},
+  const foxArtifact=mountFoxArtifact(root,renderMarkdown,putArtifactAway,href=>openWorldURL(href),size=>{if(shownArtifact){shownArtifact={...shownArtifact,size};keepArtifact(shownArtifact);}},
    // A next step on the card drafts the person's request in Fox's message bar; it goes to Fox only when they send it,
    // so a card made from untrusted content can never speak for them (core/artifacts/README.md#actions).
    action=>draftRequest(action),
    // What the person ticks or sets on the card's blocks is kept with it, so the Journal and a reopened card show it.
    blocks=>{if(shownArtifact){shownArtifact={...shownArtifact,blocks};keepArtifact(shownArtifact);}},
    native?.artifactPages);
+  function putArtifactAway(){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
   function draftRequest(action:{request:string}){const input=root.querySelector('#notionInput') as HTMLTextAreaElement|HTMLInputElement|null;if(!input)return;input.value=action.request;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange?.(input.value.length,input.value.length);}
   // Theme-driven Artifacts (core/artifacts/README.md#theme-driven-artifacts): an answer shown at medium or large size in
   // the World is laid out as a page in the theme's style by a quiet background task; the template card shows until then.
@@ -211,7 +212,7 @@ export function mountNotionWorld(data: World, native: any) {
   root.addEventListener('click',e=>{
    // A click elsewhere in the World puts the card away into the Journal. Over an Applet the card stays pinned in the
    // top-right corner until its × (owner Order 2026-10-09: a click beside it made it vanish with no way back).
-   if(foxArtifact.visible&&!insideApplet()&&!(e.target as Element).closest('#foxArtifact,#notionHUD,button,a,input,textarea,select,[role="button"],.world-task-tracker')){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
+   if(foxArtifact.visible&&!insideApplet()&&!(e.target as Element).closest('#foxArtifact,#notionHUD,button,a,input,textarea,select,[role="button"],.world-task-tracker'))putArtifactAway();
    if(!attentionPage||(e.target as Element).closest('#attentionPreview,#notionHUD,button,a,input,textarea,select,[role="button"],.notion-pin,.world-task-tracker,.notion-content,.notion-dialog'))return;
    e.preventDefault();e.stopPropagation();flyIntoJournal(root,$('attentionPreview'));closeAttentionPreview(false);voice?.hidePreview?.(true);
   },true);
@@ -323,7 +324,7 @@ export function mountNotionWorld(data: World, native: any) {
     libraryWebReturn=null;
     // A page with its own website Applet in the World (an Attention card's PostHog link) opens
     // there directly, never through the Browser and whatever page it last showed.
-    const own=websiteAppletFor(url.href,sections.filter(s=>s.entity==='app').map(s=>({id:s.moduleId,web:s.fullView?.kind==='web',siteHost:s.site?.host})));
+    const own=pageApplet(url.href);
     const site=own?sections.find(s=>s.moduleId===own):null;
     if(site){
       visitObject(site.moduleId,{enter:false});
@@ -661,12 +662,10 @@ export function mountNotionWorld(data: World, native: any) {
        if(p.dataset.labelVisible!==labelVisible)p.dataset.labelVisible=labelVisible;
        if(p.dataset.running!==running)p.dataset.running=running;
        if(p.dataset.lampState!==point.lampState)p.dataset.lampState=point.lampState;
-       let lamp=p.querySelector('.applet-base-lamp');if(!lamp){lamp=element('span','applet-base-lamp');lamp.setAttribute('aria-hidden','true');lamp.append(element('i',''));p.append(lamp);}
+       let lamp=p._lamp;if(!lamp){lamp=p._lamp=element('span','applet-base-lamp');lamp.setAttribute('aria-hidden','true');lamp.append(element('i',''));p.append(lamp);}
        const lampX=point.lampX+'px',lampY=point.lampY+'px';
        if(p._lampX!==lampX){p._lampX=lampX;lamp.style.marginLeft=lampX;}if(p._lampY!==lampY){p._lampY=lampY;lamp.style.top=lampY;}
       }
-      // Peek names are plain: the installation already identifies the Applet.
-      p.querySelector('.applet-icon')?.remove();
       let attention=p.querySelector('.applet-attention');const attentionKey=point.attention?JSON.stringify(point.attention):null;
       // Connection guides do not announce saved findings or animate their arrival.
       if(point.attention){
@@ -678,7 +677,10 @@ export function mountNotionWorld(data: World, native: any) {
         attention.title=point.attention.hint;attention.setAttribute('aria-label',attention.title);
        }
        const connectionName=attention.querySelector('.applet-connection-name');if(connectionName&&connectionName.textContent!==point.title)connectionName.textContent=point.title;
-       attention.style.setProperty('--applet-guide-top',-point.attentionOffset+'px');attention.style.setProperty('--applet-guide-x',(point.attentionX||0)+'px');attention.style.setProperty('--applet-guide-anchor-x',point.x+'px');
+       const guideTop=-point.attentionOffset+'px',guideX=(point.attentionX||0)+'px',guideAnchorX=point.x+'px';
+       if(attention._top!==guideTop){attention._top=guideTop;attention.style.setProperty('--applet-guide-top',guideTop);}
+       if(attention._x!==guideX){attention._x=guideX;attention.style.setProperty('--applet-guide-x',guideX);}
+       if(attention._anchorX!==guideAnchorX){attention._anchorX=guideAnchorX;attention.style.setProperty('--applet-guide-anchor-x',guideAnchorX);}
       }
       else attention?.remove();
 
@@ -692,7 +694,7 @@ export function mountNotionWorld(data: World, native: any) {
        if(app){p.querySelector('.app-state-token')?.remove();p.title=labelKey.replace('\u0000',' · ');p.setAttribute('aria-label',p.title);}
        else p.setAttribute('aria-label',point.description||labelKey);
       }
-      const caption=p.querySelector('small'),captionHidden=!point.caption;
+      const caption=p._caption??=p.querySelector('small'),captionHidden=!point.caption;
       // Projection runs every frame; identical hidden writes still notify DOM
       // observers and schedule desktop geometry work. Preserve real changes.
       if(caption.hidden!==captionHidden)caption.hidden=captionHidden;
@@ -822,7 +824,7 @@ export function mountNotionWorld(data: World, native: any) {
     const result=moduleContentContext(),id=!content.hidden&&appReader?.record.worldItemId;
     const section=depth==='object'?sections.find(r=>r.moduleId===current&&r.entity==='matter'):null;
     const localItem=section?.children?.length===1?pages.get(section.children[0]):null;
-    const item=id?[...pages.values()].find(p=>p.worldItemId===id):localItem?.worldItemId?localItem:null;
+    const item=id?itemPage(id):localItem?.worldItemId?localItem:null;
     if(item)return {...(result||{context:{key:'attention:'+item.worldItemId,title:item.title,detail:libraryReadContext||'Read the saved item’s sources before acting.'}}),actions:attentionActions(item)};
     return result;
   }
@@ -843,7 +845,7 @@ export function mountNotionWorld(data: World, native: any) {
     }
     scene?.refreshContent?.();voice?.setGuide?.(null);nativeHUD?.sync();
     // The person approved it (Done, Got it, I've done it), here or on the phone; Fox settling it is not an approval.
-    if(['done','read'].includes(status)&&by!=='fox'&&!data.sample)reportProductEvent('attention_approved',{approval_surface:surface,item_kind:String([...pages.values()].find(p=>p.worldItemId===item.worldItemId)?.worldItemKind||'')});
+    if(['done','read'].includes(status)&&by!=='fox'&&!data.sample)reportProductEvent('attention_approved',{approval_surface:surface,item_kind:String(itemPage(item.worldItemId)?.worldItemKind||'')});
     // Listeners (e.g. the first-win moment) may keep the view here instead of advancing.
     const proceed=root.dispatchEvent(new CustomEvent('worldlet:attention-settled',{cancelable:true,detail:{id:item.worldItemId,status}}));
     if(!previewing)return;
@@ -873,7 +875,7 @@ export function mountNotionWorld(data: World, native: any) {
   const attentionReadAttempts=new Map<string,{pending:boolean,failures:number,timer:ReturnType<typeof setTimeout>}>();
   window.addEventListener('pagehide',()=>{for(const state of attentionReadAttempts.values())clearTimeout(state.timer);attentionReadAttempts.clear();},{once:true});
   async function acknowledgeAttention(record){
-    const item=[...pages.values()].find(p=>p.worldItemId===record.worldItemId);
+    const item=itemPage(record.worldItemId);
     if(!item||item.worldItemKind!=='update'||item.worldItemStatus!=='open')return;
     const id=item.worldItemId,state=attentionReadAttempts.get(id)||{pending:false,failures:0,timer:null};
     if(state.pending||state.timer)return;state.pending=true;attentionReadAttempts.set(id,state);
@@ -1091,7 +1093,7 @@ export function mountNotionWorld(data: World, native: any) {
    const thread=page.worldItemKind==='task'?replyThread({sources:page.worldItemSources}):'',draft=thread?waitingDrafts.find(d=>d.thread===thread):null;
    attentionPreview.setDraft(draft?{text:'Fox drafted a reply',label:'Review',run:()=>{closeAttentionPreview(false);window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day:dayKey(new Date(draft.createdAt*1000||Date.now()))}}));}}:null);
   }
-  const itemPage=(id:string)=>[...pages.values()].find(p=>p.worldItemId===id);
+  function itemPage(id:string){return [...pages.values()].find(p=>p.worldItemId===id);}
   function previewAttention(item){
    const page=[...pages.values()].find(p=>p.worldItemId&&p.worldItemId===item.worldItemId);if(!page)return false;
    foxArtifact.close();shownArtifact=null;attentionPage=page;attentionPreview.open({...page,attentionTimeMembers:(item.pageIds||[page.id]).map(id=>pages.get(id)).filter(Boolean).map(p=>p.worldItemSignal||{})});nativeHUD?.sync();showAttentionGuide(page);
@@ -1103,7 +1105,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   function itemActions(item){
    if(!item?.worldItemId)return;
-   const page=[...pages.values()].find(p=>p.worldItemId===item.worldItemId);if(!page)return;
+   const page=itemPage(item.worldItemId);if(!page)return;
    voice?.setGuide?.({source:'attention:'+item.worldItemId,takeover:true,
     text:attentionBrief(page),remember:true,actions:[]});
    nativeHUD?.sync();voice?.revealGuide?.();
@@ -1234,7 +1236,7 @@ export function mountNotionWorld(data: World, native: any) {
   function openStageItem(itemId){
     const r=sections.find(s=>s.moduleId===current);if(!r)return;
     const item=scene?.selectStageItem?.(current,itemId);if(!item)return;if(r.key==='meetings'&&item.meetingUrl){openMeeting(r,item.meetingUrl,item.title,item.kind==='call'?item.meeting:null);return;}if(WORK_APPLETS.includes(r.key)){openWorkItem(r,item);return;}if(item.record){openAppRecord(r,{...item.record,...(data.sample&&pages.has(item.id.slice(7))?{noteId:item.id.slice(7)}:{}),presentation:item});return;}
-    const page=[...pages.values()].find(p=>p.worldItemId===item.id);if(page)focusContent(page.id);
+    const page=itemPage(item.id);if(page)focusContent(page.id);
     itemActions({...item,worldItemId:item.id,actionTitle:item.title,fullAction:item.title,fullContext:item.context,summary:item.summary});
   }
   function foregroundActions(r,body,text=''){
@@ -1754,7 +1756,7 @@ export function mountNotionWorld(data: World, native: any) {
   function readerFailed(body,error,retry){
     if(!body.isConnected||content.hidden)return;
     const selected=appReader,provider=selected?.app.provider,action=sourceReadAction(error);
-    const saved=selected&&[...pages.values()].find(p=>p.worldItemId===selected.record.worldItemId);
+    const saved=selected&&itemPage(selected.record.worldItemId);
     body.replaceChildren(...(saved?[renderMarkdown(attentionBrief(saved),{title:saved.title,path:'attention.md'})]:[]));
     if(provider)setSourceIssue(provider,action);
     if(action)return;
@@ -1824,7 +1826,7 @@ export function mountNotionWorld(data: World, native: any) {
     // Page title is already rendered by the persistent reader header.
     const first=clean.firstElementChild;if(first?.tagName==='H1'&&first.textContent===p.title)first.remove();article.append(clean);return article;}
   function renderTable(p){const holder=element('section','notion-database');const bar=element('div','notion-db-bar'),input=element('input');input.type='search';input.placeholder='Filter this table…';input.setAttribute('aria-label','Filter records');const total=element('span');bar.append(input,total);holder.append(bar);const viewport=element('div','notion-table-wrap');viewport.tabIndex=0;viewport.setAttribute('aria-label',p.title+'，Full table · Scroll horizontally');const table=element('table'),thead=element('thead'),tr=element('tr');for(const c of p.table.columns)tr.append(element('th','',c));thead.append(tr);table.append(thead);const tbody=element('tbody');table.append(tbody);viewport.append(table);holder.append(viewport);const footer=element('div','notion-table-pager');holder.append(footer);
-    function draw(){const rows=p.table.rows.filter(r=>!query||r.join(' ').toLocaleLowerCase().includes(query.toLocaleLowerCase()));total.textContent=`${rows.length} / ${p.table.rows.length} rows`;tbody.replaceChildren();for(const row of rows){const tr=element('tr');row.forEach((v,i)=>{const td=element('td');const title=v.replace(/\s*\([^)]*\)\s*$/,'');const child=p.children.map(id=>pages.get(id)).find(c=>c.title===title||c.title===v);if(i===0&&child)td.append(button(v,()=>open(child.id),'notion-cell-link'));else td.textContent=v;tr.append(td)});tbody.append(tr)}footer.hidden=!!rows.length;footer.replaceChildren(element('span','','No matching records'))}input.oninput=()=>{query=input.value;draw()};draw();return holder;}
+    function draw(){const needle=query.toLocaleLowerCase(),children=p.children.map(id=>pages.get(id));const rows=p.table.rows.filter(r=>!query||r.join(' ').toLocaleLowerCase().includes(needle));total.textContent=`${rows.length} / ${p.table.rows.length} rows`;tbody.replaceChildren();for(const row of rows){const tr=element('tr');row.forEach((v,i)=>{const td=element('td');const title=v.replace(/\s*\([^)]*\)\s*$/,'');const child=children.find(c=>c.title===title||c.title===v);if(i===0&&child)td.append(button(v,()=>open(child.id),'notion-cell-link'));else td.textContent=v;tr.append(td)});tbody.append(tr)}footer.hidden=!!rows.length;footer.replaceChildren(element('span','','No matching records'))}input.oninput=()=>{query=input.value;draw()};draw();return holder;}
   function renderPage(){const p=pages.get(current);if(p.webApp?.kind==='x'){header(p.title,'Reading terminal');browserPanel.mount();return;}header(p.title,p.localArchive?'Notion Original export · Local, read-only':data.sample?(p.projectStatus?'Project · '+p.projectStatus:'Explore freely'):native?(p.intentId?'My intents / wishes':p.sourceId?(p.pending?'Local original · Not yet organized':'Sources & knowledge'):'Personal knowledge'):p.virtual?'NOTION / COLLECTION':p.kind==='database'?'NOTION / DATABASE':'NOTION / NOTE');if(p.provenance?.length){const refs=element('details','world-provenance');refs.append(element('summary','','Source · '+p.provenance.map(r=>r.provider).join(' / ')));for(const ref of p.provenance)refs.append(element('p','',ref.label));content.append(refs);}const template=detailTemplate(p);content.dataset.template=template?.element.dataset.template||'document';if(template)content.append(template.element);if(p.table)content.append(renderTable(p));if(p.markdown?.trim()&&!template?.replaceMarkdown)content.append(renderMarkdown(p.markdown,p));
     if(native&&p.sourceId&&!nativeHUD)content.append(button('View local original',async()=>{try{const original=await native.original(p.sourceId);const body=dialog(original.title);body.append(element('pre','private-original',original.text))}catch(e){notify(e.message)}}));
     if(p.children.length){const children=element('section','notion-children');children.append(element('h2','',`${p.virtual?'Notes':'Subpages'} · ${p.children.length}`));const list=element('div');children.append(list);const more=button('Explore further',()=>{catalogOffset+=30;drawChildren()});function drawChildren(){list.replaceChildren(...p.children.slice(0,catalogOffset+30).map(id=>pageLink(pages.get(id))));more.hidden=catalogOffset+30>=p.children.length}drawChildren();children.append(more);content.append(children)}
@@ -2023,7 +2025,7 @@ export function mountNotionWorld(data: World, native: any) {
         state:['reading','syncing'].includes(phase)?'busy':status.failed?'failed':status.connected||status.usableWithoutLogin||['browser','local'].includes(phase)?'ready':'off'};}),
       now:phoneWorldLog.now,log:phoneWorldLog.lines,widgets:widgetsNow.map(w=>({id:w.id,title:w.title})),jobs:ongoingKept.map(t=>({id:t.id,title:t.title,line:ongoingLine(t,Date.now()/1000),recent:t.recent})),thread:key=>voice?.threadOf?.('object:app-'+key)||[]}),
      // On the phone, Done asks Fox for a theme's page, Later is Not now and Remove is Don't ask again.
-     settle:(item,status,until)=>{if(!item.worldItemId.startsWith('ongoing:'))return settleAttention(item,status,until,{surface:'phone'});const id=item.worldItemId.slice(8);return status==='dismissed'?decideTheme(id,'decline'):until?decideTheme(id,'later'):makeTheme(id);},kindOf:id=>[...pages.values()].find(p=>p.worldItemId===id)?.worldItemKind,ready:()=>!!voice&&root.dataset.onboardingLocked!=='true'}):null;
+     settle:(item,status,until)=>{if(!item.worldItemId.startsWith('ongoing:'))return settleAttention(item,status,until,{surface:'phone'});const id=item.worldItemId.slice(8);return status==='dismissed'?decideTheme(id,'decline'):until?decideTheme(id,'later'):makeTheme(id);},kindOf:id=>itemPage(id)?.worldItemKind,ready:()=>!!voice&&root.dataset.onboardingLocked!=='true'}):null;
     if(phone)root.addEventListener('worldlet:fox-thread',()=>phone.refresh());
     window.addEventListener('worldlet:world-log',(event:any)=>{phoneWorldLog=event.detail||phoneWorldLog;phone?.world();});
     if(phone)root.addEventListener('worldlet:fox-live',(event:any)=>phone.live(event.detail));
@@ -2060,7 +2062,7 @@ export function mountNotionWorld(data: World, native: any) {
     appletShelf.sync(depth==='object'?current:null);
     if(data.sample&&buildings.length){travelExperiment=mountTravelExperiment({root,room:sections.find(s=>s.trip),pages,visit:visitObject,refresh:()=>{scene?.refreshContent();nativeHUD?.sync();},open:dialog,state:worldState,storage:native.storage,onContext:()=>nativeHUD?.sync()});scene?.refreshContent();}saveRegions();
     let searchTimer;const input=$('notionInput');
-    input.addEventListener('input',()=>{clearTimeout(searchTimer);if(input.isComposing||root.classList.contains('companion-console'))return;const value=input.value.trim();searchTimer=setTimeout(()=>{if(document.activeElement!==input||voice.active)return;if(value&&value.length<100&&[...pages.values()].some(p=>!p.virtual&&(p.title+' '+p.text).toLocaleLowerCase().includes(value.toLocaleLowerCase())))showSearch(value);else if(searching){home();if(!value)input.focus();}},180);});
+    input.addEventListener('input',()=>{clearTimeout(searchTimer);if(input.isComposing||root.classList.contains('companion-console'))return;const value=input.value.trim();searchTimer=setTimeout(()=>{if(document.activeElement!==input||voice.active)return;const needle=value.toLocaleLowerCase();if(value&&value.length<100&&[...pages.values()].some(p=>!p.virtual&&(p.title+' '+p.text).toLocaleLowerCase().includes(needle)))showSearch(value);else if(searching){home();if(!value)input.focus();}},180);});
     input.addEventListener('keydown',e=>{if(e.key==='ArrowDown'&&searching){const first=content.querySelector('.notion-page-link');if(first){e.preventDefault();first.focus();}}});
   }
   $('notionHome').onclick=home;$('notionBack').onclick=()=>{if($('notionDialog').open)$('notionDialog').close();else back();};$('notionNext').onclick=next;
@@ -2119,13 +2121,13 @@ export function mountNotionWorld(data: World, native: any) {
   const nextLevel=next;
   // Open an item's card and start its primary Fox action (the onboarding "do it for me").
   function helpWithAttention(id:string){
-    const page=[...pages.values()].find(p=>p.worldItemId===id);if(!page||!previewAttention({worldItemId:id}))return false;
+    const page=itemPage(id);if(!page||!previewAttention({worldItemId:id}))return false;
     const [primary]=previewActions(page);if(!primary)return false;
     void Promise.resolve(primary.run()).catch(e=>notify(e.message));return true;
   }
   // `by:'fox'` records that Fox did the work the person confirms (the first-run tour's Mark it done).
   async function settleAttentionById(id:string,status:string,{by}:{by?:'fox'}={}){
-    const page=[...pages.values()].find(p=>p.worldItemId===id);if(!page)return false;
+    const page=itemPage(id);if(!page)return false;
     await settleAttention(page,status,null,{by});return true;
   }
   return {applyWorld,previewAttention:id=>previewAttention({worldItemId:id}),helpWithAttention,ongoingProposals:()=>firstValueOngoing?.list()||[],makeOngoing:(id:string)=>firstValueOngoing?firstValueOngoing.make(id):Promise.resolve(false),settleAttention:settleAttentionById,browseURL:url=>execute('browse_web',{operation:'open',url}),openApplet:id=>visitObject(id),lookAt(id,stage='building'){scene?.focus(!id||id==='overview'?'overview':id,!id||id==='overview'?'overview':stage);},showOverview:home,revealGuide:()=>voice?.revealGuide?.(),cancel:()=>voice?.cancel(),ask:text=>voice?.ask(text),openText:()=>voice?.openText(),setGuide(value){if(!value&&foregroundGuide&&depth==='object'&&current===foregroundGuide&&content.hidden)return;foregroundGuide=null;voice?.setGuide?.(value)},openSource(id){const p=[...pages.values()].find(p=>(p.sourceId===id||(p.worldItemId&&'world-item:'+p.worldItemId===id))&&!p.intentId);if(p){if(p.appletId)focusContent(p.id);else open(p.id);}else throw Error('This source is not ready to view yet. Try again.');},refreshOverlay(){contentStore.reloadStored();applyWorld(data)},get busy(){return !!voice?.active},get guideSource(){return voice?.guideSource||''},get lastReply(){return voice?.lastReplyText||''},get current(){return current},get pageOpen(){return inPageLayer()},get metrics(){return scene?.metrics}};

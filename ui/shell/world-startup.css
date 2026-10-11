@@ -32,11 +32,6 @@
 .notion-world[data-onboarding-locked="true"] .world-actions{visibility:hidden;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.world-startup.is-opening,.world-arriving{animation:none}.world-startup.is-opening{opacity:0}}
 
-.onboarding-spotlight{position:fixed;z-index:79;background:transparent;border:2px solid #f2d397;border-radius:24px;box-shadow:0 0 0 200vmax #17262287,0 0 28px #ffe4a466;cursor:pointer;padding:0;transition:left .12s linear,top .12s linear,width .12s linear,height .12s linear;animation:onboarding-glow 2s ease-in-out infinite}
-.onboarding-spotlight[hidden]{display:none}
-@keyframes onboarding-glow{50%{border-color:#fff2ce;filter:brightness(1.08)}}
-@media(prefers-reduced-motion:reduce){.onboarding-spotlight{animation:none;transition:none}}
-
 .companion-guide-hint{display:block;font-size:11px;line-height:1.4;opacity:.6;margin:0 0 8px}
 .companion-guide-hint[hidden]{display:none}
 .fox-first-console .companion-guide-hint{position:static;margin:0;font-size:11px;opacity:.65;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -126,7 +121,6 @@
 .setup-form-panel{display:flex;flex-direction:column;align-items:center;gap:6px;width:min(560px,100%);padding:16px 20px;border-radius:20px;background:#fffffff0;box-shadow:0 6px 18px #203b3012}
 .setup-remote-code{min-height:38px;padding:7px 10px;border:1px solid #78806a40;border-radius:10px;background:#fff;color:var(--brand-ink);font:inherit;font-size:13px;box-sizing:border-box}
 .setup-remote-code{width:100%}
-.setup-agent-fallback{display:flex;gap:6px;justify-content:center}
 /* No Agent here: Worldlet installs Hermes Agent, then ChatGPT is signed in inside it (owner decisions 2026-10-09). */
 .setup-agent-needed{display:flex;flex-direction:column;align-items:center;gap:2px;max-width:520px;text-align:center}
 .setup-agent-needed .setup-note{margin:0}
