@@ -95,19 +95,17 @@ export const ARTIFACT_ONE_CARD_RULE='An artifact is one card, never longer: it n
  +'the body; and, when there is more worth reading, detail, a fuller body in the same layout for a large card, or null. '
  +'List blocks most important first: a smaller card leaves out the last ones.';
 const WIDE=/[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/u;
+const textWeight=(text:unknown)=>{let w=0;for(const ch of String(text||''))w+=WIDE.test(ch)?2:1;return w;};
 /** How much of a card a body and chart take, in ARTIFACT_CARD units. */
 export function artifactWeight(body:string,chart?:{values?:unknown[]}|null,blocks?:unknown):number {
  let weight=0;
  for(const line of String(body||'').split('\n')){
   if(/^\s*\|?[\s:|-]+\|?\s*$/.test(line)&&line.includes('-'))continue;
   const text=line.replace(/\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[|*_#>`]/g,'').replace(/\s+/g,' ').trim();
-  if(!text)continue;
-  weight+=20;
-  for(const ch of text)weight+=WIDE.test(ch)?2:1;
+  if(text)weight+=20+textWeight(text);
  }
  return Math.round(weight+(Array.isArray(chart?.values)?60+40*chart.values.length:0)+blocksWeight(blocks));
 }
-const textWeight=(text:unknown)=>{let w=0;for(const ch of String(text||''))w+=WIDE.test(ch)?2:1;return w;};
 /** The room blocks take, measured against the card as a line of text is: a block's label is a short line, and each
  * checklist item, amount, row of buttons or part's detail stands on its own ruled line, about a full line of text. */
 function blocksWeight(blocks:unknown):number {
@@ -293,10 +291,12 @@ export function orderArtifacts<T extends {id:string;createdAt:number;updatedAt:n
 /** The Artifacts page groups them by the day they were last shown: Today, Yesterday, then dates. */
 export function artifactDays<T extends {id:string;createdAt:number;updatedAt:number}>(list:T[],now:Date=new Date(),locale?:string):{label:string;artifacts:T[]}[] {
  const day=(d:Date)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
- const today=day(now),yesterday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-1).getTime(),groups=new Map<string,T[]>();
+ const today=day(now),yesterday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-1).getTime(),groups=new Map<string,T[]>(),labels=new Map<number,string>();
  for(const artifact of orderArtifacts(list).kept){
   const at=new Date(artifact.updatedAt*1000),start=day(at);
-  const label=start===today?'Today':start===yesterday?'Yesterday':at.toLocaleDateString(locale||'en-US',{month:'short',day:'numeric',year:at.getFullYear()===now.getFullYear()?undefined:'numeric'});
+  // One label a day: formatting a date is the costly part, and every artifact of a day shares it.
+  let label=labels.get(start);
+  if(label===undefined)labels.set(start,label=start===today?'Today':start===yesterday?'Yesterday':at.toLocaleDateString(locale||'en-US',{month:'short',day:'numeric',year:at.getFullYear()===now.getFullYear()?undefined:'numeric'}));
   if(!groups.has(label))groups.set(label,[]);
   groups.get(label)!.push(artifact);
  }
@@ -345,7 +345,8 @@ export function journalDays<T extends {id:string;kind:string;title:string;size?:
 /** What Fox reads when it looks for an earlier artifact: newest first, matching every word of the query. */
 export function findArtifacts(list:Artifact[],query='',limit=12){
  const words=String(query).toLowerCase().split(/\s+/).filter(Boolean);
- return orderArtifacts(list).kept.filter(a=>words.every(w=>(a.title+' '+a.body+' '+(a.category||'')).toLowerCase().includes(w))).slice(0,Math.max(1,Math.min(50,limit)))
+ const kept=orderArtifacts(list).kept;
+ return (words.length?kept.filter(a=>{const text=(a.title+' '+a.body+' '+(a.category||'')).toLowerCase();return words.every(w=>text.includes(w));}):kept).slice(0,Math.max(1,Math.min(50,limit)))
   .map(({id,kind,title,category,size,updatedAt,body})=>({id,kind,title,...(category?{category}:{}),size,shownAt:new Date(updatedAt*1000).toISOString(),preview:body.replace(/\s+/g,' ').slice(0,160)}));
 }
 

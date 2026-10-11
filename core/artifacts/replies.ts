@@ -76,15 +76,15 @@ export function replyThread(item:Pick<ReplyItem,'sources'>):string {
  * really waits for the person's reply is Fox's to judge on reading it; when it does not, nothing is drafted. */
 export function replyCandidates(items:ReplyItem[],state:PreparedRepliesState,{now,drafted=[]}:{now:Date;drafted?:string[]}):ReplyCandidate[] {
  const done=new Set(state.prepared),waiting=new Set(drafted),since=now.getTime()-PREPARED_REPLY_RECENT_HOURS*3600000;
- const found:{c:ReplyCandidate;at:number}[]=[];
+ const found:{c:ReplyCandidate;at:number}[]=[],threads=new Set<string>();
  for(const item of items){
   if(!item?.id||done.has(item.id)||item.kind!=='task'||item.ready===false)continue;
   if(item.status!=='open'&&item.status!=='read')continue;
   if(item.snoozedUntil&&Date.parse(item.snoozedUntil)>now.getTime())continue;
   const thread=replyThread(item);if(!thread||waiting.has(thread)||done.has('thread:'+thread))continue;
   const at=attentionArrivedAt(item);if(!Number.isFinite(at)||at<since||at>now.getTime()+3600000)continue;
-  if(found.some(f=>f.c.thread===thread))continue;
-  found.push({c:{id:item.id,thread,title:String(item.title||'').replace(/\s+/g,' ').trim()},at});
+  if(threads.has(thread))continue;
+  threads.add(thread);found.push({c:{id:item.id,thread,title:String(item.title||'').replace(/\s+/g,' ').trim()},at});
  }
  return found.sort((a,b)=>a.at-b.at).map(f=>f.c);
 }
@@ -110,7 +110,7 @@ export function replyPrepareRequest(c:ReplyCandidate){
 
 /** What the World's top-right says while Fox works on a prepared reply. */
 export function replyPrepareStatus(c:ReplyCandidate){
- const title=Array.from(c.title).length>36?Array.from(c.title).slice(0,35).join('')+'…':c.title;
+ const chars=Array.from(c.title),title=chars.length>36?chars.slice(0,35).join('')+'…':c.title;
  return title?'Drafting a reply: '+title+'…':'Drafting a reply…';
 }
 export type FoxWorkKind='plan'|'summary'|'reply';
