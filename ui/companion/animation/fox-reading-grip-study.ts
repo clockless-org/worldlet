@@ -84,12 +84,3 @@ export async function createReadingLeftGripArt(sources:{upper:string;forearm:str
   dispose(){for(const layer of [...layers,paw])layer.canvas.width=layer.canvas.height=1;}
  };
 }
-
-/** Source-space ownership; both pieces keep a small elbow overlap. No
- * interpolation stretches the fur or paw, even at the farthest valid reach. */
-export function readingLeftGripPart(point:RigPoint,part:'upper'|'forearm'){
- const distance=(a:RigPoint,b:RigPoint)=>{const x=b[0]-a[0],y=b[1]-a[1],t=Math.max(0,Math.min(1,((point[0]-a[0])*x+(point[1]-a[1])*y)/(x*x+y*y)));return Math.hypot(point[0]-a[0]-t*x,point[1]-a[1]-t*y);};
- if(Math.hypot(point[0]-READING_LEFT_ELBOW[0],point[1]-READING_LEFT_ELBOW[1])<.055)return true;
- const upper=distance(sourceShoulder,READING_LEFT_ELBOW),lower=distance(READING_LEFT_ELBOW,sourceGrip);
- return part==='upper'?upper<=lower:lower<upper;
-}

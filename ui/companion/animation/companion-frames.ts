@@ -17,28 +17,28 @@ export function companionPose(state:string,idleFor:number,waking=false){
  return 'idle';
 }
 
+const THOUGHTFUL=new Set(['thinking','working','transcribing','preparing']);
 export function companionFrame(state:string,elapsed:number,reduced=false){
- const thoughtful=['thinking','working','transcribing','preparing'].includes(state);
- if(thoughtful)return FOX_FRAMES.thinking;
+ if(THOUGHTFUL.has(state))return FOX_FRAMES.thinking;
  if(state==='talking')return reduced?0:Math.floor(elapsed/190)%2?2:0;
  if(state==='sleeping')return reduced?12:Math.floor(elapsed/1800)%2?13:12;
  if(state in FOX_FRAMES && state!=='idle')return FOX_FRAMES[state as keyof typeof FOX_FRAMES];
  return !reduced&&elapsed%4600>4440?1:0;
 }
 
+const MOTION_PROFILES:Readonly<Record<string,readonly number[]>>={
+ idle:[4200,.004,0,.012],blink:[4200,.004,0,.012],talking:[1100,.009,1,.008],
+ thinking:[3600,.024,0,.009],working:[3600,.024,0,.009],preparing:[3600,.024,0,.009],transcribing:[3600,.024,0,.009],
+ listening:[3000,.019,0,.012],happy:[1600,.014,3,.009],surprised:[1800,.007,1,.014],
+ confused:[3400,.03,0,.009],concerned:[4000,.012,0,.01],satisfied:[3600,.012,0,.012],
+ drowsy:[4800,.017,0,.016],yawning:[3000,.012,0,.025],sleeping:[3600,0,0,.018],
+ sleepingBreath:[3600,0,0,.018],stretching:[2600,.008,0,.026],waving:[1800,.025,1,.009],
+};
 // Whole-pose animation, not an independent ear/paw rig. Keep amplitudes small
 // so the painted character retains its contact point and readable expression.
 export function companionMotion(state:string,elapsed:number,reduced=false){
  if(reduced)return {angle:0,lift:0,breath:0};
- const profiles:Record<string,number[]>={
-  idle:[4200,.004,0,.012],blink:[4200,.004,0,.012],talking:[1100,.009,1,.008],
-  thinking:[3600,.024,0,.009],working:[3600,.024,0,.009],preparing:[3600,.024,0,.009],transcribing:[3600,.024,0,.009],
-  listening:[3000,.019,0,.012],happy:[1600,.014,3,.009],surprised:[1800,.007,1,.014],
-  confused:[3400,.03,0,.009],concerned:[4000,.012,0,.01],satisfied:[3600,.012,0,.012],
-  drowsy:[4800,.017,0,.016],yawning:[3000,.012,0,.025],sleeping:[3600,0,0,.018],
-  sleepingBreath:[3600,0,0,.018],stretching:[2600,.008,0,.026],waving:[1800,.025,1,.009],
- };
- const [period,angle,lift,breath]=profiles[state]||profiles.idle;
+ const [period,angle,lift,breath]=MOTION_PROFILES[state]||MOTION_PROFILES.idle;
  const phase=elapsed/period*Math.PI*2;
  return {angle:Math.sin(phase)*angle,lift:(1-Math.cos(phase))*lift/2,breath:(1-Math.cos(phase))*breath/2};
 }
