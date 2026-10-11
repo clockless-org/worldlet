@@ -108,6 +108,14 @@ try{
  assert.ok((await runCalendarTool(call,{operation:'delete',id:added.event.id},at) as any).ok);
  assert.deepEqual([...store.values()].map(e=>e.title),['Yoga']);
  assert.match((await runCalendarTool(call,{operation:'change',id:'ev-000000000000'},at) as any).error,/No such event/);
+ // A late-evening event made all-day stays on its own local day, west of UTC too.
+ const zone=process.env.TZ;process.env.TZ='America/Los_Angeles';
+ try{
+  const late:any=await runCalendarTool(call,{operation:'add',title:'Late call',start:'2026-10-09T23:30'},at);
+  const whole:any=await runCalendarTool(call,{operation:'change',id:late.event.id,allDay:true},at);
+  assert.equal(whole.event.start,'2026-10-09','A timed event made all-day keeps its local day');
+  assert.ok((await runCalendarTool(call,{operation:'delete',id:late.event.id},at) as any).ok);
+ }finally{if(zone===undefined)delete process.env.TZ;else process.env.TZ=zone;}
  // The gateway offers calendar/list, add, change, delete, each naming what it needs.
  const offered=worldActions().filter(a=>a.target==='calendar');
  assert.deepEqual(offered.map(a=>a.action+':'+a.parameters.required.join(',')),['list:','add:title,start','change:id','delete:id']);
