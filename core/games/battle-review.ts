@@ -91,9 +91,11 @@ export function observeBattleMessage(watch:BattleWatch,message:{visit:string;sit
 
 function forgetOldest(watch:BattleWatch){
  const rooms=Object.values(watch.battles).sort((a,b)=>a.startedAt-b.startedAt);
+ // Counted down rather than spliced: removing from the list being walked skipped the battle after each one forgotten.
+ let left=rooms.length;
  for(const battle of rooms){
-  if(rooms.length<=BATTLE_REVIEW.keep)break;
-  if(battle.reviewed||battle.endedAt===undefined){delete watch.battles[battle.room];rooms.splice(rooms.indexOf(battle),1);}
+  if(left<=BATTLE_REVIEW.keep)break;
+  if(battle.reviewed||battle.endedAt===undefined){delete watch.battles[battle.room];left--;}
  }
 }
 
