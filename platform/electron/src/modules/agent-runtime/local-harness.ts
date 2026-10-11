@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,chosenModel,LOCAL_HARNESS_SPARE,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -590,9 +590,19 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   if(running)this.running.add(runtime);else this.running.delete(runtime);
   if(!running&&!this.running.size&&this.restartWhenIdle){this.restartWhenIdle=false;this.conversation?.shutdown();}
  },this.spares,this.resident(),this.turnApprovals,this.route);}
- makeLane():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{if(running)this.lanes.add(runtime);else this.lanes.delete(runtime);},null,null,null,this.route);}
+ makeLane():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{if(running)this.lanes.add(runtime);else this.lanes.delete(runtime);},null,null,null,this.laneRoute);}
  /** The provider chosen for this Agent in Settings › Agent (model-providers.ts): its chat-tier model, read per turn. */
  private readonly route=()=>chosenModel(readAgentSetting(this.context.root,PROVIDER_SETTING),this.install.id);
+ /** Background lanes: the chosen provider's model, else the chat-tier model of the provider Hermes Agent's own default
+  * uses (its config.yaml `model.provider`, read per turn, never written). */
+ private readonly laneRoute=()=>{
+  let own:string|null=null;
+  if(this.install.id==='hermes'){
+   const home=discoverHermes(this.environment.home,this.environment.env,this.environment.platform);
+   try{const model=home?hermesConfigValues(fs.readFileSync(path.join(home,'config.yaml'),'utf8')).model:null;if(typeof model?.provider==='string')own=model.provider;}catch{}
+  }
+  return backgroundModel(readAgentSetting(this.context.root,PROVIDER_SETTING),this.install.id,own);
+ };
  /** Applet tasks run beside the conversation on the background Agent. */
  get makeTask(){
   const background=this.background();
