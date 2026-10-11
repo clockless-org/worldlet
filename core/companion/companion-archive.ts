@@ -2,7 +2,7 @@ import type {CompanionArchive} from '../../contracts/companion.ts';
 import policy from '../../contracts/companion-policy.json' with {type:'json'};
 import {characters,utf8Length} from './companion-text.ts';
 const pattern=(text:string)=>new RegExp(text.replace(/\\z$/, '(?![\\s\\S])'));
-const timestamp=pattern(policy.timestampPattern),uuid=pattern(policy.uuidPattern);
+const timestamp=pattern(policy.timestampPattern),uuid=pattern(policy.uuidPattern),memoryAuthority=pattern(policy.memoryAuthorityPattern);
 export function validCompanionID(value:unknown):boolean {return typeof value==='string'&&uuid.test(value);}
 export function validCompanionTimestamp(value:unknown):boolean {
  if(typeof value!=='string'||!timestamp.test(value))return false;
@@ -17,7 +17,7 @@ export function validateCompanionArchive(value:unknown):CompanionArchive {
  if(a.format!==policy.format||a.version!==policy.version)throw Error('Unsupported companion archive version.');
  if(!validCompanionID(identity.id)||!text(identity.name,policy.maxNameLength)||!(identity.name as string).trim()||
   !validCompanionTimestamp(identity.createdAt)||!text(a.personality,policy.maxPersonalityBytes,true)||
-  (typeof a.memoryAuthority!=='string'||!pattern(policy.memoryAuthorityPattern).test(a.memoryAuthority))||!Array.isArray(a.memories)||!Array.isArray(a.conversations)||
+  (typeof a.memoryAuthority!=='string'||!memoryAuthority.test(a.memoryAuthority))||!Array.isArray(a.memories)||!Array.isArray(a.conversations)||
   a.memories.length>policy.maxMemories||a.conversations.length>policy.maxConversations)throw Error('Invalid companion profile.');
  const memories=new Set<string>(),turns=new Set<string>();
  for(const value of a.memories){const m=object(value);

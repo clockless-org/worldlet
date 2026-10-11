@@ -18,7 +18,7 @@ export function recallCompanion(archive:CompanionArchive,args:Record<string,unkn
   const next=Math.min(chars.length,offset+3000);
   return {records:[{...row,text:chars.slice(offset,next).join(''),offset,...(next<chars.length?{nextOffset:next}:{})}],referenceOnly:true};
  }
- const matching=rows.filter(r=>(r.text as string).toLowerCase().includes(query.toLowerCase()));
+ const needle=query.toLowerCase(),matching=rows.filter(r=>(r.text as string).toLowerCase().includes(needle));
  if(offset>matching.length)throw Error('Companion result offset is out of range.');
  const records=matching.slice(offset,offset+5).map(row=>{const chars=characters(row.text as string);return {...row,text:chars.slice(0,600).join(''),truncated:chars.length>600};});
  return {records,total:matching.length,referenceOnly:true,memoryAuthority:archive.memoryAuthority,...(offset+records.length<matching.length?{nextOffset:offset+records.length}:{})};

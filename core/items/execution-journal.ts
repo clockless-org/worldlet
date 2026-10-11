@@ -22,9 +22,10 @@ export function journalPayload(value:unknown):unknown {
   return null;
  };return clean(value,0);
 }
-const kinds=['run.started','run.succeeded','run.failed','run.cancelled','run.interrupted','harness.event','tool.requested','tool.result','tool.failed','model.requested','model.result','model.interrupted','ui.command'];
+/** Journal event kinds: each one carries a payload reference (executionEvent checks it). */
+export const JOURNAL_KINDS:readonly string[]=['run.started','run.succeeded','run.failed','run.cancelled','run.interrupted','harness.event','tool.requested','tool.result','tool.failed','model.requested','model.result','model.interrupted','ui.command'];
 export function journalEntry(input:{id:string;runId:string;taskId?:string;at:number;kind:string;payload?:unknown;startedAt?:number}):{event:ExecutionEvent;payload:unknown;task?:RuntimeTask;run?:RuntimeRun} {
- if(!/^[a-zA-Z0-9_.-]{1,180}$/.test(input.id)||!kinds.includes(input.kind)||![input.id,input.runId,input.taskId??input.runId].every(v=>typeof v==='string'&&/^[a-zA-Z0-9_.:-]{1,180}$/.test(v))||!Number.isFinite(input.at)||input.at<0)throw Error('Invalid journal identity');
+ if(!/^[a-zA-Z0-9_.-]{1,180}$/.test(input.id)||!JOURNAL_KINDS.includes(input.kind)||![input.id,input.runId,input.taskId??input.runId].every(v=>typeof v==='string'&&/^[a-zA-Z0-9_.:-]{1,180}$/.test(v))||!Number.isFinite(input.at)||input.at<0)throw Error('Invalid journal identity');
  const detail=input.payload as Record<string,any>|undefined;
  const result=detail?.payload??detail;
  if(input.kind==='tool.result'&&(result?.ok===false||result?.result?.error||result?.result?.isError||result?.result?.ok===false))input={...input,kind:'tool.failed'};

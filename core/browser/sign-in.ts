@@ -8,17 +8,19 @@
 
 const GOOGLE_REJECTED=/^\/(?:v\d+\/)?signin\/(?:v\d+\/)?[a-z]*rejected\/?$/i;
 
+function googleAccountsPage(raw:unknown):URL|null {
+ let url:URL;try{url=raw instanceof URL?raw:new URL(String(raw));}catch{return null;}
+ return url.protocol==='https:'&&url.hostname.toLowerCase()==='accounts.google.com'?url:null;
+}
+
 /** accounts.google.com/v3/signin/rejected, the older /signin/v2/deniedsigninrejected and kin. */
 export function googleSignInRejected(raw:unknown):boolean {
- let url:URL;try{url=raw instanceof URL?raw:new URL(String(raw));}catch{return false;}
- return url.protocol==='https:'&&url.hostname.toLowerCase()==='accounts.google.com'&&GOOGLE_REJECTED.test(url.pathname);
+ const url=googleAccountsPage(raw);
+ return !!url&&GOOGLE_REJECTED.test(url.pathname);
 }
 
 /** A page of Google's account sign-in (accounts.google.com): Electron's views hand it to the CEF engine before Google judges them. */
-export function googleSignInPage(raw:unknown):boolean {
- let url:URL;try{url=raw instanceof URL?raw:new URL(String(raw));}catch{return false;}
- return url.protocol==='https:'&&url.hostname.toLowerCase()==='accounts.google.com';
-}
+export function googleSignInPage(raw:unknown):boolean {return !!googleAccountsPage(raw);}
 
 /** What the person is told; the panel's action opens the Applet's site in the system browser. */
 export function signInRejectedMessage(platform:string){

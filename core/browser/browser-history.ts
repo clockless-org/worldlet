@@ -17,13 +17,14 @@ export function browserHistoryDestination(url:string):string|null {
  if(privateHosts.some(name=>host===name||host.endsWith('.'+name))||privatePath.test(unescaped(address[2])))return null;
  const parts=query.split('&').filter(Boolean),key=(part:string)=>unescaped(part.split('=')[0]).toLowerCase();
  if(parts.some(part=>/token|secret|password|code|session|signature|credential/.test(key(part)))||/token=|secret=|code=|session=/i.test(unescaped(fragment??'')))return null;
- const kept=parts.filter(part=>!key(part).startsWith('utm_')&&key(part)!=='fbclid'&&key(part)!=='gclid');
+ const kept=parts.filter(part=>{const name=key(part);return !name.startsWith('utm_')&&name!=='fbclid'&&name!=='gclid';});
  return base+(kept.length?'?'+kept.join('&'):'')+(fragment===null?'':'#'+fragment);
 }
 export function recordBrowserVisit(visits:BrowserVisit[],item:BrowserVisit,sameDay:boolean[]):BrowserVisit[]|null {
  const next=visits.slice();
  const bounded={...item,title:clip(item.title,240),text:clip(item.text,6000)};
- let index=-1;for(let i=visits.length-1;i>=0;i--)if(visits[i].url.normalize('NFC')===item.url.normalize('NFC')&&sameDay[i]){index=i;break;}
+ // The new address is normalized once, and only when there is a visit to compare it with.
+ const url=visits.length?item.url.normalize('NFC'):'';let index=-1;for(let i=visits.length-1;i>=0;i--)if(visits[i].url.normalize('NFC')===url&&sameDay[i]){index=i;break;}
  if(index>=0){const previous=visits[index];if(previous.title.normalize('NFC')===bounded.title.normalize('NFC')&&previous.text.normalize('NFC')===bounded.text.normalize('NFC')&&item.visitedAt-previous.visitedAt<300)return null;next.splice(index,1);}
  next.push(bounded);return next.slice(-10000);
 }

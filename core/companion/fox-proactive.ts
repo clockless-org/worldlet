@@ -110,8 +110,9 @@ export function proactiveHeard(state:ProactiveState,{now,text}:{now:number;text:
 export function proactiveQuietRequest(text:string):boolean {
  const value=String(text??'').trim().toLowerCase().replace(/[\s,，.。!！~～]+/g,' ').trim();
  if(!value||characters(value).length>24)return false;
- return /^(fox ?|小狐狸 ?)?(你)?(先)?(别|不要|不用)(再)?(说话|打扰我?|吵|插嘴|主动说话?)(了|啦|吧)?$/.test(value.replace(/ /g,''))
-  ||/^(fox ?|小狐狸 ?)?(安静|闭嘴|少说)(点|一点|一下|些|两句)?(吧|啦)?$/.test(value.replace(/ /g,''))
+ const joined=value.replace(/ /g,'');
+ return /^(fox ?|小狐狸 ?)?(你)?(先)?(别|不要|不用)(再)?(说话|打扰我?|吵|插嘴|主动说话?)(了|啦|吧)?$/.test(joined)
+  ||/^(fox ?|小狐狸 ?)?(安静|闭嘴|少说)(点|一点|一下|些|两句)?(吧|啦)?$/.test(joined)
   ||/^(please )?(shut up|be quiet|quiet|stop talking|stop interrupting|leave me alone)( please)?$/.test(value);
 }
 

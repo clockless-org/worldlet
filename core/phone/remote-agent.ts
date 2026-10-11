@@ -56,10 +56,10 @@ const history=(value:unknown):RemoteHistory[]=>(Array.isArray(value)?value:[]).m
 /** A view that fits: the largest parts of what the person is looking at are left out first. */
 export function fitRemoteView(view:unknown,limit:number=REMOTE_TURN_LIMITS.view):Row {
  const fitted={...record(view)};
- while(Object.keys(fitted).length&&size(fitted)>limit){
-  const largest=Object.keys(fitted).sort((a,b)=>size(fitted[b])-size(fitted[a]))[0];
-  delete fitted[largest];
- }
+ // Each part's size is measured once; a stable sort keeps the first of equal parts first, as re-sorting each pass did.
+ const sizes=new Map(Object.keys(fitted).map(key=>[key,size(fitted[key])]));
+ const largest=[...sizes.keys()].sort((a,b)=>sizes.get(b)!-sizes.get(a)!);
+ for(const key of largest){if(size(fitted)<=limit)break;delete fitted[key];}
  return fitted;
 }
 const worldNote=(value:unknown)=>{const note=readWorldSince(value);return note?{world:note}:{};};

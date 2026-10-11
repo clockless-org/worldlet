@@ -129,11 +129,12 @@ function hideKeys(value:unknown,all:boolean):unknown {
 // "secret":"value" in text that is not whole JSON (NDJSON, inline page data, a cut body).
 const hideJsonText=(text:string)=>text.replace(/"([^"\\]{1,80})"(\s*:\s*)"((?:[^"\\]|\\.)*)"/g,(match,key,sep)=>SECRET_NAME.test(key)?`"${key}"${sep}"[hidden]"`:match);
 const ATTR=(name:string)=>new RegExp(`(\\s${name}\\s*=\\s*)("[^"]*"|'[^']*'|[^\\s"'>]+)`,'i');
+const NAME_ATTR=ATTR('name'),CONTENT_ATTR=ATTR('content'),VALUE_ATTR=ATTR('value');
 // Hidden and password inputs (CSRF tokens, prefilled values) and secret <meta> values in markup.
 const hideMarkup=(text:string)=>text.replace(/<(input|meta)\b[^>]*>/gi,(tag,kind:string)=>{
- const name=(tag.match(ATTR('name'))?.[2]??'').replace(/^["']|["']$/g,'');
- if(kind.toLowerCase()==='meta')return SECRET_NAME.test(name)?tag.replace(ATTR('content'),'$1"[hidden]"'):tag;
- return /\stype\s*=\s*["']?(hidden|password)\b/i.test(tag)||secretField(name)?tag.replace(ATTR('value'),'$1"[hidden]"'):tag;
+ const name=(tag.match(NAME_ATTR)?.[2]??'').replace(/^["']|["']$/g,'');
+ if(kind.toLowerCase()==='meta')return SECRET_NAME.test(name)?tag.replace(CONTENT_ATTR,'$1"[hidden]"'):tag;
+ return /\stype\s*=\s*["']?(hidden|password)\b/i.test(tag)||secretField(name)?tag.replace(VALUE_ATTR,'$1"[hidden]"'):tag;
 });
 const FORM_SHAPE=/^[^\s=&]+=[^\s&]*(&[^\s=&]+=[^\s&]*)*$/;
 const formDecode=(text:string)=>{try{return decodeURIComponent(text.replace(/\+/g,' '));}catch{return text;}};

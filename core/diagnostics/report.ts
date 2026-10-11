@@ -123,6 +123,6 @@ export function exceptionReport(value){
  const frames=(typeof value?.stack==='string'?value.stack.split('\n').slice(1,41):[]).map(stackFrame).filter(Boolean).reverse();
  const area=['main','renderer','host'].includes(value?.area)?value.area:'host';
  const operation=typeof value?.operation==='string'&&/^[A-Za-z][\w:-]{0,60}$/.test(value.operation)?value.operation:'';
- return {type,code,area,operation,level:ENVIRONMENTAL.has(code)?'warning':'error',handled:area==='host',frames,
-  ...(operation==='worldItemSave'?{rule:itemRule(message)}:setupStep(message)?{rule:setupStep(message)}:{})};
+ const rule=operation==='worldItemSave'?itemRule(message):setupStep(message);
+ return {type,code,area,operation,level:ENVIRONMENTAL.has(code)?'warning':'error',handled:area==='host',frames,...(rule?{rule}:{})};
 }
