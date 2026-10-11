@@ -1,7 +1,7 @@
-import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import {renderArtifactBlocks,artifactPicture} from './artifact-blocks.ts';
 import {fitArtifact} from './artifact-fit.ts';
+import {modelMarkdown} from '../components/index.ts';
 import {artifactBrief,artifactFitSteps,journalDays,madeArtifacts,readArtifact,type Artifact,type JournalDay,type MadeArtifact} from '../../core/artifacts/index.ts';
 /** The Journal (owner decisions 2026-10-06 and 2026-10-07; a book of its own, 2026-10-08; a timeline, 2026-10-11):
  * everything Fox produced in this World, one kind of thing, an artifact, kept day by day. Inside the book one page
@@ -57,7 +57,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  // A card shows its Markdown as the card does, without links or pictures: opening it is how to use them.
  function body(markdown:string){
   const holder=el('div','companion-journal-body');
-  holder.append(DOMPurify.sanitize(marked.parse(markdown) as string,{ALLOWED_TAGS:['p','h1','h2','h3','h4','h5','h6','ul','ol','li','strong','em','del','s','blockquote','code','br','table','thead','tbody','tr','th','td','span'],ALLOWED_ATTR:[],RETURN_DOM_FRAGMENT:true}));
+  holder.append(DOMPurify.sanitize(modelMarkdown.parse(markdown) as string,{ALLOWED_TAGS:['p','h1','h2','h3','h4','h5','h6','ul','ol','li','strong','em','del','s','blockquote','code','br','table','thead','tbody','tr','th','td','span'],ALLOWED_ATTR:[],RETURN_DOM_FRAGMENT:true}));
   return holder;
  }
  const forgetReply=(id:string)=>{artifacts=artifacts.filter(a=>a.id!==id);draw();};
@@ -178,7 +178,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   if(mine!==version)return;
   // A draft still waiting stands on today's page, however early it was made.
   const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()/1000;
-  const replies:Reply[]=(Array.isArray(mail?.reviews)?mail.reviews:[]).filter((r:any)=>!r.attempted&&typeof r?.id==='string'&&r.draft&&typeof r.draft.to==='string').map((r:any)=>{
+  const replies:Reply[]=(Array.isArray(mail?.reviews)?mail.reviews:[]).filter((r:any)=>r&&!r.attempted&&typeof r.id==='string'&&r.draft&&typeof r.draft.to==='string').map((r:any)=>{
    const at=Math.max(Number(r.createdAt)||today,today);
    return {id:r.id,kind:'reply',title:String(r.draft.subject||'(No subject)').slice(0,120),to:String(r.draft.to).replace(/\s*<[^>]*>\s*$/,'').slice(0,80)||r.draft.to,draft:r.draft,createdAt:at,updatedAt:at};
   });
