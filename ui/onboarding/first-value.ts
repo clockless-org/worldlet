@@ -6,14 +6,14 @@ import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.t
  * The second half of the first-run tour (owner design 2026-10-02, ui/onboarding/README.md): the
  * person gives Fox one real thing to do and watches it happen.
  *
- * 5. Pick: the spotlight boxes the item Fox picked in the Attention Center; **Show me** (or a click
+ * 6. Pick: the spotlight boxes the item Fox picked in the Attention Center; **Show me** (or a click
  *    on it) opens its card in the middle, and the box glides from the item to the card.
- * 6. Card: Fox asks “Can I do this for you?”; **Do it for me** opens the item's page full size in
+ * 7. Card: Fox asks “Can I do this for you?”; **Do it for me** opens the item's page full size in
  *    its Applet, where the person watches Fox work and can step in (owner feedback 2026-10-02: no
  *    picture in picture for Fox's pages; leaving shows a badge on the Applet instead). The card's
  *    own Done (Got it for something to know) works too and settles the item as the first win; its
  *    Dismiss and Later wait until the tour is over (owner request 2026-10-04).
- * 7. Fox's only question while it works is the **Go ahead** before a last step that submits,
+ * 8. Fox's only question while it works is the **Go ahead** before a last step that submits,
  *    sends, books or pays (owner decision 2026-10-03: nothing is confirmed afterwards). Once Fox
  *    has checked the result page that tap settles the item, and the first win follows Fox's reply.
  *    When Fox's turn ends with the item still open (Fox could not finish, or took no last step),
@@ -28,7 +28,7 @@ import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.t
  * model takes longer than two (Mac RC 3001)). With nothing connected (Not now on Gmail) there is nothing to
  * wait for: only a brought Agent's conversations, which reach the Center within fifteen seconds of the World
  * opening, so after the first half of the tour Fox does not wait at all (owner request 2026-10-06). Then the
- * tour ends and the World is free, instead of staying locked until an item arrives; the phone step follows (world-tour.ts).
+ * tour ends and the World is free, instead of staying locked until an item arrives.
  * Stages persist (`first-value`, `-review`, `-running`, `-outcome`), so a restart resumes the step;
  * an interrupted operation is never replayed.
  */
@@ -76,7 +76,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
   if(!overview()||root.dataset.attentionPreview==='true'){unbox();return;}
   pick();
  }
- // 5. Pick the item Fox can do.
+ // 6. Pick the item Fox can do.
  function pick(){
   // Pick among the rows the Center shows, so the box has the item to surround.
   const shownRows=[...root.querySelectorAll('.world-matter[data-world-item-id]')].filter(row=>row.getClientRects().length).map(row=>String((row as HTMLElement).dataset.worldItemId));
@@ -122,7 +122,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
   if(!same('pick:'+id)){shown='pick:'+id;guide('Let’s try one together. '+(title?'I picked this one for you: **'+title+'**.':'I picked one for you.'),[button('Show me',()=>void open())]);}
   box('pick:'+id,{target:()=>elementBox(root,'.world-matter[data-world-item-id="'+CSS.escape(id)+'"]'),act:()=>void open()});
  }
- // 5 for a brought Agent: Fox boxes a theme of the conversations it brought (core/tasks/themes.ts) and offers to pull it
+ // 6 for a brought Agent: Fox boxes a theme of the conversations it brought (core/tasks/themes.ts) and offers to pull it
  // together on one page; the artifact Fox shows is the first win (Kelvin 2026-10-07: an artifact, not an Applet).
  function pickOngoing(theme:{id:string,title:string,say:string}){
   waitingSince=0;
@@ -148,7 +148,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
   unbox();if(same('unavailable'))return;shown='unavailable';
   guide('That item is no longer waiting for you. **Let’s pick another one.**',[button('Pick another',async()=>{if(await save('first-value')){shown='';tick();}})]);
  }
- // 6. The card is open: Fox asks to do it.
+ // 7. The card is open: Fox asks to do it.
  function review(){
   const item=journeyItem(),id=String(state.onboarding?.journeyItemId||'');
   if(!item||!firstValueCandidate([item])){unavailable();return;}

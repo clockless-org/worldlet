@@ -200,7 +200,8 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 #notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport) .fox-action-left{transform:translateY(calc(var(--fox-side-n,0) * -26px))}
 #notionWorld.native-console.fox-first-console .world-actions .world-capsule{height:44px;min-height:44px;font-weight:500}
 #notionWorld[data-onboarding-locked=true] .companion-side{display:none}
-#notionWorld:is([data-tour-skippable=true],[data-tour-lock=true]) .companion-side :is(.companion-panel-button,.companion-phone-button,.companion-journal-button){visibility:hidden}
+/* The tour's last step points at them: Fox's settings and the phone live here (owner order 2026-10-11). */
+#notionWorld:is([data-tour-skippable=true],[data-tour-lock=true]):not([data-tour-step=fox]) .companion-side :is(.companion-panel-button,.companion-phone-button,.companion-journal-button){visibility:hidden}
 /* Journal and Settings belong to the World: inside an Applet they step aside (owner request 2026-10-08). */
 #notionWorld:is([data-depth=object],[data-depth=note]) .companion-side{display:none}
 :is(#notionWorld.native-console,body) .fox-side-button.fox-side-button{

@@ -272,8 +272,8 @@
  .native-console .task-group[data-group=routines]{left:calc(50% + 170px)}
 }
 /* The first run belongs to the person and the tour: only Routines show. */
-.notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step],[data-tour-coda]) .task-panel .task-group[data-group=now]{display:none}
-.notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step],[data-tour-coda]) .task-panel:not([data-routines=true]){display:none}
+.notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step]) .task-panel .task-group[data-group=now]{display:none}
+.notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step]) .task-panel:not([data-routines=true]){display:none}
 /* Playing is carried by brightness alone; no icon moves, on or off. */
 .native-console .world-audio-current[aria-busy=true] .world-audio-icon svg{animation:world-audio-wait 1.3s ease-in-out infinite}
 @keyframes world-audio-wait{0%,100%{opacity:1}50%{opacity:.45}}

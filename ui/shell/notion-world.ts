@@ -163,7 +163,7 @@ export function mountNotionWorld(data: World, native: any) {
   async function requestArtifactPage(artifact:{id:string;kind:'answer'|'attention';size:'small'|'medium'|'large'},inApplet=insideApplet()){
    if(!native?.artifactPages||artifactRenderMode(artifact,{theme:true,generator:true,inApplet})!=='page')return;
    // Work Fox starts by itself waits out the practice world, onboarding, the tour, the first run and automated browsers.
-   if(backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep||!!root.dataset.tourCoda,firstRun:!!native?.firstRun?.(),asking:false}))return;
+   if(backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep,firstRun:!!native?.firstRun?.(),asking:false}))return;
    const look=await artifactPageSpec();if(!look)return;
    await keeping;
    const result:any=await native.artifactPages({operation:'make',id:artifact.id,size:artifact.size,spec:look.spec,materials:look.materials}).catch(()=>null);
@@ -1400,7 +1400,7 @@ export function mountNotionWorld(data: World, native: any) {
   setTimeout(announceDaily,0);
   // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
   // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
-  const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep||!!root.dataset.tourCoda,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking||followUpAsking});
+  const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking||followUpAsking});
   const dailyPoll=setInterval(()=>{
     if(!root.isConnected){clearInterval(dailyPoll);return;}
     announceDaily();
