@@ -413,7 +413,7 @@ await withBrowser(fileAccess,async browser=>{
  // found here, or a select that fails, leaves the first half with it picked and the error shown; so does a select that
  // moved on before its answer check (`checkLater`) and hears that check failed; a second launch while setup is open
  // (`worldlet:connect-agent`) does the same.
- for(const scenario of ['found','missing','fails','check-fails','second-launch']){
+ for(const scenario of ['found','missing','fails','check-fails','key-missing','second-launch']){
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform,scenario})=>{
    const w=window as any;w.calls=[];w.requested=scenario==='missing'?'hermes':scenario==='second-launch'?null:'openclaw';
@@ -425,6 +425,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,memory:{name:'Nova',user:true,longTerm:true,model:false}}],recommended:'codex',selected:sessionStorage.getItem('fixture-agent')};
     if(b.action==='agentHarness'&&b.operation==='requested'){const id=w.requested;w.requested=null;return {id};}
     if(b.action==='agentHarness'&&b.operation==='select'){if(scenario==='fails')throw Error('OpenClaw did not answer.');sessionStorage.setItem('fixture-agent',b.id);
+     if(scenario==='key-missing')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,keep:true,message:'OpenClaw can’t find its key MINIMAX_API_KEY, so its model can’t answer. Save it in Terminal with: openclaw secrets store set MINIMAX_API_KEY'}})),300);
      if(scenario==='check-fails')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,message:'OpenClaw did not answer.'}})),300);
      return {ok:true,id:b.id,title:'OpenClaw',connected:true,...b.checkLater?{checking:true}:{}};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Nova',memories:[{kind:'soul'}],model:{ok:false},summary:{},history:{conversations:2,notes:0,skills:0,routines:0,list:[{title:'Trip plan',messages:4}]}};
@@ -442,11 +443,12 @@ await withBrowser(fileAccess,async browser=>{
    assert.deepEqual(await selects(),[],'Nothing requested at launch: setup waits on its first page');
    await page.evaluate(()=>{const w=window as any;w.requested='openclaw';window.dispatchEvent(new CustomEvent('worldlet:connect-agent'));});
   }
-  if(scenario==='found'||scenario==='second-launch'){
+  if(scenario==='found'||scenario==='second-launch'||scenario==='key-missing'){
    await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
    assert.deepEqual(await selects(),['openclaw'],'The named Agent is connected with the same select as the big button');
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='openclaw')),'and brought in');
    assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
+   if(scenario==='key-missing'){await page.getByText(/find its key MINIMAX_API_KEY/).waitFor();assert.equal(await page.getByRole('heading',{name:'Nova moved in'}).count(),1,'A missing model key keeps setup going and says which key');}
   }else{
    const message=scenario==='missing'?'Hermes Agent isn’t installed on this computer.':'OpenClaw did not answer.';
    await page.getByText(message,{exact:true}).waitFor();

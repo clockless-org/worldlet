@@ -84,6 +84,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  const onAgentCheck=(event:Event)=>{
   const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.ok!==false||detail.id!==draft.agent)return;
   productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
+  // The Agent runs but one of its model keys is not saved (OpenClaw's MINIMAX_API_KEY, owner report 2026-10-11): setup
+  // keeps going and says which key, instead of sending the person back to the first half again and again.
+  if(detail.keep===true){notice=String(detail.message||'').slice(0,300);render();return;}
   delete draft.agent;delete draft.agentName;draft.connected=false;step=0;notice='';
   error=String(detail.message||'').slice(0,300);
   persist();render();
