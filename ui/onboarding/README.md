@@ -60,7 +60,9 @@ fade in at their places for the tour's hello (owner request 2026-10-06: no move 
 and the tour's **Settings** button fades in with them.
 The welcome's “Welcome ♥” rises to about a fifth of the way down the window, high in the sky just under the fireworks
 (owner request 2026-10-06; `FINALE` in `ui/world/world-celebration-finale.ts`). Then comes a short guided tour with a spotlight (owner design 2026-10-02, revised from the owner's walkthrough the same day,
-and shortened by owner decision 2026-10-10: the person's existing Agent is fully connected at setup, so the tour never asks to sign in to Mail, and it no longer introduces Fox or offers to rename it; the name stays changeable in Settings;
+shortened by owner decision 2026-10-10 (no rename step; the name stays changeable in Settings), and put in the owner's
+order on 2026-10-11: Fox, the Attention Center, the Applets, the tasks and Routines beside Fox, then back to Fox for its
+settings and the phone;
 `ui/onboarding/world-tour.ts`, `ui/onboarding/first-value.ts`, `ui/onboarding/tour-spotlight.ts`,
 `ui/onboarding/tour-lock.ts`). Until it is over only the tour responds (owner request 2026-10-04):
 between spotlight steps (Fox still reading, Fox busy, nothing found yet) a clear layer keeps the
@@ -68,45 +70,47 @@ World, its corner controls and Fox's input from taking clicks, focus or typing, 
 still works. The **Tutorial** switch, in the window's bottom-right corner while a tour runs, is on throughout,
 above the spotlight, and is the one way out (owner Order 2026-10-07). Turning it off finishes the journey at
 once (`journeyStage=finish`), frees the World, and the switch goes; a note beside Settings says the tutorial can be
-turned back on in Settings › Help (owner request 2026-10-11: Tutorial and Feedback go back into Settings). Agent and Phone beside Fox step aside while the tour runs; otherwise Agent opens
+turned back on in Settings › Help (owner request 2026-10-11: Tutorial and Feedback go back into Settings). Agent and Phone beside Fox step aside while the tour runs, except on its last step, which points at them; otherwise Agent opens
 Settings directly, on Agent, with no menu between, and Phone opens Settings › Phone. Esc does nothing in the first run. The World dims, with soft,
 feathered edges, around two lit areas: one around Fox, its ears, its bubble and the bubble's name
-tag together, and one around what Fox explains (none when that is Fox itself). Every choice is made at Fox, so
+tag together, and one around what Fox explains. Every choice is made at Fox, so
 the two look different (owner request 2026-10-06): Fox's area wears a solid, still, warm amber ring, and what Fox
 explains a soft, breathing golden halo rather than a hard ring, except the card (step 6): its paper art fills it, so the
 light is cut to the card's own edge with no margin, feathering or halo around it (owner feedback 2026-10-02, #1617),
 while Fox stays where it always stands with its bubble above it (owner feedback 2026-10-06: Fox moving up under the
 card read as a jump). The box glides from one target to the next, also from
-the tour's last box to first value's first (the whole Attention Center down to the one item). Fox bolds only the word a step teaches and the Applet it names (“This is your **Applet**, **Mail**”). While it shows only the bubble's controls respond: the World, its Applets
+the tour's last box to first value's first (the whole Attention Center down to the one item). Fox bolds only the word a step teaches and what it names (“your **Applets**, … like **Mail**”). While it shows only the bubble's controls respond: the World, its Applets
 and Fox's input take no clicks, focus or typing, and the World's devices and regions neither light up nor show their names on hover. On the card (step 6) the card's source links work too: Source opens Mail or the page, the spotlight lifts there and the card comes back on return. The card's own **Done** (**Got it** for something to know) works as well and settles the item as the first win, while its Dismiss and Later are hidden until the tour is over (owner request 2026-10-04: the card could not be clicked, only Fox). A step that only tells moves on with **Continue**,
-a click anywhere (blank space included), Enter, Space or →; a step that asks the person to use
-something moves on only when they use it. In Fox's bubble every choice is an underlined word, like every other choice Fox offers, never a filled button
+a click anywhere (blank space included), Enter, Space or →; a step with a choice (**Connect Mail**, the phone) or
+one that asks the person to use something moves on only when they choose or use it. In Fox's bubble every choice is an underlined word, like every other choice Fox offers, never a filled button
 (owner feedback 2026-10-06): the step's main action (**Continue**, **Show me**, **Do it for me**,
-**Show pairing code**) in Fox's link colour, a second choice (**Not now**, **Not yet**) muted
+**Connect Mail**, **I have the app**) in Fox's link colour, a second choice (**Later**, **Not now**, **Not yet**) muted
 beside it. Fox, its bubble, its buttons, the tour's Settings and the dimmed World come in as one fade for the hello
 (owner feedback 2026-10-06: Fox flashed on entry when the World darkened in one frame and the bubble popped in after Fox).
 While the Center waits for what was connected to be read, it shows three hopping dots instead of a line of text.
 
-Steps keep the numbers of the original eight, so analytics (`tour_skipped`'s `tour_step`) and earlier notes still match; step 2 (Fox introducing itself, with **Change my name**) was removed on 2026-10-10.
+Steps are numbered 1–5 here and 6–8 in first value, as `tour_skipped`'s `tour_step` reports them (renumbered
+2026-10-11, when the owner set the order).
 
 | Step | Box | Fox says / the person does |
 | --- | --- | --- |
-| 1. Hello | none; Fox comes in where it always stands, in its circle | “Welcome! This is your World. Everything you have can live here now.” |
-| 3. Applets | an Applet whose lights blink, else Mail, else the first Applet in the World | It only tells, with **Continue** (owner decision 2026-10-10: no Connect Mail or Not now): blinking lights mean the Applet is working (Mail collects new mail); every Applet is a real app |
-| 4. Attention Center | the whole Center | What it keeps; pick anything and Fox takes care of it. With nothing connected it only says the Center fills up once mail or calendar is connected |
-| 5. Pick | the item Fox picked | **Show me** (or a click on it): its card opens in the middle and the box glides to it |
-| 6. Card | the card | “Can I do this for you?” **Do it for me** beside Fox opens the page full size in its Applet, where Fox works and the person can step in (an update offers **Continue**); the card's own **Done** or **Got it** settles it there |
-| 7. Done? | none | When Fox's turn ends, “Is it done?” **Mark it done** celebrates the first win |
-| 8. Phone (owner request 2026-10-06) | none; the code sits in Fox's bubble, lit with Fox | Last, never right after the first win's fireworks (owner feedback 2026-10-06): a couple of minutes later, at the first calm moment (the World in front, Fox idle and saying nothing else, no card open); or a few seconds after Fox says there is nothing to do yet: “you can also use me on your phone”. Until pairing starts, the bubble shows the iPhone app's download code (`phoneApps` in `ui/distribution/phone-release.ts`, today the TestFlight public beta) for the phone's camera; **Show pairing code** asks the host to start [pairing](../../core/phone/README.md#pairing) (`phonePair` `start`) and the code becomes the `worldlet://pair` link the phone app scans; when the host reports the phone (`worldlet:phone-status`) Fox says it is paired, with **Continue**. **Not now** (or the Tutorial switch turned off) ends it (ending a code nobody scanned); pairing stays in Fox's panel under Mobile. Nothing reaches the relay before Show pairing code, a click elsewhere does not move on, and a host without phone pairing leaves the step out. The journey is already finished, so this step is not saved and a restart does not bring it back |
+| 1. Hello | Fox's own ring, where it always stands | “We finally meet! This is our new World. Nothing you had was left behind: our past conversations, your memory and skills came with me, and your past days are kept in your Journal, up in the corner.” |
+| 2. Attention Center | the whole Center, top left | What it keeps, and what Fox already pulled out of the person's conversations: “I already pulled out **3 things**, like **…**” (owner request 2026-10-11). With nothing there yet: pick anything and Fox takes care of it, or, with nothing connected, the Center fills up as Fox reads the conversations and the mail once it is connected |
+| 3. Applets | Mail while it is offered, else an Applet whose lights blink, else Mail, else the first Applet | Every Applet is a real app; everything done in them is kept as history and Fox remembers it, so it helps whenever one is open (owner request 2026-10-11). With Mail in the World and not connected (by the Agent or the World), **Connect Mail** opens its connection and moves on, **Later** moves on; otherwise **Continue** |
+| 4. Tasks and Routines | the tasks beside Fox (Fox while there are none) | What Fox is doing shows here as it goes; the Routines wait their turn (the day's prep each morning, the wrap-up each evening), changeable any time |
+| 5. Settings and phone | Agent and Phone beside Fox; the code sits in Fox's bubble, lit with Fox | Everything about Fox is set up here: **Agent** opens Settings. Then the phone (owner request 2026-10-11: “让人得先能下载这个手机 app”): first the iPhone app's download code (`phoneApps` in `ui/distribution/phone-release.ts`) for the phone's camera; **I have the app** asks the host to start [pairing](../../core/phone/README.md#pairing) (`phonePair` `start`) and the code becomes the `worldlet://pair` link the phone app scans; when the host reports the phone (`worldlet:phone-status`) Fox says it is paired, with **Continue**. **Not now** moves on (ending a code nobody scanned); pairing stays in Settings › Phone. Nothing reaches the relay before I have the app, and a host without phone pairing says where pairing lives, with **Continue** |
+| 6. Pick | the item Fox picked | **Show me** (or a click on it): its card opens in the middle and the box glides to it |
+| 7. Card | the card | “Can I do this for you?” **Do it for me** beside Fox opens the page full size in its Applet, where Fox works and the person can step in (an update offers **Continue**); the card's own **Done** or **Got it** settles it there |
+| 8. Done? | none | When Fox's turn ends, “Is it done?” **Mark it done** celebrates the first win, which ends the first run |
 
-Steps 1, 3 and 4 persist as `journeyStage=world-tour` and resume at the same step; a place opened another
-way lifts the spotlight until the person is back in the overview. Continue on step 4 hands over to
+Steps 1–5 persist as `journeyStage=world-tour` and resume at the same step; a place opened another
+way lifts the spotlight until the person is back in the overview. The last choice on step 5 hands over to
 `first-value` at once. Existing completed profiles and retired Mail-tour checkpoints do not restart it.
 
 **Replay on demand** (#1327). Once the first run is behind the person (the profile is completed and
 the journey is past first value), **Show the tutorial** in Settings › Help replays the tour (owner request
-2026-10-11; from 2026-10-07 it was a switch in the World's corner). It shows steps 1, 3, 4 and the phone again with the same spotlight,
-and only tells: the phone step, last, only says where pairing lives, with no codes; the journey
+2026-10-11; from 2026-10-07 it was a switch in the World's corner). It shows steps 1–5 again with the same spotlight,
+and only tells: no Connect Mail, and the last step only says where pairing lives, with no codes; the journey
 stage, setup, accounts and Applets are left as they are; the last Continue just ends it. Turning
 the switch off ends a replay too, and so does Esc; either restores input. While a replay
 runs the switch is on, so a second one cannot start. While Fox is working, the replay waits (a note beside Settings
@@ -137,7 +141,7 @@ nothing will arrive to wait for: only a brought Agent's conversations, which rea
 within fifteen seconds of the World opening, so after the tour's first half Fox does not wait or say it is reading at all
 (owner request 2026-10-06: Fox never hangs on an empty Center). Then the tour ends (`journeyStage=finish`) and the World is the person's, with Fox
 saying it will show how it helps once something comes in, instead of staying locked until an item
-arrives (owner request 2026-10-06), and the phone step closes the tour.
+arrives (owner request 2026-10-06).
 
 For a task with a verified website, the page opens at once and Fox says it is on it. While Fox
 drives the page, the page's own frame turns into moving colors that glow inward over the page edge, with a small card grown from the top
@@ -169,8 +173,8 @@ restart; interrupted operations are never replayed automatically. Empty results 
 usable while normal background Applet jobs continue. For rehearsal without OAuth, see
 [mock Google](../../scripts/DEVELOPMENT.md#mock-google-onboarding-rehearsal).
 
-`world-tour-check.ts` walks every step in the bundled World (the phone a couple of minutes after the first win on a moved clock, and with nothing
-connected the tour moving on without a wait) and replays the tour from
+`world-tour-check.ts` walks every step in the bundled World (Connect Mail with Mail not connected, the phone's two codes, nothing
+after the first win, and with nothing connected the tour moving on without a wait) and replays the tour from
 Show the tutorial in Settings › Help (keyboard and pointer, one tour at a time, turned off, Esc, wide and narrow
 windows), checks the lock between steps, the card's own Done under the spotlight, and the switch, on, in
 the bottom-right corner during the first run and gone after it.

@@ -985,7 +985,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // Fox speaks first at a quiet moment, when it has one line worth saying (fox-proactive.ts); never while a tour
  // step shows or the phone step after the first win is still to come (Mac RC 3017, 3035).
  mountFoxProactive({call,
-  thread:()=>onDesktop()||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||!!root.dataset.tourStep||!!root.dataset.tourCoda?'':segmentNow(),
+  thread:()=>onDesktop()||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||!!root.dataset.tourStep?'':segmentNow(),
   world:()=>context.key.split(':')[0]==='overview'&&!contentIdentity(),
   busy:()=>active||streamingReply||recording||starting||transcribing||editing||!!input.value.trim()||!!guideShown||guideHere(guide)||root.classList.contains('companion-info-open'),
   environment:()=>({key:context.key,location:context.title,state:context.detail,recentActions:recentActions.slice(-4),view:visibleContent(),...worldNow(root)}),

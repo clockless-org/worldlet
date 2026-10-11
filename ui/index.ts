@@ -153,7 +153,7 @@ async function applyReceivedSnapshot(state,isCurrent=()=>true){
  const worldRoot=document.getElementById('notionWorld');
  if(!sample){if(!firstValue)firstValue=mountFirstValue({root:worldRoot,view,call,state,arriving:setupArrivalPending});else firstValue.update(state);}
  if(!sample&&!worldTour)worldRoot?.addEventListener('worldlet:first-win',()=>celebrateWin(worldRoot));
- if(!sample){if(!worldTour)worldTour=mountWorldTour({root:worldRoot,view,call,state,arriving:setupArrivalPending});else worldTour.update(state);}
+ if(!sample){if(!worldTour)worldTour=mountWorldTour({root:worldRoot,view,call,state,arriving:setupArrivalPending,connectApplet:key=>onboarding?.show('connection','home',key)});else worldTour.update(state);}
  if(!sample){if(!loginItemOffer)loginItemOffer=mountLoginItemOffer({root:worldRoot,view,call,state});else loginItemOffer.update(state);}
  if(!sample){if(!desktopHint)desktopHint=mountDesktopCompanionHint({root:worldRoot,view,state});else desktopHint.update(state);}
  if(!sample&&!reportedWorld){reportedWorld=true;track('world_entered');}

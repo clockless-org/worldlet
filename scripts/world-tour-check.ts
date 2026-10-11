@@ -1,9 +1,9 @@
-// The guided tour after first arrival (ui/onboarding/world-tour.ts): Fox says hello from where it always stands (no hop
-// to the middle, owner feedback 2026-10-04), shows an Applet at work, then boxes the Attention Center; once first value is
-// over, the tour's last step offers Fox on the phone (owner request 2026-10-06). The tour is short and never asks to sign
-// in (owner decision 2026-10-10): no Connect Mail, even when Mail is not connected, and no rename step. Esc does nothing:
-// a click anywhere (blank space included), Enter or → moves a step that only tells, and nothing beneath responds, also
-// between steps (the lock).
+// The guided tour after first arrival (ui/onboarding/world-tour.ts), in the owner's order of 2026-10-11: Fox, boxed where
+// it always stands, says hello (we finally meet, nothing was left behind); the Attention Center with what Fox already
+// pulled out; the Applets, whose use Fox remembers, offering Connect Mail while Mail is not connected; the tasks and
+// Routines beside Fox; then Fox's settings and the phone, a code to get the app first, then the pairing code. Esc does
+// nothing: a click anywhere (blank space included), Enter or → moves a step that only tells, a step with a choice waits
+// for it, and nothing beneath responds, also between steps (the lock).
 // The Tutorial switch in the World's bottom-right corner (owner Order 2026-10-07; bottom-right since 2026-10-10) is on while the tour runs; turning it
 // off ends the first run, and it stays in the corner, off, to turn the tour on again. Visiting a place lifts
 // the spotlight and resumes the same step on return. The tour hands over to first value, which
@@ -16,10 +16,8 @@ import path from 'node:path';
 const browser=await launchTestBrowser({args:['--allow-file-access-from-files']});
 type Box={x:number;y:number;width:number;height:number};
 const contains=(outer:Box|null,inner:Box|null)=>!!outer&&!!inner&&outer.x<=inner.x+1&&outer.y<=inner.y+1&&outer.x+outer.width>=inner.x+inner.width-1&&outer.y+outer.height>=inner.y+inner.height-1;
-async function open(connections:any[],journeyStage='world-tour',viewport={width:1372,height:895},proposals:any[]=[],clock=false){
+async function open(connections:any[],journeyStage='world-tour',viewport={width:1372,height:895},proposals:any[]=[]){
  const page=await browser.newPage({viewport,reducedMotion:'reduce'});
- // A page that waits out the minutes before the phone step runs on a clock the check can move forward.
- if(clock)await page.clock.install();
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(([connections,journeyStage,proposals])=>{const w=window as any;w.calls=[];
   w.fixture={workspaceId:'tour',revision:1,activityRevision:0,sources:[],knowledge:[],connections,worldItems:[],onboarding:{completed:true,journeyStage,unlockedApplets:['app-gmail','app-browser']},sampleEnabled:false};
@@ -52,13 +50,15 @@ async function turn(page:Page,on:boolean){
 }
 try{
  {
-  const {page,errors}=await open([{provider:'gmail',connected:true,running:true}],undefined,undefined,undefined,true);
+  const {page,errors}=await open([{provider:'gmail',connected:true,running:true}]);
   const dialogue=page.locator('#companionDialogue');
-  // 1. Hello: Fox stays where it always stands, the World dims, nothing is boxed.
+  // 1. Hello: Fox, boxed where it always stands, says we finally meet and nothing was left behind.
   await waitStep(page,'hello');
-  assert.match(await dialogue.innerText(),/Welcome! This is your World\. Everything you have can live here now\./);
+  assert.match(await dialogue.innerText(),/We finally meet! This is our new World\. Nothing you had was left behind: our past conversations, your memory and skills came with me, and your past days are kept in your Journal/);
   assert.equal(await root(page,'tourFox'),undefined,'Fox does not hop to the middle');
   assert.equal(await page.locator('.tour-spotlight:not([hidden])').count(),1,'the spotlight covers the World');
+  await page.waitForTimeout(600);
+  assert.ok(contains(await guide(page),await page.locator('.companion-avatar').boundingBox()),'hello rings Fox');
   assert.equal(await page.locator('.tour-spotlight:not([hidden]) .tour-spotlight-ring:not(.is-guide)').isVisible(),false,'hello boxes nothing but Fox');
   // The Tutorial switch, on, stands in the World's bottom-right corner above the spotlight, over the corner's own;
   // nothing else offers a way out, and Settings beside Fox steps aside.
@@ -89,34 +89,11 @@ try{
   // Esc does not end the tour.
   await page.keyboard.press('Escape');await page.waitForTimeout(300);
   assert.equal(await step(page),'hello','Esc does not leave the tour');
-  // A click on blank sky moves on; it reaches nothing beneath. There is no step introducing Fox (owner decision
-  // 2026-10-10): the hello goes straight to the Applets.
+  // A click on blank sky moves on; it reaches nothing beneath.
   await page.mouse.click(686,120);
-  // 3. Applets: Mail is boxed, and Fox points at its lights.
-  await waitStep(page,'applets');
-  assert.equal(await root(page,'tourFox'),undefined,'Fox is still in its place');
-  {const now=await page.locator('.companion-avatar').boundingBox();assert.ok(Math.abs(now.x-foxBox.x)<=2&&Math.abs(now.y-foxBox.y)<=2,'Fox stays in the same place '+JSON.stringify({now,foxBox}));}
-  assert.equal(await depth(page),'overview','a click never opens a place');
-  assert.ok(contains(await guide(page),await page.locator('.companion-avatar').boundingBox()),'the lit area surrounds Fox');
-  assert.ok(contains(await guide(page),await page.locator('#companionDialogue').boundingBox()),'and its bubble');
-  assert.equal(await page.getByRole('button',{name:'Change my name',exact:true}).count(),0,'the tour offers no rename');
-  const typed=await page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();return document.activeElement===input;});
-  assert.equal(typed,false,'Fox\'s message input does not take focus during the tour');
-  assert.match(await dialogue.innerText(),/Mail/);
-  assert.ok((await page.locator('#companionDialogue strong').allInnerTexts()).includes('Mail'),'the Applet\'s name is bold');
-  const mail=await page.evaluate(()=>{const root=document.querySelector<any>('#notionWorld'),m=root.sceneMetrics.modules.find(m=>m.id==='app-gmail'),c=root.querySelector('canvas[data-renderer="pixi-webgl"]').getBoundingClientRect();return m&&m.visible!==false?{x:c.left+m.peekBounds.x,y:c.top+m.peekBounds.y,width:m.peekBounds.width,height:m.peekBounds.height}:null;});
-  const applet=await ring(page);
-  assert.ok(applet,'an Applet is boxed');
-  if(mail)assert.ok(contains(applet,mail),'the box surrounds Mail '+JSON.stringify({applet,mail}));
-  // Every choice is made at Fox, so Fox's lit area looks unlike the box around what Fox explains (owner request 2026-10-06).
-  {const style=(selector:string)=>page.locator(selector).evaluate(e=>{const c=getComputedStyle(e);return {border:c.borderTopColor+' '+c.borderTopWidth,animation:c.animationName};});
-   const [fox,target]=[await style('.tour-spotlight:not([hidden]) .tour-spotlight-ring.is-guide'),await style('.tour-spotlight:not([hidden]) .tour-spotlight-ring:not(.is-guide)')];
-   assert.notEqual(fox.border,target.border,'Fox\'s ring is not the target\'s halo: '+JSON.stringify({fox,target}));}
-  // Clicking the boxed Applet does not open it while the step only tells.
-  await page.mouse.click(applet.x+applet.width/2,applet.y+applet.height/2);
-  // 4. The Attention Center, drawn and boxed before its first item.
+  // 2. The Attention Center, top left, drawn and boxed before its first item.
   await waitStep(page,'attention');
-  assert.equal(await depth(page),'overview','the boxed Applet does not open');
+  assert.equal(await depth(page),'overview','a click never opens a place');
   const tracker=page.locator('.world-task-tracker');
   await tracker.waitFor({state:'visible'});
   assert.match(await tracker.evaluate(e=>e.textContent||''),/Coming Up.*Worth Doing.*Worth Knowing/s,'The empty Center names its groups');
@@ -144,9 +121,68 @@ try{
   assert.equal(await page.locator('.world-task-waiting.is-reading i').count(),3,'three dots while Mail is read');
   assert.equal(await page.locator('.world-task-waiting.is-reading').innerText(),'','no reading line');
   assert.equal(await page.locator('.world-task-waiting.is-reading').getAttribute('aria-label'),'Reading what you connected');
-  // The first item arrives; Continue hands over to first value, which boxes the item to click.
+  // The first item arrives, and Fox names what it already pulled out.
   await page.evaluate(()=>{const w=window as any;w.fixture.worldItems=[{id:'tour-item',provider:'gmail',kind:'task',status:'open',priority:'high',title:'Reply to Sam',reason:'Sam asked for a date',summary:'Sam asked when the fictional review can happen.',attentionContentVersion:1,policyVersion:2,sources:[{provider:'gmail',id:'tour-source',quote:'When works?'}]}];w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
   await page.locator('.world-task-tracker .world-matter').first().waitFor({timeout:10000});
+  await page.waitForFunction(()=>/I already pulled out one thing, like Reply to Sam/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:10000});
+  // 3. Applets: Mail is boxed, Fox points at its lights and says it remembers what is used in them.
+  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await waitStep(page,'applets');
+  assert.equal(await root(page,'tourFox'),undefined,'Fox is still in its place');
+  {const now=await page.locator('.companion-avatar').boundingBox();assert.ok(Math.abs(now.x-foxBox.x)<=2&&Math.abs(now.y-foxBox.y)<=2,'Fox stays in the same place '+JSON.stringify({now,foxBox}));}
+  assert.equal(await depth(page),'overview','a click never opens a place');
+  assert.ok(contains(await guide(page),await page.locator('.companion-avatar').boundingBox()),'the lit area surrounds Fox');
+  assert.ok(contains(await guide(page),await page.locator('#companionDialogue').boundingBox()),'and its bubble');
+  assert.equal(await page.getByRole('button',{name:'Change my name',exact:true}).count(),0,'the tour offers no rename');
+  const typed=await page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();return document.activeElement===input;});
+  assert.equal(typed,false,'Fox\'s message input does not take focus during the tour');
+  assert.match(await dialogue.innerText(),/Mail/);
+  assert.match(await dialogue.innerText(),/Everything you do in them is kept as history, and I remember it/);
+  assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).count(),0,'Mail already connected: no Connect Mail');
+  assert.ok((await page.locator('#companionDialogue strong').allInnerTexts()).includes('Mail'),'the Applet\'s name is bold');
+  const mail=await page.evaluate(()=>{const root=document.querySelector<any>('#notionWorld'),m=root.sceneMetrics.modules.find(m=>m.id==='app-gmail'),c=root.querySelector('canvas[data-renderer="pixi-webgl"]').getBoundingClientRect();return m&&m.visible!==false?{x:c.left+m.peekBounds.x,y:c.top+m.peekBounds.y,width:m.peekBounds.width,height:m.peekBounds.height}:null;});
+  const applet=await ring(page);
+  assert.ok(applet,'an Applet is boxed');
+  if(mail)assert.ok(contains(applet,mail),'the box surrounds Mail '+JSON.stringify({applet,mail}));
+  // Every choice is made at Fox, so Fox's lit area looks unlike the box around what Fox explains (owner request 2026-10-06).
+  {const style=(selector:string)=>page.locator(selector).evaluate(e=>{const c=getComputedStyle(e);return {border:c.borderTopColor+' '+c.borderTopWidth,animation:c.animationName};});
+   const [fox,target]=[await style('.tour-spotlight:not([hidden]) .tour-spotlight-ring.is-guide'),await style('.tour-spotlight:not([hidden]) .tour-spotlight-ring:not(.is-guide)')];
+   assert.notEqual(fox.border,target.border,'Fox\'s ring is not the target\'s halo: '+JSON.stringify({fox,target}));}
+  // Clicking the boxed Applet does not open it while the step only tells.
+  await page.mouse.click(applet.x+applet.width/2,applet.y+applet.height/2);
+  // 4. The tasks and Routines beside Fox.
+  await waitStep(page,'dock');
+  assert.equal(await depth(page),'overview','the boxed Applet does not open');
+  assert.match(await dialogue.innerText(),/Beside me is what I’m doing for you.*Routines/s);
+  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  // 5. Back to Fox: its settings and the phone, first the app, then the pairing code. It waits for a choice.
+  await waitStep(page,'fox');
+  await page.waitForTimeout(600);
+  // Agent and Phone stand in the lit area with Fox and its bubble (or in a box of their own beside it).
+  {const [r,g,b]=[await ring(page),await guide(page),await page.locator('.companion-side .companion-panel-button').boundingBox()];assert.ok(contains(r,b)||contains(g,b),'Agent beside Fox is lit '+JSON.stringify({r,g,b}));}
+  assert.equal(await page.locator('.companion-side .companion-panel-button').evaluate(e=>getComputedStyle(e).visibility),'visible','Agent shows on this step');
+  assert.match(await dialogue.innerText(),/Agent opens your settings/);
+  assert.match(await dialogue.innerText(),/First get the app/);
+  assert.equal(await page.locator('.world-tour-phone-qr').getAttribute('aria-label'),'Code to get the Worldlet iPhone app');
+  assert.ok(contains(await guide(page),await page.locator('.world-tour-phone-qr').boundingBox()),'the code is lit with Fox\'s bubble');
+  assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.operation==='start')),'no pairing starts before it is asked for');
+  assert.equal(await page.getByRole('button',{name:'I have the app',exact:true}).getAttribute('class'),'world-tour-primary');
+  assert.equal(await page.getByRole('button',{name:'Not now',exact:true}).getAttribute('class'),'world-tour-quiet');
+  {const look=(name:string)=>page.getByRole('button',{name,exact:true}).evaluate(b=>{const c=getComputedStyle(b);return {background:c.backgroundColor,colour:c.color};});
+   const [main,quiet]=[await look('I have the app'),await look('Not now')];
+   assert.equal(main.background,quiet.background,'neither choice is filled: '+JSON.stringify({main,quiet}));
+   assert.notEqual(main.colour,quiet.colour,'the second choice is muted beside the main one: '+JSON.stringify({main,quiet}));}
+  await page.mouse.click(686,120);await page.waitForTimeout(400);
+  assert.equal(await step(page),'fox','blank space does not skip the phone');
+  await page.screenshot({path:'/tmp/worldlet-tour-phone.png'});
+  await page.getByRole('button',{name:'I have the app',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.world-tour-phone-qr')?.getAttribute('aria-label')==='Pairing code for the Worldlet phone app',null,{timeout:10000});
+  {const code=await page.locator('.world-tour-phone-qr svg').boundingBox();assert.ok(code&&code.width>=150&&Math.abs(code.width-code.height)<2,'the pairing code is square and large enough to scan');}
+  await page.screenshot({path:'/tmp/worldlet-tour-phone-code.png'});
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:{state:'paired',phone:{name:'Kelvin’s iPhone',version:'1.0'},seenAt:Date.now()}})));
+  await page.waitForFunction(()=>/Kelvin’s iPhone is paired/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:10000});
+  await page.screenshot({path:'/tmp/worldlet-tour-phone-paired.png'});
+  // Continue hands over to first value, which boxes the item to click.
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='first-value'));
   await page.waitForFunction(()=>/I picked this one for you/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:20000});
@@ -183,37 +219,11 @@ try{
   await done.click();
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='finish'&&c.itemId==='tour-item'),null,{timeout:10000});
   await page.waitForFunction(()=>/first win/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:10000});
-  // 8. The tour's last step (owner request 2026-10-06): Fox can be used on the phone too, a code to get the app, then the
-  // pairing code; it waits for a choice. It never follows the first win's fireworks (owner feedback 2026-10-06): the World
-  // is the person's first, and the phone comes a couple of minutes later, at a calm moment.
-  await page.waitForTimeout(6000);
-  assert.equal(await step(page),undefined,'no phone step right after the first win');
-  await page.waitForFunction(()=>{const w=document.querySelector<HTMLElement>('#notionWorld');return w.dataset.tourLock===undefined&&w.dataset.tourSpotlight===undefined;},null,{timeout:5000});
-  await page.clock.fastForward('02:05');
-  await waitStep(page,'phone');
-  assert.match(await dialogue.innerText(),/also use me on your phone/);
-  assert.equal(await page.locator('.world-tour-phone-qr').getAttribute('aria-label'),'Code to get the Worldlet iPhone app');
-  assert.ok(contains(await guide(page),await page.locator('.world-tour-phone-qr').boundingBox()),'the code is lit with Fox\'s bubble');
-  assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.operation==='start')),'no pairing starts before it is asked for');
-  assert.equal(await page.getByRole('button',{name:'Show pairing code',exact:true}).getAttribute('class'),'world-tour-primary');
-  assert.equal(await page.getByRole('button',{name:'Not now',exact:true}).getAttribute('class'),'world-tour-quiet');
-  {const look=(name:string)=>page.getByRole('button',{name,exact:true}).evaluate(b=>{const c=getComputedStyle(b);return {background:c.backgroundColor,colour:c.color};});
-   const [main,quiet]=[await look('Show pairing code'),await look('Not now')];
-   assert.equal(main.background,quiet.background,'neither choice is filled: '+JSON.stringify({main,quiet}));
-   assert.notEqual(main.colour,quiet.colour,'the second choice is muted beside the main one: '+JSON.stringify({main,quiet}));}
-  await page.mouse.click(686,120);await page.waitForTimeout(400);
-  assert.equal(await step(page),'phone','blank space does not skip the phone');
-  await page.screenshot({path:'/tmp/worldlet-tour-phone.png'});
-  await page.getByRole('button',{name:'Show pairing code',exact:true}).click();
-  await page.waitForFunction(()=>document.querySelector('.world-tour-phone-qr')?.getAttribute('aria-label')==='Pairing code for the Worldlet phone app',null,{timeout:10000});
-  {const code=await page.locator('.world-tour-phone-qr svg').boundingBox();assert.ok(code&&code.width>=150&&Math.abs(code.width-code.height)<2,'the pairing code is square and large enough to scan');}
-  await page.screenshot({path:'/tmp/worldlet-tour-phone-code.png'});
-  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:{state:'paired',phone:{name:'Kelvin’s iPhone',version:'1.0'},seenAt:Date.now()}})));
-  await page.waitForFunction(()=>/Kelvin’s iPhone is paired/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:10000});
-  await page.screenshot({path:'/tmp/worldlet-tour-phone-paired.png'});
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  // The first win ends the first run: nothing follows the fireworks.
   await page.waitForFunction(()=>{const w=document.querySelector<HTMLElement>('#notionWorld');return w.dataset.tourStep===undefined&&w.dataset.tourSpotlight===undefined&&w.dataset.tourLock===undefined;},null,{timeout:10000});
-  assert.equal(await tutorialOn(page),false,'the first run is over once the phone step closes');
+  await page.waitForTimeout(3000);
+  assert.equal(await step(page),undefined,'no tour step after the first win');
+  assert.equal(await tutorialOn(page),false,'the first run is over after the first win');
   assert.deepEqual(errors,[]);
   await page.close();
  }
@@ -286,41 +296,40 @@ try{
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='finish'&&!c.itemId),null,{timeout:25000});
   await page.waitForFunction(()=>/yours to explore/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourLock===undefined&&document.querySelector<HTMLElement>('#notionWorld').dataset.tourSpotlight===undefined,null,{timeout:5000});
-  // The phone closes the tour here too, and turning the switch off closes it.
-  await waitStep(page,'phone');
-  await turn(page,false);
-  await page.waitForFunction(()=>{const w=document.querySelector<HTMLElement>('#notionWorld');return w.dataset.tourStep===undefined&&w.dataset.tourSpotlight===undefined;},null,{timeout:5000});
-  assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.operation!=='status')),'skipping the phone asks the host for nothing');
+  await page.waitForTimeout(3000);
+  assert.equal(await step(page),undefined,'nothing follows the end of the first run');
   assert.deepEqual(errors,[]);
   await page.close();
  }
  {
-  // Mail that is not connected: the Applets step only tells, with Continue, and never offers to sign in (owner decision
-  // 2026-10-10); with nothing connected Fox never waits on an empty Attention Center (owner request 2026-10-06).
+  // Mail that is not connected: the Applets step offers Connect Mail and waits for a choice (owner request 2026-10-11);
+  // with nothing connected Fox never waits on an empty Attention Center (owner request 2026-10-06).
   const {page,errors}=await open([]);
   await waitStep(page,'hello');
   await page.mouse.click(686,120);
-  await waitStep(page,'applets');
-  assert.match(await page.locator('#companionDialogue').innerText(),/This is your Applet, Mail\. Each one is a real app/);
-  assert.doesNotMatch(await page.locator('#companionDialogue').innerText(),/connected|Connect Mail/,'no sign-in in the tour');
-  assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).count(),0,'no Connect Mail in the tour');
-  assert.equal(await page.getByRole('button',{name:'Not now',exact:true}).count(),0,'no Not now on the Applets step');
-  assert.equal(await page.getByRole('button',{name:'Continue',exact:true}).getAttribute('class'),'world-tour-primary');
-  // A telling step: blank space moves on, and nothing asks the host to sign in.
-  await page.mouse.click(686,120);
   await waitStep(page,'attention');
+  assert.match(await page.locator('#companionDialogue').innerText(),/fills up as I read your conversations, and your mail once it’s connected/);
+  await page.mouse.click(686,120);
+  await waitStep(page,'applets');
+  assert.match(await page.locator('#companionDialogue').innerText(),/In the middle are your Applets, real apps you use right here, like Mail\. Everything you do in them is kept as history, and I remember it.*Connect your mail/s);
+  assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).getAttribute('class'),'world-tour-primary');
+  assert.equal(await page.getByRole('button',{name:'Later',exact:true}).getAttribute('class'),'world-tour-quiet');
+  // A step with a choice: blank space does not move on.
+  await page.mouse.click(686,120);await page.waitForTimeout(400);
+  assert.equal(await step(page),'applets','blank space does not skip Connect Mail');
+  await page.getByRole('button',{name:'Connect Mail',exact:true}).click();
+  await waitStep(page,'dock');
+  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='connect'&&c.provider==='gmail'),null,{timeout:5000});
   assert.equal(await depth(page),'overview');
-  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),false,'the tour starts no sign-in');
-  assert.match(await page.locator('#companionDialogue').innerText(),/fills up once your mail or calendar is connected/);
-  // Nothing will arrive: first value does not wait on the Center, the tour ends and the phone closes it.
+  await page.mouse.click(686,120);
+  await waitStep(page,'fox');
+  // Nothing will arrive: first value does not wait on the Center, the tour ends after the phone.
   await page.waitForTimeout(Math.max(0,18000-await page.evaluate(()=>performance.now())));
   const before=Date.now();
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='finish'&&!c.itemId),null,{timeout:5000});
-  assert.ok(Date.now()-before<4000,'Fox does not wait on an empty Attention Center');
-  assert.equal(await page.evaluate(()=>/still reading|Give me a moment/.test(document.querySelector('#companionDialogue')?.textContent||'')),false,'no waiting message');
-  await waitStep(page,'phone');
   await page.getByRole('button',{name:'Not now',exact:true}).click();
+  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='finish'&&!c.itemId),null,{timeout:5000});
+  assert.ok(Date.now()-before<4000,'Fox does not wait on an empty Attention Center: '+(Date.now()-before)+'ms '+await page.locator('#companionDialogue').innerText());
+  assert.equal(await page.evaluate(()=>/still reading|Give me a moment/.test(document.querySelector('#companionDialogue')?.textContent||'')),false,'no waiting message');
   await page.waitForFunction(()=>{const w=document.querySelector<HTMLElement>('#notionWorld');return w.dataset.tourStep===undefined&&w.dataset.tourSpotlight===undefined&&w.dataset.tourLock===undefined;},null,{timeout:10000});
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.operation!=='status')),'skipping the phone asks the host for nothing');
   assert.deepEqual(errors,[]);
@@ -347,15 +356,17 @@ try{
   assert.equal(await tutorialOn(page),true,label+': one tour at a time, and a replay can be turned off');
   assert.equal(await page.locator('.tour-spotlight:not([hidden])').count(),1,label+': one tour, one spotlight');
   await page.mouse.click(Math.round(viewport.width/2),60);
-  // A replay never asks to sign in: Mail (not connected) is only told about.
-  await waitStep(page,'applets');
-  assert.doesNotMatch(await page.locator('#companionDialogue').innerText(),/Connect Mail/,label+': no sign-in in a replay');
-  assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).count(),0,label+': no Connect Mail in a replay');
-  await page.keyboard.press('Enter');
   await waitStep(page,'attention');
   await page.keyboard.press('Enter');
+  // A replay never asks to sign in: Mail (not connected) is only told about.
+  await waitStep(page,'applets');
+  assert.doesNotMatch(await page.locator('#companionDialogue').innerText(),/Connect your mail/,label+': no sign-in in a replay');
+  assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).count(),0,label+': no Connect Mail in a replay');
+  await page.keyboard.press('Enter');
+  await waitStep(page,'dock');
+  await page.keyboard.press('Enter');
   // The phone, last in a replay too, only tells.
-  await waitStep(page,'phone');
+  await waitStep(page,'fox');
   assert.equal(await page.locator('.world-tour-phone-qr').count(),0,label+': no codes in a replay');
   // Esc leaves, the spotlight goes and input works again.
   await page.keyboard.press('Escape');
@@ -369,7 +380,7 @@ try{
   // Played through to the end: the journey is left as it was.
   await turn(page,true);
   await waitStep(page,'hello');
-  for(const key of ['applets','attention','phone']){await page.getByRole('button',{name:'Continue',exact:true}).click();await waitStep(page,key);}
+  for(const key of ['attention','applets','dock','fox']){await page.getByRole('button',{name:'Continue',exact:true}).click();await waitStep(page,key);}
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourStep===undefined,null,{timeout:10000});
   const calls=await page.evaluate(n=>(window as any).calls.slice(n).map(c=>c.action),before);
@@ -388,5 +399,5 @@ try{
   await page.close();
  }
  console.log('PASS world tour replay: Show the tutorial in Settings › Help replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
- console.log('PASS world tour: Fox says hello where it stands (no hop to the middle), boxes an Applet (only telling, never offering Connect Mail, even when Mail is not connected; no rename step) and the Attention Center, and closes with the phone a couple of minutes after the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the window\'s bottom-right corner, turned off, ends it and goes, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; only key words are bold');
+ console.log('PASS world tour: in the owner\'s order, Fox boxed says hello where it stands (no hop to the middle), the Attention Center names what Fox already pulled out, the Applets (kept as history Fox remembers) offer Connect Mail only while Mail is not connected, the tasks and Routines beside Fox, then Fox\'s settings and the phone, the app first and then the pairing code; nothing follows the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the window\'s bottom-right corner, turned off, ends it and goes, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; only key words are bold');
 }finally{await browser.close();}

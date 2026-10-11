@@ -46,10 +46,6 @@ const logs=path.join(root,'.local/electron-checks');mkdirSync(logs,{recursive:tr
 const logFile=path.join(logs,'onboarding-flow.log'),log=createWriteStream(logFile);
 // RC 录像: pictures of the run for scripts/ui-review.ts (platform/electron/src/checks/index.ts).
 const env:NodeJS.ProcessEnv={...process.env,WORLDLET_UV:uv,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile};
-// The tour's phone step waits two minutes after the first win; here it waits WORLDLET_TOUR_CODA_MS (default 20 s), still
-// proven to wait and to come at a calm moment, so the gate's budget is not spent idle (#41). world-tour-check.ts (test:ui)
-// holds the two minutes on a moved clock.
-env.WORLDLET_TOUR_CODA_MS=process.env.WORLDLET_TOUR_CODA_MS||'20000';
 for(const key of ['ELECTRON_RUN_AS_NODE','WORLDLET_DEV_MODEL','WORLDLET_AGENT_CONFIG','WORLDLET_WORKTREE_PROFILE','WORLDLET_WEB_ROOT','WORLDLET_CAPTURE'])delete env[key];
 console.log(`Onboarding flow: library ${profile}, Codex home ${codexHome}, log ${path.relative(root,logFile)}`);
 const started=Date.now();

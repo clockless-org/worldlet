@@ -79,9 +79,9 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   mark(`click on ${what}`);
  };
  const spotlit="document.querySelector('#notionWorld')?.dataset.tourSpotlight==='true'";
- // The tour (ui/onboarding/world-tour.ts): hello, Applets (Mail, connected by mock Google)
- // and the Attention Center (no step introducing Fox since owner decision 2026-10-10), each telling step proven by its spotlight and moved on with Continue; the phone
- // comes last, after the first win (owner request 2026-10-06).
+ // The tour (ui/onboarding/world-tour.ts), in the owner's order of 2026-10-11: Fox's hello, the Attention Center, the
+ // Applets (Mail, connected by mock Google, so no Connect Mail), the tasks and Routines beside Fox, then Fox's settings
+ // and the phone, each step proven by its spotlight. The phone's Not now registers nothing with the relay.
  // The World's tasks beside Fox (ui/hud/task-panel.ts) keep out of each step's way: during the tour they show only
  // Routines, never Doing now, and never covers the spotlight's middle.
  const panelClear=`(()=>{const p=document.querySelector('.task-panel');if(p&&[...p.querySelectorAll('.task-group[data-group=now]')].some(g=>g.getClientRects().length))return false;
@@ -95,8 +95,12 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // one way out (owner Order 2026-10-07); this journey goes on.
  await wait('the Tutorial switch, on, in the bottom-right corner',"(()=>{const s=document.querySelector('.tour-switch:not([hidden])');const r=s?.getBoundingClientRect();return !!r&&r.width>0&&s.getAttribute('aria-checked')==='true'&&r.right>innerWidth*.6&&r.bottom>innerHeight*.6&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.tour-switch')!==null;})()",10);
  await press('Continue');
- await step('applets');await press('Continue');
  await step('attention');await press('Continue');
+ await step('applets');await press('Continue');
+ await step('dock');await press('Continue');
+ await step('fox');
+ // With phone pairing on this host it offers the app and the pairing code (Not now); without it, Continue.
+ await wait('the phone’s Not now, or Continue',`(()=>{const b=${button('Not now')}||${button('Continue')};if(!b)return false;b.click();return true;})()`,30);
  // First value (ui/onboarding/first-value.ts). 5. Fox boxes the item it picked; a click on it opens its card.
  // The items come from this host's own model reading the mock inbox, which on a loaded release host can
  // take minutes: Fox says it is still reading and waits for the item instead of ending the tour first
@@ -159,19 +163,6 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   mark('Fox’s page stays shown (the panel or its task picture-in-picture window)');
   await press('Go ahead');
   await wait('first win',dialogue('/first win/i'),300);
-  const won=Date.now();
-  // The tour's last step (owner request 2026-10-06): Fox on the phone too. It never follows the first win's fireworks
-  // (owner feedback 2026-10-06): the World is free first, and the phone comes a couple of minutes later, at a calm
-  // moment. npm run test:onboarding shortens that wait (WORLDLET_TOUR_CODA_MS, the snapshot's tourCodaAfterWinMs) so
-  // the RC does not spend two minutes idle; the phone must still wait at least that long, and world-tour-check.ts
-  // holds the two minutes on a moved clock. Not now registers nothing with the relay.
-  const coda=Number(store.snapshot().tourCodaAfterWinMs)||120_000;
-  await wait('the World free after the first win, the phone step waiting',"document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined&&document.querySelector('#notionWorld')?.dataset.tourLock===undefined&&document.querySelector('#notionWorld')?.dataset.tourCoda==='waiting'",15);
-  if(await js("document.querySelector('#notionWorld')?.dataset.tourStep==='phone'"))throw Error('The phone step came right after the first win.');
-  await step('phone',Math.round(coda/1000)+60);
-  // The check sees the first win up to a poll after the tour does, so allow two seconds.
-  if(Date.now()-won<coda-2000)throw Error(`The phone step came ${((Date.now()-won)/1000).toFixed(1)}s after the first win, before its ${coda/1000}s wait.`);
-  await press('Not now');
   await wait('the tour over',"document.querySelector('#notionWorld')?.dataset.tourStep===undefined&&document.querySelector('#notionWorld')?.dataset.tourSpotlight===undefined",10);
  }
  finally{clearInterval(watching);}

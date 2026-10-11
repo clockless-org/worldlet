@@ -184,8 +184,6 @@ for(const action of ['foxProactive','foxProactiveShown'])assert(policy.plumbing.
 const host=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
 assert.match(host,/if\(onboardingUnfinished\(store\.state\.onboarding\)\)return \{started:false,reason:'onboarding'\}/);
 assert.match(host,/store\.busy\|\|store\.organizing\)return \{started:false,reason:'busy'\}/);
-// No speak-first ask while a tour step (the phone step after the first win) shows…
-assert.match(fs.readFileSync('ui/companion/native-chat.ts','utf8'),/root\.dataset\.onboardingLocked==='true'\|\|!!root\.dataset\.tourStep\|\|!!root\.dataset\.tourCoda\?'':segmentNow\(\)/);
-// …nor while the phone step is still to come after the first win (Mac RC 3035: its line kept the phone from showing).
-assert.match(fs.readFileSync('ui/onboarding/world-tour.ts','utf8'),/root\.dataset\.tourCoda='waiting';/);
+// No speak-first ask while a tour step shows.
+assert.match(fs.readFileSync('ui/companion/native-chat.ts','utf8'),/root\.dataset\.onboardingLocked==='true'\|\|!!root\.dataset\.tourStep\?'':segmentNow\(\)/);
 console.log('fox proactive check passed');
