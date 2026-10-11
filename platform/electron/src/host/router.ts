@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import {core} from '../core.ts';
 import {WorldletError} from '../files.ts';
 import type {ActionHandler,Host,RequestContext,Row} from './types.ts';
+import {busyWith} from './busy.ts';
 import type {WebContents} from 'electron';
 
 const ITEM=['worldItemRead','worldItemStatus'];
@@ -39,7 +40,8 @@ export class HostRouter {
    const handler=this.actions.get(action);
    if(!handler)throw new WorldletError(`This Worldlet build does not support “${action}”. Update the app.`);
    const context:RequestContext={requestId,sender};
-   const result=await handler(request as any,context);
+   // A handler that holds the main process for a second or more is reported by name (host/busy.ts).
+   const result=await busyWith(action,()=>handler(request as any,context));
    host.store.recordWorldAction(action,request,requestId,'succeeded');
    return result===undefined?{ok:true}:result;
   }catch(error){

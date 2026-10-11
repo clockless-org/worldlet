@@ -6,6 +6,7 @@ import {channelMessageEvent} from '../../../../../core/tasks/index.ts';
 import {isoSeconds} from '../../files.ts';
 import {AGENT,ONGOING,type AgentService,type OngoingService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
+import {busyWith} from '../../host/busy.ts';
 import {TEXT_BUDGET} from '../agent-runtime/agent-files.ts';
 import {filesHistory,type HistoryOptions} from '../agent-runtime/agent-history.ts';
 import {readSelection} from '../agent-runtime/local-harness.ts';
@@ -64,7 +65,7 @@ export function createHistorySync(host:Host,{history=filesHistory,every=HISTORY_
   if(!reader)return 0;
   const started=now(),checked=ledger.historyCheckedAt(source);
   // Newest first, so when the World's limit for one Agent's history is reached, its recent threads are the ones kept.
-  const threads=(await reader.threads(checked===null?0:checked-HISTORY_SYNC.overlap)).sort((a,b)=>b.updatedAt-a.updatedAt);
+  const threads=(await busyWith('historySync',()=>reader.threads(checked===null?0:checked-HISTORY_SYNC.overlap))).sort((a,b)=>b.updatedAt-a.updatedAt);
   if(!threads.length){ledger.saveHistoryCursor(source,'',null,'',started);return 0;}
   // The same limit as any brought history (TEXT_BUDGET); a check that stops at its own limit carries on next time.
   const total=TEXT_BUDGET-ledger.companionBytes(source);
@@ -84,7 +85,7 @@ export function createHistorySync(host:Host,{history=filesHistory,every=HISTORY_
    // The lines just before a new message, for its context: the conversation's latest kept turns, then this read's.
    const before:string[]=thread.shared&&session?ledger.conversationTurns(source,session,3).map(turn=>turn.text):[];
    for(;;){
-    const page=await reader.turns(thread.id,cursor,HISTORY_SYNC.turns);
+    const page=await busyWith('historySync',()=>reader.turns(thread.id,cursor,HISTORY_SYNC.turns));
     session||=migrationSession(source,thread.title||page.title||'');
     const rows=[];
     for(const turn of page.turns){
