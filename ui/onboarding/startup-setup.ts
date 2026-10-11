@@ -317,8 +317,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(hasGoogle){selected.add('app-gmail');selected.add('app-google-calendar');}
   await prepareGoogleSources();
   await call('onboarding',{operation:'setup',applets:[...selected]});
-  // Today's prep and Wrap up today run unless the person unticked the row (both on by default).
-  await call('foxPreferenceChange',{setting:'daily_routines',value:draft.routines!==false}).catch(()=>{});
+  // Today's prep and Wrap up today are on from the start, with no row on setup (owner decision 2026-10-11); Settings ›
+  // Agent pauses them.
+  await call('foxPreferenceChange',{setting:'daily_routines',value:true}).catch(()=>{});
   const snapshot=await call('snapshot');
   const gathering=node('div','','setup-gathering');loader.append(gathering);
   // Enter your world (owner request 2026-10-10): everything else fades; the apps line up on top and become the World's
@@ -664,15 +665,12 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     if(signingIn)primary.disabled=true;
    }
    else{
-    primary=button(going?agentText('Connecting to {agent}…',going.title):'Build your world',()=>chooseAgent(picked),true);
+    primary=button(going?'Building your world…':'Build your world',()=>chooseAgent(picked),true);
     primary.classList.toggle('is-loading',!!going);if(!picked||!agents.some(a=>a.id===picked)||signingIn)primary.disabled=true;
    }
    if((error||notice)&&!formOpen){const feedback=node('p',t(error||notice),error?'setup-error':'setup-note');if(error)feedback.setAttribute('role','alert');status.append(feedback);}
   }
   primary.classList.add('setup-next');
-  // The two default Routines (core/artifacts/daily.ts, owner decision 2026-10-11): one row, on by default, beside the
-  // button that enters the World; no step of its own. Moving to another Agent keeps what the person chose before.
-  if(importing&&!move)footer.append(routinesRow());
   footer.append(status,primary);
   panel.replaceChildren(...parts,footer);
   // The chosen card travels to the left (owner request 2026-10-09).
@@ -683,13 +681,6 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   }
   if(importing)reveal();
   if(arriving&&!draft.brought&&!bringing)queueMicrotask(()=>void bringIn());
- }
- function routinesRow(){
-  const row=node('label','','setup-routines'),box=document.createElement('input');
-  box.type='checkbox';box.className='setup-routines-check';box.checked=draft.routines!==false;box.disabled=entering;
-  box.onchange=()=>{draft.routines=box.checked;persist();};
-  row.append(box,node('span',t('Each morning and evening, your Agent prepares a card for you'),'setup-routines-text'));
-  return row;
  }
  // A relaunch on the second half shows what already came over.
  if(draft.brought)shownTiles=99;

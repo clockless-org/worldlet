@@ -3,7 +3,6 @@ import {purposeCopy} from './setup-purposes.ts';
 const copy:Record<string,string[]>={
  ...purposeCopy,
  'Give your agent a world':['给你的 Agent 一个世界','あなたのエージェントに世界を','Dale un mundo a tu agente'],
- 'Each morning and evening, your Agent prepares a card for you':['每天早上和傍晚，你的 Agent 会为你准备一张卡片','毎朝と夕方、エージェントがあなたのためにカードを用意します','Cada mañana y cada tarde, tu agente te prepara una tarjeta'],
  'Build your world':['建造你的世界','あなたの世界をつくる','Construye tu mundo'],
  'your agent':['你的 Agent','あなたのエージェント','tu agente'],
  'Found on this computer':['在这台电脑上找到','このコンピュータで見つかりました','Encontrados en este equipo'],
@@ -15,6 +14,7 @@ const copy:Record<string,string[]>={
  '{agent} is moving in':['{agent} 正在搬进来','{agent} が引っ越し中','{agent} se está mudando'],
  '{agent} moved in':['{agent} 搬进来了','{agent} が引っ越してきました','{agent} ya se mudó'],
  'Moving {agent} in…':['正在把 {agent} 搬进来…','{agent} を引っ越し中…','Mudando a {agent}…'],
+ 'Building your world…':['正在建造你的世界…','あなたの世界をつくっています…','Construyendo tu mundo…'],
  'Entering your world…':['正在进入你的世界…','世界に入っています…','Entrando en tu mundo…'],
  'What comes along':['一起带来的','一緒に来るもの','Lo que viene con él'],
  'Avatar':['形象','アバター','Avatar'],
