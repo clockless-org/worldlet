@@ -1,6 +1,7 @@
 import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT,environmentAt} from '../world/index.ts';
 import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../core/applets/index.ts';
 import {xAppIcon,appLogoSource,CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
+import {AGENT_ICONS} from '../hud/agent-version.ts';
 import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
@@ -10,7 +11,6 @@ import {agentBringDimensions,agentsDetectedDimensions,diagnosticError,timingBuck
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
 // Local Agent marks: Claude Code and Codex reuse their Applet logos; the rest ship in resources/brands.
-const AGENT_ICONS:Record<string,string>={'claude-code':appLogoSource({key:'claude-code'})||'','codex':appLogoSource({key:'codex'})||'',hermes:'brands/hermes.png',openclaw:'brands/openclaw.svg',pi:'brands/pi.svg'};
 // The short name for an Agent without a name of its own: "Moving Hermes in…".
 const AGENT_SHORT:Record<string,string>={hermes:'Hermes',openclaw:'OpenClaw',pi:'pi',codex:'Codex','claude-code':'Claude Code'};
 // The page picks one local Agent for the person, in this order (owner request 2026-10-06): Hermes, OpenClaw and pi

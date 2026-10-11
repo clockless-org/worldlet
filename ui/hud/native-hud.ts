@@ -5,7 +5,7 @@ import {sourcesReading} from '../../core/applets/index.ts';
 import {fitAttentionPanel} from './fit-attention-panel.ts';
 import {mountWorldLog} from './world-log.ts';
 import {mountTaskPanel} from './task-panel.ts';
-import {agentVersionLine} from './agent-version.ts';
+import {agentVersionLine,AGENT_ICONS} from './agent-version.ts';
 import {summarizeRequest} from '../../core/agent/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
@@ -118,7 +118,9 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const readAgent=async()=>{
   const turn=++agentTurn,found=await callHost('agentHarness',{operation:'detect'}).catch(()=>null);
   if(turn!==agentTurn)return;
-  const text=agentVersionLine(found);agentLine.textContent=text;agentLine.hidden=!text;
+  const {id,text}=agentVersionLine(found),src=AGENT_ICONS[id]||'';agentLine.replaceChildren();
+  if(src){const icon=document.createElement('img');icon.className='world-agent-icon';icon.src=src;icon.alt='';agentLine.append(icon);}
+  agentLine.append(el('span','world-agent-name',text));agentLine.hidden=!text;
  };
  void readAgent();
  for(const name of ['worldlet:model-changed','worldlet:model-refresh'])window.addEventListener(name,()=>void readAgent());
