@@ -12,7 +12,7 @@ import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {endHermesInstall,hermesSessionModels,installHermes,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
-import {UPDATED,claudeCodeSignedIn,openSignIn,signInInBackground} from './provider-sign-in.ts';
+import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -421,7 +421,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    if(BACKGROUND_SIGN_IN.includes(install.id)){
     signingIn?.abort();
     const controller=signingIn=new AbortController();
-    try{await signInInBackground(install,args,harnessEnvironment(install,currentEnvironment()),controller.signal);}
+    try{await backgroundSignIn(install,args,harnessEnvironment(install,currentEnvironment()),controller.signal);}
     finally{if(signingIn===controller)signingIn=null;}
     return {ok:true,background:true};
    }

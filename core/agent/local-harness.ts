@@ -212,9 +212,12 @@ const errorText=(value:unknown,fallback:string)=>{const item=record(value);retur
  * entry, or an `env` one with no value): one plain line with the key's name and its own command to save it, never the
  * raw resolver text. Only names reach here, never values. Null when the text is not that. */
 /** Claude Code's own sign-in ran out ("Failed to authenticate: OAuth session expired and could not be refreshed",
- * 2026-10-11): one plain line with how to sign in again, never the raw text. Null when the text is not that. */
+ * 2026-10-11): one plain line, never the raw text. Worldlet opens Claude Code's own sign-in page in the browser by
+ * itself once per launch (owner decision 2026-10-11: the person should not have to worry about it). Null when the text
+ * is not that. */
+export const CLAUDE_CODE_SIGN_IN_EXPIRED='Claude Code’s sign-in has expired. Sign in again in the browser page that opened.';
 export function claudeCodeSignInExpired(text:string):string|null {
- return /Failed to authenticate|OAuth (?:session|token)[^.]*expired|invalid_grant/i.test(text)?'Claude Code’s sign-in has expired. Open Terminal, run claude and sign in again with /login.':null;
+ return /Failed to authenticate|OAuth (?:session|token)[^.]*expired|invalid_grant/i.test(text)?CLAUDE_CODE_SIGN_IN_EXPIRED:null;
 }
 /** Codex's own sign-in or usage limit, told apart from its other failures (Mac Beta 4261, 2026-10-11: a turn that
  * failed for another reason read "finish signing in" while Codex was signed in). Null when the text is neither. */

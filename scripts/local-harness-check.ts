@@ -131,7 +131,7 @@ assert.deepEqual(read('openclaw',[],1,'Error: Secret store entry "MINIMAX_API_KE
 assert.equal(openClawMissingKey('Environment variable "MINIMAX_API_KEY" is missing or empty.'),keyLine);
 assert.equal(openClawMissingKey('Rate limited'),null);
 // Claude Code whose own sign-in ran out (2026-10-11): a plain line saying how to sign in again.
-assert.equal(claudeCodeSignInExpired('Failed to authenticate: OAuth session expired and could not be refreshed'),'Claude Code’s sign-in has expired. Open Terminal, run claude and sign in again with /login.');
+assert.equal(claudeCodeSignInExpired('Failed to authenticate: OAuth session expired and could not be refreshed'),'Claude Code’s sign-in has expired. Sign in again in the browser page that opened.');
 assert.deepEqual(read('claude-code',[],1,'Failed to authenticate: OAuth session expired and could not be refreshed').outcome,{error:claudeCodeSignInExpired('Failed to authenticate')});
 assert.equal(claudeCodeSignInExpired('Rate limited'),null);
 assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: not logged in\n').outcome,{error:'Claude Code could not answer: Error: not logged in'},'banners are not Fox’s words; stderr explains a failure');
