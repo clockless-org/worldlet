@@ -62,9 +62,11 @@ await withBrowser(fileAccess,async browser=>{
  const now=panel.locator('.task-group[data-group=now]'),next=panel.locator('.task-group[data-group=routines]');
  await now.locator('.task-card').first().waitFor();
  const cards=async(side=next)=>side.locator('.task-cards>.task-card').evaluateAll(list=>list.map(c=>c.querySelector('.task-title')!.textContent+' · '+c.querySelector('.task-when')!.textContent));
- // Next: the two soonest routines, then "+3" for the rest; paused jobs left out.
- assert.deepEqual(await cards(),['Check Mail · 9:50 AM','Water the plants · 7:00 PM']);
- assert.equal((await next.locator('.task-more').innerText()).trim(),'+3');
+ // Next: the two soonest of the person's routines, then "+2" for the rest; paused jobs left out, and the Mail check is
+ // the Applet's own work, not the person's routine (owner rule 2026-10-11).
+ assert.deepEqual(await cards(),['Water the plants · 7:00 PM','Morning news · Tomorrow 6:00 AM']);
+ assert.equal((await next.locator('.task-more').innerText()).trim(),'+2');
+ assert.equal(await panel.getByText('Check Mail').count(),0,'no Applet checks');
  // Doing now: the Applet's task, a turning ring, a bar that moves on its own while how far along is not known.
  assert.deepEqual(await cards(now),['YouTube · Working on a task from Fox']);
  assert.equal(await now.locator('.task-card-bar[data-unknown=true]').count(),1);
@@ -131,10 +133,10 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source:'reply',text:'',done:'1 reply ready'}})));
  await foxCard.waitFor({state:'detached'});
  assert.equal(await panel.getByText('1 reply ready').count(),0,'nothing finished');
- // "+3" opens every routine, soonest first; a routine opens a read-only popover with when, how often and who runs it.
+ // "+2" opens every routine, soonest first; a routine opens a read-only popover with when, how often and who runs it.
  await next.locator('.task-more').click();
  await popover.locator('.task-list').waitFor();
- assert.deepEqual(await popover.locator('.task-list .task-title').allTextContents(),['Check Mail','Water the plants','Morning news','Weekly review','Flight prices']);
+ assert.deepEqual(await popover.locator('.task-list .task-title').allTextContents(),['Water the plants','Morning news','Weekly review','Flight prices']);
  await popover.locator('.task-list .task-card',{hasText:'Morning news'}).click();
  await popover.locator('.task-popover-facts').waitFor();
  assert.equal((await popover.innerText()).replace(/\s+/g,' ').trim(),'Morning news When Tomorrow 6:00 AM How often Every day Runs on OpenClaw’s scheduler');
@@ -146,7 +148,7 @@ await withBrowser(fileAccess,async browser=>{
  const pause=(paused:boolean)=>page.evaluate(paused=>{const w=window as any;w.panel={...w.panel,jobs:w.panel.jobs.map((j:any)=>j.id==='b'?{...j,paused}:j)};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));},paused);
  await pause(true);
  await next.locator('.task-card',{hasText:'Water the plants'}).waitFor({state:'detached'});
- assert.deepEqual(await cards(),['Check Mail · 9:50 AM','Morning news · Tomorrow 6:00 AM']);
+ assert.deepEqual(await cards(),['Morning news · Tomorrow 6:00 AM','Weekly review · Fri 5:00 PM']);
  await pause(false);
  await next.locator('.task-card',{hasText:'Water the plants'}).waitFor();
  // During the tour only Routines show.

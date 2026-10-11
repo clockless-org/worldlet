@@ -3,11 +3,11 @@
 // side of Fox, Fox and its message bar between them as the way to talk to the Agent; finished work lives only in the
 // Journal). The panel only draws; every decision is here: which rows, in which group and order, and each card's text.
 //
-// Inputs are what the host already keeps (the `taskPanel` host action): the person's Agent's scheduled jobs (its
-// `schedule` service), today's history rows (only `brought.older`, for older conversations still coming in), the
-// runtime task report (source checks running and their next time) and the Applet tasks working now; plus what the page
-// itself hears of Fox's background work (`worldlet:fox-status`). Names and schedules only, never prompts or source
-// contents.
+// Only what the person set going shows (owner rule 2026-10-11): their own Routines (jobs on their Agent's scheduler,
+// and Worldlet's two daily Routines, which they can pause in Settings › Agent) and the work they or their Agent's
+// Routines started (a page Fox drives, Fox's background work, an Applet working on a task Fox handed it). An Applet's
+// own regular checks (Mail, Notes, Notion) and Worldlet's housekeeping are not the person's tasks and never show here;
+// what they find comes up as Artifacts. Names and schedules only, never prompts or source contents.
 import type {HarnessJob} from '../../contracts/harness-services.ts';
 import {worldLogApplet} from '../activity/index.ts';
 import {getApp} from '../applets/index.ts';
@@ -15,9 +15,9 @@ import {nextCronRun} from './next-run.ts';
 import {DAILY_ROUTINE_NAMES} from '../artifacts/index.ts';
 
 export type TaskGroup='routines'|'now';
-/** Who does it: the person's Agent's scheduler, Fox's own background work, an Applet working on a task, a source
- * check, or one of Worldlet's routines. */
-export type TaskSource='agent-job'|'fox'|'applet'|'check'|'worldlet';
+/** Who does it: the person's Agent's scheduler, Fox (its background work and Worldlet's daily Routines), or an Applet
+ * working on a task Fox handed it. */
+export type TaskSource='agent-job'|'fox'|'applet';
 /** Where selecting a row goes, at most one place. */
 export type TaskOpen={applet:string}|{routine:string}|{url:string};
 export type TaskRow={
@@ -51,10 +51,6 @@ export type TaskPanelInput={
  jobs?:readonly HarnessJob[];
  /** The Agent whose scheduler runs the jobs ("OpenClaw"). */
  harness?:string|null;
- /** Today's history rows (seconds), any order. */
- history?:readonly unknown[];
- /** Runtime task report rows (`runtimeTaskReport().rows`, seconds). */
- tasks?:readonly unknown[];
  /** Applet tasks working now: catalog key and start (seconds). */
  working?:readonly {id:string;applet:string;at:number}[];
  /** The web page Fox is driving now, if any: its address, title and the steps its status lists. */
@@ -64,12 +60,9 @@ export type TaskPanelInput={
  /** When Fox makes the next morning brief and today's summary (core/artifacts `dailyPlanned`, ms). */
  daily?:readonly {kind:'plan'|'summary';at:number}[];
 };
-/** History kinds the panel reads: only older conversations still coming in, which is a Doing now window. */
-export const TASK_PANEL_KINDS=['brought.older'] as const;
 /** Routines reach about a week ahead, like the cron reader. */
 const AHEAD_MS=8*86_400_000;
 
-const obj=(v:unknown):Record<string,any>=>v&&typeof v==='object'&&!Array.isArray(v)?v as Record<string,any>:{};
 const clip=(value:string,limit=80)=>{const text=value.replace(/\s+/g,' ').trim(),chars=[...text];return chars.length>limit?chars.slice(0,limit-1).join('').trimEnd()+'…':text;};
 const seconds=(v:unknown):number|null=>typeof v==='number'&&Number.isFinite(v)&&v>0?v:null;
 const appletOpen=(key:string):TaskOpen|undefined=>{const id=getApp(key)?.id;return id?{applet:id}:undefined;};
@@ -120,9 +113,8 @@ export function taskSite(url:string):string {
  const m=typeof url==='string'?/^https?:\/\/(?:[^@/?#]*@)?([^/:?#]+)/i.exec(url):null;
  return m?m[1].toLowerCase().replace(/^www\./,''):'';
 }
-/** The two groups, sorted, every row kept. `now` is ms; history and task times are seconds as the host keeps them. */
+/** The two groups, sorted, every row kept. `now` is ms; Applet task starts are seconds as the host keeps them. */
 export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPanel {
- const start=new Date(now).setHours(0,0,0,0);
  const doing:TaskRow[]=[],routines:TaskRow[]=[];
  const inProgress='In progress';
 
@@ -136,18 +128,6 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:time.when,at,every:taskHowOften(job.when),by,open:{routine:job.id},
    day:time.day,clock:time.clock,name:clip(job.name,40),status:time.when,icon:'clock'});
  }
- const reports=(Array.isArray(input.tasks)?input.tasks:[]).map(obj);
- for(const task of reports){
-  if(typeof task.id!=='string'||!task.id.endsWith(':check')||task.enabled===false||task.status==='paused'||task.status==='running')continue;
-  const applet=worldLogApplet(task.owner),next=seconds(task.nextAt);
-  if(!applet||next===null)continue;
-  const at=Math.max(now,next*1000);
-  if(at-now>AHEAD_MS)continue;
-  const {when,day,clock}=planned(at,now,locale);
-  routines.push({id:'check:'+applet.key,group:'routines',source:'check',title:`Check ${applet.title}`,detail:'',when,at,every:'Regularly, for anything new',by:'Worldlet',open:appletOpen(applet.key),
-   day,clock,name:`Check ${applet.title}`,status:when,icon:'clock'});
- }
-
  // The two default Routines (Today's prep, Wrap up today; core/artifacts/daily.ts), from the page's daily state: Worldlet
  // asks the person's Agent at that time. A paused one is not planned, so it is not here.
  for(const made of input.daily??[]){
@@ -180,28 +160,6 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
    who:applet.title,lines:[`Fox handed ${applet.title} a task`,`${applet.title} is working on it`],
    name:applet.title,status:'Working on a task from Fox',icon:applet.key});
  }
- for(const task of reports){
-  if(typeof task.id!=='string'||!task.id.endsWith(':check')||task.status!=='running')continue;
-  const applet=worldLogApplet(task.owner);if(!applet)continue;
-  const at=seconds(obj(task.execution).startedAt);
-  doing.push({id:'check:'+applet.key,group:'now',source:'check',title:`Checking ${applet.title}`,detail:'',when:inProgress,at:at===null?now:at*1000,open:appletOpen(applet.key),
-   who:'Worldlet',lines:[`Reading ${applet.title} for anything new`],
-   name:`Checking ${applet.title}`,status:'Reading it for anything new',icon:applet.key});
- }
- // Older Hermes Agent conversations still coming in: today's newest report, while it is still bringing them.
- let older:{at:number;body:Record<string,any>}|null=null;
- for(const raw of Array.isArray(input.history)?input.history:[]){
-  const row=obj(raw),body={...obj(row.body),...obj(obj(row.body).data)},at=(seconds(row.at)??0)*1000;
-  if(String(row.kind)!=='brought.older'||at<start||at>now+60_000||body.agent!=='hermes'||typeof body.brought!=='number')continue;
-  if(!older||at>=older.at)older={at,body};
- }
- if(older?.body.status==='bringing'){
-  const {body,at}=older,brought=Number(body.brought),left=Number(body.remaining),many=(n:number)=>n.toLocaleString('en-US')+(n===1?' conversation':' conversations');
-  const known=Number.isFinite(brought)&&Number.isFinite(left)&&brought+left>0;
-  doing.push({name:'Older Hermes Agent chats',status:Number.isFinite(left)&&left>0?left.toLocaleString('en-US')+' to go':'Bringing them in',icon:'fox',...(known?{progress:brought/(brought+left)}:{}),id:'older:hermes',group:'now',source:'worldlet',title:'Bringing older Hermes Agent conversations',detail:'',when:Number.isFinite(left)&&left>0?left.toLocaleString('en-US')+' to go':inProgress,at,
-   who:'Worldlet',lines:[`Brought ${many(Number.isFinite(brought)?brought:0)} so far`+(Number.isFinite(left)&&left>0?` · ${left.toLocaleString('en-US')} to go`:'')]});
- }
-
  routines.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity));
  doing.sort((a,b)=>(b.at??0)-(a.at??0));
  return {routines:{rows:routines,total:routines.length},now:{rows:doing,total:doing.length},empty:!doing.length&&!routines.length};

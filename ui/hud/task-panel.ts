@@ -180,7 +180,7 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   try{
    const result=await call('taskPanel');
    input=result&&!result.sample&&typeof result==='object'?{jobs:Array.isArray(result.jobs)?result.jobs:[],harness:typeof result.harness==='string'?result.harness:null,
-    history:Array.isArray(result.history)?result.history:[],tasks:Array.isArray(result.tasks)?result.tasks:[],working:Array.isArray(result.working)?result.working:[]}:{};
+    working:Array.isArray(result.working)?result.working:[]}:{};
   }catch{/* A failed read keeps the last rows. */}
   finally{loading=false;}
   render();
