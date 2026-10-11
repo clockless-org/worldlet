@@ -18,14 +18,15 @@ import {phoneApps} from '../distribution/index.ts';
  * with Continue or a click anywhere; the phone step waits for a choice. It resumes from the persisted journey stage and hands over to first value
  * (first-value.ts), where the person gives Fox one thing to do.
  *
- * The Tutorial switch in the World's bottom-right corner (owner Order 2026-10-07, tour-lock.ts) is on while
+ * The Tutorial switch in the window's bottom-right corner (owner Order 2026-10-07, tour-lock.ts) is on while
  * the tour runs; turning it off skips (owner requests 2026-10-04 and 2026-10-05) and ends the first run at
- * any step: the journey finishes, the World is free, and the switch stays in the corner, off.
+ * any step: the journey finishes, the World is free, and the switch goes.
  *
- * Replay (#1327): once the first run is over, turning the switch on shows the same steps again on
- * demand. A replay only tells: it never moves the journey stage and never asks
- * to sign in; turning the switch off (and Esc) end it. While Fox is working it waits and says so, and starts
- * once Fox is idle. */
+ * Replay (#1327): once the first run is over, Show the tutorial in Settings › Help (owner request 2026-10-11:
+ * Tutorial and Feedback go back into Settings; it asks with `worldlet:tutorial-replay` on the World) shows the
+ * same steps again on demand. A replay only tells: it never moves the journey stage and never asks to sign in;
+ * turning the switch off (and Esc) end it. While Fox is working it waits and says so, and starts once Fox is
+ * idle. */
 type Box=ReturnType<typeof elementBox>;
 const MAIL='app-gmail',RUNNING=['reading','syncing','connecting'];
 // How long the phone step waits after first value ends. After the first win it never follows the fireworks: the World is
@@ -181,16 +182,15 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   if(!replaying)return;
   replaying=false;started=false;leave();view.setGuide(null);
   root.dispatchEvent(new CustomEvent('worldlet:world-tour-replay-done'));
-  lock.refresh();// The corner's switch, off, is back at once, not at the lock's next frame.
+  lock.refresh();// The tour's switch goes at once, not at the lock's next frame.
  }
- // The Tutorial switch in the World's corner (tour-lock.ts): on replays, one tour at a time and never over
- // the first run or Fox's work; off skips.
+ // Show the tutorial in Settings › Help replays, one tour at a time and never over the first run or Fox's work; the
+ // tour's switch (tour-lock.ts), turned off, skips. Fox's notes about it point at Settings beside Fox.
  const coach=createCoachMark();
- const tutorialSwitch=()=>lock.button as HTMLElement|null;
- const offered=()=>state.onboarding?.completed===true&&stage()!=='world-tour'&&!stage().startsWith('first-value')&&!replaying&&!coda;
+ const settingsEntry=()=>root.querySelector('.companion-side .companion-panel-button') as HTMLElement|null;
  function replay(){
   if(destroyed||replaying||started||coda||active()||tourInProgress(state.onboarding))return;
-  const entry=tutorialSwitch();
+  const entry=settingsEntry();
   if(stage().startsWith('first-value')){if(entry){coach.show(entry,'Let’s finish your first task together first. Then I can show you around again.');setTimeout(()=>coach.hide(),5000);}return;}
   if(view.busy){
    // Fox's task keeps going; the tour waits for it rather than taking the screen away.
@@ -202,14 +202,12 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   lock.refresh();// The tour's switch, on, shows with the first step, not at the lock's next poll.
  }
  const idle=()=>{if(deferred&&!view.busy){deferred=false;coach.hide();replay();}};
- // The switch turned off: the first run ends where it is, and the corner's switch stays, off, to turn it on again.
+ // The switch turned off: the first run ends where it is; Settings › Help shows the tour again.
  const overview=()=>!view.current||view.current==='overview';
  const lock=createTourLock(root,{
   locked:()=>!destroyed&&overview()&&root.dataset.onboarding!=='true'&&(replaying||tourInProgress(state.onboarding)),
   // The switch comes in with Fox's hello, never ahead of it during the arrival and the welcome (owner request 2026-10-06).
   skippable:()=>!destroyed&&!waitingForArrival&&(replaying||coda||tourInProgress(state.onboarding)),
-  offered:()=>!destroyed&&offered(),
-  turnOn:()=>replay(),
   turnOff:()=>skip(),
  });
  function skip(){
@@ -230,10 +228,11 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
   root.dispatchEvent(new CustomEvent('worldlet:tour-skipped'));
   lock.refresh();
   void call('onboarding',{operation:'journey',stage:'finish'}).catch(()=>{});
-  // The corner's switch is where the tour can be reopened; say so once, on the switch itself.
-  requestAnimationFrame(()=>{const entry=tutorialSwitch();if(!entry||destroyed)return;coach.show(entry,'Turn the tutorial back on here any time.');setTimeout(()=>{if(coach.target===entry&&!deferred)coach.hide();},5000);});
+  // Settings is where the tour can be shown again; say so once, beside it.
+  requestAnimationFrame(()=>{const entry=settingsEntry();if(!entry||destroyed)return;coach.show(entry,'Turn the tutorial back on in Settings › Help any time.');setTimeout(()=>{if(coach.target===entry&&!deferred)coach.hide();},5000);});
  }
  window.addEventListener('worldlet:fox-idle',idle);
+ root.addEventListener('worldlet:tutorial-replay',replay);
  // First value ended the tour with nothing to do together yet (first-value.ts): the World is free at once.
  const firstValueEnded=()=>{if(destroyed||!tourInProgress(state.onboarding))return;skipped=true;state={...state,onboarding:{...state.onboarding,journeyStage:'finish'}};lock.refresh();startCoda(CODA_AFTER_END);};
  root.addEventListener('worldlet:first-value-ended',firstValueEnded);
@@ -265,6 +264,6 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false}){
    state=next;if(replaying)return;if(moved()){if(started){leave();started=false;}return;}if(active()&&!started)start();},
   replay,
   get replaying(){return replaying;},
-  destroy(){destroyed=true;clearTimeout(timer);cancelCoda();clearInterval(watch);leave();spotlight.destroy();coach.destroy();lock.destroy();root.removeEventListener('worldlet:celebration-done',arrived);root.removeEventListener('worldlet:first-value-ended',firstValueEnded);root.removeEventListener('worldlet:first-win',firstWin);window.removeEventListener('worldlet:fox-idle',idle);window.removeEventListener('worldlet:phone-status',onPhoneStatus);},
+  destroy(){destroyed=true;clearTimeout(timer);cancelCoda();clearInterval(watch);leave();spotlight.destroy();coach.destroy();lock.destroy();root.removeEventListener('worldlet:celebration-done',arrived);root.removeEventListener('worldlet:first-value-ended',firstValueEnded);root.removeEventListener('worldlet:first-win',firstWin);root.removeEventListener('worldlet:tutorial-replay',replay);window.removeEventListener('worldlet:fox-idle',idle);window.removeEventListener('worldlet:phone-status',onPhoneStatus);},
  };
 }

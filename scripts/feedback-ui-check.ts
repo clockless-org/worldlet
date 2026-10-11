@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld,SETTINGS_BUTTON} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1380,height:900},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{window.calls=[];(window as any).failFeedback=true;window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);if(b.action==='snapshot')return {workspaceId:'feedback-fixture',revision:0,sources:[],knowledge:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail']},sampleEnabled:false,cloudConsent:true};if(b.action==='modelStatus')return {available:true,provider:'hermes'};if(b.action==='feedback'){if((window as any).failFeedback)throw Error('Fixture offline');return {ok:true,id:b.id};}return {ok:true};}}}};});
@@ -10,11 +10,21 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.locator('#notionInput').evaluate(e=>e===document.activeElement),true,'Clicking the message bar focuses the conversation');
  await page.evaluate(()=>{const r=document.querySelector<HTMLElement>('#notionWorld')!;r.dataset.depth='overview';r.dataset.page='';});
  await page.keyboard.press('Escape');
- // A button in the World's bottom-right corner with a small panel of its own (owner request 2026-10-10).
- const panel=page.locator('#worldFeedback'),corner=page.locator('.world-feedback-button');
- const viewport=page.viewportSize()!,c=(await corner.boundingBox())!;assert(c.x+c.width>viewport.width-40&&c.y+c.height>viewport.height-40,'Feedback sits in the bottom-right corner: '+JSON.stringify(c));
- assert.equal(await page.locator('#companionInfo [data-setting=feedback]').count(),0,'no Feedback section in Settings');
- const openFeedback=async()=>{if(!await panel.isVisible())await corner.click();await panel.waitFor();};await openFeedback();
+ // Feedback opens from Settings › Help into a small panel of its own over the World (owner request 2026-10-11): no
+ // button in the World's corner.
+ const panel=page.locator('#worldFeedback'),settings=page.locator('#companionInfo');
+ assert.equal(await page.locator('.world-feedback-button,.world-feedback-corner').count(),0,'no Feedback button in the World');
+ assert.equal(await page.locator('#companionInfo [data-setting=feedback]').count(),0,'no Feedback section of its own: it is in Help');
+ const openFeedback=async()=>{
+  if(await panel.isVisible())return;
+  if(!await settings.evaluate(e=>(e as HTMLDialogElement).open))await page.locator(SETTINGS_BUTTON).click();
+  await settings.locator('[data-setting=help]').click();
+  await settings.getByRole('button',{name:'Send feedback',exact:true}).click();
+  await panel.waitFor();
+  assert.equal(await settings.evaluate(e=>(e as HTMLDialogElement).open),false,'Settings steps aside for it');
+ };
+ await openFeedback();
+ {const viewport=page.viewportSize()!,c=(await panel.boundingBox())!;assert(c.x+c.width>viewport.width-40&&c.y+c.height>viewport.height-40,'the panel stands in the bottom-right: '+JSON.stringify(c));}
  const draft=panel.getByLabel('Your feedback',{exact:true}),send=panel.getByRole('button',{name:'Send',exact:true}),mic=panel.getByRole('button',{name:'Hold to talk',exact:true});
  // Very simple (owner feedback 2026-10-03): the box to type in and the microphone are right there.
  assert.equal(await draft.isVisible(),true,'The box is ready to type in');assert.equal(await mic.isVisible(),true);assert.equal(await send.isDisabled(),true,'Nothing to send yet');
@@ -45,5 +55,5 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/worldlet-feedback-desktop.png'});
  await page.setViewportSize({width:375,height:812});await openFeedback();
  const small=(await panel.boundingBox())!;assert(small.x>=0&&small.y>=0&&small.x+small.width<=375&&small.y+small.height<=812,'fits a phone: '+JSON.stringify(small));assert(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await page.screenshot({path:'/tmp/worldlet-feedback-small.png'});
- assert.deepEqual(errors,[]);console.log('PASS feedback UI: a corner button with its own panel, the box and microphone up front, Escape and outside click close it, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
+ assert.deepEqual(errors,[]);console.log('PASS feedback UI: opened from Settings › Help into its own panel, no button in the World, the box and microphone up front, Escape and outside click close it, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
 });

@@ -48,8 +48,11 @@ await withBrowser(fileAccess,async browser=>{
   assert.match(await journal.innerText(),/Journal/i,'it is named the Journal');
   const book=page.locator('#journalBook');await journal.click();await book.waitFor();assert(!await panel.isVisible(),'it opens the Journal, a book of its own');
   await page.getByRole('button',{name:'Close journal'}).click();await book.waitFor({state:'hidden'});}
- {const corner=page.locator('.world-tutorial-corner .world-tutorial');assert.equal(await corner.getAttribute('aria-checked'),'false','the Tutorial switch is in the World\'s corner, off');}
+ assert.equal(await page.locator('.world-tutorial,.world-tutorial-corner,.world-feedback-button').count(),0,'no Tutorial switch or Feedback button in the World\'s corners');
  await openCompanionPanel(page,'Settings');await panel.waitFor();assert(!await typing());await panel.locator('[data-setting=help]').click();await page.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();assert.equal(await page.locator('.world-recovery-toggle').count(),0);
+ // Feedback and the tutorial are in Settings › Help (owner request 2026-10-11).
+ assert.deepEqual(await panel.locator('.companion-settings-subhead').evaluateAll(list=>list.slice(0,3).map(h=>h.textContent)),['Feedback','Tutorial','Restart Fox']);
+ assert.equal(await panel.getByRole('button',{name:'Send feedback',exact:true}).count(),1);assert.equal(await panel.getByRole('button',{name:'Show the tutorial',exact:true}).count(),1);
  await page.screenshot({path:'/tmp/companion-settings.png'});
  await page.getByRole('button',{name:'Close companion panel'}).click();await page.locator(SETTINGS_BUTTON).click();await page.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Restart Fox',exact:true}).count(),1,'Settings reopens on the setting last chosen');
  await page.getByRole('button',{name:'Close companion panel'}).click();

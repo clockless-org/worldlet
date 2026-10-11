@@ -1391,7 +1391,7 @@ export function mountNotionWorld(data: World, native: any) {
     void askDaily(due);
   },30000);
   // What Fox is doing, for its name tag and the World's Task panel (worldlet:fox-status): the step while it works, then
-  // empty with what was done, which the panel keeps under Done today (ui/hud/task-panel.ts). Reply drafts made meanwhile
+  // empty with what was done, which closes its window in the panel (ui/hud/task-panel.ts). Reply drafts made meanwhile
   // are counted from the host's worldlet:email-drafted.
   function backgroundWork(source:string,kind:FoxWorkKind,text:string){
     let drafted=0;const count=()=>{drafted++;};

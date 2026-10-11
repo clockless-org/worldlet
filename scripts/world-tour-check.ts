@@ -36,20 +36,20 @@ const ring=(page:Page)=>page.locator('.tour-spotlight:not([hidden]) .tour-spotli
 // Fox, its ears, its bubble and the bubble's name tag share one softly lit area.
 const guide=(page:Page)=>page.locator('.tour-spotlight:not([hidden]) .tour-spotlight-ring.is-guide').boundingBox();
 const depth=(page:Page)=>root(page,'depth');
-// The Tutorial switch in the World's corner: the tour's own copy, on, while the tour runs; the corner's own, off, after.
-const SWITCH='.tour-switch:visible, .world-tutorial:visible';
-const tutorialSwitch=(page:Page)=>page.locator(SWITCH).first();
-// Exactly one switch shows; if that never holds, say what both were doing over a few frames.
-async function settled(page:Page){
- const one=()=>{const shown=(e:Element|null)=>!!e&&e.getBoundingClientRect().width>0&&getComputedStyle(e).visibility!=='hidden';return shown(document.querySelector('.tour-switch'))!==shown(document.querySelector('.world-tutorial'));};
- try{await page.waitForFunction(one,null,{timeout:10000});}catch{
-  const frames=await page.evaluate(()=>new Promise(done=>{const out:any[]=[];const look=()=>{const at=(e:Element|null)=>e&&{hidden:(e as HTMLElement).hidden,rect:(({x,y,width,height})=>[x,y,width,height].map(Math.round).join(","))(e.getBoundingClientRect()),visibility:getComputedStyle(e).visibility,display:getComputedStyle(e).display};
-   const w=document.querySelector<HTMLElement>('#notionWorld')!;out.push({tour:at(document.querySelector('.tour-switch')),tours:document.querySelectorAll('.tour-switch').length,corner:at(document.querySelector('.world-tutorial')),data:{...w.dataset}});if(out.length<6)requestAnimationFrame(look);else done(out);};look();}));
-  throw new Error('the Tutorial switch never settled to one: '+JSON.stringify(frames));
- }
+// The Tutorial switch: on, in the window's bottom-right, while a tour runs; once the tour is over it goes, and Show the
+// tutorial in Settings › Help plays it again (owner request 2026-10-11).
+const tutorialSwitch=(page:Page)=>page.locator('.tour-switch');
+async function tutorialOn(page:Page){const s=tutorialSwitch(page);return await s.isVisible()&&await s.getAttribute('aria-checked')==='true';}
+async function showTutorial(page:Page){
+ await page.locator('.companion-side .companion-panel-button').click();
+ await page.locator('.companion-settings-item[data-setting=help]').click();
+ await page.getByRole('button',{name:'Show the tutorial',exact:true}).click();
 }
-async function tutorialOn(page:Page){await settled(page);return await tutorialSwitch(page).getAttribute('aria-checked')==='true';}
-async function turn(page:Page,on:boolean){assert.equal(await tutorialOn(page),!on,'the Tutorial switch is '+(on?'off':'on')+' before turning it '+(on?'on':'off'));await tutorialSwitch(page).click();}
+async function turn(page:Page,on:boolean){
+ if(on){assert.equal(await tutorialOn(page),false,'no tour runs before Show the tutorial');await showTutorial(page);return;}
+ await tutorialSwitch(page).waitFor({state:'visible',timeout:10000});
+ assert.equal(await tutorialOn(page),true,'the Tutorial switch is on before turning it off');await tutorialSwitch(page).click();
+}
 try{
  {
   const {page,errors}=await open([{provider:'gmail',connected:true,running:true}],undefined,undefined,undefined,true);
@@ -66,9 +66,9 @@ try{
   await skip.waitFor({state:'visible',timeout:5000});
   assert.equal(await page.getByRole('button',{name:/^Skip/}).count(),0,'no other Skip');
   assert.equal(await page.locator('.companion-side .companion-panel-button').isVisible()&&await page.locator('.companion-side .companion-panel-button').evaluate(e=>getComputedStyle(e).visibility!=='hidden'),false,'Settings steps aside during the tour');
-  {const [s,c]=[await skip.boundingBox(),await page.locator('.world-tutorial').boundingBox()];
+  {const s=await skip.boundingBox();
    assert.ok(s.x+s.width>1372*.75&&s.y>895*.75,'the switch sits in the bottom-right corner '+JSON.stringify(s));
-   assert.ok(c&&Math.abs(c.x+c.width-(s.x+s.width))<=2&&Math.abs(c.y+c.height/2-(s.y+s.height/2))<=2,'over the corner\'s own switch '+JSON.stringify({s,c}));
+   assert.equal(await page.locator('.world-tutorial,.world-tutorial-corner').count(),0,'no second switch in the World\'s corner');
    const top=await page.evaluate(({x,y})=>document.elementFromPoint(x,y)?.closest('.tour-switch')!==null,{x:s.x+s.width/2,y:s.y+s.height/2});
    assert.ok(top,'the switch takes clicks above the spotlight');}
   assert.equal(await tutorialOn(page),true,'during the tour the Tutorial switch is on');
@@ -218,7 +218,7 @@ try{
   await page.close();
  }
  {
-  // Between spotlight steps the World stays locked; turning the switch off ends the first run, and it stays, off.
+  // Between spotlight steps the World stays locked; turning the switch off ends the first run, and the switch goes.
   const {page,errors}=await open([{provider:'gmail',connected:true,running:true}],'first-value');
   await page.waitForFunction(()=>/still reading/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:20000});
   // Fox stops boxing to wait out a busy turn: the lock alone keeps the World still.
@@ -229,15 +229,15 @@ try{
   assert.equal(await page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();return document.activeElement===input;}),false,'Fox\'s input stays locked');
   await turn(page,false);
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='finish'&&!c.itemId),null,{timeout:5000});
-  await page.waitForFunction(()=>[...document.querySelectorAll('.tour-coach:not([hidden])')].some(n=>/Turn the tutorial back on here/.test(n.textContent||'')),null,{timeout:5000});
+  await page.waitForFunction(()=>[...document.querySelectorAll('.tour-coach:not([hidden])')].some(n=>/Turn the tutorial back on in Settings › Help/.test(n.textContent||'')),null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourLock===undefined&&document.querySelector<HTMLElement>('#notionWorld').dataset.tourSpotlight===undefined,null,{timeout:5000});
   assert.equal(await page.locator('.tour-switch').isVisible(),false,'the tour\'s switch goes once skipped');
-  assert.equal(await tutorialOn(page),false,'the corner\'s switch stays, off');
+  assert.equal(await page.locator('.world-tutorial').count(),0,'no switch is left in the World\'s corner');
   // A snapshot from before the skip was saved does not bring the tour back.
   await page.evaluate(()=>{const w=window as any;const old=structuredClone(w.fixture);old.onboarding.journeyStage='first-value';old.activityRevision=9;w.worldletReceive(old);});
   await page.waitForTimeout(2500);
   assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourSpotlight),undefined,'a stale snapshot does not restart the tour');
-  // Turning the switch on reopens it.
+  // Show the tutorial in Settings › Help reopens it.
   await turn(page,true);
   await waitStep(page,'hello');
   await turn(page,false);
@@ -330,16 +330,17 @@ try{
  // shows the same tour again without touching the journey, setup or connections.
  for(const [label,viewport] of [['wide',{width:1372,height:895}],['narrow',{width:760,height:640}]] as const){
   const {page,errors}=await open([],'finish',viewport);
-  const entry=page.locator('.world-tutorial');
-  await entry.waitFor({state:'visible',timeout:20000});
+  const settings=page.locator('.companion-side .companion-panel-button');
+  await settings.waitFor({state:'visible',timeout:20000});
   await page.waitForTimeout(2500);
   assert.equal(await step(page),undefined,label+': a finished journey does not restart the tour by itself');
   const before=await page.evaluate(()=>(window as any).calls.length);
   const focusFox=()=>page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();const ok=!!input&&document.activeElement===input;input?.blur();return ok;});
   const focusable=await focusFox();
-  // The keyboard reaches the corner's switch; while the tour runs it is on, so no second one starts.
-  assert.equal(await entry.getAttribute('aria-checked'),'false',label+': the switch is off after the first run');
-  {const c=await entry.boundingBox();assert.ok(c&&c.x+c.width>viewport.width*.6&&c.y+c.height>viewport.height*.6,label+': the switch is in the bottom-right corner '+JSON.stringify(c));}
+  // No switch waits in the World's corner; the keyboard reaches Show the tutorial in Settings › Help.
+  assert.equal(await page.locator('.world-tutorial,.tour-switch:visible').count(),0,label+': no Tutorial switch in the World after the first run');
+  await settings.click();await page.locator('.companion-settings-item[data-setting=help]').click();
+  const entry=page.getByRole('button',{name:'Show the tutorial',exact:true});
   await entry.focus();await page.keyboard.press('Enter');
   await waitStep(page,'hello');
   assert.equal(await root(page,'tourReplay'),'true');
@@ -386,6 +387,6 @@ try{
   assert.equal(await tutorialOn(page),true,'the switch is on during the first run');
   await page.close();
  }
- console.log('PASS world tour replay: the Tutorial switch in the World\'s bottom-right corner replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
- console.log('PASS world tour: Fox says hello where it stands (no hop to the middle), boxes an Applet (only telling, never offering Connect Mail, even when Mail is not connected; no rename step) and the Attention Center, and closes with the phone a couple of minutes after the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the World\'s bottom-right corner, turned off, ends it and stays there, off, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; only key words are bold');
+ console.log('PASS world tour replay: Show the tutorial in Settings › Help replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
+ console.log('PASS world tour: Fox says hello where it stands (no hop to the middle), boxes an Applet (only telling, never offering Connect Mail, even when Mail is not connected; no rename step) and the Attention Center, and closes with the phone a couple of minutes after the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the window\'s bottom-right corner, turned off, ends it and goes, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; only key words are bold');
 }finally{await browser.close();}

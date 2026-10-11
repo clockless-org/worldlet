@@ -93,8 +93,8 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const sound=root.querySelector('.notion-top .world-audio');if(sound)today.append(sound);
  todayOpen.onclick=()=>{if(root.dataset.tourLock==='true'||root.dataset.tourSpotlight==='true')return;const now=new Date(),day=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day}}));};
  if(today.childElementCount)root.append(today);
- // The right side mirrors the Attention Center with the Task panel: what the person's Agent is doing now, what is
- // planned and what was done today (owner layout 2026-10-10).
+ // The right side mirrors the Attention Center with the Task panel: the person's Agent's routines and what it is
+ // doing now, one window per task (owner layouts 2026-10-10 and 2026-10-11).
  mountTaskPanel(root,{openApplet:id=>visitObject(id)});
  // The last child of the list: trimming keeps it, and the panel stays centered as one.
  const trackerMore=el('div','world-task-more');trackerMore.hidden=true;
