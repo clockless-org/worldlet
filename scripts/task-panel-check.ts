@@ -1,8 +1,8 @@
-// The World's tasks beside Fox (core/tasks/task-panel.ts, core/tasks/next-run.ts): which rows go under Next and Doing now,
+// The World's tasks beside Fox (core/tasks/task-panel.ts, core/tasks/next-run.ts): which rows go under Scheduled and Doing now,
 // their order, every row kept (a side lists them all), only what the person set going (no Applet checks, no finished
 // work), and the time text. Fixed clock, fictional jobs; no browser.
 import assert from 'node:assert/strict';
-import {nextCronRun,taskPanel,taskHowOften,routineEvery,routineDay} from '../core/tasks/index.ts';
+import {nextCronRun,taskPanel,taskHowOften,routineEvery,routineDay,turnTaskName,TURN_TASK_SOURCE} from '../core/tasks/index.ts';
 
 const at=(text:string)=>new Date(text).getTime();
 const now=at('2026-10-10T07:30:00');
@@ -87,4 +87,9 @@ assert.equal(taskPanel({page:{url:'about:blank',title:''}},now,L).now.total,0,'n
  assert.deepEqual(daily.routines.rows.map(r=>[r.id,r.title,r.day,r.clock,r.by]),[['daily:summary','Wrap up today','Today','6:00 PM','Worldlet, with your Agent'],['daily:plan','Today’s prep','Tomorrow','7:00 AM','Worldlet, with your Agent']],'the summary tonight, the brief tomorrow; one due now is not planned');
  assert.equal(daily.routines.rows[1].every,'Every morning, while you use Worldlet');
 }
+// A turn in which Fox does something is a task named after the person's words, short.
+assert.equal(turnTaskName('\n  Book a table for four at Nopa tonight at seven please\nthanks'),'Book a table for four at Nopa tonight a…');
+assert.equal(turnTaskName('   '),'Fox');
+{const turn=taskPanel({fox:[{source:TURN_TASK_SOURCE,text:'Opening Mail…',at:0,name:turnTaskName('Email Sam')}]},0);
+ assert.deepEqual([turn.now.rows[0].id,turn.now.rows[0].name,turn.now.rows[0].status],['fox:turn','Email Sam','Opening Mail…']);}
 console.log('PASS task panel: Routines and Doing now grouped and sorted with every row kept, one card each with its name, line and picture, only what the person set going (no Applet checks, no finished work), cron next runs and time text, Today’s prep and Wrap up today among the routines');

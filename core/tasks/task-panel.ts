@@ -114,6 +114,13 @@ export function taskSite(url:string):string {
  const m=typeof url==='string'?/^https?:\/\/(?:[^@/?#]*@)?([^/:?#]+)/i.exec(url):null;
  return m?m[1].toLowerCase().replace(/^www\./,''):'';
 }
+/** The source a turn of the conversation reports its work under (`worldlet:fox-status`) while Fox does something in it:
+ * the person told Fox to do a thing, so it is a task beside Fox like any other (owner request 2026-10-11, "跟小狐狸说要做
+ * 什么事的时候也是生成一个 task 直接弄到右边去"). */
+export const TURN_TASK_SOURCE='turn';
+/** What that task's card is called: the person's own words, short. */
+export function turnTaskName(said:string){return clip(said.split('\n').find(line=>line.trim())??'',40)||'Fox';}
+
 /** The two groups, sorted, every row kept. `now` is ms; Applet task starts are seconds as the host keeps them. */
 export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPanel {
  const doing:TaskRow[]=[],routines:TaskRow[]=[];

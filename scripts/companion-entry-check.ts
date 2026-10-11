@@ -32,12 +32,12 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/companion-idle.png'});
  // Clicking Fox types, like the bar; the settings button on Fox's left opens the companion panel (owner feedback 2026-10-04).
  await avatar.click();assert(await typing(),'Clicking Fox starts typing');assert(!await panel.isVisible(),'Clicking Fox does not open the panel');await page.keyboard.press('Escape');assert(!await typing());
- {const s=await page.locator(SETTINGS_BUTTON).boundingBox(),f=await avatar.boundingBox();assert(s.x+s.width<=f.x+f.width/2&&s.width>44,'the settings button sits on Fox\'s left, with its name');
-  assert.equal((await page.locator(SETTINGS_BUTTON).innerText()).trim(),'Agent','Agent, the one word of the Settings section it opens, beside its icon');
+ {const s=await page.locator(SETTINGS_BUTTON).boundingBox(),f=await avatar.boundingBox();assert(s.x+s.width<=f.x+f.width/2&&Math.abs(s.width-44)<1,'the settings button sits on Fox\'s left, its icon only until pointed at (owner request 2026-10-11) '+JSON.stringify(s));
+  assert.equal((await page.locator(SETTINGS_BUTTON).textContent()).trim(),'Agent','Agent, the one word of the Settings section it opens, its name');
   // Phone stands under it on Fox's left (owner request 2026-10-11), the same kind of button.
   const p=await page.locator('.companion-side .companion-phone-button').boundingBox();
   assert(p&&p.x+p.width<=f.x+f.width/2&&p.y>s.y+s.height-1&&Math.abs((p.x+p.width)-(s.x+s.width))<2,'Phone sits under Agent on Fox\'s left: '+JSON.stringify({p,s}));
-  assert.equal((await page.locator('.companion-side .companion-phone-button').innerText()).trim(),'Phone');}
+  assert.equal((await page.locator('.companion-side .companion-phone-button').textContent()).trim(),'Phone');}
  // Settings opens Settings directly, on Agent, with no menu between (owner Order 2026-10-07). The
  // tutorial's switch lives in the World's top-right corner instead.
  await page.locator(SETTINGS_BUTTON).click();await panel.waitFor();

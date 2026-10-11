@@ -1428,7 +1428,7 @@ export function mountNotionWorld(data: World, native: any) {
     const request=dailyArtifactRequest(due.kind,due.day,brief);
     // Made quietly in a background session beside the conversation (owner Orders 2026-10-07): no message in Fox's card
     // and no reply line, the person can talk to Fox meanwhile, and the long request never fills the conversation.
-    const work=backgroundWork('daily',due.kind,due.kind==='plan'?DAILY_ROUTINE_NAMES.plan+': preparing your day…':DAILY_ROUTINE_NAMES.summary+': writing it up…');
+    const work=backgroundWork('daily',due.kind,due.kind==='plan'?DAILY_ROUTINE_NAMES.plan+': preparing your day…':DAILY_ROUTINE_NAMES.summary+': writing it up…',DAILY_ROUTINE_NAMES[due.kind]);
     let ok=true,failed='';
     // Other background work still running: asked again at the next poll. Any other failure, or a turn that ended with
     // no card, is said plainly as a Worth Doing item (host `artifacts` scheduleFailed), never silently dropped.

@@ -62,12 +62,12 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(sent.background,true,'a background session beside the conversation, never in it');
  assert.equal(sent.shown,'Prepared reply','the archive keeps a label, never the request in the person’s name');
  assert.ok(sent.text.includes('id "thread:18c2a1"')&&sent.text.includes('prepare_email once with threadId "18c2a1"')&&sent.text.includes('you never send it'),'it reads the item’s own thread and prepares one draft, never sending');
- // Beside Fox, on its left, a card says what Fox is doing (ui/hud/task-panel.ts).
+ // Beside Fox, on its right, a card says what Fox is doing (ui/hud/task-panel.ts; Scheduled on its left).
  const panel=page.locator('.task-panel');
  const working=panel.locator('.task-group[data-group=now] .task-card[data-task-id="fox:reply"]');
  await working.locator('.task-when',{hasText:'Drafting a reply: Answer Priya about the venue…'}).waitFor();
  const box=await working.boundingBox(),fox=await page.locator('.companion-avatar').boundingBox(),view=page.viewportSize()!;
- assert.ok(box&&fox&&box.x+box.width<fox.x&&box.y>view.height*.8,'on Fox’s left, at the bottom: '+JSON.stringify({box,fox}));
+ assert.ok(box&&fox&&box.x>fox.x+fox.width&&box.y>view.height*.8,'on Fox’s right, at the bottom: '+JSON.stringify({box,fox}));
  assert.equal(await page.locator('#foxArtifact').isVisible(),false,'no card opens');
  await page.screenshot({path:path.join(tmpdir(),'worldlet-prepared-reply-working.png'),clip:{x:0,y:view.height-240,width:view.width,height:240}}).catch(()=>{});
  await page.evaluate(()=>(window as any).finish());

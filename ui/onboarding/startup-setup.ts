@@ -384,10 +384,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(night&&!assets?.night)loader.dataset.setupNight='dimmed';
   loader.classList.add('is-gathering');
   // What came along drifts into Fox while it walks down; Fox swells and glows a little as it takes in each one. Routines
-  // run on their own, so they go to the dock beside Fox instead, to Next on its right (owner layout 2026-10-11); before
+  // run on their own, so they go to the dock beside Fox instead, to Scheduled on its left (owner layout 2026-10-11); before
   // the dock has read them, to where it stands.
   const corner=(document.querySelector('.task-panel:not([hidden]) .task-group[data-group=routines]')||document.querySelector('.task-panel:not([hidden])'))?.getBoundingClientRect();
-  const cornerX=corner&&corner.width?corner.left+24:innerWidth/2+260,cornerY=corner&&corner.height?corner.top+24:innerHeight-40;
+  const cornerX=corner&&corner.width?corner.right-24:innerWidth/2-260,cornerY=corner&&corner.height?corner.top+24:innerHeight-40;
   // Daily notes are the Agent's past days, so they go to the Journal at the head of the left panel (owner decision
   // 2026-10-11), each day becoming that day's page there.
   const journal=document.querySelector('.world-today-open')?.getBoundingClientRect();

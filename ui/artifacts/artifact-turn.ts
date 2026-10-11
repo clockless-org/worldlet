@@ -1,13 +1,13 @@
 // A follow-up on an Artifact (core/artifacts/follow-up.ts): the card turns over to its back, then drops down into the
-// Doing now side beside Fox (ui/hud/task-panel.ts), where its work goes on in the background (owner request 2026-10-11).
+// Doing now side beside Fox, on its right (ui/hud/task-panel.ts), where its work goes on in the background (owner request 2026-10-11).
 // The card is put away first; what turns and flies is a sheet standing in its place, as flyIntoJournal does.
 
-/** Where the Doing now side's newest card stands: beside Fox on its left, on the message bar's line. */
+/** Where the Doing now side's newest card stands: beside Fox on its right, on the message bar's line. */
 function dockSlot(){
  const side=document.querySelector<HTMLElement>('.task-panel:not([hidden]) .task-group[data-group=now]:not([hidden]) .task-card');
  const r=side?.getBoundingClientRect();
  if(r?.width)return {left:r.left,top:r.top,width:r.width,height:r.height};
- return {left:innerWidth/2-170-208,top:innerHeight-16-48,width:208,height:48};
+ return {left:innerWidth/2+170,top:innerHeight-18-40,width:180,height:40};
 }
 
 /** Turns `from` over and drops it beside Fox. `putAway` hides the real card the moment the sheet stands in for it. */
