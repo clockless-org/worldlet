@@ -35,6 +35,8 @@ export class WorldLedger {
   this.exec('PRAGMA user_version=3;');
   try{fs.chmodSync(file,0o600);}catch{}
  }
+ /** Names each open savepoint; nested ones only need distinct names. */
+ private savepoints=0;
  close(){this.db?.close();this.db=null;}
  private get handle(){if(!this.db)throw new WorldletError('The world database is closed.');return this.db;}
  exec(sql:string){try{this.handle.exec(sql);}catch{throw new WorldletError('Could not save world data.');}}
@@ -50,7 +52,7 @@ export class WorldLedger {
   });
  }
  transaction<T>(work:()=>T):T {
-  const name='worldlet_'+crypto.randomUUID().replaceAll('-','');
+  const name='worldlet_'+(++this.savepoints);
   this.exec('SAVEPOINT '+name);
   try{const result=work();this.exec('RELEASE SAVEPOINT '+name);return result;}
   catch(error){try{this.handle.exec('ROLLBACK TO SAVEPOINT '+name);this.handle.exec('RELEASE SAVEPOINT '+name);}catch{}throw error;}

@@ -85,6 +85,8 @@ function macDefaults(domain:string){
  }
  return values;
 }
+/** The host action or service that implements each optional feature; a feature with none is always there. */
+const FEATURE_OWNERS:Partial<Record<keyof HostFeatures,string>>={nativeAppletLaunch:'openInstalledApplet',nativeCalendar:'appleSources',appleNotes:'appleSources',appleReminders:'appleSources',voiceMemos:'voiceMemos',messages:'messages',localMusic:'localMusic',folderManagement:'folderConnection',backgroundSourceChecks:'sourceChecks',browserBookmarks:'browserBookmarks',installedAppDetection:'installedApplets',browserFoxOverlay:'browserShow',browserPictureInPicture:'browserPip',browserTaskPictureInPicture:'browserLayout',curatedSourceRead:'curatedSourceContent',localDataDeletion:'deleteSourceData',googleSignInStages:'connect'};
 const PERSISTED_REQUEST_FAILURES=['agentChat','hermesChat','connect','appContent','onboarding','foxPreferences','localAgent','localHermes'];
 
 async function start(){
@@ -101,8 +103,7 @@ async function start(){
  let world:WorldWindow|null=null;
  const router=new HostRouter(()=>host);
  const implemented=(feature:keyof HostFeatures)=>{
-  const owners:Partial<Record<keyof HostFeatures,string>>={nativeAppletLaunch:'openInstalledApplet',nativeCalendar:'appleSources',appleNotes:'appleSources',appleReminders:'appleSources',voiceMemos:'voiceMemos',messages:'messages',localMusic:'localMusic',folderManagement:'folderConnection',backgroundSourceChecks:'sourceChecks',browserBookmarks:'browserBookmarks',installedAppDetection:'installedApplets',browserFoxOverlay:'browserShow',browserPictureInPicture:'browserPip',browserTaskPictureInPicture:'browserLayout',curatedSourceRead:'curatedSourceContent',localDataDeletion:'deleteSourceData',googleSignInStages:'connect'};
-  const owner=owners[feature];
+  const owner=FEATURE_OWNERS[feature];
   return !owner||router.has(owner)||services.has(owner);
  };
  // macOS's available memory and pressure, read before the World first asks for the page budget.
