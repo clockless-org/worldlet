@@ -1,5 +1,5 @@
 import {dialog} from 'electron';
-import {GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,gameFactoryEnergy,madeGameDocument,madeGameId,madeGameRecord,madeGameTask,orderMadeGames,readMadeGame,validMadeGameId,type MadeGame} from '../../../../../core/games/index.ts';
+import {GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,gameFactoryModel,madeGameDocument,madeGameId,madeGameRecord,madeGameTask,orderMadeGames,readMadeGame,validMadeGameId,type MadeGame} from '../../../../../core/games/index.ts';
 import {WorldletError} from '../../files.ts';
 import {FOX,type FoxService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
@@ -51,8 +51,8 @@ export function installGames(host:Host){
    const replaces=request.replaces==null?null:String(request.replaces),previous=replaces?read(replaces):null;
    if(replaces&&!previous)throw new WorldletError('That game is not in this world. Use list_made_games for the IDs.');
    if(!replaces&&list().length>=MADE_GAME_LIMITS.games)throw new WorldletError(`This world already has ${MADE_GAME_LIMITS.games} made games. Ask the person to delete one in the Game Factory first.`);
-   const energy=gameFactoryEnergy((await fox().energy()).source);
-   if(energy.ok===false)return {error:energy.error,needsEnergy:true};
+   const model=gameFactoryModel((await fox().modelSource()).source);
+   if(model.ok===false)return {error:model.error,needsModel:true};
    const result=fox().startAppletTask({applet:GAME_FACTORY_APPLET,task:madeGameTask(idea,previous),request:request.request,...typeof request.parent==='string'?{parent:request.parent}:{}});
    if(typeof result.id==='string')jobs.set(result.id,{idea,replaces,saved:null});
    return result;

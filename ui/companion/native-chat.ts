@@ -4,7 +4,7 @@ import {mountCompanionLife} from './companion-life.ts';
 import {companionPosition} from './companion-position.ts';
 import {uiIcon} from '../components/index.ts';
 import {mountCompanionInfo} from './companion-info.ts';
-import {watchWorldEnergy} from './world-energy.ts';
+import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
 import {mountFoxProactive} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
@@ -958,23 +958,16 @@ export function createNativeChat(call){return function({button,input,status,exec
  const companionInfo=mountCompanionInfo({root,pet,call,getName:()=>companionName});
  // The settings button beside Fox is the way into the panel; the panel's own entry button stays out of the World.
  companionInfo.entry.remove();
- const openEnergy=async()=>{try{if(isDesktopCompanion())await requireWorldSurface(call);await companionInfo.open('Energy');}catch(error){setStatus(error.message||'Could not reopen World. Try again.');}};
- // Low energy: Fox says so once, with a way to charge, unless another guide or setup is showing.
- const energyWatch=watchWorldEnergy({call,say:text=>{
-  if(guide||root.dataset.onboarding==='true')return false;
-  const charge=make('button','','Charge'),later=make('button','','Not now');charge.type=later.type='button';
-  charge.onclick=()=>{api.setGuide(null,{only:'energy'});void openEnergy();};later.onclick=()=>api.setGuide(null,{only:'energy'});
-  api.setGuide({source:'energy',takeover:false,text,actions:[charge,later]});return true;
- },needed:text=>{
-  // No model on this computer: Fox points to Settings, Model, where it is chosen (owner request 2026-10-05).
+ const modelWatch=watchModelNeeded({call,needed:text=>{
+  // No Agent on this computer: Fox points to Settings › Your Agent, where it is chosen (owner request 2026-10-05).
   if(guide||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||root.classList.contains('companion-info-open'))return false;
-  const choose=make('button','','Choose a model'),later=make('button','','Not now');choose.type=later.type='button';
+  const choose=make('button','','Choose an Agent'),later=make('button','','Not now');choose.type=later.type='button';
   choose.onclick=async()=>{api.setGuide(null,{only:'model-needed'});try{if(isDesktopCompanion())await requireWorldSurface(call);await companionInfo.open('Settings','model');}catch(error){setStatus(error.message||'Could not reopen World. Try again.');}};
   later.onclick=()=>api.setGuide(null,{only:'model-needed'});
   api.setGuide({source:'model-needed',takeover:false,text,actions:[choose,later]});api.revealGuide();return true;
  }});
  // Said once the panel closes, when it was open as no model was found.
- root.addEventListener('worldlet:companion-info-closed',()=>void energyWatch.refresh());
+ root.addEventListener('worldlet:companion-info-closed',()=>void modelWatch.refresh());
  // An Applet task Fox handed off ended: Fox says its result once the conversation is free.
  mountAppletTaskResults({busy:()=>active,say:line=>{
   const open=make('button','',line.open);open.type='button';

@@ -14,7 +14,7 @@ import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
 import {readLocalAgentMemory,summarizeLocalAgent} from '../agent-runtime/local-memory.ts';
 import {hermesThreads} from '../agent-runtime/agent-files.ts';
-import {readFoxEnergy} from './energy.ts';
+import {readModelSource} from './model-source.ts';
 import {bringAgent} from './migration.ts';
 import {createOlderHistory} from './older-history.ts';
 import {createHistorySync,ownHarnessSession} from './history-sync.ts';
@@ -734,7 +734,7 @@ export function installFox(host:Host){
  });
  host.provide<FoxService>(FOX,{scope:foxScope,turnActive:()=>agentTurn!==null,cancel:cancelCloud,stopRoutines,startRoutines,
   startAppletTask:request=>appletTaskStart(request),reviewGames:request=>appletTaskStart(request,true),makeArtifactPage:request=>appletTaskStart({...request,applet:ARTIFACT_PAGE_MAKER.id},true,true),appletTask:id=>appletTasks.get(id)?.applet??null,
-  energy:()=>readFoxEnergy(requireAgent(),error=>host.diagnostics.record(error,'foxEnergy')),report});
+  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report});
 
  host.register({
   modelStatus:()=>foxModelStatus(),
@@ -747,7 +747,7 @@ export function installFox(host:Host){
    return {agent:runtime?.id??null,available:runtime?.available===true,error,lastReply,location:harnessLocation(runtime?.id??'',model),
     model:{name:String(model.name??''),id:String(model.model??''),provider:String(model.provider??''),source:typeof model.source==='string'?model.source:null,ready:model.ready===true,configured:model.configured===true}};
   },
-  foxEnergy:()=>readFoxEnergy(requireAgent(),error=>host.diagnostics.record(error,'foxEnergy')),
+  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),
   // The person's scheduled jobs on their own Agent's scheduler (its `schedule` service), for the World's top-right:
   // names and schedules only, never prompts. None when the Agent declares no scheduler.
   foxRoutines:async()=>{

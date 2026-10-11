@@ -172,11 +172,11 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    draft.brought={conversations:Number(history.conversations)||list.length,older:Number(history.older)||0,notes:Number(history.notes)||0,skills:Number(history.skills)||0,routines:Number(history.routines)||0,list,model:adopted?.model?.ok===true,modelName:adopted?.model?.ok?String(adopted.model.model||''):'',name:typeof adopted?.name==='string'?adopted.name:null,kinds,memory:kinds.length>0||!!adopted?.name,summary:{personality:said(summary.personality),about:said(summary.about),model:said(summary.model)}};
    // Worldlet provides no model (owner decision 2026-10-05): when the Agent's model could not come over and
    // nothing else here answers (an OpenClaw on a sign-in, no Codex), say where to choose one.
-   const energy=await call('foxEnergy').catch(()=>null);
-   draft.brought.energy=['chatgpt','own','none'].includes(energy?.source)?energy.source:'';
+   const model=await call('modelSource').catch(()=>null);
+   draft.brought.model=['chatgpt','own','none'].includes(model?.source)?model.source:'';
    // An Agent Fox talks through directly keeps its own model; the one it brought only runs background work.
    if(adopted?.model?.ok&&!draft.connected)notice=agentText('Fox now runs on the model you brought from {agent}.',draft.agentName||id);
-   else if(draft.brought.energy==='none')notice=agentText('{agent} signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Your Agent.',draft.agentName||id);
+   else if(draft.brought.model==='none')notice=agentText('{agent} signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Your Agent.',draft.agentName||id);
   }catch(e){
    productEvent('agent_bring_failed',{local_agent:id,error_code:failureCode(e)},timingBucket(performance.now()-started));
    draft.brought={conversations:0,notes:0,skills:0,routines:0,list:[],model:false,modelName:'',name:null,kinds:[],memory:false,failed:true,summary:{}};

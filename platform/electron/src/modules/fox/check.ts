@@ -9,7 +9,7 @@ import {WorldStore} from '../../store/world-store.ts';
 import {AGENT,ANALYTICS,FOX,type FoxService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {createCompanion} from './companion.ts';
-import {readFoxEnergy} from './energy.ts';
+import {readModelSource} from './model-source.ts';
 // installFox uses Electron's dialogs, so this check runs in an Electron main process.
 import {app,powerMonitor} from 'electron';
 import {installFox} from './index.ts';
@@ -165,21 +165,21 @@ try{
  assert.equal(store.ledger().companionStored('private','memory-edits'),null);
  assert.notEqual(store.ledger().companionStored('private','session')?.session,session,'a new Harness session starts');
  pass('import: the new companion replaces the saved one; the previous one is kept as an archive file');
- // Energy (owner decision 2026-10-05): Worldlet charges nothing; the person's computer does.
+ // What answers for Fox (owner decision 2026-10-05): Worldlet provides no model; the person's computer does.
  const runtime=(status:Row|Error,available=true)=>({available,home:()=>'h',status:async()=>{if(status instanceof Error)throw status;return status;}}) as never;
  const errors:unknown[]=[];
- assert.deepEqual(await readFoxEnergy(runtime({ready:true,isDefault:true,source:'local-codex',provider:'openai-codex',name:'Codex on this computer',configured:true}),e=>errors.push(e)),
-  {source:'chatgpt',ready:true,name:'Codex on this computer',provider:'openai-codex',level:null,resetsAt:null,localCodex:true});
- assert.equal((await readFoxEnergy(runtime({ready:false,isDefault:true,source:'local-codex',provider:'openai-codex',configured:true}),()=>{})).source,'none','no Codex sign-in and no key: nothing charges the world');
- const own=await readFoxEnergy(runtime({ready:true,isDefault:false,source:null,provider:'anthropic',configured:true}),()=>{});
- assert.equal(own.source,'own');assert.equal(own.level,null,'only the provider knows an API key’s balance');
- assert.equal((await readFoxEnergy(runtime({ready:true,name:'Claude Code',provider:'claude-code'}),()=>{})).source,'own','a local Agent answering itself charges with its own sign-in');
- const offline=await readFoxEnergy(runtime(new Error('offline')),e=>errors.push(e));
+ assert.deepEqual(await readModelSource(runtime({ready:true,isDefault:true,source:'local-codex',provider:'openai-codex',name:'Codex on this computer',configured:true}),e=>errors.push(e)),
+  {source:'chatgpt',ready:true,name:'Codex on this computer',provider:'openai-codex'});
+ assert.equal((await readModelSource(runtime({ready:false,isDefault:true,source:'local-codex',provider:'openai-codex',configured:true}),()=>{})).source,'none','no Codex sign-in and no key: nothing answers');
+ const own=await readModelSource(runtime({ready:true,isDefault:false,source:null,provider:'anthropic',configured:true}),()=>{});
+ assert.equal(own.source,'own');
+ assert.equal((await readModelSource(runtime({ready:true,name:'Claude Code',provider:'claude-code'}),()=>{})).source,'own','a local Agent answers on its own sign-in');
+ const offline=await readModelSource(runtime(new Error('offline')),e=>errors.push(e));
  assert.equal(offline.source,'none');assert.equal(errors.length,1,'a failed read is recorded, not thrown');
  // A fresh install or update still preparing Fox's runtime is setup, not a failure (PostHog 01a0ffbb).
- const preparing=await readFoxEnergy(runtime(new Error('Fox’s runtime is not ready.'),false),e=>errors.push(e));
+ const preparing=await readModelSource(runtime(new Error('Fox’s runtime is not ready.'),false),e=>errors.push(e));
  assert.equal(preparing.source,'none');assert.equal(errors.length,1,'a runtime still being prepared is not read or recorded');
- pass('energy: which source charges Fox and how much is left');
+ pass('model source: what answers for Fox');
 
  // Applet tasks (owner decision 2026-10-03): Fox hands a task to an Applet and the conversation is
  // free at once; the task's tools reach the page under its own id, and its result is kept.

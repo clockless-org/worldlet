@@ -7,7 +7,7 @@ The Games area's **Game Factory** makes small games the person asks for (owner r
 ## Flow
 
 1. The person types the game they want in the Games area panel, or says it to Fox anywhere ("I want a game like Flappy Bird, but with a fox").
-2. Fox calls `make_game` (World target `games/make`) with the idea in their words. Only the person's own words this turn can start it. The host checks the energy rule below and hands the work to the Factory as an [Applet task](../../docs/FOX-AGENT.md#applet-tasks): it runs in the background beside the conversation, the screen over the Factory says what it is doing, and the conversation never waits.
+2. Fox calls `make_game` (World target `games/make`) with the idea in their words. Only the person's own words this turn can start it. The host checks the model rule below and hands the work to the Factory as an [Applet task](../../docs/FOX-AGENT.md#applet-tasks): it runs in the background beside the conversation, the screen over the Factory says what it is doing, and the conversation never waits.
 3. In that task Fox's model writes **one self-contained HTML page** and sends it with `save_game` (`games/save`). Its description is the contract: inline script and style only, nothing from the network, fills a 900 × 600 window down to 360 px wide, starts drawing at once, keyboard and mouse, a restart, under 300 KB. `window.worldlet.best(score)` reports a score worth keeping.
 4. The host checks the page (`checkMadeGameSource`), then plays it for a few seconds out of sight (`platform/electron/src/modules/games/trial.ts`): it must load, draw something other than a blank screen and survive a few keys and a click without a script error. Problems go back to the model, which fixes them and saves again; the task's own turn limit bounds the rounds.
 5. A game that passes is saved, leads the Games area panel (newest first) and Fox says it is ready. It opens in a play view with **Restart** and **Ask Fox to change it**, which calls `make_game` with `replaces` (the model reads the current page with `read_made_game`).
@@ -35,13 +35,13 @@ Made games live in the World's database, `world.sqlite` (owner decision 2026-10-
 
 Before 2026-10-05 each game was a folder, `games/<id>/` (`game.html`, `game.json`, `versions/<n>.html`); it moves into the database once (`platform/electron/src/store/moved-in.ts`) and stays as `games.before-database` for a month. The practice world has no Game Factory. Deleting a game asks first and removes its rows. At most 60 games per World.
 
-## Energy
+## Model
 
-Making a game takes many model tokens, so it runs on the person's own [energy](../../README.md): a ChatGPT plan (Codex sign-in) or their own API key in Settings › Your Agent, Anthropic or OpenAI (`gameFactoryEnergy`). With neither (Worldlet provides no energy of its own, owner decision 2026-10-05), `make_game` returns the reason and Fox offers to open the Energy page. A claude.ai subscription sign-in cannot be used by other apps, so Claude means an Anthropic API key. Playing a made game uses no energy. The Agent must support Applet tasks (the built-in Hermes Harness does).
+Making a game takes many model tokens, so it needs an Agent that answers on the person's own sign-in: a ChatGPT plan (Codex sign-in) or their own API key, Anthropic or OpenAI, chosen in Settings › Your Agent (`gameFactoryModel`). With neither (Worldlet provides no model of its own, owner decision 2026-10-05), `make_game` returns the reason and Fox offers to open Settings › Your Agent. A claude.ai subscription sign-in cannot be used by other apps, so Claude means an Anthropic API key. Playing a made game needs nothing. The Agent must support Applet tasks (the built-in Hermes Harness does).
 
 ## Checks
 
-`node scripts/game-factory-check.ts` checks the rules here: the static checks, the prelude, reports, records, the energy rule, and that making stays closed (no game tools offered, the Factory is not an Applet).
+`node scripts/game-factory-check.ts` checks the rules here: the static checks, the prelude, reports, records, the model rule, and that making stays closed (no game tools offered, the Factory is not an Applet).
 
 ## Battle review
 

@@ -50,8 +50,6 @@ paths.pip='<rect x="2.5" y="4.5" width="19" height="15" rx="3"/><rect x="12" y="
 paths.cornerGrip='<path d="M5 13 13 5M5 19 19 5"/>';
 
 paths.clock='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
-// Fox's energy: a charging bolt.
-paths.bolt='<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>';
 paths.skip='<path d="m5 5 8 7-8 7zM18 5v14"/>';
 
 paths.flame='<path d="M13 2c1 5-5 5-3 9 2 0 3-2 3-4 4 3 6 6 5 9a6 6 0 0 1-12 0c-1-4 1-7 4-9-1 3 0 4 0 4"/>';

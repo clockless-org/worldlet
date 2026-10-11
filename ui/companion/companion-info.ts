@@ -81,7 +81,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
   if(key!==anchorKey){anchorKey=key;Object.assign(panel.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px'});}
   anchorFrame=requestAnimationFrame(anchorPanel);
  }
- // Old section names still open their section: Energy is Your Agent now, the Journal is a book of its own (owner request
+ // Old section names still open their section: the old Energy page is Your Agent now, the Journal is a book of its own (owner request
  // 2026-10-08).
  const SECTION_ID:Record<string,string>={Profile:'fox',Energy:'model',History:'history',Mobile:'phone',iPhone:'phone',Phone:'phone',Feedback:'feedback'};
  let model:any=null,snapshot:any=null,profile:Partial<CompanionProfile>={},error='',busy=false,generation=0;
@@ -179,7 +179,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
   function card(icon,title,description,label?,action?){const c=el('section','companion-info-card'),symbol=el('span','companion-info-symbol');symbol.innerHTML=uiIcon(icon);const body=el('div');body.append(el('h4','',title),el('p','',description));c.append(symbol,body);if(label){const b=button(label,()=>run(action));b.disabled=busy;c.append(b);}grid.append(c);return c;}
   function abilitiesSection(){
    const section=el('div','companion-abilities');section.setAttribute('aria-label','What '+(profile.name||getName()||'Fox')+' can do');
-   section.append(el('h3','','What '+(profile.name||getName()||'Fox')+' can do'),el('p','companion-energy-intro','Just ask, in your own words. A few things people say:'));
+   section.append(el('h3','','What '+(profile.name||getName()||'Fox')+' can do'),el('p','companion-abilities-intro','Just ask, in your own words. A few things people say:'));
    grid=el('div','companion-info-grid companion-abilities-grid');section.append(grid);
    for(const [icon,title,say,does] of ABILITIES){const c=card(icon,title,does);c.querySelector('h4').after(el('q','companion-ability-say',say));}
    const memory=card('book','Your memory','See and correct what '+(profile.name||getName()||'Fox')+' remembers about you.','Open',async()=>{dismiss();window.dispatchEvent(new Event('worldlet:memory-manager'));});

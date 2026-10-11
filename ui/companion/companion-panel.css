@@ -102,7 +102,7 @@
 .companion-history-source svg{width:22px;height:22px}
 .companion-history-controls{position:sticky;top:-3px;z-index:1;background:#f8f0df;padding:8px 0}
 @media(max-width:600px){.native-console .companion-info-panel[open]{padding-top:40px}.companion-info-panel .companion-info-profile:not([hidden]){padding:12px 8px}}
-.companion-info-panel .companion-energy-intro{margin:-6px 0 12px}
+.companion-info-panel .companion-abilities-intro{margin:-6px 0 12px}
 .companion-info-panel .companion-phone-intro{margin:-6px 0 12px}
 .companion-phone-body{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px}
 .companion-phone-body>.companion-info-note{flex-basis:100%;margin:0}

@@ -1,7 +1,7 @@
 import {replyMarkdown} from './reply-markdown.ts';
 
 /** A Fox guide ({text, body, actions}) drawn inside the companion panel instead of Fox's bubble, so
- * a setting or an energy step finishes on the page where it started. `view` stands in for the
+ * a setting finishes on the page where it started. `view` stands in for the
  * World view the guides normally speak through. */
 export function createPanelGuide({onClear=()=>{}}:{onClear?:()=>void}={}){
  const element=document.createElement('div');element.className='companion-panel-guide';element.hidden=true;

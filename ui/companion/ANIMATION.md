@@ -89,7 +89,7 @@ only when the person's own words ask for a new look) both set it.
 
 Next: accessories as extra painted layers on the head bone (the rig needs headroom
 above the head), then companions designed from a description, repainted in the
-reference pose with the person's own energy and cut into the same layers with the
+reference pose on the person's own Agent and cut into the same layers with the
 rig's part masks. Check: `node scripts/companion-look-check.ts`.
 
 ## Renderer and state ownership

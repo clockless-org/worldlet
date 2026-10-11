@@ -15,16 +15,16 @@ export interface MadeGame {
  ideas:string[];
  createdAt:number;updatedAt:number;version:number;best:number|null;
 }
-export type EnergySourceName='chatgpt'|'own'|'none';
+export type ModelSourceName='chatgpt'|'own'|'none';
 
 const characters=(value:string)=>[...value];
 const clip=(value:unknown,count:number)=>characters(typeof value==='string'?value.replace(/\s+/g,' ').trim():'').slice(0,count).join('');
 
-/** Making a game takes many model tokens (owner decision 2026-10-03), so it runs on the person's own
- * energy: a ChatGPT plan or their own API key (Worldlet provides no model of its own, owner decision 2026-10-05). */
-export function gameFactoryEnergy(source:EnergySourceName):{ok:true}|{ok:false;error:string} {
+/** Making a game takes many model tokens (owner decision 2026-10-03), so it needs an Agent that answers on the person's
+ * own sign-in: a ChatGPT plan or their own API key (Worldlet provides no model of its own, owner decision 2026-10-05). */
+export function gameFactoryModel(source:ModelSourceName):{ok:true}|{ok:false;error:string} {
  if(source==='chatgpt'||source==='own')return {ok:true};
- return {ok:false,error:'Making a game uses a lot of energy, so it needs the person\'s own: their ChatGPT sign-in or their own API key (Anthropic or OpenAI) in Settings › Your Agent. Tell them in one or two short sentences and offer to open the Energy page (open_worldlet_controls with screen "model"). Playing games that are already made needs no energy.'};
+ return {ok:false,error:'Making a game needs an Agent that answers on the person\'s own sign-in: their ChatGPT plan or their own API key (Anthropic or OpenAI), chosen in Settings › Your Agent. Tell them in one or two short sentences and offer to open it (open_worldlet_controls with screen "model"). Playing games that are already made needs nothing.'};
 }
 
 /** A new game's ID: short, file-name safe and unique enough within one World. */
