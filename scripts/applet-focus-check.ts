@@ -54,10 +54,10 @@ await withBrowser(fileAccess,async browser=>{
   const showsAtEntry=await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length);
   const pin=page.locator('.notion-pin[data-page="place-'+app.id+'"]');
   const onGround=await pin.waitFor({timeout:8000}).then(()=>true,()=>false);
-  let tapped=null;
+  let tapped=null;const direct=!onGround&&!inAppletCatalog(app);
   if(onGround)tapped=await tapDevice(app.id);
   // A frozen website Applet is no longer offered in the Area panel; it still opens directly (as Fox opens it).
-  else if(!inAppletCatalog(app))await page.evaluate(id=>{location.hash='object='+id;},app.id);
+  else if(direct)await page.evaluate(id=>{location.hash='object='+id;},app.id);
   else {
    // Beyond a region's five ground places, the Area panel lists the person's other Applets under Recently used, and
    // catalog Applets they do not have under Recommended or, behind one button, All.
@@ -123,8 +123,8 @@ await withBrowser(fileAccess,async browser=>{
   if(app.key==='airbnb')await page.screenshot({path:'/tmp/applet-airbnb-full-view.png'});
   const before=await page.evaluate(()=>calls.filter(c=>c.action==='browserHide').length);
   await leaveApplet(page);
-  // Back returns to where the Applet was opened: its region, or the overview for shelf entries.
-  const expected=app.region&&onGround?'building-'+app.region:'overview';
+  // Back returns to where the Applet was opened: its region (also when opened directly from it), or the overview for shelf entries.
+  const expected=app.region&&(onGround||direct)?'building-'+app.region:'overview';
   try{await page.waitForFunction(id=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active===id,expected);}
   catch(error){throw new Error(app.key+' did not return to '+expected+'; active='+await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.active)+'; '+error.message);}
   assert.equal(await panel.isVisible(),false,app.key+' returns directly to Preview');
