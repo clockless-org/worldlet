@@ -56,7 +56,7 @@ await withBrowser(fileAccess,async browser=>{
   return {half:Math.round(innerWidth/2),dateRight:Math.round(date.right),timeLeft:Math.round(time.left),timeRight:Math.round(time.right),dateLeft:Math.round(date.left),soundTop:Math.round(sound.top),dateBottom:Math.round(date.bottom),soundInToday:!!document.querySelector('.world-today .world-audio'),inToday:!!group.closest('.world-today-open')};
  });
  assert.ok(clockBefore.dateRight<=clockBefore.timeLeft+1,'the date stays immediately to the left of the clock');
- assert.ok(clockBefore.inToday&&clockBefore.dateLeft>clockBefore.half&&clockBefore.soundInToday&&clockBefore.soundTop>clockBefore.dateBottom,'the date stands in the top-right and the sound under it (owner request 2026-10-11): '+JSON.stringify(clockBefore));
+ assert.ok(clockBefore.inToday&&clockBefore.dateLeft<clockBefore.half&&clockBefore.soundInToday&&clockBefore.soundTop>clockBefore.dateBottom,'the date heads the left panel in the top-left and the sound under it (owner request 2026-10-11): '+JSON.stringify(clockBefore));
  assert.equal(await page.getByRole('button',{name:'Journal: open today’s page'}).count(),1,'the date opens today’s plan');
  await page.getByRole('button',{name:'Journal: open today’s page'}).click();
  await page.locator('#journalBook').waitFor();
