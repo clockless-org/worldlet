@@ -11,7 +11,7 @@ await withBrowser(fileAccess,async browser=>{
    if(b.action==='companionProfile')return {name:'Fox'};
    if(b.action==='conversationRecall')return [];
    if(b.action==='agentChat'){await new Promise(resolve=>w.finishThinking=resolve);return {message:'I’m still here with you.'};}
-   if(b.action==='openWorld'){if(w.failRestore)throw Error('Fixture restore failed');if(w.delayRestore)await new Promise(resolve=>w.finishRestore=resolve);w.worldletDesktopCompanion(false);return {ok:true};}
+   if(b.action==='order')return w.orderReady?{available:true,ready:true}:{available:false};
    return {ok:true};
   }}}};
  });
@@ -55,33 +55,37 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>Math.round(document.querySelector('#notionCommand').getBoundingClientRect().width)===300);
  await page.keyboard.press('Escape');assert(!await typing(),'Escape returns the bar to rest');
  const originalPet=await page.locator('.companion-pet').boundingBox(),originalEntry=await page.locator('.companion-text-entry').boundingBox();
- const hudShape=()=>page.evaluate(()=>['#notionHUD','.companion-pet','.companion-avatar canvas','.companion-text-entry','#notionCommand','.companion-dock'].map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return {selector,x:r.x,y:r.y,width:r.width,height:r.height,display:s.display,font:s.fontSize};}));
+ const hudShape=()=>page.evaluate(()=>['#notionHUD','.companion-pet','.companion-avatar canvas','.companion-text-entry'].map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return {selector,x:r.x,y:r.y,width:r.width,height:r.height,display:s.display,font:s.fontSize};}));
  const originalBar=await form.boundingBox();
  const worldShape=await hudShape();
+ const sameLine=(a,b,label)=>{assert(Math.abs(a.x+a.width/2-(b.x+b.width/2))<1&&Math.abs(a.y+a.height-(b.y+b.height))<1,label+' '+JSON.stringify({a,b}));};
  await page.evaluate(()=>{(window as any).worldletCompanionGeometry();(window as any).worldletDesktopCompanion(true);});
  const fox=page.locator('.companion-avatar');
  assert.deepEqual(await hudShape(),worldShape,'The lower Companion cluster keeps the shared layout');
- await page.getByRole('button',{name:'Back to World',exact:true}).waitFor();
- assert.deepEqual(await controls.evaluateAll(b=>b.map(e=>e.className)),['companion-world-button'],'The desktop adds only the return button');
- assert.deepEqual(await form.boundingBox(),originalBar,'The bar stays put when the return button appears');
+ // On the desktop Fox stands with its bar alone (owner request 2026-10-11): nothing beside Fox or the bar, and the
+ // microphone (with the bug, when Orders can be sent) inside the bar's right end; right-click Fox goes back to the World.
+ await settle();
+ assert.equal(await controls.count(),0,'No button stands beside the bar on the desktop');
+ assert.equal(await page.getByRole('button',{name:'Back to World',exact:true}).count(),0,'No return button: right-click Fox, the Dock or the tray goes back');
+ sameLine(await form.boundingBox(),originalBar,'The bar keeps its center and bottom edge on the desktop');
+ assert.equal((await form.boundingBox()).width,200,'The desktop bar rests a little wider, since it holds the microphone');
  async function assertDesktopRow(){
-  const back=await page.locator('.companion-world-button').boundingBox(),bar=await form.boundingBox(),pet=await fox.boundingBox();
-  assert(back&&back.width===44&&back.height===44,'Return is a 44px target');
-  assert(back.x+back.width<=bar.x&&bar.x-(back.x+back.width)<=8,'Return sits just left of the bar');
-  assert(Math.abs(bar.y+bar.height-(back.y+back.height))<1,'Return and the bar share their bottom edge');
+  const bar=await form.boundingBox(),pet=await fox.boundingBox(),micBox=await mic.boundingBox();
+  assert.equal(await page.locator(SETTINGS_BUTTON).isVisible(),false,'No Settings beside desktop Fox');
+  assert.equal(await page.locator('.companion-dock').isVisible(),false,'No dock actions beside desktop Fox');
+  assert.equal(await page.locator('.companion-dock .world-capsule:visible').count(),0);
+  assert(micBox&&micBox.width===36&&micBox.height===36,'The microphone is a 36px icon inside the bar');
+  assert(micBox.x>=bar.x&&micBox.x+micBox.width<=bar.x+bar.width&&micBox.y>=bar.y&&micBox.y+micBox.height<=bar.y+bar.height,'The microphone sits inside the bar '+JSON.stringify({micBox,bar}));
+  assert(bar.x+bar.width-(micBox.x+micBox.width)<=6,'The microphone ends the bar');
   assert(Math.abs(bar.x+bar.width/2-(pet.x+pet.width/2))<=2,'The bar is centered under Fox');
   const crop=await page.evaluate(()=>(window as any).worldletCompanionGeometry());
-  assert(crop.x<=back.x&&crop.x+crop.width>=bar.x+bar.width,'Native crop contains the return button and the bar');
+  assert(crop.x<=bar.x&&crop.x+crop.width>=bar.x+bar.width,'Native crop contains the bar');
  }
  await assertDesktopRow();
- assert.equal(await page.locator('.companion-dock').getByRole('button',{name:'Back to World',exact:true}).count(),0,'No duplicate large return action');
+ await form.hover();assert.equal(await type.getAttribute('placeholder'),'Message Fox','The short desktop bar says only Message Fox, even when pointed at');
  // The first close after setup says once why Fox stayed and how to go back or quit (no platform here: no Dock or tray named).
  await page.getByText('I’ll keep working here in the background. Right-click me to go',{exact:false}).waitFor();
  assert.equal(await page.evaluate(()=>localStorage.getItem('worldlet.companion.desktop-hint')),'1','The desktop hint is remembered for this installation');
- const backRect=await page.locator('.companion-world-button').boundingBox();
- assert.equal(backRect.width,44);assert.equal(backRect.height,44);
- const returnCrop=await page.evaluate(()=>(window as any).worldletCompanionGeometry());
- assert(returnCrop.x+returnCrop.width>=backRect.x+backRect.width,'Native crop includes fourth button');
  assert.equal(await page.locator('.companion-context').isVisible(),false,'Global title stays in World');
  assert.equal(await page.locator('.world-task-tracker').isVisible(),false,'Attention Center is not part of the movable cluster');
  const detachedPet=await page.locator('.companion-pet').boundingBox(),detachedEntry=await page.locator('.companion-text-entry').boundingBox();
@@ -121,12 +125,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='speechStart').length),speechBefore+1,'Holding the desktop microphone uses the existing native microphone path');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:speech',{detail:{phase:'error',text:'Fixture microphone ended'}})));
  await fox.click({button:'right'});assert(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='companionMenu')),'Fox exposes the native full-quit menu');
- const panelEntry=page.locator(SETTINGS_BUTTON);
- const back=page.getByRole('button',{name:'Back to World',exact:true});
- const backBox=await panelEntry.boundingBox();assert(backBox&&backBox.width>=44&&backBox.height>=44,'The panel entry keeps a large target');
- await back.click();
+ await page.evaluate(()=>(window as any).worldletRestoreWorld());
  assert.equal(await page.locator('#companionInfo').isVisible(),false,'Back to World only restores the world');
- assert(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='openWorld')));
+ assert(await page.locator(SETTINGS_BUTTON).isVisible(),'Settings is beside Fox again in the World');
  await page.setViewportSize({width:1380,height:900});
  for(const size of [{width:1380,height:900},{width:375,height:812},{width:812,height:375}]){
   await page.setViewportSize(size);
@@ -152,14 +153,24 @@ await withBrowser(fileAccess,async browser=>{
  await page.keyboard.press('Escape');
  // Leaving and returning to the desktop never moves the bar.
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
- {const world=await form.boundingBox();await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();assert.deepEqual(await form.boundingBox(),world,'The bar keeps its place on the desktop');}
- await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));
- await settle();
+ {const world=await form.boundingBox();await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();sameLine(await form.boundingBox(),world,'The bar keeps its place on the desktop');}
  await assertDesktopRow();
- await openCompanionPanel(page);assert(await panel.isVisible());
- assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('desktop-companion')),false,'Desktop panel entry restores the world before opening the panel');
- assert.equal(await page.locator('#notionStage').isVisible(),true);
- await page.keyboard.press('Escape');
+ // When Orders can be sent, the bug stands left of the bar in the World and joins the microphone inside it on the desktop.
+ const order=page.locator('.companion-order-button');
+ await page.evaluate(()=>{(window as any).worldletDesktopCompanion(false);(window as any).orderReady=true;window.dispatchEvent(new Event('worldlet:app-update'));});
+ await order.waitFor();await settle();
+ {const bug=await order.boundingBox(),bar=await form.boundingBox();assert(bug.x+bug.width<=bar.x&&bug.width===44,'In the World the bug stands left of the bar');}
+ await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();
+ {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();
+  assert.equal(await order.evaluate(e=>e.parentElement===document.querySelector('.companion-speech-button').parentElement),true,'The bug and the microphone are one group on the desktop');
+  assert(bug.width===36&&bug.x>=bar.x&&bug.x+bug.width<=micBox.x&&micBox.x-(bug.x+bug.width)<=4&&Math.abs(bug.y-micBox.y)<1,'The bug sits inside the bar just left of the microphone '+JSON.stringify({bug,micBox,bar}));
+  assert.equal(bar.width,200);
+  const crop=await page.evaluate(()=>(window as any).worldletCompanionGeometry());assert(crop.x<=bar.x&&crop.x+crop.width>=bar.x+bar.width);
+  await page.screenshot({path:'/tmp/worldlet-companion-desktop-order.png',omitBackground:true,clip:crop});}
+ await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
+ {const bug=await order.boundingBox(),bar=await form.boundingBox();assert(bug.x+bug.width<=bar.x&&bug.width===44,'Back in the World the bug is left of the bar again');}
+ await page.evaluate(()=>{(window as any).orderReady=false;window.dispatchEvent(new Event('worldlet:app-update'));});
+ await page.waitForFunction(()=>document.querySelector<HTMLElement>('.companion-order-button').hidden);
  await page.emulateMedia({reducedMotion:'no-preference'});
  // Focus and sample in one step so a slow runner cannot finish the .22s widening first. It widens from
  // the low-key resting bar (owner request 2026-10-05).
@@ -170,12 +181,6 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));
  await settle();
  await page.screenshot({path:'/tmp/worldlet-companion-desktop-bar.png',omitBackground:true,clip:await page.evaluate(()=>(window as any).worldletCompanionGeometry())});
- await page.evaluate(()=>(window as any).failRestore=true);
- await back.click();await page.locator('#companionDialogue',{hasText:'Could not reopen World. Try again.'}).waitFor();
- assert(await page.evaluate(()=>document.documentElement.classList.contains('desktop-companion')),'Failed restore keeps desktop visible');
- assert(await back.isEnabled(),'Failed restore can be retried');
- await page.evaluate(()=>(window as any).failRestore=false);await back.click();
- assert(!await page.evaluate(()=>document.documentElement.classList.contains('desktop-companion')),'Fourth button retries restoration');
  assert.deepEqual(errors,[]);
- console.log('PASS desktop Companion UI: three world/four desktop icons, compact animated typing, microphone hold, reply, desktop context, native crop, responsive layouts and restoration failure/retry');
+ console.log('PASS desktop Companion UI: Fox and its bar alone on the desktop, microphone and bug inside the bar, compact animated typing, microphone hold, reply, desktop context, native crop, responsive layouts and restoration');
 });

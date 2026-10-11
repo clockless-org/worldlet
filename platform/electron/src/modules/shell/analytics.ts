@@ -75,6 +75,8 @@ const ALLOWED:Record<string,string[]>={
  update_error:['open','contents','copy','build','identity','signature','team','incomplete','disk','timeout','other'],
  // Fox's speak-first ask (modules/fox proactiveRunTurn): the moment and whether Fox spoke, never the line.
  proactive_moment:[...PROACTIVE_MOMENTS],proactive_status:['spoke','passed'],
+ // fox_proactive_shown: whether the line pointed to an open Attention card.
+ proactive_card:['yes','no'],
  // fox_browse_changed: Browse with me turned on or Don't bother chosen in Fox's card.
  fox_browse:['on','off'],
  // Order (modules/shell/order.ts): where a sent Order went, and why one ended unsent; never what was said.

@@ -8,6 +8,8 @@ import {PROACTIVE,proactiveLate,type ProactiveMoment} from '../../core/companion
  * In an Applet or page the moment is Browse with me (owner request 2026-10-08): after a short look Fox
  * may say one line about what is on screen, asked at most twice per visit. The person turns it off with Don't bother
  * in Fox's card; the host then refuses every ask, so this page keeps no switch of its own.
+ * A line about something waiting on the person carries the open Attention item it is about (`card`, owner 2026-10-10:
+ * Attention is the one place to act), and Fox's card offers to open that item's card.
  */
 export function mountFoxProactive({call,thread,world,busy,environment,say}:{
  call:(action:string,request:object)=>Promise<any>;
@@ -20,8 +22,8 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
  /** What the place shows (location, state, view), as a turn of the person's own would carry it: in a native Applet
   * there is no page text, and without this Fox saw only the place's name and passed (owner 2026-10-10). */
  environment:()=>object;
- /** `browsing` marks a Browse with me line, which offers Don't bother. */
- say:(line:{id:string;text:string;browsing:boolean})=>void;
+ /** `browsing` marks a Browse with me line, which offers Don't bother; `card` is the Attention item the line is about. */
+ say:(line:{id:string;text:string;browsing:boolean;card?:string})=>void;
 }){
  let place='',since=Date.now(),activeAt=Date.now(),settled=false,stayed=false,late=false,asking=false,visit='',looks=0,lookedAt=0;
  const touched=()=>{activeAt=Date.now();};
@@ -56,10 +58,10 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
  }
  const timer=setInterval(tick,10000);
  window.addEventListener('worldlet:fox-proactive',(event:any)=>{
-  const {id,line,thread:key,moment}=event.detail||{};
+  const {id,line,thread:key,moment,card}=event.detail||{};
   if(typeof id!=='string'||typeof line!=='string')return;
   const shown=!!line.trim()&&key===thread()&&!busy();
-  if(shown)say({id,text:line.trim(),browsing:moment==='browsing'});
+  if(shown)say({id,text:line.trim(),browsing:moment==='browsing',...typeof card==='string'&&card?{card}:{}});
   void call('foxProactiveShown',{id,shown}).catch(()=>{});
  });
  return {stop:()=>clearInterval(timer)};

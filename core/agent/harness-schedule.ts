@@ -157,3 +157,59 @@ export function scheduleStep(input:{harness:ScheduleHarness;state:ScheduleState|
  }
  return {state,results,stopped};
 }
+
+// Worldlet's own scheduled work, by the same rule ------------------------------------------------------------------
+// The morning brief, the day's summary and a run of Worldlet's own routine are results nobody watched being made: each
+// becomes an Attention item (Worth Knowing; a routine that did not finish, Worth Doing) and, while fresh, a phone
+// notification, instead of the Journal opening by itself or a passing notice. The brief and the summary stay cards in
+// the Journal; their item opens the Journal on that card. The host only saves what these return.
+
+/** The provider that owns Worldlet's own scheduled results. */
+export const WORLDLET_SCHEDULE='worldlet';
+const DAY=/^\d{4}-\d{2}-\d{2}$/;
+const JOURNAL_SOURCE=/^journal:(\d{4}-\d{2}-\d{2})(?::(.{1,200}))?$/;
+const worldletItem=({kind,title,reason,summary,source,quote,at}:{kind:'task'|'update';title:string;reason:string;summary:string;source:string;quote:string;at:number})=>processedAttentionContent({
+ provider:WORLDLET_SCHEDULE,kind,title:clip(title,40),reason,summary:clip(summary,1200),...kind==='task'?{priority:'elevated'}:{},occurredAt:new Date(at).toISOString(),
+ sources:[{provider:WORLDLET_SCHEDULE,id:clip(source,500),quote:clip(quote,1000)}]});
+const dayLabel=(day:string)=>{const [y,m,d]=day.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric'});};
+/** The opening lines of a card's Markdown, for the item's summary: no headings (a lone bold label counts), tables,
+ * rules or code. */
+function cardLines(body:string){
+ const lines=body.replace(/\r/g,'').split('\n').map(line=>line.trim()).filter(line=>line&&!/^(#|\||[-*_]{3,}$|```|\*\*[^*]+\*\*:?$)/.test(line));
+ return lines.slice(0,8).join('\n');
+}
+/** A kept morning brief (`plan`) or day summary: Worth Knowing, opening the Journal on its card (source
+ * `journal:<day>:<card id>`). The same day's card saved again updates the same item. */
+export function dailyScheduleResult(input:{kind:'plan'|'summary';day:string;artifact:{id:string;title?:string;brief?:string;body?:string};at:number;now:number}):ScheduleResult|null {
+ const {kind,day,artifact,at,now}=input;
+ if(kind!=='plan'&&kind!=='summary'||!DAY.test(day)||typeof artifact?.id!=='string'||!artifact.id||!Number.isFinite(at))return null;
+ const name=(kind==='plan'?'Morning brief · ':'Day summary · ')+dayLabel(day);
+ const said=text(artifact.brief)||cardLines(text(artifact.body));
+ const item=worldletItem({kind:'update',title:name,reason:kind==='plan'?'Fox made it for your day':'Fox wrote up your day',summary:(said?said+'\n\n':'')+'It is kept in your Journal.',
+  source:'journal:'+day+':'+artifact.id,quote:text(artifact.title)||name,at});
+ const line=firstLine(said.replace(/^\s*[-*+]\s+/gm,'').replace(/[*_`>#|]/g,''));
+ return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:name,body:clip(line||'Ready in your Journal.',240),collapse:'daily-'+kind}:null};
+}
+/** One run of Worldlet's own routine as the Agent's `routine_tick` reports it (`{ran, job:{id,name,last_status}, late}`,
+ * with `output` when the Agent returns what it said): Worth Knowing when it finished, Worth Doing when it did not.
+ * Anything else (nothing due, an error before any run) is nothing. */
+export function routineScheduleResult(value:unknown,at:number,now:number):ScheduleResult|null {
+ const result=record(value),job=record(result.job),id=text(job.id);
+ if(result.ran!==true||!id||!Number.isFinite(at))return null;
+ const name=text(job.name)||'Scheduled routine',failed=job.last_status!=='ok',late=result.late===true;
+ const output=text(result.output)||text(job.last_output);
+ const item=worldletItem({kind:failed?'task':'update',title:name,reason:failed?'Your routine did not finish':late?'It ran when your computer woke':'From your scheduled routine',
+  summary:output||(failed?'It stopped without saying why. Ask Fox to check your routines.':late?'It ran late, after your computer woke. Ask Fox what it found.':'It finished. Ask Fox what it found.'),
+  source:'routine:'+id+':'+Math.round(at),quote:output||name,at});
+ return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:clip(name,80),body:clip((failed?'Did not finish: ':'')+(output?output.replace(/\s+/g,' ').trim():failed?'It stopped without saying why.':'Finished.'),240),collapse:collapseKey('routine-'+id)}:null};
+}
+/** Where an item opens the Journal, from its sources: the day and the card, or null for any other item. */
+export function journalTarget(sources:unknown):{day:string;card?:string}|null {
+ for(const ref of Array.isArray(sources)?sources:[]){
+  const value=record(ref);
+  if(value.provider!==WORLDLET_SCHEDULE||typeof value.id!=='string')continue;
+  const match=JOURNAL_SOURCE.exec(value.id);
+  if(match)return {day:match[1],...match[2]?{card:match[2]}:{}};
+ }
+ return null;
+}

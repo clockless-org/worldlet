@@ -61,9 +61,9 @@ export function mountCompanionInfo({root,pet,call,getName}){
   review:detail=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:email-review',{detail}));}});
  // The Journal is a book of its own over the World (owner request 2026-10-08), opened by today's date in the World's top-left corner.
  const journal=mountJournalBook({root,pages:artifacts.element,start:(day,card)=>artifacts.start(day,card),stop:()=>artifacts.stop(),returnFocus:()=>document.querySelector<HTMLElement>('.world-today-open')});
- async function openJournal(day=''){
+ async function openJournal(day='',card=''){
   if(desktop()){try{await requireWorldSurface(call);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';return;}}
-  if(panel.open)dismiss();journal.open(day);
+  if(panel.open)dismiss();journal.open(day,card);
  }
  // The panel is one settings window (owner request 2026-10-10): Fox's profile, Phone, History and Feedback are sections
  // in its one list beside the settings; the World view lends the sample switch and host features.
@@ -171,7 +171,8 @@ export function mountCompanionInfo({root,pet,call,getName}){
  root.addEventListener('worldlet:onboarding-applet-added',()=>dismiss());
  window.addEventListener('worldlet:companion-info',e=>void open((e as CustomEvent).detail?.tab||'Profile',(e as CustomEvent).detail?.setting));
  // The World opens the book on a day: the morning brief and the day's summary (owner request 2026-10-08).
- window.addEventListener('worldlet:journal-open',e=>void openJournal(String((e as CustomEvent).detail?.day||'')));
+ // `day` opens that page, and `card` brings one card on it into view (an Attention item for the morning brief does).
+ window.addEventListener('worldlet:journal-open',e=>void openJournal(String((e as CustomEvent).detail?.day||''),String((e as CustomEvent).detail?.card||'')));
  panel.addEventListener('cancel',e=>{e.preventDefault();dismiss(true);});
  root.addEventListener('pointerdown',e=>{if(panel.open&&!panel.contains(e.target as Node)&&!badge.contains(e.target as Node)){if((e.target as Element).closest('.companion-avatar,.companion-text-entry'))return;dismissClick=true;dismiss();e.preventDefault();e.stopImmediatePropagation();}},true);
  root.addEventListener('click',e=>{if(dismissClick){dismissClick=false;e.preventDefault();e.stopImmediatePropagation();return;}if(panel.open&&!panel.contains(e.target as Node)&&!(e.target as Element).closest('.companion-avatar,.companion-text-entry'))dismiss();},true);

@@ -59,6 +59,9 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  await press('Enter your world',120);
  await wait('world arrival',"document.querySelector('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl'",60);
  noRecordedFailures(host,'world arrival');
+ // Fox never speaks first during the tour (ui/companion/fox-proactive.ts asks nothing there), so no speak-first line,
+ // and no Open card pointing to an Attention item (owner decision 2026-10-10), can pull the person off a tour step.
+ await js("window.__foxFirst=[];window.addEventListener('worldlet:fox-proactive',e=>window.__foxFirst.push({card:!!e.detail?.card,tour:!!document.querySelector('#notionWorld')?.dataset.tourStep}));true");
  // A real mouse click at the middle of an element: the tour's spotlight catches every click and
  // acts only on one inside its box (ui/onboarding/tour-spotlight.ts).
  const clickAt=async(what:string,selector:string)=>{
@@ -167,6 +170,8 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  }
  finally{clearInterval(watching);}
  if(asked)throw Error(`Fox asked “${asked}” during or after the browser task; the Go ahead before the last step is the only question.`);
+ const spokeFirst=await js("(window.__foxFirst||[]).filter(line=>line.tour).length").catch(()=>0);
+ if(spokeFirst)throw Error(`Fox spoke first ${spokeFirst} time(s) during the tour.`);
  for(let i=0;i<50&&await glowing();i++)await sleep(100);
  if(await glowing())throw Error('Fox’s glow stayed over the page after Fox finished.');
  const journey=store.state.onboarding;
@@ -209,7 +214,11 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  if(process.platform==='darwin'){
   try{
    await desktopCompanion(host.use<DesktopCompanionService>(DESKTOP_COMPANION),window,view,mark,
-    ()=>wait('Fox’s one-time hint: Back to World or Quit Completely',dialogue('/Back to World/')+'&&'+dialogue('/Quit Completely/'),10));
+    async()=>{
+     await wait('Fox’s one-time hint: Back to World or Quit Completely',dialogue('/Back to World/')+'&&'+dialogue('/Quit Completely/'),10);
+     // On the desktop Fox stands with its bar alone: no Settings or dock actions beside it, the microphone inside the bar (owner request 2026-10-11).
+     await wait('Fox alone with its bar on the desktop, the microphone inside it',`(()=>{const shown=s=>[...document.querySelectorAll(s)].some(e=>e.getClientRects().length);const bar=document.querySelector('#notionCommand')?.getBoundingClientRect(),mic=document.querySelector('.companion-speech-button')?.getBoundingClientRect();return !shown('.companion-side>button,.companion-dock button')&&!!bar&&!!mic&&mic.width>0&&mic.left>=bar.left&&mic.right<=bar.right;})()`,10);
+    });
   }catch(error){if(COMPANION_BLOCKING)throw error;console.log('ADVISORY FAIL onboarding flow, desktop Companion: '+message(error));}
  }
  console.log(`PASS onboarding flow: mock sign-in → apps → tour → Attention → Fox’s first task finished in the browser → confirmed → first win → tour replayed from the Tutorial switch → Fox fetched the inbox and drafted a reply in conversation, with no failed background work (${Math.round((Date.now()-started)/1000)}s)`);

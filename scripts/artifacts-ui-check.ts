@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 // Artifacts on the World page (core/artifacts/README.md): what Fox shows is kept, the Journal page of Fox's panel
-// lays it out a page a day, opening it shows it again, × forgets it, and Fox finds and opens earlier ones. An Attention card
+// lays it out as a timeline of days, opening it shows it again, × forgets it, and Fox finds and opens earlier ones. An Attention card
 // whose item has left the World opens as it was. Bundled UI with a faked native bridge that keeps artifacts in
 // memory; fictional turns, no model or account.
 // Usage: node scripts/artifacts-ui-check.ts [screenshot directory]

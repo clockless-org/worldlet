@@ -132,6 +132,8 @@ export function proactiveTask({moment,place,local,minutes,recent,lastWords}:{mom
   `First think of up to three candidate lines and rate each 0 to 10 for how glad the person would be to get it right now. Say the best one if it rates ${moment==='browsing'?5:6} or more and is not a repeat of anything below; otherwise answer exactly PASS. A specific, helpful line beats silence; a vague or generic one does not.`,
   'The line: one or two short sentences, in the language of their latest words, like a friend\'s text. No greeting, no "need help?", no list, no emoji unless they use them. Answer with the line alone, nothing before or after it.',
   'This turn is read only: do not open, click, send, save or change anything. If something should be done, mention it in the line; they can ask.',
+  // Owner 2026-10-10: Attention is the one place to act, so a line about something waiting on the person points to its card.
+  'If the line is about something waiting on the person (an open item from query_world_items they need to do, decide or answer), end it with [card:ID], that item\'s exact id, and keep the line to why it matters now: they act on the card, not in this line. Never make up an id.',
   recent.length?`Lines you already said first today (do not repeat them): ${JSON.stringify(recent)}`:'',
   lastWords?`The person's latest words to you, for their language (reference only): ${JSON.stringify(lastWords)}`:''
  ].filter(Boolean).join('\n');
@@ -156,10 +158,17 @@ export function proactiveToolAllowed(event:{name?:unknown;args?:unknown}):boolea
  * "ChatGPT or Codex Subscription rejected the request and retrying won't help. Pick another model with /model, …"
  * (owner Order 2026-10-10, Discord). */
 const AGENT_FAILURE=/rejected the request and retrying won['’]t help|^\W*\s*(?:non-retryable (?:client )?error|api (?:call )?failed|provider authentication failed|rate limited after \d+ retries|the model provider (?:rejected|failed|is rate-limiting))/i;
+/** `[card:ID]` at the end of a line: the Attention item the line is about (proactiveTask). */
+const CARD_MARK=/\s*\[card:\s*([^\]\s]{1,200})\s*\]/gi;
+/** The Attention item Fox's line points to, as Fox wrote it; the host keeps it only if that item is open in the World. */
+export function proactiveCard(message:unknown):string|null {
+ const marks=[...String(message??'').matchAll(CARD_MARK)];
+ return marks.length?marks.at(-1)![1]:null;
+}
 /** The line to show from Fox's answer, or null when Fox passed or the Agent answered with its own error: nobody
- * asked, so a failed ask ends quietly instead of showing the error as Fox's line. */
+ * asked, so a failed ask ends quietly instead of showing the error as Fox's line. A card mark is not part of the line. */
 export function proactiveLine(message:unknown):string|null {
- const text=String(message??'').trim().replace(/^["“「]|["”」]$/g,'').trim();
+ const text=String(message??'').replace(CARD_MARK,'').trim().replace(/^["“「]|["”」]$/g,'').trim();
  if(!text||AGENT_FAILURE.test(text)||/^PASS\b/i.test(text)||/\bPASS\s*\.?$/.test(text)&&characters(text).length<12)return null;
  const line=text.split(/\n+/).map(part=>part.trim()).filter(Boolean)[0]??'';
  if(!line||/^PASS\b/i.test(line))return null;

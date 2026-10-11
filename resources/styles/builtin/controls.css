@@ -252,7 +252,7 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
    2026-10-07), the bar's own glass; while an Order listens it glows red, so capturing is always visible. The microphone
    is its twin on the bar's right (owner 2026-10-07). */
 #notionWorld.native-console .companion-controls>:is(.companion-order-button,.companion-speech-button){border:1px solid var(--system-glass-line);background:var(--system-glass-fill);color:var(--hud-scene-ink,#fffdf4);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur)}
-#notionWorld.native-console .companion-controls>.companion-order-button[hidden],#notionWorld.native-console:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true]) .companion-order-button,.desktop-companion #notionWorld.native-console .companion-order-button{display:none}
+#notionWorld.native-console .companion-controls>.companion-order-button[hidden],#notionWorld.native-console:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true]) .companion-order-button{display:none}
 #notionWorld.native-console .companion-controls>:is(.companion-order-button,.companion-speech-button):is(:hover,:focus-visible){background:var(--system-glass-hover)}
 #notionWorld.native-console[data-order] .companion-order-button.companion-order-button{background:#c2412ee6;border-color:#ffd2c8;color:#fff;box-shadow:0 0 0 4px #c2412e40,var(--system-glass-shadow)}
 #notionWorld.native-console[data-order=listening] .companion-order-button.companion-order-button{animation:order-listening 1.2s ease-in-out infinite}
@@ -305,8 +305,6 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console .applet-mode-toggle button:is(:hover,:active){background:var(--system-glass-hover)}
 #notionWorld.native-console .applet-mode-toggle button[aria-pressed=true]{background:var(--hud-scene-hover)}
 #notionWorld.native-console .applet-mode-toggle svg{display:block;width:20px;height:20px}
-#notionWorld.native-console .companion-controls>.companion-world-button{display:none}
-.desktop-companion #notionWorld.native-console .companion-controls>.companion-world-button{display:inline-flex}
 #notionWorld.native-console .companion-text-entry #notionCommand{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(var(--companion-bar-width),calc(100vw - 32px));height:auto;min-height:44px;align-items:flex-end;border-radius:22px;overflow:hidden;pointer-events:auto;transition:width .22s ease-out}
 /* Send: a 32px circle with an 18px icon inside the bar's right end. */
 #notionWorld.native-console .companion-text-entry #notionSend{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;min-height:32px;margin:0 0 4px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;opacity:1;font-size:0;cursor:pointer}

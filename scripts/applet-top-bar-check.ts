@@ -72,9 +72,9 @@ async function bar(page:Page){
 }
 // Fox's dock is centered in its column, so the Applet's side is what lies left of that column.
 function side(r:any,width:number){const lane=2*(width-center(r.hud));return {width:width-lane,center:(width-lane)/2};}
-// Back and the Applet's controls wear the material of Fox's round controls (the desktop return button).
+// Back and the Applet's controls wear the material of Fox's round controls (the microphone).
 const MATERIAL=['backgroundColor','color','borderTopColor','borderTopWidth','borderTopStyle','backdropFilter','textShadow','boxShadow'];
-const material=(page:Page,selector:string)=>page.evaluate(([selector,props])=>{const pick=(e:Element)=>Object.fromEntries((props as string[]).map(p=>[p,getComputedStyle(e)[p]]));return {control:pick(document.querySelector(selector as string)),fox:pick(document.querySelector('.companion-controls>.companion-world-button'))};},[selector,MATERIAL] as const);
+const material=(page:Page,selector:string)=>page.evaluate(([selector,props])=>{const pick=(e:Element)=>Object.fromEntries((props as string[]).map(p=>[p,getComputedStyle(e)[p]]));return {control:pick(document.querySelector(selector as string)),fox:pick(document.querySelector('.companion-controls>.companion-speech-button'))};},[selector,MATERIAL] as const);
 async function assertMaterial(page:Page,selector:string,label:string){
  const {control,fox}=await material(page,selector);
  assert.deepEqual(control,fox,label+' is a darker frosted control, like Fox\'s');

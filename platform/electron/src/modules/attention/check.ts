@@ -13,6 +13,8 @@ import type {ActionHandler,Host,Row} from '../../host/types.ts';
 import {installAttention} from './index.ts';
 import {installOngoing} from '../tasks/index.ts';
 import {installWorld} from '../world.ts';
+import {installArtifacts} from '../artifacts/index.ts';
+import {journalTarget} from '../../../../../core/agent/index.ts';
 import {ONGOING,type OngoingService} from '../../host/services.ts';
 import {conversationAttentionId} from '../../../../../core/tasks/index.ts';
 import {errorMessage} from '../../files.ts';
@@ -338,5 +340,31 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   assert.equal(requests.length,made,'Going idle again stops further background requests');
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron idle gate: no scheduled source checks, Applet analysis or synthesis after 15 idle minutes; catch-up on return.');
+ }finally{await env.close();}
+}
+
+// Scheduled results (docs/ATTENTION-CENTER.md): a kept morning brief arrives as a Worth Knowing item that opens the
+// Journal on its card and stays in the Center with no source fact behind it; keeping the card again updates that item.
+{
+ const env=environment();
+ const {store,host,actions}=env;
+ installWorld(host);installArtifacts(host);
+ try{
+  store.state.cloudConsent=true;store.changed();
+  const save=(body:string)=>actions.get('artifacts')!({action:'artifacts',operation:'save',scheduled:'plan',day:'2026-10-11',artifact:{id:'art-brief0000001',kind:'answer',title:'Plan · Sun, Oct 11',body,size:'large',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',sender:null as any});
+  await save('A calm Sunday with one call.');
+  const shown=()=>store.worldItems().filter(item=>item.provider==='worldlet');
+  assert.deepEqual(shown().map(item=>[item.kind,item.title,item.status]),[['update','Morning brief · Oct 11','open']],'The brief is in Worth Knowing: '+JSON.stringify(env.errors));
+  assert.notEqual(shown()[0].attentionFresh,false,'No source fact is needed to keep it current');
+  assert.deepEqual(journalTarget(shown()[0].sources),{day:'2026-10-11',card:'art-brief0000001'},'It opens the Journal on its card');
+  await save('A calm Sunday with two calls.');
+  assert.equal(shown().length,1,'The same card kept again updates the same item');
+  assert.match(String(shown()[0].summary),/two calls/);
+  await actions.get('artifacts')!({action:'artifacts',operation:'save',artifact:{id:'art-other0000001',kind:'answer',title:'An answer',body:'Kept.',size:'medium',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',sender:null as any});
+  assert.equal(shown().length,1,'Any other card is no Attention item');
+  await actions.get('worldItemStatus')!({action:'worldItemStatus',id:shown()[0].id,status:'read'} as any,{requestId:'check',sender:null as any});
+  assert.equal(shown()[0].status,'read','Got it settles it like any update');
+  assert.deepEqual(env.errors,[],'No unexpected diagnostics');
+  console.log('PASS Electron scheduled results: a kept morning brief is a Worth Knowing item that opens its Journal card, updated in place and settled like any update.');
  }finally{await env.close();}
 }
