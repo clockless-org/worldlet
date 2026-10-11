@@ -81,7 +81,9 @@ await withBrowser(fileAccess,async browser=>{
  // The picture is the card's background, strongest on the right; the title keeps the left half under the paper scrim (#2218).
  const headingBox=await preview.locator('h2').boundingBox(),artBox=await preview.locator('img').boundingBox(),cardBox=await preview.boundingBox();
  assert.ok(headingBox.x+headingBox.width<=cardBox.x+cardBox.width/2+1&&artBox.x<=headingBox.x&&artBox.x+artBox.width>=cardBox.x+cardBox.width-1,'Title stays in the left half over the full-card picture '+JSON.stringify({headingBox,artBox,cardBox}));
- for(const size of [{width:1440,height:1000},{width:1100,height:800}]){
+ // The smaller window still fits all five rows: rows the screen cannot show leave Now for good (native-hud.ts), and the
+ // steps below need them. Since #324 moved the left panel down, 800px tall holds one row fewer.
+ for(const size of [{width:1440,height:1000},{width:1100,height:860}]){
   await page.setViewportSize(size);
   await page.waitForTimeout(150);
   const card=await preview.boundingBox(),fox=await dialogue.boundingBox();
