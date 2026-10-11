@@ -1,4 +1,4 @@
-import type {GameHost} from './core.ts';
+import {onSwipe,type GameHost} from './core.ts';
 
 const SIZE=4;
 const KEYS={ArrowLeft:[0,-1],ArrowRight:[0,1],ArrowUp:[-1,0],ArrowDown:[1,0],a:[0,-1],d:[0,1],w:[-1,0],s:[1,0]};
@@ -21,7 +21,7 @@ export function create2048(host:GameHost){
  }
  function draw(){
   grid.forEach((v,i)=>{const c=cells[i];c.textContent=v?String(v):'';c.dataset.value=v?String(Math.min(v,4096)):'';c.classList.toggle('is-new',i===fresh);c.classList.toggle('is-merged',merged.has(i));c.setAttribute('aria-label',v?String(v):'empty');});
-  const best=Math.max(score,host.best.get());if(score>host.best.get())host.best.set(score);
+  const stored=host.best.get(),best=Math.max(score,stored);if(score>stored)host.best.set(score);
   host.status(over?`No moves left · Score ${score} · Best ${best}`:won?`2048! Keep going · Score ${score}`:`Score ${score} · Best ${best}`);
   board.dataset.state=over?'over':'playing';
  }
@@ -51,13 +51,7 @@ export function create2048(host:GameHost){
  }
  function restart(){grid=Array(SIZE*SIZE).fill(0);score=0;over=false;won=false;merged=new Set();spawn();spawn();fresh=-1;draw();}
  board.addEventListener('keydown',e=>{const d=KEYS[e.key];if(!d)return;e.preventDefault();move(d[0],d[1]);});
- let touch:{x:number;y:number}|null=null;
- board.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};board.focus({preventScroll:true});});
- board.addEventListener('pointerup',e=>{
-  if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;touch=null;
-  if(Math.max(Math.abs(dx),Math.abs(dy))<24)return;
-  if(Math.abs(dx)>Math.abs(dy))move(0,dx>0?1:-1);else move(dy>0?1:-1,0);
- });
+ onSwipe(board,24,(dx,dy)=>move(dy,dx));
  restart();
  return {element:board,restart,hint:'Arrow keys or swipe. Equal tiles merge.'};
 }

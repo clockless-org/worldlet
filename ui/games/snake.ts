@@ -1,4 +1,4 @@
-import {gameLoop,type GameHost} from './core.ts';
+import {gameLoop,onSwipe,type GameHost} from './core.ts';
 
 const COLS=18,ROWS=18,CELL=22,STEP=120;
 const DIRS={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],a:[-1,0],d:[1,0],w:[0,-1],s:[0,1]};
@@ -64,13 +64,7 @@ export function createSnake(host:GameHost){
  });
  // Leaving the board (another window, closing the game) pauses rather than racing on unseen.
  board.addEventListener('blur',()=>{if(state==='playing'){state='paused';status();}});
- let touch:{x:number;y:number}|null=null;
- board.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};board.focus({preventScroll:true});});
- board.addEventListener('pointerup',e=>{
-  if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;touch=null;
-  if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
-  steer(Math.abs(dx)>Math.abs(dy)?[dx>0?1:-1,0]:[0,dy>0?1:-1]);
- });
+ onSwipe(board,20,(dx,dy)=>steer([dx,dy]));
  restart();
  return {element:board,restart,hint:'Arrow keys or swipe. Space pauses.'};
 }

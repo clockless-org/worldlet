@@ -84,6 +84,8 @@ const unit=(v:unknown):v is number=>typeof v==='number'&&Number.isFinite(v)&&v>=
 const point=(v:unknown):v is ThemePoint=>Array.isArray(v)&&v.length===2&&v.every(unit);
 const rect=(v:unknown):v is ThemeRect=>Array.isArray(v)&&v.length===4&&v.every(unit)&&v[2]>0&&v[3]>0&&v[0]+v[2]<=1&&v[1]+v[3]<=1;
 const area=(v:unknown)=>rect(v)||v==='world-pack'||v==='shared'||v==='shared-reader';
+/** Two normalized rectangles that do not overlap (touching edges are apart). */
+const apart=([x,y,w,h]:ThemeRect,[cx,cy,cw,ch]:ThemeRect)=>x+w<=cx||x>=cx+cw||y+h<=cy||y>=cy+ch;
 /** Repository-relative and inside it: a theme names files, never URLs or parent paths. */
 export function themePath(value:unknown):string {
  if(typeof value!=='string'||!value||value.startsWith('/')||value.includes('\\')||value.split('/').some(p=>!p||p==='.'||p==='..')||/[:?#\x00-\x1f]/.test(value))throw Error('Unsafe theme path');
@@ -127,17 +129,14 @@ export function parseThemePack(value:unknown,performanceStates:readonly string[]
    if(name==='roomLayouts')themePath(key);
    need(v&&rect(v.content),'applets: focus content');
    if(v.delivery){
-    const d=v.delivery,[cx,cy,cw,ch]=v.content;
+    const d=v.delivery;
     need(/\.webm$/.test(themePath(d.src))&&rect(d.bounds),'applets: delivery video and bounds');
-    const [x,y,w,h]=d.bounds;need(x+w<=cx||x>=cx+cw||y+h<=cy||y>=cy+ch,'applets: delivery clears live content');
+    need(apart(d.bounds,v.content),'applets: delivery clears live content');
     need(Number.isFinite(d.duration)&&d.duration>0&&d.duration<=20,'applets: delivery duration');
     need(d.shadow&&rect(d.shadow.bounds)&&Array.isArray(d.shadow.contact)&&d.shadow.contact.length===2&&d.shadow.contact.every(Number.isFinite)&&d.shadow.contact[0]>=0&&d.shadow.contact[1]>d.shadow.contact[0]&&d.shadow.contact[1]<=d.duration,'applets: delivery contact');
     need(Array.isArray(d.foreground)&&d.foreground.length<=8&&d.foreground.every(rect),'applets: delivery foreground');
    }
-   if(v.ambience!==undefined)for(const m of validateSceneMotion(v.ambience)){
-    const [x,y,w,h]=m.bounds,[cx,cy,cw,ch]=v.content;
-    need(x+w<=cx||x>=cx+cw||y+h<=cy||y>=cy+ch,'applets: ambience clears live content');
-   }
+   if(v.ambience!==undefined)for(const m of validateSceneMotion(v.ambience))need(apart(m.bounds,v.content),'applets: ambience clears live content');
   }
  }
  const m=t.motion;

@@ -1,4 +1,4 @@
-import type {GameHost} from './core.ts';
+import {clock,type GameHost} from './core.ts';
 
 const W=10,H=10,MINES=14;
 
@@ -36,7 +36,6 @@ export function createMinesweeper(host:GameHost){
   if(state==='won'||state==='lost'||open.has(i))return;
   if(flags.has(i))flags.delete(i);else flags.add(i);draw();
  }
- const clock=(s:number)=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
  function draw(){
   cells.forEach((b,i)=>{
    const shown=open.has(i)||(state==='lost'&&mines.has(i)),n=shown&&!mines.has(i)?count(i):0;

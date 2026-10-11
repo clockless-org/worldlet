@@ -65,10 +65,6 @@ export function applyThemeSurfaces(surfaces:BuiltSurfaces|null=themeSurfaces()){
  syncThemeSounds();
 }
 
-/** The picture the loading screen shows next launch: the theme's own, else its companion portrait. */
-export function themeStartupPicture():string|null{
- const env=environment() as any;return env?.surfaces?.startup||env?.companionPortrait||null;
-}
 /** The companion's still portrait for small places (world log, History, Profile): the theme's companion, else Fox. */
 export function companionStill():string{
  const env=environment() as any;return env&&!env.companionRive&&env.companionPortrait||'assets/fox-startup.png';

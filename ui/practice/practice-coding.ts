@@ -15,9 +15,9 @@ export function createPracticeJob(args,state,now=Date.now()){
  return {job:{id:'practice-code-'+crypto.randomUUID(),operationId:args.operationId,title:String(args.title).slice(0,100),task:String(args.task).slice(0,2000),sources:sources.map(s=>({id:s.id,title:s.title,text:s.text.slice(0,3500)})),startedAt:now,reviewed:false}};
 }
 export function practiceJobDetail(job){
- const status=practiceJobStatus(job),ready=status!=='Running';
- if(job.sources.some(s=>s.id==='sample-notion-navigation-latest'))return {messages:[{role:'user',text:job.task},{role:'assistant',text:'## Original design from Notion\n'+job.sources.map(s=>'### '+s.title+'\n'+s.text).join('\n\n')},{role:'assistant',text:ready?'## Ready for review\nThe navigation design and acceptance criteria are attached to this coding request.\n\nPrepared handoff example — no CLI execution or generated code is claimed.':'## Context received\nThe source document and acceptance criteria are attached. Preparing the review handoff…'}],scope:'Practice handoff · original Notion context · no live CLI run.',status};
+ const status=practiceJobStatus(job),ready=status!=='Running',sources=job.sources.map(s=>'### '+s.title+'\n'+s.text).join('\n\n');
+ if(job.sources.some(s=>s.id==='sample-notion-navigation-latest'))return {messages:[{role:'user',text:job.task},{role:'assistant',text:'## Original design from Notion\n'+sources},{role:'assistant',text:ready?'## Ready for review\nThe navigation design and acceptance criteria are attached to this coding request.\n\nPrepared handoff example — no CLI execution or generated code is claimed.':'## Context received\nThe source document and acceptance criteria are attached. Preparing the review handoff…'}],scope:'Practice handoff · original Notion context · no live CLI run.',status};
  return {messages:[{role:'user',text:job.task},
- {role:'assistant',text:'## Design brief\n'+job.sources.map(s=>'### '+s.title+'\n'+s.text).join('\n\n')},
+ {role:'assistant',text:'## Design brief\n'+sources},
  {role:'assistant',text:ready?'## Prepared implementation\n- A calm, keyboard-accessible timer with start, pause and reset.\n- The original design stays attached above for review.\n- Open the working prototype from Fox to try it.\n\nThis is a template implementation for the walkthrough; it is not a claim that Codex generated or tested a project.':'## In the workshop\nThe design brief is attached. Preparing the walkthrough prototype…'}],scope:'Local practice task · no CLI, repository changes or external writes.',status};
 }

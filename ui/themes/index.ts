@@ -7,7 +7,7 @@ export {PINS_THEME,selectThemePins,storedThemePins,switchThemePins,type ThemePin
 export {createMailArrivalObserver} from './mail-arrival.ts';
 export {validateSceneMotion,type SceneMotion} from './scene-motion.ts';
 export type {ThemeDeviceFeature,ThemeDeviceEffects,ThemeMailDelivery} from './theme-pack.ts';
-export {applyThemeSurfaces,attentionPicture,companionStill,playThemeSound,syncThemeSounds,themeStartupPicture,themeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
+export {applyThemeSurfaces,attentionPicture,companionStill,playThemeSound,syncThemeSounds,themeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
 
 export {themeAmbientTrack} from './theme-audio.ts';
 

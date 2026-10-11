@@ -1,4 +1,4 @@
-import type {GameHost} from './core.ts';
+import {clock,type GameHost} from './core.ts';
 
 const peers=(i:number)=>{const r=Math.floor(i/9),c=i%9,br=r-r%3,bc=c-c%3,out=new Set<number>();for(let k=0;k<9;k++){out.add(r*9+k);out.add(k*9+c);out.add((br+Math.floor(k/3))*9+bc+k%3);}out.delete(i);return [...out];};
 const PEERS=Array.from({length:81},(_,i)=>peers(i));
@@ -9,7 +9,7 @@ function solve(grid:number[],limit:number,random=false):number{
  let best=-1,options:number[]=[];
  for(let i=0;i<81;i++){
   if(grid[i])continue;
-  const used=new Set(PEERS[i].map(p=>grid[p]));const free=(random?shuffled():[1,2,3,4,5,6,7,8,9]).filter(v=>!used.has(v));
+  let used=0;for(const p of PEERS[i])used|=1<<grid[p];const free=(random?shuffled():[1,2,3,4,5,6,7,8,9]).filter(v=>!(used&1<<v));
   if(best<0||free.length<options.length){best=i;options=free;if(!free.length)return 0;}
  }
  if(best<0)return 1;
@@ -19,11 +19,11 @@ function solve(grid:number[],limit:number,random=false):number{
 }
 export function makeSudoku(clues=36){
  const solution=Array(81).fill(0);solve(solution,1,true);
- const puzzle=[...solution];
+ const puzzle=[...solution];let filled=81;
  for(const i of Array.from({length:81},(_,i)=>i).sort(()=>Math.random()-.5)){
-  if(puzzle.filter(Boolean).length<=clues)break;
+  if(filled<=clues)break;
   const v=puzzle[i];puzzle[i]=0;
-  if(solve([...puzzle],2)!==1)puzzle[i]=v;
+  if(solve([...puzzle],2)!==1)puzzle[i]=v;else filled--;
  }
  return {puzzle,solution};
 }
@@ -39,17 +39,16 @@ export function createSudoku(host:GameHost){
  for(let i=0;i<81;i++){const b=document.createElement('button');b.type='button';b.tabIndex=-1;b.className='sudoku-cell';b.dataset.index=String(i);b.dataset.row=String(Math.floor(i/9));b.dataset.col=String(i%9);board.append(b);cells.push(b);}
  for(const v of [1,2,3,4,5,6,7,8,9,0]){const b=document.createElement('button');b.type='button';b.className='sudoku-key';b.textContent=v?String(v):'Erase';b.dataset.value=String(v);pad.append(b);}
  let puzzle:number[]=[],solution:number[]=[],entry:number[]=[],selected=40,done=false,started=0;
- const clock=(s:number)=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
  function draw(){
-  const value=entry[selected];
+  const value=entry[selected],related=new Set(PEERS[selected]);
   cells.forEach((b,i)=>{
    const v=puzzle[i]||entry[i],wrong=!puzzle[i]&&!!entry[i]&&PEERS[i].some(p=>(puzzle[p]||entry[p])===entry[i]);
    b.textContent=v?String(v):'';b.dataset.given=String(!!puzzle[i]);b.classList.toggle('is-selected',i===selected);
-   b.classList.toggle('is-related',i!==selected&&PEERS[selected].includes(i));b.classList.toggle('is-same',!!v&&v===(puzzle[selected]||value)&&i!==selected);
+   b.classList.toggle('is-related',related.has(i));b.classList.toggle('is-same',!!v&&v===(puzzle[selected]||value)&&i!==selected);
    b.classList.toggle('is-wrong',wrong);b.setAttribute('aria-label',`Row ${Math.floor(i/9)+1}, column ${i%9+1}, ${v||'empty'}`);
   });
   const left=entry.reduce((n,v,i)=>n+(!puzzle[i]&&!v?1:0),0),best=host.best.get();
-  host.status(done?`Solved in ${clock(Math.round((Date.now()-started)/1000))} · Best ${clock(host.best.get())}`:`${left} squares to fill`+(best?` · Best ${clock(best)}`:''));
+  host.status(done?`Solved in ${clock(Math.round((Date.now()-started)/1000))} · Best ${clock(best)}`:`${left} squares to fill`+(best?` · Best ${clock(best)}`:''));
   element.dataset.state=done?'solved':'playing';
  }
  function put(v:number){
