@@ -25,7 +25,8 @@ await withBrowser(fileAccess,async browser=>{
   // World restore can call home while the outgoing desktop HUD is still
   // present. sceneState must retain its required node throughout the handoff.
   await page.locator('#notionWorld').evaluate(root=>root.dispatchEvent(new Event('worldlet:return-world')));
-  await page.getByRole('button',{name:'Back to World',exact:true}).click();
+  // Back to World (Fox's right-click menu, the Dock or tray icon): the host restores the page as it does natively.
+  await page.evaluate(()=>(window as any).worldletRestoreWorld());
   await page.waitForFunction(()=>!document.documentElement.classList.contains('desktop-companion'));
   assert.equal(await page.locator('#notionWorld #notionBack').count(),1,'World restore keeps the navigation control rooted');
   assert.equal(await page.locator('#notionWorld').getAttribute('data-depth'),'overview');
