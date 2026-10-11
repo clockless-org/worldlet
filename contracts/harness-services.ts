@@ -72,11 +72,18 @@ export interface HarnessSchedule {
  /** Runs that command (only after the person confirmed this exact preview), then reads the jobs again to be sure;
   * rejects with the Agent's reason. */
  change?(change:HarnessJobChange):Promise<void>;
+ /** The same two steps for a new job: its command as the person sees it, then that command, read back. */
+ previewCreate?(job:HarnessJobCreate):Promise<string>;
+ create?(job:HarnessJobCreate):Promise<void>;
 }
 /** One change to one job, each the Agent's own command (core/agent/harness-controls.ts): pause or resume it, run it
- * once now, or remove it. Creating or editing a job is the Agent's own conversation, never a World form. */
-export type HarnessJobAction='pause'|'resume'|'run'|'remove';
-export type HarnessJobChange={job:string;action:HarnessJobAction};
+ * once now, remove it, or move it to another time (owner request 2026-10-11: more control in Settings). */
+export type HarnessJobAction='pause'|'resume'|'run'|'remove'|'reschedule';
+/** A time Settings offers: every day at a clock time, or every few hours. */
+export type RoutineSchedule={daily:{hour:number;minute:number}}|{everyHours:number};
+export type HarnessJobChange={job:string;action:HarnessJobAction;schedule?:RoutineSchedule};
+/** A new job made in Settings › Agent › Routines: what to do, in the person's words, and when. */
+export type HarnessJobCreate={name:string;prompt:string;schedule:RoutineSchedule};
 
 /** approvals: the Harness's own permission prompts (dangerous commands, tool policy), answered in the World. `rule` is
  * what Always would allow, in the Harness's own terms (a Hermes Agent pattern key, an OpenClaw command); `agent` and

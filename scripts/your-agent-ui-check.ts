@@ -20,14 +20,17 @@ try{
   w.asked=[];addEventListener('worldlet:fox-ask',(e:any)=>{w.asked.push(e.detail?.text);e.stopImmediatePropagation();},true);
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
   // Each change is previewed (the Agent's exact command) and runs only with that confirmation.
-  if(b.action==='harnessSchedule'&&b.operation==='preview')return {command:'hermes cron '+b.change+' '+b.job,confirm:'c|'+b.change+'|'+b.job};
+  if(b.action==='harnessSchedule'&&b.operation==='preview'){const id=b.change==='create'?'new':b.job;(w.pending||={})[id]=b;return {command:'hermes cron '+b.change+' '+id,confirm:'c|'+b.change+'|'+id};}
   if(b.action==='harnessSchedule'&&b.operation==='change'){const [,change,id]=b.confirm.split('|');
+   const when=(s:any)=>s.daily?{cron:s.daily.minute+' '+s.daily.hour+' * * *'}:{everySeconds:s.everyHours*3600};
+   if(change==='reschedule')w.jobs=w.jobs.map(j=>j.id===id?{...j,when:when(w.pending[id].schedule)}:j);
+   if(change==='create'){const p=w.pending.new.job;w.jobs=[...w.jobs,{id:'job-9',name:p.name,paused:false,when:when(p.schedule)}];}
    if(change==='pause')w.jobs=w.jobs.map(j=>j.id===id?{...j,paused:true}:j);if(change==='resume')w.jobs=w.jobs.map(j=>j.id===id?{...j,paused:false}:j);if(change==='remove')w.jobs=w.jobs.filter(j=>j.id!==id);return {ok:true};}
   // What each Agent remembers, read only; Claude Code here is another Agent, shown read-only with where to change it.
   if(b.action==='harnessMemory')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',entries:w.memory},{harness:'claude-code',title:'Claude Code',inUse:w.current.harness==='claude-code',entries:[{id:'mem-0000000000000030',kind:'memory',text:'Use pnpm, never npm.',where:'~/.claude/CLAUDE.md'}]}]};
   if(b.action==='foxPreferences')return {ok:true,dailyRoutines:{...w.daily}};
   if(b.action==='foxPreferenceChange'&&b.setting==='daily_routines'){w.daily={...w.daily,...b.value};return {ok:true,dailyRoutines:{...w.daily}};}
-  if(b.action==='harnessSchedule')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,running:false,canStart:true,jobs:w.jobs}]};
+  if(b.action==='harnessSchedule')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,creates:true,running:false,canStart:true,jobs:w.jobs}]};
   if(b.action==='harnessSkills'&&b.operation==='preview')return {command:'hermes config set skills.disabled ["'+b.skill+'"]',confirm:'s|'+b.change+'|'+b.skill};
   if(b.action==='harnessSkills'&&b.operation==='change'){const [,change,name]=b.confirm.split('|');
    w.skills=change==='remove'?w.skills.filter(s=>s.name!==name):w.skills.map(s=>s.name===name?{...s,enabled:change==='enable'}:s);return {ok:true};}
@@ -155,6 +158,24 @@ try{
  await routinesPart.locator('[data-job=job-2]').getByRole('button',{name:'Cancel',exact:true}).click();
  await routinesPart.getByText('Nothing was changed.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['harnessSchedule','harnessSkills'].includes(c.action)&&c.operation==='change').map(c=>c.confirm)),['s|disable|seed-swap','c|pause|job-1'],'only what the person confirmed ran');
+ // Change time and New routine (owner request 2026-10-11: more control): a small form, one more ask, the Agent's own command.
+ await routinesPart.locator('[data-job=job-1]').getByRole('button',{name:'Change time',exact:true}).click();
+ await routinesPart.locator('[data-job=job-1] [data-form=reschedule] input[type=time]').fill('09:30');
+ await routinesPart.locator('[data-job=job-1] [data-action=save-time]').click();
+ await routinesPart.locator('[data-job=job-1]').getByText(/^Hermes Agent will run “Morning digest” every day at 9:30\sAM from now on\.$/).waitFor();
+ await routinesPart.locator('[data-job=job-1] [data-action=confirm-change]').click();
+ await routinesPart.getByText(/^“Morning digest” now runs every day at 9:30\sAM\.$/).waitFor();
+ await routinesPart.locator('[data-job=job-1]').getByText(/^Every day at 9:30\sAM · /).waitFor();
+ await routinesPart.getByRole('button',{name:'New routine',exact:true}).click();
+ const form=routinesPart.locator('[data-form=create]');
+ await form.getByLabel('Routine name').fill('Plant water');await form.getByLabel('What it should do').fill('Remind me to water the plants.');
+ await form.getByLabel('How often').selectOption('hours');await form.getByLabel('Hours').fill('3');
+ await form.getByRole('button',{name:'Create',exact:true}).click();
+ await routinesPart.getByText('Hermes Agent will set up “Plant water” and run it every 3 hours.',{exact:true}).waitFor();
+ await routinesPart.locator('[data-add=hermes] [data-action=confirm-change]').click();
+ await routinesPart.locator('[data-job=job-9]').getByText(/^Every 3 hours · /).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSchedule'&&c.operation==='preview'&&['reschedule','create'].includes(c.change)).map(c=>[c.change,c.schedule??c.job])),
+  [['reschedule',{daily:{hour:9,minute:30}}],['create',{name:'Plant water',prompt:'Remind me to water the plants.',schedule:{everyHours:3}}]],'what the person chose is what the Agent is asked');
  assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; no commands');
  await accounts.locator('[data-account=gmail]').getByText('alex@example.com',{exact:true}).waitFor();
  await accounts.locator('[data-account=gmail]').getByRole('button',{name:'Disconnect Google',exact:true}).waitFor();
