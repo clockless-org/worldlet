@@ -56,11 +56,11 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // The one setup page keeps every way in but the local Agents under More options (owner request 2026-10-09).
  await js("document.querySelector('.setup-more-toggle').click();true");
  await press('Use mock Google (Dev)');
- // The two default Routines (core/artifacts/daily.ts): one row beside Enter your world, on by default, no step of its own.
- await wait('the default Routines row, ticked, beside Enter your world',"(()=>{const box=document.querySelector('.setup-footer .setup-routines .setup-routines-check');return !!box&&box.checked&&!!box.offsetParent&&/morning and evening/i.test(box.closest('.setup-routines').textContent);})()",120);
+ // The two default Routines (core/artifacts/daily.ts) are on with no row on setup (owner decision 2026-10-11).
+ await wait('no Routines row beside Enter your world',"!!document.querySelector('.setup-footer .setup-next')&&!document.querySelector('.setup-routines')",120);
  await press('Enter your world',120);
  await wait('world arrival',"document.querySelector('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl'",60);
- if(!host.preferences.bool('worldlet.dailyPrep',true)||!host.preferences.bool('worldlet.dailyWrapUp',true))throw Error('Setup left the default Routines off although their row was ticked');
+ if(!host.preferences.bool('worldlet.dailyPrep',true)||!host.preferences.bool('worldlet.dailyWrapUp',true))throw Error('Setup left the default Routines off');
  mark('Today’s prep and Wrap up today are on');
  noRecordedFailures(host,'world arrival');
  // Fox never speaks first during the tour (ui/companion/fox-proactive.ts asks nothing there), so no speak-first line,

@@ -49,12 +49,12 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1);
    assert.equal(await page.locator('.setup-steps,.setup-languages,.setup-progress,.setup-skip,.setup-gallery').count(),0,'No step bars and no app gallery');
    assert.equal(await page.locator('.startup-scene').isVisible(),false,'Fox waits for the World');
-   // The brand sits large on top, and the choices with the big button below them sit in the middle (owner requests
-   // 2026-10-09).
+   // The brand sits large on top, the choices in the middle, and the big button low, where it stays on the second half
+   // (owner requests 2026-10-09, 2026-10-11).
    const [brandBox,chooseBox,nextBox]=await Promise.all([page.locator('.startup-brand').boundingBox(),page.locator('.setup-choose').boundingBox(),page.locator('.setup-next').boundingBox()]);
    const viewport=page.viewportSize()!;
    assert.ok(brandBox.y+brandBox.height<=chooseBox.y&&brandBox.height>=40&&Math.abs(brandBox.x+brandBox.width/2-viewport.width/2)<=2,'The brand is large on top: '+JSON.stringify({brandBox,chooseBox}));
-   assert.ok(Math.abs((chooseBox.y+nextBox.y+nextBox.height)/2-viewport.height/2)<=viewport.height*.08,'The choices and the big button sit in the middle: '+JSON.stringify({chooseBox,nextBox}));
+   assert.ok(chooseBox.y+chooseBox.height<=nextBox.y&&nextBox.y+nextBox.height>=viewport.height*.85&&nextBox.y+nextBox.height<=viewport.height,'The choices sit in the middle, the big button low: '+JSON.stringify({chooseBox,nextBox}));
    assert.ok(nextBox.width<=360,'The big button is narrower: '+nextBox.width);
    assert.equal(await page.locator('.startup-brand .startup-version').count(),0,'The page shows no version (owner feedback 2026-10-03)');
    assert.equal(await page.getByRole('link').count(),0,'No links on the page');
@@ -280,19 +280,12 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('.setup-tile-connections .setup-tile-logos>*').count(),2);
   assert.equal(await page.locator('.setup-tile-reading').count(),0,'Nothing reads as waiting once everything came over');
   const bringFrame=await page.locator('.setup-next').boundingBox();
-  assert.ok(['x','width','height'].every(k=>Math.abs(bringFrame[k]-firstFrame[k])<=1.5)&&bringFrame.y+bringFrame.height<=850,'The big button keeps its shape and stays on screen: '+JSON.stringify({firstFrame,bringFrame}));
+  assert.ok(['x','y','width','height'].every(k=>Math.abs(bringFrame[k]-firstFrame[k])<=1.5)&&bringFrame.y+bringFrame.height<=850,'The big button keeps its shape and its place on both halves (owner request 2026-10-11): '+JSON.stringify({firstFrame,bringFrame}));
   assert.equal(await page.locator('.setup-next').textContent(),'Enter your world');
   assert.equal(await page.locator('.setup-passport .setup-choose-again').isVisible(),true,'The chosen Agent\'s card can choose again (owner request 2026-10-09: no Back button)');
   assert.equal(await page.getByRole('button',{name:'Back',exact:true}).count(),0,'No Back button');
-  // The two default Routines (core/artifacts/daily.ts): one row beside Enter your world, ticked by default; no step of its own.
-  const routinesRow=page.locator('.setup-footer .setup-routines');
-  assert.equal(await routinesRow.textContent(),'Each morning and evening, your Agent prepares a card for you');
-  assert.equal(await routinesRow.locator('input[type=checkbox]').isChecked(),true,'On by default');
-  await routinesRow.click();assert.equal(await routinesRow.locator('input').isChecked(),false,'One click turns it off');
-  await routinesRow.click();assert.equal(await routinesRow.locator('input').isChecked(),true);
-  const rowBox=await routinesRow.boundingBox(),nextBox=await page.locator('.setup-next').boundingBox();
-  assert.ok(rowBox&&nextBox&&rowBox.y+rowBox.height<=nextBox.y&&nextBox.y+nextBox.height<=850,'The row sits above the button, both on screen');
-  await page.screenshot({path:process.env.WORLDLET_SETUP_ROUTINES_SCREEN||path.join(tmpdir(),'worldlet-setup-bring-'+platform+'.png')});
+  assert.equal(await page.locator('.setup-footer .setup-routines').count(),0,'No Routines row: both default Routines are on with no question (owner decision 2026-10-11)');
+  await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-bring-'+platform+'.png')});
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),'No Google sign-in');
