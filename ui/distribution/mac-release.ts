@@ -42,9 +42,9 @@ export function mountMacDownload(root) {
   entry.append(link,status);root.append(entry);
   latestMacRelease().then(release => {
     if (!release) {status.textContent='Coming soon';return;}
-    const universal=release.url.endsWith('-macos-universal.dmg');
-    status.textContent = `${release.version ? 'v'+displayReleaseVersion(release.version,release.build) : ''}${universal?' · Apple silicon & Intel':' · Choose your Mac chip'}`;
-    link.title=`macOS ${release.minimumSystemVersion} or later${universal?' · Apple silicon & Intel':' · Choose your Mac chip'}`;
+    const chips=release.url.endsWith('-macos-universal.dmg')?' · Apple silicon & Intel':' · Choose your Mac chip';
+    status.textContent = `${release.version ? 'v'+displayReleaseVersion(release.version,release.build) : ''}${chips}`;
+    link.title=`macOS ${release.minimumSystemVersion} or later${chips}`;
   }).catch(() => {status.textContent='Download unavailable';});
   return entry;
 }

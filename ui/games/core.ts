@@ -10,6 +10,20 @@ export function bestScore(key:string){
  return {get(){try{return Number(localStorage.getItem(name))||0;}catch{return 0;}},set(value:number){try{localStorage.setItem(name,String(value));}catch{}}};
 }
 
+/** A duration in seconds as minutes:seconds, for timed games. */
+export const clock=(s:number)=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+
+/** A swipe on the board: `turn` gets the longer axis' direction once the pointer travels at least `min` pixels. */
+export function onSwipe(board:HTMLElement,min:number,turn:(dx:number,dy:number)=>void){
+ let touch:{x:number;y:number}|null=null;
+ board.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};board.focus({preventScroll:true});});
+ board.addEventListener('pointerup',e=>{
+  if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;touch=null;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<min)return;
+  if(Math.abs(dx)>Math.abs(dy))turn(dx>0?1:-1,0);else turn(0,dy>0?1:-1);
+ });
+}
+
 /**
  * A frame loop that exists only while its game is on screen. It never schedules itself
  * once the board leaves the document, the window is hidden or the game says stop, so a
