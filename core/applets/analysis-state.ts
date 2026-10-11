@@ -23,16 +23,26 @@ export function appletObservations(previous:Row[],incoming:Row[],now:number) {
 /** A record whose unchanged revision keeps failing is parked until its source changes.
  * This bounds model spend on one poisoned thread without discarding accepted siblings. */
 export const appletAnalysisMaxFailures=3;
-function failureCount(saved:Row,row:Row,revisions?:Record<string,string>):number {
+function failureAttempts(saved:Row,row:Row,revision:string):number {
  const failure=saved.failures?.[row.id];
- return failure&&failure.revision===analysisRevision(row,revisions)&&Number.isInteger(failure.attempts)?failure.attempts:0;
+ return failure&&failure.revision===revision&&Number.isInteger(failure.attempts)?failure.attempts:0;
+}
+function failureCount(saved:Row,row:Row,revisions?:Record<string,string>):number {
+ return saved.failures?.[row.id]?failureAttempts(saved,row,analysisRevision(row,revisions)):0;
 }
 /** Independent Applet checkpoint. Hosts persist this result under a runtime fence.
  * Untried records run before retries, so one failing batch cannot hold back fresh mail. */
 export function appletAnalysisPending(records:Row[],saved:Row={},revisions?:Record<string,string>) {
- const pending=records.filter(row=>saved.analyzed?.[row.id]!==analysisRevision(row,revisions)&&failureCount(saved,row,revisions)<appletAnalysisMaxFailures);
+ // Each revision is computed once: without host revisions it serializes the whole record.
+ const attempts=new Map<Row,number>();
+ const pending=records.filter(row=>{
+  const revision=analysisRevision(row,revisions);
+  if(saved.analyzed?.[row.id]===revision)return false;
+  const count=failureAttempts(saved,row,revision);attempts.set(row,count);
+  return count<appletAnalysisMaxFailures;
+ });
  const ordered=orderAnalysisRecords(pending,saved.attempted||{});
- return [...ordered.filter(row=>!failureCount(saved,row,revisions)),...ordered.filter(row=>failureCount(saved,row,revisions))];
+ return [...ordered.filter(row=>!attempts.get(row)),...ordered.filter(row=>attempts.get(row))];
 }
 /** Records that already failed at this revision are retried one at a time. */
 export function appletAnalysisRetrying(records:Row[],saved:Row={},revisions?:Record<string,string>):string[] {
@@ -40,7 +50,7 @@ export function appletAnalysisRetrying(records:Row[],saved:Row={},revisions?:Rec
 }
 /** Unchanged records parked after repeated failures; a new source revision releases them. */
 export function appletAnalysisParked(records:Row[],saved:Row={},revisions?:Record<string,string>):string[] {
- return records.filter(row=>saved.analyzed?.[row.id]!==analysisRevision(row,revisions)&&failureCount(saved,row,revisions)>=appletAnalysisMaxFailures).map(row=>row.id);
+ return records.filter(row=>{const revision=analysisRevision(row,revisions);return saved.analyzed?.[row.id]!==revision&&failureAttempts(saved,row,revision)>=appletAnalysisMaxFailures;}).map(row=>row.id);
 }
 /** Count a content failure for each supplied record the run did not commit.
  * Hosts call this only for model/validation outcomes, never quota, network or cancellation. */
@@ -50,7 +60,7 @@ export function appletAnalysisFailed(input:{records:Row[];saved:Row;latest:Row[]
  for(const row of records){
   const revision=analysisRevision(row,input.revisions);
   if(saved.analyzed?.[row.id]===revision)continue;
-  failures[row.id]={revision,attempts:failureCount(saved,row,input.revisions)+1};
+  failures[row.id]={revision,attempts:failureAttempts(saved,row,revision)+1};
  }
  return {...saved,failures};
 }

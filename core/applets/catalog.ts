@@ -1,6 +1,5 @@
 import {POPULAR_APPS} from './popular-apps.ts';
 import type {AppletDefinition} from '../../contracts/world.ts';
-import {APPLET_VARIANTS} from './presentation.ts';
 import stripe from './definitions/stripe.ts';
 import doordash from './definitions/doordash.ts';
 import apple_reminders from './definitions/apple-reminders.ts';
@@ -43,7 +42,10 @@ import {WEB_GAME_APPLETS} from './definitions/web-games.ts';
 
 // Data-only registry: importable by native/web compilers and Node checks without Three.js or DOM.
 export const APP_DEFINITIONS: readonly AppletDefinition[] = Object.freeze([gmail,google_calendar,apple_notes,apple_reminders,weather,meetings,github,codex,claude_code,notion,obsidian,voiceMemos,messages,plaid,stripe,paypal,todoist,linear,supabase,docker,drive,docs,sheets,slides,oura,strava,fitbit,google_maps,airbnb,tripit,x,youtube,tiktok,discord,browser,ongoing,doordash,...GAME_APPLETS,...WEB_GAME_APPLETS,...POPULAR_APPS]);
-export function getApp(key){return APP_DEFINITIONS.find(app=>app.key===key||app.id===key);}
+// First definition whose key or id matches, as a linear find would return; looked up on every render and log row.
+const BY_NAME=new Map<unknown,AppletDefinition>();
+for(const app of APP_DEFINITIONS)for(const name of [app.key,app.id])if(!BY_NAME.has(name))BY_NAME.set(name,app);
+export function getApp(key){return BY_NAME.get(key);}
 // Existing world schemas keep their stable flat names during catalog extraction.
 // Every definition is in the world: there is no hidden-definition concept any more,
 // so a service that is not wanted is deleted rather than kept behind a flag.

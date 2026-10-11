@@ -8,7 +8,6 @@ export const MOMENT_MAKER={id:'app-moment-maker',key:'moment-maker',title:'Fox'}
 /** The painted device every moment Applet stands on, by its art key in the built-in style. */
 export const MOMENT_ART='moment';
 export const momentAppletId=(id:string)=>'app-'+id;
-export const momentRecordId=(appletId:string)=>appletId.startsWith('app-wgt-')?appletId.slice(4):null;
 
 export interface MomentSummary {id:string;title:string;blurb:string;color:string;endsAt:number;pinned:boolean;createdAt:number}
 
