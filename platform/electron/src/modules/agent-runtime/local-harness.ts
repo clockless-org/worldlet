@@ -181,6 +181,11 @@ export const SPARE_IDLE_MS=10*60_000;
  * when the Harness changes. */
 export class SpareTurns {
  private spare:{turn:StartedTurn;timer:NodeJS.Timeout}|null=null;
+ // Moves on every clear(): a process still starting when the spares were cleared (shutdown, a stop for a reset)
+ // is not kept when it arrives.
+ private generation=0;
+ /** What a spare being started now hands to `keep`. */
+ get ticket(){return this.generation;}
  take(key:string):StartedTurn|null {
   const entry=this.spare;if(!entry)return null;
   this.spare=null;clearTimeout(entry.timer);
@@ -188,8 +193,9 @@ export class SpareTurns {
   if(turn.key!==key||turn.child.exitCode!==null||turn.child.signalCode!==null){discardTurn(turn);return null;}
   return turn;
  }
- keep(turn:StartedTurn){
-  this.clear();
+ keep(turn:StartedTurn,ticket=this.generation){
+  if(ticket!==this.generation){discardTurn(turn);return;}
+  this.drop();
   const timer=setTimeout(()=>{if(this.spare?.turn===turn){this.spare=null;discardTurn(turn);}},SPARE_IDLE_MS);
   timer.unref?.();
   this.spare={turn,timer};
@@ -197,7 +203,8 @@ export class SpareTurns {
   turn.child.once('exit',()=>{if(this.spare?.turn===turn){clearTimeout(timer);this.spare=null;turn.bridge?.close();}});
  }
  get waiting(){return this.spare!==null;}
- clear(){const entry=this.spare;if(!entry)return;this.spare=null;clearTimeout(entry.timer);discardTurn(entry.turn);}
+ clear(){this.generation++;this.drop();}
+ private drop(){const entry=this.spare;if(!entry)return;this.spare=null;clearTimeout(entry.timer);discardTurn(entry.turn);}
 }
 
 /** Permission prompts of a conversation turn that runs a process of its own (Hermes Agent when its resident `hermes acp`
@@ -284,7 +291,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
  /** Starts the next turn's process now, with this turn's command line, so the next turn need not wait for it. */
  private prepare(home:string,system:string,tools:boolean,sample:boolean,key:string,agent:string|null,model:string|null){
   const spares=this.spares;if(!spares)return;
-  void this.start(home,{system,prompt:''},tools,sample,key,agent,model).then(turn=>spares.keep(turn)).catch(()=>{});
+  const ticket=spares.ticket;
+  void this.start(home,{system,prompt:''},tools,sample,key,agent,model).then(turn=>spares.keep(turn,ticket)).catch(()=>{});
  }
  get isRunning(){return this.child!==null||this.session!==null;}
  cancel(){this.cancelled=true;this.settleAsks();this.eventWait?.cancel();if(this.child)stopChild(this.child);this.session?.cancel();}

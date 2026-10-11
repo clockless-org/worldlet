@@ -10,6 +10,8 @@ import {attachChosenHermes,createAgentService,forgetSetupChoice,runtimeContext,s
 import {attachedHermes,unbindHermes} from './hermes-files.ts';
 import {ExternalAgentAdapter,ExternalAgentRuntime,NO_AGENT,NoAgentAdapter} from './external.ts';
 import {readAdopted,readLocalAgentMemory,writeAdopted} from './local-memory.ts';
+import {SpareTurns} from './local-harness.ts';
+import {spawn} from 'node:child_process';
 import type {Profile} from '../../profile.ts';
 import type {Row} from './types.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -275,6 +277,22 @@ function hermesAttachment(){
  }finally{if(saved===undefined)delete process.env.HERMES_HOME;else process.env.HERMES_HOME=saved;}
 }
 
-try{localMemory();hermesAttachment();await external();await noAgent();await harnessBoundary();await harnessExample();console.log(`PASS agent runtime: ${passed.length} checks`);}
+// A spare process still starting when the spares are cleared (shutdown, a stop for a reset) is not kept when it arrives.
+async function spareTurns(){
+ if(process.platform==='win32')return;
+ const started=()=>{const child=spawn('sleep',['60'],{stdio:['pipe','pipe','ignore']});return {child,bridge:null,key:'k',stderr:{text:''},dispatch:{run:async()=>({})}} as any;};
+ const ended=async(child:any)=>{const deadline=Date.now()+3000;while(Date.now()<deadline&&child.exitCode===null&&child.signalCode===null)await sleep(50);return child.exitCode!==null||child.signalCode!==null;};
+ const spares=new SpareTurns();
+ const late=started(),ticket=spares.ticket;
+ spares.clear();spares.keep(late,ticket);
+ assert.equal(spares.waiting,false,'a spare started before clear() is not kept');
+ assert(await ended(late.child),'a spare started before clear() is stopped');
+ const kept=started();spares.keep(kept,spares.ticket);
+ assert.equal(spares.waiting,true);assert.equal(spares.take('k'),kept,'a spare started after clear() is kept for the next turn');
+ kept.child.kill();
+ pass('spare turns: one still starting when the spares are cleared is stopped, not kept');
+}
+
+try{localMemory();hermesAttachment();await spareTurns();await external();await noAgent();await harnessBoundary();await harnessExample();console.log(`PASS agent runtime: ${passed.length} checks`);}
 catch(error){console.error('FAIL',error);process.exitCode=1;}
 finally{fs.rmSync(scratch,{recursive:true,force:true});}
