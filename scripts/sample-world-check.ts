@@ -23,10 +23,9 @@ await withBrowser(fileAccess,async browser=>{
  await boot().catch(async e=>{console.error({errors,body:(await page.locator('body').innerText()).slice(0,600),modules:await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length),expected:total});throw e;});
  const metrics=()=>page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics);
  assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('.native-console').dataset.sample),'true','the world knows it is the sample');
- await openCompanionPanel(page);
- await page.getByRole('tab',{name:'Settings',exact:true}).click();
- // Settings lists its pages; the sample switch lives on its own Sample world page.
- await page.locator('.companion-settings-list [data-setting=sample]').click();
+ await openCompanionPanel(page,'Settings');
+ // The sample switch lives in Settings › General.
+ await page.locator('.companion-settings-list [data-setting=general]').click();
  assert.equal(await page.locator('.companion-settings-detail .world-recovery-switch').getAttribute('aria-checked'),'true','the switch in Settings reads On');
  await page.getByRole('button',{name:'Close companion panel',exact:true}).click();
  const modules=(await metrics()).modules;

@@ -98,7 +98,7 @@ export function installPhone(host:Host){
   onError:error=>host.diagnostics.record(error,'agentPairing'),
   run:async(body,onEvent,signal,lane)=>{
    const service=agentService(),scope=host.optional<FoxService>(FOX)?.scope();
-   if(!service?.available)throw new WorldletError(`Fox’s Agent on ${computerName()} is not ready yet. Open Worldlet there and check Settings › Model.`);
+   if(!service?.available)throw new WorldletError(`Fox’s Agent on ${computerName()} is not ready yet. Open Worldlet there and check Settings › Your Agent.`);
    if(service.harness?.id==='remote')throw new WorldletError(`Fox on ${computerName()} also uses an Agent on another computer. Pair with that computer instead.`);
    if(!scope||scope.sample||scope.setup)throw new WorldletError(`Finish setting up Worldlet on ${computerName()} first.`);
    // The client's background work runs on this computer's background lane, beside its conversation.

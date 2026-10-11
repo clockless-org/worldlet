@@ -7,7 +7,7 @@ import {worldLogGo,worldLogMark} from '../components/index.ts';
 /** The History page: the world log's plain lines as a feed that keeps running, newest at the
  * bottom, each line going to its Applet or site, with what is happening now and the next check
  * under it. Every recorded event, for anyone who needs the detail, is `records`, shown from
- * Settings › Troubleshoot. Polling runs only while the panel is open. */
+ * Settings › Help. Polling runs only while the panel is open. */
 export function createCompanionHistory({call,openApplet,openSite,connections=()=>[]}:{call:any;openApplet?:(id:string)=>void;openSite?:(url:string)=>void;connections?:()=>unknown[]}){
  const el=(tag,text='')=>Object.assign(document.createElement(tag),{textContent:text});
  const section=el('section');section.className='companion-info-section companion-history';section.dataset.section='History';
@@ -124,13 +124,13 @@ export function createCompanionHistory({call,openApplet,openSite,connections=()=
   }catch{if(active&&turn===version){status.textContent='Could not refresh history. Your saved history is kept.';retry.hidden=false;}}
   finally{if(turn===version)loading=false;}
  }
- const showingRecords=()=>records.isConnected&&!records.closest('[hidden]');
+ const showingRecords=()=>records.isConnected&&!records.closest('[hidden],details:not([open])');
  async function navigate(mode:'latest'|'older'){await refresh(mode);records.scrollTop=0;}
  latest.onclick=()=>void navigate('latest');older.onclick=()=>void navigate('older');retry.onclick=()=>void refresh('latest');
  function start(){if(active)return;active=true;version++;loading=false;plain='';void refreshRecent();timer=setInterval(()=>{if(document.hidden)return;void refreshRecent();if(showingRecords())void refresh();},2000);}
  function stop(){active=false;version++;loading=false;clearInterval(timer);}
  draw();
  return {element:section,records,start,stop,
-  /** Settings › Troubleshoot shows the records: read the latest page now. */
+  /** Settings › Help shows the records: read the latest page now. */
   showRecords(){if(active)void refresh('latest');}};
 }

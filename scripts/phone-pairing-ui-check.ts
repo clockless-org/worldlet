@@ -23,8 +23,8 @@ try{
  const published=await page.evaluate(()=>(window as any).calls.find(c=>c.action==='phonePublish'));
  assert.equal(published.slot,'attention');assert.deepEqual([published.value.v,published.value.now,published.value.later],[1,[],[]]);
  // Pairing from the panel.
- await openCompanionPanel(page);
- const panel=page.locator('#companionInfo');await panel.getByRole('tab',{name:'Mobile',exact:true}).click();
+ await openCompanionPanel(page,'Mobile');
+ const panel=page.locator('#companionInfo');
  const phone=panel.locator('[data-section=Mobile]');await phone.getByRole('button',{name:'Pair phone',exact:true}).click();
  await phone.getByText('Scan with your phone').waitFor();
  const qr=phone.locator('.companion-phone-qr svg');await qr.waitFor();

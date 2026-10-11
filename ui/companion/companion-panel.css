@@ -1,4 +1,4 @@
-/* Fox's panel (companion-info.ts: profile, history, energy, phone, settings, feedback) and field dictation.
+/* Fox's panel (companion-info.ts and companion-settings.ts: one list of sections, the chosen one's details beside it) and field dictation.
    Loaded in the states layer. */
 /* Companion information is a quiet, anchored sheet, not a second chat. */
 
@@ -10,7 +10,6 @@
 .companion-info-profile h2{font-size:26px;margin:8px 0 2px}
 .companion-info-panel p{margin:0;color:#656651;font-size:12px}
 .companion-info-profile small{display:block;margin-top:18px;color:#77745e;font-size:11px}
-.companion-info-main{min-width:0;flex:1;display:flex;flex-direction:column}
 .companion-info-panel button{cursor:pointer;font:inherit}
 .companion-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow:auto;align-content:start;min-height:0}
 .companion-info-card{padding:13px;background:#e6dbc438;border:1px solid #d9cbae80;border-radius:12px;display:flex;align-items:flex-start;gap:9px;flex-wrap:wrap}
@@ -33,7 +32,6 @@
 .applet-layout-menu button{border:0;border-radius:6px;padding:10px 14px;background:transparent;color:#594b35;font:14px var(--ui-font-ui);cursor:pointer}
 .applet-layout-menu button:hover,.applet-layout-menu button:focus-visible{background:#ecdec5}
 
-.companion-info-main{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:8px}
 .companion-info-section{flex:none;margin:0 0 22px}
 .companion-info-section>h3{font-size:17px;margin:0 0 12px;color:#354132}
 .companion-info-section .companion-info-grid{overflow:visible;max-height:none;flex:none}
@@ -41,11 +39,6 @@
 
 .native-console .companion-info-panel{width:min(900px,calc(100vw - 48px));height:540px;padding:32px}
 .companion-info-body{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;gap:18px}
-.companion-info-nav{display:flex;flex:none;gap:8px;padding-right:24px;border-bottom:1px solid #d9cbae80}
-.companion-info-nav button{min-height:44px;padding:8px 14px;border:0;border-bottom:2px solid transparent;background:none;color:#656651;font-weight:600}
-.companion-info-nav button[aria-current]{color:#354132;border-bottom-color:#90723f}
-.companion-info-nav button:hover{background:#e6dbc438;border-radius:8px 8px 0 0}
-.companion-info-main{min-height:0;padding:3px 8px 8px 3px}
 .companion-history{min-height:100%;padding-top:8px}
 .companion-history ol{list-style:none;margin:18px 0;padding:0}
 .companion-history li{border-left:1px solid #d9cbae;padding:0 0 20px 14px;overflow-wrap:anywhere}
@@ -55,7 +48,6 @@
 .companion-history :is(.companion-history-all)>div{display:flex;gap:8px;flex-wrap:wrap}
 .companion-history button{min-height:44px;padding:6px 12px;border:1px solid #cbb998;border-radius:8px;background:transparent;color:inherit}
 .companion-history button:disabled{opacity:.5;cursor:default}
-@media(max-width:600px){.companion-info-nav{gap:4px;padding-right:0}.companion-info-nav button{padding-left:7px;padding-right:7px;font-size:12px}}
 .companion-feedback{min-height:100%;padding-top:8px}
 .companion-feedback form{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .companion-feedback label{font-weight:600;font-size:13px;margin:0;color:#354132}
@@ -98,34 +90,18 @@
 }
 @media(max-height:500px){.native-console .companion-info-panel[open]{padding:14px;gap:10px}.companion-info-panel .companion-info-profile{display:none}.companion-info-body{gap:10px}}
 
-/* One full-width page at a time; profile is a destination, not a permanent sidebar. */
-.companion-info-main>[data-section][hidden]{display:none!important}
 .companion-info-panel .companion-info-profile:not([hidden]){display:block;flex:none;width:min(100%,480px);max-height:none;min-height:0;align-self:center;overflow:visible;padding:16px 24px;position:static;text-align:center}
 .companion-info-panel .companion-info-profile img{position:static;width:112px;height:128px;margin:0 auto;padding:8px}
 .companion-info-panel .companion-info-profile.has-look:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:36px;align-items:center;width:min(100%,660px)}
 .companion-info-panel .companion-profile-facts{margin:20px auto 0;max-width:320px;display:grid;grid-template-columns:80px 1fr;gap:12px 16px;text-align:left}
 .companion-info-panel .companion-profile-facts dt,.companion-info-panel .companion-profile-facts dd{margin:0;font-size:13px}
-.companion-info-nav button{flex:none}
 .companion-history li{display:flex;gap:12px;border:0;padding:12px 0;align-items:flex-start}
 .companion-history li>div{min-width:0;flex:1}
 .companion-history-source{display:flex;flex:none;align-items:center;justify-content:center;width:36px;height:40px;border-radius:12px;background:#e6dbc438;color:#78694f}
 .companion-history-source img{width:32px;height:36px;object-fit:contain}
 .companion-history-source svg{width:22px;height:22px}
 .companion-history-controls{position:sticky;top:-3px;z-index:1;background:#f8f0df;padding:8px 0}
-@media(max-width:600px){.native-console .companion-info-panel[open]{padding-top:40px}.companion-info-nav{gap:0;padding-right:0}.companion-info-nav button{padding:8px 6px;font-size:12px}.companion-info-panel .companion-info-profile:not([hidden]){padding:12px 8px}}
-/* The world's energy (ui/companion/world-energy.ts): the battery on the Energy page; none in the World. */
-.energy-cell{position:relative;display:inline-block;box-sizing:border-box;width:22px;height:11px;border:1.5px solid currentColor;border-radius:3px}
-.energy-cell::after{content:'';position:absolute;right:-4px;top:2px;width:2px;height:4px;border-radius:0 1px 1px 0;background:currentColor}
-.energy-fill{position:absolute;left:1px;top:1px;bottom:1px;width:calc((100% - 2px)*var(--energy,100)/100);border-radius:1px;background:#8fbf6a;transition:width .4s ease}
-.companion-energy-now[data-state=medium] .energy-fill{background:#d9b75a}
-.companion-energy-now[data-state=low] .energy-fill{background:#d9824f}
-.companion-energy-now[data-state=empty] .energy-fill{width:0}
-@media(prefers-reduced-motion:reduce){.energy-fill{transition:none}}
-.companion-energy-now{display:flex;align-items:center;gap:16px;padding:14px 16px;margin-bottom:16px;border:1px solid #d9cbae80;border-radius:12px;background:#e6dbc438;color:#5d6b4a}
-.companion-energy-now .energy-cell{width:56px;height:26px;border-width:2px;border-radius:6px}
-.companion-energy-now .energy-cell::after{right:-6px;top:7px;width:3px;height:8px}
-.companion-energy-now .energy-fill{left:2px;top:2px;bottom:2px;border-radius:3px}
-.companion-energy-now h4{margin:0 0 3px;font-size:15px;color:#354132}
+@media(max-width:600px){.native-console .companion-info-panel[open]{padding-top:40px}.companion-info-panel .companion-info-profile:not([hidden]){padding:12px 8px}}
 .companion-info-panel .companion-energy-intro{margin:-6px 0 12px}
 .companion-info-panel .companion-phone-intro{margin:-6px 0 12px}
 .companion-phone-body{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px}
@@ -154,11 +130,8 @@
 .companion-history .companion-world-log .world-log-icon svg{width:15px;height:15px}
 .companion-history .companion-world-log [data-failed=true] span{color:#9a4b36}
 @media(max-width:600px){.companion-info-panel .companion-info-profile.has-look:not([hidden]){grid-template-columns:1fr;gap:16px}}
-/* Companion panel, redone (owner feedback 2026-10-03): larger, tabs that never scroll, every page fits. */
+/* Companion panel, redone (owner feedback 2026-10-03): larger, every page fits. */
 .native-console .companion-info-panel{width:min(1040px,calc(100vw - 32px));height:min(660px,calc(100dvh - 32px))}
-.companion-info-nav{flex-wrap:wrap;overflow:visible;row-gap:0}
-.companion-info-panel:is([data-section=History],[data-section=Journal],[data-section=Settings],[data-section=Feedback],[data-section=Energy]) .companion-info-main{overflow:hidden;display:flex;flex-direction:column}
-.companion-info-panel .companion-info-main>[data-section]:not([hidden]){flex:1 1 auto;min-height:0}
 /* Profile page: the companion on the left, what it can do scrolling on the right. */
 .companion-info-panel .companion-profile-page:not([hidden]){display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:28px;min-height:0}
 .companion-info-panel .companion-profile-page>.companion-info-profile,.companion-info-panel .companion-profile-page>.companion-info-profile.has-look{display:block;width:auto;max-height:none;min-height:0;align-self:stretch;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:4px 12px 8px 4px;position:static;text-align:center}
@@ -167,7 +140,6 @@
 .companion-profile-page .companion-abilities h3{margin-top:4px}
 .companion-profile-page .companion-look-hint{margin-top:12px}
 .companion-info-panel .companion-abilities-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-@media(min-width:701px){.companion-info-panel[data-section=Profile] .companion-info-main{overflow:hidden;display:flex;flex-direction:column}}
 @media(max-width:700px){.companion-info-panel .companion-profile-page:not([hidden]){display:block}.companion-info-panel .companion-profile-page>.companion-info-profile,.companion-profile-page .companion-abilities{overflow:visible}.companion-profile-page .companion-abilities{margin-top:16px}}
 .companion-abilities .companion-info-card{flex-wrap:nowrap;padding:12px}
 .companion-abilities .companion-info-card p{font-size:12px;line-height:1.35}
@@ -179,16 +151,13 @@
 .companion-panel-guide-actions{display:flex;flex-wrap:wrap;gap:8px}
 .companion-panel-guide :is(input,select){box-sizing:border-box;max-width:100%;min-height:36px;border:1px solid #cbb998;border-radius:8px;background:#fffaf0;padding:6px 10px;font:inherit}
 .companion-panel-guide table{font-size:12px}
-.companion-energy-page{display:flex;flex-direction:column}
-.companion-energy-page>.companion-panel-guide{flex:1}
 .companion-history{display:flex;flex-direction:column;padding-top:0}
 .companion-history-feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;border-top:1px solid #d9cbae80;border-bottom:1px solid #d9cbae80;mask-image:linear-gradient(transparent,#000 28px)}
 .companion-history .companion-history-feed ol.companion-world-log{margin:24px 0 8px}
 .companion-history .companion-world-log li[data-live=true] span{color:#4f6b45;font-style:italic}
 .companion-history-next{margin-top:8px!important;color:#656651}
 .companion-history-next[hidden]{display:none}
-.companion-history-records{max-height:280px;overflow-y:auto;margin-top:8px;padding-right:6px}
-.native-console .companion-info-panel .companion-info-main>.companion-settings:not([hidden]){display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;margin:0}
+.native-console .companion-info-panel .companion-info-body>.companion-settings{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;margin:0;flex:1;min-height:0}
 .companion-settings-list{display:flex;flex-direction:column;gap:2px;overflow-y:auto;min-height:0;padding-right:4px;border-right:1px solid #d9cbae80}
 .companion-info-panel .companion-settings-item{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:0;padding:6px 12px;border-radius:10px;cursor:pointer}
 .companion-settings-item strong{font-size:13px;color:#354132}
@@ -233,7 +202,7 @@
 .companion-feedback[data-voice=listening] .companion-feedback-mic{background:#e0b96b;border-color:transparent}
 .native-console .companion-feedback-actions .companion-feedback-send{background:var(--control-forest,#3f5a3a);color:#fff;border-color:transparent;font-weight:600}
 .companion-phone-android{font-size:13px;color:#656651}
-@media(max-width:700px){.companion-info-panel .companion-abilities-grid{grid-template-columns:1fr 1fr}.native-console .companion-info-panel .companion-info-main>.companion-settings:not([hidden]){grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.companion-settings-list{flex-direction:row;flex-wrap:wrap;border-right:0;overflow:visible}.companion-settings-item span{display:none}.companion-info-panel .companion-settings-version{border-right:0}}
+@media(max-width:700px){.companion-info-panel .companion-abilities-grid{grid-template-columns:1fr 1fr}.native-console .companion-info-panel .companion-info-body>.companion-settings{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.companion-settings-list{flex-direction:row;flex-wrap:wrap;border-right:0;overflow:visible}.companion-settings-item span{display:none}.companion-info-panel .companion-settings-version{border-right:0}}
 @media(max-width:480px){.companion-info-panel .companion-abilities-grid{grid-template-columns:1fr}}
 .companion-panel-guide .fox-model-catalog{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
 .companion-panel-guide .fox-model-catalog button{width:100%;text-align:left}
@@ -277,3 +246,15 @@
 .field-dictation[data-state=processing]{opacity:.7;cursor:progress}
 @keyframes field-dictation-listen{50%{box-shadow:0 0 0 5px #e0b96b55}}
 @media(prefers-reduced-motion:reduce){.field-dictation[data-state=listening]{animation:none}}
+
+/* Fox's profile, Phone, History and Feedback are pages of their own in the details (owner request 2026-10-10): they
+   fill it and scroll inside, the way they did as tabs. */
+.companion-settings-detail.is-page{display:flex;flex-direction:column;overflow:hidden}
+.companion-settings-detail.is-page>.companion-settings-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:stretch}
+.companion-settings-detail.is-page>.companion-settings-body>*{flex:1 1 auto;min-height:0;margin:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.companion-settings-detail.is-page .companion-profile-page{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:24px;overflow:hidden}
+@media(max-width:700px){.companion-settings-detail.is-page .companion-profile-page{display:block;overflow-y:auto}}
+.companion-settings-elsewhere{align-self:stretch;margin-top:6px}
+.companion-settings-elsewhere>summary{cursor:pointer;font-size:13px;font-weight:600;color:#354132;padding:6px 0}
+.companion-settings-elsewhere[open]>summary{margin-bottom:8px}
+.companion-settings-elsewhere>.companion-settings-row+.companion-settings-row{margin-top:8px}

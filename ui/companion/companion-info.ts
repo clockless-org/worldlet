@@ -10,7 +10,6 @@ import {companionStill} from '../themes/index.ts';
 import {createCompanionSettings} from './companion-settings.ts';
 import {readFoxSkills,skillList,skillOffers,type FoxSkills} from './companion-skills.ts';
 import {COMPANION_LOOK_PRESETS,COMPANION_SCARF_COLORS,companionLookIsClassic,companionLookKey,normalizeCompanionLook,recolorCompanionPixels,type CompanionLook} from '../../core/companion/index.ts';
-import {ENERGY_LABEL,energySourceLabel,energyState,readEnergy,rechargeText,type Energy} from './world-energy.ts';
 
 // What Fox can do, as things a person would actually say (owner feedback 2026-10-03: show real cases).
 const ABILITIES:[icon:string,title:string,say:string,does:string][]=[
@@ -48,7 +47,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const desktop=isDesktopCompanion;
  function syncEntry(){badge.innerHTML=uiIcon('companion');badge.title='Open companion panel';badge.setAttribute('aria-label',badge.title);badge.setAttribute('aria-haspopup','dialog');badge.setAttribute('aria-expanded',String(panel.open));badge.setAttribute('aria-controls',panel.id);}
  const panel=el('dialog','companion-info-panel ui-hud-panel');panel.id='companionInfo';panel.setAttribute('aria-label','Your companion');badge.setAttribute('aria-controls',panel.id);root.append(panel);
- // Settings beside Fox lands on the Settings tab (owner Order 2026-10-07); the badge on Profile.
+ // Settings beside Fox lands on Your Agent (owner Order 2026-10-07); the badge on Fox's profile.
  async function toggle(section='Profile'){if(desktop()){badge.disabled=true;try{await requireWorldSurface(call);await open(section);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';}finally{badge.disabled=false;}return;}if(panel.open)dismiss(true);else await open(section);}
  badge.onclick=e=>{e.stopPropagation();void toggle();};
  syncEntry();
@@ -67,8 +66,12 @@ export function mountCompanionInfo({root,pet,call,getName}){
   if(desktop()){try{await requireWorldSurface(call);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';return;}}
   if(panel.open)dismiss();journal.open(day);
  }
- // Settings finish in the panel; the World view lends the sample switch and host features.
- const settings=createCompanionSettings({call,host:()=>root.companionSettingsHost,history,close:()=>dismiss()});
+ // The panel is one settings window (owner request 2026-10-10): Fox's profile, Phone, History and Feedback are sections
+ // in its one list beside the settings; the World view lends the sample switch and host features.
+ const profileHost=el('div','companion-profile-host');
+ const PAGE_SECTION={fox:'Profile',phone:'Mobile',history:'History',feedback:'Feedback'};
+ const settings=createCompanionSettings({call,host:()=>root.companionSettingsHost,pages:{fox:profileHost,phone:phone.element,history:history.element,feedback:feedback.element},history,close:()=>dismiss(),
+  onShow:id=>{panel.dataset.section=PAGE_SECTION[id]||'Settings';if(id!=='feedback')void feedback.cancelVoice();}});
  root.companionSettings=settings.element;
  let anchorFrame=0,anchorKey='';
  function anchorPanel(){
@@ -78,27 +81,23 @@ export function mountCompanionInfo({root,pet,call,getName}){
   if(key!==anchorKey){anchorKey=key;Object.assign(panel.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px'});}
   anchorFrame=requestAnimationFrame(anchorPanel);
  }
- // Feedback is last (owner feedback 2026-10-03); Applets moved to their areas.
- // The Journal left these tabs for a book of its own (owner request 2026-10-08); an old link to it opens the book.
- const tabs=['Profile','Energy','History','Mobile','Settings','Feedback'];
- let tab='Profile',model:any=null,energy:Energy|null=null,snapshot:any=null,profile:Partial<CompanionProfile>={},error='',busy=false,generation=0;
+ // Old section names still open their section: Energy is Your Agent now, the Journal is a book of its own (owner request
+ // 2026-10-08).
+ const SECTION_ID:Record<string,string>={Profile:'fox',Energy:'model',History:'history',Mobile:'phone',iPhone:'phone',Phone:'phone',Feedback:'feedback'};
+ let model:any=null,snapshot:any=null,profile:Partial<CompanionProfile>={},error='',busy=false,generation=0;
  const openGroups=new Set<string>(['user']);
- // Agents already on this computer (Codex, Claude Code, …).
- let localAgents:any[]=[];
  // The skills the World shows and Fox's offers to save a repeated task (companion-skills.ts).
  let skills:FoxSkills|null=null,skillNote='';
  async function loadSkills(){try{skills=readFoxSkills(await call('foxSkills',{operation:'list'}));}catch{skills=null;}if(panel.open&&!busy)render();}
- async function loadAgents(){
-  try{const result=await call('agentHarness',{operation:'detect'});localAgents=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'):[];}
-  catch{localAgents=[];}
-  if(panel.open&&!busy)render();
- }
  function button(label,action){const b=el('button','companion-info-action',label);b.type='button';b.onclick=action;return b;}
  async function run(action){if(busy)return;busy=true;error='';render();try{await action();}catch(e){error=e.message||'Please try again.';}finally{busy=false;render();}}
  function dismiss(focus=false){generation++;history.stop();cancelAnimationFrame(anchorFrame);void feedback.cancelVoice();panel.close();root.classList.remove('companion-info-open');badge.setAttribute('aria-expanded','false');if(focus)(badge.isConnected?badge:pet.querySelector('.companion-panel-button')||badge).focus();root.dispatchEvent(new Event('worldlet:companion-info-closed'));}
  window.addEventListener('worldlet:desktop-companion',event=>{if((event as CustomEvent).detail&&root.classList.contains('companion-info-open'))dismiss();syncEntry();});
+ const close=button('×',()=>dismiss(true));close.className='companion-info-close';close.setAttribute('aria-label','Close companion panel');
+ const notice=el('p','companion-info-note');notice.setAttribute('role','status');notice.hidden=true;
+ const body=el('div','companion-info-body');body.append(settings.element,notice);panel.append(body,close);
  function render(){
-  const close=button('×',()=>dismiss(true));close.className='companion-info-close';close.setAttribute('aria-label','Close companion panel');
+  notice.textContent=error;notice.hidden=!error;
   // Profile on the left, what Fox can do scrolling on the right (owner feedback 2026-10-03).
   const page=el('section','companion-info-section companion-profile-page');page.dataset.section='Profile';
   const side=el('div','companion-info-profile'),portrait=el('img'),environment=(globalThis as any).__WORLDLET_ENV_ASSETS__;
@@ -176,30 +175,8 @@ export function mountCompanionInfo({root,pet,call,getName}){
    }
    return block;
   }
-  const body=el('div','companion-info-body'),nav=el('nav','companion-info-nav');nav.setAttribute('aria-label','Companion sections');nav.setAttribute('role','tablist');
-  for(const section of tabs){const b=button(section,()=>selectTab(section));b.dataset.sectionLink=section;b.id='companion-tab-'+section;b.setAttribute('role','tab');b.setAttribute('aria-controls','companion-page-'+section);nav.append(b);}
-  const main=el('div','companion-info-main');
   let grid=el('div','companion-info-grid');
   function card(icon,title,description,label?,action?){const c=el('section','companion-info-card'),symbol=el('span','companion-info-symbol');symbol.innerHTML=uiIcon(icon);const body=el('div');body.append(el('h4','',title),el('p','',description));c.append(symbol,body);if(label){const b=button(label,()=>run(action));b.disabled=busy;c.append(b);}grid.append(c);return c;}
-  function energySection(){
-   // The world's energy: which source powers the world, how much is left, and the ways to charge it.
-   const section=el('section','companion-info-section companion-energy-page');section.dataset.section='Energy';section.append(el('h3','','Energy'),el('p','companion-energy-intro','Energy powers your whole world: Fox and every app.'));
-   const state=energyState(energy),now=el('div','companion-energy-now');now.dataset.state=energy?state:'unknown';
-   const meter=el('span','energy-cell');meter.append(el('span','energy-fill'));meter.style.setProperty('--energy',String(energy?.level??(state==='empty'?0:100)));
-   const summary=el('div');
-   summary.append(el('h4','',energy?ENERGY_LABEL[state]+(energy.level!==null?` · ${energy.level}%`:''):'Checking energy…'),el('p','',energy?'Charging from '+energySourceLabel(energy)+'.':''));
-   const recharge=rechargeText(energy);if(recharge)summary.append(el('p','companion-info-note',recharge));
-   if(energy?.level===null&&energy.source!=='none')summary.append(el('p','companion-info-note','Your provider keeps the balance, so the world shows charged until it says otherwise.'));
-   now.append(meter,summary);section.append(now);
-   // Worldlet provides no energy of its own (owner decision 2026-10-05): the world runs on the person's Agent, and
-   // Worldlet sets nothing up below it (owner decision 2026-10-09). Choosing the Agent and its provider, the
-   // connection's status and its fixes live in Settings › Model; Energy only points there.
-   if(energy?.source==='none')summary.append(el('p','companion-info-note companion-energy-needed','Your world runs on your AI Agent. Choose one and how it signs in from Settings.'));
-   const manage=button('Manage model connection',()=>void open('Settings','model'));manage.classList.add('companion-energy-manage');
-   section.append(el('p','companion-info-note',localAgents.length?'Use an Agent on this computer, check the connection or fix a problem in Settings.':'Check the connection or fix a problem in Settings.'),manage);
-   if(energy?.name)section.append(el('p','companion-info-note','Details: '+energy.name));
-   return section;
-  }
   function abilitiesSection(){
    const section=el('div','companion-abilities');section.setAttribute('aria-label','What '+(profile.name||getName()||'Fox')+' can do');
    section.append(el('h3','','What '+(profile.name||getName()||'Fox')+' can do'),el('p','companion-energy-intro','Just ask, in your own words. A few things people say:'));
@@ -210,19 +187,9 @@ export function mountCompanionInfo({root,pet,call,getName}){
    return section;
   }
   page.append(side,abilitiesSection());
-  main.append(page,energySection(),history.element,phone.element,settings.element,feedback.element);
-  const notice=el('p','companion-info-note',error);notice.setAttribute('role','status');notice.hidden=!error;body.append(nav,main,notice);panel.replaceChildren(body,close);applyTab();
+  profileHost.replaceChildren(page);
  }
- function applyTab(){
-  for(const section of panel.querySelectorAll('.companion-info-main>[data-section]')){section.hidden=section.dataset.section!==tab;section.id='companion-page-'+section.dataset.section;section.setAttribute('role','tabpanel');section.setAttribute('aria-labelledby','companion-tab-'+section.dataset.section);section.tabIndex=0;}
-  for(const b of panel.querySelectorAll('[role=tab]')){const selected=b.dataset.sectionLink===tab;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;if(selected)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}
-  panel.dataset.section=tab;
- }
- function selectTab(next,focus=false){if(next===tab)return;tab=next;if(next!=='Feedback')void feedback.cancelVoice();if(next==='Settings')settings.open();applyTab();if(focus)panel.querySelector('[aria-selected=true]')?.focus();}
- panel.addEventListener('keydown',e=>{if(!(e.target as Element).closest('[role=tab]'))return;const index=tabs.indexOf(tab);let next;if(e.key==='ArrowRight')next=tabs[(index+1)%tabs.length];if(e.key==='ArrowLeft')next=tabs[(index+tabs.length-1)%tabs.length];if(e.key==='Home')next=tabs[0];if(e.key==='End')next=tabs.at(-1);if(next){e.preventDefault();selectTab(next,true);}});
- async function open(section='Profile',setting?:string){if(root.dataset.onboardingLocked==='true'&&root.dataset.onboardingAddApplet!=='true')return;if(section==='Journal'||section==='Artifacts'){await openJournal();return;}journal.close();delete root.dataset.onboardingFinish;tab=tabs.includes(section)?section:['iPhone','Phone'].includes(section)?'Mobile':'Profile';history.start();void phone.refresh();void loadAgents();void loadSkills();if(tab==='Settings')settings.open(setting);if(panel.open){render();return;}const ticket=++generation;render();panel.show();anchorKey='';cancelAnimationFrame(anchorFrame);anchorPanel();root.classList.add('companion-info-open');badge.setAttribute('aria-expanded','true');root.dispatchEvent(new Event('worldlet:companion-info-opened'));const results=await Promise.allSettled([call('modelStatus'),call('snapshot'),call('companionProfile').then(readCompanionProfile),readEnergy(call)]);if(!panel.open||ticket!==generation)return;model=results[0].status==='fulfilled'?results[0].value:null;snapshot=results[1].status==='fulfilled'?results[1].value:null;profile=results[2].status==='fulfilled'?results[2].value:profile;energy=results[3].status==='fulfilled'?results[3].value:energy;if(results.some(r=>r.status==='rejected'))error='Some status information is unavailable. Try reopening the panel.';render();}
- // A new model source charges the world: read the energy again.
- for(const name of ['worldlet:model-changed','worldlet:model-refresh'])window.addEventListener(name,()=>{if(!panel.open)return;void readEnergy(call).then(value=>{energy=value;if(panel.open&&!busy)render();}).catch(()=>{});});
+ async function open(section='Profile',setting?:string){if(root.dataset.onboardingLocked==='true'&&root.dataset.onboardingAddApplet!=='true')return;if(section==='Journal'||section==='Artifacts'){await openJournal();return;}journal.close();delete root.dataset.onboardingFinish;const id=section==='Settings'?setting||settings.selected||'model':SECTION_ID[section]||'fox';history.start();void phone.refresh();void loadSkills();settings.open(id);if(panel.open){render();return;}const ticket=++generation;render();panel.show();anchorKey='';cancelAnimationFrame(anchorFrame);anchorPanel();root.classList.add('companion-info-open');badge.setAttribute('aria-expanded','true');root.dispatchEvent(new Event('worldlet:companion-info-opened'));const results=await Promise.allSettled([call('modelStatus'),call('snapshot'),call('companionProfile').then(readCompanionProfile)]);if(!panel.open||ticket!==generation)return;model=results[0].status==='fulfilled'?results[0].value:null;snapshot=results[1].status==='fulfilled'?results[1].value:null;profile=results[2].status==='fulfilled'?results[2].value:profile;if(results.some(r=>r.status==='rejected'))error='Some status information is unavailable. Try reopening the panel.';render();}
  root.addEventListener('worldlet:onboarding-applet-added',()=>dismiss());
  window.addEventListener('worldlet:companion-info',e=>void open((e as CustomEvent).detail?.tab||'Profile',(e as CustomEvent).detail?.setting));
  // The World opens the book on a day: the morning brief and the day's summary (owner request 2026-10-08).

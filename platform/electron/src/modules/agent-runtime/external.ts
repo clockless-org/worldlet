@@ -237,7 +237,7 @@ export class UnavailableAgentAdapter extends PortableAdapter implements Adapter 
  * no built-in Hermes; someone without an Agent gets stock Hermes Agent at setup). Fox waits for one: every Agent call
  * says so, and the World asks for an Agent once (index.ts `foxNeedsAgent`). */
 export const NO_AGENT_ID='none';
-export const NO_AGENT='Fox needs an Agent. Choose one in Settings › Model.';
+export const NO_AGENT='Fox needs an Agent. Choose one in Settings › Your Agent.';
 export class NoAgentAdapter extends PortableAdapter implements Adapter {
  readonly id=NO_AGENT_ID;
  readonly available=false;

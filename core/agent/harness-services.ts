@@ -81,7 +81,7 @@ export function harnessLocation(harness:string,status:{location?:unknown}={}):Ha
  * declares no `calls`): why, in that Harness's terms where its row knows them, then how to get one. */
 const NO_CALLS:Readonly<Record<string,string>>=Object.freeze({hermes:'Hermes Agent’s optional telephony skill can place a call when you ask it in a chat, but it keeps no record of the call, so the World can neither start one through it nor follow it.'});
 export function harnessNoCallsNote(harness:string):string {
- return (NO_CALLS[harness]??'Your Agent has no phone calling Worldlet can use.')+' To have your Agent call from the World, choose OpenClaw with its Voice Call plugin as Fox’s Agent in Settings › Model (`openclaw plugins install @openclaw/voice-call`, then a Twilio, Telnyx or Plivo number in its settings).';
+ return (NO_CALLS[harness]??'Your Agent has no phone calling Worldlet can use.')+' To have your Agent call from the World, choose OpenClaw with its Voice Call plugin as Fox’s Agent in Settings › Your Agent (`openclaw plugins install @openclaw/voice-call`, then a Twilio, Telnyx or Plivo number in its settings).';
 }
 /** How `harness` provides `service`, or null when it does not. */
 export function harnessService(harness:string,service:HarnessServiceName):HarnessServiceMode|null {

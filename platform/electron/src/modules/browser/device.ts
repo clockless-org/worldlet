@@ -1030,7 +1030,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    const view=this.browser,site=loginSite(view?.url),username=typeof args.username==='string'?args.username:'';
    if(!view||view.hidden||!site)throw new WorldletError('Open the sign-in page first.');
    const password=this.logins.password(site,username);
-   if(password===null)throw new WorldletError('This password can no longer be opened on this computer. Delete it in Settings › Browser.');
+   if(password===null)throw new WorldletError('This password can no longer be opened on this computer. Delete it in Settings › General.');
    const result=await view.evaluate('return globalThis.__worldletLoginFill?.(username,password)??{filled:false}',{username,password},{userGesture:true,timeoutSeconds:3}).catch(()=>null) as Row|null;
    if(result?.filled!==true)throw new WorldletError('Could not find the sign-in form on this page.');
    this.logins.used(site,username);

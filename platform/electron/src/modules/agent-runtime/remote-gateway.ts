@@ -9,7 +9,7 @@ import type {Adapter,AgentEventHandler,AgentRuntime,Row,RuntimeContext} from './
 
 // Fox on an OpenClaw Gateway on another computer, reached directly (core/phone/README.md#an-agent-gateway-on-another-computer;
 // Harness `remote-openclaw`, location `native`): no Worldlet runs there. The person types its address and token in
-// Settings › Model; the token is kept in the vault (safeStorage: the OS keychain's key), never in a settings file, a
+// Settings › Your Agent; the token is kept in the vault (safeStorage: the OS keychain's key), never in a settings file, a
 // log or what the page reads. Fox's conversation turns go to its `/v1/responses` in a session per Fox thread, the same
 // GatewayConversation a local OpenClaw uses, with World tools as client function tools that run in this World; its
 // exec approvals come over its WebSocket while a turn runs, once its device is approved there. Worldlet keeps the

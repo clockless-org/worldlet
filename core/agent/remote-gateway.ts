@@ -1,5 +1,5 @@
 // Fox on a remote OpenClaw Gateway, reached directly (core/phone/README.md#an-agent-gateway-on-another-computer):
-// the person types its address and token in Settings › Model, and Fox's conversation goes to that Gateway's
+// the person types its address and token in Settings › Your Agent, and Fox's conversation goes to that Gateway's
 // `/v1/responses` (the same path a local OpenClaw uses) with no Worldlet running there. Shared rules only: which
 // addresses are accepted, the WebSocket address its approvals use, and the token's shape. The host keeps the token in
 // its vault (safeStorage) and runs the turns (platform/electron/src/modules/agent-runtime/remote-gateway.ts).

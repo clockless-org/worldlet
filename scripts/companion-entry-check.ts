@@ -33,11 +33,11 @@ await withBrowser(fileAccess,async browser=>{
  await avatar.click();assert(await typing(),'Clicking Fox starts typing');assert(!await panel.isVisible(),'Clicking Fox does not open the panel');await page.keyboard.press('Escape');assert(!await typing());
  {const s=await page.locator(SETTINGS_BUTTON).boundingBox(),f=await avatar.boundingBox();assert(s.x+s.width<=f.x+f.width/2&&s.width>44,'the settings button sits on Fox\'s left, with its name');
   assert.equal((await page.locator(SETTINGS_BUTTON).innerText()).trim(),'Settings','Settings shows its name beside its icon');}
- // Settings opens Settings directly, on its Settings tab, with no menu between (owner Order 2026-10-07). The
+ // Settings opens Settings directly, on Your Agent, with no menu between (owner Order 2026-10-07). The
  // tutorial's switch lives in the World's top-right corner instead.
  await page.locator(SETTINGS_BUTTON).click();await panel.waitFor();
  assert.equal(await page.getByRole('menuitem').count(),0,'no menu between Settings and Settings');
- assert.equal(await panel.getByRole('tab',{name:'Settings',exact:true}).getAttribute('aria-selected'),'true','Settings lands on the Settings tab');
+ assert.equal(await panel.locator('.companion-settings-list [data-setting=model]').getAttribute('aria-current'),'true','Settings lands on Your Agent');
  assert.equal(await page.locator(SETTINGS_BUTTON).getAttribute('aria-haspopup'),null,'Settings opens no menu');
  await page.getByRole('button',{name:'Close companion panel'}).click();await panel.waitFor({state:'hidden'});
  // The Journal lives in the World's top-left corner, today's date at the head of the Attention Center; Fox keeps
@@ -49,9 +49,9 @@ await withBrowser(fileAccess,async browser=>{
   const book=page.locator('#journalBook');await journal.click();await book.waitFor();assert(!await panel.isVisible(),'it opens the Journal, a book of its own');
   await page.getByRole('button',{name:'Close journal'}).click();await book.waitFor({state:'hidden'});}
  {const corner=page.locator('.world-tutorial-corner .world-tutorial');assert.equal(await corner.getAttribute('aria-checked'),'false','the Tutorial switch is in the World\'s corner, off');}
- await openCompanionPanel(page,'Settings');await panel.waitFor();assert(!await typing());await panel.locator('[data-setting=troubleshoot]').click();await page.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();assert.equal(await page.locator('.world-recovery-toggle').count(),0);
+ await openCompanionPanel(page,'Settings');await panel.waitFor();assert(!await typing());await panel.locator('[data-setting=help]').click();await page.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();assert.equal(await page.locator('.world-recovery-toggle').count(),0);
  await page.screenshot({path:'/tmp/companion-settings.png'});
- await page.getByRole('tab',{name:'Profile',exact:true}).click();await page.getByRole('tab',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Restart Fox',exact:true}).count(),1,'Settings reopens on the setting last chosen');
+ await page.getByRole('button',{name:'Close companion panel'}).click();await page.locator(SETTINGS_BUTTON).click();await page.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Restart Fox',exact:true}).count(),1,'Settings reopens on the setting last chosen');
  await page.getByRole('button',{name:'Close companion panel'}).click();
  await type.click();assert(await typing());await page.locator('#notionInput').fill('Keep this draft');await page.keyboard.press('Escape');assert(!await typing());await type.click();assert.equal(await page.locator('#notionInput').inputValue(),'Keep this draft');
  // A long draft grows the field upward (six lines at most), Shift-Enter starts a line, and a stray click outside keeps the draft open.

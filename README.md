@@ -129,7 +129,7 @@ Worldlet on your own Harness is a desktop environment, like GNOME; with the Herm
 
 ## Privacy
 
-There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › Privacy; see [analytics](core/diagnostics/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
+There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › Privacy and data; see [analytics](core/diagnostics/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
 
 ## Build from source
 

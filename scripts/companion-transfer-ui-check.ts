@@ -10,31 +10,29 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  assert(await page.locator('.companion-context .companion-name').evaluate(e=>e.scrollWidth<=e.clientWidth+1&&getComputedStyle(e).overflow!=='hidden'),'Full worktree name remains readable');
  await openCompanionPanel(page);
  const panel=page.locator('#companionInfo');
- await panel.locator('.companion-info-nav').waitFor();
+ const list=panel.locator('.companion-settings-list'),detail=panel.locator('.companion-settings-detail');await list.waitFor();
  await panel.getByText('Curious, thoughtful and playful.',{exact:true}).waitFor();
  assert(await panel.getByRole('img',{name:'Fox portrait'}).isVisible());
  assert.equal(await panel.locator('.companion-profile-facts dd').first().textContent(),'Sep 1, 2026');
- assert.equal(await panel.getByRole('tabpanel',{name:'Profile',exact:true}).isVisible(),true);
+ assert.equal(await panel.getAttribute('data-section'),'Profile');
  await page.screenshot({path:'/tmp/companion-profile-tab.png'});
- // Tabs never scroll or page by wheel (owner feedback 2026-10-03): the wheel stays on the page.
- const wheel=()=>panel.locator('.companion-info-main').dispatchEvent('wheel',{deltaY:120,bubbles:true,cancelable:true});
+ // One list of sections on the left, the chosen one's details on the right, no tabs (owner request 2026-10-10).
+ assert.equal(await panel.getByRole('tab').count(),0,'no tabs');
+ assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Fox','Your Agent','Approvals','Accounts','Phone','History','Sounds and voice','Privacy and data','General','Help','Feedback'],'Fox first, Feedback last, no Energy, no Journal');
+ const wheel=()=>detail.dispatchEvent('wheel',{deltaY:120,bubbles:true,cancelable:true});
  await wheel();await page.waitForTimeout(260);await wheel();assert.equal(await panel.getAttribute('data-section'),'Profile','the wheel never turns the page');
- assert.deepEqual(await panel.getByRole('tab').allTextContents(),['Profile','Energy','History','Mobile','Settings','Feedback'],'no Applets tab; Abilities live in Profile; the Journal is its own book, not a tab; Feedback last');
- assert(await panel.locator('.companion-info-nav').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'the tab bar does not scroll');
- await panel.getByRole('tab',{name:'Profile',exact:true}).click();await page.keyboard.press('End');assert.equal(await panel.getAttribute('data-section'),'Feedback');await page.keyboard.press('Home');assert.equal(await panel.getAttribute('data-section'),'Profile');
  assert.equal(await panel.getByRole('button',{name:/^(Import|Export)$/}).count(),0);
- const nav=panel.locator('.companion-info-nav'),main=panel.locator('.companion-info-main');
- const initial=await nav.boundingBox(),box=await panel.boundingBox();assert(box.width>=1000&&box.height>=620,'a larger panel: '+JSON.stringify(box));
+ const initial=await list.boundingBox(),box=await panel.boundingBox();assert(box.width>=1000&&box.height>=620,'a larger panel: '+JSON.stringify(box));
  const viewport=page.viewportSize();assert(Math.abs(box.x+box.width/2-viewport.width/2)<2&&Math.abs(box.y+box.height/2-viewport.height/2)<2,'Panel is independent and centered');
  assert.equal(await panel.evaluate(e=>getComputedStyle(e,'::after').display),'none','Panel has no Fox connector');
- // Every page fits the panel without scrolling it.
- for(const name of ['Profile','Energy','History','Mobile','Settings','Feedback']){
-  await nav.getByRole('tab',{name,exact:true}).click();
-  assert(await main.evaluate(e=>e.scrollHeight<=e.clientHeight+1),name+' fits without scrolling');
+ // Every section opens beside the list, which stays where it is.
+ for(const id of ['fox','model','approvals','integrations','phone','history','sounds','privacy','general','help','feedback']){
+  await list.locator(`[data-setting="${id}"]`).click();await list.locator(`[data-setting="${id}"][aria-current=true]`).waitFor();
+  const d=await detail.boundingBox(),l=await list.boundingBox();assert(d&&l&&l.x+l.width<=d.x,id+' opens right of the list');
+  assert(await panel.evaluate(e=>e.scrollHeight<=e.clientHeight+1),id+' fits the panel');
  }
- assert.equal(await panel.locator('[data-section="Profile"]').isVisible(),false,'Profile is not a permanent sidebar');
- const after=await nav.boundingBox();assert.equal(after.y,initial.y,'Navigation stays fixed');
- await nav.getByRole('tab',{name:'Profile',exact:true}).click();
+ const after=await list.boundingBox();assert.equal(after.y,initial.y,'Navigation stays fixed');
+ await list.locator('[data-setting=fox]').click();
  // Profile on the left, what Fox can do on the right, scrolling on its own.
  const profileBox=await panel.locator('.companion-profile-page .companion-info-profile').boundingBox(),abilities=panel.locator('.companion-profile-page .companion-abilities'),abilitiesBox=await abilities.boundingBox();
  assert(profileBox&&abilitiesBox&&profileBox.x+profileBox.width<=abilitiesBox.x,'abilities sit right of the profile');
@@ -45,12 +43,12 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
   await page.setViewportSize(viewport);
   await page.waitForFunction(()=>{const p=document.querySelector('#companionInfo').getBoundingClientRect();return p.right<=innerWidth&&p.bottom<=innerHeight;});
   const box=await panel.boundingBox();assert(box.x>=0&&box.y>=0&&box.x+box.width<=viewport.width&&box.y+box.height<=viewport.height);
-  assert(await main.evaluate(e=>e.clientHeight>70&&e.scrollWidth<=e.clientWidth+1),'Content fits and remains scrollable');
-  await nav.getByRole('tab',{name:'Settings',exact:true}).click();
-  assert(await nav.isVisible());assert(await nav.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'tabs wrap rather than scroll');
+  assert(await detail.evaluate(e=>e.clientHeight>70&&e.scrollWidth<=e.clientWidth+1),'Content fits and remains scrollable');
+  await list.locator('[data-setting=model]').click();
+  assert(await list.isVisible());assert(await list.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'the list wraps rather than scrolls sideways');
  }
  await page.setViewportSize({width:375,height:812});await page.screenshot({path:'/tmp/companion-panel-small.png'});
  await page.keyboard.press('Escape');assert.equal(await panel.isVisible(),false);
  assert.equal(await page.evaluate(()=>calls.some(c=>c.action==='companionArchive')),false);
- console.log('PASS companion panel: larger layout, seven tabs with Feedback last, pages that fit, no transfer controls, fixed section navigation, responsive scroll and Escape');
+ console.log('PASS companion panel: larger layout, one list of sections with Feedback last and no tabs, pages that fit, no transfer controls, fixed section list, responsive scroll and Escape');
 });

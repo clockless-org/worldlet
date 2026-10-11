@@ -24,7 +24,7 @@ const clip=(value:unknown,count:number)=>characters(typeof value==='string'?valu
  * energy: a ChatGPT plan or their own API key (Worldlet provides no model of its own, owner decision 2026-10-05). */
 export function gameFactoryEnergy(source:EnergySourceName):{ok:true}|{ok:false;error:string} {
  if(source==='chatgpt'||source==='own')return {ok:true};
- return {ok:false,error:'Making a game uses a lot of energy, so it needs the person\'s own: their ChatGPT sign-in or their own API key (Anthropic or OpenAI) on the Energy page. Tell them in one or two short sentences and offer to open the Energy page (open_worldlet_controls with screen "model"). Playing games that are already made needs no energy.'};
+ return {ok:false,error:'Making a game uses a lot of energy, so it needs the person\'s own: their ChatGPT sign-in or their own API key (Anthropic or OpenAI) in Settings › Your Agent. Tell them in one or two short sentences and offer to open the Energy page (open_worldlet_controls with screen "model"). Playing games that are already made needs no energy.'};
 }
 
 /** A new game's ID: short, file-name safe and unique enough within one World. */

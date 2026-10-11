@@ -10,13 +10,13 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.locator('#notionInput').evaluate(e=>e===document.activeElement),true,'Clicking the message bar focuses the conversation');
  await page.evaluate(()=>{const r=document.querySelector<HTMLElement>('#notionWorld')!;r.dataset.depth='overview';r.dataset.page='';});
  await page.keyboard.press('Escape');await openCompanionPanel(page);
- const panel=page.locator('#companionInfo'),nav=panel.locator('.companion-info-nav');await nav.getByRole('tab',{name:'Feedback',exact:true}).click();
+ const panel=page.locator('#companionInfo'),list=panel.locator('.companion-settings-list'),feedbackItem=list.locator('[data-setting=feedback]');await feedbackItem.click();
  const draft=panel.getByLabel('Your feedback',{exact:true}),send=panel.getByRole('button',{name:'Send',exact:true}),mic=panel.getByRole('button',{name:'Hold to talk',exact:true});
  // Very simple (owner feedback 2026-10-03): the box to type in and the microphone are right there.
  assert.equal(await draft.isVisible(),true,'The box is ready to type in');assert.equal(await mic.isVisible(),true);assert.equal(await send.isDisabled(),true,'Nothing to send yet');
  assert.equal(await panel.locator('input[type=email]').count(),0);await draft.fill('The fixture world needs a softer sun.');
  await send.click();await panel.getByText(/Fixture offline/).waitFor();assert.equal(await draft.inputValue(),'The fixture world needs a softer sun.');
- await page.keyboard.press('Escape');await openCompanionPanel(page);await nav.getByRole('tab',{name:'Feedback',exact:true}).click();assert.equal(await draft.inputValue(),'The fixture world needs a softer sun.');
+ await page.keyboard.press('Escape');await openCompanionPanel(page);await feedbackItem.click();assert.equal(await draft.inputValue(),'The fixture world needs a softer sun.');
  await page.evaluate(()=>{(window as any).failFeedback=false;});await send.click();await panel.getByText(/Received by Worldlet/).waitFor();assert.equal(await draft.inputValue(),'');
  const calls=await page.evaluate(()=>window.calls.filter(c=>c.action==='feedback'));assert.equal(calls.length,2);assert.equal(calls[0].id,calls[1].id);assert.equal(calls[0].confirmed,true);
  const fox=page.locator('.companion-avatar');
@@ -35,9 +35,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await draft.inputValue(),'A dictated suggestion.\nAnd more.');assert.equal(await page.evaluate(()=>window.calls.filter(c=>c.action==='feedback').length),2,'The microphone never sends');
  assert.equal(await page.evaluate(()=>window.calls.some(c=>['agentChat','hermesChat','chat'].includes(c.action))),false,'Feedback never becomes a normal agent request');
  await hold();await page.keyboard.press('Escape');await page.mouse.up();assert(await page.evaluate(()=>window.calls.some(c=>c.action==='speechCancel')));
- await openCompanionPanel(page);assert.equal(await nav.getByRole('tab').last().textContent(),'Feedback','Feedback is the last tab');
- await nav.getByRole('tab',{name:'Feedback',exact:true}).click();
+ await openCompanionPanel(page);assert.equal(await list.locator('[data-setting]').last().getAttribute('data-setting'),'feedback','Feedback is the last section');
+ await feedbackItem.click();
  await page.screenshot({path:'/tmp/worldlet-feedback-desktop.png'});
- await page.setViewportSize({width:375,height:812});await nav.getByRole('tab',{name:'Feedback',exact:true}).click();assert(await panel.locator('.companion-info-main').evaluate(e=>e.scrollWidth<=e.clientWidth+1));await page.screenshot({path:'/tmp/worldlet-feedback-small.png'});
- assert.deepEqual(errors,[]);console.log('PASS feedback UI: the box and microphone up front, last tab, fixed navigation, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
+ await page.setViewportSize({width:375,height:812});await feedbackItem.click();assert(await panel.locator('.companion-settings-detail').evaluate(e=>e.scrollWidth<=e.clientWidth+1));await page.screenshot({path:'/tmp/worldlet-feedback-small.png'});
+ assert.deepEqual(errors,[]);console.log('PASS feedback UI: the box and microphone up front, last section, fixed section list, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
 });

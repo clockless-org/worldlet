@@ -37,7 +37,7 @@ Before 2026-10-05 each game was a folder, `games/<id>/` (`game.html`, `game.json
 
 ## Energy
 
-Making a game takes many model tokens, so it runs on the person's own [energy](../../README.md): a ChatGPT plan (Codex sign-in) or their own API key on the Energy page, Anthropic or OpenAI (`gameFactoryEnergy`). With neither (Worldlet provides no energy of its own, owner decision 2026-10-05), `make_game` returns the reason and Fox offers to open the Energy page. A claude.ai subscription sign-in cannot be used by other apps, so Claude means an Anthropic API key. Playing a made game uses no energy. The Agent must support Applet tasks (the built-in Hermes Harness does).
+Making a game takes many model tokens, so it runs on the person's own [energy](../../README.md): a ChatGPT plan (Codex sign-in) or their own API key in Settings › Your Agent, Anthropic or OpenAI (`gameFactoryEnergy`). With neither (Worldlet provides no energy of its own, owner decision 2026-10-05), `make_game` returns the reason and Fox offers to open the Energy page. A claude.ai subscription sign-in cannot be used by other apps, so Claude means an Anthropic API key. Playing a made game uses no energy. The Agent must support Applet tasks (the built-in Hermes Harness does).
 
 ## Checks
 

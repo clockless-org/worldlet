@@ -5,7 +5,7 @@ import {WorldletError} from '../../files.ts';
 import {isConnectionId,readConnectionAdd} from '../../../../../core/agent/index.ts';
 import type {HarnessConnectionChange} from '../../../../../contracts/harness-services.ts';
 
-// Settings › Integrations, the Agent's part (owner approval 2026-10-08: manage the Agent's MCP connections through its
+// Settings › Accounts, the Agent's part (owner approval 2026-10-08: manage the Agent's MCP connections through its
 // own command line): every MCP server and chat account in each Agent on this computer, with what each was last used
 // for, and a server added or removed by that Agent's own command (agent-runtime/harness-connections.ts). A change is
 // two steps: `preview` returns the exact command and a one-time confirmation; only `change` with that confirmation

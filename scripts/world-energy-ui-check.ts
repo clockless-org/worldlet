@@ -1,4 +1,4 @@
-// The world's energy in the page: no battery in the World (owner 2026-10-04), Fox's low-energy line and the Energy page.
+// The world's energy in the page: no battery in the World (owner 2026-10-04), Fox's low-energy line opening Settings › Your Agent.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
@@ -33,21 +33,11 @@ try{
  assert.equal(await page.locator('.world-energy,.world-environment .energy-cell').count(),0,'no battery in the World\'s top-right corner');
  await page.screenshot({path:'/tmp/world-energy-low.png'});
  await page.getByRole('button',{name:'Charge',exact:true}).click();
- const energy=page.locator('#companionInfo [data-section=Energy]');await energy.waitFor();
- const openEnergy=async()=>{if(!await page.locator('#companionInfo').isVisible())await openCompanionPanel(page);await page.getByRole('tab',{name:'Energy',exact:true}).click();await energy.waitFor();};
- assert.equal(await page.getByRole('tab',{name:'Energy',exact:true}).getAttribute('aria-selected'),'true');
- await energy.getByText('Low energy · 8%').waitFor();await energy.getByText('Charging from your own account or API key.').waitFor();
- // Fox's model is the Agent's (owner decision 2026-10-09): Energy has no ways to charge of its own, only Settings › Model.
- assert.doesNotMatch(await energy.textContent()||'',/Charge with ChatGPT|Bring your own energy|Ways to charge/);
- assert.equal(await energy.getByRole('button',{name:'Connect',exact:true}).count(),0,'no Connect cards');
- // Worldlet provides no energy of its own (owner decision 2026-10-05): no free daily charge, no energy packs.
- assert.doesNotMatch(await energy.textContent()||'',/Free daily charge|Energy packs|Worldlet charges/);
- await page.screenshot({path:'/tmp/world-energy-page.png'});
- // Agents on this computer and the connection's fixes live in Settings › Model (owner request 2026-10-06).
- assert.equal(await energy.locator('[data-agent]').count(),0,'Energy no longer lists the Agents');
- await energy.getByRole('button',{name:'Manage model connection',exact:true}).click();
+ // Energy is no page of its own any more (owner request 2026-10-10): Charge opens Settings › Your Agent, where the
+ // connection, its fixes and the Agents on this computer are.
  const settingsPage=page.locator('#companionInfo [data-section=Settings]');await settingsPage.waitFor();
- assert.equal(await settingsPage.locator('[data-setting=model]').getAttribute('aria-current'),'true','Energy opens Settings on Model');
+ assert.equal(await settingsPage.locator('[data-setting=model]').getAttribute('aria-current'),'true','Charge opens Settings on Your Agent');
+ assert.equal(await page.locator('#companionInfo [data-section=Energy]').count(),0,'no Energy page');
  const local=settingsPage.locator('.companion-settings-detail');
  await local.getByText('Fox’s model is connected',{exact:true}).waitFor();
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
@@ -62,6 +52,8 @@ try{
  await local.locator('[data-agent=codex]').getByRole('button',{name:'Use',exact:true}).waitFor();
  // An Agent on another computer (core/phone/README.md#another-computers-agent): its code pairs, Settings says where Fox
  // runs, and Stop using ends the pairing.
+ // Both are folded under Other ways to connect, few people need them (owner request 2026-10-10).
+ await local.getByText('Other ways to connect',{exact:true}).click();
  const remote=local.locator('[data-agent=remote]');
  await remote.getByLabel('Code from Worldlet on your other computer').fill('worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac+mini');
  await remote.getByRole('button',{name:'Pair',exact:true}).click();
@@ -99,23 +91,11 @@ try{
  await local.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();
  await page.screenshot({path:'/tmp/world-energy-settings-problem.png'});
  await page.evaluate(()=>{(window as any).lastReply=null;});
- await page.keyboard.press('Escape');
- // A ChatGPT plan through the Codex sign-in: the tightest window decides the charge.
- await page.evaluate(()=>{const w=window as any;w.energy={source:'chatgpt',ready:true,name:'Codex on this computer',provider:'openai-codex',level:null,resetsAt:null,localCodex:true};window.dispatchEvent(new Event('worldlet:model-changed'));});
- await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='codexSession'));
- await openEnergy();await energy.getByText('Half charged · 45%').waitFor();await energy.getByText('Charging from your ChatGPT plan.').waitFor();await page.keyboard.press('Escape');
- // An API key: only the provider knows the balance, so the world shows charged.
- await page.evaluate(()=>{const w=window as any;w.energy={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic',level:null,resetsAt:null,localCodex:false};window.dispatchEvent(new Event('worldlet:model-changed'));});
- await openEnergy();await energy.getByText('Fully charged',{exact:true}).waitFor();
- // Nothing on this computer charges the world: the page says what does, with no Worldlet charge to fall back on.
+ // Nothing on this computer charges the world: Fox says so when the panel closes.
  await page.evaluate(()=>{const w=window as any;w.energy={source:'none',ready:false,name:'',provider:'openai-codex',level:null,resetsAt:null,localCodex:true};window.dispatchEvent(new Event('worldlet:model-changed'));});
- await openEnergy();await energy.getByText('Out of energy',{exact:true}).waitFor();
- await energy.getByText('Your world runs on your AI Agent. Choose one and how it signs in from Settings.').waitFor();
- assert.equal(await energy.getByRole('button',{name:/Turn (?:on|off)/}).count(),0,'no free-charge switch');
- await page.screenshot({path:'/tmp/world-energy-own.png'});
  // No model connected (owner request 2026-10-05): Fox says so once and points to Settings, Model, where one is chosen.
  await page.keyboard.press('Escape');
- await page.getByText('I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Model.').waitFor();
+ await page.getByText('I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Your Agent.').waitFor();
  await page.getByRole('button',{name:'Choose a model',exact:true}).click();
  const settings=page.locator('#companionInfo [data-section=Settings]');await settings.waitFor();
  assert.equal(await settings.locator('[data-setting=model]').getAttribute('aria-current'),'true','Settings opens on Model');
@@ -149,5 +129,5 @@ try{
  await model.locator('[data-provider=own]').getByRole('button',{name:'Use',exact:true}).click();
  await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
  assert.deepEqual(errors,[]);
- console.log('PASS world energy: no battery in the World, one low-energy line, Energy page pointing to Settings, Model; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model');
+ console.log('PASS world energy: no battery in the World, one low-energy line opening Settings › Your Agent; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model');
 }finally{await browser.close();}

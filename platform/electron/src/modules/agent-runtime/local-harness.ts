@@ -580,7 +580,7 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   if(!running&&!this.running.size&&this.restartWhenIdle){this.restartWhenIdle=false;this.conversation?.shutdown();}
  },this.spares,this.resident(),this.turnApprovals,this.route);}
  makeLane():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{if(running)this.lanes.add(runtime);else this.lanes.delete(runtime);},null,null,null,this.route);}
- /** The provider chosen for this Agent in Settings › Model (model-providers.ts): its chat-tier model, read per turn. */
+ /** The provider chosen for this Agent in Settings › Your Agent (model-providers.ts): its chat-tier model, read per turn. */
  private readonly route=()=>chosenModel(readAgentSetting(this.context.root,PROVIDER_SETTING),this.install.id);
  /** Applet tasks run beside the conversation on the background Agent. */
  get makeTask(){
@@ -588,7 +588,7 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   if(background===this)return ()=>this.makeLane();
   return background?.makeTask?()=>background.makeTask!():undefined;
  }
- /** Its models are its own: Worldlet chooses or signs in to none (Settings › Model, a quick browser step). */
+ /** Its models are its own: Worldlet chooses or signs in to none (Settings › Your Agent, a quick browser step). */
  makeModelAccess():AgentRuntime {return new UnsupportedRuntime(`Fox uses ${this.install.title} on this computer. Manage its models and accounts in ${this.install.title}.`);}
  makeSourceAccess():AgentRuntime {return new UnsupportedRuntime(`${this.install.title} does not read connected accounts for Worldlet.`);}
  /** Its scheduled jobs run on its own scheduler (`schedule`); Worldlet runs none of its own for it. */

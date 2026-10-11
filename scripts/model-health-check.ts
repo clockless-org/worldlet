@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {modelHealthView,type ModelHealth} from '../ui/companion/model-health.ts';
 
-// Settings › Model names the path, the problem in plain words and the fixes that fit (ui/companion/model-health.ts).
+// Settings › Your Agent names the path, the problem in plain words and the fixes that fit (ui/companion/model-health.ts).
 const at=Date.parse('2026-10-06T22:32:46Z');
 const codex:ModelHealth={agent:'hermes',available:true,lastReply:null,model:{name:'gpt-6-astra',id:'gpt-6-astra',provider:'openai-codex',source:'local-codex',ready:true,configured:true}};
 let view=modelHealthView(codex);

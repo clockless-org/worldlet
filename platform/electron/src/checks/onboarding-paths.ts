@@ -173,7 +173,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   const confirm=dialog.showMessageBox;
   dialog.showMessageBox=(async(...args:any[])=>{const options=args.find(arg=>arg&&typeof arg==='object'&&'message' in arg);if(options?.message!=='Reset Worldlet?')return (confirm as any)(...args);mark('confirmed Reset Worldlet?');return {response:0,checkboxChecked:false};}) as typeof dialog.showMessageBox;
   try{
-   const clicked=await js("(()=>{const settings=document.getElementById('notionWorld')?.companionSettings;settings?.querySelector('[data-setting=reset]')?.click();const reset=settings?.querySelector('[data-action=reset]');if(!reset)return false;reset.click();return true;})()");
+   const clicked=await js("(()=>{const settings=document.getElementById('notionWorld')?.companionSettings;settings?.querySelector('[data-setting=help]')?.click();const reset=settings?.querySelector('[data-action=reset]');if(!reset)return false;reset.click();return true;})()");
    if(clicked!==true)throw Error('Settings has no Reset button');
    await wait('Reset Fox returned to the setup page',signInPage,120);
   }finally{dialog.showMessageBox=confirm;}

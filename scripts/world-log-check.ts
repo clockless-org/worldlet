@@ -136,7 +136,7 @@ try{
  const recent=page.locator('#companionInfo .companion-world-log');
  await recent.getByText('You visited news.example.org',{exact:true}).waitFor({timeout:10000});
  assert(await recent.locator('button').count()>=6,'every line in History goes somewhere');
- assert.equal(await page.locator('#companionInfo [data-section=History] .companion-history-records').count(),0,'raw records stay out of History (Settings › Troubleshoot)');
+ assert.equal(await page.locator('#companionInfo [data-section=History] .companion-history-records').count(),0,'raw records stay out of History (Settings › Help)');
  await page.screenshot({path:'output/world-log/history.png'}).catch(()=>{});
  await recent.locator('button').first().click();
  await page.locator('#companionInfo').waitFor({state:'hidden'});

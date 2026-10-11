@@ -37,7 +37,7 @@ export async function readEnergy(call):Promise<Energy> {
  return energy;
 }
 /** What Fox says when nothing on this computer can answer for it. */
-export const NO_MODEL_TEXT='I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Model.';
+export const NO_MODEL_TEXT='I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Your Agent.';
 export function rechargeText(energy:Energy|null):string {
  if(!energy?.resetsAt||energy.level===null||energy.level>=100)return '';
  const at=new Date(energy.resetsAt);
@@ -45,7 +45,7 @@ export function rechargeText(energy:Energy|null):string {
 }
 
 /** Watches the world's energy without showing it in the World (owner 2026-10-04: no battery in the
- * top-right corner); the Energy page in the companion panel shows it. `say` tells the person once when
+ * top-right corner; no Energy page since 2026-10-10, low energy opens Settings › Your Agent). `say` tells the person once when
  * energy runs low and returns false when it could not be said yet. `needed` tells them, once each time it
  * happens, that no model is connected on this computer (Worldlet provides none, owner decision 2026-10-05). */
 export function watchWorldEnergy({call,say,needed=()=>false}:{call:any;say:(text:string)=>boolean|void;needed?:(text:string)=>boolean|void}){

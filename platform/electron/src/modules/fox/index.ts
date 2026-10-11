@@ -563,7 +563,7 @@ export function installFox(host:Host){
  function proactiveCancel(){if(proactiveRun){proactiveRun.cancelled=true;proactiveRun.runtime.cancel();proactiveRun=null;}}
 
  // Chat --------------------------------------------------------------------------------------
- // How Fox's last reply ended, for Settings › Model (owner request 2026-10-06: see and fix every model
+ // How Fox's last reply ended, for Settings › Your Agent (owner request 2026-10-06: see and fix every model
  // connection problem there). In memory for this run; addresses are dropped, and Agent errors carry no keys.
  let lastReply:{ok:boolean,at:number,error?:string}|null=null;
  const replyEnded=(error?:unknown)=>{lastReply=error===undefined?{ok:true,at:Date.now()}:{ok:false,at:Date.now(),error:characterPrefix(String((error as Error)?.message||error||'').replace(/https?:\/\/\S+/g,'[address]'),500)};};
@@ -738,7 +738,7 @@ export function installFox(host:Host){
 
  host.register({
   modelStatus:()=>foxModelStatus(),
-  // Settings › Model: the Agent in use, the model it is set to, whether its sign-in or key is there, and how
+  // Settings › Your Agent: the Agent in use, the model it is set to, whether its sign-in or key is there, and how
   // the last reply ended. Reading it starts nothing new.
   modelHealth:async()=>{
    const runtime=agent();let model:Row={},error='';
@@ -906,7 +906,7 @@ export function installFox(host:Host){
    if(request.stop===true){voice?.stopSpeaking();return {ok:true};}
    if(typeof request.text==='string'&&characterCount(request.text)<=12000){
     if(!voice)throw new WorldletError('Spoken replies are unavailable in this build.');
-    // Talk with Fox reads its replies unless Settings › Voice turned that off; elsewhere Spoken replies decides.
+    // Talk with Fox reads its replies unless Settings › Sounds and voice turned that off; elsewhere Spoken replies decides.
     const enabled=request.talk===true?preferences.bool('worldlet.talkReplies',true):preferences.bool('worldlet.spokenReplies');
     return {ok:true,spoken:await voice.speak(request.text,enabled,preferences.string('worldlet.spokenVoice'),agent()?.voice?.()??null)};
    }
@@ -955,7 +955,7 @@ export function installFox(host:Host){
   agentWarm:async request=>({warm:await warmThread(typeof request.thread==='string'?request.thread:'fox-main')}),
   /** Settings › Approvals: every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
   harnessApprovalRules:request=>request.operation==='revoke'?approvalRules.revoke(request.harness,request.id):approvalRules.list(),
-  /** Settings › Integrations: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
+  /** Settings › Accounts: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessConnections:request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?agentConnections.change(request.confirm):agentConnections.list(),
   harnessApproval:async request=>{
