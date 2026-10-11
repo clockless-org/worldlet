@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../core/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
@@ -130,6 +130,10 @@ assert.deepEqual(read('openclaw',[JSON.stringify({ok:false,status:'error',error:
 assert.deepEqual(read('openclaw',[],1,'Error: Secret store entry "MINIMAX_API_KEY" was not found.').outcome,{error:keyLine},'also when it only says so on stderr');
 assert.equal(openClawMissingKey('Environment variable "MINIMAX_API_KEY" is missing or empty.'),keyLine);
 assert.equal(openClawMissingKey('Rate limited'),null);
+// Claude Code whose own sign-in ran out (2026-10-11): a plain line saying how to sign in again.
+assert.equal(claudeCodeSignInExpired('Failed to authenticate: OAuth session expired and could not be refreshed'),'Claude Code’s sign-in has expired. Open Terminal, run claude and sign in again with /login.');
+assert.deepEqual(read('claude-code',[],1,'Failed to authenticate: OAuth session expired and could not be refreshed').outcome,{error:claudeCodeSignInExpired('Failed to authenticate')});
+assert.equal(claudeCodeSignInExpired('Rate limited'),null);
 assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: not logged in\n').outcome,{error:'Claude Code could not answer: Error: not logged in'},'banners are not Fox’s words; stderr explains a failure');
 assert.match(String((read('codex',[],0).outcome as {error:string}).error),/did not answer/);
 
