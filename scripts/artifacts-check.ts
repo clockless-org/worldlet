@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {artifactSizeFor,artifactFitSteps,artifactBrief,journalDays,journalOrigin,dailyNoteArtifacts,DAILY_NOTE_DAYS,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../core/artifacts/index.ts';
+import {artifactSizeFor,artifactFitSteps,artifactBrief,journalDays,journalOrigin,dailyNoteArtifacts,DAILY_NOTE_DAYS,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,artifactFollowUpSent,artifactFollowUpRequest,type Artifact} from '../core/artifacts/index.ts';
 // The rules for artifacts (core/artifacts/README.md): IDs, what Fox may show, the default size, reading a stored
 // record, saving one again, the World's limit, the Artifacts page's days and what Fox finds.
 
@@ -194,7 +194,7 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  const poll=world.slice(world.indexOf("const dailyKey="),world.indexOf('const workPoll='));
  assert.match(poll,/event\.detail\?\.event!=='user_engaged'/,'Only the person\'s own use counts');
  // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked, checked in fox-proactive-check).
- assert.match(poll,/backgroundBlocked\(\{sample:!!data\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep\|\|!!root\.dataset\.tourCoda,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\}\)/,'Never in the practice world, an automated browser, onboarding or the tour (its phone step after the first win included, Mac RCs 2983, 2985, 3035), one at a time');
+ assert.match(poll,/backgroundBlocked\(\{sample:!!data\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep\|\|!!root\.dataset\.tourCoda,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\|\|followUpAsking\}\)/,'Never in the practice world, an automated browser, onboarding or the tour (its phone step after the first win included, Mac RCs 2983, 2985, 3035), one at a time');
  assert.match(poll,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active\)return;/,'Never over a card, a dialog or a turn');
  assert.match(poll,/due\.kind==='summary'&&\(document\.hidden\|\|insideApplet\(\)\|\|inPageLayer\(\)\)\)return;/,'The summary waits for the World; the brief is made with the window hidden or an Applet open');
  assert.match(await readFile(new URL('../ui/index.ts',import.meta.url),'utf8'),/firstRun:\(\)=>!sample&&onboardingUnfinished\(current\?\.onboarding\)/,'The World learns whether onboarding is over');
@@ -284,5 +284,19 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  assert.equal(kept?.tone,'honey');assert.equal(kept?.art,'flight');
  assert.equal(readArtifact({id:'art-abcdefghijkl',kind:'answer',title:'Labs',body:'b',origin:{type:'conversation',place:'world'},createdAt:1,tone:'neon',art:'../x'})?.tone,undefined,'An unknown tone is dropped');
  assert.ok(artifactWeight('x',null,[stats,compare])>artifactWeight('x',null,[stats]),'Showing blocks count toward the one card');
+}
+// A follow-up on an open card (follow-up.ts): only the card's own next step, sent while that card is open, in the
+// person's words as they sent them; it carries the card's title, and its card beside Fox goes by that title.
+{
+ const draft={id:'art-1',title:'Which CASA lab',request:'Book the TAC Security assessment'};
+ assert.equal(artifactFollowUpSent(draft,'Book the TAC Security assessment','art-1'),true);
+ assert.equal(artifactFollowUpSent(draft,'Book TAC for Tuesday','art-1'),true,'edited, still the follow-up');
+ assert.equal(artifactFollowUpSent(draft,'  ','art-1'),false,'nothing to send');
+ assert.equal(artifactFollowUpSent(draft,'Book it','art-2'),false,'another card is open');
+ assert.equal(artifactFollowUpSent(draft,'Book it',null),false,'the card closed');
+ assert.equal(artifactFollowUpSent(null,'What does TAC stand for?','art-1'),false,'typed words stay a turn');
+ const asked=artifactFollowUpRequest(draft,' Book TAC for Tuesday ');
+ assert.ok(asked.text.startsWith('Book TAC for Tuesday\n\nThis follows up the card "Which CASA lab" (artifact "art-1")')&&asked.text.includes('show_artifact'),asked.text);
+ assert.deepEqual([asked.displayText,asked.name,asked.status],['Book TAC for Tuesday','Which CASA lab','Book TAC for Tuesday']);
 }
 console.log('PASS artifacts: the Journal timeline and its one origin label, an Agent’s daily notes as one page a day, three sizes, IDs, what Fox may show, the one-card budget, default sizes, stored records, showing again, the World limit, days and finding, next steps, pages Fox made');
