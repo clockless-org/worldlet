@@ -88,7 +88,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 ### Applets
 
-邮件、日历、备忘录、GitHub、Notion、YouTube 等一百多个，每个都是 World 里的一个小地方。Applet 用安静、好读的样子展示你自己的记录，想看原网站时也能打开。
+邮件、日历、备忘录、GitHub、Notion、Linear 等能连上你的账号或读取这台电脑的 Applet，加上浏览器和游戏，每个都是 World 里的一个小地方。Applet 用安静、好读的样子展示你自己的记录，想看原网站时也能打开。
 
 [文档 →](docs/APPLET-RUNTIME.md)
 

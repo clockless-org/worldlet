@@ -39,6 +39,8 @@ There is no hidden-definition concept: `WORLD_APPS` is `APP_DEFINITIONS`, and a 
 
 The popular-app expansion adds 30 launch-only entries. These are opt-in for existing worlds; regions page through finite slots rather than overlapping devices.
 
+The catalog offers only Applets that work once added: those that connect an account or read this computer (`connect`, `local`, `read`), the Browser and the games (`inAppletCatalog` in `core/applets/applet-support.ts`). That rule decides an Area's Recommended and All lists, the setup guide's per-Area list and the Browser's "Add to World" offer; the Area panel also leaves out Applets this computer does not support. Website-only Applets are frozen: they are not offered, but one already in a World stays, Fox can still open any of them, and their sites can still become the person's own Applet with Make Applet.
+
 ## How data reaches the scene
 
 Interaction follows [Applet presentation](../components/INTERACTION.md#applet-presentation): **Peek → Open → Focus**. Web fallback uses **Peek → Focus** directly. `appletContract(key)` summarizes resources and activity variants, which are separate from these presentation states. No extra Open button or implicit authorization; Fox guides connections.

@@ -3,7 +3,7 @@ import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,createMailArrivalObserver
 import {renderHomeFocus} from '../applets/index.ts';
 import {mailMetadata} from '../applets/index.ts';
 import {safeAttentionURL as safeAttentionSourceURL} from '../../core/attention/index.ts';
-import {getApp,recommendForArea,appletHost,curatedConnection,CURATED_READERS,HOME_NATIVE,CODING_SESSIONS,MONEY_READERS,ORIGINAL_READERS} from '../../core/applets/index.ts';
+import {getApp,inAppletCatalog,recommendForArea,appletHost,curatedConnection,CURATED_READERS,HOME_NATIVE,CODING_SESSIONS,MONEY_READERS,ORIGINAL_READERS} from '../../core/applets/index.ts';
 import {observeWorldActivity,recordWorldActivity} from '../../platform/bridge/activity.ts';
 import {curatedOriginal,renderCuratedTable} from '../applets/index.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
@@ -486,7 +486,8 @@ export function mountNotionWorld(data: World, native: any) {
    const ground=WORLD_LAYOUT.regions[id].placements.map(slot=>apps.find(app=>placements[app.moduleId]?.id===slot.id)||null);
    const groundIds=new Set(ground.filter(Boolean).map(app=>app.moduleId));
    shelf.append(element('p','region-shelf-note','The '+(ground.length===5?'five':ground.length)+' you used last stand on the ground. Pin one to keep its place.'));
-   const catalog=sections.filter(r=>r.entity==='app'&&r.key&&!['ongoing','weather'].includes(r.key)&&!r.ongoing&&!r.moment&&!r.site);
+   // Only Applets that work once added, and that this computer supports (core/applets/applet-support.ts).
+   const catalog=sections.filter(r=>r.entity==='app'&&r.key&&!['ongoing','weather'].includes(r.key)&&!r.ongoing&&!r.moment&&!r.site&&inAppletCatalog(r)&&native?.appletSupported?.(r.key)!==false);
    const list=element('div','region-shelf-scroll');shelf.append(list);
    let dragged:string|null=null,dropping=false;
    const clearDrop=()=>shelf.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));

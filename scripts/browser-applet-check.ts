@@ -29,6 +29,10 @@ await withBrowser(async browser=>{
  assert.deepEqual(await made.evaluate(()=>(window as any).opened),['app-site-abc123'],'a site already made opens its Applet');
  await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://github.com/a',title:'GitHub',loading:false}})));
  assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'a catalog site keeps its own offer');
+ // A frozen website Applet's site (Reddit) is not offered as that Applet; it can be made into one like any site.
+ await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://www.reddit.com/r/test',title:'Reddit',loading:false}})));
+ await made.getByRole('button',{name:'Make Applet'}).waitFor({state:'visible'});
+ assert.equal(await made.locator('.browser-applet-offer:not(.browser-sign-in-offer)').isVisible(),false,'a frozen website Applet is not offered');
  // A game's site is not the game (owner Order 2026-10-06): worldlet.ai itself gets Make Applet, not the Random game.
  await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://worldlet.ai/',title:'Worldlet',loading:false}})));
  await made.getByRole('button',{name:'Make Applet'}).waitFor({state:'visible'});

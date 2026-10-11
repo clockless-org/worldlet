@@ -1,6 +1,6 @@
 import type {BrowserSurfaceAction,BrowserSurfaceBodies,SurfaceRect} from '../../contracts/browser-surface.ts';
 import {appletForWebsite} from './applet-match.ts';
-import {getApp,siteAppletPage} from '../../core/applets/index.ts';
+import {getApp,inAppletCatalog,siteAppletPage} from '../../core/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
 import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,typedAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../core/browser/index.ts';
 import {createPictureInPictureOffer,createPictureInPictureWindow} from './picture-in-picture.ts';
@@ -148,12 +148,16 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   const app=getApp(event.detail.applet);
   if(status==='complete'&&app&&!(opened&&!content.hidden&&getApp(appletKey)?.id===app.id))screen.done(app.id);
  });
+ // A frozen website Applet (core/applets/applet-support.ts) is offered only to open, when it is already in the World;
+ // otherwise its site is treated as one without an Applet, so Make Applet below stays available.
+ const offeredMatch=()=>matchedApplet&&(inAppletCatalog(matchedApplet)||root.appletLayout?.has(matchedApplet.id))?matchedApplet:null;
  function syncAppletOffer(url?:string){
   if(url!==undefined)matchedApplet=appletForWebsite(url);
   const layout=root.appletLayout,visible=appletKey==='browser'&&opened&&slot?.isConnected&&!content.hidden&&content.dataset.template==='browser';
   appletOffer.hidden=!visible||!matchedApplet||!layout?.available(matchedApplet.id);
   if(appletOffer.hidden)return;
   const installed=layout.has(matchedApplet.id);
+  if(!offeredMatch()){appletOffer.hidden=true;return;}
   appletOffer.textContent=(installed?'Open ':'Add ')+matchedApplet.title+(installed?' Applet':' to World');
   appletOffer.disabled=adding;
  }
@@ -345,7 +349,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  };
  // Make Applet, at the top of the Browser (owner request 2026-10-05): the web app open here becomes an Applet of its
  // own (core/applets/site-applet.ts), on the Home ground at once; a site that already has one opens it instead. A site
- // with a catalog Applet keeps the offer above, which adds or opens that one.
+ // with an offered catalog Applet keeps the offer above, which adds or opens that one.
  const makeOffer=document.createElement('button');makeOffer.type='button';makeOffer.className='scene-control browser-make-applet';makeOffer.hidden=true;
  makeOffer.innerHTML=uiIcon('makeApplet');const makeLabel=document.createElement('span');makeOffer.append(makeLabel);
  (root.querySelector('.applet-bar-controls')||root).append(makeOffer);
@@ -355,7 +359,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  const siteKey=(url:string)=>siteAppletPage(url)?.hostname.toLowerCase().replace(/^www\./,'')||'';
  const madeFor=(url:string)=>madeApplets?.find(url)||justMade.get(siteKey(url))||null;
  function syncMakeOffer(){
-  const visible=!!madeApplets&&appletKey==='browser'&&opened&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser'&&!matchedApplet&&!!siteAppletPage(page.url);
+  const visible=!!madeApplets&&appletKey==='browser'&&opened&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser'&&!offeredMatch()&&!!siteAppletPage(page.url);
   const made=visible?madeFor(page.url):null;
   if(makeOffer.hidden===!visible&&makeOffer.dataset.made===(made?'true':'false')&&makeOffer.disabled===making)return;
   makeOffer.hidden=!visible;makeOffer.disabled=making;makeOffer.dataset.made=made?'true':'false';

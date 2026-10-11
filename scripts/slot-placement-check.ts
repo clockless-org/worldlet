@@ -3,6 +3,7 @@ import {emptyRegionLayout,moveRegionApplet,parseRegionLayout,pinnedPlace,pinRegi
 import {updateOnboarding} from '../core/onboarding/onboarding.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
 import {recommendForArea,appletHost,AREA_RECOMMEND_LIMIT} from '../core/applets/area-recommend.ts';
+import {inAppletCatalog} from '../core/applets/applet-support.ts';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
 import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
 import {resolvePlacements,freePlacements,nearestPlacement,sameAnchor,slotsForApplet} from '../ui/world/slot-placement.ts';
@@ -98,5 +99,12 @@ assert.throws(()=>updateOnboarding({version:1,presets:['home'],completed:true},{
  const moved=recommendForArea({area:'work',apps,mine:new Map([...mine,['app-spotify','work']]),limit:200});
  assert.ok(moved.includes('app-youtube')&&moved.indexOf('app-youtube')>moved.indexOf('app-zoom'),'moved-in categories follow the Area\'s own');
  assert.ok(!recommendForArea({area:'work',apps,mine,limit:200}).includes('app-youtube'),'unrelated categories stay out');
+}
+// The catalog offers only Applets that work once added: connected or local ones, the Browser and the games. Website-only
+// Applets are frozen (no longer offered), though one already in a World stays.
+{
+ const offered=new Set(WORLD_APPS.filter(inAppletCatalog).map(a=>a.key));
+ for(const key of ['gmail','google-calendar','github','linear','notion','stripe','codex','claude-code','browser','game-2048','wordle'])assert.ok(offered.has(key),key+' is offered');
+ for(const key of ['slack','reddit','spotify','airbnb','chatgpt','tiktok'])assert.ok(!offered.has(key),key+' is frozen');
 }
 console.log('PASS ground follows recent use: most recent first, pins hold, moments arrive in front, kept in the World.');
