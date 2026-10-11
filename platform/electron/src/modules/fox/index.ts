@@ -33,7 +33,7 @@ import {TASK_PANEL_KINDS,taskPanelScheduleRuns} from '../../../../../core/tasks/
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
-import {placeKey,proactiveAsked,proactiveDue,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
+import {placeKey,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 /** What the World holds about the companion, for the Profile page: its saved memory and, in the
@@ -456,7 +456,7 @@ export function installFox(host:Host){
  const proactive=proactiveState();
  // Browse with me or Don't bother, chosen in Fox's card (owner request 2026-10-08); on unless turned off.
  proactive.browse=preferences.bool('worldlet.foxBrowse',true);
- const proactiveLines=new Map<string,{line:string;thread:string;place:string;moment:ProactiveMoment}>();
+ const proactiveLines=new Map<string,{line:string;thread:string;place:string;moment:ProactiveMoment;card:string}>();
  let proactiveRun:{id:string;runtime:AgentRuntime;cancelled:boolean}|null=null;
  const localDay=(at:number)=>{const date=new Date(at*1000);return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;};
  function proactiveStart(request:Row){
@@ -490,7 +490,7 @@ export function installFox(host:Host){
   try{return JSON.stringify(rest).length<=6000?rest:{};}catch{return {};}
  }
  async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,environment={}}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;environment?:Row}){
-  let line:string|null=null;
+  let line:string|null=null,card='';
   try{
    const profile=companion.archive(scope);
    const said=[...profile.conversations].reverse().find((turn:Row)=>turn.role==='user'&&typeof turn.text==='string');
@@ -512,7 +512,7 @@ export function installFox(host:Host){
    const events=turnEvents(run.id,scope,{active:()=>proactiveRun===run&&!run.cancelled,allowActions:false,reads:proactiveToolAllowed,record:false});
    // Nobody asked, so a missing model ends the ask quietly instead of opening model settings.
    const result=await run.runtime.run(body,home(scope),event=>{if(event.type==='model_required'){run.cancelled=true;throw new Cancelled();}return events(event);});
-   if(!run.cancelled)line=proactiveLine(result.message);
+   if(!run.cancelled){line=proactiveLine(result.message);card=line?openItem(proactiveCard(result.message)):'';}
   }catch(error){
    if(!run.cancelled&&(error as Error)?.name!=='AbortError')host.diagnostics.record(error,'foxProactive');
   }finally{
@@ -522,8 +522,14 @@ export function installFox(host:Host){
   // Analytics: the moment and whether Fox spoke, never the line.
   analytics()?.recordProductEvent('fox_proactive_asked','',{proactive_moment:moment,proactive_status:line?'spoke':'passed'});
   if(!line||run.cancelled)return;
-  proactiveLines.set(run.id,{line,thread,place,moment});
-  page.event('worldlet:fox-proactive',{id:run.id,line,thread,moment});
+  proactiveLines.set(run.id,{line,thread,place,moment,card});
+  page.event('worldlet:fox-proactive',{id:run.id,line,thread,moment,...card?{card}:{}});
+ }
+ /** The Attention item a line points to, when it is still open in the World; a made-up or settled one points nowhere. */
+ function openItem(id:string|null):string {
+  if(!id)return '';
+  try{return store.worldItems().some(item=>item.id===id&&(item.status??'open')==='open')?id:'';}
+  catch(error){host.diagnostics.record(error,'foxProactive');return '';}
  }
  /** The page showed the line (or dropped it because the person moved on or started talking). A shown
   * line joins the conversation in its place, so a reply continues from it. */
@@ -534,7 +540,7 @@ export function installFox(host:Host){
   const scope=foxScope(),now=Date.now()/1000;
   proactiveSpoke(proactive,{now,day:localDay(now),place:entry.place,line:entry.line,moment:entry.moment});
   try{companion.recordTurn(entry.line,'assistant',companion.session(scope),scope,entry.thread);}catch(error){host.diagnostics.record(error,'foxProactive');}
-  analytics()?.recordProductEvent('fox_proactive_shown','',{proactive_moment:entry.moment});
+  analytics()?.recordProductEvent('fox_proactive_shown','',{proactive_moment:entry.moment,proactive_card:entry.card?'yes':'no'});
   return {ok:true};
  }
  /** Browse with me (`on` true) or Don't bother (false), from the switch in Fox's card; without `on`, reads it.

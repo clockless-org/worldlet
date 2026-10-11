@@ -198,6 +198,11 @@ export function mountNotionWorld(data: World, native: any) {
    for(let tries=0;tries<25&&!here();tries++)await new Promise(resolve=>setTimeout(resolve,120));
    if(here())visitObject(applet);else notify('That Applet is not in this World any more.');
   }
+  // Fox's line pointed to an Attention item (ui/companion/fox-proactive.ts): its card opens, or the person hears it is settled.
+  window.addEventListener('worldlet:attention-open',(event:any)=>{
+   const id=event.detail?.id;
+   if(typeof id==='string'&&id&&!previewAttention({worldItemId:id}))notify('That card is not in Attention any more.');
+  });
   window.addEventListener('worldlet:artifact-open',(event:any)=>{
    const detail=event.detail||{};
    if(typeof detail.made==='string'){void openMade(detail.made,detail.keep===true);return;}
