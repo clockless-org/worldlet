@@ -4,7 +4,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,14 +18,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.VerticalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,21 +32,22 @@ import androidx.compose.material.icons.outlined.Bedtime
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -79,94 +79,189 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.sp
 import app.worldlet.android.AppModel
 import app.worldlet.kit.AccountIssue
 import app.worldlet.kit.AttentionAction
 import app.worldlet.kit.AttentionGroup
 import app.worldlet.kit.AttentionItem
+import app.worldlet.kit.JournalEntry
 import app.worldlet.kit.PhoneApplet
 import java.time.Instant
-import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /** Text over the world keeps a soft shadow so it reads on any part of the painting. */
 internal val worldShadow = Shadow(Palette.inkShadow, Offset(0f, 1.5f), 3f)
 
 /**
- * The Attention Center as the computer shows it (docs/ATTENTION-CENTER.md), in three layers stacked top to bottom
- * (owner decision 2026-10-03): the Applet world, Now (where it opens) and Later, with their tabs at the top. Swiping
- * down on Now while its content is at the top rises to the Applet world, and swiping up turns to Later; from Later a
- * swipe down at the top of its list, and from the Applet world a swipe up, come back to Now. Each page scrolls on its
- * own and hands the gesture to the pager only at its end. Tapping a row opens its card; a long press offers Done,
- * Later and Remove. The computer settles the item and sends the new Center. The widgets for now (core/artifacts) lead
- * Now; tapping one, or its tile in the Applet world, opens its page over everything.
+ * The Attention Center as three tabs chosen with the segmented control at the top (owner request 2026-10-11, replacing
+ * the Applet world, Now and Later layers and their swipes): **Today**, where it opens, is one scroll from the date and
+ * today's Journal through Now to Later; **Applets** lists the World's Applets; **Tasks** is what the person's Agent is
+ * doing now and its Routines. Fox stays below on every tab. Tapping a row opens its card; a long press offers Done,
+ * Later and Remove, and the computer settles the item and sends the new Center. The widgets for now (core/artifacts)
+ * lead Now; tapping one, or its row in Applets, opens its page over everything.
  */
 @Composable
 fun AttentionCenter(model: AppModel, initialPage: String?, open: (AttentionItem) -> Unit, openApplet: (PhoneApplet) -> Unit) {
-    val pager = rememberPagerState(initialPage = centerPage(initialPage)) { 3 }
-    val scope = rememberCoroutineScope()
+    var tab by rememberSaveable { mutableIntStateOf(centerTab(initialPage)) }
     var widgetId by rememberSaveable { mutableStateOf<String?>(null) }
+    // Each tab keeps where it was scrolled while another is shown.
+    val todayScroll = rememberScrollState()
+    val appletsScroll = rememberScrollState()
+    val tasksScroll = rememberScrollState()
     Column(Modifier.fillMaxSize().padding(top = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        PageTabs(pager.currentPage) { scope.launch { pager.animateScrollToPage(it) } }
-        VerticalPager(pager, Modifier.fillMaxSize().padding(top = 6.dp).testTag("centerPager"), beyondViewportPageCount = 1) { page ->
-            when (page) {
-                APPLETS -> AppletWorld(model, openWidget = { widgetId = it }, openApplet = openApplet)
-                NOW -> NowPage(model, open) { widgetId = it }
-                else -> LaterPage(model, open)
+        PageTabs(tab) { tab = it }
+        Box(Modifier.fillMaxSize().padding(top = 6.dp)) {
+            when (tab) {
+                APPLETS -> AppletList(model, appletsScroll, openWidget = { widgetId = it }, openApplet = openApplet)
+                TASKS -> TasksPage(model, tasksScroll, openApplet)
+                else -> TodayPage(model, todayScroll, open) { widgetId = it }
             }
         }
     }
     model.widgets.firstOrNull { it.id == widgetId }?.let { widget -> WidgetScreen(model, widget) { widgetId = null } }
 }
 
-private const val APPLETS = 0
-private const val NOW = 1
-private const val LATER = 2
+private const val TODAY = 0
+private const val APPLETS = 1
+private const val TASKS = 2
 
-/** The layer the Center opens on: Now, unless demo mode asks for the Applet world or Later. */
-private fun centerPage(name: String?) = when (name) {
+/** The tab the Center opens on: Today, unless demo mode asks for Applets or Tasks (`now` and `later`, the old layers,
+ * are both on Today now). */
+private fun centerTab(name: String?) = when (name) {
     "applets" -> APPLETS
-    "later" -> LATER
-    else -> NOW
+    "tasks" -> TASKS
+    else -> TODAY
 }
 
-/** The Applet world, Now and Later as one frosted capsule at the top, with no counts (owner decision 2026-10-04); the
+/** Today, Applets and Tasks as one frosted capsule at the top, with no counts (owner decision 2026-10-04); the
  * selected one is lit. */
 @Composable
-private fun PageTabs(page: Int, choose: (Int) -> Unit) {
+private fun PageTabs(tab: Int, choose: (Int) -> Unit) {
     Row(Modifier.frosted(CircleShape).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Tab("Applets", page == APPLETS, "tabApplets", Icons.Outlined.GridView) { choose(APPLETS) }
-        Tab("Now", page == NOW, "tabNow") { choose(NOW) }
-        Tab("Later", page == LATER, "tabLater") { choose(LATER) }
+        Tab("Today", tab == TODAY, "tabToday") { choose(TODAY) }
+        Tab("Applets", tab == APPLETS, "tabApplets") { choose(APPLETS) }
+        Tab("Tasks", tab == TASKS, "tabTasks") { choose(TASKS) }
     }
 }
 
 @Composable
-private fun Tab(title: String, on: Boolean, tag: String, icon: ImageVector? = null, choose: () -> Unit) {
+private fun Tab(title: String, on: Boolean, tag: String, choose: () -> Unit) {
     val fill by animateColorAsState(if (on) Palette.leaf.copy(alpha = 0.75f) else Color.Transparent, label = "tab")
     val tint = if (on) Palette.ink else Palette.muted.copy(alpha = 0.75f)
-    Row(
-        Modifier.background(fill, CircleShape)
-            .combinedClickable(role = Role.Tab, onClick = choose)
+    Text(
+        title, color = tint, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.background(fill, CircleShape)
+            .clickable(role = Role.Tab, onClick = choose)
             .semantics { selected = on; contentDescription = title }
             .testTag(tag)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+    )
+}
+
+/**
+ * Today, one scroll (owner request 2026-10-11): the weekday and date as the computer's left panel shows them, today's
+ * Journal (each entry opens in a sheet), then what Now held (widgets for now, the computer away, accounts to connect,
+ * the three groups) and, further down, Later.
+ */
+@Composable
+private fun TodayPage(model: AppModel, scroll: ScrollState, open: (AttentionItem) -> Unit, openWidget: (String) -> Unit) {
+    var entryId by rememberSaveable { mutableStateOf<String?>(null) }
+    Column(
+        Modifier.fillMaxSize().verticalScroll(scroll).padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 24.dp).testTag("todayPage"),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        if (icon != null) Icon(icon, null, tint = tint, modifier = Modifier.size(15.dp))
-        Text(title, color = tint, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        DayHeader()
+        Journal(model.attention.journal.orEmpty()) { entryId = it.id }
+        NowSection(model, open, openWidget)
+        LaterSection(model, open)
+    }
+    model.attention.journal?.firstOrNull { it.id == entryId }?.let { entry -> JournalSheet(entry) { entryId = null } }
+}
+
+/** The day as the computer's left panel writes it: the weekday large, the date small under it. */
+@Composable
+private fun DayHeader() {
+    val today = LocalDate.now()
+    val locale = Locale.getDefault()
+    val date = DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMMd"), locale)
+    Column(Modifier.padding(horizontal = 10.dp).testTag("todayDate"), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+        Text(today.format(DateTimeFormatter.ofPattern("EEEE", locale)), color = Palette.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold,
+            style = TextStyle(shadow = worldShadow))
+        Text(today.format(date), color = Palette.muted.copy(alpha = 0.85f), fontSize = 15.sp, fontWeight = FontWeight.Medium,
+            style = TextStyle(shadow = worldShadow))
     }
 }
 
-/** What matters now: the widgets for now first, then the Center's three groups. */
+/** A small uppercase heading over a faint rule, like the Center's group headings but in the world's own ink. */
 @Composable
-private fun NowPage(model: AppModel, open: (AttentionItem) -> Unit, openWidget: (String) -> Unit) {
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp).padding(top = 10.dp, bottom = 8.dp).testTag("nowPage"),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
+internal fun Heading(title: String, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxWidth()) {
+        Text(title.uppercase(), color = Palette.muted.copy(alpha = 0.75f), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.3.sp,
+            style = TextStyle(shadow = worldShadow), modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 6.dp))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.ink.copy(alpha = 0.14f)))
+    }
+}
+
+/** Today's Journal cards, newest first: each row its title, time and one line; a computer that sends none (or an older
+ * one) leaves one quiet line. */
+@Composable
+private fun Journal(entries: List<JournalEntry>, open: (JournalEntry) -> Unit) {
+    val context = LocalContext.current
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Heading("Journal")
+        if (entries.isEmpty()) {
+            Text("Nothing in your Journal yet today.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 14.sp,
+                style = TextStyle(shadow = worldShadow), modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp).testTag("journalEmpty"))
+        }
+        entries.forEach { entry ->
+            Column(
+                Modifier.fillMaxWidth().clickable(onClickLabel = "Open the entry") { open(entry) }.testTag("journal-${entry.id}")
+                    .padding(horizontal = 10.dp, vertical = 7.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(entry.title, color = Palette.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        style = TextStyle(shadow = worldShadow), modifier = Modifier.weight(1f, fill = false))
+                    journalTime(context, entry)?.let { Text(it, color = Palette.muted.copy(alpha = 0.7f), fontSize = 12.sp, style = TextStyle(shadow = worldShadow)) }
+                }
+                entry.text?.lineSequence()?.map { it.trim().trimStart('#', '-', '*', '•', ' ') }?.firstOrNull { it.isNotEmpty() }?.let { line ->
+                    Text(markdown(line), color = Palette.muted.copy(alpha = 0.85f), fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        style = TextStyle(shadow = worldShadow))
+                }
+            }
+        }
+    }
+}
+
+/** The entry's time of day on this phone's clock. */
+private fun journalTime(context: android.content.Context, entry: JournalEntry): String? =
+    runCatching { Instant.parse(entry.at) }.getOrNull()?.let { android.text.format.DateUtils.formatDateTime(context, it.toEpochMilli(), android.text.format.DateUtils.FORMAT_SHOW_TIME) }
+
+/** A Journal entry in full, on paper in a bottom sheet: its title, time and category, then its text. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun JournalSheet(entry: JournalEntry, close: () -> Unit) {
+    val context = LocalContext.current
+    ModalBottomSheet(close, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = Palette.paper) {
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 16.dp).navigationBarsPadding().testTag("journalSheet"),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(entry.title, color = Palette.paperInk, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            val meta = listOfNotNull(journalTime(context, entry), entry.category?.takeIf { it.isNotEmpty() }).joinToString(" · ")
+            if (meta.isNotEmpty()) Text(meta, color = Palette.paperFoot, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            entry.text?.takeIf { it.isNotBlank() }?.let { Brief(it) }
+        }
+    }
+}
+
+/** What Now held: the widgets for now first, the computer away, accounts to connect, then the Center's three groups. */
+@Composable
+private fun NowSection(model: AppModel, open: (AttentionItem) -> Unit, openWidget: (String) -> Unit) {
+    Column(Modifier.fillMaxWidth().testTag("nowSection"), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         val widgets = model.widgets.filter { it.active(Instant.now()) }
         if (widgets.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { widgets.forEach { widget -> WidgetRow(widget) { openWidget(widget.id) } } }
@@ -191,23 +286,17 @@ private fun NowPage(model: AppModel, open: (AttentionItem) -> Unit, openWidget: 
     }
 }
 
-/** What can wait: lighter rows that keep their own kind's colour, with a dashed rule. The list scrolls freely; a
- * swipe down at its top goes back to Now. */
+/** What can wait, under its own heading below Now: lighter rows that keep their own kind's colour, with a dashed rule. */
 @Composable
-private fun LaterPage(model: AppModel, open: (AttentionItem) -> Unit) {
-    LazyColumn(
-        Modifier.fillMaxSize().testTag("laterPage"),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        item {
-            Text("Can wait. An item moves up to Now when it needs you.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 12.sp,
-                style = TextStyle(shadow = worldShadow), modifier = Modifier.padding(horizontal = 10.dp))
-        }
+private fun LaterSection(model: AppModel, open: (AttentionItem) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(top = 10.dp).testTag("laterSection"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Heading("Later")
+        Text("Can wait. An item moves up to Now when it needs you.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 12.sp,
+            style = TextStyle(shadow = worldShadow), modifier = Modifier.padding(horizontal = 10.dp))
         if (model.attention.later.isEmpty()) {
-            item { Text("Nothing is waiting.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 14.sp, modifier = Modifier.padding(horizontal = 10.dp)) }
+            Text("Nothing is waiting.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 14.sp, modifier = Modifier.padding(horizontal = 10.dp))
         }
-        items(model.attention.later, key = { it.id }) { HUDRow(model, it, open, later = true) }
+        model.attention.later.forEach { HUDRow(model, it, open, later = true) }
     }
 }
 

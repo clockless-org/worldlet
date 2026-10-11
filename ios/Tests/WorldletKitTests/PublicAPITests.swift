@@ -129,7 +129,7 @@ final class PublicAPITests: XCTestCase {
         XCTAssertEqual(snapshot.items(of: mail).map(\.id), ["a"])
         XCTAssertEqual(mail.fox?.turns.first?.text, "Two replies.")
         XCTAssertEqual(snapshot.applets?[1].widget, "wgt-abcdefghij")
-        XCTAssertEqual(snapshot.applets?[2].section, .places, "a section from a newer computer reads as In your World")
+        XCTAssertEqual(snapshot.applets?[2].section, .places, "a section from a newer computer reads as More")
         XCTAssertEqual(snapshot.applets?[2].state, .off)
         XCTAssertNil(snapshot.applets?[0].url, "a computer older than urls sends none")
         XCTAssertEqual(snapshot.applets?[3].url?.absoluteString, "https://www.youtube.com/", "a tile opens its website")

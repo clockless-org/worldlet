@@ -8,10 +8,9 @@ import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeDown
-import androidx.compose.ui.test.swipeUp
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -22,8 +21,8 @@ import org.junit.runner.RunWith
 
 /**
  * The real app on an Android emulator (the Windows RC runs these as `npm run test:android`): it launches in demo mode
- * (fixed sample data, no network or computer) and walks pairing, Now, an item's card with Fox's dialogue, Later and
- * the Applet world by vertical swipes, an Applet's page, typing to Fox and Settings, as the iPhone's XCUITests do.
+ * (fixed sample data, no network or computer) and walks pairing, Today with an item's card and Fox's dialogue and
+ * Later below it, the Applets and Tasks tabs, an Applet's page, typing to Fox and Settings, as the iPhone's XCUITests do.
  */
 @RunWith(AndroidJUnit4::class)
 class AppTest {
@@ -48,8 +47,8 @@ class AppTest {
     @Test
     fun nowCardAndFox() {
         launch(demo = true)
-        compose.onNodeWithTag("tabNow").assertIsSelected()
-        compose.onNodeWithText("Reply to Sam about the venue").assertIsDisplayed()
+        compose.onNodeWithTag("tabToday").assertIsSelected()
+        compose.onNodeWithText("Reply to Sam about the venue").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("row-t1").performClick()
         compose.onNodeWithTag("card-t1").assertIsDisplayed()
         compose.onNodeWithTag("foxOption").assertIsDisplayed()
@@ -59,32 +58,21 @@ class AppTest {
     }
 
     @Test
-    fun swipeUpToLater() {
+    fun laterBelowNowOnToday() {
         launch(demo = true)
-        // Now scrolls to its end first; the swipes past it turn to Later, whose list then takes them.
-        repeat(4) {
-            compose.onNodeWithTag("centerPager").performTouchInput { swipeUp() }
-            compose.waitForIdle()
-        }
-        compose.onNodeWithTag("tabLater").assertIsSelected()
-        compose.onNodeWithText("Renew the passport").assertIsDisplayed()
-        // Back down at the top of Later's list comes back to Now.
-        repeat(2) {
-            compose.onNodeWithTag("centerPager").performTouchInput { swipeDown() }
-            compose.waitForIdle()
-        }
-        compose.onNodeWithTag("tabNow").assertIsSelected()
+        // Later is further down Today's one scroll (owner request 2026-10-11).
+        compose.onNodeWithText("Renew the passport").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("tabToday").assertIsSelected()
     }
 
     @Test
-    fun swipeDownToTheAppletWorldAndOpenAnApplet() {
+    fun appletsTabOpensAnApplet() {
         launch(demo = true)
-        compose.onNodeWithTag("centerPager").performTouchInput { swipeDown() }
-        compose.waitForIdle()
+        compose.onNodeWithTag("tabApplets").performClick()
         compose.onNodeWithTag("tabApplets").assertIsSelected()
-        // The person's own Applets come first (owner request 2026-10-07); a website's tile opens its page on a long press.
-        compose.onNodeWithText("YOURS").assertIsDisplayed()
-        compose.onNodeWithTag("applet-mail").performTouchInput { longClick() }
+        compose.onNodeWithText("THINGS").assertIsDisplayed()
+        // A website's row opens the Applet's page on a long press.
+        compose.onNodeWithTag("applet-mail").performScrollTo().performTouchInput { longClick() }
         compose.onNodeWithTag("appletPage").assertIsDisplayed()
         compose.onNodeWithTag("appletWebsite").assertIsDisplayed()
         compose.onNodeWithTag("foxContext").assertIsDisplayed()
@@ -92,6 +80,14 @@ class AppTest {
         compose.onNodeWithTag("foxContextClose").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("appletPage").assertDoesNotExist()
+    }
+
+    @Test
+    fun tasksTab() {
+        launch(demo = true)
+        compose.onNodeWithTag("tabTasks").performClick()
+        compose.onNodeWithTag("task-task-flights").assertIsDisplayed()
+        compose.onNodeWithText("Daily news digest").assertIsDisplayed()
     }
 
     @Test

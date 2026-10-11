@@ -2,13 +2,17 @@ package app.worldlet.kit
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.nullable
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.put
@@ -51,7 +55,7 @@ data class AttentionItem(
     val art: String? = null,
     /** Fox's dialogue on this item's card; absent from computers older than it. */
     val fox: ItemFox? = null,
-    /** The key of the Applet the item came from, its home in the Applet world; absent when the World has none and
+    /** The key of the Applet the item came from, its home in the Applets tab; absent when the World has none and
      * from computers older than it. */
     val applet: String? = null,
 ) {
@@ -77,12 +81,12 @@ data class AccountIssue(val provider: String, val title: String, val action: Act
     enum class Action { @SerialName("reconnect") Reconnect, @SerialName("permissions") Permissions }
 }
 
-/** One Applet in the Applet world, the layer above Now (core/phone/payloads.ts PhoneApplet): where the grid shows it,
+/** One Applet in the phone's Applets tab (core/phone/payloads.ts PhoneApplet): the section the list shows it in,
  * its lamp, what it is doing or its status ([line]), its latest world log lines ([recent], newest last), the widget a
  * moment Applet opens (its key is `widget:<id>`), its own thread of Fox's conversation, and where one of the person's
- * own Applets came from ([mine]: `site`, `page` or `conversation`; null for a built-in one), so its tile carries the mark
- * its device has on the computer. [url] is the website its tile opens (owner request 2026-10-07); null for a moment
- * Applet or an ongoing thing, which open their own page, and from computers older than this field. */
+ * own Applets came from ([mine]: `site`, `page` or `conversation`; null for a built-in one), so its row carries the mark
+ * its device has on the computer. [url] is the website its row opens (owner request 2026-10-07); null for a moment
+ * Applet or a thing, which open their own page, and from computers older than this field. */
 @Serializable
 data class PhoneApplet(
     val key: String,
@@ -99,17 +103,18 @@ data class PhoneApplet(
     /** The website the tile opens: only an https address. */
     val website: String? get() = url?.takeIf { it.startsWith("https://") }
 
-    /** A section or lamp this app does not know yet (from a newer computer) reads as "In your World" and off. */
+    /** A section or lamp this app does not know yet (from a newer computer) reads as "More" (the rest) and off. */
     @Serializable(with = SectionSerializer::class)
     enum class Section(val title: String) {
         /** Working now, holding Now items, or a widget for now. */
         Live("Working now"),
         /** A connected account. */
         Accounts("Accounts"),
-        /** A conversation brought from another Agent that the person made into an Applet (its key is `job-…`). */
-        Jobs("Ongoing"),
+        /** Things: a conversation brought from another Agent, kept as an Applet or not yet (its key is `job-…`); a line said
+         * inside one on the phone makes it an Applet on the computer (owner request 2026-10-11). */
+        Jobs("Things"),
         /** Every other Applet in the World. */
-        Places("In your World"),
+        Places("More"),
     }
 
     @Serializable(with = StateSerializer::class)
@@ -131,6 +136,66 @@ private open class LenientEnum<T : Enum<T>>(name: String, private val values: Li
 private object SectionSerializer : LenientEnum<PhoneApplet.Section>("app.worldlet.kit.PhoneApplet.Section", PhoneApplet.Section.entries, PhoneApplet.Section.Places)
 private object StateSerializer : LenientEnum<PhoneApplet.State>("app.worldlet.kit.PhoneApplet.State", PhoneApplet.State.entries, PhoneApplet.State.Off)
 
+/** One card of the computer's Task panel (core/phone/payloads.ts PhoneTask): [name] and [status] are the card's words,
+ * [when] its time text ("In progress", "Tomorrow 6:00 AM"), [icon] its picture (`fox`, `clock` or an Applet's key),
+ * [progress] how far it is (0 to 1) when the computer knows, [applet] the phone Applet the row opens, [every] and [by]
+ * how often a routine runs and who runs it, and [lines] what a running task said, newest last. */
+@Serializable
+data class PhoneTask(
+    val id: String,
+    val name: String,
+    val status: String = "",
+    val `when`: String = "",
+    val icon: String = "fox",
+    val progress: Double? = null,
+    val applet: String? = null,
+    val every: String? = null,
+    val by: String? = null,
+    val lines: List<String>? = null,
+) {
+    /** [progress] kept within 0 to 1; null when the computer does not know how far it is. */
+    val fraction: Float? get() = progress?.takeIf { it.isFinite() }?.coerceIn(0.0, 1.0)?.toFloat()
+}
+
+/** Doing now (newest first) and Routines (soonest first), as the computer orders them. */
+@Serializable
+data class PhoneTasks(val now: List<PhoneTask> = emptyList(), val routines: List<PhoneTask> = emptyList())
+
+/** One of today's Journal cards (core/phone/payloads.ts PhoneJournalEntry): an answer Fox showed or an Attention card
+ * the person closed, with its brief or body as [text] and, for an Attention card, its [category] ("Worth Knowing"). */
+@Serializable
+data class JournalEntry(
+    val id: String,
+    val title: String,
+    @Serializable(with = JournalKindSerializer::class) val kind: Kind = Kind.Answer,
+    val at: String = "",
+    val text: String? = null,
+    val category: String? = null,
+) {
+    /** A kind a newer computer sends reads as an answer. */
+    enum class Kind { Answer, Attention }
+}
+
+private object JournalKindSerializer : LenientEnum<JournalEntry.Kind>("app.worldlet.kit.JournalEntry.Kind", JournalEntry.Kind.entries, JournalEntry.Kind.Answer)
+
+/** Reads a JSON value with [inner], or null when it does not read, so one field a newer computer changed never loses the
+ * whole snapshot. */
+@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+private open class OrNull<T : Any>(private val inner: KSerializer<T>) : KSerializer<T?> {
+    override val descriptor: SerialDescriptor = inner.descriptor.nullable
+    override fun serialize(encoder: Encoder, value: T?) {
+        if (value == null) encoder.encodeNull() else encoder.encodeSerializableValue(inner, value)
+    }
+    override fun deserialize(decoder: Decoder): T? {
+        val json = decoder as? JsonDecoder ?: return decoder.decodeSerializableValue(inner)
+        val element = json.decodeJsonElement()
+        if (element is JsonNull) return null
+        return runCatching { json.json.decodeFromJsonElement(inner, element) }.getOrNull()
+    }
+}
+private object TasksOrNull : OrNull<PhoneTasks>(PhoneTasks.serializer())
+private object JournalOrNull : OrNull<List<JournalEntry>>(ListSerializer(JournalEntry.serializer()))
+
 @Serializable
 data class AttentionSnapshot(
     val v: Int = 1,
@@ -139,8 +204,13 @@ data class AttentionSnapshot(
     val later: List<AttentionItem> = emptyList(),
     /** Absent from computers older than this field. */
     val accounts: List<AccountIssue>? = null,
-    /** The Applet world; absent from computers older than it. */
+    /** The Applets tab's Applets; absent from computers older than it. */
     val applets: List<PhoneApplet>? = null,
+    /** The computer's Task panel for the Tasks tab (owner request 2026-10-11); null from older computers, and when what a
+     * newer one sends does not read, so the rest of the Center still shows. */
+    @Serializable(with = TasksOrNull::class) val tasks: PhoneTasks? = null,
+    /** Today's Journal cards for the Today tab, newest first; null as [tasks] is. */
+    @Serializable(with = JournalOrNull::class) val journal: List<JournalEntry>? = null,
 ) {
     /** Now, in the Center's group order; empty groups are left out. */
     val nowGroups: List<Pair<AttentionGroup, List<AttentionItem>>>

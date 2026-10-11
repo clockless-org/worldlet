@@ -6,8 +6,11 @@ import app.worldlet.kit.AttentionItem
 import app.worldlet.kit.AttentionSnapshot
 import app.worldlet.kit.Conversation
 import app.worldlet.kit.ItemFox
+import app.worldlet.kit.JournalEntry
 import app.worldlet.kit.LiveTurn
 import app.worldlet.kit.PhoneApplet
+import app.worldlet.kit.PhoneTask
+import app.worldlet.kit.PhoneTasks
 import app.worldlet.kit.PhoneWidget
 import app.worldlet.kit.Turn
 import app.worldlet.kit.WidgetStateEntry
@@ -16,12 +19,12 @@ import java.time.Instant
 /**
  * Demo mode shows a fixed Center and conversation without a computer or network, for the UI tests and screenshots,
  * the same sample data as the iPhone's `-demo`: `adb shell am start -n app.worldlet.android/.MainActivity --ez demo true
- * [--es page applets|now|later] [--es card t1] [--es applet mail] [--ez live true]` in a debuggable build. Try the demo on
+ * [--es page today|applets|tasks] [--es card t1] [--es applet mail] [--ez live true]` in a debuggable build. Try the demo on
  * the pairing screen shows the same data in any build, for anyone without Worldlet on a computer yet (and Play review);
  * leaving it from Settings goes back to pairing. Nothing here is real data, and the demo never contacts the relay.
  */
 object Demo {
-    /** [page] is the Center's layer at start (applets, now or later), [card] an item whose card opens, [applet] an Applet
+    /** [page] is the Center's tab at start (today, applets or tasks; the old now and later open Today), [card] an item whose card opens, [applet] an Applet
      * whose page opens; [tried] is Try the demo, where Fox answers each line with [REPLY]. */
     /** [order] shows the Order button, as a computer that takes Orders does (`--ez order true`). */
     data class Options(val page: String? = null, val card: String? = null, val live: Boolean = false, val applet: String? = null, val tried: Boolean = false, val order: Boolean = false)
@@ -62,14 +65,41 @@ object Demo {
         item("l1", AttentionGroup.NeedsAction, "Reminders", "Renew the passport", "Expires in March.", snoozed = true, fact = "Back tomorrow · 9:00 AM", art = "scene-passport"),
         item("l2", AttentionGroup.Unseen, "Mail", "Newsletter: spring travel deals", "Fares to Tokyo dropped this week.", fact = "Found yesterday", applet = "mail"),
         item("l3", AttentionGroup.Event, "Calendar", "Book club", "Chapter 7 and 8.", start = 60.0 * 24 * 5, art = "scene-book-club"),
-    ), accounts = listOf(AccountIssue("google-calendar", "Calendar", AccountIssue.Action.Reconnect)), applets = applets())
+    ), accounts = listOf(AccountIssue("google-calendar", "Calendar", AccountIssue.Action.Reconnect)), applets = applets(), tasks = tasks(), journal = journal())
 
-    /** The Applet world: only Applets that work on the phone (owner request 2026-10-07), the person's own first (the
-     * Getty guide, a website they made into an Applet, an ongoing thing), then the rest, with every lamp. */
+    /** The Tasks tab (owner request 2026-10-11): two tasks at work (one Fox drives, with how far it is, and one in Mail,
+     * which opens Mail's page) and two Routines. */
+    private fun tasks() = PhoneTasks(
+        now = listOf(
+            PhoneTask("task-flights", "Comparing flights to Tokyo", "Reading fares on three airlines", "In progress", "fox", progress = 0.6,
+                lines = listOf("Opened the airlines' fare pages", "Found 4 fares under $900", "Checking baggage rules")),
+            PhoneTask("task-inbox", "Sorting the newsletters", "Reading Mail…", "In progress", "mail", applet = "mail"),
+        ),
+        routines = listOf(
+            PhoneTask("routine-news", "Daily news digest", "", "Tomorrow 7:00 AM", "clock", every = "Every day", by = "Fox"),
+            PhoneTask("routine-fares", "Flight price watch", "", "every hour", "clock", every = "Every hour", by = "Fox"),
+        ),
+    )
+
+    /** Today's Journal, newest first: an answer Fox showed and a card the person closed. */
+    private fun journal() = listOf(
+        JournalEntry("journal-answer", "Venues for the team dinner", JournalEntry.Kind.Answer, at(-50.0),
+            text = "Three places near the office seat 14.\n- **The Greenhouse** has a private room.\n- Sam's pick holds the date until Friday."),
+        JournalEntry("journal-weather", "Pollen is high today", JournalEntry.Kind.Attention, at(-180.0),
+            text = "Tree pollen peaks around noon. Keep the windows closed this afternoon.", category = "Worth Knowing"),
+    )
+
+    /** The Applets tab: only Applets that work on the phone (owner request 2026-10-07), the person's own first (the
+     * Getty guide, a website they made into an Applet, a thing they kept, then one not kept yet), then the rest, with every
+     * lamp. */
     private fun applets() = listOf(
         PhoneApplet("widget:wgt-gettydemo1", "Getty Center today", PhoneApplet.Section.Live, PhoneApplet.State.Ready, widget = "wgt-gettydemo1", mine = "page"),
         PhoneApplet("site-demotldraw01", "tldraw", PhoneApplet.Section.Places, PhoneApplet.State.Ready, line = "Website", mine = "site", url = "https://www.tldraw.com/"),
-        PhoneApplet("job-dietdemo0001", "#diet-and-health", PhoneApplet.Section.Jobs, PhoneApplet.State.Ready, line = "OpenClaw · Discord · 42 messages · last yesterday", mine = "conversation"),
+        PhoneApplet("job-dietdemo0001", "#diet-and-health", PhoneApplet.Section.Jobs, PhoneApplet.State.Ready, line = "OpenClaw · Discord · 42 messages · last yesterday", mine = "conversation",
+            recent = listOf(PhoneApplet.Line("Logged lunch: salad and soup", at(-300.0)), PhoneApplet.Line("Ten thousand steps reached", at(-95.0)))),
+        // A thing not kept yet: saying something inside it on the phone makes it an Applet on the computer.
+        PhoneApplet("job-spanishdemo1", "#spanish", PhoneApplet.Section.Jobs, PhoneApplet.State.Ready, line = "Hermes Agent · Telegram · 18 messages · last today",
+            recent = listOf(PhoneApplet.Line("Practised the past tense", at(-70.0)))),
         PhoneApplet("mail", "Mail", PhoneApplet.Section.Live, PhoneApplet.State.Busy, line = "Reading Mail…",
             recent = listOf(PhoneApplet.Line("Checked 12 new emails", at(-40.0)), PhoneApplet.Line("Saved Sam's venue question to Worth Doing", at(-25.0)),
                 PhoneApplet.Line("Reading Mail…", at(-1.0))),

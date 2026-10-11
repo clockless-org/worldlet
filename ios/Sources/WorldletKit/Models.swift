@@ -147,7 +147,7 @@ public struct PhoneApplet: Codable, Identifiable, Hashable, Sendable {
             case .live: "Working now"
             case .accounts: "Accounts"
             case .jobs: "Things"
-            case .places: "In your World"
+            case .places: "More"
             }
         }
     }
