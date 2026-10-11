@@ -73,7 +73,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  new MutationObserver(restack).observe(hud,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
  new MutationObserver(restack).observe(root,{attributes:true,attributeFilter:['class','data-entry-expanded','data-depth','data-detail-open']});mountCompanionPortrait(avatar,{bust:root.classList.contains('fox-first-console')});
  // Order and Feedback (core/distribution/order.ts): one round bug button standing on its own just left of Fox's message
- // bar (owner request 2026-10-06; kept there 2026-10-07) on every channel. In the Alpha and Dev apps on a computer
+ // bar (owner request 2026-10-06; kept there 2026-10-07) on every channel; on the desktop it sits inside the bar beside the microphone (2026-10-11). In the Alpha and Dev apps on a computer
  // enrolled with the admin service it is Order: a click (or ⌘B / Ctrl+B) starts Fox's voice mode (the button turns red;
  // nothing is captured before the click); what is said then goes to the owner's Claude project as a task, with pictures
  // of the window and the recent operation log. A second click finishes early. Nothing else on screen changes while it
@@ -127,7 +127,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // a microphone and Send inside it. Clicking Fox does the same as clicking the bar.
  const entry=make('div','companion-text-entry'),inputState=make('span','companion-input-state');inputState.setAttribute('role','status');const waveform=make('span','companion-input-wave');waveform.setAttribute('aria-hidden','true');for(let i=0;i<17;i++)waveform.append(make('i',''));entry.append(form,inputState,waveform);hud.append(entry);
  const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);controls.append(orderButton);
- // The microphone is the bug's twin on the bar's right, a round button of its own (owner 2026-10-07).
+ // The microphone is the bug's twin on the bar's right, a round button of its own (owner 2026-10-07); on the desktop both stand inside the bar.
  const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');voiceControls.append(speechButton);entry.append(voiceControls);
  form.querySelector('#notionSend')?.classList.add('companion-send-button');
  input.maxLength=3000;input.removeAttribute('placeholder');input.setAttribute('aria-label','Message Fox');
@@ -638,9 +638,10 @@ export function createNativeChat(call){return function({button,input,status,exec
   // A place with no conversation yet invites one; there is no canned greeting.
   // Resting, the bar says how to use it; once typing, it says whom you are asking.
   // In a website the bar is also its address bar (ui/shell/notion-world.ts), and says so (owner request 2026-10-07).
+  // On the desktop the microphone stands inside the short bar, so the resting bar only says “Message Fox” (2026-10-11).
   const content=root.querySelector('#notionContent') as HTMLElement|null,website=!!content&&!content.hidden&&content.dataset.template==='browser';
   entry.dataset.website=String(website);
-  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':quiet?'Message '+companionName+(website?' or type a web address':''):!editing?(matchMedia('(hover: none)').matches?'Tap to type · hold to speak':'Click to type · hold to speak'):website?'Ask about '+context.title+' or type a web address':context.key.split(':')[0]==='overview'?'Ask '+companionName+' anything':'Ask about '+context.title;
+  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':quiet||(!editing&&onDesktop())?'Message '+companionName+(website?' or type a web address':''):!editing?(matchMedia('(hover: none)').matches?'Tap to type · hold to speak':'Click to type · hold to speak'):website?'Ask about '+context.title+' or type a web address':context.key.split(':')[0]==='overview'?'Ask '+companionName+' anything':'Ask about '+context.title;
   speechButton.setAttribute('aria-label',talk.phase==='speaking'?'Interrupt '+companionName:recording?'Send voice message':'Speak to Fox');speechButton.title=talk.on?(talk.phase==='speaking'?'Click to interrupt · Esc ends Talk':'Talk is on · Click to send now · Esc ends Talk'):recording?'Click to send · Esc to cancel':'Click to speak · Hold to speak · Right-click to choose a microphone or Talk with Fox';speechButton.setAttribute('aria-pressed',String(speech&&(recording||starting)));
   // Voice capture is intentionally visual: the waveform acknowledges listening
   // without exposing an unstable partial transcription in the bottom status.
@@ -978,9 +979,6 @@ export function createNativeChat(call){return function({button,input,status,exec
   say:line=>{api.setGuide({source:'proactive:'+line.id,takeover:false,text:line.text,remember:true,actions:[],browsing:line.browsing});api.revealGuide();}
  });
  void call('foxBrowse',{}).then(r=>showBrowse(r?.on),()=>{});
- const backToWorld=make('button','companion-world-button');backToWorld.type='button';backToWorld.innerHTML=uiIcon('home');backToWorld.title='Back to World';backToWorld.setAttribute('aria-label','Back to World');
- backToWorld.onclick=async e=>{e.stopPropagation();backToWorld.disabled=true;try{await requireWorldSurface();}catch{setStatus('Could not reopen World. Try again.');}finally{backToWorld.disabled=false;}};
- controls.prepend(backToWorld);
  root.addEventListener('worldlet:companion-info-opened',()=>panelButton.dataset.panelOpen='true');
  root.addEventListener('worldlet:companion-info-closed',()=>delete panelButton.dataset.panelOpen);
  root.addEventListener('worldlet:companion-info-closed',()=>{clearAvatarPress();clearKeyPress();});
@@ -1022,7 +1020,11 @@ export function createNativeChat(call){return function({button,input,status,exec
   background:(text:string,{displayText}:{displayText?:string}={})=>call('background',{text,shown:displayText,context:{thread:FOX_MAIN_THREAD,key:context.key,location:context.title,state:context.detail,view:structuredClone(visibleContent()),...worldNow(root)}}),
   openText:focusInput,sync:scheduleRender,submit,ask:(text: string,{origin='user',displayText,icon,quiet=false}: {origin?: 'user'|'system';displayText?:string;icon?:string;quiet?:boolean}={})=>submit(text,undefined,false,origin,displayText,icon,quiet)
  };
- window.addEventListener('worldlet:desktop-companion',()=>api.setContext(worldContext));
- if(onDesktop())api.setContext(worldContext);
+ // On the desktop Fox stands with its message bar alone (owner request 2026-10-11): nothing beside Fox or the bar
+ // (Settings, the dock's actions; right-click Fox, the Dock or tray icon goes back to the World), and the bug joins the
+ // microphone as one group inside the bar's right end (desktop-companion.css). The World keeps the bug left of the bar.
+ const placeOrderButton=()=>{if(onDesktop())voiceControls.prepend(orderButton);else controls.append(orderButton);};
+ window.addEventListener('worldlet:desktop-companion',()=>{placeOrderButton();api.setContext(worldContext);});
+ if(onDesktop()){placeOrderButton();api.setContext(worldContext);}
  return api;
 }}

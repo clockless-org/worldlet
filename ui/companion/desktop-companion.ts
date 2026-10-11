@@ -13,7 +13,7 @@ function worldDrawn(){
   requestAnimationFrame(check);
  });
 }
-// Only the bottom Companion cluster is portable; global world chrome is not.
+// Only Fox, its card and its message bar are portable; global world chrome and the buttons beside Fox are not.
 export function installDesktopCompanion(){
  // Native may preserve the inactive world's last frame while the one live
  // page moves to the desktop. Exclude the portable cluster from that frame.
@@ -33,7 +33,7 @@ export function installDesktopCompanion(){
   // OAuth legitimately activates a browser before the world/Companion exists.
   // Do not detach that setup page or create a second fallback Fox on blur.
   if(automatic&&(document.querySelector('#worldStartup')||!hud?.querySelector('.companion-avatar')))return null;
-  const elements=hud?[...hud.querySelectorAll<HTMLElement>('.companion-pet,.fox-name-tag,.companion-avatar canvas,.companion-panel-button,.companion-controls>button,.companion-text-entry,.companion-input-handle,#notionCommand,.companion-input-wave,.companion-controls,.companion-dialogue,.companion-dock .world-capsule')]:[fallback];
+  const elements=hud?[...hud.querySelectorAll<HTMLElement>('.companion-pet,.fox-name-tag,.companion-avatar canvas,.companion-controls>button,.companion-text-entry,.companion-input-handle,#notionCommand,.companion-input-wave,.companion-controls,.companion-dialogue')]:[fallback];
   if(hud&&!isDesktopCompanion())document.documentElement.style.setProperty('--companion-desktop-transform',getComputedStyle(hud).transform);
   const rects=elements.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>e.getBoundingClientRect()).filter(r=>r.width&&r.height);
   if(!rects.length)return null;

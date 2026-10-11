@@ -92,7 +92,7 @@ try{
   // At the end of the bar's row, above the panel, in the material of Fox's round controls (the page's Back, Focus and
   // Refresh are its toolbar's, in the panel, owner request 2026-10-09).
   const props=['backgroundColor','color','borderTopColor','borderTopWidth','height','backdropFilter','boxShadow'];
-  const style=await page.evaluate(props=>{const pick=(e:Element)=>Object.fromEntries(props.map(p=>[p,getComputedStyle(e)[p]]));return {fox:pick(document.querySelector('.companion-controls>.companion-world-button')),offer:pick(document.querySelector('.browser-pip-offer'))};},props);
+  const style=await page.evaluate(props=>{const pick=(e:Element)=>Object.fromEntries(props.map(p=>[p,getComputedStyle(e)[p]]));return {fox:pick(document.querySelector('.companion-controls>.companion-speech-button')),offer:pick(document.querySelector('.browser-pip-offer'))};},props);
   assert.deepEqual(style.offer,style.fox,'the offer is the same control as Fox\'s');
   let r=await rects(page);
   assert.ok(r.offer.y+r.offer.height<=r.panel.y&&r.offer.x+r.offer.width<=r.panel.x+r.panel.width&&r.offer.x+r.offer.width>=r.panel.x+r.panel.width-24,'the offer ends the bar\'s row above the panel: '+JSON.stringify({offer:r.offer,panel:r.panel}));

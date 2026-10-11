@@ -209,7 +209,11 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  if(process.platform==='darwin'){
   try{
    await desktopCompanion(host.use<DesktopCompanionService>(DESKTOP_COMPANION),window,view,mark,
-    ()=>wait('Fox’s one-time hint: Back to World or Quit Completely',dialogue('/Back to World/')+'&&'+dialogue('/Quit Completely/'),10));
+    async()=>{
+     await wait('Fox’s one-time hint: Back to World or Quit Completely',dialogue('/Back to World/')+'&&'+dialogue('/Quit Completely/'),10);
+     // On the desktop Fox stands with its bar alone: no Settings or dock actions beside it, the microphone inside the bar (owner request 2026-10-11).
+     await wait('Fox alone with its bar on the desktop, the microphone inside it',`(()=>{const shown=s=>[...document.querySelectorAll(s)].some(e=>e.getClientRects().length);const bar=document.querySelector('#notionCommand')?.getBoundingClientRect(),mic=document.querySelector('.companion-speech-button')?.getBoundingClientRect();return !shown('.companion-side>button,.companion-dock button')&&!!bar&&!!mic&&mic.width>0&&mic.left>=bar.left&&mic.right<=bar.right;})()`,10);
+    });
   }catch(error){if(COMPANION_BLOCKING)throw error;console.log('ADVISORY FAIL onboarding flow, desktop Companion: '+message(error));}
  }
  console.log(`PASS onboarding flow: mock sign-in → apps → tour → Attention → Fox’s first task finished in the browser → confirmed → first win → tour replayed from the Tutorial switch → Fox fetched the inbox and drafted a reply in conversation, with no failed background work (${Math.round((Date.now()-started)/1000)}s)`);
