@@ -73,7 +73,8 @@ export async function runCalendarTool(call:(action:string,body:any)=>Promise<any
  }
  if(op==='change'){
   const allDay=typeof args.allDay==='boolean'?args.allDay:event.allDay;
-  const start=args.start!==undefined?read(args.start,allDay):allDay===event.allDay?event.start:read(event.start,allDay);
+  // A timed event made all-day keeps its local day (its stored start is a UTC instant).
+  const start=args.start!==undefined?read(args.start,allDay):allDay===event.allDay?event.start:allDay?localDay(Date.parse(event.start)):read(event.start,allDay);
   if(!start)return {error:'start is not a date'+(allDay?' (YYYY-MM-DD).':' and time.')};
   // A new start keeps the event's length unless a new end is given.
   const length=event.allDay?0:Date.parse(event.end)-Date.parse(event.start);
