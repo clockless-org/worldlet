@@ -160,11 +160,11 @@ await withBrowser(fileAccess,async browser=>{
  const order=page.locator('.companion-order-button');
  await page.evaluate(()=>{(window as any).worldletDesktopCompanion(false);(window as any).orderReady=true;window.dispatchEvent(new Event('worldlet:app-update'));});
  await order.waitFor();await settle();
- {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();assert(bug.width===36&&bug.x>=bar.x&&bug.x+bug.width<=micBox.x,'In the World the bug sits inside the bar just left of the microphone '+JSON.stringify({bug,micBox,bar}));}
+ {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();assert(bug.width===36&&bug.x>=bar.x&&bug.x-bar.x<=6&&bug.x+bug.width<micBox.x,'In the World the bug sits inside the bar at its left end '+JSON.stringify({bug,micBox,bar}));}
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();
  {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();
   assert.equal(await order.evaluate(e=>e.parentElement===document.querySelector('.companion-speech-button').parentElement),true,'The bug and the microphone are one group on the desktop');
-  assert(bug.width===36&&bug.x>=bar.x&&bug.x+bug.width<=micBox.x&&micBox.x-(bug.x+bug.width)<=4&&Math.abs(bug.y-micBox.y)<1,'The bug sits inside the bar just left of the microphone '+JSON.stringify({bug,micBox,bar}));
+  assert(bug.width===36&&bug.x>=bar.x&&bug.x-bar.x<=6&&bar.x+bar.width-(micBox.x+micBox.width)<=6&&Math.abs(bug.y-micBox.y)<1,'The bug sits inside the bar at its left end, the microphone at its right '+JSON.stringify({bug,micBox,bar}));
   assert.equal(bar.width,168);
   const crop=await page.evaluate(()=>(window as any).worldletCompanionGeometry());assert(crop.x<=bar.x&&crop.x+crop.width>=bar.x+bar.width);
   await page.screenshot({path:'/tmp/worldlet-companion-desktop-order.png',omitBackground:true,clip:crop});}

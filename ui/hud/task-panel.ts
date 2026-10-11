@@ -1,11 +1,15 @@
 // The World's tasks beside Fox (owner request 2026-10-11: "小狐狸在两边，中间是我们直接跟他交流的入口，两边就是这种任务正在
-// 运行啊或者即将运行的"). Fox and its message bar stay in the middle as the way to talk to the Agent; what the Agent is
-// doing now stands on Fox's left and the Routines about to run on its right, each one small card in the same style:
+// 运行啊或者即将运行的"). Fox and its message bar stay in the middle as the way to talk to the Agent; the scheduled
+// Routines stand on Fox's left and what the Agent is doing now on its right (owner request 2026-10-11, "routines 放左边
+// … 正在做的 task 放右边"), each one small card in the same style:
 // its picture, a short name and one line of what it is doing or when it runs. A running card has a turning ring and a
 // thin bar under it (how far along when that is known); a coming routine has a clock. What is finished lives only in
 // the Journal. Core decides every row and its words (core/tasks/task-panel.ts); this only draws them:
 // - Up to two cards a side in a wide World, one in a narrower one, then "+N" for the rest; under 820px wide only the
 //   count, which opens the whole list.
+// - A card moves to where its work is: a Routine that starts runs across from the left to the right, and a turn in
+//   which Fox does something (a tool runs) rises from the message bar into the right as a card of its own, gone when
+//   the turn ends.
 // - A running card opens a small window above it with everything that task said (the step, when it started, who does
 //   it), or, while Fox drives a web page, the page itself. A routine opens a read-only popover saying when, how often
 //   and who runs it.
@@ -23,20 +27,24 @@ const REFRESH_MS=30_000;
 const PAGE_MS=3000;
 /** Status lines kept for a running task's window. */
 const LOG_MAX=40;
+/** How long the pointer rests on a card before its window opens, and has left before it closes. */
+const HOVER_MS=150;
+/** How long a Routine card that left is remembered, so its work's card can come from it. */
+const MOVE_MS=90_000;
 /** Cards a side: two in a wide World, one in a narrower one, none (only the count) in a narrow one. */
 const cardsASide=()=>innerWidth>=1260?2:innerWidth>=820?1:0;
 const CLOCK='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
 const el=<K extends keyof HTMLElementTagNameMap>(tag:K,cls='',text?:string)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;};
 
 export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:string)=>{}}:{call?:(action:string,body?:object)=>Promise<any>;openApplet?:(id:string)=>void}={}){
- const panel=el('aside','task-panel');panel.hidden=true;panel.setAttribute('aria-label','Tasks: doing now and next');
+ const panel=el('aside','task-panel');panel.hidden=true;panel.setAttribute('aria-label','Tasks: scheduled and doing now');
  const side=(group:'now'|'routines',label:string)=>{
   const part=el('section','task-group');part.dataset.group=group;part.setAttribute('aria-label',label);
   const cards=el('div','task-cards'),more=el('button','task-more');more.type='button';more.setAttribute('aria-haspopup','dialog');
   part.append(el('h2','task-group-heading',label),cards,more);
   return {part,cards,more};
  };
- const now=side('now','Doing now'),next=side('routines','Next');
+ const now=side('now','Doing now'),next=side('routines','Scheduled');
  const popover=el('div','task-popover');popover.hidden=true;popover.setAttribute('role','dialog');
  panel.append(now.part,next.part,popover);root.append(panel);
  panel.addEventListener('pointerdown',e=>{e.stopPropagation();(e as any).worldletKeepFox=true;});
@@ -51,8 +59,11 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  /** What each running task has said, oldest first, kept while it runs: its window's lines. */
  const logs=new Map<string,{at:number;text:string}[]>();
 
+ /** Whether the open window was clicked open (it stays) rather than pointed at (it goes with the pointer). */
+ let pinned=false,hover=0;
+ popover.addEventListener('pointerleave',()=>{if(!pinned)hover=window.setTimeout(()=>{if(!pinned&&!popover.matches(':hover')&&!panel.querySelector('.task-card:hover'))closePopover();},HOVER_MS);});
  function closePopover(){
-  popover.hidden=true;popover.replaceChildren();shown='';
+  popover.hidden=true;popover.replaceChildren();shown='';pinned=false;
   for(const open of panel.querySelectorAll('[aria-expanded=true]'))open.setAttribute('aria-expanded','false');
  }
  document.addEventListener('pointerdown',e=>{if(!panel.contains(e.target as Node))closePopover();},true);
@@ -63,7 +74,7 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  function place(anchor:HTMLElement){
   popover.hidden=false;
   const box=anchor.getBoundingClientRect(),width=popover.offsetWidth;
-  popover.style.left=Math.max(12,Math.min(innerWidth-width-12,anchor.closest('[data-group=now]')?box.right-width:box.left))+'px';
+  popover.style.left=Math.max(12,Math.min(innerWidth-width-12,anchor.closest('[data-group=routines]')?box.right-width:box.left))+'px';
   popover.style.bottom=Math.max(12,innerHeight-box.top+8)+'px';
   anchor.setAttribute('aria-expanded','true');
  }
@@ -112,10 +123,10 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  }
  function showAll(group:'now'|'routines',anchor:HTMLElement){
   closePopover();shown='all:'+group;
-  popover.dataset.kind='list';popover.setAttribute('aria-label',group==='now'?'Doing now':'Next');
+  popover.dataset.kind='list';popover.setAttribute('aria-label',group==='now'?'Doing now':'Scheduled');
   const list=el('div','task-list');
   for(const row of model?.[group].rows??[])list.append(card(row,true));
-  popover.append(el('strong','task-popover-title',group==='now'?'Doing now':'Next'),list);
+  popover.append(el('strong','task-popover-title',group==='now'?'Doing now':'Scheduled'),list);
   place(anchor);
  }
  function card(row:TaskRow,inList=false){
@@ -134,11 +145,18 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   }
   button.title=[row.title,row.group==='now'?row.status:row.when].filter(Boolean).join(' · ');
   button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-expanded','false');
+  // Pointing at a card opens its window above it, like a dock (owner request 2026-10-11: "鼠标移上去，然后它上面显示一个大的
+  // 框"); it closes when the pointer leaves card and window. A click keeps it open until a click elsewhere.
+  if(!inList){
+   button.onpointerenter=e=>{if(e.pointerType!=='mouse'||locked()||pinned)return;clearTimeout(hover);hover=window.setTimeout(()=>{if(shown!==row.id)showTask(row,button);},HOVER_MS);};
+   button.onpointerleave=()=>{clearTimeout(hover);if(!pinned)hover=window.setTimeout(()=>{if(!pinned&&!popover.matches(':hover')&&!button.matches(':hover'))closePopover();},HOVER_MS);};
+  }
   button.onclick=e=>{
-   e.stopPropagation();if(locked())return;
-   if(shown===row.id){closePopover();return;}
+   e.stopPropagation();clearTimeout(hover);if(locked())return;
+   if(shown===row.id&&pinned){closePopover();return;}
+   pinned=true;if(shown===row.id)return;
    // A card in a side's whole list opens its window where the list stood.
-   showTask(row,inList?(row.group==='now'?now:next).more:button);
+   showTask(row,inList?(row.group==='now'?now:next).more:button);pinned=true;
   };
   return button;
  }
@@ -153,10 +171,37 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   cards.replaceChildren(...rows.slice(0,limit).map(row=>card(row)));
   const rest=rows.length-Math.min(limit,rows.length);
   more.hidden=!rest;
-  more.textContent=limit?'+'+rest:(group==='now'?'Doing now ':'Next ')+rows.length;
-  more.setAttribute('aria-label',(group==='now'?'Doing now':'Next')+': all '+rows.length);
+  more.textContent=limit?'+'+rest:(group==='now'?'Doing now ':'Scheduled ')+rows.length;
+  more.setAttribute('aria-label',(group==='now'?'Doing now':'Scheduled')+': all '+rows.length);
   more.dataset.count=limit?'more':'all';
-  more.onclick=e=>{e.stopPropagation();if(locked())return;if(shown==='all:'+group)closePopover();else showAll(group,more);};
+  more.onclick=e=>{e.stopPropagation();if(locked())return;if(shown==='all:'+group)closePopover();else{showAll(group,more);pinned=true;}};
+ }
+ /** Where each Routine card last stood, by its name, kept a while after it leaves: a Routine's card goes when its time
+  * comes, often a redraw before its work reports in. */
+ const lastSeen=new Map<string,{box:DOMRect;at:number}>();
+ /** Each running card's id before a redraw, with the Routine cards' places noted. */
+ function before(){
+  for(const c of next.cards.querySelectorAll<HTMLElement>('.task-card')){const name=c.querySelector('.task-title')?.textContent||'';if(name)lastSeen.set(name,{box:c.getBoundingClientRect(),at:Date.now()});}
+  for(const [name,seen] of lastSeen)if(Date.now()-seen.at>MOVE_MS)lastSeen.delete(name);
+  return new Set([...now.cards.querySelectorAll<HTMLElement>('.task-card')].map(c=>c.dataset.taskId!));
+ }
+ /** A new running card comes from where its work was: the Routine card of the same name on the left, or, for a turn of
+  * the conversation, the message bar. Cards that came some other way (a follow-up turns into its place,
+  * ui/artifacts/artifact-turn.ts) simply appear. */
+ function arrive(running:Set<string>){
+  if(panel.hidden)return;
+  const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for(const c of now.cards.querySelectorAll<HTMLElement>('.task-card')){
+   if(running.has(c.dataset.taskId!)||typeof c.animate!=='function')continue;
+   const name=c.querySelector('.task-title')?.textContent||'',to=c.getBoundingClientRect();
+   const bar=c.dataset.taskId==='fox:turn'?root.querySelector<HTMLElement>('.companion-text-entry')?.getBoundingClientRect():undefined;
+   const from=lastSeen.get(name)?.box??(bar?.width?bar:undefined);
+   if(!from?.width||!to.width)continue;
+   c.dataset.arrived=lastSeen.has(name)?'routine':'bar';
+   if(still)continue;
+   const dx=from.left+from.width/2-(to.left+to.width/2),dy=from.top+from.height/2-(to.top+to.height/2);
+   c.animate([{transform:`translate(${dx}px,${dy}px) scale(${Math.min(1,from.width/to.width)})`,opacity:.4},{transform:'none',opacity:1}],{duration:520,easing:'cubic-bezier(.3,.7,.3,1)'});
+  }
  }
  function render(){
   model=taskPanel({...input,page,fox:[...fox.values()],daily},Date.now());
@@ -166,12 +211,14 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   const live=new Set(model.now.rows.map(row=>row.id));for(const id of logs.keys())if(!live.has(id))logs.delete(id);
   // An open window or list is drawn again with what is new, or closes when its task has ended.
   const open=shown,anchorOf=(id:string)=>panel.querySelector<HTMLElement>(`.task-card[data-task-id="${CSS.escape(id)}"]`);
+  const was=before();
   fill('now',now);fill('routines',next);
   panel.dataset.routines=String(!!model.routines.total);
   panel.dataset.working=String(!!model.now.total);
   panel.hidden=model.empty;
+  arrive(was);
   if(!open)return;
-  closePopover();
+  const keep=pinned;closePopover();pinned=keep;
   if(open.startsWith('all:')){const group=open.slice(4) as 'now'|'routines',more=(group==='now'?now:next).more;if(model[group].total&&!more.hidden)showAll(group,more);return;}
   const row=[...model.now.rows,...model.routines.rows].find(r=>r.id===open),anchor=row&&(anchorOf(row.id)||(row.group==='now'?now:next).more);
   if(row&&anchor&&!anchor.hidden)showTask(row,anchor);

@@ -202,41 +202,47 @@
 /* Weather is only disabled while the scene is presented (recording, presets); it
    still reports the sky, so it keeps the clock's full strength. */
 .native-console .world-environment #worldWeather:disabled{opacity:1;cursor:default}
-/* Tasks beside Fox (ui/hud/task-panel.ts, owner request 2026-10-11): what the Agent is doing now on Fox's left, the
-   Routines about to run on its right, on the message bar's line, each one small card in the same style. Fox and its
+/* Tasks beside Fox (ui/hud/task-panel.ts, owner requests 2026-10-11): the scheduled Routines on Fox's left, what the
+   Agent is doing now on its right, on the message bar's line, each one small card in the same style. Fox and its
    message bar stay in the middle. Only the cards take the pointer; the strip between them lets taps reach the World. */
 .native-console .task-panel{--task-ink:#fff9e9;--task-muted:#d6dde6;--task-accent:var(--ui-hud-focus,#f6b445);position:absolute;inset:auto 0 0;height:0;z-index:24;pointer-events:none;color:var(--task-ink);font:500 var(--ui-text-label)/1.35 var(--ui-font-ui)}
 .native-console .task-panel[hidden],.native-console .task-group[hidden],.native-console .task-more[hidden]{display:none}
-.native-console .task-group{position:absolute;bottom:16px;display:flex;align-items:center;gap:8px}
-.native-console .task-group[data-group=now]{right:calc(50% + 170px);flex-direction:row-reverse}
-.native-console .task-group[data-group=routines]{left:calc(50% + 170px)}
+.native-console .task-group{position:absolute;bottom:18px;display:flex;align-items:center;gap:8px}
+.native-console .task-group[data-group=routines]{right:calc(50% + 170px);flex-direction:row-reverse}
+.native-console .task-group[data-group=now]{left:calc(50% + 170px)}
 .native-console .task-group-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .native-console .task-cards{display:flex;gap:8px}
-.native-console .task-group[data-group=now] .task-cards{flex-direction:row-reverse}
+.native-console .task-group[data-group=routines] .task-cards{flex-direction:row-reverse}
 .native-console :is(.task-card,.task-more,.task-page):focus-visible{outline:2px solid var(--ui-hud-focus);outline-offset:2px}
 /* One card: its picture, a short name and one line under it. The same size, glass and type on both sides. */
-.native-console .task-card{position:relative;display:flex;align-items:center;gap:10px;box-sizing:border-box;width:208px;height:48px;padding:0 12px 0 8px;margin:0;border:1px solid #ffffff2e;border-radius:16px;overflow:hidden;appearance:none;background:#17283fcc;box-shadow:0 4px 14px #0000003d;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:inherit;font:inherit;text-align:left;cursor:pointer;pointer-events:auto}
-.native-console .task-card:hover,.native-console .task-card[aria-expanded=true]{background:#1d3150e6;border-color:#ffffff59}
-.native-console .task-card-icon{position:relative;flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#ffffff14}
-.native-console .task-card-icon img{width:26px;height:26px;object-fit:contain;border-radius:6px}
+/* Each card is a small dock tile in the message bar's glass with its round ends, on the bar's line (owner requests
+   2026-10-11: "每一个那个框可以再稍微小一点", "routines 和 tasks … 样式风格和 inputbox 一致，routines 可以浅一点，短一点"):
+   its picture, its short name, one line of what it is doing or when it runs and, while it runs, a thin progress line.
+   A scheduled Routine's card is lighter and shorter than a running one. Pointing at a card opens its window. */
+.native-console .task-card{position:relative;display:flex;align-items:center;gap:7px;box-sizing:border-box;width:180px;height:40px;min-height:0;padding:0 14px 0 5px;margin:0;border:1px solid var(--system-glass-line);border-radius:20px;overflow:hidden;appearance:none;background:var(--system-glass-fill);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);color:inherit;font:inherit;text-align:left;cursor:pointer;pointer-events:auto}
+.native-console .task-card:hover,.native-console .task-card[aria-expanded=true]{background:var(--system-glass-hover)}
+.native-console .task-group[data-group=routines] .task-card{width:156px;background:color-mix(in srgb,var(--system-glass-fill) 55%,transparent);border-color:color-mix(in srgb,var(--system-glass-line) 70%,transparent)}
+.native-console .task-group[data-group=routines] .task-card:hover,.native-console .task-group[data-group=routines] .task-card[aria-expanded=true]{background:var(--system-glass-fill)}
+.native-console .task-card-icon{position:relative;flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#ffffff14}
+.native-console .task-card-icon img{width:22px;height:22px;object-fit:contain;border-radius:6px}
 .native-console .task-card-icon[data-icon=fox]{border-radius:50%}
-.native-console .task-card-icon[data-icon=fox] img{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:50% 20%}
-.native-console .task-card-icon[data-icon=page] img{width:32px;height:32px;object-fit:cover;object-position:top center}
+.native-console .task-card-icon[data-icon=fox] img{width:26px;height:26px;border-radius:50%;object-fit:cover;object-position:50% 20%}
+.native-console .task-card-icon[data-icon=page] img{width:28px;height:28px;object-fit:cover;object-position:top center}
 .native-console .task-card-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 /* Running: a ring turns around its picture. Next: a clock in a dashed ring. */
 .native-console .task-card[data-state=running] .task-card-icon::after{content:'';position:absolute;inset:-3px;border-radius:inherit;border:2px solid var(--task-accent);border-right-color:transparent;border-bottom-color:transparent;animation:task-turn 1.4s linear infinite}
-.native-console .task-card[data-state=next] .task-card-icon{width:28px;height:28px;margin:0 2px;border:1.5px dashed color-mix(in srgb,var(--task-accent) 70%,transparent);border-radius:50%;background:#ffffff10;color:var(--task-accent)}
+.native-console .task-card[data-state=next] .task-card-icon{width:24px;height:24px;margin:0 2px;border:1.5px dashed color-mix(in srgb,var(--task-accent) 70%,transparent);border-radius:50%;background:#ffffff10;color:var(--task-accent)}
 .native-console .task-card-text{display:flex;flex-direction:column;flex:1;min-width:0}
-.native-console .task-card .task-title{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.native-console .task-card .task-when{font-size:11.5px;color:var(--task-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console .task-card .task-title{font-weight:600;font-size:12.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.native-console .task-card .task-when{font-size:11px;line-height:1.25;color:var(--task-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .native-console .task-card[data-state=next] .task-when{color:var(--task-accent);font-variant-numeric:tabular-nums}
 .native-console .task-card[data-state=running] .task-when::before{content:'';display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:var(--task-accent);vertical-align:1px;animation:task-pulse 1.6s ease-in-out infinite}
-.native-console .task-card-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:#ffffff14;overflow:hidden}
+.native-console .task-card-bar{position:absolute;left:16px;right:16px;bottom:2px;height:2px;border-radius:1px;background:#ffffff1f;overflow:hidden}
 .native-console .task-card-bar i{display:block;height:100%;border-radius:0 2px 2px 0;background:var(--task-accent);transition:width .4s ease}
 .native-console .task-card-bar[data-unknown=true] i{width:30%;animation:task-sweep 1.8s ease-in-out infinite}
 /* The rest of a side: "+2", or in a narrow World the whole count. */
-.native-console .task-more{flex:none;min-height:30px;padding:4px 11px;margin:0;border:1px solid #ffffff2e;border-radius:15px;appearance:none;background:#17283fb3;box-shadow:0 4px 12px #0003;color:inherit;font:600 12px/1.4 var(--ui-font-ui);white-space:nowrap;cursor:pointer;pointer-events:auto}
-.native-console .task-more:hover,.native-console .task-more[aria-expanded=true]{background:#1d3150e6}
+.native-console .task-more{flex:none;min-height:32px;padding:4px 11px;margin:0;border:1px solid var(--system-glass-line);border-radius:16px;appearance:none;background:var(--system-glass-fill);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);color:inherit;font:600 12px/1.4 var(--ui-font-ui);white-space:nowrap;cursor:pointer;pointer-events:auto}
+.native-console .task-more:hover,.native-console .task-more[aria-expanded=true]{background:var(--system-glass-hover)}
 /* What a card opens, above it: a running task's window, the page Fox drives, a routine's facts, or a side's list. */
 .native-console .task-popover{position:fixed;z-index:40;box-sizing:border-box;width:300px;max-height:min(60vh,440px);overflow:auto;padding:12px 14px;border:1px solid #ffffff2e;border-radius:14px;background:#0f1a2bf2;box-shadow:0 10px 28px #0000005c;color:var(--task-ink);pointer-events:auto}
 .native-console .task-popover[hidden]{display:none}
@@ -245,7 +251,7 @@
 .native-console .task-popover-facts dt{color:var(--task-muted)}
 .native-console .task-popover-facts dd{margin:0}
 .native-console .task-list{display:flex;flex-direction:column;gap:6px}
-.native-console .task-list .task-card{width:100%}
+.native-console .task-list .task-card,.native-console .task-group[data-group] .task-list .task-card{width:100%;height:44px}
 .native-console .task-terminal{position:relative;display:flex;flex-direction:column;gap:2px;min-height:40px;padding:6px 32px 6px 8px;border-radius:8px;background:#0c100e;font:400 11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#cfeedd}
 .native-console .task-terminal-fox{position:absolute;right:4px;bottom:4px;width:24px;height:24px;object-fit:contain;filter:drop-shadow(0 2px 4px #0008);animation:task-fox-bob 2.4s ease-in-out infinite}
 .native-console .task-terminal-lines{display:flex;flex-direction:column}
@@ -268,8 +274,8 @@
 @media(max-height:560px){.native-console .task-panel{display:none}}
 /* Narrow: only each side's count beside the message bar, which opens the whole list. */
 @media(max-width:819px){
- .native-console .task-group[data-group=now]{right:calc(50% + 160px)}
- .native-console .task-group[data-group=routines]{left:calc(50% + 170px)}
+ .native-console .task-group[data-group=routines]{right:calc(50% + 160px)}
+ .native-console .task-group[data-group=now]{left:calc(50% + 170px)}
 }
 /* The first run belongs to the person and the tour: only Routines show. */
 .notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step]) .task-panel .task-group[data-group=now]{display:none}

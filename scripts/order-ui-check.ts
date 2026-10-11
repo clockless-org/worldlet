@@ -23,10 +23,11 @@ await withBrowser(fileAccess,async browser=>{
  const tell=page.locator('.companion-order-button'),bar=page.locator('#notionCommand'),root=page.locator('.notion-world');
  await tell.waitFor({state:'visible'});
  assert.equal(await page.locator('.companion-side .companion-order-button').count(),0,'no longer beside Fox');
- // Inside the bar's right end, just left of the microphone (owner request 2026-10-11: both inside the message bar).
+ // Inside the bar: the bug at its left end, the microphone at its right (owner requests 2026-10-11: both inside the
+ // message bar, "inputbox bug icon放左边").
  {const t=(await tell.boundingBox())!,b=(await bar.boundingBox())!,m=(await page.locator('.companion-speech-button').boundingBox())!;
   assert(t.x>=b.x&&t.x+t.width<=b.x+b.width,'inside the message bar: '+JSON.stringify({t,b}));
-  assert(m.x>=t.x+t.width&&m.x+m.width<=b.x+b.width,'the microphone just right of it, inside the bar');
+  assert(t.x-b.x<=6&&m.x>=t.x+t.width&&b.x+b.width-(m.x+m.width)<=6,'the bug at the bar’s left end, the microphone at its right: '+JSON.stringify({t,m,b}));
   assert.equal(await page.locator('#notionCommand .companion-speech-button').count(),0,'no microphone inside the bar');
   assert(Math.abs(m.width-t.width)<1&&Math.abs(m.y-t.y)<1,'the twin of the bug');
   assert(Math.abs((t.y+t.height/2)-(b.y+b.height/2))<2,'centred in the bar');
@@ -114,4 +115,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await away.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='order'&&c.operation==='stopped').map((c:any)=>c.reason)),['cancelled'],'the host hears why, as one bucket');
  assert.deepEqual(awayErrors,[]);
 });
-console.log('PASS Order UI: the bug inside Fox’s message bar beside the microphone where Orders can be sent, Space opens typing, ⌘B/Ctrl+B presses the bug; where the host allows it an Order: pointing at it changes nothing, click starts listening with only the button showing it, second click stops and the button spins until sent, the words go to Claude with the place and Fox confirms, or says plainly the instant post failed and why; on Beta there is no bug button and Feedback is the World’s corner button.');
+console.log('PASS Order UI: the bug at the left end of Fox’s message bar, the microphone at its right, where Orders can be sent, Space opens typing, ⌘B/Ctrl+B presses the bug; where the host allows it an Order: pointing at it changes nothing, click starts listening with only the button showing it, second click stops and the button spins until sent, the words go to Claude with the place and Fox confirms, or says plainly the instant post failed and why; on Beta there is no bug button and Feedback is the World’s corner button.');
