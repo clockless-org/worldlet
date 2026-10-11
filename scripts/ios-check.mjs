@@ -57,8 +57,10 @@ console.log(`Simulator: ${device.name} (${device.udid})`);
 try{
  const test=run('xcodebuild',['-project','Worldlet.xcodeproj','-scheme','Worldlet','-configuration','Debug','-destination',`platform=iOS Simulator,id=${device.udid}`,
   '-derivedDataPath',path.join(out,'derived'),'-resultBundlePath',path.join(out,'UITests.xcresult'),
-  // A UI test that hangs fails on its own after two minutes and names itself, instead of holding the whole run.
-  '-test-timeouts-enabled','YES','-default-test-execution-time-allowance','60','-maximum-test-execution-time-allowance','120',
+  // A UI test that hangs fails on its own after three minutes and names itself, instead of holding the whole run.
+  // Not sooner: testApplets walks the Applets tab, an Applet's page and its website and takes 73 s on a GitHub macOS
+  // runner; past a one-minute allowance it failed although it passed, and the hang report it left took minutes more.
+  '-test-timeouts-enabled','YES','-default-test-execution-time-allowance','180','-maximum-test-execution-time-allowance','180',
   'CODE_SIGNING_ALLOWED=NO','test'],{minutes:40,log:path.join(out,'test.log')});
  const cases=test.out.split('\n').filter(l=>/^Test Case .* (passed|failed)/.test(l));
  for(const line of cases)console.log('  '+line.replace(/^Test Case '-\[\S+ (\w+)\]' /,'$1 '));
