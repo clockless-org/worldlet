@@ -1,7 +1,7 @@
 import {modelFailure} from './model-failure.ts';
 import type {HarnessLocation} from '../../contracts/harness-services.ts';
 
-// What Settings › Model says about Fox's model (owner request 2026-10-06: connect models fully in Settings and
+// What Settings › Your Agent says about Fox's model (owner request 2026-10-06: connect models fully in Settings and
 // see and fix every connection problem there). The host's `modelHealth` reads the Agent's model status and
 // how the last reply ended; this turns that into plain words and the fixes that fit.
 export type ModelPath='codex'|'key'|'agent'|'remote'|'none';

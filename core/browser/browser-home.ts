@@ -5,7 +5,7 @@ import type {PageStore} from './page-resume.ts';
  * The Browser Applet's home page (owner request 2026-10-06). The Browser is entered only from its
  * own entry; pages opened from anywhere else open where the person is, not in it. Entering it again
  * within `idleMs` of leaving resumes the page that was showing; after that it starts on the home
- * page, Google unless the person chose another in Settings › Browser. Kept on this device only.
+ * page, Google unless the person chose another in Settings › General. Kept on this device only.
  */
 export const BROWSER_HOME=Object.freeze({url:'https://www.google.com/',idleMs:30*60_000});
 const STORE_KEY='worldlet-browser-home-v1';

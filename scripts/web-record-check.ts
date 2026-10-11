@@ -188,7 +188,7 @@ try{
  assert.ok(removed>0);
  const kept=ledger.webRecords(found.visits[0].id).records.map(r=>r.kind);
  assert.ok(kept.includes('input')&&kept.includes('click')&&!kept.some(k=>RAW_KINDS.includes(k as any)),'pruning keeps page text and interactions: '+kept.join(','));
- // The person deletes recordings from Settings › Privacy (`recordings`, `deleteRecordings`); Fox cannot.
+ // The person deletes recordings from Settings › Privacy and data (`recordings`, `deleteRecordings`); Fox cannot.
  const now=Date.now()/1000,other=(id:string,site:string,body:string)=>ledger.recordWeb([{id,site,url:'https://'+site+'/',title:site,applet:'browser',startedAt:now,endedAt:now}],[{visit:id,at:now,kind:'text',url:'https://'+site+'/',meta:{},body}]);
  other('keep-1','example.com','Snorlax sleeps');other('keep-2','play.example.com','Snorlax wakes');other('keep-3','other_site.com','Pidgey flies');other('keep-4','otherxsite.com','Pidgey lands');
  const controls={agent:false,sample:false,ledger,recorders:[] as unknown[]};

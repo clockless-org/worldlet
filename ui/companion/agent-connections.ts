@@ -1,4 +1,4 @@
-/** Settings › Integrations, the Agent's part: the MCP servers and chat accounts the person set up in each Agent on this
+/** Settings › Accounts, the Agent's part: the MCP servers and chat accounts the person set up in each Agent on this
  * computer (host `harnessConnections`, contracts/harness-services.ts HarnessConnections), what each was last used for,
  * and Add or Remove for a server, each run as that Agent's own command only after the person confirmed the exact
  * command shown. Never a secret: addresses and commands arrive masked. An Agent whose connections cannot be changed

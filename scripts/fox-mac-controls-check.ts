@@ -37,7 +37,7 @@ await withBrowser(fileAccess,async browser=>{
  // Below Fox in World: keyboard, microphone and Companion. Back to World appears only in the desktop Companion.
  assert.equal(await page.locator('.companion-controls>button:visible:not(.companion-order-button,.companion-speech-button)').count(),0,'one message bar replaces the icon row');assert.equal(await page.locator('.companion-world-button').isVisible(),false);assert.equal(await handle.getAttribute('aria-label'),'Message Fox');assert.equal(await handle.inputValue(),'','the bar carries no hint or status copy as text');
  assert.equal(await fox.getAttribute('title'),null,'no tooltip floats beside Fox (owner report 2026-10-07); the bar says click to type, hold to speak');assert.equal(await mic.getAttribute('title'),'Click to speak · Hold to speak · Right-click to choose a microphone or Talk with Fox');
- const openSettings=async()=>{if(!await panel.isVisible())await openCompanionPanel(page);await page.getByRole('tab',{name:'Settings',exact:true}).click();await panel.locator('section.companion-settings').waitFor();};
+ const openSettings=async()=>{if(!await panel.isVisible())await openCompanionPanel(page,'Settings');await panel.locator('section.companion-settings').waitFor();};
  const dock=page.locator('.world-actions');
  const checkTextActions=async()=>{
   const bodySize=await bubble.locator('#worldConversation').evaluate(e=>getComputedStyle(e).fontSize);
@@ -136,7 +136,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await bubble.getByRole('button',{name:'Back to world',exact:true}).count(),0,'setup spends a line on leaving');
  assert.doesNotMatch(await bubble.innerText(),/Connections use Hermes/,'setup explains its own plumbing');
  assert.doesNotMatch(await bubble.innerText(),/Bring .* to life/,'setup repeats the region already on screen');await checkTextActions();await page.screenshot({path:'output/fox-mac/source-actions.png'});await page.locator('#notionStage').click({position:{x:1320,y:120}});
- // Fox's model is the Agent's: the model screen is Settings › Model, never a model guide in the bubble.
+ // Fox's model is the Agent's: the model screen is Settings › Your Agent, never a model guide in the bubble.
  await page.evaluate(()=>worldletShowControls('model'));await page.locator('#companionInfo [data-section=Settings] [data-setting=model][aria-current=true]').waitFor();
  assert.equal(await bubble.locator('.fox-model-catalog').count(),0,'no model guide in the bubble');assert.equal(await page.evaluate(()=>calls.some(c=>['modelCatalog','modelConfigure','modelLogin'].includes(c.action))),false);
  await page.screenshot({path:'output/fox-mac/model.png'});await page.keyboard.press('Escape');await page.locator('#companionInfo').waitFor({state:'hidden'});await page.screenshot({path:'output/fox-mac/actions.png'});
@@ -162,20 +162,20 @@ await withBrowser(fileAccess,async browser=>{
  await openSettings();
  assert.match(await page.locator('.world-brand').textContent(),/worldlet\.ai/);
  assert.equal(await page.locator('.world-brand').getAttribute('href'),'https://worldlet.ai');
- // Settings work like a settings window (owner feedback 2026-10-03): the list on the left, the chosen
- // setting's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
+ // Settings work like a settings window (owner feedback 2026-10-03, one list since 2026-10-10): the list on the left,
+ // the chosen section's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
  assert.deepEqual(await panel.locator('.companion-settings-item strong').allTextContents(),
-  ['Model','Approvals','Integrations','Browser','Background tasks','Data','Sample world','Sounds','Voice','Privacy','Open at login','Updates','Troubleshoot','Reset']);
+  ['Fox','Your Agent','Approvals','Accounts','Phone','History','Sounds and voice','Privacy and data','General','Help','Feedback']);
  assert.equal(await panel.getByRole('button',{name:/Animation timing|Preview animation/}).count(),0);
  const detail=panel.locator('.companion-settings-detail');
- await panel.locator('[data-setting=data]').click();
+ await panel.locator('[data-setting=privacy]').click();
  await detail.getByRole('button',{name:'Transfer companion',exact:true}).click();
  await detail.getByRole('button',{name:'Import companion',exact:true}).waitFor();assert.equal(await detail.getByRole('button',{name:'Export companion',exact:true}).isVisible(),true);
  assert.equal(await bubble.getByRole('button',{name:'Export companion',exact:true}).count(),0,'Data finishes in the panel');
- await panel.locator('[data-setting=data]').click();
+ await panel.locator('[data-setting=general]').click();await panel.locator('[data-setting=privacy]').click();
  await detail.getByText('Connections, model setup and Fox’s memory are kept',{exact:false}).waitFor();
  assert.equal(await detail.getByRole('button',{name:'Delete saved data',exact:true}).count(),1,'deleting saved data says what it leaves standing');
- await panel.locator('[data-setting=sample]').click();
+ await panel.locator('[data-setting=general]').click();
  const sample=detail.locator('.world-recovery-switch');
  assert.equal(await sample.getAttribute('role'),'switch','the sample world is a switch, not an action');
  assert.equal(await sample.getAttribute('aria-checked'),'false','a world opens as the user\u2019s own, never as a demo');
@@ -209,7 +209,7 @@ await withBrowser(fileAccess,async browser=>{
  // Updates (owner requests 2026-10-04 and 2026-10-05): the installed version and the channel it follows; on the owner's
  // computer only open channels can be chosen, anywhere else there is no switcher.
  assert.equal(await panel.locator('.companion-settings-version').textContent(),'Worldlet 2026.1004.2750 · Beta','the version and channel show under the Settings list');
- await panel.locator('[data-setting=updates]').click();
+ await panel.locator('[data-setting=general]').click();
  await detail.getByText('Worldlet 2026.1004.2750 · Build 2750',{exact:false}).waitFor();
  const follow=(id:string)=>detail.locator(`[data-channel=${id}] button`);
  assert.deepEqual(await Promise.all(['dev','alpha','beta','production'].map(async id=>[await follow(id).textContent(),await follow(id).isDisabled()])),[['Follow',true],['Follow',false],['Following',true],['Follow',true]]);
@@ -219,17 +219,19 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await follow('alpha').textContent(),'Following');await page.waitForFunction(()=>document.querySelector('.companion-settings-version')?.textContent==='Worldlet 2026.1004.2750 · Alpha');assert.equal(await follow('beta').isDisabled(),false,'Beta can be chosen again');
  await page.screenshot({path:'output/fox-mac/updates.png'});
  await page.evaluate(()=>{window.updateSwitchable=false;});
- await panel.locator('[data-setting=reset]').click();await panel.locator('[data-setting=updates]').click();
+ await panel.locator('[data-setting=help]').click();await panel.locator('[data-setting=general]').click();
  await detail.locator('[data-channel=beta]').getByText('Beta · 公测',{exact:false}).waitFor();
  assert.equal(await detail.locator('[data-channel] button').count(),0,'off the owner’s computer there is nothing to switch');
  assert.equal(await detail.locator('[data-channel]').count(),1,'only the channel it follows shows');
- await panel.locator('[data-setting=reset]').click();
+ await panel.locator('[data-setting=help]').click();
  await detail.getByRole('button',{name:'Reset',exact:true}).click();
  await page.waitForFunction(()=>calls.some(c=>c.action==='resetFox'));
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('fox-reset')),'cancelled');
  // Restart Fox says what it is for.
- await panel.locator('[data-setting=troubleshoot]').click();
  await detail.getByText('If Fox stops answering or seems stuck, restart it.',{exact:false}).waitFor();
+ // The Debug window is folded away, for the Worldlet team (owner request 2026-10-10).
+ assert.equal(await detail.getByRole('button',{name:'Open Debug',exact:true}).isVisible(),false);
+ await detail.getByText('For the Worldlet team',{exact:true}).click();
  await detail.getByRole('button',{name:'Open Debug',exact:true}).click();
  await page.waitForFunction(()=>calls.some(c=>c.action==='showDebug'));
  await openSettings();

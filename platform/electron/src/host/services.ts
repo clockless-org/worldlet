@@ -204,8 +204,8 @@ export interface FoxService {
  makeArtifactPage(request:{task:string,request:string}):Row;
  /** The Applet ID of a running Applet task, or null once it has ended. */
  appletTask(id:string):string|null;
- /** Which source charges the world now (`foxEnergy`). */
- energy():Promise<{source:'chatgpt'|'own'|'none'}>;
+ /** What answers for Fox now (`modelSource`): an Agent with its own sign-in, the ChatGPT plan, or none. */
+ modelSource():Promise<{source:'chatgpt'|'own'|'none'}>;
  /** Fox says one line in a chat thread unasked (how a call it placed went, modules/tasks/harness-calls.ts): it joins
   * that thread's history in the person's own world, shows in the Fox bar when the person is there, and reaches the
   * paired phone. False when there is no own world to say it in (setup, the practice world). */
@@ -283,7 +283,7 @@ export interface SpeechService {
  voices():Promise<{id:string,name:string,language:string}[]>;
  /** Whether local Whisper runs on this computer (Mac and Windows). */
  readonly localSupported:boolean;
- /** The wake word ("Hey Fox", modules/voice/wake.ts): what it does now, and Settings › Voice turning it on or off
+ /** The wake word ("Hey Fox", modules/voice/wake.ts): what it does now, and Settings › Sounds and voice turning it on or off
   * (resolves with the state after asking for the microphone where the OS asks). */
  readonly wakeState:'off'|'listening'|'paused'|'unavailable';
  setWakeWord(on:boolean):Promise<'off'|'listening'|'paused'|'unavailable'>;

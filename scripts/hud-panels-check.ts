@@ -11,9 +11,7 @@ await withBrowser(fileAccess,async browser=>{
  await openCompanionPanel(page);
  const fox=page.locator('.companion-info-panel');await fox.waitFor();
  const palette=await fox.evaluate(n=>({background:getComputedStyle(n).backgroundColor,color:getComputedStyle(n).color,radius:getComputedStyle(n).borderRadius}));
- assert.equal(await fox.locator('.companion-info-nav').evaluate(n=>getComputedStyle(n).borderBottomWidth),'0px');
- for(const tab of await fox.getByRole('tab').all())assert.equal(await tab.evaluate(n=>getComputedStyle(n).borderBottomWidth),'0px');
- await fox.getByRole('tab',{name:'Profile',exact:true}).click();
+ assert.equal(await fox.getByRole('tab').count(),0,'one list of sections, no tabs');
  for(const button of await fox.locator('.companion-info-card button:visible').all()){const b=(await button.boundingBox())!;assert(b.height>=44&&b.width>=44);}
  await page.screenshot({path:'/tmp/worldlet-fox-hud-panel.png'});
  await page.getByRole('button',{name:'Close companion panel'}).click();

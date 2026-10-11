@@ -42,8 +42,6 @@
 .native-console.fox-first-console .companion-dialogue::before{background:var(--ui-paper) var(--hud-paper-art) center/cover}
 .native-console.fox-first-console .companion-speaker{background:linear-gradient(#efc77fc9,#efc77fc9),var(--hud-paper-art) center/cover;color:var(--hud-paper-ink);border-radius:13px 11px 14px 10px;box-shadow:0 2px 4px #233d3014;transform:rotate(-3deg)}
 .native-console :is(.companion-info-panel,.notion-dialog){background:var(--ui-paper) var(--hud-paper-art) center/cover;color:var(--hud-paper-ink);border:1px solid #b4a17d38;border-radius:24px 28px 26px 30px;box-shadow:0 12px 40px #162a3230}
-.native-console .companion-info-nav button{border-radius:15px 17px 0 0;color:var(--hud-paper-ink)}
-.native-console .companion-info-nav button[aria-current]{background:#efc77f60;border-bottom-color:var(--hud-paper-ink);color:var(--hud-paper-ink)}
 .native-console .companion-history-controls{background:var(--ui-paper) var(--hud-paper-art) center/cover}
 .native-console .companion-text-entry #notionCommand{background:var(--ui-paper) var(--hud-paper-art) center/cover;border:1px solid #b4a17d38;border-radius:22px 25px 23px 24px;box-shadow:var(--hud-control-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
 .native-console .companion-text-entry :is(#notionInput,#notionSend){color:var(--hud-paper-ink);text-shadow:none}

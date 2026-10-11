@@ -77,14 +77,21 @@ export const worldUrl=()=>fileUrl('dist/WorldletWeb/index.html');
 export async function bundleScript(options:BuildOptions):Promise<string>{
  return (await build({bundle:true,write:false,format:'iife',...options})).outputFiles![0].text;
 }
-// Settings beside Fox opens the companion panel straight on its Settings tab (owner Order 2026-10-07); the checks that
-// read another page start from Profile, the panel's first tab, as before.
+// Settings beside Fox opens the companion panel, one list of sections (owner request 2026-10-10), on Your Agent or the
+// section last chosen; the checks that read another page name it by its old tab name or its section id.
 export const SETTINGS_BUTTON='.companion-side .companion-panel-button';
+export const COMPANION_SECTION:Record<string,string>={Profile:'fox',Energy:'model',History:'history',Mobile:'phone',Feedback:'feedback'};
 export async function openCompanionPanel(page:Page,tab='Profile'){
  await page.locator(SETTINGS_BUTTON).click();
  const panel=page.locator('#companionInfo');await panel.waitFor();
- await panel.getByRole('tab',{name:'Settings',exact:true}).and(page.locator('[aria-selected=true]')).waitFor({timeout:5000});
- if(tab!=='Settings')await panel.getByRole('tab',{name:tab,exact:true}).click();
+ await panel.locator('.companion-settings-list [aria-current=true]').waitFor({timeout:5000});
+ if(tab!=='Settings')await openCompanionSection(page,tab);
+}
+/** Chooses a section in the companion panel's list: an old tab name (Profile, Mobile, …) or a section id. */
+export async function openCompanionSection(page:Page,section:string){
+ const id=COMPANION_SECTION[section]??section;
+ await page.locator(`#companionInfo .companion-settings-list [data-setting="${id}"]`).click();
+ await page.locator(`#companionInfo .companion-settings-list [data-setting="${id}"][aria-current=true]`).waitFor();
 }
 // Leaves the open Applet the way a person does: Back in its top bar, or on a website page, whose toolbar's Back and
 // Forward move through the page's own history, World beside Fox (owner request 2026-10-06).

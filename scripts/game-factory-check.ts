@@ -1,9 +1,9 @@
 // The Game Factory's rules (core/games/README.md) without a host: what a made game may contain, the page
-// it runs as, what the host reads back, the energy it needs, and that making stays closed for now.
+// it runs as, what the host reads back, the model it needs, and that making stays closed for now.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {widgetDocument,WIDGET_POLICY} from '../core/artifacts/index.ts';
-import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryEnergy,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../core/games/index.ts';
+import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryModel,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../core/games/index.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
 import {worldActions,listWorldTools} from '../core/tools/index.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
@@ -51,9 +51,9 @@ assert.deepEqual(madeGameTrialProblems({loaded:true,errors:[],distinctColors:40}
 assert.equal(madeGameTrialProblems({crashed:true}).length,1);
 assert.ok(madeGameTrialProblems({loaded:true,distinctColors:1}).some(problem=>/blank/.test(problem)));
 assert.ok(madeGameTrialProblems({loaded:false,errors:['x is not defined']}).length===2);
-// Energy: the person's own only.
-assert.equal(gameFactoryEnergy('chatgpt').ok,true);assert.equal(gameFactoryEnergy('own').ok,true);
-for(const source of ['none'] as const){const result=gameFactoryEnergy(source);assert.equal(result.ok,false);assert.match((result as any).error,/API key/);}
+// Model: the person's own sign-in only.
+assert.equal(gameFactoryModel('chatgpt').ok,true);assert.equal(gameFactoryModel('own').ok,true);
+for(const source of ['none'] as const){const result=gameFactoryModel(source);assert.equal(result.ok,false);assert.match((result as any).error,/API key/);}
 assert.ok(madeGameTask('a fox game').length<2000&&madeGameTask('x'.repeat(5000),second).length<2000);
 assert.match(madeGameTask('slower',second),/replaces "game-/);
 // Making games is coming soon: Fox is offered none of the tools, so a call is refused as unknown.
@@ -73,4 +73,4 @@ assert.equal(APP_DEFINITIONS.some(app=>app.id===GAME_FACTORY_APPLET),false,'the 
  assert.match(trial.slice(trial.indexOf('export async function tryMadeGame')),/lockGameContents\(contents\)/,'the trial');
  for(const player of ['games/player.ts','artifacts/widget-player.ts'])assert.match(read(player),/lockGameContents\(contents\)/,player);
 }
-console.log('PASS Game Factory: offline-only pages, sandbox prelude and reports, records, own-energy rule; making is coming soon and Fox is offered no game tools.');
+console.log('PASS Game Factory: offline-only pages, sandbox prelude and reports, records, own-model rule; making is coming soon and Fox is offered no game tools.');

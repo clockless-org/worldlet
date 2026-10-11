@@ -523,7 +523,7 @@ export class GatewayConversation implements ResidentConversation {
   let status=0;
   try{status=(await fetch(this.url('/v1/models'),{headers:this.headers(),redirect:'error',signal:AbortSignal.timeout(this.timeoutMs)})).status;}
   catch{return settings.base?`its Gateway did not answer ${gatewayWhere(settings)}`:`its Gateway is not running on port ${settings.port} (openclaw gateway)`;}
-  if(status===401||status===403)return settings.base?'Worldlet could not sign in to its Gateway (check the token in Settings › Model)':`Worldlet could not sign in to its Gateway (gateway.auth in openclaw.json)`;
+  if(status===401||status===403)return settings.base?'Worldlet could not sign in to its Gateway (check the token in Settings › Your Agent)':`Worldlet could not sign in to its Gateway (gateway.auth in openclaw.json)`;
   if(status===404||status===405)return off;
   if(status<200||status>=300)return `its Gateway answered ${status}`;
   this.checked=Date.now();

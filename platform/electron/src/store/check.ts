@@ -386,7 +386,7 @@ try{
   console.log('PASS Fox’s setup choices are kept in the database and carried by backups');
  }
  // Browsing recordings: the sites the person can delete, newest first, and a delete limited to one site
- // and a time range leaves the rest (Settings › Privacy, scripts/web-record-check.ts).
+ // and a time range leaves the rest (Settings › Privacy and data, scripts/web-record-check.ts).
  {
   const ledger=new WorldLedger(path.join(scratch,'web-recordings'));
   const visit=(id:string,site:string,at:number)=>ledger.recordWeb([{id,site,url:'https://'+site+'/',title:site,applet:'browser',startedAt:at,endedAt:at+60}],[{visit:id,at,kind:'text',url:'https://'+site+'/',meta:{},body:'Pallet Town '+id}]);

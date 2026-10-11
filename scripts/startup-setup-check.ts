@@ -218,7 +218,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentIntegrations')return {integrations:[{title:'GitHub',provider:'github',outcome:'ported'},{title:'Google Mail and Calendar',provider:'google',outcome:'reconnect'},{title:'fs',provider:null,outcome:'stays'}]};
     if(b.action==='connect')throw Error('Google must not be asked');
     // Nova signs in with its own account and there is no Codex here, so nothing answers for Fox yet.
-    if(b.action==='foxEnergy')return {source:'none',ready:false,name:'',provider:'',level:null,resetsAt:null,localCodex:false};
+    if(b.action==='modelSource')return {source:'none',ready:false,name:'',provider:'',level:null,resetsAt:null,localCodex:false};
     if(b.action==='foxPreferences'){if(b.cloudConsent)w.fixture.cloudConsent=true;return {companionStyle:'',model:{ready:true}};}
     if(b.action==='onboarding'&&b.operation==='setup'){Object.assign(w.fixture.onboarding,{completed:true,introStep:3,unlockedApplets:b.applets});w.fixture.revision++;return {ok:true};}
     if(b.action==='appContent')return {pages:[]};return {ok:true};
@@ -269,7 +269,7 @@ await withBrowser(fileAccess,async browser=>{
   // The tiles fill their grid with no gap (owner request 2026-10-09).
   const fill=await page.locator('.setup-tiles').evaluate(grid=>{const box=grid.getBoundingClientRect(),gap=10;let area=0;for(const tile of grid.querySelectorAll('.setup-tile')){const r=tile.getBoundingClientRect();area+=(r.width+gap)*(r.height+gap);}return area/((box.width+gap)*(box.height+gap));});
   assert.ok(Math.abs(fill-1)<.01,'The tiles fill the grid: '+fill);
-  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Model.',{exact:true}).waitFor();
+  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Your Agent.',{exact:true}).waitFor();
   // Only what came over gets a tile (owner request 2026-10-09), in the order it arrives.
   assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-connections','setup-tile-apps']);
   assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
@@ -346,7 +346,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='select'){sessionStorage.setItem('fixture-agent',b.id);return {ok:true,id:b.id,title:'Hermes Agent',model:true};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Elon North',memories:[{kind:'soul'},{kind:'user'},{kind:'longTerm'}],model:{ok:false},summary:{personality:'A blunt first-principles operator',about:'Kelvin runs Worldlet from San Francisco',model:'deepseek-v4-flash'},recent:Array.from({length:8},(_,i)=>({title:'Conversation '+(i+1)+' about the launch plan, with a title long enough to be cut',at:Date.now()-(i+1)*3_600_000}))};
     if(b.action==='agentIntegrations')return {integrations:[]};
-    if(b.action==='foxEnergy')return {source:'chatgpt',ready:true};
+    if(b.action==='modelSource')return {source:'chatgpt',ready:true};
     if(b.action==='foxPreferences'){if(b.cloudConsent)w.fixture.cloudConsent=true;return {companionStyle:'',model:{ready:true}};}
     if(b.action==='appContent')return {pages:[]};return {ok:true};
    }}}};
@@ -417,7 +417,7 @@ await withBrowser(fileAccess,async browser=>{
      return {ok:true,id:b.id,title:'OpenClaw',connected:true,...b.checkLater?{checking:true}:{}};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Nova',memories:[{kind:'soul'}],model:{ok:false},summary:{},history:{conversations:2,notes:0,skills:0,routines:0,list:[{title:'Trip plan',messages:4}]}};
     if(b.action==='agentIntegrations')return {integrations:[]};
-    if(b.action==='foxEnergy')return {source:'none'};
+    if(b.action==='modelSource')return {source:'none'};
     if(b.action==='foxPreferences'){if(b.cloudConsent)w.fixture.cloudConsent=true;return {companionStyle:'',model:{ready:true}};}
     if(b.action==='appContent')return {pages:[]};return {ok:true};
    }}}};
@@ -504,7 +504,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='select'){sessionStorage.setItem('fixture-agent',b.id);return {ok:true,id:b.id,title:'Hermes Agent',connected:true};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:null,memories:[],model:{ok:false},summary:{},history:{conversations:0,notes:0,skills:0,routines:0,list:[]}};
     if(b.action==='agentIntegrations')return {integrations:[]};
-    if(b.action==='foxEnergy')return {source:'own'};
+    if(b.action==='modelSource')return {source:'own'};
     if(b.action==='foxPreferences'){if(b.cloudConsent)w.fixture.cloudConsent=true;return {companionStyle:'',model:{ready:true}};}
     if(b.action==='appContent')return {pages:[]};return {ok:true};
    }}}};
@@ -556,7 +556,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='select'){w.fixture.agentNeeded=false;return {ok:true,id:b.id,title:'OpenClaw',connected:true};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Nova',memories:[],model:{ok:false},summary:{},history:{conversations:0,notes:0,skills:0,routines:0,list:[]}};
     if(b.action==='agentIntegrations')return {integrations:[]};
-    if(b.action==='foxEnergy')return {source:'own'};
+    if(b.action==='modelSource')return {source:'own'};
     if(b.action==='foxPreferences')return {companionStyle:'',model:{ready:true}};
     if(b.action==='appContent')return {pages:[]};return {ok:true};
    }}}};

@@ -131,7 +131,7 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
    const rules=standingRules(install,currentEnvironment());
    return rules?[{harness:install.id,title:install.title,rules:{list:()=>rules.list(),revoke:async(id:string)=>{await rules.revoke(id);current().forgetApprovals?.(install.id);}}}]:[];
   }),
-  // The same Harnesses' connections (Settings › Integrations); Fox's own Hermes profile is not the person's Hermes Agent.
+  // The same Harnesses' connections (Settings › Accounts); Fox's own Hermes profile is not the person's Hermes Agent.
   harnessConnections:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
    const connections=harnessConnections(install,currentEnvironment());
    return connections?[{harness:install.id,title:install.title,connections}]:[];
@@ -313,7 +313,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
     const model=!!memory?.model;
     return {id,title,configured,model,worldTools:localHarness(id).worldTools,...memory||brings?{memory:{name:memory?.name??null,user:!!memory?.user,longTerm:!!memory?.longTerm,model:!!memory?.model,...brings?{history:brings}:{}}}:{}};
    });
-   // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Model.
+   // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Your Agent.
    for(const agent of agents as Row[]){const summary=harnessToolsSummary(await harnessTools(agent.id)?.list()??[]);if(summary)agent.canAlso=summary;}
    // Its version against the oldest Worldlet works with (core/agent/agent-versions.ts), so a too-old one says so before it
    // is chosen; `fresh` reads it again, after the person updated it.

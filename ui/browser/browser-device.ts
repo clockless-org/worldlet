@@ -215,13 +215,13 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   addressField.blur();void command('open',{url});
  };
  // Each website Applet's home page is the address it opens at (core/browser/page-resume.ts appletSite); the Browser's is
- // the one in Settings › Browser. A page over the World ('web') has none. Where that address first lands (a redirect,
+ // the one in Settings › General. A page over the World ('web') has none. Where that address first lands (a redirect,
  // x.com/ → x.com/home) is its home too, for this session.
  const landedHomes=new Map<string,string>();let landingHome=false;
  function appletHome(){return appletKey==='browser'?browserHome.get():appletKey==='web'?'':appletSite(appletKey)?.url||'';}
  refresh.onclick=event=>{event.stopPropagation();if(!refresh.hidden)void command('reload');};
  // Home, in the Browser (owner request 2026-10-06) and every website Applet (owner request 2026-10-08):
- // its home page; the Browser's is Google unless the person chose another in Settings › Browser. The page itself goes there: opening the Browser again at the
+ // its home page; the Browser's is Google unless the person chose another in Settings › General. The page itself goes there: opening the Browser again at the
  // address it was opened at changed nothing once the person had searched from it (owner report 2026-10-07).
  const homeButton=document.createElement('button');homeButton.type='button';homeButton.className='scene-control browser-home';homeButton.hidden=true;
  homeButton.innerHTML=uiIcon('home');homeButton.append(Object.assign(document.createElement('span'),{textContent:'Home'}));homeButton.title='Go to the home page';

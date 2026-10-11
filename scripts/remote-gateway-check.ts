@@ -78,7 +78,7 @@ await withTempDir('worldlet-remote-gateway-',async scratch=>{
  const url=`http://127.0.0.1:${(server.address() as {port:number}).port}/claw`;
  try{
   // The check before Fox switches: a wrong token, an endpoint that is off, then the right one.
-  await assert.rejects(checkRemoteGateway(url,'wrong'),/could not sign in to its Gateway \(check the token in Settings › Model\)/);
+  await assert.rejects(checkRemoteGateway(url,'wrong'),/could not sign in to its Gateway \(check the token in Settings › Your Agent\)/);
   endpoint=false;await assert.rejects(checkRemoteGateway(url,'claw-secret'),/\/v1\/responses endpoint is off/);endpoint=true;
   await assert.rejects(checkRemoteGateway('http://192.168.1.20:18789','claw-secret'),/only over HTTPS/);
   assert.deepEqual(await checkRemoteGateway(url+'/v1/','claw-secret'),{url,token:'claw-secret',host:'127.0.0.1'});

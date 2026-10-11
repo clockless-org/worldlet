@@ -11,7 +11,7 @@ export function createFoxPreferences({call,view,root,setup,toggleSample,embedded
  const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=async()=>{b.disabled=true;try{await action();}catch(e){view.setGuide({text:e.message,actions:[button('Back',()=>show())],takeover:true});}finally{b.disabled=false;}};return b;};
  const close=()=>{generation++;view.setGuide(null);};
  async function show(screen='preferences',provider?: string){
-  // Fox's model is the Agent's: choosing the Agent and its provider happens in Settings › Model (core/agent/model-providers.ts).
+  // Fox's model is the Agent's: choosing the Agent and its provider happens in Settings › Your Agent (core/agent/model-providers.ts).
   if(screen==='model'){generation++;if(!embedded)setup?.('closed');view.setGuide(null);window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}}));return;}
   view.revealGuide?.();
   const turn=++generation;

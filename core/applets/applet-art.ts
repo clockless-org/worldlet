@@ -9,7 +9,7 @@ export const APPLET_ART_LIMITS=Object.freeze({
  icon:160_000,background:900_000,iconSize:256,backgroundWidth:1600,
  /** How long one painting may take, and how long after a failure the same Applet is tried again. */
  paintMs:6*60_000,retryMs:24*3600_000,
- /** At most this many Applets are painted per World each day: each picture spends the person's own energy. */
+ /** At most this many Applets are painted per World each day: each picture spends the person's own model tokens. */
  perDay:12,
 });
 
