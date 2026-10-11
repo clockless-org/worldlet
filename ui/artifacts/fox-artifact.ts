@@ -83,7 +83,9 @@ body.setAttribute('aria-label','Artifact contents');
   }else if(panel.dataset.render==='page'){delete panel.dataset.render;void pages?.({operation:'hide'}).catch(()=>{});layout();}
  }
  const overflows=()=>!!shown&&shown.step.text!=='brief'&&body.scrollHeight>body.clientHeight+1;
- const refit=()=>requestAnimationFrame(()=>{if(!panel.hidden&&(room()!==fitted||overflows()))layout();syncPage();});
+ // A window resize and the card's own ResizeObserver often ask in the same frame: one check a frame answers both.
+ let refitting=false;
+ const refit=()=>{if(refitting)return;refitting=true;requestAnimationFrame(()=>{refitting=false;if(!panel.hidden&&(room()!==fitted||overflows()))layout();syncPage();});};
  window.addEventListener('resize',refit);
  panel.addEventListener('click',e=>{const a=(e.target as Element).closest('a');if(a){e.preventDefault();const href=a.getAttribute('href');if(/^https:\/\//.test(href||''))onLink(href);}});
  panel.addEventListener('pointerdown',e=>{(e as any).worldletKeepFox=true;});

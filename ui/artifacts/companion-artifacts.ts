@@ -17,6 +17,10 @@ type Reply={id:string;kind:'reply';title:string;to:string;draft:Record<string,st
 type Entry=Artifact|MadeArtifact|Reply;
 // Days drawn at a time; older ones follow as the timeline scrolls near its end.
 const DAYS_AT_ONCE=7;
+// A card's time of day. One formatter for every card: toLocaleTimeString with options builds a new one per call. An
+// out-of-range time still reads "Invalid Date", as toLocaleTimeString gives, where the formatter would throw.
+const CLOCK=new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'});
+const clock=(seconds:number)=>{const at=new Date(seconds*1000);return Number.isNaN(at.getTime())?String(at):CLOCK.format(at);};
 export function createCompanionArtifacts({call,open,openMade,review}:{call:(action:string,body?:any)=>Promise<any>;open:(id:string)=>void;openMade:(id:string,keep:boolean)=>void;review?:(detail:{id:string;draft:Record<string,string>;attempted:boolean})=>void}){
  const el=(tag:string,cls='',text='')=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text)node.textContent=text;return node;};
  const section=el('section','companion-info-section companion-artifacts companion-journal');section.dataset.section='Journal';
@@ -60,15 +64,16 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  function replyCard(entry:JournalDay<Entry>['entries'][number]){
   let reply=entry.artifact as Reply,busy=false;
   const li=el('li','companion-artifact companion-reply');li.dataset.artifactId=reply.id;li.dataset.kind='reply';li.dataset.size=entry.size;
-  const top=el('span','companion-artifact-origin');top.append(el('span','','Reply · '+reply.to),el('time','',new Date(reply.createdAt*1000).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})));
+  const top=el('span','companion-artifact-origin');top.append(el('span','','Reply · '+reply.to),el('time','',clock(reply.createdAt)));
   const text=el('p','companion-reply-text',reply.draft.body||''),edit=el('textarea','companion-reply-edit') as HTMLTextAreaElement;edit.hidden=true;edit.setAttribute('aria-label','Reply to '+reply.to);
   const note=el('span','companion-reply-note');note.setAttribute('role','status');
   const actions=el('div','companion-reply-actions'),send=el('button','companion-reply-send','Send') as HTMLButtonElement,change=el('button','','Edit') as HTMLButtonElement,skip=el('button','','Skip') as HTMLButtonElement;
-  for(const b of [send,change,skip])b.type='button';
+  const buttons=[send,change,skip];
+  for(const b of buttons)b.type='button';
   actions.append(send,change,skip,note);
   li.append(top,el('strong','companion-artifact-title',reply.title),text,edit,actions);
-  const work=async(task:()=>Promise<void>)=>{if(busy)return;busy=true;for(const b of [send,change,skip])b.disabled=true;note.textContent='';
-   try{await task();}catch(error){note.textContent=error?.message||'That did not work. Try again.';}finally{busy=false;for(const b of [send,change,skip])b.disabled=false;}};
+  const work=async(task:()=>Promise<void>)=>{if(busy)return;busy=true;for(const b of buttons)b.disabled=true;note.textContent='';
+   try{await task();}catch(error){note.textContent=error?.message||'That did not work. Try again.';}finally{busy=false;for(const b of buttons)b.disabled=false;}};
   // Send: exactly the stored draft. A read-only Google connection, or a send that was tried and not confirmed,
   // continues in Fox's email review, which asks for send access or checks delivery and never sends a second copy.
   send.onclick=()=>work(async()=>{
@@ -96,7 +101,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   const artifact=entry.artifact as Artifact|MadeArtifact,made=artifact.kind==='made'?artifact as MadeArtifact:null;
   const li=el('li','companion-artifact'),openButton=el('button','companion-artifact-open') as HTMLButtonElement;
   li.dataset.artifactId=artifact.id;li.dataset.kind=artifact.kind;li.dataset.size=entry.size;if(!made&&(artifact as Artifact).tone)li.dataset.tone=(artifact as Artifact).tone!;openButton.type='button';
-  const when=new Date(entry.at*1000).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  const when=clock(entry.at);
   const top=el('span','companion-artifact-origin');top.append(el('span','',entry.origin),el('time','',when));
   // The Journal keeps the card as it was shown (owner request 2026-10-08: "journal 里保留卡片"): its paper, its picture,
   // its tone and every part of it, only smaller.
