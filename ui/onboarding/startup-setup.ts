@@ -5,8 +5,8 @@ import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
-import {LOCAL_HARNESSES,connectRequestPlan} from '../../core/agent/index.ts';
-import {agentBringDimensions,agentsDetectedDimensions,diagnosticError,timingBucket} from '../../core/diagnostics/index.ts';
+import {LOCAL_HARNESSES,agentProfileApplets,connectRequestPlan} from '../../core/agent/index.ts';
+import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,timingBucket} from '../../core/diagnostics/index.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
 // Local Agent marks: Claude Code and Codex reuse their Applet logos; the rest ship in resources/brands.
@@ -83,12 +83,25 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // not saved used to send the person back to the first half again and again).
  let checkStarted=0,signingInAgent=false;
  const onAgentCheck=(event:Event)=>{
-  const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.ok!==false||detail.id!==draft.agent)return;
+  const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.id!==draft.agent)return;
+  if('result' in detail){takeProfile(detail.profile);productEvent('agent_profile_result',agentProfileDimensions(String(detail.id),String(detail.result),draft.profile?.connections?.length||0),timingBucket(Number(detail.ms)||0));return;}
+  if(detail.ok!==false)return;
   productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
   notice=String(detail.message||'').slice(0,300);
   render();
  };
  window.addEventListener('worldlet:agent-check',onAgentCheck);
+ /** What the chosen Agent said about itself (core/agent/agent-profile.ts), arriving after its proving turn while setup
+  * goes on: the connections and channels its files do not show join the Connections tile, the skills it named count
+  * when its files held fewer, and the Applets it points to join the World's selection (owner request 2026-10-11). */
+ function takeProfile(profile:any){
+  if(!profile||typeof profile!=='object')return;
+  const titles=(items:unknown,field:string,limit:number)=>Array.isArray(items)?items.map((item:any)=>item?.[field]).filter((value:unknown):value is string=>typeof value==='string'&&!!value).slice(0,limit):[];
+  const connections=[...(Array.isArray(profile.connections)?profile.connections:[]).map((item:any)=>({title:String(item?.name||''),provider:typeof item?.service==='string'?item.service:''})),
+   ...(Array.isArray(profile.channels)?profile.channels:[]).map((item:any)=>({title:String(item?.provider||'')+(item?.place?' '+String(item.place):''),provider:typeof item?.provider==='string'?item.provider:''}))].filter(item=>item.title.trim()).slice(0,20);
+  draft.profile={connections,skills:titles(profile.skills,'name',200).length,applets:agentProfileApplets(profile,WORLD_APPS.map(app=>app.key))};
+  persist();seed();if(!busy)render();
+ }
  async function signInAgain(){
   signingInAgent=true;render();
   try{await call('agentHarness',{operation:'provider-sign-in',id:'anthropic'});notice='Claude Code is signed in.';}
@@ -123,6 +136,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_started'}));
  if(step===1)window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:'onboarding_apps_viewed'}));
  const persist=()=>localStorage.setItem(key,JSON.stringify({...draft,step,applets:[...selected],touched:[...touched]}));
+ // Back on this page after a relaunch: what the chosen Agent said about itself meanwhile.
+ if(typeof draft.agent==='string'&&!draft.profile)void call('agentHarness',{operation:'profile',id:draft.agent}).then(result=>{if(!disposed&&!draft.profile)takeProfile(result?.profile);},()=>{});
  const agentText=(text:string,agent:string)=>t(text).replace('{agent}',agent);
  // Setup's product events (core/diagnostics/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
  const productEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
@@ -151,7 +166,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    await call('foxPreferences',{cloudConsent:true});
    // Back then the same Agent again shows what already came over instead of reading it again (owner request
    // 2026-10-06); another Agent starts over.
-   if(draft.broughtFrom!==agent.id||draft.brought?.failed){delete draft.brought;delete draft.integrations;delete draft.broughtFrom;shownTiles=0;}
+   if(draft.broughtFrom!==agent.id||draft.brought?.failed){delete draft.brought;delete draft.integrations;delete draft.broughtFrom;delete draft.profile;shownTiles=0;}
    else shownTiles=99;
    flipFrom=panel.querySelector(`.setup-agent-card[data-agent="${CSS.escape(agent.id)}"]`)?.getBoundingClientRect()||null;
    notice='';draft.agent=agent.id;draft.agentName=agentName(agent);draft.connected=chosen?.connected===true;draft.consent=true;step=1;error='';persist();
@@ -528,11 +543,14 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    }));
   }
   if(kind==='notes')return keep('tile:notes',String(brought.notes)+draft.language,build('Daily notes','',big(brought.notes,'daily notes')));
-  if(kind==='skills')return keep('tile:skills',String(brought.skills)+draft.language,build('Skills','',big(brought.skills,'skills it learned')));
+  const skills=Math.max(Number(brought.skills)||0,Number(draft.profile?.skills)||0);
+  if(kind==='skills')return keep('tile:skills',String(skills)+draft.language,build('Skills','',big(skills,'skills it learned')));
   if(kind==='routines')return keep('tile:routines',String(brought.routines)+draft.language,build('Routines','',big(brought.routines,'run on their own')));
   if(kind==='connections'){
    const items:{title:string,provider?:string,logo:string,again:boolean}[]=importingAgent()
-    ?(draft.integrations||[]).filter(item=>item.outcome!=='stays').map(item=>({title:item.title,provider:typeof item.provider==='string'?item.provider:'',logo:item.provider==='google'?'brands/google.png':logoOf(item.provider),again:item.outcome==='reconnect'}))
+    ?[...(draft.integrations||[]).filter(item=>item.outcome!=='stays').map(item=>({title:item.title,provider:typeof item.provider==='string'?item.provider:'',logo:item.provider==='google'?'brands/google.png':logoOf(item.provider),again:item.outcome==='reconnect'})),
+      // The ones the Agent reported itself, beside the integrations its settings held.
+      ...(draft.profile?.connections||[]).filter((item:any)=>!(draft.integrations||[]).some((port:any)=>port.provider&&port.provider===item.provider)).map((item:any)=>({title:item.title,provider:item.provider,logo:WORLD_APPS.some(app=>app.key===item.provider)?logoOf(item.provider):'',again:false}))]
     :[{title:'Gmail',provider:'gmail',logo:logoOf('gmail'),again:false},{title:'Google Calendar',provider:'google-calendar',logo:logoOf('google-calendar'),again:false}];
    return keep('tile:connections',JSON.stringify([items,draft.language]),build('Connections','is-wide',el=>{
     if(!items.length)return none(el);
@@ -778,7 +796,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // Setup selects what this computer already has, then a few popular Applets (owner decision 2026-10-11): its draft
  // (Mail, Calendar, Browser), the apps found here, the apps the person's Agent brought or already connected, then the
  // popular starters (core/applets/regions.ts).
- const brought=()=>new Set<string>([...(draft.integrations||[]).map((item:any)=>item?.provider),...(state.connections||[]).filter((c:any)=>connectionLive(c)).map((c:any)=>c.provider)].filter((p:unknown):p is string=>typeof p==='string'));
+ const brought=()=>new Set<string>([...(draft.integrations||[]).map((item:any)=>item?.provider),...(draft.profile?.applets||[]),...(state.connections||[]).filter((c:any)=>connectionLive(c)).map((c:any)=>c.provider)].filter((p:unknown):p is string=>typeof p==='string'));
  const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched,brought());persist();};
  if(hostFeatures(state).installedAppDetection){
   void call('installedApplets').then(result=>{
