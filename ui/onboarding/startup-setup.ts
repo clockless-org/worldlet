@@ -81,7 +81,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // for a large Hermes Agent no longer holds the button. If it fails, setup still goes on with what was read on this computer
  // and says why in one line (owner decision 2026-10-11: these errors never stop onboarding; an OpenClaw model key that was
  // not saved used to send the person back to the first half again and again).
- let checkStarted=0;
+ let checkStarted=0,signingInAgent=false;
  const onAgentCheck=(event:Event)=>{
   const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.ok!==false||detail.id!==draft.agent)return;
   productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
@@ -89,6 +89,12 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   render();
  };
  window.addEventListener('worldlet:agent-check',onAgentCheck);
+ async function signInAgain(){
+  signingInAgent=true;render();
+  try{await call('agentHarness',{operation:'provider-sign-in',id:'anthropic'});notice='Claude Code is signed in.';}
+  catch(e){notice=(e as Error).message||'Claude Code was not signed in. Try again.';}
+  finally{signingInAgent=false;if(!disposed)render();}
+ }
  const languages=['en','zh','ja','es'];
  const systemLanguage=navigator.language.split('-')[0];
  const key=(move?'worldlet-agent-move:':'worldlet-startup-setup:')+state.workspaceId;
@@ -672,6 +678,11 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    else primary=button('Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
    primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering||!done);primary.setAttribute('aria-busy',String(entering||!done));if(!done||entering)primary.disabled=true;
    if(error||notice)message=node('p',t(error||notice),error?'setup-error':'setup-note');
+   // Claude Code's sign-in ran out: it signs in again here, in the browser, with no Terminal (owner decision 2026-10-11).
+   if(message&&!error&&draft.agent==='claude-code'&&/sign-in has expired/.test(notice)){
+    const again=node('button',t(signingInAgent?'Waiting for your browser…':'Sign in to Claude Code'),'setup-link setup-sign-in-again') as HTMLButtonElement;
+    again.type='button';again.disabled=signingInAgent;again.onclick=()=>void signInAgain();message.append(' ',again);
+   }
   }else{
    parts.push(node('h1',t('Give your agent a world'),'setup-visually-hidden'));
    const choose=node('div','','setup-choose');

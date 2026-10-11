@@ -183,8 +183,10 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     const row=el('div','companion-settings-row'),text=el('div'),on=chosen===p.id,signedOut=p.signedIn===false;row.dataset.provider=p.id;
     text.append(el('strong','',p.name+(on?' · In use':'')),el('span','',signedOut?`Not signed in to it in ${title} yet.`:typeof p.account==='string'?p.account:''));
     const button=signedOut?p.signIn===true?action('Sign in',async()=>{
-     said.textContent=`${title} opens in Terminal to sign in to ${p.name}. When it is done, choose Check connection.`;
-     try{await call('agentHarness',{operation:'provider-sign-in',id:p.id});}catch(e){said.textContent=(e as Error).message||'Could not open the sign-in.';}
+     // Claude Code signs in in the browser with Worldlet running it (`background`); the others open in Terminal.
+     said.textContent=found.agent==='claude-code'?`Approve the sign-in to ${p.name} in your browser.`:`${title} opens in Terminal to sign in to ${p.name}. When it is done, choose Check connection.`;
+     try{const result=await call('agentHarness',{operation:'provider-sign-in',id:p.id});if(result?.background){said.textContent=`${title} is signed in to ${p.name}.`;modelRefresh();await drawProviders();}}
+     catch(e){said.textContent=(e as Error).message||'Could not open the sign-in.';}
     },{id:'sign-in-'+p.id}):null:on?null:action('Use',choose(p.id,p.name),{id:'provider-'+p.id});
     row.append(text,...button?[button]:signedOut?[el('span','companion-settings-quiet',`Sign in to it in ${title}.`)]:[]);
     providers.append(row);

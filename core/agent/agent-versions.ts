@@ -20,7 +20,7 @@ export interface AgentVersionRule {
 export const AGENT_VERSIONS:Readonly<Record<LocalHarnessId,AgentVersionRule>>={
  // `--no-session-persistence` (cli.js) is new in 2.0.63; `--tools ""` in 2.0.31. `claude update` updates npm and native
  // installs itself and names the command for Homebrew and winget ones.
- 'claude-code':{minimum:'2.0.63',needs:'`--no-session-persistence`, which keeps Fox\'s turns out of Claude Code\'s history (new in 2.0.63)',update:['update'],howTo:'Run `claude update` in Terminal.'},
+ 'claude-code':{minimum:'2.1.40',needs:'`claude auth login` and `claude auth status`, which let the person sign in again from Worldlet without Terminal (new in 2.1.40; `--no-session-persistence` came in 2.0.63)',update:['update'],howTo:'Run `claude update` in Terminal.'},
  // Per-tool `mcp_servers.<server>.tools.<tool>.approval_mode` (codex-rs/core/src/config/types.rs) is new in 0.117.0; older
  // Codex ignores the key and cancels World tool calls that would ask. `codex update` only exists from 0.128.0, so an
  // older Codex is updated the way it was installed.
