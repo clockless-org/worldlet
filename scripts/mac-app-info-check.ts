@@ -73,7 +73,7 @@ try{
  writeFileSync(path.join(appDir,'package.json'),JSON.stringify({name:'worldlet',productName:'Worldlet',main:'main.cjs'}));
  writeFileSync(path.join(appDir,'main.cjs'),"globalThis.__devStarted=(globalThis.__devStarted||[]).concat([[require('electron').app.getAppPath(),process.env.WORLDLET_DEV]]);");
  const start=(argv:string[],env:Record<string,string>)=>{
-  const fake={appPath:'',name:'',errors:[] as string[]},electron={app:{set name(v:string){fake.name=v;},get name(){return fake.name;},setVersion(){},setAppPath(p:string){fake.appPath=p;},getAppPath:()=>fake.appPath,whenReady:()=>({then(f:()=>void){f();}}),quit(){}},dialog:{showErrorBox:(_t:string,m:string)=>fake.errors.push(m)}};
+  const fake={appPath:'',name:'',policy:'',errors:[] as string[]},electron={app:{setActivationPolicy(p:string){fake.policy=p;},set name(v:string){fake.name=v;},get name(){return fake.name;},setVersion(){},setAppPath(p:string){fake.appPath=p;},getAppPath:()=>fake.appPath,whenReady:()=>({then(f:()=>void){f();}}),quit(){}},dialog:{showErrorBox:(_t:string,m:string)=>fake.errors.push(m)}};
   const saved={argv:process.argv,env:process.env,resourcesPath:(process as any).resourcesPath};
   const real=createRequire(import.meta.url),Module=real('node:module');
   const load=Module._load;Module._load=function(request:string,...rest:unknown[]){return request==='electron'?electron:load.call(this,request,...rest);};
@@ -88,13 +88,18 @@ try{
  (globalThis as any).__devStarted=[];
  const watcher=start(['-psn_0_1',appDir],{WORLDLET_DEV:'watcher'});
  assert.deepEqual((globalThis as any).__devStarted,[[appDir,'watcher']]);assert.equal(watcher.name,'Worldlet');
+ // The watcher's redirected \`open\` starts a UIElement; the launcher makes it a regular app with a Dock icon,
+ // except for a background check launch.
+ const mac=process.platform==='darwin';
+ assert.equal(watcher.policy,mac?'regular':'');
+ assert.equal(start([appDir],{WORLDLET_DEV:'watcher',WORLDLET_BACKGROUND_WINDOWS:'1'}).policy,'');
  // Opened directly: launch.json supplies both.
  writeFileSync(path.join(home,'launch.json'),JSON.stringify(devLaunchConfig(appDir,{WORLDLET_DEV:'1',HOME:'/x'})));
  (globalThis as any).__devStarted=[];
  const direct=start([],{});
  assert.deepEqual((globalThis as any).__devStarted,[[appDir,'1']]);assert.deepEqual(direct.errors,[]);
 }finally{rmSync(tmp,{recursive:true,force:true});}
-console.log('PASS Opening Worldlet Dev.app directly starts the last launched Dev build');
+console.log('PASS Opening Worldlet Dev.app directly starts the last launched Dev build, as a regular app with a Dock icon');
 
 // One definition: both scripts use it, and no other script spells out a usage description.
 const dev_=readFileSync(path.join(root,'scripts/dev-electron.ts'),'utf8'),pkg=readFileSync(path.join(root,'scripts/package-electron.ts'),'utf8');
