@@ -216,9 +216,10 @@ export class WebEngine {
 
  send(message:EngineMessage){
   const child=this.child;if(!child?.stdin||child.stdin.destroyed)return;
-  const body=Buffer.from(JSON.stringify(message),'utf8'),header=Buffer.alloc(4);
-  header.writeUInt32LE(body.length);
-  child.stdin.write(Buffer.concat([header,body]));
+  // One buffer per message: a 4-byte little-endian length, then the JSON.
+  const text=JSON.stringify(message),length=Buffer.byteLength(text,'utf8'),frame=Buffer.allocUnsafe(4+length);
+  frame.writeUInt32LE(length,0);frame.write(text,4,'utf8');
+  child.stdin.write(frame);
  }
 
  /** The engine's own rule answers for the parity fixtures (public pages, http:// upgrades, popups and new tabs). */

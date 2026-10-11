@@ -6,7 +6,6 @@ import {dialog,shell,systemPreferences,type BaseWindow} from 'electron';
  * privacy switches; other systems have none. */
 export type MediaDevice='microphone'|'camera';
 export const mediaDevices=(media:number):MediaDevice[]=>[...media&1?['microphone' as const]:[],...media&2?['camera' as const]:[]];
-export const mediaWords=(media:number)=>media&1&&media&2?'camera and microphone':media&2?'camera':'microphone';
 
 /** The devices the OS does not let Worldlet use; macOS asks the person the first time. */
 export async function blockedMediaDevices(devices:MediaDevice[],platform:string=process.platform):Promise<MediaDevice[]> {
