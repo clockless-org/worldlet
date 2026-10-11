@@ -343,6 +343,25 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
  }finally{await env.close();}
 }
 
+// Attention starting or stopping to read reaches the page: the host sends a snapshot only when a revision changed
+// (main.ts sendState), so the page keeps the last `attentionReading` it was sent until a revision moves again.
+{
+ const env=environment();
+ const {store}=env;
+ // As main.ts sendState: a snapshot only for revisions the page does not hold yet.
+ let sentKey='',sent:boolean|null=null;
+ store.onChange(()=>{const key=`${store.state.revision}:${store.activityRevision}`;if(key===sentKey)return;sentKey=key;sent=store.snapshot().attentionReading===true;});
+ try{
+  store.setCloudConsent(true);
+  assert.equal(sent,true,'Attention reads once allowed');
+  // The pass ends with no store change of its own; within the watch's second the page hears it stopped.
+  const deadline=Date.now()+5000;
+  while(Date.now()<deadline&&(sent as boolean|null)!==false)await sleep(100);
+  assert.equal(sent as boolean|null,false,'The page learns Attention stopped reading');
+  console.log('PASS Electron Attention reading: starting and stopping both reach the page.');
+ }finally{await env.close();}
+}
+
 // Scheduled results (docs/ATTENTION-CENTER.md): a kept morning brief arrives as a Worth Knowing item that opens the
 // Journal on its card and stays in the Center with no source fact behind it; keeping the card again updates that item.
 {

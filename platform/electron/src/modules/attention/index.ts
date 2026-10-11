@@ -41,10 +41,12 @@ export function installAttention(host:Host){
  host.onPageLoaded(()=>center.start());
  // The World learns when Attention starts or stops reading (first value waits on it); the lanes flip it
  // without a store change of their own.
+ // The host sends a snapshot only for a new revision, so a flip the last snapshot did not carry moves the activity
+ // revision; the watch compares with what the last snapshot said, not with its own last look.
  const extras=host.store.snapshotExtras;
- host.store.snapshotExtras=()=>({...extras(),attentionReading:center.attentionReading()});
- let reading=false;
- const watch=setInterval(()=>{const now=center.attentionReading();if(now!==reading){reading=now;host.store.notify();}},1000);
+ let reading=false,told=false;
+ host.store.snapshotExtras=()=>{told=false;return {...extras(),attentionReading:reading=center.attentionReading()};};
+ const watch=setInterval(()=>{if(!told&&center.attentionReading()!==reading){told=true;host.store.activityRevision+=1;host.store.notify();}},1000);
  watch.unref?.();
  host.onQuit(()=>{clearInterval(watch);center.stop();});
  let allowed=false;
