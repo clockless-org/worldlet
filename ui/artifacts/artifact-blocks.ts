@@ -47,10 +47,12 @@ export function renderArtifactBlocks(blocks:ArtifactBlock[],{live=false,onChange
    const table=el('table','artifact-scale-rows'),body=el('tbody');table.append(body);
    const draw=()=>{shown.textContent=number(value)+(block.unit?' '+block.unit:'');body.replaceChildren(...block.rows.map(r=>{const tr=el('tr');tr.append(el('td','',r.label),el('td','artifact-scale-amount',number(scaledAmount(r.amount,block.base,value))+(r.unit?' '+r.unit:'')));return tr;}));};
    if(live){
-    const step=(sign:number)=>{const next=Math.round((value+sign*block.step)*1000)/1000;if(next<block.min||next>block.max)return;value=next;draw();less.disabled=value-block.step<block.min;more.disabled=value+block.step>block.max;state[index]={...block,value};changed();};
+    const step=(sign:number)=>{const next=Math.round((value+sign*block.step)*1000)/1000;if(next<block.min||next>block.max)return;value=next;draw();limits();state[index]={...block,value};changed();};
     const less=el('button','attention-preview-action artifact-scale-step','−') as HTMLButtonElement,more=el('button','attention-preview-action artifact-scale-step','+') as HTMLButtonElement;
     less.type=more.type='button';less.setAttribute('aria-label','Fewer '+(block.unit||block.label));more.setAttribute('aria-label','More '+(block.unit||block.label));
-    less.onclick=()=>step(-1);more.onclick=()=>step(1);less.disabled=value-block.step<block.min;more.disabled=value+block.step>block.max;
+    // A step button turns off where one more step would leave min..max.
+    const limits=()=>{less.disabled=value-block.step<block.min;more.disabled=value+block.step>block.max;};
+    less.onclick=()=>step(-1);more.onclick=()=>step(1);limits();
     control.append(less,shown,more);
    }else control.append(shown);
    draw();part.append(control,table);
