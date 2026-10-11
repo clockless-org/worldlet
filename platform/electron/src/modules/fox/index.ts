@@ -376,7 +376,9 @@ export function installFox(host:Host){
  function finishTurn(id:string,cancelled:boolean){
   trusts.delete(id);
   delete store.worldEvidence[id];
-  try{worldTools()?.finishTurn?.(id,cancelled);}catch{}
+  // The World tools' finishTurn also finishes the turn's Applet activity (attention/center.ts); doing it a second
+  // time changed nothing but rebuilt and sent the whole World snapshot again.
+  try{const tools=worldTools();if(tools?.finishTurn){tools.finishTurn(id,cancelled);return;}}catch{}
   try{sources()?.finishAppletTurn(id,cancelled);}catch{}
  }
  /** A World tool call from another Hermes channel, outside any Fox turn (World tools on Hermes, owner decision 2026-10-08
