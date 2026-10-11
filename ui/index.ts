@@ -111,8 +111,8 @@ async function applyReceivedSnapshot(state,isCurrent=()=>true){
     root.dispatchEvent(new CustomEvent('worldlet:prepare-arrival',{detail:next.onboarding.unlockedApplets||[]}));
     // Fox waits for the devices to land rather than speaking under them.
     root.dataset.arriving='true';
-    // Fox, its bubble and its buttons stay out of the welcome (owner feedback 2026-10-02): the tour's
-    // hello brings Fox in, in the middle of the window, once the celebration ends.
+    // Fox's bubble and buttons stay out of the welcome (owner feedback 2026-10-02) and come in with the tour's hello;
+    // Fox itself stays in the picture, where setup's Fox walks onto it (owner request 2026-10-11).
     root.dataset.foxAway='true';
     root.addEventListener('worldlet:celebration-done',()=>setTimeout(()=>{if(!root.dataset.tourStep)delete root.dataset.foxAway;},4000),{once:true});
     await landSetupDevices(root,()=>{setupArrivalPending=false;Object.assign(arrival,{settled:true});root.dispatchEvent(arrival);});

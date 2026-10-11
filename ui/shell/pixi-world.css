@@ -674,17 +674,19 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 /* Fox never moves during the tour: no hop to the middle, no lift under the card (owner feedback 2026-10-04 and 2026-10-06). */
 /* Fox's name, in its bubble while it introduces itself. */
 
-/* The welcome belongs to the world (owner feedback 2026-10-02): Fox, its bubble and its buttons stay
-   out of it, and Fox comes in for the tour's hello where it always stands. */
-#notionWorld[data-fox-away] .notion-hud :is(.companion-pet,.companion-dialogue,.companion-dock,.companion-text-entry){opacity:0;visibility:hidden;pointer-events:none;transition:none}
+/* The welcome belongs to the world (owner feedback 2026-10-02): Fox's bubble, its name badge and its buttons stay
+   out of it and come in for the tour's hello. Fox itself stays in the picture: setup's Fox walks onto it, so Fox
+   goes into the World in one continuous move and never leaves the screen (owner request 2026-10-11). */
+#notionWorld[data-fox-away] .notion-hud :is(.companion-pet .companion-entry-action,.companion-panel-button,.companion-phone-button,.companion-dialogue,.companion-dock,.companion-text-entry){opacity:0;visibility:hidden;pointer-events:none;transition:none}
+#notionWorld[data-fox-away] .notion-hud .companion-pet{pointer-events:none}
 /* Fox fades in already at its own place (owner request 2026-10-06): an entrance that moved or scaled it overrode
    its centring transform and made it jump when the entrance ended. Fox, its bubble, its buttons, the tour's Tutorial switch
    and the tour's shade come in as one fade (owner feedback 2026-10-06: Fox flashed on entry when the World darkened in one
    frame, Fox came in alone and its bubble popped in after it). */
-#notionWorld[data-fox-entering] .notion-hud :is(.companion-pet,.companion-dialogue,.companion-dock,.companion-text-entry){animation:tour-fox-enter .6s ease-out both}
+#notionWorld[data-fox-entering] .notion-hud :is(.companion-pet .companion-entry-action,.companion-panel-button,.companion-phone-button,.companion-dialogue,.companion-dock,.companion-text-entry){animation:tour-fox-enter .6s ease-out both}
 body:has(#notionWorld[data-fox-entering])>:is(.tour-switch,.tour-spotlight){animation:tour-fox-enter .6s ease-out both}
 @keyframes tour-fox-enter{from{opacity:0}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){#notionWorld[data-fox-entering] .notion-hud :is(.companion-pet,.companion-dialogue,.companion-dock,.companion-text-entry),body:has(#notionWorld[data-fox-entering])>:is(.tour-switch,.tour-spotlight){animation:none}}
+@media (prefers-reduced-motion:reduce){#notionWorld[data-fox-entering] .notion-hud :is(.companion-pet .companion-entry-action,.companion-panel-button,.companion-phone-button,.companion-dialogue,.companion-dock,.companion-text-entry),body:has(#notionWorld[data-fox-entering])>:is(.tour-switch,.tour-spotlight){animation:none}}
 
 /* Meetings: the next calls, a new call on each service and a pasted link, on one sheet of paper. */
 #notionWorld .pixi-applet-stage.meetings-open{inset:10% 35% 8% 4%;width:auto;height:auto;aspect-ratio:auto;transform:none;pointer-events:auto;padding:0}
