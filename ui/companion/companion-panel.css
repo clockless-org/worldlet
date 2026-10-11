@@ -92,7 +92,6 @@
 .companion-history-source svg{width:22px;height:22px}
 .companion-history-controls{position:sticky;top:-3px;z-index:1;background:#f8f0df;padding:8px 0}
 @media(max-width:600px){.native-console .companion-info-panel[open]{padding-top:40px}.companion-info-panel .companion-info-profile:not([hidden]){padding:12px 8px}}
-.companion-info-panel .companion-abilities-intro{margin:-6px 0 12px}
 .companion-info-panel .companion-phone-intro{margin:-6px 0 12px}
 .companion-phone-body{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px}
 .companion-phone-body>.companion-info-note{flex-basis:100%;margin:0}
@@ -109,15 +108,8 @@
 /* Companion panel, redone (owner feedback 2026-10-03): larger, every page fits. */
 .native-console .companion-info-panel{width:min(1040px,calc(100vw - 32px));height:min(660px,calc(100dvh - 32px))}
 /* Profile page: the companion on the left, what it can do scrolling on the right. */
-.companion-info-panel .companion-profile-page:not([hidden]){display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:28px;min-height:0}
-.companion-profile-page .companion-abilities{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:0 8px 8px 0}
-.companion-profile-page .companion-abilities h3{margin-top:4px}
-.companion-info-panel .companion-abilities-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-@media(max-width:700px){.companion-info-panel .companion-profile-page:not([hidden]){display:block}.companion-info-panel .companion-profile-page>.companion-info-profile,.companion-profile-page .companion-abilities{overflow:visible}.companion-profile-page .companion-abilities{margin-top:16px}}
-.companion-abilities .companion-info-card{flex-wrap:nowrap;padding:12px}
-.companion-abilities .companion-info-card p{font-size:12px;line-height:1.35}
-.companion-ability-say{display:block;margin:0 0 4px;color:#4f5c3e;font-size:13px;font-style:italic;quotes:none}
-.companion-abilities .companion-ability-memory{flex-wrap:wrap}
+.companion-info-panel .companion-profile-page:not([hidden]){display:block;max-width:420px;min-height:0}
+@media(max-width:700px){.companion-info-panel .companion-profile-page>.companion-info-profile{overflow:visible}}
 .companion-panel-guide{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto;font-size:13px;color:#354132}
 .companion-panel-guide[hidden]{display:none}
 .companion-panel-guide-text p{margin:0 0 8px;font-size:13px;color:#354132}
@@ -192,14 +184,13 @@
 .companion-feedback[data-voice=listening] .companion-feedback-mic{background:#e0b96b;border-color:transparent}
 .native-console .companion-feedback-actions .companion-feedback-send{background:var(--control-forest,#3f5a3a);color:#fff;border-color:transparent;font-weight:600}
 .companion-phone-android{font-size:13px;color:#656651}
-@media(max-width:700px){.companion-info-panel .companion-abilities-grid{grid-template-columns:1fr 1fr}.native-console .companion-info-panel .companion-info-body>.companion-settings{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.companion-settings-list{flex-direction:row;flex-wrap:wrap;border-right:0;overflow:visible}.companion-settings-item span{display:none}.companion-info-panel .companion-settings-version{border-right:0}}
-@media(max-width:480px){.companion-info-panel .companion-abilities-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.native-console .companion-info-panel .companion-info-body>.companion-settings{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.companion-settings-list{flex-direction:row;flex-wrap:wrap;border-right:0;overflow:visible}.companion-settings-item span{display:none}.companion-info-panel .companion-settings-version{border-right:0}}
 .companion-panel-guide .fox-model-catalog{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
 .companion-panel-guide .fox-model-catalog button{width:100%;text-align:left}
 .companion-panel-guide .fox-model-catalog-wrap{display:flex;flex-direction:column;gap:8px}
 .companion-settings-body .world-recovery-switch{display:flex;align-items:center;gap:16px}
 /* Profile: what the World holds about the companion, grouped and collapsible (companion-info.ts). */
-.companion-info-panel .companion-profile-knowledge{grid-column:1/-1;margin:24px 0 0;text-align:left}
+.companion-info-panel .companion-profile-knowledge{margin:4px 0 16px;text-align:left}
 .companion-profile-knowledge h3{margin:0 0 8px;font-size:15px;color:#354132}
 .companion-profile-knowledge h4{margin:10px 0 4px;font-size:12px;color:#656651}
 .companion-knowledge-group{border-top:1px solid #d9cbae80}
@@ -242,7 +233,7 @@
 .companion-settings-detail.is-page{display:flex;flex-direction:column;overflow:hidden}
 .companion-settings-detail.is-page>.companion-settings-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:stretch}
 .companion-settings-detail.is-page>.companion-settings-body>*{flex:1 1 auto;min-height:0;margin:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
-.companion-settings-detail.is-page .companion-profile-page{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:24px;overflow:hidden}
+.companion-settings-detail.is-page .companion-profile-page{display:block;max-width:420px;overflow-y:auto}
 @media(max-width:700px){.companion-settings-detail.is-page .companion-profile-page{display:block;overflow-y:auto}}
 .companion-settings-elsewhere{align-self:stretch;margin-top:6px}
 .companion-settings-elsewhere>summary{cursor:pointer;font-size:13px;font-weight:600;color:#354132;padding:6px 0}

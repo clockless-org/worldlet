@@ -411,7 +411,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // The waiting tile's line while the host still copies (owner request 2026-10-06: what is happening, in a few words).
  function bringLine(name:string){
   if(porting)return t('Checking its connections…');
-  const lines=['Reading {agent}’s memory…','Packing up {agent}’s conversations…','Folding in {agent}’s notes…','Teaching Fox {agent}’s skills…'];
+  const lines=['Reading {agent}’s memory…','Packing up {agent}’s conversations…','Folding in {agent}’s daily notes…','Teaching Fox {agent}’s skills…'];
   return agentText(lines[chatter%lines.length],name);
  }
  /** Choose again (owner request 2026-10-09: on the chosen card, instead of a Back button): what came over is kept,
@@ -493,7 +493,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     el.append(list);
    }));
   }
-  if(kind==='notes')return keep('tile:notes',String(brought.notes)+draft.language,build('Notes','',big(brought.notes,'notes')));
+  if(kind==='notes')return keep('tile:notes',String(brought.notes)+draft.language,build('Daily notes','',big(brought.notes,'daily notes')));
   if(kind==='skills')return keep('tile:skills',String(brought.skills)+draft.language,build('Skills','',big(brought.skills,'skills it learned')));
   if(kind==='routines')return keep('tile:routines',String(brought.routines)+draft.language,build('Routines','',big(brought.routines,'run on their own')));
   if(kind==='connections'){
@@ -533,7 +533,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const old=found.version?.outdated===true;card.classList.toggle('is-outdated',old);
    card.append(node('small',connecting?agentText('Connecting to {agent}…',title):old?t('Needs version {version} or newer').replace('{version}',found.version!.minimum):sub,'setup-agent-sub'));
    const history=found.memory?.history,chips=node('span','','setup-agent-chips');
-   for(const [n,label] of [[history?.conversations,'{count} conversations'],[history?.notes,'{count} notes'],[history?.skills,'{count} skills'],[history?.jobs,'{count} routines']] as [number|undefined,string][])if(n)chips.append(node('span',count(label,n),'setup-agent-chip'));
+   for(const [n,label] of [[history?.conversations,'{count} conversations'],[history?.notes,'{count} daily notes'],[history?.skills,'{count} skills'],[history?.jobs,'{count} routines']] as [number|undefined,string][])if(n)chips.append(node('span',count(label,n),'setup-agent-chip'));
    if(chips.childElementCount)card.append(chips);
    if(found.worldTools===false){card.append(node('span',t('Chat only'),'setup-signin-tag'));card.title=agentText('With {agent}, Fox can talk with you but can’t act in your world yet.',title);}
    cards.append(card);
