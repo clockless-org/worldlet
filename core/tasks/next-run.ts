@@ -25,11 +25,18 @@ export function nextCronRun(expression:string,now:number):number|null {
  if(!minutes||!hours||!days||!months||!weekdays)return null;
  // Cron's rule: when both day fields are restricted, either one matching is enough.
  const anyDay=parts[2]==='*',anyWeekday=parts[4]==='*';
- const at=new Date(now);at.setSeconds(0,0);at.setMinutes(at.getMinutes()+1);
- for(let i=0;i<8*24*60;i++){
-  const dayOk=anyDay&&anyWeekday?true:anyDay?weekdays.has(at.getDay()):anyWeekday?days.has(at.getDate()):days.has(at.getDate())||weekdays.has(at.getDay());
-  if(months.has(at.getMonth()+1)&&dayOk&&hours.has(at.getHours())&&minutes.has(at.getMinutes()))return at.getTime();
-  at.setMinutes(at.getMinutes()+1);
+ const dayOk=(at:Date)=>months.has(at.getMonth()+1)&&(anyDay&&anyWeekday?true:anyDay?weekdays.has(at.getDay()):anyWeekday?days.has(at.getDate()):days.has(at.getDate())||weekdays.has(at.getDay()));
+ // The walk visits each local minute in turn, for up to eight days of minutes. An hour whose day or hour can't match
+ // is crossed in one jump when the clock's offset is the same at both ends (no daylight-saving change inside it): the
+ // jump lands where minute steps would and counts the same minutes. Any other hour is walked minute by minute.
+ let at=new Date(now);at.setSeconds(0,0);at.setMinutes(at.getMinutes()+1);
+ for(let left=8*24*60;left>0;){
+  if(Number.isNaN(at.getTime()))return null;
+  if(!dayOk(at)||!hours.has(at.getHours())){
+   const next=new Date(at.getTime());next.setHours(at.getHours()+1,0,0,0);
+   if(next.getTimezoneOffset()===at.getTimezoneOffset()){left-=(next.getTime()-at.getTime())/60000;at=next;continue;}
+  }else if(minutes.has(at.getMinutes()))return at.getTime();
+  left--;at.setMinutes(at.getMinutes()+1);
  }
  return null;
 }
