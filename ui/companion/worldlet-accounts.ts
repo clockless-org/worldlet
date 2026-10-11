@@ -1,5 +1,6 @@
 import {connectionLive,getApp} from '../../core/applets/index.ts';
 import {showAgentConnections} from './agent-connections.ts';
+import {agentEl as el} from './agent-change.ts';
 
 // Disconnect exists for these; Google's three share one sign-in.
 const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive'];
@@ -9,7 +10,6 @@ const GOOGLE=['gmail','google-calendar','google-drive'];
  * in): Worldlet's own signed-in accounts first, with Reconnect and Disconnect, then the tools and chat accounts in the
  * person's Agent (agent-connections.ts). */
 export async function showWorldletAccounts(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
- const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const action=(label:string,run:()=>Promise<void>)=>{const b=el('button','companion-info-action',label) as HTMLButtonElement;b.type='button';b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run();}finally{if(b.isConnected)b.disabled=false;}};return b;};
  const own=el('div','companion-settings-worldlet-accounts'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  own.dataset.accounts='worldlet';

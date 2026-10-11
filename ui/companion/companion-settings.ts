@@ -8,6 +8,7 @@ import {showAgentRoutines} from './agent-routines.ts';
 import {showAgentSkills} from './agent-skills.ts';
 import {showAgentMemory} from './agent-memory.ts';
 import {showWorldletAccounts} from './worldlet-accounts.ts';
+import {agentEl as el} from './agent-change.ts';
 
 /** What the World view lends Settings: the sample world switch and which host features exist. */
 export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=>boolean;localDataDeletion:()=>boolean};
@@ -27,7 +28,6 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  openFeedback:()=>void;
  /** Help's Show the tutorial: Settings closes and the World's tour plays again. */
  replayTutorial:()=>void}){
- const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const element=el('section','companion-info-section companion-settings');element.dataset.section='Settings';
  const list=el('nav','companion-settings-list'),detail=el('div','companion-settings-detail');
  list.setAttribute('aria-label','Settings');detail.setAttribute('aria-live','polite');
@@ -37,16 +37,19 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  const guide=createPanelGuide();
   let selected='',ticket=0;
  const note=(text:string)=>el('p','companion-info-note',text);
+ const subhead=(text:string)=>el('h5','companion-settings-subhead',text);
+ const modelRefresh=()=>window.dispatchEvent(new Event('worldlet:model-refresh'));
  const status=()=>{const s=el('p','companion-settings-status');s.setAttribute('role','status');return s;};
  function action(label:string,run:(b:HTMLButtonElement)=>Promise<unknown>|void,{primary=false,id=''}={}){
   const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';if(id)b.dataset.action=id;
   b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run(b);}finally{if(b.isConnected)b.disabled=false;}};
   return b;
  }
+ const browserCommand=(operation:string,args:any={})=>call('browserCommand',{operation,args,agent:false});
  // Saved passwords of the built-in browser (core/browser/saved-logins.ts, owner request 2026-10-07): each site and
  // account, never the password, with Delete. A host that keeps none (the practice world, no keychain) leaves it out.
  async function savedLogins(target:HTMLElement){
-  const turn=ticket,command=(operation:string,args:any={})=>call('browserCommand',{operation,args,agent:false});
+  const turn=ticket,command=browserCommand;
   const box=el('div','companion-settings-logins'),said=status();
   async function draw(){
    const listed=await command('logins').catch(()=>null);if(turn!==ticket)return;
@@ -58,7 +61,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     row.append(words,action('Delete',async()=>{said.textContent='';try{await command('loginDelete',{site:login.site,username:login.username});await draw();said.textContent='Deleted the password for '+login.site+'.';}catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}},{id:'delete-login'}));
     rows.append(row);
    }
-   box.replaceChildren(el('h5','companion-settings-subhead','Saved passwords'),
+   box.replaceChildren(subhead('Saved passwords'),
     note(listed.logins.length?'Kept on this computer, locked with your system keychain. Fox never sees them.':'After you sign in to a website in the Browser, Worldlet offers to save the password and fills it in next time.'),rows,said);
   }
   target.append(box);await draw();
@@ -67,7 +70,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  // site's or all of them. Each delete asks again here, in the page; nothing is deleted until confirmed.
  // Hosts without recordings answer with an error and the section stays away.
  async function recordings(target:HTMLElement){
-  const turn=ticket,command=(operation:string,args:any={})=>call('browserCommand',{operation,args,agent:false});
+  const turn=ticket,command=browserCommand;
   const box=el('div','companion-settings-recordings'),said=status();
   let sites:{site:string;visits:number}[]=[];
   const confirmRow=(question:string,label:string,run:()=>Promise<void>)=>{
@@ -84,7 +87,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    words.append(el('strong','',sites.length?sites.length+' '+(sites.length===1?'site':'sites'):'Nothing recorded'),el('span','',sites.length?visits+' '+(visits===1?'visit':'visits'):'Pages you visit in Worldlet’s browser show up here.'));
    summary.append(words);
    if(sites.length&&!stage)summary.append(action('Delete for a site…',()=>void draw('site'),{id:'delete-site-recordings'}),action('Delete all',()=>void draw('all'),{id:'delete-all-recordings'}));
-   box.replaceChildren(el('h5','companion-settings-subhead','Browsing recordings'),note('What you see and do in Worldlet’s browser is kept so Fox can find it later. Network data goes after 30 days; page text, typing and clicks stay until you delete them.'),summary);
+   box.replaceChildren(subhead('Browsing recordings'),note('What you see and do in Worldlet’s browser is kept so Fox can find it later. Network data goes after 30 days; page text, typing and clicks stay until you delete them.'),summary);
    if(stage==='site'&&sites.length){
     const choose=el('select','companion-settings-select') as HTMLSelectElement;choose.setAttribute('aria-label','Site');
     for(const s of sites)choose.append(Object.assign(document.createElement('option'),{value:s.site,textContent:s.site+' · '+s.visits+' '+(s.visits===1?'visit':'visits')}));
@@ -133,13 +136,13 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   target.append(about,rows,...state?.switchable?[note('Moving to a steadier channel installs its newest build at the next update, even when it is older than this one. Your world and accounts stay as they are.')]:[],
    action('Check for updates',async()=>{said.textContent='Checking…';try{state=await call('appUpdate',{operation:'check'});draw();}catch(e){said.textContent=(e as Error).message||'Could not check for updates.';}},{id:'check-updates'}),said);
  }
+ const restartFox=async(said:HTMLElement)=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}};
  // A Fox preference screen, drawn in the details instead of the bubble.
  // Each screen has a guide of its own, so one section can show two of them.
  const screen=(name:string)=>async(target:HTMLElement)=>{
   const own=createPanelGuide();target.append(own.element);
   await createFoxPreferences({call,view:own.view,setup:()=>{},toggleSample:()=>host()?.toggleSample?.(),embedded:true}).show(name);
  };
- const subhead=(text:string)=>el('h5','companion-settings-subhead',text);
  // The model Fox thinks with (owner request 2026-10-05). Worldlet provides none: it is the person's Agent, answering
  // on its own sign-in with the provider chosen below.
  // This is the one place to connect it and to see and fix what is wrong with it (owner request 2026-10-06):
@@ -154,7 +157,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
    },{primary:true,id:'fix-connect'})
    :fix==='update'?action('Show updates',()=>show('general'),{primary:true,id:'fix-update'})
-   :action('Restart Fox',async()=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}},{primary:true,id:'fix-restart'});
+   :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
   // The provider the Agent in use answers with (core/agent/model-providers.ts, owner decisions 2026-10-10): only a
   // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced
   // one. Every provider the Agent supports is listed, signed in or not; signing in happens in the Agent itself.
@@ -167,10 +170,10 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    const title=typeof found.title==='string'?found.title:'your Agent',chosen=typeof found.chosen==='string'?found.chosen:null;
    const choose=(id:string|null,name:string)=>async()=>{
     said.textContent='';
-    try{await call('agentHarness',{operation:'provider',id});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent=id?`Fox now answers with ${name}.`:`Fox now answers with ${title}’s own setting.`;await drawProviders();}
+    try{await call('agentHarness',{operation:'provider',id});modelRefresh();said.textContent=id?`Fox now answers with ${name}.`:`Fox now answers with ${title}’s own setting.`;await drawProviders();}
     catch(e){said.textContent=(e as Error).message||'Could not change the provider.';}
    };
-   providers.append(el('h5','companion-settings-subhead','Provider'));
+   providers.append(subhead('Provider'));
    const own=el('div','companion-settings-row'),ownText=el('div');own.dataset.provider='own';
    ownText.append(el('strong','',`${title}’s own setting`+(chosen===null?' · In use':'')),el('span','',`Whatever ${title} is set to use.`));
    own.append(ownText,...chosen===null?[]:[action('Use',choose(null,title),{id:'provider-own'})]);providers.append(own);
@@ -185,6 +188,12 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     providers.append(row);
    }
   };
+  // Stop using the Agent, the paired computer or the Gateway in use: Fox goes back to its own model connection.
+  const stopUsing=(working:string,id:string)=>action('Stop using',async()=>{
+   said.textContent=working;
+   try{await call('agentHarness',{operation:'clear'});modelRefresh();said.textContent='';await draw();}
+   catch(e){said.textContent=(e as Error).message||'Could not switch.';}
+  },{id});
   const draw=async()=>{
    void drawProviders();
    const [health,found]=await Promise.all([call('modelHealth').catch(()=>null),call('agentHarness',{operation:'detect'}).catch(()=>null)]);
@@ -197,7 +206,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    fixes.replaceChildren(...view.fixes.map(fixButton),
     action('Check connection',async()=>{said.textContent='Checking…';await draw();said.textContent='Checked just now.';},{id:'check-model'}));
    agents.replaceChildren();
-   if(list.length)agents.append(el('h5','companion-settings-subhead','On this computer'));
+   if(list.length)agents.append(subhead('On this computer'));
    for(const agent of list){
     const using=inUse===agent.id,row=el('div','companion-settings-row'),text=el('div');row.dataset.agent=agent.id;
     text.append(el('strong','',agent.title+(using?' · In use':'')),el('span','',agent.id==='codex'?(agent.model===false?'Sign in to Codex on this computer first.':'Your ChatGPT plan through Codex.'):agent.memory?.model?'Runs on its own API key.':'Answers for Fox on its own sign-in.'),
@@ -212,17 +221,13 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
      try{await call('agentHarness',{operation:'update',id:agent.id});}catch(e){said.textContent=(e as Error).message||'Could not open the update.';}
     },{primary:true,id:'update-'+agent.id}):null;
     const recheck=old?action('Check again',async()=>{said.textContent='Checking…';await call('agentHarness',{operation:'detect',fresh:true}).catch(()=>null);said.textContent='';await draw();},{id:'recheck-'+agent.id}):null;
-    const b=using?action('Stop using',async()=>{
-     said.textContent='Fox goes back to its own model connection…';
-     try{await call('agentHarness',{operation:'clear'});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent='';await draw();}
-     catch(e){said.textContent=(e as Error).message||'Could not switch.';}
-    },{id:'stop-'+agent.id}):action('Use',async()=>{
+    const b=using?stopUsing('Fox goes back to its own model connection…','stop-'+agent.id):action('Use',async()=>{
      said.textContent='Switching to '+agent.title+'…';
      try{
       await call('agentHarness',{operation:'select',id:agent.id});
       if(agent.memory)await call('localAgent',{operation:'adopt',id:agent.id});
       await call('agentIntegrations',{operation:'port',id:agent.id}).catch(()=>null);
-      window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent='';await draw();
+      modelRefresh();said.textContent='';await draw();
      }catch(e){said.textContent=(e as Error).message||'Could not switch.';}
     },{id:'use-'+agent.id});
     row.append(text,...update?[update]:[],...recheck?[recheck]:[],...using||!old?[b]:[]);agents.append(row);
@@ -238,17 +243,13 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    if(remote&&typeof remote.computer==='string'){
     const away=!remote.seenAt||Date.now()-remote.seenAt>120_000;
     text.append(el('strong','',`Agent on ${remote.computer} · In use`),el('span','',away?`${remote.computer} is away. Fox answers once it is awake with Worldlet open.`:'Fox’s conversation runs there. Your apps and Attention Center stay on this computer.'));
-    row.append(text,action('Stop using',async()=>{
-     said.textContent='Ending the pairing…';
-     try{await call('agentHarness',{operation:'clear'});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent='';await draw();}
-     catch(e){said.textContent=(e as Error).message||'Could not switch.';}
-    },{id:'stop-remote'}));
+    row.append(text,stopUsing('Ending the pairing…','stop-remote'));
    }else{
     const code=document.createElement('input');code.className='companion-settings-input';code.placeholder='worldlet://agent?…';code.spellcheck=false;code.autocomplete='off';code.setAttribute('aria-label','Code from Worldlet on your other computer');
     text.append(el('strong','','My Agent is on another computer'),el('span','','On that computer, open Settings › Phone › Pair another computer, then paste its code here.'),code);
     row.append(text,action('Pair',async()=>{
      said.textContent='Pairing with your other computer…';
-     try{const result=await call('agentHarness',{operation:'pair',link:code.value.trim()});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent=`Fox now uses your Agent on ${result?.remote?.computer||'your other computer'}.`;await draw();}
+     try{const result=await call('agentHarness',{operation:'pair',link:code.value.trim()});modelRefresh();said.textContent=`Fox now uses your Agent on ${result?.remote?.computer||'your other computer'}.`;await draw();}
      catch(e){said.textContent=(e as Error).message||'Could not pair.';}
     },{id:'pair-remote'}));
    }
@@ -258,20 +259,16 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    const gateway=found?.gateway&&typeof found.gateway.host==='string'?found.gateway:null,gRow=el('div','companion-settings-row'),gText=el('div');gRow.dataset.agent='gateway';
    const connect=async(request:Record<string,unknown>)=>{
     said.textContent='Connecting to your Gateway…';
-    try{const result=await call('agentHarness',{operation:'gateway',...request});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent=`Fox now uses OpenClaw at ${result?.gateway?.host||'your Gateway'}.`;await draw();}
+    try{const result=await call('agentHarness',{operation:'gateway',...request});modelRefresh();said.textContent=`Fox now uses OpenClaw at ${result?.gateway?.host||'your Gateway'}.`;await draw();}
     catch(e){said.textContent=(e as Error).message||'Could not connect.';}
    };
    const forget=action('Forget',async()=>{
-    try{await call('agentHarness',{operation:'forget-gateway'});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent='The Gateway and its token are forgotten.';await draw();}
+    try{await call('agentHarness',{operation:'forget-gateway'});modelRefresh();said.textContent='The Gateway and its token are forgotten.';await draw();}
     catch(e){said.textContent=(e as Error).message||'Could not forget it.';}
    },{id:'forget-gateway'});
    if(gateway?.active){
     gText.append(el('strong','',`OpenClaw at ${gateway.host} · In use`),el('span','','Fox talks to that Gateway directly; nothing of Worldlet runs there. Your apps and Attention Center stay on this computer.'));
-    gRow.append(gText,action('Stop using',async()=>{
-     said.textContent='Fox goes back to its own model connection…';
-     try{await call('agentHarness',{operation:'clear'});window.dispatchEvent(new Event('worldlet:model-refresh'));said.textContent='';await draw();}
-     catch(e){said.textContent=(e as Error).message||'Could not switch.';}
-    },{id:'stop-gateway'}),forget);
+    gRow.append(gText,stopUsing('Fox goes back to its own model connection…','stop-gateway'),forget);
    }else{
     const address=document.createElement('input');address.className='companion-settings-input';address.placeholder='https://gateway.example.com';address.spellcheck=false;address.autocomplete='off';address.value=gateway?.url??'';address.setAttribute('aria-label','Gateway address');
     const token=document.createElement('input');token.className='companion-settings-input';token.type='password';token.placeholder=gateway?'Saved token (type a new one to replace it)':'Gateway token';token.autocomplete='off';token.setAttribute('aria-label','Gateway token');
@@ -350,7 +347,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    const team=el('details','companion-settings-elsewhere') as HTMLDetailsElement;
    team.append(el('summary','','For the Worldlet team'),
     action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}}),
-    el('h5','companion-settings-subhead','Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
+    subhead('Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
    team.ontoggle=()=>{if(team.open)records.showRecords();};
    // Feedback and the tutorial live here, not in the World's corners (owner request 2026-10-11).
    target.append(
@@ -361,7 +358,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'}));
    target.append(
     subhead('Restart Fox'),note('If Fox stops answering or seems stuck, restart it. Fox stops what it is doing and starts again; conversations, memory and connections are kept.'),
-    action('Restart Fox',async()=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'restart'}),
+    action('Restart Fox',()=>restartFox(said),{id:'restart'}),
     subhead('Report a problem'),note('Save a diagnostics file to send to the Worldlet team with your feedback.'),
     action('Save diagnostics',async()=>{try{await call('exportDiagnostics');}catch(e){said.textContent=(e as Error).message||'Could not save diagnostics.';}}),
     team,

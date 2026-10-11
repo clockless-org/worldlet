@@ -6,7 +6,6 @@ actions['music.next']={method:'backgroundMusic',args:{channel:'music',operation:
 for(const screen of ['sources','model','voice','world'])actions['open.'+screen]={method:'foxControls',args:{screen}};
 // Checks, downloads and installs the newest release, as the dock's Update button does.
 actions['app.update']={method:'appUpdate',args:{operation:'update'}};
-export const replyActionIds=Object.freeze(Object.keys(actions));
 export function replyAction(href){
  if(typeof href!=='string'||!href.startsWith('#fox-action='))return null;
  const key=href.slice('#fox-action='.length);
