@@ -208,6 +208,13 @@ export const acpPermissionReply=(rpc:unknown,outcome:unknown)=>JSON.stringify({j
 
 const textBlocks=(content:unknown)=>Array.isArray(content)?content.map(record).filter(block=>block.type==='text'&&typeof block.text==='string').map(block=>block.text).join(''):typeof content==='string'?content:'';
 const errorText=(value:unknown,fallback:string)=>{const item=record(value);return typeof value==='string'&&value?value:typeof item.message==='string'&&item.message?item.message:fallback;};
+/** OpenClaw cannot read a key its configuration names (docs.openclaw.ai/gateway/secrets: a `store` SecretRef with no
+ * entry, or an `env` one with no value): one plain line with the key's name and its own command to save it, never the
+ * raw resolver text. Only names reach here, never values. Null when the text is not that. */
+export function openClawMissingKey(text:string):string|null {
+ const name=/Secret store entry "([A-Z][A-Z0-9_]{0,127})" was not found/.exec(text)?.[1]??/Environment variable "([A-Z][A-Z0-9_]{0,127})" is missing or empty/.exec(text)?.[1];
+ return name?`OpenClaw can’t find its key ${name}, so its model can’t answer. Save it in Terminal with: openclaw secrets store set ${name}`:null;
+}
 
 /** Reads one stdout line; returns the text to show now (a delta), if any. Lines that are not this
  * Harness's JSON are ignored rather than shown: banners and logs are not Fox's words. */
@@ -308,7 +315,7 @@ export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,ex
   let envelope:Record<string,any>|null=null;
   try{envelope=record(JSON.parse(text));}catch{}
   if(envelope){
-   if(envelope.ok===false||(typeof envelope.status==='string'&&envelope.status!=='ok'))return {error:errorText(envelope.error,envelope.status==='timeout'?'OpenClaw timed out.':'OpenClaw could not answer.')};
+   if(envelope.ok===false||(typeof envelope.status==='string'&&envelope.status!=='ok')){const error=errorText(envelope.error,envelope.status==='timeout'?'OpenClaw timed out.':'OpenClaw could not answer.');return {error:openClawMissingKey(error)??error};}
    const payloads=Array.isArray(envelope.payloads)?envelope.payloads.map(record).map(item=>typeof item.text==='string'?item.text:'').filter(Boolean).join('\n\n'):'';
    const message=typeof envelope.final==='string'&&envelope.final?envelope.final:payloads;
    if(message)return {message};
@@ -319,5 +326,6 @@ export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,ex
  const message=(state.final??state.text).trim();
  if(message&&exit.code===0)return {message};
  const detail=exit.stderr.trim().split('\n').filter(Boolean).pop()??'';
+ if(id==='openclaw'){const missing=openClawMissingKey(exit.stderr);if(missing)return {error:missing};}
  return {error:detail?`${title} could not answer: ${clip(detail,300)}`:`${title} did not answer. Open it once in Terminal to finish signing in, then try again.`};
 }
