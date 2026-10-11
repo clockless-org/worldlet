@@ -163,7 +163,7 @@ export class WebRecorder {
 /** What the person's recording control needs of the World ledger (store/ledger.ts). */
 export interface RecordingLedger {webSites():{site:string;visits:number}[];deleteWeb(range:{site?:string}):number}
 
-/** The person's own control over what was recorded (Settings › Privacy and data): `recordings` lists the sites
+/** The person's own control over what was recorded (Settings › General): `recordings` lists the sites
  * that hold recordings, `deleteRecordings` deletes one site's (and its subdomains') or, with `all`,
  * every site's. Fox can neither list nor delete them this way. Open pages' recorders save what is
  * waiting first, so nothing recorded before the delete lands after it. */

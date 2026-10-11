@@ -4,7 +4,7 @@
  * leaves a short line, and when the allowed command or edit finishes the same card shows what it changed
  * (`approval_result`): each file's diff as the Harness reported it, or its output and that it reports no files. */
 const LABELS={once:'Allow once',always:'Always',deny:'Deny'};
-const SETTLED={once:'Allowed once.',always:'Allowed. It will not ask again for this; Settings › Approvals lists it.',deny:'Denied.'};
+const SETTLED={once:'Allowed once.',always:'Allowed. It will not ask again for this.',deny:'Denied.'};
 const CHANGE={add:'New file',edit:'Changed',delete:'Deleted'};
 /** What the Harness reported, as the card's body: one diff per file, `+` and `-` lines marked; else its output. */
 export function approvalResultBody(result){

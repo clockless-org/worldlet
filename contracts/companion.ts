@@ -4,8 +4,6 @@ export interface CompanionProfile {
  createdAt:string;
  personality:string;
  attentionFocus:string;
- /** The look the companion wears (core/companion/companion-look.ts). */
- look?:unknown;
  /** What the World holds about the companion (shown on the Profile page). */
  knowledge?:CompanionKnowledge;
 }

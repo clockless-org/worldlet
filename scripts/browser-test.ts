@@ -80,7 +80,7 @@ export async function bundleScript(options:BuildOptions):Promise<string>{
 // Settings beside Fox opens the companion panel, one list of sections (owner request 2026-10-10), on Your Agent or the
 // section last chosen; the checks that read another page name it by its old tab name or its section id.
 export const SETTINGS_BUTTON='.companion-side .companion-panel-button';
-export const COMPANION_SECTION:Record<string,string>={Profile:'fox',Energy:'model',History:'history',Mobile:'phone',Feedback:'feedback'};
+export const COMPANION_SECTION:Record<string,string>={Profile:'fox',Energy:'model',Mobile:'phone'};
 export async function openCompanionPanel(page:Page,tab='Profile'){
  await page.locator(SETTINGS_BUTTON).click();
  const panel=page.locator('#companionInfo');await panel.waitFor();

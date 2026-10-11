@@ -11,4 +11,3 @@ export {detailTemplate} from './templates.ts';
 export {installTextReaderHUD} from './text-reader.ts';
 export {WORLD_UI,prepareUIFonts} from './tokens.ts';
 export {weatherArtwork} from './weather-icons.ts';
-export {worldLogGo,worldLogMark} from './world-log-line.ts';

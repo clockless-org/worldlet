@@ -165,16 +165,13 @@ await withBrowser(fileAccess,async browser=>{
  // Settings work like a settings window (owner feedback 2026-10-03, one list since 2026-10-10): the list on the left,
  // the chosen section's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
  assert.deepEqual(await panel.locator('.companion-settings-item strong').allTextContents(),
-  ['Fox','Your Agent','Approvals','Accounts','Phone','History','Sounds and voice','Privacy and data','General','Help','Feedback']);
+  ['Fox','Your Agent','Accounts','Phone','General','Help']);
  assert.equal(await panel.getByRole('button',{name:/Animation timing|Preview animation/}).count(),0);
  const detail=panel.locator('.companion-settings-detail');
- await panel.locator('[data-setting=privacy]').click();
- await detail.getByRole('button',{name:'Transfer companion',exact:true}).click();
- await detail.getByRole('button',{name:'Import companion',exact:true}).waitFor();assert.equal(await detail.getByRole('button',{name:'Export companion',exact:true}).isVisible(),true);
- assert.equal(await bubble.getByRole('button',{name:'Export companion',exact:true}).count(),0,'Data finishes in the panel');
- await panel.locator('[data-setting=general]').click();await panel.locator('[data-setting=privacy]').click();
- await detail.getByText('Connections, model setup and Fox’s memory are kept',{exact:false}).waitFor();
- assert.equal(await detail.getByRole('button',{name:'Delete saved data',exact:true}).count(),1,'deleting saved data says what it leaves standing');
+ // The one privacy choice left is the usage counts switch in General (owner request 2026-10-10).
+ await panel.locator('[data-setting=general]').click();
+ await detail.locator('[data-setting=usage-analytics]').waitFor();
+ assert.equal(await detail.getByRole('button',{name:/Transfer companion|Delete saved data/}).count(),0,'no backup or transfer controls');
  await panel.locator('[data-setting=general]').click();
  const sample=detail.locator('.world-recovery-switch');
  assert.equal(await sample.getAttribute('role'),'switch','the sample world is a switch, not an action');
@@ -183,8 +180,8 @@ await withBrowser(fileAccess,async browser=>{
  // record of what was called with it. That it calls the same toggle every other
  // entry point uses is the thing worth knowing, and it is one function.
  await page.screenshot({path:'output/fox-mac/recovery.png'});
- // Privacy: the person deletes what the built-in browser recorded, one site or all, after an in-page question.
- await panel.locator('[data-setting=privacy]').click();
+ // With the Browser in General: the person deletes what the built-in browser recorded, one site or all, after an in-page question.
+ await panel.locator('[data-setting=general]').click();
  const recordings=detail.locator('.companion-settings-recordings');
  await recordings.getByText('2 sites',{exact:true}).waitFor();await recordings.getByText('4 visits',{exact:true}).waitFor();
  const deletes=()=>page.evaluate(()=>calls.filter(c=>c.action==='browserCommand'&&c.operation==='deleteRecordings'));

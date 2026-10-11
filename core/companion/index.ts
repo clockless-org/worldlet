@@ -11,7 +11,6 @@ export * from './conversation-place.ts';
 export * from './memory-edits.ts';
 export * from './model-status.ts';
 export * from './host-request.ts';
-export * from './companion-look.ts';
 export * from './fox-voice.ts';
 export * from './fox-proactive.ts';
 export * from './fox-talk.ts';

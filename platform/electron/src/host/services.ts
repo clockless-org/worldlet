@@ -283,7 +283,7 @@ export interface SpeechService {
  voices():Promise<{id:string,name:string,language:string}[]>;
  /** Whether local Whisper runs on this computer (Mac and Windows). */
  readonly localSupported:boolean;
- /** The wake word ("Hey Fox", modules/voice/wake.ts): what it does now, and Settings › Sounds and voice turning it on or off
+ /** The wake word ("Hey Fox", modules/voice/wake.ts): what it does now, and its preference turning it on or off
   * (resolves with the state after asking for the microphone where the OS asks). */
  readonly wakeState:'off'|'listening'|'paused'|'unavailable';
  setWakeWord(on:boolean):Promise<'off'|'listening'|'paused'|'unavailable'>;

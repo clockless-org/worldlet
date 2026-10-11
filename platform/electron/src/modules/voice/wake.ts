@@ -5,7 +5,7 @@ import type {LocalSpeech,SpeechInput} from './speech.ts';
 
 export type {WakeState};
 
-/** The wake word on the computer (core/companion/fox-talk.ts): while Settings › Sounds and voice has it on, the media surface
+/** The wake word on the computer (core/companion/fox-talk.ts): while `worldlet.wakeWord` is on, the media surface
  * keeps a rolling 4-second capture whose levels single out short standalone phrases (`wakeGate`); each goes to local
  * Whisper on this device (`LocalSpeech`) and `wakeMatch` decides. Nothing is recorded or sent anywhere; the audio
  * lives only in that rolling buffer. It rests while Fox's own voice input or Talk has the microphone, during a call in
@@ -46,7 +46,7 @@ export class WakeListener {
  }
  get supported(){return this.local.supported;}
  get state(){return this.current;}
- /** Settings › Sounds and voice turned it on or off. */
+ /** The wake word preference turned on or off. */
  set(on:boolean){
   this.enabled=on&&this.supported;if(on)this.local.warm();
   // A call starts or ends without telling the listener: it looks again while it is on.

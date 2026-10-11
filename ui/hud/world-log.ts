@@ -1,8 +1,8 @@
 import {worldLogLines,worldLogNow,type WorldLogLine} from '../../core/activity/index.ts';
 /** The World's saved history as plain lines. Nothing of it shows in the World's corners any more:
- * the bottom-right "next check" line is gone too (owner Order 2026-10-10), and the lines live on
- * only in the companion panel's History page. They are still read here and handed to `onLines`,
- * because the phone's Applet world shows them. Lines are Core's.
+ * the bottom-right "next check" line is gone too (owner Order 2026-10-10), and so is the History page
+ * (owner request 2026-10-10). They are still read here and handed to `onLines`, because the phone's
+ * Applet world shows them. Lines are Core's.
  *
  * Cost: one small host read every few seconds while the window is visible. Nothing runs per frame. */
 const POLL_MS=5000;

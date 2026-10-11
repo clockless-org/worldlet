@@ -72,25 +72,11 @@ artboard with headroom (`FRAME` in `fox-rive.ts`) so a jump or raised paws stay
 in view; the artboard does not clip.
 Check: `node scripts/fox-rive-check.ts`.
 
-### Companion looks
+### One look
 
-A look (`core/companion/companion-look.ts`) is a fur color and a scarf color; presets
-name a few. `loadRiveFox` keeps the nine character layers Rive embeds (arms, eyelids,
-head, ears, body, tail) through a custom asset loader and, for a look, recolors each
-one on the page and decodes it into the same image asset, so the rig, meshes and 32
-performances are untouched and nothing is recompiled. Fur is the painting's orange
-family and the scarf its sage family; cream, white, outlines and props keep their
-paint, and head layers keep the dark eye, nose and brow paint. Classic decodes the
-painted originals again. The host stores the look in the `worldlet.companionLook`
-preference (in World backups) and sends it with `companionProfile` and
-`worldlet:companion-appearance`; `ui/companion/companion-look.ts` hands it to every
-portrait. The Profile page's picker and Fox (`set_worldlet_preference companion_look`,
-only when the person's own words ask for a new look) both set it.
-
-Next: accessories as extra painted layers on the head bone (the rig needs headroom
-above the head), then companions designed from a description, repainted in the
-reference pose on the person's own Agent and cut into the same layers with the
-rig's part masks. Check: `node scripts/companion-look-check.ts`.
+Fox has one look, the painted one (owner request 2026-10-10: no customizing how the companion looks). Earlier
+looks recolored the character layers; that code is gone, and a `worldlet.companionLook` preference left from it is
+ignored.
 
 ## Renderer and state ownership
 
@@ -137,7 +123,7 @@ painted pose per performance state through the same portrait and state owner.
 
 Run `node scripts/fox-catalog-preview.ts` for the standalone 32-state player at
 `output/companion-32/index.html` (timeline, slow playback and light/dark review).
-The shipped Fox is covered by `fox-rive-check.ts`, `companion-look-check.ts`,
+The shipped Fox is covered by `fox-rive-check.ts`,
 `fox-state-catalog-check.ts`, `fox-animation-schedule-check.ts` and the painted
 fallback's `fox-painted*-check.ts`. The draft anatomy rig is a development
 fallback only, so its geometry, render and study checks were removed; Git keeps them.

@@ -2,18 +2,11 @@ import {uiIcon} from '../components/index.ts';
 import {companionStill,themeAppletIcon} from '../themes/index.ts';
 import {WORLD_APPS} from '../../core/applets/index.ts';
 import {journalPayload} from '../../core/items/index.ts';
-import {worldLogLines,worldLogNow,type WorldLogLine} from '../../core/activity/index.ts';
-import {worldLogGo,worldLogMark} from '../components/index.ts';
-/** The History page: the world log's plain lines as a feed that keeps running, newest at the
- * bottom, each line going to its Applet or site, with what is happening now and the next check
- * under it. Every recorded event, for anyone who needs the detail, is `records`, shown from
- * Settings › Help. Polling runs only while the panel is open. */
-export function createCompanionHistory({call,openApplet,openSite,connections=()=>[]}:{call:any;openApplet?:(id:string)=>void;openSite?:(url:string)=>void;connections?:()=>unknown[]}){
+/** Every event Worldlet recorded on this computer, newest first, for the Worldlet team (Settings › Help, folded under
+ * For the Worldlet team). There is no History page any more (owner request 2026-10-10). Polling runs only while the
+ * panel is open and the records show. */
+export function createActivityRecords({call}:{call:any}){
  const el=(tag,text='')=>Object.assign(document.createElement(tag),{textContent:text});
- const section=el('section');section.className='companion-info-section companion-history';section.dataset.section='History';
- const heading=el('h3','History'),feed=el('div'),recent=el('ol'),quiet=el('p','Nothing has happened yet. Open an Applet or ask Fox, and it shows up here.');
- feed.className='companion-history-feed';recent.className='companion-world-log';recent.setAttribute('aria-label','What happened');recent.setAttribute('aria-live','polite');quiet.className='companion-info-note';
- feed.append(quiet,recent);section.append(heading,feed);
  const records=el('section'),status=el('p','Loading records…'),list=el('ol'),controls=el('div');
  records.className='companion-history companion-history-records';records.setAttribute('aria-label','Activity records');
  status.setAttribute('role','status');list.setAttribute('aria-label','Activity records');
@@ -60,41 +53,6 @@ export function createCompanionHistory({call,openApplet,openSite,connections=()=
   if(animate&&records.isConnected&&!matchMedia('(prefers-reduced-motion: reduce)').matches)for(const [id,item] of existing)if(keep.has(id)){const delta=positions.get(id)-item.getBoundingClientRect().top;if(delta)item.animate([{transform:`translateY(${delta}px)`},{transform:'none'}],{duration:280,easing:'ease-out'});}
   older.disabled=!hasMore;latest.disabled=atLatest;retry.hidden=true;
  }
- let plain='',live:WorldLogLine[]=[],sample=false;
- const clock=(at:number)=>new Date(at*1000).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
- function drawRecent(lines:WorldLogLine[]){
-  // What Applets are doing right now ends the feed.
-  const now=sample?[]:worldLogNow(connections(),[]).map((l,i)=>({seq:-1-i,at:Date.now()/1000,who:'world',text:l.text,applet:l.applet,live:true} as WorldLogLine&{live?:true}));
-  const all=[...lines,...now],key=all.map(l=>l.seq+':'+l.text).join('|');
-  if(key===plain)return;
-  // Stay with the newest line unless the person scrolled up to read.
-  const pinned=feed.scrollHeight-feed.scrollTop-feed.clientHeight<24,before=new Set(Array.from(recent.querySelectorAll('li[data-key]'),(li:HTMLElement)=>li.dataset.key));
-  const first=!plain;plain=key;
-  const day=(at:number)=>new Date(at*1000).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
-  let last='';const items:HTMLElement[]=[],arrived:HTMLElement[]=[];
-  for(const line of all){
-   const d=day(line.at);if(d!==last){last=d;const h=el('li',d);h.className='companion-world-log-day';items.push(h);}
-   const item=el('li'),go=worldLogGo(line,{openApplet,openSite}),b=el(go?'button':'div');item.dataset.who=line.who;item.dataset.key=line.seq+':'+line.text;if(line.failed)item.dataset.failed='true';
-   if((line as any).live)item.dataset.live='true';
-   if(go){(b as HTMLButtonElement).type='button';b.onclick=go;}
-   const time=el('time',(line as any).live?'now':clock(line.at));time.dateTime=new Date(line.at*1000).toISOString();
-   b.append(worldLogMark(line),el('span',line.text),time);item.append(b);items.push(item);
-   if(!first&&!before.has(item.dataset.key))arrived.push(item);
-  }
-  recent.replaceChildren(...items);quiet.hidden=all.length>0;
-  if(pinned||first)feed.scrollTop=feed.scrollHeight;
-  if(arrived.length&&!section.hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches)
-   arrived.forEach((item,i)=>item.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:360,delay:Math.min(i,4)*80,easing:'ease-out',fill:'backwards'}));
- }
- async function refreshRecent(){
-  try{
-   const result=await call('worldLog',{tasks:false});if(!active)return;
-   sample=!!result?.sample;
-   live=sample||!Array.isArray(result?.entries)?[]:worldLogLines(result.entries,80);
-   if(sample)quiet.textContent='History is available in your personal world.';
-   drawRecent(live);
-  }catch{/* A failed read keeps the lines already shown. */}
- }
  async function refresh(mode:'poll'|'latest'|'older'='poll'){
   if(!active||loading)return;loading=true;const turn=version;
   try{
@@ -123,10 +81,10 @@ export function createCompanionHistory({call,openApplet,openSite,connections=()=
  const showingRecords=()=>records.isConnected&&!records.closest('[hidden],details:not([open])');
  async function navigate(mode:'latest'|'older'){await refresh(mode);records.scrollTop=0;}
  latest.onclick=()=>void navigate('latest');older.onclick=()=>void navigate('older');retry.onclick=()=>void refresh('latest');
- function start(){if(active)return;active=true;version++;loading=false;plain='';void refreshRecent();timer=setInterval(()=>{if(document.hidden)return;void refreshRecent();if(showingRecords())void refresh();},2000);}
+ function start(){if(active)return;active=true;version++;loading=false;timer=setInterval(()=>{if(document.hidden)return;if(showingRecords())void refresh();},2000);}
  function stop(){active=false;version++;loading=false;clearInterval(timer);}
  draw();
- return {element:section,records,start,stop,
+ return {records,start,stop,
   /** Settings › Help shows the records: read the latest page now. */
   showRecords(){if(active)void refresh('latest');}};
 }

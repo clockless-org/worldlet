@@ -909,7 +909,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // shortcuts or an IME composition.
  const keyboardTarget=target=>!root.querySelector('#notionDialog').open&&!target.closest('input,textarea,select,[contenteditable],a,button,[role="button"],summary,[role="dialog"],.game-board');
  window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&root.querySelector('#companionInfo')?.open)return;
+  if(e.key==='Escape'&&(root.querySelector('#companionInfo')?.open||root.querySelector('#worldFeedback')?.open))return;
   if(root.dataset.onboardingLocked==='true'||!holdToSpeak||e.defaultPrevented||e.isComposing||e.metaKey||e.ctrlKey||e.altKey||!keyboardTarget(e.target))return;
   if(e.code==='Space'){
    e.preventDefault();
@@ -934,7 +934,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(held)finishSpeech();else focusInput();
  },true);
  window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&(root.querySelector('#companionInfo')?.open||root.querySelector('#notionDialog')?.open))return;
+  if(e.key==='Escape'&&(root.querySelector('#companionInfo')?.open||root.querySelector('#worldFeedback')?.open||root.querySelector('#notionDialog')?.open))return;
   // A tour on screen takes Esc first (tour-spotlight.ts ends a replay), even over a reply preview it covers.
   if(e.key==='Escape'&&root.dataset.tourSpotlight==='true')return;
   if(e.key==='Escape'&&expanded&&!active){e.preventDefault();e.stopImmediatePropagation();toggleThread(false);return;}

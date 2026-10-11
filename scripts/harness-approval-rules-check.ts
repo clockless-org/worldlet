@@ -9,7 +9,6 @@ import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/
 import {createHarnessApprovalRules} from '../platform/electron/src/modules/fox/harness-approvals.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {approvalRuleLine,showApprovalRules} from '../ui/companion/approval-rules.ts';
 import {approvalResultBody,approvalResultText} from '../ui/companion/fox-harness-approval.ts';
 import {withTempDir} from './test-temp.ts';
 
@@ -17,7 +16,7 @@ import {withTempDir} from './test-temp.ts';
 // the declared approval features, reading Hermes Agent's `command_allowlist` and OpenClaw's approvals document and
 // grants, the documents without one rule, the World's record of who said Always and where, the tracker that ties an
 // approval to its tool call, the host services against fixture `hermes` and `openclaw` commands (their own commands
-// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, Settings › Approvals and the
+// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, and the
 // approval card's diff. scripts/harness-sessions-check.ts drives the trackers through the resident sessions.
 
 // Declarations ------------------------------------------------------------------------------------------------------
@@ -195,7 +194,7 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
   }
  }
 
- // Settings › Approvals through the World's consumer: grants recorded from the cards, listed with the rules, revoked.
+ // The rule list (host action harnessApprovalRules) through the World's consumer: grants recorded from the cards, listed with the rules, revoked.
  const world=new WorldLedger(path.join(scratch,'world'));
  const live=hermesStandingRulesService(hermesInstall,env);
  fs.writeFileSync(path.join(hermesHome,'config.yaml'),'command_allowlist:\n  - recursive delete\n  - podman *\n');
@@ -220,25 +219,6 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
  await assert.rejects(rules.revoke('hermes',outside.id),/your own world/);
  host.store.sampleEnabled=()=>false;
 
- // The Settings page: a row per rule with its agent, when and where, and Revoke; an Agent that cannot revoke says how.
- const requests:any[]=[];
- let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads its allowlist when it starts.',rules:[{id:granted.id,allows:'recursive delete',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In the gmail Applet',inWorld:true},{id:outside.id,allows:'podman *',agent:'work',kind:'command'}]},
-  {harness:'other',title:'Other Agent',revoke:null,rules:[{id:'rule-0000000000000000',allows:'x',agent:'*',kind:'command'}]}],elsewhere:'Agent on Mac mini'};
- const call=async(action:string,args:any)=>{requests.push([action,args]);if(args.operation==='revoke'){answer={harnesses:[{...answer.harnesses[0],rules:answer.harnesses[0].rules.slice(1)}]};return {ok:true};}return answer;};
- const target=new Node();
- await showApprovalRules(target as any,call,()=>true);
- const rows=target.all(n=>!!n.dataset.rule);
- assert.deepEqual(rows.map(r=>r.dataset.rule),[granted.id,outside.id,'rule-0000000000000000']);
- assert.match(rows[0].textContent,/recursive delete[\s\S]*Main agent · granted .*2026, in the gmail Applet\./);
- assert.match(rows[1].textContent,/Agent “work” · granted outside Worldlet; Hermes Agent keeps no date\./);
- assert.equal(rows[2].all(n=>n.dataset.action==='revoke-rule').length,0,'no Revoke where the Agent cannot have it revoked');
- assert.match(target.textContent,/Worldlet cannot revoke these\. Change them in Other Agent itself\./);
- assert.match(target.textContent,/Agent on Mac mini keeps its standing rules where it runs/);
- await rows[0].all(n=>n.dataset.action==='revoke-rule')[0].onclick();
- assert.deepEqual(requests.filter(([,a])=>a.operation==='revoke'),[['harnessApprovalRules',{operation:'revoke',harness:'hermes',id:granted.id}]]);
- assert.deepEqual(target.all(n=>!!n.dataset.rule).map(r=>r.dataset.rule),[outside.id],'the list is read again after a revoke');
- assert.match(target.textContent,/Hermes Agent will ask again before: recursive delete Hermes Agent reads its allowlist when it starts\./);
- assert.equal(approvalRuleLine({id:'r',allows:'x',agent:'*',kind:'command'},'OpenClaw'),'All agents · granted outside Worldlet; OpenClaw keeps no date.');
 });
 delete (globalThis as any).document;
-console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Approvals and the approval card\'s diff');
+console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs and the approval card\'s diff');

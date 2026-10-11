@@ -1,6 +1,6 @@
 // The world log: Core turns saved history into plain lines and finds the next scheduled check.
-// Nothing of it shows in the World's corner (owner Orders 2026-10-06 and 2026-10-10); the History
-// page is a running feed of the lines, each going to its Applet or site. The brand stays hidden unless a development build is ready to apply.
+// Nothing of it shows in the World's corner (owner Orders 2026-10-06 and 2026-10-10) and there is no History page
+// (owner request 2026-10-10); the phone's Applet world still reads the lines. The brand stays hidden unless a development build is ready to apply.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import path from 'node:path';
@@ -85,7 +85,7 @@ try{
  await page.waitForFunction(()=>(window as any).logCalls.length>=1);
  assert.equal(await page.locator('.world-log,.world-log-next,.world-log-lines,.world-log-line').count(),0,'no log in the World corner');
  assert.equal(await page.locator('.world-watermark').isVisible(),false,'the brand stays hidden without a build to apply');
- // New events and what an Applet is doing now reach History.
+ // New events and what an Applet is doing now are read for the phone's Applet world.
  await page.evaluate(()=>{const w=window as any;w.entries.push({seq:6,at:Date.now()/1000,kind:'activity.page.opened',key:'',body:{id:'6',data:{url:'https://news.example.org/a'}}});});
  await page.evaluate(()=>{const w=window as any;w.fixture.connections=[{provider:'gmail',connected:true,running:true}];w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
  await page.waitForFunction(()=>(window as any).logCalls.length>=3,null,{timeout:12000});
@@ -99,17 +99,12 @@ try{
  await page.waitForFunction(()=>!!document.querySelector('.applet-task-done:not([hidden])'),null,{timeout:5000});
  await page.screenshot({path:'output/world-log/task-done.png'}).catch(()=>{});
  await page.keyboard.press('Escape');
- // The companion panel's History page is a running feed of the plain lines.
+ // There is no History page any more (owner request 2026-10-10): an old link opens Fox's profile, with no feed.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'History'}})));
- const recent=page.locator('#companionInfo .companion-world-log');
- await recent.getByText('You visited news.example.org',{exact:true}).waitFor({timeout:10000});
- assert(await recent.locator('button').count()>=6,'every line in History goes somewhere');
- assert.equal(await page.locator('#companionInfo').getByText(/Next sync|check at/).count(),0,'History has no next-sync line either (owner Order 2026-10-10)');
- assert.equal(await page.locator('#companionInfo [data-section=History] .companion-history-records').count(),0,'raw records stay out of History (Settings › Help)');
- await page.screenshot({path:'output/world-log/history.png'}).catch(()=>{});
- await recent.locator('button').first().click();
- await page.locator('#companionInfo').waitFor({state:'hidden'});
+ await page.locator('#companionInfo').waitFor();
+ assert.equal(await page.locator('#companionInfo .companion-world-log,#companionInfo [data-setting=history]').count(),0,'no History page');
+ await page.keyboard.press('Escape');await page.locator('#companionInfo').waitFor({state:'hidden'});
  assert(await page.evaluate(()=>(window as any).logCalls.every(b=>typeof b.tasks==='boolean')),'every read says whether it needs the schedule');
  assert.deepEqual(errors,[]);
- console.log('PASS world log: nothing in the World corner, History is a running feed of plain lines, brand hidden, Applet task result');
+ console.log('PASS world log: nothing in the World corner, no History page, brand hidden, Applet task result');
 }finally{await browser.close();}
