@@ -162,7 +162,9 @@ final class WorldletUITests: XCTestCase {
         app.buttons["leaveApplet"].tap()
         XCTAssert(waitGone(element(app, "appletPage")), "the pill's ✕ leaves the page")
         tab(app, 0).tap()
-        XCTAssert(hittable(row))
+        // The row is below the fold on Today, under the date, the Journal and Coming up (#315), so scroll to it.
+        for _ in 0..<4 where !row.isHittable { swipe(app, from: 0.6, to: 0.35) }
+        XCTAssert(hittable(row), "the item's row is on Today")
         row.tap()
         let from = app.buttons["cardApplet"]
         XCTAssert(from.waitForExistence(timeout: 5), "the card names the item's Applet")
