@@ -31,7 +31,8 @@ export function createWorkMotion(world:Container,path:readonly number[][]){
    const target=shown?liveliness(working):0;
    lively=shown?lively+(target-lively)*Math.min(1,step/WORK_MOTION.liven*3):0;
    if(lively<.005&&target===0)lively=0;
-   glints.clear();
+   // Idle frames leave the already empty layer alone instead of clearing it again.
+   if(glints.visible||lively>0)glints.clear();
    if(lively>0){
     // Extra glints run down the river, more and brighter the busier the World.
     const count=Math.round(26*lively);

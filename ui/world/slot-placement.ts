@@ -3,11 +3,6 @@ import {WORLD_LAYOUT} from './world-layout.ts';
 import {APPLET_SPRITES} from './applet-sprites.ts';
 import {lastUse,recentlyUsedFirst,regionId,type RegionLayout} from './region-core.ts';
 export type PlacementSlot={id:string;anchor:number[];maxSize?:number[]};
-/** Fit the painted footprint, not transparent atlas padding, inside a reserved place. */
-export function placementScale(slot:PlacementSlot|undefined,width:number,height:number){
- if(!slot?.maxSize||width<=0||height<=0)return 1;
- return Math.min(1,slot.maxSize[0]*WORLD_WIDTH/width,slot.maxSize[1]*WORLD_HEIGHT/height);
-}
 export const sameAnchor=(a:number[]|undefined,b:number[])=>!!a&&a.length===2&&a.every((v,i)=>Number.isFinite(v)&&Math.abs(v-b[i])<1e-6);
 export const roomRegion=(room:any)=>regionId(room.region||room.buildingId||APPLET_SPRITES[room.key]?.region||'home');
 export function slotsForApplet(key:string,region=APPLET_SPRITES[key]?.region):PlacementSlot[]{return WORLD_LAYOUT.regions[regionId(region)]?.placements||[];}

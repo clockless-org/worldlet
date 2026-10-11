@@ -56,5 +56,5 @@ export function createLandmarkSprite(dayTexture:Texture,nightTexture:Texture|und
   for(let r=0;r<Math.max(width,height);r+=2)for(let a=0;a<16;a++){const x=Math.round(cx+Math.cos(a*Math.PI/8)*r),y=Math.round(cy+Math.sin(a*Math.PI/8)*r);if(x>=0&&y>=0&&x<width&&y<height&&alpha[y*width+x]>200)return [(x+.5)/width*day.width-day.width*.5,(y+.5)/height*day.height-day.height];}
   return [0,-day.height*.5];
  }
- return {root,setTextures,update,paintedPoint,get metrics(){return {theme,hasNight,nightAmount:amount,dayTint:day.tint,nightTint:night.tint,anchor:[root.x,root.y],width:day.width,height:day.height};}};
+ return {root,setTextures,update,paintedPoint,get theme(){return theme;},get metrics(){return {theme,hasNight,nightAmount:amount,dayTint:day.tint,nightTint:night.tint,anchor:[root.x,root.y],width:day.width,height:day.height};}};
 }
