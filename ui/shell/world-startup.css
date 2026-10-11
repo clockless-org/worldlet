@@ -209,6 +209,7 @@
 .setup-tile-conversations .setup-tile-titles li{background:#ffffffc0;border-left:3px solid #4f7a5c66}
 .setup-tile.is-empty{background:#ffffffa6;box-shadow:none}.setup-tile.is-empty::before{opacity:.1;filter:grayscale(1)}.setup-tile.is-empty .setup-tile-title{color:var(--brand-muted)}
 .setup-tile-reading{display:flex;align-items:center;gap:10px;grid-column:span 2;background:#ffffff99;box-shadow:none}
+.setup-tiles[data-layout=agent] .setup-tile-reading{grid-row:4;grid-column:1/-1}
 .setup-tile-spinner{width:16px;height:16px;flex:none;border:2px solid var(--brand-line);border-top-color:var(--brand-forest);border-radius:50%;animation:setup-spin .8s linear infinite}
 .setup-tile-line{margin:0;font-size:13px;color:var(--brand-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;animation:setup-tile-pulse 1.4s ease-in-out infinite}
 @keyframes setup-tile-pulse{50%{opacity:.5}}

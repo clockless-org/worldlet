@@ -202,6 +202,9 @@ await withBrowser(fileAccess,async browser=>{
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform})=>{
    const w=window as any;w.calls=[];
+   // Setup elements taken out of the page by a render, to find any put back: a re-inserted element replays its
+   // animations, which is the flashing people saw while an Agent moved in (owner report 2026-10-11).
+   w.taken=new Set<Element>();new MutationObserver(list=>{for(const m of list)for(const n of m.removedNodes)if(n instanceof Element)w.taken.add(n);}).observe(document,{childList:true,subtree:true});
    w.fixture={platform,workspaceId:'setup-agent-test',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:false,unlockedApplets:[]},connections:[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
    w.webkit={messageHandlers:{worldlet:{async postMessage(b){
     w.calls.push(b);
@@ -279,6 +282,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('.setup-tile-connections .setup-tile-note').textContent(),'1 to sign in again after setup','The integration that stays with the Agent gets no mark');
   assert.equal(await page.locator('.setup-tile-connections .setup-tile-logos>*').count(),2);
   assert.equal(await page.locator('.setup-tile-reading').count(),0,'Nothing reads as waiting once everything came over');
+  assert.deepEqual(await page.evaluate(()=>[...(window as any).taken].filter((e:Element)=>e.isConnected&&e.matches('.setup-tile,.setup-passport,.setup-tiles,.setup-primary')).map((e:Element)=>e.className)),[],'A render never takes a tile, the Agent card or the big button out and puts it back, so nothing flashes while the Agent moves in');
   const bringFrame=await page.locator('.setup-next').boundingBox();
   assert.ok(['x','y','width','height'].every(k=>Math.abs(bringFrame[k]-firstFrame[k])<=1.5)&&bringFrame.y+bringFrame.height<=850,'The big button keeps its shape and its place on both halves (owner request 2026-10-11): '+JSON.stringify({firstFrame,bringFrame}));
   assert.equal(await page.locator('.setup-next').textContent(),'Enter your world');
