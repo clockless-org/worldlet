@@ -3,15 +3,16 @@ import {CODING_SESSIONS} from '../../../core/applets/index.ts';
 import {practiceJobSession,practiceJobDetail} from '../../practice/index.ts';
 // CLI records remain local UI data. Listing or reading never resumes an agent.
 export const WORK_APPLETS=['github',...CODING_SESSIONS];
+const provider=(key,result)=>result.providers?.find(p=>p.provider===(key==='codex'?'codex':'claude'));
 export function workItems(key,result){
  if(key==='github')return (result.repositories||[]).map(repo=>({id:repo.id,title:repo.title,context:repo.description,when:repo.status,repo}));
- const rows=result.sessions||result.providers?.find(p=>p.provider===(key==='codex'?'codex':'claude'))?.sessions||[];
+ const rows=result.sessions||provider(key,result)?.sessions||[];
  return rows.map(session=>({id:session.id||session.sessionId,title:session.title,context:localPathName(session.cwd)||'',when:session.status||'Saved',executionState:session.status||'Saved',session}));
 }
 export function workError(key,result){
  if(result.error)return result.error;
- const provider=result.providers?.find(p=>p.provider===(key==='codex'?'codex':'claude'));
- return provider&&provider.state!=='ready'?({not_installed:'Install '+(key==='codex'?'Codex':'Claude Code')+' to read local sessions.',adapter_missing:'The local session reader is missing. Ask Fox to help repair it.',needs_attention:'Could not read local sessions. Ask Fox to retry.'}[provider.state]||'Could not read this tool.') : '';
+ const found=provider(key,result);
+ return found&&found.state!=='ready'?({not_installed:'Install '+(key==='codex'?'Codex':'Claude Code')+' to read local sessions.',adapter_missing:'The local session reader is missing. Ask Fox to help repair it.',needs_attention:'Could not read local sessions. Ask Fox to retry.'}[found.state]||'Could not read this tool.') : '';
 }
 export function renderWorkDetail(host,key,value,renderMarkdown,onMore){
  const el=(tag,text='',cls='')=>Object.assign(document.createElement(tag),{textContent:text,className:cls});

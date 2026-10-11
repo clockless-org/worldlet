@@ -1,7 +1,7 @@
 import {stripeMoney} from '../index.ts';
 const amounts=values=>values?.length?values.map(v=>stripeMoney(v.amount,v.currency)).join(' · '):'No amounts in this read';
 // Provider adapters return plain text, never provider HTML or model-generated totals.
-export function stripeOverview(value){
+function stripeOverview(value){
  return ['Stripe account overview',`Read at: ${value.asOf||'Unknown'} · ${value.timezone||'Local timezone'}`,
   'Today collected: '+(value.todayComplete===false?'Unavailable — incomplete read':amounts(value.today)),
   'Estimated MRR: '+(value.mrrComplete===false?'Unavailable — incomplete read':amounts(value.mrr)),
@@ -9,7 +9,7 @@ export function stripeOverview(value){
   'Collected is captured payment volume, not profit or payouts. MRR is the monthly equivalent of supported recurring prices. Currencies are not combined.',
   ...(value.limitations||[]),'',...(value.attention||[]).map(x=>`${x.title||x.id}: ${x.status||x.detail||''}`)].join('\n');
 }
-export function stripeCustomer(value){
+function stripeCustomer(value){
  const c=value.customer||{},lines=[c.name||c.email||c.id,c.email||'',c.id||'',''];
  for(const [key,label] of [['subscriptions','Subscriptions'],['payments','Recent payments'],['invoices','Recent invoices']]){
   lines.push(label);const rows=value[key]||[];

@@ -3,7 +3,7 @@ export function mailIdentity(from=''){
  const match=String(from).match(/^(.*?)\s*<([^>]+)>$/),name=(match?match[1]:String(from)).replace(/^"|"$/g,'').trim(),address=match?.[2]||(/^[^\s@]+@[^\s@]+$/.test(name)?name:'');
  return {name:name||address||'Sender unavailable',address,initials:(name||address).split(/\s+/).slice(0,2).map(s=>s[0]).join('').toUpperCase()||'?'};
 }
-export const defaultMailAvatar='<svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><circle cx="16" cy="11" r="5"/><path d="M6 28v-3a10 10 0 0 1 20 0v3Z"/></svg>';
+const defaultMailAvatar='<svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><circle cx="16" cy="11" r="5"/><path d="M6 28v-3a10 10 0 0 1 20 0v3Z"/></svg>';
 export function mailTitle(subject:string,curated=''){
  const text=(curated||subject||'No subject').replace(/^(?:(?:re|fw|fwd)\s*:\s*)+/ig,'').replace(/\s+/g,' ').trim();
  const chars=Array.from(text);return chars.length>68?chars.slice(0,65).join('').replace(/\s+\S*$/,'')+'…':text;
@@ -23,7 +23,7 @@ function showImage(avatar:HTMLElement,src:string,kind:string,fallback:()=>void){
 export function mailAvatar(from:string,photo=''){
  const who=mailIdentity(from),avatar=document.createElement('span');avatar.className='mail-avatar';avatar.setAttribute('aria-label',who.name);avatar.title=who.name;
  const key=(who.address||who.name).toLowerCase();let hash=0;for(const c of key)hash=(hash*31+c.codePointAt(0)!)>>>0;
- const initials=()=>{delete avatar.dataset.kind;if(who.name==='Sender unavailable'){avatar.innerHTML=defaultMailAvatar;return;}const text=document.createElement('span');text.className='mail-avatar-initials';text.textContent=Array.from(/[\u3400-\u9fff\uac00-\ud7af]/.test(who.name)?who.name.replace(/\s+/g,''):who.initials).slice(0,/[\u3400-\u9fff\uac00-\ud7af]/.test(who.name)?1:2).join('');avatar.replaceChildren(text);};
+ const initials=()=>{delete avatar.dataset.kind;if(who.name==='Sender unavailable'){avatar.innerHTML=defaultMailAvatar;return;}const text=document.createElement('span'),cjk=/[\u3400-\u9fff\uac00-\ud7af]/.test(who.name);text.className='mail-avatar-initials';text.textContent=Array.from(cjk?who.name.replace(/\s+/g,''):who.initials).slice(0,cjk?1:2).join('');avatar.replaceChildren(text);};
  avatar.style.setProperty('--mail-avatar-tint',AVATAR_TINTS[hash%AVATAR_TINTS.length]);initials();
  if(IMAGE.test(photo)){showImage(avatar,photo,'photo',initials);return avatar;}
  const address=who.address.toLowerCase();

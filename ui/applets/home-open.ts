@@ -1,5 +1,4 @@
 import {attentionIcon} from '../attention/index.ts';
-import {calendarDay} from '../world/index.ts';
 import {node} from '../components/index.ts';
 import {renderCalendar,type CalendarState} from './google-calendar/grid.ts';
 export {localCalendarItems} from './google-calendar/grid.ts';

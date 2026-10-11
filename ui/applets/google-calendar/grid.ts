@@ -6,9 +6,9 @@ import {calendarEventId,calendarOccurrences,localDay,CALENDAR_ALERT_MINUTES,LOCA
 // person's own events (applet.md#local-events) move; synced events open their original as before. A repeating event
 // shows each time it happens; moving or editing one of them changes them all, and Delete can take just that one.
 
-export const HOUR=40;
+const HOUR=40;
 const SNAP=15,DAY_MINUTES=24*60,DRAG=4;
-export type CalendarActions={save:(event:LocalCalendarEvent)=>unknown;remove:(id:string)=>unknown};
+type CalendarActions={save:(event:LocalCalendarEvent)=>unknown;remove:(id:string)=>unknown};
 export type CalendarState={mode:'day'|'week'|'month';offset:number;scroll?:number|null;editing?:string|null;draft?:Record<string,any>|null;undo?:LocalCalendarEvent|null};
 
 /** The person's own events as Calendar items, beside the synced ones. */
@@ -25,14 +25,14 @@ const addDays=(key:string,n:number)=>{const d=dayStart(key);d.setDate(d.getDate(
 const dayDiff=(a:string,b:string)=>Math.round((+dayStart(b)-+dayStart(a))/86400000);
 
 /** When an item happens; a synced event without an end lasts an hour. */
-export function itemRange(item){
+function itemRange(item){
  if(item.allDay){const first=calendarDay(item.start,true);const last=item.local?String(item.end||first).slice(0,10):first;return {allDay:true,first,last:last>=first?last:first};}
  const start=new Date(item.start);if(Number.isNaN(+start))return null;
  const rawEnd=new Date(item.end||item.record?.end||'');const end=Number.isNaN(+rawEnd)||+rawEnd<=+start?new Date(+start+3600000):rawEnd;
  return {allDay:false,start,end};
 }
 /** Side-by-side lanes for events that overlap in time, as Apple Calendar lays them out. */
-export function calendarLanes(spans:{id:string,from:number,to:number}[]){
+function calendarLanes(spans:{id:string,from:number,to:number}[]){
  const sorted=[...spans].sort((a,b)=>a.from-b.from||b.to-a.to),out=new Map<string,{lane:number,lanes:number}>();
  let group:{id:string,lane:number}[]=[],groupEnd=-Infinity,laneEnds:number[]=[];
  const close=()=>{for(const g of group)out.set(g.id,{lane:g.lane,lanes:laneEnds.length});group=[];laneEnds=[];};
@@ -44,7 +44,7 @@ export function calendarLanes(spans:{id:string,from:number,to:number}[]){
  close();return out;
 }
 /** A new event: the dragged time, or an hour from the next full hour on the shown day. */
-export function newCalendarEvent(day:string,from:number|null,to:number|null,allDay=false,now=Date.now()):LocalCalendarEvent {
+function newCalendarEvent(day:string,from:number|null,to:number|null,allDay=false,now=Date.now()):LocalCalendarEvent {
  const t=now/1000;
  const fresh={id:calendarEventId(),title:LOCAL_EVENT_TITLE,location:'',notes:'',repeat:'none' as const,skip:[],createdAt:t,updatedAt:t};
  if(allDay)return {...fresh,start:day,end:day,allDay:true,alert:null};
@@ -63,7 +63,7 @@ function repeats(item,first:string,last:string){
   record:{...item.record,start:o.start,end:o.end,occurrence:o.day,occurrenceStart:o.start,seriesStart:event.start,seriesEnd:event.end}}));
 }
 /** The event to save for an edited item: one time of a repeating event moves the whole event by as much as it moved. */
-export function series(view:any):LocalCalendarEvent {
+function series(view:any):LocalCalendarEvent {
  const {calendar:_c,occurrence,occurrenceStart,seriesStart,seriesEnd,...event}=view;
  if(!occurrence)return event;
  const wasAllDay=!/T/.test(occurrenceStart);
@@ -117,7 +117,7 @@ export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton
   body.dataset.grid='time';body.style.setProperty('--calendar-days',String(days.length));
   const alldayRows=Math.max(0,...keys.map(k=>onDay(k,true).length));body.style.setProperty('--calendar-allday',String(alldayRows));
   const gutter=node('div','home-calendar-gutter');gutter.setAttribute('aria-hidden','true');gutter.append(node('div','home-calendar-dayhead'));
-  const marks=node('div','home-calendar-hours');for(let h=1;h<24;h++){const d=new Date(2026,0,1,h);const label=node('span','',d.toLocaleTimeString(undefined,{hour:'numeric'}));label.style.top=h*HOUR+'px';marks.append(label);}
+  const marks=node('div','home-calendar-hours'),hourLabel=new Intl.DateTimeFormat(undefined,{hour:'numeric'});for(let h=1;h<24;h++){const label=node('span','',hourLabel.format(new Date(2026,0,1,h)));label.style.top=h*HOUR+'px';marks.append(label);}
   gutter.append(marks);body.append(gutter);
  }
  for(const [index,day] of days.entries()){

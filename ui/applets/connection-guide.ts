@@ -1,5 +1,5 @@
 // User-facing next steps for the current release. Account status remains native-owned.
-export const CONNECTION_GUIDES = {
+const CONNECTION_GUIDES = {
  docker:{route:'Installed Docker CLI · Local engine',scope:'Up to 100 recent containers and their status/image details. No logs, environment or mutations.',next:'Start Docker Desktop, select a local context and open the Applet.',user:'No website sign-in or additional plugin. Remote Docker contexts are not read.'},
  messages:{route:'Messages on this Mac · your Apple ID',scope:'Read your 50 most recent conversations and send iMessages you write and send yourself. Nothing goes through a Worldlet server.',next:'Open Messages in Worldlet; it tells you which permission is missing.',user:'Allow Worldlet Full Disk Access to read conversations (then restart), and allow it to use Messages the first time you send.'},
  'voice-memos':{route:'Local Voice Memos library',scope:'Read downloaded recordings and existing Apple transcripts. No upload, recording or editing.',next:'Connect Voice Memos with Fox; an export folder is also supported.',user:'Allow Worldlet Full Disk Access if requested, then restart and retry.'},
