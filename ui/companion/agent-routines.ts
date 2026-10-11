@@ -1,19 +1,20 @@
 /** Settings › Agent › Routines: the jobs each Agent on this computer runs on its own scheduler (host
  * `harnessSchedule`, contracts/harness-services.ts HarnessSchedule): each with its plain time, where its results go,
  * its newest result and a Paused mark, and whether that scheduler runs now (and Start it, the Agent's own command). Pause or Resume, Run
- * now and Remove each run as the Agent's own command after the person confirmed it in plain words (agent-change.ts);
- * creating or changing one is a request to Fox, done in the conversation by the Agent's own tools. After a change the
+ * now, Remove and Change time each run as the Agent's own command after the person confirmed it in plain words
+ * (agent-change.ts), and so does New routine (a name, what to do and when; owner request 2026-10-11: more control in
+ * Settings). Changing what one does is still a request to Fox, done in the conversation by the Agent's own tools. After a change the
  * Task panel's Routines read again (`worldlet:routines`). Plain words only: no cron, no prompts.
  * Above them, Worldlet's own two default Routines (core/artifacts/daily.ts): Today's prep and Wrap up today, which
  * Worldlet runs by asking the Agent at that time. Pause and Resume change only Worldlet's setting (host
  * `foxPreferenceChange` `daily_routines`), never the Agent. */
 import {nextCronRun,routineClock,taskHowOften,taskPlannedWhen} from '../../core/tasks/index.ts';
-import type {HarnessJob} from '../../contracts/harness-services.ts';
+import type {HarnessJob,RoutineSchedule} from '../../contracts/harness-services.ts';
 import {DAILY_PLAN_HOUR,DAILY_SUMMARY_HOUR,DAILY_ROUTINE_NAMES,readDailyRoutines} from '../../core/artifacts/index.ts';
 import {agentButton,agentDay,agentEl as el,confirmAgentChange,type AgentCall} from './agent-change.ts';
 
 type Job={id:string;name:string;paused:boolean;when:HarnessJob['when'];delivery?:string;last?:{at:number;status:'ok'|'failed'|'silent'}};
-type Harness={harness:string;title:string;jobs:Job[];running:boolean|null;canStart?:boolean;changes:boolean;inUse?:boolean;error?:string};
+type Harness={harness:string;title:string;jobs:Job[];running:boolean|null;canStart?:boolean;changes:boolean;creates?:boolean;inUse?:boolean;error?:string};
 const fixed=(value:string|undefined)=>!!value&&/^\d+$/.test(value);
 /** “Every day at 8:00 AM”, “Every 2 hours”, “Once, Tomorrow 6:00 AM”, “Next Mon 9:00 AM”. */
 export function routineWhenLine(when:HarnessJob['when'],now=Date.now(),locale?:string):string {
@@ -31,7 +32,27 @@ export function routineDeliveryLine(job:Job,title:string,inUse:boolean):string {
  if(job.delivery)return `Sends its results to ${word(job.delivery)}`+(here?`, and ${here}`:'');
  return here?`Its results show ${here}`:`Keeps its results in ${title}`;
 }
+const lowerFirst=(text:string)=>text.charAt(0).toLowerCase()+text.slice(1);
 const STATUS={ok:'done',failed:'did not finish',silent:'nothing to report'} as const;
+/** The job's time a schedule gives, for the same plain line as every job. */
+export const scheduleWhen=(schedule:RoutineSchedule):HarnessJob['when']=>'daily' in schedule?{cron:`${schedule.daily.minute} ${schedule.daily.hour} * * *`}:{everySeconds:schedule.everyHours*3600};
+/** Every day at a time, or every few hours: two plain choices, starting from the job's own time when it has one. */
+export function routineTimePicker(when?:HarnessJob['when']){
+ const box=el('div','companion-settings-when'),how=el('select','companion-settings-input') as HTMLSelectElement;how.setAttribute('aria-label','How often');
+ for(const [value,label] of [['daily','Every day at'],['hours','Every']] as const){const o=el('option','',label) as HTMLOptionElement;o.value=value;how.append(o);}
+ const clock=el('input','companion-settings-input') as HTMLInputElement;clock.type='time';clock.setAttribute('aria-label','Time');clock.value='08:00';
+ const hours=el('input','companion-settings-input') as HTMLInputElement;hours.type='number';hours.min='1';hours.max='24';hours.value='2';hours.setAttribute('aria-label','Hours');
+ const unit=el('span','','hours');
+ const [minute,hour]=when&&'cron' in when?when.cron.trim().split(/\s+/):[];
+ if(when&&'everySeconds' in when&&when.everySeconds%3600===0&&when.everySeconds<=86400){how.value='hours';hours.value=String(when.everySeconds/3600);}
+ else if(/^\d+$/.test(hour??'')&&/^\d+$/.test(minute??''))clock.value=`${hour.padStart(2,'0')}:${minute.padStart(2,'0')}`;
+ const show=()=>{const daily=how.value==='daily';clock.hidden=!daily;hours.hidden=daily;unit.hidden=daily;};
+ how.onchange=show;show();box.append(how,clock,hours,unit);
+ return {element:box,read():RoutineSchedule|null{
+  if(how.value==='hours'){const n=Number(hours.value);return Number.isInteger(n)&&n>=1&&n<=24?{everyHours:n}:null;}
+  const [h,m]=clock.value.split(':').map(Number);return Number.isInteger(h)&&Number.isInteger(m)?{daily:{hour:h,minute:m}}:null;
+ }};
+}
 export function routineLastLine(job:Job):string {return job.last?`Last run ${agentDay(job.last.at)}: ${STATUS[job.last.status]}`:'Not run yet';}
 
 /** What each of Worldlet's two default Routines does, in one line. */
@@ -67,6 +88,37 @@ export async function showAgentRoutines(target:HTMLElement,call:AgentCall,curren
  target.append(own,box,said);
  await showWorldletRoutines(own,call,current,said);
  const changed=()=>window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));
+ /** Change time: the picker opens under the job; Save asks once more in plain words, then the Agent's own command. */
+ function reschedule(row:HTMLElement,harness:Harness,job:Job){
+  for(const open of box.querySelectorAll?.('.companion-settings-confirm,.companion-settings-form')??[])open.remove();
+  said.textContent='';
+  const form=el('div','companion-settings-form'),picker=routineTimePicker(job.when);form.dataset.form='reschedule';
+  form.append(picker.element,agentButton('Save','save-time',async()=>{
+   const schedule=picker.read();if(!schedule){said.textContent='Choose when it runs.';return;}
+   const line=lowerFirst(routineWhenLine(scheduleWhen(schedule)));form.remove();
+   await confirmAgentChange({call,action:'harnessSchedule',harness:harness.harness,title:harness.title,request:{job:job.id,change:'reschedule',schedule},where:row,said,current,
+    question:`${harness.title} will run “${job.name}” ${line} from now on.`,verb:'Change',working:`${harness.title} is working on it…`,
+    done:async()=>{changed();await draw();said.textContent=`“${job.name}” now runs ${line}.`;}});
+  },true),agentButton('Cancel','cancel-time',()=>{form.remove();said.textContent='Nothing was changed.';}));
+  row.append(form);
+ }
+ /** New routine: its name, what it should do in the person's words, and when; then the same ask and the Agent's own command. */
+ function create(where:HTMLElement,harness:Harness){
+  for(const open of box.querySelectorAll?.('.companion-settings-confirm,.companion-settings-form')??[])open.remove();
+  said.textContent='';
+  const form=el('div','companion-settings-form'),picker=routineTimePicker();form.dataset.form='create';
+  const name=el('input','companion-settings-input') as HTMLInputElement;name.placeholder='Name, like Morning news';name.setAttribute('aria-label','Routine name');name.maxLength=80;
+  const prompt=el('textarea','companion-settings-input') as HTMLTextAreaElement;prompt.placeholder='What should it do? Like: Tell me the weather and my first meeting.';prompt.setAttribute('aria-label','What it should do');prompt.maxLength=2000;prompt.rows=3;
+  form.append(name,prompt,picker.element,agentButton('Create','create-routine',async()=>{
+   const schedule=picker.read(),title=name.value.trim(),what=prompt.value.trim();
+   if(!title||!what||!schedule){said.textContent='Give it a name, say what it should do and choose when.';return;}
+   const line=lowerFirst(routineWhenLine(scheduleWhen(schedule)));form.remove();
+   await confirmAgentChange({call,action:'harnessSchedule',harness:harness.harness,title:harness.title,request:{change:'create',job:{name:title,prompt:what,schedule}},where,said,current,
+    question:`${harness.title} will set up “${title}” and run it ${line}.`,verb:'Set it up',working:`${harness.title} is setting it up…`,
+    done:async()=>{changed();await draw();said.textContent=`“${title}” runs ${line}.`;}});
+  },true),agentButton('Cancel','cancel-create',()=>{form.remove();said.textContent='Nothing was changed.';}));
+  where.append(form);
+ }
  const ASK={
   pause:{verb:'Pause',question:(t:string,n:string)=>`${t} will pause “${n}”. It does not run until you resume it.`,done:(n:string)=>`“${n}” is paused.`},
   resume:{verb:'Resume',question:(t:string,n:string)=>`${t} will resume “${n}”. It runs on its schedule again.`,done:(n:string)=>`“${n}” runs on its schedule again.`},
@@ -118,14 +170,15 @@ export async function showAgentRoutines(target:HTMLElement,call:AgentCall,curren
     if(harness.changes){
      const actions=el('div','companion-settings-actions');
      actions.append(job.paused?agentButton('Resume','resume-job',()=>change(row,harness,job,'resume')):agentButton('Pause','pause-job',()=>change(row,harness,job,'pause')),
-      agentButton('Run now','run-job',()=>change(row,harness,job,'run')),agentButton('Remove','remove-job',()=>change(row,harness,job,'remove')));
+      agentButton('Run now','run-job',()=>change(row,harness,job,'run')),agentButton('Change time','change-time',()=>reschedule(row,harness,job)),agentButton('Remove','remove-job',()=>change(row,harness,job,'remove')));
      row.append(actions);
     }
     rows.append(row);
    }
    if(!harness.changes)rows.append(el('p','companion-info-note',`Change these in ${harness.title} itself.`));
-   // New tasks and changes to what one does go through the conversation, done by the Agent's own tools.
-   if(harness.inUse)rows.append(agentButton('Ask Fox to set one up or change one','ask-routine',()=>ask(`I want to set up or change a routine in ${harness.title}. Ask me what it should do and when, then make the change with ${harness.title}’s own scheduler.`)));
+   // A new one here, with the Agent's own command; changing what one does goes through the conversation.
+   if(harness.creates){const add=el('div','companion-settings-actions');add.dataset.add=harness.harness;add.append(agentButton('New routine','new-routine',()=>create(add,harness),true));rows.append(add);}
+   if(harness.inUse)rows.append(agentButton(harness.creates?'Ask Fox to change what one does':'Ask Fox to set one up or change one','ask-routine',()=>ask(`I want to set up or change a routine in ${harness.title}. Ask me what it should do and when, then make the change with ${harness.title}’s own scheduler.`)));
    else rows.append(el('p','companion-settings-quiet',`To set one up or change what one does, ask ${harness.title} in its own chat.`));
   }
   const using=listed?.current as {title:string}|null|undefined;

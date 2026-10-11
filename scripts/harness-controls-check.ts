@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesJobCommand,hermesSkillCommand,isControlArgument,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,readJobChange,readSkillChange} from '../core/agent/index.ts';
+import {hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesJobCommand,hermesJobCreateCommand,hermesSkillCommand,isControlArgument,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,readJobChange,readJobCreate,readSkillChange,scheduleMatches} from '../core/agent/index.ts';
 import {harnessScheduleControls} from '../platform/electron/src/modules/agent-runtime/harness-schedule-controls.ts';
 import {harnessSkills} from '../platform/electron/src/modules/agent-runtime/harness-skills.ts';
 import {createHarnessControls} from '../platform/electron/src/modules/fox/harness-controls.ts';
@@ -23,7 +23,23 @@ assert.equal(jobChangeDone([{...job,paused:true}],{job:'j1',action:'pause'}),tru
 assert.equal(jobChangeDone([],{job:'j1',action:'remove'}),true);assert.equal(jobChangeDone([job],{job:'j1',action:'run'}),true);
 for(const bad of ['-rf','--all','a b','../x','',' j1','x\n'])assert.equal(isControlArgument(bad),false,JSON.stringify(bad));
 assert.throws(()=>readJobChange({job:'--help',action:'run'}),/no longer there/,'never a flag');
-assert.throws(()=>readJobChange({job:'j1',action:'edit'}),/Unknown change/,'editing a job is a conversation, not a command here');
+assert.throws(()=>readJobChange({job:'j1',action:'edit'}),/Unknown change/,'changing what a job does is a conversation, not a command here');
+// A new time and a new job (owner request 2026-10-11): two plain choices of time, plain text that is never a flag.
+assert.deepEqual(readJobChange({job:'j1',action:'reschedule',schedule:{daily:{hour:9,minute:30}}}),{job:'j1',action:'reschedule',schedule:{daily:{hour:9,minute:30}}});
+for(const bad of [{daily:{hour:24,minute:0}},{daily:{hour:9,minute:7.5}},{everyHours:0},{everyHours:25},{cron:'* * * * *'},null])assert.throws(()=>readJobChange({job:'j1',action:'reschedule',schedule:bad}),/Choose when/,JSON.stringify(bad));
+assert.deepEqual(hermesJobCommand({job:'j1',action:'reschedule',schedule:{daily:{hour:9,minute:30}}}),['cron','edit','j1','--schedule','30 9 * * *']);
+assert.deepEqual(hermesJobCommand({job:'j1',action:'reschedule',schedule:{everyHours:3}}),['cron','edit','j1','--schedule','every 3h']);
+assert.deepEqual(openClawJobCommand({job:'n1',action:'reschedule',schedule:{daily:{hour:9,minute:30}}}),['cron','edit','n1','--cron','30 9 * * *']);
+assert.deepEqual(openClawJobCommand({job:'n1',action:'reschedule',schedule:{everyHours:3}}),['cron','edit','n1','--every','3h']);
+const fresh=readJobCreate({name:'  Plant   water ',prompt:'Remind me\nto water.',schedule:{everyHours:3},extra:1});
+assert.deepEqual(fresh,{name:'Plant water',prompt:'Remind me to water.',schedule:{everyHours:3}});
+assert.deepEqual(hermesJobCreateCommand(fresh),['cron','create','every 3h','Remind me to water.','--name','Plant water']);
+assert.deepEqual(openClawJobCreateCommand({...fresh,schedule:{daily:{hour:7,minute:0}}}),['cron','add','--name','Plant water','--message','Remind me to water.','--cron','0 7 * * *']);
+assert.throws(()=>readJobCreate({name:'--all',prompt:'x',schedule:{everyHours:1}}),/Start its name with a word/,'never a flag');
+assert.throws(()=>readJobCreate({name:'x',prompt:'',schedule:{everyHours:1}}),/what it should do/);
+assert.equal(scheduleMatches({cron:'30 9 * * *'},{daily:{hour:9,minute:30}}),true);assert.equal(scheduleMatches({cron:'30 9 * * 1'},{daily:{hour:9,minute:30}}),false);
+assert.equal(scheduleMatches({everySeconds:10800},{everyHours:3}),true);
+assert.equal(jobChangeDone([job],{job:'j1',action:'reschedule',schedule:{daily:{hour:7,minute:0}}}),true);assert.equal(jobChangeDone([job],{job:'j1',action:'reschedule',schedule:{everyHours:2}}),false,'read back, never assumed');
 assert.deepEqual(readSkillChange({skill:'seed-swap',action:'disable',extra:1}),{skill:'seed-swap',action:'disable'});
 assert.deepEqual(hermesDisabledSkills('skills:\n  disabled:\n    - a\n    - b\n'),['a','b']);
 assert.deepEqual(hermesDisabledSkills('skills:\n  disabled: \'["a", "b"]\'\n'),['a','b'],'the JSON text `hermes config set` may store');
@@ -63,10 +79,13 @@ await withTempDir('worldlet-controls-',async scratch=>{
   calls.push({args,env:options.env??{}});
   const [group,action,id]=args;
   if(group!=='cron')return {code:2,stdout:'',stderr:'unknown'};
+  const schedule=(text:string)=>/^every (\d+)h$/.test(text)?{kind:'interval',minutes:Number(text.slice(6,-1))*60}:{kind:'cron',expr:text};
+  if(action==='create'){write(jobsFile,JSON.stringify({jobs:[...hermesJobs(),{id:'j9',name:args[5],prompt:args[3],schedule:schedule(args[2]),enabled:true}]}));return {code:0,stdout:'Created job j9',stderr:''};}
   const jobs=hermesJobs(),found=jobs.find(j=>j.id===id);
   if(!found)return {code:1,stdout:'Failed to '+action+' job: not found',stderr:''};
   if(action==='pause'){found.enabled=false;found.state='paused';}
   if(action==='resume'){found.enabled=true;found.state='scheduled';}
+  if(action==='edit')found.schedule=schedule(args[4]);
   write(jobsFile,JSON.stringify({jobs:action==='remove'?jobs.filter(j=>j.id!==id):jobs}));
   return {code:0,stdout:'ok',stderr:''};
  };
@@ -84,7 +103,16 @@ await withTempDir('worldlet-controls-',async scratch=>{
  await hm.change!({job:'j2',action:'run'});
  await hm.change!({job:'j2',action:'remove'});
  assert.deepEqual(calls.map(c=>c.args.join(' ')),['cron pause j1','cron resume j1','cron run j2','cron remove j2']);
- assert.deepEqual((await hm.jobs()).map(j=>j.id),['j1']);
+ // A new time and a new job, read back after the command.
+ assert.equal(await hm.preview!({job:'j1',action:'reschedule',schedule:{everyHours:3}}),'hermes cron edit j1 --schedule "every 3h"');
+ await hm.change!({job:'j1',action:'reschedule',schedule:{everyHours:3}});
+ assert.deepEqual((await hm.jobs()).find(j=>j.id==='j1')?.when,{everySeconds:10800});
+ const plant={name:'Plant water',prompt:'Remind me to water.',schedule:{daily:{hour:7,minute:0}}};
+ assert.match(await hm.previewCreate!(plant),/^hermes cron create "0 7 \* \* \*" "Remind me to water\." --name "Plant water"$/);
+ await hm.create!(plant);
+ assert.deepEqual((await hm.jobs()).find(j=>j.name==='Plant water')?.when,{cron:'0 7 * * *'});
+ await assert.rejects(harnessScheduleControls(hermesInstall,environment,{run:async()=>({code:0,stdout:'',stderr:''}),settle:[]})!.create!({...plant,name:'Never made'}),/did not set it up/,'read back, never assumed');
+ assert.deepEqual((await hm.jobs()).map(j=>j.id),['j1','j9']);
  // The Agent says no, or says yes without doing it: the person hears its reason, never a success.
  const refusing=harnessScheduleControls(hermesInstall,environment,{run:async()=>({code:1,stdout:'',stderr:'Failed to pause job: locked'})})!;
  await assert.rejects(refusing.change!({job:'j1',action:'pause'}),/Hermes Agent did not do it: Failed to pause job: locked/);
@@ -181,7 +209,7 @@ await withTempDir('worldlet-controls-',async scratch=>{
  const controls=createHarnessControls(host);
  const listed=await controls.scheduleRequest({operation:'list'}) as any;
  assert.deepEqual(listed.current,{harness:'hermes',title:'Hermes Agent'});
- assert.deepEqual(listed.harnesses[0],{harness:'hermes',title:'Hermes Agent',jobs:[{id:'j1',name:'Digest',kind:'prompt',paused:false,when:{cron:'0 7 * * *'},last:{at,status:'ok'}}],running:false,canStart:true,changes:true,inUse:true},'names, times and results; never a prompt or a result’s text');
+ assert.deepEqual(listed.harnesses[0],{harness:'hermes',title:'Hermes Agent',jobs:[{id:'j1',name:'Digest',kind:'prompt',paused:false,when:{cron:'0 7 * * *'},last:{at,status:'ok'}}],running:false,canStart:true,changes:true,creates:false,inUse:true},'names, times and results; never a prompt or a result’s text');
  const preview=await controls.scheduleRequest({operation:'preview',harness:'hermes',job:'j1',change:'pause'}) as any;
  assert.equal(preview.command,'hermes cron pause j1');assert.deepEqual(ran,[],'a preview runs nothing');
  await assert.rejects(controls.scheduleRequest({operation:'change',confirm:'made-up'}),/Confirm the change again/);
