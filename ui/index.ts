@@ -84,7 +84,8 @@ window.worldletAppUpdate=value=>{appUpdate=value;window.dispatchEvent(new Custom
 // Updating and switching worlds wait for queued writes to settle, not succeed: a stale save failure must not block them.
 const updates={snapshot:()=>appUpdate,failure:error=>window.worldletAppUpdate({...appUpdate,visible:true,enabled:true,label:'Retry update',detail:error.message}),activate:async()=>{await save.catch(()=>{});window.worldletAppUpdate(await call('appUpdate'));}};
 window.worldletSpeech=value=>window.dispatchEvent(new CustomEvent('worldlet:speech',{detail:value}));
-async function toggleSample(){await save.catch(()=>{});await call('setSampleEnabled',{enabled:!sample});const url=new URL(location.href);url.hash='';location.replace(url.href)}
+function reloadWithoutHash(){const url=new URL(location.href);url.hash='';location.replace(url.href);}
+async function toggleSample(){await save.catch(()=>{});await call('setSampleEnabled',{enabled:!sample});reloadWithoutHash();}
 
 
 let firstValue=null,worldTour=null,loginItemOffer=null,desktopHint=null;
@@ -133,7 +134,7 @@ async function applyReceivedSnapshot(state,isCurrent=()=>true){
  // running page (the switch itself reloads, but a check or another process may
  // flip it), reload rather than swap worlds in place: Fox, its tools and the
  // storage were all wired for the world that was mounted.
- if(view&&nextSample!==mountedSample){const url=new URL(location.href);url.hash='';location.replace(url.href);return;}
+ if(view&&nextSample!==mountedSample){reloadWithoutHash();return;}
  if(view&&nextSample){current=state;return;}
  const prepared=nextSample?null:await worldProjector.project(state);
  if(!isCurrent())return;
@@ -149,15 +150,16 @@ async function applyReceivedSnapshot(state,isCurrent=()=>true){
  // Corner controls leave room for the window's own buttons (the Mac's traffic lights).
  document.documentElement.toggleAttribute('data-leading-window-controls',hostFeatures(state).leadingWindowControls);
  if(!view){if(state.textScale)localStorage.setItem('worldlet-ui-text-scale',String(state.textScale));values.set('aladdin-content-v1:Worldlet',JSON.stringify(state.overlay||EMPTY_OVERLAY()));view=mountNotionWorld(world,{storage,updates,browser,editApplet:body=>call('onboarding',body),unlockApplet:id=>call('onboarding',{operation:'unlock',applet:id}),launchApplet:hostFeatures(state).nativeAppletLaunch?key=>call('openInstalledApplet',{key}):undefined,appletSupported:key=>appletSupport(key,hostFeatures(current||state)).supported,installedApplets:hostFeatures(state).installedAppDetection&&!sample?()=>call('installedApplets',{icons:false}):undefined,visitedSites:sample?undefined:()=>call('browserCommand',{operation:'visitedSites',args:{},agent:false}),copyAppletPrototype:html=>call('copyAppletPrototype',{html}),resetSample:sample?resetSample:null,chat:createNativeCompanion(call,{sample}),toggleSample,setup:(screen,region,moduleKey)=>screen==='preferences'?preferences?.show():onboarding?.show(screen,region,moduleKey),weather:{autoLocate:()=>!sample&&current?.onboarding?.completed===true&&current?.onboarding?.unlockedApplets?.includes('app-weather')&&!current?.onboarding?.hiddenApplets?.includes('app-weather'),load:()=>call('weatherLoad'),save:value=>call('weatherSave',{value}),request:(operation,params)=>call('weatherRequest',{operation,params}),locate:()=>call('weatherLocate')},firstRun:()=>!sample&&onboardingUnfinished(current?.onboarding),settings:()=>view?.openText(),connect:(provider,region)=>call('connect',{provider,...(region?{region}:{})}),stripe:body=>call('stripe',body),paypalContent:body=>call('paypalContent',body),curatedSourceContent:body=>call('curatedSourceContent',body),youtube:body=>call('youtube',body),youtubePlayer:body=>call('youtubePlayer',body),widgets:sample?undefined:body=>call('widgets',body),widgetPlayer:sample?undefined:body=>call('widgetPlayer',body),artifactPages:sample?undefined:body=>call('artifactPages',body),ongoing:sample?undefined:body=>call('ongoing',body),morningBrief:sample?undefined:()=>call('foxPreferences').then(info=>info?.morningBrief),dailyRoutines:sample?undefined:()=>call('foxPreferences').then(info=>info?.dailyRoutines),emailReviews:sample?undefined:()=>call('emailAction',{operation:'list'}).then(value=>Array.isArray(value?.reviews)?value.reviews:[]),artifacts:sample?undefined:body=>call('artifacts',body),calendarEvents:body=>call('calendarEvents',body),siteApplets:sample?undefined:body=>call('siteApplets',body),appletArt:sample?undefined:body=>call('appletArt',body),doorDash:body=>call('doorDash',body),codexSession:body=>call('codexSession',body),claudeSession:body=>call('claudeSession',body),developmentSessions:(provider,options={})=>call('developmentSessions',{provider,...options}),appContent:body=>call('appContent',body),notionContent:body=>call('notionContent',body),voiceMemos:body=>call('voiceMemos',body),messages:body=>call('messages',body),obsidianContent:body=>call('obsidianContent',body),browserOutcome:(id,done)=>call('browserOutcomeAction',{id,done}),itemRead:id=>call('worldItemRead',{id}),taskReview:sample?undefined:(id,choice,candidateId)=>call('taskReviewAction',{id,choice,candidateId}),phonePublish:sample?undefined:(value,slot='attention')=>call('phonePublish',{slot,value}),harnessApproval:(id,choice)=>call('harnessApproval',{id,choice}),harnessAgents:sample?undefined:body=>call('harnessAgents',body),harnessModels:sample?undefined:body=>call('harnessModels',body),itemStatus:(id,status,snoozedUntil,by)=>call('worldItemStatus',{id,status,...(snoozedUntil?{snoozedUntil}:{}),...(by?{by}:{})}),original:id=>call('original',{id})});mountWorldAudio(call);if(hostFeatures(state).localMusic)mountLocalMusic(call)}else view.applyWorld(world,true);
- if(!sample){if(!firstValue)firstValue=mountFirstValue({root:document.getElementById('notionWorld'),view,call,state,arriving:setupArrivalPending});else firstValue.update(state);}
- if(!sample&&!worldTour){const worldRoot=document.getElementById('notionWorld');worldRoot?.addEventListener('worldlet:first-win',()=>celebrateWin(worldRoot));}
- if(!sample){if(!worldTour)worldTour=mountWorldTour({root:document.getElementById('notionWorld'),view,call,state,arriving:setupArrivalPending});else worldTour.update(state);}
- if(!sample){if(!loginItemOffer)loginItemOffer=mountLoginItemOffer({root:document.getElementById('notionWorld'),view,call,state});else loginItemOffer.update(state);}
- if(!sample){if(!desktopHint)desktopHint=mountDesktopCompanionHint({root:document.getElementById('notionWorld'),view,state});else desktopHint.update(state);}
+ const worldRoot=document.getElementById('notionWorld');
+ if(!sample){if(!firstValue)firstValue=mountFirstValue({root:worldRoot,view,call,state,arriving:setupArrivalPending});else firstValue.update(state);}
+ if(!sample&&!worldTour)worldRoot?.addEventListener('worldlet:first-win',()=>celebrateWin(worldRoot));
+ if(!sample){if(!worldTour)worldTour=mountWorldTour({root:worldRoot,view,call,state,arriving:setupArrivalPending});else worldTour.update(state);}
+ if(!sample){if(!loginItemOffer)loginItemOffer=mountLoginItemOffer({root:worldRoot,view,call,state});else loginItemOffer.update(state);}
+ if(!sample){if(!desktopHint)desktopHint=mountDesktopCompanionHint({root:worldRoot,view,state});else desktopHint.update(state);}
  if(!sample&&!reportedWorld){reportedWorld=true;track('world_entered');}
- if(setupFinished&&!onboarding)document.getElementById('notionWorld').dispatchEvent(new CustomEvent('worldlet:intro-devices',{detail:[]}));
- if(!sample){if(!onboarding)onboarding=mountWorldOnboarding({root:document.getElementById('notionWorld'),call,view,state,toggleSample,applySnapshot:receive});else onboarding.update(state);}
- if(!preferences)preferences=createFoxPreferences({call,view,root:document.getElementById('notionWorld'),toggleSample,setup:(screen,provider)=>onboarding?.show(provider?(screen==='connection'?'connection':'app'):screen,'home',provider)});
+ if(setupFinished&&!onboarding)worldRoot.dispatchEvent(new CustomEvent('worldlet:intro-devices',{detail:[]}));
+ if(!sample){if(!onboarding)onboarding=mountWorldOnboarding({root:worldRoot,call,view,state,toggleSample,applySnapshot:receive});else onboarding.update(state);}
+ if(!preferences)preferences=createFoxPreferences({call,view,root:worldRoot,toggleSample,setup:(screen,provider)=>onboarding?.show(provider?(screen==='connection'?'connection':'app'):screen,'home',provider)});
  document.title=world.appName;
  // The rendered world may contain transient Hermes results; never export it automatically.
 }
@@ -168,5 +170,6 @@ window.addEventListener('worldlet:fox-idle',()=>{if(pendingControls){const args=
 window.worldletStatus=value=>window.dispatchEvent(new CustomEvent('worldlet:job',{detail:value}));
 const backgroundSnapshot=snapshotInbox(applyReceivedSnapshot);
 function receive(state){return backgroundSnapshot(state);}
-window.worldletReceive=state=>receive(state).catch(e=>{document.getElementById('nativeNotice').textContent=e.message;document.dispatchEvent(new Event('worldlet:world-error'))});
-call('snapshot').then(receive).catch(e=>{document.getElementById('nativeNotice').textContent=e.message;document.dispatchEvent(new Event('worldlet:world-error'))});
+function showWorldError(e){document.getElementById('nativeNotice').textContent=e.message;document.dispatchEvent(new Event('worldlet:world-error'));}
+window.worldletReceive=state=>receive(state).catch(showWorldError);
+call('snapshot').then(receive).catch(showWorldError);
