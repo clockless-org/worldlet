@@ -97,12 +97,15 @@ export class RemoteGatewayRuntime implements AgentRuntime {
   try{session=await this.conversation.open(key,{home,sample:body.sample===true});}
   catch(error){events.cancel();this.eventWait=null;throw error;}
   const sessionMs=performance.now()-opening;
-  let calls=0,timedOut=false;
+  let calls=0,toolsMs=0,timedOut=false;
   const deadline=idleStop(body,()=>{timedOut=true;events.cancel(new WorldletError(`${this.title} took too long to answer. Try again.`));session.cancel();});
   // A World tool call from the Gateway runs here, in this World, as a local Agent's would.
   session.dispatch=async(name,args)=>{
-   const answer=await deadline.hold(emit({type:'tool',id:`world-${++calls}`,name,args}));
-   return answer&&typeof answer==='object'?answer as Row:{error:'World tool is unavailable.'};
+   const began=performance.now();
+   try{
+    const answer=await deadline.hold(emit({type:'tool',id:`world-${++calls}`,name,args}));
+    return answer&&typeof answer==='object'?answer as Row:{error:'World tool is unavailable.'};
+   }finally{toolsMs+=performance.now()-began;}
   };
   this.session=session;if(!background)this.onActivity(true);
   let shown:Promise<unknown>=Promise.resolve(),firstText:number|null=null;const sent=performance.now();
@@ -119,7 +122,7 @@ export class RemoteGatewayRuntime implements AgentRuntime {
    const message=result.text.trim();
    if(!message)throw new WorldletError(`${this.title} did not answer.`);
    if(!started)await say(message);
-   return {message,...result.usage?{usage:result.usage}:{},timings:harnessTurnTimings({sessionMs,firstTextMs:firstText??performance.now()-sent,usage:result.usage})};
+   return {message,...result.usage?{usage:result.usage}:{},timings:harnessTurnTimings({sessionMs,firstTextMs:firstText??performance.now()-sent,toolsMs,usage:result.usage})};
   }catch(error){
    if(this.cancelled)throw new AgentCancelled();
    throw error;

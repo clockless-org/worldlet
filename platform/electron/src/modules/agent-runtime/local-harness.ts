@@ -472,7 +472,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   * the Harness keeps the thread and compacts it. Its permission
   * prompts reach the World as `approval` events, answered through the adapter's `approvals`. The reply carries the
   * usage the Agent reported and the turn's timings: opening the session (`sessionMs`, near 0 once warmed) and send to
-  * the first word (`firstTextMs`), for the Fox timing record. */
+  * the first word (`firstTextMs`) and its World tool calls (`toolsMs`), for the Fox timing record. */
  private async converse(conversation:ResidentConversation,body:Row,home:string,tools:boolean,sample:boolean,agent:string|null,model:string|null,harnessTools:readonly HarnessTool[],{events,emit,say,started}:TurnPipe):Promise<Row> {
   // A call placed from a resident session names it (`requestedBy`), so its result comes back to this thread.
   const turn=localHarnessTurn(body,{worldTools:tools,own:localHarness(this.install.id).connect,resident:true,harnessTools,harnessCalls:harnessService(this.install.id,'calls')!==null});
@@ -481,11 +481,14 @@ export class LocalHarnessRuntime implements AgentRuntime {
   try{session=await conversation.open({world:this.world(body),thread:harnessSessionThread(body.thread),...agent?{agent}:{}},{home,sample});}
   catch(error){events.cancel();this.eventWait=null;throw error;}
   const sessionMs=performance.now()-opening;
-  let calls=0,timedOut=false;
+  let calls=0,toolsMs=0,timedOut=false;
   const deadline=idleStop(body,()=>{timedOut=true;events.cancel(new WorldletError(`${this.install.title} took too long to answer. Try again.`));session.cancel();});
   session.dispatch=async(name,args)=>{
-   const answer=await deadline.hold(emit({type:'tool',id:`world-${++calls}`,name,args}));
-   return answer&&typeof answer==='object'?answer as Row:{error:'World tool is unavailable.'};
+   const began=performance.now();
+   try{
+    const answer=await deadline.hold(emit({type:'tool',id:`world-${++calls}`,name,args}));
+    return answer&&typeof answer==='object'?answer as Row:{error:'World tool is unavailable.'};
+   }finally{toolsMs+=performance.now()-began;}
   };
   this.session=session;this.onActivity(this,true);
   const asks=body._background!==true&&body.mode!=='setup',own=new HermesOwnCalls();
@@ -506,7 +509,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
    const message=result.text.trim();
    if(!message)throw new WorldletError(`${this.install.title} did not answer.`);
    if(!started())await say(message);
-   return {message,...result.usage?{usage:result.usage}:{},timings:harnessTurnTimings({sessionMs,firstTextMs:firstText??performance.now()-sent,usage:result.usage})};
+   return {message,...result.usage?{usage:result.usage}:{},timings:harnessTurnTimings({sessionMs,firstTextMs:firstText??performance.now()-sent,toolsMs,usage:result.usage})};
   }catch(error){
    if(this.cancelled)throw new AgentCancelled();
    throw error;
