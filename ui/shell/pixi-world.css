@@ -64,10 +64,10 @@
 #notionWorld .world-today-hint>span::after{content:' ›'}
 #notionWorld .world-today-open:hover .world-today-hint>span{text-decoration:underline;text-underline-offset:3px}
 #notionWorld .world-today .world-weather-control{position:relative}
-#notionWorld .world-today #worldWeather{display:inline-flex;align-items:center;gap:8px;min-height:28px;padding:2px 8px;border-radius:10px;font:500 14px/1.4 var(--ui-font-ui)}
+#notionWorld .world-today #worldWeather{display:inline-flex;align-items:center;gap:var(--environment-inline-gap);min-height:28px;padding:2px 8px;border-radius:10px;font:500 14px/1.4 var(--ui-font-ui)}
 #notionWorld .world-today #worldWeather:hover{background:#fff6df1f}
 #notionWorld .world-today #worldWeather:disabled{cursor:default;background:none;opacity:1;color:inherit}
-#notionWorld .world-today .world-weather-text{display:inline-flex;gap:8px}
+#notionWorld .world-today .world-weather-text{display:inline-flex;gap:var(--environment-inline-gap)}
 #notionWorld .world-today .world-audio{display:flex;max-width:100%;align-items:center;min-width:0;min-height:28px;margin:0;pointer-events:auto;font:500 14px/1.4 var(--ui-font-ui)}
 #notionWorld .world-today .world-audio-current{height:28px;min-height:28px;border-radius:10px}
 #notionWorld .world-today :is(.world-today-open,#worldWeather):focus-visible{outline:2px solid var(--ui-hud-focus);outline-offset:2px}
