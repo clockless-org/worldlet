@@ -155,7 +155,7 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 @media(min-width:801px){#notionWorld.native-console:is([data-detail-open=true],[data-depth=object]):not(.compact-viewport):not(.is-typing) .companion-dialogue{bottom:calc(204px + var(--fox-tag-room,0px))}}
 /* The bar has two sizes (owner Order 2026-10-08): small until it is focused, larger while typing. Pointing at it
    changes its look, never its size. */
-#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:160px}
+#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:168px;--companion-bar-tools:36px}
 #notionWorld.native-console[data-entry-expanded=true] .companion-text-entry{--companion-bar-width:300px}
 /* In a website the small bar also says it takes a web address (owner request 2026-10-07), so it is wide enough to read it. */
 #notionWorld.native-console:not([data-entry-expanded=true]) .companion-text-entry[data-website=true]{--companion-bar-width:232px}
@@ -166,7 +166,14 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 #notionWorld.native-console .companion-text-entry[data-quiet=true] #notionSend{display:none}
 #notionWorld.native-console .companion-text-entry[data-quiet=true] #notionInput{text-align:center}
 #notionWorld.native-console .companion-controls{position:absolute;bottom:0;right:calc(50% + min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 6px);display:flex;align-items:center;gap:4px;height:44px;pointer-events:auto;transition:right .22s ease-out}
-#notionWorld.native-console .companion-controls.companion-voice-controls{right:auto;left:calc(50% + min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 6px);transition:left .22s ease-out}
+/* The microphone and, when Orders can be sent, the bug stand inside the bar's right end as plain icons like Send, in the
+   World and on the desktop alike (owner request 2026-10-11: "都融到那个 input box 里面"); native-chat.ts puts the bug in
+   the microphone's group. The bar rests small and opens wider for typing. */
+#notionWorld.native-console .companion-text-entry:has(>.companion-voice-controls>.companion-order-button:not([hidden])){--companion-bar-tools:74px}
+#notionWorld.native-console .companion-text-entry #notionCommand{padding-right:calc(var(--companion-bar-tools) + 8px)}
+#notionWorld.native-console .companion-input-wave{padding-right:calc(var(--companion-bar-tools) + 12px)}
+#notionWorld.native-console .companion-controls.companion-voice-controls{left:auto;right:calc(50% - min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 4px);gap:2px;z-index:1;transition:right .22s ease-out}
+#notionWorld.native-console .companion-controls:empty{display:none}
 /* The microphone menu under the mic (#1228): long device names ellipsize; the current one is checked. */
 .companion-mic-menu{position:fixed;z-index:200;transform:translateX(-50%);display:flex;flex-direction:column;gap:2px;min-width:180px;max-width:min(320px,calc(100vw - 16px));padding:6px;box-sizing:border-box;border:1px solid var(--hud-scene-line,#ffffff40);border-radius:12px;background:#181b20e0;color:var(--hud-scene-ink,#fff);backdrop-filter:var(--hud-scene-blur,blur(12px));-webkit-backdrop-filter:var(--hud-scene-blur,blur(12px));pointer-events:auto}
 .companion-mic-menu[hidden]{display:none}
@@ -400,3 +407,9 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 .game-panel .game-header :is(.game-title,.ui-caption){color:inherit}
 @media(max-width:600px){:is(.native-console,.ui-gallery) .mail-focus.ui-applet-surface,.mail-focus.ui-applet-surface{padding:30px 24px 26px}.mail-focus.ui-applet-surface::before{border-image-width:32px}.mail-focus .mail-identity-card{padding:10px}.mail-focus>.ui-applet-header{padding-right:112px}.game-panel .game-header{padding-inline:28px}}
 @media(forced-colors:active){.mail-focus.ui-applet-surface::before,.game-panel .game-header::before{display:none}.mail-focus.ui-applet-surface,.game-panel .game-header{background:Canvas;border:1px solid CanvasText;color:CanvasText}}
+/* Inside the bar the microphone and the bug are plain icons like Send; listening, talking and an Order still light up. */
+#notionWorld.native-console .companion-voice-controls>button{flex:0 0 36px;width:36px;height:36px;min-height:36px}
+#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button,#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button{border-color:transparent;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button:is(:hover,:focus-visible),#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button:is(:hover,:focus-visible){background:var(--system-glass-hover)}
+#notionWorld.native-console[data-order=sending] .companion-voice-controls>.companion-order-button::after{inset:8px}
+@media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-controls.companion-voice-controls{transition:none}}

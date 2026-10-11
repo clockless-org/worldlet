@@ -11,9 +11,10 @@ await withBrowser(fileAccess,async browser=>{
  const url=worldUrl();await page.goto(url);await waitForWorld(page);
  const avatar=page.locator('.companion-avatar'),type=page.locator('#notionInput'),mic=page.locator('.companion-speech-button'),panel=page.locator('#companionInfo'),form=page.locator('#notionCommand');
  const typing=()=>page.evaluate(()=>(document.querySelector('.notion-world') as HTMLElement).dataset.entryExpanded==='true');
- // One bar under Fox (owner decision 2026-10-04): the field and Send; the microphone is its own round button on the bar's right (owner 2026-10-07).
- assert(await form.isVisible());assert.equal(await form.locator('.companion-speech-button').count(),0,'the microphone is not inside the bar');
- {const [m,b]=await Promise.all([mic.boundingBox(),form.boundingBox()]);assert(m.x>=b.x+b.width&&Math.abs((m.y+m.height/2)-(b.y+b.height/2))<4,'the microphone sits on the bar\'s right');}
+ // One bar under Fox (owner decision 2026-10-04): the field and Send, with the microphone inside its right end (owner
+ // request 2026-10-11).
+ assert(await form.isVisible());
+ {const [m,b]=await Promise.all([mic.boundingBox(),form.boundingBox()]);assert(m.x>=b.x&&m.x+m.width<=b.x+b.width&&Math.abs((m.y+m.height/2)-(b.y+b.height/2))<4,'the microphone sits inside the bar\'s right end');}
  // At rest the bar is low-key: narrow, its name only (owner request 2026-10-05); pointing at it brings the microphone and Send.
  await page.mouse.move(5,5);await page.waitForTimeout(300);
  const quietWidth=(await form.boundingBox()).width;

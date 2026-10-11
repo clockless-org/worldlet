@@ -209,7 +209,7 @@
 .native-console .task-panel[hidden],.native-console .task-group[hidden],.native-console .task-more[hidden]{display:none}
 .native-console .task-group{position:absolute;bottom:16px;display:flex;align-items:center;gap:8px}
 .native-console .task-group[data-group=now]{right:calc(50% + 170px);flex-direction:row-reverse}
-.native-console .task-group[data-group=routines]{left:calc(50% + 212px)}
+.native-console .task-group[data-group=routines]{left:calc(50% + 170px)}
 .native-console .task-group-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .native-console .task-cards{display:flex;gap:8px}
 .native-console .task-group[data-group=now] .task-cards{flex-direction:row-reverse}
@@ -267,9 +267,9 @@
 .native-console:is([data-detail-open=true],[data-depth=object],[data-fox-lane=true]) .task-panel{display:none}
 @media(max-height:560px){.native-console .task-panel{display:none}}
 /* Narrow: only each side's count beside the message bar, which opens the whole list. */
-@media(max-width:859px){
+@media(max-width:819px){
  .native-console .task-group[data-group=now]{right:calc(50% + 160px)}
- .native-console .task-group[data-group=routines]{left:calc(50% + 212px)}
+ .native-console .task-group[data-group=routines]{left:calc(50% + 170px)}
 }
 /* The first run belongs to the person and the tour: only Routines show. */
 .notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step],[data-tour-coda]) .task-panel .task-group[data-group=now]{display:none}
