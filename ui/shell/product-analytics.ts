@@ -21,6 +21,10 @@ export function reportEngagement(kind:'fox_message'|'applet_open'){
  if(!personGesture()||foxActing)return;
  try{window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event:'user_engaged',engagement_kind:kind}}));}catch{/* Analytics never interrupts the app. */}
 }
+/** A product event from the World page (counts, ids and kinds only; the host allowlists the name and each value). */
+export function reportProductEvent(event:string,dimensions:Record<string,string>={}){
+ try{window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions}}));}catch{/* Analytics never interrupts the app. */}
+}
 /** `applet_opened`, timed from the open to the second frame after it (the panel's first painted frame). A hidden
  * window paints no frames: after five seconds hidden it reports without a time. */
 export function reportAppletOpened(applet:string,trigger:'user'|'background'){

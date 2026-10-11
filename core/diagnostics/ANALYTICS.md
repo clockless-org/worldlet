@@ -33,6 +33,14 @@ Since 2026-10-07 every `duration_bucket` the World page measures (`fox_turn_*`, 
 | `fox_proactive_asked` / `fox_proactive_shown` | Fox's speak-first ask ran / its line was shown | `proactive_moment` (`settled`, `long-stay`, `late`, `browsing`), `proactive_status` (`spoke`, `passed`; asked only), `proactive_card` (`yes`, `no`: the line pointed to an open Attention card; shown only); never the line. Before 2026-10-07 the host dropped both events |
 | `fox_browse_changed` | Browse with me turned on, or Don't bother chosen, in Fox's card | `fox_browse` (`on`, `off`) |
 | `order_sent` / `order_stopped` | An Order (Alpha and Dev only) was sent / ended before it was sent | `order_result`: `woke` (the project took it at once), `stored` (only Gatehouse's inbox has it), `failed` (neither); `order_stop`: `cancelled` (Escape or another stop), `stopped_early` (stopped before the microphone opened), `left_app` (left the app before the microphone opened), `speech_error` (microphone or recognition failed, or no speech heard), `no_speech`, `page_closed`, `other`; never the words. Since the releases after 2026-10-07 |
+| `attention_shown` | The Attention Center showed at least one item, once per identity per UTC day | `attention_count` (`1`–`9`, the items shown then); never a title or source (`onAttention` in `ui/shell/notion-world.ts`) |
+| `attention_approved` | The person settled an item as Done or Got it (its card, its row's I've done it, or Done on the phone); Fox settling one, Later and Remove are not approvals | `approval_surface` (`computer`, `phone`), `item_kind` (`task`, `event`, `update`) (`settleAttention`) |
+| `attention_opened_from_fox` | Open card on a line Fox said first | none (`ui/companion/native-chat.ts`); with `fox_proactive_shown` it gives how often Fox's line leads to Attention |
+| `journal_opened` | The Journal opened | `trigger` (`openJournal` in `ui/companion/companion-info.ts`) |
+| `routine_completed` | A routine run finished: one of Worldlet's own, or a job on the Agent's own scheduler that became an Attention item | `routine_source` (`worldlet`, `agent`), `routine_status` (`ok`, `failed`), `routine_late` (`yes`, `no`; Worldlet's only); never the routine's name or result (`routineResult` in `platform/electron/src/modules/fox/index.ts`, `platform/electron/src/modules/fox/harness-jobs.ts`) |
+| `phone_paired` | A phone finished pairing with this computer | none (`platform/electron/src/modules/phone/index.ts`) |
+| `phone_approved` | The phone approved something the computer took: Done on an Attention item, or Allow on the Agent's permission prompt | `approval_kind` (`attention`, `agent_permission`) |
+| `agent_settings_changed` | A change in Settings › Agent, or a model chosen for an Applet, went through | `agent_setting` (`model`, `permission`, `account`, `routine`, `skill`); never what it changed to (`settingChanged` in `platform/electron/src/modules/fox/index.ts`) |
 
 The update events come from `modules/shell/updates.ts`; the prepared Build stays on the device (`worldlet.update.prepared` in preferences.json). `app_build_changed` names only the previous public Build number (`worldlet.update.lastBuild`).
 
@@ -93,6 +101,9 @@ Events that can be started either by the person or by the app carry `trigger`: `
 | `external_outcome_confirmed` | user: the confirmed result of a send, Notion write or a browser last step the person let go ahead; no `trigger` | `withProductAnalytics`; review cards in `ui/companion/fox-email-review.ts`, `fox-notion-review.ts`, and the Go ahead in `ui/shell/notion-world.ts` |
 | `google_connection_present`, `google_connection_absent` | background: connection state at start | `ui/index.ts` |
 | `app_process_gone`, `app_unclean_exit` | background: crashes | `platform/electron/src/modules/shell/index.ts` |
+| `attention_approved`, `attention_opened_from_fox`, `phone_paired`, `phone_approved`, `agent_settings_changed` | user: the person's own approval, click, pairing or settings change | the deciding code named in the event table above |
+| `journal_opened` | mixed, by `trigger` | `openJournal` (`ui/companion/companion-info.ts`) |
+| `attention_shown`, `routine_completed` | background: what the app showed or ran on its own | the deciding code named in the event table above |
 | `$ai_generation`, `model_usage`, `model_request_rejected` | `workload` interactive (a person's Fox turn) or background | Model service (`models/observability.ts`) |
 
 **操作 is undercounted until the client release that sends `user_engaged` and `trigger`.** Older builds send neither, and much real use (reading, moving around the World, opening Applets) sends no event that proves a person started it, so a person on an older build counts as 操作 only through the **user** events above. Expect 操作 to rise as people update; nothing is backfilled.

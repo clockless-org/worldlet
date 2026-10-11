@@ -1,4 +1,4 @@
-import {AGENT,PHONE,type AgentService,type PhoneService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,PHONE,type AgentService,type AnalyticsService,type PhoneService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {harnessService,scheduleElsewhere,scheduleStep,type ScheduleState} from '../../../../../core/agent/index.ts';
 import type {HarnessJobRun} from '../../../../../contracts/harness-services.ts';
@@ -41,6 +41,8 @@ export function createHarnessJobs(host:Host,{allowed,every=60}:{allowed:()=>bool
    let id='';
    try{id=ledger.upsert([result.item as Row],'harness-schedule')[0]??'';changed=true;}catch(error){host.diagnostics.record(error,'harnessJobs');continue;}
    if(result.push&&id)void host.optional<PhoneService>(PHONE)?.notify({...result.push,open:{item:id},act:{attention:id}}).catch(()=>{});
+   // A run of one of the Agent's own jobs (a failed one is a Worth Doing task); the scheduler-stopped note is not a run.
+   if(result!==step.stopped)host.optional<AnalyticsService>(ANALYTICS)?.recordProductEvent('routine_completed','',{routine_source:'agent',routine_status:(result.item as Row).kind==='task'?'failed':'ok'});
   }
   if(changed)store.worldChanged();
   if(JSON.stringify(step.state)!==JSON.stringify(saved))ledger.saveSetting(key,step.state as unknown as Row);

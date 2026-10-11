@@ -1,7 +1,7 @@
 import os from 'node:os';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
-import {AGENT,BROWSER,COMPANION,FOX,ORDER,PHONE,VAULT,WIDGETS,type AgentService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,BROWSER,COMPANION,FOX,ORDER,PHONE,VAULT,WIDGETS,type AgentService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
@@ -29,6 +29,9 @@ export function installPhone(host:Host){
  const web=phoneWebRecording((visits,records)=>host.optional<BrowserService>(BROWSER)?.recorded(visits,records),{onError:error=>host.diagnostics.record(error,'phoneWebRecord')});
  // The last Attention snapshot sent while paired (to find new items), and lines said on the phone whose reply is due.
  let attention:PhoneAttention|undefined,liveAsked=false;
+ // Whether the phone was paired before the latest status, so a new pairing is counted once (`phone_paired`).
+ let paired:boolean|null=null;
+ const usage=(event:string,dimensions:Row={})=>host.optional<AnalyticsService>(ANALYTICS)?.recordProductEvent(event,'',dimensions);
  const asked=new Map<string,{item?:string,applet?:string,at:number}>();
  const askedKey=(text:unknown)=>typeof text==='string'?text.trim().slice(0,PHONE_LIMITS.field):'';
  const relay=createPhoneRelay({
@@ -51,10 +54,19 @@ export function installPhone(host:Host){
    const taken=(await host.page.call<boolean>('worldletPhoneMessage',message,key))===true;
    // A line said on the phone: its reply is pushed if the phone is put away before Fox finishes.
    if(taken&&message.type==='chat')asked.set(askedKey(message.text),{item:message.item,applet:message.applet,at:Date.now()});
+   // Approved on the phone: an Attention item's Done, or Allow on the Agent's permission prompt.
+   if(taken&&message.type==='attention'&&message.action==='done')usage('phone_approved',{approval_kind:'attention'});
+   if(taken&&message.type==='approval'&&message.choice!=='deny')usage('phone_approved',{approval_kind:'agent_permission'});
    return taken;
   },
-  onChange:status=>{if(status.state!=='paired')attention=undefined;host.page.event('worldlet:phone-status',status);},
+  onChange:status=>{
+   if(status.state!=='paired')attention=undefined;
+   if(status.state==='paired'&&paired===false)usage('phone_paired');
+   paired=status.state==='paired';
+   host.page.event('worldlet:phone-status',status);
+  },
  });
+ paired=relay.status().state==='paired';
  let lastActive=0,stopped=false;
  const conversation=()=>{
   const fox=host.optional<FoxService>(FOX),companion=host.optional<CompanionService>(COMPANION);

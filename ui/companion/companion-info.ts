@@ -2,6 +2,7 @@ import {readCompanionProfile,type CompanionKnowledge,type CompanionProfile} from
 import {companionPersona} from '../../core/companion/index.ts';
 import {node,uiIcon} from '../components/index.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
+import {eventTrigger,reportProductEvent} from '../shell/index.ts';
 import {createCompanionFeedback} from './companion-feedback.ts';
 import {createActivityRecords} from './activity-records.ts';
 import {createCompanionArtifacts,mountJournalBook} from '../artifacts/index.ts';
@@ -62,8 +63,11 @@ export function mountCompanionInfo({root,pet,call,getName}){
  // The Journal is a book of its own over the World (owner request 2026-10-08), opened by today's date in the World's top-left corner.
  const journal=mountJournalBook({root,pages:artifacts.element,start:(day,card)=>artifacts.start(day,card),stop:()=>artifacts.stop(),returnFocus:()=>document.querySelector<HTMLElement>('.world-today-open')});
  async function openJournal(day='',card=''){
+  const trigger=eventTrigger();
   if(desktop()){try{await requireWorldSurface(call);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';return;}}
   if(panel.open)dismiss();journal.open(day,card);
+  if(!journal.isOpen)return;
+  reportProductEvent('journal_opened',{trigger});
  }
  // The panel is one settings window (owner request 2026-10-10): Fox's profile and Phone are sections in its one list
  // beside the settings, and Help opens Feedback and the tutorial; the World view lends the sample switch and host features.

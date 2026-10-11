@@ -235,6 +235,22 @@ try{
   await new Promise(resolve=>setTimeout(resolve,30));
   assert.deepEqual(events.slice(-3).map(event=>[event.event,event.properties.order_result??event.properties.order_stop]),[['order_sent','stored'],['order_stopped','left_app'],['order_stopped','other']]);
   assert.ok(!JSON.stringify(events.slice(-3)).includes('private'),'never the words or a free-text reason');
+  // Focus-feature events (Attention, Journal, Routines, Phone, Settings › Agent): kinds and counts only;
+  // attention_shown once a day, and nothing at all with sharing off.
+  const before=events.length;
+  analytics.recordProductEvent('attention_shown','',{attention_count:'3',title:'private title'});analytics.recordProductEvent('attention_shown','',{attention_count:'4'});
+  analytics.recordProductEvent('attention_approved','',{approval_surface:'phone',item_kind:'task'});analytics.recordProductEvent('attention_opened_from_fox','',{});
+  analytics.recordProductEvent('journal_opened','',{trigger:'user'});analytics.recordProductEvent('routine_completed','',{routine_source:'worldlet',routine_status:'ok',routine_late:'no',name:'private routine'});
+  analytics.recordProductEvent('phone_paired','',{});analytics.recordProductEvent('phone_approved','',{approval_kind:'agent_permission'});
+  analytics.recordProductEvent('agent_settings_changed','',{agent_setting:'skill',value:'private skill'});
+  await new Promise(resolve=>setTimeout(resolve,30));
+  const focus=events.slice(before);
+  assert.deepEqual(focus.map(event=>event.event),['attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed'],'attention_shown is sent once a day');
+  assert.equal(focus[0].properties.attention_count,'3');assert.equal(focus[1].properties.approval_surface,'phone');assert.equal(focus[4].properties.routine_status,'ok');assert.equal(focus[7].properties.agent_setting,'skill');
+  assert.ok(!JSON.stringify(focus).includes('private'),'never a title, name or setting value');
+  analytics.setEnabled(false);analytics.recordProductEvent('attention_approved','',{approval_surface:'computer',item_kind:'task'});analytics.recordProductEvent('agent_settings_changed','',{agent_setting:'model'});
+  await new Promise(resolve=>setTimeout(resolve,30));
+  assert.equal(events.length,before+focus.length,'sharing off stops them');
   console.log('PASS invite tracking: a fresh installation claims its invited download once and reports only the opaque token');
  }
 

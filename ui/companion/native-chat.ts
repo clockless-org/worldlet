@@ -8,7 +8,7 @@ import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
 import {mountFoxProactive} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
-import {isRequestCancellation,reportEngagement} from '../shell/index.ts';
+import {isRequestCancellation,reportEngagement,reportProductEvent} from '../shell/index.ts';
 import {contextThread,cleanRecall,FOX_MAIN_THREAD,restoredMainHistory} from '../attention/index.ts';
 import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
 import {modelFailure} from './model-failure.ts';
@@ -987,7 +987,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   // A line about something waiting on the person opens its Attention card, the one place to act on it.
   say:line=>{
    const open=make('button','','Open card');open.type='button';
-   open.onclick=()=>{api.setGuide(null,{only:'proactive:'+line.id});window.dispatchEvent(new CustomEvent('worldlet:attention-open',{detail:{id:line.card}}));};
+   open.onclick=()=>{api.setGuide(null,{only:'proactive:'+line.id});reportProductEvent('attention_opened_from_fox');window.dispatchEvent(new CustomEvent('worldlet:attention-open',{detail:{id:line.card}}));};
    api.setGuide({source:'proactive:'+line.id,takeover:false,text:line.text,remember:true,actions:line.card?[open]:[],browsing:line.browsing});api.revealGuide();
   }
  });
