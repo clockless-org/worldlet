@@ -371,7 +371,7 @@ export class AttentionCenter {
     const request=core('appletAnalysisRequest',{timeoutSeconds:timeout,instructions});
     if(!isRow(request))throw new WorldletError('Invalid Applet analysis request');
     request.session=session;request.context=context;request.analysisLane=provider;
-    await this.analysisRuntime(provider).run(request,this.agent().isolatedHome('applet-analysis'),async event=>{
+    const reply=await this.analysisRuntime(provider).run(request,this.agent().isolatedHome('applet-analysis'),async event=>{
      checkCancellation(signal);
      if(this.store.attentionEpoch!==epoch||!this.consent||!this.connected(provider))throw new Cancelled();
      if(event.type!=='tool'||typeof event.name!=='string'||!isRow(event.args))return null;
@@ -421,7 +421,7 @@ export class AttentionCenter {
     // (world-tool-bridge.ts), so the Agent ends its turn instead of the run stopping: the run was cancelled all the same.
     checkCancellation(signal);
     if(this.store.attentionEpoch!==epoch||!this.consent||!this.connected(provider))throw new Cancelled();
-    if(!submitted)throw new WorldletError('Applet analysis ended without a verified result.');
+    if(!submitted)throw new WorldletError(String(core('appletAnalysisUnsubmitted',{reply:reply?.message})));
     checkCancellation(signal);
     if(!requiredIDs.every(id=>processedIDs.includes(id))){
      yielded=processedIDs.length>0||changed;

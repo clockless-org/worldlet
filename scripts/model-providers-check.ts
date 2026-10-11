@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CHAT_TIER,PROVIDERS,hermesRequestModel,agentProviders,chooseProvider,chosenModel,localHarnessInvocation,localHarnessStream,providerModel,providerSignIn,readLocalHarnessLine,readProviderChoices,signedInProviders} from '../core/agent/index.ts';
+import {CHAT_TIER,PROVIDERS,hermesRequestModel,agentProviders,backgroundModel,chooseProvider,chosenModel,localHarnessInvocation,localHarnessStream,providerModel,providerSignIn,readLocalHarnessLine,readProviderChoices,signedInProviders} from '../core/agent/index.ts';
 import {signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
 
 // The provider Fox's Agent answers with (core/agent/model-providers.ts): each provider maps to S, M and L models, chat
@@ -32,6 +32,13 @@ let saved=chooseProvider(null,'hermes','anthropic');
 assert.deepEqual(saved,{version:1,choices:{hermes:'anthropic'}});
 assert.equal(chosenModel(saved,'hermes'),'anthropic:claude-sonnet-5','chat uses the M tier');
 assert.equal(chosenModel(saved,'openclaw'),null,'another Agent keeps its own default');
+// Background work with no provider chosen names the chat-tier model of the provider the Agent's own default uses: a
+// Hermes default of gpt-6-astra, refused by a ChatGPT-plan sign-in in its pool, failed every Applet analysis (2026-10-11).
+assert.equal(backgroundModel({},'hermes','openai-codex'),'openai-codex:gpt-5.6-terra');
+assert.equal(backgroundModel(saved,'hermes','openai-codex'),'anthropic:claude-sonnet-5','a chosen provider wins');
+assert.equal(backgroundModel({},'hermes','nous'),null,'a provider Worldlet does not know keeps the Agent’s own model');
+assert.equal(backgroundModel({},'hermes',null),null);
+assert.equal(backgroundModel({},'codex','openai-codex'),null,'only an Agent that names that provider');
 assert.throws(()=>chooseProvider(saved,'claude-code','opencode-go'),/cannot use that provider/);
 saved=chooseProvider(saved,'hermes',null);
 assert.deepEqual(saved.choices,{},'null returns to the Agent\'s own setting');

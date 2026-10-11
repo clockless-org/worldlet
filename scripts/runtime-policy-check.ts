@@ -10,6 +10,19 @@ assert.equal(runtimeFailure({now,failures:9,message:'failed'}).nextAt,now+900);
 assert.equal(runtimeFailure({now,failures:4,cancelled:true}).failures,4);
 assert.deepEqual(runtimeFailure({now,failures:2,message:'Source changed during analysis; retry the current revision.'}),{code:'source_changed',waitReason:'retry_at',nextAt:now+5,failures:2});
 assert.ok(!JSON.stringify(runtimeFailure({now,failures:0,message:'private@example.com failed'})).includes('private'));
+// Applet analysis whose Agent answered with its own provider error (a model a ChatGPT account no longer accepts, every
+// 15 minutes on one Mac, 2026-10-11): the model is unavailable, so wait an hour, and the batch's records are not at fault.
+{
+ const {appletAnalysisUnsubmitted,APPLET_ANALYSIS_MODEL_UNAVAILABLE}=await import('../core/applets/index.ts');
+ const {diagnosticError}=await import('../core/diagnostics/index.ts');
+ const rejected='ChatGPT or Codex Subscription rejected the request and retrying won\'t help. Pick another model with /model, or check the details in `~/.hermes/logs/agent.log`.\n\nProvider said: HTTP 400: {"detail":"The \'gpt-6-astra\' model is not supported when using Codex with a ChatGPT account."}';
+ assert.equal(appletAnalysisUnsubmitted(rejected),APPLET_ANALYSIS_MODEL_UNAVAILABLE);
+ for(const reply of ['Done.','',undefined,{message:1}])assert.equal(appletAnalysisUnsubmitted(reply),'Applet analysis ended without a verified result.',String(reply));
+ assert.deepEqual(runtimeFailure({now,failures:5,message:APPLET_ANALYSIS_MODEL_UNAVAILABLE}),{code:'model_unavailable',waitReason:'model_budget',nextAt:now+3600,failures:6});
+ assert.equal(runtimeFailure({now,failures:0,message:'Applet analysis ended without a verified result.'}).code,'operation_failed','a turn that answered but saved nothing still counts against its records');
+ assert.equal(diagnosticError({message:APPLET_ANALYSIS_MODEL_UNAVAILABLE,operation:'appletAnalysis'}).code,'unavailable');
+ console.log('PASS Applet analysis: an Agent answering with its provider error waits an hour as model_unavailable, not a content failure');
+}
 const candidates=[{provider:'gmail',pending:20},{provider:'notion',pending:3}],tasks=[{id:'applet:gmail:analyze',nextAt:now+600}];
 assert.equal(analysisPlan({candidates,tasks,now,foreground:false}).provider,'notion');
 assert.equal(analysisPlan({candidates,tasks,now,foreground:true}).waitSeconds,1);

@@ -91,6 +91,13 @@ await withTempDir('worldlet-controls-',async scratch=>{
  const silent=harnessScheduleControls(hermesInstall,environment,{run:async()=>({code:0,stdout:'',stderr:''}),settle:[]})!;
  await assert.rejects(silent.change!({job:'j1',action:'pause'}),/did not do it/,'read back, never assumed');
  assert.equal(harnessScheduleControls({...hermesInstall,id:'pi'} as any,environment),null,'a Harness without `schedule` has none');
+ // Start: the scheduler's own `hermes gateway install` in the person's home, then its heartbeat is read again.
+ const started:string[][]=[];
+ const starter=harnessScheduleControls(hermesInstall,environment,{run:async(_i:unknown,_e:unknown,args:string[],options:{env?:Record<string,string>}={})=>{started.push(args);
+  assert.equal(options.env?.HERMES_HOME,fs.realpathSync(hermes));write(path.join(hermes,'cron','ticker_heartbeat'),String(Date.now()/1000));return {code:0,stdout:'',stderr:''};}} as any)!;
+ await starter.startScheduler!();
+ assert.deepEqual(started,[['gateway','install']]);assert.equal(await starter.running(),true);
+ await assert.rejects(harnessScheduleControls(hermesInstall,environment,{run:async()=>({code:1,stdout:'',stderr:'Error: launchd refused'})})!.startScheduler!(),/Hermes Agent did not start it: Error: launchd refused/);
 
  // OpenClaw's scheduled jobs: `openclaw cron disable|enable|run|rm` (through its Gateway) ------------------------------
  const clawJobs=path.join(state,'cron','jobs.json');
@@ -166,7 +173,7 @@ await withTempDir('worldlet-controls-',async scratch=>{
  const world=new WorldLedger(path.join(scratch,'world'));
  let sample=false;
  const ran:string[]=[];
- const schedule={jobs:async()=>[job],runs:async()=>({runs:[]}),running:async()=>false,start:'hermes gateway install',latest:async()=>[{id:'r',job:'j1',at,status:'ok' as const,output:'Secret result text'}],
+ const schedule={jobs:async()=>[job],runs:async()=>({runs:[]}),running:async()=>false,start:'hermes gateway install',startScheduler:async()=>{},latest:async()=>[{id:'r',job:'j1',at,status:'ok' as const,output:'Secret result text'}],
   preview:async(c:any)=>'hermes cron '+c.action+' '+c.job,change:async(c:any)=>{ran.push(c.action+' '+c.job);}};
  const skills={list:async()=>[{name:'seed-swap',description:'Organize.',where:'/h/skills/seed-swap',enabled:true,removable:false}],preview:async(c:any)=>'hermes config set skills.disabled ["'+c.skill+'"]',change:async(c:any)=>{ran.push(c.action+' '+c.skill);}};
  const host:any={store:{writable:true,sampleEnabled:()=>sample,ledger:()=>world},diagnostics:{record:()=>{}},
@@ -174,7 +181,7 @@ await withTempDir('worldlet-controls-',async scratch=>{
  const controls=createHarnessControls(host);
  const listed=await controls.scheduleRequest({operation:'list'}) as any;
  assert.deepEqual(listed.current,{harness:'hermes',title:'Hermes Agent'});
- assert.deepEqual(listed.harnesses[0],{harness:'hermes',title:'Hermes Agent',jobs:[{id:'j1',name:'Digest',kind:'prompt',paused:false,when:{cron:'0 7 * * *'},last:{at,status:'ok'}}],running:false,start:'hermes gateway install',changes:true,inUse:true},'names, times and results; never a prompt or a result’s text');
+ assert.deepEqual(listed.harnesses[0],{harness:'hermes',title:'Hermes Agent',jobs:[{id:'j1',name:'Digest',kind:'prompt',paused:false,when:{cron:'0 7 * * *'},last:{at,status:'ok'}}],running:false,canStart:true,changes:true,inUse:true},'names, times and results; never a prompt or a result’s text');
  const preview=await controls.scheduleRequest({operation:'preview',harness:'hermes',job:'j1',change:'pause'}) as any;
  assert.equal(preview.command,'hermes cron pause j1');assert.deepEqual(ran,[],'a preview runs nothing');
  await assert.rejects(controls.scheduleRequest({operation:'change',confirm:'made-up'}),/Confirm the change again/);

@@ -30,7 +30,6 @@ import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
 import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
-import {TASK_PANEL_KINDS} from '../../../../../core/tasks/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
@@ -774,18 +773,14 @@ export function installFox(host:Host){
   },
   modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),
   // The World's Task panel (core/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
-  // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts), today's history of
-  // older conversations still coming in, the runtime task report (source checks running and next) and the Applet tasks
-  // working now. Finished work is not read: it lives in the Journal. Core decides the rows.
+  // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
+  // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
+  // Journal: neither is read. Core decides the rows.
   taskPanel:async()=>{
    if(store.sampleEnabled())return {sample:true};
-   const runtime=agent(),schedule=runtime?.schedule?.(),now=Date.now();
+   const runtime=agent(),schedule=runtime?.schedule?.();
    const jobs=schedule?await schedule.jobs().catch(error=>{host.diagnostics.record(error,'taskPanel');return [];}):[];
-   const ledger=store.ledger(),since=new Date(now).setHours(0,0,0,0)/1000;
-   let tasks:Row[]=[];
-   try{tasks=worldTools()?.runtimeTaskReport().rows??[];}catch(error){host.diagnostics.record(error,'taskPanel');}
    return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,
-    history:ledger.history({kinds:TASK_PANEL_KINDS,since,limit:1000}),tasks,
     working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
   },
   foxProactive:request=>proactiveStart(request),
@@ -988,7 +983,7 @@ export function installFox(host:Host){
   agentWarm:async request=>({warm:await warmThread(typeof request.thread==='string'?request.thread:'fox-main')}),
   /** Every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
   harnessApprovalRules:async request=>request.operation==='revoke'?settingChanged('permission',await approvalRules.revoke(request.harness,request.id)):approvalRules.list(),
-  /** Settings › Agent › Accounts: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
+  /** Settings › Agent › Connections: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessConnections:async request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?settingChanged('account',await agentConnections.change(request.confirm)):agentConnections.list(),
   /** Settings › Agent › Routines and Skills: each Agent's own jobs or skills here (`list`), the exact command

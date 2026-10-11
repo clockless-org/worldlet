@@ -57,6 +57,18 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // Elements kept across renders, so a tile that already arrived is not drawn arriving again.
  const kept=new Map<string,{sig:string,el:HTMLElement}>();
  const keep=(key:string,sig:string,build:()=>HTMLElement)=>{const old=kept.get(key);if(old&&old.sig===sig)return old.el;const el=build();el.dataset.key=key;kept.set(key,{sig,el});return el;};
+ // A render puts its elements in place without taking out the ones already there: an element taken out and put back
+ // starts its animations over, which made arriving tiles, the spinners and the button flash on every render.
+ const place=(parent:HTMLElement,children:Node[])=>{
+  const wanted=new Set(children);for(const child of [...parent.childNodes])if(!wanted.has(child))child.remove();
+  children.forEach((child,i)=>{if(parent.childNodes[i]!==child)parent.insertBefore(child,parent.childNodes[i]||null);});
+ };
+ // The parts of the second half that stay across renders: the stage, its tiles, the waiting tile and the footer.
+ const stage=node('div','','setup-import'),bento=node('div','','setup-tiles');
+ const waiting=node('article','','setup-tile setup-tile-reading'),waitingLine=node('p','','setup-tile-line');
+ waiting.append(node('span','','setup-tile-spinner'),waitingLine);
+ const footer=node('footer','','setup-footer'),status=node('div','','setup-status-slot');status.setAttribute('aria-live','polite');
+ const primaryButton=node('button','','setup-primary') as HTMLButtonElement;primaryButton.type='button';
  // 'connecting' until the host says it opened Google consent: a reused grant opens no browser.
  let googleStage:string='connecting',googleUrl:string|undefined;
  const onGoogleStage=(event:Event)=>{const detail=(event as CustomEvent).detail,stage=googleSignInStage(detail);if(disposed||!signingIn||!stage)return;googleStage=stage;googleUrl=googleConsentUrl(detail);render();};
@@ -269,7 +281,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   picked='hermes';
   await chooseAgent('hermes');
  }
- const button=(label,fn,primary=false)=>{const b=node('button',t(label),primary?'setup-primary':'') as HTMLButtonElement;b.type='button';b.disabled=busy;b.onclick=()=>void run(fn);return b;};
+ // The big button is one element that changes its words, so its spinner keeps turning across renders.
+ const button=(label,fn,primary=false)=>{const b=primary?primaryButton:node('button','','') as HTMLButtonElement;const text=t(label);if(b.textContent!==text)b.textContent=text;b.className=primary?'setup-primary':'';b.type='button';b.disabled=busy;b.onclick=()=>void run(fn);return b;};
  async function run(fn){if(busy)return;busy=true;error='';render();try{await fn();}catch(e){error=/cancel/i.test(e.message||'')?'Your request was cancelled.':e.message||'That didn’t finish. Please try again.';}finally{busy=false;if(!disposed)render();}}
  let sourcePreparation:Promise<void>|null=null;
  function prepareGoogleSources(){
@@ -355,10 +368,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   });
   loader.classList.add('is-gathering');await Promise.all([...flights,foxFlight]);
   // What came along drifts down into Fox, one after another; Fox brightens a little as each arrives. Routines run on
-  // their own, so they go to the Task panel on the right instead, to Routines at its top (owner layout 2026-10-10); before the
+  // their own, so they go to the Routines beside Fox on its right instead (owner request 2026-10-11); before the
   // panel has read them, to where it stands.
   const corner=(document.querySelector('.task-panel:not([hidden]) .task-group[data-group=routines]')||document.querySelector('.task-panel:not([hidden])'))?.getBoundingClientRect();
-  const cornerX=corner&&corner.width?corner.right-24:innerWidth-56,cornerY=corner&&corner.height?corner.top+24:innerHeight*.4;
+  const cornerX=corner&&corner.width?corner.left+24:innerWidth/2+260,cornerY=corner&&corner.height?corner.top+24:innerHeight-40;
   await Promise.all(parcels.map(async (parcel,i)=>{
    const toCorner=parcel.classList.contains('setup-tile-routines');
    const r=parcel.getBoundingClientRect(),dx=(toCorner?cornerX:foxX)-(r.left+r.width/2),dy=(toCorner?cornerY:foxY)-(r.top+r.height/2),delay=still?0:i*110;
@@ -398,7 +411,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // The waiting tile's line while the host still copies (owner request 2026-10-06: what is happening, in a few words).
  function bringLine(name:string){
   if(porting)return t('Checking its connections…');
-  const lines=['Reading {agent}’s memory…','Packing up {agent}’s conversations…','Folding in {agent}’s notes…','Teaching Fox {agent}’s skills…'];
+  const lines=['Reading {agent}’s memory…','Packing up {agent}’s conversations…','Folding in {agent}’s daily notes…','Teaching Fox {agent}’s skills…'];
   return agentText(lines[chatter%lines.length],name);
  }
  /** Choose again (owner request 2026-10-09: on the chosen card, instead of a Back button): what came over is kept,
@@ -480,7 +493,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     el.append(list);
    }));
   }
-  if(kind==='notes')return keep('tile:notes',String(brought.notes)+draft.language,build('Notes','',big(brought.notes,'notes')));
+  if(kind==='notes')return keep('tile:notes',String(brought.notes)+draft.language,build('Daily notes','',big(brought.notes,'daily notes')));
   if(kind==='skills')return keep('tile:skills',String(brought.skills)+draft.language,build('Skills','',big(brought.skills,'skills it learned')));
   if(kind==='routines')return keep('tile:routines',String(brought.routines)+draft.language,build('Routines','',big(brought.routines,'run on their own')));
   if(kind==='connections'){
@@ -520,7 +533,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const old=found.version?.outdated===true;card.classList.toggle('is-outdated',old);
    card.append(node('small',connecting?agentText('Connecting to {agent}…',title):old?t('Needs version {version} or newer').replace('{version}',found.version!.minimum):sub,'setup-agent-sub'));
    const history=found.memory?.history,chips=node('span','','setup-agent-chips');
-   for(const [n,label] of [[history?.conversations,'{count} conversations'],[history?.notes,'{count} notes'],[history?.skills,'{count} skills'],[history?.jobs,'{count} routines']] as [number|undefined,string][])if(n)chips.append(node('span',count(label,n),'setup-agent-chip'));
+   for(const [n,label] of [[history?.conversations,'{count} conversations'],[history?.notes,'{count} daily notes'],[history?.skills,'{count} skills'],[history?.jobs,'{count} routines']] as [number|undefined,string][])if(n)chips.append(node('span',count(label,n),'setup-agent-chip'));
    if(chips.childElementCount)card.append(chips);
    if(found.worldTools===false){card.append(node('span',t('Chat only'),'setup-signin-tag'));card.title=agentText('With {agent}, Fox can talk with you but can’t act in your world yet.',title);}
    cards.append(card);
@@ -602,35 +615,35 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   loader.dataset.setupStep=String(step);
   panel.classList.toggle('is-bringing',arriving&&!settled());
   panel.classList.toggle('is-importing',importing);
-  const footer=node('footer','','setup-footer');
-  const status=node('div','','setup-status-slot');status.setAttribute('aria-live','polite');
   let primary:HTMLButtonElement;
+  let message:HTMLElement|null=null;
   const parts:HTMLElement[]=[];
   if(importing){
    const name=arriving?(draft.brought?.name||draft.agentName||draft.agent):'';
    const done=settled();
    parts.push(node('h1',arriving?agentText(done?'{agent} moved in':'{agent} is moving in',name):t('Your world is ready'),'setup-visually-hidden'));
-   const stage=node('div','','setup-import');
    const card=passport();
    const list=tiles(),shown=Math.min(shownTiles,list.length);
-   const bento=node('div','','setup-tiles');bento.setAttribute('aria-label',t('What comes along'));
+   bento.setAttribute('aria-label',t('What comes along'));
    // Each tile has its own place, so the grid stays full while every tile shows, empty ones included.
    const has=(kind:string)=>list.includes(kind);
-   const layout=has('profile')?(has('apps')?'agent':has('connections')?'agent-no-apps':'agent-only'):list.length>1?(has('connections')?'world':'world-apps'):'';
-   if(layout)bento.dataset.layout=layout;
-   for(let i=0;i<shown;i++)bento.append(tile(list[i],i===shown-1&&shownTiles<=list.length));
+   // An Agent moving in has its whole grid from the start (every tile's place, the waiting tile on the bottom row
+   // where the connections and apps arrive last), so the grid never changes shape while tiles arrive.
+   const layout=arriving?'agent':has('profile')?(has('apps')?'agent':has('connections')?'agent-no-apps':'agent-only'):list.length>1?(has('connections')?'world':'world-apps'):'';
+   if(layout)bento.dataset.layout=layout;else delete bento.dataset.layout;
+   const shownTileElements:HTMLElement[]=[];
+   for(let i=0;i<shown;i++)shownTileElements.push(tile(list[i],i===shown-1&&shownTiles<=list.length));
    // While the host still copies, one tile says what is happening.
    if(arriving&&(bringing||porting||!draft.brought)){
-    const waiting=node('article','','setup-tile setup-tile-reading');
-    const line=node('p',bringLine(name),'setup-tile-line');line.style.animationDelay=-(performance.now()%1400)+'ms';
-    waiting.append(node('span','','setup-tile-spinner'),line);bento.append(waiting);
+    const line=bringLine(name);if(waitingLine.textContent!==line)waitingLine.textContent=line;
+    shownTileElements.push(waiting);
    }
-   stage.append(card,bento);parts.push(stage);
+   place(bento,shownTileElements);place(stage,[card,bento]);parts.push(stage);
    if(entering)primary=button('Entering your world…',async()=>{},true);
    else if(!done)primary=button(agentText('Moving {agent} in…',AGENT_SHORT[draft.agent]&&!draft.brought?.name?AGENT_SHORT[draft.agent]:name),async()=>{},true);
    else primary=button('Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
    primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering||!done);primary.setAttribute('aria-busy',String(entering||!done));if(!done||entering)primary.disabled=true;
-   if(error||notice)status.append(node('p',t(error||notice),error?'setup-error':'setup-note'));
+   if(error||notice)message=node('p',t(error||notice),error?'setup-error':'setup-note');
   }else{
    parts.push(node('h1',t('Give your agent a world'),'setup-visually-hidden'));
    const choose=node('div','','setup-choose');
@@ -668,11 +681,14 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     primary=button(going?'Building your world…':'Build your world',()=>chooseAgent(picked),true);
     primary.classList.toggle('is-loading',!!going);if(!picked||!agents.some(a=>a.id===picked)||signingIn)primary.disabled=true;
    }
-   if((error||notice)&&!formOpen){const feedback=node('p',t(error||notice),error?'setup-error':'setup-note');if(error)feedback.setAttribute('role','alert');status.append(feedback);}
+   if((error||notice)&&!formOpen){message=node('p',t(error||notice),error?'setup-error':'setup-note');if(error)message.setAttribute('role','alert');}
   }
   primary.classList.add('setup-next');
-  footer.append(status,primary);
-  panel.replaceChildren(...parts,footer);
+  // The same words stay the same element, so a screen reader hears a message once.
+  const said=message?message.className+'|'+message.textContent:'';
+  if(status.dataset.said!==said){status.dataset.said=said;status.replaceChildren(...message?[message]:[]);}
+  place(footer,[status,primary]);
+  place(panel,[...parts,footer]);
   // The chosen card travels to the left (owner request 2026-10-09).
   if(importing&&flipFrom){
    const card=panel.querySelector<HTMLElement>('.setup-passport'),to=card?.getBoundingClientRect();

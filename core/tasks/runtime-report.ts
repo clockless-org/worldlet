@@ -3,7 +3,7 @@ import {attentionAdmission} from './attention-budget.ts';
 const statuses=new Set(['queued','running','waiting','succeeded','failed','paused']);
 const waits=new Set(['resource','network','rate_limit','model_budget','authorization','approval','retry_at']);
 const runStatuses=new Set(['running','succeeded','failed','cancelled','interrupted','yielded']);
-const errors=new Set(['offline','timeout','authentication','rate_limit','model_allowance','service_paused','service_credits','update_required','backpressure','operation_failed','cancelled','paused','process_interrupted','lease_expired','generation_changed','unfinished','unverified_output','incomplete_coverage']);
+const errors=new Set(['offline','timeout','authentication','rate_limit','model_allowance','service_paused','service_credits','update_required','backpressure','operation_failed','cancelled','paused','process_interrupted','lease_expired','generation_changed','unfinished','unverified_output','incomplete_coverage','model_unavailable']);
 const token=(v:unknown)=>typeof v==='string'&&/^[a-z0-9:_-]{1,120}$/.test(v)?v:'';
 const count=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>=0?Number(v):0;
 const time=(v:unknown)=>typeof v==='number'&&Number.isFinite(v)&&v>=0?v:null;

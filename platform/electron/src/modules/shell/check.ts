@@ -410,6 +410,18 @@ try{
   desktop.stop();
   console.log('PASS another app in front puts Fox on the desktop; the World coming back brings it home');
  }
+ // The World closing (quit, restart) while the page answers leaves nothing to detach: once an unhandled
+ // "Object has been destroyed" from detach on a Mac.
+ {
+  const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
+  world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
+  const page={...host.page,ready:()=>true,call:async(name:string)=>{if(name==='worldletCompanionGeometry'){world.destroy();return {x:10,y:10,width:120,height:140};}}} as Host['page'];
+  const desktop=new DesktopCompanion({...host,window:()=>world,worldView:()=>view,page},companionEntry(host,noop,'darwin'),{quit:()=>{},unfinished:()=>false,follows:false});
+  await desktop.showDesktop(true);
+  assert(!desktop.isDesktop&&desktop.panelBounds()===null,'a World destroyed mid-detach stays home');
+  desktop.stop();if(!view.webContents.isDestroyed())view.webContents.close();
+  console.log('PASS the World closing while Fox leaves for the desktop is not an error');
+ }
  for(const window of BaseWindow.getAllWindows())window.destroy();
 }catch(error){console.error('FAIL shell:',error);process.exitCode=1;}
 finally{store.closeLedger();fs.rmSync(scratch,{recursive:true,force:true});}

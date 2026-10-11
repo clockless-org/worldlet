@@ -4,7 +4,7 @@ import {tmpdir} from 'node:os';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 // A reply Fox prepares by itself (owner decision 2026-10-09, core/artifacts/replies.ts) on the World page: a new Worth
 // Doing item from a Gmail thread that waits for the person gets a background request (no card, no reply line, a label in
-// the archive) that reads that thread and prepares a draft; the World's Task panel says what Fox is doing in a window
+// the archive) that reads that thread and prepares a draft; a card beside Fox says what Fox is doing
 // that goes when it is done, and the Journal in the top-right corner holds the draft as a reply card; the item's Attention card says Fox drafted
 // a reply, and its Review opens the Journal too. Nothing is sent. Bundled UI with a faked native bridge and a fixed
 // clock (the ask polls every 30 s); fictional mail and people, no model or account.
@@ -62,21 +62,20 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(sent.background,true,'a background session beside the conversation, never in it');
  assert.equal(sent.shown,'Prepared reply','the archive keeps a label, never the request in the person’s name');
  assert.ok(sent.text.includes('id "thread:18c2a1"')&&sent.text.includes('prepare_email once with threadId "18c2a1"')&&sent.text.includes('you never send it'),'it reads the item’s own thread and prepares one draft, never sending');
- // The Task panel on the right says what Fox is doing.
+ // Beside Fox, on its left, a card says what Fox is doing (ui/hud/task-panel.ts).
  const panel=page.locator('.task-panel');
- // Doing now is a small window with Fox working in it, its status lines like a terminal.
- const working=panel.locator('.task-window[data-task-id="fox:reply"]');
- await working.locator('.task-terminal-line',{hasText:'Drafting a reply: Answer Priya about the venue…'}).waitFor();
- const box=await working.boundingBox(),view=page.viewportSize()!;
- assert.ok(box&&box.x+box.width>=view.width-60&&box.x>view.width*.6,'on the World’s right side: '+JSON.stringify(box));
+ const working=panel.locator('.task-group[data-group=now] .task-card[data-task-id="fox:reply"]');
+ await working.locator('.task-when',{hasText:'Drafting a reply: Answer Priya about the venue…'}).waitFor();
+ const box=await working.boundingBox(),fox=await page.locator('.companion-avatar').boundingBox(),view=page.viewportSize()!;
+ assert.ok(box&&fox&&box.x+box.width<fox.x&&box.y>view.height*.8,'on Fox’s left, at the bottom: '+JSON.stringify({box,fox}));
  assert.equal(await page.locator('#foxArtifact').isVisible(),false,'no card opens');
- await page.screenshot({path:path.join(tmpdir(),'worldlet-prepared-reply-working.png'),clip:{x:view.width-420,y:0,width:420,height:view.height}}).catch(()=>{});
+ await page.screenshot({path:path.join(tmpdir(),'worldlet-prepared-reply-working.png'),clip:{x:0,y:view.height-240,width:view.width,height:240}}).catch(()=>{});
  await page.evaluate(()=>(window as any).finish());
- // Then its window goes: what was done lives only in the Journal (owner request 2026-10-11), not in the Task panel.
+ // Then its card goes: what was done lives only in the Journal (owner request 2026-10-11), not beside Fox.
  await working.waitFor({state:'detached'});
- assert.equal(await panel.locator('.task-group[data-group=done]').count(),0,'no Done list in the Task panel');
+ assert.equal(await panel.locator('.task-group[data-group=done]').count(),0,'nothing finished beside Fox');
  assert.deepEqual(await page.evaluate(()=>(window as any).statuses),[{source:'reply',text:'Drafting a reply: Answer Priya about the venue…'},{source:'reply',text:'',done:'1 reply ready'}]);
- await page.screenshot({path:path.join(tmpdir(),'worldlet-prepared-reply-done.png'),clip:{x:view.width-420,y:0,width:420,height:view.height}}).catch(()=>{});
+ await page.screenshot({path:path.join(tmpdir(),'worldlet-prepared-reply-done.png'),clip:{x:0,y:view.height-240,width:view.width,height:240}}).catch(()=>{});
  const dialogue=await page.locator('#companionDialogue').innerText().catch(()=>'');
  assert.ok(!dialogue.includes('ready for your review')&&!dialogue.includes('In the background'),'Fox says nothing in the conversation');
  assert.deepEqual(JSON.parse(await page.evaluate(()=>localStorage.getItem('worldlet-prepared-replies-reply-fixture')||'{}')).prepared,['venue-reply','thread:18c2a1'],'the item and its thread are prepared once, across restarts');
@@ -102,4 +101,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='emailAction'&&c.operation==='send').length),0,'nothing is sent');
  assert.deepEqual(errors,[]);
 });
-console.log('PASS prepared reply UI: a new mail task gets a reply prepared in a background session, the Task panel’s window says Fox is drafting and goes when it is done, the Journal shows the draft as a reply card, the item’s card points at it, and nothing is sent');
+console.log('PASS prepared reply UI: a new mail task gets a reply prepared in a background session, the card beside Fox says it is drafting and goes when it is done, the Journal shows the draft as a reply card, the item’s card points at it, and nothing is sent');

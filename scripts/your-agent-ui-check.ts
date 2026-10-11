@@ -27,7 +27,7 @@ try{
   if(b.action==='harnessMemory')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',entries:w.memory},{harness:'claude-code',title:'Claude Code',inUse:w.current.harness==='claude-code',entries:[{id:'mem-0000000000000030',kind:'memory',text:'Use pnpm, never npm.',where:'~/.claude/CLAUDE.md'}]}]};
   if(b.action==='foxPreferences')return {ok:true,dailyRoutines:{...w.daily}};
   if(b.action==='foxPreferenceChange'&&b.setting==='daily_routines'){w.daily={...w.daily,...b.value};return {ok:true,dailyRoutines:{...w.daily}};}
-  if(b.action==='harnessSchedule')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,running:false,start:'hermes gateway install',jobs:w.jobs}]};
+  if(b.action==='harnessSchedule')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,running:false,canStart:true,jobs:w.jobs}]};
   if(b.action==='harnessSkills'&&b.operation==='preview')return {command:'hermes config set skills.disabled ["'+b.skill+'"]',confirm:'s|'+b.change+'|'+b.skill};
   if(b.action==='harnessSkills'&&b.operation==='change'){const [,change,name]=b.confirm.split('|');
    w.skills=change==='remove'?w.skills.filter(s=>s.name!==name):w.skills.map(s=>s.name===name?{...s,enabled:change==='enable'}:s);return {ok:true};}
@@ -71,7 +71,7 @@ try{
  const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
  // Six named sections in the owner's order (2026-10-11), each a heading and one plain line.
  assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','memory','skills','routines','permissions','accounts'],'Model, Memory, Skills, Routines, Permissions, then Accounts last');
- assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Routines','Permissions','Accounts']);
+ assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Routines','Permissions','Connections']);
  for(const line of await local.locator('[data-part] > .companion-settings-partnote').allTextContents())assert.ok(line.length>20&&line.length<160&&!line.includes('\n'),'one plain line: '+line);
  assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),6,'each section has its line');
  // Memory: what each Agent remembers, About you first, the first few with Show all; read only.
@@ -83,7 +83,7 @@ try{
  await hermesMemory.getByRole('button',{name:'Show all 6',exact:true}).click();
  await hermesMemory.locator('[data-memory=user] [data-entry]').nth(5).getByText('Prefers short replies.',{exact:true}).waitFor();
  await hermesMemory.getByText('What it remembers · 1',{exact:true}).waitFor();
- await hermesMemory.getByText('From ~/.hermes/memories/USER.md',{exact:true}).waitFor();
+ assert.doesNotMatch(await hermesMemory.innerText(),/\.hermes|USER\.md/,'no file paths');
  assert.equal(await hermesMemory.getByRole('button',{name:'Ask it to forget',exact:true}).count(),7,'Ask it to forget on each entry of the Agent in use');
  const ccMemory=memoryPart.locator('[data-harness=claude-code]');
  await ccMemory.getByText('Use pnpm, never npm.',{exact:true}).waitFor();
@@ -104,7 +104,7 @@ try{
  await ccTools.getByText('Claude Code keeps these in its own settings. Change them in Claude Code itself.',{exact:true}).waitFor();
  await local.locator('[data-part=routines]').getByText(/the same Routines as in the Task panel/).waitFor();
  await permissions.getByRole('heading',{name:'Permissions',exact:true}).waitFor();
- await accounts.getByRole('heading',{name:'Accounts',exact:true}).waitFor();
+ await accounts.getByRole('heading',{name:'Connections',exact:true}).waitFor();
  // Skills: the Agent's own, with when each last ran and an Off mark; Turn off asks first, then runs its own command.
  const skillsPart=local.locator('[data-part=skills]'),routinesPart=local.locator('[data-part=routines]');
  const seed=skillsPart.locator('[data-skill=seed-swap]');
@@ -114,8 +114,7 @@ try{
  await seed.getByRole('button',{name:'Turn off',exact:true}).click();
  await seed.getByText('Hermes Agent will stop using “seed-swap” until you turn it on again. It stays in its skills.',{exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSkills'&&c.operation==='change').length),0,'Turn off asks first');
- await seed.locator('details.companion-settings-command summary').click();
- await seed.getByText('hermes config set skills.disabled ["seed-swap"]',{exact:true}).waitFor();
+ assert.doesNotMatch(await seed.innerText(),/hermes config|skills\.disabled/,'the command itself is never shown');
  await seed.locator('[data-action=confirm-change]').click();
  await skillsPart.getByText('Hermes Agent no longer uses “seed-swap”. It takes effect in its next conversation.',{exact:true}).waitFor();
  await skillsPart.locator('[data-skill=seed-swap]').getByText('Off',{exact:true}).waitFor();
@@ -138,8 +137,9 @@ try{
  await digest.getByText(/^Last run Oct 10: done$/).waitFor();
  await routinesPart.locator('[data-job=job-2]').getByText('Paused',{exact:true}).waitFor();
  await routinesPart.locator('[data-job=job-2]').getByText(/^Every 2 hours · /).waitFor();
- await routinesPart.getByText('Hermes Agent’s scheduler is not running, so these do not run now. Start it in Terminal:',{exact:false}).waitFor();
- await routinesPart.locator('code',{hasText:'hermes gateway install'}).waitFor();
+ await routinesPart.getByText('Hermes Agent’s scheduler is not running, so these do not run now.',{exact:true}).waitFor();
+ await routinesPart.locator('[data-action=start-scheduler]').waitFor();
+ assert.doesNotMatch(await routinesPart.innerText(),/gateway install|Terminal/,'Start is a button, not a command');
  await digest.getByRole('button',{name:'Pause',exact:true}).click();
  await digest.getByText('Hermes Agent will pause “Morning digest”. It does not run until you resume it.',{exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSchedule'&&c.operation==='change').length),0,'Pause asks first');
@@ -155,13 +155,13 @@ try{
  await routinesPart.locator('[data-job=job-2]').getByRole('button',{name:'Cancel',exact:true}).click();
  await routinesPart.getByText('Nothing was changed.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['harnessSchedule','harnessSkills'].includes(c.action)&&c.operation==='change').map(c=>c.confirm)),['s|disable|seed-swap','c|pause|job-1'],'only what the person confirmed ran');
- assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; commands only under Details');
+ assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; no commands');
  await accounts.locator('[data-account=gmail]').getByText('alex@example.com',{exact:true}).waitFor();
  await accounts.locator('[data-account=gmail]').getByRole('button',{name:'Disconnect Google',exact:true}).waitFor();
- await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool · https:\/\/tools\.example\.com/).waitFor();
+ await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool( · |$)/).waitFor();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
- await rule.getByText(/^Main agent · allowed .*2026, in Fox’s main conversation\.$/).waitFor();
+ await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
  await permissions.locator('[data-rule=rule-00000000000000a2]').getByText('Use the tool github › search_issues').waitFor();
  // Plain words: tools and things it may do, never MCP, allowlist or cron.
  assert.doesNotMatch(await permissions.innerText()+'\n'+await accounts.innerText(),/\bMCP\b|allowlist|cron/i,'plain words only');
@@ -284,5 +284,5 @@ try{
  await page.waitForFunction(()=>{const part=document.querySelector('#companionInfo .companion-settings-detail [data-part=accounts]'),pane=document.querySelector('#companionInfo .companion-settings-detail');if(!part||!pane)return false;const a=part.getBoundingClientRect(),b=pane.getBoundingClientRect();return a.top>=b.top-1&&a.top<b.bottom-40&&pane.scrollTop>0;});
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; six named sections (Model, Memory, Skills, Routines, Permissions, Accounts) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts is the page\'s last part and old Accounts entry points land on it');
+ console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; six named sections (Model, Memory, Skills, Routines, Permissions, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts is the page\'s last part and old Accounts entry points land on it');
 }finally{await browser.close();}

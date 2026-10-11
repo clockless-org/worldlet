@@ -123,3 +123,15 @@ export function chosenModel(value:unknown,agent:LocalHarnessId,tier:ModelTier=CH
  const provider=readProviderChoices(value).choices[agent];
  return provider?providerModel(agent,provider,tier):null;
 }
+/** Worldlet's own background work (Applet analysis, Attention checks, Applet tasks) when no provider is chosen: the
+ * chat-tier model of the provider the Agent's own default already uses (`ownProvider`, the Agent's id for it), so
+ * Worldlet picks a model every account of that provider accepts. The Agent's own default model can be one a sign-in
+ * in its credential pool refuses (gpt-6-astra on a ChatGPT plan: HTTP 400 on every Applet analysis, 2026-10-11).
+ * Null keeps the Agent's own default (a provider Worldlet does not know). The Agent's settings are never changed. */
+export function backgroundModel(value:unknown,agent:LocalHarnessId,ownProvider:string|null):string|null {
+ const chosen=chosenModel(value,agent);
+ if(chosen)return chosen;
+ const own=AGENT_PROVIDERS[agent]??{};
+ const provider=PROVIDERS.find(item=>!!ownProvider&&own[item.id]?.provider===ownProvider);
+ return provider?providerModel(agent,provider.id):null;
+}

@@ -13,7 +13,7 @@ import {agentEl as el} from './agent-change.ts';
 /** What the World view lends Settings: the sample world switch and which host features exist. */
 export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=>boolean;localDataDeletion:()=>boolean};
 /** The companion pages that are sections of their own in the one list: Fox's profile and Phone. */
-export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement};
+export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement;/** What Fox itself knows, shown first in Agent › Memory. */knows:HTMLElement};
 type Item={id:string;label:string;hint:string;page?:boolean;show:(detail:HTMLElement)=>void|Promise<void>};
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
@@ -274,7 +274,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    }else{
     const address=document.createElement('input');address.className='companion-settings-input';address.placeholder='https://gateway.example.com';address.spellcheck=false;address.autocomplete='off';address.value=gateway?.url??'';address.setAttribute('aria-label','Gateway address');
     const token=document.createElement('input');token.className='companion-settings-input';token.type='password';token.placeholder=gateway?'Saved token (type a new one to replace it)':'Gateway token';token.autocomplete='off';token.setAttribute('aria-label','Gateway token');
-    gText.append(el('strong','','My OpenClaw Gateway is on another computer'),el('span','','Its address (HTTPS, or a Tailscale address) and its token, gateway.auth.token in its openclaw.json. Its /v1/responses endpoint must be on.'),address,token);
+    gText.append(el('strong','','My OpenClaw Gateway is on another computer'),el('span','','Its address and its access token, both from that OpenClaw.'),address,token);
     gRow.append(gText,action(gateway?'Use':'Connect',()=>connect({url:address.value.trim(),token:token.value}),{id:'connect-gateway'}),...gateway?[forget]:[]);
    }
    elsewhere.append(gRow);elsewhere.open=showElsewhere||!!(remote&&typeof remote.computer==='string')||!!gateway?.active;
@@ -290,11 +290,12 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const live=()=>turn===ticket&&target.isConnected;
   const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
   const model=part('model','Model','The Agent Fox thinks with, on its own sign-in, and the provider it answers with.');
-  const memory=part('memory','Memory','What your Agent remembers about you and your work. It lives in your Agent; Worldlet only shows it.');
+  const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
+  memory.append(pages.knows);
   const skills=part('skills','Skills','Steps your Agent follows for tasks it knows how to do. They live in your Agent; Worldlet changes them only with its own commands.');
   const routines=part('routines','Routines','What your Agent does on its own schedule, the same Routines as in the Task panel. Worldlet changes them only with its own commands.');
   const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
-  const accounts=part('accounts','Accounts','The accounts Worldlet signed in to, then the tools and chat accounts set up in your Agent.');
+  const accounts=part('accounts','Connections','The accounts Worldlet signed in to, then the tools and chat accounts set up in your Agent.');
   // A request for Fox (set up or change a routine, forget something) goes to its conversation with the panel closed.
   const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
   model.append(now,fixes,guide.element,agents,said);
@@ -303,10 +304,10 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical).
  const items:Item[]=[
-  {id:'fox',label:'Fox',hint:'Profile and what it knows',page:true,show:target=>{target.append(pages.fox);}},
+  {id:'fox',label:'Fox',hint:'Name, look and personality',page:true,show:target=>{target.append(pages.fox);}},
   {id:'model',label:'Agent',hint:'What it runs on and may use',show:modelSetting},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
-  {id:'general',label:'General',hint:'Updates, Browser, usage counts',show:async target=>{
+  {id:'general',label:'General',hint:'Updates, start at login, usage counts',show:async target=>{
    target.append(subhead('Updates'));await updates(target);
    // The one privacy choice left after the Privacy section went (owner request 2026-10-10): the website's privacy page
    // promises that usage counts can be turned off, and off stops all reporting.
@@ -321,7 +322,11 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     target.append(subhead('Usage counts'),row,said);await draw();
    }
    target.append(subhead('Open at login'));await screen('login')(target);
+   // The Browser's own settings, folded away (owner request 2026-10-11: Settings has too much).
+   const general=target;
    {
+    const browser=el('details','companion-settings-elsewhere') as HTMLDetailsElement;browser.dataset.setting='browser';
+    browser.append(el('summary','','Browser'));target.append(browser);target=browser;
     target.append(subhead('Browser home page'));
     const home=createBrowserHome(host()?.sample()?null:(()=>{try{return globalThis.localStorage;}catch{return null;}})()),said=status();
     const input=el('input','companion-settings-input') as HTMLInputElement;input.type='url';input.value=home.get();input.setAttribute('aria-label','Home page');input.spellcheck=false;input.autocapitalize='off';
@@ -333,6 +338,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     // What the built-in browser recorded, with Delete, sits with the Browser now the Privacy section is gone.
     if(!host()?.sample())await recordings(target);
    }
+   target=general;
    // Only inside the sample world, as the way back to one's own (owner request 2026-10-10: no sample switch otherwise).
    if(host()?.sample()){
     target.append(subhead('Sample world'));
@@ -343,7 +349,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     target.append(note(on?'You are in the sample world. Turn it off to return to your own world.':'Look around a made-up world with sample mail, events and tasks. Your own world and accounts stay as they are.'),toggle,said);
    }
   }},
-  {id:'help',label:'Help',hint:'Feedback, tutorial, restart, reset',show:target=>{
+  {id:'help',label:'Help',hint:'Feedback, restart, reset',show:target=>{
    const said=status();
    // The Debug window and every recorded event are for the Worldlet team: folded away (owner request 2026-10-10).
    const team=el('details','companion-settings-elsewhere') as HTMLDetailsElement;
@@ -351,21 +357,20 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}}),
     subhead('Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
    team.ontoggle=()=>{if(team.open)records.showRecords();};
-   // Feedback and the tutorial live here, not in the World's corners (owner request 2026-10-11).
+   // Feedback and the tutorial live here, not in the World's corners (owner request 2026-10-11),
+   // one part each (owner request 2026-10-11: Settings has too much): feedback with its diagnostics file, the tutorial,
+   // restarting Fox; the team's tools stay folded at the end.
    target.append(
-    subhead('Feedback'),note('Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it.'),
-    action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'}));
+    subhead('Feedback'),note('Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it. For a problem, save diagnostics too and send the file with it.'),
+    action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'}),
+    action('Save diagnostics',async()=>{try{await call('exportDiagnostics');}catch(e){said.textContent=(e as Error).message||'Could not save diagnostics.';}},{id:'diagnostics'}));
    // The practice world has no tour.
-   if(!host()?.sample())target.append(subhead('Tutorial'),note('Fox shows you around the World again: Applets, the Attention Center and your phone. Your setup stays as it is.'),
-    action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'}));
+   if(!host()?.sample())target.append(subhead('Tutorial'),action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'}));
    target.append(
-    subhead('Restart Fox'),note('If Fox stops answering or seems stuck, restart it. Fox stops what it is doing and starts again; conversations, memory and connections are kept.'),
+    subhead('Restart Fox'),note('If Fox stops answering or seems stuck. Conversations, memory and connections are kept.'),
     action('Restart Fox',()=>restartFox(said),{id:'restart'}),
-    subhead('Report a problem'),note('Save a diagnostics file to send to the Worldlet team with your feedback.'),
-    action('Save diagnostics',async()=>{try{await call('exportDiagnostics');}catch(e){said.textContent=(e as Error).message||'Could not save diagnostics.';}}),
-    team,
     subhead('Reset'),note('Reset erases Fox’s memory, your saved items and account connections on this computer, keeps your model setup, and starts setup again. You will be asked to confirm first.'),
-    action('Reset',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not reset: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'}),said);
+    action('Reset',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not reset: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'}),said,team);
   }},
  ];
  // The version at a glance under the list (owner request 2026-10-04): 2026.MMDD.BUILD and the update channel.

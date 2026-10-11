@@ -33,7 +33,8 @@ export function modelHealthView(health:ModelHealth|null,agentTitle:string|null=n
  }
  const {model}=health,codex=model.provider==='openai-codex'||model.source==='local-codex';
  const path:ModelPath=agentTitle?'agent':codex?'codex':model.configured?'key':'none';
- const named=model.id&&model.id!==model.name?`${model.name} (${model.id})`:model.name||model.id;
+ // Its name only: the raw model id is the Agent's business (owner request 2026-10-11: hide technical details).
+ const named=model.name||model.id;
  const how=path==='agent'?`${agentTitle} on this computer answers for Fox.`:path==='codex'?'Your ChatGPT plan, through the Codex sign-in on this computer.':path==='key'?`Your own API key${model.provider&&model.provider!=='custom'?' with '+model.provider:''}.`:'';
  if(path==='none'||!model.ready&&path!=='agent')return {path,state:'none',title:path==='key'?'Fox’s API key is missing':'No model connected',
   detail:'Fox needs an AI Agent signed in to a provider to answer. Choose one below.',

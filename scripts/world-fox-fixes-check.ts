@@ -45,7 +45,7 @@ const settle=async(turns=20)=>{for(let i=0;i<turns;i++)await new Promise(resolve
 {
  const {createCompanionSettings}=await import('../ui/companion/companion-settings.ts');
  const call=async(action:string)=>action==='appUpdate'?{installed:{version:'2026.1011.1',build:1},channel:'production',channels:[]}:{};
- const settings=createCompanionSettings({call,host:()=>undefined,pages:{fox:new Node() as any,phone:new Node() as any},records:{records:new Node() as any,showRecords(){}},
+ const settings=createCompanionSettings({call,host:()=>undefined,pages:{fox:new Node() as any,phone:new Node() as any,knows:new Node() as any},records:{records:new Node() as any,showRecords(){}},
   onShow(){},close(){},openFeedback(){},replayTutorial(){}});
  body.append(settings.element);
  const updateListeners=()=>listeners.get('worldlet:app-update')?.size??0;

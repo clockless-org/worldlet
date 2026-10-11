@@ -25,16 +25,19 @@ await withBrowser(fileAccess,async browser=>{
  await page.goto(worldUrl());
  await waitForWorld(page);
  await openCompanionPanel(page);
- const panel=page.locator('#companionInfo'),block=panel.locator('.companion-profile-knowledge');
+ const panel=page.locator('#companionInfo');
+ // What Fox knows sits first in Settings › Agent › Memory, beside the Agent's own memory (owner request 2026-10-11).
+ await panel.locator('[data-setting=model]').click();
+ const block=panel.locator('[data-part=memory] .companion-profile-knowledge');
  await block.getByRole('heading',{name:'What Nova knows'}).waitFor();
  const groups=block.locator('details.companion-knowledge-group');
  assert.deepEqual(await groups.locator('summary .companion-knowledge-title').allTextContents(),['About you','Memory','From OpenClaw'],'memory kinds, then each Agent that brought conversations or notes; no skills list');
- assert.deepEqual(await groups.locator('summary .companion-knowledge-count').allTextContents(),['2 entries','2 entries','120 messages · 3 notes']);
+ assert.deepEqual(await groups.locator('summary .companion-knowledge-count').allTextContents(),['2 entries','2 entries','120 messages · 3 daily notes']);
  assert.equal(await groups.first().getAttribute('open'),'','About you starts open');
  assert.deepEqual(await groups.first().locator('li').allTextContents(),['Prefers Chinese.','Runs on Saturday mornings.']);
  await block.getByText('Nova’s own conversation: 42 messages',{exact:true}).waitFor();
  await groups.nth(2).locator('summary').click();
- await groups.nth(2).getByText('Nova can look through these conversations and notes when you ask.',{exact:true}).waitFor();
+ await groups.nth(2).getByText('Nova can look through these conversations and daily notes when you ask.',{exact:true}).waitFor();
  assert.equal(await block.getByText(/Morning brief|daily-brief|seed-swap/).count(),0,'the Agent’s scheduled tasks and skills are not on Fox’s page');
  await page.screenshot({path:'/tmp/worldlet-companion-knowledge.png'});
  // A re-render (audio, layout) keeps which groups are open.

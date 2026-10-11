@@ -1,6 +1,7 @@
 import {analysisSourceContent,mergeAnalysisCandidates,orderAnalysisRecords} from './analysis-candidates.ts';
 import {sourceEvidenceIssues} from '../attention/index.ts';
 import {appletCandidateContent,canonicalSourceQuotes} from './candidate-content.ts';
+import {agentReplyFailed} from '../companion/index.ts';
 
 type Row=Record<string,any>;
 // Native hosts may retain existing content hashes; equality/queue policy is shared.
@@ -82,6 +83,14 @@ export function appletAnalysisCommit(input:{provider:string;records:Row[];latest
  const previous=(saved.items||[]).filter(item=>!item.sources?.some(ref=>processed.includes(ref.id)));
  return {items:mergeAnalysisCandidates(previous,items),analyzed,failures,attempted:Object.fromEntries(Object.entries(saved.attempted||{}).filter(([id])=>retained.has(id))),updatedAt:now,
   publishRecords:selected.filter(row=>input.publishedSourceIds?.includes(row.id)||items.some(item=>item.sources.some(ref=>ref.id===row.id)))};
+}
+/** Why an analysis turn that saved no checked batch failed. Hermes answers a provider failure with its error as a
+ * completed reply and calls no tool (a model a ChatGPT account no longer accepts failed every batch on one Mac every
+ * 15 minutes, 2026-10-11): that is the Agent's model being unavailable, not this batch's content, so it waits longer
+ * and never parks the records. */
+export const APPLET_ANALYSIS_MODEL_UNAVAILABLE='Applet analysis stopped: the Agent model service is unavailable (its provider rejected the request).';
+export function appletAnalysisUnsubmitted(reply:unknown):string {
+ return agentReplyFailed(reply)?APPLET_ANALYSIS_MODEL_UNAVAILABLE:'Applet analysis ended without a verified result.';
 }
 export function appletAnalysisRequest(timeoutSeconds:number,instructions='') {
  return {action:'chat',mode:'chat',monitor:true,sourceAnalysis:true,_background:true,_taskTimeoutSeconds:timeoutSeconds,

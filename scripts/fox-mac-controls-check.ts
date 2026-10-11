@@ -176,8 +176,9 @@ await withBrowser(fileAccess,async browser=>{
  await panel.locator('[data-setting=general]').click();
  assert.equal(await detail.locator('.world-recovery-switch').count(),0,'no sample world switch in your own world (owner request 2026-10-10)');
  await page.screenshot({path:'output/fox-mac/recovery.png'});
- // With the Browser in General: the person deletes what the built-in browser recorded, one site or all, after an in-page question.
+ // With the Browser folded in General: the person deletes what the built-in browser recorded, one site or all, after an in-page question.
  await panel.locator('[data-setting=general]').click();
+ await detail.locator('details[data-setting=browser]>summary').click();
  const recordings=detail.locator('.companion-settings-recordings');
  await recordings.getByText('2 sites',{exact:true}).waitFor();await recordings.getByText('4 visits',{exact:true}).waitFor();
  const deletes=()=>page.evaluate(()=>calls.filter(c=>c.action==='browserCommand'&&c.operation==='deleteRecordings'));
@@ -221,7 +222,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>calls.some(c=>c.action==='resetFox'));
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('fox-reset')),'cancelled');
  // Restart Fox says what it is for.
- await detail.getByText('If Fox stops answering or seems stuck, restart it.',{exact:false}).waitFor();
+ await detail.getByText('If Fox stops answering or seems stuck.',{exact:false}).waitFor();
  // The Debug window is folded away, for the Worldlet team (owner request 2026-10-10).
  assert.equal(await detail.getByRole('button',{name:'Open Debug',exact:true}).isVisible(),false);
  await detail.getByText('For the Worldlet team',{exact:true}).click();

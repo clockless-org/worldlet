@@ -157,8 +157,10 @@ export function proactiveToolAllowed(event:{name?:unknown;args?:unknown}):boolea
 
 /** Hermes Agent answers a provider failure with its error as the reply (a completed response, not a failed one), e.g.
  * "ChatGPT or Codex Subscription rejected the request and retrying won't help. Pick another model with /model, …"
- * (owner Order 2026-10-10, Discord). */
+ * (owner Order 2026-10-10, Discord), or a model the account no longer accepts (HTTP 400, Applet analysis 2026-10-11). */
 const AGENT_FAILURE=/rejected the request and retrying won['’]t help|^\W*\s*(?:non-retryable (?:client )?error|api (?:call )?failed|provider authentication failed|rate limited after \d+ retries|the model provider (?:rejected|failed|is rate-limiting))/i;
+/** Whether an Agent's final reply is its own provider error rather than an answer. */
+export function agentReplyFailed(message:unknown):boolean {return AGENT_FAILURE.test(String(message??'').trim());}
 /** `[card:ID]` at the end of a line: the Attention item the line is about (proactiveTask). */
 const CARD_MARK=/\s*\[card:\s*([^\]\s]{1,200})\s*\]/gi;
 /** The Attention item Fox's line points to, as Fox wrote it; the host keeps it only if that item is open in the World. */
@@ -170,7 +172,7 @@ export function proactiveCard(message:unknown):string|null {
  * asked, so a failed ask ends quietly instead of showing the error as Fox's line. A card mark is not part of the line. */
 export function proactiveLine(message:unknown):string|null {
  const text=String(message??'').replace(CARD_MARK,'').trim().replace(/^["“「]|["”」]$/g,'').trim();
- if(!text||AGENT_FAILURE.test(text)||/^PASS\b/i.test(text)||/\bPASS\s*\.?$/.test(text)&&characters(text).length<12)return null;
+ if(!text||agentReplyFailed(text)||/^PASS\b/i.test(text)||/\bPASS\s*\.?$/.test(text)&&characters(text).length<12)return null;
  const line=text.split(/\n+/).map(part=>part.trim()).filter(Boolean)[0]??'';
  if(!line||/^PASS\b/i.test(line))return null;
  const all=characters(line);

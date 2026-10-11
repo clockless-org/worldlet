@@ -11,18 +11,6 @@ import {companionStill} from '../themes/index.ts';
 import {createCompanionSettings} from './companion-settings.ts';
 import {readFoxSkills,skillOffers,type FoxSkills} from './companion-skills.ts';
 
-// What Fox can do, as things a person would actually say (owner feedback 2026-10-03: show real cases).
-const ABILITIES:[icon:string,title:string,say:string,does:string][]=[
- ['mail','Mail','“What needs a reply today?”','Reads your inbox, finds what needs you and drafts replies for you to review.'],
- ['calendar','Calendar','“What’s coming up this week?”','Keeps Coming Up current and gets you ready before meetings.'],
- ['compass','Websites','“Find a short cooking video on YouTube.”','Works on a site in the background and shows each step. It asks before paying, sending or deleting.'],
- ['book','Remembers you','“Remember I’m vegetarian.”','Keeps what matters to you and uses it next time. You can view and correct it.'],
- ['clock','Routines','“Every morning at 8, tell me the weather and my first meeting.”','Runs on a schedule, also while Worldlet is closed once your Agent runs as a service here.'],
- ['file','Notes and files','“Find my notes about the Tokyo trip.”','Searches your notes, Obsidian vault and the files you brought in.'],
- ['spark','Code','“How is my Codex session going?”','Follows Claude Code and Codex sessions and your GitHub pull requests.'],
- ['chat','Talk or type','Hold Fox to talk, click it to type.','Any language. Fox answers in the conversation, or out loud if you turn that on.'],
-];
-
 /** Companion controls; dismiss from the close button or outside the panel. */
 export function mountCompanionInfo({root,pet,call,getName}){
  const el:(tag:string,cls?:string,text?:unknown)=>any=node;
@@ -72,8 +60,10 @@ export function mountCompanionInfo({root,pet,call,getName}){
  // The panel is one settings window (owner request 2026-10-10): Fox's profile and Phone are sections in its one list
  // beside the settings, and Help opens Feedback and the tutorial; the World view lends the sample switch and host features.
  const profileHost=el('div','companion-profile-host');
+ // What Fox knows shows in Settings › Agent › Memory, beside what the Agent keeps (owner request 2026-10-11: one place for memory).
+ const knowsHost=el('div','companion-settings-fox-knows');
  const PAGE_SECTION={fox:'Profile',phone:'Mobile'};
- const settings=createCompanionSettings({call,host:()=>root.companionSettingsHost,pages:{fox:profileHost,phone:phone.element},records,close:()=>dismiss(),
+ const settings=createCompanionSettings({call,host:()=>root.companionSettingsHost,pages:{fox:profileHost,phone:phone.element,knows:knowsHost},records,close:()=>dismiss(),
   // Help's Feedback and Show the tutorial leave Settings for the World: the feedback panel, or the tour (world-tour.ts).
   openFeedback:()=>void openFeedback(),replayTutorial:()=>{dismiss();root.dispatchEvent(new CustomEvent('worldlet:tutorial-replay'));},
   onShow:id=>{panel.dataset.section=PAGE_SECTION[id]||'Settings';}});
@@ -104,7 +94,6 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const body=el('div','companion-info-body');body.append(settings.element,notice);panel.append(body,close);
  function render(){
   notice.textContent=error;notice.hidden=!error;
-  // Profile on the left, what Fox can do scrolling on the right (owner feedback 2026-10-03).
   const page=el('section','companion-info-section companion-profile-page');page.dataset.section='Profile';
   const side=el('div','companion-info-profile'),portrait=el('img'),environment=(globalThis as any).__WORLDLET_ENV_ASSETS__;
   // A theme with its own companion shows that companion's portrait, not Fox's.
@@ -115,7 +104,6 @@ export function mountCompanionInfo({root,pet,call,getName}){
   for(const [label,value] of [['Birthday',birthday],['Personality',companionPersona(profile.personality).summary]])facts.append(el('dt','',label),el('dd','',value));
   side.append(facts);
   side.append(el('small','',model?model.available?'Ready to help':'Model not connected':'Checking connection…'));
-  if(profile.knowledge)side.append(knowledgeBlock(profile.knowledge));
   function knowledgeBlock(knowledge:CompanionKnowledge){
    // What the World holds about the companion: its saved memory, then what each other Agent brought.
    const name=profile.name||getName()||'Fox';
@@ -144,9 +132,9 @@ export function mountCompanionInfo({root,pet,call,getName}){
    // What other Agents' conversations and notes Fox can look through. Their skills and scheduled tasks are the Agent's
    // own and are listed only in Settings › Agent (owner decision 2026-10-11), where they can be changed.
    for(const agent of knowledge.brought){
-    const parts=[[agent.conversations,'message'],[agent.notes,'note']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
+    const parts=[[agent.conversations,'message'],[agent.notes,'daily note']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
     if(!parts.length)continue;
-    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and notes when you ask.')));
+    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and daily notes when you ask.')));
    }
    // Fox's offers to save a task it keeps repeating, answered right here; the skills themselves are in Settings › Agent.
    if(skills&&!snapshot?.sampleEnabled){
@@ -156,18 +144,10 @@ export function mountCompanionInfo({root,pet,call,getName}){
    }
    return block;
   }
-  let grid=el('div','companion-info-grid');
-  function card(icon,title,description,label?,action?){const c=el('section','companion-info-card'),symbol=el('span','companion-info-symbol');symbol.innerHTML=uiIcon(icon);const body=el('div');body.append(el('h4','',title),el('p','',description));c.append(symbol,body);if(label){const b=button(label,()=>run(action));b.disabled=busy;c.append(b);}grid.append(c);return c;}
-  function abilitiesSection(){
-   const section=el('div','companion-abilities');section.setAttribute('aria-label','What '+(profile.name||getName()||'Fox')+' can do');
-   section.append(el('h3','','What '+(profile.name||getName()||'Fox')+' can do'),el('p','companion-abilities-intro','Just ask, in your own words. A few things people say:'));
-   grid=el('div','companion-info-grid companion-abilities-grid');section.append(grid);
-   for(const [icon,title,say,does] of ABILITIES){const c=card(icon,title,does);c.querySelector('h4').after(el('q','companion-ability-say',say));}
-   const memory=card('book','Your memory','See and correct what '+(profile.name||getName()||'Fox')+' remembers about you.','Open',async()=>{dismiss();window.dispatchEvent(new Event('worldlet:memory-manager'));});
-   memory.classList.add('companion-ability-memory');
-   return section;
-  }
-  page.append(side,abilitiesSection());
+  // Fox's page is who Fox is; what it knows is in Settings › Agent › Memory, and the example cards of what it can do went
+  // (owner request 2026-10-11: Settings has too much; the tutorial shows that).
+  knowsHost.replaceChildren(...profile.knowledge?[knowledgeBlock(profile.knowledge)]:[]);
+  page.append(side);
   profileHost.replaceChildren(page);
  }
  async function open(section='Profile',setting?:string){if(root.dataset.onboardingLocked==='true'&&root.dataset.onboardingAddApplet!=='true')return;if(section==='Journal'||section==='Artifacts'){await openJournal();return;}if(section==='Feedback'){await openFeedback();return;}journal.close();closeFeedback();delete root.dataset.onboardingFinish;const id=section==='Settings'?setting||settings.selected||'model':SECTION_ID[section]||'fox';records.start();void phone.refresh();void loadSkills();settings.open(id);if(panel.open){render();return;}const ticket=++generation;render();panel.show();anchorKey='';cancelAnimationFrame(anchorFrame);anchorPanel();root.classList.add('companion-info-open');badge.setAttribute('aria-expanded','true');root.dispatchEvent(new Event('worldlet:companion-info-opened'));const results=await Promise.allSettled([call('modelStatus'),call('snapshot'),call('companionProfile').then(readCompanionProfile)]);if(!panel.open||ticket!==generation)return;model=results[0].status==='fulfilled'?results[0].value:null;snapshot=results[1].status==='fulfilled'?results[1].value:null;profile=results[2].status==='fulfilled'?results[2].value:profile;if(results.some(r=>r.status==='rejected'))error='Some status information is unavailable. Try reopening the panel.';render();}
