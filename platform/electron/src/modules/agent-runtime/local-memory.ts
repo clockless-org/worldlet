@@ -77,14 +77,6 @@ export function readLocalAgentMemory(id:MigrationSource,home=os.homedir(),enviro
  }
  return memory.name||memory.user||memory.longTerm||memory.model?memory:null;
 }
-/** The folder whose model setting the Hermes host reads for `modelAdopt`. */
-export function ownAgentHome(id:MigrationSource,home=os.homedir(),environment=process.env):string|null {
- if(id==='hermes')return discoverHermes(home,environment);
- if(id==='pi'){const root=piHome(home,environment);return fs.existsSync(root)?real(root):null;}
- if(id!=='openclaw')return null;
- const state=openClawState(home,environment);
- return fs.existsSync(state)?real(state):null;
-}
 
 /** Which Agent's name and memory Fox took at setup; shown as the chosen Agent on the first page. */
 export function readAdopted(root:string):AdoptableAgent|null {

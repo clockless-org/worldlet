@@ -31,7 +31,9 @@ const FILE_LIMIT=1_000_000,TURN_LIMIT=128_000,TRANSCRIPT_LIMIT=64_000_000,SESSIO
 /** Session files are mostly tool output; reading stops after this much even if little of it was text. */
 const READ_BUDGET=1_000_000_000;
 const utf8=new TextDecoder('utf-8',{fatal:true});
-export const inside=(file:string,root:string)=>{try{return real(file).startsWith(real(root)+path.sep);}catch{return false;}};
+/** Whether files resolve inside `root`, which is resolved once for every file asked about. */
+export const insideOf=(root:string)=>{const base=real(root)+path.sep;return (file:string)=>{try{return real(file).startsWith(base);}catch{return false;}};};
+export const inside=(file:string,root:string)=>insideOf(root)(file);
 /** A regular UTF-8 file inside `root`, at most `limit` bytes; anything else counts as absent. */
 export function readFile(root:string,file:string,limit=FILE_LIMIT):string {
  try{
@@ -132,13 +134,13 @@ const piExtras=(root:string)=>markdownFiles(root,path.join(root,'prompts')).flat
 /** JSONL session files `depth` folders below `folder` (one per project; Codex files by date),
  * newest first, so a full budget keeps the recent ones. */
 export function sessionFiles(root:string,folder:string,depth=1):{file:string;time:number;size:number}[] {
- const files:{file:string;time:number;size:number}[]=[];
+ const files:{file:string;time:number;size:number}[]=[],within=insideOf(root);
  const visit=(dir:string,level:number)=>{
   if(level<depth){for(const name of directories(dir))visit(path.join(dir,name),level+1);return;}
   let names:string[]=[];try{names=fs.readdirSync(dir).filter(name=>name.endsWith('.jsonl'));}catch{}
   for(const name of names){
    const file=path.join(dir,name);
-   try{const info=fs.lstatSync(file);if(info.isFile()&&inside(file,root))files.push({file,time:info.mtimeMs,size:info.size});}catch{}
+   try{const info=fs.lstatSync(file);if(info.isFile()&&within(file))files.push({file,time:info.mtimeMs,size:info.size});}catch{}
   }
  };
  visit(folder,0);

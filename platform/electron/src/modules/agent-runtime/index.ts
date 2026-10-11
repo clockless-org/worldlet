@@ -103,6 +103,8 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
  // have always had): their files live in Fox's earlier Hermes profile folder, and a chosen Hermes Agent's own profile
  // is read first, so what it is already connected to is used as it is (owner decision 2026-10-09).
  const accountsHome=()=>attachedHermes(context.root)??path.join(context.root,'agent','private','hermes');
+ // The person's own Harnesses here: the `hermes` Worldlet set up for Fox's own profile is Fox, not the person's Hermes Agent.
+ const personsHarnesses=()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null);
  const world=sources?.(accountsHome)??null,worldGoogle=world?.google??null;
  // Fox's Harness's own text-to-speech, found once per Harness (locating it reads the PATH).
  let voice:{id:string;service:HarnessVoice|null}|null=null;
@@ -130,25 +132,25 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   approvals:()=>current().approvals?.()??null,
   // Every Harness here that keeps standing rules Worldlet can read, as `detect` finds them (the `hermes` Worldlet set
   // up for Fox's own profile is Fox, not the person's Hermes Agent); a revoke tells Fox's adapter to forget it too.
-  standingRules:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+  standingRules:()=>personsHarnesses().flatMap(install=>{
    const rules=standingRules(install,currentEnvironment());
    return rules?[{harness:install.id,title:install.title,rules:{list:()=>rules.list(),revoke:async(id:string)=>{await rules.revoke(id);current().forgetApprovals?.(install.id);}}}]:[];
   }),
   // The same Harnesses' connections (Settings › Agent › Accounts); Fox's own Hermes profile is not the person's Hermes Agent.
-  harnessConnections:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+  harnessConnections:()=>personsHarnesses().flatMap(install=>{
    const connections=harnessConnections(install,currentEnvironment());
    return connections?[{harness:install.id,title:install.title,connections}]:[];
   }),
   // The same Harnesses' own scheduled jobs and skills (Settings › Agent), each changed only by its own command.
-  harnessSchedules:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+  harnessSchedules:()=>personsHarnesses().flatMap(install=>{
    const schedule=harnessScheduleControls(install,currentEnvironment());
    return schedule?[{harness:install.id,title:install.title,schedule}]:[];
   }),
-  harnessSkillSets:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+  harnessSkillSets:()=>personsHarnesses().flatMap(install=>{
    const skills=harnessSkills(install.id,currentEnvironment(),{locate:()=>[install]});
    return skills?[{harness:install.id,title:install.title,skills}]:[];
   }),
-  harnessMemories:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+  harnessMemories:()=>personsHarnesses().flatMap(install=>{
    const memory=harnessMemory(install,currentEnvironment());
    return memory?[{harness:install.id,title:install.title,memory}]:[];
   }),
