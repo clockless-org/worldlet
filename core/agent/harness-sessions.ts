@@ -133,10 +133,10 @@ export interface ResponsesStream {buffered:string;text:string;id:string|null;cal
 export const responsesStream=():ResponsesStream=>({buffered:'',text:'',id:null,calls:[],announced:[],error:null,done:false,final:null,usage:null});
 /** Reads a chunk of the server-sent event stream; returns the answer text to show now. */
 export function readResponsesChunk(state:ResponsesStream,chunk:string):string {
- state.buffered+=chunk.replace(/\r\n/g,'\n');
- let shown='',end:number;
- while((end=state.buffered.indexOf('\n\n'))>=0){
-  const frame=state.buffered.slice(0,end);state.buffered=state.buffered.slice(end+2);
+ const buffered=state.buffered+chunk.replace(/\r\n/g,'\n');
+ let shown='',start=0,end:number;
+ while((end=buffered.indexOf('\n\n',start))>=0){
+  const frame=buffered.slice(start,end);start=end+2;
   let type='',data='';
   for(const line of frame.split('\n')){if(line.startsWith('event:'))type=line.slice(6).trim();else if(line.startsWith('data:'))data+=(data?'\n':'')+line.slice(5).replace(/^ /,'');}
   if(data==='[DONE]'){state.done=true;continue;}
@@ -162,6 +162,7 @@ export function readResponsesChunk(state:ResponsesStream,chunk:string):string {
    state.done=true;
   }
  }
+ state.buffered=buffered.slice(start);
  return shown;
 }
 
