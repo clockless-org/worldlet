@@ -38,11 +38,14 @@ import {harnessUsageLabel} from '../../core/agent/index.ts';
 export function createNativeChat(call){return function({button,input,status,execute,chatRoute,steering=false,holdToSpeak=false,replyActions=false,resolveReplyLink,onReplyNavigate,greetingContext,recallStorage=null,onSpokenReply=null,talkVoice=null}){
   const root=button.closest('.notion-world'),form=button.closest('form'),hud=form.parentElement;
  const make=(tag: string,cls?: string,text?: string): any=>Object.assign(document.createElement(tag),{className:cls,...(text?{textContent:text}:{})});
+ // Live media queries, read where needed: `.matches` follows the system setting.
+ const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)'),hoverNone=matchMedia('(hover: none)');
  root.classList.add('native-console','companion-console','voice-pet-console','radial-pet-console');
  // Viewport tiers follow the window, not the last chat render: a resized window must reveal the tracker again.
  const compact=()=>root.classList.toggle('compact-viewport',root.clientHeight<560);compact();new ResizeObserver(compact).observe(root);
  // Text and speech share the same command path; the fox remains the anchor.
  form.hidden=true;form.inert=true;status.hidden=true;button.remove();
+ const reader=root.querySelector('#notionContent') as HTMLElement,dialog=root.querySelector('#notionDialog') as HTMLDialogElement,topBar=root.querySelector('.notion-top') as HTMLElement;
  const dock=make('div','companion-dock');dock.append(hud.querySelector('.notion-shortcuts'));hud.append(dock);
  const avatar=make('button','companion-avatar');avatar.type='button';avatar.setAttribute('aria-controls','companionDialogue');
 
@@ -135,9 +138,9 @@ export function createNativeChat(call){return function({button,input,status,exec
  const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);controls.append(orderButton);
  // The microphone is the bug's twin on the bar's right, a round button of its own (owner 2026-10-07); on the desktop both stand inside the bar.
  const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');voiceControls.append(speechButton);entry.append(voiceControls);
- form.querySelector('#notionSend')?.classList.add('companion-send-button');
+ const send=form.querySelector('#notionSend');send.classList.add('companion-send-button');
  input.maxLength=3000;input.removeAttribute('placeholder');input.setAttribute('aria-label','Message Fox');
- const send=form.querySelector('#notionSend');send.setAttribute('aria-label','Send message');
+ send.setAttribute('aria-label','Send message');
  // Send is an icon like the microphone beside it, the same size and style (owner feedback 2026-10-04).
  send.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>';
  // Keep the text cursor and touch keyboard when pressing Send.
@@ -196,9 +199,9 @@ export function createNativeChat(call){return function({button,input,status,exec
  let folding=false,threadAnimation:Animation|null=null;
  function cancelThreadMotion(){const run=threadAnimation;threadAnimation=null;folding=false;run?.cancel();}
  function toggleThread(open=folding||!expanded){
-  const current=threadAnimation?{transform:getComputedStyle(threadList).transform,opacity:getComputedStyle(threadList).opacity}:null;
+  const shown=threadAnimation?getComputedStyle(threadList):null,current=shown?{transform:shown.transform,opacity:shown.opacity}:null;
   cancelThreadMotion();
-  const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const still=reducedMotion.matches;
   const animate=!still&&threadList.childElementCount>0;
   folding=!open&&expanded&&animate&&!threadList.hidden;
   if(!folding)expanded=open;
@@ -228,7 +231,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  const threadStack=make('div','companion-thread'),threadRunning=make('p','companion-thread-running'),threadAgent=make('p','companion-thread-agent'),threadList=make('div','companion-thread-list'),threadUsed=make('p','companion-thread-usage');
  threadRunning.setAttribute('role','status');threadStack.hidden=true;threadList.setAttribute('aria-label','Earlier turns');
  threadList.id='companionEarlierTurns';earlierButton.setAttribute('aria-controls',threadList.id);
- matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',event=>{
+ reducedMotion.addEventListener('change',event=>{
   if(!event.matches)return;
   const close=folding;cancelThreadMotion();if(close)expanded=false;render();
  });
@@ -242,7 +245,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(chatFolded===value)return;
   chatFolded=value;try{localStorage.setItem(FOLD_KEY,String(value));}catch{}
   cancelThreadMotion();render();
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(reducedMotion.matches)return;
   const motion={duration:value?220:280,easing:'cubic-bezier(.2,.7,.3,1)'};
   // Unfolding rises the earlier cards out of the deck; folding lifts the deck in behind the card.
   if(!value&&!threadList.hidden){const run=threadList.animate([{transform:'translateY(24px)',opacity:0},{transform:'none',opacity:1}],motion);threadAnimation=run;run.finished.then(()=>{if(threadAnimation===run)threadAnimation=null;run.cancel();}).catch(()=>{});}
@@ -478,12 +481,12 @@ export function createNativeChat(call){return function({button,input,status,exec
   const attention=root.querySelector('#foxArtifact:not([hidden])')||root.querySelector('#attentionPreview');
   // The top bar's own box is flat; its corner controls (date, weather, sounds) hang
   // below it, so the bubble and its history stop under any that stand over Fox's column (#1652).
-  const topBar=root.querySelector('.notion-top'),column=panel.getBoundingClientRect();
+  const column=panel.getBoundingClientRect();
   const topFloor=Math.max(topBar.getBoundingClientRect().bottom,...[...topBar.children].map(child=>{const r=child.getBoundingClientRect();return r.width&&r.height&&r.left<column.right&&r.right>column.left?r.bottom:0;}));
   const ceiling=Math.max(rootBounds.top+64,topFloor+16,attention&&!attention.hidden&&!sheet&&!lane&&!(attention.id==='foxArtifact'&&attention.dataset.size==='large'&&(root.dataset.depth==='object'||root.dataset.depth==='note'))?attention.getBoundingClientRect().bottom+16:0);
   // In Open/Focus, the right-hand bubble may cover the device above Fox.
   const readerRoom=parseFloat(getComputedStyle(root).getPropertyValue('--fox-reader-room'))||Infinity;
-  const available=Math.min(readerRoom,Math.max(100,panel.getBoundingClientRect().bottom-ceiling));
+  const available=Math.min(readerRoom,Math.max(100,column.bottom-ceiling));
   panel.style.setProperty('--fox-dialogue-room',available+'px');
   const room=available-parseFloat(panelStyle.paddingTop)-parseFloat(panelStyle.paddingBottom)-86-(asked.hidden?0:asked.offsetHeight);
   // Beside an Applet the right-hand column is tall, so a card may use more of it.
@@ -554,7 +557,7 @@ export function createNativeChat(call){return function({button,input,status,exec
    else if(anchor){pinnedTop=-1;threadList.scrollTop+=anchor.getBoundingClientRect().top-threadList.getBoundingClientRect().top-position.offset;}
    markThreadOverflow();
    // The card that just left the front slides up from Fox's card; the others make room.
-   if(stackChanged&&wasVisible&&(!position||position.bottom)&&stackSegment===segment&&stackIds.length+1===ids.length&&added[0]===ids.at(-1)&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+   if(stackChanged&&wasVisible&&(!position||position.bottom)&&stackSegment===segment&&stackIds.length+1===ids.length&&added[0]===ids.at(-1)&&!reducedMotion.matches){
     const moved=threadList.lastElementChild as HTMLElement,from=panel.getBoundingClientRect().top-moved.getBoundingClientRect().top,lift=moved.offsetHeight+10,motion={duration:420,easing:'cubic-bezier(.2,.7,.3,1)'};
     moved.animate([{transform:`translateY(${from}px)`},{transform:'none'}],motion);
     for(const card of [...threadList.children].slice(0,-1))(card as HTMLElement).animate([{transform:`translateY(${lift}px)`},{transform:'none'}],motion);
@@ -562,14 +565,14 @@ export function createNativeChat(call){return function({button,input,status,exec
   }
   if(stackChanged){stackIds=cards.map(c=>c.id);stackSegment=segment;}
   // A new turn's card grows in from the bottom, next to Fox, while the thread above makes room.
-  if(workingHere&&front?.id===working.id&&frontEntry!==front.id&&wasVisible&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  if(workingHere&&front?.id===working.id&&frontEntry!==front.id&&wasVisible&&!reducedMotion.matches){
    const grow={duration:320,easing:'cubic-bezier(.2,.7,.3,1)'};
    for(const part of [asked,log])if(!part.hidden)part.animate([{transform:'translateY(14px) scale(.97)',transformOrigin:'50% 100%',opacity:0},{transform:'none',transformOrigin:'50% 100%',opacity:1}],grow);
   }
   frontEntry=front?.id||'';
   // Folded in the world, the deck takes the card in with a small nudge.
   const depth=deck.hidden?0:earlier.length;
-  if(depth>deckDepth&&deckDepth>0&&wasVisible&&!matchMedia('(prefers-reduced-motion: reduce)').matches)deck.animate([{transform:'translateY(10px)'},{transform:'none'}],{duration:360,easing:'cubic-bezier(.2,.7,.3,1)'});
+  if(depth>deckDepth&&deckDepth>0&&wasVisible&&!reducedMotion.matches)deck.animate([{transform:'translateY(10px)'},{transform:'none'}],{duration:360,easing:'cubic-bezier(.2,.7,.3,1)'});
   deckDepth=depth;
   // While Fox works, the card holds one lighter line that streams in.
   log.dataset.working=String(!guided&&!!workingReply&&remembered===workingReply);
@@ -608,7 +611,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  function animateReply(){
   replyAnimation?.cancel();
   const variant=motionVariant('reply');panel.dataset.motion=String(variant);
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced=reducedMotion.matches;
   const lift=[4,6,8][variant],duration=[220,260,290][variant];
   replyAnimation=panel.animate(reduced?[{opacity:.65},{opacity:1}]:[
    {opacity:0,transform:`translate(-50%,${lift}px) scale(.99)`},
@@ -631,7 +634,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   root.dataset.entryExpanded=String(expanded);
   // At rest the bar keeps low (owner request 2026-10-05): short, faint and only its name; pointing at it
   // or Fox brings back the hint, the microphone and Send, and a click opens it wide to type.
-  const quiet=!expanded&&!speech&&!hoverInput&&!input.value.trim()&&!matchMedia('(hover: none)').matches;
+  const quiet=!expanded&&!speech&&!hoverInput&&!input.value.trim()&&!hoverNone.matches;
   entry.dataset.quiet=String(quiet);
   // While the microphone listens, for Fox or for an Order, a sound wave stands where the bar was (owner request
   // 2026-10-09); the bar comes back once the words are being understood or sent. While Fox speaks in Talk the open
@@ -645,9 +648,9 @@ export function createNativeChat(call){return function({button,input,status,exec
   // Resting, the bar says how to use it; once typing, it says whom you are asking.
   // In a website the bar is also its address bar (ui/shell/notion-world.ts), and says so (owner request 2026-10-07).
   // On the desktop the microphone stands inside the short bar, so the resting bar only says “Message Fox” (2026-10-11).
-  const content=root.querySelector('#notionContent') as HTMLElement|null,website=!!content&&!content.hidden&&content.dataset.template==='browser';
+  const website=!reader.hidden&&reader.dataset.template==='browser';
   entry.dataset.website=String(website);
-  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':quiet||(!editing&&onDesktop())?'Message '+companionName+(website?' or type a web address':''):!editing?(matchMedia('(hover: none)').matches?'Tap to type · hold to speak':'Click to type · hold to speak'):website?'Ask about '+context.title+' or type a web address':context.key.split(':')[0]==='overview'?'Ask '+companionName+' anything':'Ask about '+context.title;
+  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':quiet||(!editing&&onDesktop())?'Message '+companionName+(website?' or type a web address':''):!editing?(hoverNone.matches?'Tap to type · hold to speak':'Click to type · hold to speak'):website?'Ask about '+context.title+' or type a web address':context.key.split(':')[0]==='overview'?'Ask '+companionName+' anything':'Ask about '+context.title;
   speechButton.setAttribute('aria-label',talk.phase==='speaking'?'Interrupt '+companionName:recording?'Send voice message':'Speak to Fox');speechButton.title=talk.on?(talk.phase==='speaking'?'Click to interrupt · Esc ends Talk':'Talk is on · Click to send now · Esc ends Talk'):recording?'Click to send · Esc to cancel':'Click to speak · Hold to speak · Right-click to choose a microphone or Talk with Fox';speechButton.setAttribute('aria-pressed',String(speech&&(recording||starting)));
   // Voice capture is intentionally visual: the waveform acknowledges listening
   // without exposing an unstable partial transcription in the bottom status.
@@ -672,8 +675,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  panel.addEventListener('pointerdown',()=>{dismissed=false;peeking=false;});
  pet.addEventListener('pointerenter',recallLast);avatar.addEventListener('focus',recallLast);
  for(const area of [pet,panel,entry]){area.addEventListener('pointerenter',()=>clearTimeout(recallTimer));area.addEventListener('pointerleave',leaveRecall);}
- function hoverOn(e){if(e?.pointerType==='touch'||matchMedia('(hover: none)').matches)return;clearTimeout(collapseTimer);hoverInput=true;renderEntry();}
- function hoverOff(){clearTimeout(collapseTimer);collapseTimer=setTimeout(()=>{hoverInput=!matchMedia('(hover: none)').matches&&(pet.matches(':hover')||form.matches(':hover'));renderEntry();},180);}
+ function hoverOn(e){if(e?.pointerType==='touch'||hoverNone.matches)return;clearTimeout(collapseTimer);hoverInput=true;renderEntry();}
+ function hoverOff(){clearTimeout(collapseTimer);collapseTimer=setTimeout(()=>{hoverInput=!hoverNone.matches&&(pet.matches(':hover')||form.matches(':hover'));renderEntry();},180);}
  // The bar itself and Fox wake the bar; the round buttons beside it (Order) do not, or the widening bar
  // would slide them out from under the pointer (owner Order 2026-10-07).
  for(const area of [pet,form]){area.addEventListener('pointerenter',hoverOn);area.addEventListener('pointerleave',hoverOff);}
@@ -711,7 +714,6 @@ export function createNativeChat(call){return function({button,input,status,exec
  }
  function visibleContent(){
   if(onDesktop())return null;
-  const dialog=root.querySelector('#notionDialog'),reader=root.querySelector('#notionContent');
   const attention=root.querySelector('#attentionPreview');
   const artifact=root.querySelector('#foxArtifact');
   const surface=artifact&&!artifact.hidden?artifact:attention&&!attention.hidden?attention:dialog.open?dialog:!reader.hidden?reader:null;
@@ -723,10 +725,10 @@ export function createNativeChat(call){return function({button,input,status,exec
  // The triangle under the current card points at Fox wherever the card sits.
  function aimTail(){const a=avatar.getBoundingClientRect(),p=panel.getBoundingClientRect();if(p.width)panel.style.setProperty('--fox-tail-x',Math.round(Math.max(28,Math.min(p.width-28,a.left+a.width/2-p.left)))+'px');}
  function layout(){
-  root.querySelector('#notionContent').inert=root.querySelector('#notionDialog').open;
-  root.dataset.detailOpen=String(!root.querySelector('#notionContent').hidden||root.querySelector('#notionDialog').open);
-  root.dataset.uiMode=viewMode({depth:root.dataset.depth,readerOpen:!root.querySelector('#notionContent').hidden,dialogOpen:root.querySelector('#notionDialog').open,dialogKind:root.querySelector('#notionDialog').dataset.kind});
-  const top=root.querySelector('.notion-top').getBoundingClientRect();root.style.setProperty('--ui-top-bound',Math.ceil(top.bottom-root.getBoundingClientRect().top)+'px');
+  reader.inert=dialog.open;
+  root.dataset.detailOpen=String(!reader.hidden||dialog.open);
+  root.dataset.uiMode=viewMode({depth:root.dataset.depth,readerOpen:!reader.hidden,dialogOpen:dialog.open,dialogKind:dialog.dataset.kind});
+  const top=topBar.getBoundingClientRect();root.style.setProperty('--ui-top-bound',Math.ceil(top.bottom-root.getBoundingClientRect().top)+'px');
   root.style.setProperty('--reader-top',root.clientWidth<=800?'204px':'94px');
   aimTail();requestAnimationFrame(aimTail);
 
@@ -744,14 +746,15 @@ export function createNativeChat(call){return function({button,input,status,exec
   catch(error){if(reply===previousReply&&context.key===requestContext)say(error.message||'The action could not finish.');}
   finally{actionPending=false;link.removeAttribute('aria-busy');link.removeAttribute('aria-disabled');}
  });
- const layoutObserver=new ResizeObserver(layout);layoutObserver.observe(hud);layoutObserver.observe(panel);layoutObserver.observe(root.querySelector('.notion-top'));
+ const layoutObserver=new ResizeObserver(layout);layoutObserver.observe(hud);layoutObserver.observe(panel);layoutObserver.observe(topBar);
  window.addEventListener('resize',()=>render());
  document.fonts?.addEventListener('loadingdone',()=>{signature='';render();});
  const viewportObserver=new ResizeObserver(()=>render());viewportObserver.observe(root);
- const surfaceObserver=new MutationObserver(scheduleRender);surfaceObserver.observe(root.querySelector('#notionContent'),{attributes:true,attributeFilter:['hidden']});surfaceObserver.observe(root.querySelector('#notionDialog'),{attributes:true,attributeFilter:['open']});surfaceObserver.observe(root,{attributes:true,attributeFilter:['data-attention-preview','data-artifact-size','data-tour-spotlight']});
+ const surfaceObserver=new MutationObserver(scheduleRender);surfaceObserver.observe(reader,{attributes:true,attributeFilter:['hidden']});surfaceObserver.observe(dialog,{attributes:true,attributeFilter:['open']});surfaceObserver.observe(root,{attributes:true,attributeFilter:['data-attention-preview','data-artifact-size','data-tour-spotlight']});
  function say(text,key=context.key,remember=true,entryId=''){const parsed=parseSuggestedReplies(foxVisibleText(text));text=parsed.text;streamingReply=false;reply={id:active?'turn:'+generation:'say:'+(++replySerial),...(entryId?{entry:entryId}:{}),text:String(text||''),suggestions:parsed.suggestions,key,view:contentIdentity(),location:context.title};if(remember&&reply.text)lastReply=reply;/* Fox's newer line supersedes the guide shown here (natural order), except a choice this same turn asked for: the reply joins the thread above it. */if(guide&&guideHere(guide)&&reply.text&&!(active&&guideTurn===generation&&guide.actions?.length))guide=null;preview=true;/* Active turns render atomically in finally, without flashing their old waiting state. */if(!active)render();}
+ const clearInputFlights=()=>hud.querySelectorAll('.companion-input-flight').forEach(e=>{e.getAnimations().forEach(a=>a.cancel());e.remove();});
  function animateInput(text){
-  hud.querySelectorAll('.companion-input-flight').forEach(e=>{e.getAnimations().forEach(a=>a.cancel());e.remove();});
+  clearInputFlights();
   // What travels is not the sentence. Sending it already put the words where the
   // user can see them; flying a copy of them at the fox reads as the message being
   // carried, and a long one arrives as a slab of text crossing the world. A mote
@@ -760,7 +763,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   const base=hud.getBoundingClientRect(),from=entry.getBoundingClientRect(),to=avatar.getBoundingClientRect();
   flight.style.left=(from.x+from.width/2-base.x)+'px';flight.style.top=(from.y+from.height/2-base.y)+'px';hud.append(flight);
   const dx=to.x+to.width/2-(from.x+from.width/2),dy=to.y+to.height*.6-(from.y+from.height/2);
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced=reducedMotion.matches;
   const variant=motionVariant('input'),sway=[-8,0,8][variant],duration=[820,850,900][variant];flight.dataset.motion=String(variant);
   const frames=reduced?[{opacity:1},{opacity:0}]:[
    {opacity:0,transform:'translate(-50%,-50%) scale(1)',offset:0},
@@ -910,9 +913,11 @@ export function createNativeChat(call){return function({button,input,status,exec
  // Global shortcuts apply only to the world canvas, never to forms, dialogs,
  // reader controls, browser fields, games (Space casts or pauses there), modifier
  // shortcuts or an IME composition.
- const keyboardTarget=target=>!root.querySelector('#notionDialog').open&&!target.closest('input,textarea,select,[contenteditable],a,button,[role="button"],summary,[role="dialog"],.game-board');
+ // Settings and Feedback keep Esc for themselves.
+ const panelOpen=()=>root.querySelector('#companionInfo')?.open||root.querySelector('#worldFeedback')?.open;
+ const keyboardTarget=target=>!dialog.open&&!target.closest('input,textarea,select,[contenteditable],a,button,[role="button"],summary,[role="dialog"],.game-board');
  window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&(root.querySelector('#companionInfo')?.open||root.querySelector('#worldFeedback')?.open))return;
+  if(e.key==='Escape'&&(panelOpen()))return;
   if(root.dataset.onboardingLocked==='true'||!holdToSpeak||e.defaultPrevented||e.isComposing||e.metaKey||e.ctrlKey||e.altKey||!keyboardTarget(e.target))return;
   if(e.code==='Space'){
    e.preventDefault();
@@ -937,7 +942,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(held)finishSpeech();else focusInput();
  },true);
  window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&(root.querySelector('#companionInfo')?.open||root.querySelector('#worldFeedback')?.open||root.querySelector('#notionDialog')?.open))return;
+  if(e.key==='Escape'&&(panelOpen()||dialog.open))return;
   // A tour on screen takes Esc first (tour-spotlight.ts ends a replay), even over a reply preview it covers.
   if(e.key==='Escape'&&root.dataset.tourSpotlight==='true')return;
   if(e.key==='Escape'&&expanded&&!active){e.preventDefault();e.stopImmediatePropagation();toggleThread(false);return;}
@@ -955,7 +960,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  window.addEventListener('worldlet:app-inactive',()=>{talk.stop();if(ordering)leaveDuringOrder();else cancelSpeech();});
  window.addEventListener('pagehide',()=>cancelSpeech('page_closed'));
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)return;talk.stop();if(ordering)leaveDuringOrder();else cancelSpeech();});
- window.addEventListener('blur',()=>{clearKeyPress();if(!input.value.trim())editing=false;input.blur();clearTimeout(recallTimer);hud.querySelectorAll('.companion-input-flight').forEach(e=>{e.getAnimations().forEach(a=>a.cancel());e.remove();});clearAvatarPress();hoverInput=false;talk.stop();if(ordering)leaveDuringOrder();else if(recording||starting||transcribing)cancelSpeech();render();});
+ window.addEventListener('blur',()=>{clearKeyPress();if(!input.value.trim())editing=false;input.blur();clearTimeout(recallTimer);clearInputFlights();clearAvatarPress();hoverInput=false;talk.stop();if(ordering)leaveDuringOrder();else if(recording||starting||transcribing)cancelSpeech();render();});
  mountMicrophonePicker({anchor:speechButton,list:()=>call('microphones'),talk:talkVoice&&holdToSpeak?{get active(){return talk.on;},toggle:()=>{if(root.dataset.onboardingLocked!=='true')talk.toggle();}}:null});
  window.addEventListener('worldlet:microphone-fallback',(e:any)=>setStatus(e.detail,{source:'microphone',speech:true}));
  const companionInfo=mountCompanionInfo({root,pet,call,getName:()=>companionName});
@@ -993,8 +998,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  });
  void call('foxBrowse',{}).then(r=>showBrowse(r?.on),()=>{});
  root.addEventListener('worldlet:companion-info-opened',()=>panelButton.dataset.panelOpen='true');
- root.addEventListener('worldlet:companion-info-closed',()=>delete panelButton.dataset.panelOpen);
- root.addEventListener('worldlet:companion-info-closed',()=>{clearAvatarPress();clearKeyPress();});
+ root.addEventListener('worldlet:companion-info-closed',()=>{delete panelButton.dataset.panelOpen;clearAvatarPress();clearKeyPress();});
  render();
  let worldContext=context;
  // Choices in Fox's card: pressing one is the person's reply (see `choice`).

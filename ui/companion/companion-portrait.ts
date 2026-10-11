@@ -95,7 +95,7 @@ function mountPortrait(host,{bust=false}={}){
    if(wasDragging&&!dragging)settleUntil=now+1600;
    wasDragging=dragging;
    const dragPose=authored&&!busy()?(dragging?'pickup':now<settleUntil?'settle':null):null;
-   const smallAction=resting==='idle'&&state==='idle'&&!reduced.matches&&!host.closest('.is-dragging-fox')?ambientPose(elapsed,authored):null;
+   const smallAction=resting==='idle'&&state==='idle'&&!reduced.matches&&!dragging?ambientPose(elapsed,authored):null;
    const next=dragPose||(playfulPose&&now<playfulUntil&&!busy()?playfulPose:smallAction||resting);
    const changed=next!==pose;
    if(changed){pose=next;poseStarted=now;}

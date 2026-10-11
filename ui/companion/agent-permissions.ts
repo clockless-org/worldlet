@@ -3,6 +3,7 @@
  * allows, which agent, when and in which Fox conversation it was granted, when it was last used, and Revoke, which asks
  * once more in the page and then makes that Agent forget it its own way. An Agent that cannot have a rule revoked from
  * here says how instead. Plain words only: no allowlist, cron or MCP in what the page shows. */
+import {agentButton as button,agentEl as el} from './agent-change.ts';
 type Rule={id:string;allows:string;agent:string;kind:string;main?:boolean;grantedAt?:number;lastUsedAt?:number;note?:string;thread?:string;inWorld?:boolean};
 type Harness={harness:string;title:string;rules:Rule[];revoke:'live'|'restart'|null;note?:string;error?:string;inUse?:boolean};
 const day=(at:number)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
@@ -18,8 +19,6 @@ export function permissionLine(rule:Rule,title:string):string {
  return `${who} · ${when}${where}${used}.`;
 }
 export async function showAgentPermissions(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
- const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
- const button=(label:string,action:string,run:(b:HTMLButtonElement)=>void|Promise<void>,primary=false)=>{const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';b.dataset.action=action;b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run(b);}finally{if(b.isConnected)b.disabled=false;}};return b;};
  const box=el('div','companion-settings-approvals'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  target.append(box,said);
  /** The in-page second ask: what revoking does, and only then the Agent's own way of forgetting it. */

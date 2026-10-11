@@ -4,6 +4,7 @@
  * only after the person confirmed it in plain words, with the exact command under Details. Never a secret: addresses
  * and commands arrive masked. An Agent whose connections cannot be changed from here lists them only. Plain words
  * only: the page never says MCP. */
+import {agentEl as el} from './agent-change.ts';
 type Connection={id:string;kind:'mcp'|'account';name:string;where:string;enabled:boolean;sign?:string;agent?:string;main?:boolean;removable?:boolean;lastUsed?:{at:number;tool?:string;thread?:string}};
 type Harness={harness:string;title:string;connections:Connection[];changes:boolean;inUse?:boolean;error?:string;note?:string};
 const day=(at:number)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
@@ -21,7 +22,6 @@ export function connectionUseLine(c:Connection):string {
  return `Last used ${day(use.at)}`+(use.tool?` for ${use.tool}`:'')+(use.thread?` in “${use.thread}”`:'')+'.';
 }
 export async function showAgentConnections(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
- const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const button=(label:string,action:string,run:(b:HTMLButtonElement)=>void|Promise<void>,primary=false)=>{const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';b.dataset.action=action;b.onclick=()=>{if(!b.disabled)void run(b);};return b;};
  const box=el('div','companion-settings-agent-connections'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  target.append(el('h5','companion-settings-subhead','In your Agent'),el('p','companion-info-note','The tools and chat accounts you set up in your Agent. They live in your Agent and Fox uses them through it; nothing is copied into Worldlet.'),box,said);
