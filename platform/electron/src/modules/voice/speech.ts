@@ -119,7 +119,7 @@ export class SpeechInput {
  private transcription:AbortController|null=null;
  /** Rolling while Fox speaks in Talk (`start` with `roll`), until `keep`. */
  private rolling=false;
- /** The microphone the page chose last; the wake word listens on it too. */
+ /** The microphone the page chose last. */
  microphone:{id:string,label:string}|null=null;
  onCaptureChanged:(active:boolean)=>void=()=>{};
  onEvent:(value:{phase:string,text:string})=>void=()=>{};
@@ -144,7 +144,7 @@ export class SpeechInput {
    return (Array.isArray(list)?list:[]).filter(d=>typeof d?.id==='string'&&d.id).map(d=>({id:d.id,label:String(d.label??'')}));
   }finally{this.surface.allowList=false;}
  }
- /** Capturing or recognising: the microphone is Fox's voice input's, not the wake word's. */
+ /** Capturing or recognising: the microphone is Fox's voice input's. */
  get busy(){return this.capturing||this.transcription!==null;}
  /** `seconds` lengthens one capture (Order's spoken tasks); at most LONG_LIMIT_SECONDS. `roll` keeps only the
   * latest seconds and no time limit (Talk listening while Fox speaks) until `keep`. */

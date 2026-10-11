@@ -79,12 +79,11 @@ export function createNativeChat(call){return function({button,input,status,exec
  // of the window and the recent operation log. A second click finishes early. Nothing else on screen changes while it
  // listens (owner Order 2026-10-07): the bar, Fox's card and its buttons stay as they were, and the button alone shows
  // listening, then a spinner until it is sent; Fox then says how it went. Everywhere else (Beta, Production, a computer
- // that cannot send Orders) it is Feedback (owner 2026-10-07): it opens Fox's Feedback page, whose message goes to the
- // admin service with the app version only, and the hourly report collects it; never to Claude as an Order.
+ // that cannot send Orders) it is hidden: Feedback is the button in the World's bottom-right corner (owner 2026-10-10).
  const orderButton=make('button','companion-order-button');orderButton.type='button';orderButton.innerHTML=uiIcon('bug');
  orderButton.addEventListener('pointerdown',e=>e.stopPropagation());
  let orderMode:'order'|'feedback'='feedback';
- const setOrderMode=(mode:'order'|'feedback')=>{orderMode=mode;orderButton.dataset.mode=mode;orderButton.title=mode==='order'?ORDER.hint:ORDER_FEEDBACK.hint;orderButton.setAttribute('aria-label',mode==='order'?ORDER.name:ORDER_FEEDBACK.name);};
+ const setOrderMode=(mode:'order'|'feedback')=>{orderMode=mode;orderButton.dataset.mode=mode;orderButton.title=mode==='order'?ORDER.hint:ORDER_FEEDBACK.hint;orderButton.setAttribute('aria-label',mode==='order'?ORDER.name:ORDER_FEEDBACK.name);orderButton.hidden=mode!=='order';};
  setOrderMode('feedback');
  let ordering=false;
  const orderStatus=()=>call('order',{operation:'status'}).then(r=>setOrderMode(r?.available&&r.ready?'order':'feedback'),()=>setOrderMode('feedback'));
@@ -276,12 +275,11 @@ export function createNativeChat(call){return function({button,input,status,exec
  input.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.shiftKey||e.isComposing||e.keyCode===229)return;e.preventDefault();form.requestSubmit();});
  let quietTurn=false,active=false,recording=false,starting=false,transcribing=false,generation=0,preview=false,history=[],recentActions=[],turnKind='';
  // Talk with Fox (fox-talk.ts), where the host has local speech and a system voice (`talkVoice`): the microphone menu,
- // or the wake word (host `wake`), turns it on. While Fox speaks a quiet capture listens for the person (barge-in).
- let talkWasOn=false,wakeState='off';
+ // turns it on. While Fox speaks a quiet capture listens for the person (barge-in).
+ let talkWasOn=false;
  const talk=createFoxTalk({listen:async()=>{if(!talkVoice)return false;await beginSpeech(false,'talk');return recording||starting;},finishListening:()=>void finishSpeech(),cancelListening:()=>{if(recording||starting||transcribing)cancelSpeech('talk');},
   ...(talkVoice?.bargeIn?{listenWhileSpeaking:overhear,keepListening:(preroll:boolean)=>{void call('speechKeep',{preroll}).catch(()=>{});}}:{}),
   speak:text=>talkVoice?talkVoice.speak(text):Promise.resolve(false),stopSpeaking:()=>talkVoice?.stop(),submit:text=>void submit(text),
-  // The host's wake listener rests while Talk is on.
   changed:()=>{if(talk.on!==talkWasOn){talkWasOn=talk.on;void call('speechTalk',{active:talk.on}).catch(()=>{});}render();}});
  /** Opens the microphone while Fox speaks, without stopping the voice or saying anything when it cannot. */
  async function overhear(){
@@ -643,7 +641,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   const content=root.querySelector('#notionContent') as HTMLElement|null,website=!!content&&!content.hidden&&content.dataset.template==='browser';
   entry.dataset.website=String(website);
   input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':quiet?'Message '+companionName+(website?' or type a web address':''):!editing?(matchMedia('(hover: none)').matches?'Tap to type · hold to speak':'Click to type · hold to speak'):website?'Ask about '+context.title+' or type a web address':context.key.split(':')[0]==='overview'?'Ask '+companionName+' anything':'Ask about '+context.title;
-  speechButton.setAttribute('aria-label',talk.phase==='speaking'?'Interrupt '+companionName:recording?'Send voice message':'Speak to Fox');speechButton.title=talk.on?(talk.phase==='speaking'?'Click to interrupt · Esc ends Talk':'Talk is on · Click to send now · Esc ends Talk'):recording?'Click to send · Esc to cancel':'Click to speak · Hold to speak · Right-click to choose a microphone or Talk with Fox'+(wakeState==='listening'?' · Listening for “Hey '+companionName+'”':'');root.dataset.wake=wakeState;speechButton.setAttribute('aria-pressed',String(speech&&(recording||starting)));
+  speechButton.setAttribute('aria-label',talk.phase==='speaking'?'Interrupt '+companionName:recording?'Send voice message':'Speak to Fox');speechButton.title=talk.on?(talk.phase==='speaking'?'Click to interrupt · Esc ends Talk':'Talk is on · Click to send now · Esc ends Talk'):recording?'Click to send · Esc to cancel':'Click to speak · Hold to speak · Right-click to choose a microphone or Talk with Fox';speechButton.setAttribute('aria-pressed',String(speech&&(recording||starting)));
   // Voice capture is intentionally visual: the waveform acknowledges listening
   // without exposing an unstable partial transcription in the bottom status.
   inputState.textContent='';
@@ -889,10 +887,6 @@ export function createNativeChat(call){return function({button,input,status,exec
  }
  window.addEventListener('worldlet:speech',(e: any)=>{
  if(e.detail?.phase==='spoken'){talk.spoken();return;}
- // The wake word (the host's local listener): its state shows on the microphone, and hearing it starts Talk with what
- // was said after it, if anything.
- if(e.detail?.phase==='wake-state'){wakeState=String(e.detail.text||'off');render();return;}
- if(e.detail?.phase==='wake'){if(!talk.on&&!ordering&&!recording&&!starting&&!transcribing&&root.dataset.onboardingLocked!=='true'){noteInput();dismissed=false;talk.start(String(e.detail.text||''));}if(!talk.on)void call('speechTalk',{active:false}).catch(()=>{});return;}
  if(!recording&&!starting&&!transcribing)return;
   const value=e.detail;
   if(value.phase==='level'){waveform.style.setProperty('--voice-level',String(Math.max(0,Math.min(1,Number(value.text)||0))));if(!ordering)talk.level(Number(value.text)||0);return;}

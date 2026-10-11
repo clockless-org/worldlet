@@ -328,7 +328,8 @@ export function createCompanionSettings({call,host,pages,records,onShow,close}:{
     // What the built-in browser recorded, with Delete, sits with the Browser now the Privacy section is gone.
     if(!host()?.sample())await recordings(target);
    }
-   {
+   // Only inside the sample world, as the way back to one's own (owner request 2026-10-10: no sample switch otherwise).
+   if(host()?.sample()){
     target.append(subhead('Sample world'));
     const on=!!host()?.sample(),said=status();
     const toggle=el('button','world-recovery-switch','Sample world') as HTMLButtonElement;toggle.type='button';toggle.setAttribute('role','switch');toggle.dataset.on=String(on);toggle.setAttribute('aria-checked',String(on));

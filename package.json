@@ -68,7 +68,7 @@
     "worktree:verify": "node scripts/worktree-flow.ts verify",
     "worktree:merge": "node scripts/worktree-flow.ts merge",
     "test:worktrees": "node scripts/worktree-flow-check.ts && node scripts/primary-guard-check.mjs && node scripts/dev-change-policy-check.ts && node scripts/dev-deferred-update-check.ts && node scripts/dev-lock-wait-check.ts && node scripts/mac-app-info-check.ts",
-    "test:windows:ui": "npm run build:native-ui && node scripts/windows-backup-ui-check.ts && node scripts/windows-companion-transfer-ui-check.ts && node scripts/windows-notion-ui-check.ts && node scripts/windows-update-ui-check.ts",
+    "test:windows:ui": "npm run build:native-ui && node scripts/windows-notion-ui-check.ts && node scripts/windows-update-ui-check.ts",
     "test:windows:speech": "python3 scripts/windows-speech-check.py",
     "test:ci": "node scripts/pr-checks-check.mjs && node scripts/pr-checks.mjs --all",
     "test:weather-location": "node scripts/weather-location-check.ts",

@@ -26,7 +26,7 @@ decisions. See the [five-layer standard](../../docs/UI-CORE-PLATFORM.md).
 | `src/modules/browser` | Website views, agent-browser over CDP, history, bookmarks, picture-in-picture, YouTube, Stripe |
 | `src/modules/media` | The shared media surface (hidden playback and capture view), helper processes, tools Python |
 | `src/modules/world-audio` | World ambience, music, radio/podcasts, the computer's own music players |
-| `src/modules/voice` | Fox's dictation and Talk capture, local Whisper, wake word, spoken replies, cloud requests |
+| `src/modules/voice` | Fox's dictation and Talk capture, local Whisper, spoken replies, cloud requests |
 | `src/modules/applet-tools` | Voice Memos, weather, Codex and Claude Code sessions, delegated coding tasks |
 | `src/modules/shell` | Menus, desktop Companion, updates, diagnostics, feedback, analytics, World backup |
 | `distribution/` | Public update feed config, analytics capture key, Mac entitlements, Mac release scripts (`mac/`), Windows installer and Store identity (`windows/`) |

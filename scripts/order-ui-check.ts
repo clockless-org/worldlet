@@ -4,7 +4,7 @@
 // Where the host says this copy may send (Alpha or Dev on an enrolled computer) it is Order: one click (or ⌘B / Ctrl+B)
 // starts Fox's voice mode (button pressed and red) with a sound wave in the message bar's place (2026-10-09) and nothing else on screen changing, not even when pointed at, the
 // second click stops it and the button turns a spinner, and the final words go to the host's send with the place, then
-// Fox says it was sent. A second page plays Beta: the same button is Feedback and opens Fox's Feedback page, never an
+// Fox says it was sent. A second page plays Beta: there the bug button is hidden (Feedback is the World's corner button), never an
 // Order. A third plays a failed instant post: Fox says plainly that it did not reach Claude right away, and why. A fourth
 // leaves the window while it listens: what was heard is still sent, and an Order stopped otherwise says so. Space
 // tapped on the World opens typing to Fox.
@@ -75,12 +75,10 @@ await withBrowser(fileAccess,async browser=>{
  await beta.addInitScript(fixture,{available:false,reason:'Only the Alpha and Dev apps can send an Order.'});
  await beta.goto(worldUrl());await beta.locator('#worldStartup').waitFor({state:'detached'});
  await beta.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='order'));
- // Beta and Production: the same button is Feedback, and it opens Fox's Feedback page (owner 2026-10-07).
- const feedback=beta.locator('.companion-order-button');await feedback.waitFor({state:'visible'});
- assert.equal(await feedback.getAttribute('aria-label'),'Feedback');assert.equal(await feedback.getAttribute('data-mode'),'feedback');
- {const t=(await feedback.boundingBox())!,b=(await beta.locator('#notionCommand').boundingBox())!;assert(t.x+t.width<=b.x,'the same place, left of the bar');}
- await feedback.click();
- await beta.locator('.companion-feedback').waitFor({state:'visible'});
+ // Beta and Production: no bug button; Feedback is the button in the World's bottom-right corner (owner 2026-10-10).
+ assert.equal(await beta.locator('.companion-order-button').isVisible(),false,'no bug button where Orders cannot be sent');
+ await beta.locator('.world-feedback-button').waitFor({state:'visible'});
+ await beta.keyboard.press(process.platform==='darwin'?'Meta+b':'Control+b');
  assert.equal(await beta.evaluate(()=>(window as any).calls.some((c:any)=>c.action==='speechStart'||c.action==='order'&&c.operation==='send')),false,'never an Order');
  await beta.screenshot({path:'/tmp/feedback-open.png'});
  await page.close();await beta.close();
@@ -116,4 +114,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await away.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='order'&&c.operation==='stopped').map((c:any)=>c.reason)),['cancelled'],'the host hears why, as one bucket');
  assert.deepEqual(awayErrors,[]);
 });
-console.log('PASS Order UI: a round bug left of Fox’s message bar on every channel, the microphone its twin on the right, Space opens typing, ⌘B/Ctrl+B presses the bug; where the host allows it an Order: pointing at it changes nothing, click starts listening with only the button showing it, second click stops and the button spins until sent, the words go to Claude with the place and Fox confirms, or says plainly the instant post failed and why; on Beta it opens Fox’s Feedback page instead.');
+console.log('PASS Order UI: a round bug left of Fox’s message bar where Orders can be sent, the microphone its twin on the right, Space opens typing, ⌘B/Ctrl+B presses the bug; where the host allows it an Order: pointing at it changes nothing, click starts listening with only the button showing it, second click stops and the button spins until sent, the words go to Claude with the place and Fox confirms, or says plainly the instant post failed and why; on Beta there is no bug button and Feedback is the World’s corner button.');

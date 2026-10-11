@@ -3,9 +3,8 @@
 // level when the person stopped; the phones decide from their recognizer's words (WorldletKit TalkRules, the Android
 // kit's TalkRules) with the same pause. Fox's finished reply is read with the system voice; a short "be quiet" keeps
 // Talk going without reading replies aloud. While Fox speaks the microphone stays open (echo-cancelled where the
-// platform can) and the person's own voice, louder than Fox's echo, interrupts it (`talkBargeIn`). A wake word
-// ("Hey Fox", 「嘿 Fox」, 「小狐」 or the Fox's own name) starts Talk on the computer: short phrases the levels single
-// out (`wakeGate`) go to local Whisper and `wakeMatch` reads what it heard; `wakeState` says when it rests.
+// platform can) and the person's own voice, louder than Fox's echo, interrupts it (`talkBargeIn`).
+// There is no wake word (owner request 2026-10-10): Talk starts from the microphone's menu.
 import {proactiveQuietRequest} from './fox-proactive.ts';
 
 export const TALK={
@@ -57,64 +56,6 @@ export function talkBargeIn(start:number){
    return voiced>=TALK.bargeMs;
   }
  };
-}
-
-export const WAKE={
- /** A wake phrase is a short phrase on its own: this much speech at least, spanning no more than `maxMs`… */
- minMs:300,maxMs:2500,
- /** …after this much quiet and followed by `pauseMs` of quiet. */
- quietMs:500,pauseMs:600,
- /** At most one local Whisper check this often (each is a couple of seconds of model work). */
- gapMs:4000,
- /** Audio kept around the phrase for the check. */
- marginMs:300,
- /** How often the listener looks again at what makes it rest (a call starting or ending). */
- recheckMs:3000
-} as const;
-
-export type WakeState='off'|'listening'|'paused'|'unavailable';
-/** What the wake listener does now: off unless turned on where local Whisper runs, waiting for the microphone
- * permission, resting while something else has the person's voice (Fox's own voice input, Talk, a call), the screen
- * is locked or the computer sleeps, else listening. */
-export function wakeState({enabled,supported,permitted,busy,talking,inCall,locked}:{enabled:boolean,supported:boolean,permitted:boolean,busy:boolean,talking:boolean,inCall:boolean,locked:boolean}):WakeState{
- if(!supported)return 'unavailable';
- if(!enabled)return 'off';
- if(!permitted)return 'unavailable';
- return busy||talking||inCall||locked?'paused':'listening';
-}
-
-/** Follows the wake listener's levels; returns how many ms of audio to check when a short standalone phrase ended. */
-export function wakeGate(start:number){
- let lastAt=start,quietSince=start,began=0,lastVoice=0,voiced=0,checked=-Infinity,tooLong=false;
- return {
-  feed(level:number,now:number):number|null{
-   const step=Math.max(0,Math.min(250,now-lastAt));lastAt=now;
-   if(Number(level)>=TALK.voiceLevel){
-    if(!began){if(now-quietSince<WAKE.quietMs){quietSince=now;return null;}began=now;voiced=0;tooLong=false;}
-    voiced+=step;lastVoice=now;if(now-began>WAKE.maxMs)tooLong=true;return null;
-   }
-   if(!began){return null;}
-   if(now-lastVoice<WAKE.pauseMs)return null;
-   const span=lastVoice-began,ok=!tooLong&&voiced>=WAKE.minMs&&now-checked>=WAKE.gapMs;
-   began=0;quietSince=lastVoice;
-   if(!ok)return null;
-   checked=now;return Math.round(span+WAKE.pauseMs+2*WAKE.marginMs);
-  },
-  /** A check that could not run (Whisper busy) leaves the next phrase free to be checked. */
-  release(){checked=-Infinity;}
- };
-}
-
-const escapeRegex=(text:string)=>text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-/** Whether local Whisper's words start with the wake phrase: "Hey Fox", 「嘿 Fox」, 「嘿，小狐狸」, 「小狐」, or "Hey"
- * / 「嘿」 and the Fox's current name. Returns what was said after it (a first request), or null. */
-export function wakeMatch(text:string,name=''){
- const value=String(text??'').trim(),own=String(name??'').trim();
- const names=['fox','foxy','狐狸','小狐狸','小狐','福克斯',...(own&&[...own].length>=2&&!/^fox$/i.test(own)?[escapeRegex(own)]:[])];
- const gap='[\\s,，.。!！、~～-]*',end='(?![a-z0-9])';
- const pattern=new RegExp('^'+gap+'(?:(?:hey|hi|hello|ok|okay|嘿|嗨|哈喽|你好)'+gap+'(?:'+names.join('|')+')'+end+'|小狐狸|小狐)'+gap,'iu');
- const found=pattern.exec(value);if(!found)return null;
- return {rest:value.slice(found[0].length).replace(/^[\s,，.。!！?？、]+/,'').trim()};
 }
 
 /** A short request to stop talking (安静点, be quiet…) silences spoken replies for the rest of this Talk. */

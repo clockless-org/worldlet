@@ -173,12 +173,7 @@ await withBrowser(fileAccess,async browser=>{
  await detail.locator('[data-setting=usage-analytics]').waitFor();
  assert.equal(await detail.getByRole('button',{name:/Transfer companion|Delete saved data/}).count(),0,'no backup or transfer controls');
  await panel.locator('[data-setting=general]').click();
- const sample=detail.locator('.world-recovery-switch');
- assert.equal(await sample.getAttribute('role'),'switch','the sample world is a switch, not an action');
- assert.equal(await sample.getAttribute('aria-checked'),'false','a world opens as the user\u2019s own, never as a demo');
- // Not clicked here: switching worlds reloads the page, which takes the fixture's
- // record of what was called with it. That it calls the same toggle every other
- // entry point uses is the thing worth knowing, and it is one function.
+ assert.equal(await detail.locator('.world-recovery-switch').count(),0,'no sample world switch in your own world (owner request 2026-10-10)');
  await page.screenshot({path:'output/fox-mac/recovery.png'});
  // With the Browser in General: the person deletes what the built-in browser recorded, one site or all, after an in-page question.
  await panel.locator('[data-setting=general]').click();

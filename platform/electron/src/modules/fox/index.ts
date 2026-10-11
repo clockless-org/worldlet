@@ -771,8 +771,6 @@ export function installFox(host:Host){
    const service=analytics();
    return {platform:store.options.platform,hostCapabilities:store.options.capabilities(),model:{name:model.name??'',ready:model.ready??false,provider:model.provider??'',harness:agent()?.harness?.title??null},
     cloudConsent:store.state.cloudConsent===true,autoSync:store.state.autoSync===true,companionStyle:style.current(),spokenReplies:preferences.bool('worldlet.spokenReplies'),talkReplies:preferences.bool('worldlet.talkReplies',true),
-    // The wake word where local Whisper runs (Mac and Windows), off by default and kept on this computer.
-    ...(speech()?.localSupported?{wakeWord:preferences.bool('worldlet.wakeWord'),wakeState:speech()?.wakeState??'off'}:{}),
     spokenVoice:preferences.string('worldlet.spokenVoice'),agentVoice:!!agent()?.voice?.(),morningBrief:readMorningBrief(preferences.string('worldlet.morningBrief')),voices,sampleEnabled:store.sampleEnabled(),
     usageAnalyticsEnabled:service?service.enabled():preferences.get('WorldletUsageAnalyticsEnabled')!==false};
   },
@@ -796,8 +794,6 @@ export function installFox(host:Host){
     preferences.set('worldlet.spokenReplies',value);if(!value)speech()?.stopSpeaking();
    }else if(setting==='talk_replies'&&typeof value==='boolean'){
     preferences.set('worldlet.talkReplies',value);if(!value)speech()?.stopSpeaking();
-   }else if(setting==='wake_word'&&typeof value==='boolean'&&speech()?.localSupported){
-    preferences.set('worldlet.wakeWord',value);await speech()?.setWakeWord(value);
    }else if(setting==='spoken_voice'&&typeof value==='string'&&(value===''||(await speech()?.voices().catch(()=>[])??[]).some(voice=>voice.id===value))){
     preferences.set('worldlet.spokenVoice',value);
    }else if(setting==='companion_name'&&typeof value==='string'&&value.trim()&&characterCount(value)<=24){
