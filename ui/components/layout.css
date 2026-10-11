@@ -435,7 +435,9 @@
 .native-console #notionHome :is(.world-build-version,.world-agent-version){display:block;min-width:0;min-height:0;padding:0;overflow:hidden;text-overflow:ellipsis}
 .native-console #notionHome .world-agent-version{display:flex;align-items:center;gap:4px}
 .native-console #notionHome .world-agent-version[hidden]{display:none}
-.native-console #notionHome .world-agent-icon{width:12px;height:12px;flex:none;object-fit:contain;border-radius:3px}
+.native-console #notionHome .world-build-current{pointer-events:auto}
+/* One plain white mark for every Agent, like Worldlet's own beside it. */
+.native-console #notionHome .world-agent-icon{width:12px;height:12px;flex:none;object-fit:contain;filter:brightness(0) invert(1)}
 .native-console #notionHome .world-agent-name{min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* An open panel or the first-run setup owns the screen; the corner steps back. */
 .native-console:is([data-detail-open=true],[data-tour-lock=true]) #notionHome.world-watermark{display:none}

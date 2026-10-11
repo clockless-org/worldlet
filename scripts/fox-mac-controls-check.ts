@@ -157,7 +157,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>!/Google needs reconnecting/.test(document.querySelector('#worldConversation')?.textContent||''));
  await page.evaluate(()=>worldletShowControls('voice'));
  await page.setViewportSize({width:1000,height:700});const bounds=await bubble.boundingBox();assert.ok(bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=1000&&bounds.y+bounds.height<=700);await page.screenshot({path:'output/fox-mac/compact.png'});
- assert.match(await page.locator('.world-build-version').textContent(),/^Development · .+/);
+ assert.match(await page.locator('.world-build-version').textContent(),/^Dev · (Build \d+ · )?.+/);
  assert.equal(await page.locator('.world-channel-badge').count(),0);
  await openSettings();
  assert.match(await page.locator('.world-brand').textContent(),/Worldlet/);
