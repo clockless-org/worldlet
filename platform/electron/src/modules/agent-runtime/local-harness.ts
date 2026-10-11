@@ -431,9 +431,10 @@ export class LocalHarnessRuntime implements AgentRuntime {
    if(stream.done)stopChild(child);
    const code=stream.done?0:await exited;
    stopped();
-   const outcome=finishLocalHarness(id,stream,{code,stderr:harness.stderr.text});
+   // Background work (the Attention check) is its World tool calls; a conversation turn still needs words.
+   const outcome=finishLocalHarness(id,stream,{code,stderr:harness.stderr.text},body._background===true?calls:0);
    if('error' in outcome)throw new WorldletError(outcome.error);
-   if(!started)await say(outcome.message);
+   if(!started&&outcome.message)await say(outcome.message);
    return {message:outcome.message};
   }finally{
    this.settleAsks();

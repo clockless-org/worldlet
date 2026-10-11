@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../core/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
@@ -77,7 +77,7 @@ assert.deepEqual(opening[1].params,{cwd:'/w/home',mcpServers:[{name:'worldlet',c
 assert.deepEqual(JSON.parse(localHarnessInvocation('hermes',turn).stdin!.trim().split('\n')[1]).params.mcpServers,[],'a greeting gets no tools');
 
 // Output readers ----------------------------------------------------------------------------------
-const read=(id:LocalHarnessId,lines:unknown[],code=0,stderr='',acp?:{prompt:string})=>{
+const read=(id:LocalHarnessId,lines:unknown[],code:number|null=0,stderr='',acp?:{prompt:string})=>{
  const state=localHarnessStream(acp);
  const deltas=lines.map(line=>readLocalHarnessLine(id,state,typeof line==='string'?line:JSON.stringify(line))).filter(Boolean);
  return {deltas,outcome:finishLocalHarness(id,state,{code,stderr})};
@@ -94,7 +94,7 @@ assert.deepEqual(claude,{deltas:['hello ','fox'],outcome:{message:'hello fox'}})
 assert.deepEqual(read('claude-code',[{type:'result',subtype:'success',is_error:true,result:'Invalid API key · Please run /login'}],1).outcome,{error:'Invalid API key · Please run /login'});
 const codex=read('codex',[{type:'thread.started',thread_id:'t'},{type:'turn.started'},{type:'item.completed',item:{id:'i0',type:'reasoning',text:'thinking'}},{type:'item.completed',item:{id:'i1',type:'agent_message',text:'Done.'}},{type:'turn.completed',usage:{}}]);
 assert.deepEqual(codex,{deltas:['Done.'],outcome:{message:'Done.'}});
-assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'Not signed in'}}],1).outcome,{error:'Not signed in'});
+assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'Not signed in'}}],1).outcome,{error:'Codex is not signed in. Open Terminal, run codex login, then try again.'});
 // Hermes Agent over ACP: the session's id brings the prompt, chunks stream, permission asks are declined.
 {
  const state=localHarnessStream({prompt:'Say hi'});
@@ -135,7 +135,24 @@ assert.equal(claudeCodeSignInExpired('Failed to authenticate: OAuth session expi
 assert.deepEqual(read('claude-code',[],1,'Failed to authenticate: OAuth session expired and could not be refreshed').outcome,{error:claudeCodeSignInExpired('Failed to authenticate')});
 assert.equal(claudeCodeSignInExpired('Rate limited'),null);
 assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: not logged in\n').outcome,{error:'Claude Code could not answer: Error: not logged in'},'banners are not Fox’s words; stderr explains a failure');
-assert.match(String((read('codex',[],0).outcome as {error:string}).error),/did not answer/);
+// A turn with no answer and nothing on stderr says what happened, not "sign in" (Mac Beta 4261, 2026-10-11: Codex was
+// signed in, yet the Attention check read "Open it once in Terminal to finish signing in").
+assert.deepEqual(read('codex',[],0).outcome,{error:'Codex finished without an answer. Try again.'});
+assert.deepEqual(read('codex',[],null).outcome,{error:'Codex stopped before it answered. Try again.'});
+assert.match(String((read('codex',[],1).outcome as {error:string}).error),/stopped \(code 1\) without saying why/);
+// Background work whose work was its World tool calls may end without words.
+{
+ const state=localHarnessStream();
+ for(const event of [{type:'turn.started'},{type:'item.completed',item:{type:'mcp_tool_call',server:'worldlet',tool:'call_world_tool'}},{type:'turn.completed',usage:{}}])readLocalHarnessLine('codex',state,JSON.stringify(event));
+ assert.deepEqual(finishLocalHarness('codex',state,{code:0,stderr:''},2),{message:''});
+ assert.deepEqual(finishLocalHarness('codex',state,{code:0,stderr:''}),{error:'Codex finished without an answer. Try again.'},'a conversation turn still needs words');
+ assert.deepEqual(finishLocalHarness('codex',state,{code:1,stderr:''},2).hasOwnProperty('error'),true,'a failed process is not finished work');
+}
+// Codex's sign-in and usage limit are told apart from its other failures.
+assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'Codex is not signed in. Open Terminal, run codex login, then try again.');
+assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'});
+assert.deepEqual(read('codex',[],1,'Error: Not logged in. Run codex login.').outcome,{error:codexProblem('not logged in')});
+assert.equal(codexProblem('stream disconnected before completion'),null);
 
 // Host detection ----------------------------------------------------------------------------------
 await withTempDir('worldlet-local-harness-',async scratch=>{
