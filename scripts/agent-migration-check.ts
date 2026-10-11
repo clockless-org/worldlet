@@ -8,7 +8,7 @@ import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,he
  openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../core/agent/index.ts';
 import {openClawAgents,parseJSON5,readOpenClaw,surveyOpenClaw} from '../platform/electron/src/modules/agent-runtime/openclaw-files.ts';
 import {surveyAgentHistory} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
-import {firstSentence,localAgentModel,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
+import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
 import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/electron/src/modules/fox/migration.ts';
 import {allowed as inBackup,validate as validateBackup} from '../platform/electron/src/modules/shell/backup.ts';
 import {digest} from '../platform/electron/src/files.ts';
@@ -403,4 +403,35 @@ try{
  assert.deepEqual(codex.brought.skills.sort(),['changelog','draft-command'],'Codex’s own .system skills are not copied');
  assert.deepEqual(['.claude','.pi','.hermes','.codex'].flatMap(snapshot),before,'their own files are only read');
 }finally{fs.rmSync(others,{recursive:true,force:true});}
+
+// OpenClaw whose workspaces live outside its state folder (a person's real setup, 2026-10-11): `agents.defaults.workspace`
+// and per-agent workspaces elsewhere, the agents in an `$include` file, a `${VAR}` path, grouped skills and
+// `skills.load.extraDirs`. Everything is found where OpenClaw itself finds it.
+const outside=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-openclaw-outside-'));
+try{
+ const state=path.join(outside,'.openclaw'),env={HELPER_ROOT:path.join(outside,'workspace-helper')} as NodeJS.ProcessEnv;
+ const write=(file:string,text:string)=>{fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,text);};
+ write(path.join(state,'openclaw.json'),`{
+  // hand-edited JSON5, as OpenClaw allows
+  agents: {$include: "./agents.json5"},
+  skills: {load: {extraDirs: ["~/shared-skills"]}},
+ }`);
+ write(path.join(state,'agents.json5'),`{defaults: {workspace: "~/clawd"}, list: [{id: "main", default: true, workspace: "~/clawd"}, {id: "helper", workspace: "\${HELPER_ROOT}"}, {id: "hotline", workspace: "~/clawd-phone/hotline"}]}`);
+ write(path.join(outside,'clawd','IDENTITY.md'),'Name: Juno\n');
+ write(path.join(outside,'clawd','USER.md'),'Lives in LA.');
+ write(path.join(outside,'clawd','memory','2026-10-01.md'),'Bought floss.');
+ write(path.join(outside,'clawd','skills','personal','groceries','SKILL.md'),'---\nname: groceries\ndescription: Restock the kitchen.\n---\nOrder milk.');
+ write(path.join(outside,'workspace-helper','skills','trips','SKILL.md'),'---\nname: trips\ndescription: Plan trips.\n---\nPlan.');
+ write(path.join(outside,'clawd-phone','hotline','SOUL.md'),'Name: Hotline\nAnswer calls.');
+ write(path.join(outside,'shared-skills','vault','SKILL.md'),'---\nname: vault\ndescription: Passwords.\n---\nUse 1Password.');
+ assert.equal(openClawWorkspace(outside,env),fs.realpathSync(path.join(outside,'clawd')));
+ assert.deepEqual(openClawAgents(outside,env).map(a=>[a.id,a.name,a.workspace&&path.relative(fs.realpathSync(outside),a.workspace)]),[['main','Juno','clawd'],['helper','helper','workspace-helper'],['hotline','Hotline',path.join('clawd-phone','hotline')]]);
+ assert.deepEqual(surveyOpenClaw(outside,env),{agents:3,conversations:0,notes:1,skills:3,jobs:0});
+ const data=readOpenClaw(outside,env)!;
+ assert.deepEqual(data.skills.map(s=>s.name),['groceries','trips','vault']);
+ assert.deepEqual(data.notes.map(n=>[n.agentId,n.date]),[['main','2026-10-01']]);
+ assert.equal(readLocalAgentMemory('openclaw',outside,env)?.user,'Lives in LA.');
+ assert.equal(openClawAgents(outside,{} as NodeJS.ProcessEnv).find(a=>a.id==='helper')?.workspace,null,'a missing variable leaves only that path unread');
+}finally{fs.rmSync(outside,{recursive:true,force:true});}
+
 console.log('PASS: OpenClaw, Claude Code, pi, Hermes Agent and Codex conversations, notes, skills and scheduled jobs come into Fox the same way; their own files are only read');

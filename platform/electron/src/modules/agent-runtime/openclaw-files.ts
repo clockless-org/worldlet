@@ -7,7 +7,9 @@ import {openClawConversationIncluded,openClawConversationTitle,openClawRoutine,o
 import {realPath as real} from '../../files.ts';
 import {directories,inside,json,keep,newBudget,readFile,skillsIn,type Budget,type BroughtSkill} from './agent-files.ts';
 import {declaredName} from './hermes-files.ts';
-import {openClawState,openClawWorkspace} from './local-memory.ts';
+import {openClawPath,openClawState,openClawWorkspace,readOpenClawConfig} from './openclaw-config.ts';
+
+export {parseJSON5,readOpenClawConfig} from './openclaw-config.ts';
 
 // Read-only view of a person's OpenClaw (2026.9: per-agent SQLite sessions and a shared SQLite
 // state database; older installs: sessions.json + JSONL transcripts and cron/jobs.json). Nothing
@@ -24,42 +26,6 @@ export interface OpenClawData {
  problems:string[];truncated:boolean;
 }
 
-/** openclaw.json is JSON5 (comments, unquoted keys, trailing commas, single quotes). */
-export function parseJSON5(source:string):unknown {
- try{return JSON.parse(source);}catch{}
- let out='',i=0;
- const n=source.length;
- while(i<n){
-  const c=source[i];
-  if(c==='"'||c==='\''){
-   let value='';i++;
-   while(i<n&&source[i]!==c){if(source[i]==='\\'&&i+1<n){value+=source[i]+source[i+1];i+=2;}else value+=source[i++];}
-   i++;
-   let decoded:string;try{decoded=JSON.parse('"'+value.replace(/\\'/g,"'")+'"');}catch{decoded=value;}
-   out+=JSON.stringify(decoded);
-   continue;
-  }
-  if(c==='/'&&source[i+1]==='/'){while(i<n&&source[i]!=='\n')i++;continue;}
-  if(c==='/'&&source[i+1]==='*'){const end=source.indexOf('*/',i+2);i=end<0?n:end+2;continue;}
-  if(/[A-Za-z_$]/.test(c)){
-   let word='';while(i<n&&/[\w$]/.test(source[i]))word+=source[i++];
-   let j=i;while(j<n&&/\s/.test(source[j]))j++;
-   out+=source[j]===':'?JSON.stringify(word):word==='Infinity'||word==='NaN'?'null':word;
-   continue;
-  }
-  if(c==='+'&&/[\d.]/.test(source[i+1]??'')){i++;continue;}
-  out+=c;i++;
- }
- out=out.replace(/,(\s*[}\]])/g,'$1');
- try{return JSON.parse(out);}catch{return null;}
-}
-
-export function readOpenClawConfig(home=os.homedir(),environment=process.env):Record<string,any> {
- const state=openClawState(home,environment);
- const value=parseJSON5(readFile(state,path.join(state,'openclaw.json'),4_000_000));
- return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
-}
-
 /** Configured agents (`agents.entries`, older `agents.list`) plus agent folders on disk. The
  * default agent is the one marked `default`, else `main`, else the first. */
 export function openClawAgents(home=os.homedir(),environment=process.env,config=readOpenClawConfig(home,environment)):OpenClawAgent[] {
@@ -73,8 +39,8 @@ export function openClawAgents(home=os.homedir(),environment=process.env,config=
  const chosen=ids.find(id=>entries[id]?.default===true)??(ids.includes('main')?'main':ids[0]);
  return ids.map(id=>{
   const entry=entries[id]??{},isDefault=id===chosen;
-  const configured=typeof entry.workspace==='string'&&entry.workspace.trim()?entry.workspace.trim().replace(/^~(?=$|[\\/])/,home):null;
-  const candidate=configured??(isDefault?openClawWorkspace(home,environment):path.join(state,'workspace-'+id));
+  const configured=openClawPath(entry.workspace,home,environment);
+  const candidate=configured??(isDefault?openClawWorkspace(home,environment,config):path.join(state,'workspace-'+id));
   const workspace=candidate&&path.isAbsolute(candidate)&&fs.existsSync(candidate)&&fs.statSync(candidate).isDirectory()?real(candidate):null;
   const declared=workspace?declaredName(readFile(workspace,path.join(workspace,'IDENTITY.md')))??declaredName(readFile(workspace,path.join(workspace,'SOUL.md'))):null;
   const name=[entry.name,entry.identity?.name,declared].find(value=>typeof value==='string'&&value.trim())?.trim()??id;
@@ -274,6 +240,25 @@ export function scheduledJobs(state:string,problems:string[]=[]):unknown[] {
  return Array.isArray(legacy)?legacy:Array.isArray(legacy?.jobs)?legacy.jobs:[];
 }
 
+/** Where OpenClaw loads skills from, highest precedence first (docs/concepts/agent.md#skills): each agent's
+ * `<workspace>/skills` and `<workspace>/.agents/skills`, then `~/.agents/skills`, the shared `skills` in its state
+ * folder and `skills.load.extraDirs`. Each is {root, folder}: files are read only inside `root`. Skill folders may be
+ * grouped one level down (`skills/personal/foo/SKILL.md`). */
+export function openClawSkillRoots(home=os.homedir(),environment=process.env,config=readOpenClawConfig(home,environment),agents=openClawAgents(home,environment,config)):{root:string;folder:string}[] {
+ const state=openClawState(home,environment),roots:{root:string;folder:string}[]=[];
+ for(const agent of agents)if(agent.workspace)roots.push({root:agent.workspace,folder:path.join(agent.workspace,'skills')},{root:agent.workspace,folder:path.join(agent.workspace,'.agents','skills')});
+ roots.push({root:home,folder:path.join(home,'.agents','skills')},{root:state,folder:path.join(state,'skills')});
+ const extra=config?.skills?.load?.extraDirs;
+ for(const value of Array.isArray(extra)?extra.slice(0,20):[]){const folder=openClawPath(value,home,environment);if(folder)roots.push({root:folder,folder});}
+ const seen=new Set<string>();
+ return roots.filter(({folder})=>{let key:string;try{key=real(folder);}catch{return false;}if(seen.has(key))return false;seen.add(key);return true;});
+}
+const skillsOf=(roots:{root:string;folder:string}[])=>{
+ const seen=new Set<string>(),found:BroughtSkill[]=[];
+ for(const {root,folder} of roots)for(const skill of skillsIn(root,folder,{depth:1}))if(!seen.has(skill.name)){seen.add(skill.name);found.push(skill);}
+ return found;
+};
+
 /** Everything a person's OpenClaw holds that Worldlet can bring over. */
 export function readOpenClaw(home=os.homedir(),environment=process.env):OpenClawData|null {
  const state=openClawState(home,environment);
@@ -286,13 +271,11 @@ export function readOpenClaw(home=os.homedir(),environment=process.env):OpenClaw
   conversations.push(...(sqliteConversations(state,agent,label,budget,problems)??legacyConversations(state,agent,label,budget)));
   notes.push(...dailyNotes(agent));
   if(agent.workspace){
-   skills.push(...skillsIn(agent.workspace,path.join(agent.workspace,'skills')));
    const read=(name:string)=>readFile(agent.workspace!,path.join(agent.workspace!,name)).trim();
    personas[agent.id]={soul:[read('IDENTITY.md'),read('SOUL.md'),read('AGENTS.md')].filter(Boolean).join('\n\n'),memory:read('MEMORY.md')||read('memory.md'),user:read('USER.md')};
   }
  }
- // Skills installed for every agent.
- skills.push(...skillsIn(state,path.join(state,'skills')));
+ skills.push(...skillsOf(openClawSkillRoots(home,environment,config,agents)));
  return {agents,conversations,notes,skills,jobs:scheduledJobs(state,problems),config,personas,problems,truncated:budget.truncated};
 }
 
@@ -301,7 +284,8 @@ export function surveyOpenClaw(home=os.homedir(),environment=process.env):{agent
  const state=openClawState(home,environment);
  if(!fs.existsSync(state))return {agents:0,conversations:0,notes:0,skills:0,jobs:0};
  const agents=openClawAgents(home,environment);
- let conversations=0,notes=0,skills=directories(path.join(state,'skills')).length;
+ let conversations=0,notes=0;
+ const skills=skillsOf(openClawSkillRoots(home,environment,undefined,agents)).length;
  for(const agent of agents){
   const file=path.join(state,'agents',agent.id,'agent','openclaw-agent.sqlite');
   if(fs.existsSync(file)){
@@ -316,7 +300,6 @@ export function surveyOpenClaw(home=os.homedir(),environment=process.env):{agent
   }
   if(agent.workspace){
    try{notes+=fs.readdirSync(path.join(agent.workspace,'memory')).filter(name=>/^\d{4}-\d{2}-\d{2}.*\.md$/i.test(name)).length;}catch{}
-   skills+=directories(path.join(agent.workspace,'skills')).filter(name=>fs.existsSync(path.join(agent.workspace!,'skills',name,'SKILL.md'))).length;
   }
  }
  return {agents:agents.length,conversations,notes,skills,jobs:scheduledJobs(state,[]).filter(job=>openClawRoutine(job).ok).length};

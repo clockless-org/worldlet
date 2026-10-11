@@ -12,7 +12,7 @@ import {AgentCancelled,AgentEventWait,LineReader,UnsupportedRuntime,agentEvent,e
 import {holdStandingTurn,openWorldToolBridge,type McpCall,type WorldToolBridge} from './world-tool-bridge.ts';
 import {currentHarnessTools,harnessCalls,harnessEvents,harnessTools} from './harness-services.ts';
 import {harnessSkills} from './harness-skills.ts';
-import {openClawState,openClawWorkspace} from './local-memory.ts';
+import {openClawConfigPath,openClawWorkspace} from './openclaw-config.ts';
 import {openClawAgents,parseJSON5} from './openclaw-files.ts';
 import {AcpConversation,AgentConversations,FirstAvailable,GatewayConversation,HermesServerConversation,type ResidentConversation,type ResidentSession} from './harness-sessions.ts';
 import {discoverHermes} from './hermes-files.ts';
@@ -144,10 +144,7 @@ export function harnessEnvironment(install:LocalHarnessInstall,environment:Harne
 }
 
 /** The person's own OpenClaw configuration file: OPENCLAW_CONFIG_PATH, else openclaw.json in its state folder. */
-export function openClawConfigFile({env,home}:HarnessEnvironment):string {
- const named=env.OPENCLAW_CONFIG_PATH;
- return typeof named==='string'&&path.isAbsolute(named)?named:path.join(openClawState(home,env),'openclaw.json');
-}
+export const openClawConfigFile=({env,home}:HarnessEnvironment):string=>openClawConfigPath(home,env);
 
 /** `<command> --version`, proving the executable starts; null when it does not. */
 /** How long a Harness's output is still read after it exits. */

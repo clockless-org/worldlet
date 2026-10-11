@@ -6,6 +6,9 @@ import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts'
 import {isMigrationSource,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {claudeCodeHome,codexHome,piHome} from './agent-files.ts';
 import {declaredName,discoverHermes} from './hermes-files.ts';
+import {openClawWorkspace,readOpenClawConfig} from './openclaw-config.ts';
+
+export {openClawState,openClawWorkspace} from './openclaw-config.ts';
 
 // A person's own Agent (OpenClaw, Claude Code, pi, Hermes Agent) is a whole Agent: model plus
 // Harness, with a name and memory. Choosing it at setup keeps Fox on the built-in Hermes Harness and
@@ -35,23 +38,6 @@ function readInside(home:string,relative:string):string {
 }
 const firstOf=(home:string,names:string[])=>names.map(name=>readInside(home,name)).find(Boolean)??'';
 
-/** OpenClaw's workspace: `agents.defaults.workspace` in openclaw.json when it is plain JSON, else
- * `workspace` (or `workspace-<profile>`) under its state folder. */
-export const openClawState=(home=os.homedir(),environment=process.env)=>environment.OPENCLAW_STATE_DIR&&path.isAbsolute(environment.OPENCLAW_STATE_DIR)?environment.OPENCLAW_STATE_DIR:path.join(home,'.openclaw');
-export function openClawWorkspace(home=os.homedir(),environment=process.env):string|null {
- const state=openClawState(home,environment);
- const candidates:string[]=[];
- try{
-  const configured=JSON.parse(fs.readFileSync(path.join(state,'openclaw.json'),'utf8'))?.agents?.defaults?.workspace;
-  if(typeof configured==='string'&&configured.trim())candidates.push(configured.trim().replace(/^~(?=$|[\\/])/,home));
- }catch{}
- const profile=environment.OPENCLAW_PROFILE;
- if(profile&&profile!=='default'&&/^[A-Za-z0-9_-]+$/.test(profile))candidates.push(path.join(state,'workspace-'+profile));
- candidates.push(path.join(state,'workspace'));
- const found=candidates.find(folder=>path.isAbsolute(folder)&&fs.existsSync(folder)&&fs.statSync(folder).isDirectory());
- return found?real(found):null;
-}
-
 /** The name and memory a person's own Agent keeps, or null when it has none here. */
 export function readLocalAgentMemory(id:MigrationSource,home=os.homedir(),environment=process.env):LocalAgentMemory|null {
  let memory:LocalAgentMemory;
@@ -70,7 +56,7 @@ export function readLocalAgentMemory(id:MigrationSource,home=os.homedir(),enviro
   if(id==='pi')try{keys=Object.values(JSON.parse(readInside(root,'auth.json')||'{}')).some((entry:any)=>entry?.type==='api_key'&&typeof entry.key==='string'&&entry.key);}catch{}
   memory={name:null,soul:'',user:'',longTerm:readInside(root,id==='claude-code'?'CLAUDE.md':'AGENTS.md'),model:keys};
  }else{
-  const workspace=openClawWorkspace(home,environment),model=!!readInside(openClawState(home,environment),'openclaw.json');
+  const config=readOpenClawConfig(home,environment),workspace=openClawWorkspace(home,environment,config),model=Object.keys(config).length>0;
   if(!workspace&&!model)return null;
   const soul=workspace?readInside(workspace,'SOUL.md'):'',name=workspace?declaredName(readInside(workspace,'IDENTITY.md'))??declaredName(soul):null;
   memory=workspace?{name,soul:name?soul:'',user:readInside(workspace,'USER.md'),longTerm:firstOf(workspace,['MEMORY.md','memory.md']),model}:{name:null,soul:'',user:'',longTerm:'',model};
@@ -127,7 +113,7 @@ export function localAgentModel(id:MigrationSource,home=os.homedir(),environment
   if(id==='codex')return clean(/^model\s*=\s*["']([^"']+)["']/m.exec(readInside(codexHome(home,environment),'config.toml'))?.[1]);
   if(id==='claude-code')return clean(JSON.parse(readInside(claudeCodeHome(home,environment),'settings.json')||'{}')?.model);
   if(id==='pi')return clean(JSON.parse(readInside(piHome(home,environment),'settings.json')||'{}')?.defaultModel);
-  const model=JSON.parse(readInside(openClawState(home,environment),'openclaw.json')||'{}')?.agents?.defaults?.model;
+  const model=readOpenClawConfig(home,environment)?.agents?.defaults?.model;
   return clean(typeof model==='string'?model:model?.primary);
  }catch{return '';}
 }
