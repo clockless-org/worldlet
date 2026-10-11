@@ -143,10 +143,15 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
   if(!same('pick:'+id)){shown='pick:'+id;guide('Let’s start with something you already do. '+theme.say,[button('Show me',make)]);}
   box('pick:'+id,{target:()=>elementBox(root,'.world-ongoing[data-ongoing="'+CSS.escape(theme.id)+'"]'),act:()=>void make()});
  }
+ // The journey's item was settled or removed elsewhere: back to picking.
+ function unavailable(){
+  unbox();if(same('unavailable'))return;shown='unavailable';
+  guide('That item is no longer waiting for you. **Let’s pick another one.**',[button('Pick another',async()=>{if(await save('first-value')){shown='';tick();}})]);
+ }
  // 6. The card is open: Fox asks to do it.
  function review(){
   const item=journeyItem(),id=String(state.onboarding?.journeyItemId||'');
-  if(!item||!firstValueCandidate([item])){unbox();if(!same('unavailable')){shown='unavailable';guide('That item is no longer waiting for you. **Let’s pick another one.**',[button('Pick another',async()=>{if(await save('first-value')){shown='';tick();}})]);}return;}
+  if(!item||!firstValueCandidate([item])){unavailable();return;}
   if(root.dataset.attentionPreview!=='true'){
    // A restart or a closed card: open it again, since the tour waits on this choice. The card's
    // source opens its Applet (Mail): the spotlight lifts there and the card comes back on return.
@@ -169,10 +174,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
  // 7–8 and after: Fox works, then asks once whether it is done.
  function resume(now:string){
   const item=journeyItem(),id=String(state.onboarding?.journeyItemId||'');
-  if(!item||!firstValueCandidate([item])&&now!=='first-value-outcome'){
-   unbox();if(same('unavailable'))return;shown='unavailable';
-   guide('That item is no longer waiting for you. **Let’s pick another one.**',[button('Pick another',async()=>{if(await save('first-value')){shown='';tick();}})]);return;
-  }
+  if(!item||!firstValueCandidate([item])&&now!=='first-value-outcome'){unavailable();return;}
   if(now==='first-value-running'){
    // While Fox's own turn runs the bubble is Fox's; after a restart the turn is gone.
    if(quiet)return;

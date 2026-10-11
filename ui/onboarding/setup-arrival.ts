@@ -2,8 +2,17 @@
 export async function landSetupDevices(root:HTMLElement,onLanded:()=>void=()=>{}){
  const layer=document.getElementById('setupArrivingDevices');if(!layer){onLanded();return;}
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- let metricFrame=-1,liveModules=new Map<string,any>(),settled=false;
- function frameModules(now:number){if(now!==metricFrame){metricFrame=now;liveModules=new Map(((root as any).sceneMetrics?.modules||[]).map(m=>[m.id,m]));}return liveModules;}
+ let metricFrame=-1,settled=false;
+ // Read once per frame for every flying device: the live slots and the canvas they sit on.
+ let metrics:{modules:Map<string,any>,base:DOMRect,sx:number,sy:number};
+ function frameMetrics(now:number){
+  if(now!==metricFrame){
+   metricFrame=now;
+   const canvas=root.querySelector<HTMLElement>('[data-renderer="sim-dom"],canvas[data-renderer="pixi-webgl"]'),base=(canvas||root).getBoundingClientRect();
+   metrics={modules:new Map(((root as any).sceneMetrics?.modules||[]).map(m=>[m.id,m])),base,sx:canvas?base.width/canvas.clientWidth:1,sy:canvas?base.height/canvas.clientHeight:1};
+  }
+  return metrics;
+ }
  try{
   const modules=(root as any).sceneMetrics?.modules||[];
   await Promise.all(Array.from(layer.querySelectorAll<HTMLImageElement>('img')).map(async (img,i)=>{
@@ -22,10 +31,9 @@ export async function landSetupDevices(root:HTMLElement,onLanded:()=>void=()=>{}
     const frame=(now:number)=>{
      const progress=duration?Math.max(0,Math.min(1,(now-began-delay)/duration)):1;
      const ease=progress*progress*(3-2*progress);
-     let live=frameModules(now).get(img.dataset.appletId)?.arrivalBounds||target;
+     const {modules:liveModules,base,sx,sy}=frameMetrics(now);
+     let live=liveModules.get(img.dataset.appletId)?.arrivalBounds||target;
      const bubble=module?.arrivalVisible===false?root.querySelector<HTMLElement>('[data-action="region-more"][data-page="'+module.region+'"]'):null;
-     const canvas=root.querySelector<HTMLElement>('[data-renderer="sim-dom"],canvas[data-renderer="pixi-webgl"]'),base=(canvas||root).getBoundingClientRect();
-     const sx=canvas?base.width/canvas.clientWidth:1,sy=canvas?base.height/canvas.clientHeight:1;
      if(bubble){const r=bubble.getBoundingClientRect();live={x:(r.left+r.width/2-base.left)/sx-8,y:(r.top+r.height/2-base.top)/sy-8,width:16,height:16};}
      const mix=(a:number,b:number)=>a+(b-a)*ease;
      const dx=base.left+live.x*sx-start.left,dy=base.top+live.y*sy-start.top;
