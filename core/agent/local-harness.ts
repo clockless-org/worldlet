@@ -211,8 +211,6 @@ const errorText=(value:unknown,fallback:string)=>{const item=record(value);retur
 /** OpenClaw cannot read a key its configuration names (docs.openclaw.ai/gateway/secrets: a `store` SecretRef with no
  * entry, or an `env` one with no value): one plain line with the key's name and its own command to save it, never the
  * raw resolver text. Only names reach here, never values. Null when the text is not that. */
-/** True for a failure `openClawMissingKey` reworded: the Agent itself runs, one of its keys is not saved. */
-export const isOpenClawMissingKey=(text:string)=>text.startsWith('OpenClaw can’t find its key ');
 export function openClawMissingKey(text:string):string|null {
  const name=/Secret store entry "([A-Z][A-Z0-9_]{0,127})" was not found/.exec(text)?.[1]??/Environment variable "([A-Z][A-Z0-9_]{0,127})" is missing or empty/.exec(text)?.[1];
  return name?`OpenClaw can’t find its key ${name}, so its model can’t answer. Save it in Terminal with: openclaw secrets store set ${name}`:null;

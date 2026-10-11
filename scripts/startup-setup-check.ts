@@ -425,7 +425,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,memory:{name:'Nova',user:true,longTerm:true,model:false}}],recommended:'codex',selected:sessionStorage.getItem('fixture-agent')};
     if(b.action==='agentHarness'&&b.operation==='requested'){const id=w.requested;w.requested=null;return {id};}
     if(b.action==='agentHarness'&&b.operation==='select'){if(scenario==='fails')throw Error('OpenClaw did not answer.');sessionStorage.setItem('fixture-agent',b.id);
-     if(scenario==='key-missing')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,keep:true,message:'OpenClaw can’t find its key MINIMAX_API_KEY, so its model can’t answer. Save it in Terminal with: openclaw secrets store set MINIMAX_API_KEY'}})),300);
+     if(scenario==='key-missing')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,message:'OpenClaw can’t find its key MINIMAX_API_KEY, so its model can’t answer. Save it in Terminal with: openclaw secrets store set MINIMAX_API_KEY'}})),300);
      if(scenario==='check-fails')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,message:'OpenClaw did not answer.'}})),300);
      return {ok:true,id:b.id,title:'OpenClaw',connected:true,...b.checkLater?{checking:true}:{}};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Nova',memories:[{kind:'soul'}],model:{ok:false},summary:{},history:{conversations:2,notes:0,skills:0,routines:0,list:[{title:'Trip plan',messages:4}]}};
@@ -443,19 +443,24 @@ await withBrowser(fileAccess,async browser=>{
    assert.deepEqual(await selects(),[],'Nothing requested at launch: setup waits on its first page');
    await page.evaluate(()=>{const w=window as any;w.requested='openclaw';window.dispatchEvent(new CustomEvent('worldlet:connect-agent'));});
   }
-  if(scenario==='found'||scenario==='second-launch'||scenario==='key-missing'){
+  if(scenario==='found'||scenario==='second-launch'||scenario==='key-missing'||scenario==='check-fails'){
    await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
    assert.deepEqual(await selects(),['openclaw'],'The named Agent is connected with the same select as the big button');
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='openclaw')),'and brought in');
    assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
-   if(scenario==='key-missing'){await page.getByText(/find its key MINIMAX_API_KEY/).waitFor();assert.equal(await page.getByRole('heading',{name:'Nova moved in'}).count(),1,'A missing model key keeps setup going and says which key');}
+   // A failed answer check never stops onboarding (owner decision 2026-10-11): setup stays on the second half and says why.
+   if(scenario==='key-missing'||scenario==='check-fails'){
+    await page.getByText(scenario==='key-missing'?/find its key MINIMAX_API_KEY/:'OpenClaw did not answer.').waitFor();
+    assert.equal(await page.getByRole('heading',{name:'Nova moved in'}).count(),1,'setup goes on after a failed check');
+    assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
+    assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.checkLater)),[true],'Setup does not wait for the answer check');
+   }
   }else{
    const message=scenario==='missing'?'Hermes Agent isn’t installed on this computer.':'OpenClaw did not answer.';
    await page.getByText(message,{exact:true}).waitFor();
    assert.equal(await page.getByRole('heading',{name:'Give your agent a world'}).count(),1,'The normal first half stays');
    assert.deepEqual(await selects(),scenario==='missing'?[]:['openclaw']);
    if(scenario!=='missing')assert.equal(await page.locator('.setup-agent-default[data-agent="openclaw"]').count(),1,'The named Agent stays picked');
-   if(scenario==='check-fails')assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.checkLater)),[true],'Setup does not wait for the answer check');
   }
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='requested').length>=1),true);
   assert.deepEqual(errors,[]);await page.close();

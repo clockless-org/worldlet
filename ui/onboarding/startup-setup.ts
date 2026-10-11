@@ -78,18 +78,15 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  const onConnectRequest=()=>{if(!disposed)void detectAgents();};
  window.addEventListener('worldlet:connect-agent',onConnectRequest);
  // The short turn that proves the chosen Agent answers runs after setup moves on (`checkLater`): a half-minute cold start
- // for a large Hermes Agent no longer holds the button. If it fails while that Agent is still the one being set up, the
- // person is back on the first half with the reason, as when the check held the button.
+ // for a large Hermes Agent no longer holds the button. If it fails, setup still goes on with what was read on this computer
+ // and says why in one line (owner decision 2026-10-11: these errors never stop onboarding; an OpenClaw model key that was
+ // not saved used to send the person back to the first half again and again).
  let checkStarted=0;
  const onAgentCheck=(event:Event)=>{
   const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.ok!==false||detail.id!==draft.agent)return;
   productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
-  // The Agent runs but one of its model keys is not saved (OpenClaw's MINIMAX_API_KEY, owner report 2026-10-11): setup
-  // keeps going and says which key, instead of sending the person back to the first half again and again.
-  if(detail.keep===true){notice=String(detail.message||'').slice(0,300);render();return;}
-  delete draft.agent;delete draft.agentName;draft.connected=false;step=0;notice='';
-  error=String(detail.message||'').slice(0,300);
-  persist();render();
+  notice=String(detail.message||'').slice(0,300);
+  render();
  };
  window.addEventListener('worldlet:agent-check',onAgentCheck);
  const languages=['en','zh','ja','es'];
