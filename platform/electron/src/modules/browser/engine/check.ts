@@ -45,6 +45,23 @@ async function until<T>(label:string,read:()=>T|Promise<T>,timeout=15000):Promis
  for(;;){const value=await read();if(value)return value;if(Date.now()>end)throw Error('timed out: '+label);await wait(50);}
 }
 
+// An engine that never says it is ready is ended, and the next start spawns a new one instead of repeating the failure.
+if(process.platform!=='win32'){
+ const fake=path.join(profile.root,'never-ready'),pidFile=fake+'.pid';
+ fs.writeFileSync(fake,`#!/bin/sh\necho $$ > '${pidFile}'\nexec sleep 60\n`,{mode:0o755});
+ const engine=new WebEngine(profile,{executable:fake,addon:null});
+ engine.startTimeout=500;
+ const alive=(pid:number)=>{try{process.kill(pid,0);return true;}catch{return false;}};
+ for(const attempt of [1,2]){
+  await assert.rejects(engine.start(),/did not start/,`start ${attempt} times out`);
+  assert.equal(engine.running,false,'a start that timed out leaves no engine running');
+  const pid=Number(fs.readFileSync(pidFile,'utf8'));fs.rmSync(pidFile);
+  const deadline=Date.now()+3000;while(Date.now()<deadline&&alive(pid))await new Promise(resolve=>setTimeout(resolve,50));
+  assert.equal(alive(pid),false,'the engine that never got ready is ended');
+ }
+ console.log('PASS website engine: a start that times out ends its process, and the next start spawns a new one');
+}
+
 const files=locateEngine(profile);
 if(!files){
  // CEF is pinned for macOS, Windows and Linux x64 (platform/web-engine/cef.json).

@@ -100,6 +100,8 @@ export class WebEngine {
  private nextQuery=1;
  private queries=new Map<number,(message:EngineMessage)=>void>();
  private stopping=false;
+ /** How long a new engine has to say it is ready before it is given up and ended. */
+ startTimeout=30_000;
  /** When `restart` last ended an engine that stopped drawing (0: never). */
  restartedAt=0;
  addon:SurfaceAddon|null=null;
@@ -158,12 +160,16 @@ export class WebEngine {
    const child=spawn(this.files.executable,args,{stdio:['pipe','pipe','pipe'],windowsHide:true,...linux?{cwd:path.dirname(this.files.executable)}:{}});
    this.child=child;this.buffer=Buffer.alloc(0);
    if(child.pid)this.addon?.setSender(child.pid);
-   const timer=setTimeout(()=>reject(new Error('The website engine did not start.')),30_000);
-   child.stdout!.on('data',(chunk:Buffer)=>this.read(chunk,ready=>{clearTimeout(timer);this.version={cef:ready.cef,chromium:ready.chromium};resolve();}));
+   // An engine that never got ready, or never spawned, is let go and ended, so the next page starts a new one
+   // instead of waiting on this failed start for good.
+   let ready=false;
+   const abandon=(error:Error)=>{if(ready)return;clearTimeout(timer);if(this.child===child){this.child=null;this.started=null;}try{child.kill();}catch{}reject(error);};
+   const timer=setTimeout(()=>abandon(new Error('The website engine did not start.')),this.startTimeout);
+   child.stdout!.on('data',(chunk:Buffer)=>this.read(chunk,message=>{ready=true;clearTimeout(timer);this.version={cef:message.cef,chromium:message.chromium};resolve();}));
    // Chromium's own log lines; kept short so a noisy page cannot flood the host.
    child.stderr!.on('data',()=>{});
    child.stdin!.on('error',()=>{});
-   child.on('error',error=>{clearTimeout(timer);reject(error);});
+   child.on('error',abandon);
    child.on('exit',(code,signal)=>{
     clearTimeout(timer);reject(new Error('The website engine stopped.'));
     if(linux&&child.pid)removeFrames(child.pid);
