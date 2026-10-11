@@ -232,9 +232,17 @@
 .setup-gathering .setup-parcel{position:absolute;margin:0;transform-origin:50% 50%;will-change:transform,opacity}
 .setup-gathering .setup-parcel img{position:static;width:28px;height:28px;filter:none}
 .setup-gathering img.setup-gathering-fox{transform:translate(-50%,-50%);filter:drop-shadow(0 6px 10px #35453030)}
+.setup-gathering .setup-gathering-mark{position:absolute;margin:0;width:42px;height:42px;box-sizing:border-box;transform:translate(-50%,-50%)}
+.setup-gathering .setup-gathering-mark.setup-tile-chip{width:auto;height:30px;white-space:nowrap}
+.setup-gathering-ring{position:absolute;border-radius:50%;pointer-events:none;box-shadow:0 0 0 3px #ffe4a0cc,0 0 28px 8px #ffe4a088;transform:translate(-50%,-50%)}
 /* The setup's entrance animation holds its opacity, so it stops before everything else fades (owner request 2026-10-10). */
 .world-startup.is-gathering .startup-setup{animation:none}
-.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::before{opacity:0;transition:opacity .4s}
+.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand{opacity:0;transition:opacity .4s}
+/* The World painted behind the page comes forward and fills the screen while everything gathers, so the move into the
+   World never passes through an empty page (owner request 2026-10-11). */
+.world-startup.has-setup::after{content:'';position:absolute;inset:0;z-index:1;background:var(--setup-world-now,var(--setup-world,none)) center 70%/cover no-repeat;opacity:0;pointer-events:none}
+.world-startup.is-gathering::after{opacity:1;transition:opacity .9s ease}
+.world-startup[data-setup-night=dimmed]::after{filter:brightness(.45) saturate(.7) hue-rotate(12deg)}
 .world-startup.setup-entering{transition:opacity .7s ease}
-@media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::before{transition:none}}
+@media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::after{transition:none}}
 #setupArrivingDevices{z-index:10001}

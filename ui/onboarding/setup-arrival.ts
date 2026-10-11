@@ -2,6 +2,20 @@
 export async function landSetupDevices(root:HTMLElement,onLanded:()=>void=()=>{}){
  const layer=document.getElementById('setupArrivingDevices');if(!layer){onLanded();return;}
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ // Setup's Fox walks onto the World's own Fox and only then fades, so Fox never leaves the screen (owner request
+ // 2026-10-11: one continuous move into the World). Without a World Fox on screen it fades where it stands.
+ async function foxHome(img:HTMLImageElement){
+  const start=img.getBoundingClientRect();
+  img.getAnimations().forEach(a=>a.cancel());
+  Object.assign(img.style,{left:start.left+start.width/2+'px',top:start.top+start.height/2+'px',width:start.width+'px',height:start.height+'px'});
+  const avatar=root.querySelector<HTMLElement>('.companion-pet .companion-avatar')||document.querySelector<HTMLElement>('.companion-pet .companion-avatar');
+  const to=avatar?.getBoundingClientRect();
+  if(to&&to.width>0&&to.height>0){
+   const size=Math.max(to.width,to.height);
+   await img.animate([{left:start.left+start.width/2+'px',top:start.top+start.height/2+'px',width:start.width+'px',height:start.height+'px'},{left:to.left+to.width/2+'px',top:to.top+to.height/2+'px',width:size+'px',height:size+'px'}],{duration:reduced?0:900,easing:'cubic-bezier(.3,.7,.2,1)',fill:'forwards'}).finished;
+  }
+  await img.animate([{opacity:1},{opacity:0}],{duration:reduced?0:260,fill:'forwards'}).finished;
+ }
  let metricFrame=-1,settled=false;
  // Read once per frame for every flying device: the live slots and the canvas they sit on.
  let metrics:{modules:Map<string,any>,base:DOMRect,sx:number,sy:number};
@@ -16,6 +30,7 @@ export async function landSetupDevices(root:HTMLElement,onLanded:()=>void=()=>{}
  try{
   const modules=(root as any).sceneMetrics?.modules||[];
   await Promise.all(Array.from(layer.querySelectorAll<HTMLImageElement>('img')).map(async (img,i)=>{
+   if(img.dataset.fox){await foxHome(img);return;}
    const module=modules.find(m=>m.id===img.dataset.appletId),target=module?.arrivalBounds||module?.peekBounds;
    const start=img.getBoundingClientRect();
    // Freeze the completed transformation, so flight owns the geometry from now on.

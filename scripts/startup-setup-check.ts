@@ -318,12 +318,17 @@ await withBrowser(fileAccess,async browser=>{
   // On entry, what came along goes into Fox at the bottom, but Routines go to the Task panel on the right, where the
   // World shows background work (owner layout 2026-10-10): record where each tile's flight ends.
   await page.evaluate(()=>{const w=window as any,animate=Element.prototype.animate;w.parcelEnds={};Element.prototype.animate=function(frames:any,options:any){
+   if(this.classList?.contains('setup-gathering-mark')&&Array.isArray(frames))(w.markEnds||=[]).push({top:parseFloat(String(frames.at(-1).top)),opacity:frames.at(-1).opacity});
    if(this.classList?.contains('setup-parcel')&&Array.isArray(frames)){const r=this.getBoundingClientRect(),m=/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(String(frames.at(-1).transform));if(m)w.parcelEnds[this.className.split(' ')[1]]={x:r.left+r.width/2+Number(m[1]),y:r.top+r.height/2+Number(m[2])};}
    return animate.call(this,frames,options);};});
   await page.getByRole('button',{name:'Enter your world',exact:true}).click();
   await page.waitForFunction(()=>!document.getElementById('worldStartup'),{},{timeout:30000});
   const ends=await page.evaluate(()=>({ends:(window as any).parcelEnds,width:innerWidth,height:innerHeight}));
-  assert.ok(ends.ends['setup-tile-routines']&&ends.ends['setup-tile-routines'].x>ends.width*.8&&ends.ends['setup-tile-routines'].y<ends.height*.6,'Routines fly to the Task panel on the right: '+JSON.stringify(ends));
+  assert.ok(ends.ends['setup-tile-routines']&&ends.ends['setup-tile-routines'].x>ends.width*.6&&ends.ends['setup-tile-routines'].y>ends.height*.75,'Routines go to the dock on Fox’s right (owner layout 2026-10-11): '+JSON.stringify(ends));
+  // The connections float up with the apps and become their icons, never into Fox (owner request 2026-10-11).
+  assert.equal(ends.ends['setup-tile-connections'],undefined,'Connections do not go into Fox');
+  const marks=await page.evaluate(()=>(window as any).markEnds||[]);
+  assert.ok(marks.length===2&&marks.every(m=>m.top<ends.height*.4&&m.opacity===0),'Both connections float up and become app icons: '+JSON.stringify(marks));
   for(const kind of ['setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills'])assert.ok(ends.ends[kind]&&ends.ends[kind].y>ends.height*.6,kind+' goes into Fox at the bottom: '+JSON.stringify(ends));
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
   assert.ok(!result.calls.some(c=>c.action==='connect'),'No Google sign-in');
