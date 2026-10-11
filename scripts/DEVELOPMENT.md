@@ -261,7 +261,7 @@ Hermes' own `agent/.../hermes/logs/` files are separate raw runtime logs and may
 <a id="feedback"></a>
 ## Companion feedback
 
-Feedback lives in Fox's Companion panel, as its last tab. It has no world device, Area, slot, badge or unsolicited popup. The final section also hosts curated release notes from `ui/shell/release-notes.ts`; an empty list shows an honest empty state, not invented announcements.
+Feedback lives in Fox's Companion panel, as its last tab. It has no world device, Area, slot, badge or unsolicited popup.
 
 ### Submission
 
