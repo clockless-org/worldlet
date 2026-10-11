@@ -10,7 +10,7 @@ import {dailyScheduleResult} from '../core/agent/index.ts';
 // Attention item in Worth Knowing (the host saves it with the card, core dailyScheduleResult, as the fake host here
 // does); the Journal never opens by itself, neither when the screen wakes nor at the first touch, and the item's
 // "In your Journal · Open" opens it on the brief's card (docs/ATTENTION-CENTER.md#scheduled-results). The Task panel's
-// Planned timeline shows the next brief and the evening's summary. The evening asks nothing. Then the Journal: each
+// Routines timeline shows the next brief and the evening's summary. The evening asks nothing. Then the Journal: each
 // reply draft the brief left is a card on today's page, and Edit, Send and Skip act on that exact draft; Morning brief
 // saves the person's own list. Bundled UI with a faked native bridge and a fixed clock (the ask polls every 30 s);
 // fictional turns, mail and drafts, no model or account. WORLDLET_ATTENTION_BRIEF_SCREEN saves the brief's card.
@@ -78,7 +78,7 @@ async function hostKeeps(page){
  await page.evaluate(item=>{const w=window as any;w.fixture.worldItems=[item];w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));},item);
  return {item,card:save.artifact.id};
 }
-const plannedTitles=page=>page.locator('.task-panel .task-group[data-group=planned] .task-title').allTextContents();
+const plannedTitles=page=>page.locator('.task-panel .task-group[data-group=routines] .task-title').allTextContents();
 await withBrowser(fileAccess,async browser=>{
  {
   const {page,errors}=await run(browser,6,true);

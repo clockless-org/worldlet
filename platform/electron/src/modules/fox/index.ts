@@ -29,7 +29,7 @@ import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
 import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
-import {TASK_PANEL_KINDS,taskPanelScheduleRuns} from '../../../../../core/tasks/index.ts';
+import {TASK_PANEL_KINDS} from '../../../../../core/tasks/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
@@ -764,8 +764,8 @@ export function installFox(host:Host){
   modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),
   // The World's Task panel (core/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
   // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts), today's history of
-  // background work, the runtime task report (source checks running and next), today's scheduled-job results that
-  // became Attention items, and the Applet tasks working now. Core decides the rows.
+  // older conversations still coming in, the runtime task report (source checks running and next) and the Applet tasks
+  // working now. Finished work is not read: it lives in the Journal. Core decides the rows.
   taskPanel:async()=>{
    if(store.sampleEnabled())return {sample:true};
    const runtime=agent(),schedule=runtime?.schedule?.(),now=Date.now();
@@ -774,7 +774,7 @@ export function installFox(host:Host){
    let tasks:Row[]=[];
    try{tasks=worldTools()?.runtimeTaskReport().rows??[];}catch(error){host.diagnostics.record(error,'taskPanel');}
    return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,
-    history:ledger.history({kinds:TASK_PANEL_KINDS,since,limit:1000}),tasks,runs:taskPanelScheduleRuns(ledger.records('items'),now),
+    history:ledger.history({kinds:TASK_PANEL_KINDS,since,limit:1000}),tasks,
     working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
   },
   foxProactive:request=>proactiveStart(request),

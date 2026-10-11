@@ -50,8 +50,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  // The name tag at Fox's feet: the name at rest, what Fox is doing while it works (fox-name-tag.ts).
  const nameTag=mountFoxNameTag(pet,()=>focusInput());
  // The buttons beside Fox stand in one row on its left, each an icon with its name (owner request
- // 2026-10-05). Settings opens Settings directly (owner Order 2026-10-07; the tutorial's switch is in
- // the World's top-right corner, ui/onboarding/tour-lock.ts); Fox itself is a way to talk, like the message bar (owner feedback 2026-10-04).
+ // 2026-10-05). Settings opens Settings directly (owner Order 2026-10-07; Feedback and the tutorial are in
+ // its Help, owner request 2026-10-11); Fox itself is a way to talk, like the message bar (owner feedback 2026-10-04).
  const side=make('div','companion-side');
  // The Journal is the World's top-left corner, today's date at the head of the Attention Center (owner request
  // 2026-10-08: "journal 下面的那个按钮就不用了…收到左上角"), so Fox keeps only Settings beside it, which steps aside

@@ -63,11 +63,10 @@ and shortened by owner decision 2026-10-10: the person's existing Agent is fully
 `ui/onboarding/tour-lock.ts`). Until it is over only the tour responds (owner request 2026-10-04):
 between spotlight steps (Fox still reading, Fox busy, nothing found yet) a clear layer keeps the
 World, its corner controls and Fox's input from taking clicks, focus or typing, while Fox's bubble
-still works. The **Tutorial** switch, in the World's bottom-right corner (owner request 2026-10-10; it was the last
-line of the top-right corner, which now holds background work and routines), is on throughout, above the spotlight, and is the one way out (owner Order 2026-10-07; it was
-Skip tutorial in a Settings menu beside Fox from 2026-10-05). Turning it off finishes the journey at
-once (`journeyStage=finish`), frees the World, and a note on the switch says the tutorial can be
-turned back on there. Settings beside Fox steps aside while the tour runs, and otherwise opens
+still works. The **Tutorial** switch, in the window's bottom-right corner while a tour runs, is on throughout,
+above the spotlight, and is the one way out (owner Order 2026-10-07). Turning it off finishes the journey at
+once (`journeyStage=finish`), frees the World, and the switch goes; a note beside Settings says the tutorial can be
+turned back on in Settings › Help (owner request 2026-10-11: Tutorial and Feedback go back into Settings). Settings beside Fox steps aside while the tour runs, and otherwise opens
 Settings directly, on Your Agent, with no menu between. Esc does nothing in the first run. The World dims, with soft,
 feathered edges, around two lit areas: one around Fox, its ears, its bubble and the bubble's name
 tag together, and one around what Fox explains (none when that is Fox itself). Every choice is made at Fox, so
@@ -103,13 +102,12 @@ way lifts the spotlight until the person is back in the overview. Continue on st
 `first-value` at once. Existing completed profiles and retired Mail-tour checkpoints do not restart it.
 
 **Replay on demand** (#1327). Once the first run is behind the person (the profile is completed and
-the journey is past first value), the **Tutorial** switch in the World's bottom-right corner is off, and
-turning it on replays the tour (owner Order 2026-10-07: back in the corner, as a switch; from
-2026-10-05 it was an entry in a Settings menu beside Fox). It shows steps 1, 3, 4 and the phone again with the same spotlight,
+the journey is past first value), **Show the tutorial** in Settings › Help replays the tour (owner request
+2026-10-11; from 2026-10-07 it was a switch in the World's corner). It shows steps 1, 3, 4 and the phone again with the same spotlight,
 and only tells: the phone step, last, only says where pairing lives, with no codes; the journey
 stage, setup, accounts and Applets are left as they are; the last Continue just ends it. Turning
 the switch off ends a replay too, and so does Esc; either restores input. While a replay
-runs the switch is on, so a second one cannot start. While Fox is working, the replay waits (a note beside the switch
+runs the switch is on, so a second one cannot start. While Fox is working, the replay waits (a note beside Settings
 says so) and starts once Fox is idle; during an unfinished first task it asks to finish that first.
 
 Setup completion means the world can open, not that a useful task has been completed.
@@ -170,10 +168,10 @@ usable while normal background Applet jobs continue. For rehearsal without OAuth
 [mock Google](../../scripts/DEVELOPMENT.md#mock-google-onboarding-rehearsal).
 
 `world-tour-check.ts` walks every step in the bundled World (the phone a couple of minutes after the first win on a moved clock, and with nothing
-connected the tour moving on without a wait) and replays the tour from the
-Tutorial switch in the corner (keyboard and pointer, one tour at a time, turned off, Esc, wide and narrow
+connected the tour moving on without a wait) and replays the tour from
+Show the tutorial in Settings › Help (keyboard and pointer, one tour at a time, turned off, Esc, wide and narrow
 windows), checks the lock between steps, the card's own Done under the spotlight, and the switch, on, in
-the bottom-right corner over the corner's own during the first run.
+the bottom-right corner during the first run and gone after it.
 
 Closing the window before onboarding is over (setup, then this tour) quits Worldlet instead of
 leaving Fox on the desktop, and minimizing only minimizes (owner request 2026-10-04,

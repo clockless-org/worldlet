@@ -19,7 +19,11 @@ const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
-export function createCompanionSettings({call,host,pages,records,onShow,close}:{call:(action:string,body?:any)=>Promise<any>;host:()=>CompanionSettingsHost|undefined;pages:CompanionSettingsPages;records:{records:HTMLElement;showRecords:()=>void};onShow:(id:string)=>void;close:()=>void}){
+export function createCompanionSettings({call,host,pages,records,onShow,close,openFeedback,replayTutorial}:{call:(action:string,body?:any)=>Promise<any>;host:()=>CompanionSettingsHost|undefined;pages:CompanionSettingsPages;records:{records:HTMLElement;showRecords:()=>void};onShow:(id:string)=>void;close:()=>void;
+ /** Help's Feedback: the feedback panel over the World. */
+ openFeedback:()=>void;
+ /** Help's Show the tutorial: Settings closes and the World's tour plays again. */
+ replayTutorial:()=>void}){
  const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const element=el('section','companion-info-section companion-settings');element.dataset.section='Settings';
  const list=el('nav','companion-settings-list'),detail=el('div','companion-settings-detail');
@@ -327,7 +331,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close}:{
     target.append(note(on?'You are in the sample world. Turn it off to return to your own world.':'Look around a made-up world with sample mail, events and tasks. Your own world and accounts stay as they are.'),toggle,said);
    }
   }},
-  {id:'help',label:'Help',hint:'Restart, diagnostics, reset',show:target=>{
+  {id:'help',label:'Help',hint:'Feedback, tutorial, restart, reset',show:target=>{
    const said=status();
    // The Debug window and every recorded event are for the Worldlet team: folded away (owner request 2026-10-10).
    const team=el('details','companion-settings-elsewhere') as HTMLDetailsElement;
@@ -335,6 +339,13 @@ export function createCompanionSettings({call,host,pages,records,onShow,close}:{
     action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}}),
     el('h5','companion-settings-subhead','Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
    team.ontoggle=()=>{if(team.open)records.showRecords();};
+   // Feedback and the tutorial live here, not in the World's corners (owner request 2026-10-11).
+   target.append(
+    subhead('Feedback'),note('Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it.'),
+    action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'}));
+   // The practice world has no tour.
+   if(!host()?.sample())target.append(subhead('Tutorial'),note('Fox shows you around the World again: Applets, the Attention Center and your phone. Your setup stays as it is.'),
+    action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'}));
    target.append(
     subhead('Restart Fox'),note('If Fox stops answering or seems stuck, restart it. Fox stops what it is doing and starts again; conversations, memory and connections are kept.'),
     action('Restart Fox',async()=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'restart'}),

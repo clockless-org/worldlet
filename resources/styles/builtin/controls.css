@@ -230,9 +230,9 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 .native-console:is(.is-typing,.compact-viewport,[data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true],[data-tour-fox],[data-fox-away]) .fox-name-tag{display:none}
 #notionWorld.native-console:is(.is-typing,.compact-viewport,[data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true],[data-tour-fox],[data-fox-away]){--fox-tag-room:0px}
 :is(#notionWorld.native-console,body) .fox-side-button[hidden]{display:none}
-/* The Tutorial switch, last line of the World's top-right corner (owner Order 2026-10-07, ui/onboarding/tour-lock.ts):
-   the corner's own type, a bulb, the word and a small switch. While the tour runs its copy, on, stands over it on the
-   body, above the spotlight and the lock, wearing the corner's colours. */
+/* The Tutorial switch while a tour runs (owner Order 2026-10-07, ui/onboarding/tour-lock.ts): a bulb, the word and a
+   small switch, on, in the window's bottom-right on the body, above the spotlight and the lock. Once the tour is over
+   it goes; Settings › Help shows the tour again (owner request 2026-10-11). */
 :is(#notionWorld .world-environment,body) .tutorial-switch{order:10;justify-self:end;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;height:28px;min-height:28px;margin:0;padding:0;border:0;border-radius:8px;appearance:none;background:none;box-shadow:none;color:inherit;font:500 var(--ui-text-label,13px)/1.5 var(--ui-font-ui,system-ui);text-shadow:inherit;white-space:nowrap;cursor:pointer;pointer-events:auto}
 :is(#notionWorld .world-environment,body) .tutorial-switch[hidden]{display:none}
 :is(#notionWorld .world-environment,body) .tutorial-switch svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;filter:var(--ui-hud-glyph-shadow,none)}
@@ -243,11 +243,6 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 .tutorial-switch[aria-checked=true] .tutorial-switch-track>i{transform:translateX(12px)}
 @media (prefers-reduced-motion:reduce){.tutorial-switch-track,.tutorial-switch-track>i{transition:none}}
 body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001;color:#fffdf4;text-shadow:0 1px 2px #14251bb3}
-#notionWorld[data-tour-skippable=true] .world-tutorial{visibility:hidden}
-/* The Tutorial switch's corner: the World's bottom-right (owner request 2026-10-10), in the corner controls' ink. */
-#notionWorld .world-tutorial-corner{position:absolute;right:24px;bottom:62px;z-index:30;display:flex;justify-content:flex-end;color:var(--ui-chrome,#fffdf4);text-shadow:var(--ui-shadow-text,0 1px 2px #14251bb3);pointer-events:auto}
-#notionWorld .world-tutorial-corner:not(:has(.world-tutorial:not([hidden]))){display:none}
-@media(max-width:600px){#notionWorld .world-tutorial-corner{right:14px;bottom:54px}}
 /* Order / Feedback: a round bug on its own just left of the message bar on every channel (owner 2026-10-06, kept there
    2026-10-07), the bar's own glass; while an Order listens it glows red, so capturing is always visible. The microphone
    is its twin on the bar's right (owner 2026-10-07). */

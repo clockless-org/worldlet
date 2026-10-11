@@ -75,9 +75,9 @@ await withBrowser(fileAccess,async browser=>{
  await beta.addInitScript(fixture,{available:false,reason:'Only the Alpha and Dev apps can send an Order.'});
  await beta.goto(worldUrl());await beta.locator('#worldStartup').waitFor({state:'detached'});
  await beta.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='order'));
- // Beta and Production: no bug button; Feedback is the button in the World's bottom-right corner (owner 2026-10-10).
+ // Beta and Production: no bug button; Feedback is in Settings › Help (owner 2026-10-11).
  assert.equal(await beta.locator('.companion-order-button').isVisible(),false,'no bug button where Orders cannot be sent');
- await beta.locator('.world-feedback-button').waitFor({state:'visible'});
+ assert.equal(await beta.locator('.world-feedback-button').count(),0,'no Feedback button in the World’s corner');
  await beta.keyboard.press(process.platform==='darwin'?'Meta+b':'Control+b');
  assert.equal(await beta.evaluate(()=>(window as any).calls.some((c:any)=>c.action==='speechStart'||c.action==='order'&&c.operation==='send')),false,'never an Order');
  await beta.screenshot({path:'/tmp/feedback-open.png'});

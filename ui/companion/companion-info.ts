@@ -37,22 +37,21 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const feedback=createCompanionFeedback({call,onVoice:phase=>root.dataset.feedbackVoice=phase});
  // Every recorded event, for the Worldlet team, folded away in Settings › Help.
  const records=createActivityRecords({call});
- // Feedback is a button in the World's bottom-right corner with a small panel of its own (owner request 2026-10-10).
+ // Feedback opens from Settings › Help in a small panel of its own over the World (owner request 2026-10-11: back
+ // into Settings; no button in the World's corner), so Fox stays in view to dictate into it.
  const feedbackPanel=el('dialog','companion-feedback-panel ui-hud-panel');feedbackPanel.id='worldFeedback';feedbackPanel.setAttribute('aria-label','Feedback');
  const feedbackClose=el('button','companion-info-close','×');feedbackClose.type='button';feedbackClose.setAttribute('aria-label','Close feedback');
  feedbackPanel.append(feedback.element,feedbackClose);root.append(feedbackPanel);
- const feedbackCorner=el('div','world-feedback-corner'),feedbackButton=el('button','world-feedback-button');feedbackButton.type='button';
- feedbackButton.innerHTML=uiIcon('chat');feedbackButton.append(el('span','','Feedback'));feedbackButton.setAttribute('aria-haspopup','dialog');feedbackButton.setAttribute('aria-controls',feedbackPanel.id);
- feedbackCorner.append(feedbackButton);root.append(feedbackCorner);
- function closeFeedback(focus=false){if(!feedbackPanel.open)return;void feedback.cancelVoice();feedbackPanel.close();feedbackButton.setAttribute('aria-expanded','false');if(focus)feedbackButton.focus();}
+ // Closing hands focus back to Settings beside Fox, where Feedback was opened from.
+ const settingsButton=()=>root.querySelector('.companion-side .companion-panel-button') as HTMLElement|null;
+ function closeFeedback(focus=false){if(!feedbackPanel.open)return;void feedback.cancelVoice();feedbackPanel.close();if(focus)settingsButton()?.focus();}
  async function openFeedback(){
   if(desktop()){try{await requireWorldSurface(call);}catch{return;}}
-  if(panel.open)dismiss();journal.close();feedbackPanel.show();feedbackButton.setAttribute('aria-expanded','true');(feedback.element.querySelector('textarea') as HTMLElement|null)?.focus();
+  if(panel.open)dismiss();journal.close();feedbackPanel.show();(feedback.element.querySelector('textarea') as HTMLElement|null)?.focus();
  }
- feedbackButton.onclick=e=>{e.stopPropagation();if(feedbackPanel.open)closeFeedback(true);else void openFeedback();};
  feedbackClose.onclick=()=>closeFeedback(true);
  feedbackPanel.addEventListener('cancel',e=>{e.preventDefault();closeFeedback(true);});
- root.addEventListener('pointerdown',e=>{const t=e.target as Node;if(feedbackPanel.open&&!feedbackPanel.contains(t)&&!feedbackCorner.contains(t)&&!(t as Element).closest?.('.companion-avatar,.companion-text-entry'))closeFeedback();},true);
+ root.addEventListener('pointerdown',e=>{const t=e.target as Node;if(feedbackPanel.open&&!feedbackPanel.contains(t)&&!(t as Element).closest?.('.companion-avatar,.companion-text-entry'))closeFeedback();},true);
  window.addEventListener('keydown',e=>{if(feedbackPanel.open&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeFeedback(true);}},true);
  const phone=createCompanionPhone({call});
  // An artifact opens again in the World; the Journal steps aside first.
@@ -65,11 +64,13 @@ export function mountCompanionInfo({root,pet,call,getName}){
   if(desktop()){try{await requireWorldSurface(call);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';return;}}
   if(panel.open)dismiss();journal.open(day,card);
  }
- // The panel is one settings window (owner request 2026-10-10): Fox's profile, Phone, History and Feedback are sections
- // in its one list beside the settings; the World view lends the sample switch and host features.
+ // The panel is one settings window (owner request 2026-10-10): Fox's profile and Phone are sections in its one list
+ // beside the settings, and Help opens Feedback and the tutorial; the World view lends the sample switch and host features.
  const profileHost=el('div','companion-profile-host');
  const PAGE_SECTION={fox:'Profile',phone:'Mobile'};
  const settings=createCompanionSettings({call,host:()=>root.companionSettingsHost,pages:{fox:profileHost,phone:phone.element},records,close:()=>dismiss(),
+  // Help's Feedback and Show the tutorial leave Settings for the World: the feedback panel, or the tour (world-tour.ts).
+  openFeedback:()=>void openFeedback(),replayTutorial:()=>{dismiss();root.dispatchEvent(new CustomEvent('worldlet:tutorial-replay'));},
   onShow:id=>{panel.dataset.section=PAGE_SECTION[id]||'Settings';}});
  root.companionSettings=settings.element;
  let anchorFrame=0,anchorKey='';
