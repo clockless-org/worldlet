@@ -79,9 +79,11 @@ await withBrowser(fileAccess,async browser=>{
  // The size the person picks is kept with it.
  await card.getByRole('button',{name:'Make artifact larger'}).click();
  await page.waitForFunction(()=>[...(window as any).kept.values()].some(a=>a.title==='Three CASA labs'&&a.size==='large'));
+ // Closed, it goes into the Journal: the top-left corner takes it (owner request 2026-10-08). The bounce is brief and the
+ // corner can be redrawn as the card closes, so the check notes the moment it happens rather than polling for it.
+ await page.evaluate(()=>{const w=window as any;w.received=false;new MutationObserver(()=>{if(document.querySelector('.world-today-open.is-receiving'))w.received=true;}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class'],childList:true});});
  await card.getByRole('button',{name:'Close artifact'}).click();
- // Closed, it goes into the Journal: the top-left corner takes it (owner request 2026-10-08).
- await page.locator('.world-today-open.is-receiving').waitFor();
+ await page.waitForFunction(()=>(window as any).received);
 
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Artifacts'}})));
  const book=page.locator('#journalBook'),tab=book.locator('[data-section=Journal]');
