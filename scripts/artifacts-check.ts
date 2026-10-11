@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {artifactSizeFor,artifactFitSteps,artifactBrief,journalDays,journalOrigin,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,artifactFollowUpSent,artifactFollowUpRequest,type Artifact} from '../core/artifacts/index.ts';
+import {artifactSizeFor,artifactFitSteps,artifactBrief,journalDays,journalOrigin,dailyNoteArtifacts,DAILY_NOTE_DAYS,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,artifactFollowUpSent,artifactFollowUpRequest,type Artifact} from '../core/artifacts/index.ts';
 // The rules for artifacts (core/artifacts/README.md): IDs, what Fox may show, the default size, reading a stored
 // record, saving one again, the World's limit, the Artifacts page's days and what Fox finds.
 
@@ -228,6 +228,13 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  assert.equal(journalOrigin({kind:'attention',title:'Dinner',category:'Coming Up'}),'Coming Up');
  assert.equal(journalOrigin({kind:'answer',title:'Standup · Summary'}),'Meeting');
  assert.equal(journalOrigin({kind:'reply',title:'Re: Q4'}),'Reply');
+ // An Agent's daily notes: one Journal page per day, newest first, its line the first thing it says.
+ const noted=dailyNoteArtifacts('OpenClaw',[{date:'2026-09-01',text:'# 2026-09-01\n\n- Booked dentist.'},{date:'2026-09-01',text:'Called mom.'},{date:'2026-09-03',text:'Ran 5 km.'},{date:'notes',text:'not a day'},{date:'2026-09-04',text:'  '}],{idFor:date=>'art-'+date.replace(/-/g,'')+'aaaa',at:date=>Date.parse(date+'T12:00:00Z')/1000});
+ assert.deepEqual(noted.map(a=>[a.id,a.title,a.brief,a.origin,journalOrigin(a)]),[['art-20260903aaaa','Daily note · OpenClaw','Ran 5 km.',{type:'conversation',place:'OpenClaw daily notes'},'Daily note'],['art-20260901aaaa','Daily note · OpenClaw','Booked dentist.',{type:'conversation',place:'OpenClaw daily notes'},'Daily note']]);
+ assert.match(noted[1].body,/Booked dentist\.\n\nCalled mom\./);
+ assert.ok(noted.every(a=>readArtifact(a)),'a kept artifact');
+ assert.equal(journalDays(noted,new Date(2026,8,10))[1].entries[0].origin,'Daily note');
+ assert.equal(dailyNoteArtifacts('OpenClaw',Array.from({length:DAILY_NOTE_DAYS+5},(_,i)=>({date:new Date(Date.UTC(2026,0,1+i)).toISOString().slice(0,10),text:'x'})),{idFor:()=>'art-aaaaaaaaaaaa',at:()=>0}).length,DAILY_NOTE_DAYS);
 }
 // Blocks (owner Order 2026-10-08): Worldlet's own components on the card, checked; what the person ticks or sets is kept.
 {
@@ -292,4 +299,4 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  assert.ok(asked.text.startsWith('Book TAC for Tuesday\n\nThis follows up the card "Which CASA lab" (artifact "art-1")')&&asked.text.includes('show_artifact'),asked.text);
  assert.deepEqual([asked.displayText,asked.name,asked.status],['Book TAC for Tuesday','Which CASA lab','Book TAC for Tuesday']);
 }
-console.log('PASS artifacts: the Journal timeline and its one origin label, three sizes, IDs, what Fox may show, the one-card budget, default sizes, stored records, showing again, the World limit, days and finding, next steps, pages Fox made');
+console.log('PASS artifacts: the Journal timeline and its one origin label, an Agent’s daily notes as one page a day, three sizes, IDs, what Fox may show, the one-card budget, default sizes, stored records, showing again, the World limit, days and finding, next steps, pages Fox made');

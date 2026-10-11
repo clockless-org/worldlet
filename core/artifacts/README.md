@@ -17,6 +17,7 @@ Owner decision 2026-10-10: whatever Fox produces is one kind of thing, an **arti
 | Ongoing theme page | An answer artifact about a theme | Conversation |
 | Moment Applet, widget | A page Fox made, the interactive artifact ([Moment Applets](#moment-applets)) | Made by Fox, then Open until…, Kept or Finished |
 | Reply draft | A draft Fox prepared, waiting for Send | Reply |
+| An Agent's daily note (OpenClaw `memory/YYYY-MM-DD.md`) | That day's page, brought at setup (`dailyNoteArtifacts`, owner request 2026-10-11) | Daily note |
 | Journal page | Gone: the Journal is one timeline of days | |
 
 A page Fox made keeps its own record and sandbox (the person's own Applets, below), since it runs code; everywhere the person meets it beside the others, it is an artifact like them.
