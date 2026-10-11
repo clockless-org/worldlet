@@ -42,24 +42,20 @@
  .native-console .world-task{min-height:44px;padding-block:7px}
  .native-console .world-task:not([aria-current=location]) .world-task-objective{display:none}
  .native-console .world-matter .world-task-title{-webkit-line-clamp:2}
- .native-console>.companion-context{top:104px;left:50%;max-width:calc(100% - 28px);font-size:var(--ui-text-section)}
+ .native-console>.companion-context{left:50%;max-width:calc(100% - 28px);font-size:var(--ui-text-section)}
  .native-console>.notion-content,.native-console .notion-dialog{inset:204px 12px var(--world-footer-clearance,64px);padding:20px}
  .native-console .notion-hud{bottom:24px;width:calc(100% - 24px)}
  .native-console .world-actions{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr)}
- .native-console .world-actions .world-capsule{width:max-content;max-width:calc(100% - 8px);margin:0 4px;padding:7px 10px;min-height:40px;font-size:var(--ui-text-label);gap:6px}
+ .native-console .world-actions .world-capsule{width:max-content;max-width:calc(100% - 8px);margin:0 4px;padding:7px 10px;font-size:var(--ui-text-label);gap:6px}
  .native-console .companion-dialogue{width:calc(100% - 16px);bottom:158px;padding:16px 28px 16px 16px}
  .native-console .companion-text-entry,.native-console .companion-text-entry #notionCommand{height:44px;min-height:44px}
  .native-console .companion-text-entry :is(.companion-input-state,.companion-input-handle){line-height:16px}
  .native-console .companion-text-entry #notionInput{font-size:16px}
- .native-console .world-environment{gap:5px;flex-wrap:wrap}
+ .native-console .world-environment{flex-wrap:wrap}
  .native-console .world-environment :is(#worldDate,#worldClock,#worldWeather,.world-audio){font-size:12px}
  .ui-choice-grid{grid-template-columns:1fr}
 }
 @media(max-height:560px){.native-console>.companion-context{top:20px}.native-console .world-task-tracker{display:none}.native-console>.notion-content,.native-console .notion-dialog{top:64px;bottom:var(--world-footer-clearance,64px)}.native-console .notion-hud{bottom:12px}}
-@media(max-width:800px){
-
- .native-console>.notion-content,.native-console .notion-dialog{top:calc(var(--ui-top-bound,160px) + 20px + var(--ui-text-section) * 1.4)}
-}
 .ui-preference{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0;font-size:var(--ui-text-label)}
 .ui-preference select{width:auto}
 .native-console[data-text-scale="2"] .notion-hud{width:min(880px,calc(100% - 32px))}
@@ -95,7 +91,7 @@
 
 /* Reader fills the left two-thirds; companion and foreground share the right third.
    Reserve 24px on both sides plus the cloud’s 10px painted overhang. */
-.native-console.radial-pet-console.companion-console .companion-dialogue{box-sizing:border-box;width:calc(100vw / 3 - 68px);min-width:0;max-width:calc(100vw / 3 - 68px);max-height:var(--fox-dialogue-room,calc(100dvh - 280px))}
+.native-console.radial-pet-console.companion-console .companion-dialogue{box-sizing:border-box;min-width:0;max-height:var(--fox-dialogue-room,calc(100dvh - 280px))}
 .native-console .native-conversation{max-height:none;overflow:clip;overscroll-behavior:none;flex:none}
 @media(min-width:801px){
  /* The same HUD group is translated, never rescaled or restyled for a reader. */
@@ -215,7 +211,7 @@
 .native-console .task-panel-body{position:relative;isolation:isolate;display:flex;flex-direction:column;box-sizing:border-box;min-height:0;max-height:100%;overflow:visible;padding:16px 12px}
 /* Only the rows and windows take the pointer: the column's labels, gaps and Now marker let a tap reach the World's
    devices under them (Alpha 4176, #236/#237). The wheel over a row still scrolls the column. */
-.native-console .task-panel-scroll{display:flex;flex-direction:column;gap:16px;flex:0 1 auto;min-height:0;margin:-8px -6px;padding:8px 6px 12px;gap:12px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#fff9e94d transparent;pointer-events:none;
+.native-console .task-panel-scroll{display:flex;flex-direction:column;flex:0 1 auto;min-height:0;margin:-8px -6px;padding:8px 6px 12px;gap:12px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#fff9e94d transparent;pointer-events:none;
  -webkit-mask-image:linear-gradient(transparent,#000 8px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(transparent,#000 8px,#000 calc(100% - 12px),transparent)}
 .native-console .task-panel-chip{display:none}
 /* Its rows are small and sit over busy places, so under that backing it also wears the theme's HUD wash once (the
