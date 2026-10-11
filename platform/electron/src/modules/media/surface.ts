@@ -106,6 +106,8 @@ window.__media={
 };
 </script>`;
 
+const discard=(view:WebContentsView)=>{try{if(!view.webContents.isDestroyed())view.webContents.close();}catch{}};
+
 export class MediaSurface {
  private view:WebContentsView|null=null;
  private opening:Promise<WebContentsView>|null=null;
@@ -140,14 +142,15 @@ export class MediaSurface {
    const contents=view.webContents;
    contents.setWindowOpenHandler(()=>({action:'deny'}));
    contents.on('will-navigate',event=>event.preventDefault());
-   contents.on('render-process-gone',()=>{if(this.view===view){this.view=null;this.opening=null;this.emit({type:'gone'});}});
+   // A dropped view is closed too, or its WebContents stays alive behind the next one.
+   contents.on('render-process-gone',()=>{if(this.view===view){this.view=null;this.opening=null;discard(view);this.emit({type:'gone'});}});
    this.view=view;
    await contents.loadFile(file);
    void this.pump(view);
    return view;
   })();
   this.opening=opening;
-  opening.catch(()=>{if(this.opening===opening){this.opening=null;this.view=null;}});
+  opening.catch(()=>{if(this.opening===opening){const view=this.view;this.opening=null;this.view=null;if(view)discard(view);}});
   return opening;
  }
  private async pump(view:WebContentsView){
@@ -166,7 +169,7 @@ export class MediaSurface {
  close(){
   this.closed=true;
   const view=this.view;this.view=null;this.opening=null;
-  try{if(view&&!view.webContents.isDestroyed())view.webContents.close();}catch{}
+  if(view)discard(view);
   if(this.directory)fs.rmSync(this.directory,{recursive:true,force:true});
  }
 }
