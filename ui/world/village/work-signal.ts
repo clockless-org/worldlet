@@ -2,12 +2,16 @@ import {Graphics} from 'pixi.js';
 export function createWorkSignal(host,key,root,width,top){
  const battery=new Graphics();battery.eventMode='none';root.addChild(battery);
  const meter=document.createElement('div');meter.className='applet-weekly-battery';meter.dataset.applet=key;meter.setAttribute('role','meter');meter.setAttribute('aria-label','Weekly allowance remaining');
- meter.innerHTML='<span></span>';host.append(meter);let previous='';
+ meter.innerHTML='<span></span>';host.append(meter);let previous='',placed='',drawn:string|null=null;
  return {update(allowance:{remaining?:number;resetsAt?:number;unavailable?:boolean}|undefined,time,moving,visible,x,y,scale=1){
   battery.visible=visible;
   const placeholder=!!allowance?.unavailable,quota=allowance?.remaining!=null&&allowance.resetsAt!=null?{remaining:allowance.remaining,resetsAt:allowance.resetsAt}:null,label=placeholder?'Usage unavailable':quota?Math.round(quota.remaining)+'% weekly remaining · resets '+new Date(quota.resetsAt*1000).toLocaleString():'Weekly allowance unavailable';
-  meter.hidden=!visible;meter.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%) scale(${scale})`;
+  // Runs every frame: write only what changed (an unchanged `hidden` still queues a mutation record).
+  if(meter.hidden!==!visible)meter.hidden=!visible;
+  const transform=`translate(${x}px,${y}px) translate(-50%,-100%) scale(${scale})`;if(transform!==placed){placed=transform;meter.style.transform=transform;}
   if(label!==previous){previous=label;meter.title=label;meter.setAttribute('aria-valuetext',label);meter.dataset.known=String(!!quota);if(quota)meter.setAttribute('aria-valuenow',String(quota.remaining));else meter.removeAttribute('aria-valuenow');meter.style.setProperty('--remaining',quota?quota.remaining+'%':'0%');}
+  // The battery's shape follows only the quota; redraw it when that changes, not every frame.
+  const shape=(placeholder?'unavailable:':'')+(quota?quota.remaining:'none');if(shape===drawn)return;drawn=shape;
   battery.clear();const bw=width*.22,bh=width*.066,left=-bw/2,by=top-width*.10;
   battery.roundRect(left,by,bw,bh,width*.012).fill({color:0x443d31,alpha:.9}).stroke({width:width*.009,color:0xe4cea1,alpha:.9});
   battery.rect(bw/2,by+bh*.3,width*.016,bh*.4).fill(0xd4bd91);

@@ -26,7 +26,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  host.prepend(world);
  const stage=createAppletStage(host,onPick),stages=new Map(),activities=new Map<string,any>();
  const imageLamps=createAppletImageLamps(shellRoot,(globalThis as any).__WORLDLET_25D_ASSETS__),lampLabels=new Map<string,ReturnType<typeof createLampLabel>>();
- const levelZoom=createLevelZoom(shellRoot,host);
+ const levelZoom=createLevelZoom(shellRoot,host),reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
  let view:WorldState['view']={id:'overview',level:'overview'},environment={},motion=true,disposed=false,connections=options.connections||[],marked=false;
  const interaction={placementArea:null as string|null,framedArea:null as string|null,inset:0,hoveredApplet:null as string|null,hoveredArea:null as string|null};
  let arriving:string[]=[],hidden=new Set(options.hiddenApplets||[]),unlocked=options.unlockedApplets?new Set(options.unlockedApplets):null;
@@ -62,8 +62,12 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  /** The World's marks as the shell's pins: the shell draws the buttons, names, lamps and attention marks. */
  const marks=(points:Readonly<Record<string,WorldMark>>)=>{
   if(disposed)return;marked=true;const out={},action={applet:'space',area:'region-more','area-add':'region-more',slot:'placement'},kind={applet:'app',area:'region-more','area-add':'region-add',slot:'region-slot'};
+  // Marks arrive every frame: index the Applets and areas once, keeping the first of any shared id as find() did.
+  const roomsById=new Map<string,any>(),areasById=new Map<string,any>();
+  for(const r of rooms){const id=r.moduleId||r.id;if(!roomsById.has(id))roomsById.set(id,r);}
+  for(const b of options.buildings||[])if(!areasById.has(b.id))areasById.set(b.id,b);
   for(const m of Object.values(points)){
-   const room=m.kind==='applet'?rooms.find(r=>(r.moduleId||r.id)===m.id):null,area=(options.buildings||[]).find(b=>b.id===m.id);
+   const room=m.kind==='applet'?roomsById.get(m.id):null,area=areasById.get(m.id);
    if(m.kind==='applet'&&!room)continue;
    const key=m.kind==='applet'?'space:'+room.id:m.kind==='slot'?'region-slot:'+m.slot:kind[m.kind]+':'+regionId(m.id);
    const point:any={id:room?room.id:m.id,title:m.kind==='area-add'||m.kind==='slot'?'+':room?.title||area?.title||m.id,action:action[m.kind],kind:kind[m.kind],level:m.kind==='applet'?'room':'building',x:m.x,y:m.y,visible:m.visible,hovered:!!m.hovered};
@@ -82,7 +86,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  function drawLamps(points:Record<string,any>){
   const covered=shellInteraction(host).covered,current=view.level==='applet'?rooms.find(r=>r.moduleId===view.id):null;
   const byKey=new Map<string,LampSignal>();for(const r of rooms){const s=signalOf(r);if(s)byKey.set(r.key,s);}
-  const still=!motion||matchMedia('(prefers-reduced-motion: reduce)').matches||document.hidden;
+  const still=!motion||reducedMotion.matches||document.hidden;
   imageLamps.update(byKey,current?.key,!covered,performance.now(),still);
   for(const r of rooms){
    const signal=byKey.get(r.key);if(!signal)continue;
@@ -125,7 +129,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    const next:WorldState['view']=id==='overview'?{id,level:'overview'}:level==='object'?{id:rooms.find(r=>r.moduleId===id||r.id===id)?.moduleId||id,level:'applet'}:{id,level:'area'};
    // Moving between the World (or an open area) and an Applet zooms (level-zoom.ts); moving between two Applets does not.
    const entering=view.level!=='applet'&&next.level==='applet',leaving=view.level==='applet'&&next.level!=='applet';
-   const shot=(entering||leaving)&&motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!document.hidden?mount.picture?.()||null:null;
+   const shot=(entering||leaving)&&motion&&!reducedMotion.matches&&!document.hidden?mount.picture?.()||null:null;
    const origin=shot?entering?levelZoom.enter(next.id,center(next.id)):levelZoom.leave(view.id,center(view.id)):null;
    if(!shot&&(entering||leaving))levelZoom.finish();
    view=next;refresh();

@@ -64,7 +64,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
 
  const app=new Application(),world=new Container(),buildings=options.areas.filter(b=>b.id!=='building-people');world.sortableChildren=true;
  let view:any=null;const foregroundLayer=new Container(),softFocus=new BlurFilter({strength:3,quality:3,resolution:.5});
- const viewportFilterArea=new Rectangle();
+ const viewportFilterArea=new Rectangle(),stageHit=new Rectangle();
  let blurredWorld=false;
  let placementArea:string|null=null;
  let cameraFrame={zoom:1,anchor:OVERVIEW_CENTER},cameraSettled=true;
@@ -123,7 +123,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
  const toWorld=(point:number[])=>[point[0]*WORLD_WIDTH,point[1]*WORLD_HEIGHT];
  function transform(amount=1){
   const interaction=shell();
-  if(ready)app.stage.hitArea=new Rectangle(0,0,host.clientWidth,host.clientHeight);
+  if(ready){stageHit.width=host.clientWidth;stageHit.height=host.clientHeight;}
   // An open area panel zooms its area into the World left of the panel (owner request 2026-10-06).
   const shelf=shelfArea&&level!=='object'?shelfArea:null,visibleWidth=Math.max(1,host.clientWidth-(shelf?shelfInset:0));
   if(shelf){const frame=areaCameraFrame(shelf,visibleWidth,host.clientHeight);cameraFrame={zoom:Math.max(1.6,frame.zoom),anchor:frame.anchor};}
@@ -275,7 +275,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
   // Compile the transition blur during scene setup, not the first Applet click.
   const warmBlur=new Container();warmBlur.addChild(new Graphics().rect(0,0,32,32).fill(0xffffff));warmBlur.filters=[softFocus];
   const warmTexture=app.renderer.generateTexture({target:warmBlur});warmTexture.destroy(true);warmBlur.filters=null;warmBlur.destroy({children:true});
-  host.prepend(app.canvas);app.stage.eventMode='static';app.stage.hitArea=new Rectangle(0,0,host.clientWidth,host.clientHeight);app.stage.on('pointertap',e=>{if(e.button===0&&!dragged&&e.target===app.stage&&level!=='overview')options.back();});app.canvas.dataset.renderer='pixi-webgl';app.canvas.addEventListener('wheel',wheel,{passive:false});app.canvas.addEventListener('pointerdown',pointerDown);window.addEventListener('pointermove',pointerMove);window.addEventListener('pointerup',pointerUp);window.addEventListener('pointercancel',pointerCancel);window.addEventListener('blur',pointerCancel);app.canvas.addEventListener('contextmenu',contextMenu);app.stage.addChild(world,foregroundLayer);
+  host.prepend(app.canvas);app.stage.eventMode='static';stageHit.width=host.clientWidth;stageHit.height=host.clientHeight;app.stage.hitArea=stageHit;app.stage.on('pointertap',e=>{if(e.button===0&&!dragged&&e.target===app.stage&&level!=='overview')options.back();});app.canvas.dataset.renderer='pixi-webgl';app.canvas.addEventListener('wheel',wheel,{passive:false});app.canvas.addEventListener('pointerdown',pointerDown);window.addEventListener('pointermove',pointerMove);window.addEventListener('pointerup',pointerUp);window.addEventListener('pointercancel',pointerCancel);window.addEventListener('blur',pointerCancel);app.canvas.addEventListener('contextmenu',contextMenu);app.stage.addChild(world,foregroundLayer);
   focusScenery=await createFocusScenery(payload,image,()=>{if(!dragged&&level!=='overview')options.back();});if(closed)return;app.stage.addChildAt(focusScenery.layer,1);
   areaScenery=await createAreaScenery(payload,image);if(closed)return;app.stage.addChildAt(areaScenery.layer,1);
   const extended=await image(payload.surroundings);if(closed)return;
@@ -366,17 +366,19 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    // Projection writes DOM pin positions. Read dimensions before those writes,
    // not between projection and lighting, which forces a second frame layout.
    const width=host.clientWidth,height=host.clientHeight;
-   const amount=reduced.matches?1:1-Math.exp(-tick.deltaMS/100);const detail=shell().detailOpen&&host.clientWidth>800?1:0;framing+=(detail-framing)*amount;transform(amount);
+   const amount=reduced.matches?1:1-Math.exp(-tick.deltaMS/100);const detail=shell().detailOpen&&width>800?1:0;framing+=(detail-framing)*amount;transform(amount);
+   const light=lightingState(environment);
    // The overview's atmosphere never leaks into an authored room.
-   ambience?.update(time,animate&&level!=='object'&&!closeArea,lightingState(environment).lamps);
+   ambience?.update(time,animate&&level!=='object'&&!closeArea,light.lamps);
    // Working devices liven the World (work-motion.ts); not while an Applet is open.
-   workMotion.update(time,devices.filter(d=>d.working&&d.root.visible&&allowed(d.room)).length,animate&&level!=='object'&&!closeArea);
+   let working=0;for(const d of devices)if(d.working&&d.root.visible&&allowed(d.room))working++;
+   workMotion.update(time,working,animate&&level!=='object'&&!closeArea);
    // The Home chimney smokes faster and higher the busier the World is.
    smokeTime+=(time-smokeAt)*(1+1.5*workMotion.liveliness);smokeAt=time;
    lighting?.update(environment,time,view,width,height,framing);
    lighting?.updateMotion?.(time,animate&&level==='overview'&&!closeArea);
-   const chimney=regions.find(r=>r.landmark?.metrics.theme==='home')?.landmark;
-   const smokeInDaylight=lightingState(environment).smoke;
+   const chimney=regions.find(r=>r.landmark?.theme==='home')?.landmark;
+   const smokeInDaylight=light.smoke;
    smoke.forEach((p,i)=>{p.visible=!!chimney&&smokeInDaylight;if(!p.visible)return;const m=chimney.metrics,age=(smokeTime*.18+i/8)%1,busy=workMotion.liveliness;p.position.set(m.anchor[0]+m.width*(.74-.5)+age*8,m.anchor[1]-m.height*.94-age*65*(1+.4*busy));p.scale.set(.4+age*1.3*(1+.25*busy));p.alpha=(1-age)*.65*(1+.3*busy);});
    for(const d of devices){
     d.enchantment?.update(time,animate&&d.root.visible&&d.body.visible&&level!=='object');

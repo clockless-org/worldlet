@@ -27,7 +27,7 @@ export async function createVillageLighting({stage,host,payload,image,dayLayers}
  // The day plate fills the screen: one pass that applies the scenery tone, then the grade, instead of
  // two full-screen filter passes every frame.
  const sceneryGrade=new ColorMatrixFilter({resolution:'inherit'});
- const owned:Texture[]=[];let lastKey='',closed=false,metrics:any={};
+ const owned:Texture[]=[];let lastKey='',closed=false,metrics:any={},skyWidth=-1,skyHorizon=-1,weatherDrawn=false;
  emission.eventMode=atmosphere.eventMode='none';
  stage.addChildAt(emission,2);stage.addChildAt(atmosphere,3);
  const glow=canvasTexture(128,128,c=>{const g=c.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,222,154,.9)');g.addColorStop(.2,'rgba(255,197,101,.45)');g.addColorStop(.55,'rgba(255,181,89,.12)');g.addColorStop(1,'rgba(255,181,89,0)');c.fillStyle=g;c.fillRect(0,0,128,128);});owned.push(glow);
@@ -81,7 +81,10 @@ export async function createVillageLighting({stage,host,payload,image,dayLayers}
   }
   skyWash.alpha=0;
   const sp=skyBodyPlacement(s.celestial.solar,width,height,view),mp=skyBodyPlacement(s.celestial.lunar,width,height,view);
-  celestial.alpha=1-detail*.55;horizon.clear().rect(0,0,width,sp.horizon).fill(0xffffff);
+  celestial.alpha=1-detail*.55;
+  // The horizon mask and the stars depend only on the window's width and the horizon: rebuild them when those move.
+  const skyMoved=width!==skyWidth||sp.horizon!==skyHorizon;skyWidth=width;skyHorizon=sp.horizon;
+  if(skyMoved)horizon.clear().rect(0,0,width,sp.horizon).fill(0xffffff);
   sun.position.set(sp.x,sp.y);sun.width=sun.height=sp.diameter;
   sunGlow.position.copyFrom(sun.position);sunGlow.width=sunGlow.height=sp.diameter*4.5;
   const sunset=Math.max(0,1-Math.max(0,sp.altitude)/18);
@@ -96,9 +99,10 @@ export async function createVillageLighting({stage,host,payload,image,dayLayers}
   const lightAngle=s.celestial.lunar.lightAngle??(phase<.5?0:Math.PI);
   const nextLunarKey=fraction.toFixed(4)+':'+lightAngle.toFixed(3);
   if(nextLunarKey!==lunarKey){lunarKey=nextLunarKey;const pixels=lunarContext.createImageData(256,256);pixels.data.set(moonPixels(256,fraction,phase,lightAngle));lunarContext.putImageData(pixels,0,0);lunarTexture.source.update();}
-  stars.clear();stars.alpha=s.stars;
-  for(let i=0;i<45;i++)stars.circle(seed(i)*width,seed(i+100)*Math.max(0,sp.horizon-6),.4+seed(i+400)*.5).fill({color:0xe7effc,alpha:.15+seed(i+500)*.3});
-  particles.clear();ripples.clear();mist.clear();
+  stars.alpha=s.stars;
+  if(skyMoved){stars.clear();for(let i=0;i<45;i++)stars.circle(seed(i)*width,seed(i+100)*Math.max(0,sp.horizon-6),.4+seed(i+400)*.5).fill({color:0xe7effc,alpha:.15+seed(i+500)*.3});}
+  // Clear weather only when some was drawn or is about to be.
+  if(weatherDrawn||s.rain||s.snow||s.fog){particles.clear();ripples.clear();mist.clear();weatherDrawn=!!(s.rain||s.snow||s.fog);}
   const weatherOpacity=1-detail*.85,wind=-Math.sin(s.windFrom*Math.PI/180)*Math.min(32,s.wind)*.65;
   if(s.rain||s.snow){
    const snow=!!s.snow,n=snow?65:110;

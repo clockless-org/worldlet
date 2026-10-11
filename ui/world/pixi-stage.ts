@@ -18,7 +18,8 @@ export function createAppletStage(host,onPick){
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;
- window.addEventListener('worldlet:calendar-show',(event:any)=>{const day=event.detail?.day;if(typeof day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(day)){calendarShow=day;signature='';}});
+ const showCalendar=(event:any)=>{const day=event.detail?.day;if(typeof day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(day)){calendarShow=day;signature='';}};
+ window.addEventListener('worldlet:calendar-show',showCalendar);
  const mailState={category:"attention",offset:0};
  const hidden=(element:HTMLElement,value:boolean)=>{if(element.hidden!==value)element.hidden=value;};
  const data=(element:HTMLElement,key:string,value:string)=>{if(element.dataset[key]!==value)element.dataset[key]=value;};
@@ -75,5 +76,5 @@ export function createAppletStage(host,onPick){
    if(calendar)footer.append(move('Previous',-1));footer.append(label);if(calendar)footer.append(move('Next',1));panel.append(footer);
   }
  }
- return {render,setMotion(value:boolean){motionEnabled=value;},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null};},destroy(){stopMailMotion();(panel as any).mailLayoutObserver?.disconnect();panel.remove();mailDevice.remove();focus.remove();mailNav.remove();mailAccount.remove();}};
+ return {render,setMotion(value:boolean){motionEnabled=value;},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null};},destroy(){window.removeEventListener('worldlet:calendar-show',showCalendar);stopMailMotion();(panel as any).mailLayoutObserver?.disconnect();panel.remove();mailDevice.remove();focus.remove();mailNav.remove();mailAccount.remove();}};
 }
