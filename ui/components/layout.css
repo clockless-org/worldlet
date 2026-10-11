@@ -424,8 +424,19 @@
 /* Dev build delivery is separate from production updates and never reloads the page.
    Its Apply capsule shares the update dock and the Update button's look (.world-footer-update). */
 .native-console .dev-build-update[hidden]{display:none}
-/* The brand and build line stay hidden; Update and Dev Apply are capsules in the update dock. */
-.native-console #notionHome.world-watermark{display:none}
+/* The bottom-right corner: Worldlet's mark and version, then the Agent and its version (owner request 2026-10-11).
+   Small and faint over the scene, clear of Fox's dock in the middle; Update and Dev Apply stay capsules in the update dock.
+   The id outweighs the older per-console watermark rules. */
+.native-console #notionHome.world-watermark{display:flex;position:absolute;z-index:15;left:auto;right:max(14px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));flex-direction:column;align-items:flex-end;gap:1px;max-width:min(320px,40vw);padding:0;background:none;border:0;border-radius:0;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--ui-chrome);text-shadow:var(--ui-hud-shadow);opacity:.5;font:400 10px/1.35 var(--ui-font-ui);letter-spacing:.01em;white-space:nowrap;pointer-events:none;transition:opacity .2s}
+.native-console #notionHome.world-watermark:hover{opacity:.9}
+.native-console #notionHome .world-version-line{display:flex;align-items:center;gap:5px;min-height:0;max-width:100%}
+.native-console #notionHome .world-brand{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;letter-spacing:0;pointer-events:auto}
+.native-console #notionHome .world-brand-mark{width:13px;height:13px}
+.native-console #notionHome :is(.world-build-version,.world-agent-version){display:block;min-width:0;min-height:0;padding:0;overflow:hidden;text-overflow:ellipsis}
+.native-console #notionHome .world-agent-version[hidden]{display:none}
+/* An open panel or the first-run setup owns the screen; the corner steps back. */
+.native-console:is([data-detail-open=true],[data-tour-lock=true]) #notionHome.world-watermark{display:none}
+@media(max-width:600px){.native-console #notionHome.world-watermark{display:none}}
 /* The world log runs bottom right, right-aligned. Like the Attention Center it is faint
    text on the scene until the pointer is over it. */
 /* Quieter than the HUD at rest, but always readable: a soft dark backing keeps the plain lines

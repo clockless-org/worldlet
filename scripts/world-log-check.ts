@@ -1,6 +1,6 @@
 // The world log: Core turns saved history into plain lines and finds the next scheduled check.
 // Nothing of it shows in the World's corner (owner Orders 2026-10-06 and 2026-10-10) and there is no History page
-// (owner request 2026-10-10); the phone's Applet world still reads the lines. The brand stays hidden unless a development build is ready to apply.
+// (owner request 2026-10-10); the phone's Applet world still reads the lines. The bottom-right corner shows Worldlet's version and the Agent's.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import path from 'node:path';
@@ -75,6 +75,7 @@ try{
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){
    if(b.action==='snapshot')return structuredClone(w.fixture);
    if(b.action==='worldLog'){w.logCalls.push(b);return w.sample?{entries:[],tasks:[],sample:true}:{entries:w.entries,...(b.tasks?{tasks:w.tasks}:{})};}
+   if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'hermes',title:'Hermes Agent',version:{current:'0.21.4',minimum:'0.21.4',outdated:false}}],selected:'hermes',gateway:null};
    if(b.action==='modelStatus')return {available:true};if(b.action==='appContent')return {pages:[]};if(b.action==='weatherLoad')return null;
    return {ok:true};
   }}}};
@@ -84,7 +85,13 @@ try{
  // Nothing of the log shows in the World: the bottom-right next-check line is gone too (owner Order 2026-10-10).
  await page.waitForFunction(()=>(window as any).logCalls.length>=1);
  assert.equal(await page.locator('.world-log,.world-log-next,.world-log-lines,.world-log-line').count(),0,'no log in the World corner');
- assert.equal(await page.locator('.world-watermark').isVisible(),false,'the brand stays hidden without a build to apply');
+ // The bottom-right corner: Worldlet's mark and name, then the Agent and its version, right of the middle.
+ const corner=page.locator('#notionHome.world-watermark');
+ await page.waitForFunction(()=>document.querySelector('.world-agent-version')?.textContent==='Hermes Agent 0.21.4');
+ assert.equal(await corner.isVisible(),true,'the corner shows');
+ assert.equal(await corner.locator('.world-brand-mark').count(),1,'with Worldlet\'s mark');
+ assert.match(await corner.locator('.world-brand').textContent(),/Worldlet/);
+ const box=(await corner.boundingBox())!;assert.ok(box.x>1440/2&&box.y>900*0.8,'bottom right '+JSON.stringify(box));
  // New events and what an Applet is doing now are read for the phone's Applet world.
  await page.evaluate(()=>{const w=window as any;w.entries.push({seq:6,at:Date.now()/1000,kind:'activity.page.opened',key:'',body:{id:'6',data:{url:'https://news.example.org/a'}}});});
  await page.evaluate(()=>{const w=window as any;w.fixture.connections=[{provider:'gmail',connected:true,running:true}];w.fixture.revision++;w.worldletReceive(structuredClone(w.fixture));});
