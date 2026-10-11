@@ -354,7 +354,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   const save=(body:string)=>actions.get('artifacts')!({action:'artifacts',operation:'save',scheduled:'plan',day:'2026-10-11',artifact:{id:'art-brief0000001',kind:'answer',title:'Plan · Sun, Oct 11',body,size:'large',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',sender:null as any});
   await save('A calm Sunday with one call.');
   const shown=()=>store.worldItems().filter(item=>item.provider==='worldlet');
-  assert.deepEqual(shown().map(item=>[item.kind,item.title,item.status]),[['update','Morning brief · Oct 11','open']],'The brief is in Worth Knowing: '+JSON.stringify(env.errors));
+  assert.deepEqual(shown().map(item=>[item.kind,item.title,item.status]),[['update','Today’s prep · Oct 11','open']],'The brief is in Worth Knowing: '+JSON.stringify(env.errors));
   assert.notEqual(shown()[0].attentionFresh,false,'No source fact is needed to keep it current');
   assert.deepEqual(journalTarget(shown()[0].sources),{day:'2026-10-11',card:'art-brief0000001'},'It opens the Journal on its card');
   await save('A calm Sunday with two calls.');

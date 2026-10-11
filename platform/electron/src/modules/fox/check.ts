@@ -219,6 +219,9 @@ try{
   assert.ok(routineItems().some(item=>item.kind==='task'&&item.priority==='elevated'),'a routine that did not finish is Worth Doing');
   routineResult({error:'A scheduled task could not finish. Ask Fox to check your routines.'});
   assert.equal(routineItems().length,2,'an error before any run is no item');
+  // Each run is counted once (who ran it, how it ended, whether late); an error before any run is no run.
+  assert.deepEqual(usage.map(([event,,dimensions])=>[event,dimensions]),[['routine_completed',{routine_source:'worldlet',routine_status:'ok',routine_late:'yes'}],['routine_completed',{routine_source:'worldlet',routine_status:'failed',routine_late:'no'}]]);
+  usage.length=0;
   const request={applet:'app-youtube',task:'Find three cooking videos under ten minutes',request:'Find me short cooking videos on YouTube',parent:'turn-1'};
   const started=actions.appletTaskStart(request) as Row;
   assert.equal(started.ok,true);assert.match(started.id,/^task-/);
