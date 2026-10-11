@@ -52,7 +52,6 @@ await withBrowser(fileAccess,async browser=>{
      {type:'facts',label:'Trip',rows:[{icon:'time',text:'Fri 4:46 PM · SFO → SEA, Alaska 341'},{icon:'place',text:'Terminal 1, Gate B12'},{icon:'person',text:'With Jordan'}]},
      {type:'steps',label:'Getting there',items:[{title:'Leave home',detail:'Traffic on 101 is heavy after 3.',when:'3:15 PM'},{title:'Check in and drop the bag',detail:'',when:'3:55 PM'},{title:'Board',detail:'Group C',when:'4:16 PM'}]},
      {type:'tags',label:'Pack',items:['Passport','Charger','Jacket']}]}});return {message:'Safe travels.'};}
-    if(b.text==='Book the TAC Security assessment')return {message:'Booking it.'};
     if(b.text==='find'){w.found=await w.worldletAgentTool(b.id,{id:'t2',name:'list_artifacts',args:{query:'casa',limit:5}});w.reopened=await w.worldletAgentTool(b.id,{id:'t3',name:'open_artifact',args:{id:w.found?.artifacts?.[0]?.id}});return {message:'That one.'};}
     return {message:'Short answer to '+b.text};
    }
@@ -73,8 +72,9 @@ await withBrowser(fileAccess,async browser=>{
  await card.getByRole('button',{name:'Book TAC',exact:true}).click();
  assert.equal(await page.locator('#notionInput').inputValue(),'Book the TAC Security assessment','The click drafts the request');
  assert.ok(!(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='agentChat'&&c.text==='Book the TAC Security assessment'))),'Nothing is sent until the person sends it');
- await page.locator('#notionInput').press('Enter');
- await page.locator('#companionDialogue').getByText('Booking it.',{exact:true}).waitFor();
+ // Sent while the card is open, it becomes a background follow-up and the card turns over (#311,
+ // artifact-follow-up-ui-check); this check keeps the card, so it clears the draft instead.
+ await page.locator('#notionInput').fill('');
  await page.waitForFunction(()=>[...(window as any).kept.values()].some(a=>a.title==='Three CASA labs'&&a.actions?.[0]?.label==='Book TAC'));
  // The size the person picks is kept with it.
  await card.getByRole('button',{name:'Make artifact larger'}).click();
