@@ -268,11 +268,9 @@ private struct TasksPage: View {
                         Text(task.status).font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.85)).lineLimit(2)
                             .multilineTextAlignment(.leading)
                     }
-                    if let progress = task.progress {
-                        ProgressView(value: progress).tint(Palette.lantern)
-                    } else {
-                        ProgressView().progressViewStyle(.linear).tint(Palette.lantern)
-                    }
+                    // A still bar when the step count is unknown: an endless system animation here kept the app from
+                    // ever going idle, so every UI test tap on the Tasks tab waited out XCTest's idle timeout (#321).
+                    ProgressView(value: task.progress ?? 0.15).tint(Palette.lantern)
                     if unfolded.contains(task.id), let lines = task.lines {
                         ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                             Text(line).font(.system(size: 12, design: .monospaced)).foregroundStyle(Palette.muted.opacity(0.8))

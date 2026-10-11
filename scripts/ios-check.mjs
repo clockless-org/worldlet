@@ -7,16 +7,20 @@
 // is installed with Homebrew (a host fix done in code, #1391). Build output stays in .local/ios-build,
 // the test results in .local/ios-build/UITests.xcresult and the full log in .local/ios-build/test.log.
 import {spawnSync} from 'node:child_process';
-import {mkdirSync,rmSync,writeFileSync} from 'node:fs';
+import {closeSync,mkdirSync,openSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const ios=path.join(root,'ios'),out=path.join(root,'.local/ios-build');
 const fail=text=>{console.error('FAIL iOS: '+text);process.exit(1);};
-const run=(bin,args,{cwd=ios,minutes=20}={})=>{
- const r=spawnSync(bin,args,{cwd,encoding:'utf8',timeout:minutes*60_000,maxBuffer:256*1024*1024,stdio:['ignore','pipe','pipe']});
- return {ok:r.status===0&&!r.error,out:(r.stdout||'')+(r.stderr||''),error:r.error};
+// With `log`, the output goes straight into that file as it comes, so a run the release gate's time budget kills
+// still leaves the log of how far it got (Alpha 4244 left none, #321).
+const run=(bin,args,{cwd=ios,minutes=20,log}={})=>{
+ const fd=log?openSync(log,'w'):undefined;
+ const r=spawnSync(bin,args,{cwd,encoding:'utf8',timeout:minutes*60_000,maxBuffer:256*1024*1024,stdio:['ignore',fd??'pipe',fd??'pipe']});
+ if(fd!==undefined)closeSync(fd);
+ return {ok:r.status===0&&!r.error,out:log?readFileSync(log,'utf8'):(r.stdout||'')+(r.stderr||''),error:r.error};
 };
 
 // Every Applet in the built-in style has its device in the app's asset catalog (scripts/ios-applet-icons.mjs).
@@ -52,8 +56,10 @@ if(!booted){run('xcrun',['simctl','boot',device.udid],{minutes:5});run('xcrun',[
 console.log(`Simulator: ${device.name} (${device.udid})`);
 try{
  const test=run('xcodebuild',['-project','Worldlet.xcodeproj','-scheme','Worldlet','-configuration','Debug','-destination',`platform=iOS Simulator,id=${device.udid}`,
-  '-derivedDataPath',path.join(out,'derived'),'-resultBundlePath',path.join(out,'UITests.xcresult'),'CODE_SIGNING_ALLOWED=NO','test'],{minutes:40});
- writeFileSync(path.join(out,'test.log'),test.out);
+  '-derivedDataPath',path.join(out,'derived'),'-resultBundlePath',path.join(out,'UITests.xcresult'),
+  // A UI test that hangs fails on its own after two minutes and names itself, instead of holding the whole run.
+  '-test-timeouts-enabled','YES','-default-test-execution-time-allowance','60','-maximum-test-execution-time-allowance','120',
+  'CODE_SIGNING_ALLOWED=NO','test'],{minutes:40,log:path.join(out,'test.log')});
  const cases=test.out.split('\n').filter(l=>/^Test Case .* (passed|failed)/.test(l));
  for(const line of cases)console.log('  '+line.replace(/^Test Case '-\[\S+ (\w+)\]' /,'$1 '));
  if(!test.ok)fail(`the iPhone build or UI tests failed (log ${path.relative(root,path.join(out,'test.log'))}):\n`+test.out.split('\n').filter(l=>/error:|failed/.test(l)).slice(0,60).join('\n'));
