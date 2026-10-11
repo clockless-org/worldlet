@@ -10,7 +10,7 @@ export function createSnake(host:GameHost){
  const canvas=document.createElement('canvas');canvas.width=COLS*CELL;canvas.height=ROWS*CELL;board.append(canvas);
  const overlay=document.createElement('p');overlay.className='game-overlay';board.append(overlay);
  const ctx=canvas.getContext('2d');
- let snake:number[][]=[],dir=[1,0],queued:number[][]=[],food=[0,0],score=0,acc=0,state:'ready'|'playing'|'paused'|'over'='ready';
+ let snake:number[][]=[],dir=[1,0],queued:number[][]=[],food:number[]|null=[0,0],score=0,acc=0,state:'ready'|'playing'|'paused'|'over'='ready';
  const loop=gameLoop(board,dt=>{
   if(state!=='playing'){draw();return false;}
   acc+=dt;while(acc>=STEP&&state==='playing'){acc-=STEP;advance();}
@@ -18,12 +18,14 @@ export function createSnake(host:GameHost){
  });
  function placeFood(){
   const free:number[][]=[];for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++)if(!snake.some(p=>p[0]===x&&p[1]===y))free.push([x,y]);
-  food=free[Math.floor(Math.random()*free.length)]||[0,0];
+  // A snake that fills the whole bed has nowhere left to grow: no apple is laid on it, and the game ends.
+  if(!free.length){food=null;state='over';return;}
+  food=free[Math.floor(Math.random()*free.length)];
  }
  function advance(){
   const next=queued.shift();if(next)dir=next;
   const head=[snake[0][0]+dir[0],snake[0][1]+dir[1]];
-  const eats=head[0]===food[0]&&head[1]===food[1];
+  const eats=!!food&&head[0]===food[0]&&head[1]===food[1];
   const body=eats?snake:snake.slice(0,-1);
   if(head[0]<0||head[1]<0||head[0]>=COLS||head[1]>=ROWS||body.some(p=>p[0]===head[0]&&p[1]===head[1])){state='over';status();return;}
   snake=[head,...body];
@@ -39,8 +41,10 @@ export function createSnake(host:GameHost){
  function roundRect(x:number,y:number,w:number,h:number,r:number){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
  function draw(){
   for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){ctx.fillStyle=(x+y)%2?'#b9cf9a':'#c3d7a4';ctx.fillRect(x*CELL,y*CELL,CELL,CELL);}
-  ctx.fillStyle='#c8553d';roundRect(food[0]*CELL+4,food[1]*CELL+4,CELL-8,CELL-8,7);
-  ctx.fillStyle='#5f8a3a';ctx.fillRect(food[0]*CELL+CELL/2-1,food[1]*CELL+1,3,5);
+  if(food){
+   ctx.fillStyle='#c8553d';roundRect(food[0]*CELL+4,food[1]*CELL+4,CELL-8,CELL-8,7);
+   ctx.fillStyle='#5f8a3a';ctx.fillRect(food[0]*CELL+CELL/2-1,food[1]*CELL+1,3,5);
+  }
   snake.forEach((p,i)=>{ctx.fillStyle=i?(i%2?'#3f6f4f':'#477a57'):'#2f5a40';roundRect(p[0]*CELL+2,p[1]*CELL+2,CELL-4,CELL-4,i?6:8);});
   const h=snake[0];if(h){
    // Two eyes looking where the snake is going.

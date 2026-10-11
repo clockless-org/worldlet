@@ -4,14 +4,15 @@ export function createPracticeWalkthrough({root,scene,home,storage,show}){
  const key='worldlet-practice-walkthrough-v1';
  let state:any;try{state=JSON.parse(storage.getItem(key)||'{}')}catch{state={}}
  let running=false,device:HTMLButtonElement|null=null,panel:HTMLElement|null=null;
- const save=()=>storage.setItem(key,JSON.stringify(state));
+ // Saving is best effort: full or blocked storage keeps the practice running from memory.
+ const save=()=>{try{storage.setItem(key,JSON.stringify(state));}catch{}};
  const make=(tag,text='',css='')=>{const e=document.createElement(tag);e.textContent=text;e.style.cssText=css;return e;};
  const style=make('style',"[data-depth]:not([data-depth='overview']) .practice-local-device,[data-depth]:not([data-depth='overview']) .practice-local-panel{display:none!important}");root.append(style);
  function report(text){show({source:'practice-workflow',text,takeover:true});}
  async function wait(ms,signal){if(signal?.aborted)throw Error('Stopped');await new Promise<void>((resolve,reject)=>{const cancel=()=>{clearTimeout(timer);reject(Error('Stopped'))};const timer=setTimeout(()=>{signal?.removeEventListener('abort',cancel);resolve()},ms);signal?.addEventListener('abort',cancel,{once:true});});}
  async function flight(id,inbound,label,signal){
-  const stage=root.querySelector('#notionStage').getBoundingClientRect(),base=root.getBoundingClientRect(),point=scene()?.devicePoint?.(id),fox=root.querySelector('.companion-avatar')?.getBoundingClientRect();
-  if(!point||!fox)throw Error('World is not ready. Return to the world and try again.');
+  const stage=root.querySelector('#notionStage')?.getBoundingClientRect(),base=root.getBoundingClientRect(),point=scene()?.devicePoint?.(id),fox=root.querySelector('.companion-avatar')?.getBoundingClientRect();
+  if(!stage||!point||!fox)throw Error('World is not ready. Return to the world and try again.');
   const a={x:point.x+stage.left-base.left,y:point.y+stage.top-base.top},b={x:fox.x+fox.width/2-base.left,y:fox.y+fox.height*.3-base.top};const from=inbound?a:b,to=inbound?b:a;
   const marker=make('span',label,'position:absolute;max-width:280px;text-align:center;z-index:44;pointer-events:none;padding:9px 14px;border-radius:12px;background:#f8f5e8;color:#284432;border:1px solid #a6ba8d;font:600 16px system-ui;box-shadow:0 4px 18px #213b2820');marker.style.left=(a.x-90)+'px';marker.style.top=(a.y-66)+'px';root.append(marker);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;

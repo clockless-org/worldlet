@@ -25,7 +25,9 @@ export function mountWorldLog({call,sample=()=>false,connections=()=>[],onLines}
   }catch{/* Decoration over saved history; a failed read keeps the last line. */}
   finally{loading=false;}
  }
- const soon=()=>{setTimeout(()=>void refresh(),400);};
+ // The short waits after a job or task event, so stop() can cancel them.
+ const waits=new Set<any>();
+ const soon=()=>{const wait=setTimeout(()=>{waits.delete(wait);void refresh();},400);waits.add(wait);};
  // Applets working on a task Fox handed them, by task id, for the phone's live lines.
  const appletTasks=new Map<string,{applet:string}>();
  const task=(event:any)=>{
@@ -35,7 +37,8 @@ export function mountWorldLog({call,sample=()=>false,connections=()=>[],onLines}
  };
  window.addEventListener('worldlet:applet-task',task);
  window.addEventListener('worldlet:job',soon);
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh();});
+ const visible=()=>{if(!document.hidden)void refresh();};
+ document.addEventListener('visibilitychange',visible);
  timer=setInterval(()=>void refresh(),POLL_MS);void refresh();
- return {refresh,redraw:()=>{if(!loading)draw();},stop(){clearInterval(timer);window.removeEventListener('worldlet:job',soon);window.removeEventListener('worldlet:applet-task',task);}};
+ return {refresh,redraw:()=>{if(!loading)draw();},stop(){clearInterval(timer);for(const wait of waits)clearTimeout(wait);waits.clear();document.removeEventListener('visibilitychange',visible);window.removeEventListener('worldlet:job',soon);window.removeEventListener('worldlet:applet-task',task);}};
 }
