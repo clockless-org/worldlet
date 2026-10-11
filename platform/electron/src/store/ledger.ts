@@ -168,9 +168,10 @@ export class WorldLedger {
   }
   return ids;
  }
- taskNeedsReview(item:Row){
+ /** `items` is the items bucket when the caller already read it. */
+ taskNeedsReview(item:Row,items?:Row[]){
   if(typeof item.id!=='string')return false;
-  const previous=this.find('items',item.id);if(!previous)return false;
+  const previous=items?items.find(row=>row.id===item.id):this.find('items',item.id);if(!previous)return false;
   core('worldItemResolveID',{item,previous,identity:WorldLedger.identity(item)});
   return core('taskContinuityReview',{item,previous,identity:WorldLedger.identity(item),previousIdentity:WorldLedger.identity(previous)})===true;
  }
@@ -210,10 +211,13 @@ export class WorldLedger {
   * review saved by an older build never comes back on its own. Returns the reviews still waiting. */
  settledTaskReviews(){
   const waiting:Row[]=[],settled:string[]=[];
+  // The items bucket is read once for every review, not once per review; unreadable items settle each one, as before.
+  let items:Row[]|null|undefined;
+  const loaded=()=>{if(items===undefined){try{items=this.records('items');}catch{items=null;}}if(!items)throw new WorldletError('Invalid world data; existing data was preserved.');return items;};
   for(const row of this.records('task-reviews')){
    if(typeof row.id!=='string')continue;
    let needed=false;
-   try{needed=!!row.proposal&&typeof row.previous?.id==='string'&&this.taskNeedsReview({...row.proposal,id:row.previous.id});}catch{}
+   try{needed=!!row.proposal&&typeof row.previous?.id==='string'&&this.taskNeedsReview({...row.proposal,id:row.previous.id},loaded());}catch{}
    if(needed)waiting.push(row);else settled.push(row.id);
   }
   if(settled.length)try{this.transaction(()=>{for(const id of settled)this.delete('task-reviews',id);});}catch{}

@@ -151,7 +151,8 @@ export class WorldStore {
   if(connection.syncError)value.syncError=connection.syncError;
   const check=checks.find(row=>row.provider===connection.provider);
   if(check)value.requiredAction=check.requiredAction;
-  const input:Row={provider:connection.provider,connected:canBuild(connection),items,syncStatus:connection.syncStatus??null,check:check??null,activity:this.appletActivity[connection.provider]??null,attentionPending:attentionPending.has(connection.provider)};
+  // Core counts only this provider's items, so only those are handed over.
+  const input:Row={provider:connection.provider,connected:canBuild(connection),items:items.filter(item=>item.provider===connection.provider),syncStatus:connection.syncStatus??null,check:check??null,activity:this.appletActivity[connection.provider]??null,attentionPending:attentionPending.has(connection.provider)};
   return {...value,...core('appletActivitySnapshot',input)};
  }
  private sourceRows(knowledge:Row[]){
