@@ -13,12 +13,15 @@ export function runtimeTaskReport(input){
  for(const check of checks)if(token(check.provider))add({id:`applet:${check.provider}:check`,ownerId:check.provider,pool:'source-io',status:'queued'});
  for(const entry of input.analysis||[])if(token(entry.provider)&&count(entry.pending)>0)add({id:`applet:${entry.provider}:analyze`,ownerId:entry.provider,pool:'source-analysis',status:'queued'});
  if(deliveries.some(row=>row.consumerId==='attention:center'&&row.status==='pending'))add({id:'attention:center',ownerId:'attention-center',pool:'attention',status:'queued'});
+ // Each task's runs, found once: a task keeps up to a hundred, and every row reads only its own.
+ const runsByTask=new Map<unknown,any[]>();
+ if(rows.length)for(const run of Array.isArray(input.runs)?input.runs:[]){const id=run.taskId;if(time(run.startedAt)===null)continue;const list=runsByTask.get(id);if(list)list.push(run);else runsByTask.set(id,[run]);}
  return {supported:true,rows:rows.slice(0,200).map(task=>{
   const owner=token(task.ownerId),center=owner==='attention-center',check=checks.find(row=>row.provider===owner),cursor=(input.cursors||[]).find(row=>row.id===owner);
   const pending=deliveries.filter(row=>row.consumerId==='attention:center'&&(center||row.provider===owner)&&row.status==='pending');
   const oldest=pending.map(row=>time(row.createdAt)).filter(value=>value!==null);
   const oldestAt=oldest.length?Math.min(...oldest):null;
-  const runs=(Array.isArray(input.runs)?input.runs:[]).filter(run=>run.taskId===task.id&&time(run.startedAt)!==null);
+  const runs=(runsByTask.get(task.id)??[]).slice();
   const run=task.status==='running'?runs.find(run=>run.id===task.runId):runs.sort((a,b)=>b.startedAt-a.startedAt)[0];
   const started=time(run?.startedAt),finished=time(run?.finishedAt),now=time(input.now);
   const end=run?.status==='running'?now:finished;

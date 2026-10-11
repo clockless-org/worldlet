@@ -32,7 +32,7 @@ export function ongoingThemes(things:OngoingThing[],now:number):OngoingTheme[] {
  for(const thing of things){
   if(!ongoingOpen(thing,now))continue;
   const kind=ongoingKindOf(thing);if(!isOngoingThemeId(kind))continue;
-  groups.set(kind,[...groups.get(kind)??[],thing]);
+  const group=groups.get(kind);if(group)group.push(thing);else groups.set(kind,[thing]);
  }
  const themes=[...groups].map(([kind,group])=>{
   const sorted=[...group].sort((a,b)=>b.userTurns-a.userTurns||a.id.localeCompare(b.id));
