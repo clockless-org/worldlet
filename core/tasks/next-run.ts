@@ -1,11 +1,7 @@
-// When each of the person's scheduled jobs runs next, for the World's top-right routines line (ui/hud/routines-line.ts).
+// When each of the person's scheduled jobs runs next, for the World's Task panel (core/tasks/task-panel.ts).
 // The jobs keep running on their own Agent's scheduler (contracts/harness-services.ts `HarnessJob`); this only reads
 // their schedule. A cron expression is the standard five fields (minute hour day-of-month month day-of-week) with
 // `*`, lists, ranges and steps, read in the computer's local time like the schedulers that run them.
-import type {HarnessJob} from '../../contracts/harness-services.ts';
-
-export type RoutineRow={name:string;at:number|null;everySeconds:number|null};
-export type RoutineLine={count:number;next:{name:string;at:number}|null;names:string[];rows:RoutineRow[]};
 
 function field(text:string,min:number,max:number):Set<number>|null {
  const values=new Set<number>();
@@ -36,13 +32,4 @@ export function nextCronRun(expression:string,now:number):number|null {
   at.setMinutes(at.getMinutes()+1);
  }
  return null;
-}
-/** The active jobs, soonest first (an interval job has no fixed time and comes after the timed ones), and which runs
- * next (a one-time job still ahead counts). */
-export function routineLine(jobs:readonly HarnessJob[],now:number):RoutineLine {
- const active=jobs.filter(job=>!job.paused&&!('at' in job.when&&job.when.at<=now));
- const rows:RoutineRow[]=active.map(job=>({name:job.name,at:'cron' in job.when?nextCronRun(job.when.cron,now):'at' in job.when?job.when.at:null,everySeconds:'everySeconds' in job.when?job.when.everySeconds:null}));
- rows.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity));
- const first=rows[0]?.at!=null?rows[0]:null;
- return {count:active.length,next:first?{name:first.name,at:first.at!}:null,names:active.map(job=>job.name),rows};
 }

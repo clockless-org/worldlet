@@ -20,3 +20,4 @@ export {ongoingThemes,ongoingThemeRequest,isOngoingThemeId} from './themes.ts';
 export type {OngoingTheme} from './themes.ts';
 export {HARNESS_CALLS,callAttentionId,validCallAttentionId,callSeconds,callsForAttention,callTitle,callObservation,callMatters,callThread,callLine,callReportDue,callOriginal,callNumber,callBrief,callOpening,conversationCallBrief,callLive,callStatus,type CallBrief} from './harness-calls.ts';
 export * from './next-run.ts';
+export * from './task-panel.ts';

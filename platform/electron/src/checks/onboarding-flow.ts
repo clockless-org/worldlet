@@ -73,7 +73,14 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // The tour (ui/onboarding/world-tour.ts): hello, Applets (Mail, connected by mock Google)
  // and the Attention Center (no step introducing Fox since owner decision 2026-10-10), each telling step proven by its spotlight and moved on with Continue; the phone
  // comes last, after the first win (owner request 2026-10-06).
- const step=(key:string,seconds=30)=>wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
+ // The World's Task panel on the right (ui/hud/task-panel.ts) keeps out of each step's way: during the tour it shows only
+ // Planned, never Doing now or Done today, and never covers the spotlight's middle.
+ const panelClear=`(()=>{const p=document.querySelector('.task-panel');if(p&&[...p.querySelectorAll('.task-group[data-group=now],.task-group[data-group=done]')].some(g=>g.getClientRects().length))return false;
+  const r=document.querySelector('.tour-spotlight:not([hidden]) .tour-spotlight-ring:not([hidden])')?.getBoundingClientRect();return !r||!r.width||!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.task-panel');})()`;
+ const step=async(key:string,seconds=30)=>{
+  await wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
+  if(await js(panelClear).catch(()=>true)!==true)throw Error(`The Task panel showed work or covered the spotlight at tour step ${key}\n  screen: ${await seen()}`);
+ };
  await step('hello',60);
  // The Tutorial switch stays on in the World's bottom-right corner through the first run, above the spotlight, the
  // one way out (owner Order 2026-10-07); this journey goes on.

@@ -44,6 +44,15 @@ export function installBrowser(host:Host){
   browserPip:request=>{hookDetach();if(!desktop()?.isDesktop)device.pip(String(request.applet??''),request.rect,request.live);return {ok:true};},
   browserCommand:request=>device.command(typeof request.operation==='string'?request.operation:'',object(request.args),request.agent===true),
   browserBookmarks:()=>discoverBookmarks(),
+  // The World's Task panel shows the page Fox is driving in a small window (ui/hud/task-panel.ts): a small picture of
+  // it as it stands, its address and the steps Fox's status lists. Nothing while Fox drives no page.
+  taskPanelPage:async()=>{
+   const working=device.foxWorking,contents=working?.page.pictureContents;
+   if(!working||!contents||contents.isDestroyed())return {page:null};
+   let image='';
+   try{const shot=await contents.capturePage();if(!shot.isEmpty()){const small=shot.getSize().width>360?shot.resize({width:360,quality:'good'}):shot;image='data:image/jpeg;base64,'+small.toJPEG(60).toString('base64');}}catch{}
+   return {page:{url:working.page.url,title:working.page.title.slice(0,120),image,steps:working.steps}};
+  },
   browserOutcomeAction:async request=>{
    if(!store.writable||!store.state.cloudConsent||store.sampleEnabled()||typeof request.id!=='string'||typeof request.done!=='boolean')throw new WorldletError('Open your personal world to review a browser result.');
    if(request.done){

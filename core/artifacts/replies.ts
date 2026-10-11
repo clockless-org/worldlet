@@ -19,8 +19,6 @@ export const PREPARED_REPLIES_WAITING=MORNING_BRIEF_REPLIES;
 /** The World is past its first run for this long before Fox prepares a reply by itself: the person's first look at their
  * World after the tour, and the reply Fox drafts with them in conversation, stay theirs. */
 export const PREPARED_REPLY_SETTLE_MINUTES=30;
-/** How long the top-right says what was just done before it fades. */
-export const FOX_WORK_DONE_SECONDS=8;
 const KEEP=200;
 
 /** Kept per World in the page's storage: which items were prepared (each at most once, whatever happened), how many on

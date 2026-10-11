@@ -148,6 +148,12 @@ export class BrowserDevice {
  get visiblePage(){return this.browser;}
  /** The page Fox's steps go to: its copy while there is one, otherwise the visible page. */
  private foxPage():WebPage|null {return this.copy?.view??this.browser;}
+ /** Fox's page while its turn drives it (the turn's glow, not yet finished) and the steps its status lists, for the
+  * World's Task panel, which shows it small (ui/hud/task-panel.ts). */
+ get foxWorking():{page:WebPage;steps:{text:string;done:boolean}[]}|null {
+  const fox=glowStyle(this.worldLayout?.fox),page=fox&&!fox.finished?this.foxPage():null;
+  return page&&!page.isClosed?{page,steps:fox!.steps}:null;
+ }
  private emit(event:Row){void this.host.page.call('worldletBrowser',event);}
  private scripts=new Map<string,string>();
  /** Page scripts from the packaged UI, read once; Dev builds reread them so a rebuild applies. */

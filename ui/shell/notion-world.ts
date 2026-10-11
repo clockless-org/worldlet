@@ -1390,8 +1390,8 @@ export function mountNotionWorld(data: World, native: any) {
     if(due.kind==='summary'&&(document.hidden||insideApplet()||inPageLayer()))return;
     void askDaily(due);
   },30000);
-  // What Fox is doing, for its name tag and the World's top-right (worldlet:fox-status): the step while it works, then
-  // empty with what was done, which the top-right shows briefly (ui/hud/fox-work-line.ts). Reply drafts made meanwhile
+  // What Fox is doing, for its name tag and the World's Task panel (worldlet:fox-status): the step while it works, then
+  // empty with what was done, which the panel keeps under Done today (ui/hud/task-panel.ts). Reply drafts made meanwhile
   // are counted from the host's worldlet:email-drafted.
   function backgroundWork(source:string,kind:FoxWorkKind,text:string){
     let drafted=0;const count=()=>{drafted++;};

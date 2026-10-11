@@ -3,7 +3,28 @@
 Work that runs without the person: routines and cron jobs, source checks, background drafts, Applet tasks and the work brought in from the person's Agent. Fox starts some tasks and Applets start others; the person's Agent does the work, and each result becomes an [artifact](../artifacts/README.md). See the [feature table](../../docs/UI-CORE-PLATFORM.md#features).
 
 - Scheduling (`agent-work.ts`, `background-work.ts`, `runtime-*.ts`, `routine-catch-up.ts`, `source-checks.ts`, `deliveries.ts`, `operations.ts`): when work is due, who may run it, claims, leases and retries.
+- The Task panel (`task-panel.ts`, `next-run.ts`): what the World's right side shows of all this work. See [Task panel](#task-panel).
 - Ongoing things (`ongoing.ts`, `kinds.ts`, `themes.ts`, `attention.ts`, `external-events.ts`, `harness-calls.ts`): conversations, outside events and calls that keep going over days.
+
+## Task panel
+
+The World's right side (owner layout 2026-10-10: Attention on the left, tasks on the right) says what the person's Agent is doing now, what is planned and what was done today, so the person can see background work without asking and is more willing to let it work on its own. `taskPanel(input, now)` in `task-panel.ts` decides every row; `ui/hud/task-panel.ts` only draws them ([World corners](../../ui/components/INTERACTION.md)). It floats on the World like the Attention Center (owner feedback 2026-10-11): Doing now is a small window with Fox working in it, Planned a timeline going down from Now, and Done today a short list under it.
+
+| Group | Rows | Order and limit |
+| --- | --- | --- |
+| Doing now | Fox's background work (its step, from `worldlet:fox-status`), Applets working on a task Fox handed them, source checks running, older Hermes Agent conversations still coming in | Newest first; three, then "+N more" |
+| Planned | The person's Agent's scheduled jobs, Worldlet's routines among them (`nextCronRun` here in `next-run.ts`), and each Applet's next source check | Soonest first, repeating jobs with no fixed time last; four, then "+N more" |
+| Done today | Applet tasks, routine runs (late ones say so), scheduled-job results that became Attention items, source checks, older conversations brought, and what Fox's background work made | Newest first; four, then "N today · Journal" |
+
+- **Folding.** A day of checks of one Applet is one row ("Checked Mail · 6 times"). A check that failed shows ("Mail check didn't finish · will retry") only while no later check of that Applet succeeded. A failed task or routine says "Not finished". Failed rows are marked so the panel draws them red.
+- **Today only.** Done shows what finished since local midnight; the Journal keeps the rest.
+- **Time text.** Doing now says "In progress" (or how many older conversations are still to come); Planned says the clock today, else the day and the clock ("Tomorrow 6:00 AM", "Mon 6:30 AM"), or "every hour" for an interval job; Done says the clock it finished. A planned row's popover adds how often (`taskHowOften`: "Every day", "Every weekday", "Every 15 min") and who runs it (the Agent's scheduler, or Worldlet for checks).
+- **The Doing now window.** The newest work fills one small window; the rest is "+N more". A web page Fox drives comes first: the host's `taskPanelPage` (Electron `modules/browser/index.ts`) hands over a small picture of it every few seconds while Fox's turn drives it, with its address and the steps Fox's status lists, which become its lines ("✓ Opening the booking page", "› Choosing a court time"); a click opens the page. Any other work is a dark terminal with Fox in its corner: each row says who does it (`who`: Fox, the Applet, Worldlet) and its status lines (`lines`), and the panel keeps every line a running task has said, so its log scrolls; a click opens the whole log with the step, when it started and who does it.
+- **The Planned timeline.** Each planned row carries the day it stands under (`day`: Today, Tomorrow, a weekday, or Repeating) and the time beside its dot (`clock`).
+- **Where a row goes** (`open`, at most one): an Applet, the Journal's page for a day, an Attention item (`{attention}`, which the panel points out on the left), or a scheduled job (`{routine}`; Planned rows only open their popover in this first version, which has no Run now or Pause).
+- **Empty.** With nothing in any group the panel is hidden; with only Planned, only Planned shows. The chip in a narrow window says "Doing now 1 · Planned 3".
+
+The host action `taskPanel` (Electron `modules/fox/index.ts`) reads everything in one call: the jobs from the Agent's `schedule` service (names and schedules, never prompts) and its Agent's name, today's history rows of `TASK_PANEL_KINDS`, the runtime task report (`runtime-report.ts`), today's scheduled-job results (`taskPanelScheduleRuns`, items of a `harness:<id>` provider from `core/agent/harness-schedule.ts`) and the Applet tasks working now. The practice world shows nothing. `node scripts/task-panel-check.ts` (in `test:core`) checks grouping, order, limits, folding, failed rows and time text; `scripts/task-panel-ui-check.ts` (in `test:ui`) checks the panel in the World.
 
 ## Ongoing things
 
