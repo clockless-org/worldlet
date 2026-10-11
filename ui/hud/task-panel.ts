@@ -39,7 +39,7 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  const locked=()=>root.dataset.tourLock==='true'||root.dataset.tourSpotlight==='true';
 
  let input:TaskPanelInput={},timer=0,pageTimer=0,loading=false,model:TaskPanel|null=null,expanded='';
- let page:{url:string;title:string;image:string;steps:{text:string;done:boolean}[]}|null=null;
+ let page:{url:string;title:string;image:string;steps:{text:string;done:boolean}[]}|null=null,pageJson='null';
  const fox=new Map<string,{source:string;text:string;at:number}>();
  let daily:{kind:'plan'|'summary';at:number}[]=[];
  /** What each running task has said, oldest first, kept while it runs: its window's lines and its open log. */
@@ -181,7 +181,8 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   if(document.hidden)return;
   let next:typeof page=null;
   try{const value=(await call('taskPanelPage'))?.page;if(value&&typeof value.url==='string')next={url:value.url,title:String(value.title||''),image:typeof value.image==='string'&&value.image.startsWith('data:image/')?value.image:'',steps:Array.isArray(value.steps)?value.steps:[]};}catch{}
-  const changed=JSON.stringify(next)!==JSON.stringify(page);page=next;
+  // The last page's text is kept, so its picture is not turned into text again on every read.
+  const json=JSON.stringify(next),changed=json!==pageJson;page=next;pageJson=json;
   if(changed)render();
  }
  const soon=()=>{setTimeout(()=>void refresh(),400);};

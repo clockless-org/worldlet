@@ -13,8 +13,10 @@ export type ShelfApplet={title:string;image:string};
 // Device size and the step to the next one, by distance from the middle.
 const SIZE=[88,58,48,40],STEP=[0,96,74,60];
 const size=(d:number)=>SIZE[Math.min(d,SIZE.length-1)],step=(d:number)=>STEP[Math.min(d,STEP.length-1)];
+// How far from the middle an Applet stands `d` places out.
+function offsetOf(d:number){let x=0;for(let k=1;k<=d;k++)x+=step(k);return x;}
 // How far the farthest Applet of a ring of `n` reaches from the middle (the extra one of an even ring stands left).
-function reach(n:number){const side=Math.floor(n/2);let x=0;for(let d=1;d<=side;d++)x+=step(d);return x+size(side)/2;}
+function reach(n:number){const side=Math.floor(n/2);return offsetOf(side)+size(side)/2;}
 
 export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage}:{
  root:HTMLElement;
@@ -36,7 +38,7 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
  shelf.append(ledge,ring,extra,more,add);root.append(shelf);
  const tabs=new Map<string,HTMLElement>();
 
- function device(id:string,app:ShelfApplet){
+ function device(app:ShelfApplet){
   const image=document.createElement('img');image.alt='';image.draggable=false;
   if(app.image)image.src=app.image;else image.hidden=true;
   const mark=document.createElement('span');mark.className='applet-shelf-mark';mark.textContent=app.title.slice(0,1);mark.hidden=!!app.image;mark.setAttribute('aria-hidden','true');
@@ -46,7 +48,7 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
  function tab(id:string,app:ShelfApplet){
   let item=tabs.get(id);if(item)return item;
   item=document.createElement('div');item.className='applet-shelf-tab';item.dataset.applet=id;
-  const pick=document.createElement('button');pick.type='button';pick.className='applet-shelf-pick';pick.append(...device(id,app));
+  const pick=document.createElement('button');pick.type='button';pick.className='applet-shelf-pick';pick.append(...device(app));
   pick.onclick=event=>{event.stopPropagation();closeExtra();if(id!==current)open(id);};
   const close=document.createElement('button');close.type='button';close.className='applet-shelf-close';close.innerHTML=uiIcon('close');
   close.title='Close';close.setAttribute('aria-label','Close '+app.title);close.onclick=event=>{event.stopPropagation();closeTab(id);};
@@ -73,8 +75,8 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
   const shown=new Set<string>();
   for(const {id,offset} of visible){
    const app=applet(id);if(!app)continue;shown.add(id);
-   const item=tab(id,app),d=Math.abs(offset);let x=0;for(let k=1;k<=d;k++)x+=step(k);
-   item.style.left='calc(50% + '+Math.sign(offset)*x+'px)';item.style.setProperty('--shelf-size',size(d)+'px');item.dataset.distance=String(Math.min(d,3));
+   const item=tab(id,app),d=Math.abs(offset);
+   item.style.left='calc(50% + '+Math.sign(offset)*offsetOf(d)+'px)';item.style.setProperty('--shelf-size',size(d)+'px');item.dataset.distance=String(Math.min(d,3));
    item.toggleAttribute('data-current',id===current);
    const pick=item.querySelector<HTMLButtonElement>('.applet-shelf-pick')!;pick.setAttribute('aria-current',id===current?'page':'false');pick.title=id===current?app.title:'Open '+app.title;
    if(!item.isConnected)ring.append(item);
@@ -82,7 +84,7 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
   for(const [id,item] of tabs)if(!shown.has(id)){item.remove();tabs.delete(id);}
   const others=overflow.map(id=>[id,applet(id)] as const).filter(([,app])=>!!app) as [string,ShelfApplet][];
   more.hidden=!others.length;more.textContent='+'+others.length;more.title=others.length+' more';more.setAttribute('aria-label',others.length+' more Applets');
-  extra.replaceChildren(...others.map(([id,app])=>{const b=document.createElement('button');b.type='button';b.className='applet-shelf-pick';b.title='Open '+app.title;b.append(...device(id,app));b.onclick=event=>{event.stopPropagation();closeExtra();open(id);};return b;}));
+  extra.replaceChildren(...others.map(([id,app])=>{const b=document.createElement('button');b.type='button';b.className='applet-shelf-pick';b.title='Open '+app.title;b.append(...device(app));b.onclick=event=>{event.stopPropagation();closeExtra();open(id);};return b;}));
   if(!others.length)closeExtra();
  }
  let wanted:string|null=null;
