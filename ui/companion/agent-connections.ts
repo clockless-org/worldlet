@@ -18,7 +18,7 @@ export function connectionLine(c:Connection):string {
 /** What it was last used for, from the Agent's own history. */
 export function connectionUseLine(c:Connection):string {
  const use=c.lastUsed;
- if(!use)return c.kind==='mcp'?'Not used in your Agent’s history yet.':'No conversation on it in your Agent’s history yet.';
+ if(!use)return c.kind==='mcp'?'Not used in your Agent’s recent history.':'No conversation on it in your Agent’s history yet.';
  return `Last used ${day(use.at)}`+(use.tool?` for ${use.tool}`:'')+(use.thread?` in “${use.thread}”`:'')+'.';
 }
 export async function showAgentConnections(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
