@@ -3,10 +3,7 @@
 // is called, how a transcript event becomes a turn, how a scheduled job becomes a Fox routine and how
 // channel instructions and extra agents become Hermes skills. The host reads OpenClaw's files
 // read-only and writes Worldlet's copies. Kept ES-compatible for JavaScriptCore and Jint.
-
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
-const text=(value:unknown)=>typeof value==='string'?value.trim():'';
-const clip=(value:string,limit:number)=>value.length>limit?value.slice(0,limit-1).trimEnd()+'…':value;
+import {record,text,clip,iso,everyMinutes} from './values.ts';
 
 // Conversations ------------------------------------------------------------------------------
 
@@ -43,10 +40,6 @@ export function openClawConversationTitle(facts:OpenClawConversationFacts):strin
 }
 
 export interface OpenClawTurn {role:'user'|'assistant';text:string;at:string|null}
-const iso=(value:unknown):string|null=>{
- const date=typeof value==='number'&&Number.isFinite(value)?new Date(value<1e12?value*1000:value):typeof value==='string'&&value?new Date(value):null;
- return date&&!Number.isNaN(date.getTime())?date.toISOString().replace(/\.\d+Z$/,'Z'):null;
-};
 /** One transcript event (OpenClaw's append-only session tree) as a visible turn, or null for
  * headers, tool calls and results, compaction summaries, extension state and empty messages. */
 export function openClawTurn(event:unknown):OpenClawTurn|null {
@@ -85,7 +78,7 @@ export function openClawRoutine(job:unknown,now=Date.now()):OpenClawRoutineResul
  }else if(schedule.kind==='every'){
   const minutes=Math.round(Number(schedule.everyMs)/60000);
   if(!Number.isFinite(minutes)||minutes<1)return {ok:false,name,reason:'It runs more often than once a minute.'};
-  when=minutes%1440===0?'every '+minutes/1440+'d':minutes%60===0?'every '+minutes/60+'h':'every '+minutes+'m';
+  when=everyMinutes(minutes);
  }else if(schedule.kind==='at'){
   const at=iso(schedule.at);
   if(!at)return {ok:false,name,reason:'Its time could not be read.'};

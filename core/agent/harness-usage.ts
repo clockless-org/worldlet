@@ -5,8 +5,8 @@
 // OpenAI-style `usage` per response (toOpenAiResponsesUsage, 2026.9.8). Shared rules only; the host reads the streams.
 // Kept ES-compatible for JavaScriptCore and Jint.
 import type {HarnessUsage} from '../../contracts/harness-services.ts';
+import {record} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 const count=(value:unknown)=>typeof value==='number'&&Number.isFinite(value)&&value>=0?Math.min(Math.round(value),1e12):undefined;
 const TOKENS=['inputTokens','outputTokens','totalTokens','cachedTokens','reasoningTokens'] as const;
 const pick=(...values:unknown[])=>{for(const value of values){const n=count(value);if(n!==undefined)return n;}return undefined;};

@@ -8,9 +8,8 @@
 import type {HarnessConnection,HarnessConnectionAdd,HarnessConnectionChange,HarnessConnectionUse} from '../../contracts/harness-services.ts';
 import {standingRuleId} from './harness-approvals.ts';
 import {hermesConfigValues} from './harness-tools.ts';
+import {record,text} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
-const text=(value:unknown)=>typeof value==='string'?value.trim():'';
 const clip=(value:string,limit:number)=>value.length>limit?value.slice(0,limit-1)+'…':value;
 const off=(value:unknown)=>value===false||/^(false|no|0|off)$/i.test(text(value));
 /** A connection's id: short, printable and stable for the same Agent, profile and name. */

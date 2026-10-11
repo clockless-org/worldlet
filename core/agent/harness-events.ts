@@ -7,9 +7,8 @@
 // and record no run of their own, so neither reports them. The host reads the rows; these are the rules. Kept
 // ES-compatible for JavaScriptCore and Jint.
 import type {HarnessExternalEvent} from '../../contracts/harness-services.ts';
+import {text,clip} from './values.ts';
 
-const text=(value:unknown)=>typeof value==='string'?value.trim():'';
-const clip=(value:string,limit:number)=>value.length>limit?value.slice(0,limit-1).trimEnd()+'…':value;
 /** Epoch milliseconds from seconds, milliseconds or an ISO string; 0 when unknown. */
 export const harnessEventTime=(value:unknown):number=>{
  const n=typeof value==='number'?value:typeof value==='string'&&/^\d+(\.\d+)?$/.test(value.trim())?Number(value):typeof value==='string'?Date.parse(value):NaN;

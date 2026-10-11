@@ -4,8 +4,8 @@
 // and the bindings the World keeps (`applet-agents` in world.sqlite). Reading the files is the host's job. Kept
 // ES-compatible for JavaScriptCore and Jint.
 import {harnessSessionThread} from './harness-sessions.ts';
+import {record} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 /** An agent id or profile name, as the Harness itself accepts it (OpenClaw agent ids, Hermes `-p <name>`). */
 export const isHarnessAgentId=(value:unknown):value is string=>typeof value==='string'&&/^[A-Za-z0-9_.-]{1,64}$/.test(value)&&value!=='.'&&value!=='..';
 

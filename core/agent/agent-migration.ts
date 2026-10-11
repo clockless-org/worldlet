@@ -9,18 +9,12 @@
 import {agentRoleSkill,openClawSkillMarkdown,openClawSkillName,openClawTurn,type AgentRole,type OpenClawRoutine,type OpenClawRoutineResult,type OpenClawTurn} from './openclaw-migration.ts';
 
 import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,isMigrationSource,type MigrationSource} from '../../contracts/agent.ts';
+import {record,text,clip,iso,everyMinutes} from './values.ts';
 export {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,isMigrationSource,type MigrationSource};
 export type MigrationTurn=OpenClawTurn;
 export type MigrationRoutine=OpenClawRoutine;
 export type MigrationRoutineResult=OpenClawRoutineResult;
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
-const text=(value:unknown)=>typeof value==='string'?value.trim():'';
-const clip=(value:string,limit:number)=>value.length>limit?value.slice(0,limit-1).trimEnd()+'…':value;
-const iso=(value:unknown):string|null=>{
- const date=typeof value==='number'&&Number.isFinite(value)?new Date(value<1e12?value*1000:value):typeof value==='string'&&value?new Date(value):null;
- return date&&!Number.isNaN(date.getTime())?date.toISOString().replace(/\.\d+Z$/,'Z'):null;
-};
 const firstLine=(value:string)=>clip(value.replace(/\s+/g,' ').trim(),60);
 
 // Conversations ------------------------------------------------------------------------------
@@ -77,9 +71,7 @@ export function codexTurns(lines:unknown[]):MigrationTurn[] {
 /** Codex sessions it started for itself (sub-agents, reviews) are not conversations the person had. */
 export const codexSessionIncluded=(meta:unknown)=>{const source=record(meta).source;return source===undefined||typeof source==='string';};
 /** pi names a session in a `session_info` line; otherwise its first message stands in. */
-export function piConversationTitle({title,cwd,first}:{title?:string|null;cwd?:string|null;first?:string|null}):string {
- return claudeCodeConversationTitle({title,cwd,first});
-}
+export const piConversationTitle=claudeCodeConversationTitle;
 
 /** Hermes Agent sessions Worldlet or Hermes itself started (scheduled runs, sub-agents, Worldlet's
  * own Fox) are not conversations the person had. */
@@ -121,7 +113,7 @@ export function hermesRoutine(job:unknown,now=Date.now()):MigrationRoutineResult
  }else if(schedule.kind==='interval'){
   const minutes=Math.round(Number(schedule.minutes));
   if(!Number.isFinite(minutes)||minutes<1)return {ok:false,name,reason:'Its schedule could not be read.'};
-  when=minutes%1440===0?'every '+minutes/1440+'d':minutes%60===0?'every '+minutes/60+'h':'every '+minutes+'m';
+  when=everyMinutes(minutes);
  }else if(schedule.kind==='once'){
   const at=iso(schedule.run_at);
   if(!at)return {ok:false,name,reason:'Its time could not be read.'};

@@ -9,10 +9,7 @@
 // The host reads the rows; these are the rules. Kept ES-compatible for JavaScriptCore and Jint.
 import type {HarnessCall,HarnessCallLine,HarnessCallLive,HarnessCallOutcome,HarnessCallRequest} from '../../contracts/harness-services.ts';
 import {harnessEventTime} from './harness-events.ts';
-
-const text=(value:unknown)=>typeof value==='string'?value.trim():'';
-const clip=(value:string,limit:number)=>value.length>limit?value.slice(0,limit-1).trimEnd()+'…':value;
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
+import {record,text,clip} from './values.ts';
 
 /** The plugin's own store setting, '' for its default below the OpenClaw state folder; the host resolves `~`. */
 export function openClawVoiceCallStore(config:unknown):string {

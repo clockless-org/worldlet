@@ -8,8 +8,8 @@
 import type {HarnessModel} from '../../contracts/harness-services.ts';
 import {appletAgentThread} from './harness-agents.ts';
 import {harnessSessionThread} from './harness-sessions.ts';
+import {record} from './values.ts';
 
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 /** A model id as an Agent names it ("openrouter:anthropic/claude-haiku-4.5", "openai/gpt-5.4-mini"). */
 export const isHarnessModelId=(value:unknown):value is string=>typeof value==='string'&&/^[A-Za-z0-9][A-Za-z0-9._:@/+-]{0,199}$/.test(value);
 

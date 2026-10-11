@@ -8,6 +8,7 @@ import {acpChangesUpdate,approvalChanges,type ApprovalChanges} from './harness-a
 import {hermesAcpAnnouncement,type HermesAnnouncedCall} from './hermes-server.ts';
 import {piModelArguments} from './model-providers.ts';
 import {acpModels} from './harness-models.ts';
+import {record} from './values.ts';
 
 export type LocalHarnessId='claude-code'|'codex'|'hermes'|'openclaw'|'pi';
 export interface LocalHarnessDefinition {
@@ -88,7 +89,6 @@ export function recommendLocalHarness(found:DetectedHarness[]):LocalHarnessId|nu
 const SYSTEM_LIMIT=8000,PROMPT_LIMIT=24000;
 const clip=(text:string,limit:number)=>text.length>limit?text.slice(0,limit):text;
 const clipEnd=(text:string,limit:number)=>text.length>limit?text.slice(text.length-limit):text;
-const record=(value:unknown):Record<string,any>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:{};
 
 /** The Fox chat body as instructions plus one prompt. A turn of its own process keeps no session, so the recent
  * visible conversation and the current view ride along in the prompt; a `resident` session (core/agent/harness-sessions.ts)
