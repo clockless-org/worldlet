@@ -357,6 +357,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true,memory:{name:'Elon North',user:true,longTerm:true,model:true,history:{conversations:278,notes:0,skills:160,jobs:4}}},{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'claude-code',title:'Claude Code',configured:true,worldTools:true}],recommended:'hermes',selected:sessionStorage.getItem('fixture-agent')};
     if(b.action==='agentHarness'&&b.operation==='select'){sessionStorage.setItem('fixture-agent',b.id);return {ok:true,id:b.id,title:'Hermes Agent',model:true};}
     if(b.action==='localAgent'&&b.operation==='adopt')return {name:'Elon North',memories:[{kind:'soul'},{kind:'user'},{kind:'longTerm'}],model:{ok:false},summary:{personality:'A blunt first-principles operator',about:'Kelvin runs Worldlet from San Francisco',model:'deepseek-v4-flash'},recent:Array.from({length:8},(_,i)=>({title:'Conversation '+(i+1)+' about the launch plan, with a title long enough to be cut',at:Date.now()-(i+1)*3_600_000}))};
+    if(b.action==='agentHarness'&&b.operation==='provider-sign-in')return {ok:true,background:true};
     if(b.action==='agentIntegrations')return {integrations:[]};
     if(b.action==='modelSource')return {source:'chatgpt',ready:true};
     if(b.action==='foxPreferences'){if(b.cloudConsent)w.fixture.cloudConsent=true;return {companionStyle:'',model:{ready:true}};}
@@ -413,18 +414,19 @@ await withBrowser(fileAccess,async browser=>{
  // found here, or a select that fails, leaves the first half with it picked and the error shown; so does a select that
  // moved on before its answer check (`checkLater`) and hears that check failed; a second launch while setup is open
  // (`worldlet:connect-agent`) does the same.
- for(const scenario of ['found','missing','fails','check-fails','key-missing','second-launch']){
+ for(const scenario of ['found','missing','fails','check-fails','key-missing','claude-expired','second-launch']){
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform,scenario})=>{
-   const w=window as any;w.calls=[];w.requested=scenario==='missing'?'hermes':scenario==='second-launch'?null:'openclaw';
+   const w=window as any;w.calls=[];w.requested=scenario==='missing'?'hermes':scenario==='second-launch'?null:scenario==='claude-expired'?'claude-code':'openclaw';
    w.fixture={platform,workspaceId:'setup-connect-'+scenario,revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:false,unlockedApplets:[]},connections:[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
    w.webkit={messageHandlers:{worldlet:{async postMessage(b){
     w.calls.push(b);
     if(b.action==='snapshot')return structuredClone(w.fixture);
     if(b.action==='installedApplets')return {keys:[]};
-    if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,memory:{name:'Nova',user:true,longTerm:true,model:false}}],recommended:'codex',selected:sessionStorage.getItem('fixture-agent')};
+    if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,worldTools:true},{id:'openclaw',title:'OpenClaw',configured:true,worldTools:true,memory:{name:'Nova',user:true,longTerm:true,model:false}},...scenario==='claude-expired'?[{id:'claude-code',title:'Claude Code',configured:true,worldTools:true}]:[]],recommended:'codex',selected:sessionStorage.getItem('fixture-agent')};
     if(b.action==='agentHarness'&&b.operation==='requested'){const id=w.requested;w.requested=null;return {id};}
     if(b.action==='agentHarness'&&b.operation==='select'){if(scenario==='fails')throw Error('OpenClaw did not answer.');sessionStorage.setItem('fixture-agent',b.id);
+     if(scenario==='claude-expired')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,message:'Claude Code’s sign-in has expired. Open Terminal, run claude and sign in again with /login.'}})),300);
      if(scenario==='key-missing')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,message:'OpenClaw can’t find its key MINIMAX_API_KEY, so its model can’t answer. Save it in Terminal with: openclaw secrets store set MINIMAX_API_KEY'}})),300);
      if(scenario==='check-fails')setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:b.id,ok:false,message:'OpenClaw did not answer.'}})),300);
      return {ok:true,id:b.id,title:'OpenClaw',connected:true,...b.checkLater?{checking:true}:{}};}
@@ -443,7 +445,13 @@ await withBrowser(fileAccess,async browser=>{
    assert.deepEqual(await selects(),[],'Nothing requested at launch: setup waits on its first page');
    await page.evaluate(()=>{const w=window as any;w.requested='openclaw';window.dispatchEvent(new CustomEvent('worldlet:connect-agent'));});
   }
-  if(scenario==='found'||scenario==='second-launch'||scenario==='key-missing'||scenario==='check-fails'){
+  if(scenario==='claude-expired'){
+   // Claude Code's sign-in ran out (owner decision 2026-10-11): setup goes on and signs it in again in the browser.
+   const again=page.getByRole('button',{name:'Sign in to Claude Code'});await again.waitFor();
+   await again.click();await page.getByText('Claude Code is signed in.',{exact:true}).waitFor();
+   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='provider-sign-in').map(c=>c.id)),['anthropic']);
+   assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
+  }else if(scenario==='found'||scenario==='second-launch'||scenario==='key-missing'||scenario==='check-fails'){
    await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
    assert.deepEqual(await selects(),['openclaw'],'The named Agent is connected with the same select as the big button');
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='openclaw')),'and brought in');

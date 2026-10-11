@@ -35,15 +35,15 @@ export function modelProvider(id:ModelProviderId):ModelProvider {
 }
 
 /** How one Agent names a provider and its models. `provider`: the Agent's own provider id; `model`: the id it takes for
- * a tier model; `signIn`: the Agent's own command that signs in to it, run in the person's Terminal (null: it has none
- * Worldlet can name, or the Agent signs in another way). */
+ * a tier model; `signIn`: the Agent's own command that signs in to it, run in the person's Terminal, or by Worldlet
+ * itself for an Agent in `BACKGROUND_SIGN_IN` (null: it has none Worldlet can name, or the Agent signs in another way). */
 interface AgentProvider {provider:string;model:(tier:ModelTier,model:string)=>string;signIn:string[]|null}
 const same=(_tier:ModelTier,model:string)=>model;
 /** Claude Code's own aliases follow its newest model in each class. */
 const CLAUDE_ALIASES:Record<ModelTier,string>={S:'haiku',M:'sonnet',L:'opus'};
 const AGENT_PROVIDERS:Readonly<Record<LocalHarnessId,Partial<Record<ModelProviderId,AgentProvider>>>>={
  codex:{chatgpt:{provider:'openai',model:same,signIn:['login']}},
- 'claude-code':{anthropic:{provider:'anthropic',model:tier=>CLAUDE_ALIASES[tier],signIn:null}},
+ 'claude-code':{anthropic:{provider:'anthropic',model:tier=>CLAUDE_ALIASES[tier],signIn:['auth','login']}},
  // ACP choice ids are "provider:model" (acp_adapter/model_catalog.py encode_model_choice).
  hermes:{
   chatgpt:{provider:'openai-codex',model:(_tier,model)=>'openai-codex:'+model,signIn:['auth','add','openai-codex']},
@@ -76,6 +76,14 @@ export function agentProviders(agent:LocalHarnessId):ModelProvider[] {
 export function providerModel(agent:LocalHarnessId,provider:ModelProviderId,tier:ModelTier=CHAT_TIER):string|null {
  const own=AGENT_PROVIDERS[agent]?.[provider];
  return own?own.model(tier,modelProvider(provider).tiers[tier]):null;
+}
+/** Agents whose sign-in command Worldlet runs itself, with no Terminal (owner decision 2026-10-11): it opens the
+ * person's browser on its own and ends when they approve. Claude Code's `claude auth login` (2.1.40 and later). */
+export const BACKGROUND_SIGN_IN:readonly LocalHarnessId[]=['claude-code'];
+/** Claude Code's own sign-in state: `claude auth status --json` prints `loggedIn`; null when it says nothing usable. */
+export const CLAUDE_CODE_STATUS=['auth','status','--json'];
+export function claudeCodeLoggedIn(output:string):boolean|null {
+ try{const value=JSON.parse(output.trim());return typeof value?.loggedIn==='boolean'?value.loggedIn:null;}catch{return null;}
 }
 /** The arguments of `agent`'s own sign-in command for `provider`, or null. */
 export function providerSignIn(agent:LocalHarnessId,provider:ModelProviderId):string[]|null {

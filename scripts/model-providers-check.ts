@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CHAT_TIER,PROVIDERS,hermesRequestModel,agentProviders,backgroundModel,chooseProvider,chosenModel,localHarnessInvocation,localHarnessStream,providerModel,providerSignIn,readLocalHarnessLine,readProviderChoices,signedInProviders} from '../core/agent/index.ts';
+import {BACKGROUND_SIGN_IN,CHAT_TIER,claudeCodeLoggedIn,PROVIDERS,hermesRequestModel,agentProviders,backgroundModel,chooseProvider,chosenModel,localHarnessInvocation,localHarnessStream,providerModel,providerSignIn,readLocalHarnessLine,readProviderChoices,signedInProviders} from '../core/agent/index.ts';
 import {signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
 
 // The provider Fox's Agent answers with (core/agent/model-providers.ts): each provider maps to S, M and L models, chat
@@ -96,3 +96,12 @@ const windows=signInScript('win32',{command:'C:\\Users\\alex\\hermes.exe',prefix
 assert.equal(windows.extension,'.cmd');assert.match(windows.text,/"C:\\Users\\alex\\hermes\.exe" "auth" "add" "it""s"\r\n/);assert.match(windows.text,/pause/);
 
 console.log('PASS model providers: S/M/L tiers per provider, chat on M, each Agent\'s own per-turn switch (Codex, Claude Code, pi, OpenClaw, Hermes Agent\'s API server and its ACP session/set_model with its fallbacks), signed-in providers from the Agent\'s own list, the saved choice and sign-in in the Agent\'s own command');
+
+// Claude Code signs in again from Worldlet with no Terminal (owner decision 2026-10-11): `claude auth login`, run by
+// Worldlet, and `claude auth status --json` for whether it is signed in.
+assert.deepEqual(providerSignIn('claude-code','anthropic'),['auth','login']);
+assert.deepEqual(BACKGROUND_SIGN_IN,['claude-code']);
+assert.equal(claudeCodeLoggedIn('{"loggedIn":true,"authMethod":"oauth_token"}'),true);
+assert.equal(claudeCodeLoggedIn('{"loggedIn":false}\n'),false);
+assert.equal(claudeCodeLoggedIn('Not JSON'),null);
+console.log('PASS Claude Code sign-in from Worldlet');

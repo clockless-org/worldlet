@@ -12,18 +12,18 @@ import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {endHermesInstall,hermesSessionModels,installHermes,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
-import {UPDATED,openSignIn} from './provider-sign-in.ts';
+import {UPDATED,claudeCodeSignedIn,openSignIn,signInInBackground} from './provider-sign-in.ts';
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
-import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
+import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
@@ -48,7 +48,7 @@ import {DoorDash,DoorDashSourceAccess} from '../sources/doordash.ts';
 async function providerSignIns(install:LocalHarnessInstall):Promise<ModelProviderId[]|null> {
  const environment=currentEnvironment();
  if(install.id==='codex')return fs.existsSync(path.join(codexHome(environment.home,environment.env),'auth.json'))?['chatgpt']:[];
- if(install.id==='claude-code')return ['anthropic'];
+ if(install.id==='claude-code'){const signedIn=await claudeCodeSignedIn(install,harnessEnvironment(install,environment));return signedIn===null?null:signedIn?['anthropic']:[];}
  let listed:{id:string}[]=[];
  try{
   if(install.id==='hermes')listed=(await hermesSessionModels(install,environment)).available.filter((id):id is string=>typeof id==='string').map(id=>({id}));
@@ -417,6 +417,14 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   if(request.operation==='provider-sign-in'){
    const install=selectedInstall(context.root),args=install&&isModelProviderId(request.id)?providerSignIn(install.id,request.id):null;
    if(!install||!args)throw new WorldletError('Sign in to this provider in your Agent.');
+   // Claude Code signs in on its own in the browser, so Worldlet runs it with no Terminal (owner decision 2026-10-11).
+   if(BACKGROUND_SIGN_IN.includes(install.id)){
+    signingIn?.abort();
+    const controller=signingIn=new AbortController();
+    try{await signInInBackground(install,args,harnessEnvironment(install,currentEnvironment()),controller.signal);}
+    finally{if(signingIn===controller)signingIn=null;}
+    return {ok:true,background:true};
+   }
    await openSignIn(install,args,file=>shell.openPath(file));
    return {ok:true};
   }

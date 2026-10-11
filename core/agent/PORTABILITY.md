@@ -133,7 +133,7 @@ Each Agent has an oldest version Worldlet works with (owner decision 2026-10-10)
 
 | Agent | Minimum | What needs it | Update |
 | --- | --- | --- | --- |
-| Claude Code | 2.0.63 | `--no-session-persistence` | `claude update` |
+| Claude Code | 2.1.40 | `claude auth login` and `claude auth status` (signing in again from Worldlet without Terminal, owner decision 2026-10-11); `--no-session-persistence` (2.0.63) | `claude update` |
 | Codex | 0.117.0 | per-tool `approval_mode` for World tools (older Codex ignores it and cancels the call) | the way it was installed (`codex update` only exists from 0.128.0) |
 | Hermes Agent | 0.21.4 | `hermes config get --json --raw`; OpenCode Go also needs 0.21.1's session header | `hermes update` |
 | OpenClaw | 2026.8.1 | `openclaw agent exec` and `openclaw approvals grants` | `openclaw update` |
