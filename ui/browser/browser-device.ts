@@ -148,12 +148,14 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   const app=getApp(event.detail.applet);
   if(status==='complete'&&app&&!(opened&&!content.hidden&&getApp(appletKey)?.id===app.id))screen.done(app.id);
  });
+ // The panel is open on its page's viewport (it may still be covered).
+ function browserInPanel(){return opened&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser';}
  // A frozen website Applet (core/applets/applet-support.ts) is offered only to open, when it is already in the World;
  // otherwise its site is treated as one without an Applet, so Make Applet below stays available.
  const offeredMatch=()=>matchedApplet&&(inAppletCatalog(matchedApplet)||root.appletLayout?.has(matchedApplet.id))?matchedApplet:null;
  function syncAppletOffer(url?:string){
   if(url!==undefined)matchedApplet=appletForWebsite(url);
-  const layout=root.appletLayout,visible=appletKey==='browser'&&opened&&slot?.isConnected&&!content.hidden&&content.dataset.template==='browser';
+  const layout=root.appletLayout,visible=appletKey==='browser'&&browserInPanel();
   appletOffer.hidden=!visible||!matchedApplet||!layout?.available(matchedApplet.id);
   if(appletOffer.hidden)return;
   const installed=layout.has(matchedApplet.id);
@@ -175,13 +177,18 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  const toolbar=document.createElement('div');toolbar.className='browser-toolbar';toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Page');
  // Refresh, in the top bar of every website Applet and the Browser (owner request 2026-10-05): the page showing
  // in the panel loads again, also one stuck on a blank page. A bar control like Back: its icon, its name the label.
- const refresh=document.createElement('button');refresh.type='button';refresh.className='scene-control browser-refresh';refresh.hidden=true;
- refresh.innerHTML=uiIcon('refresh');refresh.append(Object.assign(document.createElement('span'),{textContent:'Refresh'}));refresh.title='Refresh this page';
+ const refresh=barControl('refresh','Refresh');refresh.title='Refresh this page';
+ // A page control (`browser-<name>`): its icon, its name the label, hidden until the page shows.
+ function barControl(name:string,label:string){
+  const button=document.createElement('button');button.type='button';button.className='scene-control browser-'+name;button.hidden=true;
+  button.innerHTML=uiIcon(name);button.append(Object.assign(document.createElement('span'),{textContent:label}));
+  return button;
+ }
  // The bar's page controls follow the panel, not each show of its page: a re-render of the open Applet
  // (a World update re-visits it) replaces the viewport and shows the page again a frame later, and
  // the controls flashing off and on for it read as a flicker (owner report 2026-10-06, YouTube).
  function pageInPanel(){
-  return !!native?.browser&&opened&&!taskPip&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser'&&!covered();
+  return !!native?.browser&&!taskPip&&browserInPanel()&&!covered();
  }
  // The native page is drawn over the World, so whatever opens over the panel puts the page away while it is
  // open: a dialog, and Fox's own panel (Settings, Profile…), which stood behind the page (owner report 2026-10-07).
@@ -227,20 +234,15 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // Home, in the Browser (owner request 2026-10-06) and every website Applet (owner request 2026-10-08):
  // its home page; the Browser's is Google unless the person chose another in Settings › General. The page itself goes there: opening the Browser again at the
  // address it was opened at changed nothing once the person had searched from it (owner report 2026-10-07).
- const homeButton=document.createElement('button');homeButton.type='button';homeButton.className='scene-control browser-home';homeButton.hidden=true;
- homeButton.innerHTML=uiIcon('home');homeButton.append(Object.assign(document.createElement('span'),{textContent:'Home'}));homeButton.title='Go to the home page';
+ const homeButton=barControl('home','Home');homeButton.title='Go to the home page';
  homeButton.onclick=event=>{event.stopPropagation();const url=appletHome();if(homeButton.hidden||!url)return;landingHome=appletKey!=='browser';void command('open',{url});};
  // Back and Forward, left of the title on a website Applet's page (owner request 2026-10-06): they follow the page's own
  // history, as the host reports it (`canBack`, `canForward`), and stand where the Applet's Back was; the way back to the
  // World is World beside Fox in its dock (ui/hud/native-hud.ts). Each shows only while there is somewhere to go (owner
  // request 2026-10-07; they rested, greyed, before): Back at the first page only when the page was opened from something
  // in the Applet (a link in an email), which it then returns to. A page over the World ('web') keeps its own close.
- const pageBack=document.createElement('button'),pageForward=document.createElement('button');
- for(const [button,name,label,tip] of [[pageBack,'back','Back','Go back a page'],[pageForward,'forward','Forward','Go forward a page']] as const){
-  button.type='button';button.className='scene-control browser-'+name;button.hidden=true;button.disabled=true;
-  button.innerHTML=uiIcon(name);button.append(Object.assign(document.createElement('span'),{textContent:label}));button.title=tip;
-  toolbar.append(button);
- }
+ const pageBack=barControl('back','Back'),pageForward=barControl('forward','Forward');
+ for(const [button,tip] of [[pageBack,'Go back a page'],[pageForward,'Go forward a page']] as const){button.disabled=true;button.title=tip;toolbar.append(button);}
  toolbar.append(refresh,homeButton,addressForm);
  let pageHistory={back:false,forward:false};
  function syncHistory(){
@@ -273,7 +275,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // BROWSER_TABS.max; pages beyond the host's live budget are released and open again at their last address when picked.
  // While Fox works on the page the strip rests: Fox drives the page in view, and another tab would take it away.
  const tabStrip=document.createElement('div');tabStrip.className='browser-tabs';tabStrip.setAttribute('role','tablist');tabStrip.setAttribute('aria-label','Browser tabs');
- const tabsInPanel=()=>appletKey==='browser'&&opened&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser'&&!taskPip&&!foxControl;
+ const tabsInPanel=()=>appletKey==='browser'&&browserInPanel()&&!taskPip&&!foxControl;
  function renderTabs(){
   if(appletKey!=='browser'||!native?.browser){if(tabStrip.isConnected)tabStrip.remove();return;}
   const state=tabs.state,resting=foxControl,full=!canAddTab(state);
@@ -324,8 +326,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // left after Back until the page's Back and Forward took that side, 2026-10-06, and the title's room): on by default, a website
  // page shows its main content (an article alone, an app without its distractions); pressed, the whole page shows again,
  // and the site keeps that choice. The host says what Focus does on each page it shows (`focus` reports).
- const focusButton=document.createElement('button');focusButton.type='button';focusButton.className='scene-control browser-focus';focusButton.hidden=true;
- focusButton.innerHTML=uiIcon('focus');focusButton.append(Object.assign(document.createElement('span'),{textContent:'Focus'}));
+ const focusButton=barControl('focus','Focus');
  toolbar.append(focusButton);
  let focusState:{on:boolean,reader:boolean,paused:boolean,available?:boolean}|null=null,focusBusy=false;
  // Its place is kept while the host has not yet said what Focus does on the page, so the controls beside it
@@ -359,7 +360,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  const siteKey=(url:string)=>siteAppletPage(url)?.hostname.toLowerCase().replace(/^www\./,'')||'';
  const madeFor=(url:string)=>madeApplets?.find(url)||justMade.get(siteKey(url))||null;
  function syncMakeOffer(){
-  const visible=!!madeApplets&&appletKey==='browser'&&opened&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser'&&!offeredMatch()&&!!siteAppletPage(page.url);
+  const visible=!!madeApplets&&appletKey==='browser'&&browserInPanel()&&!offeredMatch()&&!!siteAppletPage(page.url);
   const made=visible?madeFor(page.url):null;
   if(makeOffer.hidden===!visible&&makeOffer.dataset.made===(made?'true':'false')&&makeOffer.disabled===making)return;
   makeOffer.hidden=!visible;makeOffer.disabled=making;makeOffer.dataset.made=made?'true':'false';
@@ -391,15 +392,16 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   const visible=pageInPanel();
   loginFills.hidden=!visible||!loginFill?.accounts.length||loginSite(page.url)!==loginFill?.site;
   if(loginFills.hidden)delete loginFills.dataset.key;
-  if(!loginFills.hidden&&loginFills.dataset.key!==JSON.stringify(loginFill)){
-   loginFills.dataset.key=JSON.stringify(loginFill);
+  const key=JSON.stringify(loginFill);
+  if(!loginFills.hidden&&loginFills.dataset.key!==key){
+   loginFills.dataset.key=key;
    loginFills.replaceChildren(...loginFill!.accounts.map(account=>loginButton(loginFillText(account),async()=>{const result=await command('loginFill',{username:account});if(!result?.error)loginFill=null;})));
   }
  }
  const signInOffer=document.createElement('button');signInOffer.type='button';signInOffer.className='browser-applet-offer browser-sign-in-offer';signInOffer.hidden=true;root.append(signInOffer);
  let signInBlocked=false;
  function syncSignInOffer(){
-  signInOffer.hidden=!signInBlocked||!opened||!slot?.isConnected||content.hidden||content.dataset.template!=='browser';
+  signInOffer.hidden=!signInBlocked||!browserInPanel();
   if(!signInOffer.hidden)signInOffer.textContent='Open '+title+' in your browser ↗';
  }
  signInOffer.onclick=event=>{event.stopPropagation();void command('external',{platform});};

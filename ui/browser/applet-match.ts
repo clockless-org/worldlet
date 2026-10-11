@@ -6,16 +6,20 @@ const extraHosts:Record<string,string[]>={github:['github.com'],'google-calendar
 // in place of Make Applet). The Random game lands in a different /games/play/<slug>/ each time.
 const pathScopes:Record<string,string>={'random-game':'/games/'};
 const scopeOf=(app:any,url:URL)=>(pathScopes[app.key]??(app.region==='health'?url.pathname:'/')).replace(/\/(index\.html?)?$/,'');
+// Each Applet's own hosts and the path its pages keep to, worked out once: the catalog does not change.
+let owned:{app:any;hosts:string[];scope:string}[]|null=null;
+const ownedSites=()=>owned||=WORLD_APPS.filter(app=>app.key!=='browser').map(app=>{
+ const view:any=app.fullView,site=view?.original||view;const hosts=[...(extraHosts[app.key]||[])];let scope='';
+ try{if(site?.url){const own=new URL(site.url);hosts.push(own.hostname.replace(/^www\./,''));scope=scopeOf(app,own);}}catch{}
+ // A generic Google homepage is not an identity for Maps or another Google service.
+ return {app,hosts:hosts.filter(h=>h!=='google.com'&&h!=='accounts.google.com'),scope};
+});
 export function appletForWebsite(value:string){
  let url:URL;try{url=new URL(value);}catch{return null;}
  if(!['https:','http:'].includes(url.protocol)||url.username||url.password)return null;
  const host=url.hostname.toLowerCase().replace(/^www\./,''),path=url.pathname;
- const matches=WORLD_APPS.filter(app=>app.key!=='browser').flatMap(app=>{
-  const view:any=app.fullView,site=view?.original||view;let hosts=[...(extraHosts[app.key]||[])],scope='';
-  try{if(site?.url){const own=new URL(site.url);hosts.push(own.hostname.replace(/^www\./,''));scope=scopeOf(app,own);}}catch{}
+ const matches=ownedSites().flatMap(({app,hosts,scope})=>{
   if(scope&&path!==scope&&!path.startsWith(scope+'/'))return [];
-  // A generic Google homepage is not an identity for Maps or another Google service.
-  hosts=hosts.filter(h=>h!=='google.com'&&h!=='accounts.google.com');
   return hosts.filter(h=>host===h||host.endsWith('.'+h)).map(h=>({app,length:h.length+scope.length}));
  });
  matches.sort((a,b)=>b.length-a.length);return matches[0]?.app||null;
