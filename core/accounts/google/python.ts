@@ -14,7 +14,8 @@ export function pyIter(v:any):any[]{
  throw new TypeError(`'${pyType(v)}' object is not iterable`);
 }
 export const chars=(s:string)=>{let n=0;for(const _ of s)n++;return n;};
-export const head=(s:string,n:number)=>s.length<=n?s:[...s].slice(0,n).join('');
+/** s[:n] in Python: the first n code points. */
+export const head=(s:string,n:number)=>{if(s.length<=n)return s;let out='',k=0;for(const c of s){if(k++>=n)break;out+=c;}return out;};
 export function pyCompare(a:string,b:string){
  for(let i=0,j=0;;){
   const x=a.codePointAt(i),y=b.codePointAt(j);
@@ -67,6 +68,11 @@ export function pyJson(v:unknown):string{
  if(typeof v==='string')return '"'+v.replace(/[\x00-\x1f\\"]/g,c=>({'\\':'\\\\','"':'\\"','\b':'\\b','\f':'\\f','\n':'\\n','\r':'\\r','\t':'\\t'} as Record<string,string>)[c]??'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'))+'"';
  if(Array.isArray(v))return '['+v.map(pyJson).join(', ')+']';
  return '{'+pySorted(Object.keys(v)).map(k=>pyJson(k)+': '+pyJson((v as any)[k])).join(', ')+'}';
+}
+/** `hashlib.sha256(text.encode()).hexdigest()`. */
+export async function sha256Hex(text:string){
+ const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)));
+ return [...digest].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 /** `base64.urlsafe_b64decode`: binascii's lenient decoder (other characters skipped, padding ends the data). */
 export function urlsafeB64decode(text:string):Uint8Array{

@@ -1,7 +1,7 @@
 // Bounded, read-only Notion browsing through the official Notion MCP (ported from Hermes notion_mcp.py).
 import type {McpGate,McpSession,McpToolResult} from './session.ts';
 import {pyStr,pyType,head,chars,strip,truthy} from '../google/python.ts';
-import {unescape} from '../google/html.ts';
+import {unescape} from '../google/html-parser.ts';
 import {ValueError,isDict,dget,loads,urlparse} from './python.ts';
 import {handleNotionWrite,NOTION_WRITE_OPERATIONS,type NotionReviewStore,type NotionWriteOptions} from './notion-writes.ts';
 
@@ -13,10 +13,12 @@ export const NOTION_MAX_TEXT=160_000;
 const TIMEOUT=45;
 // Python's `\b` after an ASCII name: no word character (Unicode letters, digits, `_`) follows.
 const B='(?![\\p{L}\\p{N}_])';
+const MENTION_DATE=new RegExp(`<mention-date${B}[^>]*?\\/?>`,'gu'),PAGE_LINK=new RegExp(`<(?:page|mention-page)${B}[^>]*url="([^"]+)"[^>]*>(.*?)<\\/(?:page|mention-page)>`,'gsu');
+const PAGE_MENTION=new RegExp(`<mention-page${B}[^>]*url="([^"]+)"[^>]*\\/>`,'gu'),INCOMPLETE=new RegExp(`truncated="true"|<unknown${B}`,'u'),DATA_SOURCE=new RegExp(`<data-source${B}[^>]*>`,'gu');
 
 /** `<mention-date start="…"/>` as its start (and start time). */
 export function readableMentions(text:string){
- return text.replace(new RegExp(`<mention-date${B}[^>]*?\\/?>`,'gu'),match=>{
+ return text.replace(MENTION_DATE,match=>{
   const values:Record<string,string>={};
   for(const [,key,value] of match.matchAll(/(start|startTime)="([^"]+)"/g))values[key]=value;
   return ['start','startTime'].filter(key=>Object.hasOwn(values,key)).map(key=>values[key]).join(' ');
@@ -80,9 +82,9 @@ export function notionPage(value:Record<string,any>,identifier:string){
  if(kind==='page'&&!match&&!blank)throw new Error('Notion did not return a readable page body. Open it in Notion.');
  let markdown=match?readableMentions(strip(match[1])):'';
  // Page links stay readable in Notion's enhanced Markdown without executing HTML.
- markdown=markdown.replace(new RegExp(`<(?:page|mention-page)${B}[^>]*url="([^"]+)"[^>]*>(.*?)<\\/(?:page|mention-page)>`,'gsu'),(_,url,label)=>'['+label+']('+url+')');
- markdown=markdown.replace(new RegExp(`<mention-page${B}[^>]*url="([^"]+)"[^>]*\\/>`,'gu'),(_,url)=>'[Linked page]('+url+')');
- const partial=truthy(dget(value,'truncated'))||truthy(dget(value,'unknown_block_count'))||chars(markdown)>NOTION_MAX_TEXT||new RegExp(`truncated="true"|<unknown${B}`,'u').test(text);
+ markdown=markdown.replace(PAGE_LINK,(_,url,label)=>'['+label+']('+url+')');
+ markdown=markdown.replace(PAGE_MENTION,(_,url)=>'[Linked page]('+url+')');
+ const partial=truthy(dget(value,'truncated'))||truthy(dget(value,'unknown_block_count'))||chars(markdown)>NOTION_MAX_TEXT||INCOMPLETE.test(text);
  return {id:identifier,title:head(displayText(dget(value,'title')||'Untitled'),500),url:'https://www.notion.so/'+identifier,object_type:'page',
   markdown:head(markdown,NOTION_MAX_TEXT),partial,kind,lastEdited:dget(value,'page_last_edited_at','')} as Record<string,any>;
 }
@@ -96,7 +98,7 @@ const COLUMN_TYPES=new Set(['status','select','number','checkbox']);
 
 async function databaseRows(session:McpSession,value:Record<string,any>,page:Record<string,any>){
  const text=dget(value,'text','');
- const sources=[...text.matchAll(new RegExp(`<data-source${B}[^>]*>`,'gu'))].map(([tag])=>/collection:\/\/[a-f0-9-]{32,36}/.exec(tag)?.[0]).filter(Boolean);
+ const sources=[...text.matchAll(DATA_SOURCE)].map(([tag])=>/collection:\/\/[a-f0-9-]{32,36}/.exec(tag)?.[0]).filter(Boolean);
  if(!sources.length){
   page.notice='This database has no readable collection. Open it in Notion.';
   page.partial=true;

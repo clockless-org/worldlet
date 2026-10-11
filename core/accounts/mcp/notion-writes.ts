@@ -2,7 +2,7 @@
 // Saved reviews are bound to one Notion connection. A durable attempted marker is created before the write is sent:
 // a lost response never licenses another write.
 import type {McpSession} from './session.ts';
-import {pyType,truthy,strip} from '../google/python.ts';
+import {pyType,truthy,strip,sha256Hex} from '../google/python.ts';
 import {ValueError,OSError,isDict,dget,item,count,dumps,uuidCanonical} from './python.ts';
 import {jsonSchemaValid} from './json-schema.ts';
 import {notionPageId,notionPayload,notionPage} from './notion.ts';
@@ -61,8 +61,7 @@ async function checkedArgs(session:McpSession,name:string,candidates:unknown[]){
 export async function notionFingerprint(raw:Record<string,any>,target:string){
  const page=notionPage(raw,target);
  const value=Object.fromEntries(['id','title','markdown','partial','kind','lastEdited'].map(key=>[key,dget(page,key)]));
- const digest=new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode(dumps(value,{sortKeys:true}))));
- return [...digest].map(b=>b.toString(16).padStart(2,'0')).join('');
+ return sha256Hex(dumps(value,{sortKeys:true}));
 }
 
 async function prepare(session:McpSession,body:unknown,store:NotionReviewStore,binding:string,options:NotionWriteOptions){

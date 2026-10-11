@@ -1,6 +1,6 @@
 // More of the Python semantics the MCP connector readers were written with (exception kinds, attribute access on
 // provider JSON, urllib.parse.urlparse, uuid.UUID, json.dumps), on top of ../google/python.ts. Private to core/accounts.
-import {pyType,pyFloat,pyRepr,pySorted,chars,strip} from '../google/python.ts';
+import {pyType,pyFloat,pyRepr,pySorted,chars,head,strip} from '../google/python.ts';
 
 /** Python's ValueError: bad input the reader refused (an invalid ID, URL, cursor or operation). Other failures are
  * plain Errors (RuntimeError: the provider answered something unusable) or TypeErrors (Python's AttributeError and
@@ -24,7 +24,7 @@ export function item(o:unknown,k:string){
 /** `v[:n]` of a list or str (by code points). */
 export function slice(v:unknown,n:number):any[]|string{
  if(Array.isArray(v))return v.slice(0,n);
- if(typeof v==='string')return [...v].slice(0,n).join('');
+ if(typeof v==='string')return head(v,n);
  throw new TypeError(`'${pyType(v)}' object is not subscriptable`);
 }
 /** `len(v)` of a list, str or dict. */
