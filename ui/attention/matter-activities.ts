@@ -7,16 +7,16 @@ import {groupAttentionEvents} from '../../core/attention/index.ts';
 // Within a kind, Coming Up keeps start order; other rows carry their times only for ranking.
 const startOf=signal=>{const value=signal?.state==='event'?signal.start:undefined,time=typeof value==='number'?value:Date.parse(value);return Number.isFinite(time)?time:Infinity;};
 export function collectMatters({sections,pages,activities=[],events=[],current,currentSpace,depth,now=Date.now()}){
- const rank={needsAction:0,event:1,unseen:2,available:3};
+ const rank={needsAction:0,event:1,unseen:2,available:3},all=[...activities,...events];
  const items=sections.filter(r=>r.entity==='matter').map(r=>{
-  const signals=[...activities,...events].filter(a=>a.matterId?a.matterId===r.moduleId:a.placeId===r.id||r.children.includes(a.pageId)||a.pageIds?.some(id=>r.children.includes(id)));
+  const signals=all.filter(a=>a.matterId?a.matterId===r.moduleId:a.placeId===r.id||r.children.includes(a.pageId)||a.pageIds?.some(id=>r.children.includes(id)));
   signals.sort((a,b)=>(rank[a.state]??3)-(rank[b.state]??3)||startOf(a)-startOf(b));
   const state=signals[0]?.state||'available';
   const copy=matterCopy(r,signals,pages,now);
   return {id:r.moduleId,pageIds:r.children,placeId:r.id,title:r.title,taskTitle:copy.actionTitle,label:r.title,objective:copy.context,...copy,signalCount:signals.length,state,requiresChoice:!!signals[0]?.requiresChoice,priority:signals[0]?.priority||'normal',summary:signals[0]?.summary||'',worldItemId:pages?.get(signals[0]?.pageId)?.worldItemId,kind:'matter',active:current===r.moduleId||currentSpace===r.id,signals};
  });
  const apps=new Map<string,any>(sections.filter(r=>r.entity==='app').flatMap(r=>r.children.map((id): [string,any]=>[id,r])));
- for(const signal of [...activities,...events]){
+ for(const signal of all){
   for(const pageId of signal.pageId?[signal.pageId]:signal.pageIds||[]){
    const app=apps.get(pageId);if(!app)continue;
    const copy=matterCopy(app,[{...signal,pageId}],pages,now);
