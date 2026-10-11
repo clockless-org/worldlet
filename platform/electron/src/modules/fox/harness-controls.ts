@@ -60,8 +60,16 @@ export function createHarnessControls(host:Host){
       ...run?{last:{at:run.at,status:run.status}}:{}};});
     }catch(e){error=(e as Error)?.message||`${title} did not list its scheduled tasks.`;}
     // Results come to the World (Attention, the phone) for the Agent Fox talks through (fox/harness-jobs.ts).
-    return {harness,title,jobs:listed,running,...schedule.start?{start:schedule.start}:{},changes:!!schedule.change,inUse:current===harness,...error?{error}:{}};
+    return {harness,title,jobs:listed,running,...schedule.startScheduler?{canStart:true}:{},changes:!!schedule.change,inUse:current===harness,...error?{error}:{}};
    })):[]};
+  },
+  /** Starts an Agent's stopped scheduler with its own command, on the person's own Start. */
+  async start(harness:unknown):Promise<Row> {
+   if(!own())throw new WorldletError('Change scheduled tasks in your own world.');
+   const found=schedules().find(item=>item.harness===harness);if(!found)throw gone();
+   if(!found.schedule.startScheduler)throw new WorldletError(`Start it in ${found.title} itself.`);
+   await found.schedule.startScheduler();
+   return {ok:true};
   },
   async preview(harness:unknown,request:Row):Promise<Row> {
    if(!own())throw new WorldletError('Change scheduled tasks in your own world.');
@@ -124,5 +132,5 @@ export function createHarnessControls(host:Host){
  };
  /** `harnessSchedule` and `harnessSkills`: `list` (the default), `preview` a change, or the confirmed `change`. */
  const route=(service:typeof schedule|typeof skill)=>(request:Row)=>request.operation==='preview'?service.preview(request.harness,request):request.operation==='change'?service.change(request.confirm):service.list();
- return {schedule,skill,memory,scheduleRequest:route(schedule),skillRequest:route(skill),memoryRequest:()=>memory.list()};
+ return {schedule,skill,memory,scheduleRequest:(request:Row)=>request.operation==='start'?schedule.start(request.harness):route(schedule)(request),skillRequest:route(skill),memoryRequest:()=>memory.list()};
 }

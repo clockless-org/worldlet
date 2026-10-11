@@ -28,8 +28,6 @@ export async function showAgentMemory(target:HTMLElement,call:AgentCall,current:
    wrap.append(row);
   }
   if(entries.length>FIRST)wrap.append(agentButton(all?'Show fewer':`Show all ${entries.length}`,'more-memory',()=>{all?open.delete(key):open.add(key);void draw();}));
-  const files=[...new Set(entries.map(entry=>entry.where))];
-  wrap.append(el('span','companion-settings-quiet','From '+files.join(', ')));
   return wrap;
  }
  async function draw(){

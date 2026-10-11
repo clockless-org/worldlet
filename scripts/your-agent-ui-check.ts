@@ -27,7 +27,7 @@ try{
   if(b.action==='harnessMemory')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',entries:w.memory},{harness:'claude-code',title:'Claude Code',inUse:w.current.harness==='claude-code',entries:[{id:'mem-0000000000000030',kind:'memory',text:'Use pnpm, never npm.',where:'~/.claude/CLAUDE.md'}]}]};
   if(b.action==='foxPreferences')return {ok:true,dailyRoutines:{...w.daily}};
   if(b.action==='foxPreferenceChange'&&b.setting==='daily_routines'){w.daily={...w.daily,...b.value};return {ok:true,dailyRoutines:{...w.daily}};}
-  if(b.action==='harnessSchedule')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,running:false,start:'hermes gateway install',jobs:w.jobs}]};
+  if(b.action==='harnessSchedule')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,running:false,canStart:true,jobs:w.jobs}]};
   if(b.action==='harnessSkills'&&b.operation==='preview')return {command:'hermes config set skills.disabled ["'+b.skill+'"]',confirm:'s|'+b.change+'|'+b.skill};
   if(b.action==='harnessSkills'&&b.operation==='change'){const [,change,name]=b.confirm.split('|');
    w.skills=change==='remove'?w.skills.filter(s=>s.name!==name):w.skills.map(s=>s.name===name?{...s,enabled:change==='enable'}:s);return {ok:true};}
@@ -83,7 +83,7 @@ try{
  await hermesMemory.getByRole('button',{name:'Show all 6',exact:true}).click();
  await hermesMemory.locator('[data-memory=user] [data-entry]').nth(5).getByText('Prefers short replies.',{exact:true}).waitFor();
  await hermesMemory.getByText('What it remembers · 1',{exact:true}).waitFor();
- await hermesMemory.getByText('From ~/.hermes/memories/USER.md',{exact:true}).waitFor();
+ assert.doesNotMatch(await hermesMemory.innerText(),/\.hermes|USER\.md/,'no file paths');
  assert.equal(await hermesMemory.getByRole('button',{name:'Ask it to forget',exact:true}).count(),7,'Ask it to forget on each entry of the Agent in use');
  const ccMemory=memoryPart.locator('[data-harness=claude-code]');
  await ccMemory.getByText('Use pnpm, never npm.',{exact:true}).waitFor();
@@ -114,8 +114,7 @@ try{
  await seed.getByRole('button',{name:'Turn off',exact:true}).click();
  await seed.getByText('Hermes Agent will stop using “seed-swap” until you turn it on again. It stays in its skills.',{exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSkills'&&c.operation==='change').length),0,'Turn off asks first');
- await seed.locator('details.companion-settings-command summary').click();
- await seed.getByText('hermes config set skills.disabled ["seed-swap"]',{exact:true}).waitFor();
+ assert.doesNotMatch(await seed.innerText(),/hermes config|skills\.disabled/,'the command itself is never shown');
  await seed.locator('[data-action=confirm-change]').click();
  await skillsPart.getByText('Hermes Agent no longer uses “seed-swap”. It takes effect in its next conversation.',{exact:true}).waitFor();
  await skillsPart.locator('[data-skill=seed-swap]').getByText('Off',{exact:true}).waitFor();
@@ -138,8 +137,9 @@ try{
  await digest.getByText(/^Last run Oct 10: done$/).waitFor();
  await routinesPart.locator('[data-job=job-2]').getByText('Paused',{exact:true}).waitFor();
  await routinesPart.locator('[data-job=job-2]').getByText(/^Every 2 hours · /).waitFor();
- await routinesPart.getByText('Hermes Agent’s scheduler is not running, so these do not run now. Start it in Terminal:',{exact:false}).waitFor();
- await routinesPart.locator('code',{hasText:'hermes gateway install'}).waitFor();
+ await routinesPart.getByText('Hermes Agent’s scheduler is not running, so these do not run now.',{exact:true}).waitFor();
+ await routinesPart.locator('[data-action=start-scheduler]').waitFor();
+ assert.doesNotMatch(await routinesPart.innerText(),/gateway install|Terminal/,'Start is a button, not a command');
  await digest.getByRole('button',{name:'Pause',exact:true}).click();
  await digest.getByText('Hermes Agent will pause “Morning digest”. It does not run until you resume it.',{exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSchedule'&&c.operation==='change').length),0,'Pause asks first');
@@ -155,13 +155,13 @@ try{
  await routinesPart.locator('[data-job=job-2]').getByRole('button',{name:'Cancel',exact:true}).click();
  await routinesPart.getByText('Nothing was changed.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['harnessSchedule','harnessSkills'].includes(c.action)&&c.operation==='change').map(c=>c.confirm)),['s|disable|seed-swap','c|pause|job-1'],'only what the person confirmed ran');
- assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; commands only under Details');
+ assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; no commands');
  await accounts.locator('[data-account=gmail]').getByText('alex@example.com',{exact:true}).waitFor();
  await accounts.locator('[data-account=gmail]').getByRole('button',{name:'Disconnect Google',exact:true}).waitFor();
- await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool · https:\/\/tools\.example\.com/).waitFor();
+ await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool( · |$)/).waitFor();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
- await rule.getByText(/^Main agent · allowed .*2026, in Fox’s main conversation\.$/).waitFor();
+ await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
  await permissions.locator('[data-rule=rule-00000000000000a2]').getByText('Use the tool github › search_issues').waitFor();
  // Plain words: tools and things it may do, never MCP, allowlist or cron.
  assert.doesNotMatch(await permissions.innerText()+'\n'+await accounts.innerText(),/\bMCP\b|allowlist|cron/i,'plain words only');

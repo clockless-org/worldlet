@@ -86,7 +86,7 @@ assert.equal(many.results[0].item.title,'Scheduled job');assert.equal(many.resul
 assert.equal(scheduleStep({harness,state:{version:1,since:0},jobs:[],runs:[{...ok,at:NOW-13*3600_000}],running:null,now:NOW}).results[0].push,null,'an old result is in the World, not pushed');
 const stopped=scheduleStep({harness,state:{version:1,since:0},jobs:[job,{...job,id:'off',name:'Off',paused:true}],runs:[],running:false,start:'openclaw gateway install',now:NOW});
 assert.equal(stopped.state.stoppedNoted,true);assert.equal(stopped.stopped?.item.kind,'task');
-assert.match(String(stopped.stopped?.item.summary),/^Morning news run on OpenClaw's own scheduler, which is not running\. Start it with `openclaw gateway install`\./);
+assert.match(String(stopped.stopped?.item.summary),/^Morning news run on OpenClaw's own scheduler, which is not running\. Start it in Settings › Agent › Routines\./);
 assert.equal(scheduleStep({harness,state:stopped.state,jobs:[job],runs:[],running:false,now:NOW}).stopped,null,'noted once');
 assert.equal(scheduleStep({harness,state:stopped.state,jobs:[job],runs:[],running:true,now:NOW}).state.stoppedNoted,undefined,'noted again after it runs and stops');
 assert.equal(scheduleStep({harness,state:{version:1,since:0},jobs:[{...job,paused:true}],runs:[],running:false,now:NOW}).stopped,null,'nothing waiting');

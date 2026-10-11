@@ -1,6 +1,6 @@
 /** Settings › Agent › Routines: the jobs each Agent on this computer runs on its own scheduler (host
  * `harnessSchedule`, contracts/harness-services.ts HarnessSchedule): each with its plain time, where its results go,
- * its newest result and a Paused mark, and whether that scheduler runs now (and how to start it). Pause or Resume, Run
+ * its newest result and a Paused mark, and whether that scheduler runs now (and Start it, the Agent's own command). Pause or Resume, Run
  * now and Remove each run as the Agent's own command after the person confirmed it in plain words (agent-change.ts);
  * creating or changing one is a request to Fox, done in the conversation by the Agent's own tools. After a change the
  * Task panel's Routines read again (`worldlet:routines`). Plain words only: no cron, no prompts.
@@ -13,7 +13,7 @@ import {DAILY_PLAN_HOUR,DAILY_SUMMARY_HOUR,DAILY_ROUTINE_NAMES,readDailyRoutines
 import {agentButton,agentDay,agentEl as el,confirmAgentChange,type AgentCall} from './agent-change.ts';
 
 type Job={id:string;name:string;paused:boolean;when:HarnessJob['when'];delivery?:string;last?:{at:number;status:'ok'|'failed'|'silent'}};
-type Harness={harness:string;title:string;jobs:Job[];running:boolean|null;start?:string;changes:boolean;inUse?:boolean;error?:string};
+type Harness={harness:string;title:string;jobs:Job[];running:boolean|null;canStart?:boolean;changes:boolean;inUse?:boolean;error?:string};
 const fixed=(value:string|undefined)=>!!value&&/^\d+$/.test(value);
 /** “Every day at 8:00 AM”, “Every 2 hours”, “Once, Tomorrow 6:00 AM”, “Next Mon 9:00 AM”. */
 export function routineWhenLine(when:HarnessJob['when'],now=Date.now(),locale?:string):string {
@@ -91,8 +91,22 @@ export async function showAgentRoutines(target:HTMLElement,call:AgentCall,curren
    if(harness.error){rows.append(el('p','companion-info-note',harness.error));continue;}
    if(harness.running===true)rows.append(el('p','companion-settings-quiet',`${harness.title}’s scheduler is running.`));
    else if(harness.running===false&&harness.jobs.length){
-    const stopped=el('p','companion-info-note',`${harness.title}’s scheduler is not running, so these do not run now.`+(harness.start?' Start it in Terminal: ':''));
-    if(harness.start)stopped.append(el('code','',harness.start));
+    const stopped=el('div','companion-settings-row');stopped.dataset.scheduler='stopped';
+    stopped.append(el('p','companion-info-note',`${harness.title}’s scheduler is not running, so these do not run now.`));
+    // Start runs the Agent's own start command after one more ask in the page; it also starts with the computer from then on.
+    if(harness.canStart)stopped.append(agentButton('Start it','start-scheduler',()=>{
+     for(const open of box.querySelectorAll?.('.companion-settings-confirm')??[])open.remove();
+     const ask=el('div','companion-settings-confirm');ask.setAttribute('role','group');
+     ask.append(el('span','',`${harness.title} will start its scheduler and keep it running whenever this computer is on.`),
+      agentButton('Start','confirm-start',async()=>{
+       said.textContent=`${harness.title} is starting it…`;
+       try{await call('harnessSchedule',{operation:'start',harness:harness.harness});if(ask.isConnected)ask.remove();await draw();said.textContent=`${harness.title}’s routines run on schedule again.`;}
+       catch(e){said.textContent=(e as Error).message||'It did not start.';if(ask.isConnected)ask.remove();}
+      },true),
+      agentButton('Cancel','cancel-start',()=>{ask.remove();said.textContent='Nothing was changed.';}));
+     stopped.append(ask);
+    },true));
+    else stopped.append(el('p','companion-settings-quiet',`Start it in ${harness.title} itself.`));
     rows.append(stopped);
    }
    if(!harness.jobs.length)rows.append(el('p','companion-info-note','No routines yet.'));
