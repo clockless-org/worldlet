@@ -216,6 +216,13 @@ const errorText=(value:unknown,fallback:string)=>{const item=record(value);retur
 export function claudeCodeSignInExpired(text:string):string|null {
  return /Failed to authenticate|OAuth (?:session|token)[^.]*expired|invalid_grant/i.test(text)?'Claude Code’s sign-in has expired. Open Terminal, run claude and sign in again with /login.':null;
 }
+/** Codex's own sign-in or usage limit, told apart from its other failures (Mac Beta 4261, 2026-10-11: a turn that
+ * failed for another reason read "finish signing in" while Codex was signed in). Null when the text is neither. */
+export function codexProblem(text:string):string|null {
+ if(/usage limit|insufficient_quota|quota|rate.?limit|\b429\b/i.test(text))return 'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.';
+ if(/not (?:logged|signed) in|\b401\b|unauthori[sz]ed|refresh token|token (?:has )?expired|codex login/i.test(text))return 'Codex is not signed in. Open Terminal, run codex login, then try again.';
+ return null;
+}
 export function openClawMissingKey(text:string):string|null {
  const name=/Secret store entry "([A-Z][A-Z0-9_]{0,127})" was not found/.exec(text)?.[1]??/Environment variable "([A-Z][A-Z0-9_]{0,127})" is missing or empty/.exec(text)?.[1];
  return name?`OpenClaw can’t find its key ${name}, so its model can’t answer. Save it in Terminal with: openclaw secrets store set ${name}`:null;
@@ -240,7 +247,8 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
   }
   case 'codex':{
    const item=record(event.item);
-   if(event.type==='item.completed'&&item.type==='agent_message'&&typeof item.text==='string'){
+   // An empty one (Codex 0.162 after World tool calls, Mac Beta 4261) is not an answer and does not replace one.
+   if(event.type==='item.completed'&&item.type==='agent_message'&&typeof item.text==='string'&&item.text.trim()){
     // Whole messages, not tokens: each new one replaces the previous answer.
     const delta=(state.text?'\n\n':'')+item.text;state.final=item.text;return add(delta);
    }
@@ -312,8 +320,9 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
  return '';
 }
 
-/** The turn's answer once the process exited, or the reason it has none. */
-export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,exit:{code:number|null;stderr:string}):{message:string}|{error:string} {
+/** The turn's answer once the process exited, or the reason it has none. `toolCalls`: World tool calls the turn made;
+ * a turn whose work was those calls (background work such as the Attention check) may end without words. */
+export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,exit:{code:number|null;stderr:string},toolCalls=0):{message:string}|{error:string} {
  const title=localHarness(id).title;
  if(id==='openclaw'){
   const text=state.buffered.trim();
@@ -327,11 +336,17 @@ export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,ex
   }
   if(exit.code===0&&text&&!envelope)return {message:text};
  }
- if(state.error)return {error:(id==='claude-code'?claudeCodeSignInExpired(state.error):null)??state.error};
+ if(state.error)return {error:(id==='claude-code'?claudeCodeSignInExpired(state.error):id==='codex'?codexProblem(state.error):null)??state.error};
  const message=(state.final??state.text).trim();
  if(message&&exit.code===0)return {message};
+ if(exit.code===0&&toolCalls>0)return {message:''};
  const detail=exit.stderr.trim().split('\n').filter(Boolean).pop()??'';
  if(id==='openclaw'){const missing=openClawMissingKey(exit.stderr);if(missing)return {error:missing};}
  if(id==='claude-code'){const expired=claudeCodeSignInExpired(exit.stderr+'\n'+(state.final??state.text));if(expired)return {error:expired};}
- return {error:detail?`${title} could not answer: ${clip(detail,300)}`:`${title} did not answer. Open it once in Terminal to finish signing in, then try again.`};
+ if(id==='codex'){const problem=codexProblem(exit.stderr);if(problem)return {error:problem};}
+ if(detail)return {error:`${title} could not answer: ${clip(detail,300)}`};
+ // Nothing says why: name what happened rather than guess a sign-in.
+ if(exit.code===0)return {error:`${title} finished without an answer. Try again.`};
+ if(exit.code===null)return {error:`${title} stopped before it answered. Try again.`};
+ return {error:`${title} stopped (code ${exit.code}) without saying why. Open it once in Terminal to check it is signed in, then try again.`};
 }
