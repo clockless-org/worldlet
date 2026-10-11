@@ -128,15 +128,17 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   await wait('world arrival',"!!document.querySelector('#notionWorld')?.sceneMetrics?.renderer",90);
   const step=(key:string,seconds=30)=>wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
   await step('hello',90);await press('Continue');
-  // The tour never offers to sign in to Mail and has no rename step (owner decision 2026-10-10): the Applets step and the
-  // Attention Center only tell.
-  await step('applets');
-  if(await js(`!!${button('Connect Mail')}`)===true)throw Error(`the tour offered Connect Mail\n  screen: ${await seen()}`);
-  await press('Continue');
+  // The tour in the owner's order of 2026-10-11 (ui/onboarding/world-tour.ts): Fox's hello, the Attention Center, the
+  // Applets, the tasks and Routines beside Fox, then Fox's settings and the phone. Nothing is connected here, so the
+  // Applets step offers Connect Mail or Later; Later goes on without Google.
   await step('attention');await press('Continue');
-  // Nothing is connected, so first value waits on nothing: the tour closes with the phone step, or Fox offers a page
-  // on what the person keeps talking about with the brought Agent (Show me). Turning the Tutorial switch off ends either and frees the World.
-  await wait('the phone step, or a brought conversation',`document.querySelector('#notionWorld')?.dataset.tourStep==='phone'||!!${button('Show me')}`,60);
+  await step('applets');
+  if(await js(`!!${button('Connect Mail')}`)!==true)throw Error(`the Applets step did not offer Connect Mail with Mail not connected\n  screen: ${await seen()}`);
+  await press('Later');
+  await step('dock');await press('Continue');
+  // Fox's settings and the phone: with phone pairing on this host it offers the app (Not now), without it Continue.
+  // Turning the Tutorial switch off then ends the tour or first value and frees the World.
+  await step('fox');
   await skipTutorial();
   // A failed advisory step leaves no sign-in waiting, so Reset Fox still runs as before.
   const advisory=async(what:string,blocking:boolean,run:()=>Promise<void>)=>{
