@@ -8,7 +8,7 @@ import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 // per running task, stacked: a dark terminal with Fox in its corner and the last status lines, which a click opens to
 // the whole log, or, while Fox drives a web page, that page small, which a click opens. There is no Done list and no
 // Journal link: finished work lives in the Journal. The whole column scrolls as one when it is taller than the World.
-// On the left, the date and Journal corner stands on the Attention Center's edge, width and backing. During the tour
+// On the left, the date and Journal corner is the Attention Center's header: one panel, one backing. During the tour
 // only Routines show; beside an open Applet it is hidden; at 800px wide it is a chip that opens the panel, and in a
 // window 560px tall it is gone. Bundled UI, faked bridge, fixed clock, fictional jobs, mail and page.
 const t0=new Date(2026,9,10,9,30);
@@ -124,16 +124,19 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await pageWin.locator('.task-window-step').textContent(),'Fox · Choosing a court time');
  assert.ok(await pageWin.locator('.task-window-page img').evaluate(img=>(img as HTMLImageElement).complete&&(img as HTMLImageElement).naturalWidth>0),'the page, small');
  await page.screenshot({path:SCREEN});
- // Today's corner heads the Task panel's column in the top-right (owner request 2026-10-11): the same right edge and
- // width, above it, on the same light backing.
+ // Today's corner is the left panel's header, the Attention Center its body (owner request 2026-10-11): one surface
+ // with one backing, the same width and inner edge. The right column starts at the top with Routines.
  {
-  const corner=page.locator('.world-today'),[c,p]=[await corner.boundingBox(),await panel.boundingBox()];
-  assert.ok(c&&p&&Math.abs(c.x+c.width-(p.x+p.width))<1&&Math.abs(c.width-p.width)<1,'the corner on the Task panel’s right edge and width: '+JSON.stringify({c,p}));
-  const top=await panel.evaluate(e=>e.querySelector('.task-group')!.getBoundingClientRect().top);
-  assert.ok(c!.y+c!.height<=top+1,'above the column: '+JSON.stringify({c,top}));
-  const look=await page.evaluate(()=>{const s=(q:string)=>getComputedStyle(document.querySelector(q)!,'::before').backgroundColor;return {corner:s('.world-today'),panel:s('.task-panel-body')};});
-  assert.equal(look.corner,look.panel,'the same light backing');
-  await page.screenshot({path:LEFT_SCREEN,clip:{x:960,y:0,width:480,height:900}});
+  const corner=page.locator('.world-task-tracker>.world-today'),[c,l]=[await corner.boundingBox(),await tracker.boundingBox()];
+  assert.ok(c&&l&&Math.abs(c.x-l.x)<1&&Math.abs(c.y-l.y)<1&&Math.abs(c.width-l.width)<1&&l.x<40&&l.y<30,'the corner heads the left panel, top-left: '+JSON.stringify({c,l}));
+  const edges=await page.evaluate(()=>{const x=(q:string)=>document.querySelector(q)!.getBoundingClientRect().left;return {date:x('.world-today .world-date-time'),heading:x('.world-task-tracker .world-task-heading>span')};});
+  assert.ok(Math.abs(edges.date-edges.heading)<1,'its text starts where the Attention Center’s headings do: '+JSON.stringify(edges));
+  const look=await page.evaluate(()=>{const s=(q:string)=>getComputedStyle(document.querySelector(q)!,'::before').backgroundColor;return {panel:s('.world-task-tracker'),corner:s('.world-today'),list:s('.world-task-list')};});
+  assert.notEqual(look.panel,'rgba(0, 0, 0, 0)','one backing behind the whole left panel');
+  assert.ok(look.corner==='rgba(0, 0, 0, 0)'&&look.list==='rgba(0, 0, 0, 0)','no second backing inside it: '+JSON.stringify(look));
+  const p=await panel.boundingBox();
+  assert.ok(p&&Math.abs(p.y-l!.y)<1,'the right column starts level with the left panel: '+JSON.stringify({p,l}));
+  await page.screenshot({path:LEFT_SCREEN,clip:{x:0,y:0,width:480,height:900}});
  }
  await pageWin.click();
  assert.deepEqual(await page.evaluate(()=>(window as any).opened),['https://www.example.com/courts'],'a click opens the page');
@@ -166,14 +169,14 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>{delete (document.querySelector('.native-console') as HTMLElement).dataset.tourStep;});
  assert.deepEqual(await shown(),['routines','now']);
  // More than the World holds: the column scrolls as one, its backing still, nothing cut to "+N more".
- await page.evaluate(()=>{const w=window as any;w.panel={...w.panel,jobs:[...w.panel.jobs,...Array.from({length:10},(_,i)=>({id:'x'+i,name:'Extra routine '+(i+1),kind:'prompt',paused:false,when:{cron:`0 ${8+i} * * 1`}}))],
+ await page.evaluate(()=>{const w=window as any;w.panel={...w.panel,jobs:[...w.panel.jobs,...Array.from({length:14},(_,i)=>({id:'x'+i,name:'Extra routine '+(i+1),kind:'prompt',paused:false,when:{cron:`0 ${8+i} * * 1`}}))],
   working:[...w.panel.working,{id:'task-2',applet:'gmail',at:Date.now()/1000-60},{id:'task-3',applet:'google-calendar',at:Date.now()/1000-30}]};window.dispatchEvent(new CustomEvent('worldlet:applet-task',{detail:{}}));});
  await panel.locator('.task-step',{hasText:'Extra routine 10'}).waitFor({state:'attached'});
  await page.waitForFunction(()=>document.querySelectorAll('.task-panel .task-window').length===3);
  const scroller=panel.locator('.task-panel-scroll');
  const fit=await scroller.evaluate(e=>({scroll:e.scrollHeight,client:e.clientHeight,top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom}));
  assert.ok(fit.scroll>fit.client+40,'taller than the World: it scrolls '+JSON.stringify(fit));
- assert.ok(fit.top>=60&&fit.bottom<=900-60,'inside the World’s right side: '+JSON.stringify(fit));
+ assert.ok(fit.top>=12&&fit.bottom<=900-60,'inside the World’s right side: '+JSON.stringify(fit));
  const last=panel.locator('.task-window').last();
  const hiddenAtFirst=await last.evaluate((w,bottom)=>w.getBoundingClientRect().top>bottom,fit.bottom);
  assert.ok(hiddenAtFirst,'the last window is further down');
@@ -207,8 +210,7 @@ await withBrowser(fileAccess,async browser=>{
  await chip.waitFor({state:'visible'});
  assert.equal((await chip.innerText()).trim(),'Routines 2 · Doing now 1');
  const chipBox=await chip.boundingBox();
- const todayBox=await page.locator('.world-today').boundingBox();
- assert.ok(chipBox&&todayBox&&chipBox.x+chipBox.width>800-40&&chipBox.y>=todayBox.y+todayBox.height-1&&chipBox.y<todayBox.y+todayBox.height+60,'top-right, under today’s corner: '+JSON.stringify({chipBox,todayBox}));
+ assert.ok(chipBox&&chipBox.x+chipBox.width>800-40&&chipBox.y<120,'top-right: '+JSON.stringify(chipBox));
  assert.equal(await narrow.locator('.task-panel-body').isVisible(),false,'closed until asked');
  await chip.click();
  await narrow.locator('.task-panel-body .task-step',{hasText:'Morning news'}).waitFor();

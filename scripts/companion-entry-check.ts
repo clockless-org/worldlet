@@ -49,11 +49,11 @@ await withBrowser(fileAccess,async browser=>{
  await panel.locator('.companion-settings-list [data-setting=phone][aria-current=true]').waitFor();
  await page.screenshot({path:'/tmp/companion-phone.png'});
  await page.getByRole('button',{name:'Close companion panel'}).click();await panel.waitFor({state:'hidden'});
- // The Journal lives in the World's top-right corner with today's date, over the Task panel (owner request
+ // The Journal lives in the World's top-left corner with today's date, the Attention Center's header (owner request
  // 2026-10-11).
  {assert.deepEqual(await page.locator('.companion-side .fox-side-button').allInnerTexts(),['Agent','Phone'],'Agent and Phone are Fox\'s side buttons');
   const journal=page.locator('.world-today-open'),j=await journal.boundingBox();
-  assert(j&&j.x>700&&j.y<120,'the Journal is the top-right corner: '+JSON.stringify(j));
+  assert(j&&j.x<120&&j.y<120&&await page.locator('.world-task-tracker .world-today-open').count()===1,'the Journal heads the left panel in the top-left: '+JSON.stringify(j));
   assert.match(await journal.innerText(),/Journal/i,'it is named the Journal');
   const book=page.locator('#journalBook');await journal.click();await book.waitFor();assert(!await panel.isVisible(),'it opens the Journal, a book of its own');
   await page.getByRole('button',{name:'Close journal'}).click();await book.waitFor({state:'hidden'});}

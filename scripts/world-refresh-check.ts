@@ -25,10 +25,10 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>getComputedStyle(document.querySelector<HTMLElement>('.world-task-tracker')).pointerEvents),'none','the panel lies over the world without swallowing clicks on it');
  assert.equal(await tracker.locator('.world-task-group').count(),0,'nothing needs the user, so the panel shows no groups');
  assert.doesNotMatch(await tracker.innerText(),/Quiet/);
- // Nothing waiting is the best outcome, not a gap to apologise for: an empty panel
- // says nothing at all rather than asking to be filled.
- assert.equal((await tracker.innerText()).trim(),'','an empty panel asks for nothing, connected or not');
- assert.equal(await tracker.isVisible(),false,'empty Attention Center has no visible panel');
+ // Nothing waiting is the best outcome, not a gap to apologise for: under today's corner, the panel's header, an empty
+ // Attention Center says so in two words and asks for nothing (owner request 2026-10-11).
+ assert.equal((await tracker.locator('.world-task-list').innerText()).trim(),'All clear for now.','an empty panel says all clear, connected or not');
+ assert.equal(await tracker.locator('.world-today-open').isVisible(),true,'the header stays when nothing waits');
  await page.evaluate(()=>{location.hash='building=building-home';});
  await page.waitForFunction(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return m.active==='building-home'&&m.camera.settled;});
  await page.evaluate(()=>{document.querySelector<HTMLElement>('#notionStage canvas').dataset.generation='first';});
@@ -54,11 +54,11 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await tracker.locator('.world-task-heading').innerText(),'WORTH DOING','the heading names the group and nothing else');
  assert.deepEqual(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.framing.viewport),before.viewport,'showing Attention Center must not move or shrink the world');
  const shortBacking=await page.locator('.world-task-list').boundingBox();
- // Today's corner stands in the top-right (owner request 2026-10-11), clear of the Attention Center on the left, which
- // centers what it holds in its own room.
- const room=await tracker.boundingBox(),today=await page.locator('#notionWorld>.world-today').boundingBox();
- assert.ok(today&&today.x>=room.x+room.width,'the Today corner is clear of the Attention Center: '+JSON.stringify({today,room}));
- assert.ok(Math.abs(shortBacking.y+shortBacking.height/2-(room.y+room.height/2))<2,'short Attention Center stays vertically centered');
+ // Today's corner heads the Attention Center (owner request 2026-10-11): one left panel from the top-left, as tall as
+ // what it holds, the rows right under the header.
+ const room=await tracker.boundingBox(),today=await page.locator('.world-task-tracker>.world-today').boundingBox();
+ assert.ok(today&&Math.abs(today.y-room.y)<1&&Math.abs(today.x-room.x)<1,'the Today corner is the panel’s header: '+JSON.stringify({today,room}));
+ assert.ok(Math.abs(shortBacking.y-(today.y+today.height))<4&&Math.abs(room.y+room.height-(shortBacking.y+shortBacking.height))<1,'a short Attention Center sits right under the header and the panel ends with it: '+JSON.stringify({shortBacking,today,room}));
  // An event says when it is, beside its name, in both the forms a person uses.
  await page.evaluate(()=>{const at=new Date(Date.now()+2*3600*1000).toISOString();
   fixture.worldItems=[...fixture.worldItems,{id:'item-2',kind:'event',provider:'google-calendar',status:'open',title:'Dentist',context:'Bring the referral letter.',start:at,sources:[{provider:'google-calendar',id:'e1',quote:'Dentist 3:00 PM'}],createdAt:1,updatedAt:2}];});
@@ -126,7 +126,8 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(panel.scroll<=panel.client+1,'27 items and the panel still does not scroll: '+JSON.stringify(panel));
  const tallBacking=await page.locator('.world-task-list').boundingBox();
  assert.ok(tallBacking.height>shortBacking.height*2,'backing grows with the content');
- assert.ok(Math.abs(tallBacking.y+tallBacking.height/2-(room.y+room.height/2))<2,'long Attention Center stays vertically centered');
+ const tallRoom=await tracker.boundingBox(),view=page.viewportSize()!;
+ assert.ok(Math.abs(tallRoom.y-room.y)<1&&tallRoom.y+tallRoom.height<=view.height-76+1,'a long Attention Center grows down from the header and stops above the footer: '+JSON.stringify({tallRoom,view}));
  assert.equal(panel.cut,false,'copy written to the contract fits the row it is given, uncut');
  assert.equal(panel.groups,3,'every kind keeps a place; one kind does not crowd the others out');
  assert.ok(panel.rows>=3&&panel.rows<27,'the panel holds what fits and drops the rest: '+JSON.stringify(panel));

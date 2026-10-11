@@ -72,10 +72,10 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  }
  const tracker=el('nav','world-task-tracker ui-theme-attention');tracker.setAttribute('aria-label','Attention Center: Coming Up, Worth Doing and Worth Knowing');
  const trackerList=el('div','world-task-list');tracker.append(trackerList);root.append(tracker);
- // Today's corner stands in the World's top-right, heading the Task panel's column (owner request 2026-10-11, back from
- // the head of the Attention Center, where it stood from 2026-10-08): the date and clock open the Journal on today's page, where the morning
- // brief stands first, and the weather beside them keeps opening the forecast. The live nodes move here from the World's
- // corner, so the clock and the weather go on updating themselves; the sound comes too (owner request 2026-10-08).
+ // Today's corner is the Attention Center's header, one left panel with it (owner request 2026-10-11, after a day in the
+ // top-right): the date and clock open the Journal on today's page, where the morning brief stands first, and the weather
+ // beside them keeps opening the forecast. The live nodes move here from the World's corner, so the clock and the weather
+ // go on updating themselves; the sound comes too (owner request 2026-10-08).
  const today=el('div','world-today ui-theme-today'),todayOpen=el('button','world-today-open');todayOpen.type='button';
  // It is where the Journal lives (owner request 2026-10-08: "收到左上角 journal 就行了，让人知道这是 journal 的位置"):
  // the book's mark and name under the date, and closed cards fly in here.
@@ -87,7 +87,7 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  // The World's sound joins them when it is already there (world-audio.ts puts it here when it comes later).
  const sound=root.querySelector('.notion-top .world-audio');if(sound)today.append(sound);
  todayOpen.onclick=()=>{if(root.dataset.tourLock==='true'||root.dataset.tourSpotlight==='true')return;const now=new Date(),day=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day}}));};
- if(today.childElementCount)root.append(today);
+ if(today.childElementCount)tracker.prepend(today);
  // The right side mirrors the Attention Center with the Task panel: the person's Agent's routines and what it is
  // doing now, one window per task (owner layouts 2026-10-10 and 2026-10-11).
  mountTaskPanel(root,{openApplet:id=>visitObject(id)});
@@ -388,7 +388,9 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
    if(reading){line.classList.add('is-reading');line.setAttribute('aria-label','Reading what you connected');for(let i=0;i<3;i++)line.append(el('i'));}
    trackerMore.append(line);trackerMore.hidden=false;
   }
-  tracker.hidden=!items.length&&!later.length&&!introducing&&!forNow.length&&!proposals.length&&!ownItems.length;fitPanel();
+  // Nothing waiting is the best outcome: the header stays and says so in two words (owner request 2026-10-11).
+  if(!items.length&&!later.length&&!introducing&&!forNow.length&&!proposals.length&&!ownItems.length)showClear();
+  fitPanel();
   // The screen decides capacity: rows it cannot show wait instead of reappearing later.
   for(let pass=0;focusState&&items.length&&pass<2;pass++){
    // Rows carry their lead's item ID; the focus set knows each card by its key.
@@ -402,11 +404,13 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
  }
  // Nothing here is worth hunting for. The panel never scrolls and never cuts a row
  // short: what does not fit is dropped from the end, where the least pressing rows are.
+ function showClear(){const line=el('p','world-task-clear world-task-all-clear','All clear for now.');line.setAttribute('role','status');trackerMore.append(line);trackerMore.hidden=false;}
  function fitPanel(){
   if(!expanded)fitAttentionPanel(trackerList);
  }
- function renderTasks(){const s=snapshot();for(const p of s.pages.values())refreshItemPage(p);if(s.data.matterCatalog){renderMatters(s);return;}const inspect=root.querySelector('#notionDialog').open||!root.querySelector('#notionContent').hidden,items=trackedTasks().filter(a=>!inspect||a.pageId===s.current||a.pageIds?.includes(s.current)||a.placeId===s.currentSpace);tracked=items;const events=upcomingEvents(s).filter(a=>!inspect||a.pageId===s.current||a.placeId===s.currentSpace);tracker.hidden=!items.length&&!events.length;
+ function renderTasks(){const s=snapshot();for(const p of s.pages.values())refreshItemPage(p);if(s.data.matterCatalog){renderMatters(s);return;}const inspect=root.querySelector('#notionDialog').open||!root.querySelector('#notionContent').hidden,items=trackedTasks().filter(a=>!inspect||a.pageId===s.current||a.pageIds?.includes(s.current)||a.placeId===s.currentSpace);tracked=items;const events=upcomingEvents(s).filter(a=>!inspect||a.pageId===s.current||a.placeId===s.currentSpace);tracker.hidden=false;
   trackerList.replaceChildren();
+  if(!items.length&&!events.length){const line=el('p','world-task-clear world-task-all-clear','All clear for now.');line.setAttribute('role','status');trackerList.append(line);}
   for(const [state,title]of ATTENTION_GROUPS){
    const group=state==='event'?events:items.filter(a=>a.state===state);if(!group.length)continue;
    const heading=el('div','world-task-heading');heading.append(el('span','',title));trackerList.append(heading);
