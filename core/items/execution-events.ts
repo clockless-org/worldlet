@@ -1,17 +1,18 @@
 import type {ExecutionEvent,TaskClaim} from '../../contracts/execution.ts';
 import {worldEvent} from './world-events.ts';
+import {JOURNAL_KINDS} from './execution-journal.ts';
 const identity=(v:unknown):v is string=>typeof v==='string'&&v.length>0&&v.length<=200&&!/[\x00-\x1f]/.test(v);
+const fields=new Set(['version','id','at','kind','actor','requestId','taskId','runId','appletId','data','observedAt']);
+const allowed=new Set(['model','inputTokens','outputTokens','cacheReadTokens','durationMs','commandId','payloadRef','action','phase','status','ownerId','pool','generation','token','errorCode','operation','provider','moduleId','moduleKey','region','enabled','kind','itemId','sourceId','screen','preset','platform','genre','monitor','mode','level','place','id']);
 /** Closed envelope validation; only host-projected scalar metadata is admitted. */
 export function executionEvent(value:unknown):ExecutionEvent {
  if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid execution event');
  const e=value as ExecutionEvent;
- const fields=['version','id','at','kind','actor','requestId','taskId','runId','appletId','data','observedAt'];
- if(Object.keys(e).some(k=>!fields.includes(k))||e.version!==1||!identity(e.id)||!Number.isFinite(e.at)||e.at<0||!identity(e.kind)||!/^[a-zA-Z][a-zA-Z0-9_.:-]{0,63}$/.test(e.kind)||!['user','agent','scheduler','platform'].includes(e.actor)||e.observedAt!==undefined&&(!Number.isFinite(e.observedAt)||e.observedAt<0))throw Error('Invalid execution envelope');
+ if(Object.keys(e).some(k=>!fields.has(k))||e.version!==1||!identity(e.id)||!Number.isFinite(e.at)||e.at<0||!identity(e.kind)||!/^[a-zA-Z][a-zA-Z0-9_.:-]{0,63}$/.test(e.kind)||!['user','agent','scheduler','platform'].includes(e.actor)||e.observedAt!==undefined&&(!Number.isFinite(e.observedAt)||e.observedAt<0))throw Error('Invalid execution envelope');
  for(const key of ['requestId','taskId','runId','appletId'] as const)if(e[key]!==undefined&&!identity(e[key]))throw Error('Invalid execution reference');
  if(!e.data||typeof e.data!=='object'||Array.isArray(e.data))throw Error('Invalid execution metadata');
- const allowed=['model','inputTokens','outputTokens','cacheReadTokens','durationMs','commandId','payloadRef','action','phase','status','ownerId','pool','generation','token','errorCode','operation','provider','moduleId','moduleKey','region','enabled','kind','itemId','sourceId','screen','preset','platform','genre','monitor','mode','level','place','id'];
- for(const [key,v] of Object.entries(e.data))if(!allowed.includes(key)||!(typeof v==='boolean'||typeof v==='number'&&Number.isFinite(v)||typeof v==='string'&&v.length<=500))throw Error('Invalid execution metadata field');
- if(['run.started','run.succeeded','run.failed','run.cancelled','run.interrupted','harness.event','tool.requested','tool.result','tool.failed','model.requested','model.result','model.interrupted','ui.command'].includes(e.kind)){
+ for(const [key,v] of Object.entries(e.data))if(!allowed.has(key)||!(typeof v==='boolean'||typeof v==='number'&&Number.isFinite(v)||typeof v==='string'&&v.length<=500))throw Error('Invalid execution metadata field');
+ if(JOURNAL_KINDS.includes(e.kind)){
   if(!e.runId||!e.taskId||typeof e.data.payloadRef!=='string'||!/^execution\/[a-zA-Z0-9_.:-]{1,180}\.json$/.test(e.data.payloadRef))throw Error('Invalid journal event');
  } else if(e.kind==='world.action') {
   if(!e.requestId||typeof e.data.action!=='string'||!/^[a-zA-Z][a-zA-Z0-9_.:-]{0,63}$/.test(e.data.action)||!['requested','succeeded','failed'].includes(String(e.data.phase)))throw Error('Invalid action event');
