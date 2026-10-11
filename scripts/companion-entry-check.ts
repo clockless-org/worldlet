@@ -32,17 +32,26 @@ await withBrowser(fileAccess,async browser=>{
  // Clicking Fox types, like the bar; the settings button on Fox's left opens the companion panel (owner feedback 2026-10-04).
  await avatar.click();assert(await typing(),'Clicking Fox starts typing');assert(!await panel.isVisible(),'Clicking Fox does not open the panel');await page.keyboard.press('Escape');assert(!await typing());
  {const s=await page.locator(SETTINGS_BUTTON).boundingBox(),f=await avatar.boundingBox();assert(s.x+s.width<=f.x+f.width/2&&s.width>44,'the settings button sits on Fox\'s left, with its name');
-  assert.equal((await page.locator(SETTINGS_BUTTON).innerText()).trim(),'Settings','Settings shows its name beside its icon');}
- // Settings opens Settings directly, on Your Agent, with no menu between (owner Order 2026-10-07). The
+  assert.equal((await page.locator(SETTINGS_BUTTON).innerText()).trim(),'Agent','Agent, the one word of the Settings section it opens, beside its icon');
+  // Phone stands under it on Fox's left (owner request 2026-10-11), the same kind of button.
+  const p=await page.locator('.companion-side .companion-phone-button').boundingBox();
+  assert(p&&p.x+p.width<=f.x+f.width/2&&p.y>s.y+s.height-1&&Math.abs((p.x+p.width)-(s.x+s.width))<2,'Phone sits under Agent on Fox\'s left: '+JSON.stringify({p,s}));
+  assert.equal((await page.locator('.companion-side .companion-phone-button').innerText()).trim(),'Phone');}
+ // Settings opens Settings directly, on Agent, with no menu between (owner Order 2026-10-07). The
  // tutorial's switch lives in the World's top-right corner instead.
  await page.locator(SETTINGS_BUTTON).click();await panel.waitFor();
- assert.equal(await page.getByRole('menuitem').count(),0,'no menu between Settings and Settings');
- assert.equal(await panel.locator('.companion-settings-list [data-setting=model]').getAttribute('aria-current'),'true','Settings lands on Your Agent');
- assert.equal(await page.locator(SETTINGS_BUTTON).getAttribute('aria-haspopup'),null,'Settings opens no menu');
+ assert.equal(await page.getByRole('menuitem').count(),0,'no menu between Agent and Settings');
+ assert.equal(await panel.locator('.companion-settings-list [data-setting=model]').getAttribute('aria-current'),'true','Settings lands on Agent');
+ assert.equal(await page.locator(SETTINGS_BUTTON).getAttribute('aria-haspopup'),null,'Agent opens no menu');
+ // Phone opens Settings › Phone, where the phone is paired.
+ await page.getByRole('button',{name:'Close companion panel'}).click();await panel.waitFor({state:'hidden'});
+ await page.locator('.companion-side .companion-phone-button').click();
+ await panel.locator('.companion-settings-list [data-setting=phone][aria-current=true]').waitFor();
+ await page.screenshot({path:'/tmp/companion-phone.png'});
  await page.getByRole('button',{name:'Close companion panel'}).click();await panel.waitFor({state:'hidden'});
  // The Journal lives in the World's top-left corner, today's date at the head of the Attention Center; Fox keeps
  // only Settings beside it (owner request 2026-10-08).
- {assert.equal(await page.locator('.companion-side .fox-side-button').count(),1,'Settings is Fox\'s one side button');
+ {assert.deepEqual(await page.locator('.companion-side .fox-side-button').allInnerTexts(),['Agent','Phone'],'Agent and Phone are Fox\'s side buttons');
   const journal=page.locator('.world-today-open'),j=await journal.boundingBox();
   assert(j&&j.x<200&&j.y<120,'the Journal is the top-left corner');
   assert.match(await journal.innerText(),/Journal/i,'it is named the Journal');
@@ -54,7 +63,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await panel.locator('.companion-settings-subhead').evaluateAll(list=>list.slice(0,3).map(h=>h.textContent)),['Feedback','Tutorial','Restart Fox']);
  assert.equal(await panel.getByRole('button',{name:'Send feedback',exact:true}).count(),1);assert.equal(await panel.getByRole('button',{name:'Show the tutorial',exact:true}).count(),1);
  await page.screenshot({path:'/tmp/companion-settings.png'});
- await page.getByRole('button',{name:'Close companion panel'}).click();await page.locator(SETTINGS_BUTTON).click();await page.getByRole('button',{name:'Restart Fox',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Restart Fox',exact:true}).count(),1,'Settings reopens on the setting last chosen');
+ await page.getByRole('button',{name:'Close companion panel'}).click();await page.locator(SETTINGS_BUTTON).click();await panel.locator('.companion-settings-list [data-setting=model][aria-current=true]').waitFor();await panel.getByRole('button',{name:'Send feedback',exact:true}).waitFor({state:'detached'});
  await page.getByRole('button',{name:'Close companion panel'}).click();
  await type.click();assert(await typing());await page.locator('#notionInput').fill('Keep this draft');await page.keyboard.press('Escape');assert(!await typing());await type.click();assert.equal(await page.locator('#notionInput').inputValue(),'Keep this draft');
  // A long draft grows the field upward (six lines at most), Shift-Enter starts a line, and a stray click outside keeps the draft open.
@@ -88,9 +97,9 @@ await withBrowser(fileAccess,async browser=>{
   await restore(saved);}
  await page.evaluate(()=>location.hash='object=app-browser');await page.locator('#notionContent[data-template=browser]').waitFor();await page.waitForTimeout(400);assert((await avatar.boundingBox()).x>moved.x+100,'Applet reader positions Fox in its reserved right lane');
  const reader=await page.locator('#notionContent').boundingBox();assert.equal(reader.x,16);assert.equal(reader.y,150,'the panel starts below the Applet shelf (ui/hud/applet-shelf.ts)');assert.equal(850-reader.y-reader.height,16);
- assert(!await page.locator(SETTINGS_BUTTON).isVisible()&&!await page.locator('.world-today-open').isVisible(),'Journal and Settings step aside inside an Applet');
+ assert(!await page.locator(SETTINGS_BUTTON).isVisible()&&!await page.locator('.companion-side .companion-phone-button').isVisible()&&!await page.locator('.world-today-open').isVisible(),'Journal and Settings step aside inside an Applet');
  await page.screenshot({path:'/tmp/companion-bar.png'});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
  await type.click();const f=await form.boundingBox();assert(f.x>=0&&f.x+f.width<=390);await page.screenshot({path:'/tmp/companion-entry-narrow.png'});
- assert.deepEqual(errors,[]);console.log('PASS Companion: one message bar (click to type, hold to speak, Send) with the mic on its right, clicking Fox types, the top-left Journal corner opens the Journal and Settings, Fox’s one side button, opens the panel (both hidden inside an Applet), hold-to-speak on Fox and the mic, retained draft, no bubble over Fox’s head, drag/reload/Applet persistence and narrow bounds. Mock speech only.');
+ assert.deepEqual(errors,[]);console.log('PASS Companion: one message bar (click to type, hold to speak, Send) with the mic on its right, clicking Fox types, the top-left Journal corner opens the Journal, Fox’s side buttons Agent and Phone open Settings at Agent and at Phone (all hidden inside an Applet), hold-to-speak on Fox and the mic, retained draft, no bubble over Fox’s head, drag/reload/Applet persistence and narrow bounds. Mock speech only.');
 });

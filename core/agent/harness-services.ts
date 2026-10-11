@@ -29,7 +29,10 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  // Its skills (`skills`, files): `<home>/skills/**/SKILL.md` without the ones it ships (`.bundled_manifest`), each last
  // run from its own `skills/.usage.json`; a skill the person saves is a new `skills/<name>/SKILL.md`, where its own
  // `skill_manage` creates one, since its command line installs only from a hub or a URL (agent-runtime/harness-skills.ts).
- hermes:row('hermes',{conversation:'native',history:'files',schedule:'files',approvals:'native',events:'files',tools:'files',agents:'files',models:'native',send:'native',connections:'files',skills:'files'},
+ // Settings › Agent turns a skill off or on with its own `hermes config set skills.disabled`, removes a hub skill
+ // with `hermes skills uninstall`, and pauses, resumes, runs or removes a job with `hermes cron pause|resume|run|remove`
+ // (core/agent/harness-controls.ts).
+ hermes:row('hermes',{conversation:'native',history:'files',schedule:'files',approvals:'native',events:'files',tools:'files',agents:'files',models:'native',send:'native',connections:'files',skills:'files',memory:'files'},
   {rules:'files',revoke:'restart',revokeNote:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it. If Hermes Agent also runs for your chat apps, restart that too.',changes:'diffs'}),
  // A session per Fox thread on its running Gateway (`/v1/responses`, World tools as client function tools), else
  // `openclaw agent exec` per turn in the person's workspace; history from openclaw-agent.sqlite; its automations run in
@@ -55,12 +58,25 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  // Its skills (`skills`, native): each agent's workspace `skills/` and the shared `skills/` in its state folder, read
  // there; a skill the person saves goes in with its own `openclaw skills install <folder> --as <name> --agent <id>`.
  // It records a skill's use only behind its Gateway (`skills curator status`), so the World's synced turns say when.
- openclaw:row('openclaw',{conversation:'native',history:'files',schedule:'files',approvals:'native',events:'files',calls:'files',tools:'files',agents:'files',models:'native',send:'native',voice:'native',connections:'native',skills:'native'},
+ // Settings › Agent turns a skill off or on with its own `openclaw config set skills.entries.<key>.enabled` (it has
+ // no remove of its own) and pauses, resumes, runs or removes a job with `openclaw cron disable|enable|run|rm`.
+ openclaw:row('openclaw',{conversation:'native',history:'files',schedule:'files',approvals:'native',events:'files',calls:'files',tools:'files',agents:'files',models:'native',send:'native',voice:'native',connections:'native',skills:'native',memory:'files'},
   {rules:'native',revoke:'live',revokeNote:'A tool you take back stops being allowed in OpenClaw’s next session.',changes:'output'}),
  // Claude Code and pi: their session files; Codex: its rollout files and session_index.jsonl.
- 'claude-code':row('claude-code',{conversation:'native',history:'files'}),
- codex:row('codex',{conversation:'native',history:'files'}),
- pi:row('pi',{conversation:'native',history:'files'}),
+ // What each remembers (`memory`, files, every Agent above and below): Hermes Agent's memories/USER.md and MEMORY.md,
+ // OpenClaw's workspace USER.md and MEMORY.md, Claude Code's CLAUDE.md, Codex's and pi's AGENTS.md, shown read-only in
+ // Settings › Agent › Memory (agent-runtime/harness-memory.ts, core/agent/harness-memory.ts); forgetting is a
+ // request in Fox's conversation, since none has a command that forgets one entry.
+ // Claude Code, Codex and pi have no scheduler of their own. Their skills (`skills`, files: `<home>/skills/<name>/SKILL.md`)
+ // are listed only: none has a command that turns one off or removes it. Claude Code's and Codex's MCP servers
+ // (`connections`, files: Claude Code's .claude.json, Codex's config.toml) and their standing rules (`rules`, files:
+ // Claude Code's settings.json `permissions.allow`, Codex's `rules/*.rules` prefix rules) are shown read-only with where
+ // to change them: Worldlet does not answer their prompts and never edits their settings.
+ 'claude-code':row('claude-code',{conversation:'native',history:'files',skills:'files',connections:'files',memory:'files'},
+  {rules:'files',revokeNote:'Claude Code keeps these in its settings.json. Change them with /permissions in Claude Code; rules for one project stay in that project’s .claude folder.'}),
+ codex:row('codex',{conversation:'native',history:'files',skills:'files',connections:'files',memory:'files'},
+  {rules:'files',revokeNote:'Codex keeps these in the rules folder of its home (~/.codex/rules). Delete a line there to have it ask again.'}),
+ pi:row('pi',{conversation:'native',history:'files',skills:'files',memory:'files'}),
  // Fox's Agent on another computer (core/phone/README.md#another-computers-agent): each turn goes sealed to the paired
  // Worldlet there, which runs it on that computer's own Harness in a session per Fox thread and sends its World tool
  // calls back, and its permission prompts come here as approval cards; its `status` names the computer, and that Worldlet's `desktop` slot lists the person's agents there.
@@ -81,7 +97,7 @@ export function harnessLocation(harness:string,status:{location?:unknown}={}):Ha
  * declares no `calls`): why, in that Harness's terms where its row knows them, then how to get one. */
 const NO_CALLS:Readonly<Record<string,string>>=Object.freeze({hermes:'Hermes Agent’s optional telephony skill can place a call when you ask it in a chat, but it keeps no record of the call, so the World can neither start one through it nor follow it.'});
 export function harnessNoCallsNote(harness:string):string {
- return (NO_CALLS[harness]??'Your Agent has no phone calling Worldlet can use.')+' To have your Agent call from the World, choose OpenClaw with its Voice Call plugin as Fox’s Agent in Settings › Your Agent (`openclaw plugins install @openclaw/voice-call`, then a Twilio, Telnyx or Plivo number in its settings).';
+ return (NO_CALLS[harness]??'Your Agent has no phone calling Worldlet can use.')+' To have your Agent call from the World, choose OpenClaw with its Voice Call plugin as Fox’s Agent in Settings › Agent (`openclaw plugins install @openclaw/voice-call`, then a Twilio, Telnyx or Plivo number in its settings).';
 }
 /** How `harness` provides `service`, or null when it does not. */
 export function harnessService(harness:string,service:HarnessServiceName):HarnessServiceMode|null {

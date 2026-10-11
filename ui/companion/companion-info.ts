@@ -8,7 +8,7 @@ import {createCompanionArtifacts,mountJournalBook} from '../artifacts/index.ts';
 import {createCompanionPhone} from './companion-phone.ts';
 import {companionStill} from '../themes/index.ts';
 import {createCompanionSettings} from './companion-settings.ts';
-import {readFoxSkills,skillList,skillOffers,type FoxSkills} from './companion-skills.ts';
+import {readFoxSkills,skillOffers,type FoxSkills} from './companion-skills.ts';
 
 // What Fox can do, as things a person would actually say (owner feedback 2026-10-03: show real cases).
 const ABILITIES:[icon:string,title:string,say:string,does:string][]=[
@@ -29,8 +29,9 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const desktop=isDesktopCompanion;
  function syncEntry(){badge.innerHTML=uiIcon('companion');badge.title='Open companion panel';badge.setAttribute('aria-label',badge.title);badge.setAttribute('aria-haspopup','dialog');badge.setAttribute('aria-expanded',String(panel.open));badge.setAttribute('aria-controls',panel.id);}
  const panel=el('dialog','companion-info-panel ui-hud-panel');panel.id='companionInfo';panel.setAttribute('aria-label','Your companion');badge.setAttribute('aria-controls',panel.id);root.append(panel);
- // Settings beside Fox lands on Your Agent (owner Order 2026-10-07); the badge on Fox's profile.
- async function toggle(section='Profile'){if(desktop()){badge.disabled=true;try{await requireWorldSurface(call);await open(section);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';}finally{badge.disabled=false;}return;}if(panel.open)dismiss(true);else await open(section);}
+ // Agent beside Fox lands on Settings › Agent (owner Order 2026-10-07); the badge on Fox's profile.
+ // With `setting` (Fox's Agent and Phone buttons) it opens that section, and closes only when it is already showing.
+ async function toggle(section='Profile',setting?:string){if(desktop()){badge.disabled=true;try{await requireWorldSurface(call);await open(section,setting);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';}finally{badge.disabled=false;}return;}if(panel.open&&(!setting||settings.selected===setting))dismiss(true);else await open(section,setting);}
  badge.onclick=e=>{e.stopPropagation();void toggle();};
  syncEntry();
  let dismissClick=false;
@@ -81,9 +82,9 @@ export function mountCompanionInfo({root,pet,call,getName}){
   if(key!==anchorKey){anchorKey=key;Object.assign(panel.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px'});}
   anchorFrame=requestAnimationFrame(anchorPanel);
  }
- // Old section names still open their section: the old Energy page is Your Agent now, the Journal is a book of its own (owner request
+ // Old section names still open their section: the old Energy page is Agent now, the Journal is a book of its own (owner request
  // 2026-10-08) and Feedback a panel of its own; History, Sounds and Privacy are gone (owner request 2026-10-10). Accounts and
- // the standing rules Approvals listed are parts of Your Agent now: Settings opens it at that part (companion-settings.ts MOVED).
+ // the standing rules Approvals listed are parts of Settings › Agent now: Settings opens it at that part (companion-settings.ts MOVED).
  const SECTION_ID:Record<string,string>={Profile:'fox',Energy:'model',Mobile:'phone',iPhone:'phone',Phone:'phone',Accounts:'integrations',Integrations:'integrations',Approvals:'approvals'};
  let model:any=null,snapshot:any=null,profile:Partial<CompanionProfile>={},error='',busy=false,generation=0;
  const openGroups=new Set<string>(['user']);
@@ -136,19 +137,16 @@ export function mountCompanionInfo({root,pet,call,getName}){
    if(!saved)block.append(el('p','companion-info-note','Nothing saved yet. '+name+' remembers as you talk.'));
    if(!snapshot?.sampleEnabled){const edit=button('Edit memory',()=>{dismiss();window.dispatchEvent(new Event('worldlet:memory-manager'));});edit.classList.add('companion-knowledge-edit');block.append(edit);}
    if(knowledge.conversations)block.append(el('p','companion-knowledge-line',name+'’s own conversation: '+plural(knowledge.conversations,'message')));
+   // What other Agents' conversations and notes Fox can look through. Their skills and scheduled tasks are the Agent's
+   // own and are listed only in Settings › Agent (owner decision 2026-10-11), where they can be changed.
    for(const agent of knowledge.brought){
-    const parts=[[agent.conversations,'message'],[agent.notes,'note'],[agent.skills.length,'skill'],[agent.routines.length,'routine']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
+    const parts=[[agent.conversations,'message'],[agent.notes,'note']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
     if(!parts.length)continue;
-    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>{
-     if(agent.conversations||agent.notes)body.append(el('p','companion-knowledge-line',name+' can look through these conversations and notes when you ask.'));
-     if(agent.skills.length)body.append(el('h4','','Skills'),list(agent.skills));
-     if(agent.routines.length)body.append(el('h4','','Routines'),list(agent.routines.map(routine=>routine.schedule?routine.name+' · '+routine.schedule:routine.name)));
-    });
+    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and notes when you ask.')));
    }
-   // Every skill with when it last ran, then Fox's offers to save a task it keeps repeating, answered right here.
+   // Fox's offers to save a task it keeps repeating, answered right here; the skills themselves are in Settings › Agent.
    if(skills&&!snapshot?.sampleEnabled){
     const state=skills;
-    if(state.skills.length)group('skills','Skills',plural(state.skills.length,'skill'),body=>body.append(skillList(state,{el})));
     block.append(...skillOffers(state,{el,button,name,act:(operation,id)=>run(async()=>{const result=await call('foxSkills',{operation,id});skills=readFoxSkills(result)??skills;skillNote=typeof result?.note==='string'?result.note:'';})}));
     if(skillNote)block.append(el('p','companion-info-note companion-skill-note',skillNote));
    }

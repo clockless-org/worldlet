@@ -189,7 +189,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // The tour replays on demand from Show the tutorial in Settings › Help (#1327; owner request 2026-10-11: no switch in
  // the World's corner) and leaves the finished journey alone; Esc ends it. It waits while Fox works, so allow for a
  // turn still finishing.
- await wait('Settings beside Fox',"(()=>{const b=document.querySelector('.companion-side .companion-panel-button');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
+ await wait('Agent beside Fox',"(()=>{const b=document.querySelector('.companion-side .companion-panel-button');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
  await wait('Settings › Help',"(()=>{const b=document.querySelector('.companion-settings-item[data-setting=help]');if(!b)return false;b.click();return true;})()",10);
  await wait('Show the tutorial',"(()=>{const b=document.querySelector('.companion-info-action[data-action=tutorial]');if(!b)return false;b.click();return true;})()",10);
  await step('hello',120);

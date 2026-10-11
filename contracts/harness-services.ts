@@ -3,7 +3,7 @@
  * optional and declared; the World asks for a service, never for a Harness by name. Times are epoch milliseconds. */
 import type {AgentEvent} from './agent.ts';
 export const HARNESS_SERVICES_VERSION=2;
-export const HARNESS_SERVICE_NAMES=['conversation','history','schedule','approvals','agents','models','events','calls','tools','send','voice','location','connections','skills'] as const;
+export const HARNESS_SERVICE_NAMES=['conversation','history','schedule','approvals','agents','models','events','calls','tools','send','voice','location','connections','skills','memory'] as const;
 export type HarnessServiceName=typeof HARNESS_SERVICE_NAMES[number];
 /** How an adapter provides a service: `native` through the Harness's own interface (Gateway, ACP, API server, its own
  * command line), `files` by reading the Harness's own folder read-only, `worldlet` by Worldlet standing in for it. */
@@ -61,7 +61,19 @@ export interface HarnessSchedule {
  running():Promise<boolean|null>;
  /** How the person starts that scheduler (a command), for the World's note when it is not running. */
  readonly start?:string;
+ /** The newest finished run of each job, for Settings › Agent; absent: the World pages through `runs`. */
+ latest?():Promise<HarnessJobRun[]>;
+ /** The Agent's own command a change to one job runs, as the person sees it before confirming; absent with `change`:
+  * its jobs are read-only here. */
+ preview?(change:HarnessJobChange):Promise<string>;
+ /** Runs that command (only after the person confirmed this exact preview), then reads the jobs again to be sure;
+  * rejects with the Agent's reason. */
+ change?(change:HarnessJobChange):Promise<void>;
 }
+/** One change to one job, each the Agent's own command (core/agent/harness-controls.ts): pause or resume it, run it
+ * once now, or remove it. Creating or editing a job is the Agent's own conversation, never a World form. */
+export type HarnessJobAction='pause'|'resume'|'run'|'remove';
+export type HarnessJobChange={job:string;action:HarnessJobAction};
 
 /** approvals: the Harness's own permission prompts (dangerous commands, tool policy), answered in the World. `rule` is
  * what Always would allow, in the Harness's own terms (a Hermes Agent pattern key, an OpenClaw command); `agent` and
@@ -174,9 +186,28 @@ export interface HarnessConnections {
  * its own, its own way (its command line in mode `native`; in mode `files`, a new SKILL.md folder exactly where the
  * Agent's own skill tool creates one, never changing or removing an existing one); it rejects with the Agent's reason.
  * Absent: Worldlet has no way to add one there, and the World keeps the skill itself. `where` is the folder. */
-export type HarnessSkill={name:string;description:string;where:string;lastUsedAt?:number};
+export type HarnessSkill={name:string;description:string;where:string;lastUsedAt?:number;
+ /** false when the person turned it off in the Agent (it stays in its folder); absent: the Agent has no switch. */
+ enabled?:boolean;
+ /** The Agent has its own command that removes this one (Hermes Agent: only a skill it installed from its hub). */
+ removable?:boolean};
 export type HarnessSkillDraft={name:string;description:string;body:string};
-export interface HarnessSkills {list():Promise<HarnessSkill[]>;save?(draft:HarnessSkillDraft):Promise<{name:string;where:string}>;}
+/** Turn one skill off or on again, or remove it, each with the Agent's own command (core/agent/harness-controls.ts). */
+export type HarnessSkillChange={skill:string;action:'disable'|'enable'|'remove'};
+export interface HarnessSkills {list():Promise<HarnessSkill[]>;save?(draft:HarnessSkillDraft):Promise<{name:string;where:string}>;
+ /** The Agent's own command a change runs, as the person sees it before confirming; absent with `change`: read-only. */
+ preview?(change:HarnessSkillChange):Promise<string>;
+ /** Runs that command (only after the person confirmed this exact preview); rejects with the Agent's reason. */
+ change?(change:HarnessSkillChange):Promise<void>;}
+
+/** memory: what the Agent remembers, read where it keeps it, never written by Worldlet (owner decision 2026-10-11:
+ * read-only). `kind` `user` is what it keeps about the person (Hermes Agent's memories/USER.md, OpenClaw's USER.md),
+ * `memory` everything else it keeps (MEMORY.md; Claude Code's CLAUDE.md; Codex's and pi's AGENTS.md). One entry per
+ * item where the Agent separates them (Hermes Agent's `§`), else per paragraph; `where` is the file. No Agent here has
+ * a command that forgets one entry, so forgetting is a request to the Agent in Fox's conversation, where its own
+ * memory tool does it (core/agent/harness-memory.ts memoryForgetRequest). */
+export type HarnessMemoryEntry={id:string;kind:'user'|'memory';text:string;where:string};
+export interface HarnessMemory {list():Promise<HarnessMemoryEntry[]>;}
 
 /** location: where the Harness runs. A remote one is reached through a paired Worldlet on that computer, or directly
  * (`direct`: its own network interface, such as an OpenClaw Gateway's address and token). */
@@ -196,7 +227,10 @@ export function validateHarnessServices(value:unknown):HarnessServices {
  }
  if(v.approvalFeatures===undefined)return {version:2,harness:v.harness,services};
  const f=v.approvalFeatures as Record<string,unknown>;
- if(!f||typeof f!=='object'||Array.isArray(f)||!services.approvals)throw Error('Approval features need the approvals service.');
+ if(!f||typeof f!=='object'||Array.isArray(f))throw Error('Approval features must be an object.');
+ // A Harness whose prompts Worldlet does not answer may still have standing rules Worldlet only shows (rules and a
+ // note on where to change them, never revoke or changes).
+ if(!services.approvals&&(f.rules===undefined||f.revoke!==undefined||f.changes!==undefined))throw Error('Approval features need the approvals service, except rules shown read-only.');
  if(f.rules!==undefined&&!HARNESS_SERVICE_MODES.includes(f.rules as HarnessServiceMode))throw Error('Unknown approval rules mode: '+String(f.rules));
  if(f.revoke!==undefined&&(f.rules===undefined||!['live','restart'].includes(f.revoke as string)))throw Error('Revoking needs readable rules and live or restart.');
  if(f.changes!==undefined&&!['diffs','output'].includes(f.changes as string))throw Error('Unknown approval changes: '+String(f.changes));

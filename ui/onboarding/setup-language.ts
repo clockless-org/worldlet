@@ -107,7 +107,7 @@ const copy:Record<string,string[]>={
  'Bring your {agent} memory to Fox?':['把你在 {agent} 里的记忆带给 Fox 吗？','{agent} の記憶を Fox に引き継ぎますか？','¿Traer tu memoria de {agent} a Fox?'],
  'Bring your {agent} memory and model to Fox?':['把你在 {agent} 里的记忆和模型带给 Fox 吗？','{agent} の記憶とモデルを Fox に引き継ぎますか？','¿Traer tu memoria y modelo de {agent} a Fox?'],
  'Fox copies them, and its model if it uses an API key; {agent} itself stays as it is.':['Fox 复制一份，用 API key 的模型也一起带过来；{agent} 本身不会改动。','Fox はコピーし、API キーのモデルも引き継ぎます。{agent} 自体は変わりません。','Fox hace una copia, también del modelo si usa una clave de API; {agent} queda igual.'],
- '{agent} signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Your Agent.':['{agent} 用它自己的账号登录，Fox 用不了。设置完成后，在「设置 › 你的 Agent」里选一个模型。','{agent} は自分のアカウントでサインインしているため、Fox は使えません。セットアップ後、「設定 › あなたの Agent」でモデルを選んでください。','{agent} inicia sesión con su propia cuenta, que Fox no puede usar. Después de la configuración, elige un modelo en Ajustes, en Tu Agent.'],
+ '{agent} signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Agent.':['{agent} 用它自己的账号登录，Fox 用不了。设置完成后，在「设置 › Agent」里选一个模型。','{agent} は自分のアカウントでサインインしているため、Fox は使えません。セットアップ後、「設定 › Agent」でモデルを選んでください。','{agent} inicia sesión con su propia cuenta, que Fox no puede usar. Después de la configuración, elige un modelo en Ajustes, en Agent.'],
  'Choose one in Settings':['在设置里选','設定で選ぶ','Elígelo en Ajustes'],
  'Its own sign-in':['它自己的登录','自身のサインイン','Su propio inicio de sesión'],
  'Fox now runs on the model you brought from {agent}.':['Fox 现在用你从 {agent} 带来的模型。','Fox は {agent} から引き継いだモデルで動きます。','Fox ahora usa el modelo que trajiste de {agent}.'],

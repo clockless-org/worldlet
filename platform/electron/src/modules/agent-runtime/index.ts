@@ -20,6 +20,9 @@ import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentCon
 import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
+import {harnessScheduleControls} from './harness-schedule-controls.ts';
+import {harnessSkills} from './harness-skills.ts';
+import {harnessMemory} from './harness-memory.ts';
 import {AGENT_VERSIONS,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
@@ -131,10 +134,23 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
    const rules=standingRules(install,currentEnvironment());
    return rules?[{harness:install.id,title:install.title,rules:{list:()=>rules.list(),revoke:async(id:string)=>{await rules.revoke(id);current().forgetApprovals?.(install.id);}}}]:[];
   }),
-  // The same Harnesses' connections (Settings › Your Agent › Accounts and tools); Fox's own Hermes profile is not the person's Hermes Agent.
+  // The same Harnesses' connections (Settings › Agent › Accounts); Fox's own Hermes profile is not the person's Hermes Agent.
   harnessConnections:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
    const connections=harnessConnections(install,currentEnvironment());
    return connections?[{harness:install.id,title:install.title,connections}]:[];
+  }),
+  // The same Harnesses' own scheduled jobs and skills (Settings › Agent), each changed only by its own command.
+  harnessSchedules:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+   const schedule=harnessScheduleControls(install,currentEnvironment());
+   return schedule?[{harness:install.id,title:install.title,schedule}]:[];
+  }),
+  harnessSkillSets:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+   const skills=harnessSkills(install.id,currentEnvironment(),{locate:()=>[install]});
+   return skills?[{harness:install.id,title:install.title,skills}]:[];
+  }),
+  harnessMemories:()=>locateLocalHarnesses().filter(install=>install.id!=='hermes'||discoverOtherHermes(context.root)!==null).flatMap(install=>{
+   const memory=harnessMemory(install,currentEnvironment());
+   return memory?[{harness:install.id,title:install.title,memory}]:[];
   }),
   harnessEvents:()=>current().harnessEvents?.()??null,
   harnessCalls:()=>current().harnessCalls?.()??null,
@@ -313,7 +329,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
     const model=!!memory?.model;
     return {id,title,configured,model,worldTools:localHarness(id).worldTools,...memory||brings?{memory:{name:memory?.name??null,user:!!memory?.user,longTerm:!!memory?.longTerm,model:!!memory?.model,...brings?{history:brings}:{}}}:{}};
    });
-   // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Your Agent.
+   // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Agent.
    for(const agent of agents as Row[]){const summary=harnessToolsSummary(await harnessTools(agent.id)?.list()??[]);if(summary)agent.canAlso=summary;}
    // Its version against the oldest Worldlet works with (core/agent/agent-versions.ts), so a too-old one says so before it
    // is chosen; `fresh` reads it again, after the person updated it.

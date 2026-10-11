@@ -1,6 +1,7 @@
-// The Profile page shows what the World holds about the companion: saved memory by kind, Fox's own
-// conversation and what each other Agent brought, grouped and collapsible, every skill with when it last ran, and Fox's
-// offer to save a task it repeats (companion-skills.ts). Fixture data only.
+// The Profile page shows what the World holds about the companion: saved memory by kind, Fox's own conversation and
+// the conversations and notes each other Agent brought, grouped and collapsible, and Fox's offer to save a task it
+// repeats (companion-skills.ts). The Agent's own skills and scheduled tasks are only in Settings › Agent (owner
+// decision 2026-10-11), never listed twice. Fixture data only.
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 
@@ -27,20 +28,19 @@ await withBrowser(fileAccess,async browser=>{
  const panel=page.locator('#companionInfo'),block=panel.locator('.companion-profile-knowledge');
  await block.getByRole('heading',{name:'What Nova knows'}).waitFor();
  const groups=block.locator('details.companion-knowledge-group');
- assert.deepEqual(await groups.locator('summary .companion-knowledge-title').allTextContents(),['About you','Memory','From OpenClaw','Skills'],'memory kinds, each Agent that brought something, then every skill');
- assert.deepEqual(await groups.locator('summary .companion-knowledge-count').allTextContents(),['2 entries','2 entries','120 messages · 3 notes · 2 skills · 1 routine','2 skills']);
+ assert.deepEqual(await groups.locator('summary .companion-knowledge-title').allTextContents(),['About you','Memory','From OpenClaw'],'memory kinds, then each Agent that brought conversations or notes; no skills list');
+ assert.deepEqual(await groups.locator('summary .companion-knowledge-count').allTextContents(),['2 entries','2 entries','120 messages · 3 notes']);
  assert.equal(await groups.first().getAttribute('open'),'','About you starts open');
  assert.deepEqual(await groups.first().locator('li').allTextContents(),['Prefers Chinese.','Runs on Saturday mornings.']);
  await block.getByText('Nova’s own conversation: 42 messages',{exact:true}).waitFor();
  await groups.nth(2).locator('summary').click();
- await groups.nth(2).getByText('Morning brief · 0 8 * * *',{exact:true}).waitFor();
+ await groups.nth(2).getByText('Nova can look through these conversations and notes when you ask.',{exact:true}).waitFor();
+ assert.equal(await block.getByText(/Morning brief|daily-brief|seed-swap/).count(),0,'the Agent’s scheduled tasks and skills are not on Fox’s page');
  await page.screenshot({path:'/tmp/worldlet-companion-knowledge.png'});
  // A re-render (audio, layout) keeps which groups are open.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:audio',{detail:{}})));
  assert.equal(await block.locator('details[data-group="from:openclaw"]').getAttribute('open'),'');
- // Every skill with when it last ran and where it lives; then Fox's offer, saved on the person's word.
- await groups.nth(3).locator('summary').click();
- assert.deepEqual(await groups.nth(3).locator('.companion-skill-meta').allTextContents(),['Ran 3 days ago · In your Agent','Not run yet · Kept in the World']);
+ // Fox's offer to save a task it repeats stays here, saved on the person's word.
  const offer=block.locator('.companion-skill-offer');
  await offer.getByRole('heading',{name:'Nova did this 3 times'}).waitFor();
  await offer.getByText(/It goes into Nova’s skills, and the World keeps a copy\./).waitFor();
@@ -50,5 +50,5 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await page.evaluate(()=>(window as any).skillCalls.filter((c:string)=>c!=='list')),['save']);
  await block.getByRole('button',{name:'Edit memory'}).click();
  assert.deepEqual(await page.evaluate(()=>(window as any).events),['memory-manager']);
- console.log('PASS companion profile: saved memory by kind, own conversation and what other Agents brought, grouped and collapsible; skills with when each last ran and Fox’s offer to save a repeated task');
+ console.log('PASS companion profile: saved memory by kind, own conversation and the conversations and notes other Agents brought, grouped and collapsible; Fox’s offer to save a repeated task; the Agent’s skills and scheduled tasks only in Settings › Agent');
 });

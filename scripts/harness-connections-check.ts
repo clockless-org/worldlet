@@ -15,11 +15,11 @@ import {withTempDir} from './test-temp.ts';
 // `connections` service, Hermes Agent's mcp_servers and chat tokens and OpenClaw's mcp status and channels read without
 // a secret, each server's last use matched from its own tool naming, the exact command of each change, the host
 // services against fixture `hermes` and `openclaw` commands that behave like their own `mcp add/remove/unset` (their
-// files changed only by them), the World's preview-then-confirm and Settings › Your Agent › Accounts and tools.
+// files changed only by them), the World's preview-then-confirm and Settings › Agent › Accounts.
 
 // Declarations ------------------------------------------------------------------------------------------------------
 assert.equal(harnessService('hermes','connections'),'files');assert.equal(harnessService('openclaw','connections'),'native');
-assert.deepEqual(Object.keys(HARNESS_SERVICES).filter(id=>harnessService(id,'connections')).sort(),['hermes','openclaw'],'only Agents whose connections Worldlet can read declare them');
+assert.deepEqual(Object.keys(HARNESS_SERVICES).filter(id=>harnessService(id,'connections')).sort(),['claude-code','codex','hermes','openclaw'],'only Agents whose connections Worldlet can read declare them (Claude Code and Codex read-only)');
 
 // Never a secret ----------------------------------------------------------------------------------------------------
 assert.equal(maskSecrets('https://user:pw@mcp.example.com/mcp?api_key=abc123&x=1'),'https://•••@mcp.example.com/mcp?api_key=•••&x=•••');
@@ -141,7 +141,7 @@ if(args[0]==='mcp'&&args[1]==='add'){
  assert.deepEqual(called().at(-1),{hermes:['mcp','remove','jira'],home:fs.realpathSync(work)},'removed in that profile\'s home');
  assert.ok(!(await service.list()).some(c=>c.name==='jira'));
  await assert.rejects(service.change!({remove:jira.id}),/no longer has this server/);
- assert.ok(harnessConnections(hermesInstall,env));assert.equal(harnessConnections({...hermesInstall,id:'codex'},env),null,'a Harness that declares none has none');
+ assert.ok(harnessConnections(hermesInstall,env));assert.equal(harnessConnections({...hermesInstall,id:'pi'},env),null,'a Harness that declares none has none');
 
  // OpenClaw: `mcp status --json`, `channels list --json`, `mcp add` (connects first, exits 1 when it cannot or the name
  // is taken) and `mcp unset`, its own store; tool results in its per-agent transcripts.
@@ -204,7 +204,7 @@ else process.exit(2);
  await assert.rejects(world.preview('hermes',{remove:'not-an-id'}),/no longer there/);
  host.store.sampleEnabled=()=>true;await assert.rejects(world.preview('hermes',{remove:docs.id}),/your own world/);host.store.sampleEnabled=()=>false;
 
- // Settings › Your Agent › Accounts and tools: a row per connection with its last use; Remove and Add each say what they
+ // Settings › Agent › Accounts: a row per connection with its last use; Remove and Add each say what they
  // do in plain words, with the exact command under Details, and run it on Confirm.
  (globalThis as any).document={createElement:()=>new Node()};
  const requests:any[]=[];
@@ -240,4 +240,4 @@ else process.exit(2);
  assert.equal(connectionLine({id:'c',kind:'mcp',name:'x',where:'node s.js',enabled:false,agent:'work',sign:'needs-sign-in'}),'Tool · node s.js · needs sign-in in your Agent · profile “work” · turned off');
  delete (globalThis as any).document;
 });
-console.log('PASS Agent connections: declared per Harness, Hermes Agent and OpenClaw MCP servers and chat accounts listed with no secret and their last use from the Agent\'s own history, added and removed only through fixture `hermes mcp add/remove` and `openclaw mcp add/unset` after a confirmed preview, Settings › Your Agent › Accounts and tools');
+console.log('PASS Agent connections: declared per Harness, Hermes Agent and OpenClaw MCP servers and chat accounts listed with no secret and their last use from the Agent\'s own history, added and removed only through fixture `hermes mcp add/remove` and `openclaw mcp add/unset` after a confirmed preview, Settings › Agent › Accounts');

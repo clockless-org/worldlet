@@ -25,6 +25,7 @@ import {createFoxSkills} from './skills.ts';
 import {installChannelReplies} from './channel-reply.ts';
 import {createHarnessApprovalRules} from './harness-approvals.ts';
 import {createHarnessConnections} from './harness-connections.ts';
+import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
 import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
@@ -82,6 +83,7 @@ export function installFox(host:Host){
  installChannelReplies(host);
  const approvalRules=createHarnessApprovalRules(host);
  const agentConnections=createHarnessConnections(host);
+ const agentControls=createHarnessControls(host);
  const requireAgent=()=>{const value=agent();if(!value)throw new WorldletError('Fox is unavailable in this build.');return value;};
  const worldTools=()=>host.optional<WorldToolsService>(WORLD_TOOLS);
  const sources=()=>host.optional<SourcesService>(SOURCES);
@@ -577,7 +579,7 @@ export function installFox(host:Host){
  function proactiveCancel(){if(proactiveRun){proactiveRun.cancelled=true;proactiveRun.runtime.cancel();proactiveRun=null;}}
 
  // Chat --------------------------------------------------------------------------------------
- // How Fox's last reply ended, for Settings › Your Agent (owner request 2026-10-06: see and fix every model
+ // How Fox's last reply ended, for Settings › Agent (owner request 2026-10-06: see and fix every model
  // connection problem there). In memory for this run; addresses are dropped, and Agent errors carry no keys.
  let lastReply:{ok:boolean,at:number,error?:string}|null=null;
  const replyEnded=(error?:unknown)=>{lastReply=error===undefined?{ok:true,at:Date.now()}:{ok:false,at:Date.now(),error:characterPrefix(String((error as Error)?.message||error||'').replace(/https?:\/\/\S+/g,'[address]'),500)};};
@@ -752,7 +754,7 @@ export function installFox(host:Host){
 
  host.register({
   modelStatus:()=>foxModelStatus(),
-  // Settings › Your Agent: the Agent in use, the model it is set to, whether its sign-in or key is there, and how
+  // Settings › Agent: the Agent in use, the model it is set to, whether its sign-in or key is there, and how
   // the last reply ended. Reading it starts nothing new.
   modelHealth:async()=>{
    const runtime=agent();let model:Row={},error='';
@@ -966,9 +968,15 @@ export function installFox(host:Host){
   agentWarm:async request=>({warm:await warmThread(typeof request.thread==='string'?request.thread:'fox-main')}),
   /** Every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
   harnessApprovalRules:request=>request.operation==='revoke'?approvalRules.revoke(request.harness,request.id):approvalRules.list(),
-  /** Settings › Your Agent › Accounts and tools: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
+  /** Settings › Agent › Accounts: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessConnections:request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?agentConnections.change(request.confirm):agentConnections.list(),
+  /** Settings › Agent › Routines and Skills: each Agent's own jobs or skills here (`list`), the exact command
+   * a change would run with its confirmation (`preview`), or that confirmed change run (`change`). */
+  harnessSchedule:request=>agentControls.scheduleRequest(request),
+  harnessSkills:request=>agentControls.skillRequest(request),
+  /** Settings › Agent › Memory: what each Agent here remembers, read only. */
+  harnessMemory:()=>agentControls.memoryRequest(),
   harnessApproval:async request=>{
    const approvals=agent()?.approvals?.()??null;
    if(!approvals||typeof request.id!=='string'||!isHarnessApprovalChoice(request.choice))throw new WorldletError('This request can no longer be answered.');

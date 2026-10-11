@@ -49,17 +49,23 @@ export function createNativeChat(call){return function({button,input,status,exec
  const pet=make('div','companion-pet'),state=make('span','companion-listening-state');state.setAttribute('role','status');pet.append(avatar,state);
  // The name tag at Fox's feet: the name at rest, what Fox is doing while it works (fox-name-tag.ts).
  const nameTag=mountFoxNameTag(pet,()=>focusInput());
- // The buttons beside Fox stand in one row on its left, each an icon with its name (owner request
- // 2026-10-05). Settings opens Settings directly (owner Order 2026-10-07; Feedback and the tutorial are in
- // its Help, owner request 2026-10-11); Fox itself is a way to talk, like the message bar (owner feedback 2026-10-04).
+ // The buttons beside Fox stand in one column on its left, each an icon with its name (owner request
+ // 2026-10-05). Agent opens Settings directly, on its Agent section, whose one word it now carries (owner Order
+ // 2026-10-07; renamed 2026-10-11: "Your Agent 换个名字？一个词的，companion旁边的settigns按钮也改成这个词"; Feedback and
+ // the tutorial are in Settings › Help); Phone, under it, opens Settings › Phone (owner request 2026-10-11: "Phone也作为
+ // 一个常驻action到companion左边"). Fox itself is a way to talk, like the message bar (owner feedback 2026-10-04).
  const side=make('div','companion-side');
  // The Journal is the World's top-left corner, today's date at the head of the Attention Center (owner request
- // 2026-10-08: "journal 下面的那个按钮就不用了…收到左上角"), so Fox keeps only Settings beside it, which steps aside
- // inside an Applet (controls.css).
- const panelButton=make('button','companion-panel-button fox-side-button');panelButton.type='button';panelButton.innerHTML=uiIcon('settings')+'<span>Settings</span>';
- panelButton.addEventListener('pointerdown',e=>e.stopPropagation());
- panelButton.onclick=e=>{e.stopPropagation();if(root.dataset.tourLock!=='true'&&root.dataset.tourSpotlight!=='true')openPanel();};
- side.append(panelButton);pet.append(side);hud.append(pet);
+ // 2026-10-08: "journal 下面的那个按钮就不用了…收到左上角"). Both step aside inside an Applet (controls.css), and the
+ // desktop Fox shows neither (desktop-companion.css).
+ const sideButton=(cls:string,icon:string,label:string,setting:string)=>{
+  const b=make('button',cls+' fox-side-button');b.type='button';b.innerHTML=uiIcon(icon)+'<span>'+label+'</span>';
+  b.addEventListener('pointerdown',(e:Event)=>e.stopPropagation());
+  b.onclick=(e:Event)=>{e.stopPropagation();if(root.dataset.tourLock!=='true'&&root.dataset.tourSpotlight!=='true')openPanel(setting);};
+  return b;
+ };
+ const panelButton=sideButton('companion-panel-button','settings','Agent','model'),phoneButton=sideButton('companion-phone-button','phone','Phone','phone');
+ side.append(panelButton,phoneButton);pet.append(side);hud.append(pet);
  // Fox's left is one column, centered on Fox, with Fox's own buttons under the left actions of the
  // dock (World and the like): at most three a side (owner request 2026-10-05). The two live in
  // different places, so each moves by half the other's height (controls.css).
@@ -785,7 +791,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  }
  async function toggleSpeech(){if(talk.interrupt())return;if(recording||companionInfo.feedback.voicing){await finishSpeech();return;}if(starting){cancelSpeech();return;}editing=false;input.blur();await beginSpeech(false);}
  avatar.onclick=()=>{if(avatarSuppressClick){avatarSuppressClick=false;return;}focusInput();};
- function openPanel(){noteInput();void companionInfo.toggle('Settings');}
+ function openPanel(setting?:string){noteInput();void companionInfo.toggle('Settings',setting);}
  speechButton.onclick=()=>{if(avatarSuppressClick){avatarSuppressClick=false;return;}void toggleSpeech();};
  function browseReply(direction){
   if(recording||starting||transcribing)return;
@@ -886,6 +892,8 @@ export function createNativeChat(call){return function({button,input,status,exec
   finally{/* A turn superseded before it answered (the early returns above) never stays working. */if(entryId&&thread.find(x=>x.id===entryId)?.status==='working'){const interrupted='This reply was interrupted. You can try again.';thread=threadInterrupt(thread,entryId,interrupted);saveRecall();live(interrupted,true);}trace.finish(turnResult,outcome);/* What Fox said at the turn's end, for the page's finished status card (browser-device.ts). */window.dispatchEvent(new CustomEvent('worldlet:fox-reply',{detail:{outcome,message:outcome==='complete'?String((turnResult as any).message||''):failureMessage}}));if(turn===generation){turnEntry='';quietTurn=false;life.finish(outcome==='complete',{blocked:outcome==='error'});active=false;streamingReply=false;const followup=queuedTurns.shift();render();if(followup){if(followup.session&&followup.session!==recallKey(context.key,contentIdentity())){const drafts=[followup,...queuedTurns,...(input.value.trim()?[{text:input.value.trim(),origin:'user'}]:[])];input.value=drafts.map(t=>t.displayText||t.text).join('\n\n');queuedDraft={text:input.value,turns:drafts};for(const queued of [followup,...queuedTurns])queued.trace.finish({},'cancelled');queuedTurns=[];editing=true;say('Your queued messages are kept as a draft because the view changed.');}else void submit(followup.text,followup.trace,false,followup.origin,followup.displayText,followup.icon);}else window.dispatchEvent(new Event('worldlet:fox-idle'));}/* Talk reads the reply, then listens again; a queued follow-up answers first. */if(!quiet&&!invitation&&!active&&talk.phase==='thinking')void talk.replied(outcome==='complete'?String((turnResult as any).message||''):outcome==='error'?failureMessage:'');}
   return {outcome,...(guided?{candidateId:(turnResult as any).candidateId}:{}),...(outcome==='complete'?{text:(turnResult as any).message||''}:{}),...(failureMessage?{message:failureMessage}:{})};
  }
+ // Settings › Agent asks Fox for something only the conversation can do (a new or changed scheduled task).
+ window.addEventListener('worldlet:fox-ask',(e:any)=>{const text=typeof e.detail?.text==='string'?e.detail.text.trim():'';if(text)void submit(text);});
  window.addEventListener('worldlet:speech',(e: any)=>{
  if(e.detail?.phase==='spoken'){talk.spoken();return;}
  if(!recording&&!starting&&!transcribing)return;
@@ -954,7 +962,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // The settings button beside Fox is the way into the panel; the panel's own entry button stays out of the World.
  companionInfo.entry.remove();
  const modelWatch=watchModelNeeded({call,needed:text=>{
-  // No Agent on this computer: Fox points to Settings › Your Agent, where it is chosen (owner request 2026-10-05).
+  // No Agent on this computer: Fox points to Settings › Agent, where it is chosen (owner request 2026-10-05).
   if(guide||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||root.classList.contains('companion-info-open'))return false;
   const choose=make('button','','Choose an Agent'),later=make('button','','Not now');choose.type=later.type='button';
   choose.onclick=async()=>{api.setGuide(null,{only:'model-needed'});try{if(isDesktopCompanion())await requireWorldSurface(call);await companionInfo.open('Settings','model');}catch(error){setStatus(error.message||'Could not reopen World. Try again.');}};
