@@ -30,8 +30,19 @@ export type PhoneAccount={provider:string,title:string,action:'reconnect'|'permi
  * moment Applets and ongoing things, which work on the phone in their own page, come without one. */
 export type PhoneApplet={key:string,title:string,section:'live'|'accounts'|'jobs'|'places',state:'busy'|'ready'|'failed'|'off',
  line?:string,recent?:{text:string,at:string}[],widget?:string,fox?:PhoneItemFox,mine?:'site'|'page'|'conversation',url?:string};
-// `applets` is optional, so an older phone ignores it.
-export type PhoneAttention={v:1,at:string,now:PhoneAttentionItem[],later:PhoneAttentionItem[],accounts:PhoneAccount[],applets?:PhoneApplet[]};
+/** One card of the computer's Task panel, the cards either side of Fox (core/tasks task-panel.ts), as the phone's Tasks
+ * tab lists it (owner request 2026-10-11): `name` and `status` are the card's words, `when` its time text ("In progress",
+ * "Tomorrow 6:00 AM"), `icon` its picture (`fox`, `clock` or an Applet's catalog key), `progress` how far a page Fox drives
+ * is (0 to 1), `applet` the phone's Applet key the card opens, `every` and `by` how often a routine runs and who runs it,
+ * and `lines` what a running task has said, newest last. */
+export type PhoneTask={id:string,name:string,status:string,when:string,icon:string,progress?:number,applet?:string,every?:string,by?:string,lines?:string[]};
+/** Doing now (newest first) and Routines (soonest first), as the computer orders them. */
+export type PhoneTasks={now:PhoneTask[],routines:PhoneTask[]};
+/** One of today's cards in the Journal (core/artifacts), newest first: an answer Fox showed or an Attention card the
+ * person closed. `text` is its one-sentence brief, else its body, clipped. */
+export type PhoneJournalEntry={id:string,title:string,kind:'answer'|'attention',at:string,text?:string,category?:string};
+// `applets`, `tasks` and `journal` are optional, so an older phone ignores them.
+export type PhoneAttention={v:1,at:string,now:PhoneAttentionItem[],later:PhoneAttentionItem[],accounts:PhoneAccount[],applets?:PhoneApplet[],tasks?:PhoneTasks,journal?:PhoneJournalEntry[]};
 export type PhoneTurn={id:string,role:'user'|'fox',text:string,at:string};
 export type PhoneConversation={v:1,at:string,busy:boolean,name:string,messages:PhoneTurn[]};
 /** The turn Fox is on now, sent as it streams so the phone shows it word by word, as the computer's dialogue does:
@@ -68,7 +79,7 @@ export type PhoneWebRecord={at:number,kind:'page'|'text'|'text-more'|'input'|'cl
  field?:string,value?:string,label?:string,href?:string,fields?:string[]};
 const WEB_KINDS:PhoneWebRecord['kind'][]=['page','text','text-more','input','click','submit','private'];
 
-export const PHONE_LIMITS=Object.freeze({items:40,turns:40,turnText:4000,chatText:4000,field:400,summary:1500,accounts:20,steps:6,applets:48,recent:4,webRecords:300,webText:100000});
+export const PHONE_LIMITS=Object.freeze({tasks:24,taskLines:6,journal:24,journalText:1500,items:40,turns:40,turnText:4000,chatText:4000,field:400,summary:1500,accounts:20,steps:6,applets:48,recent:4,webRecords:300,webText:100000});
 const GROUPS:PhoneGroup[]=['event','needsAction','unseen'];
 const clip=(value:unknown,max:number=PHONE_LIMITS.field)=>typeof value==='string'?value.trim().slice(0,max):'';
 const iso=(value:unknown)=>{const t=typeof value==='number'?value:Date.parse(String(value??''));return Number.isFinite(t)?new Date(t).toISOString():null;};
@@ -96,7 +107,7 @@ const optional=(fields:Record<string,string>)=>Object.fromEntries(Object.entries
 // Accounts come from the World page's source issues (ui/shell/notion-world.ts publishSourceIssues).
 // `world` (optional) is the Applet world: the Applets in the World with their lamps, what they are doing now, the world
 // log, the widgets for now and each Applet's thread (phoneApplets). Without it the payload is the Center alone.
-export function phoneAttention({now,later,accounts=[],world}:{now:any[],later:any[],accounts?:any[],world?:PhoneWorld},at:number):PhoneAttention{
+export function phoneAttention({now,later,accounts=[],world,tasks,journal}:{now:any[],later:any[],accounts?:any[],world?:PhoneWorld,tasks?:any,journal?:any[]},at:number):PhoneAttention{
  const places=world?appletPlaces(world.places):[];
  const home=(item:PhoneAttentionItem)=>{const key=appletFor(item.source,places);return key?{...item,applet:key}:item;};
  const pick=(rows:any[],snoozed:(m:any)=>boolean)=>rows.map(m=>phoneItem(m,snoozed(m))).filter((v):v is PhoneAttentionItem=>!!v).slice(0,PHONE_LIMITS.items).map(home);
@@ -104,7 +115,33 @@ export function phoneAttention({now,later,accounts=[],world}:{now:any[],later:an
   .map(a=>({provider:clip(a.provider,100),title:clip(a.title,100)||clip(a.provider,100),action:a.action})).slice(0,PHONE_LIMITS.accounts);
  const value:PhoneAttention={v:1,at:new Date(at).toISOString(),now:pick(now,()=>false),later:pick(later,m=>!!m.snoozed),accounts:linked};
  if(world)value.applets=phoneApplets(world,places,value.now);
+ if(tasks)value.tasks=phoneTasks(tasks);
+ if(journal)value.journal=phoneJournal(journal,at);
  return value;
+}
+
+/** The computer's Task panel (core/tasks TaskPanel) as the phone's Tasks tab shows it. */
+export function phoneTasks(panel:any):PhoneTasks{
+ const row=(r:any):PhoneTask|null=>{
+  const id=clip(r?.id,200),name=clip(r?.name||r?.title,60);if(!id||!name)return null;
+  const applet=typeof r?.open?.applet==='string'?r.open.applet.replace(/^app-/,''):'';
+  const progress=typeof r?.progress==='number'&&Number.isFinite(r.progress)?Math.max(0,Math.min(1,r.progress)):null;
+  const lines=(Array.isArray(r?.lines)?r.lines:[]).map((l:unknown)=>clip(l,160)).filter(Boolean).slice(-PHONE_LIMITS.taskLines);
+  return {id,name,status:clip(r?.status,120),when:clip(r?.when,60),icon:/^[a-z0-9-]{1,60}$/.test(r?.icon)?r.icon:'fox',
+   ...progress===null?{}:{progress},...optional({applet:/^[a-z0-9][a-z0-9-]*$/.test(applet)?applet:'',every:clip(r?.every,60),by:clip(r?.by,60)}),...lines.length?{lines}:{}};
+ };
+ const group=(rows:unknown)=>(Array.isArray(rows)?rows:[]).map(row).filter((v):v is PhoneTask=>!!v).slice(0,PHONE_LIMITS.tasks);
+ return {now:group(panel?.now?.rows),routines:group(panel?.routines?.rows)};
+}
+
+/** Today's Journal cards (core/artifacts Artifact, `createdAt` in seconds), newest first: what the phone's Today tab
+ * shows under the date. "Today" is the computer's own day. */
+export function phoneJournal(artifacts:any[],at:number):PhoneJournalEntry[]{
+ const day=new Date(at);day.setHours(0,0,0,0);const start=day.getTime()/1000;
+ return artifacts.filter(a=>a&&(a.kind==='answer'||a.kind==='attention')&&Number.isFinite(a.createdAt)&&a.createdAt>=start&&clip(a.title))
+  .sort((a,b)=>b.createdAt-a.createdAt).slice(0,PHONE_LIMITS.journal)
+  .map(a=>({id:clip(a.id,200),title:clip(a.title,80),kind:a.kind,at:new Date(a.createdAt*1000).toISOString(),
+   ...optional({text:clip(a.brief||a.body,PHONE_LIMITS.journalText),category:clip(a.category,40)})}));
 }
 
 /** What the World page knows about its Applets, for the phone's Applet world. `places` are the Applets in the World

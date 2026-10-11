@@ -106,6 +106,20 @@ final class PublicAPITests: XCTestCase {
         XCTAssertEqual(answer, ["type": "approval", "id": "m1", "approval": "acp-1", "choice": "always"])
     }
 
+    /// The Tasks tab and today's Journal (owner request 2026-10-11) ride with the Center; an older computer sends neither.
+    func testTasksAndJournalDecode() throws {
+        let json = #"{"v":1,"at":"","now":[],"later":[],"tasks":{"now":[{"id":"page:united.com","name":"united.com","status":"Comparing fares","when":"In progress","icon":"fox","progress":0.5,"lines":["✓ a","› b"]},{"id":"applet:7","name":"YouTube","status":"Working","when":"In progress","icon":"youtube","applet":"youtube"}],"routines":[{"id":"job:d","name":"Daily news digest","status":"Tomorrow 7:00 AM","when":"Tomorrow 7:00 AM","icon":"clock","every":"Every day","by":"OpenClaw’s scheduler"}]},"journal":[{"id":"attention-x","title":"Fares dropped","kind":"attention","at":"2026-10-11T16:00:00.000Z","text":"Down $120","category":"Worth Knowing"}]}"#
+        let snapshot = try JSONDecoder().decode(AttentionSnapshot.self, from: Data(json.utf8))
+        XCTAssertEqual(snapshot.tasks?.now.map(\.progress), [0.5, nil])
+        XCTAssertEqual(snapshot.tasks?.now.last?.applet, "youtube")
+        XCTAssertEqual(snapshot.tasks?.routines.first?.every, "Every day")
+        XCTAssertEqual(snapshot.journal?.first?.category, "Worth Knowing")
+        let older = try JSONDecoder().decode(AttentionSnapshot.self, from: Data(#"{"v":1,"at":"","now":[],"later":[]}"#.utf8))
+        XCTAssertNil(older.tasks)
+        XCTAssertNil(older.journal)
+        XCTAssertEqual(PhoneApplet.Section.jobs.title, "Things")
+    }
+
     func testAppletWorldDecodesAndAppletLinesEncode() throws {
         let json = #"{"v":1,"at":"","now":[{"id":"a","ids":["a"],"group":"needsAction","title":"Mail","action":"Reply","context":"","start":null,"when":"","level":2,"snoozed":false,"source":"gmail","applet":"gmail"}],"later":[],"applets":[{"key":"gmail","title":"Mail","section":"live","state":"busy","line":"Reading Mail…","recent":[{"text":"Read 3 emails","at":"2026-10-04T05:00:00.000Z"}],"fox":{"say":"","option":"","turns":[{"user":"Any news?","text":"Two replies.","working":false,"at":""}]}},{"key":"widget:wgt-abcdefghij","title":"Getty","section":"live","state":"ready","widget":"wgt-abcdefghij"},{"key":"x","title":"X","section":"garden","state":"glowing"},{"key":"youtube","title":"YouTube","section":"places","state":"ready","url":"https://www.youtube.com/"},{"key":"bad","title":"Bad","section":"places","state":"ready","url":"javascript:alert(1)"}]}"#
         let snapshot = try JSONDecoder().decode(AttentionSnapshot.self, from: Data(json.utf8))

@@ -1,74 +1,50 @@
 import SwiftUI
 import WorldletKit
 
-/// The Applet world, the layer above Now (owner decision 2026-10-03): the World behind the Center comes forward as a grid
-/// of the Applets that work on the phone, in the computer's own order (owner request 2026-10-07): the person's own
-/// under Yours, then the others, those at work or holding Now items first; Applets that work only on the computer are
-/// not sent. A tile breathes a lantern ring while its Applet works, like the device's lamp on the computer, shows a red
-/// dot when it failed and fades when it is off; its badge counts the Now items it holds. A tile with a website opens it
-/// in this app's own browser (WebBrowser.swift), and holding it opens the Applet's page above Fox; a widget opens its page
-/// and an ongoing thing its page.
-struct AppletWorld: View {
+/// The Applets tab (owner request 2026-10-11): the Applets that work on the phone, as a list in the computer's own
+/// order, grouped by section. The person's things come first: each OpenClaw channel or long conversation that is one job
+/// carried on is a thing of its own, found by the computer (core/tasks ongoingCandidates), and the first line said in
+/// one makes it an Applet there with its own thread. Then the Applets working now, the connected accounts and the rest.
+/// Applets that work only on the computer are not sent. A row's lamp breathes while its Applet works, shows a red dot
+/// when it failed and fades when it is off; its badge counts the Now items it holds. A row with a website opens it in
+/// this app's own browser (WebBrowser.swift), and holding it opens the Applet's page above Fox; a widget opens its page
+/// and a thing its page, where Fox talks in that thing's own thread.
+struct AppletList: View {
     @Environment(AppModel.self) private var model
     let open: (PhoneApplet) -> Void
-    /// The Applet's page above Fox, for a tile that opens its website.
+    /// The Applet's page above Fox, for a row that opens its website.
     let details: (PhoneApplet) -> Void
-    /// Pulled up past its end: back to Now.
-    let back: () -> Void
-    /// In view: off screen, its tiles are hidden from VoiceOver and UI tests.
-    var shown = true
-    @State private var content: CGFloat = 0
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8, alignment: .top), count: 4)
+    private let order: [PhoneApplet.Section] = [.jobs, .live, .accounts, .places]
 
     var body: some View {
-        GeometryReader { view in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    let applets = model.attention.applets ?? []
-                    if applets.isEmpty { empty }
-                    ForEach([true, false], id: \.self) { mine in
-                        let tiles = applets.filter { $0.isMine == mine }
-                        if !tiles.isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text((mine ? "Yours" : "Applets").uppercased())
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .tracking(0.3)
-                                    .foregroundStyle(Palette.muted.opacity(0.75))
-                                    .padding(.horizontal, 8)
-                                    .padding(.bottom, 6)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .overlay(alignment: .bottom) { Rectangle().fill(Palette.ink.opacity(0.14)).frame(height: 1) }
-                                LazyVGrid(columns: columns, spacing: 14) {
-                                    ForEach(tiles) { applet in
-                                        AppletTile(applet: applet, held: held(applet)) { open(applet) }
-                                            .contextMenu {
-                                                if applet.url != nil {
-                                                    Button { details(applet) } label: { Label("Details", systemImage: "info.circle") }
-                                                }
-                                            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                let applets = model.attention.applets ?? []
+                if applets.isEmpty { empty }
+                ForEach(order, id: \.self) { section in
+                    let rows = applets.filter { $0.section == section }
+                    if !rows.isEmpty {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Heading(title: section.title)
+                            ForEach(rows) { applet in
+                                AppletRow(applet: applet, held: held(applet)) { open(applet) }
+                                    .contextMenu {
+                                        if applet.url != nil {
+                                            Button { details(applet) } label: { Label("Details", systemImage: "info.circle") }
+                                        }
                                     }
-                                }
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 14)
-                .padding(.top, 10)
-                .padding(.bottom, 24)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                // Inside the scroll view: iOS 27 does not hide a scroll view's contents from outside it.
-                .accessibilityHidden(!shown)
-                .background { GeometryReader { box in Color.clear.onAppear { content = box.size.height }.onChange(of: box.size.height) { _, h in content = h } } }
-                // Pulled up past the end of the grid (or past its top edge when the grid is short) returns to Now.
-                .overlay(alignment: .top) {
-                    PullMark(space: "applets") { y in if y < -max(0, content - view.size.height) - 90 { back() } }
-                }
             }
-            .coordinateSpace(name: "applets")
-            .scrollBounceBehavior(.always)
-            .scrollIndicators(.hidden)
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+            .padding(.bottom, 24)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .scrollIndicators(.hidden)
     }
 
     /// How many Now items this Applet holds.
@@ -85,74 +61,95 @@ struct AppletWorld: View {
     }
 }
 
-/// One Applet in the grid: its device from the World, as the computer draws it, and its name below.
-struct AppletTile: View {
-    @Environment(AppModel.self) private var model
+/// One row of the Applets tab: the Applet's device with its lamp, its name, what it is doing or its status, and when it
+/// last said something.
+struct AppletRow: View {
     let applet: PhoneApplet
     let held: Int
     let open: () -> Void
-    @State private var breathe = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Button(action: open) {
-            VStack(spacing: 6) {
-                AppletGlyph(applet: applet, size: 60)
-                    .background {
-                        // The device's lamp: a lantern glow behind it that breathes while the Applet works.
-                        if applet.state == .busy {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(Palette.lantern.opacity(breathe ? 0.12 : 0.3))
-                                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .stroke(Palette.lantern.opacity(breathe ? 0.45 : 0.95), lineWidth: breathe ? 3 : 2))
-                                .padding(-2)
-                        }
+            HStack(spacing: 12) {
+                AppletTileFace(applet: applet, held: held, size: 40)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(applet.title).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.ink).lineLimit(1)
+                    if let line = applet.line, !line.isEmpty {
+                        Text(line).font(.system(size: 13))
+                            .foregroundStyle(applet.state == .failed ? Color(hex: 0xF08A84) : Palette.muted.opacity(0.8))
+                            .lineLimit(1)
                     }
-                    .overlay(alignment: .topTrailing) {
-                        if applet.state == .failed {
-                            Circle().fill(Color(hex: 0xD9534F)).frame(width: 11, height: 11)
-                                .overlay(Circle().stroke(Color.black.opacity(0.3), lineWidth: 1))
-                                .offset(x: 4, y: -4)
-                        } else if held > 0 {
-                            Text("\(held)")
-                                .font(.system(size: 11, weight: .bold).monospacedDigit())
-                                .foregroundStyle(Color(hex: 0x3A2C10))
-                                .padding(.horizontal, 5)
-                                .frame(minWidth: 18, minHeight: 18)
-                                .background(Palette.group(.needsAction), in: Capsule())
-                                .offset(x: 6, y: -6)
-                        }
-                    }
-                    .overlay(alignment: .bottomTrailing) {
-                        // The person's own Applet carries the honey star its device has on the computer
-                        // (core/applets/MY-APPLETS.md).
-                        if applet.isMine {
-                            Image(systemName: "star.fill")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundStyle(Color(hex: 0xFFFAF0))
-                                .frame(width: 17, height: 17)
-                                .background(Circle().fill(Color(hex: 0xD9A441)))
-                                .overlay(Circle().stroke(Color(hex: 0xFFF8EA), lineWidth: 1.5))
-                                .offset(x: 5, y: 5)
-                                .accessibilityHidden(true)
-                        }
-                    }
-                Text(applet.title)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Palette.ink)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                }
+                Spacer(minLength: 6)
+                if let last = applet.recent?.last, let at = FoxDialogueDates.date(last.at) {
+                    Text(at, format: .relative(presentation: .named)).font(.system(size: 12)).foregroundStyle(Palette.muted.opacity(0.65))
+                        .lineLimit(1)
+                }
             }
-            .opacity(applet.state == .off ? 0.45 : 1)
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 7)
+            .opacity(applet.state == .off ? 0.5 : 1)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("applet-\(applet.key)")
         .accessibilityLabel(applet.title)
         .accessibilityValue([applet.isMine ? "Yours" : nil, applet.line, held > 0 ? "\(held) in Now" : nil].compactMap { $0 }.joined(separator: ", "))
-        .onAppear { startBreathing() }
-        .onChange(of: applet.state) { _, _ in startBreathing() }
+    }
+}
+
+/// An Applet's device with its lamp, as its row shows it: a lantern glow that breathes while it works, a red dot when it
+/// failed, the count of Now items it holds, and the honey star of the person's own Applet.
+struct AppletTileFace: View {
+    let applet: PhoneApplet
+    let held: Int
+    var size: CGFloat = 40
+    @State private var breathe = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        AppletGlyph(applet: applet, size: size)
+            .background {
+                // The device's lamp: a lantern glow behind it that breathes while the Applet works.
+                if applet.state == .busy {
+                    RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
+                        .fill(Palette.lantern.opacity(breathe ? 0.12 : 0.3))
+                        .overlay(RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
+                            .stroke(Palette.lantern.opacity(breathe ? 0.45 : 0.95), lineWidth: breathe ? 3 : 2))
+                        .padding(-2)
+                }
+            }
+            .overlay(alignment: .topTrailing) {
+                if applet.state == .failed {
+                    Circle().fill(Color(hex: 0xD9534F)).frame(width: 10, height: 10)
+                        .overlay(Circle().stroke(Color.black.opacity(0.3), lineWidth: 1))
+                        .offset(x: 3, y: -3)
+                } else if held > 0 {
+                    Text("\(held)")
+                        .font(.system(size: 10, weight: .bold).monospacedDigit())
+                        .foregroundStyle(Color(hex: 0x3A2C10))
+                        .padding(.horizontal, 4)
+                        .frame(minWidth: 16, minHeight: 16)
+                        .background(Palette.group(.needsAction), in: Capsule())
+                        .offset(x: 5, y: -5)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                // The person's own Applet carries the honey star its device has on the computer
+                // (core/applets/MY-APPLETS.md).
+                if applet.isMine {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundStyle(Color(hex: 0xFFFAF0))
+                        .frame(width: 14, height: 14)
+                        .background(Circle().fill(Color(hex: 0xD9A441)))
+                        .overlay(Circle().stroke(Color(hex: 0xFFF8EA), lineWidth: 1.5))
+                        .offset(x: 4, y: 4)
+                        .accessibilityHidden(true)
+                }
+            }
+            .onAppear { startBreathing() }
+            .onChange(of: applet.state) { _, _ in startBreathing() }
     }
 
     /// The lamp breathes every 2.4 seconds while the Applet works, as on the computer; still under reduced motion.

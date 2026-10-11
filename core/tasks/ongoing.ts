@@ -128,6 +128,16 @@ export function ongoingRefresh(things:OngoingThing[],conversations:BroughtConver
  }
  return {save,forget};
 }
+/** Every brought conversation that looks like a job and is not recorded yet, of any kind, busiest first: the phone
+ * lists each as a thing of its own (owner request 2026-10-11: "自动判断它这是一件事儿，我们就生成一个 applet"), and
+ * the first line the person says in one keeps it, so it becomes an Applet with its own thread. Unlike a proposal it
+ * is not saved, and nothing is offered on the computer. */
+export function ongoingCandidates(things:OngoingThing[],conversations:BroughtConversation[],now:number,textOf?:(c:BroughtConversation)=>string):OngoingThing[] {
+ const known=new Set(things.map(t=>t.id));
+ return conversations.filter(c=>!known.has(ongoingId(c.source,c.session))&&ongoingLooksLikeJob(c,now))
+  .sort((a,b)=>ongoingScore(b,now)-ongoingScore(a,now)||a.session.localeCompare(b.session))
+  .slice(0,ONGOING_LIMITS.kept).map(c=>ongoingProposal(c,now,textOf?.(c)??''));
+}
 /** Busier and more recent first: the person's messages, worth less the longer the conversation has been quiet. */
 const ongoingScore=(c:BroughtConversation,now:number)=>c.userTurns/(1+Math.max(0,now-seconds(c.last))/(7*DAY));
 

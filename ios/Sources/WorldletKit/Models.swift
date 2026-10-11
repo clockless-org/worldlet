@@ -136,7 +136,8 @@ public struct PhoneApplet: Codable, Identifiable, Hashable, Sendable {
         case live
         /// A connected account.
         case accounts
-        /// A conversation brought from another Agent that the person made into an Applet (its key is `job-…`).
+        /// A thing the person keeps coming back to, from a conversation brought from another Agent (its key is `job-…`):
+        /// one already an Applet on the computer, or one that becomes one when the person says something in it.
         case jobs
         /// Every other Applet in the World.
         case places
@@ -145,7 +146,7 @@ public struct PhoneApplet: Codable, Identifiable, Hashable, Sendable {
             switch self {
             case .live: "Working now"
             case .accounts: "Accounts"
-            case .jobs: "Ongoing"
+            case .jobs: "Things"
             case .places: "In your World"
             }
         }
@@ -212,6 +213,68 @@ public struct PhoneApplet: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
+/// One card of the computer's Task panel, the cards either side of Fox (core/phone/payloads.ts PhoneTask), as the Tasks
+/// tab lists it: its name and status, its time text ("In progress", "Tomorrow 6:00 AM"), its picture (`fox`, `clock` or an
+/// Applet's key), how far along it is, the Applet it opens, how often a routine runs and who runs it, and what a running
+/// task has said (newest last).
+public struct PhoneTask: Codable, Identifiable, Hashable, Sendable {
+    public let id: String
+    public let name: String
+    public let status: String
+    public let when: String
+    public let icon: String
+    public let progress: Double?
+    public let applet: String?
+    public let every: String?
+    public let by: String?
+    public let lines: [String]?
+
+    public init(id: String, name: String, status: String, when: String, icon: String, progress: Double? = nil, applet: String? = nil,
+                every: String? = nil, by: String? = nil, lines: [String]? = nil) {
+        self.id = id
+        self.name = name
+        self.status = status
+        self.when = when
+        self.icon = icon
+        self.progress = progress
+        self.applet = applet
+        self.every = every
+        self.by = by
+        self.lines = lines
+    }
+}
+
+/// What the person's Agent is doing now (newest first) and its Routines (soonest first).
+public struct PhoneTasks: Codable, Hashable, Sendable {
+    public let now: [PhoneTask]
+    public let routines: [PhoneTask]
+
+    public init(now: [PhoneTask], routines: [PhoneTask]) {
+        self.now = now
+        self.routines = routines
+    }
+}
+
+/// One of today's cards in the computer's Journal, newest first: an answer Fox showed or an Attention card the person
+/// closed, with its brief (or body) as `text`.
+public struct JournalEntry: Codable, Identifiable, Hashable, Sendable {
+    public let id: String
+    public let title: String
+    public let kind: String
+    public let at: String
+    public let text: String?
+    public let category: String?
+
+    public init(id: String, title: String, kind: String, at: String, text: String? = nil, category: String? = nil) {
+        self.id = id
+        self.title = title
+        self.kind = kind
+        self.at = at
+        self.text = text
+        self.category = category
+    }
+}
+
 public struct AttentionSnapshot: Codable, Sendable, Equatable {
     public let v: Int
     public let at: String
@@ -221,15 +284,20 @@ public struct AttentionSnapshot: Codable, Sendable, Equatable {
     public let accounts: [AccountIssue]?
     /// The Applet world; absent from computers older than it.
     public let applets: [PhoneApplet]?
+    /// The Tasks tab and today's Journal; absent from computers older than them (owner request 2026-10-11).
+    public let tasks: PhoneTasks?
+    public let journal: [JournalEntry]?
 
     public init(v: Int = 1, at: String, now: [AttentionItem], later: [AttentionItem], accounts: [AccountIssue] = [],
-                applets: [PhoneApplet]? = nil) {
+                applets: [PhoneApplet]? = nil, tasks: PhoneTasks? = nil, journal: [JournalEntry]? = nil) {
         self.v = v
         self.at = at
         self.now = now
         self.later = later
         self.accounts = accounts
         self.applets = applets
+        self.tasks = tasks
+        self.journal = journal
     }
 
     /// The Applet with this key, if the computer sent it.

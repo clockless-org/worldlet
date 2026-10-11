@@ -1,4 +1,4 @@
-import {CONVERSATION_ATTENTION,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../core/tasks/index.ts';
+import {CONVERSATION_ATTENTION,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../core/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {ONGOING,WORLD_TOOLS,type OngoingService,type WorldToolsService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
@@ -20,6 +20,11 @@ export function installOngoing(host:Host){
   catch(error){host.diagnostics.record(error,'ongoing');return [];}
  };
  const changed=(id='')=>page.event('worldlet:ongoing',{id});
+ const unrecorded=(known:OngoingThing[]):OngoingThing[]=>{
+  if(!own())return [];
+  try{const ledger=store.ledger();return ongoingCandidates(known,ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));}
+  catch(error){host.diagnostics.record(error,'ongoing');return [];}
+ };
  function refresh(){
   if(!own())return;
   try{
@@ -58,10 +63,15 @@ export function installOngoing(host:Host){
    const operation=typeof request.operation==='string'?request.operation:'list';
    if(operation==='list'){
     const all=orderOngoing(things());
-    return {proposals:all.filter(t=>t.state==='proposed'),kept:all.filter(t=>t.state==='kept')};
+    // `candidates`: every other conversation that looks like a job, waiting or not yet recorded, for the phone's list of
+    // things (core/tasks ongoingCandidates); saying something in one keeps it.
+    return {proposals:all.filter(t=>t.state==='proposed'),kept:all.filter(t=>t.state==='kept'),candidates:[...all.filter(t=>t.state==='proposed'),...unrecorded(all)]};
    }
    if(!own())throw new WorldletError('Ongoing things live in your own world. The practice world has none.');
-   const id=String(request.id??''),thing=validOngoingId(id)?things().find(t=>t.id===id):undefined;
+   const id=String(request.id??''),known=things();
+   let thing=validOngoingId(id)?known.find(t=>t.id===id):undefined;
+   // A thing the phone listed that is not recorded yet: keeping it records it first.
+   if(!thing&&validOngoingId(id)){thing=unrecorded(known).find(t=>t.id===id);if(thing&&operation==='keep')store.ledger().saveOngoing([thing as any]);}
    if(!thing)throw new WorldletError('That is not in this world any more.');
    if(operation==='turns'){
     const limit=Math.min(40,Math.max(1,Math.round(Number(request.limit)||12)));

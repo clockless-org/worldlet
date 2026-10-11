@@ -2,9 +2,8 @@ import Foundation
 import WorldletKit
 
 /// `-demo` shows a fixed Center and conversation without a computer or network, for the simulator screenshots the iOS
-/// workflow takes; `-page later` opens the Later page, `-card <id>` an item's card with Fox's dialogue about it and
-/// `-live` a reply Fox is still streaming, `-widget <id>` (for example `wgt-demogetty1`) a widget open, `-page applets`
-/// the Applet world and `-applet <key>` (for example `gmail`) an Applet's page.
+/// workflow takes; `-page applets` or `-page tasks` opens that tab (Today otherwise), `-card <id>` an item's card with Fox's dialogue about it and
+/// `-live` a reply Fox is still streaming, `-widget <id>` (for example `wgt-demogetty1`) a widget open and `-applet <key>` (for example `gmail`) an Applet's page.
 /// Try the demo on the pairing screen shows the same data without a computer, for anyone without Worldlet on a
 /// computer yet (and App Review); leaving it from Settings goes back to pairing.
 /// Nothing here is real data, and the demo never contacts the relay.
@@ -42,6 +41,8 @@ enum Demo {
         PhoneApplet(key: "site-demotldraw01", title: "tldraw", section: .places, state: .ready, line: "Website", mine: "site", url: URL(string: "https://www.tldraw.com/")),
         PhoneApplet(key: "job-dietdemo0001", title: "#diet-and-health", section: .jobs, state: .ready, line: "OpenClaw · Discord · 42 messages · last yesterday",
                     recent: [.init(text: "You: Lunch was the salmon bowl again", at: at(-1500)), .init(text: "OpenClaw: Logged. You're at 1,350 kcal for the day.", at: at(-1499))], mine: "conversation"),
+        PhoneApplet(key: "job-spanishdemo01", title: "#spanish", section: .jobs, state: .ready, line: "Study · OpenClaw · Discord · 120 messages · last today",
+                    recent: [.init(text: "You: ¿Cómo se dice 'deadline'?", at: at(-90)), .init(text: "OpenClaw: «Fecha límite». Want three practice sentences?", at: at(-89))], mine: "conversation"),
         PhoneApplet(key: "youtube", title: "YouTube", section: .live, state: .busy, line: "YouTube is working on a task…",
                     recent: [.init(text: "Fox asked YouTube to find the talk Ada mentioned", at: at(-4))], url: URL(string: "https://www.youtube.com/")),
         PhoneApplet(key: "gmail", title: "Mail", section: .live, state: .ready, line: "Connected · 1,000 emails",
@@ -74,7 +75,30 @@ enum Demo {
         item("l1", .needsAction, "Reminders", "Renew the passport", "Expires in March.", snoozed: true, fact: "Back tomorrow · 9:00 AM", art: "scene-passport"),
         item("l2", .unseen, "Mail", "Newsletter: spring travel deals", "Fares to Tokyo dropped this week.", fact: "Found yesterday"),
         item("l3", .event, "Calendar", "Book club", "Chapter 7 and 8.", start: 60 * 24 * 5, art: "scene-book-club"),
-    ], accounts: [AccountIssue(provider: "google-calendar", title: "Calendar", action: .reconnect)], applets: applets)
+    ], accounts: [AccountIssue(provider: "google-calendar", title: "Calendar", action: .reconnect)], applets: applets, tasks: tasks, journal: journal)
+
+    /// The Tasks tab: what the Agent is doing now and its Routines, as the computer's cards beside Fox say them.
+    static let tasks = PhoneTasks(now: [
+        PhoneTask(id: "page:united.com", name: "united.com", status: "Comparing fares for Sat, Nov 14", when: "In progress", icon: "fox",
+                  progress: 0.6, lines: ["✓ Opening the search page", "✓ Entering SFO to PVG", "› Comparing fares for Sat, Nov 14"]),
+        PhoneTask(id: "applet:yt1", name: "YouTube", status: "Working on a task from Fox", when: "In progress", icon: "youtube", applet: "youtube",
+                  lines: ["Fox handed YouTube a task", "YouTube is working on it"]),
+    ], routines: [
+        PhoneTask(id: "job:digest", name: "Daily news digest", status: "Tomorrow 7:00 AM", when: "Tomorrow 7:00 AM", icon: "clock",
+                  every: "Every day", by: "OpenClaw’s scheduler"),
+        PhoneTask(id: "job:fares", name: "Flight price watch", status: "every hour", when: "every hour", icon: "clock",
+                  every: "Every hour", by: "OpenClaw’s scheduler"),
+        PhoneTask(id: "daily:summary", name: "Wrap up today", status: "6:00 PM", when: "6:00 PM", icon: "clock",
+                  every: "Every evening of a day you use Worldlet", by: "Worldlet, with your Agent"),
+    ])
+
+    /// Today's Journal: what Fox made and the cards the person closed.
+    static let journal = [
+        JournalEntry(id: "art-demotoday001", title: "Today's prep", kind: "answer", at: at(-180),
+                     text: "Design review at 10:45 with Ada; reply to Sam about the venue by Friday; rain after 3 PM."),
+        JournalEntry(id: "attention-demo-fares", title: "Fares to Shanghai dropped $120", kind: "attention", at: at(-60),
+                     text: "The Saturday flight is now $860 round trip, the lowest this month.", category: "Worth Knowing"),
+    ]
 
     static let conversation = Conversation(v: 1, at: at(0), busy: false, name: "Fox", messages: [
         Turn(id: "1", role: .user, text: "What should I do before the design review?", at: at(-6)),
