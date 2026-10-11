@@ -55,8 +55,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  // the tutorial are in Settings › Help); Phone, under it, opens Settings › Phone (owner request 2026-10-11: "Phone也作为
  // 一个常驻action到companion左边"). Fox itself is a way to talk, like the message bar (owner feedback 2026-10-04).
  const side=make('div','companion-side');
- // The Journal is the World's top-left corner, today's date at the head of the Attention Center (owner request
- // 2026-10-08: "journal 下面的那个按钮就不用了…收到左上角"). Both step aside inside an Applet (controls.css), and the
+ // The Journal is today's date in the World's top-right corner, over the Task panel (owner requests 2026-10-08 and
+ // 2026-10-11), not a button beside Fox. Both step aside inside an Applet (controls.css), and the
  // desktop Fox shows neither (desktop-companion.css).
  const sideButton=(cls:string,icon:string,label:string,setting:string)=>{
   const b=make('button',cls+' fox-side-button');b.type='button';b.innerHTML=uiIcon(icon)+'<span>'+label+'</span>';

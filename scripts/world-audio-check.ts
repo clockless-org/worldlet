@@ -46,17 +46,17 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal((await weather.innerText()).trim(),'Check weather','an unset location does not invent a forecast');
  assert.deepEqual(await page.locator(':is(.world-environment,.world-today) [title]').evaluateAll(list=>list.map(e=>e.id)),['worldWeather'],'only the weather control carries a tooltip');
 
- // Date and time are a single unit heading the Attention Center on the left (owner request 2026-10-08), and a click
+ // Date and time are a single unit in the top-right corner (owner request 2026-10-11), and a click
  // on them opens today's plan in the Journal. The sound stands under them: a long station name scrolls inside its
  // own button and never moves the date.
  const clockBefore=await clockGroup.evaluate(group=>{
   const date=group.querySelector<HTMLElement>('#worldDate')!.getBoundingClientRect();
   const time=group.querySelector<HTMLElement>('#worldClock')!.getBoundingClientRect();
   const sound=document.querySelector<HTMLElement>('.world-audio')!.getBoundingClientRect();
-  return {dateRight:Math.round(date.right),timeLeft:Math.round(time.left),timeRight:Math.round(time.right),dateLeft:Math.round(date.left),soundTop:Math.round(sound.top),dateBottom:Math.round(date.bottom),soundInToday:!!document.querySelector('.world-today .world-audio'),inToday:!!group.closest('.world-today-open')};
+  return {half:Math.round(innerWidth/2),dateRight:Math.round(date.right),timeLeft:Math.round(time.left),timeRight:Math.round(time.right),dateLeft:Math.round(date.left),soundTop:Math.round(sound.top),dateBottom:Math.round(date.bottom),soundInToday:!!document.querySelector('.world-today .world-audio'),inToday:!!group.closest('.world-today-open')};
  });
  assert.ok(clockBefore.dateRight<=clockBefore.timeLeft+1,'the date stays immediately to the left of the clock');
- assert.ok(clockBefore.inToday&&clockBefore.dateLeft<200&&clockBefore.soundInToday&&clockBefore.soundTop>clockBefore.dateBottom,'the date heads the left column and the sound stands under it (owner request 2026-10-08): '+JSON.stringify(clockBefore));
+ assert.ok(clockBefore.inToday&&clockBefore.dateLeft>clockBefore.half&&clockBefore.soundInToday&&clockBefore.soundTop>clockBefore.dateBottom,'the date stands in the top-right and the sound under it (owner request 2026-10-11): '+JSON.stringify(clockBefore));
  assert.equal(await page.getByRole('button',{name:'Journal: open today’s page'}).count(),1,'the date opens today’s plan');
  await page.getByRole('button',{name:'Journal: open today’s page'}).click();
  await page.locator('#journalBook').waitFor();
@@ -183,7 +183,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal((await row.innerText()).trim(),'Village Air','the selected environment sound stays active when the pointer leaves');
 
  await page.setViewportSize({width:900,height:730});await page.waitForTimeout(250);
- const box=await sound.boundingBox();assert(box&&box.x>=0&&box.x+box.width<=900&&box.y>=0,'compact sound control remains in view');
+ const box=await sound.boundingBox();assert(box&&box.x>=0&&box.x+box.width<=900&&box.y>=0,'compact sound control remains in view: '+JSON.stringify({box,today:await page.locator('.world-today').boundingBox(),w:await page.locator('.world-today .world-weather-control').boundingBox()}));
  assert.equal(new URL(page.url()).pathname,new URL(worldUrl()).pathname);assert(await page.title());assert(await page.locator('#notionWorld canvas[data-renderer]').isVisible());assert((await page.locator('body').innerText()).includes('Village Air'));
  assert.deepEqual(errors,[]);
  console.log('PASS world HUD: sound toggles the current mix without type changes or on/off text; weather asks for a location; the compact control stays in view.');

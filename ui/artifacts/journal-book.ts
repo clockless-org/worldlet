@@ -1,4 +1,4 @@
-/** The Journal as a book (owner requests 2026-10-08): today's date in the World's top-left corner opens it over the
+/** The Journal as a book (owner requests 2026-10-08): today's date in the World's top-right corner opens it over the
  * World, in the World's country materials: a timber-leather cover with stitching and brass corners, an ivory leaf with
  * a faint dot grid, a moss ribbon and a pressed sage sprig (journal.css). The leaf is the Journal's timeline
  * (companion-artifacts.ts). It closes with ×, Escape or a click outside, and steps aside when a card in it opens in the
@@ -36,7 +36,7 @@ export function mountJournalBook({root,pages,start,stop,returnFocus}:{root:HTMLE
  return {open,close:shut,toggle(){if(book.open)shut(true);else open();},get isOpen(){return book.open;},element:book};
 }
 /** A card the person closes goes into the Journal (owner request 2026-10-08): a sheet of paper with its title leaves the
- * card's place and shrinks into the Journal, today's date in the World's top-left corner, which takes it with a small bounce. Nothing moves when the button
+ * card's place and shrinks into the Journal, today's date in the World's top-right corner, which takes it with a small bounce. Nothing moves when the button
  * is not on screen (inside an Applet, on the desktop) or motion is reduced, beyond that bounce. */
 export function flyIntoJournal(root:HTMLElement,from:HTMLElement|null){
  const target=document.querySelector<HTMLElement>('.world-today-open'),r=from?.getBoundingClientRect(),t=target?.getBoundingClientRect();

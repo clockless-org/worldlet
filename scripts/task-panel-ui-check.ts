@@ -124,16 +124,16 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await pageWin.locator('.task-window-step').textContent(),'Fox · Choosing a court time');
  assert.ok(await pageWin.locator('.task-window-page img').evaluate(img=>(img as HTMLImageElement).complete&&(img as HTMLImageElement).naturalWidth>0),'the page, small');
  await page.screenshot({path:SCREEN});
- // The top-left corner and the Attention Center read as one column: the same left edge and width, the same backing.
+ // Today's corner heads the Task panel's column in the top-right (owner request 2026-10-11): the same right edge and
+ // width, above it, on the same light backing.
  {
-  const corner=page.locator('.world-today'),[c,t]=[await corner.boundingBox(),await tracker.boundingBox()];
-  assert.ok(c&&t&&Math.abs(c.x-t.x)<1&&Math.abs(c.width-t.width)<1,'the corner on the Attention Center’s left edge and width: '+JSON.stringify({c,t}));
-  assert.ok(c!.y+c!.height<=t!.y+1,'above it');
-  const look=await page.evaluate(()=>{const s=(q:string,p?:string)=>getComputedStyle(document.querySelector(q)!,p);return {corner:s('.world-today','::before').backgroundColor,list:s('.world-task-list','::before').backgroundColor,cornerBlur:s('.world-today','::before').filter,listBlur:s('.world-task-list','::before').filter,ink:s('.world-today').color,matterInk:s('.world-task-tracker').getPropertyValue('--ui-matter-ink').trim()};});
-  assert.equal(look.corner,look.list,'the same soft backing');assert.equal(look.cornerBlur,look.listBlur);
-  const firstLine=await page.evaluate(()=>{const x=(q:string)=>document.querySelector(q)!.getBoundingClientRect().x;return {date:x('.world-today-open'),heading:x('.world-task-tracker .world-task-heading')};});
-  assert.ok(Math.abs(firstLine.date-firstLine.heading)<=1,'the date starts where the Attention Center’s headings do: '+JSON.stringify(firstLine));
-  await page.screenshot({path:LEFT_SCREEN,clip:{x:0,y:0,width:480,height:900}});
+  const corner=page.locator('.world-today'),[c,p]=[await corner.boundingBox(),await panel.boundingBox()];
+  assert.ok(c&&p&&Math.abs(c.x+c.width-(p.x+p.width))<1&&Math.abs(c.width-p.width)<1,'the corner on the Task panel’s right edge and width: '+JSON.stringify({c,p}));
+  const top=await panel.evaluate(e=>e.querySelector('.task-group')!.getBoundingClientRect().top);
+  assert.ok(c!.y+c!.height<=top+1,'above the column: '+JSON.stringify({c,top}));
+  const look=await page.evaluate(()=>{const s=(q:string)=>getComputedStyle(document.querySelector(q)!,'::before').backgroundColor;return {corner:s('.world-today'),panel:s('.task-panel-body')};});
+  assert.equal(look.corner,look.panel,'the same light backing');
+  await page.screenshot({path:LEFT_SCREEN,clip:{x:960,y:0,width:480,height:900}});
  }
  await pageWin.click();
  assert.deepEqual(await page.evaluate(()=>(window as any).opened),['https://www.example.com/courts'],'a click opens the page');
@@ -207,7 +207,8 @@ await withBrowser(fileAccess,async browser=>{
  await chip.waitFor({state:'visible'});
  assert.equal((await chip.innerText()).trim(),'Routines 2 · Doing now 1');
  const chipBox=await chip.boundingBox();
- assert.ok(chipBox&&chipBox.x+chipBox.width>800-40&&chipBox.y<140,'top-right: '+JSON.stringify(chipBox));
+ const todayBox=await page.locator('.world-today').boundingBox();
+ assert.ok(chipBox&&todayBox&&chipBox.x+chipBox.width>800-40&&chipBox.y>=todayBox.y+todayBox.height-1&&chipBox.y<todayBox.y+todayBox.height+60,'top-right, under today’s corner: '+JSON.stringify({chipBox,todayBox}));
  assert.equal(await narrow.locator('.task-panel-body').isVisible(),false,'closed until asked');
  await chip.click();
  await narrow.locator('.task-panel-body .task-step',{hasText:'Morning news'}).waitFor();
@@ -220,4 +221,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(narrowErrors,[]);
  assert.deepEqual(errors,[]);
 });
-console.log('PASS task panel UI: floats beside the Attention Center on its backing; Routines on top as a timeline down from Now with a read-only popover, read again when Settings pauses or resumes one; below them one window per running task, a terminal with Fox and its status lines that a click opens to the whole log, or the page Fox drives shown small that a click opens; no Done list or Journal link; one column that scrolls as one; the date and Journal corner on the Attention Center’s edge, width and backing; only Routines in the tour, hidden beside an open Applet, a chip at 800px wide and gone at 560px tall');
+console.log('PASS task panel UI: floats beside the Attention Center on its backing; Routines on top as a timeline down from Now with a read-only popover, read again when Settings pauses or resumes one; below them one window per running task, a terminal with Fox and its status lines that a click opens to the whole log, or the page Fox drives shown small that a click opens; no Done list or Journal link; one column that scrolls as one; the date and Journal corner heading the column in the top-right; only Routines in the tour, hidden beside an open Applet, a chip at 800px wide and gone at 560px tall');

@@ -5,7 +5,7 @@ import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 // A reply Fox prepares by itself (owner decision 2026-10-09, core/artifacts/replies.ts) on the World page: a new Worth
 // Doing item from a Gmail thread that waits for the person gets a background request (no card, no reply line, a label in
 // the archive) that reads that thread and prepares a draft; the World's Task panel says what Fox is doing in a window
-// that goes when it is done, and the Journal in the top-left corner holds the draft as a reply card; the item's Attention card says Fox drafted
+// that goes when it is done, and the Journal in the top-right corner holds the draft as a reply card; the item's Attention card says Fox drafted
 // a reply, and its Review opens the Journal too. Nothing is sent. Bundled UI with a faked native bridge and a fixed
 // clock (the ask polls every 30 s); fictional mail and people, no model or account.
 const t0=new Date(2026,9,9,15,5);
@@ -80,7 +80,7 @@ await withBrowser(fileAccess,async browser=>{
  const dialogue=await page.locator('#companionDialogue').innerText().catch(()=>'');
  assert.ok(!dialogue.includes('ready for your review')&&!dialogue.includes('In the background'),'Fox says nothing in the conversation');
  assert.deepEqual(JSON.parse(await page.evaluate(()=>localStorage.getItem('worldlet-prepared-replies-reply-fixture')||'{}')).prepared,['venue-reply','thread:18c2a1'],'the item and its thread are prepared once, across restarts');
- // The Journal in the top-left corner opens today's page with the draft as a reply card.
+ // The Journal in the top-right corner opens today's page with the draft as a reply card.
  await page.locator('.world-today-open').click();
  const book=page.locator('#journalBook');
  await book.waitFor({state:'visible'});

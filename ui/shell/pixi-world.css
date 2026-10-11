@@ -42,35 +42,36 @@
 /* The Task panel on the right (ui/hud/task-panel.ts) and today's corner above the Attention Center float on the same backing. */
 #notionWorld :is(.world-task-list,.task-panel-body,.world-today)::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:#0000007a;box-shadow:0 0 48px 24px #00000022;filter:blur(48px)}
 /* The Task panel's backing is lighter: it only says what Fox is doing (owner feedback 2026-10-11). */
-#notionWorld .task-panel-body::before{background:#0000004d;box-shadow:0 0 40px 16px #00000014}
+#notionWorld :is(.task-panel-body,.world-today)::before{background:#0000004d;box-shadow:0 0 40px 16px #00000014}
 #notionWorld .world-task-list:empty{display:none}
-/* Today heads the Attention Center (owner request 2026-10-08): the date opens today's plan in the Journal, the weather its
-   forecast. It is the column's first section (owner request 2026-10-11: line it up with the Attention Center): the same
-   left edge and width, the same soft backing, the same ink and inner edge, so its text starts where the Attention
-   Center's headings do; the weather and the sound share one line under the date. */
-#notionWorld .world-today{--environment-inline-gap:10px;position:absolute;left:24px;top:18px;z-index:24;box-sizing:border-box;width:330px;max-width:30%;isolation:isolate;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;justify-items:start;gap:2px 4px;padding:12px;color:#fff9e9;text-shadow:0 1px 3px #25332680;font:500 14px/1.4 var(--ui-font-ui);pointer-events:none}
-#notionWorld:has(>.world-today) .world-task-tracker{top:140px}
+/* Today's corner: the date and clock, the Journal under them, the weather and the sound on one line when they fit. It stands in the
+   World's top-right, heading the Task panel's column with the same width and the same light backing (owner request
+   2026-10-11: back to the top-right; it headed the Attention Center on the left from 2026-10-08). The date opens today's
+   page in the Journal, the weather its forecast. */
+#notionWorld .world-today{--environment-inline-gap:10px;position:absolute;right:24px;top:18px;z-index:24;box-sizing:border-box;width:min(280px,23vw);isolation:isolate;display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;padding:12px;color:var(--ui-hud-ink,#fff9e9);text-shadow:0 1px 3px #25332680;font:500 14px/1.4 var(--ui-font-ui);pointer-events:none}
+#notionWorld:has(>.world-today) .task-panel{top:150px;justify-content:flex-start}
+/* Under about 1100px the corner is narrow enough that the sound wraps under the weather: Routines start lower. */
+@media(max-width:1100px) and (min-width:801px){#notionWorld:has(>.world-today) .task-panel{top:180px}}
 #notionWorld:is(.is-typing,.compact-viewport,[data-view-level=app]) .world-today{display:none}
 #notionWorld .world-today :is(.world-today-open,#worldWeather){pointer-events:auto;appearance:none;border:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:inherit;text-shadow:inherit;font:inherit;cursor:pointer;margin:0;text-align:left}
-#notionWorld .world-today-open{grid-column:1/-1;justify-self:stretch;display:grid;gap:4px;padding:6px 8px;margin:0!important;border-radius:10px!important}
+#notionWorld .world-today-open{flex:1 0 100%;display:grid;gap:4px;padding:6px 8px;margin:0!important;border-radius:10px!important}
 #notionWorld .world-today-open:hover{background:#fff6df1f!important}
 #notionWorld .world-today .world-date-time{display:flex;justify-content:flex-start;justify-self:start;align-items:baseline;gap:10px;margin:0;text-align:left;white-space:nowrap;font:600 20px/1.25 var(--ui-font-ui);font-variant-numeric:tabular-nums;letter-spacing:0}
-#notionWorld .world-today #worldClock{font-weight:500;color:#f4eedc}
+#notionWorld .world-today #worldClock{font-weight:500}
 /* The Journal's name reads like an Attention Center heading. */
 #notionWorld .world-today-hint{display:inline-flex;align-items:center;gap:6px;font:600 11px/1.4 var(--ui-font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--ui-hud-focus,#f4eedc)}
 #notionWorld .world-today-hint svg{width:14px;height:14px;flex:0 0 14px;filter:var(--ui-hud-glyph-shadow)}
 #notionWorld .world-today-hint>span::after{content:' ›'}
 #notionWorld .world-today-open:hover .world-today-hint>span{text-decoration:underline;text-underline-offset:3px}
-#notionWorld .world-today .world-weather-control{position:relative;grid-column:1;justify-self:start}
+#notionWorld .world-today .world-weather-control{position:relative}
 #notionWorld .world-today #worldWeather{display:inline-flex;align-items:center;gap:8px;min-height:28px;padding:2px 8px;border-radius:10px;font:500 14px/1.4 var(--ui-font-ui)}
 #notionWorld .world-today #worldWeather:hover{background:#fff6df1f}
 #notionWorld .world-today #worldWeather:disabled{cursor:default;background:none;opacity:1;color:inherit}
 #notionWorld .world-today .world-weather-text{display:inline-flex;gap:8px}
-#notionWorld .world-today .world-audio{grid-column:2;justify-self:start;display:flex;align-items:center;min-width:0;min-height:28px;margin:0;pointer-events:auto;font:500 14px/1.4 var(--ui-font-ui)}
-#notionWorld .world-today .world-weather-control~.world-audio::before{content:'·';margin-right:2px;color:#f4eedc}
+#notionWorld .world-today .world-audio{display:flex;max-width:100%;align-items:center;min-width:0;min-height:28px;margin:0;pointer-events:auto;font:500 14px/1.4 var(--ui-font-ui)}
 #notionWorld .world-today .world-audio-current{height:28px;min-height:28px;border-radius:10px}
 #notionWorld .world-today :is(.world-today-open,#worldWeather):focus-visible{outline:2px solid var(--ui-hud-focus);outline-offset:2px}
-@media(max-width:800px){#notionWorld .world-today .world-date-time{font-size:17px;white-space:normal;flex-wrap:wrap;gap:0 8px}#notionWorld .world-today{left:14px;top:14px;width:210px;max-width:27%;padding:10px 6px;grid-template-columns:minmax(0,1fr)}#notionWorld .world-today .world-audio{grid-column:1}#notionWorld .world-today .world-weather-control~.world-audio::before{content:none}#notionWorld:has(>.world-today) .world-task-tracker{top:176px}}
+@media(max-width:800px){#notionWorld .world-today .world-date-time{font-size:17px;white-space:normal;flex-wrap:wrap;gap:0 8px}#notionWorld .world-today{right:14px;top:14px;width:210px;max-width:38%;padding:10px 6px;}#notionWorld:has(>.world-today) .task-panel{top:150px}}
 @media(max-height:560px){#notionWorld .world-today{display:none}}
 #notionWorld .world-task-heading{color:var(--activity-color);border-bottom-color:color-mix(in srgb,var(--activity-color) 22%,transparent);letter-spacing:.025em;font-size:11px}
 #notionWorld .world-task-group+.world-task-group{margin-top:15px}
