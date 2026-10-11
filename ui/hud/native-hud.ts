@@ -5,6 +5,7 @@ import {sourcesReading} from '../../core/applets/index.ts';
 import {fitAttentionPanel} from './fit-attention-panel.ts';
 import {mountWorldLog} from './world-log.ts';
 import {mountTaskPanel} from './task-panel.ts';
+import {agentVersionLine} from './agent-version.ts';
 import {summarizeRequest} from '../../core/agent/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
@@ -95,10 +96,12 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const trackerMore=el('div','world-task-more');trackerMore.hidden=true;
  const previousBrand=root.querySelector('#notionHome'),brand=el('div','world-watermark');brand.id='notionHome';previousBrand.remove();
  const channel=typeof __WORLDLET_CHANNEL__==='undefined'?'release':__WORLDLET_CHANNEL__,isDev=channel==='dev';brand.dataset.channel=channel;
- // The website is the first footer row; build details sit below.
- const identity=el('a','world-brand','worldlet.ai');
+ // The bottom-right corner says what is running (owner request 2026-10-11): Worldlet's mark and version on the first
+ // line, the person's Agent and its version below. Small and faint; the mark and name open worldlet.ai.
+ const identity=el('a','world-brand','Worldlet');
  identity.href='https://worldlet.ai';identity.rel='noreferrer';identity.title='Open worldlet.ai';
- identity.insertAdjacentHTML('afterbegin',worldletMark());brand.append(identity);
+ identity.insertAdjacentHTML('afterbegin',worldletMark());
+ const worldletLine=el('span','world-version-line');worldletLine.append(identity);brand.append(worldletLine);
  const build=typeof __WORLDLET_BUILD__==='undefined'?null:__WORLDLET_BUILD__;
  if(isDev){
   const revision=typeof __WORLDLET_REVISION__==='undefined'?'local':__WORLDLET_REVISION__,committed=typeof __WORLDLET_REVISION_TIME__==='undefined'?'':__WORLDLET_REVISION_TIME__;
@@ -106,9 +109,19 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
   // How old the running commit is, refreshed each minute.
   const age=()=>{current.textContent=[prefix,commitAge(committed)].filter(Boolean).join(' · ');};age();setInterval(age,60000);
   if(committed)current.title='Committed '+new Date(committed).toLocaleString();
-  line.append(current);brand.append(line);
+  line.append(current);worldletLine.append(line);
  }
- else if(build)brand.append(el('span','world-build-version','v'+displayReleaseVersion(build.version,build.build)));
+ else if(build)worldletLine.append(el('span','world-build-version',displayReleaseVersion(build.version,build.build)));
+ // The Agent Fox runs on: its name, and its version when it could be read. Read again when the model changes.
+ const agentLine=el('span','world-agent-version');agentLine.hidden=true;brand.append(agentLine);
+ let agentTurn=0;
+ const readAgent=async()=>{
+  const turn=++agentTurn,found=await callHost('agentHarness',{operation:'detect'}).catch(()=>null);
+  if(turn!==agentTurn)return;
+  const text=agentVersionLine(found);agentLine.textContent=text;agentLine.hidden=!text;
+ };
+ void readAgent();
+ for(const name of ['worldlet:model-changed','worldlet:model-refresh'])window.addEventListener(name,()=>void readAgent());
  const updateButton=el('button','world-footer-update ui-button');updateButton.type='button';updateButton.hidden=true;
  const updateDock=el('div','world-update-dock');updateDock.setAttribute('aria-label','App update');updateDock.append(updateButton);root.append(updateDock);updateDock.addEventListener('pointerdown',e=>{(e as any).worldletKeepFox=true;});
  // Dev: a prepared newer build gets the same capsule as Update, in the same dock.

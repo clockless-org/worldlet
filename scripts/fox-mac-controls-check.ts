@@ -159,9 +159,8 @@ await withBrowser(fileAccess,async browser=>{
  await page.setViewportSize({width:1000,height:700});const bounds=await bubble.boundingBox();assert.ok(bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=1000&&bounds.y+bounds.height<=700);await page.screenshot({path:'output/fox-mac/compact.png'});
  assert.match(await page.locator('.world-build-version').textContent(),/^Development · .+/);
  assert.equal(await page.locator('.world-channel-badge').count(),0);
- assert.equal(await page.locator('.world-watermark').isVisible(),false,'branding stays hidden unless a development build is ready to apply');
  await openSettings();
- assert.match(await page.locator('.world-brand').textContent(),/worldlet\.ai/);
+ assert.match(await page.locator('.world-brand').textContent(),/Worldlet/);
  assert.equal(await page.locator('.world-brand').getAttribute('href'),'https://worldlet.ai');
  // Settings work like a settings window (owner feedback 2026-10-03, one list since 2026-10-10): the list on the left,
  // the chosen section's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
