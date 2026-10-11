@@ -22,7 +22,7 @@ export class AgentBrowser implements AgentLink {
  private child:ChildProcess|null=null;
  private starting:Promise<void>|null=null;
  private buffer='';
- private pending=new Map<string,{resolve:(value:Row)=>void,reject:(error:Error)=>void}>();
+ private pending=new Map<string,{resolve:(value:Row)=>void,reject:(error:Error)=>void,timer?:ReturnType<typeof setTimeout>}>();
  private documentID='';
  private refs:Row={};
  constructor(view:WebPage,environment:AgentBrowserEnvironment){this.view=view;this.environment=environment;}
@@ -34,7 +34,7 @@ export class AgentBrowser implements AgentLink {
   const child=this.child;this.child=null;this.starting=null;this.buffer='';
   if(child){try{child.stdin?.end();}catch{}setTimeout(()=>{if(child.exitCode===null&&child.signalCode===null)child.kill();},3000);}
   const waiting=[...this.pending.values()];this.pending.clear();
-  for(const request of waiting)request.reject(new Cancelled());
+  for(const request of waiting){clearTimeout(request.timer);request.reject(new Cancelled());}
  }
  private start():Promise<void> {
   if(this.child)return Promise.resolve();
@@ -74,7 +74,7 @@ export class AgentBrowser implements AgentLink {
    if(value.kind==='cdp'&&value.message&&typeof value.message==='object')this.view.sendAgentCDP(value.message);
    else if(value.kind==='result'&&typeof value.id==='string'){
     const request=this.pending.get(value.id);if(!request)continue;
-    this.pending.delete(value.id);
+    this.pending.delete(value.id);clearTimeout(request.timer);
     const response=value.response&&typeof value.response==='object'?value.response:{};
     if(response.success===true)request.resolve(response.data&&typeof response.data==='object'?response.data:{});
     else{
@@ -90,9 +90,9 @@ export class AgentBrowser implements AgentLink {
   if(!this.child)throw new Cancelled();
   const id=crypto.randomUUID().toUpperCase();
   return new Promise((resolve,reject)=>{
-   this.pending.set(id,{resolve,reject});
+   const timer=setTimeout(()=>{if(this.pending.has(id))this.stop();},40_000);
+   this.pending.set(id,{resolve,reject,timer});
    this.send({kind:'command',id,argv});
-   setTimeout(()=>{if(this.pending.has(id))this.stop();},40_000);
   });
  }
  /** Center of an agent-browser `get box` reply, wherever the rectangle sits in it. */

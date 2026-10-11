@@ -6,6 +6,7 @@ import {googleSignInPage} from '../../../../../core/browser/index.ts';
 import {MAX_POPUPS,httpsUpgrade,opensAsTab,popupAllowed,publicPage,signInPage} from './rules.ts';
 import type {Row} from '../../host/types.ts';
 import type {WebRecordLink} from './web-page.ts';
+import {pageScript} from './page-scripts.ts';
 
 /** A browser operation abandoned because its page navigated, closed or was replaced. */
 export class Cancelled extends Error {constructor(){super('The browser operation was cancelled.');this.name='AbortError';}}
@@ -254,7 +255,7 @@ export class PageView {
   if(contents.debugger.isAttached())return;
   try{contents.debugger.attach('1.3');}catch{throw new WorldletError('The page is not ready yet.');}
   // Every DevTools session gives each new document the passkey watch (passkey-watch.js), in the page's own world.
-  let source='';try{source=fs.readFileSync(path.join(this.webRoot,'browser/passkey-watch.js'),'utf8');}catch{return;}
+  let source='';try{source=pageScript(this.webRoot,'browser/passkey-watch.js',this.demo);}catch{return;}
   for(const [method,params] of [['Page.enable',{}],['Runtime.enable',{}],['Runtime.addBinding',{name:'worldletPasskey'}],['Page.addScriptToEvaluateOnNewDocument',{source}]] as const)
    void contents.debugger.sendCommand(method,params).catch(()=>{});
   if(this.early){void contents.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument',{source:this.early}).catch(()=>{});this.early='';}
@@ -323,11 +324,11 @@ export class PageView {
     await this.cdp('Network.enable',{maxTotalBufferSize:50_000_000,maxResourceBufferSize:10_000_000});
    }
    await this.evaluateExpression('window.webkit={messageHandlers:{worldletBookmark:{postMessage:value=>worldletBookmark(JSON.stringify(value))}}};',context);
-   const source=fs.readFileSync(path.join(this.webRoot,'browser-observer.js'),'utf8');
+   const source=pageScript(this.webRoot,'browser-observer.js',this.demo);
    await this.evaluateExpression(`if(!window.worldletXReader){${source}\n}`,context);
-   if(this.recorder)await this.evaluateExpression(fs.readFileSync(path.join(this.webRoot,'browser/web-record.js'),'utf8'),context);
+   if(this.recorder)await this.evaluateExpression(pageScript(this.webRoot,'browser/web-record.js',this.demo),context);
    // Saved sign-ins (core/browser/saved-logins.ts): an older build without the script still browses.
-   try{await this.evaluateExpression(fs.readFileSync(path.join(this.webRoot,'browser/login-watch.js'),'utf8'),context);}catch{}
+   try{await this.evaluateExpression(pageScript(this.webRoot,'browser/login-watch.js',this.demo),context);}catch{}
    if(this.contextTask===task)this.isolatedContext=context;
    return context;
   })();

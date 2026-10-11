@@ -1,9 +1,8 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import crypto from 'node:crypto';
 import {WebContentsView,screen,session,shell,type BaseWindow,type Rectangle,type View} from 'electron';
 import {PAGE_MEMORY,RAW_KINDS,WEB_RECORD,type WebRecord,webSite,desktopTaskPictureInPicturePlacement,googleSignInRejected,memoryPressure,focusHost,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusRecord,PAGE_FOCUS_LIMITS,type PageFocusPlan,type SiteFocusRecord,signInRejectedMessage,linkRefusedMessage,type RefusedLink,sitePage,taskPictureInPictureAspect,type MemoryReading,VIDEO_FORMATS,needsProprietaryVideo,videoFormatHost,carriedStorage,storageCarryScript,STORAGE_READ,readLoginSignal,loginSite,loginUsername,loginOffer,loginsFor,tabApplet,isBrowserTab} from '../../../../../core/browser/index.ts';
 import {SavedLogins} from './logins.ts';
+import {pageScript} from './page-scripts.ts';
 import {WorldletError} from '../../files.ts';
 import {Cancelled,PageView,type PermissionRequest} from './page.ts';
 import {CefPageView} from './engine/page.ts';
@@ -155,15 +154,8 @@ export class BrowserDevice {
   return page&&!page.isClosed?{page,steps:fox!.steps}:null;
  }
  private emit(event:Row){void this.host.page.call('worldletBrowser',event);}
- private scripts=new Map<string,string>();
  /** Page scripts from the packaged UI, read once; Dev builds reread them so a rebuild applies. */
- private script(name:string){
-  const cached=this.host.profile.channel==='dev'?undefined:this.scripts.get(name);
-  if(cached!==undefined)return cached;
-  const text=fs.readFileSync(path.join(this.webRoot,name),'utf8');
-  if(this.host.profile.channel!=='dev')this.scripts.set(name,text);
-  return text;
- }
+ private script(name:string){return pageScript(this.webRoot,name,this.host.profile.channel==='dev');}
 
  /** Pages belong to one world and one window; a switch of either releases them all. */
  private prepare(){

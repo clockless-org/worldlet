@@ -11,6 +11,7 @@ import {SurfaceView} from './surface.ts';
 import type {EngineMessage,WebEngine} from './process.ts';
 import type {Row} from '../../../host/types.ts';
 import type {WebRecordLink} from '../web-page.ts';
+import {pageScript} from '../page-scripts.ts';
 
 // The agent's DevTools ids are remapped above the panel's own.
 const AGENT_IDS=1_000_000_000;
@@ -559,11 +560,11 @@ export class CefPageView {
     await this.cdp('Network.enable',{maxTotalBufferSize:50_000_000,maxResourceBufferSize:10_000_000});
    }
    await this.evaluateExpression('window.webkit={messageHandlers:{worldletBookmark:{postMessage:value=>worldletBookmark(JSON.stringify(value))}}};',context);
-   const source=fs.readFileSync(path.join(this.webRoot,'browser-observer.js'),'utf8');
+   const source=pageScript(this.webRoot,'browser-observer.js',this.demo);
    await this.evaluateExpression(`if(!window.worldletXReader){${source}\n}`,context);
-   if(this.recorder)await this.evaluateExpression(fs.readFileSync(path.join(this.webRoot,'browser/web-record.js'),'utf8'),context);
+   if(this.recorder)await this.evaluateExpression(pageScript(this.webRoot,'browser/web-record.js',this.demo),context);
    // Saved sign-ins (core/browser/saved-logins.ts): an older build without the script still browses.
-   try{await this.evaluateExpression(fs.readFileSync(path.join(this.webRoot,'browser/login-watch.js'),'utf8'),context);}catch{}
+   try{await this.evaluateExpression(pageScript(this.webRoot,'browser/login-watch.js',this.demo),context);}catch{}
    if(this.contextTask===task)this.isolatedContext=context;
    return context;
   })();
@@ -595,7 +596,7 @@ export class CefPageView {
   await this.cdp('Page.enable',{},2);
   if(this.early){await this.documentScript(this.early);this.early='';}
   let source:string;
-  try{source=fs.readFileSync(path.join(this.webRoot,'browser/video-formats.js'),'utf8');}catch{this.videoWatch=true;return;}
+  try{source=pageScript(this.webRoot,'browser/video-formats.js',this.demo);}catch{this.videoWatch=true;return;}
   await this.documentScript(`${source}(${JSON.stringify(PROPRIETARY_VIDEO.source)})`);
   this.videoWatch=true;
  }
@@ -616,7 +617,7 @@ export class CefPageView {
  get meetingAudioReady(){return this.meetingReady;}
  private async installMeetingAudio(){
   const name=this.meetingBinding!;
-  const source=fs.readFileSync(path.join(this.webRoot,'browser/meeting-audio.js'),'utf8');
+  const source=pageScript(this.webRoot,'browser/meeting-audio.js',this.demo);
   await this.cdp('Runtime.addBinding',{name},2);
   await this.documentScript(`${source}(${JSON.stringify(name)})`);
  }
