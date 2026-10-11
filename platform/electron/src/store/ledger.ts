@@ -1392,9 +1392,10 @@ export class WorldLedger {
      removed+=Number(this.run(`DELETE FROM web_records WHERE ${where}`,...values).changes);
     };
     drop(`kind IN (${kinds}) AND at<?`,...rawKinds,rawBefore);
-    let bytes=Number(this.all('SELECT coalesce(sum(length(body)),0) AS n FROM web_records')[0]?.n??0);
+    // octet_length reads each body's size from its row header; length() would read every body (gigabytes).
+    let bytes=Number(this.all('SELECT coalesce(sum(octet_length(body)),0) AS n FROM web_records')[0]?.n??0);
     while(bytes>maxBytes){
-     const oldest=this.all(`SELECT id,length(body) AS n FROM web_records WHERE kind IN (${kinds}) ORDER BY id LIMIT 500`,...rawKinds);
+     const oldest=this.all(`SELECT id,octet_length(body) AS n FROM web_records WHERE kind IN (${kinds}) ORDER BY id LIMIT 500`,...rawKinds);
      if(!oldest.length)break;
      const last=Number(oldest[oldest.length-1].id);
      drop(`kind IN (${kinds}) AND id<=?`,...rawKinds,last);

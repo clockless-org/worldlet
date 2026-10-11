@@ -22,9 +22,24 @@ import type {HarnessEnvironment,LocalHarnessInstall} from './local-harness.ts';
 
 const OUTPUT=4_000_000;
 const ms=(value:unknown)=>{const n=typeof value==='string'&&!/^\d+(\.\d+)?$/.test(value.trim())?Date.parse(value):Number(value);return Number.isFinite(n)&&n>0?n>1e12?n:n*1000:0;};
-/** Hermes Agent's uses in one home's state.db: the newest row of each `mcp…` tool and the newest session of each
- * chat platform, each with its conversation's title. Opened read-only; no message text is read. */
+/** How many of the newest messages are searched for a tool's last use. A long-used Hermes Agent keeps many
+ * gigabytes of messages, and every row read is read in full: searching all of them held the app for seconds each
+ * time Settings › Agent opened. */
+const RECENT_MESSAGES=20_000;
+/** The same answer for this long, so going back to Settings › Agent reads nothing again. */
+const USES_MS=5*60_000;
+const usesCache=new Map<string,{at:number;uses:ConnectionUse[]}>();
 function hermesUses(root:string):ConnectionUse[] {
+ const cached=usesCache.get(root);
+ if(cached&&Date.now()-cached.at<USES_MS)return cached.uses;
+ const uses=readHermesUses(root);
+ usesCache.set(root,{at:Date.now(),uses});
+ return uses;
+}
+/** Hermes Agent's uses in one home's state.db: the newest row of each `mcp…` tool among its newest messages and
+ * the newest session of each chat platform, each with its conversation's title. Opened read-only; no message text
+ * is read. */
+function readHermesUses(root:string):ConnectionUse[] {
  const file=path.join(root,'state.db');
  if(!fs.existsSync(file)||!inside(file,root))return [];
  let db:DatabaseSync|null=null;
@@ -36,7 +51,9 @@ function hermesUses(root:string):ConnectionUse[] {
   const title=(row:any)=>row?hermesConversationTitle({title:row.title,source:row.source,chat:row.display_name}):'';
   const uses:ConnectionUse[]=[];
   // SQLite returns the other columns of the row that holds max().
-  if(messages.has('tool_name'))for(const row of db.prepare(`SELECT tool_name,max(timestamp) AS at,session_id FROM messages WHERE tool_name LIKE 'mcp%' GROUP BY tool_name LIMIT 500`).all() as any[])
+  // Only the newest rows, found by rowid without reading the others.
+  const newest=messages.has('tool_name')?Number((db.prepare('SELECT max(rowid) AS n FROM messages').get() as any)?.n??0):0;
+  if(messages.has('tool_name'))for(const row of db.prepare(`SELECT tool_name,max(timestamp) AS at,session_id FROM messages WHERE rowid>? AND tool_name LIKE 'mcp%' GROUP BY tool_name LIMIT 500`).all(newest-RECENT_MESSAGES) as any[])
    uses.push({tool:String(row.tool_name),at:ms(row.at),thread:title(about.get(String(row.session_id)))});
   if(sessions.has('source')&&sessions.has('started_at'))for(const row of db.prepare(`SELECT source,max(started_at) AS at${named.map(name=>','+name).join('')} FROM sessions GROUP BY source LIMIT 50`).all() as any[])
    if(typeof row.source==='string')uses.push({channel:row.source.toLowerCase(),at:ms(row.at),thread:title(row)});

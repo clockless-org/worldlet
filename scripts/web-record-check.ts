@@ -216,6 +216,18 @@ try{
  const db=(ledger as any).handle;
  assert.equal(Number(db.prepare('SELECT count(*) AS n FROM web_records').get().n),0,'no records outlive their visits');
  db.exec(`INSERT INTO web_records_search(web_records_search) VALUES('integrity-check')`);
+ {
+  // Over the size limit the oldest raw records go, counted in bytes as stored (“é” is two), without reading every body.
+  const at=Date.now()/1000,body='é'.repeat(500),stored=Number((db.prepare('SELECT sum(octet_length(body)) AS n FROM web_records').get()).n??0);
+  ledger.recordWeb([{id:'budget',site:'example.com',url:'https://example.com/',title:'x',applet:'browser',startedAt:at,endedAt:at}],
+   ['response','response','text'].map((kind,i)=>({visit:'budget',at:at+i,kind,url:'https://example.com/'+i,meta:{},body:kind+' '+body})));
+  // 3,000 bytes were added but only 1,500 characters: a limit between the two is over in bytes.
+  ledger.pruneWeb({rawKinds:RAW_KINDS,rawBefore:0,maxBytes:stored+2500});
+  const left=ledger.webRecords('budget').records.map(r=>r.kind);
+  assert.deepEqual(left,['text'],'the raw records go and page text stays: '+left.join(','));
+  assert.ok(ledger.webVisits({terms:['text éé'],before:at+10}).visits.some(v=>v.id==='budget')&&!ledger.webVisits({terms:['response éé'],before:at+10}).total,'the search index forgets the removed records only');
+  db.exec(`INSERT INTO web_records_search(web_records_search) VALUES('integrity-check')`);
+ }
  // The host routes both operations to this one rule.
  assert.match(deviceSource,/op==='recordings'\|\|op==='deleteRecordings'\)\{[^}]*manageRecordings\(op,args,\{agent,/,'the host passes who is asking');
 }finally{

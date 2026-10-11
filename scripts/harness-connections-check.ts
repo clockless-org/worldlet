@@ -124,6 +124,22 @@ if(args[0]==='mcp'&&args[1]==='add'){
  assert.equal(listed[0].lastUsed!.at,1759900100_000);
  assert.ok(!JSON.stringify(listed).includes('secret')&&!JSON.stringify(listed).includes('ghp_'),'no .env value is ever listed');
  assert.equal(called().length,0,'listing only reads');
+ {
+  // A long-used Hermes Agent: only its newest messages are searched for a last use, and the answer is kept a while.
+  const big=path.join(home,'big'),bigHome=path.join(big,'.hermes');fs.mkdirSync(bigHome,{recursive:true});
+  fs.writeFileSync(path.join(bigHome,'config.yaml'),'mcp_servers:\n  old:\n    url: https://old.example.com/mcp\n  new:\n    url: https://new.example.com/mcp\n');
+  const bigDb=new DatabaseSync(path.join(bigHome,'state.db'));
+  bigDb.exec(`CREATE TABLE sessions(id TEXT PRIMARY KEY,source TEXT NOT NULL,display_name TEXT,parent_session_id TEXT,started_at REAL NOT NULL,title TEXT);
+   CREATE TABLE messages(id INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL,role TEXT NOT NULL,content TEXT,tool_call_id TEXT,tool_calls TEXT,tool_name TEXT,timestamp REAL NOT NULL);`);
+  const add=bigDb.prepare('INSERT INTO messages(session_id,role,content,tool_name,timestamp) VALUES(?,?,?,?,?)');
+  bigDb.exec('BEGIN');add.run('s','tool','{}','mcp__old__read',1759800000);for(let i=0;i<20_000;i++)add.run('s','assistant','ok',null,1759800001+i);add.run('s','tool','{}','mcp__new__read',1759900000);bigDb.exec('COMMIT');
+  const bigEnv:HarnessEnvironment={platform:'linux',env:{PATH:'/usr/bin:/bin',HOME:big},home:big,systemDirectories:[]};
+  const bigService=hermesConnectionsService(hermesInstall,bigEnv);
+  assert.deepEqual((await bigService.list()).map(c=>[c.name,c.lastUsed?.tool??null]),[['old',null],['new','read']],'a use older than the newest 20,000 messages is not searched for');
+  add.run('s','tool','{}','mcp__old__read',1759900001);
+  assert.deepEqual((await bigService.list()).map(c=>[c.name,c.lastUsed?.tool??null]),[['old',null],['new','read']],'opening the page again reads nothing again');
+  bigDb.close();
+ }
  const memory={add:{name:'memory',command:'npx',args:['-y','@modelcontextprotocol/server-memory']}};
  assert.equal(await service.preview!(memory),'hermes mcp add memory --command npx --args -y @modelcontextprotocol/server-memory');
  assert.equal(called().length,0,'a preview runs nothing');
@@ -236,7 +252,7 @@ else process.exit(2);
  assert.deepEqual(requests.at(-1),['harnessConnections',{operation:'preview',harness:'hermes',add:{name:'fetch',url:'https://f.example.com'}}]);
  form.all(n=>n.dataset.action==='cancel-connection')[0].onclick();
  assert.match(target.textContent,/Nothing was changed\./);assert.equal(requests.filter(([,a])=>a.operation==='change').length,1,'Cancel runs nothing');
- assert.equal(connectionUseLine({id:'c',kind:'mcp',name:'x',where:'',enabled:true}),'Not used in your Agent’s history yet.');
+ assert.equal(connectionUseLine({id:'c',kind:'mcp',name:'x',where:'',enabled:true}),'Not used in your Agent’s recent history.');
  assert.equal(connectionLine({id:'c',kind:'mcp',name:'x',where:'node s.js',enabled:false,agent:'work',sign:'needs-sign-in'}),'Tool · node s.js · needs sign-in in your Agent · profile “work” · turned off');
  delete (globalThis as any).document;
 });
