@@ -153,8 +153,10 @@ export function order(host:Host,channel:()=>UpdateChannel){
   // Each candidate in turn until one takes it: a replaced coordinator is archived and refuses, the next is the live one.
   let woke:{ok:boolean;error?:string}={ok:false,error:'Claude Code is not installed here'};
   if(cli){
-   const message=orderMessage({said,at:new Date(now),channel:on,version,build,place,item:stored?.id??null,screenshots:stored?.screenshots??0});
-   for(const session of orderSessions(process.env.WORLDLET_ORDER_SESSION,await adminSessions(found))){
+   const message=orderMessage({said,at:new Date(now),channel:on,version,build,place,item:stored?.id??null,screenshots:stored?.screenshots??0,name:process.env.WORLDLET_ORDER_NAME});
+   const sessions=orderSessions(process.env.WORLDLET_ORDER_SESSION,await adminSessions(found));
+   if(!sessions.length)woke={ok:false,error:'no project session to wake (Gatehouse named none and WORLDLET_ORDER_SESSION is not set)'};
+   for(const session of sessions){
     woke=await wake(cli,message,session);
     if(woke.ok)break;
     host.diagnostics.log(`Order: session …${session.slice(-8)} did not take it (${woke.error}).`);

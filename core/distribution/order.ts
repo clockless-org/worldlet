@@ -159,25 +159,23 @@ export function orderItem(f:OrderFacts){
 // project's coordinator session at once. The coordinator is replaced from time to time, so the app asks admin at send
 // time which sessions to try (gatehouse/order-target.mjs: the recorded coordinator while alive, live
 // coordinators from their heartbeats, then the recorded one anyway) and tries them in turn until one takes it (owner 2026-10-07: 「它应该永远能发成功啊」).
-// WORLDLET_ORDER_SESSION on that computer comes first; this reviewed constant is the last resort when admin has none
-// or cannot be reached. When every send fails the hourly report still claims the item.
-export const ORDER_PROJECT_SESSION='session_018APNTfnWESXhaMzrQ7eaof';
+// WORLDLET_ORDER_SESSION on that computer comes first. With neither, nothing is woken and the hourly report still
+// claims the item (session ids are not kept in this public repository).
 /** How many sessions one Order tries before it gives up on waking Claude. */
 export const ORDER_TRIES=4;
 const SESSION=/^(?:session|cse)_[A-Za-z0-9]{10,80}$/;
 const valid=(id:unknown):id is string=>typeof id==='string'&&SESSION.test(id);
 /** The sessions to try, in order: the computer's override alone, else admin's candidates (well-formed, each once, at
- * most ORDER_TRIES), else the constant. */
+ * most ORDER_TRIES); none when neither has one. */
 export function orderSessions(override?:string,admin?:unknown):string[] {
  if(valid(override))return [override];
- const list=[...new Set((Array.isArray(admin)?admin:[admin]).filter(valid))].slice(0,ORDER_TRIES);
- return list.length?list:[ORDER_PROJECT_SESSION];
+ return [...new Set((Array.isArray(admin)?admin:[admin]).filter(valid))].slice(0,ORDER_TRIES);
 }
-/** The project message: the words, where, and the inbox item that holds the pictures and the log (or that there is
- * none). Bounded well under the CLI's 64 KiB. */
-export function orderMessage({said,at,channel,version,build,place,item,screenshots}:{said:string;at:Date;channel:UpdateChannel;version:string;build:number;place?:string;item:string|null;screenshots:number}){
- const words=said.trim().slice(0,SAID_CHARS);
- return orderRedact([`Order: Kelvin said this in Worldlet ${version} (Build ${build}, ${channel}) at ${at.toISOString().slice(0,16)}Z${place?`, in ${place}`:''}:`,'',words,'',
+/** The project message: who said it (the computer's WORLDLET_ORDER_NAME, else "The owner"), the words, where, and the
+ * inbox item that holds the pictures and the log (or that there is none). Bounded well under the CLI's 64 KiB. */
+export function orderMessage({said,at,channel,version,build,place,item,screenshots,name}:{said:string;at:Date;channel:UpdateChannel;version:string;build:number;place?:string;item:string|null;screenshots:number;name?:string}){
+ const words=said.trim().slice(0,SAID_CHARS),who=name?.trim().slice(0,40)||'The owner';
+ return orderRedact([`Order: ${who} said this in Worldlet ${version} (Build ${build}, ${channel}) at ${at.toISOString().slice(0,16)}Z${place?`, in ${place}`:''}:`,'',words,'',
   item?`Admin inbox item ${item} holds it with ${screenshots} screenshot${screenshots===1?'':'s'}, the last ${ORDER_LOG.minutes} minutes of the operation log and this computer's recent errors, Fox timings and whole log files (inbox_claim {"source":"order"}; screenshots and log files at each one's machineUrl).`
    :'The admin inbox did not take it, so there are no screenshots or log this time.'].join('\n'));
 }
