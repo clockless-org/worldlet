@@ -52,5 +52,15 @@ try{
  await present('village');assert.equal(state().track,'Soft Rain','theme switching preserves explicit sound');
  for(const track of ['https://example.com/a.wav','../secret','theme:fixture:missing'])await assert.rejects(audio.command({operation:'presentation',track,active:true}),/Unknown theme ambience/);
  assert.equal(state().track,'Soft Rain','rejected sound IDs do not change playback');
+ // A crashed media page is closed, not left alive beside the one the next call opens.
+ {
+  const crashed=(surface as any).view.webContents as Electron.WebContents;
+  const gone=new Promise<void>(resolve=>surface.onEvent(event=>{if(event.type==='gone')resolve();}));
+  crashed.forcefullyCrashRenderer();await gone;
+  const deadline=Date.now()+5000;while(Date.now()<deadline&&!crashed.isDestroyed())await sleep(50);
+  assert.equal(crashed.isDestroyed(),true,'a crashed media page is closed');
+  assert.equal(await surface.call('info','ambience'),null,'the next call opens a fresh media page');
+  console.log('PASS media surface: a crashed page is closed and the next call opens a new one');
+ }
  console.log('PASS native theme audio: four decoded room loops, no autoplay, one channel, volume/ducking, hidden pause, mute, manual-source preservation, ordered switches and invalid IDs');
 }finally{audio.stop();surface.close();}
