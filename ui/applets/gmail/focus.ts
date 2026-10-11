@@ -87,7 +87,7 @@ export function renderMailFocus(value:MailValue,renderBody:(text:string,page:any
   details.append(summary,identity(entry),original(entry));paper.append(details);
  }
  root.append(paper);
- const align=()=>{const switcher=root.closest('#notionWorld')?.querySelector<HTMLElement>('.mail-reader-switch');if(!switcher)return;const h=root.getBoundingClientRect(),p=switcher.parentElement.getBoundingClientRect();switcher.style.left=h.right-p.left-116+'px';switcher.style.right='auto';switcher.style.width='96px';switcher.style.top=h.top-p.top+16+'px';};
+ const align=()=>{const switcher=root.closest('#notionWorld')?.querySelector<HTMLElement>('.mail-reader-switch');const parent=switcher?.parentElement;if(!parent)return;const h=root.getBoundingClientRect(),p=parent.getBoundingClientRect();switcher.style.left=h.right-p.left-116+'px';switcher.style.right='auto';switcher.style.width='96px';switcher.style.top=h.top-p.top+16+'px';};
  const resize=new ResizeObserver(align);resize.observe(root);
  const cleanup=new MutationObserver(()=>{if(!root.isConnected){resize.disconnect();cleanup.disconnect();}});
  requestAnimationFrame(()=>{if(root.isConnected){cleanup.observe(root.closest('#notionContent')||root.parentNode!,{childList:true,subtree:true});align();}else resize.disconnect();});

@@ -637,7 +637,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   if(value.phase==='saved'){
    caption.textContent=value.fresh?'Saved to Fox · On this device':'Already in your memory';
    notify(value.fresh?'Saved to memory':'Already remembered');
-   if(value.fresh){const fox=root.querySelector('.companion-avatar'),from=slot.getBoundingClientRect(),to=fox.getBoundingClientRect();const spark=document.createElement('span');spark.className='browser-memory-flight';spark.textContent='✦';spark.setAttribute('aria-hidden','true');root.append(spark);
+   const fox=value.fresh&&slot?root.querySelector('.companion-avatar'):null;
+   if(fox){const from=slot.getBoundingClientRect(),to=fox.getBoundingClientRect();const spark=document.createElement('span');spark.className='browser-memory-flight';spark.textContent='✦';spark.setAttribute('aria-hidden','true');root.append(spark);
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const motion=spark.animate([{transform:`translate(${from.x+from.width/2}px,${from.y+15}px) scale(1)`,opacity:1},{transform:`translate(${to.x+to.width/2}px,${to.y+to.height/3}px) scale(.25)`,opacity:0}],{duration:reduced?0:750,easing:'cubic-bezier(.35,0,.2,1)',fill:'forwards'});motion.onfinish=()=>spark.remove();
     fox.animate([{filter:'brightness(1)'},{filter:'brightness(1.3)'},{filter:'brightness(1)'}],{duration:reduced?0:500,delay:reduced?0:500});
    }
