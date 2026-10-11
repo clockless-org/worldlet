@@ -6,10 +6,12 @@ export interface Knowledge {sourceId:string;theme:string;topic:string;summary:st
 const size=(s:string)=>characters(s).length;
 const key=(s:string)=>s.normalize('NFC');
 export function validateContextAnalysis(items:Knowledge[],sources:{id:string;revision:string}[],originalIDs:string[],themes:string[]):Knowledge[]{
- const wanted=new Set(sources.map(s=>key(s.id))),actual=new Set(items.map(i=>key(i.sourceId)));
- if(items.length!==sources.length||wanted.size!==actual.size||[...wanted].some(id=>!actual.has(id)))throw Error('Analysis did not cover every selected source. Your previous world is preserved.');
+ const wanted=new Map<string,{id:string;revision:string}>();
+ for(const source of sources){const id=key(source.id);if(!wanted.has(id))wanted.set(id,source);}
+ const actual=new Set(items.map(i=>key(i.sourceId)));
+ if(items.length!==sources.length||wanted.size!==actual.size||[...wanted.keys()].some(id=>!actual.has(id)))throw Error('Analysis did not cover every selected source. Your previous world is preserved.');
  return items.map(item=>{
-  const source=sources.find(s=>key(s.id)===key(item.sourceId));
+  const source=wanted.get(key(item.sourceId));
   if(!source||!originalIDs.some(id=>key(id)===key(item.sourceId))||!themes.includes(item.theme)||!item.topic.length||size(item.topic)>100||size(item.summary)>2400||item.facts.length>12||size(item.intent??'')>400)throw Error('Invalid knowledge structure.');
   for(const fact of item.facts)if(!fact.quote.length||size(fact.quote)>1000||size(fact.text)>600)throw Error('A model quote could not be verified in the source. This result was not saved.');
   if((item.activities?.length??0)>8)throw Error('Too many activity signals.');

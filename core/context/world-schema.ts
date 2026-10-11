@@ -19,15 +19,17 @@ export function compileWorld(workspace: any,knowledge: any[],overrides: any[]=[]
   if(!topics.has(topicKey))topics.set(topicKey,{theme,title:structured.topic||THEMES[theme],items:[]});topics.get(topicKey).items.push({k,s:structured});
  }
  // A persistent home exists even before the first resource is connected.
+ const usedThemes=new Set([...topics.values()].map(t=>t.theme)),spaceOf=new Map();
  for(const [theme,title]of Object.entries(THEMES)){
-  if(theme!=='home'&&![...topics.values()].some(t=>t.theme===theme))continue;
-  spaces.push({id:'place-'+theme,theme,title,children:[]});
+  if(theme!=='home'&&!usedThemes.has(theme))continue;
+  const space={id:'place-'+theme,theme,title,children:[]};
+  spaces.push(space);spaceOf.set(theme,space);
  }
  for(const topic of topics.values()){
   // Stable semantic ID, independent of source arrival/deletion order.
   let fingerprint=14695981039346656037n;for(const char of topic.theme+':'+topic.title.trim().toLowerCase())fingerprint=BigInt.asUintN(64,(fingerprint^BigInt(char.codePointAt(0)))*1099511628211n);
   const stable=fingerprint.toString(16);
-  const tid='topic-'+stable,space=spaces.find(s=>s.theme===topic.theme);space.children.push(tid);
+  const tid='topic-'+stable,space=spaceOf.get(topic.theme);space.children.push(tid);
   const p=add(tid,topic.title,topic.items.map(({k,s})=>`## ${k.title}\n\n${s.summary}\n\n${(s.facts||[]).map(f=>'- '+f.text).join('\n')}`).join('\n\n'),root,{knowledge:true,...(topic.items.some(({s})=>Array.isArray(s.activities))?{activities:[]}:{}),revision:String(workspace.revision)});
   for(const {k,s}of topic.items){
    const sid='source-'+k.source_id;
@@ -41,8 +43,12 @@ export function compileWorld(workspace: any,knowledge: any[],overrides: any[]=[]
    }
   }
  }
- for(const space of spaces)objects.push({id:space.id,parent:'world',template:space.theme,anchor:space.theme,contextRefs:space.children});
- for(const p of pages)objects.push({id:p.id,parent:p.parent===root?(spaces.find(s=>s.children.includes(p.id))?.id||'world'):p.parent,template:p.intentId?'wish-note':'book',contextRef:p.id,revision:p.revision,action:{type:'open_content',target:p.id}});
+ const placeOf=new Map();
+ for(const space of spaces){
+  objects.push({id:space.id,parent:'world',template:space.theme,anchor:space.theme,contextRefs:space.children});
+  for(const child of space.children)if(!placeOf.has(child))placeOf.set(child,space.id);
+ }
+ for(const p of pages)objects.push({id:p.id,parent:p.parent===root?(placeOf.get(p.id)||'world'):p.parent,template:p.intentId?'wish-note':'book',contextRef:p.id,revision:p.revision,action:{type:'open_content',target:p.id}});
  pages.unshift({id:root,title:'My world',kind:'page',parent:null,children:spaces.flatMap(s=>s.children),paths:['world.md'],path:'world.md',markdown:'',text:''});
  return {version:1,cloud:true,sample:false,workspace:workspace.name,workspaceId:workspace.id,revision:workspace.revision,roots:[root],pages,spaces,assets:[],coverage:{pages:pages.length-1,databases:0,rows:0,assets:0,scope:'Private sources imported with your permission. Structure is model-generated; review originals and correct inferred intents.',problems:[]},scene:{schemaVersion:1,revision:workspace.revision,objects}};
 }

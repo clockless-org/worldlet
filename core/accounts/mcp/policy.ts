@@ -24,8 +24,14 @@ export const MCP_POLICY:Readonly<Record<string,McpPolicy>>=Object.freeze({
 });
 const policy=(name:string)=>Object.hasOwn(MCP_POLICY,name)?MCP_POLICY[name]:null;
 
+const translated=new Map<string,RegExp>();
 /** Python's `fnmatch.translate`, as a JavaScript pattern for one whole name. */
 function translate(pattern:string){
+ let compiled=translated.get(pattern);
+ if(!compiled)translated.set(pattern,compiled=compile(pattern));
+ return compiled;
+}
+function compile(pattern:string){
  let out='',i=0;const n=pattern.length;
  while(i<n){
   const c=pattern[i++];

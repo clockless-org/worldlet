@@ -1,7 +1,7 @@
 // Source pages as the records chat and checks read: one shape per provider, at most 50 records of 12,000 characters
 // (ported from Hermes source_reader.py `normalize` and `source_failure`).
 import {got,truthy,pyIn,pyIter,pyInt,pyStr,pySorted,chars,head,urlsafeB64decode} from './python.ts';
-import {unescape} from './html.ts';
+import {unescape} from './html-parser.ts';
 
 const TEXT=12000;
 function strings(value:any):string{

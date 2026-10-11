@@ -1,7 +1,7 @@
 // Mail drafts are reviewed in Fox; only the trusted native button can send (ported from Hermes mail_actions.py).
 // Receipts live behind MailReceipts, keyed by the review's lowercase UUID.
 import type {GoogleRest,MailReceipts} from './rest.ts';
-import {got,truthy,pyType,pyInt,pyIn,pyIter,pyJson,pyRepr,pySorted,chars,head,strip,WS} from './python.ts';
+import {got,truthy,pyType,pyInt,pyIn,pyIter,pyJson,pyRepr,pySorted,chars,head,strip,sha256Hex,WS} from './python.ts';
 import {getaddresses} from './addresses.ts';
 import {plainMessage,base64} from './mime.ts';
 
@@ -88,10 +88,7 @@ function receiptId(identifier:unknown){
 }
 
 /** sha256 of the draft as Python's json.dumps(sort_keys=True, ensure_ascii=False) writes it, hex. */
-export async function draftHash(draft:unknown){
- const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pyJson(draft))));
- return [...digest].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
+export async function draftHash(draft:unknown){return sha256Hex(pyJson(draft));}
 
 async function reviewedSender(api:GoogleRest,draft:any){
  const sender=address(got(await api.get(PROFILE),'emailAddress'));

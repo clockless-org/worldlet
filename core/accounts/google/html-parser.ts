@@ -1,13 +1,8 @@
 import {HTML5_ENTITIES} from './html-entities.ts';
+import {strip} from './python.ts';
 /** Python's html.parser.HTMLParser (3.13, convert_charrefs=True) and html.unescape, ported so the Gmail reader reads
  * real-world mail exactly as its Python original did: unclosed and stray tags, RAWTEXT/RCDATA elements, comments,
  * declarations and character references all tokenize the same way. Subclasses override the handle_* methods. */
-
-/** Python's str.isspace() characters; `\s` in a Python str pattern. */
-export const WS='[\\t\\n\\v\\f\\r\\x1c-\\x20\\x85\\xa0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000]';
-const edges=new RegExp(`^${WS}+|${WS}+$`,'g');
-/** Python's str.strip() with no argument. */
-export const pyStrip=(s:string)=>s.replace(edges,'');
 
 const INVALID_CHARREFS=new Map<number,string>([[0x00,'�'],[0x0d,'\r'],[0x80,'€'],[0x81,'\x81'],[0x82,'‚'],[0x83,'ƒ'],[0x84,'„'],[0x85,'…'],[0x86,'†'],[0x87,'‡'],[0x88,'ˆ'],[0x89,'‰'],[0x8a,'Š'],[0x8b,'‹'],[0x8c,'Œ'],[0x8d,'\x8d'],[0x8e,'Ž'],[0x8f,'\x8f'],[0x90,'\x90'],[0x91,'‘'],[0x92,'’'],[0x93,'“'],[0x94,'”'],[0x95,'•'],[0x96,'–'],[0x97,'—'],[0x98,'˜'],[0x99,'™'],[0x9a,'š'],[0x9b,'›'],[0x9c,'œ'],[0x9d,'\x9d'],[0x9e,'ž'],[0x9f,'Ÿ']]);
 const invalidCodepoint=(n:number)=>n>=0x1&&n<=0x8||n===0xb||n>=0xe&&n<=0x1f||n>=0x7f&&n<=0x9f||n>=0xfdd0&&n<=0xfdef||(n&0xfffe)===0xfffe;
@@ -123,7 +118,7 @@ export class HtmlParser {
    if(value)value=unescapeAttr(value);
    attrs.push([m[1].toLowerCase(),value]);k=m.index+m[0].length;
   }
-  const close=pyStrip(raw.slice(k,endpos));
+  const close=strip(raw.slice(k,endpos));
   if(close!=='>'&&close!=='/>'){this.handle_data(raw.slice(i,endpos));return endpos;}
   if(close==='/>')this.handle_startendtag(tag,attrs);
   else {

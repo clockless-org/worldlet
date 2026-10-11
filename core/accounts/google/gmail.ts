@@ -1,22 +1,18 @@
-import {HtmlParser,WS,pyStrip,type HtmlAttrs} from './html-parser.ts';
+import {HtmlParser,type HtmlAttrs} from './html-parser.ts';
 import type {GoogleRest} from './rest.ts';
+import {WS as SPACES,strip as pyStrip,chars as cpLength,head as cpSlice,truthy} from './python.ts';
 /** Bounded read-only Gmail pages. Unread queries have no arbitrary age cutoff. Ported from the Gmail reader of
  * Worldlet's former built-in Hermes, whose pages, errors and excerpts it keeps byte for byte. Lengths count characters
  * as Python does (code points). */
 
-const space=new RegExp(`${WS}+`,'g'),isSpace=new RegExp(`^${WS}$`);
+const WS=`[${SPACES}]`,space=new RegExp(`${WS}+`,'g'),isSpace=new RegExp(`^${WS}$`);
 const word='\\p{L}\\p{N}_';
 /** A Python (?i) word: its `i` also matches dotless ı and dotted İ, as Python's case folding does. */
 const ci=(s:string)=>s.replace(/i/g,'[i\\u0130\\u0131]');
-const cpLength=(s:string)=>{let n=0;for(const _ of s)n++;return n;};
-/** s[:n] in Python: the first n code points. */
-const cpSlice=(s:string,n:number)=>{if(s.length<=n)return s;let out='',k=0;for(const c of s){if(k++>=n)break;out+=c;}return out;};
 const pySplit=(s:string)=>s.split(space).filter(Boolean);
 const own=(o:any,k:string)=>o!=null&&typeof o==='object'&&Object.hasOwn(o,k);
 /** dict.get(k,fallback). */
 const get=(o:any,k:string,fallback?:any)=>own(o,k)&&o[k]!==undefined?o[k]:fallback;
-/** Python truthiness: empty lists and dicts are false too. */
-const truthy=(v:unknown)=>Array.isArray(v)?v.length>0:v&&typeof v==='object'?Object.keys(v).length>0:!!v;
 /** str() of a JSON value. */
 const pyStr=(v:unknown)=>typeof v==='string'?v:v===null||v===undefined?'None':v===true?'True':v===false?'False':typeof v==='number'?String(v):JSON.stringify(v);
 
@@ -111,13 +107,14 @@ const NOT_CONTENT=new RegExp(`(?:^|[^\\p{L}\\p{N}])(?:${ci('logos?|icons?|avatar
 const NOT_CONTENT_ALT=new RegExp(`(?<![${word}])(?:${ci('logos?|icons?|avatars?|badges?|spacer|pixel|signature|facebook|twitter|instagram|linkedin|youtube|tiktok|pinterest|whatsapp|wechat|app store|google play')})(?![${word}])`,'iu');
 /** int() of Unicode decimal digits: every Nd run is whole blocks of 0–9. */
 const digits=(s:string)=>{let n=0;for(const c of s){let zero=c.codePointAt(0),k=0;while(/\p{Nd}/u.test(String.fromCodePoint(zero-1))){zero--;k++;}n=n*10+k%10;}return n;};
+const ANY_SPACE=new RegExp(WS),SIZE=new RegExp(`^${WS}*(\\p{Nd}+)(?:px)?${WS}*$`,'u');
+const STYLE_SIZE=Object.fromEntries(['width','height'].map(name=>[name,new RegExp(`(?:^|;)${WS}*${name}${WS}*:${WS}*(\\p{Nd}+)px`,'u')]));
 export function contentImage(attrs:Attrs):MailPicture|null{
  const src=pyStrip(attrs.src||'');
- if(!src.startsWith('https://')||cpLength(src)>2000||new RegExp(WS).test(src))return null;
- const size=(name:string)=>{
-  const value=new RegExp(`^${WS}*(\\p{Nd}+)(?:px)?${WS}*$`,'u').exec(attrs[name]||'');
-  const style=new RegExp(`(?:^|;)${WS}*${name}${WS}*:${WS}*(\\p{Nd}+)px`,'u').exec((attrs.style||'').toLowerCase());
-  return value?digits(value[1]):style?digits(style[1]):0;
+ if(!src.startsWith('https://')||cpLength(src)>2000||ANY_SPACE.test(src))return null;
+ const size=(name:'width'|'height')=>{
+  const value=SIZE.exec(attrs[name]||'')??STYLE_SIZE[name].exec((attrs.style||'').toLowerCase());
+  return value?digits(value[1]):0;
  };
  const width=size('width'),height=size('height');
  if(0<width&&width<MIN_PICTURE_WIDTH||0<height&&height<120)return null;
