@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../core/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
@@ -124,6 +124,12 @@ assert.deepEqual(read('pi',[{type:'agent_end',messages:[{role:'assistant',conten
 const envelope=JSON.stringify({ok:true,status:'ok',final:'From OpenClaw',payloads:[{text:'From OpenClaw'}]},null,2).split('\n');
 assert.deepEqual(read('openclaw',envelope),{deltas:[],outcome:{message:'From OpenClaw'}});
 assert.deepEqual(read('openclaw',[JSON.stringify({ok:false,status:'timeout'})],2).outcome,{error:'OpenClaw timed out.'});
+// A key its configuration names but cannot read (a MiniMax key missing from its secret store, 2026-10-11): one plain line.
+const keyLine='OpenClaw can’t find its key MINIMAX_API_KEY, so its model can’t answer. Save it in Terminal with: openclaw secrets store set MINIMAX_API_KEY';
+assert.deepEqual(read('openclaw',[JSON.stringify({ok:false,status:'error',error:{message:'Secret store entry "MINIMAX_API_KEY" was not found.'}})],1).outcome,{error:keyLine});
+assert.deepEqual(read('openclaw',[],1,'Error: Secret store entry "MINIMAX_API_KEY" was not found.').outcome,{error:keyLine},'also when it only says so on stderr');
+assert.equal(openClawMissingKey('Environment variable "MINIMAX_API_KEY" is missing or empty.'),keyLine);
+assert.equal(openClawMissingKey('Rate limited'),null);
 assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: not logged in\n').outcome,{error:'Claude Code could not answer: Error: not logged in'},'banners are not Fox’s words; stderr explains a failure');
 assert.match(String((read('codex',[],0).outcome as {error:string}).error),/did not answer/);
 
