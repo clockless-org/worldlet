@@ -8,14 +8,39 @@ const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention
 export type WorldAction={target:string;action:string;tool:string;description:string;parameters:any;defaults:Record<string,unknown>;public:boolean};
 // Only the World knows implementation names. Models address a target + action.
 // Future templates provide the same descriptors and an executor; no new model tool.
+// Every input is a module constant (the catalogs, Applet definitions and worldModules), so the
+// list is built once per sample flag. Each call still gets its own deep copy: callers may change
+// what they receive without reaching the cache or a later call.
+const built=new Map<boolean,{modules:number;actions:WorldAction[]}>();
 export function worldActions({sample=false}={}):WorldAction[]{
+ const key=!!sample;let entry=built.get(key);
+ if(!entry||entry.modules!==worldModules.length){entry={modules:worldModules.length,actions:buildWorldActions(key)};built.set(key,entry);}
+ return copyPlain(entry.actions,new Map());
+}
+// Copies plain objects and arrays, keeping objects shared inside the list (an Applet alias and
+// its base action) shared in the copy, as structuredClone would.
+function copyPlain(value,seen:Map<object,any>){
+ if(value===null||typeof value!=='object')return value;
+ let copy=seen.get(value);if(copy)return copy;
+ if(Array.isArray(value)){
+  copy=new Array(value.length);seen.set(value,copy);
+  for(let i=0;i<value.length;i++)copy[i]=copyPlain(value[i],seen);
+  return copy;
+ }
+ if(Object.getPrototypeOf(value)!==Object.prototype)throw Error('World action schemas must be plain data.');
+ copy={};seen.set(value,copy);
+ for(const key of Object.keys(value))copy[key]=copyPlain(value[key],seen);
+ return copy;
+}
+function buildWorldActions(sample:boolean):WorldAction[]{
  const definitions=listWorldTools({sample}),actions:WorldAction[]=[];
- const add=(target,action,tool,defaults={})=>{
+ const add=(target,action,tool,defaults={}):WorldAction|undefined=>{
   const definition=definitions.find(t=>t.name===tool);if(!definition)return;
   const parameters=structuredClone(definition.parameters) as any;
   for(const key of Object.keys(defaults))delete parameters.properties[key];
   parameters.required=(parameters.required||[]).filter(key=>!Object.hasOwn(defaults,key));
-  actions.push({target,action,tool,defaults,description:definition.description,parameters,public:publicWorldToolNames.includes(tool)});
+  const added={target,action,tool,defaults,description:definition.description,parameters,public:publicWorldToolNames.includes(tool)};
+  actions.push(added);return added;
  };
  const operations=(target,tool,field='operation',only?:string[])=>{
   const def=definitions.find(t=>t.name===tool) as any;
@@ -44,11 +69,11 @@ export function worldActions({sample=false}={}):WorldAction[]{
  // emails are saved items, so Mail searches and reads them as content. Without this, gmail offered
  // only draft/reviews and Codex concluded mail could not be read (RC 5310217c).
  if(sample){
-  add('gmail','search','find_content');
-  actions[actions.length-1].description='Search the practice world\'s emails (saved in this world as items) by sender, subject or words, and return a few matches with IDs to read.';
+  const search=add('gmail','search','find_content');
+  if(search)search.description='Search the practice world\'s emails (saved in this world as items) by sender, subject or words, and return a few matches with IDs to read.';
   // Not gmail/read: that name is the live source reader, which a practice world never discovers.
-  add('gmail','read_saved','read_content_page');
-  actions[actions.length-1].description='Read one practice email by the ID a gmail/search result returned.';
+  const read=add('gmail','read_saved','read_content_page');
+  if(read)read.description='Read one practice email by the ID a gmail/search result returned.';
  }
  add('google-drive','read','read_connected_google',{service:'google-drive'});
  // The person's own events (core/tools/calendar.ts); each operation names what it needs.
@@ -78,12 +103,11 @@ export function worldActions({sample=false}={}):WorldAction[]{
  const base=actions.slice();
  for(const app of APP_DEFINITIONS){
   const target='applet:'+app.key;
-  add(target,'launch','open_applet',{id:app.id});
-  const launch=actions[actions.length-1];
-  launch.description=`Open ${app.title} in Worldlet. This does not connect an account or grant access to private content.`;
+  const launch=add(target,'launch','open_applet',{id:app.id});
+  if(launch)launch.description=`Open ${app.title} in Worldlet. This does not connect an account or grant access to private content.`;
   if(!sample){
-   add(target,'runtime','query_world_items',{provider:app.attention?.provider||app.key});
-   actions[actions.length-1].description=`Inspect saved items and available runtime task/operation status for ${app.title}. This does not start synchronization or execute an action.`;
+   const runtime=add(target,'runtime','query_world_items',{provider:app.attention?.provider||app.key});
+   if(runtime)runtime.description=`Inspect saved items and available runtime task/operation status for ${app.title}. This does not start synchronization or execute an action.`;
   }
   const owners=new Set([app.key,app.attention?.provider].filter(Boolean));
   for(const action of base.filter(a=>owners.has(a.target))){
