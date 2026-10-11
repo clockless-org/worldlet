@@ -226,7 +226,10 @@ else process.exit(2);
  const requests:any[]=[];
  let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,changes:true,connections:[{id:listed[0].id,kind:'mcp',name:'github',where:'https://api.githubcopilot.com/mcp/',enabled:true,sign:'token',agent:'default',main:true,removable:true,lastUsed:{at:Date.UTC(2026,9,8,12),tool:'search_issues',thread:'Discord · Release notes'}},
   {id:listed[4].id,kind:'account',name:'Telegram',where:'telegram',enabled:true,sign:'token',agent:'default',main:true}]},{harness:'other',title:'Other Agent',changes:false,connections:[{id:'conn-0000000000000000',kind:'mcp',name:'x',where:'y',enabled:false,removable:true}]}]};
- const call=async(action:string,args:any)=>{requests.push([action,args]);if(args.operation==='preview')return {command:args.remove?'hermes mcp remove github':'hermes mcp add fetch --url https://f.example.com',confirm:'c-1'};
+ const call=async(action:string,args:any)=>{
+  // What Hermes Agent said about itself at setup (core/agent/agent-profile.ts); Other Agent said nothing.
+  if(action==='agentHarness')return {profile:args.id==='hermes'?{connections:[{name:'1Password vault',kind:'password_vault',usedFor:'Logs in to shopping sites'},{name:'Telegram',kind:'channel'}],channels:[{provider:'discord',place:'#groceries'}]}:null};
+  requests.push([action,args]);if(args.operation==='preview')return {command:args.remove?'hermes mcp remove github':'hermes mcp add fetch --url https://f.example.com',confirm:'c-1'};
   if(args.operation==='change'){answer={harnesses:[{...answer.harnesses[0],connections:answer.harnesses[0].connections.slice(1)}]};return {ok:true};}return answer;};
  const target=new Node();
  await showAgentConnections(target as any,call,()=>true);
@@ -235,6 +238,11 @@ else process.exit(2);
  assert.match(rows[0].textContent,/githubTool.*Last used .*2026 for search_issues in “Discord · Release notes”\./);
  assert.match(rows[1].textContent,/TelegramChat account/);assert.doesNotMatch(target.textContent,/githubcopilot|token|OAuth|profile/,'no address, sign-in method or profile');assert.equal(rows[1].all(n=>n.dataset.action==='remove-connection').length,0,'an account is listed, not removed');
  assert.equal(rows[2].all(n=>n.dataset.action==='remove-connection').length,0,'no Remove where the Agent cannot be changed from here');
+ // The connections it reported itself are listed under its own, without one it already lists, and never removable.
+ const told=target.all(n=>!!n.dataset.reported);
+ assert.deepEqual(told.map(r=>r.dataset.reported),['1Password vault','Discord #groceries']);
+ assert.match(told[0].textContent,/1Password vaultPassword vaultLogs in to shopping sites/);assert.match(told[1].textContent,/Discord #groceriesChat channelHermes Agent told Worldlet it uses this\./);
+ assert.equal(told.flatMap(r=>r.all(n=>!!n.dataset.action)).length,0,'listed only');
  assert.match(target.textContent,/Change these in Other Agent itself\./);
  await rows[0].all(n=>n.dataset.action==='remove-connection')[0].onclick();
  await new Promise(resolve=>setImmediate(resolve));

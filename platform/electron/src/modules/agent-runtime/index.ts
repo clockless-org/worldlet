@@ -23,12 +23,13 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
 import {surveyOpenClaw} from './openclaw-files.ts';
 import {describeAgent,readAgentProfile,writeAgentProfile,type AgentProfileResult} from './agent-profile.ts';
+import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {surveyAgentHistory} from './agent-files.ts';
 import {readLocalAgentMemory,writeAdopted} from './local-memory.ts';
 import {RemoteHarnessAdapter} from './remote-harness.ts';
@@ -367,6 +368,8 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   if(request.operation==='requested')return {id:takeRequested()};
   // What the chosen Agent said about itself, once it has (`select`).
   if(request.operation==='profile')return {profile:isLocalHarnessId(request.id)?readAgentProfile(context.root,request.id):null};
+  // The catalog Applets the chosen Agent pointed to, which each Area recommends first (core/applets/area-recommend.ts).
+  if(request.operation==='suggestions'){const install=selectedInstall(context.root);return {keys:install?agentProfileApplets(readAgentProfile(context.root,install.id),WORLD_APPS.map(app=>app.key)):[]};}
   if(request.operation==='select'){
    if(!isLocalHarnessId(request.id))throw new WorldletError('Choose an Agent found on this computer.');
    const install=locateLocalHarnesses().find(item=>item.id===request.id&&item.id!=='codex'&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
