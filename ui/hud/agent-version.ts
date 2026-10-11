@@ -1,11 +1,6 @@
 // The Agent line in the World's bottom-right corner, from the host's Agent detection (`agentHarness` detect):
 // the chosen local Agent's name and version ("Hermes 0.21.4"), its name alone when the version could not be read,
 // "OpenClaw" for an OpenClaw Gateway on another computer, and nothing when no Agent is chosen.
-import {appLogoSource} from '../applets/index.ts';
-
-/** Each Agent's own mark, shared by setup's Agent cards and the World's corner. */
-export const AGENT_ICONS:Record<string,string>={'claude-code':appLogoSource({key:'claude-code'})||'','codex':appLogoSource({key:'codex'})||'',hermes:'brands/hermes.png',openclaw:'brands/openclaw.svg',pi:'brands/pi.svg'};
-
 /** Which Agent the corner names (its id picks the mark) and the words beside it. */
 export function agentVersionLine(found:any):{id:string;text:string} {
  const none={id:'',text:''};

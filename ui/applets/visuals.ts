@@ -24,5 +24,7 @@ const logoDrawers={'voice-memos':voiceMemosLogo,'doordash':doordashLogo,'stripe'
 
 // A website made into an Applet from the Browser carries its own site's icon (core/applets/site-applet.ts).
 export function appLogoSource(app){return popularLogos[app.key]||logoDrawers[app.key]?.source||(app.site&&app.icon)||undefined;}
+/** Each Agent's own mark, shared by setup's Agent cards and the World's bottom-right corner. */
+export const AGENT_ICONS:Record<string,string>={'claude-code':appLogoSource({key:'claude-code'})||'','codex':appLogoSource({key:'codex'})||'',hermes:'brands/hermes.png',openclaw:'brands/openclaw.svg',pi:'brands/pi.svg'};
 // Only genuine brand identity belongs beside an Applet name. No generic fallback.
 export function appHudIcon(app){return {source:appLogoSource(app)||''};}
