@@ -13,7 +13,7 @@ The World's right side (owner layout 2026-10-10: Attention on the left, tasks on
 | Group | Rows | Order and limit |
 | --- | --- | --- |
 | Doing now | Fox's background work (its step, from `worldlet:fox-status`), Applets working on a task Fox handed them, source checks running, older Hermes Agent conversations still coming in | Newest first; three, then "+N more" |
-| Planned | The person's Agent's scheduled jobs, Worldlet's routines among them (`nextCronRun` here in `next-run.ts`), and each Applet's next source check | Soonest first, repeating jobs with no fixed time last; four, then "+N more" |
+| Planned | The person's Agent's scheduled jobs, Worldlet's routines among them (`nextCronRun` here in `next-run.ts`), each Applet's next source check, and Fox's next morning brief and day summary (core/artifacts `dailyPlanned`, from the page's daily state) | Soonest first, repeating jobs with no fixed time last; four, then "+N more" |
 | Done today | Applet tasks, routine runs (late ones say so), scheduled-job results that became Attention items, source checks, older conversations brought, and what Fox's background work made | Newest first; four, then "N today · Journal" |
 
 - **Folding.** A day of checks of one Applet is one row ("Checked Mail · 6 times"). A check that failed shows ("Mail check didn't finish · will retry") only while no later check of that Applet succeeded. A failed task or routine says "Not finished". Failed rows are marked so the panel draws them red.

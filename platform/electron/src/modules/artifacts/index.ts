@@ -1,6 +1,8 @@
 import {mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../../core/artifacts/index.ts';
+import {dailyScheduleResult} from '../../../../../core/agent/index.ts';
 import {WorldletError} from '../../files.ts';
-import type {Host} from '../../host/types.ts';
+import {PHONE,type PhoneService} from '../../host/services.ts';
+import type {Host,Row} from '../../host/types.ts';
 
 /** Artifacts (core/artifacts/README.md). Every card Fox shows in this World, an Attention card or an explanation
  * from the conversation, is kept in the `artifacts` table so the person finds it again in the Artifacts page of
@@ -14,6 +16,18 @@ export function installArtifacts(host:Host){
   catch(error){host.diagnostics.record(error,'artifacts');return [];}
  };
  const changed=(id='')=>page.event('worldlet:artifacts',{id});
+ /** A kept morning brief or day summary (`scheduled` with its `day`) also arrives as an Attention item that opens the
+  * Journal on it, and on the phone while fresh. Core decides what it says (core/agent/harness-schedule.ts). */
+ function scheduledResult(kind:unknown,day:unknown,artifact:Artifact,at:number){
+  if(kind!=='plan'&&kind!=='summary'||typeof day!=='string')return;
+  try{
+   const result=dailyScheduleResult({kind,day,artifact:artifact as any,at,now:Date.now()});
+   if(!result)return;
+   const id=store.ledger().upsert([result.item as Row],'worldlet-schedule')[0]??'';
+   store.worldChanged();
+   if(result.push&&id)void host.optional<PhoneService>(PHONE)?.notify({...result.push,open:{item:id},act:{attention:id}}).catch(()=>{});
+  }catch(error){host.diagnostics.record(error,'artifacts');}
+ }
  host.register({
   artifacts:async request=>{
    const operation=typeof request.operation==='string'?request.operation:'list';
@@ -29,6 +43,7 @@ export function installArtifacts(host:Host){
     const list=all(),saved=mergeArtifact(list.find(a=>a.id===next.id),next,now);
     const {forget}=orderArtifacts([saved,...list.filter(a=>a.id!==saved.id)]);
     store.ledger().saveArtifacts([saved as any],forget);if(forget.length)store.ledger().deleteArtifactPages(forget);changed(saved.id);
+    if(request.scheduled)scheduledResult(request.scheduled,request.day,saved,now*1000);
     return {ok:true,artifact:saved};
    }
    if(operation==='delete'){

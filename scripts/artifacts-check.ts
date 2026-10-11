@@ -97,14 +97,13 @@ assert.deepEqual(madeArtifacts({}),[]);
 // before the person sits down for someone who used Worldlet in the last few days (owner Order 2026-10-07); the summary
 // only on a day they used it.
 {
- const {readDailyArtifactsState,markDailyUse,markDailyMade,dailyArtifactDue,dailyPlanRequest,dailySummaryRequest,dailyArtifactRequest,localISO,readMorningBrief,morningBriefWantsReplies,morningBriefWantsOvernight,journalWaiting,journalSeen,MORNING_BRIEF_DEFAULT,MORNING_BRIEF_LIMIT,MORNING_BRIEF_REPLIES}=await import('../core/artifacts/index.ts');
+ const {readDailyArtifactsState,markDailyUse,markDailyMade,dailyArtifactDue,dailyPlanRequest,dailySummaryRequest,dailyArtifactRequest,localISO,readMorningBrief,morningBriefWantsReplies,morningBriefWantsOvernight,dailyPlanned,MORNING_BRIEF_DEFAULT,MORNING_BRIEF_LIMIT,MORNING_BRIEF_REPLIES}=await import('../core/artifacts/index.ts');
  const at=(d:number,h:number,m=0)=>new Date(2026,9,d,h,m);
  let state=readDailyArtifactsState({used:{'2026-10-06':'x',bad:1},plan:['2026-10-05',3],summary:null});
  assert.deepEqual(state,{used:{},plan:['2026-10-05'],summary:[]},'Stored state is read defensively');
- // The day whose brief waits for the person to see the Journal open on it survives a restart.
- assert.equal(readDailyArtifactsState(journalWaiting(state,'2026-10-06')).journal,'2026-10-06');
- assert.equal(readDailyArtifactsState({...state,journal:'soon'}).journal,undefined);
- assert.deepEqual(journalSeen(journalWaiting(state,'2026-10-06')),state,'Seen: nothing waits');
+ // A kept brief no longer waits to open the Journal (it arrives as an Attention item): an older field is dropped.
+ assert.equal('journal' in readDailyArtifactsState({...state,journal:'2026-10-06'}),false);
+ assert.deepEqual(dailyPlanned(state,at(6,9)),[],'Nothing planned for an install nobody used');
  assert.equal(dailyArtifactDue(state,at(6,9)),null,'An install nobody used makes nothing');
  state=markDailyMade(markDailyUse(state,at(5,22)),'summary','2026-10-05');
  assert.equal(dailyArtifactDue(state,at(6,5,59)),null,'No brief before 6 AM');
@@ -129,6 +128,15 @@ assert.deepEqual(madeArtifacts({}),[]);
  // Only a morning gets a brief: Dev 3023 made a "Good morning" plan at 6:38 PM (owner Order 2026-10-07).
  assert.deepEqual(dailyArtifactDue(markDailyUse(readDailyArtifactsState(null),at(6,11,59)),at(6,11,59)),{kind:'plan',day:'2026-10-06'},'Opened before noon: the brief');
  assert.equal(dailyArtifactDue(markDailyUse(readDailyArtifactsState(null),at(6,13)),at(6,13)),null,'A brief not made by noon is skipped for the day');
+ // The Task panel's Planned timeline: the next brief and today's summary, never one due now.
+ {
+  const used=markDailyUse(readDailyArtifactsState(null),at(6,9));
+  assert.deepEqual(dailyPlanned(used,at(6,10)),[{kind:'summary',at:+at(6,21)},{kind:'plan',at:+at(7,6)}],'Used today: the summary at 9 PM, then tomorrow’s brief at 6 AM');
+  assert.deepEqual(dailyPlanned(markDailyUse(readDailyArtifactsState(null),at(5,20)),at(6,5)),[{kind:'plan',at:+at(6,6)}],'Before 6 AM: today’s brief; no summary of a day not yet used');
+  assert.deepEqual(dailyPlanned(markDailyMade(used,'summary','2026-10-06'),at(6,22)),[{kind:'plan',at:+at(7,6)}],'Summary made: only the brief');
+  assert.deepEqual(dailyPlanned(used,at(6,21,30)).map(p=>p.kind),['plan'],'A summary due now is not planned');
+  assert.deepEqual(dailyPlanned(markDailyUse(readDailyArtifactsState(null),at(1,9)),at(4,10)),[],'Not used for days: no brief planned');
+ }
  for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  assert.equal(Object.keys(closed.used).length,3,'Only the last few days of use are kept');
  assert.match(localISO(at(6,9,5)),/^2026-10-06T09:05:00[+-]\d{2}:\d{2}$/);
@@ -172,7 +180,10 @@ assert.deepEqual(madeArtifacts({}),[]);
  assert.match(poll,/due\.kind==='summary'&&\(document\.hidden\|\|insideApplet\(\)\|\|inPageLayer\(\)\)\)return;/,'The summary waits for the World; the brief is made with the window hidden or an Applet open');
  assert.match(await readFile(new URL('../ui/index.ts',import.meta.url),'utf8'),/firstRun:\(\)=>!sample&&onboardingUnfinished\(current\?\.onboarding\)/,'The World learns whether onboarding is over');
  assert.match(poll,/brief=await native\?\.morningBrief\?\.\(\)[\s\S]*daily=markDailyMade\(daily,due\.kind,due\.day\);saveDaily\(\);[\s\S]*dailyArtifactRequest\(due\.kind,due\.day,brief\)[\s\S]*voice\?\.background\?\.\(request\.text/,'The person\'s brief, then marked made before asking, so a failed turn never repeats all day');
- assert.match(poll,/voice\?\.background\?\.\(request\.text,\{displayText:request\.displayText\}\)\)[\s\S]*\/busy\/i[\s\S]*daily=before;saveDaily\(\);[\s\S]*\.finally\(\(\)=>\{work\.end\(ok\);dailyAsking=false;\}\)/,'Made quietly in a background session beside the conversation; asked again only while other background work runs (owner Orders 2026-10-07)');
+ assert.match(poll,/voice\?\.background\?\.\(request\.text,\{displayText:request\.displayText\}\)\)[\s\S]*\/busy\/i[\s\S]*daily=before;saveDaily\(\);[\s\S]*\.finally\(\(\)=>\{work\.end\(ok\);dailyAsking=false;dailyAsked=null;\}\)/,'Made quietly in a background session beside the conversation; asked again only while other background work runs (owner Orders 2026-10-07)');
+ // Kept as a Journal card the host turns into an Attention item (docs/ATTENTION-CENTER.md#scheduled-results); the Journal never opens by itself.
+ assert.match(poll,/native\?\.artifacts\?\.\(\{operation:'save',artifact,scheduled:due\.kind,day:due\.day\}\)/,'The brief is saved with its kind and day, for its Attention item');
+ assert.ok(!/journal-open/.test(poll)&&!world.includes('openWaitingJournal'),'Nothing opens the Journal by itself');
  const {journalPages:pagesOf}=await import('../core/artifacts/index.ts'),t=at(7,6,5).getTime()/1000;
  assert.deepEqual(pagesOf([{id:'r1',kind:'reply',title:'Re: Q4',createdAt:t+60,updatedAt:t+60},{id:'p',kind:'answer',title:'Plan · Wed, Oct 7',size:'large',createdAt:t,updatedAt:t}],at(7,9))[0].entries.map(e=>[e.artifact.id,e.size]),[['p','large'],['r1','medium']],'A reply draft is a medium card after the brief');
  console.log('PASS daily artifacts: the morning brief at 6 AM (or on waking, before noon) for someone who used Worldlet lately, holding the parts they asked for, reply drafts by default and only when mail is asked for; the summary from 9 PM or caught up the next day, never on a day nobody used');

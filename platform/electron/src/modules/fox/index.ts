@@ -27,7 +27,7 @@ import {createHarnessApprovalRules} from './harness-approvals.ts';
 import {createHarnessConnections} from './harness-connections.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {TASK_PANEL_KINDS,taskPanelScheduleRuns} from '../../../../../core/tasks/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
@@ -126,12 +126,19 @@ export function installFox(host:Host){
   harnessJobs.start();
  }
  function stopRoutines(){routinesRunning=false;routines?.stop();harnessJobs.stop();}
- /** Each routine run joins the world log; one missed while the computer slept says it ran late. */
+ /** Each routine run joins the world log; one missed while the computer slept says it ran late. Its result arrives as
+  * an Attention item, and on the phone while fresh, by the rule Harness jobs follow (core `routineScheduleResult`). */
  function routineResult(value:Row){
   const job=value?.job;
   if(value?.ran===true&&typeof job?.id==='string'){
    const at=Date.now()/1000;
    store.recordHistory({id:`routine:${job.id}:${at}`,kind:'routine.run',at,actor:'fox',status:job.last_status==='ok'?'complete':'failed',name:typeof job.name==='string'?job.name.slice(0,80):'',late:value.late===true,...typeof value.scheduledAt==='string'?{scheduledAt:value.scheduledAt}:{}});
+   const result=store.writable&&!store.sampleEnabled()?routineScheduleResult(value,at*1000,Date.now()):null;
+   if(result)try{
+    const id=store.ledger().upsert([result.item as Row],'worldlet-routine')[0]??'';
+    store.worldChanged();
+    if(result.push&&id)void host.optional<PhoneService>(PHONE)?.notify({...result.push,open:{item:id},act:{attention:id}}).catch(()=>{});
+   }catch(error){host.diagnostics.record(error,'routines');}
   }
   page.event('worldlet:routines',value);
  }

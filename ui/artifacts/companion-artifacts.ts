@@ -54,7 +54,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   catch(error){briefNote.textContent=error?.message||'Could not save it. Try again.';}
   finally{briefSave.disabled=false;}
  };
- let artifacts:Entry[]=[],pages:JournalPage<Entry>[]=[],day='',active=false,version=0;
+ let artifacts:Entry[]=[],pages:JournalPage<Entry>[]=[],day='',active=false,version=0,focus='';
  older.onclick=()=>{const i=pages.findIndex(p=>p.day===day);if(i<pages.length-1){day=pages[i+1].day;draw();}};
  newer.onclick=()=>{const i=pages.findIndex(p=>p.day===day);if(i>0){day=pages[i-1].day;draw();}};
  // A card shows its Markdown as the card does, without links or pictures: opening it is how to use them.
@@ -163,6 +163,9 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   section.dataset.leaves=one?'1':'2';
   leftPage.replaceChildren(left);rightPage.replaceChildren(right);leftPage.scrollTop=rightPage.scrollTop=0;
   for(const button of section.querySelectorAll('.companion-artifact-open'))fitting.get(button)?.();
+  // The card the book was opened for (an Attention item's "In your Journal · Open"): in view and marked a moment.
+  const wanted=focus?[...section.querySelectorAll<HTMLElement>('.companion-artifact')].find(li=>li.dataset.artifactId===focus):null;
+  if(wanted){focus='';wanted.dataset.focused='true';wanted.scrollIntoView({block:'nearest'});setTimeout(()=>{delete wanted.dataset.focused;},2400);}
  }
  async function load(){
   const mine=++version;
@@ -181,5 +184,5 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  }
  for(const name of ['worldlet:artifacts','worldlet:widgets','worldlet:email-drafted'])window.addEventListener(name,()=>{if(active)void load();});
  draw();
- return {element:section,start(open=''){active=true;day=open;void load();},stop(){active=false;}};
+ return {element:section,start(open='',card=''){active=true;day=open;focus=card;void load();},stop(){active=false;focus='';}};
 }
