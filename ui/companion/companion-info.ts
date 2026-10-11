@@ -48,7 +48,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const artifacts=createCompanionArtifacts({call,open:id=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:artifact-open',{detail:{id}}));},openMade:(made,keep)=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:artifact-open',{detail:{made,keep}}));},
   // A reply card that needs send access or a delivery check goes on in Fox's email review.
   review:detail=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:email-review',{detail}));}});
- // The Journal is a book of its own over the World (owner request 2026-10-08), opened by today's date in the World's top-right corner.
+ // The Journal is a book of its own over the World (owner request 2026-10-08), opened by today's date in the World's top-left corner.
  const journal=mountJournalBook({root,pages:artifacts.element,start:(day,card)=>artifacts.start(day,card),stop:()=>artifacts.stop(),returnFocus:()=>document.querySelector<HTMLElement>('.world-today-open')});
  async function openJournal(day='',card=''){
   const trigger=eventTrigger();
@@ -134,7 +134,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
    for(const agent of knowledge.brought){
     const parts=[[agent.conversations,'message'],[agent.notes,'daily note']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
     if(!parts.length)continue;
-    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and daily notes when you ask.')));
+    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and daily notes when you ask.'+(agent.source==='openclaw'&&Number(agent.notes)>0?' Each day’s note is also that day’s page in your Journal.':''))));
    }
    // Fox's offers to save a task it keeps repeating, answered right here; the skills themselves are in Settings › Agent.
    if(skills&&!snapshot?.sampleEnabled){

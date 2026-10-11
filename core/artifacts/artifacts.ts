@@ -318,6 +318,7 @@ export function journalOrigin(artifact:{kind:string;title:string;category?:strin
  if(artifact.kind==='attention')return artifact.category||'Attention';
  if(artifact.kind==='made')return 'Made by Fox';
  if(artifact.kind==='reply')return 'Reply';
+ if(artifact.kind==='answer'&&DAILY_NOTE_TITLE.test(artifact.title))return 'Daily note';
  const daily=DAILY_TITLE.exec(artifact.title);
  return daily?daily[1]:/ · Summary$/.test(artifact.title)?'Meeting':'Conversation';
 }
@@ -339,6 +340,31 @@ export function journalDays<T extends {id:string;kind:string;title:string;size?:
   const [y,m,d]=day.split('-').map(Number),date=new Date(y,m-1,d);
   const label=day===today?'Today':day===yesterday?'Yesterday':date.toLocaleDateString(locale||'en-US',{weekday:'short',month:'short',day:'numeric',year:y===now.getFullYear()?undefined:'numeric'});
   return {day,label,entries:entries.sort((a,b)=>rank(a.artifact)-rank(b.artifact)||a.at-b.at||a.artifact.id.localeCompare(b.artifact.id))};
+ });
+}
+
+/** An Agent's daily notes (OpenClaw's `memory/YYYY-MM-DD.md`) in the Journal, one page per day: what was done that day
+ * (owner request 2026-10-11: "every day's notes go into our Journal"). Only notes named by their day count; the newest
+ * days come first, up to `DAILY_NOTE_DAYS`. The host gives each day its stable ID (bringing the Agent again replaces the
+ * page) and its time, noon of that day; old days rank last in the World's limit, so they never push out newer cards. */
+export const DAILY_NOTE_DAYS=120;
+const DAILY_NOTE_TITLE=/^Daily note · /;
+export function dailyNoteArtifacts(agent:string,notes:{date:string;text:string}[],{idFor,at}:{idFor:(date:string)=>string;at:(date:string)=>number}):Artifact[] {
+ const days=new Map<string,string[]>();
+ for(const note of notes){
+  const text=typeof note.text==='string'?note.text.trim():'';
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(note.date)||!text)continue;
+  if(!days.has(note.date))days.set(note.date,[]);
+  days.get(note.date)!.push(text);
+ }
+ return [...days].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,DAILY_NOTE_DAYS).map(([date,texts])=>{
+  const body=texts.join('\n\n').slice(0,ARTIFACT_LIMITS.body),time=at(date);
+  // The card's line: the first line that says something, not the heading with the date.
+  const line=body.split('\n').map(l=>l.replace(/^[#>*\-\s]+/,'').trim()).find(l=>l&&!l.includes(date))||'';
+  const artifact:Artifact={id:idFor(date),kind:'answer',title:clip('Daily note · '+agent,ARTIFACT_LIMITS.title),body,chart:null,size:'medium',
+   origin:{type:'conversation',place:clip(agent+' daily notes',ARTIFACT_LIMITS.place)},actions:[],createdAt:time,updatedAt:time};
+  if(line)artifact.brief=clip(line,ARTIFACT_LIMITS.brief);
+  return artifact;
  });
 }
 

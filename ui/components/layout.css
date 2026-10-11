@@ -208,8 +208,8 @@
 .native-console .task-panel{--task-ink:#fff9e9;--task-muted:#d6dde6;--task-accent:var(--ui-hud-focus,#f6b445);position:absolute;inset:auto 0 0;height:0;z-index:24;pointer-events:none;color:var(--task-ink);font:500 var(--ui-text-label)/1.35 var(--ui-font-ui)}
 .native-console .task-panel[hidden],.native-console .task-group[hidden],.native-console .task-more[hidden]{display:none}
 .native-console .task-group{position:absolute;bottom:16px;display:flex;align-items:center;gap:8px}
-.native-console .task-group[data-group=now]{right:calc(50% + 106px);flex-direction:row-reverse}
-.native-console .task-group[data-group=routines]{left:calc(50% + 146px)}
+.native-console .task-group[data-group=now]{right:calc(50% + 170px);flex-direction:row-reverse}
+.native-console .task-group[data-group=routines]{left:calc(50% + 212px)}
 .native-console .task-group-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .native-console .task-cards{display:flex;gap:8px}
 .native-console .task-group[data-group=now] .task-cards{flex-direction:row-reverse}
@@ -262,13 +262,14 @@
 @keyframes task-cursor{50%{opacity:0}}
 @keyframes task-fox-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @media(prefers-reduced-motion:reduce){.native-console :is(.task-card-icon,.task-card-bar i,.task-when,.task-terminal-fox,.task-terminal-cursor),.native-console :is(.task-card-icon,.task-when)::after,.native-console .task-when::before{animation:none!important}}
-/* Out of the way beside an open Applet or reader, while the person talks with Fox, and in a short window. */
-.native-console:is([data-detail-open=true],[data-depth=object],[data-fox-lane=true],.companion-talking,.is-typing) .task-panel{display:none}
+/* Clear of the message bar even while it is open for typing; out of the way beside an open Applet or reader and in a
+   short window. */
+.native-console:is([data-detail-open=true],[data-depth=object],[data-fox-lane=true]) .task-panel{display:none}
 @media(max-height:560px){.native-console .task-panel{display:none}}
 /* Narrow: only each side's count beside the message bar, which opens the whole list. */
-@media(max-width:819px){
- .native-console .task-group[data-group=now]{right:calc(50% + 92px)}
- .native-console .task-group[data-group=routines]{left:calc(50% + 140px)}
+@media(max-width:859px){
+ .native-console .task-group[data-group=now]{right:calc(50% + 160px)}
+ .native-console .task-group[data-group=routines]{left:calc(50% + 212px)}
 }
 /* The first run belongs to the person and the tour: only Routines show. */
 .notion-world:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-step],[data-tour-coda]) .task-panel .task-group[data-group=now]{display:none}

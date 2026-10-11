@@ -2,8 +2,8 @@ import {randomUUID} from 'node:crypto';
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {harnessReadOnlyNote,readJobChange,readSkillChange,skillLastRuns} from '../../../../../core/agent/index.ts';
-import type {HarnessJobChange,HarnessJobRun,HarnessSkillChange} from '../../../../../contracts/harness-services.ts';
+import {harnessReadOnlyNote,readJobChange,readJobCreate,readSkillChange,skillLastRuns} from '../../../../../core/agent/index.ts';
+import type {HarnessJobChange,HarnessJobCreate,HarnessJobRun,HarnessSkillChange} from '../../../../../contracts/harness-services.ts';
 
 // Settings › Agent › Skills and Routines (owner plan 2026-10-11, PR 2; “做”): each Agent on this computer
 // that declares `skills` or `schedule`, Fox's or not, with what it keeps (each job's plain time, where its results go
@@ -40,7 +40,7 @@ export function createHarnessControls(host:Host){
  const agent=()=>host.optional<AgentService>(AGENT);
  const schedules=()=>agent()?.harnessSchedules?.()??[];
  const skillSets=()=>agent()?.harnessSkillSets?.()??[];
- const jobs=confirmations<HarnessJobChange>(),skills=confirmations<HarnessSkillChange>();
+ const jobs=confirmations<HarnessJobChange|{create:HarnessJobCreate}>(),skills=confirmations<HarnessSkillChange>();
  /** The Agent Fox talks through, so the page can say when it keeps none of these. */
  const inUse=()=>{const harness=agent()?.harness;return harness?{harness:harness.id,title:harness.title}:null;};
  const gone=()=>new WorldletError('This Agent is no longer on this computer.');
@@ -60,7 +60,7 @@ export function createHarnessControls(host:Host){
       ...run?{last:{at:run.at,status:run.status}}:{}};});
     }catch(e){error=(e as Error)?.message||`${title} did not list its scheduled tasks.`;}
     // Results come to the World (Attention, the phone) for the Agent Fox talks through (fox/harness-jobs.ts).
-    return {harness,title,jobs:listed,running,...schedule.startScheduler?{canStart:true}:{},changes:!!schedule.change,inUse:current===harness,...error?{error}:{}};
+    return {harness,title,jobs:listed,running,...schedule.startScheduler?{canStart:true}:{},changes:!!schedule.change,creates:!!schedule.create,inUse:current===harness,...error?{error}:{}};
    })):[]};
   },
   /** Starts an Agent's stopped scheduler with its own command, on the person's own Start. */
@@ -75,13 +75,20 @@ export function createHarnessControls(host:Host){
    if(!own())throw new WorldletError('Change scheduled tasks in your own world.');
    const found=schedules().find(item=>item.harness===harness);if(!found)throw gone();
    if(!found.schedule.preview||!found.schedule.change)throw new WorldletError(`${found.title}’s scheduled tasks can be changed only in ${found.title} itself.`);
-   const change=read({job:request.job,action:request.change},readJobChange),command=await found.schedule.preview(change);
+   // A new one (`change: create`) or a change to one job, each previewed as the Agent's own command.
+   if(request.change==='create'){
+    if(!found.schedule.previewCreate||!found.schedule.create)throw new WorldletError(`Set one up in ${found.title} itself.`);
+    const job=read(request.job,readJobCreate),command=await found.schedule.previewCreate(job);
+    return {command,confirm:jobs.add(found.harness,{create:job},command)};
+   }
+   const change=read({job:request.job,action:request.change,schedule:request.schedule},readJobChange),command=await found.schedule.preview(change);
    return {command,confirm:jobs.add(found.harness,change,command)};
   },
   async change(confirm:unknown):Promise<Row> {
    if(!own())throw new WorldletError('Change scheduled tasks in your own world.');
    const item=jobs.take(confirm),found=schedules().find(entry=>entry.harness===item.harness);if(!found)throw gone();
-   await found.schedule.change!(item.change);
+   if('create' in item.change)await found.schedule.create!(item.change.create);
+   else await found.schedule.change!(item.change);
    return {ok:true,command:item.command};
   },
  };

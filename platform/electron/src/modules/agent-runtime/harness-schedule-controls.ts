@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {commandLine,commandReason,harnessService,hermesJobCommand,hermesScheduleRun,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawScheduleRun,type LocalHarnessId} from '../../../../../core/agent/index.ts';
-import type {HarnessJobChange,HarnessJobRun,HarnessSchedule} from '../../../../../contracts/harness-services.ts';
+import {commandLine,commandReason,harnessService,hermesJobCommand,hermesJobCreateCommand,hermesScheduleRun,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawScheduleRun,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import type {HarnessJobChange,HarnessJobCreate,HarnessJobRun,HarnessSchedule} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
 import {directories,inside,json,readFile} from './agent-files.ts';
 import {runHarnessCommand} from './harness-approvals.ts';
@@ -93,6 +93,20 @@ export function harnessScheduleControls(install:LocalHarnessInstall,environment:
    for(const wait of [...settle,3000,5000]){if(await read.running().catch(()=>null)!==false)return;await new Promise(resolve=>setTimeout(resolve,wait));}
   }}:{},
   async preview(change){await plan(change);return commandLine(hermes?'hermes':'openclaw',args(change));},
+  async previewCreate(job:HarnessJobCreate){return commandLine(hermes?'hermes':'openclaw',hermes?hermesJobCreateCommand(job):openClawJobCreateCommand(job));},
+  async create(job:HarnessJobCreate){
+   const base=root();
+   if(hermes&&!base)throw new WorldletError(`${install.title}’s home was not found on this computer.`);
+   const before=new Set((await read.jobs()).map(item=>item.id));
+   const result=await run(install,environment,hermes?hermesJobCreateCommand(job):openClawJobCreateCommand(job),{env:hermes?{HERMES_HOME:base!}:{},timeout:90_000});
+   const reason=()=>commandReason(result.stderr+'\n'+result.stdout)||(result.code===null?'it did not answer in time':'it stopped with code '+result.code);
+   if(result.code!==0)throw new WorldletError(`${install.title} did not set it up: ${reason()}`);
+   // Read back: a job it did not have before, with this name.
+   for(let attempt=0;!(await read.jobs()).some(item=>!before.has(item.id)&&item.name===job.name);attempt++){
+    if(attempt>=settle.length)throw new WorldletError(`${install.title} did not set it up: ${reason()}`);
+    await new Promise(resolve=>setTimeout(resolve,settle[attempt]));
+   }
+  },
   async change(change){
    await plan(change);
    const base=root();

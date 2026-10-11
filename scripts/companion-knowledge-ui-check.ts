@@ -37,7 +37,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await groups.first().locator('li').allTextContents(),['Prefers Chinese.','Runs on Saturday mornings.']);
  await block.getByText('Nova’s own conversation: 42 messages',{exact:true}).waitFor();
  await groups.nth(2).locator('summary').click();
- await groups.nth(2).getByText('Nova can look through these conversations and daily notes when you ask.',{exact:true}).waitFor();
+ await groups.nth(2).getByText('Nova can look through these conversations and daily notes when you ask. Each day’s note is also that day’s page in your Journal.',{exact:true}).waitFor();
  assert.equal(await block.getByText(/Morning brief|daily-brief|seed-swap/).count(),0,'the Agent’s scheduled tasks and skills are not on Fox’s page');
  await page.screenshot({path:'/tmp/worldlet-companion-knowledge.png'});
  // A re-render (audio, layout) keeps which groups are open.
