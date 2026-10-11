@@ -60,7 +60,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
   // A reply card that needs send access or a delivery check goes on in Fox's email review.
   review:detail=>{journal.close();window.dispatchEvent(new CustomEvent('worldlet:email-review',{detail}));}});
  // The Journal is a book of its own over the World (owner request 2026-10-08), opened by today's date in the World's top-left corner.
- const journal=mountJournalBook({root,pages:artifacts.element,start:day=>artifacts.start(day),stop:()=>artifacts.stop(),returnFocus:()=>document.querySelector<HTMLElement>('.world-today-open')});
+ const journal=mountJournalBook({root,pages:artifacts.element,start:(day,card)=>artifacts.start(day,card),stop:()=>artifacts.stop(),returnFocus:()=>document.querySelector<HTMLElement>('.world-today-open')});
  async function openJournal(day=''){
   if(desktop()){try{await requireWorldSurface(call);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';return;}}
   if(panel.open)dismiss();journal.open(day);

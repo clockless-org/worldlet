@@ -1,8 +1,9 @@
 /* The Journal (journal-book.ts) and the smaller cards it keeps. Loaded in the states layer. */
-/* The Journal is a book (owner requests 2026-10-07 and 2026-10-08): every card Fox showed, a page a day, open over the
-   World in the country materials of the HUD and Mail stationery (resources/styles/builtin/STYLE.md): a timber-leather
-   cover with gold stitching and brass corners, ivory leaves with a faint dot grid and a spine shadow, a moss ribbon, day
-   tabs on the fore-edge and a pressed sage sprig. Physical only at the edges; the cards stay the artifact card. */
+/* The Journal is a book (owner requests 2026-10-07 and 2026-10-08) open over the World in the country materials of the
+   HUD and Mail stationery (resources/styles/builtin/STYLE.md): a timber-leather cover with gold stitching and brass
+   corners, an ivory leaf with a faint dot grid, a moss ribbon and a pressed sage sprig. Inside, one timeline of
+   everything Fox produced, day by day (owner decision 2026-10-11). Physical only at the edges; the cards stay the
+   artifact card. */
 .native-console .journal-book{--journal-row:118px;--journal-paper:#f7f0df;--journal-dot:#ad986d3d;--journal-ink:#34483f;--journal-moss:#315f48;
  position:fixed;inset:0;margin:auto;z-index:91;box-sizing:border-box;width:min(1120px,calc(100vw - 72px));height:min(700px,calc(100dvh - 48px));padding:18px 18px 24px;border:0;border-radius:18px;color:var(--journal-ink);overflow:visible;
  background:repeating-linear-gradient(115deg,#ffffff08 0 2px,#00000008 2px 5px),radial-gradient(130% 100% at 30% 15%,#a77a52,#87603f 55%,#6f4d32);
@@ -13,47 +14,45 @@
 .native-console .journal-book::after{content:'';position:absolute;inset:-3px;pointer-events:none;border-radius:20px;
  background:radial-gradient(circle at 0 0,#e4c37e 0 8px,#b48a45 13px,#0000 14px),radial-gradient(circle at 100% 0,#e4c37e 0 8px,#b48a45 13px,#0000 14px),radial-gradient(circle at 0 100%,#e4c37e 0 8px,#b48a45 13px,#0000 14px),radial-gradient(circle at 100% 100%,#e4c37e 0 8px,#b48a45 13px,#0000 14px)}
 .journal-book .companion-journal{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;min-height:0}
-/* The page block: two leaves meeting at the spine, with the edges of the other pages showing underneath. */
-.journal-book .companion-journal-spread{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;border-radius:6px;
- box-shadow:0 1px 0 #e7dcc4,0 3px 0 #f2e9d6,0 4px 0 #ddd0b2,0 6px 0 #efe5cf,0 7px 0 #d6c8a8,0 9px 8px -4px #2a1f1266}
-.journal-book .companion-journal-leaf{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;padding:22px 26px 40px;
- background-color:var(--journal-paper);background-image:radial-gradient(var(--journal-dot) 1px,#0000 1.3px);background-size:18px 18px;background-position:9px 9px}
-.journal-book .companion-journal-leaf-left{border-radius:6px 0 0 6px;box-shadow:inset -30px 0 32px -26px #6b4a2a5c,inset 1px 0 0 #fffaf0}
-.journal-book .companion-journal-leaf-right{border-radius:0 6px 6px 0;box-shadow:inset 30px 0 32px -26px #6b4a2a5c}
-.journal-book .companion-journal[data-leaves='1'] .companion-journal-spread{grid-template-columns:1fr}
-.journal-book .companion-journal[data-leaves='1'] .companion-journal-leaf-left{border-radius:6px;box-shadow:inset 1px 0 0 #fffaf0}
-.journal-book .companion-journal[data-leaves='1'] .companion-journal-leaf-right>.companion-journal-page{display:none}
-.journal-book .companion-journal[data-leaves='1'] .companion-journal-leaf-right{position:absolute;inset:auto 0 0 auto;width:80px;height:44px;padding:0;background:none;box-shadow:none}
-/* The day written at the top of the left leaf: a large numeral, then the date in words. */
-.journal-book .companion-journal-head{display:flex;align-items:flex-end;gap:12px;margin:0 0 14px;padding-bottom:8px;border-bottom:1.5px solid #34483fb3}
-.journal-book .companion-journal-numeral{font:600 44px/0.9 var(--ui-font-ui);letter-spacing:-.02em;color:var(--journal-moss);font-variant-numeric:tabular-nums}
-.journal-book .companion-journal-dated{flex:1;min-width:0}
-.journal-book .companion-journal-head h3{margin:0;font:600 13px/1.3 var(--ui-font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--journal-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* One leaf, with the edges of the other pages showing underneath. */
+.journal-book .companion-journal-leaf{position:relative;flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;padding:18px 26px 0;border-radius:6px;
+ background-color:var(--journal-paper);background-image:radial-gradient(var(--journal-dot) 1px,#0000 1.3px);background-size:18px 18px;background-position:9px 9px;
+ box-shadow:inset 1px 0 0 #fffaf0,0 1px 0 #e7dcc4,0 3px 0 #f2e9d6,0 4px 0 #ddd0b2,0 6px 0 #efe5cf,0 7px 0 #d6c8a8,0 9px 8px -4px #2a1f1266}
+.journal-book .companion-journal-head{display:flex;align-items:center;gap:12px;margin:0 0 6px;padding-bottom:8px;border-bottom:1.5px solid #34483fb3}
+.journal-book .companion-journal-head h3{flex:1;margin:0;font:600 13px/1.3 var(--ui-font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--journal-ink)}
 .journal-book .companion-journal-turn{display:flex;gap:6px}
-.journal-book .companion-journal-page{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px 4px 6px 2px}
-.journal-book .companion-journal-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:var(--journal-row);grid-auto-flow:row dense;gap:12px}
+/* The timeline: days newest first, each with its date in a column on the left that stays in view while its cards scroll by. */
+.journal-book .companion-journal-timeline{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:0 4px 24px 2px}
+.journal-book .companion-journal-day{display:grid;grid-template-columns:96px minmax(0,1fr);gap:0 14px;padding:14px 0 6px;border-bottom:1px dashed #b4a17d59}
+.journal-book .companion-journal-day:last-of-type{border-bottom:0}
+.journal-book .companion-journal-date{position:sticky;top:0;align-self:start;display:flex;flex-direction:column;gap:2px;padding:2px 0 6px;background:linear-gradient(var(--journal-paper) 80%,#0000)}
+.journal-book .companion-journal-numeral{font:600 40px/0.95 var(--ui-font-ui);letter-spacing:-.02em;color:var(--journal-moss);font-variant-numeric:tabular-nums}
+.journal-book .companion-journal-label{font:600 12px/1.3 var(--ui-font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--journal-ink)}
+.journal-book .companion-journal-weekday{font-size:11.5px;line-height:1.3;color:#6e7364}
+.journal-book .companion-journal-grid{list-style:none;margin:0;padding:0 0 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:var(--journal-row);gap:12px}
+.journal-book .companion-journal-more{height:1px}
 /* Cards lie on the paper like clippings: square-cut, a hair of shadow. */
 .journal-book .companion-artifact{border-radius:3px;border-color:#b4a17d40;box-shadow:0 1px 2px #6b4a2a24,0 6px 12px -8px #6b4a2a52}
+/* The card the Journal was opened for: a moss ring for a moment. */
+.journal-book .companion-artifact[data-focused=true]{outline:3px solid #6f7f5c;outline-offset:-3px}
 .journal-book .companion-journal>.companion-info-note{margin:0}
 .journal-book .companion-journal-leaf>.companion-info-note{margin:8px 0;font-size:14px;color:#6e7364}
-/* ‹ › turn the page from its bottom corners. */
-.journal-book .companion-journal-arrow{position:absolute;bottom:8px;width:32px;height:32px;border:0;border-radius:16px;background:#38564414;color:var(--journal-moss);font-size:20px;line-height:1;cursor:pointer}
-.journal-book .companion-journal-older{left:18px}.journal-book .companion-journal-newer{right:18px}
-.journal-book .companion-journal-arrow:hover:not(:disabled){background:#38564426}
-.journal-book .companion-journal-arrow:disabled{opacity:.3;cursor:default}
-/* Day tabs stand out of the book's fore-edge, the open day's in the page's own paper. */
-.journal-book .companion-journal-days{position:absolute;z-index:0;top:170px;left:100%;margin-left:16px;display:flex;flex-direction:column;gap:5px}
-.journal-book .companion-journal-day{display:block;min-width:58px;min-height:0;height:auto;padding:7px 10px 7px 8px;border:0;border-radius:0 7px 7px 0;background:#e9dcbf;color:#5d5a46;font:600 11.5px/1 var(--ui-font-ui);text-align:left;white-space:nowrap;cursor:pointer;box-shadow:1px 1px 0 #3b2f1d2e,inset 3px 0 4px -2px #6b4a2a40}
-.journal-book .companion-journal-day:hover{background:#efe4cb}
-.journal-book .companion-journal-day[aria-pressed=true]{background:var(--journal-paper);color:var(--journal-moss);min-width:66px;box-shadow:1px 1px 0 #3b2f1d2e}
-.journal-book .companion-journal-day:focus-visible,.journal-book .companion-journal-arrow:focus-visible,.journal-book-close:focus-visible{outline:2px solid var(--ui-focus,#edc47d);outline-offset:2px}
+.journal-book-close:focus-visible{outline:2px solid var(--ui-focus,#edc47d);outline-offset:2px}
+/* A narrow window: two columns of cards, the date above them. */
+@container journal (max-width:700px){
+ .journal-book .companion-journal-day{grid-template-columns:minmax(0,1fr)}
+ .journal-book .companion-journal-date{flex-direction:row;align-items:baseline;gap:8px;z-index:1;background:var(--journal-paper)}
+ .journal-book .companion-journal-numeral{font-size:28px}
+ .journal-book .companion-journal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.journal-book .companion-journal-leaf{container:journal/inline-size}
 /* A moss ribbon hangs out of the book's foot beside the spine; a sage sprig is pressed in the right leaf's corner. */
 .journal-book-ribbon{position:absolute;z-index:0;bottom:-58px;left:calc(50% + 34px);width:14px;height:74px;pointer-events:none;background:linear-gradient(90deg,#24493a,#3a6b53 50%,#24493a);clip-path:polygon(0 0,100% 0,100% 100%,50% 88%,0 100%);box-shadow:0 2px 3px #0003}
 .journal-book-sprig-holder{position:absolute;z-index:2;right:68px;bottom:27px;width:38px;height:38px;pointer-events:none;opacity:.85;transform:rotate(-6deg)}
 .journal-book-sprig{width:100%;height:100%}
 .native-console .journal-book .journal-book-close{position:absolute;z-index:3;top:-14px;right:-14px;width:36px;height:36px;border:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f0d697,#c49a52 60%,#99733a);color:#3b2a14;font:600 20px/1 var(--ui-font-ui);cursor:pointer;box-shadow:0 2px 4px #2a1f1266,inset 0 1px 0 #fff3cf}
 .native-console .journal-book .journal-book-close:hover{filter:brightness(1.06)}
-@media(max-width:800px){.native-console .journal-book{width:calc(100vw - 88px);margin-left:16px;padding:12px 12px 18px}.journal-book .companion-journal-days{top:28px}}
+@media(max-width:800px){.native-console .journal-book{width:calc(100vw - 32px);padding:12px 12px 18px}}
 @media(forced-colors:active){.journal-book-ribbon,.journal-book-sprig-holder,.native-console .journal-book::after{display:none}}
 .companion-artifact{position:relative;min-width:0;background:#fffdf6;border:1px solid #b4a17d38;border-radius:16px 18px 17px 19px;box-shadow:0 3px 0 #b4a17d30;overflow:hidden;--attention-accent:#315f48}
 .companion-artifact[data-size=small]{grid-column:span 1}

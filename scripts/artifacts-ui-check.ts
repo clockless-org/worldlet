@@ -85,51 +85,50 @@ await withBrowser(fileAccess,async browser=>{
 
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Artifacts'}})));
  const book=page.locator('#journalBook'),tab=book.locator('[data-section=Journal]');
- // The Journal: one page a day, today's first, cards in time order with the plan first, each at its size.
+ // The Journal: one timeline of days, today first, cards in time order with the plan first, each at its size.
  await tab.getByText('Three CASA labs').waitFor();
  assert.ok(await book.isVisible()&&!await panel.isVisible(),'An old link to Artifacts opens the Journal, a book of its own');
  assert.equal(await panel.getByRole('tab',{name:'Journal'}).count(),0,'Fox\'s panel has no Journal tab any more');
- assert.equal(await tab.locator('.companion-journal-day[aria-pressed=true]').textContent(),'Today');
- const titles=async()=>tab.locator('.companion-artifact-title').allTextContents();
- const today=await titles();
+ assert.deepEqual(await tab.locator('.companion-journal-day').evaluateAll(days=>days.map(d=>d.getAttribute('aria-label'))),['Today','Yesterday'],'Days stand newest first in one timeline');
+ const titles=async(label:string)=>tab.locator(`.companion-journal-day[aria-label="${label}"] .companion-artifact-title`).allTextContents();
+ const today=await titles('Today');
  assert.match(today[0],/^Plan · /,'The plan opens the day');
  assert.ok(today.includes('Three CASA labs')&&today.includes('Getty Center today'),'Today holds what was shown and made today '+JSON.stringify(today));
  assert.equal(await tab.locator('.companion-artifact',{hasText:'Three CASA labs'}).getAttribute('data-size'),'large','A card keeps its size on the page');
  assert.equal(await tab.locator('.companion-artifact',{hasText:'Getty'}).getAttribute('data-size'),'small','A page Fox made is small');
- assert.match(await tab.locator('.companion-artifact',{hasText:'Getty'}).locator('.companion-artifact-preview').first().textContent(),/^Applet until /);
+ assert.match(await tab.locator('.companion-artifact',{hasText:'Getty'}).locator('.companion-artifact-preview').first().textContent(),/^Open until /);
+ assert.equal(await tab.locator('.companion-artifact',{hasText:'Getty'}).locator('.companion-artifact-origin span').first().textContent(),'Made by Fox','A page Fox made is named like any other card, by where it came from');
  const box=async(t:string)=>(await tab.locator('.companion-artifact',{hasText:t}).first().boundingBox())!;
  const plan=await box('Plan · '),casa=await box('Three CASA labs'),getty=await box('Getty');
  assert.ok(Math.abs(plan.width-casa.width)<2&&Math.abs(plan.height-casa.height)<2&&casa.width>getty.width*1.8&&plan.height>getty.height*1.8,'Large is two by two, small one cell '+JSON.stringify({plan,casa,getty}));
  if(shots)await page.screenshot({path:shots+'/journal-today.png'});
- assert.ok(await tab.evaluate(e=>e.scrollHeight<=e.clientHeight+1),'The day fits the book; its pages scroll on their own');
+ assert.ok(await tab.evaluate(e=>e.scrollHeight<=e.clientHeight+1),'The Journal fits the book; its timeline scrolls on its own');
  // No card scrolls (owner Order 2026-10-09): each shows the fullest version its cell holds, marked More when shortened.
  const cardsFit=()=>tab.locator('.companion-artifact-open[data-fit]').evaluateAll(cards=>cards.map(c=>({fit:(c as HTMLElement).dataset.fit,overflow:getComputedStyle(c).overflowY,fits:c.scrollHeight<=c.clientHeight+1})));
  {const fits=await cardsFit();assert.ok(fits.length>=2&&fits.every(f=>f.overflow==='hidden'&&(f.fits||f.fit==='brief')),'Journal cards fit their cells without scrolling '+JSON.stringify(fits));}
- {const [left,right]=await Promise.all(['.companion-journal-leaf-left','.companion-journal-leaf-right'].map(sel=>tab.locator(sel).boundingBox()));assert.ok(left&&right&&Math.abs(left.width-right.width)<2&&right.x>=left.x+left.width-1,'The book lies open on two leaves');
-  assert.ok((await tab.locator('.companion-journal-leaf-left').innerText()).includes('Plan · '),'The plan is written on the left leaf');}
+ {const [todayDate,todayCards]=await Promise.all(['.companion-journal-date','.companion-journal-grid'].map(sel=>tab.locator('.companion-journal-day[aria-label=Today] '+sel).boundingBox()));
+  assert.ok(todayDate&&todayCards&&todayCards.x>=todayDate.x+todayDate.width,'The date stands left of its cards');
+  assert.equal(await tab.locator('.companion-journal-day[aria-label=Today] .companion-journal-weekday').textContent(),await page.evaluate(()=>new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})),'The day names its date');}
 
- // ‹ turns to yesterday: the older cards, and the summary caught up this morning, last.
- await tab.getByRole('button',{name:'Earlier day'}).click();
- assert.equal(await tab.locator('.companion-journal-day[aria-pressed=true]').textContent(),'Yesterday');
- const yesterday=await titles();
+ // Below today, yesterday: the older cards, and the summary caught up this morning, last.
+ const timeline=tab.locator('.companion-journal-timeline');
+ assert.equal(await timeline.evaluate(e=>e.scrollTop),0,'The Journal opens on today');
+ await tab.locator('.companion-journal-day[aria-label=Yesterday]').scrollIntoViewIfNeeded();
+ const yesterday=await titles('Yesterday');
  assert.match(yesterday.at(-1)!,/^Summary · /,'The day\'s summary closes its own day '+JSON.stringify(yesterday.slice(-3)));
  assert.ok(yesterday.includes('Dinner at Nopa')&&yesterday.includes('Dinner timer board'));
  assert.equal(await tab.locator('.companion-artifact',{hasText:'Dinner at Nopa'}).getAttribute('data-size'),'small','An Attention card is small');
  const medium=await box('Older plan 1'),small=await box('Dinner at Nopa');
  assert.equal(await tab.locator('.companion-artifact',{hasText:'Older plan 1'}).first().getAttribute('data-size'),'medium');
  assert.ok(medium.width>small.width*1.8&&Math.abs(medium.height-small.height)<2,'Medium is two by one '+JSON.stringify({medium,small}));
- assert.ok(await tab.locator('.companion-journal-leaf-right .companion-journal-page').evaluate(e=>e.scrollHeight>e.clientHeight),'A full day scrolls inside its right leaf');
+ assert.ok(await timeline.evaluate(e=>e.scrollHeight>e.clientHeight),'The timeline scrolls through the days');
  if(shots)await page.screenshot({path:shots+'/journal-yesterday.png'});
- assert.equal(await tab.getByRole('button',{name:'Earlier day'}).isDisabled(),true,'Nothing older');
- // A narrow window shows one leaf.
- await page.setViewportSize({width:720,height:820});await tab.locator('.companion-journal-day',{hasText:'Today'}).click();
- assert.equal(await tab.getAttribute('data-leaves'),'1','A narrow window shows the day on one leaf');
+ assert.equal(await tab.locator('.companion-journal-more').count(),0,'Nothing older');
+ // A narrow window puts the date above two columns.
+ await page.setViewportSize({width:720,height:820});
+ await page.waitForFunction(()=>getComputedStyle(document.querySelector('.companion-journal-grid')!).gridTemplateColumns.split(' ').length===2);
  if(shots)await page.screenshot({path:shots+'/journal-narrow.png'});
- await page.setViewportSize({width:1440,height:900});await tab.locator('.companion-journal-day',{hasText:'Yesterday'}).click();
- await tab.locator('.companion-journal-day',{hasText:'Today'}).click();
- assert.equal(await tab.locator('.companion-journal-day[aria-pressed=true]').textContent(),'Today','A day chip turns to its page');
- assert.equal(await tab.locator('h3').textContent(),await page.evaluate(()=>new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})),'The page names its date');
- await tab.getByRole('button',{name:'Earlier day'}).click();
+ await page.setViewportSize({width:1440,height:900});
 
  // A finished one comes back only when the person keeps it.
  await tab.getByRole('button',{name:'Keep and open',exact:true}).click();
@@ -140,7 +139,6 @@ await withBrowser(fileAccess,async browser=>{
  await page.locator('#notionContent[data-template=moment] .moment-applet').waitFor();
  await page.keyboard.press('Escape');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Journal'}})));
- await tab.getByRole('button',{name:'Earlier day'}).click();
  // An Attention card whose item has left the World opens as it was.
  await tab.locator('.companion-artifact',{hasText:'Dinner at Nopa'}).locator('.companion-artifact-open').click();
  await card.waitFor({state:'visible'});
@@ -162,7 +160,6 @@ await withBrowser(fileAccess,async browser=>{
 
  // × forgets it.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Journal'}})));
- await tab.getByRole('button',{name:'Earlier day'}).click();
  await tab.getByRole('button',{name:'Forget Dinner at Nopa'}).click();
  await tab.locator('.companion-artifact',{hasText:'Dinner at Nopa'}).waitFor({state:'detached'});
  assert.equal(await page.evaluate(()=>(window as any).kept.has('attention-cal:gone')),false);
@@ -257,5 +254,5 @@ await withBrowser(fileAccess,async browser=>{
  await card.waitFor({state:'visible'});
  assert.equal(await card.getByRole('button',{name:/Keep as Applet/}).count(),0,'the card offers no Keep as Applet');
  assert.deepEqual(errors,[]);
- console.log('PASS journal: what Fox shows is kept with its size, a page a day in Fox\'s panel (plan first, summary last on its own day, large two by two, medium two by one, small one cell, turned by ‹ › and day chips, a full day scrolling inside its page), a next step drafted for the person to send, pages Fox made (open as their Applet, a finished one kept and opened), opened again in the World (an Attention card whose item left as it was), found and opened by Fox, and forgotten with ×');
+ console.log('PASS journal: what Fox shows is kept with its size, one timeline of days in the book, newest first (plan first, summary last on its own day, large two by two, medium two by one, small one cell, every card named by where it came from, two columns in a narrow window), a next step drafted for the person to send, pages Fox made (open as their Applet, a finished one kept and opened), opened again in the World (an Attention card whose item left as it was), found and opened by Fox, and forgotten with ×');
 });

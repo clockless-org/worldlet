@@ -2,36 +2,32 @@ import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import {renderArtifactBlocks,artifactPicture} from './artifact-blocks.ts';
 import {fitArtifact} from './artifact-fit.ts';
-import {artifactBrief,artifactFitSteps,journalPages,madeArtifacts,readArtifact,type Artifact,type JournalPage,type MadeArtifact} from '../../core/artifacts/index.ts';
-/** The Journal (owner decisions 2026-10-06 and 2026-10-07; a book of its own, 2026-10-08): every card Fox showed in this
- * World, together one journal with a page a day. The book lies open on a day: its cards stand in time order on the left
- * leaf, then the right, two columns each, each at its size (large two by two, medium two by one, small one cell): the
- * plan first, the summary last, Attention cards, answers, meeting summaries, themes and pages Fox made between. ‹ › at
- * the page corners and the day tabs on the book's edge turn the pages; a day with more cards than the book holds scrolls
- * inside its right leaf, and a narrow window shows one leaf. Opening one shows it again in the World; × forgets it (a made page's own
- * Applet deletes it). It reads again while it is open and something changes.
+import {artifactBrief,artifactFitSteps,journalDays,madeArtifacts,readArtifact,type Artifact,type JournalDay,type MadeArtifact} from '../../core/artifacts/index.ts';
+/** The Journal (owner decisions 2026-10-06 and 2026-10-07; a book of its own, 2026-10-08; a timeline, 2026-10-11):
+ * everything Fox produced in this World, one kind of thing, an artifact, kept day by day. Inside the book one page
+ * scrolls through the days, newest first: each day has its date on the left and its cards in time order on the right,
+ * each at its size (large two by two, medium two by one, small one cell): the plan first, the summary last, Attention
+ * cards, answers, meeting summaries, themes and pages Fox made between, each named by where it came from
+ * (`journalOrigin`). Older days come in as the person scrolls. Opening one shows it again in the World; × forgets it (a
+ * made page's own Applet deletes it). It reads again while it is open and something changes.
  * The morning brief (owner Order 2026-10-07), and Fox by itself for a new mail task (owner decision 2026-10-09,
  * core/artifacts/replies.ts), leave a reply draft for each mail that waits for the person, a card of its own on today's page: Send sends that exact draft, Edit changes its words in place, Skip drops it. Morning brief
  * in the head says, in the person's words, what the 6 AM brief holds. */
 type Reply={id:string;kind:'reply';title:string;to:string;draft:Record<string,string>;createdAt:number;updatedAt:number};
 type Entry=Artifact|MadeArtifact|Reply;
-const CHIPS=5;
+// Days drawn at a time; older ones follow as the timeline scrolls near its end.
+const DAYS_AT_ONCE=7;
 export function createCompanionArtifacts({call,open,openMade,review}:{call:(action:string,body?:any)=>Promise<any>;open:(id:string)=>void;openMade:(id:string,keep:boolean)=>void;review?:(detail:{id:string;draft:Record<string,string>;attempted:boolean})=>void}){
  const el=(tag:string,cls='',text='')=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text)node.textContent=text;return node;};
  const section=el('section','companion-info-section companion-artifacts companion-journal');section.dataset.section='Journal';
- const head=el('div','companion-journal-head'),heading=el('h3'),days=el('div','companion-journal-days'),turn=el('div','companion-journal-turn');
- const numeral=el('span','companion-journal-numeral'),dated=el('div','companion-journal-dated');numeral.setAttribute('aria-hidden','true');
- days.setAttribute('role','group');days.setAttribute('aria-label','Days');
- const older=el('button','companion-journal-arrow','‹') as HTMLButtonElement,newer=el('button','companion-journal-arrow','›') as HTMLButtonElement;
- older.type=newer.type='button';older.setAttribute('aria-label','Earlier day');newer.setAttribute('aria-label','Later day');
+ const head=el('div','companion-journal-head'),heading=el('h3','','Journal'),turn=el('div','companion-journal-turn');
  const briefButton=el('button','companion-journal-brief-open','Morning brief') as HTMLButtonElement;briefButton.type='button';briefButton.setAttribute('aria-expanded','false');
- older.classList.add('companion-journal-older');newer.classList.add('companion-journal-newer');
  turn.append(briefButton);
- dated.append(heading);
- head.append(numeral,dated,turn);
- // Two leaves, each its own scroller: the day fills the left leaf first, then the right.
- const leftPage=el('div','companion-journal-page'),rightPage=el('div','companion-journal-page'),status=el('p','companion-info-note');status.setAttribute('role','status');
- const leftLeaf=el('div','companion-journal-leaf companion-journal-leaf-left'),rightLeaf=el('div','companion-journal-leaf companion-journal-leaf-right'),spread=el('div','companion-journal-spread');
+ head.append(heading,turn);
+ // One page that scrolls through the days, newest first.
+ const timeline=el('div','companion-journal-timeline'),status=el('p','companion-info-note');status.setAttribute('role','status');
+ const more=el('div','companion-journal-more');more.setAttribute('aria-hidden','true');
+ const leaf=el('div','companion-journal-leaf');
  // What the 6 AM brief holds, one part a line, in the person's words; empty restores the default.
  const brief=el('form','companion-journal-brief') as HTMLFormElement;brief.hidden=true;
  const briefLabel=el('label','companion-journal-brief-label','Every morning at 6, Fox makes your brief with these parts, one a line.') as HTMLLabelElement;
@@ -39,9 +35,8 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  const briefSave=el('button','companion-journal-brief-save','Save') as HTMLButtonElement,briefNote=el('span','companion-journal-brief-note');
  briefNote.setAttribute('role','status');
  brief.append(briefLabel,briefText,briefSave,briefNote);
- leftLeaf.append(head,brief,status,leftPage,older);rightLeaf.append(rightPage,newer);
- spread.append(leftLeaf,rightLeaf);
- section.append(spread,days);
+ leaf.append(head,brief,status,timeline);
+ section.append(leaf);
  briefButton.onclick=async()=>{
   brief.hidden=!brief.hidden;briefButton.setAttribute('aria-expanded',String(!brief.hidden));briefNote.textContent='';
   if(brief.hidden)return;
@@ -54,9 +49,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   catch(error){briefNote.textContent=error?.message||'Could not save it. Try again.';}
   finally{briefSave.disabled=false;}
  };
- let artifacts:Entry[]=[],pages:JournalPage<Entry>[]=[],day='',active=false,version=0;
- older.onclick=()=>{const i=pages.findIndex(p=>p.day===day);if(i<pages.length-1){day=pages[i+1].day;draw();}};
- newer.onclick=()=>{const i=pages.findIndex(p=>p.day===day);if(i>0){day=pages[i-1].day;draw();}};
+ let artifacts:Entry[]=[],days:JournalDay<Entry>[]=[],day='',focus='',drawn=0,active=false,version=0;
  // A card shows its Markdown as the card does, without links or pictures: opening it is how to use them.
  function body(markdown:string){
   const holder=el('div','companion-journal-body');
@@ -64,7 +57,7 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   return holder;
  }
  const forgetReply=(id:string)=>{artifacts=artifacts.filter(a=>a.id!==id);draw();};
- function replyCard(entry:JournalPage<Entry>['entries'][number]){
+ function replyCard(entry:JournalDay<Entry>['entries'][number]){
   let reply=entry.artifact as Reply,busy=false;
   const li=el('li','companion-artifact companion-reply');li.dataset.artifactId=reply.id;li.dataset.kind='reply';li.dataset.size=entry.size;
   const top=el('span','companion-artifact-origin');top.append(el('span','','Reply · '+reply.to),el('time','',new Date(reply.createdAt*1000).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})));
@@ -98,20 +91,19 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   skip.onclick=()=>work(async()=>{await call('emailAction',{operation:'cancel',id:reply.id});forgetReply(reply.id);});
   return li;
  }
- function card(entry:JournalPage<Entry>['entries'][number]){
+ function card(entry:JournalDay<Entry>['entries'][number]){
   if(entry.artifact.kind==='reply')return replyCard(entry);
   const artifact=entry.artifact as Artifact|MadeArtifact,made=artifact.kind==='made'?artifact as MadeArtifact:null;
   const li=el('li','companion-artifact'),openButton=el('button','companion-artifact-open') as HTMLButtonElement;
   li.dataset.artifactId=artifact.id;li.dataset.kind=artifact.kind;li.dataset.size=entry.size;if(!made&&(artifact as Artifact).tone)li.dataset.tone=(artifact as Artifact).tone!;openButton.type='button';
   const when=new Date(entry.at*1000).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
-  const origin=made?'Made by Fox':artifact.kind==='attention'?(artifact as Artifact).category||'Attention':/^Plan · /.test(artifact.title)?'Plan':/^Summary · /.test(artifact.title)?'Summary':/ · Summary$/.test(artifact.title)?'Meeting':'Conversation';
-  const top=el('span','companion-artifact-origin');top.append(el('span','',origin),el('time','',when));
+  const top=el('span','companion-artifact-origin');top.append(el('span','',entry.origin),el('time','',when));
   // The Journal keeps the card as it was shown (owner request 2026-10-08: "journal 里保留卡片"): its paper, its picture,
   // its tone and every part of it, only smaller.
   const picture=artifact.kind==='answer'?artifactPicture({title:artifact.title,body:(artifact as Artifact).body,art:(artifact as Artifact).art,tone:(artifact as Artifact).tone}):null;
   if(picture){const art=el('img','companion-artifact-art') as HTMLImageElement;art.src=picture;art.alt='';art.loading='lazy';art.decoding='async';li.dataset.art='illustration';li.append(art);}
   openButton.append(top,el('strong','companion-artifact-title',artifact.title));
-  if(made)openButton.append(el('span','companion-artifact-preview',made.state==='kept'?'Applet, kept':made.state==='now'?'Applet until '+new Date(made.endsAt*1000).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}):'Finished'),...(made.body?[el('span','companion-artifact-preview',made.body)]:[]));
+  if(made)openButton.append(el('span','companion-artifact-preview',made.state==='kept'?'Kept':made.state==='now'?'Open until '+new Date(made.endsAt*1000).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}):'Finished'),...(made.body?[el('span','companion-artifact-preview',made.body)]:[]));
   else{
    // The card never scrolls (owner Order 2026-10-09): it shows the fullest version its cell holds, down to the brief, as
    // the World card does, once it stands on the page. Its blocks show still, as the person left them; they work again
@@ -135,34 +127,43 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  }
  // Each card fits again when its cell changes size (a narrow window, the book opening).
  const fitting=new WeakMap<Element,()=>void>(),cardFits=new ResizeObserver(entries=>{for(const entry of entries)fitting.get(entry.target)?.();});
- const rowHeight=()=>parseFloat(getComputedStyle(section).getPropertyValue('--journal-row'))||132;
+ function dayBlock(page:JournalDay<Entry>){
+  const block=el('section','companion-journal-day');block.dataset.day=page.day;block.setAttribute('aria-label',page.label);
+  const date=new Date(...page.day.split('-').map((n,i)=>Number(n)-(i===1?1:0)) as [number,number,number]);
+  const dated=el('header','companion-journal-date');
+  dated.append(el('span','companion-journal-numeral',String(date.getDate())),el('strong','companion-journal-label',page.label),el('span','companion-journal-weekday',date.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})));
+  dated.firstElementChild!.setAttribute('aria-hidden','true');
+  const list=el('ul','companion-journal-grid');list.setAttribute('aria-label',page.label);
+  for(const entry of page.entries)list.append(card(entry));
+  block.append(dated,list);
+  return block;
+ }
+ // Draws days up to `until` (at least DAYS_AT_ONCE), and keeps the marker that brings older ones last.
+ function extend(until=0){
+  const end=Math.min(days.length,Math.max(drawn+DAYS_AT_ONCE,until));
+  more.remove();
+  for(const page of days.slice(drawn,end))timeline.append(dayBlock(page));
+  drawn=end;
+  if(drawn<days.length){timeline.append(more);older.observe(more);}
+ }
+ const older=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)&&drawn<days.length)extend();},{root:timeline,rootMargin:'0px 0px 480px 0px'});
  function draw(){
-  cardFits.disconnect();
-  pages=journalPages(artifacts);
-  if(!pages.some(p=>p.day===day))day=pages[0]?.day||'';
-  const index=pages.findIndex(p=>p.day===day),page=pages[index];
-  // The page names its date; the chips say Today and Yesterday.
-  const date=page?new Date(...page.day.split('-').map((n,i)=>Number(n)-(i===1?1:0)) as [number,number,number]):null;
-  heading.textContent=date?date.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}):'Journal';
-  numeral.textContent=date?String(date.getDate()):'';
-  older.disabled=!page||index>=pages.length-1;newer.disabled=!page||index<=0;
-  // The chips name the days nearest the page shown.
-  const from=Math.max(0,Math.min(index-Math.floor(CHIPS/2),pages.length-CHIPS));
-  days.replaceChildren(...pages.slice(from,from+CHIPS).map(p=>{const b=el('button','companion-journal-day',p.label.replace(/^(\w{3}), /,'')) as HTMLButtonElement;b.type='button';b.dataset.day=p.day;b.setAttribute('aria-pressed',String(p.day===day));b.onclick=()=>{day=p.day;draw();};return b;}));
-  status.hidden=!!page;
-  if(!page)status.textContent='Your journal is empty. Open an Attention card, or ask Fox to lay something out, and it is kept here, a page a day.';
-  const left=el('ul','companion-journal-grid'),right=el('ul','companion-journal-grid');if(page){left.setAttribute('aria-label',page.label);right.setAttribute('aria-label',page.label+', continued');}
-  // The left leaf takes cards in order while they fit its rows; the rest go on the right, which scrolls when full.
-  const one=section.clientWidth>0&&section.clientWidth<760,rows=Math.max(2,Math.floor((leftPage.clientHeight+12)/(rowHeight()+12))||3);
-  let used=0,turned=one;
-  for(const entry of page?.entries||[]){
-   const cells=entry.size==='large'||entry.artifact.kind==='reply'?4:entry.size==='medium'?2:1;
-   if(!turned&&used+cells>rows*2)turned=true;
-   (turned&&!one?right:left).append(card(entry));if(!turned)used+=cells;
-  }
-  section.dataset.leaves=one?'1':'2';
-  leftPage.replaceChildren(left);rightPage.replaceChildren(right);leftPage.scrollTop=rightPage.scrollTop=0;
-  for(const button of section.querySelectorAll('.companion-artifact-open'))fitting.get(button)?.();
+  cardFits.disconnect();older.disconnect();
+  days=journalDays(artifacts);
+  const top=timeline.scrollTop;
+  timeline.replaceChildren();drawn=0;
+  status.hidden=days.length>0;
+  if(!days.length)status.textContent='Your journal is empty. Open an Attention card, or ask Fox to lay something out, and it is kept here, day by day.';
+  // Opening on a day draws down to it and scrolls there; a redraw while open keeps the place.
+  const wanted=day?days.findIndex(p=>p.day===day):-1;
+  extend(wanted+1);
+  if(wanted>0)timeline.querySelector<HTMLElement>(`.companion-journal-day[data-day="${days[wanted].day}"]`)?.scrollIntoView({block:'start'});
+  else timeline.scrollTop=day?0:top;
+  day='';
+  // The card the book was opened for: in view and marked a moment.
+  const card=focus?[...timeline.querySelectorAll<HTMLElement>('.companion-artifact')].find(li=>li.dataset.artifactId===focus):null;
+  if(card){focus='';card.dataset.focused='true';card.scrollIntoView({block:'nearest'});setTimeout(()=>{delete card.dataset.focused;},2400);}
+  for(const button of timeline.querySelectorAll('.companion-artifact-open'))fitting.get(button)?.();
  }
  async function load(){
   const mine=++version;
@@ -181,5 +182,5 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  }
  for(const name of ['worldlet:artifacts','worldlet:widgets','worldlet:email-drafted'])window.addEventListener(name,()=>{if(active)void load();});
  draw();
- return {element:section,start(open=''){active=true;day=open;void load();},stop(){active=false;}};
+ return {element:section,start(open='',card=''){active=true;day=open||'today';focus=card;void load();},stop(){active=false;focus='';}};
 }

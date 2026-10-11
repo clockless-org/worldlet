@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {artifactSizeFor,artifactFitSteps,artifactBrief,journalPages,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../core/artifacts/index.ts';
+import {artifactSizeFor,artifactFitSteps,artifactBrief,journalDays,journalOrigin,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../core/artifacts/index.ts';
 // The rules for artifacts (core/artifacts/README.md): IDs, what Fox may show, the default size, reading a stored
 // record, saving one again, the World's limit, the Artifacts page's days and what Fox finds.
 
@@ -173,24 +173,29 @@ assert.deepEqual(madeArtifacts({}),[]);
  assert.match(await readFile(new URL('../ui/index.ts',import.meta.url),'utf8'),/firstRun:\(\)=>!sample&&onboardingUnfinished\(current\?\.onboarding\)/,'The World learns whether onboarding is over');
  assert.match(poll,/brief=await native\?\.morningBrief\?\.\(\)[\s\S]*daily=markDailyMade\(daily,due\.kind,due\.day\);saveDaily\(\);[\s\S]*dailyArtifactRequest\(due\.kind,due\.day,brief\)[\s\S]*voice\?\.background\?\.\(request\.text/,'The person\'s brief, then marked made before asking, so a failed turn never repeats all day');
  assert.match(poll,/voice\?\.background\?\.\(request\.text,\{displayText:request\.displayText\}\)\)[\s\S]*\/busy\/i[\s\S]*daily=before;saveDaily\(\);[\s\S]*\.finally\(\(\)=>\{work\.end\(ok\);dailyAsking=false;\}\)/,'Made quietly in a background session beside the conversation; asked again only while other background work runs (owner Orders 2026-10-07)');
- const {journalPages:pagesOf}=await import('../core/artifacts/index.ts'),t=at(7,6,5).getTime()/1000;
+ const {journalDays:pagesOf}=await import('../core/artifacts/index.ts'),t=at(7,6,5).getTime()/1000;
  assert.deepEqual(pagesOf([{id:'r1',kind:'reply',title:'Re: Q4',createdAt:t+60,updatedAt:t+60},{id:'p',kind:'answer',title:'Plan · Wed, Oct 7',size:'large',createdAt:t,updatedAt:t}],at(7,9))[0].entries.map(e=>[e.artifact.id,e.size]),[['p','large'],['r1','medium']],'A reply draft is a medium card after the brief');
  console.log('PASS daily artifacts: the morning brief at 6 AM (or on waking, before noon) for someone who used Worldlet lately, holding the parts they asked for, reply drafts by default and only when mail is asked for; the summary from 9 PM or caught up the next day, never on a day nobody used');
 }
 
-// The Journal: a page a day, newest day first; time order with the plan first and the summary last on the day they
-// are about; an Attention card and a page Fox made are small.
+// The Journal: a timeline, newest day first; time order with the plan first and the summary last on the day they
+// are about; an Attention card and a page Fox made are small; every card named by where it came from.
 {
  const at=(d:number,h:number,m=0)=>new Date(2026,9,d,h,m).getTime()/1000;
  const a=(id:string,title:string,t:number,extra:any={})=>({id,kind:'answer',title,size:'medium',createdAt:t,updatedAt:t,...extra});
  const list=[a('art-1','Which lab',at(7,10)),a('art-2','Plan · Wed, Oct 7',at(7,11),{size:'large'}),a('art-3','Summary · Tue, Oct 6',at(7,8),{size:'large'}),
   {id:'attention-x',kind:'attention',title:'Dinner',size:'medium',createdAt:at(6,9),updatedAt:at(7,12)},a('art-4','Notes',at(6,15)),{id:'wgt-1',kind:'made',title:'Timer',createdAt:at(7,9),updatedAt:at(7,9)}];
- const pages=journalPages(list,new Date(2026,9,7,13));
+ const pages=journalDays(list,new Date(2026,9,7,13));
  assert.deepEqual(pages.map(p=>p.label),['Today','Yesterday']);
  assert.deepEqual(pages[0].entries.map(e=>e.artifact.title),['Plan · Wed, Oct 7','Timer','Which lab'],'Today: the plan first, then time order');
  assert.deepEqual(pages[1].entries.map(e=>e.artifact.title),['Dinner','Notes','Summary · Tue, Oct 6'],'A summary caught up the next morning closes its own day; a card stands on the day it was made');
  assert.deepEqual(pages[0].entries.map(e=>e.size),['large','small','medium'],'A page Fox made is small; an answer keeps its size');
  assert.equal(pages[1].entries[0].size,'small','An Attention card is small');
+ assert.deepEqual(pages[0].entries.map(e=>e.origin),['Plan','Made by Fox','Conversation'],'One kind of thing, named by where it came from');
+ assert.deepEqual(pages[1].entries.map(e=>e.origin),['Attention','Conversation','Summary']);
+ assert.equal(journalOrigin({kind:'attention',title:'Dinner',category:'Coming Up'}),'Coming Up');
+ assert.equal(journalOrigin({kind:'answer',title:'Standup · Summary'}),'Meeting');
+ assert.equal(journalOrigin({kind:'reply',title:'Re: Q4'}),'Reply');
 }
 // Blocks (owner Order 2026-10-08): Worldlet's own components on the card, checked; what the person ticks or sets is kept.
 {
@@ -241,4 +246,4 @@ assert.deepEqual(madeArtifacts({}),[]);
  assert.equal(readArtifact({id:'art-abcdefghijkl',kind:'answer',title:'Labs',body:'b',origin:{type:'conversation',place:'world'},createdAt:1,tone:'neon',art:'../x'})?.tone,undefined,'An unknown tone is dropped');
  assert.ok(artifactWeight('x',null,[stats,compare])>artifactWeight('x',null,[stats]),'Showing blocks count toward the one card');
 }
-console.log('PASS artifacts: the Journal pages, three sizes, IDs, what Fox may show, the one-card budget, default sizes, stored records, showing again, the World limit, days and finding, next steps, pages Fox made');
+console.log('PASS artifacts: the Journal timeline and its one origin label, three sizes, IDs, what Fox may show, the one-card budget, default sizes, stored records, showing again, the World limit, days and finding, next steps, pages Fox made');
