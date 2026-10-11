@@ -3,6 +3,7 @@ import {drawAnatomySkin} from './fox-anatomy-skin.ts';
 type Mesh={uv:Float32Array;positions:Float32Array;uvBuffer:WebGLBuffer;positionBuffer:WebGLBuffer;indexBuffer:WebGLBuffer;count:number};
 type Target={texture:WebGLTexture;buffer:WebGLFramebuffer};
 type SkinTexture={texture:WebGLTexture;width:number;height:number;dirty:boolean};
+const UNIT_QUAD=[0,0,1,0,0,1,1,1];
 /** GPU rasterization of the same registered skin vertices as the Canvas
  * reference. Immutable part textures and topology stay resident; only positions
  * change. Frame/depth transactions stay on GPU until the final composite;
@@ -67,7 +68,7 @@ export function createAnatomyGPUSkin(surface=document.createElement('canvas')){
   }
  }
  function blit(texture:WebGLTexture,weight:number,additive:boolean){
-  const mesh=meshFor(1,1);mesh.positions.set([0,0,1,0,0,1,1,1]);
+  const mesh=meshFor(1,1);mesh.positions.set(UNIT_QUAD);
   gl!.useProgram(program!);gl!.uniform4f(bounds!,0,0,1,1);gl!.uniform1f(opacity!,weight);gl!.uniform1f(flipY!,1);gl!.activeTexture(gl!.TEXTURE0);gl!.bindTexture(gl!.TEXTURE_2D,texture);
   if(additive){gl!.enable(gl!.BLEND);gl!.blendFunc(gl!.ONE,gl!.ONE);}else gl!.disable(gl!.BLEND);
   bindMesh(mesh);gl!.drawElements(gl!.TRIANGLES,mesh.count,gl!.UNSIGNED_SHORT,0);

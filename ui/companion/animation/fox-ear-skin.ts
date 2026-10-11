@@ -12,9 +12,6 @@ export function earRootWeight(side:'L'|'R',point:RigPoint){
  }
  const t=Math.max(0,Math.min(1,signed/spec.blendDistance));return t*t*t*(10+t*(-15+6*t));
 }
-export function earVertex(side:'L'|'R',point:RigPoint,matrices:Map<string,RigMatrix>):RigPoint{
- return deformEar(side,point,matrices,earRootWeight(side,point));
-}
 function deformEar(side:'L'|'R',point:RigPoint,matrices:ReadonlyMap<string,RigMatrix>,weight:number):RigPoint{
  const base=transform(matrices.get('head')!,point),tip=transform(matrices.get('ear'+side)!,point);
  return [base[0]+(tip[0]-base[0])*weight,base[1]+(tip[1]-base[1])*weight];

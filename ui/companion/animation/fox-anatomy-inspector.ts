@@ -56,6 +56,7 @@ export async function createAnatomyInspector(canvas:HTMLCanvasElement,source:str
   }
   context.putImageData(data,0,0);return {canvas:layer,...b,...FOX_ANATOMY.parts[index]};
  });
+ const layerJoints=new Map(layers.map(layer=>[layer,FOX_ANATOMY.joints.find(j=>j.id===layer.joint)] as const));
  // Only hidden ear-root pixels may come from this authored plate. The face,
  // brows, eyes and muzzle always retain their original layers.
  const earRoots=new Map<string,HTMLCanvasElement>();
@@ -243,7 +244,7 @@ export async function createAnatomyInspector(canvas:HTMLCanvasElement,source:str
    };
    for(const layer of layers){
     if(!layer.count||options.isolate&&options.selected!==layer.id)continue;
-    const m=matrices.get(layer.joint)!,joint=FOX_ANATOMY.joints.find(j=>j.id===layer.joint)!,amount=options.explode||0;
+    const m=matrices.get(layer.joint)!,joint=layerJoints.get(layer)!,amount=options.explode||0;
     const dx=(joint.pivot[0]-.6)*amount,dy=(joint.pivot[1]-.6)*amount;
     const side=layer.id.endsWith('L')?'L':'R',arm=arms.get(side)!;
     if(authored){
