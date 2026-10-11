@@ -178,17 +178,30 @@ function cardLines(body:string){
  const lines=body.replace(/\r/g,'').split('\n').map(line=>line.trim()).filter(line=>line&&!/^(#|\||[-*_]{3,}$|```|\*\*[^*]+\*\*:?$)/.test(line));
  return lines.slice(0,8).join('\n');
 }
-/** A kept morning brief (`plan`) or day summary: Worth Knowing, opening the Journal on its card (source
+/** The two default Routines' names, as core/artifacts/daily.ts `DAILY_ROUTINE_NAMES` has them (kept here too so
+ * this file stays free of the artifacts module; scripts/harness-schedule-check.ts checks they match). */
+const DAILY_NAMES={plan:'Today’s prep',summary:'Wrap up today'} as const;
+/** A kept morning brief (`plan`, Today’s prep) or day summary (Wrap up today): Worth Knowing, opening the Journal on its card (source
  * `journal:<day>:<card id>`). The same day's card saved again updates the same item. */
 export function dailyScheduleResult(input:{kind:'plan'|'summary';day:string;artifact:{id:string;title?:string;brief?:string;body?:string};at:number;now:number}):ScheduleResult|null {
  const {kind,day,artifact,at,now}=input;
  if(kind!=='plan'&&kind!=='summary'||!DAY.test(day)||typeof artifact?.id!=='string'||!artifact.id||!Number.isFinite(at))return null;
- const name=(kind==='plan'?'Morning brief · ':'Day summary · ')+dayLabel(day);
+ const name=DAILY_NAMES[kind]+' · '+dayLabel(day);
  const said=text(artifact.brief)||cardLines(text(artifact.body));
  const item=worldletItem({kind:'update',title:name,reason:kind==='plan'?'Fox made it for your day':'Fox wrote up your day',summary:(said?said+'\n\n':'')+'It is kept in your Journal.',
   source:'journal:'+day+':'+artifact.id,quote:text(artifact.title)||name,at});
  const line=firstLine(said.replace(/^\s*[-*+]\s+/gm,'').replace(/[*_`>#|]/g,''));
  return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:name,body:clip(line||'Ready in your Journal.',240),collapse:'daily-'+kind}:null};
+}
+/** One of the two default Routines that ran and made no card (the Agent failed, or finished without one): Worth Doing,
+ * saying so plainly, so it never fails silently (owner decision 2026-10-11). The same day's again updates the item. */
+export function dailyScheduleFailure(input:{kind:'plan'|'summary';day:string;reason?:string;at:number;now:number}):ScheduleResult|null {
+ const {kind,day,at,now}=input;
+ if(kind!=='plan'&&kind!=='summary'||!DAY.test(day)||!Number.isFinite(at))return null;
+ const name=DAILY_NAMES[kind]+' · '+dayLabel(day),why=clip(text(input.reason).replace(/\s+/g,' '),300);
+ const summary=(why?'It did not finish: '+why:'It did not finish, and your Agent did not say why.')+'\n\nAsk Fox to make it again, or pause it in Settings › Agent › Routines.';
+ const item=worldletItem({kind:'task',title:name,reason:'Your routine did not finish',summary,source:'daily:'+kind+':'+day,quote:name,at});
+ return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:name,body:clip('Did not finish'+(why?': '+why:'.'),240),collapse:'daily-'+kind}:null};
 }
 /** One run of Worldlet's own routine as the Agent's `routine_tick` reports it (`{ran, job:{id,name,last_status}, late}`,
  * with `output` when the Agent returns what it said): Worth Knowing when it finished, Worth Doing when it did not.

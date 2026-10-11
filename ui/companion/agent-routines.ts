@@ -3,9 +3,13 @@
  * its newest result and a Paused mark, and whether that scheduler runs now (and how to start it). Pause or Resume, Run
  * now and Remove each run as the Agent's own command after the person confirmed it in plain words (agent-change.ts);
  * creating or changing one is a request to Fox, done in the conversation by the Agent's own tools. After a change the
- * Task panel's Routines read again (`worldlet:routines`). Plain words only: no cron, no prompts. */
+ * Task panel's Routines read again (`worldlet:routines`). Plain words only: no cron, no prompts.
+ * Above them, Worldlet's own two default Routines (core/artifacts/daily.ts): Today's prep and Wrap up today, which
+ * Worldlet runs by asking the Agent at that time. Pause and Resume change only Worldlet's setting (host
+ * `foxPreferenceChange` `daily_routines`), never the Agent. */
 import {nextCronRun,routineClock,taskHowOften,taskPlannedWhen} from '../../core/tasks/index.ts';
 import type {HarnessJob} from '../../contracts/harness-services.ts';
+import {DAILY_PLAN_HOUR,DAILY_SUMMARY_HOUR,DAILY_ROUTINE_NAMES,readDailyRoutines} from '../../core/artifacts/index.ts';
 import {agentButton,agentDay,agentEl as el,confirmAgentChange,type AgentCall} from './agent-change.ts';
 
 type Job={id:string;name:string;paused:boolean;when:HarnessJob['when'];delivery?:string;last?:{at:number;status:'ok'|'failed'|'silent'}};
@@ -30,9 +34,38 @@ export function routineDeliveryLine(job:Job,title:string,inUse:boolean):string {
 const STATUS={ok:'done',failed:'did not finish',silent:'nothing to report'} as const;
 export function routineLastLine(job:Job):string {return job.last?`Last run ${agentDay(job.last.at)}: ${STATUS[job.last.status]}`:'Not run yet';}
 
+/** What each of Worldlet's two default Routines does, in one line. */
+const DAILY_LINES={
+ plan:'What was done overnight, today’s schedule and reply drafts for mail that needs one, as one Attention card',
+ summary:'What is still open and what to prepare for tomorrow, from today’s conversation, kept in the Journal with one Attention card',
+} as const;
+async function showWorldletRoutines(box:HTMLElement,call:AgentCall,current:()=>boolean,said:HTMLElement){
+ const info=await call('foxPreferences').catch(()=>null);
+ if(!current()||!info||!info.dailyRoutines)return;
+ const on=readDailyRoutines(info.dailyRoutines),rows=el('div','companion-settings-rows');rows.dataset.harness='worldlet';
+ box.append(el('h5','companion-settings-subhead','Worldlet'),rows,el('p','companion-settings-quiet','Worldlet runs these by asking your Agent at that time; nothing is added to your Agent’s own scheduler.'));
+ for(const kind of ['plan','summary'] as const){
+  const row=el('div','companion-settings-row'),words=el('div'),name=el('strong','',DAILY_ROUTINE_NAMES[kind]);row.dataset.job='worldlet:'+kind;
+  if(!on[kind])name.append(' ',el('span','companion-settings-tag','Paused'));
+  const clock=routineClock(new Date().setHours(kind==='plan'?DAILY_PLAN_HOUR:DAILY_SUMMARY_HOUR,0,0,0));
+  words.append(name,el('span','','Every day at '+clock+' · '+DAILY_LINES[kind]));
+  const actions=el('div','companion-settings-actions');
+  actions.append(agentButton(on[kind]?'Pause':'Resume',on[kind]?'pause-job':'resume-job',async()=>{
+   try{
+    await call('foxPreferenceChange',{setting:'daily_routines',value:{[kind]:!on[kind]}});
+    if(!current())return;
+    box.replaceChildren();await showWorldletRoutines(box,call,current,said);
+    said.textContent=on[kind]?`“${DAILY_ROUTINE_NAMES[kind]}” is paused.`:`“${DAILY_ROUTINE_NAMES[kind]}” runs every day again.`;
+   }catch(e){said.textContent=(e as Error).message||'Could not change it.';}
+  }));
+  row.append(words,actions);rows.append(row);
+ }
+}
+
 export async function showAgentRoutines(target:HTMLElement,call:AgentCall,current:()=>boolean,{ask}:{ask:(text:string)=>void}){
- const box=el('div','companion-settings-agent-routines'),said=el('p','companion-settings-status');said.setAttribute('role','status');
- target.append(box,said);
+ const own=el('div','companion-settings-worldlet-routines'),box=el('div','companion-settings-agent-routines'),said=el('p','companion-settings-status');said.setAttribute('role','status');
+ target.append(own,box,said);
+ await showWorldletRoutines(own,call,current,said);
  const changed=()=>window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));
  const ASK={
   pause:{verb:'Pause',question:(t:string,n:string)=>`${t} will pause “${n}”. It does not run until you resume it.`,done:(n:string)=>`“${n}” is paused.`},

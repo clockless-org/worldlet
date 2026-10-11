@@ -16,6 +16,7 @@ try{
   const user=['Prefers Chinese.','Runs on Saturday mornings.','Lives in Lisbon.','Has two cats, Miso and Tofu.','Works on Worldlet.','Prefers short replies.'];
   w.memory=[...user.map((text,i)=>({id:'mem-00000000000000'+(10+i),kind:'user',text,where:'~/.hermes/memories/USER.md'})),{id:'mem-0000000000000020',kind:'memory',text:'The lease renewal is due in November.',where:'~/.hermes/memories/MEMORY.md'}];
   w.routinesHeard=0;addEventListener('worldlet:routines',()=>{w.routinesHeard++;});
+  w.daily={plan:true,summary:true};
   w.asked=[];addEventListener('worldlet:fox-ask',(e:any)=>{w.asked.push(e.detail?.text);e.stopImmediatePropagation();},true);
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
   // Each change is previewed (the Agent's exact command) and runs only with that confirmation.
@@ -24,6 +25,8 @@ try{
    if(change==='pause')w.jobs=w.jobs.map(j=>j.id===id?{...j,paused:true}:j);if(change==='resume')w.jobs=w.jobs.map(j=>j.id===id?{...j,paused:false}:j);if(change==='remove')w.jobs=w.jobs.filter(j=>j.id!==id);return {ok:true};}
   // What each Agent remembers, read only; Claude Code here is another Agent, shown read-only with where to change it.
   if(b.action==='harnessMemory')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',entries:w.memory},{harness:'claude-code',title:'Claude Code',inUse:w.current.harness==='claude-code',entries:[{id:'mem-0000000000000030',kind:'memory',text:'Use pnpm, never npm.',where:'~/.claude/CLAUDE.md'}]}]};
+  if(b.action==='foxPreferences')return {ok:true,dailyRoutines:{...w.daily}};
+  if(b.action==='foxPreferenceChange'&&b.setting==='daily_routines'){w.daily={...w.daily,...b.value};return {ok:true,dailyRoutines:{...w.daily}};}
   if(b.action==='harnessSchedule')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,running:false,start:'hermes gateway install',jobs:w.jobs}]};
   if(b.action==='harnessSkills'&&b.operation==='preview')return {command:'hermes config set skills.disabled ["'+b.skill+'"]',confirm:'s|'+b.change+'|'+b.skill};
   if(b.action==='harnessSkills'&&b.operation==='change'){const [,change,name]=b.confirm.split('|');
@@ -116,6 +119,19 @@ try{
  await seed.locator('[data-action=confirm-change]').click();
  await skillsPart.getByText('Hermes Agent no longer uses “seed-swap”. It takes effect in its next conversation.',{exact:true}).waitFor();
  await skillsPart.locator('[data-skill=seed-swap]').getByText('Off',{exact:true}).waitFor();
+ // Worldlet's own two default Routines come first: Today's prep at 7 AM and Wrap up today at 6 PM, paused and resumed
+ // as Worldlet's own setting (no Agent command, nothing to confirm).
+ const prep=routinesPart.locator('[data-harness=worldlet] [data-job="worldlet:plan"]'),wrap=routinesPart.locator('[data-harness=worldlet] [data-job="worldlet:summary"]');
+ await prep.getByText(/^Every day at 7:00\sAM · What was done overnight, today’s schedule and reply drafts/).waitFor();
+ await wrap.getByText(/^Every day at 6:00\sPM · What is still open and what to prepare for tomorrow, from today’s conversation/).waitFor();
+ await routinesPart.getByText('Worldlet runs these by asking your Agent at that time; nothing is added to your Agent’s own scheduler.',{exact:true}).waitFor();
+ await wrap.getByRole('button',{name:'Pause',exact:true}).click();
+ await routinesPart.getByText('“Wrap up today” is paused.',{exact:true}).waitFor();
+ await routinesPart.locator('[data-harness=worldlet] [data-job="worldlet:summary"]').getByText('Paused',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='foxPreferenceChange').map(c=>[c.setting,c.value])),[['daily_routines',{summary:false}]],'only Worldlet’s own setting changes');
+ await routinesPart.locator('[data-harness=worldlet] [data-job="worldlet:summary"]').getByRole('button',{name:'Resume',exact:true}).click();
+ await routinesPart.getByText('“Wrap up today” runs every day again.',{exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSchedule'&&c.operation==='change').length),0,'no Agent command for Worldlet’s own routines');
  // Routines: plain time, where results go, the newest result, Paused; the scheduler's state and how to start it.
  const digest=routinesPart.locator('[data-job=job-1]');
  await digest.getByText(/^Every day at 8:00\sAM · Sends its results to Telegram, and here and on your phone$/).waitFor();

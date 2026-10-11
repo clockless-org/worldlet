@@ -6,7 +6,7 @@
  * lines the World's top-right shows while Fox works and just after. The page only executes them
  * (`ui/shell/notion-world.ts`). */
 import {attentionArrivedAt} from '../attention/index.ts';
-import {dayKey,usedRecently,MORNING_BRIEF_REPLIES,type DailyArtifactsState} from './daily.ts';
+import {dayKey,usedRecently,MORNING_BRIEF_REPLIES,DAILY_ROUTINE_NAMES,type DailyArtifactsState} from './daily.ts';
 
 /** At most this many replies prepared a day, the same budget as the morning brief's. */
 export const PREPARED_REPLIES_PER_DAY=MORNING_BRIEF_REPLIES;
@@ -118,7 +118,7 @@ const replies=(n:number)=>n===1?'1 reply':n+' replies';
 /** What the top-right says once the work is done, briefly, before it fades; '' says nothing (no draft made). */
 export function foxWorkDone(kind:FoxWorkKind,drafted:number):string {
  const n=Math.max(0,Math.floor(drafted)||0);
- if(kind==='plan')return n?'Morning brief and '+replies(n)+' ready':'Morning brief ready';
- if(kind==='summary')return 'Day summary ready';
+ if(kind==='plan')return DAILY_ROUTINE_NAMES.plan+(n?' and '+replies(n):'')+' ready';
+ if(kind==='summary')return DAILY_ROUTINE_NAMES.summary+': ready';
  return n?replies(n)+' ready':'';
 }

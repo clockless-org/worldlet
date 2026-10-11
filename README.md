@@ -103,7 +103,7 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 
 - **[Phone companions](ios/README.md)**: the Attention Center and Fox on iPhone and [Android](android/README.md), paired by QR code through an end-to-end encrypted relay.
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**: the cards Fox makes are kept, day by day.
-- **[Routines](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along.
+- **[Routines](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](core/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
 - **[Your Agent on another computer](core/agent/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
 

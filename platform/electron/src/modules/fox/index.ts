@@ -56,6 +56,9 @@ function knowledgeOf(profile:Row,ledger:{companionCounts():Record<string,{turns:
 class Cancelled extends Error {constructor(){super('The request was cancelled.');this.name='AbortError';}}
 const WORLD_TOOL_NAMES=['read_companion_archive','meeting_decisions','_source_begin','_source_result','query_world_items','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','read_world_history'];
 const CONTROL_SCREENS=['preferences','sources','organize','model','privacy','voice','style','world','data','login'];
+/** Where the two default Routines' on/off is kept (on when absent). */
+const DAILY_ROUTINE_PREFS=[['plan','worldlet.dailyPrep'],['summary','worldlet.dailyWrapUp']] as const;
+const readDailyRoutinesChange=(value:Row)=>Object.fromEntries(DAILY_ROUTINE_PREFS.flatMap(([kind])=>typeof value[kind]==='boolean'?[[kind,value[kind]]]:[])) as {plan?:boolean;summary?:boolean};
 const STREAM_EVENTS=['delta','response_start','progress','steered','status'];
 /** World services that run without a model on the accounts in this computer's Platform.
  */
@@ -69,6 +72,7 @@ const iso=(seconds:number)=>new Date(seconds*1000).toISOString().replace(/\.\d{3
 
 export function installFox(host:Host){
  const {store,preferences,page}=host;
+ const dailyRoutines=()=>({plan:preferences.bool(DAILY_ROUTINE_PREFS[0][1],true),summary:preferences.bool(DAILY_ROUTINE_PREFS[1][1],true)});
  const companion=createCompanion(host);
  const older=createOlderHistory(host,companion);
  // The Agent's history read again while Worldlet runs (history-sync.ts), not only when it was brought.
@@ -797,7 +801,7 @@ export function installFox(host:Host){
    const service=analytics();
    return {platform:store.options.platform,hostCapabilities:store.options.capabilities(),model:{name:model.name??'',ready:model.ready??false,provider:model.provider??'',harness:agent()?.harness?.title??null},
     cloudConsent:store.state.cloudConsent===true,autoSync:store.state.autoSync===true,companionStyle:style.current(),spokenReplies:preferences.bool('worldlet.spokenReplies'),talkReplies:preferences.bool('worldlet.talkReplies',true),
-    spokenVoice:preferences.string('worldlet.spokenVoice'),agentVoice:!!agent()?.voice?.(),morningBrief:readMorningBrief(preferences.string('worldlet.morningBrief')),voices,sampleEnabled:store.sampleEnabled(),
+    spokenVoice:preferences.string('worldlet.spokenVoice'),agentVoice:!!agent()?.voice?.(),morningBrief:readMorningBrief(preferences.string('worldlet.morningBrief')),dailyRoutines:dailyRoutines(),voices,sampleEnabled:store.sampleEnabled(),
     usageAnalyticsEnabled:service?service.enabled():preferences.get('WorldletUsageAnalyticsEnabled')!==false};
   },
   foxPreferenceChange:async request=>{
@@ -830,6 +834,14 @@ export function installFox(host:Host){
     if(brief===MORNING_BRIEF_DEFAULT)preferences.remove('worldlet.morningBrief');else preferences.set('worldlet.morningBrief',brief);
     page.event('worldlet:morning-brief',{brief});
     return {ok:true,morningBrief:brief};
+   }else if(setting==='daily_routines'&&(typeof value==='boolean'||value&&typeof value==='object')){
+    // The two default Routines, Today's prep and Wrap up today (core/artifacts/daily.ts): on unless turned off here,
+    // from setup's one row (a boolean, both) or Settings › Agent › Routines (one of them). Worldlet's own setting;
+    // nothing is written into the Agent.
+    const next=typeof value==='boolean'?{plan:value,summary:value}:{...dailyRoutines(),...readDailyRoutinesChange(value)};
+    for(const [kind,key] of DAILY_ROUTINE_PREFS)if(next[kind])preferences.remove(key);else preferences.set(key,false);
+    page.event('worldlet:daily-routines',dailyRoutines());
+    return {ok:true,dailyRoutines:dailyRoutines()};
    }else if(setting==='companion_motion'&&['idle','happy','waving','sleeping'].includes(value)){
     page.event('worldlet:companion-appearance',{name:style.name(),expression:value});
    }else throw new WorldletError('Unsupported preference value.');

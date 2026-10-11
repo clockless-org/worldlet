@@ -12,6 +12,7 @@ import type {HarnessJob} from '../../contracts/harness-services.ts';
 import {worldLogApplet} from '../activity/index.ts';
 import {getApp} from '../applets/index.ts';
 import {nextCronRun} from './next-run.ts';
+import {DAILY_ROUTINE_NAMES} from '../artifacts/index.ts';
 
 export type TaskGroup='routines'|'now';
 /** Who does it: the person's Agent's scheduler, Fox's own background work, an Applet working on a task, a source
@@ -138,12 +139,13 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
    day:routineDay(at,now,locale),clock:routineClock(at,locale)});
  }
 
- // Fox's own morning brief and day summary, from the page's daily state.
+ // The two default Routines (Today's prep, Wrap up today; core/artifacts/daily.ts), from the page's daily state: Worldlet
+ // asks the person's Agent at that time. A paused one is not planned, so it is not here.
  for(const made of input.daily??[]){
   if(made.kind!=='plan'&&made.kind!=='summary'||!Number.isFinite(made.at)||made.at<=now||made.at-now>AHEAD_MS)continue;
   const plan=made.kind==='plan';
-  routines.push({id:'daily:'+made.kind,group:'routines',source:'fox',title:plan?'Morning brief':'Day summary',detail:'',when:taskPlannedWhen(made.at,now,locale),at:made.at,
-   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Fox',day:routineDay(made.at,now,locale),clock:routineClock(made.at,locale)});
+  routines.push({id:'daily:'+made.kind,group:'routines',source:'fox',title:DAILY_ROUTINE_NAMES[made.kind],detail:'',when:taskPlannedWhen(made.at,now,locale),at:made.at,
+   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Worldlet, with your Agent',day:routineDay(made.at,now,locale),clock:routineClock(made.at,locale)});
  }
 
  // Doing now: one window each ---------------------------------------------------------------------------------------

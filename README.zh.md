@@ -103,7 +103,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 - **[手机伴侣](ios/README.md)**：iPhone 和 [Android](android/README.md) 上的 Attention Center 和 Fox，扫码配对，经端到端加密中继连到电脑。
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**：Fox 做的卡片按天留存。
-- **[例行任务](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。
+- **[例行任务](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
 
