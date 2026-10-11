@@ -247,7 +247,8 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
   }
   case 'codex':{
    const item=record(event.item);
-   if(event.type==='item.completed'&&item.type==='agent_message'&&typeof item.text==='string'){
+   // An empty one (Codex 0.162 after World tool calls, Mac Beta 4261) is not an answer and does not replace one.
+   if(event.type==='item.completed'&&item.type==='agent_message'&&typeof item.text==='string'&&item.text.trim()){
     // Whole messages, not tokens: each new one replaces the previous answer.
     const delta=(state.text?'\n\n':'')+item.text;state.final=item.text;return add(delta);
    }

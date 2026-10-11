@@ -148,6 +148,13 @@ assert.match(String((read('codex',[],1).outcome as {error:string}).error),/stopp
  assert.deepEqual(finishLocalHarness('codex',state,{code:0,stderr:''}),{error:'Codex finished without an answer. Try again.'},'a conversation turn still needs words');
  assert.deepEqual(finishLocalHarness('codex',state,{code:1,stderr:''},2).hasOwnProperty('error'),true,'a failed process is not finished work');
 }
+// Recorded shape of Mac Beta 4261's Attention check: a plan, two World tool calls, then an empty final message.
+{
+ const state=localHarnessStream();
+ const deltas=[{type:'item.completed',item:{type:'agent_message',text:'I\'ll read the pending context.'}},{type:'item.completed',item:{type:'agent_message',text:''}},{type:'turn.completed',usage:{}}].map(event=>readLocalHarnessLine('codex',state,JSON.stringify(event))).filter(Boolean);
+ assert.deepEqual(deltas,['I\'ll read the pending context.'],'an empty message adds nothing');
+ assert.deepEqual(finishLocalHarness('codex',state,{code:0,stderr:''},2),{message:'I\'ll read the pending context.'});
+}
 // Codex's sign-in and usage limit are told apart from its other failures.
 assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'Codex is not signed in. Open Terminal, run codex login, then try again.');
 assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'});
