@@ -105,10 +105,11 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const build=typeof __WORLDLET_BUILD__==='undefined'?null:__WORLDLET_BUILD__;
  if(isDev){
   const revision=typeof __WORLDLET_REVISION__==='undefined'?'local':__WORLDLET_REVISION__,committed=typeof __WORLDLET_REVISION_TIME__==='undefined'?'':__WORLDLET_REVISION_TIME__;
-  const line=el('span','world-build-version'),current=el('span','world-build-current'),prefix='Development · '+(typeof __WORLDLET_WORKSPACE__==='undefined'?'':__WORLDLET_WORKSPACE__+' · ')+revision;
+  // Dev shows its build number and how long ago its commit was made; the workspace and commit are in the tooltip.
+  const line=el('span','world-build-version'),current=el('span','world-build-current'),buildNumber=build?.build?'Build '+build.build:'';
+  current.title=['Development',typeof __WORLDLET_WORKSPACE__==='undefined'?'':__WORLDLET_WORKSPACE__,revision].filter(Boolean).join(' · ')+(committed?' · committed '+new Date(committed).toLocaleString():'');
   // How old the running commit is, refreshed each minute.
-  const age=()=>{current.textContent=[prefix,commitAge(committed)].filter(Boolean).join(' · ');};age();setInterval(age,60000);
-  if(committed)current.title='Committed '+new Date(committed).toLocaleString();
+  const age=()=>{current.textContent=['Dev',buildNumber,commitAge(committed)].filter(Boolean).join(' · ');};age();setInterval(age,60000);
   line.append(current);worldletLine.append(line);
  }
  else if(build)worldletLine.append(el('span','world-build-version',displayReleaseVersion(build.version,build.build)));
