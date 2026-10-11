@@ -455,14 +455,17 @@ export function mountNotionWorld(data: World, native: any) {
   function closeRegionShelf(){
    shelfDrop=null;scene?.setPlacementArea(null);if(regionShelf)scene?.frameArea(null);regionShelf?.remove();regionShelf=null;regionShelfTrigger?.focus({preventScroll:true});regionShelfTrigger=null;}
   // An Area recommends Applets related to it that are not in the World yet (owner Order 2026-10-07), worked out here
-  // from the catalog, the apps installed on this computer and the sites visited in Worldlet's browser (hosts and counts
-  // only). The signals are read again at most every ten minutes, never by Fox, and nothing leaves the computer.
-  let areaSignals={installed:new Set<string>(),visits:{} as Record<string,number>,at:0},areaSignalsReading=false;
+  // from the catalog, the apps installed on this computer, the sites visited in Worldlet's browser (hosts and counts
+  // only) and the Applets the person's own Agent suggested. The signals are read again at most every ten minutes, never
+  // by Fox, and nothing leaves the computer.
+  let areaSignals={installed:new Set<string>(),visits:{} as Record<string,number>,suggested:new Set<string>(),at:0},areaSignalsReading=false;
   function readAreaSignals(){
    if(data.sample||areaSignalsReading||Date.now()-areaSignals.at<600_000)return;areaSignalsReading=true;
    const installed=native?.installedApplets?Promise.resolve(native.installedApplets()).then(r=>new Set<string>(Array.isArray(r?.keys)?r.keys:[]),()=>areaSignals.installed):Promise.resolve(areaSignals.installed);
    const visits=native?.visitedSites?Promise.resolve(native.visitedSites()).then(r=>r?.hosts&&typeof r.hosts==='object'?r.hosts:{},()=>areaSignals.visits):Promise.resolve(areaSignals.visits);
-   void Promise.all([installed,visits]).then(([i,v])=>{areaSignals={installed:i,visits:v,at:Date.now()};}).finally(()=>{areaSignalsReading=false;});
+   // What the person's own Agent suggested when it described itself (core/agent/agent-profile.ts), kept on this computer.
+   const suggested=native?.agentSuggestions?Promise.resolve(native.agentSuggestions()).then(r=>new Set<string>(Array.isArray(r?.keys)?r.keys:[]),()=>areaSignals.suggested):Promise.resolve(areaSignals.suggested);
+   void Promise.all([installed,visits,suggested]).then(([i,v,s])=>{areaSignals={installed:i,visits:v,suggested:s,at:Date.now()};}).finally(()=>{areaSignalsReading=false;});
   }
   // An Applet's catalog category is the Area it belongs to by default; the Area it stands in is the person's choice.
   const appCategory=(r:any)=>regionId(getApp(r.key)?.region||r.region||'home');
@@ -554,7 +557,7 @@ export function mountNotionWorld(data: World, native: any) {
    }
    group('On the ground',ground,'Recently used');group('Recently used',apps.filter(app=>!groundIds.has(app.moduleId)),null);
    const mine=new Map<string,string>(sections.filter(r=>r.entity==='app'&&root.appletLayout.has(r.moduleId)).map(r=>[r.moduleId,r.region]));
-   const recommended=recommendForArea({area:id,mine,removed:new Set(data.hiddenApplets||[]),installed:areaSignals.installed,visits:areaSignals.visits,
+   const recommended=recommendForArea({area:id,mine,removed:new Set(data.hiddenApplets||[]),installed:areaSignals.installed,suggested:areaSignals.suggested,visits:areaSignals.visits,
     apps:catalog.map(r=>({id:r.moduleId,key:r.key,category:appCategory(r),host:appWebsite(r)}))}).map(appId=>catalog.find(r=>r.moduleId===appId));
    if(recommended.length)group('Recommended',recommended);
    // Every catalog Applet of this Area's category the person does not have here, by name, behind one button.

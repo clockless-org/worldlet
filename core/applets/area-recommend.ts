@@ -2,7 +2,8 @@
  * person's World yet, worked out on this computer each time the panel opens. No model is asked. An Area is related to
  * its own catalog category, and also, more weakly, to the categories of the Applets the person moved into it. Within
  * those, an Applet installed on this computer comes first, then one whose website the person visits in Worldlet's
- * browser, then catalog order. */
+ * browser, then catalog order. Ahead of all of them come the Applets the person's own Agent suggested when it described
+ * itself (core/agent/agent-profile.ts, owner request 2026-10-11), in their own Area. */
 export type AreaCandidate={id:string;key:string;category:string;host?:string|null};
 export type AreaRecommendInput={
  area:string;
@@ -15,6 +16,8 @@ export type AreaRecommendInput={
  installed?:ReadonlySet<string>;
  /** Visits per website host in Worldlet's browser (no pages or titles). */
  visits?:Readonly<Record<string,number>>;
+ /** Catalog keys the person's own Agent suggested. */
+ suggested?:ReadonlySet<string>;
  limit?:number;
 };
 export const AREA_RECOMMEND_LIMIT=8;
@@ -31,10 +34,10 @@ export function areaCategories(area:string,apps:readonly AreaCandidate[],mine:Re
  for(const app of apps)if(mine.get(app.id)===area&&app.category!==area)weight[app.category]=Math.min(2,(weight[app.category]||0)+1);
  return weight;
 }
-export function recommendForArea({area,apps,mine,removed=new Set(),installed=new Set(),visits={},limit=AREA_RECOMMEND_LIMIT}:AreaRecommendInput):string[]{
+export function recommendForArea({area,apps,mine,removed=new Set(),installed=new Set(),visits={},suggested=new Set(),limit=AREA_RECOMMEND_LIMIT}:AreaRecommendInput):string[]{
  const weight=areaCategories(area,apps,mine);
- return apps.map((app,order)=>({app,order,related:weight[app.category]||0,visited:Math.min(50,visitsFor(app.host,visits)),installed:installed.has(app.key)?1:0}))
+ return apps.map((app,order)=>({app,order,related:weight[app.category]||0,visited:Math.min(50,visitsFor(app.host,visits)),installed:installed.has(app.key)?1:0,suggested:suggested.has(app.key)&&app.category===area?1:0}))
   .filter(({app,related})=>related>0&&!mine.has(app.id)&&!removed.has(app.id))
-  .sort((a,b)=>b.related-a.related||b.installed-a.installed||b.visited-a.visited||a.order-b.order)
+  .sort((a,b)=>b.suggested-a.suggested||b.related-a.related||b.installed-a.installed||b.visited-a.visited||a.order-b.order)
   .slice(0,limit).map(({app})=>app.id);
 }

@@ -99,6 +99,11 @@ assert.throws(()=>updateOnboarding({version:1,presets:['home'],completed:true},{
  const moved=recommendForArea({area:'work',apps,mine:new Map([...mine,['app-spotify','work']]),limit:200});
  assert.ok(moved.includes('app-youtube')&&moved.indexOf('app-youtube')>moved.indexOf('app-zoom'),'moved-in categories follow the Area\'s own');
  assert.ok(!recommendForArea({area:'work',apps,mine,limit:200}).includes('app-youtube'),'unrelated categories stay out');
+ // What the person's own Agent suggested comes first in its own Area, and only there (core/agent/agent-profile.ts).
+ const suggested=new Set(['jira','youtube']);
+ assert.deepEqual(recommendForArea({area:'work',apps,mine,installed:new Set(['zoom']),suggested}).slice(0,2),['app-jira','app-zoom'],'suggested, then installed');
+ assert.ok(!recommendForArea({area:'work',apps,mine,suggested,limit:200}).includes('app-youtube'),'a suggestion stays in its own Area');
+ assert.ok(!recommendForArea({area:'work',apps,mine:new Map([...mine,['app-jira','work']]),suggested}).includes('app-jira'),'one already in the World is not suggested again');
 }
 // The catalog offers every Applet, website Applets included (owner decision 2026-10-11), but not the moving ongoing placeholder.
 {
