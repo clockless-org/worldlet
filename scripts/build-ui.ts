@@ -25,7 +25,8 @@ ${n==='states'?(await Promise.all(STATE_STYLES.map(file=>readFile(path.join(root
  await mkdir(path.join(output,'hud'),{recursive:true});
  for(const [name,file] of Object.entries(BUILTIN_STYLE.hud))await copyFile(path.join(root,file),path.join(output,'hud',name+'.png'));
  await mkdir(path.join(output,'attention'),{recursive:true});
- for(const [name,file] of Object.entries(BUILTIN_STYLE.attention)){const target=path.join(output,'attention',name+'.webp');if(file.endsWith('.webp'))await copyFile(path.join(root,file),target);else await sharp(path.join(root,file)).resize({width:768,withoutEnlargement:true}).webp({quality:82}).toFile(target);}
+ // Each picture is its own file, so they are copied or resized at once.
+ await Promise.all(Object.entries(BUILTIN_STYLE.attention).map(async([name,file])=>{const target=path.join(output,'attention',name+'.webp');if(file.endsWith('.webp'))await copyFile(path.join(root,file),target);else await sharp(path.join(root,file)).resize({width:768,withoutEnlargement:true}).webp({quality:82}).toFile(target);}));
  await mkdir(path.join(output,'fonts'),{recursive:true});
  const fonts=['InterVariable.woff2','InterVariable-Italic.woff2','INTER-LICENSE.txt'];
  for(const n of fonts)await copyFile(path.join(root,'resources/common/fonts',n),path.join(output,'fonts',n));

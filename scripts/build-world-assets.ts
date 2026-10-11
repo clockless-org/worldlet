@@ -17,7 +17,6 @@ export function deviceSource(root:string,key:string,entry:RegisteredTheme=ACTIVE
  return path.join(root,themeAppletArt(entry,key).peek);
 }
 import {paintedBox} from './painted-box.ts';
-export {paintedBox};
 const IMAGE_TYPES:Record<string,string>={'image/png':'png','image/webp':'webp','image/jpeg':'jpg','image/svg+xml':'svg','font/woff2':'woff2','font/woff':'woff','font/ttf':'ttf','font/otf':'otf','audio/mpeg':'mp3','audio/ogg':'ogg','audio/mp4':'m4a','audio/wav':'wav','video/webm':'webm'};
 const FILE_TYPES:Record<string,string>=Object.fromEntries(Object.entries(IMAGE_TYPES).map(([type,ext])=>[ext,type]));
 /** A theme's file as a data URI, which externalizeImages turns into a content-named file beside the payload. */
