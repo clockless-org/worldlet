@@ -2,6 +2,7 @@ import {FINALE,welcomeFinale} from './world-celebration-finale.ts';
 import {skyFireworks} from './world-celebration-sky.ts';
 import {Fireworks} from 'fireworks-js';
 const running=new WeakMap<HTMLElement,()=>void>();
+const winning=new WeakMap<HTMLElement,()=>void>();
 // A brief, non-interactive welcome over the world; never covers it with a modal.
 export function celebrateWorld(root:HTMLElement){
  running.get(root)?.();
@@ -43,6 +44,8 @@ export function celebrateWorld(root:HTMLElement){
 /** A small burst for the first thing Fox gets done: no text, over in about two seconds. */
 export function celebrateWin(root:HTMLElement){
  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ // A second win replaces the first burst rather than stacking another layer over it.
+ winning.get(root)?.();
  const layer=document.createElement('div');layer.className='world-celebration world-win';layer.setAttribute('aria-hidden','true');
  Object.assign(layer.style,{position:'fixed',inset:'0',pointerEvents:'none',overflow:'hidden',zIndex:'78'});root.append(layer);
  const fireworks=new Fireworks(layer,{particles:40,explosion:3,traceLength:5,traceSpeed:10,acceleration:1.05,friction:.965,gravity:1.1,
@@ -50,5 +53,7 @@ export function celebrateWin(root:HTMLElement){
  fireworks.updateBoundaries({x:layer.clientWidth*.25,y:layer.clientHeight*.12,width:layer.clientWidth*.75,height:layer.clientHeight*.4});
  fireworks.launch(1);window.dispatchEvent(new CustomEvent('worldlet:celebration-sound',{detail:{kind:'launch'}}));
  const second=setTimeout(()=>fireworks.launch(1),450);
- setTimeout(()=>{clearTimeout(second);fireworks.stop(true);layer.remove();},2600);
+ const end=()=>{clearTimeout(second);clearTimeout(finish);fireworks.stop(true);layer.remove();if(winning.get(root)===end)winning.delete(root);};
+ const finish=setTimeout(end,2600);
+ winning.set(root,end);
 }
