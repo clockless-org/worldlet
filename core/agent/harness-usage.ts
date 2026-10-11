@@ -79,11 +79,11 @@ export function harnessUsageLabel(value:HarnessUsage|null,{detail=false}:{detail
 
 /** A turn's timings for the World's Fox timing record (core/diagnostics/fox-timing.ts allowlist; logs/fox-timing.jsonl,
  * and only buckets in `fox_timing`): `sessionMs` opening the thread's session (near 0 once warmed), `firstTextMs`
- * from send to the first word of the reply, and the reported tokens. */
-export function harnessTurnTimings({sessionMs,firstTextMs,usage:used}:{sessionMs?:number;firstTextMs?:number|null;usage?:HarnessUsage|null}):Record<string,number> {
+ * from send to the first word of the reply, `toolsMs` the summed time of the turn's World tool calls, and the reported tokens. */
+export function harnessTurnTimings({sessionMs,firstTextMs,toolsMs,usage:used}:{sessionMs?:number;firstTextMs?:number|null;toolsMs?:number;usage?:HarnessUsage|null}):Record<string,number> {
  const out:Record<string,number>={};
  const put=(key:string,value:unknown)=>{const n=count(value);if(n!==undefined)out[key]=n;};
- put('sessionMs',sessionMs);put('firstTextMs',firstTextMs);
+ put('sessionMs',sessionMs);put('firstTextMs',firstTextMs);put('toolsMs',toolsMs);
  if(used){put('input_tokens',used.inputTokens);put('output_tokens',used.outputTokens);put('reasoning_tokens',used.reasoningTokens);put('cache_read_tokens',used.cachedTokens);}
  return out;
 }

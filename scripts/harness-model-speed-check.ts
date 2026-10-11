@@ -66,11 +66,12 @@ for(const id of ['claude-code','codex','pi','remote'])assert.equal(harnessServic
 }
 // Timings for the Fox timing record: allowlisted fields, so the first word reaches `fox_timing` as a bucket only.
 {
- const timings=harnessTurnTimings({sessionMs:3.4,firstTextMs:2100.6,usage:{inputTokens:10,outputTokens:2,cachedTokens:4,reasoningTokens:1,totalTokens:12}});
- assert.deepEqual(timings,{sessionMs:3,firstTextMs:2101,input_tokens:10,output_tokens:2,reasoning_tokens:1,cache_read_tokens:4});
+ const timings=harnessTurnTimings({sessionMs:3.4,firstTextMs:2100.6,toolsMs:1800.4,usage:{inputTokens:10,outputTokens:2,cachedTokens:4,reasoningTokens:1,totalTokens:12}});
+ assert.deepEqual(timings,{sessionMs:3,firstTextMs:2101,toolsMs:1800,input_tokens:10,output_tokens:2,reasoning_tokens:1,cache_read_tokens:4});
  const row=foxTiming({id:'12345678-1234-1234-1234-123456789012',outcome:'complete',completeMs:4000,...timings});
- assert.equal(row!.firstTextMs,2101);assert.equal(row!.sessionMs,3);
- assert.deepEqual(foxTimingEvent(row),{event:'fox_timing',duration:'1_5s',dimensions:{timing_outcome:'complete',first_text_bucket:'1_5s'}});
+ assert.equal(row!.firstTextMs,2101);assert.equal(row!.sessionMs,3);assert.equal(row!.toolsMs,1800);
+ assert.deepEqual(foxTimingEvent(row),{event:'fox_timing',duration:'1_5s',dimensions:{timing_outcome:'complete',first_text_bucket:'1_5s',tools_bucket:'1_5s'}});
+ assert.equal(harnessTurnTimings({sessionMs:1,toolsMs:0}).toolsMs,0,'a turn with no World tool call reports 0 tool time');
 }
 // The thread: each finished turn keeps its usage (kept across a restart), and the place's thread shows its sum.
 {
@@ -138,6 +139,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
    assert.equal(entries().filter(e=>e.new).length,1,'the turn takes the warmed session');
    assert.ok(first.timings.sessionMs<100,`a warmed session opens at once (${first.timings.sessionMs} ms)`);
    assert.ok(first.timings.firstTextMs>=30&&first.timings.firstTextMs<2000,`send to first word measured (${first.timings.firstTextMs} ms)`);
+   assert.equal(first.timings.toolsMs,0,'no World tool call: no tool time');
    assert.deepEqual(first.usage,{inputTokens:1000,outputTokens:50,totalTokens:1050,context:{used:1000,size:200000}});
    assert.deepEqual([first.timings.input_tokens,first.timings.output_tokens],[1000,50],'and its tokens in the timing record');
    const second=await chat('Again');
