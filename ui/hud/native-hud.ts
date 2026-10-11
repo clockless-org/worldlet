@@ -9,17 +9,12 @@ import {summarizeRequest} from '../../core/agent/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
 import {displayReleaseVersion} from '../distribution/index.ts';
-import {attentionOrder,attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionRelevant,attentionRankSignals} from '../../core/attention/index.ts';
+import {attentionOrder,attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionRelevant,attentionRankSignals,attentionLevel} from '../../core/attention/index.ts';
 import {appHudIcon,momentLine} from '../applets/index.ts';
-import {worldletMark} from '../components/index.ts';
-import {collectMatters} from '../attention/index.ts';
-import {attentionLevel} from '../../core/attention/index.ts';
-import {attentionIcon,attentionReturnWhen,attentionGroupWhen} from '../attention/index.ts';
-import {WORLD_UI} from '../components/index.ts';
+import {collectMatters,attentionIcon,attentionReturnWhen,attentionGroupWhen} from '../attention/index.ts';
 import {roomObjects} from '../world/index.ts';
 import {collectNativeActions,upcomingEvents} from '../shell/index.ts';
-import {uiIcon as hudIcon} from '../components/index.ts';
-import {actionButton,node,taskRow} from '../components/index.ts';
+import {WORLD_UI,worldletMark,uiIcon as hudIcon,actionButton,node,taskRow} from '../components/index.ts';
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;
 // The groups are named the way a person would say them, not after the kinds they
 // hold: what is about to happen, what is owed, what is only worth knowing.
@@ -133,7 +128,7 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const sampleLabel=el('span','world-sample-label',snapshot().data.localArchive?'Local Notion':'');sampleLabel.hidden=true;root.querySelector('.notion-tools').prepend(sampleLabel);
  window.addEventListener('worldlet:job',(e: any)=>{const value=e.detail;chat()?.setStatus(snapshot().data.sample?'':value.error||'',{source:'job',persistent:true});});
  let panelLocation='',actionSignature='';
- let model={activities:[],actions:[]},tracked=[],display=[],pending=false,forceNext=false,lastRead=null,busy=new Set(),pointerHeld=false;
+ let model={activities:[],actions:[]},tracked=[],pending=false,forceNext=false,lastRead=null,busy=new Set(),pointerHeld=false;
  function savedDecisions(){try{const value=JSON.parse(storage?.getItem('decisions')||'[]');return Array.isArray(value)?value.filter(v=>typeof v==='string'):[];}catch{return [];}}
  const completed=new Set(savedDecisions());
  const isFrozen=()=>pointerHeld||!forceNext&&((root.contains(document.activeElement)&&[input,actionsRow,barLeft,barRight].some(e=>e===document.activeElement||e.contains(document.activeElement)))||[actionsRow,barLeft,barRight].some(e=>e.matches(':hover')));
@@ -213,18 +208,17 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   fox.setGuide({source:'decision:'+d.id,takeover:true,text:'**'+d.title+'** '+d.objective+'. Pick one; this is the sample, so nothing is sent.',actions:[...d.choices.map(choice),later]});
   fox.revealGuide?.();
  }
- function nextMatter(s){
-  const items=matterItems(s).filter(m=>m.signalCount);
+ function nextMatter(s,items=matterItems(s)){
   const region=s.depth==='building'?s.current:s.sections.find(r=>r.moduleId===s.current||r.id===s.currentSpace)?.buildingId;
   const priority=m=>m.placeId===s.currentSpace?2:s.sections.find(r=>r.id===m.placeId)?.buildingId===region&&region?1:0;
   items.sort((a,b)=>priority(b)-priority(a));
   return items.find(m=>!m.active&&!nextVisited.has(m.id))||items.find(m=>!m.active)||items[0];
  }
  function nextFocus(){
-  const s=snapshot(),items=matterItems(s).filter(m=>m.signalCount);
+  const s=snapshot(),items=matterItems(s);
   if(items.every(m=>m.active||nextVisited.has(m.id)))nextVisited.clear();
-  const next=nextMatter(s);chat()?.hidePreview?.();
-  if(next){const live=new Set(matterItems(s).map(m=>m.id));for(const id of nextVisited)if(!live.has(id))nextVisited.delete(id);nextVisited.add(next.id);focusItem(next);}
+  const live=new Set(items.map(m=>m.id)),next=nextMatter(s,items);chat()?.hidePreview?.();
+  if(next){for(const id of nextVisited)if(!live.has(id))nextVisited.delete(id);nextVisited.add(next.id);focusItem(next);}
   else nextVisited.clear();
  }
  const seenMatters=new Set<string>(),matterArrivals=new Map<string,number>();let mattersInitialized=false,matterSignature='';
@@ -420,7 +414,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   }
  }
  function render(){
-  display=dockOptions();const choices=display;
+  const choices=dockOptions();
   const left=el('div','fox-action-side fox-action-left'),right=el('div','fox-action-side fox-action-right');
   const restoreBackFocus=document.activeElement===backButton;
   // sceneState still owns this required control during desktop → world
@@ -515,15 +509,14 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   chat()?.setContext?.(custom?.context||{key:s.depth+':'+s.current,title,detail:s.depth==='overview'?(model.actions.find(a=>a.state==='needsAction')?'Next up: '+model.actions.find(a=>a.state==='needsAction').label+'.':''):(object?.summary||room?.summary||'').slice(0,180)});
  }
  function sync(){worldLog?.redraw();const s=snapshot();if(pointerHeld){syncContext(s);pending=true;return;}const locationKey=s.depth+':'+s.current;if(locationKey!==panelLocation){root.querySelector('#notionDialog').close();area.dataset.dismissed='false';panelLocation=locationKey;}if(s.depth==='note')lastRead=s.current;model=collect();context.hidden=true;backButton.hidden=s.depth==='overview'&&(root.querySelector('#notionContent') as HTMLElement|null)?.hidden!==false;renderTasks();renderArea(s);if(area.dataset.dismissed==='true')area.hidden=true;const panel=['place','area','building','room','object'].includes(s.depth)?area:['note','search'].includes(s.depth)?root.querySelector('#notionContent'):root;panel.prepend(context);context.classList.toggle('world-panel-context',s.depth!=='overview');
-  const custom=contextual(),room=s.sections.find(r=>r.id===s.currentSpace),building=s.buildings?.find(b=>b.id===s.current),object=room&&roomObjects(room,s.pages,s.composites).find(o=>o.id===s.current),page=s.pages.get(s.current);
+  const room=s.sections.find(r=>r.id===s.currentSpace);
   const applet=['object','note'].includes(s.depth)&&room?.entity==='app'?room:null,appletIcon: any=applet?appHudIcon(applet):{},logo=appletIcon.source||null;titleLogo.hidden=!logo;if(logo&&titleLogo.getAttribute('src')!==logo)titleLogo.src=logo;
   const overview=s.depth==='overview';
-  const title=overview?(s.data.appName||'Worldlet'):s.depth==='search'?'Search':building?.title||object?.title||page?.title||room?.title||'World';
   // World carries our mark; regions stay plain and Applets keep their own logos.
   const icon=overview?worldletMark({monochrome:false}):appletIcon.emoji||'';
   if(titleIcon._icon!==icon){titleIcon._icon=icon;titleIcon.innerHTML=icon;titleIcon.dataset.kind=overview?'mark':'emoji';}
   titleIcon.hidden=!icon;
-  chat()?.setContext?.(custom?.context||{key:locationKey,title,detail:s.depth==='overview'?(model.actions.find(a=>a.state==='needsAction')?'Next up: '+model.actions.find(a=>a.state==='needsAction').label+'.':''):(object?.summary||room?.summary||'').slice(0,180)});
+  syncContext(s);
   const docked=dockOptions(),signature=JSON.stringify(docked.map(a=>[a.id,a.label,a.disabled,a.description]));if(signature!==actionSignature){actionSignature=signature;forceNext=true;actionsRow.scrollLeft=0;}
   // Frozen buttons keep their original label; availability is a suffix, never repeated.
   if(isFrozen()){pending=true;const valid=new Set(docked.map(a=>a.id));actionsRow.querySelectorAll('[data-action-id]').forEach(b=>{const id=b.dataset.actionId,base=b.dataset.baseLabel??=b.getAttribute('aria-label');b.disabled=!valid.has(id)||busy.has(id)||!!docked.find(a=>a.id===id)?.disabled;const label=b.disabled?base+', currently unavailable':base;if(b.getAttribute('aria-label')!==label)b.setAttribute('aria-label',label);});return;}pending=false;forceNext=false;render();
