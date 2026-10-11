@@ -173,6 +173,15 @@ try{
   observeBattleMessage(watch,{visit:'v1',site:'example.com',at,body:`>${room(3)}\n|init|battle\n|player|p1|Ash Fox|\n|win|Ash Fox`});
   assert.equal(finishedBattles(watch).length,1,'only sites whose battle protocol is known');
  }
+ // A saved watch past the limit (say, kept while the limit was higher) comes back to it at the next battle: the oldest
+ // reviewed games go first, as many as it takes, not every other one.
+ {
+  const watch=fresh(),extra=6;
+  for(let n=0;n<BATTLE_REVIEW.keep+extra;n++)watch.battles[room(100+n)]={room:room(100+n),visit:'v1',site:'play.pokemonshowdown.com',startedAt:n,lastAt:n,players:{},turns:7,endedAt:n+1,reviewed:true};
+  play(watch,999,{end:false});
+  assert.equal(Object.keys(watch.battles).length,BATTLE_REVIEW.keep,'the remembered battles come back to the limit');
+  assert.deepEqual(Object.keys(watch.battles).sort(),[...Array.from({length:BATTLE_REVIEW.keep-1},(_,n)=>room(100+extra+1+n)),room(999)].sort(),'the oldest ones were forgotten');
+ }
  // Without a lobby name, the site asking them to choose says which side is theirs.
  {
   const watch=battleWatch();
