@@ -33,11 +33,10 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  }
  const after=await list.boundingBox();assert.equal(after.y,initial.y,'Navigation stays fixed');
  await list.locator('[data-setting=fox]').click();
- // Profile on the left, what Fox can do on the right, scrolling on its own.
- const profileBox=await panel.locator('.companion-profile-page .companion-info-profile').boundingBox(),abilities=panel.locator('.companion-profile-page .companion-abilities'),abilitiesBox=await abilities.boundingBox();
- assert(profileBox&&abilitiesBox&&profileBox.x+profileBox.width<=abilitiesBox.x,'abilities sit right of the profile');
- assert(await abilities.getByText('Your memory',{exact:true}).count()===1);
- assert.equal(await abilities.evaluate(e=>getComputedStyle(e).overflowY),'auto','abilities scroll');
+ // Fox's page is who Fox is: no example cards, and what it knows is in Agent › Memory (owner request 2026-10-11).
+ await panel.locator('.companion-profile-page .companion-info-profile').waitFor();
+ assert.equal(await panel.locator('.companion-info-card').count(),0,'no example cards');
+ assert.equal(await panel.locator('.companion-profile-page .companion-profile-knowledge').count(),0,'what Fox knows is not on its page');
  await page.screenshot({path:'/tmp/companion-panel-desktop.png'});
  for(const viewport of [{width:375,height:812},{width:812,height:375}]){
   await page.setViewportSize(viewport);

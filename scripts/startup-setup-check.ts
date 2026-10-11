@@ -239,7 +239,7 @@ await withBrowser(fileAccess,async browser=>{
   // Each card shows its own name, then where it comes from and what comes along.
   assert.equal(await page.locator('[data-agent="openclaw"] .setup-agent-name').textContent(),'Nova');
   assert.equal(await page.locator('[data-agent="openclaw"] .setup-agent-sub').textContent(),'OpenClaw');
-  assert.deepEqual(await page.locator('[data-agent="openclaw"] .setup-agent-chip').allTextContents(),['6 conversations','31 notes','2 skills','3 routines']);
+  assert.deepEqual(await page.locator('[data-agent="openclaw"] .setup-agent-chip').allTextContents(),['6 conversations','31 daily notes','2 skills','3 routines']);
   // Only some command lines can call World tools; the card says so before the choice.
   assert.equal(await page.locator('[data-agent="pi"] .setup-signin-tag').textContent(),'Chat only');
   assert.equal(await page.locator('[data-agent="pi"]').getAttribute('title'),'With pi, Fox can talk with you but can’t act in your world yet.');

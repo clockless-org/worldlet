@@ -71,7 +71,7 @@ try{
  const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
  // Six named sections in the owner's order (2026-10-11), each a heading and one plain line.
  assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','memory','skills','routines','permissions','accounts'],'Model, Memory, Skills, Routines, Permissions, then Accounts last');
- assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Routines','Permissions','Accounts']);
+ assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Routines','Permissions','Connections']);
  for(const line of await local.locator('[data-part] > .companion-settings-partnote').allTextContents())assert.ok(line.length>20&&line.length<160&&!line.includes('\n'),'one plain line: '+line);
  assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),6,'each section has its line');
  // Memory: what each Agent remembers, About you first, the first few with Show all; read only.
@@ -104,7 +104,7 @@ try{
  await ccTools.getByText('Claude Code keeps these in its own settings. Change them in Claude Code itself.',{exact:true}).waitFor();
  await local.locator('[data-part=routines]').getByText(/the same Routines as in the Task panel/).waitFor();
  await permissions.getByRole('heading',{name:'Permissions',exact:true}).waitFor();
- await accounts.getByRole('heading',{name:'Accounts',exact:true}).waitFor();
+ await accounts.getByRole('heading',{name:'Connections',exact:true}).waitFor();
  // Skills: the Agent's own, with when each last ran and an Off mark; Turn off asks first, then runs its own command.
  const skillsPart=local.locator('[data-part=skills]'),routinesPart=local.locator('[data-part=routines]');
  const seed=skillsPart.locator('[data-skill=seed-swap]');
@@ -284,5 +284,5 @@ try{
  await page.waitForFunction(()=>{const part=document.querySelector('#companionInfo .companion-settings-detail [data-part=accounts]'),pane=document.querySelector('#companionInfo .companion-settings-detail');if(!part||!pane)return false;const a=part.getBoundingClientRect(),b=pane.getBoundingClientRect();return a.top>=b.top-1&&a.top<b.bottom-40&&pane.scrollTop>0;});
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; six named sections (Model, Memory, Skills, Routines, Permissions, Accounts) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts is the page\'s last part and old Accounts entry points land on it');
+ console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; six named sections (Model, Memory, Skills, Routines, Permissions, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts is the page\'s last part and old Accounts entry points land on it');
 }finally{await browser.close();}
