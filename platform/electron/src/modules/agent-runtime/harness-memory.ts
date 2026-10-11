@@ -21,13 +21,13 @@ function memoryFiles(id:string,home:string|undefined,env:NodeJS.ProcessEnv):{roo
  if(id==='pi')return {root:piHome(home,env),user:'',memory:'AGENTS.md'};
  return null;
 }
-/** A file's place said the short way: under the person's home as `~/…`. Hermes Agent's folder is found by its real
- * path, so a home reached through a link (macOS `/var` → `/private/var`) is matched by its real path too. */
+/** A file's place said the short way: under the person's home as `~/…`, with `/` on Windows too. Hermes Agent's folder
+ * is found by its real path, so a home reached through a link (macOS `/var` → `/private/var`) matches by its real path. */
 function shortPath(file:string,home:string):string {
  if(!home)return file;
  let real=home;try{real=fs.realpathSync.native(home);}catch{}
  const base=[home,real].find(base=>file.startsWith(base+path.sep));
- return base?'~'+file.slice(base.length):file;
+ return base?'~'+file.slice(base.length).split(path.sep).join('/'):file;
 }
 
 export function harnessMemory(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessMemory|null {
