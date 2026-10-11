@@ -236,10 +236,15 @@ return Promise.resolve(${process.platform==='darwin'?'null':'api&&PublicKeyCrede
    try{
     await until('the tab\'s page loads',()=>tabbedLoads>0&&!tabbed.isLoading&&tabbed.url==='https://demo.worldlet.test/brightsmile',30000);
     const opened:{url:string,background:boolean}[]=[];tabbed.onOpenTab=(url,background)=>opened.push({url,background});
+    const changed=Date.now();
     await tabbed.evaluate(`document.documentElement.innerHTML='<body style="margin:0"><a id=tab href="https://example.com/hotel" target="_blank" style="position:absolute;left:100px;top:100px;width:200px;height:40px;display:block">Hotel</a><button id=sized style="position:absolute;left:100px;top:200px;width:200px;height:60px">Sign in</button></body>';
 window.linkClicks=0;document.getElementById('tab').addEventListener('click',()=>{window.linkClicks++;});
 document.getElementById('sized').addEventListener('click',()=>{window.open('about:blank','signin','width=400,height=500');});return true;`,{},{isolated:false});
     const tabSurface=(tabbed as any).surface;
+    // The press goes in once the panel shows a frame of the new content, and the surface counts the presses it
+    // gets, so a failure says whether the press reached the surface, the page, or the engine's new tab.
+    await until('the tab\'s page draws its new content',()=>tabSurface.lastDrawn>changed);
+    await tabSurface.contents.executeJavaScript("window.surfacePresses=0;document.documentElement.addEventListener('pointerdown',()=>{window.surfacePresses++;},true);true");
     const press=(x:number,y:number)=>{for(const type of ['mouseDown','mouseUp'] as const)tabSurface.contents.sendInputEvent({type,x,y,button:'left',clickCount:1});};
     const tabRefused:any[]=[];tabbed.onRefused=value=>tabRefused.push(value);
     const linkClicks=()=>tabbed.evaluate('return window.linkClicks;',{},{isolated:false}) as Promise<number>;
@@ -253,7 +258,7 @@ document.getElementById('sized').addEventListener('click',()=>{window.open('abou
      if(clicked||attempt===3)break;
      (tabbed as any).input({t:'focus',focus:true});
     }
-    await until('the link opens a tab',()=>opened.length>0).catch(async error=>{throw Error(error.message+' (link clicks '+await linkClicks()+', popup '+tabbed.hasPopup+', address '+tabbed.url+', refused '+JSON.stringify(tabRefused)+')');});
+    await until('the link opens a tab',()=>opened.length>0).catch(async error=>{throw Error(error.message+' (surface presses '+await tabSurface.contents.executeJavaScript('window.surfacePresses')+', link clicks '+await linkClicks()+', popup '+tabbed.hasPopup+', address '+tabbed.url+', refused '+JSON.stringify(tabRefused)+')');});
     assert.deepEqual(opened,[{url:'https://example.com/hotel',background:false}]);
     assert.ok(!tabbed.hasPopup&&tabbed.url==='https://demo.worldlet.test/brightsmile','the page stays, without a popup');
     press(200,230);
