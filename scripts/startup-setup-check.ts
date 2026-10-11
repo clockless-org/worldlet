@@ -302,6 +302,14 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(brought&&brought.local_agent==='openclaw'&&brought.integrations_came_over==='1_9'&&brought.integrations_reconnect==='1_9'&&/^(0|1_9|10_99|100_999|1000_plus)$/.test(brought.bring_conversations),JSON.stringify(brought));
   assert.ok(!JSON.stringify(usage).match(/GitHub|Nova|#|\//),'No titles, names or paths in setup events');
   assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true,'Choosing an Agent allows Fox to use the world’s context');
+  // OpenClaw then describes itself in the background (core/agent/agent-profile.ts): what its files did not show joins
+  // the tiles and the World's selection, and only the outcome and a count leave the device.
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:'openclaw',result:'ok',ms:40000,profile:{agent:{name:'Nova'},workspaces:[],aboutUser:[],skills:[{name:'a'},{name:'b'},{name:'c'},{name:'d'},{name:'e'}],connections:[{name:'1Password vault',kind:'password_vault',service:'1password'}],channels:[{provider:'discord',place:'#groceries'}],routines:[],threads:[],applets:[{key:'amazon',title:'Amazon',why:'Restocks the kitchen'}]}}})));
+  await page.waitForFunction(()=>document.querySelectorAll('.setup-tile-connections .setup-tile-logos>*').length===4);
+  assert.equal(await page.locator('.setup-tile-skills .setup-tile-count').textContent(),'5','The skills it named count when its files held fewer');
+  assert.ok(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('worldlet-startup-setup:')).some(k=>JSON.parse(localStorage.getItem(k)!).applets.includes('app-amazon'))),'The Applets it suggests join the World');
+  const described=await page.evaluate(()=>(window as any).calls.find(c=>c.action==='usageEvent'&&c.event==='agent_profile_result'));
+  assert.ok(described&&described.local_agent==='openclaw'&&described.profile_result==='ok'&&described.bring_connections==='1_9'&&!/Password|groceries|Nova/.test(JSON.stringify(described)),JSON.stringify(described));
   // Restarting setup resumes with what already came over, read nothing again.
   await page.reload();
   await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
@@ -328,7 +336,7 @@ await withBrowser(fileAccess,async browser=>{
   // The connections float up with the apps and become their icons, never into Fox (owner request 2026-10-11).
   assert.equal(ends.ends['setup-tile-connections'],undefined,'Connections do not go into Fox');
   const marks=await page.evaluate(()=>(window as any).markEnds||[]);
-  assert.ok(marks.length===2&&marks.every(m=>m.top<ends.height*.4&&m.opacity===0),'Both connections float up and become app icons: '+JSON.stringify(marks));
+  assert.ok(marks.length===4&&marks.every(m=>m.top<ends.height*.4&&m.opacity===0),'All four connections (two ported, two the Agent reported) float up and become app icons or fade on top: '+JSON.stringify(marks));
   assert.ok(ends.ends['setup-tile-notes']&&ends.ends['setup-tile-notes'].x<ends.width*.4&&ends.ends['setup-tile-notes'].y<ends.height*.25,'Daily notes go to the Journal at the top left (owner decision 2026-10-11): '+JSON.stringify(ends));
   for(const kind of ['setup-tile-profile','setup-tile-conversations','setup-tile-skills'])assert.ok(ends.ends[kind]&&ends.ends[kind].y>ends.height*.6,kind+' goes into Fox at the bottom: '+JSON.stringify(ends));
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));

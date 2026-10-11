@@ -27,3 +27,8 @@ export function agentBringDimensions(agent:string,brought:{conversations?:number
   integrations_reconnect:countBucket(outcomes.filter(o=>o==='reconnect').length)
  };
 }
+/** `agent_profile_result`: whether the chosen Agent described itself (core/agent/agent-profile.ts) and how many
+ * connections it reported. */
+export function agentProfileDimensions(agent:string,result:string,connections:number):Record<string,string> {
+ return {local_agent:agent,profile_result:result,bring_connections:countBucket(connections)};
+}

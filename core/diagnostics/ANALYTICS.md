@@ -57,6 +57,7 @@ Owner goal 2026-10-06: the target customer already runs an Agent (OpenClaw, Clau
 | `local_agent_select_failed` | It did not start, is not signed in or did not answer | `local_agent`, `error_code`, `duration_bucket` |
 | `agent_bring_completed` | Setup finished bringing it in, integrations included | `local_agent`, `bring_conversations`, `bring_notes`, `bring_skills`, `bring_routines`, `bring_model`, `bring_memory` (`yes`/`no`), `integrations_came_over`, `integrations_reconnect`, `duration_bucket` |
 | `agent_bring_failed` | Bringing it in failed | `local_agent`, `error_code`, `duration_bucket` |
+| `agent_profile_result` | The chosen Agent answered or not when asked to describe itself as JSON ([plan](../agent/agent-profile.ts)); setup never waits for it | `local_agent`, `profile_result` (`ok`, `timeout`, `invalid`, `failed`), `bring_connections` (connections it reported, bucketed), `duration_bucket` |
 | `tour_skipped` | The Tutorial switch turned off in the first run | `tour_step` (`1`–`8`, the [tour's steps](../../ui/onboarding/README.md#after-arrival-guided-tour-then-a-first-useful-task)) |
 | `first_win` | The first-value task was settled and celebrated | none |
 
