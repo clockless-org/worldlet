@@ -324,7 +324,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Enter your world',exact:true}).click();
   await page.waitForFunction(()=>!document.getElementById('worldStartup'),{},{timeout:30000});
   const ends=await page.evaluate(()=>({ends:(window as any).parcelEnds,width:innerWidth,height:innerHeight}));
-  assert.ok(ends.ends['setup-tile-routines']&&ends.ends['setup-tile-routines'].x>ends.width*.6&&ends.ends['setup-tile-routines'].y>ends.height*.75,'Routines go to the dock on Fox’s right (owner layout 2026-10-11): '+JSON.stringify(ends));
+  assert.ok(ends.ends['setup-tile-routines']&&ends.ends['setup-tile-routines'].x<ends.width*.45&&ends.ends['setup-tile-routines'].y>ends.height*.75,'Routines go to Scheduled on Fox’s left (owner layout 2026-10-11): '+JSON.stringify(ends));
   // The connections float up with the apps and become their icons, never into Fox (owner request 2026-10-11).
   assert.equal(ends.ends['setup-tile-connections'],undefined,'Connections do not go into Fox');
   const marks=await page.evaluate(()=>(window as any).markEnds||[]);
