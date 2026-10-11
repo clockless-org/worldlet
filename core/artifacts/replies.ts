@@ -113,7 +113,7 @@ export function replyPrepareStatus(c:ReplyCandidate){
  const chars=Array.from(c.title),title=chars.length>36?chars.slice(0,35).join('')+'…':c.title;
  return title?'Drafting a reply: '+title+'…':'Drafting a reply…';
 }
-export type FoxWorkKind='plan'|'summary'|'reply';
+export type FoxWorkKind='plan'|'summary'|'reply'|'follow-up';
 const replies=(n:number)=>n===1?'1 reply':n+' replies';
 /** What the top-right says once the work is done, briefly, before it fades; '' says nothing (no draft made). */
 export function foxWorkDone(kind:FoxWorkKind,drafted:number):string {

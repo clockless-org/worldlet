@@ -12,7 +12,7 @@ import {carriesConversation,worldSpeechTerms} from '../../core/companion/index.t
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
-import {mountFoxArtifact,flyIntoJournal,artifactPageSpec} from '../artifacts/index.ts';
+import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../artifacts/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../core/applets/index.ts';
 import {attentionRequest,journalTarget} from '../../core/agent/index.ts';
@@ -22,7 +22,7 @@ import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../core/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
-import {artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
+import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE} from '../world/index.ts';
@@ -152,7 +152,12 @@ export function mountNotionWorld(data: World, native: any) {
    blocks=>{if(shownArtifact){shownArtifact={...shownArtifact,blocks};keepArtifact(shownArtifact);}},
    native?.artifactPages);
   function putArtifactAway(){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
-  function draftRequest(action:{request:string}){const input=root.querySelector('#notionInput') as HTMLTextAreaElement|HTMLInputElement|null;if(!input)return;input.value=action.request;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange?.(input.value.length,input.value.length);}
+  // The next step picked on the open card, until it is sent: sent while the card is still open, it runs in the
+  // background as a follow-up beside Fox (core/artifacts/follow-up.ts, followUp below).
+  // An emptied bar drops it.
+  let followUpDraft:ArtifactFollowUpDraft|null=null,followUpWatched=false;
+  function draftRequest(action:{request:string}){if(shownArtifact&&foxArtifact.visible)followUpDraft={id:String(shownArtifact.id),title:String(shownArtifact.title||''),request:action.request};const input=root.querySelector('#notionInput') as HTMLTextAreaElement|HTMLInputElement|null;if(!input)return;
+   if(!followUpWatched){followUpWatched=true;input.addEventListener('input',()=>{if(!input.value.trim())followUpDraft=null;});}input.value=action.request;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange?.(input.value.length,input.value.length);}
   // Theme-driven Artifacts (core/artifacts/README.md#theme-driven-artifacts): an answer shown at medium or large size in
   // the World is laid out as a page in the theme's style by a quiet background task; the template card shows until then.
   async function requestArtifactPage(artifact:{id:string;kind:'answer'|'attention';size:'small'|'medium'|'large'},inApplet=insideApplet()){
@@ -1375,6 +1380,7 @@ export function mountNotionWorld(data: World, native: any) {
   let daily=readDailyArtifactsState(null);try{daily=readDailyArtifactsState(JSON.parse(localStorage.getItem(dailyKey)||'null'));}catch{}
   const saveDaily=()=>{try{localStorage.setItem(dailyKey,JSON.stringify(daily));}catch{}announceDaily();};
   window.addEventListener('worldlet:product-event',(event:any)=>{if(event.detail?.event!=='user_engaged'||data.sample)return;daily=markDailyUse(daily,new Date());saveDaily();});
+  let followUpAsking=false;
   let dailyAsking=false,dailyAsked:{kind:'plan'|'summary';day:string}|null=null,dailyShown=false;
   let routinesOn=DAILY_ROUTINES_ON;
   const setRoutines=(value:unknown)=>{routinesOn=readDailyRoutines(value);announceDaily();};
@@ -1394,7 +1400,7 @@ export function mountNotionWorld(data: World, native: any) {
   setTimeout(announceDaily,0);
   // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
   // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
-  const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep||!!root.dataset.tourCoda,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking});
+  const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep||!!root.dataset.tourCoda,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking||followUpAsking});
   const dailyPoll=setInterval(()=>{
     if(!root.isConnected){clearInterval(dailyPoll);return;}
     announceDaily();
@@ -1407,10 +1413,10 @@ export function mountNotionWorld(data: World, native: any) {
   // What Fox is doing, for its name tag and the World's Task panel (worldlet:fox-status): the step while it works, then
   // empty with what was done, which closes its window in the panel (ui/hud/task-panel.ts). Reply drafts made meanwhile
   // are counted from the host's worldlet:email-drafted.
-  function backgroundWork(source:string,kind:FoxWorkKind,text:string){
+  function backgroundWork(source:string,kind:FoxWorkKind,text:string,name?:string){
     let drafted=0;const count=()=>{drafted++;};
     window.addEventListener('worldlet:email-drafted',count);
-    window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text}}));
+    window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text,...(name?{name}:{})}}));
     return {drafted:()=>drafted,end(ok:boolean){window.removeEventListener('worldlet:email-drafted',count);
      window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text:'',...(ok?{done:foxWorkDone(kind,drafted)}:{})}}));}};
   }
@@ -1431,6 +1437,24 @@ export function mountNotionWorld(data: World, native: any) {
      .catch(error=>{ok=false;const said=String(error?.message||'');if(/busy/i.test(said)){daily=before;saveDaily();}else failed=said||'Your Agent stopped.';})
      .finally(()=>{work.end(ok);dailyAsking=false;dailyAsked=null;});
     if(failed)void Promise.resolve(native?.artifacts?.({operation:'scheduleFailed',scheduled:due.kind,day:due.day,reason:failed})).catch(()=>{});
+  }
+  // A follow-up on an Artifact (core/artifacts/follow-up.ts, owner request 2026-10-11): the card turns over and drops into
+  // the Doing now side beside Fox, and its request runs in a background session beside the conversation; what it makes
+  // comes back as a new card. Busy with other background work, it is an ordinary turn instead.
+  function followUp(sent:string){
+    const draft=followUpDraft;followUpDraft=null;
+    // The person's own request: only the practice world and work already running beside the conversation keep it a turn.
+    if(!draft||!voice?.background||data.sample||followUpAsking||dailyAsking||replyAsking)return false;
+    const request=artifactFollowUpRequest(draft,sent),input=$('notionInput') as HTMLTextAreaElement|HTMLInputElement;
+    input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));
+    followUpAsking=true;
+    const work=backgroundWork('follow-up','follow-up',request.status,request.name);
+    void turnIntoDock(root,$('foxArtifact'),()=>{foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();},{title:request.name,status:request.status});
+    let ok=true;
+    void Promise.resolve(voice.background(request.text,{displayText:request.displayText}))
+     .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||'')))voice?.submit?.(sent);})
+     .finally(()=>{work.end(ok);followUpAsking=false;});
+    return true;
   }
   // Replies Fox prepares by itself (owner decision 2026-10-09; rules in core/artifacts/replies.ts): a new Worth Doing
   // item from a Gmail thread that waits for the person gets a reply draft in a background session, a reply card in
@@ -1966,6 +1990,7 @@ export function mountNotionWorld(data: World, native: any) {
    // In a website, an address typed to Fox opens there: the input is also the address bar.
    const input=$('notionInput') as HTMLTextAreaElement|HTMLInputElement,address=!content.hidden&&content.dataset.template==='browser'?typedAddress(input.value):null;
    if(address&&openWorldURL(address)){input.value='';input.dispatchEvent(new Event('input'));return;}
+   if(artifactFollowUpSent(followUpDraft,input.value,foxArtifact.visible&&shownArtifact?String(shownArtifact.id):null)&&followUp(input.value))return;
    voice.submit()};
   // The first-run tour's first value can be a conversation the person brought (ui/onboarding/first-value.ts).
   let firstValueOngoing:{list:()=>{id:string,title:string,say:string}[],make:(id:string)=>Promise<boolean>}|null=null;

@@ -8,7 +8,7 @@ import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 // World, then "+N", which opens the whole list. A running card opens its window above it (the step, when it started, who
 // does it and every line it said), or the page Fox drives, which a click opens; a routine card opens a read-only
 // popover. Nothing finished shows: it lives in the Journal. They never cover the Attention Center or the message bar;
-// during the tour only Routines show; they step aside beside an open Applet and while the person talks with Fox; at
+// during the tour only Routines show; they stay clear of the message bar while the person types and step aside beside an open Applet; at
 // 800px wide each side is only its count, and in a window 540px tall they are gone. Bundled UI, faked bridge, fixed
 // clock, fictional jobs, mail and page.
 const t0=new Date(2026,9,10,9,30);
@@ -157,11 +157,15 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await shown(),['routines'],'Doing now waits for the tour to end');
  await page.evaluate(()=>{delete (document.querySelector('.native-console') as HTMLElement).dataset.tourStep;});
  assert.deepEqual(await shown(),['now','routines']);
- // While the person talks with Fox, the conversation has the bottom of the World.
- await page.evaluate(()=>document.querySelector('.native-console')!.classList.add('companion-talking'));
- await panel.waitFor({state:'hidden'});
- await page.evaluate(()=>document.querySelector('.native-console')!.classList.remove('companion-talking'));
- await now.waitFor({state:'visible'});
+ // While the person types to Fox the message bar opens wider; the cards stay clear of it and its buttons.
+ await page.locator('#notionInput').click();
+ await page.locator('#notionInput').fill('Hello');
+ {
+  const clear=await page.evaluate(()=>{const entry=document.querySelector('.companion-text-entry')!,bars=[entry,...entry.querySelectorAll('button')].map(e=>e.getBoundingClientRect()).filter(r=>r.width),cards=[...document.querySelectorAll('.task-panel .task-card,.task-panel .task-more')].filter(c=>(c as HTMLElement).offsetParent).map(c=>c.getBoundingClientRect());return {bars:bars.map(b=>[b.x,b.right]),overlap:cards.filter(c=>bars.some(bar=>c.right>bar.x&&c.x<bar.right&&c.bottom>bar.y&&c.y<bar.bottom)).length,count:cards.length};});
+  assert.ok(clear.count>0&&clear.overlap===0,'clear of the open message bar: '+JSON.stringify(clear));
+ }
+ await page.locator('#notionInput').fill('');
+ await page.keyboard.press('Escape');
  // Beside an open Applet they step aside.
  await page.evaluate(()=>{const r=document.querySelector('.native-console') as HTMLElement;r.dataset.depth='object';r.dataset.page='app-gmail';});
  await panel.waitFor({state:'hidden'});
@@ -197,4 +201,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(narrowErrors,[]);
  assert.deepEqual(errors,[]);
 });
-console.log('PASS tasks beside Fox: doing now on its left and the next Routines on its right, on the message bar’s line, one card style, two a side then +N for the whole list; a running card opens its window or the page Fox drives, a routine its read-only facts, read again when Settings pauses or resumes one; nothing finished; only Routines in the tour, aside while talking or beside an Applet, counts only at 800px wide and gone at 540px tall');
+console.log('PASS tasks beside Fox: doing now on its left and the next Routines on its right, on the message bar’s line, one card style, two a side then +N for the whole list; a running card opens its window or the page Fox drives, a routine its read-only facts, read again when Settings pauses or resumes one; nothing finished; only Routines in the tour, clear of the open message bar, aside beside an Applet, counts only at 800px wide and gone at 540px tall');
