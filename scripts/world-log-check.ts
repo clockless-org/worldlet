@@ -87,9 +87,11 @@ try{
  assert.equal(await page.locator('.world-log,.world-log-next,.world-log-lines,.world-log-line').count(),0,'no log in the World corner');
  // The bottom-right corner: Worldlet's mark and name, then the Agent and its version, right of the middle.
  const corner=page.locator('#notionHome.world-watermark');
- await page.waitForFunction(()=>document.querySelector('.world-agent-version')?.textContent==='Hermes Agent 0.21.4');
+ await page.waitForFunction(()=>document.querySelector('.world-agent-version')?.textContent==='Hermes Agent 0.21.4'&&!!document.querySelector<HTMLImageElement>('.world-agent-version img.world-agent-icon')?.complete);
  assert.equal(await corner.isVisible(),true,'the corner shows');
  assert.equal(await corner.locator('.world-brand-mark').count(),1,'with Worldlet\'s mark');
+ assert.match(await corner.locator('.world-agent-icon').getAttribute('src'),/hermes\.png$/,'and the Agent\'s mark');
+ assert.ok(await corner.locator('.world-agent-icon').evaluate((e:HTMLImageElement)=>e.naturalWidth>0),'the Agent\'s mark loads');
  assert.match(await corner.locator('.world-brand').textContent(),/Worldlet/);
  const box=(await corner.boundingBox())!;assert.ok(box.x>1440/2&&box.y>900*0.8,'bottom right '+JSON.stringify(box));
  // New events and what an Applet is doing now are read for the phone's Applet world.

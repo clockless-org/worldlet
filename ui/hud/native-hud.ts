@@ -11,7 +11,7 @@ import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
 import {displayReleaseVersion} from '../distribution/index.ts';
 import {attentionOrder,attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionRelevant,attentionRankSignals,attentionLevel} from '../../core/attention/index.ts';
-import {appHudIcon,momentLine} from '../applets/index.ts';
+import {appHudIcon,momentLine,AGENT_ICONS} from '../applets/index.ts';
 import {collectMatters,attentionIcon,attentionReturnWhen,attentionGroupWhen} from '../attention/index.ts';
 import {roomObjects} from '../world/index.ts';
 import {collectNativeActions,upcomingEvents} from '../shell/index.ts';
@@ -118,7 +118,9 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const readAgent=async()=>{
   const turn=++agentTurn,found=await callHost('agentHarness',{operation:'detect'}).catch(()=>null);
   if(turn!==agentTurn)return;
-  const text=agentVersionLine(found);agentLine.textContent=text;agentLine.hidden=!text;
+  const {id,text}=agentVersionLine(found),src=AGENT_ICONS[id]||'';agentLine.replaceChildren();
+  if(src){const icon=document.createElement('img');icon.className='world-agent-icon';icon.src=src;icon.alt='';agentLine.append(icon);}
+  agentLine.append(el('span','world-agent-name',text));agentLine.hidden=!text;
  };
  void readAgent();
  for(const name of ['worldlet:model-changed','worldlet:model-refresh'])window.addEventListener(name,()=>void readAgent());

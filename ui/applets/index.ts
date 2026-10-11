@@ -7,7 +7,7 @@ export {setMailAvatarLookup} from './gmail/presentation.ts';
 export {createAppletPanel} from './panels.ts';
 export {createGameApplet} from './games.ts';
 export {stripeMoney} from './stripe/panel.ts';
-export {appHudIcon,appLogoSource} from './visuals.ts';
+export {appHudIcon,appLogoSource,AGENT_ICONS} from './visuals.ts';
 export {createWeatherPanel} from './weather/panel.ts';
 export {momentLine} from './moment/panel.ts';
 export {requestOngoing,ongoingAsk} from './ongoing/panel.ts';
