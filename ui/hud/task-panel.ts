@@ -4,14 +4,14 @@
 // its picture, a short name and one line of what it is doing or when it runs. A running card has a turning ring and a
 // thin bar under it (how far along when that is known); a coming routine has a clock. What is finished lives only in
 // the Journal. Core decides every row and its words (core/tasks/task-panel.ts); this only draws them:
-// - Up to two cards a side in a wide World, one in a narrower one, then "+N" for the rest; under 820px wide only the
+// - Up to two cards a side in a wide World, one in a narrower one, then "+N" for the rest; under 860px wide only the
 //   count, which opens the whole list.
 // - A running card opens a small window above it with everything that task said (the step, when it started, who does
 //   it), or, while Fox drives a web page, the page itself. A routine opens a read-only popover saying when, how often
 //   and who runs it.
 // It reads the host's `taskPanel` every 30 seconds and after work starts or ends (`worldlet:routines`, `worldlet:job`,
 // `worldlet:applet-task`, `worldlet:fox-status`). Hidden while there is nothing to show; the stylesheet hides it in a
-// short window, beside an open Applet or reader and while the person talks with Fox, and keeps only Routines during
+// short window and beside an open Applet or reader, and keeps only Routines during
 // onboarding and the tour (ui/components/layout.css).
 import {FOX_STATUS_EVENT} from '../companion/index.ts';
 import {companionStill,themeAppletIcon} from '../themes/index.ts';
@@ -24,7 +24,7 @@ const PAGE_MS=3000;
 /** Status lines kept for a running task's window. */
 const LOG_MAX=40;
 /** Cards a side: two in a wide World, one in a narrower one, none (only the count) in a narrow one. */
-const cardsASide=()=>innerWidth>=1180?2:innerWidth>=820?1:0;
+const cardsASide=()=>innerWidth>=1300?2:innerWidth>=860?1:0;
 const CLOCK='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
 const el=<K extends keyof HTMLElementTagNameMap>(tag:K,cls='',text?:string)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;};
 
@@ -46,7 +46,7 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  /** What the popover shows: a task's id, or the whole list of a side. */
  let shown='';
  let page:{url:string;title:string;image:string;steps:{text:string;done:boolean}[]}|null=null,pageJson='null';
- const fox=new Map<string,{source:string;text:string;at:number}>();
+ const fox=new Map<string,{source:string;text:string;at:number;name?:string}>();
  let daily:{kind:'plan'|'summary';at:number}[]=[];
  /** What each running task has said, oldest first, kept while it runs: its window's lines. */
  const logs=new Map<string,{at:number;text:string}[]>();
@@ -198,8 +198,8 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
  const soon=()=>{setTimeout(()=>void refresh(),400);};
  // Fox's background work: its card while it works; what it made goes to the Journal, not here.
  window.addEventListener(FOX_STATUS_EVENT,(e:any)=>{
-  const source=String(e.detail?.source||'work'),said=String(e.detail?.text||'').trim();
-  if(said)fox.set(source,{source,text:said,at:fox.get(source)?.at??Date.now()});else fox.delete(source);
+  const source=String(e.detail?.source||'work'),said=String(e.detail?.text||'').trim(),name=typeof e.detail?.name==='string'?e.detail.name:undefined;
+  if(said)fox.set(source,{source,text:said,at:fox.get(source)?.at??Date.now(),...(name?{name}:{})});else fox.delete(source);
   render();
  });
  // When Fox makes the next morning brief and today's summary, from the page that asks for them (ui/shell/notion-world.ts).

@@ -142,3 +142,7 @@
 .world-today-open.is-receiving{transform-origin:left center;animation:journal-receive .6s ease-out}
 @keyframes journal-receive{0%{transform:scale(1)}35%{transform:scale(1.16)}70%{transform:scale(.96)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.world-today-open.is-receiving{animation:none}}
+/* A followed-up card's back, on its way down beside Fox (artifact-turn.ts): the dock card's dark glass. */
+.artifact-turned{position:fixed;z-index:95;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:4px;margin:0;padding:14px 18px;overflow:hidden;pointer-events:none;border-radius:14px;border:1px solid #ffffff2e;background:#17283fe6;box-shadow:0 10px 28px #0000005c;color:#fff9e9;transform-origin:center}
+.artifact-turned strong{font:600 16px/1.3 var(--ui-font-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.artifact-turned span{font:500 13px/1.4 var(--ui-font-ui);color:#d6dde6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

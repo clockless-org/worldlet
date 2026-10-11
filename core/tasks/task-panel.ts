@@ -55,8 +55,9 @@ export type TaskPanelInput={
  working?:readonly {id:string;applet:string;at:number}[];
  /** The web page Fox is driving now, if any: its address, title and the steps its status lists. */
  page?:{url:string;title:string;steps?:readonly {text:string;done:boolean}[]}|null;
- /** Fox's background work the page heard of, running now (ms). */
- fox?:readonly {source:string;text:string;at:number}[];
+ /** Fox's background work the page heard of, running now (ms), with the name its card goes by when it has one (a
+  * follow-up on an Artifact goes by that Artifact's title). */
+ fox?:readonly {source:string;text:string;at:number;name?:string}[];
  /** When Fox makes the next morning brief and today's summary (core/artifacts `dailyPlanned`, ms). */
  daily?:readonly {kind:'plan'|'summary';at:number}[];
 };
@@ -151,7 +152,7 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
  for(const work of input.fox??[]){
   const text=clip(String(work.text??''));if(!text)continue;
   doing.push({id:'fox:'+work.source,group:'now',source:'fox',title:text,detail:'',when:inProgress,at:work.at,who:'Fox',lines:[text],
-   name:'Fox',status:text,icon:'fox'});
+   name:clip(String(work.name??''),40)||'Fox',status:text,icon:'fox'});
  }
  for(const task of input.working??[]){
   const applet=worldLogApplet(task.applet);if(!applet)continue;
