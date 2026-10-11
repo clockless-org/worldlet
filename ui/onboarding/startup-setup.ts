@@ -352,9 +352,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   });
   loader.classList.add('is-gathering');await Promise.all([...flights,foxFlight]);
   // What came along drifts down into Fox, one after another; Fox brightens a little as each arrives. Routines run on
-  // their own, so they go to the World's top-right instead, where background work shows (owner request 2026-10-10).
-  const corner=(document.querySelector('.fox-routines:not([hidden])')||document.querySelector('.notion-top .world-environment'))?.getBoundingClientRect();
-  const cornerX=corner&&corner.width?corner.right-24:innerWidth-56,cornerY=corner&&corner.height?corner.top+24:48;
+  // their own, so they go to the Task panel on the right instead, under Planned (owner layout 2026-10-10); before the
+  // panel has read them, to where it stands.
+  const corner=(document.querySelector('.task-panel:not([hidden]) .task-group[data-group=planned]')||document.querySelector('.task-panel:not([hidden])'))?.getBoundingClientRect();
+  const cornerX=corner&&corner.width?corner.right-24:innerWidth-56,cornerY=corner&&corner.height?corner.top+24:innerHeight*.4;
   await Promise.all(parcels.map(async (parcel,i)=>{
    const toCorner=parcel.classList.contains('setup-tile-routines');
    const r=parcel.getBoundingClientRect(),dx=(toCorner?cornerX:foxX)-(r.left+r.width/2),dy=(toCorner?cornerY:foxY)-(r.top+r.height/2),delay=still?0:i*110;

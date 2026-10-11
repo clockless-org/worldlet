@@ -1,7 +1,7 @@
 // Replies Fox prepares by itself (owner decision 2026-10-09, core/artifacts/replies.ts): which Attention items qualify,
 // each once, a few a day, for someone who used Worldlet lately, never in the practice world, onboarding, the first-run
 // tour or an automated browser, never beside other background work; what Fox is asked (read the thread, prepare a
-// draft, send nothing); the lines the World's top-right shows; and that the page only executes these rules. No model,
+// draft, send nothing); the lines the World's Task panel shows; and that the page only executes these rules. No model,
 // no browser.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -68,7 +68,7 @@ for(const part of ['read_world_source (provider gmail, id "thread:aa02")','prepa
  assert.ok(request.text.includes(part),part);
 assert.ok(!/\bsend_email\b|\bsend it\b(?! )/.test(request.text.replace('you never send it','')),'Nothing asks for a send');
 
-// The top-right lines.
+// The Task panel's lines.
 assert.equal(replyPrepareStatus({id:'a',thread:'1',title:'Confirm school pickup'}),'Drafting a reply: Confirm school pickup…');
 assert.equal(Array.from(replyPrepareStatus({id:'a',thread:'1',title:'长'.repeat(80)})).length<=60,true,'It fits the corner');
 assert.equal(foxWorkDone('plan',2),'Morning brief and 2 replies ready');
@@ -78,16 +78,16 @@ assert.equal(foxWorkDone('reply',0),'','No draft made: nothing to say');
 assert.equal(foxWorkDone('summary',0),'Day summary ready');
 
 // The page executes these rules: the shared gate before any unasked request (the daily ask and the reply), the busy
-// retry, each item marked before asking, and the work line hidden in onboarding and the tour.
+// retry, each item marked before asking, and the Task panel's Doing now and Done today hidden in onboarding and the tour.
 const world=fs.readFileSync('ui/shell/notion-world.ts','utf8');
 assert.match(world,/const backgroundMoment=\(\)=>backgroundBlocked\(\{sample:!!data\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep\|\|!!root\.dataset\.tourCoda,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\}\);/);
 assert.match(world,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active\)return;\n\s*const due=dailyArtifactDue\(daily,new Date\(\)\);\n\s*if\(!due\)\{void prepareReply\(\);return;\}/,'The reply is prepared only past the same gate, when no brief or summary is due');
 assert.match(world,/replyPrepareDue\(replies,\{now,daily,waiting:drafts\.length\}\)\.due\)return;/);
 assert.match(world,/replies=markReplyPrepared\(replies,next\.id,now,\{thread:next\.thread\}\);saveReplies\(\);[\s\S]*voice\.background\(request\.text,\{displayText:request\.displayText\}\)[\s\S]*\/busy\/i[\s\S]*replies=before;saveReplies\(\);/,'Marked before asking; asked again only when other background work held it');
 assert.match(fs.readFileSync('ui/index.ts','utf8'),/emailReviews:sample\?undefined:/,'No drafts are read in the practice world');
-assert.match(fs.readFileSync('ui/components/layout.css','utf8'),/\.notion-world:is\(\[data-onboarding=true\],\[data-onboarding-locked=true\],\[data-tour-step\],\[data-tour-coda\]\) \.fox-work\{display:none\}/,'The work line stays out of onboarding and the tour');
+assert.match(fs.readFileSync('ui/components/layout.css','utf8'),/\.notion-world:is\(\[data-onboarding=true\],\[data-onboarding-locked=true\],\[data-tour-step\],\[data-tour-coda\]\) \.task-panel :is\(\.task-group\[data-group=now\],\.task-group\[data-group=done\]\)\{display:none\}/,'Doing now and Done today in the Task panel stay out of onboarding and the tour');
 // The host still refuses background work outside the person's own World and beside other background work.
 const host=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
 assert.match(host,/if\(scope\.sample\|\|scope\.setup\|\|store\.sampleEnabled\(\)\|\|store\.state\.cloudConsent!==true\|\|!runtime\|\|!make\)throw new WorldletError\('Background work runs in your own world\.'\);/);
 assert.match(host,/if\(backgroundRun\|\|appletTasks\.size\)throw new WorldletError\('Fox is busy with other background work\.'\);/);
-console.log('PASS prepared replies: open mail tasks from the last two days, each once, a few a day, after the first run settled, for someone who used Worldlet lately, never in the practice world, onboarding, the tour or an automated browser; Fox reads the thread and prepares a draft it never sends; the top-right says what it is doing and what is ready');
+console.log('PASS prepared replies: open mail tasks from the last two days, each once, a few a day, after the first run settled, for someone who used Worldlet lately, never in the practice world, onboarding, the tour or an automated browser; Fox reads the thread and prepares a draft it never sends; the Task panel says what it is doing and what is ready');
