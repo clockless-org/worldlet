@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {hermesRequestModel,WORLD_TOOL_SERVER,acpApprovalOutcome,acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,isHarnessModelId,usageSince,acpChangesAsked,acpChangesUpdate,approvalChanges,changesAnswered,changesAsked,isHarnessAgentId,acpApprovalRequest,harnessSessionName,openClawApprovalFor,openClawApprovalRequest,openClawChangesEvent,openClawConnect,openClawDecision,openClawDeviceProof,
+import {hermesRequestModel,openClawMissingKey,WORLD_TOOL_SERVER,acpApprovalOutcome,acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,isHarnessModelId,usageSince,acpChangesAsked,acpChangesUpdate,approvalChanges,changesAnswered,changesAsked,isHarnessAgentId,acpApprovalRequest,harnessSessionName,openClawApprovalFor,openClawApprovalRequest,openClawChangesEvent,openClawConnect,openClawDecision,openClawDeviceProof,
  harnessTurnText,openClawResponsesBody,openClawSessionIs,openClawUserInput,readOpenClawFrame,hermesAcpAnnouncement,readResponsesChunk,remoteGatewaySocketUrl,responsesBody,responsesStream,type ApprovalChanges,type HermesAnnouncedCall,type ResponsesTool,type ResponsesTurn} from '../../../../../core/agent/index.ts';
 import {worldGatewayTools} from '../../../../../core/tools/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest,HarnessApprovalResult,HarnessApprovals,HarnessConversation,HarnessModel,HarnessSession,HarnessSessionKey,HarnessTurnEvent,HarnessTurnInput,HarnessUsage} from '../../../../../contracts/harness-services.ts';
@@ -568,7 +568,7 @@ class GatewaySession implements ResidentSession {
      body:JSON.stringify(this.owner.turnBody({input:items,instructions:input.instructions,tools,previous},agent,model))});
     if(!response.ok){
      let detail='';try{const body=await response.json();detail=typeof body?.error?.message==='string'?body.error.message:'';}catch{}
-     throw new WorldletError(detail?`${this.owner.title} could not answer: ${detail.slice(0,300)}`:`${this.owner.title}'s Gateway answered ${response.status}.`);
+     throw new WorldletError(detail?openClawMissingKey(detail)??`${this.owner.title} could not answer: ${detail.slice(0,300)}`:`${this.owner.title}'s Gateway answered ${response.status}.`);
     }
     const state=responsesStream(),decoder=new TextDecoder();
     for await (const chunk of response.body as unknown as AsyncIterable<Uint8Array>){
@@ -577,7 +577,7 @@ class GatewaySession implements ResidentSession {
      if(delta){text+=delta;onEvent({type:'delta',text:delta});}
      if(state.done)break;
     }
-    if(state.error)throw new WorldletError(state.error);
+    if(state.error)throw new WorldletError(openClawMissingKey(state.error)??state.error);
     // Each response of the turn (one per tool round) reports its own usage: the turn used their sum.
     usage=addHarnessUsage(usage,state.usage);
     const calls=this.owner.offeredOnly?state.calls.filter(call=>tools?.some(tool=>tool.name===call.name)):state.calls;

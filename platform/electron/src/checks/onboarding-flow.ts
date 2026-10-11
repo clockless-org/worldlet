@@ -25,6 +25,8 @@ import {errorMessage as message} from '../files.ts';
 // library must hold no failed background work (journal, runs, Attention budget, diagnostics); an
 // item save the model repaired in the same successful run is a self-correction, not a failure.
 // Runs Fox and its background work on this computer's Codex CLI, which the launcher chose as Fox's Agent.
+// A chosen Agent that fails its answer check (an OpenClaw model key not saved) never stops this journey: setup goes on
+// and says why in one line; scripts/startup-setup-check.ts drives that on the setup page (owner decision 2026-10-11).
 
 const COMPANION_BLOCKING=false;
 export async function onboardingFlow({host,window,view}:CheckContext){
