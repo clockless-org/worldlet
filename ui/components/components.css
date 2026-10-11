@@ -20,7 +20,7 @@
 .ui-button:disabled,.ui-button[aria-busy=true]{opacity:.5;cursor:default}
 .ui-button svg,.native-console .world-capsule svg{width:18px;height:18px;flex:0 0 18px;display:block}
 .ui-button[data-variant=quiet]:hover{background:var(--ui-well)}
-.native-console .world-actions .world-capsule{justify-content:flex-start;min-width:0;max-width:100%;flex-wrap:nowrap;white-space:nowrap;font-size:var(--ui-text-label);border-radius:var(--ui-radius-control)}
+.native-console .world-actions .world-capsule{justify-content:flex-start;min-width:0;max-width:100%;flex-wrap:nowrap;white-space:nowrap;font-size:var(--ui-text-label)}
 .native-console .world-actions .world-capsule::after{display:none}
 .native-console .world-actions .world-capsule>span{min-width:0;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ui-input,.native-console :is(.world-note-search input,.notion-dialog input,.notion-dialog select,.notion-dialog .agent-place textarea){
@@ -50,7 +50,7 @@
 .native-console .native-conversation{font:400 var(--ui-text-body)/1.6 var(--ui-font-ui);color:var(--ui-dialogue-ink)}
 .native-console .companion-listening-state,.native-console .companion-speaker,.native-console .companion-gesture-hint{display:none}
 /* A soft NPC speech card; the name tab belongs to Fox, not the current place. */
-.native-console.fox-first-console .companion-dialogue{--fox-paper:var(--ui-paper);--fox-ink:var(--ui-ink);--fox-badge:#edbd76;--fox-arrow:var(--ui-attention);padding:16px 18px 10px;gap:6px;border:0;border-radius:30px 48px 34px 42px / 38px 28px 42px 27px;background:transparent;color:var(--fox-ink);box-shadow:none;isolation:isolate;backdrop-filter:none;-webkit-backdrop-filter:none}
+.native-console.fox-first-console .companion-dialogue{--fox-paper:var(--ui-paper);--fox-ink:var(--ui-ink);--fox-badge:#edbd76;--fox-arrow:var(--ui-attention);padding:16px 18px 10px;border:0;border-radius:30px 48px 34px 42px / 38px 28px 42px 27px;background:transparent;color:var(--fox-ink);box-shadow:none;isolation:isolate;backdrop-filter:none;-webkit-backdrop-filter:none}
 
 /* A separate cloud skin keeps text and edge controls unclipped. */
 .native-console.fox-first-console .companion-dialogue::before{content:'';position:absolute;inset:-3px -4px;z-index:-1;pointer-events:none;background:var(--fox-paper);-webkit-mask:var(--fox-cloud-top) top/100% min(48px,50%) no-repeat,linear-gradient(#000,#000) center/calc(100% - 12px) max(0px,calc(100% - 80px)) no-repeat,var(--fox-cloud-bottom) bottom/100% min(48px,50%) no-repeat;mask:var(--fox-cloud-top) top/100% min(48px,50%) no-repeat,linear-gradient(#000,#000) center/calc(100% - 12px) max(0px,calc(100% - 80px)) no-repeat,var(--fox-cloud-bottom) bottom/100% min(48px,50%) no-repeat;--fox-cloud-top:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 80' preserveAspectRatio='none'%3E%3Cpath d='M32 14C90 5 143 8 196 12C269 4 335 8 399 12C462 5 527 7 565 16C590 22 600 45 592 78C603 110 588 140 563 146C497 153 445 148 391 148C322 155 255 148 198 148C127 155 68 151 32 144C9 139 0 114 8 81C0 48 8 23 32 14Z'/%3E%3C/svg%3E");--fox-cloud-bottom:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 80 600 80' preserveAspectRatio='none'%3E%3Cpath d='M32 14C90 5 143 8 196 12C269 4 335 8 399 12C462 5 527 7 565 16C590 22 600 45 592 78C603 110 588 140 563 146C497 153 445 148 391 148C322 155 255 148 198 148C127 155 68 151 32 144C9 139 0 114 8 81C0 48 8 23 32 14Z'/%3E%3C/svg%3E");--fox-cloud:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 160' preserveAspectRatio='none'%3E%3Cpath d='M32 14C90 5 143 8 196 12C269 4 335 8 399 12C462 5 527 7 565 16C590 22 600 45 592 78C603 110 588 140 563 146C497 153 445 148 391 148C322 155 255 148 198 148C127 155 68 151 32 144C9 139 0 114 8 81C0 48 8 23 32 14Z'/%3E%3C/svg%3E")}
@@ -58,10 +58,9 @@
 .fox-first-console .companion-speaker{position:absolute;display:flex;align-items:center;gap:6px;left:24px;top:-18px;min-width:0;padding:5px 16px;border:0;border-radius:13px 10px 12px 9px;background:var(--fox-badge);color:#684729;box-shadow:none;transform:rotate(-4deg);font:600 var(--ui-text-body)/1.5 var(--ui-font-ui);letter-spacing:.02em}
 .fox-first-console .native-conversation{color:var(--fox-ink);font-weight:400;line-height:1.6}
 .fox-first-console[data-time-of-day=night] .companion-dialogue{--fox-paper:#eee7d3;--fox-ink:#343f32;box-shadow:none}
-.native-console .companion-text-entry #notionCommand{box-sizing:border-box;width:100%;height:40px;min-height:40px;padding:0 12px;margin:0;border:1px solid var(--ui-line);border-radius:20px;background:var(--ui-float);color:var(--ui-ink);font:400 var(--ui-text-label)/38px var(--ui-font-ui);text-shadow:none;box-shadow:none;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.native-console .companion-text-entry #notionCommand{box-sizing:border-box;width:100%;height:40px;min-height:40px;margin:0;font:400 var(--ui-text-label)/38px var(--ui-font-ui);text-shadow:none}
 .native-console .companion-text-entry #notionCommand{display:flex;align-items:center;gap:4px;padding:2px 4px 2px 12px}
 .native-console .companion-text-entry #notionInput{height:34px;min-width:0;padding:0;flex:1;background:transparent;border:0;box-shadow:none;font:400 var(--ui-text-body)/1.5 var(--ui-font-ui);color:var(--ui-ink)}
-.native-console .companion-text-entry #notionInput::placeholder{color:var(--ui-ink-muted)}
 .native-console .companion-text-entry #notionSend{background:transparent;color:var(--ui-ink);width:32px;height:32px;min-height:32px;opacity:.8}
 .native-console .companion-input-handle{opacity:.8;text-align:center;cursor:text;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .native-console .companion-input-handle::before{display:none}
@@ -470,19 +469,18 @@
 .native-console.radial-pet-console .world-task-tracker .world-matter{grid-template-columns:24px minmax(0,1fr)}
 .native-console.radial-pet-console .world-task-tracker .world-matter>.matter-icon{width:24px;max-width:24px}
 /* Region overflow is a foreground shelf. Narrow windows centre it over a still World; wide ones dock it right (below). */
-.region-shelf{position:absolute;z-index:80;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(760px,76vw);max-height:88%;display:flex;flex-direction:column;padding:16px 24px 12px;border-radius:28px;background:linear-gradient(150deg,#f8f3e8f5,#efe7d8ee);color:#29473b;box-shadow:0 16px 60px #263a3138,inset 0 1px #fff9;backdrop-filter:blur(12px);animation:region-shelf-in .26s ease-out}
+.region-shelf{position:absolute;z-index:80;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(760px,76vw);display:flex;flex-direction:column;border-radius:28px;background:linear-gradient(150deg,#f8f3e8f5,#efe7d8ee);color:#29473b;box-shadow:0 16px 60px #263a3138,inset 0 1px #fff9;backdrop-filter:blur(12px);animation:region-shelf-in .26s ease-out}
 .region-shelf-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:8px}
 .region-shelf-header h2{margin:0;font-size:24px;font-weight:600}
-.region-shelf-scroll{overflow:auto;min-height:0;overscroll-behavior:contain;padding:0 4px 8px}
-.region-shelf-scroll h3{font-size:12px;font-weight:500;color:#677568;margin:16px 0 8px}
-.region-shelf-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.region-shelf-scroll h3{font-size:12px;font-weight:500;color:#677568}
+.region-shelf-grid{display:grid}
 .region-shelf-grid[data-group="On the ground"]{grid-template-columns:repeat(6,minmax(0,1fr));max-width:440px;margin-inline:auto}
 .region-shelf-grid[data-group="On the ground"]>*{grid-column:span 2}
 .region-shelf-grid[data-group="On the ground"]>:nth-child(4){grid-column:2 / span 2}
 .region-shelf-grid[data-group="On the ground"]>:nth-child(5){grid-column:4 / span 2}
 .region-shelf-grid [data-ground-slot].is-drop-target{background:#fff8;outline:2px solid #c8b480;outline-offset:2px}
-.region-shelf-applet{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px;min-width:0;padding:8px 4px 10px;border:0;border-radius:16px;background:transparent;color:inherit;font:inherit;cursor:pointer;transition:background .2s,transform .2s}
-.region-shelf-applet img{width:100%;max-width:96px;height:88px;object-fit:contain;filter:drop-shadow(0 5px 3px #283b2828);pointer-events:none;transition:transform .2s}
+.region-shelf-applet{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0;border:0;border-radius:16px;background:transparent;color:inherit;font:inherit;cursor:pointer;transition:background .2s,transform .2s}
+.region-shelf-applet img{width:100%;object-fit:contain;filter:drop-shadow(0 5px 3px #283b2828);pointer-events:none;transition:transform .2s}
 .region-shelf-applet span{font-size:13px;line-height:1.25;text-align:center;overflow-wrap:anywhere}
 .region-shelf-applet:hover,.region-shelf-applet:focus-visible{background:#fff8;outline:2px solid #c8b48080;outline-offset:0}
 .region-shelf-applet:hover img{transform:translateY(-3px)}
@@ -506,7 +504,7 @@
 .region-shelf-all:hover{background:#fff9}
 @keyframes region-shelf-in{from{opacity:0;transform:translate(-50%,calc(-50% + 12px)) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 @media(max-width:700px){.region-shelf{width:86vw;padding:18px}.region-shelf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(prefers-reduced-motion:reduce){.region-shelf{animation:none}.region-shelf-applet,.region-shelf-applet img{transition:none}}
+@media(prefers-reduced-motion:reduce){.region-shelf-applet,.region-shelf-applet img{transition:none}}
 
 /* One bounded collection scrolls; the region heading and guidance stay put. */
 .region-shelf{top:50%;bottom:auto;max-height:88%;max-width:calc(100% - 32px);box-sizing:border-box;padding:18px 24px}
