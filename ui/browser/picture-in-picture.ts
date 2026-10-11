@@ -10,7 +10,7 @@ import {node,uiIcon} from '../components/index.ts';
 const RIM=6,BAR=32,CHROME={top:RIM+BAR,right:RIM,bottom:RIM,left:RIM};
 // What the window must not cover: Fox, its dialogue and the footer, and also open panels and
 // the World's own controls. Hidden and empty elements do not count.
-const AVOID=['.companion-avatar','.companion-dock','#notionHUD','#companionDialogue','.world-watermark','.world-update-dock','.world-environment','#notionContent','#notionDialog','#companionInfo','#attentionPreview','.world-area','.world-task-tracker'];
+const AVOID=['.companion-avatar','.companion-dock','#notionHUD','#companionDialogue','.world-watermark','.world-update-dock','.world-environment','#notionContent','#notionDialog','#companionInfo','#attentionPreview','.world-area','.world-task-tracker'].join(',');
 const WATCHED=['hidden','open','style','class'];
 const el=(tag:string,className='')=>node(tag,className);
 
@@ -62,7 +62,7 @@ export function createPictureInPictureWindow({root,place,open,close,aspect=()=>P
   if(!active)return;
   // Inside an Applet, content or search the window waits out of sight, still playing.
   const shows=pictureInPictureShows(root.dataset.depth||'overview'),avoid=[];
-   for(const node of shows?root.querySelectorAll<HTMLElement>(AVOID.join(',')):[]){
+   for(const node of shows?root.querySelectorAll<HTMLElement>(AVOID):[]){
    if(frame.contains(node))continue;
    // Elements that appear later are watched from the first placement that sees them; once,
    // since observing again restarts a resize observation and would place the window forever.
