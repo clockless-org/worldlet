@@ -83,7 +83,7 @@ export function createCodexApplet({call,renderMarkdown,onSelect,onState,onReques
    }
   }
   if(event.method==='item/commandExecution/outputDelta'&&selected?.sessionId===id&&reader?.isConnected){const pre=reader.querySelector('.codex-current-tool pre');if(pre)pre.textContent=(pre.textContent+(p.delta||'')).slice(-20000);}
-  if(event.method==='worldlet/disconnected'){requests.clear();onRequestDone();for(const r of running.values())r.reject(Error('Codex disconnected. Refresh the Applet to reconnect.'));running.clear();for(const s of sessions)if(['Running','Waiting for you'].includes(s.status))s.status='Unknown';publish();return;}
+  if(event.method==='worldlet/disconnected'){requests.clear();items.clear();onRequestDone();for(const r of running.values())r.reject(Error('Codex disconnected. Refresh the Applet to reconnect.'));running.clear();for(const s of sessions)if(['Running','Waiting for you'].includes(s.status))s.status='Unknown';publish();return;}
   if(event.method==='worldlet/request'){requests.set(p.requestId,p);setStatus(id,'Waiting for you');if(isVisible()&&selected?.sessionId===id)onRequest(requestUI(p));return;}
   if(event.method==='serverRequest/resolved'){requests.delete(String(p.requestId));requestDone();return;}
   if(event.method==='turn/started')setStatus(id,'Running');
@@ -92,7 +92,7 @@ export function createCodexApplet({call,renderMarkdown,onSelect,onState,onReques
   if(event.method==='item/agentMessage/delta'&&run){run.text+=p.delta||'';run.onDelta?.(run.text);if(selected?.sessionId===id&&reader?.isConnected){let live=reader.querySelector('.codex-stream');if(!live){live=el('pre','','codex-stream');reader.append(live);}live.textContent=run.text;}}
   if(event.method==='turn/completed'){
    setStatus(id,({completed:'Completed',interrupted:'Stopped',failed:'Failed'})[p.turn?.status]||'Idle');
-   for(const [key,req]of requests)if(req.threadId===id)requests.delete(key);requestDone();
+   for(const [key,req]of requests)if(req.threadId===id)requests.delete(key);for(const key of items.keys())if(key.startsWith(id+':'))items.delete(key);requestDone();
    if(run){running.delete(id);if(p.turn?.status==='failed')run.reject(Error(p.turn.error?.message||'Codex could not complete this turn.'));else run.resolve({message:run.text||(p.turn?.status==='interrupted'?'Codex stopped.':'Codex finished this turn.')});}
    if(selected?.sessionId===id&&reader?.isConnected)void inspect(selected,reader);
   }
