@@ -397,18 +397,7 @@
 /* Quieter than the HUD at rest, but always readable: a soft dark backing keeps the plain lines
    legible over bright meadow, water or night (RC UI reviews 2737/2743, #1699). The host narrows it
    to the space right of Fox's actions and message bar, and sets it aside when none is left. */
-.native-console .world-log{position:absolute;z-index:20;right:16px;bottom:12px;max-width:min(360px,40vw,var(--world-log-room,100vw));display:flex;flex-direction:column;align-items:flex-end;padding:4px 6px;border-radius:10px;font:400 13px/1.4 var(--ui-font-ui,-apple-system,BlinkMacSystemFont,sans-serif);color:var(--ui-chrome,#f5f4e9);text-shadow:0 1px 2px #10201890;background:#18291fcc;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:.9;transition:opacity .2s,background-color .2s;pointer-events:auto}
-.native-console .world-log:is(:hover,:focus-within){opacity:1;background:#18291fe6}
-.native-console:has(.world-tutorial-corner .world-tutorial:not([hidden])) .world-log{bottom:60px}
-.native-console .world-log[data-crowded=true]{visibility:hidden;pointer-events:none}
-.native-console .world-log[hidden]{display:none}
-.native-console .world-log-next{all:unset;box-sizing:border-box;display:block;cursor:pointer;max-width:100%;height:22px;line-height:22px;padding:0 4px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.native-console .world-log-next:focus-visible{outline:2px solid var(--ui-focus,#edc47d);outline-offset:1px}
-.native-console .world-log-next:hover{text-decoration:underline}
 /* An open panel, typing or a floating video owns the right side; the log steps back. */
-.native-console:is([data-detail-open=true],.is-typing,.companion-info-open,:has(>.browser-pip:not([hidden]))) .world-log{display:none}
-.notion-world[data-onboarding=true] .world-log{display:none}
-@media(max-height:560px),(max-width:600px){.native-console .world-log{display:none}}
 /* The person's own Applet on the background painted for it (core/applets/MY-APPLETS.md#pictures): a cream wash keeps its words readable. */
 [data-own-background]{background:linear-gradient(#fbf7ecd9,#fbf7ecf2),var(--own-applet-background) center/cover no-repeat;border-radius:14px}
 

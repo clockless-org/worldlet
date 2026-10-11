@@ -2,7 +2,7 @@ import {uiIcon} from '../components/index.ts';
 import {companionStill,themeAppletIcon} from '../themes/index.ts';
 import {WORLD_APPS} from '../../core/applets/index.ts';
 import {journalPayload} from '../../core/items/index.ts';
-import {worldLogLines,worldLogNext,worldLogNow,type WorldLogLine} from '../../core/activity/index.ts';
+import {worldLogLines,worldLogNow,type WorldLogLine} from '../../core/activity/index.ts';
 import {worldLogGo,worldLogMark} from '../components/index.ts';
 /** The History page: the world log's plain lines as a feed that keeps running, newest at the
  * bottom, each line going to its Applet or site, with what is happening now and the next check
@@ -11,9 +11,9 @@ import {worldLogGo,worldLogMark} from '../components/index.ts';
 export function createCompanionHistory({call,openApplet,openSite,connections=()=>[]}:{call:any;openApplet?:(id:string)=>void;openSite?:(url:string)=>void;connections?:()=>unknown[]}){
  const el=(tag,text='')=>Object.assign(document.createElement(tag),{textContent:text});
  const section=el('section');section.className='companion-info-section companion-history';section.dataset.section='History';
- const heading=el('h3','History'),feed=el('div'),recent=el('ol'),quiet=el('p','Nothing has happened yet. Open an Applet or ask Fox, and it shows up here.'),coming=el('p');
- feed.className='companion-history-feed';recent.className='companion-world-log';recent.setAttribute('aria-label','What happened');recent.setAttribute('aria-live','polite');quiet.className='companion-info-note';coming.className='companion-history-next';
- feed.append(quiet,recent);section.append(heading,feed,coming);
+ const heading=el('h3','History'),feed=el('div'),recent=el('ol'),quiet=el('p','Nothing has happened yet. Open an Applet or ask Fox, and it shows up here.');
+ feed.className='companion-history-feed';recent.className='companion-world-log';recent.setAttribute('aria-label','What happened');recent.setAttribute('aria-live','polite');quiet.className='companion-info-note';
+ feed.append(quiet,recent);section.append(heading,feed);
  const records=el('section'),status=el('p','Loading records…'),list=el('ol'),controls=el('div');
  records.className='companion-history companion-history-records';records.setAttribute('aria-label','Activity records');
  status.setAttribute('role','status');list.setAttribute('aria-label','Activity records');
@@ -60,14 +60,12 @@ export function createCompanionHistory({call,openApplet,openSite,connections=()=
   if(animate&&records.isConnected&&!matchMedia('(prefers-reduced-motion: reduce)').matches)for(const [id,item] of existing)if(keep.has(id)){const delta=positions.get(id)-item.getBoundingClientRect().top;if(delta)item.animate([{transform:`translateY(${delta}px)`},{transform:'none'}],{duration:280,easing:'ease-out'});}
   older.disabled=!hasMore;latest.disabled=atLatest;retry.hidden=true;
  }
- let plain='',live:WorldLogLine[]=[],tasks:any[]=[],tasksAt=0,sample=false;
+ let plain='',live:WorldLogLine[]=[],sample=false;
  const clock=(at:number)=>new Date(at*1000).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
  function drawRecent(lines:WorldLogLine[]){
-  // What Applets are doing right now ends the feed, like the world log in the corner.
+  // What Applets are doing right now ends the feed.
   const now=sample?[]:worldLogNow(connections(),[]).map((l,i)=>({seq:-1-i,at:Date.now()/1000,who:'world',text:l.text,applet:l.applet,live:true} as WorldLogLine&{live?:true}));
   const all=[...lines,...now],key=all.map(l=>l.seq+':'+l.text).join('|');
-  const next=sample?null:worldLogNext(tasks,Date.now()/1000);
-  coming.textContent=next?`Next sync · ${next.title} at ${clock(next.at)}`:'';coming.hidden=!next;
   if(key===plain)return;
   // Stay with the newest line unless the person scrolled up to read.
   const pinned=feed.scrollHeight-feed.scrollTop-feed.clientHeight<24,before=new Set(Array.from(recent.querySelectorAll('li[data-key]'),(li:HTMLElement)=>li.dataset.key));
@@ -90,10 +88,8 @@ export function createCompanionHistory({call,openApplet,openSite,connections=()=
  }
  async function refreshRecent(){
   try{
-   const wantTasks=Date.now()-tasksAt>60_000;
-   const result=await call('worldLog',{tasks:wantTasks});if(!active)return;
+   const result=await call('worldLog',{tasks:false});if(!active)return;
    sample=!!result?.sample;
-   if(wantTasks&&Array.isArray(result?.tasks)){tasks=result.tasks;tasksAt=Date.now();}
    live=sample||!Array.isArray(result?.entries)?[]:worldLogLines(result.entries,80);
    if(sample)quiet.textContent='History is available in your personal world.';
    drawRecent(live);
