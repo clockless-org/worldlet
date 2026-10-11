@@ -336,8 +336,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   const snapshot=await call('snapshot');
   const gathering=node('div','','setup-gathering');loader.append(gathering);
   // Enter your world (owner requests 2026-10-10, 2026-10-11): one continuous move. Everything else fades while, at the
-  // same time, Fox walks down to its place at the bottom and takes in what came along (Profile, Conversations, Notes,
-  // Skills), the apps and the connections float up like umbrellas and become the World's icons, and Routines go to the
+  // same time, Fox walks down to its place at the bottom and takes in what came along (Profile, Conversations,
+  // Skills), Daily notes go to the Journal, the apps and the connections float up like umbrellas and become the World's icons, and Routines go to the
   // dock beside Fox; then the icons and Fox go into the World.
   const still=reduced();
   const foxFrom=panel.querySelector('.setup-tile-fox')?.getBoundingClientRect();
@@ -389,15 +389,21 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   // the dock has read them, to where it stands.
   const corner=(document.querySelector('.task-panel:not([hidden]) .task-group[data-group=routines]')||document.querySelector('.task-panel:not([hidden])'))?.getBoundingClientRect();
   const cornerX=corner&&corner.width?corner.left+24:innerWidth/2+260,cornerY=corner&&corner.height?corner.top+24:innerHeight-40;
+  // Daily notes are the Agent's past days, so they go to the Journal at the head of the left panel (owner decision
+  // 2026-10-11), each day becoming that day's page there.
+  const journal=document.querySelector('.world-today-open')?.getBoundingClientRect();
+  const journalX=journal&&journal.width?journal.left+journal.width/2:Math.min(140,innerWidth*.12),journalY=journal&&journal.height?journal.top+journal.height/2:56;
+  const intoFox=(parcel:HTMLElement)=>!parcel.classList.contains('setup-tile-routines')&&!parcel.classList.contains('setup-tile-notes');
   const absorbed=Promise.all(parcels.map(async (parcel,i)=>{
-   const toCorner=parcel.classList.contains('setup-tile-routines');
-   const r=parcel.getBoundingClientRect(),dx=(toCorner?cornerX:foxX)-(r.left+r.width/2),dy=(toCorner?cornerY:foxY)-(r.top+r.height/2),delay=still?0:220+i*120;
+   const toCorner=parcel.classList.contains('setup-tile-routines'),toJournal=parcel.classList.contains('setup-tile-notes');
+   const [x,y]=toCorner?[cornerX,cornerY]:toJournal?[journalX,journalY]:[foxX,foxY];
+   const r=parcel.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2),delay=still?0:220+i*120;
    await parcel.animate([{transform:'none',opacity:1,filter:'none'},{transform:`translate(${dx*.55}px,${dy*.55}px) scale(.4)`,opacity:.95,filter:'brightness(1.08)',offset:.6},{transform:`translate(${dx}px,${dy}px) scale(.03)`,opacity:0,filter:'brightness(1.6) blur(2px)'}],{duration:still?0:720,delay,easing:'cubic-bezier(.55,0,.35,1)',fill:'forwards'}).finished;
    parcel.remove();
-   if(!still&&!toCorner)fox.animate([{transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1)'},{transform:'translate(-50%,-50%) scale(1.07)',filter:'brightness(1.25) drop-shadow(0 0 16px #ffe4a0)'},{transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1) drop-shadow(0 6px 10px #35453030)'}],{duration:360,easing:'ease-out'});
+   if(!still&&intoFox(parcel))fox.animate([{transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1)'},{transform:'translate(-50%,-50%) scale(1.07)',filter:'brightness(1.25) drop-shadow(0 0 16px #ffe4a0)'},{transform:'translate(-50%,-50%) scale(1)',filter:'brightness(1) drop-shadow(0 6px 10px #35453030)'}],{duration:360,easing:'ease-out'});
   })).then(()=>{
    // Fox has taken everything in: one soft ring of light, and it is ready to go.
-   if(still||!parcels.some(p=>!p.classList.contains('setup-tile-routines')))return;
+   if(still||!parcels.some(intoFox))return;
    const ring=node('div','','setup-gathering-ring');Object.assign(ring.style,{left:foxX+'px',top:foxY+'px',width:foxSize+'px',height:foxSize+'px'});gathering.append(ring);
    return ring.animate([{transform:'translate(-50%,-50%) scale(.6)',opacity:.9},{transform:'translate(-50%,-50%) scale(1.6)',opacity:0}],{duration:520,easing:'ease-out',fill:'forwards'}).finished.then(()=>ring.remove());
   });

@@ -329,7 +329,8 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(ends.ends['setup-tile-connections'],undefined,'Connections do not go into Fox');
   const marks=await page.evaluate(()=>(window as any).markEnds||[]);
   assert.ok(marks.length===2&&marks.every(m=>m.top<ends.height*.4&&m.opacity===0),'Both connections float up and become app icons: '+JSON.stringify(marks));
-  for(const kind of ['setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills'])assert.ok(ends.ends[kind]&&ends.ends[kind].y>ends.height*.6,kind+' goes into Fox at the bottom: '+JSON.stringify(ends));
+  assert.ok(ends.ends['setup-tile-notes']&&ends.ends['setup-tile-notes'].x<ends.width*.4&&ends.ends['setup-tile-notes'].y<ends.height*.25,'Daily notes go to the Journal at the top left (owner decision 2026-10-11): '+JSON.stringify(ends));
+  for(const kind of ['setup-tile-profile','setup-tile-conversations','setup-tile-skills'])assert.ok(ends.ends[kind]&&ends.ends[kind].y>ends.height*.6,kind+' goes into Fox at the bottom: '+JSON.stringify(ends));
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
   assert.ok(!result.calls.some(c=>c.action==='connect'),'No Google sign-in');
   assert.equal(result.state.onboarding.completed,true);
