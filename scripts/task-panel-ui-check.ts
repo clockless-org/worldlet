@@ -84,6 +84,10 @@ await withBrowser(fileAccess,async browser=>{
  assert.match(terminalLook.font,/mono|Menlo|Consolas/i,'monospace');assert.equal(terminalLook.bg,'rgb(12, 16, 14)','near-black');
  const [routinesBox,nowBox]=await panel.evaluate(p=>['routines','now'].map(g=>{const r=p.querySelector(`.task-group[data-group=${g}]`)?.getBoundingClientRect();return r?{y:r.y,height:r.height}:null;}));
  assert.ok(routinesBox&&nowBox&&routinesBox.y+routinesBox.height<=nowBox.y,'Routines above Doing now');
+ // Only rows and windows take the pointer: a tap on the Now marker, a day label or a gap reaches the World beneath
+ // (Alpha 4176: the column's Now marker caught a tap meant for an Applet's device).
+ const through=await panel.evaluate(p=>[...p.querySelectorAll('.task-timeline-now,.task-timeline-day,.task-group-heading')].map(e=>{const r=e.getBoundingClientRect();const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !!hit&&!hit.closest('.task-panel');}));
+ assert.ok(through.length&&through.every(Boolean),'labels and the Now marker let taps through: '+JSON.stringify(through));
  // It floats beside the Attention Center, on the same kind of soft backing, and never overlaps it.
  const tracker=page.locator('.world-task-tracker');
  await tracker.locator('.world-matter[data-world-item-id="flight-run"]').waitFor();

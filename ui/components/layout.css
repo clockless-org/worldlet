@@ -213,7 +213,9 @@
 .native-console .task-panel{--task-ink:#fff9e9;--task-muted:#f4eedc;--task-time:80px;position:absolute;right:24px;top:76px;bottom:84px;width:min(320px,26vw);z-index:24;display:flex;flex-direction:column;justify-content:center;pointer-events:none;color:var(--task-ink);text-shadow:0 1px 3px #25332680;font:500 var(--ui-text-label)/1.4 var(--ui-font-ui)}
 .native-console .task-panel[hidden]{display:none}
 .native-console .task-panel-body{position:relative;isolation:isolate;display:flex;flex-direction:column;box-sizing:border-box;min-height:0;max-height:100%;overflow:visible;padding:16px 12px}
-.native-console .task-panel-scroll{display:flex;flex-direction:column;gap:16px;flex:0 1 auto;min-height:0;margin:-8px -6px;padding:8px 6px 12px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#fff9e94d transparent;pointer-events:auto;
+/* Only the rows and windows take the pointer: the column's labels, gaps and Now marker let a tap reach the World's
+   devices under them (Alpha 4176, #236/#237). The wheel over a row still scrolls the column. */
+.native-console .task-panel-scroll{display:flex;flex-direction:column;gap:16px;flex:0 1 auto;min-height:0;margin:-8px -6px;padding:8px 6px 12px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#fff9e94d transparent;pointer-events:none;
  -webkit-mask-image:linear-gradient(transparent,#000 8px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(transparent,#000 8px,#000 calc(100% - 12px),transparent)}
 .native-console .task-panel-chip{display:none}
 /* Its rows are small and sit over busy places, so under that backing it also wears the theme's HUD wash (the
