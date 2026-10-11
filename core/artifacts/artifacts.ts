@@ -303,17 +303,28 @@ export function artifactDays<T extends {id:string;createdAt:number;updatedAt:num
  return [...groups].map(([label,artifacts])=>({label,artifacts}));
 }
 
-/** The Journal (owner decision 2026-10-07): every artifact together is one journal, one page a day. A card stands on the
- * day it was made, in time order; the day's plan opens the page and its summary closes it, even when the summary was
- * caught up the next morning. Each card keeps one size on the page: an Attention card and a page Fox made are small, a
- * reply draft waiting to be sent (kind `reply`, owner Order 2026-10-07) medium. */
-export type JournalEntry<T>={artifact:T;size:ArtifactSize;at:number};
-export type JournalPage<T>={day:string;label:string;entries:JournalEntry<T>[]};
+/** The Journal (owner decisions 2026-10-07 and 2026-10-11): everything Fox produced in this World, as one timeline,
+ * a day at a time, newest day first. Whatever made it, it is one thing, an artifact, and the Journal names it by where it
+ * came from (`journalOrigin`): an Attention card, an answer in the conversation, the day's plan or summary, a meeting's
+ * summary, a page Fox made, a reply draft. A card stands on the day it was made, in time order; the day's plan opens the
+ * day and its summary closes it, even when the summary was caught up the next morning. Each card keeps one size: an
+ * Attention card and a page Fox made are small, a reply draft waiting to be sent (kind `reply`, owner Order 2026-10-07)
+ * medium, an answer the size it was shown. */
+export type JournalEntry<T>={artifact:T;size:ArtifactSize;at:number;origin:string};
+export type JournalDay<T>={day:string;label:string;entries:JournalEntry<T>[]};
 const DAILY_TITLE=/^(Plan|Summary) · (.+)$/;
-export function journalPages<T extends {id:string;kind:string;title:string;size?:string;createdAt:number;updatedAt:number}>(list:T[],now:Date=new Date(),locale?:string):JournalPage<T>[] {
+/** The one label every Journal card carries for where it came from. */
+export function journalOrigin(artifact:{kind:string;title:string;category?:string}):string {
+ if(artifact.kind==='attention')return artifact.category||'Attention';
+ if(artifact.kind==='made')return 'Made by Fox';
+ if(artifact.kind==='reply')return 'Reply';
+ const daily=DAILY_TITLE.exec(artifact.title);
+ return daily?daily[1]:/ · Summary$/.test(artifact.title)?'Meeting':'Conversation';
+}
+export function journalDays<T extends {id:string;kind:string;title:string;size?:string;category?:string;createdAt:number;updatedAt:number}>(list:T[],now:Date=new Date(),locale?:string):JournalDay<T>[] {
  const pad=(n:number)=>String(n).padStart(2,'0'),key=(d:Date)=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
  const titleDay=(d:Date)=>d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
- const pages=new Map<string,JournalEntry<T>[]>(),rank=(a:T)=>{const m=DAILY_TITLE.exec(a.title);return a.kind==='answer'&&m?m[1]==='Plan'?0:2:1;};
+ const days=new Map<string,JournalEntry<T>[]>(),rank=(a:T)=>{const m=DAILY_TITLE.exec(a.title);return a.kind==='answer'&&m?m[1]==='Plan'?0:2:1;};
  for(const artifact of orderArtifacts(list).kept){
   let at=new Date(artifact.createdAt*1000);
   // The day's plan and summary belong to the day they are about.
@@ -321,10 +332,10 @@ export function journalPages<T extends {id:string;kind:string;title:string;size?
   if(daily)for(let back=0;back<3;back++){const d=new Date(at.getFullYear(),at.getMonth(),at.getDate()-back,12);if(titleDay(d)===daily[2]){if(back)at=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59);break;}}
   // A reply draft from the morning brief is medium: the draft and its Send, Edit and Skip.
   const size:ArtifactSize=artifact.kind==='answer'&&(artifact.size==='large'||artifact.size==='medium'||artifact.size==='small')?artifact.size:artifact.kind==='answer'||artifact.kind==='reply'?'medium':'small';
-  const k=key(at);if(!pages.has(k))pages.set(k,[]);pages.get(k)!.push({artifact,size,at:at.getTime()/1000});
+  const k=key(at);if(!days.has(k))days.set(k,[]);days.get(k)!.push({artifact,size,at:at.getTime()/1000,origin:journalOrigin(artifact)});
  }
  const today=key(now),yesterday=key(new Date(now.getFullYear(),now.getMonth(),now.getDate()-1));
- return [...pages].sort((a,b)=>b[0].localeCompare(a[0])).map(([day,entries])=>{
+ return [...days].sort((a,b)=>b[0].localeCompare(a[0])).map(([day,entries])=>{
   const [y,m,d]=day.split('-').map(Number),date=new Date(y,m-1,d);
   const label=day===today?'Today':day===yesterday?'Yesterday':date.toLocaleDateString(locale||'en-US',{weekday:'short',month:'short',day:'numeric',year:y===now.getFullYear()?undefined:'numeric'});
   return {day,label,entries:entries.sort((a,b)=>rank(a.artifact)-rank(b.artifact)||a.at-b.at||a.artifact.id.localeCompare(b.artifact.id))};
@@ -338,8 +349,8 @@ export function findArtifacts(list:Artifact[],query='',limit=12){
   .map(({id,kind,title,category,size,updatedAt,body})=>({id,kind,title,...(category?{category}:{}),size,shownAt:new Date(updatedAt*1000).toISOString(),preview:body.replace(/\s+/g,' ').slice(0,160)}));
 }
 
-/** A page Fox made for a moment (core/artifacts) as the Artifacts page lists it: the most interactive artifact, which
- * is already an Applet while its moment lasts or once the person keeps it. Its record stays in the `widgets` table. */
+/** A page Fox made as the Journal lists it: an artifact like any other, the most interactive kind, which opens as its own
+ * page while its moment lasts or once the person keeps it. Its record stays in the `widgets` table. */
 export type MadeArtifact={id:string;kind:'made';title:string;body:string;state:'now'|'kept'|'finished';endsAt:number;createdAt:number;updatedAt:number};
 export function madeArtifacts(lists:{now?:unknown[];finished?:unknown[]}):MadeArtifact[] {
  const read=(w:any,finished:boolean):MadeArtifact[]=>{

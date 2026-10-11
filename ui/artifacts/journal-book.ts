@@ -1,8 +1,8 @@
-/** The Journal as a book (owner requests 2026-10-08): its own button above Settings opens it over the World, open on a
- * day, in the World's country materials: a timber-leather cover with stitching and brass corners, two ivory leaves with
- * a faint dot grid, a moss ribbon, day tabs on the fore-edge and a pressed sage sprig (journal-book.css). The pages
- * themselves are the Journal (companion-artifacts.ts). It closes with ×, Escape or a click outside, and steps aside
- * when a card in it opens in the World. */
+/** The Journal as a book (owner requests 2026-10-08): today's date in the World's top-left corner opens it over the
+ * World, in the World's country materials: a timber-leather cover with stitching and brass corners, an ivory leaf with
+ * a faint dot grid, a moss ribbon and a pressed sage sprig (journal.css). The leaf is the Journal's timeline
+ * (companion-artifacts.ts). It closes with ×, Escape or a click outside, and steps aside when a card in it opens in the
+ * World. */
 export type JournalBook={open(day?:string,card?:string):void;close(focus?:boolean):void;toggle():void;readonly isOpen:boolean;readonly element:HTMLDialogElement};
 // A pressed sage sprig: one stem, paired leaves along it, one at the tip (drawn here, no image asset).
 const LEAF='M0 0C7-8 22-8 30 0C22 8 7 8 0 0Z';
@@ -15,7 +15,7 @@ export function mountJournalBook({root,pages,start,stop,returnFocus}:{root:HTMLE
  const ribbon=document.createElement('span');ribbon.className='journal-book-ribbon';ribbon.setAttribute('aria-hidden','true');
  const sprig=document.createElement('span');sprig.className='journal-book-sprig-holder';sprig.innerHTML=SPRIG;
  book.append(ribbon,pages,sprig,close);root.append(book);
- /** Opens on `day` (today when empty) and, given one, brings `card` into view on that page. */
+ /** Opens at `day` (today when empty) and, given one, brings `card` into view. */
  function open(day='',card=''){
   if(root.dataset.onboardingLocked==='true')return;
   start(day,card);
