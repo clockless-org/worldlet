@@ -122,11 +122,14 @@ export class DesktopCompanion implements DesktopCompanionService {
   // Capture screen coordinates before the OS starts its minimize animation.
   const frame=world.isMinimized()&&this.frame?this.frame:this.viewFrame(world);
   let value:unknown=null;
+  // The World can close (quit, restart) while the page answers: its window and view are then destroyed.
+  const closed=()=>world.isDestroyed()||view.webContents.isDestroyed();
   try{value=await this.host.page.call('worldletCompanionGeometry',automatic);}catch{}
   if(!this.detaching||generation!==this.generation)return;
-  if(automatic&&!value){this.detaching=false;return;}
+  if(closed()||automatic&&!value){this.detaching=false;return;}
   const backdrop=hideWorld?null:await this.capture(view);
   if(!this.detaching||generation!==this.generation)return;
+  if(closed()){this.detaching=false;return;}
   // Back in front while the frame was taken: Fox stays in the World.
   if(automatic&&(world.isFocused()||this.inFront())){this.detaching=false;return;}
   const bounds=view.getBounds();
@@ -147,9 +150,9 @@ export class DesktopCompanion implements DesktopCompanionService {
  }
  private async detach(world:BaseWindow,frame:Rectangle,hideWorld:boolean,generation:number,image:NativeImage|null=null){
   const view=this.host.worldView();
-  if(!view)return;
+  if(!view||world.isDestroyed()||view.webContents.isDestroyed())return;
   for(const listener of this.listeners)try{listener();}catch(error){this.host.diagnostics.record(error,'desktopCompanion');}
-  const panel=this.panel??this.makePanel(world);
+  const panel=this.panel&&!this.panel.isDestroyed()?this.panel:this.makePanel(world);
   this.panel=panel;this.desktop=true;
   const crop=this.crop;
   panel.setBounds({x:Math.round(frame.x+crop.x),y:Math.round(frame.y+crop.y),width:crop.width,height:crop.height});
@@ -165,7 +168,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   view.setBounds({x:-crop.x,y:-crop.y,width:this.viewport.width,height:this.viewport.height});
   panel.contentView.addChildView(view);
   await this.host.page.call('worldletDesktopCompanion',true);
-  if(!this.desktop||this.generation!==generation)return;
+  if(!this.desktop||this.generation!==generation||world.isDestroyed()||panel.isDestroyed())return;
   if(hideWorld){world.hide();this.entry?.show();}
   panel.showInactive();
   this.presented(true);

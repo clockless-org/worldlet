@@ -145,14 +145,19 @@ for(const [message,code,rule] of [['Invalid Applet candidate title.','outputVali
  const saved=exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation:'worldItemSave'});
  assert.deepEqual([saved.code,saved.rule],[code,rule],message);assert.doesNotMatch(JSON.stringify(saved),/secret|Invalid|Events/);
 }
-assert.equal('rule' in crash,false,'only World item saves and Fox setup failures carry a rule');
+assert.equal('rule' in crash,false,'an unclassified failure carries no rule');
+// Applet page analysis names which ending failed (a week of bare operationFailed on one Mac, 2026-10-11); a kept page
+// released under memory pressure is the browser working as designed, so error tracking never hears of it.
+for(const [message,rule] of [['Applet analysis ended without a verified result.','noResult'],['Applet analysis did not cover every supplied source record; retry remaining analysis.','partialCoverage'],['ENOENT: no such file','missing']])
+ assert.equal(exceptionReport({name:'Error',message,stack:'',area:'host',operation:'appletAnalysis'}).rule,rule,message);
+assert.equal(exceptionReport({name:'Error',message:'Kept page released under memory pressure (appFootprint).',stack:'',area:'host',operation:'keptPageRelease'}),null);
 // Fox setup failure messages still map to fixed tags.
 {
  for(const [message,rule] of [['Fox setup files do not match this app. Reinstall Worldlet.','setupFiles'],['Fox setup files are missing. Reinstall Worldlet and try again.','setupFiles'],
   ['Fox setup failed integrity verification. Reinstall Worldlet and try again.','setupVerify'],['Background setup could not finish. Check your connection and try connecting again. Your saved world is safe.','setupOther']])
   assert.equal(exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation:'agentChat'}).rule,rule,message);
 }
-console.log('PASS exception projection: type, failure code and sanitized frames only; no message, path, query or user name; World item rejections name their rule');
+console.log('PASS exception projection: type, failure code and sanitized frames only; no message, path, query or user name; World item rejections and Applet analysis endings name their rule; kept-page releases are not exceptions');
 
 // Fox and startup timings reach PostHog only as buckets of an allowlisted row; running turns and steering send nothing.
 {

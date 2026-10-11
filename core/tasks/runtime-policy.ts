@@ -9,6 +9,9 @@ export function runtimeFailure(input:{message?:string;cancelled?:boolean;madePro
  if(input.cancelled)return {code:'cancelled',waitReason:'retry_at',nextAt:now+5,failures:input.failures||0};
  // A newer revision of a record arrived mid-analysis: analyze that one soon; nothing failed.
  if(/Source changed during analysis/i.test(message))return {code:'source_changed',waitReason:'retry_at',nextAt:now+5,failures:input.failures||0};
+ // The Agent's own model refused the turn (core/applets/analysis-state.ts): retrying soon only repeats the refusal
+ // until the person picks another model, and the batch's records did nothing wrong.
+ if(/agent model service is unavailable/i.test(message))return {code:'model_unavailable',waitReason:'model_budget',nextAt:now+3600,failures};
  // A persisted code is reclassified after restart, so it must map back to the same wait.
  const service=attentionFailure(Object.hasOwn(serviceCodes,message)?serviceCodes[message]:message,now);
  // Included-model stops (allowance, pause, credits, outdated app) carry their own deadline; a short backoff only adds rejected calls.
