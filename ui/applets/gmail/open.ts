@@ -24,7 +24,7 @@ export function renderMailOpen(panel,items,value,_state,onPick,_redraw,sharedDev
  const important=mailMatters(items).filter(item=>!!item.attention).slice(0,9);
  const el=(tag,cls,text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  panel.dataset.mailCategory='attention';panel.dataset.mailReading=String(!!value?.reading);
- const parts=(globalThis as any).__WORLDLET_25D_ASSETS__?.mailParts;
+ const assets=(globalThis as any).__WORLDLET_25D_ASSETS__,parts=assets?.mailParts;
  const painted=(src,cls)=>{const image=el('img',cls);image.src=src;image.alt='';image.draggable=false;return image;};
  const desk=el('div','mail-open-desk');desk.setAttribute('aria-label','Mail attention board');panel.append(desk);
  const board=el('section','mail-attention-board');board.setAttribute('aria-label','Needs Attention');desk.append(board);
@@ -34,18 +34,18 @@ export function renderMailOpen(panel,items,value,_state,onPick,_redraw,sharedDev
  for(const [index,item] of important.entries()){
   const b=el('button','pixi-stage-item');b.type='button';b.dataset.itemId=item.id;b.dataset.curated=String(!!item.curated);b.dataset.pinned='true';b.dataset.stacked=String(item.messageCount>1);b.style.setProperty('--leaf',String(index));
   const title=item.record?.title||item.title;b.title=title;b.setAttribute('aria-label',title);
-  b.append(el('span','mail-envelope-front'),el('span','mail-letter-pin'),el('strong','',mailTitle(title,item.curated?item.title:'')));
-  if(parts?.['pinned-envelope'])b.querySelector('.mail-envelope-front').append(painted(parts['pinned-envelope'],'mail-envelope-paint'));
+  const front=el('span','mail-envelope-front');b.append(front,el('span','mail-letter-pin'),el('strong','',mailTitle(title,item.curated?item.title:'')));
+  if(parts?.['pinned-envelope'])front.append(painted(parts['pinned-envelope'],'mail-envelope-paint'));
   const record=mailMetadata(item.record),from=record.from;
-  const stamp=mailAvatar(from,record.avatar);stamp.classList.add('mail-envelope-avatar');b.querySelector('.mail-envelope-front').append(stamp);
+  const stamp=mailAvatar(from,record.avatar);stamp.classList.add('mail-envelope-avatar');front.append(stamp);
   b.append(el('span','mail-letter-sender',from?mailIdentity(from).name:'Sender unavailable'));
-  const rawDate=record.date||record.receivedAt||record.sentAt||record.internalDate;
-  if(rawDate){const formatted=mailTime(rawDate),time=el('time','mail-letter-time',formatted.label);time.title=formatted.exact;if(formatted.iso)time.dateTime=formatted.iso;b.append(time);}
+  // mailMetadata already falls back through receivedAt, sentAt, internalDate and the Date header.
+  if(record.date){const formatted=mailTime(record.date),time=el('time','mail-letter-time',formatted.label);time.title=formatted.exact;if(formatted.iso)time.dateTime=formatted.iso;b.append(time);}
   const mark=el('i','applet-attention applet-item-attention');mark.dataset.state=item.attention.state;mark.innerHTML=attentionIcon(item.attention.state,false,item.attention.priority);mark.setAttribute('aria-hidden','true');b.append(mark);
   b.onclick=()=>onPick(item);grid.append(b);
  }
  // Painted paper wear marks the empty slots without explanatory text.
- const assets=(globalThis as any).__WORLDLET_25D_ASSETS__,asset=assets?.devices?.gmail;
+ const asset=assets?.devices?.gmail;
  if(asset&&!sharedDevice){const image=el('img','mail-open-device');image.dataset.applet='gmail';image.src=typeof asset==='string'?asset:asset.src;image.alt='';panel.append(image);}
  return important;
 }

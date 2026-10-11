@@ -29,7 +29,8 @@ export function createCodexApplet({call,renderMarkdown,onSelect,onState,onReques
  async function refresh(more=false,background=false){if(busy)return;busy=true;error='';status.removeAttribute('role');status.textContent='Reading local Codex sessions…';try{
   if(Date.now()-usageReadAt>60000){usageReadAt=Date.now();void call({operation:'usage'}).then(value=>{usage={...value,observedAt:Date.now()};publish();}).catch(()=>{usage=null;publish();});}
   const result=await call({operation:'list',...(more&&cursor?{cursor}:{})}),rows=result.providers?.find(p=>p.provider==='codex')?.sessions||[];
-  sessions=background?[...new Map([...rows,...sessions.filter(s=>!rows.some(r=>r.sessionId===s.sessionId))].map(s=>[s.sessionId,s])).values()]:more?[...new Map([...sessions,...rows].map(s=>[s.sessionId,s])).values()]:rows;
+  const fresh=new Set(rows.map(r=>r.sessionId));
+  sessions=background?[...new Map([...rows,...sessions.filter(s=>!fresh.has(s.sessionId))].map(s=>[s.sessionId,s])).values()]:more?[...new Map([...sessions,...rows].map(s=>[s.sessionId,s])).values()]:rows;
   if(!background)cursor=result.nextCursor;status.textContent=result.scope||'Live states apply to Worldlet sessions; other sessions are saved history.';publish();
  }catch(e){error=e.message;status.textContent=e.message;status.setAttribute('role','alert');publish();}finally{busy=false;drawRows();}}
  async function inspect(session,container,older=false){

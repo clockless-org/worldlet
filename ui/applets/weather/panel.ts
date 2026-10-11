@@ -1,6 +1,5 @@
 import {node,appletSurface,actionButton,facts,notice,emptyState} from '../../components/index.ts';
-import {weatherGlyph} from '../../world/index.ts';
-import {weatherKind} from '../../world/index.ts';
+import {weatherGlyph,weatherKind} from '../../world/index.ts';
 
 const value=(v:any,suffix='')=>Number.isFinite(v)?Math.round(v)+suffix:'—';
 export function createWeatherPanel({refresh,locate}:{refresh:()=>Promise<unknown>;locate:()=>Promise<unknown>}){
@@ -21,10 +20,11 @@ export function createWeatherPanel({refresh,locate}:{refresh:()=>Promise<unknown
   if(!days.length)surface.body.append(emptyState(state.busy?'Loading forecast…':'No forecast yet',state.hasLocation?'Refresh to try again.':'Allow location to see your local forecast.'));
   if(!days.some(day=>day.time===selected))selected=days[0]?.time||null;
   const list=node('div','weather-forecast-list');list.setAttribute('aria-label','Seven-day forecast');surface.body.append(list);
-  const localDay=(time:number)=>new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).format(time);
+  // One formatter per draw, not two per day: each Intl.DateTimeFormat is costly to build.
+  const dayKey=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}),weekday=new Intl.DateTimeFormat('en',{timeZone:tz,weekday:'short'}),today=dayKey.format(Date.now());
   const lows=days.map(d=>d.low).filter(Number.isFinite),highs=days.map(d=>d.high).filter(Number.isFinite),min=Math.min(...lows),max=Math.max(...highs),span=Math.max(1,max-min);
   for(const day of days){
-   const label=localDay(day.time)===localDay(Date.now())?'Today':new Intl.DateTimeFormat('en',{timeZone:tz,weekday:'short'}).format(day.time);
+   const label=dayKey.format(day.time)===today?'Today':weekday.format(day.time);
    const condition=weatherKind(day.code).label,b=node('button','weather-forecast-row');b.type='button';b.dataset.time=String(day.time);b.setAttribute('aria-pressed',String(selected===day.time));b.setAttribute('aria-label',`${label}, ${condition}, low ${value(day.low,'°C')}, high ${value(day.high,'°C')}, precipitation ${value(day.rain,'%')}`);
    b.append(node('strong','weather-weekday',label),glyph(day.code),node('span','weather-row-condition',condition),node('span','weather-low',value(day.low,'°')));
    const track=node('span','weather-range'),bar=node('span');if(Number.isFinite(day.low)&&Number.isFinite(day.high)){bar.style.left=((day.low-min)/span*100)+'%';bar.style.width=(Math.max(.03,(day.high-day.low)/span)*100)+'%';track.append(bar);}b.append(track,node('strong','weather-high',value(day.high,'°')),node('span','weather-rain',value(day.rain,'%')));b.onclick=()=>openDay(day.time);list.append(b);
