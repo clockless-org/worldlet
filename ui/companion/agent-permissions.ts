@@ -1,4 +1,4 @@
-/** Settings › Your Agent › Things it may do without asking: the standing rules an Always on an approval card left in
+/** Settings › Your Agent › Permissions: the standing rules an Always on an approval card left in
  * each Agent on this computer (host `harnessApprovalRules`, contracts/harness-services.ts HarnessStandingRules): what it
  * allows, which agent, when and in which Fox conversation it was granted, when it was last used, and Revoke, which asks
  * once more in the page and then makes that Agent forget it its own way. An Agent that cannot have a rule revoked from
@@ -21,7 +21,7 @@ export async function showAgentPermissions(target:HTMLElement,call:(action:strin
  const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const button=(label:string,action:string,run:(b:HTMLButtonElement)=>void|Promise<void>,primary=false)=>{const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';b.dataset.action=action;b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run(b);}finally{if(b.isConnected)b.disabled=false;}};return b;};
  const box=el('div','companion-settings-approvals'),said=el('p','companion-settings-status');said.setAttribute('role','status');
- target.append(el('p','companion-info-note','When you choose Always on an approval card, your Agent stops asking for that. These live in your Agent; Worldlet shows them so you can take one back, and then your Agent asks again.'),box,said);
+ target.append(box,said);
  /** The in-page second ask: what revoking does, and only then the Agent's own way of forgetting it. */
  function confirmRevoke(row:HTMLElement,harness:Harness,rule:Rule){
   for(const open of box.querySelectorAll?.('.companion-settings-confirm')??[])open.remove();

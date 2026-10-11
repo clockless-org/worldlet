@@ -66,6 +66,10 @@ export interface AgentService {
  /** The MCP servers and chat accounts in each Harness on this computer that declares `connections`, Fox's or not; a
   * change runs that Harness's own command. */
  harnessConnections?():{harness:string;title:string;connections:import('../../../../contracts/harness-services.ts').HarnessConnections}[];
+ /** The scheduled jobs and skills in each Harness on this computer that declares `schedule` or `skills`, Fox's or not
+  * (Settings › Your Agent); a change runs that Harness's own command. */
+ harnessSchedules?():{harness:string;title:string;schedule:import('../../../../contracts/harness-services.ts').HarnessSchedule}[];
+ harnessSkillSets?():{harness:string;title:string;skills:HarnessSkills}[];
  /** The person's Harness's `events`, `calls` and `tools` services (contracts/harness-services.ts), null when it provides none. */
  harnessEvents?():HarnessEvents|null;
  harnessCalls?():HarnessCalls|null;

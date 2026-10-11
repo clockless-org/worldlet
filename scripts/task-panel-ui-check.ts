@@ -152,6 +152,13 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await popover.locator('button').count(),0,'view only');
  await page.keyboard.press('Escape');
  await popover.waitFor({state:'hidden'});
+ // A routine paused in Settings › Your Agent leaves the timeline at once: Settings announces `worldlet:routines` after the
+ // Agent's own command ran (ui/companion/agent-routines.ts), and the panel reads its jobs again; resumed, it is back.
+ const pause=(paused:boolean)=>page.evaluate(paused=>{const w=window as any;w.panel={...w.panel,jobs:w.panel.jobs.map((j:any)=>j.id==='b'?{...j,paused}:j)};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));},paused);
+ await pause(true);
+ await panel.locator('.task-step',{hasText:'Water the plants'}).waitFor({state:'detached'});
+ await pause(false);
+ await panel.locator('.task-step',{hasText:'Water the plants'}).waitFor();
  // During the tour only Routines show.
  const shown=async()=>panel.locator('.task-group:visible').evaluateAll(list=>list.map(g=>(g as HTMLElement).dataset.group));
  await page.evaluate(()=>{(document.querySelector('.native-console') as HTMLElement).dataset.tourStep='hello';});
@@ -213,4 +220,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(narrowErrors,[]);
  assert.deepEqual(errors,[]);
 });
-console.log('PASS task panel UI: floats beside the Attention Center on its backing; Routines on top as a timeline down from Now with a read-only popover; below them one window per running task, a terminal with Fox and its status lines that a click opens to the whole log, or the page Fox drives shown small that a click opens; no Done list or Journal link; one column that scrolls as one; the date and Journal corner on the Attention Center’s edge, width and backing; only Routines in the tour, hidden beside an open Applet, a chip at 800px wide and gone at 560px tall');
+console.log('PASS task panel UI: floats beside the Attention Center on its backing; Routines on top as a timeline down from Now with a read-only popover, read again when Settings pauses or resumes one; below them one window per running task, a terminal with Fox and its status lines that a click opens to the whole log, or the page Fox drives shown small that a click opens; no Done list or Journal link; one column that scrolls as one; the date and Journal corner on the Attention Center’s edge, width and backing; only Routines in the tour, hidden beside an open Applet, a chip at 800px wide and gone at 560px tall');

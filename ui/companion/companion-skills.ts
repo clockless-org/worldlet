@@ -1,7 +1,7 @@
-/** The skills on the Profile page's “What Fox knows” (core/agent/PORTABILITY.md#the-agents-skills-in-the-world): each
- * skill with when it last ran and whether it lives in the person's Agent, the World's copy or both, and Fox's offer to
- * save a task it keeps repeating, as a card the person confirms (Save as a skill) or turns down (Not now). */
-import {skillLastRanLabel,type SkillProposal,type WorldSkill} from '../../core/agent/index.ts';
+/** Fox's offer on the Profile page's “What Fox knows” (core/agent/PORTABILITY.md#the-agents-skills-in-the-world) to save
+ * a task it keeps repeating, as a card the person confirms (Save as a skill) or turns down (Not now). The Agent's own
+ * skills are listed in Settings › Your Agent (agent-skills.ts). */
+import type {SkillProposal,WorldSkill} from '../../core/agent/index.ts';
 
 export type FoxSkills={skills:WorldSkill[];proposals:SkillProposal[];saves:'agent'|'world';agent:string|null};
 const record=(value:unknown):value is Record<string,any>=>!!value&&typeof value==='object'&&!Array.isArray(value);
@@ -13,7 +13,6 @@ export function readFoxSkills(value:unknown):FoxSkills|null {
   times:Number(p.times)||0,lastAt:Number(p.lastAt)||0,asks:Array.isArray(p.asks)?p.asks.filter((a:unknown)=>typeof a==='string'):[]}));
  return {skills,proposals,saves:value.saves==='agent'?'agent':'world',agent:typeof value.agent==='string'?value.agent:null};
 }
-const WHERE={agent:'In your Agent',world:'Kept in the World',both:'In your Agent and the World'} as const;
 /** Fox's offers, one card each; `act` runs Save or Not now. */
 export function skillOffers(state:FoxSkills,{el,button,name,act}:{el:(tag:string,cls?:string,text?:unknown)=>any;button:(label:string,action:()=>void)=>HTMLButtonElement;name:string;act:(operation:'save'|'decline',id:string)=>void}):HTMLElement[] {
  return state.proposals.map(proposal=>{
@@ -25,15 +24,4 @@ export function skillOffers(state:FoxSkills,{el,button,name,act}:{el:(tag:string
   card.append(actions);
   return card;
  });
-}
-/** The Skills group's body: newest run first. */
-export function skillList(state:FoxSkills,{el,now=Date.now()}:{el:(tag:string,cls?:string,text?:unknown)=>any;now?:number}):HTMLElement {
- const ul=el('ul','companion-skill-list');
- for(const skill of state.skills.slice(0,80)){
-  const li=el('li');li.dataset.skill=skill.name;li.title=skill.description;
-  li.append(el('span','companion-skill-name',skill.name),el('span','companion-skill-meta',skillLastRanLabel(skill.lastRanAt,now)+' · '+WHERE[skill.where]));
-  ul.append(li);
- }
- if(state.skills.length>80)ul.append(el('li','companion-knowledge-more','and '+(state.skills.length-80)+' more'));
- return ul;
 }

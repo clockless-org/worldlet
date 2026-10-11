@@ -61,7 +61,19 @@ export interface HarnessSchedule {
  running():Promise<boolean|null>;
  /** How the person starts that scheduler (a command), for the World's note when it is not running. */
  readonly start?:string;
+ /** The newest finished run of each job, for Settings › Your Agent; absent: the World pages through `runs`. */
+ latest?():Promise<HarnessJobRun[]>;
+ /** The Agent's own command a change to one job runs, as the person sees it before confirming; absent with `change`:
+  * its jobs are read-only here. */
+ preview?(change:HarnessJobChange):Promise<string>;
+ /** Runs that command (only after the person confirmed this exact preview), then reads the jobs again to be sure;
+  * rejects with the Agent's reason. */
+ change?(change:HarnessJobChange):Promise<void>;
 }
+/** One change to one job, each the Agent's own command (core/agent/harness-controls.ts): pause or resume it, run it
+ * once now, or remove it. Creating or editing a job is the Agent's own conversation, never a World form. */
+export type HarnessJobAction='pause'|'resume'|'run'|'remove';
+export type HarnessJobChange={job:string;action:HarnessJobAction};
 
 /** approvals: the Harness's own permission prompts (dangerous commands, tool policy), answered in the World. `rule` is
  * what Always would allow, in the Harness's own terms (a Hermes Agent pattern key, an OpenClaw command); `agent` and
@@ -174,9 +186,19 @@ export interface HarnessConnections {
  * its own, its own way (its command line in mode `native`; in mode `files`, a new SKILL.md folder exactly where the
  * Agent's own skill tool creates one, never changing or removing an existing one); it rejects with the Agent's reason.
  * Absent: Worldlet has no way to add one there, and the World keeps the skill itself. `where` is the folder. */
-export type HarnessSkill={name:string;description:string;where:string;lastUsedAt?:number};
+export type HarnessSkill={name:string;description:string;where:string;lastUsedAt?:number;
+ /** false when the person turned it off in the Agent (it stays in its folder); absent: the Agent has no switch. */
+ enabled?:boolean;
+ /** The Agent has its own command that removes this one (Hermes Agent: only a skill it installed from its hub). */
+ removable?:boolean};
 export type HarnessSkillDraft={name:string;description:string;body:string};
-export interface HarnessSkills {list():Promise<HarnessSkill[]>;save?(draft:HarnessSkillDraft):Promise<{name:string;where:string}>;}
+/** Turn one skill off or on again, or remove it, each with the Agent's own command (core/agent/harness-controls.ts). */
+export type HarnessSkillChange={skill:string;action:'disable'|'enable'|'remove'};
+export interface HarnessSkills {list():Promise<HarnessSkill[]>;save?(draft:HarnessSkillDraft):Promise<{name:string;where:string}>;
+ /** The Agent's own command a change runs, as the person sees it before confirming; absent with `change`: read-only. */
+ preview?(change:HarnessSkillChange):Promise<string>;
+ /** Runs that command (only after the person confirmed this exact preview); rejects with the Agent's reason. */
+ change?(change:HarnessSkillChange):Promise<void>;}
 
 /** location: where the Harness runs. A remote one is reached through a paired Worldlet on that computer, or directly
  * (`direct`: its own network interface, such as an OpenClaw Gateway's address and token). */

@@ -8,7 +8,7 @@ import {createCompanionArtifacts,mountJournalBook} from '../artifacts/index.ts';
 import {createCompanionPhone} from './companion-phone.ts';
 import {companionStill} from '../themes/index.ts';
 import {createCompanionSettings} from './companion-settings.ts';
-import {readFoxSkills,skillList,skillOffers,type FoxSkills} from './companion-skills.ts';
+import {readFoxSkills,skillOffers,type FoxSkills} from './companion-skills.ts';
 
 // What Fox can do, as things a person would actually say (owner feedback 2026-10-03: show real cases).
 const ABILITIES:[icon:string,title:string,say:string,does:string][]=[
@@ -136,19 +136,16 @@ export function mountCompanionInfo({root,pet,call,getName}){
    if(!saved)block.append(el('p','companion-info-note','Nothing saved yet. '+name+' remembers as you talk.'));
    if(!snapshot?.sampleEnabled){const edit=button('Edit memory',()=>{dismiss();window.dispatchEvent(new Event('worldlet:memory-manager'));});edit.classList.add('companion-knowledge-edit');block.append(edit);}
    if(knowledge.conversations)block.append(el('p','companion-knowledge-line',name+'’s own conversation: '+plural(knowledge.conversations,'message')));
+   // What other Agents' conversations and notes Fox can look through. Their skills and scheduled tasks are the Agent's
+   // own and are listed only in Settings › Your Agent (owner decision 2026-10-11), where they can be changed.
    for(const agent of knowledge.brought){
-    const parts=[[agent.conversations,'message'],[agent.notes,'note'],[agent.skills.length,'skill'],[agent.routines.length,'routine']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
+    const parts=[[agent.conversations,'message'],[agent.notes,'note']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
     if(!parts.length)continue;
-    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>{
-     if(agent.conversations||agent.notes)body.append(el('p','companion-knowledge-line',name+' can look through these conversations and notes when you ask.'));
-     if(agent.skills.length)body.append(el('h4','','Skills'),list(agent.skills));
-     if(agent.routines.length)body.append(el('h4','','Routines'),list(agent.routines.map(routine=>routine.schedule?routine.name+' · '+routine.schedule:routine.name)));
-    });
+    group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and notes when you ask.')));
    }
-   // Every skill with when it last ran, then Fox's offers to save a task it keeps repeating, answered right here.
+   // Fox's offers to save a task it keeps repeating, answered right here; the skills themselves are in Your Agent.
    if(skills&&!snapshot?.sampleEnabled){
     const state=skills;
-    if(state.skills.length)group('skills','Skills',plural(state.skills.length,'skill'),body=>body.append(skillList(state,{el})));
     block.append(...skillOffers(state,{el,button,name,act:(operation,id)=>run(async()=>{const result=await call('foxSkills',{operation,id});skills=readFoxSkills(result)??skills;skillNote=typeof result?.note==='string'?result.note:'';})}));
     if(skillNote)block.append(el('p','companion-info-note companion-skill-note',skillNote));
    }

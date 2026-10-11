@@ -220,7 +220,7 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
  await assert.rejects(rules.revoke('hermes',outside.id),/your own world/);
  host.store.sampleEnabled=()=>false;
 
- // Settings › Your Agent › Things it may do without asking: a row per rule with its agent, when and where, and Revoke,
+ // Settings › Your Agent › Permissions: a row per rule with its agent, when and where, and Revoke,
  // which asks once more in the page before the Agent forgets it; an Agent that cannot revoke says how.
  const requests:any[]=[];
  let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:harnessApprovalFeatures('hermes').revokeNote,rules:[{id:granted.id,allows:'recursive delete',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In the gmail Applet',inWorld:true},{id:outside.id,allows:'podman *',agent:'work',kind:'command'}]},
@@ -251,4 +251,4 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
 
 });
 delete (globalThis as any).document;
-console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Your Agent › Things it may do without asking and the approval card\'s diff');
+console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Your Agent › Permissions and the approval card\'s diff');

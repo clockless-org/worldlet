@@ -4,6 +4,8 @@ import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
+import {showAgentRoutines} from './agent-routines.ts';
+import {showAgentSkills} from './agent-skills.ts';
 import {showWorldletAccounts} from './worldlet-accounts.ts';
 
 /** What the World view lends Settings: the sample world switch and which host features exist. */
@@ -281,13 +283,22 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   // The connection steps open under the buttons; a new connection redraws what Fox runs on.
   const changed=()=>{if(turn!==ticket||!target.isConnected){for(const name of MODEL_EVENTS)window.removeEventListener(name,changed);return;}void draw();};
   for(const name of MODEL_EVENTS)window.addEventListener(name,changed);
-  // Your Agent's own settings that Worldlet only shows and changes its way, after what Fox runs on: what it may do
-  // without asking (its standing rules) and, last, the accounts and tools (Worldlet's own, then the Agent's).
+  // The page is six named sections in this order, each with one plain line (owner decision 2026-10-11): Model (what
+  // Fox runs on), then what lives in the Agent and Worldlet only shows and changes its way: its Skills, Routines (the
+  // same jobs as the Task panel's Routines), Permissions (its standing rules) and, last, Accounts (Worldlet's own, then
+  // the Agent's tools and chat accounts).
   const live=()=>turn===ticket&&target.isConnected;
-  const part=(id:string,heading:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading));return box;};
-  const permissions=part('permissions','Things it may do without asking'),accounts=part('accounts','Accounts and tools');
-  target.append(now,fixes,guide.element,agents,said,permissions,accounts);
-  await Promise.all([draw(),showAgentPermissions(permissions,call,live),showWorldletAccounts(accounts,call,live)]);
+  const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
+  const model=part('model','Model','The Agent Fox thinks with, on its own sign-in, and the provider it answers with.');
+  const skills=part('skills','Skills','Steps your Agent follows for tasks it knows how to do. They live in your Agent; Worldlet changes them only with its own commands.');
+  const routines=part('routines','Routines','What your Agent does on its own schedule, the same Routines as in the Task panel. Worldlet changes them only with its own commands.');
+  const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
+  const accounts=part('accounts','Accounts','The accounts Worldlet signed in to, then the tools and chat accounts set up in your Agent.');
+  // A request for Fox (set up or change a routine) goes to its conversation with the panel closed.
+  const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
+  model.append(now,fixes,guide.element,agents,said);
+  target.append(model,skills,routines,permissions,accounts);
+  await Promise.all([draw(),showAgentSkills(skills,call,live),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),showWorldletAccounts(accounts,call,live)]);
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical).
  const items:Item[]=[

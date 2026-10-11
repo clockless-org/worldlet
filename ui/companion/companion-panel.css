@@ -160,14 +160,21 @@
 .companion-settings-confirm{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:13px;color:#354132}
 .companion-settings-part{display:flex;flex-direction:column;align-items:flex-start;gap:10px;align-self:stretch;margin-top:12px;padding-top:14px;border-top:1px solid #d9cbae80;scroll-margin-top:4px}
 .companion-settings-parthead{margin:0;font-size:15px;color:#354132}
+.companion-settings-part:first-child{margin-top:0;padding-top:0;border-top:0}
 .companion-settings-approvals,.companion-settings-worldlet-accounts{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-approvals .companion-settings-row{flex-wrap:wrap}
 .companion-settings-approvals code{font-size:12px;font-weight:400;overflow-wrap:anywhere}
 .companion-settings-command{flex:1 1 100%;font-size:12px;color:#656651}
-.companion-settings-command summary{cursor:pointer}
+.companion-settings-command summary{cursor:pointer;min-height:0;line-height:1.4}
+.companion-settings-command:not([open]) code{display:none}
 .companion-settings-command code{display:block;margin-top:4px}
 .companion-settings-agent-connections{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-agent-connections .companion-settings-row{flex-wrap:wrap}
+.companion-settings-agent-skills,.companion-settings-agent-routines,.companion-settings-agent-memory{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
+.companion-settings-agent-skills .companion-settings-row,.companion-settings-agent-routines .companion-settings-row,.companion-settings-agent-memory .companion-settings-row{flex-wrap:wrap}
+.companion-settings-row .companion-settings-tag{display:inline-block;margin-left:2px;padding:0 6px;border-radius:8px;background:#d9cbae80;font-size:11px;font-weight:500;color:#5b5440;vertical-align:1px}
+.companion-settings-agent-routines code{font-size:12px;overflow-wrap:anywhere}
+.companion-settings-row>.companion-settings-actions{flex:0 0 auto;flex-direction:row;align-items:center;justify-content:flex-end}
 .companion-settings-row>.companion-settings-confirm{flex:1 1 100%;flex-direction:row}
 .companion-settings-confirm code{font-size:12px;overflow-wrap:anywhere}
 .companion-settings-body>.companion-panel-guide,.companion-settings-body>.companion-history-records{align-self:stretch}

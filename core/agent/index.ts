@@ -28,3 +28,4 @@ export * from './harness-skills.ts';
 export * from './world-since.ts';
 export * from './remote-gateway.ts';
 export * from './harness-connections.ts';
+export * from './harness-controls.ts';
