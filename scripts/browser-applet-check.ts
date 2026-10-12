@@ -53,7 +53,7 @@ await withBrowser(async browser=>{
   await button.click();
  }
  assert.deepEqual(await fresh.evaluate(()=>(window as any).commands),['reload','reload'],'Refresh reloads the page shown');
- await fresh.evaluate(()=>{document.querySelector('section')!.hidden=true;});
+ await fresh.evaluate(()=>{document.querySelector('main>section')!.hidden=true;});
  await fresh.locator('.browser-refresh').waitFor({state:'hidden'});
  console.log('PASS Refresh: in the toolbar of website Applets and the Browser while a page shows, reloading it.');
 });
