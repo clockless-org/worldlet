@@ -2,6 +2,7 @@ import {calendarParts,nativeReleaseVersion} from '../core/distribution/index.ts'
 import {workspace} from './dev-workspace.ts';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
+import {releaseIdentity} from './ci-release.mjs';
 const root=new URL('../',import.meta.url);
 // One committed release identity across Swift, the bundled UI and Cloudflare.
 // Git checkout depth, documentation commits and build-machine clocks do not change it.
@@ -20,17 +21,15 @@ export function buildInfo(platform: 'mac' | 'windows' = process.env.WORLDLET_TAR
  return {version:calendarParts(info.version)?.build ? nativeReleaseVersion(info.version,build) : info.version,build,builtAt:info.builtAt};
 }
 // A development build is whatever main commit it runs, so it names that commit the way every release of it
-// would (2026.MMDD.<main commit count>), not the last identity committed to release.json, which stopped moving
-// when releases became tags (a Dev app on 2026-10-05 main said "2026.1003.1143"). A shallow checkout cannot
-// count commits and keeps release.json.
+// would (YYYY.MMDD.<Build>, Build = BUILD_OFFSET + main commit count, scripts/ci-release.mjs), not the last identity
+// committed to release.json, which stopped moving when releases became tags (a Dev app said "2026.1003.1143").
+// A shallow checkout cannot count commits and keeps release.json.
 export function devBuildInfo(git=(...args:string[])=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim()){
  const fallback=buildInfo();
  try{
   if(git('rev-parse','--is-shallow-repository')!=='false')return fallback;
-  const build=Number(git('rev-list','--count','HEAD')),committed=new Date(git('log','-1','--format=%cI','HEAD'));
-  if(!Number.isSafeInteger(build)||build<fallback.build||build>65535||!Number.isFinite(committed.getTime()))return fallback;
-  const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(committed).map(x=>[x.type,x.value]));
-  return {version:nativeReleaseVersion(`${p.year}.${p.month}${p.day}.${build}`,build),build,builtAt:committed.toISOString().replace(/\.\d{3}Z$/,'Z')};
+  const {version,build,builtAt}=releaseIdentity(Number(git('rev-list','--count','HEAD')),git('log','-1','--format=%cI','HEAD'));
+  return build<fallback.build ? fallback : {version,build,builtAt};
  }catch{return fallback;}
 }
 export const buildDefines=({channel=process.env.WORLDLET_BUILD_CHANNEL||'release'}={})=>({__WORLDLET_BUILD__:JSON.stringify(channel==='dev'?devBuildInfo():buildInfo()),__WORLDLET_CHANNEL__:JSON.stringify(channel),__WORLDLET_WORKSPACE__:JSON.stringify(channel==='dev'?workspace().label:''),__WORLDLET_REVISION__:JSON.stringify(execFileSync('git',['rev-parse','--short=7','HEAD'],{cwd:root,encoding:'utf8'}).trim()),__WORLDLET_REVISION_TIME__:JSON.stringify(execFileSync('git',['show','-s','--format=%cI','HEAD'],{cwd:root,encoding:'utf8'}).trim())});
