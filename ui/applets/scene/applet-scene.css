@@ -49,3 +49,11 @@
 .applet-scene .applet-scene-region[data-role=secondary]{align-items:center;justify-content:center;gap:0;padding:2px;text-align:center;overflow:hidden}
 .applet-scene .applet-scene-region[data-role=secondary] .scene-title{font-size:clamp(14px,50cqh,48px);line-height:1}
 .applet-scene .applet-scene-region[data-role=secondary] .scene-meta{font-size:clamp(8px,14cqh,13px)}
+
+/* A web Applet's page (ui/browser/browser-device.ts) sits in the Browser scene's screen region: the painting is its
+   frame, so the panel's own wooden rim steps aside and the native page follows the panel. */
+#notionWorld>.browser-scene{position:absolute;inset:0;z-index:4;pointer-events:none}
+#notionWorld[data-applet-scene=browser]>.notion-content[data-template=browser]{left:var(--applet-scene-primary-left);top:var(--applet-scene-primary-top);width:var(--applet-scene-primary-width);height:var(--applet-scene-primary-height);right:auto;bottom:auto;max-width:none;max-height:none;margin:0;
+ --browser-pad:4px;padding:4px;border:0;border-radius:var(--scene-radius);background:var(--scene-fill);box-shadow:none}
+/* The Applet shelf (ui/hud/applet-shelf.ts) stands above an open Applet: the page starts under it. */
+#notionWorld[data-applet-scene=browser][data-applet-shelf]>.notion-content[data-template=browser]{top:max(var(--applet-scene-primary-top),150px);height:calc(var(--applet-scene-primary-height) + var(--applet-scene-primary-top) - max(var(--applet-scene-primary-top),150px))}
