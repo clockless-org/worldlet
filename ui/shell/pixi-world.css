@@ -493,8 +493,8 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld:has(.browser-back[data-web-page])>.applet-bar-left>#notionBack{display:none}
 /* The Applet shelf (hud/applet-shelf.ts, owner request 2026-10-09): the recent Applets stand over the Applet's side in
    place of its title, the open one in the middle, largest and lit; the others smaller and fainter the further they stand.
-   Moving between Applets slides them along. No ledge under them and no name tags (owner request 2026-10-11): a name shows
-   on hover as the button's tooltip and stays in the button for screen readers. */
+   Moving between Applets slides them along. No ledge under them and no name tags (owner request 2026-10-11): the open one's
+   name shows as plain text below it; the others' names show on hover and stay in the button for screen readers. */
 #notionWorld>.applet-shelf{position:absolute;z-index:39;left:0;top:6px;width:calc(100% - var(--reader-companion-lane,464px));height:136px;pointer-events:none;font:600 12px/1.2 var(--ui-font-ui,system-ui)}
 #notionWorld>.applet-shelf[hidden]{display:none}
 #notionWorld[data-applet-shelf]>.companion-context{visibility:hidden}
@@ -504,6 +504,7 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld .applet-shelf-mark{display:grid;place-items:center;border-radius:28%;background:#f4e8cc;color:#4a3519;font-size:calc(var(--shelf-size,48px) * .45);box-shadow:0 3px 6px #28190a59}
 #notionWorld .applet-shelf-mark[hidden],#notionWorld .applet-shelf-pick img[hidden]{display:none}
 #notionWorld .applet-shelf-tab .applet-shelf-name{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#notionWorld .applet-shelf-tab[data-current] .applet-shelf-name{top:100%;width:auto;height:auto;max-width:160px;margin-top:10px;overflow:hidden;clip-path:none;text-overflow:ellipsis;color:#fffaf0;font-size:14px;font-weight:700;text-shadow:0 1px 3px #000c,0 0 8px #0009}
 #notionWorld .applet-shelf-tab[data-distance="1"] .applet-shelf-pick>*{opacity:.95}
 #notionWorld .applet-shelf-tab[data-distance="2"] .applet-shelf-pick>*{opacity:.8}
 #notionWorld .applet-shelf-tab[data-distance="3"] .applet-shelf-pick>*{opacity:.65}
