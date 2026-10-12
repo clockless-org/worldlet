@@ -15,9 +15,10 @@ await withBrowser(fileAccess,async browser=>{
   // Start each Applet from the overview, not from the previous Applet's open reader.
   await page.evaluate(()=>location.hash='');await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');
   await page.evaluate(key=>location.hash='object=app-'+key,key);
-  const item=page.locator(`.pixi-applet-stage[data-applet="${key}"] :is(.pixi-stage-item,.scene-item,.home-leaf)`).first();
+  const item=page.locator(`.pixi-applet-stage[data-applet="${key}"] :is(.pixi-stage-item,.scene-item,.home-leaf,.notes-row)`).first();
   // Use keyboard selection: Calendar's separately owned day grid can overlap its item hitbox.
   await item.focus();await item.press('Enter');
+  if(key==='apple-notes')await page.getByRole('button',{name:'Open original',exact:true}).click();
   const host=page.locator('#notionContent');await host.waitFor();
   const surface=key==='gmail'?host.locator('.mail-focus.ui-applet-surface'):host.locator(':scope[data-reader-hud=true]');
   await surface.waitFor();
@@ -53,7 +54,7 @@ await withBrowser(fileAccess,async browser=>{
  }
  // Stress the production reader shell with a long original, not a second mock UI.
  await page.evaluate(()=>location.hash='');await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');
- await page.evaluate(()=>location.hash='object=app-apple-notes');await page.locator('.pixi-applet-stage[data-applet=apple-notes] .home-leaf').first().click();
+ await page.evaluate(()=>location.hash='object=app-apple-notes');await page.locator('.pixi-applet-stage[data-applet=apple-notes] .notes-row').first().click();await page.getByRole('button',{name:'Open original',exact:true}).click();
  await page.locator('#notionContent[data-reader-hud=true]').waitFor();
  await page.locator('.ui-reader-body .notion-prose').evaluate(e=>{for(let i=0;i<35;i++){const p=document.createElement('p');p.textContent='Long original paragraph '+i+'. Original words remain readable, with one continuous scroll area.';e.append(p);}});
  for(const size of [{width:900,height:650},{width:390,height:844}]){

@@ -1,3 +1,4 @@
+import {renderNotesOpen} from './apple-notes/open.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {node} from '../components/index.ts';
 import {renderCalendar,type CalendarState} from './google-calendar/grid.ts';
@@ -11,6 +12,7 @@ export function calendarWindow(now:number,mode:HomeOpenState['mode'],offset:numb
  return Array.from({length:count},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return d;});
 }
 export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,redraw){
+ if(room.key==='apple-notes')return renderNotesOpen(panel,items,value,state,pick);
  const calendar=room.key==='google-calendar',notes=room.key==='apple-notes';panel.classList.add('home-open');
  panel.dataset.homeKind=calendar?'calendar':notes?'notes':'reminders';panel.dataset.calendarMode=state.mode;
  const sheet=node('section','home-open-sheet'),header=node('header','home-open-header'),title=node('h2','',room.title);panel.append(sheet);sheet.append(header);header.append(title);

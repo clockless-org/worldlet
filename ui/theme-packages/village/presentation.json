@@ -896,16 +896,16 @@
           1672,
           941
         ],
-        "sha256": "59bf84d8da9ed83f068d37ba339651a5c32779ddb643869d8c9c927b0d820086",
+        "sha256": "af4c7e69da5b54aa84626f5a49196ff354f4ff38d998ea24e8c9c070f5195fcd",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.075,
-              0.17,
-              0.53,
-              0.595
+              0.045,
+              0.057,
+              0.587,
+              0.744
             ],
             "material": "paper"
           }

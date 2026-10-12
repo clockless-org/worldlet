@@ -1,0 +1,66 @@
+/* Only Notes: the theme supplies the paper, binding and surroundings. HTML supplies live ink and controls. */
+.notes-host{min-width:0;min-height:0;height:100%;container-type:size}
+.applet-scene .notes-host{padding:0;gap:0;overflow:hidden;border-radius:0;background:none}
+.notes-notebook{height:100%;display:flex;flex-direction:column;min-height:0;color:var(--scene-ink,#493821);font:400 clamp(13px,2cqi,20px)/1.4 var(--scene-display-font,Georgia,serif)}
+.notes-notebook button,.notes-notebook input{font:inherit;color:inherit}
+.notes-notebook button{cursor:pointer}
+.notes-notebook button:focus-visible,.notes-notebook input:focus-visible{outline:2px solid var(--scene-focus,#647342);outline-offset:2px}
+.notes-header{height:11.5%;flex:none;display:flex;align-items:center;gap:1.4%;padding:0 1.5% 1.1%;box-sizing:border-box}
+.notes-notebook .notes-header h2{margin:0 auto 0 0;display:flex;gap:.35em;align-items:center;font:600 clamp(23px,4.4cqi,44px)/1 var(--scene-display-font,Georgia,serif)}
+.notes-glyph{display:inline-flex;align-items:center;justify-content:center;flex:none}
+.notes-glyph svg{width:1.15em;height:1.15em}
+.notes-header h2 .notes-glyph{font-size:.8em;color:var(--scene-accent,#697643)}
+.notes-searchbox{display:flex;align-items:center;gap:.4em;width:29%;min-width:0;padding:.3em .6em;border:1px solid var(--scene-line,#c5ae82);border-radius:2em;background:var(--scene-control,#fcf3df);box-shadow:0 2px 3px #49382130,inset 0 1px 2px #ffffffa0}
+.notes-search{width:100%;min-width:0;padding:0;border:0!important;outline-offset:4px;background:transparent!important;box-shadow:none!important}
+.notes-search::placeholder{color:var(--scene-muted,#837457)}
+.notes-notebook .notes-control{display:inline-flex;align-items:center;justify-content:center;padding:.3em .6em;min-height:1.9em;border:1px solid var(--scene-line,#c5ae82);border-radius:.55em;background:var(--scene-control,#fcf3df);box-shadow:0 2px 2px #49382122,inset 0 1px 1px #fff9}
+.notes-notebook .notes-control:hover{filter:brightness(.97)}
+.notes-notebook .notes-control:disabled{opacity:.45;cursor:default}
+.notes-header>.notes-control{font-size:1.25em}
+.notes-pages{flex:1;min-height:0;display:grid;grid-template-columns:35.7% minmax(0,1fr);gap:1.5%}
+.notes-index{min-width:0;min-height:0;display:flex;flex-direction:column;padding:1.6% 3% 4%;box-sizing:border-box}
+.notes-folders{display:flex;flex:none;gap:.3em;overflow:auto;scrollbar-width:thin;padding:.35em .1em .55em}
+.notes-folders .notes-control{white-space:nowrap;font-size:.9em;flex:none}
+.notes-folders .notes-control[aria-pressed=true]{background:color-mix(in srgb,#eeb94b 65%,var(--scene-control,#fcf3df));border-color:#c69c45}
+.notes-list{overflow:auto;min-height:0;scrollbar-width:thin;padding-right:.25em}
+.notes-notebook .notes-row{position:relative;display:flex;align-items:center;gap:.7em;width:100%;padding:.6em .45em;text-align:left;border:0;border-bottom:1px solid var(--scene-line,#d4c7ab);border-radius:0;background:none;box-shadow:none}
+.notes-notebook .notes-row[aria-pressed=true]{border:1px solid #d9bb72;border-radius:.75em;background:color-mix(in srgb,#f2cb68 36%,transparent);box-shadow:inset 0 1px 2px #fff8,0 1px 3px #7d5f2420}
+.notes-note-stamp{display:grid;place-items:center;width:2.8em;height:3em;flex:none;border:1px solid var(--scene-line,#d4c7ab);border-radius:.4em;color:var(--scene-accent,#6c7948);background:color-mix(in srgb,var(--scene-control,#f9f1db) 50%,transparent)}
+.notes-note-stamp .notes-glyph{font-size:1.55em}
+.notes-note-copy{display:flex;flex-direction:column;min-width:0}
+.notes-note-copy strong{font-weight:500;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notes-snippet,.notes-note-copy small{font-size:.83em;color:var(--scene-muted,#837457);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notes-unread{position:absolute;right:.2em;top:.6em;width:.32em;height:.32em;border-radius:50%;background:var(--scene-accent,#6c7948)}
+.notes-page{display:flex;flex-direction:column;min-width:0;min-height:0;padding:2.1% 4.5% 3.4% 5%;box-sizing:border-box;overflow:hidden}
+.notes-page-meta{display:flex;justify-content:flex-end;flex:none;color:var(--scene-muted,#837457);font-size:.82em;min-height:1.4em}
+.notes-title{font:600 clamp(22px,4.5cqi,47px)/1.12 var(--scene-display-font,Georgia,serif);margin:.12em 0 .35em;overflow-wrap:anywhere;flex:none;max-height:2.3em;overflow:auto}
+.notes-prose{flex:1;overflow:auto;min-height:0;scrollbar-width:thin;padding-right:.4em;overflow-wrap:anywhere}
+.notes-notebook .notes-prose .notion-prose{font:inherit;color:inherit;max-width:none;padding:0;margin:0}
+.notes-prose :is(p,ul,ol){margin:.4em 0 .8em;line-height:1.5}
+.notes-prose :is(h1,h2,h3){font-family:var(--scene-display-font,Georgia,serif);color:inherit;font-size:1.3em;line-height:1.25}
+.notes-prose :is(h1,h2,h3):first-child{margin-top:0}
+.notes-prose blockquote{margin:.5em 0;padding:0 0 0 .7em;border-left:2px solid var(--scene-line,#d4c7ab);font-style:italic;color:var(--scene-accent,#6c7948)}
+.notes-prose img{max-width:100%;height:auto;border-radius:.4em}
+.notes-prose pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85em}
+.notes-prose table{max-width:100%;font-size:.85em}
+.notes-prose input[type=checkbox]{accent-color:var(--scene-accent,#6c7948)}
+.notes-plain{white-space:pre-wrap}
+.notes-footer{display:flex;align-items:center;justify-content:space-between;gap:.4em;flex:none;margin-top:.7em;font-size:.85em}
+.notes-tools{display:flex;gap:.4em}.notes-tools .notes-control{gap:.35em}
+.notes-folder-tag{max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:.2em .65em;border-radius:2em;background:var(--scene-accent,#7b8752);color:var(--scene-accent-ink,#fff9e9);box-shadow:0 2px 3px #49382120}
+.notes-empty,.notes-status{color:var(--scene-muted,#837457);margin:1em .4em}
+.notes-notebook .notes-back{display:none}
+/* Compact scenes become readable single-page notebooks rather than shrinking the ink. */
+@container (max-width:540px){
+ .notes-header{height:auto;min-height:58px;padding:6px}.notes-notebook .notes-header h2{font-size:24px}.notes-searchbox{width:43%}
+ .notes-pages{grid-template-columns:1fr}.notes-index{padding:4px 8px}.notes-page{display:none;padding:12px}
+ .notes-notebook[data-reading=true] .notes-index{display:none}.notes-notebook[data-reading=true] .notes-page{display:flex}
+ .notes-notebook .notes-back{display:inline-flex;margin-right:auto}.notes-page-meta{align-items:center}.notes-title{font-size:28px}
+ .notes-note-copy strong{white-space:normal}.notes-note-stamp{width:34px;height:38px}
+}
+
+.notes-prose li:has(>input[type=checkbox]){list-style:none;margin:.5em 0}.notes-prose ul:has(input[type=checkbox]){padding-left:0}.notes-prose input[type=checkbox]{width:1em;height:1em;margin:0 .6em 0 0;vertical-align:middle;opacity:1}
+
+/* World typography sets fonts directly on descendants; keep that from flattening Notes typography. */
+.notes-notebook :where(button,input,p,span,strong,small,time,div,section,article,nav,header,h1,h2,h3,li,td,th,a,label){font-family:inherit}
+.notes-notebook .notes-prose p{font-size:inherit}
