@@ -14,6 +14,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -80,6 +88,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
@@ -91,6 +100,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -110,9 +120,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Fox stays at the bottom, as on the computer and the iPhone, as one input bar (owner request 2026-10-04, like Claude's):
- * Fox's portrait is a round button at the bar's left, a little taller than the bar, and opens Settings ([openSettings]);
- * then the line to type, the microphone and Send. At rest the bar is a little shorter and says "Tap to type · hold to
+ * Fox stays at the bottom, as on the computer and the iPhone, beside one input bar (owner request 2026-10-04, like
+ * Claude's): the bar runs the width of the screen with the line to type, the microphone and Send, and Fox's portrait is
+ * its own round button at the bar's right, as tall as the bar, with its name badge over Fox's feet as on the computer
+ * (owner request 2026-10-12); a tap on Fox opens Settings ([openSettings]). At rest the bar is a little shorter and says "Tap to type · hold to
  * speak": a tap on it opens the keyboard, and holding it talks until released, as holding the microphone does. The
  * microphone takes a tap (tap it again, or Send, to send) or a hold (release to send); the words are recognized on this
  * phone only. Send, or the keyboard's send key, sends the line. Fox's dialogue box is above the bar
@@ -240,15 +251,24 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
             Modifier.widthIn(max = 460.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            AnimatedVisibility(model.takesOrders, enter = fadeIn(), exit = fadeOut()) { OrderButton(ordering) { toggleOrder() } }
-            Box(Modifier.weight(1f)) {
-                // The bar starts under Fox, which hides its rounded end; Fox stays centred on the bar's bottom line as the line grows.
+            Box(Modifier.weight(1f).padding(bottom = BadgeRoom)) {
+                // Like Claude's (owner request 2026-10-12): round buttons inside the bar, the bug at its left while the
+                // computer takes Orders, the microphone and Send at its right. A tap on the microphone records with ✕ at
+                // the left, a dotted sound wave, Stop (the words go into the line) and Send.
+                val leftButton = talk.tapped || talking.on || model.takesOrders
+                val buttonPad = Modifier.padding(bottom = (bar - 36.dp) / 2)
                 Row(
-                    Modifier.padding(vertical = (FoxSize - bar) / 2).fillMaxWidth().heightIn(min = bar)
-                        .frosted(RoundedCornerShape(bar / 2)).padding(start = FoxSize + 8.dp, end = 6.dp),
-                    verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    Modifier.fillMaxWidth().heightIn(min = bar)
+                        .frosted(RoundedCornerShape(bar / 2)).padding(start = if (leftButton) 6.dp else 16.dp, end = 6.dp),
+                    verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Box(Modifier.weight(1f).heightIn(min = bar), contentAlignment = Alignment.CenterStart) {
+                    when {
+                        talking.on -> EndTalkButton(buttonPad) { talking.stop() }
+                        talk.tapped -> RoundButton(Icons.Outlined.Close, "Cancel the voice message", "foxCancelVoice", buttonPad) { talk.cancel() }
+                        model.takesOrders -> OrderButton(ordering, buttonPad) { toggleOrder() }
+                    }
+                    if (talk.tapped) DottedWave(voice, Modifier.weight(1f).height(bar))
+                    else Box(Modifier.weight(1f).heightIn(min = bar), contentAlignment = Alignment.CenterStart) {
                         Box(Modifier.padding(vertical = 10.dp), contentAlignment = Alignment.CenterStart) {
                             if (draft.isEmpty()) {
                                 Text(
@@ -280,11 +300,17 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
                             )
                         }
                     }
-                    if (talking.on) EndTalkButton(Modifier.padding(bottom = (bar - 36.dp) / 2)) { talking.stop() }
-                    TalkButton(talk, talking, if (talking.phase == TalkMode.Phase.Speaking) "Interrupt ${model.conversation.name}" else "Talk to ${model.conversation.name}", Modifier.padding(bottom = (bar - 36.dp) / 2))
-                    SendButton(enabled = draft.isNotBlank() || talk.tapped, Modifier.padding(bottom = (bar - 36.dp) / 2)) { send() }
+                    if (talk.tapped) RoundButton(Icons.Filled.Stop, "Stop and edit", "foxStopVoice", buttonPad) {
+                        talk.stop { heard -> draft = if (draft.isEmpty()) heard else "$draft $heard"; focus.requestFocus(); keyboard?.show() }
+                    }
+                    else TalkButton(talk, talking, if (talking.phase == TalkMode.Phase.Speaking) "Interrupt ${model.conversation.name}" else "Talk to ${model.conversation.name}", buttonPad)
+                    SendButton(enabled = draft.isNotBlank() || talk.tapped, buttonPad) { send() }
                 }
-                FoxButton(Modifier.align(Alignment.BottomStart), openSettings, talking.on, "Talk with ${model.conversation.name}") { toggleTalk() }
+            }
+            // Fox stands on the bar's bottom line as the line grows, its name badge over its feet.
+            Box(Modifier.align(Alignment.Bottom), contentAlignment = Alignment.BottomCenter) {
+                FoxButton(Modifier.padding(bottom = BadgeRoom), bar, openSettings, talking.on, "Talk with ${model.conversation.name}") { toggleTalk() }
+                NameBadge(model, Modifier.widthIn(max = 76.dp).offset(y = 1.dp), compact = true)
             }
         }
     }
@@ -299,21 +325,67 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
     }
 }
 
-/** Fox's round button: a little taller than the bar it sits at the left of. */
-private val FoxSize = 56.dp
+/** Room under the row for the half of Fox's name badge below Fox. */
+private val BadgeRoom = 8.dp
+/** Fox's middle from the row's end, where the dialogue's tail points: half the typing bar's height. */
+private val FoxTail = 25.dp
 /** The Order button while it listens, as on the computer. */
 private val OrderRed = Color(0xFFC2412E)
 
-/** The Order button: round with a bug, on its own left of the bar, red while it listens. */
+/** The round buttons in the bar, a quiet grey as in Claude's, and Send in Claude's terracotta. */
+private val ButtonFill = Color.White.copy(alpha = 0.12f)
+private val SendFill = Color(0xFFD97757)
+
+/** The Order button: round with a bug, at the bar's left inside it, red while it listens. */
 @Composable
-private fun OrderButton(listening: Boolean, toggle: () -> Unit) {
+private fun OrderButton(listening: Boolean, modifier: Modifier, toggle: () -> Unit) {
     Box(
-        Modifier.size(44.dp).then(if (listening) Modifier.background(OrderRed, CircleShape) else Modifier.frosted(CircleShape))
+        modifier.size(36.dp).background(if (listening) OrderRed else ButtonFill, CircleShape)
             .clickable(onClickLabel = if (listening) "Send the Order" else "Start an Order", role = Role.Button, onClick = toggle)
             .semantics { contentDescription = "Order" }
             .testTag("foxOrder"),
         contentAlignment = Alignment.Center,
-    ) { Icon(Icons.Outlined.BugReport, null, tint = Palette.ink, modifier = Modifier.size(20.dp)) }
+    ) { Icon(Icons.Outlined.BugReport, null, tint = Palette.ink, modifier = Modifier.size(18.dp)) }
+}
+
+/** A grey round button in the bar: ✕ for a tapped recording, or Stop. */
+@Composable
+private fun RoundButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, tag: String, modifier: Modifier, onClick: () -> Unit) {
+    Box(
+        modifier.size(36.dp).background(ButtonFill, CircleShape)
+            .clickable(onClickLabel = label, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label }.testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) { Icon(icon, null, tint = Palette.ink, modifier = Modifier.size(18.dp)) }
+}
+
+/** A tapped recording's sound wave, as Claude's: a dotted line that moves left, each moment's loudness a bar rising
+ * from it, the newest at the right. */
+@Composable
+private fun DottedWave(voice: VoiceInput, modifier: Modifier) {
+    val levels = remember { mutableStateListOf<Float>() }
+    LaunchedEffect(Unit) {
+        while (true) {
+            levels.add((voice.level * 1.6f).coerceAtMost(1f))
+            if (levels.size > 200) levels.removeRange(0, levels.size - 200)
+            delay(70)
+        }
+    }
+    Canvas(modifier.semantics { contentDescription = "Listening" }.testTag("foxVoiceWave")) {
+        val step = 6.dp.toPx()
+        val dot = 3.dp.toPx()
+        val count = maxOf(1, (size.width / step).toInt())
+        val recent = levels.takeLast(count)
+        val start = size.width - recent.size * step
+        val wave = 28.dp.toPx()
+        for (i in 0 until count) {
+            val x = i * step + step / 2
+            val sample = if (x >= start) recent.getOrNull(((x - start) / step).toInt()) else null
+            val height = maxOf(dot, (sample ?: 0f) * (wave - 4.dp.toPx()))
+            drawRoundRect(Palette.ink.copy(alpha = if (sample == null) 0.45f else 0.95f), Offset(x - dot / 2, (size.height - height) / 2),
+                Size(dot, height), CornerRadius(dot / 2))
+        }
+    }
 }
 
 /**
@@ -332,6 +404,18 @@ private class Talk(val voice: VoiceInput, private val scope: CoroutineScope, pri
     fun finish() {
         tapped = false
         scope.launch { voice.stop().takeIf { it.isNotEmpty() }?.let(send) }
+    }
+
+    /** ✕: drops the tapped recording. */
+    fun cancel() {
+        tapped = false
+        scope.launch { voice.stop() }
+    }
+
+    /** Stop: ends the tapped recording and hands what was heard to [into] (the line), unsent. */
+    fun stop(into: (String) -> Unit) {
+        tapped = false
+        scope.launch { voice.stop().takeIf { it.isNotEmpty() }?.let(into) }
     }
 
     /** A tap on the microphone: starts a recording that runs until the next tap, or sends the one under way. */
@@ -357,13 +441,12 @@ private fun Modifier.holdToTalk(talk: Talk, haptics: HapticFeedback, tap: () -> 
     }
 }
 
-/** Fox's portrait as a round button at the bar's left, opening Settings; a long press starts or ends Talk with Fox,
- * and a lantern ring shows while Talk is on. */
+/** Fox's portrait as a round button at the bar's right, as tall as the bar, opening Settings; a long press starts or
+ * ends Talk with Fox, and a lantern ring shows while Talk is on. */
 @Composable
-private fun FoxButton(modifier: Modifier, open: () -> Unit, talking: Boolean, talkLabel: String, toggleTalk: () -> Unit) {
+private fun FoxButton(modifier: Modifier, size: Dp, open: () -> Unit, talking: Boolean, talkLabel: String, toggleTalk: () -> Unit) {
     Box(
-        // Opaque, so the bar under its right half does not show through.
-        modifier.size(FoxSize).shadow(4.dp, CircleShape).frosted(CircleShape, Color(0xFF26302A))
+        modifier.size(size).shadow(4.dp, CircleShape).frosted(CircleShape, Color(0xFF26302A))
             .then(if (talking) Modifier.border(2.5.dp, Palette.lantern, CircleShape) else Modifier)
             .combinedClickable(onClickLabel = "Open settings", role = Role.Button, onLongClickLabel = if (talking) "End Talk" else talkLabel,
                 onLongClick = toggleTalk, onClick = open)
@@ -371,7 +454,7 @@ private fun FoxButton(modifier: Modifier, open: () -> Unit, talking: Boolean, ta
             .testTag("foxAvatar"),
         contentAlignment = Alignment.Center,
     ) {
-        Image(painterResource(R.drawable.fox), null, Modifier.size(48.dp))
+        Image(painterResource(R.drawable.fox), null, Modifier.size(size - 6.dp))
     }
 }
 
@@ -379,7 +462,7 @@ private fun FoxButton(modifier: Modifier, open: () -> Unit, talking: Boolean, ta
 @Composable
 private fun EndTalkButton(modifier: Modifier, end: () -> Unit) {
     Box(
-        modifier.size(36.dp).background(Palette.ink.copy(alpha = 0.12f), CircleShape)
+        modifier.size(36.dp).background(ButtonFill, CircleShape)
             .clickable(onClickLabel = "End Talk", role = Role.Button, onClick = end)
             .semantics { contentDescription = "End Talk" }.testTag("foxEndTalk"),
         contentAlignment = Alignment.Center,
@@ -394,7 +477,7 @@ private fun TalkButton(talk: Talk, talking: TalkMode, label: String, modifier: M
     val scale by animateFloatAsState(if (voice.listening) 1.1f else 1f, label = "mic")
     Box(
         modifier.scale(scale).size(36.dp)
-            .background(if (talking.on) Palette.lantern.copy(alpha = 0.75f) else if (voice.listening) Color.Red.copy(alpha = 0.7f) else Color.Transparent, CircleShape)
+            .background(if (talking.on) Palette.lantern.copy(alpha = 0.75f) else if (voice.listening) Color.Red.copy(alpha = 0.7f) else ButtonFill, CircleShape)
             .pointerInput(talk) {
                 awaitEachGesture {
                     awaitFirstDown()
@@ -418,16 +501,16 @@ private fun TalkButton(talk: Talk, talking: TalkMode, label: String, modifier: M
     ) { Icon(if (voice.listening) Icons.Outlined.GraphicEq else Icons.Outlined.Mic, null, tint = Palette.ink, modifier = Modifier.size(20.dp)) }
 }
 
-/** Send, filled in lantern gold while there is something to send. */
+/** Send, a terracotta circle as Claude's, dimmed until there is something to send (owner request 2026-10-12). */
 @Composable
 private fun SendButton(enabled: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Box(
-        modifier.size(36.dp).background(if (enabled) Palette.lantern else Palette.ink.copy(alpha = 0.12f), CircleShape)
+        modifier.size(36.dp).background(SendFill.copy(alpha = if (enabled) 1f else 0.45f), CircleShape)
             .clickable(enabled = enabled, onClickLabel = "Send", role = Role.Button, onClick = onClick)
             .semantics { contentDescription = "Send" }.testTag("foxSend"),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(Icons.AutoMirrored.Outlined.Send, null, tint = if (enabled) Palette.forest else Palette.ink.copy(alpha = 0.4f), modifier = Modifier.size(18.dp))
+        Icon(Icons.Outlined.ArrowUpward, null, tint = Color.White.copy(alpha = if (enabled) 1f else 0.5f), modifier = Modifier.size(20.dp))
     }
 }
 
@@ -548,14 +631,16 @@ private fun ApprovalChoices(model: AppModel, approval: HarnessApproval) {
     }
 }
 
-/** Fox's name on a honey badge. */
+/** Fox's name on a honey badge: on the dialogue, and smaller ([compact]) over the feet of Fox's button beside the bar. */
 @Composable
-private fun NameBadge(model: AppModel, modifier: Modifier = Modifier) {
+private fun NameBadge(model: AppModel, modifier: Modifier = Modifier, compact: Boolean = false) {
     Text(
-        model.conversation.name, color = Color(0xFF4A3413), fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+        model.conversation.name, color = Color(0xFF4A3413), fontSize = if (compact) 11.sp else 14.sp, fontWeight = FontWeight.SemiBold,
+        maxLines = 1, overflow = TextOverflow.Ellipsis,
         modifier = modifier.shadow(3.dp, RoundedCornerShape(12.dp))
             .background(Color(0xFFF0C27A), RoundedCornerShape(topStart = 13.dp, bottomStart = 10.dp, bottomEnd = 14.dp, topEnd = 11.dp))
-            .padding(horizontal = 14.dp, vertical = 4.dp),
+            .padding(horizontal = if (compact) 8.dp else 14.dp, vertical = if (compact) 1.dp else 4.dp)
+            .then(if (compact) Modifier.clearAndSetSemantics {} else Modifier),
     )
 }
 
@@ -665,15 +750,15 @@ private fun EarlierCard(card: DialogueCard) {
     }
 }
 
-/** The dialogue's paper with its tail toward Fox below it, at the start of the bar (the dialogue and the bar are the
- * same width). */
+/** The dialogue's paper with its tail toward Fox below it, at the end of the row beside the bar (the dialogue and the
+ * row are the same width). */
 private val Bubble = object : androidx.compose.ui.graphics.Shape {
     override fun createOutline(size: androidx.compose.ui.geometry.Size, layoutDirection: androidx.compose.ui.unit.LayoutDirection, density: androidx.compose.ui.unit.Density): androidx.compose.ui.graphics.Outline {
         val r = with(density) { 20.dp.toPx() }
         val tail = with(density) { 9.dp.toPx() }
         val body = size.height - tail
-        val start = with(density) { (FoxSize / 2).toPx() }
-        val fox = if (layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl) size.width - start else start
+        val end = with(density) { (FoxTail).toPx() }
+        val fox = if (layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl) end else size.width - end
         val path = androidx.compose.ui.graphics.Path().apply {
             addRoundRect(androidx.compose.ui.geometry.RoundRect(0f, 0f, size.width, body, androidx.compose.ui.geometry.CornerRadius(r)))
             moveTo(fox - tail, body - 1)

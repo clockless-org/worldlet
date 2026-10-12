@@ -1,10 +1,11 @@
 import SwiftUI
 import WorldletKit
 
-/// Fox stays at the bottom, as on the computer, in one input bar (owner request 2026-10-04): Fox's portrait is a round
-/// button at the bar's left, a little taller than the bar, and opens Settings; then the line to type, the microphone and
-/// the send button. At rest the bar is a little shorter and says "Tap to type · hold to speak": a tap opens the keyboard
-/// (Return or the send button sends), and holding the bar talks. Talking works like a Telegram voice message (owner
+/// Fox stays at the bottom, as on the computer, beside one input bar (owner request 2026-10-04): the bar runs the width of
+/// the screen with the line to type, the microphone and the send button, and Fox's portrait is its own round button at
+/// the bar's right, as tall as the bar, with its name badge over Fox's feet as on the computer (owner request
+/// 2026-10-12); a tap on Fox opens Settings. At rest the bar is a little shorter and says "Tap to type · hold to speak":
+/// a tap opens the keyboard (Return or the send button sends), and holding the bar talks. Talking works like a Telegram voice message (owner
 /// request 2026-10-03): hold the microphone (or the bar) to talk and release to send; slide sideways to cancel; slide up
 /// to lock, then tap send to send or ✕ to cancel. A quick tap on the microphone starts a locked recording. While it
 /// records, the time and a sound wave take the line's place in the bar. The words are recognized on this iPhone only.
@@ -48,10 +49,15 @@ struct FoxDock: View {
     /// How far a held recording slides sideways to be cancelled, or up to be locked.
     private let cancelDistance: CGFloat = 80
     private let lockDistance: CGFloat = 70
-    /// Fox's round button, a little taller than the bar it sits in.
-    private let foxSize: CGFloat = 56
+    /// The bar's height, a little shorter at rest; Fox's round button beside it is as tall.
+    private var barHeight: CGFloat { resting ? 44 : 50 }
+    /// Room under the row for the half of Fox's name badge below Fox.
+    private let badgeRoom: CGFloat = 8
     /// The Order button while it listens, as on the computer.
     private static let orderRed = Color(hex: 0xC2412E)
+    /// The round buttons in the bar, a quiet grey as in Claude's, and Send in Claude's terracotta.
+    private static let buttonFill = Color.white.opacity(0.12)
+    private static let sendFill = Color(hex: 0xD97757)
 
     var body: some View {
         VStack(spacing: 14) {
@@ -103,10 +109,7 @@ struct FoxDock: View {
 
     /// The Order button, when the computer takes Orders, then the input bar.
     private var bar: some View {
-        HStack(spacing: 10) {
-            if model.takesOrders { orderButton.transition(.scale.combined(with: .opacity)) }
-            input
-        }
+        input
         .overlay(alignment: .topLeading) {
             if let orderHint {
                 Text(orderHint)
@@ -125,46 +128,48 @@ struct FoxDock: View {
         .glassContainer(spacing: 8)
     }
 
-    /// The one input bar: Fox at its left, then the line (or the recording under way), the microphone and send.
+    /// The one input bar (the line, or the recording under way, the microphone and send), then Fox on its right.
     private var input: some View {
-        ZStack(alignment: .leading) {
+        HStack(spacing: 10) {
+            // Like Claude's (owner request 2026-10-12): round buttons inside the bar, the bug at its left while the
+            // computer takes Orders, the microphone and Send at its right. A tap on the microphone records with ✕ at
+            // the left, a dotted sound wave, Stop (the words go into the line) and Send.
             HStack(spacing: 6) {
-                field
                 if recording == .locked || talk.on { cancelButton.transition(.scale.combined(with: .opacity)) }
-                mic
+                else if model.takesOrders { orderButton.transition(.scale.combined(with: .opacity)) }
+                field
+                if recording == .locked { stopButton.transition(.scale.combined(with: .opacity)) } else { mic }
                 sendButton
             }
-            // The capsule starts under Fox's middle, so Fox reads as part of the bar.
-            .padding(.leading, foxSize / 2 + 10)
+            .padding(.leading, recording == .locked || talk.on || model.takesOrders ? 6 : 16)
             .padding(.trailing, 6)
-            .frame(height: resting ? 44 : 50)
+            .frame(height: barHeight)
             .liquidGlass(Capsule(), interactive: false)
-            .padding(.leading, foxSize / 2)
             fox
         }
-        .frame(height: foxSize)
+        .padding(.bottom, badgeRoom)
         .overlay(alignment: .topTrailing) {
-            // Slide up to lock, above the microphone (its middle is 6 + 36 + 6 + 18 points from the bar's end).
+            // Slide up to lock, above the microphone (its middle is 6 + 36 + 6 + 18 points from the bar's end, and the
+            // bar ends Fox's width and the gap before the row's end).
             if recording == .holding {
                 lockHint
-                    .padding(.trailing, 66 - 17)
+                    .padding(.trailing, 66 - 17 + barHeight + 10)
                     .offset(y: -72 + max(-lockDistance, min(0, slide.height)) * 0.5)
             }
         }
     }
 
-    /// Order (core/distribution/order.ts, owner request 2026-10-06): the team's own button, round with a bug, on its own
-    /// left of the bar, only while the computer takes Orders (an Alpha or Dev app on a computer that can send them). One
+    /// Order (core/distribution/order.ts, owner request 2026-10-06): the team's own button, round with a bug, at the
+    /// bar's left inside it (owner request 2026-10-12), only while the computer takes Orders (an Alpha or Dev app on a computer that can send them). One
     /// tap listens (the button turns red), a second sends what was heard to the team's Claude as an Order from the
     /// computer, never as a line for Fox. Voice only, as on the computer.
     private var orderButton: some View {
         Button(action: toggleOrder) {
             Image(systemName: "ladybug")
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(Palette.ink)
-                .frame(width: 44, height: 44)
-                .background { if ordering { Circle().fill(Self.orderRed) } }
-                .liquidGlass(Circle())
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(ordering ? Self.orderRed : Self.buttonFill))
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -251,7 +256,7 @@ struct FoxDock: View {
             .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(Palette.ink)
             .frame(width: 36, height: 36)
-            .background(Circle().fill(talk.on ? Palette.lantern.opacity(0.75) : recording == .idle ? Color.clear : Color.red.opacity(0.75)))
+            .background(Circle().fill(talk.on ? Palette.lantern.opacity(0.75) : recording == .idle ? Self.buttonFill : Color.red.opacity(0.75)))
             .scaleEffect(recording == .holding ? 1.3 : 1)
             .offset(recording == .holding ? CGSize(width: slide.width * 0.4, height: min(0, slide.height) * 0.4) : .zero)
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: recording)
@@ -266,16 +271,16 @@ struct FoxDock: View {
     /// Sends the line typed, or the locked recording.
     private var sendButton: some View {
         let ready = recording == .locked || (recording == .idle && !draftEmpty)
-        // The system's prominent round button, as Messages sends (owner request 2026-10-04: native controls).
+        // A terracotta circle as Claude's, dimmed until there is something to send (owner request 2026-10-12).
         return Button { recording == .locked ? finish() : send() } label: {
             Image(systemName: "arrow.up")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(ready ? Palette.forest : Palette.ink.opacity(0.45))
-                .frame(width: 20, height: 20)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(Color.white.opacity(ready ? 1 : 0.5))
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(Self.sendFill.opacity(ready ? 1 : 0.45)))
+                .contentShape(Circle())
         }
-        .buttonStyle(.borderedProminent)
-        .buttonBorderShape(.circle)
-        .tint(Palette.ink)
+        .buttonStyle(.plain)
         .disabled(!ready)
         .animation(.easeOut(duration: 0.15), value: ready)
         .accessibilityLabel("Send")
@@ -286,14 +291,30 @@ struct FoxDock: View {
     private var cancelButton: some View {
         Button { cancel() } label: {
             Image(systemName: "xmark")
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Palette.ink)
-                .frame(width: 16, height: 16)
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(Self.buttonFill))
+                .contentShape(Circle())
         }
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.circle)
-        .tint(Palette.ink)
+        .buttonStyle(.plain)
         .accessibilityLabel(talk.on ? "End Talk" : "Cancel the voice message")
+        .accessibilityIdentifier("foxCancelVoice")
+    }
+
+    /// Stops a tapped recording and puts its words into the line to read or change before sending, as Claude's Stop.
+    private var stopButton: some View {
+        Button { stopToLine() } label: {
+            Image(systemName: "stop.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Palette.ink)
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(Self.buttonFill))
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Stop and edit")
+        .accessibilityIdentifier("foxStopVoice")
     }
 
     /// Talk under way, in the line's place: the wave while it listens, then what Fox is doing.
@@ -340,7 +361,18 @@ struct FoxDock: View {
     }
 
     /// The recording under way, in the line's place: a red dot and the time, the wave, and while held how to cancel.
-    private var recordingStatus: some View {
+    @ViewBuilder private var recordingStatus: some View {
+        if recording == .locked {
+            DottedWave(voice: voice)
+                .frame(maxWidth: .infinity)
+                .accessibilityLabel("Listening")
+        } else {
+            heldStatus
+        }
+    }
+
+    /// A held recording: the time, the wave and how to cancel, as in Telegram.
+    private var heldStatus: some View {
         HStack(spacing: 10) {
             TimelineView(.periodic(from: startedAt, by: 0.5)) { context in
                 let seconds = max(0, Int(context.date.timeIntervalSince(startedAt)))
@@ -351,17 +383,13 @@ struct FoxDock: View {
                 }
             }
             .font(.system(size: 15, weight: .semibold))
-            if recording == .locked {
-                SoundWave(level: voice.level, compact: true)
-            } else {
-                // A narrow iPhone keeps the way to cancel and lets the wave go.
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 10) {
-                        SoundWave(level: voice.level, compact: true)
-                        slideToCancel
-                    }
+            // A narrow iPhone keeps the way to cancel and lets the wave go.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    SoundWave(level: voice.level, compact: true)
                     slideToCancel
                 }
+                slideToCancel
             }
         }
         .foregroundStyle(Palette.ink)
@@ -444,6 +472,17 @@ struct FoxDock: View {
         }
     }
 
+    private func stopToLine() {
+        guard recording == .locked else { return }
+        withAnimation(.snappy) { recording = .idle }
+        haptic(.light)
+        Task {
+            let text = await voice.stop()
+            if !text.isEmpty { draft = draft.isEmpty ? text : draft + " " + text }
+            focused = true
+        }
+    }
+
     private func cancel() {
         if talk.on { talk.stop(); return }
         guard recording != .idle else { return }
@@ -457,13 +496,14 @@ struct FoxDock: View {
         UIImpactFeedbackGenerator(style: style).impactOccurred()
     }
 
-    /// Fox's portrait as a round button at the bar's left; a tap opens Fox's panel (Settings). Its ring breathes in
-    /// lantern light while Fox works and turns red while the microphone listens.
+    /// Fox's portrait as a round button at the bar's right, as tall as the bar, its name badge over its feet; a tap
+    /// opens Fox's panel (Settings). Its ring breathes in lantern light while Fox works and turns red while the
+    /// microphone listens.
     private var fox: some View {
         Button(action: openPanel) {
             Image("Fox").resizable().scaledToFit()
-                .padding(6)
-                .frame(width: foxSize, height: foxSize)
+                .padding(4)
+                .frame(width: barHeight, height: barHeight)
                 .liquidGlass(Circle())
                 .overlay {
                     if talk.on {
@@ -485,6 +525,12 @@ struct FoxDock: View {
         }
         .scaleEffect(recording == .holding ? 1.06 : 1)
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: recording)
+        .overlay(alignment: .bottom) {
+            FoxNameBadge(name: model.conversation.name, compact: true)
+                .offset(y: badgeRoom + 1)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
         .accessibilityLabel("Open settings")
         .accessibilityAction(named: talk.on ? "End Talk" : "Talk with \(model.conversation.name)") { toggleTalk() }
         .accessibilityValue(model.foxWorking ? "\(model.conversation.name) is working" : model.conversation.name)
@@ -516,6 +562,58 @@ struct FoxDock: View {
             if case .unavailable = voice.state { return true }
             return false
         }, set: { if !$0 { voice.dismissProblem() } })
+    }
+}
+
+/// Fox's name on a honey badge: on the dialogue, and smaller over the feet of Fox's round button beside the bar.
+struct FoxNameBadge: View {
+    let name: String
+    var compact = false
+
+    var body: some View {
+        Text(name)
+            .font(.system(size: compact ? 11 : 14, weight: .semibold))
+            .lineLimit(1)
+            .truncationMode(.tail)
+            // Beside the bar a long name stays about as wide as Fox.
+            .frame(maxWidth: compact ? 60 : nil)
+            .foregroundStyle(Color(hex: 0x4A3413))
+            .padding(.horizontal, compact ? 8 : 14)
+            .padding(.vertical, compact ? 2 : 4)
+            .background(Color(hex: 0xF0C27A), in: UnevenRoundedRectangle(topLeadingRadius: 13, bottomLeadingRadius: 10, bottomTrailingRadius: 14, topTrailingRadius: 11))
+            .shadow(color: Color(hex: 0x5A3A10).opacity(0.2), radius: 3, y: 2)
+            .fixedSize()
+    }
+}
+
+/// A tapped recording's sound wave, as Claude's: a dotted line that moves left, each moment's loudness a bar rising
+/// from it, the newest at the right.
+private struct DottedWave: View {
+    let voice: VoiceInput
+    @State private var levels: [Double] = []
+
+    var body: some View {
+        Canvas { context, size in
+            let step: CGFloat = 6
+            let count = max(1, Int(size.width / step))
+            let recent = levels.suffix(count)
+            let start = size.width - CGFloat(recent.count) * step
+            for i in 0..<count {
+                let x = CGFloat(i) * step + step / 2
+                let sample: Double? = x >= start ? recent[recent.startIndex + Int((x - start) / step)] : nil
+                let height = max(3, CGFloat(sample ?? 0) * (size.height - 4))
+                let rect = CGRect(x: x - 1.5, y: (size.height - height) / 2, width: 3, height: height)
+                context.fill(Path(roundedRect: rect, cornerRadius: 1.5), with: .color(Palette.ink.opacity(sample == nil ? 0.45 : 0.95)))
+            }
+        }
+        .frame(height: 28)
+        .task {
+            while !Task.isCancelled {
+                levels.append(min(1, voice.level * 1.6))
+                if levels.count > 200 { levels.removeFirst(levels.count - 200) }
+                try? await Task.sleep(for: .milliseconds(70))
+            }
+        }
     }
 }
 
@@ -692,15 +790,7 @@ private struct FoxDialogue: View {
     }
 
     /// Fox's name on a honey badge.
-    private var nameBadge: some View {
-        Text(model.conversation.name)
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(Color(hex: 0x4A3413))
-            .padding(.horizontal, 14)
-            .padding(.vertical, 4)
-            .background(Color(hex: 0xF0C27A), in: UnevenRoundedRectangle(topLeadingRadius: 13, bottomLeadingRadius: 10, bottomTrailingRadius: 14, topTrailingRadius: 11))
-            .shadow(color: Color(hex: 0x5A3A10).opacity(0.2), radius: 3, y: 2)
-    }
+    private var nameBadge: some View { FoxNameBadge(name: model.conversation.name) }
 
     /// Expand and Fold: a quiet paper tab, muted until pressed (owner request 2026-10-05: not History, not loud).
     private var expandToggle: some View {
@@ -980,13 +1070,13 @@ private struct EarlierCard: View {
     }
 }
 
-/// The dialogue's paper with its tail toward Fox below it, at the input bar's left (Fox's middle is 28 points in).
+/// The dialogue's paper with its tail toward Fox below it, at the input bar's right (Fox's middle is 25 points in).
 private struct Paper: View {
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
+        ZStack(alignment: .bottomTrailing) {
             RoundedRectangle(cornerRadius: 20).fill(Color(hex: 0xF9F6E4))
             RoundedRectangle(cornerRadius: 20).stroke(Color(hex: 0xEBE5CC))
-            Tail().fill(Color(hex: 0xF9F6E4)).frame(width: 18, height: 11).offset(x: 28 - 9, y: 10)
+            Tail().fill(Color(hex: 0xF9F6E4)).frame(width: 18, height: 11).offset(x: -(25 - 9), y: 10)
         }
     }
 }

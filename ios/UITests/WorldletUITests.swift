@@ -56,7 +56,7 @@ final class WorldletUITests: XCTestCase {
         let order = app.buttons["foxOrder"]
         XCTAssert(order.waitForExistence(timeout: 10))
         XCTAssertEqual(order.label, "Order")
-        XCTAssertLessThanOrEqual(order.frame.maxX, app.buttons["foxAvatar"].frame.minX, "left of the bar, outside it")
+        XCTAssertLessThanOrEqual(order.frame.maxX, app.buttons["foxAvatar"].frame.minX, "left of the bar and of Fox, outside them")
         app.terminate()
         let plain = launch(["-demo"])
         XCTAssert(element(plain, "Reply to Sam about the venue").waitForExistence(timeout: 10))
@@ -102,7 +102,7 @@ final class WorldletUITests: XCTestCase {
         row.tap()
         XCTAssert(dismiss.waitForExistence(timeout: 5))
         let fox = app.buttons["foxAvatar"].frame
-        app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: fox.minX / 2, dy: fox.midY)).tap()
+        app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: (fox.maxX + app.frame.maxX) / 2, dy: fox.midY)).tap()
         XCTAssert(waitGone(dismiss), "a tap beside the input bar closes the card")
         XCTAssertFalse(app.buttons["Help me do it"].exists, "the dialogue returns to the main conversation")
     }
