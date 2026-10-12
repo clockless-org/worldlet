@@ -28,7 +28,7 @@ import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
 import {surveyOpenClaw} from './openclaw-files.ts';
-import {describeAgent,readAgentProfile,writeAgentProfile,type AgentProfileResult} from './agent-profile.ts';
+import {conversationTitles,describeAgent,readAgentProfile,writeAgentProfile,type AgentProfileResult} from './agent-profile.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {surveyAgentHistory} from './agent-files.ts';
 import {readLocalAgentMemory,writeAdopted} from './local-memory.ts';
@@ -271,6 +271,7 @@ let channelTool:((name:string,args:Row)=>Promise<Row>)|null=null;
  * away and `update` opens its own update command in Terminal. */
 /** Each Agent's `--version` line, kept for a minute so Settings and setup do not start every Agent on each redraw;
  * `fresh` reads it again (choosing an Agent, or after its update). */
+const THINGS_PLACED='agent-things-placed';
 const versionLines=new Map<string,{at:number;line:Promise<string|null>}>();
 function installedVersion(install:LocalHarnessInstall,fresh=false):Promise<string|null> {
  const key=[install.command,...install.prefix].join('\0'),known=versionLines.get(key);
@@ -402,8 +403,8 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // Once it answers, it describes itself in the background (owner request 2026-10-11); setup never waits for that.
    const describe=async()=>{
     if(!agentProfileAsked(install.id))return;
-    const started=Date.now(),{profile,result}=await describeAgent(()=>new LocalHarnessRuntime(install),adapter.home('setup'));
-    if(profile)try{writeAgentProfile(context.root,install.id,profile);}catch{}
+    const started=Date.now(),{profile,result}=await describeAgent(()=>new LocalHarnessRuntime(install),adapter.home('setup'),conversationTitles(install.id));
+    try{writeAgentProfile(context.root,install.id,profile,result);}catch{}
     onAgentCheck({id:install.id,profile,result,ms:Date.now()-started});
    };
    if(later)void prove().then(()=>{onAgentCheck({id:install.id,ok:true});return describe();},error=>onAgentCheck({id:install.id,ok:false,message:(error as Error).message}));
@@ -512,7 +513,21 @@ export function installAgentRuntime(host:Host){
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);
-   // The things it said the person handles most become Applets once their conversations are brought (modules/tasks).
-   if('profile' in event&&event.profile?.things?.length)host.optional<OngoingService>(ONGOING)?.refresh();})});
+   // The things it said the person handles most become Applets: its own conversations' (modules/tasks), and a catalog
+   // Applet that fits joins the World when setup is already over (setup itself adds them to its selection).
+   if('profile' in event&&event.profile?.things?.length){host.optional<OngoingService>(ONGOING)?.refresh();placeThings(event.id,event.profile);}})});
+ function placeThings(id:string,profile:AgentProfile){
+  const onboarding=host.store.state.onboarding;
+  if(!onboarding?.completed||!host.store.writable||host.store.sampleEnabled())return;
+  const placed=readAgentSetting(context.root,THINGS_PLACED) as Record<string,string[]>|null,before=new Set(placed?.[id]??[]);
+  const keys=agentProfileApplets({...profile,applets:[],connections:[],channels:[]},WORLD_APPS.map(app=>app.key)).filter(key=>!before.has(key));
+  if(!keys.length)return;
+  for(const key of keys){
+   const app=WORLD_APPS.find(a=>a.key===key);
+   // One the person removed stays removed.
+   if(app&&!onboarding.hiddenApplets?.includes(app.id)&&!onboarding.unlockedApplets?.includes(app.id))try{host.store.updateOnboarding({operation:'unlock',applet:app.id});}catch(error){host.diagnostics.record(error,'agentThings');}
+  }
+  try{writeAgentSetting(context.root,THINGS_PLACED,{...placed??{},[id]:[...before,...keys]} as any);}catch{}
+ }
  host.onQuit(()=>{endHermesInstall();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
 }

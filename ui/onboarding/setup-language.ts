@@ -26,6 +26,8 @@ const copy:Record<string,string[]>={
  'skills it learned':['个学会的技能','件の覚えたスキル','habilidades aprendidas'],
  'Routines':['定时任务','ルーティン','Rutinas'],
  'run on their own':['个自动运行','件が自動で動きます','se ejecutan solas'],
+ 'Things':['Things','Things','Things'],
+ 'Asking {agent} what you do most…':['正在问 {agent} 你平时最常做的事…','{agent} に、あなたがいちばんよくしていることを聞いています…','Preguntando a {agent} qué haces más…'],
  'Connections':['连接','接続','Conexiones'],
  'Apps':['应用','アプリ','Apps'],
  '{count} found on this computer':['这台电脑上找到 {count} 个','このコンピュータで {count} 個','{count} encontradas en este equipo'],

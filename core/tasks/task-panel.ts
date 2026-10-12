@@ -4,8 +4,8 @@
 // Journal). The panel only draws; every decision is here: which rows, in which group and order, and each card's text.
 //
 // Only what the person set going shows (owner rule 2026-10-11): their own Routines (jobs on their Agent's scheduler,
-// and Worldlet's two daily Routines, which they can pause in Settings › Agent) and the work they or their Agent's
-// Routines started (a page Fox drives, Fox's background work, an Applet working on a task Fox handed it). An Applet's
+// paused ones last, and Worldlet's two daily Routines, which they can pause in Settings › Agent) and the work they or
+// their Agent's Routines started (a page Fox drives, Fox's background work, an Applet working on a task Fox handed it). An Applet's
 // own regular checks (Mail, Notes, Notion) and Worldlet's housekeeping are not the person's tasks and never show here;
 // what they find comes up as Artifacts. Names and schedules only, never prompts or source contents.
 import type {HarnessJob} from '../../contracts/harness-services.ts';
@@ -129,7 +129,14 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
  // Routines ---------------------------------------------------------------------------------------------------------
  const by=input.harness?`${input.harness}’s scheduler`:'Your Agent’s scheduler';
  for(const job of input.jobs??[]){
-  if(job.paused||'at' in job.when&&job.when.at<=now)continue;
+  if('at' in job.when&&job.when.at<=now)continue;
+  // A paused one came along with the Agent too (setup counts it): it shows last, saying so (owner report 2026-10-12,
+  // Kelvin: "读到了四个 routine … 并没有在最后的 world 里面显示").
+  if(job.paused){
+   routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:'Paused',at:null,every:taskHowOften(job.when),by,open:{routine:job.id},
+    day:'Paused',clock:taskHowOften(job.when),name:clip(job.name,40),status:'Paused',icon:'clock'});
+   continue;
+  }
   const at='cron' in job.when?nextCronRun(job.when.cron,now):'at' in job.when?job.when.at:null;
   const every='everySeconds' in job.when?routineEvery(job.when.everySeconds):'';
   const time=at!==null?planned(at,now,locale):{when:every,day:'Repeating',clock:every};

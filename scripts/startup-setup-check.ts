@@ -280,8 +280,10 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(Math.abs(fill-1)<.01,'The tiles fill the grid: '+fill);
   await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Agent.',{exact:true}).waitFor();
   // Only what came over gets a tile (owner request 2026-10-09), in the order it arrives.
-  assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-connections','setup-tile-apps']);
+  assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-things','setup-tile-connections','setup-tile-apps']);
   assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
+  // Meanwhile Worldlet asks the Agent what the person does most (core/agent/agent-profile.ts things), and says so.
+  assert.equal(await page.locator('.setup-tile-things.is-waiting .setup-tile-note').textContent(),'Asking Nova what you do most…');
   assert.equal(await page.locator('.setup-tile-conversations .setup-tile-count').textContent(),'3');
   assert.deepEqual(await page.locator('.setup-tile-conversations li').allTextContents(),['Trip plan for Kyoto','Weekly investor update','Fix the flaky login test']);
   assert.deepEqual(await page.locator('.setup-tile-notes,.setup-tile-skills,.setup-tile-routines').evaluateAll(list=>list.map(e=>e.querySelector('.setup-tile-count')!.textContent)),['31','2','3']);
@@ -310,8 +312,10 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true,'Choosing an Agent allows Fox to use the world’s context');
   // OpenClaw then describes itself in the background (core/agent/agent-profile.ts): what its files did not show joins
   // the tiles and the World's selection, and only the outcome and a count leave the device.
-  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:'openclaw',result:'ok',ms:40000,profile:{agent:{name:'Nova'},workspaces:[],aboutUser:[],skills:[{name:'a'},{name:'b'},{name:'c'},{name:'d'},{name:'e'}],connections:[{name:'1Password vault',kind:'password_vault',service:'1password'}],channels:[{provider:'discord',place:'#groceries'}],routines:[],threads:[],applets:[{key:'amazon',title:'Amazon',why:'Restocks the kitchen'}]}}})));
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:'openclaw',result:'ok',ms:40000,profile:{agent:{name:'Nova'},workspaces:[],aboutUser:[],skills:[{name:'a'},{name:'b'},{name:'c'},{name:'d'},{name:'e'}],connections:[{name:'1Password vault',kind:'password_vault',service:'1password'}],channels:[{provider:'discord',place:'#groceries'}],routines:[],threads:[],applets:[{key:'amazon',title:'Amazon',why:'Restocks the kitchen'}],things:[{title:'Kitchen restock',threads:['#groceries'],key:'amazon'},{title:'Studio invoices',threads:[]}]}}})));
   await page.waitForFunction(()=>document.querySelectorAll('.setup-tile-connections .setup-tile-logos>*').length===4);
+  assert.deepEqual(await page.locator('.setup-tile-things li').allTextContents(),['Kitchen restock','Studio invoices'],'The things it named show');
+  assert.equal(await page.locator('.setup-tile-things.is-waiting').count(),0);
   assert.equal(await page.locator('.setup-tile-skills .setup-tile-count').textContent(),'5','The skills it named count when its files held fewer');
   assert.ok(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('worldlet-startup-setup:')).some(k=>JSON.parse(localStorage.getItem(k)!).applets.includes('app-amazon'))),'The Applets it suggests join the World');
   const described=await page.evaluate(()=>(window as any).calls.find(c=>c.action==='usageEvent'&&c.event==='agent_profile_result'));

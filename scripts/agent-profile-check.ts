@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {AGENT_PROFILE_SCHEMA,agentProfileApplets,agentProfileAsked,agentProfilePrompt,looksSecret,parseAgentProfile} from '../core/agent/index.ts';
 import {describeAgent,readAgentProfile,writeAgentProfile} from '../platform/electron/src/modules/agent-runtime/agent-profile.ts';
+import {readAgentSetting} from '../platform/electron/src/store/agent-settings.ts';
 
 // What a person's own Agent says about itself before setup brings it in (core/agent/agent-profile.ts): the prompt, the
 // bounded and secret-free parse, the Applets it points to, and the background turn's timeout and one retry.
@@ -12,6 +13,9 @@ const prompt=agentProfilePrompt(['gmail','discord','amazon']);
 assert.match(prompt,new RegExp(AGENT_PROFILE_SCHEMA.replace(/[./]/g,'\\$&')));
 assert.match(prompt,/NEVER include secrets/);assert.match(prompt,/Do not change any setting or file/);assert.match(prompt,/gmail, discord, amazon/);
 assert.ok(agentProfileAsked('openclaw')&&agentProfileAsked('hermes')&&!agentProfileAsked('codex'));
+// The things it names point at the conversations Worldlet brings, by the titles Worldlet gives them.
+assert.doesNotMatch(prompt,/Worldlet lists your conversations/);
+assert.match(agentProfilePrompt(['gmail'],['Telegram · Sam',' Telegram  ·  Sam','#groceries']),/exactly as written here: "Telegram · Sam", "#groceries"\./);
 
 for(const secret of ['sk-ant-api03-abcdefghijklmnop','ghp_abcdefghijklmnopqrstuvwxyz0123','Bearer abcdefghijklmnop0123456789','token AbC123dEf456GhI789jKl012MnO345pQr678StU901'])assert.ok(looksSecret(secret),secret);
 for(const plain of ['~/clawd-phone/hotline/skills/personal/groceries','Gmail for hotel bookings','1Password vault with an API key'])assert.ok(!looksSecret(plain),plain);
@@ -49,7 +53,7 @@ assert.equal(agent.asked.length,2);assert.match(agent.asked[1],/was not that JSO
 agent=fake(['nope','still nope']);
 assert.deepEqual(await describeAgent(agent.make,'/tmp'),{profile:null,result:'invalid'});
 agent=fake(['hang']);
-assert.deepEqual(await describeAgent(agent.make,'/tmp',50),{profile:null,result:'timeout'});
+assert.deepEqual(await describeAgent(agent.make,'/tmp',[],50),{profile:null,result:'timeout'});
 agent=fake([new Error('MINIMAX_API_KEY is missing')]);
 assert.deepEqual(await describeAgent(agent.make,'/tmp'),{profile:null,result:'failed'});
 
@@ -59,6 +63,12 @@ try{
  assert.equal(readAgentProfile(root,'openclaw'),null);
  writeAgentProfile(root,'openclaw',profile);writeAgentProfile(root,'hermes',{...profile,persona:'Other'});
  assert.equal(readAgentProfile(root,'openclaw')?.agent.name,'Juno');assert.equal(readAgentProfile(root,'hermes')?.persona,'Other');
+ // A later try that brought nothing keeps what it said before, and says how asking ended.
+ writeAgentProfile(root,'openclaw',null,'timeout',5);
+ assert.equal(readAgentProfile(root,'openclaw')?.agent.name,'Juno');
+ writeAgentProfile(root,'pi',null,'failed',5);assert.equal(readAgentProfile(root,'pi'),null);
+ const kept=readAgentSetting(root,'agent-profile') as any;
+ assert.deepEqual([kept.openclaw.result,kept.openclaw.triedAt,kept.pi],['timeout',5,{result:'failed',triedAt:5}]);
 }finally{fs.rmSync(root,{recursive:true,force:true});}
 
 console.log('PASS: the chosen Agent describes itself as bounded JSON with no secrets, retried once, timed out and failing quietly; its Applets join the World and the answer stays in the World\'s settings');

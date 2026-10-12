@@ -156,6 +156,17 @@
 .setup-tiles[data-layout] .setup-tile-routines{grid-area:routines}
 .setup-tiles[data-layout] .setup-tile-connections{grid-area:connections}
 .setup-tiles[data-layout] .setup-tile-apps{grid-area:apps}
+/* With the Things tile (what the Agent says the person does most), the avatar gives up its lowest row to it. */
+.setup-tiles[data-layout=agent][data-things]{grid-template-areas:'avatar profile profile notes' 'avatar conversations conversations skills' 'things conversations conversations routines' 'connections connections apps apps'}
+.setup-tiles[data-layout=agent-no-apps][data-things]{grid-template-areas:'avatar profile profile notes' 'avatar conversations conversations skills' 'things conversations conversations routines' 'connections connections connections connections'}
+.setup-tiles[data-layout=agent-only][data-things]{grid-template-areas:'avatar profile profile notes' 'avatar conversations conversations skills' 'things conversations conversations routines'}
+.setup-tiles[data-layout] .setup-tile-things{grid-area:things}
+.setup-tile-things .setup-tile-chips{display:flex;flex-wrap:wrap;gap:5px;max-height:calc(100% - 20px);margin:8px 0 0;padding:0;list-style:none;overflow:hidden}
+.setup-tile-things .setup-tile-chips li{max-width:100%;padding:3px 9px;border-radius:9px;background:var(--brand-surface);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setup-tile-things .setup-tile-note{white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.setup-tile-things.is-waiting .setup-tile-note{animation:setup-things-wait 1.6s ease-in-out infinite alternate}
+@keyframes setup-things-wait{from{opacity:.55}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.setup-tile-things.is-waiting .setup-tile-note{animation:none}}
 .setup-tile{position:relative;min-width:0;padding:12px 14px;border-radius:18px;background:#fffffff0;box-shadow:0 4px 14px #203b300f;overflow:hidden;box-sizing:border-box}
 .setup-tile.is-arriving{animation:setup-tile-in .42s cubic-bezier(.22,.7,.2,1) both}
 @keyframes setup-tile-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}

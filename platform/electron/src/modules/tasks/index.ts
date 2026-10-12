@@ -36,7 +36,7 @@ export function installOngoing(host:Host){
    // The things the chosen Agent said the person handles most (core/agent/agent-profile.ts) become their own Applets once
    // their conversations are here; a removed one stays removed (core/tasks ongoingFromAgent).
    const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
-   const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60)):[];
+   const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60),chosen??undefined):[];
    if(keep.length){store.ledger().saveOngoing(keep as any[]);changed();store.changed();}
   }catch(error){host.diagnostics.record(error,'ongoing');}
   observe();
