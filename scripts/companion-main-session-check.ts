@@ -215,12 +215,12 @@ try{
  await page.evaluate(async()=>{const w=window as any;w.holds['wait thread']();await w.pending;});
  assert.match(await page.locator('#worldConversation').textContent(),/Reply to wait thread/,'the card becomes the answer');
  assert.equal(await page.locator('.companion-deck').getAttribute('data-depth'),'1');
- // After a long pause, the place's last turn is still the card, faded under a gradient, never replayed as "Welcome back".
- assert.equal(await page.locator('#worldConversation').getAttribute('data-stale'),'false','a fresh line does not fade');
+ // After a long pause, the place's last turn is still the card, as it was: never faded (owner Order 2026-10-12: the fog),
+ // never replayed as "Welcome back".
  await page.evaluate(()=>{const w=window as any;w.realNow=Date.now;Date.now=()=>w.realNow()+3*3600e3;w.view('calendar','U');w.view('mail','T');});
  assert.match(await page.locator('#worldConversation').textContent(),/Reply to wait thread/);
  assert.doesNotMatch(await page.locator('#worldConversation').textContent(),/Welcome back/);
- assert.equal(await page.locator('#worldConversation').getAttribute('data-stale'),'true','an old line fades');
+ assert.equal(await page.locator('#worldConversation').getAttribute('data-stale'),null,'an old line does not fade');
  assert.equal(await page.locator('.companion-deck').getAttribute('data-depth'),'1');
  await page.evaluate(()=>{const w=window as any;Date.now=w.realNow;w.view('calendar','U');w.view('mail','T');});
  // Turns about one thing are one stack (#2171): the greeting and the short question that answers it share a topic, shown
@@ -248,44 +248,34 @@ try{
  assert.equal(await page.locator('.companion-earlier').textContent(),'Expand','a quiet Expand handle opens the whole conversation');
  await page.locator('#worldConversation').hover();await page.mouse.wheel(0,-120);
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue').dataset.expanded==='true');
- assert.match(await page.locator('.companion-thread-list').textContent(),/This is your world[\s\S]*suggest a quiet cafe nearby/,'scrolling up unfolds earlier turns, the answered greeting first');
- assert.equal(await page.locator('.companion-earlier').textContent(),'Fold');
- await page.locator('.companion-earlier').click();
- assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'false','the handle folds them again');
+ // Expanded in the world the conversation is one chat window (owner Order 2026-10-12, fox-chat-window.ts): every turn
+ // a pair of bubbles, the stacked cards gone; its Fold closes it.
+ const chat=page.locator('.fox-chat-window .fox-chat-messages');
+ assert.match(await chat.textContent(),/This is your world[\s\S]*suggest a quiet cafe nearby[\s\S]*Reply to world question/,'scrolling up opens the chat window, the answered greeting first');
+ assert.equal(await page.locator('.fox-chat-bubble[data-who=user]',{hasText:'world question'}).count(),1,'the person\'s words are a bubble of their own');
+ assert.equal(await page.locator('.companion-thread-list').isVisible(),false,'the window takes the stacked cards\' place');
+ assert.equal(await page.locator('.companion-earlier').isVisible(),false);
+ await page.locator('.fox-chat-fold').evaluate((button:HTMLButtonElement)=>button.click());
+ assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'false','its Fold closes the window');
+ assert.equal(await page.locator('.fox-chat-window').isVisible(),false);
  await page.locator('#worldConversation').click();
- assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'true','a click on the card unfolds too');
- // With motion on, folding and unfolding are animated and still settle.
- await page.emulateMedia({reducedMotion:'no-preference'});
- await page.locator('.companion-earlier').click();
- assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'true','folding animates before the column closes');
- await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue').dataset.expanded==='false');
- await page.locator('.companion-earlier').click();
- assert.ok(await page.locator('.companion-thread-list').evaluate(c=>c.getAnimations().length>0),'unfolding animates the bounded reading surface');
- // Reversing while motion is active must honor the latest click, with no stale
- // fold completion closing an already reopened history.
- await page.locator('.companion-earlier').evaluate((button:HTMLButtonElement)=>{button.click();button.click();button.click();button.click();});
- await page.waitForFunction(()=>document.querySelector('.companion-thread-list').getAnimations().length===0);
- assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'true','rapid reversals settle open');
- const historyBeforeFold=await page.locator('.companion-thread-list').textContent();
- await page.locator('.companion-thread-list').evaluate(list=>{(window as any).retainedHistoryCard=list.firstElementChild;});
- await page.locator('.companion-earlier').click();
- await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue').dataset.expanded==='false');
- await page.locator('.companion-earlier').click();
- assert.equal(await page.locator('.companion-thread-list').textContent(),historyBeforeFold,'folding preserves message content');
- assert.ok(await page.locator('.companion-thread-list').evaluate(list=>list.firstElementChild===(window as any).retainedHistoryCard),'reopening retains history DOM');
- await page.emulateMedia({reducedMotion:'reduce'});
+ assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'true','a click on the card opens it too');
+ // Sending in the window keeps it open: the new turn joins it as bubbles.
+ await page.evaluate(async()=>{await (window as any).fox.submit('window question');});
+ assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'true','the window stays open while Fox answers');
+ assert.match(await chat.textContent(),/window question[\s\S]*Reply to window question/);
  await page.keyboard.press('Escape');
  assert.equal(await page.locator('#companionDialogue').getAttribute('data-expanded'),'false','Esc folds the thread');
  await page.mouse.move(5,5);
  await page.evaluate(()=>{const w=window as any;w.fox.setGuide({text:'An old world notice',takeover:true});w.fox.hidePreview(true);});
  assert.equal(await page.locator('#companionDialogue').isVisible(),false);
  await page.locator('.companion-avatar').hover();
- await page.waitForFunction(()=>/Reply to world question/.test(document.querySelector('#worldConversation')?.textContent||''));
+ await page.waitForFunction(()=>/Reply to window question/.test(document.querySelector('#worldConversation')?.textContent||''));
  const hovered=await page.locator('#worldConversation').textContent();
  await page.mouse.move(5,5);await page.evaluate(()=>{(window as any).fox.hidePreview(true);});
  await page.locator('#notionInput').click();
  assert.equal(await page.locator('#worldConversation').textContent(),hovered,'starting to type shows the card hovering shows');
- assert.equal(await page.locator('.companion-asked').textContent(),'world question');
+ assert.equal(await page.locator('.companion-asked').textContent(),'window question');
  await page.keyboard.press('Escape');
  // Coming back to the world, Fox's last line does not pop up again; hovering Fox still shows it (owner Order 2026-10-07).
  await page.mouse.move(5,5);
@@ -293,7 +283,7 @@ try{
  await page.waitForTimeout(50);
  assert.equal(await page.locator('#companionDialogue').isVisible(),false,'returning to the world shows no card');
  await page.locator('.companion-avatar').hover();
- await page.waitForFunction(()=>/Reply to world question/.test(document.querySelector('#worldConversation')?.textContent||''));
+ await page.waitForFunction(()=>/Reply to window question/.test(document.querySelector('#worldConversation')?.textContent||''));
  await page.mouse.move(5,5);
  const threadRows=await page.evaluate(()=>(window as any).saved.find(r=>r.key==='fox-thread')?.entries||[]);
  assert.ok(threadRows.some(e=>e.user==='plan a weekend trip to Tokyo'&&e.text==='Reply to plan a weekend trip to Tokyo'),'the thread survives persistence');

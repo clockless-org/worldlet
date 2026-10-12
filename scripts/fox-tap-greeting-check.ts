@@ -41,7 +41,6 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(await page.locator('#companionDialogue').isVisible(),'Typing always shows the Fox bubble');
  assert.match(await page.locator('#worldConversation').textContent(),/This is your world/,'a new conversation says what Fox can do');
  assert.equal(await page.locator('.companion-asked').isVisible(),false,'a greeting is not a turn');
- const greetingWidth=(await page.locator('#companionDialogue').boundingBox()).width;
  assert.equal(await page.locator('.companion-topic').isVisible(),false,'the card points at Fox and carries no name tag (owner Order 2026-10-08)');
  assert.equal(await count(),0,'Opening typing does not spend a model call on a greeting');
  await page.mouse.move(1200,700);
@@ -79,20 +78,19 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>document.querySelector('#worldConversation')?.textContent.includes('Hello from Fox.'));
  assert.equal(await page.evaluate(()=>calls.filter(b=>b.action==='agentChat').length),1,'hover restores local context without a model request');
  assert.equal(await page.getByText('Previous reply · World',{exact:true}).count(),0);
- // Earlier turns unfold upward as separate cards stacked above the front card.
+ // Expanded, the conversation is one chat window (owner Order 2026-10-12): every turn a pair of bubbles, oldest first.
  if(await page.locator('#notionInput').isVisible())await page.locator('#notionInput').focus();
  else await page.locator('#notionInput').click();
  await page.locator('#notionInput').fill('Again');await page.locator('#notionInput').press('Enter');
  await page.waitForFunction(()=>calls.filter(b=>b.action==='agentChat').length===2&&document.querySelector<HTMLElement>('#notionWorld').dataset.replyBusy!=='true');
  await page.locator('.companion-earlier',{hasText:'Expand'}).click();
- assert.match(await page.locator('.companion-thread-card').first().textContent(),/This is Work/,'the answered greeting moved up into the history');
- const [earlierCard,front]=[await page.locator('.companion-thread-card').last().boundingBox(),await page.locator('#companionDialogue').boundingBox()];
- assert.ok(earlierCard&&front&&earlierCard.y+earlierCard.height+12<front.y,'the earlier turn is its own card above the front card: '+JSON.stringify({earlierCard,front}));
- assert.deepEqual(await page.locator('.companion-thread-card').evaluateAll(cards=>cards.map(e=>getComputedStyle(e).opacity)),['1','1'],'history cards are opaque paper');
- const [olderBg,newerBg]=await page.locator('.companion-thread-card').evaluateAll(cards=>cards.map(e=>getComputedStyle(e).backgroundColor));
- assert.notEqual(olderBg,newerBg,'older cards are paler');
+ const bubbles=page.locator('.fox-chat-window .fox-chat-bubble');
+ assert.match(await bubbles.first().textContent(),/This is Work/,'the answered greeting leads the window');
+ assert.equal(await page.locator('.fox-chat-bubble[data-who=user]',{hasText:'Again'}).count(),1,'the person\'s message is a bubble of its own');
+ const [win,foxBox]=[await page.locator('.fox-chat-window').boundingBox(),await page.locator('.companion-avatar').boundingBox()];
+ assert.ok(win&&foxBox&&win.y+win.height<=foxBox.y+8,'the window stands above Fox: '+JSON.stringify({win,foxBox}));
+ assert.equal(await page.locator('.companion-thread-list').isVisible(),false,'no stacked cards beside the window');
+ assert.deepEqual(await bubbles.evaluateAll(b=>[...new Set(b.map(e=>getComputedStyle(e.firstElementChild!).fontSize))]),['15px'],'one type size for every message');
  await page.screenshot({path:'output/fox-mac/cards-expanded.png'});
- assert.equal((await page.locator('#companionDialogue').boundingBox()).width,greetingWidth,'expanded, the card keeps its one width (owner Order 2026-10-07)');
- assert.ok(await page.locator('.companion-thread-list').evaluate(e=>parseFloat(e.style.maxHeight)<=Math.round(innerHeight*.78)),'earlier cards stop at an upper bound');
  assert.deepEqual(errors,[]);console.log('PASS local place lines without model calls; hover and click show the same card; conversation preserved per place');
 });

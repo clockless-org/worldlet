@@ -278,7 +278,9 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:path.join(shots,'world-deck.png')});
  await page.locator('.companion-earlier').click();
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue')?.dataset.sheet==='true');
- assert.equal(await worldWidth(),width,'expanded, the card keeps its width (no wider reading sheet)');
+ // Expanded in the World the conversation is one chat window (owner Order 2026-10-12, fox-chat-window.ts).
+ const chat=page.locator('.fox-chat-window');await chat.waitFor();
+ assert.equal(await list.isVisible(),false,'the window takes the stacked cards\' place');
  await page.keyboard.press('Escape');await page.mouse.move(700,500);
  await type('wait world');await asked.filter({hasText:'wait world'}).waitFor();
  await type('and this too');
@@ -289,23 +291,13 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>(window as any).holds['wait world']());await idle('wait world');
  assert.equal(await asked.textContent(),'and this too','the answer stays under the newest message, never the one before it');
  assert.match(await front.textContent(),/Reply to wait world and and this too/);
- await page.locator('.companion-earlier').click();await list.waitFor();
- // Turns about one thing are one stack (owner Order 2026-10-08): these all talk about the world, so the earlier
- // ones read as one card under the topic's name and count, showing the newest; its name opens it into its turns.
- const head=list.locator('.companion-topic-head');
- assert.equal(await list.locator('.companion-thread-card').count(),1,'one topic, one stack: '+JSON.stringify(await cardTexts()));
- assert.equal(await head.locator('.companion-topic-name').textContent(),'world one','the stack is named by its first question');
- assert.equal(await head.locator('.companion-topic-count').textContent(),'5','and says how many messages it holds (the World\'s greeting and four turns)');
- assert.match((await cardTexts())[0],/wait world$/,'the stack shows its newest message');
- assert.ok(await list.locator('.companion-thread-card.is-topic-stack').evaluate(c=>/,/.test(getComputedStyle(c).boxShadow)),'card edges peek out under the stack');
- await page.screenshot({path:path.join(shots,'world-topic-stack.png')});
- await head.click();
- assert.equal(await head.first().getAttribute('aria-expanded'),'true');
- const worldCards=await cardTexts();
- assert.match(worldCards.at(-1)!,/^wait world$/,'opened, the question before it waits in the stack as its own card: '+JSON.stringify(worldCards));
- assert.match(worldCards.join('\n'),/world two[\s\S]*long world[\s\S]*wait world$/,'oldest first');
- await head.first().click();
- assert.equal(await list.locator('.companion-thread-card').count(),1,'its name folds it again');
+ await page.locator('.companion-earlier').click();await chat.waitFor();
+ // The window shows every message as its own bubble, oldest first: the person's on the right, Fox's on the left.
+ const bubbles=await chat.locator('.fox-chat-bubble').evaluateAll(items=>items.map(i=>(i as HTMLElement).dataset.who+':'+i.firstElementChild!.textContent));
+ assert.match(bubbles.join('\n'),/user:world two[\s\S]*fox:Reply to world two[\s\S]*user:long world[\s\S]*user:wait world[\s\S]*user:and this too\nfox:Reply to wait world and and this too$/,'oldest first: '+JSON.stringify(bubbles));
+ const [mine,its]=[(await chat.locator('.fox-chat-bubble[data-who=user]').last().boundingBox())!,(await chat.locator('.fox-chat-bubble[data-who=fox]').last().boundingBox())!];
+ assert.ok(mine.x+mine.width>its.x+its.width,'the person\'s bubbles sit right of Fox\'s');
+ await page.screenshot({path:path.join(shots,'world-chat-window.png')});
  await page.keyboard.press('Escape');
  // A phone-width window keeps the one width inside the window.
  await page.setViewportSize({width:390,height:844});await page.mouse.move(200,300);
