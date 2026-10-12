@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **275 Markdown documents** and **619 supporting documentation files**.
+Indexed: **275 Markdown documents** and **620 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -64,7 +64,7 @@ Indexed: **275 Markdown documents** and **619 supporting documentation files**.
 | Resource and artwork records | 71 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 619 |
+| Documentation diagrams, previews and evidence | 620 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -376,7 +376,7 @@ Indexed: **275 Markdown documents** and **619 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (619)</summary>
+<details><summary>Documentation diagrams, previews and evidence (620)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -820,6 +820,7 @@ Indexed: **275 Markdown documents** and **619 supporting documentation files**.
 - [resources/styles/builtin/references/registered-scenes/brands/zoom/background.webp](../resources/styles/builtin/references/registered-scenes/brands/zoom/background.webp)
 - [resources/styles/builtin/references/registered-scenes/brands/zoom/effect.json](../resources/styles/builtin/references/registered-scenes/brands/zoom/effect.json)
 - [resources/styles/builtin/references/registered-scenes/brands/zoom/effect.webp](../resources/styles/builtin/references/registered-scenes/brands/zoom/effect.webp)
+- [resources/styles/builtin/references/registered-scenes/browser/background.json](../resources/styles/builtin/references/registered-scenes/browser/background.json)
 - [resources/styles/builtin/references/registered-scenes/browser/background.png](../resources/styles/builtin/references/registered-scenes/browser/background.png)
 - [resources/styles/builtin/references/registered-scenes/catalog.json](../resources/styles/builtin/references/registered-scenes/catalog.json)
 - [resources/styles/builtin/references/registered-scenes/clock/background.png](../resources/styles/builtin/references/registered-scenes/clock/background.png)
