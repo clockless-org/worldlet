@@ -681,13 +681,11 @@ export function createNativeChat(call){return function({button,input,status,exec
   voiceCancel.hidden=voiceStop.hidden=!editable;entry.dataset.voiceEdit=String(editable);
   const icon=editable?'send':'microphone';if(speechButton.dataset.icon!==icon){speechButton.dataset.icon=icon;speechButton.innerHTML=editable?SEND_ICON:uiIcon('microphone');}
   state.textContent='';
-  // A place with no conversation yet invites one; there is no canned greeting.
-  // Resting, the bar says how to use it; once typing, it says whom you are asking.
-  // In a website the bar is also its address bar (ui/shell/notion-world.ts), and says so (owner request 2026-10-07).
-  // On the desktop the microphone stands inside the short bar, so the resting bar only says “Message Fox” (2026-10-11).
+  // The bar always says “Message <Agent>” (owner Order 2026-10-12), resting, pointed at or typing, in a website too
+  // (where it still takes a web address, ui/shell/notion-world.ts); only voice and Talk say what they are doing.
   const website=!reader.hidden&&reader.dataset.template==='browser';
   entry.dataset.website=String(website);
-  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':quiet||(!editing&&onDesktop())?'Message '+companionName+(website?' or type a web address':''):!editing?(hoverNone.matches?'Tap to type · hold to speak':'Click to type · hold to speak'):website?'Ask about '+context.title+' or type a web address':context.key.split(':')[0]==='overview'?'Ask '+companionName+' anything':'Ask about '+context.title;
+  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':'Message '+companionName;
   speechButton.setAttribute('aria-label',talk.phase==='speaking'?'Interrupt '+companionName:recording?'Send voice message':'Speak to Fox');speechButton.title=talk.on?(talk.phase==='speaking'?'Click to interrupt · Esc ends Talk':'Talk is on · Click to send now · Esc ends Talk'):recording?'Click to send · Esc to cancel':'Click to speak · Hold to speak · Right-click to choose a microphone or Talk with Fox';speechButton.setAttribute('aria-pressed',String(speech&&(recording||starting)));
   // Voice capture is intentionally visual: the waveform acknowledges listening
   // without exposing an unstable partial transcription in the bottom status.

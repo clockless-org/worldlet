@@ -155,14 +155,11 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 @media(min-width:801px){#notionWorld.native-console:is([data-detail-open=true],[data-depth=object]):not(.compact-viewport):not(.is-typing) .companion-dialogue{bottom:calc(204px + var(--fox-tag-room,0px))}}
 /* The bar has two sizes (owner Order 2026-10-08): small at rest, larger while typing or while the pointer is on it
    or on Fox (owner request 2026-10-12). */
-#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:168px;--companion-bar-tools:36px}
+#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:232px;--companion-bar-tools:36px}
 #notionWorld.native-console:is([data-entry-expanded=true],[data-entry-hover=true],[data-entry-held=true]) .companion-text-entry{--companion-bar-width:300px}
-/* In a website the small bar also says it takes a web address (owner request 2026-10-07), so it is wide enough to read it. */
-#notionWorld.native-console:not([data-entry-expanded=true],[data-entry-hover=true],[data-entry-held=true]) .companion-text-entry[data-website=true]{--companion-bar-width:232px}
-/* At rest the bar is low-key (owner request 2026-10-05): fainter, its name only; pointing at it or at Fox brings
-   back the hint. Send shows only once there is something to send. */
+/* At rest the bar says only “Message <Agent>” in the same frosted glass as the buttons beside Fox, so it blends with
+   the scene without hiding it (owner Order 2026-10-12). Send shows only once there is something to send. */
 #notionWorld.native-console:not([data-entry-expanded=true],[data-entry-hover=true]) .companion-text-entry #notionCommand:has(#notionInput:placeholder-shown) #notionSend{display:none}
-#notionWorld.native-console .companion-text-entry[data-quiet=true] #notionCommand{opacity:.62;box-shadow:none}
 #notionWorld.native-console .companion-text-entry[data-quiet=true] #notionSend{display:none}
 #notionWorld.native-console .companion-text-entry[data-quiet=true] #notionInput{text-align:center}
 #notionWorld.native-console .companion-controls{position:absolute;bottom:0;right:calc(50% + min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 6px);display:flex;align-items:center;gap:4px;height:44px;pointer-events:auto;transition:right .22s ease-out}
@@ -407,7 +404,7 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 
 
 /* System navigation has its own glass material; content surfaces keep their paper/forest palette. */
-:root{--system-glass-fill:#25332b99;--system-glass-hover:#243329bf;--system-glass-line:#fffdf433;--system-glass-blur:blur(18px) saturate(1.15);--system-glass-shadow:inset 0 1px 0 #ffffff14,0 2px 6px #15281c14;--system-glass-menu:#1d2a23e6}
+:root{--system-glass-fill:#25332b99;--system-glass-hover:#243329bf;--system-glass-line:#fffdf433;--system-glass-blur:blur(18px) saturate(1.15);--system-glass-shadow:inset 0 1px 0 #ffffff14,0 2px 6px #15281c14;--system-glass-menu:#1d2a23e6;--system-glass-press:#fffdf424}
 #notionWorld.native-console .companion-text-entry #notionCommand,#notionWorld.native-console .companion-text-entry #notionCommand:focus-within{background:var(--system-glass-fill);border-color:var(--system-glass-line);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur)}
 @media(prefers-reduced-transparency:reduce){:root{--system-glass-fill:#33483b;--system-glass-hover:#263b2e;--system-glass-blur:none;--system-glass-shadow:none}}
 @supports not (backdrop-filter:blur(1px)){:root{--system-glass-fill:#33483b;--system-glass-hover:#263b2e;--system-glass-blur:none}}
@@ -425,18 +422,17 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 .game-panel .game-header :is(.game-title,.ui-caption){color:inherit}
 @media(max-width:600px){:is(.native-console,.ui-gallery) .mail-focus.ui-applet-surface,.mail-focus.ui-applet-surface{padding:30px 24px 26px}.mail-focus.ui-applet-surface::before{border-image-width:32px}.mail-focus .mail-identity-card{padding:10px}.mail-focus>.ui-applet-header{padding-right:112px}.game-panel .game-header{padding-inline:28px}}
 @media(forced-colors:active){.mail-focus.ui-applet-surface::before,.game-panel .game-header::before{display:none}.mail-focus.ui-applet-surface,.game-panel .game-header{background:Canvas;border:1px solid CanvasText;color:CanvasText}}
-/* Inside the bar the microphone and the bug are quiet round buttons like Claude's, in the theme's glass (owner requests
-   2026-10-12); listening,
-   talking and an Order still light up. */
+/* Inside the bar "+", the bug, the microphone, ✕ and Stop are one kind of button (owner Order 2026-10-12): a plain
+   icon on the bar's glass, a light frost under the pointer, like Claude's; listening, talking and an Order still light up. */
 #notionWorld.native-console .companion-voice-controls>button{flex:0 0 36px;width:36px;height:36px;min-height:36px}
-#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button,#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button{border-color:transparent;background:var(--system-glass-hover);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button:is(:hover,:focus-visible),#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button:is(:hover,:focus-visible){background:var(--hud-scene-hover,var(--system-glass-hover))}
+#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button,#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button{border-color:transparent;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button:is(:hover,:focus-visible),#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button:is(:hover,:focus-visible){background:var(--system-glass-press)}
 #notionWorld.native-console[data-order=sending] .companion-voice-controls>.companion-order-button::after{inset:8px}
 @media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-controls.companion-voice-controls{transition:none}}
 /* ✕ and Stop are round like the bar's other buttons; Send keeps the theme's light circle (owner 2026-10-12: buttons keep
    the theme's colours), dimmed while there is nothing to send, as in Claude's bar. */
-#notionWorld.native-console .companion-voice-controls>:is(.companion-voice-cancel,.companion-voice-stop){border:0;border-radius:50%;background:var(--system-glass-hover);box-shadow:none}
-#notionWorld.native-console .companion-voice-controls>:is(.companion-voice-cancel,.companion-voice-stop):is(:hover,:focus-visible){background:var(--hud-scene-hover,var(--system-glass-hover))}
+#notionWorld.native-console .companion-voice-controls>:is(.companion-voice-cancel,.companion-voice-stop){border:0;border-radius:50%;background:transparent;box-shadow:none}
+#notionWorld.native-console .companion-voice-controls>:is(.companion-voice-cancel,.companion-voice-stop):is(:hover,:focus-visible){background:var(--system-glass-press)}
 #notionWorld.native-console .companion-text-entry #notionCommand:has(#notionInput:placeholder-shown) #notionSend.companion-send-button{opacity:.45}
 /* While the microphone listens the bar opens to its typing width and works like Claude's: ✕ at its left, a dotted wave
    (native-chat.ts paints each dot's height from the voice, the newest at the right), Stop, and the microphone as Send. */
@@ -459,8 +455,8 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console .companion-text-entry[data-send=true] #notionSend{margin-left:calc(var(--companion-bar-tools) + 6px)}
 #notionWorld.native-console .companion-text-entry[data-send=true] .companion-voice-controls{right:calc(50% - min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 42px)}
 /* "+" at the open bar's far left, the bug after it (owner request 2026-10-12). */
-#notionWorld.native-console .companion-voice-controls>.companion-plus-button{position:absolute;top:4px;right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 82px);display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:var(--system-glass-hover);color:var(--hud-scene-ink,#fffdf4);cursor:pointer;transition:right .22s ease-out}
-#notionWorld.native-console .companion-voice-controls>.companion-plus-button:is(:hover,:focus-visible){background:var(--hud-scene-hover,var(--system-glass-hover))}
+#notionWorld.native-console .companion-voice-controls>.companion-plus-button{position:absolute;top:4px;right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 82px);display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--hud-scene-ink,#fffdf4);cursor:pointer;transition:right .22s ease-out}
+#notionWorld.native-console .companion-voice-controls>.companion-plus-button:is(:hover,:focus-visible){background:var(--system-glass-press)}
 #notionWorld.native-console .companion-voice-controls>.companion-plus-button[hidden]{display:none}
 #notionWorld.native-console .companion-text-entry[data-send=true]{--companion-bar-lead:40px}
 #notionWorld.native-console .companion-text-entry[data-send=true]:has(>.companion-voice-controls>.companion-order-button:not([hidden])){--companion-bar-lead:78px}

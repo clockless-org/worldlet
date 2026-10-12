@@ -24,8 +24,8 @@ await withBrowser(fileAccess,async browser=>{
  // (owner request 2026-10-12), as pointing at Fox does; focus keeps it there.
  await form.hover();await page.waitForTimeout(400);
  assert(await mic.isVisible());assert(await form.locator('#notionSend').isVisible(),'Send shows, dimmed, as in Claude\'s bar (owner request 2026-10-12)');
- assert.match(await type.getAttribute('placeholder'),/to type · hold to speak/);
- const hoverWidth=(await form.boundingBox()).width;assert(hoverWidth>quietWidth+100,'pointing at the bar opens it to the typing size');
+ assert.equal(await type.getAttribute('placeholder'),'Message Fox','the bar always says Message and the Agent\'s name (owner Order 2026-10-12)');
+ const hoverWidth=(await form.boundingBox()).width;assert(hoverWidth>quietWidth+40,'pointing at the bar opens it to the typing size');
  await page.mouse.move(5,5);await page.waitForTimeout(400);assert.equal((await form.boundingBox()).width,quietWidth,'leaving it returns it to the small size');
  await avatar.hover();await page.waitForTimeout(400);assert.equal((await form.boundingBox()).width,hoverWidth,'pointing at Fox opens the bar too');assert(!await typing(),'without starting to type');
  await type.click();await page.waitForTimeout(400);
