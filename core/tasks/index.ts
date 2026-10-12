@@ -12,6 +12,8 @@ export * from './runtime-tasks.ts';
 export * from './source-checks.ts';
 export {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingCandidates,ongoingDecide,ongoingAgo,ongoingLine,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKindOf,ongoingFromAgent} from './ongoing.ts';
 export type {OngoingState,BroughtConversation,OngoingThing,OngoingDecision} from './ongoing.ts';
+export {FOX_SESSION_PLACE,FOX_SESSION_LIMIT,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionDetail,foxSessionCards} from './fox-sessions.ts';
+export type {FoxSession} from './fox-sessions.ts';
 export {ONGOING_KINDS,ONGOING_KIND_IDS,isOngoingKind,ongoingKind,ongoingTemplate} from './kinds.ts';
 export type {OngoingKind,OngoingKindOrGeneral,OngoingKindSpec,OngoingTemplate,OngoingTemplateEntry} from './kinds.ts';
 export {CONVERSATION_ATTENTION,conversationAttentionId,validConversationAttentionId,conversationsForAttention,conversationObservation,conversationOriginal,attentionFromAgent,type AgentAttentionEntry} from './attention.ts';

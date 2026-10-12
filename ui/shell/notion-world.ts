@@ -44,7 +44,7 @@ import {createClaudeSession} from '../applets/index.ts';
 import {forecastStage,weatherGlyph} from '../world/index.ts';
 import {createWeatherPanel} from '../applets/index.ts';
 import {createGameApplet} from '../applets/index.ts';
-import {ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,type OngoingThing} from '../../core/tasks/index.ts';
+import {foxSessions,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,type OngoingThing} from '../../core/tasks/index.ts';
 import {loadMoney,readMoneyItem} from '../applets/index.ts';
 import {WORK_APPLETS,workItems,workError,renderWorkDetail,sampleWork,sampleWorkDetail} from '../applets/index.ts';
 import {attentionIcon} from '../attention/index.ts';
@@ -2119,8 +2119,11 @@ export function mountNotionWorld(data: World, native: any) {
       const kept:OngoingThing[]=Array.isArray(result?.kept)?result.kept:[];
       const withRecent=(list:OngoingThing[])=>Promise.all(list.map(async t=>{const r=await native.ongoing({operation:'turns',id:t.id,limit:4}).catch(()=>null);
        return {...t,recent:Array.isArray(r?.recent)?r.recent:[]};}));
+      const others:OngoingThing[]=Array.isArray(result?.candidates)?result.candidates:[];
+      // Fox's sessions beside its conversation (core/tasks/fox-sessions.ts): the Things, then the other conversations.
+      root.dispatchEvent(new CustomEvent('worldlet:fox-sessions',{detail:{sessions:foxSessions(kept,others),turns:(id:string)=>native.ongoing({operation:'turns',id,limit:24})}}));
       ongoingKept=await withRecent(kept);
-      ongoingOthers=phone?await withRecent(Array.isArray(result?.candidates)?result.candidates:[]):[];
+      ongoingOthers=phone?await withRecent(others):[];
       nativeHUD?.sync();phone?.world();
      }catch{}
     };

@@ -124,6 +124,7 @@ export function approvalGrantFor(rule:HarnessStandingRule,harness:string,grants:
 export function approvalThreadLabel(thread:string):string {
  if(thread.startsWith('applet:')&&thread.length>7)return 'In the '+clip(thread.slice(7),60)+' Applet';
  if(thread.startsWith('item:')&&thread.length>5)return 'On an item’s card';
+ if(thread.startsWith('session:')&&thread.length>8)return 'In a past conversation';
  return 'In Fox’s main conversation';
 }
 

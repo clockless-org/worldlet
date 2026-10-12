@@ -20,7 +20,8 @@ try{
   if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
   if(b.action==='agentChat'){if(/read_companion_archive/.test(b.text||''))await w.worldletAgentTool(b.id,{id:'t1',name:'show_artifact',args:{title:'Eating well this autumn',body:'Lunches are steady.\n\n## Next\nKeep the salmon bowl.',chart:null,size:'large',actions:[]}});return {message:'Here is your page.'};}
   if(b.action==='ongoing'){
-   if(b.operation==='list')return {proposals,kept};
+   if(b.operation==='list')return {proposals,kept,candidates:[...proposals,thing('job-sideproj0001','#side-project','proposed')]};
+   if(b.operation==='turns'&&b.id==='job-sideproj0001')return {turns:[{role:'user',text:'Plan the launch',createdAt:iso(t-2*day)},{role:'assistant',text:'Launch on Tuesday, with the beta list first.',createdAt:iso(t-2*day)}]};
    if(b.operation==='turns')return {...b.template===true?{template:{kind:'food',title:'Food',heading:'Meals you noted',stats:[{label:'Meals',value:'9'},{label:'Days',value:'5'},{label:'Last',value:'yesterday'}],entries:[{at:iso(t-day),text:'Lunch was the salmon bowl again, about 650 kcal',value:'650 kcal'}],empty:'No meals in this conversation yet.',action:'Review my meals'}}:{},turns:[{role:'user',text:'Lunch was the salmon bowl again',createdAt:iso(t-day)},{role:'assistant',text:'Logged. You are at 1,350 kcal today.',createdAt:iso(t-day+60)}],recent:[{text:'You: Lunch was the salmon bowl again',at:iso(t-day)}]};
    if(['later','decline'].includes(b.operation)){proposals=proposals.filter(x=>x.id!==b.id);return {ok:true};}
    if(b.operation==='keep'){const p=proposals.find(x=>x.id===b.id);proposals=proposals.filter(x=>x.id!==b.id);if(p)kept=[{...p,state:'kept',region:'money'},...kept];
@@ -32,6 +33,24 @@ try{
  await page.goto(worldUrl());await waitForWorld(page);
  // A thing kept earlier is a device of its own.
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any)?.appletLayout?.has('app-job-fooddiary001'));
+ // Fox's sessions (core/tasks/fox-sessions.ts): pointing at Fox shows them left of its card, the main one first.
+ const avatar=page.locator('.companion-avatar'),input=page.locator('#notionInput'),column=page.locator('.fox-sessions');
+ await avatar.hover();await column.waitFor();
+ assert.equal(await column.locator('.fox-session strong').first().textContent(),'Fox','the main session leads, under the Agent\'s name');
+ assert.equal(await column.locator('.fox-session[data-main=true]').count(),1,'the main session leads');
+ assert.equal(await column.locator('.fox-session[data-thing=true]').count(),1,'the kept conversation is a Thing');
+ assert.equal(await column.locator('.fox-session',{hasText:'#side-project'}).count(),1,'a conversation that is not a Thing is listed too');
+ // A session that is not a Thing becomes the place Fox talks in, in the World: its turns, its name in the bar, a way back.
+ await column.locator('.fox-session',{hasText:'#side-project'}).click();
+ await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLInputElement).placeholder==='Message Fox · #side-project');
+ await page.locator('.companion-thread-list,#worldConversation',{hasText:'Launch on Tuesday'}).first().waitFor();
+ assert(await page.locator('.companion-session-leave').isVisible(),'a × goes back to the main session');
+ await page.screenshot({path:'/tmp/fox-sessions.png'});
+ await input.click();await input.fill('Where were we?');await page.keyboard.press('Enter');
+ await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='agentChat'&&/Where were we/.test(c.text)&&String(c.thread||'').includes('session:job-sideproj0001')));
+ await page.locator('.companion-session-leave').click();
+ await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLInputElement).placeholder==='Message Fox');
+ await page.keyboard.press('Escape');await page.mouse.move(5,5);
  // The two food conversations are one theme in Worth Doing, after the items; one of no kind offers nothing.
  const row=page.locator('.world-task-group[data-group=needsAction] .world-ongoing');
  await row.waitFor();
@@ -58,7 +77,8 @@ try{
  await page.screenshot({path:'/tmp/ongoing-artifact.png'});
   // A conversation kept as an Applet earlier opens on its own device, with its kind's page and latest messages.
  await page.getByRole('button',{name:'Close artifact'}).click();
- await page.evaluate(()=>{location.hash='object=app-job-fooddiary001';});
+ // A Thing's row in Fox's sessions opens its Applet.
+ await page.locator('.companion-avatar').hover();await page.locator('.fox-session[data-thing=true]').click();
  const panel=page.locator('#notionContent[data-template=job-fooddiary001] .ongoing-applet');await panel.waitFor();
  await panel.locator('.ongoing-heading h2',{hasText:'#food-diary'}).waitFor();
  await panel.locator('.ongoing-turn[data-role=user]',{hasText:'salmon bowl'}).waitFor();
@@ -73,5 +93,5 @@ try{
  await panel.getByRole('button',{name:'Review my meals'}).waitFor();
  await page.screenshot({path:'/tmp/ongoing-food.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Ongoing: brought conversations about one subject stand in Worth Doing as one theme, and Show me asks Fox for one artifact from them, making no Applet; a thing kept earlier is a device of its own that opens on its kind\'s page and latest messages.');
+ console.log('PASS Ongoing: brought conversations about one subject stand in Worth Doing as one theme, and Show me asks Fox for one artifact from them, making no Applet; a thing kept earlier is a device of its own that opens on its kind\'s page and latest messages; Fox\'s sessions list the main one, Things and other conversations, switch Fox in the World and go back, and a Thing\'s row opens its Applet.');
 }finally{await browser.close();}

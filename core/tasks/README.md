@@ -71,6 +71,7 @@ Owner request 2026-10-06 ("根据对话 channels 推荐生成 applet … 其实�
 
 - **Computer**: each kept thing is an **Applet of its own** (`ongoingApplet`: ID `app-job-…`, key `job-…`), a device in the area Fox picks for it when it is kept (`ongoingRegion`: a trip, food, health, family or money in Life, a game in Games, music, video and shows in Entertainment, friends and communities in Social, writing, design, code and work in Work; a coding Agent's conversation is work; anything else is Home). The person can move it like any device. It wears the Ongoing device's art; opening it shows where it lives, how many messages, when it was last active and its latest turns; **Talk to Fox about this** asks Fox with the conversation named (Fox can read all of it with `read_companion_archive`), and talking inside it is its own thread. The host's snapshot carries the kept things (`ongoing`), the page's World projection adds them beside the catalog's Applets (`dynamicApplets`), and keeping or removing one changes the World so the page projects it again. The **Ongoing** Applet (`app-ongoing`) is the catalog entry whose art and panel they borrow.
 - **Phone**: each kept thing has its own tile under **Ongoing** in the Applet world (`PhoneApplet` section `jobs`, the same key as its device), with its line and latest turns. Talking on its page opens its device on the computer and talks in its thread. Themes arrive as Worth Doing items with the ID `ongoing:<kind>`; the option Fox offers asks Fox for the theme's artifact.
+- **Fox's sessions**: beside Fox's card in the World, the kept things and the other conversations that look like a job are listed as Fox's sessions, latest first, under the main one (`foxSessions` in `fox-sessions.ts`, [Fox's sessions](../../ui/companion/CONVERSATION.md#one-session-one-visible-thread-per-context)). A kept thing's row opens its Applet; any other row makes that conversation the place Fox talks in (`session:<id>`), without keeping it.
 
 ### Storage
 
@@ -78,7 +79,7 @@ Local first. Each thing's record (JSON) is a `conversation` row of the person's 
 
 ### Checks
 
-`node scripts/ongoing-check.ts` (in `test:core`) checks the rules here: what looks like a job, proposing and its limits, decisions, forgetting, names and lines, kinds, their pages, and the phone's tiles and proposal items. `scripts/ongoing-ui-check.ts` (in `test:ui`) checks a Food proposal, keeping it, and its page.
+`node scripts/ongoing-check.ts` (in `test:core`) checks the rules here: what looks like a job, proposing and its limits, decisions, forgetting, names and lines, kinds, their pages, Fox's sessions (the list, its places and their cards), and the phone's tiles and proposal items. `scripts/ongoing-ui-check.ts` (in `test:ui`) checks a Food proposal, keeping it, and its page.
 
 ### Attention
 

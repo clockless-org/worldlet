@@ -14,7 +14,8 @@ import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
 import {modelFailure} from './model-failure.ts';
 import {FOX_WORKING} from './fox-doing.ts';
 import {mountFoxNameTag,FOX_STATUS_EVENT} from './fox-name-tag.ts';
-import {TURN_TASK_SOURCE,turnTaskName} from '../../core/tasks/index.ts';
+import {TURN_TASK_SOURCE,turnTaskName,foxSessionCards,foxSessionDetail,foxSessionOf,foxSessionPlace,type FoxSession} from '../../core/tasks/index.ts';
+import {mountFoxSessions} from './fox-sessions.ts';
 import type {FoxActivitySignal} from '../../contracts/companion-activity.ts';
 import {worldNow} from '../shell/index.ts';
 import {foxGreeting} from './fox-greeting.ts';
@@ -168,6 +169,13 @@ export function createNativeChat(call){return function({button,input,status,exec
  voiceStop.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
  for(const button of [voiceCancel,voiceStop])button.addEventListener('pointerdown',e=>e.stopPropagation());
  voiceControls.append(plusButton,orderButton,voiceCancel,voiceStop,speechButton);entry.append(voiceControls);
+ // In one of Fox's other sessions the bar names it (“Message Fox · #diet”) and this ×, beside the microphone, goes back
+ // to the main one.
+ const sessionLeave=make('button','companion-session-leave');sessionLeave.type='button';sessionLeave.hidden=true;sessionLeave.setAttribute('aria-label','Back to the main conversation');
+ sessionLeave.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+ sessionLeave.addEventListener('pointerdown',e=>e.stopPropagation());
+ sessionLeave.onclick=e=>{e.stopPropagation();pickSession(null);};
+ voiceControls.insertBefore(sessionLeave,speechButton);
  const send=form.querySelector('#notionSend');send.classList.add('companion-send-button');
  input.maxLength=3000;input.removeAttribute('placeholder');input.setAttribute('aria-label','Message Fox');
  send.setAttribute('aria-label','Send message');
@@ -296,6 +304,30 @@ export function createNativeChat(call){return function({button,input,status,exec
  }
  window.addEventListener('worldlet:harness-agents',()=>{answeredBy.clear();scheduleRender();});
  threadStack.append(threadList,threadFoot);panel.append(threadStack);
+ // Fox's sessions (core/tasks/fox-sessions.ts): the main one, then each conversation brought from the person's other
+ // Agents. A Thing's row opens its Applet; any other row makes that conversation the place Fox talks in, in the World,
+ // until the main session is picked again or the person goes somewhere else (owner request 2026-10-12).
+ let sessionList:FoxSession[]=[],sessionHere:FoxSession|null=null,sessionTurns:((id:string)=>Promise<any>)|null=null;
+ const originCards=new Map<string,ThreadEntry[]>();
+ const sessionContext=(s:FoxSession)=>({key:foxSessionPlace(s.id),title:s.title,detail:foxSessionDetail(s)});
+ function pickSession(s:FoxSession|null){
+  if(s?.thing){sessionHere=null;root.appletLayout?.open?.('app-'+s.id);return;}
+  sessionHere=s;
+  if(s&&sessionTurns&&!originCards.has(s.id))void sessionTurns(s.id).then(r=>{originCards.set(s.id,foxSessionCards(Array.isArray(r?.turns)?r.turns:[],foxSessionPlace(s.id)) as ThreadEntry[]);scheduleRender();},()=>{});
+  api.setContext(worldContext);
+  // The picked session's conversation stays open, as the main one was; going back to the main one closes it.
+  if(s){expanded=true;peeking=true;preview=true;}else{expanded=false;peeking=false;preview=false;}
+  render();
+ }
+ const sessionColumn=mountFoxSessions({pick:pickSession});panel.append(sessionColumn.element);
+ root.addEventListener('worldlet:fox-sessions',(e:any)=>{
+  sessionList=Array.isArray(e.detail?.sessions)?e.detail.sessions:[];sessionTurns=typeof e.detail?.turns==='function'?e.detail.turns:null;
+  // A session that is gone (its Agent brought again without it), or that became a Thing, leaves the World's place.
+  if(sessionHere&&!sessionList.some(s=>s.id===sessionHere.id&&!s.thing)){sessionHere=null;api.setContext(worldContext);}
+  scheduleRender();
+ });
+ // The cards of a place: in a session, its brought turns come first, then what was said there since.
+ const cardsHere=()=>{const id=foxSessionOf(context.key);return id&&originCards.has(id)?[...originCards.get(id),...thread]:thread;};
  threadStack.addEventListener('pointerdown',e=>e.stopPropagation());
  const contextButton=make('div','companion-context'),name=make('span','companion-name');contextButton.append(name);root.append(contextButton);
  let dismissed=false,peeking=false,dismissedGuide=null;
@@ -396,7 +428,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // Hover, click and arriving in an Applet all show this one card.
  const STALE_AFTER=2*3600e3;
  function frontReply(){
-  const segment=segmentNow(),last=thread.filter(e=>segmentOf(e)===segment&&e.status!=='working'&&!!e.text).at(-1),saved=contextReplies.get(segment);
+  const segment=segmentNow(),last=cardsHere().filter(e=>segmentOf(e)===segment&&e.status!=='working'&&!!e.text).at(-1),saved=contextReplies.get(segment);
   const latest=last&&!(saved?.at>last.at)?entryReply(last):saved||null,base={key:context.key,view:contentIdentity(),location:context.title};
   if(!latest)return {id:'greeting:'+segment,text:foxGreeting(context,greetingContext?.()?.applet,visibleContent()),...base};
   return latest.at&&Date.now()-latest.at>STALE_AFTER?{...latest,stale:true}:latest;
@@ -456,12 +488,12 @@ export function createNativeChat(call){return function({button,input,status,exec
   const text=guided?shownGuide.text:remembered?.text||(preview?context.detail:'');
   // A guide that follows a reply (a question with options) is that reply's card, not a new one.
   const frontId=guided?guideEntry.get(shownGuide)||'':remembered?.entry||'';
-  const front=frontId?thread.find(e=>e.id===frontId)||null:null;
+  const front=frontId?cardsHere().find(e=>e.id===frontId)||null:null;
   // A choice in Fox's card shows as the person's reply on the card that answers it.
   showQuestion(asked,guided&&shownGuide.answered?{user:shownGuide.answered,userIcon:'reply'}:front);
   const onboarding=root.dataset.onboardingLocked==='true';
   // Options and notices take the front card; they never wipe the thread above it.
-  const earlier=onboarding?[]:threadCards(thread,segment,{exclude:front?.id||''});
+  const earlier=onboarding?[]:threadCards(cardsHere(),segment,{exclude:front?.id||''});
   const runningElsewhere=!!working&&!workingHere;
   threadRunning.hidden=!runningElsewhere;
   // What this place's thread used so far, as the person's Agent reported it: one quiet line under the cards.
@@ -622,6 +654,8 @@ export function createNativeChat(call){return function({button,input,status,exec
   browseSwitch.hidden=browsing===null||onDesktop()||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||(context.key.split(':')[0]==='overview'&&!contentIdentity())||!(browsing===false||guided&&shownGuide.browsing===true);
   actionBar.hidden=browseSwitch.hidden&&guideActions.hidden&&actionFooter.hidden&&attentionActions.hidden;
   replyNav.setAttribute('aria-busy',String(unavailable));
+  // The sessions stand left of the card while it shows in the World (not beside an Applet, not in the first run).
+  sessionColumn.show({visible:!panel.hidden&&!onboarding&&!beside&&!onDesktop()&&root.dataset.onboarding!=='true'&&!root.dataset.tourStep,sessions:sessionList,here:foxSessionOf(context.key),name:companionName});
   root.dataset.expressionMode=panel.hidden?'idle':'reply';hud.classList.toggle('composer-expanded',!panel.hidden);hud.classList.toggle('is-chat-peeking',!panel.hidden);root.classList.toggle('companion-talking',!panel.hidden);
   root.dataset.talk=talk.phase;root.classList.toggle('is-listening',listening&&recording);root.classList.toggle('is-preparing-speech',listening&&starting);root.classList.toggle('is-transcribing',listening&&transcribing);
   const value=listening&&recording?'listening':listening&&starting?'preparing':listening&&transcribing?'transcribing':active?(streamingReply?'talking':turnKind===FOX_WORKING?'working':'thinking'):editing||hoverInput?'writing':'idle';avatar.dataset.state=value;
@@ -692,7 +726,8 @@ export function createNativeChat(call){return function({button,input,status,exec
   // (where it still takes a web address, ui/shell/notion-world.ts); only voice and Talk say what they are doing.
   const website=!reader.hidden&&reader.dataset.template==='browser';
   entry.dataset.website=String(website);
-  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':'Message '+companionName;
+  input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':'Message '+companionName+(sessionHere?' · '+sessionHere.title:'');
+  sessionLeave.hidden=!sessionHere;if(sessionHere)sessionLeave.title='Back to the main conversation';
   speechButton.setAttribute('aria-label',talk.phase==='speaking'?'Interrupt '+companionName:recording?'Send voice message':'Speak to Fox');speechButton.title=talk.on?(talk.phase==='speaking'?'Click to interrupt · Esc ends Talk':'Talk is on · Click to send now · Esc ends Talk'):recording?'Click to send · Esc to cancel':'Click to speak · Hold to speak · Right-click to choose a microphone or Talk with Fox';speechButton.setAttribute('aria-pressed',String(speech&&(recording||starting)));
   // Voice capture is intentionally visual: the waveform acknowledges listening
   // without exposing an unstable partial transcription in the bottom status.
@@ -1077,7 +1112,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   revealGuide(){dismissed=false;peeking=false;render();},
   setStatus,
   setGuide(value,{forget=false,only=null}={}){if(only&&guide?.source!==only)return;if(!value&&(!dismissed||forget))dismissedGuide=null;if(value)dismissedGuide=null;if(!value&&guide?.source==='model-setup'&&root.dataset.onboarding==='true'){root.dataset.onboarding='false';queueMicrotask(()=>root.dispatchEvent(new Event('worldlet:recommendations')));}/* A guide is a line said now: it takes the front at once, even during a turn (natural order). */if(value){for(const button of value.actions||[])if(button instanceof HTMLElement&&!choiceButtons.has(button)){choiceButtons.add(button);button.addEventListener('click',()=>{choice={label:button.textContent.trim(),at:Date.now()};},{capture:true});}if(choice&&Date.now()-choice.at<5000){value.answered=choice.label;choice=null;}}if(value?.takeover){editing=false;input.blur();}if(value)bindGuide(value);guide=value;guideTurn=value&&active?generation:-1;guideActions.replaceChildren(...(value?.actions||[]));guideContent.replaceChildren(...(value?.body?[value.body]:[]));if(value){if(value.remember&&value.text){reply={id:'attention:'+Date.now(),text:value.text,key:context.key,view:contentIdentity(),location:context.title};lastReply=reply;rememberContext(reply);const turns=threadHistory.get(FOX_MAIN_THREAD)||[];if(turns.at(-1)?.text!==value.text){threadHistory.set(FOX_MAIN_THREAD,[...turns,{role:'assistant',text:value.text}].slice(-6));saveRecall();}}preview=false;expanded=false;}render();if(value?.onPage&&pageIndex===0)value.onPage(0);},
-  setContext(value){if(!value)return;worldContext=value;if(onDesktop())value={key:'overview:desktop',title:'Desktop Companion',detail:'The world window is closed. Fox is a desktop companion. No Thing or desktop content is visible; do not infer what is on the user’s screen.'};/* A turn that opened a view (an artifact) said its answer there before the World's context caught up: that is not the person moving, so the answer stays. */const anchor=recallKey(value.key,contentIdentity()),saidHere=!!reply?.text&&reply.key===value.key&&reply.view===contentIdentity(),changed=contextAnchor!==anchor&&!saidHere;contextAnchor=anchor;if(changed){peeking=false;hoverReply=null;reply=null;preview=false;expanded=false;}
+  setContext(value){if(!value)return;worldContext=value;if(sessionHere){if(!onDesktop()&&String(value.key||'').split(':')[0]==='overview'&&!contentIdentity())value=sessionContext(sessionHere);else sessionHere=null;}if(onDesktop())value={key:'overview:desktop',title:'Desktop Companion',detail:'The world window is closed. Fox is a desktop companion. No Thing or desktop content is visible; do not infer what is on the user’s screen.'};/* A turn that opened a view (an artifact) said its answer there before the World's context caught up: that is not the person moving, so the answer stays. */const anchor=recallKey(value.key,contentIdentity()),saidHere=!!reply?.text&&reply.key===value.key&&reply.view===contentIdentity(),changed=contextAnchor!==anchor&&!saidHere;contextAnchor=anchor;if(changed){peeking=false;hoverReply=null;reply=null;preview=false;expanded=false;}
    if(changed){
     // A guide stays the newest line of the place it appeared in (bindGuide), like a reply,
     // and shows only there; the person's next message or Fox's next reply supersedes it.
