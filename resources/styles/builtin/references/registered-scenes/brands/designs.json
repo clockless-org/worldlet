@@ -1,0 +1,905 @@
+{
+  "schemaVersion": 1,
+  "designs": [
+    {
+      "id": "github",
+      "title": "GitHub",
+      "category": "development",
+      "layout": "code",
+      "setting": "An open-air village maker workshop under a timber pergola, gears and labeled-free project drawers, drafting instruments, a black-and-cream Octocat sign above an organized tool bench.",
+      "surface": "A cream blueprint board in a dark oak frame with brass corners.",
+      "icon": "assets/devices/github.webp"
+    },
+    {
+      "id": "codex",
+      "title": "Codex",
+      "category": "ai",
+      "layout": "code",
+      "setting": "A village inventor's garden laboratory, blue glass lamps, small mechanical models and a tidy terminal-shaped instrument, blue cloud-terminal emblem from the icon as a meaningful workshop sign.",
+      "surface": "A warm ivory drafting screen in a blue-enamel and oak enclosure.",
+      "icon": "assets/devices/codex.webp"
+    },
+    {
+      "id": "claude-code",
+      "title": "Claude Code",
+      "category": "ai",
+      "layout": "code",
+      "setting": "A terracotta-roofed coding atelier opening into a herb courtyard, copper instruments, punched-paper rolls and orange starburst maker sign above the workbench.",
+      "surface": "An ivory paper drafting board with rust-orange leather corners.",
+      "icon": "assets/devices/claude-code.webp"
+    },
+    {
+      "id": "notion",
+      "title": "Notion",
+      "category": "productivity",
+      "layout": "workspace",
+      "setting": "An outdoor planning pavilion in a village square, modular wooden card drawers, notebooks and tidy project binders, black N cube insignia integrated into the shelving.",
+      "surface": "A very large cream planner board with ebony binding and brass clips.",
+      "icon": "assets/devices/notion.webp"
+    },
+    {
+      "id": "obsidian",
+      "title": "Obsidian",
+      "category": "productivity",
+      "layout": "knowledge",
+      "setting": "A quiet cottage library with a small violet crystal study nook, linked strings between tiny closed notebooks outside the working area, violet faceted crystal as a bookend and identity.",
+      "surface": "A cream open notebook surface in a plum leather frame, flat rectangular page.",
+      "icon": "assets/devices/obsidian.webp"
+    },
+    {
+      "id": "plaid",
+      "title": "Plaid",
+      "category": "finance",
+      "layout": "finance",
+      "setting": "A village cooperative counting house courtyard, linked wooden account drawers, woven teal knot emblem on an actual safe cabinet, ledger volumes and small brass scales.",
+      "surface": "A pale ledger sheet mounted in a teal and walnut frame.",
+      "icon": "assets/devices/plaid.webp"
+    },
+    {
+      "id": "stripe",
+      "title": "Stripe",
+      "category": "finance",
+      "layout": "finance",
+      "setting": "A village craft shop counter with wrapped orders, violet payment terminal and a clearly readable Stripe plaque fixed to the shop canopy, receipt rolls at the edge.",
+      "surface": "A large ivory sales ledger board framed with violet leather and warm timber.",
+      "icon": "assets/devices/stripe.webp"
+    },
+    {
+      "id": "paypal",
+      "title": "PayPal",
+      "category": "finance",
+      "layout": "finance",
+      "setting": "A small village merchants' exchange under a blue awning, coin trays and parcel handover shelves, overlapping blue PayPal P emblem on the exchange sign.",
+      "surface": "A cream account ledger in navy leather with polished brass edges.",
+      "icon": "assets/devices/paypal.webp"
+    },
+    {
+      "id": "todoist",
+      "title": "Todoist",
+      "category": "productivity",
+      "layout": "tasks",
+      "setting": "A village task-organizing shed opening to a vegetable garden, red checkmark emblem on the tool cabinet, folded task cards and neatly hung everyday tools.",
+      "surface": "A large blank cream checklist clipboard with a muted red upper binding.",
+      "icon": "assets/devices/todoist.webp"
+    },
+    {
+      "id": "linear",
+      "title": "Linear",
+      "category": "productivity",
+      "layout": "kanban",
+      "setting": "An airy village engineering studio beside a stone workshop, precision rulers and wooden project tokens, silver striped-circle Linear badge on the workshop clock.",
+      "surface": "A broad ivory planning board in a charcoal and brass frame.",
+      "icon": "assets/devices/linear.webp"
+    },
+    {
+      "id": "supabase",
+      "title": "Supabase",
+      "category": "development",
+      "layout": "database",
+      "setting": "A village greenhouse seed archive, orderly oak drawers, green glass jars and a green lightning badge on the data-archive cabinet, bright botanical courtyard.",
+      "surface": "An ivory registry panel framed in green enamel and timber.",
+      "icon": "assets/devices/supabase.webp"
+    },
+    {
+      "id": "docker",
+      "title": "Docker",
+      "category": "development",
+      "layout": "deploy",
+      "setting": "A village canal-side shipping workshop with stacked miniature blue containers, ropes and a blue whale emblem on the warehouse sign, no large bridge.",
+      "surface": "A huge blank cream shipping manifest board in blue painted wood.",
+      "icon": "assets/devices/docker.webp"
+    },
+    {
+      "id": "google-drive",
+      "title": "Google Drive",
+      "category": "documents",
+      "layout": "files",
+      "setting": "A village archive courtyard, colorful filing drawers under a green-yellow-blue triangular archive sign, paper parcels and shelving shaded by ivy.",
+      "surface": "An ivory document index sheet in a timber folder frame with colored corner tabs.",
+      "icon": "assets/devices/google-drive.webp"
+    },
+    {
+      "id": "google-docs",
+      "title": "Google Docs",
+      "category": "documents",
+      "layout": "document",
+      "setting": "A village writing veranda with fountain pens, blue-bound manuscripts and a blue page emblem on a stationery cabinet, garden light.",
+      "surface": "A broad cream writing sheet mounted on a blue linen writing folio.",
+      "icon": "assets/devices/google-docs.webp"
+    },
+    {
+      "id": "google-sheets",
+      "title": "Google Sheets",
+      "category": "documents",
+      "layout": "spreadsheet",
+      "setting": "A village farm bookkeeping station overlooking vegetable rows, green ledgers, an abacus and a green spreadsheet-page insignia on the cabinet.",
+      "surface": "A large blank cream ledger page in a green linen folio, no grid painted.",
+      "icon": "assets/devices/google-sheets.webp"
+    },
+    {
+      "id": "google-slides",
+      "title": "Google Slides",
+      "category": "documents",
+      "layout": "slides",
+      "setting": "A village community presentation pavilion, amber projection lamp, rolled posters and golden page emblem on the small presentation stand.",
+      "surface": "A broad blank ivory projection surface with warm yellow timber trim.",
+      "icon": "assets/devices/google-slides.webp"
+    },
+    {
+      "id": "oura",
+      "title": "Oura Ring",
+      "category": "wellbeing",
+      "layout": "wellness",
+      "setting": "A serene village moon garden wellness terrace, smooth stones, linen cushions and a circular Oura ring emblem above a small rest cabinet, gentle early-morning light.",
+      "surface": "An ivory wellness journal board in pale oak with dark charcoal edging.",
+      "icon": "assets/devices/oura.webp"
+    },
+    {
+      "id": "strava",
+      "title": "Strava",
+      "category": "wellbeing",
+      "layout": "activity",
+      "setting": "A village cycling trailhead with a road bicycle, route signposts and orange Strava chevrons carved into the trail kiosk, orchard lanes beyond.",
+      "surface": "A broad cream route journal board in weathered timber with orange details.",
+      "icon": "assets/devices/strava.webp"
+    },
+    {
+      "id": "fitbit",
+      "title": "Fitbit",
+      "category": "wellbeing",
+      "layout": "wellness",
+      "setting": "A village walking garden with exercise steps, water bottles and turquoise dotted Fitbit badge on a small activity station, fresh sunny greenery.",
+      "surface": "A large ivory health journal panel in teal linen and light timber.",
+      "icon": "assets/devices/fitbit.webp"
+    },
+    {
+      "id": "google-maps",
+      "title": "Google Maps",
+      "category": "travel",
+      "layout": "map",
+      "setting": "A village wayfinding plaza with a globe, compass and recognizable multicolor map pin mounted on a real signpost, branching paths and modest cottages.",
+      "surface": "A front-facing blank pale map display in a natural oak surveying frame.",
+      "icon": "assets/devices/google-maps.webp"
+    },
+    {
+      "id": "airbnb",
+      "title": "Airbnb",
+      "category": "travel",
+      "layout": "stays",
+      "setting": "A charming village guesthouse courtyard with coral cushions, luggage, cottage keys and a large coral Airbnb Belo emblem on the guesthouse sign, flowering doorway.",
+      "surface": "A large ivory guestbook board framed in coral linen and warm oak.",
+      "icon": "assets/devices/airbnb.webp"
+    },
+    {
+      "id": "tripit",
+      "title": "TripIt",
+      "category": "travel",
+      "layout": "itinerary",
+      "setting": "A village rail station travel desk with suitcases, ticket wallets and orange TripIt route-node emblem on a station trip-planning sign.",
+      "surface": "A cream itinerary folio in deep blue leather with orange route tabs.",
+      "icon": "assets/devices/tripit.webp"
+    },
+    {
+      "id": "x",
+      "title": "X",
+      "category": "social",
+      "layout": "feed",
+      "setting": "A village news kiosk in a lively square, folded newspapers, a brass speaking horn and stark black-and-white X plaque on the kiosk.",
+      "surface": "A huge cream bulletin page in an ebony and oak frame.",
+      "icon": "assets/devices/x.webp"
+    },
+    {
+      "id": "youtube",
+      "title": "YouTube",
+      "category": "media",
+      "layout": "video",
+      "setting": "An outdoor village cinema garden, rolled canvas, a projector and large red YouTube play insignia on the screening canopy, warm late-afternoon light.",
+      "surface": "A blank ivory cinema screen in a timber projection frame.",
+      "icon": "assets/devices/youtube.webp"
+    },
+    {
+      "id": "tiktok",
+      "title": "TikTok",
+      "category": "media",
+      "layout": "short-video",
+      "setting": "A playful village music courtyard with a small filming stand, patterned pots and cyan-red TikTok music-note emblem on a rustic studio sign.",
+      "surface": "An ivory content board in dark timber with tiny coral and teal edge details.",
+      "icon": "assets/devices/tiktok.webp"
+    },
+    {
+      "id": "discord",
+      "title": "Discord",
+      "category": "social",
+      "layout": "chat",
+      "setting": "A village clubhouse under a purple wisteria pergola, headsets and little voice-room bells, recognizable Discord controller-face emblem on the club entrance.",
+      "surface": "A broad cream conversation board in lavender-painted oak.",
+      "icon": "assets/devices/discord.webp"
+    },
+    {
+      "id": "doordash",
+      "title": "DoorDash",
+      "category": "shopping",
+      "layout": "food",
+      "setting": "A village bakery pickup porch with red delivery bags, bicycle and steaming bread baskets, red DoorDash wing emblem fixed over the pickup hatch.",
+      "surface": "An ivory order menu board in warm timber and red enamel trim.",
+      "icon": "assets/devices/doordash.webp"
+    },
+    {
+      "id": "wordle",
+      "title": "Wordle",
+      "category": "games",
+      "layout": "word-game",
+      "setting": "A village word-puzzle stall beside a bookshop, green and gold letter blocks outside the main surface, a clear Wordle sign above its puzzle shelf.",
+      "surface": "A large blank cream puzzle board in green-trimmed oak, no letters or grids inside.",
+      "icon": "assets/devices/wordle.webp"
+    },
+    {
+      "id": "nyt-connections",
+      "title": "Connections",
+      "category": "games",
+      "layout": "connections",
+      "setting": "A village puzzle conservatory with four colored drawers in yellow green blue purple, groups of matching wooden objects, Connections plaque on the cabinet.",
+      "surface": "A large ivory puzzle tray in a dark walnut frame, empty interior.",
+      "icon": "assets/devices/nyt-connections.webp"
+    },
+    {
+      "id": "slither-io",
+      "title": "Slither.io",
+      "category": "games",
+      "layout": "arcade",
+      "setting": "A playful village garden arcade with a friendly purple toy snake coiled beside glowing marbles, Slither.io sign on its wooden stall.",
+      "surface": "A blank pale sage game surface inside a broad timber arcade frame.",
+      "icon": "assets/devices/slither-io.webp"
+    },
+    {
+      "id": "agar-io",
+      "title": "Agar.io",
+      "category": "games",
+      "layout": "arcade",
+      "setting": "A village glassblower's bubble arcade, colorful round glass marbles and an Agar.io plaque, sunny round-window workshop open to the square.",
+      "surface": "A blank cream game screen in rounded blue-and-oak framing.",
+      "icon": "assets/devices/agar-io.webp"
+    },
+    {
+      "id": "krunker-io",
+      "title": "Krunker",
+      "category": "games",
+      "layout": "arcade",
+      "setting": "A toy-scale village target-game booth with foam dart equipment and blocky wooden obstacles, Krunker insignia above the booth, no real weapons or violence.",
+      "surface": "A large blank warm ivory arcade screen in rugged timber and orange trim.",
+      "icon": "assets/devices/krunker-io.webp"
+    },
+    {
+      "id": "skribbl-io",
+      "title": "skribbl.io",
+      "category": "games",
+      "layout": "drawing",
+      "setting": "An outdoor village drawing class with colored pencils, paint jars and a bright scribble-pencil emblem with skribbl.io sign.",
+      "surface": "A front-facing blank ivory drawing canvas in a honey-oak easel frame.",
+      "icon": "assets/devices/skribbl-io.webp"
+    },
+    {
+      "id": "infinite-craft",
+      "title": "Infinite Craft",
+      "category": "games",
+      "layout": "craft",
+      "setting": "A village alchemist's courtyard with blue water, orange fire, green leaf and white cloud decorative bottles on a side shelf, Infinite Craft sign.",
+      "surface": "A broad blank cream crafting work surface in brass-edged oak.",
+      "icon": "assets/devices/infinite-craft.webp"
+    },
+    {
+      "id": "little-alchemy-2",
+      "title": "Little Alchemy 2",
+      "category": "games",
+      "layout": "craft",
+      "setting": "A whimsical village apothecary with golden glass potion flasks, herbs and tiny element jars, Little Alchemy 2 label on the shop sign.",
+      "surface": "A large blank pale parchment experiment board in walnut with amber glass corners.",
+      "icon": "assets/devices/little-alchemy-2.webp"
+    },
+    {
+      "id": "cookie-clicker",
+      "title": "Cookie Clicker",
+      "category": "games",
+      "layout": "cookie",
+      "setting": "A village biscuit bakery with ovens, oversized chocolate-chip cookies and a wooden Cookie Clicker shop sign, flour sacks and brass baking tools.",
+      "surface": "A large blank cream recipe-game board in caramel oak with biscuit-shaped corner details.",
+      "icon": "assets/devices/cookie-clicker.webp"
+    },
+    {
+      "id": "lichess",
+      "title": "Lichess",
+      "category": "games",
+      "layout": "chess",
+      "setting": "A village chess garden with carved knight pieces and a chess clock on a side table, Lichess knight emblem on a hanging sign, climbing roses.",
+      "surface": "A blank ivory game board surface in dark walnut, no grid painted inside.",
+      "icon": "assets/devices/lichess.webp"
+    },
+    {
+      "id": "drive-mad",
+      "title": "Drive Mad",
+      "category": "games",
+      "layout": "racing",
+      "setting": "A village toy garage with a yellow monster truck, little ramps and a Drive Mad sign on a tool wall, sunny gravel courtyard.",
+      "surface": "A blank ivory race-planning display in yellow-edged timber.",
+      "icon": "assets/devices/drive-mad.webp"
+    },
+    {
+      "id": "subway-surfers",
+      "title": "Subway Surfers",
+      "category": "games",
+      "layout": "racing",
+      "setting": "A playful village tram stop with bright sneakers, a skateboard and coin tokens, a Subway Surfers sign fixed to the shelter.",
+      "surface": "A blank cream game display in teal timber with terracotta roof trim.",
+      "icon": "assets/devices/subway-surfers.webp"
+    },
+    {
+      "id": "sekai",
+      "title": "Sekai",
+      "category": "games",
+      "layout": "game-library",
+      "setting": "A magical village game fair with star-shaped lanterns, colorful game boxes and a shooting-star Sekai emblem on an actual booth canopy.",
+      "surface": "A large blank cream selection board in purple and warm oak.",
+      "icon": "assets/devices/sekai.webp"
+    },
+    {
+      "id": "sekai-sketch-racer",
+      "title": "Sketch Racer",
+      "category": "games",
+      "layout": "racing",
+      "setting": "A village sketchbook toy-racing workshop with a pencil, miniature racing car and Sketch Racer badge on the workbench.",
+      "surface": "A blank ivory sketch-race board framed in warm wood and graphite edging.",
+      "icon": "assets/devices/sekai-sketch-racer.webp"
+    },
+    {
+      "id": "sekai-3d-uno",
+      "title": "3D UNO!",
+      "category": "games",
+      "layout": "cards",
+      "setting": "A village card-game patio with colorful upright UNO cards and a small card table on the right, a 3D UNO sign under flowering vines.",
+      "surface": "A large blank pale sage card-table surface framed in polished oak.",
+      "icon": "assets/devices/sekai-3d-uno.webp"
+    },
+    {
+      "id": "sekai-devil-level",
+      "title": "Devil Level: 50 Trolls",
+      "category": "games",
+      "layout": "platformer",
+      "setting": "A mischievous village toy obstacle workshop with a cheerful yellow cube mascot, toy spring traps and rounded foam spikes, Devil Level sign.",
+      "surface": "A large blank ivory game surface in orange and walnut framing.",
+      "icon": "assets/devices/sekai-devil-level.webp"
+    },
+    {
+      "id": "pokemon-showdown",
+      "title": "Pokémon Showdown",
+      "category": "games",
+      "layout": "battle",
+      "setting": "A village monster-battle club garden with red-white ball-shaped badges and playful blue-orange creature figurines, Pokemon Showdown sign on the club wall.",
+      "surface": "A large blank ivory strategy display in blue and copper timber framing.",
+      "icon": "assets/devices/pokemon-showdown.webp"
+    },
+    {
+      "id": "chatgpt",
+      "title": "ChatGPT",
+      "category": "ai",
+      "layout": "assistant",
+      "setting": "A village idea conservatory with notebooks, tea, a brass microphone and recognizable green OpenAI knot emblem on the atelier sign.",
+      "surface": "A broad ivory conversation page in green linen and oak.",
+      "icon": "assets/devices/chatgpt.webp"
+    },
+    {
+      "id": "claude",
+      "title": "Claude",
+      "category": "ai",
+      "layout": "assistant",
+      "setting": "A warm village reading and writing porch, terracotta-bound books, a daisy arrangement and orange Claude starburst on a real wooden studio sign.",
+      "surface": "A cream writing folio framed in terracotta leather and oak.",
+      "icon": "assets/devices/claude.webp"
+    },
+    {
+      "id": "gemini",
+      "title": "Gemini",
+      "category": "ai",
+      "layout": "assistant",
+      "setting": "A village stargazer's daytime observatory garden with a small telescope, prism glass and Gemini four-point gradient star emblem above the desk.",
+      "surface": "A blank ivory research screen in pale oak with blue-violet enamel corners.",
+      "icon": "assets/devices/gemini.webp"
+    },
+    {
+      "id": "perplexity",
+      "title": "Perplexity",
+      "category": "ai",
+      "layout": "research",
+      "setting": "A village research library courtyard with a magnifying glass, index cards and Perplexity geometric star emblem etched into a charcoal archive sign.",
+      "surface": "A large ivory reference folio in charcoal linen and brass.",
+      "icon": "assets/devices/perplexity.webp"
+    },
+    {
+      "id": "deepseek",
+      "title": "DeepSeek",
+      "category": "ai",
+      "layout": "assistant",
+      "setting": "A village waterside research boathouse with scrolls, a blue whale emblem on the study cabinet and neat blue glass instruments, calm reed garden.",
+      "surface": "A broad cream writing board in blue enamel and pale timber.",
+      "icon": "assets/devices/deepseek.webp"
+    },
+    {
+      "id": "whatsapp",
+      "title": "WhatsApp",
+      "category": "social",
+      "layout": "chat",
+      "setting": "A village green telephone kiosk beside a flowering courtyard, rotary handset and message envelopes, WhatsApp phone-in-bubble emblem on the booth.",
+      "surface": "An ivory conversation board framed with leaf-green enamel and timber.",
+      "icon": "assets/devices/whatsapp.webp"
+    },
+    {
+      "id": "telegram",
+      "title": "Telegram",
+      "category": "social",
+      "layout": "chat",
+      "setting": "A village courier loft opening to a sunny square, paper airplanes and sorted dispatch folders, Telegram blue paper-plane emblem on its sign.",
+      "surface": "A large cream dispatch sheet in sky-blue and oak framing.",
+      "icon": "assets/devices/telegram.webp"
+    },
+    {
+      "id": "slack",
+      "title": "Slack",
+      "category": "social",
+      "layout": "chat",
+      "setting": "A village collaborative workshop with multicolor project drawers and four colored channel bells, Slack hashtag emblem mounted above the shared shelves.",
+      "surface": "A broad cream team conversation board in dark oak with colored corner accents.",
+      "icon": "assets/devices/slack.webp"
+    },
+    {
+      "id": "teams",
+      "title": "Microsoft Teams",
+      "category": "social",
+      "layout": "meeting",
+      "setting": "A village community meeting hall opening onto a lavender courtyard, paired chairs, microphone and Microsoft Teams purple T emblem on the room sign.",
+      "surface": "A large ivory meeting display in purple linen and warm timber.",
+      "icon": "assets/devices/teams.webp"
+    },
+    {
+      "id": "zoom",
+      "title": "Zoom",
+      "category": "social",
+      "layout": "meeting",
+      "setting": "An open-sided village meeting pavilion with a brass camera, linen chairs and blue Zoom camera emblem on the pavilion sign.",
+      "surface": "A blank ivory meeting screen in blue-painted timber.",
+      "icon": "assets/devices/zoom.webp"
+    },
+    {
+      "id": "dropbox",
+      "title": "Dropbox",
+      "category": "documents",
+      "layout": "files",
+      "setting": "A village parcel archive with blue open-box emblem, organized document crates and shelving under a cream canopy, stone courtyard.",
+      "surface": "A broad ivory file manifest mounted in blue cloth and oak.",
+      "icon": "assets/devices/dropbox.webp"
+    },
+    {
+      "id": "onedrive",
+      "title": "OneDrive",
+      "category": "documents",
+      "layout": "files",
+      "setting": "A bright village attic archive opening to a cloud-filled sky, white filing drawers and a blue OneDrive cloud sign.",
+      "surface": "A cream file folio in whitewashed oak and blue linen.",
+      "icon": "assets/devices/onedrive.webp"
+    },
+    {
+      "id": "microsoft-word",
+      "title": "Word",
+      "category": "documents",
+      "layout": "document",
+      "setting": "A village writer's cottage veranda with a small typewriter, blue manuscripts and Microsoft Word W page badge on the writing cabinet.",
+      "surface": "A large blank ivory manuscript page bound in blue leather.",
+      "icon": "assets/devices/microsoft-word.webp"
+    },
+    {
+      "id": "microsoft-excel",
+      "title": "Excel",
+      "category": "documents",
+      "layout": "spreadsheet",
+      "setting": "A village vineyard accounts desk with green ledgers, an abacus and Excel X badge on the accounting drawers, vine-covered pergola.",
+      "surface": "A broad blank cream ledger sheet in forest-green leather, no baked grid.",
+      "icon": "assets/devices/microsoft-excel.webp"
+    },
+    {
+      "id": "microsoft-powerpoint",
+      "title": "PowerPoint",
+      "category": "documents",
+      "layout": "slides",
+      "setting": "A village storytelling pavilion with an antique projector and orange PowerPoint P emblem on a presentation cabinet, rolled canvas posters.",
+      "surface": "A broad blank ivory projection screen in orange-edged timber.",
+      "icon": "assets/devices/microsoft-powerpoint.webp"
+    },
+    {
+      "id": "figma",
+      "title": "Figma",
+      "category": "creative",
+      "layout": "design",
+      "setting": "A village design studio courtyard with colorful modular wood shapes, rulers, material swatches and Figma's five-color emblem on the studio sign.",
+      "surface": "A large blank ivory design board in pale oak with fine graphite edges.",
+      "icon": "assets/devices/figma.webp"
+    },
+    {
+      "id": "canva",
+      "title": "Canva",
+      "category": "creative",
+      "layout": "design",
+      "setting": "A village print-and-paint workshop with turquoise paint pots, blank poster rolls, flower arrangements and the Canva wordmark on a round studio sign.",
+      "surface": "A broad blank cream canvas in turquoise and oak framing.",
+      "icon": "assets/devices/canva.webp"
+    },
+    {
+      "id": "spotify",
+      "title": "Spotify",
+      "category": "media",
+      "layout": "music",
+      "setting": "A village music garden with a gramophone, records and the green Spotify three-wave emblem on a speaker cabinet, ivy-covered pergola.",
+      "surface": "A blank cream music-library board in deep green and oak.",
+      "icon": "assets/devices/spotify.webp"
+    },
+    {
+      "id": "apple-music",
+      "title": "Apple Music",
+      "category": "media",
+      "layout": "music",
+      "setting": "A village record shop veranda with a small turntable, crimson album sleeves and Apple Music music-note emblem on a red shop sign.",
+      "surface": "A broad ivory listening-library panel in red linen and warm timber.",
+      "icon": "assets/devices/apple-music.webp"
+    },
+    {
+      "id": "reddit",
+      "title": "Reddit",
+      "category": "social",
+      "layout": "feed",
+      "setting": "A village discussion cafe terrace with conversation postcards, notice shelves and Reddit Snoo orange mascot emblem on the cafe sign.",
+      "surface": "A large cream community bulletin board in orange-trimmed oak.",
+      "icon": "assets/devices/reddit.webp"
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram",
+      "category": "social",
+      "layout": "photos",
+      "setting": "A village photographer's rose courtyard, instant camera and hanging photo prints outside the main area, Instagram gradient camera emblem on a studio plaque.",
+      "surface": "A blank ivory photo-album surface in rose linen and brass corners.",
+      "icon": "assets/devices/instagram.webp"
+    },
+    {
+      "id": "linkedin",
+      "title": "LinkedIn",
+      "category": "social",
+      "layout": "jobs",
+      "setting": "A village professional guild hall entrance with portfolio cases, business-card trays and LinkedIn blue in emblem on a guild plaque.",
+      "surface": "A cream opportunity ledger in navy linen and polished oak.",
+      "icon": "assets/devices/linkedin.webp"
+    },
+    {
+      "id": "amazon",
+      "title": "Amazon",
+      "category": "shopping",
+      "layout": "shop",
+      "setting": "A village general-store pickup courtyard with stacked parcels, shopping baskets and a clear Amazon smile logo on an orange shop sign.",
+      "surface": "A broad cream shopping catalog board in orange-edged walnut.",
+      "icon": "assets/devices/amazon.webp"
+    },
+    {
+      "id": "netflix",
+      "title": "Netflix",
+      "category": "media",
+      "layout": "video",
+      "setting": "A village outdoor theatre at warm dusk with rich red curtains, projector reels and the red Netflix N integrated into the theatre canopy.",
+      "surface": "A blank warm ivory cinema display framed in dark walnut, red curtains stay outside the blank panel.",
+      "icon": "assets/devices/netflix.webp"
+    },
+    {
+      "id": "outlook",
+      "title": "Outlook",
+      "category": "productivity",
+      "layout": "mail",
+      "setting": "A village post sorting station with blue letter slots, envelopes and Outlook O/envelope emblem above the sorting cabinet, sunny courtyard.",
+      "surface": "A large ivory letter board in navy-blue timber and brass.",
+      "icon": "assets/devices/outlook.webp"
+    },
+    {
+      "id": "apple-podcasts",
+      "title": "Apple Podcasts",
+      "category": "media",
+      "layout": "podcast",
+      "setting": "A village radio recording porch with a vintage microphone, headphones and purple Apple Podcasts emblem fixed to a broadcast cabinet.",
+      "surface": "A broad cream listening board in purple linen and oak.",
+      "icon": "assets/devices/apple-podcasts.webp"
+    },
+    {
+      "id": "google-photos",
+      "title": "Google Photos",
+      "category": "media",
+      "layout": "photos",
+      "setting": "A village photo studio garden with camera lenses, photo albums and the Google Photos four-color pinwheel emblem on a carved sign.",
+      "surface": "A large blank ivory photo album page in cream linen with colored corner accents.",
+      "icon": "assets/devices/google-photos.webp"
+    },
+    {
+      "id": "pinterest",
+      "title": "Pinterest",
+      "category": "creative",
+      "layout": "photos",
+      "setting": "A village inspiration studio beneath a rose arbor, fabric swatches and craft tools, Pinterest red P emblem above a pinboard cabinet.",
+      "surface": "A blank cream inspiration board framed with red linen and brass pins outside the surface.",
+      "icon": "assets/devices/pinterest.webp"
+    },
+    {
+      "id": "facebook",
+      "title": "Facebook",
+      "category": "social",
+      "layout": "feed",
+      "setting": "A village community square kiosk with event envelopes and blue Facebook f emblem over a neighbourhood notice cabinet, flowers and benches.",
+      "surface": "A large ivory community bulletin board in blue-painted oak.",
+      "icon": "assets/devices/facebook.webp"
+    },
+    {
+      "id": "threads",
+      "title": "Threads",
+      "category": "social",
+      "layout": "feed",
+      "setting": "A village conversation cafe beneath olive trees, little handwritten blank cards and black Threads spiral emblem on a cream cafe plaque.",
+      "surface": "A cream conversational notebook board in black linen and oak.",
+      "icon": "assets/devices/threads.webp"
+    },
+    {
+      "id": "capcut",
+      "title": "CapCut",
+      "category": "creative",
+      "layout": "video-edit",
+      "setting": "A village film-editing workshop opening to a sunny courtyard, film reels, scissors and CapCut black ribbon emblem on an editing cabinet.",
+      "surface": "A large blank ivory editing display in cream and ebony wood.",
+      "icon": "assets/devices/capcut.webp"
+    },
+    {
+      "id": "uber",
+      "title": "Uber",
+      "category": "travel",
+      "layout": "ride",
+      "setting": "A village carriage-and-taxi stand with a small black car, luggage and clear Uber wordmark on a functional pickup sign, stone plaza.",
+      "surface": "A broad ivory trip board in black leather and brass trim.",
+      "icon": "assets/devices/uber.webp"
+    },
+    {
+      "id": "uber-eats",
+      "title": "Uber Eats",
+      "category": "shopping",
+      "layout": "food",
+      "setting": "A village restaurant pickup garden with green insulated delivery bags and plated meals, Uber Eats wordmark on a green pickup canopy.",
+      "surface": "A large cream menu board in green-enamel timber.",
+      "icon": "assets/devices/uber-eats.webp"
+    },
+    {
+      "id": "booking",
+      "title": "Booking.com",
+      "category": "travel",
+      "layout": "stays",
+      "setting": "A village inn reception courtyard with brass room keys, travel cases and blue Booking.com plaque above the reception hatch.",
+      "surface": "A large ivory reservation book surface framed in cobalt-blue linen and oak.",
+      "icon": "assets/devices/booking.webp"
+    },
+    {
+      "id": "feishu",
+      "title": "飞书",
+      "category": "social",
+      "layout": "workspace",
+      "setting": "A village collaboration garden pavilion with blue-green bird emblem on shared stationery drawers, notebooks and meeting bells.",
+      "surface": "A broad cream collaborative planner in teal and sky-blue timber.",
+      "icon": "assets/devices/feishu.webp"
+    },
+    {
+      "id": "bilibili",
+      "title": "哔哩哔哩",
+      "category": "media",
+      "layout": "video",
+      "setting": "A playful village screening courtyard with a pink television mascot sign, film rolls and a small stage, Bilibili identity clearly visible.",
+      "surface": "A broad blank ivory cinema panel in pink and cream timber.",
+      "icon": "assets/devices/bilibili.webp"
+    },
+    {
+      "id": "xiaohongshu",
+      "title": "小红书",
+      "category": "social",
+      "layout": "photos",
+      "setting": "A village lifestyle journal cafe with red notebooks, instant camera and the red Xiaohongshu Chinese wordmark sign, flowers and pottery.",
+      "surface": "A large cream scrapbook page in red linen and oak.",
+      "icon": "assets/devices/xiaohongshu.webp"
+    },
+    {
+      "id": "baidu-netdisk",
+      "title": "百度网盘",
+      "category": "documents",
+      "layout": "files",
+      "setting": "A village storage archive under a blue awning, white drawers and Baidu Netdisk blue-red interlinked ring emblem on the cabinet.",
+      "surface": "A large ivory archive index panel in white oak and sky-blue trim.",
+      "icon": "assets/devices/baidu-netdisk.webp"
+    },
+    {
+      "id": "twitch",
+      "title": "Twitch",
+      "category": "media",
+      "layout": "video",
+      "setting": "A village live-broadcast game cafe at dusk, microphone and small stage, purple Twitch chat logo as the lit cafe sign.",
+      "surface": "A blank warm ivory stream display in purple and dark timber.",
+      "icon": "assets/devices/twitch.webp"
+    },
+    {
+      "id": "copilot",
+      "title": "Microsoft Copilot",
+      "category": "ai",
+      "layout": "assistant",
+      "setting": "A village problem-solving studio with rainbow ribbon glass ornament and Microsoft Copilot emblem on its workbench cabinet, sunny flower garden.",
+      "surface": "A broad blank ivory assistant board in blue-green linen and oak.",
+      "icon": "assets/devices/copilot.webp"
+    },
+    {
+      "id": "acrobat",
+      "title": "Adobe Acrobat",
+      "category": "documents",
+      "layout": "document",
+      "setting": "A village print bindery with red-bound folios, sealing tools and Adobe Acrobat white ribbon logo on a red publishing sign.",
+      "surface": "A large blank ivory document sheet in red leather and timber.",
+      "icon": "assets/devices/acrobat.webp"
+    },
+    {
+      "id": "wikipedia",
+      "title": "Wikipedia",
+      "category": "productivity",
+      "layout": "research",
+      "setting": "A village public library courtyard with a carved puzzle-globe emblem, reference volumes and a brass magnifying glass, open stone arches.",
+      "surface": "A broad cream encyclopedia folio in neutral linen and walnut.",
+      "icon": "assets/devices/wikipedia.webp"
+    },
+    {
+      "id": "doubao",
+      "title": "豆包",
+      "category": "ai",
+      "layout": "assistant",
+      "setting": "A friendly village learning nook with a small round assistant portrait plaque matching the reference icon, notebooks, tea and Doubao shop lettering.",
+      "surface": "A large blank ivory conversation page in warm brown linen and pale oak.",
+      "icon": "assets/devices/doubao.webp"
+    },
+    {
+      "id": "taobao",
+      "title": "淘宝",
+      "category": "shopping",
+      "layout": "shop",
+      "setting": "A lively village market stall with orange parcel bags, baskets and prominent Taobao orange Chinese character shop sign, patterned awning.",
+      "surface": "A large cream shopping catalog board in orange and cream wood.",
+      "icon": "assets/devices/taobao.webp"
+    },
+    {
+      "id": "alipay",
+      "title": "支付宝",
+      "category": "finance",
+      "layout": "finance",
+      "setting": "A village payments exchange booth with a blue Alipay Chinese-character sign, coin trays, receipt rolls and a small secure cash drawer.",
+      "surface": "A broad ivory accounts ledger in bright-blue linen and brass.",
+      "icon": "assets/devices/alipay.webp"
+    },
+    {
+      "id": "douyin",
+      "title": "抖音",
+      "category": "media",
+      "layout": "short-video",
+      "setting": "A village performance-and-video courtyard with a small tripod, rhythm instruments and Douyin cyan-red musical-note emblem on the stage sign.",
+      "surface": "A large blank ivory content display in dark oak with teal and coral edging.",
+      "icon": "assets/devices/douyin.webp"
+    },
+    {
+      "id": "posthog",
+      "title": "PostHog",
+      "category": "development",
+      "layout": "analytics",
+      "setting": "A village observatory for experiments with chart scrolls, a little hedgehog emblem matching the icon on a data cabinet, amber instruments.",
+      "surface": "A broad cream analytics ledger in amber linen and dark timber.",
+      "icon": "assets/devices/posthog.webp"
+    },
+    {
+      "id": "cloudflare",
+      "title": "Cloudflare",
+      "category": "development",
+      "layout": "deploy",
+      "setting": "A village communications outpost with a small weather vane, copper network pipes and orange Cloudflare cloud emblem on a protective gateway arch.",
+      "surface": "A broad blank ivory operations board in orange-trimmed oak.",
+      "icon": "assets/devices/cloudflare.webp"
+    },
+    {
+      "id": "vercel",
+      "title": "Vercel",
+      "category": "development",
+      "layout": "deploy",
+      "setting": "A village architecture deployment studio with clean triangular roof models, black Vercel triangle on a white workshop sign, bright stone courtyard.",
+      "surface": "A cream project board in ebony and pale oak framing.",
+      "icon": "assets/devices/vercel.webp"
+    },
+    {
+      "id": "netlify",
+      "title": "Netlify",
+      "category": "development",
+      "layout": "deploy",
+      "setting": "A village connected-workshop garden with teal pinwheel-like network emblem on a routing cabinet, organized cable reels and small project models.",
+      "surface": "A large ivory deployment board in teal-painted timber.",
+      "icon": "assets/devices/netlify.webp"
+    },
+    {
+      "id": "firebase",
+      "title": "Firebase",
+      "category": "development",
+      "layout": "database",
+      "setting": "A village data-foundry courtyard with amber glass lamps, small organized drawers and Firebase yellow-orange flame emblem over the archive cabinet.",
+      "surface": "A broad blank cream database ledger in amber and oak.",
+      "icon": "assets/devices/firebase.webp"
+    },
+    {
+      "id": "sentry",
+      "title": "Sentry",
+      "category": "development",
+      "layout": "issues",
+      "setting": "A village watchkeeper's workshop with small signal bells, inspection tools and Sentry purple angular emblem on an observation station.",
+      "surface": "A large ivory incident journal board in purple linen and walnut.",
+      "icon": "assets/devices/sentry.webp"
+    },
+    {
+      "id": "railway",
+      "title": "Railway",
+      "category": "development",
+      "layout": "deploy",
+      "setting": "A village railway control hut with a model rail engine, switching levers and Railway white-striped round emblem on the station sign.",
+      "surface": "A broad blank cream service board in black-enamel timber.",
+      "icon": "assets/devices/railway.webp"
+    },
+    {
+      "id": "render",
+      "title": "Render",
+      "category": "development",
+      "layout": "deploy",
+      "setting": "A village maker's service workshop with wooden server-like cabinets, green status lamps and Render black abstract emblem matching the icon on a cream sign.",
+      "surface": "A blank ivory deployment console in cream and dark timber with subtle green accents.",
+      "icon": "assets/devices/render.webp"
+    },
+    {
+      "id": "gitlab",
+      "title": "GitLab",
+      "category": "development",
+      "layout": "code",
+      "setting": "A village code-making forge with orange fox emblem on its tool cabinet, tidy project drawers and copper instruments, open flower-lined courtyard.",
+      "surface": "A broad cream project folio in rust-orange and dark oak.",
+      "icon": "assets/devices/gitlab.webp"
+    },
+    {
+      "id": "jira",
+      "title": "Jira",
+      "category": "productivity",
+      "layout": "kanban",
+      "setting": "A village project-planning guild pavilion with blue diamond Jira emblem on a task-token cabinet, ordered planning trays and drafting tools.",
+      "surface": "A large ivory task board in cobalt-blue linen and warm timber.",
+      "icon": "assets/devices/jira.webp"
+    }
+  ]
+}
