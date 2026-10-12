@@ -1,4 +1,5 @@
 import {fitThemeScene,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeSceneMaterialName} from '../../themes/index.ts';
+import {appletSceneKey} from './scene-family.ts';
 /**
  * The shared Applet scene renderer. An Applet supplies records and controls; the active theme supplies the painting,
  * the regions measured on it and how each region's material looks (presentation.json `appletScenes`,
@@ -33,14 +34,14 @@ export function sceneMaterialStyle(material:ThemeSceneMaterialName):Record<strin
  return out;
 }
 /**
- * Mount `key`'s scene in `host` (which it fills). `source` overrides the theme's scene, for a preview that serves the
+ * Mount `key`'s scene in `host` (which it fills): the theme's own for that Applet, else its family's (scene-family.ts). `source` overrides the theme's scene, for a preview that serves the
  * package itself. The region elements are empty: the Applet renders into `primary.element` (and any secondary ones).
  * `shell`, when given, receives the primary and companion rectangles as CSS variables in its own coordinates
  * (--applet-scene-primary-left/top/width/height, --applet-scene-companion-*), for shell surfaces outside the scene
  * (an Applet's reader) to sit on the same painted region, along with the primary region's material (--scene-*).
  */
 export function mountAppletScene(host:HTMLElement,key:string,options:{source?:AppletSceneSource;shell?:HTMLElement|null}={}):AppletScene{
- const own=options.source||themeAppletScene(key),painted=!!own?.background,source=own||PLAIN_SCENE;
+ const family=appletSceneKey(key),own=options.source||(family?themeAppletScene(family):undefined),painted=!!own?.background,source=own||PLAIN_SCENE;
  const element=document.createElement('div');element.className='applet-scene';element.dataset.applet=key;element.dataset.painted=String(painted);
  // The painting's outer margins: the same picture, blurred, rather than bare colour around a letterboxed scene.
  const margin=document.createElement('div');margin.className='applet-scene-margin';
