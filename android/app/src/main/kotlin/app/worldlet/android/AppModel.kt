@@ -17,6 +17,7 @@ import app.worldlet.kit.PairLink
 import app.worldlet.kit.PairingException
 import app.worldlet.kit.PhoneApplet
 import app.worldlet.kit.PhoneInfo
+import app.worldlet.kit.PhoneAttachment
 import app.worldlet.kit.PhoneMessage
 import app.worldlet.kit.PhoneSession
 import app.worldlet.kit.PhoneUpdate
@@ -388,6 +389,37 @@ class AppModel(
         val id = UUID.randomUUID().toString()
         pending = pending + Turn(id, Turn.Role.User, line, Instant.now().toString())
         send(PhoneMessage.Chat(id, line)) { pending = pending.filterNot { it.id == id } }
+    }
+
+    /** A line with photos or files attached with "+" (owner request 2026-10-12): each attachment goes in parts first,
+     * then the line that names them, in the main conversation, an item's card ([about]) or an Applet's page ([inside]).
+     * The computer saves the files and Fox's Agent reads them there. */
+    fun say(text: String, attachments: List<PhoneAttachment>, about: AttentionItem? = null, inside: PhoneApplet? = null) {
+        val line = text.trim()
+        val shown = (listOf(line) + attachments.map { "📎 ${it.name}" }).filter { it.isNotEmpty() }.joinToString("\n")
+        if (shown.isEmpty() || (session == null && demo == null)) return
+        val id = UUID.randomUUID().toString()
+        val message = PhoneMessage.Attach(id, line, attachments.map { it.file }, about?.id, inside?.key)
+        if (demo != null) { demoSent += message; demoReply(shown); return }
+        val session = session ?: return
+        when {
+            about != null -> itemPending[about.id] = shown
+            inside != null -> appletPending[inside.key] = shown
+            else -> pending = pending + Turn(id, Turn.Role.User, shown, Instant.now().toString())
+        }
+        viewModelScope.launch {
+            try {
+                for (attachment in attachments) for (part in attachment.messages { UUID.randomUUID().toString() }) session.send(part)
+                session.send(message)
+            } catch (e: CancellationException) { throw e } catch (e: Exception) {
+                when {
+                    about != null -> itemPending.remove(about.id)
+                    inside != null -> appletPending.remove(inside.key)
+                    else -> pending = pending.filterNot { it.id == id }
+                }
+                error = e.message
+            }
+        }
     }
 
     /** A line said with an item's card open, or the option Fox offers there ([option] true): it joins that item's

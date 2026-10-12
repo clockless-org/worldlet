@@ -74,6 +74,20 @@ class PairingTest {
         assertEquals(mapOf("type" to "chat", "id" to "3", "text" to "Hi", "applet" to "mail"), flat(PhoneMessage.Tell("3", "Hi", "mail")))
         assertEquals(mapOf("type" to "applet", "id" to "4", "applet" to "mail", "action" to "open"), flat(PhoneMessage.OpenApplet("4", "mail")))
         assertEquals(mapOf("type" to "order", "id" to "r", "said" to "Fix it"), flat(PhoneMessage.Order("r", "Fix it")))
+        // Attachments go in parts that each fit the relay's box, then the line names them.
+        val attachment = PhoneAttachment("Plan.pdf", "application/pdf", ByteArray(200_000) { it.toByte() }, "file-0001")
+        var n = 0
+        val parts = attachment.messages { "p${n++}" }
+        assertEquals(2, parts.size)
+        assertEquals(listOf(0, 1), parts.map { it.part })
+        assertEquals(java.util.Base64.getEncoder().encodeToString(attachment.bytes), parts.joinToString("") { it.data })
+        assertTrue(parts.all { it.data.length <= PhoneAttachment.PART_SIZE })
+        assertEquals(mapOf("type" to "file", "id" to "p0", "file" to "file-0001", "part" to "0", "parts" to "2", "name" to "Plan.pdf", "mime" to "application/pdf"),
+            flat(parts[0]) - "data")
+        val line = PhoneMessage.Attach("5", "", listOf("file-0001"), null, "mail").toJson()
+        assertEquals("chat", line["type"]!!.jsonPrimitive.content)
+        assertEquals("mail", line["applet"]!!.jsonPrimitive.content)
+        assertEquals(listOf("file-0001"), line["files"]!!.jsonArray.map { it.jsonPrimitive.content })
     }
 
     @Test

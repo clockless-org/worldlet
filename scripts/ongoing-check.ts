@@ -169,6 +169,12 @@ assert.equal(tile.fox?.turns[0]?.text,'Weigh in on Friday.','an ongoing thing ha
 const item=value.now[0];
 assert.equal(item.id,'ongoing:fitness');assert.equal(item.group,'needsAction');assert.equal(item.fox?.option,'Show me');assert.equal(item.applet,undefined,'the Ongoing panel is not on the phone');
 assert.deepEqual(readPhoneMessage({type:'chat',id:'m1',text:'Where are we?',applet:kept.id}),{type:'chat',id:'m1',text:'Where are we?',applet:kept.id});
+// A photo attached with "+" on the phone: parts first, then the line that names it (owner request 2026-10-12).
+assert.deepEqual(readPhoneMessage({type:'file',id:'f1',file:'photo-0001',part:0,parts:2,name:'../IMG 1.jpg',mime:'image/jpeg',data:'aGVsbG8='}),{type:'file',id:'f1',file:'photo-0001',part:0,parts:2,name:'.._IMG 1.jpg'.replace(/^\.+/,''),mime:'image/jpeg',data:'aGVsbG8='});
+assert.equal(readPhoneMessage({type:'file',id:'f2',file:'photo-0001',part:2,parts:2,name:'a.jpg',mime:'image/jpeg',data:'aGVsbG8='}),null,'a part past the end is dropped');
+assert.equal(readPhoneMessage({type:'file',id:'f3',file:'photo-0001',part:0,parts:1,name:'a.jpg',mime:'image/jpeg',data:'not base64!'}),null);
+assert.deepEqual(readPhoneMessage({type:'chat',id:'m4',text:'',files:['photo-0001','bad id!']}),{type:'chat',id:'m4',text:'',files:['photo-0001']},'a photo alone is a line');
+assert.equal(readPhoneMessage({type:'chat',id:'m5',text:''}),null);
 assert.deepEqual(readPhoneMessage({type:'applet',id:'m2',applet:kept.id,action:'open'}),{type:'applet',id:'m2',applet:kept.id,action:'open'});
 assert.deepEqual(readPhoneMessage({type:'option',id:'m3',item:item.id}),{type:'option',id:'m3',item:item.id});
 

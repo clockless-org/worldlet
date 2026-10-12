@@ -439,6 +439,12 @@ sealed interface PhoneMessage {
     data class Web(override val id: String, val applet: String, val records: List<WebReport>) : PhoneMessage
     /** The person's answer to the approval riding on the live turn (core/phone PhoneMessage `approval`). */
     data class Approval(override val id: String, val approval: String, val choice: HarnessApproval.Choice) : PhoneMessage
+    /** One part of a photo or file attached with "+" (owner request 2026-10-12; core/phone PhoneMessage `file`): [data]
+     * is a slice of the whole file's base64, sent before the line that names [file]. */
+    data class File(override val id: String, val file: String, val part: Int, val parts: Int, val name: String, val mime: String, val data: String) : PhoneMessage
+    /** A line with attached files (each sent before as [File] parts), in the main conversation, an item's card ([item])
+     * or an Applet's page ([applet]). */
+    data class Attach(override val id: String, val text: String, val files: List<String>, val item: String? = null, val applet: String? = null) : PhoneMessage
 
     fun toJson(): JsonObject = buildJsonObject {
         when (val m = this@PhoneMessage) {
@@ -451,6 +457,15 @@ sealed interface PhoneMessage {
             is Connect -> { put("type", "connect"); put("id", m.id); put("provider", m.provider) }
             is Order -> { put("type", "order"); put("id", m.id); put("said", m.said) }
             is Approval -> { put("type", "approval"); put("id", m.id); put("approval", m.approval); put("choice", m.choice.wire) }
+            is File -> {
+                put("type", "file"); put("id", m.id); put("file", m.file); put("part", m.part); put("parts", m.parts)
+                put("name", m.name); put("mime", m.mime); put("data", m.data)
+            }
+            is Attach -> {
+                put("type", "chat"); put("id", m.id); put("text", m.text)
+                put("files", kotlinx.serialization.json.JsonArray(m.files.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+                if (m.item != null) put("item", m.item) else if (m.applet != null) put("applet", m.applet)
+            }
             is Web -> {
                 put("type", "web"); put("id", m.id); put("applet", m.applet)
                 put("records", kotlinx.serialization.json.JsonArray(m.records.map { WorldletJson.encodeToJsonElement(WebReport.serializer(), it) }))
@@ -533,5 +548,23 @@ class WebReportBuffer(val applet: String) {
         if (batch.isNotEmpty()) messages += PhoneMessage.Web(id(), applet, batch)
         pending.clear()
         return messages
+    }
+}
+
+/** A photo or file attached with "+": split into [PhoneMessage.File] parts that each fit a sealed box (core/phone
+ * PHONE_LIMITS `filePart`, base64 characters), sent before the line that names [file]. */
+class PhoneAttachment(val name: String, val mime: String, val bytes: ByteArray, val file: String = java.util.UUID.randomUUID().toString().replace("-", "")) {
+    fun messages(id: () -> String): List<PhoneMessage.File> {
+        val encoded = java.util.Base64.getEncoder().encodeToString(bytes)
+        val parts = maxOf(1, (encoded.length + PART_SIZE - 1) / PART_SIZE)
+        return (0 until parts).map { part ->
+            PhoneMessage.File(id(), file, part, parts, name, mime, encoded.substring(part * PART_SIZE, minOf(encoded.length, (part + 1) * PART_SIZE)))
+        }
+    }
+
+    companion object {
+        const val PART_SIZE = 150_000
+        const val MAX_BYTES = 1_500_000
+        const val MAX_COUNT = 3
     }
 }

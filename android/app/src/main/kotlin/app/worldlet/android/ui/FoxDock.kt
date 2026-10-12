@@ -15,6 +15,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Image
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.compose.foundation.horizontalScroll
+import android.net.Uri
+import app.worldlet.kit.PhoneAttachment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.CornerRadius
@@ -152,10 +160,24 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
     var focused by remember { mutableStateOf(false) }
     var openedAt by remember { mutableStateOf(Instant.now()) }
     val focus = remember { FocusRequester() }
+    /** Photos and files attached with "+", sent with the next line (owner request 2026-10-12). */
+    val attachments = remember { mutableStateListOf<PhoneAttachment>() }
+    var attachProblem by remember { mutableStateOf<String?>(null) }
+    fun attach(uris: List<Uri>, photo: Boolean) = scope.launch {
+        for (uri in uris) {
+            if (attachments.size >= PhoneAttachment.MAX_COUNT) { attachProblem = "Up to ${PhoneAttachment.MAX_COUNT} at a time."; break }
+            withContext(Dispatchers.IO) { readAttachment(context, uri, photo) }
+                .onSuccess { attachments += it }
+                .onFailure { attachProblem = (it as? AttachmentProblem)?.message ?: "That file could not be read." }
+        }
+    }
+    val pickPhotos = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(PhoneAttachment.MAX_COUNT)) { attach(it, true) }
+    val pickFiles = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { attach(it, false) }
     LaunchedEffect(item?.id, inside?.key) { openedAt = Instant.now(); onChat(false) }
     BackHandler(enabled = chat) { onChat(false) }
 
     fun say(text: String) = when {
+        attachments.isNotEmpty() -> { model.say(text, attachments.toList(), item, inside); attachments.clear() }
         item != null -> model.say(text, item)
         inside != null -> model.say(text, inside)
         else -> model.say(text)
@@ -191,8 +213,8 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
     fun send() {
         // A recording started by a tap on the microphone is sent by Send too.
         if (talk.tapped) { talk.finish(); return }
-        if (draft.isBlank()) return
-        say(draft)
+        if (draft.isBlank() && attachments.isEmpty()) return
+        say(draft.trim())
         draft = ""
         focusManager.clearFocus()
     }
@@ -247,7 +269,10 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
             Text(shown, color = Palette.ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.frosted(RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 7.dp).testTag("foxOrderHint"))
         }
-        val resting = !typing
+        AnimatedVisibility(attachments.isNotEmpty(), Modifier.fillMaxWidth(), enter = fadeIn(), exit = fadeOut()) {
+            AttachmentChips(attachments)
+        }
+        val resting = !typing && attachments.isEmpty()
         val bar by animateDpAsState(if (resting) 44.dp else 50.dp, label = "bar")
         val haptics = LocalHapticFeedback.current
         Row(
@@ -268,7 +293,8 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
                         talking.on -> EndTalkButton(buttonPad) { talking.stop() }
                         talk.tapped -> RoundButton(Icons.Outlined.Close, "Cancel the voice message", "foxCancelVoice", buttonPad) { talk.cancel() }
                         else -> {
-                            PlusButton(buttonPad, "Talk with ${model.conversation.name}", { toggleTalk() }, openSettings)
+                            PlusButton(buttonPad, photos = { pickPhotos.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                                files = { pickFiles.launch(arrayOf("*/*")) })
                             if (model.takesOrders) OrderButton(ordering, buttonPad) { toggleOrder() }
                         }
                     }
@@ -309,7 +335,7 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
                         talk.stop { heard -> draft = if (draft.isEmpty()) heard else "$draft $heard"; focus.requestFocus(); keyboard?.show() }
                     }
                     else TalkButton(talk, talking, if (talking.phase == TalkMode.Phase.Speaking) "Interrupt ${model.conversation.name}" else "Talk to ${model.conversation.name}", buttonPad)
-                    SendButton(enabled = draft.isNotBlank() || talk.tapped, buttonPad) { send() }
+                    SendButton(enabled = draft.isNotBlank() || attachments.isNotEmpty() || talk.tapped, buttonPad) { send() }
                 }
             }
             // Fox stands on the bar's bottom line as the line grows, its name badge over its feet.
@@ -320,6 +346,14 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
         }
     }
 
+    attachProblem?.let { problem ->
+        AlertDialog(
+            onDismissRequest = { attachProblem = null },
+            confirmButton = { TextButton({ attachProblem = null }) { Text("OK") } },
+            title = { Text("Can't attach") },
+            text = { Text(problem) },
+        )
+    }
     (voice.state as? VoiceInput.State.Unavailable)?.let { problem ->
         AlertDialog(
             onDismissRequest = voice::dismissProblem,
@@ -363,15 +397,40 @@ private fun RoundButton(icon: androidx.compose.ui.graphics.vector.ImageVector, l
     ) { Icon(icon, null, tint = Palette.ink, modifier = Modifier.size(18.dp)) }
 }
 
-/** "+" at the bar's far left, as in Claude's (owner request 2026-10-12): Talk with Fox and Settings. */
+/** "+" at the bar's far left, as in Claude's (owner decision 2026-10-12): attach photos or files, which go to the
+ * computer with the next line and are saved there for Fox. */
 @Composable
-private fun PlusButton(modifier: Modifier, talkLabel: String, talk: () -> Unit, settings: () -> Unit) {
+private fun PlusButton(modifier: Modifier, photos: () -> Unit, files: () -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box(modifier) {
-        RoundButton(Icons.Outlined.Add, "Add", "foxPlus", Modifier) { open = true }
+        RoundButton(Icons.Outlined.Add, "Attach photos or files", "foxPlus", Modifier) { open = true }
         DropdownMenu(open, { open = false }) {
-            DropdownMenuItem({ Text(talkLabel) }, { open = false; talk() }, modifier = Modifier.testTag("foxPlusTalk"))
-            DropdownMenuItem({ Text("Settings") }, { open = false; settings() }, modifier = Modifier.testTag("foxPlusSettings"))
+            DropdownMenuItem({ Text("Photos") }, { open = false; photos() }, leadingIcon = { Icon(Icons.Outlined.Image, null) },
+                modifier = Modifier.testTag("foxPlusPhotos"))
+            DropdownMenuItem({ Text("Files") }, { open = false; files() }, leadingIcon = { Icon(Icons.Outlined.Description, null) },
+                modifier = Modifier.testTag("foxPlusFiles"))
+        }
+    }
+}
+
+/** What will go with the next line, each removable. */
+@Composable
+private fun AttachmentChips(attachments: MutableList<PhoneAttachment>) {
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).testTag("foxAttachments"), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        for (attachment in attachments.toList()) {
+            Row(
+                Modifier.frosted(RoundedCornerShape(50)).padding(start = 10.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(if (attachment.mime.startsWith("image/")) Icons.Outlined.Image else Icons.Outlined.Description, null,
+                    tint = Palette.ink, modifier = Modifier.size(16.dp))
+                Text(attachment.name, color = Palette.ink, fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1,
+                    overflow = TextOverflow.MiddleEllipsis, modifier = Modifier.widthIn(max = 140.dp))
+                Box(
+                    Modifier.size(24.dp).clickable(onClickLabel = "Remove ${attachment.name}", role = Role.Button) { attachments.remove(attachment) },
+                    contentAlignment = Alignment.Center,
+                ) { Icon(Icons.Outlined.Close, "Remove ${attachment.name}", tint = Palette.ink, modifier = Modifier.size(14.dp)) }
+            }
         }
     }
 }

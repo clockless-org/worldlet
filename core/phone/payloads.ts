@@ -72,15 +72,19 @@ export type PhoneWidgets={v:1,at:string,widgets:PhoneWidget[]};
 // `web` is what happened on a website the phone opened in its own browser (owner request 2026-10-07): the observer's
 // reports (platform/bridge/web-record.js) with the phone's time, kept in the computer's World by the same rules as
 // the computer's browser (core/browser/web-record.ts).
-export type PhoneMessage={type:'chat',id:string,text:string,item?:string,applet?:string}|{type:'applet',id:string,applet:string,action:'open'}|{type:'widget',id:string,widget:string,state:WidgetState}|{type:'option',id:string,item:string}|{type:'attention',id:string,action:PhoneAction}|{type:'connect',id:string,provider:string}|{type:'order',id:string,said:string}|{type:'web',id:string,applet:string,records:PhoneWebRecord[]}|{type:'approval',id:string,approval:string,choice:'once'|'always'|'deny'};
+// `file` is one part of a photo or file the person attached with "+" (owner request 2026-10-12): a sealed box holds at most
+// 256 KiB, so the phone sends each attachment in parts (`part` from 0 of `parts`, `data` base64) before the chat line,
+// whose `files` names them; the computer saves the file and the line carries its path for Fox's Agent.
+export type PhoneMessage={type:'chat',id:string,text:string,item?:string,applet?:string,files?:string[]}|{type:'file',id:string,file:string,part:number,parts:number,name:string,mime:string,data:string}|{type:'applet',id:string,applet:string,action:'open'}|{type:'widget',id:string,widget:string,state:WidgetState}|{type:'option',id:string,item:string}|{type:'attention',id:string,action:PhoneAction}|{type:'connect',id:string,provider:string}|{type:'order',id:string,said:string}|{type:'web',id:string,applet:string,records:PhoneWebRecord[]}|{type:'approval',id:string,approval:string,choice:'once'|'always'|'deny'};
 /** One report from the observer on a page the phone opened, `at` in seconds. `private` says the page showed a password,
  * card or one-time-code field: nothing more is kept from it until its address changes. */
 export type PhoneWebRecord={at:number,kind:'page'|'text'|'text-more'|'input'|'click'|'submit'|'private',url:string,title?:string,text?:string,
  field?:string,value?:string,label?:string,href?:string,fields?:string[]};
 const WEB_KINDS:PhoneWebRecord['kind'][]=['page','text','text-more','input','click','submit','private'];
 
-export const PHONE_LIMITS=Object.freeze({tasks:24,taskLines:6,journal:24,journalText:1500,items:40,turns:40,turnText:4000,chatText:4000,field:400,summary:1500,accounts:20,steps:6,applets:48,recent:4,webRecords:300,webText:100000});
+export const PHONE_LIMITS=Object.freeze({files:3,fileParts:16,filePart:160000,tasks:24,taskLines:6,journal:24,journalText:1500,items:40,turns:40,turnText:4000,chatText:4000,field:400,summary:1500,accounts:20,steps:6,applets:48,recent:4,webRecords:300,webText:100000});
 const GROUPS:PhoneGroup[]=['event','needsAction','unseen'];
+const FILE_ID=/^[A-Za-z0-9_-]{8,64}$/,BASE64=/^[A-Za-z0-9+/]*={0,2}$/;
 const clip=(value:unknown,max:number=PHONE_LIMITS.field)=>typeof value==='string'?value.trim().slice(0,max):'';
 const iso=(value:unknown)=>{const t=typeof value==='number'?value:Date.parse(String(value??''));return Number.isFinite(t)?new Date(t).toISOString():null;};
 
@@ -228,7 +232,17 @@ export function phoneDesktop({name,version,order}:{name:string,version:string,or
 export function readPhoneMessage(value:any):PhoneMessage|null{
  const id=clip(value?.id,200);
  if(!id)return null;
- if(value.type==='chat'){const text=clip(value.text,PHONE_LIMITS.chatText),item=clip(value.item,200),applet=appletKey(value.applet);return text?{type:'chat',id,text,...item?{item}:applet?{applet}:{}}:null;}
+ if(value.type==='chat'){
+  const text=clip(value.text,PHONE_LIMITS.chatText),item=clip(value.item,200),applet=appletKey(value.applet);
+  const files=(Array.isArray(value.files)?value.files:[]).filter((f:unknown)=>typeof f==='string'&&FILE_ID.test(f)).slice(0,PHONE_LIMITS.files);
+  return text||files.length?{type:'chat',id,text,...item?{item}:applet?{applet}:{},...files.length?{files}:{}}:null;
+ }
+ if(value.type==='file'){
+  const file=typeof value.file==='string'&&FILE_ID.test(value.file)?value.file:'',parts=Number(value.parts),part=Number(value.part);
+  const name=clip(value.name,120).replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').replace(/^\.+/,''),mime=clip(value.mime,100);
+  const data=typeof value.data==='string'&&value.data.length<=PHONE_LIMITS.filePart&&BASE64.test(value.data)?value.data:'';
+  return file&&name&&data&&Number.isInteger(parts)&&parts>=1&&parts<=PHONE_LIMITS.fileParts&&Number.isInteger(part)&&part>=0&&part<parts?{type:'file',id,file,part,parts,name,mime,data}:null;
+ }
  if(value.type==='applet'){const applet=appletKey(value.applet);return applet&&value.action==='open'?{type:'applet',id,applet,action:'open'}:null;}
  if(value.type==='option'){const item=clip(value.item,200);return item?{type:'option',id,item}:null;}
  if(value.type==='attention'&&['done','later','remove'].includes(value.action))return {type:'attention',id,action:value.action};
