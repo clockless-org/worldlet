@@ -33,7 +33,7 @@ function run(command:string,args:string[],env:NodeJS.ProcessEnv=process.env){
 }
 // On Windows `python3` is usually the Microsoft Store alias; use the interpreter the release host verifies.
 const python=process.platform==='win32'?process.env.WORLDLET_SETUP_PYTHON||'python':'python3';
-const info=buildInfo(platform==='win32'?'windows':'mac');
+const info=buildInfo();
 const channel=process.env.WORLDLET_DISTRIBUTION_CHANNEL||'unknown';
 // 1. Interface and host, release channel.
 run(process.execPath,['scripts/build-native-ui.ts'],{...process.env,WORLDLET_BUILD_CHANNEL:'release',WORLDLET_TARGET_PLATFORM:platform==='win32'?'windows':'mac'});

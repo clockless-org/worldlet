@@ -39,7 +39,6 @@
     "build:windows": "node scripts/windows.ts build",
     "package:windows": "node scripts/windows.ts package",
     "installer:windows": "node scripts/windows.ts installer",
-    "version:windows": "node scripts/windows-build-number.ts",
     "test:windows": "node scripts/local-deletion-check.ts && node scripts/windows.ts check",
     "build:native-ui": "node scripts/build-native-ui.ts",
     "test:codex:stream": "node scripts/codex-stream-check.ts",
