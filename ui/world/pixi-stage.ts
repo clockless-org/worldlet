@@ -10,9 +10,9 @@ export function createAppletStage(host,onPick){
  const focus=document.createElement('aside');focus.className='pixi-selected-item';focus.hidden=true;host.append(focus);
  const mailNav=document.createElement('nav');mailNav.className='mail-reader-switch';mailNav.setAttribute('aria-label','Browse emails');mailNav.hidden=true;host.append(mailNav);
  // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail, Calendar, Notes,
- // Reminders and Messages so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; the others' items
+ // Reminders, Messages and Voice Memos so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; the others' items
  // open in the shared reader.
- const SCENE_APPLETS=new Set(['gmail','google-calendar','apple-notes','apple-reminders','messages']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
+ const SCENE_APPLETS=new Set(['gmail','google-calendar','apple-notes','apple-reminders','messages','voice-memos']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;

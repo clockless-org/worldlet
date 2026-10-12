@@ -35,11 +35,11 @@ await withBrowser(fileAccess,async browser=>{
  // Fox's guide re-renders asynchronously; wait for the button instead of sampling once (RC 6158b2de, #1223).
  await page.getByRole('button',{name:'Restart Worldlet',exact:true}).waitFor({timeout:5000});
  await page.getByRole('button',{name:'Choose recordings',exact:true}).click();
- // Every recording shows at once; the item area scrolls rather than paging (owner Order 2026-10-07).
- await page.waitForFunction(()=>document.querySelectorAll('.pixi-stage-item').length===6);
+ // Every recording shows at once on the theme's Voice Memos scene; the list scrolls rather than paging (owner Order 2026-10-07).
+ await page.waitForFunction(()=>document.querySelectorAll('.applet-scene .scene-item').length===6);
  await page.screenshot({path:'/tmp/worldlet-voice-memos-open.png'});
  assert.equal(await page.getByRole('button',{name:'Next',exact:true}).count(),0,'no page arrows');
- await page.locator('.pixi-stage-item').first().click();
+ await page.locator('.applet-scene .scene-item').first().click();
  await page.getByText('An actual supplied transcript from the fixture.',{exact:true}).waitFor();
  await page.getByRole('button',{name:'Play',exact:true}).click();
  await page.getByRole('button',{name:'Pause',exact:true}).waitFor();
@@ -65,7 +65,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.getByRole('button',{name:'Disconnect',exact:true}).click();
  for(let i=0;i<10&&await page.getByRole('button',{name:'Next page'}).isVisible();i++)await page.getByRole('button',{name:'Next page'}).click();
  await page.getByRole('button',{name:'Choose recordings',exact:true}).waitFor();
- assert.equal(await page.locator('.pixi-stage-item').count(),0);
+ assert.equal(await page.locator('.applet-scene .scene-item').count(),0);
  assert.equal(await page.evaluate(()=>calls.some(c=>['agentChat','browserShow'].includes(c.action))),false,'local listening neither uploads nor opens a browser');
  assert.deepEqual(errors,[]);
  console.log('PASS Voice Memos: folder setup, Open showing every recording, native Focus transcript, Fox playback actions, adjacent recordings, stop on exit and disconnect.');
