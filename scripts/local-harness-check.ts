@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../core/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
+import {BUSY_RETRIES,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Local Agent Harnesses at setup: the shared catalog, recommendation, per-command turns and output
@@ -160,6 +160,11 @@ assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'C
 assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'});
 assert.deepEqual(read('codex',[],1,'Error: Not logged in. Run codex login.').outcome,{error:codexProblem('not logged in')});
 assert.equal(codexProblem('stream disconnected before completion'),null);
+// A model busy for everyone is told apart from the person's own limits: the turn is worth another try (#416).
+assert.equal(modelAtCapacity('Selected model is at capacity. Please try a different model.'),true);
+assert.equal(modelAtCapacity('Claude Code could not answer: API Error: 529 {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}'),true);
+assert.equal(modelAtCapacity('Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'),false);
+assert.equal(modelAtCapacity('Codex is not signed in. Open Terminal, run codex login, then try again.'),false);
 
 // Host detection ----------------------------------------------------------------------------------
 await withTempDir('worldlet-local-harness-',async scratch=>{
@@ -321,6 +326,23 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   // A Harness that fails explains itself; Fox never shows a blank answer.
   script(path.join(bin,'claude'),'echo "Error: not logged in" >&2\nexit 1\n');
   await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: not logged in/);
+  // A turn the provider turns away as busy before anything happened runs again after a wait (Mac Alpha 4312, #416):
+  // the person sees that it is trying again, then the answer; one that stays busy fails with the provider's words.
+  {
+   const tries=path.join(scratch,'busy-tries.txt');fs.rmSync(tries,{force:true});
+   const busy='echo "API Error: 529 {\\"type\\":\\"error\\",\\"error\\":{\\"type\\":\\"overloaded_error\\",\\"message\\":\\"Overloaded\\"}}" >&2\nexit 1\n';
+   script(path.join(bin,'claude'),`echo try >> "${tries}"\nif [ "$(wc -l < "${tries}")" -lt 2 ]; then\n${busy}fi\ncat > "$PWD/stdin.txt"\ncat "${fixture}"\n`);
+   const waits=BUSY_RETRIES.splice(0,BUSY_RETRIES.length,50,50),events:any[]=[];
+   try{
+    assert.deepEqual(await new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome,async event=>{events.push(event);return null;}),{message:'Hello from Claude Code'});
+    assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'one more try after the busy one');
+    assert.ok(events.some(event=>event.type==='progress'&&/busy right now\. Trying again/.test(event.name)),'the person sees it is trying again: '+JSON.stringify(events));
+    fs.rmSync(tries,{force:true});
+    script(path.join(bin,'claude'),`echo try >> "${tries}"\n${busy}`);
+    await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi',_background:true},agentHome),/overloaded_error/);
+    assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,1+BUSY_RETRIES.length,'a model that stays busy is tried a bounded number of times');
+   }finally{BUSY_RETRIES.splice(0,BUSY_RETRIES.length,...waits);}
+  }
   // Cancellation stops the process.
   script(path.join(bin,'claude'),'sleep 30\n');
   const slow=new LocalHarnessRuntime(found[0],unix);
