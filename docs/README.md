@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **270 Markdown documents** and **43 supporting documentation files**.
+Indexed: **271 Markdown documents** and **43 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -61,7 +61,7 @@ Indexed: **270 Markdown documents** and **43 supporting documentation files**.
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 30 |
-| Resource and artwork records | 67 |
+| Resource and artwork records | 68 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 43 |
@@ -257,7 +257,7 @@ Indexed: **270 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (67)</summary>
+<details><summary>Resource and artwork records (68)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -315,6 +315,7 @@ Indexed: **270 Markdown documents** and **43 supporting documentation files**.
 - [resources/styles/builtin/drafts/moment/README.md](../resources/styles/builtin/drafts/moment/README.md)
 - [resources/styles/builtin/drafts/ongoing/README.md](../resources/styles/builtin/drafts/ongoing/README.md)
 - [resources/styles/builtin/drafts/remaining-bold/README.md](../resources/styles/builtin/drafts/remaining-bold/README.md)
+- [resources/styles/builtin/presets/personal-scenes/README.md](../resources/styles/builtin/presets/personal-scenes/README.md)
 - [resources/styles/builtin/references/browser-focus/README.md](../resources/styles/builtin/references/browser-focus/README.md)
 - [resources/styles/builtin/references/home-readers/README.md](../resources/styles/builtin/references/home-readers/README.md)
 - [resources/styles/builtin/references/immersive/README.md](../resources/styles/builtin/references/immersive/README.md)

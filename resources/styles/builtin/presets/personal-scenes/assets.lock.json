@@ -1,0 +1,425 @@
+{
+  "references": {
+    "ui/theme-packages/village/assets/world/day.webp": "5add5153c97e3ce96a1bfd5a8cde2ba480d28fbab02cd20906d80854f5979ef8",
+    "ui/theme-packages/village/assets/devices/tripit.webp": "135aad597b521fcf74d8547f8c10acf71d7a7d3310ea02cf2b20b068b5597129",
+    "ui/theme-packages/village/assets/devices/strava.webp": "aa0b3b9fcaf1338654b3d9db227eb9bac8abdd334dafbc0c678f00e30bfc9d76"
+  },
+  "assets": {
+    "weight-balance/icon.png": {
+      "sha256": "0f8eb14a254aacf5902a9e0c3331fc7eab17caf66307b75f3a03a9def30f53d2",
+      "bytes": 1961815,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        61,
+        74,
+        1202,
+        1201
+      ]
+    },
+    "weight-balance/background.png": {
+      "sha256": "54d7f2b373145598361567074081b399fd8c4dba780d8a8ae3c6f093bb8245fd",
+      "bytes": 2406116,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "meal-planner/icon.png": {
+      "sha256": "fce314e05b99dfc1842db3815acfa66db415a8fd92df414b76566abdc0681768",
+      "bytes": 2037810,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        85,
+        50,
+        1180,
+        1201
+      ]
+    },
+    "meal-planner/background.png": {
+      "sha256": "ed63088eff3dcbeefd3bbc6dc69c88ecadd9e537e66850b6287448f87700778d",
+      "bytes": 2613497,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "fitness/icon.png": {
+      "sha256": "6717520588f8d56a1dd501af9ad49d7960b4c0d215a5dfb3ab585dca5ef182c1",
+      "bytes": 1727734,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        101,
+        111,
+        1214,
+        1130
+      ]
+    },
+    "fitness/background.png": {
+      "sha256": "95d3d0a2b37f960d1e3c794fcc59ae0b7e114392184429459353b0a88a52250e",
+      "bytes": 2879938,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "sleep/icon.png": {
+      "sha256": "d6a47f69e9c9144bf13987c141b1157809b66e16db48688f7aeadbb6c14551d7",
+      "bytes": 1364536,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        208,
+        94,
+        1081,
+        1154
+      ]
+    },
+    "sleep/background.png": {
+      "sha256": "68374a7c999f8bbe27895d686d74903c3e883c2e711582e0c6d33a4053038f7e",
+      "bytes": 2478828,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "travel/icon.png": {
+      "sha256": "98c475ec90b380c7342c7bec3eca21e9137ffc1a7e077802412f5b3aea702133",
+      "bytes": 1859383,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        117,
+        51,
+        1143,
+        1205
+      ]
+    },
+    "travel/background.png": {
+      "sha256": "c7a3806576304a475aa0577590904a8ce49671809dcc42fe8f0d5bcc4a08f7f5",
+      "bytes": 2790342,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "outdoor/icon.png": {
+      "sha256": "26eb5ee9147e4501ca08285b36ab7e595984a8d7a01ea394cd209bbe4ba4e38c",
+      "bytes": 1941512,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        141,
+        52,
+        1182,
+        1209
+      ]
+    },
+    "outdoor/background.png": {
+      "sha256": "009c5bbc3542f6752f7f0cc055dac4db70f895c9471e3b47eb00334803373c43",
+      "bytes": 2758664,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "shopping/icon.png": {
+      "sha256": "01b0becc584fe61dddd07798cac9f9cbbbb22696fb4aa1ca6c79eb795dcec7c5",
+      "bytes": 1946045,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        135,
+        66,
+        1144,
+        1204
+      ]
+    },
+    "shopping/background.png": {
+      "sha256": "182f1bc70435cfb67fb7287094a96ce74438fc9823169c350bf8ce873cb18dc2",
+      "bytes": 2671316,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "budget/icon.png": {
+      "sha256": "7f70b8e43731891684a84a358ccfbda18fc9c0b5e8cb2f71cd47bb84742ef563",
+      "bytes": 1930430,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        33,
+        73,
+        1221,
+        1203
+      ]
+    },
+    "budget/background.png": {
+      "sha256": "56a2f99687c75719f545725d017ce4162ba328d42cd79d406ed1c1e07aad243f",
+      "bytes": 2524633,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "home-care/icon.png": {
+      "sha256": "1ce5a348cf69254898e39609a3bc8097e64b5be9e37ba229aad036ccc18ab839",
+      "bytes": 1978476,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        138,
+        62,
+        1186,
+        1234
+      ]
+    },
+    "home-care/background.png": {
+      "sha256": "34048a28c826db8e77cb3cff57e654d3d466cacbe596ca5837916d33fafff21f",
+      "bytes": 2730242,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "garden/icon.png": {
+      "sha256": "1cbe78843b31714b20afb9f9458853b9273222cab7410a1667a394f06a5afb59",
+      "bytes": 1686655,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        65,
+        79,
+        1192,
+        1214
+      ]
+    },
+    "garden/background.png": {
+      "sha256": "f2c7ac897a18fed20bf707439aec359a461819a175c9a1e8c8ba755573827c29",
+      "bytes": 2720495,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "daily-planner/icon.png": {
+      "sha256": "457b4ec671dce7a66e5e3fd03ea7cb7f88d33ed7aa95939102ae9ee2b284e8f8",
+      "bytes": 1760693,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        98,
+        35,
+        1178,
+        1238
+      ]
+    },
+    "daily-planner/background.png": {
+      "sha256": "5919456e82d37d7bdc8311ef846dccb8da8ee83267622c23527a6da4323b2947",
+      "bytes": 2486397,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "reading/icon.png": {
+      "sha256": "ec081168d77f6d7f24dd269379945a8b1e1938942bd5d3106df301c9d6dfe4e2",
+      "bytes": 1880273,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        111,
+        73,
+        1167,
+        1234
+      ]
+    },
+    "reading/background.png": {
+      "sha256": "202d0172bc0cf2b4b8884cf92b661d6c7f1779225d61e006321358794b62c39b",
+      "bytes": 2414905,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "language/icon.png": {
+      "sha256": "cb5e1de290b46af782c8bb34d1e6b6facec1862f6e8f898c53f79289e08a7fee",
+      "bytes": 1650057,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        139,
+        100,
+        1146,
+        1192
+      ]
+    },
+    "language/background.png": {
+      "sha256": "2b4b6f734017050f0cbcc4def4a61de41eb8e2309291f65209ea1332f5fe8be5",
+      "bytes": 2320643,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "journal/icon.png": {
+      "sha256": "df761bfc39543af7bf8bf1b4a1fa2b1b4468beefeca333f9a04bc522112cfc57",
+      "bytes": 2122290,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        110,
+        67,
+        1153,
+        1204
+      ]
+    },
+    "journal/background.png": {
+      "sha256": "da1da205ff35f2ff3648dddeea42beb303d66720c38a34697bee82b6cae5e12e",
+      "bytes": 2485414,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "job-search/icon.png": {
+      "sha256": "0de3e02582ce86762f609c783c6e20dae49a44e4b2f472e2cfde2d031e1cf1d4",
+      "bytes": 1956626,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        128,
+        35,
+        1159,
+        1237
+      ]
+    },
+    "job-search/background.png": {
+      "sha256": "27ffde91ac96453f8aa9c2f348ce3ba27d996da647edf747d8aca71c14e29409",
+      "bytes": 2622944,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    },
+    "project-planner/icon.png": {
+      "sha256": "fc528b1fadff675fbc68492fa154e3c409c2ca16d4ccade4ac41bfd59f207510",
+      "bytes": 1880031,
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": true,
+      "paintedBounds": [
+        75,
+        54,
+        1181,
+        1201
+      ]
+    },
+    "project-planner/background.png": {
+      "sha256": "268861448905eda3371841e78dfb1463e2c0a6b70698f2334fab49d4b4e119bc",
+      "bytes": 2302966,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": false,
+      "paintedBounds": [
+        0,
+        0,
+        1672,
+        941
+      ]
+    }
+  }
+}
