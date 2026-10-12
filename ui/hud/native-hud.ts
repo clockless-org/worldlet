@@ -38,7 +38,7 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  // Forward, Refresh, Home, address and Focus are its toolbar's, in the panel (owner request 2026-10-09).
  // What Fox can do here, such as Summarize in Mail, sits beside Fox in its dock, not in the bar.
  const barLeft=el('div','applet-bar-side applet-bar-left'),barRight=el('div','applet-bar-side applet-bar-right'),barControls=el('div','applet-bar-controls');
- barRight.setAttribute('aria-label','Applet controls');barRight.append(barControls);
+ barRight.setAttribute('aria-label','Thing controls');barRight.append(barControls);
  const barTitle=root.querySelector('.companion-context');if(barTitle)barTitle.after(barLeft,barRight);else root.append(barLeft,barRight);barControls.append(...root.querySelectorAll(':scope>.browser-pip-offer,:scope>.browser-make-applet,:scope>.applet-mode-toggle'));
  // The sides sit against the title wherever it is drawn (its centering is a transform), on its
  // row; when a narrow window stacks the title below the bar they start the bar instead.
@@ -358,7 +358,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
    page.append(put);trackerList.append(page);
   }else{
    if(forNow.length)trackerList.append(groupSection('widget','For now',forNow.map(w=>{
-    const row=taskRow({title:w.title,objective:w.blurb,label:'Applet · '+w.title,state:'widget',when:{factor:momentLine(w),label:momentLine(w)},run:()=>openWidget(w.id)});
+    const row=taskRow({title:w.title,objective:w.blurb,label:'Thing · '+w.title,state:'widget',when:{factor:momentLine(w),label:momentLine(w)},run:()=>openWidget(w.id)});
     row.classList.add('world-widget');row.dataset.widget=w.id;row.style.setProperty('--widget-accent',w.color);return row;
    })));
   }

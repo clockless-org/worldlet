@@ -107,7 +107,7 @@ export function createAppletTaskScreen({root,openApplet,place}:{root:HTMLElement
  return {
   /** Fox drives `key`'s page out of sight; the page is `size` in the panel. */
   show(key:string,size:{width:number;height:number}){
-   const app:any=getApp(key),id=app?.id||key,title=app?.title||'this Applet',icon=app?appHudIcon(app).source:'';
+   const app:any=getApp(key),id=app?.id||key,title=app?.title||'this Thing',icon=app?appHudIcon(app).source:'';
    if(applet!==id)step='';
    applet=id;page=size;sent='';frame.style.transform='';clear(id);
    logo.hidden=!icon;if(icon)logo.src=icon;
@@ -121,7 +121,7 @@ export function createAppletTaskScreen({root,openApplet,place}:{root:HTMLElement
   hide(){applet='';sent='';frame.hidden=true;place(ZERO);if(!done.size){cancelAnimationFrame(frameID);clearTimeout(timer);}},
   /** Fox's turn ended with `key`'s page out of sight: a Done mark over the device until it is opened. */
   done(key:string){
-   const app:any=getApp(key),id=app?.id||key,title=app?.title||'this Applet';
+   const app:any=getApp(key),id=app?.id||key,title=app?.title||'this Thing';
    if(done.has(id))return;
    const mark=el('button','applet-task-done') as HTMLButtonElement;mark.type='button';mark.hidden=true;
    // A green check over its head (owner decision 2026-10-03); the exclamation is for something to fix.

@@ -142,7 +142,7 @@ private fun centerTab(name: String?) = when (name) {
 private fun PageTabs(tab: Int, choose: (Int) -> Unit) {
     Row(Modifier.frosted(CircleShape).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Tab("Today", tab == TODAY, "tabToday") { choose(TODAY) }
-        Tab("Applets", tab == APPLETS, "tabApplets") { choose(APPLETS) }
+        Tab("Things", tab == APPLETS, "tabApplets") { choose(APPLETS) }
         Tab("Tasks", tab == TASKS, "tabTasks") { choose(TASKS) }
     }
 }

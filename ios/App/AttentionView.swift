@@ -22,7 +22,7 @@ struct AttentionCenter: View {
         var title: String {
             switch self {
             case .today: "Today"
-            case .applets: "Applets"
+            case .applets: "Things"
             case .tasks: "Tasks"
             }
         }

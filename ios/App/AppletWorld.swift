@@ -52,7 +52,7 @@ struct AppletList: View {
 
     @ViewBuilder private var empty: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Your Applets").font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.ink)
+            Text("Your Things").font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.ink)
             Text("They appear here when \(model.computerName.isEmpty ? "your computer" : model.computerName) sends them. Update Worldlet there if this stays empty.")
                 .font(.system(size: 13)).foregroundStyle(Palette.muted.opacity(0.85))
         }

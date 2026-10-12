@@ -83,7 +83,7 @@ export function createCodexApplet({call,renderMarkdown,onSelect,onState,onReques
    }
   }
   if(event.method==='item/commandExecution/outputDelta'&&selected?.sessionId===id&&reader?.isConnected){const pre=reader.querySelector('.codex-current-tool pre');if(pre)pre.textContent=(pre.textContent+(p.delta||'')).slice(-20000);}
-  if(event.method==='worldlet/disconnected'){requests.clear();items.clear();onRequestDone();for(const r of running.values())r.reject(Error('Codex disconnected. Refresh the Applet to reconnect.'));running.clear();for(const s of sessions)if(['Running','Waiting for you'].includes(s.status))s.status='Unknown';publish();return;}
+  if(event.method==='worldlet/disconnected'){requests.clear();items.clear();onRequestDone();for(const r of running.values())r.reject(Error('Codex disconnected. Refresh the Thing to reconnect.'));running.clear();for(const s of sessions)if(['Running','Waiting for you'].includes(s.status))s.status='Unknown';publish();return;}
   if(event.method==='worldlet/request'){requests.set(p.requestId,p);setStatus(id,'Waiting for you');if(isVisible()&&selected?.sessionId===id)onRequest(requestUI(p));return;}
   if(event.method==='serverRequest/resolved'){requests.delete(String(p.requestId));requestDone();return;}
   if(event.method==='turn/started')setStatus(id,'Running');

@@ -38,8 +38,8 @@ export function matterCopy(matter,signals,pages,now=Date.now()){
  else if(lead?.state==='event')action=plain(lead.taskTitle||lead.label||matter.title);
  else if(lead?.state==='unseen')action=plain(lead.actionTitle||source?.title||matter.title);
  else action=plain(matter.title);
- // The context says the thing itself. Which Applet it came from is already on the
- // Applet's own marker, and when it happens has its own place beside the title.
+ // The context says the thing itself. Which Thing it came from is already on the
+ // Thing's own marker, and when it happens has its own place beside the title.
  if(source?.worldItemId)action=plain(source.title);
  const context=plain(source?.worldItemSignal?.reason)||plain(lead?.context)||excerpt(source)||plain(matter.description)||'';
  const when=lead?attentionWhen({...source?.worldItemSignal,...lead},{now:new Date(now)}):null;

@@ -75,7 +75,7 @@ fun WidgetRow(widget: PhoneWidget, open: () -> Unit) {
     Row(
         Modifier.fillMaxWidth()
             .frosted(shape, tint = accent.copy(alpha = 0.28f))
-            .clickable(onClickLabel = "Open the Applet", onClick = open)
+            .clickable(onClickLabel = "Open the Thing", onClick = open)
             .testTag("widget-row")
             .padding(horizontal = 12.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -125,7 +125,7 @@ fun WidgetScreen(model: AppModel, widget: PhoneWidget, close: () -> Unit) {
                 ) {
                     Icon(Icons.Outlined.Computer, null, tint = Palette.paperFoot, modifier = Modifier.size(28.dp))
                     Text("Open it on your computer", color = Palette.paperInk, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                    Text("This Applet's page is too large to send to the phone right now.", color = Palette.paperFoot, fontSize = 14.sp,
+                    Text("This Thing's page is too large to send to the phone right now.", color = Palette.paperFoot, fontSize = 14.sp,
                         textAlign = TextAlign.Center, style = TextStyle(lineHeight = 20.sp))
                 }
             }

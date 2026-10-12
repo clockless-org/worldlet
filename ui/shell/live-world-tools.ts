@@ -32,14 +32,14 @@ export function createWorldTools({ pages, sections, state, home, back, next, vis
     switch (name) {
       case 'scroll_browser':
         if(!['up','down'].includes(args.direction))return {error:'Choose up or down.'};
-        return scrollBrowser?scrollBrowser(args.direction):{error:'Open an Applet website first.'};
+        return scrollBrowser?scrollBrowser(args.direction):{error:'Open a Thing website first.'};
       case 'open_applet': {
         const app=WORLD_APPS.find(app=>app.id===args.id);
-        if(!app)return {error:'Unknown Applet. Use an ID from the public Applet catalog.'};
-        if(!visitContext)return {error:'Applet navigation is unavailable.'};
+        if(!app)return {error:'Unknown Thing. Use an ID from the public Thing catalog.'};
+        if(!visitContext)return {error:'Thing navigation is unavailable.'};
         return Promise.resolve(visitContext(app.id)).then(result=>result?.ok
           ?{ok:true,id:app.id,title:app.title}
-          :{error:'Could not open this Applet.'});
+          :{error:'Could not open this Thing.'});
       }
       case 'list_deleted': return {items:contentStore?.deleted()||[]};
       case 'inspect_world': {

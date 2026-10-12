@@ -49,7 +49,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
  function applet():{id:string,title:string,running:boolean}|null {
   const list=modules();
   const busy=offerMail()&&list.find((m:any)=>m.id===MAIL)||list.find((m:any)=>RUNNING.includes(m.presentation?.phase))||list.find((m:any)=>m.id===MAIL)||list[0];
-  return busy?{id:busy.id,title:getApp(busy.id)?.title||'This Applet',running:RUNNING.includes(busy.presentation?.phase)}:null;
+  return busy?{id:busy.id,title:getApp(busy.id)?.title||'This Thing',running:RUNNING.includes(busy.presentation?.phase)}:null;
  }
  function connectMail(){try{connectApplet('gmail');}catch{}next();}
  // What the Attention Center shows now: its rows (what needs the person, and what they keep talking about with their
@@ -105,10 +105,10 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   {key:'applets',tell:()=>!offerMail(),target:()=>{const a=applet();return a?appletBox(root,a.id):null;},text:()=>{
    const a=applet(),history=' Everything you do in them is kept as history, and I remember it, so I can help whenever one is open.';
    // The word the step teaches and the Applet's name are bold (owner feedback 2026-10-06).
-   if(!a)return 'In the middle are your **Applets**. Each one is a real app you can open and use right here.'+history;
-   if(offerMail())return `In the middle are your **Applets**, real apps you use right here, like **${a.title}**.${history} Connect your mail, and I’ll keep an eye on it for you.`;
-   return a.running?`In the middle are your **Applets**, like **${a.title}**. See its lights blinking? It’s working for you right now${a.id===MAIL?', collecting your new mail':''}.${history}`
-    :`In the middle are your **Applets**, like **${a.title}**. Each one is a real app you can open and use right here.${history}`;
+   if(!a)return 'In the middle are your **Things**. Each one is a real app you can open and use right here.'+history;
+   if(offerMail())return `In the middle are your **Things**, real apps you use right here, like **${a.title}**.${history} Connect your mail, and I’ll keep an eye on it for you.`;
+   return a.running?`In the middle are your **Things**, like **${a.title}**. See its lights blinking? It’s working for you right now${a.id===MAIL?', collecting your new mail':''}.${history}`
+    :`In the middle are your **Things**, like **${a.title}**. Each one is a real app you can open and use right here.${history}`;
   },actions:()=>offerMail()?[button('Later',next,true),button('Connect Mail',connectMail)]:[button('Continue',next)]},
   // 4. The dock beside Fox: what Fox is doing now, and the Routines (owner layout 2026-10-11).
   {key:'dock',target:()=>elementBox(root,'.task-panel:not([hidden])')||elementBox(root,'.companion-pet .companion-avatar'),text:()=>

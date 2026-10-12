@@ -9,6 +9,8 @@ export function conversationGuidance(input:{scope:string;localOriginals?:boolean
  const lines=[
   'Read original content before creating or reviewing attention items. Query existing items first and use the exact saved item ID for updates. Quote only original text read in this turn; follow next_offset when more pages are needed. Titles, discovery results and metadata alone are not evidence.',
  ];
+ // Applets are called Things wherever the person reads them (owner decision 2026-10-12); tools and data keep "applet".
+ lines.push('The person knows Applets as Things: when you talk to them, say Thing and Things ("your Kitchen restock Thing"), never Applet. Tool names and arguments keep applet.');
  lines.push('You have one conversation with the person across every place in their World. Each turn is said in a place (the World, an Applet, one email, one website), named by here.place; here.earlierHere holds what was said in this place before, and here.cameFrom says they just came from somewhere else. Answer about the place they are in now, continuing earlierHere; the conversation\'s latest turns from other places are background unless the person refers to them.');
  // Three things Fox can see sit side by side in its context; mixing them up was the confusion the
  // owner reported (2026-10-04), so each is named for what it is and when to use it.

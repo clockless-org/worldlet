@@ -13,7 +13,7 @@ export function mountHomeReview(call,getView){
   const show=(text,actions)=>getView()?.setGuide({source:'home-review',text,body,actions,takeover:true});
   cancel.onclick=async()=>{if(attempted)return;attempted=true;await call('homeReview',{operation:'discard',id:review.id}).catch(()=>{});getView()?.setGuide(null,{only:'home-review',forget:true});};
   confirm.onclick=async()=>{if(attempted)return;attempted=true;confirm.disabled=cancel.disabled=true;
-   try{const result=await call('homeReview',{operation:'commit',id:review.id});show(result.refreshPending?'Saved and checked in the source. Reopen the Applet to refresh its contents.':'Saved and checked in the source.',[]);window.dispatchEvent(new CustomEvent('worldlet:home-changed',{detail:{provider:plan.provider}}));}
+   try{const result=await call('homeReview',{operation:'commit',id:review.id});show(result.refreshPending?'Saved and checked in the source. Reopen the Thing to refresh its contents.':'Saved and checked in the source.',[]);window.dispatchEvent(new CustomEvent('worldlet:home-changed',{detail:{provider:plan.provider}}));}
    catch(error){show((error.message||'The result could not be verified.')+' Check the source before trying again.',[]);}
   };
   show('Review this change. Nothing has been written yet.',[confirm,cancel]);

@@ -311,7 +311,7 @@ try{
   assert.match(await page.locator('#companionDialogue').innerText(),/fills up as I read your conversations, and your mail once it’s connected/);
   await page.mouse.click(686,120);
   await waitStep(page,'applets');
-  assert.match(await page.locator('#companionDialogue').innerText(),/In the middle are your Applets, real apps you use right here, like Mail\. Everything you do in them is kept as history, and I remember it.*Connect your mail/s);
+  assert.match(await page.locator('#companionDialogue').innerText(),/In the middle are your Things, real apps you use right here, like Mail\. Everything you do in them is kept as history, and I remember it.*Connect your mail/s);
   assert.equal(await page.getByRole('button',{name:'Connect Mail',exact:true}).getAttribute('class'),'world-tour-primary');
   assert.equal(await page.getByRole('button',{name:'Later',exact:true}).getAttribute('class'),'world-tour-quiet');
   // A step with a choice: blank space does not move on.

@@ -181,7 +181,7 @@ struct HomeView: View {
             Button("Pair with \(link.name.isEmpty ? "it" : link.name)", role: .destructive) { model.replacePairing(with: link) }
             Button("Keep \(currentName)", role: .cancel) { model.keepPairing() }
         } message: { link in
-            Text("Pair with \(link.name.isEmpty ? "the other computer" : link.name) instead of \(currentName)? This iPhone unpairs from \(currentName) and clears what it brought, Applets included.")
+            Text("Pair with \(link.name.isEmpty ? "the other computer" : link.name) instead of \(currentName)? This iPhone unpairs from \(currentName) and clears what it brought, Things included.")
         }
         // Asked once after pairing, before the system's own question (owner goal 2026-10-07: what used to reach
         // Telegram now reaches this iPhone).
