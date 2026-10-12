@@ -46,7 +46,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>document.querySelector('.browser-tabs .browser-tab-pick')?.textContent==='Google');
  assert.deepEqual(await labels(),['*Google']);
  const geometry=await page.evaluate(()=>{const strip=document.querySelector('.browser-tabs').getBoundingClientRect(),bar=document.querySelector('.browser-toolbar').getBoundingClientRect(),rect=(window as any).calls.filter((c:any)=>['browserShow','browserLayout'].includes(c.action)).at(-1).rect;return {stripBottom:strip.bottom,stripTop:strip.top,height:strip.height,barBottom:bar.bottom,rectY:rect.y};});
- assert.ok(geometry.rectY>=geometry.barBottom&&geometry.barBottom>geometry.stripBottom,'the native page starts below the strip and the toolbar '+JSON.stringify(geometry));
+ assert.ok(geometry.rectY>=geometry.stripBottom&&geometry.barBottom<=geometry.stripTop,'the native page starts below the strip; the toolbar floats above both, taking no room '+JSON.stringify(geometry));
  assert.ok(geometry.height<=36,'the strip is slim '+JSON.stringify(geometry));
  await go('browser','https://flights.example.com/sfo');
  await page.waitForFunction(()=>document.querySelector('.browser-tabs .browser-tab-pick')?.textContent.startsWith('Flights'));

@@ -106,10 +106,12 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   assert.ok(r.dock.includes('Summarize'),'the Applet\'s action, Summarize, sits beside Fox in its dock '+JSON.stringify(r.dock));
   assert.deepEqual([r.offer.width,r.offer.height],[44,44],'Picture in picture is its icon circle');
   await assertMaterial(page,'.browser-pip-offer','Picture in picture');
-  // The toolbar: one row in the panel above the page, as wide as the page.
+  // The toolbar: one row floating above the page.
   assert.deepEqual(r.tools,['Back','Forward','Refresh','Home','Address','Focus'],'the toolbar, in order '+JSON.stringify(r.tools));
-  assert.ok(r.toolbar.y>=r.panel.y&&r.toolbar.y+r.toolbar.height<=r.viewport.y,'the toolbar is in the panel above the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
-  assert.ok(Math.abs(r.toolbar.x-r.viewport.x)<=1&&Math.abs(r.toolbar.width-r.viewport.width)<=1,'as wide as the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
+  // It takes no room from the page (owner request 2026-10-11): it floats centered just above the page's top edge.
+  assert.ok(Math.abs(r.toolbar.y+r.toolbar.height-r.viewport.y)<=1,'the toolbar ends at the page\'s top edge, never over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
+  assert.ok(r.viewport.y-r.panel.y<=14,'the page starts at the panel\'s rim, with no row above it '+JSON.stringify({panel:r.panel,viewport:r.viewport}));
+  assert.ok(Math.abs(center(r.toolbar)-center(r.viewport))<=1&&r.toolbar.width<=r.viewport.width,'centered over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
   for(const b of r.toolBoxes)assert.ok(Math.abs(middle(b)-middle(r.toolbar))<=1,'every tool shares its row');
   const address=r.toolBoxes[4];assert.ok(address.width>r.toolbar.width/2,'the address takes the row\'s room '+JSON.stringify(address));
   // At rest the row is one badge naming the site (owner request 2026-10-11); pointing at it opens the row in place.
@@ -125,7 +127,7 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   await shot(page,'applet-top-bar-'+width+'.png');
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS at 1440 and 1100 the shelf takes the title\'s place, the Applet\'s own control ends the bar\'s row in Fox\'s material, and a website page\'s toolbar (Back, Forward, Refresh, Home, address, Focus) is one row in the panel above the page.');
+ console.log('PASS at 1440 and 1100 the shelf takes the title\'s place, the Applet\'s own control ends the bar\'s row in Fox\'s material, and a website page\'s toolbar (Back, Forward, Refresh, Home, address, Focus) is one row floating centered above the page, taking none of its room.');
  {
   // Back and Forward follow the page's own history (owner request 2026-10-06): in the toolbar both stay, resting while
   // there is nowhere to go; the File menu's keys do the same, and World beside Fox leaves for the World.
