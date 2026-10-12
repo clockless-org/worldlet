@@ -92,13 +92,48 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const close=button('×',()=>dismiss(true));close.className='companion-info-close';close.setAttribute('aria-label','Close companion panel');
  const notice=el('p','companion-info-note');notice.setAttribute('role','status');notice.hidden=true;
  const body=el('div','companion-info-body');body.append(settings.element,notice);panel.append(body,close);
+ // The name is renamed right here (owner Order 2026-10-12): click it or Rename, type, Enter saves and Escape cancels.
+ // It saves like telling Fox to, so the World, desktop Fox, the message bar and the phone all follow.
+ let renaming:string|null=null,renameNote='';
+ function nameRow(){
+  const current=profile.name||getName()||'Fox';
+  if(renaming===null){
+   const heading=el('h2','companion-name');
+   const name=el('button','companion-name-text',current);name.type='button';name.title='Rename';name.setAttribute('aria-label','Rename '+current);
+   const rename=el('button','companion-name-rename','Rename');rename.type='button';rename.setAttribute('aria-label','Rename '+current);
+   name.onclick=rename.onclick=()=>{renaming=current;renameNote='';render();};
+   heading.append(name);
+   const row=el('div','companion-name-row');row.append(heading,rename);
+   if(renameNote)row.append(el('p','companion-info-note',renameNote));
+   return row;
+  }
+  const form=el('form','companion-name-edit'),field=el('input');field.type='text';field.value=renaming;field.maxLength=24;field.setAttribute('aria-label','Companion name');field.autocomplete='off';field.spellcheck=false;
+  const save=el('button','companion-info-action','Save');save.type='submit';
+  const cancel=el('button','companion-info-action','Cancel');cancel.type='button';
+  const stop=()=>{renaming=null;render();};
+  field.oninput=()=>{renaming=field.value;};
+  field.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();stop();}};
+  cancel.onclick=stop;
+  form.onsubmit=async e=>{
+   e.preventDefault();const value=field.value.trim();
+   if(!value||value===current){stop();return;}
+   save.disabled=field.disabled=true;
+   try{await call('foxPreferenceChange',{setting:'companion_name',value});profile={...profile,name:value};renaming=null;renameNote='';}
+   catch(error){renameNote=(error as Error)?.message||'Could not rename. Try again.';save.disabled=field.disabled=false;}
+   render();
+  };
+  form.append(field,save,cancel);
+  if(renameNote)form.append(el('p','companion-info-note',renameNote));
+  queueMicrotask(()=>{if(field.isConnected&&!field.disabled&&document.activeElement!==field){field.focus();field.select();}});
+  return form;
+ }
  function render(){
   notice.textContent=error;notice.hidden=!error;
   const page=el('section','companion-info-section companion-profile-page');page.dataset.section='Profile';
   const side=el('div','companion-info-profile'),portrait=el('img'),environment=(globalThis as any).__WORLDLET_ENV_ASSETS__;
   // A theme with its own companion shows that companion's portrait, not Fox's.
   portrait.src=companionStill();portrait.alt=environment?.companionRive?'Fox portrait':'Companion portrait';side.setAttribute('aria-label','Companion profile');
-  side.append(portrait,el('h2','',profile.name||getName()||'Fox'),el('p','','Your companion'));
+  side.append(portrait,nameRow(),el('p','','Your companion'));
   const facts=el('dl','companion-profile-facts'),born=new Date(profile.createdAt||'');
   const birthday=Number.isFinite(born.getTime())?born.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Not available';
   for(const [label,value] of [['Birthday',birthday],['Personality',companionPersona(profile.personality).summary]])facts.append(el('dt','',label),el('dd','',value));
@@ -159,7 +194,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  panel.addEventListener('cancel',e=>{e.preventDefault();dismiss(true);});
  root.addEventListener('pointerdown',e=>{if(panel.open&&!panel.contains(e.target as Node)&&!badge.contains(e.target as Node)){if((e.target as Element).closest('.companion-avatar,.companion-text-entry'))return;dismissClick=true;dismiss();e.preventDefault();e.stopImmediatePropagation();}},true);
  root.addEventListener('click',e=>{if(dismissClick){dismissClick=false;e.preventDefault();e.stopImmediatePropagation();return;}if(panel.open&&!panel.contains(e.target as Node)&&!(e.target as Element).closest('.companion-avatar,.companion-text-entry'))dismiss();},true);
- window.addEventListener('keydown',e=>{if(panel.open&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();dismiss(true);}},true);
+ window.addEventListener('keydown',e=>{if(panel.open&&e.key==='Escape'&&renaming===null){e.preventDefault();e.stopImmediatePropagation();dismiss(true);}},true);
  window.addEventListener('worldlet:companion-appearance',e=>{profile={...profile,...(e as CustomEvent).detail};if(panel.open)render();});
  return {open,toggle,entry:badge,feedback,journal:{toggle:()=>journal.isOpen?journal.close(true):void openJournal(),get isOpen(){return journal.isOpen;}},get openSection(){return journal.isOpen?'Journal':panel.open?panel.dataset.section||null:null;},get feedbackActive(){return feedbackPanel.open;}};
 }

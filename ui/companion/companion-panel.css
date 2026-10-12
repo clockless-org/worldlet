@@ -8,6 +8,11 @@
 .companion-info-profile{flex:0 0 150px;text-align:center;align-self:center}
 .companion-info-profile img{width:120px;height:130px;object-fit:contain}
 .companion-info-profile h2{font-size:26px;margin:8px 0 2px}
+.companion-name-text{all:unset;cursor:text;border-radius:6px;padding:0 4px;overflow-wrap:anywhere}
+.companion-name-text:hover,.companion-name-text:focus-visible{background:#e6dbc466;outline:none}
+.companion-info-panel .companion-name-rename{border:0;background:none;color:#77745e;font-size:11px;text-decoration:underline;padding:0}
+.companion-name-edit{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 4px}
+.companion-name-edit input{flex:1 1 100%;min-width:0;font:inherit;font-size:18px;text-align:center;padding:4px 8px;border:1px solid #d9cbae;border-radius:8px;box-sizing:border-box}
 .companion-info-panel p{margin:0;color:#656651;font-size:12px}
 .companion-info-profile small{display:block;margin-top:18px;color:#77745e;font-size:11px}
 .companion-info-panel button{cursor:pointer;font:inherit}
