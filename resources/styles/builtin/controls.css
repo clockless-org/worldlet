@@ -205,15 +205,15 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 /* In the World they show only their icons (owner request 2026-10-11: "在世界上的时候可以就只显示一个 icon，然后你把鼠标移上去
    它会展开显示那个按钮的这个具体的名字"): each is round, and pointing at it or focusing it opens its name beside the icon,
    away from Fox, so the icon stays where it was. A button with no icon (a choice Fox offers) keeps its words. Both
-   sides stand centred on Fox whatever their number. While typing, in a short window or inside an Applet they keep
-   their names. */
-#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button){
+   sides stand centred on Fox whatever their number. While typing, in a short window or inside an Applet (data-depth
+   object or note) they keep their names. */
+#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport):not([data-depth=object]):not([data-depth=note]) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button){
  box-sizing:border-box;width:auto;height:44px;min-height:44px;min-width:44px;padding:0 12px;gap:0;justify-content:flex-start;transition:gap .18s ease-out,padding .18s ease-out}
-#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport) :is(.fox-action-left>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button){flex-direction:row-reverse}
-#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button)>span{
+#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport):not([data-depth=object]):not([data-depth=note]) :is(.fox-action-left>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button){flex-direction:row-reverse}
+#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport):not([data-depth=object]):not([data-depth=note]) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button)>span{
  display:block;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;transition:max-width .2s ease-out,opacity .15s ease-out}
-#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button):is(:hover,:focus-visible){gap:7px;padding:0 14px}
-#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button):is(:hover,:focus-visible)>span{max-width:180px;opacity:1}
+#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport):not([data-depth=object]):not([data-depth=note]) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button):is(:hover,:focus-visible){gap:7px;padding:0 14px}
+#notionWorld.native-console.fox-first-console:not(.is-typing):not(.compact-viewport):not([data-depth=object]):not([data-depth=note]) :is(.fox-action-side>.world-capsule:has(>svg),.companion-side>.fox-side-button.fox-side-button):is(:hover,:focus-visible)>span{max-width:180px;opacity:1}
 @media(prefers-reduced-motion:reduce){#notionWorld.native-console.fox-first-console :is(.fox-action-side>.world-capsule,.companion-side>.fox-side-button.fox-side-button),#notionWorld.native-console.fox-first-console :is(.fox-action-side>.world-capsule,.companion-side>.fox-side-button.fox-side-button)>span{transition:none}}
 #notionWorld[data-onboarding-locked=true] .companion-side{display:none}
 /* The tour's last step points at them: Fox's settings and the phone live here (owner order 2026-10-11). */
