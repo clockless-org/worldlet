@@ -70,8 +70,8 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.locator('.pixi-stage-item[data-curated=false] .applet-attention').count(),0,'raw records never invent attention');
   const markBox=await marks.first().boundingBox(),itemBox=await page.locator(itemSelector+':has(.applet-attention)').first().boundingBox();
   if(key==='gmail')assert.ok(markBox.x>=itemBox.x&&markBox.x+markBox.width<=itemBox.x+itemBox.width+1,'Mail attention mark stays on its letter');
-  // Mail and Calendar draw on the theme's painted scene (ui/applets/scene).
-  if(['gmail','google-calendar'].includes(key))assert.equal(await page.locator(`.applet-scene[data-applet="${key}"] .applet-scene-region[data-role=primary] ${itemSelector}`).count()>0,true,key+' draws in its scene');
+  // Mail, Calendar and Notes draw on the theme's painted scene (ui/applets/scene).
+  if(['gmail','google-calendar','apple-notes'].includes(key))assert.equal(await page.locator(`.applet-scene[data-applet="${key}"] .applet-scene-region[data-role=primary] ${itemSelector}`).count()>0,true,key+' draws in its scene');
   await page.mouse.move(20,40);
   await page.screenshot({path:'/tmp/worldlet-'+key+'-open.png'});
   if(key!=='gmail'){await page.setViewportSize({width:600,height:740});await page.screenshot({path:'/tmp/worldlet-'+key+'-narrow.png'});assert.ok(await page.locator('.home-open-body').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'narrow content has no horizontal overflow');await page.setViewportSize({width:1280,height:850});}
