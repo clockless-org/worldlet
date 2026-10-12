@@ -6,6 +6,8 @@ import sharp from 'sharp';
 import {cachedEncode} from './build-cache.ts';
 import {theme,themeAppletArt} from '../ui/themes/index.ts';
 import {themeAssetPath} from '../ui/themes/build-theme-contract.ts';
+import {checkVillageSceneLibrary} from './village-scene-library.ts';
+import {checkVillageRegisteredScenes} from './village-registered-scenes.ts';
 import {checkVillageAppletPresets} from './village-applet-presets.ts';
 import {paintedBox} from './painted-box.ts';
 
@@ -113,6 +115,6 @@ export async function checkVillageArt(root:string){
 
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const root=fileURLToPath(new URL('../',import.meta.url));
- if(process.argv.includes('--check')){console.log(`PASS Village art: ${await checkVillageArt(root)} committed files match their sources`);await checkVillageAppletPresets(root);}
+ if(process.argv.includes('--check')){console.log(`PASS Village art: ${await checkVillageArt(root)} committed files match their sources`);await checkVillageAppletPresets(root);await checkVillageRegisteredScenes(root);await checkVillageSceneLibrary(root);}
  else{await encodeVillageArt(root);console.log(`Encoded Village art into ${VILLAGE_ART} (${await checkVillageArt(root)} files)`);}
 }

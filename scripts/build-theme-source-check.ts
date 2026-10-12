@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {fitThemeScene} from '../ui/themes/scene-registration.ts';
+import type {ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
@@ -41,6 +44,24 @@ try{
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  await write('first');await assert.rejects(validateBuildTheme(source),/Missing declared asset/);
  await fs.writeFile(path.join(source,'assets/plate.svg'),'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"/>');
+ // Image registrations describe multiple physical surfaces, not executable page layout.
+ const plate=await fs.readFile(path.join(source,'assets/plate.svg'));
+ const registration:ThemeSceneRegistration={imageSize:[16,16],sha256:createHash('sha256').update(plate).digest('hex'),regions:[{id:'main',role:'primary',rect:[.05,.1,.55,.8],material:'paper'},{id:'date',role:'secondary',rect:[.7,.1,.2,.2],material:'paper'}],companion:[.7,.5,.25,.45]};
+ const registered=(r:unknown)=>({...presentation,appletScenes:{gmail:{background:'assets/plate.svg',registration:r}}});
+ assert.doesNotThrow(()=>parseThemePresentation(registered(registration)));
+ for(const bad of [{...registration,imageSize:[0,16]},{...registration,sha256:'wrong'},{...registration,regions:[]},{...registration,regions:[registration.regions[1]]},{...registration,regions:[registration.regions[0],registration.regions[0]]},{...registration,regions:[{...registration.regions[0],rect:[.1,.1,1,.5]}]},{...registration,companion:[.2,.2,.5,.5]}])assert.throws(()=>parseThemePresentation(registered(bad)),/Invalid build theme/);
+ for(const [width,height] of [[160,160],[320,160],[160,320]]){
+  const fit=fitThemeScene(registration,width,height);
+  assert.equal(fit.image.width,160);assert.equal(fit.image.height,160);
+  assert.equal(fit.regions[0].x,fit.image.x+8);assert.equal(fit.regions[0].width,88);
+  assert.equal(fit.regions[1].x,fit.image.x+112);assert.equal(fit.regions[1].height,32);
+ }
+ assert.throws(()=>fitThemeScene(registration,0,100),/positive/);
+ for(const [bad,error] of [[{...registration,sha256:'0'.repeat(64)},/stale/],[{...registration,imageSize:[32,16]},/dimensions differ/]] as const){
+  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(registered(bad)));await assert.rejects(validateBuildTheme(source),error);
+ }
+ presentation.appletScenes=registered(registration).appletScenes;
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  // A theme's Artifact look is static files it names: rules and prompt in Markdown, reference pictures, materials, colours.
  const artifact={style:'assets/artifact/STYLE.md',prompt:'assets/artifact/PROMPT.md',references:[{image:'assets/artifact/a.webp',role:'Primary'}],materials:[{id:'paper',image:'assets/artifact/paper.webp',usage:'Paper'}],colors:{paper:'#f7efdc',moss:'#315f48'}};
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,artifact}));
@@ -64,6 +85,7 @@ try{
  const output=path.join(tmp,'output');await fs.mkdir(path.join(output,'theme-assets'),{recursive:true});await fs.writeFile(path.join(output,'theme-assets','stale.txt'),'old');assert.deepEqual((await buildThemeSource(consumer,output)).map(t=>t.id),['first','second']);await assert.rejects(fs.stat(path.join(output,'theme-assets/stale.txt')));assert.equal(await fs.readFile(path.join(output,'theme-assets/second/test.txt'),'utf8'),'fixture');
  assert.equal(await fs.readFile(path.join(output,'theme-assets/first/plate.svg'),'utf8'),await fs.readFile(path.join(source,'assets/plate.svg'),'utf8'),'preset art survives import and publication');
  assert.deepEqual(JSON.parse(await fs.readFile(path.join(consumer,'ui/theme-packages/first/presentation.json'),'utf8')).appletPresets,[preset]);
+ assert.deepEqual(JSON.parse(await fs.readFile(path.join(consumer,'ui/theme-packages/first/presentation.json'),'utf8')).appletScenes,presentation.appletScenes);
  // Code and stylesheets are refused, wherever they sit in the package.
  for(const file of ['entry.ts','theme.css','assets/draw.js']){await fs.writeFile(path.join(source,file),'export default 1');await assert.rejects(validateBuildTheme(source),/A theme is static/);await fs.rm(path.join(source,file));}
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify({...presentation,icons:{gmail:'assets/missing.png'}}));await assert.rejects(validateBuildTheme(source),/Missing declared asset/);

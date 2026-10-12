@@ -14,4 +14,6 @@ export {themeAmbientTrack} from './theme-audio.ts';
 export * from './build-theme-contract.ts';
 
 // The one Theme contract: the bundled static package.
-export {activeBuildTheme,themeArtifact,themeAssetURL,themeData,themeAppletIcon,themeAppletPresets,BUILD_THEMES,DEFAULT_BUILD_THEME_ID,type InstalledTheme,type ThemePackage} from './build-theme.ts';
+export {activeBuildTheme,themeArtifact,themeAssetURL,themeData,themeAppletIcon,themeAppletPresets,themeAppletScene,BUILD_THEMES,DEFAULT_BUILD_THEME_ID,type InstalledTheme,type ThemePackage} from './build-theme.ts';
+
+export {fitThemeScene} from './scene-registration.ts';

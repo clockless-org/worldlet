@@ -32,6 +32,11 @@ export function themeAppletIcon(key:string):string|undefined{
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
  return typeof src==='string'&&src?src:undefined;
 }
+/** A registered background for a specific Applet; reusable theme presets are returned separately. */
+export function themeAppletScene(key:string){
+ const scene=active.package.presentation.appletScenes?.[key];
+ return scene?{...scene,background:themeAssetURL(active.id,scene.background)}:undefined;
+}
 /** Reusable custom-Applet art, with URLs ready for the host to display. These do not create Applets or connect data. */
 export function themeAppletPresets(){
  return (active.package.presentation.appletPresets??[]).map(p=>({...p,

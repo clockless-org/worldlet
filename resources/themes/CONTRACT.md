@@ -18,12 +18,12 @@ flowchart LR
 ```text
 package/
   theme.json          # contractVersion: 3, id, title, assets, presentation, optional updatedAt
-  presentation.json   # tokens, fonts, optional hud, sound, icons, artifact and appletPresets
+  presentation.json   # tokens, fonts, optional hud, sound, icons, artifact, appletPresets and appletScenes
   assets/             # every picture, sound, font and licence the JSON names
   *.json              # other data the host's World code reads (the Village's lamps.json, assets/art.json)
 ```
 
-`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons`, `artifact` and `appletPresets`; a field that would place the World, an Applet page or the HUD is refused, because the host lays them out.
+`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons`, `artifact`, `appletPresets` and `appletScenes`. Image registration records painted surface bounds; executable layouts, viewport CSS and placement of host controls remain the host’s responsibility.
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-10T07:10:00Z`); it is informational. `contractVersion` alone controls compatibility; source hashes identify the copied contents.
 
@@ -39,6 +39,7 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 | `sound.events` (optional) | An audio file per business event: `applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`. |
 | `icons` (optional) | The theme's picture of an Applet by Applet key (`png`, `webp` or `svg`). The host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. |
 | `appletPresets` (optional) | Reusable icon/background pairs for custom Applets, with a unique `id`, `title`, `description`, `category`, `icon` and `background`. Both images are package-local `png`, `webp` or `svg` files. |
+| `appletScenes` (optional) | Backgrounds keyed by Applet key, with measured image registration for live HTML surfaces. |
 | `artifact` (optional) | How the theme's Artifacts look, as static files ([Artifacts](#artifacts)). |
 
 Anything left out keeps the shared look, sounds and pictures.
@@ -48,6 +49,23 @@ Anything left out keeps the shared look, sounds and pictures.
 The host reads `themeAppletPresets()` from `ui/themes/index.ts`. It returns the active theme's entries with `icon` and `background` resolved to published URLs; a theme without presets returns an empty list. IDs are stable within the theme. Presets are art choices, not Applet keys: they neither register providers nor create Applets, authorize actions or connect user data. The host owns selection, responsive layout and live HTML content.
 
 The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presentation.json`. The [source catalog](../styles/builtin/presets/personal-scenes/README.md) contains the full visual gallery and research. An Applet creation picker is not connected yet. For example, host code can read `themeAppletPresets().find(p => p.id === 'meal-planner')` and use its image URLs.
+
+### Registered backgrounds and live HTML
+
+`themeAppletScene(appletKey)` returns an optional Applet-bound background with its published URL and `registration`. Reusable `appletPresets` can also carry `registration`. An Applet's icon still comes from `icons` using the same key; a generic preset carries its own icon. No registration means the existing host presentation continues.
+
+| Registration field | Meaning |
+| --- | --- |
+| `imageSize` | Final encoded image width and height in pixels. |
+| `sha256` | SHA-256 of those exact encoded background bytes. Import rejects a stale hash or size. |
+| `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. |
+| `companion` | A separate normalized rectangle describing quiet painted clearance. This does not position or style Fox. |
+
+Coordinates start at the image's upper-left and stay within 0–1. They are measured from the finished picture, not guessed from a generation prompt. `fitThemeScene(registration, width, height)` applies one centered, uniform contain transform to the painting, every region and companion clearance. Do not crop the background independently. The host chooses its responsive presentation and may switch to a normal readable page on narrow viewports instead of shrinking interactive text.
+
+Keep dates, messages, task state and controls out of the bitmap. The host supplies real HTML and trusted data inside those surfaces. A Calendar can have a main event surface and a separate small date surface. Regions grant no capabilities, execute no code and bind no provider data themselves. Embedded external websites still require the host's browser surface and cannot acquire this appearance from artwork alone.
+
+The [Village scene library](../styles/builtin/references/registered-scenes/README.md) includes the inventory and an interactive preview with fictional data. This addition supplies artwork, registration, validation and host helpers; the production Applet reader and the preset picker have not adopted registered surfaces yet.
 
 ### Artifacts
 

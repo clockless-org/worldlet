@@ -19,8 +19,8 @@
       ]
     },
     "weight-balance/background.png": {
-      "sha256": "54d7f2b373145598361567074081b399fd8c4dba780d8a8ae3c6f093bb8245fd",
-      "bytes": 2406116,
+      "sha256": "04d52ac91e48a2c6e83331f3128ae9bd5fc570390c551cc9ae470db8df1d7baa",
+      "bytes": 2706259,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -45,8 +45,8 @@
       ]
     },
     "meal-planner/background.png": {
-      "sha256": "ed63088eff3dcbeefd3bbc6dc69c88ecadd9e537e66850b6287448f87700778d",
-      "bytes": 2613497,
+      "sha256": "0821a4e8de4803afc2dcb7c5285eb58893b3944273d252758e686342ff53bb96",
+      "bytes": 2782142,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -71,8 +71,8 @@
       ]
     },
     "fitness/background.png": {
-      "sha256": "95d3d0a2b37f960d1e3c794fcc59ae0b7e114392184429459353b0a88a52250e",
-      "bytes": 2879938,
+      "sha256": "fcf6049dac5ddf73fc51cdfc3634cb69647a1b4c0291e4778ab14d3f000ecccb",
+      "bytes": 2663192,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -97,8 +97,8 @@
       ]
     },
     "sleep/background.png": {
-      "sha256": "68374a7c999f8bbe27895d686d74903c3e883c2e711582e0c6d33a4053038f7e",
-      "bytes": 2478828,
+      "sha256": "0b2ae46c8659502f4c9b330bb0c7c7a00353b005af23f61d6059e205042302b3",
+      "bytes": 2768446,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -123,8 +123,8 @@
       ]
     },
     "travel/background.png": {
-      "sha256": "c7a3806576304a475aa0577590904a8ce49671809dcc42fe8f0d5bcc4a08f7f5",
-      "bytes": 2790342,
+      "sha256": "7f7d7848899e6f67dd5b34ed2b0d549d974b57b6881eb440b01a41670c07342e",
+      "bytes": 2514866,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -149,8 +149,8 @@
       ]
     },
     "outdoor/background.png": {
-      "sha256": "009c5bbc3542f6752f7f0cc055dac4db70f895c9471e3b47eb00334803373c43",
-      "bytes": 2758664,
+      "sha256": "2b1c60905ae8ec058c916e2aa7d6dc36a13afacdd6425024496bedb95883fee3",
+      "bytes": 2693686,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -175,8 +175,8 @@
       ]
     },
     "shopping/background.png": {
-      "sha256": "182f1bc70435cfb67fb7287094a96ce74438fc9823169c350bf8ce873cb18dc2",
-      "bytes": 2671316,
+      "sha256": "ec672ab2017be6137bf378a14919bdbc19cf0dc1c2a11003ec8a3eac9bc963b6",
+      "bytes": 2559011,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -201,8 +201,8 @@
       ]
     },
     "budget/background.png": {
-      "sha256": "56a2f99687c75719f545725d017ce4162ba328d42cd79d406ed1c1e07aad243f",
-      "bytes": 2524633,
+      "sha256": "8547918d805766123b5afbf01e427f5ec1d9eca20ad2cc97abb5d2372abbe394",
+      "bytes": 2381605,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -227,8 +227,8 @@
       ]
     },
     "home-care/background.png": {
-      "sha256": "34048a28c826db8e77cb3cff57e654d3d466cacbe596ca5837916d33fafff21f",
-      "bytes": 2730242,
+      "sha256": "ee8dada5a13f1f2ac074c7498371b59cd47912c01f9081ee68f28c9733c64b73",
+      "bytes": 2530426,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -253,8 +253,8 @@
       ]
     },
     "garden/background.png": {
-      "sha256": "f2c7ac897a18fed20bf707439aec359a461819a175c9a1e8c8ba755573827c29",
-      "bytes": 2720495,
+      "sha256": "f33a829fc92670a0fcd556263f6c89a523db853329e930959f48e7ac34b264f6",
+      "bytes": 2426416,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -279,8 +279,8 @@
       ]
     },
     "daily-planner/background.png": {
-      "sha256": "5919456e82d37d7bdc8311ef846dccb8da8ee83267622c23527a6da4323b2947",
-      "bytes": 2486397,
+      "sha256": "56111a3b51a9014c0b2dc2ae7471d2012cd22dccdfa1a40280fa3d0bc83cf824",
+      "bytes": 2393321,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -305,8 +305,8 @@
       ]
     },
     "reading/background.png": {
-      "sha256": "202d0172bc0cf2b4b8884cf92b661d6c7f1779225d61e006321358794b62c39b",
-      "bytes": 2414905,
+      "sha256": "45fd1fe341321562aa03d536319e6985384a4b5c88747198d33da86a1c5cc87a",
+      "bytes": 2506187,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -331,8 +331,8 @@
       ]
     },
     "language/background.png": {
-      "sha256": "2b4b6f734017050f0cbcc4def4a61de41eb8e2309291f65209ea1332f5fe8be5",
-      "bytes": 2320643,
+      "sha256": "24ec8777ac54ec713ca68dbb385fef9c308496944671a8ad48b76b78dc8b03ff",
+      "bytes": 2487159,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -357,8 +357,8 @@
       ]
     },
     "journal/background.png": {
-      "sha256": "da1da205ff35f2ff3648dddeea42beb303d66720c38a34697bee82b6cae5e12e",
-      "bytes": 2485414,
+      "sha256": "dce95fe44676a7001da077ad0838ccee4858ce30e67d404cd3ff9d6fc061159e",
+      "bytes": 2686351,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -383,8 +383,8 @@
       ]
     },
     "job-search/background.png": {
-      "sha256": "27ffde91ac96453f8aa9c2f348ce3ba27d996da647edf747d8aca71c14e29409",
-      "bytes": 2622944,
+      "sha256": "142917c9b69ef18114c8645c6dcf5d8223112e352492167c83f6c1be4d24da27",
+      "bytes": 2426255,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,
@@ -409,8 +409,8 @@
       ]
     },
     "project-planner/background.png": {
-      "sha256": "268861448905eda3371841e78dfb1463e2c0a6b70698f2334fab49d4b4e119bc",
-      "bytes": 2302966,
+      "sha256": "704f1615b7e5885d6ad38e3e8069ca3c47f23add4593c7a0afa0c21186dd3a04",
+      "bytes": 2369293,
       "width": 1672,
       "height": 941,
       "hasAlpha": false,

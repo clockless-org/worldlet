@@ -1,0 +1,1350 @@
+{
+  "schemaVersion": 1,
+  "counts": {
+    "core": 15,
+    "generic": 16,
+    "branded": 103
+  },
+  "entries": [
+    {
+      "id": "gmail",
+      "title": "Mail",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/gmail.webp",
+      "background": "assets/applet-scenes/gmail/background.webp",
+      "status": "registered",
+      "registrationKey": "gmail"
+    },
+    {
+      "id": "google-calendar",
+      "title": "Calendar",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/google-calendar.webp",
+      "background": "assets/applet-scenes/google-calendar/background.webp",
+      "status": "registered",
+      "registrationKey": "google-calendar"
+    },
+    {
+      "id": "apple-notes",
+      "title": "Notes",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/apple-notes.webp",
+      "background": "assets/applet-scenes/apple-notes/background.webp",
+      "status": "registered",
+      "registrationKey": "apple-notes"
+    },
+    {
+      "id": "apple-reminders",
+      "title": "Reminders",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/apple-reminders.webp",
+      "background": "assets/applet-scenes/apple-reminders/background.webp",
+      "status": "registered",
+      "registrationKey": "apple-reminders"
+    },
+    {
+      "id": "weather",
+      "title": "Weather",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/weather.webp",
+      "background": "assets/focus/weather.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "meetings",
+      "title": "Meetings",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/meetings.webp",
+      "background": "assets/focus/meetings.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "github",
+      "title": "GitHub",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/github.webp",
+      "background": "assets/focus/github.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "codex",
+      "title": "Codex",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/codex.webp",
+      "background": "assets/focus/codex.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "claude-code",
+      "title": "Claude Code",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/claude-code.webp",
+      "background": "assets/focus/claude-code.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "notion",
+      "title": "Notion",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/notion.webp",
+      "background": "assets/focus/notion.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "obsidian",
+      "title": "Obsidian",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/obsidian.webp",
+      "background": "assets/focus/obsidian.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "voice-memos",
+      "title": "Voice Memos",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/voice-memos.webp",
+      "background": "assets/focus/voice-memos.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "messages",
+      "title": "Messages",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/messages.webp",
+      "background": "assets/focus/messages.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "plaid",
+      "title": "Plaid",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/plaid.webp",
+      "background": "assets/focus/plaid.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "stripe",
+      "title": "Stripe",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/stripe.webp",
+      "background": "assets/focus/stripe.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "paypal",
+      "title": "PayPal",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/paypal.webp",
+      "background": "assets/focus/paypal.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "todoist",
+      "title": "Todoist",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/todoist.webp",
+      "background": "assets/focus/todoist.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "linear",
+      "title": "Linear",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/linear.webp",
+      "background": "assets/focus/linear.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "supabase",
+      "title": "Supabase",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/supabase.webp",
+      "background": "assets/focus/supabase.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "docker",
+      "title": "Docker",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/docker.webp",
+      "background": "assets/focus/docker.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "google-drive",
+      "title": "Google Drive",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-drive.webp",
+      "background": "assets/focus/google-drive.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "google-docs",
+      "title": "Google Docs",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-docs.webp",
+      "background": "assets/focus/google-docs.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "google-sheets",
+      "title": "Google Sheets",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-sheets.webp",
+      "background": "assets/focus/google-sheets.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "google-slides",
+      "title": "Google Slides",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-slides.webp",
+      "background": "assets/focus/google-slides.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "oura",
+      "title": "Oura Ring",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/oura.webp",
+      "background": "assets/focus/oura.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "strava",
+      "title": "Strava",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/strava.webp",
+      "background": "assets/focus/strava.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "fitbit",
+      "title": "Fitbit",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/fitbit.webp",
+      "background": "assets/focus/fitbit.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "google-maps",
+      "title": "Google Maps",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-maps.webp",
+      "background": "assets/focus/google-maps.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "airbnb",
+      "title": "Airbnb",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/airbnb.webp",
+      "background": "assets/focus/airbnb.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "tripit",
+      "title": "TripIt",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/tripit.webp",
+      "background": "assets/focus/tripit.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "x",
+      "title": "X",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/x.webp",
+      "background": "assets/focus/x.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "youtube",
+      "title": "YouTube",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/youtube.webp",
+      "background": "assets/focus/youtube.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "tiktok",
+      "title": "TikTok",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/tiktok.webp",
+      "background": "assets/focus/tiktok.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "discord",
+      "title": "Discord",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/discord.webp",
+      "background": "assets/focus/discord.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "browser",
+      "title": "Browser",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/browser.webp",
+      "background": "assets/focus/browser.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "ongoing",
+      "title": "Ongoing",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/ongoing.webp",
+      "background": "assets/focus/ongoing.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "doordash",
+      "title": "DoorDash",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/doordash.webp",
+      "background": "assets/focus/doordash.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "game-2048",
+      "title": "2048",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/game-2048.webp",
+      "background": "assets/focus/game-2048.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "snake",
+      "title": "Snake",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/snake.webp",
+      "background": "assets/focus/snake.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "minesweeper",
+      "title": "Minesweeper",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/minesweeper.webp",
+      "background": "assets/focus/minesweeper.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sudoku",
+      "title": "Sudoku",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/sudoku.webp",
+      "background": "assets/focus/sudoku.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "random-game",
+      "title": "Random game",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/random-game.webp",
+      "background": "assets/focus/random-game.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "wordle",
+      "title": "Wordle",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/wordle.webp",
+      "background": "assets/focus/wordle.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "nyt-connections",
+      "title": "Connections",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/nyt-connections.webp",
+      "background": "assets/focus/nyt-connections.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "slither-io",
+      "title": "Slither.io",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/slither-io.webp",
+      "background": "assets/focus/slither-io.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "agar-io",
+      "title": "Agar.io",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/agar-io.webp",
+      "background": "assets/focus/agar-io.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "krunker-io",
+      "title": "Krunker",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/krunker-io.webp",
+      "background": "assets/focus/krunker-io.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "skribbl-io",
+      "title": "skribbl.io",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/skribbl-io.webp",
+      "background": "assets/focus/skribbl-io.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "infinite-craft",
+      "title": "Infinite Craft",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/infinite-craft.webp",
+      "background": "assets/focus/infinite-craft.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "little-alchemy-2",
+      "title": "Little Alchemy 2",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/little-alchemy-2.webp",
+      "background": "assets/focus/little-alchemy-2.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "cookie-clicker",
+      "title": "Cookie Clicker",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/cookie-clicker.webp",
+      "background": "assets/focus/cookie-clicker.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "lichess",
+      "title": "Lichess",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/lichess.webp",
+      "background": "assets/focus/lichess.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "drive-mad",
+      "title": "Drive Mad",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/drive-mad.webp",
+      "background": "assets/focus/drive-mad.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "subway-surfers",
+      "title": "Subway Surfers",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/subway-surfers.webp",
+      "background": "assets/focus/subway-surfers.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sekai",
+      "title": "Sekai",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai.webp",
+      "background": "assets/focus/sekai.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sekai-rogue-ai-tic-tac-toe",
+      "title": "Rogue AI Tic-Tac-Toe",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-rogue-ai-tic-tac-toe.webp",
+      "background": "assets/focus/sekai-rogue-ai-tic-tac-toe.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sekai-sketch-racer",
+      "title": "Sketch Racer",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-sketch-racer.webp",
+      "background": "assets/focus/sekai-sketch-racer.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sekai-mixing-colors",
+      "title": "Mixing Colors",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-mixing-colors.webp",
+      "background": "assets/focus/sekai-mixing-colors.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sekai-roller-coaster",
+      "title": "Roller Coaster Builder",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-roller-coaster.webp",
+      "background": "assets/focus/sekai-roller-coaster.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sekai-3d-uno",
+      "title": "3D UNO!",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-3d-uno.webp",
+      "background": "assets/focus/sekai-3d-uno.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sekai-devil-level",
+      "title": "Devil Level: 50 Trolls",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-devil-level.webp",
+      "background": "assets/focus/sekai-devil-level.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "pokemon-showdown",
+      "title": "Pokémon Showdown",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/pokemon-showdown.webp",
+      "background": "assets/focus/pokemon-showdown.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "chatgpt",
+      "title": "ChatGPT",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/chatgpt.webp",
+      "background": "assets/focus/chatgpt.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "claude",
+      "title": "Claude",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/claude.webp",
+      "background": "assets/focus/claude.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "gemini",
+      "title": "Gemini",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/gemini.webp",
+      "background": "assets/focus/gemini.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "perplexity",
+      "title": "Perplexity",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/perplexity.webp",
+      "background": "assets/focus/perplexity.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "deepseek",
+      "title": "DeepSeek",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/deepseek.webp",
+      "background": "assets/focus/deepseek.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "whatsapp",
+      "title": "WhatsApp",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/whatsapp.webp",
+      "background": "assets/focus/whatsapp.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "telegram",
+      "title": "Telegram",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/telegram.webp",
+      "background": "assets/focus/telegram.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "slack",
+      "title": "Slack",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/slack.webp",
+      "background": "assets/focus/slack.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "teams",
+      "title": "Microsoft Teams",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/teams.webp",
+      "background": "assets/focus/teams.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "zoom",
+      "title": "Zoom",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/zoom.webp",
+      "background": "assets/focus/zoom.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "dropbox",
+      "title": "Dropbox",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/dropbox.webp",
+      "background": "assets/focus/dropbox.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "onedrive",
+      "title": "OneDrive",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/onedrive.webp",
+      "background": "assets/focus/onedrive.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "microsoft-word",
+      "title": "Word",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/microsoft-word.webp",
+      "background": "assets/focus/microsoft-word.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "microsoft-excel",
+      "title": "Excel",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/microsoft-excel.webp",
+      "background": "assets/focus/microsoft-excel.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "microsoft-powerpoint",
+      "title": "PowerPoint",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/microsoft-powerpoint.webp",
+      "background": "assets/focus/microsoft-powerpoint.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "figma",
+      "title": "Figma",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/figma.webp",
+      "background": "assets/focus/figma.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "canva",
+      "title": "Canva",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/canva.webp",
+      "background": "assets/focus/canva.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "spotify",
+      "title": "Spotify",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/spotify.webp",
+      "background": "assets/focus/spotify.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "apple-music",
+      "title": "Apple Music",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/apple-music.webp",
+      "background": "assets/focus/apple-music.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "reddit",
+      "title": "Reddit",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/reddit.webp",
+      "background": "assets/focus/reddit.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/instagram.webp",
+      "background": "assets/focus/instagram.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "linkedin",
+      "title": "LinkedIn",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/linkedin.webp",
+      "background": "assets/focus/linkedin.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "amazon",
+      "title": "Amazon",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/amazon.webp",
+      "background": "assets/focus/amazon.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "netflix",
+      "title": "Netflix",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/netflix.webp",
+      "background": "assets/focus/netflix.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "outlook",
+      "title": "Outlook",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/outlook.webp",
+      "background": "assets/focus/outlook.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "apple-podcasts",
+      "title": "Apple Podcasts",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/apple-podcasts.webp",
+      "background": "assets/focus/apple-podcasts.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "google-photos",
+      "title": "Google Photos",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-photos.webp",
+      "background": "assets/focus/google-photos.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "pinterest",
+      "title": "Pinterest",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/pinterest.webp",
+      "background": "assets/focus/pinterest.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "facebook",
+      "title": "Facebook",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/facebook.webp",
+      "background": "assets/focus/facebook.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "threads",
+      "title": "Threads",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/threads.webp",
+      "background": "assets/focus/threads.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "capcut",
+      "title": "CapCut",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/capcut.webp",
+      "background": "assets/focus/capcut.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "uber",
+      "title": "Uber",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/uber.webp",
+      "background": "assets/focus/uber.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "uber-eats",
+      "title": "Uber Eats",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/uber-eats.webp",
+      "background": "assets/focus/uber-eats.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "booking",
+      "title": "Booking.com",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/booking.webp",
+      "background": "assets/focus/booking.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "feishu",
+      "title": "飞书",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/feishu.webp",
+      "background": "assets/focus/feishu.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "bilibili",
+      "title": "哔哩哔哩",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/bilibili.webp",
+      "background": "assets/focus/bilibili.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "xiaohongshu",
+      "title": "小红书",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/xiaohongshu.webp",
+      "background": "assets/focus/xiaohongshu.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "baidu-netdisk",
+      "title": "百度网盘",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/baidu-netdisk.webp",
+      "background": "assets/focus/baidu-netdisk.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "twitch",
+      "title": "Twitch",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/twitch.webp",
+      "background": "assets/focus/twitch.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "copilot",
+      "title": "Microsoft Copilot",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/copilot.webp",
+      "background": "assets/focus/copilot.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "acrobat",
+      "title": "Adobe Acrobat",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/acrobat.webp",
+      "background": "assets/focus/acrobat.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "wikipedia",
+      "title": "Wikipedia",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/wikipedia.webp",
+      "background": "assets/focus/wikipedia.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "doubao",
+      "title": "豆包",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/doubao.webp",
+      "background": "assets/focus/doubao.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "taobao",
+      "title": "淘宝",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/taobao.webp",
+      "background": "assets/focus/taobao.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "alipay",
+      "title": "支付宝",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/alipay.webp",
+      "background": "assets/focus/alipay.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "douyin",
+      "title": "抖音",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/douyin.webp",
+      "background": "assets/focus/douyin.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "posthog",
+      "title": "PostHog",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/posthog.webp",
+      "background": "assets/focus/posthog.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "cloudflare",
+      "title": "Cloudflare",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/cloudflare.webp",
+      "background": "assets/focus/cloudflare.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "vercel",
+      "title": "Vercel",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/vercel.webp",
+      "background": "assets/focus/vercel.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "netlify",
+      "title": "Netlify",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/netlify.webp",
+      "background": "assets/focus/netlify.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "firebase",
+      "title": "Firebase",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/firebase.webp",
+      "background": "assets/focus/firebase.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "sentry",
+      "title": "Sentry",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sentry.webp",
+      "background": "assets/focus/sentry.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "railway",
+      "title": "Railway",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/railway.webp",
+      "background": "assets/focus/railway.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "render",
+      "title": "Render",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/render.webp",
+      "background": "assets/focus/render.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "gitlab",
+      "title": "GitLab",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/gitlab.webp",
+      "background": "assets/focus/gitlab.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "jira",
+      "title": "Jira",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/jira.webp",
+      "background": "assets/focus/jira.webp",
+      "status": "legacy",
+      "registrationKey": null
+    },
+    {
+      "id": "weight-balance",
+      "title": "Weight balance",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/weight-balance/icon.webp",
+      "background": "assets/applet-presets/weight-balance/background.webp",
+      "status": "registered",
+      "registrationKey": "weight-balance"
+    },
+    {
+      "id": "meal-planner",
+      "title": "Meal planner",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/meal-planner/icon.webp",
+      "background": "assets/applet-presets/meal-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "meal-planner"
+    },
+    {
+      "id": "fitness",
+      "title": "Workout plan",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/fitness/icon.webp",
+      "background": "assets/applet-presets/fitness/background.webp",
+      "status": "registered",
+      "registrationKey": "fitness"
+    },
+    {
+      "id": "sleep",
+      "title": "Sleep & recovery",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/sleep/icon.webp",
+      "background": "assets/applet-presets/sleep/background.webp",
+      "status": "registered",
+      "registrationKey": "sleep"
+    },
+    {
+      "id": "travel",
+      "title": "Travel planner",
+      "collection": "generic",
+      "group": "Out & about",
+      "icon": "assets/applet-presets/travel/icon.webp",
+      "background": "assets/applet-presets/travel/background.webp",
+      "status": "registered",
+      "registrationKey": "travel"
+    },
+    {
+      "id": "outdoor",
+      "title": "Outdoor adventures",
+      "collection": "generic",
+      "group": "Out & about",
+      "icon": "assets/applet-presets/outdoor/icon.webp",
+      "background": "assets/applet-presets/outdoor/background.webp",
+      "status": "registered",
+      "registrationKey": "outdoor"
+    },
+    {
+      "id": "shopping",
+      "title": "Shopping list",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/shopping/icon.webp",
+      "background": "assets/applet-presets/shopping/background.webp",
+      "status": "registered",
+      "registrationKey": "shopping"
+    },
+    {
+      "id": "budget",
+      "title": "Household budget",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/budget/icon.webp",
+      "background": "assets/applet-presets/budget/background.webp",
+      "status": "registered",
+      "registrationKey": "budget"
+    },
+    {
+      "id": "home-care",
+      "title": "Home care",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/home-care/icon.webp",
+      "background": "assets/applet-presets/home-care/background.webp",
+      "status": "registered",
+      "registrationKey": "home-care"
+    },
+    {
+      "id": "garden",
+      "title": "Garden planner",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/garden/icon.webp",
+      "background": "assets/applet-presets/garden/background.webp",
+      "status": "registered",
+      "registrationKey": "garden"
+    },
+    {
+      "id": "daily-planner",
+      "title": "Daily planner",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/daily-planner/icon.webp",
+      "background": "assets/applet-presets/daily-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "daily-planner"
+    },
+    {
+      "id": "reading",
+      "title": "Reading & research",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/reading/icon.webp",
+      "background": "assets/applet-presets/reading/background.webp",
+      "status": "registered",
+      "registrationKey": "reading"
+    },
+    {
+      "id": "language",
+      "title": "Language practice",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/language/icon.webp",
+      "background": "assets/applet-presets/language/background.webp",
+      "status": "registered",
+      "registrationKey": "language"
+    },
+    {
+      "id": "journal",
+      "title": "Personal journal",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/journal/icon.webp",
+      "background": "assets/applet-presets/journal/background.webp",
+      "status": "registered",
+      "registrationKey": "journal"
+    },
+    {
+      "id": "job-search",
+      "title": "Job search",
+      "collection": "generic",
+      "group": "Work",
+      "icon": "assets/applet-presets/job-search/icon.webp",
+      "background": "assets/applet-presets/job-search/background.webp",
+      "status": "registered",
+      "registrationKey": "job-search"
+    },
+    {
+      "id": "project-planner",
+      "title": "Project planner",
+      "collection": "generic",
+      "group": "Work",
+      "icon": "assets/applet-presets/project-planner/icon.webp",
+      "background": "assets/applet-presets/project-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "project-planner"
+    }
+  ]
+}

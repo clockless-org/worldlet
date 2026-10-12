@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **271 Markdown documents** and **43 supporting documentation files**.
+Indexed: **272 Markdown documents** and **48 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -61,10 +61,10 @@ Indexed: **271 Markdown documents** and **43 supporting documentation files**.
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 30 |
-| Resource and artwork records | 68 |
+| Resource and artwork records | 69 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 43 |
+| Documentation diagrams, previews and evidence | 48 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -257,7 +257,7 @@ Indexed: **271 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (68)</summary>
+<details><summary>Resource and artwork records (69)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -319,6 +319,7 @@ Indexed: **271 Markdown documents** and **43 supporting documentation files**.
 - [resources/styles/builtin/references/browser-focus/README.md](../resources/styles/builtin/references/browser-focus/README.md)
 - [resources/styles/builtin/references/home-readers/README.md](../resources/styles/builtin/references/home-readers/README.md)
 - [resources/styles/builtin/references/immersive/README.md](../resources/styles/builtin/references/immersive/README.md)
+- [resources/styles/builtin/references/registered-scenes/README.md](../resources/styles/builtin/references/registered-scenes/README.md)
 - [resources/styles/builtin/references/village-hud/README.md](../resources/styles/builtin/references/village-hud/README.md)
 - [resources/styles/builtin/references/youtube-web/README.md](../resources/styles/builtin/references/youtube-web/README.md)
 - [resources/themes/CONTRACT.md](../resources/themes/CONTRACT.md)
@@ -372,7 +373,7 @@ Indexed: **271 Markdown documents** and **43 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (43)</summary>
+<details><summary>Documentation diagrams, previews and evidence (48)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -413,6 +414,11 @@ Indexed: **271 Markdown documents** and **43 supporting documentation files**.
 - [resources/styles/builtin/references/immersive/use-case-audit.json](../resources/styles/builtin/references/immersive/use-case-audit.json)
 - [resources/styles/builtin/references/immersive/use-cases.json](../resources/styles/builtin/references/immersive/use-cases.json)
 - [resources/styles/builtin/references/night.png](../resources/styles/builtin/references/night.png)
+- [resources/styles/builtin/references/registered-scenes/apple-notes/background.png](../resources/styles/builtin/references/registered-scenes/apple-notes/background.png)
+- [resources/styles/builtin/references/registered-scenes/apple-reminders/background.png](../resources/styles/builtin/references/registered-scenes/apple-reminders/background.png)
+- [resources/styles/builtin/references/registered-scenes/catalog.json](../resources/styles/builtin/references/registered-scenes/catalog.json)
+- [resources/styles/builtin/references/registered-scenes/gmail/background.png](../resources/styles/builtin/references/registered-scenes/gmail/background.png)
+- [resources/styles/builtin/references/registered-scenes/google-calendar/background.png](../resources/styles/builtin/references/registered-scenes/google-calendar/background.png)
 - [resources/styles/builtin/references/village-hud/components.png](../resources/styles/builtin/references/village-hud/components.png)
 - [resources/styles/builtin/references/village-hud/weather.png](../resources/styles/builtin/references/village-hud/weather.png)
 - [resources/styles/builtin/references/youtube-web/focus-concept.png](../resources/styles/builtin/references/youtube-web/focus-concept.png)

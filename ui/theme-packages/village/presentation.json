@@ -182,7 +182,33 @@
       "description": "Track weight trends, measurements and personal goals",
       "category": "Health",
       "icon": "assets/applet-presets/weight-balance/icon.webp",
-      "background": "assets/applet-presets/weight-balance/background.webp"
+      "background": "assets/applet-presets/weight-balance/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.07,
+              0.18,
+              0.42,
+              0.46
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "58ff38ae048802594ec54d941d0df108b485105bca56ab17e669b10b0b017809"
+      }
     },
     {
       "id": "meal-planner",
@@ -190,7 +216,33 @@
       "description": "Plan weekly meals and reuse pantry ingredients",
       "category": "Health",
       "icon": "assets/applet-presets/meal-planner/icon.webp",
-      "background": "assets/applet-presets/meal-planner/background.webp"
+      "background": "assets/applet-presets/meal-planner/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.093,
+              0.23,
+              0.42,
+              0.49
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "0e22ab6b2881ca359a8ad01c2777bbe9b44093782fe8b593071518ffd586752d"
+      }
     },
     {
       "id": "fitness",
@@ -198,7 +250,33 @@
       "description": "Plan workouts and record progress",
       "category": "Health",
       "icon": "assets/applet-presets/fitness/icon.webp",
-      "background": "assets/applet-presets/fitness/background.webp"
+      "background": "assets/applet-presets/fitness/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.235,
+              0.435,
+              0.39
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "4074702f5451bbb01ae5ffe8c3e07c715ac8b3263defc71e8abaaa2db984ccfc"
+      }
     },
     {
       "id": "sleep",
@@ -206,7 +284,33 @@
       "description": "Review sleep records and plan wind-down routines",
       "category": "Health",
       "icon": "assets/applet-presets/sleep/icon.webp",
-      "background": "assets/applet-presets/sleep/background.webp"
+      "background": "assets/applet-presets/sleep/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.16,
+              0.48,
+              0.4
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "a911aa55fb53a3d007250516bd66f4b88b1845cc505b98f74d423f2836b9ce37"
+      }
     },
     {
       "id": "travel",
@@ -214,7 +318,33 @@
       "description": "Compare destinations and organize itineraries",
       "category": "Out & about",
       "icon": "assets/applet-presets/travel/icon.webp",
-      "background": "assets/applet-presets/travel/background.webp"
+      "background": "assets/applet-presets/travel/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.11,
+              0.21,
+              0.47,
+              0.56
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "2aa8342534dcf83c7d129dd56909f85d18ac69e5c5335ce3b31f71cea4068b2c"
+      }
     },
     {
       "id": "outdoor",
@@ -222,7 +352,33 @@
       "description": "Prepare walks, hikes, weather checks and packing lists",
       "category": "Out & about",
       "icon": "assets/applet-presets/outdoor/icon.webp",
-      "background": "assets/applet-presets/outdoor/background.webp"
+      "background": "assets/applet-presets/outdoor/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.195,
+              0.48,
+              0.49
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "e552c29aac5e4721e29528fdac78e4e9c9c257e2bf87773b55f56291224a3615"
+      }
     },
     {
       "id": "shopping",
@@ -230,7 +386,33 @@
       "description": "Collect grocery needs and compare purchases",
       "category": "Home",
       "icon": "assets/applet-presets/shopping/icon.webp",
-      "background": "assets/applet-presets/shopping/background.webp"
+      "background": "assets/applet-presets/shopping/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.083,
+              0.192,
+              0.5,
+              0.51
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "9ba192879326816f4cbc70203b636618a1724c0b49927d08a8183141679ccd66"
+      }
     },
     {
       "id": "budget",
@@ -238,7 +420,33 @@
       "description": "Categorize expenses, monitor budgets and bill dates",
       "category": "Home",
       "icon": "assets/applet-presets/budget/icon.webp",
-      "background": "assets/applet-presets/budget/background.webp"
+      "background": "assets/applet-presets/budget/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.14,
+              0.495,
+              0.5
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "c37403b34ce5ddf293a366941e128955451085c6b7023c20a97a4e4992486ffa"
+      }
     },
     {
       "id": "home-care",
@@ -246,7 +454,44 @@
       "description": "Schedule chores, maintenance and household tasks",
       "category": "Home",
       "icon": "assets/applet-presets/home-care/icon.webp",
-      "background": "assets/applet-presets/home-care/background.webp"
+      "background": "assets/applet-presets/home-care/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.11,
+              0.235,
+              0.39,
+              0.35
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.785,
+              0.256,
+              0.125,
+              0.096
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "719b84b129d311d30bd579952fe02d0b69427fe28b41daf42a78e548fec13f8e"
+      }
     },
     {
       "id": "garden",
@@ -254,7 +499,44 @@
       "description": "Plan planting, watering and seasonal garden work",
       "category": "Home",
       "icon": "assets/applet-presets/garden/icon.webp",
-      "background": "assets/applet-presets/garden/background.webp"
+      "background": "assets/applet-presets/garden/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.126,
+              0.16,
+              0.423,
+              0.56
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.725,
+              0.34,
+              0.205,
+              0.087
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "caf5ee7b98bebe53f44960065f0d17b009d87bdffadbdd739cd3d14158013a8d"
+      }
     },
     {
       "id": "daily-planner",
@@ -262,7 +544,44 @@
       "description": "Collect today's schedule, priorities and reminders",
       "category": "Life & learning",
       "icon": "assets/applet-presets/daily-planner/icon.webp",
-      "background": "assets/applet-presets/daily-planner/background.webp"
+      "background": "assets/applet-presets/daily-planner/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.133,
+              0.245,
+              0.435,
+              0.45
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.79,
+              0.24,
+              0.097,
+              0.13
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "55846d3b631511c9fb39a0d7465d95ad5770b86d67d324a257fcdd3e07e34be1"
+      }
     },
     {
       "id": "reading",
@@ -270,7 +589,44 @@
       "description": "Save reading, summarize sources and gather research",
       "category": "Life & learning",
       "icon": "assets/applet-presets/reading/icon.webp",
-      "background": "assets/applet-presets/reading/background.webp"
+      "background": "assets/applet-presets/reading/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.14,
+              0.16,
+              0.433,
+              0.48
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.705,
+              0.175,
+              0.183,
+              0.135
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "de7f81c9ca6bce9f05be1780d75412bc0ca5108d408cbc08dc1a847440504309"
+      }
     },
     {
       "id": "language",
@@ -278,7 +634,44 @@
       "description": "Practice conversation, vocabulary and study routines",
       "category": "Life & learning",
       "icon": "assets/applet-presets/language/icon.webp",
-      "background": "assets/applet-presets/language/background.webp"
+      "background": "assets/applet-presets/language/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.181,
+              0.229,
+              0.44,
+              0.49
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.726,
+              0.248,
+              0.174,
+              0.135
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "9bcbefe2c9a3deddef1739eb1bc32d42de7d84dc7f2baf353c5b4a1947e2829d"
+      }
     },
     {
       "id": "journal",
@@ -286,7 +679,44 @@
       "description": "Capture reflections, memories and daily notes",
       "category": "Life & learning",
       "icon": "assets/applet-presets/journal/icon.webp",
-      "background": "assets/applet-presets/journal/background.webp"
+      "background": "assets/applet-presets/journal/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.163,
+              0.139,
+              0.315,
+              0.647
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.599,
+              0.211,
+              0.197,
+              0.164
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "9ad4af29fa51183f853e7662ee6557fa676683903e5e7113c96990cfc606db56"
+      }
     },
     {
       "id": "job-search",
@@ -294,7 +724,44 @@
       "description": "Compare openings, track applications and prepare interviews",
       "category": "Work",
       "icon": "assets/applet-presets/job-search/icon.webp",
-      "background": "assets/applet-presets/job-search/background.webp"
+      "background": "assets/applet-presets/job-search/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.127,
+              0.268,
+              0.358,
+              0.464
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.764,
+              0.29,
+              0.15,
+              0.102
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "9ecd835864b2b12d11983143216d14409078e76896359db02840c2c745338641"
+      }
     },
     {
       "id": "project-planner",
@@ -302,7 +769,173 @@
       "description": "Track milestones, tasks and next actions",
       "category": "Work",
       "icon": "assets/applet-presets/project-planner/icon.webp",
-      "background": "assets/applet-presets/project-planner/background.webp"
+      "background": "assets/applet-presets/project-planner/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.122,
+              0.204,
+              0.39,
+              0.448
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.728,
+              0.214,
+              0.149,
+              0.14
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ],
+        "sha256": "424de9b16550dbaf0e6cc130d797ab75efeed1859dcac0bab62764ec0e9e5b60"
+      }
     }
-  ]
+  ],
+  "appletScenes": {
+    "google-calendar": {
+      "background": "assets/applet-scenes/google-calendar/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "3bd8e78f1628d6c73a8a07687d05d9df90dba66cd0aaf95f1307c773689772e8",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.077,
+              0.229,
+              0.525,
+              0.51
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "today",
+            "role": "secondary",
+            "rect": [
+              0.744,
+              0.274,
+              0.08,
+              0.112
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.55,
+          0.24,
+          0.4
+        ]
+      }
+    },
+    "gmail": {
+      "background": "assets/applet-scenes/gmail/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "c72521640af9cc26adf16698c87aa9e62f302b91f0d920cfa3ef8551d7119003",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.077,
+              0.226,
+              0.508,
+              0.507
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.55,
+          0.24,
+          0.4
+        ]
+      }
+    },
+    "apple-notes": {
+      "background": "assets/applet-scenes/apple-notes/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "59bf84d8da9ed83f068d37ba339651a5c32779ddb643869d8c9c927b0d820086",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.075,
+              0.17,
+              0.53,
+              0.595
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.55,
+          0.24,
+          0.4
+        ]
+      }
+    },
+    "apple-reminders": {
+      "background": "assets/applet-scenes/apple-reminders/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "e43f2e6ed22762cef3ecbe89978908396e9a74c2f390df0db82dfd347ead2b42",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.085,
+              0.163,
+              0.493,
+              0.49
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.55,
+          0.24,
+          0.4
+        ]
+      }
+    }
+  }
 }

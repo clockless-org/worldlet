@@ -50,8 +50,34 @@
       "background": "weight-balance/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT: a mint-green analog bathroom scale with a large cream dial, a soft measuring tape draped beside it, one small peach",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a bright village wellness courtyard beside an apple orchard, a low sage-green analog body scale and neatly rolled measuring tape on a built-in stone ledge at upper right, a linen towel, rounded apple trees and low stone planters around the edges, broad pale sandstone paving on the left"
-      }
+        "background": "Create one production-ready 16:9 Worldlet Village background, stylized-concept. Reference supplies softly painted rounded 3D countryside style: cream stone, carved warm wood, sculpted plants, restrained brass, NOT photorealism. This is a reusable unbranded personal applet scene. CLOSE immersive view. LEFT side must include one LARGE FRONT-FACING real writing surface, rectangular and parallel to camera: outer frame x4%-65%,y12%-89%, inner clean blank cream surface x8%-61%,y22%-80%. Surface must be physically meaningful in this activity, not floating UI or a distant billboard. Keep whole interior empty for dynamic HTML: soft paper grain only, no shadows, props, text, numbers, diagrams, grids or controls. Place all recognizable functional objects along upper-right and margins. Lower-right x71%-96%, y55%-94% clear calm floor or stone for companion. Vary environment based on activity; no repetitive bridges/mountain panorama. No person, animal, brand logos, icon plinth, watermark. Background scenery: a bright village wellness courtyard beside an apple orchard, a low sage-green analog body scale and neatly rolled measuring tape on a built-in stone ledge at upper right, a linen towel, rounded apple trees and low stone planters around the edges, broad pale sandstone paving on the left. LEFT writing surface is a pale mint framed wellness log clipboard mounted at the orchard wellness station; no markings."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.07,
+              0.18,
+              0.42,
+              0.46
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a bright village wellness courtyard beside an apple orchard, a low sage-green analog body scale and neatly rolled measuring tape on a built-in stone ledge at upper right, a linen towel, rounded apple trees and low stone planters around the edges, broad pale sandstone paving on the left"
     },
     {
       "id": "meal-planner",
@@ -65,8 +91,34 @@
       "background": "meal-planner/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a cream ceramic bowl of colorful vegetables in front of a sage recipe book with a tiny brass spoon",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a semi-open village summer kitchen facing vegetable beds, cream plaster wall and pale limestone preparation counter filling the left, warm terracotta roof above, a small seasonal produce basket, ceramic bowl and copper cooking pot grouped on shelving at upper right, herbs and runner beans at the margins"
-      }
+        "background": "Create one production-ready 16:9 Worldlet Village background, stylized-concept. Reference supplies softly painted rounded 3D countryside style: cream stone, carved warm wood, sculpted plants, restrained brass, NOT photorealism. This is a reusable unbranded personal applet scene. CLOSE immersive view. LEFT side must include one LARGE FRONT-FACING real writing surface, rectangular and parallel to camera: outer frame x4%-65%,y12%-89%, inner clean blank cream surface x8%-61%,y22%-80%. Surface must be physically meaningful in this activity, not floating UI or a distant billboard. Keep whole interior empty for dynamic HTML: soft paper grain only, no shadows, props, text, numbers, diagrams, grids or controls. Place all recognizable functional objects along upper-right and margins. Lower-right x71%-96%, y55%-94% clear calm floor or stone for companion. Vary environment based on activity; no repetitive bridges/mountain panorama. No person, animal, brand logos, icon plinth, watermark. Background scenery: a semi-open village summer kitchen facing vegetable beds, cream plaster wall and pale limestone preparation counter filling the left, warm terracotta roof above, a small seasonal produce basket, ceramic bowl and copper cooking pot grouped on shelving at upper right, herbs and runner beans at the margins. LEFT writing surface is a large cream recipe/menu sheet held in a terracotta-and-oak kitchen recipe stand with tiny brass spoon motif above, no writing."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.093,
+              0.23,
+              0.42,
+              0.49
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a semi-open village summer kitchen facing vegetable beds, cream plaster wall and pale limestone preparation counter filling the left, warm terracotta roof above, a small seasonal produce basket, ceramic bowl and copper cooking pot grouped on shelving at upper right, herbs and runner beans at the margins"
     },
     {
       "id": "fitness",
@@ -80,8 +132,34 @@
       "background": "fitness/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. one teal kettlebell with a brass handle beside a neatly rolled rust-orange exercise mat",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: an outdoor village exercise lawn with a clay running track curving at the far edge, broad quiet pale packed-earth training terrace on the left, a timber equipment rack at upper right holding a teal kettlebell and rolled rust-orange mat, meadow flowers and chestnut trees around the perimeter"
-      }
+        "background": "Create one production-ready 16:9 Worldlet Village background, stylized-concept. Reference supplies softly painted rounded 3D countryside style: cream stone, carved warm wood, sculpted plants, restrained brass, NOT photorealism. This is a reusable unbranded personal applet scene. CLOSE immersive view. LEFT side must include one LARGE FRONT-FACING real writing surface, rectangular and parallel to camera: outer frame x4%-65%,y12%-89%, inner clean blank cream surface x8%-61%,y22%-80%. Surface must be physically meaningful in this activity, not floating UI or a distant billboard. Keep whole interior empty for dynamic HTML: soft paper grain only, no shadows, props, text, numbers, diagrams, grids or controls. Place all recognizable functional objects along upper-right and margins. Lower-right x71%-96%, y55%-94% clear calm floor or stone for companion. Vary environment based on activity; no repetitive bridges/mountain panorama. No person, animal, brand logos, icon plinth, watermark. Background scenery: an outdoor village exercise lawn with a clay running track curving at the far edge, broad quiet pale packed-earth training terrace on the left, a timber equipment rack at upper right holding a teal kettlebell and rolled rust-orange mat, meadow flowers and chestnut trees around the perimeter. LEFT writing surface is a large pale ivory training plan board with a sage wooden frame at a village exercise lawn; a small rolled mat and kettlebell on upper right."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.235,
+              0.435,
+              0.39
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: an outdoor village exercise lawn with a clay running track curving at the far edge, broad quiet pale packed-earth training terrace on the left, a timber equipment rack at upper right holding a teal kettlebell and rolled rust-orange mat, meadow flowers and chestnut trees around the perimeter"
     },
     {
       "id": "sleep",
@@ -95,8 +173,34 @@
       "background": "sleep/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a soft indigo crescent moon cradling an ivory pillow with a tiny gold star",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village sleeping porch at blue hour, pale quiet limewashed wall and empty linen-covered daybed surface on the left, an indigo quilt, crescent-shaped bedside lantern and lavender pot at upper right, open shutters showing a dark blue orchard and a few stars, warm gentle lamplight"
-      }
+        "background": "Create one production-ready 16:9 Worldlet Village background, stylized-concept. Reference supplies softly painted rounded 3D countryside style: cream stone, carved warm wood, sculpted plants, restrained brass, NOT photorealism. This is a reusable unbranded personal applet scene. CLOSE immersive view. LEFT side must include one LARGE FRONT-FACING real writing surface, rectangular and parallel to camera: outer frame x4%-65%,y12%-89%, inner clean blank cream surface x8%-61%,y22%-80%. Surface must be physically meaningful in this activity, not floating UI or a distant billboard. Keep whole interior empty for dynamic HTML: soft paper grain only, no shadows, props, text, numbers, diagrams, grids or controls. Place all recognizable functional objects along upper-right and margins. Lower-right x71%-96%, y55%-94% clear calm floor or stone for companion. Vary environment based on activity; no repetitive bridges/mountain panorama. No person, animal, brand logos, icon plinth, watermark. Background scenery: a village sleeping porch at blue hour, pale quiet limewashed wall and empty linen-covered daybed surface on the left, an indigo quilt, crescent-shaped bedside lantern and lavender pot at upper right, open shutters showing a dark blue orchard and a few stars, warm gentle lamplight. LEFT writing surface is a cream linen-bound sleep journal panel in a simple midnight-blue timber frame, warm lamplight at the edges only; twilight outside."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.16,
+              0.48,
+              0.4
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village sleeping porch at blue hour, pale quiet limewashed wall and empty linen-covered daybed surface on the left, an indigo quilt, crescent-shaped bedside lantern and lavender pot at upper right, open shutters showing a dark blue orchard and a few stars, warm gentle lamplight"
     },
     {
       "id": "travel",
@@ -110,8 +214,34 @@
       "background": "travel/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a teal travel trunk with brass corners, an unfolded cream map and a small coral compass",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a charming small countryside railway station forecourt, broad pale stone plaza on the left and station facade near the upper edge, a teal trunk, compass and rolled map at the upper right beside a luggage cart, small cream-and-green train visible beyond a low fence, flower pots and a timber canopy, no bridge"
-      }
+        "background": "Create a single 16:9 production background for a Worldlet Village custom applet. Stylized-concept, use reference village world only for rounded painterly 3D materials and foliage, cream stone/warm wood/brass, not photography. Close viewpoint. A LARGE real blank writing surface occupies LEFT TWO THIRDS, outer edges x4%-65%,y10%-90%; inner rectangular cream surface x8%-61%,y21%-81%. Make its edges parallel to the canvas, front-facing, NO perspective tilt. The interior must be completely blank gentle paper/linen texture for dynamic HTML, no map marks, dates, grids, letters, numbers, shadows, props or controls. It must belong physically to the activity's furniture. Perimeter and upper RIGHT richly express the function. Lower right x71%-96%,y55%-94% quiet empty floor for companion and speech. Diverse countryside activities, no repeated bridge-and-mountain postcard. No people, animals, app logos, floating UI, icon monument, watermark. SCENE: a charming small countryside railway station forecourt, broad pale stone plaza on the left and station facade near the upper edge, a teal trunk, compass and rolled map at the upper right beside a luggage cart, small cream-and-green train visible beyond a low fence, flower pots and a timber canopy, no bridge. The left interactive surface is a cream travel itinerary sheet in a navy and brass departure planning case, supported upright at the station counter. Functional objects stay at upper right."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.11,
+              0.21,
+              0.47,
+              0.56
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a charming small countryside railway station forecourt, broad pale stone plaza on the left and station facade near the upper edge, a teal trunk, compass and rolled map at the upper right beside a luggage cart, small cream-and-green train visible beyond a low fence, flower pots and a timber canopy, no bridge"
     },
     {
       "id": "outdoor",
@@ -125,8 +255,34 @@
       "background": "outdoor/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a coral hiking backpack with a small brass compass and one rolled sage sleeping mat",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village woodland trailhead and small lakeside campsite, broad pale sandy clearing on the left, a coral backpack and rolled sage mat on a timber bench at upper right, small canvas tent farther behind, rounded pines and reeds around the edges, no bridge and no dramatic mountains"
-      }
+        "background": "Create a single 16:9 production background for a Worldlet Village custom applet. Stylized-concept, use reference village world only for rounded painterly 3D materials and foliage, cream stone/warm wood/brass, not photography. Close viewpoint. A LARGE real blank writing surface occupies LEFT TWO THIRDS, outer edges x4%-65%,y10%-90%; inner rectangular cream surface x8%-61%,y21%-81%. Make its edges parallel to the canvas, front-facing, NO perspective tilt. The interior must be completely blank gentle paper/linen texture for dynamic HTML, no map marks, dates, grids, letters, numbers, shadows, props or controls. It must belong physically to the activity's furniture. Perimeter and upper RIGHT richly express the function. Lower right x71%-96%,y55%-94% quiet empty floor for companion and speech. Diverse countryside activities, no repeated bridge-and-mountain postcard. No people, animals, app logos, floating UI, icon monument, watermark. SCENE: a village woodland trailhead and small lakeside campsite, broad pale sandy clearing on the left, a coral backpack and rolled sage mat on a timber bench at upper right, small canvas tent farther behind, rounded pines and reeds around the edges, no bridge and no dramatic mountains. Left is an upright blank cream trail planning map sheet in a rugged timber camp-map frame, unmarked. Tent, backpack, compass and picnic details belong on right, lake visible beyond."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.195,
+              0.48,
+              0.49
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village woodland trailhead and small lakeside campsite, broad pale sandy clearing on the left, a coral backpack and rolled sage mat on a timber bench at upper right, small canvas tent farther behind, rounded pines and reeds around the edges, no bridge and no dramatic mountains"
     },
     {
       "id": "shopping",
@@ -140,8 +296,34 @@
       "background": "shopping/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a woven market basket with a baguette, carrots and a folded sage shopping list with simple blank ruled lines",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village farmers market before opening, quiet broad cream cobblestone market square on the left, small striped sage-and-cream awning at upper right over a produce stall with carrots, bread and woven baskets, terracotta pots and low cottages at the distant edge"
-      }
+        "background": "Create a single 16:9 production background for a Worldlet Village custom applet. Stylized-concept, use reference village world only for rounded painterly 3D materials and foliage, cream stone/warm wood/brass, not photography. Close viewpoint. A LARGE real blank writing surface occupies LEFT TWO THIRDS, outer edges x4%-65%,y10%-90%; inner rectangular cream surface x8%-61%,y21%-81%. Make its edges parallel to the canvas, front-facing, NO perspective tilt. The interior must be completely blank gentle paper/linen texture for dynamic HTML, no map marks, dates, grids, letters, numbers, shadows, props or controls. It must belong physically to the activity's furniture. Perimeter and upper RIGHT richly express the function. Lower right x71%-96%,y55%-94% quiet empty floor for companion and speech. Diverse countryside activities, no repeated bridge-and-mountain postcard. No people, animals, app logos, floating UI, icon monument, watermark. SCENE: a village farmers market before opening, quiet broad cream cobblestone market square on the left, small striped sage-and-cream awning at upper right over a produce stall with carrots, bread and woven baskets, terracotta pots and low cottages at the distant edge. Left is a broad blank cream grocery order slate framed in warm green market wood; foreground produce only outside its inner edges; colorful farmers market activity props at upper right."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.083,
+              0.192,
+              0.5,
+              0.51
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village farmers market before opening, quiet broad cream cobblestone market square on the left, small striped sage-and-cream awning at upper right over a produce stall with carrots, bread and woven baskets, terracotta pots and low cottages at the distant edge"
     },
     {
       "id": "budget",
@@ -155,8 +337,34 @@
       "background": "budget/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a honey-colored wooden savings box with a coin slot, three brass coins and a tiny cream ledger",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village cooperative counting-house veranda, calm cream plaster wall and wide pale oak accounting desk across the left, small wooden savings box, brass coins and closed ledger grouped on an upper-right shelf, arched opening onto a quiet market lane, green shutters and restrained warm brass details"
-      }
+        "background": "Create a single 16:9 production background for a Worldlet Village custom applet. Stylized-concept, use reference village world only for rounded painterly 3D materials and foliage, cream stone/warm wood/brass, not photography. Close viewpoint. A LARGE real blank writing surface occupies LEFT TWO THIRDS, outer edges x4%-65%,y10%-90%; inner rectangular cream surface x8%-61%,y21%-81%. Make its edges parallel to the canvas, front-facing, NO perspective tilt. The interior must be completely blank gentle paper/linen texture for dynamic HTML, no map marks, dates, grids, letters, numbers, shadows, props or controls. It must belong physically to the activity's furniture. Perimeter and upper RIGHT richly express the function. Lower right x71%-96%,y55%-94% quiet empty floor for companion and speech. Diverse countryside activities, no repeated bridge-and-mountain postcard. No people, animals, app logos, floating UI, icon monument, watermark. SCENE: a village cooperative counting-house veranda, calm cream plaster wall and wide pale oak accounting desk across the left, small wooden savings box, brass coins and closed ledger grouped on an upper-right shelf, arched opening onto a quiet market lane, green shutters and restrained warm brass details. Left is a large upright cream household ledger writing surface in dark walnut and brass account-book frame, no page crease inside the writing rectangle. Coins, receipts, abacus and a small savings box occupy upper right."
+      },
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09,
+              0.14,
+              0.495,
+              0.5
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village cooperative counting-house veranda, calm cream plaster wall and wide pale oak accounting desk across the left, small wooden savings box, brass coins and closed ledger grouped on an upper-right shelf, arched opening onto a quiet market lane, green shutters and restrained warm brass details"
     },
     {
       "id": "home-care",
@@ -170,8 +378,46 @@
       "background": "home-care/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a small cream cottage with a sage roof, a miniature broom and a brass key",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village laundry and potting courtyard behind a cottage, broad clean pale stone work courtyard on the left, a folded linen basket, little broom and wall-hung keys at upper right near a sage door, clothesline along the upper edge and chamomile pots, no people"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: At the open back door of the cream-stone green-roof cottage matching the icon, domestic courtyard with broom and brass house key. MAIN is a practical cream household planner pinned into a broad green wooden wall organizer at left; SECOND is a small cream key-hook message plaque above right, with the brass key hanging outside its blank interior. Clear right courtyard floor, flowers and folded laundry at margins."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village laundry and potting courtyard behind a cottage, broad clean pale stone work courtyard on the left, a folded linen basket, little broom and wall-hung keys at upper right near a sage door, clothesline along the upper edge and chamomile pots, no people",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.11,
+              0.235,
+              0.39,
+              0.35
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.785,
+              0.256,
+              0.125,
+              0.096
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/home-care/icon.webp"
     },
     {
       "id": "garden",
@@ -185,8 +431,46 @@
       "background": "garden/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a sage watering can beside a terracotta pot containing a sturdy green seedling",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village allotment garden with a small greenhouse near the upper right, broad empty pale potting bench and quiet plaster tool-shed wall filling the left, a sage watering can, seedling pots and neatly hung hand tools at upper right, raised vegetable beds and flowering vines at the edges"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: Inside a sunlit potting greenhouse, raised beds and seed trays. MAIN is an oversized open gardener's field notebook held upright on the left potting bench, single clear cream page with sage binding and softly irregular paper edge OUTSIDE inner rectangle. SECOND is a smaller blank cream plant label in a brass-edged wooden holder mounted upper right. Icon's sage watering can and terracotta seedling pot sit naturally just above/along right edge, never obstruct surfaces or lower right."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village allotment garden with a small greenhouse near the upper right, broad empty pale potting bench and quiet plaster tool-shed wall filling the left, a sage watering can, seedling pots and neatly hung hand tools at upper right, raised vegetable beds and flowering vines at the edges",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.126,
+              0.16,
+              0.423,
+              0.56
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.725,
+              0.34,
+              0.205,
+              0.087
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/garden/icon.webp"
     },
     {
       "id": "daily-planner",
@@ -200,8 +484,46 @@
       "background": "daily-planner/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a cream standing day-planner with three embossed green checkmarks and a small golden sunrise disc",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village morning breakfast terrace, broad pale limewashed wall and clear ivory tabletop on the left, a small standing planner with blank pages, ceramic coffee cup and brass alarm clock on an upper-right shelf, climbing jasmine, a sunny cottage lane visible at far right"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: A village breakfast terrace under a grape pergola. MAIN is a large cream ring-bound day planner with warm honey leather binding and brass rings matching icon, mounted upright left. SECOND is a separate small sun-shaped brass-framed cream date plaque upper right (outer silhouette a sun, inner blank square centered x76%-93%,y24%-42%). No grids or dates baked in. Breakfast cup and flowers around margins; right paving spacious."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village morning breakfast terrace, broad pale limewashed wall and clear ivory tabletop on the left, a small standing planner with blank pages, ceramic coffee cup and brass alarm clock on an upper-right shelf, climbing jasmine, a sunny cottage lane visible at far right",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.133,
+              0.245,
+              0.435,
+              0.45
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.79,
+              0.24,
+              0.097,
+              0.13
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/daily-planner/icon.webp"
     },
     {
       "id": "reading",
@@ -215,8 +537,46 @@
       "background": "reading/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. two forest-green books supporting an open ivory book and a small brass magnifying glass",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village library courtyard under a leafy tree, broad light plaster wall and empty pale oak reading table on the left, an arched bookshelf, a few green books and a brass magnifying glass at upper right, scattered ivy and calm garden light"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: A quiet village library courtyard with green-and-gold bound books and brass magnifier matching icon. MAIN is an upright open reading folio on LEFT with a single uninterrupted cream page, dark-green leather binding, natural page edge. SECOND is a distinct small clipped cream reading-note card on an upper-right shelf. Book spines and magnifying glass outside blanks, clear lower-right limestone courtyard."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village library courtyard under a leafy tree, broad light plaster wall and empty pale oak reading table on the left, an arched bookshelf, a few green books and a brass magnifying glass at upper right, scattered ivy and calm garden light",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.14,
+              0.16,
+              0.433,
+              0.48
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.705,
+              0.175,
+              0.183,
+              0.135
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/reading/icon.webp"
     },
     {
       "id": "language",
@@ -230,8 +590,46 @@
       "background": "language/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. two overlapping speech bubbles made from cream enamel and blue ceramic, with a tiny closed dictionary",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village open-air school veranda, broad calm ivory teaching wall and empty pale desk to the left, two colorful blank speech-bubble plaques, a closed blue dictionary and headphones in a niche at upper right, flowering window boxes and a little school bell at the top edge"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: Village open-air school veranda. MAIN is one large front-facing cream learning page with cobalt-blue leather binding at LEFT. SECOND is a cream speech-bubble-shaped blank plaque with blue enamel rim upper RIGHT, square clear interior. Small matching blue-and-brass dictionary and blue speech-bubble emblem above right. Flowers and school bell at margins; no text, dots or lettering inside blank surfaces."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village open-air school veranda, broad calm ivory teaching wall and empty pale desk to the left, two colorful blank speech-bubble plaques, a closed blue dictionary and headphones in a niche at upper right, flowering window boxes and a little school bell at the top edge",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.181,
+              0.229,
+              0.44,
+              0.49
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.726,
+              0.248,
+              0.174,
+              0.135
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/language/icon.webp"
     },
     {
       "id": "journal",
@@ -245,8 +643,46 @@
       "background": "journal/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a plum cloth-bound journal with a brass clasp, cream quill and pressed daisy",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a quiet village rose-garden writing pavilion, pale plaster alcove and wide clean cream writing desk on the left, a plum journal, feather pen, ink bottle and pressed flowers in a shallow upper-right niche, climbing roses and soft afternoon light, no bridges"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: Quiet rose-garden pavilion. MAIN is a single upright cream journal page with plum leather binding on LEFT, no center crease. SECOND is a separate blank cream reflection card clipped with brass upper RIGHT. Plum daisy journal, ivory feather in ceramic inkpot on high right shelf match icon. Roses around edges; peaceful open right courtyard."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a quiet village rose-garden writing pavilion, pale plaster alcove and wide clean cream writing desk on the left, a plum journal, feather pen, ink bottle and pressed flowers in a shallow upper-right niche, climbing roses and soft afternoon light, no bridges",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.163,
+              0.139,
+              0.315,
+              0.647
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.599,
+              0.211,
+              0.197,
+              0.164
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/journal/icon.webp"
     },
     {
       "id": "job-search",
@@ -260,8 +696,46 @@
       "background": "job-search/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a cognac leather briefcase with a cream resume sheet showing only blank ruled marks and a brass magnifying glass",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village guildhall entrance courtyard, large quiet cream noticeboard wall and pale stone ledge on the left, a cognac leather briefcase, blank paper folder and magnifying glass on a bench at upper right, warm timber guildhall doorway, neat climbing vines and sandstone paving"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: Village guildhall entrance courtyard. MAIN is an upright open cognac leather portfolio with broad single flat blank cream page on LEFT. SECOND is a small blank cream application-status card in brass corner mounts upper RIGHT. Icon's cognac briefcase, ivory resume folder and brass magnifier naturally on right high shelf, not within the blanks. Guildhall timber doorway, stone paving, vines."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village guildhall entrance courtyard, large quiet cream noticeboard wall and pale stone ledge on the left, a cognac leather briefcase, blank paper folder and magnifying glass on a bench at upper right, warm timber guildhall doorway, neat climbing vines and sandstone paving",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.127,
+              0.268,
+              0.358,
+              0.464
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.764,
+              0.29,
+              0.15,
+              0.102
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/job-search/icon.webp"
     },
     {
       "id": "project-planner",
@@ -275,8 +749,46 @@
       "background": "project-planner/background.png",
       "prompt": {
         "icon": "Create one production-ready transparent applet icon, square canvas, stylized-concept. Use the supplied Village device images only as material and perspective references: rounded handcrafted cozy 3D storybook asset, muted rich color, warm wood and restrained brass, softly painted textures, NOT photorealistic. Single compact freestanding object composition, slight elevated three-quarter front view, object fills 80% of square with clear silhouette readable at 64px, tiny low wooden foot/base with one small central brass inset, consistent with Worldlet devices. NO app brand logos, no letters, no numbers, no enclosing tile or giant square sign, no landscape, no cast shadow outside the object. Actual transparent alpha background. SUBJECT:  Camera always front facing screen-left, visible right side and top, 20 degree yaw and 25 degree elevation. a small walnut task board with three sage, cream and terracotta blank cards, beside a brass hourglass",
-        "background": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village craft workshop with wide doors open onto its courtyard, a broad empty cream worktable and light plaster wall across the left, small wood task board with blank cards, brass hourglass and neatly arranged craft tools at upper right, sawdust-free floor, warm terracotta and sage details"
-      }
+        "background": "Create a finished 16:9 production background for Worldlet Village, stylized-concept. Reference 1 is the village world style (rounded painterly 3D, cream stone, warm wood, soft sculpted plants, NOT photography). Reference 2 is this scene's existing icon: preserve its main objects, colors and materials, REMOVE the icon's display base, incorporate objects naturally at life-size into the environment. Do not paste a giant icon. This is an interactive HTML scene with TWO physically separate BLANK surfaces. MAIN usable surface on LEFT, large front-facing cream writing area, interior x8%-60%,y20%-81%, edges parallel to canvas, rich object-specific frame OUTSIDE it. SECOND smaller surface on upper RIGHT, blank cream interior x76%-93%,y24%-42%, also frontal, at readable scale. Their interiors must be completely blank gentle paper texture: NO text, numbers, grids, doodles, shadows or props. Paint a cohesive interesting environment around them, not a generic billboard wall. Keep lower-right x69%-96%,y55%-95% visually calm and generous for companion and speech; functional objects stay at top or margins. No people, animals, live UI, watermark, no repeated bridge/mountain vista. SCENE: Open village craft workshop courtyard. MAIN is a warm wooden planning board with one large flat blank cream inset on LEFT. SECOND is a separate blank sage milestone card brass-pinned in a small wooden frame upper RIGHT. Icon's brass hourglass and clay/sage task cards near right top, carpentry tools along edges. Clear right courtyard, warm terracotta and sage details."
+      },
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village craft workshop with wide doors open onto its courtyard, a broad empty cream worktable and light plaster wall across the left, small wood task board with blank cards, brass hourglass and neatly arranged craft tools at upper right, sawdust-free floor, warm terracotta and sage details",
+      "composition": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.122,
+              0.204,
+              0.39,
+              0.448
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "summary",
+            "role": "secondary",
+            "rect": [
+              0.728,
+              0.214,
+              0.149,
+              0.14
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.58,
+          0.26,
+          0.38
+        ]
+      },
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/project-planner/icon.webp"
     }
   ]
 }
