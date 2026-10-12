@@ -344,7 +344,7 @@ try{
 
  assert.deepEqual(surveyAgentHistory('claude-code',others,{}),{conversations:3,notes:1,skills:3,jobs:0});
  assert.deepEqual(surveyAgentHistory('pi',others,{}),{conversations:1,notes:0,skills:2,jobs:0});
- assert.deepEqual(surveyAgentHistory('hermes',others,{}),{conversations:2,notes:0,skills:2,jobs:1});
+ assert.deepEqual(surveyAgentHistory('hermes',others,{}),{conversations:2,notes:0,skills:2,jobs:2},'every job its scheduler shows in the World, a script one too; Worldlet\'s own are not counted');
  assert.deepEqual(surveyAgentHistory('codex',others,{}),{conversations:3,notes:0,skills:2,jobs:0},'its own sub-agent runs are not counted');
  assert.equal(readLocalAgentMemory('claude-code',others,{})?.longTerm,'Always answer briefly.');
  assert.deepEqual(readLocalAgentMemory('pi',others,{}),{name:null,soul:'',user:'',longTerm:'Use pnpm.',model:true},'pi’s API key can become Fox’s model');
