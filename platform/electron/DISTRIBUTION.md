@@ -257,6 +257,17 @@ The Mac registers the app itself through SMAppService (`type: 'mainAppService'`)
 
 The NSIS uninstaller does not remove the Run entry. A leftover entry points at a missing executable, and Windows skips it.
 
+### Default browser
+
+The setting is **Default browser** in Settings → General, off until a person turns it on. It uses the `defaultBrowser` host action (`platform/electron/src/modules/shell/default-browser.ts`); the support rule, the routing of an incoming link and the setting's words are shared in `core/distribution/default-browser.ts`. Only the installed Mac and Windows apps offer it; a Dev build, Linux and a Microsoft Store package report `unsupported` and never touch the system's link handlers.
+
+- **Mac:** the packaged app declares `http` and `https` URL types (`scripts/package-electron.ts`), which changes nothing by itself. Turning the setting on calls `app.setAsDefaultProtocolClient`, and macOS asks the person to confirm. Turning it off sets the browser recorded when it was turned on back as the handler (macOS asks again), or lets Electron pick another handler when none was recorded.
+- **Windows:** Windows lets only the person choose a default browser. Turning the setting on writes a per-user browser registration (`HKCU\Software\Clients\StartMenuInternet\Worldlet`, a `WorldletURL` ProgId and a `RegisteredApplications` entry) and opens Settings → Default apps at Worldlet. Each launch rewrites it so the registered path follows updates. Turning the setting off removes the registration and opens Default apps.
+
+A link arrives through `open-url` on the Mac (listened for before `ready`, so the link that launched Worldlet is kept) and as an argument on Windows (`Worldlet.exe <url>`, or `second-instance` when Worldlet is running). An `https` page waits in the host until the World takes it: after it loads, and only after onboarding. It then opens in its own website Thing, or else the Browser, never in whichever Thing is open. Other links the World does not load (`http`, a local server, a link carrying a password) go straight to the previous browser.
+
+While Worldlet is the default, pages Worldlet itself sends to "your browser" (`openInBrowser` in `platform/electron/src/system-browser.ts`) open in the browser that was the default before, or Safari or Edge when none was recorded, so they never come back to Worldlet. Sign-in pages that an Agent's own command line opens do come to Worldlet and open in the Browser.
+
 ### Release login item check (Mac)
 
 `node scripts/release-login-item-mac.mjs --app <Worldlet.app> --out <dir> [--quit-running]` checks that `openAtLogin` round-trips in the packaged app. The RC package step runs it on 02 after the permission check, against the app inside the mounted DMG. It opens the app through LaunchServices with `--login-item-check <report>.json` (`platform/electron/src/world/login-item-check.ts`). The app turns Open at Login on and then off again through the same `loginItem` action as the setting, and reads `app.getLoginItemSettings()` back after each step. If the item was on to begin with, the app turns it on again, then quits.

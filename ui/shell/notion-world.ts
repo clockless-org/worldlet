@@ -320,10 +320,11 @@ export function mountNotionWorld(data: World, native: any) {
     if(from.attention?.worldItemId&&previewAttention({worldItemId:from.attention.worldItemId}))return;
     if(from.artifact&&!foxArtifact.visible)void openArtifact(from.artifact.id);
   }
-  function openWorldURL(value:string,from:{attention?:any,artifact?:any}={}){
+  function openWorldURL(value:string,from:{attention?:any,artifact?:any,incoming?:boolean}={}){
     let url:URL;try{url=new URL(value);}catch{return false;}
     if(url.protocol!=='https:'||url.username||url.password)return false;
-    const app=depth==='object'?sections.find(s=>s.moduleId===current&&s.entity==='app'):null;
+    // A link another app opened never lands in whichever Thing happens to be open.
+    const app=depth==='object'&&!from.incoming?sections.find(s=>s.moduleId===current&&s.entity==='app'):null;
     if(app){
       if(content.dataset.template!=='browser')libraryWebReturn={app,record:appReader?.app.key===app.key?appReader.record:null};
       header(app.title,'Website',{applet:true});browserPanel.mount(app.key,{url:url.href,platform:'web'});sceneState();return true;
@@ -341,6 +342,13 @@ export function mountNotionWorld(data: World, native: any) {
     closeRegionShelf();header(webSite(url.href),'Web');browserPanel.mount('web',{url:url.href,platform:'web'});pageLayer=origin;sceneState();return true;
   }
   window.addEventListener('worldlet:open-url',(event:any)=>openWorldURL(event.detail?.url||''));
+  // Links other apps opened while Worldlet is the default browser wait in the host until the World is here (after
+  // onboarding): the newest opens in its own website Thing, else the Browser (platform/electron/src/system-browser.ts).
+  const takeIncoming=()=>{
+    if(!native?.incomingLinks)return;
+    void Promise.resolve(native.incomingLinks()).then(result=>{const links=Array.isArray(result?.links)?result.links:[],last=links[links.length-1];if(typeof last==='string')openWorldURL(last,{incoming:true});},()=>{});
+  };
+  window.addEventListener('worldlet:incoming-links',takeIncoming);takeIncoming();
   root.addEventListener('click',event=>{
     const link=(event.target as Element)?.closest?.('a[href]') as HTMLAnchorElement|null;
     if(!native?.browser||!link||link.hasAttribute('download')||event.defaultPrevented)return;

@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import {app,BaseWindow,dialog,Menu,powerMonitor,shell,type MenuItemConstructorOptions} from 'electron';
+import {app,BaseWindow,dialog,Menu,powerMonitor,type MenuItemConstructorOptions} from 'electron';
 import {WorldletError,errorMessage,isoSeconds} from '../../files.ts';
 import {AGENT,ANALYTICS,APP_UPDATES,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,SOURCES,SPEECH,USER_ACTIVITY,WORLD_TOOLS,
  type AgentService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type SourcesService,type SpeechService,type UserActivityService,type WorldToolsService} from '../../host/services.ts';
@@ -15,6 +15,8 @@ import {diagnostics,exportDiagnostics,recordFoxTiming,sendFeedback,showDebug,wat
 import {decode,dispose,exportTo,restore,type Archive} from './backup.ts';
 import {worldMenu,worldMenuState,type WorldMenuState} from './world-menu.ts';
 import {createLoginItem} from './login-item.ts';
+import {createDefaultBrowser} from './default-browser.ts';
+import {openInBrowser} from '../../system-browser.ts';
 import {order} from './order.ts';
 import {wantsQuit} from '../../host/quit.ts';
 import {busyWith,onStall,watchMainStalls} from '../../host/busy.ts';
@@ -22,7 +24,7 @@ import {localDataFacts} from './data-size.ts';
 import {foxTimingEvent,nativeCrashFromIps} from '../../../../../core/diagnostics/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
-/** App shell: menus, the desktop Companion, updates, Open at Login, diagnostics, feedback, usage analytics and World backups. */
+/** App shell: menus, the desktop Companion, updates, Open at Login, the default browser setting, diagnostics, feedback, usage analytics and World backups. */
 export function installShell(host:Host){
  const {store,page}=host;
  const companion=host.provide(DESKTOP_COMPANION,new DesktopCompanion(host));
@@ -33,6 +35,7 @@ export function installShell(host:Host){
  // Page console warnings and errors, kept in memory for an Order (diagnostics.ts).
  watchConsole();
  const loginItem=createLoginItem(host);
+ const defaultBrowser=createDefaultBrowser(host);
  // System-wide input idle time (any app, not only Worldlet), shortened by an open paired phone. An unreadable
  // idle time counts as active, so background work never stops on a platform that cannot report it.
  host.provide<UserActivityService>(USER_ACTIVITY,{idleSeconds:()=>{
@@ -142,6 +145,8 @@ export function installShell(host:Host){
   if(process.platform!=='darwin'){world?.setMenuBarVisibility(false);world?.on('focus',()=>analytics.recordActiveDay());}
   // The person may have allowed or removed the login item in System Settings meanwhile.
   if(loginItem.supported())world?.on('focus',()=>loginItem.refresh());
+  // A confirmation the Mac asked for, or a choice in Windows Settings, while the World was in the background.
+  if(defaultBrowser.supported())world?.on('focus',()=>void defaultBrowser.refresh());
   // world_active_time (owner 2026-10-11 20:21 PDT: Production metrics): the World's use so far, once it is left.
   world?.on('blur',()=>analytics.endActive());world?.on('hide',()=>analytics.endActive());
   analytics.recordActiveDay();
@@ -175,8 +180,16 @@ export function installShell(host:Host){
   openSystemBrowser:async request=>{
    let url:URL;try{url=new URL(String(request.url??''));}catch{throw new WorldletError('Invalid link.');}
    if(url.protocol!=='https:'||url.username||url.password)throw new WorldletError('Only secure links can be opened.');
-   try{await shell.openExternal(url.href);}catch{throw new WorldletError('Could not open your browser. Try again.');}
+   try{await openInBrowser(url.href);}catch{throw new WorldletError('Could not open your browser. Try again.');}
    return {ok:true};
+  },
+  // The default browser setting: `status` (default), `set` {enabled}, or `take` the links other apps opened.
+  defaultBrowser:request=>{
+   const operation=typeof request.operation==='string'?request.operation:'status';
+   if(operation==='status')return defaultBrowser.refresh();
+   if(operation==='take')return defaultBrowser.take();
+   if(operation==='set'&&typeof request.enabled==='boolean')return defaultBrowser.set(request.enabled);
+   throw new WorldletError('Unknown default browser operation.');
   },
   // Fox's one-time offer and the Open at Login setting: `status` (default), `set` {enabled} or `offered`.
   loginItem:request=>{

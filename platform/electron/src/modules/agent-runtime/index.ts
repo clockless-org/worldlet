@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {app,shell} from 'electron';
+import {openInBrowser} from '../../system-browser.ts';
 import {WorldletError} from '../../files.ts';
 import {AGENT,ANALYTICS,ONGOING,VAULT,type AgentService,type AnalyticsService,type OngoingService,type VaultService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
@@ -473,7 +474,7 @@ export function installAgentRuntime(host:Host){
  const listeners:((reason:AgentChange)=>void)[]=[];
  const context=runtimeContext(host.profile,{
   analyticsID:()=>{try{return host.optional<AnalyticsService>(ANALYTICS)?.modelAnalyticsID()??'';}catch{return '';}},
-  openExternal:url=>shell.openExternal(url),
+  openExternal:url=>openInBrowser(url),
   record:entry=>{try{return host.store.ledger().recordExecution(entry);}catch{return false;}},
   failure:(error,operation)=>host.diagnostics.record(error,operation),
   ownSession:(source,session,thread)=>{try{host.store.ledger().rememberOwnHarnessSession(source,session,thread);}catch{}},
