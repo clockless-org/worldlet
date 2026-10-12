@@ -25,6 +25,9 @@ export interface AgentProfile {
  threads:{title:string;summary?:string}[];
  /** Applets it suggests: a catalog key when one fits, else a title of its own. */
  applets:{key?:string;title:string;why?:string}[];
+ /** What the person handles most day to day, read from their conversations (owner request 2026-10-12): each becomes
+  * an Applet, the catalog's when `key` fits, else the conversation it happens in (core/tasks ongoingFromAgent). */
+ things:{title:string;why?:string;threads:string[];key?:string}[];
 }
 
 const KINDS=['mcp','channel','api_key','password_vault','oauth','cli','email','other'];
@@ -33,10 +36,11 @@ const KINDS=['mcp','channel','api_key','password_vault','oauth','cli','email','o
 export function agentProfilePrompt(catalog:readonly string[]):string {
  return [
   'Worldlet is setting up a desktop for you and the person you work for. Describe yourself as ONE JSON object, exactly this shape (every field optional, arrays may be empty):',
-  JSON.stringify({schema:AGENT_PROFILE_SCHEMA,agent:{name:'your name',model:'provider/model'},workspaces:[{agent:'agent id',path:'absolute folder holding your SOUL.md, memory, skills'}],persona:'one or two sentences: who you are and how you talk',aboutUser:['short facts about your person'],skills:[{name:'skill name',description:'one line'}],connections:[{name:'what it is',kind:KINDS.join('|'),service:'e.g. gmail, discord, 1password',usedFor:'one line'}],channels:[{provider:'discord|telegram|…',place:'#channel or chat name',purpose:'one line'}],routines:[{name:'',schedule:'cron or plain words',what:'one line'}],threads:[{title:'recent conversation',summary:'one line'}],applets:[{key:'catalog key below, or omit',title:'name',why:'what your person does that it helps with'}]}),
+  JSON.stringify({schema:AGENT_PROFILE_SCHEMA,agent:{name:'your name',model:'provider/model'},workspaces:[{agent:'agent id',path:'absolute folder holding your SOUL.md, memory, skills'}],persona:'one or two sentences: who you are and how you talk',aboutUser:['short facts about your person'],skills:[{name:'skill name',description:'one line'}],connections:[{name:'what it is',kind:KINDS.join('|'),service:'e.g. gmail, discord, 1password',usedFor:'one line'}],channels:[{provider:'discord|telegram|…',place:'#channel or chat name',purpose:'one line'}],routines:[{name:'',schedule:'cron or plain words',what:'one line'}],threads:[{title:'recent conversation',summary:'one line'}],things:[{title:'short name, like Kitchen restock',why:'what your person keeps doing',threads:['the conversation titles it happens in, exactly as titled'],key:'catalog key below, or omit'}],applets:[{key:'catalog key below, or omit',title:'name',why:'what your person does that it helps with'}]}),
   'Use what you actually have: your configuration, workspace files, skills, memory and notes, channels, scheduled jobs and recent conversations. Leave out anything you are unsure of; do not invent.',
   'NEVER include secrets: no passwords, tokens, API key values or private keys. Name the service and how it is connected instead.',
   'Do not change any setting or file and do not message anyone; only answer.',
+  'things: go through your conversations with your person and name the things they handle most day to day, up to 12, busiest first: recurring jobs, not one-off questions. Each lists the conversations it happens in by their exact titles, and a key from the list below when one Applet fits.',
   'threads: up to 30 recent ones. applets: up to 8, based on what your person really does with you; use a key from this list when one fits: '+catalog.join(', ')+'.',
   'Reply with the JSON object only, no other text.',
  ].join('\n\n');
@@ -84,21 +88,23 @@ export function parseAgentProfile(reply:unknown):AgentProfile|null {
   channels:list(value.channels,60,entry=>{const provider=text(entry.provider,40)?.toLowerCase(),place=text(entry.place,120);return provider&&place?defined({provider,place,purpose:text(entry.purpose,200)}):null;}),
   routines:list(value.routines,60,entry=>{const name=text(entry.name,120);return name?defined({name,schedule:text(entry.schedule,80),what:text(entry.what,200)}):null;}),
   threads:list(value.threads,30,entry=>{const title=text(entry.title,160);return title?defined({title,summary:text(entry.summary,200)}):null;}),
+  things:list(value.things,12,entry=>{const title=text(entry.title,60);if(!title)return null;const threads=Array.isArray(entry.threads)?entry.threads.slice(0,20).map((thread:unknown)=>text(thread,160)).filter((thread):thread is string=>!!thread).slice(0,10):[];return defined({title,why:text(entry.why,200),threads,key:text(entry.key,60)?.toLowerCase()});}),
   applets:list(value.applets,8,entry=>{const title=text(entry.title,80)??text(entry.key,60);return title?defined({key:text(entry.key,60)?.toLowerCase(),title,why:text(entry.why,200)}):null;}),
  };
  if(profile.persona===undefined)delete profile.persona;
- const empty=!profile.agent.name&&!profile.persona&&[profile.workspaces,profile.aboutUser,profile.skills,profile.connections,profile.channels,profile.routines,profile.threads,profile.applets].every(items=>!items.length);
+ const empty=!profile.agent.name&&!profile.persona&&[profile.workspaces,profile.aboutUser,profile.skills,profile.connections,profile.channels,profile.routines,profile.threads,profile.applets,profile.things].every(items=>!items.length);
  return empty?null:profile;
 }
 
 /** Service names an Agent uses for a catalog Applet, where they differ from its key. */
 const SERVICE_KEYS:Record<string,string>={'google calendar':'google-calendar',gcal:'google-calendar',calendar:'google-calendar','google drive':'google-drive',gdrive:'google-drive',twitter:'x','x.com':'x',mail:'gmail',email:'gmail','1password':'',imessage:'messages','apple notes':'apple-notes','apple reminders':'apple-reminders',amazon:'amazon'};
-/** Catalog Applets the profile points to: the ones it suggests by key, then the services its connections and channels
+/** Catalog Applets the profile points to: the things it named and the ones it suggests by key, then the services its connections and channels
  * use, in that order, without repeats. */
 export function agentProfileApplets(profile:AgentProfile|null,catalog:readonly string[]):string[] {
  if(!profile)return [];
  const known=new Set(catalog),found:string[]=[];
  const add=(name:string|undefined)=>{if(!name)return;const lower=name.toLowerCase().trim(),key=lower in SERVICE_KEYS?SERVICE_KEYS[lower]:lower.replace(/\s+/g,'-');if(key&&known.has(key)&&!found.includes(key))found.push(key);};
+ for(const thing of profile.things??[])if(thing.key)add(thing.key);
  for(const applet of profile.applets)add(applet.key??applet.title);
  for(const connection of profile.connections)add(connection.service);
  for(const channel of profile.channels)add(channel.provider);
