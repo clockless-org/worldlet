@@ -1,6 +1,6 @@
 # Village personal Applet scenes
 
-Sixteen reusable icon/background pairs for custom Applets. These are authored assets, **not registered runtime Applets or a new Theme contract**. No provider accounts, actions or data are implied by selecting a picture. The current World and existing Applets are unchanged.
+Sixteen reusable icon/background pairs for custom Applets. Their optimized WebP copies are bundled in the public repository’s Village SIM through the optional `appletPresets` section of Theme contract v3. No provider accounts, actions or data are implied by selecting a picture. The current World and existing Applets are unchanged.
 
 [Visual catalog](index.html) · [Machine-readable catalog and exact prompts](catalog.json) · [Village style authority](../../STYLE.md)
 
@@ -12,12 +12,16 @@ These curated examples establish plausible uses, not market share, customer freq
 
 ## Use the assets
 
-- Select a stable preset ID and resolve its relative `icon` and `background` paths from `catalog.json`.
+- Host code reads `themeAppletPresets()` from `ui/themes/index.ts`, selects a stable preset ID, and uses the returned `icon` and `background` URLs. The original PNG paths remain in `catalog.json` for authoring.
 - Icons are transparent PNGs. Keep their proportions and full base; do not flatten against a white background. Their little brass inset is decorative artwork, not a live status indicator.
 - Backgrounds have no baked-in data, labels or controls. Layer real Applet content above the left side; keep the lower right available for Fox and speech.
 - `layout` records normalized composition guidance, not a runtime API. At narrow widths, reflow content instead of blindly cropping an assumed safe region.
-- Import through the existing [Applet implementation](../../../../../ui/applets/IMPLEMENTATION-GUIDE.md) and [Theme contract](../../../../themes/CONTRACT.md) when integrating a custom Applet. This authoring catalog is not currently loaded by the preset picker or bundled into the running app.
+- Import through the existing [Applet implementation](../../../../../ui/applets/IMPLEMENTATION-GUIDE.md) and [Theme contract](../../../../themes/CONTRACT.md) when integrating a custom Applet. The 16 picture pairs are bundled; an Applet creation picker is not connected yet.
 - These are single lighting plates. Sleep is intentionally an evening scene; the remaining presets are day scenes. No day/night pairs or animation masks are supplied.
+
+## Rebuild the SIM assets
+
+Run `node scripts/village-applet-presets.ts` after changing source pictures or catalog metadata. It encodes transparent icons at 768 px and backgrounds at their original size, updates the package presentation and source lock, and records source/output hashes in `assets/applet-presets/art.lock.json`. `npm run check:style` checks those hashes. The authoring gallery, prompts and original PNGs stay here; only the optimized pictures and preset metadata ship in the app.
 
 ## Catalog
 

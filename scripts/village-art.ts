@@ -5,6 +5,8 @@ import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
 import {cachedEncode} from './build-cache.ts';
 import {theme,themeAppletArt} from '../ui/themes/index.ts';
+import {themeAssetPath} from '../ui/themes/build-theme-contract.ts';
+import {checkVillageAppletPresets} from './village-applet-presets.ts';
 import {paintedBox} from './painted-box.ts';
 
 /**
@@ -35,10 +37,10 @@ export async function encodeVillageArt(root:string){
  const out=path.join(root,VILLAGE_ART),entry=theme('village'),STYLE=entry.style.manifest,lock:Lock={};
  const {WORLD_APPS}=await import('../core/applets/catalog.ts');
  const {MOMENT_ART}=await import('../core/applets/moment.ts');
- // Re-encode from scratch, keeping the folder's README.
- const readme=await readFile(path.join(out,'README.md')).catch(()=>null);
- await rm(out,{recursive:true,force:true});
- if(readme){await mkdir(out,{recursive:true});await writeFile(path.join(out,'README.md'),readme);}
+ // Only remove files this encoder owns. Artifact materials and Applet presets have separate sources and locks.
+ const previous:Lock=JSON.parse(await readFile(path.join(out,'art.lock.json'),'utf8').catch(()=>'{}'));
+ for(const name of Object.keys(previous)){themeAssetPath('assets/'+name);await rm(path.join(out,name),{force:true});}
+ await mkdir(out,{recursive:true});
  /** Writes one output from one source with the named settings and records it in the lock. */
  const emit=async(name:string,source:string,settings:string,encode:(file:string)=>Promise<Buffer>)=>{
   const file=path.join(root,source),bytes=settings==='copy'?await readFile(file):await cachedEncode(file,settings,()=>encode(file));
@@ -111,6 +113,6 @@ export async function checkVillageArt(root:string){
 
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const root=fileURLToPath(new URL('../',import.meta.url));
- if(process.argv.includes('--check'))console.log(`PASS Village art: ${await checkVillageArt(root)} committed files match their sources`);
+ if(process.argv.includes('--check')){console.log(`PASS Village art: ${await checkVillageArt(root)} committed files match their sources`);await checkVillageAppletPresets(root);}
  else{await encodeVillageArt(root);console.log(`Encoded Village art into ${VILLAGE_ART} (${await checkVillageArt(root)} files)`);}
 }

@@ -47,6 +47,16 @@ export interface ThemeArtifact {
     /** `#rrggbb` per colour role; a role left out keeps the host's. */
     colors?: Partial<Record<ThemeArtifactColor, string>>;
 }
+/** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
+export interface ThemeAppletPreset {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    /** Package-local pictures; the icon may be transparent. The background contains no live data. */
+    icon: string;
+    background: string;
+}
 /** The theme's type and colours. */
 export interface ThemeTokens {
     bodyFont: string;
@@ -72,6 +82,8 @@ export interface ThemePresentation {
     icons?: Readonly<Record<string, string>>;
     /** How the theme's Artifacts look. Left out, Artifacts keep the host's card. */
     artifact?: ThemeArtifact;
+    /** Optional art choices for custom Applets. Omitted means no presets. The host owns selection and rendering. */
+    appletPresets?: readonly ThemeAppletPreset[];
 }
 /** theme.json. Every other file in the package is a picture, a sound, a font, a licence text or JSON. */
 export interface BuildThemeManifest {

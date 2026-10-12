@@ -18,12 +18,12 @@ flowchart LR
 ```text
 package/
   theme.json          # contractVersion: 3, id, title, assets, presentation, optional updatedAt
-  presentation.json   # tokens, fonts, optional hud, sound and icons
+  presentation.json   # tokens, fonts, optional hud, sound, icons, artifact and appletPresets
   assets/             # every picture, sound, font and licence the JSON names
   *.json              # other data the host's World code reads (the Village's lamps.json, assets/art.json)
 ```
 
-`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons` and `artifact`; a field that would place the World, an Applet page or the HUD is refused, because the host lays them out.
+`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons`, `artifact` and `appletPresets`; a field that would place the World, an Applet page or the HUD is refused, because the host lays them out.
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-10T07:10:00Z`); it is informational. `contractVersion` alone controls compatibility; source hashes identify the copied contents.
 
@@ -38,9 +38,16 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 | `hud.skin` (optional) | Nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). |
 | `sound.events` (optional) | An audio file per business event: `applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`. |
 | `icons` (optional) | The theme's picture of an Applet by Applet key (`png`, `webp` or `svg`). The host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. |
+| `appletPresets` (optional) | Reusable icon/background pairs for custom Applets, with a unique `id`, `title`, `description`, `category`, `icon` and `background`. Both images are package-local `png`, `webp` or `svg` files. |
 | `artifact` (optional) | How the theme's Artifacts look, as static files ([Artifacts](#artifacts)). |
 
 Anything left out keeps the shared look, sounds and pictures.
+
+### Custom Applet art presets
+
+The host reads `themeAppletPresets()` from `ui/themes/index.ts`. It returns the active theme's entries with `icon` and `background` resolved to published URLs; a theme without presets returns an empty list. IDs are stable within the theme. Presets are art choices, not Applet keys: they neither register providers nor create Applets, authorize actions or connect user data. The host owns selection, responsive layout and live HTML content.
+
+The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presentation.json`. The [source catalog](../styles/builtin/presets/personal-scenes/README.md) contains the full visual gallery and research. An Applet creation picker is not connected yet. For example, host code can read `themeAppletPresets().find(p => p.id === 'meal-planner')` and use its image URLs.
 
 ### Artifacts
 

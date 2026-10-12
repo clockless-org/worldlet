@@ -2,7 +2,7 @@
 
 **cozy-miniature@1.0.0** is the only supported style; it is the style of the Village [Theme Pack](../../themes/README.md), the only theme. World, Applets, Fox and application HUD use its shared inventory/tokens. There is no theme picker.
 
-Reusable [personal Applet scene presets](presets/personal-scenes/README.md) provide paired icons and backgrounds for custom Applet authoring. They are an asset catalog, not a runtime preset picker.
+Reusable [personal Applet scene presets](presets/personal-scenes/README.md) provide paired icons and backgrounds for custom Applet authoring. Optimized copies ship in the Village SIM and are available through `themeAppletPresets()`; the preset picker is not connected yet.
 
 Start with [STYLE.md](STYLE.md): the currently used World, Applet and Fox images are the visual authority, not historical concepts or a new generation. Day/night references resolve directly to the live 4K pair.
 

@@ -31,6 +31,16 @@ try{
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.png'}}));
  assert.throws(()=>parseThemePresentation({...presentation,icons:{Gmail:'assets/gmail.png'}}),/applet icons/);
  assert.throws(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.txt'}}),/applet icons/);
+ // Presets are optional reusable art, with stable unique ids and package-local images, never page code or layout.
+ const preset={id:'reading',title:'Reading',description:'A place for books',category:'Learning',icon:'assets/plate.svg',background:'assets/plate.svg'};
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,appletPresets:[]}));
+ for(const invalid of [[{...preset,background:'https://example.com/bg.png'}],[{...preset,icon:'assets/../escape.png'}],[{...preset,background:'assets/page.html'}],[{...preset,layout:{x:10}}],[{...preset,title:''}], [preset,preset], [null]]){
+  assert.throws(()=>parseThemePresentation({...presentation,appletPresets:invalid}),/Invalid build theme/);
+ }
+ presentation.appletPresets=[preset];
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
+ await write('first');await assert.rejects(validateBuildTheme(source),/Missing declared asset/);
+ await fs.writeFile(path.join(source,'assets/plate.svg'),'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"/>');
  // A theme's Artifact look is static files it names: rules and prompt in Markdown, reference pictures, materials, colours.
  const artifact={style:'assets/artifact/STYLE.md',prompt:'assets/artifact/PROMPT.md',references:[{image:'assets/artifact/a.webp',role:'Primary'}],materials:[{id:'paper',image:'assets/artifact/paper.webp',usage:'Paper'}],colors:{paper:'#f7efdc',moss:'#315f48'}};
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,artifact}));
@@ -52,6 +62,8 @@ try{
  assert.equal(await fs.readFile(lock,'utf8'),initial,'importing another theme leaves the first untouched');
  assert.match(await fs.readFile(path.join(consumer,'ui/theme-packages/index.ts'),'utf8'),/THEME_PACKAGES=\[theme_first,theme_second\]/);
  const output=path.join(tmp,'output');await fs.mkdir(path.join(output,'theme-assets'),{recursive:true});await fs.writeFile(path.join(output,'theme-assets','stale.txt'),'old');assert.deepEqual((await buildThemeSource(consumer,output)).map(t=>t.id),['first','second']);await assert.rejects(fs.stat(path.join(output,'theme-assets/stale.txt')));assert.equal(await fs.readFile(path.join(output,'theme-assets/second/test.txt'),'utf8'),'fixture');
+ assert.equal(await fs.readFile(path.join(output,'theme-assets/first/plate.svg'),'utf8'),await fs.readFile(path.join(source,'assets/plate.svg'),'utf8'),'preset art survives import and publication');
+ assert.deepEqual(JSON.parse(await fs.readFile(path.join(consumer,'ui/theme-packages/first/presentation.json'),'utf8')).appletPresets,[preset]);
  // Code and stylesheets are refused, wherever they sit in the package.
  for(const file of ['entry.ts','theme.css','assets/draw.js']){await fs.writeFile(path.join(source,file),'export default 1');await assert.rejects(validateBuildTheme(source),/A theme is static/);await fs.rm(path.join(source,file));}
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify({...presentation,icons:{gmail:'assets/missing.png'}}));await assert.rejects(validateBuildTheme(source),/Missing declared asset/);

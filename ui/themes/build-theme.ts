@@ -32,6 +32,11 @@ export function themeAppletIcon(key:string):string|undefined{
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
  return typeof src==='string'&&src?src:undefined;
 }
+/** Reusable custom-Applet art, with URLs ready for the host to display. These do not create Applets or connect data. */
+export function themeAppletPresets(){
+ return (active.package.presentation.appletPresets??[]).map(p=>({...p,
+  icon:themeAssetURL(active.id,p.icon),background:themeAssetURL(active.id,p.background)}));
+}
 /** The active theme's Artifact look (presentation.json `artifact`) with every file as a published URL, or null when the
  * theme leaves Artifacts to the host's card. Package paths stay alongside, for a reader that loads the files itself. */
 export function themeArtifact(){
