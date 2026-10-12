@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {CLAUDE_CODE_SIGN_IN_EXPIRED,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {claudeCodeNeedsSignIn,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -451,8 +451,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
    // Background work (the Attention check) is its World tool calls; a conversation turn still needs words.
    const outcome=finishLocalHarness(id,stream,{code,stderr:harness.stderr.text},body._background===true?calls:0);
    if('error' in outcome){
-    // Claude Code's sign-in ran out: its own sign-in page opens in the browser by itself, once per launch.
-    if(outcome.error===CLAUDE_CODE_SIGN_IN_EXPIRED)signInOnce(this.install,harnessEnvironment(this.install,this.environment));
+    // Claude Code's sign-in ran out or never happened: its own sign-in page opens in the browser by itself, once per launch.
+    if(claudeCodeNeedsSignIn(outcome.error))signInOnce(this.install,harnessEnvironment(this.install,this.environment));
     // Nothing shown and no World tool called yet, the same turn can simply run again. Background work (an Applet's
     // analysis, the Attention check) is a bounded pass that reads, then saves items by their IDs, with no one watching:
     // it runs again also when the model turned busy mid-pass, after its reads (Mac Alpha 4320, #429).
