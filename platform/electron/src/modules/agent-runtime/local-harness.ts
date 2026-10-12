@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {CLAUDE_CODE_SIGN_IN_EXPIRED,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {CLAUDE_CODE_SIGN_IN_EXPIRED,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -23,6 +23,13 @@ import {HARNESS_SCHEDULES} from './harness-schedule.ts';
 import {HARNESS_AGENTS} from './harness-agents.ts';
 import {runSendCommand} from './harness-send.ts';
 import {signInOnce} from './provider-sign-in.ts';
+import {setTimeout as sleep} from 'node:timers/promises';
+
+/** A turn the provider turned away before it said or did anything because its model was busy for everyone. */
+class ModelBusy extends WorldletError {}
+/** Waits before each new try of a turn whose model was busy: a busy model is usually free again within seconds
+ * (Mac Alpha 4312's onboarding mail conversation failed on Codex's "Selected model is at capacity", #416). */
+export const BUSY_RETRIES=[4000,15000];
 
 // A Harness the person already runs here (Claude Code, Codex, Hermes Agent, OpenClaw, pi) as
 // Fox's Agent. Core owns the catalog and the per-command turn; this file finds the executables and runs a Fox
@@ -328,7 +335,19 @@ export class LocalHarnessRuntime implements AgentRuntime {
   if(!fs.existsSync(this.install.command))return {ready:false,name:this.install.title,provider:localHarnessAdapterId(this.install.id),error:`${this.install.title} is no longer installed.`};
   return {ready:true,name:this.install.title,provider:localHarnessAdapterId(this.install.id),capabilities:{streaming:true,tools:localHarness(this.install.id).worldTools,cancel:true,steer:false,memory:false,sessions:this.conversation!==null,routines:false}};
  }
+ /** One turn; tried again, after a wait, while the provider turns it away as busy before anything happened. */
  private async execute(body:Row,home:string,onEvent:AgentEventHandler):Promise<Row> {
+  for(let tried=0;;tried++){
+   try{return await this.attempt(body,home,onEvent);}
+   catch(error){
+    if(!(error instanceof ModelBusy)||tried>=BUSY_RETRIES.length||this.cancelled)throw error;
+    if(body._background!==true)await onEvent(agentEvent({type:'progress',name:`${this.install.title}'s model is busy right now. Trying again…`}));
+    await sleep(BUSY_RETRIES[tried]);
+    if(this.cancelled)throw new AgentCancelled();
+   }
+  }
+ }
+ private async attempt(body:Row,home:string,onEvent:AgentEventHandler):Promise<Row> {
   if(this.child)throw new WorldletError('This Agent is already working.');
   this.cancelled=false;
   const id=this.install.id;
@@ -434,6 +453,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
    if('error' in outcome){
     // Claude Code's sign-in ran out: its own sign-in page opens in the browser by itself, once per launch.
     if(outcome.error===CLAUDE_CODE_SIGN_IN_EXPIRED)signInOnce(this.install,harnessEnvironment(this.install,this.environment));
+    // Nothing shown and no World tool called yet: the same turn can simply run again.
+    if(!started&&calls===0&&modelAtCapacity(outcome.error))throw new ModelBusy(outcome.error);
     throw new WorldletError(outcome.error);
    }
    if(!started&&outcome.message)await say(outcome.message);
