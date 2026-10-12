@@ -11,7 +11,7 @@ try{
   if(b.action==='snapshot')return {workspaceId:'phone-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
   if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
   if(b.action==='phonePair'&&b.kind==='agent'){if(b.operation==='start')w.agentPairing={state:'waiting',link:'worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end')w.agentPairing={state:'none'};return w.agentPairing;}
-  if(b.action==='phonePair'){if(b.operation==='start')w.pairing={state:'waiting',link:'worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end')w.pairing={state:'none'};return w.pairing;}
+  if(b.action==='phonePair'){if(b.operation==='start')w.pairing={state:'waiting',link:'worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end'){w.pairing={state:'none'};setTimeout(()=>w.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:w.pairing})));}return w.pairing;}
   if(b.action==='phonePublish')return {sent:true};
   if(b.action==='order'&&b.operation==='send')return {available:true,ready:true,sent:{id:'order:order.x.'+b.id,screenshots:1,logLines:3,woke:true}};
   if(b.action==='agentChat'){w.worldletAgentEvent(b.id,{type:'progress',name:'read_mail'});w.worldletAgentEvent(b.id,{type:'delta',text:'Hello '});await new Promise(r=>setTimeout(r,400));w.worldletAgentEvent(b.id,{type:'delta',text:'from'});await new Promise(r=>setTimeout(r,400));return {message:'Hello from Fox.'};}
@@ -34,9 +34,14 @@ try{
  // The host reports the phone's first poll.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:{state:'paired',phone:{name:'Kelvin’s iPhone',version:'1.0'},seenAt:Date.now(),push:{platform:'apns'}}})));
  await phone.getByText('Paired with Kelvin’s iPhone').waitFor();await phone.getByText('Active now').waitFor();await phone.getByText('Notifications on').waitFor();
+ // Paired, Fox's Phone button steps aside (owner Order 2026-10-11).
+ const phoneButton=page.locator('.companion-side .companion-phone-button');
+ assert.equal(await phoneButton.getAttribute('hidden'),'','a paired phone hides the Phone button');
  await page.screenshot({path:'/tmp/phone-pairing-paired.png'});
  await phone.getByRole('button',{name:'Unpair',exact:true}).click();await phone.getByRole('button',{name:'Pair phone',exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&!c.kind).map(c=>c.operation)),['status','start','end']);
+ await phoneButton.waitFor();// unpaired (the host reports the change, as its relay does), the Phone button is back
+ // One status read for Fox's Phone button as the World starts, one for the panel, then pairing and unpairing.
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&!c.kind).map(c=>c.operation)),['status','status','start','end']);
  // Another computer (core/phone/README.md#another-computers-agent): its code is text to copy, then the paired laptop.
  await phone.getByRole('button',{name:'Pair another computer',exact:true}).click();
  await phone.locator('.companion-phone-code').getByText('worldlet://agent?v=1&s=',{exact:false}).waitFor();
