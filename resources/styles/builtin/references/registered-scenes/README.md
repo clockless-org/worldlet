@@ -2,7 +2,8 @@
 
 | Collection | Asset groups | Registered HTML surfaces | Existing art awaiting registration |
 | --- | ---: | ---: | ---: |
-| Core | 14 | 🟢 4 | 🟡 10 |
+| Core everyday tools | 9 | 🟢 4 | 🟡 5 |
+| Individual playable games (separate from everyday tools) | 5 | 0 | 🟡 5 |
 | Generic scenes | 16 | 🟢 16 | 0 |
 | Brand-specific products and external games | 100 | 0 | 🟡 100 |
 | Total existing art selections | 130 | 20 | 110 |
@@ -18,11 +19,11 @@ The nine existing everyday tools are Mail, Calendar, Notes, Reminders, Weather, 
 | Files | Browse local files, downloads and Agent-created documents; offer document preview | 🔴 Planned; no dedicated icon, registered background or runtime Applet yet |
 | Clock | World time, alarms, timers and stopwatch; optional focus timer | 🔴 Planned; no dedicated icon, registered background or runtime Applet yet |
 
-After both additions are implemented, the everyday tool count becomes 11 and the core art count becomes 16 including games. The planned total is 132 art groups (16 core + 16 generic + 100 branded); the status table above counts existing selections only.
+Files and Clock are confirmed additions, not completed implementations. After both additions are implemented, the everyday tool count becomes 11 and the core art count becomes 16 including games. The planned total is 132 art groups (16 core + 16 generic + 100 branded); the status table above counts existing selections only.
 
 Ongoing is an internal type for persistent conversations brought from other Agents, not an everyday tool to place by itself. It is not installed by default. A kept conversation should use a generic scene matching its actual subject, such as meal planning, travel or a project. Its runtime mechanism and fallback art remain available, but its standalone art group is excluded from this curated library. See [ongoing conversations](../../../../../core/tasks/README.md#ongoing-things).
 
-Artifact, Journal and Settings are system surfaces outside the Applet count. The reusable personal-journal preset is a separate art choice.
+Artifact, Journal and Settings are system surfaces outside the Applet count. Games as a hub and App Store as a marketplace are also outside the basic-Applet comparison; neither is a planned core tool. Individual playable games remain separate from everyday tools. The reusable personal-journal preset is a separate art choice.
 
 ## The 100 branded selections
 
@@ -32,60 +33,96 @@ Keep the branded collection at 100 groups. Exclude three narrow external mini-ga
 
 Apple's current US [iPhone 17 specification](https://www.apple.com/iphone-17/specs/) lists 48 built-in apps, counted on 2026-10-11. This device/region-specific list includes Apple's creative apps and system utilities; it is not a target count for Worldlet.
 
-Statuses describe repository structure, not feature acceptance: **Present** means an existing dedicated Applet/module; **Related** means only a website, partial module or art preset; **Planned** means confirmed but not implemented; **Absent** means no dedicated counterpart. Provider acceptance and platform availability require separate validation.
+Statuses describe repository structure, not feature acceptance: **Present** means an existing dedicated Applet/module; **Related** means only a website, partial module or art preset; **Planned** means confirmed but not implemented; **Absent** means no dedicated counterpart; **Excluded** means a hub or host surface outside this comparison. Provider acceptance and platform availability require separate validation.
+
+The 48 source entries are retained for completeness: **8 present, 21 related, 2 planned, 14 absent and 3 excluded**. The comparison scope is 45 entries after exclusions. Meetings is an additional Worldlet tool outside this iPhone list.
+
+### 🟢 Dedicated Applet exists (8)
 
 | # | iPhone app | Status | Current Worldlet counterpart |
 | --- | --- | --- | --- |
-| 1 | App Store | Related | Applet discovery/library exists; no equivalent app marketplace |
-| 2 | Books | Related | Reading/research art preset; no standalone book library or reader |
-| 3 | Calculator | Absent | No standalone calculator Applet |
 | 4 | Calendar | Present | Calendar Applet; registered art updated |
-| 5 | Camera | Absent | No standalone camera Applet |
-| 6 | Clock | Planned | Confirmed next core tool; art and runtime pending |
-| 7 | Compass | Absent | No compass Applet |
-| 8 | Contacts | Absent | Messages can resolve contact names, but no standalone contacts Applet |
+| 23 | Mail | Present | Mail Applet; registered art updated |
+| 26 | Messages | Present | Messages Applet using native records |
+| 29 | Notes | Present | Notes Applet; registered art updated |
+| 37 | Reminders | Present | Reminders Applet; registered art updated |
+| 38 | Safari | Present | Browser Applet |
+| 45 | Voice Memos | Present | Voice Memos Applet using native records |
+| 48 | Weather | Present | Weather Applet; remains core |
+
+### 🟡 Related capability only (21)
+
+| # | iPhone app | Status | Current Worldlet counterpart |
+| --- | --- | --- | --- |
+| 2 | Books | Related | Reading/research art preset; no standalone book library or reader |
 | 9 | FaceTime | Related | Zoom and Teams launch-only web entries; no native calling counterpart |
-| 10 | Files | Planned | Confirmed next core tool; art and runtime pending |
-| 11 | Find My | Absent | No device/item-location Applet |
 | 12 | Fitness | Related | Strava/Fitbit web entries and fitness art preset; no unified fitness tool |
 | 13 | Freeform | Related | Artifacts display structured cards; no freeform collaborative whiteboard |
-| 14 | Games | Present | Built-in game Applets and external web games; not Apple Games feature parity |
-| 15 | GarageBand | Absent | No music creation Applet |
 | 16 | Health | Related | Oura/Fitbit web entries and wellness presets; no unified health-record tool |
-| 17 | Home | Absent | No smart-home control Applet; home-care preset is household planning |
 | 18 | iMovie | Related | CapCut launch-only web entry; no built-in video editor |
-| 19 | iTunes Store | Absent | No media purchase storefront |
 | 20 | Journal | Related | System Journal retains Agent artifact cards; personal-journal art preset exists, not an equivalent personal diary editor |
 | 21 | Keynote | Related | Google Slides marked building; PowerPoint launch-only |
-| 22 | Magnifier | Absent | No magnifier Applet |
-| 23 | Mail | Present | Mail Applet; registered art updated |
 | 24 | Maps | Related | Google Maps embedded website; no generic core Maps tool |
-| 25 | Measure | Absent | No measuring Applet |
-| 26 | Messages | Present | Messages Applet using native records |
 | 27 | Music | Related | Apple Music and Spotify launch-only web entries |
 | 28 | News | Related | Attention surfaces relevant information; no standalone news reader |
-| 29 | Notes | Present | Notes Applet; registered art updated |
 | 30 | Numbers | Related | Google Sheets marked building; Excel launch-only |
 | 31 | Pages | Related | Google Docs marked building; Word launch-only |
-| 32 | Passwords | Absent | No user-facing password-manager Applet; connection credentials are a separate concern |
-| 33 | Phone | Absent | No standalone dialer Applet |
 | 34 | Photos | Related | Google Photos launch-only; no generic local photo library |
 | 35 | Podcasts | Related | Apple Podcasts launch-only web entry |
 | 36 | Preview | Related | Acrobat launch-only entry; document preview belongs in the planned Files scope |
-| 37 | Reminders | Present | Reminders Applet; registered art updated |
-| 38 | Safari | Present | Browser Applet |
-| 39 | Settings | Present | Existing host settings surface; not an Applet |
 | 40 | Shortcuts | Related | Agent/Routines handle some automation; no equivalent visual workflow editor |
-| 41 | Stocks | Absent | No dedicated market/watchlist Applet; financial-service entries are not a substitute |
 | 42 | Tips | Related | Onboarding/tour and documentation; no separate tips Applet |
 | 43 | Translate | Related | Language-practice art preset; no standalone translation Applet |
 | 44 | TV | Related | Netflix and YouTube web entries; no Apple TV counterpart |
-| 45 | Voice Memos | Present | Voice Memos Applet using native records |
 | 46 | Wallet | Related | Payment-service entries such as PayPal/Alipay; no unified cards, passes or wallet |
+
+### 🔵 Confirmed additions, not implemented (2)
+
+| # | iPhone app | Status | Current Worldlet counterpart |
+| --- | --- | --- | --- |
+| 6 | Clock | Planned | Confirmed next core tool; art and runtime pending |
+| 10 | Files | Planned | Confirmed next core tool; art and runtime pending |
+
+### 🔴 No dedicated counterpart (14)
+
+| # | iPhone app | Status | Current Worldlet counterpart |
+| --- | --- | --- | --- |
+| 3 | Calculator | Absent | No standalone calculator Applet |
+| 5 | Camera | Absent | No standalone camera Applet |
+| 7 | Compass | Absent | No compass Applet |
+| 8 | Contacts | Absent | Messages can resolve contact names, but no standalone contacts Applet |
+| 11 | Find My | Absent | No device/item-location Applet |
+| 15 | GarageBand | Absent | No music creation Applet |
+| 17 | Home | Absent | No smart-home control Applet; home-care preset is household planning |
+| 19 | iTunes Store | Absent | No media purchase storefront |
+| 22 | Magnifier | Absent | No magnifier Applet |
+| 25 | Measure | Absent | No measuring Applet |
+| 32 | Passwords | Absent | No user-facing password-manager Applet; connection credentials are a separate concern |
+| 33 | Phone | Absent | No standalone dialer Applet |
+| 41 | Stocks | Absent | No dedicated market/watchlist Applet; financial-service entries are not a substitute |
 | 47 | Watch | Absent | No watch-management Applet |
-| 48 | Weather | Present | Weather Applet; remains core |
+
+### ⚪ Outside the basic-Applet scope (3)
+
+| # | iPhone app | Status | Current Worldlet counterpart |
+| --- | --- | --- | --- |
+| 1 | App Store | Excluded | Marketplace; excluded from the basic-Applet scope |
+| 14 | Games | Excluded | Game hub; individual playable game Applets are counted separately |
+| 39 | Settings | Excluded | Host settings surface; not a standalone Applet |
 
 Prioritize Files and Clock now. Calculator and Contacts are the clearest next candidates if the everyday toolkit expands again. Meetings is Worldlet-specific and should not be treated as the equivalent of FaceTime.
+
+## Local data for the planned tools
+
+Prefer the user’s existing records over a separate demo-only store. The host obtains authorized local data through native adapters, Core supplies shared records and actions, and the Applet renders live HTML in the SIM’s registered surfaces. Theme assets do not read files, hold credentials or request OS permissions. A registered background alone does not connect an account or a local application. See the [connector reference](../../../../../core/applets/INTEGRATIONS.md#local-home-adapters) for implementation and acceptance evidence.
+
+- **Files:** start with explicitly selected local folders and Agent-created documents. File selection, enumeration and preview must use the host’s filesystem boundary; show the real source and open the original file. A cloud file visible locally may still need downloading. Do not imply access to every cloud provider or private application database.
+- **Clock:** start with system time, world time, stopwatch and Worldlet-owned timers/alarms. Background delivery and restart behavior need runtime implementation and validation. Synchronizing existing Apple Clock alarms is not established and is not part of the initial promise.
+- **Other local apps:** reuse existing Calendar/Reminders, Notes, Messages and Voice Memos adapters where supported; Meetings can use calendar meeting records. Mail currently uses the Google connection, while a local Apple Mail adapter remains proposed. Obsidian demonstrates the chosen-folder approach for a branded app. A web launcher is not a local-data connector.
+
+Apple-specific adapters concern data available on the Mac, including data already synced there. They do not provide arbitrary access to iPhone app storage or establish Windows parity. Each adapter needs its own permission and live-account acceptance checks; code and sample previews alone are not evidence that a user's data is connected. Voice Memos’ optional native-library reader depends on an undocumented local store, so selected audio folders remain an important fallback.
+
+If the toolkit expands later, Contacts and Photos have official local-data APIs worth evaluating: [Contacts](https://developer.apple.com/documentation/contacts/accessing-the-contact-store) and [PhotoKit](https://developer.apple.com/documentation/photokit). These are candidates, not confirmed additions or implemented connectors.
 
 ## Design and integration
 
