@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {WebContentsView,shell,type Session} from 'electron';
+import {WebContentsView,type Session} from 'electron';
+import {openInBrowser} from '../../system-browser.ts';
 import {digest,readJSON,writeJSON,WorldletError} from '../../files.ts';
 import {VAULT,type VaultService} from '../../host/services.ts';
 import {publicPage} from './rules.ts';
@@ -56,7 +57,7 @@ export class YouTubeService {
   if(!this.forgot){this.forgot=true;try{this.forgetAccount();}catch{}}
   if(op==='external'){
    const id=videoID(body.id);
-   try{await shell.openExternal('https://www.youtube.com/watch?v='+id);}catch{throw new WorldletError('Could not open your browser.');}
+   try{await openInBrowser('https://www.youtube.com/watch?v='+id);}catch{throw new WorldletError('Could not open your browser.');}
    return {ok:true};
   }
   if(op==='status')return this.status();

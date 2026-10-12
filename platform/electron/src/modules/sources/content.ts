@@ -1,4 +1,4 @@
-import {shell} from 'electron';
+import {openInBrowser} from '../../system-browser.ts';
 import {core} from '../../core.ts';
 import {WorldletError,errorMessage as message} from '../../files.ts';
 import {canBuild,referenceDate,type WorldStore} from '../../store/world-store.ts';
@@ -186,7 +186,7 @@ export async function doorDash(ctx:SourcesContext,operation:string):Promise<Row>
  const {store}=ctx;
  if(!store.writable||store.sampleEnabled())throw new WorldletError('Use DoorDash in your personal world.');
  if(!['status','login','disconnect','waitlist'].includes(operation))throw new WorldletError('Ask Fox to help with your DoorDash cart.');
- if(operation==='waitlist'){await shell.openExternal('https://forms.gle/gvCQZvu9C1EKA6aM6');return {ok:true};}
+ if(operation==='waitlist'){await openInBrowser('https://forms.gle/gvCQZvu9C1EKA6aM6');return {ok:true};}
  if(store.busy)throw new WorldletError('Wait for the current operation to finish.');
  const work=async()=>{
   const result=await ctx.sourceAccess().run({action:'sourceRequest',provider:'doordash',operation},ctx.home());

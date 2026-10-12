@@ -1,4 +1,4 @@
-import {displayReleaseVersion} from '../../core/distribution/index.ts';
+import {defaultBrowserText,displayReleaseVersion} from '../../core/distribution/index.ts';
 import {BROWSER_HOME,createBrowserHome} from '../../core/browser/index.ts';
 import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
@@ -309,7 +309,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   {id:'fox',label:'Fox',hint:'Name, look and personality',page:true,show:target=>{target.append(pages.fox);}},
   {id:'model',label:'Agent',hint:'What it runs on and may use',show:modelSetting},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
-  {id:'general',label:'General',hint:'Updates, start at login, usage counts',show:async target=>{
+  {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',show:async target=>{
    target.append(subhead('Updates'));await updates(target);
    // The one privacy choice left after the Privacy section went (owner request 2026-10-10): the website's privacy page
    // promises that usage counts can be turned off, and off stops all reporting.
@@ -324,6 +324,21 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     target.append(subhead('Usage counts'),row,said);await draw();
    }
    target.append(subhead('Open at login'));await screen('login')(target);
+   // Off until turned on (owner request 2026-10-12): links from other apps then open in their own Thing or the Browser.
+   {
+    const turn=ticket,said=status(),row=el('div','companion-settings-row'),words=el('div');row.dataset.setting='default-browser';
+    const draw=async()=>{
+     const info=await call('defaultBrowser').catch(()=>null);if(turn!==ticket||!info)return;
+     const on=info.status==='on';
+     words.replaceChildren(el('strong','',on?'Worldlet is your default browser':'Worldlet is not your default browser'),el('span','',defaultBrowserText(info.status,info.platform)));
+     row.replaceChildren(words);
+     if(info.status!=='unsupported')row.append(action(on?'Stop using':'Use Worldlet',async()=>{said.textContent='';try{await call('defaultBrowser',{operation:'set',enabled:!on});await draw();}catch(e){said.textContent=(e as Error).message||'Could not change it.';}},{id:'default-browser'}));
+    };
+    // The Mac's confirmation or a choice in Windows Settings lands later; the host says when the status moved.
+    const moved=()=>{if(!row.isConnected){window.removeEventListener('worldlet:default-browser',moved);return;}void draw();};
+    window.addEventListener('worldlet:default-browser',moved);
+    target.append(subhead('Default browser'),row,said);await draw();
+   }
    // The Browser's own settings, folded away (owner request 2026-10-11: Settings has too much).
    const general=target;
    {

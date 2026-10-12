@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {shell} from 'electron';
+import {openInBrowser} from '../../system-browser.ts';
 import {digest,ensureDirectory,WorldletError} from '../../files.ts';
 import {VAULT,type VaultService} from '../../host/services.ts';
 import {bundledResource} from '../../resources.ts';
@@ -115,7 +115,7 @@ export class StripeService {
    const id=typeof body.id==='string'?body.id:'';
    if(id)stripeIdentifier(id,'cus_');
    const mode=this.status().mode==='test'?'test/':'';
-   try{await shell.openExternal('https://dashboard.stripe.com/'+mode+(id?'customers/'+id:'dashboard'));}catch{throw new WorldletError('Could not open Stripe Dashboard.');}
+   try{await openInBrowser('https://dashboard.stripe.com/'+mode+(id?'customers/'+id:'dashboard'));}catch{throw new WorldletError('Could not open Stripe Dashboard.');}
    return {ok:true};
   }
   if(op==='configure'||op==='complete'||op==='disconnect'){
@@ -130,7 +130,7 @@ export class StripeService {
     const data=await this.cli.run(['login','--non-interactive']);
     this.validate(epoch,false);
     const login=StripeCLI.loginSession(data);
-    try{await shell.openExternal(login.url);}catch{throw new WorldletError('Could not open Stripe authorization in your browser.');}
+    try{await openInBrowser(login.url);}catch{throw new WorldletError('Could not open Stripe authorization in your browser.');}
     this.pending={arguments:login.completion,epoch,mode};
     return {authorizing:true,verificationCode:login.code};
    }

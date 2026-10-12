@@ -4,7 +4,8 @@ import {browserBudget} from '../../../core/browser/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {app,crashReporter,ipcMain,shell,dialog,BaseWindow} from 'electron';
+import {app,crashReporter,ipcMain,dialog,BaseWindow} from 'electron';
+import {listenForLinks,openInBrowser} from './system-browser.ts';
 import {macDomain,resolveProfile,platformName,RELEASE_CHECKS} from './profile.ts';
 import {Preferences,MAC_IMPORT_KEYS} from './preferences.ts';
 import {WorldStore} from './store/world-store.ts';
@@ -41,6 +42,8 @@ let loginCheck:LoginItemCheckRequest|null=null;
 try{loginCheck=loginItemCheckRequest(process.argv);}catch(error){process.stderr.write(error.message+'\n');app.exit(2);}
 const launchedAt=new Date();
 registerWorldScheme();
+// A link another app opened while Worldlet is the default browser can arrive before `ready` (system-browser.ts).
+listenForLinks();
 // No public debugging port, whatever the launch arguments say: agent-browser reaches only the
 // selected page through webContents.debugger. One page plays sound at a time (Mac media rule).
 for(const name of ['remote-debugging-port','remote-debugging-pipe','remote-debugging-address','remote-allow-origins'])app.commandLine.removeSwitch(name);
@@ -161,7 +164,7 @@ async function start(){
  const quiet=profile.channel==='release'&&!capture&&!probe&&!loginCheck&&!profile.smoke&&openedAtLogin({platform:process.platform,argv:process.argv,wasOpenedAtLogin:process.platform==='darwin'?app.getLoginItemSettings({type:'mainAppService'}).wasOpenedAtLogin:false});
  startBackgroundLaunch(profile);
  world=new WorldWindow(profile,preload,{
-  openURL:url=>{const browser=host.optional<{openExternalRequest(url:string):void}>('browser');if(browser)browser.openExternalRequest(url);else void shell.openExternal(url);},
+  openURL:url=>{const browser=host.optional<{openExternalRequest(url:string):void}>('browser');if(browser)browser.openExternalRequest(url);else void openInBrowser(url);},
   loaded:()=>{sent='';for(const listener of loadedListeners)try{listener();}catch(error){diagnostics.record(error,'pageLoaded');}},
   navigating:()=>{for(const listener of reloadListeners)try{listener();}catch(error){diagnostics.record(error,'pageReload');}},
   closing:()=>host.optional<{shouldKeepOpen():boolean}>('desktopCompanion')?.shouldKeepOpen()??false,

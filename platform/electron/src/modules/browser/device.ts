@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
-import {WebContentsView,screen,session,shell,type BaseWindow,type Rectangle,type View} from 'electron';
+import {WebContentsView,screen,session,type BaseWindow,type Rectangle,type View} from 'electron';
+import {openInBrowser} from '../../system-browser.ts';
 import {PAGE_MEMORY,RAW_KINDS,WEB_RECORD,type WebRecord,webSite,desktopTaskPictureInPicturePlacement,googleSignInRejected,memoryPressure,focusHost,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusRecord,PAGE_FOCUS_LIMITS,type PageFocusPlan,type SiteFocusRecord,signInRejectedMessage,linkRefusedMessage,type RefusedLink,sitePage,taskPictureInPictureAspect,type MemoryReading,VIDEO_FORMATS,needsProprietaryVideo,videoFormatHost,carriedStorage,storageCarryScript,STORAGE_READ,readLoginSignal,loginSite,loginUsername,loginOffer,loginsFor,tabApplet,isBrowserTab} from '../../../../../core/browser/index.ts';
 import {SavedLogins} from './logins.ts';
 import {pageScript} from './page-scripts.ts';
@@ -1152,7 +1153,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
   }
   if(op==='external'){
    const target=this.externalDestination(typeof args.platform==='string'?args.platform:this.platform);
-   try{await shell.openExternal(target);}catch{throw new WorldletError('Could not open your browser. Try again.');}
+   try{await openInBrowser(target);}catch{throw new WorldletError('Could not open your browser. Try again.');}
    return {ok:true};
   }
   // This applies even in sample mode: a live X account is never fictional data.
