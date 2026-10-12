@@ -1,0 +1,69 @@
+// The shared Applet scene renderer (ui/applets/scene): the theme's painting and measured regions, laid out at one
+// uniform scale, each region wearing the theme's material; the Applet only fills the region. Another scene changes
+// where and how Mail is drawn without any change to Mail.
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+import {readFile} from 'node:fs/promises';
+import {parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
+import {launchTestBrowser} from './browser-test.ts';
+
+const village=JSON.parse(await readFile('ui/theme-packages/village/presentation.json','utf8'));
+assert.ok(parseThemePresentation(village).sceneMaterials?.paper,'Village gives its paper a material');
+for(const [bad,why] of [[{paper:{ink:'red'}},'colour'],[{glass:{ink:'#000000'}},'material'],[{paper:{shadow:'#000000'}},'role'],[{paper:{bodyFont:'url(x)'}},'font']] as const)
+ assert.throws(()=>parseThemePresentation({...village,sceneMaterials:bad}),/scene materials/,'rejects a bad '+why);
+
+const bundle=await build({entryPoints:['scripts/fixtures/applet-scene-entry.ts'],bundle:true,format:'iife',globalName:'Scene',write:false});
+const browser=await launchTestBrowser();
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:900}}),errors:string[]=[];page.on('pageerror',e=>errors.push(String(e)));
+ // The fixture serves the package's own picture, as the preview does; the World resolves it through themeAppletScene.
+ await page.route('http://scene.test/**',route=>{const path=new URL(route.request().url()).pathname;
+  return path==='/'?route.fulfill({contentType:'text/html',body:'<!doctype html>'}):route.fulfill({path:'ui/theme-packages/village'+path});});
+ await page.goto('http://scene.test/');
+ await page.setContent('<main id="shell" style="position:fixed;inset:0"><section id="host" style="position:absolute;inset:0"></section></main>');
+ await page.addStyleTag({content:await readFile('ui/applets/scene/applet-scene.css','utf8')+await readFile('ui/applets/gmail/focus.css','utf8')});
+ await page.addScriptTag({content:bundle.outputFiles[0].text});
+ const mount=(key:string,source:any)=>page.evaluate(([key,source])=>{const S=(window as any).Scene;(window as any).scene?.destroy();
+  const scene=(window as any).scene=S.mountAppletScene(document.getElementById('host'),key,{source,shell:document.getElementById('shell')});
+  S.renderMailOpen(scene.primary.element,[{id:'a',title:'Review the plan',attention:{state:'task',priority:'high'},record:{title:'Review the plan',from:'Alex <alex@example.com>',date:new Date().toISOString()}}],{connected:true,loaded:true},()=>{});
+  return scene.metrics;},[key,source]);
+ const expected=(registration:any,width:number,height:number)=>page.evaluate(([r,w,h])=>(window as any).Scene.fitThemeScene(r,w,h),[registration,width,height]);
+ const measure=()=>page.evaluate(()=>{const box=(s:string)=>{const r=document.querySelector(s)?.getBoundingClientRect();return r&&{x:r.x,y:r.y,width:r.width,height:r.height};};
+  const region=document.querySelector<HTMLElement>('.applet-scene-region[data-role=primary]')!,shell=document.getElementById('shell')!.style;
+  return {plate:box('.applet-scene-plate'),region:box('.applet-scene-region[data-role=primary]'),ink:getComputedStyle(region).getPropertyValue('--scene-ink').trim(),
+   font:getComputedStyle(region.querySelector('.scene-title')!).fontFamily,shellLeft:shell.getPropertyValue('--applet-scene-primary-left'),shellInk:shell.getPropertyValue('--scene-ink'),letters:region.querySelectorAll('.mail-letter').length};});
+ const near=(a:any,b:any,label:string)=>assert.ok(['x','y','width','height'].every(k=>Math.abs(a[k]-b[k])<=1),label+': '+JSON.stringify({a,b}));
+
+ const mail=village.appletScenes.gmail,source={background:mail.background,registration:mail.registration};
+ for(const [width,height] of [[1440,900],[1000,900],[1920,1080]]){
+  await page.setViewportSize({width,height});await mount('gmail',source);await page.waitForTimeout(50);
+  const fit=await expected(mail.registration,width,height),got=await measure();
+  near(got.plate,fit.image,'the painting keeps one uniform, uncropped scale at '+width);
+  near(got.region,fit.regions[0],'the region is where the theme measured it at '+width);
+  assert.equal(got.ink,village.sceneMaterials.paper.ink,'the region wears the paper material');
+  assert.match(got.font,/Georgia/,'titles use the material\'s display font');
+  assert.ok(Math.abs(parseFloat(got.shellLeft)-fit.regions[0].x)<=1,'the shell learns the region: '+got.shellLeft);
+  assert.equal(got.shellInk,village.sceneMaterials.paper.ink,'the shell learns the material for its reader');
+  assert.equal(got.letters,1);
+ }
+ // A narrow window: the painted paper would shrink text past reading, so a readable sheet lies over the painting and the
+ // shell's reader keeps its own narrow place.
+ await page.setViewportSize({width:700,height:900});await mount('gmail',source);await page.waitForTimeout(50);
+ const compact=await page.evaluate(()=>(window as any).scene.metrics);
+ assert.equal(compact.compact,true);assert.equal(compact.primary.width,700-32);
+ assert.equal(await page.evaluate(()=>document.getElementById('shell')!.dataset.appletScene),undefined,'a compact scene does not move the reader');
+ await page.setViewportSize({width:1920,height:1080});
+ // The same Mail on another painting: only the theme's data changed.
+ const browserScene=village.appletScenes.browser;
+ await mount('gmail',{background:browserScene.background,registration:browserScene.registration});
+ const fit=await expected(browserScene.registration,1920,1080),got=await measure();
+ near(got.region,fit.regions[0],'another scene moves Mail to its own region');
+ assert.equal(got.ink,village.sceneMaterials.screen.ink,'and dresses it in that region\'s material');assert.equal(got.letters,1);
+ // No painting: one sheet of paper, no picture.
+ const plain=await mount('unknown-applet',undefined);
+ assert.equal(plain.painted,false);assert.equal(await page.locator('.applet-scene-plate').count(),0);assert.equal((await measure()).letters,1);
+ await page.evaluate(()=>(window as any).scene.destroy());
+ assert.equal(await page.evaluate(()=>document.getElementById('shell')!.style.cssText),'position: fixed; inset: 0px;','destroy leaves the shell as it was');
+ assert.deepEqual(errors,[]);
+ console.log('PASS Applet scene: theme painting at one scale, measured regions, theme materials, plain fallback, Mail unchanged across scenes.');
+}finally{await browser.close();}

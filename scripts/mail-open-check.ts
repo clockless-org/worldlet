@@ -13,38 +13,38 @@ assert.equal(mailCategory({record:{labelIds:['SPAM','CATEGORY_PROMOTIONS']}}),'s
 assert.equal(mailCategory({attention:{state:'task'},record:{labelIds:['SPAM']}}),'attention');
 assert.equal(mailCategory({record:{title:'Special offer'}}),'other','never infer spam from a title');
 
-// Exercise the actual Open renderer with more than nine attention threads.
+// Exercise the actual Open renderer in a real scene (ui/applets/scene) with more than nine attention threads.
 const {build}=await import('esbuild'),{readFile}=await import('node:fs/promises'),{launchTestBrowser}=await import('./browser-test.ts');
-const bundle=await build({entryPoints:['ui/applets/gmail/open.ts'],bundle:true,format:'iife',globalName:'MailOpen',write:false});
+const bundle=await build({entryPoints:['scripts/fixtures/mail-open-entry.ts'],bundle:true,format:'iife',globalName:'MailOpen',write:false});
 const browser=await launchTestBrowser();
 try{
  const page=await browser.newPage({viewport:{width:1440,height:950}});
- await page.setContent('<div id="notionWorld" style="position:absolute;inset:0;background:#b8c1a0;font-family:system-ui"><section class="pixi-applet-stage" data-installation="true" data-applet="gmail"></section></div>');
- await page.addStyleTag({content:await readFile('ui/shell/pixi-world.css','utf8')});
+ await page.setContent('<div id="notionWorld" style="position:absolute;inset:0;font-family:system-ui"><section class="pixi-applet-stage" data-scene="gmail" data-applet="gmail"></section></div>');
+ for(const file of ['ui/shell/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/gmail/focus.css'])await page.addStyleTag({content:await readFile(file,'utf8')});
  await page.addScriptTag({content:bundle.outputFiles[0].text});
- const artRoot='resources/styles/builtin/assets/applets/gmail/mail-parts/';
- await page.evaluate(parts=>(window as any).__WORLDLET_25D_ASSETS__={mailParts:Object.fromEntries(Object.entries(parts).map(([key,data])=>[key,URL.createObjectURL(new Blob([Uint8Array.from(atob(data.split(',')[1]),c=>c.charCodeAt(0))],{type:'image/png'}))]))},{board:'data:image/png;base64,'+(await readFile(artRoot+'wall-board-v5.png')).toString('base64'),'pinned-envelope':'data:image/png;base64,'+(await readFile(artRoot+'pinned-envelope-v2.png')).toString('base64')});
- await page.evaluate(()=>{const items=Array.from({length:13},(_,i)=>({id:String(i),title:['Review the launch plan','Confirm Friday’s meeting','Feedback on the proposal'][i%3],attention:i<12?{state:'task',priority:'high'}:null,record:{title:['Review the launch plan','Confirm Friday’s meeting','Feedback on the proposal'][i%3],from:['Alice Chen <alice@example.com>','Sam Miller <sam@example.com>','Jamie Lee <jamie@example.com>'][i%3],date:new Date(Date.now()-3600000*(i+1)).toISOString(),threadId:String(i)}}));(window as any).MailOpen.renderMailOpen(document.querySelector('section'),items,{connected:true},{},item=>(window as any).picked=item.id,()=>{});});
- assert.equal(await page.locator('.pixi-stage-item').count(),9);
- assert.equal(await page.locator('.mail-open-piles,.mail-board-pages').count(),0);
- assert.equal(await page.getByRole('heading',{name:'Needs Attention'}).count(),1);
- await page.locator('.pixi-stage-item').first().click();assert.equal(await page.evaluate(()=>(window as any).picked),'0');
- const fit=await page.locator('.mail-open-desk').evaluate((desk:HTMLElement)=>desk.scrollHeight<=desk.clientHeight&&desk.scrollWidth<=desk.clientWidth);assert.ok(fit,'nine letters fit without scrolling');
- await page.locator('.mail-board-paint').waitFor();
- await page.evaluate(async()=>{for(const img of document.querySelectorAll<HTMLImageElement>('.mail-board-paint,.mail-envelope-paint'))await img.decode();});
- await page.screenshot({path:'/tmp/mail-attention-board.png'});
+ const render=(items,value)=>page.evaluate(([items,value])=>{const w=window as any;w.scene?.destroy();w.scene=w.MailOpen.mountAppletScene(document.querySelector('section'),'gmail',{source:w.MailOpen.PLAIN_SCENE});w.MailOpen.renderMailOpen(w.scene.primary.element,items,value,item=>w.picked=item.id);},[items,value]);
+ const items=Array.from({length:13},(_,i)=>({id:String(i),title:['Review the launch plan','Confirm Friday’s meeting','Feedback on the proposal'][i%3],attention:i<12?{state:'task',priority:'high'}:null,record:{title:['Review the launch plan','Confirm Friday’s meeting','Feedback on the proposal'][i%3],from:['Alice Chen <alice@example.com>','Sam Miller <sam@example.com>','Jamie Lee <jamie@example.com>'][i%3],date:new Date(Date.now()-3600000*(i+1)).toISOString(),threadId:String(i)}}));
+ await render(items,{connected:true,loaded:true,accountLabel:'reader@example.test'});
+ assert.equal(await page.locator('.mail-letter').count(),9,'at most nine attention letters');
+ assert.equal(await page.locator('.mail-open-piles,.mail-board-pages,.mail-open-desk').count(),0);
+ assert.equal(await page.getByRole('heading',{name:'Needs your attention'}).count(),1);
+ assert.equal(await page.locator('.mail-account').textContent(),'reader@example.test');
+ await page.locator('.mail-letter').first().click();assert.equal(await page.evaluate(()=>(window as any).picked),'0');
  for(const width of [1440,1000,600]){
   await page.setViewportSize({width,height:950});
-  assert.ok(await page.locator('.pixi-stage-item').evaluateAll(cards=>cards.every(card=>{
-   const stamp=card.querySelector('.mail-envelope-avatar'),paint=card.querySelector('.mail-envelope-front'),a=stamp.getBoundingClientRect(),b=paint.getBoundingClientRect(),css=getComputedStyle(stamp);
-   const overlap=selector=>{const r=card.querySelector(selector).getBoundingClientRect();return a.left<r.right&&a.right>r.left&&a.top<r.bottom&&a.bottom>r.top;};
-   return stamp.parentElement===paint&&css.borderTopWidth==='0px'&&css.outlineStyle==='none'&&a.left>b.left+b.width*.8&&!overlap('strong')&&!overlap('.mail-letter-sender');
-  })),'one painted stamp, portrait inset and text do not overlap at '+width);
+  assert.ok(await page.locator('.mail-letter').evaluateAll(letters=>letters.every(letter=>{
+   const parts=['.mail-letter-avatar','.mail-letter-text','.mail-letter-side'].map(s=>letter.querySelector(s)!.getBoundingClientRect()),box=letter.getBoundingClientRect();
+   const apart=(a,b)=>a.right<=b.left+1||b.right<=a.left+1;
+   return apart(parts[0],parts[1])&&apart(parts[1],parts[2])&&parts.every(r=>r.left>=box.left-1&&r.right<=box.right+1);
+  })),'portrait, text and time never overlap at '+width);
+  assert.ok(await page.locator('.applet-scene-region').evaluate(r=>r.scrollWidth<=r.clientWidth+1),'no sideways scrolling at '+width);
  }
  await page.setViewportSize({width:1440,height:950});
- await page.screenshot({path:'/tmp/mail-stamp-fixed.png'});
- await page.evaluate(()=>{const panel=document.querySelector('section');panel.replaceChildren();(window as any).MailOpen.renderMailOpen(panel,[],{connected:true},{},()=>{},()=>{});});
- assert.equal(await page.locator('.mail-idle-pin').count(),0);
- assert.equal(await page.locator('.mail-board-empty,.mail-board-note').count(),0);
- console.log('PASS Mail attention board: nine threads, no bins, no scrolling, selectable envelopes.');
+ await page.screenshot({path:'/tmp/mail-open-scene.png'});
+ await render([],{connected:true,loaded:true});
+ assert.equal(await page.locator('.mail-empty').textContent(),'No letters need you right now.');
+ await render([],{connected:true,loaded:false,error:'Network timed out'});
+ assert.equal(await page.locator('.mail-empty').count(),0,'a failed read stays quiet');
+ assert.ok(!(await page.locator('.applet-scene').innerText()).includes('Network timed out'));
+ console.log('PASS Mail Open: nine attention threads on the scene\'s paper, selectable letters, quiet failed reads.');
 }finally{await browser.close();}

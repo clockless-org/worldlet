@@ -62,6 +62,26 @@ export interface ThemeSceneRegistration {
     /** Quiet painted space the host can reserve for its companion. */
     companion: readonly [number, number, number, number];
 }
+/** The materials a scene region can be painted as; the host renders an Applet's records and controls on each one. */
+export declare const THEME_SCENE_MATERIALS: readonly ["paper", "board", "screen"];
+export type ThemeSceneMaterialName = typeof THEME_SCENE_MATERIALS[number];
+/** How live HTML looks on one painted material: `#rrggbb` or `#rrggbbaa` colours and optional font stacks. The painting
+ * itself is the surface, so `fill` is only for a material that needs a wash under the text. A role left out keeps the
+ * host's, which it takes from the tokens. */
+export interface ThemeSceneMaterial {
+    ink?: string;
+    muted?: string;
+    line?: string;
+    accent?: string;
+    /** Text on an accent-coloured button. */
+    accentInk?: string;
+    /** An ordinary button's face and text. */
+    control?: string;
+    controlInk?: string;
+    fill?: string;
+    bodyFont?: string;
+    displayFont?: string;
+}
 /** A background tied to one Applet key. Its live records and controls are supplied by the host. */
 export interface ThemeAppletScene {
     background: string;
@@ -107,6 +127,8 @@ export interface ThemePresentation {
     appletPresets?: readonly ThemeAppletPreset[];
     /** Backgrounds bound to specific Applet keys; independent of reusable presets. */
     appletScenes?: Readonly<Record<string, ThemeAppletScene>>;
+    /** How Applet content looks on each region material (ui/applets/scene). Left out, a material keeps the host's look. */
+    sceneMaterials?: Partial<Record<ThemeSceneMaterialName, ThemeSceneMaterial>>;
 }
 /** theme.json. Every other file in the package is a picture, a sound, a font, a licence text or JSON. */
 export interface BuildThemeManifest {

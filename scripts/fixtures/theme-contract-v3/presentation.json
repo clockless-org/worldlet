@@ -127,5 +127,38 @@
         ]
       }
     }
+  },
+  "sceneMaterials": {
+    "paper": {
+      "ink": "#2b3a2e",
+      "muted": "#6a6553",
+      "line": "#4a54402e",
+      "accent": "#3f6b4f",
+      "accentInk": "#fff8e8",
+      "control": "#f3e8cc",
+      "controlInk": "#2b3a2e",
+      "displayFont": "Georgia, serif"
+    },
+    "board": {
+      "ink": "#2b3a2e",
+      "muted": "#5d5a49",
+      "line": "#3b3a2c33",
+      "accent": "#3f6b4f",
+      "accentInk": "#fff8e8",
+      "control": "#f6edd6",
+      "controlInk": "#2b3a2e",
+      "fill": "#fbf4e2d9",
+      "displayFont": "Georgia, serif"
+    },
+    "screen": {
+      "ink": "#1f2a24",
+      "muted": "#5b6660",
+      "line": "#1f2a2422",
+      "accent": "#315f48",
+      "accentInk": "#ffffff",
+      "control": "#eef1ec",
+      "controlInk": "#1f2a24",
+      "fill": "#fbfaf6"
+    }
   }
 }

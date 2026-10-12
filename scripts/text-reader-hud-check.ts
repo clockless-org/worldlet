@@ -15,7 +15,7 @@ await withBrowser(fileAccess,async browser=>{
   // Start each Applet from the overview, not from the previous Applet's open reader.
   await page.evaluate(()=>location.hash='');await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');
   await page.evaluate(key=>location.hash='object=app-'+key,key);
-  const item=page.locator(`.pixi-applet-stage[data-applet="${key}"] :is(.pixi-stage-item,.home-leaf)`).first();
+  const item=page.locator(`.pixi-applet-stage[data-applet="${key}"] :is(.pixi-stage-item,.home-leaf,.mail-letter)`).first();
   // Use keyboard selection: Calendar's separately owned day grid can overlap its item hitbox.
   await item.focus();await item.press('Enter');
   const host=page.locator('#notionContent');await host.waitFor();
@@ -24,15 +24,17 @@ await withBrowser(fileAccess,async browser=>{
   const outer=await surface.boundingBox();
   // The Applet shelf (ui/hud/applet-shelf.ts) stands above an open Applet; the reader starts under it.
   const top=await page.locator('#notionWorld').evaluate(e=>e.hasAttribute('data-applet-shelf'))?150:64;
-  assert(Math.abs(outer.x-64)<2&&Math.abs(outer.y-top)<2&&Math.abs(1000-outer.y-outer.height-64)<2,key+' equal left/bottom Focus gutters, top under the shelf: '+JSON.stringify(outer));
+  // Mail reads on its theme scene's painted paper (ui/applets/scene); the other readers keep the shared gutters.
+  if(key==='gmail'){const paper=await page.locator('.applet-scene[data-applet=gmail] .applet-scene-region[data-role=primary]').boundingBox();assert(['x','y','width','height'].every(k=>Math.abs(outer[k]-paper[k])<2),key+' reads on the scene paper: '+JSON.stringify({outer,paper}));}
+  else assert(Math.abs(outer.x-64)<2&&Math.abs(outer.y-top)<2&&Math.abs(1000-outer.y-outer.height-64)<2,key+' equal left/bottom Focus gutters, top under the shelf: '+JSON.stringify(outer));
   assert(await surface.locator('.ui-applet-header').isVisible(),key+' header');
   assert(await surface.locator('.ui-applet-body').innerText(),key+' original is present');
   for(const theme of ['day','night']){
    await page.evaluate(theme=>(window as any).worldletExecute('set_scene_lighting',{lighting:theme}),theme);
    await page.waitForFunction(theme=>document.querySelector('#notionWorld')?.getAttribute('data-time-of-day')===theme,theme);
    const colors=await surface.evaluate(e=>{const probe=document.createElement('span');probe.style.color='var(--control-ink)';probe.style.background='var(--control-paper)';e.append(probe);const expected={bg:getComputedStyle(probe).backgroundColor,ink:getComputedStyle(probe).color};probe.remove();return {bg:getComputedStyle(e).backgroundColor,image:getComputedStyle(e).backgroundImage,ink:getComputedStyle(e).color,paper:getComputedStyle(e,'::before').borderImageSource,expected};});
-   // Mail's paper is the approved country stationery behind it (#1638), not the flat shared paper.
-   if(key==='gmail'){assert.equal(colors.bg,'rgba(0, 0, 0, 0)',key+' no flat paper over the stationery');assert.match(colors.paper,/country-stationery\.png/,key+' stationery paper');}
+   // Mail's paper is the theme scene's painting behind it, not a flat shared paper or its own stationery.
+   if(key==='gmail'){assert.equal(colors.bg,'rgba(0, 0, 0, 0)',key+' no flat paper over the painting');assert.ok(await page.locator('.applet-scene[data-applet=gmail] .applet-scene-plate').isVisible(),key+' scene paper');}
    else assert.equal(colors.bg,colors.expected.bg,key+' shared surface');
    assert.equal(colors.ink,colors.expected.ink,key+' readable ink');
    // Painted paper (Mail's stationery, the Home Notes/Reminders/Calendar pages) keeps day ink at night;
@@ -41,7 +43,8 @@ await withBrowser(fileAccess,async browser=>{
    // against what is painted: the paper art's own color when there is one.
    const painted=key==='gmail'||/hud\/paper\.png/.test(colors.image);
    assert.equal(painted,PAPER_READERS.includes(key),key+' paper material');
-   assert.equal(colors.ink,theme==='night'&&!painted?'rgb(244, 240, 229)':'rgb(32, 59, 48)',key+' '+theme+' ink');
+   // Mail's ink is the theme's paper material (presentation.json sceneMaterials.paper.ink).
+   assert.equal(colors.ink,theme==='night'&&!painted?'rgb(244, 240, 229)':key==='gmail'?'rgb(43, 58, 46)':'rgb(32, 59, 48)',key+' '+theme+' ink');
    assert(contrast(colors.ink,painted?'rgb(244, 240, 229)':colors.bg)>=7,key+' '+theme+' ink contrast');
    if(key==='apple-notes'){await page.waitForTimeout(2400);await page.screenshot({path:'/tmp/text-hud-notes-'+theme+'.png'});}
   }

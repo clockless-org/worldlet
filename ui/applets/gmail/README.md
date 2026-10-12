@@ -33,15 +33,22 @@ not shown here; only an Attention card may show one picture from the email
 ([email pictures](../../../core/attention/README.md#email-pictures)). Missing dates remain explicitly unavailable. No contact lookup or
 invented profile picture is used.
 
-Open retains its village attention pinboard: up to nine attention-bearing
-threads, with concise titles, source sender and date. Other mail remains
+Open and Focus are drawn in the theme's Mail scene by the shared
+[scene renderer](../scene/README.md): the letters list sits on the painted
+paper region and wears its material, and a letter's reader takes the same
+region while the scene stays. Open lists up to nine attention-bearing threads,
+each with the sender's portrait, name, a concise title and time, under a line
+naming the mailbox it reads. A failed or unfinished read adds no copy; Fox
+reports source problems. Other mail remains
 available through Web. Saved drafts remain accessible through Fox, without a permanent board button. This UI
 does not modify messages or connection permissions.
 
-Focused checks: `node scripts/mail-avatar-check.ts` covers portrait sources and
+Focused checks: `node scripts/mail-open-check.ts` covers the Open list in a
+scene; `node scripts/applet-scene-check.ts` covers the renderer;
+`node scripts/mail-avatar-check.ts` covers portrait sources and
 reading rules without a browser; `node scripts/mail-focus-check.ts` exercises original reading,
 safe metadata, attachments and compact layout; `node
 scripts/text-reader-hud-check.ts` verifies the live bundled day/night HUD and
 equal Focus gutters with fictional records. These are not real-account tests.
 
-Mail uses a static sage mailbox on a broad, low timber pedestal. The shared device stays still in Peek, Open and Focus; no mailbox sprite-frame animation is registered. Content transitions and attention indicators remain separate from device motion.
+Mail uses a static sage mailbox on a broad, low timber pedestal in the World. Inside the Applet the theme's painting supplies the post office, so no separate device picture is drawn; no mailbox sprite-frame animation is registered. Content transitions and attention indicators remain separate from device motion.
