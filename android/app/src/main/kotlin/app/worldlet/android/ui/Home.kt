@@ -128,7 +128,7 @@ private fun AppletLayer(model: AppModel, applet: PhoneApplet?, last: PhoneApplet
         Box(
             Modifier.fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.35f))
-                .clickable(remember { MutableInteractionSource() }, indication = null, onClickLabel = "Close the Applet") { close() },
+                .clickable(remember { MutableInteractionSource() }, indication = null, onClickLabel = "Close the Thing") { close() },
         )
     }
     AnimatedVisibility(

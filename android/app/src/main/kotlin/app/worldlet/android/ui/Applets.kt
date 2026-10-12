@@ -93,7 +93,7 @@ fun AppletList(model: AppModel, scroll: ScrollState, openWidget: (String) -> Uni
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         if (applets.isEmpty()) {
-            Text("Your Applets appear here when your computer sends them.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 14.sp,
+            Text("Your Things appear here when your computer sends them.", color = Palette.muted.copy(alpha = 0.85f), fontSize = 14.sp,
                 style = TextStyle(shadow = worldShadow), modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp))
         }
         listOf(PhoneApplet.Section.Jobs, PhoneApplet.Section.Live, PhoneApplet.Section.Accounts, PhoneApplet.Section.Places).forEach { section ->
@@ -127,7 +127,7 @@ private fun AppletRow(model: AppModel, applet: PhoneApplet, details: () -> Unit,
         Modifier.fillMaxWidth()
             .then(if (applet.website != null) {
                 Modifier.combinedClickable(onClickLabel = "Open ${applet.title}", onLongClickLabel = "Details", onLongClick = details, onClick = open)
-            } else Modifier.clickable(onClickLabel = "Open the Applet", onClick = open))
+            } else Modifier.clickable(onClickLabel = "Open the Thing", onClick = open))
             .semantics(mergeDescendants = true) {
                 contentDescription = applet.title
                 stateDescription = listOfNotNull(if (applet.mine != null) "Yours" else null, line, if (held > 0) "$held in Now" else null).joinToString(", ")

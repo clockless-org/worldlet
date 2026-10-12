@@ -9,7 +9,7 @@ import {APP_DEFINITIONS} from './catalog.ts';
 const requirements:Record<string,keyof HostFeatures>=Object.fromEntries(APP_DEFINITIONS.flatMap(app=>app.requiresHostFeature?[[app.key,app.requiresHostFeature]]:[]));
 export function appletSupport(provider:string,features:HostFeatures):{supported:boolean;reason?:string} {
  const feature=requirements[provider];
- return !feature||features[feature]?{supported:true}:{supported:false,reason:'This device does not support this system Applet. Your saved information is kept.'};
+ return !feature||features[feature]?{supported:true}:{supported:false,reason:'This device does not support this system Thing. Your saved information is kept.'};
 }
 
 /** What the Applet catalog offers (an Area's Recommended and All lists, the Browser's "Add to World" offer): every

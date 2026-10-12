@@ -45,13 +45,13 @@ export function createPracticeWalkthrough({root,scene,home,storage,show}){
  async function iteration(meta){
   if(running)return {error:'The practice iteration is already running.'};running=true;home();panel?.remove();
   try{
-   state.iteration={status:'running',meeting:{title:'Engineering design review',decisions:['Keep the world visible while Fox coordinates work.','Show readable handoff signals between Applets and Fox.','Preserve the original source and show a reviewable result.']},artifacts:[]};save();await wait(1000,meta?.signal);
+   state.iteration={status:'running',meeting:{title:'Engineering design review',decisions:['Keep the world visible while Fox coordinates work.','Show readable handoff signals between Things and Fox.','Preserve the original source and show a reviewable result.']},artifacts:[]};save();await wait(1000,meta?.signal);
    report('Reading the decisions from our last engineering design meeting.');await flight('app-google-calendar',true,'Meeting decisions',meta?.signal);
    const doc={title:'World task handoffs — implementation plan',source:'Engineering design review',body:state.iteration.meeting.decisions.map((x,i)=>`${i+1}. ${x}`).join('\n')};state.iteration.doc=doc;save();
    report('Writing the implementation plan into the practice Notion document.');await flight('app-notion',false,'Implementation doc',meta?.signal);await wait(900,meta?.signal);await flight('app-notion',true,'Plan + acceptance criteria',meta?.signal);
    report('Passing the plan and its source context to the practice Codex task.');await flight('app-codex',false,'Implement iteration',meta?.signal);scene()?.setAppActivity?.('app-codex',{sessions:[{status:'Running'}]});await wait(4000,meta?.signal);
    state.iteration.result={status:'prepared',summary:'World handoff signals, source context and review state',scope:'Authored implementation result; no CLI run'};save();await flight('app-codex',true,'Changes ready for review',meta?.signal);scene()?.setAppActivity?.('app-codex',{sessions:[]});
-   report('Preparing the practice GitHub pull request.');await flight('app-github',false,'Pull request',meta?.signal);state.iteration.pr={title:'Show cross-Applet task handoffs in the world',status:'ready for review',local:true};state.iteration.status='complete';save();
+   report('Preparing the practice GitHub pull request.');await flight('app-github',false,'Pull request',meta?.signal);state.iteration.pr={title:'Show cross-Thing task handoffs in the world',status:'ready for review',local:true};state.iteration.status='complete';save();
    report('**Iteration ready for review.**\n\nCalendar decisions → Notion plan → Codex task → GitHub pull request.\n\n*Practice result saved locally. No external PR or CLI execution.*');
    return {ok:true,fictional:true,scope:'Local practice artifacts only; no remote write or CLI execution',...state.iteration};
   }catch(e){state.iteration.status='stopped';save();return {error:e.message,fictional:true};}finally{running=false;scene()?.setAppActivity?.('app-codex',{sessions:[]});}

@@ -2,7 +2,7 @@ import {appletStatus as appStatus} from '../../core/applets/index.ts';
 
 // Shared Full View inventory. Selecting a record displays its original.
 export function createAppDevice({root,call,openRecord,onRecords}){
- const host=document.createElement('section');host.className='app-device-inventory';host.setAttribute('aria-label','Applet contents');host.hidden=true;root.append(host);
+ const host=document.createElement('section');host.className='app-device-inventory';host.setAttribute('aria-label','Thing contents');host.hidden=true;root.append(host);
  const states=new Map();let app,connection;
  const el=(tag: string,cls: string,text?: string): any=>{const n=document.createElement(tag);n.className=cls;if(text)n.textContent=text;return n;};
  const button=(title,run)=>{const b=el('button','app-device-row',title);b.type='button';b.onclick=run;return b;};

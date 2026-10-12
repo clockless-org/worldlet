@@ -202,7 +202,7 @@ export function mountNotionWorld(data: World, native: any) {
    if(keep){if(!native?.widgets)return;try{await native.widgets({operation:'pin',id:widget});}catch(error){notify(error.message||'Could not bring it back.');return;}}
    const here=()=>sections.some(r=>r.moduleId===applet);
    for(let tries=0;tries<25&&!here();tries++)await new Promise(resolve=>setTimeout(resolve,120));
-   if(here())visitObject(applet);else notify('That Applet is not in this World any more.');
+   if(here())visitObject(applet);else notify('That Thing is not in this World any more.');
   }
   // Fox's line pointed to an Attention item (ui/companion/fox-proactive.ts): its card opens, or the person hears it is settled.
   window.addEventListener('worldlet:attention-open',(event:any)=>{
@@ -412,7 +412,7 @@ export function mountNotionWorld(data: World, native: any) {
   function loadSampleLayout(){if(!data.sample&&native?.editApplet)return;try{const saved=JSON.parse(localStorage.getItem(layoutKey)||'{}');Object.assign(data,saved);}catch{}}
   loadSampleLayout();
   async function editApplet(operation,id,position?){
-    if(!sections.some(r=>r.moduleId===id&&r.entity==='app'))throw Error('Applet is unavailable in this world.');
+    if(!sections.some(r=>r.moduleId===id&&r.entity==='app'))throw Error('Thing is unavailable in this world.');
     if(!data.sample&&native?.editApplet)await native.editApplet({operation,applet:id,...(position?{position}:{})});
     if(operation==='removeApplet')data.hiddenApplets=[...new Set([...(data.hiddenApplets||[]),id])];
     if(operation==='unlock'){data.hiddenApplets=(data.hiddenApplets||[]).filter(a=>a!==id);if(!unlockedList().includes(id))data.unlockedApplets.push(id);}
@@ -449,7 +449,7 @@ export function mountNotionWorld(data: World, native: any) {
    if(root.dataset.onboardingLocked==='true'||!root.appletLayout.has(id))return;
    moveRegionApplet(regionLayout,id,region,index);saveRegions();refreshRegions();
   }
-  const regionManage=button('Manage Applets',()=>openRegion(current),'region-manage');root.append(regionManage);
+  const regionManage=button('Manage Things',()=>openRegion(current),'region-manage');root.append(regionManage);
   let regionShelf: HTMLElement|null=null,regionShelfTrigger: HTMLElement|null=null,regionShelfPlace='';
   let shelfDrop:((index:number)=>Promise<void>)|null=null;
   function closeRegionShelf(){
@@ -563,7 +563,7 @@ export function mountNotionWorld(data: World, native: any) {
    // Every catalog Applet of this Area's category the person does not have here, by name, behind one button.
    const rest=catalog.filter(r=>appCategory(r)===id&&!(root.appletLayout.has(r.moduleId)&&r.region===id)&&!recommended.includes(r)).sort((a,b)=>a.title.localeCompare(b.title));
    if(rest.length){
-    const all=button('All '+building.title+' Applets ('+rest.length+')',()=>{all.remove();group('All',rest,'All '+building.title+' Applets');},'region-shelf-all');
+    const all=button('All '+building.title+' Things ('+rest.length+')',()=>{all.remove();group('All',rest,'All '+building.title+' Things');},'region-shelf-all');
     all.setAttribute('aria-expanded','false');list.append(all);
    }
    shelf.append(element('p','region-shelf-note','Accounts, permissions or a required desktop app are set up only when needed.'));
@@ -588,7 +588,7 @@ export function mountNotionWorld(data: World, native: any) {
     // The person's own Applet can ask for new pictures from the image model on this computer.
     const kind=myAppletKind(placed);
     if(kind&&native?.appletArt&&!data.sample)menu.append(button('Paint new pictures',async()=>{removeMenu();try{const result=await native.appletArt({operation:'repaint',applets:[{applet:id,title:placed.title,about:placed.description||'',kind}]});notify(result?.ok?'Painting new pictures for '+placed.title+'.':'New pictures need Codex signed in on this computer.');}catch(e){notify(e.message);}}));
-    const remove=moment||site?button('Delete this Applet',async()=>{remove.disabled=true;try{await (moment?native?.widgets?.({operation:'delete',id:moment.id}):native?.siteApplets?.({operation:'delete',id:site.id}));removeMenu();}catch(e){remove.disabled=false;notify(e.message);}})
+    const remove=moment||site?button('Delete this Thing',async()=>{remove.disabled=true;try{await (moment?native?.widgets?.({operation:'delete',id:moment.id}):native?.siteApplets?.({operation:'delete',id:site.id}));removeMenu();}catch(e){remove.disabled=false;notify(e.message);}})
      :button('Remove from world',async()=>{remove.disabled=true;try{await editApplet('removeApplet',id);removeMenu();}catch(e){remove.disabled=false;notify(e.message);}});remove.setAttribute('role','menuitem');menu.append(remove);root.append(menu);
     // With several agents in the person's own Harness (OpenClaw agents, Hermes Agent profiles), one can answer in this
     // Applet's thread instead of the main one, bound to the Applet, its area or a channel conversation's person or group,
@@ -596,24 +596,24 @@ export function mountNotionWorld(data: World, native: any) {
     if(native?.harnessAgents&&!data.sample)void Promise.resolve(native.harnessAgents({operation:'list',applet:id})).then(found=>{
      if(deviceMenu!==menu||!found?.places?.length)return;
      const several=found.agents?.length>1,label=several&&found.answering?'Answered by '+found.answering.name+' · '+found.answering.reason:'Instructions here';
-     const pick=button(label,()=>{removeMenu();chooseAgent(id,placed?.title||'This Applet');});pick.setAttribute('role','menuitem');menu.insertBefore(pick,remove);
+     const pick=button(label,()=>{removeMenu();chooseAgent(id,placed?.title||'This Thing');});pick.setAttribute('role','menuitem');menu.insertBefore(pick,remove);
     },()=>{});
     // With several models in the same Agent, a cheaper one can answer in this Applet's thread (the Harness `models`
     // service; fox/harness-models.ts on the host), on the person's own sign-in as before.
     if(native?.harnessModels&&!data.sample)void Promise.resolve(native.harnessModels({operation:'list',applet:id})).then(found=>{
      if(deviceMenu!==menu||!(found?.models?.length>1))return;
      const current=found.models.find(m=>m.id===found.chosen)||found.models.find(m=>m.current);
-     const pick=button('Model: '+(current&&found.chosen?current.name:'Agent’s own'),()=>{removeMenu();chooseModel(id,placed?.title||'This Applet',found);});pick.setAttribute('role','menuitem');menu.insertBefore(pick,remove);
+     const pick=button('Model: '+(current&&found.chosen?current.name:'Agent’s own'),()=>{removeMenu();chooseModel(id,placed?.title||'This Thing',found);});pick.setAttribute('role','menuitem');menu.insertBefore(pick,remove);
     },()=>{});
     const r=root.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(x-r.left,r.width-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(y-r.top,r.height-menu.offsetHeight-8))+'px';remove.focus();
   }
   // A small editor in place: for each place this Applet's thread is in (most specific first), the agent bound there and
   // the person's extra instructions there; the first bound place answers (core answeringAgent).
-  const AGENT_PLACE={person:'This person',group:'This group',applet:'This Applet',region:'This area'};
+  const AGENT_PLACE={person:'This person',group:'This group',applet:'This Thing',region:'This area'};
   async function chooseAgent(id,title){
     let found;try{found=await native.harnessAgents({operation:'list',applet:id});}catch(e){notify(e.message);return;}
     const body=dialog('Who answers in '+title),several=found.agents?.length>1;
-    body.append(element('p','',several?'Choose which of your agents answers when you talk with Fox here, and anything it should also know. The most specific place answers: a person, then a group, then this Applet, then its area.':'Anything Fox should also know when you talk with it here. The most specific place comes last.'));
+    body.append(element('p','',several?'Choose which of your agents answers when you talk with Fox here, and anything it should also know. The most specific place answers: a person, then a group, then this Thing, then its area.':'Anything Fox should also know when you talk with it here. The most specific place comes last.'));
     if(found.answering&&several)body.append(element('p','agent-answering','Answered by '+found.answering.name+' · '+found.answering.reason));
     for(const place of found.places){
      const box=element('section','agent-place'),name=place.scope==='region'&&place.area?'The '+place.area+' area':AGENT_PLACE[place.scope];
@@ -632,7 +632,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   function chooseModel(id,title,found){
     const body=dialog('Which model answers in '+title);
-    body.append(element('p','','Your Agent answers with its own model unless you choose another of its models here, such as a cheaper one for this Applet. It uses your Agent’s own sign-in.'));
+    body.append(element('p','','Your Agent answers with its own model unless you choose another of its models here, such as a cheaper one for this Thing. It uses your Agent’s own sign-in.'));
     const own=found.models.find(m=>m.current);
     const choices=[{id:null,name:'Agent’s own'+(own?' · '+own.name:'')},...found.models.filter(m=>!m.current||found.chosen===m.id)];
     for(const m of choices){
@@ -1675,7 +1675,7 @@ export function mountNotionWorld(data: World, native: any) {
     const r=sections.find(s=>s.moduleId===current);
     if(depth!=='object'||r?.fullView?.kind!=='scene'||!r.fullView.original||r.key==='obsidian'){toggle?.remove();return;}
     if(!toggle){
-      toggle=element('div','applet-mode-toggle');toggle.setAttribute('role','group');toggle.setAttribute('aria-label','Applet view');
+      toggle=element('div','applet-mode-toggle');toggle.setAttribute('role','group');toggle.setAttribute('aria-label','Thing view');
       const nativeMode=button('',()=>{},'applet-mode-native'),webMode=button('',()=>{},'applet-mode-web');
       nativeMode.innerHTML=worldletMark();nativeMode.setAttribute('aria-label','Native');
       webMode.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6.5h14M5 17.5h14"/></svg>';webMode.setAttribute('aria-label','Web');
@@ -1743,7 +1743,7 @@ export function mountNotionWorld(data: World, native: any) {
 
     if(r.fullView?.kind==='launcher'){
       appReader=null;content.hidden=true;sceneState();
-      const website=()=>{header(r.title,'Applet',{applet:true});browserPanel.mount(r.key,{url:r.fullView.url,platform:'web'});sceneState();};
+      const website=()=>{header(r.title,'Thing',{applet:true});browserPanel.mount(r.key,{url:r.fullView.url,platform:'web'});sceneState();};
       if(!native?.launchApplet){website();return;}
       void native.launchApplet(r.key).then(result=>{
         if(current!==r.moduleId)return;
@@ -1754,13 +1754,13 @@ export function mountNotionWorld(data: World, native: any) {
     if(r.fullView?.kind==='web'){
       appReader=null;
       // A website made into an Applet is not in the catalog: it brings its own page.
-      header(r.title,'Applet',{applet:true});browserPanel.mount(r.key,r.site?{url:r.fullView.url,platform:'web'}:{});sceneState();
+      header(r.title,'Thing',{applet:true});browserPanel.mount(r.key,r.site?{url:r.fullView.url,platform:'web'}:{});sceneState();
       dismissFox();
       return;
     }
     const connectedStatus=appStatus(r,data.moduleConnections||[]);
     if(native?.appContent&&!data.sample&&(connectedStatus.state==='connected'||connectedStatus.connected)){
-      header(r.title,'Applet',{applet:true});content.dataset.template='app';
+      header(r.title,'Thing',{applet:true});content.dataset.template='app';
       deviceInventory??=createAppDevice({root,call:native.appContent,openRecord:openAppRecord,onRecords(app,records){
         const link=data.moduleConnections?.find(c=>c.provider===app.provider);if(link){link.records=records;scene?.refreshContent();}saveRegions();
       }});
@@ -1774,7 +1774,7 @@ export function mountNotionWorld(data: World, native: any) {
     appBody.append(element('p','ui-caption',note));
     if(r.capability==='connect'&&!data.sample)appBody.append(button('Connect '+r.title,async()=>{try{await native.connect(r.provider,r.region);}catch(e){notify(e.message);}},'module-connect'));
     else appBody.append(element('p','app-availability',r.capability==='planned'?'Connection support is being prepared.':'Connect your account in your personal Mac world.'));
-    appBody.append(element('p','ui-caption','Applets supply context. Your matters bring related information together across applets.'));
+    appBody.append(element('p','ui-caption','Things supply context. Your matters bring related information together across Things.'));
     const related=sections.filter(m=>m.entity==='matter'&&m.region===r.region);if(related.length){appBody.append(element('h3','',data.sample?'Matters nearby':'Matters nearby'));for(const m of related)appBody.append(button(m.title,()=>visitObject(m.moduleId),'world-action-row'));}
     foregroundActions(r,appBody);
   }
@@ -1867,7 +1867,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(p)open(p.id);else if(place)visitSpace(place,'shelf');else home();
   }
   const executeWorld=createWorldTools({pages,sections,state:worldState,home,back,next,visitSpace,open,sectionFor,contentStore,onChange:contentChanged,
-    scrollBrowser:direction=>!content.hidden&&content.dataset.template==='browser'&&native?.browser?native.browser.command('scroll',{direction},true):{error:'Open an Applet website first.'},
+    scrollBrowser:direction=>!content.hidden&&content.dataset.template==='browser'&&native?.browser?native.browser.command('scroll',{direction},true):{error:'Open a Thing website first.'},
     contextTree:()=>({...data.sample&&data.persona?{profile:{...data.persona,sourceId:data.profilePageId,fictional:true}}:{},areas:areas.map(a=>({id:a.id,title:a.title})),buildings:buildings.map(b=>({id:b.id,title:b.title,rooms:b.rooms})),objects:sections.flatMap(r=>objectsFor(r).map(o=>({id:o.id,title:o.title,room:r.id,notes:o.pageIds})))}),
     visitContext:id=>{if(areas.some(a=>a.id===id))visitArea(id);else if(buildings.some(b=>b.id===id))visitBuilding(id);else if(sections.some(r=>r.id===id))visitSpace(id);else if(objectFor(id))visitObject(id);else return {error:'Unknown context ID. Inspect the world first.'};return {ok:true,current:worldState()};},
     actionList:()=>nativeHUD?.availableActions()||[],runAction:(id,meta)=>{if(!meta.request||!nativeHUD?.availableActions().some(a=>a.id===id))return {error:'Action is not available in the current context.'};return nativeHUD.run(id);}});
@@ -1973,7 +1973,7 @@ export function mountNotionWorld(data: World, native: any) {
 
   const executeAction=(name: string,args: any,meta?: any)=>{if(name==='show_artifact'){const tooLong=artifactFitProblem(args);if(tooLong)return {error:tooLong};const id=artifactId(),label=nextArtifactLabel;nextArtifactLabel=null;if(DAILY_ARTIFACT.test(String(args.title||'')))return showDailyInJournal({id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,size:args.size||'large',origin:{type:'conversation',place:current||'world'}});{const shown=showArtifact({...args,id,...label?{label}:{}},{id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,origin:{type:'conversation',place:current||'world'}});if(shown.ok)void requestArtifactPage({id,kind:'answer',size:shown.size as 'small'|'medium'|'large'});return shown;}}
    if(name==='open_artifact')return openArtifact(String(args.id||''));
-   if(name==='list_artifacts'){if(!native?.artifacts)return {artifacts:[],scope:'The practice world keeps no artifacts.'};return Promise.resolve(native.artifacts({operation:'list'})).then(r=>({artifacts:findArtifacts((r?.artifacts||[]).map(readArtifact).filter(Boolean),args.query||'',args.limit||12)}));}if(['run_practice_iteration','practice_applet'].includes(name))return practiceWalkthrough?practiceWalkthrough.execute(name,args,meta):{error:'Only available in the practice world.'};if(name==='customize_companion'){if(!data.sample)return {error:'This control belongs to the practice world.'};const name=String(args.name||'').trim();if(!name||name.length>24||!['idle','happy','waving','sleeping'].includes(args.expression))return {error:'Choose a short name and an available expression.'};window.dispatchEvent(new CustomEvent('worldlet:companion-appearance',{detail:{name,expression:args.expression}}));return {ok:true,name,expression:args.expression};}if(data.sample&&['delegate_codex','list_codex_tasks','read_codex_task','show_codex_task'].includes(name))return practiceCoding(name,args);if(name==='manage_weather_location')return environmentController.manageLocation(args,meta?.signal);if(name==='set_scene_lighting')return environmentController.setSceneLighting(args.lighting);if(name==='set_scene_weather')return environmentController.setSceneWeather(args.weather);if(name==='prepare_email')return preparePracticeEmail(args);const panelTool=PANEL_TOOLS.get(name);if(panelTool){const [key,title]=panelTool;if(current!=='app-'+key||content.hidden)visitObject('app-'+key);return appletPanels.get(key)?.agent(args)||{error:title+' is unavailable.'};}if(name==='review_email_drafts'){window.dispatchEvent(new Event('worldlet:email-drafts'));return {ok:true,status:'user_review'};}if(name==='review_notion_drafts'){window.dispatchEvent(new Event('worldlet:notion-reviews'));return {ok:true,status:'user_review'};}if(name==='manage_companion_memory'){window.dispatchEvent(new Event('worldlet:memory-manager'));return {ok:true,status:'user_review',guidance:'Memory management opened. The user makes changes directly.'};}if(name==='automate_browser')return automateBrowser(args,meta);if(name==='browse_web'){if(['records','record'].includes(args.operation)){if(data.sample)return {visits:[],scope:'The practice world records no browsing.'};return browserPanel.agent(args);}if(args.operation==='history'){if(data.sample)return {items:[],scope:'Practice world has no personal browsing history. Use find_content for authored history notes.'};return browserPanel.agent(args);}if(args.operation==='open'){if(!openWorldURL(args.url))return {error:'Use a valid HTTPS website URL.'};return browserPanel.agent(args);}if(['outline','focus'].includes(args.operation)&&(content.hidden||content.dataset.template!=='browser'))return {error:'Open the website first: Focus rules are for the site open in a website Applet.'};if(data.sample&&args.operation==='saved'){const terms=String(args.query||'').toLowerCase().split(/\s+/).filter(Boolean);const records=[...pages.values()].filter(p=>['sample-web-research-history','sample-web-shoes-history'].includes(p.id)&&terms.every(t=>(p.title+' '+p.markdown).toLowerCase().includes(t)));return {ok:true,fictional:true,results:records.map(p=>({id:p.id,title:p.title,text:p.markdown,url:p.markdown.match(/^URL: (.+)$/m)?.[1]}))};}if(args.operation!=='saved'&&(content.hidden||content.dataset.template!=='browser')){if(pages.has('device-x'))open('device-x');else {showModulePanel('module-browser');header('Browser','Library');browserPanel.mount();sceneState();}}return browserPanel.agent(args);}return executeWorld(name,args,meta);};
+   if(name==='list_artifacts'){if(!native?.artifacts)return {artifacts:[],scope:'The practice world keeps no artifacts.'};return Promise.resolve(native.artifacts({operation:'list'})).then(r=>({artifacts:findArtifacts((r?.artifacts||[]).map(readArtifact).filter(Boolean),args.query||'',args.limit||12)}));}if(['run_practice_iteration','practice_applet'].includes(name))return practiceWalkthrough?practiceWalkthrough.execute(name,args,meta):{error:'Only available in the practice world.'};if(name==='customize_companion'){if(!data.sample)return {error:'This control belongs to the practice world.'};const name=String(args.name||'').trim();if(!name||name.length>24||!['idle','happy','waving','sleeping'].includes(args.expression))return {error:'Choose a short name and an available expression.'};window.dispatchEvent(new CustomEvent('worldlet:companion-appearance',{detail:{name,expression:args.expression}}));return {ok:true,name,expression:args.expression};}if(data.sample&&['delegate_codex','list_codex_tasks','read_codex_task','show_codex_task'].includes(name))return practiceCoding(name,args);if(name==='manage_weather_location')return environmentController.manageLocation(args,meta?.signal);if(name==='set_scene_lighting')return environmentController.setSceneLighting(args.lighting);if(name==='set_scene_weather')return environmentController.setSceneWeather(args.weather);if(name==='prepare_email')return preparePracticeEmail(args);const panelTool=PANEL_TOOLS.get(name);if(panelTool){const [key,title]=panelTool;if(current!=='app-'+key||content.hidden)visitObject('app-'+key);return appletPanels.get(key)?.agent(args)||{error:title+' is unavailable.'};}if(name==='review_email_drafts'){window.dispatchEvent(new Event('worldlet:email-drafts'));return {ok:true,status:'user_review'};}if(name==='review_notion_drafts'){window.dispatchEvent(new Event('worldlet:notion-reviews'));return {ok:true,status:'user_review'};}if(name==='manage_companion_memory'){window.dispatchEvent(new Event('worldlet:memory-manager'));return {ok:true,status:'user_review',guidance:'Memory management opened. The user makes changes directly.'};}if(name==='automate_browser')return automateBrowser(args,meta);if(name==='browse_web'){if(['records','record'].includes(args.operation)){if(data.sample)return {visits:[],scope:'The practice world records no browsing.'};return browserPanel.agent(args);}if(args.operation==='history'){if(data.sample)return {items:[],scope:'Practice world has no personal browsing history. Use find_content for authored history notes.'};return browserPanel.agent(args);}if(args.operation==='open'){if(!openWorldURL(args.url))return {error:'Use a valid HTTPS website URL.'};return browserPanel.agent(args);}if(['outline','focus'].includes(args.operation)&&(content.hidden||content.dataset.template!=='browser'))return {error:'Open the website first: Focus rules are for the site open in a website Thing.'};if(data.sample&&args.operation==='saved'){const terms=String(args.query||'').toLowerCase().split(/\s+/).filter(Boolean);const records=[...pages.values()].filter(p=>['sample-web-research-history','sample-web-shoes-history'].includes(p.id)&&terms.every(t=>(p.title+' '+p.markdown).toLowerCase().includes(t)));return {ok:true,fictional:true,results:records.map(p=>({id:p.id,title:p.title,text:p.markdown,url:p.markdown.match(/^URL: (.+)$/m)?.[1]}))};}if(args.operation!=='saved'&&(content.hidden||content.dataset.template!=='browser')){if(pages.has('device-x'))open('device-x');else {showModulePanel('module-browser');header('Browser','Library');browserPanel.mount();sceneState();}}return browserPanel.agent(args);}return executeWorld(name,args,meta);};
   const execute=(name: string,args: any,meta?: any)=>{toolNavigation=true;try{return native&&!data.sample?recordWorldCommand(name,args,()=>executeAction(name,args,meta)):executeAction(name,args,meta);}finally{toolNavigation=false;}};
   // Resolve only real destinations; the model cannot invent executable actions in links.
   function resolveReplyLink(value){
@@ -2000,8 +2000,8 @@ export function mountNotionWorld(data: World, native: any) {
   if(native){
     // The paired iPhone mirrors the Center and talks to Fox through this page (core/phone/README.md).
     let widgetsNow:any[]=[],phoneWorldLog:{lines:any[],now:any[]}={lines:[],now:[]};
-    // Ongoing things (core/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is an Applet of
-    // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Applet world and its own thread.
+    // Ongoing things (core/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is a Thing of
+    // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Thing world and its own thread.
     let ongoingProposals:OngoingThing[]=[],ongoingKept:(OngoingThing&{recent:{text:string,at:string}[]})[]=[];
     // Every other brought conversation that looks like one job (core/tasks ongoingCandidates): the phone lists each as a
     // thing of its own, and the first line said in one keeps it here (owner request 2026-10-11).
@@ -2048,11 +2048,11 @@ export function mountNotionWorld(data: World, native: any) {
      askItem:(id,text)=>{previewAttention({worldItemId:id});return voice?.ask(text,{origin:'user',displayText:text});},
      choose:id=>{if(id.startsWith('ongoing:'))return isOngoingThemeId(id.slice(8))?makeTheme(id.slice(8)):undefined;const page=itemPage(id);if(!page||!previewAttention({worldItemId:id}))return;return previewActions(page)[0]?.run();},
      itemFox:id=>{if(id.startsWith('ongoing:')){const theme=themesNow().find(t=>'ongoing:'+t.id===id);if(!theme)return null;return {say:theme.say,option:theme.option,turns:[]};}const page=itemPage(id);if(!page)return null;return {say:attentionPreviewData(page).suggestion,option:previewActions(page)[0]?.label||'',turns:voice?.threadOf?.('attention:'+id)||[]};},
-     // The Applet world (core/phone phoneApplets): the Applets in this World with their lamps, what each is doing, the
-     // world log, the widgets for now and each Applet's thread. A line said in an Applet's page opens it here first.
+     // The Thing world (core/phone phoneApplets): the Things in this World with their lamps, what each is doing, the
+     // world log, the widgets for now and each Thing's thread. A line said in a Thing's page opens it here first.
      askApplet:async(key,text)=>{
       let r=sections.find(s=>s.entity==='app'&&s.key===key);
-      // A thing not kept yet becomes an Applet first, so the line joins its own thread; its device arrives with the
+      // A thing not kept yet becomes a Thing first, so the line joins its own thread; its device arrives with the
       // World update keeping it sends.
       if(!r&&ongoingOthers.some(t=>t.id===key)&&native.ongoing){
        try{await native.ongoing({operation:'keep',id:key});}catch{}
@@ -2073,11 +2073,11 @@ export function mountNotionWorld(data: World, native: any) {
     if(phone)root.addEventListener('worldlet:fox-live',(event:any)=>phone.live(event.detail));
     if(phone)window.addEventListener('worldlet:harness-approval',(event:any)=>phone.approval(event.detail));
     if(phone){root.addEventListener('worldlet:source-issues',(event:any)=>phone.accounts(event.detail||[]));sourceIssueSignature='';publishSourceIssues();}
-    // Widgets for now lead the Center (core/artifacts/README.md); the first one Fox makes puts the Widgets Applet on the
+    // Widgets for now lead the Center (core/artifacts/README.md); the first one Fox makes puts the Widgets Thing on the
     // ground, and the panel opens it next.
 
     const loadWidgets=()=>{if(data.sample||!native.widgets)return;void native.widgets({operation:'list'}).then(result=>{widgetsNow=Array.isArray(result?.now)?result.now:[];nativeHUD?.sync();phone?.world();}).catch(()=>{});};
-    // A made Applet's device arrives with the World update the host sends with this event.
+    // A made Thing's device arrives with the World update the host sends with this event.
     window.addEventListener('worldlet:widgets',()=>loadWidgets());
     loadWidgets();
     const loadOngoing=async()=>{
@@ -2104,7 +2104,7 @@ export function mountNotionWorld(data: World, native: any) {
      setInterval(loadJournal,5*60_000);loadJournal();
     }
     nativeHUD=mountNativeHUD({root,onAttention:view=>{phone?.attention(view);if(!data.sample&&view?.now?.length)reportProductEvent('attention_shown',{attention_count:String(Math.min(9,view.now.length))});},calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:()=>widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
-    // The Applet shelf above an open Applet (ui/hud/applet-shelf.ts): the recently used Applets, the open one in the middle.
+    // The Thing shelf above an open Thing (ui/hud/applet-shelf.ts): the recently used Things, the open one in the middle.
     const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:themeAppletIcon(r.key)||appLogoSource(r)||''};};
     appletShelf=mountAppletShelf({root,applet:shelfApp,lastUsed:id=>regionLayout.lastUsedAt[id]||0,
      recent:()=>sections.filter(r=>r.entity==='app'&&(regionLayout.lastUsedAt[r.moduleId]||0)>0).sort((a,b)=>(regionLayout.lastUsedAt[b.moduleId]||0)-(regionLayout.lastUsedAt[a.moduleId]||0)).map(r=>r.moduleId),
@@ -2122,7 +2122,7 @@ export function mountNotionWorld(data: World, native: any) {
   function followLocation(){const params=new URLSearchParams(location.hash.slice(1)),id=params.get('note'),place=params.get('place'),level=params.get('level'),area=params.get('area'),building=params.get('building'),room=params.get('room'),object=params.get('object');if(object==='app-sessions'){visitBuilding('building-development');return;}if(buildings.length&&building&&buildingFor(building))visitBuilding(building);else if(buildings.length&&object&&objectFor(object))visitObject(object);else if(buildings.length&&room&&sections.some(s=>s.id===room))visitSpace(room);else if(area&&areas.some(a=>a.id===area))visitArea(area);else if(id&&pages.has(id))open(id);else if(sections.some(s=>s.id===place))visitSpace(place,['place','room','shelf'].includes(level)?level:'place');else home()}
   window.addEventListener('worldlet:search',()=>showSearch(''));window.addEventListener('hashchange',followLocation);followLocation();if(contentStore.error)notify(contentStore.error);
   if(native&&!nativeHUD&&data.pages.length<=1){$('notionWorldMeta').textContent='Connect sources and let your world grow';$('notionNext').textContent='Connect your sources →';$('notionNext').onclick=()=>native.settings()}
-  // The person's own Applets are named to the host, which paints those with no pictures yet one at a time with the
+  // The person's own Things are named to the host, which paints those with no pictures yet one at a time with the
   // image model on this computer (core/applets/MY-APPLETS.md#pictures). Each set is asked for once per session.
   function askForPictures(){
     if(!native?.appletArt||data.sample)return;
@@ -2147,7 +2147,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(rebuild){$('notionPins').replaceChildren();for(const k of Object.keys(pins))delete pins[k];}loadSampleLayout();if(rebuild)buildScene();else{scene?.setConnections?.(data.moduleConnections||[]);scene?.setAppletLayout?.(data.hiddenApplets,data.appletPositions);scene?.setUnlockedApplets?.(data.unlockedApplets);scene?.refreshContent();}saveRegions();
     $('notionNext').onclick=()=>{if(depth==='overview'&&data.pages.length<=1){if(native)native.settings();}else nextLevel()};
     if(!rebuild&&previous.depth==='object'&&previous.id===current){
-      // An open Applet shows what the update brought at once: findings that arrive while it is
+      // An open Thing shows what the update brought at once: findings that arrive while it is
       // open (right after onboarding, for one) must not wait for a refresh or a re-entry (#1281).
       if(current===sceneStageApp&&content.hidden){
         const r=sections.find(s=>s.moduleId===current);

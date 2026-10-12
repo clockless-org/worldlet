@@ -7,7 +7,7 @@ import {attentionIcon} from '../attention/index.ts';
 import {calendarDay} from './applet-content.ts';
 // Painted Open installations with accessible, live text and hit targets.
 export function createAppletStage(host,onPick){
- const panel=document.createElement('section');panel.className='pixi-applet-stage';panel.hidden=true;panel.setAttribute('aria-label','Applet contents');host.append(panel);
+ const panel=document.createElement('section');panel.className='pixi-applet-stage';panel.hidden=true;panel.setAttribute('aria-label','Thing contents');host.append(panel);
  const mailDevice=document.createElement('img');mailDevice.className='mail-shared-device';mailDevice.dataset.applet='gmail';mailDevice.alt='';mailDevice.hidden=true;host.append(mailDevice);
  let motionEnabled=true;
  const mailSpec=getApp('gmail')?.motion,mailFrames=(globalThis as any).__WORLDLET_25D_ASSETS__?.motionFrames?.gmail;

@@ -16,7 +16,7 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  async function draw(){
   const state=await call('snapshot').catch(()=>null);if(!current())return;
   const live=(state?.connections||[]).filter(connectionLive),rows=el('div','companion-settings-rows');
-  if(!live.length)rows.append(el('p','companion-info-note','No accounts are connected yet. Open an Applet in the world to connect it.'));
+  if(!live.length)rows.append(el('p','companion-info-note','No accounts are connected yet. Open a Thing in the world to connect it.'));
   for(const c of live){
    const app=getApp(c.provider),google=c.transport!=='native'&&GOOGLE.includes(c.provider);
    const row=el('div','companion-settings-row'),text=el('div');row.dataset.account=c.provider;

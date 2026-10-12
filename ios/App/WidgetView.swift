@@ -54,7 +54,7 @@ struct WidgetRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("widget-row")
-        .accessibilityHint("Applet. Opens it.")
+        .accessibilityHint("Thing. Opens it.")
     }
 }
 
@@ -79,7 +79,7 @@ struct WidgetScreen: View {
                         Image(systemName: "desktopcomputer")
                             .font(.system(size: 28))
                             .foregroundStyle(Palette.paperFoot)
-                        Text(widget == nil ? "This Applet's moment is over." : "Open it on your computer")
+                        Text(widget == nil ? "This Thing's moment is over." : "Open it on your computer")
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(Palette.paperInk)
                         if widget != nil {
@@ -94,7 +94,7 @@ struct WidgetScreen: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .navigationTitle(widget?.title ?? "Applet")
+            .navigationTitle(widget?.title ?? "Thing")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Palette.paper, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)

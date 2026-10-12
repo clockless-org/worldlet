@@ -11,10 +11,10 @@ export function createMomentApplet({native,content,ask=(_text:string)=>{}}){
  const root=el('section','moment-applet');
  const status=el('p','moment-message');status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.hidden=true;
  const bar=el('div','moment-bar'),until=el('p','moment-until'),actions=el('div','moment-actions'),slot=el('div','moment-slot');
- bar.append(until,actions);slot.setAttribute('aria-label','Applet page');root.append(status,bar,slot);
+ bar.append(until,actions);slot.setAttribute('aria-label','Thing page');root.append(status,bar,slot);
  let selected:any=null,visible=false,shown='',lastRect='',epoch=0;
- const api=body=>{if(!native?.widgets)throw Error('Applets Fox makes work in your own world in the Worldlet app.');return native.widgets(body);};
- const player=body=>{if(!native?.widgetPlayer)throw Error('Applets Fox makes work in your own world in the Worldlet app.');return native.widgetPlayer(body);};
+ const api=body=>{if(!native?.widgets)throw Error('Things Fox makes work in your own world in the Worldlet app.');return native.widgets(body);};
+ const player=body=>{if(!native?.widgetPlayer)throw Error('Things Fox makes work in your own world in the Worldlet app.');return native.widgetPlayer(body);};
  const message=(text:string,error=false)=>{status.textContent=text;status.dataset.error=String(error);status.hidden=!text;};
  async function run(fn:()=>unknown){try{return await fn();}catch(e){message(e.message||String(e),true);return null;}}
  function draw(){
@@ -23,7 +23,7 @@ export function createMomentApplet({native,content,ask=(_text:string)=>{}}){
   until.textContent=[momentLine(selected),selected.blurb].filter(Boolean).join(' · ');
   actions.replaceChildren(
    button(selected.pinned?'Unpin':'Keep it',()=>run(()=>update(selected.pinned?'unpin':'pin'))),
-   button('Ask Fox to change it',()=>ask(`Change my Applet “${selected.title}” (${selected.id}): `)),
+   button('Ask Fox to change it',()=>ask(`Change my Thing “${selected.title}” (${selected.id}): `)),
    button('Delete',()=>run(()=>update('delete')),'moment-delete'));
  }
  async function load(){

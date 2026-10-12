@@ -222,13 +222,13 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    points[key].caption='';points[key].description=(areaZoom?'Enter ':'Manage ')+r.b.title;points[key].hovered=hoveredRegion===r.b.id;
    if(!rooms.some(room=>room.entity==='app'&&regionId(room.buildingId)===id&&eligible(room)&&assigned[room.moduleId])){
     add('region-add:'+id,r.b.id,'+',WORLD_LAYOUT.regions[id].center,'region-more','region-add');
-    points['region-add:'+id].description='Add applets to '+r.b.title;points['region-add:'+id].hovered=hoveredRegion===r.b.id;
+    points['region-add:'+id].description='Add Things to '+r.b.title;points['region-add:'+id].hovered=hoveredRegion===r.b.id;
    }
   }
   // Projection runs before render, so worldTransform still holds the last frame's camera; once the camera settles the World idles with the mark off its device.
   if(level==='building'||level==='overview')for(const d of devices){const point=points['space:'+d.room.id];if(!point||d.room.entity!=='app')continue;const scale=d.root.getGlobalTransform(attentionTransform).a;point.attentionOffset=closeArea?18:(d.visibleBottom-d.visibleTop)*scale+50;point.attentionX=(d.visibleLeft+d.visibleWidth/2)*scale;point.hovered=!!(d.root.isHovered||d.labelHovered);}
   if(placementArea&&level!=='object')WORLD_LAYOUT.regions[placementArea]?.placements.forEach((slot,index)=>{
-   const key='region-slot:'+index;add(key,placementArea,'+',slot.anchor,'placement','region-slot');points[key].slot=index;points[key].description='Place applet in slot '+(index+1);
+   const key='region-slot:'+index;add(key,placementArea,'+',slot.anchor,'placement','region-slot');points[key].slot=index;points[key].description='Place Thing in slot '+(index+1);
    const closeSlot=closeArea?.slots.find(s=>s.id===slot.id);if(closeSlot){const p=closeArea.group.toGlobal({x:closeSlot.anchor[0]*WORLD_WIDTH,y:closeSlot.anchor[1]*WORLD_HEIGHT});points[key].x=p.x;points[key].y=p.y;points[key].visible=true;}
   });
   onProject(points);

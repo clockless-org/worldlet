@@ -129,7 +129,7 @@ export function installWidgets(host:Host){
    if(operation==='unpin'){const t=now();return save({...row.widget,pinned:false,archivedAt:t>=row.widget.endsAt?t:null});}
    if(operation==='archive'){if(player.current===id)player.stop();return save({...row.widget,pinned:false,archivedAt:now()});}
    if(operation==='delete'){
-    const parent=host.window(),options={type:'warning' as const,message:`Delete “${row.widget.title}”?`,detail:'The Applet is removed from this world and from your phone. This cannot be undone.',buttons:['Delete','Cancel'],defaultId:1,cancelId:1};
+    const parent=host.window(),options={type:'warning' as const,message:`Delete “${row.widget.title}”?`,detail:'The Thing is removed from this world and from your phone. This cannot be undone.',buttons:['Delete','Cancel'],defaultId:1,cancelId:1};
     const answer=(parent?await dialog.showMessageBox(parent,options):await dialog.showMessageBox(options)).response;
     if(answer!==0)return {cancelled:true};
     if(player.current===id)player.stop();
