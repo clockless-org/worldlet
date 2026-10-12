@@ -366,8 +366,8 @@ ARM64 Windows builds are not produced.
   `WORLDLET_GOOGLE_CLIENT_FILE` or `.local/google-oauth-client.json` (the release job
   defaults to the latter). The MSIX and Steam generators refuse a payload without it;
   the EXE installer builder does not check for it.
-- `npm run version:windows` reserves the next independent Windows Build from the live
-  manifest without advancing the Mac Build.
+- The Windows Build is the commit's Build, the same as the Mac one (4000 + its position on
+  `main`, [build-info.ts](../../scripts/build-info.ts)).
 
 ### Windows installer
 

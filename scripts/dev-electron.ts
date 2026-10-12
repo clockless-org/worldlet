@@ -168,7 +168,7 @@ if(check){updates.state.online=false;await updates.publish();const head=git(root
 // Feature previews react to edits, but main only prepares committed, clean changes.
 if(checkout.linked){
  for(const name of ['ui','core','contracts','resources','platform/bridge','platform/electron','platform/local-tools','platform/browser','platform/web-engine','scripts'])watchers.push(watch(path.join(root,name),{recursive:true},(_event,file)=>{if(!String(file??'').includes('node_modules'))schedule();}));
- for(const name of ['release.json','package.json','package-lock.json'])watchers.push(watch(path.join(root,name),()=>schedule()));
+ for(const name of ['package.json','package-lock.json'])watchers.push(watch(path.join(root,name),()=>schedule()));
 }
 headTimer=setInterval(()=>{
  if(closing||busy||locked(integrationLock))return;
