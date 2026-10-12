@@ -2,8 +2,11 @@ import Foundation
 
 /// Which language hold-to-talk listens for. The recognizer hears one language at a time, and the app's own language
 /// (`Locale.current`, English while the app has only English text) made it hear Mandarin as English. The rule matches
-/// the desktop's (ui/companion/speech-language.ts) and Android's (kit SpeechLanguage.kt): the last line the person
-/// said or typed to Fox, when its script names a language; otherwise the phone's first preferred language.
+/// the desktop's (ui/companion/speech-language.ts) and Android's (kit SpeechLanguage.kt): the person's latest line to
+/// Fox whose script names a language; otherwise a preferred language of the phone that has its own script (Chinese on an
+/// English phone); otherwise the phone's first preferred language. One English line must not lock it into English: the
+/// English recognizer writes Mandarin as English words, so every later line would read as English too (Kelvin,
+/// 2026-10-12: "手机上怎么不识别中文了"), while the Chinese recognizer still writes English words it hears.
 public enum SpeechLanguage {
     /// The language a line is written in, when its script says so; Latin text could be many languages, so nil.
     public static func language(of text: String) -> String? {
@@ -27,12 +30,14 @@ public enum SpeechLanguage {
 
     /// The recognizer locale, as an identifier from `supported` (e.g. "zh-CN"), or nil when none fits.
     /// - Parameters:
-    ///   - lastLine: the person's latest line to Fox, if any.
+    ///   - lines: the person's recent lines to Fox, newest last.
     ///   - preferred: `Locale.preferredLanguages`, most preferred first (e.g. "en-US", "zh-Hans-CN").
     ///   - supported: the recognizer's locale identifiers ("zh_CN" or "zh-CN").
-    public static func locale(lastLine: String?, preferred: [String], supported: [String]) -> String? {
+    public static func locale(lines: [String], preferred: [String], supported: [String]) -> String? {
         let available = supported.map { $0.replacingOccurrences(of: "_", with: "-") }
-        let wanted = lastLine.flatMap(language(of:)) ?? preferred.first.map { parts($0).language } ?? "en"
+        let wanted = lines.reversed().lazy.compactMap(language(of:)).first
+            ?? preferred.map { parts($0).language }.first { scripted.contains($0) }
+            ?? preferred.first.map { parts($0).language } ?? "en"
         var candidates = preferred.map(parts).filter { $0.language == wanted }.compactMap { part in
             part.region.map { "\(part.language)-\($0)" }
         }
@@ -42,6 +47,9 @@ public enum SpeechLanguage {
         }
         return available.first { parts($0).language == wanted }
     }
+
+    /// The languages `language(of:)` can name: each has its own script.
+    private static let scripted: Set<String> = ["zh", "ja", "ko", "ru", "ar", "th", "he", "hi", "el"]
 
     private static let defaults = ["zh": "zh-CN", "ja": "ja-JP", "ko": "ko-KR", "ru": "ru-RU", "ar": "ar-SA",
                                    "th": "th-TH", "he": "he-IL", "hi": "hi-IN", "el": "el-GR", "en": "en-US",

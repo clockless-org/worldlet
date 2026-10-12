@@ -20,16 +20,26 @@ class SpeechLanguageTest {
 
     @Test
     fun lastLineDecidesEvenOnAnEnglishPhone() {
-        assertEquals("zh-CN", SpeechLanguage.tag("明天有什么安排", listOf("en-US")))
-        assertEquals("zh-TW", SpeechLanguage.tag("明天有什么安排", listOf("en-US", "zh-Hant-TW")))
-        assertEquals("ja-JP", SpeechLanguage.tag("カレンダー", listOf("en-US")))
+        assertEquals("zh-CN", SpeechLanguage.tag(listOf("明天有什么安排"), listOf("en-US")))
+        assertEquals("zh-TW", SpeechLanguage.tag(listOf("明天有什么安排"), listOf("en-US", "zh-Hant-TW")))
+        assertEquals("ja-JP", SpeechLanguage.tag(listOf("カレンダー"), listOf("en-US")))
     }
 
     @Test
     fun otherwiseThePhonesFirstLanguage() {
-        assertEquals("zh-CN", SpeechLanguage.tag(null, listOf("zh-Hans-CN", "en-US")))
-        assertEquals("es-MX", SpeechLanguage.tag("Open my calendar", listOf("es-MX", "en-US")))
-        assertEquals("en-GB", SpeechLanguage.tag(null, listOf("en-GB")))
-        assertEquals("en-US", SpeechLanguage.tag(null, emptyList()))
+        assertEquals("zh-CN", SpeechLanguage.tag(emptyList(), listOf("zh-Hans-CN", "en-US")))
+        assertEquals("es-MX", SpeechLanguage.tag(listOf("Open my calendar"), listOf("es-MX", "en-US")))
+        assertEquals("en-GB", SpeechLanguage.tag(emptyList(), listOf("en-GB")))
+        assertEquals("en-US", SpeechLanguage.tag(emptyList(), emptyList()))
+    }
+
+    /** Kelvin, 2026-10-12: one English line (or Mandarin heard as English) kept every later hold in English. */
+    @Test
+    fun anEnglishLineDoesNotLockOutChinese() {
+        assertEquals("zh-CN", SpeechLanguage.tag(listOf("明天有什么安排", "ok", "Send it"), listOf("en-US")))
+        assertEquals("zh-CN", SpeechLanguage.tag(listOf("Send it"), listOf("en-US", "zh-Hans-CN")))
+        assertEquals("zh-TW", SpeechLanguage.tag(emptyList(), listOf("en-US", "zh-Hant-TW")))
+        assertEquals("ru-RU", SpeechLanguage.tag(listOf("明天有什么安排", "Открой календарь"), listOf("en-US")))
+        assertEquals("en-US", SpeechLanguage.tag(listOf("Open my calendar"), listOf("en-US", "es-MX")))
     }
 }

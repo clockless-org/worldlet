@@ -65,7 +65,7 @@ final class TalkMode {
         while !Task.isCancelled && phase != .off {
             phase = .listening
             // After a barge-in the microphone is already listening (`start` leaves it be).
-            await voice.start(lastLine: model.turns.last(where: { $0.role == .user })?.text)
+            await voice.start(lines: model.turns.filter { $0.role == .user }.map(\.text))
             if case .unavailable = voice.state { stop(); return }
             var pause = TalkPause()
             while voice.listening && !Task.isCancelled {
@@ -113,7 +113,7 @@ final class TalkMode {
         phase = .speaking
         bargedIn = false
         let session = AVAudioSession.sharedInstance()
-        await voice.start(lastLine: model.turns.last(where: { $0.role == .user })?.text, echoCancelled: true)
+        await voice.start(lines: model.turns.filter { $0.role == .user }.map(\.text), echoCancelled: true)
         let overhearing = voice.listening
         if !overhearing {
             try? session.setCategory(.playback, mode: .spokenAudio, options: .duckOthers)
