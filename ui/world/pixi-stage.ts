@@ -9,9 +9,10 @@ export function createAppletStage(host,onPick){
  const panel=document.createElement('section');panel.className='pixi-applet-stage';panel.hidden=true;panel.setAttribute('aria-label','Thing contents');host.append(panel);
  const focus=document.createElement('aside');focus.className='pixi-selected-item';focus.hidden=true;host.append(focus);
  const mailNav=document.createElement('nav');mailNav.className='mail-reader-switch';mailNav.setAttribute('aria-label','Browse emails');mailNav.hidden=true;host.append(mailNav);
- // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail so far. The
- // scene stays while one of its letters is read, so the reader sits on the same painted paper.
- const SCENE_APPLETS=new Set(['gmail']);let scene:AppletScene|null=null;
+ // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail and Calendar
+ // so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; Calendar's events
+ // open in the shared reader.
+ const SCENE_APPLETS=new Set(['gmail','google-calendar']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;
@@ -20,6 +21,8 @@ export function createAppletStage(host,onPick){
  const hidden=(element:HTMLElement,value:boolean)=>{if(element.hidden!==value)element.hidden=value;};
  const data=(element:HTMLElement,key:string,value:string)=>{if(element.dataset[key]!==value)element.dataset[key]=value;};
  let signature='',focusSignature='',shownItems=[],allItems=[],selected=null,page=0,owner='';
+ // The theme's small secondary regions (Calendar's wall date) show today's date.
+ const sceneToday=(scene:AppletScene,value)=>{const day=new Date(value?.now||Date.now());for(const region of scene.regions.filter(r=>r.role==='secondary')){const small=document.createElement('small'),strong=document.createElement('strong');small.className='scene-meta';small.textContent=day.toLocaleDateString(undefined,{weekday:'short',month:'short'});strong.className='scene-title';strong.textContent=String(day.getDate());region.element.replaceChildren(small,strong);}};
  function render(room,value,visible,focused=false,_showDevice=false){
   if(owner!==room.moduleId){owner=room.moduleId;page=0;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;}
   if(calendarShow&&room.key==='google-calendar'){const today=new Date(value?.now||Date.now());today.setHours(12,0,0,0);homeState.mode='day';homeState.offset=Math.round((+new Date(calendarShow+'T12:00:00')-+today)/86400000);homeState.editing=null;homeState.scroll=null;calendarShow=null;}
@@ -28,7 +31,7 @@ export function createAppletStage(host,onPick){
   const f=JSON.stringify([room.key,selected,allItems.map(i=>i.id)]);if(f!==focusSignature){focusSignature=f;focus.replaceChildren();mailNav.replaceChildren();if(selected){const label=document.createElement('small');label.textContent=selected.curated?'Fox summary':'Selected item';const title=document.createElement('strong');title.textContent=selected.title;const context=document.createElement('p');context.textContent=[selected.when,selected.context].filter(Boolean).join(' · ');focus.append(label,title,context);
    const at=allItems.findIndex(i=>i.id===selected.id),nav=document.createElement('nav');nav.className='pixi-focus-switch';nav.setAttribute('aria-label','Browse selected items');
    for(const [text,step] of [['Previous item',-1],['Next item',1]] as const){const b=document.createElement('button');b.type='button';b.textContent=step<0?'‹':'›';b.setAttribute('aria-label',text);b.disabled=at<0||at+step<0||at+step>=allItems.length;b.hidden=b.disabled;b.onclick=e=>{e.stopPropagation();const next=allItems[at+step];if(next){selected=next;onPick({action:'applet-item',id:next.id});}};if(room.key==='gmail'){b.textContent=step<0?'◀':'▶';b.setAttribute('aria-label',step<0?'Previous email':'Next email');mailNav.append(b);}else nav.append(b);}if(room.key!=='gmail')focus.append(nav);}}
-  const sceneOpen=SCENE_APPLETS.has(room.key)&&(visible||focused);
+  const sceneOpen=SCENE_APPLETS.has(room.key)&&(visible||focused&&SCENE_READERS.has(room.key));
   if(scene&&(!sceneOpen||scene.element.dataset.applet!==room.key)){scene.destroy();scene=null;delete panel.dataset.scene;delete panel.dataset.reading;}
   if(sceneOpen&&!scene){panel.replaceChildren();scene=mountAppletScene(panel,room.key,{shell:(host.closest('#notionWorld') as HTMLElement|null)||host});panel.dataset.scene=room.key;signature='';}
   if(scene)data(panel,'reading',String(!visible));
@@ -42,7 +45,10 @@ export function createAppletStage(host,onPick){
   // do not fit. Only the calendar moves by week, which changes the dates rather than paging.
   else shownItems=items;
   const next=JSON.stringify([room.moduleId,items,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;
-  if(scene){shownItems=renderMailOpen(scene.primary.element,items,value,item=>{selected=item;onPick({action:'applet-item',id:item.id});});scene.layout();return;}
+  if(scene){const pick=item=>{selected=item;onPick({action:'applet-item',id:item.id});};
+   if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick);
+   else{scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);});sceneToday(scene,value);}
+   scene.layout();return;}
   panel.replaceChildren();panel.dataset.installation=String(local);panel.dataset.work=String(cards);
   panel.classList.remove('home-open','meetings-open');
   if(HOME_RECORDS.includes(room.key)){shownItems=renderHomeOpen(panel,room,items,value,homeState,item=>{selected=item;onPick({action:'applet-item',id:item.id});},()=>{signature='';render(room,value,true);});return;}

@@ -34,3 +34,18 @@
  background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;overflow:hidden;pointer-events:none}
 /* While one of its items is read, the scene stays and the reader takes its primary region. */
 #notionWorld .pixi-applet-stage[data-reading=true] .applet-scene-region[data-role=primary]>*{visibility:hidden}
+
+
+/* Calendar, Notes and Reminders (ui/applets/home-open.ts) on a scene: the painting is their page, so their own sheet,
+   page art and fixed placements step aside and the theme's material colours the ink and controls. */
+.applet-scene .home-open-sheet{height:100%;padding:0;background:none;border:0;border-radius:0;box-shadow:none;animation:none;color:var(--scene-ink);font-family:var(--scene-body-font)}
+.applet-scene .home-open-sheet::before,.applet-scene .home-calendar-art{display:none}
+.applet-scene .home-open[data-home-kind] .home-open-sheet{padding:0;border:0;box-shadow:none}
+.applet-scene .home-open[data-home-kind] .home-open-header{position:static;height:auto;margin:0 0 8px;justify-content:space-between;border-bottom:1px solid var(--scene-line);padding-bottom:6px}
+.applet-scene .home-open[data-home-kind] .home-open-header h2{display:block;font:600 clamp(18px,4.6cqi,var(--scene-title-size))/1.15 var(--scene-display-font)}
+.applet-scene .home-calendar-modes button[aria-pressed=true]{background:var(--scene-accent);color:var(--scene-accent-ink)}
+.applet-scene .home-open-body[data-grid=time] .home-calendar-dayhead{background:color-mix(in srgb,var(--scene-control) 96%,transparent)}
+.applet-scene .home-leaf{background:color-mix(in srgb,var(--scene-control) 70%,transparent);border-color:var(--scene-line);color:var(--scene-ink)}
+.applet-scene .applet-scene-region[data-role=secondary]{align-items:center;justify-content:center;gap:0;padding:2px;text-align:center;overflow:hidden}
+.applet-scene .applet-scene-region[data-role=secondary] .scene-title{font-size:clamp(14px,50cqh,48px);line-height:1}
+.applet-scene .applet-scene-region[data-role=secondary] .scene-meta{font-size:clamp(8px,14cqh,13px)}
