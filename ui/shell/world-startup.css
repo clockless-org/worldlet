@@ -27,7 +27,7 @@
    the painting is big enough): it settles from slightly closer with a long, soft ease-out
    (WORLD_REVEAL_MS in world-reveal.ts) as the mist dissolves. */
 .world-arriving{animation:world-arrive 3.2s cubic-bezier(.25,.4,.2,1) both;transform-origin:50% 50%}
-.startup-mist{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);pointer-events:none;filter:blur(6px)}
+.startup-mist{position:absolute;z-index:2;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);pointer-events:none;filter:blur(6px)}
 @keyframes world-arrive{from{transform:scale(1.08)}to{transform:scale(1)}}
 .notion-world[data-onboarding-locked="true"] .world-actions{visibility:hidden;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.world-startup.is-opening,.world-arriving{animation:none}.world-startup.is-opening{opacity:0}}
@@ -227,7 +227,7 @@
 @media(prefers-reduced-motion:reduce){.startup-setup,.setup-tile.is-arriving{animation:none}.setup-tile-spinner,.setup-tile-line,.startup-setup button.setup-primary.is-loading::before{animation:none}.setup-more-chevron::before{transition:none}}
 
 /* Entering: the chosen apps gather and become their devices while the page fades. */
-.setup-gathering{position:fixed;inset:0;pointer-events:none;z-index:2}
+.setup-gathering{position:fixed;inset:0;pointer-events:none;z-index:3}
 .setup-gathering img{position:absolute;width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 3px 5px #35453025)}
 .setup-gathering .setup-parcel{position:absolute;margin:0;transform-origin:50% 50%;will-change:transform,opacity}
 .setup-gathering .setup-parcel img{position:static;width:28px;height:28px;filter:none}
@@ -243,6 +243,9 @@
 .world-startup.has-setup::after{content:'';position:absolute;inset:0;z-index:1;background:var(--setup-world-now,var(--setup-world,none)) center 70%/cover no-repeat;opacity:0;pointer-events:none}
 .world-startup.is-gathering::after{opacity:1;transition:opacity .9s ease}
 .world-startup[data-setup-night=dimmed]::after{filter:brightness(.45) saturate(.7) hue-rotate(12deg)}
+/* Enter your world (owner request 2026-10-12): fog covers that painting while everything gathers (veilWorld), and as the
+   World opens the painting gives way under the fog, so what the clearing fog reveals is the live World itself. */
+.world-startup.is-opening::after{opacity:0;transition:opacity .8s ease}
 .world-startup.setup-entering{transition:opacity .7s ease}
 @media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::after{transition:none}}
 #setupArrivingDevices{z-index:10001}
