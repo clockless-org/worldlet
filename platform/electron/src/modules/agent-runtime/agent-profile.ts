@@ -2,6 +2,8 @@ import {AGENT_PROFILE_TIMEOUT_MS,agentProfilePrompt,parseAgentProfile,type Agent
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentRuntime} from './types.ts';
+import {hermesThreads} from './agent-files.ts';
+import {openClawThreads} from './openclaw-files.ts';
 
 // The person's own Agent describes itself once it is chosen (core/agent/agent-profile.ts). One background turn on that
 // Agent, in Worldlet's setup home, with no World tools; the answer is kept in the World's database beside the other
@@ -10,9 +12,10 @@ import type {AgentRuntime} from './types.ts';
 const SETTING='agent-profile';
 export type AgentProfileResult='ok'|'timeout'|'invalid'|'failed';
 
-/** Asks once, and once more when the reply was not the JSON; each answer gets AGENT_PROFILE_TIMEOUT_MS. */
-export async function describeAgent(runtime:()=>AgentRuntime,home:string,timeout=AGENT_PROFILE_TIMEOUT_MS):Promise<{profile:AgentProfile|null;result:AgentProfileResult}> {
- const prompt=agentProfilePrompt(WORLD_APPS.filter(app=>app.region!=='health').map(app=>app.key));
+/** Asks once, and once more when the reply was not the JSON; each answer gets AGENT_PROFILE_TIMEOUT_MS. `conversations`: the
+ * titles Worldlet gives the Agent's conversations (conversationTitles). */
+export async function describeAgent(runtime:()=>AgentRuntime,home:string,conversations:readonly string[]=[],timeout=AGENT_PROFILE_TIMEOUT_MS):Promise<{profile:AgentProfile|null;result:AgentProfileResult}> {
+ const prompt=agentProfilePrompt(WORLD_APPS.filter(app=>app.region!=='health').map(app=>app.key),conversations);
  let result:AgentProfileResult='failed';
  for(let attempt=0;attempt<2;attempt++){
   const agent=runtime();
@@ -38,4 +41,13 @@ export function readAgentProfile(root:string,id:string):AgentProfile|null {
 export function writeAgentProfile(root:string,id:string,profile:AgentProfile,now=Date.now()){
  const saved=readAgentSetting(root,SETTING) as Record<string,any>|null;
  writeAgentSetting(root,SETTING,{...saved&&typeof saved==='object'?saved:{},[id]:{at:now,profile}} as any);
+}
+
+/** The titles Worldlet gives the Agent's conversations, newest first, for the things it names to point at. */
+export function conversationTitles(id:string):string[] {
+ try{
+  if(id==='hermes')return (hermesThreads()??[]).filter(thread=>!thread.shared).sort((a,b)=>b.last-a.last).map(thread=>thread.title);
+  if(id==='openclaw')return (openClawThreads()??[]).map(thread=>thread.title);
+ }catch{}
+ return [];
 }

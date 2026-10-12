@@ -219,5 +219,16 @@ assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
  assert.deepEqual(ongoingFromAgent(said,[waiting],brought,now).map(t=>[t.id,t.state,t.title]),[[waiting.id,'kept','Kitchen restock'],[made[1].id,'kept','School runs']],'a waiting proposal is kept');
  const full=Array.from({length:ONGOING_LIMITS.kept},(_,i)=>({...made[1],id:ongoingId('openclaw','x'+i),session:'x'+i}));
  assert.deepEqual(ongoingFromAgent(said,full,brought,now),[],'never past the kept limit');
+ // Told which Agent it is, a thing with no conversation here is its own Applet still, unless a catalog Applet fits it;
+ // nothing stands alone before that Agent's conversations are brought.
+ assert.deepEqual(ongoingFromAgent([{title:'Taxes',threads:['#taxes']},{title:'Music',threads:[],key:'spotify'}],[],[],now,undefined,'openclaw'),[],'not before its conversations arrive');
+ const alone=ongoingFromAgent(said,[],brought,now,undefined,'openclaw').find(t=>t.title==='Taxes')!;
+ assert.ok(alone&&alone.state==='kept'&&alone.turns===0&&alone.id===ongoingId('openclaw','Taxes')&&alone.named==='Taxes','a thing of its own');
+ assert.deepEqual(ongoingFromAgent([{title:'Music',threads:[],key:'spotify'}],[],brought,now,undefined,'openclaw'),[],'a catalog Applet fits it instead');
+ assert.equal(ongoingLine(alone,now),'Money · OpenClaw','no messages to count');
+ assert.deepEqual(ongoingRefresh([alone],brought,now).forget,[],'with no conversation of its own it is not forgotten');
+ assert.deepEqual(ongoingFromAgent(said,[alone],brought,now,undefined,'openclaw').filter(t=>t.title==='Taxes'),[],'once is enough');
+ const later=ongoingFromAgent([{title:'Taxes',threads:['#taxes']}],[alone],[...brought,conversation('OpenClaw · Discord · #taxes')],now,undefined,'openclaw');
+ assert.deepEqual(later.map(t=>[t.title,t.session,t.state]),[['Taxes','Taxes','declined'],['Taxes','OpenClaw · Discord · #taxes','kept']],'its conversation, brought later, takes its place');
 }
 console.log('PASS Ongoing things: what looks like a job, proposing and its limits, themes and the page Fox is asked for, decisions, forgetting, names and lines, kinds and their pages, the phone\'s tiles, things and proposals, and its Tasks and Journal.');

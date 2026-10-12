@@ -12,6 +12,9 @@ const prompt=agentProfilePrompt(['gmail','discord','amazon']);
 assert.match(prompt,new RegExp(AGENT_PROFILE_SCHEMA.replace(/[./]/g,'\\$&')));
 assert.match(prompt,/NEVER include secrets/);assert.match(prompt,/Do not change any setting or file/);assert.match(prompt,/gmail, discord, amazon/);
 assert.ok(agentProfileAsked('openclaw')&&agentProfileAsked('hermes')&&!agentProfileAsked('codex'));
+// The things it names point at the conversations Worldlet brings, by the titles Worldlet gives them.
+assert.doesNotMatch(prompt,/Worldlet lists your conversations/);
+assert.match(agentProfilePrompt(['gmail'],['Telegram · Sam',' Telegram  ·  Sam','#groceries']),/exactly as written here: "Telegram · Sam", "#groceries"\./);
 
 for(const secret of ['sk-ant-api03-abcdefghijklmnop','ghp_abcdefghijklmnopqrstuvwxyz0123','Bearer abcdefghijklmnop0123456789','token AbC123dEf456GhI789jKl012MnO345pQr678StU901'])assert.ok(looksSecret(secret),secret);
 for(const plain of ['~/clawd-phone/hotline/skills/personal/groceries','Gmail for hotel bookings','1Password vault with an API key'])assert.ok(!looksSecret(plain),plain);
@@ -49,7 +52,7 @@ assert.equal(agent.asked.length,2);assert.match(agent.asked[1],/was not that JSO
 agent=fake(['nope','still nope']);
 assert.deepEqual(await describeAgent(agent.make,'/tmp'),{profile:null,result:'invalid'});
 agent=fake(['hang']);
-assert.deepEqual(await describeAgent(agent.make,'/tmp',50),{profile:null,result:'timeout'});
+assert.deepEqual(await describeAgent(agent.make,'/tmp',[],50),{profile:null,result:'timeout'});
 agent=fake([new Error('MINIMAX_API_KEY is missing')]);
 assert.deepEqual(await describeAgent(agent.make,'/tmp'),{profile:null,result:'failed'});
 

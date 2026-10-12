@@ -115,7 +115,8 @@ export function ongoingRefresh(things:OngoingThing[],conversations:BroughtConver
  const save:OngoingThing[]=[],forget:string[]=[];
  for(const thing of things){
   const c=byId.get(thing.id);
-  if(!c){if(thing.state!=='declined')forget.push(thing.id);continue;}
+  // A thing the Agent named with no conversation of its own (ongoingFromAgent) has none to follow.
+  if(!c){if(thing.state!=='declined'&&!(thing.named&&!thing.turns))forget.push(thing.id);continue;}
   // A thing proposed before kinds learns its kind from its messages once.
   const kind=thing.kind===undefined&&textOf?{kind:ongoingKind(thing,textOf(c))}:{};
   if(c.turns!==thing.turns||c.last!==thing.last||c.userTurns!==thing.userTurns||c.first!==thing.first||kind.kind)save.push({...thing,turns:c.turns,userTurns:c.userTurns,first:c.first,last:c.last,...kind});
@@ -149,8 +150,10 @@ const ongoingScore=(c:BroughtConversation,now:number)=>c.userTurns/(1+Math.max(0
  * describe itself (owner request 2026-10-12, Kelvin: "根据他的聊天记录，总结一下这个用户他现在日常处理最多的 things，然后我们
  * 每一个 thing 呢都变成一个 applet"). Each thing names the conversations it happens in; the busiest brought conversation
  * whose name matches becomes that thing, kept at once under the Agent's name for it, as the person's own Applet. A thing
- * already kept or removed (declined) is left as it is, so asking again never brings back what the person took out. */
-export function ongoingFromAgent(said:readonly {title:string;threads:readonly string[]}[],things:OngoingThing[],conversations:BroughtConversation[],now:number,textOf?:(c:BroughtConversation)=>string):OngoingThing[] {
+ * already kept or removed (declined) is left as it is, so asking again never brings back what the person took out.
+ * A thing whose conversations are not here and that no catalog Applet fits (`key`) is still its own Applet, under the
+ * Agent's name for it (`source`, the chosen Agent), with no conversation of its own until one is brought. */
+export function ongoingFromAgent(said:readonly {title:string;threads:readonly string[];key?:string}[],things:OngoingThing[],conversations:BroughtConversation[],now:number,textOf?:(c:BroughtConversation)=>string,source?:string):OngoingThing[] {
  const plain=(value:string)=>value.toLowerCase().replace(/^[#@]+/,'').replace(/[\s_-]+/g,' ').trim();
  const matches=(name:string,thread:string)=>{const a=plain(name),b=plain(thread);return !!a&&!!b&&(a===b||(Math.min(a.length,b.length)>=4&&(a.includes(b)||b.includes(a))));};
  const byId=new Map(things.map(t=>[t.id,t])),used=new Set<string>(),keep:OngoingThing[]=[];
@@ -160,9 +163,20 @@ export function ongoingFromAgent(said:readonly {title:string;threads:readonly st
   if(!title||kept>=ONGOING_LIMITS.kept)continue;
   const found=conversations.filter(c=>isMigrationSource(c.source)&&!used.has(ongoingId(c.source,c.session))&&thing.threads.some(thread=>matches(ongoingName(c.source,c.session).title,thread)))
    .sort((a,b)=>ongoingScore(b,now)-ongoingScore(a,now)||a.session.localeCompare(b.session))[0];
-  if(!found)continue;
+  if(!found){
+   // Only once that Agent's conversations are brought, so one still on its way is matched instead.
+   if(thing.key||!source||!isMigrationSource(source)||!conversations.some(c=>c.source===source))continue;
+   const id=ongoingId(source,title);
+   if(byId.has(id)||used.has(id))continue;
+   used.add(id);
+   keep.push({...ongoingDecide(ongoingProposal({source,session:title,turns:0,userTurns:0,first:'',last:''},now),'keep',now),named:title,title});kept++;
+   continue;
+  }
   const id=ongoingId(found.source,found.session),known=byId.get(id);
   used.add(id);
+  // Its conversation came after it stood alone: the conversation's thing takes its place.
+  const alone=source?byId.get(ongoingId(source,title)):undefined;
+  if(alone&&alone.state==='kept'&&!alone.turns)keep.push({...alone,state:'declined',decidedAt:Math.round(now)});
   if(known&&known.state!=='proposed')continue;
   keep.push({...ongoingDecide(known??ongoingProposal(found,now,textOf?.(found)??''),'keep',now),named:title,title});kept++;
  }
@@ -189,7 +203,7 @@ export function ongoingAgo(iso:string,now:number):string {
  * has one ("Fitness · OpenClaw · Discord · …"). */
 export function ongoingLine(thing:OngoingThing,now:number):string {
  const ago=ongoingAgo(thing.last,now),kind=ongoingKindOf(thing);
- return [kind==='general'?'':ONGOING_KINDS[kind].title,thing.where,thing.turns+(thing.turns===1?' message':' messages'),ago?'last '+ago:''].filter(Boolean).join(' · ');
+ return [kind==='general'?'':ONGOING_KINDS[kind].title,thing.where,thing.turns?thing.turns+(thing.turns===1?' message':' messages'):'',ago?'last '+ago:''].filter(Boolean).join(' · ');
 }
 /** What the person actually wrote in a brought turn. A chat gateway (Hermes on Slack and the like) stores each message with
  * what it told its Agent around it: a `[Replying to: "…"]` pointer and a `[Thread context — …]` block of the thread's

@@ -5,7 +5,7 @@ import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
-import {LOCAL_HARNESSES,agentProfileApplets,connectRequestPlan} from '../../core/agent/index.ts';
+import {LOCAL_HARNESSES,agentProfileApplets,agentProfileAsked,connectRequestPlan} from '../../core/agent/index.ts';
 import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,timingBucket} from '../../core/diagnostics/index.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
@@ -84,7 +84,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  let checkStarted=0,signingInAgent=false;
  const onAgentCheck=(event:Event)=>{
   const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.id!==draft.agent)return;
-  if('result' in detail){takeProfile(detail.profile);productEvent('agent_profile_result',agentProfileDimensions(String(detail.id),String(detail.result),draft.profile?.connections?.length||0),timingBucket(Number(detail.ms)||0));return;}
+  if('result' in detail){draft.profileResult=String(detail.result);takeProfile(detail.profile);if(!detail.profile){persist();if(!busy)render();}productEvent('agent_profile_result',agentProfileDimensions(String(detail.id),String(detail.result),draft.profile?.connections?.length||0),timingBucket(Number(detail.ms)||0));return;}
   if(detail.ok!==false)return;
   productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
   notice=String(detail.message||'').slice(0,300);
@@ -99,7 +99,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   const titles=(items:unknown,field:string,limit:number)=>Array.isArray(items)?items.map((item:any)=>item?.[field]).filter((value:unknown):value is string=>typeof value==='string'&&!!value).slice(0,limit):[];
   const connections=[...(Array.isArray(profile.connections)?profile.connections:[]).map((item:any)=>({title:String(item?.name||''),provider:typeof item?.service==='string'?item.service:''})),
    ...(Array.isArray(profile.channels)?profile.channels:[]).map((item:any)=>({title:String(item?.provider||'')+(item?.place?' '+String(item.place):''),provider:typeof item?.provider==='string'?item.provider:''}))].filter(item=>item.title.trim()).slice(0,20);
-  draft.profile={connections,skills:titles(profile.skills,'name',200).length,applets:agentProfileApplets(profile,WORLD_APPS.map(app=>app.key))};
+  draft.profile={connections,skills:titles(profile.skills,'name',200).length,applets:agentProfileApplets(profile,WORLD_APPS.map(app=>app.key)),things:titles(profile.things,'title',12)};
   persist();seed();if(!busy)render();
  }
  async function signInAgain(){
@@ -166,7 +166,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    await call('foxPreferences',{cloudConsent:true});
    // Back then the same Agent again shows what already came over instead of reading it again (owner request
    // 2026-10-06); another Agent starts over.
-   if(draft.broughtFrom!==agent.id||draft.brought?.failed){delete draft.brought;delete draft.integrations;delete draft.broughtFrom;delete draft.profile;shownTiles=0;}
+   if(draft.broughtFrom!==agent.id||draft.brought?.failed){delete draft.brought;delete draft.integrations;delete draft.broughtFrom;delete draft.profile;delete draft.profileResult;shownTiles=0;}
    else shownTiles=99;
    flipFrom=panel.querySelector(`.setup-agent-card[data-agent="${CSS.escape(agent.id)}"]`)?.getBoundingClientRect()||null;
    notice='';draft.agent=agent.id;draft.agentName=agentName(agent);draft.connected=chosen?.connected===true;draft.consent=true;step=1;error='';persist();
@@ -232,6 +232,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(importingAgent()){
    if(!draft.brought)return list;
    list.push('profile','conversations','notes','skills','routines');
+   // What the Agent says the person does most (core/agent/agent-profile.ts things): asked while the rest arrives.
+   if(agentProfileAsked(draft.agent))list.push('things');
    if(!porting)list.push('connections','apps');
    return list;
   }
@@ -549,6 +551,16 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   const skills=Math.max(Number(brought.skills)||0,Number(draft.profile?.skills)||0);
   if(kind==='skills')return keep('tile:skills',String(skills)+draft.language,build('Skills','',big(skills,'skills it learned')));
   if(kind==='routines')return keep('tile:routines',String(brought.routines)+draft.language,build('Routines','',big(brought.routines,'run on their own')));
+  if(kind==='things'){
+   const things:string[]=draft.profile?.things||[],asking=!draft.profile&&!draft.profileResult;
+   return keep('tile:things',JSON.stringify([things,asking,draft.language]),build('Things','is-wide',el=>{
+    if(asking){el.classList.add('is-waiting');el.append(node('p',agentText('Asking {agent} what you do most…',draft.agentName||'your Agent'),'setup-tile-note'));return;}
+    if(!things.length)return none(el);
+    const list=node('ul','','setup-tile-chips');
+    for(const title of things){const row=node('li',title);row.title=title;list.append(row);}
+    el.append(list);
+   }));
+  }
   if(kind==='connections'){
    const items:{title:string,provider?:string,logo:string,again:boolean}[]=importingAgent()
     ?[...(draft.integrations||[]).filter(item=>item.outcome!=='stays').map(item=>({title:item.title,provider:typeof item.provider==='string'?item.provider:'',logo:item.provider==='google'?'brands/google.png':logoOf(item.provider),again:item.outcome==='reconnect'})),
@@ -686,6 +698,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    // where the connections and apps arrive last), so the grid never changes shape while tiles arrive.
    const layout=arriving?'agent':has('profile')?(has('apps')?'agent':has('connections')?'agent-no-apps':'agent-only'):list.length>1?(has('connections')?'world':'world-apps'):'';
    if(layout)bento.dataset.layout=layout;else delete bento.dataset.layout;
+   bento.toggleAttribute('data-things',has('things')||arriving&&agentProfileAsked(draft.agent));
    const shownTileElements:HTMLElement[]=[];
    for(let i=0;i<shown;i++)shownTileElements.push(tile(list[i],i===shown-1&&shownTiles<=list.length));
    // While the host still copies, one tile says what is happening.

@@ -32,8 +32,10 @@ export interface AgentProfile {
 
 const KINDS=['mcp','channel','api_key','password_vault','oauth','cli','email','other'];
 
-/** The message sent to the Agent. `catalog`: the Applet keys it may suggest from. */
-export function agentProfilePrompt(catalog:readonly string[]):string {
+/** The message sent to the Agent. `catalog`: the Applet keys it may suggest from. `conversations`: the titles Worldlet
+ * gives its conversations, so the things it names point at ones Worldlet brings (core/tasks ongoingFromAgent). */
+export function agentProfilePrompt(catalog:readonly string[],conversations:readonly string[]=[]):string {
+ const titles=[...new Set(conversations.map(title=>title.replace(/\s+/g,' ').trim()).filter(Boolean))].slice(0,80);
  return [
   'Worldlet is setting up a desktop for you and the person you work for. Describe yourself as ONE JSON object, exactly this shape (every field optional, arrays may be empty):',
   JSON.stringify({schema:AGENT_PROFILE_SCHEMA,agent:{name:'your name',model:'provider/model'},workspaces:[{agent:'agent id',path:'absolute folder holding your SOUL.md, memory, skills'}],persona:'one or two sentences: who you are and how you talk',aboutUser:['short facts about your person'],skills:[{name:'skill name',description:'one line'}],connections:[{name:'what it is',kind:KINDS.join('|'),service:'e.g. gmail, discord, 1password',usedFor:'one line'}],channels:[{provider:'discord|telegram|…',place:'#channel or chat name',purpose:'one line'}],routines:[{name:'',schedule:'cron or plain words',what:'one line'}],threads:[{title:'recent conversation',summary:'one line'}],things:[{title:'short name, like Kitchen restock',why:'what your person keeps doing',threads:['the conversation titles it happens in, exactly as titled'],key:'catalog key below, or omit'}],applets:[{key:'catalog key below, or omit',title:'name',why:'what your person does that it helps with'}]}),
@@ -41,6 +43,7 @@ export function agentProfilePrompt(catalog:readonly string[]):string {
   'NEVER include secrets: no passwords, tokens, API key values or private keys. Name the service and how it is connected instead.',
   'Do not change any setting or file and do not message anyone; only answer.',
   'things: go through your conversations with your person and name the things they handle most day to day, up to 12, busiest first: recurring jobs, not one-off questions. Each lists the conversations it happens in by their exact titles, and a key from the list below when one Applet fits.',
+  ...titles.length?['Worldlet lists your conversations with these titles; in things, name the conversations exactly as written here: '+titles.map(title=>JSON.stringify(title)).join(', ')+'.']:[],
   'threads: up to 30 recent ones. applets: up to 8, based on what your person really does with you; use a key from this list when one fits: '+catalog.join(', ')+'.',
   'Reply with the JSON object only, no other text.',
  ].join('\n\n');
