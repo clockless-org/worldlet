@@ -1,7 +1,8 @@
-/** Fox's conversation as one chat window (owner Order 2026-10-12: "左边是 thread … 右边是一个对话列表"): expanded in the
- * World, the card becomes a window over Fox. Its left side lists the sessions (fox-sessions.ts: the main one a primary
- * card, the others scrolling under it); its right side is the session's history, one bubble per message, the person's
- * on the right and Fox's on the left, in one type size. A long message folds to a few lines with Show more. */
+/** Fox's conversation laid out like a chat (owner Order 2026-10-12: "左边是 thread … 右边是一个对话列表", then "不要做成一个
+ * panel 还是对话框 一个一个气泡的"): expanded in the World, the card gives way to floating speech bubbles over Fox, with
+ * no box around them. The sessions stand on the left (fox-sessions.ts: the main one a primary card, the others scrolling
+ * under it); the session's history rises on the right, one bubble per message, the person's on the right and Fox's on
+ * the left, in one type size. A long message folds to a few lines with Show more. */
 import {mountFoxSessions} from './fox-sessions.ts';
 import {showQuestion,type ThreadEntry} from './fox-thread.ts';
 import type {FoxSession} from '../../core/tasks/index.ts';
