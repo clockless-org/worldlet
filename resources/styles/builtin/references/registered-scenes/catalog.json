@@ -19,10 +19,10 @@
           "id": "main",
           "role": "primary",
           "rect": [
-            0.077,
-            0.229,
-            0.525,
-            0.51
+            0.067584,
+            0.201913,
+            0.542464,
+            0.585547
           ],
           "material": "paper"
         },
@@ -30,10 +30,10 @@
           "id": "today",
           "role": "secondary",
           "rect": [
-            0.744,
-            0.274,
-            0.08,
-            0.112
+            0.736,
+            0.262,
+            0.084,
+            0.09
           ],
           "material": "paper"
         }
@@ -41,7 +41,8 @@
       "identityReference": "ui/theme-packages/village/assets/devices/google-calendar.webp",
       "refinements": [
         "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Change the calendar's horizontal top binding bar to warm terracotta red matching icon 2. Keep brass binder rings and cream paper. Replace the tiny generic calendar emblem at the top with a small red-bound calendar object matching icon 2, without dates or grid. Keep the wood support natural. Do not add writing, grids or controls anywhere on the large paper. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space.",
-        "Use case: precise-object-edit. Edit this Village Calendar background. Preserve the entire large left calendar sheet, its exact bounds, red top binding, rings, blank paper, and the existing village painterly style. On the UPPER RIGHT add a separate clearly usable TODAY DATE display: a cream blank tear-off calendar card with rounded upper corners, red top binding and TWO brass rings, naturally hanging on a slim wooden garden post. Its outer silhouette fits x74%-95%,y19%-48%; its empty FRONT-FACING cream interior must fit x77%-92%,y27%-44%. It is a real small calendar card, not a UI overlay. Remove the little black lamp if it conflicts with this small date card; simplify pots behind it. This secondary card will receive live HTML date text, so no painted dates, letters, grids or numbers. Preserve a generous clear lower-right terrace from x69%-97%,y55%-96% for companion. Keep all other details and the 16:9 canvas."
+        "Use case: precise-object-edit. Edit this Village Calendar background. Preserve the entire large left calendar sheet, its exact bounds, red top binding, rings, blank paper, and the existing village painterly style. On the UPPER RIGHT add a separate clearly usable TODAY DATE display: a cream blank tear-off calendar card with rounded upper corners, red top binding and TWO brass rings, naturally hanging on a slim wooden garden post. Its outer silhouette fits x74%-95%,y19%-48%; its empty FRONT-FACING cream interior must fit x77%-92%,y27%-44%. It is a real small calendar card, not a UI overlay. Remove the little black lamp if it conflicts with this small date card; simplify pots behind it. This secondary card will receive live HTML date text, so no painted dates, letters, grids or numbers. Preserve a generous clear lower-right terrace from x69%-97%,y55%-96% for companion. Keep all other details and the 16:9 canvas.",
+        "Use case: precise-object-edit. Built-in imagegen edit of concepts/google-calendar/effect.webp. Preserve the scene, frame, paper and static decorative artwork. Remove baked live text, controls and content; restore clean paper for the production HTML renderer. Calendar uses continuous paper for day/week/month layouts. Mail retains its raised letter. Reminders retains the two decorative notes outside its main writing area."
       ],
       "category": "core",
       "group": "utilities"
@@ -62,17 +63,18 @@
           "id": "main",
           "role": "primary",
           "rect": [
-            0.077,
-            0.226,
-            0.508,
-            0.507
+            0.065789,
+            0.171095,
+            0.519139,
+            0.613177
           ],
           "material": "paper"
         }
       ],
       "identityReference": "ui/theme-packages/village/assets/devices/gmail.webp",
       "refinements": [
-        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Make the main green frame a slightly lighter weathered sage matching mailbox icon 2. Change the envelope emblem above the blank paper to a blue enamel rectangular plaque with ivory envelope and four brass rivets, matching the mailbox badge. Replace a section of upper-right sorting cubbies with that recognizable full-size curved-top sage mailbox with brass flag and blue envelope badge, integrated into the postal wall. Remove the unrelated red hanging envelope sign, or turn it into a small matching blue sign. Keep the blank paper entirely clear. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
+        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Make the main green frame a slightly lighter weathered sage matching mailbox icon 2. Change the envelope emblem above the blank paper to a blue enamel rectangular plaque with ivory envelope and four brass rivets, matching the mailbox badge. Replace a section of upper-right sorting cubbies with that recognizable full-size curved-top sage mailbox with brass flag and blue envelope badge, integrated into the postal wall. Remove the unrelated red hanging envelope sign, or turn it into a small matching blue sign. Keep the blank paper entirely clear. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space.",
+        "Use case: precise-object-edit. Built-in imagegen edit of concepts/gmail/effect.webp. Preserve the scene, frame, paper and static decorative artwork. Remove baked live text, controls and content; restore clean paper for the production HTML renderer. Calendar uses continuous paper for day/week/month layouts. Mail retains its raised letter. Reminders retains the two decorative notes outside its main writing area."
       ],
       "category": "core",
       "group": "utilities"
@@ -124,17 +126,18 @@
           "id": "main",
           "role": "primary",
           "rect": [
-            0.085,
-            0.163,
-            0.493,
-            0.49
+            0.077751,
+            0.146652,
+            0.400718,
+            0.594049
           ],
           "material": "paper"
         }
       ],
       "identityReference": "ui/theme-packages/village/assets/devices/apple-reminders.webp",
       "refinements": [
-        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Echo icon 2: keep the warm timber frame and brass clips. Add three small round enamel studs BLUE, AMBER, RED on the wooden top rail (outside the blank paper), positioned near the three brass clips. Add an olive-green wooden pencil cup holding one yellow pencil on the upper-right shelf. Keep cream paper blank and lower-right clearance unchanged. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
+        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Echo icon 2: keep the warm timber frame and brass clips. Add three small round enamel studs BLUE, AMBER, RED on the wooden top rail (outside the blank paper), positioned near the three brass clips. Add an olive-green wooden pencil cup holding one yellow pencil on the upper-right shelf. Keep cream paper blank and lower-right clearance unchanged. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space.",
+        "Use case: precise-object-edit. Built-in imagegen edit of concepts/apple-reminders/effect.webp. Preserve the scene, frame, paper and static decorative artwork. Remove baked live text, controls and content; restore clean paper for the production HTML renderer. Calendar uses continuous paper for day/week/month layouts. Mail retains its raised letter. Reminders retains the two decorative notes outside its main writing area."
       ],
       "category": "core",
       "group": "utilities"

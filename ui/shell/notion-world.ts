@@ -1236,6 +1236,13 @@ export function mountNotionWorld(data: World, native: any) {
       if(explicit)acknowledgeAttention(item.record||item);
     }
   };}
+  function mailDeskActions(){return {
+    async read(item){const record=item.record||{},page=pages.get(record.noteId);if(data.sample)return {text:page?.markdown||record.text||'',title:record.title||item.title};if(!native?.original)throw Error('Connect Mail to read this letter.');return native.original(record.sourceId||record.id);},
+    renderOriginal:value=>renderMailFocus(value,renderMarkdown,{embedded:true}),
+    compose:()=>draftRequest({request:'Help me compose an email. Ask for the recipient and message, then prepare a draft for my confirmation.'}),
+    reply:item=>draftRequest({request:'Help me draft a reply to this email: '+(item.record?.title||item.title)+'. Source: '+(item.record?.sourceId||item.record?.id||item.id)+'. Prepare the reply for my review before sending.'}),
+    selected(item,original,explicit){libraryReadContext='Selected Mail original. Source: '+(item.record?.sourceId||item.record?.id||item.id)+'\n'+(original.title||item.title)+'\n'+original.text.slice(0,8000);if(explicit)acknowledgeAttention(item.record||item);}
+  };}
   function appletStageData(r,records=[]){
     if([...HOME_NATIVE,...ORIGINAL_READERS,'voice-memos','messages'].includes(r.key)){
       const source=data.sample?records:(localStageRecords.get(r.key)||records);
@@ -1244,7 +1251,7 @@ export function mountNotionWorld(data: World, native: any) {
       // them left Mail empty under its attention mark until a refresh (#1281).
       const items=[...coreAppletItems(r.provider,r.key==='gmail'&&!data.sample?[...source,...mailIdentities.values()]:source,[...pages.values()]),...(r.key==='google-calendar'?localCalendarItems(calendarEvents):[])];
       if(r.key==='gmail'&&items.some(item=>item.attention&&item.record.sourceId&&!mailMetadata(item.record).from&&!mailIdentityReads.has(item.record.sourceId)))queueMicrotask(()=>void hydrateMailIdentity(r,items));
-      return {accountLabel:link?.label||'',sample:!!data.sample,loaded:data.sample||localStageRecords.has(r.key),reading:!!link?.reading,items,connected:!!data.sample||connectionLive(data.moduleConnections?.find(c=>c.provider===r.provider)||{}),now:Date.now(),...(r.key==='google-calendar'?{calendar:calendarActions}:{}),...(r.key==='apple-notes'?{notes:notesActions()}:{})};
+      return {accountLabel:link?.label||'',sample:!!data.sample,loaded:data.sample||localStageRecords.has(r.key),reading:!!link?.reading,items,connected:!!data.sample||connectionLive(data.moduleConnections?.find(c=>c.provider===r.provider)||{}),now:Date.now(),...(r.key==='google-calendar'?{calendar:calendarActions}:{}),...(r.key==='apple-notes'?{notes:notesActions()}:{}),...(r.key==='gmail'?{mail:mailDeskActions()}:{}),...(r.key==='apple-reminders'?{reminders:{create:()=>draftRequest({request:'Help me create a reminder. Ask for its title, list and due date, then prepare it for my confirmation.'})}}:{})};
     }
     const items: any[]=[...pages.values()].filter(p=>p.worldItemId&&p.sourceProvider===r.provider).map(p=>{
       const signal=p.events?.[0]||p.activities?.[0]||{};

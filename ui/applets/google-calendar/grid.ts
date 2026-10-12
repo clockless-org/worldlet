@@ -88,7 +88,7 @@ export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton
  const create=(event:LocalCalendarEvent)=>{state.editing=event.id;state.draft=null;state.undo=null;save(event);};
  // Today and New Event on the date row, as in Apple Calendar.
  const todayButton=node('button','home-calendar-today','Today');todayButton.type='button';todayButton.onclick=()=>{state.offset=0;state.scroll=null;redraw();};
- const add=node('button','home-calendar-add','+');add.type='button';add.setAttribute('aria-label','New event');add.title='New event';
+ const add=node('button','home-calendar-add','Add event');add.type='button';add.setAttribute('aria-label','New event');add.title='New event';
  add.disabled=!actions;add.onclick=()=>{const day=keys.includes(today)?today:keys[0];create(newCalendarEvent(day,null,null,false,now));};
  nav.prepend(todayButton);nav.append(add);
  // What the person should know: a read in progress, an error, or that their events stay here.

@@ -1,3 +1,4 @@
+import {renderRemindersOpen} from './apple-reminders/open.ts';
 import {renderNotesOpen} from './apple-notes/open.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {node} from '../components/index.ts';
@@ -12,6 +13,7 @@ export function calendarWindow(now:number,mode:HomeOpenState['mode'],offset:numb
  return Array.from({length:count},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return d;});
 }
 export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,redraw){
+ if(room.key==='apple-reminders')return renderRemindersOpen(panel,items,value,state,pick);
  if(room.key==='apple-notes')return renderNotesOpen(panel,items,value,state,pick);
  const calendar=room.key==='google-calendar',notes=room.key==='apple-notes';panel.classList.add('home-open');
  panel.dataset.homeKind=calendar?'calendar':notes?'notes':'reminders';panel.dataset.calendarMode=state.mode;
@@ -33,6 +35,7 @@ export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,r
   for(const mode of ['day','week','month'] as const){const b=node('button','',mode[0].toUpperCase()+mode.slice(1));b.type='button';b.setAttribute('aria-pressed',String(state.mode===mode));b.onclick=()=>{state.mode=mode;state.offset=0;state.editing=null;redraw();};modes.append(b);}header.append(modes);
   const days=calendarWindow(value?.now||Date.now(),state.mode,state.offset),nav=node('nav','home-calendar-navigation');nav.setAttribute('aria-label','Calendar dates');
   for(const [label,delta] of [['Previous',-1],['Next',1]] as const){const b=node('button','',delta<0?'‹':'›');b.type='button';b.setAttribute('aria-label',label+' '+state.mode);b.onclick=()=>{state.offset+=delta;state.editing=null;redraw();};nav.append(b);}
+  title.textContent=days[0].toLocaleDateString(undefined,{month:'long',year:'numeric'});
   const period=node('strong','',state.mode==='month'?days[0].toLocaleDateString(undefined,{month:'long',year:'numeric'}):days[0].toLocaleDateString(undefined,{month:'short',day:'numeric'})+(state.mode==='week'?' – '+days[6].toLocaleDateString(undefined,{month:'short',day:'numeric'}):''));nav.insertBefore(period,nav.lastChild);sheet.insertBefore(nav,body);
   renderCalendar({sheet,nav,body,items,value,state,days,itemButton,redraw});
  }else{

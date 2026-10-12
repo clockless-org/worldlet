@@ -24,3 +24,11 @@ The source-analysis Harness receives one authorized batch, calls S without tools
 This is immediate application-level batching, not Cloudflare's deferred asynchronous Batch API. Each small batch can register findings promptly without waiting for the entire 1,000-message discovery. Oversized source records and repeated quality failures remain visible failures, not silent truncation or a model upgrade.
 
 Source extraction instructions live in `prompts/extract.md`. Deterministic preprocessing skips only complete threads whose messages are all Spam/Trash; Promotions alone never excludes a thread. Each fresh S batch acknowledges inspected IDs, including records with no findings.
+
+## Village letter desk
+
+[open.ts](open.ts) renders the inbox and selected saved original on the registered scene's two paper surfaces. Needs you retains the existing nine-thread attention limit; Inbox, Starred and Sent filter the records already loaded, and search stays local. This is not a complete server mailbox search.
+
+The original uses the existing safe [Mail reader](focus.ts), including quoted messages and source images. Selecting a letter updates Fox's reading context; automatic first selection does not acknowledge attention. Late reads cannot replace a newer selection. Reply and Compose prepare requests in Fox for review, never send mail automatically. Original opens the full existing reader. Narrow layouts switch between list and letter.
+
+Preview: build the native UI, run `node scripts/core-paper-preview.ts`, serve the repository root and open `/output/core-paper-applets/?applet=gmail`. All preview records are fictional.

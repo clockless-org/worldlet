@@ -31,8 +31,8 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(app.fullView.kind,'scene',key+' declares an in-world Open stage');
   await page.evaluate(id=>location.hash='object='+id,id);
   await page.waitForFunction(id=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.presentation.stage&&document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.presentation.id===id,id);
-  await page.waitForFunction(count=>document.querySelectorAll('.pixi-stage-item,.home-leaf,.notes-row,.mail-letter').length===count,items).catch(async e=>{throw Error(key+': '+JSON.stringify(await page.evaluate(()=>({calls,stage:document.querySelector('.pixi-applet-stage')?.textContent})))+' '+e.message)});
-  const itemSelector=key==='gmail'?'.mail-letter':key==='apple-notes'?'.notes-row':'.home-leaf';
+  await page.waitForFunction(count=>document.querySelectorAll('.pixi-stage-item,.home-leaf,.notes-row,.reminders-task,.mail-letter').length===count,items).catch(async e=>{throw Error(key+': '+JSON.stringify(await page.evaluate(()=>({calls,stage:document.querySelector('.pixi-applet-stage')?.textContent})))+' '+e.message)});
+  const itemSelector=key==='gmail'?'.mail-letter':key==='apple-notes'?'.notes-row':key==='apple-reminders'?'.reminders-task':'.home-leaf';
   const dock=await page.locator('.notion-hud').boundingBox();
   assert.ok(dock.x+dock.width/2>1280*.7,key+' places Fox on the right in Open');
   const view=await stage();
@@ -42,7 +42,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(view.stage.items,items,key+' exposes its saved local records');
   assert.equal(await page.locator('.pixi-applet-stage '+itemSelector).count(),items,key+' renders each record as a selectable Open item');
   assert.equal(await page.locator('#notionContent').isVisible(),false,key+' opens in the world without a website');
-  assert.equal(await page.locator(key==='gmail'?'.applet-scene[data-applet=gmail]':key==='apple-notes'?'.notes-notebook':'.home-open-sheet').count(),1,'Open uses its painted installation');
+  assert.equal(await page.locator(key==='gmail'?'.applet-scene[data-applet=gmail]':key==='apple-notes'?'.notes-notebook':key==='apple-reminders'?'.reminders-board':'.home-open-sheet').count(),1,'Open uses its painted installation');
   if(key==='gmail'){
    assert.equal((await stage()).deviceVisible,false,'Mail foreground uses the HTML device only');
    await page.screenshot({path:'/tmp/worldlet-gmail-open.png'});
@@ -53,7 +53,7 @@ await withBrowser(fileAccess,async browser=>{
    assert.ok(['x','y','width','height'].every(k=>Math.abs(box[k]-scene.primary[k])<=1.5),'the region is where the theme measured it: '+JSON.stringify({box,scene}));
    assert.equal(await region.evaluate(e=>getComputedStyle(e).getPropertyValue('--scene-ink').trim()),'#2b3a2e','the region wears the theme\'s paper material');
    assert.equal(await page.locator('.mail-open-piles,.mail-bin-spread,.mail-open-desk').count(),0,'Mail Open has no bins and no painted desk of its own');
-   assert.ok(await page.locator('.mail-letter').evaluateAll((letters,r)=>letters.every(l=>{const b=l.getBoundingClientRect();return b.left>=r.x-1&&b.right<=r.x+r.width+1&&b.top>=r.y-1&&b.bottom<=r.y+r.height+1;}),box),'attention letters sit inside the painted paper');
+   assert.ok(await page.locator('.mail-letters').evaluate((l,r)=>{const b=l.getBoundingClientRect();return b.left>=r.x-1&&b.right<=r.x+r.width+1&&b.top>=r.y-1&&b.bottom<=r.y+r.height+1;},box),'scrollable inbox sits inside the painted paper');
    assert.equal(await region.locator('.mail-letter').count(),6,'ordinary letters never replace attention mail');
    assert.ok((await region.locator('.mail-account').textContent()).includes('reader@example.test'),'the mailbox it reads is named on the page');
 
@@ -74,7 +74,7 @@ await withBrowser(fileAccess,async browser=>{
   if(['gmail','google-calendar','apple-notes','apple-reminders'].includes(key))assert.equal(await page.locator(`.applet-scene[data-applet="${key}"] .applet-scene-region[data-role=primary] ${itemSelector}`).count()>0,true,key+' draws in its scene');
   await page.mouse.move(20,40);
   await page.screenshot({path:'/tmp/worldlet-'+key+'-open.png'});
-  if(key!=='gmail'){await page.setViewportSize({width:600,height:740});await page.screenshot({path:'/tmp/worldlet-'+key+'-narrow.png'});assert.ok(await page.locator(key==='apple-notes'?'.notes-notebook':'.home-open-body').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'narrow content has no horizontal overflow');await page.setViewportSize({width:1280,height:850});}
+  if(key!=='gmail'){await page.setViewportSize({width:600,height:740});await page.screenshot({path:'/tmp/worldlet-'+key+'-narrow.png'});assert.ok(await page.locator(key==='apple-notes'?'.notes-notebook':key==='apple-reminders'?'.reminders-board':'.home-open-body').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'narrow content has no horizontal overflow');await page.setViewportSize({width:1280,height:850});}
   if(key==='gmail'){
    await page.emulateMedia({reducedMotion:'no-preference'});
    await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.mailWorking='true');
@@ -90,11 +90,11 @@ await withBrowser(fileAccess,async browser=>{
 
   }
   const browserShows=await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length);
-  const selectedTitle=await page.locator(itemSelector+' strong').first().textContent();
+  const selectedTitle=key==='gmail'?await page.locator(itemSelector).first().getAttribute('aria-label'):await page.locator(itemSelector+' strong').first().textContent();
   await page.locator(itemSelector).first().click();
   if(key==='apple-notes'){await page.locator('.notes-prose').getByText('The complete original from this Mac.').waitFor();await page.getByRole('button',{name:'Open original',exact:true}).click();}
-  if(key==='gmail')await page.locator('.mail-paper').waitFor();
-  await page.getByText('The complete original from this Mac.').waitFor();
+  if(key==='gmail'){await page.locator('.mail-desk-body .mail-paper').waitFor();await page.getByRole('button',{name:'Original',exact:true}).click();}
+  await page.locator('#notionContent').getByText('The complete original from this Mac.').waitFor();
   // The narrow-window step above resizes the World back to 1280 px; the device settles on the World's next frames.
   if(key!=='gmail'){
    // Compare the device's own scale: its painted bounds (foregroundWidth) move by a pixel or two as the scene animates.
@@ -110,7 +110,7 @@ await withBrowser(fileAccess,async browser=>{
   }else await page.locator('.pixi-applet-stage').waitFor({state:'hidden'});
   await page.locator('.pixi-selected-item').waitFor({state:key==='gmail'?'hidden':'visible'});
   assert.equal(await page.locator('.pixi-selected-item strong').textContent(),selectedTitle,'Focus preserves the selected Open item');
-  if(key==='gmail'){assert.equal(await page.locator('.mail-sender-name').textContent(),'From Alice Chen');
+  if(key==='gmail'){assert.equal(await page.locator('#notionContent .mail-sender-name').textContent(),'From Alice Chen');
    assert.equal(await page.locator('.pixi-selected-item .pixi-focus-switch').count(),0);
    assert.ok(await page.locator('.mail-reader-switch').isVisible());
    await page.getByRole('button',{name:'Next email',exact:true}).click();

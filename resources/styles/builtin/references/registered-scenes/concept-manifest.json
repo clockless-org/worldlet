@@ -14,7 +14,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/google-calendar/background.webp",
-        "sha256": "3bd8e78f1628d6c73a8a07687d05d9df90dba66cd0aaf95f1307c773689772e8"
+        "sha256": "993c035bb092f70bbd63d15a3f956d6f82be155b27d00bfba567ec0be77cf0f2"
       },
       "status": "registered",
       "registrationKey": "google-calendar",
@@ -34,7 +34,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/gmail/background.webp",
-        "sha256": "c72521640af9cc26adf16698c87aa9e62f302b91f0d920cfa3ef8551d7119003"
+        "sha256": "43aa494c86d948643bab5268b903a928309b1f1da9d9e7d058dd040345b73a85"
       },
       "status": "registered",
       "registrationKey": "gmail",
@@ -74,7 +74,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/apple-reminders/background.webp",
-        "sha256": "e43f2e6ed22762cef3ecbe89978908396e9a74c2f390df0db82dfd347ead2b42"
+        "sha256": "c8cc587fd8d801b47fe2ac318d3ccb96bdd531e93df1d89a3d4638f903e28308"
       },
       "status": "registered",
       "registrationKey": "apple-reminders",

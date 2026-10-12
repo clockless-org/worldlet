@@ -6,12 +6,13 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import sharp from 'sharp';
+import {buildCorePaperPreview} from './core-paper-preview.ts';
 import {buildNotesPreview} from './notes-notebook-preview.ts';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const target='resources/styles/builtin/references/registered-scenes/mockups';
 const library=JSON.parse(await readFile(path.join(root,'ui/theme-packages/village/scene-library.json'),'utf8'));
 const entries=library.entries.filter(e=>e.collection!=='branded');assert.equal(entries.length,40);
-const sources=['scripts/fixtures/applet-scene-preview/preview.js','scripts/fixtures/applet-scene-preview/samples.js','scripts/fixtures/applet-scene-preview/samples.css','scripts/fixtures/applet-scene-preview/index.html','ui/theme-packages/village/presentation.json','resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json','ui/applets/apple-notes/open.ts','ui/applets/apple-notes/open.css','scripts/fixtures/notes-notebook/main.ts','scripts/notes-notebook-preview.ts'];
+const sources=['scripts/fixtures/applet-scene-preview/preview.js','scripts/fixtures/applet-scene-preview/samples.js','scripts/fixtures/applet-scene-preview/samples.css','scripts/fixtures/applet-scene-preview/index.html','ui/theme-packages/village/presentation.json','resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json','ui/applets/apple-notes/open.ts','ui/applets/apple-notes/open.css','scripts/fixtures/notes-notebook/main.ts','scripts/notes-notebook-preview.ts','scripts/core-paper-preview.ts','scripts/fixtures/core-paper-applets/main.ts','ui/applets/gmail/open.ts','ui/applets/gmail/focus.ts','ui/applets/gmail/open.css','ui/applets/apple-reminders/open.ts','ui/applets/apple-reminders/open.css','ui/applets/google-calendar/open.css','ui/applets/google-calendar/grid.ts','ui/applets/home-open.ts'];
 const digest=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
 const inputHashes=Object.fromEntries(await Promise.all(sources.map(async file=>[file,digest(await readFile(path.join(root,file)))])));
 const materialDirectory='resources/styles/builtin/references/registered-scenes/mockup-materials';
@@ -31,15 +32,15 @@ if(process.argv.includes('--check')){
  console.log('PASS 40 mockups match their source and output hashes');
 }else{
  const url=process.env.SCENE_PREVIEW_URL||'http://127.0.0.1:8787/output/applet-scene-preview/';
- await mkdir(path.join(root,target),{recursive:true});await buildNotesPreview(root);
+ await mkdir(path.join(root,target),{recursive:true});await buildNotesPreview(root);await buildCorePaperPreview(root);
  const browser=await chromium.launch({headless:true}),page=await browser.newPage({viewport:{width:1672,height:941},deviceScaleFactor:1});
  const errors:string[]=[],overflows:string[]=[],images:unknown[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(String(r.status())+' '+r.url())});
  try{for(const item of entries){
-  const notes=item.id==='apple-notes';
-  await page.goto(notes?new URL('/output/notes-notebook/',url).href:url+'?capture=1&scene='+encodeURIComponent(item.id));
-  if(notes)await page.locator('.notes-prose p').first().waitFor();else await page.waitForFunction(id=>(window as any).scenePreview?.id===id,item.id);
+  const notes=item.id==='apple-notes',paper=['gmail','google-calendar','apple-reminders'].includes(item.id);
+  await page.goto(paper?new URL('/output/core-paper-applets/?applet='+item.id,url).href:notes?new URL('/output/notes-notebook/',url).href:url+'?capture=1&scene='+encodeURIComponent(item.id));
+  if(paper)await page.locator(item.id==='gmail'?'.mail-desk-body .mail-message':item.id==='google-calendar'?'.home-calendar-day':'.reminders-task').first().waitFor();else if(notes)await page.locator('.notes-prose p').first().waitFor();else await page.waitForFunction(id=>(window as any).scenePreview?.id===id,item.id);
   await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(i=>i.decode()));});
-  const overflow=await page.locator(notes?'.notes-notebook':'.sample-scroll').evaluate(e=>({height:e.scrollHeight-e.clientHeight,width:e.scrollWidth-e.clientWidth}));
+  const overflow=await page.locator(paper?'.applet-scene-region[data-role=primary]':notes?'.notes-notebook':'.sample-scroll').evaluate(e=>({height:e.scrollHeight-e.clientHeight,width:e.scrollWidth-e.clientWidth}));
   if(overflow.height>2||overflow.width>2)overflows.push(item.id+': '+JSON.stringify(overflow));
   const bytes=await sharp(await page.locator('#viewport').screenshot()).webp({quality:92}).toBuffer();
   const file=item.id+'.webp';await writeFile(path.join(root,target,file),bytes);images.push({id:item.id,title:item.title,file,sha256:digest(bytes)});

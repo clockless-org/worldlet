@@ -1,0 +1,54 @@
+/* The desk is raster artwork owned by the theme; these are live, scrollable paper controls. */
+.applet-scene .mail-desk-host{padding:0;overflow:hidden;gap:0;background:none;border-radius:0}
+.mail-desk{height:100%;min-height:0;display:grid;grid-template-columns:50% minmax(0,1fr);gap:2%;color:var(--scene-ink);font:400 clamp(13px,2cqi,19px)/1.4 var(--scene-display-font,Georgia,serif)}
+.mail-desk :where(button,input,p,span,strong,small,time,h2,h3,div,section,article){font-family:inherit}
+.mail-desk button,.mail-desk input{font:inherit;color:inherit}.mail-desk button{cursor:pointer}
+.mail-desk-index{display:flex;flex-direction:column;min-width:0;min-height:0;padding:1% 3% 1% 0}
+.mail-desk-header{flex:none}.mail-desk .mail-desk-header h2{margin:0;font:600 clamp(28px,5.1cqi,48px)/1.1 var(--scene-display-font,Georgia,serif)}
+.mail-desk .mail-account{font-size:.75em;color:var(--scene-muted);margin:.4em 0 .65em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mail-desk-tabs{display:flex;gap:.2em;margin-bottom:.4em;flex:none}.mail-desk .mail-desk-tabs button{font-size:.8em;padding:.45em .5em;flex:1;white-space:nowrap}
+.mail-desk .mail-desk-button,.mail-desk-back{border:1px solid var(--scene-line);border-radius:5px;padding:.45em .7em;background:var(--scene-control);box-shadow:inset 0 1px 1px #fff9,0 2px 2px #49382122}
+.mail-desk .mail-desk-tabs button[aria-pressed=true]{background:var(--scene-accent);color:var(--scene-accent-ink)}
+.mail-desk-search{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--scene-line);border-radius:0;padding:.4em .5em;margin-bottom:.45em;background:transparent;box-shadow:none;font-size:.85em!important}
+.mail-desk .mail-letters{display:flex;flex-direction:column;overflow:auto;min-height:0;gap:.4em;padding:.15em .2em .3em 0;scrollbar-width:thin;flex:1}
+.mail-desk .mail-letter{display:grid;grid-template-columns:50px minmax(0,1fr) auto;align-items:center;gap:.65em;position:relative;flex:none;width:100%;min-height:84px;padding:.6em .45em;border:1px solid var(--scene-line);border-radius:5px;background:color-mix(in srgb,var(--scene-control) 30%,transparent);color:inherit;text-align:left;box-shadow:0 2px 2px #49382118,inset 0 1px 1px #fff6;transform:none}
+.mail-desk .mail-letter[aria-pressed=true]{background:color-mix(in srgb,#c9dbe8 65%,transparent);border-color:#9ab2c4;box-shadow:inset 4px 0 #8daec2,0 2px 3px #49382118}
+.mail-desk .mail-letter-avatar{width:48px;height:54px;border-radius:4px;font-size:1.1em;box-shadow:0 2px 3px #49382125}
+.mail-desk .mail-letter-text{min-width:0;display:flex;flex-direction:column;gap:2px}.mail-desk .mail-letter-sender{font-size:1em;font-weight:600}
+.mail-desk .mail-letter-subject{font-size:.85em;font-weight:400;line-height:1.25}.mail-desk .mail-letter-snippet{display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:.75em;color:var(--scene-muted)}
+.mail-desk .mail-letter-side{display:flex;align-items:center;flex-direction:column;gap:10px;align-self:start;min-width:0}.mail-desk .mail-letter-time{font-size:.6em;white-space:nowrap;color:var(--scene-muted)}
+.mail-desk .mail-letter-side .applet-attention{position:static;width:15px;height:15px}
+.mail-desk-footer{flex:none;padding-top:.6em;font-size:.8em}
+.mail-desk-letter{display:flex;flex-direction:column;min-width:0;min-height:0;padding:8% 4% 3% 3%;box-sizing:border-box}
+.mail-desk-body{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;overflow-wrap:anywhere}
+.mail-desk .mail-focus{height:auto;min-height:0;max-height:none;padding:0;border:0;border-radius:0;box-shadow:none;background:transparent;color:inherit;font:inherit;overflow:visible;display:flex;flex-direction:column}
+.mail-desk .mail-page-title{order:1;font:600 1.6em/1.15 var(--scene-display-font,Georgia,serif);padding:0;margin:.65em 0 .6em;max-width:none}
+.mail-desk .mail-paper{display:contents}.mail-desk .mail-identity-card{order:0;display:flex;align-items:start;gap:.7em;border-bottom:1px solid var(--scene-line);padding:0 0 .9em;margin:0;background:none}
+.mail-desk .mail-person{min-width:0;flex:1}.mail-desk .mail-sender-name{font:600 1.2em/1.2 var(--scene-display-font,Georgia,serif)}
+.mail-desk .mail-address,.mail-desk .mail-recipient{font-size:.7em;overflow-wrap:anywhere;color:var(--scene-muted)}
+.mail-desk .mail-date{font-size:.65em;max-width:5em;white-space:normal}.mail-desk .mail-sender-portrait{width:42px;height:42px;order:-1}
+.mail-desk .mail-message,.mail-desk .mail-thread-message{order:2}.mail-desk .notion-prose{font:inherit;color:inherit;padding:0;max-width:none;margin:0}.mail-desk .notion-prose p{font:inherit;margin:0 0 .85em;line-height:1.5}
+.mail-desk .notion-prose :is(h1,h2,h3){font:600 1.2em/1.2 var(--scene-display-font,Georgia,serif)}.mail-desk .notion-prose img{max-width:100%;height:auto}
+.mail-desk .mail-desk-actions{display:flex;gap:.5em;padding-top:.8em;font-size:.9em}.mail-desk-actions button:first-child{background:var(--scene-accent);color:var(--scene-accent-ink)}
+.mail-desk-status,.mail-desk .mail-empty{font-size:.9em;color:var(--scene-muted);padding:1em 0}.mail-desk-plain{white-space:pre-wrap}.mail-desk-back{display:none}
+@container (max-width:560px){.mail-desk{grid-template-columns:1fr;gap:0}.mail-desk-index{padding:10px}.mail-desk-letter{display:none;padding:12px}.mail-desk[data-reading=true] .mail-desk-index{display:none}.mail-desk[data-reading=true] .mail-desk-letter{display:flex}.mail-desk-back{display:block;align-self:start;margin-bottom:10px}.mail-desk .mail-letter{grid-template-columns:40px minmax(0,1fr) auto;min-height:76px}.mail-desk .mail-letter-avatar{width:38px;height:42px}.mail-desk .mail-desk-header h2{font-size:30px}}
+.mail-desk-header{padding-left:36px}
+.mail-desk .mail-focus::before,.mail-desk .mail-focus>.ui-applet-header::after{display:none}
+.mail-desk .mail-focus>.ui-applet-header{display:contents}
+.mail-desk-letter{padding:7% 5% 2% 5%}
+.mail-desk .mail-desk-button,.mail-desk .mail-desk-back,.mail-desk .mail-account{font-family:var(--scene-display-font,Georgia,serif)}
+.mail-desk .mail-letter{min-height:73px;padding:.5em .4em}
+.mail-desk .mail-letter-sender{color:var(--scene-ink)}
+@container(max-width:560px){.mail-desk-header{padding-left:0}.mail-desk-letter{padding:12px}}
+.mail-desk .mail-message .notion-prose p:has(>img:only-child){float:right;width:44%;margin:.1em 0 .65em .8em}
+.mail-desk .mail-message .notion-prose p>img:only-child{display:block;box-sizing:border-box;border:6px solid var(--scene-control);box-shadow:0 3px 5px #49382130}
+.mail-desk .mail-message .notion-prose::after{content:'';display:table;clear:both}
+.mail-desk .mail-letter-text{line-height:1.15}.mail-desk .mail-letter-sender,.mail-desk .mail-letter-subject,.mail-desk .mail-letter-snippet{line-height:1.2}
+.mail-desk .mail-letter{padding:.35em .45em;min-height:70px}.mail-desk .mail-identity-card{border:0;border-bottom:1px solid var(--scene-line);border-radius:0;box-shadow:none}
+.mail-desk-letter{padding-top:12%}
+@container(max-width:560px){.mail-desk-letter{padding-top:12px}}
+.mail-desk-header{display:flex;align-items:baseline;gap:16px;padding-bottom:10px}.mail-desk .mail-account{margin:0;flex:1;text-align:right}
+.mail-desk .mail-letters{gap:.25em}.mail-desk .mail-letter{background-image:var(--hud-paper-art);background-size:cover}
+.mail-desk .mail-letter[aria-pressed=true]{background-image:none}
+.mail-desk .mail-desk-button{background-image:var(--hud-paper-art);background-size:cover}.mail-desk .mail-desk-button[aria-pressed=true],.mail-desk-actions button:first-child{background-image:none}
+.applet-scene[data-compact=true] .mail-desk-host{background:var(--scene-control)}

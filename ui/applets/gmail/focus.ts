@@ -49,7 +49,7 @@ export function splitQuoted(text:string):{main:string,quoted:string} {
  return main?{main,quoted:lines.slice(at).join('\n').trim()}:{main:text,quoted:''};
 }
 type MailValue={text:string,title:string,displayTitle?:string,summary?:string,mail?:{headers?:Record<string,string>,attachments?:{name:string,size?:number}[]},messages?:MailValue[]};
-export function renderMailFocus(value:MailValue,renderBody:(text:string,page:any)=>HTMLElement){
+export function renderMailFocus(value:MailValue,renderBody:(text:string,page:any)=>HTMLElement,options:{embedded?:boolean}={}){
  const el=(tag:string,cls:string,text?:string)=>{const n=document.createElement(tag);n.className=cls;if(text)n.textContent=text;return n;};
  const messages=value.messages?.length?value.messages:[value];
  const parsed=messages.map(message=>({message,...parseMail(message.text)}));
@@ -87,6 +87,8 @@ export function renderMailFocus(value:MailValue,renderBody:(text:string,page:any
   details.append(summary,identity(entry),original(entry));paper.append(details);
  }
  root.append(paper);
+ // The desk owns its own scroll area and navigation; only the full reader aligns the shell switcher.
+ if(options.embedded)return root;
  const align=()=>{const switcher=root.closest('#notionWorld')?.querySelector<HTMLElement>('.mail-reader-switch');const parent=switcher?.parentElement;if(!parent)return;const h=root.getBoundingClientRect(),p=parent.getBoundingClientRect();switcher.style.left=h.right-p.left-116+'px';switcher.style.right='auto';switcher.style.width='96px';switcher.style.top=h.top-p.top+16+'px';};
  const resize=new ResizeObserver(align);resize.observe(root);
  const cleanup=new MutationObserver(()=>{if(!root.isConnected){resize.disconnect();cleanup.disconnect();}});
