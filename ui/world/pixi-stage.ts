@@ -9,10 +9,10 @@ export function createAppletStage(host,onPick){
  const panel=document.createElement('section');panel.className='pixi-applet-stage';panel.hidden=true;panel.setAttribute('aria-label','Thing contents');host.append(panel);
  const focus=document.createElement('aside');focus.className='pixi-selected-item';focus.hidden=true;host.append(focus);
  const mailNav=document.createElement('nav');mailNav.className='mail-reader-switch';mailNav.setAttribute('aria-label','Browse emails');mailNav.hidden=true;host.append(mailNav);
- // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail and Calendar
- // so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; Calendar's events
- // open in the shared reader.
- const SCENE_APPLETS=new Set(['gmail','google-calendar']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
+ // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail, Calendar and Notes
+ // so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; Calendar's events and
+ // Notes' notes open in the shared reader.
+ const SCENE_APPLETS=new Set(['gmail','google-calendar','apple-notes']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;
