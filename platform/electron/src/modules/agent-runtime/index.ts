@@ -404,7 +404,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    const describe=async()=>{
     if(!agentProfileAsked(install.id))return;
     const started=Date.now(),{profile,result}=await describeAgent(()=>new LocalHarnessRuntime(install),adapter.home('setup'),conversationTitles(install.id));
-    if(profile)try{writeAgentProfile(context.root,install.id,profile);}catch{}
+    try{writeAgentProfile(context.root,install.id,profile,result);}catch{}
     onAgentCheck({id:install.id,profile,result,ms:Date.now()-started});
    };
    if(later)void prove().then(()=>{onAgentCheck({id:install.id,ok:true});return describe();},error=>onAgentCheck({id:install.id,ok:false,message:(error as Error).message}));

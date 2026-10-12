@@ -9,8 +9,10 @@ export const AGENT_PROFILE_SCHEMA='worldlet.agent-profile/v1';
 /** Agents asked; others keep only what their files hold. */
 export const AGENT_PROFILE_SOURCES=['openclaw','hermes'] as const;
 export const agentProfileAsked=(id:unknown)=>(AGENT_PROFILE_SOURCES as readonly unknown[]).includes(id);
-/** One answer may take this long; a reply that is not the JSON is asked again once. */
-export const AGENT_PROFILE_TIMEOUT_MS=90_000;
+/** One answer may take this long; a reply that is not the JSON is asked again once. Going through its conversations
+ * takes an Agent several tool calls, more than the 90 s first allowed (owner report 2026-10-12: a Hermes Agent's
+ * answer never came); it runs in the background, so waiting longer holds nothing up. */
+export const AGENT_PROFILE_TIMEOUT_MS=300_000;
 
 export interface AgentProfile {
  agent:{name?:string;model?:string};

@@ -38,9 +38,11 @@ export function readAgentProfile(root:string,id:string):AgentProfile|null {
  const entry=saved&&typeof saved==='object'?saved[id]:null;
  return entry&&typeof entry==='object'&&entry.profile&&typeof entry.profile==='object'?entry.profile as AgentProfile:null;
 }
-export function writeAgentProfile(root:string,id:string,profile:AgentProfile,now=Date.now()){
- const saved=readAgentSetting(root,SETTING) as Record<string,any>|null;
- writeAgentSetting(root,SETTING,{...saved&&typeof saved==='object'?saved:{},[id]:{at:now,profile}} as any);
+/** Keeps what it said, or, when it said nothing usable, how asking ended beside what it said before. */
+export function writeAgentProfile(root:string,id:string,profile:AgentProfile|null,result:AgentProfileResult='ok',now=Date.now()){
+ const saved=readAgentSetting(root,SETTING) as Record<string,any>|null,all=saved&&typeof saved==='object'?saved:{};
+ const before=all[id]&&typeof all[id]==='object'?all[id]:{};
+ writeAgentSetting(root,SETTING,{...all,[id]:profile?{at:now,result,profile}:{...before,result,triedAt:now}} as any);
 }
 
 /** The titles Worldlet gives the Agent's conversations, newest first, for the things it names to point at. */

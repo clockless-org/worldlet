@@ -86,6 +86,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   const detail=(event as CustomEvent).detail;if(disposed||!detail||detail.id!==draft.agent)return;
   if('result' in detail){draft.profileResult=String(detail.result);takeProfile(detail.profile);if(!detail.profile){persist();if(!busy)render();}productEvent('agent_profile_result',agentProfileDimensions(String(detail.id),String(detail.result),draft.profile?.connections?.length||0),timingBucket(Number(detail.ms)||0));return;}
   if(detail.ok!==false)return;
+  // It did not answer, so it is not asked about itself either: the Things tile stops waiting.
+  draft.profileResult='failed';persist();
   productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
   notice=String(detail.message||'').slice(0,300);
   render();
@@ -553,7 +555,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(kind==='routines')return keep('tile:routines',String(brought.routines)+draft.language,build('Routines','',big(brought.routines,'run on their own')));
   if(kind==='things'){
    const things:string[]=draft.profile?.things||[],asking=!draft.profile&&!draft.profileResult;
-   return keep('tile:things',JSON.stringify([things,asking,draft.language]),build('Things','is-wide',el=>{
+   return keep('tile:things',JSON.stringify([things,asking,draft.language]),build('Things','',el=>{
     if(asking){el.classList.add('is-waiting');el.append(node('p',agentText('Asking {agent} what you do most…',draft.agentName||'your Agent'),'setup-tile-note'));return;}
     if(!things.length)return none(el);
     const list=node('ul','','setup-tile-chips');

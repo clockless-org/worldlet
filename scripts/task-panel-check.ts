@@ -49,18 +49,18 @@ const tasks=[
 ];
 const history=[{seq:1,at:s('2026-10-10T07:00:00'),kind:'brought.older',body:{agent:'hermes',status:'bringing',brought:200,remaining:1300}}];
 const planned=taskPanel({jobs,harness:'OpenClaw',...{tasks,history} as any},now,L);
-assert.deepEqual(planned.routines.rows.map(r=>[r.title,r.when]),[['Call the dentist','7:50 AM'],['Morning brief','8:00 AM'],['Gym','Mon 6:30 AM'],['Flight prices','every hour']],JSON.stringify(planned.routines.rows));
-assert.equal(planned.routines.total,4,'every routine kept: the side’s list shows them all');
+assert.deepEqual(planned.routines.rows.map(r=>[r.title,r.when]),[['Call the dentist','7:50 AM'],['Morning brief','8:00 AM'],['Gym','Mon 6:30 AM'],['Flight prices','every hour'],['Paused one','Paused']],JSON.stringify(planned.routines.rows));
+assert.equal(planned.routines.total,5,'every routine kept: the side’s list shows them all');
 assert.equal(planned.now.total,0,'a running Applet check or Worldlet’s own housekeeping is not the person’s task');
 assert.ok(planned.routines.rows.every(r=>r.group==='routines'));
 const brief=planned.routines.rows.find(r=>r.id==='job:a')!;
 assert.deepEqual([brief.source,brief.every,brief.by,brief.open],['agent-job','Every day','OpenClaw’s scheduler',{routine:'a'}]);
-assert.deepEqual(planned.routines.rows.map(r=>[r.name,r.status,r.icon]),[['Call the dentist','7:50 AM','clock'],['Morning brief','8:00 AM','clock'],['Gym','Mon 6:30 AM','clock'],['Flight prices','every hour','clock']],'each card: its name, when it runs, a clock');
+assert.deepEqual(planned.routines.rows.map(r=>[r.name,r.status,r.icon]),[['Call the dentist','7:50 AM','clock'],['Morning brief','8:00 AM','clock'],['Gym','Mon 6:30 AM','clock'],['Flight prices','every hour','clock'],['Paused one','Paused','clock']],'each card: its name, when it runs, a clock');
 // Tomorrow's job.
 assert.equal(taskPanel({jobs:[{id:'t',name:'Weather',kind:'prompt',paused:false,when:{cron:'0 6 * * *'}}] as any},now,L).routines.rows[0].when,'Tomorrow 6:00 AM');
 assert.equal(taskPanel({jobs:[{id:'t',name:'Weather',kind:'prompt',paused:false,when:{everySeconds:3600}}] as any},now,L).routines.rows[0].when,'every hour');
 // The day and time of each.
-assert.deepEqual(planned.routines.rows.map(r=>[r.day,r.clock]),[['Today','7:50 AM'],['Today','8:00 AM'],['Mon','6:30 AM'],['Repeating','every hour']]);
+assert.deepEqual(planned.routines.rows.map(r=>[r.day,r.clock]),[['Today','7:50 AM'],['Today','8:00 AM'],['Mon','6:30 AM'],['Repeating','every hour'],['Paused','Every day']]);
 
 // Doing now: Fox's work and Applets working on a task Fox handed them, newest first, one card each.
 const doing=taskPanel({

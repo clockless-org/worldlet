@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {AGENT_PROFILE_SCHEMA,agentProfileApplets,agentProfileAsked,agentProfilePrompt,looksSecret,parseAgentProfile} from '../core/agent/index.ts';
 import {describeAgent,readAgentProfile,writeAgentProfile} from '../platform/electron/src/modules/agent-runtime/agent-profile.ts';
+import {readAgentSetting} from '../platform/electron/src/store/agent-settings.ts';
 
 // What a person's own Agent says about itself before setup brings it in (core/agent/agent-profile.ts): the prompt, the
 // bounded and secret-free parse, the Applets it points to, and the background turn's timeout and one retry.
@@ -62,6 +63,12 @@ try{
  assert.equal(readAgentProfile(root,'openclaw'),null);
  writeAgentProfile(root,'openclaw',profile);writeAgentProfile(root,'hermes',{...profile,persona:'Other'});
  assert.equal(readAgentProfile(root,'openclaw')?.agent.name,'Juno');assert.equal(readAgentProfile(root,'hermes')?.persona,'Other');
+ // A later try that brought nothing keeps what it said before, and says how asking ended.
+ writeAgentProfile(root,'openclaw',null,'timeout',5);
+ assert.equal(readAgentProfile(root,'openclaw')?.agent.name,'Juno');
+ writeAgentProfile(root,'pi',null,'failed',5);assert.equal(readAgentProfile(root,'pi'),null);
+ const kept=readAgentSetting(root,'agent-profile') as any;
+ assert.deepEqual([kept.openclaw.result,kept.openclaw.triedAt,kept.pi],['timeout',5,{result:'failed',triedAt:5}]);
 }finally{fs.rmSync(root,{recursive:true,force:true});}
 
 console.log('PASS: the chosen Agent describes itself as bounded JSON with no secrets, retried once, timed out and failing quietly; its Applets join the World and the answer stays in the World\'s settings');
