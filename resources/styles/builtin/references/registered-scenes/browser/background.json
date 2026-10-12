@@ -4,6 +4,6 @@
   "collection": "core",
   "generator": "built-in imagegen",
   "purpose": "Registered runtime background",
-  "prompt": "Enlarge the existing Village Browser blank screen mainly downward and slightly right. Preserve the dark teal wood, brass compass, sunlit conservatory, globe, books and companion floor. Keep the screen empty and front-facing for dynamic HTML.",
+  "prompt": "Village Browser in a sunlit conservatory with a large empty ivory screen and dark teal brass-trimmed frame. Browser identity comes from functional instruments on the right: a geographical globe in a substantial Chrome-inspired red, green and yellow enamel cradle, plus an open brass compass with a Safari-inspired blue dial and red-white needle resting on books. Preserve screen geometry and companion clearance. No separate logo plaques, text or baked-in UI.",
   "registrationKey": "browser"
 }

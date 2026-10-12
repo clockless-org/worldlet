@@ -10,7 +10,7 @@
     "scripts/fixtures/applet-scene-preview/samples.js": "6a27cf7a5f57c283bb89cced6271683135c9ed37d0b46a8248b2e1a05c2ef1c6",
     "scripts/fixtures/applet-scene-preview/samples.css": "3cec177fe0be0aa236023a10e475d28b7a402c4611c9a2cc3eb77b2d031125a2",
     "scripts/fixtures/applet-scene-preview/index.html": "64e320da7ee406eea2c4a618fd59c53141e5fe13ecc7b3cae3f1d1aadb865e6b",
-    "ui/theme-packages/village/presentation.json": "f8526a26e2b1eeb63a5b24ce947e38d55ec5fc7a0d1a87a44f9d2edc77bf2412",
+    "ui/theme-packages/village/presentation.json": "7017ce93ee7af0a17b60ce881f2b95f9aa3cd144e85860aaebdcbf2e0112a3ba",
     "resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json": "2a2f666e54b7fea85a1511fe9235a78115fc06b1ce69123068ab4f2e56cf380e"
   },
   "images": [
@@ -72,7 +72,7 @@
       "id": "browser",
       "title": "Browser",
       "file": "browser.webp",
-      "sha256": "c5a550ab858f8c463e0503d360eda4dfa63e5b49ed440de3c1e6578ec902058f"
+      "sha256": "30e819fd35129d0391e8c3c4a0248746b4adefd7c78668f76bc94210b9f12a7d"
     },
     {
       "id": "maps",
