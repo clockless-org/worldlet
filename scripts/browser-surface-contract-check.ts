@@ -64,6 +64,9 @@ for(const invalid of [
  {...paperEdge,profile:{...paperEdge.profile,bottom:[1,NaN]}}, {...paperEdge,extra:true}
 ])assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:invalid}));
 assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge,page:{width:640,height:480}}));
+const frame={asset:paperEdge.asset,source:{x:0,y:0,width:1,height:1},target:rect};
+assert.doesNotThrow(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:{...paperEdge,frame}}));
+for(const bad of [{...frame,source:{...frame.source,width:2}},{...frame,asset:'https://example.com/mask.png'},{...frame,target:{...rect,width:0}}])assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:{...paperEdge,frame:bad}}));
 const detached=readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge});
 if(detached.action==='browserLayout')(detached.paperEdge!.profile.top as number[])[0]=0;
 assert.equal(paperEdge.profile.top[0],1,'Paper profiles must be detached at the native boundary');

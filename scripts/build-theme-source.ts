@@ -38,6 +38,10 @@ export async function validateBuildTheme(source:string){
  // A measured surface must describe these exact encoded bytes. Empty media are CI checkout stand-ins.
  for(const scene of [...Object.values(presentation.appletScenes??{}),...(presentation.appletPresets??[])]){
   if(!scene.registration)continue;
+  if(scene.registration.webFrame){
+   const mask=await fs.readFile(path.join(source,scene.registration.webFrame.mask));
+   if(mask.length&&!(await sharp(mask).metadata()).hasAlpha)throw Error('Scene frame requires transparency: '+scene.registration.webFrame.mask);
+  }
   const bytes=await fs.readFile(path.join(source,scene.background));
   if(bytes.length){
    if(hashes[scene.background]!==scene.registration.sha256)throw Error('Scene registration is stale: '+scene.background);

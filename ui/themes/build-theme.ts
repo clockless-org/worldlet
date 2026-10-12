@@ -1,6 +1,6 @@
 import {THEME_PACKAGES} from '../theme-packages/index.ts';
 import {applyThemeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
-import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildThemeManifest,type ThemePresentation,type ThemeSceneMaterialName} from './build-theme-contract.ts';
+import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildThemeManifest,type ThemePresentation,type ThemeSceneMaterialName,type ThemeSceneRegistration} from './build-theme-contract.ts';
 /** One bundled theme package, validated against the contract when the bundle loads. A theme is static: its manifest,
  * its presentation, the assets they name and any other JSON it ships (`data`, by package path). */
 export interface ThemePackage {manifest:BuildThemeManifest;presentation:ThemePresentation;data:Readonly<Record<string,unknown>>}
@@ -32,10 +32,11 @@ export function themeAppletIcon(key:string):string|undefined{
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
  return typeof src==='string'&&src?src:undefined;
 }
+const sceneRegistration=(r:ThemeSceneRegistration):ThemeSceneRegistration=>({...r,...r.webFrame?{webFrame:{...r.webFrame,mask:themeAssetURL(active.id,r.webFrame.mask)}}:{}});
 /** A registered background for a specific Applet; reusable theme presets are returned separately. */
 export function themeAppletScene(key:string){
  const scene=active.package.presentation.appletScenes?.[key];
- return scene?{...scene,background:themeAssetURL(active.id,scene.background)}:undefined;
+ return scene?{...scene,background:themeAssetURL(active.id,scene.background),registration:sceneRegistration(scene.registration)}:undefined;
 }
 /** How Applet content looks on one scene material (presentation.json `sceneMaterials`), every role filled: a role the
  * theme leaves out comes from its tokens. The shared Applet scene renderer (ui/applets/scene) is its one reader. */
@@ -48,7 +49,7 @@ export function themeSceneMaterial(material:ThemeSceneMaterialName){
 /** Reusable custom-Applet art, with URLs ready for the host to display. These do not create Applets or connect data. */
 export function themeAppletPresets(){
  return (active.package.presentation.appletPresets??[]).map(p=>({...p,
-  icon:themeAssetURL(active.id,p.icon),background:themeAssetURL(active.id,p.background)}));
+  icon:themeAssetURL(active.id,p.icon),background:themeAssetURL(active.id,p.background),...p.registration?{registration:sceneRegistration(p.registration)}:{}}));
 }
 /** The active theme's Artifact look (presentation.json `artifact`) with every file as a published URL, or null when the
  * theme leaves Artifacts to the host's card. Package paths stay alongside, for a reader that loads the files itself. */

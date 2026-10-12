@@ -50,6 +50,12 @@ export interface ThemeArtifact {
 /** Geometry measured on the final background, in normalized image coordinates (x, y, width, height).
  * These are facts about painted surfaces, not viewport CSS or authority over host controls. */
 export interface ThemeSceneRegistration {
+    /** Alpha from an extracted frame, registered to the original painting. Normalized source and target bounds. */
+    webFrame?: {
+        mask: string;
+        source: readonly [number, number, number, number];
+        target: readonly [number, number, number, number];
+    };
     /** Optional paper overlap along top/right/bottom/left, clockwise source-pixel samples, at most 3 px deep. */
     webEdge?: {
         top: readonly number[];

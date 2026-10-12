@@ -487,7 +487,7 @@ export class BrowserDevice {
   this.pointerScale=size&&size.width>0?frame.width/size.width:1;
   // Paper geometry arrives in World CSS pixels; project it with the same scale as the native page.
   const scale=rect.width>0?frame.width/rect.width:1;
-  const scaled=paperEdge&&!size&&!browser.isFullscreen?{asset:paperEdge.asset,image:{x:paperEdge.image.x*scale,y:paperEdge.image.y*scale,width:paperEdge.image.width*scale,height:paperEdge.image.height*scale},
+  const scaled=paperEdge&&!size&&!browser.isFullscreen?{...paperEdge.frame?{frame:{...paperEdge.frame,target:{x:paperEdge.frame.target.x*scale,y:paperEdge.frame.target.y*scale,width:paperEdge.frame.target.width*scale,height:paperEdge.frame.target.height*scale}}}:{},asset:paperEdge.asset,image:{x:paperEdge.image.x*scale,y:paperEdge.image.y*scale,width:paperEdge.image.width*scale,height:paperEdge.image.height*scale},
    profile:Object.fromEntries(Object.entries(paperEdge.profile).map(([side,values])=>[side,values.map(n=>Math.min(3,n*scale))])) as unknown as BrowserPaperEdge['profile']}:undefined;
   this.paperEdge.apply(scaled,this.surface.window(),this.screenRect(frame));
   const style=glowStyle(fox),copied=copy?this.showCopy(copy,style):null;

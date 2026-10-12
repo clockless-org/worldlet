@@ -20,6 +20,17 @@ await withBrowser(async browser=>{
  assert.equal(result.center[3],0,'Website content remains fully transparent');
  assert.equal(result.scrollbar[3],0,'The right edge may leave the scrollbar completely open');
  assert.equal(result.cleared[3],0,'Hidden foreground must clear old artwork');
+ const framed=await page.evaluate(async()=>{
+  const src=document.createElement('canvas');src.width=800;src.height=600;const s=src.getContext('2d')!;
+  s.fillStyle='#aa6633';s.fillRect(0,0,800,600);
+  const mask=document.createElement('canvas');mask.width=800;mask.height=600;const m=mask.getContext('2d')!;
+  m.fillStyle='#0066ff';m.fillRect(0,0,800,600);m.clearRect(20,20,760,560);
+  await (window as any).paperEdge.apply({src:src.toDataURL(),image:{x:0,y:0,width:800,height:600},profile:{top:[0,0],right:[0,0],bottom:[0,0],left:[0,0]},frame:{src:mask.toDataURL(),source:{x:0,y:0,width:1,height:1},target:{x:0,y:0,width:800,height:600}}});
+  const g=document.querySelector('canvas')!.getContext('2d')!;
+  return {rim:Array.from(g.getImageData(10,300,1,1).data),hole:g.getImageData(400,300,1,1).data[3]};
+ });
+ assert.deepEqual(framed.rim,[170,102,51,255],'The frame uses original painting colours, never generated mask colours');
+ assert.equal(framed.hole,0,'Extracted alpha leaves the real website fully visible');
  await page.setViewportSize({width:400,height:300});
  await page.waitForFunction(()=>document.querySelector('canvas')!.width===400);
  await page.evaluate(async()=>{await (window as any).paperEdge.apply({src:'data:image/png;base64,broken',image:{x:0,y:0,width:400,height:300},profile:{top:[3,3],right:[1,1],bottom:[3,3],left:[1,1]}});});

@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **275 Markdown documents** and **620 supporting documentation files**.
+Indexed: **276 Markdown documents** and **621 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -61,10 +61,10 @@ Indexed: **275 Markdown documents** and **620 supporting documentation files**.
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 31 |
-| Resource and artwork records | 71 |
+| Resource and artwork records | 72 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 620 |
+| Documentation diagrams, previews and evidence | 621 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -258,7 +258,7 @@ Indexed: **275 Markdown documents** and **620 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (71)</summary>
+<details><summary>Resource and artwork records (72)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -322,6 +322,7 @@ Indexed: **275 Markdown documents** and **620 supporting documentation files**.
 - [resources/styles/builtin/references/immersive/README.md](../resources/styles/builtin/references/immersive/README.md)
 - [resources/styles/builtin/references/registered-scenes/CONCEPTS.md](../resources/styles/builtin/references/registered-scenes/CONCEPTS.md)
 - [resources/styles/builtin/references/registered-scenes/README.md](../resources/styles/builtin/references/registered-scenes/README.md)
+- [resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/frame-cutout.md](../resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/frame-cutout.md)
 - [resources/styles/builtin/references/registered-scenes/mockups/README.md](../resources/styles/builtin/references/registered-scenes/mockups/README.md)
 - [resources/styles/builtin/references/village-hud/README.md](../resources/styles/builtin/references/village-hud/README.md)
 - [resources/styles/builtin/references/youtube-web/README.md](../resources/styles/builtin/references/youtube-web/README.md)
@@ -376,7 +377,7 @@ Indexed: **275 Markdown documents** and **620 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (620)</summary>
+<details><summary>Documentation diagrams, previews and evidence (621)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -680,6 +681,7 @@ Indexed: **275 Markdown documents** and **620 supporting documentation files**.
 - [resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/background.webp](../resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/background.webp)
 - [resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/effect.json](../resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/effect.json)
 - [resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/effect.webp](../resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/effect.webp)
+- [resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/frame-cutout.png](../resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/frame-cutout.png)
 - [resources/styles/builtin/references/registered-scenes/brands/posthog/background.json](../resources/styles/builtin/references/registered-scenes/brands/posthog/background.json)
 - [resources/styles/builtin/references/registered-scenes/brands/posthog/background.webp](../resources/styles/builtin/references/registered-scenes/brands/posthog/background.webp)
 - [resources/styles/builtin/references/registered-scenes/brands/posthog/effect.json](../resources/styles/builtin/references/registered-scenes/brands/posthog/effect.json)

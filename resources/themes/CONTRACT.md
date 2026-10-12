@@ -60,6 +60,7 @@ The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presen
 | `imageSize` | Final encoded image width and height in pixels. |
 | `sha256` | SHA-256 of those exact encoded background bytes. Import rejects a stale hash or size. |
 | `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. |
+| `webFrame` (optional) | Extracted alpha asset (`mask`) and normalized `source` / `target` bounds. The host takes its alpha only, sampling colours from the original scene. A click-through foreground covers the website seam with the complete painted frame. |
 | `webEdge` (optional) | Clockwise `top`, `right`, `bottom`, `left` sample arrays (2–64 values per side, 0–3 source pixels). Original background pixels overlap the outer edge of a live website; the host scales them down with the scene and caps enlargement. No input capture or website styling. |
 | `companion` | A separate normalized rectangle describing quiet painted clearance. This does not position or style Fox. |
 
