@@ -149,12 +149,15 @@ export function openClawToolConfig(include:string|null,server:WorldToolServer):s
  return JSON.stringify({...include?{$include:include}:{},mcp:{servers:{[WORLD_TOOL_SERVER]:{command,args,env}}},tools:{toolSearch:false}},null,1)+'\n';
 }
 
+/** A Claude Code session a turn continues: the person's own conversation Fox was switched to (owner decision
+ * 2026-10-12, core/tasks/fox-sessions.ts), written into so it goes on in Claude Code too. */
+export type LocalHarnessResume={session:string};
 /** `config`: an OpenClaw configuration for this turn (openClawToolConfig); `workspace`: the person's OpenClaw
  * workspace, so its own persona, memory and instructions come along. `agent`: one of the person's other agents
  * (HarnessSessionKey.agent): Hermes Agent's profile (`-p`); OpenClaw's `agent exec` has no agent flag, so that
  * agent's `workspace` and `model` stand for it; `model` is also the one chosen for an Applet's thread (`--model`), or the
  * chosen provider's model (model-providers.ts), on each Harness's own per-turn switch. */
-export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;prompt:string},server:WorldToolServer|null=null,{cwd='.',config=null,workspace=null,agent=null,model=null}:{cwd?:string;config?:string|null;workspace?:string|null;agent?:string|null;model?:string|null}={}):LocalHarnessInvocation {
+export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;prompt:string},server:WorldToolServer|null=null,{cwd='.',config=null,workspace=null,agent=null,model=null,resume=null}:{cwd?:string;config?:string|null;workspace?:string|null;agent?:string|null;model?:string|null;resume?:LocalHarnessResume|null}={}):LocalHarnessInvocation {
  if(server&&worldToolSecretInEnv(server.env))throw Error('World tool secrets must be passed by file, not on the command line.');
  const combined=turn.system+'\n\n'+turn.prompt;
  // Arguments share Windows' 32,767-character command line with the instructions.
@@ -164,9 +167,10 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
   // Built-in tools stay off; only Worldlet's two gateway tools are allowed without a prompt. The prompt
   // arrives as one stream-json message, so the process can start before it is known (LOCAL_HARNESS_SPARE).
   // Only Worldlet's MCP server starts (the person's own servers would start every turn for tools Fox
-  // cannot use), and Fox's turns stay out of the person's Claude Code history.
+  // cannot use), and Fox's turns stay out of the person's Claude Code history, except in a brought conversation Fox
+  // continues (`resume`), which goes on in that conversation itself.
   case 'claude-code':return {args:['-p','--input-format','stream-json','--output-format','stream-json','--verbose','--include-partial-messages','--tools','',
-   '--strict-mcp-config','--no-session-persistence',...model?['--model',model]:[],
+   '--strict-mcp-config',...resume?['--resume',resume.session]:['--no-session-persistence'],...model?['--model',model]:[],
    ...server?['--mcp-config',JSON.stringify({mcpServers:{[WORLD_TOOL_SERVER]:server}}),'--allowedTools',...WORLD_GATEWAY_TOOLS.map(name=>`mcp__${WORLD_TOOL_SERVER}__${name}`)]:[],
    '--append-system-prompt',turn.system],stdin:JSON.stringify({type:'user',message:{role:'user',content:turn.prompt}})+'\n'};
   // `codex exec -` reads the prompt from stdin; a read-only sandbox outside any repository.
@@ -205,8 +209,8 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
  * reading and ends the process; `asks`: permission prompts the host puts to the person (null: declined at once);
  * `changes`: their tool calls, so `results` says what an allowed one changed (core/agent/harness-approvals.ts). */
 /** `announced`: calls to Worldlet's standing server Hermes announced before running them (HermesOwnCalls). */
-export interface LocalHarnessStream {text:string;final:string|null;error:string|null;buffered:string;outbox:string[];done:boolean;acp:{prompt:string;model:string|null;session:string|null;tentative?:boolean}|null;asks:{rpc:unknown;params:unknown}[]|null;changes:ApprovalChanges|null;results:HarnessApprovalResult[];announced:HermesAnnouncedCall[]}
-export const localHarnessStream=(acp?:{prompt:string;model?:string},{ask=false}:{ask?:boolean}={}):LocalHarnessStream=>({text:'',final:null,error:null,buffered:'',outbox:[],done:false,acp:acp?{prompt:acp.prompt,model:acp.model??null,session:null}:null,asks:ask?[]:null,changes:ask?approvalChanges():null,results:[],announced:[]});
+export interface LocalHarnessStream {text:string;final:string|null;error:string|null;buffered:string;outbox:string[];done:boolean;acp:{prompt:string;model:string|null;session:string|null;tentative?:boolean}|null;asks:{rpc:unknown;params:unknown}[]|null;changes:ApprovalChanges|null;results:HarnessApprovalResult[];announced:HermesAnnouncedCall[];session:string|null}
+export const localHarnessStream=(acp?:{prompt:string;model?:string},{ask=false}:{ask?:boolean}={}):LocalHarnessStream=>({text:'',final:null,error:null,buffered:'',outbox:[],done:false,acp:acp?{prompt:acp.prompt,model:acp.model??null,session:null}:null,asks:ask?[]:null,changes:ask?approvalChanges():null,results:[],announced:[],session:null});
 /** The answer to a permission prompt the host held (`asks`), as the line written back to the Harness. */
 export const acpPermissionReply=(rpc:unknown,outcome:unknown)=>JSON.stringify({jsonrpc:'2.0',id:rpc,result:outcome})+'\n';
 
@@ -258,6 +262,8 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
  const add=(text:unknown)=>{if(typeof text!=='string'||!text)return '';state.text+=text;return text;};
  switch(id){
   case 'claude-code':{
+   // The session it answers in (its first line names it): a resumed one under a new ID is continued there next turn.
+   if(!state.session&&typeof event.session_id==='string'&&/^[A-Za-z0-9-]{8,80}$/.test(event.session_id))state.session=event.session_id;
    const delta=record(record(event.event).delta);
    if(event.type==='stream_event'&&delta.type==='text_delta')return add(delta.text);
    if(event.type==='result'){

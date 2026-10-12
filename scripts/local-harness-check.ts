@@ -53,6 +53,12 @@ assert.deepEqual(localHarnessInvocation('claude-code',turn).args.slice(0,7),['-p
 assert.deepEqual(JSON.parse(localHarnessInvocation('claude-code',turn).stdin!),{type:'user',message:{role:'user',content:turn.prompt}});
 assert.deepEqual(localHarnessInvocation('claude-code',turn).args,localHarnessInvocation('claude-code',{...turn,prompt:''}).args);
 assert.ok(['--strict-mcp-config','--no-session-persistence'].every(flag=>localHarnessInvocation('claude-code',turn).args.includes(flag)),'only Worldlet\'s MCP server, and Fox\'s turns stay out of the person\'s Claude Code history');
+{
+ const resuming=localHarnessInvocation('claude-code',turn,null,{resume:{session:'abc12345-0000'}}).args;
+ assert.ok(resuming[resuming.indexOf('--resume')+1]==='abc12345-0000'&&!resuming.includes('--no-session-persistence'),'a brought conversation goes on in the person\'s own session');
+ const stream=localHarnessStream();readLocalHarnessLine('claude-code',stream,JSON.stringify({type:'system',subtype:'init',session_id:'def67890-1111'}));
+ assert.equal(stream.session,'def67890-1111','the session it answers in is read from its first line');
+}
 assert.deepEqual(localHarnessInvocation('codex',turn).args,['exec','--json','--skip-git-repo-check','--sandbox','read-only','-']);
 const server={command:'C:\\Program Files\\Worldlet\\Worldlet.exe',args:['C:\\Users\\a b\\worldlet-mcp.cjs'],env:{ELECTRON_RUN_AS_NODE:'1',WORLDLET_MCP_TOKEN_FILE:'t'}};
 // The command line is readable by other local users: a secret in the server's environment is refused.
@@ -332,6 +338,44 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    assert.equal(fs.readdirSync(spareHome).filter(name=>name.endsWith('.token')).length,0,'shutdown stops the spare and its bridge');
    script(path.join(bin,'claude'),`if [ "$1" = "--version" ]; then echo "2.1.0 (Claude Code)"; exit 0; fi\ncat > "$PWD/stdin.txt"\nprintf '%s\\n' "$@" > "$PWD/args.txt"\nenv > "$PWD/env.txt"\ncat "${fixture}"\n`);
   }
+  // A brought conversation Fox continues (core/tasks/fox-sessions.ts): its turns go on in the person's own Claude Code
+  // session, in the folder it ran in; the kept one's Applet does too. A session Claude Code answers under a new ID is
+  // continued there next time. Never one Worldlet keeps out of the history sync.
+  {
+   const project=path.join(scratch,'project'),folder=path.join(home,'.claude','projects','-project');
+   fs.mkdirSync(project,{recursive:true});fs.mkdirSync(folder,{recursive:true});
+   const original='11111111-aaaa-4bbb-8ccc-000000000001',moved='22222222-aaaa-4bbb-8ccc-000000000002';
+   const transcript=JSON.stringify({type:'user',cwd:project,sessionId:original,message:{role:'user',content:'Plan the launch'}})+'\n';
+   fs.writeFileSync(path.join(folder,original+'.jsonl'),transcript);
+   const answer=(session:string)=>{const file=path.join(scratch,session+'.out');fs.writeFileSync(file,[{type:'system',subtype:'init',session_id:session},{type:'result',subtype:'success',is_error:false,result:'Picking up the launch'}].map(line=>JSON.stringify(line)).join('\n')+'\n');return file;};
+   const answering=(session:string)=>script(path.join(bin,'claude'),`cat > "$PWD/stdin.txt"\nprintf '%s\\n' "$@" > "$PWD/args.txt"\ncat "${answer(session)}"\n`);
+   const links={origin:(source:string,id:string)=>source==='claude-code'&&id==='job-launch'?original:null};
+   const forkHome=path.join(scratch,'fork-home'),argsIn=(dir:string)=>fs.readFileSync(path.join(dir,'args.txt'),'utf8').split('\n'),resumed=(dir:string)=>{const args=argsIn(dir);return args.includes('--resume')?args[args.indexOf('--resume')+1]:null;};
+   const run=(place:string)=>new LocalHarnessRuntime(found[0],unix,undefined,null,null,null,undefined,links).run({action:'chat',text:'Where were we?',thread:JSON.stringify([place,'']),history:[{role:'user',text:'Earlier words'}]},forkHome,async()=>null);
+   answering(original);
+   assert.deepEqual(await run('session:job-launch'),{message:'Picking up the launch'});
+   assert.equal(resumed(project),original,'the turn goes on in the person\'s session, in its folder');
+   assert.ok(!argsIn(project).includes('--no-session-persistence')&&!argsIn(project).includes('--fork-session'),'and is written into it: '+argsIn(project).join(' '));
+   assert.doesNotMatch(fs.readFileSync(path.join(project,'stdin.txt'),'utf8'),/Recent conversation/,'the session has the conversation, so it is not repeated');
+   fs.rmSync(path.join(project,'args.txt'));
+   await run('object:app-job-launch');
+   assert.equal(resumed(project),original,'the kept one\'s Applet continues it too');
+   // Answered under a new ID: the next turn continues that one; once it no longer opens, the conversation's own.
+   answering(moved);
+   await run('session:job-launch');
+   fs.writeFileSync(path.join(folder,moved+'.jsonl'),transcript.replace(original,moved));
+   await run('session:job-launch');
+   assert.equal(resumed(project),moved,'the next turn continues where it answered');
+   fs.rmSync(path.join(folder,moved+'.jsonl'));
+   await run('session:job-launch');
+   assert.equal(resumed(project),original,'a later session that is gone: back to the conversation\'s own');
+   // A conversation with no session to continue, and any other place: Fox's own turn, as before.
+   fs.rmSync(path.join(project,'args.txt'));
+   for(const place of ['session:job-other','overview:world']){
+    await run(place);
+    assert.ok(!fs.existsSync(path.join(project,'args.txt'))&&argsIn(forkHome).includes('--no-session-persistence'),place+' is a turn of Fox\'s own');
+   }
+  }
   // A Harness that fails explains itself; Fox never shows a blank answer.
   script(path.join(bin,'claude'),'echo "Error: connect ECONNREFUSED" >&2\nexit 1\n');
   await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: connect ECONNREFUSED/);
@@ -493,4 +537,4 @@ readline.createInterface({input:process.stdin}).on('line',async line=>{
  }finally{bridge.close();}
  assert.equal(fs.existsSync(tokenFile),false,'the token file goes with the turn');
 });
-console.log('PASS local Agent Harnesses: catalog, recommendation, turns, output readers, detection (Codex inside the ChatGPT and Codex apps too), selection, accounts in the Platform with no built-in Agent, background work on the Harness, streamed turns (Hermes Agent over ACP with a World tool call, OpenClaw with its own workspace and a per-turn configuration) and the World tool MCP server and pi extension');
+console.log('PASS local Agent Harnesses: catalog, recommendation, turns, output readers, detection (Codex inside the ChatGPT and Codex apps too), selection, accounts in the Platform with no built-in Agent, background work on the Harness, streamed turns (Hermes Agent over ACP with a World tool call, a brought Claude Code conversation continued in its own session, OpenClaw with its own workspace and a per-turn configuration) and the World tool MCP server and pi extension');

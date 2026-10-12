@@ -164,6 +164,17 @@ export function claudeCodeConversation(root:string,file:string,budget:Budget):{c
   sessions:[...new Set([key,...entries.flatMap(entry=>typeof entry.sessionId==='string'?[entry.sessionId]:[])])]};
 }
 export const claudeCodeHome=(home=os.homedir(),environment=process.env)=>absolute(environment.CLAUDE_CONFIG_DIR)??path.join(home,'.claude');
+/** The folder a Claude Code conversation ran in (its transcript's `cwd`), so it can be resumed there; null when the
+ * session is not among `projects/<folder>/*.jsonl` or names no existing folder. Only the transcript's start is read. */
+export function claudeCodeSessionFolder(root:string,session:string):string|null {
+ if(!/^[A-Za-z0-9-]{8,80}$/.test(session))return null;
+ const found=sessionFiles(root,path.join(root,'projects')).find(({file})=>path.basename(file,'.jsonl')===session);
+ if(!found)return null;
+ let head='';
+ try{const fd=fs.openSync(found.file,'r');try{const buffer=Buffer.alloc(Math.min(found.size,256_000));head=buffer.subarray(0,fs.readSync(fd,buffer,0,buffer.length,0)).toString('utf8');}finally{fs.closeSync(fd);}}catch{return null;}
+ const cwd=lines(head.slice(0,head.lastIndexOf('\n')+1)||head).find(entry=>typeof entry.cwd==='string')?.cwd;
+ try{return typeof cwd==='string'&&path.isAbsolute(cwd)&&fs.statSync(cwd).isDirectory()?cwd:null;}catch{return null;}
+}
 /** Claude Code: `projects/<folder>/<session>.jsonl` conversations, the auto memory notes beside
  * them (`projects/<folder>/memory/*.md`), `skills/<name>/SKILL.md`, and sub-agents (`agents/*.md`)
  * and slash commands (`commands/**.md`) as skills too. `CLAUDE.md` is its memory,

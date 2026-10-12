@@ -25,6 +25,7 @@ import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
 import {AGENT_VERSIONS,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
+import {ongoingId} from '../../../../../core/tasks/index.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
 import {reportOpenClawWorkspaces,surveyOpenClaw} from './openclaw-files.ts';
@@ -476,6 +477,14 @@ export function installAgentRuntime(host:Host){
   record:entry=>{try{return host.store.ledger().recordExecution(entry);}catch{return false;}},
   failure:(error,operation)=>host.diagnostics.record(error,operation),
   ownSession:(source,session,thread)=>{try{host.store.ledger().rememberOwnHarnessSession(source,session,thread);}catch{}},
+  origin:(source,id)=>{
+   try{
+    if(!host.store.writable||host.store.sampleEnabled())return null;
+    const ledger=host.store.ledger(),found=ledger.broughtConversations().find(c=>c.source===source&&ongoingId(c.source,c.session)===id);
+    if(!found||ledger.historyShared(source,found.session)===true)return null;
+    return ledger.historyThreads(source,found.session).find(thread=>ledger.historyCursor(source,thread)?.shared!==true)??null;
+   }catch{return null;}
+  },
   changed:reason=>{for(const listener of listeners)try{listener(reason);}catch(error){host.diagnostics.record(error,'agentRuntime');}}
  });
  // The pairing with Worldlet on another computer whose Agent Fox uses (core/phone/README.md#another-computers-agent).
