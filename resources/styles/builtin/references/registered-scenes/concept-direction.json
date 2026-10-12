@@ -1,0 +1,214 @@
+{
+  "backgroundPrompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for {title}, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: {setting}\nLEFT: {surface} integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"{title}\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
+  "effectPrompt": "Use case: ui-mockup. Create ONE beautiful polished Applet CONCEPT EFFECT IMAGE for {title}, landscape 16:9 matching the supplied background exactly.\nThe supplied image is the EDIT TARGET: keep the SAME camera, complete setting, world style, physical frame, brand sign, props and right-side companion clearance. Fill only the large blank LEFT working surface with a superb designed application interface that feels physically part of this scene. Do not replace the setting or shift its composition.\nConcept: {concept}\nMake aesthetic quality the priority. Rich storybook 3D painterly material craft: textured rag paper, printed-ink typography, natural raised paper edges, tiny brass fasteners, woven linen tabs, tasteful illustrated content and realistic soft contact shadows that share the background light. Use restrained authentic brand accents. This should look like an exquisite usable Applet painted into the world, NOT a flat modern webpage, NOT piles of random decorations, NOT a generic list reused for every app. Normal straight-on content surfaces and sensible controls so it can later be implemented in HTML.\nUse the working area generously, large readable headings, readable short fictional content, attractive hierarchy. No overflow onto the frame or right-side scenery. Do not add people, a companion, outside UI chrome, watermarks or floating toolbars outside the physical working surface. All account/content values are fictional. The brand is \"{title}\". One complete final visual concept only.",
+  "brandLayouts": {
+    "code": "Repository workspace: small project navigation, selected repository \"village-garden\", a thoughtful pull-request review with three changed files, a short readable code diff, status checks and a crafted Review button. If this is a coding-agent product, show its task conversation, three completed steps and a proposed file diff instead of a repository home.",
+    "workspace": "Personal workspace with a narrow page index, a large project notebook, two meaningful task cards and a small schedule strip. Show \"Autumn workshop\" with an illustrated garden cover and clear next actions, warm paper blocks with refined tactile tabs.",
+    "knowledge": "A linked-notes research vault: slim note index, an open well-typeset note \"A garden through the seasons\", a small beautifully drawn relationship graph, a clipped botanical illustration and backlink labels. Keep useful writing area generous.",
+    "finance": "A highly readable account or payments ledger: three summary figures, a modest ink trend chart, four realistic fictional transaction rows with dates and statuses, and two useful actions. Use brass-edged ledger tabs and cream paper, not decorative coin clutter inside the working area. Include \"Sample account\" subtly.",
+    "tasks": "An elegant tangible task notebook: Today and Upcoming tabs, five readable tasks grouped by project, checkboxes, one completed item, one dated reminder and a small project-color ribbon. Rich paper layering and subtle cloth controls; generous comfortable spacing.",
+    "kanban": "A useful project planning board: three columns \"Planned\", \"In progress\", \"Done\", with two carefully typeset task cards in each, small priority marks, owner initials and a visible project heading. Cards feel like thick paper clipped to the board; not oversized empty boxes.",
+    "database": "A developer database console reimagined as a refined physical registry: project name, small table navigation, four rows of fictional data in a crisp table, a connection/status strip and a compact usage chart. All tabular content must remain flat and readable.",
+    "deploy": "A deployment/service dashboard as a beautiful operations ledger: project \"village-web\", green Healthy status, three recent deployments with branch and time, one small traffic chart and a clear Deploy action. Fine brass tabs and paper cards, no giant pointless gauges.",
+    "wellness": "A tasteful wellness journal with three readings, a compact seven-day trend, a daily activity or recovery card and a short routine list. Use fictional illustrative metrics, avoid diagnostic claims. Tiny botanical illustration and restrained soft colored ink.",
+    "activity": "An activity journal with a beautiful small route map, distance 4.8 km, time 32 min, elevation 85 m, a weekly chart and three recent activities. Orange route thread and physical paper card craft, no generic office dashboard.",
+    "map": "An inviting navigation interface: a large detailed illustrated village map inset occupying most of the paper, a slim saved-places list, a clear route between two locations and a compact distance/time direction card. Muted cartographic paper, attractive route markers.",
+    "stays": "A travel stay-planning board: two beautiful cottage photos on cream photo prints, a clear location/date/guest selector, two listing cards with names and sample prices, and a compact reservation summary. Images and interface should feel like a curated guesthouse travel folio.",
+    "itinerary": "A well-designed trip folio: a three-day dated itinerary, transport and stay cards, a small route illustration and one clipped destination photo. Tickets have believable paper perforation and brass clips without compromising readable rows.",
+    "feed": "A readable social community feed with three distinct short fictional posts, small avatars or initial medallions, one attractive village photo, replies and a narrow channel/topic rail. Physical warm paper, restrained brand-color accents, no real private accounts.",
+    "video": "A media browsing/player design: one large inviting illustrated video poster with play control, timeline, readable title and channel, plus three smaller recommendation thumbnails. Appropriate to the named service: live indicators for livestream products, film cards for streaming movies. Match the tactile cinema scene.",
+    "short-video": "A short-video browsing design with one central portrait-format video poster, clear play and progress controls, a readable caption, compact vertical action controls and two smaller queued clips. Illustrated village-life content; enough breathing room, no real people or private accounts.",
+    "chat": "A beautiful conversation workspace: narrow channel/contact column, three readable chat exchanges, one attached photo card and a clear message composer. Threaded conversations for workplace products; personal message bubbles for messengers. Paper and linen microtexture, subtle useful branded tabs.",
+    "meeting": "A village meeting workspace: a large four-person grid represented by tasteful illustrated avatar/initial tiles, an adjacent agenda with three items, one note card, small microphone/camera controls and a clear Join meeting button. No photographs of real people.",
+    "food": "An appetizing food ordering board with two richly illustrated meal photos, readable restaurant/menu names, prices and timing, a compact basket summary and a clear order-review action. Warm ceramic food colors, paper menu and restrained brand accents.",
+    "word-game": "A crisp six-by-five Wordle letter grid with two plausible sample guesses, green/gold/cream tiles, a compact letter keyboard and restrained game status. Tiles feel tactile and fit exactly in the working area. No unrelated app dashboard.",
+    "connections": "An attractive four-by-four Connections word-tile puzzle with sixteen readable words, two softly highlighted selected tiles, small mistakes counter, Shuffle and Submit controls. Rounded thick-paper tiles in the game colors, generous readable type.",
+    "arcade": "A convincing playable-looking game window for the named game: a large illustrated game field, appropriate recognizable game objects, score and small controls. Match the game genre and icon: snakes and pellets, colorful cells, or toy block arena as appropriate. Keep all play content inside the reserved area.",
+    "drawing": "A drawing-game interface with a large central canvas showing a charming simple hand-drawn garden object, colored pencils/tools along an edge, a readable guessing chat and short timer. Clearly the named drawing game, tactile art supplies around a practical canvas.",
+    "craft": "A delightful element-combining game: a wide open cream workspace with a few arranged illustrated element tokens, a slim inventory showing Water, Fire, Earth and Wind and two discovered combinations. Beautiful small illustrated tokens and clear labels, not a busy wall of icons.",
+    "cookie": "A satisfying Cookie Clicker game interface: one large richly rendered chocolate-chip cookie, readable cookie count, a small production rate and three upgrade cards with mini bakery illustrations. Keep most play space clear, warm delicious material detail.",
+    "chess": "A beautiful chess interface with a large exact 8x8 chessboard, a plausible opening position, readable clocks and a slim move list. Realistic carved wooden pieces and ivory/dark squares; direct front view for usable game positioning.",
+    "racing": "A convincing race-game view for the named game: a large toy-like track/game scene, the recognizable car or runner, score and compact start/restart controls. Use a colorful miniature world, avoid any screenshot framing floating over the overall painting.",
+    "game-library": "A charming game-selection board with four distinct illustrated game cover cards, readable titles, tiny genre labels and one clear Play action. Rich covers, beautiful paper cards, good hierarchy and spare space for actual browsing.",
+    "cards": "A polished UNO-style card-game table with a draw pile, discard pile and a readable hand of seven colorful cards, opponent card backs and clear turn indicator. Detailed physical cards with consistent lighting, ample play area, no random dashboard widgets.",
+    "platformer": "A playful platform game view with a yellow cube character, a coherent simple level of platforms and toy hazards, a level number and small restart control. Clear legibility and spare play field, consistent village-toy materials.",
+    "battle": "A monster battle strategy view with two charming illustrated opposing creatures, compact health bars, readable move buttons and a small team lineup. Fictional battle state, toy-like friendly style, no gore or real people.",
+    "assistant": "An inviting AI assistant conversation: short user request about planning a village workshop, a useful structured response with a small itinerary/checklist, one beautifully illustrated supporting card, a clear composer and a few suggestion chips. Match this specific assistant brand while retaining village paper and cloth materiality.",
+    "research": "A research reader with a thoughtful question, a short structured answer or encyclopedia passage, three compact source cards and one relevant botanical/architectural illustration. Clear citations visually represented as numbered references, fictional sample content, generous reading area.",
+    "files": "A tangible but practical file library: a slim folder rail, three tasteful document/image previews, four readable file rows with type and modified date, search and upload/new-folder controls. Paper folders and colored linen tabs, attractive thumbnail images.",
+    "document": "An elegant document reader/editor: small page thumbnails, a large readable manuscript titled \"The village workshop\", a short heading and two paragraphs, one small illustration, a light formatting toolbar and a compact comment tab. Flat readable page, tasteful paper grain.",
+    "spreadsheet": "A carefully typeset spreadsheet on a physical ledger: columns Item, Planned, Actual and Notes; five sample household or workshop rows; a small total summary and modest bar chart. Thin crisp grid lines, aligned numbers, letter/row headers and small formula bar. No distorted perspective.",
+    "slides": "A presentation workspace: three small slide thumbnails at left, one large title slide \"Growing together\" with an elegant garden illustration and two concise points, a short speaker-note strip. Projector-screen aesthetic with warm paper and brass controls.",
+    "design": "A creative design canvas: slim tool rail, two attractive miniature poster/card artboards, color swatches and a small layer/properties panel. Show actual attractive designed pieces about an autumn village gathering; no generic placeholder rectangles.",
+    "music": "A listening library: a richly illustrated album cover, album/playlist title, visible play/pause and progress controls, three track rows with durations and a tiny queue. Physical sleeve, linen tabs and warm brass details, precise and inviting.",
+    "photos": "A curated photographic scrapbook interface: six DIFFERENT charming illustrated countryside photos, readable album tabs and subtle import/search controls. Thick photo-paper edges and soft shadows, varied food/garden/market/lake imagery, careful alignment and large useful viewing area.",
+    "jobs": "A professional opportunities workspace: profile summary, three fictional job cards with role/location/status, one highlighted application and a useful networking note. Restrained blue identity, refined paper portfolio materials, readable business-like hierarchy.",
+    "shop": "A useful shopping board with three appealing illustrated products matching village life (book, ceramic mug, woven basket), readable names/prices, search and category tabs, and a compact basket panel. Crafted catalog paper, tactile product photos and restrained branded controls.",
+    "mail": "A refined mail workspace: narrow mailbox and message list, an open invitation letter with readable sender/subject/body and a clipped garden photograph, reply and compose controls. Thin paper layers, brass clip, thoughtful warm spacing.",
+    "podcast": "A podcast listening library: two beautiful distinct illustrated episode covers, selected episode title and short description, a working-looking progress player with time, and three episode rows. Letterpress cover craft and restrained purple/brass accents.",
+    "video-edit": "A video editing desk view: large illustrated video preview, three source-media thumbnails, a clear timeline with three colored clip strips, playhead and a small export control. Tactile film-strip and paper labels, precise flat timeline, generous preview.",
+    "analytics": "Product analytics on a printed dashboard with clear weekly activity chart, funnel steps, retention heatmap and three summary metrics, annotated ink axes and restrained amber accents."
+  },
+  "coreConcepts": [
+    {
+      "id": "google-calendar",
+      "concept": "A beautiful October 2026 calendar book. Five weekday paper columns MON 5 through FRI 9, clipped sage event notes: Weekly planning 09:00, Garden workshop 10:30, Riverside walk 15:00. Month heading, previous/next brass buttons, Week/Month fabric tabs, Add event. Small separate right blank calendar shows MON 5. Accurate readable dates."
+    },
+    {
+      "id": "gmail",
+      "concept": "A village post office inbox: small folder rail, five tactile envelope/message rows, selected Garden workshop invitation expanded with a botanical postcard image, sender Alex, RSVP and Reply, compose with small wax-red accent. Mail useful hierarchy."
+    },
+    {
+      "id": "apple-notes",
+      "concept": "Open notebook editor with slim note index, selected Garden ideas note containing a lovely botanical watercolor, short checklist, heading, pencil formatting row, realistic paper edges. Search, new note and tags."
+    },
+    {
+      "id": "apple-reminders",
+      "concept": "Garden errands reminder board with Today heading, seven large readable checkboxes on subtle ruled paper, morning/afternoon sections, colored priority dots, two checked rows, new reminder footer."
+    },
+    {
+      "id": "files",
+      "concept": "Beautiful file cabinet index on ivory stock, narrow locations rail, breadcrumb My files / Weekend trip, thumbnail folders and actual document/photo previews with file names and sizes, sort/search/view tools."
+    },
+    {
+      "id": "weather",
+      "concept": "Blue enamel weather station display: stylized luminous sun and drifting clouds, 22° village forecast, hourly row, five-day forecast, wind compass and rainfall graph as tasteful physical instruments."
+    },
+    {
+      "id": "meetings",
+      "concept": "Meeting preparation folio with upcoming weekly planning card, 10:30 join button, three small illustrated avatars, agenda notes and past meeting summaries, balanced dark blue fabric tabs."
+    },
+    {
+      "id": "voice-memos",
+      "concept": "Vintage audio recorder face with large copper record button, realistic waveform paper strip and time 02:34, recording list with dates and playback controls; credible elegant audio tool."
+    },
+    {
+      "id": "messages",
+      "concept": "Messaging stationery with contacts rail, selected conversation with Alex, short threaded messages and a garden photo postcard attachment, a usable compose field and send button."
+    },
+    {
+      "id": "browser",
+      "concept": "Village exploration browser start page on ivory paper, substantial search/address bar, illustrated pinned website cards for Library, Maps, Garden, News, small recent tabs, neat restrained navigation."
+    },
+    {
+      "id": "maps",
+      "concept": "Rich illustrated village street map with actual labeled paths, park pond and market, winding route and start/end pins, search field, route time 12 min and zoom controls, printed atlas character."
+    },
+    {
+      "id": "clock",
+      "concept": "Clockmaker panel showing readable analog clock and digital 10:24, time zones London Tokyo, timer set 25:00 with start button, alarm 07:30 with switch. Brass controls and ivory instrument faces."
+    },
+    {
+      "id": "contacts",
+      "concept": "Address book with alphabetical tabs, portrait illustration Alex and contact card, short fictional phone/email placeholders example.com, favorites and search, tasteful green leather accents."
+    },
+    {
+      "id": "photos",
+      "concept": "Exquisite photo album: mixed-size actual picture thumbnails of a garden picnic, village lanes, coast, friends silhouettes, travel. Consistent gutters, paper corners, Library/Albums tabs, October 2026 heading, selected-photo action tools."
+    },
+    {
+      "id": "music",
+      "concept": "Tactile music player with large illustrated album artwork Autumn Walk, vinyl inset, warm brass play/pause and progress slider, track queue with three illustrated album covers, forest green accent."
+    },
+    {
+      "id": "news",
+      "concept": "Beautiful village gazette with serif masthead Morning Brief, one large illustrated editorial scene, two smaller story images, short readable headlines, topic tabs and saved articles, generous newspaper columns."
+    },
+    {
+      "id": "podcasts",
+      "concept": "Vintage radio podcast library with illustrated show covers, selected episode The Quiet Garden 28 min, brass play control, waveform and queue, chapter list on paper, plum and cream."
+    },
+    {
+      "id": "stocks",
+      "concept": "Printed financial watchlist with clean ink line chart, fictional ACORN ticker 128.40 +1.2%, three clear stock rows, range selectors and watchlist tabs, precise restrained green/red trends."
+    },
+    {
+      "id": "game-2048",
+      "concept": "An active 4 by 4 2048 game with warm carved wooden numbered tiles, coherent 2/4/8/16/32/64 values, score 1240 best 2860, New game and Undo brass controls."
+    },
+    {
+      "id": "snake",
+      "concept": "A playable-looking snake game occupying most of the green board, clear gridded field, a winding green segmented snake and red apple, Score 120, Start/Pause, small arrow-key controls."
+    },
+    {
+      "id": "minesweeper",
+      "concept": "A readable 10 by 10 minesweeper field of ceramic square tiles, some revealed cells with blue 1 and green 2, red flags, mine counter and timer, New game button."
+    },
+    {
+      "id": "sudoku",
+      "concept": "Precise 9 by 9 Sudoku grid with 3 by 3 heavy dividers, partly filled numbers, one highlighted cell, pencil notes, digits1–9 input strip, Erase/Hint/Undo. Ivory paper and blue ink."
+    },
+    {
+      "id": "gomoku",
+      "concept": "A 15 by 15 carved Go grid on wooden board with black and white stones centered at intersections, mid-game position, Your turn, small player portraits and New game/Undo. Do not make a chessboard."
+    },
+    {
+      "id": "random-game",
+      "concept": "Village game arcade selection board with six charming illustrated game cards: 2048, Snake, Minesweeper, Sudoku, Gomoku, Surprise me. Large Random play button, tactile paper labels."
+    },
+    {
+      "id": "weight-balance",
+      "concept": "Kind balanced wellness journal: week weight trend line 72.4 kg, small progress ring, water glasses, habit check-ins, illustrated balanced meal, no exaggerated weight-loss promises."
+    },
+    {
+      "id": "meal-planner",
+      "concept": "Beautiful weekly recipe planner with three detailed appetizing food photos on paper recipe cards, day tabs, meal names and ingredients checklist, grocery list button."
+    },
+    {
+      "id": "fitness",
+      "concept": "Illustrated training planner showing three exercise cards with clear human exercise sketches, weekly activity chart, duration 30 min, Start session, recovery/rest indication."
+    },
+    {
+      "id": "sleep",
+      "concept": "Evening sleep journal with moon and stars illustration, circular sleep duration 7h45m, elegant overnight timeline, bedtime 22:30, wake07:00, gentle sleep routine checklist."
+    },
+    {
+      "id": "travel",
+      "concept": "Travel scrapbook itinerary for a village weekend, watercolor route map, realistic scenic postcard, rail ticket, three-day tabs, accommodation card and packing checklist, quiet blue accents."
+    },
+    {
+      "id": "outdoor",
+      "concept": "Hiking field guide with detailed trail map, elevation profile, distance 8.4km, scenic trail image, weather strip, checklist, Start walk. Canvas and kraft labels."
+    },
+    {
+      "id": "shopping",
+      "concept": "Market shopping list grouped Produce/Pantry/Home, realistic little watercolor vegetable illustrations, checkboxes and quantities, total budget, Add item, three items checked."
+    },
+    {
+      "id": "budget",
+      "concept": "Household ledger with income/expenses balance, simple readable monthly bar chart, three category envelopes, short transaction list, Add expense, believable fictional amounts."
+    },
+    {
+      "id": "home-care",
+      "concept": "Home care planner with illustrated rooms, due chores cards, week schedule and completion status, add task. Fill small secondary plaque with Today 3 tasks."
+    },
+    {
+      "id": "garden",
+      "concept": "Gardening field notebook with plant illustrations, herb watering tasks, planting calendar and plant status labels. Small secondary plaque shows Water today 4 plants."
+    },
+    {
+      "id": "daily-planner",
+      "concept": "Beautiful daily agenda on ring-bound paper, morning/afternoon timeline, priorities checklist and illustrated inspiration postcard, small separate sun plaque shows Monday 5."
+    },
+    {
+      "id": "reading",
+      "concept": "Reading journal with illustrated book covers, current book progress and one readable quotation, reading goal indicator, tabs. Secondary plaque shows 12 / 20 books."
+    },
+    {
+      "id": "language",
+      "concept": "Language practice notebook with Italian words and English meanings, one large illustrated flashcard for giardino / garden, audio control, quiz answer buttons. Secondary panel shows daily streak7."
+    },
+    {
+      "id": "journal",
+      "concept": "Rich personal journal page with October5 heading, short fictional reflective paragraphs, garden photo taped in, pressed flower and mood marker, paper tabs; secondary plaque shows mood and date."
+    },
+    {
+      "id": "job-search",
+      "concept": "Career portfolio with application tracker rows, resume preview, interview card and organization logos represented by fictional initials, status chips. Secondary plaque next interview Tuesday10:00."
+    },
+    {
+      "id": "project-planner",
+      "concept": "Project folio with three kanban columns, six readable task cards, miniature timeline, collaborators, tabs. Secondary plaque shows due Friday and 6/10 tasks."
+    }
+  ]
+}

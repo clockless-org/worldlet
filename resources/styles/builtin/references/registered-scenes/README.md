@@ -1,5 +1,7 @@
 # Village Applet scene library
 
+[View image-generated backgrounds and effects for all 140 selections](CONCEPTS.md). These are visual targets for later HTML implementation; the registration counts below describe the existing runtime plates.
+
 | Collection | Asset groups | Registered HTML surfaces | Existing art awaiting registration |
 | --- | ---: | ---: | ---: |
 | Core everyday applications | 18 | 🟢 18 | 0 |
@@ -8,7 +10,7 @@
 | Brand-specific products and external games | 100 | 0 | 🟡 100 |
 | Total art selections | **140** | **40** | **100** |
 
-Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. The 100 branded selections retain their existing art and await registered surfaces. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
+Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. The 100 branded selections retain their existing runtime art and await registered surfaces; the new background and effect studies are catalogued separately above. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
 
 ## Core applications and games
 
