@@ -173,6 +173,21 @@ final class WorldletUITests: XCTestCase {
         XCTAssert(waitGone(app.buttons["Dismiss"]), "in the card's place")
     }
 
+    /// A swipe sideways moves between the tabs, and the segmented control follows (owner request 2026-10-12).
+    func testSwipeBetweenTabs() {
+        let app = launch(["-demo"])
+        XCTAssert(element(app, "Reply to Sam about the venue").waitForExistence(timeout: 10))
+        app.swipeLeft()
+        XCTAssert(hittable(app.buttons["applet-gmail"]), "a swipe left from Today shows Applets")
+        XCTAssert(tab(app, 1).isSelected, "and the control says so")
+        app.swipeLeft()
+        XCTAssert(element(app, "DOING NOW").waitForExistence(timeout: 5), "another shows Tasks")
+        XCTAssert(tab(app, 2).isSelected)
+        app.swipeRight()
+        XCTAssert(hittable(app.buttons["applet-gmail"]), "a swipe right goes back")
+        XCTAssert(tab(app, 1).isSelected)
+    }
+
     /// The Tasks tab says what the Agent is doing now and its Routines; an Applet's task opens its Applet.
     func testTasks() {
         let app = launch(["-demo"])

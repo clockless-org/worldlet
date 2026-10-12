@@ -1,8 +1,8 @@
 import SwiftUI
 import WorldletKit
 
-/// The phone in three tabs (owner request 2026-10-11), chosen with the system's segmented control at the top; Fox stays
-/// below on every tab and talks about wherever the person is. **Today** is the computer's left side: the date, today's
+/// The phone in three tabs (owner request 2026-10-11), chosen with the system's segmented control at the top or a swipe
+/// sideways (2026-10-12); Fox stays below on every tab and talks about wherever the person is. **Today** is the computer's left side: the date, today's
 /// Journal and the Attention Center, with Later below Now. **Applets** lists the Applets that work on the phone, the
 /// person's things first (each OpenClaw channel or long conversation is a thing of its own, AppletWorld.swift).
 /// **Tasks** is what sits either side of Fox on the computer: what the person's Agent is doing now and its Routines.
@@ -37,13 +37,18 @@ struct AttentionCenter: View {
             .frame(width: 252)
             .padding(.top, 6)
             .accessibilityIdentifier("tabs")
-            Group {
-                switch tab {
-                case .today: TodayPage(open: open, openWidget: { widget = OpenWidget(id: $0.id) }, openEntry: { entry = $0 })
-                case .applets: AppletList(open: openTile, details: { openApplet($0) })
-                case .tasks: TasksPage(openApplet: openApplet)
-                }
+            // The tabs are pages side by side: a swipe left or right moves between them and the control follows
+            // (owner request 2026-10-12).
+            TabView(selection: $tab) {
+                TodayPage(open: open, openWidget: { widget = OpenWidget(id: $0.id) }, openEntry: { entry = $0 })
+                    .tag(Tab.today)
+                AppletList(open: openTile, details: { openApplet($0) })
+                    .tag(Tab.applets)
+                TasksPage(openApplet: openApplet)
+                    .tag(Tab.tasks)
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .accessibilityIdentifier("centerPages")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .fullScreenCover(item: $widget) { WidgetScreen(id: $0.id) }

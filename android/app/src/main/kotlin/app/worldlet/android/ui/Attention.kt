@@ -5,6 +5,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -45,7 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -88,6 +90,7 @@ import app.worldlet.kit.AttentionItem
 import app.worldlet.kit.JournalEntry
 import app.worldlet.kit.PhoneApplet
 import java.time.Instant
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -96,8 +99,8 @@ import java.util.Locale
 internal val worldShadow = Shadow(Palette.inkShadow, Offset(0f, 1.5f), 3f)
 
 /**
- * The Attention Center as three tabs chosen with the segmented control at the top (owner request 2026-10-11, replacing
- * the Applet world, Now and Later layers and their swipes): **Today**, where it opens, is one scroll from the date and
+ * The Attention Center as three tabs chosen with the capsule at the top or a swipe sideways (owner requests 2026-10-11
+ * and 10-12, replacing the Applet world, Now and Later layers): **Today**, where it opens, is one scroll from the date and
  * today's Journal through Now to Later; **Applets** lists the World's Applets; **Tasks** is what the person's Agent is
  * doing now and its Routines. Fox stays below on every tab. Tapping a row opens its card; a long press offers Done,
  * Later and Remove, and the computer settles the item and sends the new Center. The widgets for now (core/artifacts)
@@ -105,16 +108,19 @@ internal val worldShadow = Shadow(Palette.inkShadow, Offset(0f, 1.5f), 3f)
  */
 @Composable
 fun AttentionCenter(model: AppModel, initialPage: String?, open: (AttentionItem) -> Unit, openApplet: (PhoneApplet) -> Unit) {
-    var tab by rememberSaveable { mutableIntStateOf(centerTab(initialPage)) }
+    // The tabs are pages side by side: a swipe left or right moves between them, as a tap on the capsule does (owner
+    // request 2026-10-12).
+    val pager = rememberPagerState(initialPage = centerTab(initialPage)) { 3 }
+    val scope = rememberCoroutineScope()
     var widgetId by rememberSaveable { mutableStateOf<String?>(null) }
     // Each tab keeps where it was scrolled while another is shown.
     val todayScroll = rememberScrollState()
     val appletsScroll = rememberScrollState()
     val tasksScroll = rememberScrollState()
     Column(Modifier.fillMaxSize().padding(top = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        PageTabs(tab) { tab = it }
-        Box(Modifier.fillMaxSize().padding(top = 6.dp)) {
-            when (tab) {
+        PageTabs(pager.targetPage) { scope.launch { pager.animateScrollToPage(it) } }
+        HorizontalPager(pager, Modifier.fillMaxSize().padding(top = 6.dp).testTag("centerPager"), verticalAlignment = Alignment.Top) { page ->
+            when (page) {
                 APPLETS -> AppletList(model, appletsScroll, openWidget = { widgetId = it }, openApplet = openApplet)
                 TASKS -> TasksPage(model, tasksScroll, openApplet)
                 else -> TodayPage(model, todayScroll, open) { widgetId = it }
