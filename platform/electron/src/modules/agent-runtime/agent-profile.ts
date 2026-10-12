@@ -1,9 +1,9 @@
-import {AGENT_PROFILE_TIMEOUT_MS,agentProfilePrompt,parseAgentProfile,type AgentProfile} from '../../../../../core/agent/index.ts';
+import {AGENT_PROFILE_DIGEST,AGENT_PROFILE_TIMEOUT_MS,agentProfilePrompt,type AgentConversationDigest,parseAgentProfile,type AgentProfile} from '../../../../../core/agent/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentRuntime} from './types.ts';
-import {hermesThreads} from './agent-files.ts';
-import {openClawThreads} from './openclaw-files.ts';
+import {hermesThread,hermesThreads} from './agent-files.ts';
+import {openClawThread,openClawThreads} from './openclaw-files.ts';
 
 // The person's own Agent describes itself once it is chosen (core/agent/agent-profile.ts). One background turn on that
 // Agent, in Worldlet's setup home, with no World tools; the answer is kept in the World's database beside the other
@@ -12,9 +12,9 @@ import {openClawThreads} from './openclaw-files.ts';
 const SETTING='agent-profile';
 export type AgentProfileResult='ok'|'timeout'|'invalid'|'failed';
 
-/** Asks once, and once more when the reply was not the JSON; each answer gets AGENT_PROFILE_TIMEOUT_MS. `conversations`: the
- * titles Worldlet gives the Agent's conversations (conversationTitles). */
-export async function describeAgent(runtime:()=>AgentRuntime,home:string,conversations:readonly string[]=[],timeout=AGENT_PROFILE_TIMEOUT_MS):Promise<{profile:AgentProfile|null;result:AgentProfileResult}> {
+/** Asks once, and once more when the reply was not the JSON; each answer gets AGENT_PROFILE_TIMEOUT_MS. `conversations`: what
+ * Worldlet read of the Agent's conversations (conversationDigest). */
+export async function describeAgent(runtime:()=>AgentRuntime,home:string,conversations:readonly AgentConversationDigest[]=[],timeout=AGENT_PROFILE_TIMEOUT_MS):Promise<{profile:AgentProfile|null;result:AgentProfileResult}> {
  const prompt=agentProfilePrompt(WORLD_APPS.filter(app=>app.region!=='health').map(app=>app.key),conversations);
  let result:AgentProfileResult='failed';
  for(let attempt=0;attempt<2;attempt++){
@@ -45,11 +45,18 @@ export function writeAgentProfile(root:string,id:string,profile:AgentProfile|nul
  writeAgentSetting(root,SETTING,{...all,[id]:profile?{at:now,result,profile}:{...before,result,triedAt:now}} as any);
 }
 
-/** The titles Worldlet gives the Agent's conversations, newest first, for the things it names to point at. */
-export function conversationTitles(id:string):string[] {
+/** The Agent's conversations as Worldlet reads them from its files, newest first (core AgentConversationDigest): what
+ * it is asked to summarize instead of going through its history itself. Group chats are left out. */
+export function conversationDigest(id:string,home?:string,environment?:NodeJS.ProcessEnv):AgentConversationDigest[] {
+ const day=(ms:number)=>ms>0?new Date(ms).toISOString().slice(0,10):undefined;
+ const digest=(title:string,turns:{role:string;text:string}[],last:number):AgentConversationDigest=>({title,messages:turns.length,...day(last)?{last:day(last)}:{},
+  opening:turns.filter(turn=>turn.role==='user').map(turn=>turn.text).filter(Boolean).slice(0,AGENT_PROFILE_DIGEST.lines)});
+ const limit=AGENT_PROFILE_DIGEST.conversations;
  try{
-  if(id==='hermes')return (hermesThreads()??[]).filter(thread=>!thread.shared).sort((a,b)=>b.last-a.last).map(thread=>thread.title);
-  if(id==='openclaw')return (openClawThreads()??[]).map(thread=>thread.title);
+  if(id==='hermes')return (hermesThreads(home,environment)??[]).filter(thread=>!thread.shared).sort((a,b)=>b.last-a.last).slice(0,limit)
+   .map(thread=>digest(thread.title,hermesThread(thread,home,environment)?.turns??[],thread.last*1000));
+  if(id==='openclaw')return (openClawThreads(home,environment)??[]).filter(thread=>!thread.shared).sort((a,b)=>b.last-a.last).slice(0,limit)
+   .map(thread=>digest(thread.title,openClawThread(thread.id,home,environment)?.turns??[],thread.last));
  }catch{}
  return [];
 }

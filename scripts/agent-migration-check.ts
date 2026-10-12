@@ -6,7 +6,7 @@ import zlib from 'node:zlib';
 import {DatabaseSync} from 'node:sqlite';
 import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,hermesConversationTitle,hermesRoutine,hermesTurn,migrationMemoryNote,migrationRoutineKey,migrationSkillMarkdown,migrationSkillPath,migrationSkillsSafe,
  openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../core/agent/index.ts';
-import {openClawAgents,parseJSON5,readOpenClaw,surveyOpenClaw} from '../platform/electron/src/modules/agent-runtime/openclaw-files.ts';
+import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,surveyOpenClaw} from '../platform/electron/src/modules/agent-runtime/openclaw-files.ts';
 import {surveyAgentHistory} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
 import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
 import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/electron/src/modules/fox/migration.ts';
@@ -432,6 +432,16 @@ try{
  assert.deepEqual(data.notes.map(n=>[n.agentId,n.date]),[['main','2026-10-01']]);
  assert.equal(readLocalAgentMemory('openclaw',outside,env)?.user,'Lives in LA.');
  assert.equal(openClawAgents(outside,{} as NodeJS.ProcessEnv).find(a=>a.id==='helper')?.workspace,null,'a missing variable leaves only that path unread');
+ // Where its configuration leads nowhere, the folder the Agent itself reported (core/agent/agent-profile.ts workspaces)
+ // is read, when it is a workspace inside the home folder; one outside it never is.
+ write(path.join(outside,'elsewhere','helper','SOUL.md'),'Name: Helper\nHelps.');
+ const away=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-openclaw-away-'));write(path.join(away,'SOUL.md'),'Name: Away');
+ try{
+  reportOpenClawWorkspaces([{agent:'helper',path:path.join(away)},{agent:'helper',path:'~/elsewhere/helper'}]);
+  assert.equal(openClawAgents(outside,{} as NodeJS.ProcessEnv).find(a=>a.id==='helper')?.workspace,fs.realpathSync(path.join(outside,'elsewhere','helper')));
+  assert.equal(openClawAgents(outside,env).find(a=>a.id==='helper')?.workspace,fs.realpathSync(path.join(outside,'workspace-helper')),'a configured workspace that holds its files wins');
+ }finally{reportOpenClawWorkspaces(null);fs.rmSync(away,{recursive:true,force:true});}
+ assert.equal(openClawAgents(outside,{} as NodeJS.ProcessEnv).find(a=>a.id==='helper')?.workspace,null);
 }finally{fs.rmSync(outside,{recursive:true,force:true});}
 
 console.log('PASS: OpenClaw, Claude Code, pi, Hermes Agent and Codex conversations, notes, skills and scheduled jobs come into Fox the same way; their own files are only read');

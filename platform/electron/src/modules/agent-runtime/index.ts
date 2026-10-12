@@ -27,8 +27,8 @@ import {AGENT_VERSIONS,agentProfileApplets,agentProfileAsked,type AgentProfile,B
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
-import {surveyOpenClaw} from './openclaw-files.ts';
-import {conversationTitles,describeAgent,readAgentProfile,writeAgentProfile,type AgentProfileResult} from './agent-profile.ts';
+import {reportOpenClawWorkspaces,surveyOpenClaw} from './openclaw-files.ts';
+import {conversationDigest,describeAgent,readAgentProfile,writeAgentProfile,type AgentProfileResult} from './agent-profile.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {surveyAgentHistory} from './agent-files.ts';
 import {readLocalAgentMemory,writeAdopted} from './local-memory.ts';
@@ -403,8 +403,9 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // Once it answers, it describes itself in the background (owner request 2026-10-11); setup never waits for that.
    const describe=async()=>{
     if(!agentProfileAsked(install.id))return;
-    const started=Date.now(),{profile,result}=await describeAgent(()=>new LocalHarnessRuntime(install),adapter.home('setup'),conversationTitles(install.id));
+    const started=Date.now(),{profile,result}=await describeAgent(()=>new LocalHarnessRuntime(install),adapter.home('setup'),conversationDigest(install.id));
     try{writeAgentProfile(context.root,install.id,profile,result);}catch{}
+    if(install.id==='openclaw'&&profile)reportOpenClawWorkspaces(profile.workspaces);
     onAgentCheck({id:install.id,profile,result,ms:Date.now()-started});
    };
    if(later)void prove().then(()=>{onAgentCheck({id:install.id,ok:true});return describe();},error=>onAgentCheck({id:install.id,ok:false,message:(error as Error).message}));
@@ -505,6 +506,8 @@ export function installAgentRuntime(host:Host){
   await switchTo(noAgent());
  };
  host.provide<AgentService>(AGENT,service);
+ // Where OpenClaw said its workspaces are, from its last description (openclaw-files reportOpenClawWorkspaces).
+ try{reportOpenClawWorkspaces(readAgentProfile(context.root,'openclaw')?.workspaces);}catch{}
  const extras=host.store.snapshotExtras;
  host.store.snapshotExtras=()=>({...extras(),agentNeeded:foxNeedsAgent(context,adapter)});
  // `--connect=<id>` from an install script, at launch or on a second launch while running (main.ts brings the window

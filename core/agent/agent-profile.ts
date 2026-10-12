@@ -34,18 +34,34 @@ export interface AgentProfile {
 
 const KINDS=['mcp','channel','api_key','password_vault','oauth','cli','email','other'];
 
-/** The message sent to the Agent. `catalog`: the Applet keys it may suggest from. `conversations`: the titles Worldlet
- * gives its conversations, so the things it names point at ones Worldlet brings (core/tasks ongoingFromAgent). */
-export function agentProfilePrompt(catalog:readonly string[],conversations:readonly string[]=[]):string {
- const titles=[...new Set(conversations.map(title=>title.replace(/\s+/g,' ').trim()).filter(Boolean))].slice(0,80);
+/** One of the Agent's conversations as Worldlet read it from the Agent's own files: its title, how many messages it
+ * has, when it was last written to (YYYY-MM-DD) and the person's first few lines. */
+export interface AgentConversationDigest {title:string;messages?:number;last?:string;opening?:string[]}
+export const AGENT_PROFILE_DIGEST=Object.freeze({conversations:40,lines:3,line:140});
+
+/** The message sent to the Agent. `catalog`: the Applet keys it may suggest from. `conversations`: its conversations as
+ * Worldlet already read them from its files (owner request 2026-10-12, Kelvin: "先读文件可以"). With them, the Agent
+ * answers from the list and what it already knows, without tools: going through its history itself took a Hermes Agent
+ * minutes and sometimes never ended. The things it names point at these titles (core/tasks ongoingFromAgent). */
+export function agentProfilePrompt(catalog:readonly string[],conversations:readonly (AgentConversationDigest|string)[]=[]):string {
+ const one=(value:string,limit:number)=>[...value.replace(/\s+/g,' ').trim()].slice(0,limit).join('');
+ const seen=new Set<string>(),list:AgentConversationDigest[]=[];
+ for(const entry of conversations){
+  const c=typeof entry==='string'?{title:entry}:entry,title=one(c.title||'',160);
+  if(!title||seen.has(title)||list.length>=AGENT_PROFILE_DIGEST.conversations)continue;
+  seen.add(title);
+  list.push({title,...Number.isFinite(c.messages)&&c.messages!>0?{messages:Math.round(c.messages!)}:{},...c.last&&/^\d{4}-\d{2}-\d{2}$/.test(c.last)?{last:c.last}:{},
+   ...c.opening?.length?{opening:c.opening.map(line=>one(line,AGENT_PROFILE_DIGEST.line)).filter(Boolean).slice(0,AGENT_PROFILE_DIGEST.lines)}:{}});
+ }
  return [
   'Worldlet is setting up a desktop for you and the person you work for. Describe yourself as ONE JSON object, exactly this shape (every field optional, arrays may be empty):',
   JSON.stringify({schema:AGENT_PROFILE_SCHEMA,agent:{name:'your name',model:'provider/model'},workspaces:[{agent:'agent id',path:'absolute folder holding your SOUL.md, memory, skills'}],persona:'one or two sentences: who you are and how you talk',aboutUser:['short facts about your person'],skills:[{name:'skill name',description:'one line'}],connections:[{name:'what it is',kind:KINDS.join('|'),service:'e.g. gmail, discord, 1password',usedFor:'one line'}],channels:[{provider:'discord|telegram|…',place:'#channel or chat name',purpose:'one line'}],routines:[{name:'',schedule:'cron or plain words',what:'one line'}],threads:[{title:'recent conversation',summary:'one line'}],things:[{title:'short name, like Kitchen restock',why:'what your person keeps doing',threads:['the conversation titles it happens in, exactly as titled'],key:'catalog key below, or omit'}],applets:[{key:'catalog key below, or omit',title:'name',why:'what your person does that it helps with'}]}),
-  'Use what you actually have: your configuration, workspace files, skills, memory and notes, channels, scheduled jobs and recent conversations. Leave out anything you are unsure of; do not invent.',
+  list.length?'Answer right away from what you already know about yourself and your person and from the conversations listed below; do not run tools or read files for this. Leave out anything you are unsure of; do not invent.'
+   :'Use what you actually have: your configuration, workspace files, skills, memory and notes, channels, scheduled jobs and recent conversations. Leave out anything you are unsure of; do not invent.',
   'NEVER include secrets: no passwords, tokens, API key values or private keys. Name the service and how it is connected instead.',
   'Do not change any setting or file and do not message anyone; only answer.',
-  'things: go through your conversations with your person and name the things they handle most day to day, up to 12, busiest first: recurring jobs, not one-off questions. Each lists the conversations it happens in by their exact titles, and a key from the list below when one Applet fits.',
-  ...titles.length?['Worldlet lists your conversations with these titles; in things, name the conversations exactly as written here: '+titles.map(title=>JSON.stringify(title)).join(', ')+'.']:[],
+  'things: name the things your person handles most day to day, up to 12, busiest first: recurring jobs, not one-off questions. Each lists the conversations it happens in by their exact titles, and a key from the list below when one Applet fits.',
+  ...list.length?['Your conversations, newest first, as Worldlet read them from your files (title, messages, last active, your person\'s first lines). In things and threads, use these titles exactly as written:\n'+list.map(c=>JSON.stringify(c)).join('\n')]:[],
   'threads: up to 30 recent ones. applets: up to 8, based on what your person really does with you; use a key from this list when one fits: '+catalog.join(', ')+'.',
   'Reply with the JSON object only, no other text.',
  ].join('\n\n');
