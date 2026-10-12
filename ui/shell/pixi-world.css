@@ -493,7 +493,8 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld:has(.browser-back[data-web-page])>.applet-bar-left>#notionBack{display:none}
 /* The Applet shelf (hud/applet-shelf.ts, owner request 2026-10-09): the recent Applets stand over the Applet's side in
    place of its title, the open one in the middle, largest and lit; the others smaller and fainter the further they stand.
-   Moving between Applets slides them along. No ledge under them and no name tags (owner request 2026-10-11): the open one's
+   Moving between Applets slides them along; nothing closes from it. Back, +N, + and the Applet's controls stand on the
+   bar's one row (the shelf starts 6px down the window). No ledge under them and no name tags (owner request 2026-10-11): the open one's
    name shows as plain text below it; the others' names show on hover and stay in the button for screen readers. */
 #notionWorld>.applet-shelf{position:absolute;z-index:39;left:0;top:6px;width:calc(100% - var(--reader-companion-lane,464px));height:136px;pointer-events:none;font:600 12px/1.2 var(--ui-font-ui,system-ui)}
 #notionWorld>.applet-shelf[hidden]{display:none}
@@ -513,10 +514,7 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld .applet-shelf-tab[data-current] .applet-shelf-pick{cursor:default}
 #notionWorld .applet-shelf-tab[data-current] .applet-shelf-pick::before{content:'';position:absolute;left:50%;bottom:-10px;width:150px;height:34px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(closest-side,#ffe2a0d9,#ffd28259 60%,transparent);z-index:-1}
 #notionWorld .applet-shelf-tab[data-current] .applet-shelf-pick img{filter:drop-shadow(0 8px 8px #28190a80) drop-shadow(0 0 18px #ffdc9699)}
-#notionWorld .applet-shelf-close{display:none;pointer-events:auto;position:absolute;left:calc(var(--shelf-size,48px) / 2 - 14px);bottom:calc(var(--shelf-size,48px) - 20px);width:22px;height:22px;padding:0;border:0;border-radius:11px;background:#281e14bf;color:#fff;cursor:pointer;place-items:center}
-#notionWorld .applet-shelf-close svg{width:12px;height:12px}
-#notionWorld .applet-shelf-tab[data-current] .applet-shelf-close{display:grid}
-#notionWorld :is(.applet-shelf-more,.applet-shelf-new){pointer-events:auto;position:absolute;top:46px;min-width:44px;height:44px;padding:0 12px;border:0;border-radius:22px;display:grid;place-items:center;background:#261a0e8c;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px #ffffff1f;color:#fff;font:600 13px/1 var(--ui-font-ui,system-ui);cursor:pointer}
+#notionWorld :is(.applet-shelf-more,.applet-shelf-new){pointer-events:auto;position:absolute;min-width:44px;height:44px;padding:0 12px;border:0;border-radius:22px;display:grid;place-items:center;background:#261a0e8c;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px #ffffff1f;color:#fff;font:600 13px/1 var(--ui-font-ui,system-ui);cursor:pointer;top:calc(var(--applet-bar-top) - 6px + (var(--applet-bar-height) - 44px) / 2)}
 #notionWorld .applet-shelf-more{left:calc(var(--applet-bar-start) + 52px)}
 #notionWorld .applet-shelf-new{right:var(--applet-shelf-controls,16px);padding:0}
 #notionWorld .applet-shelf-new svg{width:20px;height:20px}

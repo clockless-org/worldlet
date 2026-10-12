@@ -18,15 +18,6 @@ export function enterShelf(state:ShelfState,id:string):ShelfState{
  return state.order.includes(id)?state:{order:[...state.order,id]};
 }
 
-// Closing takes an Applet off the ring; the neighbour after it (or before it, at the end) opens in its place
-// when it was the open one, and nothing when it was the last.
-export function closeOnShelf(state:ShelfState,id:string,current:string|null):{state:ShelfState;next:string|null}{
- const index=state.order.indexOf(id);if(index<0)return {state,next:current};
- const order=state.order.filter(x=>x!==id);
- if(id!==current)return {state:{order},next:current};
- return {state:{order},next:order[index]??order[index-1]??null};
-}
-
 // The ring around the open Applet. `lastUsed` ranks the ones that stay when more than `size` are on it; the rest,
 // most recently used first, are the shelf's "+N". Offsets are signed steps from the middle, balanced on both sides
 // (the extra one of an even count goes left).

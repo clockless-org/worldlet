@@ -2108,7 +2108,7 @@ export function mountNotionWorld(data: World, native: any) {
     const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:themeAppletIcon(r.key)||appLogoSource(r)||''};};
     appletShelf=mountAppletShelf({root,applet:shelfApp,lastUsed:id=>regionLayout.lastUsedAt[id]||0,
      recent:()=>sections.filter(r=>r.entity==='app'&&(regionLayout.lastUsedAt[r.moduleId]||0)>0).sort((a,b)=>(regionLayout.lastUsedAt[b.moduleId]||0)-(regionLayout.lastUsedAt[a.moduleId]||0)).map(r=>r.moduleId),
-     open:id=>visitObject(id),leave:()=>home(),
+     open:id=>visitObject(id),
      // + enters the Browser with its address ready to type, or opens a new tab when the Browser is already open (ui/browser/browser-device.ts).
      newPage:()=>{const inside=current==='app-browser';if(!inside)visitObject('app-browser');requestAnimationFrame(()=>window.dispatchEvent(new CustomEvent('worldlet:browser-navigate',{detail:inside?'new-tab':'address',cancelable:true})));}});
     appletShelf.sync(depth==='object'?current:null);

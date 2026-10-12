@@ -1,7 +1,7 @@
 // The Applet shelf's order (core/applets/shelf.ts) without a page: the open Applet in the middle, one stable ring
-// around it, the ones used longest ago behind "+N", and closing handing over to a neighbour.
+// around it, and the ones used longest ago behind "+N".
 import assert from 'node:assert/strict';
-import {seedShelf,enterShelf,closeOnShelf,shelfRing} from '../core/applets/index.ts';
+import {seedShelf,enterShelf,shelfRing} from '../core/applets/index.ts';
 
 const used:Record<string,number>={a:6,b:5,c:4,d:3,e:2,f:1,g:0};
 const lastUsed=(id:string)=>used[id]??0;
@@ -23,12 +23,4 @@ const ring=shelfRing(full,'g',lastUsed,4);
 assert.deepEqual(ring.visible.map(v=>v.id).sort(),['a','b','c','g'],'the open Applet and the most recently used stay');
 assert.deepEqual(ring.overflow,['d','e','f'],'the rest wait behind +N, most recent first');
 
-let closed=closeOnShelf(state,'b','b');
-assert.deepEqual([closed.state.order,closed.next],[['c','a','d'],'a'],'closing the open Applet opens the one after it');
-closed=closeOnShelf(state,'d','d');
-assert.equal(closed.next,'a','closing the last in the order opens the one before it');
-closed=closeOnShelf(state,'c','d');
-assert.deepEqual([closed.state.order,closed.next],[['b','a','d'],'d'],'closing another Applet keeps the open one');
-closed=closeOnShelf({order:['x']},'x','x');
-assert.deepEqual([closed.state.order,closed.next],[[],null],'closing the only Applet leaves for the World');
-console.log('PASS the Applet shelf keeps one ring with the open Applet in the middle, +N for the rest, and closing opens a neighbour.');
+console.log('PASS the Applet shelf keeps one ring with the open Applet in the middle, +N for the rest.');
