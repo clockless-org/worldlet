@@ -1,7 +1,7 @@
 // Ongoing things' rules (core/tasks/README.md) without a host: what looks like one job carried on, proposing and
 // its limits, decisions, forgetting, names and lines, and how the phone receives kept things and proposals.
 import assert from 'node:assert/strict';
-import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
+import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
 
@@ -203,4 +203,21 @@ assert.equal(ongoingTurnText('[Replying to your previous message: "ok"]\n\nNext:
 assert.equal(ongoingTurnText('[Thread context — unfinished block'),'[Thread context — unfinished block','an unclosed block is kept as written');
 assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
 
+// What the person's own Agent said they handle most (core/agent/agent-profile.ts `things`) becomes their own Applets at once,
+// under the Agent's name for each, from the busiest conversation whose name matches; what they removed stays removed.
+{
+ const brought=[conversation('OpenClaw · Discord · #groceries',{userTurns:20}),conversation('OpenClaw · Discord · #groceries-old',{userTurns:3,last:30}),conversation('OpenClaw · Telegram · Kids school',{userTurns:9}),conversation('OpenClaw · Discord · #random')];
+ const said=[{title:'Kitchen restock',threads:['groceries']},{title:'School runs',threads:['#kids-school','Kids school']},{title:'Taxes',threads:['#taxes']},{title:'',threads:['#random']}];
+ const made=ongoingFromAgent(said,[],brought,now);
+ assert.deepEqual(made.map(t=>[t.title,t.session,t.state]),[['Kitchen restock','OpenClaw · Discord · #groceries','kept'],['School runs','OpenClaw · Telegram · Kids school','kept']],'busiest match, exact or contained; no conversation, no Applet');
+ assert.ok(made.every(t=>t.region&&t.decidedAt===Math.round(now)));
+ assert.equal(readOngoing(JSON.parse(JSON.stringify(made[0])))?.title,'Kitchen restock','its name survives being stored');
+ assert.equal(ongoingApplet(readOngoing(made[0])!).title,'Kitchen restock');
+ const removed=ongoingDecide(made[0],'decline',now);
+ assert.deepEqual(ongoingFromAgent(said,[removed,made[1]],brought,now),[],'removed and already kept ones are left alone');
+ const waiting=ongoingProposal(brought[0],now);
+ assert.deepEqual(ongoingFromAgent(said,[waiting],brought,now).map(t=>[t.id,t.state,t.title]),[[waiting.id,'kept','Kitchen restock'],[made[1].id,'kept','School runs']],'a waiting proposal is kept');
+ const full=Array.from({length:ONGOING_LIMITS.kept},(_,i)=>({...made[1],id:ongoingId('openclaw','x'+i),session:'x'+i}));
+ assert.deepEqual(ongoingFromAgent(said,full,brought,now),[],'never past the kept limit');
+}
 console.log('PASS Ongoing things: what looks like a job, proposing and its limits, themes and the page Fox is asked for, decisions, forgetting, names and lines, kinds and their pages, the phone\'s tiles, things and proposals, and its Tasks and Journal.');

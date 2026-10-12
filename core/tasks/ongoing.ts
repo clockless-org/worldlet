@@ -44,6 +44,9 @@ export interface OngoingThing {
  /** What it is about (core/tasks/kinds.ts): fitness, food, study, money, travel, a project, or general. Told
   * from its name and the person's own messages when it is proposed. */
  kind?:OngoingKindOrGeneral;
+ /** The name the person's own Agent gave the thing when it described what they handle most (core/agent/agent-profile.ts
+  * `things`), shown instead of the conversation's own name. */
+ named?:string;
 }
 
 const DAY=86_400;
@@ -96,7 +99,8 @@ export function readOngoing(value:unknown):OngoingThing|null {
   proposedAt:number(v.proposedAt)??0,decidedAt:number(v.decidedAt),laterUntil:number(v.laterUntil),
   turns:number(v.turns)??0,userTurns:number(v.userTurns)??0,first:typeof v.first==='string'?v.first:'',last:typeof v.last==='string'?v.last:'',
   ...REGIONS.includes(v.region as string)?{region:v.regrouped===true?v.region:({library:'work',travel:'money'} as Record<string,string>)[v.region as string]??v.region,regrouped:true as const}:{},
-  ...isOngoingKind(v.kind)?{kind:v.kind}:{}};
+  ...isOngoingKind(v.kind)?{kind:v.kind}:{},
+  ...typeof v.named==='string'&&clip(v.named,60)?{named:clip(v.named,60),title:clip(v.named,60)}:{}};
 }
 
 /** A proposal waiting for the person now (not put off with Not now). */
@@ -140,6 +144,30 @@ export function ongoingCandidates(things:OngoingThing[],conversations:BroughtCon
 }
 /** Busier and more recent first: the person's messages, worth less the longer the conversation has been quiet. */
 const ongoingScore=(c:BroughtConversation,now:number)=>c.userTurns/(1+Math.max(0,now-seconds(c.last))/(7*DAY));
+
+/** What the person handles most, as their own Agent summarized it from their conversations when setup asked it to
+ * describe itself (owner request 2026-10-12, Kelvin: "根据他的聊天记录，总结一下这个用户他现在日常处理最多的 things，然后我们
+ * 每一个 thing 呢都变成一个 applet"). Each thing names the conversations it happens in; the busiest brought conversation
+ * whose name matches becomes that thing, kept at once under the Agent's name for it, as the person's own Applet. A thing
+ * already kept or removed (declined) is left as it is, so asking again never brings back what the person took out. */
+export function ongoingFromAgent(said:readonly {title:string;threads:readonly string[]}[],things:OngoingThing[],conversations:BroughtConversation[],now:number,textOf?:(c:BroughtConversation)=>string):OngoingThing[] {
+ const plain=(value:string)=>value.toLowerCase().replace(/^[#@]+/,'').replace(/[\s_-]+/g,' ').trim();
+ const matches=(name:string,thread:string)=>{const a=plain(name),b=plain(thread);return !!a&&!!b&&(a===b||(Math.min(a.length,b.length)>=4&&(a.includes(b)||b.includes(a))));};
+ const byId=new Map(things.map(t=>[t.id,t])),used=new Set<string>(),keep:OngoingThing[]=[];
+ let kept=things.filter(t=>t.state==='kept').length;
+ for(const thing of said){
+  const title=clip(thing.title,60);
+  if(!title||kept>=ONGOING_LIMITS.kept)continue;
+  const found=conversations.filter(c=>isMigrationSource(c.source)&&!used.has(ongoingId(c.source,c.session))&&thing.threads.some(thread=>matches(ongoingName(c.source,c.session).title,thread)))
+   .sort((a,b)=>ongoingScore(b,now)-ongoingScore(a,now)||a.session.localeCompare(b.session))[0];
+  if(!found)continue;
+  const id=ongoingId(found.source,found.session),known=byId.get(id);
+  used.add(id);
+  if(known&&known.state!=='proposed')continue;
+  keep.push({...ongoingDecide(known??ongoingProposal(found,now,textOf?.(found)??''),'keep',now),named:title,title});kept++;
+ }
+ return keep;
+}
 
 export type OngoingDecision='keep'|'later'|'decline';
 /** The person's answer to a proposal (or Remove on a kept thing, which is a decline: it is not proposed again). */

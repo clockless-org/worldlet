@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {app,shell} from 'electron';
 import {WorldletError} from '../../files.ts';
-import {AGENT,ANALYTICS,VAULT,type AgentService,type AnalyticsService,type VaultService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,ONGOING,VAULT,type AgentService,type AnalyticsService,type OngoingService,type VaultService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 import {installationRoot,type Profile} from '../../profile.ts';
 import {ExecutionJournal} from './journal.ts';
@@ -511,6 +511,8 @@ export function installAgentRuntime(host:Host){
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
-  async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>host.page.event('worldlet:agent-check',event))});
+  async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);
+   // The things it said the person handles most become Applets once their conversations are brought (modules/tasks).
+   if('profile' in event&&event.profile?.things?.length)host.optional<OngoingService>(ONGOING)?.refresh();})});
  host.onQuit(()=>{endHermesInstall();void standing?.then(tools=>tools.close(),()=>{});return adapter.shutdown();});
 }

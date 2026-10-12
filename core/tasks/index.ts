@@ -10,7 +10,7 @@ export * from './runtime-policy.ts';
 export * from './runtime-report.ts';
 export * from './runtime-tasks.ts';
 export * from './source-checks.ts';
-export {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingCandidates,ongoingDecide,ongoingAgo,ongoingLine,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKindOf} from './ongoing.ts';
+export {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingCandidates,ongoingDecide,ongoingAgo,ongoingLine,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKindOf,ongoingFromAgent} from './ongoing.ts';
 export type {OngoingState,BroughtConversation,OngoingThing,OngoingDecision} from './ongoing.ts';
 export {ONGOING_KINDS,ONGOING_KIND_IDS,isOngoingKind,ongoingKind,ongoingTemplate} from './kinds.ts';
 export type {OngoingKind,OngoingKindOrGeneral,OngoingKindSpec,OngoingTemplate,OngoingTemplateEntry} from './kinds.ts';

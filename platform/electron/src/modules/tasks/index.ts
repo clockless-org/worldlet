@@ -1,9 +1,11 @@
-import {CONVERSATION_ATTENTION,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../core/tasks/index.ts';
+import {CONVERSATION_ATTENTION,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../core/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {ONGOING,WORLD_TOOLS,type OngoingService,type WorldToolsService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 import {installExternalEvents} from './external-events.ts';
 import {installHarnessCalls} from './harness-calls.ts';
+import {readAgentProfile} from '../agent-runtime/agent-profile.ts';
+import {readSelection} from '../agent-runtime/local-harness.ts';
 
 const HOUR=3_600_000;
 
@@ -31,6 +33,11 @@ export function installOngoing(host:Host){
    const ledger=store.ledger();
    const {save,forget}=ongoingRefresh(things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));
    if(save.length||forget.length){store.ledger().saveOngoing(save as any[],forget);changed();}
+   // The things the chosen Agent said the person handles most (core/agent/agent-profile.ts) become their own Applets once
+   // their conversations are here; a removed one stays removed (core/tasks ongoingFromAgent).
+   const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
+   const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60)):[];
+   if(keep.length){store.ledger().saveOngoing(keep as any[]);changed();store.changed();}
   }catch(error){host.diagnostics.record(error,'ongoing');}
   observe();
  }
