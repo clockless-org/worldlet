@@ -127,14 +127,18 @@ The [Theme contract](../../../../themes/CONTRACT.md#registered-backgrounds-and-l
 
 This package update supplies art, metadata, validation and shared transform helpers. Production Applet readers and the custom-Applet picker have not adopted the new registered surfaces yet. The preview below demonstrates HTML alignment and local interactions with fictional data; it is not a live account connection.
 
-## Interactive preview
+## Design mockups and preview
+
+[View all 40 app-specific design mockups](mockups/README.md): 18 applications, six games and 16 generic scenes. Each combines the original background with HTML inside its measured regions. Files, albums, reading layouts, plans, charts and game boards use their own content structures. These are illustrative compositions with fictional data, not completed application implementations.
 
 ```sh
 node scripts/applet-scene-preview.ts
 python3 -m http.server 8787 --bind 127.0.0.1
 ```
 
-Open `/output/applet-scene-preview/` on that local server. Browse the 24 core pairs and 16 generic pairs below the stage, or select a scene. The stage starts with artwork only. Show registration guides to inspect the actual usable rectangle and companion clearance. Existing sample scenes can also show fictional HTML; new scenes intentionally have no placeholder application behavior. Calendar changes weeks, Mail selects letters and opens a reply draft, Notes saves a local session draft, and lists support adding and completing items. All image and HTML regions use the same uniform transform. Narrow views remain a design preview; production should use a readable responsive page when the scene no longer provides sufficient space.
+Open `/output/applet-scene-preview/`. Select a scene or click a gallery image to inspect its HTML composition. Toggle **Background only** to compare the blank plate and **Registration guides** to inspect the usable region. Calendar week navigation, Mail selection/reply drafts, editable Notes, and adding/completing Reminders or shopping items work locally for review. Other application controls are explicitly illustrative. The narrow view is a scaled artwork review, not a production mobile interface.
+
+Export all 40 pictures with `node scripts/applet-scene-mockups.ts`; verify saved pictures with `node scripts/applet-scene-mockups.ts --check`. The exporter verifies image loads and primary-region overflow before writing its manifest.
 
 ## Core scenes
 
