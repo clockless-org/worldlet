@@ -22,8 +22,8 @@ await withBrowser(fileAccess,async browser=>{
    window.addEventListener('worldlet:celebration-sound',e=>w.sky.push({...(e as CustomEvent).detail,at:performance.now()}));
    document.addEventListener('worldlet:celebration-done',()=>{w.celebrationDone=performance.now();},true);
    document.addEventListener('worldlet:setup-complete',()=>{w.devicesBeforeCurtain=document.querySelectorAll('#setupArrivingDevices img').length;});
-   // Entering after setup (owner request 2026-10-12): no fog; the loading screen's painting fades slowly into the live World.
-   document.addEventListener('worldlet:world-opening',()=>{const loader=document.getElementById('worldStartup')!;w.atOpening={fog:!!document.querySelector('.startup-mist'),painting:getComputedStyle(loader,'::after').transitionDuration};});
+   // Entering after setup (owner requests 2026-10-12): no fog; the loading screen, painting and all, fades slowly into the live World.
+   document.addEventListener('worldlet:world-opening',()=>{const loader=document.getElementById('worldStartup')!;w.atOpening={fog:!!document.querySelector('.startup-mist'),painting:getComputedStyle(loader).transitionDuration};});
    new MutationObserver(()=>{if(document.querySelector('.startup-mist'))w.fogSeen=true;}).observe(document,{childList:true,subtree:true});
    // Record the arrival state when the loader goes away; polling afterwards races the landing.
    document.addEventListener('worldlet:world-revealed',()=>{const modules=(document.querySelector('#notionWorld') as any)?.sceneMetrics?.modules||[];w.atReveal={unlocked:modules.filter(m=>m.unlocked).length,celebrations:document.querySelectorAll('.world-celebration').length,targets:modules.filter(m=>document.querySelector('#setupArrivingDevices [data-applet-id="'+m.id+'"]')).map(m=>m.arrivalBounds)};});
@@ -144,10 +144,17 @@ await withBrowser(fileAccess,async browser=>{
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-world-compact-'+platform+'.png')});
    assert.ok(await page.evaluate(()=>{const el=document.getElementById('worldStartup');return el.scrollHeight<=el.clientHeight+1;}),'No scrolling at compact desktop size');
    await page.setViewportSize({width:1280,height:850});
+   // The loading screen's background stays exactly as it is until the World opens (owner request 2026-10-12).
+   const background=()=>page.evaluate(()=>{const l=document.getElementById('worldStartup');if(!l||l.classList.contains('is-opening'))return null;const a=getComputedStyle(l,'::after');return {page:getComputedStyle(l).backgroundImage,painting:getComputedStyle(l,'::before').opacity,cover:a.content==='none'||a.content===''||a.opacity==='0'};});
+   const backgroundBefore=await background();
    await page.getByRole('button',{name:'Enter your world',exact:true}).click();
    await page.getByRole('button',{name:'Entering your world…',exact:true}).waitFor();
-   // The brand and the painting leave as the icons start to change (owner request 2026-10-06).
+   // The brand leaves as the icons start to change (owner request 2026-10-06).
    await page.waitForFunction(()=>document.getElementById('worldStartup')?.classList.contains('is-gathering'));
+   await page.waitForTimeout(950);
+   const backgroundGathering=await background();
+   if(backgroundGathering)assert.deepEqual(backgroundGathering,backgroundBefore,'The background does not change while everything gathers');
+   assert.equal(backgroundBefore?.cover,true,'No painting comes forward over the page');
    assert.ok(await page.evaluate(()=>getComputedStyle(document.querySelector('#worldStartup>.startup-brand')!).transitionProperty.includes('opacity')),'The brand fades while the icons change');
    assert.equal(await page.locator('.setup-primary[aria-busy=true]').count(),1);
   }

@@ -249,14 +249,10 @@
 /* The setup's entrance animation holds its opacity, so it stops before everything else fades (owner request 2026-10-10). */
 .world-startup.is-gathering .startup-setup{animation:none}
 .world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand{opacity:0;transition:opacity .4s}
-/* The World painted behind the page comes forward and fills the screen while everything gathers, so the move into the
-   World never passes through an empty page (owner request 2026-10-11). */
-.world-startup.has-setup::after{content:'';position:absolute;inset:0;z-index:1;background:var(--setup-world-now,var(--setup-world,none)) center 70%/cover no-repeat;opacity:0;pointer-events:none}
-.world-startup.is-gathering::after{opacity:1;transition:opacity .9s ease}
-.world-startup[data-setup-night=dimmed]::after{filter:brightness(.45) saturate(.7) hue-rotate(12deg)}
-/* Enter your world (owner request 2026-10-12): no fog. As the World opens, the loading screen's painting slowly fades
-   away and the live World behind it shows through, while the icons and Fox go on to their own places in it. */
-.world-startup.has-setup.is-opening::before,.world-startup.has-setup.is-opening::after{opacity:0;transition:opacity 2.4s cubic-bezier(.4,0,.2,1)}
+/* Entering the World (owner requests 2026-10-11 and 2026-10-12): no fog, and the loading screen's background stays
+   exactly as it was while everything gathers. Only once the World opens does that page, painting and all, slowly fade
+   away, and the live World behind it shows through while the icons and Fox go on to their own places in it. */
+.world-startup.has-setup.is-opening{background:radial-gradient(ellipse at 50% 40%,var(--brand-paper),var(--brand-surface));opacity:0;transition:opacity 2.4s cubic-bezier(.4,0,.2,1)}
 .world-startup.setup-entering{transition:opacity .7s ease}
-@media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand,.world-startup.is-gathering::after{transition:none}}
+@media(prefers-reduced-motion:reduce){.world-startup.setup-entering,.world-startup.has-setup.is-opening,.world-startup.is-gathering .startup-setup,.world-startup.is-gathering>.startup-brand{transition:none}}
 #setupArrivingDevices{z-index:10001}

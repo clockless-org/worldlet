@@ -338,7 +338,6 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   if(signature===matterSignature)return;
   matterSignature=signature;tracker.hidden=false;trackerList.replaceChildren();
   const matterRow=m=>{const b=taskRow({title:m.actionTitle,objective:m.context,label:m.fullAction+' · '+m.title,active:s.attentionItemId?m.worldItemId===s.attentionItemId:m.active,state:m.state,when:m.when,run:()=>focusMatter(m.id)});b.title=[m.fullAction,m.fullContext].filter(Boolean).join(' · ');b.classList.add('world-matter');if(m.worldItemId===s.attentionItemId&&m.worldItemId!==previousSelection)b.classList.add('world-matter-selecting');if(matterArrivals.has(m.id)){b.classList.add('world-matter-arriving');b.style.animationDelay=-(arrivalNow-matterArrivals.get(m.id))+'ms';}b.dataset.taskId=m.id;if(m.worldItemId)b.dataset.worldItemId=m.worldItemId;b.dataset.matterState=m.state;b.dataset.attentionLevel=String(attentionLevel(m));b.setAttribute("aria-description",(m.state==="event"?"Urgency":"Importance")+" level "+attentionLevel(m)+" of 5");const mark=b.querySelector('.world-task-marker');if(mark){mark.innerHTML=attentionIcon(m.state,m.requiresChoice,m.priority);mark.className='matter-icon';}return b;};
-  // The guided introduction names all three groups; ordinary empty groups stay quiet.
   const groupSection=(state,title,rows)=>{
    const section=el('section','world-task-group');section.dataset.group=state;section.setAttribute('aria-label',title);
    if(title){const heading=el('h2','world-task-heading');heading.append(el('span','',title));section.append(heading);}
@@ -381,7 +380,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
    const merged=[...group];
    if(state==='event')for(const m of [...ownItems].sort((a,b)=>startOf(a)-startOf(b))){const at=merged.findIndex(x=>startOf(x)>startOf(m));merged.splice(at<0?merged.length:at,0,m);}
    const rows=merged.map(m=>m.id.startsWith('calendar:')?ownRow(m):matterRow(m));
-   if(!rows.length&&!extra.length&&!introducing)continue;
+   // All three groups always stand, empty or not (owner request 2026-10-12), so the Center reads the same every day.
    trackerList.append(groupSection(state,title,[...rows,...extra.map(proposalRow)]));
   }
   const showLater=()=>{

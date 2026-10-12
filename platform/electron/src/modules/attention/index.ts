@@ -26,6 +26,7 @@ export function installAttention(host:Host){
   startOnboardingMailCheck:()=>center.startOnboardingMailCheck(),
   observeWeather:value=>center.observeWeather(value),
   observeConversations:records=>center.observeConversations(records),
+  seedFromAgent:entries=>center.seedFromAgent(entries),
   runtimeTaskReport:()=>center.runtimeTaskReport(),
   cancelProvider:provider=>center.cancelProvider(provider),
   finishTurn:(turn,cancelled)=>center.finishTurn(turn,cancelled)
