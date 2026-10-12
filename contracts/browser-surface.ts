@@ -1,5 +1,20 @@
 /** Host protocol v1: coordinates are CSS pixels relative to the World viewport. */
 export interface SurfaceRect {x:number;y:number;width:number;height:number}
+/** Narrow paper overlap in CSS pixels, sampled along each side (clockwise). */
+export interface BrowserPaperProfile {top:readonly number[];right:readonly number[];bottom:readonly number[];left:readonly number[]}
+/** A packaged painting projected relative to the native page; only its narrow edge is drawn over the page. */
+export interface BrowserPaperEdge {asset:string;image:SurfaceRect;profile:BrowserPaperProfile}
+export function readBrowserPaperProfile(input:unknown):BrowserPaperProfile {
+ const value=object(input);keys(value,['top','right','bottom','left']);
+ for(const side of ['top','right','bottom','left'])if(!Array.isArray(value[side])||(value[side] as unknown[]).length<2||(value[side] as unknown[]).length>64||!(value[side] as unknown[]).every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=3))throw Error('Invalid browser paper edge profile');
+ return {top:[...value.top as number[]],right:[...value.right as number[]],bottom:[...value.bottom as number[]],left:[...value.left as number[]]};
+}
+export function readBrowserPaperEdge(input:unknown):BrowserPaperEdge {
+ const value=object(input);keys(value,['asset','image','profile']);
+ if(typeof value.asset!=='string'||value.asset.length>512||!/^theme-assets\/[a-z0-9-]+\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:webp|png|jpg)$/.test(value.asset))throw Error('Invalid browser paper edge asset');
+ const image=readRect(value.image);if(image.width<=0||image.height<=0||image.width>32768||image.height>32768||Math.abs(image.x)>32768||Math.abs(image.y)>32768)throw Error('Invalid browser paper image bounds');
+ return {asset:value.asset,image,profile:readBrowserPaperProfile(value.profile)};
+}
 /** How many website pages stay live at once and how many Fox browser tasks may drive pages at the
  * same time (core/browser/budget.ts). Hosts send it with their capabilities (`browserBudget`). */
 export interface BrowserBudget {livePages:number;foxTasks:number}
@@ -49,8 +64,8 @@ export interface BrowserFoxGlow {label:string;colors:string[];turnSeconds:number
  */
 export interface BrowserFoxCopy {rect:SurfaceRect;page:SurfacePageSize}
 export interface BrowserSurfaceBodies {
- browserShow:{rect:SurfaceRect;platform:string;url?:string;applet?:string;resume?:boolean;hold?:boolean;live?:string[];fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean;copy?:BrowserFoxCopy};
- browserLayout:{rect:SurfaceRect;fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean;copy?:BrowserFoxCopy;takeCopy?:boolean};
+ browserShow:{rect:SurfaceRect;paperEdge?:BrowserPaperEdge;platform:string;url?:string;applet?:string;resume?:boolean;hold?:boolean;live?:string[];fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean;copy?:BrowserFoxCopy};
+ browserLayout:{rect:SurfaceRect;paperEdge?:BrowserPaperEdge;fox?:BrowserFoxGlow;page?:SurfacePageSize;press?:boolean;copy?:BrowserFoxCopy;takeCopy?:boolean};
  browserHide:{live?:string[]};
  browserPip:{applet:string;rect?:SurfaceRect;live?:string[]};
 }
@@ -113,7 +128,7 @@ function readRect(input:unknown):SurfaceRect {
 export function readBrowserSurfaceRequest(input:unknown):BrowserSurfaceRequest {
  const request=object(input),action=request.action;
  if(!isBrowserSurfaceAction(action))throw Error('Unknown browser surface action');
- keys(request,action==='browserShow'?['action','rect','platform','url','applet','resume','hold','live','fox','page','press','copy']:action==='browserLayout'?['action','rect','fox','page','press','copy','takeCopy']:action==='browserPip'?['action','applet','rect','live']:['action','live']);
+ keys(request,action==='browserShow'?['action','rect','platform','url','applet','resume','hold','live','fox','page','press','copy','paperEdge']:action==='browserLayout'?['action','rect','fox','page','press','copy','takeCopy','paperEdge']:action==='browserPip'?['action','applet','rect','live']:['action','live']);
  const kept=request.live!==undefined?{live:live(request.live)}:{};
  if(action==='browserHide')return {action,...kept};
  if(action==='browserPip'){
@@ -121,6 +136,8 @@ export function readBrowserSurfaceRequest(input:unknown):BrowserSurfaceRequest {
   return {action,applet:request.applet as string,...request.rect!==undefined?{rect:readRect(request.rect)}:{},...kept};
  }
  const rect=readRect(request.rect);
+ const paper=request.paperEdge===undefined?{}:{paperEdge:readBrowserPaperEdge(request.paperEdge)};
+ if(request.paperEdge!==undefined&&(request.page!==undefined||request.press))throw Error('Scaled pages have no paper edge');
  const fox=request.fox===undefined?{}:{fox:readFox(request.fox)};
  if(request.press!==undefined&&typeof request.press!=='boolean')throw Error('Invalid browser surface press');
  if(request.press&&request.page===undefined)throw Error('Only a scaled page takes presses');
@@ -130,7 +147,7 @@ export function readBrowserSurfaceRequest(input:unknown):BrowserSurfaceRequest {
  if(action==='browserLayout'){
   if(request.takeCopy!==undefined&&typeof request.takeCopy!=='boolean')throw Error('Invalid browser surface copy');
   if(request.takeCopy&&request.copy!==undefined)throw Error('A taken copy is no longer a copy');
-  return {action,rect,...fox,...scaled,...copy,...request.takeCopy!==undefined?{takeCopy:request.takeCopy as boolean}:{}};
+  return {action,rect,...paper,...fox,...scaled,...copy,...request.takeCopy!==undefined?{takeCopy:request.takeCopy as boolean}:{}};
  }
  if(typeof request.platform!=='string'||!request.platform||request.platform.length>128)throw Error('Invalid browser surface platform');
  if(request.url!==undefined&&(typeof request.url!=='string'||request.url.length>32768))throw Error('Invalid browser surface URL');
@@ -140,5 +157,5 @@ export function readBrowserSurfaceRequest(input:unknown):BrowserSurfaceRequest {
  if(request.hold!==undefined&&(typeof request.hold!=='boolean'||request.hold&&(!request.resume||request.url===undefined)))throw Error('Invalid browser surface hold');
  return {action,rect,platform:request.platform,...request.url!==undefined?{url:request.url as string}:{},
   ...request.applet!==undefined?{applet:request.applet as string}:{},...request.resume!==undefined?{resume:request.resume as boolean}:{},...request.hold!==undefined?{hold:request.hold as boolean}:{},
-  ...kept,...fox,...scaled,...copy};
+  ...kept,...paper,...fox,...scaled,...copy};
 }

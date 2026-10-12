@@ -12,6 +12,8 @@ import {pageEngine,sharedEngine,sharedEnginePid,surfacePreload} from './engine/p
 import {readMemory,refreshMemory} from './memory.ts';
 import type {WebPage} from './web-page.ts';
 import {AgentBrowser,type AgentBrowserEnvironment} from './agent.ts';
+import {PaperEdge} from './paper-edge.ts';
+import type {BrowserPaperEdge} from '../../../../../contracts/browser-surface.ts';
 import {FoxGlow,glowStyle,type GlowStyle} from './glow.ts';
 import {PressOverlay,TaskWindow} from './task-window.ts';
 import {BrowserHistory,historyDestination} from './history.ts';
@@ -31,7 +33,7 @@ import {GAME_REVIEW_APPLET} from '../../../../../core/games/index.ts';
 import {busyWith} from '../../host/busy.ts';
 
 type Kept={view:WebPage;platform:string;requestedURL:URL|null};
-type Layout={rect:Row;fox?:Row;page?:Row;press:boolean;copy?:Row};
+type Layout={rect:Row;paperEdge?:BrowserPaperEdge;fox?:Row;page?:Row;press:boolean;copy?:Row};
 type Pip=Kept&{key:string;applet:string;press:WebContentsView};
 /** Fox's copy of the visible page in the panel's corner (foxCopyPlacement), its overlay and its own size. */
 type Copy={view:CefPageView;overlay:PressOverlay;page:{width:number;height:number}};
@@ -62,6 +64,7 @@ export class BrowserDevice {
  readonly surface:Surface;
  private browser:WebPage|null=null;
  private glow=new FoxGlow();
+ private paperEdge=new PaperEdge(()=>this.webRoot,error=>this.host.diagnostics.record(error,'browserPaperEdge'));
  private timer:NodeJS.Timeout|null=null;
  private history:BrowserHistory|null=null;
  private activity:ActivityRecorder;
@@ -165,8 +168,11 @@ export class BrowserDevice {
   if(this.pagesScope&&(this.pagesScope!==this.scope||this.pagesWindow!==window))this.stop();
   if(window&&this.watchedWindow!==window){
    this.watchedWindow=window;
-   const follow=()=>{if(this.watchedWindow===window&&this.browser&&this.glow.isShowing){const screen=this.surface.toScreen(this.browser.frameRect());if(screen)this.glow.place(screen);}};
+   const follow=()=>{if(this.watchedWindow===window&&this.browser){const screen=this.surface.toScreen(this.browser.frameRect());if(screen){this.glow.place(screen);this.paperEdge.place(screen);}}};
    window.on('move',follow);window.on('resize',follow);
+   const hidePaper=()=>{if(this.watchedWindow===window)this.paperEdge.hide();};
+   const restorePaper=()=>{const layout=this.worldLayout;if(this.watchedWindow===window&&this.browser&&!this.browser.hidden&&!this.away&&layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy,false,layout.paperEdge);};
+   window.on('hide',hidePaper);window.on('minimize',hidePaper);window.on('show',restorePaper);window.on('restore',restorePaper);
   }
   return window;
  }
@@ -259,7 +265,7 @@ export class BrowserDevice {
    this.pageIssue=null;this.requestedURL=destination;this.browser.load(destination.href);
   }
   this.browser.raise();
-  this.layout(body.rect,body.fox,body.page,body.press,body.copy);this.browser.setHidden(false);this.status();
+  this.layout(body.rect,body.fox,body.page,body.press,body.copy,false,body.paperEdge);this.browser.setHidden(false);this.status();
   const focused=this.focusState.get(this.browser);if(focused)this.emit({...focused,platform:this.platform});
   this.startTimer();
  }
@@ -368,6 +374,7 @@ export class BrowserDevice {
  private bind(view:WebPage){
   const visible=()=>this.browser===view;
   const recording=()=>this.store.writable&&!this.sample;
+  view.onFullscreen=()=>{if(!visible())return;const layout=this.worldLayout;if(view.isFullscreen)this.paperEdge.hide();else if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy,false,layout.paperEdge);};
   // page_load_timing: from the page's document starting to load to it loaded or failed; buckets and the engine only.
   // Both engines count the main frame only (isLoadingMainFrame): an iframe loading after the document finished would run
   // until the next navigation. CEF sends its loading state false only after every load end, so a CEF page that stops
@@ -465,11 +472,11 @@ export class BrowserDevice {
   return !blocked.length;
  };
  private screenRect(frame:Rectangle){return this.surface.toScreen(frame);}
- layout(rect:Row,fox?:Row,page?:Row,press=false,copy?:Row,takeCopy=false){
+ layout(rect:Row,fox?:Row,page?:Row,press=false,copy?:Row,takeCopy=false,paperEdge?:BrowserPaperEdge){
   // While the World is away, the page keeps its window beside the Companion; layouts only say
   // whether Fox is working.
   if(this.away){this.taskGlow(glowStyle(fox));return;}
-  this.worldLayout={rect,fox,page,press,copy};
+  this.worldLayout={rect,fox,page,press,copy,paperEdge};
   // Fox's copy lasts while layouts carry it; taken, it becomes the visible page.
   if(takeCopy)this.takeCopy();else if(!copy)this.closeCopy();
   const browser=this.browser,frame=this.surface.toParent(rect);
@@ -478,6 +485,11 @@ export class BrowserDevice {
   const size=this.pageSize(page);
   browser.setFrame(frame,size?{width:size.width,height:size.height}:undefined,!!size&&press===true);
   this.pointerScale=size&&size.width>0?frame.width/size.width:1;
+  // Paper geometry arrives in World CSS pixels; project it with the same scale as the native page.
+  const scale=rect.width>0?frame.width/rect.width:1;
+  const scaled=paperEdge&&!size&&!browser.isFullscreen?{asset:paperEdge.asset,image:{x:paperEdge.image.x*scale,y:paperEdge.image.y*scale,width:paperEdge.image.width*scale,height:paperEdge.image.height*scale},
+   profile:Object.fromEntries(Object.entries(paperEdge.profile).map(([side,values])=>[side,values.map(n=>Math.min(3,n*scale))])) as unknown as BrowserPaperEdge['profile']}:undefined;
+  this.paperEdge.apply(scaled,this.surface.window(),this.screenRect(frame));
   const style=glowStyle(fox),copied=copy?this.showCopy(copy,style):null;
   // Fox's glow, pointer and status go with Fox's copy; the person's page carries none of them.
   if(copied){this.pointerScale=copied.width/this.copy!.page.width;this.applyGlow(style,copied);}
@@ -593,7 +605,7 @@ export class BrowserDevice {
   if(view instanceof CefPageView&&parent)view.moveTo(parent,()=>this.surface.window());
   this.task?.hide();this.dropGlow();
   const layout=this.worldLayout;
-  if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press);
+  if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy,false,layout.paperEdge);
  }
  /** Every layout carries the current glow; absent means Fox is not driving the page. */
  private applyGlow(style:GlowStyle|null,frame:Rectangle){
@@ -607,7 +619,7 @@ export class BrowserDevice {
   this.close();this.endPictureInPicture();
   for(const page of this.parked.values())page.view.close();
   this.parked.clear();this.held.clear();this.pagesScope=null;this.pagesWindow=null;this.stopMemoryWatch();
-  this.away=false;this.taskSize=null;this.taskFox=null;this.worldLayout=null;this.task?.destroy();this.task=null;
+  this.away=false;this.taskSize=null;this.taskFox=null;this.worldLayout=null;this.task?.destroy();this.task=null;this.paperEdge.close();
  }
  private close(){
   this.closeCopy();this.endTranscript();
@@ -616,7 +628,7 @@ export class BrowserDevice {
   this.browser=null;this.requestedURL=null;this.pageIssue=null;this.pageKey=null;this.videoPlaying=false;
  }
  // Fox's glow belongs to the visible page; a kept or closed page leaves without it.
- private dropGlow(){this.glow.hide();}
+ private dropGlow(){this.glow.hide();this.paperEdge.hide();}
  private park(live?:string[]){
   this.closeCopy();this.endTranscript();
   const view=this.browser,key=this.pageKey;
@@ -817,7 +829,7 @@ export class BrowserDevice {
   this.held.delete(view);view.close();
   const next=this.create(url,engine,early);
   this.browser=next;this.pageIssue=null;this.videoPlaying=false;this.bind(next);next.raise();
-  if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy);
+  if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy,false,layout.paperEdge);
   next.setHidden(false);this.status();
  }
  private videoStopped(){if(!this.videoPlaying)return;this.videoPlaying=false;this.emit({phase:'video',platform:this.platform,playing:false});}

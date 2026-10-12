@@ -1,3 +1,4 @@
+import type {SurfaceRect} from '../../../contracts/browser-surface.ts';
 import {mountAppletScene,type AppletScene} from './applet-scene.ts';
 /**
  * A theme scene behind the World's content panel (a website's page, a game's board): the painting frames the panel and
@@ -15,5 +16,5 @@ export function createPanelScene(content:HTMLElement){
   scene=mountAppletScene(host,key,{shell:world});scene.primary.element.setAttribute('aria-hidden','true');
   shown=key;world.dataset.panelScene=key;
  }
- return {sync,destroy:()=>sync('')};
+ return {sync,paperEdge:(rect:SurfaceRect)=>scene?.paperEdge(rect),destroy:()=>sync('')};
 }

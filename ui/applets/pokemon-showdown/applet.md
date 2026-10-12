@@ -8,6 +8,8 @@ A website Applet in the Games area (owner request 2026-10-04). It opens `https:/
 
 The Village theme registers its dedicated blue timber clubhouse plate under `appletScenes["pokemon-showdown"]`. The shared browser panel follows the measured blank board; the right-hand Showdown cabinet and pennant remain visible beside it. This replaces the generic Random game scene for this Applet only. The live website runs in the existing isolated native browser surface, with its own team builder and battle controls. The concept's illustrated team roster is a visual study, not a replacement battle client.
 
+The original paper rim and blue frame stay in the background. A theme-authored `webEdge` adds at most 3 pixels of original paper texture over the website seam; the right edge is thinner to preserve the scrollbar. This foreground takes no input and does not change the original website.
+
 Source artwork and measured regions are recorded in `resources/styles/builtin/references/registered-scenes/catalog.json` under `brands`; core Applets retain their separate 24-entry collection.
 
 ## Runtime

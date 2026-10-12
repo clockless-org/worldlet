@@ -108,6 +108,8 @@ export class CefPageView {
  makeDriver:((view:CefPageView)=>AgentLink)|null=null;
  onNavigation=()=>{};
  onChange=()=>{};
+ onFullscreen=()=>{};
+ get isFullscreen(){return this.fullscreen;}
  onLoaded=()=>{};
  onError=(_code:number)=>{};
  onActivityEnd=(_reason:string)=>{};
@@ -233,7 +235,7 @@ export class CefPageView {
     }
     if(active){this.failPending();this.onActivityEnd('unavailable');this.onError(-2);}
     break;
-   case 'fullscreen':if(active){this.fullscreen=!!message.on;this.place();}break;
+   case 'fullscreen':if(active){this.fullscreen=!!message.on;this.place();this.onFullscreen();}break;
    case 'popup':{
     const before=this.hasPopup;
     this.track(message.id,String(message.url??''));

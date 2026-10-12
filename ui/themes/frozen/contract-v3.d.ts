@@ -50,6 +50,13 @@ export interface ThemeArtifact {
 /** Geometry measured on the final background, in normalized image coordinates (x, y, width, height).
  * These are facts about painted surfaces, not viewport CSS or authority over host controls. */
 export interface ThemeSceneRegistration {
+    /** Optional paper overlap along top/right/bottom/left, clockwise source-pixel samples, at most 3 px deep. */
+    webEdge?: {
+        top: readonly number[];
+        right: readonly number[];
+        bottom: readonly number[];
+        left: readonly number[];
+    };
     imageSize: readonly [number, number];
     /** Hash of the encoded picture. Re-measure after changing it. */
     sha256: string;

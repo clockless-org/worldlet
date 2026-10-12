@@ -51,6 +51,8 @@ export class PageView {
  makeDriver:((view:PageView)=>AgentLink)|null=null;
  onNavigation=()=>{};
  onChange=()=>{};
+ onFullscreen=()=>{};
+ get isFullscreen(){return this.fullscreen;}
  onLoaded=()=>{};
  onError=(_code:number)=>{};
  onActivityEnd=(_reason:string)=>{};
@@ -143,8 +145,8 @@ export class PageView {
    this.failPending();this.onActivityEnd('unavailable');this.onError(code);
   });
   contents.on('render-process-gone',()=>{if(active()){this.failPending();this.onActivityEnd('unavailable');this.onError(-2);}});
-  contents.on('enter-html-full-screen',()=>{if(active()){this.fullscreen=true;this.place();}});
-  contents.on('leave-html-full-screen',()=>{this.fullscreen=false;this.place();});
+  contents.on('enter-html-full-screen',()=>{if(active()){this.fullscreen=true;this.place();this.onFullscreen();}});
+  contents.on('leave-html-full-screen',()=>{this.fullscreen=false;this.place();this.onFullscreen();});
   // Main-frame and frame navigations stay on public pages; a popup may start blank. An http:// page on a
   // public host opens at its https:// address instead (rules.ts httpsUpgrade), once per address, as the engine does.
   let upgraded='',upgradedAt=0;
