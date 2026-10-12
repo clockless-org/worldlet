@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {chipFamily,deviceClass,memoryBucket,stallTask} from '../core/diagnostics/index.ts';
+import {chipFamily,deviceClass,localDataDimensions,memoryBucket,rowBucket,sizeBucket,stallTask} from '../core/diagnostics/index.ts';
 import {busyWith,onStall,watchMainStalls,type Stall} from '../platform/electron/src/host/busy.ts';
 
 // Device class: the chip family and a memory band, never the model string or the exact size.
@@ -40,3 +40,10 @@ assert.equal(stalls.length,2,'a hidden app is not watched (the system may hold i
 stop();
 assert.throws(()=>busyWith('failing',()=>{throw Error('x');}));
 console.log('PASS: device class is coarse; main-process stalls are reported by task code name, once each, only while the app is in front');
+
+// Local data sizes: bands only, `none` for an Agent that is not here.
+assert.deepEqual([0,5e7,5e8,1.5e9,3.5e9,7e9,19e9,30e9,6e10].map(sizeBucket),['none','under_100mb','100mb_1gb','1_2gb','2_5gb','5_10gb','10_20gb','20_50gb','over_50gb']);
+assert.deepEqual([0,50_000,523_676,2e6,2e7].map(rowBucket),['under_10k','10k_100k','100k_1m','1m_10m','over_10m']);
+assert.deepEqual(localDataDimensions({worldBytes:3.5e9,recordingBytes:1.98e9,eventRows:523_676,hermesBytes:19e9,openclawBytes:null,diskFreeBytes:2e11}),
+ {world_db_size:'2_5gb',recordings_size:'1_2gb',history_rows:'100k_1m',hermes_db_size:'10_20gb',openclaw_db_size:'none',disk_free:'over_50gb'});
+console.log('PASS: local data sizes are reported in bands');

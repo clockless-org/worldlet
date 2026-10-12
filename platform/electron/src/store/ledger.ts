@@ -1384,7 +1384,7 @@ export class WorldLedger {
  pruneWeb({rawKinds,rawBefore,maxBytes}:{rawKinds:string[];rawBefore:number;maxBytes:number}):number {
   this.ensureWeb();
   const kinds=rawKinds.map(()=>'?').join(',');
-  let removed=0;
+  let removed=0,counted=0;
   try{
    this.transaction(()=>{
     const drop=(where:string,...values:any[])=>{
@@ -1402,10 +1402,18 @@ export class WorldLedger {
      bytes-=oldest.reduce((sum,row)=>sum+Number(row.n),0);
     }
     this.run('DELETE FROM web_visits WHERE NOT EXISTS (SELECT 1 FROM web_records r WHERE r.visit=web_visits.id)');
+    counted=Math.max(0,bytes);
    });
+   this.recordingBytes=counted;
   }catch{throw new WorldletError('Could not tidy the browsing recordings.');}
   return removed;
  }
+ /** The recordings' size in bytes, from each row's header (octet_length reads no recorded body), as the last tidy
+  * (`pruneWeb`, a minute after start and hourly) counted it; a cold disk still takes a second to walk the headers. */
+ private recordingBytes:number|null=null;
+ webRecordBytes():number {this.ensureWeb();return this.recordingBytes??=Number(this.all('SELECT coalesce(sum(octet_length(body)),0) AS n FROM web_records')[0]?.n??0);}
+ /** How many events the World has written, deleted ones included (the newest sequence number). */
+ eventRows():number {return Number(this.all('SELECT coalesce(max(seq),0) AS n FROM entries')[0]?.n??0);}
  /** The recorded sites, most recently visited first, with how many visits each holds. */
  webSites():{site:string;visits:number;lastAt:number}[] {
   this.ensureWeb();
