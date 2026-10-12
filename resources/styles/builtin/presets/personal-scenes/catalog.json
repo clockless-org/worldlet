@@ -62,10 +62,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.07,
-              0.18,
-              0.42,
-              0.46
+              0.061005,
+              0.127524,
+              0.438397,
+              0.797024
             ],
             "material": "paper"
           }
@@ -77,7 +77,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a bright village wellness courtyard beside an apple orchard, a low sage-green analog body scale and neatly rolled measuring tape on a built-in stone ledge at upper right, a linen towel, rounded apple trees and low stone planters around the edges, broad pale sandstone paving on the left"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a bright village wellness courtyard beside an apple orchard, a low sage-green analog body scale and neatly rolled measuring tape on a built-in stone ledge at upper right, a linen towel, rounded apple trees and low stone planters around the edges, broad pale sandstone paving on the left",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Weight balance background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x7.0% through x49.0% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Weight balance-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "meal-planner",
@@ -103,10 +107,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.093,
-              0.23,
-              0.42,
-              0.49
+              0.076555,
+              0.127524,
+              0.448565,
+              0.803401
             ],
             "material": "paper"
           }
@@ -118,7 +122,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a semi-open village summer kitchen facing vegetable beds, cream plaster wall and pale limestone preparation counter filling the left, warm terracotta roof above, a small seasonal produce basket, ceramic bowl and copper cooking pot grouped on shelving at upper right, herbs and runner beans at the margins"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a semi-open village summer kitchen facing vegetable beds, cream plaster wall and pale limestone preparation counter filling the left, warm terracotta roof above, a small seasonal produce basket, ceramic bowl and copper cooking pot grouped on shelving at upper right, herbs and runner beans at the margins",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Meal planner background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x9.3% through x51.3% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Meal planner-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "fitness",
@@ -136,7 +144,7 @@
       },
       "composition": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
         "regions": [
@@ -144,10 +152,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.235,
-              0.435,
-              0.39
+              0.074207,
+              0.144527,
+              0.452424,
+              0.78746
             ],
             "material": "paper"
           }
@@ -159,7 +167,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: an outdoor village exercise lawn with a clay running track curving at the far edge, broad quiet pale packed-earth training terrace on the left, a timber equipment rack at upper right holding a teal kettlebell and rolled rust-orange mat, meadow flowers and chestnut trees around the perimeter"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: an outdoor village exercise lawn with a clay running track curving at the far edge, broad quiet pale packed-earth training terrace on the left, a timber equipment rack at upper right holding a teal kettlebell and rolled rust-orange mat, meadow flowers and chestnut trees around the perimeter",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Increase only left cream-board usable HEIGHT to about 80%; lower green timber crossbar to bottom image edge, preserving board width, natural paper, garden sports field, and equipment."
+      }
     },
     {
       "id": "sleep",
@@ -185,10 +197,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.16,
-              0.48,
-              0.4
+              0.078947,
+              0.144527,
+              0.502392,
+              0.794899
             ],
             "material": "paper"
           }
@@ -200,7 +212,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village sleeping porch at blue hour, pale quiet limewashed wall and empty linen-covered daybed surface on the left, an indigo quilt, crescent-shaped bedside lantern and lavender pot at upper right, open shutters showing a dark blue orchard and a few stars, warm gentle lamplight"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village sleeping porch at blue hour, pale quiet limewashed wall and empty linen-covered daybed surface on the left, an indigo quilt, crescent-shaped bedside lantern and lavender pot at upper right, open shutters showing a dark blue orchard and a few stars, warm gentle lamplight",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Sleep & recovery background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x9.0% through x57.0% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Sleep & recovery-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "travel",
@@ -226,10 +242,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.11,
-              0.21,
-              0.47,
-              0.56
+              0.114234,
+              0.146652,
+              0.435407,
+              0.735388
             ],
             "material": "paper"
           }
@@ -241,7 +257,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a charming small countryside railway station forecourt, broad pale stone plaza on the left and station facade near the upper edge, a teal trunk, compass and rolled map at the upper right beside a luggage cart, small cream-and-green train visible beyond a low fence, flower pots and a timber canopy, no bridge"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a charming small countryside railway station forecourt, broad pale stone plaza on the left and station facade near the upper edge, a teal trunk, compass and rolled map at the upper right beside a luggage cart, small cream-and-green train visible beyond a low fence, flower pots and a timber canopy, no bridge",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Travel planner background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x11.0% through x58.0% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Travel planner-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "outdoor",
@@ -267,10 +287,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.195,
-              0.48,
-              0.49
+              0.089713,
+              0.146652,
+              0.452153,
+              0.788523
             ],
             "material": "paper"
           }
@@ -282,7 +302,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village woodland trailhead and small lakeside campsite, broad pale sandy clearing on the left, a coral backpack and rolled sage mat on a timber bench at upper right, small canvas tent farther behind, rounded pines and reeds around the edges, no bridge and no dramatic mountains"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village woodland trailhead and small lakeside campsite, broad pale sandy clearing on the left, a coral backpack and rolled sage mat on a timber bench at upper right, small canvas tent farther behind, rounded pines and reeds around the edges, no bridge and no dramatic mountains",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Precise local geometry correction to this Worldlet Village outdoor background. KEEP the original WIDTH and horizontal edges of the main left blank panel, same style and entire right-side identity scenery. Increase actual BLANK INTERIOR HEIGHT: top paper at8% canvas height, bottom paper at96%; bottom physical frame at98%, almost touching bottom edge. Remove the unused floor/counter/table space below the left panel and fill with its tall blank paper. Remove ALL flowers, foliage, plants, furniture, tables, cloth, cups, lamps and other props overlapping any part of this main blank panel, including upper-left and bottom-left corners and bottom-right edge. The complete rectangular content surface MUST BE CLEAR, no overlaps anywhere, no false perspective, subtle low contrast texture. Props can remain OUTSIDE its border, especially the right side of the image. Do not widen the panel, no changes to brand logos/right scene/secondary cards outside the panel. No text or UI. Paper should be taller than this reference; bottom frame nearly touches canvas bottom and no ground strip underneath it. Landscape canvas same size/aspect ratio."
+      }
     },
     {
       "id": "shopping",
@@ -308,10 +332,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.083,
-              0.192,
-              0.5,
-              0.51
+              0.058014,
+              0.162593,
+              0.547249,
+              0.765143
             ],
             "material": "paper"
           }
@@ -323,7 +347,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village farmers market before opening, quiet broad cream cobblestone market square on the left, small striped sage-and-cream awning at upper right over a produce stall with carrots, bread and woven baskets, terracotta pots and low cottages at the distant edge"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village farmers market before opening, quiet broad cream cobblestone market square on the left, small striped sage-and-cream awning at upper right over a produce stall with carrots, bread and woven baskets, terracotta pots and low cottages at the distant edge",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Precise local geometry correction to this Worldlet Village shopping background. KEEP the original WIDTH and horizontal edges of the main left blank panel, same style and entire right-side identity scenery. Increase actual BLANK INTERIOR HEIGHT: top paper at8% canvas height, bottom paper at96%; bottom physical frame at98%, almost touching bottom edge. Remove the unused floor/counter/table space below the left panel and fill with its tall blank paper. Remove ALL flowers, foliage, plants, furniture, tables, cloth, cups, lamps and other props overlapping any part of this main blank panel, including upper-left and bottom-left corners and bottom-right edge. The complete rectangular content surface MUST BE CLEAR, no overlaps anywhere, no false perspective, subtle low contrast texture. Props can remain OUTSIDE its border, especially the right side of the image. Do not widen the panel, no changes to brand logos/right scene/secondary cards outside the panel. No text or UI. Paper should be taller than this reference; bottom frame nearly touches canvas bottom and no ground strip underneath it. Landscape canvas same size/aspect ratio."
+      }
     },
     {
       "id": "budget",
@@ -349,10 +377,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.14,
-              0.495,
-              0.5
+              0.078947,
+              0.146652,
+              0.517344,
+              0.751328
             ],
             "material": "paper"
           }
@@ -364,7 +392,11 @@
           0.38
         ]
       },
-      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village cooperative counting-house veranda, calm cream plaster wall and wide pale oak accounting desk across the left, small wooden savings box, brass coins and closed ledger grouped on an upper-right shelf, arched opening onto a quiet market lane, green shutters and restrained warm brass details"
+      "previousBackgroundPrompt": "Create one production-ready 16:9 landscape background plate, stylized-concept. Reference is the actual Worldlet Village world map; match its softly painted rounded 3D illustration, simplified sculpted foliage, cream stone, warm wood, cheerful sage/olive greens and friendly proportions. NOT photography or hyperrealistic, no fine photo noise. Close immersive eye-level scene that belongs to this same village. Layout constraint: left 5-62% width, 17-87% height is a large calm low-detail area suitable behind real HTML content; keep this part coherent physical architecture, not a pasted UI card. Upper-right 68-94% width carries recognizable functional props, lower right 69-96% width, 51-95% height stays uncluttered for a companion and speech interface. Rich attractive environmental detail around the perimeter. Do not paint any person, animal, companion, text, numbers, logo, controls, applet icons, cards with content, charts, UI, border, watermark. Do not repeat river bridges or mountain panoramas. SCENE: a village cooperative counting-house veranda, calm cream plaster wall and wide pale oak accounting desk across the left, small wooden savings box, brass coins and closed ledger grouped on an upper-right shelf, arched opening onto a quiet market lane, green shutters and restrained warm brass details",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Household budget background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x9.0% through x58.5% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Household budget-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "home-care",
@@ -391,10 +423,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.11,
-              0.235,
-              0.39,
-              0.35
+              0.110048,
+              0.113709,
+              0.389952,
+              0.789586
             ],
             "material": "paper"
           },
@@ -417,7 +449,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/home-care/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/home-care/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Home care background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x11.0% through x50.0% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Home care-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "garden",
@@ -444,10 +480,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.126,
-              0.16,
-              0.423,
-              0.56
+              0.110048,
+              0.146652,
+              0.437799,
+              0.739639
             ],
             "material": "paper"
           },
@@ -470,7 +506,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/garden/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/garden/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Garden planner background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x12.6% through x54.9% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Garden planner-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "daily-planner",
@@ -497,10 +537,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.133,
-              0.245,
-              0.435,
-              0.45
+              0.123804,
+              0.144527,
+              0.447368,
+              0.808714
             ],
             "material": "paper"
           },
@@ -523,7 +563,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/daily-planner/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/daily-planner/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Precise local geometry correction to this Worldlet Village daily-planner background. KEEP the original WIDTH and horizontal edges of the main left blank panel, same style and entire right-side identity scenery. Increase actual BLANK INTERIOR HEIGHT: top paper at8% canvas height, bottom paper at96%; bottom physical frame at98%, almost touching bottom edge. Remove the unused floor/counter/table space below the left panel and fill with its tall blank paper. Remove ALL flowers, foliage, plants, furniture, tables, cloth, cups, lamps and other props overlapping any part of this main blank panel, including upper-left and bottom-left corners and bottom-right edge. The complete rectangular content surface MUST BE CLEAR, no overlaps anywhere, no false perspective, subtle low contrast texture. Props can remain OUTSIDE its border, especially the right side of the image. Do not widen the panel, no changes to brand logos/right scene/secondary cards outside the panel. No text or UI. Paper should be taller than this reference; bottom frame nearly touches canvas bottom and no ground strip underneath it. Landscape canvas same size/aspect ratio."
+      }
     },
     {
       "id": "reading",
@@ -550,10 +594,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.14,
-              0.16,
-              0.433,
-              0.48
+              0.139952,
+              0.09458,
+              0.433612,
+              0.769394
             ],
             "material": "paper"
           },
@@ -561,10 +605,10 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.705,
-              0.175,
-              0.183,
-              0.135
+              0.7003588516746412,
+              0.16684378320935175,
+              0.19078947368421054,
+              0.16153028692879914
             ],
             "material": "paper"
           }
@@ -576,7 +620,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/reading/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/reading/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Make a minimal cleanup edit to this exact1672x941 Village Reading scene. Remove the entire small stack of green books and the magnifying glass in LOWER LEFT that overlaps the large open book's blank paper. Reconstruct blank paper and green book cover behind these props seamlessly. Also remove only small leafy tips that intrude onto cream paper from top-left; plants outside paper/cover can remain. Preserve exact large open book size, its two-page shape and gentle center seam, gold corners, bookmark, green binding, perspective and cream paper. Preserve original board/small clipboard on upper right unchanged, and all right-side Village library terrace architecture, banner, lantern and lower-right companion space. Do not move props into secondary clipboard or companion space; removing small props entirely is preferred. No words, data, text, UI or lines. This edit must leave the ENTIRE big blank open-book spread unobstructed from its paper top to bottom across both pages, for live HTML. Keep exact framing, lighting, rendering, palette and image dimensions."
+      }
     },
     {
       "id": "language",
@@ -603,10 +651,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.181,
-              0.229,
-              0.44,
-              0.49
+              0.187799,
+              0.146652,
+              0.433612,
+              0.721573
             ],
             "material": "paper"
           },
@@ -629,7 +677,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/language/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/language/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Language practice background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x18.1% through x62.1% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Language practice-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "journal",
@@ -656,10 +708,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.163,
-              0.139,
-              0.315,
-              0.647
+              0.178828,
+              0.146652,
+              0.30622,
+              0.758767
             ],
             "material": "paper"
           },
@@ -682,7 +734,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/journal/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/journal/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Personal journal background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x16.3% through x47.8% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Personal journal-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "job-search",
@@ -709,10 +765,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.127,
-              0.268,
-              0.358,
-              0.464
+              0.163278,
+              0.146652,
+              0.330144,
+              0.767269
             ],
             "material": "paper"
           },
@@ -735,7 +791,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/job-search/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/job-search/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Job search background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges at x12.7% through x48.5% of the canvas. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Job search-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only."
+      }
     },
     {
       "id": "project-planner",
@@ -762,10 +822,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.122,
-              0.204,
-              0.39,
-              0.448
+              0.05622,
+              0.146652,
+              0.450957,
+              0.790648
             ],
             "material": "paper"
           },
@@ -788,7 +848,11 @@
           0.38
         ]
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/project-planner/icon.webp"
+      "identityReference": "ui/theme-packages/village/assets/applet-presets/project-planner/icon.webp",
+      "backgroundRefinement": {
+        "generator": "built-in imagegen",
+        "prompt": "Precise local geometry correction to this Worldlet Village project-planner background. KEEP the original WIDTH and horizontal edges of the main left blank panel, same style and entire right-side identity scenery. Increase actual BLANK INTERIOR HEIGHT: top paper at8% canvas height, bottom paper at96%; bottom physical frame at98%, almost touching bottom edge. Remove the unused floor/counter/table space below the left panel and fill with its tall blank paper. Remove ALL flowers, foliage, plants, furniture, tables, cloth, cups, lamps and other props overlapping any part of this main blank panel, including upper-left and bottom-left corners and bottom-right edge. The complete rectangular content surface MUST BE CLEAR, no overlaps anywhere, no false perspective, subtle low contrast texture. Props can remain OUTSIDE its border, especially the right side of the image. Do not widen the panel, no changes to brand logos/right scene/secondary cards outside the panel. No text or UI. Paper should be taller than this reference; bottom frame nearly touches canvas bottom and no ground strip underneath it. Landscape canvas same size/aspect ratio."
+      }
     }
   ]
 }

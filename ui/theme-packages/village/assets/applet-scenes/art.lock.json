@@ -1,8 +1,8 @@
 {
   "assets/applet-scenes/google-calendar/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/google-calendar/background.png",
-    "sourceSha256": "05216c7a5092d31e74fdab4103fcf29956a0894d8b8b54d1213c5ac5bdcddf61",
-    "sha256": "993c035bb092f70bbd63d15a3f956d6f82be155b27d00bfba567ec0be77cf0f2",
+    "sourceSha256": "00861031df8b8a97cd4e3a6096b8c21e9ed24244a784dc6b8cd199d49a77fba8",
+    "sha256": "0ebe9c061312710711bd8b9c3421193debba543fbb7f90e30460390e4a73b0ea",
     "imageSize": [
       1672,
       941
@@ -11,8 +11,8 @@
   },
   "assets/applet-scenes/gmail/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/gmail/background.png",
-    "sourceSha256": "07d993d74c9b1e5a66a9fbfb55e66750f4d25cb66524af3ee9d84ab504f87d11",
-    "sha256": "43aa494c86d948643bab5268b903a928309b1f1da9d9e7d058dd040345b73a85",
+    "sourceSha256": "b3a5a8d97b94b1c7de747481fa22c0e81babacdf9abff0ef8a3a7885ab8ac04c",
+    "sha256": "21820740c355e3e9c5fea229e0d840b7f2e51364f488828a688128dcdc7791a9",
     "imageSize": [
       1672,
       941
@@ -21,8 +21,8 @@
   },
   "assets/applet-scenes/apple-notes/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/apple-notes/background.png",
-    "sourceSha256": "9dc1c80628ea6b0b81dc876242374cf8eb181d1cd7b35fd4eafb38cda124c956",
-    "sha256": "af4c7e69da5b54aa84626f5a49196ff354f4ff38d998ea24e8c9c070f5195fcd",
+    "sourceSha256": "9bd61cbb0ef1ca1dbe7e7fa52ce8dbdbf68ca02de9359739848b3e7cb6236069",
+    "sha256": "e21fd7fa05a713d23bb0d461f0c3d8491ed3e9cb1b117d5b1d1dbfab46dbfb85",
     "imageSize": [
       1672,
       941
@@ -31,8 +31,8 @@
   },
   "assets/applet-scenes/apple-reminders/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/apple-reminders/background.png",
-    "sourceSha256": "0b312a3da0afb29a5f444e4d5057aba4679a2630243d7abe1c041837d5d0eda9",
-    "sha256": "c8cc587fd8d801b47fe2ac318d3ccb96bdd531e93df1d89a3d4638f903e28308",
+    "sourceSha256": "37d968b780054b816a7f32a916ecd6da4138772f6718e628a26ba31164ae0537",
+    "sha256": "f3973af58c4a95bd3b0d9575d383d1733ffaf0441fe74a6b903e099ea00f0080",
     "imageSize": [
       1672,
       941
@@ -41,8 +41,8 @@
   },
   "assets/applet-scenes/files/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/files/background.png",
-    "sourceSha256": "150bc9caaa2fb120ab2cebfbb899b15e7fddbaf3f9c870a2d688f208ea6858a3",
-    "sha256": "e15515b52d1ef8016dfd456127f2aec1ff6837854a88f8e81c78f6bc8719584e",
+    "sourceSha256": "4de234ad3359d6538d3e1fab27d956d56528b7d52dd1b89bb562e57783f7e3b6",
+    "sha256": "722b60e371732ebfdc9a5bc300746b61931cdac88488d06b36fd454a21da3fef",
     "imageSize": [
       1672,
       941
@@ -51,8 +51,8 @@
   },
   "assets/applet-scenes/weather/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/weather/background.png",
-    "sourceSha256": "a3e0e19193e0e1ef9d3ee733cf8ad038e0285429f5823fda5c16261b9ba874ab",
-    "sha256": "3d6f92af66d678157a3613798b8cb5d1f32bc4d38e3d8a51e7dcdc6ddff6925d",
+    "sourceSha256": "ed4bde4d70387aac0f28760aa80e632d4c82b57a593cfbe30c2bb0e419d6550c",
+    "sha256": "a12b29dab16165ac1c16d95eed232b39da65f136ca13dc7272a8052bee33b403",
     "imageSize": [
       1672,
       941
@@ -61,8 +61,8 @@
   },
   "assets/applet-scenes/meetings/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/meetings/background.png",
-    "sourceSha256": "e76a99faa86225a1b5c57ccc86ef1d9f95721ad8abb6d80f2673c95f08f8fdf5",
-    "sha256": "2dbaab950152a58fd7baff6933b09c5ff2da000d19b3be0efe78617d8314fcbc",
+    "sourceSha256": "4c5f761b4d555c4799881090349cc07215bbc096b241ae0d6c1591578bf4322f",
+    "sha256": "da40c5af79314960f79feff799b181077dbec3eeb7ec54a14cc56038f4b3cfb6",
     "imageSize": [
       1672,
       941
@@ -71,8 +71,8 @@
   },
   "assets/applet-scenes/voice-memos/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/voice-memos/background.png",
-    "sourceSha256": "5180713e9b495deae71a4b30bb718368bc367e17913c72aad77b64fc7a0574e2",
-    "sha256": "695761a1752d3374c2605bda7397797f390ca6b53c040b0f8a2589e7ddbace37",
+    "sourceSha256": "a540c9b0bf57ad6899e28ba45fb74905b38f1bb408186d8d3f635a2f22946111",
+    "sha256": "c9df5b6413de9a69a93723a69fbe53444fcb40216dcb9408ae2f294b2264cc64",
     "imageSize": [
       1672,
       941
@@ -81,8 +81,8 @@
   },
   "assets/applet-scenes/messages/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/messages/background.png",
-    "sourceSha256": "8136eb7d7a5cf95cf057b9d0eecee3053eab2819e998df950dc2bd0c2f4eee37",
-    "sha256": "bd251af163554e6c1395034ac15ed51aa811230c3e23d19e4a09805ff2353938",
+    "sourceSha256": "ca3cc96cc63bf48e0bab6a3053a5d1fe42f036d108971e9d18ca56d99db3341f",
+    "sha256": "c84740c55d9ae27a472fbab86c175aa010803cd4401bd182a0d3c6fae70e6baa",
     "imageSize": [
       1672,
       941
@@ -91,8 +91,8 @@
   },
   "assets/applet-scenes/browser/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/browser/background.png",
-    "sourceSha256": "193c9bb566aca16034455ed33c21f6b95ddda4099bd72289fa541ec52da55f9b",
-    "sha256": "a9ab01e6a9afd99c9040d6bf37787b692f5b21af6778f710f788a6ce57932167",
+    "sourceSha256": "4c887b4b2fb8e9f4fa9c1fa5130f10d8e080b8607f9370671b026468cf9ed50d",
+    "sha256": "428df1524e20777e8841251a8f3c075787d682587bbd59f652bd4322488715e4",
     "imageSize": [
       1672,
       941
@@ -101,8 +101,8 @@
   },
   "assets/applet-scenes/maps/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/maps/background.png",
-    "sourceSha256": "2b62026e7c7006c55a553736073c39fc063058c9b85f3ce424377986ff11e1e5",
-    "sha256": "8d37a0234130da3aa467110c6c5f90b2cb4423eb29a0d82da5f3e3d2f839c147",
+    "sourceSha256": "fa92fbd15927348a5dade71d6ee36be7474d7e5797f1673720f1a4a52dddbeab",
+    "sha256": "159c362475b40026cb4ece17b7234a81385cdcb6834d2bf98bd906fac84a5b02",
     "imageSize": [
       1672,
       941
@@ -111,8 +111,8 @@
   },
   "assets/applet-scenes/clock/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/clock/background.png",
-    "sourceSha256": "18052c2a73e218b4fb0ea993ab25b1d04e2bf9c35ac4049f8538ff3f1226e471",
-    "sha256": "5c7deb1c4cfa09762ab9e862de0cdb0c59a334e4f09b2ab275a9931e50816374",
+    "sourceSha256": "8628ffdab890d43e5109991e9ec16e3c6a2318269c84d2799adbfb62a48e2acb",
+    "sha256": "435ce92cc7fe00a7c117864727abe79bdb9b6d8c03f5c7eed38d652f5fd8a82b",
     "imageSize": [
       1672,
       941
@@ -121,8 +121,8 @@
   },
   "assets/applet-scenes/contacts/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/contacts/background.png",
-    "sourceSha256": "a1eab2f706e152e0b0adaacd4887a229891bc79dc2018dee24bdf65143ed74d1",
-    "sha256": "50b7028cae786070c0d98b211e800376eec2ab1241d98d03771fc43e6db143f0",
+    "sourceSha256": "f8a241afddbd172056e2636a4c04e877bd66bf8996a223405df3bd613fc58859",
+    "sha256": "77a7a123cd0d58cbf5e18a5df94764bff0a2463b1714eeffe469679a2f9f164d",
     "imageSize": [
       1672,
       941
@@ -131,8 +131,8 @@
   },
   "assets/applet-scenes/photos/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/photos/background.png",
-    "sourceSha256": "099eb7c764512ab137b95ce1fe6f8aff55032f5486b5e736cd53ab89fde55eff",
-    "sha256": "c5bf12b749abab8e341cbb1f5b46cef6d318122078a3b42af25796eb3fbea73c",
+    "sourceSha256": "3d0e0af11860e1351954103b02af33b0e9c02ee249fe315f1a393b73bd82ff8b",
+    "sha256": "63de067a6764129e83091c6d619d39e79cfb7221220cd6197d1281f11bf955a8",
     "imageSize": [
       1672,
       941
@@ -141,8 +141,8 @@
   },
   "assets/applet-scenes/music/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/music/background.png",
-    "sourceSha256": "30946d0de7570059cd6bd57dd4a87c518665d15582d3bfb4dd36048daee78111",
-    "sha256": "d9e758daa23765002a231e8125d661c11465efaf8f5b85db94e85fee413e9e29",
+    "sourceSha256": "e3a6e6d6fa0c11ad1b6576a910ab5de8200c09b10b30ec5458c78e70e30ba755",
+    "sha256": "6eb29df33151ef573f8a23b18b9471a9f522a4b169b275b69d69fccdb6d2c134",
     "imageSize": [
       1672,
       941
@@ -151,8 +151,8 @@
   },
   "assets/applet-scenes/news/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/news/background.png",
-    "sourceSha256": "7dd08bfd0721bba8e3c2257249277239b0dff154fd485eb939fb69fee3645a26",
-    "sha256": "38ca1889eecd9bd796cae03f7781c59ba8703cbb35c3481f45726d01d8818e9a",
+    "sourceSha256": "441497390963192d493029c07966ff9d99f2e42d92ffcc102027adb9446f3ae4",
+    "sha256": "f3cd80c34fdc227ad46233e017051133899fc6131ee931f79ca2dabbc4470a4a",
     "imageSize": [
       1672,
       941
@@ -161,8 +161,8 @@
   },
   "assets/applet-scenes/podcasts/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/podcasts/background.png",
-    "sourceSha256": "dc6681e44a728b390dfc15e81ea69284787a5a0bcf9551448d1cd77b82a4a6c0",
-    "sha256": "99f524f10b5aab3cf26f1c7956a5ac66afc13cf91736ffaec93fe3529a71d2f2",
+    "sourceSha256": "dd4340338950f8ac2174f126cfab2f618ff2b08a265f9dd9a82a915075f80a01",
+    "sha256": "796957809ac92c551e8610b25ab7cec9b98f1a547968ed9ea42d3368b025b536",
     "imageSize": [
       1672,
       941
@@ -171,8 +171,8 @@
   },
   "assets/applet-scenes/stocks/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/stocks/background.png",
-    "sourceSha256": "9f7fc789284dac239f162b7fccdc8d4deb6b1c76d077fb69d6798646022163c3",
-    "sha256": "cc79cf0391817ef73c67df3994bd435bc4900c84d6a93605a3e34dbd7497618f",
+    "sourceSha256": "1dc72975f2fbfbb1f3a52a5d3e2c7ed637ae205d29858f0caf1a712f63ad4fc7",
+    "sha256": "94429000646b62e09b58d2bc1ec0b1b75c63935ee63ea9ddc2108a7ddeae0676",
     "imageSize": [
       1672,
       941
@@ -181,8 +181,8 @@
   },
   "assets/applet-scenes/game-2048/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/game-2048/background.png",
-    "sourceSha256": "d8e14ba25151f9914f581eda9a39b0e5636c35c3a70d021603ba73fc39d5094e",
-    "sha256": "e4110e60b734fe2b5883ebaefb8cb4c1312345151e09c199aa833b69244f6b61",
+    "sourceSha256": "40292d0de1615f15e70ef22d5cd42d863f632f8d4b8fa85a57457589c068c067",
+    "sha256": "c7dc9eda0f85932ddc5ad9b39473bd353b734832e8f00fd45ea3423222b1a0ad",
     "imageSize": [
       1672,
       941
@@ -191,8 +191,8 @@
   },
   "assets/applet-scenes/snake/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/snake/background.png",
-    "sourceSha256": "8666ae3c7b6f9f3b604c60f55fd471280ba56b031103635e229cc69beab2c5df",
-    "sha256": "fe82dc3a0d1aa2a752bbef27a283b13829daf93a9ea0f42ce1f592ad4c30db9b",
+    "sourceSha256": "09a036c2bbd7db731c673decf36d8bf6a120500bf7553dcab80983c4de5a58ac",
+    "sha256": "be09b3fe4f4d4c6aee91c51787a5d4de25dab518d34fa906c572b79d5ee6c243",
     "imageSize": [
       1672,
       941
@@ -201,8 +201,8 @@
   },
   "assets/applet-scenes/minesweeper/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/minesweeper/background.png",
-    "sourceSha256": "339d5d99374cf9498d812142db1a41025580b12921c9f472be9037f7e601b7f4",
-    "sha256": "c8f9e6300d0675fe9befe797b75f5166c4ec7e71255f4a696c6b464b4756d085",
+    "sourceSha256": "1e00ab9712d392b355e1e07509cb2e1baf8288138e50c1e9da3c5bb238fb8379",
+    "sha256": "29b43c395304df3928bcd834d5544ace40229c41464ca4dc16946ae6a4977894",
     "imageSize": [
       1672,
       941
@@ -211,8 +211,8 @@
   },
   "assets/applet-scenes/sudoku/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/sudoku/background.png",
-    "sourceSha256": "f23cbbe4ad63b17019ee9d4dab9aae805d2f4e805ada45dd79e113ba4276a036",
-    "sha256": "84fce2cda2cd52fd934f36341243790ce77b28a829091053678676039578b095",
+    "sourceSha256": "4423c4b4241fe09aebdcae00e02bc7d215fc3181a0671e6b3ff89f537062aab6",
+    "sha256": "a85157f4ae7f58de79d937fbfaf77dc3e8d0dd7bcdeba2b186421d8a38a47339",
     "imageSize": [
       1672,
       941
@@ -221,8 +221,8 @@
   },
   "assets/applet-scenes/gomoku/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/gomoku/background.png",
-    "sourceSha256": "890dd31401c269e94a2a5cd76486c9b07badedef97781cd975537a0effc3803e",
-    "sha256": "2a993326d17f56fd5f197e3386b85826705be8e7f4716c6384f50f2b41ce253e",
+    "sourceSha256": "315e6ea292e26286280c1f7f3df84c1248d80483ec5812dccaec9ec5c516e8c3",
+    "sha256": "eaa14c0295af7d6967462b5ce2588725891b0b664a68bd71416e0898f29f680e",
     "imageSize": [
       1672,
       941
@@ -231,8 +231,1008 @@
   },
   "assets/applet-scenes/random-game/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/random-game/background.png",
-    "sourceSha256": "f706411e793e3c71893f223de82a1b46256212c9d6befb76dbad4d004c39b361",
-    "sha256": "318c7f80fe103e6aff63df31d8a989ef46015ac00df47cb03f552d5a6d5680aa",
+    "sourceSha256": "2b713ebb251ad99b0100a19dd777584d47851f3fcf4e3591e2ec25870af46a16",
+    "sha256": "7fd34dac68cb2f099735490bf3ca4eb4672b2de2196c30b98b46aec7172d928e",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/pokemon-showdown/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/background.webp",
+    "sourceSha256": "a1a7c932d733ad10714357303c4485c0c0d715799b9ef743acf3f087761e65d5",
+    "sha256": "60f0ea6857dc1cdba8a86d74d44aebe3b7ee64beb334d6c96fb3383abd0d9f18",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/github/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/github/background.webp",
+    "sourceSha256": "726a8782e2c0201d1c5840459af11380b4a7d10863daf6d5cf8f736b61874585",
+    "sha256": "f2f6d1cdd8ae96646ef2ffd80b0a08693b6193340082c80bfe4757e1dc38bbf8",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/codex/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/codex/background.webp",
+    "sourceSha256": "ad7d9006c7cc2d5a9328faba73970637fd0e2a90bea5f943bfb399959ab648d5",
+    "sha256": "a9dd313426b7d5a428e0ac379187b5ff30684a66b8b7df1997084d6d2cfbf942",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/claude-code/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/claude-code/background.webp",
+    "sourceSha256": "c3bff919b63581efe1da79b188eb80efd9229cb87aae1337be3f98eb2a7b1d9d",
+    "sha256": "ba6c6de823fd12b5d1e03add347d1f89a87076374b5cb829af9d1e164dbc1044",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/notion/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/notion/background.webp",
+    "sourceSha256": "c16f25af36e8c5a8856d5da2965704ede921ff49da8ae5ca2263bf05c529e5f7",
+    "sha256": "2217bdc8334d571dedd9c45a3c19158b0aad84fc35934e47172440924149e649",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/obsidian/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/obsidian/background.webp",
+    "sourceSha256": "f911dc7e4e0036d5b271a8259eeb943718deef4dd8717e18c040655fdabd47ab",
+    "sha256": "43f2a0670b9b5b4114b7a4d23470e4900801a13b7d6c3cafbca11dcee0a12cf2",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/plaid/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/plaid/background.webp",
+    "sourceSha256": "1142d119e816a8f265c2bcdc7670e6294c06322437db1ece5bb8f25e15516aaa",
+    "sha256": "fa38165ce979a4bb0168369d419ccac61a4abd5539c0ca568f1441f283510bf7",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/stripe/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/stripe/background.webp",
+    "sourceSha256": "72e5d1af210dd72487f6c683534d26420ea109e593c27cf31c175afa41501bad",
+    "sha256": "37aefb8ecac1a4758af122aa2986e2abddfd8a72de0fdf9ae64db73a7345ff8b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/paypal/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/paypal/background.webp",
+    "sourceSha256": "1e2b042f79d18be5ccfd20f1930514ba8cfcdedfa44423b8abefe1064df5621b",
+    "sha256": "8dd7ffb9ca84ca05cca3f8fa718c6d7b4dd1d93797950b98ed8d26450fb6df87",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/todoist/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/todoist/background.webp",
+    "sourceSha256": "5c30efacd8a3f9e425f1bc1532f8e063013c7304ff3fa977f0a2618723443e15",
+    "sha256": "372e19c1605b0b4f1d5f0b89266eecb53b82835df8324f74d26387021b522002",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/linear/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/linear/background.webp",
+    "sourceSha256": "b111cce179bbcd1a62d620ef5470b3bdaf8a38266322c4fe40b3b136db7d8ce0",
+    "sha256": "5e5953604d54df2fb0b21cdfd6a505c4630f41046ec06cf3356b16df5d7f8222",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/supabase/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/supabase/background.webp",
+    "sourceSha256": "27a1adafd8771616055c834ff1c5f734fad6b61e171d28e1f5a8ea903cbce465",
+    "sha256": "7c26e19bdc55e3a3528071e0faa3f7ef85ba9a6ff7e72cdba9402082ec0ac659",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/docker/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/docker/background.webp",
+    "sourceSha256": "56c91fabaab2faf8125ece3443c50b15f1a9e1ad94e6e0a1f00c3402aef44855",
+    "sha256": "ca1883cf31ff7b8cf017d48aa9201b82ba55c6f022a88242d461a8b0b14352b3",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/google-drive/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/google-drive/background.webp",
+    "sourceSha256": "01a6c20628bb8cceea6601a27dc8a492b17786f1d9bd335c91204abc2f0dacc8",
+    "sha256": "d0f40acdc0b02f650900967faa6ca5fb9389dd3515b41d66c2166ddd7cab6574",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/google-docs/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/google-docs/background.webp",
+    "sourceSha256": "a03ffc69146a8d6aaf57f5408ca1af4f639211f4b167769423da5df57f40adc0",
+    "sha256": "abac1aa65a9c6a1ca228e3e540fbc4f37c7906d1918da40ab597b895a7eb97b8",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/google-sheets/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/google-sheets/background.webp",
+    "sourceSha256": "d2f1d09b68b4c8f1b6ab1f60e012dc5fccde7c9c06533a2ae3502fc66f4ed560",
+    "sha256": "35eb0fed4282a5f7e4863c5e20d901766940e194807d6de15e2cbf5ff9f023aa",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/google-slides/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/google-slides/background.webp",
+    "sourceSha256": "ac3547374d5429f1016af1ceb8443cb87e7bd4ef60bafeee576a6022810446e2",
+    "sha256": "de559ec310f20d484ca1d89de9bcde242f5c450d6b3c678ec5a70d246c038c90",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/oura/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/oura/background.webp",
+    "sourceSha256": "b2f46d06a3830ec5075d224256a77e557f64ac2077e32f10837c4ed5d141f830",
+    "sha256": "141292b7b774cbb73f476e7ae4d0dab7b29425643b37f64acce36b0298176c40",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/strava/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/strava/background.webp",
+    "sourceSha256": "b22e9a494a65095b3938bc3038d7e30eeb89748aec8136763b63a5840d9bcf3a",
+    "sha256": "d030ec434152006e4b1e36aba4d58a008b78aa56c583a0c60299e31c3812bc4f",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/fitbit/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/fitbit/background.webp",
+    "sourceSha256": "d6f75408b307535274bc445e9bb2b6a32fc5c4091f3edc85e2e052725f895973",
+    "sha256": "b6a3fb8d22a7f95efd9d5767d2112e4726a96741c94e330a6fef9712b27c8c21",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/google-maps/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/google-maps/background.webp",
+    "sourceSha256": "0276187ce884a8f03d790da6bd652b40c8535064d1c10a4948cbe75182f9c083",
+    "sha256": "e5fe3310f12805e94d3e0d2021cb3b61fff8352c585046e0e4b1a80f01cc74e2",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/airbnb/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/airbnb/background.webp",
+    "sourceSha256": "fa87dd84fd3563cf578ab52e80a752cc14fd0b3f8874d0362abf00f03ca8fecd",
+    "sha256": "4449933eed58a9e12cc1a1cee55149566c68bdeea3dc78f567c356f8252ac407",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/tripit/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/tripit/background.webp",
+    "sourceSha256": "9065ea9e1c194f0915db942bc7179f25af493f5ea21ff083d0e7e2560de81dd1",
+    "sha256": "21dd65a5ecfbc0415f0f663acc756e03f25e9aedd2b5dc205e840dc4222645bc",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/x/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/x/background.webp",
+    "sourceSha256": "6f0104dae2ae3c210929bf02d27d22bfedab872b75d1fb53ea049125a2031274",
+    "sha256": "66e20b2c7390fa063ddc3c6861e32d6ee91778165195fd65815ac6354ef5e4a4",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/youtube/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/youtube/background.webp",
+    "sourceSha256": "827197cb2c34b82fabcc937b203d302abcb7e59f5f62d71d1e4b84d99ce97b5f",
+    "sha256": "bdb8ab63f45a505741169a88cc2c24e87808c0fa34e430116a613baf0bab6d33",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/tiktok/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/tiktok/background.webp",
+    "sourceSha256": "e155aa22086435594464a6f7b528cc51e0af69557d9c588f18759ce9366b828b",
+    "sha256": "eb9f7649b8d434505567825359ebe5f186cc9a44ca91f7ec6e8a02f106e9b997",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/discord/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/discord/background.webp",
+    "sourceSha256": "5c2cadaca3798ddfbf026e89cbd93fc1ee44abc09c58dba48c4179431eb72f48",
+    "sha256": "1771c26444da0cb7473330aefea384a612c0f288f867f0a1cf61a00358a3998b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/doordash/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/doordash/background.webp",
+    "sourceSha256": "a45680c79eb5da3fba0b61ccc2be9703b38a5d47ac3206a05eadc9fb9b5848a3",
+    "sha256": "49845c04e5449b3059c092fa6f1caeb671b4953b7dd660c74403513bd1d5642f",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/wordle/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/wordle/background.webp",
+    "sourceSha256": "d6305d480b2d3e45a0a3956aad580ae37dd5221b134c8d1c3349d8f8bd7dd9b9",
+    "sha256": "0b99a0db04f3aa71ddc420a95916baf3d63189ddcd6541c966f7f4c08b8e9e9e",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/nyt-connections/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/nyt-connections/background.webp",
+    "sourceSha256": "e5555d73ba0dd573d9ec460511430969fcaa163a7ecf8320fbe791ab1ef02356",
+    "sha256": "fb5975eedd10cb59548fc6e3b7bab704f2b1b1433b2941e5c299827a84f8db22",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/slither-io/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/slither-io/background.webp",
+    "sourceSha256": "d5cd4d8d4257f6d4961c346545b82a7586dfa459f28cebf97d9cfdef2d6fb142",
+    "sha256": "ac995b298da7c57e6b442bb40b2658980cb433335977878f12ef535b502e1b52",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/agar-io/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/agar-io/background.webp",
+    "sourceSha256": "628abfaeea6cacc17e0cf5149b9cc0db02530c035f8f9c18a4574e45befd6c74",
+    "sha256": "c555688d647a285178327327ed5b6df8a2118adf8564fb5f5aa0f59270600e35",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/krunker-io/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/krunker-io/background.webp",
+    "sourceSha256": "3a3b48d0e4204adcb78076d10729c9b12308411701cf9ce7643b6152ef622d12",
+    "sha256": "4cfe75412edc1e7f7d949d2d89ce2d21e89c9317f9cf0bebc10b2841cb720985",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/skribbl-io/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/skribbl-io/background.webp",
+    "sourceSha256": "ffe196fb112c5dec2a418d543c52129934f60c1245f68f24ee5597a3fc631af1",
+    "sha256": "492e5bdbdc04ae8639ceb35943815c331510251d6e158ea87d1bf0ce1aec12df",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/infinite-craft/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/infinite-craft/background.webp",
+    "sourceSha256": "ef16f7ed99500b8e1d89a24561178efabac47b96035cd7df3e6b21af5002458d",
+    "sha256": "e5cd8f59a794f3435905274049e20dc67beee1f44cd681113de52d76f1c71fa5",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/little-alchemy-2/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/little-alchemy-2/background.webp",
+    "sourceSha256": "951d27e3c71bd3ac18615e8d54c38fc79a41b0db8847b6cca5d582a039c94f01",
+    "sha256": "7edca685105264d7bf5625469ec6ce0e7d8bf2fde6c9556dcc6cc80d4d80e421",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/cookie-clicker/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/cookie-clicker/background.webp",
+    "sourceSha256": "2630461925ac2e82930d9a7cbd65ae5133f0570b7dc3f438694f4258884d1710",
+    "sha256": "77bc218d89e3c4bf96a9790daf52a12ddaefb1cf0c44ef0f206b9a617a2bed60",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/lichess/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/lichess/background.webp",
+    "sourceSha256": "2df69f97501ee9a0c5d9f151deb8c52af206d20ec4ab9be5c2ca1864034eaf31",
+    "sha256": "2a2712ad4c2885e745586cf10f16f9484226a89fc25c9a4bc77bfc840b8d2c32",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/drive-mad/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/drive-mad/background.webp",
+    "sourceSha256": "4263b7e8d093250e26fc6ec89a553d8e63ee8f4eb635b363f8c49822a5be7c43",
+    "sha256": "bb67ba1e30b5c053ea7c8249a2867e2df9c8aca6f77508e42f0284ddfb1fd864",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/subway-surfers/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/subway-surfers/background.webp",
+    "sourceSha256": "e5ea82dd1399615a7091ea98b66173b59d3f6fd28424107a1e825545bc992fd0",
+    "sha256": "f866ec527d2a01b5019fea929e0c956fcece0a22071ea5a4841161fa70b396d7",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/sekai/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/sekai/background.webp",
+    "sourceSha256": "c41a30b108b10174519a8296bcca6b9f45187550364826749a0b55de71bfe648",
+    "sha256": "604bd67b77e63de2cccd1c9b290946cdefd95a16f5cfd4c222ea83bd9f2062ad",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/sekai-sketch-racer/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/sekai-sketch-racer/background.webp",
+    "sourceSha256": "fd2a88ae5e2789c43de61d38611e51c39bca63598c0b861c4c2bf8ad0c146a0c",
+    "sha256": "f2531e072c3f9e16f7e373c082e8bdc0142f583a5d42bba8c6d2f2641701f097",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/sekai-3d-uno/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/sekai-3d-uno/background.webp",
+    "sourceSha256": "fb3ef2c90442d4a21b29b86ed65410966e0670dfd856f4e0494b5d8cf1c30f43",
+    "sha256": "a60c0167ac9d283fd404a68419c52d81cf645849828c1c367b7db52ae3bf580b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/sekai-devil-level/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/sekai-devil-level/background.webp",
+    "sourceSha256": "eda236246494a2744afd7fe49c4274fcb61a1aed5e40c60f742400988e38f12a",
+    "sha256": "b6ee98b98445d8dea0964722733792100284ab41a38058a5e0ad474cc45a1652",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/chatgpt/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/chatgpt/background.webp",
+    "sourceSha256": "03cac2ad2b540b0bf299f389df7805a840100e67596906f600d7622e9da4808a",
+    "sha256": "6429a264eb0bbc3ccd2dbcd2145e7b6db862f8818297aa87c49fada260129b13",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/claude/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/claude/background.webp",
+    "sourceSha256": "bb31392f808052bf9ad5e60025e8f8bbfd9c15afcabf2e6ff92ac38e68be6971",
+    "sha256": "23d0d842f94c77c1aae28ec166f1fa722c42c958a964a1fe3879b1202abff14d",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/gemini/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/gemini/background.webp",
+    "sourceSha256": "5f9f03c6eff2cab56121bf7e5f989f6dae23fa7a4c8770576db7c1a7ee2b1e0c",
+    "sha256": "dea4f1afd9b8016beae1bd95cea3fc7fd57c8b321649efd6a7d8509ac1dd6aa6",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/perplexity/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/perplexity/background.webp",
+    "sourceSha256": "b74d99f0a9fc6a2944d9503118d9c97c919dd5dd6e02be7a03f07f67aae9e16a",
+    "sha256": "f796d35ba6d1e74acd6f00aa83dfdc9eb282bb22b93c8b853282ab0ab5fc48f3",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/deepseek/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/deepseek/background.webp",
+    "sourceSha256": "c061c316fede0add644cdd88fa633eb605bfc7ea3cac367ba642f45ca3f7ebd0",
+    "sha256": "e858dc550d81c7c0e58de0b5f7484c8be5bb239da231fb65124c70007958b76b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/whatsapp/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/whatsapp/background.webp",
+    "sourceSha256": "28ee41d3ca96d98f187c2e5f2006bf6533bde2dd13bcab841333f6aa97e25594",
+    "sha256": "3dba8b6a9fd75ea25a45a031b301b2efe89deac7e82724dfc15acacc6b1b8498",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/telegram/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/telegram/background.webp",
+    "sourceSha256": "7333eaceda0a5ed4072f2a686e1855599c8bce4f966b70b8a711443c0f543cc9",
+    "sha256": "9878f3fcad2864ded7977b43ad1f7c7019a42a0a23e0bdd74f5ec27e93d16046",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/slack/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/slack/background.webp",
+    "sourceSha256": "1994678ac7e44244b3f062c041973f25de240569d55e321f5669c1e01edde763",
+    "sha256": "6b018fb4cf86d6b57be99ff2f2170a61166539976509bcb12cee17901779d282",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/teams/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/teams/background.webp",
+    "sourceSha256": "0969aee48e392721557ddfa6ae31588c026dfe6f84919da489853f670c9172b9",
+    "sha256": "be598bd567f497cfaea169a92b3e7ef94dd38dbad85d433cd0327c3f6396757a",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/zoom/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/zoom/background.webp",
+    "sourceSha256": "0d7aa2a17043437eb54ffbba39dd5d5fd9b37a00ddc146e070b444be0c4b8bf1",
+    "sha256": "aaebd46cdf043d7186054b765fd7802ce0d0a14f76591ae195f64282ff78a9f8",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/dropbox/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/dropbox/background.webp",
+    "sourceSha256": "3d6d5f7d9ad706a78cbad158768a2dfe8c6e2945e6b592dbf6ebf5efcae57b70",
+    "sha256": "8811f4b5ec067d64cbb6d8746b28c7de5349eabbf459351aff73f6217a859ded",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/onedrive/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/onedrive/background.webp",
+    "sourceSha256": "ee4ed3938f7d303f3674abf5a09013c7f664eb33c6b78e02f1cddde8e9296f1b",
+    "sha256": "262128282aabb0670d05fd4c65449c290a2667c0627cdaaf76a19c91d0bc678b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/microsoft-word/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/microsoft-word/background.webp",
+    "sourceSha256": "a58a3da0220de52e36b0f562971cecaf9effa13fb83f70db6381112868488eae",
+    "sha256": "2326dd0e4be5cbc5e999115e6f8552431dc25c5ff8ed4f6086545021dc7a8d76",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/microsoft-excel/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/microsoft-excel/background.webp",
+    "sourceSha256": "6bd91a007b18ec883af74ca40bf9b5543da91735b0858a5a282ce74307bf58ff",
+    "sha256": "f957209271d5940b873a1d00ed8805e3c238f4c656c261bcb05f04995a22d07b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/microsoft-powerpoint/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/microsoft-powerpoint/background.webp",
+    "sourceSha256": "e736eb507301a28b0503c8f2a91e6ebe12d515a075e372936fe6b5114fc7e4ab",
+    "sha256": "3b5fd3bc71ec847316e9c3c842265e4de261dcf0b9adf7a6f2d890edb06266a9",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/figma/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/figma/background.webp",
+    "sourceSha256": "d7e697aba007c3658559d9eceb5be94954d2b4a8e4836e58be735a930e0a817b",
+    "sha256": "c9cc5cf46f5cca94e19505da67346f9bb925e5dc85753970ac0f8edfb76f96c7",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/canva/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/canva/background.webp",
+    "sourceSha256": "bc8d7f5a9cbf99c6bf2c409106512455ef91cd65750ea584eb8d885fb7287ad1",
+    "sha256": "4826d4f3772e8c7cdfa5513d2d8f6c5a47f2193e3ffc42dd8ae84dd2e6aa7e95",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/spotify/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/spotify/background.webp",
+    "sourceSha256": "7cd3224e9c4eebb3cd6ddca8b05e2b9240718a2310858c76f1a757e21d1a9bca",
+    "sha256": "1816f675c90344b32a0612cea56200bbbfc20892eaded94c9909054cae32d683",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/apple-music/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/apple-music/background.webp",
+    "sourceSha256": "dd5e44d2c883f4bb3641730353a36a37b0d4520ccf49370c153ba9d7d704b811",
+    "sha256": "334eaf32a113eac17d94bf03686495294f0aa183f8408300b3530ddacf4ab8df",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/reddit/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/reddit/background.webp",
+    "sourceSha256": "4b6aed778b33ad52d80239e1e30a549c117f49c265ea55c5a7325ee2e93f993d",
+    "sha256": "76a19b64e03401882fd9564d582dcbbacddaa57c1bc6c2f0fce06c143932c636",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/instagram/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/instagram/background.webp",
+    "sourceSha256": "d30a6b2db6be59c9278e941f250f2814de897a5e82472574d8fe911ff62cce16",
+    "sha256": "b978b695d03cb014dd1ef858a1753eae0fb17193e429e4ae59c44948fd4b6f0e",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/linkedin/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/linkedin/background.webp",
+    "sourceSha256": "baeeaf235d8296a2840bff83b8ba0427404f6499f187a451c6374f59fdf07b62",
+    "sha256": "ae5fdeb4a7569f013da179b1476a53699e45d2becbe3e95405850bedd4b95e57",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/amazon/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/amazon/background.webp",
+    "sourceSha256": "543f59c24b2b7b1298f77e8b0eae4403db9a41247dfb0102fae7ff864643eddd",
+    "sha256": "2f250001524d336e2959604c27ab01114b8fb0743f17269e81b4f50884739928",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/netflix/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/netflix/background.webp",
+    "sourceSha256": "13b09d8cd72f7d8938ef18b1fd26d6b543b8657788fc2da7fd5350b5e4bd2322",
+    "sha256": "b47bafbf170567c12e752e861b39f96ddd18c3116e20d5023fe1e6fad5c3979b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/outlook/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/outlook/background.webp",
+    "sourceSha256": "710bea6a0117e58915ce6f6573d85641b877d441a94109986ae2d777e46a8c41",
+    "sha256": "b38b432b897181b8bde22835d94c1fc74637d4417aa56318984f0b79955afe5e",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/apple-podcasts/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/apple-podcasts/background.webp",
+    "sourceSha256": "e8b02466b491b3d478b018fa7bde32e6d6cd7cd15a2e69df680a3f6f96499145",
+    "sha256": "1f5df97b2d4d073bc00eee1d4e9efbc784afb11f1dfc5d5bc9ff2af8d90a07c6",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/google-photos/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/google-photos/background.webp",
+    "sourceSha256": "efe4f820d55b89074b6f294a76870b357c2864185e9e1d77369d585c8d91aa45",
+    "sha256": "fcec6c1b534219859182869aacbf87ab416f9e03dbb352cd985a66e179abbcdb",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/pinterest/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/pinterest/background.webp",
+    "sourceSha256": "5b8973e9e45c9c82f1f3c9027d27d44d52febf52ba77ea013249e5f60a85a576",
+    "sha256": "0f202f39a59b302242d138dcd19fe11a987d7df2efad177197edf37b7347d545",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/facebook/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/facebook/background.webp",
+    "sourceSha256": "d8b0e0b06f96a947ea3e6e8ed2d985186d4b29b9fb65b37d8d4507ed9b7efd3c",
+    "sha256": "b18e4264b8e35011e9763db26a8fa07a33b2b801068743b9016292bad695b57c",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/threads/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/threads/background.webp",
+    "sourceSha256": "dcddc1c55801373a04c0d1a471a9acc167514c59469cf64a9b37181c6e0ec8d8",
+    "sha256": "fa85876e0d12ba6e58255ba1b7f4546b1c575f3f6318dd7d70e90b0171b4710d",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/capcut/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/capcut/background.webp",
+    "sourceSha256": "87c65b890b1a6079d7e6d948e31b85f3daed24c6fbfc109988bd270660b4d654",
+    "sha256": "64c60d3e4f9eaf4b6a0d901db0c47ba904e966a9f3010a45e54151969c21187c",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/uber/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/uber/background.webp",
+    "sourceSha256": "602b5dce11c408ce6816467e68495ac00c19032d91dc840bb6972e1f749599f1",
+    "sha256": "bc79b2c19663841101b14f6acef3037f9c2088bb8d2c8ed2a378b5f2be04441a",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/uber-eats/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/uber-eats/background.webp",
+    "sourceSha256": "e0cfa831b04caeb6c46bf8e37a423c5b04401d3c8ec8ace923b3f4e3e3e4a1dd",
+    "sha256": "9ffa7872a79f5365a56f149f4a2f1cf145ad214fde151b606cbc913ef2fe646d",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/booking/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/booking/background.webp",
+    "sourceSha256": "7274b8c5b167f8c3f02defdbfdcd1e1a73c7838a647c367241903346440f7402",
+    "sha256": "7ed27006e54ff36340a567befa5d970144e83f96ff788cdf04e6e1b436d76a06",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/feishu/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/feishu/background.webp",
+    "sourceSha256": "1740804d0ae045326f40ea5799784c84307df5396a70c711236b879ed14c78b3",
+    "sha256": "dde8acb8528160cf3e7de45f54611c0bf2c0043905d38a1ea51577759c6bc067",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/bilibili/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/bilibili/background.webp",
+    "sourceSha256": "8400375743528aaaa986437dd22d12190a9c0ce615f7ce3064cb3a0978746e90",
+    "sha256": "1594cda7371a2a926efad8a77e1628811bde3da9e8d8ef4d956c6346c6aa8ff7",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/xiaohongshu/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/background.webp",
+    "sourceSha256": "b21c9a5ab88a32b6d0b245ac34ded71e747f46ed0fcf6fa1a3b294fe699614bf",
+    "sha256": "229bb1f638f65a695933c11a3388843d871aaf70d7da42f83f0d157276e02751",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/baidu-netdisk/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/baidu-netdisk/background.webp",
+    "sourceSha256": "8b44b7d87cf46e85ed217f13a9e2672b0ad949975dfc812728f89061db62d3a9",
+    "sha256": "c1a2bc8fd3e76f4a6e215a88d0b5df3bf976b8e4c522de1a18b7a9c5685a84cc",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/twitch/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/twitch/background.webp",
+    "sourceSha256": "ecc676a0a18f882af0a5fd2cf42e5b6386ba57e6a77ba2f86eee6e8ceb7f3a30",
+    "sha256": "bc2aad2dfafc55905b02e2d04203617088231917322ea16c54831b2b231611b4",
+    "imageSize": [
+      1671,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/copilot/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/copilot/background.webp",
+    "sourceSha256": "d5de09274f774b314eb2ebe9d7047f23e99155f6caf260dc1145a69882709ed5",
+    "sha256": "e7bddcbf19351b0f8e3d37ff2f7c6d89737c0c529bb8716b94c3ccbcc11c5d54",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/acrobat/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/acrobat/background.webp",
+    "sourceSha256": "b7d318c35749b22a4712d4c67c8c6e778facdba3bb1d5ba8cb2c4e9de4c4869d",
+    "sha256": "09d73655ce832b10ad2f027e9f8cf65086fe1182c67624bb699679f006760a62",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/wikipedia/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/wikipedia/background.webp",
+    "sourceSha256": "de35c09d46a8ffd99c91662cb31df53258914d4ca85bdd5c59058cee309ad02a",
+    "sha256": "12ca07cf4a3a53edff5ff9b754a567d2cb4e5bb7b4405ed489c81cfcf30ce67b",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/doubao/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/doubao/background.webp",
+    "sourceSha256": "900d0a0493cba8027e4b5562de72a6a8328894208dafb402d34de8baff42695d",
+    "sha256": "c39d9e12850c88b5be09cdef39021b2fcb7073c96aa350d9e91f4072668f488f",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/taobao/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/taobao/background.webp",
+    "sourceSha256": "e2b8b6ab70b49ca35eb1017cdee03e5a4e2c8fce3e9a461d0c6624e0c89a65a6",
+    "sha256": "2bd94596e0676a153c970786431e3a9f986b61c7a17f7f5e5ba97f50e0ccc719",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/alipay/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/alipay/background.webp",
+    "sourceSha256": "3d1b2ff29f809014ce6be54b3e36988e422648cb3c668046b21cfc1276ad6240",
+    "sha256": "c0b659cafed9bd34d50de601ef4a7c965fab3a608604d9dc5d59d6e80af51351",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/douyin/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/douyin/background.webp",
+    "sourceSha256": "5df96763f5df91ef14ea41be6d7cd85eadd5dec94c2b06f0c0a0bacd5715792b",
+    "sha256": "817e7bdb95d9de54a14129f10e2b832344d15cfa34f76713bc18afee345732f9",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/posthog/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/posthog/background.webp",
+    "sourceSha256": "a69bddb0bcc8c215849c5d08fd9a9881dd22defe7dcd3b28c90e576ed00b6def",
+    "sha256": "79fa5596d3982e83afc5bff7ddcdb0b6d7fa71f6eeb5b13abf11d002fd0d1108",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/cloudflare/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/cloudflare/background.webp",
+    "sourceSha256": "91e0cf447ab848741c0f22db7b93496b88c6e3b997547d76bcf884bc73422772",
+    "sha256": "bce1e42944993e768c4bd768699bef577f846d3d82a7256f653ce2ba845d6b38",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/vercel/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/vercel/background.webp",
+    "sourceSha256": "3bf94e7fede9ded5f12b791cf928f185c137c5fde362c410a0c6d827a1d5c2d4",
+    "sha256": "6f84c296539fb822fd2ac749b7a99fc663d147cc55a5e887542b4e5dca4cd2d4",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/netlify/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/netlify/background.webp",
+    "sourceSha256": "0eb3c69d3aa84f8a2e3e41cd7e4cecf393c6f646badb592498929dfbd52af83c",
+    "sha256": "2e5da11abe1cff0faf93052dc095b3bb6f0f2a18454a30273b9c8980dd9ab064",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/firebase/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/firebase/background.webp",
+    "sourceSha256": "93b3e408681685417578e2c6d2eef7891c6cf93e2a5a1d0cf357031265754612",
+    "sha256": "2b22a8778da41c4a17650df89d28eb216d998ac11e75f12627cc62c53b42e765",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/sentry/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/sentry/background.webp",
+    "sourceSha256": "6827fec932653dcd59ab2c6906f49b38e6ed40882aa9b96f784c120d4001ead6",
+    "sha256": "48a097f15a005c8f58a9b40aedc801a3e6e820bdbaceaa2f0f73c9781f417e16",
+    "imageSize": [
+      1672,
+      940
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/railway/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/railway/background.webp",
+    "sourceSha256": "d33632109a6cd2f1ff219cf2acf831790210ba5540ec02fa51ab8c8268a238b2",
+    "sha256": "0f388795bdb3b5e8ce63b35a2e88c8d3fca6e114f36b3c6367ecf62c58cc8553",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/render/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/render/background.webp",
+    "sourceSha256": "f40f7d4cebb5c799d3daad9bc1b202113e8ffa5f93bc3ff93a44de7c7b3b648f",
+    "sha256": "f99b30dfd60d5fc7ae43c3820d080c58fbb8bc9ad8563b2ab8aa679333b9e01d",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/gitlab/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/gitlab/background.webp",
+    "sourceSha256": "f158745fcbaed6a8d1c539f766049cfde9190b8ef315ed49d60bd35e2c0c1d0e",
+    "sha256": "b3368fe3dd86db8afdc849eb9609cf75730da5a1400b63a3a03e8e2b92fe5310",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/jira/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/brands/jira/background.webp",
+    "sourceSha256": "549887ab31c31e2eb6508895b66e742b5d74afb6fca60c291f8a7853ae96c711",
+    "sha256": "62d442b50f2ff070b008accc24b7a87f24b18d09b7c27d685645a3f2525bc0cf",
     "imageSize": [
       1672,
       941

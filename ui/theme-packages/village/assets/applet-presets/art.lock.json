@@ -7,8 +7,8 @@
   },
   "assets/applet-presets/weight-balance/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/weight-balance/background.png",
-    "sourceSha256": "04d52ac91e48a2c6e83331f3128ae9bd5fc570390c551cc9ae470db8df1d7baa",
-    "sha256": "58ff38ae048802594ec54d941d0df108b485105bca56ab17e669b10b0b017809",
+    "sourceSha256": "f0c3e5c0a4058f55211db7506d62229469d4979877b7e7484f941e8c90584aca",
+    "sha256": "9dbf3ccc9a8cbbc3509ba650a9878aaa2bb23d0d619b83a50be552398866e03b",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/meal-planner/icon.webp": {
@@ -19,8 +19,8 @@
   },
   "assets/applet-presets/meal-planner/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/meal-planner/background.png",
-    "sourceSha256": "0821a4e8de4803afc2dcb7c5285eb58893b3944273d252758e686342ff53bb96",
-    "sha256": "0e22ab6b2881ca359a8ad01c2777bbe9b44093782fe8b593071518ffd586752d",
+    "sourceSha256": "f3966c291cd02316a1d244809b13e823deaa4203e7e95a6836aee53ef8e792a5",
+    "sha256": "0129606b6b2884a2c4512c49f92c376259a486c0b6227abc009022d20c0d51a0",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/fitness/icon.webp": {
@@ -31,8 +31,8 @@
   },
   "assets/applet-presets/fitness/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/fitness/background.png",
-    "sourceSha256": "fcf6049dac5ddf73fc51cdfc3634cb69647a1b4c0291e4778ab14d3f000ecccb",
-    "sha256": "4074702f5451bbb01ae5ffe8c3e07c715ac8b3263defc71e8abaaa2db984ccfc",
+    "sourceSha256": "6f121bbc4fb0633879470b7c1a8a11eee1caef4a5e9d043d26d15d9ed2edef15",
+    "sha256": "2b2bc76f39b2ee16e68c1bf9ffaf3a20b6f5f51c042071029066a103d918c7cf",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/sleep/icon.webp": {
@@ -43,8 +43,8 @@
   },
   "assets/applet-presets/sleep/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/sleep/background.png",
-    "sourceSha256": "0b2ae46c8659502f4c9b330bb0c7c7a00353b005af23f61d6059e205042302b3",
-    "sha256": "a911aa55fb53a3d007250516bd66f4b88b1845cc505b98f74d423f2836b9ce37",
+    "sourceSha256": "900ab81a14b5adf90233653bf31a6f67e4cf562e4f5d201533b6149b7d94fc63",
+    "sha256": "93fff7bdc301cb7ae2b5fccf3805449439bb7437cac9b443ce6f10597ae71c01",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/travel/icon.webp": {
@@ -55,8 +55,8 @@
   },
   "assets/applet-presets/travel/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/travel/background.png",
-    "sourceSha256": "7f7d7848899e6f67dd5b34ed2b0d549d974b57b6881eb440b01a41670c07342e",
-    "sha256": "2aa8342534dcf83c7d129dd56909f85d18ac69e5c5335ce3b31f71cea4068b2c",
+    "sourceSha256": "03eb269de8862e762247fbd4848e6c3dac42fbcfa827108ea9b28b6f4cf2576c",
+    "sha256": "1b7e8cb6dbc2a8ab1b4fb03134559f78afe319d4aa4e3750e2005fb2339c6c6f",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/outdoor/icon.webp": {
@@ -67,8 +67,8 @@
   },
   "assets/applet-presets/outdoor/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/outdoor/background.png",
-    "sourceSha256": "2b1c60905ae8ec058c916e2aa7d6dc36a13afacdd6425024496bedb95883fee3",
-    "sha256": "e552c29aac5e4721e29528fdac78e4e9c9c257e2bf87773b55f56291224a3615",
+    "sourceSha256": "18fe4519b34bfeb7cae5e7fb60f56f043dfdac7cdaf200bff154d3756df0d60c",
+    "sha256": "3e6dea12beed3cdbdc32e88a23e5fe59692cc38c0c8a2effeb1342fd15dc54c7",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/shopping/icon.webp": {
@@ -79,8 +79,8 @@
   },
   "assets/applet-presets/shopping/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/shopping/background.png",
-    "sourceSha256": "ec672ab2017be6137bf378a14919bdbc19cf0dc1c2a11003ec8a3eac9bc963b6",
-    "sha256": "9ba192879326816f4cbc70203b636618a1724c0b49927d08a8183141679ccd66",
+    "sourceSha256": "47d3c2f2c59d4c3fde9aace45b0d921bb3ab1cf6d9999e758a7020e67ce8c9ec",
+    "sha256": "a2e6dcc9153b8d8d06536362af436e8dabaa5f2f882c3d01212b34823c4aa586",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/budget/icon.webp": {
@@ -91,8 +91,8 @@
   },
   "assets/applet-presets/budget/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/budget/background.png",
-    "sourceSha256": "8547918d805766123b5afbf01e427f5ec1d9eca20ad2cc97abb5d2372abbe394",
-    "sha256": "c37403b34ce5ddf293a366941e128955451085c6b7023c20a97a4e4992486ffa",
+    "sourceSha256": "73be7a49c9435c0ee2de79cfff890c6569c4fc0955e3dc0479348f708063a947",
+    "sha256": "cf87bd11a39abcea45cc86b6c0c3207eb8504fc6cce617a8431417988cd5c2e2",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/home-care/icon.webp": {
@@ -103,8 +103,8 @@
   },
   "assets/applet-presets/home-care/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/home-care/background.png",
-    "sourceSha256": "ee8dada5a13f1f2ac074c7498371b59cd47912c01f9081ee68f28c9733c64b73",
-    "sha256": "719b84b129d311d30bd579952fe02d0b69427fe28b41daf42a78e548fec13f8e",
+    "sourceSha256": "e5a3d5bc7de5488a58017f204d2969cd19ecf242e71cd71faccc63b04bdfd024",
+    "sha256": "bcf6dae886c2542cf4e10e81e7cdbd9978f4e63da32f6e92d72e3f3a518fc98b",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/garden/icon.webp": {
@@ -115,8 +115,8 @@
   },
   "assets/applet-presets/garden/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/garden/background.png",
-    "sourceSha256": "f33a829fc92670a0fcd556263f6c89a523db853329e930959f48e7ac34b264f6",
-    "sha256": "caf5ee7b98bebe53f44960065f0d17b009d87bdffadbdd739cd3d14158013a8d",
+    "sourceSha256": "c00cf4647d7c0390afcdb9cc2723677e409db4b23b1d2bcc88b5413e6647fa3d",
+    "sha256": "26d381f61cdc0e6b402752a0099cfc3ebd0244ef7fb0838963572e18abe6cc86",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/daily-planner/icon.webp": {
@@ -127,8 +127,8 @@
   },
   "assets/applet-presets/daily-planner/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/daily-planner/background.png",
-    "sourceSha256": "56111a3b51a9014c0b2dc2ae7471d2012cd22dccdfa1a40280fa3d0bc83cf824",
-    "sha256": "55846d3b631511c9fb39a0d7465d95ad5770b86d67d324a257fcdd3e07e34be1",
+    "sourceSha256": "23f7d0281a4a3305a55eb54c1591313f36308dc089e4ae18b314772e906eb500",
+    "sha256": "ab8404e328938bf65a12a505aa97408f1f840e5489bead9936cf2e11fdbf2f3a",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/reading/icon.webp": {
@@ -139,8 +139,8 @@
   },
   "assets/applet-presets/reading/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/reading/background.png",
-    "sourceSha256": "45fd1fe341321562aa03d536319e6985384a4b5c88747198d33da86a1c5cc87a",
-    "sha256": "de7f81c9ca6bce9f05be1780d75412bc0ca5108d408cbc08dc1a847440504309",
+    "sourceSha256": "05d9af9aebcf6c602eae73df510436000ad536cee95170544198b3ffbd5d687d",
+    "sha256": "46cf6ba21f732e6198f6a65b2015aed22031a08b17ce20661f26cfbe26f769ed",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/language/icon.webp": {
@@ -151,8 +151,8 @@
   },
   "assets/applet-presets/language/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/language/background.png",
-    "sourceSha256": "24ec8777ac54ec713ca68dbb385fef9c308496944671a8ad48b76b78dc8b03ff",
-    "sha256": "9bcbefe2c9a3deddef1739eb1bc32d42de7d84dc7f2baf353c5b4a1947e2829d",
+    "sourceSha256": "b32eb6943a42798ef4c6d463603a23379681dcd30df63bbbab7f3ec04df78739",
+    "sha256": "830c6a1d2258146d920f376a7ef829b860874293cb2eed44a130f9b99d05a379",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/journal/icon.webp": {
@@ -163,8 +163,8 @@
   },
   "assets/applet-presets/journal/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/journal/background.png",
-    "sourceSha256": "dce95fe44676a7001da077ad0838ccee4858ce30e67d404cd3ff9d6fc061159e",
-    "sha256": "9ad4af29fa51183f853e7662ee6557fa676683903e5e7113c96990cfc606db56",
+    "sourceSha256": "ff1701e2fafb5913c38b5f53354bb641266d1bfedc9d72e323089d29026b9968",
+    "sha256": "5a453399a3f0e276c5902b5f31142057cd75cfef86ab3497f094beb34414a99a",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/job-search/icon.webp": {
@@ -175,8 +175,8 @@
   },
   "assets/applet-presets/job-search/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/job-search/background.png",
-    "sourceSha256": "142917c9b69ef18114c8645c6dcf5d8223112e352492167c83f6c1be4d24da27",
-    "sha256": "9ecd835864b2b12d11983143216d14409078e76896359db02840c2c745338641",
+    "sourceSha256": "8910b6e9cc10323f62bcf7d39d05e5e82e0a41f964e2f20c3400712e14109885",
+    "sha256": "1f944f3901ee2dfbf9896fed0f0f3d9c550ef30c279ee1420e142706dd344120",
     "settings": "original-size-webp-q90"
   },
   "assets/applet-presets/project-planner/icon.webp": {
@@ -187,8 +187,8 @@
   },
   "assets/applet-presets/project-planner/background.webp": {
     "source": "resources/styles/builtin/presets/personal-scenes/project-planner/background.png",
-    "sourceSha256": "704f1615b7e5885d6ad38e3e8069ca3c47f23add4593c7a0afa0c21186dd3a04",
-    "sha256": "424de9b16550dbaf0e6cc130d797ab75efeed1859dcac0bab62764ec0e9e5b60",
+    "sourceSha256": "b80d9b5f3c88c30ce8122d0ecf5c2338fe9c2fd8b940ba4e864ce12579c1b57e",
+    "sha256": "a4125f8841b0288031f02d156ac34bd4c486dd2e96b26aa123a13e1409fdeac4",
     "settings": "original-size-webp-q90"
   }
 }

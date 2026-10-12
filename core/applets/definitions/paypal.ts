@@ -1,5 +1,5 @@
 export default {
-  fullView: {kind:"scene",original:{url:"https://www.paypal.com/",platform:"web"}},
+  fullView:{kind:'web',url:"https://www.paypal.com/",platform:"web"},
   "id": "app-paypal",
   "key": "paypal",
   "title": "PayPal",

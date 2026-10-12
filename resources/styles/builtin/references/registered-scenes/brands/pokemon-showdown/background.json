@@ -3,6 +3,32 @@
   "title": "Pokémon Showdown",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "background design; runtime registration pending",
-  "prompt": "Create one landscape 16:9 Worldlet Village background plate for a Pokémon Showdown strategy-game applet. Reference 1 is the existing scene style; reference 2 is its existing icon identity. Make a friendly sunlit village board-game clubhouse terrace, polished sculpted storybook illustration, cream stone and timber, flowers and warm brass. On the left, a large completely blank ivory board occupying x5–65%, y14–81%, near-front-facing with a thin blue wooden frame, unobstructed space for future HTML. On the right, detailed strategy-game clubhouse furniture: wooden storage drawers, small red-and-white circular game tokens, notebooks, brass timer, fabric cushions, plant pots and game-rule books. A modest Pokemon Showdown name plaque is attached to a storage drawer. No characters or creatures, no weapons, no violence, no battles depicted. Match the icon colors and village style. Do not render UI or sample data."
+  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "prompt": "Create one landscape 16:9 Worldlet Village background plate for a Pokémon Showdown strategy-game applet. Reference 1 is the existing scene style; reference 2 is its existing icon identity. Make a friendly sunlit village board-game clubhouse terrace, polished sculpted storybook illustration, cream stone and timber, flowers and warm brass. On the left, a large completely blank ivory board occupying x5–65%, y14–81%, near-front-facing with a thin blue wooden frame, unobstructed space for future HTML. On the right, detailed strategy-game clubhouse furniture: wooden storage drawers, small red-and-white circular game tokens, notebooks, brass timer, fabric cushions, plant pots and game-rule books. A modest Pokemon Showdown name plaque is attached to a storage drawer. No characters or creatures, no weapons, no violence, no battles depicted. Match the icon colors and village style. Do not render UI or sample data.",
+  "refinement": "Built-in imagegen: preserve original horizontal layout and Village identity; extend only the clear content height toward80%; remove foreground obstructions.",
+  "registration": {
+    "imageSize": [
+      1672,
+      941
+    ],
+    "regions": [
+      {
+        "id": "main",
+        "role": "primary",
+        "rect": [
+          0.0575,
+          0.136,
+          0.5359,
+          0.756
+        ],
+        "material": "paper"
+      }
+    ],
+    "companion": [
+      0.72,
+      0.7,
+      0.26,
+      0.28
+    ]
+  }
 }

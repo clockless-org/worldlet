@@ -17,7 +17,8 @@ function scene(item:Source,entry:Lock[string]):ThemeAppletScene{
  return {background:`assets/applet-scenes/${item.id}/background.webp`,registration:{imageSize:entry.imageSize,sha256:entry.sha256,regions:item.regions,companion:item.companion}};
 }
 export async function encodeVillageRegisteredScenes(root:string){
- const {applets}:{applets:Source[]}=await json(root,SOURCE+'/catalog.json'),lock:Lock={},iconLock:Lock={},scenes:Record<string,ThemeAppletScene>={};
+ const catalog:{applets:Source[];brands?:Source[]}=await json(root,SOURCE+'/catalog.json');
+ const applets=[...catalog.applets,...catalog.brands??[]],lock:Lock={},iconLock:Lock={},scenes:Record<string,ThemeAppletScene>={};
  const presentation=await json(root,PACKAGE+'/presentation.json');
  for(const item of applets){
   const source=SOURCE+'/'+item.source,input=await readFile(path.join(root,source)),result=await sharp(input).webp({quality:90}).toBuffer({resolveWithObject:true});
@@ -42,7 +43,8 @@ export async function encodeVillageRegisteredScenes(root:string){
  await importBuildTheme(path.join(root,PACKAGE),root);await checkVillageRegisteredScenes(root);
 }
 export async function checkVillageRegisteredScenes(root:string){
- const {applets}:{applets:Source[]}=await json(root,SOURCE+'/catalog.json'),lock:Lock=await json(root,PACKAGE+'/assets/applet-scenes/art.lock.json'),presentation=await json(root,PACKAGE+'/presentation.json');
+ const catalog:{applets:Source[];brands?:Source[]}=await json(root,SOURCE+'/catalog.json');
+ const applets=[...catalog.applets,...catalog.brands??[]],lock:Lock=await json(root,PACKAGE+'/assets/applet-scenes/art.lock.json'),presentation=await json(root,PACKAGE+'/presentation.json');
  const expected:Record<string,ThemeAppletScene>={};
  const iconLock:Lock=await json(root,PACKAGE+'/assets/applet-scenes/icons.lock.json');
  for(const item of applets){

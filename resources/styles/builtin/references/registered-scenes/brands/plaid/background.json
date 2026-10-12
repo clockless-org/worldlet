@@ -3,6 +3,32 @@
   "title": "Plaid",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "background design; runtime registration pending",
-  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Plaid, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village cooperative counting house courtyard, linked wooden account drawers, woven teal knot emblem on an actual safe cabinet, ledger volumes and small brass scales.\nLEFT: A pale ledger sheet mounted in a teal and walnut frame. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Plaid\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet."
+  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Plaid, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village cooperative counting house courtyard, linked wooden account drawers, woven teal knot emblem on an actual safe cabinet, ledger volumes and small brass scales.\nLEFT: A pale ledger sheet mounted in a teal and walnut frame. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Plaid\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
+  "refinement": "Use case: precise-object-edit. Edit this exact 1672x941 Village Plaid background with ONLY TWO corrections to LEFT paper panel. 1) Remove ALL flowers, leaves, vines, pots and other plant parts overlapping its cream paper or its left/top corners. Blank paper must be clear all four corners, entire width. Keep plants on surrounding stone outside the board if they do not overlap paper. 2) Extend the paper DOWN to y895, with bottom wooden outer frame at y925: move lower rail down about50px, replacing the floor beneath board. The clear cream rectangle must span x105..935,y110..895 (83.4% HEIGHT), same current width, no horizontal enlargement. Keep top position and width approximately unchanged. Corners slightly rounded allowed but ensure live safe rectangle x120..921,y120..885 has no obstructions (81.3% HEIGHT). Preserve teal inner lining, narrow wooden frame, brass corners outside paper.\nAll RIGHT side imagery unchanged: Plaid knot logo on dark teal banner and safe, brass bank scale, account ledgers, village view, rich stone/wood setting. Preserve the exact original brand shapes, text and materials in that right scene, lighting and stylized sculpted storybook Village render. No live UI, no new text/data/buttons or marks on paper. No crop, same1672x941. Preserve style. Main objective clear full-width usable paper of at least80% canvas HEIGHT, with zero plants invading its area.",
+  "registration": {
+    "imageSize": [
+      1672,
+      941
+    ],
+    "regions": [
+      {
+        "id": "main",
+        "role": "primary",
+        "rect": [
+          0.064593,
+          0.099894,
+          0.492225,
+          0.797024
+        ],
+        "material": "paper"
+      }
+    ],
+    "companion": [
+      0.72,
+      0.62,
+      0.25,
+      0.34
+    ]
+  }
 }

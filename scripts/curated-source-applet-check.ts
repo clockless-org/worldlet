@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
+import {getApp} from '../core/applets/index.ts';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-// Curated-source Applets (read-only cards from a connected account): one fixture, one row per provider.
+// Website routing keeps account readers available without mounting their old card UI; Docker remains native.
 type Case={applets:string[];provider:string;label:string;url:string;details:Record<string,unknown>;notice?:string;detailLine:RegExp;web:boolean;pass:string};
 const cases:Case[]=[
  {applets:['google-drive','google-docs','google-sheets','google-slides'],provider:'google-drive',label:'Google Drive',url:'https://drive.google.com/file/d/',details:{type:'application/vnd.google-apps.document',modified:'2026-10-01'},notice:'Google Docs text export.',detailLine:/Modified: 2026-10-01/,web:true,pass:'cards, originals, shared-account reauthorization, disconnect and Web switch.'},
@@ -26,15 +27,18 @@ await withBrowser(fileAccess,async browser=>{
  await page.goto(worldUrl());
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length>0,undefined,{timeout:60000});
  await page.evaluate(()=>location.hash='object=app-'+window.testApplet);
+ if(c.web){
+  await page.locator('.browser-viewport').waitFor();
+  await page.waitForFunction(url=>calls.some(c=>c.action==='browserShow'&&c.url===url),getApp(applet)!.fullView.url);
+  assert.equal(await page.locator('.applet-mode-toggle').count(),0,'The branded Applet opens the real site directly');
+  assert.deepEqual(errors,[]);console.log('PASS '+applet+' opens its original website');await page.close();continue;
+ }
  await page.waitForFunction(()=>document.querySelectorAll('.scene-item').length>0).catch(async e=>{console.log(applet,await page.evaluate(()=>({calls,hash:location.hash,text:document.body.innerText.slice(-2500)})));throw e;});
  assert.ok(await page.locator('.scene-item').first().innerText());
  await page.locator('.scene-item').first().click();
  await page.waitForFunction(()=>document.querySelector('.app-source-body')?.textContent.includes(testApplet==='google-sheets'?'42':'Full original description'));
  if(applet==='google-sheets'){assert.equal(await page.locator('td').last().innerText(),'42');assert.equal(await page.locator('.curated-source-table script').count(),0);}else assert.match(await page.locator('.app-source-body').innerText(),c.detailLine);
- if(c.web){
-  await page.locator('.applet-mode-web').click();await page.locator('.browser-viewport').waitFor();
-  await page.locator('.applet-mode-native').click();await page.locator('.app-source-body').waitFor();
- }else assert.equal(await page.locator('.applet-mode-toggle').count(),0);
+ assert.equal(await page.locator('.applet-mode-toggle').count(),0);
  assert.equal(await page.evaluate(()=>calls.some(c=>c.action==='curatedSourceContent'&&!['list','read'].includes(c.operation))),false);
  await page.evaluate(()=>{window.listCountBefore=calls.filter(c=>c.action==='curatedSourceContent'&&c.operation==='list').length;fixture.connections[0].contentRevision='0:2';fixture.revision++;window.worldletReceive(structuredClone(fixture));});
  await page.waitForFunction(()=>calls.filter(c=>c.action==='curatedSourceContent'&&c.operation==='list').length>listCountBefore);

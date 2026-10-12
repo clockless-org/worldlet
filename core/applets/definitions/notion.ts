@@ -2,7 +2,7 @@
 export default {
  attention:{version:1,provider:'notion',reader:'source-reader',intervalMinutes:30,freshnessMinutes:1440} as const,
   content: {noun: ["page", "pages"]},
-  fullView: {kind: "scene", original: {url: "https://www.notion.so/login", platform: "web"}},
+  fullView:{kind:'web',url: "https://www.notion.so/login", platform: "web"},
   "id": "app-notion",
   "key": "notion",
   "title": "Notion",

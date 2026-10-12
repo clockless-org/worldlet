@@ -28,6 +28,12 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length>0);
  for(const key of ['notion','obsidian']){
   await page.evaluate(k=>location.hash='object=app-'+k,key);
+  if(key==='notion'){
+   await page.locator('.browser-viewport').waitFor();
+   await page.waitForFunction(()=>calls.some(c=>c.action==='browserShow'&&c.url?.includes('notion.so/')));
+   assert.equal(await page.locator('.applet-mode-toggle').count(),0,'Notion uses the original site');
+   await leaveApplet(page);continue;
+  }
   await page.locator('.pixi-applet-stage').waitFor();
   if(key==='obsidian')await page.getByRole('button',{name:'Choose vault',exact:true}).click();
   // Every page shows at once; more than the places scroll in the item area instead of paging (#2048).
@@ -45,20 +51,10 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Next item',exact:true}).click();
   await page.waitForFunction(k=>calls.filter(c=>c.action===(k==='notion'?'notionContent':'obsidianContent')&&['read','fetch'].includes(c.operation)).length>=2,key);
   await page.screenshot({path:path.join(os.tmpdir(),'library-'+key+'-focus.png')});
-  if(key==='notion'){
-    const selected=await page.locator('.pixi-selected-item').innerText();
-    await page.locator('.applet-mode-web').click();
-    await page.locator('.browser-viewport').waitFor();
-    assert.equal(await page.locator('#notionWorld').getAttribute('data-page'),'app-notion');
-    await page.waitForFunction(()=>calls.some(c=>c.action==='browserShow'&&c.url?.includes('notion.so/')));
-    await page.locator('.applet-mode-native').click();
-    await page.locator('.app-source-body').waitFor();
-    await page.waitForFunction(text=>(document.querySelector('.pixi-selected-item') as HTMLElement|null)?.innerText===text,selected);
-    await page.waitForFunction(()=>calls.some(c=>c.action==='browserHide'));
-  }else assert.equal(await page.locator('.applet-mode-toggle').count(),0);
+  assert.equal(await page.locator('.applet-mode-toggle').count(),0);
   await leaveApplet(page);
   await page.locator('.pixi-applet-stage').waitFor();
  }
  assert.deepEqual(errors,[]);
- console.log('PASS Library native Open showing every page, Focus originals, selected device, outside navigation, web escape and return.');
+ console.log('PASS Notion opens its original website; Obsidian keeps native pages, originals and item navigation.');
 });

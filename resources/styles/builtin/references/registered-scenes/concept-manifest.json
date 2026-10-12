@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generator": "built-in imagegen",
-  "status": "Visual concepts; HTML and account integration are not implemented by these images.",
+  "status": "Historical image-generated design studies; backgrounds use the current measured scene. Website applets render their original sites.",
   "entries": [
     {
       "id": "google-calendar",
@@ -14,7 +14,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/google-calendar/background.webp",
-        "sha256": "993c035bb092f70bbd63d15a3f956d6f82be155b27d00bfba567ec0be77cf0f2"
+        "sha256": "0ebe9c061312710711bd8b9c3421193debba543fbb7f90e30460390e4a73b0ea"
       },
       "status": "registered",
       "registrationKey": "google-calendar",
@@ -34,7 +34,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/gmail/background.webp",
-        "sha256": "43aa494c86d948643bab5268b903a928309b1f1da9d9e7d058dd040345b73a85"
+        "sha256": "21820740c355e3e9c5fea229e0d840b7f2e51364f488828a688128dcdc7791a9"
       },
       "status": "registered",
       "registrationKey": "gmail",
@@ -54,7 +54,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/apple-notes/background.webp",
-        "sha256": "af4c7e69da5b54aa84626f5a49196ff354f4ff38d998ea24e8c9c070f5195fcd"
+        "sha256": "e21fd7fa05a713d23bb0d461f0c3d8491ed3e9cb1b117d5b1d1dbfab46dbfb85"
       },
       "status": "registered",
       "registrationKey": "apple-notes",
@@ -74,7 +74,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/apple-reminders/background.webp",
-        "sha256": "c8cc587fd8d801b47fe2ac318d3ccb96bdd531e93df1d89a3d4638f903e28308"
+        "sha256": "f3973af58c4a95bd3b0d9575d383d1733ffaf0441fe74a6b903e099ea00f0080"
       },
       "status": "registered",
       "registrationKey": "apple-reminders",
@@ -94,7 +94,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/files/background.webp",
-        "sha256": "e15515b52d1ef8016dfd456127f2aec1ff6837854a88f8e81c78f6bc8719584e"
+        "sha256": "722b60e371732ebfdc9a5bc300746b61931cdac88488d06b36fd454a21da3fef"
       },
       "status": "registered",
       "registrationKey": "files",
@@ -114,7 +114,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/weather/background.webp",
-        "sha256": "3d6f92af66d678157a3613798b8cb5d1f32bc4d38e3d8a51e7dcdc6ddff6925d"
+        "sha256": "a12b29dab16165ac1c16d95eed232b39da65f136ca13dc7272a8052bee33b403"
       },
       "status": "registered",
       "registrationKey": "weather",
@@ -134,7 +134,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/meetings/background.webp",
-        "sha256": "2dbaab950152a58fd7baff6933b09c5ff2da000d19b3be0efe78617d8314fcbc"
+        "sha256": "da40c5af79314960f79feff799b181077dbec3eeb7ec54a14cc56038f4b3cfb6"
       },
       "status": "registered",
       "registrationKey": "meetings",
@@ -154,7 +154,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/voice-memos/background.webp",
-        "sha256": "695761a1752d3374c2605bda7397797f390ca6b53c040b0f8a2589e7ddbace37"
+        "sha256": "c9df5b6413de9a69a93723a69fbe53444fcb40216dcb9408ae2f294b2264cc64"
       },
       "status": "registered",
       "registrationKey": "voice-memos",
@@ -174,7 +174,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/messages/background.webp",
-        "sha256": "bd251af163554e6c1395034ac15ed51aa811230c3e23d19e4a09805ff2353938"
+        "sha256": "c84740c55d9ae27a472fbab86c175aa010803cd4401bd182a0d3c6fae70e6baa"
       },
       "status": "registered",
       "registrationKey": "messages",
@@ -194,7 +194,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/browser/background.webp",
-        "sha256": "a9ab01e6a9afd99c9040d6bf37787b692f5b21af6778f710f788a6ce57932167"
+        "sha256": "428df1524e20777e8841251a8f3c075787d682587bbd59f652bd4322488715e4"
       },
       "status": "registered",
       "registrationKey": "browser",
@@ -214,7 +214,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/maps/background.webp",
-        "sha256": "8d37a0234130da3aa467110c6c5f90b2cb4423eb29a0d82da5f3e3d2f839c147"
+        "sha256": "159c362475b40026cb4ece17b7234a81385cdcb6834d2bf98bd906fac84a5b02"
       },
       "status": "registered",
       "registrationKey": "maps",
@@ -234,7 +234,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/clock/background.webp",
-        "sha256": "5c7deb1c4cfa09762ab9e862de0cdb0c59a334e4f09b2ab275a9931e50816374"
+        "sha256": "435ce92cc7fe00a7c117864727abe79bdb9b6d8c03f5c7eed38d652f5fd8a82b"
       },
       "status": "registered",
       "registrationKey": "clock",
@@ -254,7 +254,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/contacts/background.webp",
-        "sha256": "50b7028cae786070c0d98b211e800376eec2ab1241d98d03771fc43e6db143f0"
+        "sha256": "77a7a123cd0d58cbf5e18a5df94764bff0a2463b1714eeffe469679a2f9f164d"
       },
       "status": "registered",
       "registrationKey": "contacts",
@@ -274,7 +274,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/photos/background.webp",
-        "sha256": "c5bf12b749abab8e341cbb1f5b46cef6d318122078a3b42af25796eb3fbea73c"
+        "sha256": "63de067a6764129e83091c6d619d39e79cfb7221220cd6197d1281f11bf955a8"
       },
       "status": "registered",
       "registrationKey": "photos",
@@ -294,7 +294,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/music/background.webp",
-        "sha256": "d9e758daa23765002a231e8125d661c11465efaf8f5b85db94e85fee413e9e29"
+        "sha256": "6eb29df33151ef573f8a23b18b9471a9f522a4b169b275b69d69fccdb6d2c134"
       },
       "status": "registered",
       "registrationKey": "music",
@@ -314,7 +314,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/news/background.webp",
-        "sha256": "38ca1889eecd9bd796cae03f7781c59ba8703cbb35c3481f45726d01d8818e9a"
+        "sha256": "f3cd80c34fdc227ad46233e017051133899fc6131ee931f79ca2dabbc4470a4a"
       },
       "status": "registered",
       "registrationKey": "news",
@@ -334,7 +334,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/podcasts/background.webp",
-        "sha256": "99f524f10b5aab3cf26f1c7956a5ac66afc13cf91736ffaec93fe3529a71d2f2"
+        "sha256": "796957809ac92c551e8610b25ab7cec9b98f1a547968ed9ea42d3368b025b536"
       },
       "status": "registered",
       "registrationKey": "podcasts",
@@ -354,7 +354,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/stocks/background.webp",
-        "sha256": "cc79cf0391817ef73c67df3994bd435bc4900c84d6a93605a3e34dbd7497618f"
+        "sha256": "94429000646b62e09b58d2bc1ec0b1b75c63935ee63ea9ddc2108a7ddeae0676"
       },
       "status": "registered",
       "registrationKey": "stocks",
@@ -374,7 +374,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/game-2048/background.webp",
-        "sha256": "e4110e60b734fe2b5883ebaefb8cb4c1312345151e09c199aa833b69244f6b61"
+        "sha256": "c7dc9eda0f85932ddc5ad9b39473bd353b734832e8f00fd45ea3423222b1a0ad"
       },
       "status": "registered",
       "registrationKey": "game-2048",
@@ -394,7 +394,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/snake/background.webp",
-        "sha256": "fe82dc3a0d1aa2a752bbef27a283b13829daf93a9ea0f42ce1f592ad4c30db9b"
+        "sha256": "be09b3fe4f4d4c6aee91c51787a5d4de25dab518d34fa906c572b79d5ee6c243"
       },
       "status": "registered",
       "registrationKey": "snake",
@@ -414,7 +414,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/minesweeper/background.webp",
-        "sha256": "c8f9e6300d0675fe9befe797b75f5166c4ec7e71255f4a696c6b464b4756d085"
+        "sha256": "29b43c395304df3928bcd834d5544ace40229c41464ca4dc16946ae6a4977894"
       },
       "status": "registered",
       "registrationKey": "minesweeper",
@@ -434,7 +434,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/sudoku/background.webp",
-        "sha256": "84fce2cda2cd52fd934f36341243790ce77b28a829091053678676039578b095"
+        "sha256": "a85157f4ae7f58de79d937fbfaf77dc3e8d0dd7bcdeba2b186421d8a38a47339"
       },
       "status": "registered",
       "registrationKey": "sudoku",
@@ -454,7 +454,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/gomoku/background.webp",
-        "sha256": "2a993326d17f56fd5f197e3386b85826705be8e7f4716c6384f50f2b41ce253e"
+        "sha256": "eaa14c0295af7d6967462b5ce2588725891b0b664a68bd71416e0898f29f680e"
       },
       "status": "registered",
       "registrationKey": "gomoku",
@@ -474,7 +474,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/random-game/background.webp",
-        "sha256": "318c7f80fe103e6aff63df31d8a989ef46015ac00df47cb03f552d5a6d5680aa"
+        "sha256": "7fd34dac68cb2f099735490bf3ca4eb4672b2de2196c30b98b46aec7172d928e"
       },
       "status": "registered",
       "registrationKey": "random-game",
@@ -494,7 +494,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/weight-balance/background.webp",
-        "sha256": "58ff38ae048802594ec54d941d0df108b485105bca56ab17e669b10b0b017809"
+        "sha256": "9dbf3ccc9a8cbbc3509ba650a9878aaa2bb23d0d619b83a50be552398866e03b"
       },
       "status": "registered",
       "registrationKey": "weight-balance",
@@ -514,7 +514,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/meal-planner/background.webp",
-        "sha256": "0e22ab6b2881ca359a8ad01c2777bbe9b44093782fe8b593071518ffd586752d"
+        "sha256": "0129606b6b2884a2c4512c49f92c376259a486c0b6227abc009022d20c0d51a0"
       },
       "status": "registered",
       "registrationKey": "meal-planner",
@@ -534,7 +534,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/fitness/background.webp",
-        "sha256": "4074702f5451bbb01ae5ffe8c3e07c715ac8b3263defc71e8abaaa2db984ccfc"
+        "sha256": "2b2bc76f39b2ee16e68c1bf9ffaf3a20b6f5f51c042071029066a103d918c7cf"
       },
       "status": "registered",
       "registrationKey": "fitness",
@@ -554,7 +554,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/sleep/background.webp",
-        "sha256": "a911aa55fb53a3d007250516bd66f4b88b1845cc505b98f74d423f2836b9ce37"
+        "sha256": "93fff7bdc301cb7ae2b5fccf3805449439bb7437cac9b443ce6f10597ae71c01"
       },
       "status": "registered",
       "registrationKey": "sleep",
@@ -574,7 +574,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/travel/background.webp",
-        "sha256": "2aa8342534dcf83c7d129dd56909f85d18ac69e5c5335ce3b31f71cea4068b2c"
+        "sha256": "1b7e8cb6dbc2a8ab1b4fb03134559f78afe319d4aa4e3750e2005fb2339c6c6f"
       },
       "status": "registered",
       "registrationKey": "travel",
@@ -594,7 +594,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/outdoor/background.webp",
-        "sha256": "e552c29aac5e4721e29528fdac78e4e9c9c257e2bf87773b55f56291224a3615"
+        "sha256": "3e6dea12beed3cdbdc32e88a23e5fe59692cc38c0c8a2effeb1342fd15dc54c7"
       },
       "status": "registered",
       "registrationKey": "outdoor",
@@ -614,7 +614,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/shopping/background.webp",
-        "sha256": "9ba192879326816f4cbc70203b636618a1724c0b49927d08a8183141679ccd66"
+        "sha256": "a2e6dcc9153b8d8d06536362af436e8dabaa5f2f882c3d01212b34823c4aa586"
       },
       "status": "registered",
       "registrationKey": "shopping",
@@ -634,7 +634,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/budget/background.webp",
-        "sha256": "c37403b34ce5ddf293a366941e128955451085c6b7023c20a97a4e4992486ffa"
+        "sha256": "cf87bd11a39abcea45cc86b6c0c3207eb8504fc6cce617a8431417988cd5c2e2"
       },
       "status": "registered",
       "registrationKey": "budget",
@@ -654,7 +654,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/home-care/background.webp",
-        "sha256": "719b84b129d311d30bd579952fe02d0b69427fe28b41daf42a78e548fec13f8e"
+        "sha256": "bcf6dae886c2542cf4e10e81e7cdbd9978f4e63da32f6e92d72e3f3a518fc98b"
       },
       "status": "registered",
       "registrationKey": "home-care",
@@ -674,7 +674,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/garden/background.webp",
-        "sha256": "caf5ee7b98bebe53f44960065f0d17b009d87bdffadbdd739cd3d14158013a8d"
+        "sha256": "26d381f61cdc0e6b402752a0099cfc3ebd0244ef7fb0838963572e18abe6cc86"
       },
       "status": "registered",
       "registrationKey": "garden",
@@ -694,7 +694,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/daily-planner/background.webp",
-        "sha256": "55846d3b631511c9fb39a0d7465d95ad5770b86d67d324a257fcdd3e07e34be1"
+        "sha256": "ab8404e328938bf65a12a505aa97408f1f840e5489bead9936cf2e11fdbf2f3a"
       },
       "status": "registered",
       "registrationKey": "daily-planner",
@@ -714,7 +714,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/reading/background.webp",
-        "sha256": "de7f81c9ca6bce9f05be1780d75412bc0ca5108d408cbc08dc1a847440504309"
+        "sha256": "46cf6ba21f732e6198f6a65b2015aed22031a08b17ce20661f26cfbe26f769ed"
       },
       "status": "registered",
       "registrationKey": "reading",
@@ -734,7 +734,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/language/background.webp",
-        "sha256": "9bcbefe2c9a3deddef1739eb1bc32d42de7d84dc7f2baf353c5b4a1947e2829d"
+        "sha256": "830c6a1d2258146d920f376a7ef829b860874293cb2eed44a130f9b99d05a379"
       },
       "status": "registered",
       "registrationKey": "language",
@@ -754,7 +754,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/journal/background.webp",
-        "sha256": "9ad4af29fa51183f853e7662ee6557fa676683903e5e7113c96990cfc606db56"
+        "sha256": "5a453399a3f0e276c5902b5f31142057cd75cfef86ab3497f094beb34414a99a"
       },
       "status": "registered",
       "registrationKey": "journal",
@@ -774,7 +774,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/job-search/background.webp",
-        "sha256": "9ecd835864b2b12d11983143216d14409078e76896359db02840c2c745338641"
+        "sha256": "1f944f3901ee2dfbf9896fed0f0f3d9c550ef30c279ee1420e142706dd344120"
       },
       "status": "registered",
       "registrationKey": "job-search",
@@ -794,7 +794,7 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-presets/project-planner/background.webp",
-        "sha256": "424de9b16550dbaf0e6cc130d797ab75efeed1859dcac0bab62764ec0e9e5b60"
+        "sha256": "a4125f8841b0288031f02d156ac34bd4c486dd2e96b26aa123a13e1409fdeac4"
       },
       "status": "registered",
       "registrationKey": "project-planner",
@@ -813,11 +813,11 @@
         "sha256": "6b0bc978ca0e1f0cbcef3ae07d0487d8d47e253a2674ac7cba4a66696aff0572"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/github/background.webp",
-        "sha256": "7f6434615a0be502ffb69f98ad4aad6454e9aa294d9163fba1943ce4be1bd07e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/github/background.webp",
+        "sha256": "f2f6d1cdd8ae96646ef2ffd80b0a08693b6193340082c80bfe4757e1dc38bbf8"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "github",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/github/effect.webp",
         "sha256": "5afac61fc897f96d1dd8b87c47f7859f1f77d0f4e2738e0e72887bfee50023ff"
@@ -833,11 +833,11 @@
         "sha256": "81564825a97b24e89b204c31c0d4ebc8cf9743c1fe43a4e175ba950e1e1b0d2e"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/codex/background.webp",
-        "sha256": "5afa32e6a8d30a631b9e30e4b31e8ef03a3f8337ce153d014e55a9c9f55510c3"
+        "path": "ui/theme-packages/village/assets/applet-scenes/codex/background.webp",
+        "sha256": "a9dd313426b7d5a428e0ac379187b5ff30684a66b8b7df1997084d6d2cfbf942"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "codex",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/codex/effect.webp",
         "sha256": "4f2d809aca52ea07a5355d2d1132c04a2dfcabe706bb4548d20d3801219e16e1"
@@ -853,11 +853,11 @@
         "sha256": "d33f1efd8e2b6b566771d9a38d0a5329926b4faa99ed7e6adbaebba9fe8f7a59"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/claude-code/background.webp",
-        "sha256": "9616937d95098d473d9a72c2e4a42730ca31a006d38f752722a47cb5c7197a82"
+        "path": "ui/theme-packages/village/assets/applet-scenes/claude-code/background.webp",
+        "sha256": "ba6c6de823fd12b5d1e03add347d1f89a87076374b5cb829af9d1e164dbc1044"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "claude-code",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/claude-code/effect.webp",
         "sha256": "777da6275fcbbb1e921067e799df5233f06d28fd591291936b2ec164db9aaa77"
@@ -873,11 +873,11 @@
         "sha256": "4f6ba7e7d33f5fda3f011bd3699240d221dcef4182ee9b1af6d78bed7bf331e3"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/notion/background.webp",
-        "sha256": "145600fafcc13f78ee0a57128571e917730ddb5efa8adbc032765c033346f550"
+        "path": "ui/theme-packages/village/assets/applet-scenes/notion/background.webp",
+        "sha256": "2217bdc8334d571dedd9c45a3c19158b0aad84fc35934e47172440924149e649"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "notion",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/notion/effect.webp",
         "sha256": "dde3567bbfc20f6f070da71a82bcf4adf94ebc33eb3d36135a1b6c0c90393f7d"
@@ -893,11 +893,11 @@
         "sha256": "f4a5d027ca9714fa2bffab6100d70dc0da33079f1277327477ae8484dd44df4b"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/obsidian/background.webp",
-        "sha256": "822bbb7e94217a74a48f05e0472030e4d0c1bd1b43f316a6836abcc1ef5e37c3"
+        "path": "ui/theme-packages/village/assets/applet-scenes/obsidian/background.webp",
+        "sha256": "43f2a0670b9b5b4114b7a4d23470e4900801a13b7d6c3cafbca11dcee0a12cf2"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "obsidian",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/obsidian/effect.webp",
         "sha256": "0bc6490484ba6b6d0894381393f12fd6554c3073a814ccfa77492ddbb5955fce"
@@ -913,11 +913,11 @@
         "sha256": "70a227dc24cc37c6f1e6ef39c92348f3b7c93a428bcc479e6e2ebbf96163f27c"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/plaid/background.webp",
-        "sha256": "fcda66a1178ac3b574a51efa5a71790101838f0e8deddca005c08512e6174013"
+        "path": "ui/theme-packages/village/assets/applet-scenes/plaid/background.webp",
+        "sha256": "fa38165ce979a4bb0168369d419ccac61a4abd5539c0ca568f1441f283510bf7"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "plaid",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/plaid/effect.webp",
         "sha256": "401a36055c0775ec64c67ae40b329b85f96e31424cb7f2a10a771a88ab2c986c"
@@ -933,11 +933,11 @@
         "sha256": "184d2278007574d98b894297da1f9b879930139a0edb0ea0ab694e0bd962954d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/stripe/background.webp",
-        "sha256": "d1df6271ee95e8db63326bb4f43f5ab4533f0430948874ecc1e0dda984fcb963"
+        "path": "ui/theme-packages/village/assets/applet-scenes/stripe/background.webp",
+        "sha256": "37aefb8ecac1a4758af122aa2986e2abddfd8a72de0fdf9ae64db73a7345ff8b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "stripe",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/stripe/effect.webp",
         "sha256": "1ca576c290f9d99017b7af6ffa4f1988f5ec16aeb7bc8b5c98c9f21124528d48"
@@ -953,11 +953,11 @@
         "sha256": "234ea9d7bee980904fdec467be5886fabe130eb16521723015c3f117fa69bf52"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/paypal/background.webp",
-        "sha256": "552cdfef84987ecc4244b51fc6a4665692b4d02265fc738ba322bd04df7c54bd"
+        "path": "ui/theme-packages/village/assets/applet-scenes/paypal/background.webp",
+        "sha256": "8dd7ffb9ca84ca05cca3f8fa718c6d7b4dd1d93797950b98ed8d26450fb6df87"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "paypal",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/paypal/effect.webp",
         "sha256": "c0c8e883739d55d3d92836ba2ed5fabaae3e87fdc85048fefa5dc53669760073"
@@ -973,11 +973,11 @@
         "sha256": "10b5e3cb0ffb152f1e9faee87826ab10e1d6c9e5a7eb46920e66d88730d74154"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/todoist/background.webp",
-        "sha256": "cd5ad5211e0be5a5fef59605aa08f89f6b67d902c303eab8ca5006cf5a93bc98"
+        "path": "ui/theme-packages/village/assets/applet-scenes/todoist/background.webp",
+        "sha256": "372e19c1605b0b4f1d5f0b89266eecb53b82835df8324f74d26387021b522002"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "todoist",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/todoist/effect.webp",
         "sha256": "cf80112ed0af9a571ba2ab3850caff056788bece60f75ff177b47c126bdca3a9"
@@ -993,11 +993,11 @@
         "sha256": "0336c06ed91f16230c22ac26f4d325a3ff8349adc92624e8c9f8073a57eea073"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/linear/background.webp",
-        "sha256": "26e6d9619910b9f3242c8de9869a42c4aaff63a26d1052b4decf04ddd673fb3e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/linear/background.webp",
+        "sha256": "5e5953604d54df2fb0b21cdfd6a505c4630f41046ec06cf3356b16df5d7f8222"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "linear",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/linear/effect.webp",
         "sha256": "98663b4754fe7cbb7bbeae94b0a1fc0b8d5a3b68fa58358cbe37aaf7a7540614"
@@ -1013,11 +1013,11 @@
         "sha256": "ea768f593ccd3261b5f8d4dc0c54c748496814e3ae870dc2dc9ed28c009407d3"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/supabase/background.webp",
-        "sha256": "959a0a4ec3f6798979682a1c1bf3c7eb8ddca0846bb42cce2135abe2b860f77e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/supabase/background.webp",
+        "sha256": "7c26e19bdc55e3a3528071e0faa3f7ef85ba9a6ff7e72cdba9402082ec0ac659"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "supabase",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/supabase/effect.webp",
         "sha256": "6f9327ea62e9e193018ff2c8af8f9e2e3a37e79bd5a0354e6e8a98750493af56"
@@ -1033,11 +1033,11 @@
         "sha256": "7de0e6119481f7505b02ad01343e8b5060725f8119056cb758c359f9ada26c02"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/docker/background.webp",
-        "sha256": "8b0e6a6fa5acd4a4e8a1d72efc1fe24981c2cded80d7a2e37472411b81779495"
+        "path": "ui/theme-packages/village/assets/applet-scenes/docker/background.webp",
+        "sha256": "ca1883cf31ff7b8cf017d48aa9201b82ba55c6f022a88242d461a8b0b14352b3"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "docker",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/docker/effect.webp",
         "sha256": "1f08454981ff938eddcbd923e29b732d235d676530f856ebc3e860935638180e"
@@ -1053,11 +1053,11 @@
         "sha256": "5cf2e34ac0f72e9cae1b89cfef2dd7c4d1b6c2fd5c6f5a296c3f841ab21d5b5f"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/google-drive/background.webp",
-        "sha256": "1bca5b3f824e86ce1af08b7b83abac87ae729d5a199628ce105ff837d45afbdc"
+        "path": "ui/theme-packages/village/assets/applet-scenes/google-drive/background.webp",
+        "sha256": "d0f40acdc0b02f650900967faa6ca5fb9389dd3515b41d66c2166ddd7cab6574"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "google-drive",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-drive/effect.webp",
         "sha256": "015f731aa719926aee9cb6be79e50d6be411128eb47031ae8c0956754e2210fa"
@@ -1073,11 +1073,11 @@
         "sha256": "04f5688301a4e2f20f9c6e239d1a50717a18c106a9a20ed273647f6b0d7d9a7e"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/google-docs/background.webp",
-        "sha256": "a01d036dfdab83054258d361f75f1f2a69cb3a5ef019055c2d431f0fea3c1d06"
+        "path": "ui/theme-packages/village/assets/applet-scenes/google-docs/background.webp",
+        "sha256": "abac1aa65a9c6a1ca228e3e540fbc4f37c7906d1918da40ab597b895a7eb97b8"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "google-docs",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-docs/effect.webp",
         "sha256": "f69ca4d836a348533d0c5431559acc2bb4bbd7c9ec3ad16ec04c462ff7621b42"
@@ -1093,11 +1093,11 @@
         "sha256": "915296937307c426975c01703b0562d9608966eeda922bc480b2368933dcc75d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/google-sheets/background.webp",
-        "sha256": "4072afe04e683e3fd6e929df4dd955dfa152f6f452ee14627649b5b98e776dda"
+        "path": "ui/theme-packages/village/assets/applet-scenes/google-sheets/background.webp",
+        "sha256": "35eb0fed4282a5f7e4863c5e20d901766940e194807d6de15e2cbf5ff9f023aa"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "google-sheets",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-sheets/effect.webp",
         "sha256": "3bd617754a9241436fe8063225d98e1367c1e82e0a0525879e6f270c1d72fe1a"
@@ -1113,11 +1113,11 @@
         "sha256": "bc5552ce7c903b237e63d722b9fa7e7420296efaf7e380118b33c9d3c034a37e"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/google-slides/background.webp",
-        "sha256": "5be3ab56b66030f9d29bc688ce7e27e6c31a92f7bddc2fd18721340e55a25880"
+        "path": "ui/theme-packages/village/assets/applet-scenes/google-slides/background.webp",
+        "sha256": "de559ec310f20d484ca1d89de9bcde242f5c450d6b3c678ec5a70d246c038c90"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "google-slides",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-slides/effect.webp",
         "sha256": "8948e26c1d92fdef065cce7eb4b99ea2cd5fbee2928211f862b740e530b1229e"
@@ -1133,11 +1133,11 @@
         "sha256": "0a06375a59582941dcebc278311a2da7e3cd6d76f4adb31f3090d43636130e11"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/oura/background.webp",
-        "sha256": "79cf9ac675400a6d4f1ef14080bb0a6e6b911c5d8f2be81a8da2fd5c4536cede"
+        "path": "ui/theme-packages/village/assets/applet-scenes/oura/background.webp",
+        "sha256": "141292b7b774cbb73f476e7ae4d0dab7b29425643b37f64acce36b0298176c40"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "oura",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/oura/effect.webp",
         "sha256": "888cf2948eef893579280d43c4972962baecf137f3c2d2cbc38354741c5ae77e"
@@ -1153,11 +1153,11 @@
         "sha256": "aa0b3b9fcaf1338654b3d9db227eb9bac8abdd334dafbc0c678f00e30bfc9d76"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/strava/background.webp",
-        "sha256": "3e5c784c73a3d9474d0cf86b4e4c124f1e784a30bb979ef6b5af5ffd9c74959f"
+        "path": "ui/theme-packages/village/assets/applet-scenes/strava/background.webp",
+        "sha256": "d030ec434152006e4b1e36aba4d58a008b78aa56c583a0c60299e31c3812bc4f"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "strava",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/strava/effect.webp",
         "sha256": "31879d39505335890a2e6c056689c7d62a8dca0da57c7d6ca9f37ff97c7017d8"
@@ -1173,11 +1173,11 @@
         "sha256": "f84d3a5fcf6149e433eb9c9b64be20e1440547a0f3d52995cb561d5ca7147256"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/fitbit/background.webp",
-        "sha256": "f3c2282878315088fc5d62c3be28d98a3c1c9cea102cfe9ce8b2e89309bbe0fd"
+        "path": "ui/theme-packages/village/assets/applet-scenes/fitbit/background.webp",
+        "sha256": "b6a3fb8d22a7f95efd9d5767d2112e4726a96741c94e330a6fef9712b27c8c21"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "fitbit",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/fitbit/effect.webp",
         "sha256": "251b8339b6f1a255ac262f7f880d098330747627eb26eabd5765decae530af45"
@@ -1193,11 +1193,11 @@
         "sha256": "d648335f7b91ea5b036c3339f4fd2141e627937e4e79990d38d5dfa6051bbe32"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/google-maps/background.webp",
-        "sha256": "473def687d299e2fa1c86e13dd3fed4f02f157c1baee3329f4aff624abc68a82"
+        "path": "ui/theme-packages/village/assets/applet-scenes/google-maps/background.webp",
+        "sha256": "e5fe3310f12805e94d3e0d2021cb3b61fff8352c585046e0e4b1a80f01cc74e2"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "google-maps",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-maps/effect.webp",
         "sha256": "8c19aeb2f175cc6a06ad280f56ffe8e05110c8371c403e5c5f41a4607fe3d6e0"
@@ -1213,11 +1213,11 @@
         "sha256": "dc36aa75b53fe8b01f6432ac3ba080446908fd673994f30697c2c98cc5442a88"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/airbnb/background.webp",
-        "sha256": "7e9bfe2ef4d1c1269d734e4ffa56ac458f83944baa4cc1439927bdd338570af2"
+        "path": "ui/theme-packages/village/assets/applet-scenes/airbnb/background.webp",
+        "sha256": "4449933eed58a9e12cc1a1cee55149566c68bdeea3dc78f567c356f8252ac407"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "airbnb",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/airbnb/effect.webp",
         "sha256": "cb1ec4609d90f3e7914f7e0195ecfc8de84aefbcab566307dbbfe8a0ef58125a"
@@ -1233,11 +1233,11 @@
         "sha256": "135aad597b521fcf74d8547f8c10acf71d7a7d3310ea02cf2b20b068b5597129"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/tripit/background.webp",
-        "sha256": "5b265eebb9787095e63a4eb74bfb07e908b365d71324a76cde6cdf308a093c15"
+        "path": "ui/theme-packages/village/assets/applet-scenes/tripit/background.webp",
+        "sha256": "21dd65a5ecfbc0415f0f663acc756e03f25e9aedd2b5dc205e840dc4222645bc"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "tripit",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/tripit/effect.webp",
         "sha256": "4085fec646823bd1a205440b2f59bee3113430a99d5b5eb27918baa0dbb132f7"
@@ -1253,11 +1253,11 @@
         "sha256": "532bc7ae8943be715357e2dbfcc3ce43036d4705f9b7202b2aa2c791d81375e5"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/x/background.webp",
-        "sha256": "194a94398adc767a6b1939e34e4d413874d6c830d167c2fc2e34743018b403a7"
+        "path": "ui/theme-packages/village/assets/applet-scenes/x/background.webp",
+        "sha256": "66e20b2c7390fa063ddc3c6861e32d6ee91778165195fd65815ac6354ef5e4a4"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "x",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/x/effect.webp",
         "sha256": "4800d4c32d92295795135f9f5e008eeabee7fa1ed2040646cd2d2abbd64b7dd4"
@@ -1273,11 +1273,11 @@
         "sha256": "6a77d3c45f9ec739304c0237619061d30d0ba5256eadd3abd7af3bbbe420470c"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/youtube/background.webp",
-        "sha256": "4f17881f4a3171dec0bada8680483e34f6603b4d31824a828f3c8439b251fb99"
+        "path": "ui/theme-packages/village/assets/applet-scenes/youtube/background.webp",
+        "sha256": "bdb8ab63f45a505741169a88cc2c24e87808c0fa34e430116a613baf0bab6d33"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "youtube",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/youtube/effect.webp",
         "sha256": "d7fb8e9bb94a61ed88dd5aba83e6823dcc80f633ca7b200599cc39b95278ec6c"
@@ -1293,11 +1293,11 @@
         "sha256": "4aab4870b54f7e036db400ba8984d90bed39c0743dca4704f0456b45f8b8c241"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/tiktok/background.webp",
-        "sha256": "a35bca29fdc84cb9f21d5b5d2f821b32c20a63349a9b79bd5192a2cbc5b21ad5"
+        "path": "ui/theme-packages/village/assets/applet-scenes/tiktok/background.webp",
+        "sha256": "eb9f7649b8d434505567825359ebe5f186cc9a44ca91f7ec6e8a02f106e9b997"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "tiktok",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/tiktok/effect.webp",
         "sha256": "fd089185d1bb068db2f1f8174357c6bec4d5a9dc5731bd87baff3b57a7bf2a58"
@@ -1313,11 +1313,11 @@
         "sha256": "11a79de41f485cbe137f9600ef450ef3cfaac9bede3b50aea77cac6e49dc1e89"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/discord/background.webp",
-        "sha256": "4b7e7ec2c0dbc12f84b680e3e7e53a3fd056b755c8b718874732f7b10eb69546"
+        "path": "ui/theme-packages/village/assets/applet-scenes/discord/background.webp",
+        "sha256": "1771c26444da0cb7473330aefea384a612c0f288f867f0a1cf61a00358a3998b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "discord",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/discord/effect.webp",
         "sha256": "edea427815825178162725abdd62cb28a71d0b007416583dc5c2fa025f6e31e5"
@@ -1333,11 +1333,11 @@
         "sha256": "64a4f2273f96bed12c7655fe52241d4a8a3ca8871deca36cc8fbf4b2a8ed8043"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/doordash/background.webp",
-        "sha256": "909cda033228860741beef2e3c664b941c678fb4566279d516458517188e5969"
+        "path": "ui/theme-packages/village/assets/applet-scenes/doordash/background.webp",
+        "sha256": "49845c04e5449b3059c092fa6f1caeb671b4953b7dd660c74403513bd1d5642f"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "doordash",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/doordash/effect.webp",
         "sha256": "41ef1619b49f5d6a2fe0ef44bc05b6add6418f2097c05740006b34c110451d47"
@@ -1353,11 +1353,11 @@
         "sha256": "d2d11cf3f2c805ffc9826ab539d076d77aeafaea0e1ae91c0fd8329b3bf769a3"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/wordle/background.webp",
-        "sha256": "7121e2d8d0c79410df262833e926231ace88ba76da8a497d80c13617e01cf372"
+        "path": "ui/theme-packages/village/assets/applet-scenes/wordle/background.webp",
+        "sha256": "0b99a0db04f3aa71ddc420a95916baf3d63189ddcd6541c966f7f4c08b8e9e9e"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "wordle",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/wordle/effect.webp",
         "sha256": "09ba9e532cbbf9e03a121cd9332109c484bf73dd1d62f24212b59f5005a0084f"
@@ -1373,11 +1373,11 @@
         "sha256": "8b6c48a14f280abb358b8ac17e7ac054f12716f87379036733a8141683f0a32f"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/nyt-connections/background.webp",
-        "sha256": "98cbc7f422fd12cc1c8f3bd88d39e2da0ca75a63ab259acc358f987669506f1f"
+        "path": "ui/theme-packages/village/assets/applet-scenes/nyt-connections/background.webp",
+        "sha256": "fb5975eedd10cb59548fc6e3b7bab704f2b1b1433b2941e5c299827a84f8db22"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "nyt-connections",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/nyt-connections/effect.webp",
         "sha256": "c97c8af3c922360ac0e6c2ba365ca4505c860c6b98dc65a9c3c30554816d164a"
@@ -1393,11 +1393,11 @@
         "sha256": "aefced09e7d088fbb8a9c7b407cfc28cac69e1f2190a39c97b6e86503d41536c"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/slither-io/background.webp",
-        "sha256": "e7801344f7de13ae441589c556fc6a159394e90f73e4b6d83b04041b9b20a89e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/slither-io/background.webp",
+        "sha256": "ac995b298da7c57e6b442bb40b2658980cb433335977878f12ef535b502e1b52"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "slither-io",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/slither-io/effect.webp",
         "sha256": "4909ab583c46f7e5ab42233410c6d77d4ade728ec01f782ae6d10eaba65012a4"
@@ -1413,11 +1413,11 @@
         "sha256": "af530cc7a0b1c51587cdb1572161e8d125ae97855c0e6bd5b253964eabe03f48"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/agar-io/background.webp",
-        "sha256": "b3a70b07e1532b288ebae0f4afa125a47c4788dfb3693700b630cfd2409267b3"
+        "path": "ui/theme-packages/village/assets/applet-scenes/agar-io/background.webp",
+        "sha256": "c555688d647a285178327327ed5b6df8a2118adf8564fb5f5aa0f59270600e35"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "agar-io",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/agar-io/effect.webp",
         "sha256": "26dcb6ff5766ea8b9c325c19675eb84afef08dbd13b239b0c5746ac03354468e"
@@ -1433,11 +1433,11 @@
         "sha256": "60f4b30843c062af222296a65ac90e68d7df283faf63cbaeabee139357059e26"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/krunker-io/background.webp",
-        "sha256": "ba46ad184afad5c16991ed7169bb6d24acc6bf21879736ef0bfba20685d3ce7d"
+        "path": "ui/theme-packages/village/assets/applet-scenes/krunker-io/background.webp",
+        "sha256": "4cfe75412edc1e7f7d949d2d89ce2d21e89c9317f9cf0bebc10b2841cb720985"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "krunker-io",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/krunker-io/effect.webp",
         "sha256": "b369093ec81d58a60873a0d326be09f6a8dee696bfbaaf71fc066134de1b8d2b"
@@ -1453,11 +1453,11 @@
         "sha256": "f186fd2e60825acef419c8ebb530782c2f7eb87c13b876b6a6d5acdcf9d82bb2"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/skribbl-io/background.webp",
-        "sha256": "6926bc437f403b548c0d11d080381de599d96a0ff5348cd269e01c8d2f40e152"
+        "path": "ui/theme-packages/village/assets/applet-scenes/skribbl-io/background.webp",
+        "sha256": "492e5bdbdc04ae8639ceb35943815c331510251d6e158ea87d1bf0ce1aec12df"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "skribbl-io",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/skribbl-io/effect.webp",
         "sha256": "470eb0976e3202a0569e7c85afc56eb6bf9d494752058ed7e14dec0405b0ef7a"
@@ -1473,11 +1473,11 @@
         "sha256": "8bb8efdca9b04a506843acc9560bfa9f5a2174dbbfbab244f3d2bdb5194e9948"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/infinite-craft/background.webp",
-        "sha256": "8c1825610f72f99bec300538869150435b74fd483f11c91c18a9ddd1a9a73ddd"
+        "path": "ui/theme-packages/village/assets/applet-scenes/infinite-craft/background.webp",
+        "sha256": "e5cd8f59a794f3435905274049e20dc67beee1f44cd681113de52d76f1c71fa5"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "infinite-craft",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/infinite-craft/effect.webp",
         "sha256": "5dbea8f9509ef03666b0ceb3cb02260ffc61e0c1e3c4a61e51186db2f844dfed"
@@ -1493,11 +1493,11 @@
         "sha256": "a6db1c84519490ff8f01443acc81cc18fe5855ddf676f0066d37ea69ed7d91f1"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/little-alchemy-2/background.webp",
-        "sha256": "57d2c1d65dbe78797968fc2561ff6ae7e2bacad1839f3420b6dab9c59a9e7991"
+        "path": "ui/theme-packages/village/assets/applet-scenes/little-alchemy-2/background.webp",
+        "sha256": "7edca685105264d7bf5625469ec6ce0e7d8bf2fde6c9556dcc6cc80d4d80e421"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "little-alchemy-2",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/little-alchemy-2/effect.webp",
         "sha256": "7cb24a40befb7d18e1a67b36b5e00cdf8e1db599548b329de4932f4455f0ac23"
@@ -1513,11 +1513,11 @@
         "sha256": "316807a9917f1f2d9badab06e9f8b879ea7a48d6fa679ae948c1e72a50ee792f"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/cookie-clicker/background.webp",
-        "sha256": "1471da456edcbe98d319dfd7307cca70ed0eff7fb40ef5c279e3831f1559d611"
+        "path": "ui/theme-packages/village/assets/applet-scenes/cookie-clicker/background.webp",
+        "sha256": "77bc218d89e3c4bf96a9790daf52a12ddaefb1cf0c44ef0f206b9a617a2bed60"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "cookie-clicker",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/cookie-clicker/effect.webp",
         "sha256": "26c5626aa65b4d184a2cfdff13bb515969d7cac9c9cb1a5fa3d3c121a0bb7dcc"
@@ -1533,11 +1533,11 @@
         "sha256": "f1f62a289046c6236ee20268ea83b2bb5b7263dd88a940da9160e11b3ecb7a5a"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/lichess/background.webp",
-        "sha256": "2ac287dfd9f2ffb1afc981c9cd88da1db803669353bf6d333055366c34c8526b"
+        "path": "ui/theme-packages/village/assets/applet-scenes/lichess/background.webp",
+        "sha256": "2a2712ad4c2885e745586cf10f16f9484226a89fc25c9a4bc77bfc840b8d2c32"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "lichess",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/lichess/effect.webp",
         "sha256": "238db1b0a6569ed633b42c4277a4aa1fb19d901ef9968ef60a37789085f38ba1"
@@ -1553,11 +1553,11 @@
         "sha256": "20ad9eb7cf57784d1684a0dedcd62572e46ffa47213b2f752605d5e93822762e"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/drive-mad/background.webp",
-        "sha256": "dab3a108230ad13339f925ac652b082fa18d48ed3bf0cce569067be378c66e44"
+        "path": "ui/theme-packages/village/assets/applet-scenes/drive-mad/background.webp",
+        "sha256": "bb67ba1e30b5c053ea7c8249a2867e2df9c8aca6f77508e42f0284ddfb1fd864"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "drive-mad",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/drive-mad/effect.webp",
         "sha256": "2f0df12ae81ff6527b05a5b42319748c558b0c6f03fc1bd3ea43d19b62b02b24"
@@ -1573,11 +1573,11 @@
         "sha256": "c32d787cac31cfbfe858f324cf8a9e4ae84bb6b2f4f7c149a6e07be393bdf4c8"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/subway-surfers/background.webp",
-        "sha256": "5b2ecbd5ec05d503e9932283be0ddca8f5a9cbeadcc3aeab057f72c5b4a085a7"
+        "path": "ui/theme-packages/village/assets/applet-scenes/subway-surfers/background.webp",
+        "sha256": "f866ec527d2a01b5019fea929e0c956fcece0a22071ea5a4841161fa70b396d7"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "subway-surfers",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/subway-surfers/effect.webp",
         "sha256": "47e73166c49e3e7fb2717a8af6624a26e99763312385d20903d218139a704b42"
@@ -1593,11 +1593,11 @@
         "sha256": "29b600b1dae30adbb0bfe979d60c2534ac02587403b200c0938189c3a01b6f28"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/sekai/background.webp",
-        "sha256": "7dd8741084bf9537d6fe088079c17dae19e765fe07fa32ef0eb47d68cde04a98"
+        "path": "ui/theme-packages/village/assets/applet-scenes/sekai/background.webp",
+        "sha256": "604bd67b77e63de2cccd1c9b290946cdefd95a16f5cfd4c222ea83bd9f2062ad"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "sekai",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai/effect.webp",
         "sha256": "18782dbb85b5bfdc3b9fc7cb0439532020f2d73b1a20f0674d46ea14ca04f4e1"
@@ -1613,11 +1613,11 @@
         "sha256": "2bcae0e2617c6489dd31c117da9ac1da38087ceaf8e79e6ab0bdfb5d02f02306"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-sketch-racer/background.webp",
-        "sha256": "1d8a25730cef998bc2c1d842a619a9aaffa3002597aacc9530470fb1813556a2"
+        "path": "ui/theme-packages/village/assets/applet-scenes/sekai-sketch-racer/background.webp",
+        "sha256": "f2531e072c3f9e16f7e373c082e8bdc0142f583a5d42bba8c6d2f2641701f097"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "sekai-sketch-racer",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-sketch-racer/effect.webp",
         "sha256": "8e690f0fc9cb5f4283cbaf3c9aae7e1763879a14ef4f80b3b9f77acdb4d0fbcd"
@@ -1633,11 +1633,11 @@
         "sha256": "a8938bacd4ff6ac41d5fa80b3a001829936909113e15803521aa7aef966ba1b0"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-3d-uno/background.webp",
-        "sha256": "5bbfc5aa2669ce408d76f6eedf25e5c410f2dbaada219ca42979273ad6e4ac7a"
+        "path": "ui/theme-packages/village/assets/applet-scenes/sekai-3d-uno/background.webp",
+        "sha256": "a60c0167ac9d283fd404a68419c52d81cf645849828c1c367b7db52ae3bf580b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "sekai-3d-uno",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-3d-uno/effect.webp",
         "sha256": "10682958aff5b073d8bf9b89860947cf93ce1efa4858aad7d81afeb5494a3653"
@@ -1653,11 +1653,11 @@
         "sha256": "c778e13739ddad7ba61f70c736fd31e6d6c1c290f6afae3f0f80ed37b48280fe"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-devil-level/background.webp",
-        "sha256": "200d3904b370acbd1c8f61f74509f9f1cb31e46d815361b44c98db50e1ccd094"
+        "path": "ui/theme-packages/village/assets/applet-scenes/sekai-devil-level/background.webp",
+        "sha256": "b6ee98b98445d8dea0964722733792100284ab41a38058a5e0ad474cc45a1652"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "sekai-devil-level",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-devil-level/effect.webp",
         "sha256": "fa33e54e36b1df1efc00b8c1b22992061162fde0e960c3c09a57645215b06175"
@@ -1673,11 +1673,11 @@
         "sha256": "a665fe5fc8e529e96e2a9723c8b1fc079c863782682c3af297a7db6b24fb3840"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/background.webp",
-        "sha256": "a4508a3aed1c06b2cb3e255f4b6eb20994509e386283d40ebe32328215056df5"
+        "path": "ui/theme-packages/village/assets/applet-scenes/pokemon-showdown/background.webp",
+        "sha256": "60f0ea6857dc1cdba8a86d74d44aebe3b7ee64beb334d6c96fb3383abd0d9f18"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "pokemon-showdown",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/effect.webp",
         "sha256": "3b0aad0f62af1ff16aed1269fc96ffd541c953ca0bc88ef097cbebf9a0a430b9"
@@ -1693,11 +1693,11 @@
         "sha256": "c8175f17b6b17a60ca45e60b4cbf3d0c528aa59e6b2a1d4cdc22c7b3da31fcd8"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/chatgpt/background.webp",
-        "sha256": "cdd479b5c5a1ac69a403cb0569bfce19c54225421d3228fe49ac06301b66d2c7"
+        "path": "ui/theme-packages/village/assets/applet-scenes/chatgpt/background.webp",
+        "sha256": "6429a264eb0bbc3ccd2dbcd2145e7b6db862f8818297aa87c49fada260129b13"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "chatgpt",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/chatgpt/effect.webp",
         "sha256": "e01f64807634371ea3d50d58e2d7903c247cd2a24d7a750747a7468ec20a1ed4"
@@ -1713,11 +1713,11 @@
         "sha256": "328e80eb30087d28cfb733aab6bb2288fa0a2684bea128fe98f7ed018c16667b"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/claude/background.webp",
-        "sha256": "05b8054f9b2bbc0ec7a9a7233f44afc89d9ffa7dee98a1e132c7e47fa1de3f31"
+        "path": "ui/theme-packages/village/assets/applet-scenes/claude/background.webp",
+        "sha256": "23d0d842f94c77c1aae28ec166f1fa722c42c958a964a1fe3879b1202abff14d"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "claude",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/claude/effect.webp",
         "sha256": "d856b40db398e65b7a926814ff01a742b1f015f6944e241d6f347a20d40a7acc"
@@ -1733,11 +1733,11 @@
         "sha256": "daa2bafdcd27ac32c35bbf27ebb6b09ff168f3a46f164a236e03461d2eae688d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/gemini/background.webp",
-        "sha256": "d9477a4a52ebb32f5dbc362d5ed6936fc3732ba478ea5e826f99d5a0dd3f2a2a"
+        "path": "ui/theme-packages/village/assets/applet-scenes/gemini/background.webp",
+        "sha256": "dea4f1afd9b8016beae1bd95cea3fc7fd57c8b321649efd6a7d8509ac1dd6aa6"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "gemini",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/gemini/effect.webp",
         "sha256": "0964d2bf0e8b9bdc770d3f1e14a6f59d3b48d1b21da2e0500a801bd9afa0c423"
@@ -1753,11 +1753,11 @@
         "sha256": "497bfa8544adba514cb07b21f3ab1923576a4ca301355385600ceed165a568ee"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/perplexity/background.webp",
-        "sha256": "d9e0b64e86defc6ef54259cdb7937a549a15d3656ee9319ce53854fdbbdd4e91"
+        "path": "ui/theme-packages/village/assets/applet-scenes/perplexity/background.webp",
+        "sha256": "f796d35ba6d1e74acd6f00aa83dfdc9eb282bb22b93c8b853282ab0ab5fc48f3"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "perplexity",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/perplexity/effect.webp",
         "sha256": "c12e17808264bf034ef22b505dc63c08d31e6caef6f296015ef38de460bd8f13"
@@ -1773,11 +1773,11 @@
         "sha256": "47cf01a8df83f76de099a4bc9a8bf10a5eb0299836154d17a2777a88c1b4921c"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/deepseek/background.webp",
-        "sha256": "6faf3720373c651406ba561801adc8266a96bb5221fd6975dce140979ad8f0bc"
+        "path": "ui/theme-packages/village/assets/applet-scenes/deepseek/background.webp",
+        "sha256": "e858dc550d81c7c0e58de0b5f7484c8be5bb239da231fb65124c70007958b76b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "deepseek",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/deepseek/effect.webp",
         "sha256": "4ebf9c0c956f0ff025c19881fe01ca700e8f0bea866ec33005cb15880d04bfb9"
@@ -1793,11 +1793,11 @@
         "sha256": "7600015bf177e75bdfe1383b62e07dd0b08091e0ce7618666701c375be214f35"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/whatsapp/background.webp",
-        "sha256": "ba7e0c7ddd6c5fde53c464420185f68862b1d764fd9c03f3efe9c033c4b26c67"
+        "path": "ui/theme-packages/village/assets/applet-scenes/whatsapp/background.webp",
+        "sha256": "3dba8b6a9fd75ea25a45a031b301b2efe89deac7e82724dfc15acacc6b1b8498"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "whatsapp",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/whatsapp/effect.webp",
         "sha256": "d1fe758009f156770721ba09828afac25ab616cdeb9862e7ae9ad44f85a5f5a6"
@@ -1813,11 +1813,11 @@
         "sha256": "54c53b66699c14bee0f34bde71dd3a86b826e06cee2fd64fbd8dbba6fa44d18d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/telegram/background.webp",
-        "sha256": "bfcd1b2ad92f0de877a2cc0c916404706f460d260a8dc0ec5ff8a543339fc443"
+        "path": "ui/theme-packages/village/assets/applet-scenes/telegram/background.webp",
+        "sha256": "9878f3fcad2864ded7977b43ad1f7c7019a42a0a23e0bdd74f5ec27e93d16046"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "telegram",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/telegram/effect.webp",
         "sha256": "f52d36ec8d6622d37187311da304326897866453287cf7b8147a747a9b072640"
@@ -1833,11 +1833,11 @@
         "sha256": "6b7e31753b9e829238af2d628ea719c880dbaf90f0f28f6c5b9159f251d35a9a"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/slack/background.webp",
-        "sha256": "2f2d1578799ae0811a68969a55e9a09c76f3b6c4a9ce2ce44caef643898ee25a"
+        "path": "ui/theme-packages/village/assets/applet-scenes/slack/background.webp",
+        "sha256": "6b018fb4cf86d6b57be99ff2f2170a61166539976509bcb12cee17901779d282"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "slack",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/slack/effect.webp",
         "sha256": "75a30ea59ed8275e1bdd9c4f402341822275db63ddc9599043dc97ca643d7d7d"
@@ -1853,11 +1853,11 @@
         "sha256": "c974fad6f18f3f1bf0729f07b99c316d45bec72e9a81d2942e55fa32799993c2"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/teams/background.webp",
-        "sha256": "266aae92d88852e4ae5f0c662bc9c4fc8949845780e48ee8e691a349fd36868e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/teams/background.webp",
+        "sha256": "be598bd567f497cfaea169a92b3e7ef94dd38dbad85d433cd0327c3f6396757a"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "teams",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/teams/effect.webp",
         "sha256": "e131a3ab3190c3925c39ece97171b6353f681e999365b8096265f30b3a9319f9"
@@ -1873,11 +1873,11 @@
         "sha256": "bc042432de9a6e48a85c02c0366391cecff7194de12bfdea52e6df4693ae0e9d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/zoom/background.webp",
-        "sha256": "dc8e31b38bea88af8847d47267a2872c3eb8cb89e2e4f6a877948a2c29a27be1"
+        "path": "ui/theme-packages/village/assets/applet-scenes/zoom/background.webp",
+        "sha256": "aaebd46cdf043d7186054b765fd7802ce0d0a14f76591ae195f64282ff78a9f8"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "zoom",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/zoom/effect.webp",
         "sha256": "a5f57eb98c7a19a48bc17cafdabcf2279f90928ad51e585c7e3ce3dd80cc977c"
@@ -1893,11 +1893,11 @@
         "sha256": "f3abdd80f95cd11d896b6f0d96f49b1c7d5c036abe9244cb7f3bfcde1287bafb"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/dropbox/background.webp",
-        "sha256": "f5601f3b27ec73e87bb749a6fffc8b1245bc4af9230c311facb7c8e580df8a42"
+        "path": "ui/theme-packages/village/assets/applet-scenes/dropbox/background.webp",
+        "sha256": "8811f4b5ec067d64cbb6d8746b28c7de5349eabbf459351aff73f6217a859ded"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "dropbox",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/dropbox/effect.webp",
         "sha256": "1e3e3ec21f35796c771a25c240d7555bf1d0cf5e8fe5f2ff9e4bd2159e543336"
@@ -1913,11 +1913,11 @@
         "sha256": "dafb8c863a777bc82f0e134d3046324bf7740043b79e9f19655646a95ce59ee5"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/onedrive/background.webp",
-        "sha256": "53c351c9d3c0ddffaab12239d4dab606532aafbed33ff30137f8eb78d7d82611"
+        "path": "ui/theme-packages/village/assets/applet-scenes/onedrive/background.webp",
+        "sha256": "262128282aabb0670d05fd4c65449c290a2667c0627cdaaf76a19c91d0bc678b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "onedrive",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/onedrive/effect.webp",
         "sha256": "27b5d1fe038beed04649c462f623b02247ebe3db063b0998c1048b369edd3cf2"
@@ -1933,11 +1933,11 @@
         "sha256": "20853b7aa4cab90a00400133b9cbad6a3267d7473984a7c52537391f144e3184"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-word/background.webp",
-        "sha256": "359a84347a6f8e15a5fb1db55b778625c81fd07233d0e5a3a9af5e7bfd030646"
+        "path": "ui/theme-packages/village/assets/applet-scenes/microsoft-word/background.webp",
+        "sha256": "2326dd0e4be5cbc5e999115e6f8552431dc25c5ff8ed4f6086545021dc7a8d76"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "microsoft-word",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-word/effect.webp",
         "sha256": "bd2bd37c0a189221cc2b2af3e8aca76f27761a34a891e1c76bac5163dab4f7dd"
@@ -1953,11 +1953,11 @@
         "sha256": "13a85030b68737d2f248494d5c523fa08d46fc6ea939867e52e2e1392084a81c"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-excel/background.webp",
-        "sha256": "53ede516a26ddbd7d14fb045bdd842a020b33d0d752e9ac0a7cf3d7e26139b27"
+        "path": "ui/theme-packages/village/assets/applet-scenes/microsoft-excel/background.webp",
+        "sha256": "f957209271d5940b873a1d00ed8805e3c238f4c656c261bcb05f04995a22d07b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "microsoft-excel",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-excel/effect.webp",
         "sha256": "37cd637e92426e85bd3e5cb161cce9f3b1d60bb99d6b4e1d67262ea036ffe6b6"
@@ -1973,11 +1973,11 @@
         "sha256": "000cf02f4ef4281c76af6ccc506e206c7e4aca0ed4fe676accad78d4c1d6b065"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-powerpoint/background.webp",
-        "sha256": "68df57bf139c1fa3de70b2235d15dc56f8bc9e236d8ca632c445c0db1b95001b"
+        "path": "ui/theme-packages/village/assets/applet-scenes/microsoft-powerpoint/background.webp",
+        "sha256": "3b5fd3bc71ec847316e9c3c842265e4de261dcf0b9adf7a6f2d890edb06266a9"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "microsoft-powerpoint",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-powerpoint/effect.webp",
         "sha256": "b82f06ed62738a910571ecf8fea6e14b454643b37f926ec1f0346b33cd0692fd"
@@ -1993,11 +1993,11 @@
         "sha256": "d7d6654695358fdb25da117d1d78a549fe1a04446988004a61185339835cc75a"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/figma/background.webp",
-        "sha256": "f0e022211189a9cc6ce34cb416c9e7cb3e77a5ba824324690168bab16e4121dd"
+        "path": "ui/theme-packages/village/assets/applet-scenes/figma/background.webp",
+        "sha256": "c9cc5cf46f5cca94e19505da67346f9bb925e5dc85753970ac0f8edfb76f96c7"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "figma",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/figma/effect.webp",
         "sha256": "8d6a9659ade8d38549d7dd5592e90aee317eb0ffe8a3521932580d4a88302c85"
@@ -2013,11 +2013,11 @@
         "sha256": "c7d6d432628918ee414dd6f82fa887c5c48c61ab5fc534cdb4055cb7ec73ceb1"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/canva/background.webp",
-        "sha256": "30e88a9d0289f2e208192e4139e75fdfc762a8b1ce5798ac6e4cc1a9555a850e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/canva/background.webp",
+        "sha256": "4826d4f3772e8c7cdfa5513d2d8f6c5a47f2193e3ffc42dd8ae84dd2e6aa7e95"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "canva",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/canva/effect.webp",
         "sha256": "37bf3926b6df0e7147eff46b0bfb9e3ca95c59bbeba056f2b4d92407fa7936dd"
@@ -2033,11 +2033,11 @@
         "sha256": "98c76b39b261fc43effb38b27779d270731e3e6c2928a78cda9e66320a377d1f"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/spotify/background.webp",
-        "sha256": "beb69ce1cf45816ab8dec3b10ff127eec919010deda21b9c84f60f25af715936"
+        "path": "ui/theme-packages/village/assets/applet-scenes/spotify/background.webp",
+        "sha256": "1816f675c90344b32a0612cea56200bbbfc20892eaded94c9909054cae32d683"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "spotify",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/spotify/effect.webp",
         "sha256": "2be6b0ff2e2249752aa9265ae77a5d3eae8701a94c1514b3df01ea6776d7a4c0"
@@ -2053,11 +2053,11 @@
         "sha256": "27a0fe2ba4aa245a85c8573e65a8b7e0634e51b77838d991effbc0a9c52b63eb"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/apple-music/background.webp",
-        "sha256": "47654e0dfb780d8ea28eb01061b31163d29e69632350f42187ddf6c83b5f1787"
+        "path": "ui/theme-packages/village/assets/applet-scenes/apple-music/background.webp",
+        "sha256": "334eaf32a113eac17d94bf03686495294f0aa183f8408300b3530ddacf4ab8df"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "apple-music",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/apple-music/effect.webp",
         "sha256": "222e9c99ef3a6658851a32d49ae0a61a637a2706693116da236cfb13a1455e76"
@@ -2073,11 +2073,11 @@
         "sha256": "398405a111853dbf81d579a2741867aa0338eeb2f882b1b322f04194d55eb406"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/reddit/background.webp",
-        "sha256": "08b0b5032498944dddae1383b9f9e226cd73420171f98c6b527c3f554f3de3cd"
+        "path": "ui/theme-packages/village/assets/applet-scenes/reddit/background.webp",
+        "sha256": "76a19b64e03401882fd9564d582dcbbacddaa57c1bc6c2f0fce06c143932c636"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "reddit",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/reddit/effect.webp",
         "sha256": "cb51d892d1be20f26c152dd2574805276bc85d40144838e6f476a3088092c910"
@@ -2093,11 +2093,11 @@
         "sha256": "03b333fae0bcb0f128ee3d1d9b2f9ef986af64353597f7806f972f36ec946f6f"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/instagram/background.webp",
-        "sha256": "a6baed6535c9cb3d37f94ea75f6504c3ad15110734cc5c0fd1d4660cfbe3df97"
+        "path": "ui/theme-packages/village/assets/applet-scenes/instagram/background.webp",
+        "sha256": "b978b695d03cb014dd1ef858a1753eae0fb17193e429e4ae59c44948fd4b6f0e"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "instagram",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/instagram/effect.webp",
         "sha256": "6129ab40f96baea71736fd0559f7d8807d07db5a7ad3a9e01f8e53acee1dc44f"
@@ -2113,11 +2113,11 @@
         "sha256": "d609e986c9cc9346479f6da1b36fc7eda8fbb3784dba4149b1f4f3629ff5ea31"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/linkedin/background.webp",
-        "sha256": "53c2fbd66de507f89a3a897d8f717da8cb2bdce67e32bc7289c9d2d76ef07dbd"
+        "path": "ui/theme-packages/village/assets/applet-scenes/linkedin/background.webp",
+        "sha256": "ae5fdeb4a7569f013da179b1476a53699e45d2becbe3e95405850bedd4b95e57"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "linkedin",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/linkedin/effect.webp",
         "sha256": "37840217423fa7140e65dba0ec041516ff26aea1b2188d3c987fbdb5488338c3"
@@ -2133,11 +2133,11 @@
         "sha256": "6f6b11c1501401194d432bb8080f14fdf4de94fdb163117b5d605ab6edc89f9d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/amazon/background.webp",
-        "sha256": "717b64916e7f38441841923757ad1e3c36076f81704f6a9d4d511c574eff67ee"
+        "path": "ui/theme-packages/village/assets/applet-scenes/amazon/background.webp",
+        "sha256": "2f250001524d336e2959604c27ab01114b8fb0743f17269e81b4f50884739928"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "amazon",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/amazon/effect.webp",
         "sha256": "f0cc61998f44f532cbf32274963c9c01da68d9a60e7afa482f88c3c82acf70c6"
@@ -2153,11 +2153,11 @@
         "sha256": "7002b2e7b74b96f56b1161dcef98619de4eeda6b85a3fc321c9422baa33f1381"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/netflix/background.webp",
-        "sha256": "6e51b1be102f9d2d22af7543a5eae45960527e3cc7ea46c1005b397f4bb5b963"
+        "path": "ui/theme-packages/village/assets/applet-scenes/netflix/background.webp",
+        "sha256": "b47bafbf170567c12e752e861b39f96ddd18c3116e20d5023fe1e6fad5c3979b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "netflix",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/netflix/effect.webp",
         "sha256": "a73a8bd4051865469cd54a05761e04bb036b36b5dca9447403e07777a82214cf"
@@ -2173,11 +2173,11 @@
         "sha256": "331e0f987e188cf4cce97849c53808b379ea9423fb8f68895fde267cd0438c32"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/outlook/background.webp",
-        "sha256": "d7594dc847b9a88c218f93c047f4e683fab1ac2a48f59fe502c0b1d697b7df25"
+        "path": "ui/theme-packages/village/assets/applet-scenes/outlook/background.webp",
+        "sha256": "b38b432b897181b8bde22835d94c1fc74637d4417aa56318984f0b79955afe5e"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "outlook",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/outlook/effect.webp",
         "sha256": "5818633699d7d73e1d13b6cdb0a7e41fcdba43312e59b716e083641340f45d5c"
@@ -2193,11 +2193,11 @@
         "sha256": "5c633f9854077535f55b9fae3d5d579d733d6c2b9f7f0c6e1d455a4727b8048e"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/apple-podcasts/background.webp",
-        "sha256": "451cb10aa52cb92d0496e487b2ae40e5dcff25779b9cfc702cba2a81f78b5d83"
+        "path": "ui/theme-packages/village/assets/applet-scenes/apple-podcasts/background.webp",
+        "sha256": "1f5df97b2d4d073bc00eee1d4e9efbc784afb11f1dfc5d5bc9ff2af8d90a07c6"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "apple-podcasts",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/apple-podcasts/effect.webp",
         "sha256": "7c15f0ed52e3d88095d03deed04b97e09b00bfd634f1310a120a53e11087dc5f"
@@ -2213,11 +2213,11 @@
         "sha256": "4b360eb61ce712f29c778107227fa8d01a119436b9416c1c40a151c1a80abe8a"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/google-photos/background.webp",
-        "sha256": "4019124da7e41d3b3f696833fec3a34847eea0fe947f43def765835a05c1acae"
+        "path": "ui/theme-packages/village/assets/applet-scenes/google-photos/background.webp",
+        "sha256": "fcec6c1b534219859182869aacbf87ab416f9e03dbb352cd985a66e179abbcdb"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "google-photos",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-photos/effect.webp",
         "sha256": "74c5b009ee46614b1be0d929c48e9b30e9bd46581a879cadca616af27d05be88"
@@ -2233,11 +2233,11 @@
         "sha256": "212e72b82a48822d0691eaf6c4af73a8235c6ee81d69799496c5c7c2975329ac"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/pinterest/background.webp",
-        "sha256": "6132259b51ee135558fefa9906b2d6d46e0321d877b2874a2ee62805353fbfae"
+        "path": "ui/theme-packages/village/assets/applet-scenes/pinterest/background.webp",
+        "sha256": "0f202f39a59b302242d138dcd19fe11a987d7df2efad177197edf37b7347d545"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "pinterest",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/pinterest/effect.webp",
         "sha256": "9d217d33fe05fe93379c337c1b3271e93a920952d805a58b829b410d5293e662"
@@ -2253,11 +2253,11 @@
         "sha256": "8b2b4e002593486dc05bf12276dd5c2be9d6ea9f0d0c025ca9484c5c8d2f6649"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/facebook/background.webp",
-        "sha256": "1bf30d437bcf964292b13d5ebac2e41f16106b3d56dd8cfd92faabd0e7dd9c15"
+        "path": "ui/theme-packages/village/assets/applet-scenes/facebook/background.webp",
+        "sha256": "b18e4264b8e35011e9763db26a8fa07a33b2b801068743b9016292bad695b57c"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "facebook",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/facebook/effect.webp",
         "sha256": "f897e3bcc7eb90ce6a0e9fca4b546574780ee01a7be3f001d2e788453b199c09"
@@ -2273,11 +2273,11 @@
         "sha256": "d6b31df70114826a6c114c6f76d8527ce1014b895ed54cf22f456056c2b4f0bf"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/threads/background.webp",
-        "sha256": "d6f25643ad192ae79e2097cae29a66aa4852b8ce0cf68db2b2e19e2a6d5d3a97"
+        "path": "ui/theme-packages/village/assets/applet-scenes/threads/background.webp",
+        "sha256": "fa85876e0d12ba6e58255ba1b7f4546b1c575f3f6318dd7d70e90b0171b4710d"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "threads",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/threads/effect.webp",
         "sha256": "64cdf262bbab21c972f79750ebb7318d4b8718b1a60076d244d7c6d99fe7e1eb"
@@ -2293,11 +2293,11 @@
         "sha256": "e16cd8e2ec3dfb16faf52d6678f43967a2f839165aee79f332c00c925f4b30ce"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/capcut/background.webp",
-        "sha256": "c8e877e728b475592a9f74fad6f4ff420aa23dcb2d83376c06eccbc553b7f98e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/capcut/background.webp",
+        "sha256": "64c60d3e4f9eaf4b6a0d901db0c47ba904e966a9f3010a45e54151969c21187c"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "capcut",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/capcut/effect.webp",
         "sha256": "349a016550872fe9d92b5097ee975646097fd52ab9e865d69f0a6f5dfeb587f1"
@@ -2313,11 +2313,11 @@
         "sha256": "ba7b567e25b2581d5b9ff40a2d2416dc0e0d26566a39525546fddd3558ebd5ab"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/uber/background.webp",
-        "sha256": "8754262c8ff99bd3c957b8b37ef7bbf930662472ffba3c5850f08357168a13b1"
+        "path": "ui/theme-packages/village/assets/applet-scenes/uber/background.webp",
+        "sha256": "bc79b2c19663841101b14f6acef3037f9c2088bb8d2c8ed2a378b5f2be04441a"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "uber",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/uber/effect.webp",
         "sha256": "242963da64255e0ca6af8b78c5aba6e8a789e741130bccbc555088d9afaeaf14"
@@ -2333,11 +2333,11 @@
         "sha256": "8846650d45939e61fb3861eefe13638c62d83e53e58daee95e7373dd88a497c9"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/uber-eats/background.webp",
-        "sha256": "dc8ee0df998d0d89aedaeb905b1a3ace25f955942e79120d5942212a6ee0c604"
+        "path": "ui/theme-packages/village/assets/applet-scenes/uber-eats/background.webp",
+        "sha256": "9ffa7872a79f5365a56f149f4a2f1cf145ad214fde151b606cbc913ef2fe646d"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "uber-eats",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/uber-eats/effect.webp",
         "sha256": "1c54ef51ef4053b4ecacec2d939dda9e2d27a55795ea5b22cd4262ed3fc1ade8"
@@ -2353,11 +2353,11 @@
         "sha256": "81a44ffe2946e4adfee91903635f05583d7fd5cc13312f02e511ee23beb47f2f"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/booking/background.webp",
-        "sha256": "a55b4bcc80c9fcf91e6fdad6acd65eb3c4ee3bc6d53542f444b1b0df3fb312b7"
+        "path": "ui/theme-packages/village/assets/applet-scenes/booking/background.webp",
+        "sha256": "7ed27006e54ff36340a567befa5d970144e83f96ff788cdf04e6e1b436d76a06"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "booking",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/booking/effect.webp",
         "sha256": "deb96b42794f3342ccd8851fb688cc34e01e1127eb963aaf59ca55d854bea166"
@@ -2373,11 +2373,11 @@
         "sha256": "9370906a7276e6060f3ad3aa60db859a2c3aba54ae70c924b945f8f0ebdc517d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/feishu/background.webp",
-        "sha256": "260054efa93990a75438e9c201a1ed5133f9eeecc8618f659e686dd403dec684"
+        "path": "ui/theme-packages/village/assets/applet-scenes/feishu/background.webp",
+        "sha256": "dde8acb8528160cf3e7de45f54611c0bf2c0043905d38a1ea51577759c6bc067"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "feishu",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/feishu/effect.webp",
         "sha256": "5b9d78782d2c6b5123514c200af4a8851be35f8dee6ca82fa2f9fd5a0b45e38b"
@@ -2393,11 +2393,11 @@
         "sha256": "90827c42187a0d623fc38a964a32e58cebf6e28fae5070acab75a7f3c66ad2b8"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/bilibili/background.webp",
-        "sha256": "f1a57dbb06620d124162a8885309bddf84db51a9cc3b0680f12bb8e6e2cd4fd6"
+        "path": "ui/theme-packages/village/assets/applet-scenes/bilibili/background.webp",
+        "sha256": "1594cda7371a2a926efad8a77e1628811bde3da9e8d8ef4d956c6346c6aa8ff7"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "bilibili",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/bilibili/effect.webp",
         "sha256": "264b871e3a1503c2320e40333fff5928df7257bbede69c62d594bfc2d7cfca74"
@@ -2413,11 +2413,11 @@
         "sha256": "3b7ea816dd90878913bf3e38e00432493ba63ae404481b113c5ef8910049f885"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/background.webp",
-        "sha256": "8cf040001a3e00ec9790bbce530a8f0a648aec21a4f1dba1966366395ca18816"
+        "path": "ui/theme-packages/village/assets/applet-scenes/xiaohongshu/background.webp",
+        "sha256": "229bb1f638f65a695933c11a3388843d871aaf70d7da42f83f0d157276e02751"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "xiaohongshu",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/effect.webp",
         "sha256": "8fc6f8e248e68e71a4cf34a98f9dfc624304c7c3355e4dee917df5f308396617"
@@ -2433,11 +2433,11 @@
         "sha256": "325d7045ea14eda5559829ddb0e79ff25e75f93ee70c04add7461878c31846ef"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/baidu-netdisk/background.webp",
-        "sha256": "c5fc86acf78d386468caed683c6d5bfd1c18ec7ec0b33378bee5b9298fa87822"
+        "path": "ui/theme-packages/village/assets/applet-scenes/baidu-netdisk/background.webp",
+        "sha256": "c1a2bc8fd3e76f4a6e215a88d0b5df3bf976b8e4c522de1a18b7a9c5685a84cc"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "baidu-netdisk",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/baidu-netdisk/effect.webp",
         "sha256": "aa77d761a9d6d55af3e2a0a3b2dda4a56c4800122639676b1f246c31b5816b9c"
@@ -2453,11 +2453,11 @@
         "sha256": "384ee9a5bcf9c707e8c7facfa198946a05739a30719afade5f295df31c3bfafd"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/twitch/background.webp",
-        "sha256": "4fda4640cec1bc24bbece817566b13c6823cca1253824c56d7b4af8107a85fea"
+        "path": "ui/theme-packages/village/assets/applet-scenes/twitch/background.webp",
+        "sha256": "bc2aad2dfafc55905b02e2d04203617088231917322ea16c54831b2b231611b4"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "twitch",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/twitch/effect.webp",
         "sha256": "463a1b1a8d21124f873007db9fbff80e85dfa268eb40b7d8da4cb60bc562592e"
@@ -2473,11 +2473,11 @@
         "sha256": "3d58e8e1791e6ae3c9dae0657c02a2997bd2760168bab460a9f31b0a421fa9ee"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/copilot/background.webp",
-        "sha256": "77f2f76d793327b1dd8ecbff5b496fcee5bb8e6176de6453636d7035e711d9c3"
+        "path": "ui/theme-packages/village/assets/applet-scenes/copilot/background.webp",
+        "sha256": "e7bddcbf19351b0f8e3d37ff2f7c6d89737c0c529bb8716b94c3ccbcc11c5d54"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "copilot",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/copilot/effect.webp",
         "sha256": "6b7023046f608b0b761226caaf4fdc86d081f871ed5c79f955b2253dd47d5732"
@@ -2493,11 +2493,11 @@
         "sha256": "cb6aefc7becff0186ddbbdbf7b309bfd4efed138210418cb1b95186ea4043912"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/acrobat/background.webp",
-        "sha256": "0d5f73f7ec2646e56e8baf0227085b0dd5e961cb7df96cbf41018885716735f6"
+        "path": "ui/theme-packages/village/assets/applet-scenes/acrobat/background.webp",
+        "sha256": "09d73655ce832b10ad2f027e9f8cf65086fe1182c67624bb699679f006760a62"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "acrobat",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/acrobat/effect.webp",
         "sha256": "e2da67506a21a245e6bbbbb3fa5b6f65c1dcb873b090817ab86ebf88098be785"
@@ -2513,11 +2513,11 @@
         "sha256": "fbae84fcb97b544ffcb8836df486f02c0169127f5df81d8d37c0c1d173d625aa"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/wikipedia/background.webp",
-        "sha256": "0823a9ec752c2faedecde387e2826999efbe3510d3999f32bf41725f901672d3"
+        "path": "ui/theme-packages/village/assets/applet-scenes/wikipedia/background.webp",
+        "sha256": "12ca07cf4a3a53edff5ff9b754a567d2cb4e5bb7b4405ed489c81cfcf30ce67b"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "wikipedia",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/wikipedia/effect.webp",
         "sha256": "38d62250e881fc0808dcff0aaf9bbb3ddca42d6be6e6967d6d27863c61ff7d1c"
@@ -2533,11 +2533,11 @@
         "sha256": "1bdff89a5cc2e970aa7e10d8ca85c0d345fbca8258aa829ce6afcf4a5f947f3a"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/doubao/background.webp",
-        "sha256": "8aec8196f82013275cc9dc6b90c8bb42d079f202189a0049f963b8405729f13e"
+        "path": "ui/theme-packages/village/assets/applet-scenes/doubao/background.webp",
+        "sha256": "c39d9e12850c88b5be09cdef39021b2fcb7073c96aa350d9e91f4072668f488f"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "doubao",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/doubao/effect.webp",
         "sha256": "7182f78979cfe702a3a0e7576c2c6fa5a2158472452a9e3b8ff3706ddbb03ef6"
@@ -2553,11 +2553,11 @@
         "sha256": "b77417dc793320f3f8fb4c5c408a06965c410ffb9da1b9c9c26acaf105e4d5e4"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/taobao/background.webp",
-        "sha256": "c6802eaad71d6793ddb8c50826912b9fcba6f6cf642afa46360710c2a584a201"
+        "path": "ui/theme-packages/village/assets/applet-scenes/taobao/background.webp",
+        "sha256": "2bd94596e0676a153c970786431e3a9f986b61c7a17f7f5e5ba97f50e0ccc719"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "taobao",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/taobao/effect.webp",
         "sha256": "8ef277ee3e02d655598d4c2e48adc4a768bffc02d6a636935b00771cd690a790"
@@ -2573,11 +2573,11 @@
         "sha256": "562cab879f4d1812ec70560d18ce801a733b5d3a0a169d2ff34f332f2b4f5da8"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/alipay/background.webp",
-        "sha256": "03bdc35e068afed05ddc8bfdd09a71746d38f1ac39043fc57ad33f9b0ae64cd9"
+        "path": "ui/theme-packages/village/assets/applet-scenes/alipay/background.webp",
+        "sha256": "c0b659cafed9bd34d50de601ef4a7c965fab3a608604d9dc5d59d6e80af51351"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "alipay",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/alipay/effect.webp",
         "sha256": "53f9ff6eebd4cac6efbbe6a0b8ae8542376d39c0c348bc4cdb7e1abd4cbf8fbb"
@@ -2593,11 +2593,11 @@
         "sha256": "4aab4870b54f7e036db400ba8984d90bed39c0743dca4704f0456b45f8b8c241"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/douyin/background.webp",
-        "sha256": "1d124ced28bf7dc28dc08ccc6fe4c61f62f6da89ec5335f227daee3848e5fe29"
+        "path": "ui/theme-packages/village/assets/applet-scenes/douyin/background.webp",
+        "sha256": "817e7bdb95d9de54a14129f10e2b832344d15cfa34f76713bc18afee345732f9"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "douyin",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/douyin/effect.webp",
         "sha256": "5f81055ef26ec37bd488919c9ab52f7d0ff29d3f7e15b03cd8e509d94773c79e"
@@ -2613,11 +2613,11 @@
         "sha256": "46837e5a6bda9b44c71b3fad74e223e56e8281f8ddf68180aaa7ad73f1a8e7fe"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/posthog/background.webp",
-        "sha256": "007143ae4f11ec46836175dfec1dd1e73ba2d2cbfd54783ad6692064f9562717"
+        "path": "ui/theme-packages/village/assets/applet-scenes/posthog/background.webp",
+        "sha256": "79fa5596d3982e83afc5bff7ddcdb0b6d7fa71f6eeb5b13abf11d002fd0d1108"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "posthog",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/posthog/effect.webp",
         "sha256": "575f7c24ec4616139c4ed1e5a5317b2555f97303d0374bf3a41c6c2d8664e98d"
@@ -2633,11 +2633,11 @@
         "sha256": "397a1265addce7d149ec5f0304091d151649705d93ee2c02788eaa94fb24f4ce"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/cloudflare/background.webp",
-        "sha256": "11c951f0937dc774fc689158ec5fdcab94db2eef895dac3d8b265c4fe42a8967"
+        "path": "ui/theme-packages/village/assets/applet-scenes/cloudflare/background.webp",
+        "sha256": "bce1e42944993e768c4bd768699bef577f846d3d82a7256f653ce2ba845d6b38"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "cloudflare",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/cloudflare/effect.webp",
         "sha256": "52da870e8c28de230920f8c2b378605df2ca81f7a9bc82cb159a8b4b5358921c"
@@ -2653,11 +2653,11 @@
         "sha256": "e631b11445f7ffb5e8b7ff407b3641defd74a94e3a98c6eab709c2d914ff598f"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/vercel/background.webp",
-        "sha256": "b5eb66a06777258b9a9195f93112f5e1e89c6bead2a8ed107486f8a3a7a6ea9c"
+        "path": "ui/theme-packages/village/assets/applet-scenes/vercel/background.webp",
+        "sha256": "6f84c296539fb822fd2ac749b7a99fc663d147cc55a5e887542b4e5dca4cd2d4"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "vercel",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/vercel/effect.webp",
         "sha256": "c5c871f2c946095110785bd1b08d764ec1b44f520c3fcc39f7f97ab7b262db1b"
@@ -2673,11 +2673,11 @@
         "sha256": "3717b4232438ac61510cf6f2a7a72bb2925fd9a85a09cbdd3fd3dff02d77a209"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/netlify/background.webp",
-        "sha256": "25e8cb4a4880778ec612f2c8cdbe72f320b92d9aeed40aae06e86605c10a6204"
+        "path": "ui/theme-packages/village/assets/applet-scenes/netlify/background.webp",
+        "sha256": "2e5da11abe1cff0faf93052dc095b3bb6f0f2a18454a30273b9c8980dd9ab064"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "netlify",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/netlify/effect.webp",
         "sha256": "35931be1837c6cccbd5ad7835972c68bd56e4c7d3e8de9d71ee3b97218df446f"
@@ -2693,11 +2693,11 @@
         "sha256": "011049dc5fd6ffcf0a3f46261c7298bd7f6094f980ca7c1c049b2ddac7671da4"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/firebase/background.webp",
-        "sha256": "ec44fd3fc101c14790ee26a7ca292ab71cf71f35b8ee3b62e57a47a2bf928dab"
+        "path": "ui/theme-packages/village/assets/applet-scenes/firebase/background.webp",
+        "sha256": "2b22a8778da41c4a17650df89d28eb216d998ac11e75f12627cc62c53b42e765"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "firebase",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/firebase/effect.webp",
         "sha256": "9dc1b864ed696e98a6ea7b61d7de069a3e4fddcb97f4feff7b8b1078f7fb8566"
@@ -2713,11 +2713,11 @@
         "sha256": "f90f0cbd0aec79c77d9c5381642a469eb297a537d4552db0b04b03a3692a86af"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/sentry/background.webp",
-        "sha256": "1593dedbd424b8735c9f98afa1404fb0c811e48e8d303a058d4fe5755d6a1e01"
+        "path": "ui/theme-packages/village/assets/applet-scenes/sentry/background.webp",
+        "sha256": "48a097f15a005c8f58a9b40aedc801a3e6e820bdbaceaa2f0f73c9781f417e16"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "sentry",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sentry/effect.webp",
         "sha256": "c72653812becf56195d07b4fdd84be8a8fc7fde68f29aca79c10cfed30aa189e"
@@ -2733,11 +2733,11 @@
         "sha256": "05cde80f6729e78ee8ee1f423fdcf511b596502cf30c66ac07f3c5405c12737e"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/railway/background.webp",
-        "sha256": "25a21dfccaf8280f9545734d7af4b017c0f541c6be19c55e308bd563bbdbd031"
+        "path": "ui/theme-packages/village/assets/applet-scenes/railway/background.webp",
+        "sha256": "0f388795bdb3b5e8ce63b35a2e88c8d3fca6e114f36b3c6367ecf62c58cc8553"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "railway",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/railway/effect.webp",
         "sha256": "22b2e9f40c4b82c517fa4b89b969972019420567ec1303c0db66a1cdf52f907d"
@@ -2753,11 +2753,11 @@
         "sha256": "9b424e558f31be6d4b2d8fffcf98bba8a18a993a05c949124ce4e6e96827c7d9"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/render/background.webp",
-        "sha256": "c7247944079e061bc268bbd911565fa31b46b8e87a71ad5fb51b1445c53deb6c"
+        "path": "ui/theme-packages/village/assets/applet-scenes/render/background.webp",
+        "sha256": "f99b30dfd60d5fc7ae43c3820d080c58fbb8bc9ad8563b2ab8aa679333b9e01d"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "render",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/render/effect.webp",
         "sha256": "70cd1701724f463c171bf8a8e8be415d404b16245e526188bd5a1b2192aa0625"
@@ -2773,11 +2773,11 @@
         "sha256": "000939a5d5ed363abd09ec49815f27a042bc7c5d6cc83cdffe830ac1afdb38f3"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/gitlab/background.webp",
-        "sha256": "cb3520cb1b91bcb386d6a23b06bd7f44b7da73375b68257e1b4d84749e053281"
+        "path": "ui/theme-packages/village/assets/applet-scenes/gitlab/background.webp",
+        "sha256": "b3368fe3dd86db8afdc849eb9609cf75730da5a1400b63a3a03e8e2b92fe5310"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "gitlab",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/gitlab/effect.webp",
         "sha256": "5241dd39e6906a93731717cfa4011ed353c85ca7646677fc5b8f7dfa953575b6"
@@ -2793,11 +2793,11 @@
         "sha256": "4d8e7b74c9fef150772893b5aaa591e5f7dcc7dc153d61ebb8575918df60455d"
       },
       "background": {
-        "path": "resources/styles/builtin/references/registered-scenes/brands/jira/background.webp",
-        "sha256": "40d5c206cffaabde5ba77be76d4d7480874d1077b3759d6f07d3bfd6d38f00fa"
+        "path": "ui/theme-packages/village/assets/applet-scenes/jira/background.webp",
+        "sha256": "62d442b50f2ff070b008accc24b7a87f24b18d09b7c27d685645a3f2525bc0cf"
       },
-      "status": "legacy",
-      "registrationKey": null,
+      "status": "registered",
+      "registrationKey": "jira",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/jira/effect.webp",
         "sha256": "98172885aca6000fa516b64210c081ea21b9828897b9a551ed5b2c47998de9e4"

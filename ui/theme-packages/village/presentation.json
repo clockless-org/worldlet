@@ -203,10 +203,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.07,
-              0.18,
-              0.42,
-              0.46
+              0.061005,
+              0.127524,
+              0.438397,
+              0.797024
             ],
             "material": "paper"
           }
@@ -217,7 +217,7 @@
           0.26,
           0.38
         ],
-        "sha256": "58ff38ae048802594ec54d941d0df108b485105bca56ab17e669b10b0b017809"
+        "sha256": "9dbf3ccc9a8cbbc3509ba650a9878aaa2bb23d0d619b83a50be552398866e03b"
       }
     },
     {
@@ -237,10 +237,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.093,
-              0.23,
-              0.42,
-              0.49
+              0.076555,
+              0.127524,
+              0.448565,
+              0.803401
             ],
             "material": "paper"
           }
@@ -251,7 +251,7 @@
           0.26,
           0.38
         ],
-        "sha256": "0e22ab6b2881ca359a8ad01c2777bbe9b44093782fe8b593071518ffd586752d"
+        "sha256": "0129606b6b2884a2c4512c49f92c376259a486c0b6227abc009022d20c0d51a0"
       }
     },
     {
@@ -263,7 +263,7 @@
       "background": "assets/applet-presets/fitness/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
         "regions": [
@@ -271,10 +271,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.235,
-              0.435,
-              0.39
+              0.074207,
+              0.144527,
+              0.452424,
+              0.78746
             ],
             "material": "paper"
           }
@@ -285,7 +285,7 @@
           0.26,
           0.38
         ],
-        "sha256": "4074702f5451bbb01ae5ffe8c3e07c715ac8b3263defc71e8abaaa2db984ccfc"
+        "sha256": "2b2bc76f39b2ee16e68c1bf9ffaf3a20b6f5f51c042071029066a103d918c7cf"
       }
     },
     {
@@ -305,10 +305,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.16,
-              0.48,
-              0.4
+              0.078947,
+              0.144527,
+              0.502392,
+              0.794899
             ],
             "material": "paper"
           }
@@ -319,7 +319,7 @@
           0.26,
           0.38
         ],
-        "sha256": "a911aa55fb53a3d007250516bd66f4b88b1845cc505b98f74d423f2836b9ce37"
+        "sha256": "93fff7bdc301cb7ae2b5fccf3805449439bb7437cac9b443ce6f10597ae71c01"
       }
     },
     {
@@ -339,10 +339,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.11,
-              0.21,
-              0.47,
-              0.56
+              0.114234,
+              0.146652,
+              0.435407,
+              0.735388
             ],
             "material": "paper"
           }
@@ -353,7 +353,7 @@
           0.26,
           0.38
         ],
-        "sha256": "2aa8342534dcf83c7d129dd56909f85d18ac69e5c5335ce3b31f71cea4068b2c"
+        "sha256": "1b7e8cb6dbc2a8ab1b4fb03134559f78afe319d4aa4e3750e2005fb2339c6c6f"
       }
     },
     {
@@ -373,10 +373,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.195,
-              0.48,
-              0.49
+              0.089713,
+              0.146652,
+              0.452153,
+              0.788523
             ],
             "material": "paper"
           }
@@ -387,7 +387,7 @@
           0.26,
           0.38
         ],
-        "sha256": "e552c29aac5e4721e29528fdac78e4e9c9c257e2bf87773b55f56291224a3615"
+        "sha256": "3e6dea12beed3cdbdc32e88a23e5fe59692cc38c0c8a2effeb1342fd15dc54c7"
       }
     },
     {
@@ -407,10 +407,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.083,
-              0.192,
-              0.5,
-              0.51
+              0.058014,
+              0.162593,
+              0.547249,
+              0.765143
             ],
             "material": "paper"
           }
@@ -421,7 +421,7 @@
           0.26,
           0.38
         ],
-        "sha256": "9ba192879326816f4cbc70203b636618a1724c0b49927d08a8183141679ccd66"
+        "sha256": "a2e6dcc9153b8d8d06536362af436e8dabaa5f2f882c3d01212b34823c4aa586"
       }
     },
     {
@@ -441,10 +441,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09,
-              0.14,
-              0.495,
-              0.5
+              0.078947,
+              0.146652,
+              0.517344,
+              0.751328
             ],
             "material": "paper"
           }
@@ -455,7 +455,7 @@
           0.26,
           0.38
         ],
-        "sha256": "c37403b34ce5ddf293a366941e128955451085c6b7023c20a97a4e4992486ffa"
+        "sha256": "cf87bd11a39abcea45cc86b6c0c3207eb8504fc6cce617a8431417988cd5c2e2"
       }
     },
     {
@@ -475,10 +475,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.11,
-              0.235,
-              0.39,
-              0.35
+              0.110048,
+              0.113709,
+              0.389952,
+              0.789586
             ],
             "material": "paper"
           },
@@ -500,7 +500,7 @@
           0.26,
           0.38
         ],
-        "sha256": "719b84b129d311d30bd579952fe02d0b69427fe28b41daf42a78e548fec13f8e"
+        "sha256": "bcf6dae886c2542cf4e10e81e7cdbd9978f4e63da32f6e92d72e3f3a518fc98b"
       }
     },
     {
@@ -520,10 +520,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.126,
-              0.16,
-              0.423,
-              0.56
+              0.110048,
+              0.146652,
+              0.437799,
+              0.739639
             ],
             "material": "paper"
           },
@@ -545,7 +545,7 @@
           0.26,
           0.38
         ],
-        "sha256": "caf5ee7b98bebe53f44960065f0d17b009d87bdffadbdd739cd3d14158013a8d"
+        "sha256": "26d381f61cdc0e6b402752a0099cfc3ebd0244ef7fb0838963572e18abe6cc86"
       }
     },
     {
@@ -565,10 +565,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.133,
-              0.245,
-              0.435,
-              0.45
+              0.123804,
+              0.144527,
+              0.447368,
+              0.808714
             ],
             "material": "paper"
           },
@@ -590,7 +590,7 @@
           0.26,
           0.38
         ],
-        "sha256": "55846d3b631511c9fb39a0d7465d95ad5770b86d67d324a257fcdd3e07e34be1"
+        "sha256": "ab8404e328938bf65a12a505aa97408f1f840e5489bead9936cf2e11fdbf2f3a"
       }
     },
     {
@@ -610,10 +610,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.14,
-              0.16,
-              0.433,
-              0.48
+              0.139952,
+              0.09458,
+              0.433612,
+              0.769394
             ],
             "material": "paper"
           },
@@ -621,10 +621,10 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.705,
-              0.175,
-              0.183,
-              0.135
+              0.7003588516746412,
+              0.16684378320935175,
+              0.19078947368421054,
+              0.16153028692879914
             ],
             "material": "paper"
           }
@@ -635,7 +635,7 @@
           0.26,
           0.38
         ],
-        "sha256": "de7f81c9ca6bce9f05be1780d75412bc0ca5108d408cbc08dc1a847440504309"
+        "sha256": "46cf6ba21f732e6198f6a65b2015aed22031a08b17ce20661f26cfbe26f769ed"
       }
     },
     {
@@ -655,10 +655,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.181,
-              0.229,
-              0.44,
-              0.49
+              0.187799,
+              0.146652,
+              0.433612,
+              0.721573
             ],
             "material": "paper"
           },
@@ -680,7 +680,7 @@
           0.26,
           0.38
         ],
-        "sha256": "9bcbefe2c9a3deddef1739eb1bc32d42de7d84dc7f2baf353c5b4a1947e2829d"
+        "sha256": "830c6a1d2258146d920f376a7ef829b860874293cb2eed44a130f9b99d05a379"
       }
     },
     {
@@ -700,10 +700,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.163,
-              0.139,
-              0.315,
-              0.647
+              0.178828,
+              0.146652,
+              0.30622,
+              0.758767
             ],
             "material": "paper"
           },
@@ -725,7 +725,7 @@
           0.26,
           0.38
         ],
-        "sha256": "9ad4af29fa51183f853e7662ee6557fa676683903e5e7113c96990cfc606db56"
+        "sha256": "5a453399a3f0e276c5902b5f31142057cd75cfef86ab3497f094beb34414a99a"
       }
     },
     {
@@ -745,10 +745,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.127,
-              0.268,
-              0.358,
-              0.464
+              0.163278,
+              0.146652,
+              0.330144,
+              0.767269
             ],
             "material": "paper"
           },
@@ -770,7 +770,7 @@
           0.26,
           0.38
         ],
-        "sha256": "9ecd835864b2b12d11983143216d14409078e76896359db02840c2c745338641"
+        "sha256": "1f944f3901ee2dfbf9896fed0f0f3d9c550ef30c279ee1420e142706dd344120"
       }
     },
     {
@@ -790,10 +790,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.122,
-              0.204,
-              0.39,
-              0.448
+              0.05622,
+              0.146652,
+              0.450957,
+              0.790648
             ],
             "material": "paper"
           },
@@ -815,7 +815,7 @@
           0.26,
           0.38
         ],
-        "sha256": "424de9b16550dbaf0e6cc130d797ab75efeed1859dcac0bab62764ec0e9e5b60"
+        "sha256": "a4125f8841b0288031f02d156ac34bd4c486dd2e96b26aa123a13e1409fdeac4"
       }
     }
   ],
@@ -827,16 +827,16 @@
           1672,
           941
         ],
-        "sha256": "993c035bb092f70bbd63d15a3f956d6f82be155b27d00bfba567ec0be77cf0f2",
+        "sha256": "0ebe9c061312710711bd8b9c3421193debba543fbb7f90e30460390e4a73b0ea",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
               0.067584,
-              0.201913,
-              0.542464,
-              0.585547
+              0.142402,
+              0.546651,
+              0.777896
             ],
             "material": "paper"
           },
@@ -844,10 +844,10 @@
             "id": "today",
             "role": "secondary",
             "rect": [
-              0.736,
-              0.262,
-              0.084,
-              0.09
+              0.733254,
+              0.264612,
+              0.0939,
+              0.09458
             ],
             "material": "paper"
           }
@@ -867,16 +867,16 @@
           1672,
           941
         ],
-        "sha256": "43aa494c86d948643bab5268b903a928309b1f1da9d9e7d058dd040345b73a85",
+        "sha256": "21820740c355e3e9c5fea229e0d840b7f2e51364f488828a688128dcdc7791a9",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.065789,
-              0.171095,
-              0.519139,
-              0.613177
+              0.083732,
+              0.138151,
+              0.491627,
+              0.79915
             ],
             "material": "paper"
           }
@@ -896,16 +896,16 @@
           1672,
           941
         ],
-        "sha256": "af4c7e69da5b54aa84626f5a49196ff354f4ff38d998ea24e8c9c070f5195fcd",
+        "sha256": "e21fd7fa05a713d23bb0d461f0c3d8491ed3e9cb1b117d5b1d1dbfab46dbfb85",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.045,
-              0.057,
-              0.587,
-              0.744
+              0.058612,
+              0.102019,
+              0.562201,
+              0.798087
             ],
             "material": "paper"
           }
@@ -925,16 +925,16 @@
           1672,
           941
         ],
-        "sha256": "c8cc587fd8d801b47fe2ac318d3ccb96bdd531e93df1d89a3d4638f903e28308",
+        "sha256": "f3973af58c4a95bd3b0d9575d383d1733ffaf0441fe74a6b903e099ea00f0080",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
               0.077751,
-              0.146652,
+              0.140276,
               0.400718,
-              0.594049
+              0.773645
             ],
             "material": "paper"
           }
@@ -954,16 +954,16 @@
           1672,
           941
         ],
-        "sha256": "e15515b52d1ef8016dfd456127f2aec1ff6837854a88f8e81c78f6bc8719584e",
+        "sha256": "722b60e371732ebfdc9a5bc300746b61931cdac88488d06b36fd454a21da3fef",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.06,
-              0.12,
-              0.65,
-              0.69
+              0.072368,
+              0.146652,
+              0.639952,
+              0.770457
             ],
             "material": "paper"
           }
@@ -983,16 +983,16 @@
           1672,
           941
         ],
-        "sha256": "3d6f92af66d678157a3613798b8cb5d1f32bc4d38e3d8a51e7dcdc6ddff6925d",
+        "sha256": "a12b29dab16165ac1c16d95eed232b39da65f136ca13dc7272a8052bee33b403",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.075,
-              0.12,
-              0.54,
-              0.67
+              0.067584,
+              0.146652,
+              0.559809,
+              0.742827
             ],
             "material": "screen"
           }
@@ -1012,16 +1012,16 @@
           1672,
           941
         ],
-        "sha256": "2dbaab950152a58fd7baff6933b09c5ff2da000d19b3be0efe78617d8314fcbc",
+        "sha256": "da40c5af79314960f79feff799b181077dbec3eeb7ec54a14cc56038f4b3cfb6",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.07,
-              0.11,
-              0.54,
-              0.65
+              0.063397,
+              0.09458,
+              0.550239,
+              0.783209
             ],
             "material": "screen"
           }
@@ -1041,16 +1041,16 @@
           1672,
           941
         ],
-        "sha256": "695761a1752d3374c2605bda7397797f390ca6b53c040b0f8a2589e7ddbace37",
+        "sha256": "c9df5b6413de9a69a93723a69fbe53444fcb40216dcb9408ae2f294b2264cc64",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.045,
-              0.15,
-              0.53,
-              0.61
+              0.045455,
+              0.104145,
+              0.523325,
+              0.793836
             ],
             "material": "screen"
           }
@@ -1070,16 +1070,16 @@
           1672,
           941
         ],
-        "sha256": "bd251af163554e6c1395034ac15ed51aa811230c3e23d19e4a09805ff2353938",
+        "sha256": "c84740c55d9ae27a472fbab86c175aa010803cd4401bd182a0d3c6fae70e6baa",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.08,
-              0.14,
-              0.62,
-              0.63
+              0.074163,
+              0.127524,
+              0.62799,
+              0.816153
             ],
             "material": "paper"
           }
@@ -1099,16 +1099,16 @@
           1672,
           941
         ],
-        "sha256": "a9ab01e6a9afd99c9040d6bf37787b692f5b21af6778f710f788a6ce57932167",
+        "sha256": "428df1524e20777e8841251a8f3c075787d682587bbd59f652bd4322488715e4",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.056,
-              0.117,
-              0.662,
-              0.724
+              0.05323,
+              0.146652,
+              0.666866,
+              0.737513
             ],
             "material": "screen"
           }
@@ -1128,16 +1128,16 @@
           1672,
           941
         ],
-        "sha256": "8d37a0234130da3aa467110c6c5f90b2cb4423eb29a0d82da5f3e3d2f839c147",
+        "sha256": "159c362475b40026cb4ece17b7234a81385cdcb6834d2bf98bd906fac84a5b02",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.067,
-              0.13,
-              0.64,
-              0.69
+              0.080144,
+              0.146652,
+              0.632775,
+              0.791711
             ],
             "material": "paper"
           }
@@ -1157,16 +1157,16 @@
           1672,
           941
         ],
-        "sha256": "5c7deb1c4cfa09762ab9e862de0cdb0c59a334e4f09b2ab275a9931e50816374",
+        "sha256": "435ce92cc7fe00a7c117864727abe79bdb9b6d8c03f5c7eed38d652f5fd8a82b",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.055,
-              0.13,
-              0.67,
-              0.7
+              0.039474,
+              0.146652,
+              0.697368,
+              0.733262
             ],
             "material": "screen"
           }
@@ -1186,16 +1186,16 @@
           1672,
           941
         ],
-        "sha256": "50b7028cae786070c0d98b211e800376eec2ab1241d98d03771fc43e6db143f0",
+        "sha256": "77a7a123cd0d58cbf5e18a5df94764bff0a2463b1714eeffe469679a2f9f164d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.1,
-              0.13,
-              0.595,
-              0.69
+              0.0939,
+              0.146652,
+              0.605263,
+              0.754516
             ],
             "material": "paper"
           }
@@ -1215,16 +1215,16 @@
           1672,
           941
         ],
-        "sha256": "c5bf12b749abab8e341cbb1f5b46cef6d318122078a3b42af25796eb3fbea73c",
+        "sha256": "63de067a6764129e83091c6d619d39e79cfb7221220cd6197d1281f11bf955a8",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.055,
-              0.13,
-              0.69,
-              0.7
+              0.068182,
+              0.146652,
+              0.662081,
+              0.791711
             ],
             "material": "paper"
           }
@@ -1244,16 +1244,16 @@
           1672,
           941
         ],
-        "sha256": "d9e758daa23765002a231e8125d661c11465efaf8f5b85db94e85fee413e9e29",
+        "sha256": "6eb29df33151ef573f8a23b18b9471a9f522a4b169b275b69d69fccdb6d2c134",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.05,
-              0.13,
-              0.64,
-              0.61
+              0.057416,
+              0.132837,
+              0.620813,
+              0.797024
             ],
             "material": "paper"
           }
@@ -1273,16 +1273,16 @@
           1672,
           941
         ],
-        "sha256": "38ca1889eecd9bd796cae03f7781c59ba8703cbb35c3481f45726d01d8818e9a",
+        "sha256": "f3cd80c34fdc227ad46233e017051133899fc6131ee931f79ca2dabbc4470a4a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.075,
-              0.13,
-              0.6,
-              0.65
+              0.072368,
+              0.146652,
+              0.60945,
+              0.740701
             ],
             "material": "paper"
           }
@@ -1302,16 +1302,16 @@
           1672,
           941
         ],
-        "sha256": "99f524f10b5aab3cf26f1c7956a5ac66afc13cf91736ffaec93fe3529a71d2f2",
+        "sha256": "796957809ac92c551e8610b25ab7cec9b98f1a547968ed9ea42d3368b025b536",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.115,
-              0.14,
-              0.53,
-              0.61
+              0.072368,
+              0.103082,
+              0.571172,
+              0.785335
             ],
             "material": "screen"
           }
@@ -1331,16 +1331,16 @@
           1672,
           941
         ],
-        "sha256": "cc79cf0391817ef73c67df3994bd435bc4900c84d6a93605a3e34dbd7497618f",
+        "sha256": "94429000646b62e09b58d2bc1ec0b1b75c63935ee63ea9ddc2108a7ddeae0676",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.085,
-              0.11,
-              0.62,
-              0.7
+              0.105861,
+              0.146652,
+              0.601077,
+              0.751328
             ],
             "material": "paper"
           }
@@ -1360,16 +1360,16 @@
           1672,
           941
         ],
-        "sha256": "e4110e60b734fe2b5883ebaefb8cb4c1312345151e09c199aa833b69244f6b61",
+        "sha256": "c7dc9eda0f85932ddc5ad9b39473bd353b734832e8f00fd45ea3423222b1a0ad",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.04,
-              0.09,
-              0.67,
-              0.77
+              0.037081,
+              0.146652,
+              0.672249,
+              0.773645
             ],
             "material": "board"
           }
@@ -1389,16 +1389,16 @@
           1672,
           941
         ],
-        "sha256": "fe82dc3a0d1aa2a752bbef27a283b13829daf93a9ea0f42ce1f592ad4c30db9b",
+        "sha256": "be09b3fe4f4d4c6aee91c51787a5d4de25dab518d34fa906c572b79d5ee6c243",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.045,
-              0.11,
-              0.67,
-              0.65
+              0.044258,
+              0.146652,
+              0.691986,
+              0.718385
             ],
             "material": "board"
           }
@@ -1418,16 +1418,16 @@
           1672,
           941
         ],
-        "sha256": "c8f9e6300d0675fe9befe797b75f5166c4ec7e71255f4a696c6b464b4756d085",
+        "sha256": "29b43c395304df3928bcd834d5544ace40229c41464ca4dc16946ae6a4977894",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.1,
-              0.12,
-              0.59,
-              0.67
+              0.087321,
+              0.146652,
+              0.608852,
+              0.755579
             ],
             "material": "board"
           }
@@ -1447,16 +1447,16 @@
           1672,
           941
         ],
-        "sha256": "84fce2cda2cd52fd934f36341243790ce77b28a829091053678676039578b095",
+        "sha256": "a85157f4ae7f58de79d937fbfaf77dc3e8d0dd7bcdeba2b186421d8a38a47339",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.045,
-              0.12,
-              0.66,
-              0.7
+              0.043062,
+              0.146652,
+              0.66567,
+              0.742827
             ],
             "material": "board"
           }
@@ -1476,16 +1476,16 @@
           1672,
           941
         ],
-        "sha256": "2a993326d17f56fd5f197e3386b85826705be8e7f4716c6384f50f2b41ce253e",
+        "sha256": "eaa14c0295af7d6967462b5ce2588725891b0b664a68bd71416e0898f29f680e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.04,
-              0.085,
-              0.66,
-              0.76
+              0.0939,
+              0.146652,
+              0.611842,
+              0.751328
             ],
             "material": "board"
           }
@@ -1505,16 +1505,16 @@
           1672,
           941
         ],
-        "sha256": "318c7f80fe103e6aff63df31d8a989ef46015ac00df47cb03f552d5a6d5680aa",
+        "sha256": "7fd34dac68cb2f099735490bf3ca4eb4672b2de2196c30b98b46aec7172d928e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.12,
-              0.14,
-              0.515,
-              0.62
+              0.117823,
+              0.146652,
+              0.525718,
+              0.742827
             ],
             "material": "board"
           }
@@ -1524,6 +1524,2906 @@
           0.73,
           0.19,
           0.23
+        ]
+      }
+    },
+    "pokemon-showdown": {
+      "background": "assets/applet-scenes/pokemon-showdown/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "60f0ea6857dc1cdba8a86d74d44aebe3b7ee64beb334d6c96fb3383abd0d9f18",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.0575,
+              0.136,
+              0.5359,
+              0.756
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.7,
+          0.26,
+          0.28
+        ]
+      }
+    },
+    "github": {
+      "background": "assets/applet-scenes/github/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "f2f6d1cdd8ae96646ef2ffd80b0a08693b6193340082c80bfe4757e1dc38bbf8",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.128589,
+              0.162593,
+              0.440191,
+              0.739639
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "codex": {
+      "background": "assets/applet-scenes/codex/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "a9dd313426b7d5a428e0ac379187b5ff30684a66b8b7df1997084d6d2cfbf942",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.065789,
+              0.129649,
+              0.501794,
+              0.81509
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "claude-code": {
+      "background": "assets/applet-scenes/claude-code/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "ba6c6de823fd12b5d1e03add347d1f89a87076374b5cb829af9d1e164dbc1044",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.057416,
+              0.146652,
+              0.490431,
+              0.802338
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "notion": {
+      "background": "assets/applet-scenes/notion/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "2217bdc8334d571dedd9c45a3c19158b0aad84fc35934e47172440924149e649",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.037679,
+              0.146652,
+              0.549641,
+              0.781084
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "obsidian": {
+      "background": "assets/applet-scenes/obsidian/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "43f2a0670b9b5b4114b7a4d23470e4900801a13b7d6c3cafbca11dcee0a12cf2",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.055622,
+              0.146652,
+              0.529306,
+              0.794899
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "plaid": {
+      "background": "assets/applet-scenes/plaid/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "fa38165ce979a4bb0168369d419ccac61a4abd5539c0ca568f1441f283510bf7",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.064593,
+              0.099894,
+              0.492225,
+              0.797024
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "stripe": {
+      "background": "assets/applet-scenes/stripe/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "37aefb8ecac1a4758af122aa2986e2abddfd8a72de0fdf9ae64db73a7345ff8b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.041268,
+              0.146652,
+              0.52811,
+              0.785335
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "paypal": {
+      "background": "assets/applet-scenes/paypal/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "8dd7ffb9ca84ca05cca3f8fa718c6d7b4dd1d93797950b98ed8d26450fb6df87",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.038278,
+              0.146652,
+              0.575957,
+              0.79915
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "todoist": {
+      "background": "assets/applet-scenes/todoist/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "372e19c1605b0b4f1d5f0b89266eecb53b82835df8324f74d26387021b522002",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.052632,
+              0.146652,
+              0.469498,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "linear": {
+      "background": "assets/applet-scenes/linear/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "5e5953604d54df2fb0b21cdfd6a505c4630f41046ec06cf3356b16df5d7f8222",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.066986,
+              0.140276,
+              0.5311,
+              0.790648
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "supabase": {
+      "background": "assets/applet-scenes/supabase/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "7c26e19bdc55e3a3528071e0faa3f7ef85ba9a6ff7e72cdba9402082ec0ac659",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.036483,
+              0.146652,
+              0.480263,
+              0.788523
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "docker": {
+      "background": "assets/applet-scenes/docker/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "ca1883cf31ff7b8cf017d48aa9201b82ba55c6f022a88242d461a8b0b14352b3",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.075359,
+              0.143464,
+              0.494617,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "google-drive": {
+      "background": "assets/applet-scenes/google-drive/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "d0f40acdc0b02f650900967faa6ca5fb9389dd3515b41d66c2166ddd7cab6574",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.044856,
+              0.146652,
+              0.522129,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "google-docs": {
+      "background": "assets/applet-scenes/google-docs/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "abac1aa65a9c6a1ca228e3e540fbc4f37c7906d1918da40ab597b895a7eb97b8",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.032895,
+              0.146652,
+              0.562201,
+              0.809777
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "google-sheets": {
+      "background": "assets/applet-scenes/google-sheets/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "35eb0fed4282a5f7e4863c5e20d901766940e194807d6de15e2cbf5ff9f023aa",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.121411,
+              0.146652,
+              0.454545,
+              0.761955
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "google-slides": {
+      "background": "assets/applet-scenes/google-slides/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "de559ec310f20d484ca1d89de9bcde242f5c450d6b3c678ec5a70d246c038c90",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.035287,
+              0.146652,
+              0.57177,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "oura": {
+      "background": "assets/applet-scenes/oura/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "141292b7b774cbb73f476e7ae4d0dab7b29425643b37f64acce36b0298176c40",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.095694,
+              0.087141,
+              0.470096,
+              0.804463
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "strava": {
+      "background": "assets/applet-scenes/strava/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "d030ec434152006e4b1e36aba4d58a008b78aa56c583a0c60299e31c3812bc4f",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.094498,
+              0.149841,
+              0.485048,
+              0.765143
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "fitbit": {
+      "background": "assets/applet-scenes/fitbit/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "b6a3fb8d22a7f95efd9d5767d2112e4726a96741c94e330a6fef9712b27c8c21",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.126794,
+              0.146652,
+              0.467105,
+              0.710946
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "google-maps": {
+      "background": "assets/applet-scenes/google-maps/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "e5fe3310f12805e94d3e0d2021cb3b61fff8352c585046e0e4b1a80f01cc74e2",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.146531,
+              0.146652,
+              0.425239,
+              0.727949
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "airbnb": {
+      "background": "assets/applet-scenes/airbnb/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "4449933eed58a9e12cc1a1cee55149566c68bdeea3dc78f567c356f8252ac407",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.060407,
+              0.12221,
+              0.492823,
+              0.806589
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "tripit": {
+      "background": "assets/applet-scenes/tripit/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "21dd65a5ecfbc0415f0f663acc756e03f25e9aedd2b5dc205e840dc4222645bc",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.135167,
+              0.146652,
+              0.436603,
+              0.730074
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "x": {
+      "background": "assets/applet-scenes/x/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "66e20b2c7390fa063ddc3c6861e32d6ee91778165195fd65815ac6354ef5e4a4",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.091507,
+              0.119022,
+              0.450957,
+              0.744952
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "youtube": {
+      "background": "assets/applet-scenes/youtube/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "bdb8ab63f45a505741169a88cc2c24e87808c0fa34e430116a613baf0bab6d33",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.092105,
+              0.146652,
+              0.495813,
+              0.778959
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "tiktok": {
+      "background": "assets/applet-scenes/tiktok/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "eb9f7649b8d434505567825359ebe5f186cc9a44ca91f7ec6e8a02f106e9b997",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.060407,
+              0.146652,
+              0.495215,
+              0.789586
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "discord": {
+      "background": "assets/applet-scenes/discord/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "1771c26444da0cb7473330aefea384a612c0f288f867f0a1cf61a00358a3998b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.068182,
+              0.146652,
+              0.544856,
+              0.797024
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "doordash": {
+      "background": "assets/applet-scenes/doordash/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "49845c04e5449b3059c092fa6f1caeb671b4953b7dd660c74403513bd1d5642f",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.077153,
+              0.146652,
+              0.505383,
+              0.800213
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "wordle": {
+      "background": "assets/applet-scenes/wordle/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "0b99a0db04f3aa71ddc420a95916baf3d63189ddcd6541c966f7f4c08b8e9e9e",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.074761,
+              0.146652,
+              0.502392,
+              0.794899
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "nyt-connections": {
+      "background": "assets/applet-scenes/nyt-connections/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "fb5975eedd10cb59548fc6e3b7bab704f2b1b1433b2941e5c299827a84f8db22",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.047249,
+              0.146652,
+              0.519737,
+              0.783209
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "slither-io": {
+      "background": "assets/applet-scenes/slither-io/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "ac995b298da7c57e6b442bb40b2658980cb433335977878f12ef535b502e1b52",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.080144,
+              0.146652,
+              0.528708,
+              0.780021
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "agar-io": {
+      "background": "assets/applet-scenes/agar-io/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "c555688d647a285178327327ed5b6df8a2118adf8564fb5f5aa0f59270600e35",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.05622,
+              0.146652,
+              0.507775,
+              0.783209
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "krunker-io": {
+      "background": "assets/applet-scenes/krunker-io/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "4cfe75412edc1e7f7d949d2d89ce2d21e89c9317f9cf0bebc10b2841cb720985",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.069976,
+              0.146652,
+              0.523923,
+              0.77577
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "skribbl-io": {
+      "background": "assets/applet-scenes/skribbl-io/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "492e5bdbdc04ae8639ceb35943815c331510251d6e158ea87d1bf0ce1aec12df",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.09689,
+              0.146652,
+              0.465909,
+              0.793836
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "infinite-craft": {
+      "background": "assets/applet-scenes/infinite-craft/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "e5cd8f59a794f3435905274049e20dc67beee1f44cd681113de52d76f1c71fa5",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.079545,
+              0.146652,
+              0.532297,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "little-alchemy-2": {
+      "background": "assets/applet-scenes/little-alchemy-2/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "7edca685105264d7bf5625469ec6ce0e7d8bf2fde6c9556dcc6cc80d4d80e421",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.074163,
+              0.146652,
+              0.465909,
+              0.791711
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "cookie-clicker": {
+      "background": "assets/applet-scenes/cookie-clicker/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "77bc218d89e3c4bf96a9790daf52a12ddaefb1cf0c44ef0f206b9a617a2bed60",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.062201,
+              0.146652,
+              0.482057,
+              0.791711
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "lichess": {
+      "background": "assets/applet-scenes/lichess/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "2a2712ad4c2885e745586cf10f16f9484226a89fc25c9a4bc77bfc840b8d2c32",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.068182,
+              0.146652,
+              0.52512,
+              0.791711
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "drive-mad": {
+      "background": "assets/applet-scenes/drive-mad/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "bb67ba1e30b5c053ea7c8249a2867e2df9c8aca6f77508e42f0284ddfb1fd864",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.078947,
+              0.146652,
+              0.485048,
+              0.784272
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "subway-surfers": {
+      "background": "assets/applet-scenes/subway-surfers/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "f866ec527d2a01b5019fea929e0c956fcece0a22071ea5a4841161fa70b396d7",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.080742,
+              0.164718,
+              0.467703,
+              0.764081
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "sekai": {
+      "background": "assets/applet-scenes/sekai/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "604bd67b77e63de2cccd1c9b290946cdefd95a16f5cfd4c222ea83bd9f2062ad",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.072368,
+              0.165781,
+              0.520335,
+              0.768332
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "sekai-sketch-racer": {
+      "background": "assets/applet-scenes/sekai-sketch-racer/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "f2531e072c3f9e16f7e373c082e8bdc0142f583a5d42bba8c6d2f2641701f097",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.069378,
+              0.146652,
+              0.510167,
+              0.789586
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "sekai-3d-uno": {
+      "background": "assets/applet-scenes/sekai-3d-uno/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "a60c0167ac9d283fd404a68419c52d81cf645849828c1c367b7db52ae3bf580b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.072967,
+              0.146652,
+              0.529904,
+              0.785335
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "sekai-devil-level": {
+      "background": "assets/applet-scenes/sekai-devil-level/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "b6ee98b98445d8dea0964722733792100284ab41a38058a5e0ad474cc45a1652",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.094498,
+              0.146652,
+              0.5,
+              0.786397
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "chatgpt": {
+      "background": "assets/applet-scenes/chatgpt/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "6429a264eb0bbc3ccd2dbcd2145e7b6db862f8818297aa87c49fada260129b13",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.058014,
+              0.146652,
+              0.514354,
+              0.804463
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "claude": {
+      "background": "assets/applet-scenes/claude/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "23d0d842f94c77c1aae28ec166f1fa722c42c958a964a1fe3879b1202abff14d",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.043062,
+              0.146652,
+              0.539474,
+              0.797024
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "gemini": {
+      "background": "assets/applet-scenes/gemini/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "dea4f1afd9b8016beae1bd95cea3fc7fd57c8b321649efd6a7d8509ac1dd6aa6",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.081938,
+              0.146652,
+              0.491627,
+              0.791711
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "perplexity": {
+      "background": "assets/applet-scenes/perplexity/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "f796d35ba6d1e74acd6f00aa83dfdc9eb282bb22b93c8b853282ab0ab5fc48f3",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.048445,
+              0.146652,
+              0.535885,
+              0.784272
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "deepseek": {
+      "background": "assets/applet-scenes/deepseek/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "e858dc550d81c7c0e58de0b5f7484c8be5bb239da231fb65124c70007958b76b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.067584,
+              0.146652,
+              0.520335,
+              0.794899
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "whatsapp": {
+      "background": "assets/applet-scenes/whatsapp/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "3dba8b6a9fd75ea25a45a031b301b2efe89deac7e82724dfc15acacc6b1b8498",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.080144,
+              0.146652,
+              0.5,
+              0.794899
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "telegram": {
+      "background": "assets/applet-scenes/telegram/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "9878f3fcad2864ded7977b43ad1f7c7019a42a0a23e0bdd74f5ec27e93d16046",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.055622,
+              0.155154,
+              0.491029,
+              0.774708
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "slack": {
+      "background": "assets/applet-scenes/slack/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "6b018fb4cf86d6b57be99ff2f2170a61166539976509bcb12cee17901779d282",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.044856,
+              0.146652,
+              0.538876,
+              0.803401
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "teams": {
+      "background": "assets/applet-scenes/teams/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "be598bd567f497cfaea169a92b3e7ef94dd38dbad85d433cd0327c3f6396757a",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.059809,
+              0.146652,
+              0.501794,
+              0.777896
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "zoom": {
+      "background": "assets/applet-scenes/zoom/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "aaebd46cdf043d7186054b765fd7802ce0d0a14f76591ae195f64282ff78a9f8",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.05622,
+              0.146652,
+              0.542464,
+              0.794899
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "dropbox": {
+      "background": "assets/applet-scenes/dropbox/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "8811f4b5ec067d64cbb6d8746b28c7de5349eabbf459351aff73f6217a859ded",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.049043,
+              0.146652,
+              0.538876,
+              0.791711
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "onedrive": {
+      "background": "assets/applet-scenes/onedrive/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "262128282aabb0670d05fd4c65449c290a2667c0627cdaaf76a19c91d0bc678b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.062799,
+              0.146652,
+              0.508971,
+              0.785335
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "microsoft-word": {
+      "background": "assets/applet-scenes/microsoft-word/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "2326dd0e4be5cbc5e999115e6f8552431dc25c5ff8ed4f6086545021dc7a8d76",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.058014,
+              0.146652,
+              0.510167,
+              0.805526
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "microsoft-excel": {
+      "background": "assets/applet-scenes/microsoft-excel/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "f957209271d5940b873a1d00ed8805e3c238f4c656c261bcb05f04995a22d07b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.058014,
+              0.146652,
+              0.523325,
+              0.797024
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "microsoft-powerpoint": {
+      "background": "assets/applet-scenes/microsoft-powerpoint/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "3b5fd3bc71ec847316e9c3c842265e4de261dcf0b9adf7a6f2d890edb06266a9",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.059211,
+              0.146652,
+              0.534091,
+              0.788523
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "figma": {
+      "background": "assets/applet-scenes/figma/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "c9cc5cf46f5cca94e19505da67346f9bb925e5dc85753970ac0f8edfb76f96c7",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.050239,
+              0.146652,
+              0.545455,
+              0.790648
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "canva": {
+      "background": "assets/applet-scenes/canva/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "4826d4f3772e8c7cdfa5513d2d8f6c5a47f2193e3ffc42dd8ae84dd2e6aa7e95",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.063995,
+              0.16153,
+              0.54067,
+              0.769394
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "spotify": {
+      "background": "assets/applet-scenes/spotify/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "1816f675c90344b32a0612cea56200bbbfc20892eaded94c9909054cae32d683",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.086124,
+              0.146652,
+              0.523325,
+              0.772582
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "apple-music": {
+      "background": "assets/applet-scenes/apple-music/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "334eaf32a113eac17d94bf03686495294f0aa183f8408300b3530ddacf4ab8df",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.061005,
+              0.146652,
+              0.536483,
+              0.774708
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "reddit": {
+      "background": "assets/applet-scenes/reddit/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "76a19b64e03401882fd9564d582dcbbacddaa57c1bc6c2f0fce06c143932c636",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.054426,
+              0.146652,
+              0.519139,
+              0.783209
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "instagram": {
+      "background": "assets/applet-scenes/instagram/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "b978b695d03cb014dd1ef858a1753eae0fb17193e429e4ae59c44948fd4b6f0e",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.059211,
+              0.146652,
+              0.52811,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "linkedin": {
+      "background": "assets/applet-scenes/linkedin/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "ae5fdeb4a7569f013da179b1476a53699e45d2becbe3e95405850bedd4b95e57",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.067584,
+              0.146652,
+              0.492823,
+              0.776833
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "amazon": {
+      "background": "assets/applet-scenes/amazon/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "2f250001524d336e2959604c27ab01114b8fb0743f17269e81b4f50884739928",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.059809,
+              0.146652,
+              0.521531,
+              0.802338
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "netflix": {
+      "background": "assets/applet-scenes/netflix/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "b47bafbf170567c12e752e861b39f96ddd18c3116e20d5023fe1e6fad5c3979b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.123804,
+              0.158342,
+              0.441388,
+              0.773645
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "outlook": {
+      "background": "assets/applet-scenes/outlook/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "b38b432b897181b8bde22835d94c1fc74637d4417aa56318984f0b79955afe5e",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.07177,
+              0.146652,
+              0.49701,
+              0.782147
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "apple-podcasts": {
+      "background": "assets/applet-scenes/apple-podcasts/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "1f5df97b2d4d073bc00eee1d4e9efbc784afb11f1dfc5d5bc9ff2af8d90a07c6",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.062799,
+              0.146652,
+              0.509569,
+              0.800213
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "google-photos": {
+      "background": "assets/applet-scenes/google-photos/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "fcec6c1b534219859182869aacbf87ab416f9e03dbb352cd985a66e179abbcdb",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.099282,
+              0.146652,
+              0.462321,
+              0.778959
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "pinterest": {
+      "background": "assets/applet-scenes/pinterest/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "0f202f39a59b302242d138dcd19fe11a987d7df2efad177197edf37b7347d545",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.065789,
+              0.146652,
+              0.489833,
+              0.790648
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "facebook": {
+      "background": "assets/applet-scenes/facebook/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "b18e4264b8e35011e9763db26a8fa07a33b2b801068743b9016292bad695b57c",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.108254,
+              0.146652,
+              0.485646,
+              0.803401
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "threads": {
+      "background": "assets/applet-scenes/threads/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "fa85876e0d12ba6e58255ba1b7f4546b1c575f3f6318dd7d70e90b0171b4710d",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.053828,
+              0.146652,
+              0.514952,
+              0.793836
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "capcut": {
+      "background": "assets/applet-scenes/capcut/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "64c60d3e4f9eaf4b6a0d901db0c47ba904e966a9f3010a45e54151969c21187c",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.056818,
+              0.146652,
+              0.547847,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "uber": {
+      "background": "assets/applet-scenes/uber/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "bc79b2c19663841101b14f6acef3037f9c2088bb8d2c8ed2a378b5f2be04441a",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.048445,
+              0.146652,
+              0.51256,
+              0.789586
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "uber-eats": {
+      "background": "assets/applet-scenes/uber-eats/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "9ffa7872a79f5365a56f149f4a2f1cf145ad214fde151b606cbc913ef2fe646d",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.114833,
+              0.146652,
+              0.447368,
+              0.792774
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "booking": {
+      "background": "assets/applet-scenes/booking/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "7ed27006e54ff36340a567befa5d970144e83f96ff788cdf04e6e1b436d76a06",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.092105,
+              0.146652,
+              0.459928,
+              0.781084
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "feishu": {
+      "background": "assets/applet-scenes/feishu/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "dde8acb8528160cf3e7de45f54611c0bf2c0043905d38a1ea51577759c6bc067",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.061005,
+              0.146652,
+              0.525718,
+              0.783209
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "bilibili": {
+      "background": "assets/applet-scenes/bilibili/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "1594cda7371a2a926efad8a77e1628811bde3da9e8d8ef4d956c6346c6aa8ff7",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.08433,
+              0.146652,
+              0.50299,
+              0.798087
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "xiaohongshu": {
+      "background": "assets/applet-scenes/xiaohongshu/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "229bb1f638f65a695933c11a3388843d871aaf70d7da42f83f0d157276e02751",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.061603,
+              0.146652,
+              0.481459,
+              0.800213
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "baidu-netdisk": {
+      "background": "assets/applet-scenes/baidu-netdisk/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "c1a2bc8fd3e76f4a6e215a88d0b5df3bf976b8e4c522de1a18b7a9c5685a84cc",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.069378,
+              0.146652,
+              0.508971,
+              0.798087
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "twitch": {
+      "background": "assets/applet-scenes/twitch/background.webp",
+      "registration": {
+        "imageSize": [
+          1671,
+          941
+        ],
+        "sha256": "bc2aad2dfafc55905b02e2d04203617088231917322ea16c54831b2b231611b4",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.064632,
+              0.146652,
+              0.540395,
+              0.788523
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "copilot": {
+      "background": "assets/applet-scenes/copilot/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "e7bddcbf19351b0f8e3d37ff2f7c6d89737c0c529bb8716b94c3ccbcc11c5d54",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.063995,
+              0.146652,
+              0.533493,
+              0.797024
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "acrobat": {
+      "background": "assets/applet-scenes/acrobat/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "09d73655ce832b10ad2f027e9f8cf65086fe1182c67624bb699679f006760a62",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.054426,
+              0.146652,
+              0.529904,
+              0.791711
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "wikipedia": {
+      "background": "assets/applet-scenes/wikipedia/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "12ca07cf4a3a53edff5ff9b754a567d2cb4e5bb7b4405ed489c81cfcf30ce67b",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.042464,
+              0.146652,
+              0.531699,
+              0.805526
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "doubao": {
+      "background": "assets/applet-scenes/doubao/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "c39d9e12850c88b5be09cdef39021b2fcb7073c96aa350d9e91f4072668f488f",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.052632,
+              0.146652,
+              0.552033,
+              0.797024
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "taobao": {
+      "background": "assets/applet-scenes/taobao/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "2bd94596e0676a153c970786431e3a9f986b61c7a17f7f5e5ba97f50e0ccc719",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.052632,
+              0.146652,
+              0.521531,
+              0.785335
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "alipay": {
+      "background": "assets/applet-scenes/alipay/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "c0b659cafed9bd34d50de601ef4a7c965fab3a608604d9dc5d59d6e80af51351",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.061005,
+              0.146652,
+              0.520933,
+              0.794899
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "douyin": {
+      "background": "assets/applet-scenes/douyin/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "817e7bdb95d9de54a14129f10e2b832344d15cfa34f76713bc18afee345732f9",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.074761,
+              0.146652,
+              0.547847,
+              0.777896
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "posthog": {
+      "background": "assets/applet-scenes/posthog/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "79fa5596d3982e83afc5bff7ddcdb0b6d7fa71f6eeb5b13abf11d002fd0d1108",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.058612,
+              0.146652,
+              0.499402,
+              0.794899
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "cloudflare": {
+      "background": "assets/applet-scenes/cloudflare/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "bce1e42944993e768c4bd768699bef577f846d3d82a7256f653ce2ba845d6b38",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.075359,
+              0.146652,
+              0.508373,
+              0.79915
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "vercel": {
+      "background": "assets/applet-scenes/vercel/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "6f84c296539fb822fd2ac749b7a99fc663d147cc55a5e887542b4e5dca4cd2d4",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.105263,
+              0.146652,
+              0.47488,
+              0.789586
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "netlify": {
+      "background": "assets/applet-scenes/netlify/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "2e5da11abe1cff0faf93052dc095b3bb6f0f2a18454a30273b9c8980dd9ab064",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.061603,
+              0.146652,
+              0.538876,
+              0.785335
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "firebase": {
+      "background": "assets/applet-scenes/firebase/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "2b22a8778da41c4a17650df89d28eb216d998ac11e75f12627cc62c53b42e765",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.110646,
+              0.146652,
+              0.454545,
+              0.798087
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "sentry": {
+      "background": "assets/applet-scenes/sentry/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          940
+        ],
+        "sha256": "48a097f15a005c8f58a9b40aedc801a3e6e820bdbaceaa2f0f73c9781f417e16",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.074761,
+              0.146809,
+              0.504785,
+              0.781915
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "railway": {
+      "background": "assets/applet-scenes/railway/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "0f388795bdb3b5e8ce63b35a2e88c8d3fca6e114f36b3c6367ecf62c58cc8553",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.074761,
+              0.146652,
+              0.492225,
+              0.789586
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "render": {
+      "background": "assets/applet-scenes/render/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "f99b30dfd60d5fc7ae43c3820d080c58fbb8bc9ad8563b2ab8aa679333b9e01d",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.029904,
+              0.146652,
+              0.508373,
+              0.786397
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "gitlab": {
+      "background": "assets/applet-scenes/gitlab/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "b3368fe3dd86db8afdc849eb9609cf75730da5a1400b63a3a03e8e2b92fe5310",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.05323,
+              0.146652,
+              0.52512,
+              0.774708
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
+        ]
+      }
+    },
+    "jira": {
+      "background": "assets/applet-scenes/jira/background.webp",
+      "registration": {
+        "imageSize": [
+          1672,
+          941
+        ],
+        "sha256": "62d442b50f2ff070b008accc24b7a87f24b18d09b7c27d685645a3f2525bc0cf",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.072368,
+              0.146652,
+              0.517943,
+              0.772582
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.72,
+          0.62,
+          0.25,
+          0.34
         ]
       }
     }

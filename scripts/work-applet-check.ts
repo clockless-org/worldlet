@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
+import {withBrowser,fileAccess,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
 import {tmpdir} from 'node:os';
 import {localPathName} from '../core/context/local-path.ts';
 import path from 'node:path';
@@ -36,24 +36,29 @@ await withBrowser(fileAccess,async browser=>{
  });
  await page.goto(worldUrl());
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length>0);
- for(const key of ['github','codex','claude-code']){
+ await page.evaluate(()=>location.hash='object=app-github');
+ await page.locator('#notionContent[data-applet=github] .browser-viewport').waitFor();
+ await page.waitForFunction(()=>calls.some(c=>c.action==='browserShow'&&c.applet==='github'));
+ assert.equal(await page.evaluate(()=>calls.some(c=>c.action==='developmentSessions'&&c.provider==='github')),false,'GitHub opens the original site without a repository read');
+ await leaveApplet(page);
+ for(const key of ['codex','claude-code']){
   await page.evaluate(key=>location.hash='object=app-'+key,key);
   // Work Applets draw in their theme scene (ui/applets/scene/scene-family.ts: the files scene in Village).
   await page.locator(`.pixi-applet-stage[data-scene="${key}"]`).waitFor();
   // Every session shows at once; more than the four folios scroll inside the item area instead of paging.
-  await page.waitForFunction(count=>document.querySelectorAll('.scene-item').length===count,key==='github'?2:6);
+  await page.waitForFunction(count=>document.querySelectorAll('.scene-item').length===count,6);
   assert.equal(await page.locator('#notionContent').isVisible(),false);
   await page.screenshot({path:path.join(tmpdir(),'worldlet-'+key+'-open.png')});
   assert.equal(await page.locator('.pixi-open-pagination').count(),0,'no page arrows');
   assert.equal(await page.locator('.applet-scene-region[data-role=primary]').evaluate(e=>getComputedStyle(e).overflowY),'auto','more sessions than fit scroll in place');
   await page.locator('.scene-item').first().click();
-  await page.getByText(key==='github'?'#12 · Improve the village':key==='codex'?'The Codex conversation is visible.':'The Claude conversation is visible.',{exact:true}).waitFor();
+  await page.getByText(key==='codex'?'The Codex conversation is visible.':'The Claude conversation is visible.',{exact:true}).waitFor();
   await page.locator('.pixi-selected-item').waitFor();
   const card=await page.locator('.pixi-selected-item').boundingBox(),nextArrow=await page.getByRole('button',{name:'Next item',exact:true}).boundingBox();
   assert.ok(nextArrow.x>=card.x+card.width,'next arrow lives outside the item');
-  if(key!=='github'){await page.emulateMedia({reducedMotion:'no-preference'});await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(key=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(m=>m.id==='app-'+key)?.presentation.rigMotion===0,key);}
+  {await page.emulateMedia({reducedMotion:'no-preference'});await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(key=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(m=>m.id==='app-'+key)?.presentation.rigMotion===0,key);}
   await page.getByRole('button',{name:'Next item',exact:true}).click();
-  await page.waitForFunction(()=>document.querySelector('.pixi-selected-item strong')?.textContent==='Review navigation'||document.querySelector('.pixi-selected-item strong')?.textContent==='notes');
+  await page.waitForFunction(()=>document.querySelector('.pixi-selected-item strong')?.textContent==='Review navigation');
   await page.getByRole('button',{name:'Previous item',exact:true}).click();
   // The Applet's immersive background paints its device, so the Pixi device is not duplicated.
   await page.waitForFunction(key=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return m.focusRoom?.key===key&&m.focusRoom.framing==='scene-fit'&&m.presentation.deviceVisible===false;},key);
@@ -61,7 +66,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.screenshot({path:path.join(tmpdir(),'worldlet-'+key+'-focus.png')});
   await page.locator('#notionBack').click();await page.locator('.pixi-applet-stage').waitFor();
  }
- assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length),0,'Work Applets never silently redirect to websites');
+ assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='browserShow'&&c.applet!=='github').length),0,'Local coding Applets never redirect to websites');
  assert.equal(await page.evaluate(()=>calls.filter(c=>c.operation==='send').length),0,'reading never starts coding');
  await page.evaluate(()=>location.hash='object=app-codex');
  await page.locator('.scene-item').first().click();

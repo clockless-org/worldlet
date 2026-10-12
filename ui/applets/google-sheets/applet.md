@@ -1,12 +1,16 @@
 # Google Sheets
 
+## Website presentation
+
+Opening this Applet loads its original website in Worldlet's isolated browser surface. The Village theme supplies only the backdrop and measured page rectangle; the site's own interface handles editing, navigation and account sign-in. Existing authorized data readers remain available to Fox and Attention; opening the site does not grant them new access.
+
 ## Runtime
 
-Native Peek → Open → Focus. Uses the existing explicit Drive read-only grant,
+The saved-content reader uses the existing explicit Drive read-only grant,
 with a type-filtered list (20 per page). Account changes invalidate cached content.
 No writes, background ingestion or automatic model processing.
 
-Focus presents the provider export, not a summary. Docs and Slides export plain
+The saved-content reader presents the provider export, not a summary. Docs and Slides export plain
 text; Sheets exports only its first worksheet as CSV, rendered as an HTML table.
 Images, comments, layout and other sheets remain available through Web.
 
