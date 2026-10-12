@@ -17,16 +17,25 @@ final class SpeechLanguageTests: XCTestCase {
     }
 
     func testLastLineDecidesEvenOnAnEnglishPhone() {
-        XCTAssertEqual(SpeechLanguage.locale(lastLine: "明天有什么安排", preferred: ["en-US"], supported: supported), "zh-CN")
-        XCTAssertEqual(SpeechLanguage.locale(lastLine: "明天有什么安排", preferred: ["en-US", "zh-Hant-TW"], supported: supported), "zh-TW")
-        XCTAssertEqual(SpeechLanguage.locale(lastLine: "カレンダー", preferred: ["en-US"], supported: supported), "ja-JP")
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["明天有什么安排"], preferred: ["en-US"], supported: supported), "zh-CN")
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["明天有什么安排"], preferred: ["en-US", "zh-Hant-TW"], supported: supported), "zh-TW")
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["カレンダー"], preferred: ["en-US"], supported: supported), "ja-JP")
     }
 
     func testOtherwiseThePhonesFirstLanguage() {
-        XCTAssertEqual(SpeechLanguage.locale(lastLine: nil, preferred: ["zh-Hans-CN", "en-US"], supported: supported), "zh-CN")
-        XCTAssertEqual(SpeechLanguage.locale(lastLine: "Open my calendar", preferred: ["es-MX", "en-US"], supported: supported), "es-MX")
-        XCTAssertEqual(SpeechLanguage.locale(lastLine: nil, preferred: ["en-GB"], supported: supported), "en-GB")
-        XCTAssertEqual(SpeechLanguage.locale(lastLine: nil, preferred: [], supported: supported), "en-US")
-        XCTAssertNil(SpeechLanguage.locale(lastLine: "שלום", preferred: ["en-US"], supported: supported))
+        XCTAssertEqual(SpeechLanguage.locale(lines: [], preferred: ["zh-Hans-CN", "en-US"], supported: supported), "zh-CN")
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["Open my calendar"], preferred: ["es-MX", "en-US"], supported: supported), "es-MX")
+        XCTAssertEqual(SpeechLanguage.locale(lines: [], preferred: ["en-GB"], supported: supported), "en-GB")
+        XCTAssertEqual(SpeechLanguage.locale(lines: [], preferred: [], supported: supported), "en-US")
+        XCTAssertNil(SpeechLanguage.locale(lines: ["שלום"], preferred: ["en-US"], supported: supported))
+    }
+
+    /// Kelvin, 2026-10-12: one English line (or Mandarin heard as English) kept every later hold in English.
+    func testAnEnglishLineDoesNotLockOutChinese() {
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["明天有什么安排", "ok", "Send it"], preferred: ["en-US"], supported: supported), "zh-CN")
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["Send it"], preferred: ["en-US", "zh-Hans-CN"], supported: supported), "zh-CN")
+        XCTAssertEqual(SpeechLanguage.locale(lines: [], preferred: ["en-US", "zh-Hant-TW"], supported: supported), "zh-TW")
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["明天有什么安排", "Открой календарь"], preferred: ["en-US"], supported: supported), "ru-RU")
+        XCTAssertEqual(SpeechLanguage.locale(lines: ["Open my calendar"], preferred: ["en-US", "es-MX"], supported: supported), "en-US")
     }
 }

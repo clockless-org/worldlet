@@ -24,10 +24,10 @@ final class VoiceInput {
 
     var listening: Bool { state == .listening }
 
-    /// Starts listening in the language of `lastLine` (the person's latest line to Fox), else the phone's own
+    /// Starts listening in the language of `lines` (the person's recent lines to Fox, newest last), else the phone's
     /// (`SpeechLanguage`); asks for speech and microphone permission the first time. `echoCancelled` listens through
     /// the iPhone's voice processing (`.voiceChat`, as a call does) so Talk can hear the person while Fox speaks.
-    func start(lastLine: String? = nil, echoCancelled: Bool = false) async {
+    func start(lines: [String] = [], echoCancelled: Bool = false) async {
         guard state != .listening else { return }
         hold += 1
         transcript = ""
@@ -36,7 +36,7 @@ final class VoiceInput {
             state = .unavailable("Allow Speech Recognition and the microphone for Worldlet in Settings to talk to Fox.")
             return
         }
-        let identifier = SpeechLanguage.locale(lastLine: lastLine, preferred: Locale.preferredLanguages,
+        let identifier = SpeechLanguage.locale(lines: lines, preferred: Locale.preferredLanguages,
                                                supported: SFSpeechRecognizer.supportedLocales().map(\.identifier))
         recognizer = identifier.flatMap { SFSpeechRecognizer(locale: Locale(identifier: $0)) } ?? SFSpeechRecognizer()
         guard let recognizer, recognizer.isAvailable, recognizer.supportsOnDeviceRecognition else {

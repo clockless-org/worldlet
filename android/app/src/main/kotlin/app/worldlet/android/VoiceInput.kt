@@ -45,10 +45,10 @@ class VoiceInput(private val context: Context) {
     }
 
     /**
-     * Starts listening in the language of [lastLine] (the person's latest line to Fox), else the phone's own
+     * Starts listening in the language of [lines] (the person's recent lines to Fox, newest last), else the phone's
      * ([SpeechLanguage]); the caller has already asked for the microphone permission.
      */
-    fun start(permitted: Boolean, lastLine: String? = null) {
+    fun start(permitted: Boolean, lines: List<String> = emptyList()) {
         if (listening) return
         if (!permitted) {
             state = State.Unavailable("Allow the microphone for Worldlet in Settings to talk to Fox. Speech is recognized on this phone only.")
@@ -66,7 +66,7 @@ class VoiceInput(private val context: Context) {
         this.recognizer = recognizer
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, SpeechLanguage.tag(lastLine, LocaleList.getDefault().toLanguageTags().split(',')))
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, SpeechLanguage.tag(lines, LocaleList.getDefault().toLanguageTags().split(',')))
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
             // Keep listening through pauses while the person holds.

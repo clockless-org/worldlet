@@ -195,7 +195,7 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
     /** Starts the microphone, or asks for it first (the person holds again once it is allowed). */
     fun microphone(): Boolean {
         if (!permitted()) { askMicrophone.launch(Manifest.permission.RECORD_AUDIO); return false }
-        voice.start(true, model.turns.lastOrNull { it.role == Turn.Role.User }?.text)
+        voice.start(true, model.turns.filter { it.role == Turn.Role.User }.map { it.text })
         return voice.listening
     }
     /** Hold-to-talk; the Order button and Talk with Fox have the microphone while they run. */
@@ -237,7 +237,7 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
         if (voice.listening || talk.tapped || talking.on) return
         if (!permitted()) { askMicrophone.launch(Manifest.permission.RECORD_AUDIO); return }
         orderHint = null
-        voice.start(true, model.turns.lastOrNull { it.role == Turn.Role.User }?.text)
+        voice.start(true, model.turns.filter { it.role == Turn.Role.User }.map { it.text })
         ordering = voice.listening
     }
     // The computer stopped taking Orders (another channel, or unpaired) while the button listened.

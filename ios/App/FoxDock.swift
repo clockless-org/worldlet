@@ -225,7 +225,7 @@ struct FoxDock: View {
         ordering = true
         haptic(.medium)
         Task {
-            await voice.start(lastLine: model.turns.last(where: { $0.role == .user })?.text)
+            await voice.start(lines: model.turns.filter { $0.role == .user }.map(\.text))
             // Tapped again while the microphone was still starting, or refused.
             if !ordering { await voice.cancel() }
             if case .unavailable = voice.state { ordering = false }
@@ -544,7 +544,7 @@ struct FoxDock: View {
         withAnimation(.snappy) { recording = locked ? .locked : .holding }
         haptic(.medium)
         Task {
-            await voice.start(lastLine: model.turns.last(where: { $0.role == .user })?.text)
+            await voice.start(lines: model.turns.filter { $0.role == .user }.map(\.text))
             // Released, cancelled or refused while the microphone was still starting.
             if recording == .idle { await voice.cancel() }
             if case .unavailable = voice.state { withAnimation(.snappy) { recording = .idle } }

@@ -3,8 +3,11 @@ package app.worldlet.kit
 /**
  * Which language hold-to-talk listens for. The recognizer hears one language at a time, and without a language it
  * used the phone's, so Mandarin on an English phone was heard as English. The rule matches the desktop's
- * (ui/companion/speech-language.ts) and the iPhone's (WorldletKit SpeechLanguage.swift): the last line the person
- * said or typed to Fox, when its script names a language; otherwise the phone's first preferred language.
+ * (ui/companion/speech-language.ts) and the iPhone's (WorldletKit SpeechLanguage.swift): the person's latest line to
+ * Fox whose script names a language; otherwise a preferred language of the phone that has its own script (Chinese on an
+ * English phone); otherwise the phone's first preferred language. One English line must not lock it into English: the
+ * English recognizer writes Mandarin as English words, so every later line would read as English too (Kelvin,
+ * 2026-10-12: "手机上怎么不识别中文了"), while the Chinese recognizer still writes English words it hears.
  */
 object SpeechLanguage {
     /** The language a line is written in, when its script says so; Latin text could be many languages, so null. */
@@ -30,14 +33,19 @@ object SpeechLanguage {
     }
 
     /**
-     * The recognizer's language tag (e.g. "zh-CN"), from [lastLine] (the person's latest line to Fox) and [preferred],
-     * the phone's language tags, most preferred first (e.g. "en-US", "zh-Hans-CN").
+     * The recognizer's language tag (e.g. "zh-CN"), from [lines] (the person's recent lines to Fox, newest last) and
+     * [preferred], the phone's language tags, most preferred first (e.g. "en-US", "zh-Hans-CN").
      */
-    fun tag(lastLine: String?, preferred: List<String>): String {
-        val wanted = lastLine?.let(::languageOf) ?: preferred.firstOrNull()?.let { parts(it).first } ?: "en"
+    fun tag(lines: List<String>, preferred: List<String>): String {
+        val wanted = lines.asReversed().firstNotNullOfOrNull(::languageOf)
+            ?: preferred.map { parts(it).first }.firstOrNull { it in scripted }
+            ?: preferred.firstOrNull()?.let { parts(it).first } ?: "en"
         preferred.map(::parts).firstOrNull { it.first == wanted && it.second != null }?.let { return "${it.first}-${it.second}" }
         return defaults[wanted] ?: wanted
     }
+
+    /** The languages [languageOf] can name: each has its own script. */
+    private val scripted = setOf("zh", "ja", "ko", "ru", "ar", "th", "he", "hi", "el")
 
     private val defaults = mapOf("zh" to "zh-CN", "ja" to "ja-JP", "ko" to "ko-KR", "ru" to "ru-RU", "ar" to "ar-SA",
         "th" to "th-TH", "he" to "he-IL", "hi" to "hi-IN", "el" to "el-GR", "en" to "en-US")
