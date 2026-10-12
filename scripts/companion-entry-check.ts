@@ -23,7 +23,7 @@ await withBrowser(fileAccess,async browser=>{
  // Two sizes only (owner Order 2026-10-08): pointing at the bar brings the hint and opens it to the typing size
  // (owner request 2026-10-12), as pointing at Fox does; focus keeps it there.
  await form.hover();await page.waitForTimeout(400);
- assert(await mic.isVisible());assert(!await form.locator('#notionSend').isVisible(),'no Send while there is nothing to send');
+ assert(await mic.isVisible());assert(await form.locator('#notionSend').isVisible(),'Send shows, dimmed, as in Claude\'s bar (owner request 2026-10-12)');
  assert.match(await type.getAttribute('placeholder'),/to type · hold to speak/);
  const hoverWidth=(await form.boundingBox()).width;assert(hoverWidth>quietWidth+100,'pointing at the bar opens it to the typing size');
  await page.mouse.move(5,5);await page.waitForTimeout(400);assert.equal((await form.boundingBox()).width,quietWidth,'leaving it returns it to the small size');
