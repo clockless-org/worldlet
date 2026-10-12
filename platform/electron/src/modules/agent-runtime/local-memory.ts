@@ -6,7 +6,7 @@ import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts'
 import {isMigrationSource,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {claudeCodeHome,codexHome,piHome} from './agent-files.ts';
 import {declaredName,discoverHermes} from './hermes-files.ts';
-import {openClawWorkspace,readOpenClawConfig} from './openclaw-config.ts';
+import {openClawConfigPresent,openClawWorkspace,readOpenClawConfig} from './openclaw-config.ts';
 
 export {openClawState,openClawWorkspace} from './openclaw-config.ts';
 
@@ -56,7 +56,7 @@ export function readLocalAgentMemory(id:MigrationSource,home=os.homedir(),enviro
   if(id==='pi')try{keys=Object.values(JSON.parse(readInside(root,'auth.json')||'{}')).some((entry:any)=>entry?.type==='api_key'&&typeof entry.key==='string'&&entry.key);}catch{}
   memory={name:null,soul:'',user:'',longTerm:readInside(root,id==='claude-code'?'CLAUDE.md':'AGENTS.md'),model:keys};
  }else{
-  const config=readOpenClawConfig(home,environment),workspace=openClawWorkspace(home,environment,config),model=Object.keys(config).length>0;
+  const config=readOpenClawConfig(home,environment),workspace=openClawWorkspace(home,environment,config),model=openClawConfigPresent(home,environment);
   if(!workspace&&!model)return null;
   const soul=workspace?readInside(workspace,'SOUL.md'):'',name=workspace?declaredName(readInside(workspace,'IDENTITY.md'))??declaredName(soul):null;
   memory=workspace?{name,soul:name?soul:'',user:readInside(workspace,'USER.md'),longTerm:firstOf(workspace,['MEMORY.md','memory.md']),model}:{name:null,soul:'',user:'',longTerm:'',model};
