@@ -273,6 +273,9 @@ export type PhonePushAct={attention:string}|{reply:true}|{approval:string,once?:
 /** What a module asks PhoneService.notify for; `collapse` replaces an earlier notification with the same key. */
 export type PhonePushRequest=Omit<PhonePush,'v'|'id'|'at'>&{collapse?:string};
 /** `box` is the relay's cap on the sealed box (worker/push.ts PUSH_LIMITS), `perCall` the Attention pushes per snapshot. */
+/** The paired phone's system for `phone_paired` (owner 2026-10-11 20:21 PDT: Production metrics), from the platform it
+ * registered for notifications with (`apns`, `apns-dev` or `fcm`); a phone that has not registered is `unknown`. */
+export const phonePlatform=(push?:{platform?:unknown}|null):'ios'|'android'|'unknown'=>typeof push?.platform!=='string'?'unknown':push.platform.startsWith('apns')?'ios':push.platform==='fcm'?'android':'unknown';
 export const PHONE_PUSH_LIMITS=Object.freeze({title:80,body:240,perCall:3,box:3000});
 const PUSH_KINDS:PhonePush['kind'][]=['attention','fox','routine','task'];
 const oneLine=(value:unknown,max:number)=>typeof value==='string'?value.replace(/\s+/g,' ').trim().slice(0,max):'';

@@ -3,7 +3,7 @@ import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,FOX,ORDER,PHONE,VAULT,WIDGETS,type AgentService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
-import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
+import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
@@ -32,6 +32,10 @@ export function installPhone(host:Host){
  // Whether the phone was paired before the latest status, so a new pairing is counted once (`phone_paired`).
  let paired:boolean|null=null;
  const usage=(event:string,dimensions:Row={})=>host.optional<AnalyticsService>(ANALYTICS)?.recordProductEvent(event,'',dimensions);
+ // Its system (owner 2026-10-11 20:21 PDT: Production metrics) shows only once the phone registers for notifications
+ // (`apns`, `apns-dev` or `fcm`), usually just after pairing: phone_paired waits up to a minute for it, else `unknown`.
+ let pairedReport:ReturnType<typeof setTimeout>|null=null;
+ const reportPaired=(push?:{platform:string}|null)=>{if(pairedReport)clearTimeout(pairedReport);pairedReport=null;usage('phone_paired',{phone_platform:phonePlatform(push)});};
  const asked=new Map<string,{item?:string,applet?:string,at:number}>();
  const askedKey=(text:unknown)=>typeof text==='string'?text.trim().slice(0,PHONE_LIMITS.field):'';
  const relay=createPhoneRelay({
@@ -61,7 +65,8 @@ export function installPhone(host:Host){
   },
   onChange:status=>{
    if(status.state!=='paired')attention=undefined;
-   if(status.state==='paired'&&paired===false)usage('phone_paired');
+   if(status.state==='paired'&&paired===false){if(status.push?.platform)reportPaired(status.push);else pairedReport=setTimeout(()=>reportPaired(relay.status().push),60_000);}
+   else if(pairedReport&&status.push?.platform)reportPaired(status.push);
    paired=status.state==='paired';
    host.page.event('worldlet:phone-status',status);
   },
@@ -208,5 +213,5 @@ export function installPhone(host:Host){
   },
  });
  host.onPageLoaded(()=>{for(const link of links)link.schedule(1000);});
- host.onQuit(()=>{stopped=true;clearInterval(watch);remoteHost.stop();for(const link of links)link.stop();});
+ host.onQuit(()=>{stopped=true;if(pairedReport)reportPaired(relay.status().push);clearInterval(watch);remoteHost.stop();for(const link of links)link.stop();});
 }

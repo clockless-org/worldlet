@@ -142,6 +142,8 @@ export function installShell(host:Host){
   if(process.platform!=='darwin'){world?.setMenuBarVisibility(false);world?.on('focus',()=>analytics.recordActiveDay());}
   // The person may have allowed or removed the login item in System Settings meanwhile.
   if(loginItem.supported())world?.on('focus',()=>loginItem.refresh());
+  // world_active_time (owner 2026-10-11 20:21 PDT: Production metrics): the World's use so far, once it is left.
+  world?.on('blur',()=>analytics.endActive());world?.on('hide',()=>analytics.endActive());
   analytics.recordActiveDay();
   if(uncleanExit)analytics.recordProductEvent('app_unclean_exit','',{native_crash:nativeCrash?'yes':'no'});
   setTimeout(()=>reportNativeCrashes(host,analytics),10_000);
@@ -149,7 +151,7 @@ export function installShell(host:Host){
   setTimeout(()=>{try{analytics.recordLocalData(()=>busyWith('dataSize',()=>localDataFacts(host)));}catch(error){host.diagnostics.record(error,'dataSize');}},120_000).unref?.();
   updates.start();
  });
- host.onQuit(()=>{companion.stop();updates.quit();try{fs.rmSync(runMarker,{force:true});}catch{}});
+ host.onQuit(()=>{analytics.endActive();companion.stop();updates.quit();try{fs.rmSync(runMarker,{force:true});}catch{}});
 
  let pending:{id:string,archive:Archive}|null=null;
  const orders=order(host,()=>updates.channel);
