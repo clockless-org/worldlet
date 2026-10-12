@@ -2,7 +2,8 @@
 // 交AI云端修复", and 2026-10-09: the stages are Dev, Alpha, Beta and GA). The Dev tests run in CI (release.yml); Alpha and
 // Beta run on the release machines. A failure opens one Issue per stage, platform and failure signature (the failing
 // gates or jobs); the same failure again only adds a comment, so a broken main does not open an Issue per push. A pass
-// closes that stage and platform's open Issues. A cloud AI session picks the Issues up and fixes them with a normal
+// closes that stage and platform's open Issues, and a failure closes that stage and platform's older Issues with another
+// signature (owner 2026-10-12: To do held 16 stale reports), so one Issue per stage and platform stays open. A cloud AI session picks the Issues up and fixes them with a normal
 // pull request.
 import {spawnSync} from 'node:child_process';
 import {existsSync,readdirSync,readFileSync} from 'node:fs';
@@ -74,11 +75,13 @@ export function report({stage='dev',platform,state,failing=[],signature,sha,runU
  }
  if(state!=='fail')return {};
  const same=mine.find(i=>i.body.includes(marker(stage,platform,signature)));
- if(same){gh(['issue','comment',String(same.number),'--body',`Still failing at ${sha}: ${runURL}`+failing.filter(g=>errors?.[g]).map(g=>`\n- ${g}${errorNote(g,errors)}`).join('')+detailSection(failing,details)]);return {commented:same.number};}
+ // The newest run decides what is failing: the stage and platform's other Issues are superseded by this one.
+ const supersede=current=>{const older=mine.filter(i=>i.number!==same?.number);for(const i of older)gh(['issue','close',String(i.number),'--reason','not planned','--comment',`Superseded: the newest ${Stage(stage)} run on ${platform} at ${sha} fails ${failing.length?failing.join(', '):'setup'}, tracked in ${current}.`]);return older.length?{superseded:older.map(i=>i.number)}:{};};
+ if(same){gh(['issue','comment',String(same.number),'--body',`Still failing at ${sha}: ${runURL}`+failing.filter(g=>errors?.[g]).map(g=>`\n- ${g}${errorNote(g,errors)}`).join('')+detailSection(failing,details)]);return {commented:same.number,...supersede('#'+same.number)};}
  for(const [name,color] of [[LABEL,'d73a4a'],[`stage:${stage}`,'5319e7'],[`platform:${platform}`,'0e8a16']])gh(['label','create',name,'--color',color,'--force']);
  const title=`[${Stage(stage)}][${platform}] ${failing.length?failing.join(', '):'setup'} failing`;
  const url=gh(['issue','create','--title',title,'--label',LABEL,'--label',`stage:${stage}`,'--label',`platform:${platform}`,'--body',issueBody({stage,platform,failing,signature,sha,runURL,errors,details,advisory})]);
- return {created:url.trim()};
+ return {created:url.trim(),...supersede(url.trim())};
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){

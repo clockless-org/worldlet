@@ -69,8 +69,15 @@ const body=issueBody({...fail});
 g=github([{number:3,body},{number:4,body:issueBody({...fail,platform:'windows'})},{number:5,body:issueBody({...fail,stage:'beta'})}]);
 assert.deepEqual(report({...fail,gh:g.gh}),{commented:3});
 assert(!g.calls.some(c=>c[0]==='issue'&&c[1]==='create'));
-g=github([{number:3,body}]);
-assert(report({...fail,failing:['check'],signature:'check',gh:g.gh}).created,'a different failure is a new Issue');
+g=github([{number:3,body},{number:4,body:issueBody({...fail,platform:'windows'})}]);
+const other=report({...fail,failing:['check'],signature:'check',gh:g.gh});
+assert(other.created,'a different failure is a new Issue');
+assert.deepEqual(other.superseded,[3],'and supersedes the older Issue of that stage and platform only');
+const closeOld=g.calls.find(c=>c[0]==='issue'&&c[1]==='close');
+assert.equal(closeOld[2],'3');assert.match(closeOld.at(-1),/^Superseded: the newest Alpha run on mac at abc fails check, tracked in https:\/\/github\.com\/example\/worldlet\/issues\/9\.$/);
+// The same failure again keeps its Issue and closes the stage and platform's other ones.
+g=github([{number:3,body},{number:6,body:issueBody({...fail,failing:['check'],signature:'check'})}]);
+assert.deepEqual(report({...fail,gh:g.gh}),{commented:3,superseded:[6]});
 
 // A pass closes only that stage and platform's Issues.
 g=github([{number:3,body},{number:4,body:issueBody({...fail,platform:'windows'})},{number:5,body:issueBody({...fail,stage:'beta'})}]);
