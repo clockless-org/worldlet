@@ -2,7 +2,8 @@
 // its limits, decisions, forgetting, names and lines, and how the phone receives kept things and proposals.
 import assert from 'node:assert/strict';
 import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
-import {attentionFromAgent,conversationAttentionId} from '../core/tasks/index.ts';
+import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionCards,FOX_SESSION_LIMIT} from '../core/tasks/index.ts';
+import {harnessSessionThread,harnessChatThread,harnessThreadPlace} from '../core/agent/harness-sessions.ts';
 import {processedAttentionContent} from '../core/attention/attention-content.ts';
 import {validateWorldItem} from '../core/items/world-item-validation.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
@@ -261,4 +262,23 @@ assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
  assert.equal(new Set(made.map(m=>m.key)).size,3);
  assert.deepEqual(attentionFromAgent([{group:'doing',title:'Send the deck to Sam',why:'x',thread:'#work'}],brought,now,'openclaw')[0].key,made[1].key,'the same entry keeps its key, so it is made once');
 }
-console.log('PASS Ongoing things: what looks like a job, proposing and its limits, themes and the page Fox is asked for, decisions, forgetting, names and lines, kinds and their pages, the phone\'s tiles, things and proposals, and its Tasks and Journal.');
+{
+ // Fox's sessions (core/tasks/fox-sessions.ts): Things and other conversations, latest first, each once, a bounded list.
+ const thing=(id:string,last:number,extra={})=>({id,source:'openclaw',session:'s-'+id,title:'#'+id,where:'OpenClaw · Discord',state:'kept',proposedAt:now,decidedAt:now,laterUntil:null,turns:9,userTurns:6,first:ago(9),last:ago(last),...extra}) as any;
+ const list=foxSessions([thing('job-a',3),thing('job-b',1,{named:'Diet'})],[thing('job-c',0,{state:'proposed'}),thing('job-a',0)]);
+ assert.deepEqual(list.map(s=>[s.id,s.thing]),[['job-c',false],['job-b',true],['job-a',true]],'latest first; a Thing stays a Thing and is listed once');
+ assert.equal(list[1].title,'Diet','the name the Agent gave a Thing is shown');
+ assert.equal(foxSessionLine(list[0],now),'OpenClaw · Discord · today');
+ assert.equal(foxSessions([],Array.from({length:30},(_,i)=>thing('job-'+i,i))).length,FOX_SESSION_LIMIT);
+ assert.equal(foxSessionOf(foxSessionPlace('job-c')),'job-c');assert.equal(foxSessionOf('overview:world'),'');
+ // A session place is a session of its own in the person's Agent, and the way back finds the same place.
+ const place=JSON.stringify([foxSessionPlace('job-c'),'']);
+ assert.equal(harnessSessionThread(place),'session:job-c');
+ assert.equal(harnessChatThread('session:job-c'),place);
+ assert.equal(harnessSessionThread(harnessThreadPlace('session:job-c')),'session:job-c');
+ // Brought turns become the place's cards: what the person said with the answer after it.
+ const cards=foxSessionCards([{role:'user',text:'Plan lunch',createdAt:ago(1)},{role:'assistant',text:'Salad?'},{role:'assistant',text:'Or soup.'},{role:'user',text:' '},{role:'user',text:'Soup'}],foxSessionPlace('job-c'));
+ assert.deepEqual(cards.map(c=>[c.user,c.text]),[['Plan lunch','Salad?'],['','Or soup.'],['Soup','']]);
+ assert.ok(cards.every(c=>c.key==='session:job-c'&&c.status==='done'));
+}
+console.log('PASS Ongoing things: what looks like a job, proposing and its limits, themes and the page Fox is asked for, decisions, forgetting, names and lines, kinds and their pages, the phone\'s tiles, things and proposals, and its Tasks and Journal, and Fox\'s sessions.');

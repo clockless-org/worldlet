@@ -22,6 +22,8 @@ export function harnessSessionThread(thread:unknown):string {
  try{const value=JSON.parse(String(thread??''));if(Array.isArray(value)&&typeof value[0]==='string')place=value[0];}catch{}
  if(place.startsWith('attention:')&&place.length>10)return 'item:'+clip(place.slice(10),200);
  if(place.startsWith('object:app-')&&place.length>11)return 'applet:'+clip(place.slice(11),120);
+ // A brought conversation the person switched Fox to (core/tasks/fox-sessions.ts): a session of its own.
+ if(place.startsWith('session:')&&place.length>8)return 'session:'+clip(place.slice(8),120);
  return 'main';
 }
 /** The chat's thread for a resident session's thread (the other way): an item card's or an Applet's place, else Fox's
@@ -30,6 +32,7 @@ export function harnessSessionThread(thread:unknown):string {
 export function harnessChatThread(thread:string):string {
  if(thread.startsWith('item:')&&thread.length>5)return JSON.stringify(['attention:'+thread.slice(5),'']);
  if(thread.startsWith('applet:')&&thread.length>7)return JSON.stringify(['object:app-'+thread.slice(7),'']);
+ if(thread.startsWith('session:')&&thread.length>8)return JSON.stringify([thread,'']);
  return 'fox-main';
 }
 /** The place thread a session thread came from, so a turn another Worldlet sends (core/phone remote-agent.ts) opens the
@@ -37,6 +40,7 @@ export function harnessChatThread(thread:string):string {
 export function harnessThreadPlace(thread:string):string {
  if(thread.startsWith('item:')&&thread.length>5)return JSON.stringify(['attention:'+clip(thread.slice(5),200),'']);
  if(thread.startsWith('applet:')&&thread.length>7)return JSON.stringify(['object:app-'+clip(thread.slice(7),120),'']);
+ if(thread.startsWith('session:')&&thread.length>8)return JSON.stringify(['session:'+clip(thread.slice(8),120),'']);
  return JSON.stringify(['','']);
 }
 /** The turn's input as the session receives it: the World's note since its last reply (HarnessTurnInput.world), then
