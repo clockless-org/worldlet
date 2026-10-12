@@ -1,4 +1,5 @@
 import {fitThemeScene,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeSceneMaterialName} from '../../themes/index.ts';
+import type {BrowserPaperEdge,SurfaceRect} from '../../../contracts/browser-surface.ts';
 import {appletSceneKey} from './scene-family.ts';
 /**
  * The shared Applet scene renderer. An Applet supplies records and controls; the active theme supplies the painting,
@@ -17,6 +18,7 @@ export interface AppletScene {
  /** False when the theme has no painting for this Applet and the renderer drew its plain paper instead. */
  painted:boolean;
  layout():void;
+ paperEdge(rect:SurfaceRect):BrowserPaperEdge|undefined;
  destroy():void;
  readonly metrics:{key:string;painted:boolean;compact?:boolean;primary:{x:number;y:number;width:number;height:number}|null;companion:{x:number;y:number;width:number;height:number}|null};
 }
@@ -80,6 +82,14 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
  const resize=new ResizeObserver(layout);resize.observe(element);layout();
  return {element,regions,primary:primaryRegion,painted,layout,
   get metrics(){return last;},
+  paperEdge(rect){
+   const profile=source.registration.webEdge;
+   if(!painted||last.compact||!profile||!source.background||rect.width<=0||rect.height<=0)return;
+   const image=plate.getBoundingClientRect(),scale=Math.min(1,image.width/source.registration.imageSize[0]);
+   const samples=(values:readonly number[])=>values.map(n=>n*scale);
+   return {asset:source.background,image:{x:image.x-rect.x,y:image.y-rect.y,width:image.width,height:image.height},
+    profile:{top:samples(profile.top),right:samples(profile.right),bottom:samples(profile.bottom),left:samples(profile.left)}};
+  },
   destroy(){
    resize.disconnect();element.remove();const shell=options.shell;if(!shell||shell.dataset.appletScene!==key)return;
    delete shell.dataset.appletScene;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);

@@ -556,22 +556,23 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    const rect={x:x+inset,y:y+top,width:Math.max(0,right-x-2*inset),height:Math.max(0,bottom-y-top-inset)};
    if(rect.width<1||rect.height<1)return;
    panelRect=rect;
+   const edge=panelScene.paperEdge(rect),paper=edge?{paperEdge:edge}:{};
    // Fox's copy above Fox's conversation box (else the panel's corner); a panel grown too small for it takes Fox's page in instead.
    const copyRect=copyPage?foxCopyPlacement({panel:rect,page:copyPage,dialogue:dialogueRect()}):null;
    if(copyPage&&!copyRect){copyPage=null;copyTake=true;copyOff=true;markFoxControl();}
    const copy=copyPage&&copyRect?{copy:{rect:copyRect,page:copyPage}}:{},take=copyTake&&showing?{takeCopy:true}:{};copyTake=false;
-   const fox=glow?{fox:glow}:{},key=JSON.stringify({rect,fox:glow&&{...glow,phaseSeconds:undefined},...copy,...take});
+   const fox=glow?{fox:glow}:{},key=JSON.stringify({rect,...paper,fox:glow&&{...glow,phaseSeconds:undefined},...copy,...take});
    if(showsFinished()&&!finishTimer)finishTimer=window.setTimeout(clearFinished,FINISHED_MS);
    if(!showing){
     showing=true;lastRect=key;hidden.delete(resumeKey);const restored=restoring?resumeKey:'',show=++shows;settled=false;syncPipOffer();
     // Until the host confirms, page reports may still describe the previous Applet's page.
-    void queue('browserShow',{rect,platform,...address?{url:address}:{},...resumeKey?{applet:resumeKey,resume:resuming}:{},...restored?{hold:true}:{},live:livePages(),...fox,...copy}).then(()=>{if(show===shows)settled=true;},e=>{
+    void queue('browserShow',{rect,...paper,platform,...address?{url:address}:{},...resumeKey?{applet:resumeKey,resume:resuming}:{},...restored?{hold:true}:{},live:livePages(),...fox,...copy}).then(()=>{if(show===shows)settled=true;},e=>{
      // A remembered page the host no longer opens is forgotten; the Applet opens its start page.
      if(restored){forget(restored);renderTabs();if(restored===resumeKey&&restoring){restoring=false;address=fallback;showing=false;lastRect='';geometry();}return;}
      caption.textContent='';notify(e.message);
     });
    }
-   else if(key!==lastRect){lastRect=key;void queue('browserLayout',{rect,...fox,...copy,...take});}
+   else if(key!==lastRect){lastRect=key;void queue('browserLayout',{rect,...paper,...fox,...copy,...take});}
   }finally{syncRefresh();syncFocus();syncHistory();resolve();}};
    flushGeometry=update;if(immediate)update();else{animation=requestAnimationFrame(update);timer=window.setTimeout(update,80);}
   });

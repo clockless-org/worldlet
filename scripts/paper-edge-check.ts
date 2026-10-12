@@ -1,0 +1,29 @@
+import assert from 'node:assert/strict';
+import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
+const script=await bundleScript({entryPoints:['ui/browser/paper-edge.ts']});
+await withBrowser(async browser=>{
+ const page=await browser.newPage({viewport:{width:800,height:600}}),errors=pageErrors(page);
+ await page.setContent('<style>body{margin:0}canvas{pointer-events:none}</style><canvas></canvas>');
+ await page.addScriptTag({content:script});
+ const result=await page.evaluate(async()=>{
+  const c=document.createElement('canvas');c.width=800;c.height=600;const g=c.getContext('2d')!;
+  g.fillStyle='#aa6633';g.fillRect(0,0,800,600);
+  const value={src:c.toDataURL(),image:{x:0,y:0,width:800,height:600},profile:{top:[3,3],right:[0,0],bottom:[3,3],left:[1,1]}};
+  await (window as any).paperEdge.apply(value);
+  const paint=document.querySelector('canvas')!.getContext('2d')!;
+  const pixel=(x:number,y:number)=>Array.from(paint.getImageData(x,y,1,1).data);
+  const values={edge:pixel(400,0),center:pixel(400,300),scrollbar:pixel(799,300)};
+  await (window as any).paperEdge.apply(null);
+  return {...values,cleared:pixel(400,0)};
+ });
+ assert.deepEqual(result.edge,[170,102,51,255],'Original artwork pixels form the foreground');
+ assert.equal(result.center[3],0,'Website content remains fully transparent');
+ assert.equal(result.scrollbar[3],0,'The right edge may leave the scrollbar completely open');
+ assert.equal(result.cleared[3],0,'Hidden foreground must clear old artwork');
+ await page.setViewportSize({width:400,height:300});
+ await page.waitForFunction(()=>document.querySelector('canvas')!.width===400);
+ await page.evaluate(async()=>{await (window as any).paperEdge.apply({src:'data:image/png;base64,broken',image:{x:0,y:0,width:400,height:300},profile:{top:[3,3],right:[1,1],bottom:[3,3],left:[1,1]}});});
+ assert.equal(await page.evaluate(()=>document.querySelector('canvas')!.getContext('2d')!.getImageData(0,0,1,1).data[3]),0,'Decode failure cannot leave a stale paper mask');
+ assert.deepEqual(errors,[]);
+ console.log('PASS paper foreground: source pixels, transparent content and scrollbar, clearing, resize and failed decode');
+});

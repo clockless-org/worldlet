@@ -8,13 +8,13 @@ import {importBuildTheme} from './build-theme-source.ts';
 import type {ThemeAppletScene,ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
 
 const SOURCE='resources/styles/builtin/references/registered-scenes',PACKAGE='ui/theme-packages/village';
-type Source={id:string;title:string;source:string;iconSource?:string;regions:ThemeSceneRegistration['regions'];companion:ThemeSceneRegistration['companion'];prompt:string};
+type Source={webEdge?:ThemeSceneRegistration['webEdge'];id:string;title:string;source:string;iconSource?:string;regions:ThemeSceneRegistration['regions'];companion:ThemeSceneRegistration['companion'];prompt:string};
 type Lock=Record<string,{source:string;sourceSha256:string;sha256:string;imageSize:[number,number];settings:string}>;
 const sha=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
 const json=async(root:string,file:string)=>JSON.parse(await readFile(path.join(root,file),'utf8'));
 const write=async(root:string,file:string,value:unknown)=>writeFile(path.join(root,file),JSON.stringify(value,null,2)+'\n');
 function scene(item:Source,entry:Lock[string]):ThemeAppletScene{
- return {background:`assets/applet-scenes/${item.id}/background.webp`,registration:{imageSize:entry.imageSize,sha256:entry.sha256,regions:item.regions,companion:item.companion}};
+ return {background:`assets/applet-scenes/${item.id}/background.webp`,registration:{imageSize:entry.imageSize,sha256:entry.sha256,regions:item.regions,companion:item.companion,...item.webEdge?{webEdge:item.webEdge}:{}}};
 }
 export async function encodeVillageRegisteredScenes(root:string){
  const catalog:{applets:Source[];brands?:Source[]}=await json(root,SOURCE+'/catalog.json');

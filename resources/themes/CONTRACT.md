@@ -60,6 +60,7 @@ The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presen
 | `imageSize` | Final encoded image width and height in pixels. |
 | `sha256` | SHA-256 of those exact encoded background bytes. Import rejects a stale hash or size. |
 | `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. |
+| `webEdge` (optional) | Clockwise `top`, `right`, `bottom`, `left` sample arrays (2–64 values per side, 0–3 source pixels). Original background pixels overlap the outer edge of a live website; the host scales them down with the scene and caps enlargement. No input capture or website styling. |
 | `companion` | A separate normalized rectangle describing quiet painted clearance. This does not position or style Fox. |
 
 Coordinates start at the image's upper-left and stay within 0–1. They are measured from the finished picture, not guessed from a generation prompt. `fitThemeScene(registration, width, height)` applies one centered, uniform contain transform to the painting, every region and companion clearance. Do not crop the background independently. The host chooses its responsive presentation and may switch to a normal readable page on narrow viewports instead of shrinking interactive text.

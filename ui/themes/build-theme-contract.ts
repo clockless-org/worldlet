@@ -36,6 +36,8 @@ export interface ThemeArtifact {
 /** Geometry measured on the final background, in normalized image coordinates (x, y, width, height).
  * These are facts about painted surfaces, not viewport CSS or authority over host controls. */
 export interface ThemeSceneRegistration {
+ /** Optional paper overlap along top/right/bottom/left, clockwise source-pixel samples, at most 3 px deep. */
+ webEdge?:{top:readonly number[];right:readonly number[];bottom:readonly number[];left:readonly number[]};
  imageSize:readonly [number,number];
  /** Hash of the encoded picture. Re-measure after changing it. */
  sha256:string;
@@ -120,12 +122,15 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  if(p.icons!==undefined)need(object(p.icons)&&Object.entries(p.icons).every(([key,file])=>id(key)&&picture(file)),'applet icons');
  const registration=(r:ThemeSceneRegistration)=>{
   const rect=(v:unknown)=>Array.isArray(v)&&v.length===4&&v.every(Number.isFinite)&&v[0]>=0&&v[1]>=0&&v[2]>0&&v[3]>0&&v[0]+v[2]<=1&&v[1]+v[3]<=1;
-  need(object(r)&&Object.keys(r).every(k=>['imageSize','sha256','regions','companion'].includes(k)),'scene registration fields');
+  need(object(r)&&Object.keys(r).every(k=>['imageSize','sha256','regions','companion','webEdge'].includes(k)),'scene registration fields');
   need(Array.isArray(r.imageSize)&&r.imageSize.length===2&&r.imageSize.every(n=>Number.isInteger(n)&&n>0),'scene image size');
   need(typeof r.sha256==='string'&&/^[a-f0-9]{64}$/.test(r.sha256),'scene image hash');
   need(Array.isArray(r.regions)&&r.regions.length>0&&r.regions.every(region=>object(region)&&Object.keys(region).every(k=>['id','role','rect','material'].includes(k))&&id(region.id)&&['primary','secondary'].includes(region.role)&&rect(region.rect)&&['paper','board','screen'].includes(region.material)),'scene content regions');
   need(new Set(r.regions.map(region=>region.id)).size===r.regions.length&&r.regions.filter(region=>region.role==='primary').length===1,'scene region ids and primary surface');
   need(rect(r.companion),'scene companion clearance');
+  if(r.webEdge!==undefined){
+   need(object(r.webEdge)&&Object.keys(r.webEdge).length===4&&['top','right','bottom','left'].every(side=>{const samples=(r.webEdge as any)[side];return Array.isArray(samples)&&samples.length>=2&&samples.length<=64&&samples.every(n=>Number.isFinite(n)&&n>=0&&n<=3);}), 'scene web edge');
+  }
   const regions=[...r.regions.map(region=>region.rect),r.companion];
   for(let i=0;i<regions.length;i++)for(let j=i+1;j<regions.length;j++){
    const [x,y,w,h]=regions[i],[cx,cy,cw,ch]=regions[j];

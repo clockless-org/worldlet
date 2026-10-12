@@ -1,7 +1,7 @@
 {
   "contractVersion": 3,
   "id": "village",
-  "updatedAt": "2026-10-12T21:27:36Z",
+  "updatedAt": "2026-10-12T22:41:24Z",
   "sha256": {
     "areas/README.md": "80217926b9781d55794f65f58d037301bd0c5ad51a3e37534eed05726c5f7282",
     "areas/health-day.webp": "3b2bd9fcc88702007fe194e8ac3717d85ca3040c6c84154402f7d4ecfca93217",
@@ -496,10 +496,10 @@
     "assets/world/night.webp": "2b073aa2e2173ff56db29069ab1378fc34680da97d1cfd974d0d3c44b6b010b0",
     "lamps.json": "cdac834f10e2af71670ed83af0c3b91eb44addffad9969e3babc331fd5b50c52",
     "pack.json": "170253831a36247a3afec65218d8eae3493e8842c11a24e10ba1e7ca3f001770",
-    "presentation.json": "f8f2dd594386079f5fbd20fae466d41a652488ae3d666b2abb1188db4d9c159e",
+    "presentation.json": "8da02b4b7ac8cbad807dfb2a6273da46c244d393e13e2185014b3d400fd31960",
     "scene-library.json": "e9e2dce8a674f28497f38160b57b58a08b705ed15953b28e1c2a298b0c7d2b95",
     "style.json": "89aec5f29671c3f6ca989f70a9f5191ab06706e1bea8fa5dbf288f205f4c55d7",
-    "theme.json": "77dc394f4b25cb23c53c46937e9295f7b04235507bcb849c011be35607f392f2",
+    "theme.json": "72867deb96a4f821ffa9174478050757ff3a2dbc753abe38eb9074447223cbee",
     "tokens.json": "3475420e827d9b9ea3d4e191eba092b5d2c7eb7e4ad6f11476fbeff206e83aa8",
     "world.json": "fe82d319d24897bf2c7da33cc0ac5ed05e05d5c10e80336c373020ec531f12ed"
   }

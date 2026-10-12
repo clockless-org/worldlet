@@ -52,6 +52,21 @@ for(const request of [null,[],{action:'unknown'},
  {action:'browserPip',applet:'youtube',rect,page:{width:1280,height:720}},{action:'browserHide',page:{width:1280,height:720}},
  {action:'browserLayout',rect,copy:{rect}},{action:'browserLayout',rect,copy:{rect,page:{width:0,height:1}}},{action:'browserLayout',rect,copy:{rect,page:{width:1280,height:720},url:'https://example.com/'}},
  {action:'browserLayout',rect,takeCopy:'yes'},{action:'browserLayout',rect,takeCopy:true,copy:{rect,page:{width:1280,height:720}}},{action:'browserShow',rect,platform:'web',takeCopy:true}])assert.throws(()=>readBrowserSurfaceRequest(request));
+const paperEdge={asset:'theme-assets/village/applet-scenes/pokemon-showdown/background.webp',image:rect,profile:{top:[1,2,1],right:[0.5,0.8],bottom:[1,2.5,1],left:[1,1.5]}};
+for(const action of ['browserLayout','browserShow']){
+ const request={action,rect,...(action==='browserShow'?{platform:'web'}:{}),paperEdge};
+ assert.deepEqual(readBrowserSurfaceRequest(request),request);
+}
+for(const invalid of [
+ {...paperEdge,asset:'https://example.com/paper.png'}, {...paperEdge,asset:'theme-assets/village/../paper.png'},
+ {...paperEdge,image:{...rect,width:40000}}, {...paperEdge,profile:{...paperEdge.profile,top:[1,4]}},
+ {...paperEdge,profile:{...paperEdge.profile,right:[-1,0]}}, {...paperEdge,profile:{...paperEdge.profile,left:[1]}},
+ {...paperEdge,profile:{...paperEdge.profile,bottom:[1,NaN]}}, {...paperEdge,extra:true}
+])assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:invalid}));
+assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge,page:{width:640,height:480}}));
+const detached=readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge});
+if(detached.action==='browserLayout')(detached.paperEdge!.profile.top as number[])[0]=0;
+assert.equal(paperEdge.profile.top[0],1,'Paper profiles must be detached at the native boundary');
 const sent:unknown[]=[];
 (globalThis as any).window={worldletHost:{version:1,platform:'macos',request:async body=>{sent.push(body);return {ok:true};}}};
 await assert.rejects(callHost('browserLayout',{rect:{...rect,width:-1}}));
