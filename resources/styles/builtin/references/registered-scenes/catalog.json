@@ -87,16 +87,16 @@
         0.24,
         0.4
       ],
-      "prompt": "Create a single finished 16:9 Worldlet Village applet background, stylized-concept. Use the reference only for the village's rounded softly painted 3D style: cream stone, sculpted foliage, warm timber, restrained brass, cheerful natural color, NOT photorealism. The functional interactive surface is on the LEFT, close, large, absolutely front-facing, straight rectangular edges parallel to the camera, outer edge x4%-65%,y12%-89%; clean blank cream interior x8%-61%, y23%-81%. Leave the ENTIRE interior empty, gentle paper grain only, no props, shadows, perspective slant, text, handwriting, dates, numbers, grids, controls or baked UI. HTML will be drawn in that exact inner surface. Rich themed environment around margins and on RIGHT, upper-right functional props reveal the app's purpose. Lower right x71%-96%,y55%-94% stays clear quiet floor/stone for a companion. No person, animal, floating UI, plinth, watermark, generic bridges or mountain panorama. Distinct activity-specific scene. NOTES: sheltered village writing garden with a LARGE upright single open cream notebook writing page held by a plum linen binding on LEFT, page edge and binding outside blank interior; the inner single writing surface is one clear rectangle without a center crease. On upper RIGHT a little book shelf, fountain pen, inkwell, dried lavender and a cottage garden. Quiet stone paving below. Clearly a place for writing and collecting ideas, with rich papery and linen details.",
+      "prompt": "Production extraction from the selected Notes concept: preserve the Village garden, wooden notebook, yellow header, two ivory paper leaves and five brass rings. Remove all baked text, drawings and controls so live Notes HTML occupies the notebook.",
       "regions": [
         {
           "id": "main",
           "role": "primary",
           "rect": [
-            0.075,
-            0.17,
-            0.53,
-            0.595
+            0.045,
+            0.057,
+            0.587,
+            0.744
           ],
           "material": "paper"
         }

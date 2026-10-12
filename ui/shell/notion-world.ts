@@ -1222,6 +1222,20 @@ export function mountNotionWorld(data: World, native: any) {
    }
    if(current===r.moduleId&&content.hidden)scene?.setAppStage?.(r.moduleId,appletStageData(r));
   }
+  function notesActions(){return {
+    async read(item){
+      const record=item.record||{},page=pages.get(record.noteId)||pages.get(String(item.id).replace(/^record:/,''));
+      if(data.sample)return {text:page?.markdown||page?.text||record.text||'',title:page?.title||record.title};
+      if(!native?.original)throw Error('Connect Notes to read the original.');
+      return native.original(record.sourceId||record.id);
+    },
+    renderBody:(text,title)=>renderMarkdown(text,{title,path:'original.md'}),
+    create:()=>draftRequest({request:'Help me create a new Apple Note. Ask me for its title and content, then prepare it for my confirmation.'}),
+    selected(item,original,explicit){
+      libraryReadContext='Selected Notes original. Source: '+(item.record?.sourceId||item.record?.id||item.id)+'\n'+(original.title||item.title)+'\n'+original.text.slice(0,8000);
+      if(explicit)acknowledgeAttention(item.record||item);
+    }
+  };}
   function appletStageData(r,records=[]){
     if([...HOME_NATIVE,...ORIGINAL_READERS,'voice-memos','messages'].includes(r.key)){
       const source=data.sample?records:(localStageRecords.get(r.key)||records);
@@ -1230,7 +1244,7 @@ export function mountNotionWorld(data: World, native: any) {
       // them left Mail empty under its attention mark until a refresh (#1281).
       const items=[...coreAppletItems(r.provider,r.key==='gmail'&&!data.sample?[...source,...mailIdentities.values()]:source,[...pages.values()]),...(r.key==='google-calendar'?localCalendarItems(calendarEvents):[])];
       if(r.key==='gmail'&&items.some(item=>item.attention&&item.record.sourceId&&!mailMetadata(item.record).from&&!mailIdentityReads.has(item.record.sourceId)))queueMicrotask(()=>void hydrateMailIdentity(r,items));
-      return {accountLabel:link?.label||'',sample:!!data.sample,loaded:data.sample||localStageRecords.has(r.key),reading:!!link?.reading,items,connected:!!data.sample||connectionLive(data.moduleConnections?.find(c=>c.provider===r.provider)||{}),now:Date.now(),...(r.key==='google-calendar'?{calendar:calendarActions}:{})};
+      return {accountLabel:link?.label||'',sample:!!data.sample,loaded:data.sample||localStageRecords.has(r.key),reading:!!link?.reading,items,connected:!!data.sample||connectionLive(data.moduleConnections?.find(c=>c.provider===r.provider)||{}),now:Date.now(),...(r.key==='google-calendar'?{calendar:calendarActions}:{}),...(r.key==='apple-notes'?{notes:notesActions()}:{})};
     }
     const items: any[]=[...pages.values()].filter(p=>p.worldItemId&&p.sourceProvider===r.provider).map(p=>{
       const signal=p.events?.[0]||p.activities?.[0]||{};

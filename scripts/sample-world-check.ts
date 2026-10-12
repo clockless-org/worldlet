@@ -77,7 +77,7 @@ await withBrowser(fileAccess,async browser=>{
    const stage=page.locator(`.pixi-applet-stage[data-applet="${app.key}"]`);await stage.waitFor();
    assert.ok(authored.has(app.key),app.key+' has authored sample notes');
    // Software WebGL on a shared CI runner can take well over ten seconds for one Applet's first records.
-   const rendered=await stage.locator('.pixi-stage-item,.scene-item,.home-leaf,.meetings-call,.mail-letter').first().waitFor({timeout:30000}).then(()=>true,()=>false);
+   const rendered=await stage.locator('.pixi-stage-item,.scene-item,.home-leaf,.notes-row,.meetings-call,.mail-letter').first().waitFor({timeout:30000}).then(()=>true,()=>false);
    assert.ok(rendered,app.key+' exposes sample records in its authored Open; stage: '+(await stage.evaluate(e=>e.outerHTML.slice(0,600))));
    assert.equal(await stage.locator('.pixi-open-empty').count(),0,app.key+' shows no empty Open');
    assert.equal(await page.locator('#notionContent').isVisible(),false);

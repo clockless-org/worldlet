@@ -21,8 +21,8 @@
   },
   "assets/applet-scenes/apple-notes/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/apple-notes/background.png",
-    "sourceSha256": "3396fb1122b48646b11b08444799ad4e039b63852ffd40216a065881488a14fb",
-    "sha256": "59bf84d8da9ed83f068d37ba339651a5c32779ddb643869d8c9c927b0d820086",
+    "sourceSha256": "9dc1c80628ea6b0b81dc876242374cf8eb181d1cd7b35fd4eafb38cda124c956",
+    "sha256": "af4c7e69da5b54aa84626f5a49196ff354f4ff38d998ea24e8c9c070f5195fcd",
     "imageSize": [
       1672,
       941
