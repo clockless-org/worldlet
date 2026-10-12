@@ -45,7 +45,7 @@ await withBrowser(fileAccess,async browser=>{
  }
  // A representative few open in turn, one of each way in (owner request 2026-10-05: no RC opens every Applet, and
  // an RC finishes within 20 minutes): the Home Applets on their stages (Home has more than its five ground places, so
- // one opens from the region shelf), GitHub and Notion on theirs, YouTube, Airbnb and the Browser as websites, and a
+ // one opens from the region shelf), GitHub, Notion, YouTube, Airbnb and the Browser as websites, and a
  // game board. New launch-only entries have their own all-30 route/pagination fixture.
  for(const key of OPENED)assert.ok(WORLD_APPS.some(a=>a.key===key&&a.installByDefault!==false),key+' is a default Applet');
  for(const app of WORLD_APPS.filter(a=>OPENED.includes(a.key))){
@@ -131,10 +131,10 @@ await withBrowser(fileAccess,async browser=>{
   if(app.fullView.kind==='web')await page.waitForFunction(n=>calls.filter(c=>c.action==='browserHide').length>n,before);
  }
  assert.equal(await page.evaluate(()=>calls.some(c=>['connect','agentChat','original'].includes(c.action))),false,'viewing never authorizes accounts or requests private content');
- // Four core Applets and Notion read their records; the Meetings radar also refreshes the
+ // Four core Applets read their records; the Meetings radar also refreshes the
  // connected calendar about once a minute in the background (c48dbb10), so its count varies.
  const reads=await page.evaluate(()=>calls.filter(c=>c.action==='appContent').map(c=>c.provider));
- assert.deepEqual(reads.filter(p=>p!=='google-calendar'),['gmail','apple-notes','apple-reminders','notion'],'only the Applets with records read them');
+ assert.deepEqual(reads.filter(p=>p!=='google-calendar'),['gmail','apple-notes','apple-reminders'],'only the Applets with records read them');
  assert.ok(reads.includes('google-calendar'),'Calendar and Meetings read the calendar');
  // Legacy Fox/setup entry points preserve the actual entry region.
  const legacyEntry=await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active);
@@ -144,8 +144,8 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>calls.some(c=>['agentChat','cloudRequest'].includes(c.action))),false,'legacy entry starts no Fox turn either');
  }
  await page.evaluate(()=>worldletShowControls('sources','github'));
- await page.locator('.pixi-applet-stage[data-applet=github]').waitFor();
- assert.equal(await panel.isVisible(),false,'GitHub legacy entry also opens its native repository stage');
+ await page.locator('#notionContent[data-applet=github] .browser-viewport').waitFor();
+ assert.ok(await page.evaluate(()=>calls.some(c=>c.action==='browserShow'&&c.applet==='github')),'GitHub legacy entry also opens its original website');
  const shows=await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length);
  await page.evaluate(()=>worldletShowControls('sources','discord'));
  await panel.locator('.browser-viewport').waitFor();
@@ -177,7 +177,7 @@ await withBrowser(fileAccess,async browser=>{
  // A stage that hides the website, then the website again before the next frame (a slow host): it is shown anew.
  const quick=await page.evaluate(()=>new Promise<number>(resolve=>{const content=document.querySelector<HTMLElement>('#notionContent'),n=calls.filter(c=>c.action==='browserShow').length;
   new MutationObserver((_,o)=>{if(!content.hidden)return;o.disconnect();queueMicrotask(()=>{worldletShowControls('sources','discord');resolve(n);});}).observe(content,{attributes:true});
-  worldletShowControls('sources','github');}));
+  worldletShowControls('sources','codex');}));
  await page.waitForFunction(n=>calls.filter(c=>c.action==='browserShow').length>n,quick);
  // Opening an unconnected account Applet starts its authorization directly; no status panel or Connect button in between.
  await page.evaluate(()=>{fixture.connections=fixture.connections.filter(c=>c.provider!=='apple-reminders');fixture.revision++;return worldletReceive(structuredClone(fixture));});

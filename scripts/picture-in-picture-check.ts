@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import {FOX_COPY,PAGE_RESUME,PICTURE_IN_PICTURE,foxCopyPlacement,TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,livePagePlan,pageFrameRate,pictureInPictureApplet,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,taskPictureInPictureAspect} from '../core/browser/index.ts';
 
 // Applets whose own view is their website; not local Applets, meetings or a scene Applet's Web mode.
-for(const key of ['youtube','tiktok','x','netflix','twitch','bilibili','browser'])assert.equal(pictureInPictureApplet(key),true,key+' offers it');
-for(const key of ['gmail','notion','weather','meetings','apple-notes','nope'])assert.equal(pictureInPictureApplet(key),false,key+' does not');
+for(const key of ['youtube','tiktok','x','netflix','twitch','bilibili','browser','notion','github','stripe','paypal','todoist','linear','supabase','google-drive','google-docs','google-sheets','google-slides'])assert.equal(pictureInPictureApplet(key),true,key+' offers it');
+for(const key of ['gmail','weather','meetings','apple-notes','nope'])assert.equal(pictureInPictureApplet(key),false,key+' does not');
 // It shows in the World and waits out of sight inside an Applet, content or search.
 for(const depth of ['overview','area','building','place','room'])assert.equal(pictureInPictureShows(depth),true,depth);
 for(const depth of ['object','note','search','',undefined as any])assert.equal(pictureInPictureShows(depth),false,String(depth));

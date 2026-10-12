@@ -17,6 +17,10 @@ discrepancies and prioritized official backend candidates. Dependencies are
 curated by Applet authors at packaging time, not installed by end users; see the
 [packaging policy](../../ui/applets/IMPLEMENTATION-GUIDE.md#curated-dependencies-at-packaging-time).
 
+## Default presentation
+
+Branded website Applets open their original sites in the isolated host browser. Mail, Calendar, Notes and Reminders keep their paper views; local tools retain their native interfaces. Connector and saved-content reader implementations described below remain separate capabilities: opening a website does not imply structured data access.
+
 ## Evidence levels
 
 - **Endpoint exists, tool list readable, DCR available** proves the protocol is reachable. It does not prove the user has authorized Worldlet or that a source syncs.

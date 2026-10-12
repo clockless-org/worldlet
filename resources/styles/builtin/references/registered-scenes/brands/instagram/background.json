@@ -3,6 +3,32 @@
   "title": "Instagram",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "background design; runtime registration pending",
-  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Instagram, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village photographer's rose courtyard, instant camera and hanging photo prints outside the main area, Instagram gradient camera emblem on a studio plaque.\nLEFT: A blank ivory photo-album surface in rose linen and brass corners. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Instagram\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet."
+  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Instagram, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village photographer's rose courtyard, instant camera and hanging photo prints outside the main area, Instagram gradient camera emblem on a studio plaque.\nLEFT: A blank ivory photo-album surface in rose linen and brass corners. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Instagram\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
+  "refinement": "Use case: precise-object-edit. Edit existing Worldlet Village Instagram blank background. Preserve exact landscape aspect ratio, the ORIGINAL WIDTH and horizontal position of the LEFT functional paper/board/screen, original village painterly sculpted style, and ALL RIGHT-HAND brand-specific objects, recognizable Instagram identity and companion area. CHANGE ONLY HEIGHT AND CLEARANCE of the left content object. The inner blank surface must now extend almost the FULL HEIGHT of the picture: its TOP at8% and its BOTTOM at96% of canvas. Put the bottom frame at98% canvas height, nearly touching the bottom image edge. Replace ALL floor, rugs, counters, legs and foreground objects UNDER THE LEFT BOARD with blank paper down to96%. The entire left board's interior must be uninterrupted from top to bottom, absolutely no flowers, foliage, furniture, clips, props, dividers or shadows crossing inside it; move such overlaps OUTSIDE the main panel. Keep thin original-colored physical border outside. Remain front-facing rectangular so a real website or HTML can occupy most of its height. VERY IMPORTANT do not leave a large strip of floor below the board. Bottom frame nearly touches bottom image edge. This is roughly80% USABLE HEIGHT once the host toolbar and inner safety margin are allowed for. Do NOT widen it to80% width. Keep the exact original left and right board edges and right scene width. Rich right-hand scenery unchanged. Quiet subtle material texture in the blank surface, no text, numbers, controls, UI, data, characters or new logos. Only one finished background plate.",
+  "registration": {
+    "imageSize": [
+      1672,
+      941
+    ],
+    "regions": [
+      {
+        "id": "main",
+        "role": "primary",
+        "rect": [
+          0.059211,
+          0.146652,
+          0.52811,
+          0.792774
+        ],
+        "material": "paper"
+      }
+    ],
+    "companion": [
+      0.72,
+      0.62,
+      0.25,
+      0.34
+    ]
+  }
 }

@@ -8,7 +8,7 @@ These raster design studies establish the visual target. They are not HTML scree
 | Generic scenes | 16/16 | 16/16 | 🟡 Design study |
 | Branded applications and games | 100/100 | 100/100 | 🟡 Design study |
 
-Each pair shows the background followed by its image-generated effect. Core and generic backgrounds reuse their registered plates; branded backgrounds are new studies and need measured HTML regions before runtime registration. Existing runtime assets remain active.
+Each pair shows the current registered background followed by an earlier image-generated effect. The effects retain their original proportions and are visual references, not screenshots of the current runtime. Backgrounds reserve approximately 80% canvas height for content while preserving their original horizontal layout. Website Applets use their original sites in the host browser surface.
 
 Build the searchable local gallery with `node scripts/applet-concept-gallery.ts --complete`, serve the repository root and open `/output/applet-concept-gallery/`. Rebuild this document and the hash manifest with `--write-docs`.
 
@@ -357,7 +357,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![GitHub background](brands/github/background.webp) | ![GitHub effect](brands/github/effect.webp) |
+| ![GitHub background](../../../../../ui/theme-packages/village/assets/applet-scenes/github/background.webp) | ![GitHub effect](brands/github/effect.webp) |
 
 ### Codex
 
@@ -365,7 +365,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Codex background](brands/codex/background.webp) | ![Codex effect](brands/codex/effect.webp) |
+| ![Codex background](../../../../../ui/theme-packages/village/assets/applet-scenes/codex/background.webp) | ![Codex effect](brands/codex/effect.webp) |
 
 ### Claude Code
 
@@ -373,7 +373,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Claude Code background](brands/claude-code/background.webp) | ![Claude Code effect](brands/claude-code/effect.webp) |
+| ![Claude Code background](../../../../../ui/theme-packages/village/assets/applet-scenes/claude-code/background.webp) | ![Claude Code effect](brands/claude-code/effect.webp) |
 
 ### Notion
 
@@ -381,7 +381,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Notion background](brands/notion/background.webp) | ![Notion effect](brands/notion/effect.webp) |
+| ![Notion background](../../../../../ui/theme-packages/village/assets/applet-scenes/notion/background.webp) | ![Notion effect](brands/notion/effect.webp) |
 
 ### Obsidian
 
@@ -389,7 +389,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Obsidian background](brands/obsidian/background.webp) | ![Obsidian effect](brands/obsidian/effect.webp) |
+| ![Obsidian background](../../../../../ui/theme-packages/village/assets/applet-scenes/obsidian/background.webp) | ![Obsidian effect](brands/obsidian/effect.webp) |
 
 ### Plaid
 
@@ -397,7 +397,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Plaid background](brands/plaid/background.webp) | ![Plaid effect](brands/plaid/effect.webp) |
+| ![Plaid background](../../../../../ui/theme-packages/village/assets/applet-scenes/plaid/background.webp) | ![Plaid effect](brands/plaid/effect.webp) |
 
 ### Stripe
 
@@ -405,7 +405,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Stripe background](brands/stripe/background.webp) | ![Stripe effect](brands/stripe/effect.webp) |
+| ![Stripe background](../../../../../ui/theme-packages/village/assets/applet-scenes/stripe/background.webp) | ![Stripe effect](brands/stripe/effect.webp) |
 
 ### PayPal
 
@@ -413,7 +413,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![PayPal background](brands/paypal/background.webp) | ![PayPal effect](brands/paypal/effect.webp) |
+| ![PayPal background](../../../../../ui/theme-packages/village/assets/applet-scenes/paypal/background.webp) | ![PayPal effect](brands/paypal/effect.webp) |
 
 ### Todoist
 
@@ -421,7 +421,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Todoist background](brands/todoist/background.webp) | ![Todoist effect](brands/todoist/effect.webp) |
+| ![Todoist background](../../../../../ui/theme-packages/village/assets/applet-scenes/todoist/background.webp) | ![Todoist effect](brands/todoist/effect.webp) |
 
 ### Linear
 
@@ -429,7 +429,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Linear background](brands/linear/background.webp) | ![Linear effect](brands/linear/effect.webp) |
+| ![Linear background](../../../../../ui/theme-packages/village/assets/applet-scenes/linear/background.webp) | ![Linear effect](brands/linear/effect.webp) |
 
 ### Supabase
 
@@ -437,7 +437,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Supabase background](brands/supabase/background.webp) | ![Supabase effect](brands/supabase/effect.webp) |
+| ![Supabase background](../../../../../ui/theme-packages/village/assets/applet-scenes/supabase/background.webp) | ![Supabase effect](brands/supabase/effect.webp) |
 
 ### Docker
 
@@ -445,7 +445,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Docker background](brands/docker/background.webp) | ![Docker effect](brands/docker/effect.webp) |
+| ![Docker background](../../../../../ui/theme-packages/village/assets/applet-scenes/docker/background.webp) | ![Docker effect](brands/docker/effect.webp) |
 
 ### Google Drive
 
@@ -453,7 +453,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Google Drive background](brands/google-drive/background.webp) | ![Google Drive effect](brands/google-drive/effect.webp) |
+| ![Google Drive background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-drive/background.webp) | ![Google Drive effect](brands/google-drive/effect.webp) |
 
 ### Google Docs
 
@@ -461,7 +461,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Google Docs background](brands/google-docs/background.webp) | ![Google Docs effect](brands/google-docs/effect.webp) |
+| ![Google Docs background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-docs/background.webp) | ![Google Docs effect](brands/google-docs/effect.webp) |
 
 ### Google Sheets
 
@@ -469,7 +469,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Google Sheets background](brands/google-sheets/background.webp) | ![Google Sheets effect](brands/google-sheets/effect.webp) |
+| ![Google Sheets background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-sheets/background.webp) | ![Google Sheets effect](brands/google-sheets/effect.webp) |
 
 ### Google Slides
 
@@ -477,7 +477,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Google Slides background](brands/google-slides/background.webp) | ![Google Slides effect](brands/google-slides/effect.webp) |
+| ![Google Slides background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-slides/background.webp) | ![Google Slides effect](brands/google-slides/effect.webp) |
 
 ### Oura Ring
 
@@ -485,7 +485,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Oura Ring background](brands/oura/background.webp) | ![Oura Ring effect](brands/oura/effect.webp) |
+| ![Oura Ring background](../../../../../ui/theme-packages/village/assets/applet-scenes/oura/background.webp) | ![Oura Ring effect](brands/oura/effect.webp) |
 
 ### Strava
 
@@ -493,7 +493,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Strava background](brands/strava/background.webp) | ![Strava effect](brands/strava/effect.webp) |
+| ![Strava background](../../../../../ui/theme-packages/village/assets/applet-scenes/strava/background.webp) | ![Strava effect](brands/strava/effect.webp) |
 
 ### Fitbit
 
@@ -501,7 +501,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Fitbit background](brands/fitbit/background.webp) | ![Fitbit effect](brands/fitbit/effect.webp) |
+| ![Fitbit background](../../../../../ui/theme-packages/village/assets/applet-scenes/fitbit/background.webp) | ![Fitbit effect](brands/fitbit/effect.webp) |
 
 ### Google Maps
 
@@ -509,7 +509,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Google Maps background](brands/google-maps/background.webp) | ![Google Maps effect](brands/google-maps/effect.webp) |
+| ![Google Maps background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-maps/background.webp) | ![Google Maps effect](brands/google-maps/effect.webp) |
 
 ### Airbnb
 
@@ -517,7 +517,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Airbnb background](brands/airbnb/background.webp) | ![Airbnb effect](brands/airbnb/effect.webp) |
+| ![Airbnb background](../../../../../ui/theme-packages/village/assets/applet-scenes/airbnb/background.webp) | ![Airbnb effect](brands/airbnb/effect.webp) |
 
 ### TripIt
 
@@ -525,7 +525,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![TripIt background](brands/tripit/background.webp) | ![TripIt effect](brands/tripit/effect.webp) |
+| ![TripIt background](../../../../../ui/theme-packages/village/assets/applet-scenes/tripit/background.webp) | ![TripIt effect](brands/tripit/effect.webp) |
 
 ### X
 
@@ -533,7 +533,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![X background](brands/x/background.webp) | ![X effect](brands/x/effect.webp) |
+| ![X background](../../../../../ui/theme-packages/village/assets/applet-scenes/x/background.webp) | ![X effect](brands/x/effect.webp) |
 
 ### YouTube
 
@@ -541,7 +541,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![YouTube background](brands/youtube/background.webp) | ![YouTube effect](brands/youtube/effect.webp) |
+| ![YouTube background](../../../../../ui/theme-packages/village/assets/applet-scenes/youtube/background.webp) | ![YouTube effect](brands/youtube/effect.webp) |
 
 ### TikTok
 
@@ -549,7 +549,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![TikTok background](brands/tiktok/background.webp) | ![TikTok effect](brands/tiktok/effect.webp) |
+| ![TikTok background](../../../../../ui/theme-packages/village/assets/applet-scenes/tiktok/background.webp) | ![TikTok effect](brands/tiktok/effect.webp) |
 
 ### Discord
 
@@ -557,7 +557,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Discord background](brands/discord/background.webp) | ![Discord effect](brands/discord/effect.webp) |
+| ![Discord background](../../../../../ui/theme-packages/village/assets/applet-scenes/discord/background.webp) | ![Discord effect](brands/discord/effect.webp) |
 
 ### DoorDash
 
@@ -565,7 +565,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![DoorDash background](brands/doordash/background.webp) | ![DoorDash effect](brands/doordash/effect.webp) |
+| ![DoorDash background](../../../../../ui/theme-packages/village/assets/applet-scenes/doordash/background.webp) | ![DoorDash effect](brands/doordash/effect.webp) |
 
 ### Wordle
 
@@ -573,7 +573,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Wordle background](brands/wordle/background.webp) | ![Wordle effect](brands/wordle/effect.webp) |
+| ![Wordle background](../../../../../ui/theme-packages/village/assets/applet-scenes/wordle/background.webp) | ![Wordle effect](brands/wordle/effect.webp) |
 
 ### Connections
 
@@ -581,7 +581,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Connections background](brands/nyt-connections/background.webp) | ![Connections effect](brands/nyt-connections/effect.webp) |
+| ![Connections background](../../../../../ui/theme-packages/village/assets/applet-scenes/nyt-connections/background.webp) | ![Connections effect](brands/nyt-connections/effect.webp) |
 
 ### Slither.io
 
@@ -589,7 +589,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Slither.io background](brands/slither-io/background.webp) | ![Slither.io effect](brands/slither-io/effect.webp) |
+| ![Slither.io background](../../../../../ui/theme-packages/village/assets/applet-scenes/slither-io/background.webp) | ![Slither.io effect](brands/slither-io/effect.webp) |
 
 ### Agar.io
 
@@ -597,7 +597,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Agar.io background](brands/agar-io/background.webp) | ![Agar.io effect](brands/agar-io/effect.webp) |
+| ![Agar.io background](../../../../../ui/theme-packages/village/assets/applet-scenes/agar-io/background.webp) | ![Agar.io effect](brands/agar-io/effect.webp) |
 
 ### Krunker
 
@@ -605,7 +605,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Krunker background](brands/krunker-io/background.webp) | ![Krunker effect](brands/krunker-io/effect.webp) |
+| ![Krunker background](../../../../../ui/theme-packages/village/assets/applet-scenes/krunker-io/background.webp) | ![Krunker effect](brands/krunker-io/effect.webp) |
 
 ### skribbl.io
 
@@ -613,7 +613,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![skribbl.io background](brands/skribbl-io/background.webp) | ![skribbl.io effect](brands/skribbl-io/effect.webp) |
+| ![skribbl.io background](../../../../../ui/theme-packages/village/assets/applet-scenes/skribbl-io/background.webp) | ![skribbl.io effect](brands/skribbl-io/effect.webp) |
 
 ### Infinite Craft
 
@@ -621,7 +621,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Infinite Craft background](brands/infinite-craft/background.webp) | ![Infinite Craft effect](brands/infinite-craft/effect.webp) |
+| ![Infinite Craft background](../../../../../ui/theme-packages/village/assets/applet-scenes/infinite-craft/background.webp) | ![Infinite Craft effect](brands/infinite-craft/effect.webp) |
 
 ### Little Alchemy 2
 
@@ -629,7 +629,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Little Alchemy 2 background](brands/little-alchemy-2/background.webp) | ![Little Alchemy 2 effect](brands/little-alchemy-2/effect.webp) |
+| ![Little Alchemy 2 background](../../../../../ui/theme-packages/village/assets/applet-scenes/little-alchemy-2/background.webp) | ![Little Alchemy 2 effect](brands/little-alchemy-2/effect.webp) |
 
 ### Cookie Clicker
 
@@ -637,7 +637,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Cookie Clicker background](brands/cookie-clicker/background.webp) | ![Cookie Clicker effect](brands/cookie-clicker/effect.webp) |
+| ![Cookie Clicker background](../../../../../ui/theme-packages/village/assets/applet-scenes/cookie-clicker/background.webp) | ![Cookie Clicker effect](brands/cookie-clicker/effect.webp) |
 
 ### Lichess
 
@@ -645,7 +645,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Lichess background](brands/lichess/background.webp) | ![Lichess effect](brands/lichess/effect.webp) |
+| ![Lichess background](../../../../../ui/theme-packages/village/assets/applet-scenes/lichess/background.webp) | ![Lichess effect](brands/lichess/effect.webp) |
 
 ### Drive Mad
 
@@ -653,7 +653,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Drive Mad background](brands/drive-mad/background.webp) | ![Drive Mad effect](brands/drive-mad/effect.webp) |
+| ![Drive Mad background](../../../../../ui/theme-packages/village/assets/applet-scenes/drive-mad/background.webp) | ![Drive Mad effect](brands/drive-mad/effect.webp) |
 
 ### Subway Surfers
 
@@ -661,7 +661,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Subway Surfers background](brands/subway-surfers/background.webp) | ![Subway Surfers effect](brands/subway-surfers/effect.webp) |
+| ![Subway Surfers background](../../../../../ui/theme-packages/village/assets/applet-scenes/subway-surfers/background.webp) | ![Subway Surfers effect](brands/subway-surfers/effect.webp) |
 
 ### Sekai
 
@@ -669,7 +669,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Sekai background](brands/sekai/background.webp) | ![Sekai effect](brands/sekai/effect.webp) |
+| ![Sekai background](../../../../../ui/theme-packages/village/assets/applet-scenes/sekai/background.webp) | ![Sekai effect](brands/sekai/effect.webp) |
 
 ### Sketch Racer
 
@@ -677,7 +677,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Sketch Racer background](brands/sekai-sketch-racer/background.webp) | ![Sketch Racer effect](brands/sekai-sketch-racer/effect.webp) |
+| ![Sketch Racer background](../../../../../ui/theme-packages/village/assets/applet-scenes/sekai-sketch-racer/background.webp) | ![Sketch Racer effect](brands/sekai-sketch-racer/effect.webp) |
 
 ### 3D UNO!
 
@@ -685,7 +685,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![3D UNO! background](brands/sekai-3d-uno/background.webp) | ![3D UNO! effect](brands/sekai-3d-uno/effect.webp) |
+| ![3D UNO! background](../../../../../ui/theme-packages/village/assets/applet-scenes/sekai-3d-uno/background.webp) | ![3D UNO! effect](brands/sekai-3d-uno/effect.webp) |
 
 ### Devil Level: 50 Trolls
 
@@ -693,7 +693,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Devil Level: 50 Trolls background](brands/sekai-devil-level/background.webp) | ![Devil Level: 50 Trolls effect](brands/sekai-devil-level/effect.webp) |
+| ![Devil Level: 50 Trolls background](../../../../../ui/theme-packages/village/assets/applet-scenes/sekai-devil-level/background.webp) | ![Devil Level: 50 Trolls effect](brands/sekai-devil-level/effect.webp) |
 
 ### Pokémon Showdown
 
@@ -701,7 +701,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Pokémon Showdown background](brands/pokemon-showdown/background.webp) | ![Pokémon Showdown effect](brands/pokemon-showdown/effect.webp) |
+| ![Pokémon Showdown background](../../../../../ui/theme-packages/village/assets/applet-scenes/pokemon-showdown/background.webp) | ![Pokémon Showdown effect](brands/pokemon-showdown/effect.webp) |
 
 ### ChatGPT
 
@@ -709,7 +709,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![ChatGPT background](brands/chatgpt/background.webp) | ![ChatGPT effect](brands/chatgpt/effect.webp) |
+| ![ChatGPT background](../../../../../ui/theme-packages/village/assets/applet-scenes/chatgpt/background.webp) | ![ChatGPT effect](brands/chatgpt/effect.webp) |
 
 ### Claude
 
@@ -717,7 +717,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Claude background](brands/claude/background.webp) | ![Claude effect](brands/claude/effect.webp) |
+| ![Claude background](../../../../../ui/theme-packages/village/assets/applet-scenes/claude/background.webp) | ![Claude effect](brands/claude/effect.webp) |
 
 ### Gemini
 
@@ -725,7 +725,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Gemini background](brands/gemini/background.webp) | ![Gemini effect](brands/gemini/effect.webp) |
+| ![Gemini background](../../../../../ui/theme-packages/village/assets/applet-scenes/gemini/background.webp) | ![Gemini effect](brands/gemini/effect.webp) |
 
 ### Perplexity
 
@@ -733,7 +733,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Perplexity background](brands/perplexity/background.webp) | ![Perplexity effect](brands/perplexity/effect.webp) |
+| ![Perplexity background](../../../../../ui/theme-packages/village/assets/applet-scenes/perplexity/background.webp) | ![Perplexity effect](brands/perplexity/effect.webp) |
 
 ### DeepSeek
 
@@ -741,7 +741,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![DeepSeek background](brands/deepseek/background.webp) | ![DeepSeek effect](brands/deepseek/effect.webp) |
+| ![DeepSeek background](../../../../../ui/theme-packages/village/assets/applet-scenes/deepseek/background.webp) | ![DeepSeek effect](brands/deepseek/effect.webp) |
 
 ### WhatsApp
 
@@ -749,7 +749,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![WhatsApp background](brands/whatsapp/background.webp) | ![WhatsApp effect](brands/whatsapp/effect.webp) |
+| ![WhatsApp background](../../../../../ui/theme-packages/village/assets/applet-scenes/whatsapp/background.webp) | ![WhatsApp effect](brands/whatsapp/effect.webp) |
 
 ### Telegram
 
@@ -757,7 +757,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Telegram background](brands/telegram/background.webp) | ![Telegram effect](brands/telegram/effect.webp) |
+| ![Telegram background](../../../../../ui/theme-packages/village/assets/applet-scenes/telegram/background.webp) | ![Telegram effect](brands/telegram/effect.webp) |
 
 ### Slack
 
@@ -765,7 +765,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Slack background](brands/slack/background.webp) | ![Slack effect](brands/slack/effect.webp) |
+| ![Slack background](../../../../../ui/theme-packages/village/assets/applet-scenes/slack/background.webp) | ![Slack effect](brands/slack/effect.webp) |
 
 ### Microsoft Teams
 
@@ -773,7 +773,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Microsoft Teams background](brands/teams/background.webp) | ![Microsoft Teams effect](brands/teams/effect.webp) |
+| ![Microsoft Teams background](../../../../../ui/theme-packages/village/assets/applet-scenes/teams/background.webp) | ![Microsoft Teams effect](brands/teams/effect.webp) |
 
 ### Zoom
 
@@ -781,7 +781,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Zoom background](brands/zoom/background.webp) | ![Zoom effect](brands/zoom/effect.webp) |
+| ![Zoom background](../../../../../ui/theme-packages/village/assets/applet-scenes/zoom/background.webp) | ![Zoom effect](brands/zoom/effect.webp) |
 
 ### Dropbox
 
@@ -789,7 +789,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Dropbox background](brands/dropbox/background.webp) | ![Dropbox effect](brands/dropbox/effect.webp) |
+| ![Dropbox background](../../../../../ui/theme-packages/village/assets/applet-scenes/dropbox/background.webp) | ![Dropbox effect](brands/dropbox/effect.webp) |
 
 ### OneDrive
 
@@ -797,7 +797,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![OneDrive background](brands/onedrive/background.webp) | ![OneDrive effect](brands/onedrive/effect.webp) |
+| ![OneDrive background](../../../../../ui/theme-packages/village/assets/applet-scenes/onedrive/background.webp) | ![OneDrive effect](brands/onedrive/effect.webp) |
 
 ### Word
 
@@ -805,7 +805,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Word background](brands/microsoft-word/background.webp) | ![Word effect](brands/microsoft-word/effect.webp) |
+| ![Word background](../../../../../ui/theme-packages/village/assets/applet-scenes/microsoft-word/background.webp) | ![Word effect](brands/microsoft-word/effect.webp) |
 
 ### Excel
 
@@ -813,7 +813,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Excel background](brands/microsoft-excel/background.webp) | ![Excel effect](brands/microsoft-excel/effect.webp) |
+| ![Excel background](../../../../../ui/theme-packages/village/assets/applet-scenes/microsoft-excel/background.webp) | ![Excel effect](brands/microsoft-excel/effect.webp) |
 
 ### PowerPoint
 
@@ -821,7 +821,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![PowerPoint background](brands/microsoft-powerpoint/background.webp) | ![PowerPoint effect](brands/microsoft-powerpoint/effect.webp) |
+| ![PowerPoint background](../../../../../ui/theme-packages/village/assets/applet-scenes/microsoft-powerpoint/background.webp) | ![PowerPoint effect](brands/microsoft-powerpoint/effect.webp) |
 
 ### Figma
 
@@ -829,7 +829,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Figma background](brands/figma/background.webp) | ![Figma effect](brands/figma/effect.webp) |
+| ![Figma background](../../../../../ui/theme-packages/village/assets/applet-scenes/figma/background.webp) | ![Figma effect](brands/figma/effect.webp) |
 
 ### Canva
 
@@ -837,7 +837,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Canva background](brands/canva/background.webp) | ![Canva effect](brands/canva/effect.webp) |
+| ![Canva background](../../../../../ui/theme-packages/village/assets/applet-scenes/canva/background.webp) | ![Canva effect](brands/canva/effect.webp) |
 
 ### Spotify
 
@@ -845,7 +845,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Spotify background](brands/spotify/background.webp) | ![Spotify effect](brands/spotify/effect.webp) |
+| ![Spotify background](../../../../../ui/theme-packages/village/assets/applet-scenes/spotify/background.webp) | ![Spotify effect](brands/spotify/effect.webp) |
 
 ### Apple Music
 
@@ -853,7 +853,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Apple Music background](brands/apple-music/background.webp) | ![Apple Music effect](brands/apple-music/effect.webp) |
+| ![Apple Music background](../../../../../ui/theme-packages/village/assets/applet-scenes/apple-music/background.webp) | ![Apple Music effect](brands/apple-music/effect.webp) |
 
 ### Reddit
 
@@ -861,7 +861,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Reddit background](brands/reddit/background.webp) | ![Reddit effect](brands/reddit/effect.webp) |
+| ![Reddit background](../../../../../ui/theme-packages/village/assets/applet-scenes/reddit/background.webp) | ![Reddit effect](brands/reddit/effect.webp) |
 
 ### Instagram
 
@@ -869,7 +869,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Instagram background](brands/instagram/background.webp) | ![Instagram effect](brands/instagram/effect.webp) |
+| ![Instagram background](../../../../../ui/theme-packages/village/assets/applet-scenes/instagram/background.webp) | ![Instagram effect](brands/instagram/effect.webp) |
 
 ### LinkedIn
 
@@ -877,7 +877,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![LinkedIn background](brands/linkedin/background.webp) | ![LinkedIn effect](brands/linkedin/effect.webp) |
+| ![LinkedIn background](../../../../../ui/theme-packages/village/assets/applet-scenes/linkedin/background.webp) | ![LinkedIn effect](brands/linkedin/effect.webp) |
 
 ### Amazon
 
@@ -885,7 +885,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Amazon background](brands/amazon/background.webp) | ![Amazon effect](brands/amazon/effect.webp) |
+| ![Amazon background](../../../../../ui/theme-packages/village/assets/applet-scenes/amazon/background.webp) | ![Amazon effect](brands/amazon/effect.webp) |
 
 ### Netflix
 
@@ -893,7 +893,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Netflix background](brands/netflix/background.webp) | ![Netflix effect](brands/netflix/effect.webp) |
+| ![Netflix background](../../../../../ui/theme-packages/village/assets/applet-scenes/netflix/background.webp) | ![Netflix effect](brands/netflix/effect.webp) |
 
 ### Outlook
 
@@ -901,7 +901,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Outlook background](brands/outlook/background.webp) | ![Outlook effect](brands/outlook/effect.webp) |
+| ![Outlook background](../../../../../ui/theme-packages/village/assets/applet-scenes/outlook/background.webp) | ![Outlook effect](brands/outlook/effect.webp) |
 
 ### Apple Podcasts
 
@@ -909,7 +909,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Apple Podcasts background](brands/apple-podcasts/background.webp) | ![Apple Podcasts effect](brands/apple-podcasts/effect.webp) |
+| ![Apple Podcasts background](../../../../../ui/theme-packages/village/assets/applet-scenes/apple-podcasts/background.webp) | ![Apple Podcasts effect](brands/apple-podcasts/effect.webp) |
 
 ### Google Photos
 
@@ -917,7 +917,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Google Photos background](brands/google-photos/background.webp) | ![Google Photos effect](brands/google-photos/effect.webp) |
+| ![Google Photos background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-photos/background.webp) | ![Google Photos effect](brands/google-photos/effect.webp) |
 
 ### Pinterest
 
@@ -925,7 +925,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Pinterest background](brands/pinterest/background.webp) | ![Pinterest effect](brands/pinterest/effect.webp) |
+| ![Pinterest background](../../../../../ui/theme-packages/village/assets/applet-scenes/pinterest/background.webp) | ![Pinterest effect](brands/pinterest/effect.webp) |
 
 ### Facebook
 
@@ -933,7 +933,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Facebook background](brands/facebook/background.webp) | ![Facebook effect](brands/facebook/effect.webp) |
+| ![Facebook background](../../../../../ui/theme-packages/village/assets/applet-scenes/facebook/background.webp) | ![Facebook effect](brands/facebook/effect.webp) |
 
 ### Threads
 
@@ -941,7 +941,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Threads background](brands/threads/background.webp) | ![Threads effect](brands/threads/effect.webp) |
+| ![Threads background](../../../../../ui/theme-packages/village/assets/applet-scenes/threads/background.webp) | ![Threads effect](brands/threads/effect.webp) |
 
 ### CapCut
 
@@ -949,7 +949,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![CapCut background](brands/capcut/background.webp) | ![CapCut effect](brands/capcut/effect.webp) |
+| ![CapCut background](../../../../../ui/theme-packages/village/assets/applet-scenes/capcut/background.webp) | ![CapCut effect](brands/capcut/effect.webp) |
 
 ### Uber
 
@@ -957,7 +957,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Uber background](brands/uber/background.webp) | ![Uber effect](brands/uber/effect.webp) |
+| ![Uber background](../../../../../ui/theme-packages/village/assets/applet-scenes/uber/background.webp) | ![Uber effect](brands/uber/effect.webp) |
 
 ### Uber Eats
 
@@ -965,7 +965,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Uber Eats background](brands/uber-eats/background.webp) | ![Uber Eats effect](brands/uber-eats/effect.webp) |
+| ![Uber Eats background](../../../../../ui/theme-packages/village/assets/applet-scenes/uber-eats/background.webp) | ![Uber Eats effect](brands/uber-eats/effect.webp) |
 
 ### Booking.com
 
@@ -973,7 +973,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Booking.com background](brands/booking/background.webp) | ![Booking.com effect](brands/booking/effect.webp) |
+| ![Booking.com background](../../../../../ui/theme-packages/village/assets/applet-scenes/booking/background.webp) | ![Booking.com effect](brands/booking/effect.webp) |
 
 ### 飞书
 
@@ -981,7 +981,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![飞书 background](brands/feishu/background.webp) | ![飞书 effect](brands/feishu/effect.webp) |
+| ![飞书 background](../../../../../ui/theme-packages/village/assets/applet-scenes/feishu/background.webp) | ![飞书 effect](brands/feishu/effect.webp) |
 
 ### 哔哩哔哩
 
@@ -989,7 +989,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![哔哩哔哩 background](brands/bilibili/background.webp) | ![哔哩哔哩 effect](brands/bilibili/effect.webp) |
+| ![哔哩哔哩 background](../../../../../ui/theme-packages/village/assets/applet-scenes/bilibili/background.webp) | ![哔哩哔哩 effect](brands/bilibili/effect.webp) |
 
 ### 小红书
 
@@ -997,7 +997,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![小红书 background](brands/xiaohongshu/background.webp) | ![小红书 effect](brands/xiaohongshu/effect.webp) |
+| ![小红书 background](../../../../../ui/theme-packages/village/assets/applet-scenes/xiaohongshu/background.webp) | ![小红书 effect](brands/xiaohongshu/effect.webp) |
 
 ### 百度网盘
 
@@ -1005,7 +1005,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![百度网盘 background](brands/baidu-netdisk/background.webp) | ![百度网盘 effect](brands/baidu-netdisk/effect.webp) |
+| ![百度网盘 background](../../../../../ui/theme-packages/village/assets/applet-scenes/baidu-netdisk/background.webp) | ![百度网盘 effect](brands/baidu-netdisk/effect.webp) |
 
 ### Twitch
 
@@ -1013,7 +1013,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Twitch background](brands/twitch/background.webp) | ![Twitch effect](brands/twitch/effect.webp) |
+| ![Twitch background](../../../../../ui/theme-packages/village/assets/applet-scenes/twitch/background.webp) | ![Twitch effect](brands/twitch/effect.webp) |
 
 ### Microsoft Copilot
 
@@ -1021,7 +1021,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Microsoft Copilot background](brands/copilot/background.webp) | ![Microsoft Copilot effect](brands/copilot/effect.webp) |
+| ![Microsoft Copilot background](../../../../../ui/theme-packages/village/assets/applet-scenes/copilot/background.webp) | ![Microsoft Copilot effect](brands/copilot/effect.webp) |
 
 ### Adobe Acrobat
 
@@ -1029,7 +1029,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Adobe Acrobat background](brands/acrobat/background.webp) | ![Adobe Acrobat effect](brands/acrobat/effect.webp) |
+| ![Adobe Acrobat background](../../../../../ui/theme-packages/village/assets/applet-scenes/acrobat/background.webp) | ![Adobe Acrobat effect](brands/acrobat/effect.webp) |
 
 ### Wikipedia
 
@@ -1037,7 +1037,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Wikipedia background](brands/wikipedia/background.webp) | ![Wikipedia effect](brands/wikipedia/effect.webp) |
+| ![Wikipedia background](../../../../../ui/theme-packages/village/assets/applet-scenes/wikipedia/background.webp) | ![Wikipedia effect](brands/wikipedia/effect.webp) |
 
 ### 豆包
 
@@ -1045,7 +1045,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![豆包 background](brands/doubao/background.webp) | ![豆包 effect](brands/doubao/effect.webp) |
+| ![豆包 background](../../../../../ui/theme-packages/village/assets/applet-scenes/doubao/background.webp) | ![豆包 effect](brands/doubao/effect.webp) |
 
 ### 淘宝
 
@@ -1053,7 +1053,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![淘宝 background](brands/taobao/background.webp) | ![淘宝 effect](brands/taobao/effect.webp) |
+| ![淘宝 background](../../../../../ui/theme-packages/village/assets/applet-scenes/taobao/background.webp) | ![淘宝 effect](brands/taobao/effect.webp) |
 
 ### 支付宝
 
@@ -1061,7 +1061,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![支付宝 background](brands/alipay/background.webp) | ![支付宝 effect](brands/alipay/effect.webp) |
+| ![支付宝 background](../../../../../ui/theme-packages/village/assets/applet-scenes/alipay/background.webp) | ![支付宝 effect](brands/alipay/effect.webp) |
 
 ### 抖音
 
@@ -1069,7 +1069,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![抖音 background](brands/douyin/background.webp) | ![抖音 effect](brands/douyin/effect.webp) |
+| ![抖音 background](../../../../../ui/theme-packages/village/assets/applet-scenes/douyin/background.webp) | ![抖音 effect](brands/douyin/effect.webp) |
 
 ### PostHog
 
@@ -1077,7 +1077,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![PostHog background](brands/posthog/background.webp) | ![PostHog effect](brands/posthog/effect.webp) |
+| ![PostHog background](../../../../../ui/theme-packages/village/assets/applet-scenes/posthog/background.webp) | ![PostHog effect](brands/posthog/effect.webp) |
 
 ### Cloudflare
 
@@ -1085,7 +1085,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Cloudflare background](brands/cloudflare/background.webp) | ![Cloudflare effect](brands/cloudflare/effect.webp) |
+| ![Cloudflare background](../../../../../ui/theme-packages/village/assets/applet-scenes/cloudflare/background.webp) | ![Cloudflare effect](brands/cloudflare/effect.webp) |
 
 ### Vercel
 
@@ -1093,7 +1093,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Vercel background](brands/vercel/background.webp) | ![Vercel effect](brands/vercel/effect.webp) |
+| ![Vercel background](../../../../../ui/theme-packages/village/assets/applet-scenes/vercel/background.webp) | ![Vercel effect](brands/vercel/effect.webp) |
 
 ### Netlify
 
@@ -1101,7 +1101,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Netlify background](brands/netlify/background.webp) | ![Netlify effect](brands/netlify/effect.webp) |
+| ![Netlify background](../../../../../ui/theme-packages/village/assets/applet-scenes/netlify/background.webp) | ![Netlify effect](brands/netlify/effect.webp) |
 
 ### Firebase
 
@@ -1109,7 +1109,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Firebase background](brands/firebase/background.webp) | ![Firebase effect](brands/firebase/effect.webp) |
+| ![Firebase background](../../../../../ui/theme-packages/village/assets/applet-scenes/firebase/background.webp) | ![Firebase effect](brands/firebase/effect.webp) |
 
 ### Sentry
 
@@ -1117,7 +1117,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Sentry background](brands/sentry/background.webp) | ![Sentry effect](brands/sentry/effect.webp) |
+| ![Sentry background](../../../../../ui/theme-packages/village/assets/applet-scenes/sentry/background.webp) | ![Sentry effect](brands/sentry/effect.webp) |
 
 ### Railway
 
@@ -1125,7 +1125,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Railway background](brands/railway/background.webp) | ![Railway effect](brands/railway/effect.webp) |
+| ![Railway background](../../../../../ui/theme-packages/village/assets/applet-scenes/railway/background.webp) | ![Railway effect](brands/railway/effect.webp) |
 
 ### Render
 
@@ -1133,7 +1133,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Render background](brands/render/background.webp) | ![Render effect](brands/render/effect.webp) |
+| ![Render background](../../../../../ui/theme-packages/village/assets/applet-scenes/render/background.webp) | ![Render effect](brands/render/effect.webp) |
 
 ### GitLab
 
@@ -1141,7 +1141,7 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![GitLab background](brands/gitlab/background.webp) | ![GitLab effect](brands/gitlab/effect.webp) |
+| ![GitLab background](../../../../../ui/theme-packages/village/assets/applet-scenes/gitlab/background.webp) | ![GitLab effect](brands/gitlab/effect.webp) |
 
 ### Jira
 
@@ -1149,4 +1149,4 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 | Background | Image-generated effect |
 | --- | --- |
-| ![Jira background](brands/jira/background.webp) | ![Jira effect](brands/jira/effect.webp) |
+| ![Jira background](../../../../../ui/theme-packages/village/assets/applet-scenes/jira/background.webp) | ![Jira effect](brands/jira/effect.webp) |

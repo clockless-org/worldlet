@@ -1,16 +1,16 @@
 # Village Applet scene library
 
-[View image-generated backgrounds and effects for all 140 selections](CONCEPTS.md). These are visual targets for later HTML implementation; the registration counts below describe the existing runtime plates.
+[View image-generated backgrounds and effects for all 140 selections](CONCEPTS.md). Current registered backgrounds are paired with earlier image-generated concepts; the concepts retain their original proportions.
 
 | Collection | Asset groups | Registered HTML surfaces | Existing art awaiting registration |
 | --- | ---: | ---: | ---: |
 | Core everyday applications | 18 | 🟢 18 | 0 |
 | Individual games: five fixed games + Random | 6 | 🟢 6 | 0 |
 | Generic scenes | 16 | 🟢 16 | 0 |
-| Brand-specific products and external games | 100 | 0 | 🟡 100 |
-| Total art selections | **140** | **40** | **100** |
+| Brand-specific products and external games | 100 | 🟢 100 | 0 |
+| Total art selections | **140** | **140** | **0** |
 
-Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. The 100 branded selections retain their existing runtime art and await registered surfaces; the new background and effect studies are catalogued separately above. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
+Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. All 140 backgrounds now have measured primary regions. Their original horizontal compositions are retained while the content surfaces extend vertically toward 80% of the canvas height. Safe insets vary with bindings and frames. Website Applets open the original site in the isolated native browser surface; the four core paper Applets retain their interactive HTML. Artwork availability does not imply account integration. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
 
 ## Core applications and games
 
@@ -75,8 +75,8 @@ The 48 source entries are retained for completeness: **8 present, 21 related, 2 
 
 | # | iPhone app | Status | Current Worldlet counterpart |
 | --- | --- | --- | --- |
-| 6 | Clock | Planned | Confirmed next core tool; art and runtime pending |
-| 10 | Files | Planned | Confirmed next core tool; art and runtime pending |
+| 6 | Clock | Planned | Registered art ready; runtime pending |
+| 10 | Files | Planned | Registered art ready; runtime pending |
 
 ### 🔴 No dedicated counterpart (14)
 
@@ -148,7 +148,7 @@ Export all 40 pictures with `node scripts/applet-scene-mockups.ts`; verify saved
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-calendar.webp" width="100" alt="Calendar icon">
 
-Primary HTML region: 52.5% of image width × 51.0% of image height; measured inside the painted surface.
+Primary HTML region: 54.7% of image width × 77.8% of image height; measured inside the painted surface.
 
 ![Calendar background](google-calendar/background.png)
 
@@ -156,7 +156,7 @@ Primary HTML region: 52.5% of image width × 51.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/gmail.webp" width="100" alt="Mail icon">
 
-Primary HTML region: 50.8% of image width × 50.7% of image height; measured inside the painted surface.
+Primary HTML region: 49.2% of image width × 79.9% of image height; measured inside the painted surface.
 
 ![Mail background](gmail/background.png)
 
@@ -164,7 +164,7 @@ Primary HTML region: 50.8% of image width × 50.7% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-notes.webp" width="100" alt="Notes icon">
 
-Primary HTML region: 53.0% of image width × 59.5% of image height; measured inside the painted surface.
+Primary HTML region: 56.2% of image width × 79.8% of image height; measured inside the painted surface.
 
 ![Notes background](apple-notes/background.png)
 
@@ -172,7 +172,7 @@ Primary HTML region: 53.0% of image width × 59.5% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-reminders.webp" width="100" alt="Reminders icon">
 
-Primary HTML region: 49.3% of image width × 49.0% of image height; measured inside the painted surface.
+Primary HTML region: 40.1% of image width × 77.4% of image height; measured inside the painted surface.
 
 ![Reminders background](apple-reminders/background.png)
 
@@ -180,7 +180,7 @@ Primary HTML region: 49.3% of image width × 49.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/files/icon.webp" width="100" alt="Files icon">
 
-Primary HTML region: 65.0% of image width × 69.0% of image height; measured inside the painted surface.
+Primary HTML region: 64.0% of image width × 77.0% of image height; measured inside the painted surface.
 
 ![Files background](files/background.png)
 
@@ -188,7 +188,7 @@ Primary HTML region: 65.0% of image width × 69.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/weather.webp" width="100" alt="Weather icon">
 
-Primary HTML region: 54.0% of image width × 67.0% of image height; measured inside the painted surface.
+Primary HTML region: 56.0% of image width × 74.3% of image height; measured inside the painted surface.
 
 ![Weather background](weather/background.png)
 
@@ -196,7 +196,7 @@ Primary HTML region: 54.0% of image width × 67.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/meetings.webp" width="100" alt="Meetings icon">
 
-Primary HTML region: 54.0% of image width × 65.0% of image height; measured inside the painted surface.
+Primary HTML region: 55.0% of image width × 78.3% of image height; measured inside the painted surface.
 
 ![Meetings background](meetings/background.png)
 
@@ -204,7 +204,7 @@ Primary HTML region: 54.0% of image width × 65.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/voice-memos.webp" width="100" alt="Voice Memos icon">
 
-Primary HTML region: 53.0% of image width × 61.0% of image height; measured inside the painted surface.
+Primary HTML region: 52.3% of image width × 79.4% of image height; measured inside the painted surface.
 
 ![Voice Memos background](voice-memos/background.png)
 
@@ -212,7 +212,7 @@ Primary HTML region: 53.0% of image width × 61.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/messages.webp" width="100" alt="Messages icon">
 
-Primary HTML region: 62.0% of image width × 63.0% of image height; measured inside the painted surface.
+Primary HTML region: 62.8% of image width × 81.6% of image height; measured inside the painted surface.
 
 ![Messages background](messages/background.png)
 
@@ -220,7 +220,7 @@ Primary HTML region: 62.0% of image width × 63.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/browser.webp" width="100" alt="Browser icon">
 
-Primary HTML region: 66.2% of image width × 72.4% of image height; measured inside the painted surface. The taller frame provides about 22% more page area while preserving the globe and companion clearance. The globe’s red, green and yellow enamel cradle and the open blue-dial compass evoke Chrome and Safari as physical instruments.
+Primary HTML region: 66.7% of image width × 73.8% of image height; measured inside the painted surface.
 
 ![Browser background](browser/background.png)
 
@@ -228,7 +228,7 @@ Primary HTML region: 66.2% of image width × 72.4% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/maps/icon.webp" width="100" alt="Maps icon">
 
-Primary HTML region: 64.0% of image width × 69.0% of image height; measured inside the painted surface.
+Primary HTML region: 63.3% of image width × 79.2% of image height; measured inside the painted surface.
 
 ![Maps background](maps/background.png)
 
@@ -236,7 +236,7 @@ Primary HTML region: 64.0% of image width × 69.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/clock/icon.webp" width="100" alt="Clock icon">
 
-Primary HTML region: 67.0% of image width × 70.0% of image height; measured inside the painted surface.
+Primary HTML region: 69.7% of image width × 73.3% of image height; measured inside the painted surface.
 
 ![Clock background](clock/background.png)
 
@@ -244,7 +244,7 @@ Primary HTML region: 67.0% of image width × 70.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/contacts/icon.webp" width="100" alt="Contacts icon">
 
-Primary HTML region: 59.5% of image width × 69.0% of image height; measured inside the painted surface.
+Primary HTML region: 60.5% of image width × 75.5% of image height; measured inside the painted surface.
 
 ![Contacts background](contacts/background.png)
 
@@ -252,7 +252,7 @@ Primary HTML region: 59.5% of image width × 69.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/photos/icon.webp" width="100" alt="Photos icon">
 
-Primary HTML region: 69.0% of image width × 70.0% of image height; measured inside the painted surface.
+Primary HTML region: 66.2% of image width × 79.2% of image height; measured inside the painted surface.
 
 ![Photos background](photos/background.png)
 
@@ -260,7 +260,7 @@ Primary HTML region: 69.0% of image width × 70.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/music/icon.webp" width="100" alt="Music icon">
 
-Primary HTML region: 64.0% of image width × 61.0% of image height; measured inside the painted surface.
+Primary HTML region: 62.1% of image width × 79.7% of image height; measured inside the painted surface.
 
 ![Music background](music/background.png)
 
@@ -268,7 +268,7 @@ Primary HTML region: 64.0% of image width × 61.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/news/icon.webp" width="100" alt="News icon">
 
-Primary HTML region: 60.0% of image width × 65.0% of image height; measured inside the painted surface.
+Primary HTML region: 60.9% of image width × 74.1% of image height; measured inside the painted surface.
 
 ![News background](news/background.png)
 
@@ -276,7 +276,7 @@ Primary HTML region: 60.0% of image width × 65.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/podcasts/icon.webp" width="100" alt="Podcasts icon">
 
-Primary HTML region: 53.0% of image width × 61.0% of image height; measured inside the painted surface.
+Primary HTML region: 57.1% of image width × 78.5% of image height; measured inside the painted surface.
 
 ![Podcasts background](podcasts/background.png)
 
@@ -284,7 +284,7 @@ Primary HTML region: 53.0% of image width × 61.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/stocks/icon.webp" width="100" alt="Stocks icon">
 
-Primary HTML region: 62.0% of image width × 70.0% of image height; measured inside the painted surface.
+Primary HTML region: 60.1% of image width × 75.1% of image height; measured inside the painted surface.
 
 ![Stocks background](stocks/background.png)
 
@@ -292,7 +292,7 @@ Primary HTML region: 62.0% of image width × 70.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/game-2048.webp" width="100" alt="2048 icon">
 
-Primary HTML region: 67.0% of image width × 77.0% of image height; measured inside the painted surface.
+Primary HTML region: 67.2% of image width × 77.4% of image height; measured inside the painted surface.
 
 ![2048 background](game-2048/background.png)
 
@@ -300,7 +300,7 @@ Primary HTML region: 67.0% of image width × 77.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/snake.webp" width="100" alt="Snake icon">
 
-Primary HTML region: 67.0% of image width × 65.0% of image height; measured inside the painted surface.
+Primary HTML region: 69.2% of image width × 71.8% of image height; measured inside the painted surface.
 
 ![Snake background](snake/background.png)
 
@@ -308,7 +308,7 @@ Primary HTML region: 67.0% of image width × 65.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/minesweeper.webp" width="100" alt="Minesweeper icon">
 
-Primary HTML region: 59.0% of image width × 67.0% of image height; measured inside the painted surface.
+Primary HTML region: 60.9% of image width × 75.6% of image height; measured inside the painted surface.
 
 ![Minesweeper background](minesweeper/background.png)
 
@@ -316,7 +316,7 @@ Primary HTML region: 59.0% of image width × 67.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/sudoku.webp" width="100" alt="Sudoku icon">
 
-Primary HTML region: 66.0% of image width × 70.0% of image height; measured inside the painted surface.
+Primary HTML region: 66.6% of image width × 74.3% of image height; measured inside the painted surface.
 
 ![Sudoku background](sudoku/background.png)
 
@@ -324,7 +324,7 @@ Primary HTML region: 66.0% of image width × 70.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/gomoku/icon.webp" width="100" alt="Gomoku icon">
 
-Primary HTML region: 66.0% of image width × 76.0% of image height; measured inside the painted surface.
+Primary HTML region: 61.2% of image width × 75.1% of image height; measured inside the painted surface.
 
 ![Gomoku background](gomoku/background.png)
 
@@ -332,7 +332,7 @@ Primary HTML region: 66.0% of image width × 76.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/random-game.webp" width="100" alt="Random Game icon">
 
-Primary HTML region: 51.5% of image width × 62.0% of image height; measured inside the painted surface.
+Primary HTML region: 52.6% of image width × 74.3% of image height; measured inside the painted surface.
 
 ![Random Game background](random-game/background.png)
 

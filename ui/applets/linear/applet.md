@@ -2,6 +2,10 @@
 
 Read your Linear issues through the official Linear MCP server; no user plugin installation.
 
+## Website presentation
+
+Opening this Applet loads its original website in Worldlet's isolated browser surface. The Village theme supplies only the backdrop and measured page rectangle; the site's own interface handles editing, navigation and account sign-in. Existing authorized data readers remain available to Fox and Attention; opening the site does not grant them new access.
+
 ## Runtime
 
 - Stable identity: `app-linear`; provider: `linear`.
@@ -9,8 +13,8 @@ Read your Linear issues through the official Linear MCP server; no user plugin i
 - Mode: **on-demand**.
 
 - Peek: shared device and connection state.
-- Open: your issues, newest first, 20 per request with cursor pagination when the server offers one. Titles remain the source titles; the card line shows status, priority and due date.
-- Focus: the complete issue description and returned metadata (status, priority, project, team, assignee, labels, dates); Web opens Linear for creating and editing.
+- Saved-content list: your issues, newest first, 20 per request with cursor pagination when the server offers one. Titles remain the source titles; the card line shows status, priority and due date.
+- Saved-content detail: the complete issue description and returned metadata (status, priority, project, team, assignee, labels, dates); Web opens Linear for creating and editing.
 - Shared/Core validates read requests (`core/applets/curated-source.ts`); the request goes to the isolated Hermes source worker (`harness/hermes/linear_mcp.py`).
 - The reader calls only `list_issues` and `get_issue`. It fits its request to the arguments the server advertises (assignee `me`, limit, order, cursor) and accepts a Linear OAuth connection or an API key brought over from another Agent.
 - No create, edit, comment or background publication in this slice.

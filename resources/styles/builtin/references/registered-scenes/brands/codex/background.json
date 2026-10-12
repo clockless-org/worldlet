@@ -3,6 +3,32 @@
   "title": "Codex",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "background design; runtime registration pending",
-  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Codex, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village inventor's garden laboratory, blue glass lamps, small mechanical models and a tidy terminal-shaped instrument, blue cloud-terminal emblem from the icon as a meaningful workshop sign.\nLEFT: A warm ivory drafting screen in a blue-enamel and oak enclosure. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Codex\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet."
+  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Codex, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village inventor's garden laboratory, blue glass lamps, small mechanical models and a tidy terminal-shaped instrument, blue cloud-terminal emblem from the icon as a meaningful workshop sign.\nLEFT: A warm ivory drafting screen in a blue-enamel and oak enclosure. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Codex\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
+  "refinement": "Extend only left board height to about 80% while retaining its width; put bottom blue frame near canvas bottom, remove paper obstructions, preserve Codex brand and right workshop scene.",
+  "registration": {
+    "imageSize": [
+      1672,
+      941
+    ],
+    "regions": [
+      {
+        "id": "main",
+        "role": "primary",
+        "rect": [
+          0.065789,
+          0.129649,
+          0.501794,
+          0.81509
+        ],
+        "material": "paper"
+      }
+    ],
+    "companion": [
+      0.72,
+      0.62,
+      0.25,
+      0.34
+    ]
+  }
 }

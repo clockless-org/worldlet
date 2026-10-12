@@ -19,28 +19,15 @@ await withBrowser(fileAccess,async browser=>{
  });
  await page.goto(worldUrl());
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length>0,undefined,{timeout:60000});
- for(const key of ['stripe','paypal']){
-  await page.evaluate(k=>location.hash='object=app-'+k,key);
-  // Every record shows at once (#2048): the item area scrolls instead of paging.
-  await page.waitForFunction(count=>document.querySelectorAll('.scene-item').length===count,key==='stripe'?6:5);
-  await page.screenshot({path:'/tmp/worldlet-'+key+'-open.png'});
-  await page.locator('.scene-item').first().click();await page.locator('.app-source-body').waitFor();
-  await page.waitForFunction(k=>document.querySelector('.app-source-body')?.textContent.includes(k==='stripe'?'$123.45':'12.34 USD'),key);
-  if(key==='stripe')assert.match(await page.locator('.app-source-body').innerText(),/Unavailable — incomplete read/);
-  await page.locator('.pixi-selected-item').waitFor();
-  await page.getByRole('button',{name:'Next item',exact:true}).click();
-  await page.waitForFunction(k=>calls.some(c=>k==='stripe'?c.action==='stripe'&&c.operation==='customer':c.action==='paypalContent'&&c.operation==='read'&&c.id==='INV2-TEST-1'),key);
-  await page.screenshot({path:'/tmp/worldlet-'+key+'-focus.png'});
-  await page.locator('.applet-mode-web').click();await page.locator('.browser-viewport').waitFor();
-  await page.locator('.applet-mode-native').click();await page.locator('.app-source-body').waitFor();
-  await leaveApplet(page);await page.locator('.pixi-applet-stage').waitFor();
- }
- for(const key of ['oura','strava','fitbit','google-maps','airbnb','tripit','plaid']){
+ for(const key of ['stripe','paypal','oura','strava','fitbit','google-maps','airbnb','tripit','plaid']){
   await page.evaluate(k=>location.hash='object=app-'+k,key);await page.locator('.browser-viewport').waitFor();
   await page.waitForFunction(k=>document.querySelector<HTMLElement>('#notionContent').dataset.applet===k,key);
+  await page.waitForFunction(k=>calls.some(c=>c.action==='browserShow'&&c.applet===k),key);
+  assert.equal(await page.locator('.applet-mode-toggle').count(),0);
+  await leaveApplet(page);
  }
  for(const region of ['health','travel','money']){await page.evaluate(r=>location.hash='building=building-'+r,region);await page.waitForFunction(r=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return m.active==='building-'+r&&m.camera.settled;},region);await page.screenshot({path:'/tmp/worldlet-'+region+'-region.png'});}
  assert.deepEqual(errors,[]);
  assert.equal(await page.evaluate(()=>calls.some(c=>['configure','send_invoice','pay_order','create_refund'].includes(c.operation))),false);
- console.log('PASS Money Open/Focus, correct currency units and incomplete totals, read-only dispatch, web escape and seven website Applets.');
+ console.log('PASS nine money, health and travel Applets open their real sites without issuing payment or configuration actions.');
 });

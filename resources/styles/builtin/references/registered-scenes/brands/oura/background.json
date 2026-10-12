@@ -3,6 +3,32 @@
   "title": "Oura Ring",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "background design; runtime registration pending",
-  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Oura Ring, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A serene village moon garden wellness terrace, smooth stones, linen cushions and a circular Oura ring emblem above a small rest cabinet, gentle early-morning light.\nLEFT: An ivory wellness journal board in pale oak with dark charcoal edging. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Oura Ring\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet."
+  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Oura Ring, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A serene village moon garden wellness terrace, smooth stones, linen cushions and a circular Oura ring emblem above a small rest cabinet, gentle early-morning light.\nLEFT: An ivory wellness journal board in pale oak with dark charcoal edging. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Oura Ring\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
+  "refinement": "Use case: precise-object-edit. Minimal edit to this exact1672x941 Village Oura backdrop. Keep original main blank board horizontal position/width, x145..960 paper and x109..994 outer frame; do NOT widen. Keep its upper paper edge abouty57. Extend blank paper BOTTOM down to y894 and outer lower wood frame to y930: replace rug under the board with the taller board, don't crop the image.\nREMOVE foreground cushion and ALL flowers, leaves, branches/pots or shadows invading the LEFT cream paper including top-left overhang and middle-left branches. Paper has to be continuously clear across x150..954, y100..885, >80% canvas HEIGHT, with all four corners accessible, no foreground obstruction. Vegetation outside board may remain. Bottom-left pillow must no longer overlap paper. Exact quiet fine cream paper texture.\nPreserve all RIGHT-side Oura wellness scene unchanged: Oura logo disk and OURA RING label, ring on stone stand, candle, bottle, rolled yoga mat, towel, wood cabinet, tiny books, village vista and warm stone terrace. Preserve original rich sculpted storybook Village illustration, warm sunny palette, materials. No new typography, UI, controls, data or lines on paper. Aspect1672x941, no horizontal composition changes. Main purpose at least80% ACTUAL UNOBSTRUCTED usable paper HEIGHT.",
+  "registration": {
+    "imageSize": [
+      1672,
+      941
+    ],
+    "regions": [
+      {
+        "id": "main",
+        "role": "primary",
+        "rect": [
+          0.095694,
+          0.087141,
+          0.470096,
+          0.804463
+        ],
+        "material": "paper"
+      }
+    ],
+    "companion": [
+      0.72,
+      0.62,
+      0.25,
+      0.34
+    ]
+  }
 }

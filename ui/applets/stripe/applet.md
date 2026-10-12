@@ -2,6 +2,10 @@
 
 Read today’s collected payments, recurring revenue and customer billing history.
 
+## Website presentation
+
+Opening this Applet loads its original website in Worldlet's isolated browser surface. The Village theme supplies only the backdrop and measured page rectangle; the site's own interface handles editing, navigation and account sign-in. Existing authorized data readers remain available to Fox and Attention; opening the site does not grant them new access.
+
 ## Runtime
 
 - Stable identity: `app-stripe`; provider: `stripe`.
