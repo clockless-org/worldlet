@@ -706,8 +706,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    else primary=button('Enter your world',async()=>{entering=true;render();try{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));await finish();}finally{entering=false;}},true);
    primary.classList.add('setup-enter');primary.classList.toggle('is-loading',entering||!done);primary.setAttribute('aria-busy',String(entering||!done));if(!done||entering)primary.disabled=true;
    if(error||notice)message=node('p',t(error||notice),error?'setup-error':'setup-note');
-   // Claude Code's sign-in ran out: it signs in again here, in the browser, with no Terminal (owner decision 2026-10-11).
-   if(message&&!error&&draft.agent==='claude-code'&&/sign-in has expired/.test(notice)){
+   // Claude Code's sign-in ran out or never happened: it signs in here, in the browser, with no Terminal (owner decision 2026-10-11).
+   if(message&&!error&&draft.agent==='claude-code'&&/sign-in has expired|isn’t signed in/.test(notice)){
     const again=node('button',t(signingInAgent?'Waiting for your browser…':'Sign in to Claude Code'),'setup-link setup-sign-in-again') as HTMLButtonElement;
     again.type='button';again.disabled=signingInAgent;again.onclick=()=>void signInAgain();message.append(' ',again);
    }

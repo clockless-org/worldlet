@@ -216,9 +216,17 @@ const errorText=(value:unknown,fallback:string)=>{const item=record(value);retur
  * itself once per launch (owner decision 2026-10-11: the person should not have to worry about it). Null when the text
  * is not that. */
 export const CLAUDE_CODE_SIGN_IN_EXPIRED='Claude Code’s sign-in has expired. Sign in again in the browser page that opened.';
+/** Claude Code was never signed in on this computer, or not in the environment Worldlet starts it with (a key set only
+ * in a shell profile): it answers "Not logged in · Please run /login" or "Invalid API key · Please run /login" (Mac Beta
+ * 4180, 2026-10-11: setup failed this way four times). Handled like an expired sign-in: its own sign-in page opens. */
+export const CLAUDE_CODE_NOT_SIGNED_IN='Claude Code isn’t signed in yet. Sign in in the browser page that opened.';
+/** Either of the two lines above when the text says Claude Code needs signing in, else null. */
 export function claudeCodeSignInExpired(text:string):string|null {
- return /Failed to authenticate|OAuth (?:session|token)[^.]*expired|invalid_grant/i.test(text)?CLAUDE_CODE_SIGN_IN_EXPIRED:null;
+ if(/Failed to authenticate|OAuth (?:session|token)[^.]*expired|invalid_grant/i.test(text))return CLAUDE_CODE_SIGN_IN_EXPIRED;
+ return /Not logged in|Please run \/login|Invalid API key/i.test(text)?CLAUDE_CODE_NOT_SIGNED_IN:null;
 }
+/** Whether a turn's error is one of Claude Code's sign-in lines, so its sign-in page opens. */
+export const claudeCodeNeedsSignIn=(error:string)=>error===CLAUDE_CODE_SIGN_IN_EXPIRED||error===CLAUDE_CODE_NOT_SIGNED_IN;
 /** Codex's own sign-in or usage limit, told apart from its other failures (Mac Beta 4261, 2026-10-11: a turn that
  * failed for another reason read "finish signing in" while Codex was signed in). Null when the text is neither. */
 export function codexProblem(text:string):string|null {

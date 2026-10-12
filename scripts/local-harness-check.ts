@@ -91,7 +91,6 @@ const claude=read('claude-code',[
  {type:'result',subtype:'success',is_error:false,result:'hello fox'}
 ]);
 assert.deepEqual(claude,{deltas:['hello ','fox'],outcome:{message:'hello fox'}});
-assert.deepEqual(read('claude-code',[{type:'result',subtype:'success',is_error:true,result:'Invalid API key · Please run /login'}],1).outcome,{error:'Invalid API key · Please run /login'});
 const codex=read('codex',[{type:'thread.started',thread_id:'t'},{type:'turn.started'},{type:'item.completed',item:{id:'i0',type:'reasoning',text:'thinking'}},{type:'item.completed',item:{id:'i1',type:'agent_message',text:'Done.'}},{type:'turn.completed',usage:{}}]);
 assert.deepEqual(codex,{deltas:['Done.'],outcome:{message:'Done.'}});
 assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'Not signed in'}}],1).outcome,{error:'Codex is not signed in. Open Terminal, run codex login, then try again.'});
@@ -134,7 +133,10 @@ assert.equal(openClawMissingKey('Rate limited'),null);
 assert.equal(claudeCodeSignInExpired('Failed to authenticate: OAuth session expired and could not be refreshed'),'Claude Code’s sign-in has expired. Sign in again in the browser page that opened.');
 assert.deepEqual(read('claude-code',[],1,'Failed to authenticate: OAuth session expired and could not be refreshed').outcome,{error:claudeCodeSignInExpired('Failed to authenticate')});
 assert.equal(claudeCodeSignInExpired('Rate limited'),null);
-assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: not logged in\n').outcome,{error:'Claude Code could not answer: Error: not logged in'},'banners are not Fox’s words; stderr explains a failure');
+// Never signed in (Claude Code 2.1 `-p`): the same sign-in page, with its own line.
+assert.equal(claudeCodeSignInExpired('Not logged in · Please run /login'),'Claude Code isn’t signed in yet. Sign in in the browser page that opened.');
+assert.deepEqual(read('claude-code',[{type:'result',subtype:'success',is_error:true,result:'Invalid API key · Please run /login'}],1).outcome,{error:claudeCodeSignInExpired('Invalid API key')});
+assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: connect ECONNREFUSED\n').outcome,{error:'Claude Code could not answer: Error: connect ECONNREFUSED'},'banners are not Fox’s words; stderr explains a failure');
 // A turn with no answer and nothing on stderr says what happened, not "sign in" (Mac Beta 4261, 2026-10-11: Codex was
 // signed in, yet the Attention check read "Open it once in Terminal to finish signing in").
 assert.deepEqual(read('codex',[],0).outcome,{error:'Codex finished without an answer. Try again.'});
@@ -324,8 +326,8 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    script(path.join(bin,'claude'),`if [ "$1" = "--version" ]; then echo "2.1.0 (Claude Code)"; exit 0; fi\ncat > "$PWD/stdin.txt"\nprintf '%s\\n' "$@" > "$PWD/args.txt"\nenv > "$PWD/env.txt"\ncat "${fixture}"\n`);
   }
   // A Harness that fails explains itself; Fox never shows a blank answer.
-  script(path.join(bin,'claude'),'echo "Error: not logged in" >&2\nexit 1\n');
-  await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: not logged in/);
+  script(path.join(bin,'claude'),'echo "Error: connect ECONNREFUSED" >&2\nexit 1\n');
+  await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: connect ECONNREFUSED/);
   // A turn the provider turns away as busy before anything happened runs again after a wait (Mac Alpha 4312, #416):
   // the person sees that it is trying again, then the answer; one that stays busy fails with the provider's words.
   {
@@ -370,9 +372,9 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   await assert.rejects(holding,(error:Error)=>error.name==='AbortError');
   assert.ok(Date.now()-stuckAt<5000,'cancel answers promptly');
   // One that exits but leaves a helper holding its output is answered as an exit, not waited on.
-  script(path.join(bin,'claude'),'sleep 30 &\necho "Error: not logged in" >&2\nexit 1\n');
+  script(path.join(bin,'claude'),'sleep 30 &\necho "Error: connect ECONNREFUSED" >&2\nexit 1\n');
   const leftAt=Date.now();
-  await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: not logged in/);
+  await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: connect ECONNREFUSED/);
   assert.ok(Date.now()-leftAt<5000,'an exit answers promptly');
 
   // Hermes Agent over ACP, end to end: the session gets Worldlet's MCP server, the fixture Agent starts it and calls a
