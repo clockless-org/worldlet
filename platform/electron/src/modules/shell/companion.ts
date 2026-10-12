@@ -56,9 +56,11 @@ export class DesktopCompanion implements DesktopCompanionService {
  private inFront:()=>boolean;
  /** Checks and background launches never move Fox on their own: their windows rarely hold the foreground. */
  private follows:boolean;
+ /** Mac: give the foreground back to the app the person was using. */
+ private hideApp:()=>void;
  constructor(host:Host,entry?:CompanionTray|null,{quit=()=>app.quit(),unfinished=()=>onboardingUnfinished(host.store.state.onboarding),
-  inFront=()=>BaseWindow.getFocusedWindow()!==null,follows=personalLaunch(host)}:{quit?:()=>void,unfinished?:()=>boolean,inFront?:()=>boolean,follows?:boolean}={}){
-  this.host=host;this.quit=quit;this.unfinished=unfinished;this.inFront=inFront;this.follows=follows;
+  inFront=()=>BaseWindow.getFocusedWindow()!==null,follows=personalLaunch(host),hideApp=()=>{if(process.platform==='darwin')app.hide();}}:{quit?:()=>void,unfinished?:()=>boolean,inFront?:()=>boolean,follows?:boolean,hideApp?:()=>void}={}){
+  this.host=host;this.quit=quit;this.unfinished=unfinished;this.inFront=inFront;this.follows=follows;this.hideApp=hideApp;
   this.entry=entry===undefined?companionEntry(host,{back:()=>{this.reattach();},quit:()=>app.quit()}):entry;
  }
  get isDesktop(){return this.desktop;}
@@ -67,7 +69,12 @@ export class DesktopCompanion implements DesktopCompanionService {
  beforeDetach(listener:()=>void){this.listeners.push(listener);}
  onPresentation(listener:(desktop:boolean)=>void){this.presentation.push(listener);}
  keepInWorld(check:()=>boolean){this.holds.push(check);}
- panelBounds(){return this.desktop&&this.panel&&!this.panel.isDestroyed()?this.panel.getBounds():null;}
+ /** Where Fox's cluster is on screen: the window itself spans the whole World view. */
+ panelBounds(){
+  if(!this.desktop||!this.panel||this.panel.isDestroyed())return null;
+  const {x,y}=this.panel.getBounds();
+  return {x:x+this.crop.x,y:y+this.crop.y,width:this.crop.width,height:this.crop.height};
+ }
  backdropImage(){return this.desktop?this.backdropFrame:null;}
  private presented(desktop:boolean){for(const listener of this.presentation)try{listener(desktop);}catch(error){this.host.diagnostics.record(error,'desktopCompanion');}}
  /** The World window exists only after modules install; attach once it loaded. */
@@ -157,8 +164,10 @@ export class DesktopCompanion implements DesktopCompanionService {
   for(const listener of this.listeners)try{listener();}catch(error){this.host.diagnostics.record(error,'desktopCompanion');}
   const panel=this.panel&&!this.panel.isDestroyed()?this.panel:this.makePanel(world);
   this.panel=panel;this.desktop=true;this.hidden=false;
-  const crop=this.crop;
-  panel.setBounds({x:Math.round(frame.x+crop.x),y:Math.round(frame.y+crop.y),width:crop.width,height:crop.height});
+  // The window covers the whole World view and never resizes (owner Order 2026-10-12: a window that moved and resized
+  // with Fox's bar and card shook Fox). It lets the pointer through everywhere but over Fox's cluster (pointer()).
+  panel.setBounds({x:Math.round(frame.x),y:Math.round(frame.y),width:this.viewport.width,height:this.viewport.height});
+  panel.setIgnoreMouseEvents(true,{forward:true});
   world.contentView.removeChildView(view);
   if(image){
    const backdrop=this.backdrop??new ImageView();this.backdrop=backdrop;
@@ -168,7 +177,7 @@ export class DesktopCompanion implements DesktopCompanionService {
    world.contentView.addChildView(backdrop);
   }
   view.setBackgroundColor('#00000000');
-  view.setBounds({x:-crop.x,y:-crop.y,width:this.viewport.width,height:this.viewport.height});
+  view.setBounds({x:0,y:0,width:this.viewport.width,height:this.viewport.height});
   panel.contentView.addChildView(view);
   await this.host.page.call('worldletDesktopCompanion',true);
   if(!this.desktop||this.generation!==generation||world.isDestroyed()||panel.isDestroyed())return;
@@ -231,17 +240,17 @@ export class DesktopCompanion implements DesktopCompanionService {
   if(x<0||y<0||width<=0||height<=0||x+width>this.viewport.width+1||y+height>this.viewport.height+1)return null;
   return {x:Math.round(x),y:Math.round(y),width:Math.max(1,Math.round(width)),height:Math.max(1,Math.round(height))};
  }
+ /** The page reports where Fox's cluster is; the window stays put and only remembers it (panelBounds). */
  setBounds(value:unknown){
-  const view=this.host.worldView(),panel=this.panel;
-  if(!this.desktop||!panel||!view)return;
+  if(!this.desktop||!this.panel)return;
   const next=this.validCrop(value);
-  if(!next||next.x===this.crop.x&&next.y===this.crop.y&&next.width===this.crop.width&&next.height===this.crop.height)return;
-  // Only the native crop moves; the page stays fixed in screen coordinates.
-  const bounds=panel.getBounds();
-  const origin={x:bounds.x+next.x-this.crop.x,y:bounds.y+next.y-this.crop.y};
-  this.crop=next;
-  panel.setBounds({...origin,width:next.width,height:next.height});
-  view.setBounds({x:-next.x,y:-next.y,width:this.viewport.width,height:this.viewport.height});
+  if(next)this.crop=next;
+ }
+ /** The page says whether the pointer is over Fox's cluster: only there does the window take clicks. */
+ pointer(over:boolean){
+  const panel=this.panel;
+  if(!this.desktop||!panel||panel.isDestroyed())return;
+  panel.setIgnoreMouseEvents(!over,{forward:true});
  }
  /** The page reports press and release; the window follows the screen cursor in between. */
  beginDrag(){
@@ -256,15 +265,17 @@ export class DesktopCompanion implements DesktopCompanionService {
  }
  endDrag(){if(this.drag)clearInterval(this.drag);this.drag=null;}
  /** Fox's hide button (owner Order 2026-10-12): Fox leaves the desktop but the World does not come forward. Fox stays
-  * away until the person opens the World again (its window, the Dock or the tray); leaving the World after that
-  * brings Fox out as before. */
+  * away until the person opens the World again (the Dock, the tray or launching Worldlet); leaving the World after
+  * that brings Fox out as before. */
  hide(){
-  const panel=this.panel;
+  const panel=this.panel,world=this.host.window();
   if(!this.desktop||!panel||panel.isDestroyed())return;
-  this.endDrag();panel.hide();this.hidden=true;
-  // Without a visible World window the tray (Windows) is the way back; the Dock is on Mac.
-  const world=this.host.window();
-  if(!world||world.isDestroyed()||!world.isVisible())this.entry?.show();
+  this.endDrag();this.hidden=true;
+  // The whole of Worldlet steps aside (owner Order 2026-10-12): hiding only Fox let the World window take the
+  // foreground. The Dock (Mac) or the tray (Windows) is the way back.
+  if(world&&!world.isDestroyed()&&world.isVisible())world.hide();
+  panel.hide();this.entry?.show();
+  this.hideApp();
  }
  stop(){this.cancelInactive();this.detaching=false;this.generation+=1;this.endDrag();this.entry?.hide();}
  private makePanel(world:BaseWindow){

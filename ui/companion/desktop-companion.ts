@@ -48,6 +48,16 @@ export function installDesktopCompanion(){
   return {x,y,width:Math.min(innerWidth,Math.ceil(Math.max(...rects.map(r=>r.right))+16))-x,height:Math.min(innerHeight,Math.ceil(Math.max(...rects.map(r=>r.bottom))+16))-y};
  };
  (window as any).worldletCompanionGeometry=capture;
+ // The desktop window covers the whole World view and lets the pointer through except over Fox's cluster
+ // (modules/shell/companion.ts pointer); while it lets it through, the window still hears the pointer move.
+ let over:boolean|null=null;
+ const PORTABLE='.companion-pet,.companion-dialogue,.companion-text-entry,.desktop-companion-setup,dialog[open]';
+ const point=(next:boolean)=>{if(!isDesktopCompanion()||next===over)return;over=next;void callHost('desktopCompanionPointer',{over:next}).catch(()=>{over=null;});};
+ document.addEventListener('mousemove',event=>{
+  const target=event.target as Element|null;
+  point(document.documentElement.classList.contains('is-dragging-fox')||!!document.querySelector('.is-dragging-fox')||!!target?.closest?.(PORTABLE));
+ },{capture:true,passive:true});
+ document.documentElement.addEventListener('mouseleave',()=>{if(!document.querySelector('.is-dragging-fox'))point(false);});
  let lastBounds='',frame=0;
  const resize=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{
   if(!isDesktopCompanion())return;
@@ -67,7 +77,7 @@ export function installDesktopCompanion(){
   if(enabled)document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach(dialog=>dialog.close());
   document.documentElement.classList.toggle('desktop-companion',enabled);
   window.dispatchEvent(new CustomEvent('worldlet:desktop-companion',{detail:enabled}));
-  window.dispatchEvent(new Event('resize'));lastBounds='';resize();
+  window.dispatchEvent(new Event('resize'));lastBounds='';over=null;resize();
   if(!enabled)document.documentElement.style.removeProperty('--companion-desktop-transform');
   const hud=document.querySelector('#notionHUD');if(hud){observer.observe(hud);for(const element of hud.querySelectorAll('.companion-dialogue,#notionCommand'))observer.observe(element);}
  };

@@ -102,6 +102,12 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal((await form.boundingBox()).width,300,'Pointing at desktop Fox opens the bar');
   assert.deepEqual(await page.evaluate(()=>(window as any).worldletCompanionGeometry()),rest,'The native crop already fits the open bar');
   assert.equal(await sizes(),before,'Pointing at Fox does not resize the desktop window');
+  // The desktop window takes the pointer only over Fox's cluster and lets it through everywhere else.
+  const pointer=()=>page.evaluate(()=>(window as any).calls.filter(c=>c.action==='desktopCompanionPointer').map(c=>c.over).at(-1));
+  assert.equal(await pointer(),true,'Over Fox the desktop window takes the pointer');
+  await page.mouse.move(5,5);await page.waitForTimeout(100);
+  assert.equal(await pointer(),false,'Away from Fox the pointer goes through to the apps behind');
+  await fox.hover();await page.waitForTimeout(400);await settle();
   // Fox's hide button shows at Fox's shoulder while the pointer is on Fox and puts Fox away.
   const hide=page.locator('.companion-hide-button');
   assert(await hide.isVisible(),'The hide button is there on the desktop');
