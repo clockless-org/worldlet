@@ -341,6 +341,17 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
     script(path.join(bin,'claude'),`echo try >> "${tries}"\n${busy}`);
     await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi',_background:true},agentHome),/overloaded_error/);
     assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,1+BUSY_RETRIES.length,'a model that stays busy is tried a bounded number of times');
+    // Busy after it began answering: a conversation turn is not run twice under the person's eyes; background work, a
+    // bounded pass no one watches, runs again (Mac Alpha 4320's Gmail analysis turned busy mid-pass, #429).
+    const partial=path.join(scratch,'busy-partial.jsonl');
+    fs.writeFileSync(partial,JSON.stringify({type:'stream_event',event:{type:'content_block_delta',delta:{type:'text_delta',text:'Reading '}}})+'\n');
+    script(path.join(bin,'claude'),`echo try >> "${tries}"\ncat > "$PWD/stdin.txt"\nif [ "$(wc -l < "${tries}")" -lt 2 ]; then\ncat "${partial}"\n${busy}fi\ncat "${fixture}"\n`);
+    fs.rmSync(tries,{force:true});
+    await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome,async()=>null),/overloaded_error/);
+    assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,1,'a conversation turn that began answering is not run again');
+    fs.rmSync(tries,{force:true});
+    assert.equal((await new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi',_background:true},agentHome,async()=>null)).message,'Hello from Claude Code');
+    assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'background work runs again after turning busy mid-pass');
    }finally{BUSY_RETRIES.splice(0,BUSY_RETRIES.length,...waits);}
   }
   // Cancellation stops the process.

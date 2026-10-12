@@ -25,7 +25,7 @@ import {runSendCommand} from './harness-send.ts';
 import {signInOnce} from './provider-sign-in.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
-/** A turn the provider turned away before it said or did anything because its model was busy for everyone. */
+/** A turn the provider turned away because its model was busy for everyone, and that can run again as it is. */
 class ModelBusy extends WorldletError {}
 /** Waits before each new try of a turn whose model was busy: a busy model is usually free again within seconds
  * (Mac Alpha 4312's onboarding mail conversation failed on Codex's "Selected model is at capacity", #416). */
@@ -453,8 +453,10 @@ export class LocalHarnessRuntime implements AgentRuntime {
    if('error' in outcome){
     // Claude Code's sign-in ran out: its own sign-in page opens in the browser by itself, once per launch.
     if(outcome.error===CLAUDE_CODE_SIGN_IN_EXPIRED)signInOnce(this.install,harnessEnvironment(this.install,this.environment));
-    // Nothing shown and no World tool called yet: the same turn can simply run again.
-    if(!started&&calls===0&&modelAtCapacity(outcome.error))throw new ModelBusy(outcome.error);
+    // Nothing shown and no World tool called yet, the same turn can simply run again. Background work (an Applet's
+    // analysis, the Attention check) is a bounded pass that reads, then saves items by their IDs, with no one watching:
+    // it runs again also when the model turned busy mid-pass, after its reads (Mac Alpha 4320, #429).
+    if((body._background===true||(!started&&calls===0))&&modelAtCapacity(outcome.error))throw new ModelBusy(outcome.error);
     throw new WorldletError(outcome.error);
    }
    if(!started&&outcome.message)await say(outcome.message);
