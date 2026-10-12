@@ -386,6 +386,31 @@ final class AppModel {
         }
     }
 
+    /// A line with photos or files attached with "+" (owner request 2026-10-12): each attachment goes in parts first, then
+    /// the line that names them, in the main conversation, an item's card or an Applet's page. The computer saves the
+    /// files and Fox's Agent reads them there.
+    func send(_ text: String, attachments: [PhoneAttachment], item: AttentionItem? = nil, applet: PhoneApplet? = nil) {
+        let text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let shown = ([text] + attachments.map { "📎 " + $0.name }).filter { !$0.isEmpty }.joined(separator: "\n")
+        guard !shown.isEmpty else { return }
+        guard let session else { if Demo.enabled { demoReply(to: shown) }; return }
+        let id = UUID().uuidString
+        if let item { itemPending[item.id] = shown }
+        else if let applet { appletPending[applet.key] = shown }
+        else { pending.append(Turn(id: id, role: .user, text: shown, at: ISO8601DateFormatter().string(from: Date()))) }
+        Task {
+            do {
+                for attachment in attachments {
+                    for part in attachment.messages(id: { UUID().uuidString }) { try await session.send(part) }
+                }
+                try await session.send(.attach(id: id, text: text, files: attachments.map(\.file), item: item?.id, applet: applet?.key))
+            } catch {
+                if let item { itemPending[item.id] = nil } else if let applet { appletPending[applet.key] = nil } else { pending.removeAll { $0.id == id } }
+                self.error = error.localizedDescription
+            }
+        }
+    }
+
     /// A line said with an item's card open, or the option Fox offers there (`option` true): it joins that item's
     /// conversation on the computer, which opens the same card.
     func say(_ text: String, about item: AttentionItem, option: Bool = false) {

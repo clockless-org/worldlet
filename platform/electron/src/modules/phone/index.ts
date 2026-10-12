@@ -1,4 +1,6 @@
+import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,FOX,ORDER,PHONE,VAULT,WIDGETS,type AgentService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
@@ -38,6 +40,7 @@ export function installPhone(host:Host){
  const reportPaired=(push?:{platform:string}|null)=>{if(pairedReport)clearTimeout(pairedReport);pairedReport=null;usage('phone_paired',{phone_platform:phonePlatform(push)});};
  const asked=new Map<string,{item?:string,applet?:string,at:number}>();
  const askedKey=(text:unknown)=>typeof text==='string'?text.trim().slice(0,PHONE_LIMITS.field):'';
+ const attachments=phoneAttachments(()=>path.join(app.getPath('userData'),'Phone files'));
  const relay=createPhoneRelay({
   fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (phone pairing)`,
   relay:process.env.WORLDLET_PAIR_RELAY||undefined,
@@ -53,6 +56,14 @@ export function installPhone(host:Host){
    // An Order from the phone goes out as the computer's own (the page sends it and Fox says how it went); one this
    // computer cannot send now (another channel, no Claude Code or enrolment) is dropped without a word.
    if(message.type==='order'&&!await orderReady())return true;
+   // A photo or file attached on the phone arrives in parts before its line; the whole file is saved on this computer.
+   if(message.type==='file'){lastActive=Date.now();attachments.add(message);return true;}
+   if(message.type==='chat'&&message.files?.length){
+    // The line carries the saved files' paths, one a line, for Fox's Agent to read here (as "+" on the computer does).
+    const paths=message.files.map(file=>attachments.path(file)).filter((p):p is string=>!!p);
+    message={type:'chat',id:message.id,text:[message.text,...paths].filter(Boolean).join('\n'),...message.item?{item:message.item}:message.applet?{applet:message.applet}:{}};
+    if(!message.text)return true;
+   }
    if(!host.page.ready())return false;
    lastActive=Date.now();
    const taken=(await host.page.call<boolean>('worldletPhoneMessage',message,key))===true;
@@ -214,4 +225,30 @@ export function installPhone(host:Host){
  });
  host.onPageLoaded(()=>{for(const link of links)link.schedule(1000);});
  host.onQuit(()=>{stopped=true;if(pairedReport)reportPaired(relay.status().push);clearInterval(watch);remoteHost.stop();for(const link of links)link.stop();});
+}
+
+// Photos and files attached on the phone (core/phone PhoneMessage `file`): parts are held until the file is whole, then
+// saved under Phone files/<date>/ with a name no earlier file has; a line's `files` read back the saved paths. Parts of a
+// file that never completes are dropped after an hour.
+function phoneAttachments(folder:()=>string){
+ const pending=new Map<string,{parts:string[],count:number,name:string,at:number}>(),saved=new Map<string,string>();
+ const save=(name:string,data:Buffer)=>{
+  const dir=path.join(folder(),new Date().toISOString().slice(0,10));fs.mkdirSync(dir,{recursive:true});
+  const ext=path.extname(name),base=path.basename(name,ext)||'Attachment';
+  for(let n=1;;n++){const file=path.join(dir,n===1?base+ext:`${base} ${n}${ext}`);try{fs.writeFileSync(file,data,{flag:'wx'});return file;}catch(e){if((e as NodeJS.ErrnoException).code!=='EEXIST')throw e;}}
+ };
+ return {
+  add(message:{file:string,part:number,parts:number,name:string,data:string}){
+   const now=Date.now();for(const [id,p] of pending)if(now-p.at>3600_000)pending.delete(id);
+   if(saved.has(message.file))return;
+   const entry=pending.get(message.file)??{parts:new Array(message.parts).fill(''),count:0,name:message.name,at:now};
+   if(entry.parts.length!==message.parts||entry.parts[message.part])return;
+   entry.parts[message.part]=message.data;entry.count++;pending.set(message.file,entry);
+   if(entry.count<entry.parts.length)return;
+   pending.delete(message.file);
+   try{saved.set(message.file,save(entry.name,Buffer.from(entry.parts.join(''),'base64')));}catch{}
+   while(saved.size>200)saved.delete(saved.keys().next().value!);
+  },
+  path:(file:string)=>saved.get(file)??null,
+ };
 }

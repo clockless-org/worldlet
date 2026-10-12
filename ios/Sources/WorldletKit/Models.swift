@@ -501,8 +501,14 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
     case web(id: String, applet: String, records: [WebReport])
     /// The person's answer to the approval riding on the live turn (core/phone PhoneMessage `approval`).
     case approval(id: String, approval: String, choice: HarnessApproval.Choice)
+    /// One part of a photo or file attached with "+" (owner request 2026-10-12; core/phone PhoneMessage `file`): `data`
+    /// is a slice of the whole file's base64, sent before the line that names the file.
+    case file(id: String, file: String, part: Int, parts: Int, name: String, mime: String, data: String)
+    /// A line with attached files (each sent before as `file` parts), said in the main conversation, an item's card
+    /// (`item`) or an Applet's page (`applet`).
+    case attach(id: String, text: String, files: [String], item: String?, applet: String?)
 
-    private enum Keys: String, CodingKey { case type, id, text, item, applet, action, provider, widget, state, said, records, approval, choice }
+    private enum Keys: String, CodingKey { case type, id, text, item, applet, action, provider, widget, state, said, records, approval, choice, file, part, parts, name, mime, data, files }
 
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: Keys.self)
@@ -557,6 +563,21 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
             try c.encode(id, forKey: .id)
             try c.encode(approval, forKey: .approval)
             try c.encode(choice, forKey: .choice)
+        case let .file(id, file, part, parts, name, mime, data):
+            try c.encode("file", forKey: .type)
+            try c.encode(id, forKey: .id)
+            try c.encode(file, forKey: .file)
+            try c.encode(part, forKey: .part)
+            try c.encode(parts, forKey: .parts)
+            try c.encode(name, forKey: .name)
+            try c.encode(mime, forKey: .mime)
+            try c.encode(data, forKey: .data)
+        case let .attach(id, text, files, item, applet):
+            try c.encode("chat", forKey: .type)
+            try c.encode(id, forKey: .id)
+            try c.encode(text, forKey: .text)
+            try c.encode(files, forKey: .files)
+            if let item { try c.encode(item, forKey: .item) } else if let applet { try c.encode(applet, forKey: .applet) }
         }
     }
 }
@@ -957,4 +978,33 @@ public func mergeWidgetState(_ state: WidgetState, _ incoming: WidgetState) -> (
         changed = true
     }
     return (cleanWidgetState(merged), changed)
+}
+
+/// A photo or file attached with "+": split into `file` messages that each fit a sealed box (core/phone PHONE_LIMITS
+/// `filePart`, base64 characters), sent before the line that names `file`.
+public struct PhoneAttachment: Sendable, Equatable {
+    public static let partSize = 150_000
+    public static let maxBytes = 1_500_000
+    public static let maxCount = 3
+    public let file: String
+    public let name: String
+    public let mime: String
+    public let data: Data
+
+    public init(name: String, mime: String, data: Data, file: String = UUID().uuidString.replacingOccurrences(of: "-", with: "")) {
+        self.file = file
+        self.name = name
+        self.mime = mime
+        self.data = data
+    }
+
+    public func messages(id: () -> String) -> [PhoneMessage] {
+        let encoded = data.base64EncodedString()
+        let chars = Array(encoded.utf8)
+        let parts = max(1, (chars.count + Self.partSize - 1) / Self.partSize)
+        return (0..<parts).map { part in
+            let slice = chars[(part * Self.partSize)..<min(chars.count, (part + 1) * Self.partSize)]
+            return .file(id: id(), file: file, part: part, parts: parts, name: name, mime: mime, data: String(decoding: slice, as: UTF8.self))
+        }
+    }
 }

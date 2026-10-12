@@ -1,4 +1,6 @@
+import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 import WorldletKit
 
 /// Fox stays at the bottom, as on the computer, beside one input bar (owner request 2026-10-04): the bar runs the width of
@@ -43,6 +45,12 @@ struct FoxDock: View {
     /// A short line above the Order button after it was used: sent, or nothing heard.
     @State private var orderHint: String?
     @FocusState private var focused: Bool
+    /// Photos and files attached with "+", sent with the next line (owner request 2026-10-12).
+    @State private var attachments: [PhoneAttachment] = []
+    @State private var photoItems: [PhotosPickerItem] = []
+    @State private var pickingPhotos = false
+    @State private var pickingFiles = false
+    @State private var attachProblem: String?
 
     enum Recording { case idle, holding, locked }
 
@@ -66,6 +74,7 @@ struct FoxDock: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .bottom)))
             }
             if let place { AppletPill(applet: place, leave: leaveApplet).transition(.opacity.combined(with: .move(edge: .bottom))) }
+            if !attachments.isEmpty { attachmentChips.transition(.opacity.combined(with: .move(edge: .bottom))) }
             bar
         }
         .padding(.horizontal, 16)
@@ -93,6 +102,21 @@ struct FoxDock: View {
             case "locked": recording = .locked
             default: break
             }
+        }
+        .photosPicker(isPresented: $pickingPhotos, selection: $photoItems, maxSelectionCount: PhoneAttachment.maxCount, matching: .images)
+        .onChange(of: photoItems) { _, items in
+            guard !items.isEmpty else { return }
+            photoItems = []
+            Task { for item in items { await attachPhoto(item) } }
+        }
+        .fileImporter(isPresented: $pickingFiles, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
+            if case let .success(urls) = result { for url in urls { attachFile(url) } }
+        }
+        .animation(.snappy, value: attachments)
+        .alert("Can't attach", isPresented: Binding(get: { attachProblem != nil }, set: { if !$0 { attachProblem = nil } })) {
+            Button("OK", role: .cancel) { attachProblem = nil }
+        } message: {
+            Text(attachProblem ?? "")
         }
         .alert("Voice is off", isPresented: voiceProblem) {
             Button("OK", role: .cancel) { voice.dismissProblem() }
@@ -272,7 +296,7 @@ struct FoxDock: View {
 
     /// Sends the line typed, or the locked recording.
     private var sendButton: some View {
-        let ready = recording == .locked || (recording == .idle && !draftEmpty)
+        let ready = recording == .locked || (recording == .idle && (!draftEmpty || !attachments.isEmpty))
         // The theme's light circle, dimmed until there is something to send, as in Claude's (owner 2026-10-12).
         return Button { recording == .locked ? finish() : send() } label: {
             Image(systemName: "arrow.up")
@@ -304,11 +328,11 @@ struct FoxDock: View {
         .accessibilityIdentifier("foxCancelVoice")
     }
 
-    /// "+" at the bar's far left, as in Claude's (owner request 2026-10-12): Talk with Fox and Settings.
+    /// "+" at the bar's far left, as in Claude's (owner request 2026-10-12): attach photos or files to the next line.
     private var plusButton: some View {
         Menu {
-            Button(talk.on ? "End Talk" : "Talk with \(model.conversation.name)", systemImage: talk.on ? "stop.circle" : "waveform") { toggleTalk() }
-            Button("Settings", systemImage: "gearshape") { openPanel() }
+            Button("Photos", systemImage: "photo.on.rectangle") { pickingPhotos = true }
+            Button("Files", systemImage: "doc") { pickingFiles = true }
         } label: {
             Image(systemName: "plus")
                 .font(.system(size: 17, weight: .semibold))
@@ -319,8 +343,58 @@ struct FoxDock: View {
         }
         .buttonStyle(.plain)
         .disabled(recording != .idle || ordering)
-        .accessibilityLabel("Add")
+        .accessibilityLabel("Attach")
         .accessibilityIdentifier("foxPlus")
+    }
+
+    /// What is attached, above the bar: each a small chip with its name and ✕.
+    private var attachmentChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(attachments, id: \.file) { attachment in
+                    HStack(spacing: 6) {
+                        Image(systemName: attachment.mime.hasPrefix("image/") ? "photo" : "doc")
+                        Text(attachment.name).lineLimit(1).truncationMode(.middle).frame(maxWidth: 140)
+                        Button { attachments.removeAll { $0.file == attachment.file } } label: {
+                            Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Remove \(attachment.name)")
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .liquidGlass(Capsule(), interactive: false)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityIdentifier("foxAttachments")
+    }
+
+    /// A photo is made smaller before it goes (at most 1600 points on its long side, JPEG), so it fits the relay.
+    private func attachPhoto(_ item: PhotosPickerItem) async {
+        guard attachments.count < PhoneAttachment.maxCount else { attachProblem = "Up to \(PhoneAttachment.maxCount) at a time."; return }
+        guard let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) else { attachProblem = "That photo could not be read."; return }
+        let scale = min(1, 1600 / max(image.size.width, image.size.height))
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let small = UIGraphicsImageRenderer(size: size, format: format).image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
+        guard let jpeg = small.jpegData(compressionQuality: 0.7), jpeg.count <= PhoneAttachment.maxBytes else { attachProblem = "That photo is too large to send."; return }
+        let number = attachments.filter { $0.mime == "image/jpeg" }.count + 1
+        attachments.append(PhoneAttachment(name: "Photo \(number).jpg", mime: "image/jpeg", data: jpeg))
+    }
+
+    private func attachFile(_ url: URL) {
+        guard attachments.count < PhoneAttachment.maxCount else { attachProblem = "Up to \(PhoneAttachment.maxCount) at a time."; return }
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url) else { attachProblem = "\(url.lastPathComponent) could not be read."; return }
+        guard data.count <= PhoneAttachment.maxBytes else { attachProblem = "\(url.lastPathComponent) is too large to send (1.5 MB at most)."; return }
+        let mime = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType ?? "application/octet-stream"
+        attachments.append(PhoneAttachment(name: url.lastPathComponent, mime: mime, data: data))
     }
 
     /// Stops a tapped recording and puts its words into the line to read or change before sending, as Claude's Stop.
@@ -559,6 +633,13 @@ struct FoxDock: View {
     }
 
     private func send() {
+        if !attachments.isEmpty {
+            model.send(draft, attachments: attachments, item: item, applet: place)
+            attachments = []
+            draft = ""
+            focused = false
+            return
+        }
         guard !draftEmpty else { return }
         say(draft)
         draft = ""
