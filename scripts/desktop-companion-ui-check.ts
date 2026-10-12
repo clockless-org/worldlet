@@ -46,7 +46,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.locator('.companion-text-entry').getAttribute('data-quiet'),'true','The bar rests quiet');
  await form.hover();await page.waitForTimeout(400);
  assert.deepEqual(await form.locator('button').evaluateAll(b=>b.filter(e=>(e as HTMLElement).offsetParent).map(e=>e.id||e.className)),[],'No Send while there is nothing to send; the microphone stands inside the bar\'s right end');assert(await mic.isVisible());
- assert.equal((await form.boundingBox()).width,168,'The resting bar is small, the microphone inside it (two sizes, owner Orders 2026-10-08 and 2026-10-11)');assert.match(await type.getAttribute('placeholder'),/Click to type · hold to speak/);
+ assert.equal((await form.boundingBox()).width,300,'Pointed at, the bar opens to its typing size, the microphone inside it (owner Orders 2026-10-08, 2026-10-11 and 2026-10-12)');assert.match(await type.getAttribute('placeholder'),/Click to type · hold to speak/);
  assert.match(await form.evaluate(e=>getComputedStyle(e).backdropFilter),/blur/,'The bar is frosted');
  await openCompanionPanel(page);assert(await panel.isVisible(),'The settings button opens the companion panel');assert(!await typing(),'Opening the panel does not start typing');
  await page.keyboard.press('Escape');assert.equal(await panel.isVisible(),false);
@@ -68,6 +68,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await controls.count(),0,'No button stands beside the bar on the desktop');
  assert.equal(await page.getByRole('button',{name:'Back to World',exact:true}).count(),0,'No return button: right-click Fox, the Dock or the tray goes back');
  sameLine(await form.boundingBox(),originalBar,'The bar keeps its center and bottom edge on the desktop');
+ await page.mouse.move(5,5);await page.waitForTimeout(400);
  assert.equal((await form.boundingBox()).width,168,'The desktop bar is the World\'s, the microphone inside it (owner request 2026-10-11)');
  async function assertDesktopRow(){
   const bar=await form.boundingBox(),pet=await fox.boundingBox(),micBox=await mic.boundingBox();
@@ -82,7 +83,7 @@ await withBrowser(fileAccess,async browser=>{
   assert(crop.x<=bar.x&&crop.x+crop.width>=bar.x+bar.width,'Native crop contains the bar');
  }
  await assertDesktopRow();
- await form.hover();assert.equal(await type.getAttribute('placeholder'),'Message Fox','The short desktop bar says only Message Fox, even when pointed at');
+ await form.hover();assert.equal(await type.getAttribute('placeholder'),'Message Fox','The desktop bar says only Message Fox, even when pointed at');
  // The first close after setup says once why Fox stayed and how to go back or quit (no platform here: no Dock or tray named).
  await page.getByText('I’ll keep working here in the background. Right-click me to go',{exact:false}).waitFor();
  assert.equal(await page.evaluate(()=>localStorage.getItem('worldlet.companion.desktop-hint')),'1','The desktop hint is remembered for this installation');
@@ -161,7 +162,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>{(window as any).worldletDesktopCompanion(false);(window as any).orderReady=true;window.dispatchEvent(new Event('worldlet:app-update'));});
  await order.waitFor();await settle();
  {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();assert(bug.width===36&&bug.x>=bar.x&&bug.x-bar.x<=6&&bug.x+bug.width<micBox.x,'In the World the bug sits inside the bar at its left end '+JSON.stringify({bug,micBox,bar}));}
- await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();
+ await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await page.mouse.move(5,5);await page.waitForTimeout(400);await settle();
  {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();
   assert.equal(await order.evaluate(e=>e.parentElement===document.querySelector('.companion-speech-button').parentElement),true,'The bug and the microphone are one group on the desktop');
   assert(bug.width===36&&bug.x>=bar.x&&bug.x-bar.x<=6&&bar.x+bar.width-(micBox.x+micBox.width)<=6&&Math.abs(bug.y-micBox.y)<1,'The bug sits inside the bar at its left end, the microphone at its right '+JSON.stringify({bug,micBox,bar}));
