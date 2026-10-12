@@ -64,3 +64,4 @@
 .applet-scene .meetings-open-sheet>h2{font:600 clamp(18px,4.6cqi,var(--scene-title-size))/1.15 var(--scene-display-font);padding-bottom:6px;border-bottom:1px solid var(--scene-line)}
 .applet-scene .meetings-open-sheet h3{color:var(--scene-muted)}
 .applet-scene .meetings-call{background:color-mix(in srgb,var(--scene-control) 70%,transparent);border-color:var(--scene-line)}
+.applet-scene .scene-item-glyph{display:block;width:32px;height:32px}.applet-scene .scene-item-glyph svg{display:block;width:100%;height:100%}
