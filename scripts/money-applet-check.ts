@@ -22,9 +22,9 @@ await withBrowser(fileAccess,async browser=>{
  for(const key of ['stripe','paypal']){
   await page.evaluate(k=>location.hash='object=app-'+k,key);
   // Every record shows at once (#2048): the item area scrolls instead of paging.
-  await page.waitForFunction(count=>document.querySelectorAll('.pixi-stage-item').length===count,key==='stripe'?6:5);
+  await page.waitForFunction(count=>document.querySelectorAll('.scene-item').length===count,key==='stripe'?6:5);
   await page.screenshot({path:'/tmp/worldlet-'+key+'-open.png'});
-  await page.locator('.pixi-stage-item').first().click();await page.locator('.app-source-body').waitFor();
+  await page.locator('.scene-item').first().click();await page.locator('.app-source-body').waitFor();
   await page.waitForFunction(k=>document.querySelector('.app-source-body')?.textContent.includes(k==='stripe'?'$123.45':'12.34 USD'),key);
   if(key==='stripe')assert.match(await page.locator('.app-source-body').innerText(),/Unavailable — incomplete read/);
   await page.locator('.pixi-selected-item').waitFor();

@@ -1,6 +1,6 @@
 import {renderHomeOpen,type HomeOpenState} from '../applets/index.ts';
 import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../core/applets/index.ts';
-import {renderMailOpen,renderMeetingsOpen,renderSceneList,mountAppletScene,type AppletScene} from '../applets/index.ts';
+import {renderMailOpen,renderMeetingsOpen,renderSceneList,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
 import {weatherGlyph} from './environment/weather-forecast.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {calendarDay} from './applet-content.ts';
@@ -9,10 +9,10 @@ export function createAppletStage(host,onPick){
  const panel=document.createElement('section');panel.className='pixi-applet-stage';panel.hidden=true;panel.setAttribute('aria-label','Thing contents');host.append(panel);
  const focus=document.createElement('aside');focus.className='pixi-selected-item';focus.hidden=true;host.append(focus);
  const mailNav=document.createElement('nav');mailNav.className='mail-reader-switch';mailNav.setAttribute('aria-label','Browse emails');mailNav.hidden=true;host.append(mailNav);
- // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail, Calendar, Notes,
- // Reminders, Messages, Voice Memos, Meetings and Weather so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; the others' items
- // open in the shared reader.
- const SCENE_APPLETS=new Set(['gmail','google-calendar','apple-notes','apple-reminders','messages','voice-memos','meetings','weather']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
+ // An Applet the active theme paints a scene for, its own or its family's (ui/applets/scene/scene-family.ts), draws
+ // through the shared scene renderer: switching themes changes which pictures there are, never this code. Mail's scene
+ // stays while a letter is read, so its reader sits on the same painted paper; the others' items open in the shared reader.
+ const SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;
@@ -31,7 +31,7 @@ export function createAppletStage(host,onPick){
   const f=JSON.stringify([room.key,selected,allItems.map(i=>i.id)]);if(f!==focusSignature){focusSignature=f;focus.replaceChildren();mailNav.replaceChildren();if(selected){const label=document.createElement('small');label.textContent=selected.curated?'Fox summary':'Selected item';const title=document.createElement('strong');title.textContent=selected.title;const context=document.createElement('p');context.textContent=[selected.when,selected.context].filter(Boolean).join(' · ');focus.append(label,title,context);
    const at=allItems.findIndex(i=>i.id===selected.id),nav=document.createElement('nav');nav.className='pixi-focus-switch';nav.setAttribute('aria-label','Browse selected items');
    for(const [text,step] of [['Previous item',-1],['Next item',1]] as const){const b=document.createElement('button');b.type='button';b.textContent=step<0?'‹':'›';b.setAttribute('aria-label',text);b.disabled=at<0||at+step<0||at+step>=allItems.length;b.hidden=b.disabled;b.onclick=e=>{e.stopPropagation();const next=allItems[at+step];if(next){selected=next;onPick({action:'applet-item',id:next.id});}};if(room.key==='gmail'){b.textContent=step<0?'◀':'▶';b.setAttribute('aria-label',step<0?'Previous email':'Next email');mailNav.append(b);}else nav.append(b);}if(room.key!=='gmail')focus.append(nav);}}
-  const sceneOpen=SCENE_APPLETS.has(room.key)&&(visible||focused&&SCENE_READERS.has(room.key));
+  const sceneOpen=!!room.key&&!!appletSceneKey(room.key)&&(visible||focused&&SCENE_READERS.has(room.key));
   if(scene&&(!sceneOpen||scene.element.dataset.applet!==room.key)){scene.destroy();scene=null;delete panel.dataset.scene;delete panel.dataset.reading;}
   if(sceneOpen&&!scene){panel.replaceChildren();scene=mountAppletScene(panel,room.key,{shell:(host.closest('#notionWorld') as HTMLElement|null)||host});panel.dataset.scene=room.key;signature='';}
   if(scene)data(panel,'reading',String(!visible));

@@ -7,7 +7,7 @@ export function renderSceneList(region:HTMLElement,room,items,value,pick:(item)=
  head.className='scene-head';title.className='scene-title';title.textContent=room.title;head.append(title);list.className='scene-list';
  region.replaceChildren(head,list);
  for(const item of items){
-  const button=document.createElement('button');button.type='button';button.className='scene-item';button.dataset.itemId=item.id;
+  const button=document.createElement('button');button.type='button';button.className='scene-item';button.dataset.itemId=item.id;button.dataset.state=item.state||'unseen';if(item.executionState)button.dataset.execution=item.executionState;button.dataset.curated=String(!!item.curated);
   const mark=document.createElement('i');mark.setAttribute('aria-hidden','true');
   if(glyph){mark.className='scene-item-glyph';mark.innerHTML=glyph(item);}
   else if(item.attention){mark.className='applet-attention scene-item-attention';mark.dataset.state=item.attention.state;mark.innerHTML=attentionIcon(item.attention.state,false,item.attention.priority);button.dataset.attention='true';}
@@ -16,5 +16,7 @@ export function renderSceneList(region:HTMLElement,room,items,value,pick:(item)=
   button.append(mark,text);button.onclick=()=>pick(item);list.append(button);
  }
  if(!items.length){const empty=document.createElement('p');empty.className='scene-empty';empty.textContent=value?.error||(value?.connected?(room.content?.empty||'Nothing needs your attention right now.'):room.connection?.kind==='local-cli'?'Reading '+room.title+'…':'Connect '+room.title+' with Fox.');region.append(empty);}
+ if(value?.scope){const scope=document.createElement('p');scope.className='scene-meta scene-scope';scope.textContent=value.scope;region.append(scope);}
+ if(value?.loadMore){const more=document.createElement('button');more.type='button';more.className='scene-button scene-more';more.textContent='Load more';more.onclick=value.loadMore;region.append(more);}
  return items;
 }

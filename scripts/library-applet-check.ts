@@ -31,11 +31,11 @@ await withBrowser(fileAccess,async browser=>{
   await page.locator('.pixi-applet-stage').waitFor();
   if(key==='obsidian')await page.getByRole('button',{name:'Choose vault',exact:true}).click();
   // Every page shows at once; more than the places scroll in the item area instead of paging (#2048).
-  await page.waitForFunction(()=>document.querySelectorAll('.pixi-stage-item').length===6);
+  await page.waitForFunction(()=>document.querySelectorAll('.scene-item').length===6);
   assert.equal(await page.locator('.pixi-open-pagination').count(),0,'no page arrows');
   assert.equal(await page.locator('#notionContent').isVisible(),false);
   await page.screenshot({path:path.join(os.tmpdir(),'library-'+key+'-open.png')});
-  await page.locator('.pixi-stage-item').first().click();
+  await page.locator('.scene-item').first().click();
   await page.getByText(key==='notion'?'Readable source content.':'Local Markdown source.',{exact:true}).waitFor();
   await page.locator('.pixi-selected-item').waitFor();
   // The Applet's immersive background paints its device, so the Pixi device is not duplicated.

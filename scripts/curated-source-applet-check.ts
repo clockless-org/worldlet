@@ -26,9 +26,9 @@ await withBrowser(fileAccess,async browser=>{
  await page.goto(worldUrl());
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length>0,undefined,{timeout:60000});
  await page.evaluate(()=>location.hash='object=app-'+window.testApplet);
- await page.waitForFunction(()=>document.querySelectorAll('.pixi-stage-item').length>0).catch(async e=>{console.log(applet,await page.evaluate(()=>({calls,hash:location.hash,text:document.body.innerText.slice(-2500)})));throw e;});
- assert.ok(await page.locator('.pixi-stage-item').first().innerText());
- await page.locator('.pixi-stage-item').first().click();
+ await page.waitForFunction(()=>document.querySelectorAll('.scene-item').length>0).catch(async e=>{console.log(applet,await page.evaluate(()=>({calls,hash:location.hash,text:document.body.innerText.slice(-2500)})));throw e;});
+ assert.ok(await page.locator('.scene-item').first().innerText());
+ await page.locator('.scene-item').first().click();
  await page.waitForFunction(()=>document.querySelector('.app-source-body')?.textContent.includes(testApplet==='google-sheets'?'42':'Full original description'));
  if(applet==='google-sheets'){assert.equal(await page.locator('td').last().innerText(),'42');assert.equal(await page.locator('.curated-source-table script').count(),0);}else assert.match(await page.locator('.app-source-body').innerText(),c.detailLine);
  if(c.web){
@@ -39,7 +39,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>{window.listCountBefore=calls.filter(c=>c.action==='curatedSourceContent'&&c.operation==='list').length;fixture.connections[0].contentRevision='0:2';fixture.revision++;window.worldletReceive(structuredClone(fixture));});
  await page.waitForFunction(()=>calls.filter(c=>c.action==='curatedSourceContent'&&c.operation==='list').length>listCountBefore);
  await page.evaluate(()=>{fixture.connections=[];fixture.revision++;window.worldletReceive(structuredClone(fixture));});
- await page.waitForFunction(()=>!document.querySelector('.app-source-body')?.textContent.includes(testApplet==='google-sheets'?'42':'Full original description')&&document.querySelectorAll('.pixi-stage-item').length===0);
+ await page.waitForFunction(()=>!document.querySelector('.app-source-body')?.textContent.includes(testApplet==='google-sheets'?'42':'Full original description')&&document.querySelectorAll('.scene-item').length===0);
  assert.deepEqual(errors,[]);
  console.log('PASS '+applet+' '+c.pass);await page.close();
  }
