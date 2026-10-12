@@ -28,6 +28,13 @@ assert.match(turn.system,/You are Fox/);assert.match(turn.system,/Be warm\./);
 assert.match(turn.prompt,/Person: hi\nFox: Hello!/);assert.match(turn.prompt,/"view":"world"/);assert.ok(turn.prompt.endsWith('Person: What is next?'));
 assert.match(turn.system,/cannot act in Worldlet/,'text-only by default');
 assert.match(localHarnessTurn({text:'hi'},{worldTools:true}).system,/describe_world_tools.*call_world_tool/);
+{
+ // Known actions travel with the instructions, so Fox calls one without discovery rounds (owner 2026-10-12: Fox slow).
+ const tools=localHarnessTurn({text:'hi'},{worldTools:true}).system;
+ assert.match(tools,/companion: recall, memory, reply/);assert.match(tools,/"arguments":"\{\\"query\\":/,'the example sends arguments as a string');
+ assert.doesNotMatch(tools,/applet:/,'Applet aliases repeat their base targets');
+ assert.match(localHarnessTurn({text:'hi',sample:true},{worldTools:true}).system,/gmail: [^;]*search/,'the practice world lists its own actions');
+}
 assert.deepEqual(LOCAL_HARNESSES.filter(h=>h.worldTools).map(h=>h.id),['claude-code','codex','hermes','openclaw','pi'],'every Harness gets World tools for a turn');
 assert.deepEqual(LOCAL_HARNESSES.filter(h=>h.connect).map(h=>h.id),['hermes','openclaw','pi'],'the person\'s own Agents are talked through directly');
 const own=localHarnessTurn({text:'hi'},{own:true}).system;

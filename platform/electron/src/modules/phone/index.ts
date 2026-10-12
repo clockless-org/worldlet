@@ -14,14 +14,18 @@ import {phoneWebRecording} from './web.ts';
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot
 // (`phonePublish`, sent the moment the Center changes) and carries out the phone's messages (`worldletPhoneMessage`),
 // because Center ordering and Fox turns live there. While the phone is open (it reached the relay in the last two
-// minutes) the desktop long-polls the relay, so a chat line or a Done from the phone arrives within about a second, and
-// it re-reads Fox's conversation every two seconds while Fox works. Otherwise it checks every 15 seconds.
+// minutes, or any time in the last week; see LISTENING) the desktop long-polls the relay, so a chat line or a Done from
+// the phone arrives within about a second; while the app is open it re-reads Fox's conversation every two seconds while
+// Fox works. Otherwise it checks every 15 seconds.
 // Notifications (core/phone/README.md#push) go out only while the phone is not showing the app: it reached the relay in
 // the last 45 seconds (an open app long-polls every 20), a shorter window than the two minutes that keep this loop quick, so
 // a reply that lands just after the person put the phone away still reaches them. New Coming Up and Worth Doing items
 // (core/phone phoneAttentionPushes, diffed against the previous snapshot) and Fox's finished reply to a line said on the
 // phone are pushed here; other modules call PhoneService.notify.
-const QUICK=2000,SLOW=15000,ACTIVE=120000,WAIT=15,CONVERSATION=15000,SHOWING=45000,ASKED=3600000;
+// A phone seen in the last week keeps the desktop long-polling even while the app is closed (owner 2026-10-12: Fox
+// slower on the phone). A short check every 15 seconds left the first line typed after opening the app waiting up to 15
+// seconds before Fox began; a long poll takes the same number of requests and picks the line up within a second.
+const QUICK=2000,SLOW=15000,ACTIVE=120000,WAIT=15,CONVERSATION=15000,SHOWING=45000,ASKED=3600000,LISTENING=7*86400000;
 export function computerName(){return os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer';}
 
 export function installPhone(host:Host){
@@ -142,6 +146,7 @@ export function installPhone(host:Host){
   deliver:message=>remoteHost.receive(message),
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
+ const phoneListening=()=>{const seen=relay.status().seenAt;return phoneOpen()||!!seen&&Date.now()-seen<LISTENING;};
  const agentOpen=()=>{const seen=agent.status().seenAt;return remoteHost.busy||!!seen&&Date.now()-seen<ACTIVE;};
  // The person's agents here for the client's Applet menus, read at most once a minute.
  let agentsRead={at:0,info:remoteHostInfo([])};
@@ -154,7 +159,7 @@ export function installPhone(host:Host){
  };
  // One loop per pairing. A long poll holds its tick while it waits, so Fox's replies reach an open side through the
  // watch below: every two seconds while Fox works and once more when it finishes, and at least every 15 seconds.
- const links=[{relay,open:phoneOpen,phone:true},{relay:agent,open:agentOpen,phone:false}].map(link=>{
+ const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false}].map(link=>{
   let timer:ReturnType<typeof setTimeout>|null=null,running=false,foxWasBusy=false,conversationAt=0;
   async function publishConversation(){
    conversationAt=Date.now();
@@ -163,7 +168,7 @@ export function installPhone(host:Host){
   async function tick(){
    timer=null;if(stopped||running||!link.relay.pairing)return schedule();
    running=true;
-   const listen=link.relay.paired&&link.open();
+   const listen=link.relay.paired&&link.listening();
    try{
     if(await link.relay.poll(listen?WAIT:0)&&link.phone)lastActive=Date.now();
     if(link.relay.paired){

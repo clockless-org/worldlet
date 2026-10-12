@@ -118,6 +118,15 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  if(new Set(actions.map(a=>a.target+'/'+a.action)).size!==actions.length)throw Error('Duplicate World target/action.');
  return actions;
 }
+/** Every target and its action names on one line, for a Harness's instructions: the model calls an action it already
+ * knows instead of listing targets and actions first, each listing another model round of several seconds (owner
+ * 2026-10-12: Fox slow; one reply spent 6 of its 9 model calls discovering companion/recall). Applet aliases
+ * (`applet:<key>`) are left out: they repeat their base target's actions. */
+export function worldToolIndex({sample=false}={}){
+ const byTarget=new Map<string,string[]>();
+ for(const a of worldActions({sample}))if(!a.target.startsWith('applet:'))byTarget.set(a.target,[...byTarget.get(a.target)||[],a.action]);
+ return [...byTarget].map(([target,actions])=>target+': '+actions.join(', ')).join('; ');
+}
 export function describeActions(actions:WorldAction[],target='',action=''){
  if(!target)return {version:WORLD_TOOL_VERSION,targets:[...new Set(actions.map(a=>a.target))]};
  const matches=actions.filter(a=>a.target===target);

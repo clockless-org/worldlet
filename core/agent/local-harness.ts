@@ -9,6 +9,7 @@ import {hermesAcpAnnouncement,type HermesAnnouncedCall} from './hermes-server.ts
 import {piModelArguments} from './model-providers.ts';
 import {acpModels} from './harness-models.ts';
 import {record} from './values.ts';
+import {worldToolIndex} from '../tools/index.ts';
 
 export type LocalHarnessId='claude-code'|'codex'|'hermes'|'openclaw'|'pi';
 export interface LocalHarnessDefinition {
@@ -100,7 +101,10 @@ export function localHarnessTurn(body:unknown,{worldTools=false,own=false,reside
  if(typeof input.text!=='string'||!input.text.trim())throw Error('Fox needs a message.');
  // The person's own Agent (`connect`) stays itself: Worldlet is where it now meets them, not a new persona.
  const who=own?'The person is talking with you, their own Agent, through Worldlet, a personal AI world on this computer where you appear as their companion. Answer them directly and briefly, as yourself.':'You are Fox, the companion inside Worldlet, a personal AI world on this computer. Answer the person directly and briefly.';
- const tools=worldTools?'To look at or act in Worldlet (open Applets and websites, read and save items, use the browser), use the worldlet tools: describe_world_tools to discover a target, its actions and argument schema, then call_world_tool. Confirm success only from a tool result.':'You cannot act in Worldlet in this conversation; say so when asked to.';
+ // The targets and actions travel with the instructions, so a known action is one call_world_tool, not a chain of
+ // discovery calls (each a model round). The example shows `arguments` as a string: models often send an object,
+ // which a Harness that checks the schema (Hermes) rejects before Worldlet sees it, costing another round.
+ const tools=worldTools?`To look at or act in Worldlet (open Applets and websites, read and save items, use the browser), use the worldlet tools call_world_tool and describe_world_tools (your Agent may list them as mcp__worldlet__call_world_tool and mcp__worldlet__describe_world_tools). Targets and their actions: ${worldToolIndex({sample:input.sample===true})}. Call call_world_tool directly with target, action and the action's arguments as a JSON object encoded in a string, for example {"target":"companion","action":"recall","arguments":"{\\"query\\":\\"plans\\"}"}, or "{}" when it needs none. Call describe_world_tools with a target and action only when you need that action's argument schema. Confirm success only from a tool result.`:'You cannot act in Worldlet in this conversation; say so when asked to.';
  const system=clip([who+' Do not edit files or run commands on this computer unless the person explicitly asks.',tools,harnessToolsLine(harnessTools,{calls:harnessCalls}),typeof input.style==='string'?input.style.trim():''].filter(Boolean).join('\n\n'),SYSTEM_LIMIT);
  const parts:string[]=[];
  const history=!resident&&Array.isArray(input.history)?input.history.map(record).filter(turn=>typeof turn.text==='string'&&turn.text.trim()):[];
