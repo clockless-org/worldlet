@@ -16,6 +16,9 @@ assert.throws(()=>releaseIdentity(65536-BUILD_OFFSET,'2026-10-09T05:30:00Z'));
 assert.deepEqual(releaseManifest(id,'a'.repeat(40)).platformBuilds,{mac:4012,windows:4012});
 // The builds this repository publishes stay above every build the release hosts published before it.
 assert(BUILD_OFFSET>=3400);
+// One Build everywhere: Android's versionCode and the Dev app add the same offset to the same count.
+assert(readFileSync(new URL('../android/app/build.gradle.kts',import.meta.url),'utf8').includes(BUILD_OFFSET+' + ProcessBuilder("git", "rev-list", "--count", "HEAD")'),'Android versionCode is BUILD_OFFSET + the commit count');
+assert(readFileSync(new URL('./build-info.ts',import.meta.url),'utf8').includes("releaseIdentity(Number(git('rev-list','--count','HEAD'))"),'the Dev app takes its Build from releaseIdentity');
 
 // Channels: live ones use the feeds installed apps read; others go to staging releases nothing reads.
 assert.equal(liveChannel('dev',{live:['dev']}),true);
