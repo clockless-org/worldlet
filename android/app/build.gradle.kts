@@ -9,11 +9,12 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// One version number on every platform (owner request 2026-10-04): versionCode is the commit's position on main, the
-// Build the desktop and iPhone builds of that commit carry (scripts/release-rc-build.mjs), and versionName is the day in
-// the desktop's native form plus that Build (2026.1004.2716). -PworldletBuild=N overrides it; without Git history it is 1.
+// One version number on every platform (owner request 2026-10-04): versionCode is the commit's Build, 4000 + its position
+// on main (BUILD_OFFSET in scripts/ci-release.mjs), the Build the desktop and iPhone builds of that commit carry, and
+// versionName is the day in the desktop's native form plus that Build (2026.1011.4281).
+// -PworldletBuild=N overrides it; without Git history it is 1.
 val worldletBuild: Int = (findProperty("worldletBuild") as String?)?.toIntOrNull() ?: runCatching {
-    ProcessBuilder("git", "rev-list", "--count", "HEAD").directory(rootDir).redirectErrorStream(true).start()
+    4000 + ProcessBuilder("git", "rev-list", "--count", "HEAD").directory(rootDir).redirectErrorStream(true).start()
         .inputStream.bufferedReader().readText().trim().toInt()
 }.getOrDefault(1)
 val worldletVersion: String = LocalDate.now(ZoneId.of("America/Los_Angeles"))
