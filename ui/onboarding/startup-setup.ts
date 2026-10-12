@@ -1,4 +1,4 @@
-import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT,environmentAt} from '../world/index.ts';
+import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT,environmentAt,veilWorld} from '../world/index.ts';
 import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../core/applets/index.ts';
 import {xAppIcon,appLogoSource,AGENT_ICONS,CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
 import {themeAppletIcon} from '../themes/index.ts';
@@ -404,6 +404,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(now&&typeof now==='string')loader.style.setProperty('--setup-world-now','url("'+now.replace(/"/g,'%22')+'")');
   if(night&&!assets?.night)loader.dataset.setupNight='dimmed';
   loader.classList.add('is-gathering');
+  // The page turns into fog over the World and starts to thin (owner request 2026-10-12); it clears the rest of the
+  // way as the World opens behind it, while the icons and Fox go on to their own places (world-reveal.ts).
+  veilWorld(loader,{night});
   // What came along drifts into Fox while it walks down; Fox swells and glows a little as it takes in each one. Routines
   // run on their own, so they go to the dock beside Fox instead, to Scheduled on its left (owner layout 2026-10-11); before
   // the dock has read them, to where it stands.
