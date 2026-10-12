@@ -41,6 +41,7 @@ try{
  assert.equal(await column.locator('.fox-session[data-thing=true]').count(),1,'the kept conversation is a Thing');
  assert.equal(await column.locator('.fox-session',{hasText:'#side-project'}).count(),1,'a conversation that is not a Thing is listed too');
  assert.equal(await column.locator('.fox-session[data-main=false] span').count(),0,'the other sessions show only their names');
+ assert.equal(await column.locator('.fox-session-list .fox-session').count(),await column.locator('.fox-session[data-main=false]').count(),'the other sessions share one card of their own, apart from the main one');
  // A session that is not a Thing becomes the place Fox talks in, in the World: its turns, its name in the bar, a way back.
  await column.locator('.fox-session',{hasText:'#side-project'}).click();
  await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLInputElement).placeholder==='Message Fox · #side-project');
