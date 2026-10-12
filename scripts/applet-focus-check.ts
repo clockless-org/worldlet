@@ -291,15 +291,16 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(dialogueWidth>=viewportWidth/4-1&&dialogueWidth<=viewportWidth/3+1,'Fox dialogue stays within its width bounds: '+dialogueWidth);
  assert.equal(await page.locator('#notionInput').inputValue(),'Keep this draft');
  assert.ok(await page.evaluate(()=>(window as any).savedFoxDialogue===document.querySelector('.companion-dialogue')),'the same dialogue node survives');
+ // The page panel sits on the theme Browser scene's screen region (#427); the painting is its frame.
  const frame=await page.evaluate(()=>{
   const panel=document.querySelector<HTMLElement>('#notionContent'),p=panel.getBoundingClientRect(),slot=panel.querySelector('.browser-viewport').getBoundingClientRect();
+  const w=getComputedStyle(document.querySelector('#notionWorld')),v=(k:string)=>parseFloat(w.getPropertyValue('--applet-scene-primary-'+k));
   const rect=(window as any).calls.filter(c=>c.action==='browserShow'||c.action==='browserLayout').at(-1).rect;
-  return {titleBottom:document.querySelector('.applet-shelf-tab[data-current] .applet-shelf-name')?.getBoundingClientRect().bottom??document.querySelector('.companion-context').getBoundingClientRect().bottom,left:p.left,top:p.top,bottom:innerHeight-p.bottom,inside:rect.x>=p.left+7&&rect.y>=p.top+7&&rect.x+rect.width<=p.right-7&&rect.y+rect.height<=p.bottom-7,slotRight:slot.right,panelRight:p.right};
+  return {titleBottom:document.querySelector('.applet-shelf-tab[data-current] .applet-shelf-name')?.getBoundingClientRect().bottom??document.querySelector('.companion-context').getBoundingClientRect().bottom,left:p.left,right:p.right,bottom:p.bottom,top:p.top,region:{left:v('left'),width:v('width'),bottom:v('top')+v('height')},inside:rect.x>=p.left&&rect.y>=p.top&&rect.x+rect.width<=p.right&&rect.y+rect.height<=p.bottom,slotRight:slot.right,panelRight:p.right};
  });
- assert.equal(frame.left,16,'browser frame stays near the window edge');
+ assert.ok(Math.abs(frame.left-frame.region.left)<1&&Math.abs(frame.right-frame.left-frame.region.width)<1&&Math.abs(frame.bottom-frame.region.bottom)<1,'browser frame takes the Browser scene\'s screen region: '+JSON.stringify(frame));
  assert.ok(frame.top>=frame.titleBottom+8,'browser frame leaves the shelf\'s name (or the context title) visible');
- assert.ok(Math.abs(frame.bottom-frame.left)<1,'browser bottom and left margins match');
- assert.ok(frame.inside&&frame.slotRight<frame.panelRight,'native web surface stays inside the painted rim');
+ assert.ok(frame.inside&&frame.slotRight<=frame.panelRight,'native web surface stays inside the painted screen');
  await page.screenshot({path:'output/applet-layout/youtube-focus.png'});
  // Inside an Applet a click on empty scenery acts as Back, one level (owner request 2026-10-05), but while the
  // person is typing (the draft above keeps Fox's message bar focused) it only ends typing (#1901).
