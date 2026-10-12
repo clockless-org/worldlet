@@ -29,7 +29,7 @@ async function settle(page){
  const p=await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(m=>m.id==='app-gmail').peekHit);
  await page.mouse.click(p.x,p.y);
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active==='app-gmail');
- const brightness=await page.locator('.mail-shared-device').evaluate(e=>getComputedStyle(e).filter);
+ const brightness=await page.locator('.applet-scene[data-applet=gmail] .applet-scene-plate').evaluate(e=>getComputedStyle(e).filter);
  assert.ok(!brightness.includes('brightness('),'operable mailbox stays bright at night');
  await page.getByRole('button',{name:'Pilot newsletter #6',exact:true}).click();
  for(const width of [1200,900]){

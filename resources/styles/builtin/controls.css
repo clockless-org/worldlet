@@ -350,9 +350,10 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console.is-dragging-fox .companion-avatar{cursor:grabbing}
 /* Native readers keep their reading gutter; browser frames own their tighter inset. */
 @media(min-width:801px){
- #notionWorld.native-console #notionContent:not([data-template=browser]){top:64px!important;left:64px!important;bottom:64px!important}
+ /* An Applet drawn in its theme scene puts its reader on the scene's painted region instead (ui/applets/scene). */
+ #notionWorld.native-console:not([data-applet-scene]) #notionContent:not([data-template=browser]){top:64px!important;left:64px!important;bottom:64px!important}
  /* Inside an Applet the Applet shelf stands above the panel (ui/hud/applet-shelf.ts). */
- #notionWorld.native-console[data-applet-shelf] #notionContent{top:150px!important}
+ #notionWorld.native-console[data-applet-shelf]:not([data-applet-scene]) #notionContent{top:150px!important}
  #notionWorld.native-console #notionContent:not([data-template=browser]):is([data-template=weather],[data-applet=gmail]){--weather-shell-padding:0px;padding:0!important}
  #notionWorld.native-console #notionContent[data-template=weather]>.notion-reader-head{display:none}
  #notionWorld.native-console #notionContent .weather-panel{max-width:none;margin:0}

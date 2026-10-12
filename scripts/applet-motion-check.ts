@@ -40,7 +40,7 @@ await withBrowser(fileAccess,async browser=>{
  for(const key of ['gmail','google-calendar','apple-notes','apple-reminders','weather']){
   await page.evaluate(id=>location.hash='object=app-'+id,key);
   await page.waitForFunction(id=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active==='app-'+id&&document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.camera.settled,key);
-  if(key==='gmail')await page.waitForFunction(()=>{const device=document.querySelector<HTMLElement>('.mail-shared-device');return !!device&&!device.dataset.motionFrame;});
+  if(key==='gmail')await page.locator('.applet-scene[data-applet=gmail] .applet-scene-plate').waitFor();
   else assert.equal(await page.evaluate(id=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(d=>d.id==='app-'+id)?.presentation.rigMotion,key),0,key+' foreground artwork stays static');
   await page.screenshot({path:'/tmp/worldlet-motion-'+key+'.png'});
   if(process.env.MOTION_VIDEO)await page.waitForTimeout(1600);

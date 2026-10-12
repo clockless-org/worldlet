@@ -41,7 +41,7 @@ export const parallelChecks=available([
  'scripts/world-refresh-check.ts','scripts/world-scene-check.ts','scripts/feedback-ui-check.ts',
  'scripts/applet-preview-check.ts','scripts/world-audio-check.ts','scripts/local-music-check.ts',
  'scripts/browser-history-check.ts','scripts/browser-tabs-ui-check.ts','scripts/browser-sign-in-check.ts','scripts/voice-memos-check.ts','scripts/messages-check.ts','scripts/attention-later-check.ts','scripts/applet-first-entry-check.ts',
- 'scripts/demo-site-check.ts','scripts/mail-open-check.ts','scripts/weather-location-check.ts',
+ 'scripts/demo-site-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/weather-location-check.ts',
  'scripts/mail-focus-check.ts','scripts/retired-mail-tour-check.ts','scripts/core-applet-content-check.ts',
  'scripts/sample-persona-check.ts','scripts/work-signal-check.py',
  'scripts/attention-level-check.ts','scripts/attention-brief-markdown-check.ts','scripts/village-camera-check.ts','scripts/fox-visible-text-check.ts',
@@ -123,7 +123,7 @@ export const quickChecks=available([
  'scripts/applet-first-entry-check.ts','scripts/library-applet-check.ts','scripts/work-applet-check.ts','scripts/immersive-background-check.ts',
  'gatehouse/board-browser-check.mjs','scripts/attention-actions-check.ts','scripts/attention-no-refill-check.ts','scripts/attention-brief-markdown-check.ts',
  'scripts/fox-chat-fold-check.ts','scripts/fox-execution-check.ts','scripts/companion-entry-check.ts','scripts/onboarding-first-value-check.ts',
- 'scripts/google-connection-check.ts','scripts/mail-open-check.ts','scripts/browser-applet-check.ts','scripts/world-history-ui-check.ts',
+ 'scripts/google-connection-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/browser-applet-check.ts','scripts/world-history-ui-check.ts',
  'scripts/artifacts-ui-check.ts','scripts/order-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
  'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts',
 ]);
@@ -132,7 +132,7 @@ export const quickChecks=available([
 // on software WebGL, four at a time, and timed out clicking it (PR #125's first run), so they stay in Alpha.
 export const prChecks=quickChecks.filter(c=>[
  'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
- 'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/web-record-check.ts',
+ 'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/web-record-check.ts',
  'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',
  'scripts/meetings-check.ts',
 ].includes(c));

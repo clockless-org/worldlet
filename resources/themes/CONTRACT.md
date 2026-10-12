@@ -18,12 +18,12 @@ flowchart LR
 ```text
 package/
   theme.json          # contractVersion: 3, id, title, assets, presentation, optional updatedAt
-  presentation.json   # tokens, fonts, optional hud, sound, icons, artifact, appletPresets and appletScenes
+  presentation.json   # tokens, fonts, optional hud, sound, icons, artifact, appletPresets, appletScenes and sceneMaterials
   assets/             # every picture, sound, font and licence the JSON names
   *.json              # other data the host's World code reads (the Village's lamps.json, assets/art.json)
 ```
 
-`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons`, `artifact`, `appletPresets` and `appletScenes`. Image registration records painted surface bounds; executable layouts, viewport CSS and placement of host controls remain the host’s responsibility.
+`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons`, `artifact`, `appletPresets`, `appletScenes` and `sceneMaterials`. Image registration records painted surface bounds; executable layouts, viewport CSS and placement of host controls remain the host’s responsibility.
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-10T07:10:00Z`); it is informational. `contractVersion` alone controls compatibility; source hashes identify the copied contents.
 
@@ -40,6 +40,7 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 | `icons` (optional) | The theme's picture of an Applet by Applet key (`png`, `webp` or `svg`). The host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. |
 | `appletPresets` (optional) | Reusable icon/background pairs for custom Applets, with a unique `id`, `title`, `description`, `category`, `icon` and `background`. Both images are package-local `png`, `webp` or `svg` files. |
 | `appletScenes` (optional) | Backgrounds keyed by Applet key, with measured image registration for live HTML surfaces. |
+| `sceneMaterials` (optional) | How Applet content looks on each region material (`paper`, `board`, `screen`): colours `ink`, `muted`, `line`, `accent`, `accentInk`, `control`, `controlInk` and `fill` (`#rrggbb` or `#rrggbbaa`), and font stacks `bodyFont` and `displayFont`. A role left out comes from `tokens`. |
 | `artifact` (optional) | How the theme's Artifacts look, as static files ([Artifacts](#artifacts)). |
 
 Anything left out keeps the shared look, sounds and pictures.
@@ -65,7 +66,9 @@ Coordinates start at the image's upper-left and stay within 0–1. They are meas
 
 Keep dates, messages, task state and controls out of the bitmap. The host supplies real HTML and trusted data inside those surfaces. A Calendar can have a main event surface and a separate small date surface. Regions grant no capabilities, execute no code and bind no provider data themselves. Embedded external websites still require the host's browser surface and cannot acquire this appearance from artwork alone.
 
-The [Village scene library](../styles/builtin/references/registered-scenes/README.md) includes the inventory and an interactive preview with fictional data. This addition supplies artwork, registration, validation and host helpers; the production Applet reader and the preset picker have not adopted registered surfaces yet.
+The host draws registered scenes with one shared renderer, [ui/applets/scene](../../ui/applets/scene/README.md): it lays the painting out with `fitThemeScene`, puts a live HTML element on every region and gives each region its `sceneMaterials` entry as CSS variables. An Applet fills the regions with its records and the shared controls and names no coordinate, colour or font, so a theme changes how an Applet looks without a change to the Applet. Mail is drawn this way; the other Applets keep their current pages until they move over, and the preset picker has not adopted registered surfaces yet.
+
+The [Village scene library](../styles/builtin/references/registered-scenes/README.md) includes the inventory and an interactive preview with fictional data.
 
 ### Artifacts
 

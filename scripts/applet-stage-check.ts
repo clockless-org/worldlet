@@ -31,8 +31,8 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(app.fullView.kind,'scene',key+' declares an in-world Open stage');
   await page.evaluate(id=>location.hash='object='+id,id);
   await page.waitForFunction(id=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.presentation.stage&&document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.presentation.id===id,id);
-  await page.waitForFunction(count=>document.querySelectorAll('.pixi-stage-item,.home-leaf').length===count,items).catch(async e=>{throw Error(key+': '+JSON.stringify(await page.evaluate(()=>({calls,stage:document.querySelector('.pixi-applet-stage')?.textContent})))+' '+e.message)});
-  const itemSelector=key==='gmail'?'.pixi-stage-item':'.home-leaf';
+  await page.waitForFunction(count=>document.querySelectorAll('.pixi-stage-item,.home-leaf,.mail-letter').length===count,items).catch(async e=>{throw Error(key+': '+JSON.stringify(await page.evaluate(()=>({calls,stage:document.querySelector('.pixi-applet-stage')?.textContent})))+' '+e.message)});
+  const itemSelector=key==='gmail'?'.mail-letter':'.home-leaf';
   const dock=await page.locator('.notion-hud').boundingBox();
   assert.ok(dock.x+dock.width/2>1280*.7,key+' places Fox on the right in Open');
   const view=await stage();
@@ -42,15 +42,20 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(view.stage.items,items,key+' exposes its saved local records');
   assert.equal(await page.locator('.pixi-applet-stage '+itemSelector).count(),items,key+' renders each record as a selectable Open item');
   assert.equal(await page.locator('#notionContent').isVisible(),false,key+' opens in the world without a website');
-  assert.equal(await page.locator(key==='gmail'?'.mail-shared-device':'.home-open-sheet').count(),1,'Open uses its painted installation');
+  assert.equal(await page.locator(key==='gmail'?'.applet-scene[data-applet=gmail]':'.home-open-sheet').count(),1,'Open uses its painted installation');
   if(key==='gmail'){
    assert.equal((await stage()).deviceVisible,false,'Mail foreground uses the HTML device only');
    await page.screenshot({path:'/tmp/worldlet-gmail-open.png'});
-   assert.equal(await page.locator('.mail-open-desk').evaluate(e=>getComputedStyle(e).overflowY),'hidden','Mail pinboard does not scroll');
-   // The nine-letter attention pinboard (57c1e5cd) replaced the three bins.
-   assert.equal(await page.locator('.mail-open-piles,.mail-bin-spread').count(),0,'Mail Open has no bins');
-   assert.ok(await page.locator('.mail-open-desk').evaluate(d=>d.scrollHeight<=d.clientHeight&&d.scrollWidth<=d.clientWidth),'attention letters fit the pinboard');
-   assert.equal(await page.locator('.mail-open-desk .pixi-stage-item').count(),6,'ordinary letters never replace attention mail');
+   // Mail draws through the shared scene renderer (ui/applets/scene) on the theme's painted Mail scene.
+   const scene=(await stage()).stage.scene,region=page.locator('.applet-scene[data-applet=gmail] .applet-scene-region[data-role=primary]');
+   assert.equal(scene?.painted,true,'Mail opens in the theme\'s painted scene: '+JSON.stringify(scene));
+   const box=await region.boundingBox();
+   assert.ok(['x','y','width','height'].every(k=>Math.abs(box[k]-scene.primary[k])<=1.5),'the region is where the theme measured it: '+JSON.stringify({box,scene}));
+   assert.equal(await region.evaluate(e=>getComputedStyle(e).getPropertyValue('--scene-ink').trim()),'#2b3a2e','the region wears the theme\'s paper material');
+   assert.equal(await page.locator('.mail-open-piles,.mail-bin-spread,.mail-open-desk').count(),0,'Mail Open has no bins and no painted desk of its own');
+   assert.ok(await page.locator('.mail-letter').evaluateAll((letters,r)=>letters.every(l=>{const b=l.getBoundingClientRect();return b.left>=r.x-1&&b.right<=r.x+r.width+1&&b.top>=r.y-1&&b.bottom<=r.y+r.height+1;}),box),'attention letters sit inside the painted paper');
+   assert.equal(await region.locator('.mail-letter').count(),6,'ordinary letters never replace attention mail');
+   assert.ok((await region.locator('.mail-account').textContent()).includes('reader@example.test'),'the mailbox it reads is named on the page');
 
   }
   if(key==='gmail')await page.waitForFunction(()=>document.querySelector('.mail-letter-sender')?.textContent==='Alice Chen');
@@ -64,7 +69,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(await marks.count()>0,key+' carries attention onto individual Open items');
   assert.equal(await page.locator('.pixi-stage-item[data-curated=false] .applet-attention').count(),0,'raw records never invent attention');
   const markBox=await marks.first().boundingBox(),itemBox=await page.locator(itemSelector+':has(.applet-attention)').first().boundingBox();
-  if(key==='gmail')assert.ok(markBox.y+markBox.height<itemBox.y&&Math.abs(markBox.x+markBox.width/2-itemBox.x-itemBox.width/2)<2,'Mail attention mark is centered above the envelope');
+  if(key==='gmail')assert.ok(markBox.x>=itemBox.x&&markBox.x+markBox.width<=itemBox.x+itemBox.width+1,'Mail attention mark stays on its letter');
   await page.mouse.move(20,40);
   await page.screenshot({path:'/tmp/worldlet-'+key+'-open.png'});
   if(key!=='gmail'){await page.setViewportSize({width:600,height:740});await page.screenshot({path:'/tmp/worldlet-'+key+'-narrow.png'});assert.ok(await page.locator('.home-open-body').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'narrow content has no horizontal overflow');await page.setViewportSize({width:1280,height:850});}
@@ -74,15 +79,14 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.locator('.mail-open-flight').count(),0,'a busy model must not throw letters');
    await page.evaluate(()=>{fixture.connections.find(c=>c.provider==='gmail').reading=true;fixture.revision++;(window as any).worldletReceive(structuredClone(fixture));});
    // The pinboard (57c1e5cd) records a provider read without throwing letters.
-   await page.locator('.pixi-applet-stage[data-mail-reading=true]').waitFor({state:'attached'});
+   await page.locator('.applet-scene-region[data-mail-reading=true]').waitFor({state:'attached'});
    assert.equal(await page.locator('.mail-open-flight').count(),0,'a provider read throws no letters over the pinboard');
    await page.evaluate(()=>{fixture.connections.find(c=>c.provider==='gmail').reading=false;fixture.revision++;(window as any).worldletReceive(structuredClone(fixture));});
-   await page.locator('.pixi-applet-stage[data-mail-reading=false]').waitFor({state:'attached'});
+   await page.locator('.applet-scene-region[data-mail-reading=false]').waitFor({state:'attached'});
    await page.evaluate(()=>delete document.querySelector<HTMLElement>('#notionWorld').dataset.mailWorking);
    await page.emulateMedia({reducedMotion:'reduce'});
 
   }
-  const mailDeviceBox=key==='gmail'?await page.locator('.mail-shared-device').boundingBox():null;
   const browserShows=await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length);
   const selectedTitle=await page.locator(itemSelector+' strong').first().textContent();
   await page.locator(itemSelector).first().click();
@@ -95,10 +99,15 @@ await withBrowser(fileAccess,async browser=>{
    const now=await deviceScale();
    assert.ok(openScale&&now&&openScale.every((v,i)=>Math.abs(v-now[i])<1e-6),'Open and Focus keep device scale: '+JSON.stringify({open:openScale,focus:now}));
   }
-  await page.locator('.pixi-applet-stage').waitFor({state:'hidden'});
+  // Mail's scene stays while a letter is read; the reader takes the scene's paper region.
+  if(key==='gmail'){
+   await page.locator('.pixi-applet-stage[data-reading=true]').waitFor();
+   const paper=await page.locator('.applet-scene-region[data-role=primary]').boundingBox(),reader=await page.locator('#notionContent').boundingBox();
+   assert.ok(['x','y','width','height'].every(k=>Math.abs(paper[k]-reader[k])<=2),'the reader sits on the scene\'s painted paper: '+JSON.stringify({paper,reader}));
+  }else await page.locator('.pixi-applet-stage').waitFor({state:'hidden'});
   await page.locator('.pixi-selected-item').waitFor({state:key==='gmail'?'hidden':'visible'});
   assert.equal(await page.locator('.pixi-selected-item strong').textContent(),selectedTitle,'Focus preserves the selected Open item');
-  if(key==='gmail'){await page.locator('.mail-account-status').hover();assert.ok(await page.getByRole('tooltip').isVisible());assert.ok((await page.getByRole('tooltip').innerText()).includes('reader@example.test'));await page.mouse.move(20,40);assert.equal(await page.getByRole('tooltip').isVisible(),false);assert.deepEqual(await page.locator('.mail-shared-device').boundingBox(),mailDeviceBox,'Mail device stays in exactly the same place in Open and Focus');assert.equal(await page.locator('.mail-sender-name').textContent(),'From Alice Chen');
+  if(key==='gmail'){assert.equal(await page.locator('.mail-sender-name').textContent(),'From Alice Chen');
    assert.equal(await page.locator('.pixi-selected-item .pixi-focus-switch').count(),0);
    assert.ok(await page.locator('.mail-reader-switch').isVisible());
    await page.getByRole('button',{name:'Next email',exact:true}).click();
@@ -111,7 +120,7 @@ await withBrowser(fileAccess,async browser=>{
   // A backdrop tap inside an Applet acts as Back, one step (owner request 2026-10-05).
   await page.mouse.click(1120,450);
   await page.locator('#notionContent').waitFor({state:'hidden'});
-  await page.locator('.pixi-applet-stage').waitFor();
+  await page.locator('.pixi-applet-stage:not([data-reading=true])').waitFor();
   assert.equal((await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics)).active,'app-'+key,'Focus backdrop returns to the same Applet');
  }
  // Returning dismisses the accessible stage without replacing the world.

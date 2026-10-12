@@ -8,10 +8,10 @@ await withBrowser(fileAccess,async browser=>{
  // Enter Mail the way a person does (a restored location does not start a read).
  await page.evaluate(()=>location.hash='building=building-home');
  await page.locator('.notion-pin[data-page="place-app-gmail"]').focus();await page.keyboard.press('Enter');
- await page.locator('.mail-attention-board').waitFor();
+ await page.locator('.applet-scene[data-applet=gmail]').waitFor();
  await page.waitForFunction(()=>(window as any).calls.some(b=>b.action==='appContent'));
- // The empty board is its painted slots: no error or retry copy replaces it.
- assert.equal(await page.locator('.mail-attention-board .pixi-stage-item').count(),0);
+ // The empty scene is its painted paper: no error or retry copy replaces it.
+ assert.equal(await page.locator('.applet-scene .mail-letter,.applet-scene .mail-empty').count(),0);
  assert.equal(await page.locator('.pixi-open-empty').count(),0,'A failed inventory read adds no explanatory error text');
  assert.equal(await page.locator('.companion-source-alert').isVisible(),false);
  assert.ok(!/read did not finish|Ask Fox to retry|Network timed out/.test(await page.locator('#notionWorld').innerText()));
