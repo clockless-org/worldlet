@@ -77,8 +77,17 @@ assert.equal(normalized[0].sources[0].quote,original);
 assert.equal(candidate.sources[0].quote,'Renewal   deadline');
 assert.equal(canonicalSourceQuotes([candidate],{'gmail:thread:test':{text:'Renewal tomorrow deadline'}})[0].sources[0].quote,candidate.sources[0].quote);
 assert.equal(canonicalSourceQuotes([candidate],{'gmail:thread:test':{text:'Renewal\n deadline; Renewal\tdeadline'}})[0].sources[0].quote,candidate.sources[0].quote);
+// A model retyping a quote drops invisible padding and straightens typography.
+const quoted=(quote:string,text:string)=>canonicalSourceQuotes([{...candidate,sources:[{provider:'gmail',id:'thread:test',quote}]}],{'gmail:thread:test':{text}})[0].sources[0].quote;
+const typeset='Hi Alex,\u034f\u200c We\u2019re renewing\u00a0your plan \u2014 the \u201cPro\u201d tier\u2026 cafe\u0301 hours.';
+assert.equal(quoted("We're renewing your plan - the \"Pro\" tier... caf\u00e9 hours",typeset),'We\u2019re renewing\u00a0your plan \u2014 the \u201cPro\u201d tier\u2026 cafe\u0301 hours');
+assert.equal(quoted('Hi Alex, We',typeset),'Hi Alex,\u034f\u200c We');
+assert.ok(typeset.includes(quoted('your plan - the',typeset)));
+assert.equal(quoted("We're renewing",'We\u2019re renewing; we\u2018re renewing; We\'re renewing.'),"We're renewing");
+assert.equal(quoted("We're renewing",'We\u2019re renewing and We\u02bcre renewing'),"We're renewing");
+assert.equal(quoted('we are renewing',typeset),'we are renewing');
 assert.throws(()=>appletCandidateContent({...candidate,title:'x'.repeat(201)}));
-console.log('PASS S candidate copy independent of card limits; unique whitespace-only quote recovery, immutable and fail-closed');
+console.log('PASS S candidate copy independent of card limits; unique whitespace-, invisible- and typography-only quote recovery, immutable and fail-closed');
 
 const unicodeMail='😀'.repeat(6000)+'a'.repeat(6000);
 assert.equal(observeAttention([],reg,[{id:'unicode',text:unicodeMail}],now)[0].text,unicodeMail);
