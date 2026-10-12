@@ -22,9 +22,9 @@ await withBrowser(fileAccess,async browser=>{
    window.addEventListener('worldlet:celebration-sound',e=>w.sky.push({...(e as CustomEvent).detail,at:performance.now()}));
    document.addEventListener('worldlet:celebration-done',()=>{w.celebrationDone=performance.now();},true);
    document.addEventListener('worldlet:setup-complete',()=>{w.devicesBeforeCurtain=document.querySelectorAll('#setupArrivingDevices img').length;});
-   // The fog over the World (owner request 2026-10-12): still there as the World opens, cleared by the time the loader goes.
-   document.addEventListener('worldlet:world-opening',()=>{w.fogAtOpening=!!document.querySelector('#worldStartup>.startup-mist');});
-   document.addEventListener('worldlet:world-revealed',()=>{w.fogAtReveal=!!document.querySelector('.startup-mist');},true);
+   // Entering after setup (owner request 2026-10-12): no fog; the loading screen's painting fades slowly into the live World.
+   document.addEventListener('worldlet:world-opening',()=>{const loader=document.getElementById('worldStartup')!;w.atOpening={fog:!!document.querySelector('.startup-mist'),painting:getComputedStyle(loader,'::after').transitionDuration};});
+   new MutationObserver(()=>{if(document.querySelector('.startup-mist'))w.fogSeen=true;}).observe(document,{childList:true,subtree:true});
    // Record the arrival state when the loader goes away; polling afterwards races the landing.
    document.addEventListener('worldlet:world-revealed',()=>{const modules=(document.querySelector('#notionWorld') as any)?.sceneMetrics?.modules||[];w.atReveal={unlocked:modules.filter(m=>m.unlocked).length,celebrations:document.querySelectorAll('.world-celebration').length,targets:modules.filter(m=>document.querySelector('#setupArrivingDevices [data-applet-id="'+m.id+'"]')).map(m=>m.arrivalBounds)};});
    w.fixture={platform,workspaceId:'setup-test',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:mode==='existing',unlockedApplets:['app-gmail']},mockGoogleAvailable:true,connections:sessionStorage.getItem('fixture-google')?['gmail','google-calendar'].map(provider=>({provider,status:'connected',enabled:true})):[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
@@ -147,21 +147,14 @@ await withBrowser(fileAccess,async browser=>{
    await page.waitForFunction(()=>document.getElementById('worldStartup')?.classList.contains('is-gathering'));
    assert.ok(await page.evaluate(()=>getComputedStyle(document.querySelector('#worldStartup>.startup-brand')!).transitionProperty.includes('opacity')),'The brand fades while the icons change');
    assert.equal(await page.locator('.setup-primary[aria-busy=true]').count(),1);
-   // Enter your world (owner request 2026-10-12): the page turns into fog over the World's painting, under the icons and Fox.
-   const fog=await page.evaluate(()=>{const loader=document.getElementById('worldStartup')!,mist=loader.querySelector<HTMLCanvasElement>(':scope>.startup-mist'),gathering=loader.querySelector('.setup-gathering');
-    if(!mist)return null;const z=(el:Element|null,pseudo?:string)=>el?Number(getComputedStyle(el,pseudo).zIndex)||0:NaN,a=mist.getContext('2d')!.getImageData(0,0,1,1).data[3];
-    return {mist:z(mist),painting:z(loader,'::after'),gathering:z(gathering),edge:a};});
-   assert.ok(fog,'Fog covers the page as everything gathers');
-   assert.ok(fog.mist>fog.painting&&fog.gathering>fog.mist,'The fog lies over the World’s painting and under the icons and Fox: '+JSON.stringify(fog));
-   assert.ok(fog.edge>180,'The fog is thick at the edges before the World opens: '+fog.edge);
   }
   await page.waitForFunction(()=>!document.getElementById('worldStartup'),{},{timeout:30000});
   assert.equal(await page.locator('.startup-setup').count(),0);
   if(mode==='google'){
    assert.ok(await page.evaluate(()=>(window as any).devicesBeforeCurtain>0),'Icons become devices before opening the curtain');
-   const fogEnd=await page.evaluate(()=>({opening:(window as any).fogAtOpening,reveal:(window as any).fogAtReveal}));
-   assert.equal(fogEnd.opening,true,'The fog is still there as the World opens, and clears over it');
-   assert.equal(fogEnd.reveal,false,'The fog has cleared by the time the World is revealed');
+   const opening=await page.evaluate(()=>({...(window as any).atOpening,fogSeen:!!(window as any).fogSeen}));
+   assert.equal(opening.fog||opening.fogSeen,false,'No fog over the World after setup: '+JSON.stringify(opening));
+   assert.ok(parseFloat(opening.painting)>=2,'The loading screen’s painting fades slowly into the World: '+JSON.stringify(opening));
    const atReveal=await page.evaluate(()=>(window as any).atReveal);
    assert.equal(atReveal.celebrations,0,'Fireworks wait for applet arrivals');
    assert.equal(atReveal.unlocked,0,'Destinations stay empty during arrival');

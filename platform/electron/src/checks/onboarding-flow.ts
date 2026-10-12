@@ -66,13 +66,13 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  await press('Use mock Google (Dev)');
  // The two default Routines (core/artifacts/daily.ts) are on with no row on setup (owner decision 2026-10-11).
  await wait('no Routines row beside Enter your world',"!!document.querySelector('.setup-footer .setup-next')&&!document.querySelector('.setup-routines')",120);
- // Fog over the World (owner request 2026-10-12): the page turns into fog as setup gathers and clears as the World opens.
- await js("window.__fog=matchMedia('(prefers-reduced-motion: reduce)').matches;new MutationObserver((_,o)=>{if(document.querySelector('#worldStartup>.startup-mist')){window.__fog=true;o.disconnect();}}).observe(document.body,{childList:true,subtree:true});true");
+ // No fog after setup (owner request 2026-10-12): the loading screen's painting fades slowly into the World instead.
+ await js("window.__fog=false;new MutationObserver((_,o)=>{if(document.querySelector('.startup-mist')){window.__fog=true;o.disconnect();}}).observe(document.body,{childList:true,subtree:true});true");
  await press('Enter your world',120);
  await wait('world arrival',"document.querySelector('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl'",60);
  // One continuous move into the World (owner request 2026-10-11): setup's Fox and icons land and their layer goes.
  await wait('setup Fox and icons landed in the World',"!document.getElementById('setupArrivingDevices')",30);
- await wait('the fog cleared over the World',"window.__fog===true&&!document.querySelector('.startup-mist')",10);
+ await wait('the painting faded into the World with no fog',"window.__fog===false&&!document.getElementById('worldStartup')",10);
  if(!host.preferences.bool('worldlet.dailyPrep',true)||!host.preferences.bool('worldlet.dailyWrapUp',true))throw Error('Setup left the default Routines off');
  mark('Today’s prep and Wrap up today are on');
  noRecordedFailures(host,'world arrival');
