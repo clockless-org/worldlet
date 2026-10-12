@@ -54,7 +54,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.locator('#notionContent').getAttribute('hidden'), '');
  await run('move_view',{direction:'overview'});
  await run('open_applet',{id:'app-codex'});
- await page.locator('.pixi-stage-item[data-execution="Running"]').waitFor();
+ await page.locator('.scene-item[data-execution="Running"]').waitFor();
  await page.getByRole('button',{name:/Review navigation/}).click();
  await page.locator(':is(.world-actions,.applet-bar-side)').getByRole('button',{name:'Review result',exact:true}).click();
  await page.waitForFunction(()=>document.querySelector('#notionContent')?.textContent.includes('Prepared result:'));

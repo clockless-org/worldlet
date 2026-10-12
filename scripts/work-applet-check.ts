@@ -38,14 +38,15 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld')?.sceneMetrics?.modules.length>0);
  for(const key of ['github','codex','claude-code']){
   await page.evaluate(key=>location.hash='object=app-'+key,key);
-  await page.locator('.pixi-applet-stage[data-work=true]').waitFor();
+  // Work Applets draw in their theme scene (ui/applets/scene/scene-family.ts: the files scene in Village).
+  await page.locator(`.pixi-applet-stage[data-scene="${key}"]`).waitFor();
   // Every session shows at once; more than the four folios scroll inside the item area instead of paging.
-  await page.waitForFunction(count=>document.querySelectorAll('.pixi-stage-item').length===count,key==='github'?2:6);
+  await page.waitForFunction(count=>document.querySelectorAll('.scene-item').length===count,key==='github'?2:6);
   assert.equal(await page.locator('#notionContent').isVisible(),false);
   await page.screenshot({path:path.join(tmpdir(),'worldlet-'+key+'-open.png')});
   assert.equal(await page.locator('.pixi-open-pagination').count(),0,'no page arrows');
-  if(key!=='github')assert.deepEqual(await page.locator('.pixi-open-contents').evaluate(e=>({scroll:e.dataset.scroll,overflowY:getComputedStyle(e).overflowY,scrolls:e.scrollHeight>e.clientHeight})),{scroll:'true',overflowY:'auto',scrolls:true},'more sessions than folios scroll in place');
-  await page.locator('.pixi-stage-item').first().click();
+  assert.equal(await page.locator('.applet-scene-region[data-role=primary]').evaluate(e=>getComputedStyle(e).overflowY),'auto','more sessions than fit scroll in place');
+  await page.locator('.scene-item').first().click();
   await page.getByText(key==='github'?'#12 · Improve the village':key==='codex'?'The Codex conversation is visible.':'The Claude conversation is visible.',{exact:true}).waitFor();
   await page.locator('.pixi-selected-item').waitFor();
   const card=await page.locator('.pixi-selected-item').boundingBox(),nextArrow=await page.getByRole('button',{name:'Next item',exact:true}).boundingBox();
@@ -63,7 +64,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length),0,'Work Applets never silently redirect to websites');
  assert.equal(await page.evaluate(()=>calls.filter(c=>c.operation==='send').length),0,'reading never starts coding');
  await page.evaluate(()=>location.hash='object=app-codex');
- await page.locator('.pixi-stage-item').first().click();
+ await page.locator('.scene-item').first().click();
  await page.getByText('The Codex conversation is visible.',{exact:true}).waitFor();
  await page.evaluate(()=>window.worldletShowControls('preferences'));
  await page.locator('#notionInput').fill('Continue this task');await page.locator('#notionInput').press('Enter');
