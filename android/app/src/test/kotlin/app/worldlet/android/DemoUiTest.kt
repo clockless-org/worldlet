@@ -17,6 +17,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows
 import app.worldlet.android.ui.WorldletRoot
@@ -171,6 +173,25 @@ class DemoUiTest {
         compose.onNodeWithTag("applet-job-spanishdemo1").assertIsDisplayed()
         compose.onNodeWithTag("appletMine-job-spanishdemo1", useUnmergedTree = true).assertDoesNotExist()
         shot("applets")
+    }
+
+    @Test
+    fun swipeBetweenTabs() {
+        show(demo())
+        // A swipe sideways moves between the tabs, and the capsule follows (owner request 2026-10-12).
+        compose.onNodeWithTag("centerPager").performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.onNodeWithTag("tabApplets").assertIsSelected()
+        compose.onNodeWithTag("appletList").assertIsDisplayed()
+        compose.onNodeWithTag("centerPager").performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.onNodeWithTag("tabTasks").assertIsSelected()
+        compose.onNodeWithText("DOING NOW").assertIsDisplayed()
+        compose.onNodeWithTag("centerPager").performTouchInput { swipeRight() }
+        compose.onNodeWithTag("centerPager").performTouchInput { swipeRight() }
+        compose.waitForIdle()
+        compose.onNodeWithTag("tabToday").assertIsSelected()
+        compose.onNodeWithTag("todayPage").assertIsDisplayed()
     }
 
     @Test
