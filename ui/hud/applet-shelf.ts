@@ -28,7 +28,7 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
  newPage:()=>void;
 }){
  let state:ShelfState|null=null,current:string|null=null;
- const shelf=document.createElement('nav');shelf.className='applet-shelf';shelf.setAttribute('aria-label','Recent Applets');shelf.hidden=true;
+ const shelf=document.createElement('nav');shelf.className='applet-shelf';shelf.setAttribute('aria-label','Recent Things');shelf.hidden=true;
  const ledge=document.createElement('div');ledge.className='applet-shelf-ledge';ledge.setAttribute('aria-hidden','true');
  const ring=document.createElement('div');ring.className='applet-shelf-ring';
  const more=document.createElement('button');more.type='button';more.className='applet-shelf-more';more.hidden=true;
@@ -83,7 +83,7 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
   }
   for(const [id,item] of tabs)if(!shown.has(id)){item.remove();tabs.delete(id);}
   const others=overflow.map(id=>[id,applet(id)] as const).filter(([,app])=>!!app) as [string,ShelfApplet][];
-  more.hidden=!others.length;more.textContent='+'+others.length;more.title=others.length+' more';more.setAttribute('aria-label',others.length+' more Applets');
+  more.hidden=!others.length;more.textContent='+'+others.length;more.title=others.length+' more';more.setAttribute('aria-label',others.length+' more Things');
   extra.replaceChildren(...others.map(([id,app])=>{const b=document.createElement('button');b.type='button';b.className='applet-shelf-pick';b.title='Open '+app.title;b.append(...device(app));b.onclick=event=>{event.stopPropagation();closeExtra();open(id);};return b;}));
   if(!others.length)closeExtra();
  }

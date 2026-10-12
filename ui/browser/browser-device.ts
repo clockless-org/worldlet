@@ -160,13 +160,13 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   if(appletOffer.hidden)return;
   const installed=layout.has(matchedApplet.id);
   if(!offeredMatch()){appletOffer.hidden=true;return;}
-  appletOffer.textContent=(installed?'Open ':'Add ')+matchedApplet.title+(installed?' Applet':' to World');
+  appletOffer.textContent=(installed?'Open ':'Add ')+matchedApplet.title+(installed?' Thing':' to World');
   appletOffer.disabled=adding;
  }
  appletOffer.onclick=async event=>{
   event.stopPropagation();const app=matchedApplet;if(!app||adding)return;adding=true;syncAppletOffer();
   try{if(!root.appletLayout.has(app.id))await root.appletLayout.add(app.id);openApplet(app.id);}
-  catch{notify('Could not add this Applet. Please try again.');}
+  catch{notify('Could not add this Thing. Please try again.');}
   finally{adding=false;syncAppletOffer();}
  };
  root.addEventListener('worldlet:applet-layout',()=>syncAppletOffer());
@@ -364,15 +364,15 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   const made=visible?madeFor(page.url):null;
   if(makeOffer.hidden===!visible&&makeOffer.dataset.made===(made?'true':'false')&&makeOffer.disabled===making)return;
   makeOffer.hidden=!visible;makeOffer.disabled=making;makeOffer.dataset.made=made?'true':'false';
-  makeLabel.textContent=made?'Open Applet':'Make Applet';
-  makeOffer.title=made?'Open '+made.title+', the Applet made from this site':'Make this site an Applet in your World';
+  makeLabel.textContent=made?'Open Thing':'Make Thing';
+  makeOffer.title=made?'Open '+made.title+', the Thing made from this site':'Make this site a Thing in your World';
  }
  makeOffer.onclick=async event=>{
   event.stopPropagation();if(!madeApplets||making||makeOffer.hidden)return;
   const made=madeFor(page.url);if(made){openApplet(made.id);return;}
   making=true;syncMakeOffer();
-  try{const result=await madeApplets.make({...page});justMade.set(siteKey(page.url),result);notify(result.title+' is now an Applet in your World');}
-  catch(error){notify(error?.message||'Could not make this Applet. Please try again.');}
+  try{const result=await madeApplets.make({...page});justMade.set(siteKey(page.url),result);notify(result.title+' is now a Thing in your World');}
+  catch(error){notify(error?.message||'Could not make this Thing. Please try again.');}
   finally{making=false;syncMakeOffer();}
  };
  root.addEventListener('worldlet:applet-layout',()=>syncMakeOffer());

@@ -27,7 +27,7 @@ fun WorldletRoot(model: AppModel) {
                 confirmButton = { TextButton({ model.replacePairing(link) }, Modifier.testTag("replacePairing")) { Text("Pair with $next") } },
                 dismissButton = { TextButton(model::keepPairing, Modifier.testTag("keepPairing")) { Text("Keep $current") } },
                 title = { Text("Pair with another computer?") },
-                text = { Text("Pair with $next instead of $current? This phone unpairs from $current and clears what it brought, Applets included.") },
+                text = { Text("Pair with $next instead of $current? This phone unpairs from $current and clears what it brought, Things included.") },
             )
         }
     }

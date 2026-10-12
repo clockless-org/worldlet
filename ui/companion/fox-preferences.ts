@@ -42,7 +42,7 @@ export function createFoxPreferences({call,view,root,setup,toggleSample,embedded
     row.append(control);table.append(row);
    }
    body.append(table);
-   view.setGuide({takeover:true,text:'**Background tasks**\n'+(runtime.rows?.length?'Each Applet keeps its own progress. Pause revokes active results and preserves saved progress. Items needing review are held for retry; other work continues.':'No tasks have started yet.'),body,actions:[button('Refresh',()=>show('tasks')),...(embedded?[]:[button('Back',()=>show('diagnostics')),button('Done',close)])]});return;
+   view.setGuide({takeover:true,text:'**Background tasks**\n'+(runtime.rows?.length?'Each Thing keeps its own progress. Pause revokes active results and preserves saved progress. Items needing review are held for retry; other work continues.':'No tasks have started yet.'),body,actions:[button('Refresh',()=>show('tasks')),...(embedded?[]:[button('Back',()=>show('diagnostics')),button('Done',close)])]});return;
   }
   if(screen==='diagnostics'){
    const report=await call('diagnostics');if(turn!==generation)return;
@@ -61,7 +61,7 @@ export function createFoxPreferences({call,view,root,setup,toggleSample,embedded
    // Mac Reconnect reuses a still-valid Google grant without asking which account (Windows asks
    // every time); a fresh grant after Disconnect always asks. So say how to switch on both hosts.
    const google=live.some(c=>c.transport!=='native'&&['gmail','google-calendar','google-drive'].includes(c.provider));
-   view.setGuide({takeover:true,text:live.length?'**Connected accounts.** Choose one to reconnect or disconnect it.'+(google?' To use a different Google account, disconnect Google first.':''):'**No accounts are connected yet.** Open an Applet in the world and I will offer to read it.',
+   view.setGuide({takeover:true,text:live.length?'**Connected accounts.** Choose one to reconnect or disconnect it.'+(google?' To use a different Google account, disconnect Google first.':''):'**No accounts are connected yet.** Open a Thing in the world and I will offer to read it.',
     actions});
    view.revealGuide?.();return;
   }
@@ -88,7 +88,7 @@ export function createFoxPreferences({call,view,root,setup,toggleSample,embedded
    if(typeof info.talkReplies==='boolean'){
     text+='\n\n**Talk with Fox**: right-click the microphone and choose Talk with Fox. Fox listens, answers each thing you say'+(info.talkReplies?' out loud':'')+' and listens again; talk over Fox or click the microphone while it speaks to interrupt, say "be quiet" to keep Talk going without the voice, and press Escape to end it.';
     actions.push(button(info.talkReplies?'Talk without reading replies':'Read replies in Talk',async()=>{await call('foxPreferenceChange',{setting:'talk_replies',value:!info.talkReplies});await show('voice');}));
-    text+='\n\n**Dictation**: in any text field of the World, press '+(/Mac/i.test(navigator.platform)?'⌘⇧D':'Ctrl+Shift+D')+' to speak into it, and again to stop. Local Whisper hears your World’s names (its people, Applets and places) so it spells them your way.';
+    text+='\n\n**Dictation**: in any text field of the World, press '+(/Mac/i.test(navigator.platform)?'⌘⇧D':'Ctrl+Shift+D')+' to speak into it, and again to stop. Local Whisper hears your World’s names (its people, Things and places) so it spells them your way.';
    }
    const select=document.createElement('select');select.setAttribute('aria-label','Spoken reply voice');
    // The first choice is the Agent's own voice when Fox's Agent has one (its Harness `voice` service), read by a system

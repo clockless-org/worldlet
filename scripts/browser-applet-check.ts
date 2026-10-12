@@ -9,7 +9,7 @@ await withBrowser(async browser=>{
  await page.evaluate(()=>{const root:any=document.querySelector('main'),content=document.querySelector('section');(window as any).installed=new Set();(window as any).opened=[];root.appletLayout={available:()=>true,has:id=>(window as any).installed.has(id),add:async id=>(window as any).installed.add(id)};(window as any).panel=(window as any).BrowserPanel.createBrowserPanel({root,content,native:{browser:{call:async()=>({})}},notify:()=>{},openApplet:id=>(window as any).opened.push(id)});(window as any).panel.mount('browser',{url:'https://github.com/test',platform:'web'});});
  await page.getByRole('button',{name:'Add GitHub to World'}).click();
  assert.deepEqual(await page.evaluate(()=>(window as any).opened),['app-github']);
- await page.getByRole('button',{name:'Open GitHub Applet'}).click();
+ await page.getByRole('button',{name:'Open GitHub Thing'}).click();
  assert.equal(await page.evaluate(()=>(window as any).installed.size),1);
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://example.com',loading:false}})));
  assert.equal(await page.locator('.browser-applet-offer:not(.browser-sign-in-offer)').isVisible(),false);
@@ -23,9 +23,9 @@ await withBrowser(async browser=>{
    madeApplets:{find:url=>w.made.find(m=>new URL(url).hostname===m.host)||null,make:async page=>{w.asked=page;return {id:'app-site-abc123',title:'Excalidraw'};}}});
   w.panel.mount('browser',{url:'https://www.google.com/',platform:'web'});
   window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://excalidraw.com/#room=1',title:'Excalidraw | Hand-drawn look & feel',loading:false}}));});
- await made.getByRole('button',{name:'Make Applet'}).click();
- assert.deepEqual(await made.evaluate(()=>[(window as any).asked,(window as any).notes]),[{title:'Excalidraw | Hand-drawn look & feel',url:'https://excalidraw.com/#room=1'},['Excalidraw is now an Applet in your World']]);
- await made.getByRole('button',{name:'Open Applet'}).click();
+ await made.getByRole('button',{name:'Make Thing'}).click();
+ assert.deepEqual(await made.evaluate(()=>[(window as any).asked,(window as any).notes]),[{title:'Excalidraw | Hand-drawn look & feel',url:'https://excalidraw.com/#room=1'},['Excalidraw is now a Thing in your World']]);
+ await made.getByRole('button',{name:'Open Thing'}).click();
  assert.deepEqual(await made.evaluate(()=>(window as any).opened),['app-site-abc123'],'a site already made opens its Applet');
  await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://github.com/a',title:'GitHub',loading:false}})));
  assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'a catalog site keeps its own offer');
@@ -35,7 +35,7 @@ await withBrowser(async browser=>{
  assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'a website Applet\'s site keeps its own offer');
  // A game's site is not the game (owner Order 2026-10-06): worldlet.ai itself gets Make Applet, not the Random game.
  await made.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:browser',{detail:{phase:'page',platform:'web',url:'https://worldlet.ai/',title:'Worldlet',loading:false}})));
- await made.getByRole('button',{name:'Make Applet'}).waitFor({state:'visible'});
+ await made.getByRole('button',{name:'Make Thing'}).waitFor({state:'visible'});
  assert.equal(await made.locator('.browser-applet-offer:not(.browser-sign-in-offer)').isVisible(),false,'a game Applet does not claim the rest of its site');
  await made.evaluate(()=>(window as any).panel.mount('youtube',{url:'https://www.youtube.com/',platform:'web'}));
  assert.equal(await made.locator('.browser-make-applet').isVisible(),false,'only the generic Browser offers Make Applet');

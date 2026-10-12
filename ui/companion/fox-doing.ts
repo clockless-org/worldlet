@@ -47,12 +47,12 @@ const DOING = {
  list_made_games:'Looking at your games',
  save_game:'Trying the game',
  read_made_game:'Reading the game',
- make_applet:'Making a new Applet',
- list_made_applets:'Looking at the Applets I made',
- save_applet:'Trying the new Applet',
- read_applet:'Reading the Applet',
- update_applet_data:'Updating the Applet',
- read_applet_data:'Reading the Applet',
+ make_applet:'Making a new Thing',
+ list_made_applets:'Looking at the Things I made',
+ save_applet:'Trying the new Thing',
+ read_applet:'Reading the Thing',
+ update_applet_data:'Updating the Thing',
+ read_applet_data:'Reading the Thing',
  read_artifact_brief:'Laying out the card',
  save_artifact_page:'Laying out the card'
 };

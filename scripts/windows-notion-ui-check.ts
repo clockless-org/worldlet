@@ -36,7 +36,7 @@ await withBrowser(async browser=>{
  for(const provider of ['apple-notes','apple-reminders','voice-memos']){
   const before=await page.evaluate(()=>notionCalls.length);
   await page.evaluate(provider=>notionGuide.show('connection','home',provider),provider);
-  assert.match(await page.locator('#guide').innerText(),/does not support this system Applet/);
+  assert.match(await page.locator('#guide').innerText(),/does not support this system Thing/);
   assert.equal(await page.evaluate(()=>notionCalls.length),before,'unsupported connection never reaches native execution');
  }
  assert.deepEqual(errors,[]);
