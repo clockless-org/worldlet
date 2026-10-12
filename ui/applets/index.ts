@@ -5,6 +5,7 @@ export {renderMailFocus} from './gmail/focus.ts';
 export {renderMailOpen} from './gmail/open.ts';
 export {mountAppletScene,sceneMaterialStyle,PLAIN_SCENE,type AppletScene,type AppletSceneRegion,type AppletSceneSource} from './scene/applet-scene.ts';
 export {renderSceneList} from './scene/scene-list.ts';
+export {appletSceneKey} from './scene/scene-family.ts';
 export {setMailAvatarLookup} from './gmail/presentation.ts';
 export {createAppletPanel} from './panels.ts';
 export {createGameApplet} from './games.ts';

@@ -5,7 +5,7 @@ import {uiIcon} from '../components/index.ts';
 import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,typedAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../core/browser/index.ts';
 import {createPictureInPictureOffer,createPictureInPictureWindow} from './picture-in-picture.ts';
 import {createAppletTaskScreen} from './applet-task-screen.ts';
-import {mountAppletScene,type AppletScene} from '../applets/index.ts';
+import {mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
 
 
 export function createBrowserPanel({root,content,native,notify,openApplet=(_id:string)=>{},openPage=(_url:string)=>{},leave=()=>{},canReturn=()=>false,onPage=(_applet:string,_page:{title:string,url:string},_byFox:boolean)=>{},sample=false,madeApplets=null as null|{find:(url:string)=>{id:string,title:string}|null,make:(page:{title:string,url:string})=>Promise<{id:string,title:string}>}}){
@@ -493,16 +493,19 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  }
  // `now` lays out at once instead of on the next frame: the panel was just hidden, so an Applet
  // opened before that frame (another one, then this one again) still shows its page anew.
- // A web Applet's page sits in the theme's Browser scene (ui/applets/scene): the painting frames it and the panel takes
- // the scene's screen region, so the native page follows the panel as before.
- let scene:AppletScene|null=null,sceneHost:HTMLElement|null=null;
+ // A web Applet's page sits in its theme scene (ui/applets/scene): its own or its family's (Spotify in the music
+ // scene), else the Browser scene; a scene Applet's original website stays in the Browser scene. The painting frames it and the panel takes the scene's primary region, so the
+ // native page follows the panel as before.
+ let scene:AppletScene|null=null,sceneHost:HTMLElement|null=null,sceneKey='';
  function syncScene(){
   const wanted=opened&&!content.hidden&&content.dataset.template==='browser'&&!!native?.browser;
-  if(!wanted){if(scene){scene.destroy();scene=null;sceneHost?.remove();}return;}
-  if(scene)return;
-  const world=content.parentElement as HTMLElement|null;if(!world)return;
+  const key=wanted?(getApp(appletKey)?.fullView?.kind==='web'&&appletSceneKey(appletKey)?appletKey:'browser'):'',world=content.parentElement as HTMLElement|null;
+  if(scene&&key===sceneKey)return;
+  if(scene){scene.destroy();scene=null;sceneHost?.remove();sceneKey='';if(world)delete world.dataset.webScene;}
+  if(!key||!world)return;
   sceneHost=document.createElement('div');sceneHost.className='browser-scene';content.before(sceneHost);
-  scene=mountAppletScene(sceneHost,'browser',{shell:world});scene.primary.element.setAttribute('aria-hidden','true');
+  scene=mountAppletScene(sceneHost,key,{shell:world});scene.primary.element.setAttribute('aria-hidden','true');
+  sceneKey=key;world.dataset.webScene=key;
  }
  function geometry(now?:unknown){
   syncScene();

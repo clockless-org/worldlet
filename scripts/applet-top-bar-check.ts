@@ -170,6 +170,18 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   console.log('PASS a website page\'s Back and Forward follow its history and rest with nowhere to go, Home takes it home, the menu\'s keys reach it, and World beside Fox returns to the World.');
  }
  {
+  // A website Applet's page sits in its family's theme scene (ui/applets/scene/scene-family.ts), else the Browser scene.
+  const {page,errors}=await open();
+  for(const [key,title,scene] of [['youtube','YouTube','browser'],['spotify','Spotify','spotify']]){
+   await enter(page,key,title);await page.locator('.browser-viewport').waitFor();
+   await page.locator(`.browser-scene .applet-scene[data-applet="${scene}"][data-painted=true]`).waitFor();
+   const [panel,region]=await Promise.all(['#notionContent',`.browser-scene .applet-scene[data-applet="${scene}"] .applet-scene-region[data-role=primary]`].map(s=>page.locator(s).boundingBox()));
+   assert(Math.abs(panel.x-region.x)<2&&Math.abs(panel.width-region.width)<2,key+' page on its scene region '+JSON.stringify({panel,region}));
+  }
+  assert.deepEqual(errors,[]);await page.close();
+  console.log('PASS a website page sits in its family\'s theme scene (Spotify in the music scene), else the Browser scene.');
+ }
+ {
   // Where the page is (owner requests 2026-10-08 and 2026-10-09): the toolbar's field shows the page's address, the whole
   // address once clicked; Enter opens an address typed there, or searches for anything else; Escape puts the page's back.
   const {page,errors}=await open();

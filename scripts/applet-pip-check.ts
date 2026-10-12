@@ -95,7 +95,8 @@ try{
   const style=await page.evaluate(props=>{const pick=(e:Element)=>Object.fromEntries(props.map(p=>[p,getComputedStyle(e)[p]]));return {fox:(()=>{/* Fox's round control, as it stands outside the message bar (the microphone itself is a plain icon inside it since 2026-10-11). */const probe=document.createElement('button');probe.className='companion-speech-button';const group=document.querySelector('.companion-controls:not(.companion-voice-controls)')!;group.append(probe);const picked=pick(probe);probe.remove();return picked;})(),offer:pick(document.querySelector('.browser-pip-offer'))};},props);
   assert.deepEqual(style.offer,style.fox,'the offer is the same control as Fox\'s');
   let r=await rects(page);
-  assert.ok(r.offer.y+r.offer.height<=r.panel.y&&r.offer.x+r.offer.width<=r.panel.x+r.panel.width&&r.offer.x+r.offer.width>=r.panel.x+r.panel.width-24,'the offer ends the bar\'s row above the panel: '+JSON.stringify({offer:r.offer,panel:r.panel}));
+  // The page sits in its theme scene's region (ui/applets/scene), which need not end where the Applet's side does.
+  assert.ok(r.offer.y+r.offer.height<=r.panel.y&&r.offer.x+r.offer.width<=r.panel.x+r.panel.width,'the offer ends the bar\'s row above the panel: '+JSON.stringify({offer:r.offer,panel:r.panel}));
   assert.equal(await offer(page).textContent(),'Picture in picture');
   if(shots)await page.screenshot({path:path.join(shots,'pip-offer.png')});
   // Fox driving the page keeps it in the panel.
