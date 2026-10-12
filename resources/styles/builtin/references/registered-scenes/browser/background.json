@@ -1,0 +1,9 @@
+{
+  "id": "browser",
+  "title": "Browser",
+  "collection": "core",
+  "generator": "built-in imagegen",
+  "purpose": "Registered runtime background",
+  "prompt": "Enlarge the existing Village Browser blank screen mainly downward and slightly right. Preserve the dark teal wood, brass compass, sunlit conservatory, globe, books and companion floor. Keep the screen empty and front-facing for dynamic HTML.",
+  "registrationKey": "browser"
+}

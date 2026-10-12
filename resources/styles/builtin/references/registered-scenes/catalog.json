@@ -293,7 +293,7 @@
       "category": "core",
       "group": "utilities",
       "source": "browser/background.png",
-      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. A village explorers conservatory. LEFT broad blank warm ivory viewing screen within dark teal oak portal with brass detailing. UPPER RIGHT a blue-and-green globe on brass arm, magnifying glass, travel books, lush potted fern and tall open windows looking into a garden, not mountains. CRITICAL simple practical layout: camera exactly perpendicular to MAIN PLANE. The usable blank interior rectangle must run from x=5% to x=74%, y=10% to y=87% of whole image, horizontal and vertical sides, NO perspective slant. Functional object border OUTSIDE those coordinates. Widen object to reach 76%. Shrink secondary props to upper-right x80%-97%,y10%-48%. Empty light stone lower-right x80%-98%,y55%-95%. No readable text, no actual UI.",
+      "prompt": "Village Browser in a sunlit conservatory. Tall dark teal wooden frame with brass compass, large continuous blank ivory screen, globe and books on the right. Extend the frame downward and slightly right for a larger web surface; preserve companion floor space. No baked-in interface or text.",
       "companion": [
         0.79,
         0.73,
@@ -305,10 +305,10 @@
           "id": "main",
           "role": "primary",
           "rect": [
-            0.06,
-            0.12,
-            0.635,
-            0.62
+            0.056,
+            0.117,
+            0.662,
+            0.724
           ],
           "material": "screen"
         }

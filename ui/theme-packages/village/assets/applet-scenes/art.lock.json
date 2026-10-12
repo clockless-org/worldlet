@@ -91,8 +91,8 @@
   },
   "assets/applet-scenes/browser/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/browser/background.png",
-    "sourceSha256": "21eca8446eaed7acd2d83a720715c7c939ae1d39ac381d88d18b5b65aa06d07f",
-    "sha256": "545ff3cd9e4bfb7e391d73f0f3302792ecd80a92f816369d41af40a6b4b14e3c",
+    "sourceSha256": "3912b8f96feb2cb6fb0b3d62c290c67051e5efd8013ffc55516bdf3cb6c6627f",
+    "sha256": "b01993ed40d72634a1f777be545e1c8f37aaca4d8244ca3fd45c21fe6761b751",
     "imageSize": [
       1672,
       941
