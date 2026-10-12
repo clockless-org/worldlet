@@ -83,6 +83,10 @@ await withBrowser(fileAccess,async browser=>{
   assert(Math.abs(bar.x+bar.width/2-(pet.x+pet.width/2))<=2,'The bar is centered under Fox');
   const crop=await page.evaluate(()=>(window as any).worldletCompanionGeometry());
   assert(crop.x<=bar.x&&crop.x+crop.width>=bar.x+bar.width,'Native crop contains the bar');
+  // ...at its open width too, so pointing at Fox never resizes the window under the pointer (owner Order 2026-10-12).
+  // Measured without Fox's card, which is wider than the bar whenever it shows.
+  const bare=await page.evaluate(()=>{const card=document.querySelector<HTMLElement>('.companion-dialogue'),was=card?.style.display??'';if(card)card.style.display='none';try{return (window as any).worldletCompanionGeometry();}finally{if(card)card.style.display=was;}});
+  const center=bar.x+bar.width/2;assert(bare.x<=center-150&&bare.x+bare.width>=center+150,'Native crop fits the open bar '+JSON.stringify({bare,bar}));
  }
  await assertDesktopRow();
  await form.hover();assert.equal(await type.getAttribute('placeholder'),'Message Fox','The desktop bar says only Message Fox, even when pointed at');
@@ -91,6 +95,21 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>localStorage.getItem('worldlet.companion.desktop-hint')),'1','The desktop hint is remembered for this installation');
  assert.equal(await page.locator('.companion-context').isVisible(),false,'Global title stays in World');
  assert.equal(await page.locator('.world-task-tracker').isVisible(),false,'Attention Center is not part of the movable cluster');
+ // Pointing at Fox widens the bar inside the window Fox already has: the native crop does not change, so the window
+ // never resizes under the pointer and Fox does not shake (owner Order 2026-10-12).
+ {const rest=await page.evaluate(()=>(window as any).worldletCompanionGeometry()),sizes=()=>page.evaluate(()=>(window as any).calls.filter(c=>c.action==='desktopCompanionSize').length),before=await sizes();
+  await fox.hover();await page.waitForTimeout(400);await settle();
+  assert.equal((await form.boundingBox()).width,300,'Pointing at desktop Fox opens the bar');
+  assert.deepEqual(await page.evaluate(()=>(window as any).worldletCompanionGeometry()),rest,'The native crop already fits the open bar');
+  assert.equal(await sizes(),before,'Pointing at Fox does not resize the desktop window');
+  // Fox's hide button shows at Fox's shoulder while the pointer is on Fox and puts Fox away.
+  const hide=page.locator('.companion-hide-button');
+  assert(await hide.isVisible(),'The hide button is there on the desktop');
+  assert.equal(await hide.evaluate(e=>getComputedStyle(e).opacity),'1','It shows while the pointer is on Fox');
+  const hideBox=await hide.boundingBox();assert(hideBox.x>=rest.x&&hideBox.y>=rest.y&&hideBox.x+hideBox.width<=rest.x+rest.width,'It sits inside the desktop window');
+  await hide.click();
+  assert(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='desktopCompanionHide')),'The hide button puts Fox away');
+  assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='desktopCompanionDrag')),false,'Clicking it does not drag Fox');}
  const detachedPet=await page.locator('.companion-pet').boundingBox(),detachedEntry=await page.locator('.companion-text-entry').boundingBox();
  assert.deepEqual(detachedPet,originalPet);assert.deepEqual(detachedEntry,originalEntry,'Native crop must not resize or reposition any HUD control');
  assert.equal(detachedEntry.y+detachedEntry.height-detachedPet.y-detachedPet.height,originalEntry.y+originalEntry.height-originalPet.y-originalPet.height,'Status bar stays at the same relative position');

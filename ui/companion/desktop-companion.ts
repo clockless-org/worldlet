@@ -33,9 +33,16 @@ export function installDesktopCompanion(){
   // OAuth legitimately activates a browser before the world/Companion exists.
   // Do not detach that setup page or create a second fallback Fox on blur.
   if(automatic&&(document.querySelector('#worldStartup')||!hud?.querySelector('.companion-avatar')))return null;
-  const elements=hud?[...hud.querySelectorAll<HTMLElement>('.companion-pet,.fox-name-tag,.companion-avatar canvas,.companion-controls>button,.companion-text-entry,.companion-input-handle,#notionCommand,.companion-input-wave,.companion-controls,.companion-dialogue')]:[fallback];
+  const elements=hud?[...hud.querySelectorAll<HTMLElement>('.companion-pet,.companion-hide-button,.fox-name-tag,.companion-avatar canvas,.companion-controls>button,.companion-text-entry,.companion-input-handle,#notionCommand,.companion-input-wave,.companion-controls,.companion-dialogue')]:[fallback];
   if(hud&&!isDesktopCompanion())document.documentElement.style.setProperty('--companion-desktop-transform',getComputedStyle(hud).transform);
   const rects=elements.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>e.getBoundingClientRect()).filter(r=>r.width&&r.height);
+  // The bar widens when the pointer is on it or on Fox (controls.css). Crop around its open width from the start:
+  // resizing the native window on every frame of that widening shook Fox on the desktop (owner Order 2026-10-12).
+  const bar=hud?.querySelector<HTMLElement>('.companion-text-entry');
+  if(bar?.getClientRects().length){
+   const open=parseFloat(getComputedStyle(bar).getPropertyValue('--companion-bar-open'))||0,box=bar.getBoundingClientRect(),half=Math.min(open,innerWidth-32)/2,center=box.left+box.width/2;
+   if(half>0)rects.push(new DOMRect(center-half,box.bottom-44,half*2,44));
+  }
   if(!rects.length)return null;
   const x=Math.max(0,Math.floor(Math.min(...rects.map(r=>r.left))-16)),y=Math.max(0,Math.floor(Math.min(...rects.map(r=>r.top))-16));
   return {x,y,width:Math.min(innerWidth,Math.ceil(Math.max(...rects.map(r=>r.right))+16))-x,height:Math.min(innerHeight,Math.ceil(Math.max(...rects.map(r=>r.bottom))+16))-y};

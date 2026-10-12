@@ -311,6 +311,9 @@ export interface DesktopCompanionService {
  keepInWorld(check:()=>boolean):void;
  /** The Companion's floating window on screen while on the desktop. */
  panelBounds():{x:number;y:number;width:number;height:number}|null;
+ /** Fox's hide button: the Companion's window goes away until the World is opened again. */
+ hide():void;
+ readonly isHidden:boolean;
  /** While Fox is on the desktop because another app is in front: the World as the window behind Fox shows it. */
  backdropImage?():NativeImage|null;
 }

@@ -42,6 +42,7 @@ export class DesktopCompanion implements DesktopCompanionService {
  private listeners:(()=>void)[]=[];
  private presentation:((desktop:boolean)=>void)[]=[];
  private sheets=0;
+ private hidden=false;
  private holds:(()=>boolean)[]=[];
  private inactive:ReturnType<typeof setTimeout>|null=null;
  /** The World's last frame, shown in the World window while Fox is out because another app is in front. */
@@ -61,6 +62,8 @@ export class DesktopCompanion implements DesktopCompanionService {
   this.entry=entry===undefined?companionEntry(host,{back:()=>{this.reattach();},quit:()=>app.quit()}):entry;
  }
  get isDesktop(){return this.desktop;}
+ /** On the desktop but put away with Fox's hide button. */
+ get isHidden(){return this.desktop&&this.hidden;}
  beforeDetach(listener:()=>void){this.listeners.push(listener);}
  onPresentation(listener:(desktop:boolean)=>void){this.presentation.push(listener);}
  keepInWorld(check:()=>boolean){this.holds.push(check);}
@@ -153,7 +156,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   if(!view||world.isDestroyed()||view.webContents.isDestroyed())return;
   for(const listener of this.listeners)try{listener();}catch(error){this.host.diagnostics.record(error,'desktopCompanion');}
   const panel=this.panel&&!this.panel.isDestroyed()?this.panel:this.makePanel(world);
-  this.panel=panel;this.desktop=true;
+  this.panel=panel;this.desktop=true;this.hidden=false;
   const crop=this.crop;
   panel.setBounds({x:Math.round(frame.x+crop.x),y:Math.round(frame.y+crop.y),width:crop.width,height:crop.height});
   world.contentView.removeChildView(view);
@@ -179,7 +182,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   if(!world||!view)return false;
   this.detaching=false;this.generation+=1;this.endDrag();
   if(this.desktop){
-   this.desktop=false;
+   this.desktop=false;this.hidden=false;
    this.panel?.contentView.removeChildView(view);
    view.setBackgroundColor(WORLD_BACKGROUND);
    world.contentView.addChildView(view);
@@ -252,6 +255,17 @@ export class DesktopCompanion implements DesktopCompanionService {
   },16);
  }
  endDrag(){if(this.drag)clearInterval(this.drag);this.drag=null;}
+ /** Fox's hide button (owner Order 2026-10-12): Fox leaves the desktop but the World does not come forward. Fox stays
+  * away until the person opens the World again (its window, the Dock or the tray); leaving the World after that
+  * brings Fox out as before. */
+ hide(){
+  const panel=this.panel;
+  if(!this.desktop||!panel||panel.isDestroyed())return;
+  this.endDrag();panel.hide();this.hidden=true;
+  // Without a visible World window the tray (Windows) is the way back; the Dock is on Mac.
+  const world=this.host.window();
+  if(!world||world.isDestroyed()||!world.isVisible())this.entry?.show();
+ }
  stop(){this.cancelInactive();this.detaching=false;this.generation+=1;this.endDrag();this.entry?.hide();}
  private makePanel(world:BaseWindow){
   const area=screen.getDisplayMatching(world.getBounds()).workArea;

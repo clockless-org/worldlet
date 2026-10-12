@@ -229,11 +229,20 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // ADVISORY FAIL until it has passed on 02, then COMPANION_BLOCKING turns on.
  if(process.platform==='darwin'){
   try{
-   await desktopCompanion(host.use<DesktopCompanionService>(DESKTOP_COMPANION),window,view,mark,
+   const companion=host.use<DesktopCompanionService>(DESKTOP_COMPANION);
+   await desktopCompanion(companion,window,view,mark,
     async()=>{
      await wait('Fox’s one-time hint: Back to World or Quit Completely',dialogue('/Back to World/')+'&&'+dialogue('/Quit Completely/'),10);
      // On the desktop Fox stands with its bar alone: no Settings or dock actions beside it, the microphone inside the bar (owner request 2026-10-11).
      await wait('Fox alone with its bar on the desktop, the microphone inside it',`(()=>{const shown=s=>[...document.querySelectorAll(s)].some(e=>e.getClientRects().length);const bar=document.querySelector('#notionCommand')?.getBoundingClientRect(),mic=document.querySelector('.companion-speech-button')?.getBoundingClientRect();return !shown('.companion-side>button,.companion-dock button')&&!!bar&&!!mic&&mic.width>0&&mic.left>=bar.left&&mic.right<=bar.right;})()`,10);
+     // Pointing at Fox widens the bar inside the window Fox already has, so the window never resizes and Fox does not
+     // shake (owner Order 2026-10-12); Fox's hide button puts it away until the World is opened again.
+     await wait('the desktop window already fits the open bar',`(()=>{const crop=window.worldletCompanionGeometry(),bar=document.querySelector('#notionCommand')?.getBoundingClientRect(),open=Math.min(300,innerWidth-32);return !!crop&&!!bar&&crop.width>=open&&crop.x<=bar.left+bar.width/2-open/2+1;})()`,10);
+     await wait('Fox’s hide button',`!!document.querySelector('.companion-pet>.companion-hide-button')?.getClientRects().length`,10);
+     await js(`document.querySelector('.companion-hide-button').click()`);
+     for(let i=0;i<25&&!companion.isHidden;i++)await new Promise(resolve=>setTimeout(resolve,200));
+     if(!companion.isHidden||!companion.isDesktop)throw Error('Fox’s hide button did not put Fox away');
+     mark('Fox’s hide button put Fox away');
     });
   }catch(error){if(COMPANION_BLOCKING)throw error;console.log('ADVISORY FAIL onboarding flow, desktop Companion: '+message(error));}
  }
