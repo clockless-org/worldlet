@@ -12,7 +12,7 @@ import {app,BaseWindow,Menu,WebContentsView} from 'electron';
 import {core} from '../../core.ts';
 import {Preferences} from '../../preferences.ts';
 import {WorldStore} from '../../store/world-store.ts';
-import {UsageAnalytics,INSTALLATION_KEYS,INSTALL_CLAIM_URL,ingestPath,personInput} from './analytics.ts';
+import {UsageAnalytics,INSTALLATION_KEYS,INSTALL_CLAIM_URL,ingestPath,personInput,safeDimensions} from './analytics.ts';
 import {minidumpCrash,nativeCrashes} from './native-crashes.ts';
 import {nativeCrashFromIps} from '../../../../../core/diagnostics/index.ts';
 import {capture,decode,dispose,encode,restore,validate,PREFERENCE_KEYS,type Archive} from './backup.ts';
@@ -189,9 +189,44 @@ try{
   assert.doesNotMatch(JSON.stringify(sent),/private|<script>/);
   analytics.setEnabled(false);clock+=86_400_000;native('keyDown');await settle();
   assert.equal(engaged().length,4,'nothing after the person turns sharing off');
-  assert.ok(sent.every(event=>event.event==='user_engaged'),'only user_engaged was sent: '+sent.map(event=>event.event).join(', '));
+  assert.ok(sent.every(event=>['user_engaged','world_active_time'].includes(event.event)),'only user_engaged (and the time it made) was sent: '+sent.map(event=>event.event).join(', '));
   contents.close();
   console.log('PASS user_engaged: a person\'s own input or Fox message once a day; synthetic DOM events, automation, unfocused input and moves do not count');
+ }
+
+ // world_active_time (owner 2026-10-11 20:21 PDT: Production metrics): the World is in use while focused and the person's
+ // own input came in the last minute. Reported when it is left, and every ten minutes of a long span; automation,
+ // unfocused input and the practice world add nothing.
+ {
+  const activeRoot=path.join(scratch,'active');fs.mkdirSync(activeRoot,{recursive:true});
+  const sent:any[]=[];let focused=true,clock=Date.parse('2026-10-03T10:00:00Z');
+  const analytics=new UsageAnalytics({...host,preferences:Preferences.at(activeRoot),profile:{...host.profile,root:activeRoot}},{config:{key:'phc_check',url:'https://us.i.posthog.com/capture/',version:'2026.1011.1',build:'1',channel:'website'},
+   fetch:(async(_url:unknown,init?:{body?:unknown})=>{sent.push(...JSON.parse(String(init?.body)).batch);return new Response('{}');}) as unknown as typeof fetch,
+   focused:()=>focused,now:()=>clock});
+  const active=()=>sent.filter(event=>event.event==='world_active_time').map(event=>event.properties.active_seconds);
+  const settle=()=>new Promise(resolve=>setTimeout(resolve,30));
+  const view=new WebContentsView(),contents=view.webContents;
+  await contents.loadURL('data:text/html,<p>World</p>');
+  analytics.watchInput(contents);
+  const native=(type:string)=>contents.emit(type.startsWith('mouse')?'before-mouse-event':'before-input-event',{preventDefault(){}},{type,x:4,y:4});
+  analytics.endActive();await settle();assert.deepEqual(active(),[],'no use, no event');
+  // 20 s between two inputs, five quiet minutes that count as one, and half a minute after the last before the blur.
+  native('keyDown');clock+=20_000;native('mouseWheel');clock+=300_000;native('keyDown');clock+=30_000;analytics.endActive();await settle();
+  assert.deepEqual(active(),[110]);assert.equal(typeof active()[0],'number','a number, not a bucket');
+  contents.debugger.attach('1.3');native('keyDown');clock+=30_000;native('keyDown');contents.debugger.detach();analytics.endActive();
+  focused=false;native('keyDown');clock+=30_000;native('keyDown');analytics.endActive();focused=true;
+  for(const type of ['mouseMove','keyUp'])native(type);clock+=30_000;analytics.endActive();
+  preferences.set('worldlet.sampleEnabled',true);native('keyDown');clock+=30_000;native('keyDown');analytics.endActive();preferences.set('worldlet.sampleEnabled',false);
+  await settle();assert.deepEqual(active(),[110],'automation, an unfocused app, moves and releases, and the practice world add nothing');
+  // A long span: an input every 30 s for 25 minutes reports at ten and twenty minutes, and the rest when it is left.
+  for(let i=0;i<=50;i++){native('keyDown');clock+=30_000;}
+  analytics.endActive();await settle();
+  assert.deepEqual(active(),[110,600,600,330]);
+  assert.deepEqual([safeDimensions({active_seconds:99_999}).active_seconds,safeDimensions({active_seconds:'60'}).active_seconds,safeDimensions({active_seconds:0.4}).active_seconds,safeDimensions({active_seconds:NaN}).active_seconds],[3600,undefined,undefined,undefined],'whole seconds up to an hour, numbers only');
+  analytics.setEnabled(false);native('keyDown');clock+=30_000;analytics.endActive();await settle();
+  assert.equal(active().length,4,'nothing with sharing off');
+  contents.close();
+  console.log('PASS world_active_time: focused time with the person\'s own input in the last minute, every ten minutes and when left; automation and the practice world add nothing');
  }
 
  // Invite tracking: a fresh installation asks worldlet.ai once which invited download it came from and then sends that
@@ -243,12 +278,21 @@ try{
   analytics.recordProductEvent('journal_opened','',{trigger:'user'});analytics.recordProductEvent('routine_completed','',{routine_source:'worldlet',routine_status:'ok',routine_late:'no',name:'private routine'});
   analytics.recordProductEvent('phone_paired','',{});analytics.recordProductEvent('phone_approved','',{approval_kind:'agent_permission'});
   analytics.recordProductEvent('agent_settings_changed','',{agent_setting:'skill',value:'private skill'});
+  // owner 2026-10-11 20:21 PDT: Production metrics.
+  analytics.recordProductEvent('attention_item_opened','',{open_surface:'computer',item_kind:'event',title:'private title'});
+  analytics.recordProductEvent('task_completed','',{task_kind:'routine'});analytics.recordProductEvent('task_completed','',{task_kind:'fox'});analytics.recordProductEvent('task_completed','',{task_kind:'private kind'});
+  analytics.recordProductEvent('phone_paired','',{phone_platform:'android'});analytics.recordProductEvent('world_active_time','',{active_seconds:42.7});
   await new Promise(resolve=>setTimeout(resolve,30));
   const focus=events.slice(before);
-  assert.deepEqual(focus.map(event=>event.event),['attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed'],'attention_shown is sent once a day');
+  assert.deepEqual(focus.map(event=>event.event),['attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed',
+   'attention_item_opened','task_completed','task_completed','task_completed','phone_paired','world_active_time'],'attention_shown is sent once a day');
+  assert.deepEqual([focus[8].properties.open_surface,focus[8].properties.item_kind,focus[9].properties.task_kind,focus[10].properties.task_kind,focus[11].properties.task_kind,focus[12].properties.phone_platform,focus[13].properties.active_seconds],
+   ['computer','event','routine','fox','other','android',42]);
   assert.equal(focus[0].properties.attention_count,'3');assert.equal(focus[1].properties.approval_surface,'phone');assert.equal(focus[4].properties.routine_status,'ok');assert.equal(focus[7].properties.agent_setting,'skill');
   assert.ok(!JSON.stringify(focus).includes('private'),'never a title, name or setting value');
   analytics.setEnabled(false);analytics.recordProductEvent('attention_approved','',{approval_surface:'computer',item_kind:'task'});analytics.recordProductEvent('agent_settings_changed','',{agent_setting:'model'});
+  await new Promise(resolve=>setTimeout(resolve,30));
+  analytics.recordProductEvent('task_completed','',{task_kind:'applet'});analytics.recordProductEvent('world_active_time','',{active_seconds:60});
   await new Promise(resolve=>setTimeout(resolve,30));
   assert.equal(events.length,before+focus.length,'sharing off stops them');
   console.log('PASS invite tracking: a fresh installation claims its invited download once and reports only the opaque token');

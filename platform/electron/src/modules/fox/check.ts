@@ -220,7 +220,8 @@ try{
   routineResult({error:'A scheduled task could not finish. Ask Fox to check your routines.'});
   assert.equal(routineItems().length,2,'an error before any run is no item');
   // Each run is counted once (who ran it, how it ended, whether late); an error before any run is no run.
-  assert.deepEqual(usage.map(([event,,dimensions])=>[event,dimensions]),[['routine_completed',{routine_source:'worldlet',routine_status:'ok',routine_late:'yes'}],['routine_completed',{routine_source:'worldlet',routine_status:'failed',routine_late:'no'}]]);
+  // A run that went well is also a finished task (owner 2026-10-11 20:21 PDT: Production metrics).
+  assert.deepEqual(usage.map(([event,,dimensions])=>[event,dimensions]),[['routine_completed',{routine_source:'worldlet',routine_status:'ok',routine_late:'yes'}],['task_completed',{task_kind:'routine'}],['routine_completed',{routine_source:'worldlet',routine_status:'failed',routine_late:'no'}]]);
   usage.length=0;
   const request={applet:'app-youtube',task:'Find three cooking videos under ten minutes',request:'Find me short cooking videos on YouTube',parent:'turn-1'};
   const started=actions.appletTaskStart(request) as Row;
@@ -258,7 +259,7 @@ try{
   }
   assert.deepEqual((actions.appletTasks({}) as Row).tasks,[]);
   // Analytics: the catalog key, a coarse duration and, on failure, Core's error code; never the task or result.
-  assert.deepEqual(usage.map(([event,,dimensions])=>[event,dimensions]),[['applet_task_started',{applet:'youtube'}],['applet_task_completed',{applet:'youtube'}]]);
+  assert.deepEqual(usage.map(([event,,dimensions])=>[event,dimensions]),[['applet_task_started',{applet:'youtube'}],['applet_task_completed',{applet:'youtube'}],['task_completed',{task_kind:'applet'}]]);
   assert.equal(usage[0][1],'');assert.match(usage[1][1],/^(under_1s|1_5s|5_15s)$/,'a coarse duration bucket');
   taskRuntime.run=async()=>{throw new Error('The request timed out.');};
   actions.appletTaskStart(request);

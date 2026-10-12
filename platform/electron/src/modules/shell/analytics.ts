@@ -38,7 +38,9 @@ export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
 export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
 const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','agent_profile_result','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','fox_browse_changed','order_sent','order_stopped',
- 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall']);
+ 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall',
+ // owner 2026-10-11 20:21 PDT: Production metrics.
+ 'attention_item_opened','task_completed','world_active_time']);
 /** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
  * Fox and startup timings (`timingBucket` in core/diagnostics). */
 const DURATIONS=['under_1s','1_5s','5_15s','over_15s','15_60s','1_5m','5_15m','over_15m'];
@@ -96,16 +98,23 @@ const ALLOWED:Record<string,string[]>={
  // routine_completed: whose scheduler ran it (Worldlet's own routines or the Agent's), how it ended, and whether it ran late.
  routine_source:['worldlet','agent'],routine_status:['ok','failed'],routine_late:['yes','no'],
  // agent_settings_changed: which part of Settings › Agent changed; never what it changed to.
- agent_setting:['model','permission','account','routine','skill']
+ agent_setting:['model','permission','account','routine','skill'],
+ // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform.
+ // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
+ phone_platform:['ios','android','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet']
 };
-export function safeDimensions(input:Row):Record<string,string> {
- const result:Record<string,string>={};
+/** world_active_time: whole seconds, at most an hour per event. */
+export const ACTIVE_LIMIT=3600;
+export function safeDimensions(input:Row):Record<string,string|number> {
+ const result:Record<string,string|number>={};
  for(const [key,values] of Object.entries(ALLOWED))if(typeof input[key]==='string')result[key]=values.includes(input[key])?input[key]:'other';
  if(typeof input.outcome_key==='string'&&/^[a-f0-9]{64}$/.test(input.outcome_key))result.outcome_key=input.outcome_key;
  // main_stall: the code name of the host action or background task that held the main process (host/busy.ts).
  if(typeof input.stall_task==='string')result.stall_task=stallTask(input.stall_task);
  // app_build_changed: the Build the previous launch ran (modules/shell/updates.ts), a public release number.
  if(typeof input.from_build==='string'&&/^[1-9]\d{0,4}$/.test(input.from_build))result.from_build=input.from_build;
+ // world_active_time: the only number a product event carries (owner 2026-10-11 20:21 PDT: Production metrics).
+ if(typeof input.active_seconds==='number'&&Number.isFinite(input.active_seconds)&&input.active_seconds>=1)result.active_seconds=Math.min(ACTIVE_LIMIT,Math.floor(input.active_seconds));
  return result;
 }
 /** Input that is a person at the World: a key, a mouse button or the wheel, never a mouse move or key release.
@@ -124,6 +133,8 @@ export class UsageAnalytics implements AnalyticsService {
  private now:()=>number;
  private system:NodeJS.Platform;
  private engagedCheckedAt=-Infinity;
+ // world_active_time: active time not yet reported, the person's last counted input and when the span started.
+ private activeMs=0;private lastInput=-Infinity;private activeFrom=-Infinity;
  private session=uuid();
  private sending=new Map<string,AbortController>();
  private client:PostHog|null=null;
@@ -255,14 +266,39 @@ export class UsageAnalytics implements AnalyticsService {
  /** The World page's own input counts as real use (main process, before the page sees it). A mouse press may arrive
   * just before the click focuses the window, so an unfocused press is looked at again shortly after. */
  watchInput(contents:WebContents){
+  const use=()=>{this.noteActive();this.recordUserEngaged('input');};
   const seen=(type:unknown)=>{
    if(typeof type!=='string'||!PERSON_INPUT.has(type)||contents.isDestroyed())return;
    const automated=contents.debugger.isAttached();
-   if(personInput(type,{focused:this.focused(),automated}))this.recordUserEngaged('input');
-   else if(!automated&&type==='mouseDown')setTimeout(()=>{if(!contents.isDestroyed()&&personInput(type,{focused:this.focused(),automated:contents.debugger.isAttached()}))this.recordUserEngaged('input');},150);
+   if(personInput(type,{focused:this.focused(),automated}))use();
+   else if(!automated&&type==='mouseDown')setTimeout(()=>{if(!contents.isDestroyed()&&personInput(type,{focused:this.focused(),automated:contents.debugger.isAttached()}))use();},150);
   };
   contents.on('before-input-event',(_event,input)=>seen(input.type));
   contents.on('before-mouse-event',(_event,mouse)=>seen(mouse.type));
+ }
+ /** world_active_time (owner 2026-10-11 20:21 PDT: Production metrics): the World counts as in use while it is focused
+  * and the person's own input (watchInput: never automation) came in the last minute, so each input adds the time
+  * since the one before, up to a minute. The total goes out at the first input ten minutes into a span, and when the
+  * window loses focus or hides and on quit (endActive); the practice world is not counted. */
+ private noteActive(){
+  const now=this.now();
+  if(!this.config||!this.enabled()||this.host.store?.sampleEnabled?.()){this.activeMs=0;this.lastInput=this.activeFrom=-Infinity;return;}
+  if(Number.isFinite(this.lastInput))this.activeMs+=Math.min(Math.max(0,now-this.lastInput),60_000);
+  this.lastInput=now;
+  if(!Number.isFinite(this.activeFrom))this.activeFrom=now;
+  if(now-this.activeFrom>=600_000)this.reportActive(now);
+ }
+ /** The World stopped being in use (blur, hide, quit): the minute after the last input counts up to now. */
+ endActive(){
+  const now=this.now();
+  if(Number.isFinite(this.lastInput))this.activeMs+=Math.min(Math.max(0,now-this.lastInput),60_000);
+  this.lastInput=this.activeFrom=-Infinity;
+  this.reportActive(now);
+ }
+ private reportActive(now:number){
+  const seconds=Math.floor(this.activeMs/1000);
+  this.activeMs-=seconds*1000;if(Number.isFinite(this.activeFrom))this.activeFrom=now;
+  if(seconds>=1)this.recordProductEvent('world_active_time','',{active_seconds:seconds});
  }
  recordOnboardingCompleted(){this.record('onboarding_completed','WorldletUsageOnboardingReported','1');}
  recordProductEvent(event:string,duration:string,dimensions:Row){
