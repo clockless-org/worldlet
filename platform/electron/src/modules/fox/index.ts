@@ -499,7 +499,7 @@ export function installFox(host:Host){
   const id='proactive-'+crypto.randomUUID().toUpperCase();
   const run={id,runtime:make(),cancelled:false};
   proactiveRun=run;trusts.set(id,{untrusted:true,sources:['browse_web']});
-  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0)),environment:proactiveEnvironment(request.environment)});
+  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0)),opened:moment==='browsing'&&request.opened===true,environment:proactiveEnvironment(request.environment)});
   return {started:true,id};
  }
  /** What the page says the place shows (location, state, view, the World's facts), as a turn of the person's own
@@ -510,7 +510,7 @@ export function installFox(host:Host){
   const {history:_h,here:_p,browsing:_b,page:_g,proactive:_m,...rest}=value as Row;
   try{return JSON.stringify(rest).length<=6000?rest:{};}catch{return {};}
  }
- async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,environment={}}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;environment?:Row}){
+ async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,opened=false,environment={}}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;opened?:boolean;environment?:Row}){
   let line:string|null=null,card='';
   try{
    const profile=companion.archive(scope);
@@ -528,7 +528,7 @@ export function installFox(host:Host){
     if(visit&&pageText)context.page={site:visit.site,title:visit.title,text:pageText};
    }catch(error){host.diagnostics.record(error,'foxPlace');}
    const local=new Date().toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'});
-   const text=proactiveTask({moment,place,local,minutes,recent:proactive.recent,lastWords:said?characterPrefix(said.text,300):''});
+   const text=proactiveTask({moment,place,local,minutes,recent:proactive.recent,lastWords:said?characterPrefix(said.text,300):'',opened});
    const body={action:'chat',session:run.id,mode:'chat',text,history:[],context,style:companion.prompt(companion.reference(profile))+guidanceFor(scope),sample:false};
    const events=turnEvents(run.id,scope,{active:()=>proactiveRun===run&&!run.cancelled,allowActions:false,reads:proactiveToolAllowed,record:false});
    // Nobody asked, so a missing model ends the ask quietly instead of opening model settings.

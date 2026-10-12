@@ -1,0 +1,5 @@
+/* A line Fox said on its own (fox-proactive.ts arriveProactive, owner 2026-10-12): a warm ring around Fox's card and
+   one light sweeping across it as the line arrives; the ring stays, softer, while the line shows and goes with it. */
+#notionWorld.native-console .companion-dialogue>.companion-proactive-glow{position:absolute;inset:0;z-index:1;border-radius:inherit;overflow:hidden;pointer-events:none;opacity:0;box-shadow:0 0 0 1.5px #eea24bb3,0 0 20px 3px #ffbd5c66;transition:opacity .3s ease}
+#notionWorld.native-console .companion-dialogue[data-proactive=true]>.companion-proactive-glow{opacity:1}
+#notionWorld.native-console .companion-dialogue>.companion-proactive-glow>.companion-proactive-shine{position:absolute;top:-10%;bottom:-10%;left:0;width:40%;opacity:0;background:linear-gradient(90deg,#ffd27a00,#ffcf6faa 40%,#fffaf0f2 50%,#ffcf6faa 60%,#ffd27a00)}
