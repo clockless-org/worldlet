@@ -1,5 +1,5 @@
-// Browse with me (owner request 2026-10-08): in an Applet Fox asks for one browse line per visit after a short look,
-// shows it in its card with Browse with me | Don't bother, and Don't bother goes to the host and stays on Fox's cards
+// Browse with me (owner request 2026-10-08): in an Applet Fox asks for a browse line a few seconds after it opens
+// (owner 2026-10-12 「进一个 applet 就开始推荐说话」), shows it in its card with its own arrival effect with Browse with me | Don't bother, and Don't bother goes to the host and stays on Fox's cards
 // in the Applet so it can be turned back on there; the World never shows the switch.
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
@@ -37,19 +37,22 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>(window as any).openResult!==null);
  assert.equal(await page.locator('#notionContent').getAttribute('data-applet'),'youtube');
  assert.equal(await on.isVisible(),false,'Fox’s own reply carries no switch while Browse with me is on');
- // About 30 seconds of looking (out of Fox's message bar): one browse ask for this visit.
+ // A few seconds after the Applet opens (out of Fox's message bar): the opening browse ask for this visit.
  await page.locator('#notionInput').blur();
- for(let i=0;i<4;i++)await page.clock.fastForward(15_000);
+ for(let i=0;i<3;i++)await page.clock.fastForward(2_000);
  // The fake clock stops waitForFunction's polling, so the ask is read once the timers have run.
  assert.ok(await page.evaluate(()=>(window as any).calls.some((c:any)=>c.action==='foxProactive')),'Fox was asked after the look');
  const asks=await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'));
- assert.equal(asks.length,1);assert.equal(asks[0].moment,'browsing');assert.match(asks[0].visit,/@\d+$/);
+ assert.equal(asks.length,1);assert.equal(asks[0].moment,'browsing');assert.match(asks[0].visit,/@\d+$/);assert.equal(asks[0].opened,true,'the opening ask');
  await page.clock.fastForward(1000);
 await card.getByText('This video is the one your calendar note links to.').waitFor();
  await on.waitFor();
+ // A line Fox said first wears its own effect: the warm ring on the card.
+ assert.equal(await card.getAttribute('data-proactive'),'true');
+ assert.equal(await card.locator('.companion-proactive-glow').count(),1);
  assert.equal(await on.getAttribute('aria-pressed'),'true');assert.equal(await off.getAttribute('aria-pressed'),'false');
  await page.screenshot({path:'output/fox-browse/browse-line.png'});
- // Still in the same visit: no second ask.
+ // Still in the same visit, with Fox's line still showing: no second ask over it.
 for(let i=0;i<8;i++)await page.clock.fastForward(15_000);
  assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'&&c.moment==='browsing').length),1,'one line per visit');
  await off.click();
@@ -64,5 +67,5 @@ for(let i=0;i<8;i++)await page.clock.fastForward(15_000);
  await page.clock.fastForward(5000);
  assert.equal(await page.locator('.companion-browse:visible').count(),0,'never in the World');
  assert.deepEqual(errors,[]);
- console.log('PASS Browse with me: one browse ask per Applet visit, its line in Fox’s card with Browse with me | Don’t bother, the choice sent to the host, no switch in the World');
+ console.log('PASS Browse with me: an opening browse ask as the Applet opens, its line arriving with its own effect, its line in Fox’s card with Browse with me | Don’t bother, the choice sent to the host, no switch in the World');
 });

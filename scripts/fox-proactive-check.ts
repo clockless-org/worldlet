@@ -55,40 +55,45 @@ assert.equal(proactiveHeard(state,{now:t0,text:'安静点'}),true);
 assert.deepEqual(ask(state,t0+3600),{due:false,reason:'quiet'});
 assert.deepEqual(ask(state,t0+PROACTIVE.quietSeconds+PROACTIVE.minGapSeconds),{due:true});
 
-// Browse with me (owner request 2026-10-08): in an Applet or page Fox may say one line per visit after a short
-// look, asked at most twice per visit, on its own clock (2 minutes, doubling when let pass, 30 a day) apart from the
-// other moments' limits (owner 2026-10-10 「让它提供的更勤一点」).
+// Browse with me (owner request 2026-10-08): in an Applet or page Fox may say a line about the screen, asked a few
+// times per visit, on its own clock (45 seconds, doubling when let pass, at most four times) apart from the other
+// moments' limits (owner 2026-10-10 「让它提供的更勤一点」, 2026-10-12 「进一个 applet 就开始推荐说话」).
 const browse=(state:ReturnType<typeof proactiveState>,now:number,visit:string,place='Mail')=>proactiveDue(state,{now,day,moment:'browsing',place,visit});
 state=proactiveState();
 assert.equal(state.browse,true,'on unless the person chose Don\'t bother');
+assert(PROACTIVE.browse.settleSeconds<=5,'the opening line is asked a few seconds after the Applet opens');
 assert.deepEqual(browse(state,t0,''),{due:false,reason:'visit'},'a browse ask names its visit');
 assert.deepEqual(browse(state,t0,'mail@1'),{due:true});
 proactiveAsked(state,{now:t0,day,moment:'browsing',visit:'mail@1'});
-assert.deepEqual(browse(state,t0+PROACTIVE.browse.againSeconds,'mail@1'),{due:true},'a second look in the same visit');
-proactiveAsked(state,{now:t0+PROACTIVE.browse.againSeconds,day,moment:'browsing',visit:'mail@1'});
-assert.deepEqual(browse(state,t0+3600,'mail@1'),{due:false,reason:'visit'},'at most two asks per visit');
+let at=t0;
+for(let i=1;i<PROACTIVE.browse.perVisit;i++){at+=PROACTIVE.browse.againSeconds;assert.deepEqual(browse(state,at,'mail@1'),{due:true},'another look in the same visit');proactiveAsked(state,{now:at,day,moment:'browsing',visit:'mail@1'});}
+assert.deepEqual(browse(state,t0+3600,'mail@1'),{due:false,reason:'visit'},'a few asks per visit at most');
 state.browseAt=t0;
-assert.deepEqual(browse(state,t0+60,'x@2','X'),{due:false,reason:'gap'});
+assert.deepEqual(browse(state,t0+10,'x@2','X'),{due:false,reason:'gap'});
 assert.deepEqual(browse(state,t0+PROACTIVE.browse.gapSeconds,'x@2','X'),{due:true});
 // A browse ask leaves the other moments' clock alone, and its lines do not use up their per-place or per-day counts.
 assert.equal(state.lastAt,0);assert.deepEqual(ask(state,t0+60),{due:true});
 proactiveSpoke(state,{now:t0+PROACTIVE.browse.gapSeconds,day,place:'X',line:'That thread is from your landlord.',moment:'browsing'});
 assert.equal(state.spoken,0);assert.equal(state.browsed,1);assert.deepEqual(state.places,{});
-assert.deepEqual(browse(state,t0+2*PROACTIVE.browse.gapSeconds,'y@3','Y'),{due:false,reason:'waiting'},'a line waits for its answer');
-// Let pass, the next browse lines wait longer: twice, then four times the gap.
-now=t0+PROACTIVE.browse.gapSeconds+PROACTIVE.answeredSeconds+1;
-assert.deepEqual(browse(state,now,'y@3','Y'),{due:true});
-assert.equal(state.ignored,1);
+// A browse line does not wait for the last line's answer (one unanswered line held every Applet quiet for 10 minutes).
+now=t0+2*PROACTIVE.browse.gapSeconds;
+assert.deepEqual(browse(state,now,'y@3','Y'),{due:true},'the next Applet opens with its own line');
+// Back in the same Applet soon after Fox spoke there: no opening line again until a while has passed.
+assert.deepEqual(browse(state,now,'x@9','X'),{due:false,reason:'place'});
+assert.deepEqual(browse(state,t0+PROACTIVE.browse.gapSeconds+PROACTIVE.browse.placeSeconds,'x@9','X'),{due:true});
+// Let pass (a new line over an unanswered one, or no answer in time), the next browse lines wait longer, at most ×4.
 proactiveAsked(state,{now,day,moment:'browsing',visit:'y@3'});proactiveSpoke(state,{now,day,place:'Y',line:'Two',moment:'browsing'});
-const spokeAt=now;now+=PROACTIVE.answeredSeconds+1;
-browse(state,now,'w@4','W');
-assert.equal(state.ignored,2);
-assert.deepEqual(browse(state,spokeAt+4*PROACTIVE.browse.gapSeconds-1,'w@4','W'),{due:false,reason:'gap'});
-assert.deepEqual(browse(state,spokeAt+4*PROACTIVE.browse.gapSeconds,'w@4','W'),{due:true});
+assert.equal(state.ignored,1);
+assert.deepEqual(browse(state,now+2*PROACTIVE.browse.gapSeconds-1,'w@4','W'),{due:false,reason:'gap'});
+assert.deepEqual(browse(state,now+2*PROACTIVE.browse.gapSeconds,'w@4','W'),{due:true});
+state.ignored=3;
+assert.deepEqual(browse(state,now+4*PROACTIVE.browse.gapSeconds,'w@4','W'),{due:true},'browsing slows at most four times');
+// Answering resets it.
+proactiveHeard(state,{now:now+30,text:'yes, open it'});assert.equal(state.ignored,0);
 // The day's browse lines run out on their own count.
 state=proactiveState();
 for(let i=0;i<PROACTIVE.browse.perDay;i++)proactiveSpoke(state,{now:t0,day,place:'p',line:String(i),moment:'browsing'});
-state.pending=null;
+state.pending=null;state.ignored=0;
 assert.deepEqual(browse(state,t0+PROACTIVE.browse.gapSeconds,'z@1'),{due:false,reason:'day'});
 assert.deepEqual(proactiveDue(state,{now:t0+PROACTIVE.browse.gapSeconds,day:'2026-10-07',moment:'browsing',place:'p',visit:'z@1'}),{due:true});
 // Don't bother: Fox never speaks first, for any moment, until Browse with me is chosen again; "be quiet" holds browsing too.
@@ -99,6 +104,10 @@ assert.deepEqual(browse(state,t0+60,'v'),{due:false,reason:'quiet'});
 // The browse ask asks for context about the screen, still read only with PASS.
 const browseTask=proactiveTask({moment:'browsing',place:'Mail',local:'Thu 11:40',minutes:1,recent:[],lastWords:''});
 for(const part of ['looking at Mail','context','PASS','read only'])assert(browseTask.includes(part),part);
+// The ask made as the Applet opens asks for one concrete recommendation about it, with the lowest bar.
+const openTask=proactiveTask({moment:'browsing',place:'Mail',local:'Thu 11:40',minutes:0,recent:[],lastWords:'',opened:true});
+for(const part of ['just opened Mail','one concrete recommendation','rates 3 or more','PASS','read only'])assert(openTask.includes(part),part);
+assert(!browseTask.includes('just opened')&&!proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:'',opened:true}).includes('just opened'),'only the opening browse ask');
 assert(!proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:''}).includes('Browsing along'),'only the browse ask adds the context reason');
 
 // The switch: the host keeps the choice (on by default), refuses every ask while off and cancels one running; the
@@ -113,13 +122,23 @@ const chat=fs.readFileSync('ui/companion/native-chat.ts','utf8');
 assert.match(chat,/make\('button','','Browse with me'\),browseOff=make\('button','','Don’t bother'\)/);
 assert.match(chat,/browseSwitch\.hidden=browsing===null\|\|onDesktop\(\)\|\|root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true'\|\|\(context\.key\.split\(':'\)\[0\]==='overview'&&!contentIdentity\(\)\)\|\|!\(browsing===false\|\|guided&&shownGuide\.browsing===true\)/);
 const pageSource=fs.readFileSync('ui/companion/fox-proactive.ts','utf8');
-assert.match(pageSource,/const due=looks===0\?here>=PROACTIVE\.browse\.settleSeconds:looks<PROACTIVE\.browse\.perVisit&&\(now-lookedAt\)\/1000>=PROACTIVE\.browse\.againSeconds;/);
-assert.match(pageSource,/if\(due&&quiet>=5\)\{settled=true;looks\+\+;lookedAt=now;void ask\('browsing',key\);return;\}/);
+assert.match(pageSource,/const due=looks===0\?\(openedByPerson\?here>=PROACTIVE\.browse\.settleSeconds:here>=PROACTIVE\.browse\.againSeconds\):looks<PROACTIVE\.browse\.perVisit&&\(now-lookedAt\)\/1000>=PROACTIVE\.browse\.againSeconds;/);
+// Only a place the person opened themselves gets the opening line; one Fox or the first run brought them to (the end of
+// the tour leaves them on Fox's page, onboarding-flow.ts) waits for the later look.
+assert.match(pageSource,/openedByPerson=since-activeAt<10_000;/);
+assert.match(pageSource,/if\(due&&quiet>=2\)\{settled=true;looks\+\+;lookedAt=now;void ask\('browsing',key\);return;\}/);
+assert.match(pageSource,/\{visit,opened:looks===1&&openedByPerson\}/);
+assert.match(pageSource,/setInterval\(tick,2000\)/);
+assert.match(hostSource,/opened:moment==='browsing'&&request\.opened===true/);
+// A line Fox said first arrives with its own effect in the card, never on a reply.
+assert.match(chat,/const spokeFirst=guided&&String\(shownGuide\.source\|\|''\)\.startsWith\('proactive:'\)\?shownGuide:null;panel\.dataset\.proactive=String\(!!spokeFirst\);/);
+assert.match(chat,/arriveProactive\(panel,log,reducedMotion\.matches\)/);
+assert(fs.readFileSync('scripts/build-ui.ts','utf8').includes("'ui/companion/fox-proactive.css'"),'the effect styles ship');
 // The ask sees what the place shows, as the person's own turn would (a native Applet has no page text).
 assert.match(pageSource,/environment:context/);
 assert.match(chat,/environment:\(\)=>\(\{key:context\.key,location:context\.title,state:context\.detail,/);
 assert.match(hostSource,/const context:Row=\{\.\.\.environment,history:recentHistory\(\),proactive:\{moment\}\};/);
-assert(browseTask.includes('rates 5 or more')&&proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:''}).includes('rates 6 or more'),'the bar is lower while browsing');
+assert(browseTask.includes('rates 4 or more')&&proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:''}).includes('rates 6 or more'),'the bar is lower while browsing');
 assert(policyIncludes('foxBrowse'),'the switch is plumbing, never World history');
 
 // Fox's answer: PASS shows nothing; a line is one line, unquoted and clipped.

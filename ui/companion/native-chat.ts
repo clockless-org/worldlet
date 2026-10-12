@@ -6,7 +6,7 @@ import {uiIcon} from '../components/index.ts';
 import {mountCompanionInfo} from './companion-info.ts';
 import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
-import {mountFoxProactive} from './fox-proactive.ts';
+import {mountFoxProactive,arriveProactive} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
 import {isRequestCancellation,reportEngagement,reportProductEvent} from '../shell/index.ts';
 import {contextThread,cleanRecall,FOX_MAIN_THREAD,restoredMainHistory} from '../attention/index.ts';
@@ -365,7 +365,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  const previousMotion={};
  function motionVariant(kind){const last=previousMotion[kind];const index=last===undefined?Math.floor(Math.random()*3):(last+1+Math.floor(Math.random()*2))%3;previousMotion[kind]=index;return index;}
  let recommendationSignature='';
- let streamingReply=false,turnStatus='',guide=null,guideTurn=-1,answeredGuide='',choice:{label:string;at:number}|null=null,keyPress=null,keyHoldTimer=null,guideShown=null;
+ let streamingReply=false,turnStatus='',guide=null,guideTurn=-1,answeredGuide='',choice:{label:string;at:number}|null=null,keyPress=null,keyHoldTimer=null,guideShown=null,proactiveArrived=null;
  // A guide belongs to the context it appeared in, like a turn: it shows in that context's
  // thread and waits there while the person is elsewhere. Model setup, first-use journeys,
  // the memory editor and help narration for a running turn follow the person instead.
@@ -477,6 +477,8 @@ export function createNativeChat(call){return function({button,input,status,exec
   guideShown=guided?shownGuide:null;root.dataset.foxGuide=String(guided);guideActions.hidden=!guided||!shownGuide?.actions?.length;guideContent.hidden=!guided||!shownGuide?.body;
   if(guided){if(guideActions.firstChild!==shownGuide.actions?.[0])guideActions.replaceChildren(...(shownGuide.actions||[]));if(guideContent.firstChild!==shownGuide.body)guideContent.replaceChildren(...(shownGuide.body?[shownGuide.body]:[]));}
   panel.dataset.bubbleMode=guided?'guide':'reply';
+  // A line Fox said on its own arrives with its own effect (owner 2026-10-12), apart from replies.
+  const spokeFirst=guided&&String(shownGuide.source||'').startsWith('proactive:')?shownGuide:null;panel.dataset.proactive=String(!!spokeFirst);
   // Continuous conversation, context-local presentation. Ambient copy is not
   // a model turn and never enters the transcript or overwrites saved replies.
   const currentReply=sameContext(reply)&&reply?.text?reply:null;
@@ -670,6 +672,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   send.title=active?(steering&&!!turnEntry&&!quietTurn&&!chatRoute?.()?'Add to current task':`Send next · ${queuedTurns.length} queued`):'';
   layout();
  if(!panel.hidden&&!wasVisible)animateReply();
+  if(spokeFirst&&spokeFirst!==proactiveArrived&&!panel.hidden){proactiveArrived=spokeFirst;arriveProactive(panel,log,reducedMotion.matches);}else if(!spokeFirst)proactiveArrived=null;
   if(panel.hidden){replyAnimation?.cancel();replyAnimation=null;cancelThreadMotion();}
  }
  function animateReply(){
