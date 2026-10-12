@@ -1,11 +1,12 @@
-import {seedShelf,enterShelf,closeOnShelf,shelfRing,SHELF_SIZE,type ShelfState} from '../../core/applets/index.ts';
+import {seedShelf,enterShelf,shelfRing,SHELF_SIZE,type ShelfState} from '../../core/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
 
 // The Applet shelf (owner request 2026-10-09: "applet之间要可以丝滑切换，进入applet后，上方显示最近使用的applets，像一个
 // 一个tab，开新tab是进入browser"): inside an Applet, the recently used Applets stand on a small wooden shelf above it, each
 // its World device, the open one's name in plain text below it, the others' on hover (owner request 2026-10-11: no bar, no name tags). The open Applet stands in the middle, largest and lit ("当前 applet 要在中间");
 // the others grow smaller and fainter the further they stand from it, in one order around it (core/applets/shelf.ts), so
-// picking one slides the shelf to bring it to the middle. "+N" at the left end holds the ones used longest ago; + at the
+// picking one slides the shelf to bring it to the middle. A Thing on the shelf cannot be closed from it (owner request
+// 2026-10-11: no close mark). "+N" at the left end holds the ones used longest ago; + at the
 // right end opens a new page in the Browser. The shelf stands above the Applet's panel and never over a website's page,
 // which the host draws over everything below it.
 
@@ -18,13 +19,12 @@ function offsetOf(d:number){let x=0;for(let k=1;k<=d;k++)x+=step(k);return x;}
 // How far the farthest Applet of a ring of `n` reaches from the middle (the extra one of an even ring stands left).
 function reach(n:number){const side=Math.floor(n/2);return offsetOf(side)+size(side)/2;}
 
-export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage}:{
+export function mountAppletShelf({root,applet,recent,lastUsed,open,newPage}:{
  root:HTMLElement;
  applet:(id:string)=>ShelfApplet|null;
  recent:()=>string[];
  lastUsed:(id:string)=>number;
  open:(id:string)=>void;
- leave:()=>void;
  newPage:()=>void;
 }){
  let state:ShelfState|null=null,current:string|null=null;
@@ -49,13 +49,7 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
   item=document.createElement('div');item.className='applet-shelf-tab';item.dataset.applet=id;
   const pick=document.createElement('button');pick.type='button';pick.className='applet-shelf-pick';pick.append(...device(app));
   pick.onclick=event=>{event.stopPropagation();closeExtra();if(id!==current)open(id);};
-  const close=document.createElement('button');close.type='button';close.className='applet-shelf-close';close.innerHTML=uiIcon('close');
-  close.title='Close';close.setAttribute('aria-label','Close '+app.title);close.onclick=event=>{event.stopPropagation();closeTab(id);};
-  item.append(pick,close);tabs.set(id,item);return item;
- }
- function closeTab(id:string){
-  if(!state)return;const {state:next,next:to}=closeOnShelf(state,id,current);state=next;
-  if(to&&to!==current)open(to);else if(!to)leave();else render();
+  item.append(pick);tabs.set(id,item);return item;
  }
  function closeExtra(){extra.hidden=true;more.setAttribute('aria-expanded','false');}
  more.onclick=event=>{event.stopPropagation();const showing=extra.hidden;extra.hidden=!showing;more.setAttribute('aria-expanded',String(showing));};

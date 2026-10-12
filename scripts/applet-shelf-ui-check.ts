@@ -1,8 +1,7 @@
 // The Applet shelf (owner request 2026-10-09), driven through the real World UI with a faked native bridge: inside an
 // Applet the recently used Applets stand above it, the open one in the middle and largest, the others smaller the
-// further they stand; picking one slides the shelf and opens it; closing the open one opens its neighbour, and closing
-// the last returns to the World; the ones that do not fit wait behind "+N"; + opens a new page in the Browser with its
-// address ready. The background crossfades while it switches.
+// further they stand; picking one slides the shelf and opens it; nothing closes from the shelf; the ones that do not
+// fit wait behind "+N"; + opens a new page in the Browser with its address ready. The background crossfades while it switches.
 import assert from 'node:assert/strict';
 import type {Page} from 'playwright';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
@@ -75,27 +74,22 @@ await withBrowser(fileAccess,async browser=>{
  assertRing(r,right.id,'after picking '+right.id);
  const rotate=(a:string[],b:string[])=>a.length===b.length&&a.some((_,k)=>a.every((x,i)=>x===b[(i+k)%b.length]));
  assert.ok(rotate(order(r),before),'the ring keeps its order '+JSON.stringify([before,order(r)]));
- // Closing the open Applet opens its neighbour after it in the ring.
- const was=right.id;
- await page.locator(`.applet-shelf-tab[data-applet="${was}"] .applet-shelf-close`).click();
- await page.waitForFunction(id=>{const w=document.querySelector<HTMLElement>('#notionWorld') as any;return w.sceneMetrics.active!==id&&w.dataset.depth==='object';},was);
- await settle(page);r=await shelf(page);
- assert.ok(!r.tabs.some((t:any)=>t.id===was),'the closed Applet left the shelf');
- assertRing(r,await active(page),'after closing');
+ // A Thing cannot be closed from the shelf (owner request 2026-10-11): no close mark. Back, +N, + and the Thing's
+ // controls share one row (owner request 2026-10-11: the buttons stood scattered).
+ assert.equal(await page.locator('.applet-shelf-close').count(),0,'no close mark on the shelf');
+ const row=await page.evaluate(()=>{const mid=(s:string)=>{const r=document.querySelector(s)!.getBoundingClientRect();return r.top+r.height/2;};return {bar:mid('#notionWorld>.applet-bar-left'),add:mid('.applet-shelf-new')};});
+ assert.ok(Math.abs(row.add-row.bar)<=1,'+ stands on the bar\'s row '+JSON.stringify(row));
  // + opens a new page in the Browser with its address ready to type.
  await page.locator('.applet-shelf-new').click();
  await page.waitForFunction(()=>(document.querySelector<HTMLElement>('#notionWorld') as any).sceneMetrics.active==='app-browser');
  await page.waitForFunction(()=>document.activeElement?.closest('.browser-address'));
- // Closing every Applet returns to the World.
- for(let n=0;n<8&&await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld')!.dataset.depth==='object');n++){
-  const id=await active(page);await page.locator(`.applet-shelf-tab[data-applet="${id}"] .applet-shelf-close`).click();
-  await page.waitForFunction(id=>{const w=document.querySelector<HTMLElement>('#notionWorld') as any;return w.sceneMetrics.active!==id||w.dataset.depth!=='object';},id);
- }
+ // World beside Fox returns to the World, where the shelf rests.
+ await page.locator('.world-capsule[title="World"]').click();
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld')!.dataset.depth!=='object');
  assert.equal((await shelf(page)).shown,false,'the World has no shelf');
  assert.deepEqual(errors,[]);
  await page.close();
- console.log('PASS the open Applet stands in the middle of the shelf, largest; picking a neighbour slides the same ring; closing opens a neighbour and the last returns to the World; + opens the Browser\'s address.');
+ console.log('PASS the open Applet stands in the middle of the shelf, largest; picking a neighbour slides the same ring; nothing closes from it; + stands on the bar\'s row and opens the Browser\'s address.');
 
  // A narrower window holds fewer: the ones used longest ago wait behind +N and open from there.
  {
