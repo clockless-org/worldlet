@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {claudeCodeAgentSkill,claudeCodeConversationTitle,claudeCodeTurn,codexSessionIncluded,codexTurns,hermesConversationIncluded,hermesConversationTitle,hermesSendRoute,hermesSharedChat,hermesProfileSkill,hermesRoutine,hermesTurn,migrationNotesSession,piConversationTitle,piTurn,promptTemplateSkill,
+import {claudeCodeAgentSkill,claudeCodeConversationTitle,claudeCodeTurn,codexSessionIncluded,codexTurns,hermesConversationIncluded,hermesConversationTitle,hermesSendRoute,hermesSharedChat,hermesProfileSkill,hermesRoutine,hermesScheduleJob,hermesTurn,migrationNotesSession,piConversationTitle,piTurn,promptTemplateSkill,
  type HermesSendRoute,type MigrationRoutineResult,type MigrationTurn} from '../../../../../core/agent/index.ts';
 import {realPath as real} from '../../files.ts';
 import {declaredName,discoverHermes} from './hermes-files.ts';
@@ -520,5 +520,5 @@ export function surveyAgentHistory(id:'claude-code'|'pi'|'hermes'|'codex',home=o
  };
  const profiles=otherHermesProfiles(root,home,environment);
  return {conversations:[root,...profiles.map(p=>p.root)].reduce((sum,base)=>sum+count(base),0),notes:0,
-  skills:countSkills(root,path.join(root,'skills'),{depth:2,skip:bundledSkills(root)})+profiles.length,jobs:hermesJobs(root).filter(ownJob).filter(job=>hermesRoutine(job).ok).length};
+  skills:countSkills(root,path.join(root,'skills'),{depth:2,skip:bundledSkills(root)})+profiles.length,jobs:hermesJobs(root).filter(ownJob).filter(job=>hermesScheduleJob(job)).length};
 }
