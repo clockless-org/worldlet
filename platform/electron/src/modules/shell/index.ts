@@ -17,7 +17,8 @@ import {worldMenu,worldMenuState,type WorldMenuState} from './world-menu.ts';
 import {createLoginItem} from './login-item.ts';
 import {order} from './order.ts';
 import {wantsQuit} from '../../host/quit.ts';
-import {onStall,watchMainStalls} from '../../host/busy.ts';
+import {busyWith,onStall,watchMainStalls} from '../../host/busy.ts';
+import {localDataFacts} from './data-size.ts';
 import {foxTimingEvent,nativeCrashFromIps} from '../../../../../core/diagnostics/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -146,6 +147,8 @@ export function installShell(host:Host){
   analytics.recordActiveDay();
   if(uncleanExit)analytics.recordProductEvent('app_unclean_exit','',{native_crash:nativeCrash?'yes':'no'});
   setTimeout(()=>reportNativeCrashes(host,analytics),10_000);
+  // How much this computer keeps, once a day, two minutes after start (core/diagnostics/data-size.ts).
+  setTimeout(()=>{try{analytics.recordLocalData(()=>busyWith('dataSize',()=>localDataFacts(host)));}catch(error){host.diagnostics.record(error,'dataSize');}},120_000).unref?.();
   updates.start();
  });
  host.onQuit(()=>{analytics.endActive();companion.stop();updates.quit();try{fs.rmSync(runMarker,{force:true});}catch{}});

@@ -4,3 +4,4 @@ export * from './report.ts';
 export * from './setup-events.ts';
 export * from './native-crash.ts';
 export * from './device-class.ts';
+export * from './data-size.ts';

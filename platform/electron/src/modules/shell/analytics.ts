@@ -9,7 +9,7 @@ import {platformName} from '../../profile.ts';
 import {AGENT,type AgentService,type AnalyticsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,UPDATE_WAIT_BUCKETS,deviceClass,stallTask,timingBucket,type DeviceClass} from '../../../../../core/diagnostics/index.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
@@ -20,7 +20,7 @@ import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 const ENABLED='WorldletUsageAnalyticsEnabled',ACCOUNT='WorldletUsageAccount',ANONYMOUS='WorldletUsageAnonymousID',INSTALLATION='WorldletUsageInstallID';
 // Download tracking (website/README.md#download-tracking): the opaque token of the download press this installation came
 // from, and whether this installation has asked. Never an email.
-const INVITE='WorldletInviteToken',INVITE_ASKED='WorldletInviteClaimAsked',LAST_DAY='WorldletUsageLastDay';
+const INVITE='WorldletInviteToken',INVITE_ASKED='WorldletInviteClaimAsked',LAST_DAY='WorldletUsageLastDay',DATA_DAY='WorldletUsageDataSizeDay';
 export const INSTALL_CLAIM_URL='https://worldlet.ai/api/install/claim';
 /** The World page sends its PostHog web traffic to worldlet://app/ingest/…, which the host forwards to the project's
  * ingestion host (PostHog's reverse-proxy setup), so the page itself keeps no network access. Only these paths pass:
@@ -38,7 +38,7 @@ export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
 export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
 const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','agent_profile_result','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','fox_browse_changed','order_sent','order_stopped',
- 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall',
+ 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall','local_data_size',
  // owner 2026-10-11 20:21 PDT: Production metrics.
  'attention_item_opened','task_completed','world_active_time']);
 /** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
@@ -101,7 +101,9 @@ const ALLOWED:Record<string,string[]>={
  agent_setting:['model','permission','account','routine','skill'],
  // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform.
  // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
- phone_platform:['ios','android','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet']
+ phone_platform:['ios','android','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
+ // local_data_size (core/diagnostics/data-size.ts): how much this computer keeps, in bands; never a name or path.
+ world_db_size:[...SIZE_BUCKETS],recordings_size:[...SIZE_BUCKETS],hermes_db_size:[...SIZE_BUCKETS],openclaw_db_size:[...SIZE_BUCKETS],disk_free:[...SIZE_BUCKETS],history_rows:[...ROW_BUCKETS]
 };
 /** world_active_time: whole seconds, at most an hour per event. */
 export const ACTIVE_LIMIT=3600;
@@ -334,6 +336,14 @@ export class UsageAnalytics implements AnalyticsService {
   if(!this.config||!this.enabled()||this.stalls>=MAIN_STALL_LIMIT)return;
   this.stalls+=1;
   this.recordProductEvent('main_stall',timingBucket(stall.ms),{stall_task:stall.task});
+ }
+ /** How much this computer keeps (core/diagnostics/data-size.ts), once per UTC day; `facts` is read only when due. */
+ recordLocalData(facts:()=>LocalDataFacts|null){
+  if(!this.config||!this.enabled())return;
+  const day=isoSeconds(new Date(this.now())).slice(0,10);
+  if(this.prefs.string(DATA_DAY)===day)return;
+  const read=facts();
+  if(read)this.record('local_data_size',DATA_DAY,day,true,'',safeDimensions(localDataDimensions(read)));
  }
  /** PostHog error tracking: type, Core's failure code and sanitized frames of our own code, never the message.
   * Each distinct exception is sent once per run, at most 30 per run. */
