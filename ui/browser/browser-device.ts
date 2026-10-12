@@ -173,11 +173,12 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // The page's toolbar (owner request 2026-10-09: "website based，下面多个框，显示url，前进后退，home之类的按钮"): one plain row
  // along the top of the panel, above the page, in every website Applet and the Browser, under the Applet shelf
  // (ui/hud/applet-shelf.ts) that now names the Applet: Back, Forward, Refresh, Home, the page's address and Focus.
- // It sits in the panel above the page, since the host draws the page over anything placed on it.
+ // It floats centered just above the page's top edge, taking none of its room (owner request 2026-10-11), since the host
+ // draws the page over anything placed on it (ui/components/layout.css).
  const toolbar=document.createElement('div');toolbar.className='browser-toolbar';toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Page');
  // At rest the toolbar folds into a small badge naming the site (owner request 2026-10-11: "收起来，缩到一个小的 badge 里面，
- // 鼠标移上去再展开"); pointing at it or moving focus into it opens the whole row in place. The row keeps its height, so the
- // page below never moves; the controls stay laid out under the badge, so a click lands where they will show.
+ // 鼠标移上去再展开"); pointing at it or moving focus into it opens the whole row over the same spot for as long as it is
+ // used, so the page below never moves; the controls stay laid out under the badge, so a click lands where they will show.
  const badge=document.createElement('span');badge.className='browser-badge';badge.setAttribute('aria-hidden','true');badge.innerHTML=uiIcon('compass');
  const badgeName=document.createElement('span');badge.append(badgeName);toolbar.prepend(badge);
  // Refresh, in the top bar of every website Applet and the Browser (owner request 2026-10-05): the page showing

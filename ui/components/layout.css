@@ -294,21 +294,23 @@
 /* Keep context readable over every sky; brand remains the original Applet asset. */
 .native-console>.companion-context,.native-console>.companion-context .companion-name{color:var(--ui-hud-ink);text-shadow:var(--ui-hud-shadow)}
 .native-console>.companion-context .companion-name{min-width:0}
-/* A website page's toolbar (owner request 2026-10-09, browser/browser-device.ts): one plain row on the panel above the
-   page: Back, Forward, Refresh and Home, the address in a white field, and Focus at the end (their look: controls.css). */
-:is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-toolbar{flex:none;align-self:stretch;max-width:none;width:auto;display:flex;align-items:center;gap:4px;height:44px;margin:0 0 6px;padding:0 4px;border-radius:12px;background:#f4efe2;box-shadow:inset 0 0 0 1px #785a322e}
+/* A website page's toolbar (owner request 2026-10-09, browser/browser-device.ts): Back, Forward, Refresh and Home, the
+   address in a white field, and Focus at the end (their look: controls.css). It takes no room from the page (owner
+   request 2026-10-11): it floats centered just above the page's top edge, over the panel's rim, where the host's page
+   cannot cover it. At rest only a small badge naming the site shows there; pointing at it or focusing into it opens the
+   whole row over the same spot for as long as it is used. The page never moves for either. */
+:is(#notionWorld,.native-console)>.notion-content[data-template=browser]{--browser-pad:3px}
+:is(#notionWorld,.native-console)>.notion-content[data-template=browser]:has(>.browser-toolbar:not([hidden])){overflow:visible}
+:is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-toolbar{position:absolute;z-index:3;left:50%;top:calc(var(--browser-pad) - 36px);box-sizing:border-box;width:min(600px,calc(100% - 48px));max-width:none;display:flex;align-items:center;gap:4px;height:36px;margin:0;padding:0 4px;border-radius:18px;background:#f4efe2;box-shadow:0 4px 14px #28190a40,inset 0 0 0 1px #785a322e;transform:translateX(-50%);transition:background-color 160ms,box-shadow 160ms}
 .browser-toolbar[hidden]{display:none!important}
+.browser-toolbar>.scene-control{flex:none}
 .browser-toolbar>.browser-address{flex:1;min-width:0;margin:0 4px}
-.browser-toolbar>.browser-address>input{box-sizing:border-box;width:100%;height:32px;padding:0 14px;border:0;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px #785a3238;color:#2d261e;font:400 13.5px/1 var(--ui-font-ui,system-ui);text-overflow:ellipsis}
+.browser-toolbar>.browser-address>input{box-sizing:border-box;width:100%;height:28px;padding:0 14px;border:0;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px #785a3238;color:#2d261e;font:400 13.5px/1 var(--ui-font-ui,system-ui);text-overflow:ellipsis}
 .browser-toolbar>.browser-address>input:focus{outline:2px solid #6d8f5a;outline-offset:0}
 .browser-toolbar>.browser-address>input::placeholder{color:#8a8073}
-/* At rest the row folds into a badge naming the site at its start; pointing at the row or focusing into it opens it in
-   place (owner request 2026-10-11). The controls keep their places under the badge, only faded out. */
-.browser-toolbar{position:relative}
-.browser-toolbar>.browser-badge{position:absolute;left:4px;top:50%;display:flex;align-items:center;gap:6px;max-width:220px;height:30px;padding:0 12px 0 10px;border-radius:15px;background:#f4efe2;box-shadow:inset 0 0 0 1px #785a322e;color:#3d3326;font:600 13px/1 var(--ui-font-ui,system-ui);white-space:nowrap;pointer-events:none;transform:translateY(-50%);transition:opacity 160ms}
+.browser-toolbar>.browser-badge{position:absolute;left:50%;top:50%;display:flex;align-items:center;gap:6px;max-width:220px;height:28px;padding:0 12px 0 10px;border-radius:14px;background:#f4efe2;box-shadow:0 2px 8px #28190a33,inset 0 0 0 1px #785a322e;color:#3d3326;font:600 13px/1 var(--ui-font-ui,system-ui);white-space:nowrap;pointer-events:none;transform:translate(-50%,-50%);transition:opacity 160ms}
 .browser-toolbar>.browser-badge>svg{flex:none;width:15px;height:15px}
 .browser-toolbar>.browser-badge>span{overflow:hidden;text-overflow:ellipsis}
-:is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-toolbar{transition:background-color 160ms,box-shadow 160ms}
 :is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-toolbar:not(:hover,:focus-within){background-color:transparent;box-shadow:none}
 .browser-toolbar:not(:hover,:focus-within)>:not(.browser-badge){opacity:0!important}
 .browser-toolbar>:not(.browser-badge){transition:opacity 160ms}
@@ -325,7 +327,7 @@
 /* While Fox works the whole frame turns colorful (pixi-world.css); the groove would draw a second ring inside it. */
 #notionWorld>.notion-content[data-template=browser] .browser-viewport.is-fox-control[data-fox-overlay]{box-shadow:none}
 @media(min-width:801px){
- #notionWorld>.notion-content[data-template=browser]{top:64px;left:16px;bottom:16px;right:calc(var(--reader-companion-lane,33.333%) + 12px);padding:12px;border-radius:22px;animation:none;transition:none}
+ #notionWorld>.notion-content[data-template=browser]{--browser-pad:12px;top:64px;left:16px;bottom:16px;right:calc(var(--reader-companion-lane,33.333%) + 12px);padding:12px;border-radius:22px;animation:none;transition:none}
 }
 #notionWorld>.notion-content[data-template=browser] .browser-viewport{width:auto;min-width:0;max-width:100%;min-height:0;align-self:stretch;box-sizing:border-box;overflow:hidden;isolation:isolate}
 /* The Browser's tabs (owner request 2026-10-07; ui/browser/browser-device.ts): a slim strip on the frame's top rim, above the
