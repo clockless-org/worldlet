@@ -5,33 +5,33 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
 import {importBuildTheme} from './build-theme-source.ts';
-import type {ThemeAppletPreset} from '../ui/themes/build-theme-contract.ts';
+import type {ThemeAppletPreset,ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
 
 const SOURCE='resources/styles/builtin/presets/personal-scenes';
 const PACKAGE='ui/theme-packages/village';
 const SETTINGS={icon:'768px-webp-q92-alpha100',background:'original-size-webp-q90'} as const;
-type Catalog={presets:{id:string;name:string;use:string;category:string;icon:string;background:string}[]};
+type Catalog={presets:{id:string;name:string;use:string;category:string;icon:string;background:string;composition?:Omit<ThemeSceneRegistration,'sha256'>}[]};
 type Lock=Record<string,{source:string;sourceSha256:string;sha256:string;settings:string}>;
 const sha=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
 const json=async(root:string,file:string)=>JSON.parse(await readFile(path.join(root,file),'utf8'));
 const write=async(root:string,file:string,value:unknown)=>writeFile(path.join(root,file),JSON.stringify(value,null,2)+'\n');
-async function definitions(root:string):Promise<ThemeAppletPreset[]>{
+async function definitions(root:string,lock:Lock):Promise<ThemeAppletPreset[]>{
  const catalog:Catalog=await json(root,SOURCE+'/catalog.json');
  return catalog.presets.map(p=>({id:p.id,title:p.name,description:p.use,category:p.category,
-  icon:`assets/applet-presets/${p.id}/icon.webp`,background:`assets/applet-presets/${p.id}/background.webp`}));
+  icon:`assets/applet-presets/${p.id}/icon.webp`,background:`assets/applet-presets/${p.id}/background.webp`,...(p.composition?{registration:{...p.composition,sha256:lock[`assets/applet-presets/${p.id}/background.webp`].sha256}}:{})}));
 }
 /** Encode source PNGs into portable SIM assets, then refresh the validated package's source lock. */
 export async function encodeVillageAppletPresets(root:string){
- const catalog:Catalog=await json(root,SOURCE+'/catalog.json'),presets=await definitions(root),lock:Lock={};
+ const catalog:Catalog=await json(root,SOURCE+'/catalog.json'),lock:Lock={};
  for(const [i,preset] of catalog.presets.entries())for(const kind of ['icon','background'] as const){
   const source=SOURCE+'/'+preset[kind],bytes=await readFile(path.join(root,source));
   let image=sharp(bytes);if(kind==='icon')image=image.resize({width:768,withoutEnlargement:true});
-  const encoded=await image.webp({quality:kind==='icon'?92:90,alphaQuality:100}).toBuffer(),target=presets[i][kind];
+  const encoded=await image.webp({quality:kind==='icon'?92:90,alphaQuality:100}).toBuffer(),target=`assets/applet-presets/${preset.id}/${kind}.webp`;
   await mkdir(path.dirname(path.join(root,PACKAGE,target)),{recursive:true});await writeFile(path.join(root,PACKAGE,target),encoded);
   lock[target]={source,sourceSha256:sha(bytes),sha256:sha(encoded),settings:SETTINGS[kind]};
  }
  await write(root,PACKAGE+'/assets/applet-presets/art.lock.json',lock);
- const presentation=await json(root,PACKAGE+'/presentation.json');presentation.appletPresets=presets;
+ const presentation=await json(root,PACKAGE+'/presentation.json');presentation.appletPresets=await definitions(root,lock);
  await write(root,PACKAGE+'/presentation.json',presentation);
  const manifest=await json(root,PACKAGE+'/theme.json');manifest.updatedAt=new Date().toISOString().replace(/\.\d{3}Z$/,'Z');
  await write(root,PACKAGE+'/theme.json',manifest);
@@ -40,9 +40,9 @@ export async function encodeVillageAppletPresets(root:string){
 }
 /** CI uses empty media stand-ins. Check declarations/existence there, and both source/output hashes with real media. */
 export async function checkVillageAppletPresets(root:string){
- const expected=await definitions(root),presentation=await json(root,PACKAGE+'/presentation.json');
+ const lock:Lock=await json(root,PACKAGE+'/assets/applet-presets/art.lock.json'),expected=await definitions(root,lock),presentation=await json(root,PACKAGE+'/presentation.json');
  assert.deepEqual(presentation.appletPresets,expected,'Village SIM presets must match the authored catalog');
- const catalog:Catalog=await json(root,SOURCE+'/catalog.json'),lock:Lock=await json(root,PACKAGE+'/assets/applet-presets/art.lock.json');
+ const catalog:Catalog=await json(root,SOURCE+'/catalog.json');
  assert.deepEqual(Object.keys(lock).sort(),expected.flatMap(p=>[p.icon,p.background]).sort(),'lock covers exactly the declared pictures');
  for(const [i,preset] of expected.entries())for(const kind of ['icon','background'] as const){
   const entry=lock[preset[kind]],source=SOURCE+'/'+catalog.presets[i][kind];

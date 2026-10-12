@@ -1,0 +1,42 @@
+{
+  "assets/applet-scenes/google-calendar/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/google-calendar/background.png",
+    "sourceSha256": "406d5e31c7af27611f0dd7a17930ce708e113a1d72eee879088444d59d1602e9",
+    "sha256": "3bd8e78f1628d6c73a8a07687d05d9df90dba66cd0aaf95f1307c773689772e8",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/gmail/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/gmail/background.png",
+    "sourceSha256": "48155b3be8b6c9ece8fc7d64a6cd1e6af18052a01ac225f52bc3b79e9d0a1a18",
+    "sha256": "c72521640af9cc26adf16698c87aa9e62f302b91f0d920cfa3ef8551d7119003",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/apple-notes/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/apple-notes/background.png",
+    "sourceSha256": "3396fb1122b48646b11b08444799ad4e039b63852ffd40216a065881488a14fb",
+    "sha256": "59bf84d8da9ed83f068d37ba339651a5c32779ddb643869d8c9c927b0d820086",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  },
+  "assets/applet-scenes/apple-reminders/background.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/apple-reminders/background.png",
+    "sourceSha256": "b0ebd7f11514aaa212b6d327faaca170f7d00abeda13be93a5c683b763bf6f3d",
+    "sha256": "e43f2e6ed22762cef3ecbe89978908396e9a74c2f390df0db82dfd347ead2b42",
+    "imageSize": [
+      1672,
+      941
+    ],
+    "settings": "original-size-webp-q90"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "generator": "built-in imagegen",
+  "reference": "ui/theme-packages/village/assets/world/day.webp",
+  "applets": [
+    {
+      "id": "google-calendar",
+      "title": "Calendar",
+      "source": "google-calendar/background.png",
+      "companion": [
+        0.72,
+        0.55,
+        0.24,
+        0.4
+      ],
+      "prompt": "Use case: stylized-concept. Create one 16:9 production background plate for Worldlet Village Calendar applet. Reference image is the actual village world map: match its rounded sculpted storybook 3D foliage, cream stone, warm timber, soft painterly materials, NOT photography. Close immersive view on a village garden veranda. Main subject is a LARGE FRONT-FACING blank cream paper hanging calendar writing surface on the LEFT, absolutely rectangular and parallel to the camera, NO perspective trapezoid: outer warm timber frame from x=4% to 65%, y=12% to 89%, inside clear cream paper from x=7% to 62%, y=21% to 84%. Brass hanging rings only above the paper, gentle material grain, no cast shadow or objects crossing the inner paper. The blank surface will receive real interactive HTML calendar, so DO NOT paint grids, dates, letters, numbers, schedules, buttons or content. A tasteful calendar emblem (tiny bound-page object without writing) and a few flowers can sit above the frame. RIGHT third is a beautiful bright village garden terrace with potted herbs, rounded apple trees and a glimpse of modest cottage architecture; upper right functional props, lower right x=71-96%,y=55-94% quiet empty pale stone for companion and speech. Rich detail around margins, use varied countryside setting, not mountains/bridges. Do not add person, animal, UI overlay, applet icon plinth, logos, watermark. Single finished background only.",
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.077,
+            0.229,
+            0.525,
+            0.51
+          ],
+          "material": "paper"
+        },
+        {
+          "id": "today",
+          "role": "secondary",
+          "rect": [
+            0.744,
+            0.274,
+            0.08,
+            0.112
+          ],
+          "material": "paper"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/google-calendar.webp",
+      "refinements": [
+        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Change the calendar's horizontal top binding bar to warm terracotta red matching icon 2. Keep brass binder rings and cream paper. Replace the tiny generic calendar emblem at the top with a small red-bound calendar object matching icon 2, without dates or grid. Keep the wood support natural. Do not add writing, grids or controls anywhere on the large paper. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space.",
+        "Use case: precise-object-edit. Edit this Village Calendar background. Preserve the entire large left calendar sheet, its exact bounds, red top binding, rings, blank paper, and the existing village painterly style. On the UPPER RIGHT add a separate clearly usable TODAY DATE display: a cream blank tear-off calendar card with rounded upper corners, red top binding and TWO brass rings, naturally hanging on a slim wooden garden post. Its outer silhouette fits x74%-95%,y19%-48%; its empty FRONT-FACING cream interior must fit x77%-92%,y27%-44%. It is a real small calendar card, not a UI overlay. Remove the little black lamp if it conflicts with this small date card; simplify pots behind it. This secondary card will receive live HTML date text, so no painted dates, letters, grids or numbers. Preserve a generous clear lower-right terrace from x69%-97%,y55%-96% for companion. Keep all other details and the 16:9 canvas."
+      ],
+      "category": "core"
+    },
+    {
+      "id": "gmail",
+      "title": "Mail",
+      "source": "gmail/background.png",
+      "companion": [
+        0.72,
+        0.55,
+        0.24,
+        0.4
+      ],
+      "prompt": "Create a single finished 16:9 Worldlet Village applet background, stylized-concept. Use the reference only for the village's rounded softly painted 3D style: cream stone, sculpted foliage, warm timber, restrained brass, cheerful natural color, NOT photorealism. The functional interactive surface is on the LEFT, close, large, absolutely front-facing, straight rectangular edges parallel to the camera, outer edge x4%-65%,y12%-89%; clean blank cream interior x8%-61%, y23%-81%. Leave the ENTIRE interior empty, gentle paper grain only, no props, shadows, perspective slant, text, handwriting, dates, numbers, grids, controls or baked UI. HTML will be drawn in that exact inner surface. Rich themed environment around margins and on RIGHT, upper-right functional props reveal the app's purpose. Lower right x71%-96%,y55%-94% stays clear quiet floor/stone for a companion. No person, animal, floating UI, plinth, watermark, generic bridges or mountain panorama. Distinct activity-specific scene. MAIL: village post office with a broad upright cream letter-writing sheet held in a green oak sorting-desk frame on LEFT; small brass clips outside the blank interior. On upper RIGHT green mail pigeonholes, a recognizable envelope emblem, sealing wax, tied mail bundles, a discreet small red envelope-shaped sign. Open doorway and flower pots give countryside life. Frame should feel like stationery on a real postal workstation, not a billboard.",
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.077,
+            0.226,
+            0.508,
+            0.507
+          ],
+          "material": "paper"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/gmail.webp",
+      "refinements": [
+        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Make the main green frame a slightly lighter weathered sage matching mailbox icon 2. Change the envelope emblem above the blank paper to a blue enamel rectangular plaque with ivory envelope and four brass rivets, matching the mailbox badge. Replace a section of upper-right sorting cubbies with that recognizable full-size curved-top sage mailbox with brass flag and blue envelope badge, integrated into the postal wall. Remove the unrelated red hanging envelope sign, or turn it into a small matching blue sign. Keep the blank paper entirely clear. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
+      ],
+      "category": "core"
+    },
+    {
+      "id": "apple-notes",
+      "title": "Notes",
+      "source": "apple-notes/background.png",
+      "companion": [
+        0.72,
+        0.55,
+        0.24,
+        0.4
+      ],
+      "prompt": "Create a single finished 16:9 Worldlet Village applet background, stylized-concept. Use the reference only for the village's rounded softly painted 3D style: cream stone, sculpted foliage, warm timber, restrained brass, cheerful natural color, NOT photorealism. The functional interactive surface is on the LEFT, close, large, absolutely front-facing, straight rectangular edges parallel to the camera, outer edge x4%-65%,y12%-89%; clean blank cream interior x8%-61%, y23%-81%. Leave the ENTIRE interior empty, gentle paper grain only, no props, shadows, perspective slant, text, handwriting, dates, numbers, grids, controls or baked UI. HTML will be drawn in that exact inner surface. Rich themed environment around margins and on RIGHT, upper-right functional props reveal the app's purpose. Lower right x71%-96%,y55%-94% stays clear quiet floor/stone for a companion. No person, animal, floating UI, plinth, watermark, generic bridges or mountain panorama. Distinct activity-specific scene. NOTES: sheltered village writing garden with a LARGE upright single open cream notebook writing page held by a plum linen binding on LEFT, page edge and binding outside blank interior; the inner single writing surface is one clear rectangle without a center crease. On upper RIGHT a little book shelf, fountain pen, inkwell, dried lavender and a cottage garden. Quiet stone paving below. Clearly a place for writing and collecting ideas, with rich papery and linen details.",
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.075,
+            0.17,
+            0.53,
+            0.595
+          ],
+          "material": "paper"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/apple-notes.webp",
+      "refinements": [
+        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Replace the plum-purple linen notebook binding with the warm golden-yellow notepad identity from icon 2: substantial rounded yellow top binding, layered ivory pages and a slim honey-wood support at bottom. Keep the exact large front-facing blank rectangular page position and inner bounds. Remove the decorative plum notebook clasp. On upper-right writing ledge replace the fountain pen with a normal-sized yellow pencil with red eraser matching the icon; retain the village writing garden. No lines or text on the paper. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
+      ],
+      "category": "core"
+    },
+    {
+      "id": "apple-reminders",
+      "title": "Reminders",
+      "source": "apple-reminders/background.png",
+      "companion": [
+        0.72,
+        0.55,
+        0.24,
+        0.4
+      ],
+      "prompt": "Create a single finished 16:9 Worldlet Village applet background, stylized-concept. Use the reference only for the village's rounded softly painted 3D style: cream stone, sculpted foliage, warm timber, restrained brass, cheerful natural color, NOT photorealism. The functional interactive surface is on the LEFT, close, large, absolutely front-facing, straight rectangular edges parallel to the camera, outer edge x4%-65%,y12%-89%; clean blank cream interior x8%-61%, y23%-81%. Leave the ENTIRE interior empty, gentle paper grain only, no props, shadows, perspective slant, text, handwriting, dates, numbers, grids, controls or baked UI. HTML will be drawn in that exact inner surface. Rich themed environment around margins and on RIGHT, upper-right functional props reveal the app's purpose. Lower right x71%-96%,y55%-94% stays clear quiet floor/stone for a companion. No person, animal, floating UI, plinth, watermark, generic bridges or mountain panorama. Distinct activity-specific scene. REMINDERS: village household workshop porch with a LARGE front-facing pale cream task pinboard inside honey-colored wooden frame on LEFT, small brass clips along the top outside blank interior. On upper RIGHT a neatly organized peg rail, house keys, a small hourglass, woven chore basket, folded linen and a watering can. Lower right clear porch floor with garden view beyond. Warm practical homestead mood, not a generic office.",
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.085,
+            0.163,
+            0.493,
+            0.49
+          ],
+          "material": "paper"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/apple-reminders.webp",
+      "refinements": [
+        "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Echo icon 2: keep the warm timber frame and brass clips. Add three small round enamel studs BLUE, AMBER, RED on the wooden top rail (outside the blank paper), positioned near the three brass clips. Add an olive-green wooden pencil cup holding one yellow pencil on the upper-right shelf. Keep cream paper blank and lower-right clearance unchanged. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
+      ],
+      "category": "core"
+    }
+  ]
+}

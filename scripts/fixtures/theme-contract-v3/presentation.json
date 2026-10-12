@@ -46,7 +46,86 @@
       "description": "A place for books",
       "category": "Learning",
       "icon": "assets/plate.svg",
-      "background": "assets/plate.svg"
+      "background": "assets/plate.svg",
+      "registration": {
+        "imageSize": [
+          1500,
+          844
+        ],
+        "sha256": "ae0fcc98190d74940d562c2557ac43154932ce318602982483c9794277b46dfb",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.05,
+              0.1,
+              0.55,
+              0.8
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "date",
+            "role": "secondary",
+            "rect": [
+              0.7,
+              0.1,
+              0.2,
+              0.2
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.5,
+          0.25,
+          0.45
+        ]
+      }
     }
-  ]
+  ],
+  "appletScenes": {
+    "gmail": {
+      "background": "assets/plate.svg",
+      "registration": {
+        "imageSize": [
+          1500,
+          844
+        ],
+        "sha256": "ae0fcc98190d74940d562c2557ac43154932ce318602982483c9794277b46dfb",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.05,
+              0.1,
+              0.55,
+              0.8
+            ],
+            "material": "paper"
+          },
+          {
+            "id": "date",
+            "role": "secondary",
+            "rect": [
+              0.7,
+              0.1,
+              0.2,
+              0.2
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.7,
+          0.5,
+          0.25,
+          0.45
+        ]
+      }
+    }
+  }
 }

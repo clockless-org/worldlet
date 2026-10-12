@@ -1,5 +1,7 @@
 # Village personal Applet scenes
 
+Updated backgrounds include measured dynamic HTML regions. See the [registered scene library](../../references/registered-scenes/README.md) for the three collections, status and interactive preview.
+
 Sixteen reusable icon/background pairs for custom Applets. Their optimized WebP copies are bundled in the public repository’s Village SIM through the optional `appletPresets` section of Theme contract v3. No provider accounts, actions or data are implied by selecting a picture. The current World and existing Applets are unchanged.
 
 [Visual catalog](index.html) · [Machine-readable catalog and exact prompts](catalog.json) · [Village style authority](../../STYLE.md)

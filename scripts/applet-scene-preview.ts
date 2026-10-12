@@ -1,0 +1,10 @@
+import {build} from 'esbuild';
+import {mkdir,copyFile,writeFile} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url)),source='scripts/fixtures/applet-scene-preview';
+const output=path.join(root,'output/applet-scene-preview');await mkdir(output,{recursive:true});
+await build({entryPoints:[path.join(root,source,'preview.js')],bundle:true,format:'esm',outfile:path.join(output,'preview.js')});
+await copyFile(path.join(root,source,'index.html'),path.join(output,'index.html'));
+await writeFile(path.join(output,'README.txt'),'Serve the repository root, then open /output/applet-scene-preview/. Fictional data only.\n');
+console.log('Preview: /output/applet-scene-preview/ (serve the repository root)');

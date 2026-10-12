@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -32,6 +33,16 @@ export async function validateBuildTheme(source:string){
   if(file.endsWith('.json')){
    const inspect=(value:unknown)=>{if(typeof value==='string'&&value.startsWith('assets/')){if(!files.includes(themeAssetPath(value)))throw Error('Missing declared asset: '+value);}else if(value&&typeof value==='object')Object.values(value).forEach(inspect);};
    inspect(JSON.parse(bytes.toString()));
+  }
+ }
+ // A measured surface must describe these exact encoded bytes. Empty media are CI checkout stand-ins.
+ for(const scene of [...Object.values(presentation.appletScenes??{}),...(presentation.appletPresets??[])]){
+  if(!scene.registration)continue;
+  const bytes=await fs.readFile(path.join(source,scene.background));
+  if(bytes.length){
+   if(hashes[scene.background]!==scene.registration.sha256)throw Error('Scene registration is stale: '+scene.background);
+   const meta=await sharp(bytes).metadata();
+   if(meta.width!==scene.registration.imageSize[0]||meta.height!==scene.registration.imageSize[1])throw Error('Scene registration dimensions differ: '+scene.background);
   }
  }
  return {manifest,files,hashes};

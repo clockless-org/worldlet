@@ -47,6 +47,26 @@ export interface ThemeArtifact {
     /** `#rrggbb` per colour role; a role left out keeps the host's. */
     colors?: Partial<Record<ThemeArtifactColor, string>>;
 }
+/** Geometry measured on the final background, in normalized image coordinates (x, y, width, height).
+ * These are facts about painted surfaces, not viewport CSS or authority over host controls. */
+export interface ThemeSceneRegistration {
+    imageSize: readonly [number, number];
+    /** Hash of the encoded picture. Re-measure after changing it. */
+    sha256: string;
+    regions: readonly {
+        id: string;
+        role: 'primary' | 'secondary';
+        rect: readonly [number, number, number, number];
+        material: 'paper' | 'board' | 'screen';
+    }[];
+    /** Quiet painted space the host can reserve for its companion. */
+    companion: readonly [number, number, number, number];
+}
+/** A background tied to one Applet key. Its live records and controls are supplied by the host. */
+export interface ThemeAppletScene {
+    background: string;
+    registration: ThemeSceneRegistration;
+}
 /** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
 export interface ThemeAppletPreset {
     id: string;
@@ -56,6 +76,7 @@ export interface ThemeAppletPreset {
     /** Package-local pictures; the icon may be transparent. The background contains no live data. */
     icon: string;
     background: string;
+    registration?: ThemeSceneRegistration;
 }
 /** The theme's type and colours. */
 export interface ThemeTokens {
@@ -84,6 +105,8 @@ export interface ThemePresentation {
     artifact?: ThemeArtifact;
     /** Optional art choices for custom Applets. Omitted means no presets. The host owns selection and rendering. */
     appletPresets?: readonly ThemeAppletPreset[];
+    /** Backgrounds bound to specific Applet keys; independent of reusable presets. */
+    appletScenes?: Readonly<Record<string, ThemeAppletScene>>;
 }
 /** theme.json. Every other file in the package is a picture, a sound, a font, a licence text or JSON. */
 export interface BuildThemeManifest {
