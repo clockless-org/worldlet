@@ -1,6 +1,7 @@
 /** Fox's sessions beside its conversation (owner request 2026-10-12, core/tasks/fox-sessions.ts): a narrow column left
- * of the card while it shows in the World. The main session leads, large and stressed; then the person's other
- * sessions, latest first, each only its name (where it lives and when, on hover: the owner asked for little detail).
+ * of the card while it shows in the World. The main session is a primary card of its own; under it, a second card
+ * scrolls the person's other sessions, latest first, packed tight, each only its name (where it lives and when, on
+ * hover: the owner asked for little detail).
  * A Thing's row opens its Applet; any other row switches Fox to that session right in the World. The row of the
  * session Fox is in is marked. */
 import {foxSessionLine,type FoxSession} from '../../core/tasks/index.ts';
@@ -29,8 +30,8 @@ export function mountFoxSessions({pick}:{pick:(session:FoxSession|null)=>void}):
   const now=Date.now()/1000;
   const next=JSON.stringify([here,name,sessions.map(s=>[s.id,s.title,s.where,s.last,s.thing])]);
   if(next===signature)return;signature=next;
-  element.replaceChildren(
-   row(name,'Main conversation',!here,true,false,()=>pick(null)),
-   ...sessions.map(s=>row(s.title,foxSessionLine(s,now),s.id===here,false,s.thing,()=>pick(s))));
+  const others=document.createElement('div');others.className='fox-session-list';
+  others.append(...sessions.map(s=>row(s.title,foxSessionLine(s,now),s.id===here,false,s.thing,()=>pick(s))));
+  element.replaceChildren(row(name,'Main conversation',!here,true,false,()=>pick(null)),others);
  }};
 }
