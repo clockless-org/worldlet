@@ -110,9 +110,10 @@ assert.equal(claudeCodeLoggedIn('Not JSON'),null);
 console.log('PASS Claude Code sign-in from Worldlet');
 // Its sign-in page opens by itself at most once per launch, and a Sign in click while it is open shares it.
 {
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-claude-sign-in-')),log=path.join(dir,'runs.txt'),command=path.join(dir,'claude');
- fs.writeFileSync(command,`#!/bin/sh\necho "$@" >> '${log}'\nsleep 0.3\n`,{mode:0o755});
- const install={id:'claude-code' as const,title:'Claude Code',command,prefix:[],configured:true},env={PATH:process.env.PATH??''};
+ // A Node script stands in for `claude`, so the check runs the same on Windows (no shell scripts there).
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-claude-sign-in-')),log=path.join(dir,'runs.txt'),script=path.join(dir,'claude.cjs');
+ fs.writeFileSync(script,`require('fs').appendFileSync(${JSON.stringify(log)},process.argv.slice(2).join(' ')+'\\n');setTimeout(()=>{},300);\n`);
+ const install={id:'claude-code' as const,title:'Claude Code',command:process.execPath,prefix:[script],configured:true},env={PATH:process.env.PATH??''};
  assert.equal(signInOnce(install,env),true);
  await backgroundSignIn(install,['auth','login'],env,new AbortController().signal);
  assert.equal(signInOnce(install,env),false,'not again in this launch');
