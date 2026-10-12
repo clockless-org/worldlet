@@ -146,6 +146,15 @@ export function ongoingCandidates(things:OngoingThing[],conversations:BroughtCon
 /** Busier and more recent first: the person's messages, worth less the longer the conversation has been quiet. */
 const ongoingScore=(c:BroughtConversation,now:number)=>c.userTurns/(1+Math.max(0,now-seconds(c.last))/(7*DAY));
 
+/** Whether a conversation's own name is the one an Agent wrote for it: the same words, or one inside the other. */
+export function conversationNamed(name:string,thread:string):boolean {
+ const plain=(value:string)=>value.toLowerCase().replace(/^[#@]+/,'').replace(/[\s_-]+/g,' ').trim();
+ const a=plain(name),b=plain(thread);
+ return !!a&&!!b&&(a===b||(Math.min(a.length,b.length)>=4&&(a.includes(b)||b.includes(a))));
+}
+/** Busier and more recent first. */
+export const ongoingBusier=(a:BroughtConversation,b:BroughtConversation,now:number)=>ongoingScore(b,now)-ongoingScore(a,now)||a.session.localeCompare(b.session);
+
 /** What the person handles most, as their own Agent summarized it from their conversations when setup asked it to
  * describe itself (owner request 2026-10-12, Kelvin: "根据他的聊天记录，总结一下这个用户他现在日常处理最多的 things，然后我们
  * 每一个 thing 呢都变成一个 applet"). Each thing names the conversations it happens in; the busiest brought conversation
@@ -154,14 +163,12 @@ const ongoingScore=(c:BroughtConversation,now:number)=>c.userTurns/(1+Math.max(0
  * A thing whose conversations are not here and that no catalog Applet fits (`key`) is still its own Applet, under the
  * Agent's name for it (`source`, the chosen Agent), with no conversation of its own until one is brought. */
 export function ongoingFromAgent(said:readonly {title:string;threads:readonly string[];key?:string}[],things:OngoingThing[],conversations:BroughtConversation[],now:number,textOf?:(c:BroughtConversation)=>string,source?:string):OngoingThing[] {
- const plain=(value:string)=>value.toLowerCase().replace(/^[#@]+/,'').replace(/[\s_-]+/g,' ').trim();
- const matches=(name:string,thread:string)=>{const a=plain(name),b=plain(thread);return !!a&&!!b&&(a===b||(Math.min(a.length,b.length)>=4&&(a.includes(b)||b.includes(a))));};
  const byId=new Map(things.map(t=>[t.id,t])),used=new Set<string>(),keep:OngoingThing[]=[];
  let kept=things.filter(t=>t.state==='kept').length;
  for(const thing of said){
   const title=clip(thing.title,60);
   if(!title||kept>=ONGOING_LIMITS.kept)continue;
-  const found=conversations.filter(c=>isMigrationSource(c.source)&&!used.has(ongoingId(c.source,c.session))&&thing.threads.some(thread=>matches(ongoingName(c.source,c.session).title,thread)))
+  const found=conversations.filter(c=>isMigrationSource(c.source)&&!used.has(ongoingId(c.source,c.session))&&thing.threads.some(thread=>conversationNamed(ongoingName(c.source,c.session).title,thread)))
    .sort((a,b)=>ongoingScore(b,now)-ongoingScore(a,now)||a.session.localeCompare(b.session))[0];
   if(!found){
    // Only once that Agent's conversations are brought, so one still on its way is matched instead.

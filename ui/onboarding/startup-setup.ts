@@ -1,4 +1,4 @@
-import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT,environmentAt} from '../world/index.ts';
+import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT} from '../world/index.ts';
 import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../core/applets/index.ts';
 import {xAppIcon,appLogoSource,AGENT_ICONS,CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
 import {themeAppletIcon} from '../themes/index.ts';
@@ -401,12 +401,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const provider=mark.dataset.provider==='google'?'gmail':mark.dataset.provider,index=chosenApps.findIndex(a=>a.key===provider);
    return float(copy,r.left+r.width/2,r.top+r.height/2,index>=0?slot(index):{x:innerWidth/2,y:innerHeight*.18},iconsToGather.length+i,{end:{opacity:0,scale:.7}}).then(()=>copy.remove());
   });
-  // The World comes forward as it will open, by day or by night from the same clock the World reads before it knows a
-  // place, so the painting and the World match when one hands over to the other.
-  // A theme without its own night painting gets its day painting dimmed for the night.
-  const assets=(globalThis as any).__WORLDLET_25D_ASSETS__,night=environmentAt().night,now=night&&assets?.night?assets.night:assets?.surroundings;
-  if(now&&typeof now==='string')loader.style.setProperty('--setup-world-now','url("'+now.replace(/"/g,'%22')+'")');
-  if(night&&!assets?.night)loader.dataset.setupNight='dimmed';
+  // The page's background stays as it is while everything gathers (owner request 2026-10-12); it fades when the World opens.
   loader.classList.add('is-gathering');
   // What came along drifts into Fox while it walks down; Fox swells and glows a little as it takes in each one. Routines
   // run on their own, so they go to the dock beside Fox instead, to Scheduled on its left (owner layout 2026-10-11); before

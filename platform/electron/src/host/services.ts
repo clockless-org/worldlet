@@ -144,6 +144,8 @@ export interface WorldToolsService {
  observeWeather(value:Row):void;
  /** Brought conversations recently active, as Attention context (core/tasks/attention.ts). */
  observeConversations(records:Row[]):void;
+ /** What the person's own Agent picked out for the Center at setup (core/tasks attentionFromAgent); the keys saved. */
+ seedFromAgent(entries:{key:string;item:Row}[]):string[];
  runtimeTaskReport():Row;
  /** Cancels a provider's background reader and analysis lane (a check was paused/removed). */
  cancelProvider(provider:string):void;

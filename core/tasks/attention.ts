@@ -5,7 +5,7 @@
 // provider; the Attention Center's ordinary synthesis reads it, and an item it finds quotes the conversation and
 // opens back to it (core/tasks/README.md#attention). These are the rules every host applies.
 import {MIGRATION_SOURCE_TITLES,isMigrationSource} from '../../contracts/agent.ts';
-import {digest,ongoingName,type BroughtConversation} from './ongoing.ts';
+import {conversationNamed,digest,ongoingBusier,ongoingName,type BroughtConversation} from './ongoing.ts';
 
 export const CONVERSATION_ATTENTION=Object.freeze({
  /** The Attention provider brought conversations stand in for (core/applets/definitions/ongoing.ts). */
@@ -64,4 +64,33 @@ export function conversationOriginal(c:Pick<BroughtConversation,'source'|'sessio
  const name=ongoingName(c.source,c.session);
  const lines=turns.slice(-CONVERSATION_ATTENTION.originalTurns).filter(t=>typeof t?.text==='string'&&t.text.trim()).map(t=>line(c.source,t));
  return {title:name.title,text:(name.where?name.where+'. ':'')+'Its latest messages, oldest first.\n\n'+lines.join('\n\n')};
+}
+
+/** What the person's own Agent picked out for the Attention Center when setup asked it to describe itself
+ * (core/agent/agent-profile.ts `attention`; owner request 2026-10-12, Kelvin: "onboard了以后 Attention Center里面要有东西").
+ * Its answer comes before any synthesis pass has run on its conversations, so the Center is not empty when the World
+ * opens. Each entry becomes a Center item of the `conversations` provider that cites the conversation it names (the
+ * busiest brought one whose name matches) and opens back to it; one whose conversation is not here yet waits for it.
+ * `key` names an entry for good, so one the person already saw is never made again. */
+export interface AgentAttentionEntry {group:'coming'|'doing'|'knowing';title:string;why:string;summary?:string;when?:string;thread:string}
+export function attentionFromAgent(said:readonly AgentAttentionEntry[],conversations:BroughtConversation[],now:number,agent:string):{key:string;item:Record<string,unknown>}[] {
+ const out:{key:string;item:Record<string,unknown>}[]=[];
+ for(const entry of said){
+  const found=conversations.filter(c=>isMigrationSource(c.source)&&conversationNamed(ongoingName(c.source,c.session).title,entry.thread)).sort((a,b)=>ongoingBusier(a,b,now))[0];
+  if(!found)continue;
+  const kind=entry.group==='coming'?'event':entry.group==='doing'?'task':'update';
+  // A coming thing needs its day, from yesterday to a month ahead; a date alone is all day.
+  let dates:Record<string,unknown>={};
+  if(kind==='event'){
+   const allDay=/^\d{4}-\d{2}-\d{2}$/.test(entry.when??''),at=Date.parse(allDay?entry.when+'T23:59:59Z':entry.when??'')/1000;
+   if(!Number.isFinite(at)||at<now-DAY||at>now+31*DAY)continue;
+   dates={start:entry.when,...allDay?{allDay:true}:{},eventDisposition:'confirmed'};
+  }
+  const name=ongoingName(found.source,found.session).title;
+  out.push({key:digest(agent+'\u0000'+entry.group+'\u0000'+entry.title.toLowerCase()),item:{kind,provider:CONVERSATION_ATTENTION.provider,title:entry.title,reason:entry.why,summary:entry.summary||entry.why,
+   ...(kind==='task'?{attentionReason:entry.why}:{}),...dates,
+   // The conversation's own name is in what the Center reads of it (conversationObservation), so it is the quote.
+   sources:[{provider:CONVERSATION_ATTENTION.provider,id:conversationAttentionId(found.source,found.session),quote:name}]}});
+ }
+ return out;
 }

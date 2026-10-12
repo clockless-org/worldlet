@@ -1,4 +1,4 @@
-import {CONVERSATION_ATTENTION,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../core/tasks/index.ts';
+import {CONVERSATION_ATTENTION,attentionFromAgent,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../core/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {ONGOING,WORLD_TOOLS,type OngoingService,type WorldToolsService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
@@ -6,8 +6,11 @@ import {installExternalEvents} from './external-events.ts';
 import {installHarnessCalls} from './harness-calls.ts';
 import {readAgentProfile} from '../agent-runtime/agent-profile.ts';
 import {readSelection} from '../agent-runtime/local-harness.ts';
+import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 
 const HOUR=3_600_000;
+/** The Attention items the person's Agent picked out at setup that were already made, by Agent: never made twice. */
+const AGENT_ATTENTION='agent-attention-seeded';
 
 /** Ongoing things (core/tasks/README.md). Brought conversations that look like one job carried on are proposed
  * as something worth doing; the person's yes makes one an Applet, listed in the Ongoing Applet and on the phone.
@@ -54,7 +57,19 @@ export function installOngoing(host:Host){
     return value?[value]:[];
    });
    if(records.length)center.observeConversations(records);
+   seed(center,conversationsForAttention(ledger.broughtConversations(),now()));
   }catch(error){host.diagnostics.record(error,'ongoingAttention');}
+ }
+ // What the chosen Agent picked out for the Center when setup asked it to describe itself (core/agent/agent-profile.ts
+ // `attention`) is there when the World opens, before any synthesis pass, each from a conversation the Center reads.
+ function seed(center:WorldToolsService,recent:ReturnType<typeof conversationsForAttention>){
+  const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.attention??[]:[];
+  if(!chosen||!said.length)return;
+  const all=readAgentSetting(host.profile.root,AGENT_ATTENTION) as Record<string,string[]>|null,made=new Set(all?.[chosen]??[]);
+  const entries=attentionFromAgent(said,recent,now(),chosen).filter(e=>!made.has(e.key));
+  if(!entries.length)return;
+  const saved=center.seedFromAgent(entries);
+  if(saved.length)writeAgentSetting(host.profile.root,AGENT_ATTENTION,{...all,[chosen]:[...made,...saved]} as any);
  }
  // Webhooks, mail triggers and hooks that started the person's own Agent, new channel messages that may need the
  // person, and the phone calls it made or took, stand beside its conversations.

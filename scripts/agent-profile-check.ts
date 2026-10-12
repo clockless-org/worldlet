@@ -30,7 +30,10 @@ const reply='Here you go:\n```json\n'+JSON.stringify({schema:AGENT_PROFILE_SCHEM
  skills:[{name:'groceries',description:'Restock the kitchen'},{description:'no name'}],connections:[{name:'1Password vault',kind:'Password_Vault',service:'1Password'},{name:'Third mailbox',kind:'imap',service:'Gmail',usedFor:'hotels'},{name:'Leaked',service:'x',usedFor:'ghp_abcdefghijklmnopqrstuvwxyz0123'}],
  channels:[{provider:'Discord',place:'#groceries',purpose:'shopping'},{provider:'discord'}],routines:[{name:'Morning news',schedule:'0 8 * * *'}],threads:Array.from({length:40},(_,i)=>({title:'Thread '+i})),
  things:[{title:'Kitchen restock',why:'Every week',threads:['#groceries','',7],key:'Amazon'},{title:'Taxes',threads:[]},{threads:['#x']}],
- applets:[{key:'amazon',title:'Amazon',why:'Restocks'},{title:'Getty guide',why:'Museum day'},{key:'not-in-catalog',title:'Other'}]})+'\n```';
+ applets:[{key:'amazon',title:'Amazon',why:'Restocks'},{title:'Getty guide',why:'Museum day'},{key:'not-in-catalog',title:'Other'}],
+ attention:[{group:'Coming',title:'Dentist',why:'Booked on Tuesday',when:'2026-10-14T15:00:00-07:00',thread:'#health'},{group:'coming',title:'No date',why:'Somewhere',thread:'#x'},
+  {group:'doing',title:'Send the deck to Sam',why:'You promised it by Friday',summary:'Sam asked for the deck.',thread:'#work'},{group:'doing',title:'Too wordy',why:'one two three four five six seven eight nine',thread:'#x'},
+  {group:'knowing',title:'Refund came through',why:'The airline paid it back',thread:'#travel'},{group:'later',title:'Unknown group',why:'x',thread:'#x'},{group:'doing',title:'No thread',why:'x'}]})+'\n```';
 const profile=parseAgentProfile(reply)!;
 assert.deepEqual(profile.agent,{name:'Juno',model:'anthropic/claude-opus'});
 assert.deepEqual(profile.workspaces,[{agent:'main',path:'~/clawd'}]);
@@ -41,6 +44,11 @@ assert.deepEqual(profile.channels,[{provider:'discord',place:'#groceries',purpos
 assert.equal(profile.threads.length,30);
 assert.deepEqual(profile.things,[{title:'Kitchen restock',why:'Every week',threads:['#groceries'],key:'amazon'},{title:'Taxes',threads:[]}],'what the person handles most, with where it happens');
 assert.match(prompt,/things: name the things your person handles most/);
+// What the person should see in the Attention Center right after setup (owner request 2026-10-12): a coming thing needs
+// its day, a reason stays within eight words, every one names its conversation.
+assert.deepEqual(profile.attention,[{group:'coming',title:'Dentist',why:'Booked on Tuesday',when:'2026-10-14T15:00:00-07:00',thread:'#health'},
+ {group:'doing',title:'Send the deck to Sam',why:'You promised it by Friday',summary:'Sam asked for the deck.',thread:'#work'},{group:'knowing',title:'Refund came through',why:'The airline paid it back',thread:'#travel'}]);
+assert.match(prompt,/attention: up to 9 things your person should see today/);
 assert.ok(!JSON.stringify(profile).includes('ghp_')&&!JSON.stringify(profile).includes('sk-live'));
 assert.deepEqual(agentProfileApplets(profile,['gmail','discord','amazon','x']),['amazon','gmail','x','discord'],'suggested first, then what its connections and channels use');
 assert.equal(parseAgentProfile('I cannot do that.'),null);
@@ -54,7 +62,7 @@ const fake=(replies:(string|Error|'hang')[])=>{
  return {asked,make:()=>{let cancel=()=>{};return {async run(body:any){asked.push(body.text);assert.equal(body._background,true);const next=replies.shift()!;if(next==='hang')return new Promise((_,reject)=>{cancel=()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'}));});if(next instanceof Error)throw next;return {message:next};},steer:async()=>false,cancel:()=>cancel()};}};
 };
 let agent=fake(['Sure! I am Juno.',JSON.stringify({agent:{name:'Juno'}})]);
-assert.deepEqual(await describeAgent(agent.make,'/tmp'),{profile:{agent:{name:'Juno'},workspaces:[],aboutUser:[],skills:[],connections:[],channels:[],routines:[],threads:[],applets:[],things:[]},result:'ok'});
+assert.deepEqual(await describeAgent(agent.make,'/tmp'),{profile:{agent:{name:'Juno'},workspaces:[],aboutUser:[],skills:[],connections:[],channels:[],routines:[],threads:[],applets:[],things:[],attention:[]},result:'ok'});
 assert.equal(agent.asked.length,2);assert.match(agent.asked[1],/was not that JSON object/);
 agent=fake(['nope','still nope']);
 assert.deepEqual(await describeAgent(agent.make,'/tmp'),{profile:null,result:'invalid'});

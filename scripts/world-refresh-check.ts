@@ -23,11 +23,14 @@ await withBrowser(fileAccess,async browser=>{
  const tracker=page.locator('.world-task-tracker');
  assert.equal(await page.evaluate(()=>!!document.querySelector<HTMLElement>('.world-attention-title')),false,'the panel shows its contents, not a heading over them');
  assert.equal(await page.evaluate(()=>getComputedStyle(document.querySelector<HTMLElement>('.world-task-tracker')).pointerEvents),'none','the panel lies over the world without swallowing clicks on it');
- assert.equal(await tracker.locator('.world-task-group').count(),0,'nothing needs the user, so the panel shows no groups');
+ // The three groups always stand, empty or not (owner request 2026-10-12).
+ assert.deepEqual(await tracker.locator('.world-task-group').evaluateAll(g=>g.map(e=>e.getAttribute('data-group'))),['event','needsAction','unseen'],'the panel always shows Coming Up, Worth Doing and Worth Knowing');
+ assert.equal(await tracker.locator('.world-matter').count(),0);
  assert.doesNotMatch(await tracker.innerText(),/Quiet/);
  // Nothing waiting is the best outcome, not a gap to apologise for: under today's corner, the panel's header, an empty
  // Attention Center says so in two words and asks for nothing (owner request 2026-10-11).
- assert.equal((await tracker.locator('.world-task-list').innerText()).trim(),'All clear for now.','an empty panel says all clear, connected or not');
+ assert.equal((await tracker.locator('.world-task-more').innerText()).trim(),'All clear for now.','an empty panel says all clear, connected or not');
+ assert.deepEqual((await tracker.locator('.world-task-heading').allInnerTexts()).map(t=>t.trim().toUpperCase()),['COMING UP','WORTH DOING','WORTH KNOWING']);
  assert.equal(await tracker.locator('.world-today-open').isVisible(),true,'the header stays when nothing waits');
  await page.evaluate(()=>{location.hash='building=building-home';});
  await page.waitForFunction(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return m.active==='building-home'&&m.camera.settled;});
@@ -49,9 +52,10 @@ await withBrowser(fileAccess,async browser=>{
  after=await page.evaluate(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return {generation:document.querySelector<HTMLElement>('#notionStage canvas')?.dataset.generation,active:m.active,gmail:m.modules.find(d=>d.id==='app-gmail')};});
  assert.equal(after.generation,'first','saved items must not rebuild the scene');
  assert.equal(after.active,'building-home');
- assert.equal(await tracker.locator('.world-task-group').count(),1,'only the group that holds something appears');
+ assert.equal(await tracker.locator('.world-task-group').count(),3,'the empty groups still stand');
+ assert.equal(await tracker.locator('.world-task-group[data-group=needsAction] .world-matter').count(),1,'the task sits in Worth Doing');
  assert.equal(await tracker.locator('.world-matter').count(),1);
- assert.equal(await tracker.locator('.world-task-heading').innerText(),'WORTH DOING','the heading names the group and nothing else');
+ assert.equal(await tracker.locator('.world-task-group[data-group=needsAction] .world-task-heading').innerText(),'WORTH DOING','the heading names the group and nothing else');
  assert.deepEqual(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.framing.viewport),before.viewport,'showing Attention Center must not move or shrink the world');
  const shortBacking=await page.locator('.world-task-list').boundingBox();
  // Today's corner heads the Attention Center (owner request 2026-10-11): one left panel from the top-left, as tall as
@@ -73,7 +77,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.ok(columns.every(x=>Math.abs(x-columns[0])<1),'Real HUD titles align');
  const nearTiming=await page.evaluate(()=>{const title=document.querySelector<HTMLElement>('.world-task-group[data-group=event] .world-task-title').getBoundingClientRect(),time=document.querySelector<HTMLElement>('.world-task-group[data-group=event] .world-task-time'),facts=time.parentElement;return {under:time.getBoundingClientRect().top>=title.bottom-1,leads:facts.classList.contains('world-task-objective')&&facts.firstElementChild===time};});
  assert.deepEqual(nearTiming,{under:true,leads:true},'the time leads the line under the title');
- assert.deepEqual((await tracker.locator('.world-task-heading').allInnerTexts()),['COMING UP','WORTH DOING'],'time-bound items come first, under their own name');
+ assert.deepEqual((await tracker.locator('.world-task-heading').allInnerTexts()),['COMING UP','WORTH DOING','WORTH KNOWING'],'time-bound items come first, under their own name');
  assert.doesNotMatch(await tracker.innerText(),/Calendar|Mail|Gmail/,'a row says the thing, never which Applet it came from');
  // Shapes say kind; importance remains data, while rows use a neutral hover.
  const shapes=()=>page.evaluate(()=>[...document.querySelectorAll<HTMLElement>('.world-matter')].map(r=>{const svg=r.querySelector('.matter-icon svg');return r.dataset.matterState+':'+svg.firstElementChild.tagName+':'+(svg.children.length-1);}));
@@ -195,5 +199,5 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(!said.includes(secret),'the world state recited an item instead of counting it: '+secret);
 
  assert.deepEqual(errors,[]);
- console.log('PASS world refresh: Applet activity and saved items update in place; scene and camera stay; the Attention Center keeps its size, shows only what it holds, times its events and names no Applets; Fox is told the time, the sky and the sound in the air.');
+ console.log('PASS world refresh: Applet activity and saved items update in place; scene and camera stay; the Attention Center keeps its size, always shows its three groups, times its events and names no Applets; Fox is told the time, the sky and the sound in the air.');
 });

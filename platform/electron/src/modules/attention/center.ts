@@ -156,6 +156,23 @@ export class AttentionCenter {
   if(!this.writable||!this.consent||this.sample()||!records.length)return;
   this.observeAttention('conversations',records.slice(0,50));
  }
+ /** What the person's own Agent picked out at setup (core/tasks attentionFromAgent), before any synthesis pass: each item
+  * is checked as any finding is and depends on the conversation it cites, which the Center already reads. Returns the
+  * keys of the ones saved; one that does not fit yet is left for a later call. */
+ seedFromAgent(entries:{key:string;item:Row}[]):string[] {
+  if(!this.writable||!this.consent||this.sample()||!entries.length)return [];
+  const db=this.db(),facts=db.attentionFacts(),saved:string[]=[];
+  for(const {key,item} of entries){
+   try{
+    const content=core('attentionContent',{item});
+    if(!isRow(content))continue;
+    db.saveTaskProposals([this.attentionManaged(content,facts,'source',{facts,paused:[]})],'agent-profile');
+    saved.push(key);
+   }catch(error){if(!isValidation(error))this.persist(error,'agentAttention');}
+  }
+  if(saved.length)this.worldChanged();
+  return saved;
+ }
  observeAttention(provider:string,records:Row[],publish=false){
   if(!this.writable||this.sample()||!(provider==='google-calendar'||this.consent))return;
   const storedAt=publish?null:this.storeAppletRecords(provider,records);
