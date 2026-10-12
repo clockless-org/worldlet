@@ -222,7 +222,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    if(!draft.brought.failed)productEvent('agent_bring_completed',agentBringDimensions(id,draft.brought,draft.integrations),timingBucket(performance.now()-started));
   }
  }
- // The apps the World starts with: those found on this computer first, then the popular starters.
+ // The apps the World starts with: those found on this computer first, then each area's starters.
  // Starter games arrive without being shown.
  const worldApps=()=>WORLD_APPS.filter(a=>selected.has(a.id)&&a.region!=='health'&&appletSupport(a.key,hostFeatures(state)).supported).sort((a,b)=>Number(detected.has(b.key))-Number(detected.has(a.key)));
  /** The tiles on the right, in the order they arrive (owner requests 2026-10-09): the avatar, its profile,
@@ -575,7 +575,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     el.append(node('p',again?count('{count} to sign in again after setup',again):items.map(item=>item.title).join(' · '),'setup-tile-note'));
    }));
   }
-  // The apps: the ones found here, then the popular starters; their icons fly into the World on Enter your world.
+  // The apps: the ones found here, then each area's starters; their icons fly into the World on Enter your world.
   const apps=worldApps(),found=apps.filter(a=>detected.has(a.key)).length,limit=14;
   return keep('tile:apps',JSON.stringify([apps.map(a=>a.id),found,Object.keys(nativeIcons).length,draft.language]),build('Apps','is-wide setup-tile-apps',el=>{
    const row=node('div','','setup-tile-logos');
@@ -808,9 +808,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  }
  void detectAgents();
  if(step===1)void prepareGoogleSources();
- // Setup selects what this computer already has, then a few popular Applets (owner decision 2026-10-11): its draft
- // (Mail, Calendar, Browser), the apps found here, the apps the person's Agent brought or already connected, then the
- // popular starters (core/applets/regions.ts).
+ // Setup selects what this computer already has, then four more Applets in every area (owner Order 2026-10-12): its
+ // draft (Mail, Calendar, Browser), the apps found here, the apps the person's Agent brought or already connected, then
+ // each area's starters (core/applets/regions.ts).
  const brought=()=>new Set<string>([...(draft.integrations||[]).map((item:any)=>item?.provider),...(draft.profile?.applets||[]),...(state.connections||[]).filter((c:any)=>connectionLive(c)).map((c:any)=>c.provider)].filter((p:unknown):p is string=>typeof p==='string'));
  const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched,brought());persist();};
  if(hostFeatures(state).installedAppDetection){

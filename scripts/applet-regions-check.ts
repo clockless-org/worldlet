@@ -1,27 +1,31 @@
 import assert from 'node:assert/strict';
 import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
 import {setupText} from '../ui/onboarding/setup-language.ts';
-import {APPLET_REGION_TITLES,AREA_LAYOUT_VERSION,FIRST_WORLD_SIZE,GAME_STARTERS,POPULAR_STARTERS,SETUP_SUGGESTIONS,migrateAreaLayout,seedAppletSelection,setupOffers} from '../core/applets/regions.ts';
+import {APPLET_REGION_TITLES,AREA_LAYOUT_VERSION,AREA_STARTER_COUNT,AREA_STARTERS,GAME_STARTERS,SETUP_SUGGESTIONS,migrateAreaLayout,seedAppletSelection,setupOffers} from '../core/applets/regions.ts';
 const keys=APP_DEFINITIONS.map(a=>a.key);
 assert.equal(new Set(keys).size,keys.length,'Each app has one definition');
 for(const app of APP_DEFINITIONS)assert.ok(Object.hasOwn(APPLET_REGION_TITLES,app.region||''),app.key+' definition names one of the six areas');
-// A first run selects what this computer has, then popular starters (owner decision 2026-10-11): setup's draft (Mail,
-// Calendar, Browser), the apps found here and the apps the Agent brought or connected, then popular Applets until the
-// World holds FIRST_WORLD_SIZE. Games keep their three starters.
+// A first run selects what this computer has, then AREA_STARTER_COUNT more Applets in every area (owner Order
+// 2026-10-12): setup's draft (Mail, Calendar, Browser, counted in Home), the apps found here and the apps the Agent
+// brought or connected, then each area's starters. Games keep their three starters.
 const draft=['app-gmail','app-google-calendar','app-browser'],games=APP_DEFINITIONS.filter(a=>a.region==='health');
+for(const [region,keys] of Object.entries(AREA_STARTERS))for(const key of keys)assert.ok(APP_DEFINITIONS.some(a=>a.key===key&&a.region===region&&!a.requiresHostFeature),'Starter '+key+' is a '+region+' Applet that opens on any computer');
 for(const detected of [new Set<string>(),new Set(APP_DEFINITIONS.map(a=>a.key)),new Set(['whatsapp','strava','cloudflare'])]){
  const selected=new Set<string>(draft);seedAppletSelection(APP_DEFINITIONS,detected,selected,new Set());
  for(const key of detected)assert.ok(selected.has('app-'+key),'Found here: '+key);
- for(const app of APP_DEFINITIONS)if(app.region!=='health'&&!draft.includes(app.id)&&selected.has(app.id))assert.ok(detected.has(app.key)||POPULAR_STARTERS.includes(app.key),'Only what is found here or popular joins: '+app.key);
- const size=APP_DEFINITIONS.filter(a=>a.region!=='health'&&selected.has(a.id)).length;
- assert.ok(size<=Math.max(FIRST_WORLD_SIZE,draft.length+detected.size),'Popular starters only fill up to '+FIRST_WORLD_SIZE+': '+size);
+ for(const app of APP_DEFINITIONS)if(app.region!=='health'&&!draft.includes(app.id)&&selected.has(app.id))assert.ok(detected.has(app.key)||AREA_STARTERS[app.region]?.includes(app.key),'Only what is found here or an area starter joins: '+app.key);
+ for(const region of Object.keys(AREA_STARTERS)){
+  const added=APP_DEFINITIONS.filter(a=>a.region===region&&selected.has(a.id)&&!detected.has(a.key)).length,room=APP_DEFINITIONS.filter(a=>a.region===region&&!detected.has(a.key)).length;
+  assert.equal(added,Math.min(AREA_STARTER_COUNT,room),region+' gets '+AREA_STARTER_COUNT+' beyond what is found here');
+ }
  assert.ok(games.filter(a=>selected.has(a.id)).length>=3,'The Games area keeps its starters');
 }
 const fresh=new Set<string>(draft);seedAppletSelection(APP_DEFINITIONS,new Set(),fresh,new Set());
-assert.ok(POPULAR_STARTERS.length>=6&&POPULAR_STARTERS.length<=8&&POPULAR_STARTERS.every(key=>APP_DEFINITIONS.some(a=>a.key===key&&a.region!=='health'&&!a.requiresHostFeature)),'Six to eight popular starters, each opens on any computer');
-assert.deepEqual([...fresh],[...draft,...POPULAR_STARTERS.map(key=>'app-'+key),...GAME_STARTERS.map(key=>'app-'+key)],'A fresh computer starts with Mail, Calendar, Browser, the popular starters and the three starter games: '+[...fresh].join(' '));
+assert.deepEqual([...fresh],[...draft,'app-weather',...['chatgpt','notion','slack','github','whatsapp','discord','reddit','telegram','google-maps','amazon','airbnb','uber','youtube','spotify','netflix','wikipedia',...GAME_STARTERS].map(key=>'app-'+key)],'A fresh computer starts with the draft and four Applets in every area, plus the three starter games: '+[...fresh].join(' '));
+const found=new Set<string>(draft);seedAppletSelection(APP_DEFINITIONS,new Set(['slack','zoom']),found,new Set());
+assert.ok(['app-slack','app-zoom','app-chatgpt','app-notion','app-github','app-claude'].every(id=>found.has(id)),'Apps found here do not use up an area\'s starters');
 const withAgent=new Set<string>(draft);seedAppletSelection(APP_DEFINITIONS,new Set(['notion']),withAgent,new Set(),new Set(['github','google']));
-assert.ok(withAgent.has('app-github')&&withAgent.has('app-notion')&&withAgent.has('app-youtube')&&!withAgent.has('app-x'),'Apps brought from the Agent and found here join, then popular starters');
+assert.ok(withAgent.has('app-github')&&withAgent.has('app-notion')&&withAgent.has('app-youtube')&&!withAgent.has('app-x'),'Apps brought from the Agent and found here join, then area starters');
 const selected=new Set<string>();seedAppletSelection(APP_DEFINITIONS,new Set(['whatsapp']),selected,new Set(['app-whatsapp','app-github']),new Set(['github']));assert.ok(selected.has('app-youtube'),'Other starters still join');assert.ok(!selected.has('app-whatsapp')&&!selected.has('app-github'),'Explicit unchecks are respected');
 const unchecked=new Set<string>();seedAppletSelection(APP_DEFINITIONS,new Set(),unchecked,new Set(GAME_STARTERS.map(key=>'app-'+key)));
 for(const key of GAME_STARTERS)assert.ok(!unchecked.has('app-'+key),'Respect uncheck: '+key);
@@ -56,4 +60,4 @@ assert.deepEqual(after.pins,{work:['app-github','app-slack','app-notion','app-fi
 assert.deepEqual(after.themePins,{castle:{work:['app-canva',null,null,null,null]}});
 assert.equal(migrateAreaLayout(after),after,'a regrouped layout is left alone');
 assert.deepEqual(migrateAreaLayout({version:3,assignments:{'app-x':'library'}}).assignments,{'app-x':'library'},'Social choices are kept');
-console.log('PASS complete, exclusive six-area catalog; the 2026-10-08 regroup and its layout migration; first run selects the draft, apps found here and brought from the Agent, then popular starters up to '+FIRST_WORLD_SIZE+', plus the starter games; explicit unchecks; short setup offer; purposes in every setup language');
+console.log('PASS complete, exclusive six-area catalog; the 2026-10-08 regroup and its layout migration; first run selects the draft, apps found here and brought from the Agent, then '+AREA_STARTER_COUNT+' more in every area, plus the starter games; explicit unchecks; short setup offer; purposes in every setup language');

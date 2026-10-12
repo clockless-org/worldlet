@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {emptyRegionLayout,moveRegionApplet,parseRegionLayout,pinnedPlace,pinRegionApplet,recentlyUsedFirst,readRegionLayout,recordAppletUse} from '../ui/world/region-layout.ts';
 import {updateOnboarding} from '../core/onboarding/onboarding.ts';
 import {WORLD_APPS} from '../core/applets/catalog.ts';
-import {recommendForArea,appletHost,AREA_RECOMMEND_LIMIT} from '../core/applets/area-recommend.ts';
+import {recommendForArea,appletHost} from '../core/applets/area-recommend.ts';
 import {inAppletCatalog} from '../core/applets/applet-support.ts';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
 import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
@@ -83,26 +83,26 @@ assert.equal(withMoment[arrived.moduleId]?.id,homeSlots[0].id,'a new moment Appl
 const kept=updateOnboarding({version:1,presets:['home'],completed:true},{operation:'regionLayout',layout:{...used,usage:{x:-1,y:2},extra:true}});
 assert.deepEqual(parseRegionLayout(kept.regionLayout),{...parseRegionLayout(used),usage:{y:2}});assert.equal((kept.regionLayout as any).extra,undefined);assert.deepEqual((kept.regionLayout as any).usage,{y:2});
 assert.throws(()=>updateOnboarding({version:1,presets:['home'],completed:true},{operation:'regionLayout',layout:[]}),/Invalid area layout/);
-// An Area recommends related Applets the person does not have yet (owner Order 2026-10-07): its own category first,
+// An Area recommends every related Applet the person does not have yet (owner Orders 2026-10-07, 2026-10-12): its own category first,
 // then installed apps, then sites visited in Worldlet's browser, then catalog order; never theirs, never removed ones.
 {
  const apps=WORLD_APPS.map(a=>({id:a.id,key:a.key,category:a.region,host:appletHost(a)}));
  const mine=new Map([['app-github','work'],['app-slack','work']]);
  const work=recommendForArea({area:'work',apps,mine});
- assert.equal(work.length,AREA_RECOMMEND_LIMIT,'eight at most');
+ assert.equal(work.length,apps.filter(a=>a.category==='work'&&!mine.has(a.id)).length,'all of them, not a short list');
  assert.ok(work.every(id=>WORLD_APPS.find(a=>a.id===id)?.region==='work'&&!mine.has(id)),'only Work Applets the person does not have');
- assert.deepEqual(work,apps.filter(a=>a.category==='work'&&!mine.has(a.id)).slice(0,AREA_RECOMMEND_LIMIT).map(a=>a.id),'catalog order without other signals');
+ assert.deepEqual(work,apps.filter(a=>a.category==='work'&&!mine.has(a.id)).map(a=>a.id),'catalog order without other signals');
  const ranked=recommendForArea({area:'work',apps,mine,installed:new Set(['zoom']),visits:{'linear.app':4,'m.vercel.com':9}});
  assert.deepEqual(ranked.slice(0,3),['app-zoom','app-vercel','app-linear'],'installed, then visited (subdomains count), then catalog order');
  assert.ok(!recommendForArea({area:'work',apps,mine,removed:new Set(['app-zoom']),installed:new Set(['zoom'])}).includes('app-zoom'),'removed Applets are not pushed back');
  // Moving Spotify into Work makes Explore Applets related to Work, after Work's own.
- const moved=recommendForArea({area:'work',apps,mine:new Map([...mine,['app-spotify','work']]),limit:200});
+ const moved=recommendForArea({area:'work',apps,mine:new Map([...mine,['app-spotify','work']])});
  assert.ok(moved.includes('app-youtube')&&moved.indexOf('app-youtube')>moved.indexOf('app-zoom'),'moved-in categories follow the Area\'s own');
- assert.ok(!recommendForArea({area:'work',apps,mine,limit:200}).includes('app-youtube'),'unrelated categories stay out');
+ assert.ok(!recommendForArea({area:'work',apps,mine}).includes('app-youtube'),'unrelated categories stay out');
  // What the person's own Agent suggested comes first in its own Area, and only there (core/agent/agent-profile.ts).
  const suggested=new Set(['jira','youtube']);
  assert.deepEqual(recommendForArea({area:'work',apps,mine,installed:new Set(['zoom']),suggested}).slice(0,2),['app-jira','app-zoom'],'suggested, then installed');
- assert.ok(!recommendForArea({area:'work',apps,mine,suggested,limit:200}).includes('app-youtube'),'a suggestion stays in its own Area');
+ assert.ok(!recommendForArea({area:'work',apps,mine,suggested}).includes('app-youtube'),'a suggestion stays in its own Area');
  assert.ok(!recommendForArea({area:'work',apps,mine:new Map([...mine,['app-jira','work']]),suggested}).includes('app-jira'),'one already in the World is not suggested again');
 }
 // The catalog offers every Applet, website Applets included (owner decision 2026-10-11), but not the moving ongoing placeholder.
