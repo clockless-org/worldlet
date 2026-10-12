@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {BACKGROUND_SIGN_IN,CHAT_TIER,claudeCodeLoggedIn,PROVIDERS,hermesRequestModel,agentProviders,backgroundModel,chooseProvider,chosenModel,localHarnessInvocation,localHarnessStream,providerModel,providerSignIn,readLocalHarnessLine,readProviderChoices,signedInProviders} from '../core/agent/index.ts';
-import {signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
+import {backgroundSignIn,signInOnce,signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
 
 // The provider Fox's Agent answers with (core/agent/model-providers.ts): each provider maps to S, M and L models, chat
 // uses M, the choice reaches every Harness on its own per-turn switch, and signing in happens in the Agent itself.
@@ -105,3 +108,15 @@ assert.equal(claudeCodeLoggedIn('{"loggedIn":true,"authMethod":"oauth_token"}'),
 assert.equal(claudeCodeLoggedIn('{"loggedIn":false}\n'),false);
 assert.equal(claudeCodeLoggedIn('Not JSON'),null);
 console.log('PASS Claude Code sign-in from Worldlet');
+// Its sign-in page opens by itself at most once per launch, and a Sign in click while it is open shares it.
+{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-claude-sign-in-')),log=path.join(dir,'runs.txt'),command=path.join(dir,'claude');
+ fs.writeFileSync(command,`#!/bin/sh\necho "$@" >> '${log}'\nsleep 0.3\n`,{mode:0o755});
+ const install={id:'claude-code' as const,title:'Claude Code',command,prefix:[],configured:true},env={PATH:process.env.PATH??''};
+ assert.equal(signInOnce(install,env),true);
+ await backgroundSignIn(install,['auth','login'],env,new AbortController().signal);
+ assert.equal(signInOnce(install,env),false,'not again in this launch');
+ assert.deepEqual(fs.readFileSync(log,'utf8').trim().split('\n'),['auth login'],'one sign-in page, shared');
+ fs.rmSync(dir,{recursive:true,force:true});
+ console.log('PASS Claude Code sign-in opens by itself once per launch');
+}

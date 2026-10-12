@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {WorldletError} from '../../files.ts';
 import {spawn} from 'node:child_process';
-import {CLAUDE_CODE_STATUS,claudeCodeLoggedIn} from '../../../../../core/agent/index.ts';
+import {CLAUDE_CODE_STATUS,claudeCodeLoggedIn,providerSignIn} from '../../../../../core/agent/index.ts';
 import {stopChild} from './protocol.ts';
 import type {LocalHarnessInstall} from './local-harness.ts';
 
@@ -60,4 +60,23 @@ export function claudeCodeSignedIn(install:LocalHarnessInstall,env:Record<string
   child.once('error',()=>{clearTimeout(timer);resolve(null);});
   child.once('exit',()=>{clearTimeout(timer);resolve(claudeCodeLoggedIn(output));});
  });
+}
+
+// One sign-in at a time: the page Worldlet opened by itself and the person's Sign in button share it, so the browser
+// never gets two sign-in pages.
+let running:Promise<void>|null=null,triedThisLaunch=false;
+export function backgroundSignIn(install:LocalHarnessInstall,args:string[],env:Record<string,string>,signal:AbortSignal):Promise<void> {
+ if(running)return running;
+ const current=running=signInInBackground(install,args,env,signal).finally(()=>{if(running===current)running=null;});
+ return current;
+}
+/** Claude Code's sign-in ran out (a setup check, Fox's turn or background work said so): Worldlet opens its own
+ * sign-in page in the browser by itself, at most once per launch, so a page the person closed never comes back on its
+ * own (owner decision 2026-10-11). The Sign in buttons in setup and in Settings, Agent stay for another try. */
+export function signInOnce(install:LocalHarnessInstall,env:Record<string,string>):boolean {
+ const args=providerSignIn(install.id,'anthropic');
+ if(install.id!=='claude-code'||!args||triedThisLaunch||running)return false;
+ triedThisLaunch=true;
+ void backgroundSignIn(install,args,env,new AbortController().signal).catch(()=>{});
+ return true;
 }

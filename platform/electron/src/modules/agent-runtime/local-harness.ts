@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {CLAUDE_CODE_SIGN_IN_EXPIRED,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -22,6 +22,7 @@ import type {HarnessAgents,HarnessApprovalChoice,HarnessApprovals,HarnessModels,
 import {HARNESS_SCHEDULES} from './harness-schedule.ts';
 import {HARNESS_AGENTS} from './harness-agents.ts';
 import {runSendCommand} from './harness-send.ts';
+import {signInOnce} from './provider-sign-in.ts';
 
 // A Harness the person already runs here (Claude Code, Codex, Hermes Agent, OpenClaw, pi) as
 // Fox's Agent. Core owns the catalog and the per-command turn; this file finds the executables and runs a Fox
@@ -430,7 +431,11 @@ export class LocalHarnessRuntime implements AgentRuntime {
    stopped();
    // Background work (the Attention check) is its World tool calls; a conversation turn still needs words.
    const outcome=finishLocalHarness(id,stream,{code,stderr:harness.stderr.text},body._background===true?calls:0);
-   if('error' in outcome)throw new WorldletError(outcome.error);
+   if('error' in outcome){
+    // Claude Code's sign-in ran out: its own sign-in page opens in the browser by itself, once per launch.
+    if(outcome.error===CLAUDE_CODE_SIGN_IN_EXPIRED)signInOnce(this.install,harnessEnvironment(this.install,this.environment));
+    throw new WorldletError(outcome.error);
+   }
    if(!started&&outcome.message)await say(outcome.message);
    return {message:outcome.message};
   }finally{
