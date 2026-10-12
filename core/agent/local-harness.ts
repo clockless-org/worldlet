@@ -226,6 +226,12 @@ export function codexProblem(text:string):string|null {
  if(/not (?:logged|signed) in|\b401\b|unauthori[sz]ed|refresh token|token (?:has )?expired|codex login/i.test(text))return 'Codex is not signed in. Open Terminal, run codex login, then try again.';
  return null;
 }
+/** The provider turned the request away because the model is busy for everyone (Codex: "Selected model is at capacity.
+ * Please try a different model."; Anthropic: overloaded, 529), not because of this person's account: worth one more
+ * try a little later (Mac Alpha 4312, #416). */
+export function modelAtCapacity(text:string):boolean {
+ return /at capacity|overloaded|server_is_overloaded|\b529\b/i.test(text);
+}
 export function openClawMissingKey(text:string):string|null {
  const name=/Secret store entry "([A-Z][A-Z0-9_]{0,127})" was not found/.exec(text)?.[1]??/Environment variable "([A-Z][A-Z0-9_]{0,127})" is missing or empty/.exec(text)?.[1];
  return name?`OpenClaw can’t find its key ${name}, so its model can’t answer. Save it in Terminal with: openclaw secrets store set ${name}`:null;

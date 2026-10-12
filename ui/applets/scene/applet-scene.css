@@ -1,0 +1,51 @@
+/* The shared Applet scene (applet-scene.ts): the theme's painting, its measured regions and the controls an Applet
+   puts on them. Every colour, font and size here comes from the region's material (--scene-*), set from the theme's
+   presentation.json; an Applet's own stylesheet arranges its content and never names a colour. */
+.applet-scene{position:absolute;inset:0;overflow:hidden;pointer-events:none;isolation:isolate}
+.applet-scene-margin{position:absolute;inset:-48px;background-size:cover;background-position:center;filter:blur(28px) saturate(.9) brightness(.9);pointer-events:none}
+.applet-scene-plate{position:absolute;display:block;max-width:none;user-select:none;pointer-events:none}
+.applet-scene-region{position:absolute;box-sizing:border-box;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;container-type:size;
+ display:flex;flex-direction:column;gap:clamp(6px,2cqh,14px);padding:clamp(8px,3cqh,24px) clamp(10px,3cqi,30px);pointer-events:auto;
+ color:var(--scene-ink);background:var(--scene-fill);border-radius:var(--scene-radius);font:400 clamp(13px,2.6cqi,var(--scene-body-size))/1.45 var(--scene-body-font)}
+/* No painting: the region is a sheet of the material laid over the World. */
+.applet-scene[data-painted=false] .applet-scene-region{background:var(--scene-fill,#fff8e8);box-shadow:0 16px 40px #2a221526}
+.applet-scene[data-painted=false] .applet-scene-region[data-material=paper]{background:color-mix(in srgb,var(--scene-control) 92%,transparent)}
+.applet-scene[data-compact=true] .applet-scene-region{background:color-mix(in srgb,var(--scene-control) 94%,transparent);box-shadow:0 12px 32px #2a221530}
+.applet-scene-region[hidden]{display:none}
+.applet-scene-region :focus-visible{outline:2px solid var(--scene-focus);outline-offset:2px}
+
+/* Shared controls an Applet places in a region. */
+.applet-scene .scene-head{flex:none;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;padding-bottom:clamp(4px,1.5cqh,10px);border-bottom:1px solid var(--scene-line)}
+.applet-scene .scene-title{margin:0;min-width:0;font:600 clamp(18px,4.6cqi,var(--scene-title-size))/1.15 var(--scene-display-font);color:var(--scene-ink);overflow-wrap:anywhere}
+.applet-scene .scene-meta{margin:0;font-size:.82em;color:var(--scene-muted)}
+.applet-scene .scene-list{display:grid;gap:0;align-content:start;min-height:0}
+.applet-scene .scene-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(8px,2cqi,16px);width:100%;min-height:var(--scene-control-height);box-sizing:border-box;
+ padding:clamp(6px,1.6cqh,12px) clamp(4px,1cqi,10px);border:0;border-bottom:1px solid var(--scene-line);border-radius:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.applet-scene .scene-item:hover{background:color-mix(in srgb,var(--scene-accent) 9%,transparent)}
+.applet-scene .scene-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:calc(var(--scene-control-height) - 4px);padding:0 14px;border:1px solid var(--scene-line);
+ border-radius:var(--scene-radius);background:var(--scene-control);color:var(--scene-control-ink);font:500 14px/1 var(--scene-body-font);cursor:pointer}
+.applet-scene .scene-button[data-kind=primary]{background:var(--scene-accent);color:var(--scene-accent-ink);border-color:transparent}
+.applet-scene .scene-button:hover{filter:brightness(1.04)}
+.applet-scene .scene-empty{margin:auto;max-width:28em;text-align:center;color:var(--scene-muted)}
+@media(prefers-reduced-motion:reduce){.applet-scene *{transition:none!important;animation:none!important}}
+
+/* The stage that hosts a scene fills the World and leaves placement to the scene. */
+#notionWorld .pixi-applet-stage[data-scene][data-applet]{inset:0;width:auto;height:auto;max-height:none;aspect-ratio:auto;transform:none;padding:0;border:0;border-radius:0;
+ background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;overflow:hidden;pointer-events:none}
+/* While one of its items is read, the scene stays and the reader takes its primary region. */
+#notionWorld .pixi-applet-stage[data-reading=true] .applet-scene-region[data-role=primary]>*{visibility:hidden}
+
+
+/* Calendar, Notes and Reminders (ui/applets/home-open.ts) on a scene: the painting is their page, so their own sheet,
+   page art and fixed placements step aside and the theme's material colours the ink and controls. */
+.applet-scene .home-open-sheet{height:100%;padding:0;background:none;border:0;border-radius:0;box-shadow:none;animation:none;color:var(--scene-ink);font-family:var(--scene-body-font)}
+.applet-scene .home-open-sheet::before,.applet-scene .home-calendar-art{display:none}
+.applet-scene .home-open[data-home-kind] .home-open-sheet{padding:0;border:0;box-shadow:none}
+.applet-scene .home-open[data-home-kind] .home-open-header{position:static;height:auto;margin:0 0 8px;justify-content:space-between;border-bottom:1px solid var(--scene-line);padding-bottom:6px}
+.applet-scene .home-open[data-home-kind] .home-open-header h2{display:block;font:600 clamp(18px,4.6cqi,var(--scene-title-size))/1.15 var(--scene-display-font)}
+.applet-scene .home-calendar-modes button[aria-pressed=true]{background:var(--scene-accent);color:var(--scene-accent-ink)}
+.applet-scene .home-open-body[data-grid=time] .home-calendar-dayhead{background:color-mix(in srgb,var(--scene-control) 96%,transparent)}
+.applet-scene .home-leaf{background:color-mix(in srgb,var(--scene-control) 70%,transparent);border-color:var(--scene-line);color:var(--scene-ink)}
+.applet-scene .applet-scene-region[data-role=secondary]{align-items:center;justify-content:center;gap:0;padding:2px;text-align:center;overflow:hidden}
+.applet-scene .applet-scene-region[data-role=secondary] .scene-title{font-size:clamp(14px,50cqh,48px);line-height:1}
+.applet-scene .applet-scene-region[data-role=secondary] .scene-meta{font-size:clamp(8px,14cqh,13px)}

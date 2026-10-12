@@ -193,6 +193,8 @@ export class DesktopCompanion implements DesktopCompanionService {
    }
    const [width,height]=world.getContentSize();
    view.setBounds({x:0,y:0,width,height});
+   // A view moved back from another window can keep an empty layer on Mac until something repaints it.
+   view.webContents.invalidate();
    this.panel?.hide();
    this.entry?.hide();
    this.presented(false);
@@ -260,7 +262,10 @@ export class DesktopCompanion implements DesktopCompanionService {
    skipTaskbar:true,alwaysOnTop:true,backgroundColor:'#00000000',...(mac?{type:'panel' as const}:{})
   });
   panel.setAlwaysOnTop(true,'floating');
-  panel.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true});
+  // On Mac, visibleOnFullScreen without skipTransformProcessType turns the whole app into an accessory
+  // (Electron's app.dock.hide()): Worldlet lost its Dock icon, Command-Tab entry and menu bar, so there was
+  // no ordinary way back to the World after Fox went to the desktop (Alpha 4306).
+  panel.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true,skipTransformProcessType:true});
   // A continuation of the World surface, never closed on its own.
   panel.on('close',event=>event.preventDefault());
   return panel;

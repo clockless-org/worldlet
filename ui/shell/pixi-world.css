@@ -81,8 +81,6 @@
    flip page. All titles, dates and hit targets are live, never painted text. */
 #notionWorld [data-installation=true] .pixi-open-pagination{top:7%;bottom:auto;left:auto;right:13%;background:#f8f0dce8;border-radius:12px;padding:4px 12px;color:#62533b;text-shadow:none}
 /* Core Open v2: runtime content occupies the painted leaves, never the scenery. */
-#notionWorld [data-applet=gmail] .pixi-open-contents{inset:32% 32% 44% 9%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr;gap:3%}
-#notionWorld [data-applet=gmail] .pixi-stage-item{padding:18px 10px 10px;transform:rotate(-2deg);box-shadow:2px 5px 8px #473b2440}
 #notionWorld [data-applet=apple-notes] .pixi-open-contents{inset:29% 7% 39%;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:1fr;gap:4%}
 #notionWorld [data-applet=apple-reminders] .pixi-open-contents{inset:38% 15% 35%;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr;gap:8%}
 #notionWorld [data-applet=apple-reminders] .pixi-stage-item{background:transparent;box-shadow:none;padding:12px 8px}
@@ -100,15 +98,12 @@
 .pixi-selected-item small{display:block;font-size:11px;color:#8b7753;margin-bottom:14px}
 .pixi-selected-item strong{display:block;font-size:22px;line-height:1.3}
 .pixi-selected-item p{font-size:14px;line-height:1.6}
-#notionWorld .pixi-selected-item[data-applet=gmail]{border-top:22px solid #eee0c2}
 #notionWorld .pixi-selected-item[data-applet=google-calendar]{border-top:16px solid #8d9b80;transform:rotate(-1deg)}
 #notionWorld .pixi-selected-item[data-applet=apple-notes]{border-left:12px solid #8b9a79;background:repeating-linear-gradient(#f7efda 0 27px,#d7cba8 28px,#f7efda 29px)}
 #notionWorld .pixi-selected-item[data-applet=apple-reminders]{border-top:12px solid #ba9b62;transform:rotate(1deg)}
 @media(max-width:850px){#notionWorld .pixi-selected-item{padding:16px 12px}.pixi-selected-item strong{font-size:17px}}
 #notionContent[data-template=app-source]:is([data-applet=gmail],[data-applet=google-calendar],[data-applet=apple-notes],[data-applet=apple-reminders]) .notion-close{display:none}
 .notion-pin[data-kind=app] small:not([hidden]){display:block;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#fff8e8;text-shadow:0 1px 5px #312917}
-#notionWorld [data-applet=gmail] .pixi-stage-item{position:relative;background:linear-gradient(170deg,#fffaf0,#eadfc9);border:1px solid #c6b99880;border-radius:3px 5px 6px 4px}
-#notionWorld [data-applet=gmail] .pixi-stage-item::before{content:'';position:absolute;top:0;left:10%;right:10%;height:7px;border-bottom:1px solid #bbae9066;border-radius:0 0 50% 50%}
 
 .notion-pin .applet-attention{position:absolute;top:var(--applet-guide-top);left:50%;margin-left:var(--applet-guide-x,0px);transform:translateX(-50%);width:25px;height:25px;color:#fff3c9;filter:drop-shadow(0 2px 3px #43351db3);pointer-events:none;animation:applet-attention-arrive .5s cubic-bezier(.2,.8,.3,1) both}
 .applet-connection-label{display:none}
@@ -225,20 +220,6 @@
 .messages-compose .messages-to{grid-column:1/-1}
 .messages-compose input,.messages-compose textarea{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid #d8c6a3;background:var(--ui-paper,#fffaf0);color:var(--ui-ink,#3d3326);resize:vertical}
 .messages-note{display:block;margin-top:10px;opacity:.65}
-/* Mail Open: meaningful letters above, a folded-away pile below. */
-#notionWorld .pixi-applet-stage[data-installation=true][data-applet=gmail]{left:4%;right:5%;top:16%;bottom:16%;transform:none;width:auto;aspect-ratio:auto;overflow:visible}
-
-/* Painted Mail parts share the mailbox's materials; labels remain live text. */
-#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:14% 36% 42% 1%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr;gap:24px}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{display:grid;position:relative;align-self:center;justify-self:center;width:86%;height:auto;aspect-ratio:1.72;padding:0;border:0;background:none;box-shadow:none;transform:none;isolation:isolate;animation:mail-arrival .85s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--leaf)*120ms)}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::before,#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{display:none}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{position:absolute;left:10%;right:10%;top:48%;height:38%;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.4vw,20px);line-height:1.25;font-weight:600;color:#203f31;text-shadow:none;text-align:center;overflow:hidden}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:is(:hover,:focus-visible){transform:translateY(-5px);filter:brightness(1.035);outline:2px solid #f3d59d88;outline-offset:5px;border-radius:7px}
-.mail-open-device{position:absolute;right:0;top:10%;width:31%;height:84%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 12px 14px #28322525)}
-@keyframes mail-arrival{from{opacity:0;translate:80px 25px}to{opacity:1;translate:0 0}}
-@media(max-width:800px){#notionWorld [data-applet=gmail] .mail-open-envelopes{gap:12px;right:32%}}
-@media(prefers-reduced-motion:reduce){#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{animation:none}}
-
 
 /* Mail item navigation belongs to the reader, not the foreground device. */
 #notionWorld .mail-reader-switch{position:absolute;z-index:40;left:28px;right:calc(33.333% + 16px);top:85px;height:32px;display:flex;justify-content:space-between;pointer-events:none}
@@ -246,67 +227,17 @@
 .mail-reader-switch button{pointer-events:auto;border:0;border-radius:12px;background:#f4efdfed;color:#344741;padding:5px 12px;font:inherit;font-size:14px;cursor:pointer}
 .mail-reader-switch button:last-child{margin-left:auto}
 .mail-reader-switch button[hidden]{visibility:hidden;display:block;pointer-events:none}
-/* Keep the Open device above Fox's bounded conversation area. */
-@media(min-width:801px){#notionWorld .mail-open-device{top:0;height:58%}}
-
 #notionWorld .mail-reader-switch{top:100px;left:38px;right:calc(33.333% + 30px)}
 .mail-reader-switch button{background:#edbd70;color:#674923;font-size:26px;line-height:28px;width:34px;height:34px;padding:0;border-radius:10px}
 
-/* Match the original sage mailbox: matte colour, quiet highlights and soft shadows.
-   Grade painted parts only; live labels retain their reading contrast. All bin
-   layers share one grade so the foreground rim does not reveal a colour seam. */
-[data-applet=gmail]{--mail-paint:saturate(.68) contrast(.84) brightness(1.06)}
 .notion-pin .applet-attention:has(.applet-guide-mark){width:44px;height:52px}
-
-/* The same device stays anchored in both Open and Focus. */
-#notionWorld .mail-shared-device{position:absolute;right:6%;top:21%;width:21%;height:35%;object-fit:contain;pointer-events:none;z-index:12;filter:drop-shadow(0 10px 12px #28322522)}
-.mail-shared-device[hidden]{display:none}
-
-/* A level rack for useful mail, aligned with the three lower-priority bins. */
-#notionWorld [data-applet=gmail] .mail-open-envelopes{left:6%;right:39%;top:12%;bottom:49%;z-index:1;align-items:end}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{width:88%;align-self:end;aspect-ratio:1.72;animation:none}
-
-/* A cork-like wood backing keeps important letters visibly pinned together. */
-#notionWorld [data-applet=gmail] .mail-open-envelopes{padding:14px 16px 18px;border:8px solid #977651;border-radius:9px;background:linear-gradient(120deg,#b39a73,#a28b64);box-shadow:inset 0 2px 9px #51442b35,0 5px 12px #34422c24;box-sizing:border-box}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{content:'';display:block;position:absolute;top:3px;left:calc(50% - 4px);width:8px;height:8px;border-radius:50%;background:#ae7644;box-shadow:0 2px 2px #4b342750}
-
-/* Painted furniture shares one camera, palette and material; labels stay native. */
-#notionWorld [data-applet=gmail] .mail-open-envelopes{border:0;border-radius:0;background-color:transparent;background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;padding:26px 20px 22px}
-
-/* The pinboard owns only attention mail. Opened bins spread beneath it. */
-.mail-open-desk{position:absolute;left:3%;right:36%;top:-2%;bottom:-4%;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#bba98770 transparent;padding:8px 10px 24px;pointer-events:auto}
-.mail-attention-board{position:relative;width:100%;aspect-ratio:1.85;background-size:100% 100%;background-repeat:no-repeat;filter:var(--mail-paint)}
-#notionWorld [data-applet=gmail] .mail-open-envelopes{position:absolute;inset:19% 6% 10%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-flow:row;gap:12px 16px;padding:0;border:0;background:none!important;box-shadow:none;align-items:center;overflow:visible}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{position:relative;display:block;width:100%;height:auto;aspect-ratio:1.72;align-self:center;justify-self:center;padding:0;margin:0;background:none;border:0;box-shadow:none;animation:none;transform:none;isolation:isolate}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{position:absolute;left:9%;right:9%;top:48%;height:40%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(12px,1.1vw,17px);line-height:1.18;color:#203f31;text-shadow:none;overflow:hidden}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{top:0;left:calc(50% - 4px)}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .applet-item-attention{top:-30px;left:50%;right:auto;bottom:auto;transform:translateX(-50%);translate:none;width:22px;height:22px}
-/* The overview fits both board and all three bins; only expanded bins scroll. */
-.mail-open-desk{top:-6%;bottom:-7%}
-[data-mail-category=attention] .mail-open-desk{overflow:visible;display:grid;grid-template-rows:minmax(0,1fr) minmax(120px,29%);gap:12px;padding-block:4px}
-[data-mail-category=attention] .mail-attention-board{height:100%;aspect-ratio:auto}
 
 .notion-pin .applet-attention:has(.applet-guide-mark){margin-top:12px}
 
 /* Authored Home devices stay visible beside their expanded content. */
 #notionWorld .pixi-applet-stage[data-installation=true][data-animated-device=true]:is([data-applet=google-calendar],[data-applet=apple-notes],[data-applet=apple-reminders]){left:35%;width:min(860px,68vw,calc((100vh - 220px)*1.5))}
-/* Envelope fronts carry real addressing metadata, never text over the flap. */
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front{position:absolute;inset:0;display:block;margin:0;opacity:1;border:1px solid #d7cbb3;border-radius:3px 5px 4px 3px;background:linear-gradient(115deg,#faf4e5,#eee4cf);box-shadow:0 3px 7px #403b2926,inset 0 0 10px #cbb89317;pointer-events:none}
-.mail-envelope-front::after{content:'';position:absolute;right:9%;top:10%;width:12%;height:22%;border:2px dotted #a1a88f;background:#b7bd9e33;box-shadow:inset 0 0 0 2px #f7f0df}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{top:35%;height:40%;left:9%;right:9%;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-align:left;font-size:clamp(12px,1.1vw,16px);line-height:1.25;background:none;padding:0;border:0;border-radius:0}
-#notionWorld [data-applet=gmail] .pixi-stage-item .mail-letter-sender{position:absolute;top:10%;left:9%;right:26%;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;font-size:11px;line-height:1.3;color:#68715e;opacity:1}
-#notionWorld [data-applet=gmail] .mail-letter-time{position:absolute;bottom:8%;right:9%;font-size:10px;color:#7b7767}
 #notionWorld .mail-reader-switch button{background:var(--ui-paper) var(--hud-paper-art) center/cover;box-shadow:var(--hud-control-shadow);color:var(--hud-paper-ink);font-size:12px;width:34px;height:34px;line-height:34px;border-radius:50%}
 #notionWorld .mail-reader-switch button:hover{filter:brightness(1.04)}
-.mail-account-status{position:absolute;z-index:13;top:57%;right:16.5%;transform:translateX(50%);width:28px;height:28px;padding:0;border:0;background:transparent;color:#fff8e8b8;font:20px/28px system-ui;text-shadow:0 1px 5px #233126aa;cursor:help}
-.mail-account-status:hover,.mail-account-status:focus-visible{color:#fff8e8}
-.mail-account-tooltip{position:absolute;bottom:calc(100% + 8px);right:0;width:max-content;max-width:min(280px,65vw);padding:9px 12px;border-radius:9px;background:#f5edddeF;color:#48503e;font:12px/1.5 system-ui;text-shadow:none;box-shadow:0 3px 14px #202a2426;white-space:normal;overflow-wrap:anywhere;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .12s}
-.mail-account-status:hover .mail-account-tooltip,.mail-account-status:focus-visible .mail-account-tooltip{visibility:visible;opacity:1}
-.mail-account-status[hidden]{display:none}
-.mail-envelope-front::after{display:none}
-#notionWorld [data-applet=gmail] .pixi-stage-item .mail-envelope-avatar{position:absolute;right:7%;top:8%;display:grid;place-items:center;width:30px;height:32px;margin:0;opacity:1;background:var(--mail-avatar-tint,#a0a98f);color:#fff9eb;border:2px solid #f8f2e0;outline:1px dashed #a1a88f;border-radius:3px;font:600 12px/1 system-ui;box-shadow:0 1px 3px #403b291a}
-
-#notionWorld [data-applet=gmail] .pixi-stage-item .mail-letter-sender{font-size:12px;font-weight:650;color:#414d3d;line-height:1.4;background:#a0a98f26;padding:2px 5px;border-radius:3px}
 .mail-avatar svg{display:block;width:65%;height:65%;margin:auto}
 /* Region labels and overflow share one projected baseline. */
 #notionWorld .notion-pin[data-kind=region-more]{transform:translate(-50%,-50%);box-sizing:border-box;display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;line-height:1;border:0;border-radius:50%;background:transparent;color:var(--hud-scene-ink,#fff9e8);text-shadow:var(--hud-scene-text-shadow);backdrop-filter:none;isolation:isolate}
@@ -316,57 +247,12 @@
 #notionWorld .notion-pin[data-kind=region-more]:hover::before{background:var(--hud-scene-hover,#ffffff30)}
 #notionWorld[data-onboarding-locked=true] .notion-pin[data-kind=region-more]{display:none}
 
-/* Native Mail: a quiet, pinned correspondence board, never an inbox of bins. */
-#notionWorld [data-applet=gmail] .mail-open-desk{left:2%;right:35%;top:-5%;bottom:-6%;display:block;overflow:hidden;padding:8px 12px 12px}
-#notionWorld [data-applet=gmail] .mail-attention-board{height:100%;box-sizing:border-box;aspect-ratio:auto;border:12px solid #a38c6d;border-radius:12px;background:radial-gradient(ellipse at 30% 10%,#dbccac88,transparent 70%),repeating-linear-gradient(93deg,#baa78520 0 1px,transparent 1px 4px),#bca988;box-shadow:inset 0 2px 10px #67523b28,0 7px 18px #40392924,inset 0 0 0 2px #eadcc14d;filter:none}
-#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:15% 5% 8%;grid-template-rows:repeat(3,minmax(0,1fr));gap:25px 18px;align-items:center}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{aspect-ratio:1.62;width:100%;max-height:100%;height:100%;rotate:-1deg;cursor:pointer;transition:translate .18s,filter .18s}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:nth-child(3n+2){rotate:1deg}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:nth-child(3n){rotate:-.5deg}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item:is(:hover,:focus-visible){translate:0 -3px;transform:none;outline:2px solid #fff1cb;outline-offset:4px}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front{border-color:#cfc2a7;background:radial-gradient(ellipse at 20% 0%,#fffdf4b3,transparent 80%),linear-gradient(175deg,#faf4e5,#eee2c9);box-shadow:1px 6px 6px #59483029,inset 0 -2px 2px #cabfa638,inset 0 1px #fffaf1;border-radius:2px 3px 5px 2px}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front::after{top:13%;right:6%;width:19%;height:27%;border:1px dashed #93977c;background:transparent;box-shadow:0 0 0 3px #faf3e3;rotate:3deg}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item::after{display:none}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item[data-stacked=true]::before{content:'';display:block;position:absolute;inset:2px -2px -3px 2px;z-index:-1;border:1px solid #d2c4a7;border-radius:3px;background:#eee5d1;rotate:2deg;box-shadow:1px 3px 4px #51453520}
-.mail-letter-pin{position:absolute;top:-5px;left:calc(50% - 5px);z-index:3;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 32% 25%,#f7e1b3,#b49360 60%,#8b744f);box-shadow:1px 3px 2px #58452e55}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{top:43%;height:38%;left:8%;right:8%;font-size:clamp(12px,1.15vw,17px);line-height:1.25;color:#3d4c40;font-weight:600}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{top:15%;left:8%;right:29%;font-size:clamp(10px,.95vw,13px);font-weight:650;color:#526047;background:none;padding:0}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{top:14%;right:7%;width:18%;height:26%;border-radius:2px;object-fit:cover;z-index:2}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-time{bottom:7%;font-size:clamp(9px,.8vw,11px)}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .applet-item-attention{top:-23px;width:18px;height:18px}
-#notionWorld .mail-shared-device{top:12%;height:36%}
-#notionWorld .mail-account-status{top:49%}
-@media(prefers-reduced-motion:reduce){#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item{transition:none}}
-
-/* Generated stationery: painted materials, live accessible mail metadata. */
-#notionWorld [data-applet=gmail] .mail-attention-board{border:0;background:none;border-radius:0;box-shadow:none}
-#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:23% 13% 15%;gap:20px 14px}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front{inset:-5% -3%;border:0;border-radius:0;background:none;box-shadow:none}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-front::after,#notionWorld [data-applet=gmail] .mail-letter-pin{display:none}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{top:15%;right:4%;width:11%;height:17%;border:0;outline:0;background:var(--mail-avatar-tint,#9ba587);box-shadow:none;border-radius:0}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{top:20%;right:25%}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{top:44%;font-size:clamp(12px,1.05vw,16px)}
-
-.mail-board-paint{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.mail-envelope-paint{display:block;width:100%;height:100%;pointer-events:none}
 /* The region name alone opens its five places and the complete app shelf. */
 #notionWorld .notion-pin[data-kind=region-more]{display:flex;align-items:center;justify-content:center;gap:8px;width:auto;min-width:44px;padding:0 8px;border-radius:24px;white-space:nowrap}
 #notionWorld .notion-pin[data-kind=region-more]::before{display:block;inset:4px 0;border-radius:24px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18)}
 #notionWorld .notion-pin[data-kind=region-more] strong{font-size:15px;font-weight:600}
 .region-shelf-slot{min-height:122px;display:grid;place-items:center;border:1px dashed #53675c30;border-radius:16px;font-size:12px;color:#53675c99}
 .region-shelf-note{font-size:13px;line-height:1.5;margin:4px 0 10px;color:#53675c}
-
-/* A full-size wall noticeboard prioritizes correspondence over its frame. */
-#notionWorld .pixi-applet-stage[data-installation=true][data-applet=gmail]{left:1.5%;right:2%;top:10%;bottom:9%}
-#notionWorld [data-applet=gmail] .mail-open-desk{left:0;right:33%;top:0;bottom:0;padding:0;overflow:hidden}
-#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:20% 5% 6%;gap:20px 18px}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .pixi-stage-item strong{font-size:clamp(13px,1.25vw,19px)}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{font-size:clamp(11px,1vw,15px)}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{right:4%;top:14%;width:12%;height:21%;border:2px solid #f6edd9;outline:1px dashed #a1a58b}
-
-
-/* Live letters align with the painted paper-wear marks. */
-#notionWorld [data-applet=gmail] .mail-open-envelopes{inset:25% 7% 12%;column-gap:5%;row-gap:7%}
 
 /* Region labels share one opacity, including courts near the lower HUD. */
 #notionWorld #notionPins{mask-image:none;-webkit-mask-image:none}
@@ -434,14 +320,10 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 .home-leaf{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;border:1px solid #526d4530;border-radius:8px;padding:16px;background:#fffdf5ad;box-shadow:0 2px 4px #203b3008;min-width:0;min-height:44px}.home-leaf:hover{background:#e8eddf}.home-leaf:focus-visible,.home-open button:focus-visible{outline:2px solid #315f48;outline-offset:2px}.home-leaf-text{display:flex;flex-direction:column;gap:8px;min-width:0}.home-leaf strong{font-size:16px;line-height:1.4;overflow-wrap:anywhere}.home-leaf small,.home-leaf p{font-size:13px;line-height:1.5;margin:0;color:#4d6255}.home-leaf[data-attention=true]{border-left:3px solid #bd9753}.home-calendar-day .home-leaf{padding:8px 6px;margin-bottom:8px;background:#b5c6ad40}.home-calendar-day .home-leaf strong{font-size:13px}.home-calendar-day .home-leaf small{font-size:12px}.home-task-check{font-size:25px;color:#a38b60;line-height:1}
 .home-open[data-home-kind=notes] .home-open-sheet{border-top:24px solid #d8b963}.home-open[data-home-kind=notes] .home-open-body{grid-template-columns:repeat(2,minmax(0,1fr))}.home-open[data-home-kind=notes] .home-leaf{min-height:140px;background:linear-gradient(#fffdf5ed,#f7f1dfed);border-radius:3px 3px 14px 3px}
 .home-open[data-home-kind=reminders] .home-open-sheet{border-top:12px solid #b3a68e}.home-open[data-home-kind=reminders] .home-open-body{display:flex;flex-direction:column}.home-open-empty{grid-column:1/-1;color:#4d6255;padding:16px;margin:0}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-sender{top:15%;left:8%;right:28%;font-size:clamp(12px,1.05vw,16px);font-weight:650;line-height:1.4}
-/* Avatar fills the painted stamp inset; the asset already supplies its perforated rim. */
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-envelope-avatar{top:16.6%;left:84.1%;right:auto;width:8.5%;height:18.1%;margin:0;padding:0;background:var(--mail-avatar-tint,#a4ae94);border:0;outline:0;border-radius:0;box-shadow:none;display:grid;place-items:center;overflow:hidden}
 .mail-avatar img{width:100%;height:100%;object-fit:cover}.mail-avatar svg{width:80%;height:80%}
 /* A logo sits whole on stamp paper; initials are the sender's own letters, never a stock figure. */
 #notionWorld [data-applet=gmail] .mail-avatar[data-kind=logo]{background:#fffaf0}.mail-avatar[data-kind=logo] img{object-fit:contain;box-sizing:border-box;padding:12%}
 .mail-avatar-initials{font:650 clamp(10px,1vw,15px)/1 var(--ui-font-ui,system-ui);letter-spacing:.02em;color:#fffaf0;text-transform:uppercase}
-#notionWorld [data-applet=gmail] .mail-open-envelopes .mail-letter-time{bottom:10%;right:8%;font-size:clamp(11px,.85vw,13px)}
 @media(max-width:850px){#notionWorld .pixi-applet-stage[data-installation=true][data-animated-device].home-open{left:3%;right:34%}.home-open-sheet{padding:22px 12px 16px}.home-calendar-modes button{padding:6px 8px}.home-open[data-home-kind=calendar] .home-open-body{grid-template-columns:repeat(7,minmax(84px,1fr))}.home-open[data-calendar-mode=day] .home-open-body{grid-template-columns:1fr}.home-open[data-home-kind=notes] .home-open-body{grid-template-columns:1fr}}
 
 .home-open[data-home-kind=calendar] .home-open-sheet{background:transparent;border:0;box-shadow:none;padding:12% 6% 10%}.home-open[data-home-kind=calendar] .home-open-sheet::before{display:none}
@@ -471,9 +353,6 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 .home-open[data-home-kind=calendar] .home-open-header h2{font-size:20px}
 @media(max-width:800px){
  #notionWorld .pixi-applet-stage[data-installation=true][data-animated-device].home-open{top:150px;bottom:36%}
- #notionWorld .pixi-applet-stage[data-installation=true][data-applet=gmail]{inset:140px 16px 36%;width:auto}
- #notionWorld [data-applet=gmail] .mail-open-desk{right:0}
- #notionWorld [data-applet=gmail] .mail-open-envelopes{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:130px;overflow:auto;align-content:start;padding-top:24px;row-gap:26px}
  #notionWorld #notionContent:is([data-applet=gmail],[data-applet=google-calendar],[data-applet=apple-notes],[data-applet=apple-reminders]){top:150px;bottom:36%}
 }
 
@@ -523,7 +402,7 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld .applet-shelf-extra[hidden]{display:none}
 #notionWorld .applet-shelf-extra .applet-shelf-pick{position:relative;transform:none;--shelf-size:44px;width:72px}
 #notionWorld .applet-shelf-extra .applet-shelf-name{position:absolute;top:100%;margin-top:4px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #000c;font-size:11px}
-#notionWorld[data-applet-shelf] .pixi-applet-stage:is(:not([data-installation=true]),[data-installation=true][data-animated-device].home-open,[data-installation=true][data-applet=gmail]){top:150px}
+#notionWorld[data-applet-shelf] .pixi-applet-stage:is(:not([data-installation=true]),[data-installation=true][data-animated-device].home-open):not([data-scene]){top:150px}
 @media(prefers-reduced-motion:reduce){#notionWorld .applet-shelf-tab,#notionWorld .applet-shelf-pick :is(img,.applet-shelf-mark){transition:none}}
 /* Picture in picture (#919, browser/picture-in-picture.ts). The window is a small paper frame
    like the website panel's, the native video in its slot and its controls on the bar above,
@@ -720,7 +599,7 @@ body:has(#notionWorld[data-fox-entering])>:is(.tour-switch,.tour-spotlight){anim
 #notionWorld .world-tour-phone small{font-size:12px;color:#5c6a5f;text-align:center}
 
 /* Dedicated Applet landscapes already paint the identity; live contents stay above them. */
-#notionStage:has(> [data-immersive-background]) :is(.pixi-open-art,.mail-shared-device){display:none}
+#notionStage:has(> [data-immersive-background]) .pixi-open-art{display:none}
 
 /* Calendar's day and week time grid (ui/applets/google-calendar/grid.ts): hours, an all-day strip, and the
    person's own events in terracotta beside the synced ones in sage. Explicit ink: the page is painted paper day and night. */

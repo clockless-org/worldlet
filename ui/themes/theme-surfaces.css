@@ -22,7 +22,7 @@ html[data-theme-skin~=button] .ui-button{border-width:var(--theme-skin-button-wi
 html[data-theme-skin~=card] :is(.ui-applet-surface,.home-leaf){border-width:var(--theme-skin-card-width);border-image:var(--theme-skin-card) var(--theme-skin-card-slice) fill/var(--theme-skin-card-width) stretch}
 html[data-theme-skin~=frame] .pixi-applet-stage:not([data-installation=true]){border-width:var(--theme-skin-frame-width);border-image:var(--theme-skin-frame) var(--theme-skin-frame-slice)/var(--theme-skin-frame-width) stretch}
 /* Fonts: display for titles and nameplates, label for place names and small captions. Reading text stays the shared face. */
-html[data-theme-fonts~=display] :is(.ui-title,.notion-content h2,.companion-name,.world-task-heading,.home-open-header h2,.region-shelf-header h2,.mail-attention-board>h2,#notionWorld>.companion-context){font-family:var(--theme-font-display)}
+html[data-theme-fonts~=display] :is(.ui-title,.notion-content h2,.companion-name,.world-task-heading,.home-open-header h2,.region-shelf-header h2,#notionWorld>.companion-context){font-family:var(--theme-font-display)}
 html[data-theme-fonts~=label] :is(.notion-pin strong,.world-date-time,.companion-topic,.fox-name-tag){font-family:var(--theme-font-label)}
 /* Entering an Applet's room. */
 @keyframes theme-room-fade{from{opacity:0}to{opacity:1}}
@@ -32,7 +32,7 @@ html[data-theme-room-transition=door] #notionWorld[data-depth=object] #notionCon
 @media(prefers-reduced-motion:reduce){html[data-theme-room-transition] #notionWorld #notionContent{animation:none}}
 
 /* Build theme renderers own the Applet stage; host helper layers obey hidden state. */
-.ui-theme-world :is(.pixi-selected-item,.mail-shared-device,.mail-reader-switch,.mail-account-status)[hidden]{display:none!important}
+.ui-theme-world :is(.pixi-selected-item,.mail-reader-switch)[hidden]{display:none!important}
 
 /* Host-owned default content can be embedded on a theme-owned plane through renderDefault. */
 .ui-theme-default .home-open-sheet{height:100%;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;display:flex;flex-direction:column}

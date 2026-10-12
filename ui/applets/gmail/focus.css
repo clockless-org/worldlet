@@ -36,3 +36,22 @@
 #notionWorld .mail-reader-switch button:hover{background:#e4dbc5;filter:none}
 /* The quoted-reply fold is a quiet control, not the shared bordered details panel. */
 .mail-focus .mail-message details.mail-quoted{margin:1.4em 0 0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:var(--control-muted)}
+
+/* Mail in its theme scene (ui/applets/scene): the letters list is Mail's, the paper, ink, fonts and controls are the
+   theme's material. Sender tints are the one colour Mail owns: they identify a person, not a look. */
+.mail-letters{flex:1}
+@container (min-width:560px){.mail-letters{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(16px,4cqi,32px)}}
+.mail-letter .mail-avatar{display:grid;place-items:center;width:clamp(28px,6cqi,38px);aspect-ratio:1;border-radius:50%;overflow:hidden;background:var(--mail-avatar-tint)}
+.mail-letter-text{display:flex;flex-direction:column;min-width:0}
+.mail-letter-sender{font-size:.8em;color:var(--scene-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mail-letter-subject{font-weight:600;line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.mail-letter-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.mail-letter-time{font-size:.75em;color:var(--scene-muted);white-space:nowrap}
+#notionWorld .applet-scene .mail-letter .applet-item-attention,.applet-scene .mail-letter .applet-item-attention{position:static;filter:none;color:var(--scene-accent);display:block;width:18px;height:18px;transform:none;translate:none;margin:0}
+.applet-scene .mail-letter .applet-item-attention svg{display:block;width:100%;height:100%;fill:currentColor}
+/* The reader takes the scene's primary region and its material. */
+#notionWorld[data-applet-scene=gmail] #notionContent[data-applet=gmail]{left:var(--applet-scene-primary-left);top:var(--applet-scene-primary-top);width:var(--applet-scene-primary-width);height:var(--applet-scene-primary-height);right:auto;bottom:auto;max-width:none;max-height:none;margin:0;padding:0;scrollbar-gutter:auto}
+#notionWorld[data-applet-scene=gmail] .mail-focus{--control-ink:var(--scene-ink);--control-muted:var(--scene-muted);--control-line:var(--scene-line);--control-fill:var(--scene-control);--control-paper:var(--scene-fill);font-family:var(--scene-body-font)}
+#notionWorld[data-applet-scene=gmail] .mail-focus.ui-applet-surface{padding:clamp(8px,2vw,24px) clamp(10px,2.4vw,30px);background:var(--scene-fill);color:var(--scene-ink);border:0;border-radius:var(--scene-radius);box-shadow:none}
+#notionWorld[data-applet-scene=gmail] .mail-page-title{font-family:var(--scene-display-font);color:var(--scene-ink)}
+#notionWorld[data-applet-scene=gmail] .mail-focus.ui-applet-surface::before{display:none}

@@ -1,6 +1,6 @@
 import {THEME_PACKAGES} from '../theme-packages/index.ts';
 import {applyThemeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
-import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildThemeManifest,type ThemePresentation} from './build-theme-contract.ts';
+import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildThemeManifest,type ThemePresentation,type ThemeSceneMaterialName} from './build-theme-contract.ts';
 /** One bundled theme package, validated against the contract when the bundle loads. A theme is static: its manifest,
  * its presentation, the assets they name and any other JSON it ships (`data`, by package path). */
 export interface ThemePackage {manifest:BuildThemeManifest;presentation:ThemePresentation;data:Readonly<Record<string,unknown>>}
@@ -36,6 +36,14 @@ export function themeAppletIcon(key:string):string|undefined{
 export function themeAppletScene(key:string){
  const scene=active.package.presentation.appletScenes?.[key];
  return scene?{...scene,background:themeAssetURL(active.id,scene.background)}:undefined;
+}
+/** How Applet content looks on one scene material (presentation.json `sceneMaterials`), every role filled: a role the
+ * theme leaves out comes from its tokens. The shared Applet scene renderer (ui/applets/scene) is its one reader. */
+export function themeSceneMaterial(material:ThemeSceneMaterialName){
+ const t=active.package.presentation.tokens,m=active.package.presentation.sceneMaterials?.[material]??{};
+ return {ink:m.ink??t.ink,muted:m.muted??t.ink+'b3',line:m.line??t.ink+'26',accent:m.accent??t.accent,accentInk:m.accentInk??t.paper,
+  control:m.control??t.paper,controlInk:m.controlInk??t.ink,fill:m.fill??'transparent',bodyFont:m.bodyFont??t.bodyFont,displayFont:m.displayFont??t.displayFont,
+  bodySize:t.bodySize,titleSize:t.titleSize,radius:t.radius,controlHeight:t.controlHeight,focus:t.focus};
 }
 /** Reusable custom-Applet art, with URLs ready for the host to display. These do not create Applets or connect data. */
 export function themeAppletPresets(){

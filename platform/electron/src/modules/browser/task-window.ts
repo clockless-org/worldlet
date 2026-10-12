@@ -51,7 +51,8 @@ export class TaskWindow {
   this.window=new BaseWindow({show:false,title:'Fox',frame:false,resizable:false,minimizable:false,maximizable:false,fullscreenable:false,
    skipTaskbar:true,alwaysOnTop:true,hasShadow:true,backgroundColor:'#ffffff',...(mac?{type:'panel' as const}:{})});
   this.window.setAlwaysOnTop(true,'floating');
-  this.window.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true});
+  // Keeps the app's Dock icon and Command-Tab entry (see DesktopCompanion.makePanel).
+  this.window.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true,skipTransformProcessType:true});
   // It goes with its page, never on its own.
   this.window.on('close',event=>event.preventDefault());
   this.overlay=new PressOverlay({onPress,onClose});

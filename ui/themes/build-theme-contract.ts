@@ -43,6 +43,21 @@ export interface ThemeSceneRegistration {
  /** Quiet painted space the host can reserve for its companion. */
  companion:readonly [number,number,number,number];
 }
+/** The materials a scene region can be painted as; the host renders an Applet's records and controls on each one. */
+export const THEME_SCENE_MATERIALS=['paper','board','screen'] as const;
+export type ThemeSceneMaterialName=typeof THEME_SCENE_MATERIALS[number];
+/** How live HTML looks on one painted material: `#rrggbb` or `#rrggbbaa` colours and optional font stacks. The painting
+ * itself is the surface, so `fill` is only for a material that needs a wash under the text. A role left out keeps the
+ * host's, which it takes from the tokens. */
+export interface ThemeSceneMaterial {
+ ink?:string;muted?:string;line?:string;accent?:string;
+ /** Text on an accent-coloured button. */
+ accentInk?:string;
+ /** An ordinary button's face and text. */
+ control?:string;controlInk?:string;
+ fill?:string;
+ bodyFont?:string;displayFont?:string;
+}
 /** A background tied to one Applet key. Its live records and controls are supplied by the host. */
 export interface ThemeAppletScene {background:string;registration:ThemeSceneRegistration}
 /** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
@@ -67,6 +82,8 @@ export interface ThemePresentation {
  appletPresets?:readonly ThemeAppletPreset[];
  /** Backgrounds bound to specific Applet keys; independent of reusable presets. */
  appletScenes?:Readonly<Record<string,ThemeAppletScene>>;
+ /** How Applet content looks on each region material (ui/applets/scene). Left out, a material keeps the host's look. */
+ sceneMaterials?:Partial<Record<ThemeSceneMaterialName,ThemeSceneMaterial>>;
 }
 /** theme.json. Every other file in the package is a picture, a sound, a font, a licence text or JSON. */
 export interface BuildThemeManifest {
@@ -89,7 +106,7 @@ export function parseBuildThemeManifest(value:unknown):BuildThemeManifest {
 export function parseThemePresentation(value:unknown):ThemePresentation {
  const p=value as ThemePresentation;
  need(p&&p.tokens,'presentation');
- need(Object.keys(p).every(key=>['tokens','fonts','hud','sound','icons','artifact','appletPresets','appletScenes'].includes(key)),'presentation fields (the host lays out the World and Applet pages)');
+ need(Object.keys(p).every(key=>['tokens','fonts','hud','sound','icons','artifact','appletPresets','appletScenes','sceneMaterials'].includes(key)),'presentation fields (the host lays out the World and Applet pages)');
  const t=p.tokens;for(const k of ['bodyFont','displayFont','ink','paper','accent','focus'])need(text(t[k]),'token '+k);
  for(const k of ['bodySize','titleSize','radius','controlHeight'])need(Number.isFinite(t[k])&&t[k]>0,'token '+k);
  need(t.bodySize>=12&&t.controlHeight>=32,'readable type and controls');
@@ -121,6 +138,11 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
    need(id(key)&&object(scene)&&Object.keys(scene).every(k=>['background','registration'].includes(k))&&picture(scene.background),'applet scene');
    registration(scene.registration);
   }
+ }
+ if(p.sceneMaterials!==undefined){
+  const color=(v:unknown)=>typeof v==='string'&&/^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i.test(v),font=(v:unknown)=>text(v)&&/^[a-zA-Z0-9 ,'"-]+$/.test(v as string);
+  need(object(p.sceneMaterials)&&Object.entries(p.sceneMaterials).every(([name,m])=>(THEME_SCENE_MATERIALS as readonly string[]).includes(name)&&object(m)&&
+   Object.entries(m as object).every(([k,v])=>['ink','muted','line','accent','accentInk','control','controlInk','fill'].includes(k)?color(v):['bodyFont','displayFont'].includes(k)&&font(v))),'scene materials');
  }
  if(p.appletPresets!==undefined){
   const presets=p.appletPresets;

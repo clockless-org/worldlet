@@ -53,14 +53,14 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **274 Markdown documents** and **619 supporting documentation files**.
+Indexed: **275 Markdown documents** and **619 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
 | Root entry points | 6 |
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
-| UI and Applet authoring references | 30 |
+| UI and Applet authoring references | 31 |
 | Resource and artwork records | 71 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
@@ -222,7 +222,7 @@ Indexed: **274 Markdown documents** and **619 supporting documentation files**.
 
 </details>
 
-<details><summary>UI and Applet authoring references (30)</summary>
+<details><summary>UI and Applet authoring references (31)</summary>
 
 - [ui/DESIGN-STANDARDS.md](../ui/DESIGN-STANDARDS.md)
 - [ui/README.md](../ui/README.md)
@@ -236,6 +236,7 @@ Indexed: **274 Markdown documents** and **619 supporting documentation files**.
 - [ui/applets/google-calendar/prompts/extract.md](../ui/applets/google-calendar/prompts/extract.md)
 - [ui/applets/meetings/README.md](../ui/applets/meetings/README.md)
 - [ui/applets/messages/README.md](../ui/applets/messages/README.md)
+- [ui/applets/scene/README.md](../ui/applets/scene/README.md)
 - [ui/applets/voice-memos/README.md](../ui/applets/voice-memos/README.md)
 - [ui/artifacts/CARD-SYSTEM.md](../ui/artifacts/CARD-SYSTEM.md)
 - [ui/artifacts/README.md](../ui/artifacts/README.md)
