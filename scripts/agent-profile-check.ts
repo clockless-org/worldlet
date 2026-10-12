@@ -14,8 +14,14 @@ assert.match(prompt,new RegExp(AGENT_PROFILE_SCHEMA.replace(/[./]/g,'\\$&')));
 assert.match(prompt,/NEVER include secrets/);assert.match(prompt,/Do not change any setting or file/);assert.match(prompt,/gmail, discord, amazon/);
 assert.ok(agentProfileAsked('openclaw')&&agentProfileAsked('hermes')&&!agentProfileAsked('codex'));
 // The things it names point at the conversations Worldlet brings, by the titles Worldlet gives them.
-assert.doesNotMatch(prompt,/Worldlet lists your conversations/);
-assert.match(agentProfilePrompt(['gmail'],['Telegram · Sam',' Telegram  ·  Sam','#groceries']),/exactly as written here: "Telegram · Sam", "#groceries"\./);
+// Read from its files first (owner request 2026-10-12, "先读文件可以"): with its conversations listed, it answers from them
+// without tools; each line bounded, repeats and empty titles dropped.
+assert.doesNotMatch(prompt,/Worldlet read them from your files/);assert.match(prompt,/Use what you actually have/);
+const listed=agentProfilePrompt(['gmail'],[{title:'Telegram · Sam',messages:42,last:'2026-10-11',opening:['Buy milk '.repeat(40),'and floss']},{title:' Telegram  ·  Sam'},{title:''},'#groceries']);
+assert.match(listed,/do not run tools or read files for this/);assert.doesNotMatch(listed,/Use what you actually have/);
+const lines=listed.split('use these titles exactly as written:\n')[1].split('\n\n')[0].split('\n').map(line=>JSON.parse(line));
+assert.deepEqual(lines.map(c=>c.title),['Telegram · Sam','#groceries']);
+assert.ok(lines[0].messages===42&&lines[0].last==='2026-10-11'&&lines[0].opening.length===2&&[...lines[0].opening[0]].length===140);
 
 for(const secret of ['sk-ant-api03-abcdefghijklmnop','ghp_abcdefghijklmnopqrstuvwxyz0123','Bearer abcdefghijklmnop0123456789','token AbC123dEf456GhI789jKl012MnO345pQr678StU901'])assert.ok(looksSecret(secret),secret);
 for(const plain of ['~/clawd-phone/hotline/skills/personal/groceries','Gmail for hotel bookings','1Password vault with an API key'])assert.ok(!looksSecret(plain),plain);
@@ -34,7 +40,7 @@ assert.deepEqual(profile.connections,[{name:'1Password vault',kind:'password_vau
 assert.deepEqual(profile.channels,[{provider:'discord',place:'#groceries',purpose:'shopping'}]);
 assert.equal(profile.threads.length,30);
 assert.deepEqual(profile.things,[{title:'Kitchen restock',why:'Every week',threads:['#groceries'],key:'amazon'},{title:'Taxes',threads:[]}],'what the person handles most, with where it happens');
-assert.match(prompt,/things: go through your conversations/);
+assert.match(prompt,/things: name the things your person handles most/);
 assert.ok(!JSON.stringify(profile).includes('ghp_')&&!JSON.stringify(profile).includes('sk-live'));
 assert.deepEqual(agentProfileApplets(profile,['gmail','discord','amazon','x']),['amazon','gmail','x','discord'],'suggested first, then what its connections and channels use');
 assert.equal(parseAgentProfile('I cannot do that.'),null);

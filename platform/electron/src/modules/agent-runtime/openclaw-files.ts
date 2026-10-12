@@ -26,8 +26,28 @@ export interface OpenClawData {
  problems:string[];truncated:boolean;
 }
 
+/** The workspaces the OpenClaw Agent itself said it keeps (core/agent/agent-profile.ts `workspaces`), for an agent whose
+ * folder its configuration does not lead to (owner question 2026-10-12, Kelvin: "有的数据不在默认目录 怎么搞"). */
+let reportedWorkspaces:{agent?:string;path:string}[]=[];
+export function reportOpenClawWorkspaces(list:readonly {agent?:string;path:string}[]|null|undefined){reportedWorkspaces=(list??[]).filter(w=>w&&typeof w.path==='string').slice(0,20);}
+/** A folder that holds an OpenClaw workspace's own files. */
+const holdsWorkspace=(folder:string)=>['SOUL.md','AGENTS.md','IDENTITY.md','MEMORY.md','memory','skills'].some(name=>fs.existsSync(path.join(folder,name)));
+/** Where the Agent said this agent's workspace is, when that is a workspace in the person's home folder; read only. */
+function reportedWorkspace(id:string,isDefault:boolean,home:string,environment:NodeJS.ProcessEnv):string|null {
+ for(const entry of reportedWorkspaces.filter(w=>w.agent===id||isDefault&&(!w.agent||w.agent==='default'))){
+  const found=openClawPath(entry.path,home,environment);
+  try{
+   if(!found||!fs.statSync(found).isDirectory())continue;
+   const folder=real(found),within=path.relative(real(home),folder);
+   if(within&&!within.startsWith('..')&&!path.isAbsolute(within)&&holdsWorkspace(folder))return folder;
+  }catch{}
+ }
+ return null;
+}
+
 /** Configured agents (`agents.entries`, older `agents.list`) plus agent folders on disk. The
- * default agent is the one marked `default`, else `main`, else the first. */
+ * default agent is the one marked `default`, else `main`, else the first. An agent whose configured folder holds no
+ * workspace takes the one the Agent reported (reportOpenClawWorkspaces). */
 export function openClawAgents(home=os.homedir(),environment=process.env,config=readOpenClawConfig(home,environment)):OpenClawAgent[] {
  const state=openClawState(home,environment),agents=config?.agents??{};
  const entries:Record<string,any>={};
@@ -41,7 +61,8 @@ export function openClawAgents(home=os.homedir(),environment=process.env,config=
   const entry=entries[id]??{},isDefault=id===chosen;
   const configured=openClawPath(entry.workspace,home,environment);
   const candidate=configured??(isDefault?openClawWorkspace(home,environment,config):path.join(state,'workspace-'+id));
-  const workspace=candidate&&path.isAbsolute(candidate)&&fs.existsSync(candidate)&&fs.statSync(candidate).isDirectory()?real(candidate):null;
+  const found=candidate&&path.isAbsolute(candidate)&&fs.existsSync(candidate)&&fs.statSync(candidate).isDirectory()?real(candidate):null;
+  const workspace=found&&holdsWorkspace(found)?found:reportedWorkspace(id,isDefault,home,environment)??found;
   const declared=workspace?declaredName(readFile(workspace,path.join(workspace,'IDENTITY.md')))??declaredName(readFile(workspace,path.join(workspace,'SOUL.md'))):null;
   const name=[entry.name,entry.identity?.name,declared].find(value=>typeof value==='string'&&value.trim())?.trim()??id;
   return {id,name:name.slice(0,80),default:isDefault,workspace};
