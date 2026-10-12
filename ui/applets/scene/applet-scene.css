@@ -55,12 +55,6 @@
 #notionWorld>.panel-scene{position:absolute;inset:0;z-index:4;pointer-events:none}
 #notionWorld[data-applet-scene][data-panel-scene]>.notion-content:is([data-template=browser],[data-template=game]){left:var(--applet-scene-primary-left);top:var(--applet-scene-primary-top);width:var(--applet-scene-primary-width);height:var(--applet-scene-primary-height);right:auto;bottom:auto;max-width:none;max-height:none;margin:0;
  --browser-pad:4px;padding:4px;border:0;border-radius:var(--scene-radius);background:var(--scene-fill);box-shadow:none}
-/* A native website is rectangular. An opaque, even mat bridges the painted opening's irregular edges instead of
-   letting its paper slivers meet the page. Keep the mat outside the registered area so the website loses no space. */
-#notionWorld[data-applet-scene][data-panel-scene]>.notion-content[data-template=browser]{
- --scene-web-mat:clamp(4px,.6vw,10px);border-radius:0;background:var(--scene-control);
- box-shadow:0 0 0 var(--scene-web-mat) var(--scene-control),0 0 0 calc(var(--scene-web-mat) + 1px) var(--scene-line)}
-#notionWorld[data-applet-scene][data-panel-scene]>.notion-content[data-template=browser] .browser-viewport{border-radius:0}
 /* The Applet shelf (ui/hud/applet-shelf.ts) stands above an open Applet: the page starts under it. */
 #notionWorld[data-applet-scene][data-panel-scene][data-applet-shelf]>.notion-content:is([data-template=browser],[data-template=game]){top:max(var(--applet-scene-primary-top),150px);height:calc(var(--applet-scene-primary-height) + var(--applet-scene-primary-top) - max(var(--applet-scene-primary-top),150px))}
 .applet-scene .scene-item-text{display:grid;gap:2px;min-width:0}.applet-scene .scene-item-text strong{font-weight:600;overflow-wrap:anywhere}
