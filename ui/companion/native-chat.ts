@@ -20,6 +20,9 @@ import {worldNow} from '../shell/index.ts';
 import {foxGreeting} from './fox-greeting.ts';
 import {THREAD_ROW,renderThreadCards,threadTopicKey,showQuestion,restoreThread,segmentOf,threadCards,threadFinish,threadInterrupt,threadLine,threadRow,threadStart,threadStep,threadSteer,threadUsage,workingText,type ThreadEntry} from './fox-thread.ts';
 // Optional model-authored drafts; malformed metadata never becomes an action.
+// The dots of the listening bar's sound wave; each is one moment of the voice, the newest at the right.
+const WAVE_DOTS=40;
+const SEND_ICON='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>';
 export function parseSuggestedReplies(value){
  const raw=String(value||''),start=raw.lastIndexOf('<worldlet-replies>');if(start<0)return {text:raw,suggestions:[]};
  let suggestions=[];try{const match=raw.slice(start).match(/^<worldlet-replies>([\s\S]*?)<\/worldlet-replies>\s*$/),items=match&&JSON.parse(match[1]);if(Array.isArray(items))suggestions=[...new Set(items.filter(s=>typeof s==='string'&&s.trim().length>0&&s.trim().length<=48&&!/[\r\n<>]/.test(s)).map(s=>s.trim()))].slice(0,2);}catch{}
@@ -135,11 +138,23 @@ export function createNativeChat(call){return function({button,input,status,exec
  const life=mountCompanionLife(root,pet,avatar),position=companionPosition(root,hud,avatar);
  // One message bar under Fox (owner decision 2026-10-04, like Claude's composer): click to type, hold to speak,
  // a microphone and Send inside it. Clicking Fox does the same as clicking the bar.
- const entry=make('div','companion-text-entry'),inputState=make('span','companion-input-state');inputState.setAttribute('role','status');const waveform=make('span','companion-input-wave');waveform.setAttribute('aria-hidden','true');for(let i=0;i<17;i++)waveform.append(make('i',''));entry.append(form,inputState,waveform);hud.append(entry);
+ const entry=make('div','companion-text-entry'),inputState=make('span','companion-input-state');inputState.setAttribute('role','status');const waveform=make('span','companion-input-wave');waveform.setAttribute('aria-hidden','true');for(let i=0;i<WAVE_DOTS;i++)waveform.append(make('i',''));entry.append(form,inputState,waveform);hud.append(entry);
  const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);
  // The bug and the microphone stand inside the bar's right end, in the World and on the desktop alike (owner request
  // 2026-10-11: "把那个报 bug 的按钮和语音的按钮都融到那个 input box 里面去").
- const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');voiceControls.append(orderButton,speechButton);entry.append(voiceControls);
+ const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');// While the microphone listens the bar works like Claude's (owner request 2026-10-12): ✕ at its left cancels, a dotted
+ // sound wave moves left with the voice, Stop puts the words into the line to edit, and the microphone, now Send, sends.
+ // "+" stands at the bar's far left while it is open, the bug after it (owner request 2026-10-12).
+ const plusButton=make('button','companion-plus-button');plusButton.type='button';plusButton.setAttribute('aria-label','Add files');plusButton.title='Add files';
+ plusButton.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+ plusButton.addEventListener('pointerdown',e=>e.stopPropagation());
+ const voiceCancel=make('button','companion-voice-cancel'),voiceStop=make('button','companion-voice-stop');
+ voiceCancel.type=voiceStop.type='button';voiceCancel.hidden=voiceStop.hidden=true;
+ voiceCancel.setAttribute('aria-label','Cancel voice message');voiceStop.setAttribute('aria-label','Stop and edit');
+ voiceCancel.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+ voiceStop.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
+ for(const button of [voiceCancel,voiceStop])button.addEventListener('pointerdown',e=>e.stopPropagation());
+ voiceControls.append(plusButton,orderButton,voiceCancel,voiceStop,speechButton);entry.append(voiceControls);
  const send=form.querySelector('#notionSend');send.classList.add('companion-send-button');
  input.maxLength=3000;input.removeAttribute('placeholder');input.setAttribute('aria-label','Message Fox');
  send.setAttribute('aria-label','Send message');
@@ -284,7 +299,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  function fitInput(collapsed=false){const line=parseFloat(getComputedStyle(input).lineHeight)||21,limit=Math.round(line*6);input.style.height='auto';const height=input.scrollHeight;input.style.height=(input.value&&!collapsed?Math.min(height,limit):line)+'px';input.style.overflowY=height>limit&&!collapsed?'auto':'hidden';const lift=Math.max(0,parseFloat(input.style.height)-line);if(lift)hud.style.setProperty('--companion-entry-lift',lift+'px');else hud.style.removeProperty('--companion-entry-lift');}
  entry.addEventListener('transitionend',e=>{if(e.target===form&&e.propertyName==='width')fitInput(!editing||recording||starting||transcribing);});
  input.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.shiftKey||e.isComposing||e.keyCode===229)return;e.preventDefault();form.requestSubmit();});
- let quietTurn=false,active=false,recording=false,starting=false,transcribing=false,generation=0,preview=false,history=[],recentActions=[],turnKind='';
+ let speechToLine=false,quietTurn=false,active=false,recording=false,starting=false,transcribing=false,generation=0,preview=false,history=[],recentActions=[],turnKind='';
  // Talk with Fox (fox-talk.ts), where the host has local speech and a system voice (`talkVoice`): the microphone menu,
  // turns it on. While Fox speaks a quiet capture listens for the person (barge-in).
  let talkWasOn=false;
@@ -645,8 +660,15 @@ export function createNativeChat(call){return function({button,input,status,exec
   // microphone only waits for an interruption, and the bar says how to interrupt.
   const listening=(recording||starting)&&!(talk.on&&talk.phase!=='listening')&&root.dataset.order!=='sending';
   entry.dataset.voice=String(listening);
+  // Send stands at the bar's right end with the microphone just before it, as in Claude's (owner request 2026-10-12),
+  // whenever it shows (controls.css hides it at rest with nothing typed).
+  entry.dataset.send=String(!listening&&!quiet&&(expanded||root.dataset.entryHover==='true'||!!input.value));plusButton.hidden=entry.dataset.send!=='true';
   form.hidden=listening;form.inert=listening;fitInput(!expanded);inputState.hidden=true;
+  if(listening&&waveform.hidden)clearWave();
   waveform.hidden=!listening;
+  const editable=listening&&!ordering&&!talk.on;
+  voiceCancel.hidden=voiceStop.hidden=!editable;entry.dataset.voiceEdit=String(editable);
+  const icon=editable?'send':'microphone';if(speechButton.dataset.icon!==icon){speechButton.dataset.icon=icon;speechButton.innerHTML=editable?SEND_ICON:uiIcon('microphone');}
   state.textContent='';
   // A place with no conversation yet invites one; there is no canned greeting.
   // Resting, the bar says how to use it; once typing, it says whom you are asking.
@@ -698,6 +720,20 @@ export function createNativeChat(call){return function({button,input,status,exec
  avatar.addEventListener('worldlet:preview-action',()=>{if(active||recording||starting||transcribing)return;editing=false;hoverInput=false;input.blur();render();});
  let draggingFox=false;
  function clearAvatarPress(){if(draggingFox){draggingFox=false;if(onDesktop())void call('desktopCompanionDrag',{phase:'end'}).catch(()=>{});else position.end();}clearTimeout(avatarHoldTimer);avatarHoldTimer=null;avatarPress=null;root.classList.remove('is-pressing-fox','is-dragging-fox');}
+ // The listening bar's dotted wave: each dot is one moment of the voice, rising with its loudness, the newest at the right.
+ const waveLevels:number[]=[];
+ function paintWave(){const dots=waveform.children;for(let i=0;i<dots.length;i++){const level=waveLevels[waveLevels.length-dots.length+i];(dots[i] as HTMLElement).style.height=level===undefined?'':(3+level*26).toFixed(1)+'px';(dots[i] as HTMLElement).classList.toggle('is-heard',level!==undefined);}}
+ function pushWave(level:number){waveLevels.push(Math.min(1,level*1.6));if(waveLevels.length>WAVE_DOTS)waveLevels.splice(0,waveLevels.length-WAVE_DOTS);paintWave();}
+ function clearWave(){waveLevels.length=0;paintWave();}
+ // "+": the files the person picks go into the line as paths, one a line, for Fox's Agent to read on this computer.
+ plusButton.addEventListener('click',async()=>{
+  const picked=await call('foxChooseFiles').catch(()=>null);const paths=Array.isArray(picked?.paths)?picked.paths.filter((p:unknown)=>typeof p==='string'):[];
+  if(!paths.length)return;
+  input.value=(input.value.trim()?input.value.trimEnd()+'\n':'')+paths.join('\n')+'\n';
+  editing=true;render();input.focus({preventScroll:true});fitInput();
+ });
+ voiceCancel.addEventListener('click',()=>cancelSpeech('cancelled'));
+ voiceStop.addEventListener('click',()=>{if(!recording&&!starting)return;speechToLine=true;void finishSpeech();});
  async function finishSpeech(){if(companionInfo.feedback.voicing){await companionInfo.feedback.finishVoice();return;}if(starting){cancelSpeech('stopped_early');return;}if(recording)try{await call('speechStop');}catch(e){cancelSpeech('speech_error');say(e.message||'I could not hear you. Please try again.');}}
  for(const target of [avatar,speechButton,input]){
  target.addEventListener('pointerdown',e=>{
@@ -779,7 +815,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   animation.finished.catch(()=>{}).finally(()=>{flight.remove();if(!reduced)avatar.animate([{filter:'brightness(1)'},{filter:'brightness(1.2)'},{filter:'brightness(1)'}],{duration:240,easing:'ease-out'});});
  }
  function clearKeyPress(){clearTimeout(keyHoldTimer);keyHoldTimer=null;keyPress=null;root.classList.remove('is-pressing-fox');}
- function cancelSpeech(why?:unknown){if(why!=='talk')talk.stop();const order=ordering;if(ordering)endOrder();void companionInfo.feedback.cancelVoice();clearKeyPress();clearTimeout(finalTimer);clearAvatarPress();speechGeneration++;if(recording||starting||transcribing)call('speechCancel').catch(()=>{});recording=false;starting=false;transcribing=false;render();if(order){orderStopped(typeof why==='string'?why:'other');say(ORDER_STOPPED);}}
+ function cancelSpeech(why?:unknown){speechToLine=false;if(why!=='talk')talk.stop();const order=ordering;if(ordering)endOrder();void companionInfo.feedback.cancelVoice();clearKeyPress();clearTimeout(finalTimer);clearAvatarPress();speechGeneration++;if(recording||starting||transcribing)call('speechCancel').catch(()=>{});recording=false;starting=false;transcribing=false;render();if(order){orderStopped(typeof why==='string'?why:'other');say(ORDER_STOPPED);}}
  // An Order is never dropped without a word (owner Order 2026-10-07: 「怎么发不了bug了」, after one Order ended when the
  // World's view settled and another when the window lost focus while its words were being recognised). Moving to
  // another view leaves it running; leaving the app while it listens stops the microphone and sends what was heard;
@@ -908,13 +944,16 @@ export function createNativeChat(call){return function({button,input,status,exec
  if(e.detail?.phase==='spoken'){talk.spoken();return;}
  if(!recording&&!starting&&!transcribing)return;
   const value=e.detail;
-  if(value.phase==='level'){waveform.style.setProperty('--voice-level',String(Math.max(0,Math.min(1,Number(value.text)||0))));if(!ordering)talk.level(Number(value.text)||0);return;}
+  if(value.phase==='level'){const level=Math.max(0,Math.min(1,Number(value.text)||0));waveform.style.setProperty('--voice-level',String(level));pushWave(level);if(!ordering)talk.level(Number(value.text)||0);return;}
   // Draft speech stays in the input line; only the final transcript executes.
   if(value.phase==='partial'){renderEntry();}
   else if(value.phase==='processing'){recording=false;starting=false;transcribing=true;if(ordering)orderSending();render();}
   else if(value.phase==='final'){
    recording=false;starting=false;transcribing=true;if(ordering)orderSending();render();
-   const turn=speechGeneration;clearTimeout(finalTimer);finalTimer=setTimeout(()=>{if(turn!==speechGeneration)return;transcribing=false;render();if(ordering)void sendOrder(value.text||'');else if(talk.heard(value.text||''))return;else if(value.text?.trim())submit(value.text);else say('I didn’t catch that. Use the microphone to try again.');},0);
+   const turn=speechGeneration;clearTimeout(finalTimer);finalTimer=setTimeout(()=>{if(turn!==speechGeneration)return;transcribing=false;
+    // Stop: the words wait in the line to be read or changed, unsent.
+    if(speechToLine&&!ordering){speechToLine=false;const heard=String(value.text||'').trim();if(heard)input.value=input.value.trim()?input.value.trimEnd()+' '+heard:heard;editing=true;render();input.focus({preventScroll:true});fitInput();return;}
+    render();if(ordering)void sendOrder(value.text||'');else if(talk.heard(value.text||''))return;else if(value.text?.trim())submit(value.text);else say('I didn’t catch that. Use the microphone to try again.');},0);
   }else if(value.phase==='error'){if(talk.on&&!ordering&&/did not hear|didn’t catch|did not catch/i.test(String(value.text||''))){cancelSpeech('talk');talk.missed();}else{cancelSpeech('speech_error');say(value.text||'I couldn’t hear you. Use the microphone to try again.');}}
  });
  // Global shortcuts apply only to the world canvas, never to forms, dialogs,

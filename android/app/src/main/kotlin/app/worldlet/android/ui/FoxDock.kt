@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.CornerRadius
@@ -57,6 +58,8 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -255,17 +258,19 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
                 // Like Claude's (owner request 2026-10-12): round buttons inside the bar, the bug at its left while the
                 // computer takes Orders, the microphone and Send at its right. A tap on the microphone records with ✕ at
                 // the left, a dotted sound wave, Stop (the words go into the line) and Send.
-                val leftButton = talk.tapped || talking.on || model.takesOrders
                 val buttonPad = Modifier.padding(bottom = (bar - 36.dp) / 2)
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = bar)
-                        .frosted(RoundedCornerShape(bar / 2)).padding(start = if (leftButton) 6.dp else 16.dp, end = 6.dp),
+                        .frosted(RoundedCornerShape(bar / 2)).padding(start = 6.dp, end = 6.dp),
                     verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     when {
                         talking.on -> EndTalkButton(buttonPad) { talking.stop() }
                         talk.tapped -> RoundButton(Icons.Outlined.Close, "Cancel the voice message", "foxCancelVoice", buttonPad) { talk.cancel() }
-                        model.takesOrders -> OrderButton(ordering, buttonPad) { toggleOrder() }
+                        else -> {
+                            PlusButton(buttonPad, "Talk with ${model.conversation.name}", { toggleTalk() }, openSettings)
+                            if (model.takesOrders) OrderButton(ordering, buttonPad) { toggleOrder() }
+                        }
                     }
                     if (talk.tapped) DottedWave(voice, Modifier.weight(1f).height(bar))
                     else Box(Modifier.weight(1f).heightIn(min = bar), contentAlignment = Alignment.CenterStart) {
@@ -332,9 +337,8 @@ private val FoxTail = 25.dp
 /** The Order button while it listens, as on the computer. */
 private val OrderRed = Color(0xFFC2412E)
 
-/** The round buttons in the bar, a quiet grey as in Claude's, and Send in Claude's terracotta. */
-private val ButtonFill = Color.White.copy(alpha = 0.12f)
-private val SendFill = Color(0xFFD97757)
+/** The round buttons in the bar, quiet as in Claude's, in the theme's colours (owner 2026-10-12). */
+private val ButtonFill = Palette.ink.copy(alpha = 0.12f)
 
 /** The Order button: round with a bug, at the bar's left inside it, red while it listens. */
 @Composable
@@ -357,6 +361,19 @@ private fun RoundButton(icon: androidx.compose.ui.graphics.vector.ImageVector, l
             .semantics { contentDescription = label }.testTag(tag),
         contentAlignment = Alignment.Center,
     ) { Icon(icon, null, tint = Palette.ink, modifier = Modifier.size(18.dp)) }
+}
+
+/** "+" at the bar's far left, as in Claude's (owner request 2026-10-12): Talk with Fox and Settings. */
+@Composable
+private fun PlusButton(modifier: Modifier, talkLabel: String, talk: () -> Unit, settings: () -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box(modifier) {
+        RoundButton(Icons.Outlined.Add, "Add", "foxPlus", Modifier) { open = true }
+        DropdownMenu(open, { open = false }) {
+            DropdownMenuItem({ Text(talkLabel) }, { open = false; talk() }, modifier = Modifier.testTag("foxPlusTalk"))
+            DropdownMenuItem({ Text("Settings") }, { open = false; settings() }, modifier = Modifier.testTag("foxPlusSettings"))
+        }
+    }
 }
 
 /** A tapped recording's sound wave, as Claude's: a dotted line that moves left, each moment's loudness a bar rising
@@ -501,16 +518,16 @@ private fun TalkButton(talk: Talk, talking: TalkMode, label: String, modifier: M
     ) { Icon(if (voice.listening) Icons.Outlined.GraphicEq else Icons.Outlined.Mic, null, tint = Palette.ink, modifier = Modifier.size(20.dp)) }
 }
 
-/** Send, a terracotta circle as Claude's, dimmed until there is something to send (owner request 2026-10-12). */
+/** Send, filled in lantern gold, dimmed until there is something to send, as in Claude's (owner 2026-10-12). */
 @Composable
 private fun SendButton(enabled: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Box(
-        modifier.size(36.dp).background(SendFill.copy(alpha = if (enabled) 1f else 0.45f), CircleShape)
+        modifier.size(36.dp).background(Palette.lantern.copy(alpha = if (enabled) 1f else 0.45f), CircleShape)
             .clickable(enabled = enabled, onClickLabel = "Send", role = Role.Button, onClick = onClick)
             .semantics { contentDescription = "Send" }.testTag("foxSend"),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(Icons.Outlined.ArrowUpward, null, tint = Color.White.copy(alpha = if (enabled) 1f else 0.5f), modifier = Modifier.size(20.dp))
+        Icon(Icons.Outlined.ArrowUpward, null, tint = Palette.forest.copy(alpha = if (enabled) 1f else 0.6f), modifier = Modifier.size(20.dp))
     }
 }
 

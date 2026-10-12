@@ -55,9 +55,8 @@ struct FoxDock: View {
     private let badgeRoom: CGFloat = 8
     /// The Order button while it listens, as on the computer.
     private static let orderRed = Color(hex: 0xC2412E)
-    /// The round buttons in the bar, a quiet grey as in Claude's, and Send in Claude's terracotta.
-    private static let buttonFill = Color.white.opacity(0.12)
-    private static let sendFill = Color(hex: 0xD97757)
+    /// The round buttons in the bar, quiet as in Claude's, in the theme's colours (owner 2026-10-12).
+    private static let buttonFill = Palette.ink.opacity(0.12)
 
     var body: some View {
         VStack(spacing: 14) {
@@ -136,12 +135,15 @@ struct FoxDock: View {
             // the left, a dotted sound wave, Stop (the words go into the line) and Send.
             HStack(spacing: 6) {
                 if recording == .locked || talk.on { cancelButton.transition(.scale.combined(with: .opacity)) }
-                else if model.takesOrders { orderButton.transition(.scale.combined(with: .opacity)) }
+                else {
+                    plusButton
+                    if model.takesOrders { orderButton.transition(.scale.combined(with: .opacity)) }
+                }
                 field
                 if recording == .locked { stopButton.transition(.scale.combined(with: .opacity)) } else { mic }
                 sendButton
             }
-            .padding(.leading, recording == .locked || talk.on || model.takesOrders ? 6 : 16)
+            .padding(.leading, 6)
             .padding(.trailing, 6)
             .frame(height: barHeight)
             .liquidGlass(Capsule(), interactive: false)
@@ -271,13 +273,13 @@ struct FoxDock: View {
     /// Sends the line typed, or the locked recording.
     private var sendButton: some View {
         let ready = recording == .locked || (recording == .idle && !draftEmpty)
-        // A terracotta circle as Claude's, dimmed until there is something to send (owner request 2026-10-12).
+        // The theme's light circle, dimmed until there is something to send, as in Claude's (owner 2026-10-12).
         return Button { recording == .locked ? finish() : send() } label: {
             Image(systemName: "arrow.up")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Color.white.opacity(ready ? 1 : 0.5))
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(Palette.forest.opacity(ready ? 1 : 0.6))
                 .frame(width: 36, height: 36)
-                .background(Circle().fill(Self.sendFill.opacity(ready ? 1 : 0.45)))
+                .background(Circle().fill(Palette.ink.opacity(ready ? 1 : 0.45)))
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -300,6 +302,25 @@ struct FoxDock: View {
         .buttonStyle(.plain)
         .accessibilityLabel(talk.on ? "End Talk" : "Cancel the voice message")
         .accessibilityIdentifier("foxCancelVoice")
+    }
+
+    /// "+" at the bar's far left, as in Claude's (owner request 2026-10-12): Talk with Fox and Settings.
+    private var plusButton: some View {
+        Menu {
+            Button(talk.on ? "End Talk" : "Talk with \(model.conversation.name)", systemImage: talk.on ? "stop.circle" : "waveform") { toggleTalk() }
+            Button("Settings", systemImage: "gearshape") { openPanel() }
+        } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Palette.ink)
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(Self.buttonFill))
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .disabled(recording != .idle || ordering)
+        .accessibilityLabel("Add")
+        .accessibilityIdentifier("foxPlus")
     }
 
     /// Stops a tapped recording and puts its words into the line to read or change before sending, as Claude's Stop.

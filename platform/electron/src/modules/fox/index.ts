@@ -765,6 +765,9 @@ export function installFox(host:Host){
   modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report});
 
  host.register({
+  // "+" in Fox's bar (owner request 2026-10-12): files the person picks, as paths for the line; Fox's Agent runs on this
+  // computer and reads them there.
+  foxChooseFiles:async()=>{const parent=window(),options:OpenDialogOptions={properties:['openFile','multiSelections'],message:'Choose files for Fox'};const result=parent?await dialog.showOpenDialog(parent,options):await dialog.showOpenDialog(options);return {paths:result.canceled?[]:result.filePaths.slice(0,10)};},
   modelStatus:()=>foxModelStatus(),
   // Settings › Agent: the Agent in use, the model it is set to, whether its sign-in or key is there, and how
   // the last reply ended. Reading it starts nothing new.
