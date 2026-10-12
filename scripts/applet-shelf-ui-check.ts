@@ -36,7 +36,7 @@ await withBrowser(fileAccess,async browser=>{
   const nav=document.querySelector<HTMLElement>('.applet-shelf')!,panel=document.querySelector('#notionContent')!.getBoundingClientRect();
   const lane=nav.getBoundingClientRect();
   // A website page sits in its theme scene's region (ui/applets/scene), not under the shelf's lane.
-  const inScene=document.querySelector('#notionWorld')!.hasAttribute('data-web-scene');
+  const inScene=document.querySelector('#notionWorld')!.hasAttribute('data-panel-scene');
   return {shown:!nav.hidden,middle:lane.x+lane.width/2,panel:{x:panel.x+panel.width/2,top:panel.top,width:inScene?0:panel.width},bottom:nav.getBoundingClientRect().bottom,
    more:(document.querySelector<HTMLElement>('.applet-shelf-more')!.hidden?'':document.querySelector('.applet-shelf-more')!.textContent),
    tabs:[...document.querySelectorAll<HTMLElement>('.applet-shelf-tab')].map(t=>({id:t.dataset.applet,current:t.hasAttribute('data-current'),distance:+t.dataset.distance!,
