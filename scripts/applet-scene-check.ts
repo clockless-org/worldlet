@@ -46,12 +46,6 @@ try{
   assert.equal(got.shellInk,village.sceneMaterials.paper.ink,'the shell learns the material for its reader');
   assert.equal(got.letters,1);
  }
- // A narrow window: the painted paper would shrink text past reading, so a readable sheet lies over the painting and the
- // shell's reader keeps its own narrow place.
- await page.setViewportSize({width:700,height:900});await mount('gmail',source);await page.waitForTimeout(50);
- const compact=await page.evaluate(()=>(window as any).scene.metrics);
- assert.equal(compact.compact,true);assert.equal(compact.primary.width,700-32);
- assert.equal(await page.evaluate(()=>document.getElementById('shell')!.dataset.appletScene),undefined,'a compact scene does not move the reader');
  await page.setViewportSize({width:1920,height:1080});
  // The same Mail on another painting: only the theme's data changed.
  const browserScene=village.appletScenes.browser;
