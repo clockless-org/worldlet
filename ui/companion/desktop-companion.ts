@@ -51,7 +51,7 @@ export function installDesktopCompanion(){
   const rect=capture(),key=JSON.stringify(rect);if(!rect||key===lastBounds)return;lastBounds=key;
   void callHost('desktopCompanionSize',{rect}).catch(()=>{lastBounds='';});
  });};
- new MutationObserver(resize).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','hidden','data-entry-expanded'],childList:true});
+ new MutationObserver(resize).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','hidden','data-entry-expanded','data-entry-hover'],childList:true});
  document.addEventListener('transitionrun',event=>{if((event.target as Element)?.closest('.companion-controls'))resize();});
  const observer=new ResizeObserver(resize);observer.observe(document.body);window.addEventListener('resize',resize);
  const apply=(enabled:boolean)=>{

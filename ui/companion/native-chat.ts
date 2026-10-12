@@ -634,6 +634,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  function renderEntry(){
   const speech=(recording||starting||transcribing)&&!ordering,expanded=editing&&!speech;
   root.dataset.entryExpanded=String(expanded);
+  // Pointing at Fox or at the bar opens it to its typing width without starting to type (owner request 2026-10-12).
+  root.dataset.entryHover=String(!expanded&&!speech&&hoverInput);
   // At rest the bar keeps low (owner request 2026-10-05): short, faint and only its name; pointing at it
   // or Fox brings back the hint, the microphone and Send, and a click opens it wide to type.
   const quiet=!expanded&&!speech&&!hoverInput&&!input.value.trim()&&!hoverNone.matches;
@@ -678,10 +680,11 @@ export function createNativeChat(call){return function({button,input,status,exec
  pet.addEventListener('pointerenter',recallLast);avatar.addEventListener('focus',recallLast);
  for(const area of [pet,panel,entry]){area.addEventListener('pointerenter',()=>clearTimeout(recallTimer));area.addEventListener('pointerleave',leaveRecall);}
  function hoverOn(e){if(e?.pointerType==='touch'||hoverNone.matches)return;clearTimeout(collapseTimer);hoverInput=true;renderEntry();}
- function hoverOff(){clearTimeout(collapseTimer);collapseTimer=setTimeout(()=>{hoverInput=!hoverNone.matches&&(pet.matches(':hover')||form.matches(':hover'));renderEntry();},180);}
- // The bar itself and Fox wake the bar; the round buttons beside it (Order) do not, or the widening bar
- // would slide them out from under the pointer (owner Order 2026-10-07).
+ function hoverOff(){clearTimeout(collapseTimer);collapseTimer=setTimeout(()=>{hoverInput=!hoverNone.matches&&(pet.matches(':hover')||form.matches(':hover')||hoverInput&&voiceControls.matches(':hover'));renderEntry();},180);}
+ // The bar itself and Fox wake the bar and widen it; the buttons in it (the microphone, the bug) keep it open but
+ // do not open it, or the widening bar would slide them out from under the pointer (owner Order 2026-10-07).
  for(const area of [pet,form]){area.addEventListener('pointerenter',hoverOn);area.addEventListener('pointerleave',hoverOff);}
+ voiceControls.addEventListener('pointerenter',()=>{if(hoverInput)clearTimeout(collapseTimer);});voiceControls.addEventListener('pointerleave',hoverOff);
  input.addEventListener('focus',()=>{
   clearTimeout(recallTimer);dismissed=false;peeking=false;editing=true;warmThread();
   if(active||recording||starting||transcribing){renderEntry();return;}

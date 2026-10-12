@@ -20,13 +20,16 @@ await withBrowser(fileAccess,async browser=>{
  const quietWidth=(await form.boundingBox()).width;
  assert.equal(await page.locator('.companion-text-entry').getAttribute('data-quiet'),'true','the bar rests quiet');
  assert.equal(await type.getAttribute('placeholder'),'Message Fox');assert(await mic.isVisible()&&!await form.locator('#notionSend').isVisible(),'the microphone stays, no Send at rest');
- // Two sizes only (owner Order 2026-10-08): pointing at the bar brings the hint but keeps its size; focus makes it larger.
+ // Two sizes only (owner Order 2026-10-08): pointing at the bar brings the hint and opens it to the typing size
+ // (owner request 2026-10-12), as pointing at Fox does; focus keeps it there.
  await form.hover();await page.waitForTimeout(400);
  assert(await mic.isVisible());assert(!await form.locator('#notionSend').isVisible(),'no Send while there is nothing to send');
  assert.match(await type.getAttribute('placeholder'),/to type · hold to speak/);
- assert.equal((await form.boundingBox()).width,quietWidth,'pointing at the bar does not resize it');
+ const hoverWidth=(await form.boundingBox()).width;assert(hoverWidth>quietWidth+100,'pointing at the bar opens it to the typing size');
+ await page.mouse.move(5,5);await page.waitForTimeout(400);assert.equal((await form.boundingBox()).width,quietWidth,'leaving it returns it to the small size');
+ await avatar.hover();await page.waitForTimeout(400);assert.equal((await form.boundingBox()).width,hoverWidth,'pointing at Fox opens the bar too');assert(!await typing(),'without starting to type');
  await type.click();await page.waitForTimeout(400);
- assert((await form.boundingBox()).width>quietWidth+100,'focus makes the bar larger');await page.keyboard.press('Escape');await page.mouse.move(5,5);await page.waitForTimeout(400);
+ assert.equal((await form.boundingBox()).width,hoverWidth,'focus keeps the typing size');await page.keyboard.press('Escape');await page.mouse.move(5,5);await page.waitForTimeout(400);
  assert.equal((await form.boundingBox()).width,quietWidth,'and it returns to the small size');
  await form.hover();await page.waitForTimeout(400);
  await page.screenshot({path:'/tmp/companion-idle.png'});
