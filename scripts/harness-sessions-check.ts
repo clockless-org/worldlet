@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
+import {DatabaseSync} from 'node:sqlite';
 import {WebSocketServer} from 'ws';
 import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionThread,hermesBorrowsCodex,hermesConversationIncluded,HERMES_CHANNEL_READ_ONLY,hermesAcpAnnouncement,hermesChannelToolAllowed,HermesOwnCalls,hermesStandingWriteApproval,hermesStreamAnnouncement,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,localHarnessStream,localHarnessTurn,openClawApprovalFor,openClawApprovalRequest,openClawConnect,openClawSessionIs,openClawDecision,openClawDeviceProof,
  openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,usableHermesServerKey} from '../core/agent/index.ts';
@@ -297,6 +298,28 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   assert.ok(!replayed.some(e=>e.type==='delta'&&/replayed/.test(e.text)),'replayed history is not shown as Fox\'s words');
   assert.ok(fs.existsSync(path.join(turnHome,'harness-sessions.json')),'Worldlet keeps the thread-to-session map in its own folder');
   await adapter.shutdown();
+  // A brought conversation Fox was switched to (core/tasks/fox-sessions.ts) goes on in the person's own session, its
+  // newest one (owner decision 2026-10-12): loaded, not one of Fox's own, so its turns keep coming back through the
+  // history sync. One of another profile's, or with no session to continue, is a session of Fox's own as before.
+  {
+   fs.mkdirSync(path.join(home,'.hermes'),{recursive:true});fs.writeFileSync(path.join(home,'.hermes','config.yaml'),'model:\n  provider: openrouter\n');
+   const db=new DatabaseSync(path.join(home,'.hermes','state.db'));
+   db.exec(`CREATE TABLE sessions(id TEXT PRIMARY KEY,source TEXT NOT NULL,display_name TEXT,parent_session_id TEXT,started_at REAL NOT NULL,message_count INTEGER DEFAULT 0,title TEXT);
+    CREATE TABLE messages(id INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL,role TEXT NOT NULL,content TEXT,timestamp REAL NOT NULL);`);
+   const session=db.prepare('INSERT INTO sessions VALUES(?,?,?,?,?,?,?)'),message=db.prepare('INSERT INTO messages(session_id,role,content,timestamp) VALUES(?,?,?,?)');
+   session.run('h1','telegram','Kelvin',null,100,2,'Trip planning');message.run('h1','user','Plan Kyoto',100);message.run('h1','assistant','Day one: temples.',101);
+   session.run('h2','telegram','Kelvin','h1',200,2,'Trip planning');message.run('h2','user','Day two?',200);message.run('h2','assistant','Gardens.',201);
+   db.close();
+   const before=owned.length;
+   adapter=new LocalHarnessAdapter({...context(root),origin:(source:string,id:string)=>source==='hermes'?({'job-trip':'h1','job-other':'work:h9'} as Record<string,string>)[id]??null:null},install,unix);
+   assert.equal((await chat('Where were we?','session:job-trip')).message,'Turn 2 in h2','the conversation\'s newest session continues');
+   assert.equal(entries().filter(e=>e.load).at(-1).load,'h2');
+   assert.match(entries().filter(e=>e.prompt).at(-1).text,/Person: Where were we\?$/);
+   assert.equal(owned.length,before,'the person\'s session is not taken as Fox\'s own');
+   assert.equal((await chat('Hello','session:job-other')).message,'Turn 1 in s1','another profile\'s conversation: a session of Fox\'s own');
+   assert.equal(owned.length,before+1);
+   await adapter.shutdown();
+  }
   // Its resident interface does not answer: the turn runs a `hermes acp` of its own, and its prompt reaches the same card.
   for(const [choice,answer] of [['once','cleaned'],['deny','left alone']] as const){
    const fallback=new LocalHarnessAdapter(context(root),install,unix);
@@ -653,4 +676,4 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   }finally{server.close();}
  }
 });
-console.log('PASS resident Harness sessions: Hermes Agent kept running (its own gateway install and start, the API server key added only when there is none, the person\'s own read and kept, the standard profile\'s Codex sign-in borrowed read-only in the service as Hermes launches it) World tools registered on Hermes with its own hermes mcp add (theirs by that name left alone), and its API server taking the main thread once they are, its World tool calls coming back to the running Fox turn through the standing endpoint (Fox own calls matched on its stream run under the turn trust with no card; a guarded write its stream never announced, as from another channel, only after the person allows it on the approval card), a call with no Fox turn a channel call (reads only, a write refused with the reason), Worldlet is not open once closed, hermes acp otherwise, recorded once; the standard Hermes Agent\'s conversation on the same route or the built-in runtime; thread keys, ACP approvals (Always is the permanent option; what an allowed call changed comes back as its diff), Responses stream, phone and approval card; Hermes Agent over one ACP process (a session per thread, approvals answered in the World, cancel, reload after restart, the same card on a per-turn fallback); OpenClaw Gateway (session key per thread, World tools as client function tools, exec approvals over its WebSocket for that session only with the allowed command’s output, a refused device noted once) and the per-turn fallback noted once');
+console.log('PASS resident Harness sessions: Hermes Agent kept running (its own gateway install and start, the API server key added only when there is none, the person\'s own read and kept, the standard profile\'s Codex sign-in borrowed read-only in the service as Hermes launches it) World tools registered on Hermes with its own hermes mcp add (theirs by that name left alone), and its API server taking the main thread once they are, its World tool calls coming back to the running Fox turn through the standing endpoint (Fox own calls matched on its stream run under the turn trust with no card; a guarded write its stream never announced, as from another channel, only after the person allows it on the approval card), a call with no Fox turn a channel call (reads only, a write refused with the reason), Worldlet is not open once closed, hermes acp otherwise, recorded once; the standard Hermes Agent\'s conversation on the same route or the built-in runtime; thread keys, ACP approvals (Always is the permanent option; what an allowed call changed comes back as its diff), Responses stream, phone and approval card; Hermes Agent over one ACP process (a session per thread, approvals answered in the World, cancel, reload after restart, a brought conversation continued in the person\'s own session, the same card on a per-turn fallback); OpenClaw Gateway (session key per thread, World tools as client function tools, exec approvals over its WebSocket for that session only with the allowed command’s output, a refused device noted once) and the per-turn fallback noted once');

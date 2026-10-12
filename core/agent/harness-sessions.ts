@@ -43,6 +43,13 @@ export function harnessThreadPlace(thread:string):string {
  if(thread.startsWith('session:')&&thread.length>8)return JSON.stringify(['session:'+clip(thread.slice(8),120),'']);
  return JSON.stringify(['','']);
 }
+/** The brought conversation a session thread continues (core/tasks ongoingId `job-…`): one the person switched Fox to
+ * (`session:job-…`) or a kept one's Applet (`app-job-…`, so `applet:job-…`); '' for any other thread. The host continues
+ * that conversation's own session when the Agent can (local-harness.ts `resumeOf`). */
+export function harnessOriginId(thread:string):string {
+ const id=thread.startsWith('session:')?thread.slice(8):thread.startsWith('applet:')?thread.slice(7):'';
+ return /^job-[A-Za-z0-9_-]{1,100}$/.test(id)?id:'';
+}
 /** The turn's input as the session receives it: the World's note since its last reply (HarnessTurnInput.world), then
  * the line. Every resident adapter sends this, so no Harness reads the note its own way. */
 export const harnessTurnText=(input:{text:string;world?:string}):string=>(typeof input.world==='string'&&input.world.trim()?input.world.trim()+'\n\n':'')+input.text;

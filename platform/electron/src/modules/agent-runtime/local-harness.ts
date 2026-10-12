@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {claudeCodeNeedsSignIn,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {claudeCodeNeedsSignIn,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -16,6 +16,7 @@ import {openClawConfigPath,openClawWorkspace} from './openclaw-config.ts';
 import {openClawAgents,parseJSON5} from './openclaw-files.ts';
 import {AcpConversation,AgentConversations,FirstAvailable,GatewayConversation,HermesServerConversation,type ResidentConversation,type ResidentSession} from './harness-sessions.ts';
 import {discoverHermes} from './hermes-files.ts';
+import {claudeCodeHome,claudeCodeSessionFolder,hermesThreads} from './agent-files.ts';
 import {hermesServer} from './hermes-service.ts';
 import type {Adapter,AgentEventHandler,AgentRoutines,AgentRuntime,Row,RuntimeContext} from './types.ts';
 import type {HarnessAgents,HarnessApprovalChoice,HarnessApprovals,HarnessModels,HarnessSchedule,HarnessTool} from '../../../../../contracts/harness-services.ts';
@@ -174,6 +175,20 @@ export function harnessVersion(install:LocalHarnessInstall,environment:HarnessEn
 /** One process per Fox turn. Claude Code and Codex also get World tools through a per-turn MCP server. */
 /** One turn's Harness process, started with its command line and waiting for the prompt on stdin. Its World tool
  * bridge relays to whichever turn takes it (`dispatch`). `key` is everything its command line depends on. */
+/** A brought conversation a turn continues (LocalHarnessRuntime resumeOf): its ongoing ID, the person's session it
+ * goes on in, and the folder that session ran in. */
+type Resume={origin:string;session:string;cwd:string};
+const CONTINUED_FILE='harness-continued.json';
+function readContinued(home:string):Record<string,string> {
+ try{const value=JSON.parse(fs.readFileSync(path.join(home,CONTINUED_FILE),'utf8'));return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}
+}
+function saveContinued(home:string,origin:string,session:string|null){
+ try{
+  const all=readContinued(home);
+  if(session)all[origin]=session;else delete all[origin];
+  fs.mkdirSync(home,{recursive:true,mode:0o700});writeAtomic(path.join(home,CONTINUED_FILE),JSON.stringify(all)+'\n',0o600);
+ }catch{}
+}
 interface StartedTurn {child:ChildProcess;bridge:WorldToolBridge|null;key:string;stderr:{text:string};dispatch:{run:(name:string,args:Row)=>Promise<Row>}}
 function discardTurn(turn:StartedTurn){stopChild(turn.child);turn.child.stdout?.destroy();turn.bridge?.close();}
 /** How long a spare process waits for the next turn before it is stopped. */
@@ -249,16 +264,50 @@ export class LocalHarnessRuntime implements AgentRuntime {
  private asking:string[]=[];
  /** The chosen provider's model for this Agent's turns (model-providers.ts), null for its own default. */
  private readonly route:()=>string|null;
- constructor(install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),onActivity:(runtime:LocalHarnessRuntime,running:boolean)=>void=()=>{},spares:SpareTurns|null=null,conversation:ResidentConversation|null=null,approvals:TurnApprovals|null=null,route:()=>string|null=()=>null){
-  this.install=install;this.environment=environment;this.onActivity=onActivity;this.route=route;
+ /** The brought conversations a turn may continue (RuntimeContext `origin`). */
+ private readonly links:Pick<RuntimeContext,'origin'>;
+ constructor(install:LocalHarnessInstall,environment:HarnessEnvironment=currentEnvironment(),onActivity:(runtime:LocalHarnessRuntime,running:boolean)=>void=()=>{},spares:SpareTurns|null=null,conversation:ResidentConversation|null=null,approvals:TurnApprovals|null=null,route:()=>string|null=()=>null,links:Pick<RuntimeContext,'origin'>={}){
+  this.install=install;this.environment=environment;this.onActivity=onActivity;this.route=route;this.links=links;
   this.spares=LOCAL_HARNESS_SPARE.includes(install.id)?spares:null;
   this.conversation=conversation;this.approvals=approvals;
+ }
+ /** The person's own session a turn in a brought conversation's place continues (owner decision 2026-10-12: Fox
+  * writes into it, so the conversation goes on where the person left it, in their Agent too): the one an earlier
+  * turn moved on to, else the conversation's own. Claude Code resumes a session file in the folder it ran in
+  * (`--resume`); Hermes Agent loads the conversation's newest session (`session/load`) for its main profile. Never a
+  * group or channel others write in (RuntimeContext `origin`); OpenClaw's are not continued yet. */
+ private resumeOf(home:string,thread:unknown,agent:string|null=null):Resume|null {
+  const origin=harnessOriginId(harnessSessionThread(thread));
+  if(!origin||agent)return null;
+  const later=readContinued(home)[origin];
+  if(this.install.id==='claude-code'){
+   const root=claudeCodeHome(this.environment.home,this.environment.env),moved=later?claudeCodeSessionFolder(root,later):null;
+   if(later&&moved)return {origin,session:later,cwd:moved};
+   const session=this.links.origin?.(this.install.id,origin)??null,cwd=session?claudeCodeSessionFolder(root,session):null;
+   return session&&cwd?{origin,session,cwd}:null;
+  }
+  if(this.install.id==='hermes'){
+   // Its main profile's conversations only (a profile's chain is named `profile:root`).
+   const chain=this.links.origin?.(this.install.id,origin)??null;
+   const session=chain&&!chain.includes(':')?hermesThreads(this.environment.home,this.environment.env)?.find(item=>item.key===chain)?.sessions.at(-1)??null:null;
+   return session?{origin,session,cwd:home}:null;
+  }
+  return null;
+ }
+ /** The person's own session a resident thread continues (Hermes Agent's `session/load`), for warming and the turn alike. */
+ private residentResume(home:string,thread:unknown,agent:string|null):{resume?:string} {
+  const resume=this.install.id==='hermes'?this.resumeOf(home,thread,agent):null;
+  return resume?{resume:resume.session}:{};
+ }
+ /** Claude Code may answer a resumed conversation in a session of a new ID: the next turn continues that one. */
+ private continued(home:string,resume:Resume,session:string){
+  if(readContinued(home)[resume.origin]!==session)saveContinued(home,resume.origin,session);
  }
  private settleAsks(){for(const id of this.asking.splice(0))this.approvals?.settle(id,null);}
  /** Opens the turn's World tool bridge (when it has tools) and starts the Harness with its command line; `agent`: the
   * person's other agent that answers this thread (its Hermes profile; its OpenClaw workspace and model); `chosen`: the
   * model chosen for the thread (OpenClaw's `--model`; a Hermes Agent turn of its own keeps its profile's model). */
- private async start(home:string,turn:{system:string;prompt:string},tools:boolean,sample:boolean,key:string,agent:string|null=null,chosen:string|null=null):Promise<StartedTurn> {
+ private async start(home:string,turn:{system:string;prompt:string},tools:boolean,sample:boolean,key:string,agent:string|null=null,chosen:string|null=null,resume:Resume|null=null):Promise<StartedTurn> {
   fs.mkdirSync(home,{recursive:true,mode:0o700});
   const dispatch={run:async(_name:string,_args:Row):Promise<Row>=>({error:'World tool is unavailable.'})};
   const bridge=tools?await openWorldToolBridge(home,{sample,dispatch:(name,args)=>dispatch.run(name,args)}):null;
@@ -284,8 +333,9 @@ export class LocalHarnessRuntime implements AgentRuntime {
   }
   if(chosen)model=chosen;
   try{
-   const invocation=localHarnessInvocation(this.install.id,turn,bridge?.server??null,{cwd:home,config,workspace,agent,model});
-   child=spawn(this.install.command,[...this.install.prefix,...invocation.args],{cwd:home,env,stdio:['pipe','pipe','pipe'],windowsHide:true});
+   const invocation=localHarnessInvocation(this.install.id,turn,bridge?.server??null,{cwd:home,config,workspace,agent,model,resume});
+   // A resumed conversation is found in the folder it ran in.
+   child=spawn(this.install.command,[...this.install.prefix,...invocation.args],{cwd:resume?.cwd??home,env,stdio:['pipe','pipe','pipe'],windowsHide:true});
   }catch(error){bridge?.close();throw error;}
   if(!child.pid){child.kill();bridge?.close();throw new WorldletError(`${this.install.title} could not start.`);}
   child.stdin!.on('error',()=>{});
@@ -317,7 +367,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   const agent=isHarnessAgentId(body.harnessAgent)?body.harnessAgent:null,model=this.model(body,agent)??undefined;
   try{
    if(await conversation.unavailable(agent??undefined)!==null)return {warm:false};
-   const session=await conversation.open({world:this.world(body),thread:harnessSessionThread(body.thread),...agent?{agent}:{}},{home,sample:body.sample===true});
+   const session=await conversation.open({world:this.world(body),thread:harnessSessionThread(body.thread),...agent?{agent}:{}},{home,sample:body.sample===true,...this.residentResume(home,body.thread,agent)});
    await session.prepare(model);
    return {warm:true};
   }catch{return {warm:false};}
@@ -374,11 +424,14 @@ export class LocalHarnessRuntime implements AgentRuntime {
    if(reason===null){conversation.noted=null;return this.converse(conversation,body,home,tools,sample,agent,model,harnessTools,{events,emit,say,started:()=>started});}
    if(conversation.noted!==reason){conversation.noted=reason;await emit({type:'progress',name:`${this.install.title} is not keeping this conversation: ${reason}. Fox starts it for each message, so it is slower and sees only the last few messages.`});}
   }
-  const turn=localHarnessTurn(body,{worldTools:tools,own:localHarness(id).connect,harnessTools});
+  // A brought conversation the person switched Fox to, or a kept one's Applet, goes on in that conversation's own
+  // Claude Code session (core/tasks/fox-sessions.ts).
+  const resume=id==='claude-code'&&body._background!==true&&body.mode!=='setup'?this.resumeOf(home,body.thread,agent):null;
+  const turn=localHarnessTurn(body,{worldTools:tools,own:localHarness(id).connect,harnessTools,resident:resume!==null});
   const key=JSON.stringify([home,turn.system,tools,sample,agent,model]);
   // The spare the previous turn left waiting, when it was started for this command line; else a new process.
   let harness:StartedTurn;
-  try{harness=this.spares?.take(key)??await this.start(home,turn,tools,sample,key,agent,model);}
+  try{harness=(resume?null:this.spares?.take(key))??await this.start(home,turn,tools,sample,key,agent,model,resume);}
   catch(error){events.cancel();this.eventWait=null;throw error;}
   let calls=0;
   let deadline:ReturnType<typeof idleStop>|null=null;
@@ -388,7 +441,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
    return answer&&typeof answer==='object'?answer as Row:{error:'World tool is unavailable.'};
   };
   const {child,bridge}=harness;
-  const invocation=localHarnessInvocation(id,turn,bridge?.server??null,{cwd:home,agent,model});
+  const invocation=localHarnessInvocation(id,turn,bridge?.server??null,{cwd:home,agent,model,resume});
   this.child=child;this.onActivity(this,true);
   // A conversation over stdin (Hermes Agent's ACP) keeps it open for the replies the stream asks for.
   if(invocation.acp)child.stdin!.write(invocation.stdin??'');
@@ -440,6 +493,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
     while(!stream.done&&(line=reader.line())!==null){
      stopped();
      await say(readLocalHarnessLine(id,stream,line.toString('utf8')));
+     if(resume&&stream.session&&stream.session!==resume.session)this.continued(home,resume,stream.session);
      for(const call of stream.announced.splice(0))own.announce(call);
      await answer();
     }
@@ -451,6 +505,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
    // Background work (the Attention check) is its World tool calls; a conversation turn still needs words.
    const outcome=finishLocalHarness(id,stream,{code,stderr:harness.stderr.text},body._background===true?calls:0);
    if('error' in outcome){
+    // A later session that no longer opens: the next turn goes back to the conversation's own.
+    if(resume&&!started&&readContinued(home)[resume.origin]===resume.session)saveContinued(home,resume.origin,null);
     // Claude Code's sign-in ran out or never happened: its own sign-in page opens in the browser by itself, once per launch.
     if(claudeCodeNeedsSignIn(outcome.error))signInOnce(this.install,harnessEnvironment(this.install,this.environment));
     // Nothing shown and no World tool called yet, the same turn can simply run again. Background work (an Applet's
@@ -469,7 +525,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
    stopChild(child);child.stdout!.destroy();
    this.child=null;this.onActivity(this,false);
    // A foreground turn that ran its course leaves the next one's process waiting.
-   if(!this.cancelled&&!timedOut&&body._background!==true)this.prepare(home,turn.system,tools,sample,key,agent,model);
+   if(!resume&&!this.cancelled&&!timedOut&&body._background!==true)this.prepare(home,turn.system,tools,sample,key,agent,model);
   }
  }
  /** Hermes Agent loads the `worldlet` server registered in its profile (World tools on Hermes, world-tool-bridge.ts) as
@@ -504,7 +560,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   const turn=localHarnessTurn(body,{worldTools:tools,own:localHarness(this.install.id).connect,resident:true,harnessTools,harnessCalls:harnessService(this.install.id,'calls')!==null});
   let session:ResidentSession;
   const opening=performance.now();
-  try{session=await conversation.open({world:this.world(body),thread:harnessSessionThread(body.thread),...agent?{agent}:{}},{home,sample});}
+  try{session=await conversation.open({world:this.world(body),thread:harnessSessionThread(body.thread),...agent?{agent}:{}},{home,sample,...this.residentResume(home,body.thread,agent)});}
   catch(error){events.cancel();this.eventWait=null;throw error;}
   const sessionMs=performance.now()-opening;
   let calls=0,toolsMs=0,timedOut=false;
@@ -615,7 +671,7 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
  make():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{
   if(running)this.running.add(runtime);else this.running.delete(runtime);
   if(!running&&!this.running.size&&this.restartWhenIdle){this.restartWhenIdle=false;this.conversation?.shutdown();}
- },this.spares,this.resident(),this.turnApprovals,this.route);}
+ },this.spares,this.resident(),this.turnApprovals,this.route,{origin:this.context.origin});}
  makeLane():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{if(running)this.lanes.add(runtime);else this.lanes.delete(runtime);},null,null,null,this.laneRoute);}
  /** The provider chosen for this Agent in Settings › Agent (model-providers.ts): its chat-tier model, read per turn. */
  private readonly route=()=>chosenModel(readAgentSetting(this.context.root,PROVIDER_SETTING),this.install.id);

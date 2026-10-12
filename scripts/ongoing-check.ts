@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
 import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionCards,FOX_SESSION_LIMIT} from '../core/tasks/index.ts';
-import {harnessSessionThread,harnessChatThread,harnessThreadPlace} from '../core/agent/harness-sessions.ts';
+import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginId} from '../core/agent/harness-sessions.ts';
 import {processedAttentionContent} from '../core/attention/attention-content.ts';
 import {validateWorldItem} from '../core/items/world-item-validation.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
@@ -276,6 +276,8 @@ assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
  assert.equal(harnessSessionThread(place),'session:job-c');
  assert.equal(harnessChatThread('session:job-c'),place);
  assert.equal(harnessSessionThread(harnessThreadPlace('session:job-c')),'session:job-c');
+ // The brought conversation a session or a kept one's Applet continues; any other thread none.
+ assert.deepEqual(['session:job-c',harnessSessionThread(JSON.stringify(['object:app-job-c',''])),'applet:mail','session:x','main','item:job-c'].map(harnessOriginId),['job-c','job-c','','','','']);
  // Brought turns become the place's cards: what the person said with the answer after it.
  const cards=foxSessionCards([{role:'user',text:'Plan lunch',createdAt:ago(1)},{role:'assistant',text:'Salad?'},{role:'assistant',text:'Or soup.'},{role:'user',text:' '},{role:'user',text:'Soup'}],foxSessionPlace('job-c'));
  assert.deepEqual(cards.map(c=>[c.user,c.text]),[['Plan lunch','Salad?'],['','Or soup.'],['Soup','']]);

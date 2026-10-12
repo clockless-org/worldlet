@@ -1,7 +1,8 @@
 /** Fox's sessions beside its conversation (owner request 2026-10-12, core/tasks/fox-sessions.ts): a narrow column left
- * of the card while it shows in the World. The main session leads, stressed; then the person's other sessions, latest
- * first, each its name and where it lives. A Thing's row opens its Applet; any other row switches Fox to that session
- * right in the World. The row of the session Fox is in is marked. */
+ * of the card while it shows in the World. The main session leads, large and stressed; then the person's other
+ * sessions, latest first, each only its name (where it lives and when, on hover: the owner asked for little detail).
+ * A Thing's row opens its Applet; any other row switches Fox to that session right in the World. The row of the
+ * session Fox is in is marked. */
 import {foxSessionLine,type FoxSession} from '../../core/tasks/index.ts';
 
 export type FoxSessionColumn={element:HTMLElement;show(state:{visible:boolean;sessions:readonly FoxSession[];here:string;name:string}):void};
@@ -17,8 +18,8 @@ export function mountFoxSessions({pick}:{pick:(session:FoxSession|null)=>void}):
   button.dataset.main=String(main);button.dataset.thing=String(thing);button.setAttribute('aria-current',String(current));
   const name=document.createElement('strong');name.textContent=title;
   button.append(name);
-  if(line){const sub=document.createElement('span');sub.textContent=line;button.append(sub);}
-  button.title=thing?title+' · opens its Thing':title;
+  if(main){const sub=document.createElement('span');sub.textContent=line;button.append(sub);}
+  button.title=[title,main?'':line,thing?'opens its Thing':''].filter(Boolean).join(' · ');
   button.onclick=e=>{e.stopPropagation();onClick();};
   return button;
  };

@@ -34,7 +34,9 @@ import type {Row} from './types.ts';
 // `hermes acp` otherwise (FirstAvailable).
 
 /** Where a session lives: the Fox scope's home (its MCP server and token files) and whether it is the practice world. */
-export interface SessionPlace {home:string;sample:boolean}
+/** `resume`: the person's own session a brought conversation's place continues (local-harness.ts resumeOf), loaded
+ * instead of one of Fox's own; it stays theirs, so its turns keep coming back through the history sync. */
+export interface SessionPlace {home:string;sample:boolean;resume?:string}
 /** `hold` keeps the turn's idle deadline from running out while the person decides an approval. */
 /** `announce`: Hermes announced a call to Worldlet's standing server before running it (core HermesOwnCalls). */
 export type TurnOptions={hold?:<T>(work:Promise<T>)=>Promise<T>;announce?:(call:HermesAnnouncedCall)=>void};
@@ -51,6 +53,8 @@ export interface ResidentConversation extends HarnessConversation {
  /** The models it can switch a thread to (contracts/harness-services.ts `models`), as far as it knows them now. */
  models?(agent?:string):HarnessModel[];
  open(key:HarnessSessionKey,place?:SessionPlace):Promise<ResidentSession>;
+ /** Whether it can continue one of the person's own sessions (SessionPlace `resume`). */
+ readonly resumes?:boolean;
  readonly approvals:HarnessApprovals|null;
  /** Whether a fallback was already told for this reason (noted once, never silently). */
  noted:string|null;
@@ -78,6 +82,7 @@ type Approval={session:AcpSession;rpc:unknown;params:unknown;timer:NodeJS.Timeou
 
 /** One `hermes acp` process for every Fox thread, started on the first turn and kept while it is used. */
 export class AcpConversation implements ResidentConversation,HarnessApprovals {
+ readonly resumes=true;
  readonly approvals:HarnessApprovals=this;
  noted:string|null=null;
  private process:AcpProcess|null=null;
@@ -173,11 +178,14 @@ export class AcpConversation implements ResidentConversation,HarnessApprovals {
   session.bridge=bridge;
   const {command,args,env}=bridge.server;
   const mcpServers=[{name:WORLD_TOOL_SERVER,command,args,env:Object.entries(env).map(([name,value])=>({name,value}))}];
+  let theirs=false;
   try{
-   // The thread's earlier session, reloaded after a restart (Hermes keeps ACP sessions in its state.db), else a new one.
+   // The person's own session the place continues, else the thread's earlier session, reloaded after a restart
+   // (Hermes keeps ACP sessions in its state.db), else a new one.
    const saved=savedSessions(place.home)[name];
    let id:string|null=null,opened:Row={};
-   if(saved&&this.process?.loadSession)try{opened=await this.request('session/load',{sessionId:saved,cwd:place.home,mcpServers});id=saved;}catch{}
+   if(place.resume&&this.process?.loadSession)try{opened=await this.request('session/load',{sessionId:place.resume,cwd:place.home,mcpServers});id=place.resume;theirs=true;}catch{}
+   if(!id&&saved&&this.process?.loadSession)try{opened=await this.request('session/load',{sessionId:saved,cwd:place.home,mcpServers});id=saved;}catch{}
    if(!id){
     opened=await this.request('session/new',{cwd:place.home,mcpServers});
     if(typeof opened.sessionId!=='string')throw new WorldletError(`${this.title} did not start a conversation.`);
@@ -189,7 +197,7 @@ export class AcpConversation implements ResidentConversation,HarnessApprovals {
    if(models.length)this.known=models;
    session.defaultModel=models.find(model=>model.current)?.id??null;
   }catch(error){bridge.close();throw error;}
-  try{this.own(session.id,key.thread);}catch{}
+  if(!theirs)try{this.own(session.id,key.thread);}catch{}
   this.sessions.set(name,session);
   return session;
  }
@@ -662,6 +670,11 @@ export class FirstAvailable implements ResidentConversation {
   return this.second.unavailable(agent);
  }
  models(agent?:string){return this.current.models?.(agent)??[];}
- open(key:HarnessSessionKey,place?:SessionPlace){return this.current.open(key,place);}
+ /** A session of the person's own that only the second can continue (Hermes Agent's API server keeps sessions of its
+  * own; `hermes acp` loads theirs) opens there, else, when it cannot, as one of Fox's own where turns go now. */
+ async open(key:HarnessSessionKey,place?:SessionPlace){
+  if(place?.resume&&!this.current.resumes&&this.second.resumes)try{return await this.second.open(key,place);}catch{return this.current.open(key,{...place,resume:undefined});}
+  return this.current.open(key,place);
+ }
  shutdown(){this.first.shutdown();this.second.shutdown();}
 }

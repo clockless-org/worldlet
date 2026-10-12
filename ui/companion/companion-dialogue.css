@@ -177,14 +177,15 @@
    and stressed, then the person's other sessions, latest first. A Thing's row carries a small arrow: it opens its Thing. */
 #notionWorld.native-console .fox-sessions{position:absolute;right:calc(100% + 12px);bottom:0;z-index:2;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:210px;max-height:var(--fox-dialogue-room,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:8px;border:1px solid #ebe5cc;border-radius:18px;background:var(--fox-glass,#f9f6e4f2);backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);box-shadow:0 4px 12px #162a321c;pointer-events:auto}
 #notionWorld.native-console .fox-sessions[hidden]{display:none}
-#notionWorld.native-console .fox-session{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-width:0;padding:6px 10px;border:0;border-radius:11px;background:none;color:#3d3420;text-align:left;font:500 13px/1.3 inherit;cursor:pointer}
+#notionWorld.native-console .fox-session{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-width:0;padding:4px 10px;border:0;border-radius:9px;background:none;color:#5a4e36;text-align:left;font:400 12.5px/1.3 inherit;cursor:pointer}
 #notionWorld.native-console .fox-session:hover,#notionWorld.native-console .fox-session:focus-visible{background:#efe4c4}
 #notionWorld.native-console .fox-session[aria-current=true]{background:#f0c27a66}
-#notionWorld.native-console .fox-session strong{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+#notionWorld.native-console .fox-session strong{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:inherit}
 #notionWorld.native-console .fox-session span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:#7a6c4f}
-#notionWorld.native-console .fox-session[data-main=true]{margin-bottom:4px;padding:8px 10px;background:#f0c27a;color:#4a3413}
+#notionWorld.native-console .fox-session[data-main=true]{margin-bottom:6px;padding:10px 12px;border-radius:13px;background:#f0c27a;color:#4a3413;font-size:15px;box-shadow:0 2px 6px #b7802a33}
 #notionWorld.native-console .fox-session[data-main=true]:hover{background:#ebb666}
 #notionWorld.native-console .fox-session[data-main=true] strong{font-weight:700}
+#notionWorld.native-console .fox-session[data-main=true][aria-current=true]{outline:2px solid #c98a2e;outline-offset:-2px}
 #notionWorld.native-console .fox-session[data-main=true] span{color:#6b4d1f}
 #notionWorld.native-console .fox-session[data-thing=true] strong::after{content:' ›';color:#a08a5c}
 /* In one of those sessions the message bar names it, and this ×, beside the microphone, goes back to the main one. */

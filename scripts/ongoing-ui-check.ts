@@ -40,12 +40,12 @@ try{
  assert.equal(await column.locator('.fox-session[data-main=true]').count(),1,'the main session leads');
  assert.equal(await column.locator('.fox-session[data-thing=true]').count(),1,'the kept conversation is a Thing');
  assert.equal(await column.locator('.fox-session',{hasText:'#side-project'}).count(),1,'a conversation that is not a Thing is listed too');
+ assert.equal(await column.locator('.fox-session[data-main=false] span').count(),0,'the other sessions show only their names');
  // A session that is not a Thing becomes the place Fox talks in, in the World: its turns, its name in the bar, a way back.
  await column.locator('.fox-session',{hasText:'#side-project'}).click();
  await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLInputElement).placeholder==='Message Fox · #side-project');
  await page.locator('.companion-thread-list,#worldConversation',{hasText:'Launch on Tuesday'}).first().waitFor();
  assert(await page.locator('.companion-session-leave').isVisible(),'a × goes back to the main session');
- await page.screenshot({path:'/tmp/fox-sessions.png'});
  await input.click();await input.fill('Where were we?');await page.keyboard.press('Enter');
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='agentChat'&&/Where were we/.test(c.text)&&String(c.thread||'').includes('session:job-sideproj0001')));
  await page.locator('.companion-session-leave').click();

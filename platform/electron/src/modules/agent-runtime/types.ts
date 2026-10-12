@@ -18,6 +18,9 @@ export interface RuntimeContext {
  changed(reason:'runtime-ready'|'model-changed'|'agent-changed'):void;
  /** A Harness session that is Fox's own (a resident session per Fox thread), kept out of that Harness's history sync. */
  ownSession?(source:string,session:string,thread:string):void;
+ /** The Harness thread of the brought conversation `id` (core/tasks ongoingId) from `source`, when Fox may continue it
+  * there: the person's own one, never a group or channel others write in. */
+ origin?(source:string,id:string):string|null;
 }
 
 /** The selected Agent implementation (Mac AgentAdapter + AgentProfiles + AgentCompanionTransfer). */
