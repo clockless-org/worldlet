@@ -77,11 +77,13 @@ export interface HarnessSchedule {
  create?(job:HarnessJobCreate):Promise<void>;
 }
 /** One change to one job, each the Agent's own command (core/agent/harness-controls.ts): pause or resume it, run it
- * once now, remove it, or move it to another time (owner request 2026-10-11: more control in Settings). */
-export type HarnessJobAction='pause'|'resume'|'run'|'remove'|'reschedule';
+ * once now, remove it, move it to another time (owner request 2026-10-11: more control in Settings), or edit its name,
+ * what it does and its time at once (owner request 2026-10-12, from the Routines beside Fox). */
+export type HarnessJobAction='pause'|'resume'|'run'|'remove'|'reschedule'|'edit';
 /** A time Settings offers: every day at a clock time, or every few hours. */
 export type RoutineSchedule={daily:{hour:number;minute:number}}|{everyHours:number};
-export type HarnessJobChange={job:string;action:HarnessJobAction;schedule?:RoutineSchedule};
+/** `edit` carries at least one of a new name, a new prompt and a new time; what it leaves out stays as it is. */
+export type HarnessJobChange={job:string;action:HarnessJobAction;schedule?:RoutineSchedule;name?:string;prompt?:string};
 /** A new job made in Settings › Agent › Routines: what to do, in the person's words, and when. */
 export type HarnessJobCreate={name:string;prompt:string;schedule:RoutineSchedule};
 

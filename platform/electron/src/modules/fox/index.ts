@@ -787,7 +787,9 @@ export function installFox(host:Host){
    if(store.sampleEnabled())return {sample:true};
    const runtime=agent(),schedule=runtime?.schedule?.();
    const jobs=schedule?await schedule.jobs().catch(error=>{host.diagnostics.record(error,'taskPanel');return [];}):[];
-   return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,
+   // Whether its Routine cards may offer their controls (Run now, Pause, Edit, Remove), each run as `harnessSchedule`.
+   const id=runtime?.harness?.id??null,controls=id&&store.writable?runtime?.harnessSchedules?.().find(item=>item.harness===id)?.schedule:undefined;
+   return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,harnessId:id,changes:!!controls?.change,
     working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
   },
   foxProactive:request=>proactiveStart(request),

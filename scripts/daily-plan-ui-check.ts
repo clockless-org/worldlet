@@ -122,7 +122,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(!dialogue.includes('Your brief is ready'),'Fox says nothing about it');
   assert.ok(!dialogue.includes('Today’s prep'),'no “You · Today’s prep” line in Fox’s card');
   assert.ok(!dialogue.includes('Good morning'),'the request never shows');
-  assert.deepEqual(await page.evaluate(()=>(window as any).statuses),[{source:'daily',text:'Today’s prep: preparing your day…'},{source:'daily',text:'',done:'Today’s prep and 1 reply ready'}],'what Fox is doing is announced for a status line, then cleared with what was made');
+  assert.deepEqual(await page.evaluate(()=>(window as any).statuses),[{source:'daily',text:'Today’s prep: preparing your day…',name:'Today’s prep'},{source:'daily',text:'',done:'Today’s prep and 1 reply ready'}],'what Fox is doing is announced for a status line, then cleared with what was made');
   await page.waitForTimeout(31000);
   assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='agentChat').length),1,'once a day');
 
@@ -178,10 +178,12 @@ await withBrowser(fileAccess,async browser=>{
   await page.waitForTimeout(33000);
   assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='agentChat').length),0,'no brief in the afternoon');
   assert.deepEqual(await plannedTitles(page),['Wrap up today','Today’s prep'],'a day used: tonight’s wrap-up at 6, then tomorrow’s prep, are planned');
-  // Paused in Settings › Agent › Routines (the host says so with worldlet:daily-routines): it leaves the timeline.
+  // Paused in Settings › Agent › Routines (the host says so with worldlet:daily-routines): it is no longer planned, and
+  // its card stays last, saying Paused, so it can be resumed there (owner request 2026-10-12).
   await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:daily-routines',{detail:{plan:false,summary:true}})));
-  await page.waitForFunction(()=>document.querySelectorAll('.task-panel .task-group[data-group=routines] .task-title').length===1);
-  assert.deepEqual(await plannedTitles(page),['Wrap up today'],'a paused Today’s prep is not planned');
+  await page.waitForFunction(()=>[...document.querySelectorAll('.task-panel .task-group[data-group=routines] .task-when')].some(e=>e.textContent==='Paused'));
+  assert.deepEqual(await plannedTitles(page),['Wrap up today','Today’s prep'],'a paused Today’s prep is not planned but still shows');
+  assert.equal(await page.locator('.task-panel .task-card',{hasText:'Today’s prep'}).locator('.task-when').textContent(),'Paused');
   assert.deepEqual(errors,[]);
   await page.close();
  }

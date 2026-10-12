@@ -1402,7 +1402,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   // When the next brief and today's summary will be made, for the Task panel's Planned timeline (ui/hud/task-panel.ts);
   // nothing in the practice world or before the first run is over, which makes neither.
-  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn)}}));};
+  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn),paused:none?[]:(['plan','summary'] as const).filter(kind=>!routinesOn[kind])}}));};
   setTimeout(announceDaily,0);
   // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
   // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
