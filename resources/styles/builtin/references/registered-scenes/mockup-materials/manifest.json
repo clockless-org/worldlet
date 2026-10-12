@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "generator": "Built-in image generation",
+  "reference": "resources/styles/builtin/references/registered-scenes/google-calendar/background.png",
+  "assets": [
+    {
+      "id": "paper-card",
+      "source": "paper-card.png",
+      "file": "paper-card.webp",
+      "transparent": true,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: One blank rectangular cream cotton-rag paper note card, landscape 4:3 aspect, straight front-facing orthographic, very subtly irregular deckled edges, soft folded bottom-right corner, two layered paper edges under bottom, small aged brass clip at top center. Fine restrained fibrous surface, warm cream, all center 80% entirely blank and flat for HTML text. Whole card and soft natural close-contact shadow isolated on transparent background. No words, icons, lines or illustrations. Image is a reusable HTML card skin, match the reference paper and lighting. Keep card fills 94% of image.",
+      "sourceSha256": "d820633410afa63e39bf2596c5ea86e840c6141ad513f6fa3c2540f05d8d6810",
+      "sha256": "bfd43f171ce67329a2606b70cbab729c9d5b504a7276c05ba0a6cd0fd9dab0cd"
+    },
+    {
+      "id": "linen-tab",
+      "source": "linen-tab.png",
+      "file": "linen-tab.webp",
+      "transparent": true,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: Single wide short rectangular sage green linen-covered physical button with gently rounded corners, thin aged brass rim, fine woven cloth, subtle pressed inset face. Face directly front-facing and flat, warm upper-left sunlight, soft short shadow. Width:height 3:1, button fills94%canvas, transparent background. Blank center for live HTML label. No text, glyphs, icons or markings. A crafted button that feels at home on the village paper interface, not modern plastic UI.",
+      "sourceSha256": "043b5d792674975962191a6f7a73aa2d6c47cdecfd4c54d9749203f68c9598a5",
+      "sha256": "1726308f91d9ad216784b07b1c24cd56b0134e9945f07c701dca9aeeae1cd229"
+    },
+    {
+      "id": "garden-photo",
+      "source": "garden-photo.png",
+      "file": "garden-photo.webp",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: A beautiful close garden scene: hands-free empty cream stone potting table with lush basil and lavender seedlings in terracotta pots, green herb beds, warm cottage wall and dappled sun. Immersive natural eye-level framing, no table allocated for UI. Full-bleed landscape 4:3 illustration to put inside an HTML photo print. Vivid botanical subject, no people, no text, no logo, no frame, no empty panel.",
+      "sourceSha256": "0a7f575fa3336f2cb8a5c0a13192e8da222a4fc8c1f1a8d886d205acf2f3eff6",
+      "sha256": "e181fd01293fc1028a591250f4a2e3fe167e5af9753a24730fdd08bd650967bf"
+    },
+    {
+      "id": "orchard-photo",
+      "source": "orchard-photo.png",
+      "file": "orchard-photo.webp",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: A sunlit village orchard footpath in early autumn, rounded apple trees laden with red apples, woven harvest basket beside a low stone wall, golden wildflowers, warm green and amber palette. Full-bleed landscape 4:3 illustration, no people, no text, no UI surfaces, no bridge. Picture for a travel postcard and a music album cover.",
+      "sourceSha256": "16464f191eb5b88b50f0a00b63094baf60aacbe202a22720a7afb505b130b18d",
+      "sha256": "0cce68c681242c9a6c4b2d88eb16c64b58e419fb372042575c9709c4753862f1"
+    },
+    {
+      "id": "market-photo",
+      "source": "market-photo.png",
+      "file": "market-photo.webp",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: A welcoming little village market in the square, cheerful cream stone houses with terracotta roofs, sage and cream striped awnings, baskets of fresh vegetables and flowers, bread stall. Lively arrangement without people. Full-bleed landscape 4:3 illustration, no text, no logos, no empty boards or UI surfaces, no bridge.",
+      "sourceSha256": "560a09dfc95e922dc59662f3b44ed74a8e1a7602eebb6c2945175974400bfb76",
+      "sha256": "7c60fdc89d08448371a347648100b54a37de5076f4be0ad4566f44d08481a361"
+    },
+    {
+      "id": "supper-photo",
+      "source": "supper-photo.png",
+      "file": "supper-photo.webp",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: Close appealing rustic village lunch, ceramic cream bowl of rich orange roasted vegetable soup garnished with basil, slices of sourdough bread, linen napkin, olive branches, oak dining table, warm garden light. Full-bleed landscape 4:3 illustrated still life, no people, no text, no labels, no UI.",
+      "sourceSha256": "fa46a7d304d48b583fc36fb240c4327e1c94da3c756126982b25a2cecb80f238",
+      "sha256": "4a1adc1c6bb5db71f670579ef39e3d6b3724f7d64fabc6acc141229914b26543"
+    },
+    {
+      "id": "library-photo",
+      "source": "library-photo.png",
+      "file": "library-photo.webp",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: A cozy village reading alcove by a sunlit open cottage window, warm leather and green linen books, tea in cream ceramic cup, bouquet of tiny daisies and a comfortable reading chair. Storybook literary calm, rich small details. Full-bleed landscape 4:3 illustration, no people, no legible book titles, no empty UI paper, no frame.",
+      "sourceSha256": "477c2e50c2a724c7d9e6e87a269bb3b066eea5156fea5265c18809b7649966e3",
+      "sha256": "6e9e95a8c9aa89dbcb311e69aa99191c224b1d190bae905b41c2740a42463714"
+    },
+    {
+      "id": "lake-photo",
+      "source": "lake-photo.png",
+      "file": "lake-photo.webp",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Generate ONE production bitmap asset for Worldlet Village HTML content. Input image is STYLE REFERENCE ONLY: match its fine painterly storybook 3D, warm cream/timber, organic craftsmanship and soft directional sunlight. No photorealism, no flat vector illustration. Subject: Peaceful countryside lake shore with a small wooden rowboat pulled onto grassy bank, cream village cottages farther along the shore, reeds, bright reflections, soft morning light. Painterly sculpted foliage and gentle rounded forms. Full-bleed landscape 4:3 illustration, no mountains dominating, no bridge, no people, no text or empty UI surface.",
+      "sourceSha256": "a9fd36dc7a0b9e11da04c68f4c391c821a0eebc2f083b379a7d4c1328457c681",
+      "sha256": "8fa146597f24a4d9646ac6eed93715036ab6d671bc6bc36a96655727183b07d7"
+    }
+  ]
+}

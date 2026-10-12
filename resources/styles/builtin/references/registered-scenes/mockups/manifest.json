@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "viewport": [
+    1672,
+    941
+  ],
+  "content": "fictional-design-samples",
+  "sources": {
+    "scripts/fixtures/applet-scene-preview/preview.js": "e7a03bfbbfedc96877990de62a01df61affca32f1995bd4434f650f000248b44",
+    "scripts/fixtures/applet-scene-preview/samples.js": "6a27cf7a5f57c283bb89cced6271683135c9ed37d0b46a8248b2e1a05c2ef1c6",
+    "scripts/fixtures/applet-scene-preview/samples.css": "3cec177fe0be0aa236023a10e475d28b7a402c4611c9a2cc3eb77b2d031125a2",
+    "scripts/fixtures/applet-scene-preview/index.html": "64e320da7ee406eea2c4a618fd59c53141e5fe13ecc7b3cae3f1d1aadb865e6b",
+    "ui/theme-packages/village/presentation.json": "ec0ab09ba3f304d636cf6014f089902fea30d5484759dec8a3c0a9588c309fe2",
+    "resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json": "2a2f666e54b7fea85a1511fe9235a78115fc06b1ce69123068ab4f2e56cf380e"
+  },
+  "images": [
+    {
+      "id": "google-calendar",
+      "title": "Calendar",
+      "file": "google-calendar.webp",
+      "sha256": "754b0008461c1f886a2c06db46232ed67ece04c18b591e49901ea476d4a93721"
+    },
+    {
+      "id": "gmail",
+      "title": "Mail",
+      "file": "gmail.webp",
+      "sha256": "acdf1a9b172b89c101a6cac8923d068ad51970fba5d92f8f1721ca13987122fd"
+    },
+    {
+      "id": "apple-notes",
+      "title": "Notes",
+      "file": "apple-notes.webp",
+      "sha256": "c5c67c70a4c996954a5e7f0e07311172058e456ffaa047f7f2c20d439d32f723"
+    },
+    {
+      "id": "apple-reminders",
+      "title": "Reminders",
+      "file": "apple-reminders.webp",
+      "sha256": "788ab67db29b062e3704a7f79a1ca9ba36a2b8958f4c23fca7294cffc86fb665"
+    },
+    {
+      "id": "files",
+      "title": "Files",
+      "file": "files.webp",
+      "sha256": "e6d3e5e1bc7426ab080624216bb7b7be800fc9fe240074224777f86980b73a6f"
+    },
+    {
+      "id": "weather",
+      "title": "Weather",
+      "file": "weather.webp",
+      "sha256": "ccb794438b9def22cb5807d3a4d9e695e8c0b28c0f51a78895e6220e373a1c0c"
+    },
+    {
+      "id": "meetings",
+      "title": "Meetings",
+      "file": "meetings.webp",
+      "sha256": "4a67983e9257007be735a1ce628ca9bdde09d2c5bf0c9a6f822ce46baa182343"
+    },
+    {
+      "id": "voice-memos",
+      "title": "Voice Memos",
+      "file": "voice-memos.webp",
+      "sha256": "ee3295d5cbb367dbde91f2fc50c4f2c13a40dcd6f01ef97cde0c15fb2d7c5233"
+    },
+    {
+      "id": "messages",
+      "title": "Messages",
+      "file": "messages.webp",
+      "sha256": "791b7efdd08ee2287f8b49002e58eb88330cd109fee48f1b6f3d3e0c61e95ebc"
+    },
+    {
+      "id": "browser",
+      "title": "Browser",
+      "file": "browser.webp",
+      "sha256": "33b58f51964828bcd85ed997a5612a89f1062d8e1e4ee2190d7d58fe28c7e2ba"
+    },
+    {
+      "id": "maps",
+      "title": "Maps",
+      "file": "maps.webp",
+      "sha256": "70a6e012921c1da0052c8fd66763286ea52f1343609a99b882fd25295514e4ca"
+    },
+    {
+      "id": "clock",
+      "title": "Clock",
+      "file": "clock.webp",
+      "sha256": "89358e6d3ac0e53450c7759ada9eead4fd5073dcd9f8157ebdab2a940b2313f8"
+    },
+    {
+      "id": "contacts",
+      "title": "Contacts",
+      "file": "contacts.webp",
+      "sha256": "fc7d8a82b21483f1947fe42db0e11eb7f08a1b35f2bd191b20ed71ea5e8479c1"
+    },
+    {
+      "id": "photos",
+      "title": "Photos",
+      "file": "photos.webp",
+      "sha256": "d8c755050972e5be57ab555abeb1800061d18acb757c1b91a2c6ebc36a9560ac"
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "file": "music.webp",
+      "sha256": "07956963598225e4dbc4fcf2c100f621df4e0044c664611c92922935b83f3e40"
+    },
+    {
+      "id": "news",
+      "title": "News",
+      "file": "news.webp",
+      "sha256": "7fa98963d5ed9b86854204be8a2343404af42b3793a9c14ff46fca5035637c9c"
+    },
+    {
+      "id": "podcasts",
+      "title": "Podcasts",
+      "file": "podcasts.webp",
+      "sha256": "0f9fd0dfb524af64e5672bc76904fdd88d347f69477bcfe4ffb219952dbfc70d"
+    },
+    {
+      "id": "stocks",
+      "title": "Stocks",
+      "file": "stocks.webp",
+      "sha256": "74ffa0ef40fea3ac1ebfd46633485b80af7019ff0499f10ff5448f91e109f258"
+    },
+    {
+      "id": "game-2048",
+      "title": "2048",
+      "file": "game-2048.webp",
+      "sha256": "39274afca6b64b67bd6e83fcd402c2f6cca8903f0dab3e43e70297a5d3c3d6a1"
+    },
+    {
+      "id": "snake",
+      "title": "Snake",
+      "file": "snake.webp",
+      "sha256": "f6e2ab244b553f92cd39bb9ccf30607c159b6c9a6e86fb2752c2ed53876ea91c"
+    },
+    {
+      "id": "minesweeper",
+      "title": "Minesweeper",
+      "file": "minesweeper.webp",
+      "sha256": "3b4bfa5682a1d7dff19309d2a28d169fe7ba71a88dcd31393236680c782f4bc0"
+    },
+    {
+      "id": "sudoku",
+      "title": "Sudoku",
+      "file": "sudoku.webp",
+      "sha256": "22ba3e3a84a038f8dd1e37a340759a58814f244218a2c5f797bfc1cf0c4f16a9"
+    },
+    {
+      "id": "gomoku",
+      "title": "Gomoku",
+      "file": "gomoku.webp",
+      "sha256": "f35b6e6dfb66efd8118d3aa66d5aa8aaf19f8acddd0a597cd068a25101404a9c"
+    },
+    {
+      "id": "random-game",
+      "title": "Random Game",
+      "file": "random-game.webp",
+      "sha256": "89c43ba52b53c922d9b2ef9298f21fcd358d4a39e5e9130386ada479f6ce4882"
+    },
+    {
+      "id": "weight-balance",
+      "title": "Weight balance",
+      "file": "weight-balance.webp",
+      "sha256": "57c1e0631cddc7f74c90d8a21a3f6648b0c6e8d7aaedd976ed14e4f477b06c1d"
+    },
+    {
+      "id": "meal-planner",
+      "title": "Meal planner",
+      "file": "meal-planner.webp",
+      "sha256": "74ed4b086a32f637b856502c73157dbaf338e267de0cb98262f9ca2beaab7059"
+    },
+    {
+      "id": "fitness",
+      "title": "Workout plan",
+      "file": "fitness.webp",
+      "sha256": "72e4940d3ac91ef1f734cda76733400c5c28c2d9e309e7aa98e7b82edfdc02d1"
+    },
+    {
+      "id": "sleep",
+      "title": "Sleep & recovery",
+      "file": "sleep.webp",
+      "sha256": "b6f783ea1b41fd6b653fe4ed7a5e4aabd97d539925e179674b2db0ced1fbbe6e"
+    },
+    {
+      "id": "travel",
+      "title": "Travel planner",
+      "file": "travel.webp",
+      "sha256": "2396c8edf9795708e4be302d7ec5b1c0601c4a36f8c9de2815dea034cd953219"
+    },
+    {
+      "id": "outdoor",
+      "title": "Outdoor adventures",
+      "file": "outdoor.webp",
+      "sha256": "3e932d0793428bd73a90e8795794d0f864b3a25af776e989db42c6a679ba436a"
+    },
+    {
+      "id": "shopping",
+      "title": "Shopping list",
+      "file": "shopping.webp",
+      "sha256": "90082b02fad787d3d24c8369e0892eaffbe7e181d84a74ad8091af161f57884f"
+    },
+    {
+      "id": "budget",
+      "title": "Household budget",
+      "file": "budget.webp",
+      "sha256": "521ce6e006635a01389ce7cd2b3cb07ef57c3434c6958aa1c6c0a8e2c7265bea"
+    },
+    {
+      "id": "home-care",
+      "title": "Home care",
+      "file": "home-care.webp",
+      "sha256": "dd9d6753343dfcb38c8cac2a4325992eacacb576c70ce274d08761d87f8744eb"
+    },
+    {
+      "id": "garden",
+      "title": "Garden planner",
+      "file": "garden.webp",
+      "sha256": "5237eb37b57dd61fcd879ac94a46f020991331bfd2106e4e4c872fb90fdc7414"
+    },
+    {
+      "id": "daily-planner",
+      "title": "Daily planner",
+      "file": "daily-planner.webp",
+      "sha256": "41ffc04d7206c4a991571574f8c430317a413a15957265e74b4c773427228882"
+    },
+    {
+      "id": "reading",
+      "title": "Reading & research",
+      "file": "reading.webp",
+      "sha256": "21abd66c18586cccd168a080e8586e8cea3c61a0e19d43dc34de9a0420281fa4"
+    },
+    {
+      "id": "language",
+      "title": "Language practice",
+      "file": "language.webp",
+      "sha256": "54bb1dbcba611b213276b41411f992022616cceacfb517ee853b87fa23c3a220"
+    },
+    {
+      "id": "journal",
+      "title": "Personal journal",
+      "file": "journal.webp",
+      "sha256": "2adc35e184ac99356d7339b9ff5aec076c5b487f20aa4a7627da0e889496c8db"
+    },
+    {
+      "id": "job-search",
+      "title": "Job search",
+      "file": "job-search.webp",
+      "sha256": "afadf6a53386398aff16be7cf1ce32c42814aede0ad61c1187be13d8aaba6273"
+    },
+    {
+      "id": "project-planner",
+      "title": "Project planner",
+      "file": "project-planner.webp",
+      "sha256": "10fa5548fb4777942d51ff9fc6db3af487b9405b6561738b62b6e7c810884fa9"
+    }
+  ]
+}
