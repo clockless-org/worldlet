@@ -2,14 +2,48 @@
 
 | Collection | Asset groups | Registered HTML surfaces | Existing art awaiting registration |
 | --- | ---: | ---: | ---: |
-| Core | 15 | 🟢 4 | 🟡 11 |
+| Core | 14 | 🟢 4 | 🟡 10 |
 | Generic scenes | 16 | 🟢 16 | 0 |
-| Brand-specific products and external games | 103 | 0 | 🟡 103 |
-| Total | 134 | 20 | 114 |
+| Brand-specific products and external games | 100 | 0 | 🟡 100 |
+| Total existing art selections | 130 | 20 | 110 |
 
-Counts describe artwork, not connected accounts or working provider integrations. The 118 catalog Applets and 16 reusable presets are separate collections. The generated [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) includes each icon, background, collection and registration status. Regenerate it with `node scripts/village-scene-library.ts` after changing the catalog.
+Counts describe curated artwork, not connected accounts or working provider integrations. The runtime catalog still has 118 Applets. The art library selects 114 of them and adds 16 reusable scenes; four explicit exclusions are listed below. The generated [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains each icon, background, collection and registration status, plus planned core additions and exclusions. Regenerate it with `node scripts/village-scene-library.ts` after changing the catalog.
 
-Core utilities: Mail, Calendar, Notes, Reminders, Weather, Meetings, Voice Memos, Messages, Browser and Ongoing. The core games subgroup contains 2048, Snake, Minesweeper, Sudoku and Random Game. Classification follows the purpose, not a provider key such as `gmail`. Branded external games remain in the branded collection. Artifact, Journal and Settings are system surfaces outside the Applet count; the reusable personal-journal preset is a separate art choice.
+## Core tools and planned additions
+
+The nine existing everyday tools are Mail, Calendar, Notes, Reminders, Weather, Meetings, Voice Memos, Messages and Browser. Weather remains a core tool. The five core games are 2048, Snake, Minesweeper, Sudoku and Random Game. Classification follows purpose, not a provider key such as `gmail`.
+
+| Next core tool | Intended use | Status |
+| --- | --- | --- |
+| Files | Browse local files, downloads and Agent-created documents; offer document preview | 🔴 Planned; no dedicated icon, registered background or runtime Applet yet |
+| Clock | World time, alarms, timers and stopwatch; optional focus timer | 🔴 Planned; no dedicated icon, registered background or runtime Applet yet |
+
+After both additions are implemented, the everyday tool count becomes 11 and the core art count becomes 16 including games. The planned total is 132 art groups (16 core + 16 generic + 100 branded); the status table above counts existing selections only.
+
+Ongoing is an internal type for persistent conversations brought from other Agents, not an everyday tool to place by itself. It is not installed by default. A kept conversation should use a generic scene matching its actual subject, such as meal planning, travel or a project. Its runtime mechanism and fallback art remain available, but its standalone art group is excluded from this curated library. See [ongoing conversations](../../../../../core/tasks/README.md#ongoing-things).
+
+Artifact, Journal and Settings are system surfaces outside the Applet count. The reusable personal-journal preset is a separate art choice.
+
+## The 100 branded selections
+
+Keep the branded collection at 100 groups. Exclude three narrow external mini-games with overlapping coverage: Rogue AI Tic-Tac-Toe (`sekai-rogue-ai-tic-tac-toe`), Mixing Colors (`sekai-mixing-colors`) and Roller Coaster Builder (`sekai-roller-coaster`). The main Sekai entry remains. This is an editorial art selection based on scope overlap, not a measured usage ranking; it does not remove runtime Applets or existing user installations.
+
+## iPhone comparison
+
+Apple's current US [iPhone 17 specification](https://www.apple.com/iphone-17/specs/) lists 48 built-in apps, counted on 2026-10-11. This device/region-specific list includes Apple's creative apps and system utilities; it is not a target count for Worldlet.
+
+| Comparison | Worldlet position |
+| --- | --- |
+| Mail, Calendar, Notes, Reminders, Weather, Voice Memos, Messages, Safari | Eight existing tool counterparts; Browser corresponds to Safari |
+| Files, Clock | The two confirmed next tools above |
+| Journal, Settings | Existing system surfaces, counted separately |
+| Maps, Music, Podcasts, Photos, TV, Pages, Numbers, Keynote | Related branded entries exist (Google Maps, Apple Music, Apple Podcasts, Google Photos, Netflix, Google Docs/Sheets/Slides); listing does not imply feature parity or a connected account |
+| Games | Five core games plus branded web games |
+| Calculator, Contacts, Translate, Books, Preview, Freeform | Useful remaining everyday-tool candidates; document preview can start inside Files |
+| Camera, Phone, FaceTime, Compass, Measure, Magnifier, Find My, Watch | Primarily phone, hardware or device-ecosystem functions; lower priority for this desktop art library |
+| App Store, Fitness, GarageBand, Health, Home, iMovie, iTunes Store, News, Passwords, Shortcuts, Stocks, Tips, Wallet | Other Apple built-ins; some overlap with generic scenes, branded entries or Agent capabilities, but are not equivalent standalone core tools |
+
+Prioritize Files and Clock now. Calculator and Contacts are the clearest next candidates if the everyday toolkit expands again. Meetings is Worldlet-specific and should not be treated as the equivalent of FaceTime.
 
 ## Design and integration
 
