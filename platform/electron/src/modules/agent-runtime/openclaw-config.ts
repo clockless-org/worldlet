@@ -49,6 +49,8 @@ const CONFIG_LIMIT=4_000_000;
 function readConfigFile(file:string):string {
  try{const info=fs.statSync(file);return info.isFile()&&info.size<=CONFIG_LIMIT?fs.readFileSync(file,'utf8'):'';}catch{return '';}
 }
+/** Whether OpenClaw has a configuration file here at all: even one that parses to nothing may name a model to bring. */
+export const openClawConfigPresent=(home=os.homedir(),environment=process.env)=>!!readConfigFile(openClawConfigPath(home,environment)).trim();
 const isObject=(value:unknown):value is Record<string,any>=>!!value&&typeof value==='object'&&!Array.isArray(value);
 function deepMerge(base:unknown,over:unknown):unknown {
  if(!isObject(base)||!isObject(over))return over;
