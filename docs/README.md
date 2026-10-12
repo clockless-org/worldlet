@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **272 Markdown documents** and **48 supporting documentation files**.
+Indexed: **272 Markdown documents** and **78 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -64,7 +64,7 @@ Indexed: **272 Markdown documents** and **48 supporting documentation files**.
 | Resource and artwork records | 69 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 48 |
+| Documentation diagrams, previews and evidence | 78 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -373,7 +373,7 @@ Indexed: **272 Markdown documents** and **48 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (48)</summary>
+<details><summary>Documentation diagrams, previews and evidence (78)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -416,9 +416,39 @@ Indexed: **272 Markdown documents** and **48 supporting documentation files**.
 - [resources/styles/builtin/references/night.png](../resources/styles/builtin/references/night.png)
 - [resources/styles/builtin/references/registered-scenes/apple-notes/background.png](../resources/styles/builtin/references/registered-scenes/apple-notes/background.png)
 - [resources/styles/builtin/references/registered-scenes/apple-reminders/background.png](../resources/styles/builtin/references/registered-scenes/apple-reminders/background.png)
+- [resources/styles/builtin/references/registered-scenes/browser/background.png](../resources/styles/builtin/references/registered-scenes/browser/background.png)
 - [resources/styles/builtin/references/registered-scenes/catalog.json](../resources/styles/builtin/references/registered-scenes/catalog.json)
+- [resources/styles/builtin/references/registered-scenes/clock/background.png](../resources/styles/builtin/references/registered-scenes/clock/background.png)
+- [resources/styles/builtin/references/registered-scenes/clock/icon.png](../resources/styles/builtin/references/registered-scenes/clock/icon.png)
+- [resources/styles/builtin/references/registered-scenes/contacts/background.png](../resources/styles/builtin/references/registered-scenes/contacts/background.png)
+- [resources/styles/builtin/references/registered-scenes/contacts/icon.png](../resources/styles/builtin/references/registered-scenes/contacts/icon.png)
+- [resources/styles/builtin/references/registered-scenes/files/background.png](../resources/styles/builtin/references/registered-scenes/files/background.png)
+- [resources/styles/builtin/references/registered-scenes/files/icon.png](../resources/styles/builtin/references/registered-scenes/files/icon.png)
+- [resources/styles/builtin/references/registered-scenes/game-2048/background.png](../resources/styles/builtin/references/registered-scenes/game-2048/background.png)
 - [resources/styles/builtin/references/registered-scenes/gmail/background.png](../resources/styles/builtin/references/registered-scenes/gmail/background.png)
+- [resources/styles/builtin/references/registered-scenes/gomoku/background.png](../resources/styles/builtin/references/registered-scenes/gomoku/background.png)
+- [resources/styles/builtin/references/registered-scenes/gomoku/icon.png](../resources/styles/builtin/references/registered-scenes/gomoku/icon.png)
 - [resources/styles/builtin/references/registered-scenes/google-calendar/background.png](../resources/styles/builtin/references/registered-scenes/google-calendar/background.png)
+- [resources/styles/builtin/references/registered-scenes/maps/background.png](../resources/styles/builtin/references/registered-scenes/maps/background.png)
+- [resources/styles/builtin/references/registered-scenes/maps/icon.png](../resources/styles/builtin/references/registered-scenes/maps/icon.png)
+- [resources/styles/builtin/references/registered-scenes/meetings/background.png](../resources/styles/builtin/references/registered-scenes/meetings/background.png)
+- [resources/styles/builtin/references/registered-scenes/messages/background.png](../resources/styles/builtin/references/registered-scenes/messages/background.png)
+- [resources/styles/builtin/references/registered-scenes/minesweeper/background.png](../resources/styles/builtin/references/registered-scenes/minesweeper/background.png)
+- [resources/styles/builtin/references/registered-scenes/music/background.png](../resources/styles/builtin/references/registered-scenes/music/background.png)
+- [resources/styles/builtin/references/registered-scenes/music/icon.png](../resources/styles/builtin/references/registered-scenes/music/icon.png)
+- [resources/styles/builtin/references/registered-scenes/news/background.png](../resources/styles/builtin/references/registered-scenes/news/background.png)
+- [resources/styles/builtin/references/registered-scenes/news/icon.png](../resources/styles/builtin/references/registered-scenes/news/icon.png)
+- [resources/styles/builtin/references/registered-scenes/photos/background.png](../resources/styles/builtin/references/registered-scenes/photos/background.png)
+- [resources/styles/builtin/references/registered-scenes/photos/icon.png](../resources/styles/builtin/references/registered-scenes/photos/icon.png)
+- [resources/styles/builtin/references/registered-scenes/podcasts/background.png](../resources/styles/builtin/references/registered-scenes/podcasts/background.png)
+- [resources/styles/builtin/references/registered-scenes/podcasts/icon.png](../resources/styles/builtin/references/registered-scenes/podcasts/icon.png)
+- [resources/styles/builtin/references/registered-scenes/random-game/background.png](../resources/styles/builtin/references/registered-scenes/random-game/background.png)
+- [resources/styles/builtin/references/registered-scenes/snake/background.png](../resources/styles/builtin/references/registered-scenes/snake/background.png)
+- [resources/styles/builtin/references/registered-scenes/stocks/background.png](../resources/styles/builtin/references/registered-scenes/stocks/background.png)
+- [resources/styles/builtin/references/registered-scenes/stocks/icon.png](../resources/styles/builtin/references/registered-scenes/stocks/icon.png)
+- [resources/styles/builtin/references/registered-scenes/sudoku/background.png](../resources/styles/builtin/references/registered-scenes/sudoku/background.png)
+- [resources/styles/builtin/references/registered-scenes/voice-memos/background.png](../resources/styles/builtin/references/registered-scenes/voice-memos/background.png)
+- [resources/styles/builtin/references/registered-scenes/weather/background.png](../resources/styles/builtin/references/registered-scenes/weather/background.png)
 - [resources/styles/builtin/references/village-hud/components.png](../resources/styles/builtin/references/village-hud/components.png)
 - [resources/styles/builtin/references/village-hud/weather.png](../resources/styles/builtin/references/village-hud/weather.png)
 - [resources/styles/builtin/references/youtube-web/focus-concept.png](../resources/styles/builtin/references/youtube-web/focus-concept.png)

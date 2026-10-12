@@ -1,0 +1,102 @@
+{
+  "assets/applet-scenes/files/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/files/icon.png",
+    "sourceSha256": "50945e59256037861368efd0b1b240ad4222985c9f551ee41c7947519ca6c32c",
+    "sha256": "17c4e347fb73e0a90cee647e023889d3601d3ee66017cc00a16247c5494680ce",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/maps/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/maps/icon.png",
+    "sourceSha256": "98a3f86a51865dba9bdb9907206a88421d97f7ec09df2db089482154c5f5f7c2",
+    "sha256": "d2a092c241b233e0d2b621c19e8c273d1d8cb75209caab12a61a0df363aac92d",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/clock/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/clock/icon.png",
+    "sourceSha256": "60219de7222a3bb5db517508a5f902bc1ce6f81365bdf13bff0b182dc7f4bbdb",
+    "sha256": "d83a8298a80d9cbd35baca612290b16b40f8f280d4cb34a13b61ad95968a1ded",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/contacts/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/contacts/icon.png",
+    "sourceSha256": "d2712940299c91d08ae7eb94a7b0729298cfb7b94fd92dbe854935bce28b542a",
+    "sha256": "8fdd5a7f575d5db70daf28cf682ec51c69ec88448def896e454b575774b98093",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/photos/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/photos/icon.png",
+    "sourceSha256": "c8ed7f26568c2fb9aabe051e1a9b608d5b6971a603519d31bc07ae30ed2cb5f3",
+    "sha256": "5d3e5ee597bcea639e12a7503ae4a28a956f63abdab56238e3f8fd7f9c0e717f",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/music/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/music/icon.png",
+    "sourceSha256": "a51f72b3c9e413dd6403e28dec96c1deb3b9ee6d8453ff09a5d67197c484529c",
+    "sha256": "bcd06b28957a8198a1d8b31f8ba7c77cdab6fbe9e3380d9437b30ae48d1ec8af",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/news/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/news/icon.png",
+    "sourceSha256": "2fc8b4018a0029c6b7ba6e771ad4d0617c74519b0be02705da8b6e2016e90ceb",
+    "sha256": "64276c551b7a204af7d50d49cb739e4587bf0dd06c49a446b73793ce413a834e",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/podcasts/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/podcasts/icon.png",
+    "sourceSha256": "1b574e0a480ec4fe651105aba59f7e3df62932e56257ef7dc0711a96294793a3",
+    "sha256": "2a3dd7ee0348715d3ab5abfd3a01e68f7e7a9ae78bdcc62213cd7373a6be8f73",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/stocks/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/stocks/icon.png",
+    "sourceSha256": "a022b1990939c42b3b76d4316ae0981675486d4f9226e5c4a2670c66b20ff555",
+    "sha256": "769afd420fee0dbda5674f11c5646c610f11e0a592a2aa83d4b446bc08ae9409",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  },
+  "assets/applet-scenes/gomoku/icon.webp": {
+    "source": "resources/styles/builtin/references/registered-scenes/gomoku/icon.png",
+    "sourceSha256": "3a414f0419609d7e996b6e237c294154146374839b5fcbe87ca24c53f1ed0c9f",
+    "sha256": "5a2b33abe9ae55262836f39ff6383d3e7e9ef8f3072768d0142fb37975fe302c",
+    "imageSize": [
+      768,
+      768
+    ],
+    "settings": "contain-768-lossless-webp"
+  }
+}

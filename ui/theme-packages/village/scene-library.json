@@ -1,33 +1,11 @@
 {
   "schemaVersion": 1,
   "counts": {
-    "core": 14,
+    "core": 24,
     "generic": 16,
     "branded": 100
   },
-  "plannedCore": [
-    {
-      "id": "files",
-      "title": "Files",
-      "status": "planned"
-    },
-    {
-      "id": "clock",
-      "title": "Clock",
-      "status": "planned"
-    }
-  ],
   "entries": [
-    {
-      "id": "gmail",
-      "title": "Mail",
-      "collection": "core",
-      "group": "utilities",
-      "icon": "assets/devices/gmail.webp",
-      "background": "assets/applet-scenes/gmail/background.webp",
-      "status": "registered",
-      "registrationKey": "gmail"
-    },
     {
       "id": "google-calendar",
       "title": "Calendar",
@@ -37,6 +15,16 @@
       "background": "assets/applet-scenes/google-calendar/background.webp",
       "status": "registered",
       "registrationKey": "google-calendar"
+    },
+    {
+      "id": "gmail",
+      "title": "Mail",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/gmail.webp",
+      "background": "assets/applet-scenes/gmail/background.webp",
+      "status": "registered",
+      "registrationKey": "gmail"
     },
     {
       "id": "apple-notes",
@@ -59,14 +47,24 @@
       "registrationKey": "apple-reminders"
     },
     {
+      "id": "files",
+      "title": "Files",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/files/icon.webp",
+      "background": "assets/applet-scenes/files/background.webp",
+      "status": "registered",
+      "registrationKey": "files"
+    },
+    {
       "id": "weather",
       "title": "Weather",
       "collection": "core",
       "group": "utilities",
       "icon": "assets/devices/weather.webp",
-      "background": "assets/focus/weather.webp",
-      "status": "legacy",
-      "registrationKey": null
+      "background": "assets/applet-scenes/weather/background.webp",
+      "status": "registered",
+      "registrationKey": "weather"
     },
     {
       "id": "meetings",
@@ -74,9 +72,339 @@
       "collection": "core",
       "group": "utilities",
       "icon": "assets/devices/meetings.webp",
-      "background": "assets/focus/meetings.webp",
-      "status": "legacy",
-      "registrationKey": null
+      "background": "assets/applet-scenes/meetings/background.webp",
+      "status": "registered",
+      "registrationKey": "meetings"
+    },
+    {
+      "id": "voice-memos",
+      "title": "Voice Memos",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/voice-memos.webp",
+      "background": "assets/applet-scenes/voice-memos/background.webp",
+      "status": "registered",
+      "registrationKey": "voice-memos"
+    },
+    {
+      "id": "messages",
+      "title": "Messages",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/messages.webp",
+      "background": "assets/applet-scenes/messages/background.webp",
+      "status": "registered",
+      "registrationKey": "messages"
+    },
+    {
+      "id": "browser",
+      "title": "Browser",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/browser.webp",
+      "background": "assets/applet-scenes/browser/background.webp",
+      "status": "registered",
+      "registrationKey": "browser"
+    },
+    {
+      "id": "maps",
+      "title": "Maps",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/maps/icon.webp",
+      "background": "assets/applet-scenes/maps/background.webp",
+      "status": "registered",
+      "registrationKey": "maps"
+    },
+    {
+      "id": "clock",
+      "title": "Clock",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/clock/icon.webp",
+      "background": "assets/applet-scenes/clock/background.webp",
+      "status": "registered",
+      "registrationKey": "clock"
+    },
+    {
+      "id": "contacts",
+      "title": "Contacts",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/contacts/icon.webp",
+      "background": "assets/applet-scenes/contacts/background.webp",
+      "status": "registered",
+      "registrationKey": "contacts"
+    },
+    {
+      "id": "photos",
+      "title": "Photos",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/photos/icon.webp",
+      "background": "assets/applet-scenes/photos/background.webp",
+      "status": "registered",
+      "registrationKey": "photos"
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/music/icon.webp",
+      "background": "assets/applet-scenes/music/background.webp",
+      "status": "registered",
+      "registrationKey": "music"
+    },
+    {
+      "id": "news",
+      "title": "News",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/news/icon.webp",
+      "background": "assets/applet-scenes/news/background.webp",
+      "status": "registered",
+      "registrationKey": "news"
+    },
+    {
+      "id": "podcasts",
+      "title": "Podcasts",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/podcasts/icon.webp",
+      "background": "assets/applet-scenes/podcasts/background.webp",
+      "status": "registered",
+      "registrationKey": "podcasts"
+    },
+    {
+      "id": "stocks",
+      "title": "Stocks",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/stocks/icon.webp",
+      "background": "assets/applet-scenes/stocks/background.webp",
+      "status": "registered",
+      "registrationKey": "stocks"
+    },
+    {
+      "id": "game-2048",
+      "title": "2048",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/game-2048.webp",
+      "background": "assets/applet-scenes/game-2048/background.webp",
+      "status": "registered",
+      "registrationKey": "game-2048"
+    },
+    {
+      "id": "snake",
+      "title": "Snake",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/snake.webp",
+      "background": "assets/applet-scenes/snake/background.webp",
+      "status": "registered",
+      "registrationKey": "snake"
+    },
+    {
+      "id": "minesweeper",
+      "title": "Minesweeper",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/minesweeper.webp",
+      "background": "assets/applet-scenes/minesweeper/background.webp",
+      "status": "registered",
+      "registrationKey": "minesweeper"
+    },
+    {
+      "id": "sudoku",
+      "title": "Sudoku",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/sudoku.webp",
+      "background": "assets/applet-scenes/sudoku/background.webp",
+      "status": "registered",
+      "registrationKey": "sudoku"
+    },
+    {
+      "id": "gomoku",
+      "title": "Gomoku",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/applet-scenes/gomoku/icon.webp",
+      "background": "assets/applet-scenes/gomoku/background.webp",
+      "status": "registered",
+      "registrationKey": "gomoku"
+    },
+    {
+      "id": "random-game",
+      "title": "Random Game",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/random-game.webp",
+      "background": "assets/applet-scenes/random-game/background.webp",
+      "status": "registered",
+      "registrationKey": "random-game"
+    },
+    {
+      "id": "weight-balance",
+      "title": "Weight balance",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/weight-balance/icon.webp",
+      "background": "assets/applet-presets/weight-balance/background.webp",
+      "status": "registered",
+      "registrationKey": "weight-balance"
+    },
+    {
+      "id": "meal-planner",
+      "title": "Meal planner",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/meal-planner/icon.webp",
+      "background": "assets/applet-presets/meal-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "meal-planner"
+    },
+    {
+      "id": "fitness",
+      "title": "Workout plan",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/fitness/icon.webp",
+      "background": "assets/applet-presets/fitness/background.webp",
+      "status": "registered",
+      "registrationKey": "fitness"
+    },
+    {
+      "id": "sleep",
+      "title": "Sleep & recovery",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/sleep/icon.webp",
+      "background": "assets/applet-presets/sleep/background.webp",
+      "status": "registered",
+      "registrationKey": "sleep"
+    },
+    {
+      "id": "travel",
+      "title": "Travel planner",
+      "collection": "generic",
+      "group": "Out & about",
+      "icon": "assets/applet-presets/travel/icon.webp",
+      "background": "assets/applet-presets/travel/background.webp",
+      "status": "registered",
+      "registrationKey": "travel"
+    },
+    {
+      "id": "outdoor",
+      "title": "Outdoor adventures",
+      "collection": "generic",
+      "group": "Out & about",
+      "icon": "assets/applet-presets/outdoor/icon.webp",
+      "background": "assets/applet-presets/outdoor/background.webp",
+      "status": "registered",
+      "registrationKey": "outdoor"
+    },
+    {
+      "id": "shopping",
+      "title": "Shopping list",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/shopping/icon.webp",
+      "background": "assets/applet-presets/shopping/background.webp",
+      "status": "registered",
+      "registrationKey": "shopping"
+    },
+    {
+      "id": "budget",
+      "title": "Household budget",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/budget/icon.webp",
+      "background": "assets/applet-presets/budget/background.webp",
+      "status": "registered",
+      "registrationKey": "budget"
+    },
+    {
+      "id": "home-care",
+      "title": "Home care",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/home-care/icon.webp",
+      "background": "assets/applet-presets/home-care/background.webp",
+      "status": "registered",
+      "registrationKey": "home-care"
+    },
+    {
+      "id": "garden",
+      "title": "Garden planner",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/garden/icon.webp",
+      "background": "assets/applet-presets/garden/background.webp",
+      "status": "registered",
+      "registrationKey": "garden"
+    },
+    {
+      "id": "daily-planner",
+      "title": "Daily planner",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/daily-planner/icon.webp",
+      "background": "assets/applet-presets/daily-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "daily-planner"
+    },
+    {
+      "id": "reading",
+      "title": "Reading & research",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/reading/icon.webp",
+      "background": "assets/applet-presets/reading/background.webp",
+      "status": "registered",
+      "registrationKey": "reading"
+    },
+    {
+      "id": "language",
+      "title": "Language practice",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/language/icon.webp",
+      "background": "assets/applet-presets/language/background.webp",
+      "status": "registered",
+      "registrationKey": "language"
+    },
+    {
+      "id": "journal",
+      "title": "Personal journal",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/journal/icon.webp",
+      "background": "assets/applet-presets/journal/background.webp",
+      "status": "registered",
+      "registrationKey": "journal"
+    },
+    {
+      "id": "job-search",
+      "title": "Job search",
+      "collection": "generic",
+      "group": "Work",
+      "icon": "assets/applet-presets/job-search/icon.webp",
+      "background": "assets/applet-presets/job-search/background.webp",
+      "status": "registered",
+      "registrationKey": "job-search"
+    },
+    {
+      "id": "project-planner",
+      "title": "Project planner",
+      "collection": "generic",
+      "group": "Work",
+      "icon": "assets/applet-presets/project-planner/icon.webp",
+      "background": "assets/applet-presets/project-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "project-planner"
     },
     {
       "id": "github",
@@ -125,26 +453,6 @@
       "group": "products-and-external-games",
       "icon": "assets/devices/obsidian.webp",
       "background": "assets/focus/obsidian.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "voice-memos",
-      "title": "Voice Memos",
-      "collection": "core",
-      "group": "utilities",
-      "icon": "assets/devices/voice-memos.webp",
-      "background": "assets/focus/voice-memos.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "messages",
-      "title": "Messages",
-      "collection": "core",
-      "group": "utilities",
-      "icon": "assets/devices/messages.webp",
-      "background": "assets/focus/messages.webp",
       "status": "legacy",
       "registrationKey": null
     },
@@ -359,72 +667,12 @@
       "registrationKey": null
     },
     {
-      "id": "browser",
-      "title": "Browser",
-      "collection": "core",
-      "group": "utilities",
-      "icon": "assets/devices/browser.webp",
-      "background": "assets/focus/browser.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
       "id": "doordash",
       "title": "DoorDash",
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": "assets/devices/doordash.webp",
       "background": "assets/focus/doordash.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "game-2048",
-      "title": "2048",
-      "collection": "core",
-      "group": "built-in-games",
-      "icon": "assets/devices/game-2048.webp",
-      "background": "assets/focus/game-2048.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "snake",
-      "title": "Snake",
-      "collection": "core",
-      "group": "built-in-games",
-      "icon": "assets/devices/snake.webp",
-      "background": "assets/focus/snake.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "minesweeper",
-      "title": "Minesweeper",
-      "collection": "core",
-      "group": "built-in-games",
-      "icon": "assets/devices/minesweeper.webp",
-      "background": "assets/focus/minesweeper.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "sudoku",
-      "title": "Sudoku",
-      "collection": "core",
-      "group": "built-in-games",
-      "icon": "assets/devices/sudoku.webp",
-      "background": "assets/focus/sudoku.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "random-game",
-      "title": "Random game",
-      "collection": "core",
-      "group": "built-in-games",
-      "icon": "assets/devices/random-game.webp",
-      "background": "assets/focus/random-game.webp",
       "status": "legacy",
       "registrationKey": null
     },
@@ -1157,166 +1405,6 @@
       "background": "assets/focus/jira.webp",
       "status": "legacy",
       "registrationKey": null
-    },
-    {
-      "id": "weight-balance",
-      "title": "Weight balance",
-      "collection": "generic",
-      "group": "Health",
-      "icon": "assets/applet-presets/weight-balance/icon.webp",
-      "background": "assets/applet-presets/weight-balance/background.webp",
-      "status": "registered",
-      "registrationKey": "weight-balance"
-    },
-    {
-      "id": "meal-planner",
-      "title": "Meal planner",
-      "collection": "generic",
-      "group": "Health",
-      "icon": "assets/applet-presets/meal-planner/icon.webp",
-      "background": "assets/applet-presets/meal-planner/background.webp",
-      "status": "registered",
-      "registrationKey": "meal-planner"
-    },
-    {
-      "id": "fitness",
-      "title": "Workout plan",
-      "collection": "generic",
-      "group": "Health",
-      "icon": "assets/applet-presets/fitness/icon.webp",
-      "background": "assets/applet-presets/fitness/background.webp",
-      "status": "registered",
-      "registrationKey": "fitness"
-    },
-    {
-      "id": "sleep",
-      "title": "Sleep & recovery",
-      "collection": "generic",
-      "group": "Health",
-      "icon": "assets/applet-presets/sleep/icon.webp",
-      "background": "assets/applet-presets/sleep/background.webp",
-      "status": "registered",
-      "registrationKey": "sleep"
-    },
-    {
-      "id": "travel",
-      "title": "Travel planner",
-      "collection": "generic",
-      "group": "Out & about",
-      "icon": "assets/applet-presets/travel/icon.webp",
-      "background": "assets/applet-presets/travel/background.webp",
-      "status": "registered",
-      "registrationKey": "travel"
-    },
-    {
-      "id": "outdoor",
-      "title": "Outdoor adventures",
-      "collection": "generic",
-      "group": "Out & about",
-      "icon": "assets/applet-presets/outdoor/icon.webp",
-      "background": "assets/applet-presets/outdoor/background.webp",
-      "status": "registered",
-      "registrationKey": "outdoor"
-    },
-    {
-      "id": "shopping",
-      "title": "Shopping list",
-      "collection": "generic",
-      "group": "Home",
-      "icon": "assets/applet-presets/shopping/icon.webp",
-      "background": "assets/applet-presets/shopping/background.webp",
-      "status": "registered",
-      "registrationKey": "shopping"
-    },
-    {
-      "id": "budget",
-      "title": "Household budget",
-      "collection": "generic",
-      "group": "Home",
-      "icon": "assets/applet-presets/budget/icon.webp",
-      "background": "assets/applet-presets/budget/background.webp",
-      "status": "registered",
-      "registrationKey": "budget"
-    },
-    {
-      "id": "home-care",
-      "title": "Home care",
-      "collection": "generic",
-      "group": "Home",
-      "icon": "assets/applet-presets/home-care/icon.webp",
-      "background": "assets/applet-presets/home-care/background.webp",
-      "status": "registered",
-      "registrationKey": "home-care"
-    },
-    {
-      "id": "garden",
-      "title": "Garden planner",
-      "collection": "generic",
-      "group": "Home",
-      "icon": "assets/applet-presets/garden/icon.webp",
-      "background": "assets/applet-presets/garden/background.webp",
-      "status": "registered",
-      "registrationKey": "garden"
-    },
-    {
-      "id": "daily-planner",
-      "title": "Daily planner",
-      "collection": "generic",
-      "group": "Life & learning",
-      "icon": "assets/applet-presets/daily-planner/icon.webp",
-      "background": "assets/applet-presets/daily-planner/background.webp",
-      "status": "registered",
-      "registrationKey": "daily-planner"
-    },
-    {
-      "id": "reading",
-      "title": "Reading & research",
-      "collection": "generic",
-      "group": "Life & learning",
-      "icon": "assets/applet-presets/reading/icon.webp",
-      "background": "assets/applet-presets/reading/background.webp",
-      "status": "registered",
-      "registrationKey": "reading"
-    },
-    {
-      "id": "language",
-      "title": "Language practice",
-      "collection": "generic",
-      "group": "Life & learning",
-      "icon": "assets/applet-presets/language/icon.webp",
-      "background": "assets/applet-presets/language/background.webp",
-      "status": "registered",
-      "registrationKey": "language"
-    },
-    {
-      "id": "journal",
-      "title": "Personal journal",
-      "collection": "generic",
-      "group": "Life & learning",
-      "icon": "assets/applet-presets/journal/icon.webp",
-      "background": "assets/applet-presets/journal/background.webp",
-      "status": "registered",
-      "registrationKey": "journal"
-    },
-    {
-      "id": "job-search",
-      "title": "Job search",
-      "collection": "generic",
-      "group": "Work",
-      "icon": "assets/applet-presets/job-search/icon.webp",
-      "background": "assets/applet-presets/job-search/background.webp",
-      "status": "registered",
-      "registrationKey": "job-search"
-    },
-    {
-      "id": "project-planner",
-      "title": "Project planner",
-      "collection": "generic",
-      "group": "Work",
-      "icon": "assets/applet-presets/project-planner/icon.webp",
-      "background": "assets/applet-presets/project-planner/background.webp",
-      "status": "registered",
-      "registrationKey": "project-planner"
     }
   ],
   "excluded": [
