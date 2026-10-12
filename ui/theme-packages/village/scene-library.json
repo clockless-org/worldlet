@@ -1,10 +1,22 @@
 {
   "schemaVersion": 1,
   "counts": {
-    "core": 15,
+    "core": 14,
     "generic": 16,
-    "branded": 103
+    "branded": 100
   },
+  "plannedCore": [
+    {
+      "id": "files",
+      "title": "Files",
+      "status": "planned"
+    },
+    {
+      "id": "clock",
+      "title": "Clock",
+      "status": "planned"
+    }
+  ],
   "entries": [
     {
       "id": "gmail",
@@ -357,16 +369,6 @@
       "registrationKey": null
     },
     {
-      "id": "ongoing",
-      "title": "Ongoing",
-      "collection": "core",
-      "group": "utilities",
-      "icon": "assets/devices/ongoing.webp",
-      "background": "assets/focus/ongoing.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
       "id": "doordash",
       "title": "DoorDash",
       "collection": "branded",
@@ -557,42 +559,12 @@
       "registrationKey": null
     },
     {
-      "id": "sekai-rogue-ai-tic-tac-toe",
-      "title": "Rogue AI Tic-Tac-Toe",
-      "collection": "branded",
-      "group": "products-and-external-games",
-      "icon": "assets/devices/sekai-rogue-ai-tic-tac-toe.webp",
-      "background": "assets/focus/sekai-rogue-ai-tic-tac-toe.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
       "id": "sekai-sketch-racer",
       "title": "Sketch Racer",
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": "assets/devices/sekai-sketch-racer.webp",
       "background": "assets/focus/sekai-sketch-racer.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "sekai-mixing-colors",
-      "title": "Mixing Colors",
-      "collection": "branded",
-      "group": "products-and-external-games",
-      "icon": "assets/devices/sekai-mixing-colors.webp",
-      "background": "assets/focus/sekai-mixing-colors.webp",
-      "status": "legacy",
-      "registrationKey": null
-    },
-    {
-      "id": "sekai-roller-coaster",
-      "title": "Roller Coaster Builder",
-      "collection": "branded",
-      "group": "products-and-external-games",
-      "icon": "assets/devices/sekai-roller-coaster.webp",
-      "background": "assets/focus/sekai-roller-coaster.webp",
       "status": "legacy",
       "registrationKey": null
     },
@@ -1345,6 +1317,28 @@
       "background": "assets/applet-presets/project-planner/background.webp",
       "status": "registered",
       "registrationKey": "project-planner"
+    }
+  ],
+  "excluded": [
+    {
+      "id": "ongoing",
+      "title": "Ongoing",
+      "reason": "Uses a generic scene for its actual subject"
+    },
+    {
+      "id": "sekai-rogue-ai-tic-tac-toe",
+      "title": "Rogue AI Tic-Tac-Toe",
+      "reason": "Overlapping external mini-game; main Sekai entry retained"
+    },
+    {
+      "id": "sekai-mixing-colors",
+      "title": "Mixing Colors",
+      "reason": "Overlapping external mini-game; main Sekai entry retained"
+    },
+    {
+      "id": "sekai-roller-coaster",
+      "title": "Roller Coaster Builder",
+      "reason": "Overlapping external mini-game; main Sekai entry retained"
     }
   ]
 }
