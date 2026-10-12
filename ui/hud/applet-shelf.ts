@@ -3,7 +3,7 @@ import {uiIcon} from '../components/index.ts';
 
 // The Applet shelf (owner request 2026-10-09: "applet之间要可以丝滑切换，进入applet后，上方显示最近使用的applets，像一个
 // 一个tab，开新tab是进入browser"): inside an Applet, the recently used Applets stand on a small wooden shelf above it, each
-// its World device with its name below. The open Applet stands in the middle, largest and lit ("当前 applet 要在中间");
+// its World device, its name only on hover (owner request 2026-10-11: no bar under them, no name tags). The open Applet stands in the middle, largest and lit ("当前 applet 要在中间");
 // the others grow smaller and fainter the further they stand from it, in one order around it (core/applets/shelf.ts), so
 // picking one slides the shelf to bring it to the middle. "+N" at the left end holds the ones used longest ago; + at the
 // right end opens a new page in the Browser. The shelf stands above the Applet's panel and never over a website's page,
@@ -29,13 +29,12 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,leave,newPage
 }){
  let state:ShelfState|null=null,current:string|null=null;
  const shelf=document.createElement('nav');shelf.className='applet-shelf';shelf.setAttribute('aria-label','Recent Things');shelf.hidden=true;
- const ledge=document.createElement('div');ledge.className='applet-shelf-ledge';ledge.setAttribute('aria-hidden','true');
  const ring=document.createElement('div');ring.className='applet-shelf-ring';
  const more=document.createElement('button');more.type='button';more.className='applet-shelf-more';more.hidden=true;
  const extra=document.createElement('div');extra.className='applet-shelf-extra';extra.hidden=true;
  const add=document.createElement('button');add.type='button';add.className='applet-shelf-new';add.innerHTML=uiIcon('plus');
  add.title='New page in the Browser';add.setAttribute('aria-label','New page in the Browser');
- shelf.append(ledge,ring,extra,more,add);root.append(shelf);
+ shelf.append(ring,extra,more,add);root.append(shelf);
  const tabs=new Map<string,HTMLElement>();
 
  function device(app:ShelfApplet){
