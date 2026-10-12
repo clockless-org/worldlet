@@ -75,6 +75,10 @@ Animation follows observed task state and otherwise stays quiet. Reduced motion 
 hidden-window suspension apply. Current animation drafts are not final art acceptance.
 The desktop Companion reuses the existing world/conversation; no second Agent runs.
 
+The companion's name is the person's to change: click it in Settings › Fox (or Rename beside it), or ask Fox
+to. Both save `worldlet.companionName` and the companion profile, and the World, desktop Fox's name tag, the
+message bar ("Message <name>") and the paired phone all follow.
+
 ## Responsiveness and recovery
 
 Keep model context bounded and fetch originals on demand. Separate foreground turns
