@@ -29,5 +29,5 @@ export {mountWorldAudio} from './world-audio.ts';
 export {celebrateWin,celebrateWorld} from './world-celebration.ts';
 export {mountWorldEnvironment} from './world-environment.ts';
 export {WORLD_FACTS,worldNow} from './world-now.ts';
-export {WORLD_REVEAL_MS,dissolveWorldSurface,veilWorld} from './world-reveal.ts';
+export {WORLD_REVEAL_MS,dissolveWorldSurface} from './world-reveal.ts';
 export {bindWorldViewport} from './world-viewport.ts';
