@@ -62,10 +62,10 @@ await withBrowser(fileAccess,async browser=>{
  const now=panel.locator('.task-group[data-group=now]'),next=panel.locator('.task-group[data-group=routines]');
  await now.locator('.task-card').first().waitFor();
  const cards=async(side=next)=>side.locator('.task-cards>.task-card').evaluateAll(list=>list.map(c=>c.querySelector('.task-title')!.textContent+' · '+c.querySelector('.task-when')!.textContent));
- // Scheduled: the two soonest of the person's routines, then "+2" for the rest; paused jobs left out, and the Mail check is
+ // Scheduled: the two soonest of the person's routines, then "+3" for the rest; a paused job counts and stands last (#379), and the Mail check is
  // the Applet's own work, not the person's routine (owner rule 2026-10-11).
  assert.deepEqual(await cards(),['Water the plants · 7:00 PM','Morning news · Tomorrow 6:00 AM']);
- assert.equal((await next.locator('.task-more').innerText()).trim(),'+2');
+ assert.equal((await next.locator('.task-more').innerText()).trim(),'+3');
  assert.equal(await panel.getByText('Check Mail').count(),0,'no Applet checks');
  // Doing now: the Applet's task, a turning ring, a bar that moves on its own while how far along is not known.
  assert.deepEqual(await cards(now),['YouTube · Working on a task from Fox']);
@@ -174,17 +174,17 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source:'reply',text:'',done:'1 reply ready'}})));
  await foxCard.waitFor({state:'detached'});
  assert.equal(await panel.getByText('1 reply ready').count(),0,'nothing finished');
- // "+2" opens every routine, soonest first; a routine opens a read-only popover with when, how often and who runs it.
+ // "+3" opens every routine, soonest first and the paused one last; a routine opens a read-only popover with when, how often and who runs it.
  await next.locator('.task-more').click();
  await popover.locator('.task-list').waitFor();
- assert.deepEqual(await popover.locator('.task-list .task-title').allTextContents(),['Water the plants','Morning news','Weekly review','Flight prices']);
+ assert.deepEqual(await popover.locator('.task-list .task-title').allTextContents(),['Water the plants','Morning news','Weekly review','Flight prices','Old one']);
  await popover.locator('.task-list .task-card',{hasText:'Morning news'}).click();
  await popover.locator('.task-popover-facts').waitFor();
  assert.equal((await popover.innerText()).replace(/\s+/g,' ').trim(),'Morning news When Tomorrow 6:00 AM How often Every day Runs on OpenClaw’s scheduler');
  assert.equal(await popover.locator('button').count(),0,'view only');
  await page.keyboard.press('Escape');
  await popover.waitFor({state:'hidden'});
- // A routine paused in Settings › Agent leaves at once: Settings announces `worldlet:routines` after the Agent's own
+ // A routine paused in Settings › Agent leaves the cards at once: Settings announces `worldlet:routines` after the Agent's own
  // command ran (ui/companion/agent-routines.ts), and the panel reads its jobs again; resumed, it is back.
  const pause=(paused:boolean)=>page.evaluate(paused=>{const w=window as any;w.panel={...w.panel,jobs:w.panel.jobs.map((j:any)=>j.id==='b'?{...j,paused}:j)};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));},paused);
  await pause(true);
