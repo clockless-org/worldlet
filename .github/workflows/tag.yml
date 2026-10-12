@@ -1,0 +1,40 @@
+name: Tag
+# Every commit on main gets its Build as a git tag, v<label> (v2026.1011.4281), the moment it lands (owner request
+# 2026-10-11 「commit的时候就打tag」), documentation-only pushes included. The number comes from one place,
+# scripts/ci-release.mjs (Build = 4000 + the commit's position on main), the same one the release machines, the Dev app
+# (scripts/build-info.ts), iPhone, Android and the release board use. A packaged build's release reuses this tag.
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  tag:
+    name: Tag the Build
+    if: github.repository == 'clockless-org/worldlet'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      # Full history without file contents: the Build is the commit's position on main.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: scripts/ci-release.mjs
+          sparse-checkout-cone-mode: false
+      - id: identity
+        run: node scripts/ci-release.mjs identity --count "$(git rev-list --count HEAD)" --committed-at "$(git log -1 --format=%cI HEAD)"
+      # A tag that already names this commit (a rerun, or a release made first) is fine; one naming another commit fails.
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ steps.identity.outputs.label }}
+        run: |
+          if have="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.sha 2>/dev/null)"; then
+            [ "$have" = "$GITHUB_SHA" ] || { echo "$TAG already names $have, not $GITHUB_SHA" >&2; exit 1; }
+            echo "$TAG already names $GITHUB_SHA"; exit 0
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA" --silent
+          echo "Tagged $GITHUB_SHA as $TAG" | tee -a "$GITHUB_STEP_SUMMARY"

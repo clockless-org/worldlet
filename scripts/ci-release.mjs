@@ -146,6 +146,15 @@ export function githubStore(repo=process.env.GITHUB_REPOSITORY,gh=(args,input)=>
    if(r.status!==0)throw Error(`Could not compare ${sha} with main: ${(r.stderr||'').trim().slice(0,300)}`);
    return r.stdout.trim();
   },
+  // A stage's git tag on the commit (alpha/v<label>, beta/v<label>; owner request 2026-10-11 「alpha beta ga release的时候再
+  // 打tag」). One already on this commit is kept. Never fails the release: GitHub may refuse this workflow's token a tag
+  // (see superseded below), and the Build's own v<label> tag (tag.yml) still names the commit. Returns '' or why not.
+  tag(name,sha){
+   const have=gh(['api',`repos/${repo}/git/ref/tags/${name}`,'--jq','.object.sha']);
+   if(have.status===0)return have.stdout.trim()===sha?'':`${name} already names ${have.stdout.trim()}`;
+   const r=gh(['api',`repos/${repo}/git/refs`,'-f',`ref=refs/tags/${name}`,'-f',`sha=${sha}`,'--silent']);
+   return r.status===0?'':`Could not tag ${name}: ${(r.stderr||'').trim().slice(0,300)}`;
+  },
   close(){rmSync(scratch,{recursive:true,force:true});},
  };
 }
@@ -203,6 +212,8 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
   }
   // A Build on live Beta is the public release: no longer a prerelease, and the repository's latest.
   if(channel==='beta'&&live)await own.promote(tag);
+  // Alpha and Beta (and GA once it is a channel) also mark the commit with the stage's tag.
+  if(channel!=='dev'&&live&&own.tag){const failed=await own.tag(`${channel}/${tag}`,identity.sourceCommit);result.tag=failed||`${channel}/${tag}`;if(failed)console.warn(failed);}
   return result;
  }finally{if(!store)own.close();}
 }
