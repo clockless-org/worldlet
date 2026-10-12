@@ -194,13 +194,13 @@
       },
       "background": {
         "path": "ui/theme-packages/village/assets/applet-scenes/browser/background.webp",
-        "sha256": "b01993ed40d72634a1f777be545e1c8f37aaca4d8244ca3fd45c21fe6761b751"
+        "sha256": "a9ab01e6a9afd99c9040d6bf37787b692f5b21af6778f710f788a6ce57932167"
       },
       "status": "registered",
       "registrationKey": "browser",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/browser/effect.webp",
-        "sha256": "8cbb1f0dfbaa30a2d6349dadd3fb3908bea0df0dda878970493a2050c39a9675"
+        "sha256": "69f54b3d6aac2c2f7966377ccbeed9780121fd578b22dd3d64b3212d6b46bcf9"
       }
     },
     {

@@ -293,7 +293,7 @@
       "category": "core",
       "group": "utilities",
       "source": "browser/background.png",
-      "prompt": "Village Browser in a sunlit conservatory. Tall dark teal wooden frame with brass compass, large continuous blank ivory screen, globe and books on the right. Extend the frame downward and slightly right for a larger web surface; preserve companion floor space. No baked-in interface or text.",
+      "prompt": "Village Browser in a sunlit conservatory with a large empty ivory screen and dark teal brass-trimmed frame. Browser identity comes from functional instruments on the right: a geographical globe in a substantial Chrome-inspired red, green and yellow enamel cradle, plus an open brass compass with a Safari-inspired blue dial and red-white needle resting on books. Preserve screen geometry and companion clearance. No separate logo plaques, text or baked-in UI.",
       "companion": [
         0.79,
         0.73,

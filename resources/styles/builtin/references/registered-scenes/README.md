@@ -220,7 +220,7 @@ Primary HTML region: 62.0% of image width × 63.0% of image height; measured ins
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/browser.webp" width="100" alt="Browser icon">
 
-Primary HTML region: 66.2% of image width × 72.4% of image height; measured inside the painted surface. The taller frame provides about 22% more page area while preserving the globe and companion clearance.
+Primary HTML region: 66.2% of image width × 72.4% of image height; measured inside the painted surface. The taller frame provides about 22% more page area while preserving the globe and companion clearance. The globe’s red, green and yellow enamel cradle and the open blue-dial compass evoke Chrome and Safari as physical instruments.
 
 ![Browser background](browser/background.png)
 
