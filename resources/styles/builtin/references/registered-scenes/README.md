@@ -32,16 +32,58 @@ Keep the branded collection at 100 groups. Exclude three narrow external mini-ga
 
 Apple's current US [iPhone 17 specification](https://www.apple.com/iphone-17/specs/) lists 48 built-in apps, counted on 2026-10-11. This device/region-specific list includes Apple's creative apps and system utilities; it is not a target count for Worldlet.
 
-| Comparison | Worldlet position |
-| --- | --- |
-| Mail, Calendar, Notes, Reminders, Weather, Voice Memos, Messages, Safari | Eight existing tool counterparts; Browser corresponds to Safari |
-| Files, Clock | The two confirmed next tools above |
-| Journal, Settings | Existing system surfaces, counted separately |
-| Maps, Music, Podcasts, Photos, TV, Pages, Numbers, Keynote | Related branded entries exist (Google Maps, Apple Music, Apple Podcasts, Google Photos, Netflix, Google Docs/Sheets/Slides); listing does not imply feature parity or a connected account |
-| Games | Five core games plus branded web games |
-| Calculator, Contacts, Translate, Books, Preview, Freeform | Useful remaining everyday-tool candidates; document preview can start inside Files |
-| Camera, Phone, FaceTime, Compass, Measure, Magnifier, Find My, Watch | Primarily phone, hardware or device-ecosystem functions; lower priority for this desktop art library |
-| App Store, Fitness, GarageBand, Health, Home, iMovie, iTunes Store, News, Passwords, Shortcuts, Stocks, Tips, Wallet | Other Apple built-ins; some overlap with generic scenes, branded entries or Agent capabilities, but are not equivalent standalone core tools |
+Statuses describe repository structure, not feature acceptance: **Present** means an existing dedicated Applet/module; **Related** means only a website, partial module or art preset; **Planned** means confirmed but not implemented; **Absent** means no dedicated counterpart. Provider acceptance and platform availability require separate validation.
+
+| # | iPhone app | Status | Current Worldlet counterpart |
+| --- | --- | --- | --- |
+| 1 | App Store | Related | Applet discovery/library exists; no equivalent app marketplace |
+| 2 | Books | Related | Reading/research art preset; no standalone book library or reader |
+| 3 | Calculator | Absent | No standalone calculator Applet |
+| 4 | Calendar | Present | Calendar Applet; registered art updated |
+| 5 | Camera | Absent | No standalone camera Applet |
+| 6 | Clock | Planned | Confirmed next core tool; art and runtime pending |
+| 7 | Compass | Absent | No compass Applet |
+| 8 | Contacts | Absent | Messages can resolve contact names, but no standalone contacts Applet |
+| 9 | FaceTime | Related | Zoom and Teams launch-only web entries; no native calling counterpart |
+| 10 | Files | Planned | Confirmed next core tool; art and runtime pending |
+| 11 | Find My | Absent | No device/item-location Applet |
+| 12 | Fitness | Related | Strava/Fitbit web entries and fitness art preset; no unified fitness tool |
+| 13 | Freeform | Related | Artifacts display structured cards; no freeform collaborative whiteboard |
+| 14 | Games | Present | Built-in game Applets and external web games; not Apple Games feature parity |
+| 15 | GarageBand | Absent | No music creation Applet |
+| 16 | Health | Related | Oura/Fitbit web entries and wellness presets; no unified health-record tool |
+| 17 | Home | Absent | No smart-home control Applet; home-care preset is household planning |
+| 18 | iMovie | Related | CapCut launch-only web entry; no built-in video editor |
+| 19 | iTunes Store | Absent | No media purchase storefront |
+| 20 | Journal | Related | System Journal retains Agent artifact cards; personal-journal art preset exists, not an equivalent personal diary editor |
+| 21 | Keynote | Related | Google Slides marked building; PowerPoint launch-only |
+| 22 | Magnifier | Absent | No magnifier Applet |
+| 23 | Mail | Present | Mail Applet; registered art updated |
+| 24 | Maps | Related | Google Maps embedded website; no generic core Maps tool |
+| 25 | Measure | Absent | No measuring Applet |
+| 26 | Messages | Present | Messages Applet using native records |
+| 27 | Music | Related | Apple Music and Spotify launch-only web entries |
+| 28 | News | Related | Attention surfaces relevant information; no standalone news reader |
+| 29 | Notes | Present | Notes Applet; registered art updated |
+| 30 | Numbers | Related | Google Sheets marked building; Excel launch-only |
+| 31 | Pages | Related | Google Docs marked building; Word launch-only |
+| 32 | Passwords | Absent | No user-facing password-manager Applet; connection credentials are a separate concern |
+| 33 | Phone | Absent | No standalone dialer Applet |
+| 34 | Photos | Related | Google Photos launch-only; no generic local photo library |
+| 35 | Podcasts | Related | Apple Podcasts launch-only web entry |
+| 36 | Preview | Related | Acrobat launch-only entry; document preview belongs in the planned Files scope |
+| 37 | Reminders | Present | Reminders Applet; registered art updated |
+| 38 | Safari | Present | Browser Applet |
+| 39 | Settings | Present | Existing host settings surface; not an Applet |
+| 40 | Shortcuts | Related | Agent/Routines handle some automation; no equivalent visual workflow editor |
+| 41 | Stocks | Absent | No dedicated market/watchlist Applet; financial-service entries are not a substitute |
+| 42 | Tips | Related | Onboarding/tour and documentation; no separate tips Applet |
+| 43 | Translate | Related | Language-practice art preset; no standalone translation Applet |
+| 44 | TV | Related | Netflix and YouTube web entries; no Apple TV counterpart |
+| 45 | Voice Memos | Present | Voice Memos Applet using native records |
+| 46 | Wallet | Related | Payment-service entries such as PayPal/Alipay; no unified cards, passes or wallet |
+| 47 | Watch | Absent | No watch-management Applet |
+| 48 | Weather | Present | Weather Applet; remains core |
 
 Prioritize Files and Clock now. Calculator and Contacts are the clearest next candidates if the everyday toolkit expands again. Meetings is Worldlet-specific and should not be treated as the equivalent of FaceTime.
 
