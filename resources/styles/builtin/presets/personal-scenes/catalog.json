@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "authored-assets-not-runtime-registered",
+  "status": "bundled-in-village-sim",
   "updated": "2026-10-11",
   "generator": {
     "tool": "built-in imagegen",

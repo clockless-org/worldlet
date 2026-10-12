@@ -174,5 +174,135 @@
       "clay": "#a04e33",
       "plum": "#6c4a78"
     }
-  }
+  },
+  "appletPresets": [
+    {
+      "id": "weight-balance",
+      "title": "Weight balance",
+      "description": "Track weight trends, measurements and personal goals",
+      "category": "Health",
+      "icon": "assets/applet-presets/weight-balance/icon.webp",
+      "background": "assets/applet-presets/weight-balance/background.webp"
+    },
+    {
+      "id": "meal-planner",
+      "title": "Meal planner",
+      "description": "Plan weekly meals and reuse pantry ingredients",
+      "category": "Health",
+      "icon": "assets/applet-presets/meal-planner/icon.webp",
+      "background": "assets/applet-presets/meal-planner/background.webp"
+    },
+    {
+      "id": "fitness",
+      "title": "Workout plan",
+      "description": "Plan workouts and record progress",
+      "category": "Health",
+      "icon": "assets/applet-presets/fitness/icon.webp",
+      "background": "assets/applet-presets/fitness/background.webp"
+    },
+    {
+      "id": "sleep",
+      "title": "Sleep & recovery",
+      "description": "Review sleep records and plan wind-down routines",
+      "category": "Health",
+      "icon": "assets/applet-presets/sleep/icon.webp",
+      "background": "assets/applet-presets/sleep/background.webp"
+    },
+    {
+      "id": "travel",
+      "title": "Travel planner",
+      "description": "Compare destinations and organize itineraries",
+      "category": "Out & about",
+      "icon": "assets/applet-presets/travel/icon.webp",
+      "background": "assets/applet-presets/travel/background.webp"
+    },
+    {
+      "id": "outdoor",
+      "title": "Outdoor adventures",
+      "description": "Prepare walks, hikes, weather checks and packing lists",
+      "category": "Out & about",
+      "icon": "assets/applet-presets/outdoor/icon.webp",
+      "background": "assets/applet-presets/outdoor/background.webp"
+    },
+    {
+      "id": "shopping",
+      "title": "Shopping list",
+      "description": "Collect grocery needs and compare purchases",
+      "category": "Home",
+      "icon": "assets/applet-presets/shopping/icon.webp",
+      "background": "assets/applet-presets/shopping/background.webp"
+    },
+    {
+      "id": "budget",
+      "title": "Household budget",
+      "description": "Categorize expenses, monitor budgets and bill dates",
+      "category": "Home",
+      "icon": "assets/applet-presets/budget/icon.webp",
+      "background": "assets/applet-presets/budget/background.webp"
+    },
+    {
+      "id": "home-care",
+      "title": "Home care",
+      "description": "Schedule chores, maintenance and household tasks",
+      "category": "Home",
+      "icon": "assets/applet-presets/home-care/icon.webp",
+      "background": "assets/applet-presets/home-care/background.webp"
+    },
+    {
+      "id": "garden",
+      "title": "Garden planner",
+      "description": "Plan planting, watering and seasonal garden work",
+      "category": "Home",
+      "icon": "assets/applet-presets/garden/icon.webp",
+      "background": "assets/applet-presets/garden/background.webp"
+    },
+    {
+      "id": "daily-planner",
+      "title": "Daily planner",
+      "description": "Collect today's schedule, priorities and reminders",
+      "category": "Life & learning",
+      "icon": "assets/applet-presets/daily-planner/icon.webp",
+      "background": "assets/applet-presets/daily-planner/background.webp"
+    },
+    {
+      "id": "reading",
+      "title": "Reading & research",
+      "description": "Save reading, summarize sources and gather research",
+      "category": "Life & learning",
+      "icon": "assets/applet-presets/reading/icon.webp",
+      "background": "assets/applet-presets/reading/background.webp"
+    },
+    {
+      "id": "language",
+      "title": "Language practice",
+      "description": "Practice conversation, vocabulary and study routines",
+      "category": "Life & learning",
+      "icon": "assets/applet-presets/language/icon.webp",
+      "background": "assets/applet-presets/language/background.webp"
+    },
+    {
+      "id": "journal",
+      "title": "Personal journal",
+      "description": "Capture reflections, memories and daily notes",
+      "category": "Life & learning",
+      "icon": "assets/applet-presets/journal/icon.webp",
+      "background": "assets/applet-presets/journal/background.webp"
+    },
+    {
+      "id": "job-search",
+      "title": "Job search",
+      "description": "Compare openings, track applications and prepare interviews",
+      "category": "Work",
+      "icon": "assets/applet-presets/job-search/icon.webp",
+      "background": "assets/applet-presets/job-search/background.webp"
+    },
+    {
+      "id": "project-planner",
+      "title": "Project planner",
+      "description": "Track milestones, tasks and next actions",
+      "category": "Work",
+      "icon": "assets/applet-presets/project-planner/icon.webp",
+      "background": "assets/applet-presets/project-planner/background.webp"
+    }
+  ]
 }

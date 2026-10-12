@@ -38,5 +38,15 @@
   },
   "icons": {
     "gmail": "assets/plate.svg"
-  }
+  },
+  "appletPresets": [
+    {
+      "id": "reading",
+      "title": "Reading",
+      "description": "A place for books",
+      "category": "Learning",
+      "icon": "assets/plate.svg",
+      "background": "assets/plate.svg"
+    }
+  ]
 }

@@ -33,6 +33,12 @@ export interface ThemeArtifact {
  /** `#rrggbb` per colour role; a role left out keeps the host's. */
  colors?:Partial<Record<ThemeArtifactColor,string>>;
 }
+/** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
+export interface ThemeAppletPreset {
+ id:string;title:string;description:string;category:string;
+ /** Package-local pictures; the icon may be transparent. The background contains no live data. */
+ icon:string;background:string;
+}
 /** The theme's type and colours. */
 export interface ThemeTokens {bodyFont:string;displayFont:string;bodySize:number;titleSize:number;ink:string;paper:string;accent:string;focus:string;radius:number;controlHeight:number}
 export interface ThemePresentation {
@@ -44,6 +50,8 @@ export interface ThemePresentation {
  icons?:Readonly<Record<string,string>>;
  /** How the theme's Artifacts look. Left out, Artifacts keep the host's card. */
  artifact?:ThemeArtifact;
+ /** Optional art choices for custom Applets. Omitted means no presets. The host owns selection and rendering. */
+ appletPresets?:readonly ThemeAppletPreset[];
 }
 /** theme.json. Every other file in the package is a picture, a sound, a font, a licence text or JSON. */
 export interface BuildThemeManifest {
@@ -66,7 +74,7 @@ export function parseBuildThemeManifest(value:unknown):BuildThemeManifest {
 export function parseThemePresentation(value:unknown):ThemePresentation {
  const p=value as ThemePresentation;
  need(p&&p.tokens,'presentation');
- need(Object.keys(p).every(key=>['tokens','fonts','hud','sound','icons','artifact'].includes(key)),'presentation fields (the host lays out the World and Applet pages)');
+ need(Object.keys(p).every(key=>['tokens','fonts','hud','sound','icons','artifact','appletPresets'].includes(key)),'presentation fields (the host lays out the World and Applet pages)');
  const t=p.tokens;for(const k of ['bodyFont','displayFont','ink','paper','accent','focus'])need(text(t[k]),'token '+k);
  for(const k of ['bodySize','titleSize','radius','controlHeight'])need(Number.isFinite(t[k])&&t[k]>0,'token '+k);
  need(t.bodySize>=12&&t.controlHeight>=32,'readable type and controls');
@@ -78,6 +86,11 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  }
  if(p.sound!==undefined)need(object(p.sound)&&object(p.sound.events)&&Object.entries(p.sound.events).every(([event,file])=>(THEME_SOUND_EVENTS as readonly string[]).includes(event)&&/\.(mp3|ogg|m4a|wav)$/.test(themeAssetPath(file))),'sound events');
  if(p.icons!==undefined)need(object(p.icons)&&Object.entries(p.icons).every(([key,file])=>id(key)&&picture(file)),'applet icons');
+ if(p.appletPresets!==undefined){
+  const presets=p.appletPresets;
+  need(Array.isArray(presets)&&presets.every(a=>object(a)&&Object.keys(a).every(k=>['id','title','description','category','icon','background'].includes(k))&&id(a.id)&&text(a.title)&&text(a.description)&&text(a.category)&&picture(a.icon)&&picture(a.background)),'applet presets');
+  need(new Set(presets.map(a=>a.id)).size===presets.length,'unique applet preset ids');
+ }
  if(p.artifact!==undefined){
   const a=p.artifact,markdown=(v:unknown)=>/\.md$/.test(themeAssetPath(v)),list=(v:unknown,max:number)=>Array.isArray(v)&&v.length<=max;
   need(object(a)&&Object.keys(a).every(key=>['style','prompt','references','materials','colors'].includes(key)),'artifact fields');
