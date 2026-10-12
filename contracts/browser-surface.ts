@@ -3,17 +3,24 @@ export interface SurfaceRect {x:number;y:number;width:number;height:number}
 /** Narrow paper overlap in CSS pixels, sampled along each side (clockwise). */
 export interface BrowserPaperProfile {top:readonly number[];right:readonly number[];bottom:readonly number[];left:readonly number[]}
 /** A packaged painting projected relative to the native page; only its narrow edge is drawn over the page. */
-export interface BrowserPaperEdge {asset:string;image:SurfaceRect;profile:BrowserPaperProfile}
+export interface BrowserPaperEdge {asset:string;image:SurfaceRect;profile:BrowserPaperProfile;frame?:{asset:string;source:SurfaceRect;target:SurfaceRect}}
 export function readBrowserPaperProfile(input:unknown):BrowserPaperProfile {
  const value=object(input);keys(value,['top','right','bottom','left']);
  for(const side of ['top','right','bottom','left'])if(!Array.isArray(value[side])||(value[side] as unknown[]).length<2||(value[side] as unknown[]).length>64||!(value[side] as unknown[]).every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=3))throw Error('Invalid browser paper edge profile');
  return {top:[...value.top as number[]],right:[...value.right as number[]],bottom:[...value.bottom as number[]],left:[...value.left as number[]]};
 }
 export function readBrowserPaperEdge(input:unknown):BrowserPaperEdge {
- const value=object(input);keys(value,['asset','image','profile']);
+ const value=object(input);keys(value,['asset','image','profile','frame']);
  if(typeof value.asset!=='string'||value.asset.length>512||!/^theme-assets\/[a-z0-9-]+\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:webp|png|jpg)$/.test(value.asset))throw Error('Invalid browser paper edge asset');
  const image=readRect(value.image);if(image.width<=0||image.height<=0||image.width>32768||image.height>32768||Math.abs(image.x)>32768||Math.abs(image.y)>32768)throw Error('Invalid browser paper image bounds');
- return {asset:value.asset,image,profile:readBrowserPaperProfile(value.profile)};
+ let frame:BrowserPaperEdge['frame'];
+ if(value.frame!==undefined){
+  const f=object(value.frame);keys(f,['asset','source','target']);
+  const checked=readBrowserPaperEdge({asset:f.asset,image:f.target,profile:value.profile}),source=readRect(f.source);
+  if(source.x<0||source.y<0||source.width<=0||source.height<=0||source.x+source.width>1||source.y+source.height>1)throw Error('Invalid frame source bounds');
+  frame={asset:checked.asset,source,target:checked.image};
+ }
+ return {asset:value.asset,image,profile:readBrowserPaperProfile(value.profile),...frame?{frame}:{}};
 }
 /** How many website pages stay live at once and how many Fox browser tasks may drive pages at the
  * same time (core/browser/budget.ts). Hosts send it with their capabilities (`browserBudget`). */

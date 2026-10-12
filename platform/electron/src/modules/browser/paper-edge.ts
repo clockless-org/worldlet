@@ -10,6 +10,7 @@ export class PaperEdge {
  private parent:BaseWindow|null=null;
  private ready:Promise<void>|null=null;
  private generation=0;
+ private offset:Rectangle={x:0,y:0,width:0,height:0};
  private cached:{asset:string;src:string}|null=null;
  private webRoot:()=>string;
  private report:(error:unknown)=>void;
@@ -40,8 +41,12 @@ export class PaperEdge {
   if(!value||!parent||!screen||screen.width<1||screen.height<1){this.hide();return;}
   try{
    const edge=readBrowserPaperEdge(value),window=this.create(parent),token=++this.generation;
-   window.setBounds(screen);
-   const paint={src:this.image(edge.asset),image:edge.image,profile:edge.profile};
+   const f=edge.frame,box=f?edge.image:{x:0,y:0,width:screen.width,height:screen.height};
+   this.offset={x:Math.floor(box.x),y:Math.floor(box.y),width:Math.ceil(box.width),height:Math.ceil(box.height)};
+   const {x,y}=this.offset;
+   window.setBounds({x:screen.x+x,y:screen.y+y,width:this.offset.width,height:this.offset.height});
+   const paint={src:this.image(edge.asset),image:{...edge.image,x:edge.image.x-x,y:edge.image.y-y},profile:edge.profile,
+    ...f?{frame:{src:this.image(f.asset),source:f.source,target:{...f.target,x:f.target.x-x,y:f.target.y-y}}}:{}};
    void this.ready!.then(()=>{
     if(token!==this.generation||window.isDestroyed())return false;
     return window.webContents.executeJavaScript(`paperEdge.apply(${JSON.stringify(paint)})`,false);
@@ -49,7 +54,7 @@ export class PaperEdge {
     .catch(error=>{if(token===this.generation)this.hide();this.report(error);});
   }catch(error){this.hide();this.report(error);}
  }
- place(screen:Rectangle){if(this.window&&!this.window.isDestroyed()&&this.window.isVisible())this.window.setBounds(screen);}
+ place(screen:Rectangle){if(this.window&&!this.window.isDestroyed()&&this.window.isVisible())this.window.setBounds({x:screen.x+this.offset.x,y:screen.y+this.offset.y,width:this.offset.width,height:this.offset.height});}
  hide(){++this.generation;if(this.window&&!this.window.isDestroyed())this.window.hide();}
  close(){this.hide();const window=this.window;this.window=null;this.parent=null;this.ready=null;this.cached=null;if(window&&!window.isDestroyed())window.destroy();}
 }

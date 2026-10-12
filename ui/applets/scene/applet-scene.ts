@@ -83,11 +83,12 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
  return {element,regions,primary:primaryRegion,painted,layout,
   get metrics(){return last;},
   paperEdge(rect){
-   const profile=source.registration.webEdge;
+   const profile=source.registration.webEdge||(source.registration.webFrame?{top:[0,0],right:[0,0],bottom:[0,0],left:[0,0]}:undefined);
    if(!painted||last.compact||!profile||!source.background||rect.width<=0||rect.height<=0)return;
    const image=plate.getBoundingClientRect(),scale=Math.min(1,image.width/source.registration.imageSize[0]);
    const samples=(values:readonly number[])=>values.map(n=>n*scale);
-   return {asset:source.background,image:{x:image.x-rect.x,y:image.y-rect.y,width:image.width,height:image.height},
+   const f=source.registration.webFrame,box=f?.target,frame=f&&box?{asset:f.mask,source:{x:f.source[0],y:f.source[1],width:f.source[2],height:f.source[3]},target:{x:image.x-rect.x+box[0]*image.width,y:image.y-rect.y+box[1]*image.height,width:box[2]*image.width,height:box[3]*image.height}}:undefined;
+   return {...frame?{frame}:{},asset:source.background,image:{x:image.x-rect.x,y:image.y-rect.y,width:image.width,height:image.height},
     profile:{top:samples(profile.top),right:samples(profile.right),bottom:samples(profile.bottom),left:samples(profile.left)}};
   },
   destroy(){

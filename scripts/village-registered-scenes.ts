@@ -8,13 +8,13 @@ import {importBuildTheme} from './build-theme-source.ts';
 import type {ThemeAppletScene,ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
 
 const SOURCE='resources/styles/builtin/references/registered-scenes',PACKAGE='ui/theme-packages/village';
-type Source={webEdge?:ThemeSceneRegistration['webEdge'];id:string;title:string;source:string;iconSource?:string;regions:ThemeSceneRegistration['regions'];companion:ThemeSceneRegistration['companion'];prompt:string};
+type Source={frameSource?:string;webFrame?:ThemeSceneRegistration['webFrame'];webEdge?:ThemeSceneRegistration['webEdge'];id:string;title:string;source:string;iconSource?:string;regions:ThemeSceneRegistration['regions'];companion:ThemeSceneRegistration['companion'];prompt:string};
 type Lock=Record<string,{source:string;sourceSha256:string;sha256:string;imageSize:[number,number];settings:string}>;
 const sha=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
 const json=async(root:string,file:string)=>JSON.parse(await readFile(path.join(root,file),'utf8'));
 const write=async(root:string,file:string,value:unknown)=>writeFile(path.join(root,file),JSON.stringify(value,null,2)+'\n');
 function scene(item:Source,entry:Lock[string]):ThemeAppletScene{
- return {background:`assets/applet-scenes/${item.id}/background.webp`,registration:{imageSize:entry.imageSize,sha256:entry.sha256,regions:item.regions,companion:item.companion,...item.webEdge?{webEdge:item.webEdge}:{}}};
+ return {background:`assets/applet-scenes/${item.id}/background.webp`,registration:{imageSize:entry.imageSize,sha256:entry.sha256,regions:item.regions,companion:item.companion,...item.webEdge?{webEdge:item.webEdge}:{},...item.webFrame?{webFrame:item.webFrame}:{}}};
 }
 export async function encodeVillageRegisteredScenes(root:string){
  const catalog:{applets:Source[];brands?:Source[]}=await json(root,SOURCE+'/catalog.json');
@@ -26,6 +26,10 @@ export async function encodeVillageRegisteredScenes(root:string){
   await mkdir(path.dirname(output),{recursive:true});await writeFile(output,result.data);
   lock[target]={source,sourceSha256:sha(input),sha256:sha(result.data),imageSize:[result.info.width,result.info.height],settings:'original-size-webp-q90'};
   scenes[item.id]=scene(item,lock[target]);
+  if(item.frameSource&&item.webFrame){
+   const source=SOURCE+'/'+item.frameSource,input=await readFile(path.join(root,source));
+   await writeFile(path.join(root,PACKAGE,item.webFrame.mask),input);
+  }
   if(item.iconSource){
    const source=SOURCE+'/'+item.iconSource,input=await readFile(path.join(root,source));
    const result=await sharp(input).resize(768,768,{fit:'contain',background:'#00000000'}).webp({lossless:true}).toBuffer({resolveWithObject:true});
@@ -53,6 +57,11 @@ export async function checkVillageRegisteredScenes(root:string){
   const input=await readFile(path.join(root,entry.source)),output=await readFile(path.join(root,PACKAGE,target));
   if(input.length)assert.equal(sha(input),entry.sourceSha256,'Scene source changed: '+item.id);
   if(output.length)assert.equal(sha(output),entry.sha256,'Scene output changed: '+item.id);
+  if(item.frameSource&&item.webFrame){
+   const input=await readFile(path.join(root,SOURCE,item.frameSource)),output=await readFile(path.join(root,PACKAGE,item.webFrame.mask));
+   assert.equal(sha(input),sha(output),'Frame alpha source must match its bundled asset');
+   if(output.length)assert.equal((await sharp(output).metadata()).hasAlpha,true,'Frame must preserve transparency');
+  }
   assert.ok(presentation.icons[item.id],'Every scene has a matching icon');
   if(item.iconSource){
    const target=`assets/applet-scenes/${item.id}/icon.webp`,entry=iconLock[target];assert.ok(entry);
