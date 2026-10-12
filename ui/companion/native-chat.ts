@@ -286,7 +286,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  threadStack.addEventListener('pointerdown',e=>e.stopPropagation());
  const contextButton=make('div','companion-context'),name=make('span','companion-name');contextButton.append(name);root.append(contextButton);
  let dismissed=false,peeking=false,dismissedGuide=null;
- let hoverInput=false,editing=false,collapseTimer=null,avatarHoldTimer=null,avatarPress=null,avatarSuppressClick=false;
+ let voiceWide=false,hoverInput=false,editing=false,collapseTimer=null,avatarHoldTimer=null,avatarPress=null,avatarSuppressClick=false;
  let speechGeneration=0,finalTimer=null,queuedTurns=[],activeView='';
  let queuedDraft:null|{text:string;turns:any[]}=null;
  input.addEventListener('input',()=>{queuedDraft=null;fitInput();warmThread();});
@@ -651,6 +651,11 @@ export function createNativeChat(call){return function({button,input,status,exec
   root.dataset.entryExpanded=String(expanded);
   // Pointing at Fox or at the bar opens it to its typing width without starting to type (owner request 2026-10-12).
   root.dataset.entryHover=String(!expanded&&!speech&&hoverInput);
+  // Once voice starts (Fox's microphone, a hold, Talk or an Order) the bar keeps the length it had until the voice ends
+  // (owner Order 2026-10-12): an open bar does not shrink because the pointer left it or speech took the field's place.
+  const voice=speech||!!ordering;
+  if(!voice)voiceWide=expanded||root.dataset.entryHover==='true';
+  root.dataset.entryHeld=String(voice&&voiceWide);
   // At rest the bar keeps low (owner request 2026-10-05): short, faint and only its name; pointing at it
   // or Fox brings back the hint, the microphone and Send, and a click opens it wide to type.
   const quiet=!expanded&&!speech&&!hoverInput&&!input.value.trim()&&!hoverNone.matches;

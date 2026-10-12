@@ -53,11 +53,23 @@ try {
  await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLTextAreaElement).value==='Plan my morning');
  assert(await input.evaluate(e=>e===document.activeElement),'Stop leaves the words in the line to edit');
  assert.equal(await count('agentChat'),0,'Stop does not send');
+ // Once voice starts the bar keeps the length it had (owner Order 2026-10-12): holding the open bar to speak does not
+ // shrink it, and the wave stands at that same length until the voice ends.
+ await page.keyboard.press('Escape');await page.mouse.move(5,5);await page.waitForTimeout(400);
+ await bar.hover();await page.waitForTimeout(400);
+ const open=(await bar.boundingBox())!;
+ await page.mouse.move(open.x+open.width/2,open.y+open.height/2);await page.mouse.down();
+ await page.waitForFunction(()=>document.querySelector('#notionWorld')?.classList.contains('is-listening'));await page.waitForTimeout(400);
+ {const w=(await page.locator('.companion-input-wave').boundingBox())!;assert(Math.abs(w.width-open.width)<1,'the wave keeps the open bar\'s length: '+JSON.stringify({w,open}));}
+ const heard=await count('speechStop');await page.mouse.up();
+ await page.waitForFunction(n=>(window as any).calls.filter(c=>c==='speechStop').length>n,heard);
+ assert.equal(await page.locator('.companion-text-entry').evaluate(e=>getComputedStyle(e).getPropertyValue('--companion-bar-width').trim()),Math.round(open.width)+'px','the bar keeps its length while the words are understood');
+ await page.evaluate(()=>(window as any).worldletSpeech({phase:'final',text:''}));
  // "+" at the open bar's far left adds the files the person picks to the line (owner request 2026-10-12).
  await page.keyboard.press('Escape');await page.mouse.move(5,5);await page.waitForTimeout(400);
  await bar.hover();await page.waitForTimeout(400);const plus=page.locator('.companion-plus-button');
  assert(await plus.isVisible(),'"+" shows while the bar is open');
  {const p=(await plus.boundingBox())!,b=(await bar.boundingBox())!;assert(p.x-b.x<=6,'"+" stands at the bar\'s far left');}
  await plus.click();await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLTextAreaElement).value.includes('/Users/alex/Plan.pdf'));
- console.log('PASS speech deactivation/page teardown cancellation and delayed-start isolation; ✕, the dotted wave and Stop to edit; "+" adds files; no microphone accessed.');
+ console.log('PASS speech deactivation/page teardown cancellation and delayed-start isolation; ✕, the dotted wave and Stop to edit; voice keeps the bar\'s length; "+" adds files; no microphone accessed.');
 } finally {await browser.close();}
