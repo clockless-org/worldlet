@@ -29,6 +29,8 @@ import {errorMessage as message} from '../files.ts';
 // and says why in one line; scripts/startup-setup-check.ts drives that on the setup page (owner decision 2026-10-11).
 // Claude Code whose sign-in ran out opens its own sign-in page in the browser by itself, once per launch
 // (agent-runtime/provider-sign-in.ts signInOnce, scripts/model-providers-check.ts); this journey runs on Codex.
+// An OpenClaw or Hermes Agent also describes itself after that check (core/agent/agent-profile.ts), in the background:
+// Codex is not asked, so this journey never waits for it; startup-setup-check.ts drives a late description arriving.
 
 const COMPANION_BLOCKING=false;
 export async function onboardingFlow({host,window,view}:CheckContext){

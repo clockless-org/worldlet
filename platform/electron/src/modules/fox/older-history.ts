@@ -1,6 +1,7 @@
 import {setTimeout as sleep} from 'node:timers/promises';
 import {AGENT,ONGOING,type AgentService,type OngoingService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
+import {busyWith} from '../../host/busy.ts';
 import {readOlderHermes,TEXT_BUDGET,type HermesCursor,type HermesWindowResult} from '../agent-runtime/agent-files.ts';
 import {broughtConversations} from './migration.ts';
 import type {Companion} from './companion.ts';
@@ -46,7 +47,7 @@ export function createOlderHistory(host:Host,companion:Companion,{read=readOlder
    // Fox's own turn comes first.
    if(host.optional<AgentService>(AGENT)?.hasInteractiveWork()){await sleep(pause*1000);continue;}
    let next:OlderHistory;
-   try{next=step(value);}
+   try{next=busyWith('olderHistory',()=>step(value));}
    catch(error){host.diagnostics.record(error,'olderHistory');next={...value,status:'partial'};}
    // Read, step and save share one turn of the event loop, so a bring starting over (reset, then start) never
    // interleaves with a window.

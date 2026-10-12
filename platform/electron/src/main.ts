@@ -11,7 +11,7 @@ import {WorldStore} from './store/world-store.ts';
 import {HostRouter} from './host/router.ts';
 import {createPageBridge} from './host/page.ts';
 import {createDiagnostics,keepProcessOutput} from './host/diagnostics.ts';
-import {endStrayChildren,hideAllWindows,installQuitTask,startPendingRelaunch,wantsQuit,withDeadline} from './host/quit.ts';
+import {endStrayChildren,hideAllWindows,installQuitTask,relaunchAfterQuit,startPendingRelaunch,wantsQuit,withDeadline} from './host/quit.ts';
 import {hostCapabilities} from './capabilities.ts';
 import {registerWorldScheme,trustedWorldURL} from './world/protocol.ts';
 import {WorldWindow} from './world/window.ts';
@@ -179,8 +179,18 @@ async function start(){
  if(capture)void runCapture(capture,launchedAt,()=>world?{window:world.window,view:world.view}:null).finally(()=>app.quit());
  if(probe)void runProbe(probe,(body,sender)=>router.dispatch(body,sender),world.view.webContents,()=>store.state.connections??[]).finally(()=>app.quit());
  if(loginCheck)void runLoginItemCheck(loginCheck,profile.channel,(body,sender)=>router.dispatch(body,sender),world.view.webContents).finally(()=>app.quit());
- app.on('second-instance',(_event,argv)=>{if(wantsQuit(argv)){app.quit();return;}const window=world?.window;if(window){if(window.isMinimized())window.restore();window.show();window.focus();}});
- app.on('activate',()=>{world?.window.show();});
+ // The World window can be closed for good while another window (the glow, a task page) keeps the app running, for
+ // example before its page is ready. Showing a destroyed window throws in the main process, so the Dock icon or a
+ // second launch then starts Worldlet again to bring the World back.
+ const bringWorld=()=>{
+  const window=world?.window;
+  if(!window)return;
+  if(window.isDestroyed()){relaunchAfterQuit();app.quit();return;}
+  if(window.isMinimized())window.restore();
+  window.show();window.focus();
+ };
+ app.on('second-instance',(_event,argv)=>{if(wantsQuit(argv)){app.quit();return;}bringWorld();});
+ app.on('activate',()=>{const window=world?.window;if(window?.isDestroyed())bringWorld();else window?.show();});
  let quitting=false;
  const shutdown=(code:number)=>{
   quitting=true;

@@ -27,6 +27,7 @@ import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService
 import {userIdle} from '../../../../../core/tasks/index.ts';
 import {timingBucket} from '../../../../../core/diagnostics/index.ts';
 import {GAME_REVIEW_APPLET} from '../../../../../core/games/index.ts';
+import {busyWith} from '../../host/busy.ts';
 
 type Kept={view:WebPage;platform:string;requestedURL:URL|null};
 type Layout={rect:Row;fox?:Row;page?:Row;press:boolean;copy?:Row};
@@ -207,7 +208,7 @@ export class BrowserDevice {
  /** A recorder's batch: kept in the World, and followed for games to review. */
  recorded(visits:RecordedVisit[],records:(WebRecord&{visit:string})[]){
   if(!this.store.writable||this.sample)return;
-  this.store.ledger().recordWeb(visits,records);
+  busyWith('recordWeb',()=>this.store.ledger().recordWeb(visits,records));
   this.battles.observe(visits,records);
  }
  private prunedAt=0;

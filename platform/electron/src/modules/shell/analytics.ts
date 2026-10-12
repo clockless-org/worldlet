@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {app,BaseWindow,type WebContents} from 'electron';
 import {PostHog} from 'posthog-node';
@@ -8,7 +9,7 @@ import {platformName} from '../../profile.ts';
 import {AGENT,type AgentService,type AnalyticsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,LOCAL_AGENT_IDS,UPDATE_WAIT_BUCKETS} from '../../../../../core/diagnostics/index.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,UPDATE_WAIT_BUCKETS,deviceClass,stallTask,timingBucket,type DeviceClass} from '../../../../../core/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
@@ -36,8 +37,8 @@ export function ingestPath(pathname:string){
 export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string,identified:boolean,properties:Row}
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
 export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
-const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','fox_browse_changed','order_sent','order_stopped',
- 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed']);
+const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','agent_profile_result','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','fox_browse_changed','order_sent','order_stopped',
+ 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall']);
 /** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
  * Fox and startup timings (`timingBucket` in core/diagnostics). */
 const DURATIONS=['under_1s','1_5s','5_15s','over_15s','15_60s','1_5m','5_15m','over_15m'];
@@ -67,7 +68,7 @@ const ALLOWED:Record<string,string[]>={
  local_agent:LOCAL_AGENT_IDS,recommended_agent:[...LOCAL_AGENT_IDS,'none'],agents_found:[...AGENTS_FOUND],
  // Who answers for Fox: the built-in Hermes Agent on a model Fox has, or the chosen Agent on its own sign-in.
  fox_brain:['built_in','agent'],
- bring_conversations:[...COUNT_BUCKETS],bring_notes:[...COUNT_BUCKETS],bring_skills:[...COUNT_BUCKETS],bring_routines:[...COUNT_BUCKETS],
+ bring_conversations:[...COUNT_BUCKETS],bring_notes:[...COUNT_BUCKETS],bring_skills:[...COUNT_BUCKETS],bring_routines:[...COUNT_BUCKETS],bring_connections:[...COUNT_BUCKETS],
  bring_model:['yes','no'],bring_memory:['yes','no'],integrations_came_over:[...COUNT_BUCKETS],integrations_reconnect:[...COUNT_BUCKETS],
  // page_load_timing: which engine loaded a page in the browser device (no URL, no site).
  page_engine:['cef','electron'],
@@ -82,6 +83,8 @@ const ALLOWED:Record<string,string[]>={
  fox_browse:['on','off'],
  // Order (modules/shell/order.ts): where a sent Order went, and why one ended unsent; never what was said.
  order_result:['woke','stored','failed'],
+ // How the chosen Agent's description of itself ended (core/agent/agent-profile.ts).
+ profile_result:['ok','timeout','invalid','failed'],
  order_stop:['cancelled','stopped_early','left_app','speech_error','no_speech','page_closed'],
  // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/onboarding/README.md).
  tour_step:['1','2','3','4','5','6','7','8'],
@@ -99,6 +102,8 @@ export function safeDimensions(input:Row):Record<string,string> {
  const result:Record<string,string>={};
  for(const [key,values] of Object.entries(ALLOWED))if(typeof input[key]==='string')result[key]=values.includes(input[key])?input[key]:'other';
  if(typeof input.outcome_key==='string'&&/^[a-f0-9]{64}$/.test(input.outcome_key))result.outcome_key=input.outcome_key;
+ // main_stall: the code name of the host action or background task that held the main process (host/busy.ts).
+ if(typeof input.stall_task==='string')result.stall_task=stallTask(input.stall_task);
  // app_build_changed: the Build the previous launch ran (modules/shell/updates.ts), a public release number.
  if(typeof input.from_build==='string'&&/^[1-9]\d{0,4}$/.test(input.from_build))result.from_build=input.from_build;
  return result;
@@ -125,6 +130,8 @@ export class UsageAnalytics implements AnalyticsService {
  private inflight=new Map<string,AbortController>();
  private accepted=new Set<string>();
  private exceptions=new Set<string>();
+ private stalls=0;
+ private deviceInfo:DeviceClass|null=null;
  private config:{key:string,url:string,version:string,build:string,channel:string,host?:string}|null=null;
  private listeners:(()=>void)[]=[];
  constructor(host:Host,overrides:AnalyticsOverrides={}){
@@ -190,7 +197,7 @@ export class UsageAnalytics implements AnalyticsService {
   const account=this.profile(),identified=Object.keys(account).length>0;
   return {key:config.key,apiHost:INGEST_PREFIX,distinctId:this.identity(account),identified,properties:{
    surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),
-   analytics_schema:4,installation_id:this.installationID(),app_build:config.build,platform:platformName(),app_version:config.version,$geoip_disable:true}};
+   analytics_schema:4,installation_id:this.installationID(),app_build:config.build,platform:platformName(),app_version:config.version,...this.device(),$geoip_disable:true}};
  }
  /** Forwards one World page request under /ingest to PostHog. Anything else, or anything with sharing off, is dropped. */
  async ingest(request:Request):Promise<Response> {
@@ -277,6 +284,21 @@ export class UsageAnalytics implements AnalyticsService {
   }
   this.record(event,uuid(),'1',false,timing,safe);
  }
+ /** The kind of computer, on every event (core/diagnostics/device-class.ts): chip family, memory band, architecture and
+  * whether the app runs translated. Never the CPU's model string or the exact memory. */
+ private device():DeviceClass {
+  if(!this.deviceInfo){
+   let translated=false;try{translated=!!app.runningUnderARM64Translation;}catch{}
+   this.deviceInfo=deviceClass({cpuModel:os.cpus()[0]?.model??'',arch:process.arch,translated,memoryBytes:os.totalmem()});
+  }
+  return this.deviceInfo;
+ }
+ /** A second or more the main process did not answer (host/busy.ts), at most MAIN_STALL_LIMIT a run. */
+ recordMainStall(stall:{task:string,ms:number}){
+  if(!this.config||!this.enabled()||this.stalls>=MAIN_STALL_LIMIT)return;
+  this.stalls+=1;
+  this.recordProductEvent('main_stall',timingBucket(stall.ms),{stall_task:stall.task});
+ }
  /** PostHog error tracking: type, Core's failure code and sanitized frames of our own code, never the message.
   * Each distinct exception is sent once per run, at most 30 per run. */
  recordException(error:unknown,area:'main'|'renderer'|'host',operation=''){
@@ -333,7 +355,7 @@ export class UsageAnalytics implements AnalyticsService {
   if(envelope.dimensions&&typeof envelope.dimensions==='object')dimensions=envelope.dimensions;
   const properties:Row={
    surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),$session_id:this.session,analytics_schema:4,installation_id:this.installationID(),
-   app_build:config.build,platform,app_version:config.version,duration_bucket:duration,os_version:process.getSystemVersion(),
+   app_build:config.build,platform,app_version:config.version,duration_bucket:duration,os_version:process.getSystemVersion(),...this.device(),
    language:(app.getPreferredSystemLanguages()[0]??'und').split('-')[0]||'und',$set:person,$set_once:{first_profile_seen_at:isoSeconds(),...(invite?{invite_token:invite}:{})},$process_person_profile:identified,$geoip_disable:true,
    ...(invite?{invite_token:invite}:{}),...dimensions
   };

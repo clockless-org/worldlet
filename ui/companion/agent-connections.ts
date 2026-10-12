@@ -20,6 +20,15 @@ export function connectionUseLine(c:Connection):string {
  if(!use)return c.kind==='mcp'?'Not used in your Agent’s recent history.':'No conversation on it in your Agent’s history yet.';
  return `Last used ${day(use.at)}`+(use.tool?` for ${use.tool}`:'')+(use.thread?` in “${use.thread}”`:'')+'.';
 }
+const KIND_WORDS:Record<string,string>={mcp:'Tool',channel:'Chat channel',api_key:'Service key',password_vault:'Password vault',oauth:'Account',cli:'Command-line tool',email:'Mailbox',other:'Connection'};
+/** The connections and channels the Agent reported about itself, in plain words; never more than a name and a use. */
+export function reportedConnections(profile:any):{name:string;line:string;use?:string}[] {
+ if(!profile||typeof profile!=='object')return [];
+ const said=(value:unknown)=>typeof value==='string'&&value.trim()?value.trim():'';
+ const connections=(Array.isArray(profile.connections)?profile.connections:[]).map((c:any)=>({name:said(c?.name),line:KIND_WORDS[c?.kind]||'Connection',use:said(c?.usedFor)}));
+ const channels=(Array.isArray(profile.channels)?profile.channels:[]).map((c:any)=>({name:[said(c?.provider).replace(/^./,(l:string)=>l.toUpperCase()),said(c?.place)].filter(Boolean).join(' '),line:'Chat channel',use:said(c?.purpose)}));
+ return [...connections,...channels].filter(r=>r.name).slice(0,40).map(r=>r.use?r:{name:r.name,line:r.line});
+}
 export async function showAgentConnections(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const button=(label:string,action:string,run:(b:HTMLButtonElement)=>void|Promise<void>,primary=false)=>{const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';b.dataset.action=action;b.onclick=()=>{if(!b.disabled)void run(b);};return b;};
  const box=el('div','companion-settings-agent-connections'),said=el('p','companion-settings-status');said.setAttribute('role','status');
@@ -59,6 +68,16 @@ export async function showAgentConnections(target:HTMLElement,call:(action:strin
     row.append(words);
     if(harness.changes&&c.removable)row.append(button('Remove','remove-connection',()=>confirmChange(row,harness,{remove:c.id},'Remove',`remove ${c.name}`,`${c.name} was removed from ${harness.title}.`)));
     rows.append(row);
+   }
+   // What the Agent itself said it uses when it described itself (core/agent/agent-profile.ts): vaults, mailboxes,
+   // chat channels that are not tools Worldlet can read. Listed only; they stay in the Agent.
+   const told=await call('agentHarness',{operation:'profile',id:harness.harness}).then(r=>r?.profile,()=>null);
+   if(!current())return;
+   const reported=reportedConnections(told).filter(r=>!harness.connections.some(c=>c.name.toLowerCase()===r.name.toLowerCase()));
+   for(const r of reported){
+    const row=el('div','companion-settings-row'),words=el('div');row.dataset.reported=r.name;
+    words.append(el('strong','',r.name),el('span','',r.line),el('span','companion-settings-quiet',r.use||`${harness.title} told Worldlet it uses this.`));
+    row.append(words);rows.append(row);
    }
    if(!harness.changes){rows.append(el('p','companion-info-note',harness.note||`Change these in ${harness.title} itself.`));continue;}
    const form=el('div','companion-settings-row'),fields=el('div');form.dataset.add=harness.harness;

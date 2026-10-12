@@ -331,10 +331,15 @@ function hermesMessages(db:DatabaseSync){
  const summary=columns.has('_compressed_summary')?',_compressed_summary AS summary':'';
  return db.prepare(`SELECT role,content,timestamp${summary} FROM messages WHERE session_id=? AND role IN ('user','assistant') ORDER BY timestamp,id`);
 }
+/** The person's and the Agent's turns of the sessions `ids`, in that order. */
+function hermesTurns(messages:ReturnType<DatabaseSync['prepare']>,ids:string[]):MigrationTurn[] {
+ const turns:MigrationTurn[]=[];
+ for(const id of ids)for(const row of messages.iterate(id) as Iterable<any>){const turn=hermesTurn(row);if(turn)turns.push(turn);}
+ return turns;
+}
 function hermesConversation(messages:ReturnType<DatabaseSync['prepare']>,chain:HermesChain,budget:Budget):BroughtConversation|null {
  const sessions=[...chain.sessions].sort((a,b)=>stamp(a.started_at)-stamp(b.started_at));
- const turns:MigrationTurn[]=[];
- for(const session of sessions)for(const row of messages.iterate(String(session.id)) as Iterable<any>){const turn=hermesTurn(row);if(turn)turns.push(turn);}
+ const turns=hermesTurns(messages,sessions.map(session=>String(session.id)));
  if(!turns.length)return null;
  const named=[...sessions].reverse().find(session=>session.title)?.title;
  const title=hermesConversationTitle({title:named,source:sessions[0].source,chat:sessions[0].display_name,first:turns.find(turn=>turn.role==='user')?.text});
@@ -430,14 +435,15 @@ export function readOlderHermes(cursor:HermesCursor,left:number,home=os.homedir(
 
 /** Hermes Agent's conversations as threads, for the history service (agent-history.ts): each chain across the active
  * profile and the others, with its title, the IDs of its sessions and when it was last written to (its newest message,
- * in seconds). With `key`, that chain's conversation instead. Opened read-only; only `messages` rows of the person and
- * the Agent are read. */
-export interface HermesThread {key:string;title:string;shared?:boolean;sessions:string[];last:number}
-function hermesOpen<T>(home:string,environment:NodeJS.ProcessEnv,read:(db:DatabaseSync,profile:string|null,index:number)=>T[]):T[]|null {
+ * in seconds) and which Hermes home (profile) keeps it. Opened read-only; only `messages` rows of the person and the
+ * Agent are read. */
+export interface HermesThread {key:string;title:string;shared?:boolean;sessions:string[];last:number;home:number}
+function hermesOpen<T>(home:string,environment:NodeJS.ProcessEnv,read:(db:DatabaseSync,profile:string|null,index:number)=>T[],only?:number):T[]|null {
  const root=discoverHermes(home,environment);
  if(!root)return null;
  const found:T[]=[];
  hermesHomes(root,otherHermesProfiles(root,home,environment)).forEach((entry,index)=>{
+  if(only!==undefined&&index!==only)return;
   const file=path.join(entry.root,'state.db');
   if(!fs.existsSync(file)||!inside(file,entry.root))return;
   let db:DatabaseSync|null=null;
@@ -454,7 +460,7 @@ export function hermesThreads(home=os.homedir(),environment=process.env):HermesT
    const last=Math.max(chain.last,...sessions.map(session=>stamp((newest.get(String(session.id)) as any)?.t)));
    const named=[...sessions].reverse().find(session=>session.title)?.title,opening=(first.get(String(sessions[0].id)) as any)?.content;
    const title=hermesConversationTitle({title:named,source:sessions[0].source,chat:sessions[0].display_name,first:typeof opening==='string'?opening:null});
-   return {key:chain.key,title:profile?profile+' · '+title:title,...sessions.some(session=>hermesSharedChat(session.chat_type))?{shared:true}:{},sessions:sessions.map(session=>String(session.id)),last};
+   return {key:chain.key,title:profile?profile+' · '+title:title,...sessions.some(session=>hermesSharedChat(session.chat_type))?{shared:true}:{},sessions:sessions.map(session=>String(session.id)),last,home:index};
   });
  });
 }
@@ -473,12 +479,14 @@ export function hermesStateFolders(home=os.homedir(),environment=process.env):st
  const root=discoverHermes(home,environment);
  return root?hermesHomes(root,otherHermesProfiles(root,home,environment)).map(entry=>entry.root):[];
 }
-export function hermesThread(key:string,home=os.homedir(),environment=process.env):BroughtConversation|null {
- return hermesOpen(home,environment,(db,profile,index)=>{
-  const chain=hermesChains(db,profile,index).find(chain=>chain.key===key);
-  const conversation=chain?hermesConversation(hermesMessages(db),chain,newBudget()):null;
-  return conversation?[conversation]:[];
- })?.[0]??null;
+/** One listed thread's conversation. It reads the listed sessions' messages from that thread's own home only: the
+ * history check reads threads one by one on the main process, and building every chain again for each thread made a
+ * first read of a large `state.db` cost seconds per check. */
+export function hermesThread(thread:HermesThread,home=os.homedir(),environment=process.env):BroughtConversation|null {
+ return hermesOpen(home,environment,db=>{
+  const turns=hermesTurns(hermesMessages(db),thread.sessions);
+  return turns.length?[{key:thread.key,title:thread.title,turns:keep(turns,newBudget())}]:[];
+ },thread.home)?.[0]??null;
 }
 
 /** Counts for the setup question, without reading transcripts. */

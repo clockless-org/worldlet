@@ -23,11 +23,13 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
 import {surveyOpenClaw} from './openclaw-files.ts';
+import {describeAgent,readAgentProfile,writeAgentProfile,type AgentProfileResult} from './agent-profile.ts';
+import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {surveyAgentHistory} from './agent-files.ts';
 import {readLocalAgentMemory,writeAdopted} from './local-memory.ts';
 import {RemoteHarnessAdapter} from './remote-harness.ts';
@@ -279,7 +281,8 @@ function installedVersion(install:LocalHarnessInstall,fresh=false):Promise<strin
 }
 /** What setup hears while Hermes Agent is installed (`install-hermes`) or signs in to ChatGPT (`sign-in-hermes`). */
 /** How the short turn that proves a chosen Agent answers ended, when setup let it run after the switch (`checkLater`). */
-export type AgentCheckEvent={id:LocalHarnessId;ok:true}|{id:LocalHarnessId;ok:false;message:string};
+/** How the proving turn ended; then, for an Agent that describes itself (core/agent/agent-profile.ts), what it said. */
+export type AgentCheckEvent={id:LocalHarnessId;ok:true}|{id:LocalHarnessId;ok:false;message:string}|{id:LocalHarnessId;profile:AgentProfile|null;result:AgentProfileResult;ms:number};
 export type HermesSetupEvent=({stage:'install'}&HermesInstallProgress)|{stage:'sign-in';url:string;code:string|null};
 export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,noAgent:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{},release:(id:LocalHarnessId)=>Promise<void>=async()=>{},onAgentCheck:(event:AgentCheckEvent)=>void=()=>{}){
  let signingIn:AbortController|null=null;
@@ -363,6 +366,10 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   if(request.operation==='cancel-sign-in'){signingIn?.abort();return {ok:true};}
   // The Agent an install script named (`--connect=<id>`), handed to first-run setup once; setup decides what it means.
   if(request.operation==='requested')return {id:takeRequested()};
+  // What the chosen Agent said about itself, once it has (`select`).
+  if(request.operation==='profile')return {profile:isLocalHarnessId(request.id)?readAgentProfile(context.root,request.id):null};
+  // The catalog Applets the chosen Agent pointed to, which each Area recommends first (core/applets/area-recommend.ts).
+  if(request.operation==='suggestions'){const install=selectedInstall(context.root);return {keys:install?agentProfileApplets(readAgentProfile(context.root,install.id),WORLD_APPS.map(app=>app.key)):[]};}
   if(request.operation==='select'){
    if(!isLocalHarnessId(request.id))throw new WorldletError('Choose an Agent found on this computer.');
    const install=locateLocalHarnesses().find(item=>item.id===request.id&&item.id!=='codex'&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
@@ -392,7 +399,15 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    if(!later)await prove();
    writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id,error=>context.failure(error,'foxMove'));
    await switchTo(adapter);
-   if(later)void prove().then(()=>onAgentCheck({id:install.id,ok:true}),error=>onAgentCheck({id:install.id,ok:false,message:(error as Error).message}));
+   // Once it answers, it describes itself in the background (owner request 2026-10-11); setup never waits for that.
+   const describe=async()=>{
+    if(!agentProfileAsked(install.id))return;
+    const started=Date.now(),{profile,result}=await describeAgent(()=>new LocalHarnessRuntime(install),adapter.home('setup'));
+    if(profile)try{writeAgentProfile(context.root,install.id,profile);}catch{}
+    onAgentCheck({id:install.id,profile,result,ms:Date.now()-started});
+   };
+   if(later)void prove().then(()=>{onAgentCheck({id:install.id,ok:true});return describe();},error=>onAgentCheck({id:install.id,ok:false,message:(error as Error).message}));
+   else void describe();
    return {ok:true,id:install.id,title:install.title,...connect?{connected:true}:{},...later?{checking:true}:{}};
   }
   // The provider Fox's Agent answers with (core/agent/model-providers.ts): `providers` lists the ones it supports, which

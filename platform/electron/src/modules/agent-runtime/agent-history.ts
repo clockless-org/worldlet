@@ -131,7 +131,7 @@ function listing(source:MigrationSource,home:string,environment:NodeJS.ProcessEn
  }
  if(source==='hermes'){
   if(!discoverHermes(home,environment))return null;
-  return ()=>(hermesThreads(home,environment)??[]).map(chain=>({thread:{id:chain.key,title:chain.title,...chain.shared?{shared:true}:{},updatedAt:chain.last*1000},lazy:false,sessions:chain.sessions,cwd:null,read:()=>hermesThread(chain.key,home,environment)}));
+  return ()=>(hermesThreads(home,environment)??[]).map(chain=>({thread:{id:chain.key,title:chain.title,...chain.shared?{shared:true}:{},updatedAt:chain.last*1000},lazy:false,sessions:chain.sessions,cwd:null,read:()=>hermesThread(chain,home,environment)}));
  }
  if(!fs.existsSync(openClawState(home,environment)))return null;
  return ()=>(openClawThreads(home,environment)??[]).map(({sessions,last,...thread})=>({thread:{...thread,updatedAt:last},lazy:false,sessions,cwd:null,read:()=>{const value=openClawThread(thread.id,home,environment);return value?{key:thread.id,title:value.title,turns:value.turns}:null;}}));
