@@ -1,6 +1,6 @@
 import {renderHomeOpen,type HomeOpenState} from '../applets/index.ts';
 import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../core/applets/index.ts';
-import {renderMailOpen,renderMeetingsOpen,mountAppletScene,type AppletScene} from '../applets/index.ts';
+import {renderMailOpen,renderMeetingsOpen,renderSceneList,mountAppletScene,type AppletScene} from '../applets/index.ts';
 import {weatherGlyph} from './environment/weather-forecast.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {calendarDay} from './applet-content.ts';
@@ -9,10 +9,10 @@ export function createAppletStage(host,onPick){
  const panel=document.createElement('section');panel.className='pixi-applet-stage';panel.hidden=true;panel.setAttribute('aria-label','Thing contents');host.append(panel);
  const focus=document.createElement('aside');focus.className='pixi-selected-item';focus.hidden=true;host.append(focus);
  const mailNav=document.createElement('nav');mailNav.className='mail-reader-switch';mailNav.setAttribute('aria-label','Browse emails');mailNav.hidden=true;host.append(mailNav);
- // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail, Calendar, Notes
- // and Reminders so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; the others' items
+ // Applets the theme paints a scene for draw through the shared scene renderer (ui/applets/scene): Mail, Calendar, Notes,
+ // Reminders and Messages so far. Mail's scene stays while a letter is read, so its reader sits on the same painted paper; the others' items
  // open in the shared reader.
- const SCENE_APPLETS=new Set(['gmail','google-calendar','apple-notes','apple-reminders']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
+ const SCENE_APPLETS=new Set(['gmail','google-calendar','apple-notes','apple-reminders','messages']),SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;
@@ -47,6 +47,7 @@ export function createAppletStage(host,onPick){
   const next=JSON.stringify([room.moduleId,items,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;
   if(scene){const pick=item=>{selected=item;onPick({action:'applet-item',id:item.id});};
    if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick);
+   else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick);
    else{scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);});sceneToday(scene,value);}
    scene.layout();return;}
   panel.replaceChildren();panel.dataset.installation=String(local);panel.dataset.work=String(cards);

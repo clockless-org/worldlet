@@ -86,13 +86,12 @@ await withBrowser(fileAccess,async browser=>{
  await page.getByRole('button',{name:'Restart Worldlet',exact:true}).waitFor({timeout:5000});
  // Coming back to Worldlet checks again; now the conversations show.
  await page.evaluate(()=>{(window as any).access='ok';window.dispatchEvent(new Event('worldlet:app-active'));});
- // Every conversation shows at once; past the four folios the item area scrolls instead of paging.
- await page.waitForFunction(()=>document.querySelectorAll('.pixi-stage-item').length===6);
- assert.equal(await page.locator('.pixi-open-contents[data-scroll=true]').count(),1);
+ // Every conversation shows at once, as one list on the theme's Messages scene (ui/applets/scene), which scrolls.
+ await page.waitForFunction(()=>document.querySelectorAll('.applet-scene[data-applet=messages] .scene-item').length===6);
  assert.equal((await calls('list')).length,2,'returning checks once');
  await page.screenshot({path:'/tmp/worldlet-messages-open.png'});
  // A conversation reads as bubbles; Send needs Automation and keeps the words until it is allowed.
- await page.locator('.pixi-stage-item').first().click();
+ await page.locator('.applet-scene .scene-item').first().click();
  await page.getByText('Are we still on for tennis?',{exact:true}).waitFor();
  assert.equal(await page.locator('.messages-bubble[data-from=me]').count(),1);
  await page.getByText('Alex Chen',{exact:false}).first().waitFor();
@@ -139,7 +138,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/worldlet-messages-call-done.png'});
  // A new message goes to a phone number or email the person types.
  await page.locator('#notionBack').click();
- await page.waitForFunction(()=>document.querySelectorAll('.pixi-stage-item').length===6);
+ await page.waitForFunction(()=>document.querySelectorAll('.applet-scene .scene-item').length===6);
  await page.getByRole('button',{name:'New message',exact:true}).click();
  await page.getByRole('textbox',{name:'To',exact:true}).fill('alex@example.com');
  await page.getByRole('textbox',{name:'Message to send',exact:true}).fill('Hello from my world');
