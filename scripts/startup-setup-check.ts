@@ -4,7 +4,7 @@ import path from 'node:path';
 import {tmpdir} from 'node:os';
 const platform=process.platform==='win32'?'windows':'macos';
 import {updateOnboarding} from '../core/onboarding/onboarding.ts';
-import {POPULAR_STARTERS,WORLD_APPS} from '../core/applets/index.ts';
+import {WORLD_APPS,seedAppletSelection} from '../core/applets/index.ts';
 // Every app setup can offer says what it is for in one line (demo feedback 2026-10-03); a website Applet never claims account sync.
 for(const app of WORLD_APPS){
  assert.ok(typeof app.purpose==='string'&&app.purpose.trim().length>=10&&app.purpose.length<=90&&!app.purpose.includes('\n'),'one-line purpose for '+app.key);
@@ -123,10 +123,13 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
    assert.deepEqual(await frame(),firstFrame,'The big button stays where it was');
    // The apps the World starts with, the ones found here first (the fixture Mac has Notion); starter games arrive unshown.
-   // Setup's draft, the apps found here, then the popular starters (owner decision 2026-10-11).
+   // Setup's draft, the apps found here, then four more in every area (owner Order 2026-10-12).
    const shelf=await page.locator('.setup-tile-apps .setup-app').evaluateAll((list:HTMLElement[])=>list.map(e=>e.dataset.appletId));
    if(platform==='macos')assert.equal(shelf[0],'app-notion','Apps found here come first: '+shelf.join(' '));
-   assert.deepEqual([...shelf].sort(),[...new Set([...(platform==='macos'?['app-notion']:[]),'app-browser','app-gmail','app-google-calendar',...POPULAR_STARTERS.map(key=>'app-'+key)])].sort(),'The draft, the apps found here and the popular starters show, games arrive unshown: '+shelf.join(' '));
+   const expected=new Set<string>(['app-gmail','app-google-calendar','app-browser']);seedAppletSelection(WORLD_APPS,new Set(platform==='macos'?['notion']:[]),expected,new Set());
+   const world=WORLD_APPS.filter(a=>expected.has(a.id)&&a.region!=='health').map(a=>a.id);
+   assert.ok(shelf.length===Math.min(14,world.length)&&shelf.every(id=>world.includes(id)),'The draft, the apps found here and each area\'s starters show (fourteen icons at most), games arrive unshown: '+shelf.join(' '));
+   assert.match(await page.locator('.setup-tile-apps .setup-tile-note').textContent(),new RegExp('^'+world.length+' apps'),'The tile counts every app the World starts with');
    assert.equal(await page.locator('.setup-choose-again').count(),0,'Google has nothing to choose again');
    await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-google-world-'+platform+'.png')});
    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='google_connect_failed')),'Saved native connections recover even when the original bridge reply fails');
@@ -183,7 +186,7 @@ await withBrowser(fileAccess,async browser=>{
 
   if(mode!=='existing'){
    const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
-   assert.ok(['app-gmail','app-google-calendar','app-browser','app-youtube','app-game-2048'].every(id=>result.state.onboarding.unlockedApplets.includes(id))&&!result.state.onboarding.unlockedApplets.includes('app-x'),'A first run unlocks the draft, the popular starters and the starter games: '+result.state.onboarding.unlockedApplets.join(' '));
+   assert.ok(['app-gmail','app-google-calendar','app-browser','app-youtube','app-game-2048'].every(id=>result.state.onboarding.unlockedApplets.includes(id))&&!result.state.onboarding.unlockedApplets.includes('app-x'),'A first run unlocks the draft, the area starters and the starter games: '+result.state.onboarding.unlockedApplets.join(' '));
    assert.equal(result.state.cloudConsent,mode==='google'&&platform==='macos','Only supported background source preparation saves consent during setup');
    if(platform==='macos')assert.ok(result.calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'),'Google sign-in starts background source checks before entering');
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld')?.sceneMetrics?.modules?.some(m=>m.id==='app-gmail'&&m.unlocked));
@@ -352,7 +355,7 @@ await withBrowser(fileAccess,async browser=>{
   const result=await page.evaluate(()=>({state:(window as any).fixture,calls:(window as any).calls}));
   assert.ok(!result.calls.some(c=>c.action==='connect'),'No Google sign-in');
   assert.equal(result.state.onboarding.completed,true);
-  assert.ok(result.state.onboarding.unlockedApplets.includes('app-github')&&!result.state.onboarding.unlockedApplets.includes('app-x'),'The app brought from the Agent comes along, with the popular starters only: '+result.state.onboarding.unlockedApplets.join(' '));
+  assert.ok(result.state.onboarding.unlockedApplets.includes('app-github')&&!result.state.onboarding.unlockedApplets.includes('app-x'),'The app brought from the Agent comes along, with the area starters only: '+result.state.onboarding.unlockedApplets.join(' '));
   assert.ok(!result.calls.some(c=>c.action==='onboarding'&&c.operation==='checkMail'),'No Google sources to read');
   assert.deepEqual(result.calls.filter(c=>c.action==='foxPreferenceChange'&&c.setting==='daily_routines').map(c=>c.value),[true],'Today’s prep and Wrap up today are on');
   const analytics=result.calls.filter(c=>c.action==='usageEvent').map(c=>c.event);
