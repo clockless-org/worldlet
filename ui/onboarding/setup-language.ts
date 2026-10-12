@@ -95,6 +95,8 @@ const copy:Record<string,string[]>={
  'Waiting for ChatGPT…':['等待 ChatGPT…','ChatGPT を待っています…','Esperando a ChatGPT…'],
  'Enter this code: ':['输入这个代码：','このコードを入力：','Introduce este código: '],
  'Check again':['重新检测','もう一度確認','Volver a comprobar'],
+ 'Update Worldlet':['更新 Worldlet','Worldlet をアップデート','Actualizar Worldlet'],
+ 'Restarting…':['正在重启…','再起動しています…','Reiniciando…'],
  'Your agent on another computer':['你在另一台电脑上的 Agent','別のコンピュータのエージェント','Tu agente en otro ordenador'],
  'My Agent is on another computer':['我的 Agent 在另一台电脑上','エージェントは別のコンピュータにあります','Mi agente está en otro ordenador'],
  'Use an agent on this computer':['使用这台电脑上的 Agent','このコンピュータのエージェントを使う','Usar un agente de este ordenador'],

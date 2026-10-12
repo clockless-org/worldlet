@@ -93,6 +93,13 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   render();
  };
  window.addEventListener('worldlet:agent-check',onAgentCheck);
+ // A Worldlet update made ready while setup is open: Update lives in the World, which setup covers, so someone who
+ // cannot get past setup never saw it and stayed on the old build (Mac Beta 4180, 2026-10-11). Setup offers it too.
+ let appUpdate:any=state.appUpdate||null,updatingApp=false;
+ const onAppUpdate=(event:Event)=>{appUpdate=(event as CustomEvent).detail||null;if(!disposed&&!busy)render();};
+ window.addEventListener('worldlet:app-update',onAppUpdate);
+ const appUpdateButton=node('button','','setup-link setup-app-update') as HTMLButtonElement;appUpdateButton.type='button';
+ appUpdateButton.onclick=()=>{if(updatingApp)return;updatingApp=true;render();void call('appUpdate').then(value=>{appUpdate=value;},()=>{}).finally(()=>{updatingApp=false;if(!disposed)render();});};
  /** What the chosen Agent said about itself (core/agent/agent-profile.ts), arriving after its proving turn while setup
   * goes on: the connections and channels its files do not show join the Connections tile, the skills it named count
   * when its files held fewer, and the Applets it points to join the World's selection (owner request 2026-10-11). */
@@ -330,7 +337,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  }
  // Setup is over: its draft, timers and listeners go.
  function dispose(){
-  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('worldlet:agent-check',onAgentCheck);
+  localStorage.removeItem(key);disposed=true;clearTimeout(revealTimer);clearInterval(chatterTimer);window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);window.removeEventListener('worldlet:connect-agent',onConnectRequest);window.removeEventListener('worldlet:hermes-setup',onHermesSetup);window.removeEventListener('worldlet:agent-check',onAgentCheck);window.removeEventListener('worldlet:app-update',onAppUpdate);
  }
  async function finish(){
   if(!ready())throw Error('Connect Google to enter your world.');
@@ -754,7 +761,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   // The same words stay the same element, so a screen reader hears a message once.
   const said=message?message.className+'|'+message.textContent:'';
   if(status.dataset.said!==said){status.dataset.said=said;status.replaceChildren(...message?[message]:[]);}
-  place(footer,[status,primary]);
+  const offerUpdate=appUpdate?.visible===true&&appUpdate.enabled===true&&['ready','installing'].includes(appUpdate.state);
+  if(offerUpdate){const text=t(updatingApp||appUpdate.state==='installing'?'Restarting…':'Update Worldlet');if(appUpdateButton.textContent!==text)appUpdateButton.textContent=text;appUpdateButton.title=String(appUpdate.detail||'');appUpdateButton.disabled=updatingApp;}
+  place(footer,[status,primary,...offerUpdate?[appUpdateButton]:[]]);
   place(panel,[...parts,footer]);
   // The chosen card travels to the left (owner request 2026-10-09).
   if(importing&&flipFrom){

@@ -491,6 +491,13 @@ await withBrowser(fileAccess,async browser=>{
     assert.equal(await page.getByRole('button',{name:'Enter your world',exact:true}).isEnabled(),true);
     assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.checkLater)),[true],'Setup does not wait for the answer check');
    }
+   // An update made ready while setup is open is offered here too: the World's Update dock is not there yet.
+   if(scenario==='check-fails'){
+    assert.equal(await page.locator('.setup-app-update').count(),0,'no update, no offer');
+    await page.evaluate(()=>(window as any).worldletAppUpdate({state:'ready',label:'Update',detail:'Worldlet 2026.1012.4330 is ready.',visible:true,enabled:true}));
+    await page.getByRole('button',{name:'Update Worldlet'}).click();
+    assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='appUpdate')),'Update Worldlet applies the prepared update');
+   }
   }else{
    const message=scenario==='missing'?'Hermes Agent isn’t installed on this computer.':'OpenClaw did not answer.';
    await page.getByText(message,{exact:true}).waitFor();
