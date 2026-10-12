@@ -381,7 +381,7 @@ try{
  const fake:TrayFactory=()=>{const tray={tooltip:'',menu:null as Menu|null,click:()=>{},destroyed:false};trays.push(tray);
   return {setToolTip:text=>{tray.tooltip=text;},setContextMenu:menu=>{tray.menu=menu;},on:(_event,listener)=>{tray.click=listener;},destroy:()=>{tray.destroyed=true;}};};
  let quits=0,closeQuits=0,unfinished=true;
- const desktop:DesktopCompanion=new DesktopCompanion(live,companionEntry(live,{back:()=>{void desktop.restoreWorld();},quit:()=>{quits+=1;}},'win32',fake),{quit:()=>{closeQuits+=1;},unfinished:()=>unfinished,follows:false});
+ const desktop:DesktopCompanion=new DesktopCompanion(live,companionEntry(live,{back:()=>{void desktop.restoreWorld();},quit:()=>{quits+=1;}},'win32',fake),{quit:()=>{closeQuits+=1;},unfinished:()=>unfinished,follows:false,hideApp:()=>{}});
  desktop.attach();
  // Until onboarding is over, closing quits and Fox does not stay on the desktop (owner request 2026-10-04).
  assert(desktop.shouldKeepOpen(),'closing during onboarding keeps the window from merely closing');
@@ -435,7 +435,7 @@ try{
   let front=true,busy=false,unfinished=true;
   const trays:string[]=[];
   const fake:TrayFactory=()=>{trays.push('shown');return {setToolTip:()=>{},setContextMenu:()=>{},on:()=>{},destroy:()=>{}};};
-  const desktop=new DesktopCompanion(live,companionEntry(live,noop,'win32',fake),{quit:()=>{},unfinished:()=>unfinished,inFront:()=>front,follows:true});
+  const desktop=new DesktopCompanion(live,companionEntry(live,noop,'win32',fake),{quit:()=>{},unfinished:()=>unfinished,inFront:()=>front,follows:true,hideApp:()=>{}});
   desktop.keepInWorld(()=>busy);
   desktop.attach();world.showInactive();
   const away=async()=>{world.emit('blur');for(let i=0;i<20&&!desktop.isDesktop;i++)await new Promise(resolve=>setTimeout(resolve,50));};
@@ -451,7 +451,8 @@ try{
   assert.equal(trays.length,0,'the World keeps its taskbar button, so no tray icon');
   // Fox's hide button (owner Order 2026-10-12): Fox goes away and stays away until the World is opened again.
   desktop.hide();
-  assert(desktop.isDesktop&&desktop.isHidden,'hiding puts Fox away without bringing the World forward');
+  assert(desktop.isDesktop&&desktop.isHidden&&!world.isVisible(),'hiding puts Fox and the World away; neither comes forward');
+  assert.equal(trays.length,1,'the tray (Windows) is the way back while both are away');
   world.emit('blur');await new Promise(resolve=>setTimeout(resolve,250));
   assert(desktop.isHidden,'another app coming to the front again does not bring a hidden Fox back');
   world.emit('focus');await new Promise(resolve=>setImmediate(resolve));
@@ -466,7 +467,7 @@ try{
   const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
   world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
   const page={...host.page,ready:()=>true,call:async(name:string)=>{if(name==='worldletCompanionGeometry'){world.destroy();return {x:10,y:10,width:120,height:140};}}} as Host['page'];
-  const desktop=new DesktopCompanion({...host,window:()=>world,worldView:()=>view,page},companionEntry(host,noop,'darwin'),{quit:()=>{},unfinished:()=>false,follows:false});
+  const desktop=new DesktopCompanion({...host,window:()=>world,worldView:()=>view,page},companionEntry(host,noop,'darwin'),{quit:()=>{},unfinished:()=>false,follows:false,hideApp:()=>{}});
   await desktop.showDesktop(true);
   assert(!desktop.isDesktop&&desktop.panelBounds()===null,'a World destroyed mid-detach stays home');
   desktop.stop();if(!view.webContents.isDestroyed())view.webContents.close();
