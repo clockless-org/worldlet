@@ -449,8 +449,14 @@ try{
   assert(desktop.isDesktop&&desktop.panelBounds(),'another app in front puts Fox on the desktop');
   assert(world.isVisible()&&!world.contentView.children.includes(view),'the World window stays where it was while Fox is out');
   assert.equal(trays.length,0,'the World keeps its taskbar button, so no tray icon');
+  // Fox's hide button (owner Order 2026-10-12): Fox goes away and stays away until the World is opened again.
+  desktop.hide();
+  assert(desktop.isDesktop&&desktop.isHidden,'hiding puts Fox away without bringing the World forward');
+  world.emit('blur');await new Promise(resolve=>setTimeout(resolve,250));
+  assert(desktop.isHidden,'another app coming to the front again does not bring a hidden Fox back');
   world.emit('focus');await new Promise(resolve=>setImmediate(resolve));
   assert(!desktop.isDesktop&&world.contentView.children.includes(view),'bringing the World back to the front brings Fox back into it');
+  assert(!desktop.isHidden,'opening the World ends the hiding');
   desktop.stop();
   console.log('PASS another app in front puts Fox on the desktop; the World coming back brings it home');
  }

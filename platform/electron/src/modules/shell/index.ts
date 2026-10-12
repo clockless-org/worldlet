@@ -190,6 +190,7 @@ export function installShell(host:Host){
   desktopCompanionSize:request=>{companion.setBounds(request.rect);return {ok:true};},
   desktopCompanionDrag:request=>{if(request.phase==='start')companion.beginDrag();else companion.endDrag();return {ok:true};},
   desktopCompanionState:()=>({enabled:companion.isDesktop}),
+  desktopCompanionHide:()=>{companion.hide();return {ok:true};},
   // The timing stays in logs/fox-timing.jsonl; PostHog gets only its buckets (core foxTimingEvent), to see Fox slowing down.
   foxTiming:request=>{try{const timing=foxTimingEvent(recordFoxTiming(store.root,request));if(timing)analytics.recordProductEvent(timing.event,timing.duration,timing.dimensions);}catch{}return {ok:true};},
   appUpdate:request=>updates.activate(request),

@@ -18,3 +18,17 @@ html.desktop-companion,html.desktop-companion body{background:transparent!import
 .desktop-companion #notionHUD{transform:var(--companion-desktop-transform,translateX(-50%))!important;transition:none!important}
 .desktop-companion .companion-avatar{cursor:grab}
 .desktop-companion .is-dragging-fox .companion-avatar{cursor:grabbing}
+/* Fox's hide button (owner Order 2026-10-12): only on the desktop, at Fox's shoulder, in the same frosted glass as the
+   buttons beside Fox; it shows while the pointer is on Fox. It always takes its place, so the native crop never
+   changes when it shows. */
+.companion-hide-button{display:none}
+.desktop-companion #notionWorld .companion-pet>.companion-hide-button{
+ display:grid;place-items:center;position:absolute;top:0;right:-6px;left:auto;bottom:auto;z-index:2;box-sizing:border-box;width:26px;height:26px;min-width:0;min-height:0;margin:0;padding:0;
+ border:1px solid var(--system-glass-line);border-radius:50%;background:var(--system-glass-fill);color:var(--hud-scene-ink,#fffdf4);
+ box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);
+ opacity:0;transform:none;transition:opacity .15s ease-out;cursor:pointer;pointer-events:auto;appearance:none
+}
+.desktop-companion #notionWorld .companion-pet>.companion-hide-button svg{width:14px;height:14px;filter:drop-shadow(0 1px 2px #14251b99)}
+.desktop-companion #notionWorld .companion-pet:hover>.companion-hide-button,.desktop-companion #notionWorld .companion-pet>.companion-hide-button:focus-visible{opacity:1}
+.desktop-companion #notionWorld .companion-pet>.companion-hide-button:hover{background:var(--system-glass-hover)}
+.desktop-companion .is-dragging-fox .companion-hide-button{opacity:0!important}

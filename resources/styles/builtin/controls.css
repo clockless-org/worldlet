@@ -155,8 +155,8 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 @media(min-width:801px){#notionWorld.native-console:is([data-detail-open=true],[data-depth=object]):not(.compact-viewport):not(.is-typing) .companion-dialogue{bottom:calc(204px + var(--fox-tag-room,0px))}}
 /* The bar has two sizes (owner Order 2026-10-08): small at rest, larger while typing or while the pointer is on it
    or on Fox (owner request 2026-10-12). */
-#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:232px;--companion-bar-tools:36px}
-#notionWorld.native-console:is([data-entry-expanded=true],[data-entry-hover=true],[data-entry-held=true]) .companion-text-entry{--companion-bar-width:300px}
+#notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:232px;--companion-bar-open:300px;--companion-bar-tools:36px}
+#notionWorld.native-console:is([data-entry-expanded=true],[data-entry-hover=true],[data-entry-held=true]) .companion-text-entry{--companion-bar-width:var(--companion-bar-open)}
 /* At rest the bar says only “Message <Agent>” in the same frosted glass as the buttons beside Fox, so it blends with
    the scene without hiding it (owner Order 2026-10-12). Send shows only once there is something to send. */
 #notionWorld.native-console:not([data-entry-expanded=true],[data-entry-hover=true]) .companion-text-entry #notionCommand:has(#notionInput:placeholder-shown) #notionSend{display:none}
@@ -436,7 +436,7 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console .companion-text-entry #notionCommand:has(#notionInput:placeholder-shown) #notionSend.companion-send-button{opacity:.45}
 /* While the microphone listens the bar opens to its typing width and works like Claude's: ✕ at its left, a dotted wave
    (native-chat.ts paints each dot's height from the voice, the newest at the right), Stop, and the microphone as Send. */
-#notionWorld.native-console .companion-text-entry[data-voice-edit=true]{--companion-bar-width:300px}
+#notionWorld.native-console .companion-text-entry[data-voice-edit=true]{--companion-bar-width:var(--companion-bar-open)}
 #notionWorld.native-console .companion-text-entry[data-voice-edit=true]{--companion-bar-tools:74px;--companion-bar-lead:40px}
 #notionWorld.native-console .companion-voice-controls>.companion-voice-cancel{position:absolute;top:4px;right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 44px);transition:right .22s ease-out}
 #notionWorld.native-console .companion-voice-controls>:is(.companion-voice-cancel,.companion-voice-stop){display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;min-height:36px;padding:0;color:var(--hud-scene-ink,#fffdf4);cursor:pointer}
