@@ -33,7 +33,7 @@ The Dev tests run in [the Release workflow](../.github/workflows/release.yml) as
 
 A release machine records a passed channel on the commit as the status `worldlet/alpha-mac`, `worldlet/alpha-windows`, `worldlet/beta-mac` or `worldlet/beta-windows`, and promotion checks that platform's status before it publishes it. Each platform is promoted on its own (`platform` input of the Release workflow; owner decision 2026-10-10), so Mac and Windows can serve different Builds.
 
-A failure opens one Issue per channel, platform and set of failing gates or jobs, labelled `test-failure`, `stage:dev|alpha|beta` and `platform:linux|mac|windows`, with the run ([ci-failure-report.mjs](../scripts/ci-failure-report.mjs)). The same failure again adds a comment instead of another Issue, and the next pass closes it. A cloud AI session fixes these Issues with ordinary pull requests.
+A failure opens one Issue per channel, platform and set of failing gates or jobs, labelled `test-failure`, `stage:dev|alpha|beta` and `platform:linux|mac|windows`, with the run ([ci-failure-report.mjs](../scripts/ci-failure-report.mjs)). The same failure again adds a comment instead of another Issue, a different failure on the same channel and platform closes the older Issue as superseded, so at most one stays open per channel and platform, and the next pass closes it. A cloud AI session fixes these Issues with ordinary pull requests.
 
 Gates that need a signed-in Codex CLI (`test:onboarding`, `test:agent:local`, `test:ui:review`) report SKIP where no Codex is signed in, and `test:android` stays advisory.
 
