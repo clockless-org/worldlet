@@ -10,25 +10,35 @@
     "scripts/fixtures/applet-scene-preview/samples.js": "6a27cf7a5f57c283bb89cced6271683135c9ed37d0b46a8248b2e1a05c2ef1c6",
     "scripts/fixtures/applet-scene-preview/samples.css": "3cec177fe0be0aa236023a10e475d28b7a402c4611c9a2cc3eb77b2d031125a2",
     "scripts/fixtures/applet-scene-preview/index.html": "64e320da7ee406eea2c4a618fd59c53141e5fe13ecc7b3cae3f1d1aadb865e6b",
-    "ui/theme-packages/village/presentation.json": "1febc5e191a5e918a451cab0d2d6c2613ce0c18ef522e78fc612edc8d3bcc885",
+    "ui/theme-packages/village/presentation.json": "5ba3dc92e00ad1785f3811a59ec5a86a00d7550e63576d13d166d9a8efdb9b04",
     "resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json": "2a2f666e54b7fea85a1511fe9235a78115fc06b1ce69123068ab4f2e56cf380e",
     "ui/applets/apple-notes/open.ts": "32c1b9bb9041f7c478ea51befdaf148385d29cd4cc2cc2018d9c291b7c48b9e8",
     "ui/applets/apple-notes/open.css": "6c9c66d2dd0d6a5ec19d4de1144c9d195d7056dbe18a7a7733105e7035b1b256",
     "scripts/fixtures/notes-notebook/main.ts": "1ad6078b3ec5d169e4c530ea57ddc1fdab4903b6fb668672c70ecc88a36ee07d",
-    "scripts/notes-notebook-preview.ts": "0676d3e1596cfc44be47ff87b2052687517cb25949a24e28237cdb5bfc0b4bc5"
+    "scripts/notes-notebook-preview.ts": "0676d3e1596cfc44be47ff87b2052687517cb25949a24e28237cdb5bfc0b4bc5",
+    "scripts/core-paper-preview.ts": "89681fe91df415180d5afad60f49e26900951eaf0c884531961d41035a2838eb",
+    "scripts/fixtures/core-paper-applets/main.ts": "3329fc022081731c45f316815a030d4a0be4ccc17242b539295df6edab519861",
+    "ui/applets/gmail/open.ts": "7a64f49d71bc887cb262af146026f1d861d1db8199e7c9781195e7b0bb14a64c",
+    "ui/applets/gmail/focus.ts": "c67c475c7fd2afda0010de19ac02c967a3047744569f68d53a8166ca80fea14e",
+    "ui/applets/gmail/open.css": "510ed9afa8a16f4664c95b41199e240ac094f0a762e6ad70ea6aaaa9dca19dc3",
+    "ui/applets/apple-reminders/open.ts": "cedfc3d3ee6bd889c958d9d7f6b534db3527181ade236b5e13fce6d44b08cf38",
+    "ui/applets/apple-reminders/open.css": "811808b2a7d33ad95f76c819e9081acbd0496a1321155521e25d976c9cfc8e10",
+    "ui/applets/google-calendar/open.css": "b0714880007589c51f3158fdb5bcc97cf28fc0ec2cd37ba97e31965684a6976d",
+    "ui/applets/google-calendar/grid.ts": "ab2ec41c8c8b78a29ebc38c314ac454c8efc3bf8a423bbfbb7a094114bce57bf",
+    "ui/applets/home-open.ts": "b96568220d6ae6e7641926a94bbb768c1d191c9d049f08f67e8052dd532fd386"
   },
   "images": [
     {
       "id": "google-calendar",
       "title": "Calendar",
       "file": "google-calendar.webp",
-      "sha256": "754b0008461c1f886a2c06db46232ed67ece04c18b591e49901ea476d4a93721"
+      "sha256": "a6f310d9cd1b7057debed3e97d16ca0d622180a8b0a64d2f22448518dbdc04bb"
     },
     {
       "id": "gmail",
       "title": "Mail",
       "file": "gmail.webp",
-      "sha256": "acdf1a9b172b89c101a6cac8923d068ad51970fba5d92f8f1721ca13987122fd"
+      "sha256": "2d05b6a6b78656490ad8fcacef8e619d0c656780c3b7531aee42bba59eac5314"
     },
     {
       "id": "apple-notes",
@@ -40,7 +50,7 @@
       "id": "apple-reminders",
       "title": "Reminders",
       "file": "apple-reminders.webp",
-      "sha256": "788ab67db29b062e3704a7f79a1ca9ba36a2b8958f4c23fca7294cffc86fb665"
+      "sha256": "74d247edafa46fe9e906b72a2edccd5d9efd8315a0b218f10030b7e99f1e3ef1"
     },
     {
       "id": "files",

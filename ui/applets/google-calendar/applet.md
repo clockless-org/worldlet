@@ -47,3 +47,9 @@ Checks: `scripts/calendar-events-check.ts` (rules, repeats, alerts, world.sqlite
 Use the [shared runtime status and lifecycle contract](../../../docs/APPLET-RUNTIME.md#status-and-presentation).
 No Applet-specific status override. The mode and capability declarations above
 never imply additional authorization or background work.
+
+## Village paper calendar
+
+The registered garden calendar has a clean paper surface, red binding and brass rings. [open.css](open.css) styles the existing live day/week/month grid on that surface. The week keeps all seven days; the small separate hanging page displays today's date. Existing local-event creation, editing, move/resize, repeat, delete and undo behavior stays in [grid.ts](grid.ts); imported events remain read-only.
+
+Preview: build the native UI, run `node scripts/core-paper-preview.ts`, serve the repository root and open `/output/core-paper-applets/?applet=google-calendar`. All preview events are fictional.

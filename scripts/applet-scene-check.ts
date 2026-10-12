@@ -21,7 +21,7 @@ try{
   return path==='/'?route.fulfill({contentType:'text/html',body:'<!doctype html>'}):route.fulfill({path:'ui/theme-packages/village'+path});});
  await page.goto('http://scene.test/');
  await page.setContent('<main id="shell" style="position:fixed;inset:0"><section id="host" style="position:absolute;inset:0"></section></main>');
- await page.addStyleTag({content:await readFile('ui/applets/scene/applet-scene.css','utf8')+await readFile('ui/applets/gmail/focus.css','utf8')});
+ await page.addStyleTag({content:await readFile('ui/applets/scene/applet-scene.css','utf8')+await readFile('ui/applets/gmail/focus.css','utf8')+await readFile('ui/applets/gmail/open.css','utf8')});
  await page.addScriptTag({content:bundle.outputFiles[0].text});
  const mount=(key:string,source:any)=>page.evaluate(([key,source])=>{const S=(window as any).Scene;(window as any).scene?.destroy();
   const scene=(window as any).scene=S.mountAppletScene(document.getElementById('host'),key,{source,shell:document.getElementById('shell')});

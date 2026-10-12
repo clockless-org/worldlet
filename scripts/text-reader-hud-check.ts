@@ -15,7 +15,7 @@ await withBrowser(fileAccess,async browser=>{
   // Start each Applet from the overview, not from the previous Applet's open reader.
   await page.evaluate(()=>location.hash='');await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');
   await page.evaluate(key=>location.hash='object=app-'+key,key);
-  const item=page.locator(`.pixi-applet-stage[data-applet="${key}"] :is(.pixi-stage-item,.scene-item,.home-leaf,.notes-row)`).first();
+  const item=page.locator(`.pixi-applet-stage[data-applet="${key}"] :is(.pixi-stage-item,.scene-item,.home-leaf,.notes-row,.reminders-task)`).first();
   // Use keyboard selection: Calendar's separately owned day grid can overlap its item hitbox.
   await item.focus();await item.press('Enter');
   if(key==='apple-notes')await page.getByRole('button',{name:'Open original',exact:true}).click();
