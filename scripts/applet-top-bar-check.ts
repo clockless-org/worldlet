@@ -174,8 +174,8 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   const {page,errors}=await open();
   for(const [key,title,scene] of [['youtube','YouTube','browser'],['spotify','Spotify','spotify']]){
    await enter(page,key,title);await page.locator('.browser-viewport').waitFor();
-   await page.locator(`.browser-scene .applet-scene[data-applet="${scene}"][data-painted=true]`).waitFor();
-   const [panel,region]=await Promise.all(['#notionContent',`.browser-scene .applet-scene[data-applet="${scene}"] .applet-scene-region[data-role=primary]`].map(s=>page.locator(s).boundingBox()));
+   await page.locator(`.panel-scene .applet-scene[data-applet="${scene}"][data-painted=true]`).waitFor();
+   const [panel,region]=await Promise.all(['#notionContent',`.panel-scene .applet-scene[data-applet="${scene}"] .applet-scene-region[data-role=primary]`].map(s=>page.locator(s).boundingBox()));
    assert(Math.abs(panel.x-region.x)<2&&Math.abs(panel.width-region.width)<2,key+' page on its scene region '+JSON.stringify({panel,region}));
   }
   assert.deepEqual(errors,[]);await page.close();
