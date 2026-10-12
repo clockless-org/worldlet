@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **273 Markdown documents** and **78 supporting documentation files**.
+Indexed: **274 Markdown documents** and **136 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -61,10 +61,10 @@ Indexed: **273 Markdown documents** and **78 supporting documentation files**.
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 31 |
-| Resource and artwork records | 69 |
+| Resource and artwork records | 70 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 78 |
+| Documentation diagrams, previews and evidence | 136 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -258,7 +258,7 @@ Indexed: **273 Markdown documents** and **78 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (69)</summary>
+<details><summary>Resource and artwork records (70)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -321,6 +321,7 @@ Indexed: **273 Markdown documents** and **78 supporting documentation files**.
 - [resources/styles/builtin/references/home-readers/README.md](../resources/styles/builtin/references/home-readers/README.md)
 - [resources/styles/builtin/references/immersive/README.md](../resources/styles/builtin/references/immersive/README.md)
 - [resources/styles/builtin/references/registered-scenes/README.md](../resources/styles/builtin/references/registered-scenes/README.md)
+- [resources/styles/builtin/references/registered-scenes/mockups/README.md](../resources/styles/builtin/references/registered-scenes/mockups/README.md)
 - [resources/styles/builtin/references/village-hud/README.md](../resources/styles/builtin/references/village-hud/README.md)
 - [resources/styles/builtin/references/youtube-web/README.md](../resources/styles/builtin/references/youtube-web/README.md)
 - [resources/themes/CONTRACT.md](../resources/themes/CONTRACT.md)
@@ -374,7 +375,7 @@ Indexed: **273 Markdown documents** and **78 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (78)</summary>
+<details><summary>Documentation diagrams, previews and evidence (136)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -435,6 +436,64 @@ Indexed: **273 Markdown documents** and **78 supporting documentation files**.
 - [resources/styles/builtin/references/registered-scenes/meetings/background.png](../resources/styles/builtin/references/registered-scenes/meetings/background.png)
 - [resources/styles/builtin/references/registered-scenes/messages/background.png](../resources/styles/builtin/references/registered-scenes/messages/background.png)
 - [resources/styles/builtin/references/registered-scenes/minesweeper/background.png](../resources/styles/builtin/references/registered-scenes/minesweeper/background.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/garden-photo.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/garden-photo.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/garden-photo.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/garden-photo.webp)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/lake-photo.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/lake-photo.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/lake-photo.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/lake-photo.webp)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/library-photo.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/library-photo.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/library-photo.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/library-photo.webp)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/linen-tab.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/linen-tab.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/linen-tab.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/linen-tab.webp)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json](../resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/market-photo.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/market-photo.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/market-photo.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/market-photo.webp)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/orchard-photo.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/orchard-photo.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/orchard-photo.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/orchard-photo.webp)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/paper-card.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/paper-card.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/paper-card.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/paper-card.webp)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/supper-photo.png](../resources/styles/builtin/references/registered-scenes/mockup-materials/supper-photo.png)
+- [resources/styles/builtin/references/registered-scenes/mockup-materials/supper-photo.webp](../resources/styles/builtin/references/registered-scenes/mockup-materials/supper-photo.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/apple-notes.webp](../resources/styles/builtin/references/registered-scenes/mockups/apple-notes.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/apple-reminders.webp](../resources/styles/builtin/references/registered-scenes/mockups/apple-reminders.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/browser.webp](../resources/styles/builtin/references/registered-scenes/mockups/browser.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/budget.webp](../resources/styles/builtin/references/registered-scenes/mockups/budget.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/clock.webp](../resources/styles/builtin/references/registered-scenes/mockups/clock.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/contacts.webp](../resources/styles/builtin/references/registered-scenes/mockups/contacts.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/daily-planner.webp](../resources/styles/builtin/references/registered-scenes/mockups/daily-planner.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/files.webp](../resources/styles/builtin/references/registered-scenes/mockups/files.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/fitness.webp](../resources/styles/builtin/references/registered-scenes/mockups/fitness.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/game-2048.webp](../resources/styles/builtin/references/registered-scenes/mockups/game-2048.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/garden.webp](../resources/styles/builtin/references/registered-scenes/mockups/garden.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/gmail.webp](../resources/styles/builtin/references/registered-scenes/mockups/gmail.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/gomoku.webp](../resources/styles/builtin/references/registered-scenes/mockups/gomoku.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/google-calendar.webp](../resources/styles/builtin/references/registered-scenes/mockups/google-calendar.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/home-care.webp](../resources/styles/builtin/references/registered-scenes/mockups/home-care.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/job-search.webp](../resources/styles/builtin/references/registered-scenes/mockups/job-search.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/journal.webp](../resources/styles/builtin/references/registered-scenes/mockups/journal.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/language.webp](../resources/styles/builtin/references/registered-scenes/mockups/language.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/manifest.json](../resources/styles/builtin/references/registered-scenes/mockups/manifest.json)
+- [resources/styles/builtin/references/registered-scenes/mockups/maps.webp](../resources/styles/builtin/references/registered-scenes/mockups/maps.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/meal-planner.webp](../resources/styles/builtin/references/registered-scenes/mockups/meal-planner.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/meetings.webp](../resources/styles/builtin/references/registered-scenes/mockups/meetings.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/messages.webp](../resources/styles/builtin/references/registered-scenes/mockups/messages.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/minesweeper.webp](../resources/styles/builtin/references/registered-scenes/mockups/minesweeper.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/music.webp](../resources/styles/builtin/references/registered-scenes/mockups/music.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/news.webp](../resources/styles/builtin/references/registered-scenes/mockups/news.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/outdoor.webp](../resources/styles/builtin/references/registered-scenes/mockups/outdoor.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/photos.webp](../resources/styles/builtin/references/registered-scenes/mockups/photos.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/podcasts.webp](../resources/styles/builtin/references/registered-scenes/mockups/podcasts.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/project-planner.webp](../resources/styles/builtin/references/registered-scenes/mockups/project-planner.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/random-game.webp](../resources/styles/builtin/references/registered-scenes/mockups/random-game.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/reading.webp](../resources/styles/builtin/references/registered-scenes/mockups/reading.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/shopping.webp](../resources/styles/builtin/references/registered-scenes/mockups/shopping.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/sleep.webp](../resources/styles/builtin/references/registered-scenes/mockups/sleep.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/snake.webp](../resources/styles/builtin/references/registered-scenes/mockups/snake.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/stocks.webp](../resources/styles/builtin/references/registered-scenes/mockups/stocks.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/sudoku.webp](../resources/styles/builtin/references/registered-scenes/mockups/sudoku.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/travel.webp](../resources/styles/builtin/references/registered-scenes/mockups/travel.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/voice-memos.webp](../resources/styles/builtin/references/registered-scenes/mockups/voice-memos.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/weather.webp](../resources/styles/builtin/references/registered-scenes/mockups/weather.webp)
+- [resources/styles/builtin/references/registered-scenes/mockups/weight-balance.webp](../resources/styles/builtin/references/registered-scenes/mockups/weight-balance.webp)
 - [resources/styles/builtin/references/registered-scenes/music/background.png](../resources/styles/builtin/references/registered-scenes/music/background.png)
 - [resources/styles/builtin/references/registered-scenes/music/icon.png](../resources/styles/builtin/references/registered-scenes/music/icon.png)
 - [resources/styles/builtin/references/registered-scenes/news/background.png](../resources/styles/builtin/references/registered-scenes/news/background.png)

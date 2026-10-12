@@ -19,3 +19,4 @@ export {mountHomeReview} from './fox-home-review.ts';
 export {helpNarration,narrateHelp} from './help-narration.ts';
 export {mountPhoneBridge} from './phone-bridge.ts';
 export {pairingQR} from './companion-phone.ts';
+export {routineTimePicker,routineWhenLine,scheduleWhen} from './agent-routines.ts';

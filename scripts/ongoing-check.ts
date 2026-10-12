@@ -2,6 +2,9 @@
 // its limits, decisions, forgetting, names and lines, and how the phone receives kept things and proposals.
 import assert from 'node:assert/strict';
 import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
+import {attentionFromAgent,conversationAttentionId} from '../core/tasks/index.ts';
+import {processedAttentionContent} from '../core/attention/attention-content.ts';
+import {validateWorldItem} from '../core/items/world-item-validation.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
 
@@ -236,5 +239,26 @@ assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
  assert.deepEqual(ongoingFromAgent(said,[alone],brought,now,undefined,'openclaw').filter(t=>t.title==='Taxes'),[],'once is enough');
  const later=ongoingFromAgent([{title:'Taxes',threads:['#taxes']}],[alone],[...brought,conversation('OpenClaw · Discord · #taxes')],now,undefined,'openclaw');
  assert.deepEqual(later.map(t=>[t.title,t.session,t.state]),[['Taxes','Taxes','declined'],['Taxes','OpenClaw · Discord · #taxes','kept']],'its conversation, brought later, takes its place');
+}
+// What the person's Agent picked out for the Attention Center at setup (core/tasks attentionFromAgent): each cites the
+// busiest conversation of that name and passes the Center's own checks; one with no conversation here waits.
+{
+ const brought=[conversation('OpenClaw · Discord · #work',{userTurns:3}),conversation('OpenClaw · Discord · #work-notes',{userTurns:9}),conversation('OpenClaw · Discord · #health'),conversation('OpenClaw · Discord · #travel')];
+ const soon=new Date((now+2*DAY)*1000).toISOString().slice(0,10);
+ const made=attentionFromAgent([
+  {group:'coming',title:'Dentist',why:'Booked last week',when:soon,thread:'#health'},
+  {group:'coming',title:'Old trip',why:'Long gone',when:'2026-01-02',thread:'#travel'},
+  {group:'doing',title:'Send the deck to Sam',why:'You promised it by Friday',thread:'work'},
+  {group:'knowing',title:'Refund came through',why:'The airline paid it back',summary:'$412 is back on the card.',thread:'#travel'},
+  {group:'doing',title:'Elsewhere',why:'Not brought yet',thread:'#garden'},
+ ],brought,now,'openclaw');
+ assert.deepEqual(made.map(m=>[m.item.kind,m.item.title,(m.item.sources as any)[0].id]),[
+  ['event','Dentist',conversationAttentionId('openclaw','OpenClaw · Discord · #health')],
+  ['task','Send the deck to Sam',conversationAttentionId('openclaw','OpenClaw · Discord · #work-notes')],
+  ['update','Refund came through',conversationAttentionId('openclaw','OpenClaw · Discord · #travel')]],'past days and conversations not here are left out');
+ assert.deepEqual(made[0].item,{kind:'event',provider:'conversations',title:'Dentist',reason:'Booked last week',summary:'Booked last week',start:soon,allDay:true,eventDisposition:'confirmed',sources:[{provider:'conversations',id:conversationAttentionId('openclaw','OpenClaw · Discord · #health'),quote:'#health'}]});
+ for(const {item} of made){const ready=processedAttentionContent(item as any);const at=(v:unknown)=>typeof v==='string'?Date.parse(v)/1000:null;validateWorldItem(ready,{start:at(ready.start),end:at(ready.end)});}
+ assert.equal(new Set(made.map(m=>m.key)).size,3);
+ assert.deepEqual(attentionFromAgent([{group:'doing',title:'Send the deck to Sam',why:'x',thread:'#work'}],brought,now,'openclaw')[0].key,made[1].key,'the same entry keeps its key, so it is made once');
 }
 console.log('PASS Ongoing things: what looks like a job, proposing and its limits, themes and the page Fox is asked for, decisions, forgetting, names and lines, kinds and their pages, the phone\'s tiles, things and proposals, and its Tasks and Journal.');

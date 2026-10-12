@@ -86,6 +86,10 @@ assert.equal(taskPanel({page:{url:'about:blank',title:''}},now,L).now.total,0,'n
  const daily=taskPanel({daily:[{kind:'summary',at:at('2026-10-10T18:00:00')},{kind:'plan',at:at('2026-10-11T07:00:00')},{kind:'plan',at:now-1}]},now,L);
  assert.deepEqual(daily.routines.rows.map(r=>[r.id,r.title,r.day,r.clock,r.by]),[['daily:summary','Wrap up today','Today','6:00 PM','Worldlet, with your Agent'],['daily:plan','Today’s prep','Tomorrow','7:00 AM','Worldlet, with your Agent']],'the summary tonight, the brief tomorrow; one due now is not planned');
  assert.equal(daily.routines.rows[1].every,'Every morning, while you use Worldlet');
+ assert.deepEqual(daily.routines.rows.map(r=>r.routine),[{daily:'summary',paused:false},{daily:'plan',paused:false}],'each card can pause its Routine');
+ // Paused (owner request 2026-10-12, "可以重启"): it stays last, saying so, so its card can resume it.
+ const paused=taskPanel({daily:[{kind:'summary',at:at('2026-10-10T18:00:00')}],dailyPaused:['plan'],jobs:[{id:'j',name:'News',kind:'prompt',paused:false,when:{cron:'0 8 * * *'}}]},now,L);
+ assert.deepEqual(paused.routines.rows.map(r=>[r.id,r.status,r.routine]),[['job:j','8:00 AM',{job:'j',when:{cron:'0 8 * * *'},kind:'prompt',paused:false}],['daily:summary','6:00 PM',{daily:'summary',paused:false}],['daily:plan','Paused',{daily:'plan',paused:true}]]);
 }
 // A turn in which Fox does something is a task named after the person's words, short.
 assert.equal(turnTaskName('\n  Book a table for four at Nopa tonight at seven please\nthanks'),'Book a table for four at Nopa tonight a…');

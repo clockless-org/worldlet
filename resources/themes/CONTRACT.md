@@ -68,7 +68,7 @@ Keep dates, messages, task state and controls out of the bitmap. The host suppli
 
 The host draws registered scenes with one shared renderer, [ui/applets/scene](../../ui/applets/scene/README.md): it lays the painting out with `fitThemeScene`, puts a live HTML element on every region and gives each region its `sceneMaterials` entry as CSS variables. An Applet fills the regions with its records and the shared controls and names no coordinate, colour or font, so a theme changes how an Applet looks without a change to the Applet. Mail is drawn this way; the other Applets keep their current pages until they move over, and the preset picker has not adopted registered surfaces yet.
 
-The [Village scene library](../styles/builtin/references/registered-scenes/README.md) includes the inventory and an interactive preview with fictional data; Applets already on the shared renderer show their real interface there.
+The [Village scene library](../styles/builtin/references/registered-scenes/README.md) includes the inventory and an interactive preview with fictional data.
 
 ### Artifacts
 

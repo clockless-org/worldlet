@@ -560,7 +560,8 @@ export function mountNotionWorld(data: World, native: any) {
    const recommended=recommendForArea({area:id,mine,removed:new Set(data.hiddenApplets||[]),installed:areaSignals.installed,suggested:areaSignals.suggested,visits:areaSignals.visits,
     apps:catalog.map(r=>({id:r.moduleId,key:r.key,category:appCategory(r),host:appWebsite(r)}))}).map(appId=>catalog.find(r=>r.moduleId===appId));
    if(recommended.length)group('Recommended',recommended);
-   // Every catalog Applet of this Area's category the person does not have here, by name, behind one button.
+   // Recommended lists every related Applet not in the World; the rest of this Area's category (ones the person removed
+   // or keeps in another Area) waits by name behind one button.
    const rest=catalog.filter(r=>appCategory(r)===id&&!(root.appletLayout.has(r.moduleId)&&r.region===id)&&!recommended.includes(r)).sort((a,b)=>a.title.localeCompare(b.title));
    if(rest.length){
     const all=button('All '+building.title+' Things ('+rest.length+')',()=>{all.remove();group('All',rest,'All '+building.title+' Things');},'region-shelf-all');
@@ -1402,7 +1403,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   // When the next brief and today's summary will be made, for the Task panel's Planned timeline (ui/hud/task-panel.ts);
   // nothing in the practice world or before the first run is over, which makes neither.
-  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn)}}));};
+  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn),paused:none?[]:(['plan','summary'] as const).filter(kind=>!routinesOn[kind])}}));};
   setTimeout(announceDaily,0);
   // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
   // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.

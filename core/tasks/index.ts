@@ -14,7 +14,7 @@ export {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoi
 export type {OngoingState,BroughtConversation,OngoingThing,OngoingDecision} from './ongoing.ts';
 export {ONGOING_KINDS,ONGOING_KIND_IDS,isOngoingKind,ongoingKind,ongoingTemplate} from './kinds.ts';
 export type {OngoingKind,OngoingKindOrGeneral,OngoingKindSpec,OngoingTemplate,OngoingTemplateEntry} from './kinds.ts';
-export {CONVERSATION_ATTENTION,conversationAttentionId,validConversationAttentionId,conversationsForAttention,conversationObservation,conversationOriginal} from './attention.ts';
+export {CONVERSATION_ATTENTION,conversationAttentionId,validConversationAttentionId,conversationsForAttention,conversationObservation,conversationOriginal,attentionFromAgent,type AgentAttentionEntry} from './attention.ts';
 export {EXTERNAL_EVENTS,externalEventAttentionId,validExternalEventAttentionId,externalEventsForAttention,externalEventObservation,externalEventOriginal,externalEventMatters,externalEventPush,channelMessageAsks,channelMessageEvent} from './external-events.ts';
 export {ongoingThemes,ongoingThemeRequest,isOngoingThemeId} from './themes.ts';
 export type {OngoingTheme} from './themes.ts';

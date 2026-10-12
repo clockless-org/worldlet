@@ -53,6 +53,10 @@ await withBrowser(fileAccess,async browser=>{
  await panel.locator('.companion-settings-list [data-setting=phone][aria-current=true]').waitFor();
  await page.screenshot({path:'/tmp/companion-phone.png'});
  await page.getByRole('button',{name:'Close companion panel'}).click();await panel.waitFor({state:'hidden'});
+ // A paired phone needs no Phone button (owner Order 2026-10-11); unpaired, it comes back.
+ const phoneStatus=(state:string)=>page.evaluate(state=>window.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:{state}})),state);
+ await phoneStatus('paired');await page.locator('.companion-side .companion-phone-button').waitFor({state:'hidden'});
+ await phoneStatus('none');await page.locator('.companion-side .companion-phone-button').waitFor();
  // The Journal lives in the World's top-left corner with today's date, the Attention Center's header (owner request
  // 2026-10-11).
  {assert.deepEqual(await page.locator('.companion-side .fox-side-button').allInnerTexts(),['Agent','Phone'],'Agent and Phone are Fox\'s side buttons');

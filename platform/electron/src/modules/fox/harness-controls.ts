@@ -81,7 +81,7 @@ export function createHarnessControls(host:Host){
     const job=read(request.job,readJobCreate),command=await found.schedule.previewCreate(job);
     return {command,confirm:jobs.add(found.harness,{create:job},command)};
    }
-   const change=read({job:request.job,action:request.change,schedule:request.schedule},readJobChange),command=await found.schedule.preview(change);
+   const change=read({job:request.job,action:request.change,schedule:request.schedule,name:request.name,prompt:request.prompt},readJobChange),command=await found.schedule.preview(change);
    return {command,confirm:jobs.add(found.harness,change,command)};
   },
   async change(confirm:unknown):Promise<Row> {

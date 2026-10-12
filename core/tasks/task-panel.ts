@@ -43,6 +43,9 @@ export type TaskRow={
  name:string;status:string;icon:string;
  /** How far along a running task is (0 to 1), only when it is known; the card's bar moves on its own otherwise. */
  progress?:number;
+ /** A Routine's own controls in its popover (owner request 2026-10-12, "routines 要可以删除可以重启可以修改"): the
+  * Agent's job as its scheduler keeps it, or which of Worldlet's two daily Routines, and whether it is paused. */
+ routine?:{job:string;when:HarnessJob['when'];kind:HarnessJob['kind'];paused:boolean}|{daily:'plan'|'summary';paused:boolean};
 };
 /** Every row of a group; the panel decides how many cards fit beside Fox. */
 export type TaskSection={rows:TaskRow[];total:number};
@@ -60,6 +63,8 @@ export type TaskPanelInput={
  fox?:readonly {source:string;text:string;at:number;name?:string}[];
  /** When Fox makes the next morning brief and today's summary (core/artifacts `dailyPlanned`, ms). */
  daily?:readonly {kind:'plan'|'summary';at:number}[];
+ /** Which of those two the person paused: each stays, saying so, so it can be resumed from its card. */
+ dailyPaused?:readonly ('plan'|'summary')[];
 };
 /** Routines reach about a week ahead, like the cron reader. */
 const AHEAD_MS=8*86_400_000;
@@ -134,23 +139,29 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   // Kelvin: "读到了四个 routine … 并没有在最后的 world 里面显示").
   if(job.paused){
    routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:'Paused',at:null,every:taskHowOften(job.when),by,open:{routine:job.id},
-    day:'Paused',clock:taskHowOften(job.when),name:clip(job.name,40),status:'Paused',icon:'clock'});
+    day:'Paused',clock:taskHowOften(job.when),name:clip(job.name,40),status:'Paused',icon:'clock',routine:{job:job.id,when:job.when,kind:job.kind,paused:true}});
    continue;
   }
   const at='cron' in job.when?nextCronRun(job.when.cron,now):'at' in job.when?job.when.at:null;
   const every='everySeconds' in job.when?routineEvery(job.when.everySeconds):'';
   const time=at!==null?planned(at,now,locale):{when:every,day:'Repeating',clock:every};
   routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:time.when,at,every:taskHowOften(job.when),by,open:{routine:job.id},
-   day:time.day,clock:time.clock,name:clip(job.name,40),status:time.when,icon:'clock'});
+   day:time.day,clock:time.clock,name:clip(job.name,40),status:time.when,icon:'clock',routine:{job:job.id,when:job.when,kind:job.kind,paused:false}});
  }
  // The two default Routines (Today's prep, Wrap up today; core/artifacts/daily.ts), from the page's daily state: Worldlet
- // asks the person's Agent at that time. A paused one is not planned, so it is not here.
+ // asks the person's Agent at that time. A paused one is not planned: it stands last, saying so, so its card can resume it.
+ const DAILY_EVERY={plan:'Every morning, while you use Worldlet',summary:'Every evening of a day you use Worldlet'} as const;
  for(const made of input.daily??[]){
   if(made.kind!=='plan'&&made.kind!=='summary'||!Number.isFinite(made.at)||made.at<=now||made.at-now>AHEAD_MS)continue;
-  const plan=made.kind==='plan',{when,day,clock}=planned(made.at,now,locale);
+  const {when,day,clock}=planned(made.at,now,locale);
   routines.push({id:'daily:'+made.kind,group:'routines',source:'fox',title:DAILY_ROUTINE_NAMES[made.kind],detail:'',when,at:made.at,
-   every:plan?'Every morning, while you use Worldlet':'Every evening of a day you use Worldlet',by:'Worldlet, with your Agent',day,clock,
-   name:DAILY_ROUTINE_NAMES[made.kind],status:when,icon:'clock'});
+   every:DAILY_EVERY[made.kind],by:'Worldlet, with your Agent',day,clock,
+   name:DAILY_ROUTINE_NAMES[made.kind],status:when,icon:'clock',routine:{daily:made.kind,paused:false}});
+ }
+ for(const kind of ['plan','summary'] as const){
+  if(!input.dailyPaused?.includes(kind))continue;
+  routines.push({id:'daily:'+kind,group:'routines',source:'fox',title:DAILY_ROUTINE_NAMES[kind],detail:'',when:'Paused',at:null,every:DAILY_EVERY[kind],by:'Worldlet, with your Agent',
+   day:'Paused',clock:DAILY_EVERY[kind],name:DAILY_ROUTINE_NAMES[kind],status:'Paused',icon:'clock',routine:{daily:kind,paused:true}});
  }
 
  // Doing now: one window each ---------------------------------------------------------------------------------------

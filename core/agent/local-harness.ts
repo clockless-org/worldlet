@@ -201,7 +201,7 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
  * reading and ends the process; `asks`: permission prompts the host puts to the person (null: declined at once);
  * `changes`: their tool calls, so `results` says what an allowed one changed (core/agent/harness-approvals.ts). */
 /** `announced`: calls to Worldlet's standing server Hermes announced before running them (HermesOwnCalls). */
-export interface LocalHarnessStream {text:string;final:string|null;error:string|null;buffered:string;outbox:string[];done:boolean;acp:{prompt:string;model:string|null;session:string|null}|null;asks:{rpc:unknown;params:unknown}[]|null;changes:ApprovalChanges|null;results:HarnessApprovalResult[];announced:HermesAnnouncedCall[]}
+export interface LocalHarnessStream {text:string;final:string|null;error:string|null;buffered:string;outbox:string[];done:boolean;acp:{prompt:string;model:string|null;session:string|null;tentative?:boolean}|null;asks:{rpc:unknown;params:unknown}[]|null;changes:ApprovalChanges|null;results:HarnessApprovalResult[];announced:HermesAnnouncedCall[]}
 export const localHarnessStream=(acp?:{prompt:string;model?:string},{ask=false}:{ask?:boolean}={}):LocalHarnessStream=>({text:'',final:null,error:null,buffered:'',outbox:[],done:false,acp:acp?{prompt:acp.prompt,model:acp.model??null,session:null}:null,asks:ask?[]:null,changes:ask?approvalChanges():null,results:[],announced:[]});
 /** The answer to a permission prompt the host held (`asks`), as the line written back to the Harness. */
 export const acpPermissionReply=(rpc:unknown,outcome:unknown)=>JSON.stringify({jsonrpc:'2.0',id:rpc,result:outcome})+'\n';
@@ -284,10 +284,11 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
    }
    const prompt=()=>state.outbox.push(rpc(3,'session/prompt',{sessionId:state.acp!.session,prompt:[{type:'text',text:state.acp!.prompt}]}));
    // 4 session/set_model, before the prompt, when a provider is chosen: a Hermes Agent too old to switch (no such
-   // method) answers with its own default; a model it refuses ends the turn with its reason.
+   // method) answers with its own default; a model it refuses ends the turn with its reason, unless the switch was only
+   // tried (`tentative`, below), when its own default answers as before.
    if(event.id===4&&state.acp){
     const failure=record(event.error);
-    if(event.error!==undefined&&failure.code!==-32601){state.error=errorText(event.error,'Hermes Agent could not switch its model.');state.done=true;return '';}
+    if(event.error!==undefined&&failure.code!==-32601&&!state.acp.tentative){state.error=errorText(event.error,'Hermes Agent could not switch its model.');state.done=true;return '';}
     prompt();return '';
    }
    if(event.error!==undefined){state.error=errorText(event.error,'Hermes Agent could not answer.');state.done=true;return '';}
@@ -295,9 +296,17 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
    if(event.id===2&&state.acp){
     if(typeof result.sessionId!=='string'){state.error='Hermes Agent did not start a conversation.';state.done=true;return '';}
     state.acp.session=result.sessionId;
-    // Only a model its session lists: a provider the Agent is not signed in to leaves its own default.
-    const listed=acpModels(result);
-    if(state.acp.model&&(!listed.length||listed.some(model=>model.id===state.acp!.model)))state.outbox.push(rpc(4,'session/set_model',{sessionId:result.sessionId,modelId:state.acp.model}));
+    // Only a model its session lists: a provider the Agent is not signed in to leaves its own default. A model of the
+    // provider its own default already uses is tried even when unlisted: Hermes lists only its current model for a
+    // provider whose credential pool it counts as exhausted, and that default can be one the account refuses
+    // (gpt-6-astra on a ChatGPT plan: every Applet analysis on one Mac failed hourly with HTTP 400, 2026-10-12).
+    const listed=acpModels(result),wanted=state.acp.model;
+    const current=record(record(result).models).currentModelId,provider=(id:string)=>id.slice(0,id.indexOf(':'));
+    const own=!!wanted&&typeof current==='string'&&wanted.includes(':')&&provider(current)===provider(wanted);
+    if(wanted&&(!listed.length||listed.some(model=>model.id===wanted)||own)){
+     state.acp.tentative=listed.length>0&&!listed.some(model=>model.id===wanted);
+     state.outbox.push(rpc(4,'session/set_model',{sessionId:result.sessionId,modelId:wanted}));
+    }
     else prompt();
    }
    if(event.id===3){

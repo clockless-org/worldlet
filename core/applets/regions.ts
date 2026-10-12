@@ -39,21 +39,30 @@ export function setupOffers(app:{id:string;key:string;region?:string},chosen:boo
  if(SETUP_HIDDEN_REGIONS.includes(app.region||''))return false;
  return chosen||(SETUP_SUGGESTIONS[app.region||'']||[]).includes(app.key);
 }
-/** Popular Applets a first World starts with (owner decision 2026-10-11, Kelvin: a first World holds what this computer
- * already has plus some popular ones, not the whole catalog). Common across areas, every one opens on any computer. */
-export const POPULAR_STARTERS=['chatgpt','youtube','slack','notion','spotify','whatsapp','github','discord'];
-/** Popular starters only fill a first World up to this many non-game Applets, so a computer with many apps found stays uncrowded. */
-export const FIRST_WORLD_SIZE=12;
-/** What setup selects before the person changes anything (owner decision 2026-10-11, replacing 2026-10-10's "only the
- * Applets in use"). Mail, Calendar and the Browser are setup's own draft; this adds the apps installed on this computer
- * (`detected`), the apps brought from the person's Agent or already connected (`brought`, by provider), then the popular
- * starters until the World holds FIRST_WORLD_SIZE. The rest of the catalog stays one click away in each area's panel
- * (Recommended, All <area> Applets). The Games area still gets its three starters. Explicit unchecks (`touched`) are
- * respected. */
+/** What each area starts with on top of what the person already has (owner Order 2026-10-12, Kelvin, replacing
+ * 2026-10-11's "popular starters up to twelve"): a few popular Applets per area, in order, every one opens on any
+ * computer. Games use GAME_STARTERS. */
+export const AREA_STARTERS:Record<string,readonly string[]>={
+ home:['weather','outlook','google-photos'],
+ work:['chatgpt','notion','slack','github','claude','zoom'],
+ library:['whatsapp','discord','reddit','telegram','instagram','x'],
+ money:['google-maps','amazon','airbnb','uber','booking','paypal'],
+ travel:['youtube','spotify','netflix','wikipedia','twitch','apple-podcasts'],
+};
+/** How many Applets each area gets beyond the ones the person already has (found here, brought or connected). */
+export const AREA_STARTER_COUNT=4;
+/** What setup selects before the person changes anything (owner Order 2026-10-12). Mail, Calendar and the Browser are
+ * setup's own draft; this adds the apps installed on this computer (`detected`) and the apps brought from the person's
+ * Agent or already connected (`brought`, by provider). Then every area gets AREA_STARTER_COUNT more from AREA_STARTERS
+ * (Home counts setup's draft among its own), and the Games area its three starter games. Every other Applet stays in
+ * each area's panel under Recommended. Explicit unchecks (`touched`) are respected. */
 export function seedAppletSelection(apps:readonly {id:string;key:string;region?:string}[],detected:Set<string>,selected:Set<string>,touched:Set<string>,brought:Set<string>=new Set()){
  for(const app of apps)if((detected.has(app.key)||brought.has(app.key))&&!touched.has(app.id))selected.add(app.id);
- const size=()=>apps.filter(a=>a.region!=='health'&&selected.has(a.id)).length;
- for(const key of POPULAR_STARTERS){const app=apps.find(a=>a.key===key);if(size()>=FIRST_WORLD_SIZE)break;if(app&&!touched.has(app.id))selected.add(app.id);}
+ const own=(a:{key:string})=>detected.has(a.key)||brought.has(a.key);
+ for(const [region,keys] of Object.entries(AREA_STARTERS)){
+  const added=()=>apps.filter(a=>a.region===region&&selected.has(a.id)&&!own(a)).length;
+  for(const key of keys){if(added()>=AREA_STARTER_COUNT)break;const app=apps.find(a=>a.key===key);if(app&&!touched.has(app.id))selected.add(app.id);}
+ }
  const games=[...GAME_STARTERS.map(key=>apps.find(a=>a.key===key)).filter(Boolean),...apps.filter(a=>a.region==='health'&&!GAME_STARTERS.includes(a.key))] as {id:string;region?:string}[];
  for(const app of games){if(apps.filter(a=>a.region==='health'&&selected.has(a.id)).length>=3)break;if(!touched.has(app.id))selected.add(app.id);}
 }

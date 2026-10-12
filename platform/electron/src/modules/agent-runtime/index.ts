@@ -518,7 +518,9 @@ export function installAgentRuntime(host:Host){
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);
    // The things it said the person handles most become Applets: its own conversations' (modules/tasks), and a catalog
    // Applet that fits joins the World when setup is already over (setup itself adds them to its selection).
-   if('profile' in event&&event.profile?.things?.length){host.optional<OngoingService>(ONGOING)?.refresh();placeThings(event.id,event.profile);}})});
+   // What it picked out for the Attention Center reaches it the same way (modules/tasks).
+   if('profile' in event&&(event.profile?.things?.length||event.profile?.attention?.length))host.optional<OngoingService>(ONGOING)?.refresh();
+   if('profile' in event&&event.profile?.things?.length)placeThings(event.id,event.profile);})});
  function placeThings(id:string,profile:AgentProfile){
   const onboarding=host.store.state.onboarding;
   if(!onboarding?.completed||!host.store.writable||host.store.sampleEnabled())return;

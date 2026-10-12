@@ -1,5 +1,6 @@
-/** What an Area's panel recommends (owner Order 2026-10-07): catalog Applets related to this Area that are not in the
- * person's World yet, worked out on this computer each time the panel opens. No model is asked. An Area is related to
+/** What an Area's panel recommends (owner Order 2026-10-07): every catalog Applet related to this Area that is not in
+ * the person's World yet (owner Order 2026-10-12: all of them, not a short list), worked out on this computer each time
+ * the panel opens. No model is asked. An Area is related to
  * its own catalog category, and also, more weakly, to the categories of the Applets the person moved into it. Within
  * those, an Applet installed on this computer comes first, then one whose website the person visits in Worldlet's
  * browser, then catalog order. Ahead of all of them come the Applets the person's own Agent suggested when it described
@@ -18,9 +19,9 @@ export type AreaRecommendInput={
  visits?:Readonly<Record<string,number>>;
  /** Catalog keys the person's own Agent suggested. */
  suggested?:ReadonlySet<string>;
+ /** Leave out to list them all. */
  limit?:number;
 };
-export const AREA_RECOMMEND_LIMIT=8;
 export const appHost=(url:unknown)=>{if(typeof url!=='string')return null;try{return new URL(url).hostname.toLowerCase().replace(/^www\./,'');}catch{return null;}};
 /** An Applet's website host: a website Applet's own page, or the original site a native Applet reads (Linear, Todoist). */
 export const appletHost=(app:{fullView?:any}|null|undefined)=>appHost(app?.fullView?.url||app?.fullView?.original?.url);
@@ -34,7 +35,7 @@ export function areaCategories(area:string,apps:readonly AreaCandidate[],mine:Re
  for(const app of apps)if(mine.get(app.id)===area&&app.category!==area)weight[app.category]=Math.min(2,(weight[app.category]||0)+1);
  return weight;
 }
-export function recommendForArea({area,apps,mine,removed=new Set(),installed=new Set(),visits={},suggested=new Set(),limit=AREA_RECOMMEND_LIMIT}:AreaRecommendInput):string[]{
+export function recommendForArea({area,apps,mine,removed=new Set(),installed=new Set(),visits={},suggested=new Set(),limit=Infinity}:AreaRecommendInput):string[]{
  const weight=areaCategories(area,apps,mine);
  return apps.map((app,order)=>({app,order,related:weight[app.category]||0,visited:Math.min(50,visitsFor(app.host,visits)),installed:installed.has(app.key)?1:0,suggested:suggested.has(app.key)&&app.category===area?1:0}))
   .filter(({app,related})=>related>0&&!mine.has(app.id)&&!removed.has(app.id))

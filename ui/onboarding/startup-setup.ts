@@ -1,4 +1,4 @@
-import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT,environmentAt} from '../world/index.ts';
+import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT} from '../world/index.ts';
 import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../core/applets/index.ts';
 import {xAppIcon,appLogoSource,AGENT_ICONS,CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
 import {themeAppletIcon} from '../themes/index.ts';
@@ -222,7 +222,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    if(!draft.brought.failed)productEvent('agent_bring_completed',agentBringDimensions(id,draft.brought,draft.integrations),timingBucket(performance.now()-started));
   }
  }
- // The apps the World starts with: those found on this computer first, then the popular starters.
+ // The apps the World starts with: those found on this computer first, then each area's starters.
  // Starter games arrive without being shown.
  const worldApps=()=>WORLD_APPS.filter(a=>selected.has(a.id)&&a.region!=='health'&&appletSupport(a.key,hostFeatures(state)).supported).sort((a,b)=>Number(detected.has(b.key))-Number(detected.has(a.key)));
  /** The tiles on the right, in the order they arrive (owner requests 2026-10-09): the avatar, its profile,
@@ -401,12 +401,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    const provider=mark.dataset.provider==='google'?'gmail':mark.dataset.provider,index=chosenApps.findIndex(a=>a.key===provider);
    return float(copy,r.left+r.width/2,r.top+r.height/2,index>=0?slot(index):{x:innerWidth/2,y:innerHeight*.18},iconsToGather.length+i,{end:{opacity:0,scale:.7}}).then(()=>copy.remove());
   });
-  // The World comes forward as it will open, by day or by night from the same clock the World reads before it knows a
-  // place, so the painting and the World match when one hands over to the other.
-  // A theme without its own night painting gets its day painting dimmed for the night.
-  const assets=(globalThis as any).__WORLDLET_25D_ASSETS__,night=environmentAt().night,now=night&&assets?.night?assets.night:assets?.surroundings;
-  if(now&&typeof now==='string')loader.style.setProperty('--setup-world-now','url("'+now.replace(/"/g,'%22')+'")');
-  if(night&&!assets?.night)loader.dataset.setupNight='dimmed';
+  // The page's background stays as it is while everything gathers (owner request 2026-10-12); it fades when the World opens.
   loader.classList.add('is-gathering');
   // What came along drifts into Fox while it walks down; Fox swells and glows a little as it takes in each one. Routines
   // run on their own, so they go to the dock beside Fox instead, to Scheduled on its left (owner layout 2026-10-11); before
@@ -575,7 +570,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
     el.append(node('p',again?count('{count} to sign in again after setup',again):items.map(item=>item.title).join(' · '),'setup-tile-note'));
    }));
   }
-  // The apps: the ones found here, then the popular starters; their icons fly into the World on Enter your world.
+  // The apps: the ones found here, then each area's starters; their icons fly into the World on Enter your world.
   const apps=worldApps(),found=apps.filter(a=>detected.has(a.key)).length,limit=14;
   return keep('tile:apps',JSON.stringify([apps.map(a=>a.id),found,Object.keys(nativeIcons).length,draft.language]),build('Apps','is-wide setup-tile-apps',el=>{
    const row=node('div','','setup-tile-logos');
@@ -808,9 +803,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  }
  void detectAgents();
  if(step===1)void prepareGoogleSources();
- // Setup selects what this computer already has, then a few popular Applets (owner decision 2026-10-11): its draft
- // (Mail, Calendar, Browser), the apps found here, the apps the person's Agent brought or already connected, then the
- // popular starters (core/applets/regions.ts).
+ // Setup selects what this computer already has, then four more Applets in every area (owner Order 2026-10-12): its
+ // draft (Mail, Calendar, Browser), the apps found here, the apps the person's Agent brought or already connected, then
+ // each area's starters (core/applets/regions.ts).
  const brought=()=>new Set<string>([...(draft.integrations||[]).map((item:any)=>item?.provider),...(draft.profile?.applets||[]),...(state.connections||[]).filter((c:any)=>connectionLive(c)).map((c:any)=>c.provider)].filter((p:unknown):p is string=>typeof p==='string'));
  const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched,brought());persist();};
  if(hostFeatures(state).installedAppDetection){

@@ -72,6 +72,8 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // No fog after setup (owner request 2026-10-12): the loading screen's painting fades slowly into the World instead.
  await js("window.__fog=false;new MutationObserver((_,o)=>{if(document.querySelector('.startup-mist')){window.__fog=true;o.disconnect();}}).observe(document.body,{childList:true,subtree:true});true");
  await press('Enter your world',120);
+ // The loading screen's background stays as it was until the World opens (owner request 2026-10-12): no painting comes forward.
+ await wait('the loading screen kept its background while everything gathered',"(()=>{const l=document.getElementById('worldStartup');return !l||l.classList.contains('is-opening')||getComputedStyle(l,'::after').content==='none';})()",10);
  await wait('world arrival',"document.querySelector('#notionWorld')?.sceneMetrics?.renderer==='pixi-webgl'",60);
  // One continuous move into the World (owner request 2026-10-11): setup's Fox and icons land and their layer goes.
  await wait('setup Fox and icons landed in the World',"!document.getElementById('setupArrivingDevices')",30);

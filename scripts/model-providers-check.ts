@@ -92,6 +92,29 @@ const hermes=(model:string,listed:string[])=>{
  assert.equal(state.error,'No credentials for anthropic');assert.equal(state.done,true);
 }
 
+{
+ // The Agent's own provider, its sign-in counted as exhausted: Hermes lists only its current model there, which the
+ // account refuses (gpt-6-astra, Applet analysis every hour on one Mac, 2026-10-12); the background model is tried.
+ const state=localHarnessStream({prompt:'hi',model:'openai-codex:gpt-5.6-terra'});
+ const line=(value:unknown)=>readLocalHarnessLine('hermes',state,JSON.stringify(value));
+ const sent=()=>state.outbox.splice(0).map(text=>JSON.parse(text));
+ const listed=['openai-codex:gpt-6-astra','openrouter:deepseek/deepseek-v4-flash'];
+ line({jsonrpc:'2.0',id:2,result:{sessionId:'s1',models:{currentModelId:'openai-codex:gpt-6-astra',availableModels:listed.map(modelId=>({modelId,name:modelId}))}}});
+ assert.deepEqual(sent(),[{jsonrpc:'2.0',id:4,method:'session/set_model',params:{sessionId:'s1',modelId:'openai-codex:gpt-5.6-terra'}}]);
+ line({jsonrpc:'2.0',id:4,result:{}});
+ assert.deepEqual(sent().map(m=>m.method),['session/prompt']);
+ // Refused: its own default answers, as when the switch was not tried.
+ const refused=localHarnessStream({prompt:'hi',model:'openai-codex:gpt-5.6-terra'});
+ const say=(value:unknown)=>readLocalHarnessLine('hermes',refused,JSON.stringify(value));
+ say({jsonrpc:'2.0',id:2,result:{sessionId:'s1',models:{currentModelId:'openai-codex:gpt-6-astra',availableModels:listed.map(modelId=>({modelId,name:modelId}))}}});
+ refused.outbox.splice(0);say({jsonrpc:'2.0',id:4,error:{code:-32602,message:'Cannot switch'}});
+ assert.equal(refused.error,null);assert.deepEqual(refused.outbox.splice(0).map(text=>JSON.parse(text).method),['session/prompt']);
+ // Another provider it does not list still leaves its own default.
+ const other=localHarnessStream({prompt:'hi',model:'anthropic:claude-sonnet-5'});
+ readLocalHarnessLine('hermes',other,JSON.stringify({jsonrpc:'2.0',id:2,result:{sessionId:'s1',models:{currentModelId:'openai-codex:gpt-6-astra',availableModels:listed.map(modelId=>({modelId,name:modelId}))}}}));
+ assert.deepEqual(other.outbox.splice(0).map(text=>JSON.parse(text).method),['session/prompt']);
+}
+
 // Sign-in opens the Agent's own command in Terminal --------------------------------------------------------------------
 const mac=signInScript('darwin',{command:'/Users/alex/.local/bin/hermes',prefix:[],title:'Hermes Agent'},['auth','add','anthropic']);
 assert.equal(mac.extension,'.command');assert.match(mac.text,/^#!\/bin\/sh\n'\/Users\/alex\/\.local\/bin\/hermes' 'auth' 'add' 'anthropic'\n/);

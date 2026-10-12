@@ -156,9 +156,9 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 /* The bar has two sizes (owner Order 2026-10-08): small at rest, larger while typing or while the pointer is on it
    or on Fox (owner request 2026-10-12). */
 #notionWorld.native-console .companion-text-entry{left:50%;bottom:0;width:144px;height:44px;transform:translateX(-50%);pointer-events:none;--companion-bar-width:168px;--companion-bar-tools:36px}
-#notionWorld.native-console:is([data-entry-expanded=true],[data-entry-hover=true]) .companion-text-entry{--companion-bar-width:300px}
+#notionWorld.native-console:is([data-entry-expanded=true],[data-entry-hover=true],[data-entry-held=true]) .companion-text-entry{--companion-bar-width:300px}
 /* In a website the small bar also says it takes a web address (owner request 2026-10-07), so it is wide enough to read it. */
-#notionWorld.native-console:not([data-entry-expanded=true],[data-entry-hover=true]) .companion-text-entry[data-website=true]{--companion-bar-width:232px}
+#notionWorld.native-console:not([data-entry-expanded=true],[data-entry-hover=true],[data-entry-held=true]) .companion-text-entry[data-website=true]{--companion-bar-width:232px}
 /* At rest the bar is low-key (owner request 2026-10-05): fainter, its name only; pointing at it or at Fox brings
    back the hint. Send shows only once there is something to send. */
 #notionWorld.native-console:not([data-entry-expanded=true],[data-entry-hover=true]) .companion-text-entry #notionCommand:has(#notionInput:placeholder-shown) #notionSend{display:none}

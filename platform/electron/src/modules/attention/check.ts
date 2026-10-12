@@ -17,6 +17,8 @@ import {installArtifacts} from '../artifacts/index.ts';
 import {journalTarget} from '../../../../../core/agent/index.ts';
 import {ONGOING,type OngoingService} from '../../host/services.ts';
 import {conversationAttentionId} from '../../../../../core/tasks/index.ts';
+import {writeSelection} from '../agent-runtime/local-harness.ts';
+import {writeAgentProfile} from '../agent-runtime/agent-profile.ts';
 import {errorMessage} from '../../files.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -307,6 +309,35 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   assert.equal(original.title,'#kyoto-trip');assert.match(original.text,/You: Please review the project proposal by Friday\./);
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron brought conversations: recent ones are Attention context, findings cite and open them, unchanged ones renew without a pass.');
+ }finally{await env.close();}
+}
+
+// What the chosen Agent picked out for the Center when setup asked it to describe itself (core/tasks attentionFromAgent)
+// is there before any synthesis pass, current and citing its conversation; one the person removed is not made again.
+{
+ const env=environment();
+ const {store,services,host}=env;
+ scriptedAgent(store,services);
+ installOngoing(host);installWorld(host);
+ try{
+  store.state.cloudConsent=true;store.changed();
+  const session='OpenClaw · Discord · #kyoto-trip';
+  store.ledger().addCompanionTurns('openclaw',[{id:'k1',session,role:'user',text:'We should book the ryokan soon.',createdAt:new Date(Date.now()-86_400_000).toISOString().replace(/\.\d+Z$/,'Z')}]);
+  writeSelection(host.profile.root,'openclaw');
+  writeAgentProfile(host.profile.root,'openclaw',{agent:{},workspaces:[],aboutUser:[],skills:[],connections:[],channels:[],routines:[],threads:[],applets:[],things:[],
+   attention:[{group:'doing',title:'Book the ryokan',why:'Rooms go fast in November',thread:'#kyoto-trip'}]});
+  host.use<OngoingService>(ONGOING).refresh();
+  const mine=()=>store.ledger().records('items').filter(item=>item.title==='Book the ryokan');
+  assert.equal(mine().length,1,'The Agent’s pick is in the Center: '+JSON.stringify(env.errors));
+  assert.deepEqual(mine()[0].sources.map((ref:Row)=>[ref.provider,ref.id]),[['conversations',conversationAttentionId('openclaw',session)]]);
+  assert.ok(store.worldItems().some(item=>item.id===mine()[0].id&&item.attentionFresh===true&&item.status==='open'),'It is current in the Center');
+  host.use<OngoingService>(ONGOING).refresh();
+  assert.equal(mine().length,1,'Made once');
+  store.ledger().delete('items',mine()[0].id);
+  host.use<OngoingService>(ONGOING).refresh();
+  assert.equal(mine().length,0,'One the person removed stays removed');
+  assert.deepEqual(env.errors.filter(e=>e.startsWith('agentAttention')),[],'No unexpected diagnostics');
+  console.log('PASS Electron Agent picks: what the chosen Agent picked out at setup is in the Center at once, current, once.');
  }finally{await env.close();}
 }
 
