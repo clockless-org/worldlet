@@ -10,7 +10,8 @@
 // - OpenClaw (src/cli/cron-cli/register.cron-simple.ts, docs/cli/cron.md, docs/tools/skills.md, docs/cli/config.md):
 //   `openclaw cron disable|enable|run|rm <id>` (they need its running Gateway);
 //   a new time with `hermes cron edit <id> --schedule <expr|every Nh>` or `openclaw cron edit <id> --cron <expr>|--every
-//   <Nh>`, and a new job with `hermes cron create <schedule> <prompt> --name <name>` or `openclaw cron add --name <name>
+//   <Nh>`, a new name or prompt with the same `edit` and `--name <name>` / `--prompt <text>` (Hermes Agent) or `--name
+//   <name>` / `--message <text>` (OpenClaw, checked at 2026.8.1), and a new job with `hermes cron create <schedule> <prompt> --name <name>` or `openclaw cron add --name <name>
 //   --message <prompt> --cron <expr>|--every <Nh>` (both checked at Hermes Agent 0.21.4 and OpenClaw 2026.8.1 too); a skill turned off or on with `openclaw
 //   config set skills.entries.<key>.enabled false|true --strict-json`. It has no command of its own that removes a
 //   skill (its docs send people to the separate `clawhub uninstall`), so OpenClaw's skills offer no Remove.
@@ -18,7 +19,7 @@
 import type {HarnessJob,HarnessJobAction,HarnessJobChange,HarnessJobCreate,HarnessSkillChange,RoutineSchedule} from '../../contracts/harness-services.ts';
 import {hermesConfigValues} from './harness-tools.ts';
 
-export const JOB_ACTIONS:readonly HarnessJobAction[]=['pause','resume','run','remove','reschedule'];
+export const JOB_ACTIONS:readonly HarnessJobAction[]=['pause','resume','run','remove','reschedule','edit'];
 export const SKILL_ACTIONS:readonly HarnessSkillChange['action'][]=['disable','enable','remove'];
 /** An id or name the Agent gave a job or skill, safe as one argument of its command: never a flag, no control
  * characters, no path separators. */
@@ -39,6 +40,14 @@ export function readJobChange(value:unknown):HarnessJobChange {
  if(!isControlArgument(v.job))throw Error('This scheduled task is no longer there.');
  if(!JOB_ACTIONS.includes(v.action as HarnessJobAction))throw Error('Unknown change.');
  if(v.action==='reschedule')return {job:v.job,action:'reschedule',schedule:readRoutineSchedule(v.schedule)};
+ if(v.action==='edit'){
+  const edit:HarnessJobChange={job:v.job,action:'edit'};
+  if(v.name!==undefined)edit.name=plainText(v.name,80,'its name');
+  if(v.prompt!==undefined)edit.prompt=plainText(v.prompt,2000,'what it should do');
+  if(v.schedule!==undefined)edit.schedule=readRoutineSchedule(v.schedule);
+  if(!edit.name&&!edit.prompt&&!edit.schedule)throw Error('Change its name, what it does or when it runs.');
+  return edit;
+ }
  return {job:v.job,action:v.action as HarnessJobAction};
 }
 /** One line of plain text, never read as a flag by the Agent's command line. */
@@ -80,15 +89,18 @@ export function readSkillChange(value:unknown):HarnessSkillChange {
 
 // Scheduled jobs ---------------------------------------------------------------------------------------------------
 
-/** Hermes Agent: `hermes cron pause|resume|run|remove <job_id>`, or `hermes cron edit <job_id> --schedule …`. */
+/** Hermes Agent: `hermes cron pause|resume|run|remove <job_id>`, or `hermes cron edit <job_id> --name … --prompt …
+ * --schedule …`. */
 export function hermesJobCommand(change:HarnessJobChange):string[] {
  if(change.action==='reschedule')return ['cron','edit',change.job,'--schedule',hermesSchedule(change.schedule!)];
+ if(change.action==='edit')return ['cron','edit',change.job,...change.name?['--name',change.name]:[],...change.prompt?['--prompt',change.prompt]:[],...change.schedule?['--schedule',hermesSchedule(change.schedule)]:[]];
  return ['cron',change.action,change.job];
 }
-/** OpenClaw: `openclaw cron disable|enable|run|rm <id>`, or `openclaw cron edit <id> --cron …|--every …`. */
+/** OpenClaw: `openclaw cron disable|enable|run|rm <id>`, or `openclaw cron edit <id> --name … --message … --cron …|--every …`. */
 export function openClawJobCommand(change:HarnessJobChange):string[] {
  if(change.action==='reschedule')return ['cron','edit',change.job,...openClawSchedule(change.schedule!)];
- return ['cron',{pause:'disable',resume:'enable',run:'run',remove:'rm'}[change.action],change.job];
+ if(change.action==='edit')return ['cron','edit',change.job,...change.name?['--name',change.name]:[],...change.prompt?['--message',change.prompt]:[],...change.schedule?openClawSchedule(change.schedule):[]];
+ return ['cron',{pause:'disable',resume:'enable',run:'run',remove:'rm'}[change.action as 'pause'|'resume'|'run'|'remove'],change.job];
 }
 /** Whether the change is offered for this job now: Pause only when it runs, Resume only when paused. */
 export function jobChangeOffered(job:HarnessJob,action:HarnessJobAction):boolean {
@@ -98,6 +110,8 @@ export function jobChangeOffered(job:HarnessJob,action:HarnessJobAction):boolean
 export function jobChangeDone(jobs:readonly HarnessJob[],change:HarnessJobChange):boolean {
  const job=jobs.find(item=>item.id===change.job);
  if(change.action==='reschedule')return !!job&&scheduleMatches(job.when,change.schedule!);
+ // An edit reads back its name and time; a new prompt is the Agent's to keep (the World never reads prompts back).
+ if(change.action==='edit')return !!job&&(!change.name||job.name===change.name)&&(!change.schedule||scheduleMatches(job.when,change.schedule));
  return change.action==='remove'?!job:change.action==='pause'?!!job?.paused:change.action==='resume'?!!job&&!job.paused:!!job;
 }
 

@@ -23,7 +23,18 @@ assert.equal(jobChangeDone([{...job,paused:true}],{job:'j1',action:'pause'}),tru
 assert.equal(jobChangeDone([],{job:'j1',action:'remove'}),true);assert.equal(jobChangeDone([job],{job:'j1',action:'run'}),true);
 for(const bad of ['-rf','--all','a b','../x','',' j1','x\n'])assert.equal(isControlArgument(bad),false,JSON.stringify(bad));
 assert.throws(()=>readJobChange({job:'--help',action:'run'}),/no longer there/,'never a flag');
-assert.throws(()=>readJobChange({job:'j1',action:'edit'}),/Unknown change/,'changing what a job does is a conversation, not a command here');
+assert.throws(()=>readJobChange({job:'j1',action:'rename'}),/Unknown change/);
+// Edit from the Routines beside Fox (owner request 2026-10-12): a new name, prompt and time at once, each plain text
+// that is never a flag; what it leaves out stays; read back by its name and time.
+assert.throws(()=>readJobChange({job:'j1',action:'edit'}),/Change its name/,'an edit changes something');
+assert.deepEqual(readJobChange({job:'j1',action:'edit',name:' Morning  news ',extra:1}),{job:'j1',action:'edit',name:'Morning news'});
+assert.throws(()=>readJobChange({job:'j1',action:'edit',prompt:'--all'}),/Start what it should do with a word/,'never a flag');
+const edit={job:'j1',action:'edit' as const,name:'News',prompt:'Read me the news.',schedule:{daily:{hour:8,minute:0}}};
+assert.deepEqual(readJobChange(edit),edit);
+assert.deepEqual(hermesJobCommand(edit),['cron','edit','j1','--name','News','--prompt','Read me the news.','--schedule','0 8 * * *']);
+assert.deepEqual(openClawJobCommand({...edit,job:'n1'}),['cron','edit','n1','--name','News','--message','Read me the news.','--cron','0 8 * * *']);
+assert.deepEqual(openClawJobCommand({job:'n1',action:'edit',name:'News'}),['cron','edit','n1','--name','News']);
+assert.equal(jobChangeDone([{...job,name:'News',when:{cron:'0 8 * * *'}}],edit),true);assert.equal(jobChangeDone([job],edit),false,'read back, never assumed');
 // A new time and a new job (owner request 2026-10-11): two plain choices of time, plain text that is never a flag.
 assert.deepEqual(readJobChange({job:'j1',action:'reschedule',schedule:{daily:{hour:9,minute:30}}}),{job:'j1',action:'reschedule',schedule:{daily:{hour:9,minute:30}}});
 for(const bad of [{daily:{hour:24,minute:0}},{daily:{hour:9,minute:7.5}},{everyHours:0},{everyHours:25},{cron:'* * * * *'},null])assert.throws(()=>readJobChange({job:'j1',action:'reschedule',schedule:bad}),/Choose when/,JSON.stringify(bad));

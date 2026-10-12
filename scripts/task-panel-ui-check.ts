@@ -52,6 +52,13 @@ await withBrowser(fileAccess,async browser=>{
    if(b.action==='foxPreferences')return {model:{name:'M',ready:true},cloudConsent:true};
    if(b.action==='taskPanel')return w.panel;
    if(b.action==='taskPanelPage')return {page:w.foxPage};
+   // The Agent's own commands for one job, as fox/harness-controls.ts answers them: a preview, then the change.
+   if(b.action==='harnessSchedule'&&b.operation==='preview'){w.asked=b;return {command:'openclaw cron …',confirm:'ok-'+b.change};}
+   if(b.action==='harnessSchedule'&&b.operation==='change'){
+    const ask=w.asked;
+    w.panel={...w.panel,jobs:ask.change==='remove'?w.panel.jobs.filter((j:any)=>j.id!==ask.job):w.panel.jobs.map((j:any)=>j.id!==ask.job?j:ask.change==='edit'?{...j,name:ask.name??j.name}:ask.change==='pause'?{...j,paused:true}:ask.change==='resume'?{...j,paused:false}:j)};
+    return {ok:true,command:'openclaw cron …'};
+   }
    if(b.action==='cloudRequest')return {status:200,body:{configured:false,authorized:false}};
    return {ok:true};
   }}}};
@@ -181,9 +188,41 @@ await withBrowser(fileAccess,async browser=>{
  await popover.locator('.task-list .task-card',{hasText:'Morning news'}).click();
  await popover.locator('.task-popover-facts').waitFor();
  assert.equal((await popover.innerText()).replace(/\s+/g,' ').trim(),'Morning news When Tomorrow 6:00 AM How often Every day Runs on OpenClaw’s scheduler');
- assert.equal(await popover.locator('button').count(),0,'view only');
+ assert.equal(await popover.locator('button').count(),0,'view only while the Agent keeps them read-only here');
  await page.keyboard.press('Escape');
  await popover.waitFor({state:'hidden'});
+ // With the Agent's own controls (owner request 2026-10-12, "routines 要可以删除可以重启可以修改"): Run now, Pause, Edit and
+ // Remove, each asked once in plain words in the popover, then the Agent's own command; the cards are read again.
+ await page.evaluate(()=>{const w=window as any;w.panel={...w.panel,harnessId:'openclaw',changes:true};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));});
+ await page.waitForTimeout(600);
+ await next.locator('.task-more').click();
+ await popover.locator('.task-list .task-card',{hasText:'Morning news'}).click();
+ await popover.locator('.task-routine-actions').waitFor();
+ assert.deepEqual(await popover.locator('.task-routine-actions button').allTextContents(),['Run now','Pause','Edit','Remove']);
+ await popover.locator('button[data-action=edit]').click();
+ assert.equal(await popover.locator('.task-routine-input').first().inputValue(),'Morning news');
+ await popover.locator('.task-routine-input').first().fill('Morning headlines');
+ await popover.locator('button[data-action=save]').click();
+ await popover.locator('.task-routine-confirm').waitFor();
+ assert.equal(await popover.locator('.task-routine-confirm>span').textContent(),'OpenClaw will change “Morning news” to call it “Morning headlines”.');
+ assert.deepEqual(await page.evaluate(()=>{const {action,operation,harness,job,change,name,schedule,prompt}=(window as any).asked;return {action,operation,harness,job,change,name,schedule,prompt};}),
+  {action:'harnessSchedule',operation:'preview',harness:'openclaw',job:'a',change:'edit',name:'Morning headlines',schedule:undefined,prompt:undefined},'only what was changed');
+ await popover.locator('button[data-action=confirm]').click();
+ await popover.locator('.task-routine-said',{hasText:'“Morning headlines” is changed.'}).waitFor();
+ assert.equal(await popover.locator('.task-popover-title').textContent(),'Morning headlines','read again from the Agent');
+ // Pause keeps it as a Paused card with Resume; Remove takes it away.
+ await popover.locator('button[data-action=pause]').click();
+ await popover.locator('button[data-action=confirm]').click();
+ await popover.locator('button[data-action=resume]').waitFor();
+ await popover.locator('button[data-action=remove]').click();
+ assert.match(await popover.locator('.task-routine-confirm>span').textContent()??'',/remove “Morning headlines”\. This can’t be undone/);
+ await popover.locator('button[data-action=cancel]').click();
+ assert.equal(await popover.locator('.task-routine-said').textContent(),'Nothing was changed.');
+ await popover.locator('button[data-action=remove]').click();
+ await popover.locator('button[data-action=confirm]').click();
+ await popover.waitFor({state:'hidden'});
+ await page.evaluate(()=>{const w=window as any;w.panel={...w.panel,harnessId:undefined,changes:false,jobs:[{id:'a',name:'Morning news',kind:'prompt',paused:false,when:{cron:'0 6 * * *'}},...w.panel.jobs]};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));});
+ await next.locator('.task-card',{hasText:'Morning news'}).waitFor();
  // A routine paused in Settings › Agent leaves the cards at once: Settings announces `worldlet:routines` after the Agent's own
  // command ran (ui/companion/agent-routines.ts), and the panel reads its jobs again; resumed, it is back.
  const pause=(paused:boolean)=>page.evaluate(paused=>{const w=window as any;w.panel={...w.panel,jobs:w.panel.jobs.map((j:any)=>j.id==='b'?{...j,paused}:j)};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));},paused);
@@ -242,4 +281,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(narrowErrors,[]);
  assert.deepEqual(errors,[]);
 });
-console.log('PASS tasks beside Fox: the scheduled Routines on its left and doing now on its right, a turn’s task rising from the bar and a starting Routine coming across, the buttons beside Fox icons that open their names on hover, on the message bar’s line, one card style, two a side then +N for the whole list; a running card opens its window or the page Fox drives, a routine its read-only facts, read again when Settings pauses or resumes one; nothing finished; only Routines in the tour, clear of the open message bar, aside beside an Applet, counts only at 800px wide and gone at 540px tall');
+console.log('PASS tasks beside Fox: the scheduled Routines on its left and doing now on its right, a turn’s task rising from the bar and a starting Routine coming across, the buttons beside Fox icons that open their names on hover, on the message bar’s line, one card style, two a side then +N for the whole list; a running card opens its window or the page Fox drives, a routine its facts and, when its Agent allows, Run now, Pause, Edit and Remove asked once in the popover, read again when Settings pauses or resumes one; nothing finished; only Routines in the tour, clear of the open message bar, aside beside an Applet, counts only at 800px wide and gone at 540px tall');
