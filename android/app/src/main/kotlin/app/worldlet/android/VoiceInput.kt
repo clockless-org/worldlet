@@ -30,6 +30,8 @@ class VoiceInput(private val context: Context) {
     var state by mutableStateOf<State>(State.Idle); private set
     /** The words heard so far in this hold. */
     var transcript by mutableStateOf(""); private set
+    /** How loud the person speaks now, 0 to 1, for the sound wave. */
+    var level by mutableStateOf(0f); private set
 
     private var recognizer: SpeechRecognizer? = null
     private var finished: CompletableDeferred<String>? = null
@@ -88,7 +90,7 @@ class VoiceInput(private val context: Context) {
             }
             override fun onReadyForSpeech(params: Bundle?) {}
             override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onRmsChanged(rmsdB: Float) { level = ((rmsdB + 2f) / 12f).coerceIn(0f, 1f) }
             override fun onBufferReceived(buffer: ByteArray?) {}
             override fun onEndOfSpeech() {}
             override fun onEvent(eventType: Int, params: Bundle?) {}
@@ -106,6 +108,7 @@ class VoiceInput(private val context: Context) {
         this.recognizer = null
         finished = null
         if (listening) state = State.Idle
+        level = 0f
         return text.trim()
     }
 }
