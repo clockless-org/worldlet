@@ -45,6 +45,38 @@ function reportedWorkspace(id:string,isDefault:boolean,home:string,environment:N
  return null;
 }
 
+/** Workspaces found by looking through the person's home folder, for when neither the configuration nor the Agent leads
+ * to one (owner 2026-10-12, Kelvin: "先自己先扫文件…尽量读到核心的重要的 path"): folders up to three levels down that
+ * hold SOUL.md beside AGENTS.md or IDENTITY.md. Hidden folders (other than ~/.openclaw), installed packages and system
+ * libraries are skipped, and the look stops after a fixed number of folders; it runs once per home. Read only. */
+const SCAN_SKIP=new Set(['node_modules','Library','AppData','Applications','Pictures','Movies','Music','Photos','go','venv','__pycache__','dist','build','target','vendor']);
+const SCAN_FOLDERS=3000;
+const scanned=new Map<string,string[]>();
+export function scanOpenClawWorkspaces(home:string,fresh=false):string[] {
+ const root=real(home);
+ if(!fresh&&scanned.has(root))return scanned.get(root)!;
+ const found:string[]=[],queue:[string,number][]=[[root,0]];let seen=0;
+ while(queue.length&&seen<SCAN_FOLDERS&&found.length<20){
+  const [folder,depth]=queue.shift()!;seen++;
+  if(depth&&fs.existsSync(path.join(folder,'SOUL.md'))&&['AGENTS.md','IDENTITY.md'].some(name=>fs.existsSync(path.join(folder,name))))found.push(folder);
+  if(depth>=3)continue;
+  let names:fs.Dirent[];try{names=fs.readdirSync(folder,{withFileTypes:true});}catch{continue;}
+  for(const entry of names){
+   if(!entry.isDirectory()||SCAN_SKIP.has(entry.name)||entry.name.startsWith('.')&&!(depth===0&&entry.name==='.openclaw'))continue;
+   queue.push([path.join(folder,entry.name),depth+1]);
+  }
+ }
+ scanned.set(root,found);
+ return found;
+}
+/** A scanned workspace that is this agent's: named for it (`<id>`, `workspace-<id>`), or for the main agent `workspace`
+ * or the only one found. */
+function scannedWorkspace(id:string,isDefault:boolean,home:string):string|null {
+ const list=scanOpenClawWorkspaces(home),name=(folder:string)=>path.basename(folder).toLowerCase(),own=id.toLowerCase();
+ return list.find(folder=>name(folder)===own||name(folder)==='workspace-'+own)
+  ??(isDefault?list.find(folder=>name(folder)==='workspace')??(list.length===1?list[0]:null):null)??null;
+}
+
 /** Configured agents (`agents.entries`, older `agents.list`) plus agent folders on disk. The
  * default agent is the one marked `default`, else `main`, else the first. An agent whose configured folder holds no
  * workspace takes the one the Agent reported (reportOpenClawWorkspaces). */
@@ -62,7 +94,7 @@ export function openClawAgents(home=os.homedir(),environment=process.env,config=
   const configured=openClawPath(entry.workspace,home,environment);
   const candidate=configured??(isDefault?openClawWorkspace(home,environment,config):path.join(state,'workspace-'+id));
   const found=candidate&&path.isAbsolute(candidate)&&fs.existsSync(candidate)&&fs.statSync(candidate).isDirectory()?real(candidate):null;
-  const workspace=found&&holdsWorkspace(found)?found:reportedWorkspace(id,isDefault,home,environment)??found;
+  const workspace=found&&holdsWorkspace(found)?found:reportedWorkspace(id,isDefault,home,environment)??scannedWorkspace(id,isDefault,home)??found;
   const declared=workspace?declaredName(readFile(workspace,path.join(workspace,'IDENTITY.md')))??declaredName(readFile(workspace,path.join(workspace,'SOUL.md'))):null;
   const name=[entry.name,entry.identity?.name,declared].find(value=>typeof value==='string'&&value.trim())?.trim()??id;
   return {id,name:name.slice(0,80),default:isDefault,workspace};
