@@ -861,7 +861,7 @@ export function mountNotionWorld(data: World, native: any) {
     // Clearing an item from its card moves straight to the next one still in the Center.
     const index=order.indexOf(item.worldItemId),remaining=new Set(attentionRowOrder());remaining.delete(item.worldItemId);
     const next=advance?[...order.slice(index+1),...order.slice(0,Math.max(0,index))].find(id=>remaining.has(id)):null;
-    if(!next||!previewAttention({worldItemId:next}))closeAttentionPreview();
+    if(!next||!previewAttention({worldItemId:next},true))closeAttentionPreview();
   }
   function attentionActions(item){
     const id=item.worldItemId,kind=item.worldItemKind;
@@ -1102,8 +1102,11 @@ export function mountNotionWorld(data: World, native: any) {
    attentionPreview.setDraft(draft?{text:'Fox drafted a reply',label:'Review',run:()=>{closeAttentionPreview(false);window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day:dayKey(new Date(draft.createdAt*1000||Date.now()))}}));}}:null);
   }
   function itemPage(id:string){return [...pages.values()].find(p=>p.worldItemId===id);}
-  function previewAttention(item){
+  function previewAttention(item,advanced=false){
    const page=[...pages.values()].find(p=>p.worldItemId&&p.worldItemId===item.worldItemId);if(!page)return false;
+   // owner 2026-10-11 20:21 PDT: Production metrics: the person opened this item's card themselves; Fox, a restore and the
+   // next card shown after one is settled do not count.
+   if(!advanced&&!data.sample&&eventTrigger()==='user')reportProductEvent('attention_item_opened',{open_surface:'computer',item_kind:String(page.worldItemKind||'')});
    foxArtifact.close();shownArtifact=null;attentionPage=page;attentionPreview.open({...page,attentionTimeMembers:(item.pageIds||[page.id]).map(id=>pages.get(id)).filter(Boolean).map(p=>p.worldItemSignal||{})});nativeHUD?.sync();showAttentionGuide(page);
    const card=attentionPreviewData(page);
    // A scheduled result already kept in the Journal (the morning brief) is not kept a second time as its Attention card.
@@ -1439,6 +1442,9 @@ export function mountNotionWorld(data: World, native: any) {
      .then(()=>{if(!dailyShown)failed='It finished without making the card.';})
      .catch(error=>{ok=false;const said=String(error?.message||'');if(/busy/i.test(said)){daily=before;saveDaily();}else failed=said||'Your Agent stopped.';})
      .finally(()=>{work.end(ok);dailyAsking=false;dailyAsked=null;});
+    // Today's prep and Wrap up today are Worldlet's own routines (owner 2026-10-11 20:21 PDT: Production metrics); a run
+    // put off because other work was busy did not run. The host leaves the practice world out.
+    if(ok||failed){reportProductEvent('routine_completed',{routine_source:'worldlet',routine_status:failed?'failed':'ok'});if(!failed)reportProductEvent('task_completed',{task_kind:'routine'});}
     if(failed)void Promise.resolve(native?.artifacts?.({operation:'scheduleFailed',scheduled:due.kind,day:due.day,reason:failed})).catch(()=>{});
   }
   // A follow-up on an Artifact (core/artifacts/follow-up.ts, owner request 2026-10-11): the card turns over and drops into
@@ -1456,7 +1462,8 @@ export function mountNotionWorld(data: World, native: any) {
     let ok=true;
     void Promise.resolve(voice.background(request.text,{displayText:request.displayText}))
      .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||'')))voice?.submit?.(sent);})
-     .finally(()=>{work.end(ok);followUpAsking=false;});
+     // owner 2026-10-11 20:21 PDT: Production metrics: work the person asked Fox for finished in the background.
+     .finally(()=>{work.end(ok);followUpAsking=false;if(ok)reportProductEvent('task_completed',{task_kind:'fox'});});
     return true;
   }
   // Replies Fox prepares by itself (owner decision 2026-10-09; rules in core/artifacts/replies.ts): a new Worth Doing

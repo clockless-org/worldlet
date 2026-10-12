@@ -140,6 +140,8 @@ export function installFox(host:Host){
   if(value?.ran===true&&typeof job?.id==='string'){
    const at=Date.now()/1000;
    analytics()?.recordProductEvent('routine_completed','',{routine_source:'worldlet',routine_status:job.last_status==='ok'?'ok':'failed',routine_late:value.late===true?'yes':'no'});
+   // owner 2026-10-11 20:21 PDT: Production metrics: every background task that finished well, by kind.
+   if(job.last_status==='ok')analytics()?.recordProductEvent('task_completed','',{task_kind:'routine'});
    store.recordHistory({id:`routine:${job.id}:${at}`,kind:'routine.run',at,actor:'fox',status:job.last_status==='ok'?'complete':'failed',name:typeof job.name==='string'?job.name.slice(0,80):'',late:value.late===true,...typeof value.scheduledAt==='string'?{scheduledAt:value.scheduledAt}:{}});
    const result=store.writable&&!store.sampleEnabled()?routineScheduleResult(value,at*1000,Date.now()):null;
    if(result)try{
@@ -458,6 +460,8 @@ export function installFox(host:Host){
    finishTurn(task.id,status==='cancelled');
   }
   analytics()?.recordProductEvent('applet_task_'+(status==='complete'?'completed':status),taskDuration(Date.now()/1000-task.startedAt),{applet:task.key,...code?{error_code:code}:{}});
+  // owner 2026-10-11 20:21 PDT: Production metrics: every background task that finished well, by kind.
+  if(status==='complete')analytics()?.recordProductEvent('task_completed','',{task_kind:'applet'});
   store.recordHistory({id:task.id+':finished',kind:'applet.task',at:Date.now()/1000,actor:'fox',status,runId:task.id},task.key);
   // The result joins Fox's conversation, so Fox knows it in the next turn.
   // A quiet task (an Artifact page Worldlet asked for by itself) keeps its result out of the conversation.
