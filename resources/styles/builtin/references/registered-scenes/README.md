@@ -2,28 +2,21 @@
 
 | Collection | Asset groups | Registered HTML surfaces | Existing art awaiting registration |
 | --- | ---: | ---: | ---: |
-| Core everyday tools | 9 | 🟢 4 | 🟡 5 |
-| Individual playable games (separate from everyday tools) | 5 | 0 | 🟡 5 |
+| Core everyday applications | 18 | 🟢 18 | 0 |
+| Individual games: five fixed games + Random | 6 | 🟢 6 | 0 |
 | Generic scenes | 16 | 🟢 16 | 0 |
 | Brand-specific products and external games | 100 | 0 | 🟡 100 |
-| Total existing art selections | 130 | 20 | 110 |
+| Total art selections | **140** | **40** | **100** |
 
-Counts describe curated artwork, not connected accounts or working provider integrations. The runtime catalog still has 118 Applets. The art library selects 114 of them and adds 16 reusable scenes; four explicit exclusions are listed below. The generated [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains each icon, background, collection and registration status, plus planned core additions and exclusions. Regenerate it with `node scripts/village-scene-library.ts` after changing the catalog.
+Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. The 100 branded selections retain their existing art and await registered surfaces. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
 
-## Core tools and planned additions
+## Core applications and games
 
-The nine existing everyday tools are Mail, Calendar, Notes, Reminders, Weather, Meetings, Voice Memos, Messages and Browser. Weather remains a core tool. The five core games are 2048, Snake, Minesweeper, Sudoku and Random Game. Classification follows purpose, not a provider key such as `gmail`.
+The 18 applications are Mail, Calendar, Notes, Reminders, Messages, Voice Memos, Browser, Weather, Maps, Meetings, Files, Clock, Contacts, Photos, Music, News, Podcasts and Stocks. The six game selections are 2048, Snake, Minesweeper, Sudoku, Gomoku and Random Game.
 
-| Next core tool | Intended use | Status |
-| --- | --- | --- |
-| Files | Browse local files, downloads and Agent-created documents; offer document preview | 🔴 Planned; no dedicated icon, registered background or runtime Applet yet |
-| Clock | World time, alarms, timers and stopwatch; optional focus timer | 🔴 Planned; no dedicated icon, registered background or runtime Applet yet |
+Files covers documents, spreadsheets, presentations and PDFs. Photos and Music have provider-neutral identities suitable for combining services later. News is intended for curated reading. Their pictures and regions are ready; new application behavior, data integration and the Gomoku game implementation remain separate work. Google Maps remains a branded selection alongside the new generic Maps artwork.
 
-Files and Clock are confirmed additions, not completed implementations. After both additions are implemented, the everyday tool count becomes 11 and the core art count becomes 16 including games. The planned total is 132 art groups (16 core + 16 generic + 100 branded); the status table above counts existing selections only.
-
-Ongoing is an internal type for persistent conversations brought from other Agents, not an everyday tool to place by itself. It is not installed by default. A kept conversation should use a generic scene matching its actual subject, such as meal planning, travel or a project. Its runtime mechanism and fallback art remain available, but its standalone art group is excluded from this curated library. See [ongoing conversations](../../../../../core/tasks/README.md#ongoing-things).
-
-Artifact, Journal and Settings are system surfaces outside the Applet count. Games as a hub and App Store as a marketplace are also outside the basic-Applet comparison; neither is a planned core tool. Individual playable games remain separate from everyday tools. The reusable personal-journal preset is a separate art choice.
+Ongoing is an internal type for persistent conversations, not a standalone core art selection; choose a generic scene matching its subject. Artifact, Journal, Settings, the Games hub and an App Store are outside the 140 selections. Fitness remains a generic scene rather than a new core application.
 
 ## The 100 branded selections
 
@@ -128,7 +121,7 @@ If the toolkit expands later, Contacts and Photos have official local-data APIs 
 
 Match the Village world and each existing icon's recognizable objects, palette and materials. The icon's display base stays in the icon; the background expands those objects into a functional place. Brand-specific scenes must integrate recognizable product identity meaningfully, without sacrificing usable space. Vary the environment by activity: orchard, kitchen, trail, greenhouse, library, guildhall or workshop.
 
-Every updated background has blank painted surfaces for live HTML, a large primary region on the left and quiet lower-right companion clearance. Calendar and eight generic scenes also have a separate auxiliary surface. Paper texture and frames are baked into the image; dates, labels, task state and controls are HTML. Surface coordinates were measured on the final image, with conservative insets around rings, props and perspective edges. The World map and existing Applet icons are unchanged.
+Every updated background has blank painted surfaces for live HTML, a large primary region on the left and quiet lower-right companion clearance. Calendar and eight generic scenes also have a separate auxiliary surface. Paper texture and frames are baked into the image; dates, labels, task state and controls are HTML. Surface coordinates were measured on the final image, with conservative insets around rings, props and perspective edges. The World map and existing Applet icons are unchanged. Ten new icons use the same wooden plinth and brass status-lamp treatment. New backgrounds use one uninterrupted primary rectangle: address-book paper, album paper, a radio display, a ledger leaf or a game tray. Decorative object shapes do not constrain the HTML layout. Keep content blank in the painting, with no baked lists, dates, game grids or controls.
 
 The [Theme contract](../../../../themes/CONTRACT.md#registered-backgrounds-and-live-html) describes `appletScenes` and optional preset `registration`. It includes image dimensions, an encoded-image hash, named primary/secondary regions, material hints and companion clearance. The host keeps responsibility for data, actions, typography, responsive behavior and browser isolation.
 
@@ -141,7 +134,7 @@ node scripts/applet-scene-preview.ts
 python3 -m http.server 8787 --bind 127.0.0.1
 ```
 
-Open `/output/applet-scene-preview/` on that local server. Switch between the 20 updated scenes, compare the icon, show registration guides or hide HTML. Calendar changes weeks, Mail selects letters and opens a reply draft, Notes saves a local session draft, and lists support adding and completing items. All image and HTML regions use the same uniform transform. Narrow views remain a design preview; production should use a readable responsive page when the scene no longer provides sufficient space.
+Open `/output/applet-scene-preview/` on that local server. Browse the 24 core pairs and 16 generic pairs below the stage, or select a scene. The stage starts with artwork only. Show registration guides to inspect the actual usable rectangle and companion clearance. Existing sample scenes can also show fictional HTML; new scenes intentionally have no placeholder application behavior. Calendar changes weeks, Mail selects letters and opens a reply draft, Notes saves a local session draft, and lists support adding and completing items. All image and HTML regions use the same uniform transform. Narrow views remain a design preview; production should use a readable responsive page when the scene no longer provides sufficient space.
 
 ## Core scenes
 
@@ -149,11 +142,15 @@ Open `/output/applet-scene-preview/` on that local server. Switch between the 20
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-calendar.webp" width="100" alt="Calendar icon">
 
+Primary HTML region: 52.5% of image width × 51.0% of image height; measured inside the painted surface.
+
 ![Calendar background](google-calendar/background.png)
 
 ### Mail
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/gmail.webp" width="100" alt="Mail icon">
+
+Primary HTML region: 50.8% of image width × 50.7% of image height; measured inside the painted surface.
 
 ![Mail background](gmail/background.png)
 
@@ -161,13 +158,177 @@ Open `/output/applet-scene-preview/` on that local server. Switch between the 20
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-notes.webp" width="100" alt="Notes icon">
 
+Primary HTML region: 53.0% of image width × 59.5% of image height; measured inside the painted surface.
+
 ![Notes background](apple-notes/background.png)
 
 ### Reminders
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-reminders.webp" width="100" alt="Reminders icon">
 
+Primary HTML region: 49.3% of image width × 49.0% of image height; measured inside the painted surface.
+
 ![Reminders background](apple-reminders/background.png)
+
+### Files
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/files/icon.webp" width="100" alt="Files icon">
+
+Primary HTML region: 65.0% of image width × 69.0% of image height; measured inside the painted surface.
+
+![Files background](files/background.png)
+
+### Weather
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/weather.webp" width="100" alt="Weather icon">
+
+Primary HTML region: 54.0% of image width × 67.0% of image height; measured inside the painted surface.
+
+![Weather background](weather/background.png)
+
+### Meetings
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/meetings.webp" width="100" alt="Meetings icon">
+
+Primary HTML region: 54.0% of image width × 65.0% of image height; measured inside the painted surface.
+
+![Meetings background](meetings/background.png)
+
+### Voice Memos
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/voice-memos.webp" width="100" alt="Voice Memos icon">
+
+Primary HTML region: 53.0% of image width × 61.0% of image height; measured inside the painted surface.
+
+![Voice Memos background](voice-memos/background.png)
+
+### Messages
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/messages.webp" width="100" alt="Messages icon">
+
+Primary HTML region: 62.0% of image width × 63.0% of image height; measured inside the painted surface.
+
+![Messages background](messages/background.png)
+
+### Browser
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/browser.webp" width="100" alt="Browser icon">
+
+Primary HTML region: 63.5% of image width × 62.0% of image height; measured inside the painted surface.
+
+![Browser background](browser/background.png)
+
+### Maps
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/maps/icon.webp" width="100" alt="Maps icon">
+
+Primary HTML region: 64.0% of image width × 69.0% of image height; measured inside the painted surface.
+
+![Maps background](maps/background.png)
+
+### Clock
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/clock/icon.webp" width="100" alt="Clock icon">
+
+Primary HTML region: 67.0% of image width × 70.0% of image height; measured inside the painted surface.
+
+![Clock background](clock/background.png)
+
+### Contacts
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/contacts/icon.webp" width="100" alt="Contacts icon">
+
+Primary HTML region: 59.5% of image width × 69.0% of image height; measured inside the painted surface.
+
+![Contacts background](contacts/background.png)
+
+### Photos
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/photos/icon.webp" width="100" alt="Photos icon">
+
+Primary HTML region: 69.0% of image width × 70.0% of image height; measured inside the painted surface.
+
+![Photos background](photos/background.png)
+
+### Music
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/music/icon.webp" width="100" alt="Music icon">
+
+Primary HTML region: 64.0% of image width × 61.0% of image height; measured inside the painted surface.
+
+![Music background](music/background.png)
+
+### News
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/news/icon.webp" width="100" alt="News icon">
+
+Primary HTML region: 60.0% of image width × 65.0% of image height; measured inside the painted surface.
+
+![News background](news/background.png)
+
+### Podcasts
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/podcasts/icon.webp" width="100" alt="Podcasts icon">
+
+Primary HTML region: 53.0% of image width × 61.0% of image height; measured inside the painted surface.
+
+![Podcasts background](podcasts/background.png)
+
+### Stocks
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/stocks/icon.webp" width="100" alt="Stocks icon">
+
+Primary HTML region: 62.0% of image width × 70.0% of image height; measured inside the painted surface.
+
+![Stocks background](stocks/background.png)
+
+### 2048
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/game-2048.webp" width="100" alt="2048 icon">
+
+Primary HTML region: 67.0% of image width × 77.0% of image height; measured inside the painted surface.
+
+![2048 background](game-2048/background.png)
+
+### Snake
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/snake.webp" width="100" alt="Snake icon">
+
+Primary HTML region: 67.0% of image width × 65.0% of image height; measured inside the painted surface.
+
+![Snake background](snake/background.png)
+
+### Minesweeper
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/minesweeper.webp" width="100" alt="Minesweeper icon">
+
+Primary HTML region: 59.0% of image width × 67.0% of image height; measured inside the painted surface.
+
+![Minesweeper background](minesweeper/background.png)
+
+### Sudoku
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/sudoku.webp" width="100" alt="Sudoku icon">
+
+Primary HTML region: 66.0% of image width × 70.0% of image height; measured inside the painted surface.
+
+![Sudoku background](sudoku/background.png)
+
+### Gomoku
+
+<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/gomoku/icon.webp" width="100" alt="Gomoku icon">
+
+Primary HTML region: 66.0% of image width × 76.0% of image height; measured inside the painted surface.
+
+![Gomoku background](gomoku/background.png)
+
+### Random Game
+
+<img src="../../../../../ui/theme-packages/village/assets/devices/random-game.webp" width="100" alt="Random Game icon">
+
+Primary HTML region: 51.5% of image width × 62.0% of image height; measured inside the painted surface.
+
+![Random Game background](random-game/background.png)
 
 ## Generic scenes
 
@@ -301,7 +462,7 @@ Track milestones, tasks and next actions.
 
 ## Sources and reproducibility
 
-The built-in image-generation tool created these backgrounds. [Core prompts and measured regions](catalog.json) retain the original request, icon references and refinements. [Generic prompts and registrations](../../presets/personal-scenes/catalog.json) retain original and updated background prompts. Source PNG hashes are in the generic source lock; runtime WebP source/output hashes are in each package art lock.
+The built-in image-generation tool created these backgrounds. [Core prompts and measured regions](catalog.json) retain the original request, icon references and refinements. [Generic prompts and registrations](../../presets/personal-scenes/catalog.json) retain original and updated background prompts. Source PNG hashes are in the generic source lock; runtime WebP source/output hashes are in each package art lock. New transparent icon sources and their prompts are also recorded in the core catalog; `icons.lock.json` records their lossless 768-pixel WebP exports.
 
 ```sh
 node scripts/village-registered-scenes.ts

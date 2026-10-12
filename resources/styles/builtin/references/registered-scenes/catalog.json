@@ -43,7 +43,8 @@
         "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Change the calendar's horizontal top binding bar to warm terracotta red matching icon 2. Keep brass binder rings and cream paper. Replace the tiny generic calendar emblem at the top with a small red-bound calendar object matching icon 2, without dates or grid. Keep the wood support natural. Do not add writing, grids or controls anywhere on the large paper. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space.",
         "Use case: precise-object-edit. Edit this Village Calendar background. Preserve the entire large left calendar sheet, its exact bounds, red top binding, rings, blank paper, and the existing village painterly style. On the UPPER RIGHT add a separate clearly usable TODAY DATE display: a cream blank tear-off calendar card with rounded upper corners, red top binding and TWO brass rings, naturally hanging on a slim wooden garden post. Its outer silhouette fits x74%-95%,y19%-48%; its empty FRONT-FACING cream interior must fit x77%-92%,y27%-44%. It is a real small calendar card, not a UI overlay. Remove the little black lamp if it conflicts with this small date card; simplify pots behind it. This secondary card will receive live HTML date text, so no painted dates, letters, grids or numbers. Preserve a generous clear lower-right terrace from x69%-97%,y55%-96% for companion. Keep all other details and the 16:9 canvas."
       ],
-      "category": "core"
+      "category": "core",
+      "group": "utilities"
     },
     {
       "id": "gmail",
@@ -73,7 +74,8 @@
       "refinements": [
         "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Make the main green frame a slightly lighter weathered sage matching mailbox icon 2. Change the envelope emblem above the blank paper to a blue enamel rectangular plaque with ivory envelope and four brass rivets, matching the mailbox badge. Replace a section of upper-right sorting cubbies with that recognizable full-size curved-top sage mailbox with brass flag and blue envelope badge, integrated into the postal wall. Remove the unrelated red hanging envelope sign, or turn it into a small matching blue sign. Keep the blank paper entirely clear. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
       ],
-      "category": "core"
+      "category": "core",
+      "group": "utilities"
     },
     {
       "id": "apple-notes",
@@ -103,7 +105,8 @@
       "refinements": [
         "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Replace the plum-purple linen notebook binding with the warm golden-yellow notepad identity from icon 2: substantial rounded yellow top binding, layered ivory pages and a slim honey-wood support at bottom. Keep the exact large front-facing blank rectangular page position and inner bounds. Remove the decorative plum notebook clasp. On upper-right writing ledge replace the fountain pen with a normal-sized yellow pencil with red eraser matching the icon; retain the village writing garden. No lines or text on the paper. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
       ],
-      "category": "core"
+      "category": "core",
+      "group": "utilities"
     },
     {
       "id": "apple-reminders",
@@ -133,7 +136,594 @@
       "refinements": [
         "Use case: precise-object-edit. Image 1 is the background to edit. Image 2 is its actual Applet icon and must determine identity colors and main functional object. Preserve the entire image 1 composition, 16:9 canvas, painterly village style, camera, lighting, front-facing blank left HTML writing surface and its precise position; preserve right lower clear space. Change only identity details: Echo icon 2: keep the warm timber frame and brass clips. Add three small round enamel studs BLUE, AMBER, RED on the wooden top rail (outside the blank paper), positioned near the three brass clips. Add an olive-green wooden pencil cup holding one yellow pencil on the upper-right shelf. Keep cream paper blank and lower-right clearance unchanged. Do not enlarge or paste the icon as a plinth or a floating graphic. It is a real object/material language integrated into this space."
       ],
-      "category": "core"
+      "category": "core",
+      "group": "utilities"
+    },
+    {
+      "id": "files",
+      "title": "Files",
+      "category": "core",
+      "group": "utilities",
+      "source": "files/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. FILES. A village archive pavilion: a broad opened blue linen document folder laid on the oak sorting desk occupies x2%-76%,y5%-92%. ONE uninterrupted BLANK ivory document sheet x5%-72%,y11%-87%, no spine crossing it. Blue folder tabs protrude only along outside top edge. Small filing drawers and brass folder emblem at upper-right, orchard and cream stone beyond. No interactive labels or separate panels. IMPORTANT keep the main inner blank page at least 70% of the image WIDTH, no perspective, camera perpendicular to surface. Reduce border thickness and decorative clutter.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.06,
+            0.12,
+            0.65,
+            0.69
+          ],
+          "material": "paper"
+        }
+      ],
+      "iconSource": "files/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: An open blue linen document folder with layered ivory files, small oak filing drawer and a brass folder clasp",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/files/icon.webp"
+    },
+    {
+      "id": "weather",
+      "title": "Weather",
+      "category": "core",
+      "group": "utilities",
+      "source": "weather/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate, not collage. Art direction: polished miniature village game, rounded sculpted foliage, soft painterly 3D, warm timber and cream limestone, natural warm daylight, NOT a photograph. Large functional surface on LEFT, very close, rectangle flat and parallel to camera, outer bounds x4%-65%,y10%-88%; clean BLANK interior x8%-61%,y18%-80%. Entire interior empty, mild material texture only, no deep shadows, perspective distortion, objects, text, grids or controls; live HTML will occupy it. Rich purpose-specific scene around margins and upper right. Reserve lower-right x72%-96%,y62%-95% as calm clear floor for companion. No people, UI overlays, floating logo, icon pedestal, watermark, repeated bridge or mountain panorama. An open-air hilltop village weather observatory. LEFT broad blank pale blue frosted-glass forecast panel in warm oak with brass corner fittings. UPPER RIGHT a gold rooster weather vane, red-white windsock and small brass barometer, echoing the icon. Open sky and windswept grasses, no bridges.",
+      "refinements": [
+        "Use case: precise-object-edit. Edit the attached applet background to increase actual usable area. Preserve this scene's purpose, colors, materials and object identity, but RECOMPOSE. Main surface must become strictly FRONT-FACING rectangular, no perspective: outer border x2%-74%, y4%-95%; clean BLANK interior x5%-71%, y12%-88%. This full 66%-wide 76%-tall rectangle must be completely unobstructed and empty for interactive HTML. Move all props outside it. Thin physical frame only, do not waste space on thick trim. Put meaningful thematic objects in right x77%-99%,y4%-57%, simplify lower right x77%-98%,y62%-97% into clear floor for companion. Keep countryside style painterly and sculpted rather than photoreal, no bridge panoramas. Remove all readable text, logos, grids or UI content. Preserve 16:9 canvas. Return the complete revised background only."
+      ],
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.075,
+            0.12,
+            0.54,
+            0.67
+          ],
+          "material": "screen"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/weather.webp"
+    },
+    {
+      "id": "meetings",
+      "title": "Meetings",
+      "category": "core",
+      "group": "utilities",
+      "source": "meetings/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate, not collage. Art direction: polished miniature village game, rounded sculpted foliage, soft painterly 3D, warm timber and cream limestone, natural warm daylight, NOT a photograph. Large functional surface on LEFT, very close, rectangle flat and parallel to camera, outer bounds x4%-65%,y10%-88%; clean BLANK interior x8%-61%,y18%-80%. Entire interior empty, mild material texture only, no deep shadows, perspective distortion, objects, text, grids or controls; live HTML will occupy it. Rich purpose-specific scene around margins and upper right. Reserve lower-right x72%-96%,y62%-95% as calm clear floor for companion. No people, UI overlays, floating logo, icon pedestal, watermark, repeated bridge or mountain panorama. A village council garden pavilion with a blue enamel projection cabinet holding a large blank warm ivory projection screen on LEFT. UPPER RIGHT a small blue-and-ivory vintage video camera with brass knobs, a semicircle of empty oak chairs and flowering pergola.",
+      "refinements": [
+        "Use case: precise-object-edit. Edit the attached applet background to increase actual usable area. Preserve this scene's purpose, colors, materials and object identity, but RECOMPOSE. Main surface must become strictly FRONT-FACING rectangular, no perspective: outer border x2%-74%, y4%-95%; clean BLANK interior x5%-71%, y12%-88%. This full 66%-wide 76%-tall rectangle must be completely unobstructed and empty for interactive HTML. Move all props outside it. Thin physical frame only, do not waste space on thick trim. Put meaningful thematic objects in right x77%-99%,y4%-57%, simplify lower right x77%-98%,y62%-97% into clear floor for companion. Keep countryside style painterly and sculpted rather than photoreal, no bridge panoramas. Remove all readable text, logos, grids or UI content. Preserve 16:9 canvas. Return the complete revised background only."
+      ],
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.07,
+            0.11,
+            0.54,
+            0.65
+          ],
+          "material": "screen"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/meetings.webp"
+    },
+    {
+      "id": "voice-memos",
+      "title": "Voice Memos",
+      "category": "core",
+      "group": "utilities",
+      "source": "voice-memos/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate, not collage. Art direction: polished miniature village game, rounded sculpted foliage, soft painterly 3D, warm timber and cream limestone, natural warm daylight, NOT a photograph. Large functional surface on LEFT, very close, rectangle flat and parallel to camera, outer bounds x4%-65%,y10%-88%; clean BLANK interior x8%-61%,y18%-80%. Entire interior empty, mild material texture only, no deep shadows, perspective distortion, objects, text, grids or controls; live HTML will occupy it. Rich purpose-specific scene around margins and upper right. Reserve lower-right x72%-96%,y62%-95% as calm clear floor for companion. No people, UI overlays, floating logo, icon pedestal, watermark, repeated bridge or mountain panorama. An acoustic recording nook in an open timber barn facing a meadow. LEFT large blank warm pale-grey recorder display in charcoal leather and walnut with little red and blue trim OUTSIDE display. UPPER RIGHT a substantial vintage perforated brass microphone, reel tape, folded wool acoustic blanket.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.045,
+            0.15,
+            0.53,
+            0.61
+          ],
+          "material": "screen"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/voice-memos.webp"
+    },
+    {
+      "id": "messages",
+      "title": "Messages",
+      "category": "core",
+      "group": "utilities",
+      "source": "messages/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. A village community courtyard with climbing jasmine. LEFT large blank ivory correspondence panel in sage-green enamel and oak frame. UPPER RIGHT an integrated green glazed ceramic speech-bubble emblem mounted on the village message kiosk, a small hanging brass lantern, two empty wicker seats. CRITICAL simple practical layout: camera exactly perpendicular to MAIN PLANE. The usable blank interior rectangle must run from x=5% to x=74%, y=10% to y=87% of whole image, horizontal and vertical sides, NO perspective slant. Functional object border OUTSIDE those coordinates. Widen object to reach 76%. Shrink secondary props to upper-right x80%-97%,y10%-48%. Empty light stone lower-right x80%-98%,y55%-95%. No readable text, no actual UI.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.08,
+            0.14,
+            0.62,
+            0.63
+          ],
+          "material": "paper"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/messages.webp"
+    },
+    {
+      "id": "browser",
+      "title": "Browser",
+      "category": "core",
+      "group": "utilities",
+      "source": "browser/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. A village explorers conservatory. LEFT broad blank warm ivory viewing screen within dark teal oak portal with brass detailing. UPPER RIGHT a blue-and-green globe on brass arm, magnifying glass, travel books, lush potted fern and tall open windows looking into a garden, not mountains. CRITICAL simple practical layout: camera exactly perpendicular to MAIN PLANE. The usable blank interior rectangle must run from x=5% to x=74%, y=10% to y=87% of whole image, horizontal and vertical sides, NO perspective slant. Functional object border OUTSIDE those coordinates. Widen object to reach 76%. Shrink secondary props to upper-right x80%-97%,y10%-48%. Empty light stone lower-right x80%-98%,y55%-95%. No readable text, no actual UI.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.06,
+            0.12,
+            0.635,
+            0.62
+          ],
+          "material": "screen"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/browser.webp"
+    },
+    {
+      "id": "maps",
+      "title": "Maps",
+      "category": "core",
+      "group": "utilities",
+      "source": "maps/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. A countryside trail waystation beside an orchard. LEFT large unfolded completely BLANK cream atlas sheet in honey oak field-map cabinet, front-facing and flat. UPPER RIGHT a large teal enamel location pin with brass compass on a carved trail marker, walking poles, rolled maps and branching dirt footpaths. No printed map on the main paper. CRITICAL simple practical layout: camera exactly perpendicular to MAIN PLANE. The usable blank interior rectangle must run from x=5% to x=74%, y=10% to y=87% of whole image, horizontal and vertical sides, NO perspective slant. Functional object border OUTSIDE those coordinates. Widen object to reach 76%. Shrink secondary props to upper-right x80%-97%,y10%-48%. Empty light stone lower-right x80%-98%,y55%-95%. No readable text, no actual UI.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.067,
+            0.13,
+            0.64,
+            0.69
+          ],
+          "material": "paper"
+        }
+      ],
+      "iconSource": "maps/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A large teal enamel location pin holding a brass compass rose, on an unfolded cream atlas",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/maps/icon.webp"
+    },
+    {
+      "id": "clock",
+      "title": "Clock",
+      "category": "core",
+      "group": "utilities",
+      "source": "clock/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. CLOCK. Village clockmaker's bench. A single large front-facing warm ivory enamel instrument panel x4%-74%,y10%-87%, thin walnut and teal surround with winding knob at far outside edge. This blank main instrument face will show dynamic world clocks, timers and alarm lists. Keep it ONE large clean rectangle, no circular cutouts or smaller instruments inside. Upper-right ONE beautiful ivory-and-brass round mantel clock with teal rim and simple decorative hands, hourglass and hanging bell, herb courtyard beyond. Do not bake any current date or readable numbers. IMPORTANT keep the main inner blank page at least 70% of the image WIDTH, no perspective, camera perpendicular to surface. Reduce border thickness and decorative clutter.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.055,
+            0.13,
+            0.67,
+            0.7
+          ],
+          "material": "screen"
+        }
+      ],
+      "iconSource": "clock/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A rounded ivory mantel clock with teal enamel rim, brass bells and hands, a small hourglass beside it",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/clock/icon.webp"
+    },
+    {
+      "id": "contacts",
+      "title": "Contacts",
+      "category": "core",
+      "group": "utilities",
+      "source": "contacts/background.png",
+      "prompt": "Use case: stylized-concept. One finished landscape 16:9 Worldlet Village background plate. Painterly stylized 3D village game art: soft rounded carved forms, restrained texture, cheerful natural colors, NOT photography. CRITICAL USABILITY: the large flat interactive surface dominates LEFT 83% of entire image, front facing with strictly horizontal/vertical edges, NO perspective trapezoid. Outer frame at x1%-83%,y2%-97%. Inner clean BLANK rectangle at x3%-79%,y8%-93%, at least 76% of image width and 85% of height. This exact full rectangle must be continuous and unobstructed; gentle low-contrast texture only. Nothing overlaps it. Do NOT draw text, grids, icons, controls, content, dates, photographs or cast shadows on that rectangle. Physical border only OUTSIDE that rectangle. Scene-specific rich setting and identity objects concentrated in RIGHT x83%-99%,y4%-58% and outermost margins. Keep RIGHT x82%-98%,y62%-97% as quiet uncluttered floor for companion. Need a BIG useful content surface, not a small prop lost in scenery. No people, UI overlay, pedestal, watermark. Avoid bridges and mountain panoramas. A welcoming village community reception porch. LEFT large front-facing blank cream page of a sage-green leather address book, brass alphabet tabs outside the page but NO lettering. UPPER RIGHT a matching small green address book with brass human-profile medallion, ceramic visiting-card holder and flowers; background cottage doors and garden gate.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.1,
+            0.13,
+            0.595,
+            0.69
+          ],
+          "material": "paper"
+        }
+      ],
+      "iconSource": "contacts/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: An upright sage-green leather address book, brass profile medallion on cover, cream page edges and small index tabs",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/contacts/icon.webp"
+    },
+    {
+      "id": "photos",
+      "title": "Photos",
+      "category": "core",
+      "group": "utilities",
+      "source": "photos/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. PHOTOS. A village photographer's garden worktable: one large landscape-format coral linen photo album opened to a SINGLE uninterrupted blank ivory mounting page x5%-73%,y10%-88%, facing camera flat. Thin bound edge and tiny corner mounts outside usable rectangle, no center fold, no printed photo frames. Upper-right vintage cream camera with sage strap and two little clipped flower photographs, no extra display. Future photo grid entirely inside large blank album page. Lower-right quiet stone. IMPORTANT keep the main inner blank page at least 70% of the image WIDTH, no perspective, camera perpendicular to surface. Reduce border thickness and decorative clutter.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.055,
+            0.13,
+            0.69,
+            0.7
+          ],
+          "material": "paper"
+        }
+      ],
+      "iconSource": "photos/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A coral linen photo album with one small flower photograph on cover and a cream vintage camera with sage strap",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/photos/icon.webp"
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "category": "core",
+      "group": "utilities",
+      "source": "music/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. MUSIC. Countryside listening gazebo. An open landscape songbook portfolio in teal linen and walnut on the listening console, with ONE large blank cream rectangular sheet x4%-73%,y11%-87%, no crease across it; live playlist, album art and playback controls all fit on this single plane. Upper-right a compact brass-horn gramophone with teal housing and stacked vinyl sleeves, cottage garden beyond. No oversized circular interactive record surface. CRITICAL simple practical layout: camera exactly perpendicular to MAIN PLANE. The usable blank interior rectangle must run from x=5% to x=74%, y=10% to y=87% of whole image, horizontal and vertical sides, NO perspective slant. Functional object border OUTSIDE those coordinates. Widen object to reach 76%. Shrink secondary props to upper-right x80%-97%,y10%-48%. Empty light stone lower-right x80%-98%,y55%-95%. No readable text, no actual UI.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.05,
+            0.13,
+            0.64,
+            0.61
+          ],
+          "material": "paper"
+        }
+      ],
+      "iconSource": "music/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A teal enamel gramophone with a large warm brass horn and one black vinyl record",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/music/icon.webp"
+    },
+    {
+      "id": "news",
+      "title": "News",
+      "category": "core",
+      "group": "utilities",
+      "source": "news/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. NEWS. Village editor's desk under an open green market awning. One broad single BLANK cream newspaper sheet held on a slim dark green printer's composing bed, clear rectangle x4%-73%,y10%-88%. No folds, printed headlines, rules or columns within it; live news articles go here. Upper-right small printing press, ink roller and tied newspaper bundle, town square behind. One usable surface only.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.075,
+            0.13,
+            0.6,
+            0.65
+          ],
+          "material": "paper"
+        }
+      ],
+      "iconSource": "news/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A folded cream newspaper with understated unreadable column marks, forest-green binding, and a small brass printing roller",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/news/icon.webp"
+    },
+    {
+      "id": "podcasts",
+      "title": "Podcasts",
+      "category": "core",
+      "group": "utilities",
+      "source": "podcasts/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. PODCASTS. Village lavender radio nook. One large warm ivory glass radio display x4%-73%,y10%-88% in violet enamel and walnut receiver cabinet with thin rim. Blank uninterrupted rectangular display for real episode list and player. Round physical knobs OUTSIDE it, no extra little screens. Upper-right perforated brass broadcast microphone, headphones, broadcast-wave emblem and meadow beyond.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.115,
+            0.14,
+            0.53,
+            0.61
+          ],
+          "material": "screen"
+        }
+      ],
+      "iconSource": "podcasts/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A plum enamel radio with cream display, brass microphone and compact headphones",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/podcasts/icon.webp"
+    },
+    {
+      "id": "stocks",
+      "title": "Stocks",
+      "category": "core",
+      "group": "utilities",
+      "source": "stocks/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. STOCKS. Village market counting desk. A single wide blank cream account ledger leaf x4%-73%,y10%-88%, green leather binder at outer edge and thin brass corners. No fold, numbers, table or chart on main page; dynamic watchlist/chart will fit together on this one rectangle. Upper-right brass abacus, balance scale and green rising-bars medallion, market stalls beyond. Main blank interior should occupy at least 70% of image width; thin framing, minimal perspective.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.085,
+            0.11,
+            0.62,
+            0.7
+          ],
+          "material": "paper"
+        }
+      ],
+      "iconSource": "stocks/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A forest-green account ledger with a small brass rising bar graph, three coins and an abacus",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/stocks/icon.webp"
+    },
+    {
+      "id": "game-2048",
+      "title": "2048",
+      "category": "core",
+      "group": "built-in-games",
+      "source": "game-2048/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. 2048. Village potter's game workshop. Large front-facing ochre ceramic game tray x3%-73%,y7%-90% with flat BLANK playing interior and thin walnut rim. NOT a hanging whiteboard. Empty ceramic area will receive dynamic HTML tiles and numbers; no static grid or pieces. Upper right neat chunky yellow, ivory and terracotta ceramic game tiles in a small wooden storage rack, decorative top tile bears 2048. Small pottery kiln, marigolds and cottage doorway at the edge. Lower right quiet pale paving. Main blank interior should occupy at least 70% of image width; thin framing, minimal perspective.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.04,
+            0.09,
+            0.67,
+            0.77
+          ],
+          "material": "board"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/game-2048.webp"
+    },
+    {
+      "id": "snake",
+      "title": "Snake",
+      "category": "core",
+      "group": "built-in-games",
+      "source": "snake/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. SNAKE. An orchard play garden with a large flat sage-enamel sandbox-like play tray at x3%-73%,y7%-91%; absolutely blank unobstructed enamel interior for dynamic snake game, no paths or grids. Thin rounded warm oak rim, seated on garden bench facing camera. Upper-right cute segmented ceramic green toy snake and a red apple as game identity, apple baskets and sculpted orchard trees. Lower-right clear path for companion. Main blank interior should occupy at least 70% of image width; thin framing, minimal perspective.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.045,
+            0.11,
+            0.67,
+            0.65
+          ],
+          "material": "board"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/snake.webp"
+    },
+    {
+      "id": "minesweeper",
+      "title": "Minesweeper",
+      "category": "core",
+      "group": "built-in-games",
+      "source": "minesweeper/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. MINESWEEPER. A village gardener's puzzle table by vegetable beds. Huge shallow walnut tray x3%-73%,y7%-91% containing flat blank pale sage ceramic playing surface, no grids or pieces. Slim oak border, small brass corners. Upper-right stacked cream square tiles, a miniature red survey flag and a rounded charcoal toy mine like a game piece, flowering vegetables and gardening shed. Lower-right unobstructed paving. Main blank interior should occupy at least 70% of image width; thin framing and no perspective.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.1,
+            0.12,
+            0.59,
+            0.67
+          ],
+          "material": "board"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/minesweeper.webp"
+    },
+    {
+      "id": "sudoku",
+      "title": "Sudoku",
+      "category": "core",
+      "group": "built-in-games",
+      "source": "sudoku/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. SUDOKU. Village school puzzle desk under a chestnut tree. Huge cream ceramic writing slate x3%-73%,y7%-91% lying flat and front-facing with slim oak frame, navy pencil rail outside. Totally BLANK interior for future live Sudoku grid. Upper-right chunky ivory number tiles and a navy-blue pencil, brass school bell and books. School courtyard visible at edge. Lower-right clear pale paving. Main blank interior should occupy at least 70% of image width; thin framing and no perspective.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.045,
+            0.12,
+            0.66,
+            0.7
+          ],
+          "material": "board"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/sudoku.webp"
+    },
+    {
+      "id": "gomoku",
+      "title": "Gomoku",
+      "category": "core",
+      "group": "built-in-games",
+      "source": "gomoku/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. GOMOKU. Quiet village tea garden. A HUGE flat honey-oak rectangular playing board directly facing camera fills x3%-73%,y6%-91%. Board is perfectly BLANK and unobstructed, no grid/stones: actual HTML grid and live moves go here. Thin dark walnut lip and brass feet rather than wall-mounted frame. Upper-right two bowls full of glossy charcoal/ivory stones on low tea table, a tiny decorative board with five black stones in a row, teapot, climbing wisteria. Lower-right clear pale paving. Actual game-table object with open-air garden around edges. Main blank interior should occupy at least 70% of image width; thin framing and no perspective.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.04,
+            0.085,
+            0.66,
+            0.76
+          ],
+          "material": "board"
+        }
+      ],
+      "iconSource": "gomoku/icon.png",
+      "iconPrompt": "Generate one isolated Village applet icon, square composition, transparent background. Match reference icon's stylized finely crafted painterly 3D materials, warm walnut circular/rounded plinth, brass trim, tiny black circular status lamp centered on FRONT of plinth; same perspective three-quarter with front visible, same toy-like handcrafted scale, soft daylight. Not photographic, not flat logo. Object centered fills 85% of canvas; no backdrop, ground, scenery or text. Clearly readable at small sizes, restrained 2-3 objects max. Subject: A honey-oak Gomoku board with black and ivory stones including five black stones in a row, and a small stone bowl",
+      "identityReference": "ui/theme-packages/village/assets/applet-scenes/gomoku/icon.webp"
+    },
+    {
+      "id": "random-game",
+      "title": "Random Game",
+      "category": "core",
+      "group": "built-in-games",
+      "source": "random-game/background.png",
+      "prompt": "Use case: stylized-concept. One finished 16:9 Worldlet Village background plate. Finely crafted stylized painterly 3D, rounded soft materials, restrained wood grain, cream limestone, warm sunlight, NOT photography. FUNCTIONAL PHYSICAL OBJECT as usable area, not generic freestanding whiteboard. Main content is a SINGLE LARGE flat rectangle taking LEFT three quarters, no distortion, face parallel to camera. Low-contrast blank texture for dynamic HTML; absolutely no text, data, grids, UI, controls or props within it. Meaningful scenery compressed to upper-right narrow strip and outside edges. Keep right x79%-98%,y65%-96% as quiet uncluttered ground. Do not fragment the usable area into multiple small shapes. No people, icon pedestal, watermark, bridges or mountain panorama. RANDOM GAME. A village fairground mystery-game booth. Huge empty shallow walnut toy theater x3%-73%,y7%-91%, pale cream flat front-facing interior for dynamically embedded games; thin blue and terracotta side curtains OUTSIDE blank area, not covering content. Upper-right chunky ivory mystery die with navy question mark and two interlocking blue/terracotta arrows as a real carved booth sign. Pennants and small wooden prizes along outer edges, lower-right quiet ground. Main blank interior should occupy at least 70% of image width; thin framing and no perspective.",
+      "companion": [
+        0.79,
+        0.73,
+        0.19,
+        0.23
+      ],
+      "regions": [
+        {
+          "id": "main",
+          "role": "primary",
+          "rect": [
+            0.12,
+            0.14,
+            0.515,
+            0.62
+          ],
+          "material": "board"
+        }
+      ],
+      "identityReference": "ui/theme-packages/village/assets/devices/random-game.webp"
     }
   ]
 }
