@@ -507,7 +507,7 @@
 @media(prefers-reduced-motion:reduce){.region-shelf-applet,.region-shelf-applet img{transition:none}}
 
 /* Entering an Area (enterArea, notion-world.ts): its painted map fills the window and its Applets lie flat in the
-   middle on a soft shade, five to a row and on down, each managed in place (⋯ for own, + to add). The Attention Center
+   middle on a soft shade, five to a row and on down, each managed in place by right-click. The Attention Center
    and the World's other chrome step aside; Fox stays above. */
 .area-view{position:absolute;z-index:30;inset:0;overflow:hidden;background:#2f4a36;animation:area-view-in .32s ease-out}
 .area-view[data-time=night]{background:#16202e}
@@ -516,9 +516,11 @@
 .area-view-header h1{margin:0;color:#fff;font-size:28px;font-weight:650;line-height:1.2;text-shadow:0 2px 12px #0009}
 .area-view-back{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border:1px solid #ffffff59;border-radius:999px;background:#fffbf233;color:#fff;cursor:pointer;backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 4px 18px #0003;transition:background .2s}
 .area-view-back:hover{background:#fffbf259}
-.area-view-shade{position:absolute;top:calc(50% - 53px);left:50%;transform:translate(-50%,-50%);max-height:calc(100% - 290px);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:18px;overflow-x:hidden;overflow-y:auto;padding:26px 36px;border-radius:32px;background:#10161257;box-shadow:0 18px 60px #0000004d;backdrop-filter:blur(3px);scrollbar-width:none;overscroll-behavior:contain}
-.area-view-shade::-webkit-scrollbar{display:none}
-.area-view[data-time=night] .area-view-shade{background:#060a1266}
+.area-view-shade{position:absolute;top:calc(50% - 53px);left:50%;transform:translate(-50%,-50%);max-height:calc(100% - 230px);display:flex;flex-direction:column}
+.area-view-shade::before{content:"";position:absolute;z-index:-1;inset:-40px -80px;border-radius:50%;background:#0e1410;opacity:.5;filter:blur(48px);pointer-events:none}
+.area-view[data-time=night] .area-view-shade::before{background:#050911;opacity:.55}
+.area-view-list{display:flex;flex-direction:column;align-items:center;gap:18px;min-height:0;overflow-x:hidden;overflow-y:auto;padding:28px 40px;scrollbar-width:none;overscroll-behavior:contain;-webkit-mask-image:linear-gradient(transparent,#000 28px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(transparent,#000 28px,#000 calc(100% - 28px),transparent)}
+.area-view-list::-webkit-scrollbar{display:none}
 #notionWorld[data-area-view] .applet-layout-menu{display:flex;flex-direction:column;align-items:stretch}
 #notionWorld[data-area-view] .applet-layout-menu button{text-align:left}
 .area-view-grid{display:grid;grid-template-columns:repeat(5,120px);gap:20px 28px}
@@ -531,14 +533,11 @@
 .area-view-cell[data-own=false] .area-view-applet span{opacity:.8}
 .area-view-applet:hover img,.area-view-applet:focus-visible img{transform:translateY(-3px) scale(1.05)}
 .area-view-applet:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.area-view-more,.area-view-add{position:absolute;top:2px;right:10px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:#fffbf2;color:#29473b;cursor:pointer;box-shadow:0 2px 6px #0004}
-.area-view-more{opacity:0;transition:opacity .15s}
-.area-view-cell:hover .area-view-more,.area-view-more:focus-visible,.area-view-more[aria-expanded=true]{opacity:1}
 .area-view-all{padding:8px 16px;border:1px solid #ffffff59;border-radius:999px;background:#fffbf226;color:#fff;font:inherit;font-weight:600;cursor:pointer}
 .area-view-all:hover{background:#fffbf247}
 #notionWorld[data-area-view] :is(.world-task-tracker,.notion-top,.applet-bar-side,.world-update-dock,.world-watermark){visibility:hidden;pointer-events:none}
 @keyframes area-view-in{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.area-view{animation:none}.area-view-applet img,.area-view-more{transition:none}}
+@media(prefers-reduced-motion:reduce){.area-view{animation:none}.area-view-applet img{transition:none}}
 
 /* One bounded collection scrolls; the region heading and guidance stay put. */
 .region-shelf{top:50%;bottom:auto;max-height:88%;max-width:calc(100% - 32px);box-sizing:border-box;padding:18px 24px}
