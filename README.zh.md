@@ -19,11 +19,31 @@
   Worldlet 让 OpenClaw、Hermes Agent、Claude Code、Codex 或 pi 有一个你看得见的工作场所。World 由 AI 操作，你在一旁看着、做决定。
 </p>
 
-<h3 align="center"><a href="#安装"><ins>一条命令安装</ins></a> · <a href="https://worldlet.ai/download/"><ins>下载</ins></a></h3>
-
 <p align="center">
   <img src="docs/assets/readme/world.jpg" alt="Worldlet 的 World：放着 Applet 的各个地点，左边是 Attention Center，下方是 Fox" width="960" />
 </p>
+
+<h3 align="center"><a href="#安装"><ins>一条命令安装</ins></a> · <a href="https://worldlet.ai/download/"><ins>下载</ins></a></h3>
+
+## 你的 Agent，你的模型：用电脑来类比
+
+<p align="center">
+  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.zh.svg" alt="个人电脑的层次和个人助理的层次对照：Worldlet 是 Harness 之上缺的那层 World UI" width="960" /></a>
+</p>
+
+Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的登录、连接、技能和记忆，并通过 `worldlet` MCP 服务器把 World 工具交给 Agent。换 Agent，你的 World 还在。
+
+| 电脑 | AI 时代 | 归谁 |
+| --- | --- | --- |
+| CPU | 模型 | 你的模型提供方（你自己的登录或 API key） |
+| 内核 | Harness：Hermes Agent、OpenClaw、Claude Code、Codex、pi | 你选，可以替换 |
+| 驱动和钥匙串 | MCP 服务器、连接器和它们的令牌 | 你的 Harness；Worldlet 借用 |
+| 终端 | 聊天 App 和命令行 | Agent 现在待的地方 |
+| 图形界面 | Worldlet：World、Applet、Fox、Attention Center | 本项目 |
+| 系统 API | World 工具，通过 `worldlet` MCP 服务器提供给 Agent | 本项目 |
+| 磁盘 | 你电脑上的 `world.sqlite` 和 World 存储 | 本项目 |
+
+Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它安装的 Hermes Agent，就像发行版 Ubuntu。World → Agent 的工具走 MCP；Agent → World 每种 Harness 一个适配器（[Harness 契约](contracts/HARNESS.md)、[交互式架构图](docs/architecture.html)）。
 
 ## 安装
 
@@ -107,26 +127,6 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 - **[例行任务](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
-
-## 你的 Agent，你的模型：用电脑来类比
-
-<p align="center">
-  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.zh.svg" alt="个人电脑的层次和个人助理的层次对照：Worldlet 是 Harness 之上缺的那层 World UI" width="960" /></a>
-</p>
-
-Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的登录、连接、技能和记忆，并通过 `worldlet` MCP 服务器把 World 工具交给 Agent。换 Agent，你的 World 还在。
-
-| 电脑 | AI 时代 | 归谁 |
-| --- | --- | --- |
-| CPU | 模型 | 你的模型提供方（你自己的登录或 API key） |
-| 内核 | Harness：Hermes Agent、OpenClaw、Claude Code、Codex、pi | 你选，可以替换 |
-| 驱动和钥匙串 | MCP 服务器、连接器和它们的令牌 | 你的 Harness；Worldlet 借用 |
-| 终端 | 聊天 App 和命令行 | Agent 现在待的地方 |
-| 图形界面 | Worldlet：World、Applet、Fox、Attention Center | 本项目 |
-| 系统 API | World 工具，通过 `worldlet` MCP 服务器提供给 Agent | 本项目 |
-| 磁盘 | 你电脑上的 `world.sqlite` 和 World 存储 | 本项目 |
-
-Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它安装的 Hermes Agent，就像发行版 Ubuntu。World → Agent 的工具走 MCP；Agent → World 每种 Harness 一个适配器（[Harness 契约](contracts/HARNESS.md)、[交互式架构图](docs/architecture.html)）。
 
 ## 隐私
 
