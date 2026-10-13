@@ -29,7 +29,7 @@ import {createVault} from './vault.ts';
 import {ANALYTICS,VAULT,type AnalyticsService} from './host/services.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
-import {startBackgroundLaunch} from './background-launch.ts';
+import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';
 
 // Release smoke (#987): parsed before anything opens; malformed arguments are a usage error.
 let capture:CaptureRequest|null=null;
@@ -54,6 +54,10 @@ app.commandLine.appendSwitch('enable-features','AudioFocusEnforcement');
 // produced and the window stays one flat color (release smoke, RCs 1085 and 1087).
 if(process.platform==='win32')app.commandLine.appendSwitch('disable-features','CalculateNativeWinOcclusion');
 const profile=resolveProfile();
+// A background check launch on the Mac sits below every ordinary window (background-launch.ts). Once windows on that
+// screen cover it whole, Chromium hides its pages as occluded: no frame is drawn, capturePage rejects with "Current
+// display surface not available" and the World never arrives (Mac Alpha 4378 and 4380, #500).
+if(process.platform==='darwin'&&backgroundLaunchWanted(profile))app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 ensureDirectory(profile.root);
 // Chromium's own profile lives inside the library, beside the World data it serves.
 app.setPath('userData',path.join(profile.root,'Browser','Electron'));
