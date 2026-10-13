@@ -294,7 +294,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.locator('.companion-earlier').click();await chat.waitFor();
  // The history shows every turn as one of Fox's usual cards, oldest first, the person's words its top line.
  const turns=await chat.locator('.fox-chat-card').evaluateAll(items=>items.map(i=>(i.querySelector('.fox-chat-asked')?.textContent||'')+'|'+(i.querySelector('.fox-chat-body')?.textContent||'')));
- assert.match(turns.join('\n'),/world two\|Reply to world two[\s\S]*long world\|[\s\S]*wait world\|[\s\S]*and this too\|Reply to wait world and and this too$/,'oldest first: '+JSON.stringify(turns));
+ assert.match(turns.join('\n').trim(),/world two\|Reply to world two[\s\S]*long world\|[\s\S]*wait world\|[\s\S]*and this too\|Reply to wait world and and this too\.$/,'oldest first: '+JSON.stringify(turns));
  await page.screenshot({path:path.join(shots,'world-chat-window.png')});
  await page.keyboard.press('Escape');
  // A phone-width window keeps the one width inside the window.

@@ -3,7 +3,7 @@
   "title": "Fitbit",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "purpose": "Registered production background and extracted alpha foreground; enlarged usable opening",
   "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Fitbit, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village walking garden with exercise steps, water bottles and turquoise dotted Fitbit badge on a small activity station, fresh sunny greenery.\nLEFT: A large ivory health journal panel in teal linen and light timber. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Fitbit\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
   "refinement": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Fitbit background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges exactly at the existing positions shown in the reference. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Fitbit-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only.",
   "registration": {
@@ -16,19 +16,39 @@
         "id": "main",
         "role": "primary",
         "rect": [
-          0.126794,
-          0.146652,
-          0.467105,
-          0.710946
+          0.040072,
+          0.09458,
+          0.683612,
+          0.783209
         ],
         "material": "paper"
       }
     ],
     "companion": [
-      0.72,
-      0.62,
-      0.25,
-      0.34
-    ]
-  }
+      0.75,
+      0.55,
+      0.24,
+      0.43
+    ],
+    "webFrame": {
+      "mask": "assets/applet-scenes/fitbit/frame-mask.png",
+      "source": [
+        0.001942,
+        0.001464,
+        0.996482,
+        0.995896
+      ],
+      "target": [
+        0,
+        0,
+        1,
+        1
+      ]
+    }
+  },
+  "refinements": [
+    "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion."
+  ],
+  "frameSource": "brands/fitbit/frame-mask.png",
+  "framePrompt": "Extract ONLY the existing large LEFT frame from this exact image as a transparent PNG foreground overlay. Preserve exact original position, size, orientation, shape, painted wood/leather/brass rim, irregular paper lip, rings, clips, shadows and tiny foliage overlapping that rim. The entire wide central paper interior MUST become true alpha transparency; all scenery outside the left frame MUST become true alpha transparency too. Only retain a narrow foreground border, no opaque paper backing inside the opening. No new background, no checkerboard drawn in pixels. Do not redesign, recenter, shrink or crop. Same full original landscape canvas, 1672 by 941. Frame remains on left side of canvas."
 }

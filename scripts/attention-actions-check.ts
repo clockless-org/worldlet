@@ -177,7 +177,8 @@ await withBrowser(fileAccess,async browser=>{
  await page.waitForFunction(()=>document.querySelector('#notionWorld').getAttribute('data-depth')==='object');
  await page.evaluate(()=>{(document.querySelector('.world-matter[data-world-item-id="Local note task"]') as HTMLButtonElement).click();});await preview.waitFor({state:'visible'});
  assert.equal(await page.locator('#notionWorld').getAttribute('data-depth'),'object','Preview preserves an existing Applet context');
- await page.waitForFunction(()=>{const card=document.querySelector('#attentionPreview').getBoundingClientRect(),bubble=document.querySelector('#companionDialogue').getBoundingClientRect();return bubble.width>=innerWidth/4-1&&bubble.width<=innerWidth/3+1;});
+ // Registered scenes reserve a companion lane rather than a fixed quarter-to-third width.
+ await page.waitForFunction(()=>{const bubble=document.querySelector('#companionDialogue').getBoundingClientRect(),reader=document.querySelector('#notionContent').getBoundingClientRect();return bubble.width>=180&&bubble.left>=reader.right-1&&bubble.right<=innerWidth;});
  await page.locator('#notionStage').click({position:{x:20,y:120}});
  await preview.waitFor({state:'hidden'});
  // Applet context keeps Fox's ordinary card visible (CONVERSATION.md); only the Attention guide closes.

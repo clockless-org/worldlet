@@ -24,10 +24,10 @@
 .timer{font:7cqw/1.5 Georgia;letter-spacing:.03em}.monogram{background:#aab89660;border:1px solid #7c8f6144;border-radius:50%;width:7cqw;height:7cqw;display:grid;place-items:center;font:3cqw Georgia;margin:0 auto 1cqw}.contact>h3,.contact>p{text-align:center}.contact .row{font-size:1.6cqw}
 .timeline>div{display:flex;gap:2cqw;padding:1.3cqw 0}.timeline time{width:7cqw;flex-shrink:0;font:1.4cqw/2 system-ui;color:#8b7655}.timeline article{border-left:2px solid #a5af8b;padding-left:2cqw}.timeline h3{font-size:2.2cqw;margin:0 0 .4cqw}.timeline p{font-size:1.55cqw}.vocabulary{display:flex;flex-wrap:wrap;gap:1cqw}.translation{font-style:italic;font-size:2.5cqw;margin-bottom:1.5cqw!important}
 .game-layout{display:flex;flex:1;gap:4cqw;min-height:0}.game-layout>div{height:100%;aspect-ratio:1;flex:0 1 auto;max-width:68%}.game-layout aside{flex:1;display:flex;flex-direction:column;justify-content:center;gap:2cqw}.game-layout .stats{flex-direction:column;gap:1cqw}.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1cqw;padding:1cqw;background:#9e826330;border-radius:.8cqw}.tiles>div{display:grid;place-items:center;font:bold 4cqw Georgia;background:#e5d6b5;border-radius:.6cqw;box-shadow:0 .3cqw .35cqw #6543182b}.tiles [data-value="0"]{background:#a89c8126;box-shadow:none}.tiles [data-value="64"],.tiles [data-value="128"],.tiles [data-value="256"]{background:#b9894c;color:#fff8e8}.snake-board{display:grid;grid-template-columns:repeat(12,1fr);padding:1cqw;background:#a5b58930;border:1px solid #8a9b67}.snake-board i{border:1px solid #8a9b6710}.snake-cell{background:#648345;border-radius:.2cqw}.apple-cell{background:#b86d4f;border-radius:50%;margin:15%}.mines,.sudoku{display:grid;grid-template-columns:repeat(9,1fr);border:2px solid #9b8965}.mines>div,.sudoku>div{display:grid;place-items:center;font:2cqw Georgia;border:1px solid #9b896552}.mines>div{background:#d3cbb5;box-shadow:inset 2px 2px #fff9,inset -2px -2px #7e775950}.mines .revealed{background:#f1edd73b;box-shadow:none;color:#597e7d}.sudoku .edge-r{border-right:2px solid #807052}.sudoku .edge-b{border-bottom:2px solid #807052}.gomoku{display:grid;grid-template-columns:repeat(15,1fr);background:#bf92592b;padding:1cqw}.gomoku i{position:relative;background:linear-gradient(transparent 48%,#806538 49%,#806538 51%,transparent 52%),linear-gradient(90deg,transparent 48%,#806538 49%,#806538 51%,transparent 52%)}.stone{position:absolute;inset:5%;border-radius:50%;box-shadow:.15cqw .25cqw .25cqw #291c2840}.stone.dark{background:radial-gradient(circle at 30% 30%,#65635b,#272921)}.stone.light{background:radial-gradient(circle at 30% 30%,#fffbed,#d8d3bd)}.game-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:2cqw;text-align:center}.game-icon{width:100%;height:15cqw;object-fit:contain}.game-choices p{font-size:1.5cqw}
-.capture #viewport{width:100vw;height:100vh;min-height:0}.capture header,.capture footer,.capture #gallery{display:none}.capture #companion{display:none}.capture .sample-label{display:block;position:absolute;right:1.2%;bottom:1.3%;font:11px system-ui;color:#fff;background:#304b3ad9;padding:7px 11px;border-radius:6px}
+.capture #viewport{width:100vw;height:100vh;min-height:0}.capture>header,.capture>footer,.capture #gallery{display:none}.capture #companion{display:none}.capture .sample-label{display:block;position:absolute;right:1.2%;bottom:1.3%;font:11px system-ui;color:#fff;background:#304b3ad9;padding:7px 11px;border-radius:6px}
 .sample-label{display:none}
 #surface .composition p{margin:0}#surface .composition p+p{margin-top:1.4cqw}
-[data-sample="journal"]{font-size:2.7cqw;gap:2.6cqw}[data-sample="journal"] .eyebrow{font-size:1.6cqw}[data-sample="journal"] h2{font-size:5.5cqw!important}[data-sample="journal"] h3{font-size:3.7cqw}
+[data-sample="journal"]{font-size:1.95cqw;gap:1.7cqw}[data-sample="journal"] h3{font-size:2.8cqw}
 [data-sample="files"] .row,[data-sample="fitness"] .row,[data-sample="budget"] .row{padding:.75cqw 0}
 [data-sample="voice-memos"] .wave{height:7cqw;margin:1cqw 0}
 [data-sample="music"] .row,[data-sample="stocks"] .row{padding:1cqw 0}
@@ -57,7 +57,7 @@
 .note-photo{width:75%;margin:2cqw 0 0 auto!important}.note-photo .photo{height:13cqw}.message-photo{width:63%;margin:1.5cqw 0 0!important}.message-photo .photo{height:9cqw}.message-photo figcaption{font-size:1.15cqw}
 .album-photo .photo{height:24cqw;max-height:none}.album-photo{transform:rotate(-1deg)}
 .podcast-cover,.book-cover{float:left;width:13cqw;height:15cqw;object-fit:cover;margin:.4cqw 2cqw 1cqw 0;border:.6cqw solid #eee1c5;box-shadow:.3cqw .5cqw .7cqw #573d2c35}.book-cover{width:12cqw;height:17cqw;border-left:1.1cqw solid #778160}
-.journal-photo{width:85%;margin:3cqw auto!important}.journal-photo .photo{height:24cqw;max-height:none}
+.journal-photo{width:75%;margin:1.5cqw auto!important}.journal-photo .photo{height:17cqw;max-height:none}
 .event-photo{display:block;width:100%;height:6cqw;object-fit:cover;margin-top:1cqw;border:.3cqw solid #f2ead4;box-shadow:0 .2cqw .3cqw #4d382525}
 .week-grid .paper{position:relative;padding:2.1cqw 1.2cqw 1.4cqw;background:linear-gradient(120deg,#f4ecd4,#ded5b8);box-shadow:0 .2cqw .3cqw #503a2f40,0 .5cqw .7cqw #503a2f26;border-color:#b5a37965}
 .week-grid .paper:before{content:'';position:absolute;width:.85cqw;height:1.7cqw;border:1px solid #8c6428;background:linear-gradient(90deg,#c49b45,#fbe09c 45%,#b18334);top:-.5cqw;left:calc(50% - .4cqw);border-radius:.3cqw;box-shadow:0 .2cqw .25cqw #50352044}
@@ -74,7 +74,8 @@
 .photo-grid .photo{height:11.3cqw}
 [data-sample="music"] .row{padding:.6cqw 0}[data-sample="music"] .player{margin:1cqw 0}
 [data-sample="podcasts"] .row{padding:1cqw 0}[data-sample="podcasts"] .sample-scroll{gap:1.3cqw}
-[data-sample="meal-planner"] .row{padding:1cqw 0}
+[data-sample="meal-planner"] .row,[data-sample="garden"] .row{padding:.8cqw 0}
+[data-sample="meal-planner"] .photo,[data-sample="garden"] .photo{max-height:22cqw}
 [data-sample="fitness"] .row{padding:.35cqw 0}
 
 /* Game pieces receive shallow material depth, while board coordinates stay exact. */

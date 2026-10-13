@@ -3,7 +3,7 @@
   "title": "Claude Code",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "purpose": "Registered production background and extracted alpha foreground; enlarged usable opening",
   "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Claude Code, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A terracotta-roofed coding atelier opening into a herb courtyard, copper instruments, punched-paper rolls and orange starburst maker sign above the workbench.\nLEFT: An ivory paper drafting board with rust-orange leather corners. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Claude Code\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
   "refinement": "Precise local geometry correction to this Worldlet Village claude-code background. KEEP the original WIDTH and horizontal edges of the main left blank panel, same style and entire right-side identity scenery. Increase actual BLANK INTERIOR HEIGHT: top paper at8% canvas height, bottom paper at96%; bottom physical frame at98%, almost touching bottom edge. Remove the unused floor/counter/table space below the left panel and fill with its tall blank paper. Remove ALL flowers, foliage, plants, furniture, tables, cloth, cups, lamps and other props overlapping any part of this main blank panel, including upper-left and bottom-left corners and bottom-right edge. The complete rectangular content surface MUST BE CLEAR, no overlaps anywhere, no false perspective, subtle low contrast texture. Props can remain OUTSIDE its border, especially the right side of the image. Do not widen the panel, no changes to brand logos/right scene/secondary cards outside the panel. No text or UI. Paper should be taller than this reference; bottom frame nearly touches canvas bottom and no ground strip underneath it. Landscape canvas same size/aspect ratio.",
   "registration": {
@@ -16,19 +16,39 @@
         "id": "main",
         "role": "primary",
         "rect": [
-          0.057416,
-          0.146652,
-          0.490431,
-          0.802338
+          0.019139,
+          0.032944,
+          0.684809,
+          0.909671
         ],
         "material": "paper"
       }
     ],
     "companion": [
-      0.72,
-      0.62,
-      0.25,
-      0.34
-    ]
-  }
+      0.75,
+      0.55,
+      0.24,
+      0.43
+    ],
+    "webFrame": {
+      "mask": "assets/applet-scenes/claude-code/frame-mask.png",
+      "source": [
+        0.000635,
+        0.001105,
+        0.998841,
+        0.998824
+      ],
+      "target": [
+        0,
+        0,
+        1,
+        1
+      ]
+    }
+  },
+  "refinements": [
+    "Expand usable surface to approximately 70% width and 80% height, retain characteristic brand scene; remove baked-in companions."
+  ],
+  "frameSource": "brands/claude-code/frame-mask.png",
+  "framePrompt": "Extract ONLY the existing large LEFT frame from this exact image as a transparent PNG foreground overlay. Preserve exact original position, size, orientation, shape, painted wood/leather/brass rim, irregular paper lip, rings, clips, shadows and tiny foliage overlapping that rim. The entire wide central paper interior MUST become true alpha transparency; all scenery outside the left frame MUST become true alpha transparency too. Only retain a narrow foreground border, no opaque paper backing inside the opening. No new background, no checkerboard drawn in pixels. Do not redesign, recenter, shrink or crop. Same full original landscape canvas, 1672 by 941. Frame remains on left side of canvas."
 }

@@ -10,7 +10,8 @@ h1{font:600 22px Georgia;margin:0}label{display:flex;gap:7px;align-items:center}
 select{padding:8px 12px;border:1px solid #b7aa8f;border-radius:7px;background:#fffdf7}button{cursor:pointer}
 #viewport{position:relative;width:100%;height:calc(100dvh - 130px);min-height:420px;background:#d5cbb6;overflow:hidden}
 #plate{position:absolute;pointer-events:none}#surface{position:absolute;background:transparent;border:0}
-#companion{display:none;position:absolute;border:2px dashed #527661;border-radius:12px;align-items:center;justify-content:center;color:#234932;background:#e7ffdf45;font:600 13px system-ui}
+body.without-frame .applet-scene-foreground{display:none}
+.applet-scene-foreground{z-index:5;pointer-events:none}#companion{z-index:6;display:none;position:absolute;border:2px dashed #527661;border-radius:12px;align-items:center;justify-content:center;color:#234932;background:#e7ffdf45;font:600 13px system-ui}
 body.guides #companion{display:flex}body.guides #surface,body.guides .secondary{outline:2px dashed #b7693b}
 body.background-only #surface,body.background-only .secondary{visibility:hidden}
 body.guides.background-only #surface,body.guides.background-only .secondary{visibility:visible}
@@ -24,6 +25,7 @@ footer{padding:10px 24px;font-size:12px;display:flex;justify-content:space-betwe
 .gallery-grid img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}.gallery-grid .gallery-icon{position:absolute;width:64px;height:64px;bottom:4px;right:10px;object-fit:contain}
 .gallery-grid span{display:block;padding:12px 80px 0 16px;font-weight:600}
 @media(max-width:800px){header{gap:10px;padding:12px}#viewport{height:auto;aspect-ratio:1672/941;min-height:0}#companion{font-size:9px}footer{display:block}footer>span{display:block;margin-bottom:4px}}
+#surface.website-fit{display:flex;flex-direction:column;background:#fff!important;color:#263038;overflow:hidden;container-type:size;font:14px/1.6 system-ui}.website-fit>header{flex:none;padding:12px 18px;background:#f5f6f8;border:0;border-bottom:1px solid #ddd;justify-content:space-between}.website-fit button{border:1px solid #b9c0c4;border-radius:5px;background:#fff;padding:5px 10px}.website-fit-body{display:flex;flex:1;min-height:0}.website-fit nav{width:21%;padding:22px 18px;background:#f5f6f8;border-right:1px solid #e3e6e8}.website-fit article{flex:1;padding:28px;overflow:auto}.website-fit h2{font-size:clamp(18px,2.8cqi,32px);line-height:1.2}.website-fit small{font-size:10px;letter-spacing:.1em;color:#76818a}.fit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:26px 0}.fit-grid section{border:1px solid #e0e5e9;border-radius:7px;padding:18px 12px}#surface.website-fit.dark{background:#151a20!important;color:#dfe6ea}.website-fit.dark>header,.website-fit.dark nav{background:#202830;border-color:#39444e}.website-fit.dark button{background:#283440;color:#eaf2f8;border-color:#53616b}.website-fit.dark .fit-grid section{border-color:#39444e}
 </style>
 <link rel="stylesheet" href="./preview.css">
 <body>
@@ -31,8 +33,8 @@ footer{padding:10px 24px;font-size:12px;display:flex;justify-content:space-betwe
 <label>Collection <select id="collection"><option value="apps">Core apps · 18</option><option value="games">Games · 6</option><option value="presets">Generic · 16</option><option value="brands">Branded · 100</option></select></label>
 <label>Scene <select id="scene"></select></label>
 <label><input type="checkbox" id="guides"> Registration guides</label>
-<label><input type="checkbox" id="backgroundOnly"> Background only</label><label><input type="checkbox" id="longContent"> Long-content test</label></header>
+<label><input type="checkbox" id="frameOverlay" checked> Transparent frame</label><label><input type="checkbox" id="backgroundOnly"> Background only</label><label><input type="checkbox" id="longContent"> Long-content test</label></header>
 <main id="viewport"><img id="plate" alt=""><section id="surface" aria-label="Fictional design sample"></section><span class="sample-label">Design study · Sample data</span><aside id="companion">Companion clearance</aside></main>
-<footer><span>40 HTML previews · 100 branded backgrounds · Websites run in the desktop app</span><span id="status"></span></footer>
+<footer><span>40 HTML previews · 100 website fit tests · Original websites run in the desktop app</span><span id="status"></span></footer>
 <div id="gallery"></div><script type="module" src="./preview.js"></script>
 </html>

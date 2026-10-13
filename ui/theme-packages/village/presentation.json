@@ -203,21 +203,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.061005,
-              0.127524,
-              0.438397,
-              0.797024
+              0.033493,
+              0.116897,
+              0.6561,
+              0.795962
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "9dbf3ccc9a8cbbc3509ba650a9878aaa2bb23d0d619b83a50be552398866e03b"
+        "webFrame": {
+          "mask": "assets/applet-presets/weight-balance/frame-mask.png",
+          "source": [
+            0.039408,
+            0,
+            0.960592,
+            1
+          ],
+          "target": [
+            0,
+            0.053957,
+            0.898034,
+            0.92875
+          ]
+        },
+        "sha256": "b95b1c67c0f50c64b92c22316de5936289846b198a69c0dea8239def9174dd0a"
       }
     },
     {
@@ -237,21 +252,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.076555,
-              0.127524,
-              0.448565,
-              0.803401
+              0.047249,
+              0.103082,
+              0.700957,
+              0.801275
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.760206,
+          0.55,
+          0.229794,
+          0.43
         ],
-        "sha256": "0129606b6b2884a2c4512c49f92c376259a486c0b6227abc009022d20c0d51a0"
+        "webFrame": {
+          "mask": "assets/applet-presets/meal-planner/frame-mask.png",
+          "source": [
+            0.017882,
+            0,
+            0.976844,
+            0.980216
+          ],
+          "target": [
+            0,
+            0.002446,
+            1,
+            0.997554
+          ]
+        },
+        "sha256": "2a862dd588f6b5d6af53a69bfadd171fd6d8d35a50ab76c30b5c3f5cef767db0"
       }
     },
     {
@@ -263,7 +293,7 @@
       "background": "assets/applet-presets/fitness/background.webp",
       "registration": {
         "imageSize": [
-          1671,
+          1672,
           941
         ],
         "regions": [
@@ -271,21 +301,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.074207,
-              0.144527,
-              0.452424,
-              0.78746
+              0.04366,
+              0.11796,
+              0.677033,
+              0.758767
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "2b2bc76f39b2ee16e68c1bf9ffaf3a20b6f5f51c042071029066a103d918c7cf"
+        "webFrame": {
+          "mask": "assets/applet-presets/fitness/frame-mask.png",
+          "source": [
+            0.001237,
+            0,
+            0.998763,
+            0.998937
+          ],
+          "target": [
+            0,
+            0.001063,
+            0.999053,
+            0.998937
+          ]
+        },
+        "sha256": "bcde6802ebf759bce579380ae9c830584216b703a991e02b98c4bb0c006e3583"
       }
     },
     {
@@ -305,21 +350,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.078947,
-              0.144527,
-              0.502392,
-              0.794899
+              0.055024,
+              0.120085,
+              0.643541,
+              0.786397
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "93fff7bdc301cb7ae2b5fccf3805449439bb7437cac9b443ce6f10597ae71c01"
+        "webFrame": {
+          "mask": "assets/applet-presets/sleep/frame-mask.png",
+          "source": [
+            0.058478,
+            0.005258,
+            0.941522,
+            0.991826
+          ],
+          "target": [
+            0,
+            0,
+            0.959455,
+            1
+          ]
+        },
+        "sha256": "2a92f650f9258478fbdabeb4ea44f4c18684b3466fba9c0223a76be4294bd9ca"
       }
     },
     {
@@ -339,21 +399,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.114234,
-              0.146652,
-              0.435407,
-              0.735388
+              0.053828,
+              0.12221,
+              0.673445,
+              0.766206
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "1b7e8cb6dbc2a8ab1b4fb03134559f78afe319d4aa4e3750e2005fb2339c6c6f"
+        "webFrame": {
+          "mask": "assets/applet-presets/travel/frame-mask.png",
+          "source": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "target": [
+            0.008591,
+            0.003115,
+            0.763463,
+            0.983494
+          ]
+        },
+        "sha256": "16763941e71972c5a5d776841337ae1b7859effd9879831597bf8abd65d08143"
       }
     },
     {
@@ -373,21 +448,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.089713,
-              0.146652,
-              0.452153,
-              0.788523
+              0.038876,
+              0.086079,
+              0.692584,
+              0.805526
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "3e6dea12beed3cdbdc32e88a23e5fe59692cc38c0c8a2effeb1342fd15dc54c7"
+        "webFrame": {
+          "mask": "assets/applet-presets/outdoor/frame-mask.png",
+          "source": [
+            0.000669,
+            0.000119,
+            0.998264,
+            0.99867
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "sha256": "5aa6c5958106fd9c03420f299248c970f5dd2f5bc6e5fab6baa7baad84413d71"
       }
     },
     {
@@ -407,21 +497,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.058014,
-              0.162593,
-              0.547249,
-              0.765143
+              0.037679,
+              0.141339,
+              0.684809,
+              0.766206
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "a2e6dcc9153b8d8d06536362af436e8dabaa5f2f882c3d01212b34823c4aa586"
+        "webFrame": {
+          "mask": "assets/applet-presets/shopping/frame-mask.png",
+          "source": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "target": [
+            0.003945,
+            0.003625,
+            0.860922,
+            0.982143
+          ]
+        },
+        "sha256": "a78fadd9474b7dcae7508674d62a3cbc93e1a078a7887aa47a94c369da2ae58e"
       }
     },
     {
@@ -441,21 +546,36 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.078947,
-              0.146652,
-              0.517344,
-              0.751328
+              0.056818,
+              0.103082,
+              0.66567,
+              0.768332
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "cf87bd11a39abcea45cc86b6c0c3207eb8504fc6cce617a8431417988cd5c2e2"
+        "webFrame": {
+          "mask": "assets/applet-presets/budget/frame-mask.png",
+          "source": [
+            0.132168,
+            0.000397,
+            0.867832,
+            0.999603
+          ],
+          "target": [
+            0,
+            0,
+            0.953441,
+            0.964623
+          ]
+        },
+        "sha256": "19e968cf5fe00d38ba0acf33baf7719b9ec6ef8af69e2411f3b31d3dafe98656"
       }
     },
     {
@@ -475,10 +595,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.110048,
-              0.113709,
-              0.389952,
-              0.789586
+              0.051435,
+              0.103082,
+              0.663278,
+              0.814028
             ],
             "material": "paper"
           },
@@ -486,21 +606,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.785,
-              0.256,
-              0.125,
-              0.096
+              0.844,
+              0.156,
+              0.109,
+              0.095
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "bcf6dae886c2542cf4e10e81e7cdbd9978f4e63da32f6e92d72e3f3a518fc98b"
+        "webFrame": {
+          "mask": "assets/applet-presets/home-care/frame-mask.png",
+          "source": [
+            0.090975,
+            0.057526,
+            0.909025,
+            0.942474
+          ],
+          "target": [
+            0,
+            0,
+            0.852598,
+            0.993454
+          ]
+        },
+        "sha256": "f06970a801965da1ba5ed5211792c1a371cb76ae34249c6cfe89ac3462991b28"
       }
     },
     {
@@ -520,10 +655,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.110048,
-              0.146652,
-              0.437799,
-              0.739639
+              0.04366,
+              0.076514,
+              0.712321,
+              0.814028
             ],
             "material": "paper"
           },
@@ -531,21 +666,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.725,
-              0.34,
-              0.205,
-              0.087
+              0.824,
+              0.309,
+              0.14,
+              0.105
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.767981,
+          0.55,
+          0.222019,
+          0.43
         ],
-        "sha256": "26d381f61cdc0e6b402752a0099cfc3ebd0244ef7fb0838963572e18abe6cc86"
+        "webFrame": {
+          "mask": "assets/applet-presets/garden/frame-mask.png",
+          "source": [
+            0.019275,
+            0,
+            0.980725,
+            1
+          ],
+          "target": [
+            0,
+            0.029797,
+            0.911497,
+            0.958386
+          ]
+        },
+        "sha256": "e413d77576a53e5d5d134a793fb1743e3df0410b7dc7a99121c74ebcb2075e21"
       }
     },
     {
@@ -565,10 +715,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.123804,
-              0.144527,
-              0.447368,
-              0.808714
+              0.061603,
+              0.083953,
+              0.695574,
+              0.845909
             ],
             "material": "paper"
           },
@@ -576,21 +726,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.79,
-              0.24,
-              0.097,
-              0.13
+              0.837,
+              0.169,
+              0.102,
+              0.131
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.769177,
+          0.55,
+          0.220823,
+          0.43
         ],
-        "sha256": "ab8404e328938bf65a12a505aa97408f1f840e5489bead9936cf2e11fdbf2f3a"
+        "webFrame": {
+          "mask": "assets/applet-presets/daily-planner/frame-mask.png",
+          "source": [
+            0.008004,
+            0.017856,
+            0.977528,
+            0.965823
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "sha256": "e6107ea10faa7a5193bd3443d76ddbc64b4db3501b9a16b7a6ed19aa7a4b6e21"
       }
     },
     {
@@ -610,10 +775,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.139952,
-              0.09458,
-              0.433612,
-              0.769394
+              0.058014,
+              0.083953,
+              0.674043,
+              0.772582
             ],
             "material": "paper"
           },
@@ -621,21 +786,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.7003588516746412,
-              0.16684378320935175,
-              0.19078947368421054,
-              0.16153028692879914
+              0.803,
+              0.182,
+              0.122,
+              0.102
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "46cf6ba21f732e6198f6a65b2015aed22031a08b17ce20661f26cfbe26f769ed"
+        "webFrame": {
+          "mask": "assets/applet-presets/reading/frame-mask.png",
+          "source": [
+            0,
+            0,
+            1,
+            0.984126
+          ],
+          "target": [
+            0.007816,
+            0.037239,
+            0.827917,
+            0.962761
+          ]
+        },
+        "sha256": "d8aedc52f9c2ed2a4f6f61ce38b696c3dbcb2d06cc984903bd9c36fd2ac25d3d"
       }
     },
     {
@@ -655,10 +835,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.187799,
-              0.146652,
-              0.433612,
-              0.721573
+              0.071172,
+              0.088204,
+              0.68122,
+              0.772582
             ],
             "material": "paper"
           },
@@ -666,21 +846,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.726,
-              0.248,
-              0.174,
-              0.135
+              0.783,
+              0.191,
+              0.154,
+              0.118
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.764392,
+          0.55,
+          0.225608,
+          0.43
         ],
-        "sha256": "830c6a1d2258146d920f376a7ef829b860874293cb2eed44a130f9b99d05a379"
+        "webFrame": {
+          "mask": "assets/applet-presets/language/frame-mask.png",
+          "source": [
+            0.026612,
+            0,
+            0.973388,
+            1
+          ],
+          "target": [
+            0,
+            0.05229,
+            0.821795,
+            0.876063
+          ]
+        },
+        "sha256": "4cf36f04fd215a347972f45f5d1ec2efbcc02c54dce8c28c5aedb116f6261aa7"
       }
     },
     {
@@ -692,7 +887,7 @@
       "background": "assets/applet-presets/journal/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
         "regions": [
@@ -700,10 +895,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.178828,
-              0.146652,
-              0.30622,
-              0.758767
+              0.064034,
+              0.082891,
+              0.681029,
+              0.817216
             ],
             "material": "paper"
           },
@@ -711,21 +906,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.599,
-              0.211,
-              0.197,
-              0.164
+              0.778,
+              0.17,
+              0.123,
+              0.159
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.757063,
+          0.55,
+          0.232937,
+          0.43
         ],
-        "sha256": "5a453399a3f0e276c5902b5f31142057cd75cfef86ab3497f094beb34414a99a"
+        "webFrame": {
+          "mask": "assets/applet-presets/journal/frame-mask.png",
+          "source": [
+            0.000715,
+            0.001288,
+            0.998233,
+            0.997379
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "sha256": "249afe8d3a93c3fdda2b2804b60296cd8c7838d9b8dae14be7a066258b146af9"
       }
     },
     {
@@ -745,10 +955,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.163278,
-              0.146652,
-              0.330144,
-              0.767269
+              0.062799,
+              0.100956,
+              0.663876,
+              0.782147
             ],
             "material": "paper"
           },
@@ -756,21 +966,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.764,
-              0.29,
+              0.844,
               0.15,
-              0.102
+              0.115,
+              0.108
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "1f944f3901ee2dfbf9896fed0f0f3d9c550ef30c279ee1420e142706dd344120"
+        "webFrame": {
+          "mask": "assets/applet-presets/job-search/frame-mask.png",
+          "source": [
+            0.000872,
+            0,
+            0.999128,
+            1
+          ],
+          "target": [
+            0,
+            0.053428,
+            0.784053,
+            0.883777
+          ]
+        },
+        "sha256": "99800889437ce3b8d6bb1034ec814c85a51f7cb5beb7672e63f2266a5484af77"
       }
     },
     {
@@ -790,10 +1015,10 @@
             "id": "main",
             "role": "primary",
             "rect": [
-              0.05622,
-              0.146652,
-              0.450957,
-              0.790648
+              0.032895,
+              0.095643,
+              0.669258,
+              0.828905
             ],
             "material": "paper"
           },
@@ -801,21 +1026,36 @@
             "id": "summary",
             "role": "secondary",
             "rect": [
-              0.728,
-              0.214,
-              0.149,
-              0.14
+              0.765,
+              0.169,
+              0.131,
+              0.092
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7,
-          0.58,
-          0.26,
-          0.38
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
-        "sha256": "a4125f8841b0288031f02d156ac34bd4c486dd2e96b26aa123a13e1409fdeac4"
+        "webFrame": {
+          "mask": "assets/applet-presets/project-planner/frame-mask.png",
+          "source": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "target": [
+            0.00366,
+            0.054001,
+            0.810634,
+            0.917062
+          ]
+        },
+        "sha256": "b8f371a014ddddc43193fb094b01279a077c6fa357d933210e875e05f3dbffc8"
       }
     }
   ],
@@ -827,16 +1067,16 @@
           1672,
           941
         ],
-        "sha256": "0ebe9c061312710711bd8b9c3421193debba543fbb7f90e30460390e4a73b0ea",
+        "sha256": "a4218c9dfb845a984f1e9f7a7b24ee9612f50f8ff00895c67747c2f7a2586423",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.067584,
-              0.142402,
-              0.546651,
-              0.777896
+              0.041268,
+              0.11796,
+              0.697967,
+              0.791711
             ],
             "material": "paper"
           },
@@ -844,20 +1084,35 @@
             "id": "today",
             "role": "secondary",
             "rect": [
-              0.733254,
-              0.264612,
-              0.0939,
-              0.09458
+              0.825,
+              0.27,
+              0.085,
+              0.085
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
+          0.751235,
           0.55,
-          0.24,
-          0.4
-        ]
+          0.238765,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/google-calendar/frame-mask.png",
+          "source": [
+            0.004595,
+            0.007117,
+            0.990525,
+            0.985115
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "gmail": {
@@ -867,26 +1122,41 @@
           1672,
           941
         ],
-        "sha256": "21820740c355e3e9c5fea229e0d840b7f2e51364f488828a688128dcdc7791a9",
+        "sha256": "b6fb61a673e1c4fcee7d8c1160b0964777de3682fdef5c49a7eddf8859b17086",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.083732,
-              0.138151,
-              0.491627,
-              0.79915
+              0.046053,
+              0.124336,
+              0.680622,
+              0.814028
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
+          0.75,
           0.55,
           0.24,
-          0.4
-        ]
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/gmail/frame-mask.png",
+          "source": [
+            0.00683,
+            0.011354,
+            0.98292,
+            0.977632
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "apple-notes": {
@@ -896,26 +1166,41 @@
           1672,
           941
         ],
-        "sha256": "e21fd7fa05a713d23bb0d461f0c3d8491ed3e9cb1b117d5b1d1dbfab46dbfb85",
+        "sha256": "e10049a793c115bb95d61eb263c6539e8993c2765f494624b30ffa4b86a5566a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.058612,
-              0.102019,
-              0.562201,
-              0.798087
+              0.037679,
+              0.096706,
+              0.726675,
+              0.812965
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
+          0.776354,
           0.55,
-          0.24,
-          0.4
-        ]
+          0.213646,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/apple-notes/frame-mask.png",
+          "source": [
+            0.003948,
+            0.003442,
+            0.990902,
+            0.986825
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "apple-reminders": {
@@ -925,26 +1210,41 @@
           1672,
           941
         ],
-        "sha256": "f3973af58c4a95bd3b0d9575d383d1733ffaf0441fe74a6b903e099ea00f0080",
+        "sha256": "88bc8c9936201d6d1b9721d552fb6e38bd19f51dc398c5cd7aefc83de22c8288",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.077751,
-              0.140276,
-              0.400718,
-              0.773645
+              0.054426,
+              0.11796,
+              0.671651,
+              0.786397
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
+          0.75,
           0.55,
           0.24,
-          0.4
-        ]
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/apple-reminders/frame-mask.png",
+          "source": [
+            0.000592,
+            0,
+            0.999408,
+            0.991244
+          ],
+          "target": [
+            0,
+            0.016794,
+            0.988785,
+            0.983206
+          ]
+        }
       }
     },
     "files": {
@@ -954,26 +1254,41 @@
           1672,
           941
         ],
-        "sha256": "722b60e371732ebfdc9a5bc300746b61931cdac88488d06b36fd454a21da3fef",
+        "sha256": "77b0aa80071f4d053536284fb299c6879689d74dde3566b524fa42869f21b06d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.072368,
-              0.146652,
-              0.639952,
-              0.770457
+              0.021531,
+              0.082891,
+              0.702153,
+              0.831031
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/files/frame-mask.png",
+          "source": [
+            0.00632,
+            0.010387,
+            0.985445,
+            0.978093
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "weather": {
@@ -983,26 +1298,41 @@
           1672,
           941
         ],
-        "sha256": "a12b29dab16165ac1c16d95eed232b39da65f136ca13dc7272a8052bee33b403",
+        "sha256": "ece5f2d8a492d9c495113e0d49e317120c993c87d105226296f21fd0fc81ded0",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.067584,
-              0.146652,
-              0.559809,
-              0.742827
+              0.049043,
+              0.116897,
+              0.690191,
+              0.782147
             ],
             "material": "screen"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.751234,
+          0.55,
+          0.238766,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/weather/frame-mask.png",
+          "source": [
+            0.0033,
+            0.003277,
+            0.993902,
+            0.990411
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "meetings": {
@@ -1012,26 +1342,41 @@
           1672,
           941
         ],
-        "sha256": "da40c5af79314960f79feff799b181077dbec3eeb7ec54a14cc56038f4b3cfb6",
+        "sha256": "9b4fb0efb2c3e26ecee89784625268a843712339ba05bfba5ffa6556fa3f3765",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.063397,
-              0.09458,
-              0.550239,
-              0.783209
+              0.028708,
+              0.112646,
+              0.710526,
+              0.780021
             ],
             "material": "screen"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.751234,
+          0.55,
+          0.238766,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/meetings/frame-mask.png",
+          "source": [
+            0.001923,
+            0.00154,
+            0.99577,
+            0.995879
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "voice-memos": {
@@ -1041,26 +1386,41 @@
           1672,
           941
         ],
-        "sha256": "c9df5b6413de9a69a93723a69fbe53444fcb40216dcb9408ae2f294b2264cc64",
+        "sha256": "e19cc0c01e2d05ad1cad1a128176a5dd1001124daed41287a468c66bd7ed1aae",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.045455,
-              0.104145,
-              0.523325,
-              0.793836
+              0.019139,
+              0.091392,
+              0.69677,
+              0.812965
             ],
             "material": "screen"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/voice-memos/frame-mask.png",
+          "source": [
+            0.05213,
+            0,
+            0.94787,
+            1
+          ],
+          "target": [
+            0,
+            0.020236,
+            0.876761,
+            0.958333
+          ]
+        }
       }
     },
     "messages": {
@@ -1070,55 +1430,85 @@
           1672,
           941
         ],
-        "sha256": "c84740c55d9ae27a472fbab86c175aa010803cd4401bd182a0d3c6fae70e6baa",
+        "sha256": "92b2e5bc31498bfc7e6b50e4e4a7de0d16c10260d0fb4b20d7b891c4625c1db9",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.074163,
-              0.127524,
-              0.62799,
-              0.816153
+              0.041268,
+              0.099894,
+              0.699761,
+              0.800213
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.753029,
+          0.55,
+          0.236971,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/messages/frame-mask.png",
+          "source": [
+            0.000635,
+            0.001339,
+            0.999141,
+            0.997323
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "browser": {
       "background": "assets/applet-scenes/browser/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
-        "sha256": "428df1524e20777e8841251a8f3c075787d682587bbd59f652bd4322488715e4",
+        "sha256": "203e18549d1a4057be19761cd184c77e4c92834de1d5742036f41544f237d3e5",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.05323,
-              0.146652,
-              0.666866,
-              0.737513
+              0.041891,
+              0.119022,
+              0.707361,
+              0.756642
             ],
             "material": "screen"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.761252,
+          0.55,
+          0.228748,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/browser/frame-mask.png",
+          "source": [
+            0.004074,
+            0,
+            0.988946,
+            0.999702
+          ],
+          "target": [
+            0,
+            0.022452,
+            1,
+            0.977548
+          ]
+        }
       }
     },
     "maps": {
@@ -1128,26 +1518,41 @@
           1672,
           941
         ],
-        "sha256": "159c362475b40026cb4ece17b7234a81385cdcb6834d2bf98bd906fac84a5b02",
+        "sha256": "0e533481e880b75e7fccb96ae10b719423f3476f05e92183ae73669436474fa0",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.080144,
-              0.146652,
-              0.632775,
-              0.791711
+              0.049043,
+              0.113709,
+              0.669258,
+              0.780021
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/maps/frame-mask.png",
+          "source": [
+            0.004689,
+            0.006338,
+            0.990117,
+            0.982143
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "clock": {
@@ -1157,26 +1562,41 @@
           1672,
           941
         ],
-        "sha256": "435ce92cc7fe00a7c117864727abe79bdb9b6d8c03f5c7eed38d652f5fd8a82b",
+        "sha256": "25e30d2258da96a06ec2e058620563bcf174565d3bc3359b62b0ae35101c5e33",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.039474,
-              0.146652,
-              0.697368,
-              0.733262
+              0.040072,
+              0.096706,
+              0.697967,
+              0.802338
             ],
             "material": "screen"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.750039,
+          0.55,
+          0.239961,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/clock/frame-mask.png",
+          "source": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "target": [
+            0.002353,
+            0.022832,
+            0.971548,
+            0.95414
+          ]
+        }
       }
     },
     "contacts": {
@@ -1186,26 +1606,41 @@
           1672,
           941
         ],
-        "sha256": "77a7a123cd0d58cbf5e18a5df94764bff0a2463b1714eeffe469679a2f9f164d",
+        "sha256": "934e22ccfadd1183b71b369acb9b8b6324859bb34ed5c96ac6ea53133a96f72d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.0939,
-              0.146652,
-              0.605263,
-              0.754516
+              0.034689,
+              0.12221,
+              0.701555,
+              0.780021
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/contacts/frame-mask.png",
+          "source": [
+            0.004624,
+            0.007208,
+            0.988003,
+            0.98489
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "photos": {
@@ -1215,26 +1650,41 @@
           1672,
           941
         ],
-        "sha256": "63de067a6764129e83091c6d619d39e79cfb7221220cd6197d1281f11bf955a8",
+        "sha256": "d8dde9b890e2c8b8f85350b572bc3492aa3d4c39f3eb6d170147368420d0afa7",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.068182,
-              0.146652,
-              0.662081,
-              0.791711
+              0.023923,
+              0.139214,
+              0.691388,
+              0.77577
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/photos/frame-mask.png",
+          "source": [
+            0.0045,
+            0.008736,
+            0.987826,
+            0.983425
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "music": {
@@ -1244,26 +1694,41 @@
           1672,
           941
         ],
-        "sha256": "6eb29df33151ef573f8a23b18b9471a9f522a4b169b275b69d69fccdb6d2c134",
+        "sha256": "109f8fee37d271231a088821e1a1667132c490a2e5f70b25e30a77c46149cf67",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.057416,
-              0.132837,
-              0.620813,
-              0.797024
+              0.046053,
+              0.099894,
+              0.689593,
+              0.808714
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/music/frame-mask.png",
+          "source": [
+            0.004771,
+            0.009214,
+            0.987794,
+            0.982781
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "news": {
@@ -1273,26 +1738,41 @@
           1672,
           941
         ],
-        "sha256": "f3cd80c34fdc227ad46233e017051133899fc6131ee931f79ca2dabbc4470a4a",
+        "sha256": "1a9a5e2c874a2a7e1db8c922ffb24c0cbb512ba3130159e6e7b161a8de20200c",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.072368,
-              0.146652,
-              0.60945,
-              0.740701
+              0.038876,
+              0.10627,
+              0.702751,
+              0.766206
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.753627,
+          0.55,
+          0.236373,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/news/frame-mask.png",
+          "source": [
+            0.004572,
+            0.005476,
+            0.991183,
+            0.988811
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "podcasts": {
@@ -1302,26 +1782,41 @@
           1672,
           941
         ],
-        "sha256": "796957809ac92c551e8610b25ab7cec9b98f1a547968ed9ea42d3368b025b536",
+        "sha256": "7117e0cfb81e04c2393c1837d3de61affee2bedf82a6e3f919c76e7de1f11c73",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.072368,
-              0.103082,
-              0.571172,
-              0.785335
+              0.041866,
+              0.069075,
+              0.682416,
+              0.83847
             ],
             "material": "screen"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/podcasts/frame-mask.png",
+          "source": [
+            0.004725,
+            0.005266,
+            0.987665,
+            0.985951
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "stocks": {
@@ -1331,26 +1826,41 @@
           1672,
           941
         ],
-        "sha256": "94429000646b62e09b58d2bc1ec0b1b75c63935ee63ea9ddc2108a7ddeae0676",
+        "sha256": "1122043820d6603dd4ac7503f36026ab22245db8d3b9be13d10a4355c8f8e01c",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.105861,
-              0.146652,
-              0.601077,
-              0.751328
+              0.036483,
+              0.086079,
+              0.676435,
+              0.823592
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/stocks/frame-mask.png",
+          "source": [
+            0.005995,
+            0.011306,
+            0.984,
+            0.980494
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "game-2048": {
@@ -1360,26 +1870,41 @@
           1672,
           941
         ],
-        "sha256": "c7dc9eda0f85932ddc5ad9b39473bd353b734832e8f00fd45ea3423222b1a0ad",
+        "sha256": "e61b91608b5ae4331aaaa53d1808616dcd47c0eb9ab0da02c006c9e33b85a408",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.037081,
-              0.146652,
-              0.672249,
-              0.773645
+              0.027512,
+              0.059511,
+              0.688995,
+              0.871413
             ],
             "material": "board"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/game-2048/frame-mask.png",
+          "source": [
+            0.00774,
+            0.0067,
+            0.980803,
+            0.977887
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "snake": {
@@ -1389,26 +1914,41 @@
           1672,
           941
         ],
-        "sha256": "be09b3fe4f4d4c6aee91c51787a5d4de25dab518d34fa906c572b79d5ee6c243",
+        "sha256": "0b4cee7fe9274c7c23db47ed962dba09cd2b37c96ea0be7f7f970743d8ecf7c0",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.044258,
-              0.146652,
-              0.691986,
-              0.718385
+              0.032297,
+              0.095643,
+              0.700359,
+              0.791711
             ],
             "material": "board"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/snake/frame-mask.png",
+          "source": [
+            0.004115,
+            0.004927,
+            0.984549,
+            0.982409
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "minesweeper": {
@@ -1418,26 +1958,41 @@
           1672,
           941
         ],
-        "sha256": "29b43c395304df3928bcd834d5544ace40229c41464ca4dc16946ae6a4977894",
+        "sha256": "5beb17ac5687d46621dbed2ec815da1ccb7421fac2536937d6b89b93ae14df5a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.087321,
-              0.146652,
-              0.608852,
-              0.755579
+              0.041268,
+              0.085016,
+              0.667464,
+              0.837407
             ],
             "material": "board"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/minesweeper/frame-mask.png",
+          "source": [
+            0.006983,
+            0,
+            0.993017,
+            1
+          ],
+          "target": [
+            0,
+            0.023728,
+            0.847884,
+            0.963054
+          ]
+        }
       }
     },
     "sudoku": {
@@ -1447,26 +2002,41 @@
           1672,
           941
         ],
-        "sha256": "a85157f4ae7f58de79d937fbfaf77dc3e8d0dd7bcdeba2b186421d8a38a47339",
+        "sha256": "33ed2c97e7e96324f6f55cec297f334c2908b0ed6b6172e88fa1805beb478833",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.043062,
-              0.146652,
-              0.66567,
-              0.742827
+              0.034091,
+              0.093518,
+              0.678828,
+              0.83847
             ],
             "material": "board"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/sudoku/frame-mask.png",
+          "source": [
+            0.010491,
+            0.020832,
+            0.974314,
+            0.960409
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "gomoku": {
@@ -1476,26 +2046,41 @@
           1672,
           941
         ],
-        "sha256": "eaa14c0295af7d6967462b5ce2588725891b0b664a68bd71416e0898f29f680e",
+        "sha256": "95a5c10cb403039813a7c419b586c0a0483628e0650f8bd2532d6076ff1335ff",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.0939,
-              0.146652,
-              0.611842,
-              0.751328
+              0.027512,
+              0.072264,
+              0.684809,
+              0.839532
             ],
             "material": "board"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/gomoku/frame-mask.png",
+          "source": [
+            0.010418,
+            0.016895,
+            0.971027,
+            0.959184
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "random-game": {
@@ -1505,26 +2090,41 @@
           1672,
           941
         ],
-        "sha256": "7fd34dac68cb2f099735490bf3ca4eb4672b2de2196c30b98b46aec7172d928e",
+        "sha256": "4a864ec133ff1eb617854228c56ccb82ee0eb0f0cbd2bae34dfd6546d56dd895",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.117823,
-              0.146652,
-              0.525718,
-              0.742827
+              0.050239,
+              0.114772,
+              0.659689,
+              0.785335
             ],
             "material": "board"
           }
         ],
         "companion": [
-          0.79,
-          0.73,
-          0.19,
-          0.23
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/random-game/frame-mask.png",
+          "source": [
+            0.006237,
+            0.006182,
+            0.983592,
+            0.983629
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "pokemon-showdown": {
@@ -1534,25 +2134,25 @@
           1671,
           941
         ],
-        "sha256": "265f2322a3a16ffe0a7587bd3d10701e75b3219f201ee9e69f037d0f74183b15",
+        "sha256": "8af390fb6740dcb30e1e8a1a09bb837651833775dded89c2ab1b3a63ad3395cb",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.02333931777378815,
-              0.11902231668437832,
-              0.6475164572112507,
-              0.8161530286928799
+              0.016158,
+              0.107333,
+              0.714542,
+              0.828905
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.7001795332136446,
-          0.64,
-          0.29323758228605623,
-          0.34
+          0.75,
+          0.55,
+          0.24,
+          0.43
         ],
         "webEdge": {
           "top": [
@@ -1610,18 +2210,18 @@
           ]
         },
         "webFrame": {
-          "mask": "assets/applet-scenes/pokemon-showdown/frame-cutout.png",
+          "mask": "assets/applet-scenes/pokemon-showdown/frame-mask.png",
           "source": [
-            0.0017953321364452424,
-            0.07438894792773645,
-            0.6941950927588271,
-            0.9096705632306057
+            0.001257,
+            0.002697,
+            0.996633,
+            0.994832
           ],
           "target": [
-            0.0005984440454817474,
-            0.07970244420828905,
-            0.6953919808497906,
-            0.9054197662061636
+            0,
+            0,
+            1,
+            1
           ]
         }
       }
@@ -1630,29 +2230,44 @@
       "background": "assets/applet-scenes/github/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
-        "sha256": "f2f6d1cdd8ae96646ef2ffd80b0a08693b6193340082c80bfe4757e1dc38bbf8",
+        "sha256": "9e0108d558ece3a644c35b450908e276932ac571e781ded44c9ce23fb5a1f29f",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.128589,
-              0.162593,
-              0.440191,
-              0.739639
+              0.035907,
+              0.108395,
+              0.663076,
+              0.784272
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/github/frame-mask.png",
+          "source": [
+            0.001334,
+            0.002583,
+            0.99637,
+            0.995902
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "codex": {
@@ -1662,26 +2277,41 @@
           1672,
           941
         ],
-        "sha256": "a9dd313426b7d5a428e0ac379187b5ff30684a66b8b7df1997084d6d2cfbf942",
+        "sha256": "3e02a470d79a05d5a50c2e7190897d0d37505cfef3b912019e7c5ef030c6d564",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.065789,
-              0.129649,
-              0.501794,
-              0.81509
+              0.038278,
+              0.134963,
+              0.694976,
+              0.773645
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/codex/frame-mask.png",
+          "source": [
+            0.001266,
+            0.000383,
+            0.99827,
+            0.99723
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "claude-code": {
@@ -1691,26 +2321,41 @@
           1672,
           941
         ],
-        "sha256": "ba6c6de823fd12b5d1e03add347d1f89a87076374b5cb829af9d1e164dbc1044",
+        "sha256": "355f8df7431b9c9e2f9e9bd9d56518c37df8be5275aa4565ae67bb339b454e51",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.057416,
-              0.146652,
-              0.490431,
-              0.802338
+              0.019139,
+              0.032944,
+              0.684809,
+              0.909671
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/claude-code/frame-mask.png",
+          "source": [
+            0.000635,
+            0.001105,
+            0.998841,
+            0.998824
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "notion": {
@@ -1720,26 +2365,41 @@
           1672,
           941
         ],
-        "sha256": "2217bdc8334d571dedd9c45a3c19158b0aad84fc35934e47172440924149e649",
+        "sha256": "9dbe43291091ea74d11c9e3256e59cdcc3fcedc4647fe76401b9856f495b2cfd",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.037679,
-              0.146652,
-              0.549641,
-              0.781084
+              0.02512,
+              0.064825,
+              0.700957,
+              0.873539
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/notion/frame-mask.png",
+          "source": [
+            0.001242,
+            0.001313,
+            0.998285,
+            0.996324
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "obsidian": {
@@ -1749,26 +2409,41 @@
           1672,
           941
         ],
-        "sha256": "43f2a0670b9b5b4114b7a4d23470e4900801a13b7d6c3cafbca11dcee0a12cf2",
+        "sha256": "5c69f2fdb36c8fcb036c5d210f8ed6248799f262f9f849d31fcc5009217043f4",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.055622,
-              0.146652,
-              0.529306,
-              0.794899
+              0.029306,
+              0.049947,
+              0.643541,
+              0.87779
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/obsidian/frame-mask.png",
+          "source": [
+            0.001284,
+            0,
+            0.997793,
+            0.999029
+          ],
+          "target": [
+            0,
+            0.002188,
+            1,
+            0.997812
+          ]
+        }
       }
     },
     "plaid": {
@@ -1778,26 +2453,41 @@
           1672,
           941
         ],
-        "sha256": "fa38165ce979a4bb0168369d419ccac61a4abd5539c0ca568f1441f283510bf7",
+        "sha256": "0f20b2a60e090c48c16f170d2b9295fb87b405d3c555b0ed007be04d9e2314bf",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.064593,
-              0.099894,
-              0.492225,
-              0.797024
+              0.0311,
+              0.079702,
+              0.645335,
+              0.78746
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/plaid/frame-mask.png",
+          "source": [
+            0.000598,
+            0,
+            0.999402,
+            0.99769
+          ],
+          "target": [
+            0,
+            0.000951,
+            0.999402,
+            0.999049
+          ]
+        }
       }
     },
     "stripe": {
@@ -1807,26 +2497,41 @@
           1672,
           941
         ],
-        "sha256": "37aefb8ecac1a4758af122aa2986e2abddfd8a72de0fdf9ae64db73a7345ff8b",
+        "sha256": "421ff22eb3c99201ce2f562d3b7e8a7d90b22d3323e3878d3452467a1fd5621d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.041268,
-              0.146652,
-              0.52811,
-              0.785335
+              0.024522,
+              0.054198,
+              0.673445,
+              0.867163
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/stripe/frame-mask.png",
+          "source": [
+            0.001818,
+            0.000071,
+            0.998182,
+            0.998765
+          ],
+          "target": [
+            0,
+            0,
+            0.999074,
+            1
+          ]
+        }
       }
     },
     "paypal": {
@@ -1836,26 +2541,41 @@
           1672,
           941
         ],
-        "sha256": "8dd7ffb9ca84ca05cca3f8fa718c6d7b4dd1d93797950b98ed8d26450fb6df87",
+        "sha256": "2c1371e07ed95eb7a031be35c488e4b6381b5f0542162351bb6e096f5537a985",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.038278,
-              0.146652,
-              0.575957,
-              0.79915
+              0.021531,
+              0.061637,
+              0.6561,
+              0.860786
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/paypal/frame-mask.png",
+          "source": [
+            0.001858,
+            0,
+            0.99725,
+            0.999038
+          ],
+          "target": [
+            0,
+            0.002203,
+            1,
+            0.997797
+          ]
+        }
       }
     },
     "todoist": {
@@ -1865,26 +2585,41 @@
           1672,
           941
         ],
-        "sha256": "372e19c1605b0b4f1d5f0b89266eecb53b82835df8324f74d26387021b522002",
+        "sha256": "ca81aa7e2ce6af935b0215d54efcd356441859507eff1cff2158f2152863833d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.052632,
-              0.146652,
-              0.469498,
-              0.792774
+              0.037081,
+              0.100956,
+              0.645933,
+              0.803401
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/todoist/frame-mask.png",
+          "source": [
+            0.000634,
+            0.00134,
+            0.999069,
+            0.997333
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "linear": {
@@ -1894,26 +2629,41 @@
           1672,
           941
         ],
-        "sha256": "5e5953604d54df2fb0b21cdfd6a505c4630f41046ec06cf3356b16df5d7f8222",
+        "sha256": "8c46182575586e97e71064883255c8cec59970213e9bf1adbdbfc25595ca078d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.066986,
-              0.140276,
-              0.5311,
-              0.790648
+              0.0311,
+              0.123273,
+              0.659091,
+              0.77577
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/linear/frame-mask.png",
+          "source": [
+            0.000628,
+            0,
+            0.999088,
+            1
+          ],
+          "target": [
+            0,
+            0.002468,
+            1,
+            0.997245
+          ]
+        }
       }
     },
     "supabase": {
@@ -1923,55 +2673,85 @@
           1672,
           941
         ],
-        "sha256": "7c26e19bdc55e3a3528071e0faa3f7ef85ba9a6ff7e72cdba9402082ec0ac659",
+        "sha256": "6510717e3ac52e89712c0444f335c9bd12fd52b1d0c0433502021ed2dbfa8669",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.036483,
-              0.146652,
-              0.480263,
-              0.788523
+              0.020335,
+              0.05101,
+              0.66866,
+              0.895855
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/supabase/frame-mask.png",
+          "source": [
+            0.001854,
+            0,
+            0.997302,
+            0.998937
+          ],
+          "target": [
+            0,
+            0.001063,
+            1,
+            0.998937
+          ]
+        }
       }
     },
     "docker": {
       "background": "assets/applet-scenes/docker/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
-        "sha256": "ca1883cf31ff7b8cf017d48aa9201b82ba55c6f022a88242d461a8b0b14352b3",
+        "sha256": "350967366cf6db8fdd363772a0c376a0dcd852c8c003c1320655f3d4ca46377b",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.075359,
-              0.143464,
-              0.494617,
-              0.792774
+              0.041891,
+              0.126461,
+              0.658887,
+              0.806589
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/docker/frame-mask.png",
+          "source": [
+            0.001237,
+            0,
+            0.998763,
+            0.999124
+          ],
+          "target": [
+            0,
+            0.003523,
+            0.999676,
+            0.996477
+          ]
+        }
       }
     },
     "google-drive": {
@@ -1981,26 +2761,41 @@
           1672,
           941
         ],
-        "sha256": "d0f40acdc0b02f650900967faa6ca5fb9389dd3515b41d66c2166ddd7cab6574",
+        "sha256": "d68ad7ff72a231af9450bf62ee78eb178d3c1fdbbc0e0a4af6474b950930f2bd",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.044856,
-              0.146652,
-              0.522129,
-              0.792774
+              0.014354,
+              0.080765,
+              0.69378,
+              0.829968
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/google-drive/frame-mask.png",
+          "source": [
+            0.00185,
+            0.001388,
+            0.996534,
+            0.996129
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "google-docs": {
@@ -2010,26 +2805,41 @@
           1672,
           941
         ],
-        "sha256": "abac1aa65a9c6a1ca228e3e540fbc4f37c7906d1918da40ab597b895a7eb97b8",
+        "sha256": "05530ab3b97378559fe93967eb43cc4c6ae2bab6bc1bae7f16d5af3c6a602894",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.032895,
-              0.146652,
-              0.562201,
-              0.809777
+              0.017943,
+              0.053135,
+              0.694976,
+              0.891605
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/google-docs/frame-mask.png",
+          "source": [
+            0.001282,
+            0.004589,
+            0.995675,
+            0.993998
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "google-sheets": {
@@ -2039,26 +2849,41 @@
           1672,
           941
         ],
-        "sha256": "35eb0fed4282a5f7e4863c5e20d901766940e194807d6de15e2cbf5ff9f023aa",
+        "sha256": "36ca838e5781f9b88b23513bf109d2d39a75083d98a7a7270e6cfe57e4697044",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.121411,
-              0.146652,
-              0.454545,
-              0.761955
+              0.022727,
+              0.095643,
+              0.677632,
+              0.828905
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/google-sheets/frame-mask.png",
+          "source": [
+            0.002436,
+            0,
+            0.997564,
+            0.983958
+          ],
+          "target": [
+            0,
+            0.014769,
+            0.999338,
+            0.985231
+          ]
+        }
       }
     },
     "google-slides": {
@@ -2068,26 +2893,41 @@
           1672,
           941
         ],
-        "sha256": "de559ec310f20d484ca1d89de9bcde242f5c450d6b3c678ec5a70d246c038c90",
+        "sha256": "3383250bf5c511639312fc8eb3a9557e493cc9179004e65329cef806cf90b47a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.035287,
-              0.146652,
-              0.57177,
-              0.792774
+              0.021531,
+              0.075452,
+              0.674641,
+              0.841658
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/google-slides/frame-mask.png",
+          "source": [
+            0.000577,
+            0,
+            0.999423,
+            0.999047
+          ],
+          "target": [
+            0,
+            0.002223,
+            0.998533,
+            0.997777
+          ]
+        }
       }
     },
     "oura": {
@@ -2097,55 +2937,85 @@
           1672,
           941
         ],
-        "sha256": "141292b7b774cbb73f476e7ae4d0dab7b29425643b37f64acce36b0298176c40",
+        "sha256": "862e75e6739a5aff3db0573f35bbce179b0256d6593afaef350026bfd325ef47",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.095694,
-              0.087141,
-              0.470096,
-              0.804463
+              0.058014,
+              0.079702,
+              0.678828,
+              0.801275
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/oura/frame-mask.png",
+          "source": [
+            0.001302,
+            0.001284,
+            0.998229,
+            0.997326
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "strava": {
       "background": "assets/applet-scenes/strava/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
-        "sha256": "d030ec434152006e4b1e36aba4d58a008b78aa56c583a0c60299e31c3812bc4f",
+        "sha256": "b04ad74f115aaa296e38cc468728ed1ee95ea3b72f379a980db5652a2430da3a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.094498,
-              0.149841,
-              0.485048,
-              0.765143
+              0.041293,
+              0.103082,
+              0.66906,
+              0.801275
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/strava/frame-mask.png",
+          "source": [
+            0.001274,
+            0.001631,
+            0.997604,
+            0.994652
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "fitbit": {
@@ -2155,26 +3025,41 @@
           1672,
           941
         ],
-        "sha256": "b6a3fb8d22a7f95efd9d5767d2112e4726a96741c94e330a6fef9712b27c8c21",
+        "sha256": "630e0303e34ab3ec5e9ab2819de9f6b6d18e76424b89d32fcb660f17237eb76e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.126794,
-              0.146652,
-              0.467105,
-              0.710946
+              0.040072,
+              0.09458,
+              0.683612,
+              0.783209
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/fitbit/frame-mask.png",
+          "source": [
+            0.001942,
+            0.001464,
+            0.996482,
+            0.995896
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "google-maps": {
@@ -2184,26 +3069,41 @@
           1672,
           941
         ],
-        "sha256": "e5fe3310f12805e94d3e0d2021cb3b61fff8352c585046e0e4b1a80f01cc74e2",
+        "sha256": "b54a022f11bbfa193b7ce3a8d52a12bf015aa53576d8e7b967f5921f450404df",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.146531,
-              0.146652,
-              0.425239,
-              0.727949
+              0.05622,
+              0.105207,
+              0.66567,
+              0.818278
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/google-maps/frame-mask.png",
+          "source": [
+            0.002761,
+            0.002835,
+            0.994271,
+            0.993455
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "airbnb": {
@@ -2213,26 +3113,41 @@
           1672,
           941
         ],
-        "sha256": "4449933eed58a9e12cc1a1cee55149566c68bdeea3dc78f567c356f8252ac407",
+        "sha256": "709f7d5cacafdf2476f21afc5ae19f5799dc4f6c6fef4f3e4bd6269d0d265091",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.060407,
-              0.12221,
-              0.492823,
-              0.806589
+              0.025718,
+              0.093518,
+              0.669258,
+              0.82678
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/airbnb/frame-mask.png",
+          "source": [
+            0.001295,
+            0.002877,
+            0.996406,
+            0.992228
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "tripit": {
@@ -2242,26 +3157,41 @@
           1672,
           941
         ],
-        "sha256": "21dd65a5ecfbc0415f0f663acc756e03f25e9aedd2b5dc205e840dc4222645bc",
+        "sha256": "04b52680909dbd35839d453f0e60d0e6908818ae0c8fd3a6ef917f9c8893b5ae",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.135167,
-              0.146652,
-              0.436603,
-              0.730074
+              0.045455,
+              0.069075,
+              0.651914,
+              0.852285
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/tripit/frame-mask.png",
+          "source": [
+            0.000685,
+            0.001244,
+            0.998155,
+            0.997487
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "x": {
@@ -2315,55 +3245,85 @@
           1672,
           941
         ],
-        "sha256": "bdb8ab63f45a505741169a88cc2c24e87808c0fa34e430116a613baf0bab6d33",
+        "sha256": "3fb551611fb52e584956c2a03745a84150e84a7400df823c7f2743ff7ee54a2c",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.092105,
-              0.146652,
-              0.495813,
-              0.778959
+              0.04067,
+              0.085016,
+              0.651914,
+              0.840595
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/youtube/frame-mask.png",
+          "source": [
+            0.010167,
+            0,
+            0.989833,
+            0.973507
+          ],
+          "target": [
+            0,
+            0.013932,
+            0.989833,
+            0.986068
+          ]
+        }
       }
     },
     "tiktok": {
       "background": "assets/applet-scenes/tiktok/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
-        "sha256": "eb9f7649b8d434505567825359ebe5f186cc9a44ca91f7ec6e8a02f106e9b997",
+        "sha256": "51b2b9b5ec46787787f8f9cb7ceb4a8965dfe6ed2388fa1ca6a9ab3894ea0b92",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.060407,
-              0.146652,
-              0.495215,
-              0.789586
+              0.03471,
+              0.07864,
+              0.690604,
+              0.797024
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/tiktok/frame-mask.png",
+          "source": [
+            0.001985,
+            0.004911,
+            0.994179,
+            0.991935
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "discord": {
@@ -2373,26 +3333,41 @@
           1672,
           941
         ],
-        "sha256": "1771c26444da0cb7473330aefea384a612c0f288f867f0a1cf61a00358a3998b",
+        "sha256": "380f2daa254ce71e251f9354e44d2d2f8f4e0267b5c61774ec5356207a103e8d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.068182,
-              0.146652,
-              0.544856,
-              0.797024
+              0.04067,
+              0.12221,
+              0.655502,
+              0.749203
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/discord/frame-mask.png",
+          "source": [
+            0.001314,
+            0,
+            0.997845,
+            0.997875
+          ],
+          "target": [
+            0,
+            0.002125,
+            1,
+            0.997875
+          ]
+        }
       }
     },
     "doordash": {
@@ -2402,55 +3377,85 @@
           1672,
           941
         ],
-        "sha256": "49845c04e5449b3059c092fa6f1caeb671b4953b7dd660c74403513bd1d5642f",
+        "sha256": "ac6b82e6e2eba34218197217b0b61f40b2a18692bd45fc15fb94fa4f0f69f9ab",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.077153,
-              0.146652,
-              0.505383,
-              0.800213
-            ],
-            "material": "paper"
-          }
-        ],
-        "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
-      }
-    },
-    "wordle": {
-      "background": "assets/applet-scenes/wordle/background.webp",
-      "registration": {
-        "imageSize": [
-          1672,
-          941
-        ],
-        "sha256": "0b99a0db04f3aa71ddc420a95916baf3d63189ddcd6541c966f7f4c08b8e9e9e",
-        "regions": [
-          {
-            "id": "main",
-            "role": "primary",
-            "rect": [
-              0.074761,
-              0.146652,
-              0.502392,
+              0.036483,
+              0.104145,
+              0.678828,
               0.794899
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/doordash/frame-mask.png",
+          "source": [
+            0.008178,
+            0,
+            0.991822,
+            1
+          ],
+          "target": [
+            0,
+            0.035376,
+            0.790238,
+            0.940431
+          ]
+        }
+      }
+    },
+    "wordle": {
+      "background": "assets/applet-scenes/wordle/background.webp",
+      "registration": {
+        "imageSize": [
+          1603,
+          981
+        ],
+        "sha256": "60828cd56a56c4f7ec373b39208bfff00ad1155284dc119e3600bffd6329f347",
+        "regions": [
+          {
+            "id": "main",
+            "role": "primary",
+            "rect": [
+              0.028072,
+              0.093782,
+              0.688709,
+              0.797146
+            ],
+            "material": "paper"
+          }
+        ],
+        "companion": [
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/wordle/frame-mask.png",
+          "source": [
+            0.001559,
+            0.004836,
+            0.966591,
+            0.995164
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            0.991646
+          ]
+        }
       }
     },
     "nyt-connections": {
@@ -2460,84 +3465,129 @@
           1672,
           941
         ],
-        "sha256": "fb5975eedd10cb59548fc6e3b7bab704f2b1b1433b2941e5c299827a84f8db22",
+        "sha256": "222c4998447d9721c6b266c79c91f11062a7859da15b72bb82e2d0b4950e1f52",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.047249,
-              0.146652,
-              0.519737,
-              0.783209
+              0.030502,
+              0.07864,
+              0.66866,
+              0.836344
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/nyt-connections/frame-mask.png",
+          "source": [
+            0.001225,
+            0,
+            0.998775,
+            0.9981
+          ],
+          "target": [
+            0,
+            0.004449,
+            0.999674,
+            0.995551
+          ]
+        }
       }
     },
     "slither-io": {
       "background": "assets/applet-scenes/slither-io/background.webp",
       "registration": {
         "imageSize": [
-          1672,
+          1671,
           941
         ],
-        "sha256": "ac995b298da7c57e6b442bb40b2658980cb433335977878f12ef535b502e1b52",
+        "sha256": "c1ca26dbb53537c5727671f6422da168b3f135705c63799095553cb39c58a856",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.080144,
-              0.146652,
-              0.528708,
-              0.780021
+              0.049072,
+              0.110521,
+              0.678037,
+              0.797024
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/slither-io/frame-mask.png",
+          "source": [
+            0.000644,
+            0,
+            0.999113,
+            1
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "agar-io": {
       "background": "assets/applet-scenes/agar-io/background.webp",
       "registration": {
         "imageSize": [
-          1672,
-          941
+          1603,
+          981
         ],
-        "sha256": "c555688d647a285178327327ed5b6df8a2118adf8564fb5f5aa0f59270600e35",
+        "sha256": "ddab1bcb0fd88f31b111da2db2dbf46d1d52da24367a489d96966ec6b7386c6d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.05622,
-              0.146652,
-              0.507775,
-              0.783209
+              0.028072,
+              0.071356,
+              0.668122,
+              0.793068
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/agar-io/frame-mask.png",
+          "source": [
+            0.003841,
+            0.00056,
+            0.99024,
+            0.99944
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            0.952519
+          ]
+        }
       }
     },
     "krunker-io": {
@@ -2547,84 +3597,129 @@
           1672,
           941
         ],
-        "sha256": "4cfe75412edc1e7f7d949d2d89ce2d21e89c9317f9cf0bebc10b2841cb720985",
+        "sha256": "df9b4285b38d03b099f005f4afe58e159e8b622704ed96338f5c6dfe3179b3ee",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.069976,
-              0.146652,
-              0.523923,
-              0.77577
+              0.037081,
+              0.090329,
+              0.677033,
+              0.809777
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/krunker-io/frame-mask.png",
+          "source": [
+            0.0013,
+            0.000124,
+            0.997336,
+            0.998677
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "skribbl-io": {
       "background": "assets/applet-scenes/skribbl-io/background.webp",
       "registration": {
         "imageSize": [
-          1672,
-          941
+          1602,
+          981
         ],
-        "sha256": "492e5bdbdc04ae8639ceb35943815c331510251d6e158ea87d1bf0ce1aec12df",
+        "sha256": "ddc39e21051066c5b64e647abb0d3103844f0ac15ba6fddc4de9e31b572fbc2e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.09689,
-              0.146652,
-              0.465909,
-              0.793836
+              0.061798,
+              0.114169,
+              0.648564,
+              0.748216
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/skribbl-io/frame-mask.png",
+          "source": [
+            0,
+            0.001502,
+            0.991218,
+            0.995879
+          ],
+          "target": [
+            0.00007,
+            0,
+            0.99993,
+            1
+          ]
+        }
       }
     },
     "infinite-craft": {
       "background": "assets/applet-scenes/infinite-craft/background.webp",
       "registration": {
         "imageSize": [
-          1672,
-          941
+          1603,
+          981
         ],
-        "sha256": "e5cd8f59a794f3435905274049e20dc67beee1f44cd681113de52d76f1c71fa5",
+        "sha256": "573d650e203f858cee1188e51ebc045c9bd60c13be3ff4d41e6d2a58e7fe34ac",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.079545,
-              0.146652,
-              0.532297,
-              0.792774
+              0.053026,
+              0.055046,
+              0.663755,
+              0.836901
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/infinite-craft/frame-mask.png",
+          "source": [
+            0.000752,
+            0,
+            0.999248,
+            1
+          ],
+          "target": [
+            0,
+            0.00325,
+            0.999738,
+            0.938498
+          ]
+        }
       }
     },
     "little-alchemy-2": {
@@ -2634,26 +3729,41 @@
           1672,
           941
         ],
-        "sha256": "7edca685105264d7bf5625469ec6ce0e7d8bf2fde6c9556dcc6cc80d4d80e421",
+        "sha256": "199fe515d3748bf9aebda7a91adbe0dffb2a25c5358b948b0d97185331d66a33",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.074163,
-              0.146652,
-              0.465909,
-              0.791711
+              0.034689,
+              0.069075,
+              0.661483,
+              0.823592
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/little-alchemy-2/frame-mask.png",
+          "source": [
+            0.001229,
+            0,
+            0.998771,
+            0.999081
+          ],
+          "target": [
+            0,
+            0.002216,
+            0.999679,
+            0.997784
+          ]
+        }
       }
     },
     "cookie-clicker": {
@@ -2663,26 +3773,41 @@
           1672,
           941
         ],
-        "sha256": "77bc218d89e3c4bf96a9790daf52a12ddaefb1cf0c44ef0f206b9a617a2bed60",
+        "sha256": "7bdce6a925e24076857cac52b7a1393a846f510887bf5c0e36e8e3a8cc7b8f2f",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.062201,
-              0.146652,
-              0.482057,
-              0.791711
+              0.031699,
+              0.062699,
+              0.659689,
+              0.831031
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/cookie-clicker/frame-mask.png",
+          "source": [
+            0.003802,
+            0.001148,
+            0.993619,
+            0.998711
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "lichess": {
@@ -2692,26 +3817,41 @@
           1672,
           941
         ],
-        "sha256": "2a2712ad4c2885e745586cf10f16f9484226a89fc25c9a4bc77bfc840b8d2c32",
+        "sha256": "b7dd8c0aac0f192dd05d0369d4b845ec65fb09c7a422e20ac8227991c7e51f72",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.068182,
-              0.146652,
-              0.52512,
-              0.791711
+              0.041268,
+              0.06695,
+              0.648923,
+              0.858661
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/lichess/frame-mask.png",
+          "source": [
+            0.001116,
+            0,
+            0.998884,
+            1
+          ],
+          "target": [
+            0,
+            0.004578,
+            0.997036,
+            0.995037
+          ]
+        }
       }
     },
     "drive-mad": {
@@ -2721,26 +3861,41 @@
           1672,
           941
         ],
-        "sha256": "bb67ba1e30b5c053ea7c8249a2867e2df9c8aca6f77508e42f0284ddfb1fd864",
+        "sha256": "77b616aaa6b3e5635465ae0ac8a57539a34eec1fa011c5ad79dc8fa838aa6425",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.078947,
-              0.146652,
-              0.485048,
-              0.784272
+              0.048445,
+              0.110521,
+              0.642344,
+              0.79915
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/drive-mad/frame-mask.png",
+          "source": [
+            0.001432,
+            0.002735,
+            0.995914,
+            0.994638
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "subway-surfers": {
@@ -2750,26 +3905,41 @@
           1672,
           941
         ],
-        "sha256": "f866ec527d2a01b5019fea929e0c956fcece0a22071ea5a4841161fa70b396d7",
+        "sha256": "ab7750d92d4d9323e92b0275bba9a77e00e53e1203fdb837ddf8ecbee943b9e4",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.080742,
-              0.164718,
-              0.467703,
-              0.764081
+              0.049043,
+              0.127524,
+              0.6561,
+              0.79915
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/subway-surfers/frame-mask.png",
+          "source": [
+            0.001289,
+            0,
+            0.998167,
+            1
+          ],
+          "target": [
+            0,
+            0.003699,
+            1,
+            0.995995
+          ]
+        }
       }
     },
     "sekai": {
@@ -2779,26 +3949,41 @@
           1672,
           941
         ],
-        "sha256": "604bd67b77e63de2cccd1c9b290946cdefd95a16f5cfd4c222ea83bd9f2062ad",
+        "sha256": "70b33e3b10830ac7ab7093a753bb423f80a6635317d0be6d990f939b81a534e9",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.072368,
-              0.165781,
-              0.520335,
-              0.768332
+              0.023923,
+              0.11796,
+              0.687799,
+              0.782147
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/sekai/frame-mask.png",
+          "source": [
+            0.002527,
+            0.000332,
+            0.994755,
+            0.99726
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "sekai-sketch-racer": {
@@ -2808,26 +3993,41 @@
           1672,
           941
         ],
-        "sha256": "f2531e072c3f9e16f7e373c082e8bdc0142f583a5d42bba8c6d2f2641701f097",
+        "sha256": "a7b1008ead10d4da0f5bb74688fbef6ec30da7602161009e29c5656230da41e3",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.069378,
-              0.146652,
-              0.510167,
-              0.789586
+              0.0311,
+              0.07864,
+              0.698565,
+              0.82678
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/sekai-sketch-racer/frame-mask.png",
+          "source": [
+            0.001253,
+            0,
+            0.998279,
+            1
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "sekai-3d-uno": {
@@ -2837,26 +4037,41 @@
           1672,
           941
         ],
-        "sha256": "a60c0167ac9d283fd404a68419c52d81cf645849828c1c367b7db52ae3bf580b",
+        "sha256": "d63128f749da5b67e75ea339146221d3fd61131e4f85ae242887d0d97b26e1e5",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.072967,
-              0.146652,
-              0.529904,
-              0.785335
+              0.028708,
+              0.074389,
+              0.657895,
+              0.846971
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/sekai-3d-uno/frame-mask.png",
+          "source": [
+            0.000654,
+            0,
+            0.998172,
+            1
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "sekai-devil-level": {
@@ -2866,26 +4081,41 @@
           1672,
           941
         ],
-        "sha256": "b6ee98b98445d8dea0964722733792100284ab41a38058a5e0ad474cc45a1652",
+        "sha256": "7844af4d8753c52fd5bbe3c8eec050aae94ff2b8487971bddecfb379207f6ead",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.094498,
-              0.146652,
-              0.5,
-              0.786397
+              0.050837,
+              0.075452,
+              0.641148,
+              0.832094
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/sekai-devil-level/frame-mask.png",
+          "source": [
+            0.001295,
+            0,
+            0.998124,
+            1
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "chatgpt": {
@@ -2895,26 +4125,41 @@
           1672,
           941
         ],
-        "sha256": "6429a264eb0bbc3ccd2dbcd2145e7b6db862f8818297aa87c49fada260129b13",
+        "sha256": "626de8709760457cb3e20765ff5a3ede3ef2adb1ee177b910193861392ca628c",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.058014,
-              0.146652,
-              0.514354,
-              0.804463
+              0.023923,
+              0.032944,
+              0.663278,
+              0.927736
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/chatgpt/frame-mask.png",
+          "source": [
+            0.001266,
+            0.001146,
+            0.99728,
+            0.997693
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "claude": {
@@ -2924,26 +4169,41 @@
           1672,
           941
         ],
-        "sha256": "23d0d842f94c77c1aae28ec166f1fa722c42c958a964a1fe3879b1202abff14d",
+        "sha256": "b5c5606e58496de5ed510e2197a6b7d4ec874a15647f6432817e8db868dce3f3",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.043062,
-              0.146652,
-              0.539474,
-              0.797024
+              0.029904,
+              0.071201,
+              0.665072,
+              0.8661
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/claude/frame-mask.png",
+          "source": [
+            0.001311,
+            0.001247,
+            0.996383,
+            0.997528
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "gemini": {
@@ -2953,26 +4213,41 @@
           1672,
           941
         ],
-        "sha256": "dea4f1afd9b8016beae1bd95cea3fc7fd57c8b321649efd6a7d8509ac1dd6aa6",
+        "sha256": "bf4813b9312804a695fe407f04f5b56e81f586df8d2111096c890de2392ed104",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.081938,
-              0.146652,
-              0.491627,
-              0.791711
+              0.046651,
+              0.103082,
+              0.66567,
+              0.793836
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/gemini/frame-mask.png",
+          "source": [
+            0.001882,
+            0,
+            0.998118,
+            0.998937
+          ],
+          "target": [
+            0,
+            0.001063,
+            0.999925,
+            0.998937
+          ]
+        }
       }
     },
     "perplexity": {
@@ -2982,26 +4257,41 @@
           1672,
           941
         ],
-        "sha256": "f796d35ba6d1e74acd6f00aa83dfdc9eb282bb22b93c8b853282ab0ab5fc48f3",
+        "sha256": "01bdf9ea62625418e2ed91c71521974b1431d1e5ace2300296312bb8e24ebb31",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.048445,
-              0.146652,
-              0.535885,
-              0.784272
+              0.02811,
+              0.090329,
+              0.642943,
+              0.842721
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/perplexity/frame-mask.png",
+          "source": [
+            0.001253,
+            0.0013,
+            0.998726,
+            0.997459
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "deepseek": {
@@ -3011,26 +4301,41 @@
           1672,
           941
         ],
-        "sha256": "e858dc550d81c7c0e58de0b5f7484c8be5bb239da231fb65124c70007958b76b",
+        "sha256": "fd361b4a384497e3bd08e3a45e7d89f2c79e8b50ea2a12eb02c0b3ad4f7d7bd3",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.067584,
-              0.146652,
-              0.520335,
-              0.794899
+              0.046651,
+              0.098831,
+              0.653708,
+              0.827843
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/deepseek/frame-mask.png",
+          "source": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "target": [
+            0.009789,
+            0.00667,
+            0.979279,
+            0.985969
+          ]
+        }
       }
     },
     "whatsapp": {
@@ -3040,26 +4345,41 @@
           1672,
           941
         ],
-        "sha256": "3dba8b6a9fd75ea25a45a031b301b2efe89deac7e82724dfc15acacc6b1b8498",
+        "sha256": "e22bc1df5ebee9395273cbb11828cab72cdb74e4f51d56292761cfb8eb306047",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.080144,
-              0.146652,
-              0.5,
-              0.794899
+              0.046651,
+              0.089267,
+              0.656699,
+              0.843783
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/whatsapp/frame-mask.png",
+          "source": [
+            0.000731,
+            0,
+            0.997253,
+            0.984588
+          ],
+          "target": [
+            0,
+            0.007857,
+            1,
+            0.992143
+          ]
+        }
       }
     },
     "telegram": {
@@ -3069,26 +4389,41 @@
           1672,
           941
         ],
-        "sha256": "9878f3fcad2864ded7977b43ad1f7c7019a42a0a23e0bdd74f5ec27e93d16046",
+        "sha256": "d60b09ff4aa815843d92a28d0da7d0b86824490178d74e7b09eb78deca0fc20c",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.055622,
-              0.155154,
-              0.491029,
-              0.774708
+              0.033493,
+              0.128587,
+              0.644737,
+              0.78746
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/telegram/frame-mask.png",
+          "source": [
+            0.001295,
+            0.000359,
+            0.997201,
+            0.997279
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "slack": {
@@ -3098,26 +4433,41 @@
           1672,
           941
         ],
-        "sha256": "6b018fb4cf86d6b57be99ff2f2170a61166539976509bcb12cee17901779d282",
+        "sha256": "971e014aff3cdfce649bce8bdbfd945a4109a22e921c25e028088d524da92bcb",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.044856,
-              0.146652,
-              0.538876,
-              0.803401
+              0.023923,
+              0.086079,
+              0.697967,
+              0.809777
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/slack/frame-mask.png",
+          "source": [
+            0.001286,
+            0,
+            0.997151,
+            1
+          ],
+          "target": [
+            0,
+            0.000118,
+            1,
+            0.998679
+          ]
+        }
       }
     },
     "teams": {
@@ -3127,26 +4477,41 @@
           1672,
           941
         ],
-        "sha256": "be598bd567f497cfaea169a92b3e7ef94dd38dbad85d433cd0327c3f6396757a",
+        "sha256": "2636b39b9ee7a1ae46582c77ca48d47cce4522213025806e161de7907883637b",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.059809,
-              0.146652,
-              0.501794,
-              0.777896
+              0.037679,
+              0.088204,
+              0.650718,
+              0.81509
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/teams/frame-mask.png",
+          "source": [
+            0.000635,
+            0.00012,
+            0.999076,
+            0.998686
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "zoom": {
@@ -3156,26 +4521,41 @@
           1672,
           941
         ],
-        "sha256": "aaebd46cdf043d7186054b765fd7802ce0d0a14f76591ae195f64282ff78a9f8",
+        "sha256": "f847208d7bdc10cc3e3b8a7b2019348c2099b19598333a32a764bbe6f3d1fbf0",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.05622,
-              0.146652,
-              0.542464,
-              0.794899
+              0.037081,
+              0.12221,
+              0.668062,
+              0.795962
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/zoom/frame-mask.png",
+          "source": [
+            0.000703,
+            0,
+            0.9973,
+            0.998937
+          ],
+          "target": [
+            0,
+            0.001063,
+            1,
+            0.998937
+          ]
+        }
       }
     },
     "dropbox": {
@@ -3185,26 +4565,41 @@
           1672,
           941
         ],
-        "sha256": "8811f4b5ec067d64cbb6d8746b28c7de5349eabbf459351aff73f6217a859ded",
+        "sha256": "6b5efca8efbbc93005481a5691e2d354cba69e461eb925641cd6aebdb6c4af68",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.049043,
-              0.146652,
-              0.538876,
-              0.791711
+              0.027512,
+              0.056323,
+              0.669258,
+              0.88204
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/dropbox/frame-mask.png",
+          "source": [
+            0.000598,
+            0.000072,
+            0.999402,
+            0.998786
+          ],
+          "target": [
+            0,
+            0,
+            0.999402,
+            1
+          ]
+        }
       }
     },
     "onedrive": {
@@ -3214,26 +4609,41 @@
           1672,
           941
         ],
-        "sha256": "262128282aabb0670d05fd4c65449c290a2667c0627cdaaf76a19c91d0bc678b",
+        "sha256": "1b5e290fc27c807e287c99ee642995bf47db8e8e1cafa7bd890269e6f739ce9a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.062799,
-              0.146652,
-              0.508971,
-              0.785335
+              0.032297,
+              0.082891,
+              0.659091,
+              0.828905
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/onedrive/frame-mask.png",
+          "source": [
+            0.000674,
+            0,
+            0.999326,
+            1
+          ],
+          "target": [
+            0,
+            0.027615,
+            0.967545,
+            0.948529
+          ]
+        }
       }
     },
     "microsoft-word": {
@@ -3243,26 +4653,41 @@
           1672,
           941
         ],
-        "sha256": "2326dd0e4be5cbc5e999115e6f8552431dc25c5ff8ed4f6086545021dc7a8d76",
+        "sha256": "d3af0897754124ff52549cd2a078923ab71c8be4d667483fa03843e67f712505",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.058014,
-              0.146652,
-              0.510167,
-              0.805526
+              0.028708,
+              0.063762,
+              0.665072,
+              0.858661
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/microsoft-word/frame-mask.png",
+          "source": [
+            0.000653,
+            0.000083,
+            0.998192,
+            0.998753
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "microsoft-excel": {
@@ -3272,26 +4697,41 @@
           1672,
           941
         ],
-        "sha256": "f957209271d5940b873a1d00ed8805e3c238f4c656c261bcb05f04995a22d07b",
+        "sha256": "a7d20e0628639a56a29429fbee5fff736139415d13c6ba66f73828862b185d0c",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.058014,
-              0.146652,
-              0.523325,
-              0.797024
+              0.02811,
+              0.100956,
+              0.677033,
+              0.835282
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/microsoft-excel/frame-mask.png",
+          "source": [
+            0.000678,
+            0.001463,
+            0.997336,
+            0.996154
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "microsoft-powerpoint": {
@@ -3301,26 +4741,41 @@
           1672,
           941
         ],
-        "sha256": "3b5fd3bc71ec847316e9c3c842265e4de261dcf0b9adf7a6f2d890edb06266a9",
+        "sha256": "0f74681b7d84803800161e235edf770b47453793c739bcd3899b37a00745cf8e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.059211,
-              0.146652,
-              0.534091,
-              0.788523
+              0.029306,
+              0.083953,
+              0.665072,
+              0.816153
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/microsoft-powerpoint/frame-mask.png",
+          "source": [
+            0.006628,
+            0.005623,
+            0.979204,
+            0.984252
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "figma": {
@@ -3330,26 +4785,41 @@
           1672,
           941
         ],
-        "sha256": "c9cc5cf46f5cca94e19505da67346f9bb925e5dc85753970ac0f8edfb76f96c7",
+        "sha256": "36f573cf9b74d925ba07444dc5c1c99659ea7ef9018c919e34732e58eff7cd54",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.050239,
-              0.146652,
-              0.545455,
-              0.790648
+              0.026914,
+              0.073326,
+              0.647129,
+              0.837407
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/figma/frame-mask.png",
+          "source": [
+            0.005158,
+            0.013549,
+            0.986989,
+            0.975703
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "canva": {
@@ -3359,26 +4829,41 @@
           1672,
           941
         ],
-        "sha256": "4826d4f3772e8c7cdfa5513d2d8f6c5a47f2193e3ffc42dd8ae84dd2e6aa7e95",
+        "sha256": "504e71d807130bc44fe806e14ea417bc3b2726d34e509f10aace9d5140153aaf",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.063995,
-              0.16153,
-              0.54067,
-              0.769394
+              0.041866,
+              0.125399,
+              0.660885,
+              0.760893
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/canva/frame-mask.png",
+          "source": [
+            0.001315,
+            0.000181,
+            0.99727,
+            0.998592
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "spotify": {
@@ -3388,26 +4873,41 @@
           1672,
           941
         ],
-        "sha256": "1816f675c90344b32a0612cea56200bbbfc20892eaded94c9909054cae32d683",
+        "sha256": "61d4b2a34aebb6057a0c42d31ab918fb98bb7d62242d21b8f3e4e293dfc0ae89",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.086124,
-              0.146652,
-              0.523325,
-              0.772582
+              0.02811,
+              0.083953,
+              0.678828,
+              0.792774
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/spotify/frame-mask.png",
+          "source": [
+            0.001276,
+            0.000118,
+            0.997343,
+            0.998649
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "apple-music": {
@@ -3417,26 +4917,41 @@
           1672,
           941
         ],
-        "sha256": "334eaf32a113eac17d94bf03686495294f0aa183f8408300b3530ddacf4ab8df",
+        "sha256": "c3d9575c62c99de89e8dfd763b79de56e5d450ebc59d1278a3c08e4513b84edc",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.061005,
-              0.146652,
-              0.536483,
-              0.774708
+              0.04067,
+              0.081828,
+              0.645933,
+              0.816153
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/apple-music/frame-mask.png",
+          "source": [
+            0.000638,
+            0,
+            0.999069,
+            1
+          ],
+          "target": [
+            0,
+            0.002342,
+            1,
+            0.997382
+          ]
+        }
       }
     },
     "reddit": {
@@ -3446,26 +4961,41 @@
           1672,
           941
         ],
-        "sha256": "76a19b64e03401882fd9564d582dcbbacddaa57c1bc6c2f0fce06c143932c636",
+        "sha256": "14d419bea3adf31ea274b29dc49e06f4c21110bbd50abaa8f2f3bfb33c81c888",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.054426,
-              0.146652,
-              0.519139,
-              0.783209
+              0.034689,
+              0.098831,
+              0.655502,
+              0.812965
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/reddit/frame-mask.png",
+          "source": [
+            0.001895,
+            0,
+            0.997248,
+            1
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "instagram": {
@@ -3475,26 +5005,41 @@
           1672,
           941
         ],
-        "sha256": "b978b695d03cb014dd1ef858a1753eae0fb17193e429e4ae59c44948fd4b6f0e",
+        "sha256": "900c4b6d915244efe9a1835c20d16cf5eb63e7ec825aea01d58c6be52431a6bf",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.059211,
-              0.146652,
-              0.52811,
-              0.792774
+              0.034091,
+              0.073326,
+              0.641148,
+              0.82678
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/instagram/frame-mask.png",
+          "source": [
+            0.001895,
+            0.003684,
+            0.997186,
+            0.993523
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "linkedin": {
@@ -3504,26 +5049,41 @@
           1672,
           941
         ],
-        "sha256": "ae5fdeb4a7569f013da179b1476a53699e45d2becbe3e95405850bedd4b95e57",
+        "sha256": "5d6f28fc085ec8f91ef8575330171b190cdea295cd2f89e511864c9c9b520eee",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.067584,
-              0.146652,
-              0.492823,
-              0.776833
+              0.02512,
+              0.068013,
+              0.669258,
+              0.876727
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/linkedin/frame-mask.png",
+          "source": [
+            0.002441,
+            0.001324,
+            0.997559,
+            0.996337
+          ],
+          "target": [
+            0,
+            0,
+            0.999355,
+            1
+          ]
+        }
       }
     },
     "amazon": {
@@ -3533,26 +5093,41 @@
           1672,
           941
         ],
-        "sha256": "2f250001524d336e2959604c27ab01114b8fb0743f17269e81b4f50884739928",
+        "sha256": "2069bea6c814d8ffbe51c2f377af0e1841e9a21390272dcd68d13aa24a44ab2b",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.059809,
-              0.146652,
-              0.521531,
-              0.802338
+              0.032895,
+              0.12221,
+              0.695574,
+              0.749203
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/amazon/frame-mask.png",
+          "source": [
+            0.007209,
+            0.003215,
+            0.98185,
+            0.982833
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "netflix": {
@@ -3562,26 +5137,41 @@
           1672,
           941
         ],
-        "sha256": "b47bafbf170567c12e752e861b39f96ddd18c3116e20d5023fe1e6fad5c3979b",
+        "sha256": "3ba9da7b6c5a7606f2208af8ac7637cf58e6331f160ce508f9a0ab651d32ed8d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.123804,
-              0.158342,
-              0.441388,
-              0.773645
+              0.038278,
+              0.104145,
+              0.675837,
+              0.778959
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/netflix/frame-mask.png",
+          "source": [
+            0.003383,
+            0.014495,
+            0.990214,
+            0.973865
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "outlook": {
@@ -3591,55 +5181,85 @@
           1672,
           941
         ],
-        "sha256": "b38b432b897181b8bde22835d94c1fc74637d4417aa56318984f0b79955afe5e",
+        "sha256": "8b0102c630263776e79b39dd24892b85fece8011a8a42ec209d2ef0da1673eb0",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.07177,
-              0.146652,
-              0.49701,
-              0.782147
+              0.031699,
+              0.087141,
+              0.659689,
+              0.82678
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/outlook/frame-mask.png",
+          "source": [
+            0.007635,
+            0,
+            0.986326,
+            0.985838
+          ],
+          "target": [
+            0,
+            0.010316,
+            1,
+            0.989684
+          ]
+        }
       }
     },
     "apple-podcasts": {
       "background": "assets/applet-scenes/apple-podcasts/background.webp",
       "registration": {
         "imageSize": [
-          1672,
-          941
+          1603,
+          981
         ],
-        "sha256": "1f5df97b2d4d073bc00eee1d4e9efbc784afb11f1dfc5d5bc9ff2af8d90a07c6",
+        "sha256": "5059bb9d0b423d2e70a1e0ddc6dd2263111955f00b67b5a970ec6bb485e66d25",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.062799,
-              0.146652,
-              0.509569,
-              0.800213
+              0.029944,
+              0.077472,
+              0.652527,
+              0.799185
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/apple-podcasts/frame-mask.png",
+          "source": [
+            0.001876,
+            0,
+            0.993763,
+            1
+          ],
+          "target": [
+            0,
+            0.005097,
+            1,
+            0.959225
+          ]
+        }
       }
     },
     "google-photos": {
@@ -3649,26 +5269,41 @@
           1672,
           941
         ],
-        "sha256": "fcec6c1b534219859182869aacbf87ab416f9e03dbb352cd985a66e179abbcdb",
+        "sha256": "18c27797983c5deb4a46163a60cf9510c0a357927206697b7f97b0d4d46dd2e9",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.099282,
-              0.146652,
-              0.462321,
-              0.778959
+              0.019737,
+              0.064825,
+              0.667464,
+              0.852285
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/google-photos/frame-mask.png",
+          "source": [
+            0.006947,
+            0.011273,
+            0.982883,
+            0.974874
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "pinterest": {
@@ -3678,26 +5313,41 @@
           1672,
           941
         ],
-        "sha256": "0f202f39a59b302242d138dcd19fe11a987d7df2efad177197edf37b7347d545",
+        "sha256": "bf4956b701469fd80616acfb22c6fb711efff374cbc91c59c9d6d9562b6902f0",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.065789,
-              0.146652,
-              0.489833,
-              0.790648
+              0.028708,
+              0.068013,
+              0.677033,
+              0.839532
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/pinterest/frame-mask.png",
+          "source": [
+            0.001848,
+            0.001335,
+            0.998152,
+            0.996173
+          ],
+          "target": [
+            0,
+            0,
+            0.999928,
+            1
+          ]
+        }
       }
     },
     "facebook": {
@@ -3707,26 +5357,41 @@
           1672,
           941
         ],
-        "sha256": "b18e4264b8e35011e9763db26a8fa07a33b2b801068743b9016292bad695b57c",
+        "sha256": "1c9dc110725883d0ccdd62c46e65db0af936df0a940907e4ef761a25a8aa1518",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.108254,
-              0.146652,
-              0.485646,
-              0.803401
+              0.034091,
+              0.11796,
+              0.670455,
+              0.783209
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/facebook/frame-mask.png",
+          "source": [
+            0.001325,
+            0.000331,
+            0.996413,
+            0.997264
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "threads": {
@@ -3736,26 +5401,41 @@
           1672,
           941
         ],
-        "sha256": "fa85876e0d12ba6e58255ba1b7f4546b1c575f3f6318dd7d70e90b0171b4710d",
+        "sha256": "a95cc039b662b316302d97feca6c9be8cedf0a126c45c48936285c7e74751c26",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.053828,
-              0.146652,
-              0.514952,
-              0.793836
+              0.020335,
+              0.064825,
+              0.691388,
+              0.867163
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/threads/frame-mask.png",
+          "source": [
+            0.000351,
+            0,
+            0.999649,
+            1
+          ],
+          "target": [
+            0,
+            0.026345,
+            0.938446,
+            0.956316
+          ]
+        }
       }
     },
     "capcut": {
@@ -3765,26 +5445,41 @@
           1672,
           941
         ],
-        "sha256": "64c60d3e4f9eaf4b6a0d901db0c47ba904e966a9f3010a45e54151969c21187c",
+        "sha256": "b92d7b1ab0fd1dd8b3722a930f4dcc08b48f4f55d5906a0ee955d2ac81cc06fc",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.056818,
-              0.146652,
-              0.547847,
-              0.792774
+              0.037679,
+              0.071201,
+              0.651914,
+              0.868225
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/capcut/frame-mask.png",
+          "source": [
+            0.000707,
+            0.000092,
+            0.997232,
+            0.998767
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "uber": {
@@ -3794,26 +5489,41 @@
           1672,
           941
         ],
-        "sha256": "bc79b2c19663841101b14f6acef3037f9c2088bb8d2c8ed2a378b5f2be04441a",
+        "sha256": "71af65534ce74b1521f9240bf5ca3488c1a4a8d1681ad09fba9ccd07a954014a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.048445,
-              0.146652,
-              0.51256,
-              0.789586
+              0.023325,
+              0.062699,
+              0.655502,
+              0.869288
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/uber/frame-mask.png",
+          "source": [
+            0.002577,
+            0.005963,
+            0.992661,
+            0.990148
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "uber-eats": {
@@ -3823,26 +5533,41 @@
           1672,
           941
         ],
-        "sha256": "9ffa7872a79f5365a56f149f4a2f1cf145ad214fde151b606cbc913ef2fe646d",
+        "sha256": "0a416dcbc6ec01b5d4983651dfe1c58c028d1cdfb857ea144ffc79d7b8825ffa",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.114833,
-              0.146652,
-              0.447368,
-              0.792774
+              0.026914,
+              0.114772,
+              0.671651,
+              0.772582
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/uber-eats/frame-mask.png",
+          "source": [
+            0.062946,
+            0,
+            0.937054,
+            1
+          ],
+          "target": [
+            0,
+            0.07519,
+            0.778787,
+            0.856295
+          ]
+        }
       }
     },
     "booking": {
@@ -3852,26 +5577,41 @@
           1672,
           941
         ],
-        "sha256": "7ed27006e54ff36340a567befa5d970144e83f96ff788cdf04e6e1b436d76a06",
+        "sha256": "dfc9f78c8bc6b6f4f5ed1d7a268f395755d75f5706b20eeadfd2734b719d62bb",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.092105,
-              0.146652,
-              0.459928,
-              0.781084
+              0.05323,
+              0.088204,
+              0.657895,
+              0.800213
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/booking/frame-mask.png",
+          "source": [
+            0.000699,
+            0,
+            0.998172,
+            1
+          ],
+          "target": [
+            0,
+            0.003541,
+            1,
+            0.996
+          ]
+        }
       }
     },
     "feishu": {
@@ -3881,26 +5621,41 @@
           1672,
           941
         ],
-        "sha256": "dde8acb8528160cf3e7de45f54611c0bf2c0043905d38a1ea51577759c6bc067",
+        "sha256": "c1e04cdab0d614233be3aeab4d5f0959c2b07091bad43b2b802fcb349780a1d0",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.061005,
-              0.146652,
-              0.525718,
-              0.783209
+              0.039474,
+              0.075452,
+              0.666268,
+              0.818278
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/feishu/frame-mask.png",
+          "source": [
+            0.002055,
+            0.003703,
+            0.993682,
+            0.993455
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "bilibili": {
@@ -3910,26 +5665,41 @@
           1672,
           941
         ],
-        "sha256": "1594cda7371a2a926efad8a77e1628811bde3da9e8d8ef4d956c6346c6aa8ff7",
+        "sha256": "fc3895784ddb3a197d2569d275ba27de47da02c9b42180a7178602c15a9fe21e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.08433,
-              0.146652,
-              0.50299,
-              0.798087
+              0.044856,
+              0.132837,
+              0.644737,
+              0.781084
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/bilibili/frame-mask.png",
+          "source": [
+            0.000044,
+            0,
+            0.999067,
+            0.99906
+          ],
+          "target": [
+            0,
+            0.002309,
+            1,
+            0.997691
+          ]
+        }
       }
     },
     "xiaohongshu": {
@@ -3939,26 +5709,41 @@
           1672,
           941
         ],
-        "sha256": "229bb1f638f65a695933c11a3388843d871aaf70d7da42f83f0d157276e02751",
+        "sha256": "39f2ba24850845815f47e6e52c3afb3943204a06ddbf5e7745004684d564e45d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.061603,
-              0.146652,
-              0.481459,
-              0.800213
+              0.041268,
+              0.074389,
+              0.641148,
+              0.862912
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/xiaohongshu/frame-mask.png",
+          "source": [
+            0.001996,
+            0,
+            0.99531,
+            0.997793
+          ],
+          "target": [
+            0,
+            0.000968,
+            1,
+            0.999032
+          ]
+        }
       }
     },
     "baidu-netdisk": {
@@ -3968,26 +5753,41 @@
           1672,
           941
         ],
-        "sha256": "c1a2bc8fd3e76f4a6e215a88d0b5df3bf976b8e4c522de1a18b7a9c5685a84cc",
+        "sha256": "2baf1ed0a8c33266f3fd1330d458f5e178feadb08d1c5f7162bf4381aa3a9c6a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.069378,
-              0.146652,
-              0.508971,
+              0.035287,
+              0.109458,
+              0.65311,
               0.798087
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/baidu-netdisk/frame-mask.png",
+          "source": [
+            0.005827,
+            0.008342,
+            0.988029,
+            0.98255
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "twitch": {
@@ -3997,26 +5797,41 @@
           1671,
           941
         ],
-        "sha256": "bc2aad2dfafc55905b02e2d04203617088231917322ea16c54831b2b231611b4",
+        "sha256": "32263ff0fefd517da158ee51b2d5c4c31aeee2d5d6db280e5c730f2a085b97de",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.064632,
-              0.146652,
-              0.540395,
-              0.788523
+              0.04249,
+              0.091392,
+              0.641532,
+              0.820404
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/twitch/frame-mask.png",
+          "source": [
+            0.001279,
+            0.00131,
+            0.997527,
+            0.997389
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "copilot": {
@@ -4026,26 +5841,41 @@
           1672,
           941
         ],
-        "sha256": "e7bddcbf19351b0f8e3d37ff2f7c6d89737c0c529bb8716b94c3ccbcc11c5d54",
+        "sha256": "2eb638f8f6e576df72862ca0f7c8c9f3dfeb1102ef1a4d2d1f45bdc935e4e85a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.063995,
-              0.146652,
-              0.533493,
-              0.797024
+              0.034689,
+              0.10627,
+              0.66866,
+              0.824655
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/copilot/frame-mask.png",
+          "source": [
+            0.001295,
+            0.002268,
+            0.997302,
+            0.997732
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            0.99903
+          ]
+        }
       }
     },
     "acrobat": {
@@ -4055,26 +5885,41 @@
           1672,
           941
         ],
-        "sha256": "09d73655ce832b10ad2f027e9f8cf65086fe1182c67624bb699679f006760a62",
+        "sha256": "a3f69547699c49c4b868aed7c68c5d6cc3079c0914ef34f84afc8a5534d8392e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.054426,
-              0.146652,
-              0.529904,
-              0.791711
+              0.04366,
+              0.062699,
+              0.644737,
+              0.858661
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/acrobat/frame-mask.png",
+          "source": [
+            0.001323,
+            0.000082,
+            0.997201,
+            0.998753
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "wikipedia": {
@@ -4084,26 +5929,41 @@
           1672,
           941
         ],
-        "sha256": "12ca07cf4a3a53edff5ff9b754a567d2cb4e5bb7b4405ed489c81cfcf30ce67b",
+        "sha256": "47e21bf0326600b260cf9ba18c1313d4245a63699297bd1c13f75be4a01c416d",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.042464,
-              0.146652,
-              0.531699,
-              0.805526
+              0.020335,
+              0.080765,
+              0.669856,
+              0.820404
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/wikipedia/frame-mask.png",
+          "source": [
+            0.005003,
+            0,
+            0.990126,
+            0.999606
+          ],
+          "target": [
+            0,
+            0.017075,
+            1,
+            0.982925
+          ]
+        }
       }
     },
     "doubao": {
@@ -4113,26 +5973,41 @@
           1672,
           941
         ],
-        "sha256": "c39d9e12850c88b5be09cdef39021b2fcb7073c96aa350d9e91f4072668f488f",
+        "sha256": "71ac9a8baad53ecafaed4b05f8bfeecbbf701330408b3d92063e5baa92ee0abf",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.052632,
-              0.146652,
-              0.552033,
-              0.797024
+              0.031699,
+              0.092455,
+              0.665072,
+              0.840595
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/doubao/frame-mask.png",
+          "source": [
+            0.001915,
+            0.001306,
+            0.996383,
+            0.997452
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "taobao": {
@@ -4142,26 +6017,41 @@
           1672,
           941
         ],
-        "sha256": "2bd94596e0676a153c970786431e3a9f986b61c7a17f7f5e5ba97f50e0ccc719",
+        "sha256": "9924c75805f736e2eabf02b5ccf1c10616713c91d8701a99f9dcd2a9d96b014e",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.052632,
-              0.146652,
-              0.521531,
-              0.785335
+              0.035287,
+              0.099894,
+              0.666268,
+              0.803401
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/taobao/frame-mask.png",
+          "source": [
+            0.000632,
+            0,
+            0.999097,
+            0.998274
+          ],
+          "target": [
+            0,
+            0.005703,
+            1,
+            0.994297
+          ]
+        }
       }
     },
     "alipay": {
@@ -4171,26 +6061,41 @@
           1672,
           941
         ],
-        "sha256": "c0b659cafed9bd34d50de601ef4a7c965fab3a608604d9dc5d59d6e80af51351",
+        "sha256": "96b18d96b3f740102bc0613549d4fd0bdb5ff74932b29d4b39539cc238c54db3",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.061005,
-              0.146652,
-              0.520933,
-              0.794899
+              0.029306,
+              0.081828,
+              0.651316,
+              0.806589
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/alipay/frame-mask.png",
+          "source": [
+            0.001254,
+            0,
+            0.998153,
+            0.99909
+          ],
+          "target": [
+            0,
+            0.002235,
+            1,
+            0.997765
+          ]
+        }
       }
     },
     "douyin": {
@@ -4200,26 +6105,41 @@
           1672,
           941
         ],
-        "sha256": "817e7bdb95d9de54a14129f10e2b832344d15cfa34f76713bc18afee345732f9",
+        "sha256": "24b93686f4b986f2e169bebdf935f89774764085e578d996416f44044f826938",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.074761,
-              0.146652,
-              0.547847,
-              0.777896
+              0.038876,
+              0.073326,
+              0.670455,
+              0.817216
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/douyin/frame-mask.png",
+          "source": [
+            0.002575,
+            0.001263,
+            0.995516,
+            0.997379
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "posthog": {
@@ -4229,26 +6149,41 @@
           1672,
           941
         ],
-        "sha256": "79fa5596d3982e83afc5bff7ddcdb0b6d7fa71f6eeb5b13abf11d002fd0d1108",
+        "sha256": "a6a30335a3b469800e2d5f9646667d2b14f068578a04ca165ed75b0b4b476ab3",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.058612,
-              0.146652,
-              0.499402,
-              0.794899
+              0.026914,
+              0.043571,
+              0.663876,
+              0.888417
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/posthog/frame-mask.png",
+          "source": [
+            0.001249,
+            0.000113,
+            0.998751,
+            0.99759
+          ],
+          "target": [
+            0,
+            0,
+            0.999965,
+            1
+          ]
+        }
       }
     },
     "cloudflare": {
@@ -4258,26 +6193,41 @@
           1672,
           941
         ],
-        "sha256": "bce1e42944993e768c4bd768699bef577f846d3d82a7256f653ce2ba845d6b38",
+        "sha256": "3e31a7cf0c414ed8551b8ead94ba2af71d08a87e695daea2c1b483d4cd5d1178",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.075359,
-              0.146652,
-              0.508373,
-              0.79915
+              0.058014,
+              0.064825,
+              0.644737,
+              0.873539
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/cloudflare/frame-mask.png",
+          "source": [
+            0.000654,
+            0.001063,
+            0.999067,
+            0.998937
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            0.998937
+          ]
+        }
       }
     },
     "vercel": {
@@ -4287,26 +6237,41 @@
           1672,
           941
         ],
-        "sha256": "6f84c296539fb822fd2ac749b7a99fc663d147cc55a5e887542b4e5dca4cd2d4",
+        "sha256": "cef8c987a3ea4caad56d8e0af00acec35c945e623dcbe49a285bfbff9f60176a",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.105263,
-              0.146652,
-              0.47488,
-              0.789586
+              0.047847,
+              0.085016,
+              0.646531,
+              0.816153
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/vercel/frame-mask.png",
+          "source": [
+            0.000598,
+            0,
+            0.999402,
+            0.998142
+          ],
+          "target": [
+            0,
+            0.004471,
+            0.998804,
+            0.995529
+          ]
+        }
       }
     },
     "netlify": {
@@ -4316,26 +6281,41 @@
           1672,
           941
         ],
-        "sha256": "2e5da11abe1cff0faf93052dc095b3bb6f0f2a18454a30273b9c8980dd9ab064",
+        "sha256": "23c657c9946795d25655c5206c901d5bb9f10534ef84c9aa0603872c4508d1ed",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.061603,
-              0.146652,
-              0.538876,
-              0.785335
+              0.032895,
+              0.085016,
+              0.663278,
+              0.804463
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/netlify/frame-mask.png",
+          "source": [
+            0.003903,
+            0.010146,
+            0.990934,
+            0.981358
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "firebase": {
@@ -4345,26 +6325,41 @@
           1672,
           941
         ],
-        "sha256": "2b22a8778da41c4a17650df89d28eb216d998ac11e75f12627cc62c53b42e765",
+        "sha256": "ec6c84a2e9c08159c20122bb7b73fd2df50a5131f16aa9b05af815a91f010440",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.110646,
-              0.146652,
-              0.454545,
-              0.798087
+              0.02811,
+              0.088204,
+              0.6561,
+              0.831031
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/firebase/frame-mask.png",
+          "source": [
+            0.000653,
+            0,
+            0.998167,
+            0.998937
+          ],
+          "target": [
+            0,
+            0.001063,
+            1,
+            0.998937
+          ]
+        }
       }
     },
     "sentry": {
@@ -4372,28 +6367,43 @@
       "registration": {
         "imageSize": [
           1672,
-          940
+          941
         ],
-        "sha256": "48a097f15a005c8f58a9b40aedc801a3e6e820bdbaceaa2f0f73c9781f417e16",
+        "sha256": "7aaed0b4dc32b9744ba17ba8088ef11c3f870c2449e977a98f971d2cb6a31d76",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.074761,
-              0.146809,
-              0.504785,
-              0.781915
+              0.04366,
+              0.038257,
+              0.655502,
+              0.872476
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/sentry/frame-mask.png",
+          "source": [
+            0.009332,
+            0.010632,
+            0.978899,
+            0.974233
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "railway": {
@@ -4403,55 +6413,85 @@
           1672,
           941
         ],
-        "sha256": "0f388795bdb3b5e8ce63b35a2e88c8d3fca6e114f36b3c6367ecf62c58cc8553",
+        "sha256": "c5263d6557974eeae71c5515625822cdab3a732dd30b74a3210bd0224d457a82",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.074761,
-              0.146652,
-              0.492225,
-              0.789586
+              0.041866,
+              0.115834,
+              0.649522,
+              0.781084
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/railway/frame-mask.png",
+          "source": [
+            0.001875,
+            0.000163,
+            0.998125,
+            0.998628
+          ],
+          "target": [
+            0,
+            0,
+            0.999977,
+            1
+          ]
+        }
       }
     },
     "render": {
       "background": "assets/applet-scenes/render/background.webp",
       "registration": {
         "imageSize": [
-          1672,
-          941
+          1603,
+          981
         ],
-        "sha256": "f99b30dfd60d5fc7ae43c3820d080c58fbb8bc9ad8563b2ab8aa679333b9e01d",
+        "sha256": "4b6e5adebf2c2f4b32737b6f0929948c56440d9ea8fe0591483806c2e332dd76",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.029904,
-              0.146652,
-              0.508373,
-              0.786397
+              0.020586,
+              0.102956,
+              0.65315,
+              0.75841
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/render/frame-mask.png",
+          "source": [
+            0.008001,
+            0.005927,
+            0.97531,
+            0.994073
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            0.94968
+          ]
+        }
       }
     },
     "gitlab": {
@@ -4461,26 +6501,41 @@
           1672,
           941
         ],
-        "sha256": "b3368fe3dd86db8afdc849eb9609cf75730da5a1400b63a3a03e8e2b92fe5310",
+        "sha256": "b4e5219760a2bd44a9dc327b85943c18bbfdc62ea8d947051776142b566b3531",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.05323,
-              0.146652,
-              0.52512,
-              0.774708
+              0.026914,
+              0.107333,
+              0.663278,
+              0.812965
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/gitlab/frame-mask.png",
+          "source": [
+            0.001326,
+            0.001208,
+            0.995467,
+            0.998682
+          ],
+          "target": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       }
     },
     "jira": {
@@ -4490,26 +6545,41 @@
           1672,
           941
         ],
-        "sha256": "62d442b50f2ff070b008accc24b7a87f24b18d09b7c27d685645a3f2525bc0cf",
+        "sha256": "380175c984b510837f549655ac5d3f7af25fcdf8768bc37103b740a52a813cb3",
         "regions": [
           {
             "id": "main",
             "role": "primary",
             "rect": [
-              0.072368,
-              0.146652,
-              0.517943,
-              0.772582
+              0.0311,
+              0.087141,
+              0.661483,
+              0.804463
             ],
             "material": "paper"
           }
         ],
         "companion": [
-          0.72,
-          0.62,
-          0.25,
-          0.34
-        ]
+          0.75,
+          0.55,
+          0.24,
+          0.43
+        ],
+        "webFrame": {
+          "mask": "assets/applet-scenes/jira/frame-mask.png",
+          "source": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "target": [
+            0.001963,
+            0.036377,
+            0.99398,
+            0.957908
+          ]
+        }
       }
     }
   },

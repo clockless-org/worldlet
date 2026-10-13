@@ -3,12 +3,12 @@
   "title": "Pokémon Showdown",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "purpose": "Registered production background and extracted alpha foreground; enlarged usable opening",
   "prompt": "Create one landscape 16:9 Worldlet Village background plate for a Pokémon Showdown strategy-game applet. Reference 1 is the existing scene style; reference 2 is its existing icon identity. Make a friendly sunlit village board-game clubhouse terrace, polished sculpted storybook illustration, cream stone and timber, flowers and warm brass. On the left, a large completely blank ivory board occupying x5–65%, y14–81%, near-front-facing with a thin blue wooden frame, unobstructed space for future HTML. On the right, detailed strategy-game clubhouse furniture: wooden storage drawers, small red-and-white circular game tokens, notebooks, brass timer, fabric cushions, plant pots and game-rule books. A modest Pokemon Showdown name plaque is attached to a storage drawer. No characters or creatures, no weapons, no violence, no battles depicted. Match the icon colors and village style. Do not render UI or sample data.",
   "refinement": "Built-in imagegen: preserve original horizontal layout and Village identity; extend only the clear content height toward80%; remove foreground obstructions.",
   "registration": {
     "imageSize": [
-      1672,
+      1671,
       941
     ],
     "regions": [
@@ -16,19 +16,39 @@
         "id": "main",
         "role": "primary",
         "rect": [
-          0.0575,
-          0.136,
-          0.5359,
-          0.756
+          0.016158,
+          0.107333,
+          0.714542,
+          0.828905
         ],
         "material": "paper"
       }
     ],
     "companion": [
-      0.72,
-      0.7,
-      0.26,
-      0.28
-    ]
-  }
+      0.75,
+      0.55,
+      0.24,
+      0.43
+    ],
+    "webFrame": {
+      "mask": "assets/applet-scenes/pokemon-showdown/frame-mask.png",
+      "source": [
+        0.001257,
+        0.002697,
+        0.996633,
+        0.994832
+      ],
+      "target": [
+        0,
+        0,
+        1,
+        1
+      ]
+    }
+  },
+  "refinements": [
+    "Edit this pokemon-showdown Village website background. Enlarge the LEFT BLANK INTERIOR to occupy x=3%..75% and y=10%..94% of the entire image (72%width84%height). Move right rail to75% and bottom to94%, preserve left/top if already near target. Thin original material frame OUTSIDE opening, no broad inner mat. Flat frontal rectangle, no perspective taper. Preserve this app's recognizable brand signage and purposeful props, consolidate them in rightmost24%, with lower-right ground for a fox companion. Keep original storybook painted village style, palette and scene character. No interface, people, new text or live content. Same landscape aspect."
+  ],
+  "frameSource": "brands/pokemon-showdown/frame-mask.png",
+  "framePrompt": "Extract ONLY the existing large LEFT frame from this exact image as a transparent PNG foreground overlay. Preserve exact original position, size, orientation, shape, painted wood/leather/brass rim, irregular paper lip, rings, clips, shadows and tiny foliage overlapping that rim. The entire wide central paper interior MUST become true alpha transparency; all scenery outside the left frame MUST become true alpha transparency too. Only retain a narrow foreground border, no opaque paper backing inside the opening. No new background, no checkerboard drawn in pixels. Do not redesign, recenter, shrink or crop. Same full original landscape canvas, 1672 by 941. Frame remains on left side of canvas."
 }

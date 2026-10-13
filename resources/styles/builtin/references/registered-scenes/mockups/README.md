@@ -24,7 +24,7 @@ The exporter checks all 40 compositions for failed image loads, browser errors a
 
 ## HTML implementation
 
-The background owns the room, board, frame and lighting. The registered primary surface owns a normal HTML layout; secondary surfaces can carry a date, progress or next action. `fitThemeScene` applies the same image-to-viewport transform to every layer. Do not independently use `background-size: cover` and viewport percentages for the content.
+The background owns the room, board, frame and lighting. The registered primary surface owns a normal HTML layout; secondary surfaces can carry a date, progress or next action. `fitThemeScene` applies the same image-to-viewport transform to every layer. `mountSceneFrame` then samples the original painting through the extracted alpha mask above the HTML, preserving its physical edge without blocking pointer input. Do not independently use `background-size: cover` and viewport percentages for the content.
 
 | Layer | Implementation | Changes with data |
 | --- | --- | --- |
@@ -32,6 +32,7 @@ The background owns the room, board, frame and lighting. The registered primary 
 | Physical details | Transparent paper card, linen button and image prints from the [material catalog](../mockup-materials/manifest.json) | Selected theme asset |
 | Content | DOM text, lists, images, CSS Grid/Flex, SVG charts | Titles, dates, messages, amounts, attachments |
 | Controls | HTML buttons, inputs and scrollable content | Applet actions and state |
+| Foreground frame | Original painting pixels through the registered transparent mask | Theme selection and viewport geometry |
 | Companion | Reserved region from registration | Host-managed conversation |
 
 The preview uses actual image-backed HTML controls and six different illustrated sample photos. It does not flatten text into the painting. Photo subjects follow the sample content: a garden invitation, orchard notes, a meal plan, travel postcards, reading and an album library. Soft contact shadows, modest paper rotation and material edges connect those layers to the board without rotating the working surface itself.

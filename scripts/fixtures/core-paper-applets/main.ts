@@ -8,6 +8,7 @@ const id=new URL(location.href).searchParams.get('applet')||'gmail';
 const safeId=['gmail','google-calendar','apple-reminders'].includes(id)?id:'gmail';
 const viewport=document.querySelector<HTMLElement>('#viewport')!;viewport.dataset.scene=viewport.dataset.applet=safeId;
 const source=structuredClone(presentation.appletScenes[safeId]) as AppletSceneSource;source.background='/ui/theme-packages/village/'+source.background+'?v='+source.registration.sha256;
+if(source.registration.webFrame)source.registration.webFrame.mask='/ui/theme-packages/village/'+source.registration.webFrame.mask;
 const scene=mountAppletScene(viewport,safeId,{source});
 const prose=(text,options)=>{const el=document.createElement('article');el.className='notion-prose';el.innerHTML=DOMPurify.sanitize(marked.parse(text) as string);return el;};
 const now=new Date(2026,9,5,8).getTime();

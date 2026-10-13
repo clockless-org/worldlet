@@ -19,17 +19,11 @@
       ]
     },
     "weight-balance/background.png": {
-      "sha256": "04d52ac91e48a2c6e83331f3128ae9bd5fc570390c551cc9ae470db8df1d7baa",
-      "bytes": 2706259,
+      "sha256": "6ef873461931d4b9ed50c902927d05e07dce47c4995b0323723477d04b216297",
+      "bytes": 894062,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "meal-planner/icon.png": {
       "sha256": "fce314e05b99dfc1842db3815acfa66db415a8fd92df414b76566abdc0681768",
@@ -45,17 +39,11 @@
       ]
     },
     "meal-planner/background.png": {
-      "sha256": "0821a4e8de4803afc2dcb7c5285eb58893b3944273d252758e686342ff53bb96",
-      "bytes": 2782142,
+      "sha256": "e98ce40a26b13f9d362fd93ce0888d24991df311d6402d1d56f5777806db505e",
+      "bytes": 842175,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "fitness/icon.png": {
       "sha256": "6717520588f8d56a1dd501af9ad49d7960b4c0d215a5dfb3ab585dca5ef182c1",
@@ -71,17 +59,11 @@
       ]
     },
     "fitness/background.png": {
-      "sha256": "fcf6049dac5ddf73fc51cdfc3634cb69647a1b4c0291e4778ab14d3f000ecccb",
-      "bytes": 2663192,
+      "sha256": "4ee90d517e51dcaf8190e125836b3aa13c9f4a33087c27b7b7859df48ccaebdf",
+      "bytes": 822483,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "sleep/icon.png": {
       "sha256": "d6a47f69e9c9144bf13987c141b1157809b66e16db48688f7aeadbb6c14551d7",
@@ -97,17 +79,11 @@
       ]
     },
     "sleep/background.png": {
-      "sha256": "0b2ae46c8659502f4c9b330bb0c7c7a00353b005af23f61d6059e205042302b3",
-      "bytes": 2768446,
+      "sha256": "3a65e435537378c060476fab8b4cb6d2d3f22adc2f2a1a3f959fea5e80daaca9",
+      "bytes": 811977,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "travel/icon.png": {
       "sha256": "98c475ec90b380c7342c7bec3eca21e9137ffc1a7e077802412f5b3aea702133",
@@ -123,17 +99,11 @@
       ]
     },
     "travel/background.png": {
-      "sha256": "7f7d7848899e6f67dd5b34ed2b0d549d974b57b6881eb440b01a41670c07342e",
-      "bytes": 2514866,
+      "sha256": "3270afeee28bff1d39027e1f45f1de98e1bdc64065b7f7d0c0971524c26ed0d9",
+      "bytes": 790055,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "outdoor/icon.png": {
       "sha256": "26eb5ee9147e4501ca08285b36ab7e595984a8d7a01ea394cd209bbe4ba4e38c",
@@ -149,17 +119,11 @@
       ]
     },
     "outdoor/background.png": {
-      "sha256": "2b1c60905ae8ec058c916e2aa7d6dc36a13afacdd6425024496bedb95883fee3",
-      "bytes": 2693686,
+      "sha256": "e6d27d79d37e768fc03bf762d4d6c7d6c40078ece6283d94fb817ff3fd7850ef",
+      "bytes": 858425,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "shopping/icon.png": {
       "sha256": "01b0becc584fe61dddd07798cac9f9cbbbb22696fb4aa1ca6c79eb795dcec7c5",
@@ -175,17 +139,11 @@
       ]
     },
     "shopping/background.png": {
-      "sha256": "ec672ab2017be6137bf378a14919bdbc19cf0dc1c2a11003ec8a3eac9bc963b6",
-      "bytes": 2559011,
+      "sha256": "e8de68a487a28b94924e3ee1b534b51c439808d75492dd8ec26491b209d3b07c",
+      "bytes": 799564,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "budget/icon.png": {
       "sha256": "7f70b8e43731891684a84a358ccfbda18fc9c0b5e8cb2f71cd47bb84742ef563",
@@ -201,17 +159,11 @@
       ]
     },
     "budget/background.png": {
-      "sha256": "8547918d805766123b5afbf01e427f5ec1d9eca20ad2cc97abb5d2372abbe394",
-      "bytes": 2381605,
+      "sha256": "a1128e87646c3b4a3a28ec4b911866396a3f482b767bbb5898b35093e4e9885d",
+      "bytes": 822390,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "home-care/icon.png": {
       "sha256": "1ce5a348cf69254898e39609a3bc8097e64b5be9e37ba229aad036ccc18ab839",
@@ -227,17 +179,11 @@
       ]
     },
     "home-care/background.png": {
-      "sha256": "ee8dada5a13f1f2ac074c7498371b59cd47912c01f9081ee68f28c9733c64b73",
-      "bytes": 2530426,
+      "sha256": "6b99d62cd4078b694e0eb0fbe6f69c4e70893a091652880b22e55f0431a35934",
+      "bytes": 862381,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "garden/icon.png": {
       "sha256": "1cbe78843b31714b20afb9f9458853b9273222cab7410a1667a394f06a5afb59",
@@ -253,17 +199,11 @@
       ]
     },
     "garden/background.png": {
-      "sha256": "f33a829fc92670a0fcd556263f6c89a523db853329e930959f48e7ac34b264f6",
-      "bytes": 2426416,
+      "sha256": "6d3f393a44a58b2085053cf6d0e62307dce42e0c4fb6ca73808c568d3526625d",
+      "bytes": 833370,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "daily-planner/icon.png": {
       "sha256": "457b4ec671dce7a66e5e3fd03ea7cb7f88d33ed7aa95939102ae9ee2b284e8f8",
@@ -279,17 +219,11 @@
       ]
     },
     "daily-planner/background.png": {
-      "sha256": "56111a3b51a9014c0b2dc2ae7471d2012cd22dccdfa1a40280fa3d0bc83cf824",
-      "bytes": 2393321,
+      "sha256": "7cef5226855ccb22814465fe628944e67ee3a1c796a028e690c4415d5e3d1802",
+      "bytes": 791400,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "reading/icon.png": {
       "sha256": "ec081168d77f6d7f24dd269379945a8b1e1938942bd5d3106df301c9d6dfe4e2",
@@ -305,17 +239,11 @@
       ]
     },
     "reading/background.png": {
-      "sha256": "45fd1fe341321562aa03d536319e6985384a4b5c88747198d33da86a1c5cc87a",
-      "bytes": 2506187,
+      "sha256": "6316a6475ffe215f18ab5bfed1552a3bfc774ede2627baee3ebb9e7d38bc5b0b",
+      "bytes": 734730,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "language/icon.png": {
       "sha256": "cb5e1de290b46af782c8bb34d1e6b6facec1862f6e8f898c53f79289e08a7fee",
@@ -331,17 +259,11 @@
       ]
     },
     "language/background.png": {
-      "sha256": "24ec8777ac54ec713ca68dbb385fef9c308496944671a8ad48b76b78dc8b03ff",
-      "bytes": 2487159,
+      "sha256": "6b21d43621d4ade227d0261dca93c87d9d0ab0aa148815fff3dd0234b64ae8c9",
+      "bytes": 721832,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "journal/icon.png": {
       "sha256": "df761bfc39543af7bf8bf1b4a1fa2b1b4468beefeca333f9a04bc522112cfc57",
@@ -357,17 +279,11 @@
       ]
     },
     "journal/background.png": {
-      "sha256": "dce95fe44676a7001da077ad0838ccee4858ce30e67d404cd3ff9d6fc061159e",
-      "bytes": 2686351,
-      "width": 1672,
+      "sha256": "f846ae553cc6c43ddf4c0d309224b2cd5353c005b582a1b7785e65db1583ade9",
+      "bytes": 811054,
+      "width": 1671,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "job-search/icon.png": {
       "sha256": "0de3e02582ce86762f609c783c6e20dae49a44e4b2f472e2cfde2d031e1cf1d4",
@@ -383,17 +299,11 @@
       ]
     },
     "job-search/background.png": {
-      "sha256": "142917c9b69ef18114c8645c6dcf5d8223112e352492167c83f6c1be4d24da27",
-      "bytes": 2426255,
+      "sha256": "a206d61aa1b048859a6c02224ec1c6abd93122afdb2e9b65731c6a715f5c19d1",
+      "bytes": 771419,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
     },
     "project-planner/icon.png": {
       "sha256": "fc528b1fadff675fbc68492fa154e3c409c2ca16d4ccade4ac41bfd59f207510",
@@ -409,17 +319,123 @@
       ]
     },
     "project-planner/background.png": {
-      "sha256": "704f1615b7e5885d6ad38e3e8069ca3c47f23add4593c7a0afa0c21186dd3a04",
-      "bytes": 2369293,
+      "sha256": "a1293fd0ab3bd234ffa02fc64f6d93788deacd8e1f9518898cb2fde0553afcb9",
+      "bytes": 896971,
       "width": 1672,
       "height": 941,
-      "hasAlpha": false,
-      "paintedBounds": [
-        0,
-        0,
-        1672,
-        941
-      ]
+      "hasAlpha": false
+    },
+    "weight-balance/frame-mask.png": {
+      "sha256": "fb15d750b41a577303d7d7e599f26effc4233d3be2df80028d5a8d2ad1fe6c6e",
+      "bytes": 415242,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "meal-planner/frame-mask.png": {
+      "sha256": "171ea796d8e29ebaa654416767db41a7d68d388e7b93cf0c82c83dac0b7c6f7f",
+      "bytes": 517471,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "fitness/frame-mask.png": {
+      "sha256": "132a4b2ffe7e95b71bb4911a0599d8ecb106afb1ae0cf2a6a733df93a43a10bb",
+      "bytes": 458068,
+      "width": 1671,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "sleep/frame-mask.png": {
+      "sha256": "84a8ab09095c3ad1d2a3f06711c3396597f243b3be9e9848d830bc613026ab51",
+      "bytes": 547007,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "travel/frame-mask.png": {
+      "sha256": "0d67fef1928139e499e1881fd0e3dc3b12b62d8cc58d9504d4e9270e01cb8e4d",
+      "bytes": 503853,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "outdoor/frame-mask.png": {
+      "sha256": "e870c60c8ece64ccd31bd071ec3dd652aaeb084bf8edc1fd78b4b1f0180748bd",
+      "bytes": 401730,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "shopping/frame-mask.png": {
+      "sha256": "d8692152bfe420392073cf8db4d2b8db17d853db1ab0c71b1ad1eb8619c5a17c",
+      "bytes": 477534,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "budget/frame-mask.png": {
+      "sha256": "de14f141f2d946f6c09468ad4a45c430631224f67914e43ad781b5ab7feeb516",
+      "bytes": 492396,
+      "width": 1671,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "home-care/frame-mask.png": {
+      "sha256": "4fb0d00ea46077f8365b3728bdfc2e4bc15cab73a6db9283c1cb8360b7b30ca8",
+      "bytes": 569714,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "garden/frame-mask.png": {
+      "sha256": "66782cecaa1f9cc68c034dab631c159084206c6d148b01a05ae9445d78593f51",
+      "bytes": 408459,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "daily-planner/frame-mask.png": {
+      "sha256": "22d74ef016dfcb27017f3de21244a80126ae80f620b890fe041b955672ed60ee",
+      "bytes": 344239,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "reading/frame-mask.png": {
+      "sha256": "d63e50f91097a539afd3b21ebf58688878e5ae7440a267cb94aebc328875efdc",
+      "bytes": 388305,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "language/frame-mask.png": {
+      "sha256": "4768f5d080c8a16129f0265f34bb6b19e36fac75a13b21d62794ff80548d4e2a",
+      "bytes": 436470,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "journal/frame-mask.png": {
+      "sha256": "43c5cfc44c45c29938a9ee697cfdb5a4779a182b6717ae24bdad88bb40dc130d",
+      "bytes": 480618,
+      "width": 1671,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "job-search/frame-mask.png": {
+      "sha256": "be3dc72aed17a5788aa8d062ed57bdcdf12aa13cae01b4b11c67aa8e52ec26dc",
+      "bytes": 577092,
+      "width": 1671,
+      "height": 941,
+      "hasAlpha": true
+    },
+    "project-planner/frame-mask.png": {
+      "sha256": "7b8fe394e99643bffe9bfeed9ad7fa50cb65985602921c72db01958753588db9",
+      "bytes": 327485,
+      "width": 1672,
+      "height": 941,
+      "hasAlpha": true
     }
   }
 }
