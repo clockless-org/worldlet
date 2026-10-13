@@ -177,11 +177,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // It floats centered just above the page's top edge, taking none of its room (owner request 2026-10-11), since the host
  // draws the page over anything placed on it (ui/components/layout.css).
  const toolbar=document.createElement('div');toolbar.className='browser-toolbar';toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Page');
- // At rest the toolbar folds into a small badge naming the site (owner request 2026-10-11: "收起来，缩到一个小的 badge 里面，
- // 鼠标移上去再展开"); pointing at it or moving focus into it opens the whole row over the same spot for as long as it is
- // used, so the page below never moves; the controls stay laid out under the badge, so a click lands where they will show.
- const badge=document.createElement('span');badge.className='browser-badge';badge.setAttribute('aria-hidden','true');badge.innerHTML=uiIcon('compass');
- const badgeName=document.createElement('span');badge.append(badgeName);toolbar.prepend(badge);
+ // The whole row always shows (owner report 2026-10-13: the address, Back and Forward could not be seen when it
+ // folded into a badge naming the site at rest).
  // Refresh, in the top bar of every website Applet and the Browser (owner request 2026-10-05): the page showing
  // in the panel loads again, also one stuck on a blank page. A bar control like Back: its icon, its name the label.
  const refresh=barControl('refresh','Refresh');refresh.title='Refresh this page';
@@ -223,7 +220,6 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  function syncAddress(url:string){
   addressUrl=url;if(document.activeElement===addressField)return;
   const shown=url?pageAddress(url):'';if(addressField.value!==shown)addressField.value=shown;addressField.title=url;
-  const host=shown.split('/')[0]||'Page';if(badgeName.textContent!==host)badgeName.textContent=host;
  }
  addressField.onfocus=()=>{addressField.value=addressUrl;addressField.select();};
  addressField.onblur=()=>syncAddress(addressUrl);

@@ -95,6 +95,13 @@
  #notionWorld.native-console.radial-pet-console[data-applet-frame] .world-actions .world-capsule>span{flex-shrink:0}
 }
 
+/* A framed page's toolbar (ui/browser/browser-device.ts) stands on the window's top row, between Back and the Applet's
+   controls, where the painted frame's top rail cannot cover it: just above the page, the rail (drawn over the page by the
+   host, or by the foreground canvas) hid the site badge, the address, Back and Forward (owner report 2026-10-13). */
+#notionWorld[data-applet-frame][data-applet-scene][data-panel-scene][data-applet-shelf]>.notion-content[data-template=browser]>.browser-toolbar{
+ top:calc(var(--applet-bar-top) + (var(--applet-bar-height) - 36px) / 2 - var(--applet-scene-primary-top));
+}
+
 /* The extracted foreground is the only rim: the native rectangle reaches underneath it.
    A second CSS mat, rounded corner or inset would expose an empty border around the website. */
 #notionWorld[data-applet-frame][data-applet-scene][data-panel-scene]>.notion-content:is([data-template=browser],[data-template=game]){
