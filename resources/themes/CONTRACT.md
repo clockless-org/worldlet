@@ -71,7 +71,7 @@ Desktop Applet artwork and layout should target these usable dimensions (design 
 | Dimension | Target |
 | --- | --- |
 | Usable content height | About 80% of the Applet viewport height |
-| Usable content width | About 75% of the Applet viewport width |
+| Usable content width | About 70% of the Applet viewport width |
 | Remaining right-hand space | Place Fox and its conversation here, aligned with the scene; avoid an unused gap between the Applet and companion |
 
 Measure the live HTML or website area after navigation, padding and decorative frame insets, not the outer painted board. Keep the main content on the left. Arrange frames and props around this area rather than reducing it; preserve irregular paper edges as foreground detail without covering usable controls. Check the complete composition with the actual companion and reply visible. These are approximate desktop targets; retain readable responsive fallbacks on narrow windows. Existing scenes may need revision to meet them.

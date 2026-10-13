@@ -53,7 +53,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **276 Markdown documents** and **621 supporting documentation files**.
+Indexed: **277 Markdown documents** and **622 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -61,10 +61,10 @@ Indexed: **276 Markdown documents** and **621 supporting documentation files**.
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 31 |
-| Resource and artwork records | 72 |
+| Resource and artwork records | 73 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 621 |
+| Documentation diagrams, previews and evidence | 622 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -258,7 +258,7 @@ Indexed: **276 Markdown documents** and **621 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (72)</summary>
+<details><summary>Resource and artwork records (73)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -323,6 +323,7 @@ Indexed: **276 Markdown documents** and **621 supporting documentation files**.
 - [resources/styles/builtin/references/registered-scenes/CONCEPTS.md](../resources/styles/builtin/references/registered-scenes/CONCEPTS.md)
 - [resources/styles/builtin/references/registered-scenes/README.md](../resources/styles/builtin/references/registered-scenes/README.md)
 - [resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/frame-cutout.md](../resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/frame-cutout.md)
+- [resources/styles/builtin/references/registered-scenes/brands/x/frame-cutout.md](../resources/styles/builtin/references/registered-scenes/brands/x/frame-cutout.md)
 - [resources/styles/builtin/references/registered-scenes/mockups/README.md](../resources/styles/builtin/references/registered-scenes/mockups/README.md)
 - [resources/styles/builtin/references/village-hud/README.md](../resources/styles/builtin/references/village-hud/README.md)
 - [resources/styles/builtin/references/youtube-web/README.md](../resources/styles/builtin/references/youtube-web/README.md)
@@ -377,7 +378,7 @@ Indexed: **276 Markdown documents** and **621 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (621)</summary>
+<details><summary>Documentation diagrams, previews and evidence (622)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -810,6 +811,7 @@ Indexed: **276 Markdown documents** and **621 supporting documentation files**.
 - [resources/styles/builtin/references/registered-scenes/brands/x/background.webp](../resources/styles/builtin/references/registered-scenes/brands/x/background.webp)
 - [resources/styles/builtin/references/registered-scenes/brands/x/effect.json](../resources/styles/builtin/references/registered-scenes/brands/x/effect.json)
 - [resources/styles/builtin/references/registered-scenes/brands/x/effect.webp](../resources/styles/builtin/references/registered-scenes/brands/x/effect.webp)
+- [resources/styles/builtin/references/registered-scenes/brands/x/frame-cutout.png](../resources/styles/builtin/references/registered-scenes/brands/x/frame-cutout.png)
 - [resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/background.json](../resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/background.json)
 - [resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/background.webp](../resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/background.webp)
 - [resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/effect.json](../resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/effect.json)

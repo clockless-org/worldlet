@@ -1446,21 +1446,37 @@
           "id": "main",
           "role": "primary",
           "rect": [
-            0.091507,
-            0.119022,
-            0.450957,
-            0.744952
+            0.025119617224880382,
+            0.13602550478214664,
+            0.6866028708133971,
+            0.7970244420828906
           ],
           "material": "paper"
         }
       ],
       "companion": [
-        0.72,
-        0.62,
-        0.25,
-        0.34
+        0.7380382775119617,
+        0.63,
+        0.2511961722488038,
+        0.35
       ],
-      "prompt": "Built-in imagegen refinement: extend the original X newsstand blank paper vertically while preserving original horizontal composition and right-side brand props."
+      "prompt": "Built-in imagegen: widen the original X Village newsstand board to approximately 70% usable canvas width and 80% height. Keep the X sign, striped awning and brass megaphone in the right-side newsstand. Thin original dark iron and wood rails, brass corner pins and a narrow irregular paper lip; no broad cream mat. Leave the lower-right paving for the live companion and keep the entire paper aperture blank.",
+      "frameSource": "brands/x/frame-cutout.png",
+      "webFrame": {
+        "mask": "assets/applet-scenes/x/frame-cutout.png",
+        "source": [
+          0.04784688995215311,
+          0.04675876726886291,
+          0.9043062200956937,
+          0.9054197662061636
+        ],
+        "target": [
+          0.001965986072291439,
+          0.08324336377479807,
+          0.732910133118575,
+          0.8994076827652197
+        ]
+      }
     },
     {
       "id": "youtube",

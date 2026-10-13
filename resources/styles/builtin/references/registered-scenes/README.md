@@ -121,7 +121,7 @@ If the toolkit expands later, Contacts and Photos have official local-data APIs 
 
 ## Design and integration
 
-For new and revised desktop scenes, target a live content area about **75% of the viewport width and 80% of its height**, after navigation and frame insets. Reserve the remaining right side for the actual Fox and conversation placement; review them together so neither the Applet nor companion leaves an unusable gap. These are the current [usable-area design targets](../../../../themes/CONTRACT.md#registered-backgrounds-and-live-html), not a claim that every existing scene already meets them.
+For new and revised desktop scenes, target a live content area about **70% of the viewport width and 80% of its height**, after navigation and frame insets. Reserve the remaining right side for the actual Fox and conversation placement; review them together so neither the Applet nor companion leaves an unusable gap. These are the current [usable-area design targets](../../../../themes/CONTRACT.md#registered-backgrounds-and-live-html), not a claim that every existing scene already meets them.
 
 Match the Village world and each existing icon's recognizable objects, palette and materials. The icon's display base stays in the icon; the background expands those objects into a functional place. Brand-specific scenes must integrate recognizable product identity meaningfully, without sacrificing usable space. Vary the environment by activity: orchard, kitchen, trail, greenhouse, library, guildhall or workshop.
 

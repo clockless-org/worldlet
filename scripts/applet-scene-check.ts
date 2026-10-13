@@ -56,17 +56,17 @@ try{
  // A framed web scene places the actual shell and Fox on the theme's registered coordinates.
  await page.addStyleTag({content:await readFile('ui/components/layout.css','utf8')+await readFile('ui/companion/companion-dialogue.css','utf8')});
  await page.evaluate(()=>{const shell=document.getElementById('shell')!;shell.id='notionWorld';shell.className='native-console fox-first-console';shell.dataset.depth='object';shell.dataset.panelScene='pokemon-showdown';shell.dataset.appletShelf='true';
-  shell.insertAdjacentHTML('beforeend','<div class="notion-content" data-template="browser"></div><div class="notion-hud"><div class="companion-dialogue">A reply beside the game</div></div>');});
- const showdown=village.appletScenes['pokemon-showdown'];
- for(const [width,height] of [[1672,941],[1440,900],[1000,900]]){
+  shell.insertAdjacentHTML('beforeend','<div class="notion-content" data-template="browser"><div class="browser-viewport"></div></div><div class="notion-hud"><div class="companion-dialogue">A reply beside the game</div></div>');});
+ for(const key of ['pokemon-showdown','x'])for(const [width,height] of [[1672,941],[1440,900],[1000,900]]){
   await page.setViewportSize({width,height});
-  await page.evaluate(source=>{const w=window as any;w.scene.destroy();w.scene=w.Scene.mountAppletScene(document.getElementById('host'),'pokemon-showdown',{source,shell:document.getElementById('notionWorld')});},showdown);
+  await page.evaluate(([key,source])=>{const w=window as any;w.scene.destroy();document.getElementById('notionWorld')!.dataset.panelScene=key;w.scene=w.Scene.mountAppletScene(document.getElementById('host'),key,{source,shell:document.getElementById('notionWorld')});},[key,village.appletScenes[key]]);
   await page.waitForTimeout(350);
-  const bounds=await page.evaluate(()=>{const box=(s:string)=>{const r=document.querySelector(s)!.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};return {panel:box('.notion-content'),hud:box('.notion-hud'),replyWidth:parseFloat(getComputedStyle(document.querySelector('.companion-dialogue')!).width),scene:(window as any).scene.metrics};});
+  const bounds=await page.evaluate(()=>{const box=(s:string)=>{const r=document.querySelector(s)!.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};return {padding:getComputedStyle(document.querySelector('.notion-content')!).padding,viewportRadius:getComputedStyle(document.querySelector('.browser-viewport')!).borderRadius,panel:box('.notion-content'),hud:box('.notion-hud'),replyWidth:parseFloat(getComputedStyle(document.querySelector('.companion-dialogue')!).width),scene:(window as any).scene.metrics};});
+  assert.equal(bounds.padding,'0px','The native page has no second inset');assert.equal(bounds.viewportRadius,'0px','The painted foreground owns the corners');
   assert.ok(bounds.panel.x+bounds.panel.width<bounds.hud.x,'Fox and the webpage do not overlap at '+width);
   assert.ok(Math.abs(bounds.hud.x+bounds.hud.width/2-(bounds.scene.companion.x+bounds.scene.companion.width/2))<2,'Fox is centered in the painted companion lane');
   assert.ok(bounds.replyWidth<=bounds.hud.width+1,'Replies fit Fox’s lane');
-  if(width===1672){assert.ok(bounds.panel.width>width*.64,'The webpage uses about two thirds of the width');assert.ok(bounds.panel.height>height*.79,'The webpage uses about eighty percent of the height, after the shelf');}
+  if(width===1672){assert.ok(bounds.panel.width>width*(key==='x'?.68:.64),'The webpage uses about two thirds of the width');assert.ok(bounds.panel.height>height*.79,'The webpage uses about eighty percent of the height, after the shelf');}
  }
  await page.setViewportSize({width:500,height:800});await page.waitForTimeout(50);
  assert.equal(await page.locator('#notionWorld').getAttribute('data-applet-frame'),null,'Compact layout releases the companion lane');
