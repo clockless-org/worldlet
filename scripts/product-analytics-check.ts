@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withProductAnalytics,withFoxTurnAnalytics} from '../ui/shell/product-analytics.ts';
-import {foxTiming,foxTimingEvent,timingBucket,updateWaitBucket} from '../core/diagnostics/index.ts';
+import {foxTiming,foxTimingEvent,replyBucket,timingBucket,updateWaitBucket} from '../core/diagnostics/index.ts';
 let enabled=true,fail=false,telemetryFails=false;
 const events:any[]=[];
 const {call,track}=withProductAnalytics(async(action:string,body:any={})=>{
@@ -167,8 +167,10 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  const id='0b9f4c62-3c1e-4f5e-9a51-6d1c7e2b8a10';
  assert.deepEqual([999,1000,4999,14999,59999,299999,899999,900000,-1,NaN,'5'].map(timingBucket),['under_1s','1_5s','1_5s','5_15s','15_60s','1_5m','5_15m','over_15m','','','']);
  assert.deepEqual(foxTimingEvent(foxTiming({id,outcome:'complete',completeMs:7200,firstTextMs:2100,modelMs:6000,toolsMs:400,prompt:'secret'})),
-  {event:'fox_timing',duration:'5_15s',dimensions:{timing_outcome:'complete',first_text_bucket:'1_5s',model_bucket:'5_15s',tools_bucket:'under_1s'}});
- assert.deepEqual(foxTimingEvent(foxTiming({id,outcome:'error',completeMs:61000})),{event:'fox_timing',duration:'1_5m',dimensions:{timing_outcome:'error'}});
+  {event:'fox_timing',duration:'5_15s',dimensions:{timing_outcome:'complete',first_text_bucket:'1_5s',model_bucket:'5_15s',tools_bucket:'under_1s',reply_bucket:'5_10s',first_text_reply_bucket:'2_5s'}});
+ // Finer reply buckets split at 10 seconds (owner 2026-10-13 「10秒以上就太慢了」).
+ assert.deepEqual([1999,2000,9999,10000,14999,29999,59999,60000,-1,NaN].map(replyBucket),['under_2s','2_5s','5_10s','10_15s','10_15s','15_30s','30_60s','over_60s','','']);
+ assert.deepEqual(foxTimingEvent(foxTiming({id,outcome:'error',completeMs:61000})),{event:'fox_timing',duration:'1_5m',dimensions:{timing_outcome:'error',reply_bucket:'over_60s'}});
  assert.equal(foxTimingEvent(foxTiming({id,outcome:'running',completeMs:900})),null);
  assert.equal(foxTimingEvent(foxTiming({id,outcome:'complete',completeMs:900,parentId:id})),null);
  assert.equal(foxTimingEvent(foxTiming({id,outcome:'complete'})),null);

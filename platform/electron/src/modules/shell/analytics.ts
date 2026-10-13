@@ -9,7 +9,7 @@ import {platformName} from '../../profile.ts';
 import {AGENT,type AgentService,type AnalyticsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
@@ -64,6 +64,8 @@ const ALLOWED:Record<string,string[]>={
  // fox_timing / app_startup_timing: parts of a turn or a start, bucketed (core/diagnostics/fox-timing.ts foxTimingEvent).
  timing_outcome:['complete','error','cancelled'],
  first_text_bucket:DURATIONS,model_bucket:DURATIONS,tools_bucket:DURATIONS,first_frame_bucket:DURATIONS,
+ // fox_timing: the reply and its first word in finer buckets split at 10 seconds (owner 2026-10-13: past 10 s is too slow).
+ reply_bucket:[...REPLY_BUCKETS],first_text_reply_bucket:[...REPLY_BUCKETS],
  // app_unclean_exit: whether Crashpad wrote a crash report during that run (the report itself stays on the device).
  native_crash:['yes','no'],
  // Setup with a local Agent (core/diagnostics/setup-events.ts): its public product ID, coarse counts and outcomes.
