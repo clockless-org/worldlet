@@ -156,6 +156,9 @@ const background=read('platform/electron/src/background-launch.ts');
 assert.match(background,/process\.platform==='darwin'\|\|process\.platform==='win32'/,'Background check launches cover the Mac and Windows');
 assert.match(background,/setAlwaysOnTop\(true,'normal',-1\)[\s\S]*showInactive\(\)/,'A background window sits below ordinary windows and is shown inactive');
 assert.match(read('platform/electron/src/world/window.ts'),/backgroundLaunch\(\)\)\{showInBackground\(this\.window\)/,'The World window opens in the background');
+// Covered whole by those windows, its pages still draw: Chromium does not hide them as occluded (Mac Alpha 4378, #500).
+assert.match(read('platform/electron/src/main.ts'),/darwin'&&backgroundLaunchWanted\(profile\)\)app\.commandLine\.appendSwitch\('disable-backgrounding-occluded-windows'\)/,'A covered background World still draws on the Mac');
+assert.match(read('scripts/electron-checks.ts'),/darwin'\)app\.commandLine\.appendSwitch\('disable-backgrounding-occluded-windows'\)/,'A covered check window still draws on the Mac');
 assert.match(read('platform/electron/src/modules/shell/login-item.ts'),/channel==='release'/,'Only the packaged app registers');
 assert.match(read('ui/index.ts'),/if\(!sample\)\{if\(!loginItemOffer\)loginItemOffer=mountLoginItemOffer/,'The practice world never offers');
 console.log('PASS open at login: status mapping, one-time offer, login guide, quiet start');
