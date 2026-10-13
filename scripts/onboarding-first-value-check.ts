@@ -108,6 +108,31 @@ try{
  await page.evaluate(()=>{const w=window as any;w.controller.destroy();w.beforeDestroyCalls=w.calls.length;w.root.dispatchEvent(new CustomEvent('worldlet:attention-help',{detail:{id:'refund',phase:'started'}}));});
  assert.equal(await page.evaluate(()=>{const w=window as any;return w.calls.length===w.beforeDestroyCalls;}),true,'Unmounted controller must not write progress');
  console.log('PASS first-value selection, Show me pick step, Do it for me on the card, publication gate, failed-run recovery, and explicit outcome confirmation. Fixture only.');
+ // The first card (owner decision 2026-10-13): while the World's first Today's prep is being made, Fox waits for it and
+ // says so; once it arrives it is picked, Looks good settles it as the first win, and each step is reported once.
+ const prep={id:'prep',kind:'update',status:'open',title:'Today’s prep · Tue, Oct 13',summary:'You have been busy with the move.',attentionContentVersion:1,sources:[{provider:'worldlet',id:'journal:2026-10-13:card-1'}]};
+ const first=await browser.newPage();await first.setContent('<main id="world"></main>');await first.addScriptTag({content:bundle});
+ await first.evaluate(()=>{
+  const w=window as any;w.calls=[];w.guides=[];w.events=[];w.root=document.getElementById('world');w.root.dataset.firstCard='preparing';
+  window.addEventListener('worldlet:product-event',(e:any)=>{if(typeof e.detail==='object')w.events.push(e.detail.event);else w.events.push(e.detail);});
+  w.fixture={revision:1,onboarding:{completed:true,journeyStage:'first-value'},worldItems:[]};
+  w.controller=w.FirstValue.mountFirstValue({root:w.root,state:w.fixture,view:w.view={current:'overview',busy:false,guideSource:'',setGuide(g){this.guideSource=g?.source||'';w.guides.push(g);w.root.replaceChildren(...g.actions);},revealGuide(){},previewAttention(id){w.preview=id;},async settleAttention(id,status){w.settled=[id,status];return true;}},call:async(action,args)=>{w.calls.push({action,...args});w.fixture={...w.fixture,revision:w.fixture.revision+1,onboarding:{...w.fixture.onboarding,journeyStage:args.stage,journeyItemId:args.itemId}};return {ok:true};}});
+ });
+ await first.waitForFunction(()=>(window as any).guides.some(g=>/making your first card/.test(g.text)));
+ await first.waitForTimeout(16000);
+ assert.equal(await first.evaluate(()=>(window as any).calls.some(c=>c.stage==='finish')),false,'With nothing connected, the tour still waits for the first card');
+ await first.evaluate(prep=>{const w=window as any;w.root.dataset.firstCard='ready';w.controller.update({...w.fixture,revision:2,worldItems:[prep]});},prep);
+ await first.waitForFunction(()=>(window as any).guides.some(g=>/I made your first card from what you’ve been working on/.test(g.text)));
+ await first.getByRole('button',{name:'Show me'}).click();
+ await first.waitForFunction(()=>(window as any).preview==='prep');
+ await first.evaluate(prep=>{const w=window as any;w.root.dataset.attentionPreview='true';w.controller.update({...w.fixture,onboarding:{completed:true,journeyStage:'first-value-review',journeyItemId:'prep'},worldItems:[prep]});},prep);
+ await first.getByRole('button',{name:'Looks good'}).click();
+ assert.deepEqual(await first.evaluate(()=>(window as any).settled),['prep','read']);
+ await first.evaluate(()=>{const w=window as any;w.root.dispatchEvent(new CustomEvent('worldlet:attention-settled',{cancelable:true,detail:{id:'prep',status:'read'}}));});
+ await first.waitForFunction(()=>(window as any).events.includes('first_win'));
+ assert.deepEqual(await first.evaluate(()=>(window as any).events.filter(e=>e.startsWith('first_'))),['first_card_shown','first_card_opened','first_card_approved','first_win'],'Each step of the first card once, then the first win');
+ await first.evaluate(()=>(window as any).controller.destroy());
+ console.log('PASS the first card: Fox waits while it is made, picks it, and Looks good is the first win.');
 }finally{await browser.close();}
 // Fox keeps talking through its ~20s of planning, never claims a page action, and yields to real work.
 const lines=helpNarration('Book dental cleaning',true);

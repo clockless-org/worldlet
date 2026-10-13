@@ -67,6 +67,18 @@ Owner goal 2026-10-06: the target customer already runs an Agent (OpenClaw, Clau
 | `tour_skipped` | The Tutorial switch turned off in the first run | `tour_step` (`1`–`8`, the [tour's steps](../../ui/onboarding/README.md#after-arrival-guided-tour-then-a-first-useful-task)) |
 | `first_win` | The first-value task was settled and celebrated | none |
 
+### The first card
+
+Owner decision 2026-10-13: a new person's first Today's prep starts as their World first opens, beside the first-run tour, so the tour's pick step finds a card Fox already made and approving it is the first win, with no Google needed (`startFirstCard` in `ui/shell/notion-world.ts`, `ui/onboarding/first-value.ts`). Each step is sent once per World:
+
+| Event | When | Dimensions |
+| --- | --- | --- |
+| `first_card_started` | The first Today's prep was asked of the Agent in a background session | none |
+| `first_card_ready` | That turn ended | `first_card_result` (`ok`: the card is in the Journal and the Attention Center; `no_card`: the turn ended without one; `failed`: the Agent stopped or failed), `duration_bucket` |
+| `first_card_shown` | The tour's pick step boxed the card in the Attention Center | none |
+| `first_card_opened` | Its card opened in the middle for the person to approve | none |
+| `first_card_approved` | The person approved it and the first win followed | none |
+
 All are background-shown setup facts except `local_agent_selected` (the person's choice); none counts as 操作 beyond what the [who table](#who-started-an-event) already says. `analytics-insights.json` holds the funnel detected → chosen → brought → World → first Fox reply → first win, broken down by `local_agent`. `node scripts/product-analytics-check.ts` covers the buckets and that no title or path passes.
 
 ## Real use (`user_engaged`)
@@ -98,6 +110,7 @@ Events that can be started either by the person or by the app carry `trigger`: `
 | `fox_turn_*` | user: a visible conversation turn the person sent or a Worldlet button they pressed; greetings excluded | `withFoxTurnAnalytics` (`ui/shell/product-analytics.ts`), `submit` (`ui/companion/native-chat.ts`) |
 | `onboarding_started`, `onboarding_apps_viewed`, `local_agents_detected`, `local_agent_select_failed`, `agent_bring_completed`, `agent_bring_failed` | background: shown by the setup surface | `ui/onboarding/startup-setup.ts` |
 | `tour_skipped`, `first_win` | background: the first-run tour's outcome | `ui/onboarding/world-tour.ts`, `ui/onboarding/first-value.ts` |
+| `first_card_started`, `first_card_ready`, `first_card_shown`, `first_card_opened`, `first_card_approved` | background: the first card's steps, approving included (`first_win` follows it) | `startFirstCard` (`ui/shell/notion-world.ts`), `ui/onboarding/first-value.ts` |
 | `onboarding_completed`, `local_agent_selected` | user: the person finished setup or chose an Agent | `recordOnboardingCompleted` (`analytics.ts`); `ui/onboarding/startup-setup.ts` |
 | `world_entered` | background: the World loaded | `ui/index.ts` |
 | `google_connect_*`, `source_connect_*`, `source_disconnect_*`, `item_update_*` | user, with `trigger` (Fox's tool steps and calls after the gesture expired are `background`) | `withProductAnalytics` (`ui/shell/product-analytics.ts`) |

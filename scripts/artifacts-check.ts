@@ -182,6 +182,14 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  assert.ok(quiet.includes('"今天的日程\\nX 上的 AI 新闻"')&&!quiet.includes('prepare_email')&&!quiet.includes('provider gmail'),'A brief without mail neither reads nor drafts it');
  assert.deepEqual(dailyArtifactRequest('plan','2026-10-06','今天的日程'),{text:dailyPlanRequest('2026-10-06','今天的日程'),displayText:'Today’s prep'});
  assert.equal(dailyArtifactRequest('summary','2026-10-06').displayText,'Wrap up today');
+ // The first card (owner decision 2026-10-13): a new person's first Today's prep, whatever the hour, from what the brought
+ // Agent knows; no overnight part and no mail drafting, so it is quick, and still titled as the day's plan.
+ const {firstPrepRequest,FIRST_PREP_BRIEF}=await import('../core/artifacts/index.ts');
+ const firstPrep=firstPrepRequest('2026-10-06');
+ assert.ok(firstPrep.startsWith('I just set up Worldlet')&&!/Good morning/.test(firstPrep)&&firstPrep.includes('whatever the hour'),'The first card is made at once, not as a morning greeting');
+ assert.ok(firstPrep.includes('read_companion_archive')&&firstPrep.includes(JSON.stringify(FIRST_PREP_BRIEF)),'It reads what the brought Agent knows');
+ assert.ok(!firstPrep.includes('prepare_email')&&!firstPrep.includes('read_world_history'),'No mail drafting and no overnight part');
+ assert.match(firstPrep,/show_artifact, titled "Plan · Tue, Oct 6", size large/);
  // Any mail or calendar connection, the Agent's or the World's (owner decision 2026-10-11); with neither, the card is still made and says what it could not see.
  for(const request of [morning,summary])assert.ok(request.includes('A mail or calendar connection of yours and one of my World\'s are the same to me: use whichever exists')&&request.includes('still make the card from what you have')&&request.includes('what you could not see'),'Any connection; never silent about a missing one');
  assert.ok(morning.includes('your own mail tools when my World has no mail connected')&&morning.includes('your own calendar tools when my World has no calendar connected'),'The Agent\'s own mail and calendar count');
@@ -200,7 +208,7 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  assert.match(await readFile(new URL('../ui/index.ts',import.meta.url),'utf8'),/firstRun:\(\)=>!sample&&onboardingUnfinished\(current\?\.onboarding\)/,'The World learns whether onboarding is over');
  assert.match(poll,/brief=await native\?\.morningBrief\?\.\(\)[\s\S]*daily=markDailyMade\(daily,due\.kind,due\.day\);saveDaily\(\);[\s\S]*dailyArtifactRequest\(due\.kind,due\.day,brief\)[\s\S]*voice\?\.background\?\.\(request\.text/,'The person\'s brief, then marked made before asking, so a failed turn never repeats all day');
  assert.match(poll,/voice\?\.background\?\.\(request\.text,\{displayText:request\.displayText\}\)\)[\s\S]*\/busy\/i[\s\S]*daily=before;saveDaily\(\);[\s\S]*\.finally\(\(\)=>\{work\.end\(ok\);dailyAsking=false;dailyAsked=null;\}\)/,'Made quietly in a background session beside the conversation; asked again only while other background work runs (owner Orders 2026-10-07)');
- assert.match(poll,/if\(!dailyShown\)failed=[\s\S]*else failed=said\|\|[\s\S]*if\(failed\)void Promise\.resolve\(native\?\.artifacts\?\.\(\{operation:'scheduleFailed',scheduled:due\.kind,day:due\.day,reason:failed\}\)\)/,'A run that failed or made no card says so as an Attention item, never silently');
+ assert.match(poll,/if\(!dailyShown\)failed=[\s\S]*else failed=said\|\|[\s\S]*if\(failed&&!first\)void Promise\.resolve\(native\?\.artifacts\?\.\(\{operation:'scheduleFailed',scheduled:due\.kind,day:due\.day,reason:failed\}\)\)/,'A run that failed or made no card says so as an Attention item, never silently');
  assert.match(poll,/dailyArtifactDue\(daily,new Date\(\),routinesOn\)/,'A paused routine is not asked for');
  // Kept as a Journal card the host turns into an Attention item (docs/ATTENTION-CENTER.md#scheduled-results); the Journal never opens by itself.
  assert.match(poll,/native\?\.artifacts\?\.\(\{operation:'save',artifact,scheduled:due\.kind,day:due\.day\}\)/,'The brief is saved with its kind and day, for its Attention item');
