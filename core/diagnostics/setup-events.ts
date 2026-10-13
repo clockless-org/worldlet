@@ -44,7 +44,7 @@ export function hermesSetupDimensions(part:typeof HERMES_SETUP[number],step:numb
  if(error===undefined)return dimensions;
  const message=String((error as {message?:unknown})?.message??error??'');
  const failure=/Command Line Tools/.test(message)?'command_line_tools'
-  :/took too long/.test(message)?'timeout'
+  :/took too long|stopped making progress/.test(message)?'timeout'
   :/cancel/i.test(message)?'cancelled'
   :/did not start|not on this computer/.test(message)?'not_started'
   :/lists no ChatGPT model|could not use ChatGPT/.test(message)?'no_model'

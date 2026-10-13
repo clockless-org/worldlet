@@ -11,7 +11,10 @@ import {harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type Loc
 /** Stock Hermes Agent for a person with no Agent (core/agent/hermes-setup.ts): the official installer, run stage by
  * stage as Hermes' own desktop installer runs it, to Hermes' default location; nothing when a Hermes Agent is here. */
 export interface HermesInstallProgress {step:number;steps:number;title:string}
-const STAGE_TIMEOUT_MS=20*60_000;
+// A step is stopped once its output has been quiet this long, or after the whole limit however busy it is: a slow
+// connection keeps installing Python packages for a long time while still printing (owner 2026-10-13, a Windows person
+// waited 25 minutes and was stopped at a fixed 20).
+export const STAGE_LIMITS=Object.freeze({idle:15*60_000,total:90*60_000});
 const INSTALLER_LIMIT=2*1024*1024;
 const FAILED='Hermes Agent could not be installed. Check your internet connection and try again.';
 
@@ -37,11 +40,12 @@ export function releaseStandardHermes(root:string,environment:HarnessEnvironment
 const INSTALLED='hermes-installed.json';
 export function installedHermes(root:string):boolean {return fs.existsSync(path.join(root,INSTALLED));}
 /** Installs stock Hermes Agent the official way when none is here, then returns it. `progress` hears each step. */
-export async function installHermes(root:string,{environment,progress,fetch:get=fetch}:{environment:HarnessEnvironment;progress:(step:HermesInstallProgress)=>void;fetch?:typeof fetch}):Promise<LocalHarnessInstall> {
+export async function installHermes(root:string,{environment,progress,fetch:get=fetch,limits=STAGE_LIMITS}:{environment:HarnessEnvironment;progress:(step:HermesInstallProgress)=>void;fetch?:typeof fetch;limits?:{idle:number;total:number}}):Promise<LocalHarnessInstall> {
  const existing=ownHermesAgent(environment);
  // A Hermes Agent already here is used as it is (owner decision 2026-10-09 12:11 PDT): nothing is installed.
  if(existing)return existing;
  releaseStandardHermes(root,environment);
+ setAsideUnfinished(environment);
  const windows=environment.platform==='win32';
  if(environment.platform==='darwin'&&!await commandLineTools())throw new WorldletError('Hermes Agent needs Apple’s Command Line Tools. Install them in the window macOS opened, then try again.');
  const folder=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-hermes-'));
@@ -52,7 +56,7 @@ export async function installHermes(root:string,{environment,progress,fetch:get=
   const run=async(args:string[],stage?:string)=>{
    let output='';
    const [command,prefix]=windows?[path.join(environment.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe'),['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',script]]:['/bin/bash',[script]];
-   try{await step(command,[...prefix,...args],env,folder,text=>{output=(output+text).slice(-64_000);});}
+   try{await step(command,[...prefix,...args],env,folder,text=>{output=(output+text).slice(-64_000);},limits);}
    catch(error){
     // A failed stage says why in its result frame; that beats its last lines on stderr.
     const said=stage?hermesInstallerResult(output,stage):null;
@@ -77,6 +81,20 @@ export async function installHermes(root:string,{environment,progress,fetch:get=
  if(!installed)throw new WorldletError(FAILED);
  writeJSON(path.join(root,INSTALLED),{installedAt:new Date().toISOString()});
  return installed;
+}
+
+/** What an earlier install that never finished left where Hermes installs itself: a folder that is not a Hermes
+ * checkout, which the installer refuses on every later try (`dir_not_checkout`). It is moved aside next to it, never
+ * deleted, since it may hold something the person wants. A checkout, an empty folder or a link is left to the installer. */
+export function setAsideUnfinished(environment:HarnessEnvironment,now=new Date()):string|null {
+ const folder=path.join(standardHermesHome(environment.home,environment.env,environment.platform),'hermes-agent');
+ try{
+  const item=fs.lstatSync(folder);
+  if(!item.isDirectory()||fs.existsSync(path.join(folder,'.git'))||!fs.readdirSync(folder).length)return null;
+  const aside=`${folder}.worldlet-aside-${now.toISOString().replace(/\D/g,'').slice(0,14)}`;
+  fs.renameSync(folder,aside);
+  return aside;
+ }catch{return null;}
 }
 
 /** ChatGPT as Hermes Agent's model, set up with Hermes' own commands: its sign-in (`hermes auth add openai-codex`,
@@ -194,18 +212,23 @@ function stop(child:ChildProcess){
  try{child.kill();}catch{}
 }
 /** One installer run: its output goes to `output`; a failure says the last lines it wrote to stderr. */
-function step(command:string,args:string[],env:Record<string,string>,cwd:string,output:(text:string)=>void):Promise<void> {
+function step(command:string,args:string[],env:Record<string,string>,cwd:string,output:(text:string)=>void,limits:{idle:number;total:number}):Promise<void> {
  return new Promise((resolve,reject)=>{
   const child=spawn(command,args,{cwd,env,stdio:['ignore','pipe','pipe'],windowsHide:true,detached:process.platform!=='win32'});
   running.add(child);
-  let errors='',late=false;
-  const timer=setTimeout(()=>{late=true;stop(child);},STAGE_TIMEOUT_MS);timer.unref();
-  child.stdout.on('data',chunk=>output(String(chunk)));
-  child.stderr.on('data',chunk=>{errors=(errors+String(chunk)).slice(-8192);});
-  child.once('error',error=>{running.delete(child);clearTimeout(timer);reject(error);});
+  let errors='',late='';
+  const end=(why:string)=>{late=why;stop(child);};
+  const total=setTimeout(()=>end('Installing Hermes Agent took too long. Try again.'),limits.total);total.unref();
+  // Any output is progress, so only a step that has gone quiet is stopped early.
+  let idle=setTimeout(()=>end('Installing Hermes Agent stopped making progress. Try again.'),limits.idle);idle.unref();
+  const busy=()=>{if(late)return;clearTimeout(idle);idle=setTimeout(()=>end('Installing Hermes Agent stopped making progress. Try again.'),limits.idle);idle.unref();};
+  const clear=()=>{clearTimeout(total);clearTimeout(idle);};
+  child.stdout.on('data',chunk=>{busy();output(String(chunk));});
+  child.stderr.on('data',chunk=>{busy();errors=(errors+String(chunk)).slice(-8192);});
+  child.once('error',error=>{running.delete(child);clear();reject(error);});
   child.once('close',code=>{
-   running.delete(child);clearTimeout(timer);
-   if(late)return reject(new WorldletError('Installing Hermes Agent took too long. Try again.'));
+   running.delete(child);clear();
+   if(late)return reject(new WorldletError(late));
    if(code===0)return resolve();
    reject(new Error((errors.trim().split('\n').filter(Boolean).slice(-2).join(' ')||`it stopped with code ${code}`).slice(-300)));
   });
