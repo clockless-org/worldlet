@@ -9,6 +9,7 @@ import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneAttentionPushes,phoneC
 import {createPhoneRelay} from './relay.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
+import {openInBrowser} from '../../system-browser.ts';
 
 // Phone pairing (core/phone/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot
@@ -25,7 +26,7 @@ import {phoneWebRecording} from './web.ts';
 // A phone seen in the last week keeps the desktop long-polling even while the app is closed (owner 2026-10-12: Fox
 // slower on the phone). A short check every 15 seconds left the first line typed after opening the app waiting up to 15
 // seconds before Fox began; a long poll takes the same number of requests and picks the line up within a second.
-const QUICK=2000,SLOW=15000,ACTIVE=120000,WAIT=15,CONVERSATION=15000,SHOWING=45000,ASKED=3600000,LISTENING=7*86400000;
+const QUICK=2000,SLOW=15000,ACTIVE=120000,WAIT=15,CONVERSATION=15000,SHOWING=45000,ASKED=3600000,LISTENING=7*86400000,WEB_LISTENING=3600000;
 export function computerName(){return os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer';}
 
 export function installPhone(host:Host){
@@ -45,10 +46,8 @@ export function installPhone(host:Host){
  const asked=new Map<string,{item?:string,applet?:string,at:number}>();
  const askedKey=(text:unknown)=>typeof text==='string'?text.trim().slice(0,PHONE_LIMITS.field):'';
  const attachments=phoneAttachments(()=>path.join(app.getPath('userData'),'Phone files'));
- const relay=createPhoneRelay({
-  fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (phone pairing)`,
-  relay:process.env.WORLDLET_PAIR_RELAY||undefined,
-  deliver:async(message:PhoneMessage,key:string)=>{
+ // What the phone or a paired browser (core/phone/README.md#web) asked; both are carried out alike.
+ const deliver=async(message:PhoneMessage,key:string)=>{
    // A widget edit is the host's own (modules/artifacts): it is merged and saved even while the page reloads.
    if(message.type==='widget'){
     lastActive=Date.now();
@@ -77,7 +76,10 @@ export function installPhone(host:Host){
    if(taken&&message.type==='attention'&&message.action==='done')usage('phone_approved',{approval_kind:'attention'});
    if(taken&&message.type==='approval'&&message.choice!=='deny')usage('phone_approved',{approval_kind:'agent_permission'});
    return taken;
-  },
+ };
+ const relay=createPhoneRelay({
+  fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (phone pairing)`,
+  relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
   onChange:status=>{
    if(status.state!=='paired')attention=undefined;
    if(status.state==='paired'&&paired===false){if(status.push?.platform)reportPaired(status.push);else pairedReport=setTimeout(()=>reportPaired(relay.status().push),60_000);}
@@ -146,6 +148,22 @@ export function installPhone(host:Host){
   deliver:message=>remoteHost.receive(message),
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
+ // A web browser (core/phone/README.md#web): the page at `<relay>/open/` pairs like a phone, through the same relay and
+ // boxes as its own pairing, and gets the same Center, conversation and live turn. It takes no notifications; a tab
+ // seen in the last hour keeps the long poll, so a Done from it lands within a second.
+ let webPaired:boolean|null=null;
+ const browser=createPhoneRelay({
+  fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (web pairing)`,kind:'web',
+  relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
+  onChange:status=>{
+   if(status.state==='paired'&&webPaired===false)usage('phone_paired',{phone_platform:'web'});
+   webPaired=status.state==='paired';
+   host.page.event('worldlet:web-pair-status',status);
+  },
+ });
+ webPaired=browser.status().state==='paired';
+ const webOpen=()=>{const seen=browser.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE;};
+ const webListening=()=>{const seen=browser.status().seenAt;return !!seen&&Date.now()-seen<WEB_LISTENING;};
  const phoneListening=()=>{const seen=relay.status().seenAt;return phoneOpen()||!!seen&&Date.now()-seen<LISTENING;};
  const agentOpen=()=>{const seen=agent.status().seenAt;return remoteHost.busy||!!seen&&Date.now()-seen<ACTIVE;};
  // The person's agents here for the client's Applet menus, read at most once a minute.
@@ -159,7 +177,7 @@ export function installPhone(host:Host){
  };
  // One loop per pairing. A long poll holds its tick while it waits, so Fox's replies reach an open side through the
  // watch below: every two seconds while Fox works and once more when it finishes, and at least every 15 seconds.
- const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false}].map(link=>{
+ const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false},{relay:browser,open:webOpen,listening:webListening,phone:true}].map(link=>{
   let timer:ReturnType<typeof setTimeout>|null=null,running=false,foxWasBusy=false,conversationAt=0;
   async function publishConversation(){
    conversationAt=Date.now();
@@ -195,17 +213,23 @@ export function installPhone(host:Host){
  });
  const watch=setInterval(()=>{for(const link of links)link.watch();},QUICK);
  host.provide<PhoneService>(PHONE,{
-  publish:(slot,value)=>relay.publish(slot,value),
+  publish:async(slot,value)=>{const [phone,page]=await Promise.all([relay.publish(slot,value),browser.publish(slot,value)]);return phone||page;},
   idleSeconds:()=>{const last=Math.max(relay.status().seenAt||0,lastActive);return last?Math.max(0,(Date.now()-last)/1000):null;},
   notify,
  });
  host.register({
-  // `kind: 'agent'` is the pairing with another Worldlet; otherwise the phone's.
+  // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a web browser's; otherwise the phone's.
   phonePair:async request=>{
-   const link=links[request.kind==='agent'?1:0];
+   const link=links[request.kind==='agent'?1:request.kind==='web'?2:0];
    if(request.operation==='status')return link.relay.status();
    if(request.operation==='start'){const status=await link.relay.start();link.schedule(QUICK);return status;}
    if(request.operation==='end')return await link.relay.end();
+   // A browser's link opens in the person's default browser, never inside the World.
+   if(request.operation==='open'&&request.kind==='web'){
+    const status=link.relay.status();if(!status.link)throw new WorldletError('Make a link first.');
+    try{await openInBrowser(status.link);}catch{throw new WorldletError('Could not open your browser. Copy the link instead.');}
+    return status;
+   }
    throw new WorldletError('Unknown pairing request.');
   },
   // The page's current Attention Center (Now and Later), already shaped by core/phone phoneAttention, and the turn Fox

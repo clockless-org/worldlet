@@ -45,8 +45,10 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  const forgetSeen=()=>{seen=[];seenSet.clear();options.vault.delete(SEEN_ID);};
  const save=()=>{if(saved)options.vault.set(VAULT_ID,JSON.stringify(saved));else{options.vault.delete(VAULT_ID);forgetSeen();}};
  const ensureKeys=async()=>keys??=saved?await pairKeys(fromBase64url(saved.secret)):null;
- const status=():PhoneStatus=>!saved?{state:'none'}:saved.paired?{state:'paired',phone:saved.phone??null,seenAt,...(push!==undefined?{push}:{}),...(error?{error}:{})}
-  :{state:'waiting',link:pairLink({secret:fromBase64url(saved.secret),relay:saved.relay,name:saved.name,kind}),...(error?{error}:{})};
+ const link=()=>pairLink({secret:fromBase64url(saved!.secret),relay:saved!.relay,name:saved!.name,kind});
+ // A browser's link stays shown once paired: any browser that opens it joins the same pairing (core/phone/README.md#web).
+ const status=():PhoneStatus=>!saved?{state:'none'}:saved.paired?{state:'paired',...(kind==='web'?{link:link()}:{}),phone:saved.phone??null,seenAt,...(push!==undefined?{push}:{}),...(error?{error}:{})}
+  :{state:'waiting',link:link(),...(error?{error}:{})};
  const changed=()=>options.onChange?.(status());
  async function request(path:string,init:RequestInit={},token?:string,timeout=20_000){
   const k=await ensureKeys();

@@ -6,10 +6,11 @@ import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-tes
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
- await page.addInitScript(()=>{const w=window as any;w.calls=[];w.pairing={state:'none'};w.agentPairing={state:'none'};
+ await page.addInitScript(()=>{const w=window as any;w.calls=[];w.pairing={state:'none'};w.agentPairing={state:'none'};w.webPairing={state:'none'};
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
   if(b.action==='snapshot')return {workspaceId:'phone-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
   if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
+  if(b.action==='phonePair'&&b.kind==='web'){const link='https://worldlet.ai/open/#v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac';if(b.operation==='start')w.webPairing={state:'waiting',link};if(b.operation==='end')w.webPairing={state:'none'};return w.webPairing;}
   if(b.action==='phonePair'&&b.kind==='agent'){if(b.operation==='start')w.agentPairing={state:'waiting',link:'worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end')w.agentPairing={state:'none'};return w.agentPairing;}
   if(b.action==='phonePair'){if(b.operation==='start')w.pairing={state:'waiting',link:'worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end'){w.pairing={state:'none'};setTimeout(()=>w.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:w.pairing})));}return w.pairing;}
   if(b.action==='phonePublish')return {sent:true};
@@ -52,6 +53,17 @@ try{
  await phone.locator('.companion-phone-computers').getByRole('button',{name:'Unpair',exact:true}).click();
  await phone.getByRole('button',{name:'Pair another computer',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='agent').map(c=>c.operation)),['status','start','end']);
+ // Any web browser (core/phone/README.md#web): one button makes the link and opens it in the person's browser; once a
+ // browser opened it, the link stays to open again or copy, and Turn off ends it.
+ const web=phone.locator('.companion-phone-browser');
+ await web.getByRole('button',{name:'Open in browser',exact:true}).click();
+ await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.kind==='web'&&c.operation==='open'));
+ await web.getByRole('button',{name:'Copy link',exact:true}).waitFor();
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:web-pair-status',{detail:{state:'paired',link:'https://worldlet.ai/open/#v=1&s=x',phone:{name:'Chrome on Mac',version:'web'},seenAt:Date.now()}})));
+ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
+ await web.getByRole('button',{name:'Turn off',exact:true}).click();
+ await web.getByRole('button',{name:'Open in browser',exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='web').map(c=>c.operation)),['status','start','open','end']);
  await page.keyboard.press('Escape');
  // A chat line from the phone is the person's own message to Fox; an unknown message is taken and ignored.
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'chat',id:'c1',text:'What is next?'})),true);
