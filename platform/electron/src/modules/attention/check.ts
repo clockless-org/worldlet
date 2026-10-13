@@ -148,7 +148,11 @@ try{
  // A finished turn leaves no receipts or evidence behind.
  tools.finishTurn(turn);
  assert.equal(store.worldEvidence[turn],undefined);
+ assert.deepEqual(errors.filter(line=>line.startsWith('worldItemSave')&&line.includes('quote')),[],'A rejection the model corrected in its turn is not an error');
  assert.equal((await tools.reply('upsert_world_items',{items:[item]},turn)).error,'Read sources in this turn before saving findings.');
+ const before=errors.length;
+ tools.finishTurn(turn);
+ assert.deepEqual(errors.slice(before),['worldItemSave: Read sources in this turn before saving findings.'],'One still uncorrected when its turn ends is');
  assert.deepEqual(errors.filter(line=>!line.startsWith('worldItemSave')),[],'No unexpected diagnostics');
  console.log('PASS Electron World tools: privacy gates, schedule configuration, evidence-verified findings, queries, status/archive, history, runtime tasks, weather and turn cleanup.');
 }finally{await close();}

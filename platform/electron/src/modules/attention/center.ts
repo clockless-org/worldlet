@@ -5,8 +5,8 @@ import {digest,readJSON,WorldletError} from '../../files.ts';
 import {canBuild} from '../../store/world-store.ts';
 import {presentMailRead} from '../sources/records.ts';
 import {Cancelled} from '../../store/ledger.ts';
-import {AGENT,COMPANION,SOURCES,USER_ACTIVITY} from '../../host/services.ts';
-import type {AgentRuntime,AgentService,CompanionService,SourcesService,UserActivityService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,COMPANION,SOURCES,USER_ACTIVITY} from '../../host/services.ts';
+import type {AgentRuntime,AgentService,AnalyticsService,CompanionService,SourcesService,UserActivityService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {worldTool,worldToolReply} from './tools.ts';
 import {CONTEXT_CHANGED,SOURCE_PAUSED,now,uuid,message,isCancel,isValidation,checkCancellation,isRow,rows,strings,int,characterPrefix,internetDate,isoSeconds,sleep} from './util.ts';
@@ -32,6 +32,9 @@ export class AttentionCenter {
  readCounts=new Map<string,number>();
  readFailures=new Set<string>();
  acknowledged=new Set<string>();
+ // A World item save rejected whole goes back to the model to correct (tools.ts worldToolReply). Only one still
+ // uncorrected when its turn ends is an error; each rejection is counted as `world_item_rejected` with its rule.
+ private unsavedRejections=new Map<string,unknown>();
  analysisProviders=new Map<string,string>();
  analysisCandidates=new Map<string,Row[]>();
  synthesisFacts=new Map<string,Row[]>();
@@ -64,6 +67,18 @@ export class AttentionCenter {
  connected(provider:string){return this.store.state.connections.some(c=>c.provider===provider&&canBuild(c));}
  nativeConnected(provider:string){return this.store.state.connections.some(c=>c.provider===provider&&c.transport==='native'&&canBuild(c));}
  persist(error:unknown,operation:string,requestId?:string){this.host.diagnostics.record(error,operation,requestId??'');}
+ rejectedSave(turn:string,error:unknown){
+  this.unsavedRejections.set(turn,error);
+  let rule:unknown;try{rule=core('exceptionReport',{message:message(error),operation:'worldItemSave'})?.rule;}catch{}
+  try{this.host.optional<AnalyticsService>(ANALYTICS)?.recordProductEvent('world_item_rejected','',typeof rule==='string'?{error_rule:rule}:{});}catch{}
+ }
+ savedItems(turn:string){this.unsavedRejections.delete(turn);}
+ /** The end of a turn that saved World items: a rejection its model never corrected is reported, a cancelled turn's is not. */
+ settleSaves(turn:string,cancelled:boolean){
+  const error=this.unsavedRejections.get(turn);
+  this.unsavedRejections.delete(turn);
+  if(error!==undefined&&!cancelled)this.persist(error,'worldItemSave',turn);
+ }
  worldChanged(){this.store.worldChanged();}
  receiveAppletEvent(event:Row,turn:string){try{this.sources()?.receiveAppletEvent(event,turn);}catch(error){this.persist(error,'appletActivity',turn);}}
  finishAppletTurn(turn:string,cancelled=false){try{this.sources()?.finishAppletTurn(turn,cancelled);}catch(error){this.persist(error,'appletActivity',turn);}}
@@ -94,6 +109,7 @@ export class AttentionCenter {
 
  // Turn lifecycle ---------------------------------------------------------------------------
  finishTurn(turn:string,cancelled=false){
+  this.settleSaves(turn,cancelled);
   this.readTickets.delete(turn);this.readCounts.delete(turn);this.readFailures.delete(turn);
   delete this.store.worldEvidence[turn];this.acknowledged.delete(turn);
   this.finishAppletTurn(turn,cancelled);
@@ -454,6 +470,7 @@ export class AttentionCenter {
     this.receiveAppletEvent({provider,callId:session,phase:committed?'complete':yielded?'yielded':'error'},turn);
    }
   }finally{
+   this.settleSaves(session,signal.aborted);
    this.analysisCandidates.delete(session);this.analysisProviders.delete(session);delete this.store.worldEvidence[session];this.acknowledged.delete(session);
   }
  }
@@ -724,6 +741,7 @@ export class AttentionCenter {
       this.store.recordHistory({id:turn+':finished',kind:'applet.check',at:now(),actor:'applet',status:run.status??'error',runId:turn},provider);
       this.worldChanged();
      }finally{
+      this.settleSaves(turn,signal.aborted);
       this.readTickets.delete(turn);this.readCounts.delete(turn);this.readFailures.delete(turn);delete this.store.worldEvidence[turn];this.acknowledged.delete(turn);
       this.finishAppletTurn(turn);
       const left=this.store.appletActivity[provider];
@@ -926,6 +944,7 @@ export class AttentionCenter {
       this.store.recordHistory({id:turn+':finished',kind:'attention.synthesis',at:now(),runId:turn,status:success?'complete':cancelled?'cancelled':yielded?'yielded':'error',count:facts.length},'center');
       this.worldChanged();
      }finally{
+      this.settleSaves(turn,signal.aborted);
       delete this.store.worldEvidence[turn];this.acknowledged.delete(turn);this.synthesisFacts.delete(turn);this.synthesisPlans.delete(turn);
      }
     }finally{
