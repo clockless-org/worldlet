@@ -141,7 +141,10 @@ for(const [message,code,rule] of [['Invalid Applet candidate title.','outputVali
  ['Read sources in this turn before saving findings.','outputValidation','unread'],
  ['A world item needs source references.','outputValidation','itemShape'],['Invalid event disposition.','outputValidation','eventDisposition'],['Invalid world item: title.','outputValidation','itemShape'],['Invalid item ownership.','outputValidation','ownership'],
  ['Attention context changed. Read the latest evidence before proposing it again.','outputValidation','contextChanged'],['Attention needs model-written title, reason and summary.','outputValidation','attentionText'],
- ['Source evidence was not read or cannot be verified.','evidenceMismatch','evidence'],['secret@example.com broke','operationFailed','other']]){
+ ['Source evidence was not read or cannot be verified.','evidenceMismatch','evidence'],
+ ['Source evidence needs a provider, record id and quote.','evidenceMismatch','evidenceMissing'],['Source evidence cites a source this turn may not use.','evidenceMismatch','evidenceUnauthorized'],
+ ['Source evidence cites a record not read in this turn.','evidenceMismatch','evidenceUnread'],['Source evidence quote is not in the read record text.','evidenceMismatch','evidenceQuote'],
+ ['Invalid source evidence.','evidenceMismatch','evidenceShape'],['secret@example.com broke','operationFailed','other']]){
  const saved=exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation:'worldItemSave'});
  assert.deepEqual([saved.code,saved.rule],[code,rule],message);assert.doesNotMatch(JSON.stringify(saved),/secret|Invalid|Events/);
 }

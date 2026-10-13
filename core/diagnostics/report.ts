@@ -45,9 +45,17 @@ const ITEM_RULES:[RegExp,string][]=[
  [/attention (dueat|occurredat|sourceupdatedat) needs/,'attentionTime'],[/read sources in this turn/,'unread'],
  [/invalid world item|needs source references|invalid source link|invalid calendar projection/,'itemShape'],
 ];
+/** Which check rejected a cited source (platform/electron/src/modules/attention/tools.ts). An evidence mismatch kept
+ * recurring on 2026-10-12 after quote typography was tolerated, and one shared message could not say whether the
+ * quote, the record or the source was wrong. */
+const EVIDENCE_RULES:[RegExp,string][]=[
+ [/source evidence needs a provider/,'evidenceMissing'],[/source evidence cites a source this turn may not use/,'evidenceUnauthorized'],
+ [/source evidence cites a record not read/,'evidenceUnread'],[/source evidence quote is not in/,'evidenceQuote'],
+ [/^invalid source evidence/,'evidenceShape'],[/require covered, unchanged source evidence/,'evidenceCoverage'],
+];
 export function itemRule(message:string){
  const text=message.toLowerCase();
- return text.includes('source evidence')?'evidence':ITEM_RULES.find(([pattern])=>pattern.test(text))?.[1]??'other';
+ return text.includes('source evidence')?EVIDENCE_RULES.find(([pattern])=>pattern.test(text))?.[1]??'evidence':ITEM_RULES.find(([pattern])=>pattern.test(text))?.[1]??'other';
 }
 /** Which Fox setup step stopped, as a fixed tag, from the plain-words message the setup threw (Worldlet's earlier built-in setup). The first Windows person to fail setup (3199, 2026-10-09) reached PostHog only as operationFailed
  * thrown from installWindows, which every step shares. */
@@ -85,7 +93,7 @@ export function failureKind(message:string){
  const text=message.toLowerCase();
  return FAILURE_KINDS.find(([pattern])=>pattern.test(text))?.[1]??'other';
 }
-const RULES=new Set([...ITEM_RULES.map(([,rule])=>rule),'evidence','other',...SETUP_STEPS.map(([,step])=>step),...FAILURE_KINDS.map(([,kind])=>kind)]);
+const RULES=new Set([...ITEM_RULES.map(([,rule])=>rule),...EVIDENCE_RULES.map(([,rule])=>rule),'evidence','other',...SETUP_STEPS.map(([,step])=>step),...FAILURE_KINDS.map(([,kind])=>kind)]);
 /** Raw text is classification input only and never part of the returned record. */
 export function diagnosticError(value){
  const message=typeof value.message==='string'?value.message.toLowerCase():'';
