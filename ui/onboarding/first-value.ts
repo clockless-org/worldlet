@@ -1,5 +1,6 @@
 import {firstValueCandidate} from '../../core/onboarding/index.ts';
 import {connectionLive,sourcesReading} from '../../core/applets/index.ts';
+import {journalTarget} from '../../core/agent/index.ts';
 import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';
 
 /**
@@ -29,10 +30,15 @@ import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.t
  * wait for: only a brought Agent's conversations, which reach the Center within fifteen seconds of the World
  * opening, so after the first half of the tour Fox does not wait at all (owner request 2026-10-06). Then the
  * tour ends and the World is free, instead of staying locked until an item arrives.
+ * A new person's first Today’s prep starts as their World first opens (`startFirstCard` in ui/shell/notion-world.ts,
+ * owner decision 2026-10-13): while it is being made (`data-first-card="preparing"`) Fox waits for it up to three
+ * minutes, saying so, and the card it made is picked like any item; approving it is the first win.
  * Stages persist (`first-value`, `-review`, `-running`, `-outcome`), so a restart resumes the step;
  * an interrupted operation is never replayed.
  */
-const WAIT=60000,BROUGHT_WAIT=15000,READING_WAIT=300000;
+const WAIT=60000,BROUGHT_WAIT=15000,READING_WAIT=300000,FIRST_CARD_WAIT=180000;
+/** The first Today’s prep, or any day's card Fox kept in the Journal, as its Attention item (core/agent harness-schedule). */
+const journalCard=(item:any)=>!!item&&item.kind==='update'&&!!journalTarget(item.sources);
 
 export function mountFirstValue({root,view,call,state:initial,arriving=false}){
  let winning='',skipped=false,state=initial,shown='',quiet=false,writing=Promise.resolve(),arrival=arriving,pendingWrites=0,destroyed=false,arrivalTimer:ReturnType<typeof setTimeout>|undefined;
@@ -43,6 +49,9 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
  // starts the wait for a first item; `ending` is set once the tour ends without one.
  let focus='',waitingSince=0,ending=false,keeping=false;
  const mountedAt=Date.now();
+ // The first card's steps, each reported once (core/diagnostics/ANALYTICS.md#the-first-card).
+ const reported=new Set<string>();
+ const firstCardStep=(event:string)=>{if(reported.has(event))return;reported.add(event);window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions:{}}}));};
  // The step's main action is filled, a second choice quiet (owner request 2026-10-06; world-tour.ts).
  const button=(label,run,quiet=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.className=quiet?'world-tour-quiet':'world-tour-primary';b.onclick=()=>void run();return b;};
  function guide(text,actions=[],takeover=false){if(destroyed)return;view.setGuide({source:'first-value',text,actions,takeover});view.revealGuide();}
@@ -82,6 +91,15 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
   const shownRows=[...root.querySelectorAll('.world-matter[data-world-item-id]')].filter(row=>row.getClientRects().length).map(row=>String((row as HTMLElement).dataset.worldItemId));
   const candidate=firstValueCandidate(state.worldItems||[],Date.now(),shownRows);
   if(!candidate){
+   // The first card is on its way: Fox waits for it rather than ending the tour or making something else.
+   if(root.dataset.firstCard==='preparing'){
+    if(!waitingSince)waitingSince=Date.now();
+    if(Date.now()-waitingSince<FIRST_CARD_WAIT){
+     if(!same('first-card')){shown='first-card';guide('I’m making your first card from what you’ve been working on. **It’ll be here in a moment.**');}
+     box('first-card',{target:()=>elementBox(root,'.world-task-tracker')});
+     return;
+    }
+   }
    // Someone who brought an Agent already has work in progress: what they keep talking about with it becomes the
    // first thing Fox does with them (owner request 2026-10-06), before any mail is read.
    const proposalRows=new Set([...root.querySelectorAll('.world-ongoing[data-ongoing]')].filter(row=>row.getClientRects().length).map(row=>String((row as HTMLElement).dataset.ongoing)));
@@ -119,7 +137,9 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
   }
   // Show me opens the card in the middle, and the box glides from the item to it.
   const open=async()=>{if(await save('first-value-review',id))view.previewAttention(id);};
-  if(!same('pick:'+id)){shown='pick:'+id;guide('Let’s try one together. '+(title?'I picked this one for you: **'+title+'**.':'I picked one for you.'),[button('Show me',()=>void open())]);}
+  const first=journalCard(candidate);
+  if(first)firstCardStep('first_card_shown');
+  if(!same('pick:'+id)){shown='pick:'+id;guide(first?'I made your first card from what you’ve been working on'+(title?': **'+title+'**.':'.'):'Let’s try one together. '+(title?'I picked this one for you: **'+title+'**.':'I picked one for you.'),[button('Show me',()=>void open())]);}
   box('pick:'+id,{target:()=>elementBox(root,'.world-matter[data-world-item-id="'+CSS.escape(id)+'"]'),act:()=>void open()});
  }
  // 6 for a brought Agent: Fox boxes a theme of the conversations it brought (core/tasks/themes.ts) and offers to pull it
@@ -159,12 +179,13 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
    if(!view.busy)view.previewAttention(id);
    return;
   }
-  const task=item.kind==='task';
+  const task=item.kind==='task',first=journalCard(item);
+  if(first)firstCardStep('first_card_opened');
   if(!same('card:'+id)){
    shown='card:'+id;
-   guide(task?'Here it is. **Can I do this for you?** I’ll open it right here, and you can step in any time.':'Here’s what I found. This one is worth **knowing**.',
+   guide(task?'Here it is. **Can I do this for you?** I’ll open it right here, and you can step in any time.':first?'Here’s what I made for you. **Does it look right?**':'Here’s what I found. This one is worth **knowing**.',
     [task?button('Do it for me',()=>{unbox();if(!view.helpWithAttention?.(id))view.previewAttention(id);})
-     :button('Continue',async()=>{unbox();await view.settleAttention?.(id,'read');})]);
+     :button(first?'Looks good':'Continue',async()=>{unbox();await view.settleAttention?.(id,'read');})]);
   }
   // The card is lit to its own edge while Fox stays where it always stands, its question in its bubble (owner feedback
   // 2026-10-06: Fox moving up under the card read as a jump). Fox's button goes on with Fox; the card's own Done (or Got
@@ -219,6 +240,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
  };
  async function win(id:string,itemId=id){
   unbox();
+  if(journalCard(journeyItem()))firstCardStep('first_card_approved');
   if(!await save('finish',itemId))return;
   winning=id;celebrate();
  }
