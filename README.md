@@ -14,15 +14,36 @@
 </p>
 
 <p align="center">
-  <strong>A World for the AI Agent you already use.</strong><br/>
+  <strong>The first World UI (WUI) framework.</strong><br/>
+  A World for the AI Agent you already use: not a chat box, a place your Agent works in.<br/>
   Worldlet gives OpenClaw, Hermes Agent, Claude Code, Codex or pi a place to work that you can see. The World is operated by AI; you watch and decide.
 </p>
-
-<h3 align="center"><a href="#install"><ins>Install in one command</ins></a> · <a href="https://worldlet.ai/download/"><ins>Download</ins></a></h3>
 
 <p align="center">
   <img src="docs/assets/readme/world.jpg" alt="The Worldlet World: places with Applets, the Attention Center on the left and Fox at the bottom" width="960" />
 </p>
+
+<h3 align="center"><a href="#install"><ins>Install in one command</ins></a> · <a href="https://worldlet.ai/download/"><ins>Download</ins></a></h3>
+
+## Your Agent, your model: the stack in computer terms
+
+<p align="center">
+  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.svg" alt="The personal computer stack beside the personal assistant stack: Worldlet is the missing World UI above the Harness" width="960" /></a>
+</p>
+
+Worldlet provides no model of its own. It talks through your Agent and borrows its sign-ins, connections, skills and memory, and gives the Agent World tools over the `worldlet` MCP server. Switch Agents and your World stays.
+
+| Computer | AI era | Who owns it |
+| --- | --- | --- |
+| CPU | Model | Your model provider (your own sign-in or API key) |
+| Kernel | Harness: Hermes Agent, OpenClaw, Claude Code, Codex, pi | Your choice, replaceable |
+| Drivers and keychain | MCP servers, connectors and their tokens | Your Harness; Worldlet borrows them |
+| Terminal | Chat apps and command lines | Where Agents live today |
+| Graphical system | Worldlet: World, Applets, Fox, Attention Center | This project |
+| System API | World tools, served to the Agent over the `worldlet` MCP server | This project |
+| Disk | `world.sqlite` and World storage, on your computer | This project |
+
+Worldlet on your own Harness is a desktop environment, like GNOME; with the Hermes Agent it installs, it is a distribution, like Ubuntu. World → Agent tools go over MCP; Agent → World goes through one adapter per Harness ([Harness contract](contracts/HARNESS.md), [interactive architecture diagram](docs/architecture.html)).
 
 ## Install
 
@@ -106,26 +127,6 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 - **[Routines](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](core/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
 - **[Your Agent on another computer](core/agent/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
-
-## Your Agent, your model: the stack in computer terms
-
-<p align="center">
-  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.svg" alt="The personal computer stack beside the personal assistant stack: Worldlet is the missing World UI above the Harness" width="960" /></a>
-</p>
-
-Worldlet provides no model of its own. It talks through your Agent and borrows its sign-ins, connections, skills and memory, and gives the Agent World tools over the `worldlet` MCP server. Switch Agents and your World stays.
-
-| Computer | AI era | Who owns it |
-| --- | --- | --- |
-| CPU | Model | Your model provider (your own sign-in or API key) |
-| Kernel | Harness: Hermes Agent, OpenClaw, Claude Code, Codex, pi | Your choice, replaceable |
-| Drivers and keychain | MCP servers, connectors and their tokens | Your Harness; Worldlet borrows them |
-| Terminal | Chat apps and command lines | Where Agents live today |
-| Graphical system | Worldlet: World, Applets, Fox, Attention Center | This project |
-| System API | World tools, served to the Agent over the `worldlet` MCP server | This project |
-| Disk | `world.sqlite` and World storage, on your computer | This project |
-
-Worldlet on your own Harness is a desktop environment, like GNOME; with the Hermes Agent it installs, it is a distribution, like Ubuntu. World → Agent tools go over MCP; Agent → World goes through one adapter per Harness ([Harness contract](contracts/HARNESS.md), [interactive architecture diagram](docs/architecture.html)).
 
 ## Privacy
 
