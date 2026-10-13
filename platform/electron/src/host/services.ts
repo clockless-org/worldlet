@@ -317,10 +317,15 @@ export interface DesktopCompanionService {
  /** Fox's hide button: the Companion's window goes away until the World is opened again. */
  hide():void;
  readonly isHidden:boolean;
+ /** Run in background: no Worldlet window stays on screen while the app keeps running; false until onboarding is over. */
+ background():boolean;
  /** While Fox is on the desktop because another app is in front: the World as the window behind Fox shows it. */
  backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
+/** Run in background (core/phone/README.md#web): a preference set from the browser link's section (modules/phone) and
+ * cleared when that link ends. Closing the World then leaves no window, not even Fox, and a login launch opens none. */
+export const RUN_IN_BACKGROUND='worldlet.runInBackground';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}
 export const APP_UPDATES='appUpdates';
 /** Order (modules/shell/order.ts), for the paired phone: whether this computer takes Orders now (the `order` action's

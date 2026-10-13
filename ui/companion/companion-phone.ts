@@ -28,7 +28,7 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
  };
  const pair=async(operation:'start'|'end'|'status')=>{status=await call('phonePair',{operation});copied=false;};
  const pairAgent=async(operation:'start'|'end'|'status')=>{agent=await call('phonePair',{operation,kind:'agent'});agentCopied=false;};
- const pairWeb=async(operation:'start'|'end'|'status'|'open')=>{web=await call('phonePair',{operation,kind:'web'});if(operation!=='open')webCopied=false;};
+ const pairWeb=async(operation:'start'|'end'|'status'|'open'|'background')=>{web=await call('phonePair',{operation,kind:'web'});if(operation!=='open'&&operation!=='background')webCopied=false;};
  function browsers(){
   const box=el('div','companion-phone-browser');
   box.append(el('h4','','In a browser'),el('p','','Open what needs you, what your Agent is doing and Fox in any web browser, on this computer or another. Keep the link private: anyone who has it can see and approve here.'));
@@ -36,6 +36,9 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
    const link=web.link;
    if(web.state==='paired')box.append(el('p','',(web.phone?.name?`Opened in ${web.phone.name}`:'Opened in a browser')+' · '+seen(web.seenAt)));
    box.append(button('Open in browser',()=>pairWeb('open'),true),button(webCopied?'Link copied':'Copy link',async()=>{await navigator.clipboard.writeText(link);webCopied=true;}),button(web.state==='paired'?'Turn off':'Cancel',()=>pairWeb('end')));
+   // Run in background: no window stays on screen, not even Fox, and the link keeps working (modules/phone).
+   if(web.state==='paired')box.append(el('p','','Use Worldlet only from the browser: close every window and keep it running. Click Worldlet in the Dock or the notification area to bring the World back.'),
+    button('Run in background',()=>pairWeb('background')));
   }else if(web)box.append(button('Open in browser',async()=>{await pairWeb('start');await pairWeb('open');}));
   return box;
  }

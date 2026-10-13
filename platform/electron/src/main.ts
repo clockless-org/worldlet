@@ -21,12 +21,13 @@ import {captureRequest,refuseBesideRunningCopy,runCapture,type CaptureRequest} f
 import {probeRequest,refuseProbeBesideRunningCopy,runProbe,type ProbeRequest} from './world/permission-probe.ts';
 import {loginItemCheckRequest,refuseLoginItemCheckBesideRunningCopy,runLoginItemCheck,type LoginItemCheckRequest} from './world/login-item-check.ts';
 import {openedAtLogin} from '../../../core/distribution/index.ts';
+import {onboardingUnfinished} from '../../../core/onboarding/index.ts';
 import {updateAcceptance} from './modules/shell/update-acceptance.ts';
 import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
-import {ANALYTICS,VAULT,type AnalyticsService} from './host/services.ts';
+import {ANALYTICS,DESKTOP_COMPANION,RUN_IN_BACKGROUND,VAULT,type AnalyticsService,type DesktopCompanionService} from './host/services.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';
@@ -166,6 +167,8 @@ async function start(){
  const preload=path.join(__dirname,'world-preload.cjs');
  // Launched by the login item: the World opens minimized and Fox waits on the desktop, nothing takes focus.
  const quiet=profile.channel==='release'&&!capture&&!probe&&!loginCheck&&!profile.smoke&&openedAtLogin({platform:process.platform,argv:process.argv,wasOpenedAtLogin:process.platform==='darwin'?app.getLoginItemSettings({type:'mainAppService'}).wasOpenedAtLogin:false});
+ // Set to run in background with onboarding over: the login launch opens no window at all (the Dock or tray brings it).
+ const hidden=quiet&&preferences.bool(RUN_IN_BACKGROUND)&&!onboardingUnfinished(store.state.onboarding);
  startBackgroundLaunch(profile);
  world=new WorldWindow(profile,preload,{
   openURL:url=>{const browser=host.optional<{openExternalRequest(url:string):void}>('browser');if(browser)browser.openExternalRequest(url);else void openInBrowser(url);},
@@ -175,7 +178,7 @@ async function start(){
   activated:active=>page.event(active?'worldlet:app-active':'worldlet:app-inactive'),
   resized:()=>{},
   ingest:request=>host.optional<AnalyticsService>(ANALYTICS)?.ingest(request)??Promise.resolve(new Response(null,{status:204}))
- },{quiet});
+ },{quiet,hidden});
  if(profile.channel==='dev')installCapture(world.view.webContents);
  if(!fs.existsSync(path.join(profile.webRoot,'index.html'))){
   if(checkName===null)dialog.showErrorBox('Worldlet could not start','The Worldlet interface is missing. Run npm run build:native-ui first.');
@@ -183,6 +186,7 @@ async function start(){
   app.exit(1);return;
  }
  await world.load();
+ if(hidden)host.optional<DesktopCompanionService>(DESKTOP_COMPANION)?.background();
  if(capture)void runCapture(capture,launchedAt,()=>world?{window:world.window,view:world.view}:null).finally(()=>app.quit());
  if(probe)void runProbe(probe,(body,sender)=>router.dispatch(body,sender),world.view.webContents,()=>store.state.connections??[]).finally(()=>app.quit());
  if(loginCheck)void runLoginItemCheck(loginCheck,profile.channel,(body,sender)=>router.dispatch(body,sender),world.view.webContents).finally(()=>app.quit());
