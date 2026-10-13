@@ -31,8 +31,9 @@ export class WorldWindow {
  readonly window:BaseWindow;
  readonly view:WebContentsView;
  readonly profile:Profile;
- /** `quiet`: launched by the login item (#1229), so the World opens minimized without taking focus. */
- constructor(profile:Profile,preload:string,hooks:WorldWindowHooks,{quiet=false}:{quiet?:boolean}={}){
+ /** `quiet`: launched by the login item (#1229), so the World opens minimized without taking focus. `hidden`: also set
+  * to run in background (modules/shell/companion.ts RUN_IN_BACKGROUND), so it does not open at all. */
+ constructor(profile:Profile,preload:string,hooks:WorldWindowHooks,{quiet=false,hidden=false}:{quiet?:boolean,hidden?:boolean}={}){
   this.profile=profile;
   const mac=process.platform==='darwin';
   this.window=new BaseWindow({
@@ -58,7 +59,7 @@ export class WorldWindow {
   contents.setWindowOpenHandler(({url})=>{if(/^https:/i.test(url))hooks.openURL(url);else if(/^mailto:/i.test(url))void shell.openExternal(url);return {action:'deny'};});
   contents.on('dom-ready',()=>{if(mac&&trustedWorldURL(contents.getURL()))void contents.insertCSS(TITLE_BAR_DRAG,{cssOrigin:'user'});});
   contents.on('did-finish-load',()=>{if(trustedWorldURL(contents.getURL()))hooks.loaded();});
-  const show=()=>{if(this.window.isDestroyed())return;if(backgroundLaunch()){showInBackground(this.window);return;}if(!quiet){this.window.show();return;}if(!this.window.isVisible()&&!this.window.isMinimized()){this.window.showInactive();this.window.minimize();}};
+  const show=()=>{if(this.window.isDestroyed()||hidden)return;if(backgroundLaunch()){showInBackground(this.window);return;}if(!quiet){this.window.show();return;}if(!this.window.isVisible()&&!this.window.isMinimized()){this.window.showInactive();this.window.minimize();}};
   contents.once('did-finish-load',show);
   // A page that never paints must still show its window and loader.
   setTimeout(()=>{if(!this.window.isDestroyed()&&!this.window.isVisible())show();},4000);

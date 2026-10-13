@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
-import {AGENT,ANALYTICS,BROWSER,COMPANION,FOX,ORDER,PHONE,VAULT,WIDGETS,type AgentService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RUN_IN_BACKGROUND,VAULT,WIDGETS,type AgentService,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
@@ -158,6 +158,8 @@ export function installPhone(host:Host){
   onChange:status=>{
    if(status.state==='paired'&&webPaired===false)usage('phone_paired',{phone_platform:'web'});
    webPaired=status.state==='paired';
+   // Running in background is for this link: once it ends, closing the World leaves Fox on the desktop again.
+   if(status.state==='none'&&host.preferences.bool(RUN_IN_BACKGROUND))host.preferences.set(RUN_IN_BACKGROUND,false);
    host.page.event('worldlet:web-pair-status',status);
   },
  });
@@ -229,6 +231,16 @@ export function installPhone(host:Host){
     const status=link.relay.status();if(!status.link)throw new WorldletError('Make a link first.');
     try{await openInBrowser(status.link);}catch{throw new WorldletError('Could not open your browser. Copy the link instead.');}
     return status;
+   }
+   // Run in background: every window steps aside now, and closing the World or a login launch leaves none
+   // (modules/shell/companion.ts RUN_IN_BACKGROUND) until the link ends.
+   if(request.operation==='background'&&request.kind==='web'){
+    if(!link.relay.paired)throw new WorldletError('Open the link in a browser first.');
+    const companion=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
+    if(!companion)throw new WorldletError('Running in background is not available here.');
+    host.preferences.set(RUN_IN_BACKGROUND,true);
+    if(!companion.background())throw new WorldletError('Finish setting up Worldlet first.');
+    return link.relay.status();
    }
    throw new WorldletError('Unknown pairing request.');
   },
