@@ -66,6 +66,16 @@ The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presen
 
 Coordinates start at the image's upper-left and stay within 0–1. They are measured from the finished picture, not guessed from a generation prompt. `fitThemeScene(registration, width, height)` applies one centered, uniform contain transform to the painting, every region and companion clearance. Do not crop the background independently. The host chooses its responsive presentation and may switch to a normal readable page on narrow viewports instead of shrinking interactive text.
 
+Desktop Applet artwork and layout should target these usable dimensions (design guidance, not a schema-enforced threshold):
+
+| Dimension | Target |
+| --- | --- |
+| Usable content height | About 80% of the Applet viewport height |
+| Usable content width | About 75% of the Applet viewport width |
+| Remaining right-hand space | Place Fox and its conversation here, aligned with the scene; avoid an unused gap between the Applet and companion |
+
+Measure the live HTML or website area after navigation, padding and decorative frame insets, not the outer painted board. Keep the main content on the left. Arrange frames and props around this area rather than reducing it; preserve irregular paper edges as foreground detail without covering usable controls. Check the complete composition with the actual companion and reply visible. These are approximate desktop targets; retain readable responsive fallbacks on narrow windows. Existing scenes may need revision to meet them.
+
 Keep dates, messages, task state and controls out of the bitmap. The host supplies real HTML and trusted data inside those surfaces. A Calendar can have a main event surface and a separate small date surface. Regions grant no capabilities, execute no code and bind no provider data themselves. Embedded external websites still require the host's browser surface and cannot acquire this appearance from artwork alone.
 
 The host draws registered scenes with one shared renderer, [ui/applets/scene](../../ui/applets/scene/README.md): it lays the painting out with `fitThemeScene`, puts a live HTML element on every region and gives each region its `sceneMaterials` entry as CSS variables. An Applet fills the regions with its records and the shared controls and names no coordinate, colour or font, so a theme changes how an Applet looks without a change to the Applet. Mail is drawn this way; the other Applets keep their current pages until they move over, and the preset picker has not adopted registered surfaces yet.
