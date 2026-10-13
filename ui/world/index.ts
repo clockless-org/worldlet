@@ -21,7 +21,7 @@ export {FOX_FRAME_RATE,WORLD_FRAME_RATE,foxFrameRate,frameDue,windowActive,world
 
 export {createMailArrival} from './mail-arrival.ts';
 
-export {THEME_SCENE} from './theme-scene.ts';
+export {THEME_SCENE,themeAreaMap} from './theme-scene.ts';
 export {mountLocalMusic,runLocalMusicTool} from './local-music.ts';
 export {musicReply} from './music-command.ts';
 export {describePlace} from './notion-places.ts';

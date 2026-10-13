@@ -10,7 +10,7 @@ await withBrowser(fileAccess,async browser=>{
  // The companion panel no longer lists Applets (owner feedback 2026-10-03): they live in their areas.
  await openCompanionPanel(page);assert.equal(await page.getByRole('tab',{name:'Applets',exact:true}).count(),0);
  await page.getByRole('button',{name:'Close companion panel',exact:true}).click();
- await page.getByRole('button',{name:'Manage Home',exact:true}).click();if(!await page.locator('.region-shelf').isVisible())await page.getByRole('button',{name:'Manage Home',exact:true}).click();
+ await page.getByRole('button',{name:'Enter Home',exact:true}).click();if(!await page.locator('.area-view').isVisible())await page.getByRole('button',{name:'Enter Home',exact:true}).click();await page.locator('.area-view-manage').click();
  assert.equal(await page.locator('.region-shelf .ui-pagination').count(),0);assert.equal(await page.locator('[data-ground-slot]').count(),5);
  const shelf=page.locator('.region-shelf'),heading=shelf.getByRole('heading',{name:'Home',exact:true}),headBefore=await heading.boundingBox();
  await shelf.locator('.region-shelf-applet').last().scrollIntoViewIfNeeded();assert(Math.abs((await heading.boundingBox()).y-headBefore.y)<1);assert(await shelf.evaluate(e=>e.scrollHeight<=e.clientHeight+1));

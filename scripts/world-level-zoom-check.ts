@@ -56,10 +56,11 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal((await veils()).at(-1)?.direction,'out','leaving an Applet zooms out');
  await zoomed(start+2,'out','Leaving an Applet');
 
- // An area panel: its Applet zooms in from the panel's row, Back zooms out to the same panel, and closing the panel
- // zooms the World's camera back out.
- const shelf=page.locator('.region-shelf');
+ // An area panel, opened with Manage from inside the Area (owner request 2026-10-13): its Applet zooms in from the panel's
+ // row, Back zooms out to the same panel, and closing the panel zooms the World's camera back out.
+ const shelf=page.locator('.region-shelf'),areaView=page.locator('.area-view');
  await page.locator('.notion-pin[data-page="building-home"][data-action="region-more"]').click();
+ await areaView.locator('.area-view-manage').click();
  await shelf.waitFor();
  await page.waitForFunction(()=>{const c=(document.querySelector('#notionWorld') as any).sceneMetrics.camera;return c.settled&&!!c.area;});
  await shelf.locator('.region-shelf-applet[aria-label="Notes"]').click();
@@ -76,6 +77,10 @@ await withBrowser(fileAccess,async browser=>{
  for(let i=0;i<3&&await shelf.count();i++){await page.keyboard.press('Escape');await page.waitForTimeout(200);}
  await shelf.waitFor({state:'detached'});
  await page.waitForFunction(()=>{const c=(document.querySelector('#notionWorld') as any).sceneMetrics.camera;return c.settled&&!c.area;});
+ // Back in the Area it was opened from; Esc again leaves it for the World.
+ assert.equal(await areaView.getAttribute('data-area'),'home','closing the panel leaves the Area open');
+ for(let i=0;i<3&&await areaView.count();i++){await page.keyboard.press('Escape');await page.waitForTimeout(200);}
+ await areaView.waitFor({state:'detached'});
 
  // A website Applet (owner Order 2026-10-08: Discord, left and entered again, showed its page at 60%): its panel does
  // not grow with the zoom, because the host places the native page at the panel's rect as measured, and the page ends

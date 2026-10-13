@@ -25,7 +25,7 @@ import {attentionBrief} from '../../core/attention/index.ts';
 import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
-import {WORLD_LAYOUT,THEME_SCENE} from '../world/index.ts';
+import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
 import {createLocationWriter} from './navigation-history.ts';
 import {renderMailFocus} from '../applets/index.ts';
 import {renderTranscript,transcriptBar} from '../applets/index.ts';
@@ -119,7 +119,7 @@ export function mountNotionWorld(data: World, native: any) {
   let voice,environmentController,nativeHUD,travelExperiment,weatherPanel,picturesAsked='';
   let attentionPage:any=null;
   let arrivals=[];
-  let objectFromRoom=false,foregroundGuide=null,restoringWorld=false,appletEntryReturn=null;
+  let objectFromRoom=false,foregroundGuide=null,restoringWorld=false,appletEntryReturn=null,areaView:HTMLElement|null=null;
   let focusEntryReturn=null;
   let current=null,currentSpace=null,depth='overview',scene,searching=false,query='',history=[],catalogOffset=0,searchOffset=0,readerReturns=[];
   const readKey='aladdin-notion-read-'+(data.workspaceId||data.workspace);let read=new Set();try{read=new Set(JSON.parse(localStorage.getItem(readKey)||'[]'))}catch{}
@@ -416,7 +416,7 @@ export function mountNotionWorld(data: World, native: any) {
     // or only ends typing; the tap that opened it (the same gesture) does nothing more.
     if(!worldPointerStart?.panelOpen||attentionPage||foxArtifact.visible||$('notionDialog').open)return;
     const typing=worldPointerStart.typing;worldPointerStart.handled=true;if(typing){endTyping(typing);return;}back();return;}
-   if(target.action==='back'&&insideApplet()){if(attentionPage||foxArtifact.visible||$('notionDialog').open)return;const typing=worldPointerStart?.typing;if(worldPointerStart)worldPointerStart.handled=true;if(typing){endTyping(typing);return;}back();return;}if(target.action==='region-more'){if(root.dataset.onboardingLocked!=='true'){if(THEME_SCENE.areaZoom)visitBuilding(target.id);else openRegion(target.id);}return;}if(!content.hidden&&['app-source','coding-session','browser'].includes(content.dataset.template)&&['back','building','space'].includes(target.action)){back();return;}if(target.action==='back'){back();return;}if(target.id!=='place-app-youtube'&&target.id!=='app-youtube')dismissFox();if(target.action==='applet-item'){openStageItem(target.id);return;}if(target.action==='building')visitBuilding(target.id);else visitSpace(target.id,target.level||'place')}
+   if(target.action==='back'&&insideApplet()){if(attentionPage||foxArtifact.visible||$('notionDialog').open)return;const typing=worldPointerStart?.typing;if(worldPointerStart)worldPointerStart.handled=true;if(typing){endTyping(typing);return;}back();return;}if(target.action==='region-more'){if(root.dataset.onboardingLocked!=='true'){if(THEME_SCENE.areaZoom)visitBuilding(target.id);else if(target.kind==='region-add')openRegion(target.id);else enterArea(target.id);}return;}if(!content.hidden&&['app-source','coding-session','browser'].includes(content.dataset.template)&&['back','building','space'].includes(target.action)){back();return;}if(target.action==='back'){back();return;}if(target.id!=='place-app-youtube'&&target.id!=='app-youtube')dismissFox();if(target.action==='applet-item'){openStageItem(target.id);return;}if(target.action==='building')visitBuilding(target.id);else visitSpace(target.id,target.level||'place')}
   // Scene edits change presentation only; connected sources and records remain intact.
   const layoutKey='worldlet-applet-layout:'+String(data.sample?'sample':data.workspace);
   function loadSampleLayout(){if(!data.sample&&native?.editApplet)return;try{const saved=JSON.parse(localStorage.getItem(layoutKey)||'{}');Object.assign(data,saved);}catch{}}
@@ -482,6 +482,18 @@ export function mountNotionWorld(data: World, native: any) {
   const appWebsite=(r:any)=>appletHost(getApp(r.key)||r);
   // Puts an Applet the person did not have yet into this Area; opening it then makes it theirs.
   function placeInArea(applet:string,area:string){moveRegionApplet(regionLayout,applet,area);saveRegions();refreshRegions();}
+  // What an Area holds: the person's own Applets there, most recently used first (owner Order 2026-10-07): chosen at
+  // setup, opened, or put here; and the related Applets it recommends from the rest of the catalog.
+  function areaContents(id:string){
+   readAreaSignals();
+   const apps=sections.filter(r=>r.entity==='app'&&r.region===id&&root.appletLayout.has(r.moduleId)).sort((a,b)=>recentlyUsedFirst(a,b,regionLayout));
+   // Only Applets that work once added, and that this computer supports (core/applets/applet-support.ts).
+   const catalog=sections.filter(r=>r.entity==='app'&&r.key&&!['ongoing','weather'].includes(r.key)&&!r.ongoing&&!r.moment&&!r.site&&inAppletCatalog(r)&&native?.appletSupported?.(r.key)!==false);
+   const mine=new Map<string,string>(sections.filter(r=>r.entity==='app'&&root.appletLayout.has(r.moduleId)).map(r=>[r.moduleId,r.region]));
+   const recommended=recommendForArea({area:id,mine,removed:new Set(data.hiddenApplets||[]),installed:areaSignals.installed,suggested:areaSignals.suggested,visits:areaSignals.visits,
+    apps:catalog.map(r=>({id:r.moduleId,key:r.key,category:appCategory(r),host:appWebsite(r)}))}).map(appId=>catalog.find(r=>r.moduleId===appId)).filter(Boolean);
+   return {apps,catalog,recommended};
+  }
   function openRegion(value){
    const id=regionId(value),building=buildings.find(b=>regionId(b.id)===id);if(!building)return;
    const refresh=regionShelf?.dataset.area===id;closeRegionShelf();regionShelfTrigger=document.activeElement as HTMLElement;
@@ -497,16 +509,11 @@ export function mountNotionWorld(data: World, native: any) {
     factory.append(title,element('p','','Fox will make small games for you here, tried before they arrive and played offline on this computer.'),idea);
     shelf.append(factory);
    }
-   readAreaSignals();
-   // The Area holds only the person's own Applets, most recently used first (owner Order 2026-10-07): chosen at setup,
-   // opened, or put here. The rest of the catalog is recommended below or listed under All.
-   const apps=sections.filter(r=>r.entity==='app'&&r.region===id&&root.appletLayout.has(r.moduleId)).sort((a,b)=>recentlyUsedFirst(a,b,regionLayout));
+   const {apps,catalog,recommended}=areaContents(id);
    const placements=resolvePlacements(sections,{},r=>root.appletLayout.has(r.moduleId),{},regionLayout);
    const ground=WORLD_LAYOUT.regions[id].placements.map(slot=>apps.find(app=>placements[app.moduleId]?.id===slot.id)||null);
    const groundIds=new Set(ground.filter(Boolean).map(app=>app.moduleId));
    shelf.append(element('p','region-shelf-note','The '+(ground.length===5?'five':ground.length)+' you used last stand on the ground. Pin one to keep its place.'));
-   // Only Applets that work once added, and that this computer supports (core/applets/applet-support.ts).
-   const catalog=sections.filter(r=>r.entity==='app'&&r.key&&!['ongoing','weather'].includes(r.key)&&!r.ongoing&&!r.moment&&!r.site&&inAppletCatalog(r)&&native?.appletSupported?.(r.key)!==false);
    const list=element('div','region-shelf-scroll');shelf.append(list);
    let dragged:string|null=null,dropping=false;
    const clearDrop=()=>shelf.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));
@@ -537,7 +544,7 @@ export function mountNotionWorld(data: World, native: any) {
    const group=(title,items,heading:string|null=title)=>{if(heading)list.append(element('h3','',heading));const grid=element('div','region-shelf-grid');grid.dataset.group=title;list.append(grid);for(const [index,app] of items.entries()){
     if(!app){const empty=element('div','region-shelf-slot','Empty place');empty.setAttribute('aria-label','Empty place '+(index+1));dropTarget(empty,index);grid.append(empty);continue;}
     const own=root.appletLayout.has(app.moduleId)&&app.region===id;
-    const tile=button('',()=>{closeRegionShelf();if(!own&&!root.appletLayout.has(app.moduleId))placeInArea(app.moduleId,id);visitObject(app.moduleId);if(appletEntryReturn)appletEntryReturn.area=id;},'region-shelf-applet');tile.setAttribute('aria-label',app.title);
+    const tile=button('',()=>{const inArea=areaView?.dataset.area;closeRegionShelf();if(!own&&!root.appletLayout.has(app.moduleId))placeInArea(app.moduleId,id);visitObject(app.moduleId);if(appletEntryReturn){appletEntryReturn.area=id;if(inArea)appletEntryReturn.areaView=inArea;}},'region-shelf-applet');tile.setAttribute('aria-label',app.title);
     const img=element('img');img.src=themeAppletIcon(app.key)||'';img.alt='';tile.append(img,element('span','',app.title));
     tile.draggable=true;tile.ondragstart=e=>{if(dropping){e.preventDefault();return;}dragged=app.moduleId;requestAnimationFrame(()=>{if(dragged&&regionShelf===shelf)shelf.classList.add('is-dragging');});scene?.setPlacementArea(id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('application/worldlet-applet',app.moduleId);};tile.ondragend=()=>{dragged=null;shelf.classList.remove('is-dragging');clearDrop();scene?.setPlacementArea(null);};
     if(!own){
@@ -566,9 +573,6 @@ export function mountNotionWorld(data: World, native: any) {
     return move;
    }
    group('On the ground',ground,'Recently used');group('Recently used',apps.filter(app=>!groundIds.has(app.moduleId)),null);
-   const mine=new Map<string,string>(sections.filter(r=>r.entity==='app'&&root.appletLayout.has(r.moduleId)).map(r=>[r.moduleId,r.region]));
-   const recommended=recommendForArea({area:id,mine,removed:new Set(data.hiddenApplets||[]),installed:areaSignals.installed,suggested:areaSignals.suggested,visits:areaSignals.visits,
-    apps:catalog.map(r=>({id:r.moduleId,key:r.key,category:appCategory(r),host:appWebsite(r)}))}).map(appId=>catalog.find(r=>r.moduleId===appId));
    if(recommended.length)group('Recommended',recommended);
    // Recommended lists every related Applet not in the World; the rest of this Area's category (ones the person removed
    // or keeps in another Area) waits by name behind one button.
@@ -583,6 +587,35 @@ export function mountNotionWorld(data: World, native: any) {
    // it; closing the panel zooms back out (owner request 2026-10-06). Narrow windows keep the centred panel.
    const side=getComputedStyle(shelf).getPropertyValue('--region-shelf-side').trim()==='1';shelf.dataset.side=String(side);
    scene?.frameArea(id,side?root.clientWidth-shelf.offsetLeft:0);(shelf.querySelector('.region-shelf-applet,.region-shelf-add') as HTMLElement)?.focus({preventScroll:true});
+  }
+  // Entering an Area (owner request 2026-10-13): its painted map (themeAreaMap) fills the window and its Applets stand on
+  // it, five to a row and on down: the person's own first, then the ones it recommends. The Attention Center and the
+  // rest of the World's chrome step aside; Fox stays, and Back or Esc returns to the World. Manage opens the Area's panel
+  // for placing, pinning and moving.
+  function closeAreaView(){if(!areaView)return;closeRegionShelf();areaView.remove();areaView=null;delete root.dataset.areaView;voice?.sync();}
+  function enterArea(value){
+   const id=regionId(value),building=buildings.find(b=>regionId(b.id)===id);if(!building)return;
+   closeRegionShelf();areaView?.remove();
+   const view=element('section','area-view');areaView=view;view.dataset.area=id;view.setAttribute('aria-label',building.title);
+   const daylight=root.sceneMetrics?.environment?.daylight,hour=new Date().getHours(),night=typeof daylight==='number'?daylight<.5:hour<6||hour>=19;
+   view.dataset.time=night?'night':'day';
+   const map=themeAreaMap(id,night);
+   if(map){const img=element('img','area-view-map') as HTMLImageElement;img.src=map;img.alt='';img.draggable=false;view.append(img);}
+   const header=element('header','area-view-header');
+   const leave=button('',()=>closeAreaView(),'area-view-back');leave.setAttribute('aria-label','Back to the World');leave.title='Back to the World';
+   leave.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+   const manage=button('Manage',()=>openRegion(id),'area-view-manage');manage.setAttribute('aria-label','Manage '+building.title+' Things');
+   header.append(leave,element('h1','',building.title),manage);
+   const {apps,recommended}=areaContents(id),grid=element('div','area-view-grid');
+   const tile=(app,own:boolean)=>{
+    const t=button('',()=>{closeAreaView();if(!own&&!root.appletLayout.has(app.moduleId))placeInArea(app.moduleId,id);visitObject(app.moduleId);if(appletEntryReturn)appletEntryReturn.areaView=id;},'area-view-applet');
+    t.dataset.applet=app.moduleId;t.dataset.own=String(own);t.setAttribute('aria-label',own?app.title:'Add '+app.title);
+    const img=element('img') as HTMLImageElement;img.src=themeAppletIcon(app.key)||'';img.alt='';img.draggable=false;t.append(img,element('span','',app.title));grid.append(t);
+   };
+   apps.forEach(app=>tile(app,true));recommended.forEach(app=>tile(app,false));
+   const scroll=element('div','area-view-scroll');scroll.append(grid);view.append(header,scroll);
+   root.append(view);root.dataset.areaView=id;voice?.sync();
+   (grid.querySelector('.area-view-applet') as HTMLElement|null)?.focus({preventScroll:true});
   }
   let deviceMenu=null;
   function removeMenu(){deviceMenu?.remove();deviceMenu=null;}
@@ -674,7 +707,7 @@ export function mountNotionWorld(data: World, native: any) {
        p.ondragleave=()=>p.classList.remove('is-drop-target');
        p.ondrop=e=>{e.preventDefault();e.stopPropagation();p.classList.remove('is-drop-target');void shelfDrop?.(point.slot);};
       }
-      if(point.kind==='region-more'){const title=(THEME_SCENE.areaZoom?'Enter ':'Manage ')+point.title;if(p.title!==title)p.title=title;if(!p.querySelector('.region-edit-hint')){const hint=element('span','region-edit-hint');hint.setAttribute('aria-hidden','true');hint.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 5 5-12 12-6 1 1-6Z M13 6l5 5"/></svg>';p.append(hint);}}
+      if(point.kind==='region-more'){const title='Enter '+point.title;if(p.title!==title)p.title=title;if(!p.querySelector('.region-edit-hint')){const hint=element('span','region-edit-hint');hint.setAttribute('aria-hidden','true');hint.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 5 5-12 12-6 1 1-6Z M13 6l5 5"/></svg>';p.append(hint);}}
       const strong=p._strong??=p.querySelector('strong');
       if(point.kind==='app'){
        const labelVisible=String(!!point.labelVisible),running=String(!!point.running);
@@ -768,8 +801,8 @@ export function mountNotionWorld(data: World, native: any) {
   function syncSoundScene(){root.dataset.soundTrack=themeAmbientTrack(ACTIVE_THEME.pack,depth,current||'');}
   // An area panel belongs to the place it was opened in: entering an Applet by any path, or moving to another
   // place (as after Back reopens it, #2054), closes it, so it never covers what comes next.
-  function sceneState(){gameScene.sync(!content.hidden&&content.dataset.template==='game'&&appletSceneKey(gameKey)?gameKey:'');syncSoundScene();recordLocationActivity();if(regionShelf&&(insideApplet()||regionShelfPlace!==depth+':'+current))closeRegionShelf();if(regionsReorder&&depth==='overview'){regionsReorder=false;scene?.refreshRegions();}if(attentionPage&&!restoringWorld)closeAttentionPreview(false);if(memoReader&&(content.hidden||current!=='app-voice-memos'||content.dataset.template!=='app-source')){memoReader.dispose();memoReader=null;}if(messagesReader&&(content.hidden||current!=='app-messages'||content.dataset.template!=='app-source')){messagesReader.dispose();messagesReader=null;}if(root.dataset.onboarding!=='true'&&foregroundGuide&&(depth!=='object'||current!==foregroundGuide||!content.hidden)){foregroundGuide=null;voice?.setGuide?.(null,{forget:true});}if(depth!=='object'||!sections.some(r=>r.moduleId===current&&r.entity==='app'))deviceInventory?.hide();const place=describe(sections.find(s=>s.id===currentSpace)?.theme);root.dataset.depth=depth;appletShelf?.sync(depth==='object'?current:null);root.dataset.viewLevel=data.matterCatalog?({overview:'world',building:'region',room:'matter',object:sections.find(r=>r.id===currentSpace)?.entity||'matter',note:'detail'}[depth]||depth):data.moduleCatalog?({overview:'world',building:'region',room:'module',object:'module',note:'detail'}[depth]||depth):data.personal?({overview:'world',room:'region',object:'object',note:'detail'}[depth]||depth):depth;root.dataset.page=current||'';if(native)$('notionStage').inert=depth==='note'||depth==='search';$('notionBack').hidden=depth==='overview';$('notionNext').textContent=({overview:'Go home →',place:place.enter+' →',room:place.browse+' →',shelf:'Read a book →',note:'Next book →',search:'Back to my world →'})[depth];breadcrumbs();syncAppletMode();writeLocation();voice?.sync();updateCapsule();travelExperiment?.sync()}
-  function home(){focusEntryReturn=null;pageLayer=null;$('notionDialog').close();if(!restoringWorld)dismissFox();readerReturns=[];current=null;currentSpace=null;depth='overview';searching=false;history=[];content.hidden=true;hud.classList.remove('is-reading');$('notionWorldTitle').hidden=false;$('notionWorldTitle').textContent='This is your little world.';$('notionWorldMeta').textContent='Come home, read, and do what you love';scene?.focus('overview');sceneState();if(data.sample){$('notionWorldTitle').textContent='A place for everything in your life.';$('notionWorldMeta').textContent='Explore or type “show my mail”'}}
+  function sceneState(){gameScene.sync(!content.hidden&&content.dataset.template==='game'&&appletSceneKey(gameKey)?gameKey:'');syncSoundScene();recordLocationActivity();if(regionShelf&&(insideApplet()||regionShelfPlace!==depth+':'+current))closeRegionShelf();if(areaView&&depth!=='overview')closeAreaView();if(regionsReorder&&depth==='overview'){regionsReorder=false;scene?.refreshRegions();}if(attentionPage&&!restoringWorld)closeAttentionPreview(false);if(memoReader&&(content.hidden||current!=='app-voice-memos'||content.dataset.template!=='app-source')){memoReader.dispose();memoReader=null;}if(messagesReader&&(content.hidden||current!=='app-messages'||content.dataset.template!=='app-source')){messagesReader.dispose();messagesReader=null;}if(root.dataset.onboarding!=='true'&&foregroundGuide&&(depth!=='object'||current!==foregroundGuide||!content.hidden)){foregroundGuide=null;voice?.setGuide?.(null,{forget:true});}if(depth!=='object'||!sections.some(r=>r.moduleId===current&&r.entity==='app'))deviceInventory?.hide();const place=describe(sections.find(s=>s.id===currentSpace)?.theme);root.dataset.depth=depth;appletShelf?.sync(depth==='object'?current:null);root.dataset.viewLevel=data.matterCatalog?({overview:'world',building:'region',room:'matter',object:sections.find(r=>r.id===currentSpace)?.entity||'matter',note:'detail'}[depth]||depth):data.moduleCatalog?({overview:'world',building:'region',room:'module',object:'module',note:'detail'}[depth]||depth):data.personal?({overview:'world',room:'region',object:'object',note:'detail'}[depth]||depth):depth;root.dataset.page=current||'';if(native)$('notionStage').inert=depth==='note'||depth==='search';$('notionBack').hidden=depth==='overview';$('notionNext').textContent=({overview:'Go home →',place:place.enter+' →',room:place.browse+' →',shelf:'Read a book →',note:'Next book →',search:'Back to my world →'})[depth];breadcrumbs();syncAppletMode();writeLocation();voice?.sync();updateCapsule();travelExperiment?.sync()}
+  function home(){closeAreaView();focusEntryReturn=null;pageLayer=null;$('notionDialog').close();if(!restoringWorld)dismissFox();readerReturns=[];current=null;currentSpace=null;depth='overview';searching=false;history=[];content.hidden=true;hud.classList.remove('is-reading');$('notionWorldTitle').hidden=false;$('notionWorldTitle').textContent='This is your little world.';$('notionWorldMeta').textContent='Come home, read, and do what you love';scene?.focus('overview');sceneState();if(data.sample){$('notionWorldTitle').textContent='A place for everything in your life.';$('notionWorldMeta').textContent='Explore or type “show my mail”'}}
   function visitArea(id){
     const area=areas.find(a=>a.id===id);if(!area)return;if(buildings.length&&areas.length===1){home();return;}readerReturns=[];current=id;currentSpace=id;depth='area';searching=false;content.hidden=true;hud.classList.remove('is-reading');scene?.focus(id,'area');sceneState();
   }
@@ -811,9 +844,9 @@ export function mountNotionWorld(data: World, native: any) {
     // context change only after opening a guide on this same page.
     renderPage();sceneState();
   }
-  function back(){if(inPageLayer()){closePageLayer();return;}if(!content.hidden&&content.dataset.template==='meeting-transcript'){const r=sections.find(s=>s.key==='meetings');if(r){showMeetings(r);return;}}if(libraryWebReturn&&depth==='object'&&current===libraryWebReturn.app.moduleId&&content.dataset.template==='browser'){const previous=libraryWebReturn;libraryWebReturn=null;if(previous.record)openAppRecord(previous.app,previous.record);else showAppPanel(previous.app);return;}if(!content.hidden&&content.dataset.template==='coding-session'){visitObject(content.dataset.sessionApp);return;}if(!content.hidden&&content.dataset.template==='app-source'&&appReader){const previous=focusEntryReturn;focusEntryReturn=null;if(previous?.depth==='overview'){home();return;}if(previous?.depth==='building'){visitBuilding(previous.current);return;}if(previous?.depth==='object'&&previous.current){visitObject(previous.current);return;}visitObject(appReader.app.moduleId);return;}
+  function back(){if(areaView&&depth==='overview'){if(regionShelf)closeRegionShelf();else closeAreaView();return;}if(inPageLayer()){closePageLayer();return;}if(!content.hidden&&content.dataset.template==='meeting-transcript'){const r=sections.find(s=>s.key==='meetings');if(r){showMeetings(r);return;}}if(libraryWebReturn&&depth==='object'&&current===libraryWebReturn.app.moduleId&&content.dataset.template==='browser'){const previous=libraryWebReturn;libraryWebReturn=null;if(previous.record)openAppRecord(previous.app,previous.record);else showAppPanel(previous.app);return;}if(!content.hidden&&content.dataset.template==='coding-session'){visitObject(content.dataset.sessionApp);return;}if(!content.hidden&&content.dataset.template==='app-source'&&appReader){const previous=focusEntryReturn;focusEntryReturn=null;if(previous?.depth==='overview'){home();return;}if(previous?.depth==='building'){visitBuilding(previous.current);return;}if(previous?.depth==='object'&&previous.current){visitObject(previous.current);return;}visitObject(appReader.app.moduleId);return;}
     // An Applet opened from an area panel goes back out to that panel, and the panel out to the World (owner Order 2026-10-07).
-    if(data.moduleCatalog&&depth==='object'&&sections.some(r=>r.moduleId===current&&r.entity==='app')&&appletEntryReturn){const previous=appletEntryReturn;appletEntryReturn=null;if(previous.depth==='overview'){home();if(previous.area&&root.dataset.onboardingLocked!=='true')openRegion(previous.area);return;}if(previous.depth==='building'){visitBuilding(previous.current);return;}}
+    if(data.moduleCatalog&&depth==='object'&&sections.some(r=>r.moduleId===current&&r.entity==='app')&&appletEntryReturn){const previous=appletEntryReturn;appletEntryReturn=null;if(previous.depth==='overview'){home();if(root.dataset.onboardingLocked!=='true'){if(previous.areaView)enterArea(previous.areaView);if(previous.area)openRegion(previous.area);}return;}if(previous.depth==='building'){visitBuilding(previous.current);return;}}
     if(data.moduleCatalog&&depth==='object'){if(!sections.some(r=>r.moduleId===current&&r.entity==='app')&&!content.hidden){content.hidden=true;hud.classList.remove('is-reading');sceneState();return;}const b=buildingFor(currentSpace);if(b)visitBuilding(b.id);else home();return;}
     if(buildings.length&&!searching){
       if(depth==='note'){const saved=readerReturns.findLast(s=>s.depth==='search');readerReturns=[];if(saved){showSearch(saved.query,{offset:saved.offset,scroll:saved.scroll});return;}const o=objectFor(current);if(o)visitObject(o.id);else visitSpace(currentSpace);return;}
