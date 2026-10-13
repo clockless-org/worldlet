@@ -190,6 +190,19 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  const bring=agentBringDimensions('openclaw',{conversations:412,notes:31,skills:4,routines:0,model:true,memory:true,list:[{title:'#diet-and-health'}]} as any,[{outcome:'ported'},{outcome:'reconnect'},{outcome:'stays'},{outcome:'connected'}]);
  assert.deepEqual(bring,{local_agent:'openclaw',bring_conversations:'100_999',bring_notes:'10_99',bring_skills:'1_9',bring_routines:'0',bring_model:'yes',bring_memory:'yes',integrations_came_over:'1_9',integrations_reconnect:'1_9'});
  assert.ok(!JSON.stringify(bring).includes('diet'),'Conversation titles never leave the device');
+ const {hermesSetupDimensions}=await import('../core/diagnostics/index.ts');
+ assert.deepEqual(hermesSetupDimensions('install',0),{hermes_setup:'install',install_step:'0'});
+ assert.deepEqual(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again.')),{hermes_setup:'install',install_step:'0',hermes_failure:'download'});
+ assert.equal(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (exit 1)')).hermes_failure,'manifest');
+ const stage=hermesSetupDimensions('install',3,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (Python: C:\\Users\\me\\AppData failed)'));
+ assert.deepEqual(stage,{hermes_setup:'install',install_step:'3',hermes_failure:'stage'});
+ assert.ok(!JSON.stringify(stage).includes('Users'),'Installer output never leaves the device');
+ assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).install_step,'10_plus');
+ assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).hermes_failure,'timeout');
+ assert.equal(hermesSetupDimensions('install',0,new Error('Hermes Agent needs Apple’s Command Line Tools. Install them in the window macOS opened, then try again.')).hermes_failure,'command_line_tools');
+ assert.equal(hermesSetupDimensions('sign_in',0,new Error('Sign-in was cancelled.')).hermes_failure,'cancelled');
+ assert.equal(hermesSetupDimensions('sign_in',0,new Error('Hermes Agent lists no ChatGPT model. Choose one with `hermes model` in Terminal, then try again.')).hermes_failure,'no_model');
+ assert.equal(hermesSetupDimensions('sign_in',0,'boom').hermes_failure,'other');
  console.log('PASS: setup Agent events carry the Agent ID, bucketed counts and outcomes, never titles or paths');
 }
 

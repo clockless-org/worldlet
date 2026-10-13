@@ -32,3 +32,23 @@ export function agentBringDimensions(agent:string,brought:{conversations?:number
 export function agentProfileDimensions(agent:string,result:string,connections:number):Record<string,string> {
  return {local_agent:agent,profile_result:result,bring_connections:countBucket(connections)};
 }
+/** Setup without an Agent (core/agent/hermes-setup.ts): Worldlet installs Hermes Agent, then ChatGPT is signed in inside
+ * it. `hermes_setup` is which half; a failure says, as a fixed word, where it stopped (`hermes_failure`) and the
+ * installer's step it was on (`install_step`, `0` before the first one), never the error text. */
+export const HERMES_SETUP=['install','sign_in'] as const;
+export const HERMES_FAILURES=['command_line_tools','download','manifest','stage','not_found','timeout','cancelled','not_started','no_model','other'] as const;
+export const INSTALL_STEPS=['0','1','2','3','4','5','6','7','8','9','10_plus'] as const;
+export function hermesSetupDimensions(part:typeof HERMES_SETUP[number],step:number,error?:unknown):Record<string,string> {
+ const at=Number.isInteger(step)&&step>0?step:0;
+ const dimensions:Record<string,string>={hermes_setup:part,install_step:at>=10?'10_plus':String(at)};
+ if(error===undefined)return dimensions;
+ const message=String((error as {message?:unknown})?.message??error??'');
+ const failure=/Command Line Tools/.test(message)?'command_line_tools'
+  :/took too long/.test(message)?'timeout'
+  :/cancel/i.test(message)?'cancelled'
+  :/did not start|not on this computer/.test(message)?'not_started'
+  :/lists no ChatGPT model|could not use ChatGPT/.test(message)?'no_model'
+  :/could not be installed/.test(message)?(/\(/.test(message)?(at?'stage':'manifest'):(at?'not_found':'download'))
+  :'other';
+ return {...dimensions,hermes_failure:failure};
+}
