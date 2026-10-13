@@ -24,6 +24,7 @@ export const VILLAGE_ART='ui/theme-packages/village/assets';
 export interface VillageArtIndex {
  world:{day:string;night:string};
  landmarks:Record<string,{day:string;night:string}>;
+ areas:Record<string,{day:string;night:string}>;
  devices:Record<string,{src:string;box:number[]}>;
  motion:Record<string,{sheet:string;frames?:string[]}>;
  open:Record<string,string>;
@@ -52,11 +53,16 @@ export async function encodeVillageArt(root:string){
  // Settings strings are the build cache keys the payload used before, so existing caches still hit.
  const lossless=(name:string,source:string)=>emit(name,source,'plate:webp-lossless-6',f=>sharp(f).webp({lossless:true,effort:6}).toBuffer());
  const copy=(name:string,source:string)=>emit(name,source,'copy',async()=>Buffer.alloc(0));
- const index:VillageArtIndex={world:{day:'world/day.webp',night:'world/night.webp'},landmarks:{},devices:{},motion:{},open:{},logos:{},mail:{},focus:{}};
+ const index:VillageArtIndex={world:{day:'world/day.webp',night:'world/night.webp'},landmarks:{},areas:{},devices:{},motion:{},open:{},logos:{},mail:{},focus:{}};
  await lossless(index.world.day,STYLE.world.day);await lossless(index.world.night,STYLE.world.night);
  for(const [key,pair] of Object.entries(STYLE.landmarks as Record<string,{day:string;night:string}>)){
   index.landmarks[key]={day:`landmarks/${key}.webp`,night:`landmarks/${key}-night.webp`};
   await lossless(index.landmarks[key].day,pair.day);await lossless(index.landmarks[key].night,pair.night);
+ }
+ // Each Area's painted map, the view entering that Area opens onto (themeAreaMap), already encoded at its source.
+ for(const key of Object.keys(STYLE.landmarks)){
+  index.areas[key]={day:`areas/${key}-day.webp`,night:`areas/${key}-night.webp`};
+  await copy(index.areas[key].day,`resources/worlds/village/areas/${key}-day.webp`);await copy(index.areas[key].night,`resources/worlds/village/areas/${key}-night.webp`);
  }
  // Every catalog Applet's device, and the one every moment Applet stands on (core/artifacts/README.md).
  for(const key of [...WORLD_APPS.map(a=>a.key),MOMENT_ART]){

@@ -65,6 +65,8 @@ await withBrowser(fileAccess,async browser=>{
    await page.evaluate(()=>{location.hash='';});
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');
    await page.locator('[data-action="region-more"][data-page="'+region+'"]').click();
+   // Entering the Area shows its map; Manage opens its panel (owner request 2026-10-13).
+   await page.locator('.area-view-manage').click();
    const tile=page.locator('.region-shelf-grid').getByRole('button',{name:app.title,exact:true});if(!await tile.count())await page.locator('.region-shelf-all').click();await tile.click();
   }
   // When the Applet does not open, say what the World was doing, so a failure on a release host

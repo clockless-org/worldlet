@@ -219,7 +219,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    if(!regionAllowed(r.b.id)||(areaZoom&&level==='building'&&r.b.id!==active))continue;
    const id=regionId(r.b.id),key='region-more:'+id;
    add(key,r.b.id,r.b.title,r.site.label,'region-more','region-more');
-   points[key].caption='';points[key].description=(areaZoom?'Enter ':'Manage ')+r.b.title;points[key].hovered=hoveredRegion===r.b.id;
+   points[key].caption='';points[key].description='Enter '+r.b.title;points[key].hovered=hoveredRegion===r.b.id;
    if(!rooms.some(room=>room.entity==='app'&&regionId(room.buildingId)===id&&eligible(room)&&assigned[room.moduleId])){
     add('region-add:'+id,r.b.id,'+',WORLD_LAYOUT.regions[id].center,'region-more','region-add');
     points['region-add:'+id].description='Add Things to '+r.b.title;points['region-add:'+id].hovered=hoveredRegion===r.b.id;

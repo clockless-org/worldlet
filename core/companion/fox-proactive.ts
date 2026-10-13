@@ -36,7 +36,10 @@ export const PROACTIVE={
   * Applet opens and says one recommendation about it; a line no longer holds the next browse line until it is
   * answered (a line nobody answered held every Applet quiet for 10 minutes); `placeSeconds` keeps Fox from
   * opening on the same Applet again soon after it said something there. */
- browse:{settleSeconds:3,againSeconds:90,gapSeconds:45,perDay:60,perVisit:3,placeSeconds:10*60}
+ browse:{settleSeconds:3,againSeconds:90,gapSeconds:45,perDay:150,perVisit:3,placeSeconds:10*60,
+  /** In a game Worldlet follows (a Showdown battle), Fox keeps playing along: a look every `againSeconds`, up to
+   * `perVisit` a visit (owner 2026-10-13 「进入这种游戏了，那上来就要跟用户聊天，然后边玩也边给用户这个建议」). */
+  game:{againSeconds:40,gapSeconds:30,perVisit:40}}
 } as const;
 
 /** Why Worldlet asks: the person settled into a place, has stayed in it a long time, is up late, is
@@ -47,8 +50,6 @@ export const PROACTIVE_MOMENTS:readonly ProactiveMoment[]=['settled','long-stay'
 export interface ProactiveState {
  day:string;spoken:number;places:Record<string,number>;moments:string[];
  lastAt:number;ignored:number;quietUntil:number;
- /** Browse with me: on unless the person chose Don't bother in Fox's card (kept by the host). Off, Fox never speaks first. */
- browse:boolean;
  /** Browse lines today, when the last browse ask ran, and the visit it was for (one line per visit). */
  browsed:number;browseAt:number;browseVisit:string;browseVisitAsks:number;
  /** When Fox last said a browse line in each place today, so a return visit soon after is not opened on again. */
@@ -58,7 +59,7 @@ export interface ProactiveState {
  /** Recent lines, newest last, so Fox never says the same thing twice. */
  recent:string[];
 }
-export const proactiveState=():ProactiveState=>({day:'',spoken:0,places:{},moments:[],lastAt:0,ignored:0,quietUntil:0,browse:true,browsed:0,browseAt:0,browseVisit:'',browseVisitAsks:0,browsePlaces:{},pending:null,recent:[]});
+export const proactiveState=():ProactiveState=>({day:'',spoken:0,places:{},moments:[],lastAt:0,ignored:0,quietUntil:0,browsed:0,browseAt:0,browseVisit:'',browseVisitAsks:0,browsePlaces:{},pending:null,recent:[]});
 
 function settle(state:ProactiveState,now:number,day:string){
  if(state.day!==day){state.day=day;state.spoken=0;state.places={};state.moments=[];state.browsed=0;state.browsePlaces={};}
@@ -68,18 +69,19 @@ function settle(state:ProactiveState,now:number,day:string){
 
 /** Whether Fox may be asked now. `place` is the place key (here.place); `day` the local day (YYYY-MM-DD);
  * `visit` names one stay in an Applet or page for the browsing moment. */
-export function proactiveDue(state:ProactiveState,{now,day,moment,place,visit=''}:{now:number;day:string;moment:ProactiveMoment;place:string;visit?:string}):{due:true}|{due:false;reason:string} {
+export function proactiveDue(state:ProactiveState,{now,day,moment,place,visit='',game=false}:{now:number;day:string;moment:ProactiveMoment;place:string;visit?:string;
+ /** The place is a game Worldlet follows: browse looks keep coming while they play. */
+ game?:boolean}):{due:true}|{due:false;reason:string} {
  settle(state,now,day);
  if(!PROACTIVE_MOMENTS.includes(moment)||!place)return {due:false,reason:'unknown'};
- if(!state.browse)return {due:false,reason:'off'};
  if(now<state.quietUntil)return {due:false,reason:'quiet'};
  if(moment==='browsing'){
-  if(!visit||visit===state.browseVisit&&state.browseVisitAsks>=PROACTIVE.browse.perVisit)return {due:false,reason:'visit'};
+  if(!visit||visit===state.browseVisit&&state.browseVisitAsks>=(game?PROACTIVE.browse.game.perVisit:PROACTIVE.browse.perVisit))return {due:false,reason:'visit'};
   if(state.browsed>=PROACTIVE.browse.perDay)return {due:false,reason:'day'};
   if(visit!==state.browseVisit&&now-(state.browsePlaces[place]??-Infinity)<PROACTIVE.browse.placeSeconds)return {due:false,reason:'place'};
   // Browsing never waits for the last line's answer: a companion keeps talking about what is on screen. Lines let
   // pass still slow it, at most four times the gap.
-  if(now-Math.max(state.browseAt,state.lastAt)<PROACTIVE.browse.gapSeconds*2**Math.min(state.ignored,2))return {due:false,reason:'gap'};
+  if(now-Math.max(state.browseAt,state.lastAt)<(game?PROACTIVE.browse.game.gapSeconds:PROACTIVE.browse.gapSeconds)*2**Math.min(state.ignored,2))return {due:false,reason:'gap'};
   return {due:true};
  }
  if(state.spoken>=PROACTIVE.perDay)return {due:false,reason:'day'};
@@ -137,10 +139,16 @@ export const proactiveLate=(hour:number)=>hour>=PROACTIVE.lateFrom||hour<PROACTI
 
 /** What Worldlet asks Fox. Nobody spoke, so it is a task with the person's latest words for their
  * language, the lines Fox already said and the moment; Fox answers PASS unless one line is worth it. */
-export function proactiveTask({moment,place,local,minutes,recent,lastWords,opened=false}:{moment:ProactiveMoment;place:string;local:string;minutes:number;recent:string[];lastWords:string;
+export function proactiveTask({moment,place,local,minutes,recent,lastWords,opened=false,game=null}:{moment:ProactiveMoment;place:string;local:string;minutes:number;recent:string[];lastWords:string;
  /** The browse ask made as the Applet or page opens: Fox opens with a recommendation about it (owner 2026-10-12). */
- opened?:boolean}):string {
+ opened?:boolean;
+ /** The game on screen, when Worldlet follows it: the battle being played now and today's record there. */
+ game?:{playing:{format:string;opponent:string;turn:number}|null;record:{won:number;lost:number;tied:number}}|null}):string {
  const first=moment==='browsing'&&opened;
+ const record=game?`${game.record.won} won, ${game.record.lost} lost${game.record.tied?`, ${game.record.tied} tied`:''} today`:'';
+ // Owner 2026-10-13 「进入这种游戏了，那上来就要跟用户聊天，然后边玩也边给用户这个建议」: Fox plays along.
+ const playing=game?.playing?`They are in a battle right now (${game.playing.format||'a battle'} vs ${game.playing.opponent||'an opponent'}, turn ${game.playing.turn}; ${record}). Give one concrete tip for this turn or the next from what page.text shows of the battle: the threat to watch, a switch, a move, a target or when to Terastallize, and why in a few words. They are mid-game: keep it short and never repeat a tip you already gave.`:'';
+ const lobby=game&&!game.playing?`This is a game they play (${record}). ${first?'They just came in: open like a friend joining their session: about today\'s games, the last one, or what to try next.':'Between games: a word on the last game, their team or the next queue.'}`:'';
  const why=moment==='checkin'?`The person is in ${place}, and you have not said anything for a while.`:moment==='late'?`It is late (${local}) and the person is still here.`:moment==='long-stay'?`The person has been in ${place} for about ${minutes} minutes.`:first?`The person just opened ${place}, and asked you to browse along with them.`:moment==='browsing'?`The person is looking at ${place}, and asked you to browse along with them.`:`The person has settled into ${place} and paused.`;
  return [
   '(Not the person\'s words: Worldlet is asking at a quiet moment whether you have one thing worth saying first.)',
@@ -150,9 +158,10 @@ export function proactiveTask({moment,place,local,minutes,recent,lastWords,opene
   moment==='browsing'?'Browsing along, a fourth reason counts: context (something about what is on screen they may not see at a glance: what it means for them, how it ties to their day, a catch, the one thing worth doing here, or what you could do for them here). Talk about this screen, not about browsing.':'',
   // Owner 2026-10-12 「进一个 applet 就开始推荐说话 像个真的 companion」.
   moment==='checkin'?'Check in like a companion who is around: a fourth reason counts here: presence (a short reaction to what they are doing or where they are, a thought about their day, or something you could do for them now). Say something specific to this moment, never "how is it going" or a generic hello.':'',
-  first?'They just walked in, so open like a friend sitting beside them: one concrete recommendation for this screen (the one thing worth doing, reading or noticing here first, or what you could do for them here), naming the actual thing on screen. Answer PASS only if the screen shows nothing yet that you could name.':'',
+  playing||lobby,
+  first&&!game?'They just walked in, so open like a friend sitting beside them: one concrete recommendation for this screen (the one thing worth doing, reading or noticing here first, or what you could do for them here), naming the actual thing on screen. Answer PASS only if the screen shows nothing yet that you could name.':'',
   // Owner 2026-10-10 「让它提供的更勤一点」: at 7 and "when in doubt, PASS" Fox passed 86 of 88 asks.
-  `First think of up to three candidate lines and rate each 0 to 10 for how glad the person would be to get it right now. Say the best one if it rates ${first?3:moment==='browsing'||moment==='checkin'?4:6} or more and is not a repeat of anything below; otherwise answer exactly PASS. A specific, helpful line beats silence; a vague or generic one does not.`,
+  `First think of up to three candidate lines and rate each 0 to 10 for how glad the person would be to get it right now. Say the best one if it rates ${first||game?3:moment==='browsing'||moment==='checkin'?4:6} or more and is not a repeat of anything below; otherwise answer exactly PASS. A specific, helpful line beats silence; a vague or generic one does not.`,
   'The line: one or two short sentences, in the language of their latest words, like a friend\'s text. No greeting, no "need help?", no list, no emoji unless they use them. Answer with the line alone, nothing before or after it.',
   'This turn is read only: do not open, click, send, save or change anything. If something should be done, mention it in the line; they can ask.',
   // Owner 2026-10-10: Attention is the one place to act, so a line about something waiting on the person points to its card.
