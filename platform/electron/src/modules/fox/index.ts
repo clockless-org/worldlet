@@ -53,6 +53,10 @@ function knowledgeOf(profile:Row,ledger:{companionCounts():Record<string,{turns:
 // Fox's page actions (Mac WorldView Coordinator Fox cases, WorldToolService.swift).
 /** Swift `CancellationError` as the page sees it. */
 class Cancelled extends Error {constructor(){super('The request was cancelled.');this.name='AbortError';}}
+/** A step only the World page can do, asked in a turn that runs without it (FoxService.converse). */
+const NEEDS_WORLD={error:'This needs the Worldlet window open on the computer. Tell the person, and do not repeat it unless they ask.'};
+/** How long a line said in a browser or on the phone waits for Fox's running turn before it gives up. */
+const CONVERSE_WAIT=10*60_000;
 const WORLD_TOOL_NAMES=['read_companion_archive','meeting_decisions','_source_begin','_source_result','query_world_items','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','read_world_history'];
 const CONTROL_SCREENS=['preferences','sources','organize','model','privacy','voice','style','world','data','login'];
 /** Where the two default Routines' on/off is kept (on when absent). */
@@ -313,7 +317,8 @@ export function installFox(host:Host){
   const handle=async(event:Row):Promise<Row|null>=>{
    // `status: waiting` only keeps a long model wait alive; it is not conversation.
    if(record&&typeof event.type==='string'&&STREAM_EVENTS.includes(event.type)&&!(event.type==='status'&&event.stage==='waiting'))companion.recordEvent(id,event.type,scope,typeof event.text==='string'?event.text:null);
-   if(!active()||!page.ready())throw new Cancelled();
+   // A turn the page started ends with the page; one said in a browser or on the phone runs without it.
+   if(!active()||!page.ready()&&!headless.has(id))throw new Cancelled();
    if(event.type==='model_required'){showControls('model');return null;}
    if(event.type==='applet'){if(!scope.sample&&!scope.setup)sources()?.receiveAppletEvent(event,id);return null;}
    // The Harness's own permission prompt: an approval card in Fox's dialogue (and on the phone), answered through
@@ -339,6 +344,7 @@ export function installFox(host:Host){
    const owned=await accountServiceReply(event,id,scope,handle);
    if(owned)return owned;
    const tool=event.type==='tool';
+   if(!page.ready())return tool?NEEDS_WORLD:null;
    // UI tools may wait for user approval; they use the Agent budget, not the short page timeout.
    const deadline=tool?Number(core('agentRequestDeadline',{action:'chat'}))||120:15;
    observeAgentEvent(id,event);
@@ -374,6 +380,22 @@ export function installFox(host:Host){
   return value;
  }
  /** A turn's world bookkeeping once it ends, the conversation's and an Applet task's alike. */
+ /** Turns said in a browser or on the phone while the World page is not there (converse): they run on the host alone. */
+ const headless=new Set<string>();
+ /** A line said in a browser or on the phone (core/phone/README.md#web) while the World page is not there: it waits
+  * behind Fox's running turn, then runs as the person's own line in Fox's main conversation, without the page. Its
+  * steps that only the page can do (a World view, an Applet's page) answer that the window must be open. The reply
+  * reaches the browser or phone through the conversation the host already publishes. */
+ async function converse(text:string):Promise<{user:string,text:string}> {
+  for(const until=Date.now()+CONVERSE_WAIT;agentTurn!==null;){
+   if(Date.now()>until)throw new WorldletError('Fox is busy. Try again in a moment.');
+   await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  const id='headless-'+crypto.randomUUID();
+  headless.add(id);
+  try{const reply:Row=await agentChat({id,text});return {user:text,text:typeof reply.message==='string'?reply.message:''};}
+  finally{headless.delete(id);}
+ }
  function finishTurn(id:string,cancelled:boolean){
   trusts.delete(id);
   delete store.worldEvidence[id];
@@ -765,7 +787,7 @@ export function installFox(host:Host){
  });
  host.provide<FoxService>(FOX,{scope:foxScope,turnActive:()=>agentTurn!==null,cancel:cancelCloud,stopRoutines,startRoutines,
   startAppletTask:request=>appletTaskStart(request),reviewGames:request=>appletTaskStart(request,true),makeArtifactPage:request=>appletTaskStart({...request,applet:ARTIFACT_PAGE_MAKER.id},true,true),appletTask:id=>appletTasks.get(id)?.applet??null,
-  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report});
+  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report,converse});
 
  host.register({
   // "+" in Fox's bar (owner request 2026-10-12): files the person picks, as paths for the line; Fox's Agent runs on this
@@ -1080,6 +1102,6 @@ export function installFox(host:Host){
   try{runtime?.warm(home(foxScope()));}catch(error){host.diagnostics.record(error,'warm');}
  });
  // The page that started a turn is gone; its tools and stream have no listener left.
- host.onPageReload(()=>{if(agentTurn!==null)cancelCloud();cancelAppletTasks();});
+ host.onPageReload(()=>{if(agentTurn!==null&&!headless.has(agentTurn))cancelCloud();cancelAppletTasks();});
  host.onQuit(()=>{older.stop();history.stop();powerMonitor.off('resume',resumed);stopRoutines();chat?.cancel();cancelAppletTasks();companion.closeLedgers();});
 }
