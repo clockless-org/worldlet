@@ -150,6 +150,12 @@ assert.match(read('core/tools/controls.ts'),/'data','login'\]/,'Fox can open the
 assert.match(read('platform/electron/src/modules/fox/index.ts'),/'data','login'\]/,'The host accepts the login guide');
 assert.match(read('contracts/world-event-policy.json'),/"loginItem:offered"/);
 assert.match(read('platform/electron/src/world/window.ts'),/quiet[\s\S]*showInactive\(\)[\s\S]*minimize\(\)/,'A login launch never takes focus');
+// A check launch on a release host (WORLDLET_BACKGROUND_WINDOWS) never takes focus on the Mac or Windows, and on the Mac
+// its windows stay below the screen's ordinary windows, so a dashboard left open there stays in front.
+const background=read('platform/electron/src/background-launch.ts');
+assert.match(background,/process\.platform==='darwin'\|\|process\.platform==='win32'/,'Background check launches cover the Mac and Windows');
+assert.match(background,/setAlwaysOnTop\(true,'normal',-1\)[\s\S]*showInactive\(\)/,'A background window sits below ordinary windows and is shown inactive');
+assert.match(read('platform/electron/src/world/window.ts'),/backgroundLaunch\(\)\)\{showInBackground\(this\.window\)/,'The World window opens in the background');
 assert.match(read('platform/electron/src/modules/shell/login-item.ts'),/channel==='release'/,'Only the packaged app registers');
 assert.match(read('ui/index.ts'),/if\(!sample\)\{if\(!loginItemOffer\)loginItemOffer=mountLoginItemOffer/,'The practice world never offers');
 console.log('PASS open at login: status mapping, one-time offer, login guide, quiet start');

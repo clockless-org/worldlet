@@ -15,6 +15,7 @@ import type {Row} from '../host/types.ts';
 import type {CheckContext} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {errorMessage as message} from '../files.ts';
+import {backgroundLaunch,showInBackground} from '../background-launch.ts';
 
 // Release gate (Mac OnboardingFlowSmoke): the whole first-run journey in a fresh library, on real
 // code. Mock Google sign-in, app choice, arrival, the guided spotlight tour, Attention results, Fox's first
@@ -327,11 +328,13 @@ async function foxGlowShowing(window:BaseWindow){
  return false;
 }
 /** Website views on the rehearsal site, as attached to the World window (modules/browser/page.ts PageView). */
-/** Check evidence: the World window's screen area, the glow window above it included. */
+/** Check evidence: the World window's screen area, the glow window above it included. A background launch keeps the
+ * World behind other windows (background-launch.ts), so there it saves the World window alone. */
 function capture(window:BaseWindow,file:string){
  if(process.platform!=='darwin'){console.log('Window screenshot skipped: macOS only');return;}
- const {x,y,width,height}=window.getBounds();
- try{execFileSync('/usr/sbin/screencapture',['-x','-R',`${x},${y},${width},${height}`,file]);console.log('Window screenshot:',file);}
+ const {x,y,width,height}=window.getBounds(),id=window.getMediaSourceId().split(':')[1];
+ const area=backgroundLaunch()&&/^\d+$/.test(id??'')?['-l',id!]:['-R',`${x},${y},${width},${height}`];
+ try{execFileSync('/usr/sbin/screencapture',['-x',...area,file]);console.log('Window screenshot:',file);}
  catch(error){console.log('Window screenshot failed:',message(error));}
 }
 /** A covered or inactive World window keeps the website pane attached, visible and rendering:
@@ -342,7 +345,8 @@ async function coveredWindowCheck(window:BaseWindow,page:WebPage){
  const cover=new BrowserWindow({x:bounds.x-40,y:bounds.y-40,width:bounds.width+80,height:bounds.height+80,frame:false,show:false,backgroundColor:'#000000',hasShadow:false,skipTaskbar:true,
   webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false}});
  try{
-  cover.show();
+  // In a background launch the cover joins the World below ordinary windows, so the screen's own windows stay in front.
+  if(backgroundLaunch())showInBackground(cover);else cover.show();
   for(let i=0;i<50&&window.isFocused();i++)await sleep(100);
   await sleep(1000);
   const attached=page.isPresented()&&!page.hidden;

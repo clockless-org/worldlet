@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import {app,BrowserWindow,powerSaveBlocker,type NativeImage,type WebContents} from 'electron';
+import {backgroundLaunch,showInBackground} from '../background-launch.ts';
 /** Development check: wait for the World, then save a frame and a page probe and quit.
  * WORLDLET_CAPTURE=<png> [WORLDLET_CAPTURE_PROBE=<js expression>] [WORLDLET_CAPTURE_WAIT=<ms>].
  * Every stage is bounded, so a stalled probe or frame becomes a reported error, never a silent hang (#1045). */
@@ -37,7 +38,7 @@ export function installCapture(contents:WebContents){
   const state=()=>window?{visible:window.isVisible(),minimized:window.isMinimized(),focused:window.isFocused(),bounds:window.getBounds()}:null;
   let image:NativeImage|null=null,failure='';
   for(let attempt=0;attempt<3&&!image;attempt++){
-   if(attempt){if(window?.isMinimized())window.restore();if(window&&!window.isVisible())window.show();contents.invalidate();await new Promise(resolve=>setTimeout(resolve,2000));}
+   if(attempt){if(window?.isMinimized())window.restore();if(window&&!window.isVisible()){if(backgroundLaunch())showInBackground(window);else window.show();}contents.invalidate();await new Promise(resolve=>setTimeout(resolve,2000));}
    try{const shot=await within(contents.capturePage(),15000);if(shot==='stalled')failure='stalled for 15 s';else if(shot.isEmpty())failure='empty frame';else image=shot;}
    catch(error){failure=String((error as Error)?.message||error);}
   }
