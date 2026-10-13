@@ -6,16 +6,20 @@ import {characters} from './companion-text.ts';
  * (read only, like the proactive game review) and the Fox bar shows the line. The person's own
  * model pays for every ask, so the limits below also cap the cost. */
 export const PROACTIVE={
- /** Between two lines Fox says first; doubles for each line in a row the person let pass (at most ×8). */
- minGapSeconds:10*60,
+ /** Between two lines Fox says first; doubles for each line in a row the person let pass (at most ×2). Owner
+  * 2026-10-13 「companion说的再勤一点，隔一段时间就表达一下」: was 10 minutes, ×8 and 12 a day. */
+ minGapSeconds:4*60,
  /** Lines Fox says first per local day, and per place per day. */
- perDay:12,perPlace:3,
+ perDay:40,perPlace:10,
+ /** Check in: while the person is around (some input in the last 10 minutes) and Fox has said nothing on its own for
+  * this long, Worldlet asks whether Fox has something to say, in the World or anywhere else (owner 2026-10-13). */
+ checkinSeconds:6*60,
  /** A reply within this long after Fox spoke counts as an answer. */
  answeredSeconds:10*60,
  /** "Be quiet" holds this long. */
  quietSeconds:12*3600,
  /** How long the person stays in a place before Fox may speak there: the World, then an Applet or page. */
- settleSeconds:{world:60,applet:120},
+ settleSeconds:{world:20,applet:120},
  /** A stay this long in one place is a moment of its own (a break, or how it is going). */
  longStaySeconds:45*60,
  /** Local hours that count as late at night. */
@@ -35,10 +39,10 @@ export const PROACTIVE={
  browse:{settleSeconds:3,againSeconds:90,gapSeconds:45,perDay:60,perVisit:3,placeSeconds:10*60}
 } as const;
 
-/** Why Worldlet asks: the person settled into a place, has stayed in it a long time, is up late, or is
- * looking at an Applet or page with Browse with me on. */
-export type ProactiveMoment='settled'|'long-stay'|'late'|'browsing';
-export const PROACTIVE_MOMENTS:readonly ProactiveMoment[]=['settled','long-stay','late','browsing'];
+/** Why Worldlet asks: the person settled into a place, has stayed in it a long time, is up late, is
+ * looking at an Applet or page with Browse with me on, or Fox has been quiet a while (check in). */
+export type ProactiveMoment='settled'|'long-stay'|'late'|'browsing'|'checkin';
+export const PROACTIVE_MOMENTS:readonly ProactiveMoment[]=['settled','long-stay','late','browsing','checkin'];
 
 export interface ProactiveState {
  day:string;spoken:number;places:Record<string,number>;moments:string[];
@@ -81,8 +85,10 @@ export function proactiveDue(state:ProactiveState,{now,day,moment,place,visit=''
  if(state.spoken>=PROACTIVE.perDay)return {due:false,reason:'day'};
  if((state.places[place]??0)>=PROACTIVE.perPlace)return {due:false,reason:'place'};
  if(moment==='late'&&state.moments.includes('late'))return {due:false,reason:'once'};
- if(state.pending)return {due:false,reason:'waiting'};
- if(now-state.lastAt<PROACTIVE.minGapSeconds*2**state.ignored)return {due:false,reason:'gap'};
+ // No line waits for the last one's answer (owner 2026-10-13: speak more often); lines let pass slow it, at most ×2.
+ if(now-state.lastAt<PROACTIVE.minGapSeconds*2**Math.min(state.ignored,1))return {due:false,reason:'gap'};
+ // A check in comes only after Fox has been quiet a while, a browse line included.
+ if(moment==='checkin'&&now-Math.max(state.lastAt,state.browseAt)<PROACTIVE.checkinSeconds)return {due:false,reason:'gap'};
  return {due:true};
 }
 
@@ -135,7 +141,7 @@ export function proactiveTask({moment,place,local,minutes,recent,lastWords,opene
  /** The browse ask made as the Applet or page opens: Fox opens with a recommendation about it (owner 2026-10-12). */
  opened?:boolean}):string {
  const first=moment==='browsing'&&opened;
- const why=moment==='late'?`It is late (${local}) and the person is still here.`:moment==='long-stay'?`The person has been in ${place} for about ${minutes} minutes.`:first?`The person just opened ${place}, and asked you to browse along with them.`:moment==='browsing'?`The person is looking at ${place}, and asked you to browse along with them.`:`The person has settled into ${place} and paused.`;
+ const why=moment==='checkin'?`The person is in ${place}, and you have not said anything for a while.`:moment==='late'?`It is late (${local}) and the person is still here.`:moment==='long-stay'?`The person has been in ${place} for about ${minutes} minutes.`:first?`The person just opened ${place}, and asked you to browse along with them.`:moment==='browsing'?`The person is looking at ${place}, and asked you to browse along with them.`:`The person has settled into ${place} and paused.`;
  return [
   '(Not the person\'s words: Worldlet is asking at a quiet moment whether you have one thing worth saying first.)',
   `${why} It is ${local}.`,
@@ -143,9 +149,10 @@ export function proactiveTask({moment,place,local,minutes,recent,lastWords,opene
   'Speak only for one of three reasons: useful (something they will need soon: a clash, a deadline, the thing they were just looking for), insight (a concrete, opinionated take on what they are doing right now: a move, a draft, a plan) or warmth (what a friend would say: they just finished something, it is late, they have been at it a long time).',
   moment==='browsing'?'Browsing along, a fourth reason counts: context (something about what is on screen they may not see at a glance: what it means for them, how it ties to their day, a catch, the one thing worth doing here, or what you could do for them here). Talk about this screen, not about browsing.':'',
   // Owner 2026-10-12 「进一个 applet 就开始推荐说话 像个真的 companion」.
+  moment==='checkin'?'Check in like a companion who is around: a fourth reason counts here: presence (a short reaction to what they are doing or where they are, a thought about their day, or something you could do for them now). Say something specific to this moment, never "how is it going" or a generic hello.':'',
   first?'They just walked in, so open like a friend sitting beside them: one concrete recommendation for this screen (the one thing worth doing, reading or noticing here first, or what you could do for them here), naming the actual thing on screen. Answer PASS only if the screen shows nothing yet that you could name.':'',
   // Owner 2026-10-10 「让它提供的更勤一点」: at 7 and "when in doubt, PASS" Fox passed 86 of 88 asks.
-  `First think of up to three candidate lines and rate each 0 to 10 for how glad the person would be to get it right now. Say the best one if it rates ${first?3:moment==='browsing'?4:6} or more and is not a repeat of anything below; otherwise answer exactly PASS. A specific, helpful line beats silence; a vague or generic one does not.`,
+  `First think of up to three candidate lines and rate each 0 to 10 for how glad the person would be to get it right now. Say the best one if it rates ${first?3:moment==='browsing'||moment==='checkin'?4:6} or more and is not a repeat of anything below; otherwise answer exactly PASS. A specific, helpful line beats silence; a vague or generic one does not.`,
   'The line: one or two short sentences, in the language of their latest words, like a friend\'s text. No greeting, no "need help?", no list, no emoji unless they use them. Answer with the line alone, nothing before or after it.',
   'This turn is read only: do not open, click, send, save or change anything. If something should be done, mention it in the line; they can ask.',
   // Owner 2026-10-10: Attention is the one place to act, so a line about something waiting on the person points to its card.

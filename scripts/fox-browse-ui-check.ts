@@ -52,9 +52,11 @@ await card.getByText('This video is the one your calendar note links to.').waitF
  assert.equal(await card.locator('.companion-proactive-glow').count(),1);
  assert.equal(await on.getAttribute('aria-pressed'),'true');assert.equal(await off.getAttribute('aria-pressed'),'false');
  await page.screenshot({path:'output/fox-browse/browse-line.png'});
- // Still in the same visit, with Fox's line still showing: no second ask over it.
+ // Still in the same visit: Fox's own line showing does not hold the next look (owner 2026-10-13 「说的再勤一点」), which
+ // comes a minute and a half on, and is not the opening one.
 for(let i=0;i<8;i++)await page.clock.fastForward(15_000);
- assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'&&c.moment==='browsing').length),1,'one line per visit');
+ const looks=await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'&&c.moment==='browsing'));
+ assert.equal(looks.length,2,'a later look in the same visit');assert.equal(looks[1].visit,looks[0].visit);assert.notEqual(looks[1].opened,true);
  await off.click();
  assert.ok(await page.evaluate(()=>(window as any).calls.some((c:any)=>c.action==='foxBrowse'&&c.on===false)));
  assert.equal(await off.getAttribute('aria-pressed'),'true');

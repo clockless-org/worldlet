@@ -7,7 +7,7 @@ import {FOX_VOICE,PLACE,PROACTIVE,companionPrompt,onScreenText,proactiveAsked,pr
 
 const day='2026-10-06',t0=1_800_000_000;
 const policyIncludes=(action:string)=>JSON.parse(fs.readFileSync('contracts/world-event-policy.json','utf8')).plumbing.includes(action);
-const ask=(state:ReturnType<typeof proactiveState>,now:number,place='Games',moment:'settled'|'long-stay'|'late'='settled')=>proactiveDue(state,{now,day,moment,place});
+const ask=(state:ReturnType<typeof proactiveState>,now:number,place='Games',moment:'settled'|'long-stay'|'late'|'checkin'='settled')=>proactiveDue(state,{now,day,moment,place});
 
 // A fresh day may ask; asking (even when Fox passes) starts the gap.
 let state=proactiveState();
@@ -16,22 +16,39 @@ proactiveAsked(state,{now:t0,day,moment:'settled'});
 assert.deepEqual(ask(state,t0+60),{due:false,reason:'gap'});
 assert.deepEqual(ask(state,t0+PROACTIVE.minGapSeconds),{due:true});
 
-// A shown line waits for an answer; answered in time, the next one keeps the normal gap.
+// A shown line no longer waits for an answer (owner 2026-10-13 「companion说的再勤一点」): the gap alone spaces lines;
+// answered in time, the next one keeps the normal gap.
+assert(PROACTIVE.minGapSeconds<=5*60&&PROACTIVE.perDay>=30,'Fox speaks every few minutes, dozens of times a day');
 proactiveSpoke(state,{now:t0+PROACTIVE.minGapSeconds,day,place:'Games',line:'Nice run.'});
-assert.deepEqual(ask(state,t0+PROACTIVE.minGapSeconds+60,'Mail'),{due:false,reason:'waiting'});
+assert.deepEqual(ask(state,t0+PROACTIVE.minGapSeconds+60,'Mail'),{due:false,reason:'gap'});
 assert.equal(proactiveHeard(state,{now:t0+PROACTIVE.minGapSeconds+120,text:'haha thanks'}),false);
 assert.equal(state.ignored,0);
 assert.deepEqual(ask(state,t0+2*PROACTIVE.minGapSeconds,'Mail'),{due:true});
 
-// Lines let pass double the gap, up to eight times.
+// Lines let pass double the gap, at most twice.
 state=proactiveState();
 let now=t0;
 for(let i=0;i<4;i++){proactiveAsked(state,{now,day,moment:'settled'});proactiveSpoke(state,{now,day,place:'p'+i,line:'line '+i});now+=PROACTIVE.answeredSeconds+1;ask(state,now,'x');now+=PROACTIVE.minGapSeconds*8;}
 assert.equal(state.ignored,3);
 const last=state.lastAt;
-assert.deepEqual(ask(state,last+PROACTIVE.minGapSeconds*7,'y'),{due:false,reason:'gap'});
-assert.deepEqual(ask(state,last+PROACTIVE.minGapSeconds*8,'y'),{due:true});
+assert.deepEqual(ask(state,last+PROACTIVE.minGapSeconds*2-1,'y'),{due:false,reason:'gap'});
+assert.deepEqual(ask(state,last+PROACTIVE.minGapSeconds*2,'y'),{due:true});
 assert.deepEqual(state.recent,['line 0','line 1','line 2','line 3']);
+// Check in (owner 2026-10-13 「隔一段时间就表达一下」): asked only once Fox has said nothing on its own, a browse line
+// included, for `checkinSeconds`; then it may speak in the World or anywhere else.
+state=proactiveState();
+assert.deepEqual(ask(state,t0,'World','checkin'),{due:true});
+proactiveAsked(state,{now:t0,day,moment:'checkin'});
+assert.deepEqual(ask(state,t0+PROACTIVE.minGapSeconds,'World','checkin'),{due:false,reason:'gap'});
+assert.deepEqual(ask(state,t0+PROACTIVE.checkinSeconds,'World','checkin'),{due:true});
+state.browseAt=t0+PROACTIVE.checkinSeconds-60;
+assert.deepEqual(ask(state,t0+PROACTIVE.checkinSeconds,'World','checkin'),{due:false,reason:'gap'},'a browse line just now counts as Fox talking');
+const checkinTask=proactiveTask({moment:'checkin',place:'World',local:'Mon 15:10',minutes:12,recent:[],lastWords:''});
+for(const part of ['have not said anything for a while','presence','rates 4 or more','PASS','read only'])assert(checkinTask.includes(part),part);
+const proactivePage=fs.readFileSync('ui/companion/fox-proactive.ts','utf8');
+assert.match(proactivePage,/if\(\(now-checkedAt\)\/1000>=60\)\{checkedAt=now;void ask\('checkin',key\);\}/);
+// Fox's own last line no longer holds the next one; a question, notice or card still does.
+assert.match(fs.readFileSync('ui/companion/native-chat.ts','utf8'),/!!guideShown&&!spokeFirstLine\(guideShown\)\|\|guideHere\(guide\)&&!spokeFirstLine\(guide\)/);
 
 // Per place and per day limits; a new day starts over.
 state=proactiveState();now=t0;
@@ -98,7 +115,7 @@ assert.deepEqual(browse(state,t0+PROACTIVE.browse.gapSeconds,'z@1'),{due:false,r
 assert.deepEqual(proactiveDue(state,{now:t0+PROACTIVE.browse.gapSeconds,day:'2026-10-07',moment:'browsing',place:'p',visit:'z@1'}),{due:true});
 // Don't bother: Fox never speaks first, for any moment, until Browse with me is chosen again; "be quiet" holds browsing too.
 state=proactiveState();state.browse=false;
-for(const moment of ['settled','long-stay','late','browsing'] as const)assert.deepEqual(proactiveDue(state,{now:t0,day,moment,place:'Mail',visit:'v'}),{due:false,reason:'off'},moment);
+for(const moment of ['settled','long-stay','late','browsing','checkin'] as const)assert.deepEqual(proactiveDue(state,{now:t0,day,moment,place:'Mail',visit:'v'}),{due:false,reason:'off'},moment);
 state.browse=true;proactiveHeard(state,{now:t0,text:'别打扰我'});
 assert.deepEqual(browse(state,t0+60,'v'),{due:false,reason:'quiet'});
 // The browse ask asks for context about the screen, still read only with PASS.
@@ -131,7 +148,8 @@ assert.match(pageSource,/\{visit,opened:looks===1&&openedByPerson\}/);
 assert.match(pageSource,/setInterval\(tick,2000\)/);
 assert.match(hostSource,/opened:moment==='browsing'&&request\.opened===true/);
 // A line Fox said first arrives with its own effect in the card, never on a reply.
-assert.match(chat,/const spokeFirst=guided&&String\(shownGuide\.source\|\|''\)\.startsWith\('proactive:'\)\?shownGuide:null;panel\.dataset\.proactive=String\(!!spokeFirst\);/);
+assert.match(chat,/const spokeFirst=guided&&spokeFirstLine\(shownGuide\)\?shownGuide:null;panel\.dataset\.proactive=String\(!!spokeFirst\);/);
+assert.match(chat,/const spokeFirstLine=\(value:any\)=>String\(value\?\.source\|\|''\)\.startsWith\('proactive:'\);/);
 assert.match(chat,/arriveProactive\(panel,log,reducedMotion\.matches\)/);
 assert(fs.readFileSync('scripts/build-ui.ts','utf8').includes("'ui/companion/fox-proactive.css'"),'the effect styles ship');
 // The ask sees what the place shows, as the person's own turn would (a native Applet has no page text).

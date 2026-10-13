@@ -41,6 +41,8 @@ import {foxTrace} from './fox-performance.ts';
 import {ORDER,ORDER_FEEDBACK,ORDER_LOG} from '../../core/distribution/index.ts';
 import {harnessUsageLabel} from '../../core/agent/index.ts';
 
+/** A line Fox said on its own (fox-proactive.ts), as opposed to a reply, question or notice. */
+const spokeFirstLine=(value:any)=>String(value?.source||'').startsWith('proactive:');
 export function createNativeChat(call){return function({button,input,status,execute,chatRoute,steering=false,holdToSpeak=false,replyActions=false,resolveReplyLink,onReplyNavigate,greetingContext,recallStorage=null,onSpokenReply=null,talkVoice=null}){
   const root=button.closest('.notion-world'),form=button.closest('form'),hud=form.parentElement;
  const make=(tag: string,cls?: string,text?: string): any=>Object.assign(document.createElement(tag),{className:cls,...(text?{textContent:text}:{})});
@@ -481,7 +483,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(guided){if(guideActions.firstChild!==shownGuide.actions?.[0])guideActions.replaceChildren(...(shownGuide.actions||[]));if(guideContent.firstChild!==shownGuide.body)guideContent.replaceChildren(...(shownGuide.body?[shownGuide.body]:[]));}
   panel.dataset.bubbleMode=guided?'guide':'reply';
   // A line Fox said on its own arrives with its own effect (owner 2026-10-12), apart from replies.
-  const spokeFirst=guided&&String(shownGuide.source||'').startsWith('proactive:')?shownGuide:null;panel.dataset.proactive=String(!!spokeFirst);
+  const spokeFirst=guided&&spokeFirstLine(shownGuide)?shownGuide:null;panel.dataset.proactive=String(!!spokeFirst);
   // Continuous conversation, context-local presentation. Ambient copy is not
   // a model turn and never enters the transcript or overwrites saved replies.
   const currentReply=sameContext(reply)&&reply?.text?reply:null;
@@ -1100,7 +1102,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  mountFoxProactive({call,
   thread:()=>onDesktop()||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||!!root.dataset.tourStep?'':segmentNow(),
   world:()=>context.key.split(':')[0]==='overview'&&!contentIdentity(),
-  busy:()=>active||streamingReply||recording||starting||transcribing||editing||!!input.value.trim()||!!guideShown||guideHere(guide)||root.classList.contains('companion-info-open'),
+  // Fox's own last line does not hold the next one (owner 2026-10-13: speak every so often); a question, notice or card does.
+  busy:()=>active||streamingReply||recording||starting||transcribing||editing||!!input.value.trim()||!!guideShown&&!spokeFirstLine(guideShown)||guideHere(guide)&&!spokeFirstLine(guide)||root.classList.contains('companion-info-open'),
   environment:()=>({key:context.key,location:context.title,state:context.detail,recentActions:recentActions.slice(-4),view:visibleContent(),...worldNow(root)}),
   // A line about something waiting on the person opens its Attention card, the one place to act on it.
   say:line=>{
