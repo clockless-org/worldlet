@@ -100,5 +100,7 @@ export function appletAnalysisRequest(timeoutSeconds:number,instructions='') {
 /** A source batch needs related candidates, not the entire saved inbox. */
 export function appletAnalysisItems(records:Row[],items:Row[]) {
  const ids=new Set(records.map(row=>row.id));
- return items.filter(item=>item.sources?.some(ref=>ids.has(ref.id)));
+ // Only this batch's records can be cited: a saved item's other sources were read in an earlier batch,
+ // and copying one back would be rejected as unread evidence.
+ return items.filter(item=>item.sources?.some(ref=>ids.has(ref.id))).map(item=>item.sources.every(ref=>ids.has(ref.id))?item:{...item,sources:item.sources.filter(ref=>ids.has(ref.id))});
 }

@@ -10,9 +10,12 @@ const internalFact=new Set(['keys','fingerprint','changedAt']);
 const modelFields=['items','taskReviews','context','pendingContextIds','skippedContextIds','appletCandidates','userContext','attentionFocus','timeZone'];
 /** Reuse S's grounded extraction. The host retains originals for final validation. */
 export function attentionBatchInput(snapshot:Row) {
- const candidates:Row[]=(snapshot.appletCandidates||[]).filter((item:Row)=>(item.sources||[]).some((ref:Row)=>(snapshot.context||[]).some((row:Row)=>{
-  const owner=row.sourceReference||{provider:row.provider,id:row.sourceId};return ref.provider===owner.provider&&ref.id===owner.id;
- })));
+ const references=new Set((snapshot.context||[]).map((row:Row)=>{const owner=row.sourceReference||{provider:row.provider,id:row.sourceId};return owner.provider+':'+owner.id;}));
+ const inContext=(ref:Row)=>references.has(ref?.provider+':'+ref?.id);
+ // A saved item or candidate shown here can also cite records outside this pass's context. The host only
+ // accepts evidence read this turn, so those references are left out of what the model sees and copies.
+ const citable=(item:Row)=>Array.isArray(item.sources)&&!item.sources.every(inContext)?{...item,sources:item.sources.filter(inContext)}:item;
+ const candidates:Row[]=(snapshot.appletCandidates||[]).filter((item:Row)=>(item.sources||[]).some(inContext)).map(citable);
  const pending=new Set(snapshot.pendingContextIds||[]);
  const context=(snapshot.context||[]).map((row:Row)=>{
   const owner=row.sourceReference||{provider:row.provider,id:row.sourceId};
@@ -38,7 +41,7 @@ export function attentionBatchInput(snapshot:Row) {
   const unchanged=item.attentionContentVersion===1&&deps.length>0&&deps.every(d=>!pending.has(d.id)&&revision.has(d.id)&&revision.get(d.id)===d.revision);
   // Only identity and timing: full copy invites the model to restate it (measured: most of
   // a later pass's output, 20–80s). Omitted items stay saved; their IDs remain reusable.
-  return unchanged?{...Object.fromEntries(['id','kind','provider','title','status','start','end','dueAt'].filter(k=>item[k]!==undefined).map(k=>[k,item[k]])),unchanged:true}:item;
+  return unchanged?{...Object.fromEntries(['id','kind','provider','title','status','start','end','dueAt'].filter(k=>item[k]!==undefined).map(k=>[k,item[k]])),unchanged:true}:citable(item);
  });
  const rest=Object.fromEntries(modelFields.filter(name=>snapshot[name]!==undefined).map(name=>[name,snapshot[name]]));
  return {...rest,appletCandidates:candidates,context,...snapshot.items?{items}:{}};
