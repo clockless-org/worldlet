@@ -39,7 +39,8 @@ export class WorldLedger {
  private savepoints=0;
  close(){this.db?.close();this.db=null;}
  private get handle(){if(!this.db)throw new WorldletError('The world database is closed.');return this.db;}
- exec(sql:string){try{this.handle.exec(sql);}catch{throw new WorldletError('Could not save world data.');}}
+ // A closed ledger keeps its own message, so a write racing quit is not reported as a failed save.
+ exec(sql:string){const db=this.handle;try{db.exec(sql);}catch{throw new WorldletError('Could not save world data.');}}
  private all(sql:string,...values:any[]):Row[]{return this.handle.prepare(sql).all(...values) as Row[];}
  private run(sql:string,...values:any[]){return this.handle.prepare(sql).run(...values);}
  private tableExists(name:string){return this.all("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",name).length>0;}

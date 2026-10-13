@@ -735,6 +735,9 @@ export class AttentionCenter {
     }
    }finally{this.activeSourceChecks.delete(provider);}
   }catch(error){
+   // Quit (or a reset) stops this run and then closes the ledger under it; the interrupted run is recovered on the next
+   // start, so the closed ledger is not a failure.
+   if(signal.aborted)return;
    this.persist(error,'worldCheck');
    this.store.status='World checks could not save their state. Ask Fox to retry.';
   }
@@ -930,6 +933,9 @@ export class AttentionCenter {
     }
    }finally{this.attentionRunning=false;}
   }catch(error){
+   // Quitting for an update stopped this pass mid-run and closed the ledger before it settled (three Alpha updates on
+   // 2026-10-12); the interrupted pass is recovered on the next start.
+   if(signal.aborted)return true;
    this.persist(error,'attentionSynthesis');
    this.store.status='Attention Center could not save its check state.';
   }
