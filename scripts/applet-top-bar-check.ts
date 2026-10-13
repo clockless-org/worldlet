@@ -63,12 +63,11 @@ async function bar(page:Page){
   const shown=(e:Element)=>(e as HTMLElement).offsetWidth>0&&getComputedStyle(e).visibility!=='hidden';
   return {back:box('#notionBack'),left:box('.applet-bar-left'),right:box('.applet-bar-right'),title:box('.companion-context'),shelf:box('.applet-shelf'),add:box('.applet-shelf-new'),
    toolbar:box('.browser-toolbar'),viewport:box('.browser-viewport'),offer:box('.browser-pip-offer'),toggle:box('.applet-mode-toggle'),panel:box('#notionContent'),hud:box('.notion-hud'),
-   tools:[...document.querySelectorAll('.browser-toolbar>:not(.browser-badge)')].filter(shown).map(e=>e.classList.contains('browser-address')?'Address':e.querySelector('span')?.textContent?.trim()||''),
-   toolBoxes:[...document.querySelectorAll('.browser-toolbar>:not(.browser-badge)')].filter(shown).map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}),
+   tools:[...document.querySelectorAll('.browser-toolbar>*')].filter(shown).map(e=>e.classList.contains('browser-address')?'Address':e.querySelector('span')?.textContent?.trim()||''),
+   toolBoxes:[...document.querySelectorAll('.browser-toolbar>*')].filter(shown).map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}),
    bar:[...document.querySelectorAll('.applet-bar-side button')].filter(b=>(b as HTMLElement).offsetWidth&&!b.closest('.applet-mode-toggle')).map(b=>b.id==='notionBack'?'Back':b.classList.contains('browser-pip-offer')?'Picture in picture':b.textContent.trim()),
    dockLeft:[...document.querySelectorAll('.fox-action-left button')].filter(b=>(b as HTMLElement).offsetWidth).map(b=>b.textContent.trim()),
-   badge:document.querySelector('.browser-toolbar>.browser-badge')?.textContent?.trim()??null,
-   folded:[...document.querySelectorAll('.browser-toolbar>*')].filter(e=>e.matches('.browser-badge')||shown(e)).map(e=>getComputedStyle(e).opacity),
+   framed:document.querySelector('#notionWorld')!.hasAttribute('data-applet-frame'),
    dock:[...document.querySelectorAll('.world-actions button')].filter(b=>(b as HTMLElement).offsetWidth).map(b=>b.textContent.trim())};
  });
 }
@@ -107,19 +106,17 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   await assertMaterial(page,'.browser-pip-offer','Picture in picture');
   // The toolbar: one row floating above the page.
   assert.deepEqual(r.tools,['Back','Forward','Refresh','Home','Address','Focus'],'the toolbar, in order '+JSON.stringify(r.tools));
-  // It takes no room from the page (owner request 2026-10-11): it floats centered just above the page's top edge.
-  assert.ok(Math.abs(r.toolbar.y+r.toolbar.height-r.viewport.y)<=1,'the toolbar ends at the page\'s top edge, never over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
+  // It takes no room from the page (owner request 2026-10-11): it floats centered just above the page's top edge, or on
+  // the bar's row over a painted frame, whose top rail would cover it (owner report 2026-10-13).
+  if(r.framed)assert.ok(Math.abs(middle(r.toolbar)-38)<=1&&r.toolbar.y+r.toolbar.height<=r.viewport.y,'over a frame the toolbar stands on the bar\'s row '+JSON.stringify(r.toolbar));
+  else assert.ok(Math.abs(r.toolbar.y+r.toolbar.height-r.viewport.y)<=1,'the toolbar ends at the page\'s top edge, never over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
   assert.ok(r.viewport.y-r.panel.y<=14,'the page starts at the panel\'s rim, with no row above it '+JSON.stringify({panel:r.panel,viewport:r.viewport}));
   assert.ok(Math.abs(center(r.toolbar)-center(r.viewport))<=1&&r.toolbar.width<=r.viewport.width,'centered over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
   for(const b of r.toolBoxes)assert.ok(Math.abs(middle(b)-middle(r.toolbar))<=1,'every tool shares its row');
   const address=r.toolBoxes[4];assert.ok(address.width>r.toolbar.width/2,'the address takes the row\'s room '+JSON.stringify(address));
-  // At rest the row is one badge naming the site (owner request 2026-10-11); pointing at it opens the row in place.
-  assert.equal(r.badge,'youtube.com','the badge names the site');
-  assert.deepEqual(r.folded,['1',...r.tools.map(()=>'0')],'at rest only the badge shows '+JSON.stringify(r.folded));
-  await page.locator('.browser-toolbar').hover();
-  await page.waitForFunction(()=>getComputedStyle(document.querySelector('.browser-badge')!).opacity==='0'&&getComputedStyle(document.querySelector('.browser-address')!).opacity==='1');
-  const opened=await page.evaluate(()=>[...document.querySelectorAll('.browser-toolbar>:not(.browser-badge),.browser-viewport')].map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
-  assert.deepEqual(opened,[...r.toolBoxes,r.viewport],'opening moves neither the controls nor the page');
+  // The whole row always shows (owner report 2026-10-13): no badge folds it away.
+  assert.equal(await page.locator('.browser-badge').count(),0,'no badge folds the toolbar');
+  assert.ok(await page.locator('.browser-toolbar .browser-address').isVisible(),'the address shows at rest');
   // Refresh loads the page shown again.
   await page.locator('.browser-toolbar .browser-refresh').click();
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='browserCommand'&&c.operation==='reload'));
