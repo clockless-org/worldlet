@@ -67,7 +67,6 @@ async function bar(page:Page){
    toolBoxes:[...document.querySelectorAll('.browser-toolbar>*')].filter(shown).map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}),
    bar:[...document.querySelectorAll('.applet-bar-side button')].filter(b=>(b as HTMLElement).offsetWidth&&!b.closest('.applet-mode-toggle')).map(b=>b.id==='notionBack'?'Back':b.classList.contains('browser-pip-offer')?'Picture in picture':b.textContent.trim()),
    dockLeft:[...document.querySelectorAll('.fox-action-left button')].filter(b=>(b as HTMLElement).offsetWidth).map(b=>b.textContent.trim()),
-   framed:document.querySelector('#notionWorld')!.hasAttribute('data-applet-frame'),
    dock:[...document.querySelectorAll('.world-actions button')].filter(b=>(b as HTMLElement).offsetWidth).map(b=>b.textContent.trim())};
  });
 }
@@ -106,10 +105,10 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   await assertMaterial(page,'.browser-pip-offer','Picture in picture');
   // The toolbar: one row floating above the page.
   assert.deepEqual(r.tools,['Back','Forward','Refresh','Home','Address','Focus'],'the toolbar, in order '+JSON.stringify(r.tools));
-  // It takes no room from the page (owner request 2026-10-11): it floats centered just above the page's top edge, or on
-  // the bar's row over a painted frame, whose top rail would cover it (owner report 2026-10-13).
-  if(r.framed)assert.ok(Math.abs(middle(r.toolbar)-38)<=1&&r.toolbar.y+r.toolbar.height<=r.viewport.y,'over a frame the toolbar stands on the bar\'s row '+JSON.stringify(r.toolbar));
-  else assert.ok(Math.abs(r.toolbar.y+r.toolbar.height-r.viewport.y)<=1,'the toolbar ends at the page\'s top edge, never over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
+  // It takes no room from the page (owner request 2026-10-11): it floats centered just above the page's top edge, on a
+  // painted frame's top rail (owner request 2026-10-13), never covered by the frame.
+  assert.ok(Math.abs(r.toolbar.y+r.toolbar.height-r.viewport.y)<=1,'the toolbar ends at the page\'s top edge, never over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
+  assert.ok(await page.evaluate(()=>{const b=document.querySelector('.browser-address')!.getBoundingClientRect();return !!document.elementFromPoint(b.x+b.width/2,b.y+b.height/2)?.closest('.browser-toolbar');}),'nothing covers the toolbar');
   assert.ok(r.viewport.y-r.panel.y<=14,'the page starts at the panel\'s rim, with no row above it '+JSON.stringify({panel:r.panel,viewport:r.viewport}));
   assert.ok(Math.abs(center(r.toolbar)-center(r.viewport))<=1&&r.toolbar.width<=r.viewport.width,'centered over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
   for(const b of r.toolBoxes)assert.ok(Math.abs(middle(b)-middle(r.toolbar))<=1,'every tool shares its row');
