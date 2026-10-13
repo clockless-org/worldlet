@@ -70,7 +70,7 @@ for(const id of ['claude-code','codex','pi','remote'])assert.equal(harnessServic
  assert.deepEqual(timings,{sessionMs:3,firstTextMs:2101,toolsMs:1800,input_tokens:10,output_tokens:2,reasoning_tokens:1,cache_read_tokens:4});
  const row=foxTiming({id:'12345678-1234-1234-1234-123456789012',outcome:'complete',completeMs:4000,...timings});
  assert.equal(row!.firstTextMs,2101);assert.equal(row!.sessionMs,3);assert.equal(row!.toolsMs,1800);
- assert.deepEqual(foxTimingEvent(row),{event:'fox_timing',duration:'1_5s',dimensions:{timing_outcome:'complete',first_text_bucket:'1_5s',tools_bucket:'1_5s'}});
+ assert.deepEqual(foxTimingEvent(row),{event:'fox_timing',duration:'1_5s',dimensions:{timing_outcome:'complete',first_text_bucket:'1_5s',tools_bucket:'1_5s',reply_bucket:'2_5s',first_text_reply_bucket:'2_5s'}});
  assert.equal(harnessTurnTimings({sessionMs:1,toolsMs:0}).toolsMs,0,'a turn with no World tool call reports 0 tool time');
 }
 // The thread: each finished turn keeps its usage (kept across a restart), and the place's thread shows its sum.

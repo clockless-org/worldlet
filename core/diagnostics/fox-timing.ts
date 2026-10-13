@@ -24,6 +24,13 @@ export function timingBucket(ms:unknown):string {
  if(typeof ms!=='number'||!Number.isFinite(ms)||ms<0)return '';
  return ms<1000?'under_1s':ms<5000?'1_5s':ms<15000?'5_15s':ms<60000?'15_60s':ms<300000?'1_5m':ms<900000?'5_15m':'over_15m';
 }
+/** Finer buckets for how long a Fox reply takes (`reply_bucket`, `first_text_reply_bucket` on `fox_timing`), split at 10 seconds,
+ * the line past which a reply is too slow (owner 2026-10-13 04:28Z 「10秒以上就太慢了」). */
+export const REPLY_BUCKETS=['under_2s','2_5s','5_10s','10_15s','15_30s','30_60s','over_60s'] as const;
+export function replyBucket(ms:unknown):string {
+ if(typeof ms!=='number'||!Number.isFinite(ms)||ms<0)return '';
+ return ms<2000?'under_2s':ms<5000?'2_5s':ms<10000?'5_10s':ms<15000?'10_15s':ms<30000?'15_30s':ms<60000?'30_60s':'over_60s';
+}
 /** How long a prepared update waited for Update before a launch ran it (`update_applied`). */
 export const UPDATE_WAIT_BUCKETS=['under_1h','1_24h','1_7d','over_7d'] as const;
 export function updateWaitBucket(ms:unknown):string {
@@ -45,5 +52,7 @@ export function foxTimingEvent(row:Record<string,unknown>|null):{event:string,du
  if(!duration)return null;
  const dimensions:Record<string,string>={timing_outcome:row.outcome as string};
  for(const [key,name] of [['firstTextMs','first_text_bucket'],['modelMs','model_bucket'],['toolsMs','tools_bucket']]){const value=bucket(key);if(value)dimensions[name]=value;}
+ const reply=replyBucket(row.completeMs),first=replyBucket(row.firstTextMs);
+ if(reply)dimensions.reply_bucket=reply;if(first)dimensions.first_text_reply_bucket=first;
  return {event:'fox_timing',duration,dimensions};
 }
