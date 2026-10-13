@@ -28,11 +28,11 @@ import {createHarnessConnections} from './harness-connections.ts';
 import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
-import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
+import {phoneApprovalPush,phoneFoxPush,phoneLive} from '../../../../../core/phone/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -319,6 +319,7 @@ export function installFox(host:Host){
    if(record&&typeof event.type==='string'&&STREAM_EVENTS.includes(event.type)&&!(event.type==='status'&&event.stage==='waiting'))companion.recordEvent(id,event.type,scope,typeof event.text==='string'?event.text:null);
    // A turn the page started ends with the page; one said in a browser or on the phone runs without it.
    if(!active()||!page.ready()&&!headless.has(id))throw new Cancelled();
+   if(headless.has(id))headlessLive?.event(event);
    if(event.type==='model_required'){showControls('model');return null;}
    if(event.type==='applet'){if(!scope.sample&&!scope.setup)sources()?.receiveAppletEvent(event,id);return null;}
    // The Harness's own permission prompt: an approval card in Fox's dialogue (and on the phone), answered through
@@ -380,8 +381,44 @@ export function installFox(host:Host){
   return value;
  }
  /** A turn's world bookkeeping once it ends, the conversation's and an Applet task's alike. */
+ async function answerApproval(id:unknown,choice:unknown){
+  const approvals=agent()?.approvals?.()??null;
+  if(!approvals||typeof id!=='string'||!isHarnessApprovalChoice(choice))throw new WorldletError('This request can no longer be answered.');
+  await approvals.answer(id,choice);
+  approvalRules.answered(id,choice);
+  // Every copy of the card (this computer, the phone, a browser) settles.
+  page.event('worldlet:harness-approval',{id,settled:choice});
+  headlessLive?.settled(id);
+ }
  /** Turns said in a browser or on the phone while the World page is not there (converse): they run on the host alone. */
  const headless=new Set<string>();
+ /** The headless turn as it streams, for an open phone or browser (core/phone phoneLive): its steps, its reply so far
+  * and the Agent's permission prompt while it waits. Sent at most every quarter second, the finished reply at once. */
+ let headlessLive:{event(event:Row):void,settled(id:string):void,done(text:string):Promise<unknown>}|null=null;
+ function liveTurn(id:string,user:string){
+  let text='',steps:string[]=[],approval:Row|null=null,timer:ReturnType<typeof setTimeout>|null=null,sending:Promise<unknown>=Promise.resolve();
+  const send=(done=false)=>{
+   if(timer)clearTimeout(timer);timer=null;
+   const value=phoneLive({id,user,steps,text,done,approval},Date.now());
+   const phone=host.optional<PhoneService>(PHONE);
+   if(value&&phone?.live)sending=sending.then(()=>phone.live!(value as Row)).catch(error=>host.diagnostics.record(error,'phoneLive'));
+   return sending;
+  };
+  const soon=()=>{timer??=setTimeout(()=>void send(),250);};
+  const step=(line:string)=>{if(steps[steps.length-1]!==line)steps=[...steps,line].slice(-8);};
+  return {
+   event(event:Row){
+    if(event.type==='status'&&event.stage==='model')step('Thinking…');
+    else if(event.type==='progress')step('Working…');
+    else if(event.type==='approval'&&event.request&&typeof event.request==='object'){approval=event.request as Row;void send();return;}
+    else if(!['delta','response_start','steered'].includes(String(event.type)))return;
+    text=reduceAgentResponse(text,event as any);
+    soon();
+   },
+   settled(answered:string){if(approval?.id===answered){approval=null;void send();}},
+   done(reply:string){text=reply||text;approval=null;return send(true);},
+  };
+ }
  /** A line said in a browser or on the phone (core/phone/README.md#web) while the World page is not there: it waits
   * behind Fox's running turn, then runs as the person's own line in Fox's main conversation, without the page. Its
   * steps that only the page can do (a World view, an Applet's page) answer that the window must be open. The reply
@@ -391,10 +428,11 @@ export function installFox(host:Host){
    if(Date.now()>until)throw new WorldletError('Fox is busy. Try again in a moment.');
    await new Promise(resolve=>setTimeout(resolve,500));
   }
-  const id='headless-'+crypto.randomUUID();
-  headless.add(id);
-  try{const reply:Row=await agentChat({id,text});return {user:text,text:typeof reply.message==='string'?reply.message:''};}
-  finally{headless.delete(id);}
+  const id='headless-'+crypto.randomUUID(),live=liveTurn(id,text);
+  headless.add(id);headlessLive=live;
+  let said='';
+  try{const reply:Row=await agentChat({id,text});said=typeof reply.message==='string'?reply.message:'';return {user:text,text:said};}
+  finally{headless.delete(id);if(headlessLive===live)headlessLive=null;await live.done(said);}
  }
  function finishTurn(id:string,cancelled:boolean){
   trusts.delete(id);
@@ -787,7 +825,7 @@ export function installFox(host:Host){
  });
  host.provide<FoxService>(FOX,{scope:foxScope,turnActive:()=>agentTurn!==null,cancel:cancelCloud,stopRoutines,startRoutines,
   startAppletTask:request=>appletTaskStart(request),reviewGames:request=>appletTaskStart(request,true),makeArtifactPage:request=>appletTaskStart({...request,applet:ARTIFACT_PAGE_MAKER.id},true,true),appletTask:id=>appletTasks.get(id)?.applet??null,
-  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report,converse});
+  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report,converse,answerApproval});
 
  host.register({
   // "+" in Fox's bar (owner request 2026-10-12): files the person picks, as paths for the line; Fox's Agent runs on this
@@ -1025,15 +1063,7 @@ export function installFox(host:Host){
   harnessSkills:async request=>request.operation==='change'?settingChanged('skill',await agentControls.skillRequest(request)):agentControls.skillRequest(request),
   /** Settings › Agent › Memory: what each Agent here remembers, read only. */
   harnessMemory:()=>agentControls.memoryRequest(),
-  harnessApproval:async request=>{
-   const approvals=agent()?.approvals?.()??null;
-   if(!approvals||typeof request.id!=='string'||!isHarnessApprovalChoice(request.choice))throw new WorldletError('This request can no longer be answered.');
-   await approvals.answer(request.id,request.choice);
-   approvalRules.answered(request.id,request.choice);
-   // Every copy of the card (this computer, the phone) settles.
-   page.event('worldlet:harness-approval',{id:request.id,settled:request.choice});
-   return {ok:true};
-  },
+  harnessApproval:async request=>{await answerApproval(request.id,request.choice);return {ok:true};},
   worldWriteUndo:request=>{
    const undo=typeof request.id==='string'?writeUndos.get(request.id):undefined;
    if(!undo)throw new WorldletError('This change can no longer be undone.');
