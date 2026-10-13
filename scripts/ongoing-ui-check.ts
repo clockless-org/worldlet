@@ -21,7 +21,7 @@ try{
   if(b.action==='agentChat'){if(/read_companion_archive/.test(b.text||''))await w.worldletAgentTool(b.id,{id:'t1',name:'show_artifact',args:{title:'Eating well this autumn',body:'Lunches are steady.\n\n## Next\nKeep the salmon bowl.',chart:null,size:'large',actions:[]}});return {message:'Here is your page.'};}
   if(b.action==='ongoing'){
    if(b.operation==='list')return {proposals,kept,candidates:[...proposals,thing('job-sideproj0001','#side-project','proposed')]};
-   if(b.operation==='turns'&&b.id==='job-sideproj0001')return {turns:[{role:'user',text:'Plan the launch',createdAt:iso(t-2*day)},{role:'assistant',text:'Launch on Tuesday, with the beta list first.',createdAt:iso(t-2*day)},{role:'user',text:'Rewrite the launch notes for the team channel. '+'Keep every change, say what it means for people, and leave the build details out. '.repeat(12),createdAt:iso(t-2*day+60)},{role:'assistant',text:'Here are the notes.',createdAt:iso(t-2*day+120)}]};
+   if(b.operation==='turns'&&b.id==='job-sideproj0001')return {turns:[{role:'user',text:'Plan the launch',createdAt:iso(t-2*day)},{role:'assistant',text:'Launch on Tuesday, with the beta list first.',createdAt:iso(t-2*day)},{role:'user',text:'Rewrite the launch notes for the team channel. '+'Keep every change, say what it means for people, and leave the build details out. '.repeat(6),createdAt:iso(t-2*day+60)},{role:'assistant',text:'Here are the notes. '+'Every change is kept, said in plain words for the people it touches, with the build details left out. '.repeat(12),createdAt:iso(t-2*day+120)}]};
    if(b.operation==='turns')return {...b.template===true?{template:{kind:'food',title:'Food',heading:'Meals you noted',stats:[{label:'Meals',value:'9'},{label:'Days',value:'5'},{label:'Last',value:'yesterday'}],entries:[{at:iso(t-day),text:'Lunch was the salmon bowl again, about 650 kcal',value:'650 kcal'}],empty:'No meals in this conversation yet.',action:'Review my meals'}}:{},turns:[{role:'user',text:'Lunch was the salmon bowl again',createdAt:iso(t-day)},{role:'assistant',text:'Logged. You are at 1,350 kcal today.',createdAt:iso(t-day+60)}],recent:[{text:'You: Lunch was the salmon bowl again',at:iso(t-day)}]};
    if(['later','decline'].includes(b.operation)){proposals=proposals.filter(x=>x.id!==b.id);return {ok:true};}
    if(b.operation==='keep'){const p=proposals.find(x=>x.id===b.id);proposals=proposals.filter(x=>x.id!==b.id);if(p)kept=[{...p,state:'kept',region:'money'},...kept];
@@ -45,29 +45,28 @@ try{
  // A session that is not a Thing becomes the place Fox talks in, in the World: its turns, its name in the bar, a way back.
  await column.locator('.fox-session',{hasText:'#side-project'}).click();
  await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLInputElement).placeholder==='Message Fox · #side-project');
- // The picked session opens as one chat window (owner Order 2026-10-12): the sessions on its left, its messages as
- // bubbles on its right, the person's on the right, and no second session column beside it.
+ // The picked session opens as its history in Fox's usual cards (owner Order 2026-10-12): the sessions on the left, one
+ // card per turn, what the person said its one top line; no second session column beside it.
  const chat=page.locator('.fox-chat-window');
- await chat.locator('.fox-chat-bubble[data-who=fox]',{hasText:'Launch on Tuesday'}).waitFor();
- assert.equal(await chat.locator('.fox-chat-bubble[data-who=user]',{hasText:'Plan the launch'}).count(),1,'the person\'s message is a bubble of its own');
- assert.equal(await chat.locator('.fox-sessions .fox-session[data-main=true]').count(),1,'the window lists the sessions, the main one first');
+ const first=chat.locator('.fox-chat-card',{hasText:'Launch on Tuesday'});await first.waitFor();
+ assert.equal(await first.locator('.fox-chat-asked').textContent(),'Plan the launch','the person\'s words head the card that answers them');
+ assert.equal(await chat.locator('.fox-sessions .fox-session[data-main=true]').count(),1,'the sessions stand beside the cards, the main one first');
  assert.equal(await chat.locator('.fox-chat-head strong').textContent(),'#side-project');
- assert.equal(await page.locator('.companion-dialogue>.fox-sessions').isVisible(),false,'the window replaces the column beside the card');
- assert.equal(await page.locator('#companionEarlierTurns').isVisible(),false,'the stacked cards give way to the window');
- const [userBox,foxBox]=await Promise.all([chat.locator('.fox-chat-bubble[data-who=user]').first().boundingBox(),chat.locator('.fox-chat-bubble[data-who=fox]').first().boundingBox()]);
- assert(userBox&&foxBox&&userBox.x+userBox.width>foxBox.x+foxBox.width,'the person\'s bubble sits right of Fox\'s');
- // A long message folds to a few lines; Show more opens it whole.
- const long=chat.locator('.fox-chat-bubble[data-who=user]',{hasText:'Rewrite the launch notes'});
- assert((await long.boundingBox())!.height<160,'a long message folds');
- assert.equal(await chat.locator('.fox-chat-bubble[data-who=user]',{hasText:'Plan the launch'}).locator('.fox-chat-more').isVisible(),false,'a short message has no Show more');
+ assert.equal(await page.locator('.companion-dialogue>.fox-sessions').isVisible(),false,'one session column, not two');
+ assert.equal(await page.locator('#companionEarlierTurns').isVisible(),false,'the stacked cards give way to the history');
+ // A long question is one line; a long answer folds to a few lines, and Show more opens it whole.
+ const long=chat.locator('.fox-chat-card',{hasText:'Here are the notes'});
+ assert((await long.locator('.fox-chat-asked').boundingBox())!.height<24,'the person\'s words stay one line');
+ assert((await long.boundingBox())!.height<260,'a long answer folds');
+ assert.equal(await first.locator('.fox-chat-more').isVisible(),false,'a short answer has no Show more');
  await page.screenshot({path:'/tmp/ongoing-chat-window.png'});
  await long.locator('.fox-chat-more').click();
- assert((await long.boundingBox())!.height>200,'Show more opens it whole');
+ assert((await long.boundingBox())!.height>300,'Show more opens it whole');
  await long.locator('.fox-chat-more',{hasText:'Show less'}).click();
  assert(await page.locator('.companion-session-leave').isVisible(),'a × goes back to the main session');
  await input.click();await input.fill('Where were we?');await page.keyboard.press('Enter');
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='agentChat'&&/Where were we/.test(c.text)&&String(c.thread||'').includes('session:job-sideproj0001')));
- await chat.locator('.fox-chat-bubble[data-who=user]',{hasText:'Where were we?'}).waitFor();
+ await chat.locator('.fox-chat-asked',{hasText:'Where were we?'}).waitFor();
  await page.locator('.companion-session-leave').click();
  await page.waitForFunction(()=>(document.querySelector('#notionInput') as HTMLInputElement).placeholder==='Message Fox');
  await page.keyboard.press('Escape');await page.mouse.move(5,5);

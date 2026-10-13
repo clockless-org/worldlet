@@ -84,13 +84,13 @@ await withBrowser(fileAccess,async browser=>{
  await page.locator('#notionInput').fill('Again');await page.locator('#notionInput').press('Enter');
  await page.waitForFunction(()=>calls.filter(b=>b.action==='agentChat').length===2&&document.querySelector<HTMLElement>('#notionWorld').dataset.replyBusy!=='true');
  await page.locator('.companion-earlier',{hasText:'Expand'}).click();
- const bubbles=page.locator('.fox-chat-window .fox-chat-bubble');
+ const bubbles=page.locator('.fox-chat-window .fox-chat-card');
  assert.match(await bubbles.first().textContent(),/This is Work/,'the answered greeting leads the window');
- assert.equal(await page.locator('.fox-chat-bubble[data-who=user]',{hasText:'Again'}).count(),1,'the person\'s message is a bubble of its own');
+ assert.equal(await page.locator('.fox-chat-asked',{hasText:'Again'}).count(),1,'the person\'s words head their turn\'s card');
  const [win,foxBox]=[await page.locator('.fox-chat-window').boundingBox(),await page.locator('.companion-avatar').boundingBox()];
  assert.ok(win&&foxBox&&win.y+win.height<=foxBox.y+8,'the window stands above Fox: '+JSON.stringify({win,foxBox}));
  assert.equal(await page.locator('.companion-thread-list').isVisible(),false,'no stacked cards beside the window');
- assert.deepEqual(await bubbles.evaluateAll(b=>[...new Set(b.map(e=>getComputedStyle(e.firstElementChild!).fontSize))]),['15px'],'one type size for every message');
+ assert.deepEqual(await bubbles.evaluateAll(b=>[...new Set(b.map(e=>getComputedStyle(e.querySelector('.fox-chat-body')!).fontSize))]),['15px'],'one type size for every message');
  await page.screenshot({path:'output/fox-mac/cards-expanded.png'});
  assert.deepEqual(errors,[]);console.log('PASS local place lines without model calls; hover and click show the same card; conversation preserved per place');
 });

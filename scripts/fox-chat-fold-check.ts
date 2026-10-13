@@ -278,7 +278,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:path.join(shots,'world-deck.png')});
  await page.locator('.companion-earlier').click();
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue')?.dataset.sheet==='true');
- // Expanded in the World the conversation is one chat window (owner Order 2026-10-12, fox-chat-window.ts).
+ // Expanded in the World the conversation is its history in Fox's usual cards (owner Order 2026-10-12, fox-chat-window.ts).
  const chat=page.locator('.fox-chat-window');await chat.waitFor();
  assert.equal(await list.isVisible(),false,'the window takes the stacked cards\' place');
  await page.keyboard.press('Escape');await page.mouse.move(700,500);
@@ -292,11 +292,9 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await asked.textContent(),'and this too','the answer stays under the newest message, never the one before it');
  assert.match(await front.textContent(),/Reply to wait world and and this too/);
  await page.locator('.companion-earlier').click();await chat.waitFor();
- // The window shows every message as its own bubble, oldest first: the person's on the right, Fox's on the left.
- const bubbles=await chat.locator('.fox-chat-bubble').evaluateAll(items=>items.map(i=>(i as HTMLElement).dataset.who+':'+i.firstElementChild!.textContent));
- assert.match(bubbles.join('\n'),/user:world two[\s\S]*fox:Reply to world two[\s\S]*user:long world[\s\S]*user:wait world[\s\S]*user:and this too\nfox:Reply to wait world and and this too$/,'oldest first: '+JSON.stringify(bubbles));
- const [mine,its]=[(await chat.locator('.fox-chat-bubble[data-who=user]').last().boundingBox())!,(await chat.locator('.fox-chat-bubble[data-who=fox]').last().boundingBox())!];
- assert.ok(mine.x+mine.width>its.x+its.width,'the person\'s bubbles sit right of Fox\'s');
+ // The history shows every turn as one of Fox's usual cards, oldest first, the person's words its top line.
+ const turns=await chat.locator('.fox-chat-card').evaluateAll(items=>items.map(i=>(i.querySelector('.fox-chat-asked')?.textContent||'')+'|'+(i.querySelector('.fox-chat-body')?.textContent||'')));
+ assert.match(turns.join('\n'),/world two\|Reply to world two[\s\S]*long world\|[\s\S]*wait world\|[\s\S]*and this too\|Reply to wait world and and this too$/,'oldest first: '+JSON.stringify(turns));
  await page.screenshot({path:path.join(shots,'world-chat-window.png')});
  await page.keyboard.press('Escape');
  // A phone-width window keeps the one width inside the window.

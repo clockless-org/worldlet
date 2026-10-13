@@ -248,11 +248,11 @@ try{
  assert.equal(await page.locator('.companion-earlier').textContent(),'Expand','a quiet Expand handle opens the whole conversation');
  await page.locator('#worldConversation').hover();await page.mouse.wheel(0,-120);
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#companionDialogue').dataset.expanded==='true');
- // Expanded in the world the conversation is one chat window (owner Order 2026-10-12, fox-chat-window.ts): every turn
- // a pair of bubbles, the stacked cards gone; its Fold closes it.
+ // Expanded in the world the conversation is its history in Fox's usual cards (owner Order 2026-10-12, fox-chat-window.ts):
+ // one card per turn, the person's words its top line; its Fold closes it.
  const chat=page.locator('.fox-chat-window .fox-chat-messages');
  assert.match(await chat.textContent(),/This is your world[\s\S]*suggest a quiet cafe nearby[\s\S]*Reply to world question/,'scrolling up opens the chat window, the answered greeting first');
- assert.equal(await page.locator('.fox-chat-bubble[data-who=user]',{hasText:'world question'}).count(),1,'the person\'s words are a bubble of their own');
+ assert.equal(await page.locator('.fox-chat-card',{hasText:'Reply to world question'}).locator('.fox-chat-asked').textContent(),'world question','the person\'s words head the card that answers them');
  assert.equal(await page.locator('.companion-thread-list').isVisible(),false,'the window takes the stacked cards\' place');
  assert.equal(await page.locator('.companion-earlier').isVisible(),false);
  await page.locator('.fox-chat-fold').evaluate((button:HTMLButtonElement)=>button.click());
