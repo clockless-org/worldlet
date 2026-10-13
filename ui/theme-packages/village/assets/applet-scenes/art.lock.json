@@ -241,10 +241,10 @@
   },
   "assets/applet-scenes/pokemon-showdown/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/background.webp",
-    "sourceSha256": "a1a7c932d733ad10714357303c4485c0c0d715799b9ef743acf3f087761e65d5",
-    "sha256": "60f0ea6857dc1cdba8a86d74d44aebe3b7ee64beb334d6c96fb3383abd0d9f18",
+    "sourceSha256": "c6c3a54bc3402e4cbaf537dc0ed176ad9d2ca6907b5aaee56790716c2da35bab",
+    "sha256": "265f2322a3a16ffe0a7587bd3d10701e75b3219f201ee9e69f037d0f74183b15",
     "imageSize": [
-      1672,
+      1671,
       941
     ],
     "settings": "original-size-webp-q90"
