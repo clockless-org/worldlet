@@ -245,11 +245,14 @@ export function codexProblem(text:string):string|null {
  return null;
 }
 /** The provider turned the request away because the model is busy for everyone (Codex: "Selected model is at capacity.
- * Please try a different model."; Anthropic: overloaded, 529), not because of this person's account: worth one more
+ * Please try a different model."; Anthropic: overloaded, 529; OpenAI's 503 Service Unavailable once Codex's own
+ * reconnects ran out), not because of this person's account: worth one more
  * try a little later (Mac Alpha 4312, #416). */
 export function modelAtCapacity(text:string):boolean {
- return /at capacity|overloaded|server_is_overloaded|\b529\b/i.test(text);
+ return /at capacity|overloaded|server_is_overloaded|\b529\b|\b503\b|service unavailable/i.test(text);
 }
+/** Codex's notice while it retries a dropped or refused stream by itself ("Reconnecting... 2/5 (…)"). */
+const codexReconnecting=(value:unknown)=>typeof value==='string'&&/^\s*Reconnecting\b/i.test(value);
 export function openClawMissingKey(text:string):string|null {
  const name=/Secret store entry "([A-Z][A-Z0-9_]{0,127})" was not found/.exec(text)?.[1]??/Environment variable "([A-Z][A-Z0-9_]{0,127})" is missing or empty/.exec(text)?.[1];
  return name?`OpenClaw can’t find its key ${name}, so its model can’t answer. Save it in Terminal with: openclaw secrets store set ${name}`:null;
@@ -282,7 +285,9 @@ export function readLocalHarnessLine(id:LocalHarnessId,state:LocalHarnessStream,
     const delta=(state.text?'\n\n':'')+item.text;state.final=item.text;return add(delta);
    }
    if(event.type==='turn.failed')state.error=errorText(event.error,'Codex could not answer.');
-   if(event.type==='error')state.error=errorText(event.message??event.error,'Codex could not answer.');
+   // "Reconnecting... 2/5 (unexpected status 503 …)" is Codex retrying its own stream, not the turn's end: it goes on and
+   // either answers or ends with turn.failed (Mac Alpha 4376/4377 failed turns Codex was still retrying, #492/#497).
+   if(event.type==='error'&&!codexReconnecting(event.message??event.error))state.error=errorText(event.message??event.error,'Codex could not answer.');
    return '';
   }
   case 'hermes':{

@@ -108,6 +108,13 @@ assert.deepEqual(claude,{deltas:['hello ','fox'],outcome:{message:'hello fox'}})
 const codex=read('codex',[{type:'thread.started',thread_id:'t'},{type:'turn.started'},{type:'item.completed',item:{id:'i0',type:'reasoning',text:'thinking'}},{type:'item.completed',item:{id:'i1',type:'agent_message',text:'Done.'}},{type:'turn.completed',usage:{}}]);
 assert.deepEqual(codex,{deltas:['Done.'],outcome:{message:'Done.'}});
 assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'Not signed in'}}],1).outcome,{error:'Codex is not signed in. Open Terminal, run codex login, then try again.'});
+// Codex's "Reconnecting... n/5" is its own retry, not the turn's end: the answer after it counts (Mac Alpha 4376/4377, #492/#497).
+const reconnect='Reconnecting... 2/5 (unexpected status 503 Service Unavailable: An error occurred while processing your request.)';
+assert.deepEqual(read('codex',[{type:'turn.started'},{type:'error',message:reconnect},{type:'item.completed',item:{id:'i1',type:'agent_message',text:'Done.'}},{type:'turn.completed',usage:{}}]),{deltas:['Done.'],outcome:{message:'Done.'}});
+// Its reconnects ran out: the turn fails, as a busy model the host tries again later.
+const outOfReconnects=read('codex',[{type:'error',message:reconnect},{type:'turn.failed',error:{message:'exceeded retry limit, last status: 503 Service Unavailable'}}],1).outcome as {error:string};
+assert.equal(outOfReconnects.error,'exceeded retry limit, last status: 503 Service Unavailable');
+assert.equal(modelAtCapacity(outOfReconnects.error),true);
 // Hermes Agent over ACP: the session's id brings the prompt, chunks stream, permission asks are declined.
 {
  const state=localHarnessStream({prompt:'Say hi'});
