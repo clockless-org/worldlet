@@ -8,6 +8,15 @@ import {CONTEXT_CHANGED,SOURCE_PAUSED,uuid,message,isValidation,isCancel,isRow,r
 export const WORLD_TOOL_NAMES=['read_companion_archive','meeting_decisions','_source_begin','_source_result','query_world_items','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','read_world_history'];
 const TRACKED=['_source_result','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','meeting_decisions'];
 const UNVERIFIED='Source evidence was not read or cannot be verified.';
+// Why a cited source was rejected, one message each so error tracking can tell them apart (core/diagnostics/report.ts
+// itemRule); the model always gets UNVERIFIED with the indexed evidenceIssues.
+const EVIDENCE={
+ missing:'Source evidence needs a provider, record id and quote.',
+ unauthorized:'Source evidence cites a source this turn may not use.',
+ unread:'Source evidence cites a record not read in this turn.',
+ quote:'Source evidence quote is not in the read record text.',
+};
+const EVIDENCE_REJECTIONS=new Set([UNVERIFIED,...Object.values(EVIDENCE)]);
 
 /** Validation belongs to the tool result so the agent can correct its arguments; cancellation
  * and infrastructure errors still abort the turn. */
@@ -29,7 +38,8 @@ export async function worldToolReply(center:AttentionCenter,name:string,args:Row
  }catch(error){
   if(isCancel(error)||!isValidation(error)){recordOutcome(isCancel(error)?'cancelled':'failed');throw error;}
   recordOutcome('failed');
-  const text=message(error);
+  const evidenceRejected=name==='upsert_world_items'&&EVIDENCE_REJECTIONS.has(message(error));
+  const text=evidenceRejected?UNVERIFIED:message(error);
   const reply:Row={error:text,guidance:'Do not claim success. Correct the field or prerequisite identified by the error, preserving valid source evidence. Retry the corrected submission; unaccepted records remain pending.'};
   if(name==='upsert_world_items')center.persist(error,'worldItemSave',turn);
   if(name==='upsert_world_items'&&text===UNVERIFIED&&store.state.cloudConsent){
@@ -205,7 +215,10 @@ async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,moni
    for(const ref of refs){
     const p=ref?.provider,id=ref?.id,quote=ref?.quote;
     const read=typeof p==='string'&&typeof id==='string'?evidence[p+':'+id]:undefined;
-    if(typeof p!=='string'||typeof id!=='string'||typeof quote!=='string'||!quote||!center.attentionSourceAuthorized(p,turn)||!read||typeof read.text!=='string'||!read.text.includes(quote))throw new WorldletError(UNVERIFIED);
+    if(typeof p!=='string'||typeof id!=='string'||typeof quote!=='string'||!quote)throw new WorldletError(EVIDENCE.missing);
+    if(!center.attentionSourceAuthorized(p,turn))throw new WorldletError(EVIDENCE.unauthorized);
+    if(!read||typeof read.text!=='string')throw new WorldletError(EVIDENCE.unread);
+    if(!read.text.includes(quote))throw new WorldletError(EVIDENCE.quote);
     // The email's own picture travels with its reference, for the card (core/attention/source-image.ts).
     const image=attentionImageURL(read.image);
     canonical.push({provider:p,id,quote,url:read.url??'',...(image?{image}:{})});
