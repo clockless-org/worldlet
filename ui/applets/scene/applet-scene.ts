@@ -35,6 +35,12 @@ export function sceneMaterialStyle(material:ThemeSceneMaterialName):Record<strin
  out['--scene-body-size']=m.bodySize+'px';out['--scene-title-size']=m.titleSize+'px';out['--scene-radius']=m.radius+'px';out['--scene-control-height']=m.controlHeight+'px';
  return out;
 }
+// Shell overlays use layout coordinates, not the transient visual bounds of the entrance zoom.
+function layoutOrigin(element:HTMLElement){
+ let x=0,y=0;
+ for(let node:HTMLElement|null=element;node;node=node.offsetParent as HTMLElement|null){x+=node.offsetLeft;y+=node.offsetTop;}
+ return {x,y};
+}
 /**
  * Mount `key`'s scene in `host` (which it fills): the theme's own for that Applet, else its family's (scene-family.ts). `source` overrides the theme's scene, for a preview that serves the
  * package itself. The region elements are empty: the Applet renders into `primary.element` (and any secondary ones).
@@ -67,19 +73,17 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   if(painted)place(plate,fit.image);
   const fitted=fit.regions.find(r=>r.role==='primary')!,compact=fitted.width<SCENE_COMPACT_WIDTH;
   element.dataset.compact=String(compact);
-  if(foreground){
-   const parent=(options.shell||element).getBoundingClientRect(),scene=element.getBoundingClientRect();
-   foreground.layout({...fit.image,x:fit.image.x+scene.left-parent.left,y:fit.image.y+scene.top-parent.top},!compact);
-  }
+  const sceneOrigin=layoutOrigin(element),shellOrigin=layoutOrigin(options.shell||element);
+  const offset={x:sceneOrigin.x-shellOrigin.x,y:sceneOrigin.y-shellOrigin.y};
+  foreground?.layout({...fit.image,x:fit.image.x+offset.x,y:fit.image.y+offset.y},!compact);
   const primary=compact?{...fitted,x:16,y:84,width:width-32,height:Math.max(160,height*.75-84)}:fitted;
   for(const [index,region] of regions.entries()){region.element.hidden=compact&&region.role!=='primary';place(region.element,region.role==='primary'?primary:fit.regions[index]);}
   const round=(r:{x:number;y:number;width:number;height:number})=>({x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)});
   last={key,painted,compact,primary:round(primary),companion:round(fit.companion)};
   const shell=options.shell;if(!shell)return;
   if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;return;}
-  const s=shell.getBoundingClientRect(),e=element.getBoundingClientRect();
   for(const [name,r] of [['primary',primary],['companion',fit.companion]] as const){
-   shell.style.setProperty(`--applet-scene-${name}-left`,e.left-s.left+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,e.top-s.top+r.y+'px');
+   shell.style.setProperty(`--applet-scene-${name}-left`,offset.x+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,offset.y+r.y+'px');
    shell.style.setProperty(`--applet-scene-${name}-width`,r.width+'px');shell.style.setProperty(`--applet-scene-${name}-height`,r.height+'px');
   }
   shell.dataset.appletScene=key;

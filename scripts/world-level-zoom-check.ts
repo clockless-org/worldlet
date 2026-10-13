@@ -44,6 +44,13 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(first.pointerEvents,'none','the zoom never takes a click');
  assert.equal(first.pictures,1,'the zoom starts from a picture of the World');
  await zoomed(start+1,'in','Opening an Applet');
+ // The entrance animation cannot leave the shell's reader offset from the local scene's paper.
+ const alignment=await page.evaluate(()=>{
+  const shell=document.querySelector<HTMLElement>('#notionWorld')!,region=document.querySelector<HTMLElement>('.applet-scene-region[data-role=primary]')!;
+  const a=shell.getBoundingClientRect(),b=region.getBoundingClientRect();
+  return {paper:{x:b.x-a.x,y:b.y-a.y},reader:{x:parseFloat(shell.style.getPropertyValue('--applet-scene-primary-left')),y:parseFloat(shell.style.getPropertyValue('--applet-scene-primary-top'))}};
+ });
+ assert.ok(Math.abs(alignment.paper.x-alignment.reader.x)<=1&&Math.abs(alignment.paper.y-alignment.reader.y)<=1,'Paper and reader align after animated entry: '+JSON.stringify(alignment));
 
  // Another Applet from inside one is a move between equals: no zoom.
  await page.evaluate(()=>location.hash='object=app-apple-notes');
