@@ -72,10 +72,18 @@ export function installPhone(host:Host){
    // carries the reply. Anything else waits for the page.
    if(!host.page.ready()){
     const fox=host.optional<FoxService>(FOX),scope=fox?.scope();
+    // The Agent's permission prompt in a turn running without the page is answered on the host too.
+    if(message.type==='approval'&&fox?.answerApproval){
+     lastActive=Date.now();
+     try{await fox.answerApproval(message.approval,message.choice);}catch{/* Already answered or gone; the live turn shows the truth. */}
+     if(message.choice!=='deny')usage('phone_approved',{approval_kind:'agent_permission'});
+     return true;
+    }
     if(message.type!=='chat'||message.item||message.applet||!fox?.converse||!scope||scope.sample||scope.setup)return false;
     lastActive=Date.now();
     asked.set(askedKey(message.text),{at:Date.now()});
-    void fox.converse(message.text).then(finished,error=>host.diagnostics.record(error,'phoneConverse'));
+    // Its reply is pushed when Fox finishes (the live turn's done update, through PhoneService.live).
+    void fox.converse(message.text).catch(error=>host.diagnostics.record(error,'phoneConverse'));
     return true;
    }
    lastActive=Date.now();
@@ -224,10 +232,20 @@ export function installPhone(host:Host){
   return {...link,schedule,watch,stop(){if(timer)clearTimeout(timer);}};
  });
  const watch=setInterval(()=>{for(const link of links)link.watch();},QUICK);
+ // A live turn goes only to an open phone or browser, except while it asks for an approval and the update that settles
+ // it: the phone the notification wakes then finds the approval card with its buttons, and a settled one loses them.
+ async function publishLive(value:Row){
+  const approval=!!value.approval||liveAsked;
+  liveAsked=!!value.approval&&value.done!==true;
+  let sent=false;
+  for(const link of links)if(link.phone&&(approval||link.open())&&await link.relay.publish('live',value))sent=true;
+  return sent;
+ }
  host.provide<PhoneService>(PHONE,{
   publish:async(slot,value)=>{const [phone,page]=await Promise.all([relay.publish(slot,value),browser.publish(slot,value)]);return phone||page;},
   idleSeconds:()=>{const last=Math.max(relay.status().seenAt||0,lastActive);return last?Math.max(0,(Date.now()-last)/1000):null;},
   notify,
+  live:async value=>{if(value.done===true)finished(value);return publishLive(value);},
  });
  host.register({
   // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a web browser's; otherwise the phone's.
@@ -265,12 +283,9 @@ export function installPhone(host:Host){
     const previous=attention;attention=relay.paired?request.value:undefined;
     if(attention)for(const push of phoneAttentionPushes(previous,attention))void notify(push).catch(e=>host.diagnostics.record(e,'phonePush'));
    }
-   // A live turn goes only to an open phone, except while it asks for an approval and the update that settles it: the
-   // phone the notification wakes then finds the approval card with its buttons, and a settled one loses them.
-   const approval=request.slot==='live'&&(!!request.value.approval||liveAsked);
-   if(request.slot==='live')liveAsked=!!request.value.approval&&request.value.done!==true;
+   if(request.slot==='live')return {sent:await publishLive(request.value)};
    let sent=false;
-   for(const link of links)if(link.phone&&(request.slot!=='live'||approval||link.open()))sent=await link.relay.publish(request.slot,request.value)||sent;
+   for(const link of links)if(link.phone&&(await link.relay.publish(request.slot,request.value)))sent=true;
    return {sent};
   },
  });

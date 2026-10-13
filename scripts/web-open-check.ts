@@ -137,10 +137,14 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
 {
  const phone=readFileSync('platform/electron/src/modules/phone/index.ts','utf8'),fox=readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
- assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,300}message\.type!=='chat'\|\|message\.item\|\|message\.applet\|\|!fox\?\.converse[\s\S]{0,300}fox\.converse\(message\.text\)\.then\(finished/,'a main-conversation line without the page goes to Fox on the host, and its reply is pushed like any other');
+ assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,1200}message\.type!=='chat'\|\|message\.item\|\|message\.applet\|\|!fox\?\.converse[\s\S]{0,300}fox\.converse\(message\.text\)/,'a main-conversation line without the page goes to Fox on the host');
+ assert.match(phone,/live:async value=>\{if\(value\.done===true\)finished\(value\);return publishLive\(value\);\}/,'its turn streams to an open phone or browser, and the reply is pushed like any other');
+ assert.match(phone,/message\.type==='approval'&&fox\?\.answerApproval/,'the Agent\'s permission prompt is answered without the page');
+ assert.match(fox,/if\(headless\.has\(id\)\)headlessLive\?\.event\(event\);/,'the host streams a headless turn itself');
+ assert.match(fox,/headlessLive\?\.settled\(id\);/,'an answered prompt leaves the live turn');
  assert.match(fox,/if\(!active\(\)\|\|!page\.ready\(\)&&!headless\.has\(id\)\)throw new Cancelled\(\)/,'a turn said without the page is not cancelled for want of it');
  assert.match(fox,/if\(!page\.ready\(\)\)return tool\?NEEDS_WORLD:null;/,'its page-only steps say the window must be open');
  assert.match(fox,/host\.onPageReload\(\(\)=>\{if\(agentTurn!==null&&!headless\.has\(agentTurn\)\)cancelCloud\(\)/,'a page reload leaves it running');
- assert.match(fox,/report,converse\}\)/,'FoxService offers converse');
+ assert.match(fox,/report,converse,answerApproval\}\)/,'FoxService offers converse and answerApproval');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }

@@ -221,6 +221,8 @@ export interface FoxService {
  /** A line said in a browser or on the phone while the World page is not there: it runs in Fox's main conversation
   * on the host alone, after the running turn, and resolves with Fox's reply. */
  converse?(text:string):Promise<{user:string,text:string}>;
+ /** Answers the Agent's permission prompt (as the `harnessApproval` action does), for a phone or browser without the page. */
+ answerApproval?(id:string,choice:string):Promise<void>;
 }
 export const FOX='fox';
 
@@ -233,6 +235,9 @@ export interface PhoneService {
  /** Notifies the paired phone (core/phone PhonePush), only while it is paired and not open and never in setup or the
   * sample world; resolves whether the relay sent it. Routines and background task reports call it directly. */
  notify(push:PhonePushRequest):Promise<boolean>;
+ /** The turn Fox is streaming (core/phone phoneLive) for an open phone or browser, from a turn the host runs without the
+  * World page (FoxService.converse); the done update also pushes the reply to a phone that is put away. */
+ live?(value:Row):Promise<boolean>;
 }
 export const PHONE='phone';
 /** The person's activity fact for background admission (Core `userIdle`, #1650): seconds since their last input on
