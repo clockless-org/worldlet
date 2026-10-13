@@ -7,6 +7,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {parseBuildThemeManifest,parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
 import {validateBuildTheme,importBuildTheme,buildThemeSource} from './build-theme-source.ts';
+import {checkSceneFrameCoverage} from './scene-frame-coverage.ts';
 import ts from 'typescript';
 import sharp from 'sharp';
 import {withVirtualFile} from './ts-virtual-file.ts';
@@ -64,7 +65,7 @@ try{
  presentation.appletScenes=registered(registration).appletScenes;
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  // A declared alpha channel alone is not a usable frame. Check the sampled crop for an opening and solid rim.
- const frame={mask:'assets/frame.png',source:[0,0,1,1],target:[0,0,1,1]};
+ const frame={mask:'assets/frame.png',source:[0,0,1,1],target:[0,0,1,1]} as const;
  const saveFrame=async(bytes:Buffer)=>fs.writeFile(path.join(source,frame.mask),bytes);
  const png=async(alpha:number)=>sharp({create:{width:16,height:16,channels:4,background:{r:20,g:30,b:40,alpha}}}).png().toBuffer();
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(registered({...registration,webFrame:frame})));
@@ -78,6 +79,15 @@ try{
   await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(registered({...registration,webFrame:{...frame,source:crop}})));
   await assert.rejects(validateBuildTheme(source),/transparent opening and opaque rim/);
  }
+ // A gap in any edge or an open frame must fail even when a mask has both opaque and transparent pixels.
+ const rim=Buffer.alloc(200*200*4,255);
+ for(let y=10;y<190;y++)for(let x=10;x<190;x++)rim[(y*200+x)*4+3]=0;
+ const encodeRim=()=>sharp(rim,{raw:{width:200,height:200,channels:4}}).png().toBuffer();
+ const covered={...registration,imageSize:[200,200] as [number,number],webFrame:frame,regions:[{id:'main',role:'primary' as const,material:'paper' as const,rect:[.03,.03,.94,.94] as [number,number,number,number]}]};
+ await checkSceneFrameCoverage(await encodeRim(),covered,'covered');
+ for(const rect of [[.06,.03,.91,.94],[.03,.06,.94,.91],[.03,.03,.91,.94],[.03,.03,.94,.91]] as [number,number,number,number][])await assert.rejects(checkSceneFrameCoverage(await encodeRim(),{...covered,regions:[{...covered.regions[0],rect}]},'gap'),/cover the entire opening/);
+ for(let x=0;x<11;x++)rim[(100*200+x)*4+3]=0;
+ await assert.rejects(checkSceneFrameCoverage(await encodeRim(),covered,'broken rim'),/enclose the content opening/);
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  // A theme's Artifact look is static files it names: rules and prompt in Markdown, reference pictures, materials, colours.
  const artifact={style:'assets/artifact/STYLE.md',prompt:'assets/artifact/PROMPT.md',references:[{image:'assets/artifact/a.webp',role:'Primary'}],materials:[{id:'paper',image:'assets/artifact/paper.webp',usage:'Paper'}],colors:{paper:'#f7efdc',moss:'#315f48'}};
