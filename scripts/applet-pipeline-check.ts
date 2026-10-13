@@ -60,9 +60,16 @@ assert.equal('itemDependencies' in hosted,false,'internal dependencies never rea
 const full={id:'standup',kind:'event',provider:'google-calendar',title:'Team standup',start:'2026-09-30T09:30:00-07:00',summary:'Long copy',reason:'Why',sources:[{provider:'google-calendar',id:'s',quote:'q'}],attentionContentVersion:1};
 assert.deepEqual(attentionBatchInput({pendingContextIds:[],context:[{id:'cal',revision:'r1'}],items:[full],itemDependencies:{standup:[{id:'cal',revision:'r1'}]}}).items[0],
  {id:'standup',kind:'event',provider:'google-calendar',title:'Team standup',start:'2026-09-30T09:30:00-07:00',unchanged:true},'unchanged items carry identity and timing only, not copy to restate');
+// Saved items and candidates can also cite records outside this pass; only in-context references reach the model,
+// since the host rejects any other as unread evidence.
+const wider=attentionBatchInput({pendingContextIds:['cal'],context:sourceEvidenceContext([{id:'cal',provider:'google-calendar',sourceId:'standup',text:'Standup 09:30',revision:'r2'}]),
+ items:[{id:'standup',kind:'event',provider:'google-calendar',sources:[{provider:'google-calendar',id:'standup',quote:'Standup'},{provider:'gmail',id:'older-thread',quote:'Moved standup'}]}],
+ appletCandidates:[{title:'Standup moved',sources:[{provider:'google-calendar',id:'standup',quote:'Standup 09:30'},{provider:'gmail',id:'older-thread',quote:'Moved standup'}]}]});
+assert.deepEqual(wider.items[0].sources,[{provider:'google-calendar',id:'standup',quote:'Standup'}]);
+assert.deepEqual(wider.appletCandidates[0].sources,[{provider:'google-calendar',id:'standup',quote:'Standup 09:30'}]);
 const {attentionExecution}=await import('../core/attention/attention-execution.ts');
 assert.match(attentionExecution('synthesis').prompt!,/Output only new findings and existing items whose content this context changes\. An item marked unchanged/);
-console.log('PASS script → S checkpoints → M evidence projection: promotions preserved, deterministic skips, times, revision gating, withdrawals, compact cross-Applet evidence and unchanged-item marking');
+console.log('PASS script → S checkpoints → M evidence projection: promotions preserved, deterministic skips, times, revision gating, withdrawals, compact cross-Applet evidence, in-context citations only and unchanged-item marking');
 
 // S staging must not enforce M's final-card typography.
 const {appletCandidateContent,canonicalSourceQuotes}=await import('../core/applets/index.ts');

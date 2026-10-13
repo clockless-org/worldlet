@@ -27,6 +27,7 @@ assert.throws(()=>appletAnalysisCommit({...base,revisions:hashes,latest:[{...rec
 console.log('PASS retained native checkpoint hashes, pruned attempt state and source evidence fences');
 
 assert.deepEqual(appletAnalysisItems(records,[item,{...item,sources:[{id:'unrelated'}]}]),[item]);
+assert.deepEqual(appletAnalysisItems(records,[{...item,sources:[...item.sources,{id:'earlier-batch'}]}])[0].sources,item.sources,'only this batch\'s records stay citable');
 
 {
  const {appletAnalysisFailed,appletAnalysisRetrying,appletAnalysisParked,appletAnalysisMaxFailures}=await import('../core/applets/analysis-state.ts');
