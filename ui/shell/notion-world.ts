@@ -590,9 +590,8 @@ export function mountNotionWorld(data: World, native: any) {
   }
   // Entering an Area (owner requests 2026-10-13): its painted map (themeAreaMap) fills the window and its Applets lie
   // flat in the middle of it, five to a row and on down, on a soft shade: the person's own first, then the ones it
-  // recommends, then, behind one button, the rest of its category. The Area is managed right here: each own Applet's
-  // ⋯ (or right-click) opens the same menu as in the World (move, pin, remove), and + adds a recommended one without
-  // opening it. The Attention Center and the rest of the World's chrome step aside; Fox stays, and Back or Esc returns
+  // recommends, then, behind one button, the rest of its category. The Area is managed right here, by right-click: an own
+  // Applet opens the same menu as in the World (move, pin, remove), a recommended one offers Add without opening it. The Attention Center and the rest of the World's chrome step aside; Fox stays, and Back or Esc returns
   // to the World.
   function closeAreaView(){if(!areaView)return;closeRegionShelf();removeMenu();areaView.remove();areaView=null;delete root.dataset.areaView;voice?.sync();}
   function enterArea(value){
@@ -607,33 +606,31 @@ export function mountNotionWorld(data: World, native: any) {
    const leave=button('',()=>closeAreaView(),'area-view-back');leave.setAttribute('aria-label','Back to the World');leave.title='Back to the World';
    leave.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
    header.append(leave,element('h1','',building.title));
-   const shade=element('div','area-view-shade');view.append(header,shade);
+   const shade=element('div','area-view-shade'),list=element('div','area-view-list');shade.append(list);view.append(header,shade);
    let showAll=false;
    const open=(app,own:boolean)=>{closeAreaView();if(!own&&!root.appletLayout.has(app.moduleId))placeInArea(app.moduleId,id);visitObject(app.moduleId);if(appletEntryReturn)appletEntryReturn.areaView=id;};
    const tile=(grid:HTMLElement,app,own:boolean)=>{
     const cell=element('div','area-view-cell');cell.dataset.applet=app.moduleId;cell.dataset.own=String(own);
     const t=button('',()=>open(app,own),'area-view-applet');t.dataset.applet=app.moduleId;t.dataset.own=String(own);t.setAttribute('aria-label',app.title);
     const img=element('img') as HTMLImageElement;img.src=themeAppletIcon(app.key)||'';img.alt='';img.draggable=false;t.append(img,element('span','',app.title));cell.append(t);
-    if(own){
-     const more=button('',e=>{const r=(e.currentTarget as HTMLElement).getBoundingClientRect();appletMenu(app.moduleId,r.left,r.bottom+4);},'area-view-more');
-     more.setAttribute('aria-label','Manage '+app.title);more.title='Move, pin or remove';more.setAttribute('aria-haspopup','menu');
-     more.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
-     t.addEventListener('contextmenu',e=>{e.preventDefault();appletMenu(app.moduleId,e.clientX,e.clientY);});cell.append(more);
-    }else{
-     const add=button('',()=>{add.disabled=true;void editApplet('unlock',app.moduleId).then(()=>placeInArea(app.moduleId,id),error=>{add.disabled=false;notify(error.message||'Could not add this app. Try again.');});},'area-view-add');
-     add.setAttribute('aria-label','Add '+app.title+' to '+building.title);add.title='Add to '+building.title;
-     add.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>';cell.append(add);
-    }
+    // Managed by right-click (or the context-menu key), with no buttons over the icons (owner feedback 2026-10-13): the
+    // World's own menu for the person's Applets, Add or Open for a recommended one.
+    t.title=own?'Right-click to move, pin or remove':'Right-click to add to '+building.title;
+    t.addEventListener('contextmenu',e=>{e.preventDefault();const r=t.getBoundingClientRect(),x=e.clientX||r.left+r.width/2,y=e.clientY||r.bottom;if(own){appletMenu(app.moduleId,x,y);return;}
+     removeMenu();const menu=element('div','applet-layout-menu');deviceMenu=menu;menu.setAttribute('role','menu');
+     const add=button('Add to '+building.title,()=>{add.disabled=true;void editApplet('unlock',app.moduleId).then(()=>{placeInArea(app.moduleId,id);removeMenu();},error=>{add.disabled=false;notify(error.message||'Could not add this app. Try again.');});});
+     const go=button('Open',()=>{removeMenu();open(app,false);});add.setAttribute('role','menuitem');go.setAttribute('role','menuitem');menu.append(add,go);root.append(menu);
+     const rr=root.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(x-rr.left,rr.width-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(y-rr.top,rr.height-menu.offsetHeight-8))+'px';add.focus();});
     grid.append(cell);
    };
    const render=()=>{
-    if(areaView!==view)return;const top=shade.scrollTop;shade.replaceChildren();
-    const {apps,catalog,recommended}=areaContents(id),grid=element('div','area-view-grid');shade.append(grid);
+    if(areaView!==view)return;const top=list.scrollTop;list.replaceChildren();
+    const {apps,catalog,recommended}=areaContents(id),grid=element('div','area-view-grid');list.append(grid);
     apps.forEach(app=>tile(grid,app,true));recommended.forEach(app=>tile(grid,app,false));
     const rest=catalog.filter(r=>appCategory(r)===id&&!(root.appletLayout.has(r.moduleId)&&r.region===id)&&!recommended.includes(r)).sort((a,b)=>a.title.localeCompare(b.title));
     if(showAll)rest.forEach(app=>tile(grid,app,false));
-    else if(rest.length){const all=button('All '+building.title+' Things ('+rest.length+')',()=>{showAll=true;render();},'area-view-all');all.setAttribute('aria-expanded','false');shade.append(all);}
-    shade.scrollTop=top;
+    else if(rest.length){const all=button('All '+building.title+' Things ('+rest.length+')',()=>{showAll=true;render();},'area-view-all');all.setAttribute('aria-expanded','false');list.append(all);}
+    list.scrollTop=top;
    };
    render();(view as any).render=render;
    root.append(view);root.dataset.areaView=id;voice?.sync();
