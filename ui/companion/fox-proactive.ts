@@ -27,13 +27,16 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
  say:(line:{id:string;text:string;card?:string})=>void;
 }){
  let place='',since=Date.now(),activeAt=Date.now(),settled=false,stayed=false,late=false,asking=false,visit='',looks=0,lookedAt=0,openedByPerson=false,game=false,checkedAt=Date.now();
+ // The Applet or page the person is in, as it last showed (cached while there, since leaving it changes what the page
+ // shows), and the wrap up owed once they are back in the World (owner 2026-10-13: every Applet, not only games).
+ let lastSeen:{thread:string;environment:object}|null=null,wrap:{thread:string;minutes:number;environment:object;at:number}|null=null;
  const touched=()=>{activeAt=Date.now();};
  for(const name of ['pointerdown','keydown','wheel'])window.addEventListener(name,touched,{passive:true,capture:true});
- async function ask(moment:ProactiveMoment,key:string){
+ async function ask(moment:ProactiveMoment,key:string,extra:object={}){
   asking=true;
   try{
    let context={};try{context=structuredClone(environment())||{};}catch{}
-   const result=await call('foxProactive',{moment,thread:key,minutes:Math.round((Date.now()-since)/60000),environment:context,...moment==='browsing'?{visit,opened:looks===1&&openedByPerson}:{}});
+   const result=await call('foxProactive',{moment,thread:key,minutes:Math.round((Date.now()-since)/60000),environment:context,...extra,...moment==='browsing'?{visit,opened:looks===1&&openedByPerson}:{}});
    // Fox was busy with something else: this visit's look is tried again on a later tick, not lost.
    // A game Worldlet follows (the host says so): Fox keeps playing along this visit (owner 2026-10-13).
    if(result?.game===true&&key===place)game=true;
@@ -45,10 +48,18 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
   const key=thread();
   // A place the person just opened themselves (a click or key moments before) gets Fox's opening line; one Fox or the
   // first run brought them to (a task's page, the end of the tour) gets only the later looks.
-  if(key!==place){place=key;since=Date.now();settled=false;stayed=false;visit=key+'@'+since;looks=0;lookedAt=0;game=false;openedByPerson=since-activeAt<10_000;}
+  if(key!==place){
+   // Back in the World after a real stay somewhere (not a game, which has its own reviews): Fox owes a wrap up.
+   const stay=(Date.now()-since)/1000;
+   wrap=lastSeen&&place&&lastSeen.thread===place&&!game&&stay>=PROACTIVE.wrapup.minStaySeconds&&key&&world()?{thread:place,minutes:Math.round(stay/60),environment:lastSeen.environment,at:Date.now()}:null;
+   lastSeen=null;
+   place=key;since=Date.now();settled=false;stayed=false;visit=key+'@'+since;looks=0;lookedAt=0;game=false;openedByPerson=since-activeAt<10_000;}
   if(!key||asking||document.hidden||document.fullscreenElement||busy()||/meeting/i.test(key))return;
   const now=Date.now(),here=(now-since)/1000,quiet=(now-activeAt)/1000;
   if(quiet>10*60)return;
+  if(!world())try{lastSeen={thread:key,environment:structuredClone(environment())||{}};}catch{}
+  // The wrap up goes out as soon as Fox is free, or not at all once it is old news.
+  if(wrap){const left=wrap;wrap=null;if(now-left.at<60_000&&world()){void ask('wrapup',key,{left:{thread:left.thread,minutes:left.minutes,environment:left.environment}});return;}}
   // Browsing: an Applet or page looked at for a short while; scrolling and reading count as looking, typing does not
   // reach here (busy). It stands in for the settled moment there: a first look, and one more a few minutes on.
   if(!world()){

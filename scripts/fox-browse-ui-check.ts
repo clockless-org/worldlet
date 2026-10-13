@@ -49,16 +49,26 @@ await card.getByText('This video is the one your calendar note links to.').waitF
  assert.equal(await card.getByRole('button',{name:/Browse with me|Don’t bother/}).count(),0,'no switch in Fox’s card');
  await page.screenshot({path:'output/fox-browse/browse-line.png'});
  // Still in the same visit: Fox's own line showing does not hold the next look (owner 2026-10-13 「说的再勤一点」), which
- // comes a minute and a half on, and is not the opening one.
+ // comes a minute on (every Applet keeps talking, owner 2026-10-13 「每一个 app…更主动一点」), and is not the opening one.
 for(let i=0;i<8;i++)await page.clock.fastForward(15_000);
  const looks=await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'&&c.moment==='browsing'));
- assert.equal(looks.length,2,'a later look in the same visit');assert.equal(looks[1].visit,looks[0].visit);assert.notEqual(looks[1].opened,true);
- // A game the host follows: once the host says so, the looks keep coming at the game's pace, past an ordinary visit's few.
- await page.evaluate(()=>{(window as any).game=true;});
- for(let i=0;i<6;i++)await page.clock.fastForward(15_000);
- for(let i=0;i<8;i++)await page.clock.fastForward(15_000);
- const played=await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'&&c.moment==='browsing').length);
+ assert.ok(looks.length>=2,`later looks in the same visit (${looks.length})`);assert.equal(looks[1].visit,looks[0].visit);assert.notEqual(looks[1].opened,true);
+ // Back in the World after a couple of minutes there, Fox wraps the visit up, with what YouTube showed when they left.
+ await page.locator('body').click({position:{x:4,y:4}}).catch(()=>{});
+ await page.keyboard.press('Escape');
+ for(let i=0;i<3;i++)await page.clock.fastForward(2_000);
+ assert.ok(await page.locator('#notionContent').isHidden(),'back in the World');
+ const wraps=await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'&&c.moment==='wrapup'));
+ assert.equal(wraps.length,1,'one wrap up on the way out');assert.ok(wraps[0].left.minutes>=2);assert.match(JSON.stringify(wraps[0].left),/youtube/i);
+ // A game the host follows: once the host says so, the looks keep coming at the game's pace, past an ordinary visit's.
+ await page.evaluate(()=>{(window as any).game=true;(window as any).openResult=null;});
+ await page.locator('#notionInput').click();
+ await page.locator('#notionInput').fill('Take me to YouTube');await page.locator('#notionInput').press('Enter');
+ await page.waitForFunction(()=>(window as any).openResult!==null);
+ await page.locator('#notionInput').blur();
+ for(let i=0;i<24;i++)await page.clock.fastForward(15_000);
+ const played=await page.evaluate((first:string)=>(window as any).calls.filter((c:any)=>c.action==='foxProactive'&&c.moment==='browsing'&&c.visit!==first).length,looks[0].visit);
  assert.ok(played>=5,`Fox keeps playing along in a game (${played} looks)`);
  assert.deepEqual(errors,[]);
- console.log('PASS Browse with me: an opening browse ask as the Applet opens, its line arriving with its own effect and no switch in Fox’s card, a later look in the same visit, and the game pace once the host says the place is a game');
+ console.log('PASS Browse with me: an opening browse ask as the Applet opens, its line arriving with its own effect and no switch in Fox’s card, later looks in the same visit, a wrap up back in the World, and the game pace once the host says the place is a game');
 });

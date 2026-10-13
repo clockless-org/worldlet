@@ -3,7 +3,7 @@
 // Fox's PASS hides the answer, and that Fox's voice rides with every turn. No model, no browser.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {FOX_VOICE,PLACE,PROACTIVE,companionPrompt,onScreenText,proactiveAsked,proactiveCard,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../core/companion/index.ts';
+import {FOX_VOICE,PLACE,PROACTIVE,placeKind,companionPrompt,onScreenText,proactiveAsked,proactiveCard,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../core/companion/index.ts';
 
 const day='2026-10-06',t0=1_800_000_000;
 const policyIncludes=(action:string)=>JSON.parse(fs.readFileSync('contracts/world-event-policy.json','utf8')).plumbing.includes(action);
@@ -130,13 +130,35 @@ assert(!proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2
 state=proactiveState();
 for(let i=0;i<PROACTIVE.browse.perVisit;i++){assert.deepEqual(proactiveDue(state,{now:t0+i*PROACTIVE.browse.game.againSeconds,day,moment:'browsing',place:'Showdown',visit:'g@1',game:true}),{due:true},'look '+i);proactiveAsked(state,{now:t0+i*PROACTIVE.browse.game.againSeconds,day,moment:'browsing',visit:'g@1'});}
 const later=t0+PROACTIVE.browse.perVisit*PROACTIVE.browse.game.againSeconds;
-assert.deepEqual(proactiveDue(state,{now:later,day,moment:'browsing',place:'Showdown',visit:'g@1'}),{due:false,reason:'visit'},'an ordinary Applet stops after a few looks');
+assert.deepEqual(proactiveDue(state,{now:later,day,moment:'browsing',place:'Showdown',visit:'g@1'}),{due:false,reason:'visit'},'an ordinary Applet stops after its looks');
 assert.deepEqual(proactiveDue(state,{now:later,day,moment:'browsing',place:'Showdown',visit:'g@1',game:true}),{due:true},'a game keeps going');
 assert(PROACTIVE.browse.game.perVisit>=20&&PROACTIVE.browse.game.againSeconds<=60&&PROACTIVE.browse.game.gapSeconds<PROACTIVE.browse.game.againSeconds);
 const battleTip=proactiveTask({moment:'browsing',place:'Showdown',local:'Mon 20:10',minutes:6,recent:[],lastWords:'',game:{playing:{format:'[Gen 9] VGC 2026 Reg I',opponent:'Cynthia77',turn:4},record:{won:1,lost:2,tied:0}}});
 for(const part of ['in a battle right now','vs Cynthia77, turn 4','1 won, 2 lost today','one concrete tip for this turn','rates 3 or more'])assert(battleTip.includes(part),part);
 const gameOpen=proactiveTask({moment:'browsing',place:'Showdown',local:'Mon 20:10',minutes:0,recent:[],lastWords:'',opened:true,game:{playing:null,record:{won:0,lost:0,tied:0}}});
 assert(gameOpen.includes('joining their session')&&!gameOpen.includes('They just walked in'),'a game opens with a chat, not a screen recommendation');
+
+// Every Applet, not only games (owner 2026-10-13 「每一个 app 进来之后…变得更主动一点」): Fox keeps talking all visit (a look
+// a minute, many a visit), with the hook that fits the kind of place, and wraps up when the person comes back to the World.
+assert(PROACTIVE.browse.againSeconds<=60&&PROACTIVE.browse.perVisit>=10,'every Applet keeps talking while the person stays');
+for(const [place,title,kind] of [['web:nytimes.com','',"reading"],['applet:notes','Notes','reading'],['applet:mail','Gmail','mail'],['applet:cal','Google Calendar','plan'],['web:youtube.com','YouTube','watch'],['web:amazon.com','','shop'],['applet:gh','GitHub','code'],['applet:2048','2048','play'],['applet:weather','Weather','app']] as const)assert.equal(placeKind(place,title),kind,place);
+const readLook=proactiveTask({moment:'browsing',place:'web:nytimes.com',local:'Thu 11:40',minutes:3,recent:[],lastWords:'',kind:'reading'});
+assert(readLook.includes('the one point on screen that matters most')&&readLook.includes('say something new'),'a reading hook while browsing');
+assert(!battleTip.includes('Here, good things to talk about'),'a game keeps its own play-along prompt');
+state=proactiveState();
+const wrapAsk=(now:number)=>proactiveDue(state,{now,day,moment:'wrapup',place:'World'});
+assert.deepEqual(wrapAsk(t0),{due:true},'a wrap up when they come back');
+proactiveAsked(state,{now:t0,day,moment:'wrapup'});
+proactiveSpoke(state,{now:t0,day,place:'World',line:'Three takeaways from that piece: …',moment:'wrapup'});
+assert.equal(state.wrapped,1);assert.equal(state.spoken,0,'a wrap up keeps its own count');
+assert.deepEqual(wrapAsk(t0+60),{due:false,reason:'gap'});
+assert.deepEqual(ask(state,t0+60,'World','settled'),{due:false,reason:'gap'},'no settled line right after the wrap up');
+assert.deepEqual(wrapAsk(t0+PROACTIVE.wrapup.gapSeconds),{due:true});
+state.wrapped=PROACTIVE.wrapup.perDay;
+assert.deepEqual(wrapAsk(t0+3600),{due:false,reason:'day'});
+const wrapTask=proactiveTask({moment:'wrapup',place:'World',local:'Thu 11:40',minutes:0,recent:[],lastWords:'',left:{place:'web:nytimes.com',kind:'reading',minutes:7}});
+for(const part of ['just came back from web:nytimes.com after about 7 minutes','takeaways worth keeping','context.left','rates 4 or more','PASS'])assert(wrapTask.includes(part),part);
+assert(proactiveTask({moment:'wrapup',place:'World',local:'Thu 11:40',minutes:0,recent:[],lastWords:'',left:{place:'applet:mail',kind:'mail',minutes:3}}).includes('still waiting on an answer'),'a mail wrap up');
 
 // No Browse with me | Don't bother switch anywhere: the host forgets the old choice and has no foxBrowse action, Fox's
 // card carries no switch. The host tells the page when the place is a game, which then keeps the game's pace.
@@ -158,6 +180,10 @@ assert.match(pageSource,/openedByPerson=since-activeAt<10_000;/);
 assert.match(pageSource,/if\(due&&quiet>=2\)\{settled=true;looks\+\+;lookedAt=now;void ask\('browsing',key\);return;\}/);
 assert.match(pageSource,/\{visit,opened:looks===1&&openedByPerson\}/);
 assert.match(pageSource,/setInterval\(tick,2000\)/);
+// The page owes a wrap up only coming back to the World after a real stay (not a game), and the host checks what was left.
+assert.match(pageSource,/!game&&stay>=PROACTIVE\.wrapup\.minStaySeconds&&key&&world\(\)/);
+assert.match(pageSource,/void ask\('wrapup',key,\{left:/);
+assert.match(hostSource,/if\(moment==='wrapup'&&!proactiveLeft\(request\.left\)\)return \{started:false,reason:'unknown'\};/);
 assert.match(hostSource,/opened:moment==='browsing'&&request\.opened===true/);
 // A line Fox said first arrives with its own effect in the card, never on a reply.
 assert.match(chat,/const spokeFirst=guided&&spokeFirstLine\(shownGuide\)\?shownGuide:null;panel\.dataset\.proactive=String\(!!spokeFirst\);/);
@@ -167,7 +193,7 @@ assert(fs.readFileSync('scripts/build-ui.ts','utf8').includes("'ui/companion/fox
 // The ask sees what the place shows, as the person's own turn would (a native Applet has no page text).
 assert.match(pageSource,/environment:context/);
 assert.match(chat,/environment:\(\)=>\(\{key:context\.key,location:context\.title,state:context\.detail,/);
-assert.match(hostSource,/const context:Row=\{\.\.\.environment,history:recentHistory\(\),proactive:\{moment\}\};/);
+assert.match(hostSource,/const context:Row=\{\.\.\.environment,history:recentHistory\(\),proactive:\{moment\},/);
 assert(browseTask.includes('rates 4 or more')&&proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:''}).includes('rates 6 or more'),'the bar is lower while browsing');
 assert(!policyIncludes('foxBrowse'),'no switch action');
 

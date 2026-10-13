@@ -33,7 +33,7 @@ import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
-import {placeKey,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
+import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 /** What the World holds about the companion, for the Profile page: its saved memory and, in the
@@ -498,11 +498,15 @@ export function installFox(host:Host){
   if(moment==='browsing'||moment==='checkin')try{game=browser()?.gameNow?.()??null;}catch(error){host.diagnostics.record(error,'foxPlace');}
   const due=proactiveDue(proactive,{now,day,moment,place,visit,game:!!game});
   if(due.due!==true)return {started:false,reason:due.reason,...game?{game:true}:{}};
+  // A wrap up names the place the person just left; without it there is nothing to wrap up.
+  if(moment==='wrapup'&&!proactiveLeft(request.left))return {started:false,reason:'unknown'};
   proactiveAsked(proactive,{now,day,moment,visit});
   const id='proactive-'+crypto.randomUUID().toUpperCase();
   const run={id,runtime:make(),cancelled:false};
   proactiveRun=run;trusts.set(id,{untrusted:true,sources:['browse_web']});
-  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0)),opened:moment==='browsing'&&request.opened===true,game,environment:proactiveEnvironment(request.environment)});
+  const environment=proactiveEnvironment(request.environment);
+  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0)),opened:moment==='browsing'&&request.opened===true,game,environment,
+   kind:placeKind(place,typeof environment.location==='string'?environment.location:''),left:moment==='wrapup'?proactiveLeft(request.left):null});
   return {started:true,id,...game?{game:true}:{}};
  }
  /** What the page says the place shows (location, state, view, the World's facts), as a turn of the person's own
@@ -513,12 +517,20 @@ export function installFox(host:Host){
   const {history:_h,here:_p,browsing:_b,page:_g,proactive:_m,...rest}=value as Row;
   try{return JSON.stringify(rest).length<=6000?rest:{};}catch{return {};}
  }
- async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,opened=false,game=null,environment={}}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;opened?:boolean;game?:ReturnType<BrowserService['gameNow']>;environment?:Row}){
+ /** The Applet or page a wrap up is about, as the page saw it when the person left (owner 2026-10-13). */
+ function proactiveLeft(value:unknown):{place:string;kind:ReturnType<typeof placeKind>;minutes:number;environment:Row}|null {
+  if(!value||typeof value!=='object'||Array.isArray(value))return null;
+  const left=value as Row,place=placeKey(typeof left.thread==='string'?left.thread.slice(0,1100):'');
+  if(!place)return null;
+  const environment=proactiveEnvironment(left.environment);
+  return {place,kind:placeKind(place,typeof environment.location==='string'?environment.location:''),minutes:Math.max(0,Math.min(24*60,Math.round(Number(left.minutes)||0))),environment};
+ }
+ async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,opened=false,game=null,environment={},kind='app',left=null}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;opened?:boolean;game?:ReturnType<BrowserService['gameNow']>;environment?:Row;kind?:ReturnType<typeof placeKind>;left?:ReturnType<typeof proactiveLeft>}){
   let line:string|null=null,card='';
   try{
    const profile=companion.archive(scope);
    const said=[...profile.conversations].reverse().find((turn:Row)=>turn.role==='user'&&typeof turn.text==='string');
-   const context:Row={...environment,history:recentHistory(),proactive:{moment}};
+   const context:Row={...environment,history:recentHistory(),proactive:{moment},...left?{left:{place:left.place,...left.environment}}:{}};
    try{const here=companion.place(scope,thread);if(here)context.here=here;}catch(error){host.diagnostics.record(error,'foxPlace');}
    try{
     const page=browser()?.visiblePage(),shown=page&&!page.hidden&&!page.isClosed?page.recorder:null;
@@ -531,7 +543,7 @@ export function installFox(host:Host){
     if(visit&&pageText)context.page={site:visit.site,title:visit.title,text:pageText};
    }catch(error){host.diagnostics.record(error,'foxPlace');}
    const local=new Date().toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'});
-   const text=proactiveTask({moment,place,local,minutes,recent:proactive.recent,lastWords:said?characterPrefix(said.text,300):'',opened,game});
+   const text=proactiveTask({moment,place,local,minutes,recent:proactive.recent,lastWords:said?characterPrefix(said.text,300):'',opened,game,kind,left:left?{place:left.place,kind:left.kind,minutes:left.minutes}:null});
    const body={action:'chat',session:run.id,mode:'chat',text,history:[],context,style:companion.prompt(companion.reference(profile))+guidanceFor(scope),sample:false};
    const events=turnEvents(run.id,scope,{active:()=>proactiveRun===run&&!run.cancelled,allowActions:false,reads:proactiveToolAllowed,record:false});
    // Nobody asked, so a missing model ends the ask quietly instead of opening model settings.
