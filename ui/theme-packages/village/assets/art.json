@@ -29,6 +29,32 @@
    "night": "landmarks/travel-night.webp"
   }
  },
+ "areas": {
+  "home": {
+   "day": "areas/home-day.webp",
+   "night": "areas/home-night.webp"
+  },
+  "library": {
+   "day": "areas/library-day.webp",
+   "night": "areas/library-night.webp"
+  },
+  "money": {
+   "day": "areas/money-day.webp",
+   "night": "areas/money-night.webp"
+  },
+  "health": {
+   "day": "areas/health-day.webp",
+   "night": "areas/health-night.webp"
+  },
+  "work": {
+   "day": "areas/work-day.webp",
+   "night": "areas/work-night.webp"
+  },
+  "travel": {
+   "day": "areas/travel-day.webp",
+   "night": "areas/travel-night.webp"
+  }
+ },
  "devices": {
   "gmail": {
    "src": "devices/gmail.webp",

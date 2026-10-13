@@ -72,7 +72,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    const key=m.kind==='applet'?'space:'+room.id:m.kind==='slot'?'region-slot:'+m.slot:kind[m.kind]+':'+regionId(m.id);
    const point:any={id:room?room.id:m.id,title:m.kind==='area-add'||m.kind==='slot'?'+':room?.title||area?.title||m.id,action:action[m.kind],kind:kind[m.kind],level:m.kind==='applet'?'room':'building',x:m.x,y:m.y,visible:m.visible,hovered:!!m.hovered};
    if(m.kind==='slot'){point.slot=m.slot;point.description='Place applet in slot '+((m.slot||0)+1);}
-   if(m.kind==='area'){point.caption='';point.description='Manage '+(area?.title||m.id);}
+   if(m.kind==='area'){point.caption='';point.description='Enter '+(area?.title||m.id);}
    if(m.kind==='area-add')point.description='Add applets to '+(area?.title||m.id);
    if(room){const lampState=signalOf(room)?.state||'off',status=appletStatus(room,connections)||{};
     Object.assign(point,{labelVisible:!!m.label,running:lampState==='processing',lampState,lampX:m.lamp?.x||0,lampY:m.lamp?.y||0,attentionX:m.attention?.x||0,attentionOffset:-(m.attention?.y||0),

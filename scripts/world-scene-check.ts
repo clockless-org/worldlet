@@ -54,7 +54,7 @@ try{
 
  await page.waitForFunction(()=>document.querySelector('.companion-context .companion-name')?.textContent==='Worldlet');
  assert.equal(await page.locator('.companion-context').isVisible(),true,'overview shows the Worldlet title');
- // No area floats a plus; the region name is the only label, and it opens the region shelf.
+ // No area floats a plus; the region name is the only label, and it enters the Area.
  assert.equal(await page.locator('.notion-pin[data-action="add-applet"]').count(),0,'No area offers a floating plus');
  const area=await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.buildings.find(b=>b.id==='building-travel'));
  assert(area,'Entertainment uses its persisted region identity');
@@ -92,10 +92,10 @@ try{
  }
  await page.evaluate(()=>location.hash='');
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.camera.settled);
- // The whole area is clickable: its ground and its landmark open the same area panel as its name, while a
- // device standing in the area still opens its Applet. On a wide window the panel docks on the right and the
- // World zooms the area into the space left of it without entering it; closing the panel zooms back out.
- const shelf=page.locator('.region-shelf');
+ // The whole area is clickable: its ground and its landmark enter the same Area as its name, while a device standing in
+ // the area still opens its Applet. Entering an Area (owner request 2026-10-13) fills the window with its painted map and
+ // stands its Applets on it five to a row; the Attention Center steps aside, Fox stays, and Esc goes back to the World.
+ const shelf=page.locator('.region-shelf'),areaView=page.locator('.area-view');
  // Under reduced motion a closed panel or a new hash snaps the camera and reports it settled at once, but the World's hit
  // test and pins follow only on its next painted frame: a point read before it hit what the zoomed-in area painted there
  // (Mac RC 4d736e7a: Explore's landmark read as Work's). Each point is read two painted frames after the camera moved.
@@ -105,20 +105,20 @@ try{
   await page.mouse.move(x,y);
   await page.waitForFunction(()=>!!document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.hoveredRegion);
   await page.mouse.click(x,y);
-  await shelf.waitFor({timeout:5000}).catch(async e=>{throw new Error(what+' '+JSON.stringify(await page.evaluate(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return {active:m.active,level:m.level,hovered:m.hoveredRegion};})));});
-  assert.equal(await shelf.getByRole('heading',{level:2}).textContent(),title,what+' opens the '+title+' panel');
-  assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active),'overview',what+' does not enter the area');
-  const side=await shelf.boundingBox();
-  const width=page.viewportSize()!.width;
-  assert(side&&Math.abs(side.x+side.width+12-width)<2&&side.x>width/2-100,what+' opens the panel on the right half');
-  await page.waitForFunction(()=>{const c=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.camera;return c.settled&&!!c.area&&c.span<1;});
-  assert.ok((await viewport()).scale>overviewViewport.scale,what+' zooms the area in');
-  // Applets keep their overview size while the area is zoomed; the room goes to more of its Applets (owner request 2026-10-08).
-  const sizes=await page.evaluate(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return m.modules.filter(d=>d.visible&&d.entity==='app'&&d.region==='building-'+String(m.camera.area).replace(/^building-/,'')).map(d=>d.scale[0]*m.framing.viewport.scale);});
-  assert.ok(sizes.length&&sizes.every(size=>Math.abs(size/overviewViewport.scale-1)<.01),what+' keeps Applets at their overview size: '+JSON.stringify(sizes.map(size=>+(size/overviewViewport.scale).toFixed(3))));
-  await page.keyboard.press('Escape');await shelf.waitFor({state:'detached'});
-  await page.waitForFunction(()=>{const c=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.camera;return c.settled&&!c.area;});
-  assert.deepEqual(await viewport(),overviewViewport,what+' zooms back out when the panel closes');
+  await areaView.waitFor({timeout:5000}).catch(async e=>{throw new Error(what+' '+JSON.stringify(await page.evaluate(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return {active:m.active,level:m.level,hovered:m.hoveredRegion};})));});
+  assert.equal(await areaView.getByRole('heading',{level:1}).textContent(),title,what+' enters '+title);
+  assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active),'overview',what+' stays in the World');
+  const view=await page.evaluate(()=>{const map=document.querySelector<HTMLImageElement>('.area-view-map'),r=map?.getBoundingClientRect(),tiles=[...document.querySelectorAll('.area-view-applet')].map(t=>Math.round(t.getBoundingClientRect().top));
+   return {map:!!map?.src&&!!r&&r.width>=innerWidth&&r.height>=innerHeight,tiles,attention:getComputedStyle(document.querySelector('.world-task-tracker')).visibility,fox:getComputedStyle(document.querySelector('#notionHUD')).visibility};});
+  assert(view.map,what+' fills the window with its map');
+  assert(view.tiles.length,what+' stands its Applets on the map');
+  assert.equal(view.tiles.filter(top=>top===view.tiles[0]).length,Math.min(5,view.tiles.length),what+' stands five Applets to a row');
+  assert.equal(view.attention,'hidden',what+' puts the Attention Center away');
+  assert.equal(view.fox,'visible',what+' keeps Fox');
+  // Esc folds Fox's open chat first (native-chat.ts), then leaves the Area.
+  for(let i=0;i<3&&await areaView.count();i++){await page.keyboard.press('Escape');await page.waitForTimeout(200);}
+  await areaView.waitFor({state:'detached'});
+  assert.equal(await page.evaluate(()=>getComputedStyle(document.querySelector('.world-task-tracker')).visibility),'visible',what+' brings the Attention Center back on leaving');
  };
  await painted();
  const travel=await page.evaluate(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(d=>d.region==='building-travel'&&d.visible);return m.arrivalBounds;});
@@ -137,7 +137,7 @@ try{
  const device=await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.modules.find(d=>d.region==='building-travel'&&d.visible&&d.entity==='app'));
  await page.mouse.click(device.peekHit.x,device.peekHit.y);
  await page.waitForFunction(id=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active===id,device.id);
- assert.equal(await shelf.count(),0,'a device in the area opens its Applet, not the area panel');
+ assert.equal(await areaView.count()+await shelf.count(),0,'a device in the area opens its Applet, not the Area');
  await page.evaluate(()=>location.hash='');
  await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active==='overview');
  await page.waitForFunction(()=>document.querySelector('.companion-context .companion-name')?.textContent==='Worldlet');
@@ -154,5 +154,5 @@ try{
  const bridgePosition=placed.find(d=>d.id==='app-doordash').position;
  assert.deepEqual(bridgePosition,[.644,.426],'DoorDash uses its Life slot');
  assert.deepEqual(errors,[]);
- console.log('PASS world scene: '+WORLD_APPS.length+' Applets, each a device of its own in its region, at most five on each region ground, clear of its neighbours; no plus or mark floats over the world and the panel carries what is waiting; DoorDash uses its Life slot; the ground and landmark of an area open its panel on the right and zoom the area in until it closes, while its devices open their Applets.');
+ console.log('PASS world scene: '+WORLD_APPS.length+' Applets, each a device of its own in its region, at most five on each region ground, clear of its neighbours; no plus or mark floats over the world and the panel carries what is waiting; DoorDash uses its Life slot; the ground and landmark of an area enter it: its map fills the window with its Applets five to a row and the Attention Center put away, while its devices open their Applets.');
 }finally{await browser.close();}

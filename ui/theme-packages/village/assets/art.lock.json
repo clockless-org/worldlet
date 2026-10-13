@@ -1,4 +1,76 @@
 {
+ "areas/health-day.webp": {
+  "source": "resources/worlds/village/areas/health-day.webp",
+  "sourceSha256": "3b2bd9fcc88702007fe194e8ac3717d85ca3040c6c84154402f7d4ecfca93217",
+  "settings": "copy",
+  "sha256": "3b2bd9fcc88702007fe194e8ac3717d85ca3040c6c84154402f7d4ecfca93217"
+ },
+ "areas/health-night.webp": {
+  "source": "resources/worlds/village/areas/health-night.webp",
+  "sourceSha256": "6b732be82c486c4337fd36fba074ddd52dc341616af57ecd2857ec6f00b23374",
+  "settings": "copy",
+  "sha256": "6b732be82c486c4337fd36fba074ddd52dc341616af57ecd2857ec6f00b23374"
+ },
+ "areas/home-day.webp": {
+  "source": "resources/worlds/village/areas/home-day.webp",
+  "sourceSha256": "5c666dd1202658c1030e305e1b6297c65fe0024e07ebbfa6f2709c867fc2b2db",
+  "settings": "copy",
+  "sha256": "5c666dd1202658c1030e305e1b6297c65fe0024e07ebbfa6f2709c867fc2b2db"
+ },
+ "areas/home-night.webp": {
+  "source": "resources/worlds/village/areas/home-night.webp",
+  "sourceSha256": "efb6e626ff47df0902e9e8137ac3772fdca9fde0c4eadcaef1c23c50238dcae1",
+  "settings": "copy",
+  "sha256": "efb6e626ff47df0902e9e8137ac3772fdca9fde0c4eadcaef1c23c50238dcae1"
+ },
+ "areas/library-day.webp": {
+  "source": "resources/worlds/village/areas/library-day.webp",
+  "sourceSha256": "1395ec9084f160ea9fef05576d38285a85c4beba390e1945819f7d435800770a",
+  "settings": "copy",
+  "sha256": "1395ec9084f160ea9fef05576d38285a85c4beba390e1945819f7d435800770a"
+ },
+ "areas/library-night.webp": {
+  "source": "resources/worlds/village/areas/library-night.webp",
+  "sourceSha256": "aa941da8aa1df7be4237bd6d1ac835045ae102fb761a35540120487aff2b76eb",
+  "settings": "copy",
+  "sha256": "aa941da8aa1df7be4237bd6d1ac835045ae102fb761a35540120487aff2b76eb"
+ },
+ "areas/money-day.webp": {
+  "source": "resources/worlds/village/areas/money-day.webp",
+  "sourceSha256": "8bafafeff44c0da93f2e8ef565f3b44b5e54ccc7e85f65750191c67490b0b78e",
+  "settings": "copy",
+  "sha256": "8bafafeff44c0da93f2e8ef565f3b44b5e54ccc7e85f65750191c67490b0b78e"
+ },
+ "areas/money-night.webp": {
+  "source": "resources/worlds/village/areas/money-night.webp",
+  "sourceSha256": "3b48df532d51caf8c5a96a5a3edf764e1a25324bd832ab219abc49737d2c2041",
+  "settings": "copy",
+  "sha256": "3b48df532d51caf8c5a96a5a3edf764e1a25324bd832ab219abc49737d2c2041"
+ },
+ "areas/travel-day.webp": {
+  "source": "resources/worlds/village/areas/travel-day.webp",
+  "sourceSha256": "6cc73365d1cb26eeb2b1fe95e6648f947ee6a66bfd9b6269539391bee25d0bbb",
+  "settings": "copy",
+  "sha256": "6cc73365d1cb26eeb2b1fe95e6648f947ee6a66bfd9b6269539391bee25d0bbb"
+ },
+ "areas/travel-night.webp": {
+  "source": "resources/worlds/village/areas/travel-night.webp",
+  "sourceSha256": "043abc7ac1747dd89eb33ab9f8e7655f59c0e174e7228b40388ed37b8d99b085",
+  "settings": "copy",
+  "sha256": "043abc7ac1747dd89eb33ab9f8e7655f59c0e174e7228b40388ed37b8d99b085"
+ },
+ "areas/work-day.webp": {
+  "source": "resources/worlds/village/areas/work-day.webp",
+  "sourceSha256": "bb163edc8183ffaf8977b8af366cec1cbf68d238213b238f0f418a0621d4dde9",
+  "settings": "copy",
+  "sha256": "bb163edc8183ffaf8977b8af366cec1cbf68d238213b238f0f418a0621d4dde9"
+ },
+ "areas/work-night.webp": {
+  "source": "resources/worlds/village/areas/work-night.webp",
+  "sourceSha256": "e1c5a094bdfb787cb83f992f0b01e9f647660afdc92f581065837630b284bef6",
+  "settings": "copy",
+  "sha256": "e1c5a094bdfb787cb83f992f0b01e9f647660afdc92f581065837630b284bef6"
+ },
  "devices/acrobat.webp": {
   "source": "resources/styles/builtin/assets/applets/acrobat/peek-logo-v3.png",
   "sourceSha256": "9811748ca3ea77887b829b1591181b5406f4847a7f967c60e3cc92c95d59b6a1",

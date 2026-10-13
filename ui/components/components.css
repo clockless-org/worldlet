@@ -506,6 +506,32 @@
 @media(max-width:700px){.region-shelf{width:86vw;padding:18px}.region-shelf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.region-shelf-applet,.region-shelf-applet img{transition:none}}
 
+/* Entering an Area (enterArea, notion-world.ts): its painted map fills the window and its Applets stand on the ground,
+   five to a row and on down. The Attention Center and the World's other chrome step aside; Fox stays above. */
+.area-view{position:absolute;z-index:30;inset:0;overflow:hidden;background:#2f4a36;animation:area-view-in .32s ease-out}
+.area-view[data-time=night]{background:#16202e}
+.area-view-map{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}
+.area-view-header{position:absolute;z-index:1;top:22px;left:28px;right:28px;display:flex;align-items:center;gap:14px}
+.area-view-header h1{margin:0;color:#fff;font-size:28px;font-weight:650;line-height:1.2;text-shadow:0 2px 12px #0009}
+.area-view-back,.area-view-manage{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;padding:0 14px;border:1px solid #ffffff59;border-radius:999px;background:#fffbf233;color:#fff;font:inherit;font-weight:600;cursor:pointer;backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 4px 18px #0003;transition:background .2s}
+.area-view-back{padding:0}
+.area-view-manage{margin-left:auto}
+.area-view-back:hover,.area-view-manage:hover{background:#fffbf259}
+.area-view-scroll{position:absolute;inset:34% 0 200px;display:flex;justify-content:center;overflow-x:hidden;overflow-y:auto;padding:8px 24px 24px;scrollbar-width:none;overscroll-behavior:contain;-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent)}
+.area-view-scroll::-webkit-scrollbar{display:none}
+.area-view-grid{display:grid;grid-template-columns:repeat(5,128px);gap:18px 40px;align-content:start;height:max-content}
+.area-view-applet{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 0;border:0;border-radius:18px;background:transparent;color:#fff;font:inherit;cursor:pointer;transition:transform .2s}
+.area-view-applet::before{content:"";position:absolute;top:78px;left:50%;width:70px;height:12px;border-radius:50%;background:radial-gradient(#1d1209a6,transparent 70%);transform:translateX(-50%);pointer-events:none}
+.area-view-applet img{position:relative;width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 6px 8px #0005);transition:transform .2s}
+.area-view-applet span{max-width:100%;padding:2px 10px;border-radius:999px;background:#1d2a2266;font-size:13px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #0008;backdrop-filter:blur(6px)}
+.area-view-applet[data-own=false] img{opacity:.72}
+.area-view-applet[data-own=false]::after{content:"+";position:absolute;top:2px;right:22px;width:22px;height:22px;border-radius:50%;background:#fffbf2;color:#29473b;font-size:16px;font-weight:700;line-height:22px;text-align:center;box-shadow:0 2px 6px #0004}
+.area-view-applet:hover img,.area-view-applet:focus-visible img{transform:translateY(-4px) scale(1.06)}
+.area-view-applet:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#notionWorld[data-area-view] :is(.world-task-tracker,.notion-top,.applet-bar-side,.world-update-dock,.world-watermark){visibility:hidden;pointer-events:none}
+@keyframes area-view-in{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.area-view{animation:none}.area-view-applet,.area-view-applet img{transition:none}}
+
 /* One bounded collection scrolls; the region heading and guidance stay put. */
 .region-shelf{top:50%;bottom:auto;max-height:88%;max-width:calc(100% - 32px);box-sizing:border-box;padding:18px 24px}
 .region-shelf-scroll{overflow-y:auto;overflow-x:hidden;min-height:0;flex:1;padding:0;overscroll-behavior:contain}

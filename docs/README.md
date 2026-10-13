@@ -60,8 +60,8 @@ Indexed: **277 Markdown documents** and **622 supporting documentation files**.
 | Root entry points | 6 |
 | Product, architecture and operations guides | 16 |
 | Applet runtime descriptions | 119 |
-| UI and Applet authoring references | 31 |
-| Resource and artwork records | 73 |
+| UI and Applet authoring references | 30 |
+| Resource and artwork records | 74 |
 | Module and service documentation | 32 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 622 |
@@ -222,7 +222,7 @@ Indexed: **277 Markdown documents** and **622 supporting documentation files**.
 
 </details>
 
-<details><summary>UI and Applet authoring references (31)</summary>
+<details><summary>UI and Applet authoring references (30)</summary>
 
 - [ui/DESIGN-STANDARDS.md](../ui/DESIGN-STANDARDS.md)
 - [ui/README.md](../ui/README.md)
@@ -247,7 +247,6 @@ Indexed: **277 Markdown documents** and **622 supporting documentation files**.
 - [ui/onboarding/README.md](../ui/onboarding/README.md)
 - [ui/practice/DEMO.md](../ui/practice/DEMO.md)
 - [ui/shell/README.md](../ui/shell/README.md)
-- [ui/theme-packages/village/areas/README.md](../ui/theme-packages/village/areas/README.md)
 - [ui/theme-packages/village/assets/README.md](../ui/theme-packages/village/assets/README.md)
 - [ui/theme-packages/village/assets/artifact/HOST-PROMPT.md](../ui/theme-packages/village/assets/artifact/HOST-PROMPT.md)
 - [ui/theme-packages/village/assets/artifact/README.md](../ui/theme-packages/village/assets/artifact/README.md)
@@ -258,7 +257,7 @@ Indexed: **277 Markdown documents** and **622 supporting documentation files**.
 
 </details>
 
-<details><summary>Resource and artwork records (73)</summary>
+<details><summary>Resource and artwork records (74)</summary>
 
 - [resources/README.md](../resources/README.md)
 - [resources/audio/README.md](../resources/audio/README.md)
@@ -331,6 +330,7 @@ Indexed: **277 Markdown documents** and **622 supporting documentation files**.
 - [resources/themes/README.md](../resources/themes/README.md)
 - [resources/worlds/README.md](../resources/worlds/README.md)
 - [resources/worlds/village/README.md](../resources/worlds/village/README.md)
+- [resources/worlds/village/areas/README.md](../resources/worlds/village/areas/README.md)
 - [resources/worlds/village/drafts/six-regions/README.md](../resources/worlds/village/drafts/six-regions/README.md)
 - [resources/worlds/village/images/landmarks/NIGHT.md](../resources/worlds/village/images/landmarks/NIGHT.md)
 
