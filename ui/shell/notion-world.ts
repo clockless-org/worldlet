@@ -1539,7 +1539,8 @@ export function mountNotionWorld(data: World, native: any) {
   // opens, whatever the hour, in a background session beside the first-run tour, so the tour's pick step
   // (ui/onboarding/first-value.ts) finds a card Fox already made and approving it is the first win, with no Google
   // needed. It is the one background turn the first run allows; never in the practice world or an automated browser,
-  // once per World (a busy background session asks again at the next poll), and not with Today's prep paused.
+  // once per World (a busy background session asks again at the next poll), not with Today's prep paused, and not
+  // with Mail connected.
   // `data-first-card` tells the tour it is on its way (`preparing`), then `ready` or `failed`. Its steps are product
   // events (core/diagnostics/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
   const firstCardKey='worldlet-first-card-'+(data.workspaceId||data.workspace);
@@ -1547,7 +1548,10 @@ export function mountNotionWorld(data: World, native: any) {
   const firstCardEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
   function startFirstCard(){
     if(data.sample||navigator.webdriver||!routinesKnown||!native?.firstRun?.()||!voice?.background||!routinesOn.plan||dailyAsking||replyAsking||followUpAsking)return;
-    try{if(localStorage.getItem(firstCardKey))return;localStorage.setItem(firstCardKey,'started');}catch{return;}
+    // With Mail connected, the first thing to do together comes from the mail (a task outranks the card at the tour's pick
+    // step) and a card made beside it competes with Fox's help on that task (Mac Alpha 4386's onboarding check):
+    // the first card is for a World without mail.
+    try{if(localStorage.getItem(firstCardKey))return;localStorage.setItem(firstCardKey,connectionLive(data.moduleConnections?.find(c=>c.provider==='gmail')||{})?'mail':'started');if(localStorage.getItem(firstCardKey)==='mail')return;}catch{return;}
     firstCardStarted=performance.now();root.dataset.firstCard='preparing';firstCardEvent('first_card_started');
     void askDaily({kind:'plan',day:dayKey(new Date())},true);
   }
