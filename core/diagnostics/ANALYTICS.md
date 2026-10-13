@@ -69,7 +69,7 @@ Owner goal 2026-10-06: the target customer already runs an Agent (OpenClaw, Clau
 
 ### The first card
 
-Owner decision 2026-10-13: a new person's first Today's prep starts as their World first opens, beside the first-run tour, so the tour's pick step finds a card Fox already made and approving it is the first win, with no Google needed (`startFirstCard` in `ui/shell/notion-world.ts`, `ui/onboarding/first-value.ts`). Each step is sent once per World:
+Owner decision 2026-10-13: a new person's first Today's prep starts as their World first opens, beside the first-run tour, so the tour's pick step finds a card Fox already made and approving it is the first win, with no Google needed; with Mail connected it does not run (`startFirstCard` in `ui/shell/notion-world.ts`, `ui/onboarding/first-value.ts`). Each step is sent once per World:
 
 | Event | When | Dimensions |
 | --- | --- | --- |
