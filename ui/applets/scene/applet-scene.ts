@@ -71,13 +71,14 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   const round=(r:{x:number;y:number;width:number;height:number})=>({x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)});
   last={key,painted,compact,primary:round(primary),companion:round(fit.companion)};
   const shell=options.shell;if(!shell)return;
-  if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;return;}
+  if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;return;}
   const s=shell.getBoundingClientRect(),e=element.getBoundingClientRect();
   for(const [name,r] of [['primary',primary],['companion',fit.companion]] as const){
    shell.style.setProperty(`--applet-scene-${name}-left`,e.left-s.left+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,e.top-s.top+r.y+'px');
    shell.style.setProperty(`--applet-scene-${name}-width`,r.width+'px');shell.style.setProperty(`--applet-scene-${name}-height`,r.height+'px');
   }
   shell.dataset.appletScene=key;
+  if(source.registration.webFrame)shell.dataset.appletFrame=key;else delete shell.dataset.appletFrame;
  }
  const resize=new ResizeObserver(layout);resize.observe(element);layout();
  return {element,regions,primary:primaryRegion,painted,layout,
@@ -93,7 +94,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   },
   destroy(){
    resize.disconnect();element.remove();const shell=options.shell;if(!shell||shell.dataset.appletScene!==key)return;
-   delete shell.dataset.appletScene;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
+   delete shell.dataset.appletScene;delete shell.dataset.appletFrame;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
    for(const part of ['primary','companion'])for(const side of ['left','top','width','height'])shell.style.removeProperty(`--applet-scene-${part}-${side}`);
   }};
 }

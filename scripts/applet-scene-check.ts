@@ -53,6 +53,26 @@ try{
  const fit=await expected(browserScene.registration,1920,1080),got=await measure();
  near(got.region,fit.regions[0],'another scene moves Mail to its own region');
  assert.equal(got.ink,village.sceneMaterials.screen.ink,'and dresses it in that region\'s material');assert.equal(got.letters,1);
+ // A framed web scene places the actual shell and Fox on the theme's registered coordinates.
+ await page.addStyleTag({content:await readFile('ui/components/layout.css','utf8')+await readFile('ui/companion/companion-dialogue.css','utf8')});
+ await page.evaluate(()=>{const shell=document.getElementById('shell')!;shell.id='notionWorld';shell.className='native-console fox-first-console';shell.dataset.depth='object';shell.dataset.panelScene='pokemon-showdown';shell.dataset.appletShelf='true';
+  shell.insertAdjacentHTML('beforeend','<div class="notion-content" data-template="browser"></div><div class="notion-hud"><div class="companion-dialogue">A reply beside the game</div></div>');});
+ const showdown=village.appletScenes['pokemon-showdown'];
+ for(const [width,height] of [[1672,941],[1440,900],[1000,900]]){
+  await page.setViewportSize({width,height});
+  await page.evaluate(source=>{const w=window as any;w.scene.destroy();w.scene=w.Scene.mountAppletScene(document.getElementById('host'),'pokemon-showdown',{source,shell:document.getElementById('notionWorld')});},showdown);
+  await page.waitForTimeout(350);
+  const bounds=await page.evaluate(()=>{const box=(s:string)=>{const r=document.querySelector(s)!.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};return {panel:box('.notion-content'),hud:box('.notion-hud'),replyWidth:parseFloat(getComputedStyle(document.querySelector('.companion-dialogue')!).width),scene:(window as any).scene.metrics};});
+  assert.ok(bounds.panel.x+bounds.panel.width<bounds.hud.x,'Fox and the webpage do not overlap at '+width);
+  assert.ok(Math.abs(bounds.hud.x+bounds.hud.width/2-(bounds.scene.companion.x+bounds.scene.companion.width/2))<2,'Fox is centered in the painted companion lane');
+  assert.ok(bounds.replyWidth<=bounds.hud.width+1,'Replies fit Fox’s lane');
+  if(width===1672){assert.ok(bounds.panel.width>width*.64,'The webpage uses about two thirds of the width');assert.ok(bounds.panel.height>height*.79,'The webpage uses about eighty percent of the height, after the shelf');}
+ }
+ await page.setViewportSize({width:500,height:800});await page.waitForTimeout(50);
+ assert.equal(await page.locator('#notionWorld').getAttribute('data-applet-frame'),null,'Compact layout releases the companion lane');
+ await page.setViewportSize({width:1672,height:941});await page.waitForTimeout(50);
+ await page.evaluate(()=>{(window as any).scene.destroy();const shell=document.getElementById('notionWorld')!;delete shell.dataset.depth;delete shell.dataset.panelScene;delete shell.dataset.appletShelf;shell.className='';shell.querySelector('.notion-hud')!.remove();shell.querySelector('.notion-content')!.remove();shell.id='shell';});
+ assert.equal(await page.locator('#shell').getAttribute('data-applet-frame'),null,'Destroy releases frame state');
  // No painting: one sheet of paper, no picture.
  const plain=await mount('unknown-applet',undefined);
  assert.equal(plain.painted,false);assert.equal(await page.locator('.applet-scene-plate').count(),0);assert.equal((await measure()).letters,1);
