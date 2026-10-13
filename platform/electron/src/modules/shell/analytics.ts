@@ -9,7 +9,7 @@ import {platformName} from '../../profile.ts';
 import {AGENT,type AgentService,type AnalyticsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,HERMES_FAILURES,HERMES_SETUP,INSTALL_STEPS,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_SETUP,INSTALL_STEPS,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
@@ -58,6 +58,8 @@ const ALLOWED:Record<string,string[]>={
  engagement_kind:['input','fox_message','applet_open'],
  // Core's classified failure (core/diagnostics/report.ts); never the error text.
  error_code:ERROR_CODES,
+ // Its fixed rule when Core has one (core/diagnostics/report.ts ERROR_RULES); never the error text.
+ error_rule:ERROR_RULES,
  // Electron render-process-gone / child-process-gone; a clean exit is not reported.
  process_type:['renderer','gpu','utility','other','web_engine','web_page'],
  exit_reason:['abnormal-exit','killed','crashed','oom','launch-failed','integrity-failure','memory-eviction'],

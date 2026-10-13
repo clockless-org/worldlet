@@ -37,6 +37,14 @@ for(const [message,code] of [['Request timed out after 60s (secret)','timeout'],
 }
 await withFoxTurnAnalytics(async()=>({error:'Network unreachable'}),report)({});await Promise.resolve();
 assert.equal(outcomes.at(-1).error_code,'offline');
+// A bare operationFailed carries its fixed rule, so not running, not answering and signed out stay apart; never the text.
+for(const [message,rule] of [['Hermes Agent did not answer. Try again.','noAnswer'],['connect ECONNREFUSED 127.0.0.1:8642','notRunning'],['Claude Code was not signed in. Try again.','signedOut'],["'hermes' is not recognized as an internal or external command",'notInstalled']]){
+ await withFoxTurnAnalytics(async()=>({error:message}),report)({});await Promise.resolve();
+ assert.deepEqual([outcomes.at(-1).event,outcomes.at(-1).error_code,outcomes.at(-1).error_rule],['fox_turn_failed','operationFailed',rule]);
+ assert.doesNotMatch(JSON.stringify(outcomes.at(-1)),/hermes|127|claude|try again|internal/i);
+}
+await withFoxTurnAnalytics(async()=>({error:'something private'}),report)({});await Promise.resolve();
+assert.ok(!('error_rule' in outcomes.at(-1)),'An unclassified failure sends no rule');
 for(const error of [Error('model unavailable'),new DOMException('stopped','AbortError')]){
  const run=withFoxTurnAnalytics(async()=>{throw error;},report);
  await assert.rejects(run({}),e=>e===error);await Promise.resolve();

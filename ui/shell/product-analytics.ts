@@ -37,19 +37,24 @@ export function reportAppletOpened(applet:string,trigger:'user'|'background'){
  setTimeout(()=>{if(document.hidden)send(false);},5000);
  try{requestAnimationFrame(()=>requestAnimationFrame(()=>send(true)));}catch{send(false);}
 }
-const errorCode=(message:unknown)=>{try{return String(diagnosticError({message:typeof message==='string'?message:''}).code);}catch{return 'operationFailed';}};
+/** Core's classified failure, plus its rule when it names one (error_rule: notRunning, noAnswer, signedOut, …), so a bare
+ * operationFailed still says where to look. Never the error text. */
+const errorFields=(message:unknown)=>{
+ try{const row=diagnosticError({message:typeof message==='string'?message:''});return {error_code:String(row.code),...(typeof row.rule==='string'&&row.rule!=='other'?{error_rule:row.rule}:{})};}
+ catch{return {error_code:'operationFailed'};}
+};
 async function measured(run,base,track){
  const start=performance.now();track(base+'_started');
  const timing=()=>timingBucket(performance.now()-start);
  try{
   const value=await run();
   if(value?.cancelled)track(base+'_cancelled',timing());
-  else if(value?.error||value?.ok===false||(['google_connect','source_connect'].includes(base)&&value?.connected===false))track(base+'_failed',timing(),{error_code:errorCode(value?.error)});
+  else if(value?.error||value?.ok===false||(['google_connect','source_connect'].includes(base)&&value?.connected===false))track(base+'_failed',timing(),errorFields(value?.error));
   else track(base+'_completed',timing());
   return value;
  }catch(error){
   if(error?.name==='AbortError'||/cancelled|canceled/i.test(String(error?.message)))track(base+'_cancelled',timing());
-  else track(base+'_failed',timing(),{error_code:errorCode(error?.message)});
+  else track(base+'_failed',timing(),errorFields(error?.message));
   throw error;
  }
 }
