@@ -88,6 +88,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(detail.ok!==false)return;
   // It did not answer, so it is not asked about itself either: the Things tile stops waiting.
   draft.profileResult='failed';persist();
+  // Reported here; the World reports it only once setup is gone (native-chat.ts).
+  detail.reported=true;
   productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
   notice=String(detail.message||'').slice(0,300);
   render();

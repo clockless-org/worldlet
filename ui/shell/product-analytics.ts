@@ -39,7 +39,7 @@ export function reportAppletOpened(applet:string,trigger:'user'|'background'){
 }
 /** Core's classified failure, plus its rule when it names one (error_rule: notRunning, noAnswer, signedOut, …), so a bare
  * operationFailed still says where to look. Never the error text. */
-const errorFields=(message:unknown)=>{
+export const errorFields=(message:unknown):{error_code:string;error_rule?:string}=>{
  try{const row=diagnosticError({message:typeof message==='string'?message:''});return {error_code:String(row.code),...(typeof row.rule==='string'&&row.rule!=='other'?{error_rule:row.rule}:{})};}
  catch{return {error_code:'operationFailed'};}
 };
