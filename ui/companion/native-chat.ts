@@ -14,8 +14,9 @@ import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
 import {modelFailure} from './model-failure.ts';
 import {FOX_WORKING} from './fox-doing.ts';
 import {mountFoxNameTag,FOX_STATUS_EVENT} from './fox-name-tag.ts';
-import {TURN_TASK_SOURCE,turnTaskName,foxSessionCards,foxSessionDetail,foxSessionOf,foxSessionPlace,type FoxSession} from '../../core/tasks/index.ts';
+import {TURN_TASK_SOURCE,turnTaskName,foxSessionCards,foxSessionDetail,foxSessionLine,foxSessionOf,foxSessionPlace,type FoxSession} from '../../core/tasks/index.ts';
 import {mountFoxSessions} from './fox-sessions.ts';
+import {mountFoxChatWindow,type FoxChatMessage} from './fox-chat-window.ts';
 import type {FoxActivitySignal} from '../../contracts/companion-activity.ts';
 import {worldNow} from '../shell/index.ts';
 import {foxGreeting} from './fox-greeting.ts';
@@ -320,6 +321,10 @@ export function createNativeChat(call){return function({button,input,status,exec
   render();
  }
  const sessionColumn=mountFoxSessions({pick:pickSession});panel.append(sessionColumn.element);
+ // Expanded in the World the conversation is one chat window: the sessions on its left, the picked one's messages as
+ // bubbles on its right (owner Order 2026-10-12, fox-chat-window.ts). It stays open while Fox answers there.
+ let windowOpen=false;
+ const chatWindow=mountFoxChatWindow({pick:pickSession,close:()=>toggleThread(false),answer:text=>replyMarkdown(parseSuggestedReplies(text).text,{resolveLink:resolveReplyLink})});panel.append(chatWindow.element);
  root.addEventListener('worldlet:fox-sessions',(e:any)=>{
   sessionList=Array.isArray(e.detail?.sessions)?e.detail.sessions:[];sessionTurns=typeof e.detail?.turns==='function'?e.detail.turns:null;
   // A session that is gone (its Agent brought again without it), or that became a Thing, leaves the World's place.
@@ -423,15 +428,13 @@ export function createNativeChat(call){return function({button,input,status,exec
  const segmentNow=()=>recallKey(context.key,contentIdentity());
  const entryReply=(e:ThreadEntry)=>({id:'entry:'+e.id,entry:e.id,text:e.text,key:context.key,view:contentIdentity(),location:e.location,at:e.at});
  // Fox's line in this place: its latest finished turn (or a newer remembered line); with no
- // conversation yet, what Fox can do here. A line over two hours old fades out under a gradient
- // rather than being replayed as a "Welcome back" (owner Order 2026-10-07).
- // Hover, click and arriving in an Applet all show this one card.
- const STALE_AFTER=2*3600e3;
+ // conversation yet, what Fox can do here. An old line shows as it is, never under a fading gradient (owner Order
+ // 2026-10-12: the fog over the card). Hover, click and arriving in an Applet all show this one card.
  function frontReply(){
   const segment=segmentNow(),last=cardsHere().filter(e=>segmentOf(e)===segment&&e.status!=='working'&&!!e.text).at(-1),saved=contextReplies.get(segment);
   const latest=last&&!(saved?.at>last.at)?entryReply(last):saved||null,base={key:context.key,view:contentIdentity(),location:context.title};
   if(!latest)return {id:'greeting:'+segment,text:foxGreeting(context,greetingContext?.()?.applet,visibleContent()),...base};
-  return latest.at&&Date.now()-latest.at>STALE_AFTER?{...latest,stale:true}:latest;
+  return latest;
  }
  function conversationActions(){
   if(active||streamingReply||recording||starting||transcribing||guideShown||reply!==lastReply||reply?.key!==context.key)return [];
@@ -471,7 +474,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   // newest line here until the person's next message or Fox's next reply supersedes it.
   // While the person speaks, their voice takes the card, except for a notice about that capture itself.
   const guided=!!shownGuide&&!(active&&shownGuide.source?.startsWith('attention-preview:'))&&(!listening||!!shownGuide.speech)&&!recalled;
-  if(guided||busy||root.dataset.onboardingLocked==='true')expanded=false;
+  if(guided||busy&&!windowOpen||root.dataset.onboardingLocked==='true')expanded=false;
   // Context is optional explanatory copy, not a location label on every reply.
   guideHint.textContent=guided?shownGuide?.hint||'':'';guideHint.hidden=!guideHint.textContent;
   guideShown=guided?shownGuide:null;root.dataset.foxGuide=String(guided);guideActions.hidden=!guided||!shownGuide?.actions?.length;guideContent.hidden=!guided||!shownGuide?.body;
@@ -515,6 +518,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   // Folded beside an Applet, only the front card shows; a long one scrolls inside it.
   const folded=beside&&chatFolded;
   const history=!onboarding&&!folded&&(expanded||beside);
+  windowOpen=history&&!beside&&!onDesktop();panel.dataset.window=String(windowOpen);
   const cards=earlier;
   deck.hidden=history||!text||!earlier.length;deck.dataset.depth=String(Math.min(1,earlier.length));deck.dataset.unfold=String(folded&&!deck.hidden);
   foldButton.hidden=!beside||onboarding||!earlier.length;
@@ -526,7 +530,7 @@ export function createNativeChat(call){return function({button,input,status,exec
    foldButton.title=folded?`Expand · ${earlier.length} earlier `+(earlier.length===1?'message':'messages'):'Fold to the latest message';
   }
   panel.dataset.folded=String(folded);
-  threadList.hidden=!history||!cards.length;
+  threadList.hidden=!history||!cards.length||windowOpen;
   const answered=onboarding||!beside?'':answeredHere();threadAgent.hidden=!answered;if(answered)threadAgent.textContent=answered;
   threadStack.hidden=threadList.hidden&&threadRunning.hidden&&threadAgent.hidden;
   panel.dataset.expanded=String(expanded);panel.dataset.history=String(history);
@@ -534,6 +538,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   // above the latest (owner requests 2026-10-05: long talks were unreadable; no box around them), at the card's
   // one fixed width (owner Order 2026-10-07: the World card never changes width).
   const sheet=history&&!beside;panel.dataset.sheet=String(sheet);root.dataset.foxChatSheet=String(sheet);
+
   const stackKey=JSON.stringify([segment,cards.map(c=>c.id+':'+c.status),threadTopicKey(cards),[...openTopics]]),stackChanged=stackKey!==threadSignature;
   if(stackChanged||!history)cancelThreadMotion();
   if(stackChanged){threadSignature=stackKey;renderThreadCards(threadList,cards,{answer:entry=>replyMarkdown(parseSuggestedReplies(entry.text).text,{resolveLink:resolveReplyLink}),open:openTopics,toggle:topic=>{if(!openTopics.delete(topic))openTopics.add(topic);render();}});if(threadResize){threadResize.disconnect();for(const card of threadList.children)threadResize.observe(card);}}
@@ -602,7 +607,7 @@ export function createNativeChat(call){return function({button,input,status,exec
    root.style.setProperty('--fox-column-reserve',Math.round(rootBounds.bottom-panel.getBoundingClientRect().bottom+wanted+16)+'px');
   }else root.style.removeProperty('--fox-column-reserve');
   panel.dataset.expandable=String(!guided&&!panel.hidden&&!active&&!onboarding&&(expanded||(!beside&&!!earlier.length)));
-  earlierButton.hidden=guided||active||onboarding||beside||!(expanded||earlier.length);
+  earlierButton.hidden=guided||active||onboarding||beside||windowOpen||!(expanded||earlier.length);
   // Expand and Fold, a quiet word on the card's edge (owner request 2026-10-05: not History, not loud).
   const unfolded=expanded&&!folding,earlierLabel=unfolded?'Fold':'Expand';
   if(earlierButton.dataset.label!==earlierLabel){earlierButton.dataset.label=earlierLabel;earlierButton.innerHTML=chevron(!unfolded)+'<span></span>';earlierButton.lastElementChild.textContent=earlierLabel;}
@@ -640,7 +645,6 @@ export function createNativeChat(call){return function({button,input,status,exec
   deckDepth=depth;
   // While Fox works, the card holds one lighter line that streams in.
   log.dataset.working=String(!guided&&!!workingReply&&remembered===workingReply);
-  log.dataset.stale=String(!guided&&!!remembered?.stale);
   actionFooter.hidden=guided||streamingReply||!actionFooter.childElementCount;
   const unavailable=active||recording||starting||transcribing;
   for(const action of attentionActions.querySelectorAll('button'))action.disabled=unavailable;
@@ -657,7 +661,9 @@ export function createNativeChat(call){return function({button,input,status,exec
   actionBar.hidden=browseSwitch.hidden&&guideActions.hidden&&actionFooter.hidden&&attentionActions.hidden;
   replyNav.setAttribute('aria-busy',String(unavailable));
   // The sessions stand left of the card while it shows in the World (not beside an Applet, not in the first run).
-  sessionColumn.show({visible:!panel.hidden&&!onboarding&&!beside&&!onDesktop()&&root.dataset.onboarding!=='true'&&!root.dataset.tourStep,sessions:sessionList,here:foxSessionOf(context.key),name:companionName});
+  sessionColumn.show({visible:!panel.hidden&&!windowOpen&&!onboarding&&!beside&&!onDesktop()&&root.dataset.onboarding!=='true'&&!root.dataset.tourStep,sessions:sessionList,here:foxSessionOf(context.key),name:companionName});
+  chatWindow.show({visible:windowOpen&&!panel.hidden,sessions:sessionList,here:foxSessionOf(context.key),name:companionName,
+   title:sessionHere?sessionHere.title:companionName,detail:sessionHere?foxSessionLine(sessionHere,Date.now()/1000):'Main conversation',messages:windowOpen?chatMessages(segment,remembered):[]});
   root.dataset.expressionMode=panel.hidden?'idle':'reply';hud.classList.toggle('composer-expanded',!panel.hidden);hud.classList.toggle('is-chat-peeking',!panel.hidden);root.classList.toggle('companion-talking',!panel.hidden);
   root.dataset.talk=talk.phase;root.classList.toggle('is-listening',listening&&recording);root.classList.toggle('is-preparing-speech',listening&&starting);root.classList.toggle('is-transcribing',listening&&transcribing);
   const value=listening&&recording?'listening':listening&&starting?'preparing':listening&&transcribing?'transcribing':active?(streamingReply?'talking':turnKind===FOX_WORKING?'working':'thinking'):editing||hoverInput?'writing':'idle';avatar.dataset.state=value;
@@ -674,6 +680,13 @@ export function createNativeChat(call){return function({button,input,status,exec
  if(!panel.hidden&&!wasVisible)animateReply();
   if(spokeFirst&&spokeFirst!==proactiveArrived&&!panel.hidden){proactiveArrived=spokeFirst;arriveProactive(panel,log,reducedMotion.matches);}else if(!spokeFirst)proactiveArrived=null;
   if(panel.hidden){replyAnimation?.cancel();replyAnimation=null;cancelThreadMotion();}
+ }
+ /** The chat window's messages: this place's turns, oldest first, the running one with the step Fox is on, then Fox's
+  * line here that is not a turn (a remembered notice, the greeting) when it is the newest. */
+ function chatMessages(segment:string,remembered:any):FoxChatMessage[]{
+  const messages:FoxChatMessage[]=cardsHere().filter(e=>segmentOf(e)===segment&&(e.status==='working'||!!e.text||!!e.user)).map(e=>e.status==='working'?{...e,working:workingText(e,turnStatus)}:e);
+  if(remembered?.text&&!remembered.entry)messages.push({id:String(remembered.id||'line'),user:'',text:String(remembered.text),status:'done'});
+  return messages;
  }
  function animateReply(){
   replyAnimation?.cancel();
@@ -830,7 +843,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  }
  let actionPending=false;
  panel.addEventListener('click',async e=>{
-  const link=e.target.closest('a');if(!link||(!log.contains(link)&&!actionFooter.contains(link)&&!threadList.contains(link))||!link.getAttribute('href')?.startsWith('#'))return;
+  const link=e.target.closest('a');if(!link||(!log.contains(link)&&!actionFooter.contains(link)&&!threadList.contains(link)&&!chatWindow.element.contains(link))||!link.getAttribute('href')?.startsWith('#'))return;
   e.preventDefault();e.stopPropagation();
   if(!link.classList.contains('fox-inline-action')){const href=link.getAttribute('href');try{await requireWorldSurface(call);onReplyNavigate?.(href);}catch(error){say(error.message);}return;}
   if(actionPending||active||recording||starting||transcribing)return;
@@ -898,7 +911,7 @@ export function createNativeChat(call){return function({button,input,status,exec
 }
  previous.onclick=()=>browseReply(-1);next.onclick=()=>browseReply(1);
  panel.addEventListener('click',e=>{
-  if(e.defaultPrevented||e.target.closest('a,button,input,textarea,select,summary,.companion-guide-content,.companion-thread,.companion-deck[data-unfold=true]')||window.getSelection()?.toString())return;
+  if(e.defaultPrevented||e.target.closest('a,button,input,textarea,select,summary,.companion-guide-content,.companion-thread,.companion-deck[data-unfold=true],.fox-chat-window')||window.getSelection()?.toString())return;
   if(panel.dataset.continue==='true'){browseReply(1);return;}
   // Clicking a conversation card expands the thread upward; clicking again folds it.
   if(panel.dataset.expandable==='true'||expanded)toggleThread();
@@ -907,7 +920,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  let wheelOpened=0;
  // A long reply scrolls itself first; the earlier turns open once it is at its top.
  const scrollsReply=(e:WheelEvent)=>log.dataset.scrollable==='true'&&log.contains(e.target as Node)&&(e.deltaY>0?log.scrollHeight-log.clientHeight-log.scrollTop>1:log.scrollTop>0);
- panel.addEventListener('wheel',e=>{if(!expanded&&e.deltaY<-2&&!scrollsReply(e)&&!threadList.contains(e.target as Node)&&panel.dataset.history!=='true'&&panel.dataset.expandable==='true'&&Date.now()-wheelOpened>400){wheelOpened=Date.now();e.preventDefault();e.stopPropagation();toggleThread(true);return;}
+ panel.addEventListener('wheel',e=>{if(chatWindow.element.contains(e.target as Node)){e.stopPropagation();return;}if(!expanded&&e.deltaY<-2&&!scrollsReply(e)&&!threadList.contains(e.target as Node)&&panel.dataset.history!=='true'&&panel.dataset.expandable==='true'&&Date.now()-wheelOpened>400){wheelOpened=Date.now();e.preventDefault();e.stopPropagation();toggleThread(true);return;}
   // Over the front card, scrolling moves through the earlier cards above it.
   if(!threadList.hidden&&!threadList.contains(e.target as Node)&&!scrollsReply(e)){e.preventDefault();e.stopPropagation();threadList.scrollTop+=e.deltaY;return;}if(!e.target.closest('.companion-guide-content,.companion-thread-list')&&!scrollsReply(e)){e.preventDefault();e.stopPropagation();}else e.stopPropagation();},{passive:false});
  // origin 'system': Worldlet composed this request (a button), so it may quote
@@ -956,7 +969,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(active){queuedTurns.push({text,displayText,icon,trace,origin,session:recallKey(context.key,contentIdentity())});if(typed){input.value='';editing=true;input.focus({preventScroll:true});}render();return;}
   trace.mark('dequeuedMs');let turnResult={},outcome='complete',failureMessage='';turnActivity=undefined;turnKind='';
   if(typed){input.value='';clearTimeout(collapseTimer);editing=true;renderEntry();input.focus({preventScroll:true});}
-  if(!invitation&&!quiet){rememberSpeechLanguage(shown);animateInput(shown);}turnReply=sameContext(reply)&&reply?.text?reply:frontReply();turnEntry='';if(!quiet)expanded=false;turnStatus='Getting ready…';active=true;quietTurn=quiet;const guided=root.dataset.onboardingLocked==='true',turn=++generation,requestContext=context.key,requestView=contentIdentity(),requestThread=activeThread(),requestLocation=context.title,directSession=!invitation&&origin==='user'&&!!chatRoute?.();let turnPartial='';streamingReply=false;if(!quiet)preview=!!reply?.text;render();
+  if(!invitation&&!quiet){rememberSpeechLanguage(shown);animateInput(shown);}turnReply=sameContext(reply)&&reply?.text?reply:frontReply();turnEntry='';if(!quiet&&!windowOpen)expanded=false;turnStatus='Getting ready…';active=true;quietTurn=quiet;const guided=root.dataset.onboardingLocked==='true',turn=++generation,requestContext=context.key,requestView=contentIdentity(),requestThread=activeThread(),requestLocation=context.title,directSession=!invitation&&origin==='user'&&!!chatRoute?.();let turnPartial='';streamingReply=false;if(!quiet)preview=!!reply?.text;render();
   const entryId=invitation||quiet?'':'turn:'+Date.now()+':'+turn;
   // A turn in which Fox does something (a tool runs) is a task beside Fox while it lasts (ui/hud/task-panel.ts).
   let taskShown=false;const turnTask=(step:string)=>{taskShown=true;window.dispatchEvent(new CustomEvent(FOX_STATUS_EVENT,{detail:{source:TURN_TASK_SOURCE,text:step,name:turnTaskName(shown)}}));};
