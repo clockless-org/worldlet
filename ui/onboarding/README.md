@@ -99,9 +99,19 @@ Steps are numbered 1–5 here and 6–8 in first value, as `tour_skipped`'s `tou
 | 3. Applets | Mail while it is offered, else an Applet whose lights blink, else Mail, else the first Applet | Every Applet is a real app; everything done in them is kept as history and Fox remembers it, so it helps whenever one is open (owner request 2026-10-11). With Mail in the World and not connected (by the Agent or the World), **Connect Mail** opens its connection and moves on, **Later** moves on; otherwise **Continue** |
 | 4. Tasks and Routines | the tasks beside Fox (Fox while there are none) | What Fox is doing shows here as it goes; the Routines wait their turn (the day's prep each morning, the wrap-up each evening), changeable any time |
 | 5. Settings and phone | Agent and Phone beside Fox; the code sits in Fox's bubble, lit with Fox | Everything about Fox is set up here: **Agent** opens Settings. Then the phone (owner request 2026-10-11: “让人得先能下载这个手机 app”): first the iPhone app's download code (`phoneApps` in `ui/distribution/phone-release.ts`) for the phone's camera; **I have the app** asks the host to start [pairing](../../core/phone/README.md#pairing) (`phonePair` `start`) and the code becomes the `worldlet://pair` link the phone app scans; when the host reports the phone (`worldlet:phone-status`) Fox says it is paired, with **Continue**. **Not now** moves on (ending a code nobody scanned); pairing stays in Settings › Phone. Nothing reaches the relay before I have the app, and a host without phone pairing says where pairing lives, with **Continue** |
-| 6. Pick | the item Fox picked | **Show me** (or a click on it): its card opens in the middle and the box glides to it |
+| 6. Pick | the item Fox picked | **Show me** (or a click on it): its card opens in the middle and the box glides to it. While the first card is still being made, Fox says so and waits for it, up to three minutes |
 | 7. Card | the card | “Can I do this for you?” **Do it for me** beside Fox opens the page full size in its Applet, where Fox works and the person can step in (an update offers **Continue**); the card's own **Done** or **Got it** settles it there |
 | 8. Done? | none | When Fox's turn ends, “Is it done?” **Mark it done** celebrates the first win, which ends the first run |
+
+**The first card** (owner decision 2026-10-13). The moment a new person's World first opens, Fox makes their first
+Today's prep in a background session beside steps 1–5, whatever the hour (`startFirstCard` in `ui/shell/notion-world.ts`,
+`firstPrepRequest` in `core/artifacts/daily.ts`): what they have been busy with, from the Agent they brought, today's
+schedule where a calendar is reachable, and the one thing Fox could do first. It arrives in the Attention Center like
+any Today's prep, so step 6 boxes it (“I made your first card from what you've been working on”) and step 7 asks
+“Does it look right?”: **Looks good** settles it as the first win, with no Google needed. It runs once per World, never in
+the practice world or an automated browser, not with Today's prep paused, and not with Mail connected (the mail brings
+the first thing to do, and a card made beside it competed with Fox's help on it); a failure adds no Worth Doing item (step 6
+would pick it), and Fox goes on as before. Its steps are [product events](../../core/diagnostics/ANALYTICS.md#the-first-card).
 
 Steps 1–5 persist as `journeyStage=world-tour` and resume at the same step; a place opened another
 way lifts the spotlight until the person is back in the overview. The last choice on step 5 hands over to
