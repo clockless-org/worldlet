@@ -1,5 +1,5 @@
 // The Applet shelf (owner request 2026-10-09), driven through the real World UI with a faked native bridge: inside an
-// Applet the recently used Applets stand above it, the open one in the middle and largest, the others smaller the
+// Applet the recently used Applets stand at the top of Fox's lane, the open one in the middle and largest, the others smaller the
 // further they stand; picking one slides the shelf and opens it; nothing closes from the shelf; the ones that do not
 // fit wait behind "+N"; + opens a new page in the Browser with its address ready. The background crossfades while it switches.
 import assert from 'node:assert/strict';
@@ -34,29 +34,30 @@ await withBrowser(fileAccess,async browser=>{
  const shelf=(page:Page)=>page.evaluate(()=>{
   const box=(e:Element)=>{const r=e.getBoundingClientRect();return {x:r.x+r.width/2,width:r.width};};
   const nav=document.querySelector<HTMLElement>('.applet-shelf')!,panel=document.querySelector('#notionContent')!.getBoundingClientRect();
-  const lane=nav.getBoundingClientRect();
+  const lane=nav.getBoundingClientRect(),hud=document.querySelector('#notionWorld .notion-hud')!.getBoundingClientRect();
   // A website page sits in its theme scene's region (ui/applets/scene), not under the shelf's lane.
   const inScene=document.querySelector('#notionWorld')!.hasAttribute('data-panel-scene');
-  return {shown:!nav.hidden,middle:lane.x+lane.width/2,panel:{x:panel.x+panel.width/2,top:panel.top,width:inScene?0:panel.width},bottom:nav.getBoundingClientRect().bottom,
+  return {shown:!nav.hidden,middle:lane.x+lane.width/2,left:lane.left,fox:hud.x+hud.width/2,panel:{right:panel.right,width:inScene?0:panel.width},
    more:(document.querySelector<HTMLElement>('.applet-shelf-more')!.hidden?'':document.querySelector('.applet-shelf-more')!.textContent),
    tabs:[...document.querySelectorAll<HTMLElement>('.applet-shelf-tab')].map(t=>({id:t.dataset.applet,current:t.hasAttribute('data-current'),distance:+t.dataset.distance!,
     name:t.querySelector('.applet-shelf-name')!.textContent,...box(t.querySelector('.applet-shelf-pick img:not([hidden]),.applet-shelf-mark:not([hidden])')!)}))};
  });
  const settle=(page:Page)=>page.waitForFunction(()=>[...document.querySelectorAll('.applet-shelf-tab')].every(t=>!t.getAnimations().length));
- // The ring: the open Applet is the one marked current, centered over the Applet's panel, and each step out is smaller.
+ // The ring: the open Applet is the one marked current, centered over Fox at the top right (owner request 2026-10-13),
+ // and each step out is smaller.
  function assertRing(r:any,id:string,label:string){
   assert.ok(r.shown,label+': the shelf shows');
   const current=r.tabs.find((t:any)=>t.current);
   assert.equal(current?.id,id,label+': the open Applet is the current one');
   assert.equal(current.distance,0,label+': it stands in the middle');
   assert.ok(Math.abs(current.x-r.middle)<=1,label+': centered on the shelf '+JSON.stringify([current.x,r.middle]));
-  if(r.panel.width)assert.ok(Math.abs(r.middle-r.panel.x)<=4,label+': the shelf is centered over the Applet '+JSON.stringify([r.middle,r.panel.x]));
+  assert.ok(Math.abs(r.middle-r.fox)<=4,label+': the shelf is centered over Fox '+JSON.stringify([r.middle,r.fox]));
   for(const t of r.tabs)if(t!==current){
    assert.ok(t.width<current.width,label+': '+t.id+' is smaller than the open Applet');
    const nearer=r.tabs.filter((o:any)=>o.distance<t.distance);
    for(const o of nearer)assert.ok(o.width>=t.width,label+': nearer Applets are no smaller');
   }
-  if(r.panel.width)assert.ok(r.bottom<=r.panel.top,label+': the shelf stands above the Applet\'s panel');
+  if(r.panel.width)assert.ok(r.left>=r.panel.right-1,label+': the shelf stands beside the Applet\'s panel, not over it');
  }
 
  const {page,errors}=await open();

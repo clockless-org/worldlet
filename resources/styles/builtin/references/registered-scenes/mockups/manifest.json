@@ -8,7 +8,7 @@
   "sources": {
     "ui/themes/scene-frame.ts": "f5e9d343b8afe6d3d99790954b27539edb9658f63859155ab29518e9911c972f",
     "ui/applets/scene/applet-scene.ts": "9f5289bb117773bc1955b456b2c5f436df797e01bb81fd1bdbd0d0d15f8a2a82",
-    "ui/applets/scene/applet-scene.css": "6fafbf61ab3d09ea14781bd617dfc961c55452a752d093feef2f58eb474b7337",
+    "ui/applets/scene/applet-scene.css": "9d3ae61bfe2cfd2046eaf856c9a29e73ec7de2a8bd2963c570f928a86e62a1bf",
     "scripts/fixtures/applet-scene-preview/preview.js": "4fa83590bfced58b857e7ef0a76bec94e97de87ea9863fe582d97090f1fb09f1",
     "scripts/fixtures/applet-scene-preview/samples.js": "6a27cf7a5f57c283bb89cced6271683135c9ed37d0b46a8248b2e1a05c2ef1c6",
     "scripts/fixtures/applet-scene-preview/samples.css": "f3e0b53d97c7bef10c13156371fa4b78368830d18f5badd04d2d1fb76af17bd0",

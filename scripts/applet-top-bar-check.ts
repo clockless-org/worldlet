@@ -83,17 +83,16 @@ async function assertMaterial(page:Page,selector:string,label:string){
  assert.match(control.backdropFilter,/blur/,label+' is frosted');
 }
 const shot=(page:Page,name:string,height=240)=>shots?page.screenshot({path:path.join(shots,name),clip:{x:0,y:0,width:page.viewportSize().width,height}}):null;
-// The row under the shelf: Back at its start, the Applet's controls ending at the edge of the Applet's side, + just before them.
+// The row beside the shelf: Back at its start and the Applet's controls ending at the edge of the Applet's side; the shelf
+// stands over Fox's lane (owner request 2026-10-13), its + at the lane's right end on the same row.
 function assertShelfRow(r:any,width:number,label:string,leading=true){
  const applet=side(r,width);
  assert.ok(r.shelf&&!r.title,label+': the shelf takes the title\'s place '+JSON.stringify({shelf:r.shelf,title:r.title}));
- assert.ok(Math.abs(r.shelf.width-applet.width)<=2,label+': the shelf spans the Applet\'s side '+JSON.stringify({shelf:r.shelf,side:applet}));
+ assert.ok(r.shelf.x>=applet.width-2&&Math.abs(center(r.shelf)-center(r.hud))<=2,label+': the shelf stands over Fox\'s lane, centered on Fox '+JSON.stringify({shelf:r.shelf,hud:r.hud,side:applet}));
  if(r.back&&leading)assert.ok(r.back.x>=right(TRAFFIC_LIGHTS)+8&&!overlaps(r.back,TRAFFIC_LIGHTS),label+': Back clears the Mac traffic lights '+JSON.stringify(r.back));
- if(r.right){
-  assert.ok(Math.abs(right(r.right)-(applet.width-16))<=2,label+': the Applet\'s controls end at the edge of its side '+JSON.stringify({right:r.right,side:applet}));
-  assert.ok(right(r.add)<=r.right.x,label+': + stands before them '+JSON.stringify({add:r.add,right:r.right}));
- }
- if(r.panel)assert.ok(r.panel.y>=r.shelf.y+r.shelf.height-2,label+': the panel starts below the shelf '+JSON.stringify({panel:r.panel,shelf:r.shelf}));
+ if(r.right)assert.ok(Math.abs(right(r.right)-(r.shelf.x-16))<=2,label+': the Applet\'s controls end at the edge of its side, before the shelf '+JSON.stringify({right:r.right,shelf:r.shelf}));
+ assert.ok(r.add&&r.add.x>=r.shelf.x,label+': + stands in Fox\'s lane '+JSON.stringify({add:r.add,shelf:r.shelf}));
+ if(r.panel)assert.ok(r.panel.x+r.panel.width<=r.shelf.x+2,label+': the panel stands beside the shelf '+JSON.stringify({panel:r.panel,shelf:r.shelf}));
 }
  for(const [width,height] of [[1440,840],[1100,760]]){
   const {page,errors}=await open({width,height});
