@@ -1,4 +1,4 @@
-import {BATTLE_REVIEW,battleReviewDue,battleReviewTask,battleSite,battleWatch,battlesReviewed,observeBattleMessage,type FinishedBattle} from '../../../../../core/games/index.ts';
+import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSite,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,observeBattleMessage,type FinishedBattle} from '../../../../../core/games/index.ts';
 import type {RecordedVisit} from './recorder.ts';
 import type {WebRecord} from '../../../../../core/browser/index.ts';
 
@@ -13,8 +13,8 @@ export interface BattleReviewHost {
  onError?:(error:unknown)=>void;
 }
 
-/** Proactive game review (#1598): follows the battle messages the website recorders keep, and once the
- * person stops playing hands the games to Fox as a review (core/games/battle-review.ts decides when).
+/** Proactive game review (#1598): follows the battle messages the website recorders keep, hands each game to Fox
+ * for a short review once it ends, and every few games a summary (core/games/battle-review.ts decides when).
  * In memory only: games from before a restart are left for the person to ask about. */
 export class BattleReviews {
  private watch=battleWatch();
@@ -37,7 +37,7 @@ export class BattleReviews {
     observeBattleMessage(this.watch,{visit:record.visit,site,at:record.at,body:record.body});
    }
    if(this.sites.size>200)this.sites=new Map([...this.sites].slice(-100));
-   if(ended)this.schedule(BATTLE_REVIEW.quietSeconds+5);
+   if(ended)this.schedule(BATTLE_REVIEW.afterGameSeconds+2);
   }catch(error){this.host.onError?.(error);}
  }
 
@@ -53,12 +53,25 @@ export class BattleReviews {
   try{
    const now=this.now(),day=this.host.day(now);
    const games=battleReviewDue(this.watch,now,day);
-   if(!games){if(Object.values(this.watch.battles).some(battle=>battle.endedAt!==undefined&&!battle.reviewed&&battle.side))this.schedule(60);return null;}
+   if(!games){
+    if(Object.values(this.watch.battles).some(battle=>battle.endedAt!==undefined&&!battle.reviewed&&battle.side)){this.schedule(20);return null;}
+    // Every few reviewed games, a summary of them once Fox is free.
+    const summed=battleSummaryDue(this.watch,day);
+    if(!summed)return null;
+    const outcome=this.host.start({...battleReviewTask(summed,this.host.local,{summary:true}),games:summed});
+    if(outcome==='later'){this.schedule(30);return null;}
+    battlesSummarized(this.watch,now,day);
+    return outcome==='started'?summed:null;
+   }
    const outcome=this.host.start({...battleReviewTask(games,this.host.local),games});
-   if(outcome==='later'){this.schedule(60);return null;}
+   if(outcome==='later'){this.schedule(20);return null;}
    battlesReviewed(this.watch,games,now,day);
+   // The summary, when this review made one due, follows once Fox is free.
+   if(battleSummaryDue(this.watch,day))this.schedule(30);
    return outcome==='started'?games:null;
   }catch(error){this.host.onError?.(error);return null;}
  }
+ /** The battle playing on `visit` now and the person's record there today, for Fox's tips while they play. */
+ current(visit?:string){return battleNow(this.watch,{visit,now:this.now()});}
  stop(){if(this.timer)clearTimeout(this.timer);this.timer=null;}
 }

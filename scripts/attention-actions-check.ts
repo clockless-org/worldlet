@@ -108,7 +108,7 @@ await withBrowser(fileAccess,async browser=>{
  await preview.getByRole('heading',{name:'Optional tennis',exact:true}).waitFor();
  await page.locator('[data-action-id="attention:help:Optional tennis"]').waitFor();
  assert.equal(await preview.locator('img').getAttribute('src'),'attention/scene-tennis.webp');
- // Only rendered actions: the Browse with me | Don't bother switch is hidden outside Applets (#2230).
+ // Only rendered actions (#2230).
  assert.ok(await dialogue.evaluate(e=>{const box=e.getBoundingClientRect();return [...e.querySelectorAll('.companion-action-bar button')].filter(b=>b.getClientRects().length).every(b=>{const r=b.getBoundingClientRect();return r.top>=box.top&&r.bottom<=box.bottom;});}),'Guide actions fit inside the dialogue');
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(b=>b.action==='worldItemStatus').length),0,'Switching does not settle either item');
  assert.deepEqual(await preview.locator('.attention-preview-action').allTextContents(),['Done','Dismiss','Later'],'A task is marked done from its card');

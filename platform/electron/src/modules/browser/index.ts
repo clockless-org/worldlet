@@ -10,6 +10,7 @@ import {YouTubePlayer,YouTubeService} from './youtube.ts';
 import {StripeService} from './stripe.ts';
 import {parse} from './rules.ts';
 import type {Host,Row} from '../../host/types.ts';
+import {battleSite} from '../../../../../core/games/index.ts';
 
 /** Website Applets, the YouTube player and Stripe (Mac BrowserDevice, YouTube*, Stripe*). */
 export function installBrowser(host:Host){
@@ -87,7 +88,15 @@ export function installBrowser(host:Host){
   inCall:()=>device.inCall,
   resetHistory:()=>device.resetHistory(),
   recorded:(visits,records)=>device.recorded(visits,records),
-  reviewGamesNow:()=>device.battles.check()
+  reviewGamesNow:()=>device.battles.check(),
+  gameNow:()=>{
+   const page=device.visiblePage;
+   if(!page||page.hidden||page.isClosed)return null;
+   let site='';try{site=new URL(page.url).hostname.toLowerCase();}catch{}
+   if(!battleSite(site))return null;
+   const visit=page.recorder?.openVisit?.()||undefined;
+   return {site,...device.battles.current(visit)};
+  }
  });
  host.onPageReload(()=>{player.stop();stripe.cancel();device.endPictureInPicture();});
  host.onQuit(()=>{device.stop();player.stop();stripe.cancel();});

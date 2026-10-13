@@ -52,8 +52,7 @@
     "taskPanel",
     "taskPanelPage",
     "foxProactive",
-    "foxProactiveShown",
-    "foxBrowse"
+    "foxProactiveShown"
   ],
   "conversation": [
     "hermesChat",
