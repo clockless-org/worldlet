@@ -1,0 +1,30 @@
+/* Worldlet in a web browser (index.ts): one column, phone first, the World's paper colours. */
+:root{color-scheme:light;--ink:#354132;--muted:#6b6a5c;--paper:#fffdf7;--page:#f5efe1;--line:#d9cbae80;--accent:#3f6b4a;font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink)}
+#worldlet{max-width:680px;margin:0 auto;padding:16px 16px 48px}
+h1{margin:0;font-size:20px}
+h2{margin:20px 0 8px;font-size:15px;color:var(--muted);font-weight:600}
+h3{margin:0 0 4px;font-size:16px}
+p{margin:4px 0}
+button{font:inherit;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.web-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.web-computer{color:var(--muted);font-size:14px}
+.web-tabs{display:flex;gap:6px;margin:14px 0 4px;overflow-x:auto}
+.web-tabs button{flex:none;white-space:nowrap}
+.web-tabs button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.web-item,.web-task,.web-journal,.web-approval{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.web-meta,.web-line,.web-empty{color:var(--muted);font-size:14px}
+.web-summary{white-space:pre-wrap;font-size:14px}
+.web-fox{font-style:italic}
+.web-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.web-account{background:#fff4dc;border-radius:10px;padding:8px 12px;font-size:14px}
+.web-notice{background:#fde8e1;border-radius:10px;padding:8px 12px;font-size:14px}
+.web-turns{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.web-turn{max-width:85%;padding:8px 12px;border-radius:14px;white-space:pre-wrap;background:var(--paper);border:1px solid var(--line)}
+.web-turn.user{align-self:flex-end;background:#e7efe2}
+.web-turn.working{color:var(--muted)}
+.web-say{display:flex;gap:8px;position:sticky;bottom:12px}
+.web-say input{flex:1;font:inherit;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper)}
+progress{width:100%;accent-color:var(--accent)}

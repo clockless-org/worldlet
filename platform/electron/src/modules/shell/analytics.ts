@@ -105,9 +105,10 @@ const ALLOWED:Record<string,string[]>={
  routine_source:['worldlet','agent'],routine_status:['ok','failed'],routine_late:['yes','no'],
  // agent_settings_changed: which part of Settings › Agent changed; never what it changed to.
  agent_setting:['model','permission','account','routine','skill'],
- // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform.
+ // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform, or
+ // `web` for a web browser (core/phone/README.md#web).
  // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
- phone_platform:['ios','android','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
+ phone_platform:['ios','android','web','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
  // local_data_size (core/diagnostics/data-size.ts): how much this computer keeps, in bands; never a name or path.
  world_db_size:[...SIZE_BUCKETS],recordings_size:[...SIZE_BUCKETS],hermes_db_size:[...SIZE_BUCKETS],openclaw_db_size:[...SIZE_BUCKETS],disk_free:[...SIZE_BUCKETS],history_rows:[...ROW_BUCKETS]
 };

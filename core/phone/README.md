@@ -117,6 +117,16 @@ An OpenClaw Gateway on an always-on computer can be Fox's Agent directly, with n
 
 [scripts/remote-gateway-check.ts](../../scripts/remote-gateway-check.ts) checks the address rules, the vault, the check before switching and Fox's turns on a fixture Gateway.
 
+## Web
+
+Any web browser can open the same Center, Task panel, Journal and Fox's conversation as the phone apps, on this computer or another (owner decision 2026-10-13: Worldlet should be usable from a browser anywhere, with the computer doing the work). The browser pairs like a phone, through the same relay, keys, boxes and `phone` role, so the relay needs nothing new and still reads nothing.
+
+1. In the companion panel's **Mobile** page, **In a browser**, **Open in browser** makes a third pairing (`phonePair` with `kind: 'web'`, its own secret in the vault as `web-pairing`) and opens its link in the person's default browser (`operation: 'open'`); **Copy link** copies it for another computer. The link is the relay's own page, `https://worldlet.ai/open/#v=1&s=<secret>&n=<computer name>` (`pairLink` with `kind: 'web'`, `readWebPairLink`): the secret is in the fragment, which a browser never sends to a server.
+2. The page ([ui/web](../../ui/web/index.ts), built by `scripts/build-web-open.ts`; the website serves it at `/open/`) keeps the fragment in the browser's local storage, takes it out of the address bar at once and talks only to the origin that served it ([web-client.ts](web-client.ts), `createWebClient`). Its first poll completes the pairing and writes the `phone` slot with the browser's name ("Chrome on Mac"), which the Mobile page shows.
+3. The computer publishes the same `attention`, `conversation`, `live` and `desktop` slots to it as to a phone, and carries out its messages exactly as a phone's (Done, Later, a chat line, Fox's option, the Agent's permission prompt). It sends a browser no notifications. A browser seen in the last hour keeps the computer's long poll; after that it checks every 15 seconds.
+
+Unlike a phone's code, the link stays on the Mobile page after a browser opened it: any browser that opens it joins the same pairing, so the person can open Worldlet on a second computer without pairing again. Anyone who has the link can see and act on the Center, so **Turn off** ends the pairing (the page then says the link is off and forgets it) and **Open in browser** makes a new one. The page has four tabs: **Needs you** (Now by group, then Later, with Done or Got it and Later), **Working** (the Task panel's Doing now and Routines), **Today** (today's Journal) and **Fox** (the conversation, the turn running now, the Agent's permission prompt and a line to send). `scripts/web-open-check.ts` drives the computer's relay code and the built page against an in-memory relay.
+
 ## Push
 
 Notifications reach the phone while the app is closed (owner goal 2026-10-07: what OpenClaw and Hermes Agent sent to Telegram now goes to the Worldlet app), and the relay still reads none of them. After pairing the phone asks once for permission and registers its token (`PUT /push`; unpairing removes it first). The computer seals a `PhonePush` ([payloads.ts](payloads.ts), `phonePush`, `PHONE_PUSH_LIMITS`) with the place `push` (additional data `<id>|push`) and posts it to `/notify`; worker/push.ts hands the box to Apple or Google unchanged:
