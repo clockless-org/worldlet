@@ -590,8 +590,8 @@ export function mountNotionWorld(data: World, native: any) {
   }
   // Entering an Area (owner requests 2026-10-13): its painted map (themeAreaMap) fills the window and its Applets lie
   // flat in the middle of it, five to a row and on down, on a soft shade: the person's own first, then the ones it
-  // recommends, then, behind one button, the rest of its category. The Area is managed right here, by right-click: an own
-  // Applet opens the same menu as in the World (move, pin, remove), a recommended one offers Add without opening it. The Attention Center and the rest of the World's chrome step aside; Fox stays, and Back or Esc returns
+  // recommends, then, behind one button, the rest of its category. The Area is managed right here, by right-click, with
+  // the same menu as in the World (move, pin, remove). The Attention Center and the rest of the World's chrome step aside; Fox stays, and Back or Esc returns
   // to the World.
   function closeAreaView(){if(!areaView)return;closeRegionShelf();removeMenu();areaView.remove();areaView=null;delete root.dataset.areaView;voice?.sync();}
   function enterArea(value){
@@ -613,14 +613,12 @@ export function mountNotionWorld(data: World, native: any) {
     const cell=element('div','area-view-cell');cell.dataset.applet=app.moduleId;cell.dataset.own=String(own);
     const t=button('',()=>open(app,own),'area-view-applet');t.dataset.applet=app.moduleId;t.dataset.own=String(own);t.setAttribute('aria-label',app.title);
     const img=element('img') as HTMLImageElement;img.src=themeAppletIcon(app.key)||'';img.alt='';img.draggable=false;t.append(img,element('span','',app.title));cell.append(t);
-    // Managed by right-click (or the context-menu key), with no buttons over the icons (owner feedback 2026-10-13): the
-    // World's own menu for the person's Applets, Add or Open for a recommended one.
-    t.title=own?'Right-click to move, pin or remove':'Right-click to add to '+building.title;
-    t.addEventListener('contextmenu',e=>{e.preventDefault();const r=t.getBoundingClientRect(),x=e.clientX||r.left+r.width/2,y=e.clientY||r.bottom;if(own){appletMenu(app.moduleId,x,y);return;}
-     removeMenu();const menu=element('div','applet-layout-menu');deviceMenu=menu;menu.setAttribute('role','menu');
-     const add=button('Add to '+building.title,()=>{add.disabled=true;void editApplet('unlock',app.moduleId).then(()=>{placeInArea(app.moduleId,id);removeMenu();},error=>{add.disabled=false;notify(error.message||'Could not add this app. Try again.');});});
-     const go=button('Open',()=>{removeMenu();open(app,false);});add.setAttribute('role','menuitem');go.setAttribute('role','menuitem');menu.append(add,go);root.append(menu);
-     const rr=root.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(x-rr.left,rr.width-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(y-rr.top,rr.height-menu.offsetHeight-8))+'px';add.focus();});
+    // Every Applet shown is this Area's (owner feedback 2026-10-13): all look alike and right-click (or the context-menu
+    // key) opens the World's menu to move, pin or remove it. One the person has not had yet is put in the World first.
+    t.title='Right-click to move, pin or remove';
+    t.addEventListener('contextmenu',e=>{e.preventDefault();const r=t.getBoundingClientRect(),x=e.clientX||r.left+r.width/2,y=e.clientY||r.bottom;
+     if(own||root.appletLayout.has(app.moduleId)&&app.region===id){appletMenu(app.moduleId,x,y);return;}
+     void editApplet('unlock',app.moduleId).then(()=>{placeInArea(app.moduleId,id);appletMenu(app.moduleId,x,y);},error=>notify(error.message||'Could not change this app. Try again.'));});
     grid.append(cell);
    };
    const render=()=>{
