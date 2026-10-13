@@ -529,8 +529,6 @@
 .area-view-applet:hover{background:#ffffff14}
 .area-view-applet img{width:76px;height:76px;object-fit:contain;filter:drop-shadow(0 6px 8px #0006);transition:transform .2s}
 .area-view-applet span{max-width:100%;font-size:13px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #0009}
-.area-view-cell[data-own=false] .area-view-applet img{opacity:.75}
-.area-view-cell[data-own=false] .area-view-applet span{opacity:.8}
 .area-view-applet:hover img,.area-view-applet:focus-visible img{transform:translateY(-3px) scale(1.05)}
 .area-view-applet:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .area-view-all{padding:8px 16px;border:1px solid #ffffff59;border-radius:999px;background:#fffbf226;color:#fff;font:inherit;font-weight:600;cursor:pointer}
