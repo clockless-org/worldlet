@@ -206,20 +206,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  const guideActions=make('div','companion-guide-actions');guideActions.hidden=true;
  const actionFooter=make('div','companion-action-footer');actionFooter.hidden=true;actionFooter.setAttribute('aria-label','Recommended actions');
  const attentionActions=make('div','companion-attention-actions');attentionActions.hidden=true;
- // Browse with me | Don't bother (owner request 2026-10-08): whether Fox chimes in now and then while the person
- // looks at an Applet or page (fox-proactive.ts). It sits in Fox's card under each such line, and on every card in
- // an Applet while Don't bother holds, so it can be turned back on where it was turned off. The host keeps the choice.
- const browseSwitch=make('div','companion-browse');browseSwitch.setAttribute('role','group');browseSwitch.setAttribute('aria-label','Fox while you browse');browseSwitch.hidden=true;
- const browseOn=make('button','','Browse with me'),browseOff=make('button','','Don’t bother');browseOn.type=browseOff.type='button';
- browseOn.title='Fox says a word now and then about the Thing or page you are looking at';browseOff.title='Fox stays quiet until you talk to it';
- browseSwitch.append(browseOn,browseOff);
- let browsing:boolean|null=null;
- const showBrowse=(on:unknown)=>{if(typeof on!=='boolean')return;browsing=on;browseOn.setAttribute('aria-pressed',String(on));browseOff.setAttribute('aria-pressed',String(!on));scheduleRender();};
- const chooseBrowse=(on:boolean)=>(e:Event)=>{e.stopPropagation();if(browsing===on)return;showBrowse(on);void call('foxBrowse',{on}).then(r=>showBrowse(r?.on),()=>showBrowse(!on));};
- browseOn.onclick=chooseBrowse(true);browseOff.onclick=chooseBrowse(false);
- browseSwitch.addEventListener('pointerdown',e=>e.stopPropagation());
- window.addEventListener('worldlet:fox-browse',(e:any)=>showBrowse(e.detail?.on));
- const actionBar=make('div','companion-action-bar');actionBar.append(browseSwitch,guideActions,actionFooter,attentionActions);
+ const actionBar=make('div','companion-action-bar');actionBar.append(guideActions,actionFooter,attentionActions);
  const guideContent=make('div','companion-guide-content');guideContent.hidden=true;
  // The arrows sit on the corner of the world, but they stay part of the bubble in
  // the DOM. Moving them out took them out of every rule written about what belongs
@@ -659,8 +646,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   replyNav.hidden=!canPrevious&&!canNext;
   previous.dataset.unavailable=String(previous.disabled);next.dataset.unavailable=String(next.disabled);
   if(guided){guideActions.hidden=pageIndex<pages.length-1||!shownGuide.actions?.length;for(const action of guideActions.querySelectorAll('button'))action.hidden=active&&!workingHere&&action.dataset.duringWork!=='true';guideContent.hidden=pageIndex<pages.length-1||!shownGuide.body;}
-  browseSwitch.hidden=browsing===null||onDesktop()||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||(context.key.split(':')[0]==='overview'&&!contentIdentity())||!(browsing===false||guided&&shownGuide.browsing===true);
-  actionBar.hidden=browseSwitch.hidden&&guideActions.hidden&&actionFooter.hidden&&attentionActions.hidden;
+  actionBar.hidden=guideActions.hidden&&actionFooter.hidden&&attentionActions.hidden;
   replyNav.setAttribute('aria-busy',String(unavailable));
   // The sessions stand left of the card while it shows in the World (not beside an Applet, not in the first run).
   sessionColumn.show({visible:!panel.hidden&&!windowOpen&&!onboarding&&!beside&&!onDesktop()&&root.dataset.onboarding!=='true'&&!root.dataset.tourStep,sessions:sessionList,here:foxSessionOf(context.key),name:companionName});
@@ -1109,10 +1095,9 @@ export function createNativeChat(call){return function({button,input,status,exec
   say:line=>{
    const open=make('button','','Open card');open.type='button';
    open.onclick=()=>{api.setGuide(null,{only:'proactive:'+line.id});reportProductEvent('attention_opened_from_fox');window.dispatchEvent(new CustomEvent('worldlet:attention-open',{detail:{id:line.card}}));};
-   api.setGuide({source:'proactive:'+line.id,takeover:false,text:line.text,remember:true,actions:line.card?[open]:[],browsing:line.browsing});api.revealGuide();
+   api.setGuide({source:'proactive:'+line.id,takeover:false,text:line.text,remember:true,actions:line.card?[open]:[]});api.revealGuide();
   }
  });
- void call('foxBrowse',{}).then(r=>showBrowse(r?.on),()=>{});
  root.addEventListener('worldlet:companion-info-opened',()=>panelButton.dataset.panelOpen='true');
  root.addEventListener('worldlet:companion-info-closed',()=>{delete panelButton.dataset.panelOpen;clearAvatarPress();clearKeyPress();});
  render();

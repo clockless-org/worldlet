@@ -16,7 +16,7 @@ import {WebRecorder,readRecordings} from '../platform/electron/src/modules/brows
 import {WEB_RECORD,webTranscript,type WebRecord} from '../core/browser/index.ts';
 import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
 import {listWorldTools} from '../core/tools/index.ts';
-import {BATTLE_REVIEW,battleReviewDue,battleWatch,battlesReviewed,finishedBattles,observeBattleMessage} from '../core/games/index.ts';
+import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,finishedBattles,observeBattleMessage} from '../core/games/index.ts';
 import {BattleReviews} from '../platform/electron/src/modules/browser/battle-review.ts';
 
 type Frame={in?:string;out?:string};
@@ -64,11 +64,11 @@ try{
  recorder.flush();
  const reads={ledger,onScreen:'',now:clock+600,offsetMinutes:-420};
 
- // Worldlet reviews them without being asked once the person stops playing (#1598) ---------------------
- assert.equal(reviews.check(),null,'not while the last result is fresh: they may queue again');
- clock+=BATTLE_REVIEW.quietSeconds;
+ // Worldlet reviews them without being asked (#1598); games that ended while Fox was not asked go together ----
+ assert.equal(reviews.check(),null,'not the moment the last result comes in');
+ clock+=BATTLE_REVIEW.afterGameSeconds;
  const handed=reviews.check();
- assert.equal(proactive.length,1,'one review for the session');
+ assert.equal(proactive.length,1,'one review for the waiting games');
  assert.deepEqual(handed?.map(game=>[game.room,game.result,game.opponent,game.self,game.turns]),fixture.games.map(game=>[game.room,winner(game)==='Ashfox'?'won':'lost','Cynthia77','Ashfox',lastTurn(game)]),'the person’s three games, how each went');
  const review=proactive[0];
  assert.match(review.request,/^\(Not the person's words: Worldlet started this/,'Fox is told nobody asked');
@@ -147,7 +147,7 @@ try{
  const team=(game:{frames:Frame[]})=>[...game.frames.map(f=>f.in??'').join('\n').matchAll(/^\|poke\|p1\|([^,|]+)/gm)].map(m=>m[1]).join();
  assert.equal(new Set(session.games.map(team)).size,1,'the same six every game');
  assert.equal(new Set(session.games.map(game=>game.frames.find(f=>f.out?.includes('/choose team'))?.out?.split(' ')[2])).size,session.games.length,'a different four brought each game');
- assert.equal(battleReviewDue(watch,at+BATTLE_REVIEW.quietSeconds,'2026-10-04')?.length,6,'reviewed together once the evening is over');
+ assert.equal(battleReviewDue(watch,at+BATTLE_REVIEW.afterGameSeconds,'2026-10-04')?.length,6,'games nobody reviewed yet go together');
 }
 
 // When a review is due -----------------------------------------------------------------------------------
@@ -190,46 +190,54 @@ try{
   message(watch,4,['|tie']);
   assert.deepEqual(finishedBattles(watch).map(game=>[game.result,game.self,game.opponent]),[['tie','Guest 99','Rival']]);
  }
- // Not while a battle is on; then once they stop; then not again until enough time has passed.
+ // Each game is reviewed shortly after it ends, also while the next one is on (owner 2026-10-13 「打完了以后就可以复盘」),
+ // and every few reviewed games Fox sums them up (「打完多少局之后也会给他生成一些这个总结」).
  {
   const watch=fresh();
-  play(watch,1);play(watch,2,{end:false});
-  at+=BATTLE_REVIEW.quietSeconds+60;
-  assert.equal(battleReviewDue(watch,at,day),null,'not in the middle of a battle');
-  message(watch,2,['|win|Rival2']);
-  assert.equal(battleReviewDue(watch,at,day),null,'not right after a result');
-  at+=BATTLE_REVIEW.quietSeconds;
-  const due=battleReviewDue(watch,at,day)!;
-  assert.deepEqual(due.map(game=>game.result),['won','lost'],'both games of the session');
-  battlesReviewed(watch,due,at,day);
-  play(watch,3);at+=BATTLE_REVIEW.quietSeconds;
-  assert.equal(battleReviewDue(watch,at,day),null,'not again so soon');
-  at+=BATTLE_REVIEW.minGapSeconds;
-  assert.deepEqual(battleReviewDue(watch,at,day)?.map(game=>game.room),[room(3)],'later, the new game only');
+  play(watch,1);
+  assert.equal(battleReviewDue(watch,at,day),null,'not the moment it ends');
+  play(watch,2,{end:false});
+  const first=battleReviewDue(watch,at,day)!;
+  assert.deepEqual(first.map(game=>game.room),[room(1)],'the game just played, while the next one is on');
+  battlesReviewed(watch,first,at,day);
+  assert.equal(battleReviewDue(watch,at,day),null,'once');
+  message(watch,2,['|win|Rival2']);at+=BATTLE_REVIEW.afterGameSeconds;
+  assert.deepEqual(battleReviewDue(watch,at,day)?.map(game=>game.result),['lost'],'then the next game, no gap needed');
+  const short=battleReviewTask(battleReviewDue(watch,at,day)!,()=>'');
+  assert.match(short.task,/at most 5 short lines: the result[\s\S]*the turn that decided it[\s\S]*one thing to do differently next game/,'a short review of the game');
+  battlesReviewed(watch,battleReviewDue(watch,at,day)!,at,day);
+  assert.equal(battleSummaryDue(watch,day),null,'no summary yet');
+  for(let n=3;n<=BATTLE_REVIEW.summaryEvery;n++){play(watch,n);at+=BATTLE_REVIEW.afterGameSeconds;battlesReviewed(watch,battleReviewDue(watch,at,day)!,at,day);}
+  const summed=battleSummaryDue(watch,day)!;
+  assert.deepEqual(summed.map(game=>game.room),Array.from({length:BATTLE_REVIEW.summaryEvery},(_,n)=>room(n+1)),'the summary covers the games since the last one');
+  const summary=battleReviewTask(summed,()=>'',{summary:true});
+  assert.match(summary.request,/Sum up my last 5 battles/);
+  assert.match(summary.task,/patterns across games[\s\S]*team building[\s\S]*lost to[\s\S]*turn choices/,'the coach summary');
+  battlesSummarized(watch,at,day);
+  assert.equal(battleSummaryDue(watch,day),null,'the next summary waits for more games');
+  // While they play: the battle on now and how today went, for Fox's tips.
+  play(watch,9,{end:false});
+  message(watch,9,['|turn|4']);
+  assert.deepEqual(battleNow(watch,{visit:'v1',now:at}),{playing:{room:room(9),format:'[Gen 9] VGC 2026 Reg I',opponent:'Rival9',turn:4},record:{won:4,lost:1,tied:0}});
  }
- // An abandoned battle does not hold a review back forever.
- {
-  const watch=fresh();
-  play(watch,1);play(watch,2,{end:false});
-  at+=BATTLE_REVIEW.staleSeconds;
-  assert.equal(battleReviewDue(watch,at,day)?.length,1);
- }
- // Ten games are a batch: reviewed even while they keep playing, at most ten at a time.
+ // Several games waiting (Fox was busy) are reviewed together, at most ten, the newest.
  {
   const watch=fresh();
   for(let n=1;n<=12;n++)play(watch,n,{winner:n%3?'Ashfox':'Rival'+n});
   play(watch,13,{end:false});
+  at+=BATTLE_REVIEW.afterGameSeconds;
   const due=battleReviewDue(watch,at,day)!;
   assert.equal(due.length,BATTLE_REVIEW.batch,'the newest ten');
   assert.equal(due[0].room,room(3));
+  assert.match(battleReviewTask(due,()=>'').task,/team building[\s\S]*lost to[\s\S]*turn choices/,'a full review for many games');
   battlesReviewed(watch,due,at,day);
   assert.deepEqual(finishedBattles(watch),[],'older ones are left for the person to ask about');
  }
- // At most a few proactive reviews a day; the next day starts over.
+ // A day's reviews are bounded; the next day starts over.
  {
   const watch=fresh();
   for(let n=1;n<=BATTLE_REVIEW.perDay+1;n++){
-   play(watch,n);at+=BATTLE_REVIEW.minGapSeconds;
+   play(watch,n);at+=BATTLE_REVIEW.afterGameSeconds;
    const due=battleReviewDue(watch,at,day);
    if(n<=BATTLE_REVIEW.perDay){assert.equal(due?.length,1,`review ${n}`);battlesReviewed(watch,due!,at,day);}
    else assert.equal(due,null,'the day’s reviews are used up');
@@ -251,7 +259,7 @@ try{
   host.observe(visits,[{visit:'v9',at:now,kind:'ws-in',url:'',meta:{},body:'|updateuser| Ashfox|1|1|{}'}]);
   host.observe(visits,records(1,'|init|battle\n|player|p1|Ashfox|\n|player|p2|Rival|'));
   host.observe(visits,records(1,'|turn|3\n|win|Rival'));
-  now+=BATTLE_REVIEW.quietSeconds;
+  now+=BATTLE_REVIEW.afterGameSeconds;
   assert.equal(host.check(),null);assert.equal(asked,1,'Fox was asked');
   outcome='never';
   assert.equal(host.check(),null);assert.equal(asked,2,'and asked again');
@@ -267,4 +275,4 @@ assert.match(guidance,/帮我复盘最近几局/);
 assert.equal(conversationGuidance({scope:'sample'}),'');
 const browse=listWorldTools().find((tool:any)=>tool.name==='browse_web');
 assert.match(browse.description,/offset is always a record number, also with only or query/);
-console.log('PASS Fox finds an evening of browser games, lists them, reads each one team preview to result in at most two pages, and is told to review them as a coach; once the person stops playing, Worldlet hands it the games to review');
+console.log('PASS Fox finds an evening of browser games, lists them, reads each one team preview to result in at most two pages, and is told to review them as a coach; Worldlet hands it each game shortly after it ends and a summary every few games, and knows the battle on now for tips');

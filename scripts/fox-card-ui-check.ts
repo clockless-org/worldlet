@@ -23,7 +23,6 @@ await withBrowser(fileAccess,async browser=>{
    if(body.action==='modelStatus')return {available:true,cloudAllowed:true};
    if(body.action==='appContent')return {pages:[]};
    if(body.action==='weatherLoad')return null;
-   if(body.action==='foxBrowse')return {on:true};
    if(body.action==='foxProactive'){
     const next=w.lines.shift();
     if(!next)return {started:false,reason:'day'};

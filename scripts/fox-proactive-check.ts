@@ -77,7 +77,6 @@ assert.deepEqual(ask(state,t0+PROACTIVE.quietSeconds+PROACTIVE.minGapSeconds),{d
 // moments' limits (owner 2026-10-10 「让它提供的更勤一点」, 2026-10-12 「进一个 applet 就开始推荐说话」).
 const browse=(state:ReturnType<typeof proactiveState>,now:number,visit:string,place='Mail')=>proactiveDue(state,{now,day,moment:'browsing',place,visit});
 state=proactiveState();
-assert.equal(state.browse,true,'on unless the person chose Don\'t bother');
 assert(PROACTIVE.browse.settleSeconds<=5,'the opening line is asked a few seconds after the Applet opens');
 assert.deepEqual(browse(state,t0,''),{due:false,reason:'visit'},'a browse ask names its visit');
 assert.deepEqual(browse(state,t0,'mail@1'),{due:true});
@@ -113,10 +112,10 @@ for(let i=0;i<PROACTIVE.browse.perDay;i++)proactiveSpoke(state,{now:t0,day,place
 state.pending=null;state.ignored=0;
 assert.deepEqual(browse(state,t0+PROACTIVE.browse.gapSeconds,'z@1'),{due:false,reason:'day'});
 assert.deepEqual(proactiveDue(state,{now:t0+PROACTIVE.browse.gapSeconds,day:'2026-10-07',moment:'browsing',place:'p',visit:'z@1'}),{due:true});
-// Don't bother: Fox never speaks first, for any moment, until Browse with me is chosen again; "be quiet" holds browsing too.
-state=proactiveState();state.browse=false;
-for(const moment of ['settled','long-stay','late','browsing','checkin'] as const)assert.deepEqual(proactiveDue(state,{now:t0,day,moment,place:'Mail',visit:'v'}),{due:false,reason:'off'},moment);
-state.browse=true;proactiveHeard(state,{now:t0,text:'别打扰我'});
+// No switch turns Fox off (owner 2026-10-13 「他就该说话就说话」); "be quiet" still holds browsing too.
+state=proactiveState();
+assert(!('browse' in state),'no Browse with me | Don\'t bother state');
+proactiveHeard(state,{now:t0,text:'别打扰我'});
 assert.deepEqual(browse(state,t0+60,'v'),{due:false,reason:'quiet'});
 // The browse ask asks for context about the screen, still read only with PASS.
 const browseTask=proactiveTask({moment:'browsing',place:'Mail',local:'Thu 11:40',minutes:1,recent:[],lastWords:''});
@@ -126,20 +125,33 @@ const openTask=proactiveTask({moment:'browsing',place:'Mail',local:'Thu 11:40',m
 for(const part of ['just opened Mail','one concrete recommendation','rates 3 or more','PASS','read only'])assert(openTask.includes(part),part);
 assert(!browseTask.includes('just opened')&&!proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:'',opened:true}).includes('just opened'),'only the opening browse ask');
 assert(!proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:''}).includes('Browsing along'),'only the browse ask adds the context reason');
+// In a game Worldlet follows, Fox plays along (owner 2026-10-13 「边玩也边给用户这个建议」): browse looks keep coming all visit,
+// a tip for the turn while a battle is on, a chat about the session when they come in, all with the lowest bar.
+state=proactiveState();
+for(let i=0;i<PROACTIVE.browse.perVisit;i++){assert.deepEqual(proactiveDue(state,{now:t0+i*PROACTIVE.browse.game.againSeconds,day,moment:'browsing',place:'Showdown',visit:'g@1',game:true}),{due:true},'look '+i);proactiveAsked(state,{now:t0+i*PROACTIVE.browse.game.againSeconds,day,moment:'browsing',visit:'g@1'});}
+const later=t0+PROACTIVE.browse.perVisit*PROACTIVE.browse.game.againSeconds;
+assert.deepEqual(proactiveDue(state,{now:later,day,moment:'browsing',place:'Showdown',visit:'g@1'}),{due:false,reason:'visit'},'an ordinary Applet stops after a few looks');
+assert.deepEqual(proactiveDue(state,{now:later,day,moment:'browsing',place:'Showdown',visit:'g@1',game:true}),{due:true},'a game keeps going');
+assert(PROACTIVE.browse.game.perVisit>=20&&PROACTIVE.browse.game.againSeconds<=60&&PROACTIVE.browse.game.gapSeconds<PROACTIVE.browse.game.againSeconds);
+const battleTip=proactiveTask({moment:'browsing',place:'Showdown',local:'Mon 20:10',minutes:6,recent:[],lastWords:'',game:{playing:{format:'[Gen 9] VGC 2026 Reg I',opponent:'Cynthia77',turn:4},record:{won:1,lost:2,tied:0}}});
+for(const part of ['in a battle right now','vs Cynthia77, turn 4','1 won, 2 lost today','one concrete tip for this turn','rates 3 or more'])assert(battleTip.includes(part),part);
+const gameOpen=proactiveTask({moment:'browsing',place:'Showdown',local:'Mon 20:10',minutes:0,recent:[],lastWords:'',opened:true,game:{playing:null,record:{won:0,lost:0,tied:0}}});
+assert(gameOpen.includes('joining their session')&&!gameOpen.includes('They just walked in'),'a game opens with a chat, not a screen recommendation');
 
-// The switch: the host keeps the choice (on by default), refuses every ask while off and cancels one running; the
-// page shows Browse with me | Don't bother in Fox's card on browse lines and, while off, on every card in an Applet,
-// never in the World, onboarding or on the desktop; asks in an Applet are browse asks once per visit.
+// No Browse with me | Don't bother switch anywhere: the host forgets the old choice and has no foxBrowse action, Fox's
+// card carries no switch. The host tells the page when the place is a game, which then keeps the game's pace.
 const hostSource=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
-assert.match(hostSource,/proactive\.browse=preferences\.bool\('worldlet\.foxBrowse',true\)/);
-assert.match(hostSource,/foxBrowse:request=>proactiveBrowse\(request\)/);
-assert.match(hostSource,/preferences\.set\('worldlet\.foxBrowse',false\);proactiveCancel\(\);/);
+assert(!/foxBrowse:|proactiveBrowse|preferences\.bool\('worldlet\.foxBrowse'/.test(hostSource));
+assert.match(hostSource,/preferences\.remove\('worldlet\.foxBrowse'\)/);
+assert.match(hostSource,/game=browser\(\)\?\.gameNow\?\.\(\)\?\?null/);
+assert.match(hostSource,/return \{started:true,id,\.\.\.game\?\{game:true\}:\{\}\};/);
 assert.match(hostSource,/page\.event\('worldlet:fox-proactive',\{id:run\.id,line,thread,moment,\.\.\.card\?\{card\}:\{\}\}\)/);
 const chat=fs.readFileSync('ui/companion/native-chat.ts','utf8');
-assert.match(chat,/make\('button','','Browse with me'\),browseOff=make\('button','','Don’t bother'\)/);
-assert.match(chat,/browseSwitch\.hidden=browsing===null\|\|onDesktop\(\)\|\|root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true'\|\|\(context\.key\.split\(':'\)\[0\]==='overview'&&!contentIdentity\(\)\)\|\|!\(browsing===false\|\|guided&&shownGuide\.browsing===true\)/);
+assert(!/Browse with me|Don’t bother|browseSwitch|foxBrowse/.test(chat),'no switch in Fox\'s card');
 const pageSource=fs.readFileSync('ui/companion/fox-proactive.ts','utf8');
-assert.match(pageSource,/const due=looks===0\?\(openedByPerson\?here>=PROACTIVE\.browse\.settleSeconds:here>=PROACTIVE\.browse\.againSeconds\):looks<PROACTIVE\.browse\.perVisit&&\(now-lookedAt\)\/1000>=PROACTIVE\.browse\.againSeconds;/);
+assert.match(pageSource,/if\(result\?\.game===true&&key===place\)game=true;/);
+assert.match(pageSource,/const pace=game\?PROACTIVE\.browse\.game:PROACTIVE\.browse;/);
+assert.match(pageSource,/const due=looks===0\?\(openedByPerson\?here>=PROACTIVE\.browse\.settleSeconds:here>=PROACTIVE\.browse\.againSeconds\):looks<pace\.perVisit&&\(now-lookedAt\)\/1000>=pace\.againSeconds;/);
 // Only a place the person opened themselves gets the opening line; one Fox or the first run brought them to (the end of
 // the tour leaves them on Fox's page, onboarding-flow.ts) waits for the later look.
 assert.match(pageSource,/openedByPerson=since-activeAt<10_000;/);
@@ -157,7 +169,7 @@ assert.match(pageSource,/environment:context/);
 assert.match(chat,/environment:\(\)=>\(\{key:context\.key,location:context\.title,state:context\.detail,/);
 assert.match(hostSource,/const context:Row=\{\.\.\.environment,history:recentHistory\(\),proactive:\{moment\}\};/);
 assert(browseTask.includes('rates 4 or more')&&proactiveTask({moment:'settled',place:'Mail',local:'Thu 11:40',minutes:2,recent:[],lastWords:''}).includes('rates 6 or more'),'the bar is lower while browsing');
-assert(policyIncludes('foxBrowse'),'the switch is plumbing, never World history');
+assert(!policyIncludes('foxBrowse'),'no switch action');
 
 // Fox's answer: PASS shows nothing; a line is one line, unquoted and clipped.
 for(const message of ['PASS','pass.','  PASS  ','"PASS"','',null])assert.equal(proactiveLine(message),null,String(message));

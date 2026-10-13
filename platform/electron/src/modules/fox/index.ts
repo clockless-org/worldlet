@@ -475,8 +475,8 @@ export function installFox(host:Host){
   * like the proactive game review: untrusted, so it reads but never writes, and without UI actions.
   * Most asks end in PASS and show nothing. The person's next message cancels an ask still running. */
  const proactive=proactiveState();
- // Browse with me or Don't bother, chosen in Fox's card (owner request 2026-10-08); on unless turned off.
- proactive.browse=preferences.bool('worldlet.foxBrowse',true);
+ // Fox speaks when it should, with no switch to turn it off (owner 2026-10-13); Don't bother's old choice is forgotten.
+ try{if(store.writable)preferences.remove('worldlet.foxBrowse');}catch{}
  const proactiveLines=new Map<string,{line:string;thread:string;place:string;moment:ProactiveMoment;card:string}>();
  let proactiveRun:{id:string;runtime:AgentRuntime;cancelled:boolean}|null=null;
  const localDay=(at:number)=>{const date=new Date(at*1000);return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;};
@@ -493,14 +493,17 @@ export function installFox(host:Host){
   const place=placeKey(thread);
   const now=Date.now()/1000,day=localDay(now);
   const visit=typeof request.visit==='string'?request.visit.slice(0,1200):'';
-  const due=proactiveDue(proactive,{now,day,moment,place,visit});
-  if(due.due!==true)return {started:false,reason:due.reason};
+  // A game Worldlet follows on screen (a Showdown battle): Fox plays along (owner 2026-10-13).
+  let game:ReturnType<BrowserService['gameNow']>=null;
+  if(moment==='browsing'||moment==='checkin')try{game=browser()?.gameNow?.()??null;}catch(error){host.diagnostics.record(error,'foxPlace');}
+  const due=proactiveDue(proactive,{now,day,moment,place,visit,game:!!game});
+  if(due.due!==true)return {started:false,reason:due.reason,...game?{game:true}:{}};
   proactiveAsked(proactive,{now,day,moment,visit});
   const id='proactive-'+crypto.randomUUID().toUpperCase();
   const run={id,runtime:make(),cancelled:false};
   proactiveRun=run;trusts.set(id,{untrusted:true,sources:['browse_web']});
-  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0)),opened:moment==='browsing'&&request.opened===true,environment:proactiveEnvironment(request.environment)});
-  return {started:true,id};
+  void proactiveRunTurn(run,scope,{moment,thread,place,minutes:Math.max(0,Math.round(Number(request.minutes)||0)),opened:moment==='browsing'&&request.opened===true,game,environment:proactiveEnvironment(request.environment)});
+  return {started:true,id,...game?{game:true}:{}};
  }
  /** What the page says the place shows (location, state, view, the World's facts), as a turn of the person's own
   * carries it; without it an ask in a native Applet saw only the place's name and passed (owner 2026-10-10). The
@@ -510,7 +513,7 @@ export function installFox(host:Host){
   const {history:_h,here:_p,browsing:_b,page:_g,proactive:_m,...rest}=value as Row;
   try{return JSON.stringify(rest).length<=6000?rest:{};}catch{return {};}
  }
- async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,opened=false,environment={}}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;opened?:boolean;environment?:Row}){
+ async function proactiveRunTurn(run:{id:string;runtime:AgentRuntime;cancelled:boolean},scope:Scope,{moment,thread,place,minutes,opened=false,game=null,environment={}}:{moment:ProactiveMoment;thread:string;place:string;minutes:number;opened?:boolean;game?:ReturnType<BrowserService['gameNow']>;environment?:Row}){
   let line:string|null=null,card='';
   try{
    const profile=companion.archive(scope);
@@ -528,7 +531,7 @@ export function installFox(host:Host){
     if(visit&&pageText)context.page={site:visit.site,title:visit.title,text:pageText};
    }catch(error){host.diagnostics.record(error,'foxPlace');}
    const local=new Date().toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'});
-   const text=proactiveTask({moment,place,local,minutes,recent:proactive.recent,lastWords:said?characterPrefix(said.text,300):'',opened});
+   const text=proactiveTask({moment,place,local,minutes,recent:proactive.recent,lastWords:said?characterPrefix(said.text,300):'',opened,game});
    const body={action:'chat',session:run.id,mode:'chat',text,history:[],context,style:companion.prompt(companion.reference(profile))+guidanceFor(scope),sample:false};
    const events=turnEvents(run.id,scope,{active:()=>proactiveRun===run&&!run.cancelled,allowActions:false,reads:proactiveToolAllowed,record:false});
    // Nobody asked, so a missing model ends the ask quietly instead of opening model settings.
@@ -563,18 +566,6 @@ export function installFox(host:Host){
   try{companion.recordTurn(entry.line,'assistant',companion.session(scope),scope,entry.thread);}catch(error){host.diagnostics.record(error,'foxProactive');}
   analytics()?.recordProductEvent('fox_proactive_shown','',{proactive_moment:entry.moment,proactive_card:entry.card?'yes':'no'});
   return {ok:true};
- }
- /** Browse with me (`on` true) or Don't bother (false), from the switch in Fox's card; without `on`, reads it.
-  * Off, Fox never speaks first and an ask still running is dropped. */
- function proactiveBrowse(request:Row){
-  if(typeof request.on==='boolean'&&request.on!==proactive.browse){
-   if(!store.writable)throw new WorldletError('Preferences are read-only.');
-   proactive.browse=request.on;
-   if(request.on)preferences.remove('worldlet.foxBrowse');else{preferences.set('worldlet.foxBrowse',false);proactiveCancel();}
-   analytics()?.recordProductEvent('fox_browse_changed','',{fox_browse:request.on?'on':'off'});
-   page.event('worldlet:fox-browse',{on:request.on});
-  }
-  return {on:proactive.browse};
  }
  /** A line Fox says unasked in `thread` (FoxService.report): kept in that thread's history, shown like a proactive line
   * when the person is there (the page drops it otherwise; foxProactiveShown knows no such id, so records nothing more),
@@ -794,7 +785,6 @@ export function installFox(host:Host){
   },
   foxProactive:request=>proactiveStart(request),
   foxProactiveShown:request=>proactiveShown(request),
-  foxBrowse:request=>proactiveBrowse(request),
   foxPreferences:async request=>{
    if(typeof request.cloudConsent==='boolean')setCloudConsent(request.cloudConsent);
    if(request.autoSync===true)throw new WorldletError('Ask Fox to read a connected app. Automatic source mirroring is no longer used.');

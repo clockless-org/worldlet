@@ -7,8 +7,8 @@ import {PROACTIVE,proactiveLate,type ProactiveMoment} from '../../core/companion
  * is going on; otherwise it is dropped, never queued, because a stale line is noise.
  * In an Applet or page the moment is Browse with me (owner request 2026-10-08): Fox may say one line about what is
  * on screen, asked a few times per visit; the first ask goes out a few seconds after the Applet opens, so Fox opens with
- * a recommendation like a companion beside the person (owner 2026-10-12 「进一个 applet 就开始推荐说话」). The person turns it off with Don't bother
- * in Fox's card; the host then refuses every ask, so this page keeps no switch of its own.
+ * a recommendation like a companion beside the person (owner 2026-10-12 「进一个 applet 就开始推荐说话」). There is no switch
+ * to turn it off (owner 2026-10-13 「他就该说话就说话」); a short "be quiet" to Fox still holds every line for a while.
  * A line about something waiting on the person carries the open Attention item it is about (`card`, owner 2026-10-10:
  * Attention is the one place to act), and Fox's card offers to open that item's card.
  */
@@ -23,10 +23,10 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
  /** What the place shows (location, state, view), as a turn of the person's own would carry it: in a native Applet
   * there is no page text, and without this Fox saw only the place's name and passed (owner 2026-10-10). */
  environment:()=>object;
- /** `browsing` marks a Browse with me line, which offers Don't bother; `card` is the Attention item the line is about. */
- say:(line:{id:string;text:string;browsing:boolean;card?:string})=>void;
+ /** `card` is the Attention item the line is about. */
+ say:(line:{id:string;text:string;card?:string})=>void;
 }){
- let place='',since=Date.now(),activeAt=Date.now(),settled=false,stayed=false,late=false,asking=false,visit='',looks=0,lookedAt=0,openedByPerson=false,checkedAt=Date.now();
+ let place='',since=Date.now(),activeAt=Date.now(),settled=false,stayed=false,late=false,asking=false,visit='',looks=0,lookedAt=0,openedByPerson=false,game=false,checkedAt=Date.now();
  const touched=()=>{activeAt=Date.now();};
  for(const name of ['pointerdown','keydown','wheel'])window.addEventListener(name,touched,{passive:true,capture:true});
  async function ask(moment:ProactiveMoment,key:string){
@@ -35,6 +35,8 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
    let context={};try{context=structuredClone(environment())||{};}catch{}
    const result=await call('foxProactive',{moment,thread:key,minutes:Math.round((Date.now()-since)/60000),environment:context,...moment==='browsing'?{visit,opened:looks===1&&openedByPerson}:{}});
    // Fox was busy with something else: this visit's look is tried again on a later tick, not lost.
+   // A game Worldlet follows (the host says so): Fox keeps playing along this visit (owner 2026-10-13).
+   if(result?.game===true&&key===place)game=true;
    if(moment==='browsing'&&result?.reason==='busy'&&key===place)looks--;
   }catch{}
   finally{asking=false;}
@@ -43,14 +45,15 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
   const key=thread();
   // A place the person just opened themselves (a click or key moments before) gets Fox's opening line; one Fox or the
   // first run brought them to (a task's page, the end of the tour) gets only the later looks.
-  if(key!==place){place=key;since=Date.now();settled=false;stayed=false;visit=key+'@'+since;looks=0;lookedAt=0;openedByPerson=since-activeAt<10_000;}
+  if(key!==place){place=key;since=Date.now();settled=false;stayed=false;visit=key+'@'+since;looks=0;lookedAt=0;game=false;openedByPerson=since-activeAt<10_000;}
   if(!key||asking||document.hidden||document.fullscreenElement||busy()||/meeting/i.test(key))return;
   const now=Date.now(),here=(now-since)/1000,quiet=(now-activeAt)/1000;
   if(quiet>10*60)return;
   // Browsing: an Applet or page looked at for a short while; scrolling and reading count as looking, typing does not
   // reach here (busy). It stands in for the settled moment there: a first look, and one more a few minutes on.
   if(!world()){
-   const due=looks===0?(openedByPerson?here>=PROACTIVE.browse.settleSeconds:here>=PROACTIVE.browse.againSeconds):looks<PROACTIVE.browse.perVisit&&(now-lookedAt)/1000>=PROACTIVE.browse.againSeconds;
+   const pace=game?PROACTIVE.browse.game:PROACTIVE.browse;
+   const due=looks===0?(openedByPerson?here>=PROACTIVE.browse.settleSeconds:here>=PROACTIVE.browse.againSeconds):looks<pace.perVisit&&(now-lookedAt)/1000>=pace.againSeconds;
    if(due&&quiet>=2){settled=true;looks++;lookedAt=now;void ask('browsing',key);return;}
   }
   // Paused: no input for a little while, but still here (not away from the computer).
@@ -68,7 +71,7 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
   const {id,line,thread:key,moment,card}=event.detail||{};
   if(typeof id!=='string'||typeof line!=='string')return;
   const shown=!!line.trim()&&key===thread()&&!busy();
-  if(shown)say({id,text:line.trim(),browsing:moment==='browsing'||!world(),...typeof card==='string'&&card?{card}:{}});
+  if(shown)say({id,text:line.trim(),...typeof card==='string'&&card?{card}:{}});
   void call('foxProactiveShown',{id,shown}).catch(()=>{});
  });
  return {stop:()=>clearInterval(timer)};
