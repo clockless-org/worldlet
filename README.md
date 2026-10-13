@@ -14,7 +14,8 @@
 </p>
 
 <p align="center">
-  <strong>A World for the AI Agent you already use.</strong><br/>
+  <strong>The first World UI (WUI) framework.</strong><br/>
+  A World for the AI Agent you already use: not a chat box, a place your Agent works in.<br/>
   Worldlet gives OpenClaw, Hermes Agent, Claude Code, Codex or pi a place to work that you can see. The World is operated by AI; you watch and decide.
 </p>
 

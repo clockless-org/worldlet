@@ -14,7 +14,8 @@
 </p>
 
 <p align="center">
-  <strong>给你已经在用的 AI Agent 一个 World。</strong><br/>
+  <strong>第一个 World UI（WUI）框架。</strong><br/>
+  给你已经在用的 AI Agent 一个 World：不是聊天框，而是 Agent 工作的地方。<br/>
   Worldlet 让 OpenClaw、Hermes Agent、Claude Code、Codex 或 pi 有一个你看得见的工作场所。World 由 AI 操作，你在一旁看着、做决定。
 </p>
 
