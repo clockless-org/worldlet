@@ -8,6 +8,7 @@ import os from 'node:os';
 import {parseBuildThemeManifest,parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
 import {validateBuildTheme,importBuildTheme,buildThemeSource} from './build-theme-source.ts';
 import ts from 'typescript';
+import sharp from 'sharp';
 import {withVirtualFile} from './ts-virtual-file.ts';
 const tmp=await fs.mkdtemp(path.join(os.tmpdir(),'worldlet-theme-contract-'));
 try{
@@ -61,6 +62,22 @@ try{
   await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(registered(bad)));await assert.rejects(validateBuildTheme(source),error);
  }
  presentation.appletScenes=registered(registration).appletScenes;
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
+ // A declared alpha channel alone is not a usable frame. Check the sampled crop for an opening and solid rim.
+ const frame={mask:'assets/frame.png',source:[0,0,1,1],target:[0,0,1,1]};
+ const saveFrame=async(bytes:Buffer)=>fs.writeFile(path.join(source,frame.mask),bytes);
+ const png=async(alpha:number)=>sharp({create:{width:16,height:16,channels:4,background:{r:20,g:30,b:40,alpha}}}).png().toBuffer();
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(registered({...registration,webFrame:frame})));
+ for(const alpha of [0,1,.5]){await saveFrame(await png(alpha));await assert.rejects(validateBuildTheme(source),/transparent opening and opaque rim/);}
+ await saveFrame(await sharp(await png(1)).removeAlpha().png().toBuffer());await assert.rejects(validateBuildTheme(source),/requires transparency/);
+ const pixels=Buffer.alloc(16*16*4,255);
+ for(let y=4;y<12;y++)for(let x=4;x<12;x++)pixels[(y*16+x)*4+3]=0;
+ await saveFrame(await sharp(pixels,{raw:{width:16,height:16,channels:4}}).png().toBuffer());
+ await validateBuildTheme(source);
+ for(const crop of [[0,0,.2,.2],[.3,.3,.3,.3]]){
+  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(registered({...registration,webFrame:{...frame,source:crop}})));
+  await assert.rejects(validateBuildTheme(source),/transparent opening and opaque rim/);
+ }
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  // A theme's Artifact look is static files it names: rules and prompt in Markdown, reference pictures, materials, colours.
  const artifact={style:'assets/artifact/STYLE.md',prompt:'assets/artifact/PROMPT.md',references:[{image:'assets/artifact/a.webp',role:'Primary'}],materials:[{id:'paper',image:'assets/artifact/paper.webp',usage:'Paper'}],colors:{paper:'#f7efdc',moss:'#315f48'}};

@@ -82,6 +82,25 @@ The host draws registered scenes with one shared renderer, [ui/applets/scene](..
 
 The [Village scene library](../styles/builtin/references/registered-scenes/README.md) includes the inventory and an interactive preview with fictional data.
 
+#### Background, live content and foreground frame
+
+New and revised framed Applet artwork must deliver these parts together, for both App-bound scenes and reusable presets:
+
+| Deliverable | Requirement |
+| --- | --- |
+| Background | Complete scene with a blank, front-facing content surface and its physical frame. Match the World and icon; keep dynamic text and controls out of the bitmap. |
+| Foreground mask | PNG or lossless WebP with genuine alpha: retain the frame, pins, bindings and a thin irregular paper lip; clear the content opening and surrounding scenery. No painted white or checkerboard substitute for transparency. |
+| Registration | Measure the usable `regions`, `companion` and `webFrame` on the final art. Package the mask with the background and include both in the source lock. |
+| Composed preview | Show content underneath the foreground, with Fox and a reply visible. Check seams, usable area and unobstructed controls at desktop and narrower sizes. A background-only image is not acceptance evidence for the completed composition. |
+
+The layer order is **background → live page → extracted foreground**, with navigation and companion outside the content aperture. For external websites the host keeps its isolated rectangular browser surface and places a click-through foreground above it. The mask supplies alpha only; visible foreground pixels come from the original background, preserving its exact colours and lighting. Do not restyle the external site to imitate paper. The same composition is the art standard for HTML Applets; its host renderer must implement the foreground before claiming that scene is integrated.
+
+Extract the foreground from the final background during scene production, not as a later cleanup task. Prefer identical canvas dimensions and alignment: `source: [0,0,1,1]`, `target: [0,0,1,1]`. If extraction shifts the frame, measure and register its aperture explicitly instead of guessing a crop. Do not crop or scale the background, content and foreground independently. Recheck registration and hashes whenever the painting changes.
+
+The live page should extend just under the inner rim, with no additional matte, rounded inset, padding or CSS border between it and the painted frame. Preserve the irregular paper edge as a thin overlap; it must not hide controls or reduce the approximately 70% width / 80% height usable-area targets above. The transparent asset is decorative and must never capture pointer, keyboard or accessibility focus. Release it when leaving the scene or entering the compact fallback.
+
+`webFrame` remains optional in the schema for existing scenes and intentionally frameless themes. Its presence declares a working foreground, not an unfinished placeholder. Import checks that the registered mask crop contains both a fully transparent opening and an opaque rim; visual review still establishes their correct shape and alignment. Existing art is migrated scene by scene; this standard does not imply that all bundled scenes already include masks. See the [production workflow](../styles/builtin/references/registered-scenes/README.md#frame-production-workflow).
+
 ### Artifacts
 
 An Artifact is a card Fox puts in front of the person ([core/artifacts](../../core/artifacts/README.md)). The theme says how it looks; the host makes it. The section holds no template, stylesheet or script, only files a person or a model reads:
