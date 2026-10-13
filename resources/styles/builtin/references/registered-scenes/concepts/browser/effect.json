@@ -3,7 +3,38 @@
   "title": "Browser",
   "collection": "core",
   "generator": "built-in imagegen",
-  "purpose": "Visual concept; homepage implementation pending",
-  "prompt": "Preserve the Browser homepage concept and screen geometry. Match the revised background instruments: a blue geographical globe in a substantial Chrome-inspired red, green and yellow enamel cradle and an open brass compass with Safari-inspired blue dial and red-white needle. No separate logo plaques or hanging emblems.",
-  "registrationKey": "browser"
+  "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
+  "generatedAt": "2026-10-13T04:21:43.993Z",
+  "sourceBackground": {
+    "path": "ui/theme-packages/village/assets/applet-scenes/browser/background.webp",
+    "sha256": "203e18549d1a4057be19761cd184c77e4c92834de1d5742036f41544f237d3e5"
+  },
+  "sourceFrame": {
+    "path": "ui/theme-packages/village/assets/applet-scenes/browser/frame-mask.png",
+    "sha256": "89d03c2a454a85e9e4e53874a0dd5cb01c452a4bbc58f374fbfb57be2d1e080c"
+  },
+  "sourceImageSha256": "a48c5eabc14ab865a5bf471fc7631503cb389647a192ae77ab50cc680a32ee69",
+  "effectSha256": "5b2b5a4b4b04ea5d32a7c8875dc2e87b1b132a80208bcf5bcff064e8d039a10a",
+  "dimensions": {
+    "width": 1671,
+    "height": 941
+  },
+  "layoutIntent": {
+    "contentWidth": "approximately 70% of the scene, left aligned",
+    "contentHeight": "approximately 80% of the scene",
+    "foreground": "Existing transparent frame covers the content edge",
+    "companion": "Keep the existing right-side scene and companion clearance"
+  },
+  "prompt": "Use case: ui-mockup. Create ONE exquisite final applet design effect for Browser, landscape 16:9.\nInput image is the CURRENT BACKGROUND EDIT TARGET. Preserve exactly the camera, outer frame silhouette and dimensions, all right-hand scenery, objects, colors, lighting, village buildings and icon-related props. DO NOT redesign or resize the background. Fill the entire existing large blank LEFT surface, approximately 70% of image width and 80% height, with a highly polished, readable and genuinely useful application design. Preserve the existing narrow frame; content meets its inner edge with no extra mat, no large empty margins and no floating inset app window. The original frame is the topmost foreground layer over the content edge.\nAPPLICATION DESIGN: Village exploration browser start page on ivory paper, substantial search/address bar, illustrated pinned website cards for Library, Maps, Garden, News, small recent tabs, neat restrained navigation.\nVisual quality: beautiful finely textured paper or appropriate game-board material, elegant legible dark ink, tactile linen tabs and shallow embossed brass/wood controls, natural paper edges and small contact shadows lit in exactly the same direction as the scene. Embedded photographs or painted thumbnails where useful, crisp lines and satisfying fine detail. Rich but calm and practical, not flat generic dashboard styling. Content occupies the real usable area generously with balanced density, never a tiny UI in a giant blank board. App-specific content and intentional typography, not decorative filler. Main heading and important controls large enough to read; short realistic English fictional data only.\nImplementation-aware: flat front-facing primary content surface, normal aligned rows/cards/text, modest material depth; dynamic text and images could later be rendered in HTML. Do not fragment the working surface into excessive odd shapes. Fill any EXISTING small secondary blank plaque with the relevant date, status or progress stated by the concept; do not create new panels in the scenery. Keep lower-right scene available for the companion, but do NOT draw a fox or character.\nOutput is one complete image-generated VISUAL CONCEPT, not a photograph of a monitor, not a screenshot and not a collage. No outside browser chrome, watermarks, explanatory labels, laptops, extra pedestals, or dark overlays. Preserve the Village storybook sculpted/painterly aesthetic; no new photorealistic environment. All content fictional. Preserve every existing background edge and right-side detail.\nSTRICT EDITORIAL REQUIREMENTS: the main app heading must explicitly say \"Browser\". No inspirational quotes, mottos, slogans, heart doodles or decorative filler sentences. Use the space for working information and useful controls instead. Include clear navigation/search/filter controls where appropriate. Match the source image dimensions and keep the frame and right scenery in the same normalized locations.",
+  "generationHistory": [
+    {
+      "stage": "generation",
+      "prompt": "Use case: ui-mockup. Create ONE exquisite final applet design effect for Browser, landscape 16:9.\nInput image is the CURRENT BACKGROUND EDIT TARGET. Preserve exactly the camera, outer frame silhouette and dimensions, all right-hand scenery, objects, colors, lighting, village buildings and icon-related props. DO NOT redesign or resize the background. Fill the entire existing large blank LEFT surface, approximately 70% of image width and 80% height, with a highly polished, readable and genuinely useful application design. Preserve the existing narrow frame; content meets its inner edge with no extra mat, no large empty margins and no floating inset app window. The original frame is the topmost foreground layer over the content edge.\nAPPLICATION DESIGN: Village exploration browser start page on ivory paper, substantial search/address bar, illustrated pinned website cards for Library, Maps, Garden, News, small recent tabs, neat restrained navigation.\nVisual quality: beautiful finely textured paper or appropriate game-board material, elegant legible dark ink, tactile linen tabs and shallow embossed brass/wood controls, natural paper edges and small contact shadows lit in exactly the same direction as the scene. Embedded photographs or painted thumbnails where useful, crisp lines and satisfying fine detail. Rich but calm and practical, not flat generic dashboard styling. Content occupies the real usable area generously with balanced density, never a tiny UI in a giant blank board. App-specific content and intentional typography, not decorative filler. Main heading and important controls large enough to read; short realistic English fictional data only.\nImplementation-aware: flat front-facing primary content surface, normal aligned rows/cards/text, modest material depth; dynamic text and images could later be rendered in HTML. Do not fragment the working surface into excessive odd shapes. Fill any EXISTING small secondary blank plaque with the relevant date, status or progress stated by the concept; do not create new panels in the scenery. Keep lower-right scene available for the companion, but do NOT draw a fox or character.\nOutput is one complete image-generated VISUAL CONCEPT, not a photograph of a monitor, not a screenshot and not a collage. No outside browser chrome, watermarks, explanatory labels, laptops, extra pedestals, or dark overlays. Preserve the Village storybook sculpted/painterly aesthetic; no new photorealistic environment. All content fictional. Preserve every existing background edge and right-side detail.\nSTRICT EDITORIAL REQUIREMENTS: the main app heading must explicitly say \"Browser\". No inspirational quotes, mottos, slogans, heart doodles or decorative filler sentences. Use the space for working information and useful controls instead. Include clear navigation/search/filter controls where appropriate. Match the source image dimensions and keep the frame and right scenery in the same normalized locations."
+    }
+  ],
+  "review": {
+    "kind": "visual-design-study",
+    "runtimeGeometry": "Use the registered background and its JSON; generated concepts may have small differences.",
+    "sampleContent": "Fictional; validate text, calculations, dates and game states when implementing."
+  }
 }

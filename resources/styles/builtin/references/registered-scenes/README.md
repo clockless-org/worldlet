@@ -1,6 +1,6 @@
 # Village Applet scene library
 
-[View image-generated backgrounds and effects for all 140 selections](CONCEPTS.md). Current registered backgrounds are paired with earlier image-generated concepts; the concepts retain their original proportions.
+[View image-generated backgrounds and effects for all 140 selections](CONCEPTS.md). The 24 core and 16 generic concepts are regenerated from the current large-surface backgrounds (about 70% width and 80% height); the 100 branded concepts retain earlier layouts. The gallery distinguishes these image-generated references from HTML runtime previews.
 
 | Collection | Asset groups | Registered HTML surfaces | Transparent foregrounds |
 | --- | ---: | ---: | ---: |

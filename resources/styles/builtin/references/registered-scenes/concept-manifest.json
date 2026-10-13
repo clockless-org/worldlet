@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generator": "built-in imagegen",
-  "status": "Historical image-generated design studies; backgrounds use the current measured scene. Website applets render their original sites.",
+  "status": "40 image-generated concepts based on the current backgrounds; other concepts retain earlier layouts. These are design references, not runtime screenshots.",
   "entries": [
     {
       "id": "google-calendar",
@@ -20,8 +20,10 @@
       "registrationKey": "google-calendar",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/google-calendar/effect.webp",
-        "sha256": "e63d1e8afe64db0727ddbade2a44ea951436442bc4bca2e31f938e6b89ef987c"
-      }
+        "sha256": "daf01cd698b4853b355f3670e71408ed8a532ead45bb212cbabd6274445a9620"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:36.184Z"
     },
     {
       "id": "gmail",
@@ -40,8 +42,10 @@
       "registrationKey": "gmail",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/gmail/effect.webp",
-        "sha256": "9bdb6d1c96af2a180bf9c06a8df74c459d2d5cd88551ecde4c300257c9a28312"
-      }
+        "sha256": "9841f1f550e4ae8b8954d86de764cc50cfa586c9e8a1096b7a45e9c86573bcc1"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:36.489Z"
     },
     {
       "id": "apple-notes",
@@ -60,8 +64,10 @@
       "registrationKey": "apple-notes",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/apple-notes/effect.webp",
-        "sha256": "05dbbfa514b198a483cadf7409d649f3c603eb6a75a0bdc56481a589899a627d"
-      }
+        "sha256": "75a6d7e037d2e9907b67192127582e597b0acfa9dcb31d4ff4809c661651a39e"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:36.813Z"
     },
     {
       "id": "apple-reminders",
@@ -80,8 +86,10 @@
       "registrationKey": "apple-reminders",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/apple-reminders/effect.webp",
-        "sha256": "113d2363be82d9183c12c285c161410498854fe39a1a5bbef0c3eac2555c15ff"
-      }
+        "sha256": "11cfbe2b026d0218157ea18007e4d35f5c074955d6f1af75e76d244829528855"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:37.118Z"
     },
     {
       "id": "files",
@@ -100,8 +108,10 @@
       "registrationKey": "files",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/files/effect.webp",
-        "sha256": "3b696cb0f5b3fc812f85b8ae6a4039628129ca24da9dcde152eaaeb7b338d924"
-      }
+        "sha256": "0a47cf0035c0d42fb53f73f5ea76535781a48ea421463d4a8c55b273e631c7e0"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:21:42.443Z"
     },
     {
       "id": "weather",
@@ -120,8 +130,10 @@
       "registrationKey": "weather",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/weather/effect.webp",
-        "sha256": "4e7fc65f5bd020df69957df5bef70d2ea4e01084c4ced450590cc01d5e9f28be"
-      }
+        "sha256": "ff89be8e37b3294379fe9e7179219cb4a099dabaf8ea754ef6a49f4e66408952"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:21:42.769Z"
     },
     {
       "id": "meetings",
@@ -140,8 +152,10 @@
       "registrationKey": "meetings",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/meetings/effect.webp",
-        "sha256": "fc605472bca57377adaadbafaaa662ca6d23c6880e0edc6b72f9cc64158fc4df"
-      }
+        "sha256": "d9aafea8cea1510969280b737f0f932e2dacd8c6f27c9fb3fa9f2391ba35d328"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:21:43.081Z"
     },
     {
       "id": "voice-memos",
@@ -160,8 +174,10 @@
       "registrationKey": "voice-memos",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/voice-memos/effect.webp",
-        "sha256": "c2ae24ae9f0f41bd38a33eb6f9cdcfa6c01caf7bc7886ba1c4405022e7b60de4"
-      }
+        "sha256": "ea7cfb5bd2d104ca71e189221e9841031651106f781ce8b11e1e224b898ba529"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:21:43.398Z"
     },
     {
       "id": "messages",
@@ -180,8 +196,10 @@
       "registrationKey": "messages",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/messages/effect.webp",
-        "sha256": "d0c99e6244f58d71c14e2b34e0f07e220e41a7d558a8977af5b8a4da74459073"
-      }
+        "sha256": "8617340f25c1f761679ce958a978f6d784baa72d3f5804be2912601943de878f"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:21:43.685Z"
     },
     {
       "id": "browser",
@@ -200,8 +218,10 @@
       "registrationKey": "browser",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/browser/effect.webp",
-        "sha256": "69f54b3d6aac2c2f7966377ccbeed9780121fd578b22dd3d64b3212d6b46bcf9"
-      }
+        "sha256": "5b2b5a4b4b04ea5d32a7c8875dc2e87b1b132a80208bcf5bcff064e8d039a10a"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:21:43.993Z"
     },
     {
       "id": "maps",
@@ -220,8 +240,10 @@
       "registrationKey": "maps",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/maps/effect.webp",
-        "sha256": "8eae46910555cbfbd43fb073da77ad2ace9c926b5c88a747d4af6f90f4abfd0b"
-      }
+        "sha256": "b2998e34212385d25aaa777d6ec0eaadc5c575ad15502d2d3cfc9d897a159a37"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:37.514Z"
     },
     {
       "id": "clock",
@@ -240,8 +262,10 @@
       "registrationKey": "clock",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/clock/effect.webp",
-        "sha256": "2c2240aa02f1377497aeb52fd06d5fabed798c30ee8f0080fcecffcd9d2f0ef2"
-      }
+        "sha256": "df077cbc26b74edd236af8f3e5c1ed197c825faf0feaf5096bf146ef0f83f46f"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:37.819Z"
     },
     {
       "id": "contacts",
@@ -260,8 +284,10 @@
       "registrationKey": "contacts",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/contacts/effect.webp",
-        "sha256": "d67bdac2b1021f75cb3281cdf380649620f5cb6db6ad9d6ef3c4616f618e141a"
-      }
+        "sha256": "515c625e617ee177c3cbc1da2560dd8534a860168885350a7643c62f0e572c97"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:21:44.321Z"
     },
     {
       "id": "photos",
@@ -280,8 +306,10 @@
       "registrationKey": "photos",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/photos/effect.webp",
-        "sha256": "f5fabaf3f9ff6efe8e5b7edc7c70de7834e8d7d408a46e677cd7ef5647eaa1b7"
-      }
+        "sha256": "f9845f335dfbc63303f9350e0ebc7aef0ba8153e80ea97148d6f674b97a0d58c"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:38.182Z"
     },
     {
       "id": "music",
@@ -300,8 +328,10 @@
       "registrationKey": "music",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/music/effect.webp",
-        "sha256": "d4a4a666acd432b7b9a195f20d1055792a69d5e5329749062e480236588b86c3"
-      }
+        "sha256": "fc7a39fa446b71e2727bab4eb70568507e172af7e02b48d14aea7d2948f8d990"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:38.551Z"
     },
     {
       "id": "news",
@@ -320,8 +350,10 @@
       "registrationKey": "news",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/news/effect.webp",
-        "sha256": "4fc5f063cf7139322b88887562308d4b1c46c735a2b2a0ec41837c96a2ec9ec7"
-      }
+        "sha256": "92da70288243aa09f441b9bec609f9769b2f884be038a5585514659088d43247"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:38.888Z"
     },
     {
       "id": "podcasts",
@@ -340,8 +372,10 @@
       "registrationKey": "podcasts",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/podcasts/effect.webp",
-        "sha256": "0b0ed5c4d95cbb2d7c4957cc5db6f31f6ee7941adb491d922d5a1384d58dc18a"
-      }
+        "sha256": "dadff402f5cea2abe29193ffa0137d21fcd772db1d834c993d7b8269cbe9603d"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:39.204Z"
     },
     {
       "id": "stocks",
@@ -360,8 +394,10 @@
       "registrationKey": "stocks",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/stocks/effect.webp",
-        "sha256": "5ce3ba947491923ae8a4e0a6b795a2b5d184e11c6bc62c3a6820811df83fce52"
-      }
+        "sha256": "14472d8e83db0a07a0534c466dcf3dab732aa9007fb8039510a80062cee980ba"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:39.495Z"
     },
     {
       "id": "game-2048",
@@ -380,8 +416,10 @@
       "registrationKey": "game-2048",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/game-2048/effect.webp",
-        "sha256": "03a376679cd95f1b94c878c8a1c3a3a27d4a972502a0d93867e252c68e054261"
-      }
+        "sha256": "c3c7e04a8c71128fb83b2a628e1d9e3848b062a2cc41df4a0b730122791c6c7a"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:39.835Z"
     },
     {
       "id": "snake",
@@ -400,8 +438,10 @@
       "registrationKey": "snake",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/snake/effect.webp",
-        "sha256": "a244f60d98337efb866f759bf89556de2f778902290a5aab227d2e767abad04f"
-      }
+        "sha256": "b578e13ec07f9bd9ce4177e64c44e2a44e9585949e1c49ee1e97c43b1f3887f5"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:40.170Z"
     },
     {
       "id": "minesweeper",
@@ -420,8 +460,10 @@
       "registrationKey": "minesweeper",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/minesweeper/effect.webp",
-        "sha256": "ce302be7459be6ef2c84da12bca7c5eadffd387d1b36adaf700c9fed10ac8a6d"
-      }
+        "sha256": "4353a2012c097c482a26ae17deb75aa6785f6583c100d2a350312d8355ec8ca1"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:40.465Z"
     },
     {
       "id": "sudoku",
@@ -440,8 +482,10 @@
       "registrationKey": "sudoku",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/sudoku/effect.webp",
-        "sha256": "ab712ac3bd4a336db2554913e405ae37eec9a2f03d8911a1bfa6f94e1ed63f36"
-      }
+        "sha256": "9a35005a67d12a44422ebd256ee70422972e38de2f13902355bc7b1d876a69da"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:28:40.774Z"
     },
     {
       "id": "gomoku",
@@ -460,8 +504,10 @@
       "registrationKey": "gomoku",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/gomoku/effect.webp",
-        "sha256": "5c642d996f4b73486a219abc10285710d550e0bf386a928f4af643b35f2ccdde"
-      }
+        "sha256": "664e7c0f4b77c7431125548a9a6011a89e41c22634fb6d62d69f1fc97869c056"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:35:59.669Z"
     },
     {
       "id": "random-game",
@@ -480,8 +526,10 @@
       "registrationKey": "random-game",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/random-game/effect.webp",
-        "sha256": "d97681ad251f3da3cf5125c2e5933b9f226522ad9f0f65e1d92caa4b98745316"
-      }
+        "sha256": "75d3e4f80dbd66d308dc4dad7d089abf8c9e43f96dab57e594e32e812d2f3972"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:35:59.996Z"
     },
     {
       "id": "weight-balance",
@@ -500,8 +548,10 @@
       "registrationKey": "weight-balance",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/weight-balance/effect.webp",
-        "sha256": "3e3ad485cc354cc69e717778ad4249df25335207c4d6d245ec03c6fef60e2674"
-      }
+        "sha256": "e4d4c8db9b153c983c12f93f90a7d351e79a451bffad79e92957ce207f9066b0"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:36:00.310Z"
     },
     {
       "id": "meal-planner",
@@ -520,8 +570,10 @@
       "registrationKey": "meal-planner",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/meal-planner/effect.webp",
-        "sha256": "5164dc4f7e5bfa01852bbd6090d9130beb961b0ca9651fea48630f2be8351f48"
-      }
+        "sha256": "3bfcea80f1be93208dd80fe70ca7335a0ad607ec450aaf1527da178f8d286660"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:36:00.654Z"
     },
     {
       "id": "fitness",
@@ -540,8 +592,10 @@
       "registrationKey": "fitness",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/fitness/effect.webp",
-        "sha256": "5d6dae003af248ab3984e5ef06e5e31e4364dc457c98454e3ce21a7919d28553"
-      }
+        "sha256": "201693afb6a99f2896c1b641b9ce3ce74789a14ee87a34ab03cc827d020c90e1"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:36:00.972Z"
     },
     {
       "id": "sleep",
@@ -560,8 +614,10 @@
       "registrationKey": "sleep",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/sleep/effect.webp",
-        "sha256": "69bd7909e7b9489af555f47c532e320065f5e7b4c61c0fb07de973ffbea8ec46"
-      }
+        "sha256": "d6ff879ebee53549233df0eb4790daa9179ac963b608c9636b34744979af999d"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:36:01.289Z"
     },
     {
       "id": "travel",
@@ -580,8 +636,10 @@
       "registrationKey": "travel",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/travel/effect.webp",
-        "sha256": "27c989fdf976466450adac6252b3e2aa3ac63e848b8c1b9f203472581cf236ac"
-      }
+        "sha256": "7831c0a9657c0871404101325bd0171ccf396282387d9f0033fca4c51a865fef"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:54.043Z"
     },
     {
       "id": "outdoor",
@@ -600,8 +658,10 @@
       "registrationKey": "outdoor",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/outdoor/effect.webp",
-        "sha256": "ba9e40573a863cc9fc11cdf409f4b2c3a451deb7e2446c911d825898e492fe95"
-      }
+        "sha256": "e719b417dd537ad07739044d2469d5eeb336e16337433e37089b2f0a1939a177"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:54.455Z"
     },
     {
       "id": "shopping",
@@ -620,8 +680,10 @@
       "registrationKey": "shopping",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/shopping/effect.webp",
-        "sha256": "b6c1c72ca27883b7558f8b0564276c96a07d88d148ac3d4b0fca76b175887475"
-      }
+        "sha256": "54d3d13e037a19d312a78b523491e95cca1859c40a544d2df46c5dedcc697bde"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:54.790Z"
     },
     {
       "id": "budget",
@@ -640,8 +702,10 @@
       "registrationKey": "budget",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/budget/effect.webp",
-        "sha256": "88d331b5ee5b3ebcbef1dc19bb0dddf139465a024a3f301d2899d30198087370"
-      }
+        "sha256": "e2a1e9801cb3accd59ff831a2bf35ebf00fb1618bec60ebe9b082edbed997ff0"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:36:01.591Z"
     },
     {
       "id": "home-care",
@@ -660,8 +724,10 @@
       "registrationKey": "home-care",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/home-care/effect.webp",
-        "sha256": "4e7f4f796de098ae7bc60e58302133bd26a7e0390ea0b0f360f208802bb1df25"
-      }
+        "sha256": "28cc5c3d2e9d032ae400f51cf11ed1c8331c7c9aa55d99d71181479fa8158b8b"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:36:01.901Z"
     },
     {
       "id": "garden",
@@ -680,8 +746,10 @@
       "registrationKey": "garden",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/garden/effect.webp",
-        "sha256": "6520761e14006e57b9ec183c1f21939e9bf3bbd80a7328d148268f492ae8c840"
-      }
+        "sha256": "f0a2ed8041589e06721f34d0d47e49e53683a5f2dec483a5ee271e9b26424019"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:55.166Z"
     },
     {
       "id": "daily-planner",
@@ -700,8 +768,10 @@
       "registrationKey": "daily-planner",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/daily-planner/effect.webp",
-        "sha256": "7a4bac5a5f674dd9537b1a7d7f8930480c09b2173880ee9847fd0719aa28403b"
-      }
+        "sha256": "bfea5d55d5180c96aa249a6ffdf48201bdfa30ccb2e93aa2a79432b6d9ec9cf7"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:55.559Z"
     },
     {
       "id": "reading",
@@ -720,8 +790,10 @@
       "registrationKey": "reading",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/reading/effect.webp",
-        "sha256": "0c4218e3ec98866c7357f520a2b84d9e6ae87a23c3f66047a975e2664a552942"
-      }
+        "sha256": "ca68ebd3461db06cce122fbd60804a02a8055f725ef2b22aea713e0ab67a8181"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:55.958Z"
     },
     {
       "id": "language",
@@ -740,8 +812,10 @@
       "registrationKey": "language",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/language/effect.webp",
-        "sha256": "b94ede1534c6f9a43a8cd1872be8e4cf176c47de2c6ace992bb81aabe1bdd32d"
-      }
+        "sha256": "04d1b0ea08bf00748949d2497042ca1f820f45c544215fe2856d0a7feb3d3cc4"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:56.281Z"
     },
     {
       "id": "journal",
@@ -760,8 +834,10 @@
       "registrationKey": "journal",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/journal/effect.webp",
-        "sha256": "ee6a3fff65afb37f7b758aec0ca3498929070fa0e55d2c5427f67dfdb19f6eeb"
-      }
+        "sha256": "f7a19718a8bb0c9747e38406dd23007e2fa62a0a07685871c39d2371a572f368"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:56.649Z"
     },
     {
       "id": "job-search",
@@ -780,8 +856,10 @@
       "registrationKey": "job-search",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/job-search/effect.webp",
-        "sha256": "4af1b342298a49dc9c51cf528e84697498dfd979b9c687918586d3fdcfb38094"
-      }
+        "sha256": "6aebc2e471d44a0b9afe76d686fc207b0e467e8efd34d1c97706c05346b8a07f"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:56.974Z"
     },
     {
       "id": "project-planner",
@@ -800,8 +878,10 @@
       "registrationKey": "project-planner",
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/concepts/project-planner/effect.webp",
-        "sha256": "8b56a9bfa7fc35f6e64d1aba9433cec4f476c90a9bcc5c0b8fb6f96ff6f65d7d"
-      }
+        "sha256": "d84e0ba8e6cc545096f101ecdaf0842bff41b80cf040faa6aa2f5cfdc639321a"
+      },
+      "conceptStatus": "current-background",
+      "generatedAt": "2026-10-13T04:39:57.303Z"
     },
     {
       "id": "github",
@@ -821,7 +901,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/github/effect.webp",
         "sha256": "5afac61fc897f96d1dd8b87c47f7859f1f77d0f4e2738e0e72887bfee50023ff"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "codex",
@@ -841,7 +923,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/codex/effect.webp",
         "sha256": "4f2d809aca52ea07a5355d2d1132c04a2dfcabe706bb4548d20d3801219e16e1"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "claude-code",
@@ -861,7 +945,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/claude-code/effect.webp",
         "sha256": "777da6275fcbbb1e921067e799df5233f06d28fd591291936b2ec164db9aaa77"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "notion",
@@ -881,7 +967,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/notion/effect.webp",
         "sha256": "dde3567bbfc20f6f070da71a82bcf4adf94ebc33eb3d36135a1b6c0c90393f7d"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "obsidian",
@@ -901,7 +989,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/obsidian/effect.webp",
         "sha256": "0bc6490484ba6b6d0894381393f12fd6554c3073a814ccfa77492ddbb5955fce"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "plaid",
@@ -921,7 +1011,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/plaid/effect.webp",
         "sha256": "401a36055c0775ec64c67ae40b329b85f96e31424cb7f2a10a771a88ab2c986c"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "stripe",
@@ -941,7 +1033,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/stripe/effect.webp",
         "sha256": "1ca576c290f9d99017b7af6ffa4f1988f5ec16aeb7bc8b5c98c9f21124528d48"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "paypal",
@@ -961,7 +1055,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/paypal/effect.webp",
         "sha256": "c0c8e883739d55d3d92836ba2ed5fabaae3e87fdc85048fefa5dc53669760073"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "todoist",
@@ -981,7 +1077,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/todoist/effect.webp",
         "sha256": "cf80112ed0af9a571ba2ab3850caff056788bece60f75ff177b47c126bdca3a9"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "linear",
@@ -1001,7 +1099,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/linear/effect.webp",
         "sha256": "98663b4754fe7cbb7bbeae94b0a1fc0b8d5a3b68fa58358cbe37aaf7a7540614"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "supabase",
@@ -1021,7 +1121,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/supabase/effect.webp",
         "sha256": "6f9327ea62e9e193018ff2c8af8f9e2e3a37e79bd5a0354e6e8a98750493af56"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "docker",
@@ -1041,7 +1143,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/docker/effect.webp",
         "sha256": "1f08454981ff938eddcbd923e29b732d235d676530f856ebc3e860935638180e"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "google-drive",
@@ -1061,7 +1165,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-drive/effect.webp",
         "sha256": "015f731aa719926aee9cb6be79e50d6be411128eb47031ae8c0956754e2210fa"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "google-docs",
@@ -1081,7 +1187,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-docs/effect.webp",
         "sha256": "f69ca4d836a348533d0c5431559acc2bb4bbd7c9ec3ad16ec04c462ff7621b42"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "google-sheets",
@@ -1101,7 +1209,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-sheets/effect.webp",
         "sha256": "3bd617754a9241436fe8063225d98e1367c1e82e0a0525879e6f270c1d72fe1a"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "google-slides",
@@ -1121,7 +1231,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-slides/effect.webp",
         "sha256": "8948e26c1d92fdef065cce7eb4b99ea2cd5fbee2928211f862b740e530b1229e"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "oura",
@@ -1141,7 +1253,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/oura/effect.webp",
         "sha256": "888cf2948eef893579280d43c4972962baecf137f3c2d2cbc38354741c5ae77e"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "strava",
@@ -1161,7 +1275,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/strava/effect.webp",
         "sha256": "31879d39505335890a2e6c056689c7d62a8dca0da57c7d6ca9f37ff97c7017d8"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "fitbit",
@@ -1181,7 +1297,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/fitbit/effect.webp",
         "sha256": "251b8339b6f1a255ac262f7f880d098330747627eb26eabd5765decae530af45"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "google-maps",
@@ -1201,7 +1319,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-maps/effect.webp",
         "sha256": "8c19aeb2f175cc6a06ad280f56ffe8e05110c8371c403e5c5f41a4607fe3d6e0"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "airbnb",
@@ -1221,7 +1341,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/airbnb/effect.webp",
         "sha256": "cb1ec4609d90f3e7914f7e0195ecfc8de84aefbcab566307dbbfe8a0ef58125a"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "tripit",
@@ -1241,7 +1363,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/tripit/effect.webp",
         "sha256": "4085fec646823bd1a205440b2f59bee3113430a99d5b5eb27918baa0dbb132f7"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "x",
@@ -1261,7 +1385,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/x/effect.webp",
         "sha256": "4800d4c32d92295795135f9f5e008eeabee7fa1ed2040646cd2d2abbd64b7dd4"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "youtube",
@@ -1281,7 +1407,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/youtube/effect.webp",
         "sha256": "d7fb8e9bb94a61ed88dd5aba83e6823dcc80f633ca7b200599cc39b95278ec6c"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "tiktok",
@@ -1301,7 +1429,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/tiktok/effect.webp",
         "sha256": "fd089185d1bb068db2f1f8174357c6bec4d5a9dc5731bd87baff3b57a7bf2a58"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "discord",
@@ -1321,7 +1451,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/discord/effect.webp",
         "sha256": "edea427815825178162725abdd62cb28a71d0b007416583dc5c2fa025f6e31e5"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "doordash",
@@ -1341,7 +1473,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/doordash/effect.webp",
         "sha256": "41ef1619b49f5d6a2fe0ef44bc05b6add6418f2097c05740006b34c110451d47"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "wordle",
@@ -1361,7 +1495,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/wordle/effect.webp",
         "sha256": "09ba9e532cbbf9e03a121cd9332109c484bf73dd1d62f24212b59f5005a0084f"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "nyt-connections",
@@ -1381,7 +1517,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/nyt-connections/effect.webp",
         "sha256": "c97c8af3c922360ac0e6c2ba365ca4505c860c6b98dc65a9c3c30554816d164a"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "slither-io",
@@ -1401,7 +1539,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/slither-io/effect.webp",
         "sha256": "4909ab583c46f7e5ab42233410c6d77d4ade728ec01f782ae6d10eaba65012a4"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "agar-io",
@@ -1421,7 +1561,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/agar-io/effect.webp",
         "sha256": "26dcb6ff5766ea8b9c325c19675eb84afef08dbd13b239b0c5746ac03354468e"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "krunker-io",
@@ -1441,7 +1583,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/krunker-io/effect.webp",
         "sha256": "b369093ec81d58a60873a0d326be09f6a8dee696bfbaaf71fc066134de1b8d2b"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "skribbl-io",
@@ -1461,7 +1605,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/skribbl-io/effect.webp",
         "sha256": "470eb0976e3202a0569e7c85afc56eb6bf9d494752058ed7e14dec0405b0ef7a"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "infinite-craft",
@@ -1481,7 +1627,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/infinite-craft/effect.webp",
         "sha256": "5dbea8f9509ef03666b0ceb3cb02260ffc61e0c1e3c4a61e51186db2f844dfed"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "little-alchemy-2",
@@ -1501,7 +1649,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/little-alchemy-2/effect.webp",
         "sha256": "7cb24a40befb7d18e1a67b36b5e00cdf8e1db599548b329de4932f4455f0ac23"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "cookie-clicker",
@@ -1521,7 +1671,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/cookie-clicker/effect.webp",
         "sha256": "26c5626aa65b4d184a2cfdff13bb515969d7cac9c9cb1a5fa3d3c121a0bb7dcc"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "lichess",
@@ -1541,7 +1693,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/lichess/effect.webp",
         "sha256": "238db1b0a6569ed633b42c4277a4aa1fb19d901ef9968ef60a37789085f38ba1"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "drive-mad",
@@ -1561,7 +1715,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/drive-mad/effect.webp",
         "sha256": "2f0df12ae81ff6527b05a5b42319748c558b0c6f03fc1bd3ea43d19b62b02b24"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "subway-surfers",
@@ -1581,7 +1737,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/subway-surfers/effect.webp",
         "sha256": "47e73166c49e3e7fb2717a8af6624a26e99763312385d20903d218139a704b42"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "sekai",
@@ -1601,7 +1759,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai/effect.webp",
         "sha256": "18782dbb85b5bfdc3b9fc7cb0439532020f2d73b1a20f0674d46ea14ca04f4e1"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "sekai-sketch-racer",
@@ -1621,7 +1781,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-sketch-racer/effect.webp",
         "sha256": "8e690f0fc9cb5f4283cbaf3c9aae7e1763879a14ef4f80b3b9f77acdb4d0fbcd"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "sekai-3d-uno",
@@ -1641,7 +1803,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-3d-uno/effect.webp",
         "sha256": "10682958aff5b073d8bf9b89860947cf93ce1efa4858aad7d81afeb5494a3653"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "sekai-devil-level",
@@ -1661,7 +1825,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sekai-devil-level/effect.webp",
         "sha256": "fa33e54e36b1df1efc00b8c1b22992061162fde0e960c3c09a57645215b06175"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "pokemon-showdown",
@@ -1681,7 +1847,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/pokemon-showdown/effect.webp",
         "sha256": "3b0aad0f62af1ff16aed1269fc96ffd541c953ca0bc88ef097cbebf9a0a430b9"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "chatgpt",
@@ -1701,7 +1869,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/chatgpt/effect.webp",
         "sha256": "e01f64807634371ea3d50d58e2d7903c247cd2a24d7a750747a7468ec20a1ed4"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "claude",
@@ -1721,7 +1891,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/claude/effect.webp",
         "sha256": "d856b40db398e65b7a926814ff01a742b1f015f6944e241d6f347a20d40a7acc"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "gemini",
@@ -1741,7 +1913,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/gemini/effect.webp",
         "sha256": "0964d2bf0e8b9bdc770d3f1e14a6f59d3b48d1b21da2e0500a801bd9afa0c423"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "perplexity",
@@ -1761,7 +1935,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/perplexity/effect.webp",
         "sha256": "c12e17808264bf034ef22b505dc63c08d31e6caef6f296015ef38de460bd8f13"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "deepseek",
@@ -1781,7 +1957,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/deepseek/effect.webp",
         "sha256": "4ebf9c0c956f0ff025c19881fe01ca700e8f0bea866ec33005cb15880d04bfb9"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "whatsapp",
@@ -1801,7 +1979,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/whatsapp/effect.webp",
         "sha256": "d1fe758009f156770721ba09828afac25ab616cdeb9862e7ae9ad44f85a5f5a6"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "telegram",
@@ -1821,7 +2001,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/telegram/effect.webp",
         "sha256": "f52d36ec8d6622d37187311da304326897866453287cf7b8147a747a9b072640"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "slack",
@@ -1841,7 +2023,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/slack/effect.webp",
         "sha256": "75a30ea59ed8275e1bdd9c4f402341822275db63ddc9599043dc97ca643d7d7d"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "teams",
@@ -1861,7 +2045,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/teams/effect.webp",
         "sha256": "e131a3ab3190c3925c39ece97171b6353f681e999365b8096265f30b3a9319f9"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "zoom",
@@ -1881,7 +2067,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/zoom/effect.webp",
         "sha256": "a5f57eb98c7a19a48bc17cafdabcf2279f90928ad51e585c7e3ce3dd80cc977c"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "dropbox",
@@ -1901,7 +2089,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/dropbox/effect.webp",
         "sha256": "1e3e3ec21f35796c771a25c240d7555bf1d0cf5e8fe5f2ff9e4bd2159e543336"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "onedrive",
@@ -1921,7 +2111,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/onedrive/effect.webp",
         "sha256": "27b5d1fe038beed04649c462f623b02247ebe3db063b0998c1048b369edd3cf2"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "microsoft-word",
@@ -1941,7 +2133,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-word/effect.webp",
         "sha256": "bd2bd37c0a189221cc2b2af3e8aca76f27761a34a891e1c76bac5163dab4f7dd"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "microsoft-excel",
@@ -1961,7 +2155,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-excel/effect.webp",
         "sha256": "37cd637e92426e85bd3e5cb161cce9f3b1d60bb99d6b4e1d67262ea036ffe6b6"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "microsoft-powerpoint",
@@ -1981,7 +2177,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/microsoft-powerpoint/effect.webp",
         "sha256": "b82f06ed62738a910571ecf8fea6e14b454643b37f926ec1f0346b33cd0692fd"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "figma",
@@ -2001,7 +2199,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/figma/effect.webp",
         "sha256": "8d6a9659ade8d38549d7dd5592e90aee317eb0ffe8a3521932580d4a88302c85"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "canva",
@@ -2021,7 +2221,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/canva/effect.webp",
         "sha256": "37bf3926b6df0e7147eff46b0bfb9e3ca95c59bbeba056f2b4d92407fa7936dd"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "spotify",
@@ -2041,7 +2243,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/spotify/effect.webp",
         "sha256": "2be6b0ff2e2249752aa9265ae77a5d3eae8701a94c1514b3df01ea6776d7a4c0"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "apple-music",
@@ -2061,7 +2265,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/apple-music/effect.webp",
         "sha256": "222e9c99ef3a6658851a32d49ae0a61a637a2706693116da236cfb13a1455e76"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "reddit",
@@ -2081,7 +2287,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/reddit/effect.webp",
         "sha256": "cb51d892d1be20f26c152dd2574805276bc85d40144838e6f476a3088092c910"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "instagram",
@@ -2101,7 +2309,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/instagram/effect.webp",
         "sha256": "6129ab40f96baea71736fd0559f7d8807d07db5a7ad3a9e01f8e53acee1dc44f"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "linkedin",
@@ -2121,7 +2331,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/linkedin/effect.webp",
         "sha256": "37840217423fa7140e65dba0ec041516ff26aea1b2188d3c987fbdb5488338c3"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "amazon",
@@ -2141,7 +2353,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/amazon/effect.webp",
         "sha256": "f0cc61998f44f532cbf32274963c9c01da68d9a60e7afa482f88c3c82acf70c6"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "netflix",
@@ -2161,7 +2375,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/netflix/effect.webp",
         "sha256": "a73a8bd4051865469cd54a05761e04bb036b36b5dca9447403e07777a82214cf"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "outlook",
@@ -2181,7 +2397,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/outlook/effect.webp",
         "sha256": "5818633699d7d73e1d13b6cdb0a7e41fcdba43312e59b716e083641340f45d5c"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "apple-podcasts",
@@ -2201,7 +2419,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/apple-podcasts/effect.webp",
         "sha256": "7c15f0ed52e3d88095d03deed04b97e09b00bfd634f1310a120a53e11087dc5f"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "google-photos",
@@ -2221,7 +2441,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/google-photos/effect.webp",
         "sha256": "74c5b009ee46614b1be0d929c48e9b30e9bd46581a879cadca616af27d05be88"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "pinterest",
@@ -2241,7 +2463,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/pinterest/effect.webp",
         "sha256": "9d217d33fe05fe93379c337c1b3271e93a920952d805a58b829b410d5293e662"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "facebook",
@@ -2261,7 +2485,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/facebook/effect.webp",
         "sha256": "f897e3bcc7eb90ce6a0e9fca4b546574780ee01a7be3f001d2e788453b199c09"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "threads",
@@ -2281,7 +2507,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/threads/effect.webp",
         "sha256": "64cdf262bbab21c972f79750ebb7318d4b8718b1a60076d244d7c6d99fe7e1eb"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "capcut",
@@ -2301,7 +2529,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/capcut/effect.webp",
         "sha256": "349a016550872fe9d92b5097ee975646097fd52ab9e865d69f0a6f5dfeb587f1"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "uber",
@@ -2321,7 +2551,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/uber/effect.webp",
         "sha256": "242963da64255e0ca6af8b78c5aba6e8a789e741130bccbc555088d9afaeaf14"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "uber-eats",
@@ -2341,7 +2573,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/uber-eats/effect.webp",
         "sha256": "1c54ef51ef4053b4ecacec2d939dda9e2d27a55795ea5b22cd4262ed3fc1ade8"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "booking",
@@ -2361,7 +2595,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/booking/effect.webp",
         "sha256": "deb96b42794f3342ccd8851fb688cc34e01e1127eb963aaf59ca55d854bea166"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "feishu",
@@ -2381,7 +2617,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/feishu/effect.webp",
         "sha256": "5b9d78782d2c6b5123514c200af4a8851be35f8dee6ca82fa2f9fd5a0b45e38b"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "bilibili",
@@ -2401,7 +2639,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/bilibili/effect.webp",
         "sha256": "264b871e3a1503c2320e40333fff5928df7257bbede69c62d594bfc2d7cfca74"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "xiaohongshu",
@@ -2421,7 +2661,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/xiaohongshu/effect.webp",
         "sha256": "8fc6f8e248e68e71a4cf34a98f9dfc624304c7c3355e4dee917df5f308396617"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "baidu-netdisk",
@@ -2441,7 +2683,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/baidu-netdisk/effect.webp",
         "sha256": "aa77d761a9d6d55af3e2a0a3b2dda4a56c4800122639676b1f246c31b5816b9c"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "twitch",
@@ -2461,7 +2705,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/twitch/effect.webp",
         "sha256": "463a1b1a8d21124f873007db9fbff80e85dfa268eb40b7d8da4cb60bc562592e"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "copilot",
@@ -2481,7 +2727,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/copilot/effect.webp",
         "sha256": "6b7023046f608b0b761226caaf4fdc86d081f871ed5c79f955b2253dd47d5732"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "acrobat",
@@ -2501,7 +2749,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/acrobat/effect.webp",
         "sha256": "e2da67506a21a245e6bbbbb3fa5b6f65c1dcb873b090817ab86ebf88098be785"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "wikipedia",
@@ -2521,7 +2771,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/wikipedia/effect.webp",
         "sha256": "38d62250e881fc0808dcff0aaf9bbb3ddca42d6be6e6967d6d27863c61ff7d1c"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "doubao",
@@ -2541,7 +2793,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/doubao/effect.webp",
         "sha256": "7182f78979cfe702a3a0e7576c2c6fa5a2158472452a9e3b8ff3706ddbb03ef6"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "taobao",
@@ -2561,7 +2815,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/taobao/effect.webp",
         "sha256": "8ef277ee3e02d655598d4c2e48adc4a768bffc02d6a636935b00771cd690a790"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "alipay",
@@ -2581,7 +2837,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/alipay/effect.webp",
         "sha256": "53f9ff6eebd4cac6efbbe6a0b8ae8542376d39c0c348bc4cdb7e1abd4cbf8fbb"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "douyin",
@@ -2601,7 +2859,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/douyin/effect.webp",
         "sha256": "5f81055ef26ec37bd488919c9ab52f7d0ff29d3f7e15b03cd8e509d94773c79e"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "posthog",
@@ -2621,7 +2881,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/posthog/effect.webp",
         "sha256": "575f7c24ec4616139c4ed1e5a5317b2555f97303d0374bf3a41c6c2d8664e98d"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "cloudflare",
@@ -2641,7 +2903,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/cloudflare/effect.webp",
         "sha256": "52da870e8c28de230920f8c2b378605df2ca81f7a9bc82cb159a8b4b5358921c"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "vercel",
@@ -2661,7 +2925,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/vercel/effect.webp",
         "sha256": "c5c871f2c946095110785bd1b08d764ec1b44f520c3fcc39f7f97ab7b262db1b"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "netlify",
@@ -2681,7 +2947,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/netlify/effect.webp",
         "sha256": "35931be1837c6cccbd5ad7835972c68bd56e4c7d3e8de9d71ee3b97218df446f"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "firebase",
@@ -2701,7 +2969,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/firebase/effect.webp",
         "sha256": "9dc1b864ed696e98a6ea7b61d7de069a3e4fddcb97f4feff7b8b1078f7fb8566"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "sentry",
@@ -2721,7 +2991,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/sentry/effect.webp",
         "sha256": "c72653812becf56195d07b4fdd84be8a8fc7fde68f29aca79c10cfed30aa189e"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "railway",
@@ -2741,7 +3013,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/railway/effect.webp",
         "sha256": "22b2e9f40c4b82c517fa4b89b969972019420567ec1303c0db66a1cdf52f907d"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "render",
@@ -2761,7 +3035,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/render/effect.webp",
         "sha256": "70cd1701724f463c171bf8a8e8be415d404b16245e526188bd5a1b2192aa0625"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "gitlab",
@@ -2781,7 +3057,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/gitlab/effect.webp",
         "sha256": "5241dd39e6906a93731717cfa4011ed353c85ca7646677fc5b8f7dfa953575b6"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     },
     {
       "id": "jira",
@@ -2801,7 +3079,9 @@
       "effect": {
         "path": "resources/styles/builtin/references/registered-scenes/brands/jira/effect.webp",
         "sha256": "98172885aca6000fa516b64210c081ea21b9828897b9a551ed5b2c47998de9e4"
-      }
+      },
+      "conceptStatus": "earlier-layout",
+      "generatedAt": null
     }
   ]
 }
