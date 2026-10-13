@@ -26,7 +26,7 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
  /** `browsing` marks a Browse with me line, which offers Don't bother; `card` is the Attention item the line is about. */
  say:(line:{id:string;text:string;browsing:boolean;card?:string})=>void;
 }){
- let place='',since=Date.now(),activeAt=Date.now(),settled=false,stayed=false,late=false,asking=false,visit='',looks=0,lookedAt=0,openedByPerson=false;
+ let place='',since=Date.now(),activeAt=Date.now(),settled=false,stayed=false,late=false,asking=false,visit='',looks=0,lookedAt=0,openedByPerson=false,checkedAt=Date.now();
  const touched=()=>{activeAt=Date.now();};
  for(const name of ['pointerdown','keydown','wheel'])window.addEventListener(name,touched,{passive:true,capture:true});
  async function ask(moment:ProactiveMoment,key:string){
@@ -54,10 +54,13 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
    if(due&&quiet>=2){settled=true;looks++;lookedAt=now;void ask('browsing',key);return;}
   }
   // Paused: no input for a little while, but still here (not away from the computer).
-  if(quiet<20)return;
+  if(quiet<10)return;
   if(!late&&proactiveLate(new Date().getHours())&&here>=PROACTIVE.settleSeconds.world){late=true;void ask('late',key);return;}
   if(!stayed&&here>=PROACTIVE.longStaySeconds){stayed=true;void ask('long-stay',key);return;}
-  if(!settled&&here>=(world()?PROACTIVE.settleSeconds.world:PROACTIVE.settleSeconds.applet)){settled=true;void ask('settled',key);}
+  if(!settled&&here>=(world()?PROACTIVE.settleSeconds.world:PROACTIVE.settleSeconds.applet)){settled=true;checkedAt=now;void ask('settled',key);return;}
+  // Check in (owner 2026-10-13 「隔一段时间就表达一下」): every few minutes the person is around, Fox is asked whether it has
+  // something to say; the page offers one a minute and the host lets it through only once Fox has been quiet that long.
+  if((now-checkedAt)/1000>=60){checkedAt=now;void ask('checkin',key);}
  }
  // A short tick, so the opening line is asked a few seconds after an Applet opens rather than on the next 10 s beat.
  const timer=setInterval(tick,2000);
@@ -65,7 +68,7 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
   const {id,line,thread:key,moment,card}=event.detail||{};
   if(typeof id!=='string'||typeof line!=='string')return;
   const shown=!!line.trim()&&key===thread()&&!busy();
-  if(shown)say({id,text:line.trim(),browsing:moment==='browsing',...typeof card==='string'&&card?{card}:{}});
+  if(shown)say({id,text:line.trim(),browsing:moment==='browsing'||!world(),...typeof card==='string'&&card?{card}:{}});
   void call('foxProactiveShown',{id,shown}).catch(()=>{});
  });
  return {stop:()=>clearInterval(timer)};
