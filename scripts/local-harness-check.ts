@@ -33,6 +33,7 @@ assert.match(localHarnessTurn({text:'hi'},{worldTools:true}).system,/describe_wo
  const tools=localHarnessTurn({text:'hi'},{worldTools:true}).system;
  assert.match(tools,/companion: recall, memory, reply/);assert.match(tools,/"arguments":"\{\\"query\\":/,'the example sends arguments as a string');
  assert.doesNotMatch(tools,/applet:/,'Applet aliases repeat their base targets');
+ assert.match(tools,/call_world_tool \{target, action, arguments\}/);assert.match(tools,/without searching for them or describing them first/,'no tool search round for known tools');
  assert.match(localHarnessTurn({text:'hi',sample:true},{worldTools:true}).system,/gmail: [^;]*search/,'the practice world lists its own actions');
 }
 assert.deepEqual(LOCAL_HARNESSES.filter(h=>h.worldTools).map(h=>h.id),['claude-code','codex','hermes','openclaw','pi'],'every Harness gets World tools for a turn');
