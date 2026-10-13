@@ -39,7 +39,7 @@ try{
    request:async()=>({ok:true,json:async()=>({configured:false})}),
    nativeCall:async(action,body)=>{if(action==='openWorld')w.openedWorld=(w.openedWorld||0)+1;if(action==='usageEvent')w.analytics.push(body);if(action==='conversationRecall'){if(body?.rows)w.saved=body.rows;return w.saved;}return {};},
    modelOptions:async()=>{if(w.failModel)throw Error('Model unavailable');return {provider:'agent',setup:!!w.minimal};},
-   runAgent:async body=>{w.turns.push(body);if(body.text.startsWith('wait'))await new Promise(resolve=>w.holds[body.text]=resolve);if(body.text.includes('fail'))throw Error('Agent stopped unexpectedly');return {message:'Reply to '+body.text};}
+   runAgent:async body=>{w.turns.push(body);if(body.text.startsWith('wait')&&!w.holds[body.text])await new Promise(resolve=>w.holds[body.text]=resolve);if(body.text.includes('fail'))throw Error('Agent stopped unexpectedly');return {message:'Reply to '+body.text};}
   })({chatRoute:()=>w.directRoute?{run:async()=>({message:'Direct coding reply'})}:null,button:document.querySelector('#trigger'),input:document.querySelector('#notionInput'),status:document.querySelector('#status'),execute:async(name,args)=>{w.executed.push({name,args});if(name==='automate_browser'&&args.operation==='open')w.view('browser','site');return {ok:true};},foxPageHeld:()=>!!w.foxPageHeld,onSubmit:()=>{}});
   w.view=(key,id)=>{const content=document.querySelector('#notionContent') as HTMLElement;content.hidden=false;content.dataset.sourceId=id;content.innerHTML='<h1>'+id+'</h1>';w.fox.setContext({key,title:key,detail:id});};
  });
@@ -293,8 +293,13 @@ try{
  const continued=await page.evaluate(async()=>{const w=window as any,turn=w.turns.at(-1);await turn.execute('automate_browser',{operation:'open',url:'https://fixture.test'});const result=await turn.execute('automate_browser',{operation:'snapshot'});w.holds['wait browser']();await w.pending;return result;});
  assert.equal(continued.ok,true,'Agent browser navigation must permit the next browser step');
  assert.match(await page.locator('#worldConversation').textContent(),/Reply to wait browser/,'Agent-opened Browser receives the final reply');
- await page.evaluate(async()=>{const w=window as any;w.analytics=[];w.failModel=true;await w.fox.submit('test preflight');w.failModel=false;w.directRoute=true;await w.fox.submit('test direct session');});
- assert.deepEqual(await page.evaluate(()=>(window as any).analytics.map(e=>e.event)),['fox_turn_started','fox_turn_failed','fox_turn_started','fox_turn_completed'],'Actual Fox UI reports preflight failure and direct-session completion');
+ await page.evaluate(async()=>{const w=window as any;w.analytics=[];w.failModel=true;await w.fox.submit('test preflight');w.failModel=false;});
+ assert.match(await page.locator('#worldConversation').textContent(),/Model unavailable[\s\S]*Try again[\s\S]*Choose another Agent/,'A failed reply says why, with Try again and Choose another Agent');
+ // Try again sends the failed message once more.
+ await page.locator('.companion-action-footer a[href="#fox-action=fox.retry"]').click();
+ await page.waitForFunction(()=>/Reply to test preflight/.test(document.querySelector('#worldConversation')?.textContent||''));
+ await page.evaluate(async()=>{const w=window as any;w.directRoute=true;await w.fox.submit('test direct session');});
+ assert.deepEqual(await page.evaluate(()=>(window as any).analytics.map(e=>e.event)),['fox_turn_started','fox_turn_failed','fox_turn_started','fox_turn_failed','fox_turn_started','fox_turn_completed','fox_turn_started','fox_turn_completed'],'Actual Fox UI tries a quick preflight failure once more, reports both, Try again, and the direct-session completion');
  assert.deepEqual(errors,[]);
  console.log('PASS main Fox conversation: one card per turn (deck, upward expansion, this place only, running card elsewhere, same card on hover and click), turns on one topic stacked, cross-Applet history, current environment, in-flight navigation, target guard, late replies, persistence and queued drafts');
 }finally{await browser.close();}

@@ -3,7 +3,7 @@ export {musicReply} from '../world/index.ts';
 export {collectNativeActions,upcomingEvents} from './native-actions.ts';
 export {runAudioCommand} from './native-audio.ts';
 export {mountNotionWorld} from './notion-world.ts';
-export {withFoxTurnAnalytics,withProductAnalytics,withToolAnalytics,eventTrigger,reportEngagement,reportProductEvent,personGesture,startWebAnalytics} from './product-analytics.ts';
+export {errorFields,withFoxTurnAnalytics,withProductAnalytics,withToolAnalytics,eventTrigger,reportEngagement,reportProductEvent,personGesture,startWebAnalytics} from './product-analytics.ts';
 export {isRequestCancellation} from './request-cancellation.ts';
 export {mountWorldAudio} from '../world/index.ts';
 export {mountLocalMusic,runLocalMusicTool} from '../world/index.ts';
