@@ -35,12 +35,9 @@ await withBrowser(fileAccess,async browser=>{
    await page.evaluate(()=>{location.hash='';});
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');
    await page.locator('[data-action="region-more"][data-page="'+region+'"]').click();
-   // Entering the Area shows its map; Manage opens its panel (owner request 2026-10-13).
-   await page.locator('.area-view-manage').click();
-   // Beyond a region's five ground places, the Area panel lists the person's other Applets under Recently used, and
-   // catalog Applets they do not have under Recommended or, behind one button, All.
-   const open=page.locator('.region-shelf-grid').getByRole('button',{name:app.title,exact:true});if(!await open.count()&&await page.locator('.region-shelf-all').count())await page.locator('.region-shelf-all').click();
-   assert.equal(await open.count(),1,app.key+' is reachable through its region shelf');await open.click();
+   // Entering the Area lays out the person's own Applets, then the ones it recommends and, behind one button, All.
+   const open=page.locator('.area-view-grid').getByRole('button',{name:app.title,exact:true});if(!await open.count()&&await page.locator('.area-view-all').count())await page.locator('.area-view-all').click();
+   assert.equal(await open.count(),1,app.key+' is reachable through its Area');await open.click();
   }
   await page.waitForFunction(id=>document.querySelector<any>('#notionWorld').sceneMetrics.active===id,app.id);
   if(app.fullView.kind==='web'||platform==='windows'){

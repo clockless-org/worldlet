@@ -59,15 +59,12 @@ await withBrowser(fileAccess,async browser=>{
   // An Applet outside the catalog opens directly (as Fox opens it); every Applet is in the catalog now.
   else if(direct)await page.evaluate(id=>{location.hash='object='+id;},app.id);
   else {
-   // Beyond a region's five ground places, the Area panel lists the person's other Applets under Recently used, and
-   // catalog Applets they do not have under Recommended or, behind one button, All.
+   // Entering the Area lays out the person's own Applets, then the ones it recommends and, behind one button, All.
    const region=await page.evaluate(id=>document.querySelector<any>('#notionWorld').sceneMetrics.modules.find(module=>module.id===id).region,app.id);
    await page.evaluate(()=>{location.hash='';});
    await page.waitForFunction(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active==='overview');
    await page.locator('[data-action="region-more"][data-page="'+region+'"]').click();
-   // Entering the Area shows its map; Manage opens its panel (owner request 2026-10-13).
-   await page.locator('.area-view-manage').click();
-   const tile=page.locator('.region-shelf-grid').getByRole('button',{name:app.title,exact:true});if(!await tile.count())await page.locator('.region-shelf-all').click();await tile.click();
+   const tile=page.locator('.area-view-grid').getByRole('button',{name:app.title,exact:true});if(!await tile.count())await page.locator('.area-view-all').click();await tile.click();
   }
   // When the Applet does not open, say what the World was doing, so a failure on a release host
   // can be diagnosed from its log alone (#1468).

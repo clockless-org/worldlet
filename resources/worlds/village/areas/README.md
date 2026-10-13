@@ -1,6 +1,6 @@
 # Village Area maps
 
-Twelve painted close views of the six Village places, a day and a night plate for each. Entering an Area opens its map full screen with the Area's Applets standing on it, five to a row (`enterArea` in `ui/shell/notion-world.ts`). `node scripts/village-art.ts` copies them into the theme package as `assets/areas/` and indexes them in `assets/art.json` under `areas`; the shell reads them through `themeAreaMap` (`ui/world/theme-scene.ts`). To replace a map, change its file here and run the encoder. The World's Area ids are the landmark keys: `library` is Social, `money` is Life, `health` is Games and `travel` is Entertainment.
+Twelve painted close views of the six Village places, a day and a night plate for each. Entering an Area opens its map full screen with the Area's Applets laid out over it, five to a row (`enterArea` in `ui/shell/notion-world.ts`). `node scripts/village-art.ts` copies them into the theme package as `assets/areas/` and indexes them in `assets/art.json` under `areas`; the shell reads them through `themeAreaMap` (`ui/world/theme-scene.ts`). To replace a map, change its file here and run the encoder. The World's Area ids are the landmark keys: `library` is Social, `money` is Life, `health` is Games and `travel` is Entertainment.
 
 | Area | Day | Night |
 | --- | --- | --- |
