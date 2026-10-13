@@ -24,7 +24,9 @@ export function createLevelZoom(shell:HTMLElement,host:HTMLElement){
  // The Applet's own surfaces: its stage panels and the reader, never the World canvas, the pins or the veil itself.
  // A website panel never grows either: the host places its native page at the panel's rect as measured, and a
  // transform ends without a resize, so a page placed mid-zoom stayed at 60% of the panel (owner Order 2026-10-08).
- const surfaces=()=>[...host.children,shell.querySelector('#notionContent')].filter((el):el is HTMLElement=>!!el&&el instanceof HTMLElement&&!(el instanceof HTMLCanvasElement)&&el.id!=='notionPins'&&!el.classList.contains('world-level-zoom')&&!el.classList.contains('ui-theme-world-scene')&&el.dataset.template!=='browser'&&visible(el));
+ // A painted scene's foreground (ui/themes/scene-frame.ts) lies over its stage from the shell, so it grows with it.
+ const surfaces=()=>[...[...host.children,shell.querySelector('#notionContent')].filter((el):el is HTMLElement=>!!el&&el instanceof HTMLElement&&!(el instanceof HTMLCanvasElement)&&el.id!=='notionPins'&&!el.classList.contains('world-level-zoom')&&!el.classList.contains('ui-theme-world-scene')&&el.dataset.template!=='browser'&&visible(el)),
+  ...[...shell.querySelectorAll<HTMLElement>(':scope>.applet-scene-foreground')].filter(visible)];
  function run(direction:ZoomDirection,picture:HTMLCanvasElement,origin:ZoomPoint,{settle}:{settle:()=>boolean}){
   finish();count++;last=direction;
   const shellRect=shell.getBoundingClientRect(),rect=host.getBoundingClientRect();

@@ -42,6 +42,16 @@ export function sceneMaterialStyle(material:ThemeSceneMaterialName):Record<strin
  * (--applet-scene-primary-left/top/width/height, --applet-scene-companion-*), for shell surfaces outside the scene
  * (an Applet's reader) to sit on the same painted region, along with the primary region's material (--scene-*).
  */
+// Where `node` sits in `ancestor`'s own coordinates, from layout alone. The Applet's stage opens with a zoom (a scale
+// transform, ui/world/level-zoom.ts) that ends without a resize, so a client rect read mid-zoom left the painted
+// foreground and the reader where the stage was at that moment: a second Calendar frame across the open Calendar
+// (owner report 2026-10-13). Layout offsets ignore transforms; a scrolled or unpositioned ancestor falls back to rects.
+function offsetIn(node:HTMLElement,ancestor:HTMLElement){
+ let x=0,y=0,n:HTMLElement|null=node;
+ while(n&&n!==ancestor){x+=n.offsetLeft;y+=n.offsetTop;const p=n.offsetParent as HTMLElement|null;if(p&&p!==ancestor){x+=p.clientLeft-p.scrollLeft;y+=p.clientTop-p.scrollTop;}n=p;}
+ if(n===ancestor)return {x,y};
+ const a=ancestor.getBoundingClientRect(),e=node.getBoundingClientRect();return {x:e.left-a.left-ancestor.clientLeft,y:e.top-a.top-ancestor.clientTop};
+}
 export function mountAppletScene(host:HTMLElement,key:string,options:{source?:AppletSceneSource;shell?:HTMLElement|null}={}):AppletScene{
  const family=appletSceneKey(key),own=options.source||(family?themeAppletScene(family):undefined),painted=!!own?.background,source=own||PLAIN_SCENE;
  const element=document.createElement('div');element.className='applet-scene';element.dataset.applet=key;element.dataset.painted=String(painted);
@@ -67,19 +77,16 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   if(painted)place(plate,fit.image);
   const fitted=fit.regions.find(r=>r.role==='primary')!,compact=fitted.width<SCENE_COMPACT_WIDTH;
   element.dataset.compact=String(compact);
-  if(foreground){
-   const parent=(options.shell||element).getBoundingClientRect(),scene=element.getBoundingClientRect();
-   foreground.layout({...fit.image,x:fit.image.x+scene.left-parent.left,y:fit.image.y+scene.top-parent.top},!compact);
-  }
+  const at=options.shell?offsetIn(element,options.shell):{x:0,y:0};
+  if(foreground)foreground.layout({...fit.image,x:fit.image.x+at.x,y:fit.image.y+at.y},!compact);
   const primary=compact?{...fitted,x:16,y:84,width:width-32,height:Math.max(160,height*.75-84)}:fitted;
   for(const [index,region] of regions.entries()){region.element.hidden=compact&&region.role!=='primary';place(region.element,region.role==='primary'?primary:fit.regions[index]);}
   const round=(r:{x:number;y:number;width:number;height:number})=>({x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)});
   last={key,painted,compact,primary:round(primary),companion:round(fit.companion)};
   const shell=options.shell;if(!shell)return;
   if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;return;}
-  const s=shell.getBoundingClientRect(),e=element.getBoundingClientRect();
   for(const [name,r] of [['primary',primary],['companion',fit.companion]] as const){
-   shell.style.setProperty(`--applet-scene-${name}-left`,e.left-s.left+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,e.top-s.top+r.y+'px');
+   shell.style.setProperty(`--applet-scene-${name}-left`,at.x+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,at.y+r.y+'px');
    shell.style.setProperty(`--applet-scene-${name}-width`,r.width+'px');shell.style.setProperty(`--applet-scene-${name}-height`,r.height+'px');
   }
   shell.dataset.appletScene=key;

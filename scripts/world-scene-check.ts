@@ -109,12 +109,14 @@ try{
   assert.equal(await areaView.getByRole('heading',{level:1}).textContent(),title,what+' enters '+title);
   assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.active),'overview',what+' stays in the World');
   const view=await page.evaluate(()=>{const map=document.querySelector<HTMLImageElement>('.area-view-map'),r=map?.getBoundingClientRect(),tiles=[...document.querySelectorAll('.area-view-applet')].map(t=>Math.round(t.getBoundingClientRect().top));
-   return {map:!!map?.src&&!!r&&r.width>=innerWidth&&r.height>=innerHeight,tiles,attention:getComputedStyle(document.querySelector('.world-task-tracker')).visibility,fox:getComputedStyle(document.querySelector('#notionHUD')).visibility};});
+   return {map:!!map?.src&&!!r&&r.width>=innerWidth&&r.height>=innerHeight,tiles,attention:getComputedStyle(document.querySelector('.world-task-tracker')).visibility,fox:getComputedStyle(document.querySelector('#notionHUD')).visibility,
+    listBottom:document.querySelector('.area-view-list')!.getBoundingClientRect().bottom,foxTop:document.querySelector('.companion-avatar')!.getBoundingClientRect().top};});
   assert(view.map,what+' fills the window with its map');
   assert(view.tiles.length,what+' stands its Applets on the map');
   assert.equal(view.tiles.filter(top=>top===view.tiles[0]).length,Math.min(5,view.tiles.length),what+' stands five Applets to a row');
   assert.equal(view.attention,'hidden',what+' puts the Attention Center away');
   assert.equal(view.fox,'visible',what+' keeps Fox');
+  assert(view.listBottom<=view.foxTop,what+' keeps its Applets above Fox: '+JSON.stringify({list:view.listBottom,fox:view.foxTop}));
   // Esc folds Fox's open chat first (native-chat.ts), then leaves the Area.
   for(let i=0;i<3&&await areaView.count();i++){await page.keyboard.press('Escape');await page.waitForTimeout(200);}
   await areaView.waitFor({state:'detached'});

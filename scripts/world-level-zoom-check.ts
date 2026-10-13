@@ -29,6 +29,15 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(m.zoom.count,count,what+' zooms once');assert.equal(m.zoom.last,direction,what+' zooms '+direction);
   await veil.waitFor({state:'detached',timeout:3000}).catch(async e=>{throw new Error(what+' left its zoom on screen: '+JSON.stringify(await page.evaluate(()=>({veils:document.querySelectorAll('.world-level-zoom').length,animations:document.getAnimations().map(a=>a.playState+':'+Math.round(Number(a.currentTime))+':'+((a.effect as KeyframeEffect).target as HTMLElement)?.className)}))),{cause:e});});
  };
+ // Where the painted scene's foreground (ui/themes/scene-frame.ts) is drawn, from its own pixels, once the zoom is over. It is
+ // drawn over the stage from the shell, so a position read mid-zoom left a second Calendar frame across the open Calendar
+ // (owner report 2026-10-13); every way in must draw it where the reduced-motion open, which never zooms, does.
+ const frame=async()=>{await veil.waitFor({state:'detached',timeout:3000});await page.locator('.applet-scene-foreground[data-ready=true]').waitFor();
+  return page.evaluate(()=>{const all=[...document.querySelectorAll<HTMLCanvasElement>('.applet-scene-foreground')].filter(c=>!c.hidden);if(all.length!==1)return {count:all.length};
+   const c=all[0],data=c.getContext('2d')!.getImageData(0,0,c.width,c.height).data,d=devicePixelRatio;let x0=Infinity,y0=Infinity,x1=-1,y1=-1;
+   for(let y=0;y<c.height;y+=2)for(let x=0;x<c.width;x+=2)if(data[(y*c.width+x)*4+3]>8){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}
+   return {count:1,box:[x0,y0,x1,y1].map(n=>Math.round(n/d))};});};
+ const frames:Record<string,any>={};
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.camera.settled);
  const start=(await metrics()).zoom.count;
 
@@ -44,6 +53,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(first.pointerEvents,'none','the zoom never takes a click');
  assert.equal(first.pictures,1,'the zoom starts from a picture of the World');
  await zoomed(start+1,'in','Opening an Applet');
+ frames.device=await frame();
 
  // Another Applet from inside one is a move between equals: no zoom.
  await page.evaluate(()=>location.hash='object=app-apple-notes');
@@ -61,10 +71,11 @@ await withBrowser(fileAccess,async browser=>{
  const areaView=page.locator('.area-view');
  await page.locator('.notion-pin[data-page="building-home"][data-action="region-more"]').click();
  await areaView.waitFor();
- await areaView.locator('.area-view-applet[aria-label="Notes"]').click();
- assert.equal((await metrics()).active,'app-apple-notes','the area\'s Applet opens');
+ await areaView.locator('.area-view-applet[aria-label="Calendar"]').click();
+ assert.equal((await metrics()).active,'app-google-calendar','the area\'s Applet opens');
  assert.equal(await areaView.count(),0,'the Area gives way to the Applet');
  await zoomed(start+3,'in','Opening an Applet from its area');
+ frames.area=await frame();
  await page.locator('#notionBack').click();
  await areaView.waitFor();
  assert.equal(await areaView.getAttribute('data-area'),'home','Back returns to the area the Applet was opened from');
@@ -94,8 +105,16 @@ await withBrowser(fileAccess,async browser=>{
  // Reduced motion: the same moves, nothing zooms.
  await page.emulateMedia({reducedMotion:'reduce'});
  const before=(await veils()).length;
- await page.mouse.click(device.peekHit.x,device.peekHit.y);
+ // The Area keeps its most recently used Applets first, so Calendar may stand somewhere else by now.
+ const moved=await page.evaluate(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.modules.find((d:any)=>d.id==='app-google-calendar'&&d.visible));
+ await page.mouse.click(moved.peekHit.x,moved.peekHit.y);
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.active==='app-google-calendar');
+ const still=await frame();
+ assert.equal(still.count,1,'one painted foreground over the open Calendar');
+ for(const [way,seen] of Object.entries(frames)){
+  assert.equal(seen.count,1,way+': one painted foreground, not a second frame');
+  assert(seen.box.every((n:number,i:number)=>Math.abs(n-still.box[i])<=2),way+': the foreground lies on its painting after the zoom: '+JSON.stringify({[way]:seen.box,unzoomed:still.box}));
+ }
  await page.locator('#notionBack').click();
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.level==='overview');
  assert.equal((await veils()).length,before,'nothing zooms under reduced motion');
