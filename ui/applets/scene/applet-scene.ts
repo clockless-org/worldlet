@@ -1,4 +1,4 @@
-import {fitThemeScene,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeSceneMaterialName} from '../../themes/index.ts';
+import {fitThemeScene,mountSceneFrame,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeSceneMaterialName} from '../../themes/index.ts';
 import type {BrowserPaperEdge,SurfaceRect} from '../../../contracts/browser-surface.ts';
 import {appletSceneKey} from './scene-family.ts';
 /**
@@ -56,6 +56,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   element.append(region);return {id:r.id,role:r.role,material:r.material,element:region};
  });
  host.append(element);
+ const foreground=painted?mountSceneFrame(options.shell||element,source.background!,source.registration):null;
  const primaryRegion=regions.find(r=>r.role==='primary')!,shellStyle=options.shell?sceneMaterialStyle(primaryRegion.material):{};
  for(const [name,value] of Object.entries(shellStyle))options.shell!.style.setProperty(name,value);
  let last:AppletScene['metrics']={key,painted,primary:null,companion:null};
@@ -66,6 +67,10 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   if(painted)place(plate,fit.image);
   const fitted=fit.regions.find(r=>r.role==='primary')!,compact=fitted.width<SCENE_COMPACT_WIDTH;
   element.dataset.compact=String(compact);
+  if(foreground){
+   const parent=(options.shell||element).getBoundingClientRect(),scene=element.getBoundingClientRect();
+   foreground.layout({...fit.image,x:fit.image.x+scene.left-parent.left,y:fit.image.y+scene.top-parent.top},!compact);
+  }
   const primary=compact?{...fitted,x:16,y:84,width:width-32,height:Math.max(160,height*.75-84)}:fitted;
   for(const [index,region] of regions.entries()){region.element.hidden=compact&&region.role!=='primary';place(region.element,region.role==='primary'?primary:fit.regions[index]);}
   const round=(r:{x:number;y:number;width:number;height:number})=>({x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)});
@@ -93,7 +98,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
     profile:{top:samples(profile.top),right:samples(profile.right),bottom:samples(profile.bottom),left:samples(profile.left)}};
   },
   destroy(){
-   resize.disconnect();element.remove();const shell=options.shell;if(!shell||shell.dataset.appletScene!==key)return;
+   resize.disconnect();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shell.dataset.appletScene!==key)return;
    delete shell.dataset.appletScene;delete shell.dataset.appletFrame;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
    for(const part of ['primary','companion'])for(const side of ['left','top','width','height'])shell.style.removeProperty(`--applet-scene-${part}-${side}`);
   }};

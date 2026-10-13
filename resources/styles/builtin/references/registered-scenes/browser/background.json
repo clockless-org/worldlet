@@ -3,7 +3,53 @@
   "title": "Browser",
   "collection": "core",
   "generator": "built-in imagegen",
-  "purpose": "Registered runtime background",
+  "purpose": "Registered production background and extracted alpha foreground; enlarged usable opening",
   "prompt": "Village Browser in a sunlit conservatory with a large empty ivory screen and dark teal brass-trimmed frame. Browser identity comes from functional instruments on the right: a geographical globe in a substantial Chrome-inspired red, green and yellow enamel cradle, plus an open brass compass with a Safari-inspired blue dial and red-white needle resting on books. Preserve screen geometry and companion clearance. No separate logo plaques, text or baked-in UI.",
-  "registrationKey": "browser"
+  "registrationKey": "browser",
+  "refinements": [
+    "Use case: precise-object-edit. Input image is the existing Worldlet Village Browser production background; preserve its 16:9 canvas and original painted storybook country-village style. Enlarge ONLY THE HEIGHT of its main blank interactive surface. Keep original horizontal position and width (inner left 5.6%, inner right 71.8% of canvas). Target a clean continuous front-facing inner content surface running from y=14% to y=94%, about80% canvas HEIGHT. Extend it downward into formerly wasted floor/foreground and if necessary raise the top frame; keep all material edges, wood frames, metal clips OUTSIDE the empty usable surface. No dividers across the main surface.  Keep right-hand activity props, secondary displays, scenery, logo identity if present, companion space and their original sizes and positions. No stretching the whole scene; actually redesign the taller functional object so proportions and textures look natural. Blank paper/cloth/board texture is quiet and uniform enough for real HTML. Preserve any existing secondary surface outside the main panel. Do NOT widen the panel to80%: original WIDTH stays unchanged. Do NOT paint text, dates, controls, numbers, mock UI, people or new emblems. Rich detailed right-hand village scene remains unchanged. One finished background plate only.",
+    "Edit this browser village scene: enlarge its empty left page by extending the RIGHT EDGE 120 pixels farther right and BOTTOM EDGE 65 pixels down. Leave left and top edges in place. Target blank interior x=3..74 percent, y=10..94 percent. Preserve original thin rim and app-specific scenery, relocate right props just enough. No additional inner mat. No UI or text. Same image size and style."
+  ],
+  "registration": {
+    "imageSize": [
+      1671,
+      941
+    ],
+    "regions": [
+      {
+        "id": "main",
+        "role": "primary",
+        "rect": [
+          0.041891,
+          0.119022,
+          0.707361,
+          0.756642
+        ],
+        "material": "screen"
+      }
+    ],
+    "companion": [
+      0.761252,
+      0.55,
+      0.228748,
+      0.43
+    ],
+    "webFrame": {
+      "mask": "assets/applet-scenes/browser/frame-mask.png",
+      "source": [
+        0.004074,
+        0,
+        0.988946,
+        0.999702
+      ],
+      "target": [
+        0,
+        0.022452,
+        1,
+        0.977548
+      ]
+    }
+  },
+  "frameSource": "browser/frame-mask.png",
+  "framePrompt": "Extract only the complete outer frame of the large LEFT content board from this source. Preserve exact full-canvas position, original width/height, thin inner paper lip, rails and hardware. All blank interior becomes genuine ALPHA transparency. All outside scenery and right-side objects removed to alpha transparency. No crop, no recentering, no new decorations. Same canvas size."
 }

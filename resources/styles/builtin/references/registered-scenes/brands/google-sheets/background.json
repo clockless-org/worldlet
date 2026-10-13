@@ -3,7 +3,7 @@
   "title": "Google Sheets",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "purpose": "Registered production background and extracted alpha foreground; enlarged usable opening",
   "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Google Sheets, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A village farm bookkeeping station overlooking vegetable rows, green ledgers, an abacus and a green spreadsheet-page insignia on the cabinet.\nLEFT: A large blank cream ledger page in a green linen folio, no grid painted. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Google Sheets\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
   "refinement": "Use case: precise-object-edit. Edit the reference existing Worldlet Village Google Sheets background plate. Preserve the landscape16:9 canvas, original horizontal layout, original stylized painterly storybook village art, materials, palette and identity. Only make the MAIN BLANK INTERACTIVE SURFACE TALLER. Keep its original left and right edges exactly at the existing positions shown in the reference. Extend its inner usable blank surface vertically from y14% to y94%, approximately80% of HEIGHT, replacing wasted floor/foreground below it. Thin original material frame outside these bounds. It must remain front-facing, rectangular, uninterrupted and physically convincing as the original type of object, whether paper, board, cloth or screen. Rebuild the taller object naturally; do not distort the whole image. No widening to80%: width MUST remain as before (roughly left half or left three-fifths according to reference). Keep all right-side Google Sheets-specific props, existing recognizable branding/logos, secondary surfaces, village architecture, lighting and the companion space in their original horizontal positions. Preserve rich app-specific right scene. Blank main interior has subtle uniform texture only, no shadows or objects crossing it, NO baked interface, letters, numbers, controls, decorative drawings or sample content. Any necessary top binding and lower support move outside the 80%-high usable interior. Single finished production background only.",
   "registration": {
@@ -16,19 +16,39 @@
         "id": "main",
         "role": "primary",
         "rect": [
-          0.121411,
-          0.146652,
-          0.454545,
-          0.761955
+          0.022727,
+          0.095643,
+          0.677632,
+          0.828905
         ],
         "material": "paper"
       }
     ],
     "companion": [
-      0.72,
-      0.62,
-      0.25,
-      0.34
-    ]
-  }
+      0.75,
+      0.55,
+      0.24,
+      0.43
+    ],
+    "webFrame": {
+      "mask": "assets/applet-scenes/google-sheets/frame-mask.png",
+      "source": [
+        0.002436,
+        0,
+        0.997564,
+        0.983958
+      ],
+      "target": [
+        0,
+        0.014769,
+        0.999338,
+        0.985231
+      ]
+    }
+  },
+  "refinements": [
+    "Expand usable surface to approximately 70% width and 80% height, retain characteristic brand scene; remove baked-in companions."
+  ],
+  "frameSource": "brands/google-sheets/frame-mask.png",
+  "framePrompt": "Extract the left frame as a transparent foreground from this exact scene. Match original full 1672x941 canvas and EXACT original frame position, scale and shape. Retain only its wood/brass rim and narrow irregular paper lip with at most a few pixels of inner overlap. Make the entire paper opening true alpha transparency. Make all exterior scenery alpha transparency as well. No interior foliage extending into the usable rectangle; remove leaves crossing more than 5 pixels into the opening. No paper backing, no visible checkerboard, no new scenery. Do not recenter or resize."
 }

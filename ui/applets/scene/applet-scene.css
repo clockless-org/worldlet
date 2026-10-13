@@ -4,6 +4,8 @@
 .applet-scene{position:absolute;inset:0;overflow:hidden;pointer-events:none;isolation:isolate}
 .applet-scene-margin{position:absolute;inset:-48px;background-size:cover;background-position:center;filter:blur(28px) saturate(.9) brightness(.9);pointer-events:none}
 .applet-scene-plate{position:absolute;display:block;max-width:none;user-select:none;pointer-events:none}
+.applet-scene-foreground{z-index:35;pointer-events:none;user-select:none}
+.applet-scene-foreground[hidden]{display:none}
 .applet-scene-region{position:absolute;box-sizing:border-box;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;container-type:size;
  display:flex;flex-direction:column;gap:clamp(6px,2cqh,14px);padding:clamp(8px,3cqh,24px) clamp(10px,3cqi,30px);pointer-events:auto;
  color:var(--scene-ink);background:var(--scene-fill);border-radius:var(--scene-radius);font:400 clamp(13px,2.6cqi,var(--scene-body-size))/1.45 var(--scene-body-font)}
@@ -79,13 +81,18 @@
  #notionWorld.native-console[data-applet-frame][data-applet-scene]{--reader-companion-lane:calc(100% - var(--applet-scene-companion-left))}
  #notionWorld.native-console[data-applet-frame][data-applet-scene] .notion-hud{
   left:calc(var(--applet-scene-companion-left) + var(--applet-scene-companion-width) / 2);
-  width:calc(var(--applet-scene-companion-width) - 24px);transform:translateX(-50%);
+  width:calc(var(--applet-scene-companion-width) - 8px);transform:translateX(-50%);
  }
  #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-dialogue{
   width:min(460px,calc(var(--applet-scene-companion-width) - 24px));
   max-width:calc(var(--applet-scene-companion-width) - 24px);min-width:0;
  }
  #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-action-bar{min-width:0}
+}
+/* In the smaller companion lane, stack the icon over the label instead of truncating it. */
+@media(min-width:801px) and (max-width:1400px){
+ #notionWorld.native-console.radial-pet-console[data-applet-frame] .world-actions .world-capsule{flex-direction:column;gap:3px;padding:6px 4px;margin:0 4px;max-width:calc(100% - 8px);font-size:11px;min-height:48px}
+ #notionWorld.native-console.radial-pet-console[data-applet-frame] .world-actions .world-capsule>span{flex-shrink:0}
 }
 
 /* The shelf's active label ends at 127px; a framed page only needs a small clearance beneath it. */

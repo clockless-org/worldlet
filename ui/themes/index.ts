@@ -17,3 +17,4 @@ export * from './build-theme-contract.ts';
 export {activeBuildTheme,themeArtifact,themeAssetURL,themeData,themeAppletIcon,themeAppletPresets,themeAppletScene,themeSceneMaterial,BUILD_THEMES,DEFAULT_BUILD_THEME_ID,type InstalledTheme,type ThemePackage} from './build-theme.ts';
 
 export {fitThemeScene} from './scene-registration.ts';
+export {mountSceneFrame} from './scene-frame.ts';

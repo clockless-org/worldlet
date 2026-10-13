@@ -78,6 +78,22 @@ try{
  assert.equal(plain.painted,false);assert.equal(await page.locator('.applet-scene-plate').count(),0);assert.equal((await measure()).letters,1);
  await page.evaluate(()=>(window as any).scene.destroy());
  assert.equal(await page.evaluate(()=>document.getElementById('shell')!.style.cssText),'position: fixed; inset: 0px;','destroy leaves the shell as it was');
+ // The HTML foreground uses only mask alpha, never the extractor's repaint, and cannot intercept controls.
+ await page.evaluate(()=>{
+  const make=(mask:boolean)=>{const c=document.createElement('canvas');c.width=100;c.height=100;const g=c.getContext('2d')!;g.fillStyle=mask?'#ff0000':'#2468ac';g.fillRect(0,0,100,100);if(mask)g.clearRect(10,10,80,80);return c.toDataURL();};
+  const w=window as any,host=document.getElementById('host')!;host.innerHTML='<button id="edge-control" style="position:absolute;left:20px;top:30px">Press</button>';
+  host.querySelector('button')!.addEventListener('click',e=>(e.target as HTMLElement).textContent='Pressed');
+  w.frame=w.Scene.mountSceneFrame(host,make(false),{webFrame:{mask:make(true),source:[0,0,1,1],target:[0,0,1,1]}});
+  w.frame.layout({x:20,y:30,width:400,height:300});
+ });
+ await page.locator('.applet-scene-foreground[data-ready=true]').waitFor();
+ const pixels=await page.evaluate(()=>{const c=document.querySelector<HTMLCanvasElement>('.applet-scene-foreground')!,g=c.getContext('2d')!,d=devicePixelRatio;const at=(x:number,y:number)=>[...g.getImageData(x*d,y*d,1,1).data];return {rim:at(25,35),opening:at(200,150),outside:at(5,5)};});
+ assert.deepEqual(pixels.rim,[36,104,172,255],'Foreground samples original background RGB');
+ assert.equal(pixels.opening[3],0,'Opening leaves live HTML visible');assert.equal(pixels.outside[3],0,'Outside frame remains transparent');
+ await page.locator('#edge-control').click();assert.equal(await page.locator('#edge-control').innerText(),'Pressed','Foreground passes clicks to edge controls');
+ await page.evaluate(()=>(window as any).frame.layout({x:20,y:30,width:400,height:300},false));
+ assert.equal(await page.locator('.applet-scene-foreground').isVisible(),false,'Compact scene can suppress its foreground');
+ await page.evaluate(()=>(window as any).frame.destroy());assert.equal(await page.locator('.applet-scene-foreground').count(),0,'No foreground left after teardown');
  assert.deepEqual(errors,[]);
  console.log('PASS Applet scene: theme painting at one scale, measured regions, theme materials, plain fallback, Mail unchanged across scenes.');
 }finally{await browser.close();}

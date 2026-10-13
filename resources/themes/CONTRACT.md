@@ -99,7 +99,7 @@ Extract the foreground from the final background during scene production, not as
 
 The live page should extend just under the inner rim, with no additional matte, rounded inset, padding or CSS border between it and the painted frame. Preserve the irregular paper edge as a thin overlap; it must not hide controls or reduce the approximately 70% width / 80% height usable-area targets above. The transparent asset is decorative and must never capture pointer, keyboard or accessibility focus. Release it when leaving the scene or entering the compact fallback.
 
-`webFrame` remains optional in the schema for existing scenes and intentionally frameless themes. Its presence declares a working foreground, not an unfinished placeholder. Import checks that the registered mask crop contains both a fully transparent opening and an opaque rim; visual review still establishes their correct shape and alignment. Existing art is migrated scene by scene; this standard does not imply that all bundled scenes already include masks. See the [production workflow](../styles/builtin/references/registered-scenes/README.md#frame-production-workflow).
+`webFrame` remains optional in the schema for existing scenes and intentionally frameless themes. Its presence declares a working foreground, not an unfinished placeholder. Import checks that the registered mask crop contains both a fully transparent opening and an opaque rim; visual review still establishes their correct shape and alignment. The bundled Village library supplies masks for all 140 core, generic and branded selections; other themes may intentionally remain frameless. See the [production workflow](../styles/builtin/references/registered-scenes/README.md#frame-production-workflow).
 
 ### Artifacts
 

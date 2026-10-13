@@ -186,7 +186,7 @@ try{
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='first-value'));
   await page.waitForFunction(()=>/I picked this one for you/.test(document.querySelector('#companionDialogue')?.textContent||''),null,{timeout:20000});
-  assert.equal(await page.locator('#companionDialogue strong').allInnerTexts().then(t=>t.join('|')),'Reply to Sam','only the item is bold');
+  assert.equal(await page.locator('#companionDialogue strong:visible').allInnerTexts().then(t=>t.join('|')),'Reply to Sam','only the item is bold');
   assert.equal(await page.getByRole('button',{name:'Show me',exact:true}).count(),1,'Fox offers Show me, not Do it for me');
   const row=page.locator('.world-matter[data-world-item-id="tour-item"]');
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourSpotlight==='true',null,{timeout:10000});

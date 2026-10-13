@@ -3,7 +3,7 @@
   "title": "Sekai",
   "collection": "branded",
   "generator": "built-in imagegen",
-  "purpose": "Registered production background; original horizontal layout, taller clear content surface",
+  "purpose": "Registered production background and extracted alpha foreground; enlarged usable opening",
   "prompt": "Use case: stylized-concept. Create ONE production Worldlet Village Applet BACKGROUND PLATE for Sekai, landscape 16:9.\nREFERENCE 1: existing focus background, use its rich purposeful RIGHT-HAND furniture, layered props, atmosphere and meaningful branded objects. REFERENCE 2: existing icon, preserve its recognisable identity/colors but no icon pedestal needed. REFERENCE 3: Village calendar background, match its polished storybook sculpted 3D village aesthetic and usable front-facing surface, NOT photographic realism.\nSetting: A magical village game fair with star-shaped lanterns, colorful game boxes and a shooting-star Sekai emblem on an actual booth canopy.\nLEFT: A large blank cream selection board in purple and warm oak. integrated physically into setting. Large front-facing nearly rectangular blank usable area x5–65%, y14–81%, subtle light ivory material, unobstructed and no printed UI. Frame mounted plausibly on wall/desk/easel; correct contact shadows. No forced perspective across usable surface.\nRIGHT x69–100%: create a rich lived-in functional vignette, as engaging and detailed as reference1. Furnishings, task-related instruments, layered shelves, plants, small textiles, foreground and background depth; objects tell what this app does. Recognizable brand mark on a real useful object plus a modest \"Sekai\" label; NOT an enormous billboard, giant floating logo, or generic sign. Use varied functions/materials and actual setting, not another bridge/mountains scene. Keep only a small companion landing patch near lower right, not a whole empty half.\nWarm daylight, cream stone, tactile timber/brass/ceramic, coherent lighting, soft stylized shapes, saturated but tasteful greenery. Rich exterior or interior as setting dictates. Blank LEFT content surface must dominate usable area while RIGHT remains visually rich. No people, no companion character, no UI overlay, no watermarks. No dynamic sample content yet.",
   "refinement": "Use case: precise-object-edit. Edit existing Worldlet Village Sekai blank background. Preserve exact landscape aspect ratio, the ORIGINAL WIDTH and horizontal position of the LEFT functional paper/board/screen, original village painterly sculpted style, and ALL RIGHT-HAND brand-specific objects, recognizable Sekai identity and companion area. CHANGE ONLY HEIGHT AND CLEARANCE of the left content object. The inner blank surface must now extend almost the FULL HEIGHT of the picture: its TOP at8% and its BOTTOM at96% of canvas. Put the bottom frame at98% canvas height, nearly touching the bottom image edge. Replace ALL floor, rugs, counters, legs and foreground objects UNDER THE LEFT BOARD with blank paper down to96%. The entire left board's interior must be uninterrupted from top to bottom, absolutely no flowers, foliage, furniture, clips, props, dividers or shadows crossing inside it; move such overlaps OUTSIDE the main panel. Keep thin original-colored physical border outside. Remain front-facing rectangular so a real website or HTML can occupy most of its height. VERY IMPORTANT do not leave a large strip of floor below the board. Bottom frame nearly touches bottom image edge. This is roughly80% USABLE HEIGHT once the host toolbar and inner safety margin are allowed for. Do NOT widen it to80% width. Keep the exact original left and right board edges and right scene width. Rich right-hand scenery unchanged. Quiet subtle material texture in the blank surface, no text, numbers, controls, UI, data, characters or new logos. Only one finished background plate.",
   "registration": {
@@ -16,19 +16,41 @@
         "id": "main",
         "role": "primary",
         "rect": [
-          0.072368,
-          0.165781,
-          0.520335,
-          0.768332
+          0.023923,
+          0.11796,
+          0.687799,
+          0.782147
         ],
         "material": "paper"
       }
     ],
     "companion": [
-      0.72,
-      0.62,
-      0.25,
-      0.34
-    ]
-  }
+      0.75,
+      0.55,
+      0.24,
+      0.43
+    ],
+    "webFrame": {
+      "mask": "assets/applet-scenes/sekai/frame-mask.png",
+      "source": [
+        0.002527,
+        0.000332,
+        0.994755,
+        0.99726
+      ],
+      "target": [
+        0,
+        0,
+        1,
+        1
+      ]
+    }
+  },
+  "refinements": [
+    "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion.",
+    "Enlarge the blank paper opening of this scene. Its usable width is too small and/or height too small. Keep full 1672x941 canvas, make the blank paper itself occupy x=40 through x=1240 (1200 pixels wide) and y=95 through y=865 (770 pixels tall). Thin original-material frame outside this opening. Recompose the existing recognizable scenery to its right in the remaining 25%. Retain original app identity, brand cues where present, daylight, village illustration style and materials. The blank opening must be one uninterrupted frontal rectangle, not narrowed by decorative margins. Keep any small auxiliary plaque fully on the right x>1300. No content/text in the main paper. No fox or living animals. Do not shrink back the frame to fit decorative props.",
+    "Edit this village applet scene, preserving its exact artistic style, brand identity, frame material and all right-side functional scenery. Enlarge the LEFT blank paper opening to 70% of the total canvas width and 82% of total canvas height. Opening from x=2% to x=73%, y=10% to y=94%. A thin rim around it, no thick mat. Full original landscape canvas 1672x941. Move/recompose the right scenery into x=76%..100%; do not leave a large wasted bottom strip. Front-facing rectangular opening, uninterrupted blank paper, ready for a real webpage. No content/UI/text inside the opening. No fox/animals. Do not leave original narrow frame dimensions: the central usable paper itself MUST take 71% width. Retain recognizable existing logos and props naturally in the village on the right."
+  ],
+  "frameSource": "brands/sekai/frame-mask.png",
+  "framePrompt": "Extract the left frame as a transparent foreground from this exact scene. Match original full 1672x941 canvas and EXACT original frame position, scale and shape. Retain only its wood/brass rim and narrow irregular paper lip with at most a few pixels of inner overlap. Make the entire paper opening true alpha transparency. Make all exterior scenery alpha transparency as well. No interior foliage extending into the usable rectangle. No paper backing, no visible checkerboard, no new scenery. Do not recenter or resize."
 }

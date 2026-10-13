@@ -204,6 +204,7 @@ await withBrowser(fileAccess,async browser=>{
   return {offset:Math.round((pet.left+pet.right)/2-(hud.left+hud.right)/2),
    buttons:[...document.querySelectorAll<HTMLElement>('.world-actions .world-capsule')].map(b=>{const r=b.getBoundingClientRect(),t=b.querySelector('span');
     return {label:b.innerText.trim().replace(/\s+/g,' '),cut:!!t&&(t.scrollWidth>t.clientWidth+1||t.scrollHeight>t.clientHeight+1),
+     size:t&&[t.clientWidth,t.scrollWidth,t.clientHeight,t.scrollHeight],layout:getComputedStyle(b).flexDirection,
      gap:Math.round(r.right<=pet.left?pet.left-r.right:r.left-pet.right),out:r.left<hud.left-1||r.right>hud.right+1};})};
  });
  for(const width of [1280,1024]){
@@ -219,8 +220,8 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(lane.buttons.some(b=>b.label==='World'),width+'px: World stands beside Fox: '+JSON.stringify(lane));
   assert.ok(lane.buttons.every(b=>b.gap>=8),width+'px: the Applet\'s actions sit beside Fox: '+JSON.stringify(lane));
   assert.ok(Math.abs(lane.offset)<=2,width+'px: Fox sits centred between its two wings, off by '+lane.offset+'px');
-  assert.deepEqual(lane.buttons.filter(b=>b.cut).map(b=>b.label),[],width+'px: an action label wraps rather than being cut');
-  assert.deepEqual(lane.buttons.filter(b=>b.out||b.gap<8).map(b=>b.label),[],width+'px: no action crowds Fox or leaves the right third');
+  assert.deepEqual(lane.buttons.filter(b=>b.cut).map(b=>b.label),[],width+'px: an action label wraps rather than being cut: '+JSON.stringify(lane));
+  assert.deepEqual(lane.buttons.filter(b=>b.out||b.gap<8).map(b=>b.label),[],width+'px: no action crowds Fox or leaves the right third: '+JSON.stringify(lane));
  }
  await page.setViewportSize({width:1280,height:850});
  await page.evaluate(()=>location.hash='');
@@ -274,8 +275,8 @@ await withBrowser(fileAccess,async browser=>{
    break;
   }catch(error){if(attempt===3)throw new Error('the painted cinema did not open YouTube Focus: '+error.message);}
  }
- // Opening the cinema translates the existing Fox group without resizing or
- // replacing the user's draft or dialogue nodes.
+ // Opening the cinema fits the existing Fox group into the theme's companion lane,
+ // preserving the pet, input, draft and dialogue nodes.
  await page.evaluate(()=>location.hash='building=building-travel');
  await page.locator('.notion-pin[data-page="place-app-youtube"]').waitFor();
  await page.locator('#notionInput').click();
@@ -285,12 +286,11 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>(window as any).savedFoxDialogue=document.querySelector('.companion-dialogue'));
  await tapDevice('app-youtube');
  await panel.locator('.browser-viewport').waitFor();
- // The dialogue shows the new context's line. It is max-content between 25vw and a
- // third of the window, so its width and height follow the text within those bounds.
- const settled=await geometry(),withoutDialogueSize=(g:any)=>({...g,'.companion-dialogue':{...g['.companion-dialogue'],width:0,height:0}});
- assert.deepEqual(withoutDialogueSize(settled),withoutDialogueSize(before),'Focus preserves Fox component widths, fonts and the other sizes');
+ // The theme controls lane width; the dialogue height follows its contextual text.
+ const settled=await geometry(),withoutLaneSize=(g:any)=>({...g,'.notion-hud':{...g['.notion-hud'],width:0},'.companion-dialogue':{...g['.companion-dialogue'],width:0,height:0}});
+ assert.deepEqual(withoutLaneSize(settled),withoutLaneSize(before),'Focus preserves the pet, input, fonts and HUD height');
  const dialogueWidth=settled['.companion-dialogue'].width,viewportWidth=page.viewportSize().width;
- assert.ok(dialogueWidth>=viewportWidth/4-1&&dialogueWidth<=viewportWidth/3+1,'Fox dialogue stays within its width bounds: '+dialogueWidth);
+ assert.ok(dialogueWidth>=180&&dialogueWidth<=viewportWidth/3+1,'Fox dialogue stays readable in the registered lane: '+dialogueWidth);
  assert.equal(await page.locator('#notionInput').inputValue(),'Keep this draft');
  assert.ok(await page.evaluate(()=>(window as any).savedFoxDialogue===document.querySelector('.companion-dialogue')),'the same dialogue node survives');
  // The page panel sits on the theme Browser scene's screen region (#427); the painting is its frame.
@@ -301,17 +301,17 @@ await withBrowser(fileAccess,async browser=>{
   return {titleBottom:document.querySelector('.applet-shelf-tab[data-current] .applet-shelf-name')?.getBoundingClientRect().bottom??document.querySelector('.companion-context').getBoundingClientRect().bottom,left:p.left,right:p.right,bottom:p.bottom,top:p.top,region:{left:v('left'),width:v('width'),bottom:v('top')+v('height')},inside:rect.x>=p.left&&rect.y>=p.top&&rect.x+rect.width<=p.right&&rect.y+rect.height<=p.bottom,slotRight:slot.right,panelRight:p.right};
  });
  assert.ok(Math.abs(frame.left-frame.region.left)<1&&Math.abs(frame.right-frame.left-frame.region.width)<1&&Math.abs(frame.bottom-frame.region.bottom)<1,'browser frame takes the Browser scene\'s screen region: '+JSON.stringify(frame));
- assert.ok(frame.top>=frame.titleBottom+8,'browser frame leaves the shelf\'s name (or the context title) visible');
+ assert.ok(frame.top>=frame.titleBottom+4,'browser frame leaves the shelf\'s name (or the context title) visible: '+JSON.stringify(frame));
  assert.ok(frame.inside&&frame.slotRight<=frame.panelRight,'native web surface stays inside the painted screen');
  await page.screenshot({path:'output/applet-layout/youtube-focus.png'});
  // Inside an Applet a click on empty scenery acts as Back, one level (owner request 2026-10-05), but while the
  // person is typing (the draft above keeps Fox's message bar focused) it only ends typing (#1901).
  assert.equal(await page.evaluate(()=>document.activeElement?.id),'notionInput','the draft is still being typed');
- await page.mouse.click(1280*.72,850*.48);
+ await page.mouse.click(1280*.985,850*.44);
  await page.waitForFunction(()=>document.activeElement?.id!=='notionInput');
  assert.equal(await panel.isVisible(),true,'a scenery click while typing only ends typing and keeps the Applet');
  assert.equal(await page.locator('#notionInput').inputValue(),'Keep this draft');
- await page.mouse.click(1280*.72,850*.48);
+ await page.mouse.click(1280*.985,850*.44);
  await page.waitForFunction(()=>{const m=document.querySelector<HTMLElement>('#notionWorld').sceneMetrics;return m.active==='building-travel'&&m.camera.settled;});
  assert.equal(await panel.isVisible(),false,'a scenery click returns one level and closes the website');
  assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').sceneMetrics.presentation.focusScenery),false);

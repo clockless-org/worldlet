@@ -2,15 +2,15 @@
 
 [View image-generated backgrounds and effects for all 140 selections](CONCEPTS.md). Current registered backgrounds are paired with earlier image-generated concepts; the concepts retain their original proportions.
 
-| Collection | Asset groups | Registered HTML surfaces | Existing art awaiting registration |
+| Collection | Asset groups | Registered HTML surfaces | Transparent foregrounds |
 | --- | ---: | ---: | ---: |
-| Core everyday applications | 18 | 🟢 18 | 0 |
-| Individual games: five fixed games + Random | 6 | 🟢 6 | 0 |
-| Generic scenes | 16 | 🟢 16 | 0 |
-| Brand-specific products and external games | 100 | 🟢 100 | 0 |
-| Total art selections | **140** | **140** | **0** |
+| Core everyday applications | 18 | 🟢 18 | 🟢 18 |
+| Individual games: five fixed games + Random | 6 | 🟢 6 | 🟢 6 |
+| Generic scenes | 16 | 🟢 16 | 🟢 16 |
+| Brand-specific products and external games | 100 | 🟢 100 | 🟢 100 |
+| Total art selections | **140** | **140** | **140** |
 
-Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. All 140 backgrounds now have measured primary regions. Their original horizontal compositions are retained while the content surfaces extend vertically toward 80% of the canvas height. Safe insets vary with bindings and frames. Website Applets open the original site in the isolated native browser surface; the four core paper Applets retain their interactive HTML. Artwork availability does not imply account integration. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
+Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. All 140 backgrounds now have measured primary regions. Each scene includes an extracted alpha foreground and a remeasured opening targeting about 70% width and 80% height. The original painting supplies the foreground colours; the extracted image supplies only alpha, avoiding repaint seams. Bindings and organic paper edges overlap the live content by a few pixels. Website Applets open the original site in the isolated native browser surface; the four core paper Applets retain their interactive HTML. Artwork availability does not imply account integration. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
 
 ## Core applications and games
 
@@ -121,7 +121,7 @@ If the toolkit expands later, Contacts and Photos have official local-data APIs 
 
 ## Design and integration
 
-For new and revised desktop scenes, target a live content area about **70% of the viewport width and 80% of its height**, after navigation and frame insets. Reserve the remaining right side for the actual Fox and conversation placement; review them together so neither the Applet nor companion leaves an unusable gap. These are the current [usable-area design targets](../../../../themes/CONTRACT.md#registered-backgrounds-and-live-html), not a claim that every existing scene already meets them.
+For new and revised desktop scenes, target a live content area about **70% of the viewport width and 80% of its height**, after navigation and frame insets. Reserve the remaining right side for the actual Fox and conversation placement; review them together so neither the Applet nor companion leaves an unusable gap. These are the [usable-area design targets](../../../../themes/CONTRACT.md#registered-backgrounds-and-live-html); individual openings follow their measured artwork, and narrower windows use the readable fallback.
 
 Match the Village world and each existing icon's recognizable objects, palette and materials. The icon's display base stays in the icon; the background expands those objects into a functional place. Brand-specific scenes must integrate recognizable product identity meaningfully, without sacrificing usable space. Vary the environment by activity: orchard, kitchen, trail, greenhouse, library, guildhall or workshop.
 
@@ -143,11 +143,11 @@ Use the [background + foreground contract](../../../../themes/CONTRACT.md#backgr
 
 Suggested extraction instruction: “Extract only this finished scene's physical frame, attachments and 1–3 pixel irregular inner paper lip. Keep its exact full-canvas alignment and silhouette. Make the entire content opening and all surrounding scenery truly transparent. No replacement white fill, checkerboard, new decorations, text or changed perspective.” Inspect the result: prompt wording is not proof of transparency or alignment.
 
-The production examples are [X](brands/x/frame-cutout.md) and [Pokémon Showdown](brands/pokemon-showdown/frame-cutout.md). The host reads their registrations through the shared renderer; adding another web frame requires theme assets and coordinates, not an Applet-specific code branch. Other scenes remain eligible for migration and must not be marked frame-complete until their mask and composed preview are checked.
+The production examples are [X](brands/x/frame-cutout.md) and [Pokémon Showdown](brands/pokemon-showdown/frame-cutout.md). The host reads their registrations through the shared renderer; adding another web frame requires theme assets and coordinates, not an Applet-specific code branch. All 140 Village selections now declare a foreground. The same registration covers local HTML, games and isolated websites. Reusable generic presets carry the mask with their background and icon.
 
 ## Design mockups and preview
 
-[View all 40 app-specific design mockups](mockups/README.md): 18 applications, six games and 16 generic scenes. Each combines the original background with HTML inside its measured regions. Files, albums, reading layouts, plans, charts and game boards use their own content structures. These are illustrative compositions with fictional data, not completed application implementations.
+[View all 40 app-specific design mockups](mockups/README.md): 18 applications, six games and 16 generic scenes. Each combines the registered background, HTML and transparent foreground. The preview also provides 100 branded website fit samples with a light/dark toggle; the desktop app continues to load the original sites. Files, albums, reading layouts, plans, charts and game boards use their own content structures. These are illustrative compositions with fictional data, not completed application implementations.
 
 ```sh
 node scripts/applet-scene-preview.ts

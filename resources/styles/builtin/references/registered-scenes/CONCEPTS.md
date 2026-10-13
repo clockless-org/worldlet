@@ -8,7 +8,7 @@ These raster design studies establish the visual target. They are not HTML scree
 | Generic scenes | 16/16 | 16/16 | 🟡 Design study |
 | Branded applications and games | 100/100 | 100/100 | 🟡 Design study |
 
-Each pair shows the current registered background followed by an earlier image-generated effect. The effects retain their original proportions and are visual references, not screenshots of the current runtime. Backgrounds reserve approximately 80% canvas height for content while preserving their original horizontal layout. Website Applets use their original sites in the host browser surface.
+Each pair shows the current registered background followed by an earlier image-generated effect. The effects retain their original proportions and are visual references, not screenshots of the current runtime. Current backgrounds target approximately 70% width and 80% height for content, with extracted transparent foregrounds covering the inner seams. Website Applets use their original sites in the host browser surface.
 
 Build the searchable local gallery with `node scripts/applet-concept-gallery.ts --complete`, serve the repository root and open `/output/applet-concept-gallery/`. Rebuild this document and the hash manifest with `--write-docs`.
 
