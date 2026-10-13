@@ -1,6 +1,6 @@
 // Moving between the World, an area and an Applet zooms (owner Order 2026-10-07, ui/world/level-zoom.ts): entering an
-// Applet zooms in from where it was opened, leaving it zooms back out, Back from an Applet opened in an area panel returns
-// to that panel, and the panel's close zooms out to the World. The move itself is never delayed, the zoom takes no
+// Applet zooms in from where it was opened, leaving it zooms back out, Back from an Applet opened in an Area returns
+// to that Area, and Esc leaves it for the World. The move itself is never delayed, the zoom takes no
 // clicks, moving between two Applets does not zoom, and nothing zooms under reduced motion.
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
@@ -56,29 +56,21 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal((await veils()).at(-1)?.direction,'out','leaving an Applet zooms out');
  await zoomed(start+2,'out','Leaving an Applet');
 
- // An area panel, opened with Manage from inside the Area (owner request 2026-10-13): its Applet zooms in from the panel's
- // row, Back zooms out to the same panel, and closing the panel zooms the World's camera back out.
- const shelf=page.locator('.region-shelf'),areaView=page.locator('.area-view');
+ // An Area (owner requests 2026-10-13): its Applet zooms in from the Area's grid, Back zooms out to the same Area, and Esc
+ // leaves it for the World.
+ const areaView=page.locator('.area-view');
  await page.locator('.notion-pin[data-page="building-home"][data-action="region-more"]').click();
- await areaView.locator('.area-view-manage').click();
- await shelf.waitFor();
- await page.waitForFunction(()=>{const c=(document.querySelector('#notionWorld') as any).sceneMetrics.camera;return c.settled&&!!c.area;});
- await shelf.locator('.region-shelf-applet[aria-label="Notes"]').click();
+ await areaView.waitFor();
+ await areaView.locator('.area-view-applet[aria-label="Notes"]').click();
  assert.equal((await metrics()).active,'app-apple-notes','the area\'s Applet opens');
- assert.equal(await shelf.count(),0,'the panel gives way to the Applet');
+ assert.equal(await areaView.count(),0,'the Area gives way to the Applet');
  await zoomed(start+3,'in','Opening an Applet from its area');
  await page.locator('#notionBack').click();
- await shelf.waitFor();
- assert.equal(await shelf.getByRole('heading',{level:2}).textContent(),'Home','Back returns to the area the Applet was opened from');
+ await areaView.waitFor();
+ assert.equal(await areaView.getAttribute('data-area'),'home','Back returns to the area the Applet was opened from');
  assert.equal((await metrics()).level,'overview');
  await zoomed(start+4,'out','Going back out to the area');
- await page.waitForFunction(()=>{const c=(document.querySelector('#notionWorld') as any).sceneMetrics.camera;return c.settled&&!!c.area;});
- // Esc folds Fox's open chat first (native-chat.ts), then closes the panel.
- for(let i=0;i<3&&await shelf.count();i++){await page.keyboard.press('Escape');await page.waitForTimeout(200);}
- await shelf.waitFor({state:'detached'});
- await page.waitForFunction(()=>{const c=(document.querySelector('#notionWorld') as any).sceneMetrics.camera;return c.settled&&!c.area;});
- // Back in the Area it was opened from; Esc again leaves it for the World.
- assert.equal(await areaView.getAttribute('data-area'),'home','closing the panel leaves the Area open');
+ // Esc folds Fox's open chat first (native-chat.ts), then leaves the Area.
  for(let i=0;i<3&&await areaView.count();i++){await page.keyboard.press('Escape');await page.waitForTimeout(200);}
  await areaView.waitFor({state:'detached'});
 
