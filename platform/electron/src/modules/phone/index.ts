@@ -67,7 +67,17 @@ export function installPhone(host:Host){
     message={type:'chat',id:message.id,text:[message.text,...paths].filter(Boolean).join('\n'),...message.item?{item:message.item}:message.applet?{applet:message.applet}:{}};
     if(!message.text)return true;
    }
-   if(!host.page.ready())return false;
+   // A line for Fox's main conversation while the World page is not there (a login launch set to run in background
+   // still loading it, a reload): Fox answers on the host alone (FoxService.converse), and the conversation slot
+   // carries the reply. Anything else waits for the page.
+   if(!host.page.ready()){
+    const fox=host.optional<FoxService>(FOX),scope=fox?.scope();
+    if(message.type!=='chat'||message.item||message.applet||!fox?.converse||!scope||scope.sample||scope.setup)return false;
+    lastActive=Date.now();
+    asked.set(askedKey(message.text),{at:Date.now()});
+    void fox.converse(message.text).then(finished,error=>host.diagnostics.record(error,'phoneConverse'));
+    return true;
+   }
    lastActive=Date.now();
    const taken=(await host.page.call<boolean>('worldletPhoneMessage',message,key))===true;
    // A line said on the phone: its reply is pushed if the phone is put away before Fox finishes.

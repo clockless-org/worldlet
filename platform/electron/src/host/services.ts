@@ -218,6 +218,9 @@ export interface FoxService {
   * that thread's history in the person's own world, shows in the Fox bar when the person is there, and reaches the
   * paired phone. False when there is no own world to say it in (setup, the practice world). */
  report?(line:string,thread:string):boolean;
+ /** A line said in a browser or on the phone while the World page is not there: it runs in Fox's main conversation
+  * on the host alone, after the running turn, and resolves with Fox's reply. */
+ converse?(text:string):Promise<{user:string,text:string}>;
 }
 export const FOX='fox';
 

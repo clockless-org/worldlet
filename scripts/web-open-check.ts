@@ -4,6 +4,7 @@
 // reaching the computer, the fragment leaving the address bar, a reload from storage, and the page ending with the link.
 import assert from 'node:assert/strict';
 import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {readFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -131,3 +132,15 @@ try{
 }finally{await browser.close();await rm(out,{recursive:true,force:true});}
 await assert.rejects(client.poll(),WebPairingEnded);
 console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, reload and turning the link off.');
+
+// A line said in the browser or on the phone while the World page is not there (core/phone/README.md#web, Fox without
+// the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
+{
+ const phone=readFileSync('platform/electron/src/modules/phone/index.ts','utf8'),fox=readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+ assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,300}message\.type!=='chat'\|\|message\.item\|\|message\.applet\|\|!fox\?\.converse[\s\S]{0,300}fox\.converse\(message\.text\)\.then\(finished/,'a main-conversation line without the page goes to Fox on the host, and its reply is pushed like any other');
+ assert.match(fox,/if\(!active\(\)\|\|!page\.ready\(\)&&!headless\.has\(id\)\)throw new Cancelled\(\)/,'a turn said without the page is not cancelled for want of it');
+ assert.match(fox,/if\(!page\.ready\(\)\)return tool\?NEEDS_WORLD:null;/,'its page-only steps say the window must be open');
+ assert.match(fox,/host\.onPageReload\(\(\)=>\{if\(agentTurn!==null&&!headless\.has\(agentTurn\)\)cancelCloud\(\)/,'a page reload leaves it running');
+ assert.match(fox,/report,converse\}\)/,'FoxService offers converse');
+ console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
+}
