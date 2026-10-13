@@ -6,7 +6,7 @@ import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
 import {LOCAL_HARNESSES,agentProfileApplets,agentProfileAsked,connectRequestPlan} from '../../core/agent/index.ts';
-import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,timingBucket} from '../../core/diagnostics/index.ts';
+import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,hermesSetupDimensions,timingBucket} from '../../core/diagnostics/index.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
 // Local Agent marks: Claude Code and Codex reuse their Applet logos; the rest ship in resources/brands.
@@ -39,10 +39,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
  // the person signs in to ChatGPT inside it with Hermes' own sign-in (`sign-in-hermes`), owner decisions 2026-10-09.
  // `hermesStep` is the installer's step being run; `hermesCode` the code Hermes' device page asks for, when it does.
- let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null;
+ let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null,hermesStepNo=0;
  const onHermesSetup=(event:Event)=>{
   const detail=(event as CustomEvent).detail;if(disposed||!detail)return;
-  if(detail.stage==='install'&&hermesSetup==='installing'&&Number.isInteger(detail.step)&&Number.isInteger(detail.steps)&&typeof detail.title==='string')hermesStep=t('Step {step} of {steps}: {title}').replace('{step}',String(detail.step)).replace('{steps}',String(detail.steps)).replace('{title}',detail.title.slice(0,80));
+  if(detail.stage==='install'&&hermesSetup==='installing'&&Number.isInteger(detail.step)&&Number.isInteger(detail.steps)&&typeof detail.title==='string')hermesStepNo=detail.step,hermesStep=t('Step {step} of {steps}: {title}').replace('{step}',String(detail.step)).replace('{steps}',String(detail.steps)).replace('{title}',detail.title.slice(0,80));
   else if(detail.stage==='sign-in'&&hermesSetup==='signing-in')hermesCode=typeof detail.code==='string'&&/^[A-Z0-9-]{4,20}$/.test(detail.code)?detail.code:null;
   else return;
   render();
@@ -298,15 +298,20 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  }
  /** Installs Hermes Agent the official way (to its default location; nothing when one is already here). */
  async function installHermes(){
-  hermesSetup='installing';hermesStep='';render();
+  hermesSetup='installing';hermesStep='';hermesStepNo=0;render();
+  // How far the install got, so a person stuck here shows up in the funnel (owner 2026-10-13: First open → Agent choice).
+  const started=performance.now();productEvent('hermes_setup_started',hermesSetupDimensions('install',0));
   try{await call('agentHarness',{operation:'install-hermes'});hermesSetup='installed';}
-  catch(e){hermesSetup='idle';throw e;}
+  catch(e){hermesSetup='idle';productEvent('hermes_setup_failed',hermesSetupDimensions('install',hermesStepNo,e),timingBucket(performance.now()-started));throw e;}
+  productEvent('hermes_setup_completed',hermesSetupDimensions('install',hermesStepNo),timingBucket(performance.now()-started));
  }
  /** ChatGPT signed in inside Hermes Agent, then Hermes moves in like any Agent found here. */
  async function signInHermes(){
   hermesSetup='signing-in';hermesCode=null;render();
+  const started=performance.now();productEvent('hermes_setup_started',hermesSetupDimensions('sign_in',0));
   try{await call('agentHarness',{operation:'sign-in-hermes'});}
-  catch(e){hermesSetup='installed';throw e;}
+  catch(e){hermesSetup='installed';productEvent('hermes_setup_failed',hermesSetupDimensions('sign_in',0,e),timingBucket(performance.now()-started));throw e;}
+  productEvent('hermes_setup_completed',hermesSetupDimensions('sign_in',0),timingBucket(performance.now()-started));
   hermesSetup='idle';
   await detectAgents();
   picked='hermes';
