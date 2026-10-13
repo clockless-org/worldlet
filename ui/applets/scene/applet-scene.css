@@ -93,3 +93,12 @@
  top:max(var(--applet-scene-primary-top),132px);
  height:calc(var(--applet-scene-primary-height) + var(--applet-scene-primary-top) - max(var(--applet-scene-primary-top),132px));
 }
+
+/* The extracted foreground is the only rim: the native rectangle reaches underneath it.
+   A second CSS mat, rounded corner or inset would expose an empty border around the website. */
+#notionWorld[data-applet-frame][data-applet-scene][data-panel-scene]>.notion-content[data-template=browser]{
+ --browser-pad:0px;padding:0;border-radius:0;background:transparent;box-shadow:none;
+}
+#notionWorld[data-applet-frame][data-applet-scene][data-panel-scene]>.notion-content[data-template=browser] .browser-viewport{
+ border-radius:0;box-shadow:none;
+}

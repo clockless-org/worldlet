@@ -471,8 +471,8 @@
   },
   "assets/applet-scenes/x/background.webp": {
     "source": "resources/styles/builtin/references/registered-scenes/brands/x/background.webp",
-    "sourceSha256": "6f0104dae2ae3c210929bf02d27d22bfedab872b75d1fb53ea049125a2031274",
-    "sha256": "66e20b2c7390fa063ddc3c6861e32d6ee91778165195fd65815ac6354ef5e4a4",
+    "sourceSha256": "d81185713a716588609c301fe34797afc7da96c1d0ca047f5a3b661258afdaa2",
+    "sha256": "07c27dbe9950057024198c397abfca35b7bcf0732f24f91efcc26a40f9498d1f",
     "imageSize": [
       1672,
       941
