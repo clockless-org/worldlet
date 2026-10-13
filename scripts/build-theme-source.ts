@@ -39,8 +39,17 @@ export async function validateBuildTheme(source:string){
  for(const scene of [...Object.values(presentation.appletScenes??{}),...(presentation.appletPresets??[])]){
   if(!scene.registration)continue;
   if(scene.registration.webFrame){
-   const mask=await fs.readFile(path.join(source,scene.registration.webFrame.mask));
-   if(mask.length&&!(await sharp(mask).metadata()).hasAlpha)throw Error('Scene frame requires transparency: '+scene.registration.webFrame.mask);
+   const frame=scene.registration.webFrame,mask=await fs.readFile(path.join(source,frame.mask));
+   if(mask.length){
+    const meta=await sharp(mask).metadata();
+    if(!meta.hasAlpha)throw Error('Scene frame requires transparency: '+frame.mask);
+    // Check the registered crop, not unused transparency elsewhere in the asset.
+    const [x,y,w,h]=frame.source,left=Math.floor(x*meta.width!),top=Math.floor(y*meta.height!);
+    const width=Math.min(meta.width!,Math.ceil((x+w)*meta.width!))-left,height=Math.min(meta.height!,Math.ceil((y+h)*meta.height!))-top;
+    const crop=await sharp(mask).extract({left,top,width,height}).toBuffer();
+    const stats=await sharp(crop).stats(),alpha=stats.channels.at(-1)!;
+    if(alpha.min!==0||alpha.max!==255)throw Error('Scene frame requires a transparent opening and opaque rim: '+frame.mask);
+   }
   }
   const bytes=await fs.readFile(path.join(source,scene.background));
   if(bytes.length){

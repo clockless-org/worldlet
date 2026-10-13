@@ -129,7 +129,21 @@ Every updated background has blank painted surfaces for live HTML, a large prima
 
 The [Theme contract](../../../../themes/CONTRACT.md#registered-backgrounds-and-live-html) describes `appletScenes` and optional preset `registration`. It includes image dimensions, an encoded-image hash, named primary/secondary regions, material hints and companion clearance. The host keeps responsibility for data, actions, typography, responsive behavior and browser isolation.
 
-This package update supplies art, metadata, validation and shared transform helpers. Production Applet readers and the custom-Applet picker have not adopted the new registered surfaces yet. The preview below demonstrates HTML alignment and local interactions with fictional data; it is not a live account connection.
+The preview below demonstrates HTML alignment and local interactions with fictional data; it is not a live account connection. External websites use the host's isolated browser surface. The custom-Applet picker has not adopted registered surfaces yet.
+
+### Frame production workflow
+
+Use the [background + foreground contract](../../../../themes/CONTRACT.md#background-live-content-and-foreground-frame) for every new or revised framed scene, including core, generic and branded artwork. Produce its frame at the same time as the map. Keep the full original background as well as the extracted mask.
+
+1. Compose the blank content surface at about 70% viewport width and 80% height after host navigation. Match the icon, World and Applet's purpose; reserve the actual right-side Fox and reply area.
+2. Extract the final picture's frame into `frame-cutout.png` with genuine alpha. Keep wood, metal, corner pins, bindings and the narrow irregular paper edge. Clear the whole content opening and everything outside the frame. Preserve the full canvas and alignment when possible.
+3. Measure the opening and declare the primary region so the website extends just underneath the rim. Record `frameSource` and `webFrame` together in `catalog.json`; the encoder copies the mask into the declared package asset. Prefer full-canvas source and target bounds; use measured source/target registration if extraction shifted the art. Reusable preset packages use the same `registration.webFrame` structure.
+4. Encode with `node scripts/village-registered-scenes.ts`, then validate with `npm run theme:source-check -- ui/theme-packages/village`. The source lock records both assets. Keep generation/refinement instructions next to the source art.
+5. Review the real page beneath the foreground, with Fox and a reply visible. Check all four seams, corners, scrollbars and edge controls, pointer pass-through, letterboxed sizes and compact fallback. Preserve readable page text; do not shrink it to compensate for an undersized painted opening.
+
+Suggested extraction instruction: “Extract only this finished scene's physical frame, attachments and 1–3 pixel irregular inner paper lip. Keep its exact full-canvas alignment and silhouette. Make the entire content opening and all surrounding scenery truly transparent. No replacement white fill, checkerboard, new decorations, text or changed perspective.” Inspect the result: prompt wording is not proof of transparency or alignment.
+
+The production examples are [X](brands/x/frame-cutout.md) and [Pokémon Showdown](brands/pokemon-showdown/frame-cutout.md). The host reads their registrations through the shared renderer; adding another web frame requires theme assets and coordinates, not an Applet-specific code branch. Other scenes remain eligible for migration and must not be marked frame-complete until their mask and composed preview are checked.
 
 ## Design mockups and preview
 
