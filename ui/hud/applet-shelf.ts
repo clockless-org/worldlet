@@ -2,17 +2,18 @@ import {seedShelf,enterShelf,shelfRing,SHELF_SIZE,type ShelfState} from '../../c
 import {uiIcon} from '../components/index.ts';
 
 // The Applet shelf (owner request 2026-10-09: "applet之间要可以丝滑切换，进入applet后，上方显示最近使用的applets，像一个
-// 一个tab，开新tab是进入browser"): inside an Applet, the recently used Applets stand on a small wooden shelf above it, each
+// 一个tab，开新tab是进入browser"): inside an Applet, the recently used Applets stand at the top of Fox's lane, centered over Fox (owner request
+// 2026-10-13: top right, not above the Applet), each
 // its World device, the open one's name in plain text below it, the others' on hover (owner request 2026-10-11: no bar, no name tags). The open Applet stands in the middle, largest and lit ("当前 applet 要在中间");
 // the others grow smaller and fainter the further they stand from it, in one order around it (core/applets/shelf.ts), so
 // picking one slides the shelf to bring it to the middle. A Thing on the shelf cannot be closed from it (owner request
-// 2026-10-11: no close mark). "+N" at the left end holds the ones used longest ago; + at the
-// right end opens a new page in the Browser. The shelf stands above the Applet's panel and never over a website's page,
-// which the host draws over everything below it.
+// 2026-10-11: no close mark). "+N" at the lane's left end holds the ones used longest ago; + at its right end opens a new
+// page in the Browser. The shelf stands beside the Applet's panel and never over a website's
+// page, which the host draws over everything below it.
 
 export type ShelfApplet={title:string;image:string};
-// Device size and the step to the next one, by distance from the middle.
-const SIZE=[88,58,48,40],STEP=[0,96,74,60];
+// Device size and the step to the next one, by distance from the middle: close enough that five stand in Fox's lane.
+const SIZE=[80,52,44,38],STEP=[0,70,56,46];
 const size=(d:number)=>SIZE[Math.min(d,SIZE.length-1)],step=(d:number)=>STEP[Math.min(d,STEP.length-1)];
 // How far from the middle an Applet stands `d` places out.
 function offsetOf(d:number){let x=0;for(let k=1;k<=d;k++)x+=step(k);return x;}
@@ -56,9 +57,9 @@ export function mountAppletShelf({root,applet,recent,lastUsed,open,newPage}:{
  add.onclick=event=>{event.stopPropagation();closeExtra();newPage();};
  root.addEventListener('pointerdown',event=>{if(!extra.hidden&&!shelf.contains(event.target as Node))closeExtra();});
 
- // As many as fit beside the middle on the Applet's side, between Back and +N on the left and + and the Applet's controls on the right.
+ // As many as fit across Fox's lane, which the shelf spans.
  function capacity(){
-  const width=root.clientWidth,lane=Math.max(width/3,464),half=(width-lane)/2-120;
+  const half=shelf.clientWidth/2-8;
   for(let n=SHELF_SIZE;n>3;n--)if(reach(n)<=half)return n;
   return 3;
  }

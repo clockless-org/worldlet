@@ -57,8 +57,6 @@
 #notionWorld>.panel-scene{position:absolute;inset:0;z-index:4;pointer-events:none}
 #notionWorld[data-applet-scene][data-panel-scene]>.notion-content:is([data-template=browser],[data-template=game]){left:var(--applet-scene-primary-left);top:var(--applet-scene-primary-top);width:var(--applet-scene-primary-width);height:var(--applet-scene-primary-height);right:auto;bottom:auto;max-width:none;max-height:none;margin:0;
  --browser-pad:4px;padding:4px;border:0;border-radius:var(--scene-radius);background:var(--scene-fill);box-shadow:none}
-/* The Applet shelf (ui/hud/applet-shelf.ts) stands above an open Applet: the page starts under it. */
-#notionWorld[data-applet-scene][data-panel-scene][data-applet-shelf]>.notion-content:is([data-template=browser],[data-template=game]){top:max(var(--applet-scene-primary-top),150px);height:calc(var(--applet-scene-primary-height) + var(--applet-scene-primary-top) - max(var(--applet-scene-primary-top),150px))}
 .applet-scene .scene-item-text{display:grid;gap:2px;min-width:0}.applet-scene .scene-item-text strong{font-weight:600;overflow-wrap:anywhere}
 .applet-scene .scene-item-attention{display:block;width:18px;height:18px;color:var(--scene-accent)}.applet-scene .scene-item-attention svg{display:block;width:100%;height:100%;fill:currentColor}
 /* Meetings (ui/applets/meetings/open.ts) on a scene: the painting is its page. */
@@ -83,6 +81,8 @@
   left:calc(var(--applet-scene-companion-left) + var(--applet-scene-companion-width) / 2);
   width:calc(var(--applet-scene-companion-width) - 8px);transform:translateX(-50%);
  }
+ /* The Applet shelf (ui/hud/applet-shelf.ts) spans Fox's column, centered over Fox. */
+ #notionWorld.native-console[data-applet-frame][data-applet-scene]>.applet-shelf{left:var(--applet-scene-companion-left);width:var(--applet-scene-companion-width)}
  #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-dialogue{
   width:min(460px,calc(var(--applet-scene-companion-width) - 24px));
   max-width:calc(var(--applet-scene-companion-width) - 24px);min-width:0;
@@ -93,12 +93,6 @@
 @media(min-width:801px) and (max-width:1400px){
  #notionWorld.native-console.radial-pet-console[data-applet-frame] .world-actions .world-capsule{flex-direction:column;gap:3px;padding:6px 4px;margin:0 4px;max-width:calc(100% - 8px);font-size:11px;min-height:48px}
  #notionWorld.native-console.radial-pet-console[data-applet-frame] .world-actions .world-capsule>span{flex-shrink:0}
-}
-
-/* The shelf's active label ends at 127px; a framed page only needs a small clearance beneath it. */
-#notionWorld[data-applet-frame][data-applet-scene][data-panel-scene][data-applet-shelf]>.notion-content:is([data-template=browser],[data-template=game]){
- top:max(var(--applet-scene-primary-top),132px);
- height:calc(var(--applet-scene-primary-height) + var(--applet-scene-primary-top) - max(var(--applet-scene-primary-top),132px));
 }
 
 /* The extracted foreground is the only rim: the native rectangle reaches underneath it.

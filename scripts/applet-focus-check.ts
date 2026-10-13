@@ -295,10 +295,12 @@ await withBrowser(fileAccess,async browser=>{
   const panel=document.querySelector<HTMLElement>('#notionContent'),p=panel.getBoundingClientRect(),slot=panel.querySelector('.browser-viewport').getBoundingClientRect();
   const w=getComputedStyle(document.querySelector('#notionWorld')),v=(k:string)=>parseFloat(w.getPropertyValue('--applet-scene-primary-'+k));
   const rect=(window as any).calls.filter(c=>c.action==='browserShow'||c.action==='browserLayout').at(-1).rect;
-  return {titleBottom:document.querySelector('.applet-shelf-tab[data-current] .applet-shelf-name')?.getBoundingClientRect().bottom??document.querySelector('.companion-context').getBoundingClientRect().bottom,left:p.left,right:p.right,bottom:p.bottom,top:p.top,region:{left:v('left'),width:v('width'),bottom:v('top')+v('height')},inside:rect.x>=p.left&&rect.y>=p.top&&rect.x+rect.width<=p.right&&rect.y+rect.height<=p.bottom,slotRight:slot.right,panelRight:p.right};
+  const shelf=document.querySelector<HTMLElement>('.applet-shelf:not([hidden])');
+  return {shelfLeft:shelf?shelf.getBoundingClientRect().left:null,titleBottom:document.querySelector('.companion-context').getBoundingClientRect().bottom,left:p.left,right:p.right,bottom:p.bottom,top:p.top,region:{left:v('left'),width:v('width'),bottom:v('top')+v('height')},inside:rect.x>=p.left&&rect.y>=p.top&&rect.x+rect.width<=p.right&&rect.y+rect.height<=p.bottom,slotRight:slot.right,panelRight:p.right};
  });
  assert.ok(Math.abs(frame.left-frame.region.left)<1&&Math.abs(frame.right-frame.left-frame.region.width)<1&&Math.abs(frame.bottom-frame.region.bottom)<1,'browser frame takes the Browser scene\'s screen region: '+JSON.stringify(frame));
- assert.ok(frame.top>=frame.titleBottom+4,'browser frame leaves the shelf\'s name (or the context title) visible: '+JSON.stringify(frame));
+ // The Applet shelf stands in Fox's lane beside the page (owner request 2026-10-13); without it the context title is above the page.
+ assert.ok(frame.shelfLeft!==null?frame.right<=frame.shelfLeft+1:frame.top>=frame.titleBottom+4,'browser frame leaves the shelf (or the context title) visible: '+JSON.stringify(frame));
  assert.ok(frame.inside&&frame.slotRight<=frame.panelRight,'native web surface stays inside the painted screen');
  await page.screenshot({path:'output/applet-layout/youtube-focus.png'});
  // Inside an Applet a click on empty scenery acts as Back, one level (owner request 2026-10-05), but while the

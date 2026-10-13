@@ -52,11 +52,10 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
   root.style.setProperty('--applet-bar-side',Math.max(Math.max(leftWidth,44)+start,barRight.offsetWidth+16)+10+'px');
   const box=root.getBoundingClientRect(),t=title?.getBoundingClientRect();
   // Under the Applet shelf (ui/hud/applet-shelf.ts) the title gives way to the shelf: Back starts the bar's row and the
-  // Applet's controls end it at the edge of the Applet's side; the shelf's + stands just before them.
+  // Applet's controls end it at the edge of the Applet's side, where Fox's lane and the shelf begin.
   if(root.hasAttribute('data-applet-shelf')){
-   const lane=Math.max(box.width/3,464),end=box.width-lane-16;
-   Object.assign(barLeft.style,{left:start+'px',top:top+'px'});Object.assign(barRight.style,{left:Math.max(start,end-barRight.offsetWidth)+'px',top:top+'px'});
-   root.style.setProperty('--applet-shelf-controls',(barRight.offsetWidth?barRight.offsetWidth+8:0)+16+'px');return;
+   const shelf=root.querySelector(':scope>.applet-shelf')?.getBoundingClientRect(),end=(shelf?.width?shelf.left-box.left:box.width-Math.max(box.width/3,464))-16;
+   Object.assign(barLeft.style,{left:start+'px',top:top+'px'});Object.assign(barRight.style,{left:Math.max(start,end-barRight.offsetWidth)+'px',top:top+'px'});return;
   }
   const stacked=!t?.width||t.top-box.top>=top+height,y=stacked?top:t.top-box.top+t.height/2-height/2;
   Object.assign(barLeft.style,{left:(stacked?start:t.left-box.left-10-leftWidth)+'px',top:y+'px'});
