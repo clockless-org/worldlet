@@ -88,6 +88,11 @@ Occlusion tracking also sometimes marked the shown, uncovered window occluded, s
 (release smoke, RCs 1085 and 1087).
 A capture run also keeps the display awake. Its report lists GPU-process exits under `gpuExits`,
 and a failed capture's error names them (#1060).
+`WORLDLET_BACKGROUND_WINDOWS=1` (the release hosts set it for their checks) keeps a development build, a release build
+on the RC harness's disposable library or a Windows release on a named smoke profile out of the way of whatever is
+open on that screen: its windows appear without taking focus, and on the Mac the app is an accessory (no Dock icon or
+menu bar) whose windows sit just below every ordinary window (`src/background-launch.ts`). They keep rendering, so
+captures and WebGL work.
 `--check <name>` (development only; a release build runs only `onboarding-paths`, and only on the RC harness's
 disposable library: `src/rc-check.ts`) runs a named check from
 `src/checks/` once the World has loaded, prints `PASS`/`FAIL` lines and exits 0 or 1.

@@ -19,6 +19,8 @@ export interface Profile {
  smoke:boolean;
  /** A packaged release launched by the RC harness for one release check on a disposable library (`rcCheckRoot`). */
  rcCheck?:boolean;
+ /** A Windows release on a named smoke profile (`WORLDLET_WINDOWS_PROFILE`), as the release smoke launches it. */
+ smokeProfile?:boolean;
 }
 export const platformName=():'macos'|'windows'|'linux'=>process.platform==='darwin'?'macos':process.platform==='win32'?'windows':'linux';
 export function libraryBase(){
@@ -57,5 +59,5 @@ export function resolveProfile(argv=process.argv,env=process.env):Profile {
  const resources=app.isPackaged?process.resourcesPath:path.resolve(env.WORLDLET_REPO_ROOT||path.join(app.getAppPath(),'../..'));
  const webRoot=path.resolve(channel==='dev'&&env.WORLDLET_WEB_ROOT||(app.isPackaged?path.join(process.resourcesPath,'WorldletWeb'):path.join(resources,'dist/WorldletWeb')));
  const title=env.WORLDLET_WINDOW_TITLE||(channel==='dev'?'Worldlet Dev':'Worldlet');
- return {channel,worktree,root,title,webRoot,resources,smoke,rcCheck:!!rc};
+ return {channel,worktree,root,title,webRoot,resources,smoke,rcCheck:!!rc,smokeProfile:!!named&&channel==='release'};
 }

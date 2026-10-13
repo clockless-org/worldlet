@@ -4,7 +4,7 @@ import type {Host,Row} from '../../host/types.ts';
 import type {DesktopCompanionService} from '../../host/services.ts';
 import {companionEntry,companionMenu,type CompanionTray} from './companion-tray.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
-import {backgroundLaunch} from '../../background-launch.ts';
+import {backgroundLaunch,showInBackground} from '../../background-launch.ts';
 
 const WORLD_BACKGROUND='#20251d';
 const CHECK_FLAGS=['--check','--window-capture','--host-contract-check','--smoke-check'];
@@ -214,7 +214,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   void this.host.page.call('worldletRestoreWorld');
   if(process.platform==='darwin'&&!backgroundLaunch())app.focus({steal:true});
   if(world.isMinimized())world.restore();
-  if(backgroundLaunch())world.showInactive();else{world.show();world.focus();}
+  if(backgroundLaunch())showInBackground(world);else{world.show();world.focus();}
   view.webContents.focus();
   return true;
  }
