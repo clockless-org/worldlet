@@ -4,6 +4,7 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
+import {checkSceneFrameCoverage} from './scene-frame-coverage.ts';
 import {importBuildTheme} from './build-theme-source.ts';
 import type {ThemeAppletScene,ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
 
@@ -61,6 +62,7 @@ export async function checkVillageRegisteredScenes(root:string){
    const input=await readFile(path.join(root,SOURCE,item.frameSource)),output=await readFile(path.join(root,PACKAGE,item.webFrame.mask));
    assert.equal(sha(input),sha(output),'Frame alpha source must match its bundled asset');
    if(output.length)assert.equal((await sharp(output).metadata()).hasAlpha,true,'Frame must preserve transparency');
+   await checkSceneFrameCoverage(output,scene(item,entry).registration,item.id);
   }
   assert.ok(presentation.icons[item.id],'Every scene has a matching icon');
   if(item.iconSource){

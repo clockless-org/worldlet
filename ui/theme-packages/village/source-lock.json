@@ -1,7 +1,7 @@
 {
   "contractVersion": 3,
   "id": "village",
-  "updatedAt": "2026-10-13T03:28:58Z",
+  "updatedAt": "2026-10-13T05:46:25Z",
   "sha256": {
     "assets/README.md": "714f5e683fe78ecc571777248028a203296ff9bcf1620bb8703fdb2e5003396a",
     "assets/applet-presets/art.lock.json": "4ef976357c7797b52c941e7eec3ecf06dd677cbecefe824b5d66d8695039e6e4",
@@ -636,10 +636,10 @@
     "assets/world/night.webp": "2b073aa2e2173ff56db29069ab1378fc34680da97d1cfd974d0d3c44b6b010b0",
     "lamps.json": "cdac834f10e2af71670ed83af0c3b91eb44addffad9969e3babc331fd5b50c52",
     "pack.json": "170253831a36247a3afec65218d8eae3493e8842c11a24e10ba1e7ca3f001770",
-    "presentation.json": "9e979b1ace214ad367a619f23285d4409caec50c2d7d9dbb4b795433e9963c55",
+    "presentation.json": "034340571ba1a0e652d42313d119e773b8c0d02fb244fffa2fe05286e2a07706",
     "scene-library.json": "e9e2dce8a674f28497f38160b57b58a08b705ed15953b28e1c2a298b0c7d2b95",
     "style.json": "89aec5f29671c3f6ca989f70a9f5191ab06706e1bea8fa5dbf288f205f4c55d7",
-    "theme.json": "0f2d6a04089b12d2e558b2b7997b774243c0255521f588d40546eb3b7d96e628",
+    "theme.json": "88d70e53774529b12ede9de4fd5e9790de7fd02f5fedce14213f886fd3baa78c",
     "tokens.json": "3475420e827d9b9ea3d4e191eba092b5d2c7eb7e4ad6f11476fbeff206e83aa8",
     "world.json": "fe82d319d24897bf2c7da33cc0ac5ed05e05d5c10e80336c373020ec531f12ed"
   }

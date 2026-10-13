@@ -4,6 +4,7 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
+import {checkSceneFrameCoverage} from './scene-frame-coverage.ts';
 import {importBuildTheme} from './build-theme-source.ts';
 import type {ThemeAppletPreset,ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
 
@@ -66,6 +67,7 @@ export async function checkVillageAppletPresets(root:string){
   assert.equal(entry.source,source);assert.equal(entry.settings,SETTINGS.frame);
   const input=await readFile(path.join(root,source)),output=await readFile(path.join(root,PACKAGE,frame.mask));
   if(input.length)assert.equal(sha(input),entry.sourceSha256,'Frame source changed: '+preset.id);
+  await checkSceneFrameCoverage(output,expected.find(p=>p.id===preset.id)!.registration!,preset.id);
   if(output.length){assert.equal(sha(output),entry.sha256,'Frame output changed: '+preset.id);assert.equal((await sharp(output).metadata()).hasAlpha,true);}
  }
  for(const [i,preset] of expected.entries())for(const kind of ['icon','background'] as const){
