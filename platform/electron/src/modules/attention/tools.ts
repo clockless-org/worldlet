@@ -34,6 +34,7 @@ export async function worldToolReply(center:AttentionCenter,name:string,args:Row
  try{
   const result=await worldTool(center,name,args,turn,monitorProvider);
   recordOutcome(result.error!=null||args.failed===true?'failed':'complete');
+  if(name==='upsert_world_items'&&result.error==null)center.savedItems(turn);
   return result;
  }catch(error){
   if(isCancel(error)||!isValidation(error)){recordOutcome(isCancel(error)?'cancelled':'failed');throw error;}
@@ -41,7 +42,7 @@ export async function worldToolReply(center:AttentionCenter,name:string,args:Row
   const evidenceRejected=name==='upsert_world_items'&&EVIDENCE_REJECTIONS.has(message(error));
   const text=evidenceRejected?UNVERIFIED:message(error);
   const reply:Row={error:text,guidance:'Do not claim success. Correct the field or prerequisite identified by the error, preserving valid source evidence. Retry the corrected submission; unaccepted records remain pending.'};
-  if(name==='upsert_world_items')center.persist(error,'worldItemSave',turn);
+  if(name==='upsert_world_items')center.rejectedSave(turn,error);
   if(name==='upsert_world_items'&&text===UNVERIFIED&&store.state.cloudConsent){
    reply.guidance='Correct the indexed evidence issues below. Use the supplied sourceReference identity and a short continuous exact quote; do not translate, paraphrase or join passages. Unaccepted records remain pending.';
    // Return only previously authorized evidence for the requested records; validation stays strict.
