@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../core/agent/index.ts';
-import {installHermes,installedHermes,ownHermesAgent,releaseStandardHermes,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
+import {installHermes,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Core: the manifest, a stage's result frame, what the sign-in prints, and the model.
@@ -60,6 +60,27 @@ esac
  assert.equal(fs.existsSync(path.join(home,'.local','bin','hermes')),false,'Worldlet’s launcher is gone');
  assert.ok(fs.existsSync(path.join(root,'agent','private','hermes','config.yaml')),'Fox’s profile itself stays');
  assert.equal(installedHermes(root),false,'a failed install is not Worldlet’s Hermes');
+ // What an unfinished earlier install left where Hermes installs itself is moved aside, never deleted; a checkout stays.
+ const leftover=path.join(home,'.hermes','hermes-agent');
+ fs.mkdirSync(leftover,{recursive:true});fs.writeFileSync(path.join(leftover,'notes.txt'),'mine');
+ const aside=setAsideUnfinished(environment,new Date('2026-10-13T08:40:00Z'));
+ assert.equal(aside,leftover+'.worldlet-aside-20261013084000');
+ assert.equal(fs.existsSync(leftover),false,'the installer no longer finds a folder it refuses');
+ assert.equal(fs.readFileSync(path.join(aside!,'notes.txt'),'utf8'),'mine','the person’s files are kept');
+ fs.mkdirSync(path.join(leftover,'.git'),{recursive:true});
+ assert.equal(setAsideUnfinished(environment),null,'a checkout is the installer’s to resume');
+ fs.rmSync(path.join(home,'.hermes'),{recursive:true,force:true});
+ // A step is stopped only once it goes quiet, not while it keeps printing (a slow connection installing packages).
+ const timed=(body:string)=>(async()=>new Response(`#!/bin/bash
+case "$1" in
+ --manifest) echo '{"protocol_version":1,"stages":[{"name":"python-deps","title":"Install Python dependencies","needs_user_input":false}]}' ;;
+ --stage) ${body}; echo '{"ok":true,"stage":"'$2'","skipped":false}' ;;
+esac
+`)) as typeof fetch;
+ await assert.rejects(installHermes(root,{environment,progress:()=>{},fetch:timed('sleep 2'),limits:{idle:300,total:10_000}}),/Install Python dependencies: Installing Hermes Agent stopped making progress/);
+ await assert.rejects(installHermes(root,{environment,progress:()=>{},fetch:timed('for i in 1 2 3 4 5 6 7 8 9 10; do echo resolving; sleep 0.1; done'),limits:{idle:5_000,total:300}}),/took too long/);
+ // Busy past the quiet limit but printing: it finishes (then no hermes command was made, so it is not found).
+ await assert.rejects(installHermes(root,{environment,progress:()=>{},fetch:timed('for i in 1 2 3 4 5 6 7 8 9 10; do echo resolving; sleep 0.1; done'),limits:{idle:400,total:10_000}}),/^(?!.*(stopped making progress|took too long)).*could not be installed/s);
  // Then the whole run: every stage that needs no person, in order, reported as it runs; HERMES_HOME never reaches it.
  steps.length=0;fs.writeFileSync(log,'');
  const install=await installHermes(root,{environment,progress:step=>steps.push(`${step.step}/${step.steps} ${step.title}`),fetch:serve()});

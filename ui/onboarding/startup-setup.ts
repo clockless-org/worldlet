@@ -39,7 +39,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
  // the person signs in to ChatGPT inside it with Hermes' own sign-in (`sign-in-hermes`), owner decisions 2026-10-09.
  // `hermesStep` is the installer's step being run; `hermesCode` the code Hermes' device page asks for, when it does.
- let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null,hermesStepNo=0;
+ let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null,hermesStepNo=0,hermesFailed=false;
  const onHermesSetup=(event:Event)=>{
   const detail=(event as CustomEvent).detail;if(disposed||!detail)return;
   if(detail.stage==='install'&&hermesSetup==='installing'&&Number.isInteger(detail.step)&&Number.isInteger(detail.steps)&&typeof detail.title==='string')hermesStepNo=detail.step,hermesStep=t('Step {step} of {steps}: {title}').replace('{step}',String(detail.step)).replace('{steps}',String(detail.steps)).replace('{title}',detail.title.slice(0,80));
@@ -302,7 +302,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   // How far the install got, so a person stuck here shows up in the funnel (owner 2026-10-13: First open → Agent choice).
   const started=performance.now();productEvent('hermes_setup_started',hermesSetupDimensions('install',0));
   try{await call('agentHarness',{operation:'install-hermes'});hermesSetup='installed';}
-  catch(e){hermesSetup='idle';productEvent('hermes_setup_failed',hermesSetupDimensions('install',hermesStepNo,e),timingBucket(performance.now()-started));throw e;}
+  catch(e){hermesSetup='idle';hermesFailed=true;productEvent('hermes_setup_failed',hermesSetupDimensions('install',hermesStepNo,e),timingBucket(performance.now()-started));throw e;}
   productEvent('hermes_setup_completed',hermesSetupDimensions('install',hermesStepNo),timingBucket(performance.now()-started));
  }
  /** ChatGPT signed in inside Hermes Agent, then Hermes moves in like any Agent found here. */
@@ -747,7 +747,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    if(remoteForm){primary=button(pairingRemote?'Connecting to your other computer…':'Connect',pairRemote,true);primary.classList.toggle('is-loading',pairingRemote);if(!remoteCode.trim()||pairingRemote||signingIn)primary.disabled=true;}
    else if(!agents.length&&!detectingAgents&&!connectingAgent){
     const working=hermesSetup==='installing'||hermesSetup==='signing-in';
-    primary=button(hermesSetup==='installing'?'Installing Hermes Agent…':hermesSetup==='signing-in'?'Waiting for ChatGPT…':hermesSetup==='installed'?'Sign in with ChatGPT':'Build your world',hermesSetup==='installed'?signInHermes:installHermes,true);
+    primary=button(hermesSetup==='installing'?'Installing Hermes Agent…':hermesSetup==='signing-in'?'Waiting for ChatGPT…':hermesSetup==='installed'?'Sign in with ChatGPT':hermesFailed?'Try again':'Build your world',hermesSetup==='installed'?signInHermes:installHermes,true);
     primary.classList.toggle('is-loading',working);if(working||signingIn)primary.disabled=true;
    }
    else if(outdated(picked)&&!going){

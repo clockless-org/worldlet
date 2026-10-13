@@ -199,6 +199,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.ok(!JSON.stringify(stage).includes('Users'),'Installer output never leaves the device');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).install_step,'10_plus');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).hermes_failure,'timeout');
+ assert.equal(hermesSetupDimensions('install',4,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (Install Python dependencies: Installing Hermes Agent stopped making progress. Try again.)')).hermes_failure,'timeout');
  assert.equal(hermesSetupDimensions('install',0,new Error('Hermes Agent needs Apple’s Command Line Tools. Install them in the window macOS opened, then try again.')).hermes_failure,'command_line_tools');
  assert.equal(hermesSetupDimensions('sign_in',0,new Error('Sign-in was cancelled.')).hermes_failure,'cancelled');
  assert.equal(hermesSetupDimensions('sign_in',0,new Error('Hermes Agent lists no ChatGPT model. Choose one with `hermes model` in Terminal, then try again.')).hermes_failure,'no_model');
