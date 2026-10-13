@@ -2,15 +2,17 @@
 
 These raster design studies establish the visual target. They are not HTML screenshots or working applications. All displayed records and conversations are fictional. Text, calculations and game positions are illustrative and must be validated during implementation.
 
-| Collection | Backgrounds | Effects | Runtime integration |
-| --- | ---: | ---: | --- |
-| Core applications and games | 24/24 | 24/24 | 🟡 Design study |
-| Generic scenes | 16/16 | 16/16 | 🟡 Design study |
-| Branded applications and games | 100/100 | 100/100 | 🟡 Design study |
+| Collection | Backgrounds | Effects | Current-layout effects | Runtime integration |
+| --- | ---: | ---: | ---: | --- |
+| Core applications and games | 24/24 | 24/24 | 24/24 | 🟡 Design study |
+| Generic scenes | 16/16 | 16/16 | 16/16 | 🟡 Design study |
+| Branded applications and games | 100/100 | 100/100 | 0/100 | 🟡 Design study |
 
-Each pair shows the current registered background followed by an earlier image-generated effect. The effects retain their original proportions and are visual references, not screenshots of the current runtime. Current backgrounds target approximately 70% width and 80% height for content, with extracted transparent foregrounds covering the inner seams. Website Applets use their original sites in the host browser surface.
+Each pair shows the current registered background followed by an image-generated effect. The 24 core and 16 generic effects have been regenerated from the large-surface backgrounds; branded effects retain earlier layouts. Current backgrounds target approximately 70% width and 80% height for content, with extracted transparent foregrounds covering the inner seams. These concepts are visual references, not screenshots of the current runtime. Website Applets use their original sites in the host browser surface.
 
-Build the searchable local gallery with `node scripts/applet-concept-gallery.ts --complete`, serve the repository root and open `/output/applet-concept-gallery/`. Rebuild this document and the hash manifest with `--write-docs`.
+A current-layout status requires the source-background hash and generated-effect hash to match the saved provenance. If either asset changes, the gallery marks that concept as an earlier layout until it is reviewed and regenerated. Image generation may introduce small geometric or textual differences; runtime geometry always comes from the registered background and its JSON, not the concept image.
+
+Build and validate the searchable local gallery with `node scripts/applet-concept-gallery.ts --complete --current-complete`, serve the repository root and open `/output/applet-concept-gallery/`. The gallery defaults to the refreshed effects. Rebuild this document and the hash manifest with `--write-docs`.
 
 ## Implementation guidance
 
@@ -27,6 +29,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Calendar
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-calendar.webp" alt="Calendar icon" width="96">
 
 | Background | Image-generated effect |
@@ -34,6 +38,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Calendar background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-calendar/background.webp) | ![Calendar effect](concepts/google-calendar/effect.webp) |
 
 ### Mail
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/gmail.webp" alt="Mail icon" width="96">
 
@@ -43,6 +49,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Notes
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-notes.webp" alt="Notes icon" width="96">
 
 | Background | Image-generated effect |
@@ -50,6 +58,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Notes background](../../../../../ui/theme-packages/village/assets/applet-scenes/apple-notes/background.webp) | ![Notes effect](concepts/apple-notes/effect.webp) |
 
 ### Reminders
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-reminders.webp" alt="Reminders icon" width="96">
 
@@ -59,6 +69,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Files
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/files/icon.webp" alt="Files icon" width="96">
 
 | Background | Image-generated effect |
@@ -66,6 +78,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Files background](../../../../../ui/theme-packages/village/assets/applet-scenes/files/background.webp) | ![Files effect](concepts/files/effect.webp) |
 
 ### Weather
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/weather.webp" alt="Weather icon" width="96">
 
@@ -75,6 +89,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Meetings
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/meetings.webp" alt="Meetings icon" width="96">
 
 | Background | Image-generated effect |
@@ -82,6 +98,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Meetings background](../../../../../ui/theme-packages/village/assets/applet-scenes/meetings/background.webp) | ![Meetings effect](concepts/meetings/effect.webp) |
 
 ### Voice Memos
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/voice-memos.webp" alt="Voice Memos icon" width="96">
 
@@ -91,6 +109,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Messages
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/messages.webp" alt="Messages icon" width="96">
 
 | Background | Image-generated effect |
@@ -98,6 +118,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Messages background](../../../../../ui/theme-packages/village/assets/applet-scenes/messages/background.webp) | ![Messages effect](concepts/messages/effect.webp) |
 
 ### Browser
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/browser.webp" alt="Browser icon" width="96">
 
@@ -107,6 +129,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Maps
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/maps/icon.webp" alt="Maps icon" width="96">
 
 | Background | Image-generated effect |
@@ -114,6 +138,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Maps background](../../../../../ui/theme-packages/village/assets/applet-scenes/maps/background.webp) | ![Maps effect](concepts/maps/effect.webp) |
 
 ### Clock
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/clock/icon.webp" alt="Clock icon" width="96">
 
@@ -123,6 +149,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Contacts
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/contacts/icon.webp" alt="Contacts icon" width="96">
 
 | Background | Image-generated effect |
@@ -130,6 +158,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Contacts background](../../../../../ui/theme-packages/village/assets/applet-scenes/contacts/background.webp) | ![Contacts effect](concepts/contacts/effect.webp) |
 
 ### Photos
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/photos/icon.webp" alt="Photos icon" width="96">
 
@@ -139,6 +169,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Music
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/music/icon.webp" alt="Music icon" width="96">
 
 | Background | Image-generated effect |
@@ -146,6 +178,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Music background](../../../../../ui/theme-packages/village/assets/applet-scenes/music/background.webp) | ![Music effect](concepts/music/effect.webp) |
 
 ### News
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/news/icon.webp" alt="News icon" width="96">
 
@@ -155,6 +189,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Podcasts
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/podcasts/icon.webp" alt="Podcasts icon" width="96">
 
 | Background | Image-generated effect |
@@ -162,6 +198,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Podcasts background](../../../../../ui/theme-packages/village/assets/applet-scenes/podcasts/background.webp) | ![Podcasts effect](concepts/podcasts/effect.webp) |
 
 ### Stocks
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/stocks/icon.webp" alt="Stocks icon" width="96">
 
@@ -171,6 +209,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### 2048
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/game-2048.webp" alt="2048 icon" width="96">
 
 | Background | Image-generated effect |
@@ -178,6 +218,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![2048 background](../../../../../ui/theme-packages/village/assets/applet-scenes/game-2048/background.webp) | ![2048 effect](concepts/game-2048/effect.webp) |
 
 ### Snake
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/snake.webp" alt="Snake icon" width="96">
 
@@ -187,6 +229,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Minesweeper
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/minesweeper.webp" alt="Minesweeper icon" width="96">
 
 | Background | Image-generated effect |
@@ -194,6 +238,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Minesweeper background](../../../../../ui/theme-packages/village/assets/applet-scenes/minesweeper/background.webp) | ![Minesweeper effect](concepts/minesweeper/effect.webp) |
 
 ### Sudoku
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/sudoku.webp" alt="Sudoku icon" width="96">
 
@@ -203,6 +249,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Gomoku
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-scenes/gomoku/icon.webp" alt="Gomoku icon" width="96">
 
 | Background | Image-generated effect |
@@ -210,6 +258,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Gomoku background](../../../../../ui/theme-packages/village/assets/applet-scenes/gomoku/background.webp) | ![Gomoku effect](concepts/gomoku/effect.webp) |
 
 ### Random Game
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/random-game.webp" alt="Random Game icon" width="96">
 
@@ -222,6 +272,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Weight balance
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/weight-balance/icon.webp" alt="Weight balance icon" width="96">
 
 | Background | Image-generated effect |
@@ -229,6 +281,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Weight balance background](../../../../../ui/theme-packages/village/assets/applet-presets/weight-balance/background.webp) | ![Weight balance effect](concepts/weight-balance/effect.webp) |
 
 ### Meal planner
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/meal-planner/icon.webp" alt="Meal planner icon" width="96">
 
@@ -238,6 +292,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Workout plan
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/fitness/icon.webp" alt="Workout plan icon" width="96">
 
 | Background | Image-generated effect |
@@ -245,6 +301,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Workout plan background](../../../../../ui/theme-packages/village/assets/applet-presets/fitness/background.webp) | ![Workout plan effect](concepts/fitness/effect.webp) |
 
 ### Sleep & recovery
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/sleep/icon.webp" alt="Sleep & recovery icon" width="96">
 
@@ -254,6 +312,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Travel planner
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/travel/icon.webp" alt="Travel planner icon" width="96">
 
 | Background | Image-generated effect |
@@ -261,6 +321,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Travel planner background](../../../../../ui/theme-packages/village/assets/applet-presets/travel/background.webp) | ![Travel planner effect](concepts/travel/effect.webp) |
 
 ### Outdoor adventures
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/outdoor/icon.webp" alt="Outdoor adventures icon" width="96">
 
@@ -270,6 +332,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Shopping list
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/shopping/icon.webp" alt="Shopping list icon" width="96">
 
 | Background | Image-generated effect |
@@ -277,6 +341,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Shopping list background](../../../../../ui/theme-packages/village/assets/applet-presets/shopping/background.webp) | ![Shopping list effect](concepts/shopping/effect.webp) |
 
 ### Household budget
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/budget/icon.webp" alt="Household budget icon" width="96">
 
@@ -286,6 +352,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Home care
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/home-care/icon.webp" alt="Home care icon" width="96">
 
 | Background | Image-generated effect |
@@ -293,6 +361,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Home care background](../../../../../ui/theme-packages/village/assets/applet-presets/home-care/background.webp) | ![Home care effect](concepts/home-care/effect.webp) |
 
 ### Garden planner
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/garden/icon.webp" alt="Garden planner icon" width="96">
 
@@ -302,6 +372,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Daily planner
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/daily-planner/icon.webp" alt="Daily planner icon" width="96">
 
 | Background | Image-generated effect |
@@ -309,6 +381,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Daily planner background](../../../../../ui/theme-packages/village/assets/applet-presets/daily-planner/background.webp) | ![Daily planner effect](concepts/daily-planner/effect.webp) |
 
 ### Reading & research
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/reading/icon.webp" alt="Reading & research icon" width="96">
 
@@ -318,6 +392,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Language practice
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/language/icon.webp" alt="Language practice icon" width="96">
 
 | Background | Image-generated effect |
@@ -325,6 +401,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Language practice background](../../../../../ui/theme-packages/village/assets/applet-presets/language/background.webp) | ![Language practice effect](concepts/language/effect.webp) |
 
 ### Personal journal
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/journal/icon.webp" alt="Personal journal icon" width="96">
 
@@ -334,6 +412,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Job search
 
+🟢 Regenerated from current background · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/job-search/icon.webp" alt="Job search icon" width="96">
 
 | Background | Image-generated effect |
@@ -341,6 +421,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Job search background](../../../../../ui/theme-packages/village/assets/applet-presets/job-search/background.webp) | ![Job search effect](concepts/job-search/effect.webp) |
 
 ### Project planner
+
+🟢 Regenerated from current background · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/applet-presets/project-planner/icon.webp" alt="Project planner icon" width="96">
 
@@ -353,6 +435,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### GitHub
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/github.webp" alt="GitHub icon" width="96">
 
 | Background | Image-generated effect |
@@ -360,6 +444,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![GitHub background](../../../../../ui/theme-packages/village/assets/applet-scenes/github/background.webp) | ![GitHub effect](brands/github/effect.webp) |
 
 ### Codex
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/codex.webp" alt="Codex icon" width="96">
 
@@ -369,6 +455,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Claude Code
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/claude-code.webp" alt="Claude Code icon" width="96">
 
 | Background | Image-generated effect |
@@ -376,6 +464,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Claude Code background](../../../../../ui/theme-packages/village/assets/applet-scenes/claude-code/background.webp) | ![Claude Code effect](brands/claude-code/effect.webp) |
 
 ### Notion
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/notion.webp" alt="Notion icon" width="96">
 
@@ -385,6 +475,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Obsidian
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/obsidian.webp" alt="Obsidian icon" width="96">
 
 | Background | Image-generated effect |
@@ -392,6 +484,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Obsidian background](../../../../../ui/theme-packages/village/assets/applet-scenes/obsidian/background.webp) | ![Obsidian effect](brands/obsidian/effect.webp) |
 
 ### Plaid
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/plaid.webp" alt="Plaid icon" width="96">
 
@@ -401,6 +495,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Stripe
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/stripe.webp" alt="Stripe icon" width="96">
 
 | Background | Image-generated effect |
@@ -408,6 +504,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Stripe background](../../../../../ui/theme-packages/village/assets/applet-scenes/stripe/background.webp) | ![Stripe effect](brands/stripe/effect.webp) |
 
 ### PayPal
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/paypal.webp" alt="PayPal icon" width="96">
 
@@ -417,6 +515,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Todoist
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/todoist.webp" alt="Todoist icon" width="96">
 
 | Background | Image-generated effect |
@@ -424,6 +524,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Todoist background](../../../../../ui/theme-packages/village/assets/applet-scenes/todoist/background.webp) | ![Todoist effect](brands/todoist/effect.webp) |
 
 ### Linear
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/linear.webp" alt="Linear icon" width="96">
 
@@ -433,6 +535,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Supabase
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/supabase.webp" alt="Supabase icon" width="96">
 
 | Background | Image-generated effect |
@@ -440,6 +544,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Supabase background](../../../../../ui/theme-packages/village/assets/applet-scenes/supabase/background.webp) | ![Supabase effect](brands/supabase/effect.webp) |
 
 ### Docker
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/docker.webp" alt="Docker icon" width="96">
 
@@ -449,6 +555,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Google Drive
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-drive.webp" alt="Google Drive icon" width="96">
 
 | Background | Image-generated effect |
@@ -456,6 +564,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Google Drive background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-drive/background.webp) | ![Google Drive effect](brands/google-drive/effect.webp) |
 
 ### Google Docs
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-docs.webp" alt="Google Docs icon" width="96">
 
@@ -465,6 +575,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Google Sheets
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-sheets.webp" alt="Google Sheets icon" width="96">
 
 | Background | Image-generated effect |
@@ -472,6 +584,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Google Sheets background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-sheets/background.webp) | ![Google Sheets effect](brands/google-sheets/effect.webp) |
 
 ### Google Slides
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-slides.webp" alt="Google Slides icon" width="96">
 
@@ -481,6 +595,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Oura Ring
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/oura.webp" alt="Oura Ring icon" width="96">
 
 | Background | Image-generated effect |
@@ -488,6 +604,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Oura Ring background](../../../../../ui/theme-packages/village/assets/applet-scenes/oura/background.webp) | ![Oura Ring effect](brands/oura/effect.webp) |
 
 ### Strava
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/strava.webp" alt="Strava icon" width="96">
 
@@ -497,6 +615,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Fitbit
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/fitbit.webp" alt="Fitbit icon" width="96">
 
 | Background | Image-generated effect |
@@ -504,6 +624,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Fitbit background](../../../../../ui/theme-packages/village/assets/applet-scenes/fitbit/background.webp) | ![Fitbit effect](brands/fitbit/effect.webp) |
 
 ### Google Maps
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-maps.webp" alt="Google Maps icon" width="96">
 
@@ -513,6 +635,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Airbnb
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/airbnb.webp" alt="Airbnb icon" width="96">
 
 | Background | Image-generated effect |
@@ -520,6 +644,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Airbnb background](../../../../../ui/theme-packages/village/assets/applet-scenes/airbnb/background.webp) | ![Airbnb effect](brands/airbnb/effect.webp) |
 
 ### TripIt
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/tripit.webp" alt="TripIt icon" width="96">
 
@@ -529,6 +655,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### X
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/x.webp" alt="X icon" width="96">
 
 | Background | Image-generated effect |
@@ -536,6 +664,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![X background](../../../../../ui/theme-packages/village/assets/applet-scenes/x/background.webp) | ![X effect](brands/x/effect.webp) |
 
 ### YouTube
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/youtube.webp" alt="YouTube icon" width="96">
 
@@ -545,6 +675,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### TikTok
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/tiktok.webp" alt="TikTok icon" width="96">
 
 | Background | Image-generated effect |
@@ -552,6 +684,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![TikTok background](../../../../../ui/theme-packages/village/assets/applet-scenes/tiktok/background.webp) | ![TikTok effect](brands/tiktok/effect.webp) |
 
 ### Discord
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/discord.webp" alt="Discord icon" width="96">
 
@@ -561,6 +695,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### DoorDash
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/doordash.webp" alt="DoorDash icon" width="96">
 
 | Background | Image-generated effect |
@@ -568,6 +704,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![DoorDash background](../../../../../ui/theme-packages/village/assets/applet-scenes/doordash/background.webp) | ![DoorDash effect](brands/doordash/effect.webp) |
 
 ### Wordle
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/wordle.webp" alt="Wordle icon" width="96">
 
@@ -577,6 +715,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Connections
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/nyt-connections.webp" alt="Connections icon" width="96">
 
 | Background | Image-generated effect |
@@ -584,6 +724,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Connections background](../../../../../ui/theme-packages/village/assets/applet-scenes/nyt-connections/background.webp) | ![Connections effect](brands/nyt-connections/effect.webp) |
 
 ### Slither.io
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/slither-io.webp" alt="Slither.io icon" width="96">
 
@@ -593,6 +735,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Agar.io
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/agar-io.webp" alt="Agar.io icon" width="96">
 
 | Background | Image-generated effect |
@@ -600,6 +744,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Agar.io background](../../../../../ui/theme-packages/village/assets/applet-scenes/agar-io/background.webp) | ![Agar.io effect](brands/agar-io/effect.webp) |
 
 ### Krunker
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/krunker-io.webp" alt="Krunker icon" width="96">
 
@@ -609,6 +755,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### skribbl.io
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/skribbl-io.webp" alt="skribbl.io icon" width="96">
 
 | Background | Image-generated effect |
@@ -616,6 +764,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![skribbl.io background](../../../../../ui/theme-packages/village/assets/applet-scenes/skribbl-io/background.webp) | ![skribbl.io effect](brands/skribbl-io/effect.webp) |
 
 ### Infinite Craft
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/infinite-craft.webp" alt="Infinite Craft icon" width="96">
 
@@ -625,6 +775,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Little Alchemy 2
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/little-alchemy-2.webp" alt="Little Alchemy 2 icon" width="96">
 
 | Background | Image-generated effect |
@@ -632,6 +784,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Little Alchemy 2 background](../../../../../ui/theme-packages/village/assets/applet-scenes/little-alchemy-2/background.webp) | ![Little Alchemy 2 effect](brands/little-alchemy-2/effect.webp) |
 
 ### Cookie Clicker
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/cookie-clicker.webp" alt="Cookie Clicker icon" width="96">
 
@@ -641,6 +795,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Lichess
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/lichess.webp" alt="Lichess icon" width="96">
 
 | Background | Image-generated effect |
@@ -648,6 +804,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Lichess background](../../../../../ui/theme-packages/village/assets/applet-scenes/lichess/background.webp) | ![Lichess effect](brands/lichess/effect.webp) |
 
 ### Drive Mad
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/drive-mad.webp" alt="Drive Mad icon" width="96">
 
@@ -657,6 +815,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Subway Surfers
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/subway-surfers.webp" alt="Subway Surfers icon" width="96">
 
 | Background | Image-generated effect |
@@ -664,6 +824,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Subway Surfers background](../../../../../ui/theme-packages/village/assets/applet-scenes/subway-surfers/background.webp) | ![Subway Surfers effect](brands/subway-surfers/effect.webp) |
 
 ### Sekai
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/sekai.webp" alt="Sekai icon" width="96">
 
@@ -673,6 +835,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Sketch Racer
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/sekai-sketch-racer.webp" alt="Sketch Racer icon" width="96">
 
 | Background | Image-generated effect |
@@ -680,6 +844,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Sketch Racer background](../../../../../ui/theme-packages/village/assets/applet-scenes/sekai-sketch-racer/background.webp) | ![Sketch Racer effect](brands/sekai-sketch-racer/effect.webp) |
 
 ### 3D UNO!
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/sekai-3d-uno.webp" alt="3D UNO! icon" width="96">
 
@@ -689,6 +855,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Devil Level: 50 Trolls
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/sekai-devil-level.webp" alt="Devil Level: 50 Trolls icon" width="96">
 
 | Background | Image-generated effect |
@@ -696,6 +864,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Devil Level: 50 Trolls background](../../../../../ui/theme-packages/village/assets/applet-scenes/sekai-devil-level/background.webp) | ![Devil Level: 50 Trolls effect](brands/sekai-devil-level/effect.webp) |
 
 ### Pokémon Showdown
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/pokemon-showdown.webp" alt="Pokémon Showdown icon" width="96">
 
@@ -705,6 +875,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### ChatGPT
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/chatgpt.webp" alt="ChatGPT icon" width="96">
 
 | Background | Image-generated effect |
@@ -712,6 +884,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![ChatGPT background](../../../../../ui/theme-packages/village/assets/applet-scenes/chatgpt/background.webp) | ![ChatGPT effect](brands/chatgpt/effect.webp) |
 
 ### Claude
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/claude.webp" alt="Claude icon" width="96">
 
@@ -721,6 +895,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Gemini
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/gemini.webp" alt="Gemini icon" width="96">
 
 | Background | Image-generated effect |
@@ -728,6 +904,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Gemini background](../../../../../ui/theme-packages/village/assets/applet-scenes/gemini/background.webp) | ![Gemini effect](brands/gemini/effect.webp) |
 
 ### Perplexity
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/perplexity.webp" alt="Perplexity icon" width="96">
 
@@ -737,6 +915,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### DeepSeek
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/deepseek.webp" alt="DeepSeek icon" width="96">
 
 | Background | Image-generated effect |
@@ -744,6 +924,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![DeepSeek background](../../../../../ui/theme-packages/village/assets/applet-scenes/deepseek/background.webp) | ![DeepSeek effect](brands/deepseek/effect.webp) |
 
 ### WhatsApp
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/whatsapp.webp" alt="WhatsApp icon" width="96">
 
@@ -753,6 +935,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Telegram
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/telegram.webp" alt="Telegram icon" width="96">
 
 | Background | Image-generated effect |
@@ -760,6 +944,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Telegram background](../../../../../ui/theme-packages/village/assets/applet-scenes/telegram/background.webp) | ![Telegram effect](brands/telegram/effect.webp) |
 
 ### Slack
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/slack.webp" alt="Slack icon" width="96">
 
@@ -769,6 +955,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Microsoft Teams
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/teams.webp" alt="Microsoft Teams icon" width="96">
 
 | Background | Image-generated effect |
@@ -776,6 +964,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Microsoft Teams background](../../../../../ui/theme-packages/village/assets/applet-scenes/teams/background.webp) | ![Microsoft Teams effect](brands/teams/effect.webp) |
 
 ### Zoom
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/zoom.webp" alt="Zoom icon" width="96">
 
@@ -785,6 +975,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Dropbox
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/dropbox.webp" alt="Dropbox icon" width="96">
 
 | Background | Image-generated effect |
@@ -792,6 +984,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Dropbox background](../../../../../ui/theme-packages/village/assets/applet-scenes/dropbox/background.webp) | ![Dropbox effect](brands/dropbox/effect.webp) |
 
 ### OneDrive
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/onedrive.webp" alt="OneDrive icon" width="96">
 
@@ -801,6 +995,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Word
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/microsoft-word.webp" alt="Word icon" width="96">
 
 | Background | Image-generated effect |
@@ -808,6 +1004,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Word background](../../../../../ui/theme-packages/village/assets/applet-scenes/microsoft-word/background.webp) | ![Word effect](brands/microsoft-word/effect.webp) |
 
 ### Excel
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/microsoft-excel.webp" alt="Excel icon" width="96">
 
@@ -817,6 +1015,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### PowerPoint
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/microsoft-powerpoint.webp" alt="PowerPoint icon" width="96">
 
 | Background | Image-generated effect |
@@ -824,6 +1024,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![PowerPoint background](../../../../../ui/theme-packages/village/assets/applet-scenes/microsoft-powerpoint/background.webp) | ![PowerPoint effect](brands/microsoft-powerpoint/effect.webp) |
 
 ### Figma
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/figma.webp" alt="Figma icon" width="96">
 
@@ -833,6 +1035,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Canva
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/canva.webp" alt="Canva icon" width="96">
 
 | Background | Image-generated effect |
@@ -840,6 +1044,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Canva background](../../../../../ui/theme-packages/village/assets/applet-scenes/canva/background.webp) | ![Canva effect](brands/canva/effect.webp) |
 
 ### Spotify
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/spotify.webp" alt="Spotify icon" width="96">
 
@@ -849,6 +1055,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Apple Music
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-music.webp" alt="Apple Music icon" width="96">
 
 | Background | Image-generated effect |
@@ -856,6 +1064,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Apple Music background](../../../../../ui/theme-packages/village/assets/applet-scenes/apple-music/background.webp) | ![Apple Music effect](brands/apple-music/effect.webp) |
 
 ### Reddit
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/reddit.webp" alt="Reddit icon" width="96">
 
@@ -865,6 +1075,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Instagram
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/instagram.webp" alt="Instagram icon" width="96">
 
 | Background | Image-generated effect |
@@ -872,6 +1084,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Instagram background](../../../../../ui/theme-packages/village/assets/applet-scenes/instagram/background.webp) | ![Instagram effect](brands/instagram/effect.webp) |
 
 ### LinkedIn
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/linkedin.webp" alt="LinkedIn icon" width="96">
 
@@ -881,6 +1095,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Amazon
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/amazon.webp" alt="Amazon icon" width="96">
 
 | Background | Image-generated effect |
@@ -888,6 +1104,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Amazon background](../../../../../ui/theme-packages/village/assets/applet-scenes/amazon/background.webp) | ![Amazon effect](brands/amazon/effect.webp) |
 
 ### Netflix
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/netflix.webp" alt="Netflix icon" width="96">
 
@@ -897,6 +1115,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Outlook
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/outlook.webp" alt="Outlook icon" width="96">
 
 | Background | Image-generated effect |
@@ -904,6 +1124,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Outlook background](../../../../../ui/theme-packages/village/assets/applet-scenes/outlook/background.webp) | ![Outlook effect](brands/outlook/effect.webp) |
 
 ### Apple Podcasts
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/apple-podcasts.webp" alt="Apple Podcasts icon" width="96">
 
@@ -913,6 +1135,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Google Photos
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/google-photos.webp" alt="Google Photos icon" width="96">
 
 | Background | Image-generated effect |
@@ -920,6 +1144,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Google Photos background](../../../../../ui/theme-packages/village/assets/applet-scenes/google-photos/background.webp) | ![Google Photos effect](brands/google-photos/effect.webp) |
 
 ### Pinterest
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/pinterest.webp" alt="Pinterest icon" width="96">
 
@@ -929,6 +1155,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Facebook
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/facebook.webp" alt="Facebook icon" width="96">
 
 | Background | Image-generated effect |
@@ -936,6 +1164,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Facebook background](../../../../../ui/theme-packages/village/assets/applet-scenes/facebook/background.webp) | ![Facebook effect](brands/facebook/effect.webp) |
 
 ### Threads
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/threads.webp" alt="Threads icon" width="96">
 
@@ -945,6 +1175,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### CapCut
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/capcut.webp" alt="CapCut icon" width="96">
 
 | Background | Image-generated effect |
@@ -952,6 +1184,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![CapCut background](../../../../../ui/theme-packages/village/assets/applet-scenes/capcut/background.webp) | ![CapCut effect](brands/capcut/effect.webp) |
 
 ### Uber
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/uber.webp" alt="Uber icon" width="96">
 
@@ -961,6 +1195,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Uber Eats
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/uber-eats.webp" alt="Uber Eats icon" width="96">
 
 | Background | Image-generated effect |
@@ -968,6 +1204,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Uber Eats background](../../../../../ui/theme-packages/village/assets/applet-scenes/uber-eats/background.webp) | ![Uber Eats effect](brands/uber-eats/effect.webp) |
 
 ### Booking.com
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/booking.webp" alt="Booking.com icon" width="96">
 
@@ -977,6 +1215,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### 飞书
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/feishu.webp" alt="飞书 icon" width="96">
 
 | Background | Image-generated effect |
@@ -984,6 +1224,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![飞书 background](../../../../../ui/theme-packages/village/assets/applet-scenes/feishu/background.webp) | ![飞书 effect](brands/feishu/effect.webp) |
 
 ### 哔哩哔哩
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/bilibili.webp" alt="哔哩哔哩 icon" width="96">
 
@@ -993,6 +1235,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### 小红书
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/xiaohongshu.webp" alt="小红书 icon" width="96">
 
 | Background | Image-generated effect |
@@ -1000,6 +1244,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![小红书 background](../../../../../ui/theme-packages/village/assets/applet-scenes/xiaohongshu/background.webp) | ![小红书 effect](brands/xiaohongshu/effect.webp) |
 
 ### 百度网盘
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/baidu-netdisk.webp" alt="百度网盘 icon" width="96">
 
@@ -1009,6 +1255,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Twitch
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/twitch.webp" alt="Twitch icon" width="96">
 
 | Background | Image-generated effect |
@@ -1016,6 +1264,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Twitch background](../../../../../ui/theme-packages/village/assets/applet-scenes/twitch/background.webp) | ![Twitch effect](brands/twitch/effect.webp) |
 
 ### Microsoft Copilot
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/copilot.webp" alt="Microsoft Copilot icon" width="96">
 
@@ -1025,6 +1275,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Adobe Acrobat
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/acrobat.webp" alt="Adobe Acrobat icon" width="96">
 
 | Background | Image-generated effect |
@@ -1032,6 +1284,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Adobe Acrobat background](../../../../../ui/theme-packages/village/assets/applet-scenes/acrobat/background.webp) | ![Adobe Acrobat effect](brands/acrobat/effect.webp) |
 
 ### Wikipedia
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/wikipedia.webp" alt="Wikipedia icon" width="96">
 
@@ -1041,6 +1295,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### 豆包
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/doubao.webp" alt="豆包 icon" width="96">
 
 | Background | Image-generated effect |
@@ -1048,6 +1304,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![豆包 background](../../../../../ui/theme-packages/village/assets/applet-scenes/doubao/background.webp) | ![豆包 effect](brands/doubao/effect.webp) |
 
 ### 淘宝
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/taobao.webp" alt="淘宝 icon" width="96">
 
@@ -1057,6 +1315,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### 支付宝
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/alipay.webp" alt="支付宝 icon" width="96">
 
 | Background | Image-generated effect |
@@ -1064,6 +1324,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![支付宝 background](../../../../../ui/theme-packages/village/assets/applet-scenes/alipay/background.webp) | ![支付宝 effect](brands/alipay/effect.webp) |
 
 ### 抖音
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/douyin.webp" alt="抖音 icon" width="96">
 
@@ -1073,6 +1335,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### PostHog
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/posthog.webp" alt="PostHog icon" width="96">
 
 | Background | Image-generated effect |
@@ -1080,6 +1344,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![PostHog background](../../../../../ui/theme-packages/village/assets/applet-scenes/posthog/background.webp) | ![PostHog effect](brands/posthog/effect.webp) |
 
 ### Cloudflare
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/cloudflare.webp" alt="Cloudflare icon" width="96">
 
@@ -1089,6 +1355,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Vercel
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/vercel.webp" alt="Vercel icon" width="96">
 
 | Background | Image-generated effect |
@@ -1096,6 +1364,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Vercel background](../../../../../ui/theme-packages/village/assets/applet-scenes/vercel/background.webp) | ![Vercel effect](brands/vercel/effect.webp) |
 
 ### Netlify
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/netlify.webp" alt="Netlify icon" width="96">
 
@@ -1105,6 +1375,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Firebase
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/firebase.webp" alt="Firebase icon" width="96">
 
 | Background | Image-generated effect |
@@ -1112,6 +1384,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Firebase background](../../../../../ui/theme-packages/village/assets/applet-scenes/firebase/background.webp) | ![Firebase effect](brands/firebase/effect.webp) |
 
 ### Sentry
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/sentry.webp" alt="Sentry icon" width="96">
 
@@ -1121,6 +1395,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### Railway
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/railway.webp" alt="Railway icon" width="96">
 
 | Background | Image-generated effect |
@@ -1128,6 +1404,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![Railway background](../../../../../ui/theme-packages/village/assets/applet-scenes/railway/background.webp) | ![Railway effect](brands/railway/effect.webp) |
 
 ### Render
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/render.webp" alt="Render icon" width="96">
 
@@ -1137,6 +1415,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 
 ### GitLab
 
+🟡 Earlier layout · Image-generated visual concept
+
 <img src="../../../../../ui/theme-packages/village/assets/devices/gitlab.webp" alt="GitLab icon" width="96">
 
 | Background | Image-generated effect |
@@ -1144,6 +1424,8 @@ See [the scene inventory](README.md), [generation direction](concept-direction.j
 | ![GitLab background](../../../../../ui/theme-packages/village/assets/applet-scenes/gitlab/background.webp) | ![GitLab effect](brands/gitlab/effect.webp) |
 
 ### Jira
+
+🟡 Earlier layout · Image-generated visual concept
 
 <img src="../../../../../ui/theme-packages/village/assets/devices/jira.webp" alt="Jira icon" width="96">
 
