@@ -52,7 +52,7 @@ const thursday=(now:number)=>weekdayAhead(now,4,'10:00');
 const sunday=(now:number)=>{const last=Math.max(thursday(now),weekdayAhead(now,4,'15:00'),weekdayAhead(now,5,'14:30'));return last+(7-new Date(now+last*DAY).getDay());};
 // Fictional primary calendar: start in days from now (or worked out from now), local wall time, duration in hours. The
 // calendar leaves those openings free whatever the weekday, so Fox can book one: the 1:1 the mail puts on Thursday
-// afternoon sits between them, and the trip to New York starts the Sunday after (owner Issue #518: on a Tuesday the old
+// afternoon sits between them, and the trip to New York starts the Sunday after (Alpha test failure #518: on a Tuesday the old
 // "flight in 2 days" fell on Thursday and Fox rightly booked nothing).
 const EVENTS:[key:string,days:number|((now:number)=>number),clock:string,hours:number,title:string,description:string,location:string][]=[
  ['standup01',1,'08:30',0.5,'Team standup','Daily sync with the product team.','Zoom'],
