@@ -18,9 +18,12 @@ export type PhoneRelayOptions<M extends {type:string,id:string}=PhoneMessage>={
  vault:{get(id:string):string|null,set(id:string,v:string):void,delete(id:string):void},
  name:()=>string,
  userAgent:string,
- relay?:string,
+ /** The relay a new pairing uses; a function when it is known only when the pairing starts (this computer's own, local-relay.ts). */
+ relay?:string|(()=>string),
  /** `agent`: the pairing is with another Worldlet, not a phone. Default `phone`. */
  kind?:PairKind,
+ /** Its vault entries' name, when two pairings of one kind keep their own (the browser on this computer, `local`). Default the kind. */
+ vaultName?:string,
  /** Reads an opened message; anything it returns null for is dropped. Default: a phone's (readPhoneMessage). */
  read?:(value:unknown)=>M|null,
  /** The phone's message; resolve true once the desktop took it (the page queued the chat or settled the item). `key`
@@ -29,8 +32,8 @@ export type PhoneRelayOptions<M extends {type:string,id:string}=PhoneMessage>={
  onChange?:(status:PhoneStatus)=>void,
 };
 export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>(options:PhoneRelayOptions<M>){
- const relay=options.relay||DEFAULT_PAIR_RELAY,kind=options.kind??'phone',read=options.read??(readPhoneMessage as unknown as (value:unknown)=>M|null);
- const VAULT_ID=kind+'-pairing',SEEN_ID=kind+'-pairing-seen';
+ const relayOf=()=>(typeof options.relay==='function'?options.relay():options.relay)||DEFAULT_PAIR_RELAY,kind=options.kind??'phone',read=options.read??(readPhoneMessage as unknown as (value:unknown)=>M|null);
+ const VAULT_ID=(options.vaultName??kind)+'-pairing',SEEN_ID=(options.vaultName??kind)+'-pairing-seen';
  let saved:Saved|null=null,keys:PairKeys|null=null,cursor=0,seenAt:number|null=null,push:{platform:string}|null|undefined,error='';
  const published=new Map<string,string>(),latest=new Map<string,unknown>();
  try{const raw=options.vault.get(VAULT_ID);if(raw)saved=JSON.parse(raw);}catch{saved=null;}
@@ -52,7 +55,7 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  const changed=()=>options.onChange?.(status());
  async function request(path:string,init:RequestInit={},token?:string,timeout=20_000){
   const k=await ensureKeys();
-  const response=await options.fetch((saved?.relay||relay)+path,{...init,headers:{'User-Agent':options.userAgent,'Content-Type':'application/json',...(token||k?{Authorization:'Bearer '+(token||k!.desktopToken)}:{})},signal:AbortSignal.timeout(timeout)});
+  const response=await options.fetch((saved?.relay||relayOf())+path,{...init,headers:{'User-Agent':options.userAgent,'Content-Type':'application/json',...(token||k?{Authorization:'Bearer '+(token||k!.desktopToken)}:{})},signal:AbortSignal.timeout(timeout)});
   const body:any=await response.json().catch(()=>({}));
   if(!response.ok){const e:any=new Error(body?.error||`Pairing relay answered ${response.status}.`);e.status=response.status;throw e;}
   return body;
@@ -62,7 +65,7 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
 
  async function start(){
   await end().catch(()=>{});
-  const secret=newPairSecret(),k=await pairKeys(secret);
+  const secret=newPairSecret(),k=await pairKeys(secret),relay=relayOf();
   await request('/api/pair',{method:'POST',body:JSON.stringify({id:k.id,desktop:await sha256Hex(k.desktopToken),phone:await sha256Hex(k.phoneToken)})},k.desktopToken);
   saved={secret:base64url(secret),relay,name:options.name(),paired:false,phone:null};keys=k;cursor=0;push=undefined;published.clear();error='';
   forgetSeen();save();changed();

@@ -5,7 +5,9 @@ import qrcode from 'qrcode-generator';
 // `worldlet:phone-status`. Below it, another Worldlet (a laptop) can use this computer's Agent for Fox (`phonePair` with
 // `kind: 'agent'`, `worldlet:agent-pair-status`, core/phone/README.md#another-computers-agent): its code is pasted there
 // (a laptop rarely scans), so it shows as text to copy. Last, any web browser can open the same Center and Fox
-// (`phonePair` with `kind: 'web'`, `worldlet:web-pair-status`, core/phone/README.md#web): its link is shown to copy or open.
+// (core/phone/README.md#web): a browser on this computer opens a link this app serves itself (`phonePair` with `kind:
+// 'local'`, `worldlet:local-pair-status`), and another device's browser a link to copy (`kind: 'web'`,
+// `worldlet:web-pair-status`).
 type Status={state:'none'|'waiting'|'paired',link?:string,phone?:{name:string,version:string}|null,seenAt?:number|null,push?:{platform:string}|null,error?:string};
 export function pairingQR(link:string){
  const qr=qrcode(0,'M');qr.addData(link,'Byte');qr.make();
@@ -20,7 +22,7 @@ const seen=(at?:number|null)=>{
 export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Promise<any>}){
  const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const element=el('section','companion-info-section companion-phone-page');element.dataset.section='Mobile';
- let status:Status|null=null,agent:Status|null=null,web:Status|null=null,busy=false,error='',copied=false,agentCopied=false,webCopied=false;
+ let status:Status|null=null,agent:Status|null=null,web:Status|null=null,local:Status|null=null,busy=false,error='',copied=false,agentCopied=false,webCopied=false;
  const button=(label:string,run:()=>Promise<unknown>|void,primary=false)=>{
   const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';b.disabled=busy;
   b.onclick=async()=>{if(busy)return;busy=true;error='';render();try{await run();}catch(e){error=(e as Error).message||'Please try again.';}finally{busy=false;render();}};
@@ -28,18 +30,27 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
  };
  const pair=async(operation:'start'|'end'|'status')=>{status=await call('phonePair',{operation});copied=false;};
  const pairAgent=async(operation:'start'|'end'|'status')=>{agent=await call('phonePair',{operation,kind:'agent'});agentCopied=false;};
- const pairWeb=async(operation:'start'|'end'|'status'|'open'|'background')=>{web=await call('phonePair',{operation,kind:'web'});if(operation!=='open'&&operation!=='background')webCopied=false;};
+ const pairWeb=async(operation:'start'|'end'|'status'|'background')=>{web=await call('phonePair',{operation,kind:'web'});if(operation!=='background')webCopied=false;};
+ const pairLocal=async(operation:'start'|'end'|'status'|'open'|'background')=>{local=await call('phonePair',{operation,kind:'local'});};
  function browsers(){
-  const box=el('div','companion-phone-browser');
-  box.append(el('h4','','In a browser'),el('p','','Open what needs you, what your Agent is doing and Fox in any web browser, on this computer or another. Keep the link private: anyone who has it can see and approve here.'));
-  if(web?.link&&(web.state==='waiting'||web.state==='paired')){
-   const link=web.link;
-   if(web.state==='paired')box.append(el('p','',(web.phone?.name?`Opened in ${web.phone.name}`:'Opened in a browser')+' · '+seen(web.seenAt)));
-   box.append(button('Open in browser',()=>pairWeb('open'),true),button(webCopied?'Link copied':'Copy link',async()=>{await navigator.clipboard.writeText(link);webCopied=true;}),button(web.state==='paired'?'Turn off':'Cancel',()=>pairWeb('end')));
-   // Run in background: no window stays on screen, not even Fox, and the link keeps working (modules/phone).
-   if(web.state==='paired')box.append(el('p','','Use Worldlet only from the browser: close every window and keep it running. Click Worldlet in the Dock or the notification area to bring the World back.'),
-    button('Run in background',()=>pairWeb('background')));
-  }else if(web)box.append(button('Open in browser',async()=>{await pairWeb('start');await pairWeb('open');}));
+  const box=el('div','companion-phone-browser'),on=(p:Status|null)=>p?.state==='waiting'||p?.state==='paired';
+  const opened=(p:Status|null)=>p?.state==='paired'?(p.phone?.name?`Opened in ${p.phone.name}`:'Opened in a browser')+' · '+seen(p.seenAt):'';
+  box.append(el('h4','','In a browser'),el('p','','Open what needs you, what your Agent is doing and Fox in any web browser. Keep the link private: anyone who has it can see and approve here.'));
+  if(!local||!web)return box;
+  // This computer: Worldlet serves the page itself, so nothing goes over the internet (modules/phone local-relay.ts).
+  box.append(el('p','companion-phone-place','On this computer'));
+  if(local.state==='paired')box.append(el('p','',opened(local)));
+  box.append(button('Open in browser',async()=>{if(!on(local))await pairLocal('start');await pairLocal('open');},true));
+  // Another device: a link to copy (still through the relay; core/phone/README.md#web).
+  box.append(el('p','companion-phone-place','On another device'));
+  if(web.state==='paired')box.append(el('p','',opened(web)));
+  box.append(button(webCopied?'Link copied':'Copy link',async()=>{if(!on(web))await pairWeb('start');if(web?.link){await navigator.clipboard.writeText(web.link);webCopied=true;}}));
+  if(on(local)||on(web)){
+   box.append(button(local.state==='paired'||web.state==='paired'?'Turn off':'Cancel',async()=>{if(on(local))await pairLocal('end');if(on(web))await pairWeb('end');}));
+   // Run in background: no window stays on screen, not even Fox, and the links keep working (modules/phone).
+   if(local.state==='paired'||web.state==='paired')box.append(el('p','','Use Worldlet only from the browser: close every window and keep it running. Click Worldlet in the Dock or the notification area to bring the World back.'),
+    button('Run in background',()=>local?.state==='paired'?pairLocal('background'):pairWeb('background')));
+  }
   return box;
  }
  function computers(){
@@ -80,8 +91,9 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
  window.addEventListener('worldlet:phone-status',e=>{status=(e as CustomEvent).detail;render();});
  window.addEventListener('worldlet:agent-pair-status',e=>{agent=(e as CustomEvent).detail;render();});
  window.addEventListener('worldlet:web-pair-status',e=>{web=(e as CustomEvent).detail;render();});
+ window.addEventListener('worldlet:local-pair-status',e=>{local=(e as CustomEvent).detail;render();});
  render();
  return {element,
   /** The panel opened: read the current pairing. */
-  async refresh(){try{await pair('status');await pairAgent('status');await pairWeb('status');}catch(e){error=(e as Error).message;}render();}};
+  async refresh(){try{await pair('status');await pairAgent('status');await pairWeb('status');await pairLocal('status');}catch(e){error=(e as Error).message;}render();}};
 }

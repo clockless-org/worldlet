@@ -1,48 +1,26 @@
 // Worldlet in a web browser (core/phone/README.md#web): the computer's `web` pairing (platform/electron/src/modules/
-// phone/relay.ts) and the page (ui/web) against an in-memory relay that answers like worker/pairing.ts: the link, the
+// phone/relay.ts) and the page (ui/web) against the relay this computer serves itself (local-relay.ts), which answers
+// like worker/pairing.ts, over real HTTP on 127.0.0.1: the link, the
 // first poll completing the pairing with the browser's name, the Center reaching the page, Done and a chat line
 // reaching the computer, the fragment leaving the address bar, a reload from storage, and the page ending with the link.
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,rm} from 'node:fs/promises';
+import http from 'node:http';
 import {readFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
-import {createWebClient,readWebPairLink,WebPairingEnded,type PhoneMessage} from '../core/phone/index.ts';
+import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/electron/src/modules/phone/local-relay.ts';
+import {createWebClient,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,type PhoneMessage} from '../core/phone/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
-const ORIGIN='http://127.0.0.1:8788';
-// The relay (worker/pairing.ts), only what both sides use, in memory.
-function fakeRelay(){
- const pairs=new Map<string,{desktop:string,phone:string,version:number,phoneSeen:number|null,desktopSeen:number|null,pairedAt:number|null,slots:Map<string,{version:number,box:string}>,messages:{to:string,seq:number,box:string}[]}>();
- const SLOT_OWNER:Record<string,string>={attention:'desktop',conversation:'desktop',live:'desktop',widgets:'desktop',desktop:'desktop',phone:'phone'};
- const hash=async(text:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),b=>b.toString(16).padStart(2,'0')).join('');
- const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
- return async(input:string,init:RequestInit={}):Promise<Response>=>{
-  const url=new URL(input),method=init.method||'GET',body=init.body?JSON.parse(String(init.body)):{};
-  const [,,,id='',part='',name='']=url.pathname.split('/');
-  if(!id&&method==='POST'){pairs.set(body.id,{desktop:body.desktop,phone:body.phone,version:0,phoneSeen:null,desktopSeen:Date.now(),pairedAt:null,slots:new Map(),messages:[]});return json({id:body.id},201);}
-  const pair=pairs.get(id),token=String(new Headers(init.headers).get('Authorization')||'').replace('Bearer ','');
-  const digest=await hash(token),role=pair?.desktop===digest?'desktop':pair?.phone===digest?'phone':'';
-  if(!pair||!role)return json({error:'This pairing has ended. Pair again from Worldlet on your computer.'},404);
-  if(!part&&method==='DELETE'){pairs.delete(id);return json({ended:true});}
-  if(!part&&method==='GET'){
-   const after=Number(url.searchParams.get('after')||0);
-   pair.messages=pair.messages.filter(m=>!(m.to===role&&m.seq<=after));
-   if(role==='phone'){pair.phoneSeen=Date.now();pair.pairedAt??=Date.now();}else pair.desktopSeen=Date.now();
-   const peer=role==='desktop'?'phone':'desktop';
-   return json({version:pair.version,role,peer:{seenAt:role==='desktop'?pair.phoneSeen:pair.desktopSeen,pairedAt:pair.pairedAt},
-    slots:[...pair.slots].filter(([slot,s])=>SLOT_OWNER[slot]===peer&&s.version>after).map(([slot,s])=>({name:slot,version:s.version,box:s.box})),
-    messages:pair.messages.filter(m=>m.to===role&&m.seq>after).map(m=>({seq:m.seq,box:m.box}))});
-  }
-  if(part==='slots'&&method==='PUT'){if(SLOT_OWNER[name]!==role)return json({error:'This side cannot write that slot.'},403);pair.slots.set(name,{version:++pair.version,box:body.box});return json({version:pair.version});}
-  if(part==='messages'&&method==='POST'){const seq=++pair.version;pair.messages.push({to:role==='desktop'?'phone':'desktop',seq,box:body.box});return json({seq},201);}
-  return json({error:'Not found'},404);
- };
-}
-const relayFetch=fakeRelay();
+// The relay this computer serves itself (local-relay.ts), on a free port, with the page built as the app ships it.
+const root=fileURLToPath(new URL('../',import.meta.url)),out=await mkdtemp(path.join(os.tmpdir(),'web-open-'));
+await buildWebOpen(root,out);
+const local=createLocalRelay(),server=await serveLocalRelay({relay:local,pageRoot:out,ports:[0]}),ORIGIN=server.origin;
+const relayFetch=(input:string,init?:RequestInit)=>local.fetch(new Request(input,init));
 const memoryVault=()=>{const values=new Map<string,string>();return {get:(id:string)=>values.get(id)??null,set:(id:string,v:string)=>{values.set(id,v);},delete:(id:string)=>{values.delete(id);}};};
 const delivered:PhoneMessage[]=[];
 const desktop=createPhoneRelay({fetch:(input,init)=>relayFetch(String(input),init),vault:memoryVault(),name:()=>'Studio Mac',userAgent:'check',relay:ORIGIN,kind:'web',
@@ -75,23 +53,11 @@ await client.send({type:'attention',id:'a1',action:'done'});
 await desktop.poll();
 assert.deepEqual(delivered.map(m=>[m.type,(m as any).action]),[['attention','done']]);
 
-// The page, built as the website serves it, against the same relay.
-const root=fileURLToPath(new URL('../',import.meta.url)),out=await mkdtemp(path.join(os.tmpdir(),'web-open-'));
-await buildWebOpen(root,out);
+// The page as this computer serves it: real HTTP on 127.0.0.1, nothing routed or faked.
 const browser=await chromium.launch();
 try{
  const page=await browser.newPage({viewport:{width:390,height:844}}),errors:string[]=[];
  page.on('pageerror',e=>errors.push(e.message));
- await page.route(ORIGIN+'/**',async route=>{
-  const request=route.request(),url=new URL(request.url());
-  if(url.pathname.startsWith('/api/pair')){
-   const response=await relayFetch(request.url(),{method:request.method(),headers:await request.allHeaders(),body:request.postData()??undefined});
-   return route.fulfill({status:response.status,contentType:'application/json',body:await response.text()});
-  }
-  const file=url.pathname==='/open/'?'index.html':url.pathname.replace('/open/','');
-  try{return route.fulfill({body:await readFile(path.join(out,file)),contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html'});}
-  catch{return route.fulfill({status:404,body:''});}
- });
  await desktop.publish('attention',attention([item('a2','event','Dinner with Alex'),item('a3','needsAction','Send the invoice')]));
  await desktop.publish('desktop',{v:1,at:new Date().toISOString(),name:'Studio Mac',version:'2026.1013.4400'});
  await page.goto(link);
@@ -129,9 +95,62 @@ try{
  await page.goto(ORIGIN+'/open/');
  await page.getByRole('heading',{name:'Open Worldlet here'}).waitFor();
  assert.deepEqual(errors,[]);
-}finally{await browser.close();await rm(out,{recursive:true,force:true});}
+}finally{await browser.close();}
 await assert.rejects(client.poll(),WebPairingEnded);
 console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, reload and turning the link off.');
+
+// This computer's server (local-relay.ts): only requests addressed to 127.0.0.1 or localhost by name, only the page's
+// files, and no answer another origin may read.
+{
+ const raw=(pathname:string,host:string,headers:Record<string,string>={})=>new Promise<{status:number,headers:http.IncomingHttpHeaders,body:string}>((resolve,reject)=>{
+  const request=http.request({host:'127.0.0.1',port:server.port,path:pathname,headers:{Host:host,...headers}},response=>{let body='';response.on('data',c=>body+=c);response.on('end',()=>resolve({status:response.statusCode!,headers:response.headers,body}));});
+  request.on('error',reject);request.end();
+ });
+ const own='127.0.0.1:'+server.port;
+ assert.equal((await raw('/open/',own)).status,200);
+ assert.equal((await raw('/open/','localhost:'+server.port)).status,200);
+ assert.equal((await raw('/open/','attacker.example:'+server.port)).status,421,'a name pointed at 127.0.0.1 is refused');
+ assert.equal((await raw('/api/pair/x',own.replace(/\d+$/,'1'))).status,421);
+ const page=await raw('/open/',own,{Origin:'https://attacker.example'});
+ assert.equal(page.headers['access-control-allow-origin'],undefined);
+ assert.match(String(page.headers['content-security-policy']),/default-src 'self'/);
+ assert.equal((await raw('/',own)).headers.location,'/open/');
+ for(const bad of ['/open/../package.json','/open/%2e%2e%2fpackage.json','/open/missing.js','/open/index.json','/secret','/api/pairing'])assert.equal((await raw(bad,own)).status,404,bad);
+ assert.equal((await raw('/api/pair/AAAAAAAAAAAAAAAAAAAAAA',own)).status,404,'an unknown pairing looks ended');
+ console.log('PASS this computer serves only the page and the relay, only to itself by name, and lets no other origin read them.');
+}
+
+// The relay in memory: a pairing kept from before a restart is handed back already paired; a long poll wakes when the
+// other side writes; a browser takes no notifications; a queue that nobody reads is capped.
+{
+ const vault=new Map<string,string>(),got:PhoneMessage[]=[];
+ const memory={get:(id:string)=>vault.get(id)??null,set:(id:string,v:string)=>{vault.set(id,v);},delete:(id:string)=>{vault.delete(id);}};
+ const first=createLocalRelay(),computer=(relay:ReturnType<typeof createLocalRelay>)=>createPhoneRelay({fetch:(input,init)=>relay.fetch(new Request(input,init)),vault:memory,vaultName:'local',name:()=>'Studio Mac',userAgent:'check',relay:()=>ORIGIN,kind:'web',deliver:async m=>{got.push(m);return true;}});
+ const before=computer(first),{link:made}=await before.start();
+ assert(vault.has('local-pairing'),'its own vault entry, beside the relay browser\'s');
+ const tab=createWebClient({fetch:(input,init)=>first.fetch(new Request(String(input),init)),link:made!,relay:ORIGIN,name:'Safari on Mac',version:'web'});
+ await tab.poll();await before.poll();assert.equal(before.status().state,'paired');
+ // Restart: a new relay knows nothing until the computer hands the kept pairing back.
+ const second=createLocalRelay(),saved=JSON.parse(vault.get('local-pairing')!),k=await pairKeys(fromBase64url(saved.secret));
+ second.adopt(k.id,await sha256Hex(k.desktopToken),await sha256Hex(k.phoneToken),true);
+ const after=computer(second),again=createWebClient({fetch:(input,init)=>second.fetch(new Request(String(input),init)),link:made!,relay:ORIGIN,name:'Safari on Mac',version:'web'});
+ await after.poll();assert.equal(after.status().state,'paired','still paired after the restart');
+ await after.publish('attention',attention([item('r1','needsAction','Pay the rent')]));
+ assert.equal((await again.poll()).attention?.now[0].action,'Pay the rent');
+ // A long poll returns as soon as the browser says something.
+ await after.poll();
+ const began=Date.now(),waiting=after.poll(10);
+ await new Promise(r=>setTimeout(r,200));await again.send({type:'chat',id:'c1',text:'Hello'});
+ assert.equal(await waiting,true);assert(Date.now()-began<5000,'the long poll woke at once');
+ assert.equal((got.at(-1) as any).text,'Hello');
+ assert.deepEqual(await after.notify({title:'x',body:'y'} as any),{sent:false,reason:'no-device'});
+ const flood=createWebClient({fetch:(input,init)=>second.fetch(new Request(String(input),init)),link:made!,relay:ORIGIN,name:'x',version:'web'});
+ let refused=false;for(let i=0;i<=LOCAL_RELAY_LIMITS.messages+1&&!refused;i++)await flood.send({type:'chat',id:'f'+i,text:'x'}).catch(()=>{refused=true;});
+ assert(refused,'a queue nobody reads stops growing');
+ await after.end();await assert.rejects(again.poll(),WebPairingEnded);
+ console.log('PASS the in-memory relay: a kept pairing survives a restart, a long poll wakes at once, no notifications, a capped queue.');
+}
+await server.close();await rm(out,{recursive:true,force:true});
 
 // A line said in the browser or on the phone while the World page is not there (core/phone/README.md#web, Fox without
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
@@ -158,5 +177,9 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  assert.match(fox,/host\.onStarted\(begin\);/,'routines and history run without the page');
  assert.match(phone,/host\.onStarted\(\(\)=>\{for\(const link of links\)link\.schedule\(1000\);\}\);/,'the phone and browser links run without the page');
  assert.match(fox,/report,converse,answerApproval,taskPanel:taskPanelInput\}\)/,'FoxService offers converse, answerApproval and the Task panel');
+ // The browser on this computer has a pairing and loop of its own, served here before its link is made.
+ assert.match(phone,/\{relay:local,open:localOpen,listening:localListening,phone:true\}\]/,'the local browser link runs like the others');
+ assert.match(phone,/if\(request\.kind==='local'\)try\{await serveLocal\(\);\}/,'its server starts before its link is made');
+ assert.match(phone,/fetch:async\(input,init\)=>\{await adopted;return localRelay\.fetch/,'a kept pairing is handed back before the computer reads the relay');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }
