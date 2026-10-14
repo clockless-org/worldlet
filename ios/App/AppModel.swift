@@ -167,6 +167,7 @@ final class AppModel {
         opening = nil
         askNotifications = false
         UserDefaults.standard.removeObject(forKey: Self.sentPushKey)
+        keepsPush = false
         PairingStore.delete()
         phase = .unpaired
         attention = .empty
@@ -237,6 +238,10 @@ final class AppModel {
         if let seen = update.computerSeenAt { computerSeenAt = Date(timeIntervalSince1970: seen / 1000) }
         if let desktop = update.desktop, !desktop.name.isEmpty { computerName = desktop.name }
         if let desktop = update.desktop { takesOrders = desktop.order == true }
+        if let desktop = update.desktop, (desktop.push == true) != keepsPush {
+            keepsPush = desktop.push == true
+            sendPushToken()
+        }
         if let snapshot = update.attention {
             attention = snapshot
             receivedAttention = true
@@ -289,6 +294,9 @@ final class AppModel {
     /// Asks once, after pairing, whether to turn notifications on (HomeView's alert, before the system's own question).
     var askNotifications = false
     @ObservationIgnored private var pushToken: String?
+    /// The computer keeps the token itself (its desktop slot says `push`), so the relay gets none.
+    /// Starts as it was last sent, so a launch does not hand the token back to the relay before the slot arrives.
+    @ObservationIgnored private var keepsPush = UserDefaults.standard.string(forKey: AppModel.sentPushKey)?.hasSuffix(" direct") == true
     /// Where a tapped notification goes; HomeView opens it once the Center has what it names.
     var opening: PushTarget?
     /// A Center snapshot came since the tap, so an item or Applet still missing from it is gone.
@@ -327,11 +335,12 @@ final class AppModel {
 
     private func sendPushToken() {
         guard let session, let keys, let token = pushToken, phase == .paired else { return }
-        let sent = "\(keys.id) \(Self.pushPlatform) \(token)"
+        let direct = keepsPush
+        let sent = "\(keys.id) \(Self.pushPlatform) \(token)\(direct ? " direct" : "")"
         guard UserDefaults.standard.string(forKey: Self.sentPushKey) != sent else { return }
         Task {
             // A failure is tried again with the token the next launch brings.
-            guard (try? await session.registerPush(platform: Self.pushPlatform, token: token)) != nil, self.session === session else { return }
+            guard (try? await session.registerPush(platform: Self.pushPlatform, token: token, direct: direct)) != nil, self.session === session else { return }
             UserDefaults.standard.set(sent, forKey: Self.sentPushKey)
         }
     }

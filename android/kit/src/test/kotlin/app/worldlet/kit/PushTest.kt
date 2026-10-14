@@ -99,4 +99,20 @@ class PushTest {
         assertEquals("DELETE" to "https://worldlet.ai/api/pair/${keys.id}/push", requests[1].method to requests[1].url)
         session.unregisterPush() // a pairing that already ended has no token to forget
     }
+
+    @Test
+    fun handsTheTokenToAComputerThatKeepsIt() = runTest {
+        val requests = mutableListOf<RelayRequest>()
+        val session = PhoneSession(PairLink(secret, name = "Mac"), { requests += it; 200 to "{}" })
+        session.registerPush("fcm", "token:abc_123-XYZ", direct = true)
+        session.unregisterPush(direct = true)
+        assertEquals(listOf("POST /messages", "DELETE /push", "POST /messages", "DELETE /push"),
+            requests.map { "${it.method} ${it.url.substringAfterLast('/').let { last -> "/$last" }}" }, "sealed to the computer, and the relay keeps none")
+        fun handed(i: Int): Map<String, String> {
+            val box = Json.parseToJsonElement(requests[i].body!!).jsonObject["box"]!!.jsonPrimitive.content
+            return Json.parseToJsonElement(keys.openText(box, PairKeys.to("desktop"))).jsonObject.filterKeys { it != "id" }.mapValues { it.value.jsonPrimitive.content }
+        }
+        assertEquals(mapOf("type" to "push", "platform" to "fcm", "token" to "token:abc_123-XYZ"), handed(0))
+        assertEquals(mapOf("type" to "push", "platform" to "", "token" to ""), handed(2), "taken back")
+    }
 }

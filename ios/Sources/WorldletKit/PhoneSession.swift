@@ -119,10 +119,17 @@ public actor PhoneSession {
                               body: Box(box: try keys.seal(info, place: PairKeys.place(slot: "phone"))))
     }
 
-    /// Where the relay sends this iPhone's notifications: the APNs device token in hex, "apns" for App Store and
-    /// TestFlight builds, "apns-dev" for debug builds (Apple's sandbox).
-    public func registerPush(platform: String, token: String) async throws {
-        _ = try await request("api/pair/\(keys.id)/push", method: "PUT", body: PushToken(platform: platform, token: token))
+    /// Where this iPhone's notifications go: the APNs device token in hex, "apns" for App Store and TestFlight builds,
+    /// "apns-dev" for debug builds (Apple's sandbox). With `direct` (the computer's desktop slot says `push`) the token
+    /// goes to the computer in a sealed message and the relay's registration is removed, so the relay keeps none
+    /// (core/phone/README.md#push); otherwise the relay keeps it, as older computers need.
+    public func registerPush(platform: String, token: String, direct: Bool = false) async throws {
+        guard direct else {
+            _ = try await request("api/pair/\(keys.id)/push", method: "PUT", body: PushToken(platform: platform, token: token))
+            return
+        }
+        try await send(.push(id: UUID().uuidString, platform: platform, token: token))
+        try? await unregisterPush()
     }
 
     public func unregisterPush() async throws {
