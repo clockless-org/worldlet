@@ -32,6 +32,7 @@ import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';
 import {startGraphics} from './graphics.ts';
+import {offerApplicationsFolder} from './applications-folder.ts';
 
 // Release smoke (#987): parsed before anything opens; malformed arguments are a usage error.
 let capture:CaptureRequest|null=null;
@@ -105,6 +106,8 @@ async function start(){
  if(process.env.WORLDLET_DEV_PID_FILE&&profile.channel==='dev')try{fs.writeFileSync(process.env.WORLDLET_DEV_PID_FILE,String(process.pid));}catch{}
  delete process.env.WORLDLET_DEV_PID_FILE;
  await app.whenReady();
+ // A Mac copy run from the disk image cannot update itself: it offers to move into Applications first.
+ if(await offerApplicationsFolder(profile)){app.quit();return;}
  installQuitTask();
  const diagnostics=createDiagnostics(profile.root);
  keepProcessOutput(profile.root);
