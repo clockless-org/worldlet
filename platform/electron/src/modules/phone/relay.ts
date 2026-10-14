@@ -5,7 +5,8 @@ import {DEFAULT_PAIR_RELAY,PUSH_BOX_PLACE,ROOM_LINK_MODE,readRoomFrame,roomEntry
 // The host runs one for the phone and one for another Worldlet that uses this computer's Agent (`kind: 'agent'`,
 // core/phone/README.md#another-computers-agent): the same relay, keys and boxes, with a code and vault entry of its own.
 // Slots the desktop owns are sealed and written only when their content changes; the phone's messages go to `deliver`,
-// and a message is acknowledged (by advancing the cursor) only after `deliver` accepted it. The agent pairing reads its
+// and one it does not take yet is kept in the vault and offered again on each poll, while the relay's cursor moves on
+// (a message held on the relay instead came back at once on every long poll, about four requests a second). The agent pairing reads its
 // client's messages with `read` (core/phone readRemoteToHost) instead of a phone's, and `send` queues one to the client. `notify` asks the relay to
 // wake the phone with a sealed notification; `push` in the status says whether the phone registered for them. A phone
 // that hands its notification token to the computer (a `push` message, core/phone/README.md#push) has it kept in the
@@ -40,9 +41,10 @@ export type PhoneRelayOptions<M extends {type:string,id:string}=PhoneMessage>={
  /** Also meet the phone in the pairing room (the phone's pairing). `WebSocket` replaces the global one in checks. */
  room?:{WebSocket?:RoomSocketFactory},
 };
+const PENDING_LIMIT=200;
 export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>(options:PhoneRelayOptions<M>){
  const relayOf=()=>(typeof options.relay==='function'?options.relay():options.relay)||DEFAULT_PAIR_RELAY,kind=options.kind??'phone',read=options.read??(readPhoneMessage as unknown as (value:unknown)=>M|null);
- const VAULT_ID=(options.vaultName??kind)+'-pairing',SEEN_ID=(options.vaultName??kind)+'-pairing-seen',PUSH_ID=(options.vaultName??kind)+'-pairing-push';
+ const VAULT_ID=(options.vaultName??kind)+'-pairing',SEEN_ID=(options.vaultName??kind)+'-pairing-seen',PUSH_ID=(options.vaultName??kind)+'-pairing-push',PENDING_ID=(options.vaultName??kind)+'-pairing-pending';
  let saved:Saved|null=null,keys:PairKeys|null=null,cursor=0,seenAt:number|null=null,push:{platform:string}|null|undefined,error='';
  const published=new Map<string,string>(),latest=new Map<string,unknown>();
  // The pairing room: the socket while connected, the phones in it now, messages the desktop did not take yet, and
@@ -59,13 +61,17 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  let seen:string[]=[];
  try{const raw=options.vault.get(SEEN_ID);const list=raw?JSON.parse(raw):[];if(Array.isArray(list))seen=list.filter(key=>typeof key==='string').slice(-PHONE_SEEN_LIMIT);}catch{seen=[];}
  const seenSet=new Set(seen);
+ // Messages the desktop did not take yet (the World page not there, say), kept until it does: the relay's cursor moves on
+ // past them, so a message the desktop cannot take does not come back at once on every poll.
+ try{const raw=options.vault.get(PENDING_ID),list=raw&&saved?JSON.parse(raw):[];if(Array.isArray(list))for(const p of list.slice(-PENDING_LIMIT))if(p&&typeof p.key==='string'&&p.message&&typeof p.message.type==='string')pending.push(p);}catch{}
+ const keepPending=()=>{if(pending.length)options.vault.set(PENDING_ID,JSON.stringify(pending.slice(-PENDING_LIMIT)));else options.vault.delete(PENDING_ID);};
  const remember=(key:string)=>{
   seen.push(key);seenSet.add(key);
   while(seen.length>PHONE_SEEN_LIMIT)seenSet.delete(seen.shift()!);
   options.vault.set(SEEN_ID,JSON.stringify(seen));
  };
  const forgetSeen=()=>{seen=[];seenSet.clear();options.vault.delete(SEEN_ID);};
- const save=()=>{if(saved)options.vault.set(VAULT_ID,JSON.stringify(saved));else{options.vault.delete(VAULT_ID);forgetSeen();keep(null);}};
+ const save=()=>{if(saved)options.vault.set(VAULT_ID,JSON.stringify(saved));else{options.vault.delete(VAULT_ID);forgetSeen();keep(null);pending.length=0;keepPending();}};
  const ensureKeys=async()=>keys??=saved?await pairKeys(fromBase64url(saved.secret)):null;
  const link=()=>pairLink({secret:fromBase64url(saved!.secret),relay:saved!.relay,name:saved!.name,kind})+(options.room?'&m='+ROOM_LINK_MODE:'');
  // A phone in the room now is seen now.
@@ -98,7 +104,14 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  async function take(message:M,key:string){
   if(seenSet.has(key))return;
   if(handed(message)||await options.deliver(message,key).catch(()=>false))remember(key);
-  else if(!pending.some(p=>p.key===key))pending.push({message,key});
+  else if(!pending.some(p=>p.key===key)){pending.push({message,key});keepPending();}
+ }
+ /** Offers the desktop again what it did not take. */
+ async function retry(){
+  if(!pending.length)return;
+  const before=pending.length;
+  for(const p of pending.splice(0))await take(p.message,p.key);
+  if(pending.length!==before)keepPending();
  }
  const roomSend=(value:RoomFrame,to?:string)=>{if(socket?.readyState!==1)return false;socket.send(JSON.stringify({data:JSON.stringify(value),...(to?{to}:{})}));return true;};
  const sealSlot=async(slot:string,value:unknown)=>({s:slot,b:await sealBox(keys!,boxPlace('slot',slot),value)});
@@ -206,8 +219,8 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  async function poll(wait=0){
   const k=await ensureKeys();if(!k||!saved)return false;
   try{await connectRoom();}catch(e){if(inRoom())error=(e as Error).message;}
+  await retry();
   if(inRoom()){
-   for(const p of pending.splice(0))await take(p.message,p.key);
    if(wait&&!heard)await new Promise<void>(resolve=>{const timer=setTimeout(done,wait*1000);function done(){clearTimeout(timer);waiters.delete(done);resolve();}waiters.add(done);});
    const any=heard;heard=false;return any;
   }
@@ -225,21 +238,17 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
   for(const slot of view.slots||[])if(slot.name==='phone'){
    try{const v:any=await openBox(k,boxPlace('slot','phone'),slot.box);saved.phone={name:String(v?.name||'Phone').slice(0,60),version:String(v?.version||'').slice(0,40)};save();changed();}catch{}
   }
-  let next=view.version;
   for(const m of view.messages||[]){
    let message:M|null=null,sealed:unknown=null;
    try{sealed=await openBox(k,boxPlace('to','desktop'),m.box);message=read(sealed);}catch{}
    arrived=true;
    // An unreadable or unknown message is dropped, and so is one already taken (the relay queued it again, also
-   // after a restart) or one sealed more than a week ago; a readable new one waits until the desktop takes it.
+   // after a restart) or one sealed more than a week ago; a readable new one waits here until the desktop takes it.
    if(!message||stalePhoneMessage(sealed,Date.now()))continue;
    const key=await phoneMessageKey(message,String(m.box));
-   if(seenSet.has(key))continue;
-   if(handed(message)){remember(key);continue;}
-   if(!await options.deliver(message,key).catch(()=>false)){next=m.seq-1;break;}
-   remember(key);
+   await take(message,key);
   }
-  cursor=Math.max(cursor,next);
+  cursor=Math.max(cursor,view.version);
   return arrived;
  }
  /** Queues a message to the other side (the agent pairing's client). Throws when the relay refuses it. */
