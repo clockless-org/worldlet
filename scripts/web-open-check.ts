@@ -140,6 +140,7 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,2400}message\.type!=='chat'\|\|message\.item\|\|message\.applet\|\|!fox\?\.converse[\s\S]{0,300}fox\.converse\(message\.text\)/,'a main-conversation line without the page goes to Fox on the host');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,800}message\.type==='attention'&&hostRows\.has\(message\.id\)[\s\S]{0,600}host\.store\.setWorldItemStatus\(id,status,until\)/,'Done or Later without the page settles the item on the host');
  assert.match(phone,/if\(link\.phone\)await hostCenter\(\);/,'the host publishes the Center while the page is not there');
+ assert.match(phone,/fox\.taskPanel\?\.\(\)[\s\S]{0,200}taskPanel\(\{jobs:panel\.jobs,harness:panel\.harness,working:panel\.working\}[\s\S]{0,400}artifactRows\(\)[\s\S]{0,1200}phoneAttention\(\{now:center\.now,later:center\.later,tasks,journal\}/,'its Center carries the Task panel and today\'s Journal');
  assert.match(phone,/live:async value=>\{if\(value\.done===true\)finished\(value\);return publishLive\(value\);\}/,'its turn streams to an open phone or browser, and the reply is pushed like any other');
  assert.match(phone,/message\.type==='approval'&&fox\?\.answerApproval/,'the Agent\'s permission prompt is answered without the page');
  assert.match(fox,/if\(headless\.has\(id\)\)headlessLive\?\.event\(event\);/,'the host streams a headless turn itself');
@@ -154,6 +155,6 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  assert.match(attentionModule,/host\.onStarted\(\(\)=>center\.start\(\)\)/,'Attention reads without the page');
  assert.match(fox,/host\.onStarted\(begin\);/,'routines and history run without the page');
  assert.match(phone,/host\.onStarted\(\(\)=>\{for\(const link of links\)link\.schedule\(1000\);\}\);/,'the phone and browser links run without the page');
- assert.match(fox,/report,converse,answerApproval\}\)/,'FoxService offers converse and answerApproval');
+ assert.match(fox,/report,converse,answerApproval,taskPanel:taskPanelInput\}\)/,'FoxService offers converse, answerApproval and the Task panel');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }

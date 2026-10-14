@@ -223,6 +223,9 @@ export interface FoxService {
  converse?(text:string):Promise<{user:string,text:string}>;
  /** Answers the Agent's permission prompt (as the `harnessApproval` action does), for a phone or browser without the page. */
  answerApproval?(id:string,choice:string):Promise<void>;
+ /** What the Task panel draws from (core/tasks TaskPanelInput: the Agent's scheduled jobs, the Applet tasks working now),
+  * for the host's own Center while the World page is not there (modules/phone). */
+ taskPanel?():Promise<Row>;
 }
 export const FOX='fox';
 
