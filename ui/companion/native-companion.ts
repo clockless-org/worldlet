@@ -16,7 +16,7 @@ export function createNativeCompanion(call,{sample=false}={}){
  document.addEventListener('worldlet:world-revealed',()=>{
   const timings=window.worldletStartupTimings;if(!timings)return;
   const report:Record<string,unknown>={id:crypto.randomUUID(),kind:'startup',outcome:'complete'};
-  for(const name of ['bundleStart','scene','firstFrame','revealed'])if(Number.isFinite(timings[name]))report[name+'Ms']=Math.max(0,Math.round(timings[name]-timings.boot));
+  for(const name of ['bundleStart','scene','setup','firstFrame','revealed'])if(Number.isFinite(timings[name]))report[name+'Ms']=Math.max(0,Math.round(timings[name]-timings.boot));
   void call('foxTiming',report).catch(()=>{});
  },{once:true});
  const streams=new Map();window.worldletCloudStream=(id,event)=>streams.get(id)?.(event);

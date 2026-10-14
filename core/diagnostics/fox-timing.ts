@@ -1,5 +1,5 @@
 // One allowlist for both native hosts. Never accept prompts, URLs or raw errors.
-const fields=new Set(["nativeStartingMs","nativeWaitingMs","nativeModelMs","nativeConnectionsMs","bundleStartMs","sceneMs","firstFrameMs","revealedMs","unclosedModelMs","unclosedMs","steerAcceptedMs","configLockMs","bootstrapMs","chatLockMs","connectionsMs","sessionMs","prompt_tokens","dequeuedMs","prepareStartedMs","modelStatusMs","contextReadyMs","localActionMs","bridgeSentMs","bridgeReturnedMs","firstDeltaMs","firstRenderedMs","firstPaintMs","completeMs","paintMs","prepareMs","firstTextMs","totalMs","modelMs","toolsMs","firstReasoningMs","queueMs","workerMs","launchMs","firstWorkerEventMs","nativeEventsMs","nativeQueueMs","nativeTotalMs","contextChars","startMs","durationMs","endMs","firstChunkMs","inputChars","toolCount","input_tokens","output_tokens","reasoning_tokens","cache_read_tokens"]);
+const fields=new Set(["nativeStartingMs","nativeWaitingMs","nativeModelMs","nativeConnectionsMs","bundleStartMs","sceneMs","setupMs","firstFrameMs","revealedMs","unclosedModelMs","unclosedMs","steerAcceptedMs","configLockMs","bootstrapMs","chatLockMs","connectionsMs","sessionMs","prompt_tokens","dequeuedMs","prepareStartedMs","modelStatusMs","contextReadyMs","localActionMs","bridgeSentMs","bridgeReturnedMs","firstDeltaMs","firstRenderedMs","firstPaintMs","completeMs","paintMs","prepareMs","firstTextMs","totalMs","modelMs","toolsMs","firstReasoningMs","queueMs","workerMs","launchMs","firstWorkerEventMs","nativeEventsMs","nativeQueueMs","nativeTotalMs","contextChars","startMs","durationMs","endMs","firstChunkMs","inputChars","toolCount","input_tokens","output_tokens","reasoning_tokens","cache_read_tokens"]);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function numeric(value){
  const out:Record<string,unknown>={};
@@ -45,7 +45,10 @@ export function foxTimingEvent(row:Record<string,unknown>|null):{event:string,du
  if(row.kind==='startup'){
   const duration=bucket('revealedMs');
   const frame=bucket('firstFrameMs');
-  return duration?{event:'app_startup_timing',duration,dimensions:frame?{first_frame_bucket:frame}:{}}:null;
+  // A first launch reveals the World only after setup, so its time includes the person's own minutes in setup:
+  // such a start says so (startup_setup), and speed reads leave it out.
+  const setup=Number.isFinite(row.setupMs)?{startup_setup:'yes'}:{};
+  return duration?{event:'app_startup_timing',duration,dimensions:{...frame?{first_frame_bucket:frame}:{},...setup}}:null;
  }
  if(!['complete','error','cancelled'].includes(row.outcome as string)||row.parentId)return null;
  const duration=bucket('completeMs');

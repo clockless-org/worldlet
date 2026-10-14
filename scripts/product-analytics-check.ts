@@ -189,6 +189,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.equal(foxTimingEvent(foxTiming({id,outcome:'complete',completeMs:900,parentId:id})),null);
  assert.equal(foxTimingEvent(foxTiming({id,outcome:'complete'})),null);
  assert.deepEqual(foxTimingEvent(foxTiming({id,kind:'startup',outcome:'complete',revealedMs:3400,firstFrameMs:800})),{event:'app_startup_timing',duration:'1_5s',dimensions:{first_frame_bucket:'under_1s'}});
+ assert.deepEqual(foxTimingEvent(foxTiming({id,kind:'startup',outcome:'complete',setupMs:2500,revealedMs:240000,firstFrameMs:239000})),{event:'app_startup_timing',duration:'1_5m',dimensions:{first_frame_bucket:'1_5m',startup_setup:'yes'}},'a start through setup says so');
  assert.equal(foxTimingEvent(null),null);
  assert.deepEqual([0,3_599_999,3_600_000,86_399_999,86_400_000,604_799_999,604_800_000,-1,NaN].map(updateWaitBucket),['under_1h','under_1h','1_24h','1_24h','1_7d','1_7d','over_7d','','']);
  console.log('PASS Fox and startup timings leave the device only as buckets of finished, allowlisted rows');

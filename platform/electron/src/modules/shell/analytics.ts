@@ -66,6 +66,8 @@ const ALLOWED:Record<string,string[]>={
  // fox_timing / app_startup_timing: parts of a turn or a start, bucketed (core/diagnostics/fox-timing.ts foxTimingEvent).
  timing_outcome:['complete','error','cancelled'],
  first_text_bucket:DURATIONS,model_bucket:DURATIONS,tools_bucket:DURATIONS,first_frame_bucket:DURATIONS,
+ // app_startup_timing: this start went through setup first, so its time includes the person's setup minutes.
+ startup_setup:['yes'],
  // fox_timing: the reply and its first word in finer buckets split at 10 seconds (owner 2026-10-13: past 10 s is too slow).
  reply_bucket:[...REPLY_BUCKETS],first_text_reply_bucket:[...REPLY_BUCKETS],
  // app_unclean_exit: whether Crashpad wrote a crash report during that run (the report itself stays on the device).
