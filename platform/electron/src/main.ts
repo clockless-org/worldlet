@@ -31,6 +31,7 @@ import {ANALYTICS,DESKTOP_COMPANION,RUN_IN_BACKGROUND,VAULT,type AnalyticsServic
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';
+import {startGraphics} from './graphics.ts';
 
 // Release smoke (#987): parsed before anything opens; malformed arguments are a usage error.
 let capture:CaptureRequest|null=null;
@@ -60,6 +61,8 @@ const profile=resolveProfile();
 // display surface not available" and the World never arrives (Mac Alpha 4378 and 4380, #500).
 if(process.platform==='darwin'&&backgroundLaunchWanted(profile))app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 ensureDirectory(profile.root);
+// A computer whose GPU process kept crashing starts in software graphics for a while (graphics.ts).
+startGraphics(profile.root);
 // Chromium's own profile lives inside the library, beside the World data it serves.
 app.setPath('userData',path.join(profile.root,'Browser','Electron'));
 // Native crashes of the installed app leave a Crashpad report in the library's logs, never uploaded whole; the next

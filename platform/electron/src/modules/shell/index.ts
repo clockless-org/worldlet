@@ -18,10 +18,11 @@ import {createLoginItem} from './login-item.ts';
 import {createDefaultBrowser} from './default-browser.ts';
 import {openInBrowser} from '../../system-browser.ts';
 import {order} from './order.ts';
-import {wantsQuit} from '../../host/quit.ts';
+import {relaunchAfterQuit,wantsQuit} from '../../host/quit.ts';
+import {currentGraphics,graphicsCrashed} from '../../graphics.ts';
 import {busyWith,onStall,watchMainStalls} from '../../host/busy.ts';
 import {localDataFacts} from './data-size.ts';
-import {foxTimingEvent,nativeCrashFromIps} from '../../../../../core/diagnostics/index.ts';
+import {exitCodeName,foxTimingEvent,nativeCrashFromIps} from '../../../../../core/diagnostics/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 /** App shell: menus, the desktop Companion, updates, Open at Login, the default browser setting, diagnostics, feedback, usage analytics and World backups. */
@@ -55,9 +56,25 @@ export function installShell(host:Host){
  analytics.onChange(()=>host.page.event('worldlet:analytics-changed'));
  loginItem.onChange(buildMenus);
  // Crashed renderer, GPU and helper processes reach PostHog as an allowlisted type and Electron reason only.
- const processGone=(type:string,reason:string)=>{if(reason!=='clean-exit')analytics.recordProductEvent('app_process_gone','',{process_type:type,exit_reason:reason});};
- app.on('render-process-gone',(_event,_contents,details)=>processGone('renderer',details.reason));
- app.on('child-process-gone',(_event,details)=>processGone(details.type==='GPU'?'gpu':details.type==='Utility'?'utility':'other',details.reason));
+ // The exit code only as a fixed name (core/diagnostics/graphics-mode.ts exitCodeName).
+ const processGone=(type:string,reason:string,code:number)=>{const exit=exitCodeName(code);if(reason!=='clean-exit')analytics.recordProductEvent('app_process_gone','',{process_type:type,exit_reason:reason,...(exit?{exit_code:exit}:{})});};
+ app.on('render-process-gone',(_event,_contents,details)=>processGone('renderer',details.reason,details.exitCode));
+ app.on('child-process-gone',(_event,details)=>{
+  processGone(details.type==='GPU'?'gpu':details.type==='Utility'?'utility':'other',details.reason,details.exitCode);
+  if(details.type==='GPU'&&['crashed','abnormal-exit','launch-failed'].includes(details.reason))gpuCrashed();
+ });
+ // The second GPU process crash within minutes restarts the app in software graphics (graphics.ts), before Chromium
+ // gives up on the GPU process and ends the app, as it did every twenty seconds on one Windows computer (Build 4384).
+ let fallingBack=false;
+ const gpuCrashed=()=>{
+  if(fallingBack||host.profile.rcCheck||process.argv.includes('--window-capture')||!graphicsCrashed(host.profile.root))return;
+  fallingBack=true;
+  host.diagnostics.log('GPU process crashed again: restarting in software graphics');
+  analytics.recordProductEvent('app_graphics_fallback','',{});
+  relaunchAfterQuit();
+  // A moment for the event to leave; the World is crashing with the GPU process anyway.
+  setTimeout(()=>app.quit(),1500);
+ };
  // Uncaught main-process errors and every error the host records reach PostHog error tracking (sanitized in Core).
  // The monitor observes without changing Electron's own handling.
  process.on('uncaughtExceptionMonitor',error=>analytics.recordException(error,'main'));
@@ -150,12 +167,20 @@ export function installShell(host:Host){
   // world_active_time (owner 2026-10-11 20:21 PDT: Production metrics): the World's use so far, once it is left.
   world?.on('blur',()=>analytics.endActive());world?.on('hide',()=>analytics.endActive());
   analytics.recordActiveDay();
-  if(uncleanExit)analytics.recordProductEvent('app_unclean_exit','',{native_crash:nativeCrash?'yes':'no'});
-  setTimeout(()=>reportNativeCrashes(host,analytics),10_000);
   // How much this computer keeps, once a day, two minutes after start (core/diagnostics/data-size.ts).
   setTimeout(()=>{try{analytics.recordLocalData(()=>busyWith('dataSize',()=>localDataFacts(host)));}catch(error){host.diagnostics.record(error,'dataSize');}},120_000).unref?.();
-  updates.start();
+  startUpdates();
  });
+ // The previous run's unclean end and its native crashes are reported soon after launch, not once the World page has
+ // loaded: a computer whose World crashes before it loads (Build 4384, 2026-10-14) reported neither.
+ setTimeout(()=>{
+  if(uncleanExit)analytics.recordProductEvent('app_unclean_exit','',{native_crash:nativeCrash?'yes':'no'});
+  reportNativeCrashes(host,analytics);
+ },3_000).unref?.();
+ // Updates start with the World page, or a minute after launch without it, so a World that never loads can still update.
+ let updatesStarted=false;
+ const startUpdates=()=>{if(!updatesStarted){updatesStarted=true;updates.start();}};
+ setTimeout(startUpdates,60_000).unref?.();
  host.onQuit(()=>{analytics.endActive();companion.stop();updates.quit();try{fs.rmSync(runMarker,{force:true});}catch{}});
 
  let pending:{id:string,archive:Archive}|null=null;
