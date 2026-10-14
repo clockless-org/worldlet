@@ -14,6 +14,7 @@ import {buildWorldAssets} from './build-world-assets.ts';
 import {BUILTIN_STYLE} from '../ui/components/style.ts';
 import {buildBrand} from './build-brand.ts';
 import {buildUI} from './build-ui.ts';
+import {buildWebOpen} from './build-web-open.ts';
 import {buildDefines} from './build-info.ts';
 import {build,type Plugin} from 'esbuild';
 import {cp,mkdir,readFile,writeFile,copyFile,rm} from 'node:fs/promises';
@@ -58,6 +59,8 @@ await copyFile(path.join(root,BUILTIN_STYLE.companion.portrait),path.join(output
 await copyFile(path.join(root,'resources/common/ASTRONOMY-LICENSE.txt'),path.join(output,'ASTRONOMY-LICENSE.txt'));
 await copyFile(path.join(root,'node_modules/typebox/license'),path.join(output,'TYPEBOX-LICENSE.txt'));
 await buildWorldAssets(root,output,JSON.parse(defines.__WORLDLET_CHANNEL__));
+// Worldlet in a browser on this computer (core/phone/README.md#web): the app serves this page itself on 127.0.0.1.
+await buildWebOpen(root,path.join(output,'open'),JSON.parse(defines.__WORLDLET_BUILD__).version);
 await Promise.all(bundles);
 await writeFile(path.join(output,'index.html'),`<!doctype html><html lang="en-US" data-bundle-version="${resourceVersion}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; connect-src 'self' worldlet://app; worker-src blob:; media-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>Worldlet</title><link rel="icon" href="brand/worldlet-app-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="brand/brand.css"><link rel="stylesheet" href="world-startup.css"><link rel="preload" href="worldlet.js" as="script"><link rel="stylesheet" href="worldlet-ui.css"><link rel="stylesheet" href="native.css"><link rel="stylesheet" href="pixi-world.css"><link rel="stylesheet" href="applet-scene.css"><link rel="stylesheet" href="mail-focus.css"></head><body>${startup}<main id="app" hidden></main><main id="contextSpace" hidden></main><p id="nativeNotice" role="status"></p><script src="environment-assets.js?v=${resourceVersion}"></script><script src="world-startup.js?v=${resourceVersion}"></script></body></html>`);
 await writeFile(path.join(output,'native.css'),'.notion-top{top:40px}#nativeNotice:empty{display:none}#nativeNotice{position:fixed;top:42%;left:20%;right:20%;z-index:10;background:#fff8e9;padding:24px;border-radius:16px}.notion-wordmark{letter-spacing:.15em}\n'+await readFile(path.join(root,'ui/companion/desktop-companion.css'),'utf8'));

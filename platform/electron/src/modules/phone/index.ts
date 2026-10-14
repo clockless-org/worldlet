@@ -5,8 +5,9 @@ import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RUN_IN_BACKGROUND,VAULT,WIDGETS,type AgentService,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
-import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
+import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
+import {createLocalRelay,serveLocalRelay} from './local-relay.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
@@ -31,6 +32,8 @@ import {readArtifact} from '../../../../../core/artifacts/index.ts';
 // A phone seen in the last week keeps the desktop long-polling even while the app is closed (owner 2026-10-12: Fox
 // slower on the phone). A short check every 15 seconds left the first line typed after opening the app waiting up to 15
 // seconds before Fox began; a long poll takes the same number of requests and picks the line up within a second.
+// The ports a browser on this computer reaches Worldlet on (local-relay.ts), the first free one; the one used is kept.
+const LOCAL_PORTS=Array.from({length:10},(_,i)=>47630+i),LOCAL_PORT='worldlet.localBrowserPort';
 const QUICK=2000,SLOW=15000,ACTIVE=120000,WAIT=15,CONVERSATION=15000,SHOWING=45000,ASKED=3600000,LISTENING=7*86400000,WEB_LISTENING=3600000;
 export function computerName(){return os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer';}
 
@@ -238,11 +241,50 @@ export function installPhone(host:Host){
    if(status.state==='paired'&&webPaired===false)usage('phone_paired',{phone_platform:'web'});
    webPaired=status.state==='paired';
    // Running in background is for this link: once it ends, closing the World leaves Fox on the desktop again.
-   if(status.state==='none'&&host.preferences.bool(RUN_IN_BACKGROUND))host.preferences.set(RUN_IN_BACKGROUND,false);
+   if(status.state==='none'&&local.status().state==='none'&&host.preferences.bool(RUN_IN_BACKGROUND))host.preferences.set(RUN_IN_BACKGROUND,false);
    host.page.event('worldlet:web-pair-status',status);
   },
  });
  webPaired=browser.status().state==='paired';
+ // A browser on this computer (core/phone/README.md#web): a pairing of its own, served by this app on 127.0.0.1
+ // (local-relay.ts) with the page and a relay in memory, so what it shows never leaves the computer. The server starts
+ // with the first link and with a launch that kept one, on the port the last one used, so the browser's saved link and
+ // bookmark keep working; a link made for another port is ended, since that browser storage is gone with its origin.
+ const localRelay=createLocalRelay();
+ let served:Promise<{origin:string}>|null=null,localOrigin='';
+ const serveLocal=()=>served??=(async()=>{
+  const last=host.preferences.number(LOCAL_PORT,0);
+  const server=await serveLocalRelay({relay:localRelay,pageRoot:path.join(host.profile.webRoot,'open'),ports:[...new Set([last,...LOCAL_PORTS])].filter(port=>port>0)});
+  if(server.port!==last)host.preferences.set(LOCAL_PORT,server.port);
+  host.onQuit(()=>void server.close());
+  localOrigin=server.origin;return server;
+ })().catch(error=>{served=null;throw error;});
+ // The relay forgets everything when the app quits; the pairing the vault kept is handed back before anything reads it.
+ const adopted=(async()=>{
+  const raw=vault.get('local-pairing');if(!raw)return false;
+  const saved=JSON.parse(raw),k=await pairKeys(fromBase64url(String(saved.secret)));
+  localRelay.adopt(k.id,await sha256Hex(k.desktopToken),await sha256Hex(k.phoneToken),saved.paired===true);
+  return true;
+ })().catch(error=>{host.diagnostics.record(error,'localBrowser');return false;});
+ let localPaired:boolean|null=null;
+ const local=createPhoneRelay({
+  fetch:async(input,init)=>{await adopted;return localRelay.fetch(new Request(input,init));},
+  vault,vaultName:'local',name:computerName,userAgent:`Worldlet/${version} (local browser)`,kind:'web',relay:()=>localOrigin,deliver,
+  onChange:status=>{
+   if(status.state==='paired'&&localPaired===false)usage('phone_paired',{phone_platform:'web'});
+   localPaired=status.state==='paired';
+   if(status.state==='none'&&browser.status().state==='none'&&host.preferences.bool(RUN_IN_BACKGROUND))host.preferences.set(RUN_IN_BACKGROUND,false);
+   host.page.event('worldlet:local-pair-status',status);
+  },
+ });
+ localPaired=local.status().state==='paired';
+ void adopted.then(async kept=>{
+  if(!kept)return;
+  const {origin}=await serveLocal();
+  if(!local.status().link?.startsWith(origin+'/'))await local.end();
+ }).catch(error=>host.diagnostics.record(error,'localBrowser'));
+ const localOpen=()=>{const seen=local.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE;};
+ const localListening=()=>{const seen=local.status().seenAt;return !!seen&&Date.now()-seen<WEB_LISTENING;};
  const webOpen=()=>{const seen=browser.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE;};
  const webListening=()=>{const seen=browser.status().seenAt;return !!seen&&Date.now()-seen<WEB_LISTENING;};
  const phoneListening=()=>{const seen=relay.status().seenAt;return phoneOpen()||!!seen&&Date.now()-seen<LISTENING;};
@@ -258,7 +300,7 @@ export function installPhone(host:Host){
  };
  // One loop per pairing. A long poll holds its tick while it waits, so Fox's replies reach an open side through the
  // watch below: every two seconds while Fox works and once more when it finishes, and at least every 15 seconds.
- const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false},{relay:browser,open:webOpen,listening:webListening,phone:true}].map(link=>{
+ const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false},{relay:browser,open:webOpen,listening:webListening,phone:true},{relay:local,open:localOpen,listening:localListening,phone:true}].map(link=>{
   let timer:ReturnType<typeof setTimeout>|null=null,running=false,foxWasBusy=false,conversationAt=0;
   async function publishConversation(){
    conversationAt=Date.now();
@@ -304,28 +346,32 @@ export function installPhone(host:Host){
   return sent;
  }
  host.provide<PhoneService>(PHONE,{
-  publish:async(slot,value)=>{const [phone,page]=await Promise.all([relay.publish(slot,value),browser.publish(slot,value)]);return phone||page;},
+  publish:async(slot,value)=>{const sent=await Promise.all([relay.publish(slot,value),browser.publish(slot,value),local.publish(slot,value)]);return sent.some(Boolean);},
   idleSeconds:()=>{const last=Math.max(relay.status().seenAt||0,lastActive);return last?Math.max(0,(Date.now()-last)/1000):null;},
   notify,
   live:async value=>{if(value.done===true)finished(value);return publishLive(value);},
  });
  host.register({
-  // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a web browser's; otherwise the phone's.
+  // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a browser's through the relay (another device),
+  // `kind: 'local'` a browser's on this computer, served here; otherwise the phone's.
   phonePair:async request=>{
-   const link=links[request.kind==='agent'?1:request.kind==='web'?2:0];
+   const link=links[request.kind==='agent'?1:request.kind==='web'?2:request.kind==='local'?3:0];
    if(request.operation==='status')return link.relay.status();
-   if(request.operation==='start'){const status=await link.relay.start();link.schedule(QUICK);return status;}
+   if(request.operation==='start'){
+    if(request.kind==='local')try{await serveLocal();}catch{throw new WorldletError('Worldlet could not open a port on this computer for the browser. Copy the link instead.');}
+    const status=await link.relay.start();link.schedule(QUICK);return status;
+   }
    if(request.operation==='end')return await link.relay.end();
    // A browser's link opens in the person's default browser, never inside the World.
-   if(request.operation==='open'&&request.kind==='web'){
+   if(request.operation==='open'&&(request.kind==='web'||request.kind==='local')){
     const status=link.relay.status();if(!status.link)throw new WorldletError('Make a link first.');
     try{await openInBrowser(status.link);}catch{throw new WorldletError('Could not open your browser. Copy the link instead.');}
     return status;
    }
    // Run in background: every window steps aside now, and closing the World or a login launch leaves none
    // (modules/shell/companion.ts RUN_IN_BACKGROUND) until the link ends.
-   if(request.operation==='background'&&request.kind==='web'){
-    if(!link.relay.paired)throw new WorldletError('Open the link in a browser first.');
+   if(request.operation==='background'&&(request.kind==='web'||request.kind==='local')){
+    if(!browser.paired&&!local.paired)throw new WorldletError('Open the link in a browser first.');
     const companion=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
     if(!companion)throw new WorldletError('Running in background is not available here.');
     host.preferences.set(RUN_IN_BACKGROUND,true);
