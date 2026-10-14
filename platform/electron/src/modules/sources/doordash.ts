@@ -49,7 +49,7 @@ export class DoorDash {
   if(operation==='status')return {ok:true,installed,enabled:this.enabled(),version:installed?DOORDASH_CLI_VERSION:null,accountVerified:false};
   if(operation==='disconnect'){this.forget();return {ok:true};}
   if(operation!=='login')throw new WorldletError('Unsupported source operation.');
-  if(!installed)return {ok:false,error:'Install the official DoorDash CLI with npm run setup:doordash, then sign in here.'};
+  if(!installed)return {ok:false,error:'Install DoorDash’s official CLI on this computer, then sign in here.'};
   return this.exclusive(async()=>{
    const login=await this.cli(['login'],180);
    if(login.timedOut)return {ok:false,error:'DoorDash sign-in timed out. Finish in the browser and try again.'};
@@ -68,7 +68,7 @@ export class DoorDash {
   const permission=reply&&typeof reply==='object'?reply as Row:{error:'World service permission required.'};
   if(permission.error||!permission.ok)throw new WorldletError(String(permission.error||'World service permission required.'));
   if(!this.enabled())return {error:'Connect DoorDash in its Applet first.'};
-  if(!this.installed())return {ok:false,error:'Install the official DoorDash CLI with npm run setup:doordash, then sign in here.'};
+  if(!this.installed())return {ok:false,error:'Install DoorDash’s official CLI on this computer, then sign in here.'};
   let cliArgs:string[];
   try{cliArgs=doordashArgs(operation,args.parameters??{});}catch(error){throw new WorldletError((error as Error).message);}
   return this.exclusive(async()=>{

@@ -14,10 +14,10 @@ export function createDoorDashApplet({call,ask,onChange}){
  }
  async function load(){
   actions.replaceChildren();
-  if(!call){message.textContent='A delivery scooter waiting by the bridge. Open your personal Mac world to use the DoorDash CLI.';return;}
+  if(!call){message.textContent='A delivery scooter waiting by the bridge. Open Worldlet on your computer to use the DoorDash CLI.';return;}
   try{
    const result=await call({operation:'status'});if(result.ok===false)throw Error(result.error);
-   if(!result.installed){message.textContent='Install the official CLI on this Mac: npm run setup:doordash. DoorDash early-access approval is required.';button('Check again',load);button('Request access',()=>run('waitlist'));return;}
+   if(!result.installed){message.textContent='Install DoorDash’s official CLI on this computer, then check again. DoorDash early-access approval is required.';button('Check again',load);button('Request access',()=>run('waitlist'));return;}
    if(!result.enabled){message.textContent='DoorDash CLI is installed. Sign in with an approved early-access account. DoorDash receives a short food-ordering purpose with requests; your Fox conversation is not forwarded.';button('Sign in to DoorDash',()=>run('login'));button('Request access',()=>run('waitlist'));return;}
    message.textContent='Ask me what you would like to eat. I can find restaurants, prepare your cart and show a quote. Review and pay in DoorDash. Account access is checked when you make a request.';
    button('Find food',()=>ask('Help me find food using DoorDash. Ask what I feel like and which saved delivery address to use before searching.'));

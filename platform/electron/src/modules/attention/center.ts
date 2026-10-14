@@ -729,7 +729,7 @@ export class AttentionCenter {
       const reconciled=core('sourceCheckFinish',{check,latest,status:check.lastStatus??'error',now:now(),message:failureMessage});
       if(!isRow(reconciled))throw new WorldletError('Invalid source check result.');
       check=reconciled;
-      if(check.errorCode==='model_allowance')check.error='Checking is waiting for the included AI allowance to reset. Your connection is still saved.';
+      if(check.errorCode==='model_allowance')check.error='Checking is waiting for your model provider’s usage limit to reset. Your connection is still saved.';
       if(check.errorCode===undefined)delete run.errorCode;else run.errorCode=check.errorCode;
       const outcome=typeof check.lastStatus==='string'?check.lastStatus:'error';
       const settled=db.transaction(()=>{
