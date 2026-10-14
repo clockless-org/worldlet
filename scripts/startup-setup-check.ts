@@ -551,7 +551,7 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='snapshot')return structuredClone(w.fixture);
     if(b.action==='installedApplets')return {keys:[]};
     // Codex alone is no Agent; Hermes appears once it is installed and signed in.
-    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[{id:'codex',title:'Codex',configured:true,worldTools:true}],recommended:null,selected:sessionStorage.getItem('fixture-agent')};}
+    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[{id:'codex',title:'Codex',configured:true,worldTools:true}],recommended:null,selected:sessionStorage.getItem('fixture-agent'),...w.detects===2?{brokenHermes:true}:{}};}
     if(b.action==='agentHarness'&&b.operation==='install-hermes'){
      event({stage:'install',step:3,steps:7,title:'Create Python environment'});
      if(w.failOnce){w.failOnce=false;throw Error('Hermes Agent could not be installed. Check your internet connection and try again. (Create Python environment: bootstrap Python installation failed)');}
@@ -581,6 +581,8 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Check again'}).click();
   await page.waitForFunction(()=>(window as any).detects>=2);
   await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
+  // A Hermes Agent left half installed (its command fails at once) is no card to choose: setup says so and installs it again.
+  await page.getByText('Hermes Agent is on this computer but does not start. Worldlet installs it again the official way, then you sign in to ChatGPT inside it.',{exact:true}).waitFor();
   // A failed install names its step, and offers the same installer in a window the person sees (a Microsoft Store copy
   // stopped at Create Python environment eight times, 2026-10-13), then Try again or Check again.
   await page.getByRole('button',{name:'Build your world',exact:true}).click();

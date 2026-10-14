@@ -83,6 +83,11 @@ const FAILURE_KINDS:[RegExp,string][]=[
  [/did not cover every supplied source record/,'partialCoverage'],
  // Fox turns with the person's Agent (owner nightly diagnostics 2026-10-13: 11 sub-second fox_turn_failed in a week, all a
  // bare operationFailed with no rule, so not running, not answering and signed out looked the same).
+ // Choosing a local Agent (agentHarness select): its command did not start, it is older than Worldlet needs, or it is
+ // gone (Windows Beta 4384, 2026-10-13: eleven sub-second local_agent_select_failed, all a bare operationFailed).
+ [/did not start/,'notStarted'],
+ [/is too old for worldlet/,'outdated'],
+ [/no longer on this computer/,'missing'],
  [/not installed|command not found|is not recognized as an internal/,'notInstalled'],
  [/not (?:signed|logged) in|log ?in first|login required/,'signedOut'],
  [/\beconnrefused\b|connection refused|not running|is not kept running|socket hang up|\beconnreset\b/,'notRunning'],

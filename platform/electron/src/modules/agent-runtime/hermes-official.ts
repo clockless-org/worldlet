@@ -27,6 +27,26 @@ export function ownHermesAgent(environment:HarnessEnvironment):LocalHarnessInsta
  return found;
 }
 
+/** Whether a Hermes Agent's command runs at all (`hermes --version`): `failed` when it cannot start or exits with an
+ * error, as one left half installed does (Windows Beta 4384, 2026-10-13: a person's Hermes was found, then turned away
+ * in under a second eleven times); `slow` when it gives no answer within `timeout`, which is not counted against it. */
+export function hermesStarts(install:LocalHarnessInstall,environment:HarnessEnvironment,timeout=30_000):Promise<'ok'|'failed'|'slow'> {
+ return new Promise(resolve=>{
+  let child:ChildProcess;
+  try{child=spawn(install.command,[...install.prefix,'--version'],{env:harnessEnvironment(install,environment),stdio:'ignore',windowsHide:true});}
+  catch{resolve('failed');return;}
+  const timer=setTimeout(()=>{try{child.kill();}catch{}resolve('slow');},timeout);timer.unref();
+  child.once('error',()=>{clearTimeout(timer);resolve('failed');});
+  child.once('exit',code=>{clearTimeout(timer);resolve(code===0?'ok':'failed');});
+ });
+}
+/** The person's Hermes Agent when its command runs (or is only slow), else null: one that fails at once is installed
+ * again the official way, which repairs a checkout an earlier install left unfinished. */
+export async function workingHermesAgent(environment:HarnessEnvironment):Promise<LocalHarnessInstall|null> {
+ const found=ownHermesAgent(environment);
+ return found&&await hermesStarts(found,environment)!=='failed'?found:null;
+}
+
 /** Removes what Worldlet once put at Hermes' standard locations for Fox's own profile: the link at
  * ~/.hermes (a junction on Windows) and its own `hermes` launcher. Only Worldlet's: a real folder or another command stays. */
 export function releaseStandardHermes(root:string,environment:HarnessEnvironment){
@@ -41,8 +61,9 @@ const INSTALLED='hermes-installed.json';
 export function installedHermes(root:string):boolean {return fs.existsSync(path.join(root,INSTALLED));}
 /** Installs stock Hermes Agent the official way when none is here, then returns it. `progress` hears each step. */
 export async function installHermes(root:string,{environment,progress,fetch:get=fetch,limits=STAGE_LIMITS}:{environment:HarnessEnvironment;progress:(step:HermesInstallProgress)=>void;fetch?:typeof fetch;limits?:{idle:number;total:number}}):Promise<LocalHarnessInstall> {
- const existing=ownHermesAgent(environment);
- // A Hermes Agent already here is used as it is (owner decision 2026-10-09 12:11 PDT): nothing is installed.
+ // A Hermes Agent already here is used as it is (owner decision 2026-10-09 12:11 PDT): nothing is installed. One whose
+ // command fails at once is not one that works, so the installer runs and repairs it.
+ const existing=await workingHermesAgent(environment);
  if(existing)return existing;
  releaseStandardHermes(root,environment);
  setAsideUnfinished(environment);

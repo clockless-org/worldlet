@@ -57,9 +57,9 @@ Owner goal 2026-10-06: the target customer already runs an Agent (OpenClaw, Clau
 
 | Event | When | Dimensions |
 | --- | --- | --- |
-| `local_agents_detected` | Setup lists the Agents on this computer | `agents_found` (`0`–`2`, `3_plus`), `recommended_agent` (or `none`) |
+| `local_agents_detected` | Setup lists the Agents on this computer | `agents_found` (`0`–`2`, `3_plus`), `recommended_agent` (or `none`), `hermes_broken` (`yes` when a Hermes Agent is here but its command fails at once, so setup offers to install it again instead of listing it) |
 | `local_agent_selected` | The chosen Agent answered and Fox switched to it | `local_agent`, `fox_brain` (`built_in`: the built-in Hermes Agent on a Codex sign-in or the Agent's API-key model, with World tools; `agent`: the Agent answers itself on its own sign-in), `duration_bucket` |
-| `local_agent_select_failed` | It did not start, is not signed in or did not answer | `local_agent`, `error_code`, `duration_bucket` |
+| `local_agent_select_failed` | It did not start, is not signed in or did not answer | `local_agent`, `error_code`, `error_rule` when Core has one (`notStarted`, `outdated`, `missing`, `noAnswer`, `signedOut`, …), `duration_bucket` |
 | `agent_bring_completed` | Setup finished bringing it in, integrations included | `local_agent`, `bring_conversations`, `bring_notes`, `bring_skills`, `bring_routines`, `bring_model`, `bring_memory` (`yes`/`no`), `integrations_came_over`, `integrations_reconnect`, `duration_bucket` |
 | `agent_bring_failed` | Bringing it in failed | `local_agent`, `error_code`, `duration_bucket` |
 | `agent_profile_result` | The chosen Agent answered or not when asked to describe itself as JSON ([plan](../agent/agent-profile.ts)); setup never waits for it | `local_agent`, `profile_result` (`ok`, `timeout`, `invalid`, `failed`), `bring_connections` (connections it reported, bucketed), `duration_bucket` |
