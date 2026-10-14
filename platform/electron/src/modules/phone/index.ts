@@ -12,6 +12,8 @@ import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
 import {attentionLaterUntil,hostAttention} from '../../../../../core/attention/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
+import {taskPanel} from '../../../../../core/tasks/index.ts';
+import {readArtifact} from '../../../../../core/artifacts/index.ts';
 
 // Phone pairing (core/phone/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot
@@ -134,11 +136,18 @@ export function installPhone(host:Host){
   if(revision===hostCenterRevision&&Date.now()-hostCenterAt<60_000)return;
   hostCenterRevision=revision;hostCenterAt=Date.now();
   const items=host.store.worldItems(),center=hostAttention(items,{now:Date.now(),saved:hostFocus as any});
+  // The Task panel's Routines and Applet tasks, and today's Journal, as the page would add them. The page's own extras
+  // (the website Fox drives, its morning brief and day summary cards) wait for it.
+  const panel=await fox.taskPanel?.().catch(error=>{host.diagnostics.record(error,'phoneTasks');return null;});
+  const tasks=panel&&!panel.sample?taskPanel({jobs:panel.jobs,harness:panel.harness,working:panel.working},Date.now()):undefined;
+  let journal:any[]|undefined;
+  try{journal=host.store.writable?host.store.ledger().artifactRows().flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];}):undefined;}
+  catch(error){host.diagnostics.record(error,'phoneJournal');}
   hostFocus=center.saved;
   const kinds=new Map(items.map(item=>[String(item.id),String(item.kind||'task')]));
   hostRows.clear();
   for(const row of [...center.now,...center.later])if(row.worldItemId)hostRows.set(row.worldItemId,{kind:kinds.get(row.worldItemId)||'task',members:row.worldItemIds?.length?row.worldItemIds:[row.worldItemId]});
-  const value=phoneAttention({now:center.now,later:center.later},Date.now()),text=JSON.stringify({...value,at:''});
+  const value=phoneAttention({now:center.now,later:center.later,tasks,journal},Date.now()),text=JSON.stringify({...value,at:''});
   if(text===hostSent)return;
   hostSent=text;
   const previous=attention;attention=relay.paired?value:undefined;

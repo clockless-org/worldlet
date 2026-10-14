@@ -184,6 +184,19 @@ export function installFox(host:Host){
   subscribed=true;
   runtime.onChanged(reason=>reason==='agent-changed'?agentChanged():reason==='model-changed'?modelChanged():page.event('worldlet:model-changed'));
  }
+ // The World's Task panel (core/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
+ // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
+ // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
+ // Journal: neither is read. Core decides the rows. The page's panel and, without the page, the host's (modules/phone).
+ async function taskPanelInput():Promise<Row>{
+  if(store.sampleEnabled())return {sample:true};
+  const runtime=agent(),schedule=runtime?.schedule?.();
+  const jobs=schedule?await schedule.jobs().catch(error=>{host.diagnostics.record(error,'taskPanel');return [];}):[];
+  // Whether its Routine cards may offer their controls (Run now, Pause, Edit, Remove), each run as `harnessSchedule`.
+  const id=runtime?.harness?.id??null,controls=id&&store.writable?runtime?.harnessSchedules?.().find(item=>item.harness===id)?.schedule:undefined;
+  return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,harnessId:id,changes:!!controls?.change,
+   working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
+ }
  function showControls(screen:string,provider?:string|null){
   const desktop=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
   if(desktop?.isDesktop)void desktop.restoreWorld();
@@ -825,7 +838,7 @@ export function installFox(host:Host){
  });
  host.provide<FoxService>(FOX,{scope:foxScope,turnActive:()=>agentTurn!==null,cancel:cancelCloud,stopRoutines,startRoutines,
   startAppletTask:request=>appletTaskStart(request),reviewGames:request=>appletTaskStart(request,true),makeArtifactPage:request=>appletTaskStart({...request,applet:ARTIFACT_PAGE_MAKER.id},true,true),appletTask:id=>appletTasks.get(id)?.applet??null,
-  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report,converse,answerApproval});
+  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report,converse,answerApproval,taskPanel:taskPanelInput});
 
  host.register({
   // "+" in Fox's bar (owner request 2026-10-12): files the person picks, as paths for the line; Fox's Agent runs on this
@@ -842,19 +855,7 @@ export function installFox(host:Host){
     model:{name:String(model.name??''),id:String(model.model??''),provider:String(model.provider??''),source:typeof model.source==='string'?model.source:null,ready:model.ready===true,configured:model.configured===true}};
   },
   modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),
-  // The World's Task panel (core/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
-  // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
-  // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
-  // Journal: neither is read. Core decides the rows.
-  taskPanel:async()=>{
-   if(store.sampleEnabled())return {sample:true};
-   const runtime=agent(),schedule=runtime?.schedule?.();
-   const jobs=schedule?await schedule.jobs().catch(error=>{host.diagnostics.record(error,'taskPanel');return [];}):[];
-   // Whether its Routine cards may offer their controls (Run now, Pause, Edit, Remove), each run as `harnessSchedule`.
-   const id=runtime?.harness?.id??null,controls=id&&store.writable?runtime?.harnessSchedules?.().find(item=>item.harness===id)?.schedule:undefined;
-   return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,harnessId:id,changes:!!controls?.change,
-    working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
-  },
+  taskPanel:()=>taskPanelInput(),
   foxProactive:request=>proactiveStart(request),
   foxProactiveShown:request=>proactiveShown(request),
   foxPreferences:async request=>{
