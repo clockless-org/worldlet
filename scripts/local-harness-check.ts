@@ -5,7 +5,7 @@ import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInEx
  type LocalHarnessId} from '../core/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {BUSY_RETRIES,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
+import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Local Agent Harnesses at setup: the shared catalog, recommendation, per-command turns and output
@@ -384,22 +384,23 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
     assert.ok(!fs.existsSync(path.join(project,'args.txt'))&&argsIn(forkHome).includes('--no-session-persistence'),place+' is a turn of Fox\'s own');
    }
   }
-  // A Harness that fails explains itself; Fox never shows a blank answer.
-  script(path.join(bin,'claude'),'echo "Error: connect ECONNREFUSED" >&2\nexit 1\n');
+  // A Harness that fails explains itself; Fox never shows a blank answer. These start (`--version` answers) and then fail.
+  const runs='if [ "$1" = "--version" ]; then echo "2.1.0 (Claude Code)"; exit 0; fi\n';
+  script(path.join(bin,'claude'),runs+'echo "Error: connect ECONNREFUSED" >&2\nexit 1\n');
   await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: connect ECONNREFUSED/);
   // A turn the provider turns away as busy before anything happened runs again after a wait (Mac Alpha 4312, #416):
   // the person sees that it is trying again, then the answer; one that stays busy fails with the provider's words.
   {
    const tries=path.join(scratch,'busy-tries.txt');fs.rmSync(tries,{force:true});
    const busy='echo "API Error: 529 {\\"type\\":\\"error\\",\\"error\\":{\\"type\\":\\"overloaded_error\\",\\"message\\":\\"Overloaded\\"}}" >&2\nexit 1\n';
-   script(path.join(bin,'claude'),`echo try >> "${tries}"\nif [ "$(wc -l < "${tries}")" -lt 2 ]; then\n${busy}fi\ncat > "$PWD/stdin.txt"\ncat "${fixture}"\n`);
+   script(path.join(bin,'claude'),`${runs}echo try >> "${tries}"\nif [ "$(wc -l < "${tries}")" -lt 2 ]; then\n${busy}fi\ncat > "$PWD/stdin.txt"\ncat "${fixture}"\n`);
    const waits=BUSY_RETRIES.splice(0,BUSY_RETRIES.length,50,50),events:any[]=[];
    try{
     assert.deepEqual(await new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome,async event=>{events.push(event);return null;}),{message:'Hello from Claude Code'});
     assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'one more try after the busy one');
     assert.ok(events.some(event=>event.type==='progress'&&/busy right now\. Trying again/.test(event.name)),'the person sees it is trying again: '+JSON.stringify(events));
     fs.rmSync(tries,{force:true});
-    script(path.join(bin,'claude'),`echo try >> "${tries}"\n${busy}`);
+    script(path.join(bin,'claude'),`${runs}echo try >> "${tries}"\n${busy}`);
     await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi',_background:true},agentHome),/overloaded_error/);
     assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,1+BUSY_RETRIES.length,'a model that stays busy is tried a bounded number of times');
     // Busy after it began answering: a conversation turn is not run twice under the person's eyes; background work, a
@@ -431,10 +432,26 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   await assert.rejects(holding,(error:Error)=>error.name==='AbortError');
   assert.ok(Date.now()-stuckAt<5000,'cancel answers promptly');
   // One that exits but leaves a helper holding its output is answered as an exit, not waited on.
-  script(path.join(bin,'claude'),'sleep 30 &\necho "Error: connect ECONNREFUSED" >&2\nexit 1\n');
+  script(path.join(bin,'claude'),runs+'sleep 30 &\necho "Error: connect ECONNREFUSED" >&2\nexit 1\n');
   const leftAt=Date.now();
   await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: connect ECONNREFUSED/);
   assert.ok(Date.now()-leftAt<5000,'an exit answers promptly');
+  // One whose command does not start at all (`--version` fails too, as a half-installed Hermes Agent's does: Windows Beta
+  // 4384, 2026-10-13) says so plainly, once; later turns are refused without starting it again and report nothing more,
+  // until it is chosen or installed again.
+  {
+   const starts=path.join(scratch,'broken-starts.txt');fs.rmSync(starts,{force:true});
+   script(path.join(bin,'claude'),`echo run >> "${starts}"\necho "Traceback (most recent call last)" >&2\nexit 1\n`);
+   const count=()=>fs.readFileSync(starts,'utf8').trim().split('\n').length;
+   await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi',_background:true},agentHome),(error:any)=>error.name==='AgentNotStarting'&&error.repeat===false&&/^Claude Code does not start on this computer\./.test(error.message));
+   assert.equal(count(),2,'the turn, then one --version check');
+   await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),(error:any)=>error.name==='AgentNotStarting'&&error.repeat===true&&error.reported===true);
+   assert.equal(count(),2,'a later turn does not start it again');
+   forgetNotStarting(found[0].command);
+   script(path.join(bin,'claude'),runs+`cat > "$PWD/stdin.txt"\ncat "${fixture}"\n`);
+   assert.equal((await new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Claude Code','chosen again, it is tried again');
+   assert.match(new AgentNotStarting({id:'hermes',title:'Hermes Agent'}).message,/Settings › Agent and choose Install again/);
+  }
 
   // Hermes Agent over ACP, end to end: the session gets Worldlet's MCP server, the fixture Agent starts it and calls a
   // World tool, which reaches Fox as an ordinary tool event; the answer streams back and the process is ended.

@@ -236,6 +236,20 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     },{id:'use-'+agent.id});
     row.append(text,...update?[update]:[],...recheck?[recheck]:[],...using||!old?[b]:[]);agents.append(row);
    }
+   // A Hermes Agent whose command does not start (a half-finished install) is not offered to Use; Install again runs the
+   // official installer, which repairs it, then chooses it (Windows Beta 4384, 2026-10-13: it stayed chosen, and every
+   // background turn failed on it).
+   if(found?.brokenHermes===true){
+    if(!list.length)agents.append(subhead('On this computer'));
+    const row=el('div','companion-settings-row'),text=el('div');row.dataset.agent='hermes';
+    text.append(el('strong','','Hermes Agent'+(inUse==='hermes'?' · In use':'')),el('span','companion-settings-model-problem','It is on this computer but does not start. Install again sets it up the official way.'));
+    row.append(text,action('Install again',async()=>{
+     said.textContent='Installing Hermes Agent again. This takes a few minutes…';
+     try{await call('agentHarness',{operation:'install-hermes'});await call('agentHarness',{operation:'select',id:'hermes'});modelRefresh();said.textContent='';await draw();}
+     catch(e){said.textContent=(e as Error).message||'Could not install Hermes Agent.';}
+    },{primary:true,id:'reinstall-hermes'}));
+    agents.append(row);
+   }
    // The provider of the Agent in use comes right under the Agents here.
    agents.append(providers);
    // An Agent on another computer and an OpenClaw Gateway are for few people: folded away unless one is in use.

@@ -6,7 +6,7 @@ import {HERMES_INSTALLERS,hermesChatGptModel,hermesInstallerResult,hermesInstall
 import {WorldletError,writeJSON} from '../../files.ts';
 import {hermesCommandPath,isOwnHermes,standardHermesHome} from './hermes-files.ts';
 import {runHarnessCommand} from './harness-approvals.ts';
-import {harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
+import {harnessEnvironment,localHarnessStarts,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
 
 /** Stock Hermes Agent for a person with no Agent (core/agent/hermes-setup.ts): the official installer, run stage by
  * stage as Hermes' own desktop installer runs it, to Hermes' default location; nothing when a Hermes Agent is here. */
@@ -30,16 +30,7 @@ export function ownHermesAgent(environment:HarnessEnvironment):LocalHarnessInsta
 /** Whether a Hermes Agent's command runs at all (`hermes --version`): `failed` when it cannot start or exits with an
  * error, as one left half installed does (Windows Beta 4384, 2026-10-13: a person's Hermes was found, then turned away
  * in under a second eleven times); `slow` when it gives no answer within `timeout`, which is not counted against it. */
-export function hermesStarts(install:LocalHarnessInstall,environment:HarnessEnvironment,timeout=30_000):Promise<'ok'|'failed'|'slow'> {
- return new Promise(resolve=>{
-  let child:ChildProcess;
-  try{child=spawn(install.command,[...install.prefix,'--version'],{env:harnessEnvironment(install,environment),stdio:'ignore',windowsHide:true});}
-  catch{resolve('failed');return;}
-  const timer=setTimeout(()=>{try{child.kill();}catch{}resolve('slow');},timeout);timer.unref();
-  child.once('error',()=>{clearTimeout(timer);resolve('failed');});
-  child.once('exit',code=>{clearTimeout(timer);resolve(code===0?'ok':'failed');});
- });
-}
+export const hermesStarts=localHarnessStarts;
 /** The person's Hermes Agent when its command runs (or is only slow), else null: one that fails at once is installed
  * again the official way, which repairs a checkout an earlier install left unfinished. */
 export async function workingHermesAgent(environment:HarnessEnvironment):Promise<LocalHarnessInstall|null> {

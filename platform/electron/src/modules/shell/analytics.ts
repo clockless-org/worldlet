@@ -357,6 +357,8 @@ export class UsageAnalytics implements AnalyticsService {
  recordException(error:unknown,area:'main'|'renderer'|'host',operation=''){
   if(!this.config||!this.enabled()||this.exceptions.size>=30)return;
   const raw=error instanceof Error||(error&&typeof error==='object')?error as Row:{message:String(error)};
+  // A failure already reported once and only refused again (agent-runtime AgentNotStarting `repeat`).
+  if(raw.reported===true)return;
   let report:Row;
   try{report=core<Row>('exceptionReport',{name:raw.name,message:typeof raw.message==='string'?raw.message:'',stack:raw.stack,area,operation});}catch{return;}
   if(!report)return;

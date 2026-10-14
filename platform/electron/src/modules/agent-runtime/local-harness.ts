@@ -32,6 +32,37 @@ class ModelBusy extends WorldletError {}
  * (Mac Alpha 4312's onboarding mail conversation failed on Codex's "Selected model is at capacity", #416). */
 export const BUSY_RETRIES=[4000,15000];
 
+/** Whether an Agent's command runs at all: `--version` exits 0 ('ok'), fails or cannot be spawned ('failed'), or is still
+ * going after `timeout` ('slow', not counted as broken: a large Agent's first start on a cold disk can take that long). */
+export function localHarnessStarts(install:LocalHarnessInstall,environment:HarnessEnvironment,timeout=30_000):Promise<'ok'|'failed'|'slow'> {
+ return new Promise(resolve=>{
+  let child:ChildProcess;
+  try{child=spawn(install.command,[...install.prefix,'--version'],{env:harnessEnvironment(install,environment),stdio:'ignore',windowsHide:true});}
+  catch{resolve('failed');return;}
+  const timer=setTimeout(()=>{try{child.kill();}catch{}resolve('slow');},timeout);timer.unref();
+  child.once('error',()=>{clearTimeout(timer);resolve('failed');});
+  child.once('exit',code=>{clearTimeout(timer);resolve(code===0?'ok':'failed');});
+ });
+}
+/** A turn whose Agent does not start at all (its command fails before it writes a line, and `--version` fails too), not
+ * one that started and failed. Windows Beta 4384, 2026-10-13: a Hermes Agent left half-installed stayed chosen after
+ * setup, and every Attention check, routine and Fox speak-first ask failed on it as a bare operationFailed. `repeat`: a
+ * later turn refused without starting it again, which reports nothing more (the first one was reported). */
+export class AgentNotStarting extends WorldletError {
+ readonly repeat:boolean;
+ constructor(install:Pick<LocalHarnessInstall,'id'|'title'>,repeat=false){
+  super(install.id==='hermes'?`${install.title} does not start on this computer. Open Settings › Agent and choose Install again.`:`${install.title} does not start on this computer. Open it once in Terminal to check it, or choose another Agent in Settings › Agent.`);
+  this.name='AgentNotStarting';this.repeat=repeat;
+ }
+ /** Already reported once; the host records it locally but sends it nowhere again (modules/shell). */
+ get reported(){return this.repeat;}
+}
+/** When each Agent command was last found not to start: its turns are refused for NOT_STARTING_MS without starting it
+ * again, then tried again (it may have been repaired by hand). Choosing or installing an Agent again clears it. */
+const notStarting=new Map<string,number>();
+const NOT_STARTING_MS=10*60_000;
+export function forgetNotStarting(command?:string){if(command)notStarting.delete(command);else notStarting.clear();}
+
 // A Harness the person already runs here (Claude Code, Codex, Hermes Agent, OpenClaw, pi) as
 // Fox's Agent. Core owns the catalog and the per-command turn; this file finds the executables and runs a Fox
 // thread's turns in the Harness's resident session where it has one (Hermes Agent's ACP process, OpenClaw's Gateway:
@@ -399,6 +430,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
  }
  private async attempt(body:Row,home:string,onEvent:AgentEventHandler):Promise<Row> {
   if(this.child)throw new WorldletError('This Agent is already working.');
+  const broken=notStarting.get(this.install.command);
+  if(broken!==undefined&&Date.now()-broken<NOT_STARTING_MS)throw new AgentNotStarting(this.install,true);
   this.cancelled=false;
   const id=this.install.id;
   const events=new AgentEventWait();this.eventWait=events;
@@ -432,7 +465,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   // The spare the previous turn left waiting, when it was started for this command line; else a new process.
   let harness:StartedTurn;
   try{harness=(resume?null:this.spares?.take(key))??await this.start(home,turn,tools,sample,key,agent,model,resume);}
-  catch(error){events.cancel();this.eventWait=null;throw error;}
+  catch(error){events.cancel();this.eventWait=null;throw await this.notStarting()??error;}
   let calls=0;
   let deadline:ReturnType<typeof idleStop>|null=null;
   harness.dispatch.run=async(name,args)=>{
@@ -509,6 +542,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
     if(resume&&!started&&readContinued(home)[resume.origin]===resume.session)saveContinued(home,resume.origin,null);
     // Claude Code's sign-in ran out or never happened: its own sign-in page opens in the browser by itself, once per launch.
     if(claudeCodeNeedsSignIn(outcome.error))signInOnce(this.install,harnessEnvironment(this.install,this.environment));
+    // It wrote nothing and exited with an error: when its command does not start at all, the turn says so plainly.
+    if(received===0&&!started&&calls===0&&code!==0&&!this.cancelled&&!timedOut){const broken=await this.notStarting();if(broken)throw broken;}
     // Nothing shown and no World tool called yet, the same turn can simply run again. Background work (an Applet's
     // analysis, the Attention check) is a bounded pass that reads, then saves items by their IDs, with no one watching:
     // it runs again also when the model turned busy mid-pass, after its reads (Mac Alpha 4320, #429).
@@ -527,6 +562,12 @@ export class LocalHarnessRuntime implements AgentRuntime {
    // A foreground turn that ran its course leaves the next one's process waiting.
    if(!resume&&!this.cancelled&&!timedOut&&body._background!==true)this.prepare(home,turn.system,tools,sample,key,agent,model);
   }
+ }
+ /** AgentNotStarting when this Agent's command does not start at all (remembered for NOT_STARTING_MS), else null. */
+ private async notStarting():Promise<AgentNotStarting|null> {
+  if(this.cancelled||await localHarnessStarts(this.install,this.environment,15_000)!=='failed')return null;
+  notStarting.set(this.install.command,Date.now());
+  return new AgentNotStarting(this.install);
  }
  /** Hermes Agent loads the `worldlet` server registered in its profile (World tools on Hermes, world-tool-bridge.ts) as
   * well as the turn's own, and calls on it may come through either: while a private World turn with tools runs, the

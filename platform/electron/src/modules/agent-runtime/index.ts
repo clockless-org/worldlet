@@ -18,7 +18,7 @@ import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
-import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
+import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,forgetNotStarting,harnessEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
@@ -358,6 +358,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   // way to its default location, or the one already here as it is (12:11 PDT). The person then picks it like any other.
   if(request.operation==='install-hermes'){
    const install=await installHermes(context.root,{environment:currentEnvironment(),progress:step=>onHermesSetup({stage:'install',...step})});
+   forgetNotStarting(install.command);
    return {ok:true,id:install.id,title:install.title};
   }
   // The same installer in a window the person sees, when the quiet one failed; Check again finds what it installed.
@@ -411,6 +412,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // (`checkLater`) moves on at once and hears how it ended (`onAgentCheck`); anything else waits for it as before.
    const later=request.checkLater===true;
    if(!later)await prove();
+   forgetNotStarting(install.command);
    writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id,error=>context.failure(error,'foxMove'));
    await switchTo(adapter);
    // Once it answers, it describes itself in the background (owner request 2026-10-11); setup never waits for that.
