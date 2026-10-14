@@ -13,6 +13,7 @@ import {openInBrowser} from '../../system-browser.ts';
 import {attentionLaterUntil,hostAttention} from '../../../../../core/attention/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {taskPanel} from '../../../../../core/tasks/index.ts';
+import {APP_DEFINITIONS} from '../../../../../core/applets/index.ts';
 import {readArtifact} from '../../../../../core/artifacts/index.ts';
 
 // Phone pairing (core/phone/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
@@ -94,11 +95,19 @@ export function installPhone(host:Host){
      if(message.choice!=='deny')usage('phone_approved',{approval_kind:'agent_permission'});
      return true;
     }
-    if(message.type!=='chat'||message.item||message.applet||!fox?.converse||!scope||scope.sample||scope.setup)return false;
+    if(message.type!=='chat'||!fox?.converse||!scope||scope.sample||scope.setup)return false;
+    // A line on an item's card or in an Applet runs in that place's thread, as the page says it there
+    // (ui/attention contextThread: the card's `attention:<id>`, the Applet's `object:app-<key>`).
+    const item=message.item?host.store.worldItems().find(row=>String(row.id)===message.item):null;
+    if(message.item&&!item)return false;
+    const app=message.applet?APP_DEFINITIONS.find(a=>a.key===message.applet):null;
+    if(message.applet&&!app)return false;
+    const place=item?{thread:JSON.stringify(['attention:'+message.item,'attention:'+message.item]),location:String(item.title||'An item')}
+     :app?{thread:JSON.stringify(['object:app-'+app.key,'']),location:app.title}:undefined;
     lastActive=Date.now();
-    asked.set(askedKey(message.text),{at:Date.now()});
+    asked.set(askedKey(message.text),{item:message.item,applet:message.applet,at:Date.now()});
     // Its reply is pushed when Fox finishes (the live turn's done update, through PhoneService.live).
-    void fox.converse(message.text).catch(error=>host.diagnostics.record(error,'phoneConverse'));
+    void fox.converse(message.text,place).catch(error=>host.diagnostics.record(error,'phoneConverse'));
     return true;
    }
    lastActive=Date.now();

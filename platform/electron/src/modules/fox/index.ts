@@ -436,7 +436,7 @@ export function installFox(host:Host){
   * behind Fox's running turn, then runs as the person's own line in Fox's main conversation, without the page. Its
   * steps that only the page can do (a World view, an Applet's page) answer that the window must be open. The reply
   * reaches the browser or phone through the conversation the host already publishes. */
- async function converse(text:string):Promise<{user:string,text:string}> {
+ async function converse(text:string,place?:{thread:string,location:string}):Promise<{user:string,text:string}> {
   for(const until=Date.now()+CONVERSE_WAIT;agentTurn!==null;){
    if(Date.now()>until)throw new WorldletError('Fox is busy. Try again in a moment.');
    await new Promise(resolve=>setTimeout(resolve,500));
@@ -444,7 +444,7 @@ export function installFox(host:Host){
   const id='headless-'+crypto.randomUUID(),live=liveTurn(id,text);
   headless.add(id);headlessLive=live;
   let said='';
-  try{const reply:Row=await agentChat({id,text});said=typeof reply.message==='string'?reply.message:'';return {user:text,text:said};}
+  try{const reply:Row=await agentChat({id,text,...place?{thread:place.thread,context:{location:place.location}}:{}});said=typeof reply.message==='string'?reply.message:'';return {user:text,text:said};}
   finally{headless.delete(id);if(headlessLive===live)headlessLive=null;await live.done(said);}
  }
  function finishTurn(id:string,cancelled:boolean){

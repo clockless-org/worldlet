@@ -219,8 +219,9 @@ export interface FoxService {
   * paired phone. False when there is no own world to say it in (setup, the practice world). */
  report?(line:string,thread:string):boolean;
  /** A line said in a browser or on the phone while the World page is not there: it runs in Fox's main conversation
-  * on the host alone, after the running turn, and resolves with Fox's reply. */
- converse?(text:string):Promise<{user:string,text:string}>;
+  * on the host alone, after the running turn, and resolves with Fox's reply. `place`: said on an item's card or in an
+  * Applet instead, the thread the page would say it in (ui/attention contextThread) and that place's name. */
+ converse?(text:string,place?:{thread:string,location:string}):Promise<{user:string,text:string}>;
  /** Answers the Agent's permission prompt (as the `harnessApproval` action does), for a phone or browser without the page. */
  answerApproval?(id:string,choice:string):Promise<void>;
  /** What the Task panel draws from (core/tasks TaskPanelInput: the Agent's scheduled jobs, the Applet tasks working now),
