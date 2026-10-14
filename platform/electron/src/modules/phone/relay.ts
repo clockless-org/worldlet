@@ -248,6 +248,6 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
   try{await request(`/api/pair/${k.id}/messages`,{method:'POST',body:JSON.stringify({box:await sealBox(k,boxPlace('to','phone'),value)})});}
   catch(e){ended(e);throw e;}
  }
- return {status,start,end,publish,notify,poll,send,get paired(){return !!saved?.paired;},get pairing(){return !!saved;},get open(){return peers.size>0;}};
+ return {status,start,end,publish,notify,poll,send,get paired(){return !!saved?.paired;},get pairing(){return !!saved;},get open(){return peers.size>0;},get room(){return inRoom();}};
 }
 export type PhoneRelay=ReturnType<typeof createPhoneRelay>;

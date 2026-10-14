@@ -463,6 +463,9 @@ public struct DesktopInfo: Codable, Sendable, Equatable {
     /// True when the computer keeps this iPhone's notification token itself (core/phone PhoneDesktop `push`): the app
     /// hands it over with a `push` message and the relay keeps none. Absent from older computers.
     public let push: Bool?
+    /// True when the computer waits in the pairing room (core/phone PhoneDesktop `room`): the pairing moves there and the
+    /// relay keeps nothing more. Absent from older computers.
+    public let room: Bool?
 }
 
 /// The phone's own slot: the desktop shows its name in Settings.

@@ -40,6 +40,9 @@ data class PairLink(
     @Serializable(with = SecretSerializer::class) val secret: ByteArray,
     val relay: String = DEFAULT_RELAY,
     val name: String,
+    /** The pairing meets in the pairing room (core/phone/README.md#room): the code said `m=room`, or the computer moved a
+     * relay pairing there. Absent from links kept before. */
+    val room: Boolean = false,
 ) {
     override fun equals(other: Any?) =
         other is PairLink && secret.contentEquals(other.secret) && relay == other.relay && name == other.name
@@ -74,7 +77,7 @@ data class PairLink(
                 if (!ok) throw PairingException(PairingException.Reason.UnknownRelay)
                 relay = r
             }
-            return PairLink(secret, relay, (query["n"] ?: "").take(64))
+            return PairLink(secret, relay, (query["n"] ?: "").take(64), room = query["m"] == "room")
         }
     }
 }

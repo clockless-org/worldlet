@@ -204,6 +204,8 @@ final class AppModel {
     func pause() {
         loop?.cancel()
         loop = nil
+        // In the pairing room the computer then knows the app is put away, and notifies instead.
+        if let session { Task { await session.leaveRoom() } }
     }
 
     /// One poll; false when it failed, so the loop backs off before trying again.
@@ -213,6 +215,11 @@ final class AppModel {
         do {
             let update = try await session.sync(wait: wait)
             guard self.session === session else { return false }
+            // The computer moved the pairing into the pairing room: the kept link says so from now on.
+            if await session.inRoom, let link, link.room != true, self.session === session {
+                self.link = link.inRoom
+                PairingStore.save(link.inRoom)
+            }
             apply(update)
             if phase == .connecting {
                 phase = .paired
@@ -362,7 +369,11 @@ final class AppModel {
         guard !Demo.enabled, let keys, let session, pair == keys.id, let box, let push = try? keys.openPush(box: box),
               let message = push.message(for: button, text: text) else { return }
         if case let .approval(_, approval, choice) = message { answered[approval] = choice }
-        do { try await session.send(message) } catch {
+        do {
+            try await session.send(message)
+            // In the pairing room, staying would tell the computer the app is showing and hold back the answer's notification.
+            if UIApplication.shared.applicationState == .background { await session.leaveRoom() }
+        } catch {
             if case let .approval(_, approval, _) = message { answered[approval] = nil }
             let content = UNMutableNotificationContent()
             content.title = push.title

@@ -181,7 +181,9 @@ export function installPhone(host:Host){
  };
  const foxBusy=()=>!!host.optional<FoxService>(FOX)?.turnActive();
  const quiet=()=>{const scope=host.optional<FoxService>(FOX)?.scope();return !scope||scope.sample||scope.setup;};
- const showing=()=>{const seen=relay.status().seenAt;return !!seen&&Date.now()-seen<SHOWING;};
+ // In the pairing room the app is there exactly while it shows (it leaves when put away, and a notification's button
+ // only drops in to send), so a phone in the room is showing and one that left is not.
+ const showing=()=>{if(relay.room)return relay.open;const seen=relay.status().seenAt;return !!seen&&Date.now()-seen<SHOWING;};
  async function notify({collapse,...request}:PhonePushRequest){
   if(!relay.paired||showing()||quiet())return false;
   const push=phonePush(request);if(!push)return false;

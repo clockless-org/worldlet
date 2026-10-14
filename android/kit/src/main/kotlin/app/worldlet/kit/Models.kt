@@ -296,10 +296,10 @@ data class LiveTurn(
 }
 
 /** The computer's own slot. `order` is true while it takes Orders (core/phone PhoneDesktop): the dock shows its Order
- * button. `push` is true when the computer keeps this phone's notification token itself, so the relay keeps none.
- * Both are absent from computers that don't. */
+ * button. `push` is true when the computer keeps this phone's notification token itself, so the relay keeps none, and
+ * `room` when it waits in the pairing room, where the pairing then moves. All are absent from computers that don't. */
 @Serializable
-data class DesktopInfo(val v: Int = 1, val at: String = "", val name: String = "", val version: String = "", val order: Boolean = false, val push: Boolean = false)
+data class DesktopInfo(val v: Int = 1, val at: String = "", val name: String = "", val version: String = "", val order: Boolean = false, val push: Boolean = false, val room: Boolean = false)
 
 /** The phone's own slot: the desktop shows its name in its phone page. */
 @Serializable

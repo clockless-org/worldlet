@@ -25,6 +25,7 @@ import app.worldlet.kit.PushTarget
 import app.worldlet.kit.RelayException
 import app.worldlet.kit.Turn
 import app.worldlet.kit.PhoneWidget
+import app.worldlet.kit.RoomConnector
 import app.worldlet.kit.WidgetState
 import app.worldlet.kit.WebReport
 import app.worldlet.kit.WebReportBuffer
@@ -56,6 +57,8 @@ class AppModel(
     private val widgetStore: WidgetStore? = null,
     /** This phone's notification token (Push.kt), null while notifications are off; absent in a build without push. */
     private val pushToken: (suspend () -> String?)? = null,
+    /** The pairing room's WebSocket client (RoomClient.kt); without one the phone stays on the relay. */
+    private val room: RoomConnector? = null,
 ) : ViewModel() {
     enum class Phase { Unpaired, Connecting, Paired }
 
@@ -192,7 +195,7 @@ class AppModel(
     }
 
     private fun start(link: PairLink) {
-        val session = PhoneSession(link)
+        val session = PhoneSession(link, room = room)
         this.session = session
         this.link = link
         computerName = link.name
@@ -267,6 +270,8 @@ class AppModel(
     fun pause() {
         loop?.cancel()
         loop = null
+        // In the pairing room the computer then knows the app is put away, and notifies instead.
+        session?.leaveRoom()
     }
 
     /** One poll; false when it failed, so the loop backs off before trying again. */
@@ -275,6 +280,8 @@ class AppModel(
         try {
             val update = session.sync(wait)
             if (this.session !== session) return false
+            // The computer moved the pairing into the pairing room: the kept link says so from now on.
+            link?.takeIf { session.inRoom && !it.room }?.copy(room = true)?.let { moved -> link = moved; store?.save(moved) }
             apply(update)
             if (phase == Phase.Connecting) {
                 phase = Phase.Paired
