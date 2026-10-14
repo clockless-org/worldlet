@@ -137,7 +137,9 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
 {
  const phone=readFileSync('platform/electron/src/modules/phone/index.ts','utf8'),fox=readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
- assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,1200}message\.type!=='chat'\|\|message\.item\|\|message\.applet\|\|!fox\?\.converse[\s\S]{0,300}fox\.converse\(message\.text\)/,'a main-conversation line without the page goes to Fox on the host');
+ assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,2400}message\.type!=='chat'\|\|message\.item\|\|message\.applet\|\|!fox\?\.converse[\s\S]{0,300}fox\.converse\(message\.text\)/,'a main-conversation line without the page goes to Fox on the host');
+ assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,800}message\.type==='attention'&&hostRows\.has\(message\.id\)[\s\S]{0,600}host\.store\.setWorldItemStatus\(id,status,until\)/,'Done or Later without the page settles the item on the host');
+ assert.match(phone,/if\(link\.phone\)await hostCenter\(\);/,'the host publishes the Center while the page is not there');
  assert.match(phone,/live:async value=>\{if\(value\.done===true\)finished\(value\);return publishLive\(value\);\}/,'its turn streams to an open phone or browser, and the reply is pushed like any other');
  assert.match(phone,/message\.type==='approval'&&fox\?\.answerApproval/,'the Agent\'s permission prompt is answered without the page');
  assert.match(fox,/if\(headless\.has\(id\)\)headlessLive\?\.event\(event\);/,'the host streams a headless turn itself');
