@@ -159,7 +159,7 @@ try{
 
 // A scripted Agent for the background pipeline: page collection → Applet analysis → Center synthesis.
 // `requests` records every background request, each of which would be a model call in a real install.
-function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce=false}={}){
+function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce=false,pauseOnce=false}={}){
  const homes:string[]=[],requests:Row[]=[];
  const quote='Please review the project proposal by Friday.';
  const row={provider:'gmail',id:'thread:def456',title:'Proposal',text:'Subject: Proposal\n\n'+quote,url:''};
@@ -188,6 +188,17 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
      cancelOnce=false;store.attentionEpoch+=1;
      const answer=await tool(onEvent,'query_world_items',{}).catch((error:Error)=>({error:error.message}));
      assert.equal(answer.error,'Cancelled.');
+     return {message:'Stopped.'};
+    }
+    if(pauseOnce){
+     // The person pauses the Applet's check between the Agent's read and its save: the save is refused, and the Agent
+     // ends its turn with nothing submitted.
+     pauseOnce=false;
+     const context=await tool(onEvent,'query_world_items',{});
+     store.ledger().put('checks','gmail',{...store.ledger().find('checks','gmail'),enabled:false});
+     const fact=context.context[0];
+     const answer=await tool(onEvent,'upsert_world_items',{items:[task(fact.sourceReference)],processedContextIds:[fact.id]});
+     assert.equal(answer.error,'This source check is paused.');
      return {message:'Stopped.'};
     }
     assert.equal((await tool(onEvent,'upsert_world_items',{items:[],processedContextIds:[]})).error,'Query context, then submit Applet candidates only.');
@@ -276,6 +287,28 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   assert.deepEqual(store.ledger().records('runtime-runs').filter(run=>run.status==='failed'),[],'No failed run');
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron Applet analysis cancelled mid-run: recorded as a cancellation, analysed on the next pass.');
+ }finally{await env.close();}
+}
+
+// An Applet whose check is paused while the Agent is on its page is the World moving on too: a cancellation, not
+// "ended without a verified result" (#1610 came back as operationFailed noResult on Mac Beta 4384, 2026-10-14).
+{
+ const env=environment();
+ const {store,services,tools}=env;
+ scriptedAgent(store,services,{pauseOnce:true});
+ try{
+  store.state.cloudConsent=true;
+  store.state.connections=[{id:'hermes-gmail',provider:'gmail',target:'person@example.com',transport:'hermes',connector:'oauth',syncStatus:'connected'}];
+  store.changed();
+  await tools.checkWorldIfDue('gmail');
+  const deadline=Date.now()+20_000;
+  while(Date.now()<deadline&&store.ledger().find('checks','gmail')?.enabled!==false)await sleep(100);
+  const settled=Date.now()+20_000;
+  while(Date.now()<settled&&!store.ledger().records('runtime-runs').some(run=>run.taskId==='applet:gmail:analyze'&&run.status!=='running'))await sleep(100);
+  const runs=store.ledger().records('runtime-runs').filter(run=>run.taskId==='applet:gmail:analyze');
+  assert.deepEqual(runs.map(run=>run.status),['cancelled'],JSON.stringify(runs));
+  assert.deepEqual(env.errors,[],'No unexpected diagnostics');
+  console.log('PASS Electron Applet analysis whose check is paused mid-run: recorded as a cancellation, no diagnostic.');
  }finally{await env.close();}
 }
 

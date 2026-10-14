@@ -391,6 +391,9 @@ export class AttentionCenter {
   this.analysisProviders.set(session,provider);
   this.store.worldEvidence[session]=Object.fromEntries(records.filter(row=>typeof row.id==='string').map(row=>[provider+':'+row.id,row]));
   let submitted=false,queried=false,committed=false,yielded=false,changed=false;
+  // What a World tool call of this run threw. The Agent only sees it as the call's error and ends its turn, so without
+  // this a cancellation or a host error read as "ended without a verified result" (#1610, Mac Beta 4384 2026-10-14).
+  let toolFailure:unknown,cancelled=false;
   let processedIDs:string[]=[];
   const requiredIDs=records.map(row=>row.id).filter(id=>typeof id==='string');
   try{
@@ -405,55 +408,58 @@ export class AttentionCenter {
     if(!isRow(request))throw new WorldletError('Invalid Applet analysis request');
     request.session=session;request.context=context;request.analysisLane=provider;
     const reply=await this.analysisRuntime(provider).run(request,this.agent().isolatedHome('applet-analysis'),async event=>{
-     checkCancellation(signal);
-     if(this.store.attentionEpoch!==epoch||!this.consent||!this.connected(provider))throw new Cancelled();
-     if(event.type!=='tool'||typeof event.name!=='string'||!isRow(event.args))return null;
-     const name=event.name,args=event.args;
-     if(name==='query_world_items'){
-      queried=true;
-      const snapshot=core('appletAnalysisInput',{provider,records,items:this.db().records('items').filter(item=>item.provider===provider),now:now()});
-      if(!isRow(snapshot))throw new WorldletError('Invalid source batch');
-      snapshot.pendingContextIds=requiredIDs.filter(id=>!processedIDs.includes(id));snapshot.userContext=context.userContext??{};
-      return snapshot;
-     }
-     if(!queried||name!=='upsert_world_items')return {error:'Query context, then submit Applet candidates only.'};
-     try{core('attentionCoverage',{available:requiredIDs,required:requiredIDs,previous:processedIDs,processed:args.processedContextIds??[]});}
-     catch{return {error:'processedContextIds must contain exact IDs from the supplied source records.'};}
-     const result=await worldToolReply(this,name,args,session,provider);
-     if(result.error==null){
-      const db=this.db();
-      if(!this.enabledCheck(provider))throw new Cancelled();
-      const latest=this.observations(provider);
-      // Records cited by rejected candidates, or changed since this batch was read, stay pending.
-      const withheld=new Set(strings(result.withheldContextIds));
-      for(const row of records)if(typeof row.id==='string'&&!this.analysisSourcesCurrent([row],latest)){withheld.add(row.id);changed=true;}
-      const staged=this.analysisCandidates.get(session)??[];
-      // Never checkpoint half of a cross-record candidate: a restart would lose its staged remainder.
-      const acknowledged=new Set(strings(args.processedContextIds).filter(id=>!withheld.has(id)));
-      let stable=false;
-      while(!stable){
-       stable=true;
-       for(const item of staged){
-        const ids=rows(item.sources).map(ref=>ref.id).filter(id=>typeof id==='string');
-        if(ids.some(id=>!acknowledged.has(id)&&!processedIDs.includes(id))&&ids.some(id=>acknowledged.has(id))){for(const id of ids)acknowledged.delete(id);stable=false;}
+     try{
+      checkCancellation(signal);
+      if(this.store.attentionEpoch!==epoch||!this.consent||!this.connected(provider))throw new Cancelled();
+      if(event.type!=='tool'||typeof event.name!=='string'||!isRow(event.args))return null;
+      const name=event.name,args=event.args;
+      if(name==='query_world_items'){
+       queried=true;
+       const snapshot=core('appletAnalysisInput',{provider,records,items:this.db().records('items').filter(item=>item.provider===provider),now:now()});
+       if(!isRow(snapshot))throw new WorldletError('Invalid source batch');
+       snapshot.pendingContextIds=requiredIDs.filter(id=>!processedIDs.includes(id));snapshot.userContext=context.userContext??{};
+       return snapshot;
+      }
+      if(!queried||name!=='upsert_world_items')return {error:'Query context, then submit Applet candidates only.'};
+      try{core('attentionCoverage',{available:requiredIDs,required:requiredIDs,previous:processedIDs,processed:args.processedContextIds??[]});}
+      catch{return {error:'processedContextIds must contain exact IDs from the supplied source records.'};}
+      const result=await worldToolReply(this,name,args,session,provider);
+      if(result.error==null){
+       const db=this.db();
+       if(!this.enabledCheck(provider))throw new Cancelled();
+       const latest=this.observations(provider);
+       // Records cited by rejected candidates, or changed since this batch was read, stay pending.
+       const withheld=new Set(strings(result.withheldContextIds));
+       for(const row of records)if(typeof row.id==='string'&&!this.analysisSourcesCurrent([row],latest)){withheld.add(row.id);changed=true;}
+       const staged=this.analysisCandidates.get(session)??[];
+       // Never checkpoint half of a cross-record candidate: a restart would lose its staged remainder.
+       const acknowledged=new Set(strings(args.processedContextIds).filter(id=>!withheld.has(id)));
+       let stable=false;
+       while(!stable){
+        stable=true;
+        for(const item of staged){
+         const ids=rows(item.sources).map(ref=>ref.id).filter(id=>typeof id==='string');
+         if(ids.some(id=>!acknowledged.has(id)&&!processedIDs.includes(id))&&ids.some(id=>acknowledged.has(id))){for(const id of ids)acknowledged.delete(id);stable=false;}
+        }
        }
+       const coverage=core('attentionCoverage',{available:requiredIDs,required:requiredIDs,previous:processedIDs,processed:[...acknowledged]});
+       if(!isRow(coverage))throw new WorldletError('Invalid analysis coverage.');
+       const covered=new Set(Array.isArray(coverage.processed)?strings(coverage.processed):processedIDs);
+       if(covered.size){
+        const candidates=staged.filter(item=>rows(item.sources).every(ref=>covered.has(typeof ref.id==='string'?ref.id:'')));
+        db.withRuntimeOutput('applet:'+provider+':analyze',turn,()=>this.saveAppletCandidates(provider,candidates,session,covered));
+       }
+       submitted=true;processedIDs=Array.isArray(coverage.processed)?strings(coverage.processed):processedIDs;
+       result.pendingContextIds=coverage.remaining;
       }
-      const coverage=core('attentionCoverage',{available:requiredIDs,required:requiredIDs,previous:processedIDs,processed:[...acknowledged]});
-      if(!isRow(coverage))throw new WorldletError('Invalid analysis coverage.');
-      const covered=new Set(Array.isArray(coverage.processed)?strings(coverage.processed):processedIDs);
-      if(covered.size){
-       const candidates=staged.filter(item=>rows(item.sources).every(ref=>covered.has(typeof ref.id==='string'?ref.id:'')));
-       db.withRuntimeOutput('applet:'+provider+':analyze',turn,()=>this.saveAppletCandidates(provider,candidates,session,covered));
-      }
-      submitted=true;processedIDs=Array.isArray(coverage.processed)?strings(coverage.processed):processedIDs;
-      result.pendingContextIds=coverage.remaining;
-     }
-     return result;
+      return result;
+     }catch(error){toolFailure??=error;throw error;}
     });
     // A cancellation from a World tool call comes back to an Agent on the per-turn MCP bridge as the call's error
     // (world-tool-bridge.ts), so the Agent ends its turn instead of the run stopping: the run was cancelled all the same.
     checkCancellation(signal);
-    if(this.store.attentionEpoch!==epoch||!this.consent||!this.connected(provider))throw new Cancelled();
+    if(this.store.attentionEpoch!==epoch||!this.consent||!this.connected(provider)||!this.enabledCheck(provider))throw new Cancelled();
+    if(!submitted&&toolFailure!==undefined)throw toolFailure;
     if(!submitted)throw new WorldletError(String(core('appletAnalysisUnsubmitted',{reply:reply?.message})));
     checkCancellation(signal);
     if(!requiredIDs.every(id=>processedIDs.includes(id))){
@@ -469,8 +475,10 @@ export class AttentionCenter {
    }finally{
     this.receiveAppletEvent({provider,callId:session,phase:committed?'complete':yielded?'yielded':'error'},turn);
    }
-  }finally{
-   this.settleSaves(session,signal.aborted);
+  }catch(error){cancelled=isCancel(error);throw error;}
+  finally{
+   // A save refused because the World moved on (a paused check) is part of the cancellation, not a rejection to report.
+   this.settleSaves(session,signal.aborted||cancelled);
    this.analysisCandidates.delete(session);this.analysisProviders.delete(session);delete this.store.worldEvidence[session];this.acknowledged.delete(session);
   }
  }
