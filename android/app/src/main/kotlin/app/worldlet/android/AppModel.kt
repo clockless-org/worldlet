@@ -219,7 +219,8 @@ class AppModel(
         val session = session ?: return
         val token = pushToken ?: return
         if (demo != null) return
-        viewModelScope.launch { runCatching { token()?.let { session.registerPush("fcm", it) } ?: session.unregisterPush() } }
+        val direct = store?.keepsPush == true
+        viewModelScope.launch { runCatching { token()?.let { session.registerPush("fcm", it, direct) } ?: session.unregisterPush(direct) } }
     }
 
     fun show(target: PushTarget) { if (demo == null) this.target = target }
@@ -298,6 +299,9 @@ class AppModel(
         update.computerSeenAt?.let { computerSeenAt = Instant.ofEpochMilli(it.toLong()) }
         update.desktop?.name?.takeIf { it.isNotEmpty() }?.let { computerName = it }
         update.desktop?.let { takesOrders = it.order }
+        update.desktop?.let { desktop ->
+            store?.takeIf { it.keepsPush != desktop.push }?.let { it.keepsPush = desktop.push; if (phase == Phase.Paired) syncPush() }
+        }
         update.attention?.let { snapshot ->
             attention = snapshot
             receivedAttention = true

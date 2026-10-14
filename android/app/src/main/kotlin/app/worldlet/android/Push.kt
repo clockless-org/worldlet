@@ -160,9 +160,10 @@ class WorldletApp : Application() {
  * notification unless the app is on screen. */
 class PushService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
-        val link = PairingStore(applicationContext).load() ?: return
+        val store = PairingStore(applicationContext)
+        val link = store.load() ?: return
         if (!Push.allowed(applicationContext)) return
-        runBlocking { runCatching { withTimeoutOrNull(20_000) { PhoneSession(link).registerPush("fcm", token) } } }
+        runBlocking { runCatching { withTimeoutOrNull(20_000) { PhoneSession(link).registerPush("fcm", token, store.keepsPush) } } }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

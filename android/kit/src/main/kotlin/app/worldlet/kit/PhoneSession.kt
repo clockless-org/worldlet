@@ -132,13 +132,21 @@ class PhoneSession(val link: PairLink, private val transport: RelayTransport = H
         request("api/pair/${keys.id}/slots/phone", "PUT", body = box(keys.seal(PhoneInfo.serializer(), info, PairKeys.slot("phone"))))
     }
 
-    /** Gives the relay this phone's push token ([platform] "fcm"), so the computer can notify it while it is closed. */
-    suspend fun registerPush(platform: String, token: String) {
-        request("api/pair/${keys.id}/push", "PUT", body = buildJsonObject { put("platform", platform); put("token", token) })
+    /** Gives this phone's push token ([platform] "fcm") to whoever wakes it while it is closed. With [direct] (the
+     * computer's desktop slot says `push`) it goes to the computer in a sealed message and the relay's registration is
+     * removed, so the relay keeps none (core/phone/README.md#push); otherwise the relay keeps it, as older computers need. */
+    suspend fun registerPush(platform: String, token: String, direct: Boolean = false) {
+        if (!direct) {
+            request("api/pair/${keys.id}/push", "PUT", body = buildJsonObject { put("platform", platform); put("token", token) })
+            return
+        }
+        send(PhoneMessage.Push(java.util.UUID.randomUUID().toString(), platform, token))
+        runCatching { unregisterPush() }
     }
 
-    /** Stops notifications: the relay forgets this phone's token. */
-    suspend fun unregisterPush() {
+    /** Stops notifications: the relay forgets this phone's token, and with [direct] the computer too. */
+    suspend fun unregisterPush(direct: Boolean = false) {
+        if (direct) runCatching { send(PhoneMessage.Push(java.util.UUID.randomUUID().toString(), "", "")) }
         try { request("api/pair/${keys.id}/push", "DELETE") } catch (_: RelayException.Ended) {}
     }
 

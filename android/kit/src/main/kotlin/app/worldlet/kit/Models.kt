@@ -296,9 +296,10 @@ data class LiveTurn(
 }
 
 /** The computer's own slot. `order` is true while it takes Orders (core/phone PhoneDesktop): the dock shows its Order
- * button. Absent from computers that don't. */
+ * button. `push` is true when the computer keeps this phone's notification token itself, so the relay keeps none.
+ * Both are absent from computers that don't. */
 @Serializable
-data class DesktopInfo(val v: Int = 1, val at: String = "", val name: String = "", val version: String = "", val order: Boolean = false)
+data class DesktopInfo(val v: Int = 1, val at: String = "", val name: String = "", val version: String = "", val order: Boolean = false, val push: Boolean = false)
 
 /** The phone's own slot: the desktop shows its name in its phone page. */
 @Serializable
@@ -445,6 +446,8 @@ sealed interface PhoneMessage {
     /** A line with attached files (each sent before as [File] parts), in the main conversation, an item's card ([item])
      * or an Applet's page ([applet]). */
     data class Attach(override val id: String, val text: String, val files: List<String>, val item: String? = null, val applet: String? = null) : PhoneMessage
+    /** This phone's notification token for a computer that keeps it (core/phone PhoneMessage `push`); empty takes it back. */
+    data class Push(override val id: String, val platform: String, val token: String) : PhoneMessage
 
     fun toJson(): JsonObject = buildJsonObject {
         when (val m = this@PhoneMessage) {
@@ -456,6 +459,7 @@ sealed interface PhoneMessage {
             is Attention -> { put("type", "attention"); put("id", m.id); put("action", m.action.name.lowercase()) }
             is Connect -> { put("type", "connect"); put("id", m.id); put("provider", m.provider) }
             is Order -> { put("type", "order"); put("id", m.id); put("said", m.said) }
+            is Push -> { put("type", "push"); put("id", m.id); put("platform", m.platform); put("token", m.token) }
             is Approval -> { put("type", "approval"); put("id", m.id); put("approval", m.approval); put("choice", m.choice.wire) }
             is File -> {
                 put("type", "file"); put("id", m.id); put("file", m.file); put("part", m.part); put("parts", m.parts)

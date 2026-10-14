@@ -43,12 +43,18 @@ class PairingStore(context: Context) {
         prefs.edit().putString(LINK, Base64Url.encode(sealed)).apply()
     }
 
+    /** The computer keeps this phone's notification token (its desktop slot says `push`), so a new token goes to it. */
+    var keepsPush: Boolean
+        get() = prefs.getBoolean(KEEPS_PUSH, false)
+        set(value) { prefs.edit().putBoolean(KEEPS_PUSH, value).apply() }
+
     fun delete() {
-        prefs.edit().remove(LINK).apply()
+        prefs.edit().remove(LINK).remove(KEEPS_PUSH).apply()
     }
 
     private companion object {
         const val ALIAS = "worldlet.pairing"
         const val LINK = "computer"
+        const val KEEPS_PUSH = "computerKeepsPush"
     }
 }
