@@ -161,6 +161,12 @@ assert.equal('rule' in crash,false,'an unclassified failure carries no rule');
 // released under memory pressure is the browser working as designed, so error tracking never hears of it.
 for(const [message,rule] of [['Applet analysis ended without a verified result.','noResult'],['Applet analysis did not cover every supplied source record; retry remaining analysis.','partialCoverage'],['ENOENT: no such file','missing']])
  assert.equal(exceptionReport({name:'Error',message,stack:'',area:'host',operation:'appletAnalysis'}).rule,rule,message);
+// A background or speak-first turn on the person's Agent says how it ended (Windows Beta 4384, 2026-10-13: six bare
+// operationFailed from LocalHarnessRuntime.attempt in ten minutes, foxBackground and foxProactive).
+for(const [message,rule] of [['Hermes Agent does not start on this computer. Open Settings › Agent and choose Install again.','notStarted'],['Hermes Agent could not start.','notStarted'],
+ ['Hermes Agent stopped (code 1) without saying why. Open it once in Terminal to check it is signed in, then try again.','processExit'],['Claude Code stopped before it answered. Try again.','processExit'],
+ ['Hermes Agent finished without an answer. Try again.','noAnswer'],['Hermes Agent could not answer: No inference provider configured.','noModel'],['Hermes Agent could not answer: Traceback (most recent call last)','agentError']] as const)
+ for(const operation of ['foxBackground','foxProactive'])assert.equal(exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation}).rule,rule,message);
 assert.equal(exceptionReport({name:'Error',message:'Kept page released under memory pressure (appFootprint).',stack:'',area:'host',operation:'keptPageRelease'}),null);
 // Fox setup failure messages still map to fixed tags.
 {

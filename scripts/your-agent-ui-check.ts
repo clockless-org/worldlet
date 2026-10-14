@@ -46,7 +46,8 @@ try{
   if(b.action==='modelSource')return w.source;
   if(b.action==='modelHealth'&&w.gateway?.active)return {agent:'remote-openclaw',available:true,lastReply:null,location:{kind:'remote',computer:w.gateway.host,direct:true},model:{name:'OpenClaw at '+w.gateway.host,id:'',provider:'remote-openclaw',source:null,ready:true,configured:false}};
   if(b.action==='modelHealth')return w.remote?{agent:'remote',available:true,lastReply:null,location:{kind:'remote',computer:w.remote},model:{name:'Agent on '+w.remote,id:'',provider:'remote',source:null,ready:true,configured:false}}:{agent:'hermes',available:true,lastReply:w.lastReply??null,model:{name:w.source.name,id:'',provider:w.source.provider,source:w.source.localCodex?'local-codex':null,ready:w.source.ready,configured:w.source.source!=='none'}};
-  if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,model:true,worldTools:true},{id:'claude-code',title:'Claude Code',configured:true,model:false,worldTools:true,memory:{name:null,user:false,longTerm:true,model:false}}],recommended:'codex',selected:w.remote||w.gateway?.active?null:w.agentInUse??null,remote:w.remote?{computer:w.remote,seenAt:Date.now()}:null,gateway:w.gateway??null};
+  if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,model:true,worldTools:true},{id:'claude-code',title:'Claude Code',configured:true,model:false,worldTools:true,memory:{name:null,user:false,longTerm:true,model:false}}],recommended:'codex',selected:w.remote||w.gateway?.active?null:w.agentInUse??null,remote:w.remote?{computer:w.remote,seenAt:Date.now()}:null,gateway:w.gateway??null,...w.brokenHermes?{brokenHermes:true}:{}};
+  if(b.action==='agentHarness'&&b.operation==='install-hermes'){w.brokenHermes=false;return {ok:true,id:'hermes',title:'Hermes Agent'};}
   // A Gateway on another computer reached directly: the host answers with its address and host, never the token.
   if(b.action==='agentHarness'&&b.operation==='gateway'){if(!b.token&&!w.gateway)throw new Error('Type your Gateway’s address and token.');w.gateway={url:'https://mini.tail1.ts.net',host:'mini.tail1.ts.net',active:true};w.remote=null;return {ok:true,gateway:{host:'mini.tail1.ts.net'}};}
   if(b.action==='agentHarness'&&b.operation==='forget-gateway'){w.gateway=null;return {ok:true};}
@@ -206,6 +207,17 @@ try{
  await local.locator('[data-agent=codex]').getByRole('button',{name:'Stop using',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='clear'));
  await local.locator('[data-agent=codex]').getByRole('button',{name:'Use',exact:true}).waitFor();
+ // A Hermes Agent that is here but does not start (left half installed) is not offered to Use: Install again runs the
+ // official installer, then chooses it (Windows Beta 4384, 2026-10-13).
+ await page.evaluate(()=>{(window as any).brokenHermes=true;});
+ await local.getByRole('button',{name:'Check connection',exact:true}).click();
+ const broken=local.locator('[data-agent=hermes]');
+ await broken.getByText('It is on this computer but does not start. Install again sets it up the official way.',{exact:true}).waitFor();
+ assert.equal(await broken.getByRole('button',{name:'Use',exact:true}).count(),0,'not offered to Use');
+ await broken.getByRole('button',{name:'Install again',exact:true}).click();
+ await broken.waitFor({state:'detached'});
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['install-hermes','select'].includes(c.operation)).slice(-2).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','select:hermes']);
+ await page.evaluate(()=>{(window as any).agentInUse=null;});
  // An Agent on another computer (core/phone/README.md#another-computers-agent): its code pairs, Settings says where Fox
  // runs, and Stop using ends the pairing.
  // Both are folded under Other ways to connect, few people need them (owner request 2026-10-10).

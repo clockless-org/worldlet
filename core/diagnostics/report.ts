@@ -85,16 +85,21 @@ const FAILURE_KINDS:[RegExp,string][]=[
  // bare operationFailed with no rule, so not running, not answering and signed out looked the same).
  // Choosing a local Agent (agentHarness select): its command did not start, it is older than Worldlet needs, or it is
  // gone (Windows Beta 4384, 2026-10-13: eleven sub-second local_agent_select_failed, all a bare operationFailed).
- [/did not start/,'notStarted'],
+ [/did not start|does not start|could not start/,'notStarted'],
  [/is too old for worldlet/,'outdated'],
  [/no longer on this computer/,'missing'],
  [/not installed|command not found|is not recognized as an internal/,'notInstalled'],
  [/not (?:signed|logged) in|log ?in first|login required/,'signedOut'],
  [/\beconnrefused\b|connection refused|not running|is not kept running|socket hang up|\beconnreset\b/,'notRunning'],
- [/did not answer|no reply|empty (?:reply|response)/,'noAnswer'],
+ [/did not answer|no reply|empty (?:reply|response)|finished without an answer/,'noAnswer'],
  [/\benoent\b|no such file|not found|(?:is|are) missing|does not exist/,'missing'],
  [/\beacces\b|\beperm\b|permission denied|not permitted|access is denied/,'permission'],
- [/\bexited (?:with )?(?:code )?-?\d+|exit code|exit status/,'processExit'],
+ [/\bexited (?:with )?(?:code )?-?\d+|exit code|exit status|stopped \(code -?\d+\)|stopped before it answered/,'processExit'],
+ // No model or provider set up in the Agent yet, as a fresh install leaves it (`hermes model`, an API key to add).
+ [/no (?:inference )?provider|no model (?:is )?(?:configured|set|selected)|choose (?:one|a model) with `?hermes model|no api key|api key (?:is )?(?:missing|not set)/,'noModel'],
+ // The Agent started and said why it could not answer (its last stderr line, local-harness finishLocalHarness): the
+ // words are its own and stay on the computer; the rule says only that it was the Agent's own error.
+ [/could not answer: /,'agentError'],
  [/\b(?:http|error code:?) 4\d\d\b/,'httpClient'],
  [/unexpected token|in json|json at position|is not valid json/,'invalidData'],
  [/\beaddrinuse\b|\bebusy\b|already running|another worldlet window/,'busy'],
