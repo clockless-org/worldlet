@@ -1,4 +1,4 @@
-import {DEFAULT_PAIR_RELAY,PUSH_BOX_PLACE,base64url,boxPlace,fromBase64url,newPairSecret,openBox,pairKeys,pairLink,readPhoneMessage,sealBox,sha256Hex,phoneMessageKey,stalePhoneMessage,PHONE_SEEN_LIMIT,type PairKeys,type PairKind,type PhoneMessage,type PhonePush} from '../../../../../core/phone/index.ts';
+import {DEFAULT_PAIR_RELAY,PUSH_BOX_PLACE,base64url,boxPlace,fromBase64url,newPairSecret,openBox,pairKeys,pairLink,readPhoneMessage,sealBox,sha256Hex,phoneMessageKey,stalePhoneMessage,phonePushToken,PHONE_SEEN_LIMIT,type PairKeys,type PairKind,type PhoneMessage,type PhonePush} from '../../../../../core/phone/index.ts';
 
 // The desktop side of phone pairing (core/phone/README.md), free of Electron so scripts/phone-pairing-check.ts can drive
 // it against the relay Worker in process. It keeps one pairing: the secret in the vault, the relay cursor in memory.
@@ -7,12 +7,15 @@ import {DEFAULT_PAIR_RELAY,PUSH_BOX_PLACE,base64url,boxPlace,fromBase64url,newPa
 // Slots the desktop owns are sealed and written only when their content changes; the phone's messages go to `deliver`,
 // and a message is acknowledged (by advancing the cursor) only after `deliver` accepted it. The agent pairing reads its
 // client's messages with `read` (core/phone readRemoteToHost) instead of a phone's, and `send` queues one to the client. `notify` asks the relay to
-// wake the phone with a sealed notification; `push` in the status says whether the phone registered for them.
+// wake the phone with a sealed notification; `push` in the status says whether the phone registered for them. A phone
+// that hands its notification token to the computer (a `push` message, core/phone/README.md#push) has it kept in the
+// vault, never delivered: `notify` then sends the token with the box to the relay's `/api/push`, which stores nothing.
 export type PhoneState='none'|'waiting'|'paired';
 export type PhoneStatus={state:PhoneState,link?:string,phone?:{name:string,version:string}|null,seenAt?:number|null,push?:{platform:string}|null,error?:string};
 /** The relay's answer to a notification: sent, or why not (no-device, not-configured, device-gone, or an error). */
 export type PhoneNotifyResult={sent:boolean,reason?:string,error?:string};
 type Saved={secret:string,relay:string,name:string,paired:boolean,phone?:{name:string,version:string}|null};
+type Device={platform:string,token:string};
 export type PhoneRelayOptions<M extends {type:string,id:string}=PhoneMessage>={
  fetch:typeof fetch,
  vault:{get(id:string):string|null,set(id:string,v:string):void,delete(id:string):void},
@@ -33,10 +36,15 @@ export type PhoneRelayOptions<M extends {type:string,id:string}=PhoneMessage>={
 };
 export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>(options:PhoneRelayOptions<M>){
  const relayOf=()=>(typeof options.relay==='function'?options.relay():options.relay)||DEFAULT_PAIR_RELAY,kind=options.kind??'phone',read=options.read??(readPhoneMessage as unknown as (value:unknown)=>M|null);
- const VAULT_ID=(options.vaultName??kind)+'-pairing',SEEN_ID=(options.vaultName??kind)+'-pairing-seen';
+ const VAULT_ID=(options.vaultName??kind)+'-pairing',SEEN_ID=(options.vaultName??kind)+'-pairing-seen',PUSH_ID=(options.vaultName??kind)+'-pairing-push';
  let saved:Saved|null=null,keys:PairKeys|null=null,cursor=0,seenAt:number|null=null,push:{platform:string}|null|undefined,error='';
  const published=new Map<string,string>(),latest=new Map<string,unknown>();
  try{const raw=options.vault.get(VAULT_ID);if(raw)saved=JSON.parse(raw);}catch{saved=null;}
+ // The phone's notification token, when it handed it to this computer.
+ let device:Device|null=null;
+ try{const raw=options.vault.get(PUSH_ID),value=raw?JSON.parse(raw):null;if(saved&&phonePushToken(value?.platform,value?.token))device={platform:value.platform,token:value.token};}catch{device=null;}
+ if(device)push={platform:device.platform};
+ const keep=(next:Device|null)=>{device=next;if(next)options.vault.set(PUSH_ID,JSON.stringify(next));else options.vault.delete(PUSH_ID);};
  let seen:string[]=[];
  try{const raw=options.vault.get(SEEN_ID);const list=raw?JSON.parse(raw):[];if(Array.isArray(list))seen=list.filter(key=>typeof key==='string').slice(-PHONE_SEEN_LIMIT);}catch{seen=[];}
  const seenSet=new Set(seen);
@@ -46,7 +54,7 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
   options.vault.set(SEEN_ID,JSON.stringify(seen));
  };
  const forgetSeen=()=>{seen=[];seenSet.clear();options.vault.delete(SEEN_ID);};
- const save=()=>{if(saved)options.vault.set(VAULT_ID,JSON.stringify(saved));else{options.vault.delete(VAULT_ID);forgetSeen();}};
+ const save=()=>{if(saved)options.vault.set(VAULT_ID,JSON.stringify(saved));else{options.vault.delete(VAULT_ID);forgetSeen();keep(null);}};
  const ensureKeys=async()=>keys??=saved?await pairKeys(fromBase64url(saved.secret)):null;
  const link=()=>pairLink({secret:fromBase64url(saved!.secret),relay:saved!.relay,name:saved!.name,kind});
  // A browser's link stays shown once paired: any browser that opens it joins the same pairing (core/phone/README.md#web).
@@ -67,7 +75,7 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
   await end().catch(()=>{});
   const secret=newPairSecret(),k=await pairKeys(secret),relay=relayOf();
   await request('/api/pair',{method:'POST',body:JSON.stringify({id:k.id,desktop:await sha256Hex(k.desktopToken),phone:await sha256Hex(k.phoneToken)})},k.desktopToken);
-  saved={secret:base64url(secret),relay,name:options.name(),paired:false,phone:null};keys=k;cursor=0;push=undefined;published.clear();error='';
+  saved={secret:base64url(secret),relay,name:options.name(),paired:false,phone:null};keys=k;cursor=0;push=undefined;keep(null);published.clear();error='';
   forgetSeen();save();changed();
   return status();
  }
@@ -94,8 +102,13 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  async function notify(value:PhonePush,collapse?:string):Promise<PhoneNotifyResult>{
   const k=await ensureKeys().catch(()=>null);if(!k||!saved?.paired)return {sent:false,reason:'not-paired'};
   try{
-   const answer=await request(`/api/pair/${k.id}/notify`,{method:'POST',body:JSON.stringify({box:await sealBox(k,PUSH_BOX_PLACE,value),...(collapse?{collapse}:{})})});
-   if(answer?.reason==='device-gone'&&push){push=null;changed();}
+   const box=await sealBox(k,PUSH_BOX_PLACE,value),extra=collapse?{collapse}:{};
+   // A relay without `/api/push` (older, or one of the person's own) answers 404: that is not the pairing ending, and the
+   // relay's own registration is tried instead.
+   const direct=device&&await request('/api/push',{method:'POST',body:JSON.stringify({pair:k.id,platform:device.platform,token:device.token,box,...extra})})
+    .catch(e=>{if(e?.status===404||e?.status===405)return null;throw e;});
+   const answer=direct||await request(`/api/pair/${k.id}/notify`,{method:'POST',body:JSON.stringify({box,...extra})});
+   if(answer?.reason==='device-gone'){if(device)keep(null);if(push){push=null;changed();}}
    return {sent:answer?.sent===true,...(typeof answer?.reason==='string'?{reason:answer.reason}:{})};
   }catch(e){if(!ended(e))error=(e as Error).message;return {sent:false,error:(e as Error).message};}
  }
@@ -107,8 +120,8 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
   try{view=await request(`/api/pair/${k.id}?after=${cursor}${wait?`&wait=${wait}`:''}`,{},undefined,wait*1000+15_000);error='';}
   catch(e){if(!ended(e)){error=(e as Error).message;}return false;}
   seenAt=view.peer?.seenAt??null;
-  // An older relay sends no `push`: the status then says nothing about notifications.
-  if('push' in view){const next=view.push?.platform?{platform:String(view.push.platform)}:null;if(JSON.stringify(next)!==JSON.stringify(push)){push=next;changed();}}
+  // An older relay sends no `push`: the status then says nothing about notifications. A token this computer keeps wins.
+  if('push' in view&&!device){const next=view.push?.platform?{platform:String(view.push.platform)}:null;if(JSON.stringify(next)!==JSON.stringify(push)){push=next;changed();}}
   let arrived=false;
   if(!saved.paired&&view.peer?.pairedAt){
    saved.paired=true;save();arrived=true;changed();
@@ -127,6 +140,12 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
    if(!message||stalePhoneMessage(sealed,Date.now()))continue;
    const key=await phoneMessageKey(message,String(m.box));
    if(seenSet.has(key))continue;
+   // The phone's notification token stays here; only a phone pairing takes one.
+   if(message.type==='push'){
+    const handed=message as unknown as PhoneMessage&{type:'push'};
+    if(kind==='phone'){keep(handed.platform?{platform:handed.platform,token:handed.token}:null);const next=device?{platform:device.platform}:null;if(JSON.stringify(next)!==JSON.stringify(push)){push=next;changed();}}
+    remember(key);continue;
+   }
    if(!await options.deliver(message,key).catch(()=>false)){next=m.seq-1;break;}
    remember(key);
   }
