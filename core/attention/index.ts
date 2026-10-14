@@ -15,3 +15,7 @@ export * from './attention-events.ts';
 export * from './batch-input.ts';
 export * from './attention-time.ts';
 export * from './source-image.ts';
+export * from './matter-time.ts';
+export * from './matter-copy.ts';
+export * from './matters.ts';
+export * from './signals.ts';

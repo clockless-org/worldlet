@@ -1,4 +1,4 @@
-import {validAttentionTime} from '../../core/attention/index.ts';
+import {validAttentionTime} from './attention-time.ts';
 export interface AttentionTimeContext {now?:Date;locale?:string;timeZone?:string}
 const instant=(value:unknown)=>typeof value==='number'&&Number.isFinite(new Date(value).getTime())?new Date(value).toISOString():value;
 // Building an Intl formatter costs far more than using one, and every row of every render needs several:

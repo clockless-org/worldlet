@@ -1,6 +1,6 @@
-import {attentionGroupWhen} from './time.ts';
+import {attentionGroupWhen} from './matter-time.ts';
 import {matterCopy} from './matter-copy.ts';
-import {groupAttentionEvents} from '../../core/attention/index.ts';
+import {groupAttentionEvents} from './attention-events.ts';
 // Source signals stay independent within their Applet unless Core groups saved items
 // into one event. Explicit scenes can still fold related signals; neither grouping
 // changes the saved source evidence.

@@ -3,7 +3,7 @@ import {validateWorldItem} from '../core/items/world-item-validation.ts';
 import {readFileSync} from 'node:fs';
 import {processedAttentionContent,ATTENTION_CONTENT_LIMITS,attentionReasonWords} from '../core/attention/attention-content.ts';
 import services from '../core/tools/services.json' with {type:'json'};
-import {matterCopy} from '../ui/attention/matter-copy.ts';
+import {matterCopy} from '../core/attention/index.ts';
 import {attentionPreviewData} from '../core/attention/attention-preview.ts';
 import {projectWorldItems} from '../core/items/world-items.ts';
 import {planAttention,finishAttentionBudget} from '../core/attention/attention-center.ts';

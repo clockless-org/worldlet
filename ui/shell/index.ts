@@ -1,6 +1,6 @@
 /** Public UI component interface. Keep implementation imports inside this component. */
 export {musicReply} from '../world/index.ts';
-export {collectNativeActions,upcomingEvents} from './native-actions.ts';
+export {collectNativeActions,upcomingEvents} from '../../core/attention/index.ts';
 export {runAudioCommand} from './native-audio.ts';
 export {mountNotionWorld} from './notion-world.ts';
 export {errorFields,withFoxTurnAnalytics,withProductAnalytics,withToolAnalytics,eventTrigger,reportEngagement,reportProductEvent,personGesture,startWebAnalytics} from './product-analytics.ts';
