@@ -37,7 +37,7 @@ import {readArtifact} from '../../../../../core/artifacts/index.ts';
 // seconds before Fox began; a long poll takes the same number of requests and picks the line up within a second.
 // The ports a browser on this computer reaches Worldlet on (local-relay.ts), the first free one; the one used is kept.
 const LOCAL_PORTS=Array.from({length:10},(_,i)=>47630+i),LOCAL_PORT='worldlet.localBrowserPort';
-const QUICK=2000,SLOW=15000,ACTIVE=120000,WAIT=15,CONVERSATION=15000,SHOWING=45000,ASKED=3600000,LISTENING=7*86400000,WEB_LISTENING=3600000;
+const QUICK=2000,SLOW=15000,WAITING_QUICK=600000,ACTIVE=120000,WAIT=15,CONVERSATION=15000,SHOWING=45000,ASKED=3600000,LISTENING=7*86400000,WEB_LISTENING=3600000;
 export function computerName(){return os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer';}
 
 export function installPhone(host:Host){
@@ -311,7 +311,7 @@ export function installPhone(host:Host){
  // One loop per pairing. A long poll holds its tick while it waits, so Fox's replies reach an open side through the
  // watch below: every two seconds while Fox works and once more when it finishes, and at least every 15 seconds.
  const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false},{relay:browser,open:webOpen,listening:webListening,phone:true},{relay:local,open:localOpen,listening:localListening,phone:true}].map(link=>{
-  let timer:ReturnType<typeof setTimeout>|null=null,running=false,foxWasBusy=false,conversationAt=0;
+  let timer:ReturnType<typeof setTimeout>|null=null,running=false,foxWasBusy=false,conversationAt=0,waiting:{link:string,since:number}|null=null;
   async function publishConversation(){
    conversationAt=Date.now();
    const value=conversation();if(value)await link.relay.publish('conversation',value);
@@ -334,7 +334,11 @@ export function installPhone(host:Host){
   function schedule(delay?:number){
    if(stopped)return;
    if(timer)clearTimeout(timer);
-   const quick=link.relay.status().state==='waiting'||link.open()||foxBusy();
+   // A code just shown is checked every two seconds, so pairing feels instant; one nobody took for ten minutes, every
+   // 15 seconds (a code left on screen polled the relay all day).
+   const status=link.relay.status();
+   if(status.state!=='waiting')waiting=null;else if(waiting?.link!==status.link)waiting={link:String(status.link),since:Date.now()};
+   const quick=!!waiting&&Date.now()-waiting.since<WAITING_QUICK||link.open()||foxBusy();
    timer=setTimeout(()=>void tick(),delay??(quick?QUICK:SLOW));
   }
   function watch(){
