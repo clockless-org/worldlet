@@ -14,6 +14,7 @@ import {chromium} from 'playwright';
 import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
 import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/electron/src/modules/phone/local-relay.ts';
 import {createRoomLink} from '../platform/electron/src/modules/phone/room-link.ts';
+import {memoryRoom} from './memory-room.ts';
 import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,type PhoneMessage} from '../core/phone/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
@@ -152,59 +153,11 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  console.log('PASS the in-memory relay: a kept pairing survives a restart, a long poll wakes at once, no notifications, a capped queue.');
 }
 
-// Another device's browser meets the computer in the pairing room (core/phone room.ts, room-link.ts): a room that
-// answers like worker/room.ts in the operations repository (a side gets in with its token and the other side's hash,
-// messages pass only while both are there, nothing is kept), here in memory.
-function memoryRoom(){
- const rooms=new Map<string,{desktop:{id:string,deliver:(text:string)=>void,close:()=>void}|null,phones:Map<string,{deliver:(text:string)=>void,close:()=>void}>}>();
- let next=0;
- return {
-  /** Opens one side; null when the room refuses it. */
-  async connect(url:string,protocols:string[],deliver:(text:string)=>void,closed:()=>void){
-   const name=new URL(url).pathname.split('/')[3]||'',[role,token,peer]=(protocols.find(p=>p!=='worldlet-room.v1')||'').split('.');
-   const own=await sha256Hex(token||'');
-   if(!protocols.includes('worldlet-room.v1')||await sha256Hex(role==='desktop'?own+':'+peer:peer+':'+own)!==name)return null;
-   const room=rooms.get(name)??{desktop:null,phones:new Map()};rooms.set(name,room);
-   const id=role==='desktop'?'desktop':'p'+(++next),side={id,deliver,close:closed};
-   const say=(to:{deliver:(text:string)=>void},value:unknown)=>to.deliver(JSON.stringify(value));
-   if(role==='desktop'){room.desktop?.close();room.desktop=side;for(const [pid,phone] of room.phones){say(phone,{t:'desktop',online:true});say(side,{t:'peer',id:pid,online:true});}}
-   else{room.phones.set(id,side);say(side,{t:'desktop',online:!!room.desktop});if(room.desktop)say(room.desktop,{t:'peer',id,online:true});}
-   return {
-    send(text:string){
-     const input=JSON.parse(text);
-     if(role==='phone'){if(room.desktop)say(room.desktop,{t:'msg',from:id,data:input.data});return;}
-     if(room.desktop!==side)return;
-     for(const [pid,phone] of room.phones)if(!input.to||input.to===pid)say(phone,{t:'msg',from:'desktop',data:input.data});
-    },
-    leave(){
-     if(role==='desktop'){if(room.desktop!==side)return;room.desktop=null;for(const phone of room.phones.values())say(phone,{t:'desktop',online:false});}
-     else{room.phones.delete(id);if(room.desktop)say(room.desktop,{t:'peer',id,online:false});}
-    },
-   };
-  },
-  /** Drops the computer's connection, as a sleeping laptop does. */
-  dropDesktop(){for(const room of rooms.values())room.desktop?.close();},
- };
-}
-const room=memoryRoom();
+// Another device's browser meets the computer in the pairing room (core/phone room.ts, room-link.ts), here in memory
+// (memory-room.ts).
+const room=memoryRoom(),RoomSocket=room.Socket;
 // Polls a browser until what it shows passes `ok` (a poll returns once anything new arrives).
 const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolean)=>{let view:any=null;for(let i=0;i<30&&!(view&&ok(view));i++)view=await client.poll(1).catch(async()=>{await new Promise(r=>setTimeout(r,100));return null;});return view;};
-// A WebSocket for code under test, on the memory room.
-class RoomSocket {
- readyState=0;onopen:((e:unknown)=>void)|null=null;onmessage:((e:{data:unknown})=>void)|null=null;onclose:((e:unknown)=>void)|null=null;onerror:((e:unknown)=>void)|null=null;
- private side:{send(text:string):void,leave():void}|null=null;
- constructor(url:string,protocols:string[]){
-  // As on a real WebSocket, nothing arrives before the socket is open.
-  const early:string[]=[];
-  void room.connect(url,protocols,text=>{if(this.readyState===0)early.push(text);else queueMicrotask(()=>this.onmessage?.({data:text}));},()=>this.close()).then(side=>{
-if(!side){this.readyState=3;this.onerror?.({});this.onclose?.({});return;}
-   this.side=side;this.readyState=1;this.onopen?.({});
-   for(const text of early.splice(0))queueMicrotask(()=>this.onmessage?.({data:text}));
-  });
- }
- send(text:string){if(this.readyState!==1)throw new Error('not open');this.side!.send(text);}
- close(){if(this.readyState>=2)return;this.readyState=3;this.side?.leave();queueMicrotask(()=>this.onclose?.({}));}
-}
 {
  const vault=new Map<string,string>(),got:PhoneMessage[]=[];
  const memory={get:(id:string)=>vault.get(id)??null,set:(id:string,v:string)=>{vault.set(id,v);},delete:(id:string)=>{vault.delete(id);}};

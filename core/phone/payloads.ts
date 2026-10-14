@@ -58,7 +58,9 @@ export type PhoneLive={v:1,at:string,id:string,item?:string,applet?:string,user:
  * Order button (owner request 2026-10-06). */
 /** `push` (optional, so an older phone ignores it) says this computer keeps the phone's notification token itself
  * (README.md#push): the phone then hands it over with a `push` message instead of registering it on the relay. */
-export type PhoneDesktop={v:1,at:string,name:string,version:string,order?:true,push?:true};
+/** `room` (optional too) says this computer waits in the pairing room (README.md#room): a phone app that knows the room
+ * moves the pairing there, and the relay keeps nothing more. */
+export type PhoneDesktop={v:1,at:string,name:string,version:string,order?:true,push?:true,room?:true};
 export type PhoneAction='done'|'later'|'remove';
 /** A widget for now (core/artifacts): `page` is the whole document with the widget prelude but no seed (the phone
  * injects its stored values); it is absent when the slot has no room for it, and the phone keeps the page it has. */
@@ -226,10 +228,10 @@ export function phoneLive(turn:any,at:number):PhoneLive|null{
  return {v:1,at:new Date(at).toISOString(),id,...item?{item}:applet?{applet}:{},user:clip(turn.user,PHONE_LIMITS.field),steps,text:clip(turn.text,PHONE_LIMITS.turnText),done:turn.done===true,...approval&&turn.done!==true?{approval}:{}};
 }
 
-// The computer's own slot: its name and version, `order` only while it takes Orders, and `push` (it keeps the phone's
-// notification token).
+// The computer's own slot: its name and version, `order` only while it takes Orders, `push` (it keeps the phone's
+// notification token) and `room` (it waits in the pairing room).
 export function phoneDesktop({name,version,order}:{name:string,version:string,order:boolean},at:number):PhoneDesktop{
- return {v:1,at:new Date(at).toISOString(),name,version,...order?{order:true as const}:{},push:true};
+ return {v:1,at:new Date(at).toISOString(),name,version,...order?{order:true as const}:{},push:true,room:true};
 }
 /** The platforms a phone registers its notification token for: `apns` (App Store and TestFlight), `apns-dev` (Apple's
  * sandbox, debug builds), `fcm` (Android). */
