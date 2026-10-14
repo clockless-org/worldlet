@@ -7,4 +7,6 @@ export {hostAppletPlaces,threadPairs} from './host-applets.ts';
 export {REMOTE_AGENT_VERSION,REMOTE_TURN_LIMITS,fitRemoteView,remoteTurnRequest,readRemoteToHost,readRemoteToClient,remoteTurnBody,remoteSessionWorld,remoteParts,remoteAssembler,remoteHostInfo,readRemoteHostInfo} from './remote-agent.ts';
 export type {RemoteHistory,RemoteTurnRequest,RemoteToolResult,RemoteCancel,RemoteApprovalAnswer,RemoteApproval,RemoteToHost,RemoteTurnEvent,RemoteEvents,RemoteToolCall,RemoteDone,RemoteToClient,RemotePart,RemoteHostInfo} from './remote-agent.ts';
 export {createWebClient,WebPairingEnded} from './web-client.ts';
+export {ROOM_PROTOCOL,ROOM_LINK_MODE,roomEntry,readRoomFrame,isRoomLink,createRoomWebClient} from './room.ts';
+export type {RoomFrame,RoomSocketFactory} from './room.ts';
 export type {WebView,WebClient,WebClientOptions,WebMessage} from './web-client.ts';
