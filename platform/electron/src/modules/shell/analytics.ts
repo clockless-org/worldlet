@@ -9,7 +9,8 @@ import {platformName} from '../../profile.ts';
 import {AGENT,type AgentService,type AnalyticsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
+import {currentGraphics} from '../../graphics.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,EXIT_CODE_NAMES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
@@ -38,7 +39,7 @@ export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
 export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
 const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','world_item_rejected','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','agent_profile_result','hermes_setup_started','hermes_setup_completed','hermes_setup_failed','tour_skipped','first_win','first_card_started','first_card_ready','first_card_shown','first_card_opened','first_card_approved','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','fox_turn_retried','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','order_sent','order_stopped',
- 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall','local_data_size',
+ 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall','local_data_size','app_graphics_fallback',
  // owner 2026-10-11 20:21 PDT: Production metrics.
  'attention_item_opened','task_completed','world_active_time']);
 /** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
@@ -63,6 +64,8 @@ const ALLOWED:Record<string,string[]>={
  // Electron render-process-gone / child-process-gone; a clean exit is not reported.
  process_type:['renderer','gpu','utility','other','web_engine','web_page'],
  exit_reason:['abnormal-exit','killed','crashed','oom','launch-failed','integrity-failure','memory-eviction'],
+ // Its exit code as a fixed name: a known Windows status, a small code, else other (core/diagnostics/graphics-mode.ts).
+ exit_code:EXIT_CODE_NAMES,
  // fox_timing / app_startup_timing: parts of a turn or a start, bucketed (core/diagnostics/fox-timing.ts foxTimingEvent).
  timing_outcome:['complete','error','cancelled'],
  first_text_bucket:DURATIONS,model_bucket:DURATIONS,tools_bucket:DURATIONS,first_frame_bucket:DURATIONS,
@@ -413,6 +416,8 @@ export class UsageAnalytics implements AnalyticsService {
   const properties:Row={
    surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),$session_id:this.session,analytics_schema:4,installation_id:this.installationID(),
    app_build:config.build,platform,app_version:config.version,duration_bucket:duration,os_version:process.getSystemVersion(),...this.device(),
+   // A launch in software graphics after a crashing GPU process (graphics.ts) says so on every event.
+   ...(currentGraphics()==='software'?{graphics_mode:'software'}:{}),
    language:(app.getPreferredSystemLanguages()[0]??'und').split('-')[0]||'und',$set:person,$set_once:{first_profile_seen_at:isoSeconds(),...(invite?{invite_token:invite}:{})},$process_person_profile:identified,$geoip_disable:true,
    ...(invite?{invite_token:invite}:{}),...dimensions
   };
