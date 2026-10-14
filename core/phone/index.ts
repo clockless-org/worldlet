@@ -8,5 +8,6 @@ export {REMOTE_AGENT_VERSION,REMOTE_TURN_LIMITS,fitRemoteView,remoteTurnRequest,
 export type {RemoteHistory,RemoteTurnRequest,RemoteToolResult,RemoteCancel,RemoteApprovalAnswer,RemoteApproval,RemoteToHost,RemoteTurnEvent,RemoteEvents,RemoteToolCall,RemoteDone,RemoteToClient,RemotePart,RemoteHostInfo} from './remote-agent.ts';
 export {createWebClient,WebPairingEnded} from './web-client.ts';
 export {ROOM_PROTOCOL,ROOM_LINK_MODE,roomEntry,readRoomFrame,isRoomLink,createRoomWebClient} from './room.ts';
-export type {RoomFrame,RoomSocketFactory} from './room.ts';
+export type {RoomFrame,RoomSocketFactory,PeerConnectionFactory} from './room.ts';
+export {RTC_ICE_SERVERS,RTC_CHANNEL,RTC_OFFER_PLACE,RTC_ANSWER_PLACE,RTC_GATHER_MS,channelPieces,channelJoiner,gathered} from './rtc.ts';
 export type {WebView,WebClient,WebClientOptions,WebMessage} from './web-client.ts';
