@@ -218,6 +218,10 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.deepEqual(failedAt('The Hermes Agent installer did not describe its steps.',0),{hermes_setup:'install',install_step:'0',hermes_failure:'manifest',hermes_reason:'other'});
  assert.ok(!JSON.stringify(failedAt("Create Python environment: Cannot find path 'C:\\Users\\alex\\x'")).includes('alex'),'Installer output never leaves the device');
  assert.deepEqual(hermesSetupDimensions('terminal',0),{hermes_setup:'terminal',install_step:'0'});
+ // Choosing an Agent that cannot be used says why as a fixed rule (Windows Beta 4384, 2026-10-13).
+ const {diagnosticError}=await import('../core/diagnostics/index.ts');
+ for(const [message,rule] of [['Hermes Agent did not start. Open it once in Terminal, then try again.','notStarted'],['Hermes Agent 0.20.6 is too old for Worldlet, which needs 0.21.4 or newer. Choose Update Hermes Agent, then try again.','outdated'],['That Agent is no longer on this computer.','missing']])
+  assert.deepEqual([diagnosticError({message}).code,diagnosticError({message}).rule],['operationFailed',rule],message);
  assert.ok(!JSON.stringify(stage).includes('Users'),'Installer output never leaves the device');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).install_step,'10_plus');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).hermes_failure,'timeout');

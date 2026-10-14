@@ -12,7 +12,7 @@ import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './herm
 import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {moveFoxProfile} from './fox-move.ts';
-import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,installHermes,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
+import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
@@ -343,10 +343,16 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // is chosen; `fresh` reads it again, after the person updated it.
    const versions=await Promise.all(found.map(install=>installedVersion(install,request.fresh===true)));
    (agents as Row[]).forEach((agent,i)=>{agent.version=agentVersionStatus(found[i].id,versions[i]);});
+   // A Hermes Agent whose command fails at once (left half installed) is no Agent to choose: setup offers to install it
+   // again instead (`install-hermes` repairs it), and says why (`brokenHermes`). Choosing it used to fail in under a
+   // second with nothing to do about it (Windows Beta 4384, 2026-10-13).
+   const at=found.findIndex(install=>install.id==='hermes');
+   const brokenHermes=at>=0&&versions[at]===null&&await hermesStarts(found[at],currentEnvironment(),15_000)==='failed';
+   if(brokenHermes)agents.splice(at,1);
    // Setup preselects the recommended one (owner request 2026-10-04: the local option is the default).
    if(remote?.paired)await remote.heartbeat();
    const elsewhere=remote?.paired||gateway()?.active===true;
-   return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root),remote:remoteStatus(),gateway:remoteGatewayView(gateway())};
+   return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root),remote:remoteStatus(),gateway:remoteGatewayView(gateway()),...brokenHermes?{brokenHermes:true}:{}};
   }
   // No Agent here (Codex alone included, owner decision 2026-10-09 11:51 PDT): stock Hermes Agent, installed the official
   // way to its default location, or the one already here as it is (12:11 PDT). The person then picks it like any other.
@@ -356,7 +362,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   }
   // The same installer in a window the person sees, when the quiet one failed; Check again finds what it installed.
   if(request.operation==='install-hermes-window'){
-   if(!ownHermesAgent(currentEnvironment())){const run=hermesInstallWindow(process.platform);await openSignIn(run,run.args,file=>shell.openPath(file),process.platform,HERMES_WINDOW_DONE);}
+   if(!await workingHermesAgent(currentEnvironment())){const run=hermesInstallWindow(process.platform);await openSignIn(run,run.args,file=>shell.openPath(file),process.platform,HERMES_WINDOW_DONE);}
    return {ok:true};
   }
   // ChatGPT as Hermes Agent's model, signed in inside Hermes with its own command; `cancel-sign-in` stops it.

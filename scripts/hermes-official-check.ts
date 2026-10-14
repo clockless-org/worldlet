@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../core/agent/index.ts';
-import {HERMES_WINDOW_DONE,hermesInstallWindow,installHermes,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
+import {HERMES_WINDOW_DONE,hermesInstallWindow,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
 import {withTempDir} from './test-temp.ts';
 import {signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
 
@@ -104,6 +104,18 @@ esac
  fetched.length=0;
  assert.equal((await installHermes(root,{environment,progress:()=>assert.fail('nothing to install'),fetch:serve()})).command,install.command);
  assert.equal(fetched.length,0);
+ assert.equal(await hermesStarts(install,environment),'ok');
+ // One whose command fails at once (left half installed) is no Hermes that works: the installer runs again and repairs it.
+ fs.writeFileSync(install.command,'#!/bin/sh\necho "No module named hermes_cli" >&2\nexit 1\n',{mode:0o755});
+ assert.equal(await hermesStarts(install,environment),'failed');
+ assert.equal(await workingHermesAgent(environment),null);
+ assert.equal((await installHermes(root,{environment,progress:()=>{},fetch:serve()})).command,install.command);
+ assert.equal(fetched.length,1,'the installer ran');
+ assert.equal(await hermesStarts(install,environment),'ok','and the command works again');
+ // One that only answers slowly is not counted against it.
+ const slow={...install,command:path.join(temp,'slow-hermes')};
+ fs.writeFileSync(slow.command,'#!/bin/sh\nsleep 2\n',{mode:0o755});
+ assert.equal(await hermesStarts(slow,environment,200),'slow');
  // A real folder at ~/.hermes is the person's own and stays.
  releaseStandardHermes(root,environment);
  assert.ok(fs.existsSync(path.join(home,'.hermes','config.yaml')));

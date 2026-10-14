@@ -73,7 +73,7 @@ const ALLOWED:Record<string,string[]>={
  // Setup with a local Agent (core/diagnostics/setup-events.ts): its public product ID, coarse counts and outcomes.
  local_agent:LOCAL_AGENT_IDS,recommended_agent:[...LOCAL_AGENT_IDS,'none'],agents_found:[...AGENTS_FOUND],
  // No Agent here: Worldlet installs Hermes Agent and signs ChatGPT in inside it; where a failure stopped, never its text.
- hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],hermes_stage:[...HERMES_STAGES],hermes_reason:[...HERMES_REASONS],
+ hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],hermes_stage:[...HERMES_STAGES],hermes_reason:[...HERMES_REASONS],hermes_broken:['yes'],
  // Who answers for Fox: the built-in Hermes Agent on a model Fox has, or the chosen Agent on its own sign-in.
  fox_brain:['built_in','agent'],
  bring_conversations:[...COUNT_BUCKETS],bring_notes:[...COUNT_BUCKETS],bring_skills:[...COUNT_BUCKETS],bring_routines:[...COUNT_BUCKETS],bring_connections:[...COUNT_BUCKETS],
