@@ -1,4 +1,4 @@
-import {attentionWhen} from '../ui/attention/matter-copy.ts';
+import {attentionWhen} from '../core/attention/index.ts';
 import {processedAttentionContent} from '../core/attention/attention-content.ts';
 import {finishSourceCheck,startSourceCheck} from '../core/tasks/source-checks.ts';
 import {interruptsBackground} from '../core/tasks/background-work.ts';

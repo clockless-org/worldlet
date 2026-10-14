@@ -89,7 +89,7 @@ out=group([pay('c','Synthetic Cafe',{status:'dismissed'}),pay('e','Synthetic Caf
 assert.deepEqual(out.map(e=>e.status),['dismissed','open']);
 console.log('PASS without a saved record, member state stands in for it with the same inheritance rules');
 
-const {collectMatters}=await import('../ui/attention/matter-activities.ts');
+const {collectMatters}=await import('../core/attention/index.ts');
 const thread={provider:'gmail',id:'thread-1',quote:'Synthetic thread'};
 const page=(id:string,sources:any[],extra={})=>[id,{id,worldItemId:'item-'+id,sourceProvider:'gmail',worldItemKind:'update',worldItemStatus:'open',worldItemSources:sources,worldItemSignal:{},...extra}];
 const pages=new Map<string,any>([page('p1',[thread]),page('p2',[thread,{provider:'gmail',id:'thread-2',quote:'Follow-up'}]),page('p3',[{provider:'gmail',id:'thread-3',quote:'Other'}])] as any);

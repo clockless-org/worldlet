@@ -10,8 +10,8 @@ for(const state of ['needsAction','unseen'])for(const [i,priority] of ['normal',
 }
 console.log('PASS Attention five-level boundaries and pure shape markers.');
 
-const {eventWhen,matterCopy}=await import('../ui/attention/matter-copy.ts');
-const {upcomingEvents}=await import('../ui/shell/native-actions.ts');
+const {eventWhen,matterCopy}=await import('../core/attention/index.ts');
+const {upcomingEvents}=await import('../core/attention/index.ts');
 const morning=new Date('2026-09-24T08:43:00');
 const event={title:'Planning',start:'2026-09-24T09:30:00',end:'2026-09-24T10:30:00'};
 const when=eventWhen(event.start,{end:event.end,now:morning});
