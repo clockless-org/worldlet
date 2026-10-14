@@ -5,11 +5,13 @@ import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RUN_IN_BACKGROUND,VAULT,WIDGETS,type AgentService,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
-import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
+import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
+import {attentionLaterUntil,hostAttention} from '../../../../../core/attention/index.ts';
+import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 
 // Phone pairing (core/phone/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot
@@ -72,6 +74,17 @@ export function installPhone(host:Host){
    // carries the reply. Anything else waits for the page.
    if(!host.page.ready()){
     const fox=host.optional<FoxService>(FOX),scope=fox?.scope();
+    // Done, Later or Remove on an item of the Center the host published (hostCenter) settles it here, every member
+    // of a grouped card with it, as the desktop card does.
+    if(message.type==='attention'&&hostRows.has(message.id)){
+     lastActive=Date.now();
+     const {kind,members}=hostRows.get(message.id)!,{status,later}=phoneActionStatus(message.action,kind);
+     const until=later?attentionLaterUntil(Date.now(),Intl.DateTimeFormat().resolvedOptions().timeZone):null;
+     for(const id of members)try{host.store.setWorldItemStatus(id,status,until);}catch{/* Gone or already settled; the next Center shows the truth. */}
+     if(message.action==='done')usage('phone_approved',{approval_kind:'attention'});
+     hostCenterAt=0;
+     return true;
+    }
     // The Agent's permission prompt in a turn running without the page is answered on the host too.
     if(message.type==='approval'&&fox?.answerApproval){
      lastActive=Date.now();
@@ -108,6 +121,30 @@ export function installPhone(host:Host){
  });
  paired=relay.status().state==='paired';
  let lastActive=0,stopped=false;
+ // The Center for a phone or browser while the World page is not there (core/attention hostAttention): the same rows
+ // the desktop builds from the saved World items, published when they change. The page publishes its own whenever it
+ // is there. `hostRows` maps each published card to its item's kind and the items it settles.
+ let hostFocus:Row|null=null,hostCenterAt=0,hostCenterRevision='',hostSent='';
+ const hostRows=new Map<string,{kind:string,members:string[]}>();
+ async function hostCenter(){
+  if(host.page.ready()||!relay.paired&&!browser.paired)return;
+  const fox=host.optional<FoxService>(FOX),scope=fox?.scope();
+  if(!scope||scope.sample||scope.setup||onboardingUnfinished(host.store.state.onboarding))return;
+  const revision=String(host.store.state.revision);
+  if(revision===hostCenterRevision&&Date.now()-hostCenterAt<60_000)return;
+  hostCenterRevision=revision;hostCenterAt=Date.now();
+  const items=host.store.worldItems(),center=hostAttention(items,{now:Date.now(),saved:hostFocus as any});
+  hostFocus=center.saved;
+  const kinds=new Map(items.map(item=>[String(item.id),String(item.kind||'task')]));
+  hostRows.clear();
+  for(const row of [...center.now,...center.later])if(row.worldItemId)hostRows.set(row.worldItemId,{kind:kinds.get(row.worldItemId)||'task',members:row.worldItemIds?.length?row.worldItemIds:[row.worldItemId]});
+  const value=phoneAttention({now:center.now,later:center.later},Date.now()),text=JSON.stringify({...value,at:''});
+  if(text===hostSent)return;
+  hostSent=text;
+  const previous=attention;attention=relay.paired?value:undefined;
+  if(attention)for(const push of phoneAttentionPushes(previous,attention))void notify(push).catch(e=>host.diagnostics.record(e,'phonePush'));
+  for(const link of links)if(link.phone)await link.relay.publish('attention',value);
+ }
  const conversation=()=>{
   const fox=host.optional<FoxService>(FOX),companion=host.optional<CompanionService>(COMPANION);
   if(!fox||!companion||fox.scope().sample||fox.scope().setup)return null;
@@ -210,6 +247,7 @@ export function installPhone(host:Host){
    try{
     if(await link.relay.poll(listen?WAIT:0)&&link.phone)lastActive=Date.now();
     if(link.relay.paired){
+     if(link.phone)await hostCenter();
      if(link.phone)await publishConversation();
      const desktop=phoneDesktop({name:computerName(),version,order:link.phone&&await orderReady()},Date.now());
      await link.relay.publish('desktop',link.phone?desktop:{...desktop,agent:await hostInfo()});
@@ -284,6 +322,7 @@ export function installPhone(host:Host){
     if(attention)for(const push of phoneAttentionPushes(previous,attention))void notify(push).catch(e=>host.diagnostics.record(e,'phonePush'));
    }
    if(request.slot==='live')return {sent:await publishLive(request.value)};
+   hostSent='';
    let sent=false;
    for(const link of links)if(link.phone&&(await link.relay.publish(request.slot,request.value)))sent=true;
    return {sent};
