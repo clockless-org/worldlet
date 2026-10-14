@@ -12,7 +12,7 @@ import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './herm
 import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {moveFoxProfile} from './fox-move.ts';
-import {endHermesInstall,hermesSessionModels,installHermes,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
+import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,installHermes,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
@@ -353,6 +353,11 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   if(request.operation==='install-hermes'){
    const install=await installHermes(context.root,{environment:currentEnvironment(),progress:step=>onHermesSetup({stage:'install',...step})});
    return {ok:true,id:install.id,title:install.title};
+  }
+  // The same installer in a window the person sees, when the quiet one failed; Check again finds what it installed.
+  if(request.operation==='install-hermes-window'){
+   if(!ownHermesAgent(currentEnvironment())){const run=hermesInstallWindow(process.platform);await openSignIn(run,run.args,file=>shell.openPath(file),process.platform,HERMES_WINDOW_DONE);}
+   return {ok:true};
   }
   // ChatGPT as Hermes Agent's model, signed in inside Hermes with its own command; `cancel-sign-in` stops it.
   if(request.operation==='sign-in-hermes'){

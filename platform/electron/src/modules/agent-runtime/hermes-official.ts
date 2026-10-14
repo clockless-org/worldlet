@@ -83,6 +83,17 @@ export async function installHermes(root:string,{environment,progress,fetch:get=
  return installed;
 }
 
+/** The official installer in a window the person can see (`install-hermes-window`), offered once the quiet install has
+ * failed: it prints every step and why one stops, and runs as the person's own Terminal or PowerShell would. A Microsoft
+ * Store copy of Worldlet runs its children inside the app's package, a Windows person stopped at Create Python
+ * environment eight times there (Beta 4384, 2026-10-13), so the window may get further. Stages that ask questions are
+ * skipped, as in the quiet install; the person comes back and chooses Check again. */
+export function hermesInstallWindow(platform:NodeJS.Platform):{command:string;prefix:string[];title:string;args:string[]} {
+ if(platform==='win32')return {command:'powershell.exe',prefix:[],title:'Hermes Agent',args:['-NoProfile','-ExecutionPolicy','Bypass','-Command',`& ([scriptblock]::Create((Invoke-RestMethod '${HERMES_INSTALLERS.windows}'))) -NonInteractive`]};
+ return {command:'/bin/bash',prefix:[],title:'Hermes Agent',args:['-c',`curl -fsSL '${HERMES_INSTALLERS.posix}' | bash -s -- --non-interactive`]};
+}
+export const HERMES_WINDOW_DONE='When Hermes Agent says it is installed, close this window and choose Check again in Worldlet.';
+
 /** What an earlier install that never finished left where Hermes installs itself: a folder that is not a Hermes
  * checkout, which the installer refuses on every later try (`dir_not_checkout`). It is moved aside next to it, never
  * deleted, since it may hold something the person wants. A checkout, an empty folder or a link is left to the installer. */

@@ -25,7 +25,7 @@ export function signInScript(platform:NodeJS.Platform,install:Pick<LocalHarnessI
  return {extension:'.command',text:`#!/bin/sh\n${words.map(quoteUnix).join(' ')}\necho\necho ${quoteUnix(after)}\n`};
 }
 /** Writes the script beside the system's temporary files and opens it; it removes nothing the person needs. */
-export async function openSignIn(install:LocalHarnessInstall,args:string[],open:(file:string)=>Promise<string>,platform=process.platform,after=SIGNED_IN):Promise<void> {
+export async function openSignIn(install:Pick<LocalHarnessInstall,'command'|'prefix'|'title'>,args:string[],open:(file:string)=>Promise<string>,platform=process.platform,after=SIGNED_IN):Promise<void> {
  const script=signInScript(platform,install,args,after);
  const file=path.join(os.tmpdir(),`worldlet-sign-in-${crypto.randomUUID().slice(0,8)}${script.extension}`);
  fs.writeFileSync(file,script.text,{mode:0o700});
