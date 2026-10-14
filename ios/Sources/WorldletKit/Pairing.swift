@@ -35,7 +35,7 @@ public enum Base64URL {
     }
 }
 
-/// `worldlet://pair?v=1&s=<secret>&n=<computer name>[&r=<relay origin>]`
+/// `worldlet://pair?v=1&s=<secret>&n=<computer name>[&r=<relay origin>][&m=room]`
 public struct PairLink: Equatable, Codable, Sendable {
     public static let protocolVersion = "1"
     public static let defaultRelay = URL(string: "https://worldlet.ai")!
@@ -43,12 +43,19 @@ public struct PairLink: Equatable, Codable, Sendable {
     public let secret: Data
     public let relay: URL
     public let name: String
+    /// The pairing meets in the pairing room (core/phone/README.md#room): the code said `m=room`, or the computer moved a
+    /// relay pairing there. Absent from links kept before.
+    public let room: Bool?
 
-    public init(secret: Data, relay: URL = PairLink.defaultRelay, name: String) {
+    public init(secret: Data, relay: URL = PairLink.defaultRelay, name: String, room: Bool = false) {
         self.secret = secret
         self.relay = relay
         self.name = name
+        self.room = room ? true : nil
     }
+
+    /// The same pairing, met in the room from now on.
+    public var inRoom: PairLink { PairLink(secret: secret, relay: relay, name: name, room: true) }
 
     public init(parsing text: String) throws {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -68,7 +75,7 @@ public struct PairLink: Equatable, Codable, Sendable {
                   url.path.isEmpty, url.query == nil else { throw PairingError.unknownRelay }
             relay = url
         }
-        self.init(secret: secret, relay: relay, name: String((query["n"] ?? "").prefix(64)))
+        self.init(secret: secret, relay: relay, name: String((query["n"] ?? "").prefix(64)), room: query["m"] == "room")
     }
 }
 

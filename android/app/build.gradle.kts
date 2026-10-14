@@ -115,6 +115,8 @@ dependencies {
     // Notifications while the app is closed; the app sets Firebase up itself (Push.kt), with no Google services plugin.
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
     implementation("com.google.firebase:firebase-messaging")
+    // The pairing room's WebSocket (RoomClient.kt).
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     testImplementation(compose)

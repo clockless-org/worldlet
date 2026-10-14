@@ -56,6 +56,7 @@ await mac.poll();
 assert.equal(mac.status().state,'paired');
 assert.equal(await mac.publish('attention',attention),true);
 assert.ok(calls.includes('PUT /api/pair/:id/slots/attention'),'an older app reads the relay');
+assert.equal(mac.room,false);
 
 // The app updates and comes to the room: the pairing moves there and the relay's copy is deleted.
 const desktopSlot={v:1,at:new Date().toISOString(),name:'Mac',version:'1',push:true,room:true};
@@ -67,6 +68,7 @@ assert.equal(app.slots.get('desktop').room,true);
 await until(()=>store.get('phone-pairing')?.includes('"room":true')===true,'kept in the room');
 await until(()=>calls.includes('DELETE /api/pair/:id'),'the relay pairing is deleted');
 assert.equal(await relayGet(keys),404,'the relay keeps nothing more');
+assert.equal(mac.room,true);
 assert.ok((mac.status().seenAt??0)>Date.now()-1000,'a phone in the room is seen now');
 
 // Slots, the name and messages pass while both are there; the token stays here and wakes the phone.

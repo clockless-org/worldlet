@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                 val version = packageManager.getPackageInfo(packageName, 0).versionName ?: "1.0"
                 val stores = demo == null
                 val push: (suspend () -> String?)? = if (stores && Push.configured) ({ Push.token(applicationContext) }) else null
-                return AppModel(if (stores) PairingStore(applicationContext) else null, name, version, demo, if (stores) WidgetStore(applicationContext) else null, push) as T
+                return AppModel(if (stores) PairingStore(applicationContext) else null, name, version, demo, if (stores) WidgetStore(applicationContext) else null, push, RoomClient) as T
             }
         }
     }
