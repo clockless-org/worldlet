@@ -38,8 +38,9 @@ export function installAttention(host:Host){
   runtimeTaskControl:request=>center.runtimeTaskControl(request),
   worldSourceCheck:request=>{const {action:_,...args}=request;return worldTool(center,'configure_world_check',args,'world-source-check');}
  });
- // Mac starts checks when the World appears; each lane re-checks consent and practice mode itself.
- host.onPageLoaded(()=>center.start());
+ // Checks start with the host (the World's first load, or a run in background with no page); each lane re-checks
+ // consent and practice mode itself.
+ host.onStarted(()=>center.start());
  // The World learns when Attention starts or stops reading (first value waits on it); the lanes flip it
  // without a store change of their own.
  // The host sends a snapshot only for a new revision, so a flip the last snapshot did not carry moves the activity

@@ -37,6 +37,10 @@ export interface Host {
  onQuit(listener:()=>void|Promise<void>):void;
  /** Called once the World page finished loading. */
  onPageLoaded(listener:()=>void):void;
+ /** Called once per run when the host starts its own work: the World page's first load, or at once when the app runs in
+  * background with no page (core/phone/README.md#web). What runs without the World (Attention reading, routines, the
+  * phone and browser links) starts here, not on the page. */
+ onStarted(listener:()=>void):void;
  /** `recent`: the last failures this process recorded, with their error text, from memory only (host/diagnostics.ts). */
  diagnostics:{record(error:unknown,operation?:string,requestId?:string):void;log(line:string):void;recent?():{at:string;operation:string;requestId:string;message:string}[]};
 }

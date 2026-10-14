@@ -147,6 +147,13 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  assert.match(fox,/if\(!active\(\)\|\|!page\.ready\(\)&&!headless\.has\(id\)\)throw new Cancelled\(\)/,'a turn said without the page is not cancelled for want of it');
  assert.match(fox,/if\(!page\.ready\(\)\)return tool\?NEEDS_WORLD:null;/,'its page-only steps say the window must be open');
  assert.match(fox,/host\.onPageReload\(\(\)=>\{if\(agentTurn!==null&&!headless\.has\(agentTurn\)\)cancelCloud\(\)/,'a page reload leaves it running');
+ // Run in background starts the host's own work with no World page, and loads the page only when the World is shown.
+ const main=readFileSync('platform/electron/src/main.ts','utf8'),attentionModule=readFileSync('platform/electron/src/modules/attention/index.ts','utf8');
+ assert.match(main,/if\(hidden\)\{\s*world\.window\.once\('show',\(\)=>void loadWorld\(\)[\s\S]{0,120}startServices\(\);[\s\S]{0,120}\}else await loadWorld\(\);/,'a background launch loads no page and starts the host');
+ assert.match(main,/loaded:\(\)=>\{sent='';startServices\(\);/,'a normal launch starts the host with the first page load');
+ assert.match(attentionModule,/host\.onStarted\(\(\)=>center\.start\(\)\)/,'Attention reads without the page');
+ assert.match(fox,/host\.onStarted\(begin\);/,'routines and history run without the page');
+ assert.match(phone,/host\.onStarted\(\(\)=>\{for\(const link of links\)link\.schedule\(1000\);\}\);/,'the phone and browser links run without the page');
  assert.match(fox,/report,converse,answerApproval\}\)/,'FoxService offers converse and answerApproval');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }

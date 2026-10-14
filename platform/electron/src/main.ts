@@ -107,7 +107,7 @@ async function start(){
  keepProcessOutput(profile.root);
  const preferences=Preferences.at(profile.root,()=>macDefaults(macDomain(profile)));
  const services=new Map<string,unknown>();
- const reloadListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[];
+ const reloadListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[],startedListeners:(()=>void)[]=[];
  let world:WorldWindow|null=null;
  const router=new HostRouter(()=>host);
  const implemented=(feature:keyof HostFeatures)=>{
@@ -129,7 +129,14 @@ async function start(){
   optional:name=>services.get(name) as any,
   onPageReload:listener=>{reloadListeners.push(listener);},
   onQuit:listener=>{quitListeners.push(listener);},
-  onPageLoaded:listener=>{loadedListeners.push(listener);}
+  onPageLoaded:listener=>{loadedListeners.push(listener);},
+  onStarted:listener=>{startedListeners.push(listener);}
+ };
+ let started=false;
+ const startServices=()=>{
+  if(started)return;
+  started=true;
+  for(const listener of startedListeners)try{listener();}catch(error){diagnostics.record(error,'hostStarted');}
  };
  host.provide(VAULT,createVault(profile.root,profile.channel==='release'?'app.worldlet.context':profile.worktree?'app.worldlet.context.dev.wt'+profile.worktree:'app.worldlet.context.dev'));
  for(const install of modules)install(host);
@@ -172,7 +179,7 @@ async function start(){
  startBackgroundLaunch(profile);
  world=new WorldWindow(profile,preload,{
   openURL:url=>{const browser=host.optional<{openExternalRequest(url:string):void}>('browser');if(browser)browser.openExternalRequest(url);else void openInBrowser(url);},
-  loaded:()=>{sent='';for(const listener of loadedListeners)try{listener();}catch(error){diagnostics.record(error,'pageLoaded');}},
+  loaded:()=>{sent='';startServices();for(const listener of loadedListeners)try{listener();}catch(error){diagnostics.record(error,'pageLoaded');}},
   navigating:()=>{for(const listener of reloadListeners)try{listener();}catch(error){diagnostics.record(error,'pageReload');}},
   closing:()=>host.optional<{shouldKeepOpen():boolean}>('desktopCompanion')?.shouldKeepOpen()??false,
   activated:active=>page.event(active?'worldlet:app-active':'worldlet:app-inactive'),
@@ -185,8 +192,15 @@ async function start(){
   else process.stderr.write('FAIL '+checkName+': the Worldlet interface is missing (npm run build:native-ui)\n');
   app.exit(1);return;
  }
- await world.load();
- if(hidden)host.optional<DesktopCompanionService>(DESKTOP_COMPANION)?.background();
+ // Run in background: no window and no World page. The host does its own work (startServices), a phone or browser
+ // gets the Center and Fox from it, and the page loads only when the World is shown (the Dock, the tray, a notification).
+ let loading:Promise<unknown>|null=null;
+ const loadWorld=()=>loading??=world!.load();
+ if(hidden){
+  world.window.once('show',()=>void loadWorld().catch(error=>diagnostics.record(error,'worldLoad')));
+  startServices();
+  host.optional<DesktopCompanionService>(DESKTOP_COMPANION)?.background();
+ }else await loadWorld();
  if(capture)void runCapture(capture,launchedAt,()=>world?{window:world.window,view:world.view}:null).finally(()=>app.quit());
  if(probe)void runProbe(probe,(body,sender)=>router.dispatch(body,sender),world.view.webContents,()=>store.state.connections??[]).finally(()=>app.quit());
  if(loginCheck)void runLoginItemCheck(loginCheck,profile.channel,(body,sender)=>router.dispatch(body,sender),world.view.webContents).finally(()=>app.quit());

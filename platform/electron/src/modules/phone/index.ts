@@ -328,6 +328,8 @@ export function installPhone(host:Host){
    return {sent};
   },
  });
+ // The links run with the host, with or without the World page.
+ host.onStarted(()=>{for(const link of links)link.schedule(1000);});
  host.onPageLoaded(()=>{for(const link of links)link.schedule(1000);});
  host.onQuit(()=>{stopped=true;if(pairedReport)reportPaired(relay.status().push);clearInterval(watch);remoteHost.stop();for(const link of links)link.stop();});
 }
