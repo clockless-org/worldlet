@@ -2,14 +2,6 @@
 export function modelFailure(error){
  const text=String(error?.message||error||'').toLowerCase();
  const configure='[Change model connection](#fox-action=open.model)';
- // The model service no longer serves this release (its owner set a minimum app version).
- if(/worldlet_update_required|version of worldlet is out of date/.test(text))return {code:'update_required',message:'This version of Worldlet is out of date, so Worldlet’s included AI no longer answers it. Update Worldlet to keep talking with Fox. Your world and conversations are kept.\n\n[Update Worldlet](#fox-action=app.update)'};
- // The operator paused the included AI (models/README.md, MODEL_PAUSED): say so plainly instead of
- // the raw 503 or a connection hint, since nothing on this computer is wrong.
- if(/worldlet_model_paused|included ai is paused/.test(text))return {code:'paused',message:'Worldlet’s included AI is paused right now, so Fox can’t answer. Nothing is wrong on your computer, and your conversations and connections are kept. You can connect your own model to keep going.\n\n'+configure};
- if(/worldlet_monthly_allowance|included monthly model allowance|model allowance for this month/.test(text))return {code:'included_allowance',message:'This month’s included Worldlet model allowance is used. It resets at the start of the next UTC month. You can connect your own model to continue.\n\n'+configure};
- if(/worldlet_daily_allowance|included model (?:request )?allowance/.test(text))return {code:'included_allowance',message:'Today’s included Worldlet model allowance is used. It resets at 00:00 UTC. You can wait for the reset or connect your own model to continue.\n\n'+configure};
- if(/worldlet_rate_limit|worldlet is receiving too many requests/.test(text))return {code:'rate_limit',message:'Worldlet is receiving too many requests. Wait a minute, then try again.\n\n'+configure};
  // Worldlet provides no model (owner decision 2026-10-05): with no Codex sign-in and no key of their own, Fox has none.
  if(/codex_local_missing|runs on an ai on this computer/.test(text))return {code:'no_local_model',message:'Fox runs on your own AI Agent, and none is ready yet. Choose one and sign it in to a provider in Settings, under Agent.\n\n'+configure};
  if(/insufficient_quota|insufficient (?:balance|credits|funds)|credit balance|billing_hard_limit|quota exceeded|usage limit|exceeded your.*quota|payment required/.test(text))return {code:'quota',message:'Your model provider has no available usage or credit for this request. Check your plan or balance with that provider, or use another connection.\n\n'+configure};

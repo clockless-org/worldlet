@@ -6,7 +6,7 @@
   <a href="https://github.com/clockless-org/worldlet"><img src="https://img.shields.io/github/stars/clockless-org/worldlet?style=flat&amp;label=%E2%98%85&amp;color=4E8A3E" alt="GitHub stars" /></a>
   <a href="https://github.com/clockless-org/worldlet/releases"><img src="https://img.shields.io/github/v/release/clockless-org/worldlet?style=flat&amp;label=release&amp;color=4E8A3E" alt="Latest release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-4E8A3E?style=flat" alt="License: Apache 2.0" /></a>
-  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows-4493F8?style=flat" alt="Supported platforms: macOS and Windows" />
+  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20iPhone%20%7C%20Android-4493F8?style=flat" alt="Supported platforms: macOS, Windows, iPhone and Android" />
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@ Worldlet provides no model of its own. It talks through your Agent and borrows i
 | Kernel | Harness: Hermes Agent, OpenClaw, Claude Code, Codex, pi | Your choice, replaceable |
 | Drivers and keychain | MCP servers, connectors and their tokens | Your Harness; Worldlet borrows them |
 | Terminal | Chat apps and command lines | Where Agents live today |
-| Graphical system | Worldlet: World, Applets, Fox, Attention Center | This project |
+| Graphical system | Worldlet: World, Things, Fox, Attention Center | This project |
 | System API | World tools, served to the Agent over the `worldlet` MCP server | This project |
 | Disk | `world.sqlite` and World storage, on your computer | This project |
 
@@ -107,7 +107,7 @@ Fox is the companion you talk to, by text or voice. It does the work through you
 <tr>
 <td width="50%" valign="middle">
 
-### Applets
+### Things
 
 Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect your accounts or read this computer, plus the Browser and games, each a small place in the World. An Applet shows your own records in a calm, readable view, and the real website when you want it.
 
@@ -124,7 +124,7 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 
 - **[Phone companions](ios/README.md)**: the Attention Center and Fox on iPhone and [Android](android/README.md), paired by QR code through an end-to-end encrypted relay.
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**: the cards Fox makes are kept, day by day.
-- **[Routines](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](core/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
+- **[Scheduled](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](core/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
 - **[Your Agent on another computer](core/agent/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
 

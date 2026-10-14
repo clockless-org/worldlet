@@ -5,7 +5,7 @@ import type {HarnessLocation} from '../../contracts/harness-services.ts';
 // see and fix every connection problem there). The host's `modelHealth` reads the Agent's model status and
 // how the last reply ended; this turns that into plain words and the fixes that fit.
 export type ModelPath='codex'|'key'|'agent'|'remote'|'none';
-export type ModelFix='connect'|'restart'|'update';
+export type ModelFix='connect'|'restart';
 export interface ModelHealth {
  agent:string|null;available:boolean;error?:string;
  model:{name:string;id:string;provider:string;source:string|null;ready:boolean;configured:boolean};
@@ -23,7 +23,7 @@ const plain=(message:string)=>message.split('\n\n').filter(part=>!part.includes(
 export function modelHealthView(health:ModelHealth|null,agentTitle:string|null=null):ModelHealthView {
  if(!health||!health.available)return {path:'none',state:'none',title:'Fox’s Agent is not running',
   detail:health?.error||'Fox’s Agent on this computer did not start or did not answer.',
-  problem:'Restart Fox. If it still does not start, save diagnostics in Troubleshoot.',fixes:['restart']};
+  problem:'Restart Fox. If it still does not start, save diagnostics in Settings › Help.',fixes:['restart']};
  // An Agent on another computer: its model is that computer's business; only how the last reply went is said here.
  if(health.location?.kind==='remote'){
   // Reached directly (its own Gateway address) or through Worldlet there (a pairing code).
@@ -43,8 +43,7 @@ export function modelHealthView(health:ModelHealth|null,agentTitle:string|null=n
  const last=health.lastReply;
  if(last&&!last.ok){
   const failure=modelFailure(last.error||'');
-  const fixes:ModelFix[]=!failure?['restart','connect']:failure.code==='authentication'||failure.code==='no_local_model'?['connect']:failure.code==='model'?['connect']
-   :failure.code==='update_required'?['update']:['quota','rate_limit','paused','included_allowance'].includes(failure.code)?['connect']:['restart'];
+  const fixes:ModelFix[]=!failure?['restart','connect']:['authentication','no_local_model','model','quota','rate_limit'].includes(failure.code)?['connect']:['restart'];
   return {path,state:'attention',title:'Fox’s last reply did not finish',detail,
    problem:`At ${time(last.at)}: `+(failure?plain(failure.message):`Fox could not finish the reply${last.error?' ('+last.error+')':''}. Restart Fox and send it again.`),fixes};
  }

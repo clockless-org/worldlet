@@ -158,7 +158,6 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     if(!providers.childElementCount){said.textContent='Sign in to a provider in your Agent itself, then choose Check connection.';return;}
     providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
    },{primary:true,id:'fix-connect'})
-   :fix==='update'?action('Show updates',()=>show('general'),{primary:true,id:'fix-update'})
    :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
   // The provider the Agent in use answers with (core/agent/model-providers.ts, owner decisions 2026-10-10): only a
   // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced

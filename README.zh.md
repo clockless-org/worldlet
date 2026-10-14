@@ -6,7 +6,7 @@
   <a href="https://github.com/clockless-org/worldlet"><img src="https://img.shields.io/github/stars/clockless-org/worldlet?style=flat&amp;label=%E2%98%85&amp;color=4E8A3E" alt="GitHub stars" /></a>
   <a href="https://github.com/clockless-org/worldlet/releases"><img src="https://img.shields.io/github/v/release/clockless-org/worldlet?style=flat&amp;label=release&amp;color=4E8A3E" alt="Latest release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-4E8A3E?style=flat" alt="License: Apache 2.0" /></a>
-  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows-4493F8?style=flat" alt="Supported platforms: macOS and Windows" />
+  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20iPhone%20%7C%20Android-4493F8?style=flat" alt="Supported platforms: macOS, Windows, iPhone and Android" />
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@ Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的�
 | 内核 | Harness：Hermes Agent、OpenClaw、Claude Code、Codex、pi | 你选，可以替换 |
 | 驱动和钥匙串 | MCP 服务器、连接器和它们的令牌 | 你的 Harness；Worldlet 借用 |
 | 终端 | 聊天 App 和命令行 | Agent 现在待的地方 |
-| 图形界面 | Worldlet：World、Applet、Fox、Attention Center | 本项目 |
+| 图形界面 | Worldlet：World、Things、Fox、Attention Center | 本项目 |
 | 系统 API | World 工具，通过 `worldlet` MCP 服务器提供给 Agent | 本项目 |
 | 磁盘 | 你电脑上的 `world.sqlite` 和 World 存储 | 本项目 |
 
@@ -107,7 +107,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 <tr>
 <td width="50%" valign="middle">
 
-### Applets
+### Things
 
 邮件、日历、备忘录、GitHub、Notion、Linear 等能连上你的账号或读取这台电脑的 Applet，加上浏览器和游戏，每个都是 World 里的一个小地方。Applet 用安静、好读的样子展示你自己的记录，想看原网站时也能打开。
 
@@ -124,13 +124,13 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 - **[手机伴侣](ios/README.md)**：iPhone 和 [Android](android/README.md) 上的 Attention Center 和 Fox，扫码配对，经端到端加密中继连到电脑。
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**：Fox 做的卡片按天留存。
-- **[例行任务](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
+- **[Scheduled（定时任务）](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
 
 ## 隐私
 
-没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › 隐私 里关掉，详见[统计说明](core/diagnostics/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
+没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › 通用 › 使用统计 里关掉，详见[统计说明](core/diagnostics/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
 
 ## 从源码构建
 
