@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import {hostAttention,collectMatters,collectNativeActions,upcomingEvents} from '../core/attention/index.ts';
 import {projectNativeWorld} from '../ui/world/world-projection.ts';
+import {hostAppletPlaces,threadPairs,phoneAttention} from '../core/phone/index.ts';
 
 // The World page reads the clock itself, so the items are placed around the real now.
 const now=Date.now(),hour=3600_000;
@@ -31,3 +32,15 @@ const desktop=collectMatters({sections,pages,activities:collectNativeActions({pa
 const strip=(rows:any[])=>rows.map(r=>[r.worldItemId,r.state,r.actionTitle,r.context,r.when?.label??null]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
 assert.deepEqual(strip(host.now),strip(desktop),'the same rows, titles, context and times as the desktop');
 console.log('PASS the host builds the Attention Center for a phone or browser from World items: the desktop\'s rows, groups, focus and Later.');
+
+// The Applets page without the World page: the Applets kept (unlocked, less hidden), each lamp from its connection, and
+// an Applet's own turns with Fox paired as the page's thread gives them.
+const places=hostAppletPlaces({onboarding:{unlockedApplets:['app-gmail','app-github','app-youtube'],hiddenApplets:['app-youtube']},connections:[{provider:'gmail',connected:true,status:'connected'}]});
+assert.deepEqual(places.map(p=>p.key),['gmail','github'],'the kept Applets, less the hidden one');
+assert.equal(places[0].state,'ready','a connected account lights its lamp');
+assert.deepEqual(threadPairs([{role:'user',text:'Any news?',createdAt:'2026-10-14T00:00:00Z'},{role:'assistant',text:'Two new mails.',createdAt:'2026-10-14T00:00:02Z'},{role:'assistant',text:'One more.',createdAt:'2026-10-14T00:01:00Z'}]),
+ [{user:'Any news?',text:'Two new mails.',at:'2026-10-14T00:00:00Z'},{user:'',text:'One more.',at:'2026-10-14T00:01:00Z'}],'each line with its answer');
+const applets=phoneAttention({now:[],later:[],world:{places,thread:key=>key==='gmail'?threadPairs([{role:'user',text:'Any news?',createdAt:'2026-10-14T00:00:00Z'},{role:'assistant',text:'Two new mails.',createdAt:'2026-10-14T00:00:02Z'}]):[]}},now).applets??[];
+assert.deepEqual(applets.map(a=>a.key),['gmail','github']);
+assert.equal(applets[0].fox?.turns[0].text,'Two new mails.','an Applet carries its own turns');
+console.log('PASS the host lists the Applets page for a phone or browser: the kept Applets, their lamps and their own turns with Fox.');

@@ -3,6 +3,7 @@ export type {PairRole,PairKeys,PairLink,PairKind} from './pairing.ts';
 export {PHONE_LIMITS,phoneAttention,phoneConversation,phoneDesktop,phoneLive,readPhoneMessage,phoneActionStatus,phoneWidgets,phoneApplets,phoneTasks,phoneJournal,phonePush,phoneAttentionPushes,phoneFoxPush,phoneApprovalPush,phonePlatform,PHONE_PUSH_LIMITS} from './payloads.ts';
 export type {PhoneGroup,PhoneAttentionItem,PhoneAccount,PhoneAttention,PhoneTurn,PhoneConversation,PhoneLive,PhoneDesktop,PhoneAction,PhoneMessage,PhoneWidget,PhoneWidgets,PhoneApplet,PhoneWorld,PhoneTask,PhoneTasks,PhoneJournalEntry,PhoneWebRecord,PhonePush,PhonePushAct,PhonePushRequest} from './payloads.ts';
 export {PHONE_DESKTOP_ONLY,phoneWebAddress,httpsAddress} from './phone-web.ts';
+export {hostAppletPlaces,threadPairs} from './host-applets.ts';
 export {REMOTE_AGENT_VERSION,REMOTE_TURN_LIMITS,fitRemoteView,remoteTurnRequest,readRemoteToHost,readRemoteToClient,remoteTurnBody,remoteSessionWorld,remoteParts,remoteAssembler,remoteHostInfo,readRemoteHostInfo} from './remote-agent.ts';
 export type {RemoteHistory,RemoteTurnRequest,RemoteToolResult,RemoteCancel,RemoteApprovalAnswer,RemoteApproval,RemoteToHost,RemoteTurnEvent,RemoteEvents,RemoteToolCall,RemoteDone,RemoteToClient,RemotePart,RemoteHostInfo} from './remote-agent.ts';
 export {createWebClient,WebPairingEnded} from './web-client.ts';

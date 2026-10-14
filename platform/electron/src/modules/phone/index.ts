@@ -5,7 +5,7 @@ import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RUN_IN_BACKGROUND,VAULT,WIDGETS,type AgentService,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
-import {PHONE_LIMITS,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
+import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
@@ -156,7 +156,13 @@ export function installPhone(host:Host){
   const kinds=new Map(items.map(item=>[String(item.id),String(item.kind||'task')]));
   hostRows.clear();
   for(const row of [...center.now,...center.later])if(row.worldItemId)hostRows.set(row.worldItemId,{kind:kinds.get(row.worldItemId)||'task',members:row.worldItemIds?.length?row.worldItemIds:[row.worldItemId]});
-  const value=phoneAttention({now:center.now,later:center.later,tasks,journal},Date.now()),text=JSON.stringify({...value,at:''});
+  // The Applets page: the Applets kept in the World with their lamps, and each one's own turns with Fox.
+  let world:any;
+  try{const ledger=host.store.writable?host.store.ledger():null;
+   world={places:hostAppletPlaces({onboarding:host.store.state.onboarding,connections:host.store.state.connections}),
+    thread:(key:string)=>ledger?threadPairs(ledger.threadTurns(JSON.stringify(['object:app-'+key,'']),8)):[]};}
+  catch(error){host.diagnostics.record(error,'phoneApplets');}
+  const value=phoneAttention({now:center.now,later:center.later,world,tasks,journal},Date.now()),text=JSON.stringify({...value,at:''});
   if(text===hostSent)return;
   hostSent=text;
   const previous=attention;attention=relay.paired?value:undefined;

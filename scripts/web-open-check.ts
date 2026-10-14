@@ -142,7 +142,7 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  assert.match(phone,/if\(link\.phone\)await hostCenter\(\);/,'the host publishes the Center while the page is not there');
  assert.match(phone,/thread:JSON\.stringify\(\['attention:'\+message\.item,'attention:'\+message\.item\]\)[\s\S]{0,200}thread:JSON\.stringify\(\['object:app-'\+app\.key,''\]\)/,'a line on a card or in an Applet runs in that place\'s thread, as the page says it');
  assert.match(fox,/agentChat\(\{id,text,\.\.\.place\?\{thread:place\.thread,context:\{location:place\.location\}\}:\{\}\}\)/,'Fox takes the place\'s thread and name');
- assert.match(phone,/fox\.taskPanel\?\.\(\)[\s\S]{0,200}taskPanel\(\{jobs:panel\.jobs,harness:panel\.harness,working:panel\.working\}[\s\S]{0,400}artifactRows\(\)[\s\S]{0,1200}phoneAttention\(\{now:center\.now,later:center\.later,tasks,journal\}/,'its Center carries the Task panel and today\'s Journal');
+ assert.match(phone,/fox\.taskPanel\?\.\(\)[\s\S]{0,200}taskPanel\(\{jobs:panel\.jobs,harness:panel\.harness,working:panel\.working\}[\s\S]{0,400}artifactRows\(\)[\s\S]{0,1200}phoneAttention\(\{now:center\.now,later:center\.later,world,tasks,journal\}/,'its Center carries the Task panel and today\'s Journal');
  assert.match(phone,/live:async value=>\{if\(value\.done===true\)finished\(value\);return publishLive\(value\);\}/,'its turn streams to an open phone or browser, and the reply is pushed like any other');
  assert.match(phone,/message\.type==='approval'&&fox\?\.answerApproval/,'the Agent\'s permission prompt is answered without the page');
  assert.match(fox,/if\(headless\.has\(id\)\)headlessLive\?\.event\(event\);/,'the host streams a headless turn itself');
