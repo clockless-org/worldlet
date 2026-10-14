@@ -14,6 +14,8 @@ import {chromium} from 'playwright';
 import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
 import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/electron/src/modules/phone/local-relay.ts';
 import {createRoomLink} from '../platform/electron/src/modules/phone/room-link.ts';
+import {createRtcHost,type RtcPage} from '../platform/electron/src/modules/phone/rtc-host.ts';
+import {RTC_PAGE_SCRIPT} from '../platform/electron/src/modules/phone/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
 import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,type PhoneMessage} from '../core/phone/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
@@ -209,15 +211,24 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
  console.log('PASS another device meets the computer in the room: link, pairing, everything at once, changes, Done and chat once, away and back, turning off.');
 }
 
-// The page itself on another device: the built page at worldlet.ai/open with its WebSocket bridged to the memory room.
+// The page itself on another device: the built page at worldlet.ai/open with its WebSocket bridged to the memory room,
+// and the computer's side of the direct line (rtc-host.ts) on the hidden window's page (rtc-page.ts), here a page of the
+// same browser: real WebRTC between the two.
 {
  const vault=new Map<string,string>(),got:PhoneMessage[]=[];
  const memory={get:(id:string)=>vault.get(id)??null,set:(id:string,v:string)=>{vault.set(id,v);},delete:(id:string)=>{vault.delete(id);}};
- const mac=createRoomLink({vault:memory,vaultName:'web-room',name:()=>'Studio Mac',deliver:async m=>{got.push(m);return true;},WebSocket:RoomSocket as any});
+ const browser=await chromium.launch();
+ const hosts:import('playwright').Page[]=[];
+ const openHost=():RtcPage=>{
+  const ready=browser.newPage().then(async host=>{hosts.push(host);await host.addScriptTag({content:RTC_PAGE_SCRIPT});return host;});
+  return {run:code=>ready.then(host=>host.evaluate(code)),close:()=>void ready.then(host=>host.close()).catch(()=>{})};
+ };
+ const mac=createRoomLink({vault:memory,vaultName:'web-room',name:()=>'Studio Mac',deliver:async m=>{got.push(m);return true;},WebSocket:RoomSocket as any,rtc:createRtcHost(openHost)});
  const {link:made}=await mac.start();
  await mac.publish('attention',attention([item('w1','needsAction','Sign the lease')]));
  await mac.publish('desktop',{v:1,at:new Date().toISOString(),name:'Studio Mac',version:'2026.1014.4402'});
- const browser=await chromium.launch();
+ // What the page sends through the room, by frame kind.
+ const viaRoom:string[]=[];
  try{
   const page=await browser.newPage({viewport:{width:390,height:844}}),errors:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));
@@ -233,7 +244,7 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
    const side=await room.connect(url,protocols,text=>void page.evaluate(([n,t])=>(window as any).roomDeliver(n,t),[id,text] as const).catch(()=>{}),()=>void page.evaluate(n=>(window as any).roomClosed(n),id).catch(()=>{}));
    if(!side)return 0;sides.set(id,side);return id;
   });
-  await page.exposeFunction('roomSend',(id:number,text:string)=>sides.get(id)?.send(text));
+  await page.exposeFunction('roomSend',(id:number,text:string)=>{try{viaRoom.push(Object.keys(JSON.parse(JSON.parse(text).data))[0]);}catch{}sides.get(id)?.send(text);});
   await page.exposeFunction('roomClose',(id:number)=>{sides.get(id)?.leave();sides.delete(id);});
   await page.addInitScript(()=>{
    const w=window as any,open=new Map<number,any>(),early=new Map<number,string[]>();
@@ -251,17 +262,36 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
   await page.getByText('Sign the lease').waitFor();
   assert.equal(new URL(page.url()).hash,'','the secret leaves the address bar');
   assert.equal(await page.locator('.web-computer').textContent(),'Studio Mac');
+  assert.match(String(mac.status().phone?.name),/^Chrome on /,'the browser told the computer its name');
+  // The page offers a direct line through the room, and the computer answers it.
+  for(let i=0;i<100&&!mac.direct;i++)await mac.poll(0.1);
+  assert.equal(mac.direct,1,'the page and the computer have a direct line');
+  assert(viaRoom.includes('r'),'the offer went through the room');
+  // Over the line: a changed slot reaches the page, and Done reaches the computer without the room.
+  await mac.publish('attention',attention([item('w1','needsAction','Sign the lease'),item('w2','needsAction','Pay the rent')]));
+  await page.getByText('Pay the rent').waitFor();
+  const before=viaRoom.length;
   await page.locator('.web-item',{hasText:'Sign the lease'}).getByRole('button',{name:'Done'}).click();
   for(let i=0;i<50&&!got.some(m=>m.type==='attention');i++)await mac.poll(0.1);
-  assert(got.some(m=>m.type==='attention'&&m.id==='w1'&&m.action==='done'),'Done from the page reaches the computer through the room');
-  assert.match(String(mac.status().phone?.name),/^Chrome on /,'the browser told the computer its name');
+  assert(got.some(m=>m.type==='attention'&&m.id==='w1'&&m.action==='done'),'Done from the page reaches the computer');
+  assert.deepEqual(viaRoom.slice(before),[],'Done went over the direct line, not through the room');
+  // The line goes (the hidden window closed): everything goes through the room again.
+  await hosts[0].close();
+  for(let i=0;i<100&&mac.direct;i++)await mac.poll(0.1);
+  assert.equal(mac.direct,0);
+  await mac.publish('attention',attention([item('w2','needsAction','Pay the rent'),item('w3','needsAction','Call Mom')]));
+  await page.getByText('Call Mom').waitFor();
+  await page.locator('.web-item',{hasText:'Pay the rent'}).getByRole('button',{name:'Done'}).click();
+  for(let i=0;i<50&&!got.some(m=>m.type==='attention'&&m.id==='w2');i++)await mac.poll(0.1);
+  assert(got.some(m=>m.type==='attention'&&m.id==='w2'&&m.action==='done'),'Done reaches the computer through the room when the line is gone');
+  assert(viaRoom.slice(before).includes('m'));
   // Turned off on the computer: the page says so and forgets the link.
   await mac.end();
   await page.getByRole('heading',{name:'This link is off'}).waitFor({timeout:30000});
   assert.equal(await page.evaluate(()=>localStorage.getItem('worldlet-web-link')),null);
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
- console.log('PASS the page on another device works through the room: the Center, Done, and turning the link off.');
+ console.log('PASS the page on another device works through the room and a direct line: the Center, Done, the line going, and turning the link off.');
 }
 await server.close();await rm(out,{recursive:true,force:true});
 

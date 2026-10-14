@@ -9,6 +9,8 @@ import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInf
 import {createPhoneRelay} from './relay.ts';
 import {createLocalRelay,serveLocalRelay} from './local-relay.ts';
 import {createRoomLink} from './room-link.ts';
+import {createRtcHost} from './rtc-host.ts';
+import {openRtcWindow} from './rtc-window.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
@@ -234,11 +236,14 @@ export function installPhone(host:Host){
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
  // A web browser on another device (core/phone/README.md#web): the page at `<relay>/open/` meets this computer in the
- // pairing room (room-link.ts), which stores nothing, and gets the same Center, conversation and live turn as a phone.
+ // pairing room (room-link.ts), which stores nothing, and gets the same Center, conversation and live turn as a phone,
+ // over a direct line when the two can reach each other.
  // It takes no notifications; a tab seen in the last hour keeps the loop listening, so a Done from it lands at once.
  let webPaired:boolean|null=null;
  const browser=createRoomLink({
   vault,vaultName:'web-room',name:computerName,relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
+  // A browser that offers a direct line gets one (core/phone rtc.ts), run in a hidden window while it is open.
+  rtc:createRtcHost(openRtcWindow),
   onChange:status=>{
    if(status.state==='paired'&&webPaired===false)usage('phone_paired',{phone_platform:'web'});
    webPaired=status.state==='paired';

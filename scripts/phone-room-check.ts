@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {PUSH_BOX_PLACE,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../core/phone/index.ts';
+import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../core/phone/index.ts';
 import {createLocalRelay} from '../platform/electron/src/modules/phone/local-relay.ts';
 import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
 import {memoryRoom} from './memory-room.ts';
@@ -131,4 +131,16 @@ await until(()=>mac.status().state==='none','the computer forgets the pairing');
 ws.close();app.close();
 assert.equal(PUSH_BOX_PLACE,'push');
 
-console.log('PASS phone room: an older app keeps the relay, an app in the room moves the pairing there and the relay keeps nothing, slots on return, the kept token wakes it.');
+// A direct line's frames (core/phone rtc.ts) go in pieces small enough for every browser and join back in order; one too
+// big is dropped whole, and the next one still joins. An `r` frame reads like the others.
+{
+ const big='x'.repeat(300_000)+'é',pieces=channelPieces(big),join=channelJoiner();
+ assert(pieces.length>1&&pieces.every(piece=>piece.length<=16001));
+ assert.deepEqual(pieces.map(join).filter(text=>text!==null),[big]);
+ assert.deepEqual(channelPieces('').map(join),['']);
+ const huge=channelPieces('y'.repeat(2_100_000));
+ assert.deepEqual([...huge,...channelPieces('ok')].map(join).filter(text=>text!==null),['ok']);
+ assert.deepEqual(readRoomFrame(JSON.stringify({r:'box'})),{r:'box'});
+}
+
+console.log('PASS phone room: an older app keeps the relay, an app in the room moves the pairing there and the relay keeps nothing, slots on return, the kept token wakes it, a direct line\'s pieces.');
