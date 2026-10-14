@@ -125,7 +125,7 @@ export function installPhone(host:Host){
  };
  const relay=createPhoneRelay({
   fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (phone pairing)`,
-  relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
+  relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,room:{},
   onChange:status=>{
    if(status.state!=='paired')attention=undefined;
    if(status.state==='paired'&&paired===false){if(status.push?.platform)reportPaired(status.push);else pairedReport=setTimeout(()=>reportPaired(relay.status().push),60_000);}
