@@ -275,7 +275,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   box.append(line);
   const link=(label:string,fn:()=>void)=>{const b=node('button',t(label),'setup-link') as HTMLButtonElement;b.type='button';b.onclick=fn;box.append(b);return b;};
   if(hermesSetup==='signing-in')link('Cancel sign-in',()=>void call('agentHarness',{operation:'cancel-sign-in'}).catch(()=>{}));
-  else if(hermesSetup!=='installing')link('Check again',()=>{void detectAgents();render();}).disabled=busy;
+  // After a failed install: the same official installer in a window the person sees (`install-hermes-window`), which
+  // shows why a step stops and may get past one the quiet install could not (a Microsoft Store copy, 2026-10-13).
+  else if(hermesSetup==='idle'&&hermesFailed)link('Install in Terminal',()=>void run(installHermesWindow)).disabled=busy;
+  if(hermesSetup!=='installing'&&hermesSetup!=='signing-in')link('Check again',()=>{void detectAgents();render();}).disabled=busy;
   return box;
  }
  function remotePanel(){
@@ -306,6 +309,11 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   try{await call('agentHarness',{operation:'install-hermes'});hermesSetup='installed';}
   catch(e){hermesSetup='idle';hermesFailed=true;productEvent('hermes_setup_failed',hermesSetupDimensions('install',hermesStepNo,e),timingBucket(performance.now()-started));throw e;}
   productEvent('hermes_setup_completed',hermesSetupDimensions('install',hermesStepNo),timingBucket(performance.now()-started));
+ }
+ async function installHermesWindow(){
+  await call('agentHarness',{operation:'install-hermes-window'});
+  productEvent('hermes_setup_started',hermesSetupDimensions('terminal',0));
+  notice='Hermes Agent is installing in Terminal. When it says it is installed, choose Check again.';
  }
  /** ChatGPT signed in inside Hermes Agent, then Hermes moves in like any Agent found here. */
  async function signInHermes(){

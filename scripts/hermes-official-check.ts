@@ -7,8 +7,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../core/agent/index.ts';
-import {installHermes,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
+import {HERMES_WINDOW_DONE,hermesInstallWindow,installHermes,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
 import {withTempDir} from './test-temp.ts';
+import {signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
 
 // Core: the manifest, a stage's result frame, what the sign-in prints, and the model.
 const manifest='{"protocol_version":1,"stages":[{"name":"prerequisites","title":"System prerequisites","needs_user_input":false},{"name":"setup","title":"Configure API keys","needs_user_input":true},{"name":"complete","title":"Finish install","needs_user_input":false}]}';
@@ -27,6 +28,16 @@ assert.equal(hermesChatGptModel('nous:x',['nous:x']),null);
 assert.equal(hermesChatGptModel('nous:x',['openai-codex:gpt-6-astra','openai-codex:gpt-5.6-terra']),'gpt-5.6-terra','ChatGPT’s everyday model before Hermes’ first, which a ChatGPT account may refuse');
 assert.ok(HERMES_INSTALLERS.posix.startsWith('https://hermes-agent.nousresearch.com/')&&HERMES_INSTALLERS.windows.startsWith('https://hermes-agent.nousresearch.com/'));
 
+// After a failed quiet install, the same official installer runs in a window the person sees, skipping the stages that
+// ask questions, and says to come back to Check again.
+{
+ const windows=hermesInstallWindow('win32'),script=signInScript('win32',windows,windows.args,HERMES_WINDOW_DONE);
+ assert.equal(script.extension,'.cmd');
+ assert.ok(script.text.includes(`"powershell.exe" "-NoProfile" "-ExecutionPolicy" "Bypass" "-Command" "& ([scriptblock]::Create((Invoke-RestMethod '${HERMES_INSTALLERS.windows}'))) -NonInteractive"`),script.text);
+ assert.ok(script.text.includes('choose Check again')&&script.text.includes('pause'));
+ const mac=hermesInstallWindow('darwin'),shell=signInScript('darwin',mac,mac.args,HERMES_WINDOW_DONE);
+ assert.ok(shell.text.includes(`'/bin/bash' '-c' 'curl -fsSL '\\''${HERMES_INSTALLERS.posix}'\\'' | bash -s -- --non-interactive'`),shell.text);
+}
 if(process.platform==='win32'){console.log('PASS Hermes Agent setup rules (the installer run is checked on macOS and Linux)');process.exit(0);}
 
 await withTempDir('worldlet-hermes-official-',async temp=>{

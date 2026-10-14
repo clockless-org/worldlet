@@ -543,7 +543,7 @@ await withBrowser(fileAccess,async browser=>{
  {
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
   await page.addInitScript(({platform})=>{
-   const w=window as any;w.calls=[];w.detects=0;w.installed=false;w.signedIn=false;
+   const w=window as any;w.calls=[];w.detects=0;w.installed=false;w.signedIn=false;w.failOnce=true;
    const event=(detail:unknown)=>window.dispatchEvent(new CustomEvent('worldlet:hermes-setup',{detail}));
    w.fixture={platform,workspaceId:'setup-no-agent-test',revision:1,activityRevision:0,sources:[],knowledge:[],worldItems:[],worldChecks:[],cloudConsent:false,onboarding:{version:1,presets:['home'],completed:false,unlockedApplets:[]},connections:[],sampleEnabled:false,overlay:{version:1,created:{},edits:{},trash:{},receipts:{},undo:null},appUpdate:{visible:false}};
    w.webkit={messageHandlers:{worldlet:{async postMessage(b){
@@ -554,9 +554,11 @@ await withBrowser(fileAccess,async browser=>{
     if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[{id:'codex',title:'Codex',configured:true,worldTools:true}],recommended:null,selected:sessionStorage.getItem('fixture-agent')};}
     if(b.action==='agentHarness'&&b.operation==='install-hermes'){
      event({stage:'install',step:3,steps:7,title:'Create Python environment'});
+     if(w.failOnce){w.failOnce=false;throw Error('Hermes Agent could not be installed. Check your internet connection and try again. (Create Python environment: bootstrap Python installation failed)');}
      await new Promise<void>(resolve=>{w.finishInstall=resolve;});
      w.installed=true;return {ok:true,id:'hermes',title:'Hermes Agent'};
     }
+    if(b.action==='agentHarness'&&b.operation==='install-hermes-window')return {ok:true};
     if(b.action==='agentHarness'&&b.operation==='sign-in-hermes'){
      if(!w.installed)throw Error('Hermes Agent is not on this computer. Install it first.');
      event({stage:'sign-in',url:'https://auth.openai.com/codex/device',code:'ABCD-1234'});
@@ -579,7 +581,14 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('button',{name:'Check again'}).click();
   await page.waitForFunction(()=>(window as any).detects>=2);
   await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
+  // A failed install names its step, and offers the same installer in a window the person sees (a Microsoft Store copy
+  // stopped at Create Python environment eight times, 2026-10-13), then Try again or Check again.
   await page.getByRole('button',{name:'Build your world',exact:true}).click();
+  await page.getByText(/\(Create Python environment: bootstrap Python installation failed\)/).waitFor();
+  await page.getByRole('button',{name:'Install in Terminal',exact:true}).click();
+  await page.getByText('Hermes Agent is installing in Terminal. When it says it is installed, choose Check again.',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Check again'}).isVisible(),true);
+  await page.getByRole('button',{name:'Try again',exact:true}).click();
   await page.getByText('Step 3 of 7: Create Python environment',{exact:true}).waitFor();
   assert.equal(await page.getByRole('button',{name:'Installing Hermes Agent…',exact:true}).isDisabled(),true,'nothing else while it installs');
   assert.equal(await page.getByRole('button',{name:'Check again'}).count(),0,'nothing to check while it installs');
@@ -595,7 +604,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.evaluate(()=>(window as any).finishSignIn());
   await page.getByRole('heading',{name:/^Hermes Agent moved in$/}).waitFor();
   assert.equal(await page.locator('.setup-passport-name').textContent(),'Hermes Agent');
-  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&!['detect','requested'].includes(c.operation)).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','sign-in-hermes','select:hermes']);
+  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&!['detect','requested'].includes(c.operation)).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','install-hermes-window','install-hermes','sign-in-hermes','select:hermes']);
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>['modelConfigure','modelCatalog'].includes(c.action))),false,'no model is configured in Worldlet');
   await page.getByRole('button',{name:'Enter your world',exact:true}).waitFor();
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-no-agent-'+platform+'.png')});

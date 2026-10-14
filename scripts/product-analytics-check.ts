@@ -203,7 +203,21 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.deepEqual(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again.')),{hermes_setup:'install',install_step:'0',hermes_failure:'download'});
  assert.equal(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (exit 1)')).hermes_failure,'manifest');
  const stage=hermesSetupDimensions('install',3,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (Python: C:\\Users\\me\\AppData failed)'));
- assert.deepEqual(stage,{hermes_setup:'install',install_step:'3',hermes_failure:'stage'});
+ assert.deepEqual(stage,{hermes_setup:'install',install_step:'3',hermes_failure:'stage',hermes_stage:'other',hermes_reason:'other'});
+ // Which stage stopped and why, as fixed words (Windows Beta 4384, 2026-10-13: eight failures at step 3 said only `stage`).
+ const failedAt=(detail:string,step=3)=>hermesSetupDimensions('install',step,new Error(`Hermes Agent could not be installed. Check your internet connection and try again. (${detail})`));
+ assert.deepEqual(failedAt('Create Python environment: bootstrap Python installation failed'),{hermes_setup:'install',install_step:'3',hermes_failure:'stage',hermes_stage:'venv',hermes_reason:'python_install_failed'});
+ assert.equal(failedAt('Install Python dependencies: dependency install failed',4).hermes_reason,'deps_install_failed');
+ assert.equal(failedAt('Download Hermes Agent: C:\\Users\\alex\\AppData\\Local\\hermes\\hermes-agent exists and is not a Hermes git checkout. Move it aside.',2).hermes_reason,'dir_not_checkout');
+ assert.equal(failedAt("Create Python environment: Cannot find path 'C:\\Users\\alex\\AppData\\Local\\hermes\\hermes-agent\\pm\\lock.json' because it does not exist.").hermes_reason,'missing_file');
+ assert.equal(failedAt('Create Python environment: failed to download from https://example.com/uv.zip : timed out').hermes_reason,'download_failed');
+ assert.equal(failedAt('Create Python environment: Access to the path is denied.').hermes_reason,'access_denied');
+ assert.equal(failedAt('Install command and app: app products or command publication failed',6).hermes_stage,'products');
+ assert.equal(failedAt('Create Python environment: it did not report how the step ended').hermes_reason,'no_report');
+ assert.equal(failedAt('Create Python environment: something new').hermes_reason,'other');
+ assert.deepEqual(failedAt('The Hermes Agent installer did not describe its steps.',0),{hermes_setup:'install',install_step:'0',hermes_failure:'manifest',hermes_reason:'other'});
+ assert.ok(!JSON.stringify(failedAt("Create Python environment: Cannot find path 'C:\\Users\\alex\\x'")).includes('alex'),'Installer output never leaves the device');
+ assert.deepEqual(hermesSetupDimensions('terminal',0),{hermes_setup:'terminal',install_step:'0'});
  assert.ok(!JSON.stringify(stage).includes('Users'),'Installer output never leaves the device');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).install_step,'10_plus');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).hermes_failure,'timeout');

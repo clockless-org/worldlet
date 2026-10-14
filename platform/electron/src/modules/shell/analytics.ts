@@ -9,7 +9,7 @@ import {platformName} from '../../profile.ts';
 import {AGENT,type AgentService,type AnalyticsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_SETUP,INSTALL_STEPS,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
@@ -73,7 +73,7 @@ const ALLOWED:Record<string,string[]>={
  // Setup with a local Agent (core/diagnostics/setup-events.ts): its public product ID, coarse counts and outcomes.
  local_agent:LOCAL_AGENT_IDS,recommended_agent:[...LOCAL_AGENT_IDS,'none'],agents_found:[...AGENTS_FOUND],
  // No Agent here: Worldlet installs Hermes Agent and signs ChatGPT in inside it; where a failure stopped, never its text.
- hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],
+ hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],hermes_stage:[...HERMES_STAGES],hermes_reason:[...HERMES_REASONS],
  // Who answers for Fox: the built-in Hermes Agent on a model Fox has, or the chosen Agent on its own sign-in.
  fox_brain:['built_in','agent'],
  bring_conversations:[...COUNT_BUCKETS],bring_notes:[...COUNT_BUCKETS],bring_skills:[...COUNT_BUCKETS],bring_routines:[...COUNT_BUCKETS],bring_connections:[...COUNT_BUCKETS],
