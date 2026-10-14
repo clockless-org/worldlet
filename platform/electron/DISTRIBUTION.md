@@ -102,7 +102,10 @@ keeps applying the prepared one, and a failure there leaves it ready. After the 
 unchanged Build shows **Retry update**, which prepares again; a changed Build never continues into
 another install without a click. Fox's **Update Worldlet** button (an out-of-date app) applies a
 prepared build the same way, or prepares the newest and then installs it. An app in a folder it
-cannot write to asks the person to install the current DMG.
+cannot write to asks the person to install the current DMG. A copy opened straight from the DMG (or
+one macOS translocated to a read-only folder) first offers **Move to Applications** at launch
+(`platform/electron/src/applications-folder.ts`); a copy already in Applications that is as new or
+newer is opened instead of being replaced.
 
 #### RC update acceptance (#1140)
 
