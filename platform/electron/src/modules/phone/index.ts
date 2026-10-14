@@ -8,6 +8,7 @@ import {WorldletError} from '../../files.ts';
 import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createLocalRelay,serveLocalRelay} from './local-relay.ts';
+import {createRoomLink} from './room-link.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
@@ -141,7 +142,7 @@ export function installPhone(host:Host){
  let hostFocus:Row|null=null,hostCenterAt=0,hostCenterRevision='',hostSent='';
  const hostRows=new Map<string,{kind:string,members:string[]}>();
  async function hostCenter(){
-  if(host.page.ready()||!relay.paired&&!browser.paired)return;
+  if(host.page.ready()||!relay.paired&&!browser.paired&&!local.paired)return;
   const fox=host.optional<FoxService>(FOX),scope=fox?.scope();
   if(!scope||scope.sample||scope.setup||onboardingUnfinished(host.store.state.onboarding))return;
   const revision=String(host.store.state.revision);
@@ -230,13 +231,12 @@ export function installPhone(host:Host){
   deliver:message=>remoteHost.receive(message),
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
- // A web browser (core/phone/README.md#web): the page at `<relay>/open/` pairs like a phone, through the same relay and
- // boxes as its own pairing, and gets the same Center, conversation and live turn. It takes no notifications; a tab
- // seen in the last hour keeps the long poll, so a Done from it lands within a second.
+ // A web browser on another device (core/phone/README.md#web): the page at `<relay>/open/` meets this computer in the
+ // pairing room (room-link.ts), which stores nothing, and gets the same Center, conversation and live turn as a phone.
+ // It takes no notifications; a tab seen in the last hour keeps the loop listening, so a Done from it lands at once.
  let webPaired:boolean|null=null;
- const browser=createPhoneRelay({
-  fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (web pairing)`,kind:'web',
-  relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
+ const browser=createRoomLink({
+  vault,vaultName:'web-room',name:computerName,relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
   onChange:status=>{
    if(status.state==='paired'&&webPaired===false)usage('phone_paired',{phone_platform:'web'});
    webPaired=status.state==='paired';
@@ -245,6 +245,9 @@ export function installPhone(host:Host){
    host.page.event('worldlet:web-pair-status',status);
   },
  });
+ // A browser link from before the room kept its boxes on the relay: it is ended there once, which deletes them.
+ if(vault.get('web-pairing'))void createPhoneRelay({fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (web pairing)`,kind:'web',
+  relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver:async()=>false}).end().catch(error=>host.diagnostics.record(error,'phonePairing'));
  webPaired=browser.status().state==='paired';
  // A browser on this computer (core/phone/README.md#web): a pairing of its own, served by this app on 127.0.0.1
  // (local-relay.ts) with the page and a relay in memory, so what it shows never leaves the computer. The server starts

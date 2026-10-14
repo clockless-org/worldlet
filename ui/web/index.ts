@@ -1,4 +1,4 @@
-import {createWebClient,WebPairingEnded,type WebClient,type WebMessage,type WebView,type PhoneAttentionItem,type PhoneTask} from '../../core/phone/index.ts';
+import {createWebClient,createRoomWebClient,isRoomLink,WebPairingEnded,type WebClient,type WebMessage,type WebView,type PhoneAttentionItem,type PhoneTask,type RoomSocketFactory} from '../../core/phone/index.ts';
 
 // Worldlet in a web browser (core/phone/README.md#web): the page the relay serves at /open/ pairs with the computer
 // like the phone apps, from the link the computer's Mobile page makes, and shows what the phones show: what needs
@@ -11,7 +11,7 @@ type Tab='now'|'working'|'today'|'fox';
 const TABS:[Tab,string][]=[['now','Needs you'],['working','Working'],['today','Today'],['fox','Fox']];
 const GROUPS:Record<string,string>={event:'Coming up',needsAction:'Worth doing',unseen:'Worth knowing'};
 export type WebOpenOptions={fetch:typeof fetch,storage:Pick<Storage,'getItem'|'setItem'|'removeItem'>,location:{hash:string,origin:string},
- replaceURL:(url:string)=>void,version:string,userAgent:string,wait?:number,retry?:number};
+ replaceURL:(url:string)=>void,version:string,userAgent:string,wait?:number,retry?:number,WebSocket?:RoomSocketFactory};
 
 /** "Chrome on Mac": what the computer's Mobile page calls this browser. */
 export function browserName(userAgent:string){
@@ -27,7 +27,12 @@ export function mountWebOpen(root:HTMLElement,options:WebOpenOptions){
  const saved=options.storage.getItem(WEB_LINK_KEY);
  let client:WebClient|null=null,view:WebView={},tab:Tab='now',notice='',ended=false,stopped=false,draft='';
  const pending=new Set<string>();
- try{if(saved)client=createWebClient({fetch:options.fetch,link:saved,relay:options.location.origin,name:browserName(options.userAgent),version:options.version});}
+ try{if(saved){
+  // A link with `m=room` meets the computer in the pairing room (core/phone room.ts), where nothing is stored; an older
+  // one reads the relay's slots.
+  const base={link:saved,relay:options.location.origin,name:browserName(options.userAgent),version:options.version};
+  client=isRoomLink(saved)?createRoomWebClient({...base,...(options.WebSocket?{WebSocket:options.WebSocket}:{})}):createWebClient({...base,fetch:options.fetch});
+ }}
  catch(e){notice=(e as Error).message;options.storage.removeItem(WEB_LINK_KEY);}
  const send=async(message:WebMessage)=>{
   if(!client)return;

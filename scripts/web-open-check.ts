@@ -4,7 +4,7 @@
 // first poll completing the pairing with the browser's name, the Center reaching the page, Done and a chat line
 // reaching the computer, the fragment leaving the address bar, a reload from storage, and the page ending with the link.
 import assert from 'node:assert/strict';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import http from 'node:http';
 import {readFileSync} from 'node:fs';
 import os from 'node:os';
@@ -13,7 +13,8 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
 import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/electron/src/modules/phone/local-relay.ts';
-import {createWebClient,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,type PhoneMessage} from '../core/phone/index.ts';
+import {createRoomLink} from '../platform/electron/src/modules/phone/room-link.ts';
+import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,type PhoneMessage} from '../core/phone/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
 // The relay this computer serves itself (local-relay.ts), on a free port, with the page built as the app ships it.
@@ -150,6 +151,165 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  await after.end();await assert.rejects(again.poll(),WebPairingEnded);
  console.log('PASS the in-memory relay: a kept pairing survives a restart, a long poll wakes at once, no notifications, a capped queue.');
 }
+
+// Another device's browser meets the computer in the pairing room (core/phone room.ts, room-link.ts): a room that
+// answers like worker/room.ts in the operations repository (a side gets in with its token and the other side's hash,
+// messages pass only while both are there, nothing is kept), here in memory.
+function memoryRoom(){
+ const rooms=new Map<string,{desktop:{id:string,deliver:(text:string)=>void,close:()=>void}|null,phones:Map<string,{deliver:(text:string)=>void,close:()=>void}>}>();
+ let next=0;
+ return {
+  /** Opens one side; null when the room refuses it. */
+  async connect(url:string,protocols:string[],deliver:(text:string)=>void,closed:()=>void){
+   const name=new URL(url).pathname.split('/')[3]||'',[role,token,peer]=(protocols.find(p=>p!=='worldlet-room.v1')||'').split('.');
+   const own=await sha256Hex(token||'');
+   if(!protocols.includes('worldlet-room.v1')||await sha256Hex(role==='desktop'?own+':'+peer:peer+':'+own)!==name)return null;
+   const room=rooms.get(name)??{desktop:null,phones:new Map()};rooms.set(name,room);
+   const id=role==='desktop'?'desktop':'p'+(++next),side={id,deliver,close:closed};
+   const say=(to:{deliver:(text:string)=>void},value:unknown)=>to.deliver(JSON.stringify(value));
+   if(role==='desktop'){room.desktop?.close();room.desktop=side;for(const [pid,phone] of room.phones){say(phone,{t:'desktop',online:true});say(side,{t:'peer',id:pid,online:true});}}
+   else{room.phones.set(id,side);say(side,{t:'desktop',online:!!room.desktop});if(room.desktop)say(room.desktop,{t:'peer',id,online:true});}
+   return {
+    send(text:string){
+     const input=JSON.parse(text);
+     if(role==='phone'){if(room.desktop)say(room.desktop,{t:'msg',from:id,data:input.data});return;}
+     if(room.desktop!==side)return;
+     for(const [pid,phone] of room.phones)if(!input.to||input.to===pid)say(phone,{t:'msg',from:'desktop',data:input.data});
+    },
+    leave(){
+     if(role==='desktop'){if(room.desktop!==side)return;room.desktop=null;for(const phone of room.phones.values())say(phone,{t:'desktop',online:false});}
+     else{room.phones.delete(id);if(room.desktop)say(room.desktop,{t:'peer',id,online:false});}
+    },
+   };
+  },
+  /** Drops the computer's connection, as a sleeping laptop does. */
+  dropDesktop(){for(const room of rooms.values())room.desktop?.close();},
+ };
+}
+const room=memoryRoom();
+// Polls a browser until what it shows passes `ok` (a poll returns once anything new arrives).
+const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolean)=>{let view:any=null;for(let i=0;i<30&&!(view&&ok(view));i++)view=await client.poll(1).catch(async()=>{await new Promise(r=>setTimeout(r,100));return null;});return view;};
+// A WebSocket for code under test, on the memory room.
+class RoomSocket {
+ readyState=0;onopen:((e:unknown)=>void)|null=null;onmessage:((e:{data:unknown})=>void)|null=null;onclose:((e:unknown)=>void)|null=null;onerror:((e:unknown)=>void)|null=null;
+ private side:{send(text:string):void,leave():void}|null=null;
+ constructor(url:string,protocols:string[]){
+  // As on a real WebSocket, nothing arrives before the socket is open.
+  const early:string[]=[];
+  void room.connect(url,protocols,text=>{if(this.readyState===0)early.push(text);else queueMicrotask(()=>this.onmessage?.({data:text}));},()=>this.close()).then(side=>{
+if(!side){this.readyState=3;this.onerror?.({});this.onclose?.({});return;}
+   this.side=side;this.readyState=1;this.onopen?.({});
+   for(const text of early.splice(0))queueMicrotask(()=>this.onmessage?.({data:text}));
+  });
+ }
+ send(text:string){if(this.readyState!==1)throw new Error('not open');this.side!.send(text);}
+ close(){if(this.readyState>=2)return;this.readyState=3;this.side?.leave();queueMicrotask(()=>this.onclose?.({}));}
+}
+{
+ const vault=new Map<string,string>(),got:PhoneMessage[]=[];
+ const memory={get:(id:string)=>vault.get(id)??null,set:(id:string,v:string)=>{vault.set(id,v);},delete:(id:string)=>{vault.delete(id);}};
+ const mac=createRoomLink({vault:memory,vaultName:'web-room',name:()=>'Studio Mac',deliver:async m=>{got.push(m);return true;},WebSocket:RoomSocket as any});
+ const {link:made,state}=await mac.start();
+ assert.equal(state,'waiting');
+ assert.match(made!,/^https:\/\/worldlet\.ai\/open\/#v=1&s=[A-Za-z0-9_-]{43}&n=Studio\+Mac&m=room$/);
+ assert(isRoomLink(made!)&&isRoomLink(made!.slice(made!.indexOf('#')+1))&&!isRoomLink(started.link!));
+ await mac.publish('attention',attention([item('m1','needsAction','Book the flight')]));
+ await mac.publish('desktop',{v:1,at:new Date().toISOString(),name:'Studio Mac',version:'2026.1014.4402'});
+ const tab=createRoomWebClient({link:made!,relay:'https://worldlet.ai',name:'Safari on iPhone',version:'web',WebSocket:RoomSocket as any});
+ // Joining pairs, and the computer sends what it has at once.
+ const seen=await until(tab,v=>!!v.attention&&!!v.desktop);
+ assert.equal(seen.attention?.now[0].action,'Book the flight');
+ assert.equal(tab.computer,'Studio Mac');
+ await mac.poll();
+ assert.equal(mac.status().state,'paired');assert.equal(mac.status().phone?.name,'Safari on iPhone');
+ assert.equal(mac.status().link,made,'the link stays, so another browser can open it');
+ assert(mac.open,'a browser is in the room');
+ // A changed slot reaches the browser; an unchanged one is not sent again.
+ const dentist=attention([item('m2','event','Dentist at 3')]);
+ await mac.publish('attention',dentist);
+ assert.equal((await until(tab,v=>v.attention?.now[0].action==='Dentist at 3'))?.attention?.now[0].action,'Dentist at 3');
+ assert.equal(await mac.publish('attention',{...dentist,at:new Date().toISOString()}),false);
+ // Done and a chat line from the browser are taken once, even when the same sealed frame comes again.
+ await tab.send({type:'attention',id:'m2',action:'done'});await tab.send({type:'chat',id:'c9',text:'Hi Fox'});
+ for(let i=0;i<20&&got.length<2;i++)await mac.poll(1);
+ assert.deepEqual(got.map(m=>m.type),['attention','chat']);
+ // A second browser on the same link joins the same pairing and gets everything at once.
+ const second=createRoomWebClient({link:made!,relay:'https://worldlet.ai',name:'Firefox on Windows',version:'web',WebSocket:RoomSocket as any});
+ const other=await until(second,v=>!!v.attention);
+ assert.equal(other.attention?.now[0].action,'Dentist at 3');
+ // The computer away: the browser says so and keeps what it had; back, it sends everything again.
+ room.dropDesktop();
+ await new Promise(r=>setTimeout(r,50));
+ await assert.rejects(tab.poll(),/not reachable/);
+ await mac.publish('attention',attention([item('m3','needsAction','Water the plants')]));
+ await mac.poll();
+ const back=await until(tab,v=>v.attention?.now[0].action==='Water the plants');
+ assert.equal(back?.attention?.now[0].action,'Water the plants');
+ // A side without the right token is refused; a frame sealed with another key is dropped.
+ const stranger=createRoomWebClient({link:'#v=1&s='+'A'.repeat(43)+'&m=room',relay:'https://worldlet.ai',name:'x',version:'web',WebSocket:RoomSocket as any});
+ await assert.rejects(stranger.poll(),/not reachable/,'a pairing nobody made has no computer');
+ // Turning the link off reaches every browser in the room.
+ await mac.end();
+ const ends=async(client:{poll(wait?:number):Promise<unknown>})=>{for(let i=0;i<30;i++)try{await client.poll(1);}catch(e){if(e instanceof WebPairingEnded)return true;}return false;};
+ assert(await ends(tab)&&await ends(second),'every browser in the room hears the link is off');
+ assert.equal(vault.has('web-room-pairing'),false);
+ console.log('PASS another device meets the computer in the room: link, pairing, everything at once, changes, Done and chat once, away and back, turning off.');
+}
+
+// The page itself on another device: the built page at worldlet.ai/open with its WebSocket bridged to the memory room.
+{
+ const vault=new Map<string,string>(),got:PhoneMessage[]=[];
+ const memory={get:(id:string)=>vault.get(id)??null,set:(id:string,v:string)=>{vault.set(id,v);},delete:(id:string)=>{vault.delete(id);}};
+ const mac=createRoomLink({vault:memory,vaultName:'web-room',name:()=>'Studio Mac',deliver:async m=>{got.push(m);return true;},WebSocket:RoomSocket as any});
+ const {link:made}=await mac.start();
+ await mac.publish('attention',attention([item('w1','needsAction','Sign the lease')]));
+ await mac.publish('desktop',{v:1,at:new Date().toISOString(),name:'Studio Mac',version:'2026.1014.4402'});
+ const browser=await chromium.launch();
+ try{
+  const page=await browser.newPage({viewport:{width:390,height:844}}),errors:string[]=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.route('https://worldlet.ai/open/**',async route=>{
+   const file=new URL(route.request().url()).pathname.replace('/open/','')||'index.html';
+   try{return route.fulfill({body:await readFile(path.join(out,file)),contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html'});}
+   catch{return route.fulfill({status:404,body:''});}
+  });
+  // The page's WebSocket goes to the memory room through the test (the room's own protocol, unchanged).
+  const sides=new Map<number,{send(text:string):void,leave():void}>();let opened=0;
+  await page.exposeFunction('roomOpen',async(url:string,protocols:string[])=>{
+   const id=++opened;
+   const side=await room.connect(url,protocols,text=>void page.evaluate(([n,t])=>(window as any).roomDeliver(n,t),[id,text] as const).catch(()=>{}),()=>void page.evaluate(n=>(window as any).roomClosed(n),id).catch(()=>{}));
+   if(!side)return 0;sides.set(id,side);return id;
+  });
+  await page.exposeFunction('roomSend',(id:number,text:string)=>sides.get(id)?.send(text));
+  await page.exposeFunction('roomClose',(id:number)=>{sides.get(id)?.leave();sides.delete(id);});
+  await page.addInitScript(()=>{
+   const w=window as any,open=new Map<number,any>(),early=new Map<number,string[]>();
+   // What the room says while the socket is still opening waits for it, as on a real WebSocket.
+   w.roomDeliver=(id:number,text:string)=>{const ws=open.get(id);if(ws)ws.onmessage?.({data:text});else early.set(id,[...early.get(id)??[],text]);};
+   w.roomClosed=(id:number)=>{const ws=open.get(id);if(ws){ws.readyState=3;open.delete(id);ws.onclose?.({});}};
+   w.WebSocket=class{
+    readyState=0;onopen:any=null;onmessage:any=null;onclose:any=null;onerror:any=null;id=0;
+    constructor(url:string,protocols:string[]){void w.roomOpen(url,protocols).then((id:number)=>{if(!id){this.readyState=3;this.onclose?.({});return;}this.id=id;open.set(id,this);this.readyState=1;this.onopen?.({});for(const text of early.get(id)??[])this.onmessage?.({data:text});early.delete(id);});}
+    send(text:string){void w.roomSend(this.id,text);}
+    close(){if(this.readyState===3)return;this.readyState=3;open.delete(this.id);void w.roomClose(this.id);}
+   };
+  });
+  await page.goto(made!);
+  await page.getByText('Sign the lease').waitFor();
+  assert.equal(new URL(page.url()).hash,'','the secret leaves the address bar');
+  assert.equal(await page.locator('.web-computer').textContent(),'Studio Mac');
+  await page.locator('.web-item',{hasText:'Sign the lease'}).getByRole('button',{name:'Done'}).click();
+  for(let i=0;i<50&&!got.some(m=>m.type==='attention');i++)await mac.poll(0.1);
+  assert(got.some(m=>m.type==='attention'&&m.id==='w1'&&m.action==='done'),'Done from the page reaches the computer through the room');
+  assert.match(String(mac.status().phone?.name),/^Chrome on /,'the browser told the computer its name');
+  // Turned off on the computer: the page says so and forgets the link.
+  await mac.end();
+  await page.getByRole('heading',{name:'This link is off'}).waitFor({timeout:30000});
+  assert.equal(await page.evaluate(()=>localStorage.getItem('worldlet-web-link')),null);
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+ console.log('PASS the page on another device works through the room: the Center, Done, and turning the link off.');
+}
 await server.close();await rm(out,{recursive:true,force:true});
 
 // A line said in the browser or on the phone while the World page is not there (core/phone/README.md#web, Fox without
@@ -181,5 +341,7 @@ await server.close();await rm(out,{recursive:true,force:true});
  assert.match(phone,/\{relay:local,open:localOpen,listening:localListening,phone:true\}\]/,'the local browser link runs like the others');
  assert.match(phone,/if\(request\.kind==='local'\)try\{await serveLocal\(\);\}/,'its server starts before its link is made');
  assert.match(phone,/fetch:async\(input,init\)=>\{await adopted;return localRelay\.fetch/,'a kept pairing is handed back before the computer reads the relay');
+ assert.match(phone,/const browser=createRoomLink\(\{/,'another device\'s browser meets the computer in the room');
+ assert.match(phone,/if\(vault\.get\('web-pairing'\)\)void createPhoneRelay\([\s\S]{0,300}\.end\(\)/,'a browser link from before the room is ended on the relay once');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }
