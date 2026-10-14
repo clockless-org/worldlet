@@ -1122,7 +1122,8 @@ export function installFox(host:Host){
   }
   return runtime.profile(true);
  }
- host.onPageLoaded(()=>{
+ // With the host (the World's first load, or a run in background with no page), then again on each later World load.
+ const begin=()=>{
   subscribe();
   agent()?.onChannelTool?.(channelToolReply);
   older.resume();
@@ -1130,7 +1131,10 @@ export function installFox(host:Host){
   if(store.state.cloudConsent===true&&!store.sampleEnabled())startRoutines();
   const runtime=agent();
   try{runtime?.warm(home(foxScope()));}catch(error){host.diagnostics.record(error,'warm');}
- });
+ };
+ host.onStarted(begin);
+ let loads=0;
+ host.onPageLoaded(()=>{if(loads++)begin();});
  // The page that started a turn is gone; its tools and stream have no listener left.
  host.onPageReload(()=>{if(agentTurn!==null&&!headless.has(agentTurn))cancelCloud();cancelAppletTasks();});
  host.onQuit(()=>{older.stop();history.stop();powerMonitor.off('resume',resumed);stopRoutines();chat?.cancel();cancelAppletTasks();companion.closeLedgers();});

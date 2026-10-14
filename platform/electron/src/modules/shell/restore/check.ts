@@ -36,7 +36,7 @@ function world(name:string,legacy?:()=>Record<string,unknown>){
   opened.push(store);
   const host={profile:{channel:'dev',worktree:'',root,title:'Worldlet Check',webRoot:root,resources:process.cwd(),smoke:false},preferences,store,
    page:{call:async()=>undefined,event:()=>{},documentEvent:()=>{},ready:()=>false},window:()=>null,worldView:()=>null,register:()=>{},provide:(_name:string,service:unknown)=>service,
-   use:(name:string)=>{throw Error('Missing host service '+name);},optional:()=>undefined,onPageReload:()=>{},onQuit:()=>{},onPageLoaded:()=>{},diagnostics:{record:()=>{},log:()=>{}}} as unknown as Host;
+   use:(name:string)=>{throw Error('Missing host service '+name);},optional:()=>undefined,onPageReload:()=>{},onQuit:()=>{},onPageLoaded:()=>{},onStarted:()=>{},diagnostics:{record:()=>{},log:()=>{}}} as unknown as Host;
   return {preferences,store,host};
  }};
 }
