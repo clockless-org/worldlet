@@ -4,6 +4,9 @@ import {worldActions,describeActions,resolveAction} from '../../core/tools/index
 import {withoutUntrusted,turnBrowserAdmission,turnTrustObserve,turnWriteAdmission} from '../../core/agent/index.ts';
 import {contentWrites,createTurnPolicy} from './tool-policy.ts';
 import {runAudioCommand,runLocalMusicTool} from '../../ui/shell/index.ts';
+import {pageToolFeature} from '../../core/tools/index.ts';
+import {WEB_PAGE_UNAVAILABLE} from '../../contracts/web-world.ts';
+import {pageFeatures} from './features.ts';
 
 const validators=new WeakMap();
 function validate(definition,args){
@@ -42,6 +45,9 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
   if(!definition)return {error:'Unknown World tool.'};
   if(setup&&!publicWorldToolNames.includes(name))return {error:'Private-context permission is required. Open Worldlet privacy controls first.'};
   args=validate(definition,args);
+  // A World page in a web browser has no built-in browser, YouTube, sound or music players (contracts/web-world.ts).
+  const needs=pageToolFeature(name,args);
+  if(needs&&pageFeatures()[needs]===false)return {error:WEB_PAGE_UNAVAILABLE[needs]||'This is not available in a browser window. It needs the Worldlet app on this computer.'};
   const currentVersion=version;
   if(contentWrites.has(name)&&savedVersion===currentVersion)return {error:'A change is already saved. Do not repeat it.'};
   // Note edits, speaking style and cart changes are durable: after untrusted content in

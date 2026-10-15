@@ -87,6 +87,20 @@ page none; it talks to the host over one WebSocket at `/world/socket`, and the h
   the local tools that read other programs' files.
 - **One page at a time.** A newer page takes over and the older one says the World is open in another tab.
 
+**What a browser window cannot do.** Some of the app window's features have no browser equivalent. The socket's
+handshake names them (`WEB_PAGE_FEATURES`), and the page turns those `HostFeatures` off whatever the snapshot says
+([features.ts](../platform/bridge/features.ts) `pageFeatures`). The app's own page hears no such flags and is
+unchanged. The page flags (`websitePages`, `youtube`, `worldAudio`, `voice`, `desktopCompanion`) are on when a host
+leaves them out, unlike the host services, which fail closed: every app window has them.
+
+- **Websites and the Browser** open in a new tab instead of a native view over the panel.
+- **Hidden:** YouTube (the World leaves it out and the catalog does not offer it), the World's sound and music
+  players, the microphone (speaking to Fox, Talk, dictation and spoken replies), the desktop Companion window, and the
+  corner room the Mac keeps for its window buttons.
+- **Fox's tools** that need one of these (the built-in browser, YouTube, the World's sound, music players) answer
+  that it is not available in a browser window ([page-features.ts](../core/tools/page-features.ts)) instead of failing
+  on their own.
+
 The page's own Content-Security-Policy is unchanged: `connect-src 'self'` already admits the WebSocket to the same
 origin in Chromium. Opening the World from another device is a later step.
 

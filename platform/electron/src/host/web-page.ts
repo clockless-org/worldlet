@@ -1,5 +1,5 @@
 import {errorMessage} from '../files.ts';
-import {WORLD_ELSEWHERE_CODE,webDenied,webReply,type WorldHostFrame} from '../../../../contracts/web-world.ts';
+import {WEB_PAGE_FEATURES,WORLD_ELSEWHERE_CODE,webDenied,webReply,type WorldHostFrame} from '../../../../contracts/web-world.ts';
 import type {PageBridge} from './types.ts';
 // The World page in a web browser on this computer (contracts/web-world.ts), as a PageBridge: the host reaches it over
 // the page's socket (modules/phone/local-relay.ts) as the app reaches its own World page over IPC, and its requests go
@@ -70,7 +70,8 @@ export function createWebPage(options:WebPageOptions){
     if(typeof frame.q==='number'&&frame.body&&typeof frame.body==='object'&&!Array.isArray(frame.body))return void request(session,frame.q,frame.body as Record<string,unknown>);
     if(typeof frame.r==='number'){const resolve=session.calls.get(frame.r);session.calls.delete(frame.r);resolve?.(frame.value);}
    });
-   send(socket,{h:{version:1,platform:options.platform}});
+   // The page hears what its window cannot do, and hides or replaces those controls (contracts/web-world.ts).
+   send(socket,{h:{version:1,platform:options.platform,features:{...WEB_PAGE_FEATURES}}});
    options.loaded();
   },
   /** The host stops: the page is closed. */
