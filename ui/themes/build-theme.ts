@@ -89,7 +89,7 @@ function applyPresentation(theme:InstalledTheme){
  const shared:BuiltSurfaces=builtIn.surfaces||{tokens:{},fonts:{},skin:{},sounds:{events:{},ambient:{}},attention:[],transitions:{area:'shared',room:'shared',ms:0}};
  const displayFamily=p.tokens.displayFont.split(',')[0].trim().replace(/^['"]|['"]$/g,''),display=p.fonts.find(font=>fontFamily(font)===displayFamily);
  const displayFace=display?{family:displayFamily,src:url(display.file)}:undefined;
- g.__WORLDLET_ENV_ASSETS__={...builtIn,surfaces:{...shared,
+ g.__WORLDLET_ENV_ASSETS__={...builtIn,surfaces:{...shared,...p.hud?{hud:p.tokens}:{},
   fonts:displayFace?{...shared.fonts,display:displayFace,label:displayFace}:shared.fonts,
   skin:p.hud?Object.fromEntries(Object.entries(p.hud.skin).map(([part,piece])=>[part,{image:url(piece.image),slice:[...piece.slice],width:piece.width}])):shared.skin,
   sounds:p.sound?{events:Object.fromEntries(Object.entries(p.sound.events).map(([event,file])=>[event,url(file)])),ambient:{}}:shared.sounds}};

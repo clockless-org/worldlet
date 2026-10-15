@@ -45,6 +45,8 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 
 Anything left out keeps the shared look, sounds and pictures.
 
+Declaring `hud` also opts the shared World chrome into the package’s existing token palette and type. Floating controls, the composer and area navigation use `paper`, `ink`, `accent` and `focus`; action controls use the token `radius`; action and place labels use `displayFont`, while the composer and Attention summaries use `bodyFont`. Original source readers keep their own typography. Packages without `hud` retain the shared chrome. No extra CSS or executable configuration is needed.
+
 ### Bundled fonts
 
 The host registers each bundled font with the browser as the declared `family`, or the filename without its extension when omitted (`assets/fonts/Display.woff2` becomes `Display`). Reference that name in `tokens.bodyFont`, `tokens.displayFont` or a scene material's font stack. Family names use letters, digits, spaces, underscores, periods or hyphens; omit CSS quotes and fallback names from `family` itself.

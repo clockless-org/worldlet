@@ -40,3 +40,31 @@ html[data-theme-room-transition=door] #notionWorld[data-depth=object] #notionCon
 .ui-theme-default .home-open-body{flex:1;min-height:0;overflow:auto}
 .ui-theme-default .home-open-header h2{display:none}
 .ui-theme-default .home-open-header,.ui-theme-default .home-calendar-navigation{padding:0}
+
+
+/* A static package opting into HUD art also supplies the chrome's type and material.
+   Scope these tokens to the World: source readers and platform dialogs retain their own styles. */
+html[data-theme-hud=custom] #notionWorld{
+ --hud-scene-glass:color-mix(in srgb,var(--theme-hud-paper) 94%,transparent);
+ --hud-scene-hover:color-mix(in srgb,var(--theme-hud-paper) 84%,var(--theme-hud-accent));
+ --hud-scene-line:color-mix(in srgb,var(--theme-hud-accent) 70%,transparent);
+ --hud-scene-ink:var(--theme-hud-ink);
+ --hud-scene-text-shadow:0 1px 2px color-mix(in srgb,var(--theme-hud-paper) 70%,#000);
+ --system-glass-fill:var(--hud-scene-glass);
+ --system-glass-hover:var(--hud-scene-hover);
+ --system-glass-line:var(--hud-scene-line);
+ --system-glass-menu:var(--theme-hud-paper);
+ --system-glass-press:color-mix(in srgb,var(--theme-hud-accent) 25%,transparent);
+ --system-glass-blur:none;
+ --system-glass-shadow:inset 0 1px 0 color-mix(in srgb,var(--theme-hud-accent) 25%,transparent),0 2px 5px #0004;
+}
+html[data-theme-hud=custom] #notionWorld :is(.world-actions .world-capsule,.world-actions .world-capsule span,.applet-shelf-name,.area-view-header h1,.area-view-applet span,.area-view-all,.world-task-heading,.map-attention-rail button,#worldDate,#worldClock){font-family:var(--theme-hud-display-font)}
+html[data-theme-hud=custom] #notionWorld :is(.world-task-title,.world-task-objective,.companion-text-entry #notionInput){font-family:var(--theme-hud-body-font)}
+html[data-theme-hud=custom] #notionWorld .world-actions .world-capsule{border-radius:var(--theme-hud-radius);background:var(--hud-scene-glass);color:var(--theme-hud-ink);box-shadow:var(--system-glass-shadow);text-shadow:var(--hud-scene-text-shadow)}
+html[data-theme-hud=custom] #notionWorld .world-actions .world-capsule:not(:disabled):hover{background:var(--hud-scene-hover)}
+html[data-theme-hud=custom] #notionWorld :is(.area-view-back,.area-view-all,.applet-shelf-more,.applet-shelf-new){background:var(--hud-scene-glass);border-color:var(--hud-scene-line);color:var(--theme-hud-ink);box-shadow:var(--system-glass-shadow)}
+html[data-theme-hud=custom] #notionWorld :is(.area-view-header h1,.area-view-applet span,.applet-shelf-name){color:var(--theme-hud-ink);text-shadow:0 1px 2px #000b,0 2px 6px #0008}
+html[data-theme-hud=custom] #notionWorld .companion-text-entry #notionInput::placeholder{font-family:var(--theme-hud-body-font);color:color-mix(in srgb,var(--theme-hud-ink) 72%,transparent)}
+html[data-theme-hud=custom] #notionWorld :is(.world-actions .world-capsule,.area-view-back,.area-view-all,.applet-shelf-pick,.companion-text-entry #notionCommand):focus-visible{outline:2px solid var(--theme-hud-focus);outline-offset:3px}
+html[data-theme-hud=custom] #notionWorld .companion-text-entry #notionCommand:focus-within{border-color:var(--theme-hud-focus)}
+@media(prefers-reduced-transparency:reduce){html[data-theme-hud=custom] #notionWorld{--hud-scene-glass:var(--theme-hud-paper)}}

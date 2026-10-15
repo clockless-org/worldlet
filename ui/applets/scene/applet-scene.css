@@ -243,7 +243,7 @@
  #notionWorld.native-console[data-applet-frame][data-applet-companion-bar=true]>.applet-shelf{left:16px;width:max(280px,calc(var(--applet-scene-primary-left) - 32px))}
  #notionWorld.native-console[data-applet-companion-bar=true] .companion-dock{position:static;inset:auto;height:0;min-height:0}
  #notionWorld.native-console[data-applet-companion-bar=true] .notion-shortcuts{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-width:none}
- #notionWorld.native-console[data-applet-companion-bar=true] .fox-action-side{height:40px;min-height:0}
+ #notionWorld.native-console[data-applet-companion-bar=true] .fox-action-side{height:40px;min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;transform:none}
  #notionWorld.native-console[data-applet-companion-bar=true] .world-actions{position:absolute;left:0;right:auto;top:-48px;bottom:auto;display:flex;justify-content:flex-start;width:100%;height:40px;gap:8px}
  #notionWorld.native-console[data-applet-companion-bar=true] .world-actions .world-capsule{height:40px;min-height:40px;margin:0;padding:8px 12px}
 }
