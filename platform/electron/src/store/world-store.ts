@@ -128,7 +128,11 @@ export class WorldStore {
   this.homeWriteDrafts={};this.liveAppOriginals={};this.liveAppRecords={};this.appletActivity={};this.worldEvidence={};this.sampleUI={};
   this.writable=true;this.error=null;
  }
- setCloudConsent(allowed:boolean){if(!this.writable)throw new WorldletError('The library is read-only.');this.state.cloudConsent=allowed;this.changed();}
+ setCloudConsent(allowed:boolean){
+  if(!this.writable)throw new WorldletError('The library is read-only.');
+  if(this.state.cloudConsent!==allowed)this.attentionEpoch+=1;
+  this.state.cloudConsent=allowed;this.changed();
+ }
 
  // Snapshot ----------------------------------------------------------------------------
  // Weather and brought conversations need no account: the World holds them (core/tasks/attention.ts).

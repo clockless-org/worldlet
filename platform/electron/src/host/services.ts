@@ -1,3 +1,4 @@
+import type {ServiceRead} from '../../../../contracts/services.ts';
 import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
@@ -50,6 +51,8 @@ export interface AgentService {
  readonly accountsId:string;
  accountsHome():string;
  makeSourceAccess():AgentRuntime;
+ /** Owner-enabled periodic reads, without model execution or conversational payload history. */
+ collectServicePage?(request:ServiceRead,signal:AbortSignal):Promise<Row>;
  makeSourceConnections():AgentSourceConnections;
  /** The World's own Google connection, when this build has one: the signed-in account for analytics and greetings. */
  googleAccount?():{authorized():boolean;profile():{email:string;user_id:string;name?:string}|null}|null;

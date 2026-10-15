@@ -5,6 +5,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {core} from '../core.ts';
 import {digest,ensureDirectory,WorldletError} from '../files.ts';
 import {swiftJSON,swiftFold,stableJSON,sameJSON} from './swift-json.ts';
+import {SERVICE_SYNC_BUCKETS} from '../../../../contracts/service-sync.ts';
 import {WORLD_VIEWS_SQL} from '../../../../contracts/storage/world-views.ts';
 
 type Row=Record<string,any>;
@@ -112,7 +113,13 @@ export class WorldLedger {
  servicePresets():Row[]{return this.records('service-presets');}
  saveServicePreset(preset:Row){this.put('service-presets',preset.id,preset);}
  /** Removes the preset and its earlier revisions. */
- deleteServicePreset(id:string){this.delete('service-presets',id);}
+ deleteServicePreset(id:string){
+  this.transaction(()=>{
+   if(this.value('service-sync-jobs',id))this.invalidateRuntimeTasks('service-sync:'+id);
+   for(const bucket of SERVICE_SYNC_BUCKETS)this.delete(bucket,id);
+   this.delete('service-presets',id);
+  });
+ }
  // The board (core/board/README.md) -------------------------------------------------------------------------------
  /** The board's current definition and revision (`state.board`), or null with none. */
  board():Row|null{return this.value('board','board');}

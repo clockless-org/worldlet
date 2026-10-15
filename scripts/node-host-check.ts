@@ -213,6 +213,7 @@ await withTempDir('wl-',async temp=>{
     const page=await bootstrap.newPage();
     await page.goto(local.stdout.trim());await waitForWorld(page);
     assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'agentAccess',operation:'list'})),{agents:[]},'before setup, the local window can inspect owner access without granting it');
+    assert.match(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'serviceSync',operation:'list'}).then(()=>'',(error:Error)=>error.message)),/own writable World/,'unconsented setup cannot access collection');
     assert.equal(new URL(page.url()).hash,'','the local window removes its token from the address');
     assert.match(cli('status').stdout,/Setup: The person has not finished setup yet/,'opening the owner window does not supply consent');
    }finally{await bootstrap.close();}
@@ -335,6 +336,7 @@ await withTempDir('wl-',async temp=>{
    assert.equal(await refused({action:'browserCommand',operation:'navigate',args:{url:'https://example.com/'},agent:true}),WEB_PAGE_UNAVAILABLE.websitePages,'and driving one');
    assert.equal(await refused({action:'speechStart',language:'en'}),WEB_PAGE_UNAVAILABLE.voice,'the microphone is refused');
    assert.equal(await refused({action:'analyticsConfig'}),WEB_DENIED_MESSAGE,'the page gets no web capture, so it posts nothing to /ingest');
+   assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'serviceSync',operation:'list'})),{jobs:[]},'the built Node host installs collection without creating jobs');
    const status=await page.evaluate(()=>(window as any).worldletWebHost.request({action:'phonePair',kind:'web',operation:'status'}));
    assert.ok(status&&typeof status.state==='string'&&!('link' in status),'a pairing status comes without its link');
    // What the page's window cannot do arrives in the handshake (web-page-features-check.ts): no YouTube in the World, no

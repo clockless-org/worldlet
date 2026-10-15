@@ -1,3 +1,4 @@
+import {collectServicePage} from '../sources/service-collection.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -135,6 +136,7 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   // Every source the World reads runs in the Platform; anything else is the Agent's own (a person's own Harness
   // reads none).
   makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new ServiceSourceAccess(world.services,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess())))):current().makeSourceAccess(),
+  collectServicePage:async(request,signal)=>{if(!world)throw new WorldletError('World Services are unavailable.');return collectServicePage(world,request,signal);},
   makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new ServiceSourceConnections(world.services,()=>new McpSourceConnections(world.mcp,()=>current().makeSourceConnections(),()=>'hermes'),()=>'hermes'),()=>'hermes'):current().makeSourceConnections(),
   googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),

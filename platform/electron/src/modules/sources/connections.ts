@@ -31,7 +31,7 @@ export function createConnections(ctx:SourcesContext){
   if(typeof id!=='string'||!id||id.length>160||typeof provider!=='string'||!ctx.sourceConnections().providers(provider).length||typeof target!=='string'||target.length>2000)throw new WorldletError('Invalid connection result.');
   const previous=structuredClone(store.state);
   try{
-   const connection:Row={id,provider,target,transport:ctx.accountsId(),syncStatus:'connected',connector:typeof remote.connector==='string'?remote.connector:'mcp'};
+   const connection:Row={id,provider,target,transport:ctx.accountsId(),syncStatus:'connected',syncGrant:crypto.randomUUID(),connector:typeof remote.connector==='string'?remote.connector:'mcp'};
    if(provider==='notion')connection.cursors={reviewGrant:crypto.randomUUID().toUpperCase()};
    store.state.connections=store.state.connections.filter((c:Row)=>c.id!==id);store.state.connections.push(connection);
    // Reauthorization may select a different account: the next Applet open must read the

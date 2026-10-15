@@ -28,3 +28,5 @@ export {CLOUDFLARE_API,CLOUDFLARE_GATE,CLOUDFLARE_LIMITS,CLOUDFLARE_READS,checkC
 export {DOORDASH_CLI_VERSION,DOORDASH_MUTATIONS,doordashArgs,cleanDoordash,validDoordashCheckout,doordashOutcome,type DoordashRun} from './doordash.ts';
 // Service presets: named, saved reads of a Worldlet Service (a HogQL query, a GitHub search) that a board block names.
 export {PRESET_REASONS,SERVICE_PRESET_ID,readServicePresetRead,readServicePresetSave,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from './services/presets.ts';
+
+export {SERVICE_SYNC_LIMITS,serviceSyncReadKey,configureServiceSync,serviceSyncStart,serviceSyncFailure,serviceSyncPage,finishServiceSyncPage} from './services/sync.ts';

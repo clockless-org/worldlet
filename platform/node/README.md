@@ -151,3 +151,7 @@ nodejs.org, checked against the hashes pinned in the script), the `bin/worldlet`
 machine 02 builds them with the Mac package of the same commit, and `node scripts/ci-release.mjs publish --platform
 linux` puts them on the Build's release and writes the channel's Linux feed (`linux-dev.json`, `linux-alpha.json`,
 `linux.json` on Beta); a promotion moves them with Mac ([releasing](../../docs/RELEASING.md)).
+
+### Periodic Service collection
+
+The shared Sources module supports [scheduled Service presets](../../core/applets/INTEGRATIONS.md#scheduled-service-collection) through the local owner-only `serviceSync` host action. GitHub, PostHog and Cloudflare use their existing read-only readers and connections, with Core scheduling/retry policy and durable SQLite page checkpoints. No Agent registration or model execution is required. All jobs are opt-in; the host creates no sync schedule merely by starting. The own-World/private-context consent and connection gates still apply, and there is no sync settings UI yet. This does not change Gmail/Calendar's existing Applet collector or introduce a provider change-feed protocol.
