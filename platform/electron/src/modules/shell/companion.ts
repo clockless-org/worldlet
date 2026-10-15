@@ -1,7 +1,7 @@
 import {app,BaseWindow,ImageView,Menu,nativeImage,screen,type NativeImage,type Rectangle,type WebContentsView} from 'electron';
 import {WorldletError} from '../../files.ts';
 import type {Host,Row} from '../../host/types.ts';
-import type {DesktopCompanionService} from '../../host/services.ts';
+import {RUN_IN_BACKGROUND,type DesktopCompanionService} from '../../host/services.ts';
 import {companionEntry,companionMenu,type CompanionTray} from './companion-tray.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {backgroundLaunch,showInBackground} from '../../background-launch.ts';
@@ -120,6 +120,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   if(!world||!this.host.worldView()||!this.host.page.ready())return false;
   // Quit, not close: other windows (the glow, a task page) would keep the app alive.
   if(!this.desktop&&this.unfinished()){this.quit();return true;}
+  if(this.host.preferences.bool(RUN_IN_BACKGROUND)&&this.background())return true;
   if(this.desktop){world.hide();this.entry?.show();}else void this.showDesktop(true);
   return true;
  }
@@ -276,6 +277,18 @@ export class DesktopCompanion implements DesktopCompanionService {
   if(world&&!world.isDestroyed()&&world.isVisible())world.hide();
   panel.hide();this.entry?.show();
   this.hideApp();
+ }
+ /** Every Worldlet window steps aside while the app keeps running, so a browser link (ui/web) keeps working. The Dock
+  * (Mac) or the tray (Windows) brings the World back; until onboarding is over there is nothing to run. */
+ background(){
+  if(this.unfinished())return false;
+  this.cancelInactive();
+  if(this.desktop){this.hide();return true;}
+  const world=this.host.window();
+  if(world&&!world.isDestroyed()&&world.isVisible())world.hide();
+  this.entry?.show();
+  this.hideApp();
+  return true;
  }
  stop(){this.cancelInactive();this.detaching=false;this.generation+=1;this.endDrag();this.entry?.hide();}
  private makePanel(world:BaseWindow){

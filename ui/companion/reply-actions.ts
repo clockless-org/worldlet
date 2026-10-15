@@ -4,6 +4,8 @@ for(const track of ['ocean','rain','forest','village'])actions['ambience.'+track
 for(const channel of ['music','ambience'])for(const operation of ['play','pause','resume','stop','quieter','louder'])actions[channel+'.'+operation]={method:'backgroundMusic',args:{channel,operation}};
 actions['music.next']={method:'backgroundMusic',args:{channel:'music',operation:'next'}};
 for(const screen of ['sources','model','voice','world'])actions['open.'+screen]={method:'foxControls',args:{screen}};
+// Sends the person's last failed message again (native-chat.ts handles it; no native method runs).
+actions['fox.retry']={method:'foxRetry',args:{}};
 // Checks, downloads and installs the newest release, as the dock's Update button does.
 actions['app.update']={method:'appUpdate',args:{operation:'update'}};
 export function replyAction(href){

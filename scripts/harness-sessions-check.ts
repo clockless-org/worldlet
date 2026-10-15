@@ -6,13 +6,14 @@ import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {WebSocketServer} from 'ws';
-import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionThread,hermesBorrowsCodex,hermesConversationIncluded,HERMES_CHANNEL_READ_ONLY,hermesAcpAnnouncement,hermesChannelToolAllowed,HermesOwnCalls,hermesStandingWriteApproval,hermesStreamAnnouncement,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,localHarnessStream,localHarnessTurn,openClawApprovalFor,openClawApprovalRequest,openClawConnect,openClawSessionIs,openClawDecision,openClawDeviceProof,
- openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,usableHermesServerKey} from '../core/agent/index.ts';
+import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionThread,hermesBorrowsCodex,hermesConversationIncluded,HERMES_CHANNEL_READ_ONLY,hermesAcpAnnouncement,hermesChannelToolAllowed,hermesChannelTrust,HermesOwnCalls,hermesStandingWriteApproval,hermesStreamAnnouncement,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,localHarnessStream,localHarnessTurn,openClawApprovalFor,openClawApprovalRequest,openClawConnect,openClawSessionIs,openClawDecision,openClawDeviceProof,
+ openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,turnWriteAdmission,usableHermesServerKey} from '../core/agent/index.ts';
 import {phoneLive,readPhoneMessage} from '../core/phone/index.ts';
 import {mountHarnessApproval} from '../ui/companion/fox-harness-approval.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {hermesServer,keepHermesResident} from '../platform/electron/src/modules/agent-runtime/hermes-service.ts';
-import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
+import {openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
+import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Resident Harness sessions (contracts/harness-services.ts `conversation` and `approvals`): the shared rules, then a
@@ -93,13 +94,21 @@ assert.equal('model' in responsesBody({input:[],instructions:'',tools:null}),fal
  assert.equal(hermesWorldToolsCommand(worldTools,'outdated')!.stdin,'y\n\n','overwrite only Worldlet\'s own entry');
  for(const state of ['current','off','theirs'] as const)assert.equal(hermesWorldToolsCommand(worldTools,state),null);
  assert.equal(hermesWorldToolsRegistered(entry('/Apps/Worldlet','/h/worldlet-mcp-standing.cjs')),true);assert.equal(hermesWorldToolsRegistered(entry('npx','x')),false);
- // A call from another Hermes channel outside any Fox turn: reads and a draft for review only, fail closed.
- for(const name of ['query_world_items','read_world_history','read_world_source','prepare_email'])assert.equal(hermesChannelToolAllowed({name}),true,name);
- for(const name of ['update_world_item','archive_world_items','manage_routines','create_content','start_applet_task','open_applet','some_new_tool'])assert.equal(hermesChannelToolAllowed({name}),false,name);
+ // A call from another Hermes channel outside any Fox turn: reads and a draft for review only, fail closed; the one
+ // write is the World's browser link (owner decision 2026-10-15), whose turn alone starts trusted.
+ for(const name of ['query_world_items','read_world_history','read_world_source','prepare_email','share_world_link'])assert.equal(hermesChannelToolAllowed({name}),true,name);
+ for(const name of ['update_world_item','archive_world_items','manage_routines','create_content','start_applet_task','open_applet','some_new_tool','set_worldlet_preference','use_doordash'])assert.equal(hermesChannelToolAllowed({name}),false,name);
  assert.equal(hermesChannelToolAllowed({name:'_world_authorize',args:{name:'read_connected_google'}}),true);assert.equal(hermesChannelToolAllowed({name:'_world_authorize',args:{name:'use_doordash'}}),false);
+ assert.equal(hermesChannelToolAllowed({name:'_world_authorize',args:{name:'share_world_link'}}),false,'the link by its own name only');
+ assert.deepEqual(hermesChannelTrust({name:'share_world_link'}),{untrusted:false,sources:[]});
+ for(const name of ['query_world_items','prepare_email','update_world_item','create_content','_world_authorize'])assert.deepEqual(hermesChannelTrust({name}),{untrusted:true,sources:['hermes_channel']},name);
+ for(const name of ['update_world_item','create_content','share_world_link']){
+  const admission=turnWriteAdmission(hermesChannelTrust({name}),{type:'tool',name,args:{}});
+  assert.equal(admission.allowed,name==='share_world_link',name);
+ }
  assert.match(HERMES_CHANNEL_READ_ONLY,/confirmation/);
  // Every guarded write through the standing server that is not Fox's own asks first (Allow once or Deny); reads and unguarded steps do not.
- for(const [name,args] of [['update_world_item',{id:'i'}],['archive_world_items',{ids:['i']}],['manage_routines',{action:'create'}],['create_content',{title:'t'}],['use_doordash',{operation:'cart_add'}],['start_applet_task',{}]] as const)
+ for(const [name,args] of [['update_world_item',{id:'i'}],['archive_world_items',{ids:['i']}],['manage_routines',{action:'create'}],['create_content',{title:'t'}],['use_doordash',{operation:'cart_add'}],['start_applet_task',{}],['share_world_link',{}]] as const)
   assert.deepEqual(hermesStandingWriteApproval(name,args)?.choices,['once','deny'],name);
  for(const [name,args] of [['query_world_items',{}],['open_applet',{id:'app-x'}],['manage_routines',{action:'pause'}],['use_doordash',{operation:'search'}],['prepare_email',{}]] as const)
   assert.equal(hermesStandingWriteApproval(name,args),null,name);
@@ -349,9 +358,21 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   const key='fixture-key-'+'7'.repeat(32),serverHome=path.join(scratch,'server-home'),profile=path.join(serverHome,'.hermes');
   fs.mkdirSync(profile,{recursive:true});
   const channel:any[]=[];
-  const standing=await openStandingWorldTools({channel:async(name,args)=>{channel.push([name,args]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
+  // Each Agent's identity, Grants and audit (core/agent/GRANTS.md): token hashes in the vault, audit in the ledger.
+  const secrets=new Map<string,string>(),audit:any[]=[];
+  const vault={get:(id:string)=>secrets.get(id)??null,set:(id:string,value:string)=>{secrets.set(id,value);},delete:(id:string)=>{secrets.delete(id);},deleteAll:()=>secrets.clear()};
+  const access=createAgentAccess({root:path.join(scratch,'access-root'),vault,ledger:()=>({recordAgentAudit:(entry:any)=>{audit.push(entry);return true;},agentAudit:(agent:string)=>audit.filter(e=>e.agentId===agent).reverse()})});
+  // An install from before per-Agent tokens: its registered entry names the profile's one endpoint file.
+  fs.writeFileSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE),'{}');
+  const standing=await openStandingWorldTools({access,channel:async(name,args,agent)=>{channel.push([name,args,agent]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
   const entry=standing.server(profile);
-  if(process.platform!=='win32')assert.equal(fs.statSync(path.join(profile,'worldlet-mcp-endpoint.json')).mode&0o777,0o600,'the endpoint and its token: owner-only');
+  assert.equal(entry.env.WORLDLET_MCP_ENDPOINT_FILE,path.join(profile,standingEndpointFile('hermes')),'Hermes Agent\'s own endpoint file');
+  const endpoint=JSON.parse(fs.readFileSync(entry.env.WORLDLET_MCP_ENDPOINT_FILE,'utf8'));
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE),'utf8')),endpoint,'the earlier single endpoint becomes this Agent\'s too, until Hermes registers the new one');
+  assert.deepEqual([...secrets.keys()],['agent-token:hermes']);assert.match(secrets.get('agent-token:hermes')!,/^[0-9a-f]{64}$/);
+  assert.notEqual(secrets.get('agent-token:hermes'),endpoint.token,'the vault keeps only the token\'s hash');
+  assert.deepEqual(access.list().map(a=>[a.identity.id,a.identity.name,a.grants.map(g=>[g.id,g.access,g.duration])]),[['hermes','Hermes Agent',[['hermes-channel-read','read','standing'],['hermes-channel-link','write','standing']]]],'migrated to an identity with the channel allowlist as its default Grants');
+  for(const file of [standingEndpointFile('hermes'),STANDING_LEGACY_ENDPOINT_FILE])if(process.platform!=='win32')assert.equal(fs.statSync(path.join(profile,file)).mode&0o777,0o600,'the endpoint and its token: owner-only');
   // Hermes' MCP client: the registered stdio server, one call.
   const mcp=(name:string,args:object)=>new Promise<any>((resolve,reject)=>{
    const child=spawn(entry.command,entry.args,{env:{PATH:process.env.PATH,...entry.env},stdio:['pipe','pipe','inherit']});let out='';
@@ -439,7 +460,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
    // denied, it is not executed.
    tools.length=0;decision='deny';
    assert.match(String((await chat('Wait for me')).message),/^Telegram: {"error":"The person did not confirm this change/);
-   assert.equal(asked.length,1);assert.deepEqual(asked[0].choices,['once','deny'],'never Always');assert.match(asked[0].title,/wants to change your World/);assert.match(asked[0].detail,/^update_world_item .*item-9/);assert.equal(asked[0].thread,'main');
+   assert.equal(asked.length,1);assert.deepEqual(asked[0].choices,['once','deny'],'never Always');assert.equal(asked[0].title,'Hermes Agent wants to change your World','the card names the Agent');assert.match(asked[0].detail,/^update_world_item .*item-9/);assert.equal(asked[0].thread,'main');
    assert.deepEqual(tools,[],'not executed');decision='once';
    assert.deepEqual(channel,[],'attributed to the running turn, not run as a channel call');
    const keys=[...new Set(seen.map(s=>s.session))];
@@ -453,17 +474,35 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
    assert.equal(failures.length,1);assert.deepEqual(notes,[],'nothing in Fox\'s reply');
    assert.ok(failures.every(text=>!text.includes(key)),'the key is never in a record');
    assert.equal(fs.readFileSync(path.join(profile,'.env'),'utf8'),envBefore,'the conversation never writes the profile');
-   // Another Hermes channel, no Fox turn running: a call of its own; a read runs, a write is refused with the reason.
+   // Another Hermes channel, no Fox turn running: a call of its own; a read runs, a write is refused with the reason,
+   // and the World's browser link goes through (owner decision 2026-10-15).
    assert.deepEqual((await mcp('tools/list',{})).tools.map((t:any)=>t.name),['describe_world_tools','call_world_tool']);
    const read=await mcp('tools/call',{name:'call_world_tool',arguments:{target:'items',action:'query',arguments:'{}'}});
    assert.deepEqual([read.isError,JSON.parse(read.content[0].text)],[false,{items:[]}]);
    const write=await mcp('tools/call',{name:'call_world_tool',arguments:{target:'items',action:'update',arguments:JSON.stringify({id:'item-7',status:'done'})}});
    assert.equal(write.isError,true);assert.match(write.content[0].text,/needs the person's confirmation/);
-   assert.deepEqual(channel.map(([name])=>name),['query_world_items','update_world_item']);
+   const link=await mcp('tools/call',{name:'call_world_tool',arguments:{target:'world',action:'link',arguments:'{}'}});
+   assert.equal(link.isError,false,'the browser link is not refused from a channel');
+   assert.deepEqual(channel.map(([name,,agent])=>[name,agent]),[['query_world_items','hermes'],['share_world_link','hermes']],'a write no Grant allows never reaches Worldlet');
+   // describe_world_tools lists only the targets its Grants name.
+   const listed=JSON.parse((await mcp('tools/call',{name:'describe_world_tools',arguments:{}})).content[0].text).targets;
+   assert.ok(listed.includes('items')&&listed.includes('world')&&!listed.includes('content')&&!listed.includes('routines'),'only granted targets');
+   assert.deepEqual(audit.slice(-3).map(e=>[e.target,e.action,e.decision,e.grantId??null]),[['items','query','allowed','hermes-channel-read'],['items','update','denied',null],['world','link','allowed','hermes-channel-link']],'every decision is audited');
+   assert.ok(audit.some(e=>e.target==='items'&&e.action==='update'&&e.decision==='asked'),'another channel\'s write during a Fox turn was asked');
+   assert.ok(access.identity('hermes')?.lastSeenAt,'last use');
+   // Revoked: its token and endpoint files go and its calls are refused.
+   const token=endpoint.token;
+   access.revoke('hermes');
+   assert.equal(access.identify(token),null);assert.equal(secrets.has('agent-token:hermes'),false);
+   assert.ok(!fs.existsSync(path.join(profile,standingEndpointFile('hermes')))&&!fs.existsSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE)),'its endpoint files go');
+   assert.ok(access.identity('hermes')?.revokedAt);
+   const refused=await mcp('tools/call',{name:'call_world_tool',arguments:{target:'items',action:'query',arguments:'{}'}});
+   assert.equal(refused.isError,true);
+   standing.server(profile);assert.equal(fs.existsSync(path.join(profile,standingEndpointFile('hermes'))),false,'a revoked Agent stays revoked across runs');
    await adapter.shutdown();
    // Worldlet closed: Hermes still lists the tools; a call says Worldlet is not open.
    standing.close();
-   assert.equal(fs.existsSync(path.join(profile,'worldlet-mcp-endpoint.json')),false,'the endpoint file goes on quit');
+   assert.equal(fs.existsSync(path.join(profile,standingEndpointFile('hermes'))),false,'the endpoint file goes on quit');
    assert.equal((await mcp('tools/list',{})).tools.length,2);
    const closed=await mcp('tools/call',{name:'call_world_tool',arguments:{target:'items',action:'query',arguments:'{}'}});
    assert.equal(closed.isError,true);assert.match(closed.content[0].text,/Worldlet is not open/);
@@ -676,4 +715,4 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   }finally{server.close();}
  }
 });
-console.log('PASS resident Harness sessions: Hermes Agent kept running (its own gateway install and start, the API server key added only when there is none, the person\'s own read and kept, the standard profile\'s Codex sign-in borrowed read-only in the service as Hermes launches it) World tools registered on Hermes with its own hermes mcp add (theirs by that name left alone), and its API server taking the main thread once they are, its World tool calls coming back to the running Fox turn through the standing endpoint (Fox own calls matched on its stream run under the turn trust with no card; a guarded write its stream never announced, as from another channel, only after the person allows it on the approval card), a call with no Fox turn a channel call (reads only, a write refused with the reason), Worldlet is not open once closed, hermes acp otherwise, recorded once; the standard Hermes Agent\'s conversation on the same route or the built-in runtime; thread keys, ACP approvals (Always is the permanent option; what an allowed call changed comes back as its diff), Responses stream, phone and approval card; Hermes Agent over one ACP process (a session per thread, approvals answered in the World, cancel, reload after restart, a brought conversation continued in the person\'s own session, the same card on a per-turn fallback); OpenClaw Gateway (session key per thread, World tools as client function tools, exec approvals over its WebSocket for that session only with the allowed command’s output, a refused device noted once) and the per-turn fallback noted once');
+console.log('PASS resident Harness sessions: Hermes Agent kept running (its own gateway install and start, the API server key added only when there is none, the person\'s own read and kept, the standard profile\'s Codex sign-in borrowed read-only in the service as Hermes launches it) World tools registered on Hermes with its own hermes mcp add (theirs by that name left alone), and its API server taking the main thread once they are, its World tool calls coming back to the running Fox turn through the standing endpoint (Fox own calls matched on its stream run under the turn trust with no card; a guarded write its stream never announced, as from another channel, only after the person allows it on the approval card), a call with no Fox turn a channel call (reads and the World\'s browser link only, any other write refused with the reason), Worldlet is not open once closed, hermes acp otherwise, recorded once; the standard Hermes Agent\'s conversation on the same route or the built-in runtime; thread keys, ACP approvals (Always is the permanent option; what an allowed call changed comes back as its diff), Responses stream, phone and approval card; Hermes Agent over one ACP process (a session per thread, approvals answered in the World, cancel, reload after restart, a brought conversation continued in the person\'s own session, the same card on a per-turn fallback); OpenClaw Gateway (session key per thread, World tools as client function tools, exec approvals over its WebSocket for that session only with the allowed command’s output, a refused device noted once) and the per-turn fallback noted once');

@@ -2,6 +2,7 @@
 // an information card with a size. An Attention card is one kind; an explanation Fox shows in conversation is another.
 // Each is kept in this World so the person can find it again in the Artifacts page of Fox's panel. These are the
 // rules every host applies (core/artifacts/README.md).
+import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 
 export type ArtifactKind='attention'|'answer';
 export type ArtifactSize='small'|'medium'|'large';
@@ -49,6 +50,9 @@ export interface Artifact {
  tone?:ArtifactTone;art?:string;
  /** Attention only: its category ("Coming Up", "Worth Doing", "Worth Knowing"). */
  category?:string;
+ /** The Agent that made it (contracts/agent-identity.ts). Host-stamped from the calling Agent's token; never taken from
+  * a model. */
+ agentId?:string;
  /** Seconds since 1970. */
  createdAt:number;updatedAt:number;
 }
@@ -274,12 +278,18 @@ export function readArtifact(value:any):Artifact|null {
  if(value.kind==='answer'&&tone(value.tone))artifact.tone=value.tone;
  if(value.kind==='answer'&&validArtifactArt(value.art))artifact.art=value.art;
  if(value.kind==='attention'&&typeof value.category==='string')artifact.category=clip(value.category,ARTIFACT_LIMITS.category);
+ if(typeof value.agentId==='string'&&AGENT_ID_PATTERN.test(value.agentId))artifact.agentId=value.agentId;
  return artifact;
 }
 
-/** Saving an artifact that may already be kept: it keeps its first time and moves to the top. */
-export function mergeArtifact(previous:Artifact|undefined,next:Artifact,now:number):Artifact {
- return {...next,createdAt:previous?.createdAt??next.createdAt??now,updatedAt:now};
+/** Saving an artifact that may already be kept: it keeps its first time and moves to the top. Its Agent is the host's
+ * (`agentId`, from the calling Agent's token) or the one it was first saved by, never one the saved value names. */
+export function mergeArtifact(previous:Artifact|undefined,next:Artifact,now:number,agentId?:string):Artifact {
+ const merged:Artifact={...next,createdAt:previous?.createdAt??next.createdAt??now,updatedAt:now};
+ delete merged.agentId;
+ const by=agentId&&AGENT_ID_PATTERN.test(agentId)?agentId:previous?.agentId;
+ if(by)merged.agentId=by;
+ return merged;
 }
 
 /** Newest first; the IDs past the World's limit are forgotten, oldest first. */

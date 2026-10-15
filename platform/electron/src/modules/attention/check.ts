@@ -37,7 +37,7 @@ function environment(){
   provide:(name,service)=>{services.set(name,service);return service;},
   use:name=>{if(!services.has(name))throw Error('Missing host service '+name);return services.get(name) as any;},
   optional:name=>services.get(name) as any,
-  onPageReload:()=>{},onQuit:listener=>{quit.push(listener);},onPageLoaded:()=>{},
+  onPageReload:()=>{},onQuit:listener=>{quit.push(listener);},onPageLoaded:()=>{},onPageConnected:()=>{},onStarted:()=>{},
   diagnostics:{record:(error,operation)=>{errors.push(`${operation}: ${errorMessage(error)}`);},log:()=>{}}
  };
  installAttention(host);
@@ -46,7 +46,7 @@ function environment(){
  return {root,preferences,store,services,actions,errors,host,tools,close};
 }
 const {preferences,store,services,actions,errors,tools,close}=environment();
-const action=(name:string,body:Row)=>actions.get(name)!({action:name,...body} as any,{requestId:'check',sender:null as any});
+const action=(name:string,body:Row)=>actions.get(name)!({action:name,...body} as any,{requestId:'check',transport:'host'});
 try{
  assert.ok(tools.names.includes('upsert_world_items')&&tools.names.includes('configure_world_check'));
  assert.ok(services.has('sourceChecks'),'Background source checks advertise their owner');
@@ -148,14 +148,18 @@ try{
  // A finished turn leaves no receipts or evidence behind.
  tools.finishTurn(turn);
  assert.equal(store.worldEvidence[turn],undefined);
+ assert.deepEqual(errors.filter(line=>line.startsWith('worldItemSave')&&line.includes('quote')),[],'A rejection the model corrected in its turn is not an error');
  assert.equal((await tools.reply('upsert_world_items',{items:[item]},turn)).error,'Read sources in this turn before saving findings.');
+ const before=errors.length;
+ tools.finishTurn(turn);
+ assert.deepEqual(errors.slice(before),['worldItemSave: Read sources in this turn before saving findings.'],'One still uncorrected when its turn ends is');
  assert.deepEqual(errors.filter(line=>!line.startsWith('worldItemSave')),[],'No unexpected diagnostics');
  console.log('PASS Electron World tools: privacy gates, schedule configuration, evidence-verified findings, queries, status/archive, history, runtime tasks, weather and turn cleanup.');
 }finally{await close();}
 
 // A scripted Agent for the background pipeline: page collection → Applet analysis → Center synthesis.
 // `requests` records every background request, each of which would be a model call in a real install.
-function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce=false}={}){
+function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce=false,pauseOnce=false}={}){
  const homes:string[]=[],requests:Row[]=[];
  const quote='Please review the project proposal by Friday.';
  const row={provider:'gmail',id:'thread:def456',title:'Proposal',text:'Subject: Proposal\n\n'+quote,url:''};
@@ -184,6 +188,17 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
      cancelOnce=false;store.attentionEpoch+=1;
      const answer=await tool(onEvent,'query_world_items',{}).catch((error:Error)=>({error:error.message}));
      assert.equal(answer.error,'Cancelled.');
+     return {message:'Stopped.'};
+    }
+    if(pauseOnce){
+     // The person pauses the Applet's check between the Agent's read and its save: the save is refused, and the Agent
+     // ends its turn with nothing submitted.
+     pauseOnce=false;
+     const context=await tool(onEvent,'query_world_items',{});
+     store.ledger().put('checks','gmail',{...store.ledger().find('checks','gmail'),enabled:false});
+     const fact=context.context[0];
+     const answer=await tool(onEvent,'upsert_world_items',{items:[task(fact.sourceReference)],processedContextIds:[fact.id]});
+     assert.equal(answer.error,'This source check is paused.');
      return {message:'Stopped.'};
     }
     assert.equal((await tool(onEvent,'upsert_world_items',{items:[],processedContextIds:[]})).error,'Query context, then submit Applet candidates only.');
@@ -275,6 +290,28 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
  }finally{await env.close();}
 }
 
+// An Applet whose check is paused while the Agent is on its page is the World moving on too: a cancellation, not
+// "ended without a verified result" (#1610 came back as operationFailed noResult on Mac Beta 4384, 2026-10-14).
+{
+ const env=environment();
+ const {store,services,tools}=env;
+ scriptedAgent(store,services,{pauseOnce:true});
+ try{
+  store.state.cloudConsent=true;
+  store.state.connections=[{id:'hermes-gmail',provider:'gmail',target:'person@example.com',transport:'hermes',connector:'oauth',syncStatus:'connected'}];
+  store.changed();
+  await tools.checkWorldIfDue('gmail');
+  const deadline=Date.now()+20_000;
+  while(Date.now()<deadline&&store.ledger().find('checks','gmail')?.enabled!==false)await sleep(100);
+  const settled=Date.now()+20_000;
+  while(Date.now()<settled&&!store.ledger().records('runtime-runs').some(run=>run.taskId==='applet:gmail:analyze'&&run.status!=='running'))await sleep(100);
+  const runs=store.ledger().records('runtime-runs').filter(run=>run.taskId==='applet:gmail:analyze');
+  assert.deepEqual(runs.map(run=>run.status),['cancelled'],JSON.stringify(runs));
+  assert.deepEqual(env.errors,[],'No unexpected diagnostics');
+  console.log('PASS Electron Applet analysis whose check is paused mid-run: recorded as a cancellation, no diagnostic.');
+ }finally{await env.close();}
+}
+
 // Brought conversations (core/tasks/attention.ts): with no mail connected, a conversation active lately reaches the
 // Center through the Ongoing module, its finding cites it and stays current, and its original opens the conversation.
 {
@@ -305,7 +342,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   assert.equal(saved.length,1,'Synthesis saved the open loop: '+JSON.stringify(env.errors));
   assert.deepEqual(saved[0].sources.map((ref:Row)=>[ref.provider,ref.id]),[['conversations',conversationAttentionId('openclaw',session)]]);
   assert.ok(store.worldItems().some(item=>item.id===saved[0].id&&item.attentionFresh===true),'The finding is current in the Center');
-  const original:Row=await actions.get('original')!({action:'original',id:'conversation:'+saved[0].sources[0].id} as any,{requestId:'check',sender:null as any});
+  const original:Row=await actions.get('original')!({action:'original',id:'conversation:'+saved[0].sources[0].id} as any,{requestId:'check',transport:'host'});
   assert.equal(original.title,'#kyoto-trip');assert.match(original.text,/You: Please review the project proposal by Friday\./);
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron brought conversations: recent ones are Attention context, findings cite and open them, unchanged ones renew without a pass.');
@@ -401,7 +438,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
  installWorld(host);installArtifacts(host);
  try{
   store.state.cloudConsent=true;store.changed();
-  const save=(body:string)=>actions.get('artifacts')!({action:'artifacts',operation:'save',scheduled:'plan',day:'2026-10-11',artifact:{id:'art-brief0000001',kind:'answer',title:'Plan · Sun, Oct 11',body,size:'large',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',sender:null as any});
+  const save=(body:string)=>actions.get('artifacts')!({action:'artifacts',operation:'save',scheduled:'plan',day:'2026-10-11',artifact:{id:'art-brief0000001',kind:'answer',title:'Plan · Sun, Oct 11',body,size:'large',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',transport:'host'});
   await save('A calm Sunday with one call.');
   const shown=()=>store.worldItems().filter(item=>item.provider==='worldlet');
   assert.deepEqual(shown().map(item=>[item.kind,item.title,item.status]),[['update','Today’s prep · Oct 11','open']],'The brief is in Worth Knowing: '+JSON.stringify(env.errors));
@@ -410,9 +447,9 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   await save('A calm Sunday with two calls.');
   assert.equal(shown().length,1,'The same card kept again updates the same item');
   assert.match(String(shown()[0].summary),/two calls/);
-  await actions.get('artifacts')!({action:'artifacts',operation:'save',artifact:{id:'art-other0000001',kind:'answer',title:'An answer',body:'Kept.',size:'medium',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',sender:null as any});
+  await actions.get('artifacts')!({action:'artifacts',operation:'save',artifact:{id:'art-other0000001',kind:'answer',title:'An answer',body:'Kept.',size:'medium',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',transport:'host'});
   assert.equal(shown().length,1,'Any other card is no Attention item');
-  await actions.get('worldItemStatus')!({action:'worldItemStatus',id:shown()[0].id,status:'read'} as any,{requestId:'check',sender:null as any});
+  await actions.get('worldItemStatus')!({action:'worldItemStatus',id:shown()[0].id,status:'read'} as any,{requestId:'check',transport:'host'});
   assert.equal(shown()[0].status,'read','Got it settles it like any update');
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron scheduled results: a kept morning brief is a Worth Knowing item that opens its Journal card, updated in place and settled like any update.');

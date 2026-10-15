@@ -8,7 +8,8 @@ import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
 import {mountFoxProactive,arriveProactive} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
-import {isRequestCancellation,reportEngagement,reportProductEvent} from '../shell/index.ts';
+import {errorFields,isRequestCancellation,reportEngagement,reportProductEvent} from '../shell/index.ts';
+import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../core/companion/index.ts';
 import {contextThread,cleanRecall,FOX_MAIN_THREAD,restoredMainHistory} from '../attention/index.ts';
 import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
 import {modelFailure} from './model-failure.ts';
@@ -43,7 +44,7 @@ import {harnessUsageLabel} from '../../core/agent/index.ts';
 
 /** A line Fox said on its own (fox-proactive.ts), as opposed to a reply, question or notice. */
 const spokeFirstLine=(value:any)=>String(value?.source||'').startsWith('proactive:');
-export function createNativeChat(call){return function({button,input,status,execute,chatRoute,steering=false,holdToSpeak=false,replyActions=false,resolveReplyLink,onReplyNavigate,greetingContext,recallStorage=null,onSpokenReply=null,talkVoice=null}){
+export function createNativeChat(call){return function({button,input,status,execute,chatRoute,steering=false,holdToSpeak=false,replyActions=false,resolveReplyLink,onReplyNavigate,greetingContext,recallStorage=null,onSpokenReply=null,talkVoice=null,voice=true}){
   const root=button.closest('.notion-world'),form=button.closest('form'),hud=form.parentElement;
  const make=(tag: string,cls?: string,text?: string): any=>Object.assign(document.createElement(tag),{className:cls,...(text?{textContent:text}:{})});
  // Live media queries, read where needed: `.matches` follows the system setting.
@@ -157,6 +158,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  // a microphone and Send inside it. Clicking Fox does the same as clicking the bar.
  const entry=make('div','companion-text-entry'),inputState=make('span','companion-input-state');inputState.setAttribute('role','status');const waveform=make('span','companion-input-wave');waveform.setAttribute('aria-hidden','true');for(let i=0;i<WAVE_DOTS;i++)waveform.append(make('i',''));entry.append(form,inputState,waveform);hud.append(entry);
  const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);
+ // No microphone where the page has no voice (a World page in a web browser, contracts/web-world.ts).
+ if(!voice){speechButton.hidden=true;speechButton.dataset.voice='off';}
  // The bug and the microphone stand inside the bar's right end, in the World and on the desktop alike (owner request
  // 2026-10-11: "把那个报 bug 的按钮和语音的按钮都融到那个 input box 里面去").
  const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');// While the microphone listens the bar works like Claude's (owner request 2026-10-12): ✕ at its left cancels, a dotted
@@ -834,6 +837,8 @@ export function createNativeChat(call){return function({button,input,status,exec
   const link=e.target.closest('a');if(!link||(!log.contains(link)&&!actionFooter.contains(link)&&!threadList.contains(link)&&!chatWindow.element.contains(link))||!link.getAttribute('href')?.startsWith('#'))return;
   e.preventDefault();e.stopPropagation();
   if(!link.classList.contains('fox-inline-action')){const href=link.getAttribute('href');try{await requireWorldSurface(call);onReplyNavigate?.(href);}catch(error){say(error.message);}return;}
+  // Try again sends the failed message once more, as the person wrote it.
+  if(link.getAttribute('href')===FOX_RETRY_ACTION){if(active||recording||starting||transcribing||!lastFailed)return;const again=lastFailed;lastFailed=null;void submit(again.text,undefined,false,again.origin,again.displayText,again.icon);return;}
   if(actionPending||active||recording||starting||transcribing)return;
   actionPending=true;link.setAttribute('aria-busy','true');link.setAttribute('aria-disabled','true');
   if(link.getAttribute('href').startsWith('#fox-action=open.')){editing=false;input.blur();}
@@ -914,6 +919,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  // origin 'system': Worldlet composed this request (a button), so it may quote
  // untrusted titles. It is never steered into a running task, never handled as a
  // local command and never carries user authority into tools.
+ // The person's last message that failed, for the failure's Try again.
+ let lastFailed:{text:string;origin:'user'|'system';displayText?:string;icon?:string}|null=null;
  async function submit(request: string,trace?: any,invitation=false,origin: 'user'|'system'='user',displayText?:string,icon?:string,quiet=false){
   if(recording||starting||transcribing)return;
   // A request sent by a choice in Fox's card reads as the person's reply: its name, never the prompt.
@@ -972,11 +979,26 @@ export function createNativeChat(call){return function({button,input,status,exec
    const requestEnvironment={thread:FOX_MAIN_THREAD,key:requestContext,location:requestLocation,state:invitation?[greetingContext?.()?.lastVisited?.title?'Last browsed page: '+String(greetingContext().lastVisited.title).slice(0,100):'',context.detail].filter(Boolean).join('. '):context.detail,setup:answeredGuide,recentActions:recentActions.slice(-4),view:structuredClone(visibleContent()),...worldNow(root)};answeredGuide='';
    await recallReady;
    if(turn!==generation)return;
-   let result=await call('chat',{text,shown,trace,invitation,origin,onStatus:(value,kind,activity?:FoxActivitySignal)=>{if(turn===generation){if(entryId&&kind===FOX_WORKING&&activity?.source==='tool')turnTask(value);root.dispatchEvent(new Event('worldlet:fox-progress'));if(turnEntry){thread=threadStep(thread,turnEntry,value);live(turnPartial);}turnStatus=value;turnKind=kind||'';turnActivity=activity;streamingReply=false;render();}},onDelta:(partial,{appliedContext=false}={})=>{
+   const chatBody={text,shown,trace,invitation,origin,onStatus:(value,kind,activity?:FoxActivitySignal)=>{if(turn===generation){if(entryId&&kind===FOX_WORKING&&activity?.source==='tool')turnTask(value);root.dispatchEvent(new Event('worldlet:fox-progress'));if(turnEntry){thread=threadStep(thread,turnEntry,value);live(turnPartial);}turnStatus=value;turnKind=kind||'';turnActivity=activity;streamingReply=false;render();}},onDelta:(partial,{appliedContext=false}={})=>{
     if(turn!==generation)return;root.dispatchEvent(new Event('worldlet:fox-progress'));
     // Buffer model text; only the completed answer replaces the reader's page.
     const visible=foxVisibleText(partial,true);if(visible.trim()){turnPartial=visible;live(turnPartial);}
-   },history:threadHistory.get(FOX_MAIN_THREAD)||[],context:requestEnvironment});
+   },history:threadHistory.get(FOX_MAIN_THREAD)||[],context:requestEnvironment};
+   // A quick failure before any text or World tool is tried once more by itself (core foxTurnRetry): the person's Agent
+   // was often still starting (owner request 2026-10-13: Fox's first reply must come back).
+   let result;
+   for(let attempt=0;;attempt++){
+    const tried=performance.now();
+    try{result=await call('chat',chatBody);break;}
+    catch(e){
+     const fields=errorFields(e?.message);
+     if(turn!==generation||isRequestCancellation(e)||invitation||quiet||directSession||!foxTurnRetry({kind:fields.error_rule,known:modelFailure(e)?.code,elapsedMs:performance.now()-tried,streamed:!!turnPartial,toolsRan:taskShown,attempt}))throw e;
+     reportProductEvent('fox_turn_retried',fields);
+     turnStatus='Trying again…';streamingReply=false;render();
+     await new Promise(resolve=>setTimeout(resolve,FOX_RETRY_DELAY_MS));
+     if(turn!==generation)throw e;
+    }
+   }
    result={...result,...(guided?{candidateId:firstWinCandidate(result.message)}:{}),message:guided?guidedVisibleText(result.message):(foxVisibleText(result.message)||turnPartial)};
    turnResult=result;if(turn!==generation){outcome='cancelled';return;}
    // A quiet turn says nothing: what it made (an artifact) is its result.
@@ -989,7 +1011,7 @@ export function createNativeChat(call){return function({button,input,status,exec
    // A view the turn's own tool opened (an artifact) is where its reply belongs: the context sync that follows must not clear it as a move.
    else if(result.appliedContext){contextAnchor=recallKey(context.key,contentIdentity());say(result.message,context.key,true,entryId);}
    else if(context.key===requestContext&&contentIdentity()===requestView)say(result.message,context.key,true,entryId);
-  }catch(e){outcome=turn!==generation||isRequestCancellation(e)?'cancelled':'error';failureMessage=outcome==='cancelled'?'This task was interrupted. Try again to continue.':(!directSession&&modelFailure(e)?.message)||e.message||'Something went wrong. Please try again.';if(root.dataset.onboardingLocked!=='true'&&outcome==='cancelled')failureMessage='This reply was interrupted. You can try again.';/* The turn's own card: a stopped turn failing late must not touch the turn that replaced it. */if(entryId&&thread.find(x=>x.id===entryId)?.status==='working'){thread=threadInterrupt(thread,entryId,failureMessage);saveRecall();live(failureMessage,true);}if(turn===generation&&!quiet)say(failureMessage,context.key,true,entryId);}
+  }catch(e){outcome=turn!==generation||isRequestCancellation(e)?'cancelled':'error';failureMessage=outcome==='cancelled'?'This task was interrupted. Try again to continue.':(!directSession&&modelFailure(e)?.message)||e.message||'Something went wrong. Please try again.';/* A failed message says why, with Try again and Choose another Agent (core foxTurnFailureText). */if(outcome==='error'&&!invitation&&!quiet){failureMessage=foxTurnFailureText(failureMessage,errorFields(e?.message).error_rule);lastFailed={text,origin,displayText,icon};}if(root.dataset.onboardingLocked!=='true'&&outcome==='cancelled')failureMessage='This reply was interrupted. You can try again.';/* The turn's own card: a stopped turn failing late must not touch the turn that replaced it. */if(entryId&&thread.find(x=>x.id===entryId)?.status==='working'){thread=threadInterrupt(thread,entryId,failureMessage);saveRecall();live(failureMessage,true);}if(turn===generation&&!quiet)say(failureMessage,context.key,true,entryId);}
   finally{if(taskShown)window.dispatchEvent(new CustomEvent(FOX_STATUS_EVENT,{detail:{source:TURN_TASK_SOURCE,text:''}}));/* A turn superseded before it answered (the early returns above) never stays working. */if(entryId&&thread.find(x=>x.id===entryId)?.status==='working'){const interrupted='This reply was interrupted. You can try again.';thread=threadInterrupt(thread,entryId,interrupted);saveRecall();live(interrupted,true);}trace.finish(turnResult,outcome);/* What Fox said at the turn's end, for the page's finished status card (browser-device.ts). */window.dispatchEvent(new CustomEvent('worldlet:fox-reply',{detail:{outcome,message:outcome==='complete'?String((turnResult as any).message||''):failureMessage}}));if(turn===generation){turnEntry='';quietTurn=false;life.finish(outcome==='complete',{blocked:outcome==='error'});active=false;streamingReply=false;const followup=queuedTurns.shift();render();if(followup){if(followup.session&&followup.session!==recallKey(context.key,contentIdentity())){const drafts=[followup,...queuedTurns,...(input.value.trim()?[{text:input.value.trim(),origin:'user'}]:[])];input.value=drafts.map(t=>t.displayText||t.text).join('\n\n');queuedDraft={text:input.value,turns:drafts};for(const queued of [followup,...queuedTurns])queued.trace.finish({},'cancelled');queuedTurns=[];editing=true;say('Your queued messages are kept as a draft because the view changed.');}else void submit(followup.text,followup.trace,false,followup.origin,followup.displayText,followup.icon);}else window.dispatchEvent(new Event('worldlet:fox-idle'));}/* Talk reads the reply, then listens again; a queued follow-up answers first. */if(!quiet&&!invitation&&!active&&talk.phase==='thinking')void talk.replied(outcome==='complete'?String((turnResult as any).message||''):outcome==='error'?failureMessage:'');}
   return {outcome,...(guided?{candidateId:(turnResult as any).candidateId}:{}),...(outcome==='complete'?{text:(turnResult as any).message||''}:{}),...(failureMessage?{message:failureMessage}:{})};
  }
@@ -1075,6 +1097,9 @@ export function createNativeChat(call){return function({button,input,status,exec
   later.onclick=()=>api.setGuide(null,{only:'model-needed'});
   api.setGuide({source:'model-needed',takeover:false,text,actions:[choose,later]});api.revealGuide();return true;
  }});
+ // The short turn that proves the chosen Agent answers ends after setup moved on (startup-setup.ts checkLater): a failure
+ // setup no longer heard still reaches analytics, so a broken Agent is not invisible until Fox's first reply fails.
+ window.addEventListener('worldlet:agent-check',(e:any)=>{const detail=e.detail;if(!detail||detail.ok!==false)return;setTimeout(()=>{if(!detail.reported)reportProductEvent('local_agent_select_failed',{local_agent:String(detail.id),...errorFields(detail.message)});},0);});
  // Said once the panel closes, when it was open as no model was found.
  root.addEventListener('worldlet:companion-info-closed',()=>void modelWatch.refresh());
  // An Applet task Fox handed off ended: Fox says its result once the conversation is free.

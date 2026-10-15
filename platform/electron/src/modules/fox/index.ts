@@ -9,7 +9,7 @@ import {presentMailRead as presentLiveMail} from '../sources/records.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,SOURCES,SPEECH,WORLD_TOOLS,
  type AgentRoutines,type AgentRuntime,type AgentScope,type AgentService,type AnalyticsService,type AudioService,type BrowserService,
- ONGOING,PHONE,type PhoneService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../host/services.ts';
+ ONGOING,PHONE,WORLD_WEB,type PhoneService,type WorldWebService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../host/services.ts';
 import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
 import {readLocalAgentMemory,summarizeLocalAgent} from '../agent-runtime/local-memory.ts';
@@ -28,11 +28,12 @@ import {createHarnessConnections} from './harness-connections.ts';
 import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
+import {worldActionOf,worldActions} from '../../../../../core/tools/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
-import {phoneApprovalPush,phoneFoxPush} from '../../../../../core/phone/index.ts';
+import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../core/phone/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -53,6 +54,10 @@ function knowledgeOf(profile:Row,ledger:{companionCounts():Record<string,{turns:
 // Fox's page actions (Mac WorldView Coordinator Fox cases, WorldToolService.swift).
 /** Swift `CancellationError` as the page sees it. */
 class Cancelled extends Error {constructor(){super('The request was cancelled.');this.name='AbortError';}}
+/** A step only the World page can do, asked in a turn that runs without it (FoxService.converse). */
+const NEEDS_WORLD={error:'This needs the Worldlet window open on the computer. Tell the person, and do not repeat it unless they ask.'};
+/** How long a line said in a browser or on the phone waits for Fox's running turn before it gives up. */
+const CONVERSE_WAIT=10*60_000;
 const WORLD_TOOL_NAMES=['read_companion_archive','meeting_decisions','_source_begin','_source_result','query_world_items','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','read_world_history'];
 const CONTROL_SCREENS=['preferences','sources','organize','model','privacy','voice','style','world','data','login'];
 /** Where the two default Routines' on/off is kept (on when absent). */
@@ -180,6 +185,19 @@ export function installFox(host:Host){
   subscribed=true;
   runtime.onChanged(reason=>reason==='agent-changed'?agentChanged():reason==='model-changed'?modelChanged():page.event('worldlet:model-changed'));
  }
+ // The World's Task panel (core/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
+ // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
+ // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
+ // Journal: neither is read. Core decides the rows. The page's panel and, without the page, the host's (modules/phone).
+ async function taskPanelInput():Promise<Row>{
+  if(store.sampleEnabled())return {sample:true};
+  const runtime=agent(),schedule=runtime?.schedule?.();
+  const jobs=schedule?await schedule.jobs().catch(error=>{host.diagnostics.record(error,'taskPanel');return [];}):[];
+  // Whether its Routine cards may offer their controls (Run now, Pause, Edit, Remove), each run as `harnessSchedule`.
+  const id=runtime?.harness?.id??null,controls=id&&store.writable?runtime?.harnessSchedules?.().find(item=>item.harness===id)?.schedule:undefined;
+  return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,harnessId:id,changes:!!controls?.change,
+   working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
+ }
  function showControls(screen:string,provider?:string|null){
   const desktop=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
   if(desktop?.isDesktop)void desktop.restoreWorld();
@@ -232,6 +250,16 @@ export function installFox(host:Host){
   if(event.type!=='tool'||typeof event.name!=='string'||!event.args||typeof event.args!=='object'||Array.isArray(event.args))return null;
   const name=event.name,args=event.args as Row;
   const hosted=['prepare_home_change','prepare_notion_change','_email_review'];
+  // The World's browser link (`world/link`) runs here, on the host, so it works with no World page (a login launch,
+  // Run in background); the guarded-write rule has already admitted it under the turn's trust.
+  if(name==='share_world_link'){
+   if(scope.sample||scope.setup||store.sampleEnabled()||!store.writable||onboardingUnfinished(store.state.onboarding))return {error:'The browser link opens the person\'s own World: they need to finish setting up Worldlet first.'};
+   const phone=host.optional<PhoneService>(PHONE);
+   if(!phone?.worldLink)throw new WorldletError('This Worldlet build cannot make a browser link.');
+   // The full World on this computer too, when this host serves it (host/world-web.ts); the room link stays the answer.
+   const local=await host.optional<WorldWebService>(WORLD_WEB)?.link().catch(()=>'')??'';
+   return worldLinkReply(await phone.worldLink(),local);
+  }
   if(!hosted.includes(name)&&name!=='_world_authorize'&&name!=='update_applet_state'&&!WORLD_TOOL_NAMES.includes(name))return null;
   if(scope.sample||scope.setup||store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true)throw new WorldletError('Allow private context in your personal world first.');
   if(name==='_world_authorize')return {ok:true};
@@ -313,7 +341,9 @@ export function installFox(host:Host){
   const handle=async(event:Row):Promise<Row|null>=>{
    // `status: waiting` only keeps a long model wait alive; it is not conversation.
    if(record&&typeof event.type==='string'&&STREAM_EVENTS.includes(event.type)&&!(event.type==='status'&&event.stage==='waiting'))companion.recordEvent(id,event.type,scope,typeof event.text==='string'?event.text:null);
-   if(!active()||!page.ready())throw new Cancelled();
+   // A turn the page started ends with the page; one said in a browser or on the phone runs without it.
+   if(!active()||!page.ready()&&!headless.has(id))throw new Cancelled();
+   if(headless.has(id))headlessLive?.event(event);
    if(event.type==='model_required'){showControls('model');return null;}
    if(event.type==='applet'){if(!scope.sample&&!scope.setup)sources()?.receiveAppletEvent(event,id);return null;}
    // The Harness's own permission prompt: an approval card in Fox's dialogue (and on the phone), answered through
@@ -339,6 +369,7 @@ export function installFox(host:Host){
    const owned=await accountServiceReply(event,id,scope,handle);
    if(owned)return owned;
    const tool=event.type==='tool';
+   if(!page.ready())return tool?NEEDS_WORLD:null;
    // UI tools may wait for user approval; they use the Agent budget, not the short page timeout.
    const deadline=tool?Number(core('agentRequestDeadline',{action:'chat'}))||120:15;
    observeAgentEvent(id,event);
@@ -374,6 +405,59 @@ export function installFox(host:Host){
   return value;
  }
  /** A turn's world bookkeeping once it ends, the conversation's and an Applet task's alike. */
+ async function answerApproval(id:unknown,choice:unknown){
+  const approvals=agent()?.approvals?.()??null;
+  if(!approvals||typeof id!=='string'||!isHarnessApprovalChoice(choice))throw new WorldletError('This request can no longer be answered.');
+  await approvals.answer(id,choice);
+  approvalRules.answered(id,choice);
+  // Every copy of the card (this computer, the phone, a browser) settles.
+  page.event('worldlet:harness-approval',{id,settled:choice});
+  headlessLive?.settled(id);
+ }
+ /** Turns said in a browser or on the phone while the World page is not there (converse): they run on the host alone. */
+ const headless=new Set<string>();
+ /** The headless turn as it streams, for an open phone or browser (core/phone phoneLive): its steps, its reply so far
+  * and the Agent's permission prompt while it waits. Sent at most every quarter second, the finished reply at once. */
+ let headlessLive:{event(event:Row):void,settled(id:string):void,done(text:string):Promise<unknown>}|null=null;
+ function liveTurn(id:string,user:string){
+  let text='',steps:string[]=[],approval:Row|null=null,timer:ReturnType<typeof setTimeout>|null=null,sending:Promise<unknown>=Promise.resolve();
+  const send=(done=false)=>{
+   if(timer)clearTimeout(timer);timer=null;
+   const value=phoneLive({id,user,steps,text,done,approval},Date.now());
+   const phone=host.optional<PhoneService>(PHONE);
+   if(value&&phone?.live)sending=sending.then(()=>phone.live!(value as Row)).catch(error=>host.diagnostics.record(error,'phoneLive'));
+   return sending;
+  };
+  const soon=()=>{timer??=setTimeout(()=>void send(),250);};
+  const step=(line:string)=>{if(steps[steps.length-1]!==line)steps=[...steps,line].slice(-8);};
+  return {
+   event(event:Row){
+    if(event.type==='status'&&event.stage==='model')step('Thinking…');
+    else if(event.type==='progress')step('Working…');
+    else if(event.type==='approval'&&event.request&&typeof event.request==='object'){approval=event.request as Row;void send();return;}
+    else if(!['delta','response_start','steered'].includes(String(event.type)))return;
+    text=reduceAgentResponse(text,event as any);
+    soon();
+   },
+   settled(answered:string){if(approval?.id===answered){approval=null;void send();}},
+   done(reply:string){text=reply||text;approval=null;return send(true);},
+  };
+ }
+ /** A line said in a browser or on the phone (core/phone/README.md#web) while the World page is not there: it waits
+  * behind Fox's running turn, then runs as the person's own line in Fox's main conversation, without the page. Its
+  * steps that only the page can do (a World view, an Applet's page) answer that the window must be open. The reply
+  * reaches the browser or phone through the conversation the host already publishes. */
+ async function converse(text:string,place?:{thread:string,location:string}):Promise<{user:string,text:string}> {
+  for(const until=Date.now()+CONVERSE_WAIT;agentTurn!==null;){
+   if(Date.now()>until)throw new WorldletError('Fox is busy. Try again in a moment.');
+   await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  const id='headless-'+crypto.randomUUID(),live=liveTurn(id,text);
+  headless.add(id);headlessLive=live;
+  let said='';
+  try{const reply:Row=await agentChat({id,text,...place?{thread:place.thread,context:{location:place.location}}:{}});said=typeof reply.message==='string'?reply.message:'';return {user:text,text:said};}
+  finally{headless.delete(id);if(headlessLive===live)headlessLive=null;await live.done(said);}
+ }
  function finishTurn(id:string,cancelled:boolean){
   trusts.delete(id);
   delete store.worldEvidence[id];
@@ -385,15 +469,24 @@ export function installFox(host:Host){
  /** A World tool call from another Hermes channel, outside any Fox turn (World tools on Hermes, owner decision 2026-10-08
   * 19:15Z: Telegram, the phone, a Hermes cron run): a turn of its own in the private World that starts untrusted, so Core
   * refuses guarded writes, and it runs only reads and a draft for the person's review (core hermesChannelToolAllowed;
-  * a prepared email waits as a card, sent only from its review). Anything else is refused with the reason; the World
-  * page runs no tools for it, since nobody there asked. */
- async function channelToolReply(name:string,args:Row):Promise<Row> {
+  * a prepared email waits as a card, sent only from its review). The one exception is the World's browser link
+  * (`share_world_link`, owner decision 2026-10-15): its turn starts trusted (core hermesChannelTrust), so it runs.
+  * Anything else is refused with the reason; the World page runs no tools for it, since nobody there asked. What a
+  * channel may do is the calling Agent's Grants (core/agent/GRANTS.md; its default Grants are the list above), decided
+  * on the standing server and again here. */
+ async function channelToolReply(name:string,args:Row,agentId?:string):Promise<Row> {
   const id='channel-'+crypto.randomUUID().toUpperCase(),scope={sample:false,setup:false};
-  trusts.set(id,{untrusted:true,sources:['hermes_channel']});
+  trusts.set(id,hermesChannelTrust({name}));
   const handle=turnEvents(id,scope,{active:()=>true,allowActions:false,reads:hermesChannelToolAllowed,record:false});
   try{
    if(store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true||onboardingUnfinished(store.state.onboarding))return {error:'Worldlet is not ready for this yet: the person has not finished setting up their own World.'};
-   if(!hermesChannelToolAllowed({name,args}))return {error:HERMES_CHANNEL_READ_ONLY};
+   const access=agent()?.agentAccess?.()??null;
+   if(!access&&!hermesChannelToolAllowed({name,args}))return {error:HERMES_CHANNEL_READ_ONLY};
+   if(access){
+    const at=worldActionOf(worldActions(),name,args),identity=agentId?access.identity(agentId):null;
+    const decision=at?standingCallDecision({identity,grants:identity?access.grants(identity.id):[],target:at.target,action:at.action,tool:name,args,foxTurn:null,now:new Date().toISOString()}):null;
+    if(decision?.decision!=='allowed')return {error:decision?.reason||HERMES_CHANNEL_READ_ONLY};
+   }
    const event={type:'tool',id:'world-1',name,args},served=await trustedServiceReply(event,id,scope)??await accountServiceReply(event,id,scope,handle);
    return served??{error:'This World tool works only in a conversation with Fox in Worldlet.'};
   }catch(error){
@@ -765,7 +858,7 @@ export function installFox(host:Host){
  });
  host.provide<FoxService>(FOX,{scope:foxScope,turnActive:()=>agentTurn!==null,cancel:cancelCloud,stopRoutines,startRoutines,
   startAppletTask:request=>appletTaskStart(request),reviewGames:request=>appletTaskStart(request,true),makeArtifactPage:request=>appletTaskStart({...request,applet:ARTIFACT_PAGE_MAKER.id},true,true),appletTask:id=>appletTasks.get(id)?.applet??null,
-  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report});
+  modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),report,converse,answerApproval,taskPanel:taskPanelInput});
 
  host.register({
   // "+" in Fox's bar (owner request 2026-10-12): files the person picks, as paths for the line; Fox's Agent runs on this
@@ -782,19 +875,7 @@ export function installFox(host:Host){
     model:{name:String(model.name??''),id:String(model.model??''),provider:String(model.provider??''),source:typeof model.source==='string'?model.source:null,ready:model.ready===true,configured:model.configured===true}};
   },
   modelSource:()=>readModelSource(requireAgent(),error=>host.diagnostics.record(error,'modelSource')),
-  // The World's Task panel (core/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
-  // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
-  // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
-  // Journal: neither is read. Core decides the rows.
-  taskPanel:async()=>{
-   if(store.sampleEnabled())return {sample:true};
-   const runtime=agent(),schedule=runtime?.schedule?.();
-   const jobs=schedule?await schedule.jobs().catch(error=>{host.diagnostics.record(error,'taskPanel');return [];}):[];
-   // Whether its Routine cards may offer their controls (Run now, Pause, Edit, Remove), each run as `harnessSchedule`.
-   const id=runtime?.harness?.id??null,controls=id&&store.writable?runtime?.harnessSchedules?.().find(item=>item.harness===id)?.schedule:undefined;
-   return {jobs:jobs.map(job=>({id:job.id,name:job.name,kind:job.kind,paused:job.paused,when:job.when})),harness:runtime?.harness?.title??null,harnessId:id,changes:!!controls?.change,
-    working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
-  },
+  taskPanel:()=>taskPanelInput(),
   foxProactive:request=>proactiveStart(request),
   foxProactiveShown:request=>proactiveShown(request),
   foxPreferences:async request=>{
@@ -1003,15 +1084,7 @@ export function installFox(host:Host){
   harnessSkills:async request=>request.operation==='change'?settingChanged('skill',await agentControls.skillRequest(request)):agentControls.skillRequest(request),
   /** Settings › Agent › Memory: what each Agent here remembers, read only. */
   harnessMemory:()=>agentControls.memoryRequest(),
-  harnessApproval:async request=>{
-   const approvals=agent()?.approvals?.()??null;
-   if(!approvals||typeof request.id!=='string'||!isHarnessApprovalChoice(request.choice))throw new WorldletError('This request can no longer be answered.');
-   await approvals.answer(request.id,request.choice);
-   approvalRules.answered(request.id,request.choice);
-   // Every copy of the card (this computer, the phone) settles.
-   page.event('worldlet:harness-approval',{id:request.id,settled:request.choice});
-   return {ok:true};
-  },
+  harnessApproval:async request=>{await answerApproval(request.id,request.choice);return {ok:true};},
   worldWriteUndo:request=>{
    const undo=typeof request.id==='string'?writeUndos.get(request.id):undefined;
    if(!undo)throw new WorldletError('This change can no longer be undone.');
@@ -1070,7 +1143,8 @@ export function installFox(host:Host){
   }
   return runtime.profile(true);
  }
- host.onPageLoaded(()=>{
+ // With the host (the World's first load, or a run in background with no page), then again on each later World load.
+ const begin=()=>{
   subscribe();
   agent()?.onChannelTool?.(channelToolReply);
   older.resume();
@@ -1078,8 +1152,11 @@ export function installFox(host:Host){
   if(store.state.cloudConsent===true&&!store.sampleEnabled())startRoutines();
   const runtime=agent();
   try{runtime?.warm(home(foxScope()));}catch(error){host.diagnostics.record(error,'warm');}
- });
+ };
+ host.onStarted(begin);
+ let loads=0;
+ host.onPageLoaded(()=>{if(loads++)begin();});
  // The page that started a turn is gone; its tools and stream have no listener left.
- host.onPageReload(()=>{if(agentTurn!==null)cancelCloud();cancelAppletTasks();});
+ host.onPageReload(()=>{if(agentTurn!==null&&!headless.has(agentTurn))cancelCloud();cancelAppletTasks();});
  host.onQuit(()=>{older.stop();history.stop();powerMonitor.off('resume',resumed);stopRoutines();chat?.cancel();cancelAppletTasks();companion.closeLedgers();});
 }

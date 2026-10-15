@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {attentionLaterUntil,validAttentionTime} from '../core/attention/index.ts';
-import {attentionTimeRows,attentionGroupWhen} from '../ui/attention/time.ts';
+import {attentionTimeRows,attentionGroupWhen} from '../core/attention/index.ts';
 import {prepareWorldItem,updateWorldItem} from '../core/items/world-item-state.ts';
 import {projectWorldItems,refreshItemPage} from '../core/items/world-items.ts';
 const zone='America/Los_Angeles';

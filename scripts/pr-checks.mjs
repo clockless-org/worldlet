@@ -46,7 +46,7 @@ export const operationalChecks=available([
  // browser check is in test:ui: PR CI runs these when scripts change and has no browser).
  'gatehouse/live-status-check.mjs','gatehouse/release-check.mjs',
 ]);
-export const trustChecks=['scripts/turn-trust-check.ts'];
+export const trustChecks=['scripts/turn-trust-check.ts','scripts/agent-grants-check.ts'];
 // Product fixture/native-source changes do not exercise allocator, reporting or publication.
 // Keep build/publish/control scripts and unknown paths conservative.
 export function productPath(p){

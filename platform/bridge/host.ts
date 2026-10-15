@@ -7,6 +7,8 @@ import {isFoxHostAction} from '../../contracts/fox.ts';
 import {readFoxHostRequest} from '../../core/companion/index.ts';
 import {changesModelStatus} from '../../core/companion/index.ts';
 import type {HostCall,HostRequest,HostTransport} from '../../contracts/platform.ts';
+import {webHost} from './web-host.ts';
+import {roomHost} from './room-host.ts';
 // The only trusted-page transport selection point. Browser-page observers are
 // separately injected scripts and must never receive this application bridge.
 export function resolveHost(scope:any):HostTransport|undefined {
@@ -17,6 +19,9 @@ export function resolveHost(scope:any):HostTransport|undefined {
  }
  const legacy=scope.webkit?.messageHandlers?.worldlet;
  if(legacy)return {version:1,platform:'macos',request:(request:HostRequest)=>legacy.postMessage(request)};
+ // The World page in a web browser on this computer, served by the host with its socket (web-host.ts), or on another
+ // device, joining the computer in the pairing room from a `world` link (room-host.ts).
+ return webHost(scope)??roomHost(scope);
 }
 export const callHost:HostCall=async(action:string,body:object={})=> {
  const host=resolveHost(window);

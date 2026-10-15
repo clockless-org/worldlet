@@ -107,4 +107,19 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(body, ["platform": "apns-dev", "token": "00ab10ff"])
         XCTAssertEqual(relay.requests[0].value(forHTTPHeaderField: "Authorization"), "Bearer \(PairKeys(secret: secret).phoneToken)")
     }
+
+    func testDirectRegisterHandsTheTokenToTheComputer() async throws {
+        let link = PairLink(secret: secret, name: "Mac")
+        let relay = FakeRelay()
+        relay.answers = [(201, #"{"seq":1}"#), (200, #"{"ok":true}"#)]
+        let session = PhoneSession(link: link, transport: relay)
+        try await session.registerPush(platform: "apns", token: "00ab10ff", direct: true)
+        let keys = PairKeys(secret: secret)
+        XCTAssertEqual(relay.requests.map { "\($0.httpMethod ?? "") \($0.url?.path ?? "")" },
+                       ["POST /api/pair/\(keys.id)/messages", "DELETE /api/pair/\(keys.id)/push"], "sealed to the computer, and the relay keeps none")
+        struct Sent: Decodable { let box: String }
+        struct Handed: Decodable, Equatable { let type: String; let platform: String; let token: String }
+        let box = try JSONDecoder().decode(Sent.self, from: XCTUnwrap(relay.requests[0].httpBody)).box
+        XCTAssertEqual(try keys.open(Handed.self, box: box, place: PairKeys.place(to: "desktop")), Handed(type: "push", platform: "apns", token: "00ab10ff"))
+    }
 }

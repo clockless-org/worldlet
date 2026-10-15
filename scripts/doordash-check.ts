@@ -38,7 +38,7 @@ await withTempDir('worldlet-doordash-',async temp=>{
  let answer=(args:string[])=>({timedOut:false,exitCode:0,stdout:args[0]==='login'?'':JSON.stringify({carts:[]})});
  const doordash=new DoorDash({folder,legacyHomes:()=>[legacy],home,run:async(_command,args)=>{runs.push(args);return answer(args);}});
  assert.deepEqual(await doordash.request('status'),{ok:true,installed:false,enabled:false,version:null,accountVerified:false});
- assert.match(String((await doordash.request('login')).error),/npm run setup:doordash/);
+ assert.match(String((await doordash.request('login')).error),/official CLI on this computer/);
  fs.mkdirSync(path.dirname(doordash.binary()),{recursive:true});fs.writeFileSync(doordash.binary(),'#!/bin/sh\n',{mode:0o755});
  // A connection made earlier in Fox's Agent profile stays connected, now the World's.
  fs.writeFileSync(path.join(legacy,'doordash_enabled.json'),'{"enabled":true}\n');

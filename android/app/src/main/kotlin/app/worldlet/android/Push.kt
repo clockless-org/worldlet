@@ -141,7 +141,10 @@ class PushActionReceiver : BroadcastReceiver() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val sent = runCatching { withTimeout(20_000) { PhoneSession(link).send(message) } }.isSuccess
+                // In the pairing room the phone only drops in to send: staying would tell the computer the app is showing.
+                val session = PhoneSession(link, room = RoomClient)
+                val sent = runCatching { withTimeout(20_000) { session.send(message) } }.isSuccess
+                session.leaveRoom()
                 if (sent) manager.cancel(push.id, 0) else Push.notify(app, push, PairKeys(link.secret).id, "Not sent. Check your connection and try again.")
             } finally { pending.finish() }
         }
@@ -160,9 +163,12 @@ class WorldletApp : Application() {
  * notification unless the app is on screen. */
 class PushService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
-        val link = PairingStore(applicationContext).load() ?: return
+        val store = PairingStore(applicationContext)
+        val link = store.load() ?: return
         if (!Push.allowed(applicationContext)) return
-        runBlocking { runCatching { withTimeoutOrNull(20_000) { PhoneSession(link).registerPush("fcm", token) } } }
+        val session = PhoneSession(link, room = RoomClient)
+        runBlocking { runCatching { withTimeoutOrNull(20_000) { session.registerPush("fcm", token, store.keepsPush) } } }
+        session.leaveRoom()
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

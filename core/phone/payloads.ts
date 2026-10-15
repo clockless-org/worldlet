@@ -56,7 +56,11 @@ export type PhoneLive={v:1,at:string,id:string,item?:string,applet?:string,user:
 /** `order` (optional, so an older phone ignores it) says this computer takes Orders, the team's spoken tasks for Claude
  * (core/distribution/order.ts): an Alpha or Dev app on a computer that can send them. Only then the phone shows its
  * Order button (owner request 2026-10-06). */
-export type PhoneDesktop={v:1,at:string,name:string,version:string,order?:true};
+/** `push` (optional, so an older phone ignores it) says this computer keeps the phone's notification token itself
+ * (README.md#push): the phone then hands it over with a `push` message instead of registering it on the relay. */
+/** `room` (optional too) says this computer waits in the pairing room (README.md#room): a phone app that knows the room
+ * moves the pairing there, and the relay keeps nothing more. */
+export type PhoneDesktop={v:1,at:string,name:string,version:string,order?:true,push?:true,room?:true};
 export type PhoneAction='done'|'later'|'remove';
 /** A widget for now (core/artifacts): `page` is the whole document with the widget prelude but no seed (the phone
  * injects its stored values); it is absent when the slot has no room for it, and the phone keeps the page it has. */
@@ -75,7 +79,9 @@ export type PhoneWidgets={v:1,at:string,widgets:PhoneWidget[]};
 // `file` is one part of a photo or file the person attached with "+" (owner request 2026-10-12): a sealed box holds at most
 // 256 KiB, so the phone sends each attachment in parts (`part` from 0 of `parts`, `data` base64) before the chat line,
 // whose `files` names them; the computer saves the file and the line carries its path for Fox's Agent.
-export type PhoneMessage={type:'chat',id:string,text:string,item?:string,applet?:string,files?:string[]}|{type:'file',id:string,file:string,part:number,parts:number,name:string,mime:string,data:string}|{type:'applet',id:string,applet:string,action:'open'}|{type:'widget',id:string,widget:string,state:WidgetState}|{type:'option',id:string,item:string}|{type:'attention',id:string,action:PhoneAction}|{type:'connect',id:string,provider:string}|{type:'order',id:string,said:string}|{type:'web',id:string,applet:string,records:PhoneWebRecord[]}|{type:'approval',id:string,approval:string,choice:'once'|'always'|'deny'};
+// `push` hands the computer the phone's notification token (README.md#push; empty `platform` and `token` take it back):
+// the computer keeps it and the relay keeps none.
+export type PhoneMessage={type:'push',id:string,platform:PhonePushPlatform|'',token:string}|{type:'chat',id:string,text:string,item?:string,applet?:string,files?:string[]}|{type:'file',id:string,file:string,part:number,parts:number,name:string,mime:string,data:string}|{type:'applet',id:string,applet:string,action:'open'}|{type:'widget',id:string,widget:string,state:WidgetState}|{type:'option',id:string,item:string}|{type:'attention',id:string,action:PhoneAction}|{type:'connect',id:string,provider:string}|{type:'order',id:string,said:string}|{type:'web',id:string,applet:string,records:PhoneWebRecord[]}|{type:'approval',id:string,approval:string,choice:'once'|'always'|'deny'};
 /** One report from the observer on a page the phone opened, `at` in seconds. `private` says the page showed a password,
  * card or one-time-code field: nothing more is kept from it until its address changes. */
 export type PhoneWebRecord={at:number,kind:'page'|'text'|'text-more'|'input'|'click'|'submit'|'private',url:string,title?:string,text?:string,
@@ -222,10 +228,18 @@ export function phoneLive(turn:any,at:number):PhoneLive|null{
  return {v:1,at:new Date(at).toISOString(),id,...item?{item}:applet?{applet}:{},user:clip(turn.user,PHONE_LIMITS.field),steps,text:clip(turn.text,PHONE_LIMITS.turnText),done:turn.done===true,...approval&&turn.done!==true?{approval}:{}};
 }
 
-// The computer's own slot: its name and version, and `order` only while it takes Orders.
+// The computer's own slot: its name and version, `order` only while it takes Orders, `push` (it keeps the phone's
+// notification token) and `room` (it waits in the pairing room).
 export function phoneDesktop({name,version,order}:{name:string,version:string,order:boolean},at:number):PhoneDesktop{
- return {v:1,at:new Date(at).toISOString(),name,version,...order?{order:true as const}:{}};
+ return {v:1,at:new Date(at).toISOString(),name,version,...order?{order:true as const}:{},push:true,room:true};
 }
+/** The platforms a phone registers its notification token for: `apns` (App Store and TestFlight), `apns-dev` (Apple's
+ * sandbox, debug builds), `fcm` (Android). */
+export type PhonePushPlatform='apns'|'apns-dev'|'fcm';
+export const PHONE_PUSH_PLATFORMS:readonly PhonePushPlatform[]=Object.freeze(['apns','apns-dev','fcm']);
+const APNS_TOKEN=/^[a-f0-9]{64,200}$/,FCM_TOKEN=/^[A-Za-z0-9_:\-]{20,4096}$/;
+/** Whether `token` is a notification token of `platform`, by the relay's own rules (worker/push.ts). */
+export const phonePushToken=(platform:unknown,token:unknown):platform is PhonePushPlatform=>PHONE_PUSH_PLATFORMS.includes(platform as PhonePushPlatform)&&typeof token==='string'&&(platform==='fcm'?FCM_TOKEN:APNS_TOKEN).test(token);
 
 // A message the phone sent, after the box opened. Anything else is ignored, never executed. `connect` only opens the
 // account's sign-in on the computer; the person finishes it there.
@@ -250,6 +264,10 @@ export function readPhoneMessage(value:any):PhoneMessage|null{
  if(value.type==='connect'){const provider=clip(value.provider,100);return provider?{type:'connect',id,provider}:null;}
  if(value.type==='approval'){const approval=clip(value.approval,120);return approval&&APPROVAL_CHOICES.includes(value.choice)?{type:'approval',id,approval,choice:value.choice}:null;}
  if(value.type==='order'){const said=clip(value.said,PHONE_LIMITS.chatText);return said?{type:'order',id,said}:null;}
+ if(value.type==='push'){
+  if(value.platform===''&&value.token==='')return {type:'push',id,platform:'',token:''};
+  return phonePushToken(value.platform,value.token)?{type:'push',id,platform:value.platform,token:value.token}:null;
+ }
  if(value.type==='web'){
   const applet=appletKey(value.applet),records=(Array.isArray(value.records)?value.records:[]).slice(0,PHONE_LIMITS.webRecords).map(phoneWebRecord).filter((r):r is PhoneWebRecord=>!!r);
   return applet&&records.length?{type:'web',id,applet,records}:null;

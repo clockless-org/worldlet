@@ -4,6 +4,7 @@ import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
+import {showAgentAccess} from './agent-access.ts';
 import {showAgentRoutines} from './agent-routines.ts';
 import {showAgentSkills} from './agent-skills.ts';
 import {showAgentMemory} from './agent-memory.ts';
@@ -158,7 +159,6 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     if(!providers.childElementCount){said.textContent='Sign in to a provider in your Agent itself, then choose Check connection.';return;}
     providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
    },{primary:true,id:'fix-connect'})
-   :fix==='update'?action('Show updates',()=>show('general'),{primary:true,id:'fix-update'})
    :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
   // The provider the Agent in use answers with (core/agent/model-providers.ts, owner decisions 2026-10-10): only a
   // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced
@@ -236,6 +236,20 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     },{id:'use-'+agent.id});
     row.append(text,...update?[update]:[],...recheck?[recheck]:[],...using||!old?[b]:[]);agents.append(row);
    }
+   // A Hermes Agent whose command does not start (a half-finished install) is not offered to Use; Install again runs the
+   // official installer, which repairs it, then chooses it (Windows Beta 4384, 2026-10-13: it stayed chosen, and every
+   // background turn failed on it).
+   if(found?.brokenHermes===true){
+    if(!list.length)agents.append(subhead('On this computer'));
+    const row=el('div','companion-settings-row'),text=el('div');row.dataset.agent='hermes';
+    text.append(el('strong','','Hermes Agent'+(inUse==='hermes'?' · In use':'')),el('span','companion-settings-model-problem','It is on this computer but does not start. Install again sets it up the official way.'));
+    row.append(text,action('Install again',async()=>{
+     said.textContent='Installing Hermes Agent again. This takes a few minutes…';
+     try{await call('agentHarness',{operation:'install-hermes'});await call('agentHarness',{operation:'select',id:'hermes'});modelRefresh();said.textContent='';await draw();}
+     catch(e){said.textContent=(e as Error).message||'Could not install Hermes Agent.';}
+    },{primary:true,id:'reinstall-hermes'}));
+    agents.append(row);
+   }
    // The provider of the Agent in use comes right under the Agents here.
    agents.append(providers);
    // An Agent on another computer and an OpenClaw Gateway are for few people: folded away unless one is in use.
@@ -285,9 +299,10 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   // The connection steps open under the buttons; a new connection redraws what Fox runs on.
   const changed=()=>{if(turn!==ticket||!target.isConnected){for(const name of MODEL_EVENTS)window.removeEventListener(name,changed);return;}void draw();};
   for(const name of MODEL_EVENTS)window.addEventListener(name,changed);
-  // The page is six named sections in this order, each with one plain line (owner decision 2026-10-11): Model (what
+  // The page is seven named sections in this order, each with one plain line (owner decision 2026-10-11): Model (what
   // Fox runs on), then what lives in the Agent and Worldlet only shows and changes its way: its Memory (read only), Skills, Routines (the
-  // same jobs as the Task panel's Routines), Permissions (its standing rules) and, last, Accounts (Worldlet's own, then
+  // same jobs as the Task panel's Routines), Permissions (its standing rules), Access (each Agent's Grants and what it
+  // last did) and, last, Accounts (Worldlet's own, then
   // the Agent's tools and chat accounts).
   const live=()=>turn===ticket&&target.isConnected;
   const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
@@ -295,14 +310,16 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
   memory.append(pages.knows);
   const skills=part('skills','Skills','Steps your Agent follows for tasks it knows how to do. They live in your Agent; Worldlet changes them only with its own commands.');
-  const routines=part('routines','Routines','What your Agent does on its own schedule, the same Routines as in the Task panel. Worldlet changes them only with its own commands.');
+  const routines=part('routines','Scheduled','What your Agent does on its own schedule, the same Scheduled tasks as in the Task panel. Worldlet changes them only with its own commands.');
   const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
+  // Access: which Agents reach the World's tools on their own and what each may do (core/agent/GRANTS.md).
+  const access=part('access','Access','Agents that reach your World on their own, from any chat: what each may do, when it last did, and Revoke.');
   const accounts=part('accounts','Connections','The accounts Worldlet signed in to, then the tools and chat accounts set up in your Agent.');
   // A request for Fox (set up or change a routine, forget something) goes to its conversation with the panel closed.
   const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
   model.append(now,fixes,guide.element,agents,said);
-  target.append(model,memory,skills,routines,permissions,accounts);
-  await Promise.all([draw(),showAgentMemory(memory,call,live,{ask}),showAgentSkills(skills,call,live),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),showWorldletAccounts(accounts,call,live)]);
+  target.append(model,memory,skills,routines,permissions,access,accounts);
+  await Promise.all([draw(),showAgentMemory(memory,call,live,{ask}),showAgentSkills(skills,call,live),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),showAgentAccess(access,call,live),showWorldletAccounts(accounts,call,live)]);
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical).
  const items:Item[]=[

@@ -105,9 +105,10 @@
 .companion-phone-steps,.companion-phone-paired{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:200px;flex:1}
 .companion-phone-steps h4,.companion-phone-paired h4{margin:0;font-size:15px;color:#354132}
 .companion-phone-steps p,.companion-phone-paired p{margin:0}
-.companion-phone-computers{flex-basis:100%;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding-top:12px;border-top:1px solid #d9cbae80}
-.companion-phone-computers h4{margin:0;font-size:15px;color:#354132}
-.companion-phone-computers p{margin:0}
+.companion-phone-computers,.companion-phone-browser{flex-basis:100%;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding-top:12px;border-top:1px solid #d9cbae80}
+.companion-phone-computers h4,.companion-phone-browser h4{margin:0;font-size:15px;color:#354132}
+.companion-phone-computers p,.companion-phone-browser p{margin:0}
+.companion-phone-browser .companion-phone-place{margin-top:4px;font-weight:600;color:#354132}
 .companion-phone-code{max-width:100%;overflow-wrap:anywhere;font-size:11px;padding:6px 8px;border-radius:8px;background:#fffdf7;border:1px solid #d9cbae80;user-select:all}
 /* History leads with what happened, one plain line each, newest first and grouped by day. */
 /* Companion panel, redone (owner feedback 2026-10-03): larger, every page fits. */
@@ -160,6 +161,7 @@
 .companion-settings-part:first-child{margin-top:0;padding-top:0;border-top:0}
 .companion-settings-approvals,.companion-settings-worldlet-accounts{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-approvals .companion-settings-row{flex-wrap:wrap}
+.companion-settings-access-audit{margin:4px 0 0;padding-left:16px}
 .companion-settings-approvals code{font-size:12px;font-weight:400;overflow-wrap:anywhere}
 .companion-settings-command{flex:1 1 100%;font-size:12px;color:#656651}
 .companion-settings-command summary{cursor:pointer;min-height:0;line-height:1.4}

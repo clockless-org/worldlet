@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {DatabaseSync} from 'node:sqlite';
+import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
 import type {HarnessCall,HarnessCalls,HarnessEvents,HarnessExternalEvent,HarnessTools,HarnessTool} from '../../../../../contracts/harness-services.ts';
 import {OPENCLAW_CALL_NAMESPACES,harnessService,openClawCallArgs,openClawCallPlacing,openClawCallResult,openClawHangUpArgs,hermesExternalEvent,openClawCallChunkKey,openClawCallRecord,openClawHarnessCalls,openClawVoiceCallStore,hermesHarnessTools,openClawExternalEvent,openClawHarnessTools,openClawTurn,type OpenClawSessionFacts} from '../../../../../core/agent/index.ts';
 import {callLive} from '../../../../../core/tasks/index.ts';
@@ -16,13 +16,13 @@ import {openClawAgents,readOpenClawConfig} from './openclaw-files.ts';
 // a Harness that declares neither gets null here.
 
 type Env=NodeJS.ProcessEnv;
-const sqlite=(file:string,root:string,work:(db:DatabaseSync)=>void)=>{
+const sqlite=(file:string,root:string,work:(db:AgentDatabase)=>void)=>{
  if(!fs.existsSync(file)||!inside(file,root))return;
- let db:DatabaseSync|null=null;
- try{db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);db.exec('PRAGMA trusted_schema=OFF');work(db);}catch{}
+ let db:AgentDatabase|null=null;
+ try{db=openAgentDatabase(file);db.exec('PRAGMA trusted_schema=OFF');work(db);}catch{}
  finally{try{db?.close();}catch{}}
 };
-const tables=(db:DatabaseSync)=>new Set((db.prepare(`SELECT name FROM sqlite_master WHERE type='table'`).all() as any[]).map(row=>String(row.name)));
+const tables=(db:AgentDatabase)=>new Set((db.prepare(`SELECT name FROM sqlite_master WHERE type='table'`).all() as any[]).map(row=>String(row.name)));
 
 /** What the Harness can do beyond World tools, from its own settings. */
 function readTools(id:string,home:string,env:Env):HarnessTool[] {

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {DatabaseSync} from 'node:sqlite';
+import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
 import {afterScheduleCursor,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleRunsAfter,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import type {HarnessJobRun,HarnessSchedule} from '../../../../../contracts/harness-services.ts';
 import {directories,hermesJobs,inside,json,readFile} from './agent-files.ts';
@@ -30,12 +30,12 @@ export function openClawSchedule(home=os.homedir(),environment=process.env):Harn
  const database=path.join(state,'state','openclaw.sqlite');
  const open=()=>{
   if(!fs.existsSync(database)||!inside(database,state))return null;
-  const db=new DatabaseSync(database,{readOnly:true,timeout:2000} as any);
+  const db=openAgentDatabase(database);
   db.exec('PRAGMA trusted_schema=OFF');
   return db;
  };
  const sqliteRuns=(cursor?:string):{runs:HarnessJobRun[];cursor?:string}|null=>{
-  let db:DatabaseSync|null=null;
+  let db:AgentDatabase|null=null;
   try{
    db=open();
    if(!db)return null;

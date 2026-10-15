@@ -37,6 +37,14 @@ for(const [message,code] of [['Request timed out after 60s (secret)','timeout'],
 }
 await withFoxTurnAnalytics(async()=>({error:'Network unreachable'}),report)({});await Promise.resolve();
 assert.equal(outcomes.at(-1).error_code,'offline');
+// A bare operationFailed carries its fixed rule, so not running, not answering and signed out stay apart; never the text.
+for(const [message,rule] of [['Hermes Agent did not answer. Try again.','noAnswer'],['connect ECONNREFUSED 127.0.0.1:8642','notRunning'],['Claude Code was not signed in. Try again.','signedOut'],["'hermes' is not recognized as an internal or external command",'notInstalled']]){
+ await withFoxTurnAnalytics(async()=>({error:message}),report)({});await Promise.resolve();
+ assert.deepEqual([outcomes.at(-1).event,outcomes.at(-1).error_code,outcomes.at(-1).error_rule],['fox_turn_failed','operationFailed',rule]);
+ assert.doesNotMatch(JSON.stringify(outcomes.at(-1)),/hermes|127|claude|try again|internal/i);
+}
+await withFoxTurnAnalytics(async()=>({error:'something private'}),report)({});await Promise.resolve();
+assert.ok(!('error_rule' in outcomes.at(-1)),'An unclassified failure sends no rule');
 for(const error of [Error('model unavailable'),new DOMException('stopped','AbortError')]){
  const run=withFoxTurnAnalytics(async()=>{throw error;},report);
  await assert.rejects(run({}),e=>e===error);await Promise.resolve();
@@ -153,6 +161,12 @@ assert.equal('rule' in crash,false,'an unclassified failure carries no rule');
 // released under memory pressure is the browser working as designed, so error tracking never hears of it.
 for(const [message,rule] of [['Applet analysis ended without a verified result.','noResult'],['Applet analysis did not cover every supplied source record; retry remaining analysis.','partialCoverage'],['ENOENT: no such file','missing']])
  assert.equal(exceptionReport({name:'Error',message,stack:'',area:'host',operation:'appletAnalysis'}).rule,rule,message);
+// A background or speak-first turn on the person's Agent says how it ended (Windows Beta 4384, 2026-10-13: six bare
+// operationFailed from LocalHarnessRuntime.attempt in ten minutes, foxBackground and foxProactive).
+for(const [message,rule] of [['Hermes Agent does not start on this computer. Open Settings › Agent and choose Install again.','notStarted'],['Hermes Agent could not start.','notStarted'],
+ ['Hermes Agent stopped (code 1) without saying why. Open it once in Terminal to check it is signed in, then try again.','processExit'],['Claude Code stopped before it answered. Try again.','processExit'],
+ ['Hermes Agent finished without an answer. Try again.','noAnswer'],['Hermes Agent could not answer: No inference provider configured.','noModel'],['Hermes Agent could not answer: Traceback (most recent call last)','agentError']] as const)
+ for(const operation of ['foxBackground','foxProactive'])assert.equal(exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation}).rule,rule,message);
 assert.equal(exceptionReport({name:'Error',message:'Kept page released under memory pressure (appFootprint).',stack:'',area:'host',operation:'keptPageRelease'}),null);
 // Fox setup failure messages still map to fixed tags.
 {
@@ -175,6 +189,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.equal(foxTimingEvent(foxTiming({id,outcome:'complete',completeMs:900,parentId:id})),null);
  assert.equal(foxTimingEvent(foxTiming({id,outcome:'complete'})),null);
  assert.deepEqual(foxTimingEvent(foxTiming({id,kind:'startup',outcome:'complete',revealedMs:3400,firstFrameMs:800})),{event:'app_startup_timing',duration:'1_5s',dimensions:{first_frame_bucket:'under_1s'}});
+ assert.deepEqual(foxTimingEvent(foxTiming({id,kind:'startup',outcome:'complete',setupMs:2500,revealedMs:240000,firstFrameMs:239000})),{event:'app_startup_timing',duration:'1_5m',dimensions:{first_frame_bucket:'1_5m',startup_setup:'yes'}},'a start through setup says so');
  assert.equal(foxTimingEvent(null),null);
  assert.deepEqual([0,3_599_999,3_600_000,86_399_999,86_400_000,604_799_999,604_800_000,-1,NaN].map(updateWaitBucket),['under_1h','under_1h','1_24h','1_24h','1_7d','1_7d','over_7d','','']);
  console.log('PASS Fox and startup timings leave the device only as buckets of finished, allowlisted rows');
@@ -195,7 +210,25 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.deepEqual(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again.')),{hermes_setup:'install',install_step:'0',hermes_failure:'download'});
  assert.equal(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (exit 1)')).hermes_failure,'manifest');
  const stage=hermesSetupDimensions('install',3,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (Python: C:\\Users\\me\\AppData failed)'));
- assert.deepEqual(stage,{hermes_setup:'install',install_step:'3',hermes_failure:'stage'});
+ assert.deepEqual(stage,{hermes_setup:'install',install_step:'3',hermes_failure:'stage',hermes_stage:'other',hermes_reason:'other'});
+ // Which stage stopped and why, as fixed words (Windows Beta 4384, 2026-10-13: eight failures at step 3 said only `stage`).
+ const failedAt=(detail:string,step=3)=>hermesSetupDimensions('install',step,new Error(`Hermes Agent could not be installed. Check your internet connection and try again. (${detail})`));
+ assert.deepEqual(failedAt('Create Python environment: bootstrap Python installation failed'),{hermes_setup:'install',install_step:'3',hermes_failure:'stage',hermes_stage:'venv',hermes_reason:'python_install_failed'});
+ assert.equal(failedAt('Install Python dependencies: dependency install failed',4).hermes_reason,'deps_install_failed');
+ assert.equal(failedAt('Download Hermes Agent: C:\\Users\\alex\\AppData\\Local\\hermes\\hermes-agent exists and is not a Hermes git checkout. Move it aside.',2).hermes_reason,'dir_not_checkout');
+ assert.equal(failedAt("Create Python environment: Cannot find path 'C:\\Users\\alex\\AppData\\Local\\hermes\\hermes-agent\\pm\\lock.json' because it does not exist.").hermes_reason,'missing_file');
+ assert.equal(failedAt('Create Python environment: failed to download from https://example.com/uv.zip : timed out').hermes_reason,'download_failed');
+ assert.equal(failedAt('Create Python environment: Access to the path is denied.').hermes_reason,'access_denied');
+ assert.equal(failedAt('Install command and app: app products or command publication failed',6).hermes_stage,'products');
+ assert.equal(failedAt('Create Python environment: it did not report how the step ended').hermes_reason,'no_report');
+ assert.equal(failedAt('Create Python environment: something new').hermes_reason,'other');
+ assert.deepEqual(failedAt('The Hermes Agent installer did not describe its steps.',0),{hermes_setup:'install',install_step:'0',hermes_failure:'manifest',hermes_reason:'other'});
+ assert.ok(!JSON.stringify(failedAt("Create Python environment: Cannot find path 'C:\\Users\\alex\\x'")).includes('alex'),'Installer output never leaves the device');
+ assert.deepEqual(hermesSetupDimensions('terminal',0),{hermes_setup:'terminal',install_step:'0'});
+ // Choosing an Agent that cannot be used says why as a fixed rule (Windows Beta 4384, 2026-10-13).
+ const {diagnosticError}=await import('../core/diagnostics/index.ts');
+ for(const [message,rule] of [['Hermes Agent did not start. Open it once in Terminal, then try again.','notStarted'],['Hermes Agent 0.20.6 is too old for Worldlet, which needs 0.21.4 or newer. Choose Update Hermes Agent, then try again.','outdated'],['That Agent is no longer on this computer.','missing']])
+  assert.deepEqual([diagnosticError({message}).code,diagnosticError({message}).rule],['operationFailed',rule],message);
  assert.ok(!JSON.stringify(stage).includes('Users'),'Installer output never leaves the device');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).install_step,'10_plus');
  assert.equal(hermesSetupDimensions('install',12,new Error('Installing Hermes Agent took too long. Try again.')).hermes_failure,'timeout');

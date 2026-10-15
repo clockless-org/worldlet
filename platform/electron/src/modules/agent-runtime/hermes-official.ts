@@ -6,7 +6,7 @@ import {HERMES_INSTALLERS,hermesChatGptModel,hermesInstallerResult,hermesInstall
 import {WorldletError,writeJSON} from '../../files.ts';
 import {hermesCommandPath,isOwnHermes,standardHermesHome} from './hermes-files.ts';
 import {runHarnessCommand} from './harness-approvals.ts';
-import {harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
+import {harnessEnvironment,localHarnessStarts,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
 
 /** Stock Hermes Agent for a person with no Agent (core/agent/hermes-setup.ts): the official installer, run stage by
  * stage as Hermes' own desktop installer runs it, to Hermes' default location; nothing when a Hermes Agent is here. */
@@ -27,6 +27,17 @@ export function ownHermesAgent(environment:HarnessEnvironment):LocalHarnessInsta
  return found;
 }
 
+/** Whether a Hermes Agent's command runs at all (`hermes --version`): `failed` when it cannot start or exits with an
+ * error, as one left half installed does (Windows Beta 4384, 2026-10-13: a person's Hermes was found, then turned away
+ * in under a second eleven times); `slow` when it gives no answer within `timeout`, which is not counted against it. */
+export const hermesStarts=localHarnessStarts;
+/** The person's Hermes Agent when its command runs (or is only slow), else null: one that fails at once is installed
+ * again the official way, which repairs a checkout an earlier install left unfinished. */
+export async function workingHermesAgent(environment:HarnessEnvironment):Promise<LocalHarnessInstall|null> {
+ const found=ownHermesAgent(environment);
+ return found&&await hermesStarts(found,environment)!=='failed'?found:null;
+}
+
 /** Removes what Worldlet once put at Hermes' standard locations for Fox's own profile: the link at
  * ~/.hermes (a junction on Windows) and its own `hermes` launcher. Only Worldlet's: a real folder or another command stays. */
 export function releaseStandardHermes(root:string,environment:HarnessEnvironment){
@@ -41,8 +52,9 @@ const INSTALLED='hermes-installed.json';
 export function installedHermes(root:string):boolean {return fs.existsSync(path.join(root,INSTALLED));}
 /** Installs stock Hermes Agent the official way when none is here, then returns it. `progress` hears each step. */
 export async function installHermes(root:string,{environment,progress,fetch:get=fetch,limits=STAGE_LIMITS}:{environment:HarnessEnvironment;progress:(step:HermesInstallProgress)=>void;fetch?:typeof fetch;limits?:{idle:number;total:number}}):Promise<LocalHarnessInstall> {
- const existing=ownHermesAgent(environment);
- // A Hermes Agent already here is used as it is (owner decision 2026-10-09 12:11 PDT): nothing is installed.
+ // A Hermes Agent already here is used as it is (owner decision 2026-10-09 12:11 PDT): nothing is installed. One whose
+ // command fails at once is not one that works, so the installer runs and repairs it.
+ const existing=await workingHermesAgent(environment);
  if(existing)return existing;
  releaseStandardHermes(root,environment);
  setAsideUnfinished(environment);
@@ -82,6 +94,17 @@ export async function installHermes(root:string,{environment,progress,fetch:get=
  writeJSON(path.join(root,INSTALLED),{installedAt:new Date().toISOString()});
  return installed;
 }
+
+/** The official installer in a window the person can see (`install-hermes-window`), offered once the quiet install has
+ * failed: it prints every step and why one stops, and runs as the person's own Terminal or PowerShell would. A Microsoft
+ * Store copy of Worldlet runs its children inside the app's package, a Windows person stopped at Create Python
+ * environment eight times there (Beta 4384, 2026-10-13), so the window may get further. Stages that ask questions are
+ * skipped, as in the quiet install; the person comes back and chooses Check again. */
+export function hermesInstallWindow(platform:NodeJS.Platform):{command:string;prefix:string[];title:string;args:string[]} {
+ if(platform==='win32')return {command:'powershell.exe',prefix:[],title:'Hermes Agent',args:['-NoProfile','-ExecutionPolicy','Bypass','-Command',`& ([scriptblock]::Create((Invoke-RestMethod '${HERMES_INSTALLERS.windows}'))) -NonInteractive`]};
+ return {command:'/bin/bash',prefix:[],title:'Hermes Agent',args:['-c',`curl -fsSL '${HERMES_INSTALLERS.posix}' | bash -s -- --non-interactive`]};
+}
+export const HERMES_WINDOW_DONE='When Hermes Agent says it is installed, close this window and choose Check again in Worldlet.';
 
 /** What an earlier install that never finished left where Hermes installs itself: a folder that is not a Hermes
  * checkout, which the installer refuses on every later try (`dir_not_checkout`). It is moved aside next to it, never

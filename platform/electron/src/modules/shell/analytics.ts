@@ -9,7 +9,8 @@ import {platformName} from '../../profile.ts';
 import {AGENT,type AgentService,type AnalyticsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,HERMES_FAILURES,HERMES_SETUP,INSTALL_STEPS,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
+import {currentGraphics} from '../../graphics.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,EXIT_CODE_NAMES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../core/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../core/companion/index.ts';
 
@@ -37,8 +38,8 @@ export function ingestPath(pathname:string){
 export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string,identified:boolean,properties:Row}
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
 export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
-const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','agent_profile_result','hermes_setup_started','hermes_setup_completed','hermes_setup_failed','tour_skipped','first_win','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','order_sent','order_stopped',
- 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall','local_data_size',
+const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','world_item_rejected','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','agent_profile_result','hermes_setup_started','hermes_setup_completed','hermes_setup_failed','tour_skipped','first_win','first_card_started','first_card_ready','first_card_shown','first_card_opened','first_card_approved','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','fox_turn_retried','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown','order_sent','order_stopped',
+ 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall','local_data_size','app_graphics_fallback',
  // owner 2026-10-11 20:21 PDT: Production metrics.
  'attention_item_opened','task_completed','world_active_time']);
 /** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
@@ -58,12 +59,18 @@ const ALLOWED:Record<string,string[]>={
  engagement_kind:['input','fox_message','applet_open'],
  // Core's classified failure (core/diagnostics/report.ts); never the error text.
  error_code:ERROR_CODES,
+ // Its fixed rule when Core has one (core/diagnostics/report.ts ERROR_RULES); never the error text.
+ error_rule:ERROR_RULES,
  // Electron render-process-gone / child-process-gone; a clean exit is not reported.
  process_type:['renderer','gpu','utility','other','web_engine','web_page'],
  exit_reason:['abnormal-exit','killed','crashed','oom','launch-failed','integrity-failure','memory-eviction'],
+ // Its exit code as a fixed name: a known Windows status, a small code, else other (core/diagnostics/graphics-mode.ts).
+ exit_code:EXIT_CODE_NAMES,
  // fox_timing / app_startup_timing: parts of a turn or a start, bucketed (core/diagnostics/fox-timing.ts foxTimingEvent).
  timing_outcome:['complete','error','cancelled'],
  first_text_bucket:DURATIONS,model_bucket:DURATIONS,tools_bucket:DURATIONS,first_frame_bucket:DURATIONS,
+ // app_startup_timing: this start went through setup first, so its time includes the person's setup minutes.
+ startup_setup:['yes'],
  // fox_timing: the reply and its first word in finer buckets split at 10 seconds (owner 2026-10-13: past 10 s is too slow).
  reply_bucket:[...REPLY_BUCKETS],first_text_reply_bucket:[...REPLY_BUCKETS],
  // app_unclean_exit: whether Crashpad wrote a crash report during that run (the report itself stays on the device).
@@ -71,7 +78,7 @@ const ALLOWED:Record<string,string[]>={
  // Setup with a local Agent (core/diagnostics/setup-events.ts): its public product ID, coarse counts and outcomes.
  local_agent:LOCAL_AGENT_IDS,recommended_agent:[...LOCAL_AGENT_IDS,'none'],agents_found:[...AGENTS_FOUND],
  // No Agent here: Worldlet installs Hermes Agent and signs ChatGPT in inside it; where a failure stopped, never its text.
- hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],
+ hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],hermes_stage:[...HERMES_STAGES],hermes_reason:[...HERMES_REASONS],hermes_broken:['yes'],
  // Who answers for Fox: the built-in Hermes Agent on a model Fox has, or the chosen Agent on its own sign-in.
  fox_brain:['built_in','agent'],
  bring_conversations:[...COUNT_BUCKETS],bring_notes:[...COUNT_BUCKETS],bring_skills:[...COUNT_BUCKETS],bring_routines:[...COUNT_BUCKETS],bring_connections:[...COUNT_BUCKETS],
@@ -92,6 +99,8 @@ const ALLOWED:Record<string,string[]>={
  order_stop:['cancelled','stopped_early','left_app','speech_error','no_speech','page_closed'],
  // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/onboarding/README.md).
  tour_step:['1','2','3','4','5','6','7','8'],
+ // first_card_ready: how a new person's first Today's prep ended (ui/shell/notion-world.ts startFirstCard).
+ first_card_result:['ok','no_card','failed'],
  // attention_shown: how many items the Center showed (at most nine). attention_approved: where the person settled one
  // (its card or row on this computer, or the phone) and the item's kind. Never a title or a source.
  attention_count:['1','2','3','4','5','6','7','8','9'],approval_surface:['computer','phone'],item_kind:['task','event','update'],
@@ -101,9 +110,10 @@ const ALLOWED:Record<string,string[]>={
  routine_source:['worldlet','agent'],routine_status:['ok','failed'],routine_late:['yes','no'],
  // agent_settings_changed: which part of Settings › Agent changed; never what it changed to.
  agent_setting:['model','permission','account','routine','skill'],
- // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform.
+ // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform, or
+ // `web` for a web browser (core/phone/README.md#web).
  // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
- phone_platform:['ios','android','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
+ phone_platform:['ios','android','web','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
  // local_data_size (core/diagnostics/data-size.ts): how much this computer keeps, in bands; never a name or path.
  world_db_size:[...SIZE_BUCKETS],recordings_size:[...SIZE_BUCKETS],hermes_db_size:[...SIZE_BUCKETS],openclaw_db_size:[...SIZE_BUCKETS],disk_free:[...SIZE_BUCKETS],history_rows:[...ROW_BUCKETS]
 };
@@ -352,6 +362,8 @@ export class UsageAnalytics implements AnalyticsService {
  recordException(error:unknown,area:'main'|'renderer'|'host',operation=''){
   if(!this.config||!this.enabled()||this.exceptions.size>=30)return;
   const raw=error instanceof Error||(error&&typeof error==='object')?error as Row:{message:String(error)};
+  // A failure already reported once and only refused again (agent-runtime AgentNotStarting `repeat`).
+  if(raw.reported===true)return;
   let report:Row;
   try{report=core<Row>('exceptionReport',{name:raw.name,message:typeof raw.message==='string'?raw.message:'',stack:raw.stack,area,operation});}catch{return;}
   if(!report)return;
@@ -404,6 +416,8 @@ export class UsageAnalytics implements AnalyticsService {
   const properties:Row={
    surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),$session_id:this.session,analytics_schema:4,installation_id:this.installationID(),
    app_build:config.build,platform,app_version:config.version,duration_bucket:duration,os_version:process.getSystemVersion(),...this.device(),
+   // A launch in software graphics after a crashing GPU process (graphics.ts) says so on every event.
+   ...(currentGraphics()==='software'?{graphics_mode:'software'}:{}),
    language:(app.getPreferredSystemLanguages()[0]??'und').split('-')[0]||'und',$set:person,$set_once:{first_profile_seen_at:isoSeconds(),...(invite?{invite_token:invite}:{})},$process_person_profile:identified,$geoip_disable:true,
    ...(invite?{invite_token:invite}:{}),...dimensions
   };

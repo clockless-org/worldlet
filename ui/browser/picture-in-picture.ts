@@ -16,7 +16,8 @@ const el=(tag:string,className='')=>node(tag,className);
 
 /**
  * The Applet's control that offers picture in picture, in the top bar right of the title (#951;
- * among the Applet's own controls, .applet-bar-controls, when the HUD has made them); the Browser panel says when it shows. It is only an
+ * among the Applet's own controls, .applet-bar-controls, when the HUD has made them), or at the end of a website page's
+ * toolbar while that shows (ui/browser/browser-device.ts); the Browser panel says when it shows. It is only an
  * icon; its label stays the accessible name. It is offered for videos only: Fox's pages stay in
  * their Applet (owner feedback 2026-10-02).
  */

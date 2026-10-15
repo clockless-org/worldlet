@@ -11,9 +11,11 @@ import {Preferences,MAC_IMPORT_KEYS} from './preferences.ts';
 import {WorldStore} from './store/world-store.ts';
 import {HostRouter} from './host/router.ts';
 import {createPageBridge} from './host/page.ts';
+import {createWebPage} from './host/web-page.ts';
+import {createPagePair,serveWorldWeb} from './host/world-web.ts';
 import {createDiagnostics,keepProcessOutput} from './host/diagnostics.ts';
 import {endStrayChildren,hideAllWindows,installQuitTask,relaunchAfterQuit,startPendingRelaunch,wantsQuit,withDeadline} from './host/quit.ts';
-import {hostCapabilities} from './capabilities.ts';
+import {FEATURE_OWNERS,hostCapabilities} from './capabilities.ts';
 import {registerWorldScheme,trustedWorldURL} from './world/protocol.ts';
 import {WorldWindow} from './world/window.ts';
 import {installCapture} from './world/capture.ts';
@@ -21,15 +23,20 @@ import {captureRequest,refuseBesideRunningCopy,runCapture,type CaptureRequest} f
 import {probeRequest,refuseProbeBesideRunningCopy,runProbe,type ProbeRequest} from './world/permission-probe.ts';
 import {loginItemCheckRequest,refuseLoginItemCheckBesideRunningCopy,runLoginItemCheck,type LoginItemCheckRequest} from './world/login-item-check.ts';
 import {openedAtLogin} from '../../../core/distribution/index.ts';
+import {onboardingUnfinished} from '../../../core/onboarding/index.ts';
 import {updateAcceptance} from './modules/shell/update-acceptance.ts';
 import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
-import {ANALYTICS,VAULT,type AnalyticsService} from './host/services.ts';
+import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldRoomPageService,type WorldWebService} from './host/services.ts';
+import {roomDenied} from '../../../contracts/web-world.ts';
+import {openRtcWindow} from './modules/phone/rtc-window.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';
+import {startGraphics} from './graphics.ts';
+import {offerApplicationsFolder} from './applications-folder.ts';
 
 // Release smoke (#987): parsed before anything opens; malformed arguments are a usage error.
 let capture:CaptureRequest|null=null;
@@ -59,6 +66,8 @@ const profile=resolveProfile();
 // display surface not available" and the World never arrives (Mac Alpha 4378 and 4380, #500).
 if(process.platform==='darwin'&&backgroundLaunchWanted(profile))app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 ensureDirectory(profile.root);
+// A computer whose GPU process kept crashing starts in software graphics for a while (graphics.ts).
+startGraphics(profile.root);
 // Chromium's own profile lives inside the library, beside the World data it serves.
 app.setPath('userData',path.join(profile.root,'Browser','Electron'));
 // Native crashes of the installed app leave a Crashpad report in the library's logs, never uploaded whole; the next
@@ -92,8 +101,6 @@ function macDefaults(domain:string){
  }
  return values;
 }
-/** The host action or service that implements each optional feature; a feature with none is always there. */
-const FEATURE_OWNERS:Partial<Record<keyof HostFeatures,string>>={nativeAppletLaunch:'openInstalledApplet',nativeCalendar:'appleSources',appleNotes:'appleSources',appleReminders:'appleSources',voiceMemos:'voiceMemos',messages:'messages',localMusic:'localMusic',folderManagement:'folderConnection',backgroundSourceChecks:'sourceChecks',browserBookmarks:'browserBookmarks',installedAppDetection:'installedApplets',browserFoxOverlay:'browserShow',browserPictureInPicture:'browserPip',browserTaskPictureInPicture:'browserLayout',curatedSourceRead:'curatedSourceContent',localDataDeletion:'deleteSourceData',googleSignInStages:'connect'};
 const PERSISTED_REQUEST_FAILURES=['agentChat','hermesChat','connect','appContent','onboarding','foxPreferences','localAgent','localHermes'];
 
 async function start(){
@@ -101,12 +108,14 @@ async function start(){
  if(process.env.WORLDLET_DEV_PID_FILE&&profile.channel==='dev')try{fs.writeFileSync(process.env.WORLDLET_DEV_PID_FILE,String(process.pid));}catch{}
  delete process.env.WORLDLET_DEV_PID_FILE;
  await app.whenReady();
+ // A Mac copy run from the disk image cannot update itself: it offers to move into Applications first.
+ if(await offerApplicationsFolder(profile)){app.quit();return;}
  installQuitTask();
  const diagnostics=createDiagnostics(profile.root);
  keepProcessOutput(profile.root);
  const preferences=Preferences.at(profile.root,()=>macDefaults(macDomain(profile)));
  const services=new Map<string,unknown>();
- const reloadListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[];
+ const reloadListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[],connectedListeners:(()=>void)[]=[],startedListeners:(()=>void)[]=[];
  let world:WorldWindow|null=null;
  const router=new HostRouter(()=>host);
  const implemented=(feature:keyof HostFeatures)=>{
@@ -117,7 +126,34 @@ async function start(){
  void refreshMemory(null);
  const store=new WorldStore(profile.root,preferences,{appName:profile.title,platform:platformName(),capabilities:()=>hostCapabilities(implemented,{scaledPages:websiteEngine(profile)==='cef',budget:browserBudget(readMemory())}),mockGoogleAvailable:profile.channel==='dev'});
  store.historyFailure=(error,kind)=>diagnostics.record(error,'worldHistory:'+(kind||'unknown'));
- const page=createPageBridge(()=>world?.view.webContents??null,line=>diagnostics.log(line));
+ // The World page in the app's window, and a browser's beside it on this computer (host/world-web.ts createPagePair):
+ // the window stays the World's page; a browser's page is an extra one, the newest browser tab taking over an older one.
+ const failed=(body:any,error:any)=>{
+  // As on the Mac host, only Fox, connection, content and onboarding requests persist a
+  // diagnostic; other request errors (a city lookup, a location timeout) are the page's to show.
+  if(error?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body?.action))diagnostics.record(error,body.action,typeof body.id==='string'?body.id:'');
+ };
+ const web=createWebPage({
+  platform:platformName(),
+  dispatch:async body=>{pages.note('web',body);const value=await router.dispatch(body,null,'web');pages.note('web',body,value);return value;},
+  // A browser's page coming and going is not the window's page loading or reloading: it gets the World as it is, and
+  // what a page gets pushed when it comes (onPageConnected).
+  loaded:()=>{sent='';sendState();for(const listener of connectedListeners)try{listener();}catch(error){diagnostics.record(error,'pageConnected');}},
+  gone:()=>{},
+  failed,
+ });
+ // The World on another device, met through the pairing room (modules/phone/world-room-link.ts): a page beside the
+ // others, with only what ROOM_ALLOWED lets through (contracts/web-world.ts roomDenied).
+ const remote=createWebPage({
+  platform:platformName(),
+  denied:roomDenied,
+  dispatch:async body=>{pages.note('remote',body);const value=await router.dispatch(body,null,'web');pages.note('remote',body,value);return value;},
+  loaded:()=>{sent='';sendState();for(const listener of connectedListeners)try{listener();}catch(error){diagnostics.record(error,'pageConnected');}},
+  gone:()=>{},
+  failed,
+ });
+ const pages=createPagePair(createPageBridge(()=>world?.view.webContents??null,line=>diagnostics.log(line)),web.page,remote.page);
+ const page=pages.page;
  const host:Host={
   profile,preferences,store,page,diagnostics,
   window:()=>world?.window??null,
@@ -128,9 +164,19 @@ async function start(){
   optional:name=>services.get(name) as any,
   onPageReload:listener=>{reloadListeners.push(listener);},
   onQuit:listener=>{quitListeners.push(listener);},
-  onPageLoaded:listener=>{loadedListeners.push(listener);}
+  onPageLoaded:listener=>{loadedListeners.push(listener);},
+  onPageConnected:listener=>{connectedListeners.push(listener);},
+  onStarted:listener=>{startedListeners.push(listener);}
+ };
+ let started=false;
+ const startServices=()=>{
+  if(started)return;
+  started=true;
+  for(const listener of startedListeners)try{listener();}catch(error){diagnostics.record(error,'hostStarted');}
  };
  host.provide(VAULT,createVault(profile.root,profile.channel==='release'?'app.worldlet.context':profile.worktree?'app.worldlet.context.dev.wt'+profile.worktree:'app.worldlet.context.dev'));
+ host.provide<RtcPageFactory>(RTC_PAGE,openRtcWindow);
+ host.provide<WorldRoomPageService>(WORLD_ROOM_PAGE,{accept:socket=>remote.connect(socket)});
  for(const install of modules)install(host);
  // Contract check: report what this host implements, without opening a window.
  if(process.argv.includes('--host-contract-check')){
@@ -138,6 +184,17 @@ async function start(){
   store.closeLedger();fs.rmSync(profile.root,{recursive:true,force:true});
   app.exit(0);return;
  }
+
+ // The World in a browser on this computer, served beside the window while the app runs (contracts/web-world.ts): the
+ // same page on 127.0.0.1 at /world/, its link in the library's owner-only world-link.txt (host/world-web.ts).
+ let worldWeb:Promise<string>|null=null;
+ const serveWorld=()=>worldWeb??=(async()=>{
+  const server=await host.use<PhoneService>(PHONE).localServer!();
+  return serveWorldWeb({root:profile.root,webRoot:profile.webRoot,vault:host.use<VaultService>(VAULT),server,accept:socket=>web.connect(socket)}).link;
+ })().catch(error=>{worldWeb=null;throw error;});
+ host.provide<WorldWebService>(WORLD_WEB,{link:serveWorld});
+ host.onStarted(()=>void serveWorld().catch(error=>diagnostics.record(error,'worldWeb')));
+ host.onQuit(()=>{web.close();remote.close();});
 
  // The page ignores a payload whose revisions it already holds, so skip building one.
  let sent='';
@@ -154,35 +211,40 @@ async function start(){
   // Only the trusted main World document may call the host; subframes and websites cannot.
   const frame=event.senderFrame;
   if(!world||event.sender!==world.view.webContents||!frame||frame.parent||!trustedWorldURL(frame.url))return {ok:false,error:'This page cannot use Worldlet.'};
-  try{return {ok:true,value:await router.dispatch(body,event.sender)};}
-  catch(error){
-   // As on the Mac host, only Fox, connection, content and onboarding requests persist a
-   // diagnostic; other request errors (a city lookup, a location timeout) are the page's to show.
-   if(error?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body?.action))diagnostics.record(error,body.action,typeof body.id==='string'?body.id:'');
-   return {ok:false,error:errorMessage(error)};
-  }
+  try{pages.note('native',body);const value=await router.dispatch(body,event.sender);pages.note('native',body,value);return {ok:true,value};}
+  catch(error){failed(body,error);return {ok:false,error:errorMessage(error)};}
  });
 
  const preload=path.join(__dirname,'world-preload.cjs');
  // Launched by the login item: the World opens minimized and Fox waits on the desktop, nothing takes focus.
  const quiet=profile.channel==='release'&&!capture&&!probe&&!loginCheck&&!profile.smoke&&openedAtLogin({platform:process.platform,argv:process.argv,wasOpenedAtLogin:process.platform==='darwin'?app.getLoginItemSettings({type:'mainAppService'}).wasOpenedAtLogin:false});
+ // Set to run in background with onboarding over: the login launch opens no window at all (the Dock or tray brings it).
+ const hidden=quiet&&preferences.bool(RUN_IN_BACKGROUND)&&!onboardingUnfinished(store.state.onboarding);
  startBackgroundLaunch(profile);
  world=new WorldWindow(profile,preload,{
   openURL:url=>{const browser=host.optional<{openExternalRequest(url:string):void}>('browser');if(browser)browser.openExternalRequest(url);else void openInBrowser(url);},
-  loaded:()=>{sent='';for(const listener of loadedListeners)try{listener();}catch(error){diagnostics.record(error,'pageLoaded');}},
+  loaded:()=>{sent='';startServices();for(const listener of loadedListeners)try{listener();}catch(error){diagnostics.record(error,'pageLoaded');}for(const listener of connectedListeners)try{listener();}catch(error){diagnostics.record(error,'pageConnected');}},
   navigating:()=>{for(const listener of reloadListeners)try{listener();}catch(error){diagnostics.record(error,'pageReload');}},
   closing:()=>host.optional<{shouldKeepOpen():boolean}>('desktopCompanion')?.shouldKeepOpen()??false,
   activated:active=>page.event(active?'worldlet:app-active':'worldlet:app-inactive'),
   resized:()=>{},
   ingest:request=>host.optional<AnalyticsService>(ANALYTICS)?.ingest(request)??Promise.resolve(new Response(null,{status:204}))
- },{quiet});
+ },{quiet,hidden});
  if(profile.channel==='dev')installCapture(world.view.webContents);
  if(!fs.existsSync(path.join(profile.webRoot,'index.html'))){
   if(checkName===null)dialog.showErrorBox('Worldlet could not start','The Worldlet interface is missing. Run npm run build:native-ui first.');
   else process.stderr.write('FAIL '+checkName+': the Worldlet interface is missing (npm run build:native-ui)\n');
   app.exit(1);return;
  }
- await world.load();
+ // Run in background: no window and no World page. The host does its own work (startServices), a phone or browser
+ // gets the Center and Fox from it, and the page loads only when the World is shown (the Dock, the tray, a notification).
+ let loading:Promise<unknown>|null=null;
+ const loadWorld=()=>loading??=world!.load();
+ if(hidden){
+  world.window.once('show',()=>void loadWorld().catch(error=>diagnostics.record(error,'worldLoad')));
+  startServices();
+  host.optional<DesktopCompanionService>(DESKTOP_COMPANION)?.background();
+ }else await loadWorld();
  if(capture)void runCapture(capture,launchedAt,()=>world?{window:world.window,view:world.view}:null).finally(()=>app.quit());
  if(probe)void runProbe(probe,(body,sender)=>router.dispatch(body,sender),world.view.webContents,()=>store.state.connections??[]).finally(()=>app.quit());
  if(loginCheck)void runLoginItemCheck(loginCheck,profile.channel,(body,sender)=>router.dispatch(body,sender),world.view.webContents).finally(()=>app.quit());

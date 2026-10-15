@@ -15,8 +15,8 @@ const THREADS:Thread[]=[
  ['a7f2',-0.4,'Priya Nair <priya@northwind.example>','Q4 roadmap draft by Thursday?',
   "Hey,\n\nCould you send me your draft of the Q4 roadmap by Thursday end of day? I'd like to review it before our 1:1 on Thursday afternoon. "+
   'A rough outline with the three main bets is fine.\n\nThanks!\nPriya',['INBOX','UNREAD']],
- ['b5c9',-2.5,'Skyway Airlines <trips@skyway.example>','Your trip to New York: check-in opens tomorrow',
-  'Your flight SK 482 from San Francisco (SFO) to New York (JFK) departs in 2 days at 8:15 AM. '+
+ ['b5c9',-2.5,'Skyway Airlines <trips@skyway.example>','Your trip to New York is coming up',
+  'Your flight SK 482 from San Francisco (SFO) to New York (JFK) departs {flight} at 8:15 AM. '+
   'Online check-in opens 24 hours before departure. Confirmation code: QX7T2P. Seat 14C.',['INBOX']],
  ['c2e4',-3.0,'Oakview Apartments <leasing@oakview.example>','Lease renewal — please sign by October 15',
   'Your current lease ends on October 31. To renew for 12 months at the same rate, please review and sign the renewal in the resident portal by October 15. '+
@@ -41,12 +41,24 @@ const THREADS:Thread[]=[
  ['f9c1',-1.1,'The Morning Brief <news@morningbrief.example>','Today: markets, tech and weather',
   'Your daily digest: markets opened higher, three new product launches in consumer tech, and a sunny weekend ahead.',['CATEGORY_PROMOTIONS']],
 ];
-// Fictional primary calendar: start in days from now, local wall time, duration in hours.
-const EVENTS:[key:string,days:number,clock:string,hours:number,title:string,description:string,location:string][]=[
- ['standup01',1,'09:30',0.5,'Team standup','Daily sync with the product team.','Zoom'],
- ['oneonone01',3,'14:00',0.5,'1:1 with Priya','Weekly 1:1. Agenda: Q4 roadmap draft.','Priya’s office'],
- ['flight01',2,'08:15',5.5,'Flight SK 482 SFO → JFK','Confirmation QX7T2P · Seat 14C','San Francisco International Airport'],
- ['yoga01',5,'09:00',1,'Yoga class','Saturday vinyasa flow.','Harbor Yoga Studio'],
+// Bright Smile's booking page (platform/browser/demo/brightsmile.html) offers the coming Thursday at 10 AM and 3 PM and
+// Friday at 2:30 PM, counted as that page counts them: days from now to that weekday, a week on once today's time passed.
+const weekdayAhead=(now:number,weekday:number,clock:string)=>{
+ const day=new Date(now),[hour,minute]=clock.split(':').map(Number);day.setHours(hour,minute,0,0);
+ const add=(weekday-day.getDay()+7)%7;return add===0&&day.getTime()<=now?7:add;
+};
+const thursday=(now:number)=>weekdayAhead(now,4,'10:00');
+// The Sunday after the last opening (Thursday at 10 runs a week on from Thursday morning while 3 PM and Friday stay).
+const sunday=(now:number)=>{const last=Math.max(thursday(now),weekdayAhead(now,4,'15:00'),weekdayAhead(now,5,'14:30'));return last+(7-new Date(now+last*DAY).getDay());};
+// Fictional primary calendar: start in days from now (or worked out from now), local wall time, duration in hours. The
+// calendar leaves those openings free whatever the weekday, so Fox can book one: the 1:1 the mail puts on Thursday
+// afternoon sits between them, and the trip to New York starts the Sunday after (Alpha test failure #518: on a Tuesday the old
+// "flight in 2 days" fell on Thursday and Fox rightly booked nothing).
+const EVENTS:[key:string,days:number|((now:number)=>number),clock:string,hours:number,title:string,description:string,location:string][]=[
+ ['standup01',1,'08:30',0.5,'Team standup','Daily sync with the product team.','Zoom'],
+ ['oneonone01',thursday,'12:30',0.5,'1:1 with Priya','Weekly 1:1. Agenda: Q4 roadmap draft.','Priya’s office'],
+ ['flight01',sunday,'08:15',5.5,'Flight SK 482 SFO → JFK','Confirmation QX7T2P · Seat 14C','San Francisco International Airport'],
+ ['yoga01',now=>sunday(now)-1,'09:00',1,'Yoga class','Saturday vinyasa flow.','Harbor Yoga Studio'],
 ];
 const DAY=86_400_000;
 const base64url=(text:string)=>{const bytes=new TextEncoder().encode(text);let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_');};
@@ -55,8 +67,10 @@ const rfc2822=(date:Date)=>{
  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],pad=(n:number)=>String(n).padStart(2,'0');
  return `${days[date.getUTCDay()]}, ${pad(date.getUTCDate())} ${months[date.getUTCMonth()]} ${date.getUTCFullYear()} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())} +0000`;
 };
-function message([key,days,sender,subject,body,labels]:Thread,now:number){
+function message([key,days,sender,subject,text,labels]:Thread,now:number){
  const id=threadId(key),when=now+days*DAY;
+ // The trip mail names the day the calendar's flight leaves.
+ const body=text.replace('{flight}','on '+new Date(now+sunday(now)*DAY).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}));
  return {id,threadId:id,labelIds:labels,internalDate:String(Math.floor(when)),historyId:'1',snippet:body.slice(0,160),sizeEstimate:body.length,
   payload:{mimeType:'text/plain',headers:[{name:'Subject',value:subject},{name:'From',value:sender},{name:'To',value:MOCK_GOOGLE_EMAIL},{name:'Date',value:rfc2822(new Date(when))}],
    body:{data:base64url(body)}}};
@@ -75,7 +89,8 @@ function localISO(time:number){
  const local=new Date(time+offset*60_000).toISOString().slice(0,19);
  return `${local}${offset>=0?'+':'-'}${pad(offset/60)}:${pad(offset%60)}`;
 }
-function event([key,days,clock,hours,title,description,location]:typeof EVENTS[number],now:number){
+function event([key,offset,clock,hours,title,description,location]:typeof EVENTS[number],now:number){
+ const days=typeof offset==='function'?offset(now):offset;
  const start=new Date(now+days*DAY),[hour,minute]=clock.split(':').map(Number);start.setHours(hour,minute,0,0);
  const begins=start.getTime(),ends=begins+hours*3_600_000;
  return {id:key,status:'confirmed',summary:title,description,location,htmlLink:'https://calendar.google.com/calendar/event?eid='+key,

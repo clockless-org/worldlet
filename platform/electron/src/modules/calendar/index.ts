@@ -36,7 +36,7 @@ export function installCalendar(host:Host){
   // Looked at again when the next alert is due, and at least every few hours in case the clock jumped.
   timer=setTimeout(alerts,Math.max(1000,Math.min(next==null?Infinity:next-now,3*3600000)));
  }
- host.onPageLoaded(()=>alerts());
+ host.onStarted(()=>alerts());
  host.onQuit(()=>{stopped=true;if(timer)clearTimeout(timer);});
  host.register({
   calendarEvents:async request=>{

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import zlib from 'node:zlib';
-import {DatabaseSync} from 'node:sqlite';
+import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
 import {openClawConversationIncluded,openClawConversationTitle,openClawRoutine,openClawSharedSession,openClawTurn,type OpenClawTurn} from '../../../../../core/agent/index.ts';
 import {realPath as real} from '../../files.ts';
 import {directories,inside,json,keep,newBudget,readFile,skillsIn,type Budget,type BroughtSkill} from './agent-files.ts';
@@ -119,8 +119,8 @@ type OpenClawNode={key:string;node:any;entry:any;sessions:string[];turns:()=>Ope
 function sqliteNodes<T>(state:string,agent:OpenClawAgent,problems:string[],read:(node:OpenClawNode)=>T|null):T[]|null {
  const file=path.join(state,'agents',agent.id,'agent','openclaw-agent.sqlite');
  if(!fs.existsSync(file)||!inside(file,state))return null;
- let db:DatabaseSync;
- try{db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);}catch{problems.push(`${agent.name}'s conversations`);return [];}
+ let db:AgentDatabase;
+ try{db=openAgentDatabase(file);}catch{problems.push(`${agent.name}'s conversations`);return [];}
  const result:T[]=[];
  try{
   db.exec('PRAGMA trusted_schema=OFF');
@@ -240,9 +240,9 @@ export function openClawToolUses(home=os.homedir(),environment=process.env,limit
   sqliteNodes(state,agent,[],node=>{const title=nodeTitle(node,label);for(const session of node.sessions)titles.set(session,title);return null;});
   const file=path.join(state,'agents',agent.id,'agent','openclaw-agent.sqlite');
   if(!fs.existsSync(file)||!inside(file,state))continue;
-  let db:DatabaseSync|null=null;
+  let db:AgentDatabase|null=null;
   try{
-   db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);db.exec('PRAGMA trusted_schema=OFF');
+   db=openAgentDatabase(file);db.exec('PRAGMA trusted_schema=OFF');
    const timed=(db.prepare('PRAGMA table_info(transcript_events)').all() as any[]).some(row=>row.name==='created_at');
    for(const row of db.prepare(`SELECT session_id,event_json${timed?',created_at':''} FROM transcript_events WHERE event_json LIKE '%"toolResult"%' ORDER BY seq DESC LIMIT ?`).all(limit) as any[]){
     const entry=json(String(row.event_json))??{},message=entry.message??{};
@@ -280,9 +280,9 @@ function dailyNotes(agent:OpenClawAgent):OpenClawNote[] {
 export function scheduledJobs(state:string,problems:string[]=[]):unknown[] {
  const file=path.join(state,'state','openclaw.sqlite');
  if(fs.existsSync(file)&&inside(file,state)){
-  let db:DatabaseSync|null=null;
+  let db:AgentDatabase|null=null;
   try{
-   db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);
+   db=openAgentDatabase(file);
    db.exec('PRAGMA trusted_schema=OFF');
    const table=db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='cron_jobs'`).get();
    if(table)return (db.prepare('SELECT job_id,name,enabled,agent_id,job_json FROM cron_jobs ORDER BY sort_order,job_id').all() as any[]).map(row=>({...json(row.job_json),id:row.job_id,name:row.name,enabled:row.enabled===1,agentId:row.agent_id??json(row.job_json)?.agentId}));
@@ -343,7 +343,7 @@ export function surveyOpenClaw(home=os.homedir(),environment=process.env):{agent
   const file=path.join(state,'agents',agent.id,'agent','openclaw-agent.sqlite');
   if(fs.existsSync(file)){
    try{
-    const db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);
+    const db=openAgentDatabase(file);
     try{conversations+=(db.prepare('SELECT session_key,created_via FROM session_nodes').all() as any[]).filter(row=>openClawConversationIncluded(String(row.session_key),row.created_via)).length;}
     finally{db.close();}
    }catch{}

@@ -460,6 +460,12 @@ public struct DesktopInfo: Codable, Sendable, Equatable {
     /// True while the computer takes Orders (core/phone PhoneDesktop `order`): the dock shows its Order button. Absent
     /// from computers that don't.
     public let order: Bool?
+    /// True when the computer keeps this iPhone's notification token itself (core/phone PhoneDesktop `push`): the app
+    /// hands it over with a `push` message and the relay keeps none. Absent from older computers.
+    public let push: Bool?
+    /// True when the computer waits in the pairing room (core/phone PhoneDesktop `room`): the pairing moves there and the
+    /// relay keeps nothing more. Absent from older computers.
+    public let room: Bool?
 }
 
 /// The phone's own slot: the desktop shows its name in Settings.
@@ -507,8 +513,10 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
     /// A line with attached files (each sent before as `file` parts), said in the main conversation, an item's card
     /// (`item`) or an Applet's page (`applet`).
     case attach(id: String, text: String, files: [String], item: String?, applet: String?)
+    /// This iPhone's notification token for a computer that keeps it (core/phone PhoneMessage `push`; empty takes it back).
+    case push(id: String, platform: String, token: String)
 
-    private enum Keys: String, CodingKey { case type, id, text, item, applet, action, provider, widget, state, said, records, approval, choice, file, part, parts, name, mime, data, files }
+    private enum Keys: String, CodingKey { case type, id, text, item, applet, action, provider, widget, state, said, records, approval, choice, file, part, parts, name, mime, data, files, platform, token }
 
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: Keys.self)
@@ -578,6 +586,11 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
             try c.encode(text, forKey: .text)
             try c.encode(files, forKey: .files)
             if let item { try c.encode(item, forKey: .item) } else if let applet { try c.encode(applet, forKey: .applet) }
+        case let .push(id, platform, token):
+            try c.encode("push", forKey: .type)
+            try c.encode(id, forKey: .id)
+            try c.encode(platform, forKey: .platform)
+            try c.encode(token, forKey: .token)
         }
     }
 }

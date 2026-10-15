@@ -215,6 +215,9 @@ const copy:Record<string,string[]>={
  '{agent} moved in.':['{agent} 搬进来了。','{agent} が引っ越してきました。','{agent} se mudó.'],
  'Needs version {version} or newer':['需要 {version} 或更新版本','バージョン {version} 以降が必要です','Necesita la versión {version} o posterior'],
  'Update {agent}':['更新 {agent}','{agent} を更新','Actualizar {agent}'],
+ 'Hermes Agent is on this computer but does not start. Worldlet installs it again the official way, then you sign in to ChatGPT inside it.':['这台电脑上的 Hermes Agent 启动不了。Worldlet 会按官方方式重新安装，然后你在里面登录 ChatGPT。','このコンピュータの Hermes Agent は起動しません。Worldlet が公式の方法で入れ直し、その中で ChatGPT にサインインします。','Hermes Agent está en este equipo pero no se inicia. Worldlet lo reinstala de forma oficial y luego inicias sesión en ChatGPT dentro de él.'],
+ 'Install in Terminal':['在终端里安装','ターミナルでインストール','Instalar en Terminal'],
+ 'Hermes Agent is installing in Terminal. When it says it is installed, choose Check again.':['Hermes Agent 正在终端里安装，装好后点「重新检测」。','Hermes Agent をターミナルでインストールしています。完了したら「もう一度確認」を選んでください。','Hermes Agent se está instalando en Terminal. Cuando diga que está instalado, elige Volver a comprobar.'],
  '{agent} is updating in Terminal. When it is done, choose Check again.':['{agent} 正在终端里更新，完成后点「重新检测」。','{agent} をターミナルで更新しています。終わったら「もう一度確認」を選んでください。','{agent} se está actualizando en Terminal. Cuando termine, elige Volver a comprobar.'],
  '{agent} is still older than Worldlet needs.':['{agent} 的版本还是比 Worldlet 需要的旧。','{agent} はまだ Worldlet に必要なバージョンより古いです。','{agent} sigue siendo más antiguo de lo que Worldlet necesita.']
 };

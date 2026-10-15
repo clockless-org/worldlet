@@ -10,7 +10,7 @@ let finished=false,failed=false;
 retry.onclick=()=>location.reload();
 function fail(){if(finished)return;failed=true;loader.dataset.failed='true';loader.setAttribute('aria-busy','false');phaseLabel.textContent='Your world could not open. Try again.';retry.hidden=false;clearTimeout(slow);}
 const slow=setTimeout(()=>{if(!finished&&!failed){loader.dataset.delayed='true';phaseLabel.textContent='Your world is taking a little longer…';retry.hidden=false;}},15000);
-document.addEventListener('worldlet:setup-start',()=>{clearTimeout(slow);retry.hidden=true;phase('setup','Make this world yours');});
+document.addEventListener('worldlet:setup-start',()=>{timings.setup??=performance.now();clearTimeout(slow);retry.hidden=true;phase('setup','Make this world yours');});
 document.addEventListener('worldlet:setup-complete',()=>{loader.setAttribute('aria-busy','true');phase('scene','Bringing your world to life');});
 document.addEventListener('worldlet:startup-phase',(event: any)=>{if(finished||failed)return;timings[event.detail]=performance.now();if(event.detail==='scene')phase('scene','Bringing your world to life');});
 document.addEventListener('worldlet:world-error',fail);

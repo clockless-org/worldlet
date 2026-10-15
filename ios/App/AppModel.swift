@@ -167,6 +167,7 @@ final class AppModel {
         opening = nil
         askNotifications = false
         UserDefaults.standard.removeObject(forKey: Self.sentPushKey)
+        keepsPush = false
         PairingStore.delete()
         phase = .unpaired
         attention = .empty
@@ -203,6 +204,8 @@ final class AppModel {
     func pause() {
         loop?.cancel()
         loop = nil
+        // In the pairing room the computer then knows the app is put away, and notifies instead.
+        if let session { Task { await session.leaveRoom() } }
     }
 
     /// One poll; false when it failed, so the loop backs off before trying again.
@@ -212,6 +215,11 @@ final class AppModel {
         do {
             let update = try await session.sync(wait: wait)
             guard self.session === session else { return false }
+            // The computer moved the pairing into the pairing room: the kept link says so from now on.
+            if await session.inRoom, let link, link.room != true, self.session === session {
+                self.link = link.inRoom
+                PairingStore.save(link.inRoom)
+            }
             apply(update)
             if phase == .connecting {
                 phase = .paired
@@ -237,6 +245,10 @@ final class AppModel {
         if let seen = update.computerSeenAt { computerSeenAt = Date(timeIntervalSince1970: seen / 1000) }
         if let desktop = update.desktop, !desktop.name.isEmpty { computerName = desktop.name }
         if let desktop = update.desktop { takesOrders = desktop.order == true }
+        if let desktop = update.desktop, (desktop.push == true) != keepsPush {
+            keepsPush = desktop.push == true
+            sendPushToken()
+        }
         if let snapshot = update.attention {
             attention = snapshot
             receivedAttention = true
@@ -289,6 +301,9 @@ final class AppModel {
     /// Asks once, after pairing, whether to turn notifications on (HomeView's alert, before the system's own question).
     var askNotifications = false
     @ObservationIgnored private var pushToken: String?
+    /// The computer keeps the token itself (its desktop slot says `push`), so the relay gets none.
+    /// Starts as it was last sent, so a launch does not hand the token back to the relay before the slot arrives.
+    @ObservationIgnored private var keepsPush = UserDefaults.standard.string(forKey: AppModel.sentPushKey)?.hasSuffix(" direct") == true
     /// Where a tapped notification goes; HomeView opens it once the Center has what it names.
     var opening: PushTarget?
     /// A Center snapshot came since the tap, so an item or Applet still missing from it is gone.
@@ -327,11 +342,12 @@ final class AppModel {
 
     private func sendPushToken() {
         guard let session, let keys, let token = pushToken, phase == .paired else { return }
-        let sent = "\(keys.id) \(Self.pushPlatform) \(token)"
+        let direct = keepsPush
+        let sent = "\(keys.id) \(Self.pushPlatform) \(token)\(direct ? " direct" : "")"
         guard UserDefaults.standard.string(forKey: Self.sentPushKey) != sent else { return }
         Task {
             // A failure is tried again with the token the next launch brings.
-            guard (try? await session.registerPush(platform: Self.pushPlatform, token: token)) != nil, self.session === session else { return }
+            guard (try? await session.registerPush(platform: Self.pushPlatform, token: token, direct: direct)) != nil, self.session === session else { return }
             UserDefaults.standard.set(sent, forKey: Self.sentPushKey)
         }
     }
@@ -353,7 +369,11 @@ final class AppModel {
         guard !Demo.enabled, let keys, let session, pair == keys.id, let box, let push = try? keys.openPush(box: box),
               let message = push.message(for: button, text: text) else { return }
         if case let .approval(_, approval, choice) = message { answered[approval] = choice }
-        do { try await session.send(message) } catch {
+        do {
+            try await session.send(message)
+            // In the pairing room, staying would tell the computer the app is showing and hold back the answer's notification.
+            if UIApplication.shared.applicationState == .background { await session.leaveRoom() }
+        } catch {
             if case let .approval(_, approval, _) = message { answered[approval] = nil }
             let content = UNMutableNotificationContent()
             content.title = push.title

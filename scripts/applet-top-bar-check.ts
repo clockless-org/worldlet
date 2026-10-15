@@ -63,7 +63,7 @@ async function bar(page:Page){
   const shown=(e:Element)=>(e as HTMLElement).offsetWidth>0&&getComputedStyle(e).visibility!=='hidden';
   return {back:box('#notionBack'),left:box('.applet-bar-left'),right:box('.applet-bar-right'),title:box('.companion-context'),shelf:box('.applet-shelf'),add:box('.applet-shelf-new'),
    toolbar:box('.browser-toolbar'),viewport:box('.browser-viewport'),offer:box('.browser-pip-offer'),toggle:box('.applet-mode-toggle'),panel:box('#notionContent'),hud:box('.notion-hud'),
-   tools:[...document.querySelectorAll('.browser-toolbar>*')].filter(shown).map(e=>e.classList.contains('browser-address')?'Address':e.querySelector('span')?.textContent?.trim()||''),
+   tools:[...document.querySelectorAll('.browser-toolbar>*')].filter(shown).map(e=>e.classList.contains('browser-address')?'Address':e.classList.contains('applet-shelf-new')?'New page':e.querySelector('span')?.textContent?.trim()||''),
    toolBoxes:[...document.querySelectorAll('.browser-toolbar>*')].filter(shown).map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}),
    bar:[...document.querySelectorAll('.applet-bar-side button')].filter(b=>(b as HTMLElement).offsetWidth&&!b.closest('.applet-mode-toggle')).map(b=>b.id==='notionBack'?'Back':b.classList.contains('browser-pip-offer')?'Picture in picture':b.textContent.trim()),
    dockLeft:[...document.querySelectorAll('.fox-action-left button')].filter(b=>(b as HTMLElement).offsetWidth).map(b=>b.textContent.trim()),
@@ -89,7 +89,9 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
  assert.ok(r.shelf.x>=applet.width-2&&Math.abs(center(r.shelf)-center(r.hud))<=2,label+': the shelf stands over Fox\'s lane, centered on Fox '+JSON.stringify({shelf:r.shelf,hud:r.hud,side:applet}));
  if(r.back&&leading)assert.ok(r.back.x>=right(TRAFFIC_LIGHTS)+8&&!overlaps(r.back,TRAFFIC_LIGHTS),label+': Back clears the Mac traffic lights '+JSON.stringify(r.back));
  if(r.right)assert.ok(Math.abs(right(r.right)-(r.shelf.x-16))<=2,label+': the Applet\'s controls end at the edge of its side, before the shelf '+JSON.stringify({right:r.right,shelf:r.shelf}));
- assert.ok(r.add&&r.add.x>=r.shelf.x,label+': + stands in Fox\'s lane '+JSON.stringify({add:r.add,shelf:r.shelf}));
+ // On a website page + ends the page's toolbar instead (owner request 2026-10-15).
+ if(r.toolbar)assert.ok(r.add&&r.add.x>=r.toolbar.x&&right(r.add)<=right(r.toolbar),label+': + ends the toolbar '+JSON.stringify({add:r.add,toolbar:r.toolbar}));
+ else assert.ok(r.add&&r.add.x>=r.shelf.x,label+': + stands in Fox\'s lane '+JSON.stringify({add:r.add,shelf:r.shelf}));
  if(r.panel)assert.ok(r.panel.x+r.panel.width<=r.shelf.x+2,label+': the panel stands beside the shelf '+JSON.stringify({panel:r.panel,shelf:r.shelf}));
 }
  for(const [width,height] of [[1440,840],[1100,760]]){
@@ -98,13 +100,14 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   const r=await bar(page);
   assertShelfRow(r,width,'YouTube '+width);
   assert.equal(r.back,null,'on a website page the toolbar\'s Back is the one Back');
-  assert.deepEqual(r.bar,['Picture in picture'],'the bar holds only the Applet\'s own control '+JSON.stringify(r.bar));
+  assert.deepEqual(r.bar,[],'Picture in picture leaves the bar for the toolbar '+JSON.stringify(r.bar));
   assert.ok(r.dockLeft.includes('World'),'World, the way back to the World, stands left of Fox in its dock '+JSON.stringify(r.dockLeft));
   assert.ok(r.dock.includes('Summarize'),'the Applet\'s action, Summarize, sits beside Fox in its dock '+JSON.stringify(r.dock));
-  assert.deepEqual([r.offer.width,r.offer.height],[44,44],'Picture in picture is its icon circle');
-  await assertMaterial(page,'.browser-pip-offer','Picture in picture');
-  // The toolbar: one row floating above the page.
-  assert.deepEqual(r.tools,['Back','Forward','Refresh','Home','Address','Focus'],'the toolbar, in order '+JSON.stringify(r.tools));
+  assert.deepEqual([r.offer.width,r.offer.height],[34,34],'Picture in picture is the toolbar\'s icon circle');
+  // The toolbar: one row floating above the page, every control a frosted black button (owner request 2026-10-15),
+  // Picture in picture and + at its end.
+  assert.deepEqual(r.tools,['Back','Forward','Refresh','Home','Address','Focus','Picture in picture','New page'],'the toolbar, in order '+JSON.stringify(r.tools));
+  assert.ok(await page.evaluate(()=>[...document.querySelectorAll('.browser-toolbar>:is(button,.browser-address)')].every(e=>{const s=getComputedStyle(e.matches('button')?e:e.querySelector('input')!);return /blur/.test(s.backdropFilter)&&s.color==='rgb(255, 255, 255)'||(e as HTMLButtonElement).disabled;})),'every control is frosted black glass with white ink');
   // It takes no room from the page (owner request 2026-10-11): it floats centered just above the page's top edge, on a
   // painted frame's top rail (owner request 2026-10-13), never covered by the frame.
   assert.ok(Math.abs(r.toolbar.y+r.toolbar.height-r.viewport.y)<=1,'the toolbar ends at the page\'s top edge, never over the page '+JSON.stringify({toolbar:r.toolbar,viewport:r.viewport}));
@@ -122,7 +125,7 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   await shot(page,'applet-top-bar-'+width+'.png');
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log('PASS at 1440 and 1100 the shelf takes the title\'s place, the Applet\'s own control ends the bar\'s row in Fox\'s material, and a website page\'s toolbar (Back, Forward, Refresh, Home, address, Focus) is one row floating centered above the page, taking none of its room.');
+ console.log('PASS at 1440 and 1100 the shelf takes the title\'s place, and a website page\'s toolbar (Back, Forward, Refresh, Home, address, Focus, Picture in picture, +) is one row of frosted black buttons floating centered above the page, taking none of its room.');
  {
   // Back and Forward follow the page's own history (owner request 2026-10-06): in the toolbar both stay, resting while
   // there is nowhere to go; the File menu's keys do the same, and World beside Fox leaves for the World.

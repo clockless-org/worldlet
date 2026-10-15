@@ -203,7 +203,7 @@ try{
   const foxHost={...host,
    page:{call:async(...args:unknown[])=>{calls.push(args);return {ok:true,page:'snapshot'};},event:(name:string,detail:Row)=>{events.push([name,detail]);},documentEvent:()=>{},ready:()=>true},
    register:(more:Record<string,(request:Row)=>unknown>)=>Object.assign(actions,more),provide:(name:string,value:unknown)=>{services.set(name,value);return value;},
-   onPageLoaded:()=>{},onPageReload:()=>{},onQuit:(quit:()=>unknown)=>quits.push(quit),window:()=>null,worldView:()=>null} as unknown as Host;
+   onPageLoaded:()=>{},onPageConnected:()=>{},onStarted:()=>{},onPageReload:()=>{},onQuit:(quit:()=>unknown)=>quits.push(quit),window:()=>null,worldView:()=>null} as unknown as Host;
   installFox(foxHost);
   store.setCloudConsent(true);
   powerMonitor.emit('resume');

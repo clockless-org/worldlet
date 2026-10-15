@@ -5,7 +5,11 @@ import type {WorldStore} from '../store/world-store.ts';
 import type {HostRequest} from '../../../../contracts/platform.ts';
 
 export type Row=Record<string,any>;
-export interface RequestContext {requestId:string;sender:WebContents}
+/** How a request reached the router: the app's World page over IPC, a World page in a web browser over its socket
+ * (host/web-page.ts), or the host itself. */
+export type RequestTransport='ipc'|'web'|'host';
+/** `sender`: the app's World page, for a request that came over IPC only. */
+export interface RequestContext {requestId:string;transport:RequestTransport;sender?:WebContents}
 export type ActionHandler=(request:HostRequest&Row,context:RequestContext)=>unknown|Promise<unknown>;
 
 /** Host → trusted World page. Mirrors the earlier native hosts' page globals and events. */
@@ -35,8 +39,17 @@ export interface Host {
  /** Called when the World page reloads or the app quits. */
  onPageReload(listener:()=>void):void;
  onQuit(listener:()=>void|Promise<void>):void;
- /** Called once the World page finished loading. */
+ /** Called once the app's World page finished loading (in the Node host, a browser's page, its only one): window work
+  * goes here. */
  onPageLoaded(listener:()=>void):void;
+ /** Called when any World page comes: the app's window loading, or a browser's page connecting (host/web-page.ts).
+  * What a page needs pushed to it once it is there, beyond the World's snapshot, goes here, so a browser's page gets
+  * what the window gets on load. */
+ onPageConnected(listener:()=>void):void;
+ /** Called once per run when the host starts its own work: the World page's first load, or at once when the app runs in
+  * background with no page (core/phone/README.md#web). What runs without the World (Attention reading, routines, the
+  * phone and browser links) starts here, not on the page. */
+ onStarted(listener:()=>void):void;
  /** `recent`: the last failures this process recorded, with their error text, from memory only (host/diagnostics.ts). */
  diagnostics:{record(error:unknown,operation?:string,requestId?:string):void;log(line:string):void;recent?():{at:string;operation:string;requestId:string;message:string}[]};
 }

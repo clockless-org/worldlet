@@ -4,21 +4,22 @@ import os from 'node:os';
 import {app,shell} from 'electron';
 import {openInBrowser} from '../../system-browser.ts';
 import {WorldletError} from '../../files.ts';
-import {AGENT,ANALYTICS,ONGOING,VAULT,type AgentService,type AnalyticsService,type OngoingService,type VaultService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,ONGOING,VAULT,type AgentAccess,type AgentService,type AnalyticsService,type OngoingService,type VaultService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 import {installationRoot,type Profile} from '../../profile.ts';
 import {ExecutionJournal} from './journal.ts';
 import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './hermes-files.ts';
 import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
+import {createAgentAccess} from './agent-access.ts';
 import {moveFoxProfile} from './fox-move.ts';
-import {endHermesInstall,hermesSessionModels,installHermes,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
+import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
-import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,harnessEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
+import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,forgetNotStarting,harnessEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
 import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
@@ -164,6 +165,7 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   harnessSkills:()=>current().harnessSkills?.()??null,
   channelSend:source=>harnessSend(source),
   onChannelTool:handler=>{channelTool=handler;},
+  agentAccess:()=>agentAccess,
   voice:()=>{const id=current().harness?.id;if(!id)return null;if(voice?.id!==id)voice={id,service:harnessVoice(id)};return voice.service;},
   agents:()=>current().agents?.()??null,
   models:()=>current().models?.()??null,
@@ -246,7 +248,9 @@ export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<v
  const home=discoverOtherHermes(context.root);
  if(!home)return null;
  const install=adapter.install,environment=currentEnvironment();
- return (standing??=openStandingWorldTools({channel:(name,args)=>channelTool?channelTool(name,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})})).then(tools=>
+ const tools=standingWorldTools();
+ if(!tools)return null;
+ return tools.then(tools=>
   keepHermesResident(home,(args,stdin)=>runHarnessCommand(install,environment,args,{timeout:120_000,...stdin!==undefined?{stdin}:{}}),{worldTools:home=>tools.server(home)})).then(
   reason=>{if(reason)context.failure(new WorldletError(`Hermes Agent is not kept running for Fox: ${reason}`),'hermesResident');},
   error=>context.failure(error,'hermesResident'));
@@ -254,7 +258,17 @@ export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<v
 /** World tools on Hermes (owner decision 2026-10-08 19:15Z): the standing endpoint its registered `worldlet` server relays
  * to, one per app run, and where a call outside any Fox turn goes (Fox's module: `AgentService.onChannelTool`). */
 let standing:Promise<StandingWorldTools>|null=null;
-let channelTool:((name:string,args:Row)=>Promise<Row>)|null=null;
+/** That endpoint, opened on first use (null before the runtime is installed): Hermes Agent's registered server, and
+ * the other Agents a host registers on it (platform/node control.ts). */
+export function standingWorldTools():Promise<StandingWorldTools>|null {
+ if(!agentAccess)return null;
+ return standing??=openStandingWorldTools({access:agentAccess,channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
+}
+let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
+/** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
+let agentAccess:AgentAccess|null=null;
+/** How many of each Agent's newest audit entries Settings shows. */
+const AGENT_ACCESS_AUDIT=20;
 
 /** Setup's local Agent choice (`agentHarness`): `detect` lists Harnesses installed here by ID and
  * title, never paths; `select` proves the chosen one answers before Fox switches to it, so a
@@ -343,16 +357,28 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // is chosen; `fresh` reads it again, after the person updated it.
    const versions=await Promise.all(found.map(install=>installedVersion(install,request.fresh===true)));
    (agents as Row[]).forEach((agent,i)=>{agent.version=agentVersionStatus(found[i].id,versions[i]);});
+   // A Hermes Agent whose command fails at once (left half installed) is no Agent to choose: setup offers to install it
+   // again instead (`install-hermes` repairs it), and says why (`brokenHermes`). Choosing it used to fail in under a
+   // second with nothing to do about it (Windows Beta 4384, 2026-10-13).
+   const at=found.findIndex(install=>install.id==='hermes');
+   const brokenHermes=at>=0&&versions[at]===null&&await hermesStarts(found[at],currentEnvironment(),15_000)==='failed';
+   if(brokenHermes)agents.splice(at,1);
    // Setup preselects the recommended one (owner request 2026-10-04: the local option is the default).
    if(remote?.paired)await remote.heartbeat();
    const elsewhere=remote?.paired||gateway()?.active===true;
-   return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root),remote:remoteStatus(),gateway:remoteGatewayView(gateway())};
+   return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root),remote:remoteStatus(),gateway:remoteGatewayView(gateway()),...brokenHermes?{brokenHermes:true}:{}};
   }
   // No Agent here (Codex alone included, owner decision 2026-10-09 11:51 PDT): stock Hermes Agent, installed the official
   // way to its default location, or the one already here as it is (12:11 PDT). The person then picks it like any other.
   if(request.operation==='install-hermes'){
    const install=await installHermes(context.root,{environment:currentEnvironment(),progress:step=>onHermesSetup({stage:'install',...step})});
+   forgetNotStarting(install.command);
    return {ok:true,id:install.id,title:install.title};
+  }
+  // The same installer in a window the person sees, when the quiet one failed; Check again finds what it installed.
+  if(request.operation==='install-hermes-window'){
+   if(!await workingHermesAgent(currentEnvironment())){const run=hermesInstallWindow(process.platform);await openSignIn(run,run.args,file=>shell.openPath(file),process.platform,HERMES_WINDOW_DONE);}
+   return {ok:true};
   }
   // ChatGPT as Hermes Agent's model, signed in inside Hermes with its own command; `cancel-sign-in` stops it.
   if(request.operation==='sign-in-hermes'){
@@ -400,6 +426,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    // (`checkLater`) moves on at once and hears how it ended (`onAgentCheck`); anything else waits for it as before.
    const later=request.checkLater===true;
    if(!later)await prove();
+   forgetNotStarting(install.command);
    writeSelection(context.root,install.id);writeAdopted(context.root,null);attachChosenHermes(context.root,install.id,error=>context.failure(error,'foxMove'));
    await switchTo(adapter);
    // Once it answers, it describes itself in the background (owner request 2026-10-11); setup never waits for that.
@@ -494,6 +521,7 @@ export function installAgentRuntime(host:Host){
   // Unpaired on the other computer: Fox has no Agent until one is chosen.
   onEnded:()=>{if(adapter instanceof RemoteHarnessAdapter)void switchTo(noAgent()).catch(error=>host.diagnostics.record(error,'agentRuntime'));}});
  const vault=host.use<VaultService>(VAULT);
+ agentAccess=createAgentAccess({root:context.root,vault,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  let adapter=selectAdapter(context,undefined,remote,vault);
  // Once the runtime is ready and Fox's profile exists (after its first turn), and again whenever Fox changes Agent.
  listeners.push(()=>{void residentHermes(context,adapter);});
@@ -524,6 +552,17 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
+ /** Settings › Agent › Access (core/agent/GRANTS.md): each Agent with its last use, Grants and newest audit entries
+  * (`list`), or one revoked (`revoke`: its token and endpoint files go, revokedAt is stamped). */
+ host.register({agentAccess:async request=>{
+  const access=agentAccess!;
+  if(request.operation==='revoke'){
+   const id=typeof request.id==='string'?request.id:'';
+   if(!access.identity(id))throw new WorldletError('That Agent is not known here.');
+   access.revoke(id);return {ok:true};
+  }
+  return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit}))};
+ }});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);
    // The things it said the person handles most become Applets: its own conversations' (modules/tasks), and a catalog

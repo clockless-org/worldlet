@@ -19,6 +19,7 @@ import {capture,decode,dispose,encode,restore,validate,PREFERENCE_KEYS,type Arch
 import {worldMenu,worldMenuState} from './world-menu.ts';
 import {DesktopCompanion} from './companion.ts';
 import {companionEntry,trayIcon,type TrayFactory} from './companion-tray.ts';
+import {RUN_IN_BACKGROUND} from '../../host/services.ts';
 import type {ActionHandler,Host} from '../../host/types.ts';
 import {keptOnQuit,outliveQuit,processRows,processTrees,relaunchAfterQuit,startPendingRelaunch,strayChildren,wantsQuit,withDeadline} from '../../host/quit.ts';
 
@@ -37,7 +38,7 @@ const host:Host={
  provide:(name,service)=>{services.set(name,service);return service;},
  use:name=>{if(!services.has(name))throw Error('Missing host service '+name);return services.get(name) as any;},
  optional:name=>services.get(name) as any,
- onPageReload:()=>{},onQuit:()=>{},onPageLoaded:()=>{},
+ onPageReload:()=>{},onQuit:()=>{},onPageLoaded:()=>{},onPageConnected:()=>{},onStarted:()=>{},
  diagnostics:{record:()=>{},log:()=>{}}
 };
 const identity=()=>Object.fromEntries(INSTALLATION_KEYS.map(key=>[key,preferences.get(key)]));
@@ -460,6 +461,36 @@ try{
   assert(!desktop.isHidden,'opening the World ends the hiding');
   desktop.stop();
   console.log('PASS another app in front puts Fox on the desktop; the World coming back brings it home');
+ }
+ // Run in background (core/phone/README.md#web): no window stays, not even Fox, while the app keeps running for a browser link.
+ {
+  const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
+  world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
+  const page={...host.page,ready:()=>true,call:async(name:string)=>name==='worldletCompanionGeometry'?{x:10,y:10,width:120,height:140}:undefined} as Host['page'];
+  const live:Host={...host,window:()=>world,worldView:()=>view,page};
+  let unfinished=true,hides=0;
+  const trays:string[]=[];
+  const fake:TrayFactory=()=>{trays.push('shown');return {setToolTip:()=>{},setContextMenu:()=>{},on:()=>{},destroy:()=>{}};};
+  const desktop=new DesktopCompanion(live,companionEntry(live,noop,'win32',fake),{quit:()=>{},unfinished:()=>unfinished,follows:false,hideApp:()=>{hides+=1;}});
+  desktop.attach();world.showInactive();
+  assert(!desktop.background()&&world.isVisible(),'nothing runs in background until onboarding is over');
+  unfinished=false;
+  assert(desktop.background(),'running in background');
+  assert(!world.isVisible()&&!desktop.isDesktop,'the World goes away and Fox does not come out');
+  assert.equal(trays.length,1,'the tray (Windows) is the way back');assert.equal(hides,1,'the Mac gives the foreground back');
+  world.showInactive();
+  preferences.set(RUN_IN_BACKGROUND,true);
+  try{
+   assert(desktop.shouldKeepOpen(),'closing the World set to run in background keeps the app');
+   await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));
+   assert(!world.isVisible()&&!desktop.isDesktop,'and leaves no window, not even Fox');
+  }finally{preferences.set(RUN_IN_BACKGROUND,false);}
+  world.showInactive();
+  assert(desktop.shouldKeepOpen());
+  for(let i=0;i<20&&!desktop.isDesktop;i++)await new Promise(resolve=>setTimeout(resolve,25));
+  assert(desktop.isDesktop,'without it, closing the World leaves Fox on the desktop as before');
+  desktop.stop();world.destroy();
+  console.log('PASS run in background leaves no window, not even Fox, once onboarding is over');
  }
  // The World closing (quit, restart) while the page answers leaves nothing to detach: once an unhandled
  // "Object has been destroyed" from detach on a Mac.

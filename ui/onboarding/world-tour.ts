@@ -112,10 +112,10 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   },actions:()=>offerMail()?[button('Later',next,true),button('Connect Mail',connectMail)]:[button('Continue',next)]},
   // 4. The dock beside Fox: what Fox is doing now, and the Routines (owner layout 2026-10-11).
   {key:'dock',target:()=>elementBox(root,'.task-panel:not([hidden])')||elementBox(root,'.companion-pet .companion-avatar'),text:()=>
-   'Beside me is what I’m doing for you. Tasks I’m working on show up here as I go, and your **Routines** wait their turn: I prepare your day every morning and wrap it up every evening. You can change them any time.'},
+   'Beside me is what I’m doing for you. Tasks I’m working on show up here as I go, and your **Scheduled** tasks wait their turn: I prepare your day every morning and wrap it up every evening. You can change them any time.'},
   // 5. Back to Fox: every setting lives here, and the phone, first the app, then the pairing code. It waits for a choice.
   {key:'fox',tell:()=>!phoneOffered()||phoneState()==='paired',target:()=>elementBox(root,'.companion-pet .companion-side'),body:()=>phoneOffered()?phoneCode():null,text:()=>{
-   const settings='Everything about me is set up here: **Agent** opens your settings, your model, memory, skills, Routines and connections.';
+   const settings='Everything about me is set up here: **Agent** opens your settings, your model, memory, skills, Scheduled tasks and connections.';
    if(!phoneOffered())return `${settings} You can also use me on your **phone**: pair it any time under **Phone**.`;
    const state=phoneState();
    if(state==='paired')return `${settings} And you’re all set: ${phone.phone?.name?phone.phone.name+' is':'your phone is'} paired, so your Attention Center and I are on your **phone** too.`;

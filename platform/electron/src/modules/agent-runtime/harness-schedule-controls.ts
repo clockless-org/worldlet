@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {DatabaseSync} from 'node:sqlite';
+import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
 import {commandLine,commandReason,harnessService,hermesJobCommand,hermesJobCreateCommand,hermesScheduleRun,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawScheduleRun,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import type {HarnessJobChange,HarnessJobCreate,HarnessJobRun,HarnessSchedule} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
@@ -49,9 +49,9 @@ function hermesLatest(root:string):HarnessJobRun[] {
 function openClawLatest(state:string):HarnessJobRun[]|null {
  const database=path.join(state,'state','openclaw.sqlite');
  if(!fs.existsSync(database)||!inside(database,state))return null;
- let db:DatabaseSync|null=null;
+ let db:AgentDatabase|null=null;
  try{
-  db=new DatabaseSync(database,{readOnly:true,timeout:2000} as any);db.exec('PRAGMA trusted_schema=OFF');
+  db=openAgentDatabase(database);db.exec('PRAGMA trusted_schema=OFF');
   if(!db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='task_runs'`).get())return null;
   // SQLite returns the other columns of the row that holds max().
   const rows=db.prepare(`SELECT task_id,source_id,status,max(ended_at) AS ended_at,error,terminal_summary,detail_json FROM task_runs WHERE runtime='cron' AND ended_at IS NOT NULL AND source_id IS NOT NULL

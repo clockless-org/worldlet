@@ -1,7 +1,7 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import {protocol,net,type Session} from 'electron';
 import {pathToFileURL} from 'node:url';
+import {resolveWorldFile} from './world-file.ts';
 export const WORLD_SCHEME='worldlet';
 export const WORLD_ORIGIN='worldlet://app';
 export const WORLD_URL=WORLD_ORIGIN+'/index.html';
@@ -24,12 +24,8 @@ export function serveWorld(session:Session,webRoot:()=>string,ingest?:(request:R
   const url=new URL(request.url);
   if(url.host!=='app')return new Response('Not found',{status:404});
   if(url.pathname==='/ingest'||url.pathname.startsWith('/ingest/'))return ingest?ingest(request):new Response(null,{status:204});
-  const root=realRoot();
-  let relative=decodeURIComponent(url.pathname);
-  if(relative==='/'||!relative)relative='/index.html';
-  let file:string;
-  try{file=await fs.promises.realpath(path.join(root,path.normalize(relative)));}catch{return new Response('Not found',{status:404});}
-  if(file!==root&&!file.startsWith(root+path.sep)||!(await fs.promises.stat(file)).isFile())return new Response('Not found',{status:404});
+  const file=await resolveWorldFile(realRoot(),url.pathname);
+  if(!file)return new Response('Not found',{status:404});
   const response=await net.fetch(pathToFileURL(file).toString());
   const headers=new Headers(response.headers);
   headers.set('Cache-Control','no-cache');

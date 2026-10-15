@@ -22,7 +22,8 @@ import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../core/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
-import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
+import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,firstPrepRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
+import {timingBucket} from '../../core/diagnostics/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
@@ -1494,7 +1495,7 @@ export function mountNotionWorld(data: World, native: any) {
   const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking||followUpAsking});
   const dailyPoll=setInterval(()=>{
     if(!root.isConnected){clearInterval(dailyPoll);return;}
-    announceDaily();
+    announceDaily();startFirstCard();
     if(backgroundMoment()||foxArtifact.visible||$('notionDialog').open||voice?.active)return;
     const due=dailyArtifactDue(daily,new Date(),routinesOn);
     if(!due){void prepareReply();return;}
@@ -1511,12 +1512,12 @@ export function mountNotionWorld(data: World, native: any) {
     return {drafted:()=>drafted,end(ok:boolean){window.removeEventListener('worldlet:email-drafted',count);
      window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text:'',...(ok?{done:foxWorkDone(kind,drafted)}:{})}}));}};
   }
-  async function askDaily(due:{kind:'plan'|'summary';day:string}){
+  async function askDaily(due:{kind:'plan'|'summary';day:string},first=false){
     dailyAsking=true;dailyAsked=due;dailyShown=false;
     // What the brief holds, as the person wrote it (Morning brief in the Journal, or told to Fox).
-    let brief:string|undefined;if(due.kind==='plan')try{brief=await native?.morningBrief?.();}catch{}
+    let brief:string|undefined;if(due.kind==='plan'&&!first)try{brief=await native?.morningBrief?.();}catch{}
     const before=daily;daily=markDailyMade(daily,due.kind,due.day);saveDaily();
-    const request=dailyArtifactRequest(due.kind,due.day,brief);
+    const request=first?{text:firstPrepRequest(due.day),displayText:DAILY_ROUTINE_NAMES.plan}:dailyArtifactRequest(due.kind,due.day,brief);
     // Made quietly in a background session beside the conversation (owner Orders 2026-10-07): no message in Fox's card
     // and no reply line, the person can talk to Fox meanwhile, and the long request never fills the conversation.
     const work=backgroundWork('daily',due.kind,due.kind==='plan'?DAILY_ROUTINE_NAMES.plan+': preparing your day…':DAILY_ROUTINE_NAMES.summary+': writing it up…',DAILY_ROUTINE_NAMES[due.kind]);
@@ -1527,11 +1528,42 @@ export function mountNotionWorld(data: World, native: any) {
      .then(()=>{if(!dailyShown)failed='It finished without making the card.';})
      .catch(error=>{ok=false;const said=String(error?.message||'');if(/busy/i.test(said)){daily=before;saveDaily();}else failed=said||'Your Agent stopped.';})
      .finally(()=>{work.end(ok);dailyAsking=false;dailyAsked=null;});
+    if(first)firstCardEnded(ok,failed);
     // Today's prep and Wrap up today are Worldlet's own routines (owner 2026-10-11 20:21 PDT: Production metrics); a run
     // put off because other work was busy did not run. The host leaves the practice world out.
     if(ok||failed){reportProductEvent('routine_completed',{routine_source:'worldlet',routine_status:failed?'failed':'ok'});if(!failed)reportProductEvent('task_completed',{task_kind:'routine'});}
-    if(failed)void Promise.resolve(native?.artifacts?.({operation:'scheduleFailed',scheduled:due.kind,day:due.day,reason:failed})).catch(()=>{});
+    // The first card's failure is no Worth Doing item: the tour would pick it as the first thing to do together.
+    if(failed&&!first)void Promise.resolve(native?.artifacts?.({operation:'scheduleFailed',scheduled:due.kind,day:due.day,reason:failed})).catch(()=>{});
   }
+  // The first card (owner decision 2026-10-13): a new person's first Today's prep starts the moment their World first
+  // opens, whatever the hour, in a background session beside the first-run tour, so the tour's pick step
+  // (ui/onboarding/first-value.ts) finds a card Fox already made and approving it is the first win, with no Google
+  // needed. It is the one background turn the first run allows; never in the practice world or an automated browser,
+  // once per World (a busy background session asks again at the next poll), not with Today's prep paused, and not
+  // with Mail connected.
+  // `data-first-card` tells the tour it is on its way (`preparing`), then `ready` or `failed`. Its steps are product
+  // events (core/diagnostics/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
+  const firstCardKey='worldlet-first-card-'+(data.workspaceId||data.workspace);
+  let firstCardStarted=0,routinesKnown=!native?.dailyRoutines;
+  const firstCardEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
+  function startFirstCard(){
+    if(data.sample||navigator.webdriver||!routinesKnown||!native?.firstRun?.()||!voice?.background||!routinesOn.plan||dailyAsking||replyAsking||followUpAsking)return;
+    // With Mail connected, the first thing to do together comes from the mail (a task outranks the card at the tour's pick
+    // step) and a card made beside it competes with Fox's help on that task (Mac Alpha 4386's onboarding check):
+    // the first card is for a World without mail.
+    try{if(localStorage.getItem(firstCardKey))return;localStorage.setItem(firstCardKey,connectionLive(data.moduleConnections?.find(c=>c.provider==='gmail')||{})?'mail':'started');if(localStorage.getItem(firstCardKey)==='mail')return;}catch{return;}
+    firstCardStarted=performance.now();root.dataset.firstCard='preparing';firstCardEvent('first_card_started');
+    void askDaily({kind:'plan',day:dayKey(new Date())},true);
+  }
+  function firstCardEnded(ok:boolean,failed:string){
+    // Other background work was running: the next poll starts it again.
+    if(!ok&&!failed){try{localStorage.removeItem(firstCardKey);}catch{}delete root.dataset.firstCard;return;}
+    const result=failed?(ok?'no_card':'failed'):'ok';
+    root.dataset.firstCard=result==='ok'?'ready':'failed';
+    try{localStorage.setItem(firstCardKey,result);}catch{}
+    firstCardEvent('first_card_ready',{first_card_result:result},timingBucket(performance.now()-firstCardStarted));
+  }
+  if(!data.sample)void Promise.resolve(native?.dailyRoutines?.()).catch(()=>null).finally(()=>{routinesKnown=true;setTimeout(startFirstCard,0);});
   // A follow-up on an Artifact (core/artifacts/follow-up.ts, owner request 2026-10-11): the card turns over and drops into
   // the Doing now side beside Fox, and its request runs in a background session beside the conversation; what it makes
   // comes back as a new card. Busy with other background work, it is an ordinary turn instead.

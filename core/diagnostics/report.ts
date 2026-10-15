@@ -81,9 +81,25 @@ const FAILURE_KINDS:[RegExp,string][]=[
  // batch, or saved only part of it. Both reached PostHog for a week as a bare `other` (2026-10-04 to 10-11).
  [/applet analysis ended without a verified result/,'noResult'],
  [/did not cover every supplied source record/,'partialCoverage'],
+ // Fox turns with the person's Agent (owner nightly diagnostics 2026-10-13: 11 sub-second fox_turn_failed in a week, all a
+ // bare operationFailed with no rule, so not running, not answering and signed out looked the same).
+ // Choosing a local Agent (agentHarness select): its command did not start, it is older than Worldlet needs, or it is
+ // gone (Windows Beta 4384, 2026-10-13: eleven sub-second local_agent_select_failed, all a bare operationFailed).
+ [/did not start|does not start|could not start/,'notStarted'],
+ [/is too old for worldlet/,'outdated'],
+ [/no longer on this computer/,'missing'],
+ [/not installed|command not found|is not recognized as an internal/,'notInstalled'],
+ [/not (?:signed|logged) in|log ?in first|login required/,'signedOut'],
+ [/\beconnrefused\b|connection refused|not running|is not kept running|socket hang up|\beconnreset\b/,'notRunning'],
+ [/did not answer|no reply|empty (?:reply|response)|finished without an answer/,'noAnswer'],
  [/\benoent\b|no such file|not found|(?:is|are) missing|does not exist/,'missing'],
  [/\beacces\b|\beperm\b|permission denied|not permitted|access is denied/,'permission'],
- [/\bexited (?:with )?(?:code )?-?\d+|exit code|exit status/,'processExit'],
+ [/\bexited (?:with )?(?:code )?-?\d+|exit code|exit status|stopped \(code -?\d+\)|stopped before it answered/,'processExit'],
+ // No model or provider set up in the Agent yet, as a fresh install leaves it (`hermes model`, an API key to add).
+ [/no (?:inference )?provider|no model (?:is )?(?:configured|set|selected)|choose (?:one|a model) with `?hermes model|no api key|api key (?:is )?(?:missing|not set)/,'noModel'],
+ // The Agent started and said why it could not answer (its last stderr line, local-harness finishLocalHarness): the
+ // words are its own and stay on the computer; the rule says only that it was the Agent's own error.
+ [/could not answer: /,'agentError'],
  [/\b(?:http|error code:?) 4\d\d\b/,'httpClient'],
  [/unexpected token|in json|json at position|is not valid json/,'invalidData'],
  [/\beaddrinuse\b|\bebusy\b|already running|another worldlet window/,'busy'],
@@ -93,7 +109,9 @@ export function failureKind(message:string){
  const text=message.toLowerCase();
  return FAILURE_KINDS.find(([pattern])=>pattern.test(text))?.[1]??'other';
 }
-const RULES=new Set([...ITEM_RULES.map(([,rule])=>rule),...EVIDENCE_RULES.map(([,rule])=>rule),'evidence','other',...SETUP_STEPS.map(([,step])=>step),...FAILURE_KINDS.map(([,kind])=>kind)]);
+/** Every rule an error row may carry: the allowlist for `error_rule` in analytics. */
+export const ERROR_RULES=[...new Set([...ITEM_RULES.map(([,rule])=>rule),...EVIDENCE_RULES.map(([,rule])=>rule),'evidence','other',...SETUP_STEPS.map(([,step])=>step),...FAILURE_KINDS.map(([,kind])=>kind)])];
+const RULES=new Set(ERROR_RULES);
 /** Raw text is classification input only and never part of the returned record. */
 export function diagnosticError(value){
  const message=typeof value.message==='string'?value.message.toLowerCase():'';

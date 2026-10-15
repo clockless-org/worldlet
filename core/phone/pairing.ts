@@ -8,10 +8,10 @@ export const DEFAULT_PAIR_RELAY='https://worldlet.ai';
 export type PairRole='desktop'|'phone';
 export type PairKeys={id:string,desktopToken:string,phoneToken:string,key:CryptoKey};
 export type PairLink={secret:Uint8Array,relay:string,name:string};
-/** What a code pairs: a phone (`worldlet://pair`) or another Worldlet that runs Fox's turns on this computer's Agent
- * (`worldlet://agent`, README.md#another-computers-agent). Both use the same relay roles, keys and boxes; the
- * distinct link keeps a phone from scanning a computer's code and the reverse. */
-export type PairKind='phone'|'agent';
+/** What a code pairs: a phone (`worldlet://pair`), another Worldlet that runs Fox's turns on this computer's Agent
+ * (`worldlet://agent`, README.md#another-computers-agent) or a web browser (`<relay>/open/#…`, README.md#web). All use
+ * the same relay roles, keys and boxes; the distinct link keeps a phone from scanning a computer's code and the reverse. */
+export type PairKind='phone'|'agent'|'web';
 
 
 const enc=new TextEncoder(),dec=new TextDecoder();
@@ -41,14 +41,19 @@ export async function pairKeys(secret:Uint8Array):Promise<PairKeys>{
 }
 
 // worldlet://pair?v=1&s=<secret>&n=<computer name>[&r=<relay origin>]. The relay is omitted when it is the default.
-// A computer's code for another Worldlet is the same with `agent` in place of `pair`.
-const LINK_PATH:Record<PairKind,string>={phone:'pair',agent:'agent'};
+// A computer's code for another Worldlet is the same with `agent` in place of `pair`. A browser's link is the relay's own
+// page, `<relay>/open/#v=1&s=<secret>&n=<computer name>`: the page talks only to the origin it came from, and the secret
+// rides in the fragment, which a browser never sends to the server.
+export const WEB_PAIR_PATH='/open/';
+const LINK_PATH:Record<Exclude<PairKind,'web'>,string>={phone:'pair',agent:'agent'};
 export function pairLink({secret,relay=DEFAULT_PAIR_RELAY,name,kind='phone'}:{secret:Uint8Array,relay?:string,name:string,kind?:PairKind}){
  const q=new URLSearchParams({v:String(PAIR_PROTOCOL),s:base64url(secret),n:name.slice(0,64)});
+ if(kind==='web')return `${relay}${WEB_PAIR_PATH}#${q}`;
  if(relay!==DEFAULT_PAIR_RELAY)q.set('r',relay);
  return `worldlet://${LINK_PATH[kind]}?${q}`;
 }
 export function readPairLink(text:string,kind:PairKind='phone'):PairLink{
+ if(kind==='web')return readWebPairLink(text);
  const m=new RegExp(`^worldlet://${LINK_PATH[kind]}\\?(.*)$`).exec(text.trim());
  if(!m)throw new Error(kind==='agent'?'This is not a code from Worldlet on another computer.':'This is not a Worldlet pairing code.');
  const q=new URLSearchParams(m[1]);
@@ -57,6 +62,25 @@ export function readPairLink(text:string,kind:PairKind='phone'):PairLink{
  if(secret.length!==32)throw new Error('This pairing code is incomplete.');
  const relay=q.get('r')||DEFAULT_PAIR_RELAY;
  if(!/^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(relay)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(relay))throw new Error('This pairing code names an unknown relay.');
+ return {secret,relay,name:(q.get('n')||'').slice(0,64)};
+}
+
+/** A browser's link (`<relay>/open/#v=1&s=…&n=…`), or only its fragment as the page reads it from `location.hash`. The
+ * relay is the link's own origin; a bare fragment has none, and the page uses its own. */
+export function readWebPairLink(text:string):PairLink{
+ const value=text.trim(),at=value.indexOf('#'),fragment=at>=0?value.slice(at+1):value;
+ let relay='';
+ if(at>0){
+  let url:URL;try{url=new URL(value);}catch{throw new Error('This is not a Worldlet link.');}
+  if(url.pathname!==WEB_PAIR_PATH)throw new Error('This is not a Worldlet link.');
+  relay=url.origin;
+  if(!/^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(relay)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(relay))throw new Error('This link names an unknown relay.');
+ }
+ const q=new URLSearchParams(fragment);
+ if(!q.get('s'))throw new Error('This link has no pairing code. Open Worldlet on your computer and copy the link again.');
+ if(q.get('v')!==String(PAIR_PROTOCOL))throw new Error('Update Worldlet on your computer to open it here.');
+ const secret=fromBase64url(q.get('s')||'');
+ if(secret.length!==32)throw new Error('This link is incomplete. Copy it again from Worldlet on your computer.');
  return {secret,relay,name:(q.get('n')||'').slice(0,64)};
 }
 

@@ -9,6 +9,11 @@ const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{const w=window as any;w.calls=[];w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
+  // Settings › Agent › Access (core/agent/GRANTS.md): one Agent with its default Grants and newest decisions.
+  w.access=[{id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:'2026-10-01T09:00:00.000Z',lastSeenAt:'2026-10-14T18:30:00.000Z',
+   grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
+    {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'}],
+   audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}]}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.jobs=[{id:'job-1',name:'Morning digest',kind:'prompt',paused:false,when:{cron:'0 8 * * *'},delivery:'telegram',last:{at:Date.UTC(2026,9,10,8),status:'ok'}},{id:'job-2',name:'Plant check',kind:'prompt',paused:true,when:{everySeconds:7200}}];
   w.skills=[{name:'seed-swap',description:'Organize seed swaps.',lastRanAt:Date.now()-3*86_400_000,enabled:true,removable:false},{name:'k8s',description:'Kubernetes help.',lastRanAt:null,enabled:false,removable:true}];
@@ -36,6 +41,8 @@ try{
    w.skills=change==='remove'?w.skills.filter(s=>s.name!==name):w.skills.map(s=>s.name===name?{...s,enabled:change==='enable'}:s);return {ok:true};}
   if(b.action==='harnessSkills')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,skills:w.skills},
    {harness:'claude-code',title:'Claude Code',inUse:false,changes:false,note:'Claude Code keeps these in the skills folder of its home (~/.claude/skills). Change them there.',skills:[{name:'release-notes',description:'Draft release notes.',lastRanAt:null}]}]};
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  if(b.action==='agentAccess')return {agents:w.access};
   if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
   if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules},
    {harness:'claude-code',title:'Claude Code',revoke:null,note:'Claude Code keeps these in its settings.json. Change them with /permissions in Claude Code; rules for one project stay in that project’s .claude folder.',rules:[{id:'rule-00000000000000b1',allows:'pnpm test',agent:'*',kind:'command'}]}]};
@@ -46,7 +53,8 @@ try{
   if(b.action==='modelSource')return w.source;
   if(b.action==='modelHealth'&&w.gateway?.active)return {agent:'remote-openclaw',available:true,lastReply:null,location:{kind:'remote',computer:w.gateway.host,direct:true},model:{name:'OpenClaw at '+w.gateway.host,id:'',provider:'remote-openclaw',source:null,ready:true,configured:false}};
   if(b.action==='modelHealth')return w.remote?{agent:'remote',available:true,lastReply:null,location:{kind:'remote',computer:w.remote},model:{name:'Agent on '+w.remote,id:'',provider:'remote',source:null,ready:true,configured:false}}:{agent:'hermes',available:true,lastReply:w.lastReply??null,model:{name:w.source.name,id:'',provider:w.source.provider,source:w.source.localCodex?'local-codex':null,ready:w.source.ready,configured:w.source.source!=='none'}};
-  if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,model:true,worldTools:true},{id:'claude-code',title:'Claude Code',configured:true,model:false,worldTools:true,memory:{name:null,user:false,longTerm:true,model:false}}],recommended:'codex',selected:w.remote||w.gateway?.active?null:w.agentInUse??null,remote:w.remote?{computer:w.remote,seenAt:Date.now()}:null,gateway:w.gateway??null};
+  if(b.action==='agentHarness'&&b.operation==='detect')return {agents:[{id:'codex',title:'Codex',configured:true,model:true,worldTools:true},{id:'claude-code',title:'Claude Code',configured:true,model:false,worldTools:true,memory:{name:null,user:false,longTerm:true,model:false}}],recommended:'codex',selected:w.remote||w.gateway?.active?null:w.agentInUse??null,remote:w.remote?{computer:w.remote,seenAt:Date.now()}:null,gateway:w.gateway??null,...w.brokenHermes?{brokenHermes:true}:{}};
+  if(b.action==='agentHarness'&&b.operation==='install-hermes'){w.brokenHermes=false;return {ok:true,id:'hermes',title:'Hermes Agent'};}
   // A Gateway on another computer reached directly: the host answers with its address and host, never the token.
   if(b.action==='agentHarness'&&b.operation==='gateway'){if(!b.token&&!w.gateway)throw new Error('Type your Gateway’s address and token.');w.gateway={url:'https://mini.tail1.ts.net',host:'mini.tail1.ts.net',active:true};w.remote=null;return {ok:true,gateway:{host:'mini.tail1.ts.net'}};}
   if(b.action==='agentHarness'&&b.operation==='forget-gateway'){w.gateway=null;return {ok:true};}
@@ -72,11 +80,11 @@ try{
  // The Accounts section is part of this page now: Settings lists no section of its own for it.
  assert.equal(await settingsPage.locator('[data-setting=integrations]').count(),0,'no Accounts section');
  const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
- // Six named sections in the owner's order (2026-10-11), each a heading and one plain line.
- assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','memory','skills','routines','permissions','accounts'],'Model, Memory, Skills, Routines, Permissions, then Accounts last');
- assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Routines','Permissions','Connections']);
+ // Seven named sections in the owner's order (2026-10-11), each a heading and one plain line.
+ assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','memory','skills','routines','permissions','access','accounts'],'Model, Memory, Skills, Routines, Permissions, Access, then Accounts last');
+ assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Scheduled','Permissions','Access','Connections']);
  for(const line of await local.locator('[data-part] > .companion-settings-partnote').allTextContents())assert.ok(line.length>20&&line.length<160&&!line.includes('\n'),'one plain line: '+line);
- assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),6,'each section has its line');
+ assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),7,'each section has its line');
  // Memory: what each Agent remembers, About you first, the first few with Show all; read only.
  const memoryPart=local.locator('[data-part=memory]'),hermesMemory=memoryPart.locator('[data-harness=hermes]');
  await hermesMemory.getByText('About you · 6',{exact:true}).waitFor();
@@ -105,7 +113,7 @@ try{
  await ccTools.getByText('linear',{exact:true}).waitFor();
  assert.equal(await ccTools.getByRole('button').count(),0,'read only');
  await ccTools.getByText('Claude Code keeps these in its own settings. Change them in Claude Code itself.',{exact:true}).waitFor();
- await local.locator('[data-part=routines]').getByText(/the same Routines as in the Task panel/).waitFor();
+ await local.locator('[data-part=routines]').getByText(/the same Scheduled tasks as in the Task panel/).waitFor();
  await permissions.getByRole('heading',{name:'Permissions',exact:true}).waitFor();
  await accounts.getByRole('heading',{name:'Connections',exact:true}).waitFor();
  // Skills: the Agent's own, with when each last ran and an Off mark; Turn off asks first, then runs its own command.
@@ -196,6 +204,25 @@ try{
  await rule.waitFor({state:'detached'});
  await permissions.getByText(/^Hermes Agent will ask again before: npm test/).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessApprovalRules'&&c.operation==='revoke').map(c=>[c.harness,c.id])),[['hermes','rule-00000000000000a1']]);
+ // Access: each Agent with its last use, its Grants in plain words, its newest decisions, and Revoke after asking.
+ const accessPart=local.locator('[data-part=access]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
+ await hermesAccess.getByText('Hermes Agent',{exact:true}).waitFor();
+ await hermesAccess.getByText(/^On this computer\. Last used .*2026\.$/).waitFor();
+ await hermesAccess.getByText('Read: items, history, companion, meetings, gmail, google-calendar and 2 more.',{exact:true}).waitFor();
+ await hermesAccess.getByText('Read and change: world (link).',{exact:true}).waitFor();
+ assert.equal(await hermesAccess.locator('.companion-settings-access-audit li').count(),2);
+ await hermesAccess.locator('.companion-settings-access-audit li').first().getByText(/items update · Refused$/).waitFor();
+ assert.doesNotMatch(await accessPart.innerText(),/\bMCP\b|token|endpoint/i,'plain words only');
+ await hermesAccess.getByRole('button',{name:'Revoke',exact:true}).click();
+ await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
+ assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');
+ await accessPart.scrollIntoViewIfNeeded();
+ await page.screenshot({path:'/tmp/your-agent-access.png'});
+ await hermesAccess.locator('[data-action=confirm-revoke-agent]').click();
+ await accessPart.getByText('Hermes Agent can no longer reach your World.',{exact:true}).waitFor();
+ await hermesAccess.getByText(/^On this computer\. Revoked .*2026\.$/).waitFor();
+ assert.equal(await hermesAccess.getByRole('button',{name:'Revoke'}).count(),0,'nothing left to revoke');
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').map(c=>c.id)),['hermes']);
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='claude-code'));
  await local.getByText('Claude Code on this computer answers for Fox.').waitFor();
@@ -206,6 +233,17 @@ try{
  await local.locator('[data-agent=codex]').getByRole('button',{name:'Stop using',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='clear'));
  await local.locator('[data-agent=codex]').getByRole('button',{name:'Use',exact:true}).waitFor();
+ // A Hermes Agent that is here but does not start (left half installed) is not offered to Use: Install again runs the
+ // official installer, then chooses it (Windows Beta 4384, 2026-10-13).
+ await page.evaluate(()=>{(window as any).brokenHermes=true;});
+ await local.getByRole('button',{name:'Check connection',exact:true}).click();
+ const broken=local.locator('[data-agent=hermes]');
+ await broken.getByText('It is on this computer but does not start. Install again sets it up the official way.',{exact:true}).waitFor();
+ assert.equal(await broken.getByRole('button',{name:'Use',exact:true}).count(),0,'not offered to Use');
+ await broken.getByRole('button',{name:'Install again',exact:true}).click();
+ await broken.waitFor({state:'detached'});
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['install-hermes','select'].includes(c.operation)).slice(-2).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','select:hermes']);
+ await page.evaluate(()=>{(window as any).agentInUse=null;});
  // An Agent on another computer (core/phone/README.md#another-computers-agent): its code pairs, Settings says where Fox
  // runs, and Stop using ends the pairing.
  // Both are folded under Other ways to connect, few people need them (owner request 2026-10-10).
@@ -305,5 +343,5 @@ try{
  await page.waitForFunction(()=>{const part=document.querySelector('#companionInfo .companion-settings-detail [data-part=accounts]'),pane=document.querySelector('#companionInfo .companion-settings-detail');if(!part||!pane)return false;const a=part.getBoundingClientRect(),b=pane.getBoundingClientRect();return a.top>=b.top-1&&a.top<b.bottom-40&&pane.scrollTop>0;});
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; six named sections (Model, Memory, Skills, Routines, Permissions, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Accounts is the page\'s last part and old Accounts entry points land on it');
+ console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; seven named sections (Model, Memory, Skills, Routines, Permissions, Access, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Access lists each Agent with its last use, Grants and newest decisions and revokes it after asking; Accounts is the page\'s last part and old Accounts entry points land on it');
 }finally{await browser.close();}

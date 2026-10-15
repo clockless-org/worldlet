@@ -3,6 +3,7 @@ export * from './agent-response.ts';
 export * from './system-requests.ts';
 export * from './harness-protocol.ts';
 export * from './turn-trust.ts';
+export * from './grants.ts';
 export * from './auth-handoff.ts';
 export * from './local-harness.ts';
 export * from './openclaw-migration.ts';

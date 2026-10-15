@@ -48,7 +48,7 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  };
  for(const [target,action,tool] of [
   ['artifact','show','show_artifact'],['artifact','list','list_artifacts'],['artifact','open','open_artifact'],['artifact','brief','read_artifact_brief'],['artifact','page','save_artifact_page'],['world','inspect','inspect_world'],['world','open','visit_context'],['world','navigate','move_view'],['world','act','perform_action'],
-  ['world','lighting','set_scene_lighting'],['world','weather','set_scene_weather'],['applets','open','open_applet'],['applets','delegate','start_applet_task'],
+  ['world','lighting','set_scene_lighting'],['world','weather','set_scene_weather'],['world','link','share_world_link'],['applets','open','open_applet'],['applets','delegate','start_applet_task'],
   ['content','search','find_content'],['content','open','open_content'],['content','read','read_content_page'],
   ['content','create','create_content'],['content','update','patch_content'],['content','delete','delete_content'],
   ['content','trash','list_deleted'],['content','restore','restore_content'],['content','undo','undo_content'],
@@ -118,13 +118,20 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  if(new Set(actions.map(a=>a.target+'/'+a.action)).size!==actions.length)throw Error('Duplicate World target/action.');
  return actions;
 }
-/** Every target and its action names on one line, for a Harness's instructions: the model calls an action it already
+/** Every target and its actions on one line, for a Harness's instructions: the model calls an action it already
  * knows instead of listing targets and actions first, each listing another model round of several seconds (owner
- * 2026-10-12: Fox slow; one reply spent 6 of its 9 model calls discovering companion/recall). Applet aliases
- * (`applet:<key>`) are left out: they repeat their base target's actions. */
+ * 2026-10-12: Fox slow; one reply spent 6 of its 9 model calls discovering companion/recall). Each action carries
+ * its required argument names, `snapshot()` taking none: on 4416 Fox still described browser/read and
+ * browser/snapshot before calling them, two rounds (~8 s) for actions that take "{}" (owner 2026-10-14: the conversation is still slow).
+ * Applet aliases (`applet:<key>`) are left out: they repeat their base target's actions. */
 export function worldToolIndex({sample=false}={}){
+ const actions=worldActions({sample}).filter(a=>!a.target.startsWith('applet:'));
+ const required=(a:WorldAction):string[]=>Array.isArray(a.parameters?.required)?a.parameters.required:[];
+ // Operation families (music, youtube, doordash…) share one schema whose `required` is empty for every action, so
+ // their real needs are unknown here: those keep bare names and are described when needed.
+ const known=new Set(actions.filter(a=>!Object.keys(a.defaults).length||required(a).length).map(a=>a.target));
  const byTarget=new Map<string,string[]>();
- for(const a of worldActions({sample}))if(!a.target.startsWith('applet:'))byTarget.set(a.target,[...byTarget.get(a.target)||[],a.action]);
+ for(const a of actions)byTarget.set(a.target,[...byTarget.get(a.target)||[],known.has(a.target)||!Object.keys(a.parameters?.properties||{}).length?`${a.action}(${required(a).join(',')})`:a.action]);
  return [...byTarget].map(([target,actions])=>target+': '+actions.join(', ')).join('; ');
 }
 export function describeActions(actions:WorldAction[],target='',action=''){
@@ -134,6 +141,18 @@ export function describeActions(actions:WorldAction[],target='',action=''){
  if(!action)return {target,actions:matches.map(a=>({action:a.action,description:a.description.split('. ')[0].slice(0,100),requiresPrivateContext:!a.public}))};
  const found=matches.find(a=>a.action===action);
  return found?{target,action,description:found.description,parameters:found.parameters,requiresPrivateContext:!found.public}:{error:'Unknown action for this target.'};
+}
+/** The actions one Agent may reach (core/agent/GRANTS.md): `covers` is its Grants' answer for a target and action.
+ * `describe_world_tools` lists only these, so an Agent never discovers a target no Grant names. */
+export function grantedActions(actions:WorldAction[],covers:(target:string,action:string)=>boolean):WorldAction[]{
+ return actions.filter(a=>covers(a.target,a.action));
+}
+/** The target and action a resolved call came from: the first action of that tool whose fixed routing fields match the
+ * arguments, a base target before its Applet alias. Null when no action resolves to it (a Hermes-internal event). */
+export function worldActionOf(actions:WorldAction[],tool:string,args:Record<string,unknown>={}):{target:string;action:string}|null{
+ const matches=actions.filter(a=>a.tool===tool&&Object.keys(a.defaults).every(key=>args?.[key]===a.defaults[key]));
+ const found=matches.find(a=>!a.target.startsWith('applet:'))??matches[0];
+ return found?{target:found.target,action:found.action}:null;
 }
 export function resolveAction(actions:WorldAction[],target,action,args){
  const found=actions.find(a=>a.target===target&&a.action===action);

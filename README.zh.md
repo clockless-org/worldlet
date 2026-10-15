@@ -6,7 +6,7 @@
   <a href="https://github.com/clockless-org/worldlet"><img src="https://img.shields.io/github/stars/clockless-org/worldlet?style=flat&amp;label=%E2%98%85&amp;color=4E8A3E" alt="GitHub stars" /></a>
   <a href="https://github.com/clockless-org/worldlet/releases"><img src="https://img.shields.io/github/v/release/clockless-org/worldlet?style=flat&amp;label=release&amp;color=4E8A3E" alt="Latest release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-4E8A3E?style=flat" alt="License: Apache 2.0" /></a>
-  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows-4493F8?style=flat" alt="Supported platforms: macOS and Windows" />
+  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20iPhone%20%7C%20Android-4493F8?style=flat" alt="Supported platforms: macOS, Windows, iPhone and Android" />
 </p>
 
 <p align="center">
@@ -14,15 +14,36 @@
 </p>
 
 <p align="center">
-  <strong>给你已经在用的 AI Agent 一个 World。</strong><br/>
+  <strong>第一个 World UI（WUI）框架。</strong><br/>
+  给你已经在用的 AI Agent 一个 World：不是聊天框，而是 Agent 工作的地方。<br/>
   Worldlet 让 OpenClaw、Hermes Agent、Claude Code、Codex 或 pi 有一个你看得见的工作场所。World 由 AI 操作，你在一旁看着、做决定。
 </p>
-
-<h3 align="center"><a href="#安装"><ins>一条命令安装</ins></a> · <a href="https://worldlet.ai/download/"><ins>下载</ins></a></h3>
 
 <p align="center">
   <img src="docs/assets/readme/world.jpg" alt="Worldlet 的 World：放着 Applet 的各个地点，左边是 Attention Center，下方是 Fox" width="960" />
 </p>
+
+<h3 align="center"><a href="#安装"><ins>一条命令安装</ins></a> · <a href="https://worldlet.ai/download/"><ins>下载</ins></a></h3>
+
+## 你的 Agent，你的模型：用电脑来类比
+
+<p align="center">
+  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.zh.svg" alt="个人电脑的层次和个人助理的层次对照：Worldlet 是 Harness 之上缺的那层 World UI" width="960" /></a>
+</p>
+
+Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的登录、连接、技能和记忆，并通过 `worldlet` MCP 服务器把 World 工具交给 Agent。换 Agent，你的 World 还在。
+
+| 电脑 | AI 时代 | 归谁 |
+| --- | --- | --- |
+| CPU | 模型 | 你的模型提供方（你自己的登录或 API key） |
+| 内核 | Harness：Hermes Agent、OpenClaw、Claude Code、Codex、pi | 你选，可以替换 |
+| 驱动和钥匙串 | MCP 服务器、连接器和它们的令牌 | 你的 Harness；Worldlet 借用 |
+| 终端 | 聊天 App 和命令行 | Agent 现在待的地方 |
+| 图形界面 | Worldlet：World、Things、Fox、Attention Center | 本项目 |
+| 系统 API | World 工具，通过 `worldlet` MCP 服务器提供给 Agent | 本项目 |
+| 磁盘 | 你电脑上的 `world.sqlite` 和 World 存储 | 本项目 |
+
+Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它安装的 Hermes Agent，就像发行版 Ubuntu。World → Agent 的工具走 MCP；Agent → World 每种 Harness 一个适配器（[Harness 契约](contracts/HARNESS.md)、[交互式架构图](docs/architecture.html)）。
 
 ## 安装
 
@@ -48,7 +69,9 @@ curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
 & ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent hermes
 ```
 
-想用普通安装包？到 [worldlet.ai 下载](https://worldlet.ai/download/)，或者从 [GitHub Releases](https://github.com/clockless-org/worldlet/releases) 取。你的 Agent 也可以用 [`worldlet` 技能](harness/skills/worldlet/SKILL.md)替你安装。细节见[一行安装脚本](platform/install/README.md)。
+想用普通安装包？到 [worldlet.ai 下载](https://worldlet.ai/download/)，或者从 [GitHub Releases](https://github.com/clockless-org/worldlet/releases) 取。**Linux 或没有屏幕的电脑**：同一条 `install.sh` 命令会安装[无界面的 Worldlet 服务](platform/install/README.md#linux)，并打印你的 World 链接和二维码，用手机或另一台电脑打开。
+
+**交给你的 Agent**：对它说「Install Worldlet: follow https://worldlet.ai/agent.md」。[agent.md](platform/install/agent.md) 让任何 Agent 用自己的名字运行安装脚本、把 Worldlet 注册进自己，然后回复链接和二维码；[`worldlet` 技能](harness/skills/worldlet/SKILL.md)说的是同样的步骤。细节见[一行安装脚本](platform/install/README.md)。
 
 不需要账号。还没有 Agent 的话，设置时会用官方方式把标准的 [Hermes Agent](core/agent/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) 装到它默认的位置；已经有的就直接用。
 
@@ -86,7 +109,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 <tr>
 <td width="50%" valign="middle">
 
-### Applets
+### Things
 
 邮件、日历、备忘录、GitHub、Notion、Linear 等能连上你的账号或读取这台电脑的 Applet，加上浏览器和游戏，每个都是 World 里的一个小地方。Applet 用安静、好读的样子展示你自己的记录，想看原网站时也能打开。
 
@@ -103,33 +126,21 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 - **[手机伴侣](ios/README.md)**：iPhone 和 [Android](android/README.md) 上的 Attention Center 和 Fox，扫码配对，经端到端加密中继连到电脑。
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**：Fox 做的卡片按天留存。
-- **[例行任务](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
+- **[Scheduled（定时任务）](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
 
-## 你的 Agent，你的模型：用电脑来类比
+## 在另一台设备上打开你的 World
 
-<p align="center">
-  <a href="contracts/HARNESS.md"><img src="docs/stack-in-computer-terms.zh.svg" alt="个人电脑的层次和个人助理的层次对照：Worldlet 是 Harness 之上缺的那层 World UI" width="960" /></a>
-</p>
+在笔记本或平板的网页浏览器里打开你完整的 World，不只是 Attention Center 和 Fox。在你的电脑上打开 Fox 旁边的设置，选 **Phone**，在 **In a browser** 下选 **Copy link**，再到另一台设备上打开这个链接。能画出 World 的设备会打开完整的 World；手机打开的是 Attention Center 和 Fox。**Open the World** 会在这台电脑的浏览器里打开同一个 World。
 
-Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的登录、连接、技能和记忆，并通过 `worldlet` MCP 服务器把 World 工具交给 Agent。换 Agent，你的 World 还在。
-
-| 电脑 | AI 时代 | 归谁 |
-| --- | --- | --- |
-| CPU | 模型 | 你的模型提供方（你自己的登录或 API key） |
-| 内核 | Harness：Hermes Agent、OpenClaw、Claude Code、Codex、pi | 你选，可以替换 |
-| 驱动和钥匙串 | MCP 服务器、连接器和它们的令牌 | 你的 Harness；Worldlet 借用 |
-| 终端 | 聊天 App 和命令行 | Agent 现在待的地方 |
-| 图形界面 | Worldlet：World、Applet、Fox、Attention Center | 本项目 |
-| 系统 API | World 工具，通过 `worldlet` MCP 服务器提供给 Agent | 本项目 |
-| 磁盘 | 你电脑上的 `world.sqlite` 和 World 存储 | 本项目 |
-
-Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它安装的 Hermes Agent，就像发行版 Ubuntu。World → Agent 的工具走 MCP；Agent → World 每种 Harness 一个适配器（[Harness 契约](contracts/HARNESS.md)、[交互式架构图](docs/architecture.html)）。
+- 只有你的电脑开着、Worldlet 在上面运行时才能用：World、你的记录和 Fox 都留在你的电脑上，浏览器只是显示它们。**Run in background** 让 Worldlet 不开窗口也继续运行。
+- 页面来自 worldlet.ai，每个 Worldlet 版本一份，不含你的任何数据。你的电脑和浏览器之间的通信端到端加密，经过一个只转发、什么都不存的中继。
+- 链接请别外传：拿到链接的人能看到你的 World 并在里面操作。**Turn off** 会让它失效。设置、连接和配对只能在你的电脑上改。[工作原理](core/phone/README.md#the-world-on-another-device)
 
 ## 隐私
 
-没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › 隐私 里关掉，详见[统计说明](core/diagnostics/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
+没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › 通用 › 使用统计 里关掉，详见[统计说明](core/diagnostics/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
 
 ## 从源码构建
 
@@ -148,7 +159,7 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 | --- | --- |
 | `ui/` | 共享渲染和交互：World、Applet、Fox、Attention Center |
 | `core/` | 与平台无关的产品规则和数据 |
-| `platform/` | Electron 宿主：系统集成、浏览器引擎、受控执行 |
+| `platform/` | Electron 宿主和 Node 宿主（无显示器）：系统集成、浏览器引擎、受控执行 |
 | `harness/` | Agent 后端和参考 Harness 适配器 |
 | `contracts/` | 宿主和 Agent 共用的接口与数据形状 |
 | `resources/` | 世界、风格、美术、字体和媒体 |

@@ -26,7 +26,7 @@ export const parallelChecks=available([
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
  'scripts/applet-focus-check.ts','gatehouse/board-browser-check.mjs','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
  'scripts/attention-idle-check.ts','scripts/world-log-check.ts','scripts/your-agent-ui-check.ts','scripts/world-history-ui-check.ts','scripts/startup-check.ts','scripts/curated-source-applet-check.ts','scripts/browser-fox-glow-check.ts','scripts/demo-walkthrough-check.ts','scripts/applet-top-bar-check.ts','scripts/applet-shelf-ui-check.ts','scripts/text-reader-hud-check.ts',
- 'scripts/world-readability-check.ts','scripts/feature-audit-check.ts','scripts/ongoing-ui-check.ts','scripts/phone-pairing-ui-check.ts','scripts/desktop-companion-ui-check.ts','scripts/fox-mac-controls-check.ts','scripts/sample-world-check.ts','scripts/widgets-ui-check.ts',
+ 'scripts/world-readability-check.ts','scripts/feature-audit-check.ts','scripts/ongoing-ui-check.ts','scripts/phone-pairing-ui-check.ts','scripts/web-open-check.ts','scripts/desktop-companion-ui-check.ts','scripts/fox-mac-controls-check.ts','scripts/sample-world-check.ts','scripts/widgets-ui-check.ts',
  'scripts/order-ui-check.ts','scripts/companion-entry-check.ts','scripts/attention-group-identity-check.ts','scripts/fox-name-tag-check.ts',
  // Entering and leaving an Applet zooms, and Back from an area's Applet returns to its panel (owner Order 2026-10-07).
  'scripts/world-level-zoom-check.ts',
@@ -127,7 +127,7 @@ export const quickChecks=available([
  'scripts/fox-chat-fold-check.ts','scripts/fox-execution-check.ts','scripts/companion-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/google-connection-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/browser-applet-check.ts','scripts/world-history-ui-check.ts',
  'scripts/artifacts-ui-check.ts','scripts/order-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
- 'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts',
+ 'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts','scripts/web-open-check.ts',
 ]);
 // The pull request set (`npm run test:ui:pr`, owner decision 2026-10-10: PR CI runs quick checks within five minutes):
 // the quick checks that finish in seconds on a GitHub Linux runner. Those that draw the World took 2 to 8 minutes there
@@ -137,7 +137,7 @@ export const prChecks=quickChecks.filter(c=>[
  'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/web-record-check.ts',
  'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',
- 'scripts/meetings-check.ts',
+ 'scripts/meetings-check.ts','scripts/web-open-check.ts',
 ].includes(c));
 // The smoke set (`npm run test:ui:smoke`, owner decision 2026-10-10): the only UI checks that hold back Alpha and Beta
 // (scripts/gate.mjs blockingGates). The World draws, Fox answers, an Applet opens; nothing about how they look.

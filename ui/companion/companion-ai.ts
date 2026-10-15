@@ -11,6 +11,7 @@ import {installFieldDictation} from './field-dictation.ts';
 import {foxContext} from './fox-context.ts';
 import {contextThread} from '../attention/index.ts';
 import {isDesktopCompanion} from './world-surface.ts';
+import {WEB_PAGE_UNAVAILABLE} from '../../contracts/web-world.ts';
 
 // Tools that act on the visible page; the ones that can move it also update the tracked view.
 const VIEW_CHANGING_TOOLS=new Set(['show_artifact','open_artifact','perform_action','move_view','visit_place','open_applet','open_content','browse_web']);
@@ -91,7 +92,9 @@ export function createCompanionAI(unavailable: any,transport: any={}){return (op
  }
  let ui;
  // Native hosts transcribe on device and emit the final text themselves, with the World's names as Whisper's hint.
- const speech=transport.nativeCall?{call:async(action,body)=>{if(action!=='speechStart')return transport.nativeCall(action,body);const result=await transport.nativeCall(action,{...body,language:speechLanguage(),microphone:savedMicrophone(),vocabulary:options.speechVocabulary?.()||[]});if(result?.microphoneFallback)microphoneFallback();return result;}}:createBrowserSpeech({openText:()=>ui?.openText(),transcribe});
+ // A World page in a web browser has no voice (transport.voice false, contracts/web-world.ts): speech answers why.
+ const voice=transport.voice!==false;
+ const speech=!voice?{call:async(action:string)=>{if(action==='speechStart')throw Error(WEB_PAGE_UNAVAILABLE.voice);}}:transport.nativeCall?{call:async(action,body)=>{if(action!=='speechStart')return transport.nativeCall(action,body);const result=await transport.nativeCall(action,{...body,language:speechLanguage(),microphone:savedMicrophone(),vocabulary:options.speechVocabulary?.()||[]});if(result?.microphoneFallback)microphoneFallback();return result;}}:createBrowserSpeech({openText:()=>ui?.openText(),transcribe});
  // The media surface's device ids are the ones its capture accepts, so native hosts list there.
  const microphones=async()=>{if(!transport.nativeCall)return listMicrophones();const result=await transport.nativeCall('microphones').catch(()=>null);return Array.isArray(result?.microphones)?result.microphones:[];};
  async function runReplyAction({href,label}){
@@ -103,12 +106,12 @@ export function createCompanionAI(unavailable: any,transport: any={}){return (op
  async function steer(text){const current=activeRun;if(!current)return {accepted:false};await current.ready;if(activeRun!==current||!current.canSteer)return {accepted:false};return transport.runAgent.steer(text);}
  const trackedChat=withFoxTurnAnalytics(chat,transport.nativeCall,()=>!!transport.nativeCall&&!transport.sample);
  const call=(action,body)=>action==='steer'?steer(body.text):action==='replyAction'?runReplyAction(body):action.startsWith('speech')?speech.call(action,body):action==='microphones'?microphones():action==='harnessAgents'?(transport.nativeCall&&!transport.sample?transport.nativeCall('harnessAgents',body):Promise.resolve(null)):action==='chat'?trackedChat(body):action==='background'?background(body):action==='cancel'?(controller?.abort(),transport.nativeCall?.('speakReply',{stop:true})||Promise.resolve()):action==='agentWarm'?(transport.nativeCall&&!transport.sample?transport.nativeCall('agentWarm',body):Promise.resolve({warm:false})):unavailable(action,body);
- ui=createNativeChat(call)({...options,recallStorage:transport.nativeCall&&!transport.sample?{load:()=>transport.nativeCall('conversationRecall'),save:rows=>transport.nativeCall('conversationRecall',{rows})}:null,steering:!!transport.runAgent?.steer,holdToSpeak:!!transport.nativeCall,replyActions:!!transport.nativeCall,onSpokenReply:text=>transport.nativeCall?.('speakReply',{text:String(text).slice(0,12000)}),
+ ui=createNativeChat(call)({...options,recallStorage:transport.nativeCall&&!transport.sample?{load:()=>transport.nativeCall('conversationRecall'),save:rows=>transport.nativeCall('conversationRecall',{rows})}:null,steering:!!transport.runAgent?.steer,voice,holdToSpeak:!!transport.nativeCall&&voice,replyActions:!!transport.nativeCall,onSpokenReply:voice?text=>transport.nativeCall?.('speakReply',{text:String(text).slice(0,12000)}):null,
   // Talk with Fox reads each reply unless Talk's own spoken replies are off (`worldlet.talkReplies`); the host says whether it speaks,
   // and keeps an echo-cancelled microphone open meanwhile so the person can talk over Fox (`speechStart` with `barge`).
-  talkVoice:transport.nativeCall?{bargeIn:true,speak:async text=>(await transport.nativeCall('speakReply',{text:String(text).slice(0,12000),talk:true}))?.spoken===true,stop:()=>{void transport.nativeCall('speakReply',{stop:true})?.catch?.(()=>{});}}:null});
+  talkVoice:transport.nativeCall&&voice?{bargeIn:true,speak:async text=>(await transport.nativeCall('speakReply',{text:String(text).slice(0,12000),talk:true}))?.spoken===true,stop:()=>{void transport.nativeCall('speakReply',{stop:true})?.catch?.(()=>{});}}:null});
  // Any text field of the World takes dictation too, through the same local Whisper and hint (field-dictation.ts).
- if(transport.nativeCall)installFieldDictation({call:(action,body)=>speech.call(action,body)});
+ if(transport.nativeCall&&voice)installFieldDictation({call:(action,body)=>speech.call(action,body)});
  if(transport.nativeCall)void transport.nativeCall('companionProfile').then(profile=>{window.dispatchEvent(new CustomEvent('worldlet:companion-appearance',{detail:profile}));window.dispatchEvent(new CustomEvent('worldlet:attention-focus',{detail:{mode:profile.attentionFocus||'auto'}}));}).catch(()=>{});
  window.addEventListener('worldlet:model-changed',()=>ui.cancel());
  window.addEventListener('pagehide',()=>controller?.abort());

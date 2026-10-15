@@ -1,4 +1,4 @@
-import {attentionTimeline} from './time.ts';
+import {attentionTimeline} from './matter-time.ts';
 const plain=value=>String(value||'').replace(/!\[[^\]]*\]\([^)]*\)/g,'').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/\[\[([^\]]+)\]\]/g,'$1').replace(/[*_`#]/g,'').replace(/\s+/g,' ').trim();
 // A last resort for legacy rows only. Items are written to fit, and a row that
 // fits is never cut: an ellipsis in the Attention Center hides the thing itself.

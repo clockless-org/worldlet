@@ -16,3 +16,4 @@ export * from './fox-proactive.ts';
 export * from './fox-talk.ts';
 export * from './conversation-topics.ts';
 export * from './speech-vocabulary.ts';
+export * from './fox-turn-recovery.ts';

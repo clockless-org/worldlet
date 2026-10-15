@@ -39,7 +39,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
  // the person signs in to ChatGPT inside it with Hermes' own sign-in (`sign-in-hermes`), owner decisions 2026-10-09.
  // `hermesStep` is the installer's step being run; `hermesCode` the code Hermes' device page asks for, when it does.
- let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null,hermesStepNo=0,hermesFailed=false;
+ let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null,hermesStepNo=0,hermesFailed=false,brokenHermes=false;
  const onHermesSetup=(event:Event)=>{
   const detail=(event as CustomEvent).detail;if(disposed||!detail)return;
   if(detail.stage==='install'&&hermesSetup==='installing'&&Number.isInteger(detail.step)&&Number.isInteger(detail.steps)&&typeof detail.title==='string')hermesStepNo=detail.step,hermesStep=t('Step {step} of {steps}: {title}').replace('{step}',String(detail.step)).replace('{steps}',String(detail.steps)).replace('{title}',detail.title.slice(0,80));
@@ -88,7 +88,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(detail.ok!==false)return;
   // It did not answer, so it is not asked about itself either: the Things tile stops waiting.
   draft.profileResult='failed';persist();
-  productEvent('local_agent_select_failed',{local_agent:String(detail.id),error_code:failureCode({message:detail.message})},timingBucket(performance.now()-checkStarted));
+  // Reported here; the World reports it only once setup is gone (native-chat.ts).
+  detail.reported=true;
+  productEvent('local_agent_select_failed',{local_agent:String(detail.id),...failureFields({message:detail.message})},timingBucket(performance.now()-checkStarted));
   notice=String(detail.message||'').slice(0,300);
   render();
  };
@@ -151,6 +153,9 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // Setup's product events (core/diagnostics/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
  const productEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
  const failureCode=(error:any)=>{try{return String(diagnosticError({message:typeof error?.message==='string'?error.message:''}).code);}catch{return 'operationFailed';}};
+ // The code and, when Core has one, its fixed rule (did not start, too old, gone): select failures were a bare
+ // operationFailed (Windows Beta 4384, 2026-10-13).
+ const failureFields=(error:any):Record<string,string>=>{try{const row=diagnosticError({message:typeof error?.message==='string'?error.message:''});return {error_code:String(row.code),...row.rule?{error_rule:String(row.rule)}:{}};}catch{return {error_code:'operationFailed'};}};
  const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
  const importingAgent=()=>step===1&&typeof draft.agent==='string';
  // The Agent's own name where it has one (OpenClaw's Nova), else its product name.
@@ -171,7 +176,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    // The host proves the Agent answers before Fox uses it; a failure leaves the person on the first half.
    let chosen;
    try{checkStarted=started;chosen=await call('agentHarness',{operation:'select',id:agent.id,checkLater:true,...move?{direct:true}:{}});}
-   catch(e){productEvent('local_agent_select_failed',{local_agent:agent.id,error_code:failureCode(e)},timingBucket(performance.now()-started));throw e;}
+   catch(e){productEvent('local_agent_select_failed',{local_agent:agent.id,...failureFields(e)},timingBucket(performance.now()-started));throw e;}
    await call('foxPreferences',{cloudConsent:true});
    // Back then the same Agent again shows what already came over instead of reading it again (owner request
    // 2026-10-06); another Agent starts over.
@@ -263,7 +268,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  function hermesPanel(){
   const box=node('div','','setup-agent-needed');box.setAttribute('aria-live','polite');
   const says={
-   idle:'No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',
+   idle:brokenHermes?'Hermes Agent is on this computer but does not start. Worldlet installs it again the official way, then you sign in to ChatGPT inside it.':'No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',
    installing:'Installing Hermes Agent…',
    installed:'Hermes Agent is installed. Sign in to ChatGPT in it. To use another model, run hermes model in Terminal, then check again.',
    'signing-in':'Continue in your browser.'
@@ -273,7 +278,10 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   box.append(line);
   const link=(label:string,fn:()=>void)=>{const b=node('button',t(label),'setup-link') as HTMLButtonElement;b.type='button';b.onclick=fn;box.append(b);return b;};
   if(hermesSetup==='signing-in')link('Cancel sign-in',()=>void call('agentHarness',{operation:'cancel-sign-in'}).catch(()=>{}));
-  else if(hermesSetup!=='installing')link('Check again',()=>{void detectAgents();render();}).disabled=busy;
+  // After a failed install: the same official installer in a window the person sees (`install-hermes-window`), which
+  // shows why a step stops and may get past one the quiet install could not (a Microsoft Store copy, 2026-10-13).
+  else if(hermesSetup==='idle'&&hermesFailed)link('Install in Terminal',()=>void run(installHermesWindow)).disabled=busy;
+  if(hermesSetup!=='installing'&&hermesSetup!=='signing-in')link('Check again',()=>{void detectAgents();render();}).disabled=busy;
   return box;
  }
  function remotePanel(){
@@ -304,6 +312,11 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   try{await call('agentHarness',{operation:'install-hermes'});hermesSetup='installed';}
   catch(e){hermesSetup='idle';hermesFailed=true;productEvent('hermes_setup_failed',hermesSetupDimensions('install',hermesStepNo,e),timingBucket(performance.now()-started));throw e;}
   productEvent('hermes_setup_completed',hermesSetupDimensions('install',hermesStepNo),timingBucket(performance.now()-started));
+ }
+ async function installHermesWindow(){
+  await call('agentHarness',{operation:'install-hermes-window'});
+  productEvent('hermes_setup_started',hermesSetupDimensions('terminal',0));
+  notice='Hermes Agent is installing in Terminal. When it says it is installed, choose Check again.';
  }
  /** ChatGPT signed in inside Hermes Agent, then Hermes moves in like any Agent found here. */
  async function signInHermes(){
@@ -795,11 +808,11 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    else if(!move&&typeof result?.selected==='string'&&step===0&&found.some(a=>a.id===result.selected)){draft.agent=result.selected;draft.agentName=agentName(found.find(a=>a.id===result.selected));step=1;persist();}
    // A pairing with another computer that ended (unpaired there) returns to the first half too.
    if(typeof draft.remoteAgent==='string'&&!result?.remote){delete draft.remoteAgent;persist();if(step===1&&!ready())step=0;}
-   agents=found;detectingAgents=false;
+   agents=found;detectingAgents=false;brokenHermes=result?.brokenHermes===true;
    if(fresh){updatingAgent=null;const still=outdated(picked);error=still?agentText('{agent} is still older than Worldlet needs.',giveName(still.id)):'';notice='';}
    picked=AGENT_PRIORITY.find(id=>found.some(a=>a.id===id))||found[0]?.id||null;
    // Only when the first half is what the person sees: how many supported Agents are here, and the one picked for them.
-   if(step===0)productEvent('local_agents_detected',agentsDetectedDimensions(found,picked));
+   if(step===0)productEvent('local_agents_detected',{...agentsDetectedDimensions(found,picked),...brokenHermes?{hermes_broken:'yes'}:{}});
    if(!busy)render();
    return connectRequested();
   }).catch(()=>{detectingAgents=false;if(!disposed&&!busy)render();});

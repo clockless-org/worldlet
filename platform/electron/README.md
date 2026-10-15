@@ -11,13 +11,13 @@ decisions. See the [five-layer standard](../../docs/UI-CORE-PLATFORM.md).
 | Path | Responsibility |
 | --- | --- |
 | `src/main.ts` | App entry: profile, single-instance lock, store, router, page bridge, modules |
-| `src/profile.ts` | Library root per channel and checkout (`Worldlet`, `Worldlet Development`, `Worldlet Worktrees/<id>`) |
+| `src/profile.ts` | Library root per channel and checkout (`Worldlet`, `Worldlet Development`, `Worldlet Worktrees/<id>`); `profileFrom` holds the rules without Electron, for the [Node host](../node/README.md) |
 | `src/world/` | Trusted World window (`BaseWindow` + `WebContentsView`), `worldlet://app` scheme, preload bridge, dev capture |
-| `src/host/` | Router (`worldletHost.request`), page bridge (host → page globals/events), service contracts, diagnostics |
+| `src/host/` | Router (`worldletHost.request`), page bridge (host → page globals/events), the World page in a browser beside the window (`world-web.ts`), service contracts, diagnostics |
 | `src/checks/` | Development-only named checks run in the real app with `--check <name>` (`onboarding-flow`) |
 | `src/store/` | World store, SQLite ledger (`world.sqlite`: configuration, library tables), Swift-compatible identity encoding |
 | `src/core.ts` | Shared Core in-process: the same `invoke(operation, json)` entry JavaScriptCore and Jint used |
-| `src/preferences.ts`, `src/vault.ts` | Display/companion preferences (`preferences.json`); credentials encrypted with `safeStorage` |
+| `src/preferences.ts`, `src/vault.ts` | Display/companion preferences (`preferences.json`); credentials encrypted with `safeStorage` (or the storage a host passes in) |
 | `src/resources.ts` | Bundled helpers: Hermes bootstrap, agent-browser, Stripe CLI, imsg (Messages), Google OAuth registration, distribution config |
 | `src/modules/agent-runtime` | Harness adapters (Hermes worker, external Agent), model access, execution journal, routines |
 | `src/modules/fox` | Fox chat/model actions, World tool host services, conversation and companion records, reset |

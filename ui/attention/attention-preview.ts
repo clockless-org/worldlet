@@ -3,7 +3,7 @@ import {attentionIcon} from './icon.ts';
 import DOMPurify from 'dompurify';
 import {attentionPictureFits,attentionPreviewData,attentionSourceImage,safeAttentionURL} from '../../core/attention/index.ts';
 import {attentionSceneArt} from './scene-art.ts';
-import {attentionTimeRows,attentionGroupWhen,attentionTimeline} from './time.ts';
+import {attentionTimeRows,attentionGroupWhen,attentionTimeline} from '../../core/attention/index.ts';
 import {modelMarkdown,uiIcon} from '../components/index.ts';
 import {ACTIVE_THEME,attentionPicture} from '../themes/index.ts';
 const make=(tag:string,cls:string,text?:string)=>{const el=document.createElement(tag);el.className=cls;if(text)el.textContent=text;return el;};

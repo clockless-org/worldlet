@@ -94,6 +94,8 @@ class PairingTest {
     fun desktopOrderIsOptional() {
         assertEquals(false, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0"}""").order)
         assertEquals(true, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0","order":true}""").order)
+        assertEquals(true, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0","push":true}""").push)
+        assertEquals(false, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0"}""").push)
     }
 
     @Test

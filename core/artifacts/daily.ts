@@ -19,6 +19,16 @@ export const DAILY_PLAN_RECENT_DAYS=3;
 /** ...and only in the morning: a first use after this hour gets no plan that day (a "Good morning" plan
  * at 6:38 PM read as noise, owner Order 2026-10-07). */
 export const DAILY_PLAN_UNTIL_HOUR=12;
+/** A new person's first Today’s prep (owner decision 2026-10-13: a card is already made when they first reach their
+ * World, so their first win needs no Google). It starts as their World first opens, beside the first-run tour, whatever
+ * the hour. What Fox knows of them yet is the Agent they brought, so the card leads with what they have been busy with
+ * and the one thing Fox could do first; there is no overnight part and no mail drafting, which only slow a first card. */
+export const FIRST_PREP_BRIEF='What I have been busy with lately\nToday’s schedule\nThe one thing you could do for me first';
+export function firstPrepRequest(day:string){
+ return 'I just set up Worldlet and brought you along, and this is my first look at my World, so make my first Today’s prep now, whatever the hour. '
+  +'For what I have been busy with, use what you already know of me: your memory of me, our recent conversations (read_companion_archive) and your own history, notes and routines. '
+  +dailyPlanRequest(day,FIRST_PREP_BRIEF).replace(/^Good morning\. /,'');
+}
 /** The evening summary (Wrap up today) is made from this hour, local time, or at the first use the next day (6 PM
  * since owner decision 2026-10-11). */
 export const DAILY_SUMMARY_HOUR=18;
