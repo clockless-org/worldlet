@@ -87,6 +87,23 @@ await withTempDir('wl-',async temp=>{
  fs.symlinkSync(web,path.join(program,'WorldletWeb'),process.platform==='win32'?'junction':'dir');
  const host=path.join(program,'worldlet.cjs');
  const env={...process.env,WORLDLET_PROFILE_ROOT:library,WORLDLET_PAIR_RELAY:'https://relay.example.com'};
+ const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
+ /** Starts the built host and waits (30 s at most) until its output (stdout and stderr) shows `ready`. `stop` ends it
+  * with SIGTERM, or with the stop message over IPC (`ipc`: the only clean stop on Windows, where SIGTERM ends a process
+  * at once without running its handler), and returns its exit code. */
+ const runHost=async(hostEnv:NodeJS.ProcessEnv,ready:(out:string)=>boolean,ipc=false)=>{
+  const child=spawn(process.execPath,[host],{cwd:temp,env:hostEnv,stdio:['ignore','pipe','pipe',...ipc?['ipc' as const]:[]]});
+  let out='';child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{out+=chunk;});
+  const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
+  const deadline=Date.now()+30_000;
+  while(!ready(out)&&child.exitCode===null&&Date.now()<deadline)await sleep(100);
+  return {output:()=>out,async stop(){
+   if(ipc)child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
+   const code=await Promise.race([exited,sleep(20_000).then(()=>'hung' as const)]);
+   if(code==='hung')child.kill('SIGKILL');
+   return code;
+  }};
+ };
 
  // The contract check: what this host implements, on a temporary library it removes again.
  const contract=spawnSync(process.execPath,[host,'--host-contract-check'],{cwd:temp,env,encoding:'utf8',timeout:60_000});
@@ -103,23 +120,16 @@ await withTempDir('wl-',async temp=>{
  // Boots, writes the browser link and stops cleanly: on SIGTERM (POSIX), or on the stop message over its IPC channel,
  // which is how it is stopped on Windows, where SIGTERM ends a process at once without running its handler.
  const boot=async(stop:'signal'|'message')=>{
-  const child=spawn(process.execPath,[host],{cwd:temp,env,stdio:['ignore','pipe','pipe',...stop==='message'?['ipc' as const]:[]]});
-  let out='',err='';
-  child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{err+=chunk;});
-  const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
-  const deadline=Date.now()+30_000;
-  while(!(/room link ready in /.test(out)&&/World ready at /.test(out))&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
-  assert.match(out,/worldlet: started /,'starts: '+err.slice(-400));
-  assert.match(out,/worldlet: room link ready in .*room-link\.txt/,'says where the link is: '+err.slice(-400));
-  assert.match(out,/worldlet: World ready at http:\/\/127\.0\.0\.1:\d+\/world\/ \(its link is in .*world-link\.txt\)/,'says where the World link is: '+err.slice(-400));
+  const running=await runHost(env,out=>/room link ready in /.test(out)&&/World ready at /.test(out),stop==='message'),out=running.output();
+  assert.match(out,/worldlet: started /,'starts: '+out.slice(-400));
+  assert.match(out,/worldlet: room link ready in .*room-link\.txt/,'says where the link is: '+out.slice(-400));
+  assert.match(out,/worldlet: World ready at http:\/\/127\.0\.0\.1:\d+\/world\/ \(its link is in .*world-link\.txt\)/,'says where the World link is: '+out.slice(-400));
   assert.ok(!/#t=/.test(out),'never prints the World link, which carries its token');
   assert.ok(!/https:\/\/relay\.example\.com\/open\/#/.test(out),'never prints the link, which carries its secret');
-  if(stop==='signal')child.kill('SIGTERM');else child.send({type:'worldlet:stop'});
-  const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);
-  if(code==='hung')child.kill('SIGKILL');
-  assert.equal(code,0,(stop==='signal'?'stops cleanly on SIGTERM: ':'stops cleanly on the stop message: ')+err.slice(-400));
-  assert.match(out,/worldlet: stopped/);
-  return out;
+  const code=await running.stop(),all=running.output();
+  assert.equal(code,0,(stop==='signal'?'stops cleanly on SIGTERM: ':'stops cleanly on the stop message: ')+all.slice(-400));
+  assert.match(all,/worldlet: stopped/);
+  return all;
  };
  // POSIX proves both stops; Windows has only the message (its SIGTERM is TerminateProcess).
  const first=await boot(process.platform==='win32'?'message':'signal');
@@ -155,18 +165,9 @@ await withTempDir('wl-',async temp=>{
   assert.equal(idle.status,3,'no service: its own exit code');
   assert.match(idle.stderr,/Worldlet is not running on this computer/);
   const start=async()=>{
-   const child=spawn(process.execPath,[host],{cwd:temp,env:cliEnv,stdio:['ignore','pipe','pipe']});
-   let out='';child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{out+=chunk;});
-   const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
-   const deadline=Date.now()+30_000;
-   while(!(/World ready at /.test(out)&&fs.existsSync(socket))&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
-   assert.ok(fs.existsSync(socket),'the control socket is in the library: '+out.slice(-400));
-   return {output:()=>out,stop:async()=>{
-    child.kill('SIGTERM');
-    const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);
-    if(code==='hung')child.kill('SIGKILL');
-    assert.equal(code,0,'stops cleanly: '+out.slice(-400));
-   }};
+   const running=await runHost(cliEnv,out=>/World ready at /.test(out)&&fs.existsSync(socket));
+   assert.ok(fs.existsSync(socket),'the control socket is in the library: '+running.output().slice(-400));
+   return {output:running.output,stop:async()=>assert.equal(await running.stop(),0,'stops cleanly: '+running.output().slice(-400))};
   };
   let running=await start();
   try{
@@ -177,6 +178,16 @@ await withTempDir('wl-',async temp=>{
    assert.match(status.stdout,/Setup: The person has not finished setup yet/,'says setup is not done');
    assert.match(status.stdout,/registered in no Agent yet/);
    assert.ok(!status.stdout.includes(secret),'status never prints the link');
+   // One host per library: a second start, or a mistyped command, does not start another one beside it.
+   const second=cli();
+   assert.equal(second.status,1,'a second host does not start: '+second.stdout.slice(-400));
+   assert.match(second.stderr,/Another Worldlet is running on this library/);
+   const typo=cli('lnik');
+   assert.equal(typo.status,2,'an unknown command is not a host');
+   assert.match(typo.stderr,/^Usage: worldlet <command>/);
+   const help=cli('--help');
+   assert.equal(help.status,0,'help is no error');
+   assert.match(help.stdout,/^Usage: worldlet <command>/);
    const printed=cli('link');
    assert.equal(printed.status,0,printed.stderr);
    assert.equal(printed.stdout.trim(),link,'link prints the browser link, the same one the library keeps');
@@ -228,11 +239,11 @@ await withTempDir('wl-',async temp=>{
   running=await start();
   try{
    const deadline=Date.now()+10_000;
-   while(!fs.existsSync(path.join(mcp,'worldlet-mcp-endpoint.codex.json'))&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
+   while(!fs.existsSync(path.join(mcp,'worldlet-mcp-endpoint.codex.json'))&&Date.now()<deadline)await sleep(100);
    for(const agent of ['claude-code','codex'])assert.equal(mode(path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`)),0o600,'the same endpoint file again, owner-only');
    assert.equal(fs.readFileSync(argvLog,'utf8'),before,'no Agent registers again');
   }finally{await running.stop();}
-  console.log('PASS node host command line: status, link (and its QR code) and register over an owner-only control socket; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
+  console.log('PASS node host command line: status, link (and its QR code) and register over an owner-only control socket; one host per library, help and a mistyped command start none; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
  }
 
  // The World in a browser on this computer, on a library that finished setup and holds one item.
@@ -244,13 +255,8 @@ await withTempDir('wl-',async temp=>{
  ledger.upsert([{kind:'task',provider:'gmail',status:'open',title,context:'Due Friday.',reason:'Due Friday.',summary:'The library wrote about the card.',attentionContentVersion:1,policyVersion:2,attentionReason:'due',
   sources:[{provider:'gmail',id:'library-mail',quote:'Your card expires Friday.'}],createdAt:1,updatedAt:2}],'node-host-check',true);
  ledger.close();
- // On Windows a SIGTERM ends a process at once (TerminateProcess), so the clean stop there is the message over IPC.
- const child=spawn(process.execPath,[host],{cwd:temp,env:{...env,WORLDLET_PROFILE_ROOT:seeded},stdio:['ignore','pipe','pipe',...process.platform==='win32'?['ipc' as const]:[]]});
- let out='';child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{out+=chunk;});
- const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
+ const child=await runHost({...env,WORLDLET_PROFILE_ROOT:seeded},out=>/World ready at /.test(out),process.platform==='win32');
  try{
-  const deadline=Date.now()+30_000;
-  while(!/World ready at /.test(out)&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
   const link=new URL(fs.readFileSync(path.join(seeded,'world-link.txt'),'utf8').trim()),token=worldLinkToken(link.hash),port=Number(link.port);
   // Raw requests, with the headers a browser would not let a page choose.
   const ask=(pathname:string,headers:Record<string,string>)=>new Promise<number>((resolve,reject)=>{
@@ -341,10 +347,7 @@ await withTempDir('wl-',async temp=>{
   }finally{await browser.close();}
   console.log('PASS node host World in a browser: the real World (pixi-webgl) with its item under the web policy with no violation, one page at a time; another Host, Origin or token, denied actions and what the page\'s window cannot do are refused; the page hears what its window cannot do, leaves out YouTube, sound, the microphone and window buttons, and opens the Browser\'s page in a new tab');
  }finally{
-  if(process.platform==='win32')child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
-  const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);
-  if(code==='hung')child.kill('SIGKILL');
-  assert.equal(code,0,'stops cleanly with a World page open: '+out.slice(-400));
-  assert.ok(!out.includes(fs.readFileSync(path.join(seeded,'world-link.txt'),'utf8').trim().split('#t=')[1]),'stdout never holds the token');
+  assert.equal(await child.stop(),0,'stops cleanly with a World page open: '+child.output().slice(-400));
+  assert.ok(!child.output().includes(fs.readFileSync(path.join(seeded,'world-link.txt'),'utf8').trim().split('#t=')[1]),'stdout never holds the token');
  }
 },shortTemp);

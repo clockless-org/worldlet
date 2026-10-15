@@ -152,10 +152,8 @@ install_linux() {
   if [ -z "$AGENT" ]; then
     echo "      No Agent was named or found. Connect one later: $worldlet setup --agent <hermes|openclaw|claude-code|codex|pi>"
   else
+    # For Claude Code and Codex, setup also registers Worldlet's MCP server and skill (as worldlet register does).
     "$worldlet" setup --agent "$AGENT" </dev/null || echo "      Warning: setup did not finish. Run it again: $worldlet setup --agent $AGENT"
-    case "$AGENT" in
-      claude-code|codex) "$worldlet" register --agent "$AGENT" </dev/null || echo "      Warning: registration failed. Run it again: $worldlet register --agent $AGENT" ;;
-    esac
   fi
 
   step "Your World's link"

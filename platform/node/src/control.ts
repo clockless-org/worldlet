@@ -28,6 +28,8 @@ export type ControlRequest={command:ControlCommand;agent?:string};
 /** An answer: `lines` for the asker's stdout, or `error`. */
 export type ControlReply={lines:string[]}|{error:string};
 export const NOT_RUNNING='Worldlet is not running on this computer: start the Worldlet service, then try again.';
+/** Why a second host does not start on a library a running host already answers on. */
+export const ALREADY_RUNNING='Another Worldlet is running on this library.';
 const LIMIT=64*1024;
 
 export function readControlRequest(value:unknown):ControlRequest|null {
@@ -44,7 +46,7 @@ export async function serveControl(file:string,answer:(request:ControlRequest)=>
  const tooLong=controlSocketTooLong(file);
  if(tooLong)throw Error(tooLong);
  if(process.platform!=='win32'&&fs.existsSync(file)){
-  if(await answers(file))throw Error('Another Worldlet is running on this library.');
+  if(await controlAnswers(file))throw Error(ALREADY_RUNNING);
   fs.rmSync(file,{force:true});
  }
  const server=net.createServer(socket=>{
@@ -68,12 +70,13 @@ export async function serveControl(file:string,answer:(request:ControlRequest)=>
   server.once('error',reject);
   const mask=process.platform==='win32'?null:process.umask(0o177);
   try{server.listen(file,()=>{server.off('error',reject);resolve();});}finally{if(mask!==null)process.umask(mask);}
- });
+ }).catch((error:NodeJS.ErrnoException)=>{throw error?.code==='EADDRINUSE'?Error(ALREADY_RUNNING):error;});
  if(process.platform!=='win32')fs.chmodSync(file,0o600);
  server.on('close',()=>{if(process.platform!=='win32')fs.rmSync(file,{force:true});});
  return server;
 }
-const answers=(file:string)=>new Promise<boolean>(resolve=>{
+/** Whether a running host answers on `file`. */
+export const controlAnswers=(file:string)=>new Promise<boolean>(resolve=>{
  const socket=net.connect(file,()=>{socket.destroy();resolve(true);});
  socket.on('error',()=>resolve(false));
 });
