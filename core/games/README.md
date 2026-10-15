@@ -55,3 +55,7 @@ Checks: `node scripts/game-review-check.ts` (in `test:core`, so PR CI) records b
 ## Built-in Minesweeper
 
 `minesweeper.ts` owns immutable board decisions, safe first placement, flags, chords, completion and elapsed time. Callers supply time and randomness; Core starts no timer and touches no DOM. A bounded shuffle supports deterministic play without retry loops. Shared UI offers a compact 6 × 5 board (10 mines) and a classic 10 × 10 board (14 mines), with separate best times. The Applet starts compact; direct board callers keep the classic default. `node scripts/minesweeper-check.ts` covers both fields and terminal behavior.
+
+## Built-in Snake
+
+`snake.ts` owns movement, the bounded turn queue, safe food placement, growth, collision, pause and full-board wins. The shared Applet uses a wide 16 × 12 field with a seven-piece initial body and a visible first apple. Direct board callers retain the classic 18 × 18 field and three-piece start. Best records are scoped by field. UI supplies frame timing and randomness, paints either ordinary canvas or static-material HTML from the same state, and stops on blur, hidden documents and disposal. `node scripts/snake-check.ts` checks the decisions; the full-bed regression also plays the classic field to completion.

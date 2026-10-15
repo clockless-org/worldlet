@@ -65,7 +65,7 @@ try{
  const registered=(r:unknown)=>({...presentation,appletScenes:{gmail:{background:'assets/plate.svg',registration:r}}});
  assert.doesNotThrow(()=>parseThemePresentation(registered(registration)));
  const withSprites=(sprites:unknown)=>({...presentation,appletScenes:{'game-2048':{background:'assets/plate.svg',registration,sprites}}});
- assert.doesNotThrow(()=>parseThemePresentation(withSprites({'empty-cell':{image:'assets/plate.svg',source:[0,.1,.8,.7]},tile:{image:'assets/plate.svg',source:[0,0,1,1]}})));
+ assert.doesNotThrow(()=>parseThemePresentation(withSprites({'empty-cell':{image:'assets/plate.svg',source:[0,.1,.8,.7]},tile:{image:'assets/plate.svg',source:[0,0,1,1]},food:{image:'assets/plate.svg',source:[0,0,1,1]}})));
  for(const sprites of [{run:'code.js'},{tile:{image:'https://example.com/tile.png',source:[0,0,1,1]}},{tile:{image:'assets/plate.svg',source:[0,0,0,1]}},{tile:{image:'assets/plate.svg',source:[.5,0,1,1]}},{tile:{image:'assets/plate.svg',source:[0,0,1,1],onclick:'run()'}}])assert.throws(()=>parseThemePresentation(withSprites(sprites)),/Invalid build theme/);
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(withSprites({tile:{image:'assets/missing-tile.png',source:[0,0,1,1]}})));await assert.rejects(validateBuildTheme(source),/Missing declared asset/);
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));

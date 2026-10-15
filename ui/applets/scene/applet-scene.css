@@ -177,3 +177,31 @@
 .applet-scene .game-region .game-header[data-toolbar=true] .game-title>.game-symbol{font-size:1.3em;color:var(--scene-accent);filter:drop-shadow(0 1px 0 #fff1ad) drop-shadow(0 2px 3px #0008)}
 .applet-scene .game-region .game-symbol svg{width:100%;height:100%}
 .applet-scene .game-region .game-toolbar .game-metric:first-child:after{content:"";position:absolute;right:0;height:45%;border-right:1px solid var(--scene-accent)}
+/* Independently measured metrics and command frames surround a live board. */
+.applet-scene .game-region .game-header[data-separate-metrics=true]{justify-content:center}
+.applet-scene .game-region .game-header[data-separate-metrics=true] .game-title{font:700 clamp(30px,23cqi,52px)/1.1 var(--scene-body-font);letter-spacing:-.02em}
+.applet-scene .game-region .game-header[data-separate-metrics=true] .game-metrics{display:none}
+.applet-scene .game-region[data-region^=metric-] .game-metric{width:100%;height:100%;border:0;border-radius:0;background:none;box-shadow:none;font-family:var(--scene-body-font)}
+.applet-scene .game-region[data-region^=metric-] .game-metric span{font-size:20px;line-height:1.2}
+.applet-scene .game-region[data-region^=metric-] .game-metric strong{font-size:30px;font-weight:600;line-height:1.15}
+.applet-scene .game-region .game-command-bar{display:flex;justify-content:space-between;align-items:stretch;width:100%;height:100%;gap:12px}
+.applet-scene .game-region .game-command-bar .game-actions{width:44%;height:100%}
+.applet-scene .game-region .game-command-bar :is(button,.game-reset){width:100%;height:100%;min-height:0;min-width:0;padding:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:8px;border-image:none;background:transparent;box-shadow:none;color:var(--scene-ink);font-size:30px;cursor:pointer}
+.applet-scene .game-region .game-command-bar .game-reset{width:44%}
+.applet-scene .game-region .game-command-bar .game-reset>span:not(.game-symbol){position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.applet-scene .game-region .game-command-bar .game-symbol{width:30px;height:30px;filter:drop-shadow(0 2px 2px #0009)}
+.applet-scene .game-region .game-command-bar button:hover{background:#fff2}
+.applet-scene .game-region .game-footer:has([data-symbol=true]) .game-directions{height:70px;width:94%;flex:none}
+.applet-scene .game-region .game-footer:has([data-symbol=true]) .game-directions button{width:21.5%;border:0;border-image:none;border-radius:13px;background:transparent;box-shadow:none;color:var(--scene-ink);font-size:35px}
+.applet-scene .game-region .game-directions [data-symbol=true] svg{width:100%;height:100%;transform:none;filter:drop-shadow(0 2px 2px #0009)}
+.applet-scene .game-region .game-footer:has([data-symbol=true])>.game-hint{font-size:16px;white-space:nowrap}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .snake-board{width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;border-radius:0;background:transparent;box-shadow:none}
+.game-panel[data-sprites=true] .snake-board>canvas,.game-panel[data-sprites=true] .snake-board>.game-overlay{display:none}
+.game-panel[data-sprites=true] .snake-pieces{display:block;border:1px solid var(--scene-accent);box-sizing:border-box;background-image:linear-gradient(to right,var(--scene-accent) 1px,transparent 1px),linear-gradient(to bottom,var(--scene-accent) 1px,transparent 1px);background-size:calc(100% / var(--snake-cols)) calc(100% / var(--snake-rows))}
+.snake-piece{position:absolute;width:calc(100% / var(--snake-cols));height:calc(100% / var(--snake-rows));filter:drop-shadow(0 3px 2px #0008)}
+.snake-piece:before{content:"";position:absolute;inset:0;background-image:var(--game-tile-image);background-size:var(--game-tile-size);background-position:var(--game-tile-position);background-repeat:no-repeat}
+.snake-food:before{background-image:var(--game-food-image);background-size:var(--game-food-size);background-position:var(--game-food-position)}
+.snake-head:after{content:"";position:absolute;left:var(--eye-x);top:var(--eye-y);width:18%;height:18%;border-radius:50%;background:#171208;transform:translate(-50%,-50%)}
+/* Host action buttons otherwise reserve an 18 px flex basis for all descendant icons. */
+.applet-scene .game-region .game-symbol svg{flex:0 0 100%}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game]:has(.game-panel[data-distributed=true])::after{display:none}

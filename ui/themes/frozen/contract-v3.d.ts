@@ -106,7 +106,7 @@ export interface ThemeAppletScene {
     background: string;
     registration: ThemeSceneRegistration;
     /** Crops of painted game materials. The host owns cells, values, input and motion. */
-    sprites?: Partial<Record<'empty-cell' | 'tile', ThemeSceneSprite>>;
+    sprites?: Partial<Record<'empty-cell' | 'tile' | 'food', ThemeSceneSprite>>;
 }
 /** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
 export interface ThemeAppletPreset {

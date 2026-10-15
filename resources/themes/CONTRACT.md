@@ -164,11 +164,11 @@ The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the Vil
 
 ### Painted game materials
 
-An Applet scene may declare `sprites`, with optional `empty-cell` and `tile` roles.
+An Applet scene may declare `sprites`, with optional `empty-cell`, `tile` and `food` roles.
 Each is a package-local `image` and a normalized `[x, y, width, height]` `source`
 rectangle. The importer rejects unknown roles, invalid crops, remote paths and
 missing files. The host crops these pictures with CSS; values, scoring, input
-and motion remain in the shared game. Existing packages can omit sprites.
+and motion remain in the shared game. `food` supplies a collectible material, such as a Snake apple; it cannot set the food position or gameplay. Existing packages can omit sprites.
 
 A game scene with visible secondary `heading` and `controls` regions places its
 live title, metrics and reset above the primary board, and directional controls

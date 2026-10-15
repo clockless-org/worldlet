@@ -68,7 +68,7 @@ export interface ThemeSceneSprite {image:string;source:readonly [number,number,n
 export interface ThemeAppletScene {
  background:string;registration:ThemeSceneRegistration;
  /** Crops of painted game materials. The host owns cells, values, input and motion. */
- sprites?:Partial<Record<'empty-cell'|'tile',ThemeSceneSprite>>;
+ sprites?:Partial<Record<'empty-cell'|'tile'|'food',ThemeSceneSprite>>;
 }
 /** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
 export interface ThemeAppletPreset {
@@ -177,7 +177,7 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
   for(const [key,scene] of Object.entries(p.appletScenes)){
    need(id(key)&&object(scene)&&Object.keys(scene).every(k=>['background','registration','sprites'].includes(k))&&picture(scene.background),'applet scene');
    registration(scene.registration);
-   if(scene.sprites!==undefined)need(object(scene.sprites)&&Object.entries(scene.sprites).every(([role,sprite])=>['empty-cell','tile'].includes(role)&&object(sprite)&&Object.keys(sprite).every(k=>['image','source'].includes(k))&&picture(sprite.image)&&rect(sprite.source)),'scene sprites');
+   if(scene.sprites!==undefined)need(object(scene.sprites)&&Object.entries(scene.sprites).every(([role,sprite])=>['empty-cell','tile','food'].includes(role)&&object(sprite)&&Object.keys(sprite).every(k=>['image','source'].includes(k))&&picture(sprite.image)&&rect(sprite.source)),'scene sprites');
   }
  }
  if(p.sceneMaterials!==undefined){

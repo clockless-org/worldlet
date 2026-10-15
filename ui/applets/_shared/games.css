@@ -98,3 +98,8 @@
 .mines-cell:focus-visible,.game-settings:focus-visible,.game-modes button:focus-visible{outline:2px solid var(--ui-focus,#91b17d);outline-offset:2px}
 .game-panel[data-game=minesweeper] .game-footer{flex-direction:column;gap:6px}
 .game-help{font-size:12px}
+.snake-pieces{display:none;pointer-events:none;position:absolute;inset:0}
+.game-actions{display:flex;align-items:center;justify-content:center;gap:12px}
+.game-actions button{display:grid;place-items:center;width:44px;height:40px;padding:0;border:1px solid var(--control-line);border-radius:10px;background:var(--control-fill);color:var(--control-ink);font:inherit;cursor:pointer}
+.game-actions button:disabled{opacity:.4;cursor:default}
+.game-directions button[data-symbol=true] svg{transform:none}
