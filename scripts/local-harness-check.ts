@@ -31,7 +31,10 @@ assert.match(localHarnessTurn({text:'hi'},{worldTools:true}).system,/describe_wo
 {
  // Known actions travel with the instructions, so Fox calls one without discovery rounds (owner 2026-10-12: Fox slow).
  const tools=localHarnessTurn({text:'hi'},{worldTools:true}).system;
- assert.match(tools,/companion: recall, memory, reply/);assert.match(tools,/"arguments":"\{\\"query\\":/,'the example sends arguments as a string');
+ assert.match(tools,/companion: recall\(\), memory\(\), reply\(conversation,text\)/);
+ // Required arguments ride along, so an action taking "{}" is called without a describe round (owner 2026-10-14).
+ assert.match(tools,/browser: open\(url\), snapshot\(\)/);assert.match(tools,/music: podcast, radio/,'a shared operation schema says nothing per action');
+ assert.match(tools,/google-drive: read\(\)/,'an action with no arguments');assert.match(tools,/"arguments":"\{\\"query\\":/,'the example sends arguments as a string');
  assert.doesNotMatch(tools,/applet:/,'Applet aliases repeat their base targets');
  assert.match(tools,/call_world_tool \{target, action, arguments\}/);assert.match(tools,/without searching for them or describing them first/,'no tool search round for known tools');
  assert.match(localHarnessTurn({text:'hi',sample:true},{worldTools:true}).system,/gmail: [^;]*search/,'the practice world lists its own actions');
