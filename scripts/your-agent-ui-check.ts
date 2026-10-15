@@ -82,7 +82,7 @@ try{
  const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
  // Seven named sections in the owner's order (2026-10-11), each a heading and one plain line.
  assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','memory','skills','routines','permissions','access','accounts'],'Model, Memory, Skills, Routines, Permissions, Access, then Accounts last');
- assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Routines','Permissions','Access','Connections']);
+ assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Scheduled','Permissions','Access','Connections']);
  for(const line of await local.locator('[data-part] > .companion-settings-partnote').allTextContents())assert.ok(line.length>20&&line.length<160&&!line.includes('\n'),'one plain line: '+line);
  assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),7,'each section has its line');
  // Memory: what each Agent remembers, About you first, the first few with Show all; read only.
@@ -113,7 +113,7 @@ try{
  await ccTools.getByText('linear',{exact:true}).waitFor();
  assert.equal(await ccTools.getByRole('button').count(),0,'read only');
  await ccTools.getByText('Claude Code keeps these in its own settings. Change them in Claude Code itself.',{exact:true}).waitFor();
- await local.locator('[data-part=routines]').getByText(/the same Routines as in the Task panel/).waitFor();
+ await local.locator('[data-part=routines]').getByText(/the same Scheduled tasks as in the Task panel/).waitFor();
  await permissions.getByRole('heading',{name:'Permissions',exact:true}).waitFor();
  await accounts.getByRole('heading',{name:'Connections',exact:true}).waitFor();
  // Skills: the Agent's own, with when each last ran and an Off mark; Turn off asks first, then runs its own command.

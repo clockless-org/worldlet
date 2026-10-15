@@ -150,7 +150,7 @@ install_linux() {
 
   step "Connecting ${AGENT:-your Agent}…"
   if [ -z "$AGENT" ]; then
-    echo "      No Agent was named or found. Connect one later: $worldlet setup --agent <hermes|openclaw|claude-code|codex>"
+    echo "      No Agent was named or found. Connect one later: $worldlet setup --agent <hermes|openclaw|claude-code|codex|pi>"
   else
     "$worldlet" setup --agent "$AGENT" </dev/null || echo "      Warning: setup did not finish. Run it again: $worldlet setup --agent $AGENT"
     case "$AGENT" in

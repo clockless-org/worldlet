@@ -310,7 +310,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
   memory.append(pages.knows);
   const skills=part('skills','Skills','Steps your Agent follows for tasks it knows how to do. They live in your Agent; Worldlet changes them only with its own commands.');
-  const routines=part('routines','Routines','What your Agent does on its own schedule, the same Routines as in the Task panel. Worldlet changes them only with its own commands.');
+  const routines=part('routines','Scheduled','What your Agent does on its own schedule, the same Scheduled tasks as in the Task panel. Worldlet changes them only with its own commands.');
   const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
   // Access: which Agents reach the World's tools on their own and what each may do (core/agent/GRANTS.md).
   const access=part('access','Access','Agents that reach your World on their own, from any chat: what each may do, when it last did, and Revoke.');
