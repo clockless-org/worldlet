@@ -207,8 +207,17 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   const start=visible&&!!page.url?appletHome():'';
   const away=!!start&&(appletKey==='browser'?!atBrowserHome(page.url,start):!atAppletHome(page.url,[start,landedHomes.get(appletKey)||'']));
   homeButton.hidden=!visible||!appletHome();homeButton.disabled=!away;
-  const bar=visible&&appletKey!=='web';if(toolbar.hidden===bar){toolbar.hidden=!bar;root.dispatchEvent(new CustomEvent('worldlet:page-controls'));}
+  const bar=visible&&appletKey!=='web';if(toolbar.hidden===bar){toolbar.hidden=!bar;dockToolbarEnds(bar);root.dispatchEvent(new CustomEvent('worldlet:page-controls'));}
   syncAddress(visible?page.url:'');
+ }
+ // Picture in picture and the shelf's + (a new page in the Browser) end the toolbar's row while it shows (owner request
+ // 2026-10-15: "这两个按钮也挪到地址栏"), and go back to the top bar and the shelf when it hides.
+ const homes=new Map<HTMLElement,[HTMLElement,Node|null]>();
+ function dockToolbarEnds(shown:boolean){
+  if(shown){for(const control of [root.querySelector('.browser-pip-offer') as HTMLElement|null,root.querySelector('.applet-shelf-new') as HTMLElement|null])
+   if(control&&control.parentElement!==toolbar){homes.set(control,[control.parentElement!,control.nextSibling]);toolbar.append(control);}}
+  // Each goes back to where it was, also while the toolbar has left the page with them.
+  else for(const [control,[parent,next]] of homes){parent.insertBefore(control,next?.parentNode===parent?next:null);homes.delete(control);}
  }
  // Where the page is (owner request 2026-10-08), now in the toolbar's address field (owner request 2026-10-09): the page's
  // address while it is read, the whole address to edit once the field is clicked. Enter opens what was typed here: an
