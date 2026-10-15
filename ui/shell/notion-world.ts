@@ -904,7 +904,7 @@ export function mountNotionWorld(data: World, native: any) {
   function readSnoozes(){try{return JSON.parse(native?.storage?.getItem('itemSnoozes')||'{}');}catch{return {};}}
   // Visible Center rows in reading order: Coming Up, Worth Doing, Worth Knowing.
   const attentionRowOrder=()=>[...root.querySelectorAll('.world-matter[data-world-item-id]')].map(row=>(row as HTMLElement).dataset.worldItemId);
-  async function settleAttention(item,status,snoozedUntil,{advance=false,by,surface='computer',ask}:{advance?:boolean,by?:'fox',surface?:'computer'|'phone',ask?:{outcome:'answered'|'done'|'skipped',choice?:string,note?:string}}={}){
+  async function settleAttention(item,status,snoozedUntil,{advance=false,by,surface='computer',ask,hosted=false}:{advance?:boolean,by?:'fox',surface?:'computer'|'phone',ask?:{outcome:'answered'|'done'|'skipped',choice?:string,note?:string},hosted?:boolean}={}){
     const order=attentionRowOrder(),previewing=attentionPage?.worldItemId===item.worldItemId;
     // A settled item's website pages become the websites' own places again.
     if(status!=='open')for(const [page,bound] of siteThreads)if(bound.key==='attention:'+item.worldItemId)siteThreads.delete(page);
@@ -914,6 +914,8 @@ export function mountNotionWorld(data: World, native: any) {
     for(const id of memberIds){
       if(data.sample){settleSampleItem(id,status);const saved=readSnoozes();if(snoozedUntil)saved[id]=snoozedUntil;else delete saved[id];native?.storage?.setItem('itemSnoozes',JSON.stringify(saved));}
       // An Agent's ask (core/agent/GRANTS.md#agent-asks) is answered on the host, which settles its item with it.
+      // A GitHub draft the host already approved or dismissed (core/agent/GRANTS.md#github-drafts): its item is settled.
+      else if(hosted){}
       else if(ask){const askId=itemPage(id)?.worldItemAsk?.id;const result=askId&&native?.agentAsk?await native.agentAsk(askId,ask.outcome,ask.choice,ask.note):null;if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not answer this.');}}
       else {const result=await native.itemStatus(id,status,snoozedUntil,by);if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not save this item.');}}
       for(const page of pages.values())if(page.worldItemId===id)settleItemPage(page,status,snoozedUntil);
@@ -1159,6 +1161,26 @@ export function mountNotionWorld(data: World, native: any) {
     attentionPreview.setActions([{key:'done',label:'Done',primary:true,run:()=>answer('done').catch(e=>notify(e.message))},{key:'dismiss',label:'Dismiss',run:()=>answer('skipped').catch(e=>notify(e.message))}]);
     attentionPreview.setReview({text:(asked.agent||'An Agent')+' asks',note:true,choices:asked.choices.length?asked.choices.map((choice,index)=>({key:'choice-'+index,label:choice,run:(note?:string)=>answer('answered',choice,note).catch(e=>notify(e.message))}))
      :[{key:'reply',label:'Reply',run:(note?:string)=>note?answer('answered',undefined,note).catch(e=>notify(e.message)):Promise.resolve(notify('Write a note first.'))}]});
+    showDraftLine(page);voice?.setAttentionActions?.([]);
+    return;
+   }
+   // An Agent's GitHub draft: Approve writes it (the host reads the target again first and refuses if it changed),
+   // Dismiss drops it. The card shows the Agent, the repository, exactly what will be written and a link to the target.
+   const drafted=page.worldItemGithubDraft&&page.worldItemGithubDraft.status==='pending'&&!data.sample&&native?.githubDraft?page.worldItemGithubDraft:null;
+   if(drafted){
+    let busy=false;
+    const act=(operation:'approve'|'dismiss')=>async()=>{
+     if(busy)return;busy=true;
+     try{
+      const result=await native.githubDraft(operation,drafted.id);
+      if(!result?.ok)throw Error(result?.error||'Could not do that.');
+      await settleAttention(page,result.status==='written'?'done':'dismissed',null,{advance:true,hosted:true});
+      // Said once the card has moved on, so the next card's line does not hide it.
+      notify(result.status==='written'?'Written on GitHub.':result.status==='dismissed'?'Dismissed. Nothing was written.':result.reason||'Nothing was written.');
+     }catch(e){notify(e.message);}finally{busy=false;}
+    };
+    attentionPreview.setActions([{key:'approve',label:'Approve',primary:true,run:act('approve')},{key:'dismiss',label:'Dismiss',run:act('dismiss')}]);
+    attentionPreview.setReview({text:`${drafted.agent||'An Agent'} drafted this for ${drafted.repo}`,quote:drafted.text,...drafted.url?{link:{label:'Open on GitHub',url:drafted.url}}:{},choices:[]});
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }

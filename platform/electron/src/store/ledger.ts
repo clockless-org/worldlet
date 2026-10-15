@@ -92,6 +92,21 @@ export class WorldLedger {
    this.put('agent-asks',ask.id,ask);this.put('items',item.id,prepared);
   });
  }
+ // GitHub drafts (core/agent/github-drafts.ts, core/agent/GRANTS.md#github-drafts) -------------------------------
+ /** Every GitHub draft's current value (`state.github-drafts`). */
+ githubDrafts():Row[]{return this.records('github-drafts');}
+ /** One draft and its Attention item, saved together, as an ask is: the item is the host's own (provider `agents`), its
+  * status the draft's, set by the person (`user`) or by the Agent's draft (`agent`), and its Agent the draft's. */
+ saveGithubDraft(draft:Row,item:Row,origin:'user'|'agent'){
+  this.transaction(()=>{
+   core('worldItemValidate',{item,dates:{start:null,end:null}});
+   const previous=this.value('items',item.id);
+   const prepared=core<Row>('worldItemPrepare',{item,previous:previous??{},id:item.id,identity:WorldLedger.identity(item),run:'github-drafts',now:iso(),
+    previousIdentity:previous?WorldLedger.identity(previous):'',agentId:draft.agentId});
+   prepared.status=item.status;prepared.statusOrigin=origin;
+   this.put('github-drafts',draft.id,draft);this.put('items',item.id,prepared);
+  });
+ }
  // Service presets (core/accounts/services/presets.ts, core/applets/INTEGRATIONS.md#service-presets) ---------------
  /** Every saved Service preset (`state.service-presets`), by ID. */
  servicePresets():Row[]{return this.records('service-presets');}

@@ -33,6 +33,8 @@
 .attention-preview-review-choice:disabled{opacity:.5;cursor:default}
 .attention-preview-review.is-ask{align-items:center}
 .attention-preview-review.is-ask .attention-preview-review-choice{padding:3px 12px;border:1px solid currentColor;border-radius:999px;text-decoration:none}
+.attention-preview-review-quote{flex:1 1 100%;margin:0;padding:8px 10px;max-height:240px;overflow:auto;border-left:3px solid color-mix(in srgb,currentColor 35%,transparent);white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}
+.attention-preview-review-link{color:inherit;text-decoration:underline;text-underline-offset:3px}
 .attention-preview-review-note{flex:1 1 100%;min-width:0;padding:5px 8px;border:1px solid color-mix(in srgb,currentColor 30%,transparent);border-radius:8px;background:transparent;color:inherit;font:inherit}
 .attention-preview-original{font-size:13px;text-decoration:underline;text-underline-offset:3px;opacity:.8}
 #notionWorld[data-attention-preview=true] .world-task-tracker{display:flex;visibility:visible}

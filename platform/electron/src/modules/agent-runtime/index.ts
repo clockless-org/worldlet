@@ -14,6 +14,7 @@ import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridg
 import {createAgentAccess} from './agent-access.ts';
 import {createAgentAsks,type AgentAsks} from './agent-asks.ts';
 import {createWorldBoard,type WorldBoard} from './board.ts';
+import {createGithubDrafts,type GithubDrafts} from './github-drafts.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -27,7 +28,7 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,githubDraftGranted,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../core/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
@@ -268,7 +269,8 @@ let standing:Promise<StandingWorldTools>|null=null;
 export function standingWorldTools():Promise<StandingWorldTools>|null {
  if(!agentAccess)return null;
  return standing??=openStandingWorldTools({access:agentAccess,asks:(agentId,args)=>agentAsks?agentAsks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
-  board:(agentId,args,canRead)=>worldBoard?worldBoard.call(agentId,args,canRead):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
+  board:(agentId,args,canRead)=>worldBoard?worldBoard.call(agentId,args,canRead):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
+  drafts:(agentId,args)=>githubDrafts?githubDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
 }
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
@@ -277,6 +279,8 @@ let agentAccess:AgentAccess|null=null;
 let agentAsks:AgentAsks|null=null;
 /** The board (board.ts), made with the Agent service whose Service readers it reads through. */
 let worldBoard:WorldBoard|null=null;
+/** GitHub drafts (github-drafts.ts), made with agentAccess. */
+let githubDrafts:GithubDrafts|null=null;
 /** How many of each Agent's newest audit entries Settings shows. */
 const AGENT_ACCESS_AUDIT=20;
 
@@ -542,6 +546,30 @@ export function installAgentRuntime(host:Host){
   if(request.operation!=='answer')throw new WorldletError('Unknown asks operation.');
   try{return agentAsks!.answer(request);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not answer this.');}
  }});
+ // GitHub drafts (core/agent/GRANTS.md#github-drafts): in the person's own World with private context allowed, as asks are.
+ githubDrafts=createGithubDrafts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
+  vault,name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),userAgent:`Worldlet/${app.getVersion()}`});
+ /** The person's Approve or Dismiss on a GitHub draft's card (`approve`, `dismiss`, with the draft's ID). Approve reads
+  * the target again and writes only when it has not changed. Not in ROOM_ALLOWED: a page on another device cannot
+  * approve a GitHub write. */
+ host.register({githubDraft:async request=>{
+  try{
+   if(request.operation==='approve')return await githubDrafts!.approve(request.id);
+   if(request.operation==='dismiss')return githubDrafts!.dismiss(request.id);
+  }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
+  throw new WorldletError('Unknown GitHub draft operation.');
+ }});
+ /** The GitHub App that writes approved drafts (Settings › Agent › Connections): `status`, `connect` (its App ID,
+  * installation ID and private key, checked with GitHub before they are kept in the vault) and `disconnect`. None
+  * answers with the App's settings. Not in ROOM_ALLOWED. */
+ host.register({githubApp:async request=>{
+  try{
+   if(request.operation==='status')return githubDrafts!.app.status();
+   if(request.operation==='connect')return await githubDrafts!.app.connect({appId:request.appId,installationId:request.installationId,privateKey:request.privateKey});
+   if(request.operation==='disconnect')return githubDrafts!.app.disconnect();
+  }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
+  throw new WorldletError('Unknown GitHub App operation.');
+ }});
  let adapter=selectAdapter(context,undefined,remote,vault);
  // Once the runtime is ready and Fox's profile exists (after its first turn), and again whenever Fox changes Agent.
  listeners.push(()=>{void residentHermes(context,adapter);});
@@ -632,11 +660,25 @@ export function installAgentRuntime(host:Host){
    }else if(!access.ungrantBoard(id,kind))throw new WorldletError('Could not change that.');
    return {ok:true};
   }
+  if(request.operation==='grantGithubDrafts'||request.operation==='ungrantGithubDrafts'){
+   const id=typeof request.id==='string'?request.id:'';
+   const identity=access.identity(id);
+   if(!identity)throw new WorldletError('That Agent is not known here.');
+   if(request.operation==='grantGithubDrafts'){
+    if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
+    if(!githubDrafts?.app.status().connected)throw new WorldletError('Connect a GitHub App in Settings › Agent › Connections first.');
+    if(!access.grantGithubDrafts(id))throw new WorldletError('Could not change that.');
+   }else if(!access.ungrantGithubDrafts(id))throw new WorldletError('Could not change that.');
+   return {ok:true};
+  }
   const services=connectedServices(),now=new Date().toISOString();
+  const githubApp=githubDrafts?.app.status().connected===true;
   return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
    services:agentRevoked(identity,now)?[]:services.map(provider=>({provider,title:SERVICE_TITLES[provider],granted:serviceGranted(identity.id,grants,provider,now)})),
    asks:{ask:askGranted(identity.id,grants,'ask',now),work:askGranted(identity.id,grants,'work',now)},
-   board:{read:boardGranted(identity.id,grants,'read',now),define:boardGranted(identity.id,grants,'define',now)}}))};
+   board:{read:boardGranted(identity.id,grants,'read',now),define:boardGranted(identity.id,grants,'define',now)},
+   // "Can draft GitHub changes", shown once a GitHub App can write them (or while the Grant is still on).
+   ...!agentRevoked(identity,now)&&(githubApp||githubDraftGranted(identity.id,grants,now))?{githubDrafts:githubDraftGranted(identity.id,grants,now)}:{}}))};
  }});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);

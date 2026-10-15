@@ -2,6 +2,7 @@ import {AGENT_ID_PATTERN,type AgentAuditEntry,type AgentIdentity,type Grant} fro
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {AGENT_ASK_ACTIONS,AGENT_ASK_TARGET} from '../../contracts/agent-asks.ts';
 import {BOARD_ACTIONS,BOARD_TARGET} from '../../contracts/board.ts';
+import {GITHUB_DRAFT_ACTIONS,GITHUB_DRAFT_TARGET} from '../../contracts/github-drafts.ts';
 import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
@@ -221,9 +222,27 @@ export function boardGrantAuditEntry(agentId:string,kind:string,granted:boolean,
  return {at,agentId,target:BOARD_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:boardGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks) or the person's board, so a
- * Fox turn's Grant, which covers everything else, never covers them. */
-export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET]);
+/** "Can draft GitHub changes" in Settings › Agent › Access (core/agent/GRANTS.md#github-drafts): `github-drafts/create`
+ * and `github-drafts/read`. Never part of the default Grants, and never given by a Fox turn. Access is `read`: a draft
+ * only shows the person a change, and nothing is written to GitHub until they approve it on its card. */
+export const githubDraftGrantTargets=():string[]=>[GITHUB_DRAFT_ACTIONS.create,GITHUB_DRAFT_ACTIONS.read];
+export const githubDraftGrantId=(agentId:string)=>agentId+'-github-drafts';
+export function githubDraftGrant(agentId:string,grantedAt:string):Grant|null {
+ if(typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
+ return {id:githubDraftGrantId(agentId),agentId,targets:githubDraftGrantTargets(),access:'read',duration:'standing',grantedAt};
+}
+export function githubDraftGranted(agentId:string,grants:readonly Grant[],now:string):boolean {
+ const id=githubDraftGrantId(agentId);
+ return grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
+}
+/** The audit entry for the person turning "Can draft GitHub changes" on or off in Settings. */
+export function githubDraftGrantAuditEntry(agentId:string,granted:boolean,at:string):AgentAuditEntry {
+ return {at,agentId,target:GITHUB_DRAFT_TARGET,action:granted?'grant':'ungrant',decision:'allowed',grantId:githubDraftGrantId(agentId),
+  reason:granted?'The person let this Agent draft GitHub changes in Settings.':'The person stopped this Agent drafting GitHub changes in Settings.'};
+}
+/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub drafts) or the
+ * person's board, so a Fox turn's Grant, which covers everything else, never covers them. */
+export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET]);
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other

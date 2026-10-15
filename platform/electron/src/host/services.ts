@@ -409,6 +409,9 @@ export interface AgentAccess {
   * (core boardGrant), each change audited. */
  grantBoard(agentId:string,kind:string):boolean;
  ungrantBoard(agentId:string,kind:string):boolean;
+ /** "Can draft GitHub changes" (github-drafts/create and read), the same way (core githubDraftGrant), each change audited. */
+ grantGithubDrafts(agentId:string):boolean;
+ ungrantGithubDrafts(agentId:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {
