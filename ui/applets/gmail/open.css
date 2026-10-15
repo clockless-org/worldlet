@@ -104,3 +104,11 @@
 .mail-region .mail-desk-footer .mail-desk-button,.mail-region .mail-desk-actions .mail-desk-button{border-color:var(--scene-accent);box-shadow:inset 0 1px 1px color-mix(in srgb,var(--scene-ink) 25%,transparent),0 2px 3px #0008;text-shadow:0 1px 1px #0008}
 
 #notionWorld .applet-scene .mail-region :is(.mail-letter-avatar,.mail-letter-snippet,.mail-letter-time,.mail-sender-portrait){display:none}
+
+/* Measured desk actions sit in the board's dark control material, with a thin bevel.
+   Keep the same material while hovering so the button stays part of the painted desk. */
+.mail-region .mail-desk-footer .mail-desk-button,.mail-region .mail-desk-actions .mail-desk-button{background:var(--scene-control);color:var(--scene-ink);border:1px solid var(--scene-accent);border-radius:3px;box-shadow:inset 0 1px 1px color-mix(in srgb,var(--scene-ink) 25%,transparent),inset 0 -2px 2px #0005,0 2px 3px #0008}
+.mail-region :is(.mail-desk-footer,.mail-desk-actions) .mail-desk-button:hover{background:color-mix(in srgb,var(--scene-control) 90%,var(--scene-accent))}
+.mail-region :is(.mail-desk-footer,.mail-desk-actions) .mail-desk-button:active{box-shadow:inset 0 2px 3px #0007,0 1px 1px #0005}
+.mail-region .mail-desk-footer .mail-desk-button{min-height:36px}
+.mail-region .mail-desk-actions .mail-desk-button{min-height:40px;padding:8px 12px}

@@ -30,6 +30,8 @@ export function renderMailOpen(region:HTMLElement,items,value,onPick,regions:rea
  const active=document.activeElement as HTMLInputElement|null,wasHere=!!active&&!!region.closest('.applet-scene')?.contains(active),focusId=wasHere?active?.dataset.itemId:null,focusLabel=wasHere?active?.getAttribute('aria-label'):null,focusFolder=wasHere?active?.dataset.folder:null,caret=wasHere&&active instanceof HTMLInputElement?[active.selectionStart,active.selectionEnd]:null;
  const state=desks.get(region)||{tab:distributed?'inbox':'attention',query:'',selected:''};desks.set(region,state);
  const actions=value?.mail,threads=mailMatters(items),important=threads.filter(item=>!!item.attention).slice(0,9);
+ // Only originals read by this rendered desk can fill absent envelope metadata. Summaries cannot.
+ const readMetadata=new Map<string,ReturnType<typeof mailMetadata>>(),metadata=item=>readMetadata.get(item.id)||mailMetadata(item.record);
  const el=(tag,cls,text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const button=(text,run,cls='mail-desk-button')=>{const b=el('button',cls,text) as HTMLButtonElement;b.type='button';b.onclick=run;return b;};
  region.classList.add('mail-desk-host');region.dataset.mailReading=String(!!value?.reading);region.setAttribute('aria-label','Mail');
@@ -54,11 +56,11 @@ export function renderMailOpen(region:HTMLElement,items,value,onPick,regions:rea
    b.dataset.folder=key;b.setAttribute('aria-pressed',String(state.tab===key));tabs.append(b);}
   if(focusedFolder)(tabs as HTMLElement).querySelector<HTMLButtonElement>('[data-folder="'+focusedFolder+'"]')?.focus({preventScroll:true});
   const pool=state.tab==='attention'?important:threads.filter(item=>{const labels=(item.members||[item]).flatMap(m=>m.record?.labelIds||[]);return state.tab==='drafts'?labels.includes('DRAFT'):state.tab==='starred'?labels.includes('STARRED'):state.tab==='sent'?labels.includes('SENT'):!labels.includes('SPAM')&&!labels.includes('TRASH')&&!labels.includes('SENT')&&!labels.includes('DRAFT');});
-  const filtered=pool.filter(item=>[item.title,item.record?.title,item.record?.from,item.summary].filter(Boolean).join(' ').toLowerCase().includes(state.query.toLowerCase()));
+  const filtered=pool.filter(item=>[item.title,item.record?.title,metadata(item).from,item.summary].filter(Boolean).join(' ').toLowerCase().includes(state.query.toLowerCase()));
   if(!filtered.some(item=>item.id===state.selected))state.selected=filtered[0]?.id||'';
   list.replaceChildren();
   for(const item of filtered){
-   const record=mailMetadata(item.record),title=item.record?.title||item.title;
+   const record=metadata(item),title=item.record?.title||item.title;
    const b=button('',()=>{state.selected=item.id;if(!actions?.read){onPick(item);return;}desk.dataset.reading='true';paintRows();void read(item,true);},'mail-letter');
    b.dataset.itemId=item.id;b.dataset.curated=String(!!item.curated);b.dataset.stacked=String(item.messageCount>1);b.setAttribute('aria-label',title);b.title=title;
    const avatar=mailAvatar(record.from,record.avatar);avatar.classList.add('mail-letter-avatar');
@@ -80,6 +82,13 @@ export function renderMailOpen(region:HTMLElement,items,value,onPick,regions:rea
   try{
    const original=actions?.read?await actions.read(item):{text:item.record?.text||item.summary||'',title:item.record?.title||item.title};
    if(request!==serial||!desk.isConnected)return;if(typeof original?.text!=='string')throw Error('This letter is unavailable.');
+   const listed=metadata(item),source=actions?.read?mailMetadata(original.messages?.[0]||original):listed;
+   const resolved={...listed,from:listed.from||source.from};readMetadata.set(item.id,resolved);
+   const row=[...(list as HTMLElement).querySelectorAll<HTMLElement>('.mail-letter')].find(e=>e.dataset.itemId===item.id);
+   if(row&&resolved.from!==listed.from){
+    row.querySelector('.mail-letter-sender')!.textContent=mailIdentity(resolved.from).name;
+    const avatar=mailAvatar(resolved.from,resolved.avatar);avatar.classList.add('mail-letter-avatar');row.querySelector('.mail-letter-avatar')?.replaceWith(avatar);
+   }
    body.replaceChildren();if(actions?.renderOriginal)body.append(actions.renderOriginal(original));else body.append(el('h3','',original.title||item.title),el('p','mail-desk-plain',original.text));
    turnMailPage(body,previous);
    const tools=el('footer','mail-desk-actions');if(actions?.reply){const reply=button('Reply with Fox',()=>actions.reply(item));if(distributed){const icon=el('span','mail-folder-icon');icon.innerHTML=uiIcon('reply');reply.prepend(icon);}tools.append(reply);}tools.append(button('Original',()=>onPick(item)));(distributed?slots.actions:letter).append(tools);

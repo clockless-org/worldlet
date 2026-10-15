@@ -8,7 +8,8 @@ export function mailMetadata(record:any={}){
  for(const line of String(record.text||record.markdown||'').split(/\r?\n/).slice(0,24)){
   const match=line.match(/^(?:#{1,3}\s+)?(From|To|Cc|Date|Subject|Status):\s*(.*)$/i);
   if(match){if(!headers[match[1].toLowerCase()])headers[match[1].toLowerCase()]=match[2].trim();found=true;continue;}
-  if(!line.trim()){if(found)break;continue;}
+  // A saved note may put a status preface before the original header block.
+  if(!line.trim()){if(found&&Object.keys(headers).some(k=>k!=='status'))break;continue;}
   if(!found&&/^# /.test(line))continue;
   break;
  }
