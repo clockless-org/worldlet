@@ -56,3 +56,5 @@ supplies live score values and the game's directional callbacks own movement.
 Games may expose named `parts` for a subtitle, keypad, tools or legend. The shared panel moves those existing nodes to matching regions, sends reset to an optional `restart` region, and restores each part to its original parent on fallback. Rules and input handlers stay in the game. Disposal removes moved controls and stops the game clock.
 
 For a framed page with a short bottom composer, the shelf uses the space left of the page instead of treating the composer as a side column. World navigation sits directly above the bottom composer, clear of the native page and foreground. Ordinary side-column frames keep their existing geometry.
+
+When the measured page leaves less than one navigation row above the bottom composer, navigation sits to its left instead. The host derives this from the registered rectangles and clears it on scene disposal.

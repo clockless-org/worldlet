@@ -89,7 +89,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   const round=(r:{x:number;y:number;width:number;height:number})=>({x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)});
   last={key,painted,compact,primary:round(primary),companion:round(fit.companion)};
   const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
-  if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletPlane;return;}
+  if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletNavigationInline;delete shell.dataset.appletPlane;return;}
   for(const [name,r] of [['primary',primary],['companion',fit.companion]] as const){
    shell.style.setProperty(`--applet-scene-${name}-left`,offset.x+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,offset.y+r.y+'px');
    shell.style.setProperty(`--applet-scene-${name}-width`,r.width+'px');shell.style.setProperty(`--applet-scene-${name}-height`,r.height+'px');
@@ -98,6 +98,8 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   shell.dataset.appletScene=key;if(fitted.quad)shell.dataset.appletPlane='true';else delete shell.dataset.appletPlane;
   // A short clearance below the paper carries a compact composer, not a full-height side lane.
   if(painted&&fit.companion.height<100&&fit.companion.width>=360&&fit.companion.y>=primary.y+primary.height)shell.dataset.appletCompanionBar="true";else delete shell.dataset.appletCompanionBar;
+  // A tall page can leave room for the composer but not another row above it.
+  if(shell.dataset.appletCompanionBar&&fit.companion.x>=140&&fit.companion.y-primary.y-primary.height<48)shell.dataset.appletNavigationInline='true';else delete shell.dataset.appletNavigationInline;
   if(source.registration.webFrame)shell.dataset.appletFrame=key;else delete shell.dataset.appletFrame;
  }
  const resize=new ResizeObserver(layout);resize.observe(element);layout();
@@ -115,7 +117,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   destroy(){
    resize.disconnect();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
    shellOwners.delete(shell);shell.style.removeProperty('--applet-scene-primary-transform');
-   delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletPlane;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
+   delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletNavigationInline;delete shell.dataset.appletPlane;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
    for(const part of ['primary','companion'])for(const side of ['left','top','width','height'])shell.style.removeProperty(`--applet-scene-${part}-${side}`);
   }};
 }
