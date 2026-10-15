@@ -122,19 +122,21 @@
 /* Measured game regions override ordinary panel controls and material skins. */
 .applet-scene .applet-scene-region.game-region[data-role=secondary]{padding:0;overflow:visible;display:block;color:var(--scene-ink);text-align:left}
 .applet-scene .game-region .game-header{width:100%;height:100%;display:flex;align-items:center;gap:5cqi;margin:0;padding:0;background:none;border:0;box-shadow:none;color:var(--scene-ink)}
-.applet-scene .game-region .game-title{flex:none;margin:0;font:700 clamp(32px,12.4cqi,72px)/1 var(--scene-body-font);color:var(--scene-ink);text-shadow:0 1px 0 var(--scene-control),0 3px 2px #0009,0 7px 12px #0009}
+.applet-scene .game-region .game-title{flex:none;margin:0;font:400 clamp(32px,12.4cqi,72px)/1 var(--scene-body-font);color:var(--scene-ink);text-shadow:0 -1px 0 color-mix(in srgb,var(--scene-ink) 60%,white),0 1px 0 var(--scene-accent),0 2px 1px var(--scene-control),0 4px 5px #0009}
 .applet-scene .game-region .game-metrics{display:flex;gap:2.5cqi;flex:1;min-width:0;height:72%;font-family:var(--scene-body-font);font-variant-numeric:tabular-nums}
-.applet-scene .game-region .game-metric{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:0;border:1px solid var(--scene-accent);border-radius:9px;box-shadow:inset 0 0 0 2px #0005,0 3px 8px #0008;background:color-mix(in srgb,var(--scene-control) 84%,transparent);text-shadow:0 2px 2px #0009}
+.applet-scene .game-region .game-metric{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:0;border:1px solid var(--scene-accent);border-radius:9px;box-shadow:inset 0 1px 0 color-mix(in srgb,var(--scene-ink) 25%,transparent),inset 0 0 0 2px #0005,0 2px 4px #0008;background:linear-gradient(155deg,color-mix(in srgb,var(--scene-accent) 12%,transparent),transparent 55%),color-mix(in srgb,var(--scene-control) 70%,#000);text-shadow:0 1px 1px #0009}
 .applet-scene .game-region .game-metric span{font-size:clamp(12px,3.3cqi,20px);line-height:1.15}
 .applet-scene .game-region .game-metric strong{font-size:clamp(16px,4.5cqi,28px);line-height:1.1;font-weight:400}
 .applet-scene .game-region .game-header>.ui-caption{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-.applet-scene .game-region .game-reset,.applet-scene .game-region .game-directions button{border:1px solid var(--scene-accent);border-image:none;border-radius:14px;background:color-mix(in srgb,var(--scene-control) 85%,transparent);color:var(--scene-ink);box-shadow:inset 0 0 0 1px #f8db8b55,0 2px 8px #0008;text-shadow:0 2px 2px #000b;cursor:pointer}
+.applet-scene .game-region .game-reset,.applet-scene .game-region .game-directions button{border:1px solid var(--scene-accent);border-image:none;border-radius:14px;background:linear-gradient(165deg,color-mix(in srgb,var(--scene-accent) 19%,transparent),transparent 58%),color-mix(in srgb,var(--scene-control) 70%,#000);color:var(--scene-ink);box-shadow:inset 0 1px 1px color-mix(in srgb,var(--scene-ink) 50%,transparent),inset 0 -2px 3px #0009,0 1px 0 color-mix(in srgb,var(--scene-accent) 70%,transparent),0 3px 5px #0008;text-shadow:0 1px 1px #000b;cursor:pointer}
 .applet-scene .game-region .game-reset{flex:none;min-height:60%;width:29%;padding:0 10px;font:400 clamp(16px,4.5cqi,28px)/1 var(--scene-body-font);border-radius:30px}
 .applet-scene .game-region .game-reset:hover,.applet-scene .game-region .game-directions button:hover{filter:brightness(1.2)}
+/* A framed control has a lit rim and a shallow pressed edge; paper and painted controls below keep their own material. */
+.applet-scene .game-region[data-material=board] :is(.game-header:not([data-separate-metrics=true]) .game-reset,.game-toolbar .game-reset,.game-directions button:not([data-symbol=true])):active{box-shadow:inset 0 2px 4px #000b,inset 0 0 0 1px var(--scene-accent);filter:brightness(.95)}
 .applet-scene .game-region .game-footer{display:flex;width:100%;height:100%;flex-direction:column;justify-content:space-between;align-items:center;gap:7px;margin:0;padding:0;background:none;border:0;color:var(--scene-ink)}
 .applet-scene .game-region .game-footer>.ui-caption{font:400 clamp(12px,5cqi,22px)/1.2 var(--scene-body-font);color:inherit;text-align:center;text-shadow:0 2px 3px #000}
-.applet-scene .game-region .game-directions{height:64%;width:80%;justify-content:space-between;gap:0}
-.applet-scene .game-region .game-directions button{height:100%;width:19%;min-height:0;min-width:0}
+.applet-scene .game-region .game-directions{height:64%;min-height:0;width:80%;justify-content:space-between;gap:0}
+.applet-scene .game-region .game-directions button{height:100%;width:19%;min-height:0;min-width:0;padding:0}
 .game-panel[data-distributed=true]{height:100%;padding:0!important}
 .game-panel[data-distributed=true] .game-body{height:100%;width:100%}
 #notionWorld[data-panel-scene]>.notion-content[data-template=game]:has(.game-panel[data-distributed=true]){--weather-shell-padding:0px;padding:0;transform:var(--applet-scene-primary-transform);transform-origin:0 0;border-radius:0}
@@ -144,12 +146,12 @@
 .game-panel[data-sprites=true] .g2048-cell[data-value]:not([data-value=""]):not([data-value="2"]):not([data-value="4"]):not([data-value="8"]){font-size:clamp(22px,11cqi,52px)}
 .game-panel[data-sprites=true] .g2048-cell:is([data-value="1024"],[data-value="2048"],[data-value="4096"]){font-size:clamp(18px,8cqi,40px)}
 .applet-scene .game-region .game-reset>span,.applet-scene .game-region .game-metric>*{font-family:var(--scene-body-font)}
-.applet-scene .game-region .game-directions svg{width:26px;height:26px}
+.applet-scene .game-region .game-directions svg{width:30px;height:30px;flex:none}
 
 .game-panel[data-distributed=true] .game-board:focus-visible{outline:2px solid var(--scene-focus);outline-offset:3px}
 /* A separate toolbar leaves a long game title and board-size control above the board. */
 .applet-scene .game-region .game-header[data-toolbar=true]{flex-direction:column;justify-content:center;gap:5px;text-align:center}
-.applet-scene .game-region .game-header[data-toolbar=true] .game-title{font:600 clamp(26px,10.5cqi,44px)/1.1 var(--scene-body-font);white-space:nowrap;letter-spacing:.01em}
+.applet-scene .game-region .game-header[data-toolbar=true] .game-title{font:400 clamp(26px,10.5cqi,44px)/1.1 var(--scene-body-font);white-space:nowrap;letter-spacing:.01em}
 .applet-scene .game-region .game-settings{margin:0;padding:0 6px;text-align:center;text-align-last:center;font:400 clamp(15px,5cqi,20px)/1.2 var(--scene-body-font);border:0;background:transparent;color:var(--scene-ink);text-shadow:0 2px 3px #000}
 .applet-scene .game-region .game-settings option{background:var(--scene-control);color:var(--scene-ink);text-shadow:none}
 .applet-scene .game-region .game-toolbar{width:100%;height:100%;display:flex;align-items:stretch;gap:0;border:1px solid var(--scene-accent);border-radius:21px;box-sizing:border-box;background:color-mix(in srgb,var(--scene-control) 65%,#090b0c88);box-shadow:inset 0 0 0 1px #efd19733,0 3px 8px #0008}

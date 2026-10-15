@@ -2,6 +2,8 @@ const paths: Record<string,string>={hide:'<path d="M6 12h12"/>',file:'<path d="M
 paths.download='<path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/>';
 paths.back='<path d="m14 5-7 7 7 7"/>';
 paths.forward='<path d="m10 5 7 7-7 7"/>';
+paths.arrowLeft='<path d="M20 12H4m7-7-7 7 7 7"/>';
+paths.arrowRight='<path d="M4 12h16m-7-7 7 7-7 7"/>';
 paths.home='<path d="m3 10 9-7 9 7M5 9v12h14V9M10 21v-7h4v7"/>';
 paths.companion='<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16m4-11h4m-4 6h4"/>';
 paths.keyboard='<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"/>';
