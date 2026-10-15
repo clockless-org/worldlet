@@ -46,7 +46,7 @@ function environment(){
  return {root,preferences,store,services,actions,errors,host,tools,close};
 }
 const {preferences,store,services,actions,errors,tools,close}=environment();
-const action=(name:string,body:Row)=>actions.get(name)!({action:name,...body} as any,{requestId:'check',sender:null as any});
+const action=(name:string,body:Row)=>actions.get(name)!({action:name,...body} as any,{requestId:'check',transport:'host'});
 try{
  assert.ok(tools.names.includes('upsert_world_items')&&tools.names.includes('configure_world_check'));
  assert.ok(services.has('sourceChecks'),'Background source checks advertise their owner');
@@ -342,7 +342,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   assert.equal(saved.length,1,'Synthesis saved the open loop: '+JSON.stringify(env.errors));
   assert.deepEqual(saved[0].sources.map((ref:Row)=>[ref.provider,ref.id]),[['conversations',conversationAttentionId('openclaw',session)]]);
   assert.ok(store.worldItems().some(item=>item.id===saved[0].id&&item.attentionFresh===true),'The finding is current in the Center');
-  const original:Row=await actions.get('original')!({action:'original',id:'conversation:'+saved[0].sources[0].id} as any,{requestId:'check',sender:null as any});
+  const original:Row=await actions.get('original')!({action:'original',id:'conversation:'+saved[0].sources[0].id} as any,{requestId:'check',transport:'host'});
   assert.equal(original.title,'#kyoto-trip');assert.match(original.text,/You: Please review the project proposal by Friday\./);
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron brought conversations: recent ones are Attention context, findings cite and open them, unchanged ones renew without a pass.');
@@ -438,7 +438,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
  installWorld(host);installArtifacts(host);
  try{
   store.state.cloudConsent=true;store.changed();
-  const save=(body:string)=>actions.get('artifacts')!({action:'artifacts',operation:'save',scheduled:'plan',day:'2026-10-11',artifact:{id:'art-brief0000001',kind:'answer',title:'Plan · Sun, Oct 11',body,size:'large',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',sender:null as any});
+  const save=(body:string)=>actions.get('artifacts')!({action:'artifacts',operation:'save',scheduled:'plan',day:'2026-10-11',artifact:{id:'art-brief0000001',kind:'answer',title:'Plan · Sun, Oct 11',body,size:'large',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',transport:'host'});
   await save('A calm Sunday with one call.');
   const shown=()=>store.worldItems().filter(item=>item.provider==='worldlet');
   assert.deepEqual(shown().map(item=>[item.kind,item.title,item.status]),[['update','Today’s prep · Oct 11','open']],'The brief is in Worth Knowing: '+JSON.stringify(env.errors));
@@ -447,9 +447,9 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   await save('A calm Sunday with two calls.');
   assert.equal(shown().length,1,'The same card kept again updates the same item');
   assert.match(String(shown()[0].summary),/two calls/);
-  await actions.get('artifacts')!({action:'artifacts',operation:'save',artifact:{id:'art-other0000001',kind:'answer',title:'An answer',body:'Kept.',size:'medium',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',sender:null as any});
+  await actions.get('artifacts')!({action:'artifacts',operation:'save',artifact:{id:'art-other0000001',kind:'answer',title:'An answer',body:'Kept.',size:'medium',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',transport:'host'});
   assert.equal(shown().length,1,'Any other card is no Attention item');
-  await actions.get('worldItemStatus')!({action:'worldItemStatus',id:shown()[0].id,status:'read'} as any,{requestId:'check',sender:null as any});
+  await actions.get('worldItemStatus')!({action:'worldItemStatus',id:shown()[0].id,status:'read'} as any,{requestId:'check',transport:'host'});
   assert.equal(shown()[0].status,'read','Got it settles it like any update');
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
   console.log('PASS Electron scheduled results: a kept morning brief is a Worth Knowing item that opens its Journal card, updated in place and settled like any update.');

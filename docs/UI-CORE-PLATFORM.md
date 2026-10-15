@@ -58,12 +58,37 @@ Worldlet owns schedule settings and claim authority; Harness executes admitted j
 
 One [Electron host](../platform/electron/README.md) serves Mac, Windows and Linux; it
 replaced the Swift/CEF and C#/WebView2 hosts (#996). The [Node host](../platform/node/README.md) runs
-its modules that need no window, with no World page, for Linux and computers without a display; it
-reuses those modules through a small `electron` stand-in rather than holding product rules of its own. The shared World UI is a separate
+its modules that need no window for Linux and computers without a display, and shows the same World page in a web
+browser on that computer (below); it reuses those modules through a small `electron` stand-in rather than holding
+product rules of its own. The shared World UI is a separate
 Chromium view from external website/media views. Only the trusted packaged World
 (`worldlet://app/index.html`) receives the Host bridge, through a `contextBridge`
 preload; the main process re-checks the sending frame. Website scripts never receive
 host privileges and run in their own session partition.
+
+<a id="the-world-in-a-web-browser"></a>
+**The World in a web browser.** There is one UI: a host without a window serves the same World page to a browser on
+the same computer ([contracts/web-world.ts](../contracts/web-world.ts)). The page is the interface build, served
+read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/electron/src/modules/phone/local-relay.ts)
+(files inside the build after resolving links, `resolveWorldFile`, and only the types the page loads). Its
+`worldletHost` is [web-host.ts](../platform/bridge/web-host.ts), which `resolveHost` picks only when the app gave the
+page none; it talks to the host over one WebSocket at `/world/socket`, and the host answers through the same router
+([host/web-page.ts](../platform/electron/src/host/web-page.ts)). The trust it gets:
+
+- **Same computer only.** The server listens on 127.0.0.1 and answers only requests addressed to `127.0.0.1` or
+  `localhost` on its port by name (the `Host` header), so a website cannot reach it through a name it points at
+  127.0.0.1. The socket also requires the page's own origin (`Origin`).
+- **A token.** The socket opens only with the World's 32-byte random token, offered as a WebSocket subprotocol and
+  compared in constant time. The token travels in the link's fragment (`/world/#t=<token>`), which a browser never
+  sends to a server; the page keeps it for the tab and takes it out of the address. The host keeps it in the vault and
+  writes the link only to an owner-only file, never to stdout.
+- **Less than the app.** Before the router, the host refuses `WEB_DENIED`: the pairing secrets and pairing or unpairing
+  another device (a pairing's status comes without its link), local data deletion, restore and the library backup, and
+  the local tools that read other programs' files.
+- **One page at a time.** A newer page takes over and the older one says the World is open in another tab.
+
+The page's own Content-Security-Policy is unchanged: `connect-src 'self'` already admits the WebSocket to the same
+origin in Chromium. Opening the World from another device is a later step.
 
 CDP controls a selected target; it is not a renderer, authorization bypass or general
 component API. Agent-operated World navigation uses versioned semantic actions through
