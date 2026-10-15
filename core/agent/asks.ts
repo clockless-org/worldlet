@@ -1,4 +1,4 @@
-import {AGENT_ASK_KINDS,AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,AGENT_ASK_STATUSES,type AgentAsk,type AgentAskClaim,type AgentAskKind,type AgentAskPost,type AgentAskReply,type AgentAskResolve,type AgentAskStatus} from '../../contracts/agent-asks.ts';
+import {ASK_APPROVE_CHOICE,ASK_DRAFT_CHOICES,AGENT_ASK_KINDS,AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,AGENT_ASK_STATUSES,type AgentAsk,type AgentAskClaim,type AgentAskKind,type AgentAskPost,type AgentAskReply,type AgentAskResolve,type AgentAskStatus} from '../../contracts/agent-asks.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import type {WorldItem} from '../../contracts/world.ts';
 import {looksSecret} from './agent-profile.ts';
@@ -18,10 +18,15 @@ export const ASK_REASONS=Object.freeze({
  stale:'This ask changed since it was read. Read it again before resolving it.',
  settled:'This ask is already settled.',
  choice:'Choose one of the ask\'s own choices.',
+ approve:'An ask that carries GitHub drafts must offer Approve as one of its choices.',
+ drafts:'Each GitHub draft an ask carries must be this Agent\'s own and still waiting.',
+ local:'Approving GitHub drafts writes to GitHub: approve this ask in Worldlet on the computer itself.',
 });
 
 /** An ask ID: host-made, file-name safe. */
 export const ASK_ID_PATTERN=/^[a-z0-9][a-z0-9-]{7,63}$/;
+/** A GitHub draft's ID (core/agent/github-drafts.ts GITHUB_DRAFT_ID_PATTERN). */
+const DRAFT_ID=/^[a-z0-9][a-z0-9-]{7,63}$/;
 const LEASE_MS=AGENT_ASK_LIMITS.leaseMinutes*60_000;
 // C0 controls (except tab and line breaks, allowed in multi-line text only), DEL, C1 controls, and the bidirectional
 // overrides that can make a card read differently from what it holds.
@@ -59,7 +64,7 @@ const only=(value:Record<string,unknown>,keys:string[])=>{for(const key of Objec
 /** `asks/post` arguments, checked. An `agentId` the model sent is dropped: the host stamps the caller's own. */
 export function readAskPost(input:unknown):AgentAskPost {
  const value={...record(input)};delete value.agentId;
- only(value,['kind','title','body','choices','link','tags']);
+ only(value,['kind','title','body','choices','link','tags','draftIds']);
  const kind=value.kind===undefined?'ask':value.kind;
  if(!AGENT_ASK_KINDS.includes(kind as AgentAskKind))fail(ASK_REASONS.invalid);
  const post:AgentAskPost={kind:kind as AgentAskKind,title:text(value.title,AGENT_ASK_LIMITS.title,{required:true})};
@@ -67,6 +72,14 @@ export function readAskPost(input:unknown):AgentAskPost {
  const choices=list(value.choices,AGENT_ASK_LIMITS.choices,entry=>text(entry,AGENT_ASK_LIMITS.choice,{required:true}));if(choices.length)post.choices=choices;
  if(value.link!==undefined)post.link=askLink(value.link);
  const tags=list(value.tags,AGENT_ASK_LIMITS.tags,entry=>text(entry,AGENT_ASK_LIMITS.tag,{required:true}).toLowerCase());if(tags.length)post.tags=tags;
+ // GitHub drafts it carries: Approve on the ask approves them, so it always offers Approve.
+ const drafts=list(value.draftIds,AGENT_ASK_LIMITS.drafts,entry=>typeof entry==='string'&&DRAFT_ID.test(entry)?entry:fail(ASK_REASONS.invalid));
+ if(drafts.length){
+  if(post.kind!=='ask')fail(ASK_REASONS.invalid);
+  if(!post.choices)post.choices=[...ASK_DRAFT_CHOICES];
+  if(!post.choices.includes(ASK_APPROVE_CHOICE))fail(ASK_REASONS.approve);
+  post.draftIds=drafts;
+ }
  return post;
 }
 
@@ -80,7 +93,7 @@ export function postAsk(asks:readonly AgentAsk[],agentId:string,input:unknown,id
  const post=readAskPost(input);
  if(asks.filter(ask=>ask.agentId===agentId&&askOpen(ask)).length>=AGENT_ASK_LIMITS.openPerAgent)fail(ASK_REASONS.full);
  if(asks.some(ask=>ask.id===id))fail(ASK_REASONS.invalid);
- return {id,agentId,kind:post.kind??'ask',title:post.title,body:post.body??'',choices:post.choices??[],...post.link?{link:post.link}:{},
+ return {id,agentId,kind:post.kind??'ask',title:post.title,body:post.body??'',choices:post.choices??[],...post.link?{link:post.link}:{},...post.draftIds?{draftIds:post.draftIds}:{},
   status:'open',tags:post.tags??[],revision:1,createdAt:now,updatedAt:now};
 }
 
@@ -124,6 +137,8 @@ export function resolveAsk(ask:AgentAsk|null|undefined,agentId:string,input:unkn
  return {...ask,status:'done',resolution:{note:resolve.note,links:resolve.links??[],at:now},revision:ask.revision+1,updatedAt:now};
 }
 
+/** Whether this answer approves the ask's GitHub drafts: its Approve choice, on an ask that carries any. */
+export const askApprovesDrafts=(ask:AgentAsk,reply:{outcome:string;choice?:string})=>!!ask.draftIds?.length&&reply.outcome==='answered'&&reply.choice===ASK_APPROVE_CHOICE;
 /** The person's answer on the ask's Attention card: one of its choices and an optional note, or Done, or Dismiss.
  * Only an ask still open (or claimed) takes one. */
 export function readAskReply(input:unknown):AgentAskReply {
@@ -155,6 +170,7 @@ export function readStoredAsk(value:unknown):AgentAsk|null {
  const ask:AgentAsk={id:v.id,agentId:v.agentId,kind:v.kind as AgentAskKind,title:v.title,body:v.body,choices:strings(v.choices).slice(0,AGENT_ASK_LIMITS.choices),
   status:v.status as AgentAskStatus,tags:strings(v.tags),revision:v.revision as number,createdAt:v.createdAt,updatedAt:v.updatedAt};
  if(typeof v.link==='string')ask.link=v.link;
+ const drafts=strings(v.draftIds).filter(id=>DRAFT_ID.test(id)).slice(0,AGENT_ASK_LIMITS.drafts);if(drafts.length)ask.draftIds=drafts;
  if(typeof v.claimedBy==='string'&&AGENT_ID_PATTERN.test(v.claimedBy))ask.claimedBy=v.claimedBy;
  if(instant(v.claimedAt))ask.claimedAt=v.claimedAt;
  const answer=record(v.answer),resolution=record(v.resolution);
@@ -177,6 +193,6 @@ export function askAttentionItem(ask:AgentAsk,agentName:string):WorldItem {
  return {id:askItemId(ask.id),provider:AGENT_ASK_PROVIDER,kind,status:ITEM_STATUS[ask.status],title:ask.title,context,reason,summary:context,attentionContentVersion:1,
   ...kind==='task'?{attentionReason:[...(name+' asks you to choose.')].slice(0,600).join('')}:{},
   sources:[{provider:AGENT_ASK_PROVIDER,id:ask.id,quote:[...ask.title].slice(0,1000).join(''),...ask.link?{url:ask.link}:{}}],
-  agentId:ask.agentId,agentName:name,askId:ask.id,askKind:ask.kind,askRevision:ask.revision,askStatus:ask.status,askChoices:[...ask.choices],
+  agentId:ask.agentId,agentName:name,askId:ask.id,askKind:ask.kind,askRevision:ask.revision,askStatus:ask.status,askChoices:[...ask.choices],...ask.draftIds?.length?{askDraftIds:[...ask.draftIds]}:{},
   ...ask.answer?.choice?{askChoice:ask.answer.choice}:{},createdAt:ask.createdAt,updatedAt:ask.updatedAt};
 }
