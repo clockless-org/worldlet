@@ -12,7 +12,8 @@ import {phoneLive,readPhoneMessage} from '../core/phone/index.ts';
 import {mountHarnessApproval} from '../ui/companion/fox-harness-approval.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {hermesServer,keepHermesResident} from '../platform/electron/src/modules/agent-runtime/hermes-service.ts';
-import {openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
+import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
+import {holdStandingTurn,openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {withTempDir} from './test-temp.ts';
 
@@ -490,6 +491,26 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
    assert.deepEqual(audit.slice(-3).map(e=>[e.target,e.action,e.decision,e.grantId??null]),[['items','query','allowed','hermes-channel-read'],['items','update','denied',null],['world','link','allowed','hermes-channel-link']],'every decision is audited');
    assert.ok(audit.some(e=>e.target==='items'&&e.action==='update'&&e.decision==='asked'),'another channel\'s write during a Fox turn was asked');
    assert.ok(access.identity('hermes')?.lastSeenAt,'last use');
+   // Another Agent on the same server (Codex, registered by the Node host) while a Fox turn runs on Hermes: its calls
+   // never go to that turn or take its Grant; they are its own, under its own Grants.
+   {
+    const codexHome=path.join(scratch,'codex-mcp');fs.mkdirSync(codexHome,{recursive:true});
+    const codexEntry=standing.server(codexHome,{id:'codex',name:'Codex',harness:'codex',kind:'local'});
+    const {url,token}=JSON.parse(fs.readFileSync(codexEntry.env.WORLDLET_MCP_ENDPOINT_FILE,'utf8'));
+    const ask=async(name:string,args:object)=>{
+     const response=await fetch(url,{method:'POST',headers:{authorization:'Bearer '+token},body:JSON.stringify({method:'call',name,arguments:args})});
+     return JSON.parse((await response.json()).text);
+    };
+    const toTurn:string[]=[],release=holdStandingTurn({own:new HermesOwnCalls(),dispatch:async name=>{toTurn.push(name);return {fromTurn:true};}});
+    try{
+     channel.length=0;
+     assert.equal((await ask('call_world_tool',{target:'content',action:'read',arguments:'{"id":"x"}'})).error,STANDING_OUTSIDE_TURN,'a target its Grants do not name is refused');
+     assert.deepEqual(await ask('call_world_tool',{target:'items',action:'query',arguments:'{}'}),{items:[]},'a granted read runs as its own call');
+     assert.deepEqual(channel.map(([name,,agent])=>[name,agent]),[['query_world_items','codex']]);
+     assert.ok(!JSON.parse(JSON.stringify(await ask('describe_world_tools',{}))).targets.includes('content'),'and it lists only its own targets');
+     assert.deepEqual(toTurn,[],'nothing went to Fox\'s turn');
+    }finally{release();}
+   }
    // Revoked: its token and endpoint files go and its calls are refused.
    const token=endpoint.token;
    access.revoke('hermes');

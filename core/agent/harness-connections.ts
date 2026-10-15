@@ -172,19 +172,13 @@ export function openClawConnectionCommand(change:HarnessConnectionChange,name?:s
 export const WORLD_TOOLS_REGISTRARS=['claude-code','codex'] as const;
 export type WorldToolsRegistrar=typeof WORLD_TOOLS_REGISTRARS[number];
 export const isWorldToolsRegistrar=(value:unknown):value is WorldToolsRegistrar=>(WORLD_TOOLS_REGISTRARS as readonly unknown[]).indexOf(value)>=0;
-const envPairs=(server:HermesWorldToolsServer)=>Object.keys(server.env).map(key=>key+'='+server.env[key]);
-/** Claude Code: `claude mcp remove --scope user worldlet`, then `claude mcp add --scope user worldlet --env K=V … --
- * <command> <args…>` (user scope: every project on this computer). */
-export function claudeCodeWorldToolsCommands(server:HermesWorldToolsServer):{args:string[];optional?:true}[] {
- return [{args:['mcp','remove','--scope','user',HERMES_WORLD_TOOLS],optional:true},
-  {args:['mcp','add','--scope','user',HERMES_WORLD_TOOLS,...envPairs(server).flatMap(pair=>['--env',pair]),'--',server.command,...server.args]}];
+/** The commands for `harness`, in order. Claude Code: `claude mcp remove --scope user worldlet`, then `claude mcp add
+ * --scope user worldlet --env K=V … -- <command> <args…>` (user scope: every project on this computer). Codex: the same
+ * without `--scope user`. */
+export function worldToolsCommands(harness:WorldToolsRegistrar,server:HermesWorldToolsServer):{args:string[];optional?:true}[] {
+ const scope=harness==='claude-code'?['--scope','user']:[],env=Object.keys(server.env).flatMap(key=>['--env',key+'='+server.env[key]]);
+ return [{args:['mcp','remove',...scope,HERMES_WORLD_TOOLS],optional:true},{args:['mcp','add',...scope,HERMES_WORLD_TOOLS,...env,'--',server.command,...server.args]}];
 }
-/** Codex: `codex mcp remove worldlet`, then `codex mcp add worldlet --env K=V … -- <command> <args…>`. */
-export function codexWorldToolsCommands(server:HermesWorldToolsServer):{args:string[];optional?:true}[] {
- return [{args:['mcp','remove',HERMES_WORLD_TOOLS],optional:true},
-  {args:['mcp','add',HERMES_WORLD_TOOLS,...envPairs(server).flatMap(pair=>['--env',pair]),'--',server.command,...server.args]}];
-}
-export const worldToolsCommands=(harness:WorldToolsRegistrar,server:HermesWorldToolsServer)=>harness==='claude-code'?claudeCodeWorldToolsCommands(server):codexWorldToolsCommands(server);
 /** The last line a command printed that says why it failed (colour codes, check marks and a prompt it printed before
  * on the same line removed), masked. */
 export function commandReason(output:string):string {

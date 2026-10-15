@@ -169,7 +169,8 @@ export async function openWorldToolBridge(home:string,{sample,dispatch,runner=pr
 // even while Worldlet is closed, and a call then answers that Worldlet is not open. MCP calls name no Hermes session, so
 // a call goes to the Fox turn whose stream announced it (core HermesOwnCalls), else to the one Fox turn running on
 // Hermes now (holdStandingTurn: its tool events and trust; a guarded write there that is not its own waits for the
-// card); with none, or several and none announced it, it is a call of its own outside any Fox turn (`channel`).
+// card); with none, or several and none announced it, it is a call of its own outside any Fox turn (`channel`). Only
+// Hermes Agent's calls go to a Fox turn: another Agent's are always its own.
 export interface StandingTurn {own:HermesOwnCalls;dispatch:(name:string,args:Row,call:McpCall)=>Promise<Row>}
 const foxTurns=new Set<StandingTurn>();
 /** A Fox turn on Hermes takes the standing server's calls while it runs; returns its release. */
@@ -194,7 +195,9 @@ export async function openStandingWorldTools({channel,access,runner=process.exec
  const route='/'+crypto.randomUUID();
  const server=await serveWorldTools(token=>access.identify(token),route,(body,identity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
-  const turn=standingTurn(call),grants=access.grants(identity.id),now=new Date().toISOString();
+  // Fox's turns run on Hermes Agent: only its calls can be theirs. Another Agent registered on this server (Claude Code
+  // or Codex, platform/node mcp-home.ts) is always a call of its own, under its own Grants.
+  const turn=identity.id===HERMES_STANDING_AGENT.id?standingTurn(call):null,grants=access.grants(identity.id),now=new Date().toISOString();
   const foxTurn=turn?{own:turn.own.has(call)}:null;
   return worldGateway(body.name,body.arguments,{sample:false,
    dispatch:(name,args)=>turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
