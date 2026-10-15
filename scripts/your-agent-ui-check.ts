@@ -14,7 +14,7 @@ try{
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
     {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'}],
    audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
-   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false}}];
+   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.jobs=[{id:'job-1',name:'Morning digest',kind:'prompt',paused:false,when:{cron:'0 8 * * *'},delivery:'telegram',last:{at:Date.UTC(2026,9,10,8),status:'ok'}},{id:'job-2',name:'Plant check',kind:'prompt',paused:true,when:{everySeconds:7200}}];
   w.skills=[{name:'seed-swap',description:'Organize seed swaps.',lastRanAt:Date.now()-3*86_400_000,enabled:true,removable:false},{name:'k8s',description:'Kubernetes help.',lastRanAt:null,enabled:false,removable:true}];
@@ -46,7 +46,12 @@ try{
   if(b.action==='agentAccess'&&(b.operation==='grantService'||b.operation==='ungrantService')){w.access=w.access.map(a=>a.id===b.id?{...a,services:a.services.map(s=>s.provider===b.provider?{...s,granted:b.operation==='grantService'}:s)}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantAsks'||b.operation==='ungrantAsks')){w.access=w.access.map(a=>a.id===b.id?{...a,asks:{...a.asks,[b.kind]:b.operation==='grantAsks'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantBoard'||b.operation==='ungrantBoard')){w.access=w.access.map(a=>a.id===b.id?{...a,board:{...a.board,[b.kind]:b.operation==='grantBoard'}}:a);return {ok:true};}
-  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&(b.operation==='grantGithubDrafts'||b.operation==='ungrantGithubDrafts')){w.access=w.access.map(a=>a.id===b.id?{...a,githubDrafts:b.operation==='grantGithubDrafts'}:a);return {ok:true};}
+  // The GitHub App that writes approved GitHub drafts: the page sends its settings once and never gets them back.
+  if(b.action==='githubApp'&&b.operation==='status')return {connected:!!w.githubApp};
+  if(b.action==='githubApp'&&b.operation==='connect'){if(b.appId!=='1001')throw new Error('The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).');w.githubApp=true;return {ok:true,connected:true};}
+  if(b.action==='githubApp'&&b.operation==='disconnect'){w.githubApp=false;return {ok:true,connected:false};}
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,githubDrafts:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   if(b.action==='agentAccess')return {agents:w.access};
   if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
   if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules},
@@ -193,6 +198,25 @@ try{
  await accounts.locator('[data-account=gmail]').getByText('alex@example.com',{exact:true}).waitFor();
  await accounts.locator('[data-account=gmail]').getByRole('button',{name:'Disconnect Google',exact:true}).waitFor();
  await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool( · |$)/).waitFor();
+ // GitHub writes: the App's ID, installation ID and private key go to the host once; the key field is cleared at once,
+ // a refusal is said, and once connected only Disconnect is left: nothing of the App comes back to the page.
+ const githubApp=accounts.locator('[data-accounts=github-app]');
+ await githubApp.getByText('GitHub writes',{exact:true}).first().waitFor();
+ const appKey='-----BEGIN RSA PRIVATE KEY-----\nFIXTUREKEYFIXTUREKEY\n-----END RSA PRIVATE KEY-----';
+ await githubApp.getByRole('textbox',{name:'App ID'}).fill('9');
+ await githubApp.getByRole('textbox',{name:'Installation ID'}).fill('4242');
+ await githubApp.getByRole('textbox',{name:'Private key'}).fill(appKey);
+ await githubApp.getByRole('button',{name:'Connect',exact:true}).click();
+ await accounts.getByText(/^The GitHub App is not valid/).waitFor();
+ assert.equal(await githubApp.getByRole('textbox',{name:'Private key'}).inputValue(),'','the key is cleared as soon as it is sent');
+ await githubApp.getByRole('textbox',{name:'App ID'}).fill('1001');
+ await githubApp.getByRole('textbox',{name:'Private key'}).fill(appKey);
+ await githubApp.getByRole('button',{name:'Connect',exact:true}).click();
+ await githubApp.getByRole('button',{name:'Disconnect',exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='githubApp'&&c.operation==='connect').map(c=>[c.appId,c.installationId,c.privateKey.length])),[['9','4242',appKey.length],['1001','4242',appKey.length]]);
+ assert.ok(!(await page.content()).includes('FIXTUREKEY'),'the key is nowhere in the page');
+ await githubApp.getByRole('button',{name:'Disconnect',exact:true}).click();
+ await githubApp.getByRole('textbox',{name:'App ID'}).waitFor();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
  await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
@@ -249,6 +273,13 @@ try{
  assert.deepEqual([await seeing.isChecked(),await defining.isChecked()],[false,true]);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Board$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantBoard',id:'hermes',kind:'define'},{action:'agentAccess',operation:'ungrantBoard',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
+ // "Can draft GitHub changes" (core/agent/GRANTS.md#github-drafts): the same way, naming only the Agent.
+ const drafting=hermesAccess.getByRole('checkbox',{name:'Can draft GitHub changes',exact:true});
+ assert.equal(await drafting.isChecked(),false);
+ await drafting.click();
+ await accessPart.getByText('Hermes Agent can now draft GitHub changes for you to approve.',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubDrafts$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantGithubDrafts',id:'hermes'}],'only the Agent, never targets');
  await hermesAccess.getByRole('button',{name:'Revoke',exact:true}).click();
  await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');

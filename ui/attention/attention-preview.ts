@@ -112,14 +112,18 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
    syncFooter();
   },
   /** A pending review of this task, or null; a choice disables the line until the host answers. */
-  setReview(value:{text:string;note?:boolean;choices:{key:string;label:string;run:(note?:string)=>Promise<unknown>}[]}|null){
-   review.replaceChildren();review.hidden=!value;review.classList.toggle('is-ask',!!value?.note);if(!value)return;
+  setReview(value:{text:string;note?:boolean;quote?:string;link?:{label:string;url:string};choices:{key:string;label:string;run:(note?:string)=>Promise<unknown>}[]}|null){
+   review.replaceChildren();review.hidden=!value;review.classList.toggle('is-ask',!!value?.note);review.classList.toggle('is-draft',value?.quote!==undefined);if(!value)return;
+   // A GitHub draft shows exactly what will be written, as plain text, and a link to what it writes on.
+   const quote=value.quote!==undefined?make('div','attention-preview-review-quote',value.quote):null;
+   let link:HTMLElement|null=null;
+   if(value.link&&/^https:\/\//.test(value.link.url)){const url=value.link.url;link=make('a','attention-preview-review-link',value.link.label);(link as HTMLAnchorElement).href=url;link.addEventListener('click',e=>{e.preventDefault();onLink(url);});}
    // An Agent's ask takes an optional note with its choice.
    const note=value.note?make('input','attention-preview-review-note') as HTMLInputElement:null;
    if(note){note.type='text';note.maxLength=2000;note.placeholder='Add a note (optional)';note.setAttribute('aria-label','Note');}
    const buttons=value.choices.map(choice=>{const b=make('button','attention-preview-review-choice',choice.label) as HTMLButtonElement;b.type='button';b.dataset.reviewChoice=choice.key;
     b.onclick=async()=>{buttons.forEach(x=>x.disabled=true);try{await choice.run(note?.value.trim()||undefined);}finally{buttons.forEach(x=>x.disabled=false);}};return b;});
-   review.setAttribute('aria-label',value.text);review.append(make('span','attention-preview-review-text',value.text),...note?[note]:[],...buttons);
+   review.setAttribute('aria-label',value.text);review.append(make('span','attention-preview-review-text',value.text),...quote?[quote]:[],...link?[link]:[],...note?[note]:[],...buttons);
   },
   /** A reply Fox prepared for this item, waiting in the Journal, or null. */
   setDraft(value:{text:string;label:string;run:()=>void}|null){

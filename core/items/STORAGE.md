@@ -16,6 +16,7 @@ SQLite is the business database. JSON is appropriate for small configuration and
 | Attention | `world.sqlite`: `state.items`, `state.reviews` | Model-processed Title, Reason, Summary, time/place, source references, user decisions |
 | Agent asks | `world.sqlite`: `state.agent-asks`, each with its Attention item `ask-<id>` in `state.items` (provider `agents`) | What Agents asked the person or left as work, its claim, answer and resolution ([Agent asks](../agent/GRANTS.md#agent-asks)) |
 | Service presets | `world.sqlite`: `state.service-presets` | Named, saved reads of a Worldlet Service, without keys ([Service presets](../applets/INTEGRATIONS.md#service-presets)) |
+| GitHub drafts | `world.sqlite`: `state.github-drafts`, each with its Attention item `ghd-<id>` in `state.items` (provider `agents`) | Changes on GitHub Agents drafted, the target as it was read, and whether the person approved (with the result's link) or dismissed them ([GitHub drafts](../agent/GRANTS.md#github-drafts)); the GitHub App that writes them is in the vault (`github-app`) |
 | Board | `world.sqlite`: `state.board` (the definition, its revision and who defined it) | The person's board of Service presets ([the board](../board/README.md)) |
 | Source collection | `state.checks`, `state.attention-context` | Check settings/cursors; bounded, expiring source facts |
 | Execution | `state.runs`, `state.attention-budget` | Check outcomes, synthesis acknowledgements and budgets |

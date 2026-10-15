@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
+import {githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -125,7 +125,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>a.target!=='asks'&&a.target!=='board').length,'everything but asks and the board, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts'].includes(a.target)).length,'everything but asks, the board and GitHub drafts, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -218,4 +218,30 @@ assert.deepEqual(standingActions(actions,codex,[...codexDefaults,defineGrant],fa
 assert.equal(boardGranted('codex',[seeGrant],'read',now),true);assert.equal(boardGranted('codex',[seeGrant],'define',now),false);assert.equal(boardGranted('hermes',[seeGrant],'read',now),false);
 assert.deepEqual(boardGrantAuditEntry('codex','define',true,now),{at:now,agentId:'codex',target:'board',action:'grant-define',decision:'allowed',grantId:'codex-board-define',reason:'The person let this Agent set up the board in Settings.'});
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants.');
+// "Can draft GitHub changes": exactly github-drafts/create and read, never default, never given by a Fox turn's broad
+// `*/*` Grant, nor by a Service read Grant, and not a guarded write (nothing is written until the person approves).
+const draftGrant=githubDraftGrant('codex',now)!;
+assert.deepEqual(draftGrant,{id:'codex-github-drafts',agentId:'codex',targets:['github-drafts/create','github-drafts/read'],access:'read',duration:'standing',grantedAt:now});
+assert.equal(githubDraftGrant('Not An Id',now),null);
+assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('github-drafts/'))),'no GitHub drafts in the default Grants');
+const draftCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
+ const resolved=resolveAction(actions,'github-drafts',action,args);
+ assert.equal(resolved.name,'github_drafts');assert.equal(worldCallWrites(resolved.name,resolved.args),false,'a draft is not a guarded write');
+ return standingCallDecision({identity,grants,target:'github-drafts',action,tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+const drafting={write:'issue.comment',target:'example/app#1',body:'Thanks!'};
+assert.equal(draftCall(codexDefaults,'create',drafting).decision,'denied','ungranted: refused');
+assert.equal(draftCall([...codexDefaults,serviceReadGrant('codex','github',now)!],'create',drafting).decision,'denied','reading GitHub is not drafting');
+assert.deepEqual(draftCall([...codexDefaults,draftGrant],'create',drafting),{decision:'allowed',grantId:'codex-github-drafts'});
+assert.equal(draftCall([...codexDefaults,draftGrant],'read',{}).decision,'allowed');
+assert.equal(draftCall([...codexDefaults,{...draftGrant,revokedAt:earlier}],'create',drafting).decision,'denied','taken back: refused');
+assert.equal(draftCall(defaults,'create',drafting,{own:true},hermes).decision,'denied','a Fox turn\'s */* Grant never drafts a GitHub write');
+assert.equal(draftCall(defaults,'read',{},{own:true},hermes).decision,'denied','nor reads drafts');
+assert.equal(draftCall([...defaults,{id:'broad',agentId:'hermes',targets:['*/*'],access:'write',duration:'standing',grantedAt:now}],'create',drafting,{own:true},hermes).decision,'allowed','only an explicit Grant of its own covers it');
+assert.equal(draftCall([...defaults,githubDraftGrant('hermes',now)!],'create',drafting,{own:true},hermes).decision,'allowed','its own Grant does, in a turn too');
+assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='github-drafts'),'not listed in a Fox turn without a Grant');
+assert.deepEqual(standingActions(actions,codex,[...codexDefaults,draftGrant],false,now).filter(a=>a.target==='github-drafts').map(a=>a.action),['create','read']);
+assert.equal(githubDraftGranted('codex',[draftGrant],now),true);assert.equal(githubDraftGranted('hermes',[draftGrant],now),false);
+assert.deepEqual(githubDraftGrantAuditEntry('codex',false,now),{at:now,agentId:'codex',target:'github-drafts',action:'ungrant',decision:'allowed',grantId:'codex-github-drafts',reason:'The person stopped this Agent drafting GitHub changes in Settings.'});
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, GitHub draft Grants.');
