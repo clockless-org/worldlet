@@ -220,7 +220,8 @@ await withTempDir('worldlet-node-host-',async temp=>{
  ledger.upsert([{kind:'task',provider:'gmail',status:'open',title,context:'Due Friday.',reason:'Due Friday.',summary:'The library wrote about the card.',attentionContentVersion:1,policyVersion:2,attentionReason:'due',
   sources:[{provider:'gmail',id:'library-mail',quote:'Your card expires Friday.'}],createdAt:1,updatedAt:2}],'node-host-check',true);
  ledger.close();
- const child=spawn(process.execPath,[host],{cwd:temp,env:{...env,WORLDLET_PROFILE_ROOT:seeded},stdio:['ignore','pipe','pipe']});
+ // On Windows a SIGTERM ends a process at once (TerminateProcess), so the clean stop there is the message over IPC.
+ const child=spawn(process.execPath,[host],{cwd:temp,env:{...env,WORLDLET_PROFILE_ROOT:seeded},stdio:['ignore','pipe','pipe',...process.platform==='win32'?['ipc' as const]:[]]});
  let out='';child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{out+=chunk;});
  const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
  try{
@@ -274,7 +275,7 @@ await withTempDir('worldlet-node-host-',async temp=>{
   }finally{await browser.close();}
   console.log('PASS node host World in a browser: the real World (pixi-webgl) with its item, one page at a time; another Host, Origin or token and denied actions are refused');
  }finally{
-  child.kill('SIGTERM');
+  if(process.platform==='win32')child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);
   if(code==='hung')child.kill('SIGKILL');
   assert.equal(code,0,'stops cleanly with a World page open: '+out.slice(-400));
