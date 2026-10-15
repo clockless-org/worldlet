@@ -89,10 +89,22 @@ export function hermesWorldToolsCommand(server:HermesWorldToolsServer,state:Herm
  * the person's review run; everything else is refused with HERMES_CHANNEL_READ_ONLY. Fail closed: a tool not named here
  * is refused. `_world_authorize` names the service it authorizes. */
 const CHANNEL_TOOLS=['query_world_items','read_world_history','read_companion_archive','meeting_decisions','read_world_source','read_connected_google','prepare_email','_source_begin','_source_result','_email_review'];
-export const HERMES_CHANNEL_READ_ONLY='This came through another Hermes channel, outside a conversation with Fox in Worldlet: only reading and preparing a draft for the person to review in Worldlet run here. Anything that changes the World needs the person\'s confirmation: ask them to do it with Fox in Worldlet.';
+/** The one guarded write a Hermes channel may make with no Fox turn running: the World's browser link (`world/link`,
+ * core/tools controls.ts; it only returns the room link there is or makes one, never ends or replaces one). Owner
+ * decision 2026-10-15: the Agent may get the World link at any time, from any Hermes channel, accepting that anyone who
+ * can message the person's Agent can get it. Called by its own name only (not through `_world_authorize`), its channel
+ * turn starts trusted (hermesChannelTrust) so Core's write rule admits it; every other write stays refused. */
+const CHANNEL_LINK_TOOL='share_world_link';
+export const HERMES_CHANNEL_READ_ONLY='This came through another Hermes channel, outside a conversation with Fox in Worldlet: only reading, preparing a draft for the person to review in Worldlet and getting the World\'s browser link run here. Anything that changes the World needs the person\'s confirmation: ask them to do it with Fox in Worldlet.';
 export function hermesChannelToolAllowed(event:{name?:unknown;args?:unknown}):boolean {
+ if(event.name===CHANNEL_LINK_TOOL)return true;
  const args=record(event.args),name=event.name==='_world_authorize'?args.name:event.name;
  return CHANNEL_TOOLS.indexOf(String(name))>=0;
+}
+/** The trust a Hermes channel call's own turn starts with: untrusted (`hermes_channel`), so Core refuses its guarded
+ * writes, except for the World's browser link, which the owner allowed from a channel (CHANNEL_LINK_TOOL above). */
+export function hermesChannelTrust(event:{name?:unknown}):{untrusted:boolean;sources:string[]} {
+ return event.name===CHANNEL_LINK_TOOL?{untrusted:false,sources:[]}:{untrusted:true,sources:['hermes_channel']};
 }
 /** A standing-server call that is not Fox's own (HermesOwnCalls finds no announcement of it in a running Fox turn's
  * stream) may come from another channel (MCP calls name no Hermes session), so a guarded World write (Core's
