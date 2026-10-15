@@ -43,7 +43,7 @@ export interface ThemeSceneRegistration {
  imageSize:readonly [number,number];
  /** Hash of the encoded picture. Re-measure after changing it. */
  sha256:string;
- regions:readonly {id:string;role:'primary'|'secondary';rect:readonly [number,number,number,number];material:'paper'|'board'|'screen'}[];
+ regions:readonly {id:string;role:'primary'|'secondary';rect:readonly [number,number,number,number];material:'paper'|'board'|'screen';quad?:readonly [readonly [number,number],readonly [number,number],readonly [number,number],readonly [number,number]]}[];
  /** Quiet painted space the host can reserve for its companion. */
  companion:readonly [number,number,number,number];
 }
@@ -147,7 +147,13 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
   need(object(r)&&Object.keys(r).every(k=>['imageSize','sha256','regions','companion','webEdge','webFrame'].includes(k)),'scene registration fields');
   need(Array.isArray(r.imageSize)&&r.imageSize.length===2&&r.imageSize.every(n=>Number.isInteger(n)&&n>0),'scene image size');
   need(typeof r.sha256==='string'&&/^[a-f0-9]{64}$/.test(r.sha256),'scene image hash');
-  need(Array.isArray(r.regions)&&r.regions.length>0&&r.regions.every(region=>object(region)&&Object.keys(region).every(k=>['id','role','rect','material'].includes(k))&&id(region.id)&&['primary','secondary'].includes(region.role)&&rect(region.rect)&&['paper','board','screen'].includes(region.material)),'scene content regions');
+  need(Array.isArray(r.regions)&&r.regions.length>0&&r.regions.every(region=>object(region)&&Object.keys(region).every(k=>['id','role','rect','material','quad'].includes(k))&&id(region.id)&&['primary','secondary'].includes(region.role)&&rect(region.rect)&&['paper','board','screen'].includes(region.material)),'scene content regions');
+  for(const region of r.regions)if(region.quad!==undefined){
+   const q=region.quad;need(Array.isArray(q)&&q.length===4&&q.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=1)),'scene region quadrilateral');
+   // Clockwise TL, TR, BR, BL in screen coordinates, strictly convex and large enough to read.
+   need(q.every((p,i)=>{const b=q[(i+1)%4],c=q[(i+2)%4];return (b[0]-p[0])*(c[1]-b[1])-(b[1]-p[1])*(c[0]-b[0])>.02;}),'scene region quadrilateral winding');
+   need(!r.webFrame&&!r.webEdge,'HTML projection cannot transform a native browser surface');
+  }
   need(new Set(r.regions.map(region=>region.id)).size===r.regions.length&&r.regions.filter(region=>region.role==='primary').length===1,'scene region ids and primary surface');
   need(rect(r.companion),'scene companion clearance');
   if(r.webFrame!==undefined)need(object(r.webFrame)&&Object.keys(r.webFrame).length===3&&picture(r.webFrame.mask)&&/\.(png|webp)$/.test(r.webFrame.mask)&&rect(r.webFrame.source)&&rect(r.webFrame.target),'scene web frame');

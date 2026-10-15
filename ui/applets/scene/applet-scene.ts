@@ -1,3 +1,4 @@
+import {scenePlaneTransform} from './scene-plane.ts';
 import {fitThemeScene,mountSceneFrame,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeSceneMaterialName} from '../../themes/index.ts';
 import type {BrowserPaperEdge,SurfaceRect} from '../../../contracts/browser-surface.ts';
 import {appletSceneKey} from './scene-family.ts';
@@ -82,16 +83,17 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   const offset={x:sceneOrigin.x-shellOrigin.x,y:sceneOrigin.y-shellOrigin.y};
   foreground?.layout({...fit.image,x:fit.image.x+offset.x,y:fit.image.y+offset.y},!compact);
   const primary=compact?{...fitted,x:16,y:84,width:width-32,height:Math.max(160,height*.75-84)}:fitted;
-  for(const [index,region] of regions.entries()){region.element.hidden=compact&&region.role!=='primary';place(region.element,region.role==='primary'?primary:fit.regions[index]);}
+  for(const [index,region] of regions.entries()){region.element.hidden=compact&&region.role!=='primary';const r=region.role==='primary'?primary:fit.regions[index];place(region.element,r);region.element.style.transformOrigin='0 0';region.element.style.transform=!compact&&fit.regions[index].quad?scenePlaneTransform(fit.regions[index].quad!,r.width,r.height):'none';}
   const round=(r:{x:number;y:number;width:number;height:number})=>({x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)});
   last={key,painted,compact,primary:round(primary),companion:round(fit.companion)};
   const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
-  if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;return;}
+  if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletPlane;return;}
   for(const [name,r] of [['primary',primary],['companion',fit.companion]] as const){
    shell.style.setProperty(`--applet-scene-${name}-left`,offset.x+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,offset.y+r.y+'px');
    shell.style.setProperty(`--applet-scene-${name}-width`,r.width+'px');shell.style.setProperty(`--applet-scene-${name}-height`,r.height+'px');
   }
-  shell.dataset.appletScene=key;
+  shell.style.setProperty('--applet-scene-primary-transform',primaryRegion.element.style.transform);
+  shell.dataset.appletScene=key;if(fitted.quad)shell.dataset.appletPlane='true';else delete shell.dataset.appletPlane;
   // A short clearance below the paper carries a compact composer, not a full-height side lane.
   if(painted&&fit.companion.height<100&&fit.companion.width>=360&&fit.companion.y>=primary.y+primary.height)shell.dataset.appletCompanionBar="true";else delete shell.dataset.appletCompanionBar;
   if(source.registration.webFrame)shell.dataset.appletFrame=key;else delete shell.dataset.appletFrame;
@@ -110,8 +112,8 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   },
   destroy(){
    resize.disconnect();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
-   shellOwners.delete(shell);
-   delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
+   shellOwners.delete(shell);shell.style.removeProperty('--applet-scene-primary-transform');
+   delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletPlane;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
    for(const part of ['primary','companion'])for(const side of ['left','top','width','height'])shell.style.removeProperty(`--applet-scene-${part}-${side}`);
   }};
 }

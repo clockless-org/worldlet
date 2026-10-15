@@ -50,7 +50,7 @@ export function createAppletStage(host,onPick){
   scene?.layout();
   const next=JSON.stringify([room.moduleId,scene?.metrics.compact,items,value?.sample,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar||room.key==='apple-reminders'?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;
   if(scene){const pick=item=>{selected=item;onPick({action:'applet-item',id:item.id});};
-   if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick);
+   if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick,scene.regions);
    else if(room.key==='meetings'){scene.primary.element.replaceChildren();shownItems=renderMeetingsOpen(scene.primary.element,room,items,value,pick);}
    else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick,room.key==='weather'?item=>weatherGlyph(item.weatherCode):undefined);
    else{if(room.key!=='apple-reminders')scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar)sceneToday(scene,value);}

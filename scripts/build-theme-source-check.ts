@@ -64,6 +64,11 @@ try{
  const registration:ThemeSceneRegistration={imageSize:[16,16],sha256:createHash('sha256').update(plate).digest('hex'),regions:[{id:'main',role:'primary',rect:[.05,.1,.55,.8],material:'paper'},{id:'date',role:'secondary',rect:[.7,.1,.2,.2],material:'paper'}],companion:[.7,.5,.25,.45]};
  const registered=(r:unknown)=>({...presentation,appletScenes:{gmail:{background:'assets/plate.svg',registration:r}}});
  assert.doesNotThrow(()=>parseThemePresentation(registered(registration)));
+ const projected={...registration,regions:[{...registration.regions[0],quad:[[0,0],[.9,.02],[1,1],[.1,.98]]},registration.regions[1]]};
+ assert.doesNotThrow(()=>parseThemePresentation(registered(projected)));
+ for(const quad of [[[0,0],[1,1],[1,0],[0,1]],[[0,0],[0,1],[1,1],[1,0]],[[0,0],[1,0],[.2,.2],[0,1]],[[0,0],[2,0],[1,1],[0,1]],[[0,0],[1,0],[1,1]]])assert.throws(()=>parseThemePresentation(registered({...projected,regions:[{...registration.regions[0],quad}]})),/quadrilateral/);
+ assert.throws(()=>parseThemePresentation(registered({...projected,webEdge:{top:[0,0],right:[0,0],bottom:[0,0],left:[0,0]}})),/native browser/);
+
  for(const bad of [{...registration,imageSize:[0,16]},{...registration,sha256:'wrong'},{...registration,regions:[]},{...registration,regions:[registration.regions[1]]},{...registration,regions:[registration.regions[0],registration.regions[0]]},{...registration,regions:[{...registration.regions[0],rect:[.1,.1,1,.5]}]},{...registration,companion:[.2,.2,.5,.5]}])assert.throws(()=>parseThemePresentation(registered(bad)),/Invalid build theme/);
  for(const [width,height] of [[160,160],[320,160],[160,320]]){
   const fit=fitThemeScene(registration,width,height);

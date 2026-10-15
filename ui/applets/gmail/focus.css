@@ -55,3 +55,16 @@
 #notionWorld[data-applet-scene=gmail] .mail-focus.ui-applet-surface{padding:clamp(8px,2vw,24px) clamp(10px,2.4vw,30px);background:var(--scene-fill);color:var(--scene-ink);border:0;border-radius:var(--scene-radius);box-shadow:none}
 #notionWorld[data-applet-scene=gmail] .mail-page-title{font-family:var(--scene-display-font);color:var(--scene-ink)}
 #notionWorld[data-applet-scene=gmail] .mail-focus.ui-applet-surface::before{display:none}
+
+#notionWorld[data-applet-scene=gmail] #notionContent[data-applet=gmail]{transform:var(--applet-scene-primary-transform,none);transform-origin:0 0}
+
+/* An original on a shallow projected paper keeps its text scrollable inside that same plane. */
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-focus.ui-applet-surface{padding:0;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;font:400 16px/1.35 var(--scene-body-font)}
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .ui-applet-header{padding:0 84px 4px 0;margin:0 0 8px;min-height:0;max-height:35%}
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-page-title.ui-title{font:400 28px/1.2 var(--scene-body-font);margin:0;color:var(--scene-ink)}
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-identity-card{padding:0 0 8px;margin:0 0 12px;border:0;border-bottom:1px solid var(--scene-line);border-radius:0;background:none;gap:8px}
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-sender-portrait{display:none}
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-paper{padding:0 8px 0 0}
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-sender-name{font:400 13px/1.4 var(--scene-body-font)}
+#notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-date{font:400 10px/1.4 var(--scene-body-font);align-self:start}
+#notionWorld[data-applet-plane=true] .mail-reader-switch button{width:32px;height:32px;line-height:32px;min-height:32px;border-radius:4px;background:var(--scene-control);color:var(--scene-ink)}

@@ -71,10 +71,12 @@ The shared `ui/world/world-map.ts` renderer applies one contain transform and pu
 | --- | --- |
 | `imageSize` | Final encoded image width and height in pixels. |
 | `sha256` | SHA-256 of those exact encoded background bytes. Import rejects a stale hash or size. |
-| `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. |
+| `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. Optional `quad` projects HTML onto a measured paper plane. |
 | `webFrame` (optional) | Extracted alpha asset (`mask`) and normalized `source` / `target` bounds. The host takes its alpha only, sampling colours from the original scene. A click-through foreground covers the website seam with the complete painted frame. |
 | `webEdge` (optional) | Clockwise `top`, `right`, `bottom`, `left` sample arrays (2–64 values per side, 0–3 source pixels). Original background pixels overlap the outer edge of a live website; the host scales them down with the scene and caps enlargement. No input capture or website styling. |
 | `companion` | A separate normalized rectangle describing quiet painted clearance. The shared host chooses the companion layout from this clearance; it grants no theme control over Fox behavior or artwork. |
+
+A region's optional `quad` contains four clockwise points (top-left, top-right, bottom-right, bottom-left), normalized within that region's bounding `rect`. Points must form a strictly convex quadrilateral. The shared host projects live HTML with a homography, including pointer hit testing; text remains selectable and controls remain accessible. This does not authorize native website transforms: registrations combining `quad` with `webFrame` or `webEdge` are rejected. Compact fallback removes the projection. A full Mail original uses the same primary-plane geometry as its inline preview.
 
 Coordinates start at the image's upper-left and stay within 0–1. They are measured from the finished picture, not guessed from a generation prompt. `fitThemeScene(registration, width, height)` applies one centered, uniform contain transform to the painting, every region and companion clearance. Do not crop the background independently. The host chooses its responsive presentation and may switch to a normal readable page on narrow viewports instead of shrinking interactive text.
 

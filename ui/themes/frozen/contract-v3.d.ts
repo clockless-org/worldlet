@@ -71,6 +71,7 @@ export interface ThemeSceneRegistration {
         role: 'primary' | 'secondary';
         rect: readonly [number, number, number, number];
         material: 'paper' | 'board' | 'screen';
+        quad?: readonly [readonly [number, number], readonly [number, number], readonly [number, number], readonly [number, number]];
     }[];
     /** Quiet painted space the host can reserve for its companion. */
     companion: readonly [number, number, number, number];

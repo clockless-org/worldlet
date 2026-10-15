@@ -1,0 +1,37 @@
+/** Real shared mail controls on separate measured paper planes, at the review viewport. */
+import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {build} from 'esbuild';import {launchTestBrowser,pageErrors} from './browser-test.ts';
+const bundle=await build({stdin:{contents:"export {mountAppletScene} from './ui/applets/scene/applet-scene.ts';export {renderMailOpen} from './ui/applets/gmail/open.ts';export {renderMailFocus} from './ui/applets/gmail/focus.ts';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'iife',globalName:'Mail',write:false});
+const browser=await launchTestBrowser();try{
+ const page=await browser.newPage({viewport:{width:1500,height:844}}),errors=pageErrors(page,{console:true});
+ await page.setContent('<!doctype html><title>Measured mail surfaces</title><main id="notionWorld" class="native-console" style="position:fixed;inset:0"><div id="host" style="position:absolute;inset:0"></div></main>');
+ await page.addStyleTag({content:(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/applets/scene/applet-scene.css','ui/applets/gmail/focus.css','ui/applets/gmail/open.css'].map(p=>readFile(p,'utf8')))).join('\n')});await page.addScriptTag({content:bundle.outputFiles[0].text});
+ await page.evaluate(()=>{
+  const w=window as any;w.opened=[];w.drafts=[];w.paperActions=0;
+  w.items=['Read the plan','Saturday workshop','Saved draft'].map((title,i)=>({id:'mail-'+i,title,attention:i===0?{state:'task'}:undefined,record:{title,from:'Alex <alex@example.com>',labelIds:i===2?['DRAFT']:i===1?['INBOX','STARRED']:['INBOX'],text:'Subject: '+title+'\nFrom: Alex <alex@example.com>\n\nFictional letter.'}}));
+  w.value={sample:true,connected:true,loaded:true,mail:{read:item=>Promise.resolve({title:item.title,text:item.record.text}),renderOriginal:value=>w.Mail.renderMailFocus(value,text=>{const a=document.createElement('article');a.className='notion-prose';a.textContent=text;const b=document.createElement('button');b.textContent='Paper action';b.onclick=()=>w.paperActions++;a.append(b);return a;},{embedded:true}),compose:()=>w.drafts.push('compose'),reply:item=>w.drafts.push(item.id)}};
+  w.mount=(distributed=true)=>{w.scene?.destroy();w.scene=w.Mail.mountAppletScene(document.getElementById('host'),'gmail',{shell:document.getElementById('notionWorld'),source:{registration:{imageSize:[1500,844],sha256:'0'.repeat(64),regions:distributed?[
+   {id:'main',role:'primary',rect:[.4,.2,.4,.6],material:'paper',quad:[[.05,.02],[.9,0],[1,1],[0,.95]]},
+   {id:'navigation',role:'secondary',rect:[.03,.2,.15,.5],material:'board'},
+   {id:'letters',role:'secondary',rect:[.2,.2,.18,.6],material:'paper'},
+   {id:'heading',role:'secondary',rect:[.03,.05,.8,.1],material:'board'},
+   {id:'actions',role:'secondary',rect:[.82,.2,.16,.3],material:'board'},
+   {id:'status',role:'secondary',rect:[.03,.85,.4,.1],material:'board'}
+  ]:[{id:'main',role:'primary',rect:[.03,.1,.75,.7],material:'paper'}],companion:[.5,.85,.45,.1]}}});w.paint();};
+  w.paint=()=>w.Mail.renderMailOpen(w.scene.primary.element,w.items,w.value,item=>w.opened.push(item.id),w.scene.regions);w.mount();
+ });
+ assert.equal(await page.title(),'Measured mail surfaces');await page.getByRole('heading',{name:'Read the plan',exact:true}).waitFor();assert.equal(await page.locator('.mail-region').count(),6);assert.equal(await page.locator('.mail-letter').count(),2,'drafts do not enter Inbox');
+ // Corner sentinels verify the browser applied the measured plane, independent of the matrix implementation.
+ const corners=await page.evaluate(()=>{const e=(window as any).scene.primary.element;return [[0,0],[100,0],[100,100],[0,100]].map(([x,y])=>{const marker=document.createElement('i');marker.style.cssText=`position:absolute;left:${x}%;top:${y}%;width:0;height:0`;e.append(marker);const r=marker.getBoundingClientRect();marker.remove();return [r.x,r.y];});});
+ for(const [i,[x,y]] of [[630,178.928],[1140,168.8],[1200,675.2],[600,649.88]].entries()){assert.ok(Math.abs(corners[i][0]-x)<1);assert.ok(Math.abs(corners[i][1]-y)<1);}
+ await page.getByRole('button',{name:'Saturday workshop',exact:true}).focus();await page.keyboard.press('Enter');await page.getByRole('heading',{name:'Saturday workshop',exact:true}).waitFor();
+ await page.locator('.mail-page-outgoing').waitFor();assert.equal(await page.locator('.mail-page-outgoing').evaluate(e=>(e as HTMLElement).inert),true);await page.locator('.mail-page-outgoing').waitFor({state:'detached'});
+ await page.getByRole('button',{name:'Paper action',exact:true}).click();assert.equal(await page.evaluate(()=>(window as any).paperActions),1,'pointer hit testing follows the projected plane');
+ assert.deepEqual(await page.evaluate(()=>(window as any).opened),[]);await page.getByRole('button',{name:'Reply with Fox',exact:true}).click();assert.deepEqual(await page.evaluate(()=>(window as any).drafts),['mail-1']);
+ await page.getByRole('button',{name:'Original',exact:true}).click();assert.deepEqual(await page.evaluate(()=>(window as any).opened),['mail-1']);
+ await page.getByRole('button',{name:'Drafts',exact:true}).click();assert.equal(await page.locator('.mail-letter').count(),1);assert.equal(await page.getByRole('button',{name:'Drafts',exact:true}).evaluate(e=>e===document.activeElement),true);
+ await page.getByRole('button',{name:'Inbox',exact:true}).click();await page.getByLabel('Search letters',{exact:true}).fill('workshop');await page.evaluate(()=>(window as any).paint());assert.equal(await page.getByLabel('Search letters',{exact:true}).inputValue(),'workshop');assert.equal(await page.getByLabel('Search letters',{exact:true}).evaluate(e=>e===document.activeElement),true);
+ await page.getByLabel('Search letters',{exact:true}).fill('');await page.emulateMedia({reducedMotion:'reduce'});await page.getByRole('button',{name:'Read the plan',exact:true}).click();await page.getByRole('heading',{name:'Read the plan',exact:true}).waitFor();assert.equal(await page.locator('.mail-page-outgoing').count(),0);
+ await page.evaluate(()=>(window as any).mount(false));assert.equal(await page.locator('.mail-region').count(),0);await page.getByRole('button',{name:'Inbox',exact:true}).click();assert.equal(await page.locator('.mail-letter').count(),2,'single paper retains folders');
+ await page.evaluate(()=>(window as any).scene.destroy());assert.equal(await page.locator('.applet-scene').count(),0);assert.equal(await page.locator('#notionWorld').evaluate(e=>(e as HTMLElement).style.getPropertyValue('--applet-scene-primary-transform')),'');assert.deepEqual(errors,[]);
+ console.log('PASS measured mail: plane corners, live folders, projected input, original and Fox routes, focus, page turn, reduced motion, single paper and disposal at 1500 × 844');
+}finally{await browser.close();}
