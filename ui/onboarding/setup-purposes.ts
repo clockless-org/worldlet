@@ -110,7 +110,7 @@ export const purposeCopy:Record<string,string[]>={
  'Shop on Taobao; Fox can search and compare items for you':['在淘宝购物；Fox 可以帮你搜索和比价','Taobao で買い物。Fox が商品を検索して比べます','Compra en Taobao; Fox puede buscar y comparar productos por ti'],
  'Pay and check your bills on Alipay’s website':['在支付宝网站付款和查看账单','Alipay のサイトで支払いや請求を確認','Paga y revisa tus facturas en la web de Alipay'],
  'Watch short videos on Douyin; Fox can find them for you':['在抖音刷短视频；Fox 可以帮你找','Douyin でショート動画を見られます。Fox が探します','Mira vídeos cortos en Douyin; Fox puede buscarlos por ti'],
- 'Check your product analytics on PostHog’s website':['在 PostHog 网站查看产品分析','PostHog のサイトでプロダクト分析を確認','Consulta tu analítica de producto en la web de PostHog'],
+ 'Fox reads your PostHog analytics when you ask':['你问起时，Fox 读取你的 PostHog 分析数据','頼むと Fox が PostHog の分析を読みます','Fox lee tu analítica de PostHog cuando se lo pides'],
  'Manage your sites on Cloudflare’s dashboard':['在 Cloudflare 控制台管理你的网站','Cloudflare のダッシュボードでサイトを管理','Gestiona tus sitios en el panel de Cloudflare'],
  'Check your deployments on Vercel’s website':['在 Vercel 网站查看部署','Vercel のサイトでデプロイを確認','Consulta tus despliegues en la web de Vercel'],
  'Check your sites and deploys on Netlify’s website':['在 Netlify 网站查看站点和部署','Netlify のサイトでサイトとデプロイを確認','Consulta tus sitios y despliegues en la web de Netlify'],

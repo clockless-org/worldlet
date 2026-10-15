@@ -3,7 +3,7 @@ import {showAgentConnections} from './agent-connections.ts';
 import {agentEl as el} from './agent-change.ts';
 
 // Disconnect exists for these; Google's three share one sign-in.
-const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github'];
+const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github','posthog'];
 const GOOGLE=['gmail','google-calendar','google-drive'];
 
 /** Settings › Agent › Connections (it was a section of its own, Accounts, until the Agent page took it

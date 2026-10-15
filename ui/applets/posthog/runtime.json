@@ -2,7 +2,7 @@
   "version": 1,
   "key": "posthog",
   "provider": "posthog",
-  "mode": "website",
+  "mode": "on-demand",
   "reader": "existing-applet-adapter",
   "intervalMinutes": 0,
   "publishAttention": false,
