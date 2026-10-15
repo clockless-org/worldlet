@@ -7,21 +7,22 @@ import {characters} from './companion-text.ts';
  * model pays for every ask, so the limits below also cap the cost. */
 export const PROACTIVE={
  /** Between two lines Fox says first; doubles for each line in a row the person let pass (at most ×2). Owner
-  * 2026-10-13 「companion说的再勤一点，隔一段时间就表达一下」: was 10 minutes, ×8 and 12 a day. */
- minGapSeconds:4*60,
+  * 2026-10-13 「companion说的再勤一点，隔一段时间就表达一下」: was 10 minutes, ×8 and 12 a day. Owner 2026-10-15
+  * 「companion说话频率再高一些」: Fox spoke on ~85% of asks, so the waits were the limit; every wait and cap halved or doubled. */
+ minGapSeconds:2*60,
  /** Lines Fox says first per local day, and per place per day. */
- perDay:40,perPlace:10,
+ perDay:80,perPlace:20,
  /** Check in: while the person is around (some input in the last 10 minutes) and Fox has said nothing on its own for
   * this long, Worldlet asks whether Fox has something to say, in the World or anywhere else (owner 2026-10-13). */
- checkinSeconds:6*60,
+ checkinSeconds:3*60,
  /** A reply within this long after Fox spoke counts as an answer. */
  answeredSeconds:10*60,
  /** "Be quiet" holds this long. */
  quietSeconds:12*3600,
  /** How long the person stays in a place before Fox may speak there: the World, then an Applet or page. */
- settleSeconds:{world:20,applet:120},
+ settleSeconds:{world:10,applet:60},
  /** A stay this long in one place is a moment of its own (a break, or how it is going). */
- longStaySeconds:45*60,
+ longStaySeconds:30*60,
  /** Local hours that count as late at night. */
  lateFrom:23,lateUntil:5,
  /** The longest line shown. */
@@ -37,14 +38,14 @@ export const PROACTIVE={
   * answered (a line nobody answered held every Applet quiet for 10 minutes); `placeSeconds` keeps Fox from
   * opening on the same Applet again soon after it said something there. Owner 2026-10-13 「每一个 app 进来之后…变得更主动一点」:
   * every Applet keeps talking while the person stays (a look a minute, up to 20 a visit), not three times and done. */
- browse:{settleSeconds:3,againSeconds:60,gapSeconds:45,perDay:200,perVisit:20,placeSeconds:10*60,
+ browse:{settleSeconds:3,againSeconds:40,gapSeconds:30,perDay:400,perVisit:40,placeSeconds:5*60,
   /** In a game Worldlet follows (a Showdown battle), Fox keeps playing along: a look every `againSeconds`, up to
    * `perVisit` a visit (owner 2026-10-13 「进入这种游戏了，那上来就要跟用户聊天，然后边玩也边给用户这个建议」). */
-  game:{againSeconds:40,gapSeconds:30,perVisit:40}},
+  game:{againSeconds:30,gapSeconds:20,perVisit:80}},
  /** Wrap up (owner 2026-10-13): back in the World after at least `minStaySeconds` in an Applet or page, Fox may sum it
   * up in one line (what the person got out of it, what is left), at most `perDay` a day and `gapSeconds` after any
   * other line. A game Worldlet follows has its own reviews (core/games/battle-review.ts) instead. */
- wrapup:{minStaySeconds:120,perDay:30,gapSeconds:120}
+ wrapup:{minStaySeconds:60,perDay:60,gapSeconds:60}
 } as const;
 
 /** What kind of place an Applet or page is, for the hooks that fit it (owner 2026-10-13: every Applet, not only

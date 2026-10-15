@@ -73,8 +73,8 @@ export function mountFoxProactive({call,thread,world,busy,environment,say}:{
   if(!stayed&&here>=PROACTIVE.longStaySeconds){stayed=true;void ask('long-stay',key);return;}
   if(!settled&&here>=(world()?PROACTIVE.settleSeconds.world:PROACTIVE.settleSeconds.applet)){settled=true;checkedAt=now;void ask('settled',key);return;}
   // Check in (owner 2026-10-13 「隔一段时间就表达一下」): every few minutes the person is around, Fox is asked whether it has
-  // something to say; the page offers one a minute and the host lets it through only once Fox has been quiet that long.
-  if((now-checkedAt)/1000>=60){checkedAt=now;void ask('checkin',key);}
+  // something to say; the page offers one every 30 seconds and the host lets it through only once Fox has been quiet that long.
+  if((now-checkedAt)/1000>=30){checkedAt=now;void ask('checkin',key);}
  }
  // A short tick, so the opening line is asked a few seconds after an Applet opens rather than on the next 10 s beat.
  const timer=setInterval(tick,2000);
