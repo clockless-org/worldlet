@@ -27,6 +27,12 @@ export function skillFile(harness:WorldToolsRegistrar,env:NodeJS.ProcessEnv=proc
  const root=harness==='claude-code'?(env.CLAUDE_CONFIG_DIR&&path.isAbsolute(env.CLAUDE_CONFIG_DIR)?env.CLAUDE_CONFIG_DIR:path.join(home,'.claude')):codexHome(home,env);
  return path.join(root,'skills','worldlet','SKILL.md');
 }
+/** The Node the Agent runs the shim with: the installer's `current/node/bin/node` (install.sh) when it is this same Node,
+ * so the registration outlives the versioned folder it came from (an install keeps only the build before it). */
+export function stableRunner(home=mcpHome(),runner=process.execPath):string {
+ const current=path.join(path.dirname(home),'current','node','bin','node');
+ try{return fs.realpathSync(current)===fs.realpathSync(runner)?current:runner;}catch{return runner;}
+}
 const agentFor=(id:WorldToolsRegistrar):StandingAgent=>({id,name:LOCAL_HARNESSES.find(item=>item.id===id)!.title,harness:id,kind:'local'});
 
 /** The Agents registered from this home, in the order they were. */
@@ -56,7 +62,7 @@ export async function registerAgent(id:string,home=mcpHome()):Promise<string[]> 
  if(!tools)throw Error('The Agent runtime is not installed.');
  ensureDirectory(home);
  const server=tools.server(home,agentFor(id));
- for(const step of worldToolsCommands(id,server)){
+ for(const step of worldToolsCommands(id,{...server,command:stableRunner(home,server.command)})){
   const run=await runHarnessCommand(install,environment,step.args,{timeout:60_000});
   if(run.code!==0&&!step.optional)throw Error(`${known.title} did not add Worldlet’s MCP server: ${commandReason(run.stderr+'\n'+run.stdout)||'it stopped with code '+run.code}`);
  }
